@@ -139,7 +139,7 @@ public:
         } else if constexpr (std::is_same_v<ArrayType, ani_array_ref>) {
             ani_ref undef {};
             ani_class strCls {};
-            env_->FindClass("Lstd/core/String;", &strCls);
+            env_->FindClass("std.core.String", &strCls);
             env_->GetUndefined(&undef);
             env_->Array_New_Ref(strCls, length, undef, result);
         } else {

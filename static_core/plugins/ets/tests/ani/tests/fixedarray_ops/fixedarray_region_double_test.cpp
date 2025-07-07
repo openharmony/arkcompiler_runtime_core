@@ -85,7 +85,7 @@ TEST_F(FixedArraySetGetRegionDoubleTest, SetRegionDoubleTest)
 TEST_F(FixedArraySetGetRegionDoubleTest, CheckChangeFromManagedRegionDoubleTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lfixedarray_region_double_test/ArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("fixedarray_region_double_test.ArrayClass", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;
@@ -117,7 +117,7 @@ TEST_F(FixedArraySetGetRegionDoubleTest, CheckChangeFromManagedRegionDoubleTest)
 TEST_F(FixedArraySetGetRegionDoubleTest, CheckChangeFromApiRegionDoubleTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lfixedarray_region_double_test/ArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("fixedarray_region_double_test.ArrayClass", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;

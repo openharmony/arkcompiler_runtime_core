@@ -236,7 +236,7 @@ public:
     static bool RegisterETSChecker(ani_env *env)
     {
         ani_module mod {};
-        if (env->FindModule("Lets_any;", &mod) != ANI_OK) {
+        if (env->FindModule("ets_any", &mod) != ANI_OK) {
             return false;
         }
 

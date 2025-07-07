@@ -35,11 +35,11 @@ public:
         ASSERT_NE(registerMethod, nullptr);
 
         ani_class finRegClass = nullptr;
-        ASSERT_EQ(env_->FindClass("Lstd/core/FinalizationRegistry;", &finRegClass), ANI_OK);
-        std::string_view registerSignature = "Lstd/core/Object;Lstd/core/Object;Lstd/core/Object;:V";
+        ASSERT_EQ(env_->FindClass("std.core.FinalizationRegistry", &finRegClass), ANI_OK);
+        std::string_view registerSignature = "C{std.core.Object}C{std.core.Object}C{std.core.Object}:";
         ASSERT_EQ(env_->Class_FindMethod(finRegClass, "register", registerSignature.data(), registerMethod), ANI_OK);
 
-        std::string_view ctorSignature = "Lstd/core/Function1;:V";
+        std::string_view ctorSignature = "C{std.core.Function1}:";
         ani_method ctor = nullptr;
         ASSERT_EQ(env_->Class_FindMethod(finRegClass, "<ctor>", ctorSignature.data(), &ctor), ANI_OK);
 
@@ -66,14 +66,14 @@ protected:
     void SetUp() override
     {
         AniTest::SetUp();
-        callbackClassName_ = "Lfin_reg_test/" + GetModulePrefix() + "CallbackHolder;";
+        callbackClassName_ = "fin_reg_test." + GetModulePrefix() + "CallbackHolder";
         ASSERT_EQ(env_->FindClass(callbackClassName_.c_str(), &nativeCallbackClass_), ANI_OK);
 
-        ani_native_function fn {"invoke", "Lstd/core/Object;:V", reinterpret_cast<void *>(NativeCallbackInvoke)};
+        ani_native_function fn {"invoke", "C{std.core.Object}:", reinterpret_cast<void *>(NativeCallbackInvoke)};
         ASSERT_EQ(env_->Class_BindNativeMethods(nativeCallbackClass_, &fn, 1), ANI_OK);
 
-        ASSERT_EQ(env_->Class_FindStaticMethod(nativeCallbackClass_, "doFullGC", ":V", &doFullGcMethod_), ANI_OK);
-        ASSERT_EQ(env_->Class_FindMethod(nativeCallbackClass_, "<ctor>", "J:V", &nativeCallbackCtor_), ANI_OK);
+        ASSERT_EQ(env_->Class_FindStaticMethod(nativeCallbackClass_, "doFullGC", ":", &doFullGcMethod_), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(nativeCallbackClass_, "<ctor>", "l:", &nativeCallbackCtor_), ANI_OK);
 
         ASSERT_EQ(env_->GetUndefined(&undefinedRef_), ANI_OK);
     }
@@ -109,7 +109,7 @@ private:
             env_->Object_New(nativeCallbackClass_, nativeCallbackCtor_, &nativeCb, reinterpret_cast<ani_long>(cb)),
             ANI_OK);
 
-        std::string factorySignature = callbackClassName_ + ":Lstd/core/Function1;";
+        std::string factorySignature = "C{" + callbackClassName_ + "}:C{std.core.Function1}";
         std::string_view creatorName = "createCallbackWithArg";
 
         ani_ref createdManagedCb = nullptr;
@@ -171,7 +171,7 @@ TEST_F(FinalizationRegistryTest, test_native_finalizer)
 
 static std::string GetFinalizationMarkerClassDescriptor()
 {
-    return "Lfin_reg_test/" + FinalizationRegistryTest::GetModulePrefix() + "FinalizationMarker;";
+    return "fin_reg_test." + FinalizationRegistryTest::GetModulePrefix() + "FinalizationMarker";
 }
 
 static void FinalizeWithManagedMark(ani_env *env, ani_object cbArg)
@@ -217,7 +217,7 @@ TEST_F(FinalizationRegistryTest, test_finalizer_with_managed_access)
     ani_class markerClass = nullptr;
     ASSERT_EQ(env_->FindClass(markerClassDescriptor.c_str(), &markerClass), ANI_OK);
     ani_method markerCtor = nullptr;
-    ASSERT_EQ(env_->Class_FindMethod(markerClass, "<ctor>", ":V", &markerCtor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(markerClass, "<ctor>", ":", &markerCtor), ANI_OK);
 
     ASSERT_EQ(env_->CreateLocalScope(NUMBER_OF_REFS), ANI_OK);
 

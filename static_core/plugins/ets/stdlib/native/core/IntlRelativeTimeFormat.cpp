@@ -34,7 +34,7 @@ namespace ark::ets::stdlib::intl {
 static std::string CallOptionGetter(ani_env *env, ani_object options, const char *getterName)
 {
     ani_class optionsClass = nullptr;
-    if (env->FindClass("Lstd/core/Intl/RelativeTimeFormatOptionsImpl;", &optionsClass) != ANI_OK ||
+    if (env->FindClass("std.core.Intl.RelativeTimeFormatOptionsImpl", &optionsClass) != ANI_OK ||
         optionsClass == nullptr) {
         return "";
     }
@@ -68,7 +68,7 @@ static ani_status ThrowError(ani_env *env, const char *errorClassName, const std
     ANI_CHECK_RETURN_IF_NE(aniStatus, ANI_OK, aniStatus);
 
     ani_method errorCtor;
-    aniStatus = env->Class_FindMethod(errorClass, "<ctor>", "Lstd/core/String;:V", &errorCtor);
+    aniStatus = env->Class_FindMethod(errorClass, "<ctor>", "C{std.core.String}:", &errorCtor);
     ANI_CHECK_RETURN_IF_NE(aniStatus, ANI_OK, aniStatus);
 
     ani_string errorMsg;
@@ -86,11 +86,11 @@ static ani_status ThrowError(ani_env *env, const char *errorClassName, const std
 static ani_status ThrowRangeError(ani_env *env, const std::string &message)
 {
     ani_class errorClass = nullptr;
-    if (env->FindClass("Lstd/core/RangeError;", &errorClass) != ANI_OK) {
+    if (env->FindClass("std.core.RangeError", &errorClass) != ANI_OK) {
         return ANI_PENDING_ERROR;
     }
     ani_method ctor;
-    if (env->Class_FindMethod(errorClass, "<ctor>", "Lstd/core/String;:V", &ctor) != ANI_OK) {
+    if (env->Class_FindMethod(errorClass, "<ctor>", "C{std.core.String}:", &ctor) != ANI_OK) {
         return ANI_PENDING_ERROR;
     }
     ani_string msgStr;
@@ -107,7 +107,7 @@ static ani_status ThrowRangeError(ani_env *env, const std::string &message)
 
 static ani_status ThrowInternalError(ani_env *env, const std::string &message)
 {
-    return ThrowError(env, "Lstd/core/InternalError;", message);
+    return ThrowError(env, "std.core.InternalError", message);
 }
 
 static std::unique_ptr<icu::Locale> ToIcuLocale(ani_env *env, ani_object self)
@@ -174,7 +174,7 @@ static URelativeDateTimeUnit ToICUUnitOrThrow(ani_env *env, const std::string &u
     if (unit == "year") {
         return UDAT_REL_UNIT_YEAR;
     }
-    ThrowNewError(env, "Lstd/core/RuntimeException;", ("Invalid unit: " + unitStr).c_str(), "Lstd/core/String;:V");
+    ThrowNewError(env, "std.core.RuntimeException", ("Invalid unit: " + unitStr).c_str(), "C{std.core.String}:");
     return static_cast<URelativeDateTimeUnit>(-1);
 }
 
@@ -216,9 +216,9 @@ static ani_object StdCoreIntlRelativeTimeFormatResolvedOptionsImpl(ani_env *env,
     ani_string style = CreateUtf8String(env, styleStr.c_str(), styleStr.length());
 
     ani_class optsCls = nullptr;
-    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Intl/ResolvedRelativeTimeFormatOptionsImpl;", &optsCls));
+    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.ResolvedRelativeTimeFormatOptionsImpl", &optsCls));
     ani_method ctor = nullptr;
-    ANI_FATAL_IF_ERROR(env->Class_FindMethod(optsCls, "<ctor>", "Lstd/core/String;Lstd/core/String;:V", &ctor));
+    ANI_FATAL_IF_ERROR(env->Class_FindMethod(optsCls, "<ctor>", "C{std.core.String}C{std.core.String}:", &ctor));
 
     ani_object resolvedOpts = nullptr;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -270,12 +270,12 @@ static ani_string StdCoreIntlRelativeTimeFormatFormatImpl(ani_env *env, ani_obje
 ani_status RegisterIntlRelativeTimeFormatMethods(ani_env *env)
 {
     std::array methods = {
-        ani_native_function {"formatImpl", "DLstd/core/String;:Lstd/core/String;",
+        ani_native_function {"formatImpl", "dC{std.core.String}:C{std.core.String}",
                              reinterpret_cast<void *>(StdCoreIntlRelativeTimeFormatFormatImpl)},
-        ani_native_function {"resolvedOptionsImpl", ":Lstd/core/Intl/ResolvedRelativeTimeFormatOptions;",
+        ani_native_function {"resolvedOptionsImpl", ":C{std.core.Intl.ResolvedRelativeTimeFormatOptions}",
                              reinterpret_cast<void *>(StdCoreIntlRelativeTimeFormatResolvedOptionsImpl)}};
     ani_class rtfClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Intl/RelativeTimeFormat;", &rtfClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.RelativeTimeFormat", &rtfClass));
 
     return env->Class_BindNativeMethods(rtfClass, methods.data(), methods.size());
 }

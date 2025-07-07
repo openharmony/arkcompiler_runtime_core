@@ -86,7 +86,7 @@ public:
     static bool RegisterETSGetter(ani_env *env)
     {
         ani_module mod {};
-        if (env->FindModule("Lets_functions;", &mod) != ANI_OK) {
+        if (env->FindModule("ets_functions", &mod) != ANI_OK) {
             return false;
         }
 

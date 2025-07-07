@@ -51,7 +51,7 @@ public:
         ASSERT_EQ(value, 1);
 
         std::array functions = {
-            ani_native_function {"sum", "II:I", reinterpret_cast<void *>(Sum)},
+            ani_native_function {"sum", "ii:i", reinterpret_cast<void *>(Sum)},
         };
         ASSERT_EQ(env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()), ANI_OK);
     }

@@ -72,7 +72,7 @@ public:
     static bool RegisterNativeSaveRef(ani_env *env)
     {
         ani_module etsMod {};
-        auto status = env->FindModule("Lets_functions;", &etsMod);
+        auto status = env->FindModule("ets_functions", &etsMod);
         if (status != ANI_OK) {
             return false;
         }

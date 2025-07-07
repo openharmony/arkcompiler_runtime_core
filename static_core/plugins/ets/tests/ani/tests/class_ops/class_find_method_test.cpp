@@ -379,7 +379,7 @@ TEST_F(ClassFindMethodTest, binded_method)
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
-        ani_native_function {"foo", ":I", reinterpret_cast<void *>(NativeMethodsFooNative)},
+        ani_native_function {"foo", ":i", reinterpret_cast<void *>(NativeMethodsFooNative)},
     };
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
 

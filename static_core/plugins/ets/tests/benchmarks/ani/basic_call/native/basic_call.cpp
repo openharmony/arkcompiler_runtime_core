@@ -80,34 +80,34 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
     ani_class cls;
-    if (ANI_OK != env->FindClass("L$bench_name/BasicCall;", &cls)) {
+    if (ANI_OK != env->FindClass("$bench_name.BasicCall", &cls)) {
         std::cout << "Class BasicCall not found!\n";
         return ANI_ERROR;
     }
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     std::array<ani_native_function, 8U> methods = {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-        ani_native_function {"basic_call_s", "JLstd/core/String;Lstd/core/Object;:Lstd/core/String;",
+        ani_native_function {"basic_call_s", "lC{std.core.String}C{std.core.Object}:C{std.core.String}",
                              reinterpret_cast<void *>(basic_call_s)},
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-        ani_native_function {"basic_call_sc", "JIJ:J", reinterpret_cast<void *>(basic_call_sc)},
+        ani_native_function {"basic_call_sc", "lil:l", reinterpret_cast<void *>(basic_call_sc)},
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-        ani_native_function {"basic_call_sf", "JLstd/core/String;Lstd/core/Object;:Lstd/core/String;",
+        ani_native_function {"basic_call_sf", "lC{std.core.String}C{std.core.Object}:C{std.core.String}",
                              reinterpret_cast<void *>(basic_call_sf)},
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-        ani_native_function {"basic_call_v", "JLstd/core/String;Lstd/core/Object;:Lstd/core/String;",
+        ani_native_function {"basic_call_v", "lC{std.core.String}C{std.core.Object}:C{std.core.String}",
                              reinterpret_cast<void *>(basic_call_v)},
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-        ani_native_function {"basic_call_vf", "JLstd/core/String;Lstd/core/Object;:Lstd/core/String;",
+        ani_native_function {"basic_call_vf", "lC{std.core.String}C{std.core.Object}:C{std.core.String}",
                              reinterpret_cast<void *>(basic_call_vf)},
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-        ani_native_function {"basic_call_v_final", "JLstd/core/String;Lstd/core/Object;:Lstd/core/String;",
+        ani_native_function {"basic_call_v_final", "lC{std.core.String}C{std.core.Object}:C{std.core.String}",
                              reinterpret_cast<void *>(basic_call_v_final)},
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-        ani_native_function {"basic_call_vf_final", "JLstd/core/String;Lstd/core/Object;:Lstd/core/String;",
+        ani_native_function {"basic_call_vf_final", "lC{std.core.String}C{std.core.Object}:C{std.core.String}",
                              reinterpret_cast<void *>(basic_call_vf_final)},
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-        ani_native_function {"basic_call_baseline", ":J", reinterpret_cast<void *>(basic_call_baseline)},
+        ani_native_function {"basic_call_baseline", ":l", reinterpret_cast<void *>(basic_call_baseline)},
     };
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
         std::cout << "Binding native methods failed!\n";

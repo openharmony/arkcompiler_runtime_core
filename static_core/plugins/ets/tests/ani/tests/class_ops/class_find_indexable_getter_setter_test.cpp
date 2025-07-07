@@ -68,7 +68,7 @@ TEST_F(FindIndexableGetterTest, check_initialization)
 
     ASSERT_FALSE(IsRuntimeClassInitialized("class_find_indexable_getter_setter_test.A"));
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindIndexableGetter(cls, "D:Lclass_find_indexable_getter_setter_test/A;", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindIndexableGetter(cls, "d:C{class_find_indexable_getter_setter_test.A}", &method), ANI_OK);
     ASSERT_FALSE(IsRuntimeClassInitialized("class_find_indexable_getter_setter_test.A"));
 }
 
@@ -79,7 +79,7 @@ TEST_F(FindIndexableSetterTest, check_initialization)
 
     ASSERT_FALSE(IsRuntimeClassInitialized("class_find_indexable_getter_setter_test.A"));
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindIndexableSetter(cls, "DZ:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindIndexableSetter(cls, "dz:", &method), ANI_OK);
     ASSERT_FALSE(IsRuntimeClassInitialized("class_find_indexable_getter_setter_test.A"));
 }
 

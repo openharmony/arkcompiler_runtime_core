@@ -84,7 +84,7 @@ TEST_F(GetCreatedVMsTest, combination)
     ASSERT_EQ(env->FindNamespace("ani_get_created_virtual_machines_test.ops", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
     std::array functions = {
-        ani_native_function {"sum", "II:I", reinterpret_cast<void *>(Sum)},
+        ani_native_function {"sum", "ii:i", reinterpret_cast<void *>(Sum)},
     };
     ASSERT_EQ(env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()), ANI_OK);
 

@@ -74,12 +74,12 @@ static void SpawnChildProcess(ani_env *env, ani_object child, ani_string cmd, an
 {
     auto stdOutFd = os::CreatePipe();
     if (!stdOutFd.first.IsValid()) {
-        ThrowNewError(env, "Lstd/core/RuntimeException;", "Failed to create a child process", "Lstd/core/String;:V");
+        ThrowNewError(env, "std.core.RuntimeException", "Failed to create a child process", "C{std.core.String}:");
         return;
     }
     auto stdErrFd = os::CreatePipe();
     if (!stdErrFd.first.IsValid()) {
-        ThrowNewError(env, "Lstd/core/RuntimeException;", "Failed to create a child process", "Lstd/core/String;:V");
+        ThrowNewError(env, "std.core.RuntimeException", "Failed to create a child process", "C{std.core.String}:");
         return;
     }
 
@@ -97,7 +97,7 @@ static void SpawnChildProcess(ani_env *env, ani_object child, ani_string cmd, an
     } else {
         stdOutFd.first.Reset();
         stdErrFd.first.Reset();
-        ThrowNewError(env, "Lstd/core/RuntimeException;", "Failed to create a child process", "Lstd/core/String;:V");
+        ThrowNewError(env, "std.core.RuntimeException", "Failed to create a child process", "C{std.core.String}:");
         return;
     }
 
@@ -273,7 +273,7 @@ static void WaitChildProcess(ani_env *env, ani_object child)
         if (result.HasValue()) {
             ANI_FATAL_IF_ERROR(env->Object_SetField_Double(child, exitCodeId, result.Value()));
         } else {
-            ThrowNewError(env, "Lstd/core/RuntimeException;", "Wait failed", "Lstd/core/String;:V");
+            ThrowNewError(env, "std.core.RuntimeException", "Wait failed", "C{std.core.String}:");
             return;
         }
     }
@@ -305,7 +305,7 @@ static void KillChildProcess(ani_env *env, ani_object child, ani_int signal)
         return;
     }
 
-    ThrowNewError(env, "Lstd/core/RuntimeException;", "Kill failed", "Lstd/core/String;:V");
+    ThrowNewError(env, "std.core.RuntimeException", "Kill failed", "C{std.core.String}:");
 }
 
 static void CloseChildProcess(ani_env *env, ani_object child)
@@ -340,7 +340,7 @@ static void CloseChildProcess(ani_env *env, ani_object child)
         return;
     }
 
-    ThrowNewError(env, "Lstd/core/RuntimeException;", "Close failed", "Lstd/core/String;:V");
+    ThrowNewError(env, "std.core.RuntimeException", "Close failed", "C{std.core.String}:");
 }
 
 static ani_boolean PManagerIsAppUid([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process,
@@ -356,7 +356,7 @@ static ani_boolean PManagerIsAppUid([[maybe_unused]] ani_env *env, [[maybe_unuse
 
     return ANI_FALSE;
 #else
-    ThrowNewError(env, "Lstd/core/RuntimeException;", "not implemented for Non-OHOS target", "Lstd/core/String;:V");
+    ThrowNewError(env, "std.core.RuntimeException", "not implemented for Non-OHOS target", "C{std.core.String}:");
     return ANI_FALSE;
 #endif
 }
@@ -397,7 +397,7 @@ static ani_boolean PManagerKill(ani_env *env, [[maybe_unused]] ani_object proces
     int integerPid = static_cast<int>(pid);
     auto ownPid = ark::os::thread::GetPid();
     if (integerPid == 0 || integerPid == -1 || integerPid == ownPid || integerPid == -ownPid) {
-        ThrowNewError(env, "Lstd/core/IllegalArgumentException;", "Invalid pid argument", "Lstd/core/String;:V");
+        ThrowNewError(env, "std.core.IllegalArgumentException", "Invalid pid argument", "C{std.core.String}:");
         return 0U;
     }
 
@@ -405,7 +405,7 @@ static ani_boolean PManagerKill(ani_env *env, [[maybe_unused]] ani_object proces
     constexpr int MAX_SINAL_VALUE = 64;
 
     if (std::trunc(signal) != signal || signal < MIN_SIGNAL_VALUE || signal > MAX_SINAL_VALUE) {
-        ThrowNewError(env, "Lstd/core/IllegalArgumentException;", "Invalid signal argument", "Lstd/core/String;:V");
+        ThrowNewError(env, "std.core.IllegalArgumentException", "Invalid signal argument", "C{std.core.String}:");
         return 0U;
     }
 
@@ -428,7 +428,7 @@ static ani_boolean IsIsolatedProcImpl([[maybe_unused]] ani_env *env)
                ? ANI_TRUE
                : ANI_FALSE;
 #else
-    ThrowNewError(env, "Lstd/core/RuntimeException;", "not implemented for Non-OHOS target", "Lstd/core/String;:V");
+    ThrowNewError(env, "std.core.RuntimeException", "not implemented for Non-OHOS target", "C{std.core.String}:");
     return ANI_FALSE;
 #endif
 }
@@ -472,15 +472,15 @@ static ani_array GetGroupIDs(ani_env *env)
     ANI_FATAL_IF_ERROR(env->Array_New(groups.size(), nullptr, &result));
 
     if (groups.empty()) {
-        ThrowNewError(env, "Lstd/core/RuntimeException;", "Failed to get process groups", "Lstd/core/String;:V");
+        ThrowNewError(env, "std.core.RuntimeException", "Failed to get process groups", "C{std.core.String}:");
         return result;
     }
 
     ani_class doubleClass {};
-    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Double;", &doubleClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Double", &doubleClass));
 
     ani_method doubleCtor;
-    ANI_FATAL_IF_ERROR(env->Class_FindMethod(doubleClass, "<ctor>", "D:V", &doubleCtor));
+    ANI_FATAL_IF_ERROR(env->Class_FindMethod(doubleClass, "<ctor>", "d:", &doubleCtor));
 
     for (size_t i = 0; i < groups.size(); ++i) {
         ani_object boxedDouble {};
@@ -535,55 +535,55 @@ static ani_double GetSystemUptime([[maybe_unused]] ani_env *env)
 void RegisterProcessNativeMethods(ani_env *env)
 {
     const auto childProcessImpls =
-        std::array {ani_native_function {"readOutput", ":V", reinterpret_cast<void *>(ReadChildProcessStdOut)},
-                    ani_native_function {"readErrorOutput", ":V", reinterpret_cast<void *>(ReadChildProcessStdErr)},
-                    ani_native_function {"close", ":V", reinterpret_cast<void *>(CloseChildProcess)},
-                    ani_native_function {"killImpl", "I:V", reinterpret_cast<void *>(KillChildProcess)},
-                    ani_native_function {"spawn", "Lstd/core/String;II:V", reinterpret_cast<void *>(SpawnChildProcess)},
-                    ani_native_function {"waitImpl", ":D", reinterpret_cast<void *>(WaitChildProcess)}};
+        std::array {ani_native_function {"readOutput", ":", reinterpret_cast<void *>(ReadChildProcessStdOut)},
+                    ani_native_function {"readErrorOutput", ":", reinterpret_cast<void *>(ReadChildProcessStdErr)},
+                    ani_native_function {"close", ":", reinterpret_cast<void *>(CloseChildProcess)},
+                    ani_native_function {"killImpl", "i:", reinterpret_cast<void *>(KillChildProcess)},
+                    ani_native_function {"spawn", "C{std.core.String}ii:", reinterpret_cast<void *>(SpawnChildProcess)},
+                    ani_native_function {"waitImpl", ":d", reinterpret_cast<void *>(WaitChildProcess)}};
 
     const auto processManagerImpls = std::array {
-        ani_native_function {"isAppUid", "D:Z", reinterpret_cast<void *>(PManagerIsAppUid)},
-        ani_native_function {"getUidForName", "Lstd/core/String;:D", reinterpret_cast<void *>(PManagerGetUidForName)},
-        ani_native_function {"getThreadPriority", "D:D", reinterpret_cast<void *>(PManagerGetThreadPriority)},
-        ani_native_function {"getSystemConfig", "D:D", reinterpret_cast<void *>(PManagerGetSystemConfig)},
-        ani_native_function {"getEnvironmentVar", "Lstd/core/String;:Lstd/core/String;",
+        ani_native_function {"isAppUid", "d:z", reinterpret_cast<void *>(PManagerIsAppUid)},
+        ani_native_function {"getUidForName", "C{std.core.String}:d", reinterpret_cast<void *>(PManagerGetUidForName)},
+        ani_native_function {"getThreadPriority", "d:d", reinterpret_cast<void *>(PManagerGetThreadPriority)},
+        ani_native_function {"getSystemConfig", "d:d", reinterpret_cast<void *>(PManagerGetSystemConfig)},
+        ani_native_function {"getEnvironmentVar", "C{std.core.String}:C{std.core.String}",
                              reinterpret_cast<void *>(PManagerGetEnvironmentVar)},
-        ani_native_function {"exit", "D:V", reinterpret_cast<void *>(PManagerExit)},
-        ani_native_function {"kill", "DD:Z", reinterpret_cast<void *>(PManagerKill)},
+        ani_native_function {"exit", "d:", reinterpret_cast<void *>(PManagerExit)},
+        ani_native_function {"kill", "dd:z", reinterpret_cast<void *>(PManagerKill)},
     };
 
     const auto processImpls = std::array {
-        ani_native_function {"tid", ":D", reinterpret_cast<void *>(GetTid)},
-        ani_native_function {"pid", ":D", reinterpret_cast<void *>(GetPid)},
-        ani_native_function {"ppid", ":D", reinterpret_cast<void *>(GetPPid)},
-        ani_native_function {"uid", ":D", reinterpret_cast<void *>(GetUid)},
-        ani_native_function {"euid", ":D", reinterpret_cast<void *>(GetEuid)},
-        ani_native_function {"gid", ":D", reinterpret_cast<void *>(GetGid)},
-        ani_native_function {"egid", ":D", reinterpret_cast<void *>(GetEgid)},
-        ani_native_function {"groups", ":Lescompat/Array;", reinterpret_cast<void *>(GetGroupIDs)},
-        ani_native_function {"is64Bit", ":Z", reinterpret_cast<void *>(Is64BitProcess)},
-        ani_native_function {"getStartRealtime", ":D", reinterpret_cast<void *>(GetProcessStartRealTime)},
-        ani_native_function {"getPastCpuTime", ":D", reinterpret_cast<void *>(GetProcessPastCpuTime)},
-        ani_native_function {"abort", ":V", reinterpret_cast<void *>(AbortProcess)},
-        ani_native_function {"cwd", ":Lstd/core/String;", reinterpret_cast<void *>(GetCurrentWorkingDirectory)},
-        ani_native_function {"chdir", "Lstd/core/String;:V", reinterpret_cast<void *>(ChangeCurrentWorkingDirectory)},
-        ani_native_function {"uptime", ":D", reinterpret_cast<void *>(GetSystemUptime)},
-        ani_native_function {"isIsolatedProcess", ":Z", reinterpret_cast<void *>(IsIsolatedProcImpl)},
+        ani_native_function {"tid", ":d", reinterpret_cast<void *>(GetTid)},
+        ani_native_function {"pid", ":d", reinterpret_cast<void *>(GetPid)},
+        ani_native_function {"ppid", ":d", reinterpret_cast<void *>(GetPPid)},
+        ani_native_function {"uid", ":d", reinterpret_cast<void *>(GetUid)},
+        ani_native_function {"euid", ":d", reinterpret_cast<void *>(GetEuid)},
+        ani_native_function {"gid", ":d", reinterpret_cast<void *>(GetGid)},
+        ani_native_function {"egid", ":d", reinterpret_cast<void *>(GetEgid)},
+        ani_native_function {"groups", ":C{escompat.Array}", reinterpret_cast<void *>(GetGroupIDs)},
+        ani_native_function {"is64Bit", ":z", reinterpret_cast<void *>(Is64BitProcess)},
+        ani_native_function {"getStartRealtime", ":d", reinterpret_cast<void *>(GetProcessStartRealTime)},
+        ani_native_function {"getPastCpuTime", ":d", reinterpret_cast<void *>(GetProcessPastCpuTime)},
+        ani_native_function {"abort", ":", reinterpret_cast<void *>(AbortProcess)},
+        ani_native_function {"cwd", ":C{std.core.String}", reinterpret_cast<void *>(GetCurrentWorkingDirectory)},
+        ani_native_function {"chdir", "C{std.core.String}:", reinterpret_cast<void *>(ChangeCurrentWorkingDirectory)},
+        ani_native_function {"uptime", ":d", reinterpret_cast<void *>(GetSystemUptime)},
+        ani_native_function {"isIsolatedProcess", ":z", reinterpret_cast<void *>(IsIsolatedProcImpl)},
     };
 
     ani_class childProcessKlass;
-    ANI_FATAL_IF_ERROR(env->FindClass("Lescompat/StdProcess/ChildProcess;", &childProcessKlass));
+    ANI_FATAL_IF_ERROR(env->FindClass("escompat.StdProcess.ChildProcess", &childProcessKlass));
     ANI_FATAL_IF_ERROR(
         env->Class_BindNativeMethods(childProcessKlass, childProcessImpls.data(), childProcessImpls.size()));
 
     ani_class processManagerKlass;
-    ANI_FATAL_IF_ERROR(env->FindClass("Lescompat/StdProcess/ProcessManager;", &processManagerKlass));
+    ANI_FATAL_IF_ERROR(env->FindClass("escompat.StdProcess.ProcessManager", &processManagerKlass));
     ANI_FATAL_IF_ERROR(
         env->Class_BindNativeMethods(processManagerKlass, processManagerImpls.data(), processManagerImpls.size()));
 
     ani_namespace ns {};
-    ANI_FATAL_IF_ERROR(env->FindNamespace("Lescompat/StdProcess;", &ns));
+    ANI_FATAL_IF_ERROR(env->FindNamespace("escompat.StdProcess", &ns));
 
     ANI_FATAL_IF_ERROR(env->Namespace_BindNativeFunctions(ns, processImpls.data(), processImpls.size()));
 }

@@ -45,7 +45,7 @@ ANI_EXPORT ani_array getAppAbcFiles(ani_env *env, [[maybe_unused]] ani_class)
     ASSERT(!paths.empty());
 
     ani_class stringClass;
-    env->FindClass("Lstd/core/String;", &stringClass);
+    env->FindClass("std.core.String", &stringClass);
     ASSERT(stringClass != nullptr);
     ani_array pathsArray;
     env->Array_New(paths.size(), paths[0], &pathsArray);
@@ -65,9 +65,9 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *version)
         return ANI_ERROR;
     }
 
-    ani_native_function function {"getAppAbcFiles", ":Lescompat/Array;", reinterpret_cast<void *>(getAppAbcFiles)};
+    ani_native_function function {"getAppAbcFiles", ":C{escompat.Array}", reinterpret_cast<void *>(getAppAbcFiles)};
 
-    std::string_view mdl = "L@spawn/spawn;";
+    std::string_view mdl = "@spawn.spawn";
     ani_module spawnModule;
     if (ANI_OK != env->FindModule(mdl.data(), &spawnModule)) {
         std::cerr << "Not found '" << mdl << "'" << std::endl;
