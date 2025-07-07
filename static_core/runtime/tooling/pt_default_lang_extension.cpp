@@ -195,6 +195,7 @@ std::optional<size_t> PtDynamicDefaultExtension::GetLengthIfArray(const ObjectHe
 
 void PtDynamicDefaultExtension::EnumerateProperties(const ObjectHeader *object, const PropertyHandler &handler)
 {
+    ASSERT(object != nullptr);
     auto *cls = object->ClassAddr<HClass>();
     ASSERT(cls != nullptr);
     if (cls->IsNativePointer() || cls->IsString()) {
