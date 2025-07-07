@@ -143,7 +143,8 @@ ani_object TextDecoder::CreateThrowErrorObject(ani_env *env, const std::string &
     return errorObj;
 }
 
-ani_string TextDecoder::DecodeToString(ani_env *env, const char *source, int32_t byteOffset, int32_t length, bool iflag)
+ani_string TextDecoder::DecodeToString(ani_env *env, const char *source, int32_t byteOffset, uint32_t length,
+                                       bool iflag)
 {
     uint8_t flags = 0;
     flags |= iflag ? 0UL : static_cast<uint8_t>(ConverterFlags::FLUSH_FLG);
