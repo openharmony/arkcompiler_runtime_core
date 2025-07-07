@@ -28,6 +28,6 @@ function main() {
     arktest.assertEQ(genericRestFunction<MyUnionType>(1), 1);
     arktest.assertEQ(genericRestFunction<MyUnionType>(1, 2), 2);
 
-    let rest: MyUnionType[] = [1,"2",3,"4"]
+    let rest: MyUnionType[] = [1, "2", 3, "4"]
     arktest.assertEQ(genericRestFunction<MyUnionType>(...rest), 4);
 }

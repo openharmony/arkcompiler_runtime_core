@@ -18,7 +18,7 @@ desc: static Rest function spread with generic tuple
 tags: [compile-only, negative]
 ---*/
 
-class TH<A,B,C> {
+class TH<A, B, C> {
     static restMethod(...v: [A, B, C]) {
     }
 }
@@ -26,4 +26,3 @@ class TH<A,B,C> {
 function main() {
     let mc = new TH<number, string, boolean>
 }
-
