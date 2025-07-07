@@ -13,18 +13,16 @@
 * limitations under the License.
 */
 
+{% for case in cases %}
+
 /*---
-desc: Subtype relation between type literal and type union
+desc: Subtype relation among type literal and type String
 ---*/
 
-type StringUnion = 'some_string' | 'some_other_string'
-type StrLiteral = 'some_string'
+{{case.decl|indent}}
 
-function foo(a: StrLiteral, b: StringUnion) {
-    arktest.assertTrue(a instanceof String)
-    b = a
-    arktest.assertTrue(b instanceof String)
+function main() {
+    {{case.check|indent}}
 }
 
-foo('some_string', 'some_string')
-
+{% endfor %}

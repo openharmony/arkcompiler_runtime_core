@@ -17,13 +17,16 @@
 
 /*---
 desc: >-
-    {{c.doc|indent}}
+    Fixed-size array types are covariant and are formally defined as follows:
+    FixedSize<B> <: FixedSize<A> if B <: A.
+tags: [negative, compile-only]
 ---*/
 
-{{c.decl}}
+class Base {}
+class Derived extends Base {}
+type CustomArr<T extends Base> = FixedArray<T>
 
-function main() {
-    {{c.check|indent}}
-}
+let x: {{'CustomArr' if c.customtype else 'FixedArray'}}<{{c.stype}}> = {{c.value}}
+let y: FixedArray<{{c.dtype}}> = x
 
 {%- endfor %}

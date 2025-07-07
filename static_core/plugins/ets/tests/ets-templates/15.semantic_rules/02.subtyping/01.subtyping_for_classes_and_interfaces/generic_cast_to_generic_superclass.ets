@@ -17,13 +17,21 @@ limitations under the License.
 desc: Subtyping relation among the generic class types with same parameters
 ---*/
 
-class A {}
-class B extends A {}
-class C<T extends A> {}
+class A { id: int = 1}
+final class B extends A {id: int = 2}
+class C<T extends A> {
+  t: T
+  constructor (t: T) {this.t = t}
+  foo(): int {return this.t.id} 
+}
 
-final class D<T extends A> extends C<T> {}
+final class D<T extends A> extends C<T> {
+  constructor (t: T) {super(t)}
+}
 
 
 function main(): void {
-  let instance: C<B> = new D<B>();
+  let instance: C<B> = new D<B>(new B());
+  arktest.assertEQ(instance.foo(), 2)
+  arktest.assertTrue(instance instanceof D)
 }

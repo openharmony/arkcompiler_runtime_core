@@ -24,4 +24,8 @@ final class B<T> extends A {}
 
 function main(): void {
   let instance: A = new B<String>();
+  let o: Object = instance
+  arktest.assertTrue(o instanceof B)
+  arktest.assertTrue(o instanceof A)
+  arktest.assertTrue(instance instanceof B)
 }

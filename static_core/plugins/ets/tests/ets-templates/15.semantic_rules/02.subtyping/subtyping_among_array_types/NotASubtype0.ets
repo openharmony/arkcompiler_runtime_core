@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,20 +14,14 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Subtyping relation among the generic class and Object
+desc: Supertype relation among array types
+tags: [compile-only, negative]
 ---*/
 
-class A { id: int = 1 }
-final class B extends A { id: int = 2 }
 
-final class C<T extends A> {
-  t: T
-  constructor (t: T) { this.t = t }
-  foo(): int { return this.t.id }
-}
+class Base {}
+class Derived extends Base {}
 
-function main(): void {
-  let instance: Object = new C<B>(new B());
-  arktest.assertEQ(instance.foo(), 2)
-  arktest.assertTrue(instance instanceof C)
+function bad(ab: Array<Base>, ad: Array<Derived>) {
+    ab = ad  // TypeError: Type 'Array<Derived>' cannot be assigned to type 'Array<Base>'
 }

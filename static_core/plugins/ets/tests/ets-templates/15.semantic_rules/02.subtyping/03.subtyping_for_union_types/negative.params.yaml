@@ -18,9 +18,10 @@ cases:
           there is at least one type Vj (i in 1..m) for every type Ui (i in 1..n), i.e., Ui
           is a subtype of Vj (see Subtyping).
       decl: |-
-          let a: string | number | boolean = "abc"
+          let a: string | number | boolean = 'abc'
           let b: string | number = 42
           b = a // compile-time error, boolean is absent is 'b'
+          
     - doc: |-
           Union type U (U1 | ... | Un) is a subtype of union type V (V1 | ... | Vm) if
           there is at least one type Vj (i in 1..m) for every type Ui (i in 1..n), i.e., Ui
@@ -30,11 +31,29 @@ cases:
           class Derived extends Base {}
           
           let x: Base | string = new Base
-          let y: Derived | string = "just a test"
+          let y: Derived | string = 'just a test'
           y = x // compile-time error
+
     - doc: |-
           Non-union type T is a subtype of union type U (U1 | ... | Un) if T is assignable to a type of Ui
       decl: |-
           let u: number | string = 1 // ok
           u = "aa" // ok
           u = true // compile-time error
+
+    - doc: |-
+          unions of resizable arrays subtyping - two arrays are not related to each other
+      decl: |-
+          let ab: string[]|'b'[] = ['a', 'a', 'a']
+          let a: 'a'[] = ['a', 'a']
+          ab = a
+
+    - doc: |-
+          unions of tuples subtyping -  two tuples are not related to each other 
+      decl: |-
+          class A {}
+          class B extends A {}
+          class C {}
+          let acab: [A, C]|[A, B] = [new B, new C]
+          let b: [B, C] = [new B, new C]
+          acab = b  

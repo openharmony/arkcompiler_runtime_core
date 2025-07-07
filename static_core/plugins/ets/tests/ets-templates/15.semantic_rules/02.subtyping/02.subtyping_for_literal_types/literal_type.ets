@@ -14,16 +14,14 @@
 */
 
 /*---
-desc: Subtype relation among type literal and type String
-tags: [compile-only]
+desc: Subtype relation between type literal and type String
 ---*/
 
 type Str = String
-
 type strLiteral = "some_string"
 
 function main(): void {
   let a: strLiteral = "some_string"
-
   let b: Str = a
+  arktest.assertTrue(b instanceof strLiteral)
 }

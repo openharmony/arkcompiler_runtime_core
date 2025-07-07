@@ -15,17 +15,15 @@
 
 /*---
 desc: Subtype relation among union literal, union string and string
-tags: [compile-only]
 ---*/
 
 type UnionWide = String | String
-
 type UnionNarrow = "some_string" | "some_other_string"
 
 function main(): void {
   let a: UnionNarrow = "some_other_string"
-
   let b: UnionWide = a
-
+  arktest.assertTrue(b instanceof "some_other_string")
   let c: String = b
+  arktest.assertTrue(c instanceof String)
 }

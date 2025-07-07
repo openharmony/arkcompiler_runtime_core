@@ -17,13 +17,27 @@
 
 /*---
 desc: >-
-    {{c.doc|indent}}
+    Fixed-size array types are covariant and are formally defined as follows:
+    FixedSize<B> <: FixedSize<A> if B <: A.
 ---*/
 
-{{c.decl}}
+class Base {}
+class Derived extends Base {}
+type CustomArr<T extends Base> = FixedArray<T>
+
+let x: {{'CustomArr' if c.customtype else 'FixedArray'}}<{{c.stype}}> = {{c.value}}
+let y: FixedArray<{{c.dtype}}> = x
+
+function foo(ca: FixedArray<{{c.dtype}}>) {
+  ca[0] = {{c.newValue}}
+}
 
 function main() {
-    {{c.check|indent}}
+    let exceptionCheck = (e: Error|Exception): Boolean|String => {
+        return e instanceof ArrayStoreError && 
+        (e as ArrayStoreError).message.includes('cannot be stored in an array of type');
+    };
+    arktest.expectThrow(() => { foo(y); }, exceptionCheck);
 }
 
 {%- endfor %}

@@ -20,5 +20,7 @@ desc: Subtyping relation among the generic class and Object
 class B<T> {}
 
 function main(): void {
-  let instance: Object = new B<String>();
+  let b: B<String> = new B<String>();
+  let instance: Object = b
+  arktest.assertTrue(instance instanceof B)
 }

@@ -1370,6 +1370,20 @@
 13.compilation_units/07.export_directives/04.re-export_directive/pkg02_re-export_all_with_rename.ets
 13.compilation_units/07.export_directives/04.re-export_directive/pkg03_re-export_all.ets
 
+#28326
+15.semantic_rules/02.subtyping/01.subtyping_for_classes_and_interfaces/generic_cast_to_generic_superclass.ets
+15.semantic_rules/02.subtyping/01.subtyping_for_classes_and_interfaces/generic_cast_to_object_with_parameters.ets
+
+#27624 Union fixed arrays initialization
+15.semantic_rules/02.subtyping/03.subtyping_for_union_types/positive_5.ets
+15.semantic_rules/02.subtyping/03.subtyping_for_union_types/positive_6.ets
+
+#27702 Type safety check
+15.semantic_rules/02.subtyping/05.subtyping_for_fixed-size_array_types/positive_0.ets
+15.semantic_rules/02.subtyping/05.subtyping_for_fixed-size_array_types/positive_1.ets
+15.semantic_rules/02.subtyping/05.subtyping_for_fixed-size_array_types/negative_type_safety_0.ets
+15.semantic_rules/02.subtyping/05.subtyping_for_fixed-size_array_types/negative_type_safety_1.ets
+
 #27911 Generic functions subtyping
 15.semantic_rules/02.subtyping/04.subtyping_for_function_types/positive_function_generic_0.ets
 15.semantic_rules/02.subtyping/04.subtyping_for_function_types/positive_function_generic_1.ets

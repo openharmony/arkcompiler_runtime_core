@@ -15,6 +15,7 @@ limitations under the License.
 
 /*---
 desc: Subtyping relation among the class types
+tags: [negative, compile-only]
 ---*/
 
 class A {
@@ -29,18 +30,13 @@ final class C extends B {
   override foo(): int { return 3 }
 }
 
+
 function main(): void {
   let instanceA = new A
   let instanceB = new B
   let instanceC = new C
 
   instanceB = instanceC
-  instanceA = instanceC
-  instanceA = instanceB
+  instanceB = instanceA
 
-
-  arktest.assertTrue(instanceA instanceof C)
-  arktest.assertTrue(instanceA instanceof B)
-  arktest.assertTrue(instanceA instanceof A)
-  arktest.assertEQ(instanceA.foo(), 3)
 }

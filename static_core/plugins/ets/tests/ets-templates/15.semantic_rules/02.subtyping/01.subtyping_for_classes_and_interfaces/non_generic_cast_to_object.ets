@@ -21,4 +21,5 @@ class B {}
 
 function main(): void {
   let instance: Object = new B();
+  arktest.assertTrue(instance instanceof B)
 }

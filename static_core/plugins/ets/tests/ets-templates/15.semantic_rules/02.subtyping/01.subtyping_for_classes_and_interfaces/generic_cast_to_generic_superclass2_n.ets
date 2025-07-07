@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,33 +14,18 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Subtyping relation among the class types
+desc: Subtyping relation among the generic class types with same parameters
+tags: [negative, compile-only]
 ---*/
 
-class A {
-  foo(): int { return 1 }
-}
+class A {}
+class B extends A {}
+class X {}
+class C<T extends A> {}
 
-class B extends A {
-  override foo(): int { return 2 }
-}
+final class D<T extends A> extends C<T> {}
 
-final class C extends B {
-  override foo(): int { return 3 }
-}
 
 function main(): void {
-  let instanceA = new A
-  let instanceB = new B
-  let instanceC = new C
-
-  instanceB = instanceC
-  instanceA = instanceC
-  instanceA = instanceB
-
-
-  arktest.assertTrue(instanceA instanceof C)
-  arktest.assertTrue(instanceA instanceof B)
-  arktest.assertTrue(instanceA instanceof A)
-  arktest.assertEQ(instanceA.foo(), 3)
+  let instance2: D<B> = new C<B>();
 }
