@@ -226,7 +226,6 @@ abckit_gtests_sources = [
   "ut/metadata_core/modify_api/strings/strings_test.cpp",
   "ut/metadata_core/modify_api/types/types_test.cpp",
   "ut/metadata_core/modify_api/values/values_test.cpp",
-
   # "wrong_ctx_tests/wrong_ctx_tests_ArktsInspectApiImpl_0.cpp",
   # "wrong_ctx_tests/wrong_ctx_tests_ArktsModifyApiImpl_0.cpp",
   "wrong_ctx_tests/wrong_ctx_tests_GraphApiImpl_0.cpp",
@@ -906,6 +905,58 @@ libabckit_host_unittest_action("abckit_gtests") {
     ":gen_replace_call_site_abc",
     ":gen_router_table_abc",
   ]
+
+  if (is_ohos && is_standard_system) {
+    test_abc_dir = "/data/test"
+  } else {
+    test_abc_dir = rebase_path(target_out_dir)
+  }
+
+  test_js_dir = rebase_path(test_js_path)
+
+  defines = [
+    "ABCKIT_ABC_DIR=\"${test_abc_dir}/\"",
+    "ABCKIT_TEST_DIR=\"${test_js_dir}\"",
+  ]
+}
+
+libabckit_host_unittest_action("arklink_strip_unused_code_gtests") {
+  module_out_path = module_output_path
+
+  sources = abckit_gtests_sources
+
+  include_dirs = [
+    "$ark_root_dynamic",
+    "$abckit_root",
+    "$abckit_root/include",
+    "$abckit_root/src",
+    "$abckit_root/tests",
+  ]
+
+  configs = [ "$abckit_root:abckit_config" ]
+
+  deps = [
+    ":abckit_ets_vm_helpers",
+    ":abckit_gtests_action",
+    ":abckit_js_vm_helpers",
+    "$abckit_root/src:libabckit",
+  ]
+
+  foreach(file, test_js_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+
+  foreach(file, test_js_from_ets_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+
+  foreach(file, test_ts_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+
+  foreach(file, test_ets_files) {
+    deps += [ ":ark_link_${file}_abc" ]
+  }
 
   if (is_ohos && is_standard_system) {
     test_abc_dir = "/data/test"
