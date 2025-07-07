@@ -83,4 +83,47 @@ EtsField *ManglingUtils::GetFieldIDByDisplayName(EtsClass *klass, const PandaStr
 
     return field;
 }
+
+static void ExtractClassDescriptorsFromArray(const panda_file::File *pfile, const panda_file::ArrayValue &classesArray,
+                                             std::vector<std::string> &outDescriptors)
+{
+    const uint32_t valCount = classesArray.GetCount();
+    outDescriptors.resize(valCount);
+    for (uint32_t j = 0; j < valCount; j++) {
+        auto entityId = classesArray.Get<panda_file::File::EntityId>(j);
+        panda_file::ClassDataAccessor classData(*pfile, entityId);
+        outDescriptors[j] = utf::Mutf8AsCString(classData.GetDescriptor());
+    }
+}
+
+// NOLINT(clang-analyzer-core) // false positive: this is a function, not a global var
+bool GetExportedClassDescriptorsFromModule(ark::ets::EtsClass *etsGlobalClass, std::vector<std::string> &outDescriptors)
+{
+    ASSERT(etsGlobalClass != nullptr);
+
+    const auto *runtimeClass = etsGlobalClass->GetRuntimeClass();
+    const panda_file::File *pfile = runtimeClass->GetPandaFile();
+    panda_file::ClassDataAccessor cda(*pfile, runtimeClass->GetFileId());
+
+    bool found = false;
+    cda.EnumerateAnnotation(panda_file_items::class_descriptors::ANNOTATION_MODULE.data(),
+                            [&outDescriptors, &found, pfile](panda_file::AnnotationDataAccessor &annotationAccessor) {
+                                const uint32_t count = annotationAccessor.GetCount();
+                                for (uint32_t i = 0; i < count; i++) {
+                                    auto elem = annotationAccessor.GetElement(i);
+                                    std::string nameStr =
+                                        utf::Mutf8AsCString(pfile->GetStringData(elem.GetNameId()).data);
+                                    if (nameStr == panda_file_items::class_descriptors::ANNOTATION_MODULE_EXPORTED) {
+                                        auto classesArray = elem.GetArrayValue();
+                                        ExtractClassDescriptorsFromArray(pfile, classesArray, outDescriptors);
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                return true;
+                            });
+
+    return found;
+}
+
 }  // namespace ark::ets
