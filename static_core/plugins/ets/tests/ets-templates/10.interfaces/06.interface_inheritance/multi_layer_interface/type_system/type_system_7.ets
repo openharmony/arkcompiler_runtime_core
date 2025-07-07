@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Using class inheritance and interface implementation to verify the correctness of the type system, but not all interface methods are implemented.
+desc: >-
+    Using class inheritance and interface implementation to verify the correctness of the type system,
+    but not all interface methods are implemented.
 tags: [compile-only, negative]
 ---*/
 

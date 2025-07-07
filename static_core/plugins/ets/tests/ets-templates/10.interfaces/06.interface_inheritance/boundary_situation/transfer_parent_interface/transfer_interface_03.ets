@@ -31,7 +31,7 @@ class MarkedClass implements ParentInterface, EmptyInterface {
   }
 }
 
-function isMarked(obj: EmptyInterface):boolean  {
+function isMarked(obj: EmptyInterface):boolean {
   return true;
 }
 

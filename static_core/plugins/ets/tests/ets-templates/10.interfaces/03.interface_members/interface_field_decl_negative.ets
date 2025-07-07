@@ -19,12 +19,12 @@ tags: [compile-only, negative]
 ---*/
 
 interface BaseColors {
-  RED:   int = 1;
+  RED: int = 1;
   GREEN: int = 2;
-  BLUE:  int = 3;
-  RED:   int;
+  BLUE: int = 3;
+  RED: int;
   GREEN: int;
-  BLUE:  int;
+  BLUE: int;
 }
 
 interface ExtendedColors extends BaseColors {

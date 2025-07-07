@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that a class can distinguish the same - named constants between an interface constant and a class method parameter by local variable.
+desc: >-
+    Verify that a class can distinguish the same - named constants between an interface constant and a class method
+    parameter by local variable.
 ---*/
 
 interface MyInterface {

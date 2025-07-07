@@ -14,7 +14,9 @@ limitations under the License.
 ---*/
 
 /*---
-desc: If ‘?’ is used after the name of the property, then the property type is semantically equivalent to type | undefined
+desc: >-
+    If ‘?’ is used after the name of the property, then the property type
+    is semantically equivalent to type | undefined
 ---*/
 
 interface I<T> {

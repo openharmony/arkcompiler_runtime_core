@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that a class cannot directly implement two interfaces with the same - named constants due to conflicts, mainly focusing on type conflicts.
+desc: >-
+    Verify that a class cannot directly implement two interfaces with the same - named constants due to conflicts,
+    mainly focusing on type conflicts.
 ---*/
 
 interface InterfaceOne {

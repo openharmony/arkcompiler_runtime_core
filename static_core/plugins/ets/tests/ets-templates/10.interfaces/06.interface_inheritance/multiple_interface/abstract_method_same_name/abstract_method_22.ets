@@ -1,4 +1,4 @@
-/*
+    /*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The method with the same name has the same type and number of parameters, but a method has joint types and cross types.
+desc: >-
+    The method with the same name has the same type and number of parameters, but a method has joint types
+    and cross types.
 tags: [compile-only, negative]
 ---*/
 

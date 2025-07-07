@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that a class can distinguish the same - named constants between an interface constant and a variable with the same name inside a class method by scope.
+desc: >-
+    Verify that a class can distinguish the same - named constants between an interface constant and a variable
+    with the same name inside a class method by scope.
 ---*/
 
 interface MethodVarConflictInterface {

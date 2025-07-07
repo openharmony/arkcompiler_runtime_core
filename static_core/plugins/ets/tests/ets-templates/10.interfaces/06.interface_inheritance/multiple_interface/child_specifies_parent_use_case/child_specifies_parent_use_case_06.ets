@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that a child interface resolves method conflicts when parent interfaces have methods with different parameters.
+desc: >-
+    Verify that a child interface resolves method conflicts when parent interfaces have methods with different
+    parameters.
 ---*/
 
 interface Parent1 {

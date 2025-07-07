@@ -13,4 +13,4 @@
 
 --- # List of valid class members
 interface_members:
-  - {decl: "enum Color {Red, Green}", call: "function main(): void { arktest.assertTrue( A.E.Red.ordinal() == 0 ) }"}
+  - {decl: "enum Color {Red, Green}", call: "function main(): void { arktest.assertTrue(A.E.Red.ordinal() == 0) }"}

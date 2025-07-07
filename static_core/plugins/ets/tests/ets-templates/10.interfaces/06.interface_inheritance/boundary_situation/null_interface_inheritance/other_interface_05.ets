@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: If the interface type contains methods (i.e., non-attribute members), you cannot assign values to it using object literals.
+desc: >-
+    If the interface type contains methods (i.e., non-attribute members),
+    you cannot assign values to it using object literals.
 tags: [compile-only, negative]
 ---*/
 

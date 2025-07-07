@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that a class implementing an interface with a constant of an object type and having a static property with the same name but different type causes a compile-time error.
+desc: >-
+    Verify that a class implementing an interface with a constant of an object type and having a static property with
+    the same name but different type causes a compile-time error.
 tags: [compile-only, negative]
 ---*/
 

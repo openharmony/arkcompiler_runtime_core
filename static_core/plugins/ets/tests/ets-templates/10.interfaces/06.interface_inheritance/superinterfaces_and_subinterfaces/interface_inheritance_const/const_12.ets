@@ -21,7 +21,7 @@ interface ParentInterface {
   readonly arr: number[];
 }
 
-class Parent implements ParentInterface  {
+class Parent implements ParentInterface {
   readonly arr: number[] = [1, 2, 3, 4, 5];
 }
 

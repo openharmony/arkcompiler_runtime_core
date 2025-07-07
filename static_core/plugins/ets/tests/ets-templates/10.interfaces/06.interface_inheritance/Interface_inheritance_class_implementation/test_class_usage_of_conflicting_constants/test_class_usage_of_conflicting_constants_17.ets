@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that a class can distinguish the same - named constants between an interface constant and a class namespace by namespace access and property access.
+desc: >-
+    Verify that a class can distinguish the same - named constants between an interface constant and
+    a class namespace by namespace access and property access.
 ---*/
 
 namespace CONST {

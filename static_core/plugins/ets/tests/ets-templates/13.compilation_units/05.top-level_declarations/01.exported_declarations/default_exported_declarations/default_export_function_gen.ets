@@ -20,6 +20,6 @@ tags:
 - not-a-test
 ---*/
 
-export default function foo<G,T>(i: G, j: T): int {
+export default function foo<G, T>(i: G, j: T): int {
     return 2;
 }
