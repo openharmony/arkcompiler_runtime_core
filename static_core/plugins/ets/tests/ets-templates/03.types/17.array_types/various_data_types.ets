@@ -14,7 +14,9 @@ limitations under the License.
 ---*/
 
 /*---
-desc: An array is an object which contains elements of same data type or different type of elements as union type. This test case checks the latter case.
+desc: >-
+    An array is an object which contains elements of same data type or different type of elements as union type.
+    This test case checks the latter case.
 tags: [compile-only]
 ---*/
 

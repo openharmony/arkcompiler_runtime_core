@@ -17,8 +17,8 @@ limitations under the License.
 desc: The only value of type undefined is represented by the keyword undefined.
 ---*/
 
-function foo(i: int|undefined): boolean {
-  if( i == undefined) {
+function foo(i: int | undefined): boolean {
+  if (i == undefined) {
     return true;
   } else {
     return false;

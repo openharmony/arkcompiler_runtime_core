@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- /*---
+/*---
 desc: >-
     There is no restriction on using a type parameter T in the right side
     of a type alias declaration. The following code is valid

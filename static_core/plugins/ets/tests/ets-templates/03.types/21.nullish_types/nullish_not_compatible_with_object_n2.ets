@@ -20,8 +20,8 @@ tags:
 - negative
 ---*/
 
-function nullish (
-    o: Object, nullish3: null|undefined
+function nullish(
+    o: Object, nullish3: null | undefined
 ) {
     o = nullish3 /* compile-time error - type 'null|undefined' is not compatible with Object */
 }

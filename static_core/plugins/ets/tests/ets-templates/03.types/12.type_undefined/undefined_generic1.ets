@@ -14,12 +14,14 @@ limitations under the License.
 ---*/
 
 /*---
-desc: The undefined type can be used as the type argument that instantiates a generic type if specific value of the type argument is irrelevant.
+desc: >-
+    The undefined type can be used as the type argument that instantiates a generic type if specific value
+    of the type argument is irrelevant.
 ---*/
 
 class A<T> {}
 
 function main(): void {
-  let i: A<undefined>|undefined = undefined;
+  let i: A<undefined> | undefined = undefined;
   arktest.assertTrue( i === undefined )
 }
