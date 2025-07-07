@@ -2390,17 +2390,17 @@ void EncodeVisitor::VisitLoadArrayPair(GraphVisitor *visitor, Inst *inst)
     uint64_t indexImmValue = inst->CastToLoadArrayPair()->GetImm();
     auto offset = enc->cg_->GetGraph()->GetRuntime()->GetArrayDataOffset(enc->GetCodegen()->GetArch()) +
                   (indexImmValue << DataType::ShiftByType(type, enc->GetCodegen()->GetArch()));
-    ScopedTmpReg tmp(enc->GetEncoder());
     int32_t scale = DataType::ShiftByType(type, enc->GetCodegen()->GetArch());
     auto indexUpcasted = index.As(array.GetType());
-    enc->GetEncoder()->EncodeAdd(tmp, array, Shift(indexUpcasted, scale));
-    auto mem = MemRef(tmp, offset);
     auto prevOffset = enc->GetEncoder()->GetCursorOffset();
 
     if (loadArr->GetNeedBarrier()) {
+        auto mem = MemRef(array, indexUpcasted, scale, offset);
         enc->GetCodegen()->CreateReadPairViaBarrier(inst, mem, dst0, dst1);
     } else {
-        enc->GetEncoder()->EncodeLdp(dst0, dst1, IsTypeSigned(type), mem);
+        ScopedTmpReg tmp(enc->GetEncoder());
+        enc->GetEncoder()->EncodeAdd(tmp, array, Shift(indexUpcasted, scale));
+        enc->GetEncoder()->EncodeLdp(dst0, dst1, IsTypeSigned(type), MemRef(tmp, offset));
     }
     enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prevOffset);
 }

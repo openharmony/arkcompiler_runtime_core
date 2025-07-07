@@ -418,6 +418,18 @@ extern "C" void CmcPostWriteBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[m
 #endif
 }
 
+extern "C" void CmcPostWritePairBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] int32_t offset,
+                                        [[maybe_unused]] ark::ObjectHeader *ref1,
+                                        [[maybe_unused]] ark::ObjectHeader *ref2)
+{
+#ifdef ARK_HYBRID
+    panda::BaseRuntime::WriteBarrier(obj, ToVoidPtr(ToUintPtr(obj) + offset), ref1);
+    panda::BaseRuntime::WriteBarrier(obj, ToVoidPtr(ToUintPtr(obj) + offset + OBJECT_POINTER_SIZE), ref2);
+#else
+    UNREACHABLE();
+#endif
+}
+
 extern "C" void *CmcReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] int32_t offset)
 {
 #ifdef ARK_HYBRID
