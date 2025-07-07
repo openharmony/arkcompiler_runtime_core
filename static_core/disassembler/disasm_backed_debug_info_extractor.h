@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,8 @@ public:
     const std::vector<ParamInfo> &GetParameterInfo(panda_file::File::EntityId methodId) const override;
     const char *GetSourceFile(panda_file::File::EntityId methodId) const override;
     const char *GetSourceCode(panda_file::File::EntityId methodId) const override;
+    bool IsUserFile() const override;
+    void SetUserFile(bool isUser);
 
 private:
     struct Disassembly {
@@ -50,6 +52,7 @@ private:
     mutable Disassembler disassembler_ GUARDED_BY(mutex_);
     mutable std::unordered_map<panda_file::File::EntityId, std::optional<std::string>> sourceNames_ GUARDED_BY(mutex_);
     mutable std::unordered_map<panda_file::File::EntityId, Disassembly> disassemblies_ GUARDED_BY(mutex_);
+    bool isUserFile_ = false;
 };
 }  // namespace ark::disasm
 
