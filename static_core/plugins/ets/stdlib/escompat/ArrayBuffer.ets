@@ -315,7 +315,6 @@ export class ArrayBuffer extends Buffer
     *
     * @param {string} str - The string to be converted.
     * @param {string} encoding - The encoding to use for converting the string.
-    * @param {int} length - The desired length of the resulting ArrayBuffer.
     * @returns {ArrayBuffer} A new ArrayBuffer containing the encoded string data.
     */
     public static native from(str: string, encoding: string): ArrayBuffer;
