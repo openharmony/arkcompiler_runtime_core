@@ -23,12 +23,12 @@ desc: >-
 
 let num: number
 
-function foo(p: number|number[]|undefined): number {
+function foo(p: number | number[] | undefined): number {
     if (p instanceof Number) {
-        num = p * 2  // numeric operation without cast
+        num = p * 2 // numeric operation without cast
         return 1
     } else if (p instanceof number[]) {
-        num = p.length  // field access without cast
+        num = p.length // field access without cast
         return 2
     }
     return 3

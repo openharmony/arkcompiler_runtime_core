@@ -16,7 +16,8 @@ limitations under the License.
 /*---
 desc: |-
     Method getName() returns the name of an enumeration constant.
-    Method valueOf() returns an int or string value of an enumeration constant depending on the type of the enumeration constant.
+    Method valueOf() returns an int or string value of an enumeration constant
+    depending on the type of the enumeration constant.
 ---*/
 
 enum Color {Red = 777, Blue = 55, Green = 2}

@@ -20,6 +20,6 @@ tags:
 - not-a-test
 ---*/
 
-export function foo<T,S>(i: T, j: S): int {
+export function foo<T, S>(i: T, j: S): int {
     return 1;
 }

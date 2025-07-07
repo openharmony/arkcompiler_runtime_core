@@ -20,6 +20,6 @@ tags:
 - not-a-test
 ---*/
 
-export function foo(i: String|undefined|null ): int {
+export function foo(i: String | undefined | null): int {
     return 1;
 }

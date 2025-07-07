@@ -19,12 +19,12 @@ desc: Test cases for various usage scenarios of asynchronous functions.
 ---*/
 
 async function functionReturnArray(): Promise<Array<number>> {
-    return new Array<number>(1,2, 3);
+    return new Array<number>(1, 2, 3);
 }
 
 async function startTest() {
   const result = await functionReturnArray();
-  const resTemp = new Array<number>(1,2, 3);
+  const resTemp = new Array<number>(1, 2, 3);
   arktest.assertEQ(result === resTemp, true);
 }
 

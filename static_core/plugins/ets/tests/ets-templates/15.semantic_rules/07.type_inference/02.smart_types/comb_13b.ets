@@ -23,9 +23,9 @@ desc: >-
 
 let num: number
 
-function foo(p: null|number|string): number {
+function foo(p: null | number | string): number {
     if (p != null && !(p instanceof String)) {
-        num = p * 2  // numeric operation without cast
+        num = p * 2 // numeric operation without cast
         return 1
     }
     return 2

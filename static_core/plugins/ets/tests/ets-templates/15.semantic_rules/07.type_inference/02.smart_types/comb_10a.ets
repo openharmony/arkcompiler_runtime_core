@@ -21,19 +21,21 @@ desc: >-
     and allow operations which are specific to such narrowed type.
 ---*/
 class A {}
-let a: A|undefined = new A()
+let a: A | undefined = new A()
 
 let num: Number = 0;
 let str: string = "";
 let err: Error = new Error();
 let bool: Boolean = false;
 
-function foo(p: number|string|undefined|Error|boolean): number {
+function foo(p: number | string | undefined | Error | boolean): number {
     return p === undefined ? ((): number => { a = p; return 1 })() // assigned without cast
         : p instanceof Number ? ((): number => { num = p * 2; return 2 })() // numeric operation without cast
-            : p instanceof Error ? ((): number => { err = p; str = p.message; return 3 })() // field access without cast
-                : p instanceof String ? ((): number => { str = p.substr(0, 1); return 4 })() // string method called without cast
-                    : ((): number => { bool = !p; return 5 })()  // boolean operation without cast
+            : p instanceof Error ? ((): number => { err = p; str = p.message; return 3 })()
+            // ^^^ field access without cast
+                : p instanceof String ? ((): number => { str = p.substr(0, 1); return 4 })()
+                // ^^^ string method called without cast
+                    : ((): number => { bool = !p; return 5 })() // boolean operation without cast
 }
 
 function main() {

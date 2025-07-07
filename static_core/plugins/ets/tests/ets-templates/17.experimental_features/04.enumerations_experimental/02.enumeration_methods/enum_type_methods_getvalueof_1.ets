@@ -14,7 +14,9 @@ limitations under the License.
 ---*/
 
 /*---
-desc: getValueOf(string) returns an enumeration constant with the given name, or throws an error if no constant with such name exists.
+desc: >-
+    getValueOf(string) returns an enumeration constant with the given name,
+    or throws an error if no constant with such name exists.
 ---*/
 
 enum Color {Red, Green, Blue}

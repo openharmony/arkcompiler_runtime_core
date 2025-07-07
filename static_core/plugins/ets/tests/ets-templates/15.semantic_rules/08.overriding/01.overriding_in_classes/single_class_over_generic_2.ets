@@ -20,7 +20,7 @@ desc: >-
 tags: [compile-only, negative]
 ---*/
 
-class Base<T,S> {
+class Base<T, S> {
   constructor(i: T) {}
   constructor(i: S) {}
 }
