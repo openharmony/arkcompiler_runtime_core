@@ -22,7 +22,171 @@
 
 namespace libabckit::test {
 
-class LibAbcKitInspectApiModuleFieldsTest : public ::testing::Test {};
+class LibAbcKitInspectApiFieldsTest : public ::testing::Test {};
+
+// Test: test-kind=api, api=InspectApiImpl::moduleFieldGetType, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiFieldsTest, ModuleFieldGetTypeStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/fields/fields_static.abc");
+
+    std::set<std::string> gotTypeNames;
+    std::set<std::string> expectTypeNames = {"std.core.String"};
+
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        for (const auto &field : module.GetFields()) {
+            gotTypeNames.emplace(field.GetType().GetName());
+        }
+    }
+
+    ASSERT_EQ(gotTypeNames, expectTypeNames);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::moduleFieldGetValue, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiFieldsTest, ModuleFieldGetValueStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/fields/fields_static.abc");
+
+    using FieldVal = std::variant<bool, int, double, std::string>;
+    std::vector<FieldVal> gotFieldValues;
+    std::vector<FieldVal> expectFieldValues = {std::string("Hello")};
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        for (const auto &field : module.GetFields()) {
+            auto value = field.GetValue();
+            auto typeId = value.GetType().GetTypeId();
+            static const std::map<AbckitTypeId, std::function<void()>> valueHandlers = {
+                {ABCKIT_TYPE_ID_U1,
+                 [&]() {
+                     bool val = value.GetU1();
+                     gotFieldValues.push_back(val);
+                 }},
+                {ABCKIT_TYPE_ID_I32,
+                 [&]() {
+                     int val = value.GetInt();
+                     gotFieldValues.push_back(val);
+                 }},
+                {ABCKIT_TYPE_ID_F64,
+                 [&]() {
+                     double val = value.GetDouble();
+                     gotFieldValues.push_back(val);
+                 }},
+                {ABCKIT_TYPE_ID_STRING, [&]() {
+                     std::string val = value.GetString();
+                     gotFieldValues.push_back(val);
+                 }}};
+            auto handler = valueHandlers.find(typeId);
+            if (handler != valueHandlers.end()) {
+                handler->second();
+            }
+        }
+    }
+
+    ASSERT_EQ(gotFieldValues, expectFieldValues);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::namespaceFieldGetType, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiFieldsTest, NamespaceFieldGetTypeStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/fields/fields_static.abc");
+
+    std::set<std::string> gotTypeNames;
+    std::set<std::string> expectTypeNames = {"escompat.Array"};
+
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        for (const auto &ns : module.GetNamespaces()) {
+            for (const auto &field : ns.GetFields()) {
+                gotTypeNames.emplace(field.GetType().GetName());
+            }
+        }
+    }
+
+    ASSERT_EQ(gotTypeNames, expectTypeNames);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::classFieldGetType, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiFieldsTest, ClassFieldGetTypeStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/fields/fields_static.abc");
+
+    std::set<std::string> gotTypeNames;
+    std::set<std::string> expectTypeNames = {"std.core.String", "i32"};
+
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        for (const auto &klass : module.GetClasses()) {
+            for (const auto &field : klass.GetFields()) {
+                gotTypeNames.emplace(field.GetType().GetName());
+            }
+        }
+    }
+
+    ASSERT_EQ(gotTypeNames, expectTypeNames);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::classFieldGetValue, abc-kind=ArkTS2, category=positive, extension=c
+
+TEST_F(LibAbcKitInspectApiFieldsTest, ClassFieldGetValueStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/fields/fields_static.abc");
+    using FieldVal = std::variant<bool, int, double, std::string>;
+    std::vector<FieldVal> gotClassFieldValues;
+    std::vector<FieldVal> expectClassFieldValues = {
+        std::string("public"), std::string("protected"), std::string("private"), std::string("static"), 1, 2
+    };
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        auto result = helpers::GetClassByName(module, "C1");
+        ASSERT_NE(result, std::nullopt);
+        const auto &klass = result.value();
+        for (const auto &field : klass.GetFields()) {
+            auto value = field.GetValue();
+            auto type = field.GetType();
+            auto typeId = value.GetType().GetTypeId();
+            static const std::map<AbckitTypeId, std::function<void()>> valueHandlers = {
+                {ABCKIT_TYPE_ID_U1,
+                 [&]() {
+                     bool val = value.GetU1();
+                     gotClassFieldValues.push_back(val);
+                 }},
+                {ABCKIT_TYPE_ID_F64,
+                 [&]() {
+                     double val = value.GetDouble();
+                     gotClassFieldValues.push_back(val);
+                 }},
+                {ABCKIT_TYPE_ID_STRING,
+                 [&]() {
+                     std::string val = value.GetString();
+                     gotClassFieldValues.push_back(val);
+                 }},
+                {ABCKIT_TYPE_ID_I32, [&]() {
+                     int val = value.GetInt();
+                     gotClassFieldValues.push_back(val);
+                 }}};
+
+            auto handler = valueHandlers.find(typeId);
+            if (handler != valueHandlers.end()) {
+                handler->second();
+            } else {
+                std::string val = "[unsupported type " + std::to_string(static_cast<int>(typeId)) + "]";
+                gotClassFieldValues.push_back(val);
+            }
+        }
+    }
+
+    ASSERT_EQ(gotClassFieldValues, expectClassFieldValues);
+}
 
 // Test: test-kind=api, api=InspectApiImpl::classFieldIsPublic, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModuleFieldsTest, ClassFieldIsPublicStatic)
