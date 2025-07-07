@@ -183,7 +183,9 @@ void TimerModule::TimerCallback(uv_timer_t *timer)
 
 void TimerModule::RepeatTimer(uv_timer_t *timer, uint64_t timerId)
 {
-    auto *env = ark::ets::EtsCoroutine::GetCurrent()->GetEtsNapiEnv();
+    auto *coro = ark::ets::EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    auto *env = coro->GetEtsNapiEnv();
     auto [_, exists] = FindTimerInfo(env, timerId);
     if (exists) {
         uv_timer_again(timer);

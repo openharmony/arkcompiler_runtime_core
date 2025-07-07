@@ -22,6 +22,7 @@ namespace ark {
 template <typename T>
 ALWAYS_INLINE inline void AtomicStore(T *addr, T val, std::memory_order order)
 {
+    ASSERT(addr != nullptr);
     // Atomic with parameterized order reason: memory order passed as argument
     reinterpret_cast<std::atomic<T> *>(addr)->store(val, order);
 }
@@ -29,6 +30,7 @@ ALWAYS_INLINE inline void AtomicStore(T *addr, T val, std::memory_order order)
 template <typename T>
 ALWAYS_INLINE inline T AtomicLoad(const T *addr, std::memory_order order)
 {
+    ASSERT(addr != nullptr);
     // Atomic with parameterized order reason: memory order passed as argument
     return reinterpret_cast<const std::atomic<T> *>(addr)->load(order);
 }
@@ -36,6 +38,7 @@ ALWAYS_INLINE inline T AtomicLoad(const T *addr, std::memory_order order)
 template <typename T>
 ALWAYS_INLINE inline T AtomicCmpxchgStrong(T *addr, T expected, T newValue, std::memory_order order)
 {
+    ASSERT(addr != nullptr);
     // Atomic with parameterized order reason: memory order passed as argument
     reinterpret_cast<std::atomic<T> *>(addr)->compare_exchange_strong(expected, newValue, order);
     return expected;
@@ -45,6 +48,7 @@ template <typename T>
 ALWAYS_INLINE inline bool AtomicCmpxchgWeak(T *addr, T &expected, T newValue, std::memory_order orderSuccess,
                                             std::memory_order orderFailure)
 {
+    ASSERT(addr != nullptr);
     // Atomic with parameterized order reason: memory order passed as argument
     return reinterpret_cast<std::atomic<T> *>(addr)->compare_exchange_weak(expected, newValue, orderSuccess,
                                                                            orderFailure);

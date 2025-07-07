@@ -66,6 +66,7 @@ static ets_proxy::EtsClassWrapper *RegisterEtsProxyForStdClass(
     const ets_proxy::EtsClassWrapper::OverloadsMap *overloads = nullptr)
 {
     auto coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     PandaEtsVM *vm = coro->GetPandaVM();
     EtsClassLinker *etsClassLinker = vm->GetClassLinker();
     auto etsClass = etsClassLinker->GetClass(descriptor.data());
@@ -530,6 +531,7 @@ void RegisterBuiltinJSRefConvertors(InteropCtx *ctx)
 {
     auto cache = ctx->GetRefConvertCache();
     auto coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     PandaEtsVM *vm = coro->GetPandaVM();
     EtsClassLinkerExtension *linkerExt = vm->GetClassLinker()->GetEtsClassLinkerExtension();
     auto ptypes = PlatformTypes(coro);

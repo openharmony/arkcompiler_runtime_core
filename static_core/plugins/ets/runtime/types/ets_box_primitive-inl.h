@@ -24,6 +24,7 @@ template <typename T>
 EtsBoxPrimitive<T> *EtsBoxPrimitive<T>::Create(EtsCoroutine *coro, T value)
 {
     auto *instance = reinterpret_cast<EtsBoxPrimitive<T> *>(ObjectHeader::Create(coro, GetBoxClass(coro)));
+    ASSERT(instance != nullptr);
     instance->SetValue(value);
     return instance;
 }
@@ -51,6 +52,7 @@ EtsClass *EtsBoxPrimitive<T>::GetEtsBoxClass(EtsCoroutine *coro)
     } else if constexpr (std::is_same<T, EtsDouble>::value) {
         boxClass = ptypes->coreDouble;
     }
+    ASSERT(boxClass != nullptr);
     ASSERT(boxClass->IsBoxed());
     return boxClass;
 }

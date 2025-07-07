@@ -1149,6 +1149,7 @@ static ani_status SetArrayRegion(ScopedManagedCodeFix &s,
     EtsCoroutine *coroutine = s.GetCoroutine();
     EtsHandleScope scope(coroutine);
     EtsHandle objectArrayHandle(coroutine, objectArray);
+    ASSERT(objectArrayHandle.GetPtr() != nullptr);
     for (size_t posArr = start, posBuff = 0; posArr < end; ++posArr, ++posBuff) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         T value = buff[posBuff];

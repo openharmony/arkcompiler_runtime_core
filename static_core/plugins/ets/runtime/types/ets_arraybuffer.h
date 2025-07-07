@@ -60,7 +60,9 @@ public:
      */
     ALWAYS_INLINE static ObjectHeader *AllocateNonMovableArray(EtsInt length)
     {
-        return EtsByteArray::Create(length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT)->GetCoreType();
+        auto byteArray = EtsByteArray::Create(length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+        ASSERT(byteArray != nullptr);
+        return byteArray->GetCoreType();
     }
 
     ALWAYS_INLINE static EtsLong GetAddress(const EtsByteArray *array)
@@ -258,6 +260,7 @@ private:
         auto *allocator = static_cast<mem::Allocator *>(Runtime::GetCurrent()->GetInternalAllocator());
         auto *pandaVm = coro->GetPandaVM();
 
+        ASSERT(arrayBufferHandle.GetPtr() != nullptr);
         auto *finalizationInfo =
             allocator->New<FinalizationInfo>(arrayBufferHandle.GetPtr()->GetData(), finalizerFunction, finalizerHint);
         EtsHandle<EtsObject> handle(arrayBufferHandle);
