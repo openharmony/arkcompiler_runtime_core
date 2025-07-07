@@ -146,4 +146,15 @@ const DisasmBackedDebugInfoExtractor::Disassembly &DisasmBackedDebugInfoExtracto
                                         std::move(localVariableTable)})
         .first->second;
 }
+
+bool DisasmBackedDebugInfoExtractor::IsUserFile() const
+{
+    return isUserFile_;
+}
+
+void DisasmBackedDebugInfoExtractor::SetUserFile(bool isUser)
+{
+    isUserFile_ = isUser;
+}
+
 }  // namespace ark::disasm

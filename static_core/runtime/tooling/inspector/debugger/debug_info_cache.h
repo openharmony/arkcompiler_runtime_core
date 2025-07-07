@@ -35,7 +35,7 @@ public:
     NO_COPY_SEMANTIC(DebugInfoCache);
     NO_MOVE_SEMANTIC(DebugInfoCache);
 
-    void AddPandaFile(const panda_file::File &file);
+    void AddPandaFile(const panda_file::File &file, bool isUserPandafile = false);
     void GetSourceLocation(const PtFrame &frame, std::string_view &sourceFile, std::string_view &methodName,
                            size_t &lineNumber);
     std::unordered_set<PtLocation, HashLocation> GetCurrentLineLocations(const PtFrame &frame);
@@ -53,6 +53,8 @@ public:
     std::vector<std::string> GetPandaFiles(const std::function<bool(std::string_view)> &sourceFileFilter);
 
     const char *GetSourceFile(Method *method);
+
+    const char *GetUserSourceFile(Method *method);
 
     const panda_file::DebugInfoExtractor *GetDebugInfo(const panda_file::File *file) const;
 

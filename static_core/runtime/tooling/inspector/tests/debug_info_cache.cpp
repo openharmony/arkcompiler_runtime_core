@@ -53,7 +53,7 @@ protected:
         auto pf = panda_file::OpenPandaFile(ASM_FILE_NAME);
         ASSERT_NE(pf, nullptr);
 
-        cache.AddPandaFile(*pf);
+        cache.AddPandaFile(*pf, true);
 
         RuntimeOptions options;
         options.SetShouldInitializeIntrinsics(false);

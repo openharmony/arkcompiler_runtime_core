@@ -136,6 +136,10 @@ void Inspector::MethodEntry(PtThread thread, Method * /* method */)
 
     auto *debuggableThread = GetDebuggableThread(thread);
     ASSERT(debuggableThread != nullptr);
+    auto stack = StackWalker::Create(thread.GetManagedThread());
+    if (stack.IsCFrame()) {
+        return;
+    }
     if (debuggableThread->OnMethodEntry()) {
         HandleError(debugger_.NotifyFramePop(thread, 0));
     }
@@ -162,7 +166,7 @@ void Inspector::LoadModule(std::string_view fileName)
     Runtime::GetCurrent()->GetClassLinker()->EnumeratePandaFiles(
         [this, fileName](auto &file) {
             if (file.GetFilename() == fileName) {
-                debugInfoCache_.AddPandaFile(file);
+                debugInfoCache_.AddPandaFile(file, true);
                 const auto *extractor = debugInfoCache_.GetDebugInfo(&file);
                 SourceNameInsert(extractor);
                 ResolveBreakpoints(file, extractor);
@@ -182,7 +186,7 @@ void Inspector::SingleStep(PtThread thread, Method *method, const PtLocation &lo
 {
     os::memory::ReadLockHolder lock(debuggerEventsLock_);
 
-    auto sourceFile = debugInfoCache_.GetSourceFile(method);
+    auto sourceFile = debugInfoCache_.GetUserSourceFile(method);
     // NOTE(fangting, #IC98Z2): etsstdlib.ets should not call loadModule in pytest.
     if ((sourceFile == nullptr) || (strcmp(sourceFile, "etsstdlib.ets") == 0)) {
         return;
