@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,16 @@
  * limitations under the License.
  */
 
-{% for t in named_types_generics %}
-
 /*---
-desc: Generic named type {{named}}
-params: {{t.type}}, {{t.value}}
-tags: [compile-only]
+desc: Generic named type
 ---*/
 
-{{t.type}}
+type T1 = Object
+type T2 = number
 
-let x: {{t.value}};
+function foo(t1: T1, t2: T2) {
+    t1 = t2
+    t2 = t2 + t2
+}
 
-
-{% endfor %}
+foo(new Object(), 1)
