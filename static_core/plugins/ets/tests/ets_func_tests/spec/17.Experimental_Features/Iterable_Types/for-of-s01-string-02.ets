@@ -19,7 +19,7 @@ tags: []
 ---*/
 
 function main() : int {
-    let tmp : char = c'z';
+    let tmp : string = 'z';
     let initialString : String = "abcdef";
     let workString : String = "";
     for (tmp of initialString) {
