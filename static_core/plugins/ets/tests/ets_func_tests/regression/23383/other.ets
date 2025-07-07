@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
- /*---
- desc: Issue 23383. Cannot find type
- tags: [compile-only, not-a-test]
-
- ---*/
+/*---
+desc: Issue 23383. Cannot find type
+tags: [compile-only, not-a-test]
+---*/
 
 export interface PreviewText {
     offset: number
