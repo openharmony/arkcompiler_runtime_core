@@ -492,19 +492,21 @@ private:
                    (input.GetInst()->GetOpcode() == Opcode::SaveStateDeoptimize && inst->CanDeoptimize());
         };
         bool hasSaveState = std::find_if(inputs.begin(), inputs.end(), ssInput) != inputs.end();
-
-        bool hasOpc = true;
-        for (auto &node : inst->GetUsers()) {
-            auto opc = node.GetInst()->GetOpcode();
-            hasOpc &= std::find(opcs.begin(), opcs.end(), opc) != opcs.end();
-        }
-
         CHECKER_DO_IF_NOT_VISITOR(
-            v, !inst->HasUsers() || hasOpc,
-            (inst->Dump(&std::cerr),
-             std::cerr << "Throw inst doesn't have any users from the list:" << opcs << std::endl));
-        CHECKER_DO_IF_NOT_VISITOR(v, hasSaveState,
-                                  (inst->Dump(&std::cerr), std::cerr << "Throw inst without SaveState" << std::endl));
+            v, hasSaveState, (inst->Dump(&std::cerr), std::cerr << "Throw/deopt inst without SaveState" << std::endl));
+
+        if (!inst->CanDeoptimize()) {
+            bool hasOpc = true;
+            for (auto &node : inst->GetUsers()) {
+                auto opc = node.GetInst()->GetOpcode();
+                hasOpc &= std::find(opcs.begin(), opcs.end(), opc) != opcs.end();
+            }
+
+            CHECKER_DO_IF_NOT_VISITOR(
+                v, !inst->HasUsers() || hasOpc,
+                (inst->Dump(&std::cerr),
+                 std::cerr << "Throw inst doesn't have any users from the list:" << opcs << std::endl));
+        }
 #endif
     }
 
