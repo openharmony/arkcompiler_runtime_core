@@ -6662,6 +6662,16 @@ intrinsics:
       args: [ u16 ]
     impl: ark::ets::intrinsics::StdCoreCharToDouble
 
+  - name: StdCoreCharToString
+    space: ets
+    class_name: std.core.Char
+    method_name: toString
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ u16 ]
+    impl: ark::ets::intrinsics::StdCoreCharToString
+
   - name: StdCoreCharIsUpperCase
     space: ets
     class_name: std.core.Char
