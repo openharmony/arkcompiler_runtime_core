@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function main() {
+function testMain() {
     let buf: ArrayBuffer;
     let arr: Int32Array; 
 
@@ -27,4 +27,10 @@ function main() {
     let reason = Atomics.wait(arr, 0, 0, 10)
     console.println('reason is ' + reason)
     arktest.assertEQ(reason, 'timed-out')
+}
+
+function main() {
+    const suite = new arktest.ArkTestsuite('Function Atomics skipped_wait_timeout tests')
+    suite.addTest('Function testMain', testMain)
+    return suite.run()
 }

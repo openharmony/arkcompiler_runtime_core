@@ -14,7 +14,7 @@
  */
 
 
-function main() {
+function testMain() {
     let buf = new ArrayBuffer(4);
     let arr = new Int8Array(buf, 0, 1);
 
@@ -26,4 +26,10 @@ function main() {
     arktest.assertTrue(Atomics.isLockFree(4) && Atomics.isLockFree(8))
     arktest.assertTrue(!Atomics.isLockFree(3) && !Atomics.isLockFree(5))
     arktest.assertTrue(!Atomics.isLockFree(6) && !Atomics.isLockFree(7))
+}
+
+function main() {
+    const suite = new arktest.ArkTestsuite('Function Atomics nonconcurrent_store_load_islockfree tests')
+    suite.addTest('Function testMain', testMain)
+    return suite.run()
 }

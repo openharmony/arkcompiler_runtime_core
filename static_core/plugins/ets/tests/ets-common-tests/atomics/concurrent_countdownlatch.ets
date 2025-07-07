@@ -27,7 +27,7 @@ let arr_2: BigInt64Array = new BigInt64Array;
 let bytearr_i8: Int8Array = new Int8Array;
 let bytearr_i64: BigInt64Array = new BigInt64Array;
 
-function main() {
+function testMain() {
     buf_1 = new ArrayBuffer(4)
     buf_2 = new ArrayBuffer(8)
     arr_1 = new Int32Array(buf_1, 0, 1)
@@ -81,4 +81,10 @@ function heavyComputation(): Int {
         i += j
     }
     return i
+}
+
+function main() {
+    const suite = new arktest.ArkTestsuite('Function Atomics concurrent_countdownlatch tests')
+    suite.addTest('Function testMain', testMain)
+    return suite.run()
 }

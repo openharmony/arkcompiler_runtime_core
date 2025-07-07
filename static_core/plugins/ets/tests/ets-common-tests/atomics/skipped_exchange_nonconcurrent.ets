@@ -16,7 +16,7 @@
 let buf: ArrayBuffer;
 let arr: Int32Array; 
 
-function main() {
+function testMain() {
     try {
         buf = new ArrayBuffer(4);
         arr = new Int32Array(buf, 0, 1);
@@ -28,4 +28,10 @@ function main() {
     } catch (e) {
         arktest.assertTrue(false)
     }
+}
+
+function main() {
+    const suite = new arktest.ArkTestsuite('Function Atomics skipped_exchange_nonconcurrent tests')
+    suite.addTest('Function testMain', testMain)
+    return suite.run()
 }

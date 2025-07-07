@@ -18,7 +18,7 @@ import { launch } from 'std/concurrency'
 let s = new ArrayBuffer(4);
 let arr = new Int32Array(s, 0, 1);
 
-function main() {
+function testMain() {
     let consumerJob = launch<Int, () => Int>(consumer)
     heavyComputation()
     let producerJob = launch<Int, () => Int>(producer)
@@ -92,3 +92,8 @@ function heavyComputation(): Int {
     return i
 }
 
+function main() {
+    const suite = new arktest.ArkTestsuite('Function Atomics skipped_rendezvous_channel tests')
+    suite.addTest('Function testMain', testMain)
+    return suite.run()
+}

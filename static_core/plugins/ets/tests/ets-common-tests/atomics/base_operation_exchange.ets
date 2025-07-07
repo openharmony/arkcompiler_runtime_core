@@ -37,19 +37,17 @@ let typeArrayList = [
     uint32array
 ]
 
-function testAnd() {
+function testExchange() {
     for (let i = 0; i < typeArrayList.length; i++) {
         let ta = typeArrayList[i]
         let arraySize = ta.length
 
         for (let j = 0; j < arraySize; j++) {
-            Atomics.store(ta, j, 3)
-
-            let old = Atomics.and(ta, j, 1)
-            arktest.assertEQ(old, 3)
+            let old = Atomics.exchange(ta, j, 12)
+            arktest.assertEQ(old, 0)
 
             for (let k = 0; k < arraySize; k++) {
-                let re = (k === j) ? 1 : 0
+                let re = (k === j) ? 12 : 0
                 arktest.assertEQ(Atomics.load(ta, k), re)
             }
 
@@ -59,7 +57,7 @@ function testAnd() {
 }
 
 function main() {
-    const suite = new arktest.ArkTestsuite('Function Atomics baseOperator tests')
-    suite.addTest('Function And', testAnd)
+    const suite = new arktest.ArkTestsuite('Function Atomics base_operation_exchange tests')
+    suite.addTest('Function testExchange', testExchange)
     return suite.run()
 }

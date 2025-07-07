@@ -16,7 +16,7 @@
 let N = 200
 let RESULT = N.toByte()
 
-function main() {
+function testMain() {
     let buf = new ArrayBuffer(4);
     let arr = new Int8Array(buf, 0, 1);
 
@@ -26,4 +26,10 @@ function main() {
     let x = Atomics.load(arr, 0)
     console.println('result is ' + x)
     arktest.assertEQ(x, RESULT)
+}
+
+function main() {
+    const suite = new arktest.ArkTestsuite('Function Atomics nonconcurrent_increment tests')
+    suite.addTest('Function testMain', testMain)
+    return suite.run()
 }

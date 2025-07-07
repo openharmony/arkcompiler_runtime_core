@@ -21,7 +21,7 @@ let arr = new Int32Array(s, 0, 1);
 
 let N = 5
 
-function main() {
+function testMain() {
     let corArrayTmp = new Array<Job<int>>>();
     setUpBarrier(N)
     for (let i = 0; i < N; i++) {
@@ -74,4 +74,10 @@ function heavyComputation(): Int {
         i += j
     }
     return i
+}
+
+function main() {
+    const suite = new arktest.ArkTestsuite('Function Atomics skipped_cyclic_barrier tests')
+    suite.addTest('Function testMain', testMain)
+    return suite.run()
 }

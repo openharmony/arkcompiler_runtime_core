@@ -16,10 +16,10 @@
 const BYTE_LENGTH = 128
 
 let ab = new ArrayBuffer(BYTE_LENGTH)
-let biguint64array = new BigUint64Array(ab)
+let bigint64array = new BigInt64Array(ab)
 
-function testAddBig() {
-    let ta = biguint64array
+function testAddBigInt() {
+    let ta = bigint64array
     let arraySize = ta.length
 
     for (let j = 0; j < arraySize; j++) {
@@ -28,15 +28,15 @@ function testAddBig() {
 
         for (let k = 0; k < arraySize; k++) {
             let re = (k === j) ? 12n : 0n
-            arktest.assertEQ(Atomics.load(ta as BigUint64Array, k), re)
+            arktest.assertEQ(Atomics.load(ta as BigInt64Array, k), re)
         }
 
         Atomics.store(ta, j, 0n)
     }
 }
 
-function testAndBig() {
-    let ta = biguint64array
+function testAndBigInt() {
+    let ta = bigint64array
     let arraySize = ta.length
 
     for (let j = 0; j < arraySize; j++) {
@@ -47,15 +47,15 @@ function testAndBig() {
 
         for (let k = 0; k < arraySize; k++) {
             let re = (k === j) ? 1n : 0n
-            arktest.assertEQ(Atomics.load(ta as BigUint64Array, k), re)
+            arktest.assertEQ(Atomics.load(ta as BigInt64Array, k), re)
         }
 
         Atomics.store(ta, j, 0n)
     }
 }
 
-function testCompareExchangeBig() {
-    let ta = biguint64array
+function testCompareExchangeBigInt() {
+    let ta = bigint64array
     let arraySize = ta.length
 
     for (let j = 0; j < arraySize; j++) {
@@ -65,15 +65,15 @@ function testCompareExchangeBig() {
 
         for (let k = 0; k < arraySize; k++) {
             let re = (k === j) ? 12n : 0n
-            arktest.assertEQ(Atomics.load(ta as BigUint64Array, k), re)
+            arktest.assertEQ(Atomics.load(ta as BigInt64Array, k), re)
         }
 
         Atomics.store(ta, j, 0n)
     }
 }
 
-function testExchangeBig() {
-    let ta = biguint64array
+function testExchangeBigInt() {
+    let ta = bigint64array
     let arraySize = ta.length
 
     for (let j = 0; j < arraySize; j++) {
@@ -82,15 +82,15 @@ function testExchangeBig() {
 
         for (let k = 0; k < arraySize; k++) {
             let re = (k === j) ? 12n : 0n
-            arktest.assertEQ(Atomics.load(ta as BigUint64Array, k), re)
+            arktest.assertEQ(Atomics.load(ta as BigInt64Array, k), re)
         }
 
         Atomics.store(ta, j, 0n)
     }
 }
 
-function testLoadBig() {
-    let ta = biguint64array
+function testLoadBigInt() {
+    let ta = bigint64array
     let arraySize = ta.length
 
     for (let j = 0; j < arraySize; j++) {
@@ -98,15 +98,15 @@ function testLoadBig() {
 
         for (let k = 0; k < arraySize; k++) {
             let expected = (k === j) ? 12n : 0n
-            arktest.assertEQ(Atomics.load(ta as BigUint64Array, k), expected)
+            arktest.assertEQ(Atomics.load(ta as BigInt64Array, k), expected)
         }
 
         Atomics.store(ta, j, 0n)
     }
 }
 
-function testOrBig() {
-    let ta = biguint64array
+function testOrBigInt() {
+    let ta = bigint64array
     let arraySize = ta.length
 
     for (let j = 0; j < arraySize; j++) {
@@ -117,15 +117,15 @@ function testOrBig() {
 
         for (let k = 0; k < arraySize; k++) {
             let re = (k === j) ? 3n : 0n
-            arktest.assertEQ(Atomics.load(ta as BigUint64Array, k), re)
+            arktest.assertEQ(Atomics.load(ta as BigInt64Array, k), re)
         }
 
         Atomics.store(ta, j, 0n)
     }
 }
 
-function testStoreBig() {
-    let ta = biguint64array
+function testStoreBigInt() {
+    let ta = bigint64array
     let arraySize = ta.length
 
     for (let j = 0; j < arraySize; j++) {
@@ -134,15 +134,15 @@ function testStoreBig() {
 
         for (let k = 0; k < arraySize; k++) {
             let expected = (k === j) ? 12n : 0n
-            arktest.assertEQ(Atomics.load(ta as BigUint64Array, k), expected)
+            arktest.assertEQ(Atomics.load(ta as BigInt64Array, k), expected)
         }
 
         Atomics.store(ta, j, 0n)
     }
 }
 
-function testSubBig() {
-    let ta = biguint64array
+function testSubBigInt() {
+    let ta = bigint64array
     let arraySize = ta.length
 
     for (let j = 0; j < arraySize; j++) {
@@ -153,15 +153,15 @@ function testSubBig() {
 
         for (let k = 0; k < arraySize; k++) {
             let re = (k === j) ? 36n : 0n
-            arktest.assertEQ(Atomics.load(ta as BigUint64Array, k), re)
+            arktest.assertEQ(Atomics.load(ta as BigInt64Array, k), re)
         }
 
         Atomics.store(ta, j, 0n)
     }
 }
 
-function testXorBig() {
-    let ta = biguint64array
+function testXorBigInt() {
+    let ta = bigint64array
     let arraySize = ta.length
 
     for (let j = 0; j < arraySize; j++) {
@@ -172,7 +172,7 @@ function testXorBig() {
 
         for (let k = 0; k < arraySize; k++) {
             let re = (k === j) ? 4n : 0n
-            arktest.assertEQ(Atomics.load(ta as BigUint64Array, k), re)
+            arktest.assertEQ(Atomics.load(ta as BigInt64Array, k), re)
         }
 
         Atomics.store(ta, j, 0n)
@@ -180,15 +180,15 @@ function testXorBig() {
 }
 
 function main() {
-    const suite = new arktest.ArkTestsuite('Function Atomics baseOperator')
-    suite.addTest('Function Add', testAddBig)
-    suite.addTest('Function And', testAndBig)
-    suite.addTest('Function testCompareExchange', testCompareExchangeBig)
-    suite.addTest('Function testExchange', testExchangeBig)
-    suite.addTest('Function testLoad', testLoadBig)
-    suite.addTest('Function testOr', testOrBig)
-    suite.addTest('Function testStore', testStoreBig)
-    suite.addTest('Function testSub', testSubBig)
-    suite.addTest('Function testXor', testXorBig)
+    const suite = new arktest.ArkTestsuite('Function Atomics base_operation_bigint tests')
+    suite.addTest('Function testAddBigInt', testAddBigInt)
+    suite.addTest('Function testAndBigInt', testAndBigInt)
+    suite.addTest('Function testCompareExchangeBigInt', testCompareExchangeBigInt)
+    suite.addTest('Function testExchangeBigInt', testExchangeBigInt)
+    suite.addTest('Function testLoadBigInt', testLoadBigInt)
+    suite.addTest('Function testOrBigInt', testOrBigInt)
+    suite.addTest('Function testStoreBigInt', testStoreBigInt)
+    suite.addTest('Function testSubBigInt', testSubBigInt)
+    suite.addTest('Function testXorBigInt', testXorBigInt)
     return suite.run()
 }

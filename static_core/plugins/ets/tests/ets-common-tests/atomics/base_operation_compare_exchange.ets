@@ -58,7 +58,7 @@ function testCompareExchange() {
 }
 
 function main() {
-    const suite = new arktest.ArkTestsuite('Function Atomics baseOperator tests')
+    const suite = new arktest.ArkTestsuite('Function Atomics base_operation_compare_exchange tests')
     suite.addTest('Function testCompareExchange', testCompareExchange)
     return suite.run()
 }

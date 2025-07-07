@@ -23,7 +23,7 @@ let buf: ArrayBuffer = new ArrayBuffer(0);
 let arr: Int32Array = new Int32Array;
 let bytearr: Int8Array = new Int8Array;
 
-function main() {
+function testMain() {
     let c = new Console()
 
     buf = new ArrayBuffer(4);
@@ -53,4 +53,10 @@ function wait(): int {
         i += j
     }
     return i
+}
+
+function main() {
+    const suite = new arktest.ArkTestsuite('Function Atomics concurrent_wait_store_notify tests')
+    suite.addTest('Function testMain', testMain)
+    return suite.run()
 }
