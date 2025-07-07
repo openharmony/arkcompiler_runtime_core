@@ -23,4 +23,5 @@ function main() {
     let q1 = '\u0022\u0027\u0008\u000c\u000a\u000d\u0009\u000b\u005c\A\B\C\d\+\=\-\(\)\#\$\@\!\~\`\<\>\/\?\*\{\}\[\]\|\;\:\%\^\&\ю\Я\ ' // single-quoted
     let q2 = "\u0022\u0027\u0008\u000c\u000a\u000d\u0009\u000b\u005c\A\B\C\d\+\=\-\(\)\#\$\@\!\~\`\<\>\/\?\*\{\}\[\]\|\;\:\%\^\&\ю\Я\ " // double-quoted
     arktest.assertTrue(s1 == s2 && s1 == q1 && s1 == q2)
+	arktest.assertEQ(s1.length, 42)
 }

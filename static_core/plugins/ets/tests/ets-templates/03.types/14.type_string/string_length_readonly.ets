@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,15 +14,12 @@ limitations under the License.
 ---*/
 
 /*---
-desc: String literals are of type string, which is a predefined reference type.
+desc: Accessing the length property returns the string length as int type value
+tags: [negative, compile-only]
 ---*/
 
-function main() {
-    let s: [string, int][] = [ ["", 0], ['', 0], ["\x00", 1], ['\u0000', 1], ["\u{CAFE}", 1], ["\uBABE", 1], ['生日快乐!', 5], ["С Днём рождения!", 16] ]
-
-	arktest.assertEQ(s.length, 8)
-    for (let i = 0; i < s.length; i++) {
-        arktest.assertTrue( s[i][0] instanceof string , s[i][0] + " is not a string" )
-        arktest.assertEQ(s[i][0].length, s[i][1])
-    }
+function main(): void {
+  let a: string = "abcdefghijklmnopqrstuvwxyz"
+  arktest.assertEQ(a.length, 26)
+  a.length = 5
 }

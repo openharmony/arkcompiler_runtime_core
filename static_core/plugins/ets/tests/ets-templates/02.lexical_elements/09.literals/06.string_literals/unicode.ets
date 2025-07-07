@@ -25,4 +25,5 @@ function main() {
         arktest.assertTrue( s.charAt(i) == j )
         j += 1001
     }
+    arktest.assertEQ(s.length, 66)
 }
