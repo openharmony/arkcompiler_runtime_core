@@ -96,7 +96,7 @@ public:
         if constexpr (objType == ObjectType::DYNAMIC) {
             JSTaggedValue value = dynObjAccessor_->GetProperty(thread, obj, name);
             // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
-            return stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnwrapTagged(value));
+            return stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnWrapTagged(value));
         } else if constexpr (objType == ObjectType::STATIC) {
             // fix(hewei): exceptions may occur, check here and return default value.
             return stcObjAccessor_->GetProperty(thread, obj, name);
@@ -104,7 +104,7 @@ public:
             if (obj->IsDynamic()) {
                 JSTaggedValue value = dynObjAccessor_->GetProperty(thread, obj, name);
                 // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
-                return stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnwrapTagged(value));
+                return stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnWrapTagged(value));
             } else {  // NOLINT(readability-else-after-return)
                 // fix(hewei): exceptions may occur, check here and return default value.
                 return stcObjAccessor_->GetProperty(thread, obj, name);
@@ -142,7 +142,7 @@ public:
         if constexpr (objType == ObjectType::DYNAMIC) {
             JSTaggedValue value = dynObjAccessor_->GetElementByIdx(thread, obj, index);
             // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
-            return stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnwrapTagged(value));
+            return stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnWrapTagged(value));
         } else if constexpr (objType == ObjectType::STATIC) {
             // fix(hewei): exceptions may occur, check here and return default value.
             return stcObjAccessor_->GetElementByIdx(thread, obj, index);
@@ -150,7 +150,7 @@ public:
             if (obj->IsDynamic()) {
                 JSTaggedValue value = dynObjAccessor_->GetElementByIdx(thread, obj, index);
                 // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
-                return stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnwrapTagged(value));
+                return stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnWrapTagged(value));
             } else {  // NOLINT(readability-else-after-return)
                 // fix(hewei): exceptions may occur, check here and return default value.
                 return stcObjAccessor_->GetElementByIdx(thread, obj, index);
@@ -168,7 +168,7 @@ public:
         } else if constexpr (objType == ObjectType::STATIC) {
             // fix(hewei): exceptions may occur, check here and return default value.
             return stcObjAccessor_->SetProperty(thread, obj, name,
-                                                stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnwrapTagged(value)));
+                                                stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnWrapTagged(value)));
         } else {
             if (obj->IsDynamic()) {
                 // fix(hewei): exceptions may occur, check here and return default value.
@@ -176,7 +176,7 @@ public:
             } else {  // NOLINT(readability-else-after-return)
                 // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
                 return stcObjAccessor_->SetProperty(
-                    thread, obj, name, stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnwrapTagged(value)));
+                    thread, obj, name, stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnWrapTagged(value)));
             }
         }
     }
@@ -214,7 +214,7 @@ public:
         } else if constexpr (objType == ObjectType::STATIC) {
             // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
             return stcObjAccessor_->SetElementByIdx(
-                thread, obj, index, stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnwrapTagged(value)));
+                thread, obj, index, stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnWrapTagged(value)));
         } else {
             if (obj->IsDynamic()) {
                 // fix(hewei): exceptions may occur, check here and return default value.
@@ -222,7 +222,7 @@ public:
             } else {  // NOLINT(readability-else-after-return)
                 // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
                 return stcObjAccessor_->SetElementByIdx(
-                    thread, obj, index, stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnwrapTagged(value)));
+                    thread, obj, index, stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnWrapTagged(value)));
             }
         }
     }

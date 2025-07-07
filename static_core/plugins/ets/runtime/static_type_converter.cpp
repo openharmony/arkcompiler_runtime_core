@@ -33,7 +33,7 @@ static bool EtsToBoolean(EtsBoolean value)
     return static_cast<bool>(value);
 }
 
-panda::BoxedValue StaticTypeConverter::WrapBoxed(panda::PandaType value)
+common::BoxedValue StaticTypeConverter::WrapBoxed(common::BaseType value)
 {
     EtsObject *etsObject = nullptr;
     auto *coro = EtsCoroutine::GetCurrent();
@@ -43,7 +43,7 @@ panda::BoxedValue StaticTypeConverter::WrapBoxed(panda::PandaType value)
     std::visit(
         [&](auto &&arg) -> void {
             using T = std::decay_t<decltype(arg)>;
-            if constexpr (std::is_same_v<T, std::monostate> || std::is_same_v<T, panda::BaseUndefined>) {
+            if constexpr (std::is_same_v<T, std::monostate> || std::is_same_v<T, common::BaseUndefined>) {
                 etsObject = nullptr;
             } else if constexpr (std::is_same_v<T, bool>) {
                 etsObject = EtsBoxPrimitive<EtsBoolean>::Create(coro, arg);
@@ -59,9 +59,9 @@ panda::BoxedValue StaticTypeConverter::WrapBoxed(panda::PandaType value)
                 etsObject = EtsBoxPrimitive<EtsFloat>::Create(coro, static_cast<EtsFloat>(arg));
             } else if constexpr (std::is_same_v<T, EtsDouble>) {
                 etsObject = EtsBoxPrimitive<EtsDouble>::Create(coro, static_cast<EtsDouble>(arg));
-            } else if constexpr (std::is_same_v<T, panda::BaseNull>) {
+            } else if constexpr (std::is_same_v<T, common::BaseNull>) {
                 etsObject = EtsObject::FromCoreType(coro->GetNullValue());
-            } else if constexpr (std::is_same_v<T, panda::BaseBigInt>) {
+            } else if constexpr (std::is_same_v<T, common::BaseBigInt>) {
                 uint32_t len = arg.length;
                 bool sign = arg.sign;
                 auto etsIntArray = EtsIntArray::Create(len);
@@ -74,21 +74,21 @@ panda::BoxedValue StaticTypeConverter::WrapBoxed(panda::PandaType value)
                 bigInt->SetFieldObject(EtsBigInt::GetBytesOffset(), reinterpret_cast<EtsObject *>(arrHandle.GetPtr()));
                 bigInt->SetFieldPrimitive(EtsBigInt::GetSignOffset(), arg.data.empty() ? 0 : sign == 0 ? 1 : -1);
                 etsObject = reinterpret_cast<EtsObject *>(bigInt);
-            } else if constexpr (std::is_same_v<T, panda::BaseObject *>) {
+            } else if constexpr (std::is_same_v<T, common::BaseObject *>) {
                 etsObject = reinterpret_cast<EtsObject *>(arg);
             } else {
                 UNREACHABLE();
             }
         },
         value);
-    return reinterpret_cast<panda::BoxedValue>(etsObject);
+    return reinterpret_cast<common::BoxedValue>(etsObject);
 }
 
 // NOLINTBEGIN(readability-else-after-return)
-panda::PandaType StaticTypeConverter::UnwrapBoxed(panda::BoxedValue value)
+common::BaseType StaticTypeConverter::UnwrapBoxed(common::BoxedValue value)
 {
     if (value == nullptr) {
-        return panda::BaseUndefined {};
+        return common::BaseUndefined {};
     }
 
     auto *etsObj = reinterpret_cast<EtsObject *>(value);
@@ -114,7 +114,7 @@ panda::PandaType StaticTypeConverter::UnwrapBoxed(panda::BoxedValue value)
     } else if (cls == ptypes->coreChar) {
         return EtsBoxPrimitive<EtsChar>::Unbox(etsObj);
     } else if (cls == ptypes->escompatBigint) {
-        panda::BaseBigInt baseBigInt;
+        common::BaseBigInt baseBigInt;
         auto bigInt = EtsBigInt::FromEtsObject(etsObj);
         auto etsValue = bigInt->GetBytes();
         auto etsValueSign = bigInt->GetSign();
@@ -125,9 +125,9 @@ panda::PandaType StaticTypeConverter::UnwrapBoxed(panda::BoxedValue value)
         }
         return baseBigInt;
     } else if (etsObj->GetCoreType() == coro->GetNullValue()) {
-        return panda::BaseNull {};
+        return common::BaseNull {};
     }
-    return reinterpret_cast<panda::BoxedValue>(etsObj);
+    return reinterpret_cast<common::BoxedValue>(etsObj);
 }
 // NOLINTEND(readability-else-after-return)
 }  // namespace ark::ets

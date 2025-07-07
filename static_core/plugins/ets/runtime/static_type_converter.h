@@ -20,13 +20,13 @@
 #include "objects/static_type_converter_interface.h"
 
 namespace ark::ets {
-class StaticTypeConverter : public panda::StaticTypeConverterInterface {
+class StaticTypeConverter : public common::StaticTypeConverterInterface {
 public:
     static void Initialize();
 
-    panda::BoxedValue PUBLIC_API WrapBoxed(panda::PandaType value) override;
+    common::BoxedValue PUBLIC_API WrapBoxed(common::BaseType value) override;
 
-    panda::PandaType PUBLIC_API UnwrapBoxed(panda::BoxedValue value) override;
+    common::BaseType PUBLIC_API UnwrapBoxed(common::BoxedValue value) override;
 
 private:
     static StaticTypeConverter stcTypeConverter_;

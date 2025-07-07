@@ -20,7 +20,7 @@
 #include "objects/base_object.h"
 #include "thread/thread_holder.h"
 
-namespace panda {
+namespace common {
 // NOTE (#26214): extracted `StaticObjectAccessor` here untill `JSTaggedValue` migrated from ets_runtime
 class StaticObjectAccessorInterface {
 public:
@@ -44,5 +44,5 @@ public:
     // NOLINTNEXTLINE(misc-misplaced-const)
     virtual bool SetElementByIdx(ThreadHolder *thread, BaseObject *obj, uint32_t index, const BoxedValue value) = 0;
 };
-}  // namespace panda
+}  // namespace common
 #endif  // COMMON_INTERFACES_OBJECTS_STATIC_OBJECT_ACCESSOR_INTERFACE_H

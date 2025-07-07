@@ -36,7 +36,10 @@ struct Ins {
     }
 
     Ins() = default;
-    Ins(size_t l_n, std::string &f_c, size_t b_l, size_t b_r) : line_number(l_n), bound_left(b_l), bound_right(b_r) {}
+    Ins(size_t l_n)
+        : line_number(l_n)
+    {
+    }
 };
 
 struct LocalVariable {

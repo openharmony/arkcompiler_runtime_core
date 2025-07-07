@@ -198,12 +198,6 @@ public:
         return GetBaseClass()->IsString();
     }
 protected:
-    static BaseObject *SetClassInfo(MAddress address, TypeInfo *klass)
-    {
-        auto ref = reinterpret_cast<BaseObject *>(address);
-        return ref;
-    }
-
     inline BaseObjectOperatorInterfaces *GetOperator() const
     {
         if (state_.IsStatic()) {

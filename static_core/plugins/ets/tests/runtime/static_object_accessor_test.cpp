@@ -90,39 +90,40 @@ public:
         EtsObject *valueObject = EtsBoxPrimitive<T>::Create(coro, value);
 
         staticObjectAccessor.SetProperty(nullptr, nullptr, property,
-                                         reinterpret_cast<panda::BaseObject *>(valueObject));
-        staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<panda::BaseObject *>(obj), "test",
-                                         reinterpret_cast<panda::BaseObject *>(valueObject));
-        staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<panda::BaseObject *>(obj), property,
-                                         reinterpret_cast<panda::BaseObject *>(valueObject));
+                                         reinterpret_cast<common::BaseObject *>(valueObject));
+        staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<common::BaseObject *>(obj), "test",
+                                         reinterpret_cast<common::BaseObject *>(valueObject));
+        staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<common::BaseObject *>(obj), property,
+                                         reinterpret_cast<common::BaseObject *>(valueObject));
 
-        panda::BaseObject *baseObject = staticObjectAccessor.GetProperty(nullptr, nullptr, property);
+        common::BaseObject *baseObject = staticObjectAccessor.GetProperty(nullptr, nullptr, property);
         ASSERT_EQ(baseObject, nullptr);
-        baseObject = staticObjectAccessor.GetProperty(nullptr, reinterpret_cast<panda::BaseObject *>(obj), "test");
+        baseObject = staticObjectAccessor.GetProperty(nullptr, reinterpret_cast<common::BaseObject *>(obj), "test");
         ASSERT_EQ(baseObject, nullptr);
-        baseObject = staticObjectAccessor.GetProperty(nullptr, reinterpret_cast<panda::BaseObject *>(obj), property);
+        baseObject = staticObjectAccessor.GetProperty(nullptr, reinterpret_cast<common::BaseObject *>(obj), property);
         ASSERT_EQ(reinterpret_cast<BoxType *>(baseObject)->GetValue(), value);
-        ASSERT_EQ(staticObjectAccessor.HasProperty(nullptr, reinterpret_cast<panda::BaseObject *>(obj), property),
+        ASSERT_EQ(staticObjectAccessor.HasProperty(nullptr, reinterpret_cast<common::BaseObject *>(obj), property),
                   true);
-        ASSERT_EQ(staticObjectAccessor.HasProperty(nullptr, reinterpret_cast<panda::BaseObject *>(obj), "test"), false);
+        ASSERT_EQ(staticObjectAccessor.HasProperty(nullptr, reinterpret_cast<common::BaseObject *>(obj), "test"),
+                  false);
     }
 
     template <typename T, typename BoxType>
     void CheckSetAndGetElementByIdx(T val)
     {
         auto *array = EtsEscompatArray::Create(ARRAY_LENGTH);
-        auto *baseObject = reinterpret_cast<panda::BaseObject *>(array);
+        auto *baseObject = reinterpret_cast<common::BaseObject *>(array);
         ASSERT_NE(baseObject, nullptr);
         StaticObjectAccessor staticObjectAccessor;
         auto *coro = EtsCoroutine::GetCurrent();
         EtsObject *valueObject = BoxType::Create(coro, val);
-        staticObjectAccessor.SetElementByIdx(nullptr, nullptr, 1, reinterpret_cast<panda::BaseObject *>(valueObject));
+        staticObjectAccessor.SetElementByIdx(nullptr, nullptr, 1, reinterpret_cast<common::BaseObject *>(valueObject));
         staticObjectAccessor.SetElementByIdx(nullptr, baseObject, 1,
-                                             reinterpret_cast<panda::BaseObject *>(valueObject));
-        panda::BaseObject *baseObject2 = staticObjectAccessor.GetElementByIdx(nullptr, nullptr, 1);
+                                             reinterpret_cast<common::BaseObject *>(valueObject));
+        common::BaseObject *baseObject2 = staticObjectAccessor.GetElementByIdx(nullptr, nullptr, 1);
         ASSERT_EQ(baseObject2, nullptr);
         baseObject2 = staticObjectAccessor.GetElementByIdx(nullptr, baseObject, 1);
-        ASSERT_EQ(reinterpret_cast<panda::BaseObject *>(valueObject), baseObject2);
+        ASSERT_EQ(reinterpret_cast<common::BaseObject *>(valueObject), baseObject2);
     }
 
 private:
@@ -219,13 +220,13 @@ TEST_F(StaticObjectAccessorTest, SetAndGetPropertyValue1)
     EtsObject *barObj = EtsObject::Create(barKlass);
     EtsObject *fooObj1 = EtsObject::Create(fooKlass);
     StaticObjectAccessor staticObjectAccessor;
-    staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<panda::BaseObject *>(barObj), "foo1",
-                                     reinterpret_cast<panda::BaseObject *>(fooObj1));
-    panda::BaseObject *baseObject =
-        staticObjectAccessor.GetProperty(nullptr, reinterpret_cast<panda::BaseObject *>(barObj), "foo1");
+    staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<common::BaseObject *>(barObj), "foo1",
+                                     reinterpret_cast<common::BaseObject *>(fooObj1));
+    common::BaseObject *baseObject =
+        staticObjectAccessor.GetProperty(nullptr, reinterpret_cast<common::BaseObject *>(barObj), "foo1");
     ASSERT_EQ(reinterpret_cast<EtsObject *>(baseObject), fooObj1);
-    ASSERT_EQ(staticObjectAccessor.HasProperty(nullptr, reinterpret_cast<panda::BaseObject *>(barObj), "foo1"), true);
-    ASSERT_EQ(staticObjectAccessor.HasProperty(nullptr, reinterpret_cast<panda::BaseObject *>(barObj), "test"), false);
+    ASSERT_EQ(staticObjectAccessor.HasProperty(nullptr, reinterpret_cast<common::BaseObject *>(barObj), "foo1"), true);
+    ASSERT_EQ(staticObjectAccessor.HasProperty(nullptr, reinterpret_cast<common::BaseObject *>(barObj), "test"), false);
 }
 
 TEST_F(StaticObjectAccessorTest, SetAndGetPropertyValue2)
@@ -238,13 +239,13 @@ TEST_F(StaticObjectAccessorTest, SetAndGetPropertyValue2)
     EtsInt val = 1;
     EtsObject *valueObject = EtsBoxPrimitive<EtsInt>::Create(coro, val);
     StaticObjectAccessor staticObjectAccessor;
-    staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<panda::BaseObject *>(fooObj1), "member",
-                                     reinterpret_cast<panda::BaseObject *>(valueObject));
-    staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<panda::BaseObject *>(barObj), "foo1",
-                                     reinterpret_cast<panda::BaseObject *>(fooObj1));
-    panda::BaseObject *baseObject =
-        staticObjectAccessor.GetProperty(nullptr, reinterpret_cast<panda::BaseObject *>(barObj), "foo1");
-    panda::BaseObject *reObject = staticObjectAccessor.GetProperty(nullptr, baseObject, "member");
+    staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<common::BaseObject *>(fooObj1), "member",
+                                     reinterpret_cast<common::BaseObject *>(valueObject));
+    staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<common::BaseObject *>(barObj), "foo1",
+                                     reinterpret_cast<common::BaseObject *>(fooObj1));
+    common::BaseObject *baseObject =
+        staticObjectAccessor.GetProperty(nullptr, reinterpret_cast<common::BaseObject *>(barObj), "foo1");
+    common::BaseObject *reObject = staticObjectAccessor.GetProperty(nullptr, baseObject, "member");
     ASSERT_EQ(reinterpret_cast<EtsBoxPrimitive<EtsInt> *>(reObject)->GetValue(), 1);
 }
 
@@ -271,16 +272,16 @@ TEST_F(StaticObjectAccessorTest, SetAndGetElementByIdx1)
     auto *coro = EtsCoroutine::GetCurrent();
     EtsObject *valueObject = EtsBoxPrimitive<EtsDouble>::Create(coro, VAL_DOUBLE);
     StaticObjectAccessor staticObjectAccessor;
-    staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<panda::BaseObject *>(obj), "firSide",
-                                     reinterpret_cast<panda::BaseObject *>(valueObject));
+    staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<common::BaseObject *>(obj), "firSide",
+                                     reinterpret_cast<common::BaseObject *>(valueObject));
     staticObjectAccessor.SetElementByIdx(nullptr,
-                                         reinterpret_cast<panda::BaseObject *>(reinterpret_cast<EtsObject *>(array)), 1,
-                                         reinterpret_cast<panda::BaseObject *>(obj));
-    panda::BaseObject *baseObject =
-        staticObjectAccessor.GetElementByIdx(nullptr, reinterpret_cast<panda::BaseObject *>(array), 1);
-    ASSERT_EQ(baseObject, reinterpret_cast<panda::BaseObject *>(obj));
-    panda::BaseObject *reObject =
-        staticObjectAccessor.GetProperty(nullptr, reinterpret_cast<panda::BaseObject *>(baseObject), "firSide");
+                                         reinterpret_cast<common::BaseObject *>(reinterpret_cast<EtsObject *>(array)),
+                                         1, reinterpret_cast<common::BaseObject *>(obj));
+    common::BaseObject *baseObject =
+        staticObjectAccessor.GetElementByIdx(nullptr, reinterpret_cast<common::BaseObject *>(array), 1);
+    ASSERT_EQ(baseObject, reinterpret_cast<common::BaseObject *>(obj));
+    common::BaseObject *reObject =
+        staticObjectAccessor.GetProperty(nullptr, reinterpret_cast<common::BaseObject *>(baseObject), "firSide");
     ASSERT_EQ(reinterpret_cast<EtsBoxPrimitive<EtsDouble> *>(reObject)->GetValue(), VAL_DOUBLE);
 }
 }  // namespace ark::ets::test

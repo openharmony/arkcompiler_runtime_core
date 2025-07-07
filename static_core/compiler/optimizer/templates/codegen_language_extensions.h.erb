@@ -51,18 +51,6 @@ inline void ResolveCallByName([[maybe_unused]] ResolveVirtualInst *inst)
     GetEncoder()->SetFalseResult();
 }
 
-inline void ResolveCallByName([[maybe_unused]] ResolveVirtualInst *inst)
-{
-% Common::each_plugin_suboption("compiler_extensions", "resolve_call_by_name") do |resolve_call_by_name|
-    if (<%= resolve_call_by_name %>(inst)) {
-        return;
-    }
-% end
-
-    LOG(WARNING, COMPILER) << "Cannot encode ResolveCallByName";
-    GetEncoder()->SetFalseResult();
-}
-
 inline void GetNativeMethod([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst, [[maybe_unused]] SRCREGS src)
 {
     [[maybe_unused]] auto *graph = inst->GetBasicBlock()->GetGraph();

@@ -20,22 +20,22 @@
 #include "objects/static_object_accessor_interface.h"
 
 namespace ark::ets {
-class StaticObjectAccessor : public panda::StaticObjectAccessorInterface {
+class StaticObjectAccessor : public common::StaticObjectAccessorInterface {
 public:
-    bool HasProperty(panda::ThreadHolder *thread, const panda::BaseObject *obj, const char *name) override;
+    bool HasProperty(common::ThreadHolder *thread, const common::BaseObject *obj, const char *name) override;
 
-    panda::BoxedValue GetProperty(panda::ThreadHolder *thread, const panda::BaseObject *obj, const char *name) override;
+    common::BoxedValue GetProperty(common::ThreadHolder *thread, const common::BaseObject *obj, const char *name) override;
 
-    bool SetProperty(panda::ThreadHolder *thread, panda::BaseObject *obj, const char *name,
-                     panda::BoxedValue value) override;
+    bool SetProperty(common::ThreadHolder *thread, common::BaseObject *obj, const char *name,
+                     common::BoxedValue value) override;
 
-    bool HasElementByIdx(panda::ThreadHolder *thread, const panda::BaseObject *obj, const uint32_t index) override;
+    bool HasElementByIdx(common::ThreadHolder *thread, const common::BaseObject *obj, const uint32_t index) override;
 
-    panda::BoxedValue GetElementByIdx(panda::ThreadHolder *thread, const panda::BaseObject *obj,
+    common::BoxedValue GetElementByIdx(common::ThreadHolder *thread, const common::BaseObject *obj,
                                       const uint32_t index) override;
 
-    bool SetElementByIdx(panda::ThreadHolder *thread, panda::BaseObject *obj, uint32_t index,
-                         const panda::BoxedValue value) override;
+    bool SetElementByIdx(common::ThreadHolder *thread, common::BaseObject *obj, uint32_t index,
+                         const common::BoxedValue value) override;
 
 private:
     static StaticObjectAccessor stcObjAccessor_;

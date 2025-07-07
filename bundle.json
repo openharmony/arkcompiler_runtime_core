@@ -43,7 +43,6 @@
                 "pcre2",
                 "json",
                 "musl",
-                "openssl",
                 "elfio",
                 "node"
             ],

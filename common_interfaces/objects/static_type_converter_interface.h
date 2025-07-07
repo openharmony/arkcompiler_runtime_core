@@ -18,15 +18,15 @@
 #include "objects/base_type.h"
 #include "thread/thread_holder.h"
 
-namespace panda {
+namespace common {
 // Type Converter implemented for static vm.
 class StaticTypeConverterInterface {
 public:
-    // convert PandaType to BoxedValue
-    virtual BoxedValue WrapBoxed(PandaType value) = 0;
+    // convert BaseType to BoxedValue
+    virtual BoxedValue WrapBoxed(BaseType value) = 0;
 
-    // convert BoxedValue to PandaType
-    virtual PandaType UnwrapBoxed(BoxedValue value) = 0;
+    // convert BoxedValue to BaseType
+    virtual BaseType UnwrapBoxed(BoxedValue value) = 0;
 };
-}  // namespace panda
+}  // namespace common
 #endif  // COMMON_INTERFACES_OBJECTS_STATIC_TYPE_CONVERTER_INTERFACE_H
