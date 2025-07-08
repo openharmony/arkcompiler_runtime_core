@@ -1,9 +1,9 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -11,35 +11,40 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//arkcompiler/runtime_core/ark_config.gni")
+import("//build/ohos.gni")
 
 #####################hydra-fuzz###################
-import("//build/ohos.gni")
 import("//build/test.gni")
 module_output_path = "arkcompiler/runtime_core"
 
 ##############################fuzztest##########################################
-ohos_fuzztest("ExpectedFuzzTest") {
+ohos_fuzztest("CheckSecureMemFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file = "$ark_root/tests/fuzztest/expected_fuzzer"
+  fuzz_config_file =
+      "//arkcompiler/runtime_core/tests/fuzztest/checksecuremem_fuzzer"
+  include_dirs = []
   cflags = [
     "-g",
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "expected_fuzzer.cpp" ]
-  deps = [ "$ark_root/libpandabase:libarkbase_static" ]
+  sources = [ "checksecuremem_fuzzer.cpp" ]
+  deps = [ "//arkcompiler/runtime_core/libpandafile:libarkfile_static" ]
 
   # Temporary adaptation for fuzztest building without musl
   if (!use_musl && (current_cpu == "arm64" || current_cpu == "arm")) {
-    deps += [ "$ark_root/tests/fuzztest:runtime_core_fuzz_rt" ]
+    deps += [ "//arkcompiler/runtime_core/tests/fuzztest:runtime_core_fuzz_rt" ]
   }
 }
 
 ###############################################################################
 group("fuzztest") {
   testonly = true
-  deps = [ ":ExpectedFuzzTest" ]
+  deps = []
+  deps += [
+    # deps file
+    ":CheckSecureMemFuzzTest",
+  ]
 }
 ###############################################################################

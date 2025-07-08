@@ -38,6 +38,7 @@ public:
     NO_MOVE_SEMANTIC_CC(LineString);
     NO_COPY_SEMANTIC_CC(LineString);
 
+    static constexpr size_t ALIGNMENT_8_BYTES = 8;
     static constexpr uint32_t MAX_LENGTH = (1 << 28) - 16;
     static constexpr uint32_t INIT_LENGTH_TIMES = 4;
     // DATA_OFFSET: the string data stored after the string header.
@@ -50,6 +51,8 @@ public:
     uint16_t Get(int32_t index) const;
 
     void Set(uint32_t index, uint16_t src);
+
+    void Trim(uint32_t newLength);
 
     static size_t ComputeSizeUtf8(uint32_t utf8Len);
 

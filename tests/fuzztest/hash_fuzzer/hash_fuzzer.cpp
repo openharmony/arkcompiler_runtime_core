@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <fuzzer/FuzzedDataProvider.h>
 #include "hash_fuzzer.h"
 
 #include "utils/hash.h"
@@ -26,10 +27,14 @@ namespace OHOS {
         uint8_t* string_data = reinterpret_cast<uint8_t*>(const_cast<char*>(str.c_str()));
         panda::GetHash32String(string_data);
 
-        panda::merge_hashes(size, size);
+        FuzzedDataProvider fdp(data, size);
 
-        uint32_t lhash_uint32_t = static_cast<uint32_t>(size);
-        uint32_t rhash_uint32_t = static_cast<uint32_t>(size);
+        size_t lhash = fdp.ConsumeIntegral<size_t>();
+        size_t rhash = fdp.ConsumeIntegral<size_t>();
+        panda::merge_hashes(lhash, rhash);
+
+        uint32_t lhash_uint32_t = fdp.ConsumeIntegral<uint32_t>();
+        uint32_t rhash_uint32_t = fdp.ConsumeIntegral<uint32_t>();
         panda::merge_hashes(lhash_uint32_t, rhash_uint32_t);
     }
 }

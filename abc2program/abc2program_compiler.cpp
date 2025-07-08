@@ -100,7 +100,14 @@ bool Abc2ProgramCompiler::CheckClassId(uint32_t class_id, size_t offset) const
                                 << class_off << "). binary file corrupted. record offset (0x" << class_id
                                 << ") out of bounds (0x" << header->file_size << ")!";
     }
-    return !file_->IsExternal(panda_file::File::EntityId(class_id));
+
+    /**
+     * Currently, only imported custom annotations will generate external records in the abc files. Before introducing
+     * the annotation feature, when compiling abc files in parallel, external records were skipped, which resulted in
+     * the inability to find matching records for the corresponding annotation usage, causing errors. Therefore, when
+     * compiling abc in parallel, do not skip external records anymore.
+     */
+    return true;
 }
 
 } // namespace panda::abc2program

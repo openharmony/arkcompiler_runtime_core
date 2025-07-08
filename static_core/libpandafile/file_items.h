@@ -265,6 +265,14 @@ public:
     bool GetDependencyMark() const
     {
         return dependencyMarked_;
+    ItemTypes GetBaseItemType() const
+    {
+        return type_;
+    }
+
+    void SetBaseItemType(ItemTypes type)
+    {
+        type_ = type;
     }
 
 private:
@@ -275,6 +283,7 @@ private:
     std::list<IndexedItem *> indexDeps_;
     uint32_t pgoRank_ {0};
     uint32_t originalRank_ {0};
+    ItemTypes type_ = ItemTypes::ANNOTATION_ITEM;
 };
 
 class IndexedItem : public BaseItem {

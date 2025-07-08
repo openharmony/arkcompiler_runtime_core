@@ -18,6 +18,7 @@
 
 #include "securec.h"
 
+#include "common_components/base/config.h"
 #include "common_interfaces/base/mem.h"
 #include "common_interfaces/objects/string/base_string_declare.h"
 #include "common_interfaces/objects/string/line_string.h"
@@ -36,12 +37,18 @@ BaseString *BaseString::CreateFromUtf8(Allocator &&allocator, const uint8_t *utf
         DCHECK_CC(string != nullptr);
         std::copy(utf8Data, utf8Data + utf8Len, string->GetDataUtf8Writable());
     } else {
-        auto utf16Len = UtfUtils::Utf8ToUtf16Size(utf8Data, utf8Len);
-        string = CreateLineString(allocator, utf16Len, false);
-        DCHECK_CC(string != nullptr);
-        [[maybe_unused]] auto len =
-            UtfUtils::ConvertRegionUtf8ToUtf16(utf8Data, string->GetDataUtf16Writable(), utf8Len, utf16Len);
-        DCHECK_CC(len == utf16Len);
+        ASSERT(UtfUtils::Utf8ToUtf16Size(utf8Data, utf8Len) <= utf8Len);
+        string = CreateLineString(allocator, utf8Len, false);
+        ASSERT(string != nullptr);
+        auto utf16Len = UtfUtils::ConvertRegionUtf8ToUtf16(utf8Data, string->GetDataUtf16Writable(),
+                                                           utf8Len, utf8Len);
+    #if !defined(NDEBUG)
+        auto calculatedLen = UtfUtils::Utf8ToUtf16Size(utf8Data, utf8Len);
+        ASSERT_PRINT(utf16Len == calculatedLen,
+                     "Bad utf8 to utf16 conversion!, utf16 length: " << utf16Len
+                     << ", calculated length: " << calculatedLen);
+    #endif
+        reinterpret_cast<LineString *>(string)->LineString::Trim(utf16Len);
     }
 
     ASSERT_PRINT(canBeCompress == CanBeCompressed(string), "Bad input canBeCompress!");

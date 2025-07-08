@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-#include "openpandafilefrommemory_fuzzer.h"
-#include "libpandafile/file.h"
 
-namespace OHOS {
-void OpenPandaFileFromMemoryFuzzTest(const uint8_t *data, size_t size)
-{
-    panda::panda_file::OpenPandaFileFromMemory(data, size);
-}
-}  // namespace OHOS
+#include "libpandabase/os/mem.h"
+#include <gtest/gtest.h>
 
-/* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+namespace panda {
+
+class ReleasePagesTest : public testing::Test {};
+
+HWTEST_F(ReleasePagesTest, ReleasePagesValidRangeTest, testing::ext::TestSize.Level0)
 {
-    /* Run your code on data */
-    OHOS::OpenPandaFileFromMemoryFuzzTest(data, size);
-    return 0;
+    constexpr uintptr_t kPageStart = 0x1000UL;
+    constexpr uintptr_t kPageEnd = 0x2000UL;
+
+    panda::os::mem::ReleasePages(kPageStart, kPageEnd);
+    ASSERT_TRUE(true);
 }
+} // namespace ark::os::mem::test

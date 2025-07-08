@@ -236,6 +236,11 @@ private:
 
     void MakeChangeWithId(CodePatcher &p, CodeData *data);
 
+    void HandleStringId(CodePatcher &p, const BytecodeInstruction &inst, const panda_file::File *filePtr);
+
+    void HandleLiteralArrayId(CodePatcher &p, const BytecodeInstruction &inst, const panda_file::File *filePtr,
+                              const std::map<panda_file::File::EntityId, panda_file::BaseItem *> *items);
+
     void AddItemToKnown(panda_file::BaseItem *item, const std::map<std::string, panda_file::BaseClassItem *> &cm,
                         const panda_file::FileReader &reader);
 

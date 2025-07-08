@@ -26,10 +26,10 @@ using Address = uint64_t;
 
 class HeapAllocator {
 public:
-    static Address Allocate(size_t size, LanguageType language);
-    static Address AllocateInNonmove(size_t size, LanguageType language);
+    static Address AllocateInYoungOrHuge(size_t size, LanguageType language);
+    static Address AllocateInNonmoveOrHuge(size_t size, LanguageType language);
     static Address32 Allocate32(size_t size, LanguageType language);
-    static Address AllocateInOld(size_t size, LanguageType language);
+    static Address AllocateInOldOrHuge(size_t size, LanguageType language);
     static Address AllocateInHuge(size_t size, LanguageType language);
     static Address AllocateInReadOnly(size_t size, LanguageType language);
     static uintptr_t AllocateLargeJitFortRegion(size_t size, LanguageType language);
