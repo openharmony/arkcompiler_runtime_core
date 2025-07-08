@@ -22,7 +22,7 @@ class Foo {
 }
 
 function fooType(): ClassType {
-    return Type.of(new Foo()) as ClassType // Type.resolve("Lpackage/Foo;") as ClassType
+    return Type.of(new Foo()) as ClassType
 }
 
 function main(): void {
