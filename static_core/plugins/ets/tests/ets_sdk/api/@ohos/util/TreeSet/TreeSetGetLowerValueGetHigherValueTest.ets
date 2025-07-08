@@ -115,28 +115,6 @@ function testGetLowerValueAndHigherValueNonExistingValue() {
     arktest.assertEQ(treeSet.length, 8, "The treeSet length should be 8");
 }
 
-function testGetLowerValueAndHigherValueNonExistingValue() {
-    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return secondValue.compareTo(firstValue) });
-    treeSet.add("bb");
-    treeSet.add("cc");
-    treeSet.add("dd");
-    treeSet.add("ee");
-    treeSet.add("gg");
-    treeSet.add("ii");
-    treeSet.add("kk");
-    treeSet.add("nn");
-    let lower_ = treeSet.getLowerValue("aa");
-    let lower = treeSet.getLowerValue("ff");
-    let higher_ = treeSet.getHigherValue("pp");
-    let higher = treeSet.getHigherValue("ff");
-    assertEQ(lower_, undefined, "The treeSet should return undefined when no data is found above this value");
-    assertEQ(higher_, undefined, "The treeSet should return undefined when no data is found below this value");
-    assertEQ(lower, "ee", "The treeSet should return the correct lower value");
-    assertEQ(higher, "gg", "The treeSet should return the correct higher value");
-    assertEQ(treeSet.length, 8, "The treeSet length should be 8");
-}
-
 function testGetLowerValueGetHigherValueEmptyStringValue() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
         secondValue: string): number => { return secondValue.compareTo(firstValue) });

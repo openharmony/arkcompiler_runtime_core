@@ -96,7 +96,7 @@ protected:
         StaticTypeConverter stcTypeConverter;
         auto *coro = EtsCoroutine::GetCurrent();
         EtsObject *boxed = EtsBoxPrimitive<T>::Create(coro, value);
-        common::BaseType result = stcTypeConverter.UnwrapBoxed(reinterpret_cast<common::BoxedValue>(boxed));
+        panda::PandaType result = stcTypeConverter.UnwrapBoxed(reinterpret_cast<panda::BoxedValue>(boxed));
         if constexpr (std::is_same_v<T, EtsBoolean>) {
             EXPECT_TRUE(std::holds_alternative<bool>(result));
             EXPECT_EQ(std::get<bool>(result), value);
@@ -148,36 +148,36 @@ TEST_F(StaticTypeConverterTest, WrapBoxed_Test0)
 {
     StaticTypeConverter stcTypeConverter;
     {
-        common::BaseType value = std::monostate {};
-        common::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        panda::PandaType value = std::monostate {};
+        panda::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(result, nullptr);
     }
     {
-        common::BaseType value = true;
-        common::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        panda::PandaType value = true;
+        panda::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(reinterpret_cast<EtsBoxPrimitive<bool> *>(result)->GetValue(), std::get<bool>(value));
     }
     {
-        common::BaseType value = false;
-        common::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        panda::PandaType value = false;
+        panda::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(reinterpret_cast<EtsBoxPrimitive<bool> *>(result)->GetValue(), std::get<bool>(value));
     }
     {
         int16_t tarValue = 32767;
-        common::BaseType value = tarValue;
-        common::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        panda::PandaType value = tarValue;
+        panda::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(reinterpret_cast<EtsBoxPrimitive<int16_t> *>(result)->GetValue(), std::get<int16_t>(value));
     }
     {
         uint16_t tarValue = 65535;
-        common::BaseType value = tarValue;
-        common::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        panda::PandaType value = tarValue;
+        panda::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(reinterpret_cast<EtsBoxPrimitive<uint16_t> *>(result)->GetValue(), std::get<uint16_t>(value));
     }
     {
         uint16_t tarValue = 'A';
-        common::BaseType value = tarValue;
-        common::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        panda::PandaType value = tarValue;
+        panda::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(reinterpret_cast<EtsBoxPrimitive<uint16_t> *>(result)->GetValue(), std::get<uint16_t>(value));
     }
 }
@@ -187,26 +187,26 @@ TEST_F(StaticTypeConverterTest, WrapBoxed_Test1)
     StaticTypeConverter stcTypeConverter;
     {
         int32_t tarValue = 2147483647;
-        common::BaseType value = tarValue;
-        common::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        panda::PandaType value = tarValue;
+        panda::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(reinterpret_cast<EtsBoxPrimitive<int32_t> *>(result)->GetValue(), std::get<int32_t>(value));
     }
     {
         float tarValue = 3.14F;
-        common::BaseType value = tarValue;
-        common::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        panda::PandaType value = tarValue;
+        panda::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(reinterpret_cast<EtsBoxPrimitive<float> *>(result)->GetValue(), std::get<float>(value));
     }
     {
         double tarValue = 2.71828;
-        common::BaseType value = tarValue;
-        common::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        panda::PandaType value = tarValue;
+        panda::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(reinterpret_cast<EtsBoxPrimitive<double> *>(result)->GetValue(), std::get<double>(value));
     }
     {
         int64_t tarValue = 9223372036854775807LL;
-        common::BaseType value = tarValue;
-        common::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        panda::PandaType value = tarValue;
+        panda::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(reinterpret_cast<EtsBoxPrimitive<int64_t> *>(result)->GetValue(), std::get<int64_t>(value));
     }
 }
@@ -215,23 +215,23 @@ TEST_F(StaticTypeConverterTest, WrapBoxed_Test2)
 {
     StaticTypeConverter stcTypeConverter;
     {
-        common::BaseType value = common::BaseUndefined {};
-        common::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        panda::PandaType value = panda::BaseUndefined {};
+        panda::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(result, nullptr);
     }
     {
-        common::BaseType value = common::BaseNull {};
-        common::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        panda::PandaType value = panda::BaseNull {};
+        panda::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(reinterpret_cast<EtsObject *>(result), EtsObject::FromCoreType(GetCoroutine()->GetNullValue()));
     }
     {
-        common::BaseBigInt bigIntValue;
+        panda::BaseBigInt bigIntValue;
         uint32_t tarLength = 3;
         bigIntValue.length = tarLength;
         bigIntValue.sign = true;
         bigIntValue.data = {0x12345678, 0x9ABCDEF0, 0x13579BDF};
-        common::BaseType value = bigIntValue;
-        common::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        panda::PandaType value = bigIntValue;
+        panda::BoxedValue result = stcTypeConverter.WrapBoxed(value);
 
         auto bigInt = EtsBigInt::FromEtsObject(reinterpret_cast<EtsObject *>(result));
 
@@ -244,10 +244,10 @@ TEST_F(StaticTypeConverterTest, WrapBoxed_Test2)
         }
     }
     {
-        std::shared_ptr<common::BaseObject> sharedObj = std::make_shared<common::BaseObject>();
-        common::BaseType value = sharedObj.get();
-        common::BoxedValue result = stcTypeConverter.WrapBoxed(value);
-        EXPECT_EQ(result, std::get<common::BaseObject *>(value));
+        std::shared_ptr<panda::BaseObject> sharedObj = std::make_shared<panda::BaseObject>();
+        panda::PandaType value = sharedObj.get();
+        panda::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        EXPECT_EQ(result, std::get<panda::BaseObject *>(value));
     }
 }
 
@@ -323,9 +323,9 @@ TEST_F(StaticTypeConverterTest, UnwrapBaseBigInt)
 
     StaticTypeConverter stcTypeConverter;
     auto boxed = reinterpret_cast<EtsObject *>(bigInt);
-    common::BaseType result = stcTypeConverter.UnwrapBoxed(reinterpret_cast<common::BoxedValue>(boxed));
-    EXPECT_TRUE(std::holds_alternative<common::BaseBigInt>(result));
-    const common::BaseBigInt &baseBigInt = std::get<common::BaseBigInt>(result);
+    panda::PandaType result = stcTypeConverter.UnwrapBoxed(reinterpret_cast<panda::BoxedValue>(boxed));
+    EXPECT_TRUE(std::holds_alternative<panda::BaseBigInt>(result));
+    const panda::BaseBigInt &baseBigInt = std::get<panda::BaseBigInt>(result);
 
     EXPECT_EQ(baseBigInt.length, LENGTH);
     EXPECT_EQ(baseBigInt.sign, sign);
@@ -340,15 +340,15 @@ TEST_F(StaticTypeConverterTest, UnwrapBoxedNull)
     StaticTypeConverter stcTypeConverter;
     auto *coro = EtsCoroutine::GetCurrent();
     auto *nullObj = coro->GetNullValue();
-    auto result = stcTypeConverter.UnwrapBoxed(reinterpret_cast<common::BoxedValue>(nullObj));
-    ASSERT_TRUE(std::holds_alternative<common::BaseNull>(result));
+    auto result = stcTypeConverter.UnwrapBoxed(reinterpret_cast<panda::BoxedValue>(nullObj));
+    ASSERT_TRUE(std::holds_alternative<panda::BaseNull>(result));
 }
 
 TEST_F(StaticTypeConverterTest, UnwrapBoxedUndefined)
 {
     StaticTypeConverter stcTypeConverter;
     auto result = stcTypeConverter.UnwrapBoxed(nullptr);
-    ASSERT_TRUE(std::holds_alternative<common::BaseUndefined>(result));
+    ASSERT_TRUE(std::holds_alternative<panda::BaseUndefined>(result));
 }
 
 TEST_F(StaticTypeConverterTest, UnwrapBoxedObject)
@@ -356,9 +356,9 @@ TEST_F(StaticTypeConverterTest, UnwrapBoxedObject)
     EtsClass *klass = GetTestClass("A");
     EtsObject *testObj = EtsObject::Create(klass);
     StaticTypeConverter stcTypeConverter;
-    common::BaseType result = stcTypeConverter.UnwrapBoxed(reinterpret_cast<common::BoxedValue>(testObj));
-    ASSERT_TRUE(std::holds_alternative<common::BaseObject *>(result));
-    EXPECT_EQ(std::get<common::BoxedValue>(result), reinterpret_cast<common::BoxedValue>(testObj));
+    panda::PandaType result = stcTypeConverter.UnwrapBoxed(reinterpret_cast<panda::BoxedValue>(testObj));
+    ASSERT_TRUE(std::holds_alternative<panda::BaseObject *>(result));
+    EXPECT_EQ(std::get<panda::BoxedValue>(result), reinterpret_cast<panda::BoxedValue>(testObj));
 }
 // NOLINTEND(readability-identifier-naming, readability-magic-numbers)
 }  // namespace ark::ets::test

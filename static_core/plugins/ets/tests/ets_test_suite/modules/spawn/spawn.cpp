@@ -38,7 +38,7 @@ std::vector<ani_string> SplitString(ani_env *env, std::string_view from, char de
 
 extern "C" {
 // NOLINTNEXTLINE(readability-identifier-naming)
-ANI_EXPORT ani_array getAppAbcFiles(ani_env *env, [[maybe_unused]] ani_class /* unused */)
+ANI_EXPORT ani_array getAppAbcFiles(ani_env *env, [[maybe_unused]] ani_class)
 {
     auto appAbcFiles = ark::os::system_environment::GetEnvironmentVar("APP_ABC_FILES");
     const auto paths = SplitString(env, appAbcFiles, ':');

@@ -80,25 +80,6 @@ function testAddAllWithMultipleSets() {
     arktest.assertEQ(setA.addAll(setC), false, "The addAll method should return false when no new elements are added");
 }
 
-function testAddAllWithMultipleSets() {
-    let setA: LightWeightSet<string> = new LightWeightSet<string>();
-    let setB: LightWeightSet<string> = new LightWeightSet<string>();
-
-    setA.add("sparrow");
-    setA.add("s");
-
-    setB.add("s");
-    setB.add("squirrel");
-
-    assertEQ(setA.addAll(setB), true, "The addAll method should return true when new elements are added");
-    assertEQ(setA.length, 3, "The set length should be 3 after adding all elements");
-
-    let setC: LightWeightSet<string> = new LightWeightSet<string>();
-    setC.add("s");
-
-    assertEQ(setA.addAll(setC), false, "The addAll method should return false when no new elements are added");
-}
-
 function testHasAllData() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     let lightWeightSett: LightWeightSet<number | string> = new LightWeightSet<number | string>();

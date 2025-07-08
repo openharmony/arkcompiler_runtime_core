@@ -17,7 +17,7 @@
 //! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ets_round.ETSGLOBAL::main"
 //! METHOD        "ets_round.ETSGLOBAL::main"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /Intrinsic.StdMathRound/, 11
+//! INST_COUNT    /Intrinsic.StdMathRound/, 12
 //! ASM_METHOD    "ets_round.ETSGLOBAL::main"
 //! ASM_INST      "Intrinsic.StdMathRound"
 //! ASM           x64: /roundsd.*0x02,/, arm64: "frintp", arm32: "vrintp"
@@ -27,7 +27,7 @@
 //! RUN_PAOC      options: "--compiler-regex='.*main.*'"
 //! METHOD        "ets_round.ETSGLOBAL::main"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /Intrinsic.StdMathRound/, 11
+//! INST_COUNT    /Intrinsic.StdMathRound/, 12
 //! ASM_METHOD    "ets_round.ETSGLOBAL::main"
 //! ASM_INST      "Intrinsic.StdMathRound"
 //! ASM           x64: /roundsd.*0x02,/, arm64: "frintp"

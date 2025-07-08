@@ -267,7 +267,6 @@ private:
         }
         return nullptr;
     }
-    // NOLINTEND(cppcoreguidelines-pro-type-vararg)
 
 protected:
     ani_env *env_ {nullptr};  // NOLINT(misc-non-private-member-variables-in-classes)

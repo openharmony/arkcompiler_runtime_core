@@ -63,17 +63,6 @@ function testSetUndefined() {
     arktest.assertEQ(0, 1, "The key cannot be undefined");
 }
 
-function testSetUndefined() {
-    let hashMap: HashMap<string|undefined, number|undefined> = new HashMap<string|undefined, number|undefined>();
-    try {
-        hashMap.set(undefined, 356);
-    } catch (e: BusinessError) {
-        assertEQ(e.code, 401, "The HashMap should throw a BusinessError when key is undefined");
-        return;
-    }
-    assertEQ(0, 1, "The key cannot be undefined");
-}
-
 function testSetKeyLength1024() {
     let hashMap: HashMap<string, number> = new HashMap<string, number>();
     let param = 'a'.repeat(2048);

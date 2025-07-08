@@ -310,19 +310,6 @@ function testFromStringWithInvalidLatin1Chars() {
     arktest.assertEQ(buf.at(bufLength - 1), 24);
 }
 
-function testFromStringWithBase64Encoding() {
-    let buf = buffer.from('abc', 'base64');
-    assertEQ(buf.toString(), 'i·');
-    assertEQ(buf.length as int, 2);
-    assertEQ(buf.toString('base64'), 'abc=');
-}
-
-function testFromStringWithInvalidLength() {
-    let buf = buffer.from(new String('this is a test'), 'utf8', -1);
-    assertEQ(buf.length as int, 14);
-    assertEQ(buf.toString(), 'this is a test');
-}
-
 // Buffer.toString() tests
 function testBasicStringEncodings() {
     const asciiStr = 'Hello, World!'
@@ -587,24 +574,6 @@ function testBufferCopyWithUndefined() {
     }
     buf1.copy(buf2, undefined, 1);
     arktest.assertEQ(buf2.toString(), "bcdefghijklmnopqrstuvwxyz!")
-}
-
-function testBufferCopyWithParams() {
-    let b1 = buffer.from("abcdefg")
-    let b2 = buffer.from("1235789")
-    let num = b1.copy(b2, 2,1,3)
-    assertEQ(num, 2)
-    assertEQ(b2.toString(), "12bc789")
-}
-
-function testBufferCopyWithUndefined() {
-    let buf1 = buffer.allocUninitializedFromPool(26);
-    let buf2 = buffer.allocUninitializedFromPool(26).fill('!');
-    for (let i = 0; i < 26; i++) {
-        buf1.writeInt8(i + 97, i);
-    }
-    buf1.copy(buf2, undefined, 1);
-    assertEQ(buf2.toString(), "bcdefghijklmnopqrstuvwxyz!")
 }
 
 function testEntries() {

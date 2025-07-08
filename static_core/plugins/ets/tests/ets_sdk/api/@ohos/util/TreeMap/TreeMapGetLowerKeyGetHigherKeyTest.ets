@@ -120,30 +120,6 @@ function testGetLowerKeyAndHigherKeyNonExistingKey() {
     arktest.assertEQ(treeMap.length, 8, "The treeMap length should be 8");
 }
 
-function testGetLowerKeyAndHigherKeyNonExistingKey() {
-    let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
-            return secondValue.compareTo(firstValue)
-        });
-    treeMap.set("bb", "456");
-    treeMap.set("cc", "123");
-    treeMap.set("dd", "789");
-    treeMap.set("ee", "111");
-    treeMap.set("gg", "777");
-    treeMap.set("ii", "333");
-    treeMap.set("kk", "555");
-    treeMap.set("nn", "666");
-    let lower_ = treeMap.getLowerKey("aa");
-    let lower = treeMap.getLowerKey("ff");
-    let higher_ = treeMap.getHigherKey("pp");
-    let higher = treeMap.getHigherKey("ff");
-    assertEQ(lower_, undefined, "The treeMap should return undefined when no data is found above this key");
-    assertEQ(higher_, undefined, "The treeMap should return undefined when no data is found below this key");
-    assertEQ(lower, "ee", "The treeMap should return the correct lower key");
-    assertEQ(higher, "gg", "The treeMap should return the correct higher key");
-    assertEQ(treeMap.length, 8, "The treeMap length should be 8");
-}
-
 function testGetLowerKeyAndHigherKeyEmptyStringKey() {
     let treeMap: TreeMap<string, string> =
         new TreeMap<string, string>((firstValue: string, secondValue: string): number => {

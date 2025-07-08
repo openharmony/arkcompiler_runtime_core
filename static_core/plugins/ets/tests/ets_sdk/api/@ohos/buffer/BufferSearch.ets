@@ -121,10 +121,3 @@ function testLastIndexOfBase64() {
     const index = buf.lastIndexOf(value, 1, "base64")
     arktest.assertEQ(index, -1)
 }
-
-function testLastIndexOfBase64() {
-    let buf = buffer.from("Hello World")
-    let value = "World"
-    const index = buf.lastIndexOf(value, 1, "base64")
-    assertEQ(index, -1)
-}

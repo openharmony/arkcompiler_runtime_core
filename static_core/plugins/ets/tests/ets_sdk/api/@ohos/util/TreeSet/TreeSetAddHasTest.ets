@@ -59,18 +59,6 @@ function testAddDataWithSameKeyDifferentValues() {
     arktest.assertEQ(treeSet.length, 1, "The treeSet length should be 1");
 }
 
-function testAddDataWithSameKeyDifferentValues() {
-    let treeSet: TreeSet<MyObject> = new TreeSet<MyObject>((firstValue: MyObject,
-        secondValue: MyObject): number => { return secondValue.size - firstValue.size });
-    let obj: MyObject = new MyObject(1);
-    let obj2: MyObject = new MyObject(1);
-    treeSet.add(obj);
-    treeSet.add(obj2);
-    let result = treeSet.has(obj);
-    assertEQ(result, true, "The treeSet should contain the added value");
-    assertEQ(treeSet.length, 1, "The treeSet length should be 1");
-}
-
 function testAddEmptyStringData() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
         secondValue: string): number => { return firstValue.compareTo(secondValue) });

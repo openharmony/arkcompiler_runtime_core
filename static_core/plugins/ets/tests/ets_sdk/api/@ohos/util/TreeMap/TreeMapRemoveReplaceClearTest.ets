@@ -58,20 +58,6 @@ function testRemoveRootEntry() {
     arktest.assertEQ(treeMap.length, 2, "The treeMap length should be 0");
 }
 
-function testRemoveRootEntry() {
-    let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
-            return secondValue.compareTo(firstValue)
-        });
-    treeMap.set("aa", "a123");
-    treeMap.set("bb", "b123");
-    treeMap.set("cc", "c123");
-
-    let result = treeMap.remove("bb");
-    assertEQ(result, "b123", "The treeMap should remove the element and return its value");
-    assertEQ(treeMap.length, 2, "The treeMap length should be 0");
-}
-
 function testRemoveNonExistingKey() {
     let treeMap: TreeMap<string, string> =
         new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
@@ -183,29 +169,4 @@ function testSetDataAfterClearTreeMap() {
     }
     let strAll = "ee,333,dd,222,cc,111";
     arktest.assertEQ(str, strAll, "The treeMap should return the correct iterator");
-}
-
-function testSetDataAfterClearTreeMap() {
-    let treeMap: TreeMap<string, number> =
-        new TreeMap<string, number>((firstValue: string, secondValue: string): number => {
-            return firstValue.compareTo(secondValue)
-        });
-    treeMap.set("aa", 123);
-    treeMap.set("bb", 456);
-    treeMap.clear();
-    assertEQ(treeMap.length, 0, "The treeMap length should be 0");
-    treeMap.set("cc", 111);
-    treeMap.set("dd", 222);
-    treeMap.set("ee", 333);
-    assertEQ(treeMap.length, 3, "The treeMap length should be 3");
-    let iterator = treeMap.$_iterator();
-    let str = "";
-    for (let i: int = 0; i < 3; i++) {
-        str += iterator.next().value!.toString();
-        if (i < 2) {
-            str += ",";
-        }
-    }
-    let strAll = "ee,333,dd,222,cc,111";
-    assertEQ(str, strAll, "The treeMap should return the correct iterator");
 }

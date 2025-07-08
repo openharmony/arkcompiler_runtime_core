@@ -109,21 +109,6 @@ function testEncodeToStringSyncMime() {
     assertUint8ArraysEqual(decoded, input);
 }
 
-function testEncodeToStringSyncMime() {
-    let helper = new util.Base64Helper();
-    let input = new Uint8Array([66, 97, 115, 101, 54, 52, 32, 78, 111, 100, 101, 46, 106, 115, 54, 52, 32,
-        78, 111, 100, 101, 46, 106, 115, 115, 54, 52, 32, 78, 111, 100, 101, 46, 106, 115, 115, 115, 54, 52,
-        32, 78, 111, 100, 101, 46, 106, 115, 105, 111, 110, 102, 114, 111, 109, 111, 116, 104, 101, 114, 97,
-        110, 105, 109, 97, 108, 115, 119, 104, 105, 99, 104, 105, 115, 97, 108]);
-    let encodedStr: String = helper.encodeToStringSync(input, util.Type.MIME);
-    assertEQ(encodedStr.indexOf("\r\n"), 76);
-    assertEQ(encodedStr.lastIndexOf("\r\n"), 102);
-    assertEQ(encodedStr, "QmFzZTY0IE5vZGUuanM2NCBOb2RlLmpzczY0IE5vZGUuanNzczY0IE5vZGUuanNpb25mcm9tb3Ro\r\nZXJhbmltYWxzd2hpY2hpc2Fs\r\n");
-    let decoded: Uint8Array = helper.decodeSync(encodedStr, util.Type.MIME);
-    assertEQ(decoded.length, input.length);
-    assertUint8ArraysEqual(decoded, input);
-}
-
 function testMimeUrlSafe() {
     let helper = new util.Base64Helper();
     let input = new Uint8Array(80);

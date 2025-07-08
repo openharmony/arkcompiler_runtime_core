@@ -44,10 +44,6 @@ function main(): int {
     regexplastIndextest.lastIndex = -1;
     failure += checkTestResult(regexplastIndextest.test("aacd22"), true);
 
-    let regexplastIndextest = new RegExp("(?:ab|cd)\\d?","g");
-    regexplastIndextest.lastIndex = -1;
-    failure += checkTestResult(regexplastIndextest.test("aacd22"), true);
-
     return failure
 }
 

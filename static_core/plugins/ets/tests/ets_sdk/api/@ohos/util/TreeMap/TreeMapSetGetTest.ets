@@ -63,20 +63,6 @@ function testSetDataWithSameKeyDifferentValues() {
     arktest.assertEQ(treeMap.length, 1, "The treeMap Length should be 1");
 }
 
-function testSetDataWithSameKeyDifferentValues() {
-    let treeMap: TreeMap<MyObject, string> =
-        new TreeMap<MyObject, string>((firstValue: MyObject, secondValue: MyObject): number => {
-            return secondValue.size - firstValue.size
-        });
-    let obj: MyObject = new MyObject(1);
-    let obj2: MyObject = new MyObject(1);
-    treeMap.set(obj, "123");
-    treeMap.set(obj2, "456");
-    let result = treeMap.get(obj);
-    assertEQ(result, "456", "The treeMap should get the value by key");
-    assertEQ(treeMap.length, 1, "The treeMap Length should be 1");
-}
-
 function testSetEmptyStringData() {
     let treeMap: TreeMap<string, string> =
         new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
