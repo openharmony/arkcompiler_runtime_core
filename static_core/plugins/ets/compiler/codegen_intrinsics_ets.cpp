@@ -675,31 +675,6 @@ void Codegen::CreateBigUInt64ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRC
                  src[FOURTH_OPERAND]);
 }
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CODEGEN_TYPED_ARRAY_TO_REVERSED(Name, MacroType)                                   \
-    /* CC-OFFNXT(G.PRE.02) name part */                                                    \
-    void Codegen::Create##Name##ArrayToReversed(IntrinsicInst *inst, Reg dst, SRCREGS src) \
-    {                                                                                      \
-        ASSERT(GetArch() != Arch::AARCH32);                                                \
-        auto array = src[FIRST_OPERAND];                                                   \
-        auto eid = RuntimeInterface::EntrypointId::MacroType##_ARRAY_TO_REVERSED;          \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                             \
-        CallFastPath(inst, eid, dst, {}, array);                                           \
-    }
-
-CODEGEN_TYPED_ARRAY_TO_REVERSED(Int8, INT8)
-CODEGEN_TYPED_ARRAY_TO_REVERSED(Int16, INT16)
-CODEGEN_TYPED_ARRAY_TO_REVERSED(Int32, INT32)
-CODEGEN_TYPED_ARRAY_TO_REVERSED(BigInt64, BIG_INT64)
-CODEGEN_TYPED_ARRAY_TO_REVERSED(Float32, FLOAT32)
-CODEGEN_TYPED_ARRAY_TO_REVERSED(Float64, FLOAT64)
-CODEGEN_TYPED_ARRAY_TO_REVERSED(Uint8, UINT8)
-CODEGEN_TYPED_ARRAY_TO_REVERSED(Uint16, UINT16)
-CODEGEN_TYPED_ARRAY_TO_REVERSED(Uint32, UINT32)
-CODEGEN_TYPED_ARRAY_TO_REVERSED(BigUint64, BIG_UINT64)
-
-#undef CODEGEN_TYPED_ARRAY_TO_REVERSED
-
 void Codegen::CreateWriteString(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(IsCompressedStringsEnabled());
