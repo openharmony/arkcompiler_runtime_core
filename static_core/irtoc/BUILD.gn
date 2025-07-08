@@ -32,7 +32,9 @@ if (enable_irtoc) {
       "-isystem",
       rebase_path("$ark_third_party_root/elfio/elfio", root_build_dir),
     ]
-    configs = [ "$ark_third_party_root/elfio:elfio_public_config" ]
+    if (ark_standalone_build || ark_static_standalone_build) {
+      configs = [ "$ark_third_party_root/elfio:elfio_public_config" ]
+    }
   }
 
   irtoc_scripts = [

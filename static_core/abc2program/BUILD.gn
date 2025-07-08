@@ -85,6 +85,8 @@ ohos_shared_library("arkts_abc2program") {
 
   configs = abc2program_configs
 
+  external_deps = ["bounds_checking_function:libsec_static"]
+  
   if (is_mingw || is_win) {
     output_extension = "dll"
   } else {
