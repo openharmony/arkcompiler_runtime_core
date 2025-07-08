@@ -209,6 +209,16 @@ public:
         return GetObjectAllocator().AsObjectAllocator()->ContainObject(obj);
     }
 
+    ObjectHeader *RegisterFinalizableIfNeeded(ObjectHeader *obj, BaseClass *cls, size_t size, ManagedThread *thread);
+
+    /**
+     * Initialize GC bits and also zeroing memory for the whole Object memory
+     * @param cls - class
+     * @param mem - pointer to the ObjectHeader
+     * @return pointer to the ObjectHeader
+     */
+    ObjectHeader *InitObjectHeaderAtMem(BaseClass *cls, void *mem);
+
     HeapManager() : targetUtilization_(DEFAULT_TARGET_UTILIZATION) {}
 
     ~HeapManager() = default;
@@ -251,14 +261,6 @@ private:
             }
         }
     }
-
-    /**
-     * Initialize GC bits and also zeroing memory for the whole Object memory
-     * @param cls - class
-     * @param mem - pointer to the ObjectHeader
-     * @return pointer to the ObjectHeader
-     */
-    ObjectHeader *InitObjectHeaderAtMem(BaseClass *cls, void *mem);
 
     /// Triggers GC if needed
     void TriggerGCIfNeeded();

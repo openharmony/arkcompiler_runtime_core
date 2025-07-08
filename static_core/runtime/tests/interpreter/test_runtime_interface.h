@@ -276,7 +276,7 @@ public:
         arrayObject_ = obj;
     }
 
-    static ObjectHeader *CreateObject(Class *klass)
+    static ObjectHeader *CreateObject([[maybe_unused]] ManagedThread *thread, Class *klass)
     {
         EXPECT_EQ(klass, objectClass_);
         return object_;

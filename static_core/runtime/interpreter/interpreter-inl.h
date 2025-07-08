@@ -2029,7 +2029,7 @@ public:
         Class *klass = ResolveType<true>(id);
         if (LIKELY(klass != nullptr)) {
             this->GetFrame()->GetAcc() = this->GetAcc();
-            ObjectHeader *obj = RuntimeIfaceT::CreateObject(klass);
+            ObjectHeader *obj = RuntimeIfaceT::CreateObject(this->GetThread(), klass);
             this->GetAcc() = this->GetFrame()->GetAcc();
             if (LIKELY(obj != nullptr)) {
                 this->GetFrameHandler().GetVReg(vd).SetReference(obj);
@@ -3868,7 +3868,7 @@ public:
             return;
         }
 
-        auto *obj = RuntimeIfaceT::CreateObject(klass);
+        auto *obj = RuntimeIfaceT::CreateObject(this->GetThread(), klass);
         if (UNLIKELY(obj == nullptr)) {
             this->MoveToExceptionHandler();
             return;

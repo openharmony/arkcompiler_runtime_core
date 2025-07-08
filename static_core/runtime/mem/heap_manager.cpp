@@ -125,16 +125,23 @@ ObjectHeader *HeapManager::AllocateObject(BaseClass *cls, size_t size, Alignment
     }
     LOG(DEBUG, MM_OBJECT_EVENTS) << "Alloc object at " << mem << " size: " << size << " cls: " << cls;
     ObjectHeader *object = InitObjectHeaderAtMem(cls, mem);
+    object = RegisterFinalizableIfNeeded(object, cls, size, thread);
+    return object;
+}
+
+ObjectHeader *HeapManager::RegisterFinalizableIfNeeded(ObjectHeader *obj, BaseClass *cls, size_t size,
+                                                       ManagedThread *thread)
+{
     bool isObjectFinalizable = IsObjectFinalized(cls);
     if (UNLIKELY(isObjectFinalizable || GetNotificationManager()->HasAllocationListeners())) {
         // Use object handle here as RegisterFinalizedObject can trigger GC
         [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-        VMHandle<ObjectHeader> handle(thread, object);
+        VMHandle<ObjectHeader> handle(thread, obj);
         RegisterFinalizedObject(handle.GetPtr(), cls, isObjectFinalizable);
         GetNotificationManager()->ObjectAllocEvent(cls, handle.GetPtr(), thread, size);
-        object = handle.GetPtr();
+        obj = handle.GetPtr();
     }
-    return object;
+    return obj;
 }
 
 void *HeapManager::TryGCAndAlloc(size_t size, Alignment align, ManagedThread *thread,
