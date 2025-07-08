@@ -1454,9 +1454,6 @@ export namespace url {
             return this.flags[INDEX_DOUBLE_SLASH];
         }
 
-        hasDoubleSlash(): boolean {
-            return this.flags[11];
-        }
     }
 
     function baseIntoUrl(base: InnerURL, res: InnerURL, inputIsEmpty: boolean) {

@@ -157,9 +157,6 @@ export namespace uri {
       return this.uriEntry.getQueryValue(key);
     }
 
-
-
-
     /**
     * Returns a set of the unique names of all query parameters.
     *
@@ -532,106 +529,7 @@ export namespace uri {
       }
       this.uriEntry.setAuthority(input);
     }
-
-    /**
-     * Sets the encoded scheme-specific part of this URI.
-     * NOTE(zhangziye):#25267 Unable to use different getter/setter signature
-     * @param { string | null } input
-     */
-    set encodedSSP(input: string | null) {
-      if (input === null) {
-        return;
-      }
-      this.uriEntry.setSsp(input);
-    }
-
-    set scheme(input: string | null) {
-      if (input === null || input.length === 0) {
-        return;
-      }
-      this.uriEntry.setScheme(input);
-    }
-
-    set path(input: string | null) {
-      if (input === null) {
-        return;
-      }
-      this.uriEntry.setPath(encodeURI(input));
-    }
-
-    /**
-     * NOTE(zhangziye):#25267 Unable to use different getter/setter signature 
-     */
-    set ssp(input: string | null) {
-      if (input === null) {
-        return;
-      }
-      this.uriEntry.setSsp(encodeURI(input))
-    }
-
-    set authority(input: string | null) {
-      if (input === null) {
-        return;
-      }
-      this.uriEntry.setAuthority(encodeURI(input))
-    }
-
-    set userInfo(input: string | null) {
-      if (input === null) {
-        return;
-      }
-      this.uriEntry.setUserInfo(encodeURIComponent(input));
-    }
-
-    set query(input: string | null) {
-      if (input === null) {
-        return;
-      }
-      this.uriEntry.setQuery(encodeURIComponent(input));
-    }
-
-    set fragment(input: string | null) {
-      if (input === null) {
-        return;
-      }
-      this.uriEntry.setFragment(encodeURIComponent(input));
-    }
-
-    set encodedUserInfo(input: string | null) {
-      if (input === null) {
-        return;
-      }
-      this.uriEntry.setUserInfo(input);
-    }
-
-    set encodedPath(input: string | null) {
-      if (input === null) {
-        return;
-      }
-      this.uriEntry.setPath(input);
-    }
-
-    set encodedQuery(input: string | null) {
-      if (input === null) {
-        return;
-      }
-      this.uriEntry.setQuery(input);
-    }
-
-    set encodedFragment(input: string | null) {
-      if (input === null) {
-        return;
-      }
-      this.uriEntry.setFragment(input);
-    }
-
-    set encodedAuthority(input: string | null) {
-      if (input === null) {
-        return;
-      }
-      this.uriEntry.setAuthority(input);
-    }
-
+ 
     /**
      * NOTE(zhangziye):#25267 Unable to use different getter/setter signature 
      */

@@ -187,6 +187,8 @@ if (is_mob) {
 }
 
 config("arkbase_public_config") {
+  configs = [ sdk_libc_secshared_config ]
+
   include_dirs = [
     "$ark_root_gen_dir/libpandabase",
     "$ark_root/libpandabase",
@@ -201,8 +203,6 @@ config("arkbase_public_config") {
   if (ark_static_standalone_build) {
     ldflags = [ "-ldl" ]
   }
-
-  configs = [ sdk_libc_secshared_config ]
 }
 
 if (!ark_static_standalone_build) {
