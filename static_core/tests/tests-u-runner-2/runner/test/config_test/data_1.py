@@ -106,5 +106,6 @@ args = {
     'runner.coverage-html-report-dir': None,
     'runner.llvm-cov-exclude': None,
     'runner.lcov-exclude': None,
-    'runner.clean-gcda-before-run': False
+    'runner.clean-gcda-before-run': False,
+    'runner.gn-build': False
 }

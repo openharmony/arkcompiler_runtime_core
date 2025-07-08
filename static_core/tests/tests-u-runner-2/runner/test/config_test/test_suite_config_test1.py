@@ -96,7 +96,8 @@ class TestSuiteConfigTest1(unittest.TestCase):
             "--coverage-html-report-dir", ".",
             "--coverage-per-binary",
             "--clean-gcda-before-run",
-            "--time-edges", "1,10,100,500"]
+            "--time-edges", "1,10,100,500",
+            "--gn-build"]
 
         configs = ConfigsLoader(self.workflow_name, self.test_suite_name)
 

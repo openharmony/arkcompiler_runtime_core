@@ -47,6 +47,7 @@ class GeneralOptions(IOptions):
     __DEFAULT_DETAILED_REPORT = False
     __DEFAULT_REPORT_DIR = "report"
     __CFG_RUNNER = "runner"
+    __DEFAULT_GN_BUILD = False
 
     __VERBOSE = "verbose"
     __VERBOSE_FILTER = "verbose-filter"
@@ -57,6 +58,7 @@ class GeneralOptions(IOptions):
     __SHOW_PROGRESS = "show-progress"
     __QEMU = "qemu"
     __REPORT_DIR = "report-dir"
+    __GN_BUILD = "gn-build"
 
     def __init__(self, data: dict[str, Any], parent: IOptions):  # type: ignore[explicit-any]
         super().__init__(data)
@@ -113,6 +115,11 @@ class GeneralOptions(IOptions):
             type=lambda arg: QemuKind.is_value(arg, f"--{GeneralOptions.__QEMU}"),
             dest=f"{dest}{GeneralOptions.__QEMU}",
             help='Launch all binaries in qemu aarch64 (arm64) or arm (arm32)')
+        group.add_argument(
+            f'--{GeneralOptions.__GN_BUILD}', action='store_true',
+            default=GeneralOptions.__DEFAULT_GN_BUILD,
+            dest=f"{dest}{GeneralOptions.__GN_BUILD}",
+            help='Target build is built with GN')
 
         ReportOptions.add_report_cli(parser, dest)
         TimeReportOptions.add_cli_args(parser, dest)
@@ -191,6 +198,10 @@ class GeneralOptions(IOptions):
     def aot_check(self) -> bool:
         return False
 
+    @cached_property
+    def gn_build(self) -> bool:
+        return cast(bool, self.__parameters.get(self.__GN_BUILD, self.__DEFAULT_GN_BUILD))
+
     def get_command_line(self) -> str:
         options = [
             f'--processes={self.processes}' if self.processes != GeneralOptions.__DEFAULT_PROCESSES else '',
@@ -203,5 +214,6 @@ class GeneralOptions(IOptions):
             self.coverage.get_command_line(),
             '--aot' if self.aot_check else '',
             self.time_report.get_command_line(),
+            '--gn-build' if self.gn_build else ''
         ]
         return ' '.join(options)
