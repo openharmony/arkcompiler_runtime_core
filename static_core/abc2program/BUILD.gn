@@ -48,6 +48,17 @@ config("arkts_abc2program_public_config") {
   ]
 }
 
+if (!ark_static_standalone_build) {
+  ohos_shared_headers("arkts_abc2program_public_headers") {
+    include_dirs = [
+      "$ark_root/abc2program",
+      "$target_gen_dir",
+    ]
+    part_name = ark_part_name
+    subsystem_name = "$ark_subsystem_name"
+  }
+}
+
 abc2program_sources = [
   "$target_gen_dir/abc_inst_convert.cpp",
   "$target_gen_dir/abc_opcode_convert.cpp",
@@ -57,6 +68,7 @@ abc2program_sources = [
   "abc2program_key_data.cpp",
   "abc2program_log.cpp",
   "abc2program_options.cpp",
+  "abc_annotation_processor.cpp",
   "abc_class_processor.cpp",
   "abc_code_processor.cpp",
   "abc_field_processor.cpp",
@@ -66,7 +78,6 @@ abc2program_sources = [
   "abc_literal_array_processor.cpp",
   "abc_method_processor.cpp",
   "abc_string_table.cpp",
-  "abc_annotation_processor.cpp",
   "common/abc_code_converter.cpp",
   "program_dump.cpp",
 ]
@@ -85,8 +96,8 @@ ohos_shared_library("arkts_abc2program") {
 
   configs = abc2program_configs
 
-  external_deps = ["bounds_checking_function:libsec_static"]
-  
+  external_deps = [ "bounds_checking_function:libsec_static" ]
+
   if (is_mingw || is_win) {
     output_extension = "dll"
   } else {
