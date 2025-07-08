@@ -362,38 +362,37 @@ function testStringifyFunction(): int {
 
 type Option<T> = T | undefined
 
+
+class WithOption {
+    opt: Option<string> = "hello"
+}
 function testStringifyUnion(): int {
     const option: Option<string> = "hello"
 
     let testResult = test('"hello"' == JSON.stringify(option), "standalone union")
     testResult += test('["hello"]' == JSON.stringify([option]), "array of unions")
 
-    class WithOption {
-        opt: Option<string> = "hello"
-    }
-
     testResult += test('{"opt":"hello"}' == JSON.stringify(new WithOption()), "class with union typed field")
 
     return testResult
 }
 
-function testStringifyInterface(): int {
-    interface Fn<A, R> {
-        apply(a: A): R 
-    }
+class WithFn {
+    fn: Fn<number, number> = new IdentityFn<number>()
+}
 
-    class IdentityFn<A> implements Fn<A, A> {
-        apply(a: A): A {
-            return a
-        }
+interface Fn<A, R> {
+    apply(a: A): R 
+}
+class IdentityFn<A> implements Fn<A, A> {
+    apply(a: A): A {
+        return a
     }
+}
+function testStringifyInterface(): int {
 
     const identityNumber: Fn<number, number> = new IdentityFn<number>()
     let testResult = test("{}" == JSON.stringify(identityNumber), "standalone interface")
-
-    class WithFn {
-        fn: Fn<number, number> = new IdentityFn<number>()
-    }
 
     testResult += test('{"fn":{}}' == JSON.stringify(new WithFn()), "class with interface typed field")
 

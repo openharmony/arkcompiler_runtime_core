@@ -98,10 +98,10 @@ function testStdCoreType() {
     assertEQ((method!.getType().getReceiverType() as ClassType).getName(), classType.getName(), "method 'foo' must be declared in interface 'Base'");
 }
 
+class Handler extends DefaultProxyHandler<Map<string, string>> { };
 function testStdCoreProxy() {
     const map = new Map<string, string>();
 
-    class Handler extends DefaultProxyHandler<Map<string, string>> { };
     const mapProxy = Proxy.create(map, new Handler());
 
     assertTrue(map === mapProxy, "std.core.Proxy must work correctly in application context");

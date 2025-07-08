@@ -18,11 +18,9 @@ statements:
   - block: |-
           if (check())
             assertTrue(true);
-  - block: 'class Point {}'
   - block: 'interface A {}'
   - block: 'enum Enum { v1, v2 }'
   - block: 'const b: int = 1;'
-  - block: 'class Dict { constructor(x: int, y: int) {} }'
   - block: |- 
           let i: int = 1;
           do i++; while (i < 10)
@@ -47,10 +45,3 @@ statements:
           default: { assertTrue( false ); break; }
           }
   - block: 'assertTrue( true )'
-  - block: |-
-          class Ex extends Exception {}
-          try {
-            throw new Exception();
-          } catch (e) {
-            x = 0;
-          }

@@ -23,11 +23,10 @@ import {
     instanceChildAgeNameInterfaceClass,
 } from 'main_js';
 
+class AgeNameWrong {
+    age = tsNumber;
+}
 function checkArgFuFromSts(): boolean {
-    class AgeNameWrong {
-        age = tsNumber;
-    }
-
     return checkIntersectionInterface(new AgeNameWrong()) as boolean == false;
 }
 

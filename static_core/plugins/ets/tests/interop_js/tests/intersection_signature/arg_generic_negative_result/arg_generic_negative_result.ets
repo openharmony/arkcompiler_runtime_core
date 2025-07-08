@@ -23,10 +23,10 @@ import {
     instanceChildAgeNameGenericClass,
 } from 'main_js';
 
+class TypeWrong {
+    age = tsNumber;
+}
 function checkArgFuFromSts(): boolean {
-    class TypeWrong {
-        age = tsNumber;
-    }
     return checkAgeNameGeneric(new TypeWrong()) as boolean == false;
 }
 
