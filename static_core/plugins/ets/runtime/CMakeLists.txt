@@ -23,6 +23,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_class_linker_context.cpp
     ${ETS_EXT_SOURCES}/ets_class_linker_extension.cpp
     ${ETS_EXT_SOURCES}/ets_exceptions.cpp
+    ${ETS_EXT_SOURCES}/ets_itable_builder.cpp
     ${ETS_EXT_SOURCES}/ets_language_context.cpp
     ${ETS_EXT_SOURCES}/ets_napi_env.cpp
     ${ETS_EXT_SOURCES}/ets_native_library.cpp
@@ -31,12 +32,12 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_namespace_manager_impl.cpp
     ${ETS_EXT_SOURCES}/ets_platform_types.cpp
     ${ETS_EXT_SOURCES}/ets_runtime_interface.cpp
-    ${ETS_EXT_SOURCES}/ets_vm.cpp
+    ${ETS_EXT_SOURCES}/ets_stdlib_cache.cpp
     ${ETS_EXT_SOURCES}/ets_stubs.cpp
+    ${ETS_EXT_SOURCES}/ets_vm.cpp
+    ${ETS_EXT_SOURCES}/ets_vtable_builder.cpp
     ${ETS_EXT_SOURCES}/integrate/ets_ani_expo.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core.cpp
-    ${ETS_EXT_SOURCES}/ets_itable_builder.cpp
-    ${ETS_EXT_SOURCES}/ets_vtable_builder.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Array.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_ArrayBuffer.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_TypedArrays.cpp

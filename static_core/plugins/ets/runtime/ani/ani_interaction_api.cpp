@@ -812,9 +812,9 @@ static ani_status AllocObject(ScopedManagedCodeFix &s, ani_class cls, ani_object
 template <typename Args>
 static ani_status DoNewObject(ani_env *env, ani_class cls, ani_method method, ani_object *result, Args args)
 {
-    ani_object object;
+    LocalRef<ani_object> object(env);
     ScopedManagedCodeFix s(env);
-    ani_status status = AllocObject(s, cls, &object);
+    ani_status status = AllocObject(s, cls, &object.GetRef());
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
 
     EtsClass *klass = s.ToInternalType(cls);
@@ -823,9 +823,9 @@ static ani_status DoNewObject(ani_env *env, ani_class cls, ani_method method, an
 
     // Use any primitive type as template parameter and just ignore the result
     ani_int tmp;
-    status = DoGeneralMethodCall<EtsInt>(s, object, method, &tmp, args);
+    status = DoGeneralMethodCall<EtsInt>(s, object.GetRef(), method, &tmp, args);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
-    *result = object;
+    *result = object.Release();
     return ANI_OK;
 }
 
@@ -870,8 +870,7 @@ NO_UB_SANITIZE static ani_status Object_GetType(ani_env *env, ani_object object,
     EtsClass *etsClass = etsObject->GetClass();
     ASSERT(etsClass != nullptr);
 
-    s.AddLocalRef(etsClass->AsObject(), reinterpret_cast<ani_ref *>(result));
-    return ANI_OK;
+    return s.AddLocalRef(etsClass->AsObject(), reinterpret_cast<ani_ref *>(result));
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3937,59 +3936,37 @@ private:
     ani_error error_ {nullptr};
 };
 
-static ani_status FindClassByName(ani_env *env, const char *name, ani_class *cls)
-{
-    // NOTE(dslynko, #23447): use cache of well-known classes
-    auto status = env->FindClass(name, cls);
-    ASSERT(status == ANI_OK);
-    return status;
-}
-
-static ani_status FindMethodByName(ani_env *env, ani_class cls, const char *name, const char *sig, ani_method *res)
-{
-    auto status = env->Class_FindMethod(cls, name, sig, res);
-    ASSERT(status == ANI_OK);
-    return status;
-}
-
-static ani_status CallParameterlessCtor(ani_env *env, ani_class cls, ani_object *obj)
-{
-    ani_method ctor {};
-    // NOLINTNEXTLINE(clang-analyzer-deadcode.DeadStores)
-    auto status = env->Class_FindMethod(cls, "<ctor>", ":V", &ctor);
-    ASSERT(status == ANI_OK);
-
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    status = env->Object_New(cls, ctor, obj);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
-    return status;
-}
-
 // NOLINTBEGIN(clang-analyzer-deadcode.DeadStores)
 static ani_status GetErrorDescriptionLines(ani_env *env, ani_error error, ani_string *errDesc)
 {
-    ani_type errorType = nullptr;
-    auto status = env->Object_GetType(error, &errorType);
+    const StdlibCache *cache = PandaEnv::FromAniEnv(env)->GetEtsVM()->GetStdlibCache();
+
+    LocalRef<ani_type> errorType(env);
+    auto status = env->Object_GetType(error, &errorType.GetRef());
     ASSERT(status == ANI_OK);
 
     // Get error message
     ani_ref errorMessage = nullptr;
+
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    status = env->Object_CallMethodByName_Ref(error, "toString", ":Lstd/core/String;", &errorMessage);
+    status = env->Object_CallMethod_Ref(error, cache->std_core_String_Builder_toString, &errorMessage);
     ASSERT(status == ANI_OK);
 
     // Add newline between error message and stack trace
-    ani_string newlineString = nullptr;
+    LocalRef<ani_string> newlineString(env);
+
     std::string_view newline = "\n";
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    status = env->String_NewUTF8(newline.data(), newline.size(), &newlineString);
+    status = env->String_NewUTF8(newline.data(), newline.size(), &newlineString.GetRef());
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
 
     // Get stack trace
     ani_method getterMethod = nullptr;
-    status = env->Class_FindGetter(static_cast<ani_class>(errorType), "stack", &getterMethod);
+    status = env->Class_FindGetter(static_cast<ani_class>(errorType.GetRef()), "stack", &getterMethod);
     ASSERT(status == ANI_OK);
+
     ani_ref stackTrace = nullptr;
+
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     status = env->Object_CallMethod_Ref(error, getterMethod, &stackTrace);
     ASSERT(status == ANI_OK);
@@ -4005,31 +3982,24 @@ static ani_status GetErrorDescriptionLines(ani_env *env, ani_error error, ani_st
         stackTrace = createdString;
     }
 
-    ani_class sbCls = nullptr;
-    FindClassByName(env, "Lstd/core/StringBuilder;", &sbCls);
+    LocalRef<ani_object> sbObj(env);
 
-    // assemble error message, newline and trace into a single string
-    ani_method sbAppend = nullptr;
+    // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
     status =
-        FindMethodByName(env, sbCls, "append",
-                         "Lstd/core/String;Lstd/core/String;Lstd/core/String;:Lstd/core/StringBuilder;", &sbAppend);
-    ASSERT(status == ANI_OK);
+        env->Object_New(cache->std_core_String_Builder, cache->std_core_String_Builder_default_ctor, &sbObj.GetRef());
+    // NOLINTEND(cppcoreguidelines-pro-type-vararg)
 
-    ani_object sbObj = nullptr;
-    status = CallParameterlessCtor(env, sbCls, &sbObj);
     ASSERT(status == ANI_OK);
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    status = env->Object_CallMethod_Ref(sbObj, sbAppend, reinterpret_cast<ani_ref *>(&sbObj), errorMessage,
-                                        newlineString, stackTrace);
-    ASSERT(status == ANI_OK);
-
-    ani_method sbToString = nullptr;
-    status = FindMethodByName(env, sbCls, "toString", ":Lstd/core/String;", &sbToString);
+    status = env->Object_CallMethod_Ref(sbObj.GetRef(), cache->std_core_String_Builder_append,
+                                        reinterpret_cast<ani_ref *>(&sbObj.GetRef()), errorMessage,
+                                        newlineString.GetRef(), stackTrace);
     ASSERT(status == ANI_OK);
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    status = env->Object_CallMethod_Ref(sbObj, sbToString, reinterpret_cast<ani_ref *>(errDesc));
+    status = env->Object_CallMethod_Ref(sbObj.GetRef(), cache->std_core_String_Builder_toString,
+                                        reinterpret_cast<ani_ref *>(errDesc));
     ASSERT(status == ANI_OK);
     return status;
 }
@@ -4038,6 +4008,8 @@ NO_UB_SANITIZE static ani_status DescribeError(ani_env *env)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_PTR_ARG(env);
+
+    const StdlibCache *cache = PandaEnv::FromAniEnv(env)->GetEtsVM()->GetStdlibCache();
 
     ani_boolean errorExists = ANI_FALSE;
     auto status = env->ExistUnhandledError(&errorExists);
@@ -4051,29 +4023,17 @@ NO_UB_SANITIZE static ani_status DescribeError(ani_env *env)
     status = GetErrorDescriptionLines(env, s.GetError(), &errorDescription);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
 
-    // Get `std.core.console` global variable  [Lstd/core/Object
-    ani_module stdCoreModule = nullptr;
-    status = env->FindModule("Lstd/core;", &stdCoreModule);
+    LocalRef<ani_ref> console(env);
+    status = env->Variable_GetValue_Ref(cache->std_core_console, &console.GetRef());
     ASSERT(status == ANI_OK);
 
-    ani_variable consoleVar = nullptr;
-    status = env->Module_FindVariable(stdCoreModule, "console", &consoleVar);
-    ASSERT(status == ANI_OK);
-
-    ani_ref console = nullptr;
-    status = env->Variable_GetValue_Ref(consoleVar, &console);
-    ASSERT(status == ANI_OK);
-
-    ani_type strTyp = nullptr;
-    status = env->Object_GetType(errorDescription, &strTyp);
-    ASSERT(status == ANI_OK);
-
-    ani_array arr = nullptr;
-    status = env->Array_New(1, errorDescription, &arr);
+    LocalRef<ani_array> arr(env);
+    status = env->Array_New(1, errorDescription, &arr.GetRef());
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    status = env->Object_CallMethodByName_Void(static_cast<ani_object>(console), "error", "Lescompat/Array;:V", arr);
+    status = env->Object_CallMethod_Void(static_cast<ani_object>(console.GetRef()), cache->std_core_Console_error,
+                                         arr.GetRef());
     ASSERT(status == ANI_OK);
     return status;
 }

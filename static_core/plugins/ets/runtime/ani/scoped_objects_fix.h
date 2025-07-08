@@ -442,6 +442,42 @@ private:
     bool alreadyInManaged_;
 };
 
+template <typename Type>
+class LocalRef {
+public:
+    explicit LocalRef(ani_env *env) : env_(PandaEnv::FromAniEnv(env)), ref_(nullptr) {}
+    ~LocalRef()
+    {
+        Reset();
+    }
+
+    Type &GetRef()
+    {
+        return ref_;
+    }
+
+    void Reset()
+    {
+        if (ref_ != nullptr) {
+            ASSERT(ScopedManagedCodeFix(env_).DelLocalRef(static_cast<ani_ref>(ref_)) == ANI_OK);
+        }
+        ref_ = NULL;
+    }
+
+    Type Release()
+    {
+        Type tmpRef = ref_;
+        ref_ = nullptr;
+        return tmpRef;
+    }
+
+private:
+    ani_env *env_;
+    Type ref_;
+
+    NO_COPY_SEMANTIC(LocalRef);
+    NO_MOVE_SEMANTIC(LocalRef);
+};
 }  // namespace ark::ets::ani
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ANI_SCOPED_OBJECTS_FIX_H

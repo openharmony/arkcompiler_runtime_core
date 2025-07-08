@@ -66,6 +66,7 @@
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/mem/root_provider.h"
 #include "plugins/ets/runtime/ets_object_state_table.h"
+#include "plugins/ets/runtime/ets_stdlib_cache.h"
 #include "plugins/ets/runtime/finalreg/finalization_registry_manager.h"
 #include "plugins/ets/runtime/unhandled_manager/unhandled_object_manager.h"
 
@@ -252,6 +253,11 @@ public:
     ProfileSaverWorker *GetProfileSaverWorker() const override
     {
         return saverWorker_;
+    }
+
+    const StdlibCache *GetStdlibCache() const
+    {
+        return stdLibCache_.get();
     }
 
     PANDA_PUBLIC_API ObjectHeader *GetOOMErrorObject() override;
@@ -477,6 +483,7 @@ private:
     PandaUniquePtr<EtsObjectStateTable> objStateTable_ {nullptr};
     RunEventLoopFunction runEventLoop_ = nullptr;
     WalkEventLoopFunction walkEventLoop_ = nullptr;
+    PandaUniquePtr<StdlibCache> stdLibCache_ {nullptr};
 
     size_t preForkWorkerCount_ = 0;
 

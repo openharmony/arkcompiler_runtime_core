@@ -183,6 +183,9 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     findType(&EtsPlatformTypes::coreException, EXCEPTION);
     findType(&EtsPlatformTypes::coreStackTraceElement, STACK_TRACE_ELEMENT);
 
+    findType(&EtsPlatformTypes::core, "Lstd/core/ETSGLOBAL;");
+    findType(&EtsPlatformTypes::coreConsole, "Lstd/core/Console;");
+
     findType(&EtsPlatformTypes::coreStringBuilder, STRING_BUILDER);
 
     findType(&EtsPlatformTypes::corePromise, PROMISE);

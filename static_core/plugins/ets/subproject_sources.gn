@@ -111,6 +111,7 @@ srcs_runtime = [
   "runtime/ets_object_state_table.cpp",
   "runtime/ets_platform_types.cpp",
   "runtime/ets_runtime_interface.cpp",
+  "runtime/ets_stdlib_cache.cpp",
   "runtime/ets_stubs.cpp",
   "runtime/ets_vm.cpp",
   "runtime/ets_vm_api.cpp",  # TODO(nsizov): Take into account PR640, if needed
