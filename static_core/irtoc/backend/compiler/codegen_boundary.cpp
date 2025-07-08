@@ -131,7 +131,7 @@ void CodegenBoundary::CreateFrameInfo()
         CHECK_EQ(frameSize % target.GetSpAlignment(), target.GetSpAlignment() - target.WordSize());
     }
 
-    ssize_t offset = spillsCount;
+    auto offset = static_cast<ssize_t>(spillsCount);
     frame->SetFpCallersOffset(offset);
     offset += helpers::ToSigned(GetCallerRegsCount(target.GetArch(), true));
     frame->SetCallersOffset(offset);

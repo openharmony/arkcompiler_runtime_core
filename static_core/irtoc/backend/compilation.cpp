@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -377,7 +377,7 @@ Compilation::Result Compilation::MakeElf(std::string_view output)
         textSec->append_data(reinterpret_cast<const char *>(code.data()), code.size());
         for (auto &rel : unit->GetRelocations()) {
             size_t relOffset = offset + rel.offset;
-            auto sindex = addSymbol(unit->GetExternalFunction(rel.data));
+            auto sindex = static_cast<uint64_t>(addSymbol(unit->GetExternalFunction(rel.data)));
             if (Is64BitsArch(arch_)) {
                 // NOLINTNEXTLINE(hicpp-signed-bitwise)
                 relWriter.add_entry(relOffset, static_cast<ELFIO::Elf_Xword>(ELF64_R_INFO(sindex, rel.type)),
