@@ -52,7 +52,7 @@ public:
      * @param obj: pointer to object from which marking will be started.
      * @param visitor: mark object callback.
      */
-    virtual void MarkFromObject(void *obj, const panda::RefFieldVisitor &visitor) = 0;
+    virtual void MarkFromObject(void *obj, const common::RefFieldVisitor &visitor) = 0;
 #endif
     /**
      * @brief executes marking operation of STS VM GC that will be started from gotten object.
