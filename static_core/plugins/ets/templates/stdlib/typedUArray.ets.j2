@@ -1629,7 +1629,11 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns an {{element['name']}}Array with replaced value on index
      */
-    public final native with(index: int, value: {{element['primitiveType']}}): {{element['name']}}Array
+    public with(index: int, value: {{element['primitiveType']}}): {{element['name']}}Array {
+        let res = new {{element['name']}}Array(this)
+        res.setUnsafeClamp(index, value)
+        return res
+    }
 
     /// === with element lambda functions ===
     {#- NOTE: to add overloads with idxType == 'int' we need to enhance generics supports #}

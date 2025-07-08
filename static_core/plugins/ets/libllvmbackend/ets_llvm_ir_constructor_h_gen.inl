@@ -113,18 +113,6 @@ EMIT_TYPED_ARRAY_TO_REVERSED(BigUint64, BIG_UINT64)
 bool EmitReadString(Inst *inst);
 bool EmitWriteString(Inst *inst);
 
-bool EmitInt8ArrayWith(Inst *inst);
-bool EmitInt16ArrayWith(Inst *inst);
-bool EmitInt32ArrayWith(Inst *inst);
-bool EmitBigInt64ArrayWith(Inst *inst);
-bool EmitFloat32ArrayWith(Inst *inst);
-bool EmitFloat64ArrayWith(Inst *inst);
-bool EmitUint8ClampedArrayWith(Inst *inst);
-bool EmitUint8ArrayWith(Inst *inst);
-bool EmitUint16ArrayWith(Inst *inst);
-bool EmitUint32ArrayWith(Inst *inst);
-bool EmitBigUint64ArrayWith(Inst *inst);
-
 bool EmitInt8ArraySlice(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT8_ARRAY_SLICE, 3U);

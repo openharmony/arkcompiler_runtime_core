@@ -1075,336 +1075,6 @@
     - ark::ObjectHeader*       # ret
     - ark::ObjectHeader*       # obj
 
-- name: Int8ArrayWith
-  entrypoint: Int8ArrayWithTlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int8_t                   # val
-
-- name: Int8ArrayWithOddSaved
-  entrypoint: EtsEscompatInt8ArrayWith
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int8_t                   # val
-
-- name: Int8ArrayWithSlowPath
-  entrypoint: EtsEscompatInt8ArrayWith
-  bridge: slow_path
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int8_t                   # val
-
-- name: Int16ArrayWith
-  entrypoint: Int16ArrayWithTlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int16_t                  # val
-
-- name: Int16ArrayWithOddSaved
-  entrypoint: EtsEscompatInt16ArrayWith
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int16_t                  # val
-
-- name: Int16ArrayWithSlowPath
-  entrypoint: EtsEscompatInt16ArrayWith
-  bridge: slow_path
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int16_t                  # val
-
-- name: Int32ArrayWith
-  entrypoint: Int32ArrayWithTlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int32_t                  # val
-
-- name: Int32ArrayWithOddSaved
-  entrypoint: EtsEscompatInt32ArrayWith
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int32_t                  # val
-
-- name: Int32ArrayWithSlowPath
-  entrypoint: EtsEscompatInt32ArrayWith
-  bridge: slow_path
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int32_t                  # val
-
-- name: BigInt64ArrayWith
-  entrypoint: BigInt64ArrayWithTlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int64_t                  # val
-
-- name: BigInt64ArrayWithOddSaved
-  entrypoint: EtsEscompatBigInt64ArrayWith
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int64_t                  # val
-
-- name: BigInt64ArrayWithSlowPath
-  entrypoint: EtsEscompatBigInt64ArrayWith
-  bridge: slow_path
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int64_t                  # val
-
-- name: Float32ArrayWith
-  entrypoint: Float32ArrayWithTlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - uint32_t                 # val (float after a bitcast to uint32_t)
-
-- name: Float32ArrayWithOddSaved
-  entrypoint: EtsEscompatFloat32ArrayWith
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - uint32_t                 # val (float after a bitcast to uint32_t)
-
-- name: Float32ArrayWithSlowPath
-  entrypoint: EtsEscompatFloat32ArrayWith
-  bridge: slow_path
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - uint32_t                 # val (float after a bitcast to uint32_t)
-
-- name: Float64ArrayWith
-  entrypoint: Float64ArrayWithTlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - uint64_t                 # val (double after a bitcast to uint64_t)
-
-- name: Float64ArrayWithOddSaved
-  entrypoint: EtsEscompatFloat64ArrayWith
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - uint64_t                 # val (double after a bitcast to uint64_t)
-
-- name: Float64ArrayWithSlowPath
-  entrypoint: EtsEscompatFloat64ArrayWith
-  bridge: slow_path
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - uint64_t                 # val (double after a bitcast to uint64_t)
-
-- name: Uint8ClampedArrayWith
-  entrypoint: Uint8ClampedArrayWithTlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int32_t                  # val
-
-- name: Uint8ClampedArrayWithOddSaved
-  entrypoint: EtsEscompatUInt8ClampedArrayWith
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int32_t                  # val
-
-- name: Uint8ClampedArrayWithSlowPath
-  entrypoint: EtsEscompatUInt8ClampedArrayWith
-  bridge: slow_path
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int32_t                  # val
-
-- name: Uint8ArrayWith
-  entrypoint: Uint8ArrayWithTlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int32_t                  # val
-
-- name: Uint8ArrayWithOddSaved
-  entrypoint: EtsEscompatUInt8ArrayWith
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int32_t                  # val
-
-- name: Uint8ArrayWithSlowPath
-  entrypoint: EtsEscompatUInt8ArrayWith
-  bridge: slow_path
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int32_t                  # val
-
-- name: Uint16ArrayWith
-  entrypoint: Uint16ArrayWithTlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int32_t                  # val
-
-- name: Uint16ArrayWithOddSaved
-  entrypoint: EtsEscompatUInt16ArrayWith
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int32_t                  # val
-
-- name: Uint16ArrayWithSlowPath
-  entrypoint: EtsEscompatUInt16ArrayWith
-  bridge: slow_path
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int32_t                  # val
-
-- name: Uint32ArrayWith
-  entrypoint: Uint32ArrayWithTlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int64_t                  # val
-
-- name: Uint32ArrayWithOddSaved
-  entrypoint: EtsEscompatUInt32ArrayWith
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int64_t                  # val
-
-- name: Uint32ArrayWithSlowPath
-  entrypoint: EtsEscompatUInt32ArrayWith
-  bridge: slow_path
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int64_t                  # val
-
-- name: BigUint64ArrayWith
-  entrypoint: BigUint64ArrayWithTlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int64_t                  # val
-
-- name: BigUint64ArrayWithOddSaved
-  entrypoint: EtsEscompatBigUInt64ArrayWith
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int64_t                  # val
-
-- name: BigUint64ArrayWithSlowPath
-  entrypoint: EtsEscompatBigUInt64ArrayWith
-  bridge: slow_path
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-    - int32_t                  # pos
-    - int64_t                  # val
-
 - name: BeginGeneralNativeMethod
   entrypoint: BeginGeneralNativeMethod
   bridge: none
@@ -1754,7 +1424,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1764,7 +1434,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1784,7 +1454,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1794,7 +1464,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1814,7 +1484,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1824,7 +1494,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1844,7 +1514,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1854,7 +1524,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1874,7 +1544,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1884,7 +1554,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1904,7 +1574,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1914,7 +1584,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1936,7 +1606,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1946,7 +1616,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1966,7 +1636,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1976,7 +1646,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1996,7 +1666,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -2006,7 +1676,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -2026,7 +1696,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -2036,7 +1706,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -2056,7 +1726,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -2066,6 +1736,6 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
