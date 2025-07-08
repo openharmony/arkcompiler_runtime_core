@@ -17,6 +17,18 @@
 desc: Variable declaration with initializer.
 ---*/
 
+class User {
+    name: string;
+    constructor(name: string) {
+        this.name = name;
+    }
+}
+
+interface SomeInterface {
+    name: string;
+    age: number;
+}
+
 function main(): void {
   let tmp = 1;
   assertTrue(tmp == 1);

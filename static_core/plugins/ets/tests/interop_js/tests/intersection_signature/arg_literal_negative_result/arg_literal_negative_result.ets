@@ -23,11 +23,10 @@ import {
     instanceChildAgeNameLiteralClass,
 } from 'main_js';
 
+class IntersectionWrong {
+    age = tsNumber;
+}
 function checkArgFuFromSts(): boolean {
-    class IntersectionWrong {
-        age = tsNumber;
-    }
-
     return checkLiteralType(new IntersectionWrong()) as boolean == false;
 }
 

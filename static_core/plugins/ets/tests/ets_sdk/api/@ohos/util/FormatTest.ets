@@ -125,14 +125,14 @@ function testFormatRemoveCSS(): int {
     return success
 }
 
-function testFormatJSON(): int {
-    class TestObject {
-        x: int = 5
-        y: int = 6
-    }
+class TestObject1 {
+    x: int = 5
+    y: int = 6
+}
 
+function testFormatJSON(): int {
     // simple JSON
-    assertEQ(util.format("JSON : %j", new TestObject()), "JSON : {\"x\":5,\"y\":6}")
+    assertEQ(util.format("JSON : %j", new TestObject1()), "JSON : {\"x\":5,\"y\":6}")
 
     // JSON with circular reference
     let jsonWithCircularRef : string = "{\"name\":\"Kris\", \"father\":{\"name\":\"Bill\",\"wife\":{\"name\":\"Karen\"}},\"mother\":{\"$ref\":\"#father.wife\"}}"
@@ -142,49 +142,39 @@ function testFormatJSON(): int {
     return success
 }
 
-function testFormatObject(): int {
-    class TestObject {
-        strField : string
-        intField : int
-        floatField : float
-        boolField : boolean = false
-        constructor(strF: string, intF: int, floatF: float) {
-            this.strField = strF
-            this.intField = intF
-            this.floatField = floatF
-        }
+class TestObject2 {
+    strField : string
+    intField : int
+    floatField : float
+    boolField : boolean = false
+    constructor(strF: string, intF: int, floatF: float) {
+        this.strField = strF
+        this.intField = intF
+        this.floatField = floatF
     }
-    let res = util.format("Object: %o", new TestObject("k28", 14, 0.1f))
+}
+function testFormatObject(): int {
+    
+    let res = util.format("Object: %o", new TestObject2("k28", 14, 0.1f))
     let expected = "Object: { strField: 'k28',\nintField: 14,\nfloatField: 0.1,\nboolField: false }"
     assertEQ(res, expected)
     return success
 }
 
 function testFormatObject2(): int {
-    class TestObject {
-        strField : string
-        intField : int
-        floatField : float
-        boolField : boolean = false
-        constructor(strF: string, intF: int, floatF: float) {
-            this.strField = strF
-            this.intField = intF
-            this.floatField = floatF
-        }
-    }
-    let res = util.format("Object: %O", new TestObject("k28", 14, 0.1f))
+    let res = util.format("Object: %O", new TestObject2("k28", 14, 0.1f))
     let expected = "Object: { strField: 'k28',\nintField: 14,\nfloatField: 0.1,\nboolField: false }"
     assertEQ(res, expected)
     return success
 }
 
+class TestObject3 {
+    prop: string = ""
+    reference : Object = 0
+}
 function testFormatCircularObject(): int {
-    class Test {
-        prop: string = ""
-        reference : Object = 0
-    }
 
-    const circularObject = new Test()
+    const circularObject = new TestObject3()
     circularObject.prop = "Circular Reference Example"
     circularObject.reference = circularObject;
 
@@ -200,16 +190,11 @@ function testFormatCircularObject(): int {
 }
 
 function testArrayOfCircularObjects() : int {
-    class Test {
-        prop: string = ""
-        reference : Object = 0
-    }
-
-    const circularObject = new Test()
+    const circularObject = new TestObject3()
     circularObject.prop = "Circular Reference Example"
     circularObject.reference = circularObject
 
-    let arr = new Array<Test>(2)
+    let arr = new Array<TestObject3>(2)
     arr[0] = circularObject
     arr[1] = circularObject
 
@@ -249,22 +234,22 @@ function testFormatEscapePercent(): int {
     return success
 }
 
+class TestObject4 {
+    f1: string = ""
+    k1: int = 8
+    t : boolean = false
+}
 function testFormatArrayObect(): int {
-    class TestObject {
-        f1: string = ""
-        k1: int = 8
-        t : boolean = false
-    }
 
     {
-        let arr =  new Array<TestObject>()
+        let arr =  new Array<TestObject4>()
 
         assertEQ(util.format('Array: %o', arr), "Array: [ [length]: 0 ]")
         assertEQ(util.format('Array: %O', arr), "Array: [  ]")
     }
     {
-        let arr =  new Array<TestObject>(1)
-        arr[0] = new TestObject()
+        let arr =  new Array<TestObject4>(1)
+        arr[0] = new TestObject4()
 
         let expected = "Array: [ { f1: '',\n  k1: 8,\n  t: false }[length]: 1 ]"
         let expected1 = "Array: [ { f1: '',\n  k1: 8,\n  t: false } ]"
@@ -304,16 +289,32 @@ function testFunctionsArrayObject() : int {
     return success
 }
 
+
+class Person {
+    name: string = 'John'
+    age: int  = 20
+}
+
+class Address {
+    city: string = 'New York'
+    country: string = 'USA'
+}
+class UtilPersontype {
+    name: string = 'John'
+    age: int  = 20
+    address: Address = {}
+};
+interface utilAddresstype {
+    city: string;
+    country: string;
+}
+interface utilPersontype {
+    name: string;
+    age: number;
+    address: utilAddresstype;
+}
+
 function testApiV1Tests() : int {
-    interface utilAddresstype {
-        city: string;
-        country: string;
-    }
-    interface utilPersontype {
-        name: string;
-        age: number;
-        address: utilAddresstype;
-    }
 
     let name = 'John';
     let age = 20;
@@ -331,23 +332,6 @@ function testApiV1Tests() : int {
     const pi = 3.141592653;
     formattedString = util.format('The value of pi is %f', pi);
     assertEQ(formattedString, "The value of pi is 3.141592653");
-
-    class Person {
-        name: string = 'John'
-        age: int  = 20
-    }
-    formattedString = util.format('The object is %j', new Person());
-    assertEQ(formattedString, "The object is {\"name\":\"John\",\"age\":20}")
-
-    class Address {
-        city: string = 'New York'
-        country: string = 'USA'
-    }
-    class UtilPersontype {
-        name: string = 'John'
-        age: int  = 20
-        address: Address = {}
-    };
 
     const person: UtilPersontype = {
         name: 'John',

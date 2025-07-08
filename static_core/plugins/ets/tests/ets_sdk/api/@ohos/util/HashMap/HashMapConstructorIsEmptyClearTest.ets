@@ -41,10 +41,10 @@ function testConstructorCreatesEmptyHashMap() {
     assertEQ(hashMap.length, 1, "The hashMap length should be 1");
 }
 
+class Tmp {
+    name: number = 0
+}
 function testConstructorWithCustomTypeData() {
-    class Tmp {
-        name: number = 0
-    }
     let hashMap: HashMap<string, Tmp> = new HashMap<string, Tmp>();
     let param: Tmp = {
         name: 1

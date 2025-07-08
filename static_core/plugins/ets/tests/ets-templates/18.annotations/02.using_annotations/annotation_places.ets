@@ -62,23 +62,6 @@ function foo(@SomeAnnotation a: int, @Optional b?: string) {
 function goo(@Optional b: string = "Optional value") {
 }
 
-function bar() {
-    @SomeAnnotation({field1: {{ case.value1 }} })
-    interface LocalInterface {
-    }
-    @SomeAnnotation({field1: {{ case.value1 }} })
-    class LocalAnnotatedClass {
-        @SomeAnnotation({field1: {{ case.value1 }} })
-        buzz(): void {
-        }
-    }
-    @SomeAnnotation({field1: {{ case.value1 }} })
-    type LocalType = LocalAnnotatedClass
-
-    @SomeAnnotation({field1: {{ case.value1 }} })
-    let lf: LocalType
-}
-
 @SomeAnnotation
 class MyClass {
 

@@ -23,8 +23,9 @@ function checkRestOfString(f: JSValue) {
     return f(['aa', 'bb', 'cc'], 'aa', 'bb', 'cc');
 }
 
+class A{}
+
 function checkRestOfObject(f: JSValue) {
-    class A{}
     let a = new A();
     interface B{name: string}
     let b: B = {name: "bbb"};
