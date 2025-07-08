@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- /*---
+/*---
 desc: Verifying compatibility between any and void.
 tags: [compile-only, negative]
 ---*/

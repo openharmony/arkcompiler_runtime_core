@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- /*---
+/*---
 desc: Verifying implicit conversion from string to boolean.
 tags: [compile-only, negative]
 ---*/
