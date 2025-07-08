@@ -90,6 +90,7 @@ ohos_shared_library("arktsdisassembler") {
     "$ark_root/assembler:libarktsassembler",
     "$ark_root/libpandabase:libarktsbase",
     "$ark_root/libpandafile:libarktsfile",
+    "$ark_root/runtime:arkruntime_header_deps",
   ]
 
   external_deps = [ sdk_libc_secshared_ext_dep ]
@@ -122,6 +123,7 @@ ohos_static_library("arktsdisassembler_frontend_static") {
     "$ark_root/assembler:libarktsassembler_frontend_static",
     "$ark_root/libpandabase:libarktsbase_frontend_static",
     "$ark_root/libpandafile:libarktsfile_frontend_static",
+    "$ark_root/runtime:arkruntime_header_deps",
   ]
 
   external_deps = [ sdk_libc_secshared_ext_dep ]
