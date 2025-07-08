@@ -44,6 +44,12 @@
 03.types/06.value_types/03.floating-point_types_and_operations/bitwise_complement/bitwise_complement_double_3.ets
 03.types/06.value_types/03.floating-point_types_and_operations/bitwise_complement/bitwise_complement_float_3.ets
 
+#28320 CTE in the spec example 3.11
+03.types/11.type_void/generic_void_2.ets
+
+#28399 Possible to create a void array
+03.types/11.type_void/generic_void_n_3.ets
+
 #27134
 03.types/14.type_string/string_length_type.ets
 
@@ -1774,6 +1780,9 @@
 
 #24472
 07.expressions/32.lambda_expression/01.lambda_signature/positive_5.ets
+
+#28217 CTE in the spec example
+03.types/11.type_void/void_type_undefined.ets
 
 # #25111
 17.experimental_features/02.fixed_array_types/far3_0.ets
