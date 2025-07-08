@@ -109,7 +109,7 @@ private:
 
     uint64_t threadStartTime_ = 0;
     os::memory::Mutex addSamplInfoLock_;
-    std::map<NodeKey, size_t> nodesMap_ = {};
+    std::map<NodeKey, int> nodesMap_ = {};
     std::map<std::string, size_t> scriptIdMap_ = {};
     std::map<SampleInfo::ManagedStackFrameId, FrameInfo> stackInfoMap_;
     std::unordered_map<uint32_t, SampleInfoVector> tidToSampleInfosMap_ = {};
