@@ -15,7 +15,6 @@
 
 /*---
 desc: Test reducing the length of the array.
-tags: [compile-only, negative]
 ---*/
 
 function main(): void {
@@ -23,6 +22,6 @@ function main(): void {
 
   array1.length = 3;
   let a: number = array1.length;
-  arktest.assertTrue(a === 5)
-  arktest.assertNEQ(a, 3)
+  arktest.assertNE(a, 5)
+  arktest.assertEQ(a, 3)
 }

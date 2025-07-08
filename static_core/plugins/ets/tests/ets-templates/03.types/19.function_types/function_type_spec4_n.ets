@@ -13,14 +13,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-
-{% for c in cases %}
 /*---
-desc: Array type with prefix readonly.
+desc: Example for type function
+tags: [negative, compile-only]
 ---*/
 
-function main() {
-  let y: readonly Array<{{c.type}}> = [{{c.use}}]
-}
+type FuncTypeWithOptionalParameters = (x?: number, y?: string) => void
+let foo: FuncTypeWithOptionalParameters = (): void => {} // OK: as arguments are just ignored
 
-{% endfor %}
+foo = (p: number):void => {} // CTE as call with zero arguments is invalid
+foo = (p1: number, p2?: string): void => {} // Compile-time error: as call with zero arguments is invalid
+
+type IncorrectFuncTypeWithOptionalParameters = (x?: number, y: string) => void // compile-time error: no mandatory parameter can follow an optional parameter

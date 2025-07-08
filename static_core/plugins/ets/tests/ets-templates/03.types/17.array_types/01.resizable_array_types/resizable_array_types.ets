@@ -13,18 +13,16 @@
  * limitations under the License.
  */
 
+ {% for case in cases %}
+
 /*---
-desc: Test increasing array length.
+desc: Resizable array types
+
 ---*/
 
-function main(): int {
-   let array1: number[] = [0, 1, 2];
+type NS = String
 
-  try {
-   array1.length = 5;
-   let a: number = array1.length;
-  } catch(RangeError) {
-    return 0
-  }
-  return 1
+function main() {
+   let arr: Array<{{case.type}}> = [{{case.value}}];
 }
+ {% endfor %}

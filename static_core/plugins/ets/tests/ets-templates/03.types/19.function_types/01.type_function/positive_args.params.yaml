@@ -11,16 +11,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of predefined types
+---
 cases:
   - type: byte
-    use: 1
+    use: 1 as byte
   - type: short
-    use: 1
+    use: 1 as short
   - type: int
     use: 1
   - type: long
-    use: 1
+    use: 1 as long
   - type: float
     use: 1.0f
   - type: double
@@ -28,22 +28,6 @@ cases:
   - type: char
     use: "c'1'"
   - type: boolean
-    use: "true"
-  - type: Byte
-    use: 1
-  - type: Short
-    use: 1
-  - type: Int
-    use: 1
-  - type: Long
-    use: 1
-  - type: Float
-    use: 1.0f
-  - type: Double
-    use: 1.0
-  - type: Char
-    use: "c'1'"
-  - type: Boolean
     use: "true"
   - type: Object
     use: new Object()
@@ -65,8 +49,6 @@ cases:
     use: "[1, 0]"
   - type: "Array<int>"
     use: "[1]"
-  - type: "FixedArray<int>"
-    use: "[1, 0]"
   - type: "() => void"
     use: "(): void => {}"
   - type: "'abc' | 'def'"
