@@ -292,7 +292,8 @@ void Aarch64CallingConvention::GenerateEpilogueImpl(const FrameInfo &frameInfo, 
     // Adjust SP
     if (frameInfo.GetAdjustSpReg()) {
         // SP points to the frame's bottom
-        auto spToFrameTopSlots = fl.GetRegsSlotsCount() + CFrameRegs::Start() - CFrameReturnAddr::Start();
+        auto spToFrameTopSlots =
+            fl.GetRegsSlotsCount() + static_cast<size_t>(CFrameRegs::Start() - CFrameReturnAddr::Start());
         if (frameInfo.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
             spToFrameTopSlots -= CFrameLayout::GetFpLrSlotsCount();
         }

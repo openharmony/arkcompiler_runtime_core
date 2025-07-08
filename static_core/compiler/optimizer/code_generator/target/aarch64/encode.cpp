@@ -477,7 +477,7 @@ void Aarch64Encoder::LoadPcRelative(Reg reg, intptr_t offset, Reg regAddr)
     } else {
         size_t pc = GetCodeOffset() + GetCursorOffset();
         size_t addr;
-        if (intptr_t res = helpers::ToSigned(pc) + offset; res < 0) {
+        if (auto res = static_cast<intptr_t>(helpers::ToSigned(pc) + offset); res < 0) {
             // Make both, pc and addr, positive
             ssize_t extend = RoundUp(std::abs(res), vixl::aarch64::kPageSize);
             addr = static_cast<size_t>(res + extend);
@@ -512,7 +512,7 @@ void Aarch64Encoder::MakeCallAot(intptr_t offset)
 bool Aarch64Encoder::CanMakeCallByOffset(intptr_t offset)
 {
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
-    auto off = (offset >> vixl::aarch64::kInstructionSizeLog2);
+    auto off = (static_cast<uintptr_t>(offset) >> vixl::aarch64::kInstructionSizeLog2);
     return vixl::aarch64::Instruction::IsValidImmPCOffset(vixl::aarch64::ImmBranchType::UncondBranchType, off);
 }
 
@@ -3309,7 +3309,7 @@ void Aarch64Encoder::LoadStoreRegisters(RegMask registers, ssize_t slot, size_t 
     if (registers.none()) {
         return;
     }
-    int32_t lastReg = registers.size() - 1;
+    auto lastReg = static_cast<int32_t>(registers.size() - 1);
     for (; lastReg >= 0; --lastReg) {
         if (registers.test(lastReg)) {
             break;
@@ -3547,7 +3547,7 @@ void Aarch64Encoder::PopRegisters(RegMask registers, bool isFp)
         registers.reset(lastReg);
     }
     lastReg = INVALID_REG;
-    for (ssize_t i = registers.size() - 1; i >= 0; i--) {
+    for (auto i = static_cast<ssize_t>(registers.size() - 1); i >= 0; i--) {
         if (registers[i]) {
             if (lastReg == INVALID_REG) {
                 lastReg = i;
@@ -3616,8 +3616,8 @@ size_t Aarch64Encoder::DisasmInstr([[maybe_unused]] std::ostream &stream, size_t
         stream << GetDisasm().GetOutput();
     } else {
         stream << std::setw(0x4) << std::right << std::setfill('0') << std::hex
-               << reinterpret_cast<uintptr_t>(instr) - bufferStart + codeOffset << ": " << GetDisasm().GetOutput()
-               << std::setfill(' ') << std::dec;
+               << reinterpret_cast<uintptr_t>(instr) - bufferStart + static_cast<size_t>(codeOffset) << ": "
+               << GetDisasm().GetOutput() << std::setfill(' ') << std::dec;
     }
 
 #endif

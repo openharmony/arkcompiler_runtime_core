@@ -98,6 +98,8 @@ public:
     {
         static_assert(sizeof(uint64_t) == DOUBLE_WORD_SIZE_BYTES);
         ASSERT(divisor != 0U);
+        ASSERT(bitWidth >= 1U);
+        ASSERT(bitWidth <= DOUBLE_WORD_SIZE);
         uint64_t sizeMinusOne = static_cast<uint64_t>(bitWidth) - 1U;
         // NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult)
         uint64_t highOne = static_cast<uint64_t>(1U) << sizeMinusOne;
