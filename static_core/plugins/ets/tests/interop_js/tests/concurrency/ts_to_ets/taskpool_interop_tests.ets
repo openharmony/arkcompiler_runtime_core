@@ -289,6 +289,39 @@ function testTaskpoolInteropLoop() {
     await taskpool.execute(callback);
 }
 
+function testSerializeFunc(serializeTestObj: ESValue) {
+    let value1 = serializeTestObj.getProperty('value1').toString();
+    let value2 = serializeTestObj.getProperty('value2').toNumber();
+    arktest.assertEQ(value1, 'SerializeTest');
+    arktest.assertEQ(value2, 1);
+    return true;
+}
+
+function testTaskpoolSerialize() {
+    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+    let serializeTestObj = module.getProperty('serializeTestObj');
+    let res = (await taskpool.execute(testSerializeFunc, serializeTestObj)) as boolean;
+    arktest.assertEQ(res, true);
+}
+
+function testTaskpoolSerializeUndefined() {
+    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+    let serializeObj = module.getProperty('serializeUndefined');
+    let callback = (value: ESValue) => {
+        arktest.assertTrue(value.isUndefined());
+    }
+    await taskpool.execute(callback, serializeObj);
+}
+
+function testTaskpoolSerializeNull() {
+    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+    let serializeObj = module.getProperty('serializeNull');
+    let callback = (value: ESValue) => {
+        arktest.assertTrue(value.isNull());
+    }
+    await taskpool.execute(callback, serializeObj);
+}
+
 function taskpoolInteropTest() {
     let taskpoolInteropSuite = new arktest.ArkTestsuite('taskpool.InteropTest');
     taskpoolInteropSuite.addTest('testProcessInput', testProcessInput);
@@ -310,6 +343,9 @@ function taskpoolInteropTest() {
     taskpoolInteropSuite.addTest('testCustomThrowError', testCustomThrowError);
     taskpoolInteropSuite.addTest('testTaskpoolNestedExecute', testTaskpoolNestedExecute);
     taskpoolInteropSuite.addTest('testTaskpoolInteropLoop', testTaskpoolInteropLoop);
+    taskpoolInteropSuite.addTest('testTaskpoolSerialize', testTaskpoolSerialize);
+    taskpoolInteropSuite.addTest('testTaskpoolSerializeUndefined', testTaskpoolSerializeUndefined);
+    taskpoolInteropSuite.addTest('testTaskpoolSerializeNull', testTaskpoolSerializeNull);
     taskpoolInteropSuite.run();
     CoroutineExtras.stopTaskpool();
     return true;

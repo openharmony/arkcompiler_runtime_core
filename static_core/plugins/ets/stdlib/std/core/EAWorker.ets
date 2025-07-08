@@ -16,6 +16,7 @@
 package std.core;
 
 import { launch } from "std/concurrency";
+import { InteropSerializeHelper } from "std/interop";
 
 type Task = () => void;
 
@@ -157,8 +158,10 @@ class InteropWorker implements InternalWorker {
     public run<R>(task:Function, ...args:FixedArray<NullishType>):Job<R> {
         let job = new CompletableJob<R>();
         this.initEvent.wait();
+        let serializeHelper = new InteropSerializeHelper(args);
         let wrapperTask = ():R => {
-            return task.unsafeCall(...args) as R;
+            let deserializedArgs = serializeHelper.deserialize();
+            return task.unsafeCall(...deserializedArgs) as R;
         }
         this.poster!.post((): void => {
             InteropWorker.asyncCall(() => {
