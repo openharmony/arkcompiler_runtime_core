@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -117,7 +117,7 @@ bool ObjectIterator<LANG_TYPE_STATIC>::IterateAndDiscoverReferences(GC *gc, Obje
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool ObjectIterator<LANG_TYPE_STATIC>::Iterate(Class *cls, ObjectHeader *obj, Handler *handler)
+bool ObjectIterator<LANG_TYPE_STATIC>::Iterate(const Class *cls, ObjectHeader *obj, Handler *handler)
 {
     if (cls->IsObjectArrayClass()) {
         return ObjectArrayIterator::Iterate<ObjectPointerType, INTERRUPTIBLE>(static_cast<coretypes::Array *>(obj),
@@ -189,7 +189,8 @@ bool ObjectIterator<LANG_TYPE_STATIC>::IterateClassReferences(Class *cls, Handle
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool ObjectIterator<LANG_TYPE_STATIC>::IterateObjectReferences(ObjectHeader *object, Class *objClass, Handler *handler)
+bool ObjectIterator<LANG_TYPE_STATIC>::IterateObjectReferences(ObjectHeader *object, const Class *objClass,
+                                                               Handler *handler)
 {
     ASSERT(objClass != nullptr);
     ASSERT(!objClass->IsDynamicClass());
@@ -222,7 +223,7 @@ bool ObjectIterator<LANG_TYPE_STATIC>::IterateObjectReferences(ObjectHeader *obj
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool ObjectIterator<LANG_TYPE_STATIC>::IterateObjectReferences(ObjectHeader *object, Class *cls, Handler *handler,
+bool ObjectIterator<LANG_TYPE_STATIC>::IterateObjectReferences(ObjectHeader *object, const Class *cls, Handler *handler,
                                                                void *begin, void *end)
 {
     ASSERT(cls != nullptr);

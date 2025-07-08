@@ -45,11 +45,10 @@ public:
                          const ReferenceProcessPredicateT &pred) final;
     void HandleReference(GC *gc, const BaseClass *cls, const ObjectHeader *object,
                          const ReferenceProcessorT &processor) final;
-#if defined(ARK_HYBRID) && defined(PANDA_JS_ETS_HYBRID_MODE)
-    bool IsReference(const BaseClass *baseCls) const;
-    void HandleReference(ObjectHeader *object, ObjectPointerType *&referentPointer);
-    void ClearDeadReference(GCObjectVisitor &visitor);
-#endif
+
+    void EnqueueReference(const ObjectHeader *object);
+
+    void ClearDeadReferences(const mem::GC::ReferenceClearPredicateT &pred);
 
     void ProcessReferences(bool concurrent, bool clearSoftReferences, GCPhase gcPhase,
                            const mem::GC::ReferenceClearPredicateT &pred) final;
@@ -77,7 +76,7 @@ public:
     void ProcessFinalizers() final;
 
 private:
-    template <typename Handler>
+    template <bool NEED_BARRIER, typename Handler>
     void ProcessReferences(const mem::GC::ReferenceClearPredicateT &pred, const Handler &handler);
 
     /// Add finalizer of dead referent of FinalizableWeakRef to the queue
@@ -93,7 +92,7 @@ private:
     PandaDeque<RefFinalizer> finalizerQueue_;
 };
 
-template <typename Handler>
+template <bool NEED_BARRIER, typename Handler>
 void EtsReferenceProcessor::ProcessReferences(const mem::GC::ReferenceClearPredicateT &pred, const Handler &handler)
 {
     weakReferences_.FlushSets();
@@ -101,7 +100,7 @@ void EtsReferenceProcessor::ProcessReferences(const mem::GC::ReferenceClearPredi
         auto *weakRefObj = weakReferences_.Extract();
         ASSERT(ark::ets::EtsClass::FromRuntimeClass(weakRefObj->ClassAddr<Class>())->IsWeakReference());
         auto *weakRef = static_cast<ark::ets::EtsWeakReference *>(ark::ets::EtsObject::FromCoreType(weakRefObj));
-        auto *referent = weakRef->GetReferent();
+        auto *referent = weakRef->GetReferent<NEED_BARRIER>();
         if (referent == nullptr || referent == nullValue_) {
             LOG(DEBUG, REF_PROC) << "Don't process reference " << GetDebugInfoAboutObject(weakRefObj)
                                  << " because referent is nullish";

@@ -39,9 +39,6 @@ public:
         return true;
     }
 
-    void ForEachRefFieldSkipReferent(const common::BaseObject *object,
-                                     const common::RefFieldVisitor &visitor) const override;
-
     void ForEachRefField(const common::BaseObject *object, const common::RefFieldVisitor &visitor) const override;
 
     void IterateXRef(const common::BaseObject *object, const common::RefFieldVisitor &visitor) const override;

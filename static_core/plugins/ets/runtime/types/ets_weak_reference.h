@@ -31,23 +31,28 @@ public:
     NO_MOVE_SEMANTIC(EtsWeakReference);
     ~EtsWeakReference() = delete;
 
-    EtsObject *GetReferent() const
+    static constexpr size_t GetReferentOffset()
     {
-        return EtsObject::FromCoreType(ObjectAccessor::GetObject(this, MEMBER_OFFSET(EtsWeakReference, referent_)));
+        return MEMBER_OFFSET(EtsWeakReference, referent_);
     }
 
-#if defined(ARK_HYBRID) && defined(PANDA_JS_ETS_HYBRID_MODE)
-    ObjectPointerType *GetReferentAddress()
+    template <bool NEED_READ_BARRIER = true>
+    ALWAYS_INLINE EtsObject *GetReferent() const
     {
-        return reinterpret_cast<ObjectPointerType *>(ToUintPtr(&referent_));
+        return EtsObject::FromCoreType(
+            ObjectAccessor::GetObject<false, NEED_READ_BARRIER, false>(this, GetReferentOffset()));
     }
-    EtsObject *GetReferentFromGCThread() const;
-    void ClearReferentFromGCCthread();
-#endif
 
-    void ClearReferent();
+    template <bool NEED_WRITE_BARRIER = true>
+    ALWAYS_INLINE void ClearReferent()
+    {
+        ObjectAccessor::SetObject<false, NEED_WRITE_BARRIER, false>(this, GetReferentOffset(), nullptr);
+    }
 
-    void SetReferent(EtsObject *addr);
+    ALWAYS_INLINE void SetReferent(EtsObject *addr)
+    {
+        ObjectAccessor::SetObject(this, GetReferentOffset(), addr->GetCoreType());
+    }
 
 private:
     // Such field has the same layout as referent in std.core.WeakRef class

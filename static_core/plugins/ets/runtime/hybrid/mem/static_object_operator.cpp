@@ -84,32 +84,25 @@ void StaticObjectOperator::Initialize(ark::ets::PandaEtsVM *vm)
 #endif
 }
 
-// A temporary impl only in interop
-void StaticObjectOperator::ForEachRefFieldSkipReferent(const common::BaseObject *object,
-                                                       const common::RefFieldVisitor &visitor) const
-{
-#ifdef PANDA_JS_ETS_HYBRID_MODE
-    auto *objHeader = reinterpret_cast<ObjectHeader *>(const_cast<common::BaseObject *>(object));
-    auto *baseCls = objHeader->template ClassAddr<BaseClass>();
-    auto *process = static_cast<ark::mem::ets::EtsReferenceProcessor *>(vm_->GetReferenceProcessor());
-    ObjectPointerType *referentPointer = nullptr;
-    if (process->IsReference(baseCls)) {
-        process->HandleReference(objHeader, referentPointer);
-    }
-    SkipReferentHandler handler(visitor, referentPointer);
-    ObjectIterator<LANG_TYPE_STATIC>::template Iterate<false>(objHeader->ClassAddr<Class>(), objHeader, &handler);
-#else
-    // Only support in interop
-    std::abort();
-#endif
-}
-
 void StaticObjectOperator::ForEachRefField(const common::BaseObject *object,
                                            const common::RefFieldVisitor &visitor) const
 {
-    Handler handler(visitor);
-    auto *objHeader = reinterpret_cast<ObjectHeader *>(const_cast<common::BaseObject *>(object));
-    ObjectIterator<LANG_TYPE_STATIC>::template Iterate<false>(objHeader->ClassAddr<Class>(), objHeader, &handler);
+    const auto *objHeader = reinterpret_cast<const ObjectHeader *>(object);
+    const auto *cls = objHeader->template ClassAddr<const Class>();
+    auto *etsClass = ark::ets::EtsClass::FromRuntimeClass(cls);
+    if (UNLIKELY(etsClass->IsReference())) {
+        auto *refProcessor = static_cast<ark::mem::ets::EtsReferenceProcessor *>(vm_->GetReferenceProcessor());
+        refProcessor->EnqueueReference(objHeader);
+        ObjectPointerType *referentPointer = reinterpret_cast<ObjectPointerType *>(
+            ToUintPtr(objHeader) + ark::ets::EtsWeakReference::GetReferentOffset());
+        SkipReferentHandler handler(visitor, referentPointer);
+        ObjectIterator<LangTypeT::LANG_TYPE_STATIC>::template Iterate<false>(cls, const_cast<ObjectHeader *>(objHeader),
+                                                                             &handler);
+    } else {
+        Handler handler(visitor);
+        ObjectIterator<LangTypeT::LANG_TYPE_STATIC>::template Iterate<false>(cls, const_cast<ObjectHeader *>(objHeader),
+                                                                             &handler);
+    }
 }
 
 void StaticObjectOperator::IterateXRef(const common::BaseObject *object, const common::RefFieldVisitor &visitor) const
