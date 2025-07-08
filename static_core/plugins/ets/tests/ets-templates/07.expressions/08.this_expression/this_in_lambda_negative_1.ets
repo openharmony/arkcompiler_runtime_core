@@ -15,7 +15,8 @@
 
 /*---
 desc: Keyword this in lambda.
-assert: It may be used in a lambda expression only if it is allowed in the context in which the lambda expression appears.
+assert: >-
+    It may be used in a lambda expression only if it is allowed in the context in which the lambda expression appears.
 tags: [compile-only,negative]
 ---*/
 
