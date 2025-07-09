@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,7 +45,10 @@ enum class ClassRoot {
     ARRAY_TAGGED,
     CLASS,
     OBJECT,
-    STRING,
+    STRING,         // -> STRING_CLASS
+    LINE_STRING,    // -> LINE_STRING_CLASS
+    SLICED_STRING,  // -> SLICED_STRING_CLASS
+    TREE_STRING,    // -> TREE_STRING_CLASS
     ARRAY_CLASS,
     ARRAY_STRING,
     LAST_CLASS_ROOT_ENTRY = ARRAY_STRING  // Must be the last in this enum

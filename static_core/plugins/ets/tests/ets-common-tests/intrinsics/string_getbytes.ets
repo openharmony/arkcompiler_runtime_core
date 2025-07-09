@@ -15,6 +15,8 @@
 
 let str: String = 'abcΣΨΩ0123456789!';
 let bytes: byte[] = [97, 98, 99, -93, -88, -87, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 33]
+let strTree : String = new String("abcΣΨΩ0").concat("123456789!");
+let strSliced: String = new String("sub_abcΣΨΩ0123456789!_sub").substring(4, 21);
 
 function equals(val: byte[], exp: byte[], offset: int): boolean {
     if (val.length != (exp.length - offset)) {
@@ -48,5 +50,29 @@ function main(): int {
             return 1;
         }
     }
+
+    arktest.assertEQ(strTree, str, "strTree != str");
+    arktest.assertEQ(strSliced, str, "strSliced != str");
+
+    for (let i: int = 0; i < len; ++i) {
+        let arr: byte[] = strTree.getBytes(i, len);
+        if (!equals(arr, bytes, i)) {
+            console.println("at: " + i);
+            printArray(arr, 0,   "actual  ")
+            printArray(bytes, i, "expected")
+            return 1;
+        }
+    }
+
+    for (let i: int = 0; i < len; ++i) {
+        let arr: byte[] = strSliced.getBytes(i, len);
+        if (!equals(arr, bytes, i)) {
+            console.println("at: " + i);
+            printArray(arr, 0,   "actual  ")
+            printArray(bytes, i, "expected")
+            return 1;
+        }
+    }
+
     return 0;
 }

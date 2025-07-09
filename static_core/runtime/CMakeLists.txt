@@ -49,6 +49,7 @@ set(SOURCES
     interpreter/interpreter.cpp
     interpreter/runtime_interface.cpp
     intrinsics.cpp
+    coretypes/line_string.cpp
     coretypes/string.cpp
     coretypes/array.cpp
     class.cpp
@@ -361,6 +362,7 @@ panda_target_include_directories(arkruntime_interpreter_impl
     PUBLIC ${PANDA_BINARY_ROOT}/libpandabase/generated
     PUBLIC ${VERIFIER_INCLUDE_DIR}
     PUBLIC ${PANDA_BINARY_ROOT}
+    PUBLIC ${PANDA_ROOT}/../common_interfaces
 )
 
 panda_target_include_directories(arkruntime_interpreter_impl
@@ -604,6 +606,7 @@ panda_target_include_directories(arkruntime_obj
     PUBLIC ${GEN_INCLUDE_DIR}
     PUBLIC ${VERIFIER_INCLUDE_DIR}
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/tooling/inspector
+    PUBLIC ${PANDA_ROOT}/../common_interfaces
 )
 
 panda_target_link_libraries(arkruntime_obj arkbase arkfile arkcompiler dprof arkaotmanager arktarget_options)
@@ -620,6 +623,7 @@ panda_target_include_directories(csa_tests_arkruntime_interpreter_impl
     PUBLIC ${PANDA_ROOT}/compiler
     PUBLIC ${PANDA_ROOT}/libpandabase
     PUBLIC ${PANDA_ROOT}/libpandafile
+    PUBLIC ${PANDA_ROOT}/../common_interfaces
     PUBLIC ${PANDA_BINARY_ROOT}/panda_gen_options
     PUBLIC ${PANDA_BINARY_ROOT}
     PUBLIC ${PANDA_BINARY_ROOT}/compiler/generated
@@ -678,6 +682,7 @@ if(PANDA_WITH_TESTS)
     PUBLIC ${PANDA_BINARY_ROOT}
     PUBLIC ${PANDA_BINARY_ROOT}/libpandabase/generated
     PUBLIC ${VERIFIER_INCLUDE_DIR}
+    PUBLIC ${PANDA_ROOT}/../common_interfaces
     )
 
   panda_target_include_directories(arkruntime_test_interpreter_impl

@@ -25,6 +25,7 @@ include(cmake/target.cmake)
 include_directories(
     .
     ${PANDA_ROOT}
+    ${PANDA_ROOT}/../common_interfaces
 )
 
 include_directories(AFTER ${PANDA_BINARY_ROOT}/cross_values)

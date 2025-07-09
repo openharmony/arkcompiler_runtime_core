@@ -13,11 +13,22 @@
  * limitations under the License.
  */
 
-const EMPTY: String = '';
-const HELLO: String = 'Hello';
-const NATURE: String = '自然界';
+function testEndsWith() {
+    const EMPTY: String = '';
+    const HELLO: String = 'Hello';
+    const NATURE: String = '自然界';
+    const TreeString: String = "自然界12345678901234".concat("abcdefghijklmn");
+    const SlicedString: String = TreeString.substring(1, 15); // 然界123456789012
+    arktest.assertTrue(TreeString.endsWith('lmn'));
+    arktest.assertTrue(TreeString.endsWith("lmn", 35));
+    arktest.assertTrue(TreeString.endsWith("lmn", 100));
+    arktest.assertFalse(TreeString.endsWith("m"));
 
-function main(): int {
+    arktest.assertTrue(SlicedString.endsWith('2'));
+    arktest.assertTrue(SlicedString.endsWith("12", 15));
+    arktest.assertTrue(SlicedString.endsWith("012", 100));
+    arktest.assertFalse(SlicedString.endsWith("1"));
+
     arktest.assertTrue(EMPTY.endsWith(''));
     arktest.assertTrue(EMPTY.endsWith('', -1));
     arktest.assertTrue(EMPTY.endsWith('', 0));
@@ -95,6 +106,10 @@ function main(): int {
     arktest.assertFalse(NATURE.endsWith('自然界', 1));
     arktest.assertFalse(NATURE.endsWith('自然界', 2));
     arktest.assertTrue(NATURE.endsWith('自然界', 100));
+}
 
-    return 0;
+function main(): int {
+    let suite = new arktest.ArkTestsuite("StringEndsWith");
+    suite.addTest('testEndsWith', testEndsWith);
+    return suite.run();
 }

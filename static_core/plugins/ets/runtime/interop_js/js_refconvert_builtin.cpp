@@ -539,6 +539,10 @@ void RegisterBuiltinJSRefConvertors(InteropCtx *ctx)
     RegisterBuiltinRefConvertor<JSConvertJSValue>(cache, ctx->GetJSValueClass());
     RegisterBuiltinRefConvertor<JSConvertESError>(cache, ctx->GetESErrorClass());
     RegisterBuiltinRefConvertor<JSConvertString>(cache, ctx->GetStringClass());
+    RegisterBuiltinRefConvertor<JSConvertString>(cache, ptypes->coreLineString->GetRuntimeClass());
+    RegisterBuiltinRefConvertor<JSConvertString>(cache, ptypes->coreSlicedString->GetRuntimeClass());
+    RegisterBuiltinRefConvertor<JSConvertString>(cache, ptypes->coreTreeString->GetRuntimeClass());
+
     RegisterBuiltinRefConvertor<JSConvertBigInt>(cache, ctx->GetBigIntClass());
     RegisterBuiltinRefConvertor<JSConvertPromise>(cache, ctx->GetPromiseClass());
     RegisterBuiltinRefConvertor<JSConvertEtsNull>(cache, ctx->GetNullValueClass());

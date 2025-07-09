@@ -14,15 +14,12 @@
  */
 
 #include "reserve_string_builder_buffer.h"
-
 #include "compiler_logger.h"
-
 #include "optimizer/analysis/alias_analysis.h"
 #include "optimizer/analysis/bounds_analysis.h"
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/ir/analysis.h"
 #include "optimizer/ir/inst.h"
-
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/optimizations/string_builder_utils.h"
 #include "runtime/include/coretypes/string.h"

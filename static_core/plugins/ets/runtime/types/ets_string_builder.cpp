@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "include/coretypes/string.h"
 #include "libpandabase/utils/utils.h"
 #include "libpandabase/utils/utf.h"
 #include "runtime/arch/memory_helpers.h"
@@ -109,7 +110,7 @@ ObjectHeader *AppendCharArrayToBuffer(VMHandle<EtsObject> &sbHandle, EtsCharArra
         // Set the compress field to false if the array contains not compressable chars
         auto n = arr->GetLength();
         for (uint32_t i = 0; i < n; ++i) {
-            if (!ark::coretypes::String::IsASCIICharacter(arr->Get(i))) {
+            if (!coretypes::String::IsASCIICharacter(arr->Get(i))) {
                 sb->SetFieldPrimitive<bool>(SB_COMPRESS_OFFSET, false);
                 break;
             }
@@ -119,13 +120,13 @@ ObjectHeader *AppendCharArrayToBuffer(VMHandle<EtsObject> &sbHandle, EtsCharArra
 }
 
 static void ReconstructStringAsMUtf8(EtsString *dstString, EtsObjectArray *buffer, uint32_t index, uint32_t length,
-                                     EtsClass *stringKlass)
+                                     EtsClass *stringClass)
 {
     // All strings in the buf are MUtf8
     uint8_t *dstData = dstString->GetDataMUtf8();
     for (uint32_t i = 0; i < index; ++i) {
         EtsObject *obj = buffer->Get(i);
-        if (obj->IsInstanceOf(stringKlass)) {
+        if (obj->IsInstanceOf(stringClass)) {
             coretypes::String *srcString = EtsString::FromEtsObject(obj)->GetCoreType();
             uint32_t n = srcString->CopyDataRegionMUtf8(dstData, 0, srcString->GetLength(), length);
             dstData += n;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -145,13 +146,13 @@ static void ReconstructStringAsMUtf8(EtsString *dstString, EtsObjectArray *buffe
 }
 
 static void ReconstructStringAsUtf16(EtsString *dstString, EtsObjectArray *buffer, uint32_t index, uint32_t length,
-                                     EtsClass *stringKlass)
+                                     EtsClass *stringClass)
 {
     // Some strings in the buf are Utf16
     uint16_t *dstData = dstString->GetDataUtf16();
     for (uint32_t i = 0; i < index; ++i) {
         EtsObject *obj = buffer->Get(i);
-        if (obj->IsInstanceOf(stringKlass)) {
+        if (obj->IsInstanceOf(stringClass)) {
             coretypes::String *srcString = EtsString::FromEtsObject(obj)->GetCoreType();
             uint32_t n = srcString->CopyDataRegionUtf16(dstData, 0, srcString->GetLength(), length);
             dstData += n;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -653,7 +654,7 @@ static inline EtsCharArray *FloatingPointToCharArray(FpType number)
         auto *arr = EtsCharArray::Create(str.length());
         Span<uint16_t> data(arr->GetData<uint16_t>(), str.length());
         for (size_t i = 0; i < str.length(); ++i) {
-            ASSERT(ark::coretypes::String::IsASCIICharacter(str[i]));
+            ASSERT(coretypes::String::IsASCIICharacter(str[i]));
             data[i] = static_cast<uint16_t>(str[i]);
         }
         return arr;
@@ -697,7 +698,7 @@ ObjectHeader *StringBuilderAppendDouble(ObjectHeader *sb, EtsDouble v)
 EtsString *StringBuilderToString(ObjectHeader *sb)
 {
     ASSERT(sb != nullptr);
-
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
     auto length = sb->GetFieldPrimitive<uint32_t>(SB_LENGTH_OFFSET);
     if (length == 0) {
         return EtsString::CreateNewEmptyString();
@@ -715,14 +716,14 @@ EtsString *StringBuilderToString(ObjectHeader *sb)
         ASSERT(s == nullptr);
         return nullptr;
     }
-    EtsClass *sKlass = EtsClass::FromRuntimeClass(s->GetCoreType()->ClassAddr<Class>());
+    auto *stringClass = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::STRING);
+    EtsClass *sklass = EtsClass::FromRuntimeClass(stringClass);
     auto *buf = EtsObjectArray::FromCoreType(sbHandle->GetFieldObject(SB_BUFFER_OFFSET)->GetCoreType());
     if (compress) {
-        ReconstructStringAsMUtf8(s, buf, index, length, sKlass);
+        ReconstructStringAsMUtf8(s, buf, index, length, sklass);
     } else {
-        ReconstructStringAsUtf16(s, buf, index, length, sKlass);
+        ReconstructStringAsUtf16(s, buf, index, length, sklass);
     }
     return s;
 }
-
 }  // namespace ark::ets

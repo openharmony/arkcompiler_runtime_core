@@ -34,6 +34,13 @@ class ClassLinkerContext;
 class ManagedThread;
 class ObjectHeader;
 
+enum class StringType : uint64_t {
+    LINE_STRING_CLASS = 1,
+    SLICED_STRING_CLASS,
+    TREE_STRING_CLASS,
+    LAST_STRING_CLASS = TREE_STRING_CLASS,
+};
+
 // NOTE (Artem Udovichenko): move BaseClass to another file but still have Class.h
 class BaseClass {
 public:
@@ -47,6 +54,11 @@ public:
 
     DEFAULT_COPY_SEMANTIC(BaseClass);
     DEFAULT_MOVE_SEMANTIC(BaseClass);
+
+    StringType GetBitField() const
+    {
+        return bitField_;
+    }
 
     uint32_t GetFlags() const
     {
@@ -102,6 +114,11 @@ public:
     }
 
 protected:
+    void SetBitField(StringType bitField)
+    {
+        bitField_ = bitField;
+    }
+
     void SetFlags(uint32_t flags)
     {
         flags_ = flags;
@@ -109,14 +126,14 @@ protected:
 
 private:
     FIELD_UNUSED HeaderType hclass_ {0};  // store ptr
-    FIELD_UNUSED uint64_t bitField_ {0};  // store StringType
+    StringType bitField_ {0};             // store StringType
     uint32_t flags_ {0};
     // Size of the object of this class. In case of static classes it is 0
     // for abstract classes, interfaces and classes whose objects
     // have variable size (for example strings).
     uint32_t objectSize_ {0};
     ObjectHeader *managedObject_ {nullptr};
-    panda_file::SourceLang lang_;
+    panda_file::SourceLang lang_ {0};
 };
 
 class Class : public BaseClass {
@@ -170,6 +187,11 @@ public:
     const uint8_t *GetDescriptor() const
     {
         return descriptor_;
+    }
+
+    void SetDescriptor(const uint8_t *descriptor)
+    {
+        descriptor_ = descriptor;
     }
 
     void SetMethods(Span<Method> methods, uint32_t numVmethods, uint32_t numSmethods)
@@ -284,6 +306,16 @@ public:
         accessFlags_ = accessFlags;
     }
 
+    void SetFinal()
+    {
+        accessFlags_ |= ACC_FINAL;
+    }
+
+    void RemoveFinal()
+    {
+        accessFlags_ &= (~ACC_FINAL);
+    }
+
     bool IsPublic() const
     {
         return (accessFlags_ & ACC_PUBLIC) != 0;
@@ -302,6 +334,11 @@ public:
     bool IsFinal() const
     {
         return (accessFlags_ & ACC_FINAL) != 0;
+    }
+
+    bool IsExtensible() const
+    {
+        return !IsFinal() && !IsStringClass();
     }
 
     bool IsAnnotation() const
@@ -331,7 +368,6 @@ public:
 
     uint32_t GetObjectSize() const
     {
-        ASSERT(!IsVariableSize());
         return BaseClass::GetObjectSize();
     }
 
@@ -387,6 +423,41 @@ public:
     void SetXRefClass()
     {
         SetFlags(GetFlags() | XREF_CLASS);
+    }
+
+    void SetLineStringClass()
+    {
+        SetBitField(StringType::LINE_STRING_CLASS);
+    }
+
+    bool IsLineStringClass() const
+    {
+        return GetStringType() == StringType::LINE_STRING_CLASS;
+    }
+
+    void SetSlicedStringClass()
+    {
+        SetBitField(StringType::SLICED_STRING_CLASS);
+    }
+
+    bool IsSlicedStringClass() const
+    {
+        return GetStringType() == StringType::SLICED_STRING_CLASS;
+    }
+
+    void SetTreeStringClass()
+    {
+        SetBitField(StringType::TREE_STRING_CLASS);
+    }
+
+    bool IsTreeStringClass() const
+    {
+        return GetStringType() == StringType::TREE_STRING_CLASS;
+    }
+
+    inline StringType GetStringType() const
+    {
+        return GetBitField();
     }
 
     bool IsVariableSize() const

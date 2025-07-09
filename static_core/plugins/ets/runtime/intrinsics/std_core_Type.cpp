@@ -198,7 +198,7 @@ EtsString *TypeAPIGetUndefinedTypeDescriptor()
 EtsInt TypeAPIGetClassAttributes(EtsClass *cls)
 {
     uint32_t attrs = 0;
-    attrs |= (cls->IsFinal()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::FINAL) : 0U;
+    attrs |= (cls->IsExtensible()) ? 0U : static_cast<uint32_t>(EtsTypeAPIAttributes::FINAL);
 
     return static_cast<EtsInt>(attrs);
 }

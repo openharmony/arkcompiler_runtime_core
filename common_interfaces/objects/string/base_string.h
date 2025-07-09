@@ -23,6 +23,7 @@
 #include "objects/utils/bit_field.h"
 #include "objects/utils/span.h"
 
+#include <vector>
 #include <type_traits>
 
 namespace panda {
@@ -57,6 +58,7 @@ class SlicedString;
  *
  * Provides common interface for string types like LineString, TreeString, and SlicedString.
  */
+// NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
 class BaseString : public BaseObject {
 public:
     BASE_CAST_CHECK(BaseString, IsString);
@@ -91,7 +93,7 @@ public:
         INVALID_STRING_ADD,
     };
 
-    using CompressedStatusBit = common::BitField<CompressedStatus, 0>;       // 1
+    using CompressedStatusBit = common::BitField<CompressedStatus, 0>;            // 1
     using IsInternBit = CompressedStatusBit::NextFlag;                            // 1
     using LengthBits = IsInternBit::NextField<uint32_t, STRING_LENGTH_BITS_NUM>;  // 30
     static_assert(LengthBits::START_BIT + LengthBits::SIZE == sizeof(uint32_t) * common::BITS_PER_BYTE,
@@ -221,7 +223,7 @@ public:
      * @param index The index to retrieve.
      * @return UTF-16 code unit.
      */
-    template <bool verify = true, typename ReadBarrier>
+    template <bool VERIFY = true, typename ReadBarrier>
     uint16_t At(ReadBarrier &&readBarrier, int32_t index) const;
 
     /**
@@ -486,7 +488,7 @@ public:
      * @return true if the strings are equal in character content; false otherwise.
      */
     template <typename ReadBarrier>
-    static bool StringsAreEqualDiffUtfEncoding(ReadBarrier &&readBarrier, BaseString *str1, BaseString *str2);
+    static bool StringsAreEqualDiffUtfEncoding(ReadBarrier &&readBarrier, BaseString *left, BaseString *right);
 
     /**
      * @brief Compare a BaseString with raw UTF-8 data for equality.
@@ -641,7 +643,7 @@ public:
      * @param maxLength Maximum number of characters to write.
      */
     template <typename Char, typename ReadBarrier>
-    static void WriteToFlat(ReadBarrier &&readBarrier, const BaseString* src, Char *buf, uint32_t maxLength);
+    static void WriteToFlat(ReadBarrier &&readBarrier, const BaseString *src, Char *buf, uint32_t maxLength);
 
     /**
      * @brief Write characters from a BaseString into a buffer at a given offset.
@@ -711,6 +713,7 @@ public:
      */
     template <typename ReadBarrier>
     static const uint16_t *GetNonTreeUtf16Data(ReadBarrier &&readBarrier, const BaseString *src);
+
 private:
     static constexpr bool IsStringType(ObjectType type);
 };

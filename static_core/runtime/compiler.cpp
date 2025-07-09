@@ -157,6 +157,17 @@ compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetStringClass(Metho
     return classPtr;
 }
 
+compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetLineStringClass(MethodPtr method, uint32_t *typeId) const
+{
+    auto *caller = MethodCast(method);
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*caller);
+    auto classPtr = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::LINE_STRING);
+    if (typeId != nullptr) {
+        *typeId = classPtr->GetFileId().GetOffset();
+    }
+    return classPtr;
+}
+
 compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetNumberClass(MethodPtr method, const char *name,
                                                                            uint32_t *typeId) const
 {

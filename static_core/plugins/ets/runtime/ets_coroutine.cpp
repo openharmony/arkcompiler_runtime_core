@@ -69,7 +69,7 @@ void EtsCoroutine::Initialize()
         // NOTE (electronick, #15938): Refactor the managed class-related pseudo TLS fields
         // initialization in MT ManagedThread ctor and EtsCoroutine::Initialize
         auto *linkExt = GetPandaVM()->GetClassLinker()->GetEtsClassLinkerExtension();
-        SetStringClassPtr(linkExt->GetClassRoot(ClassRoot::STRING));
+        SetStringClassPtr(linkExt->GetClassRoot(ClassRoot::LINE_STRING));
         SetArrayU16ClassPtr(linkExt->GetClassRoot(ClassRoot::ARRAY_U16));
         SetArrayU8ClassPtr(linkExt->GetClassRoot(ClassRoot::ARRAY_U8));
     }

@@ -15,6 +15,7 @@
 
 #include "plugins/ets/runtime/ets_entrypoints.h"
 
+#include "include/coretypes/string.h"
 #include "include/object_header.h"
 #include "libpandafile/shorty_iterator.h"
 #include "plugins/ets/runtime/ets_coroutine.h"

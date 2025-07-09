@@ -35,11 +35,11 @@ enum class GcType : uint8_t {
     SYNC,
     FULL,  // Waiting finish
     APPSPAWN,
-    FULL_WITH_XREF,     // Waiting finish
+    FULL_WITH_XREF,  // Waiting finish
 };
-using HeapVisitor = const std::function<void(BaseObject*)>;
+using HeapVisitor = const std::function<void(BaseObject *)>;
 
-class PUBLIC_API BaseRuntime {
+class PUBLIC_API BaseRuntime {  // NOLINT(cppcoreguidelines-special-member-functions)
 public:
     BaseRuntime() = default;
     ~BaseRuntime() = default;
@@ -51,19 +51,19 @@ public:
     void PostFork();
 
     bool HasBeenInitialized();
-    void Init(const RuntimeParam &param);   // Support setting custom parameters
-    void Init();                            // Use default parameters
+    void Init(const RuntimeParam &param);  // Support setting custom parameters
+    void Init();                           // Use default parameters
     void InitFromDynamic(const RuntimeParam &param);
     void Fini();
     void FiniFromDynamic();
 
     // Need refactor, move to other file
-    static void WriteBarrier(void* obj, void* field, void* ref);
-    static void* ReadBarrier(void* obj, void* field);
-    static void* ReadBarrier(void* field);
-    static void* AtomicReadBarrier(void* obj, void* field, std::memory_order order);
+    static void WriteBarrier(void *obj, void *field, void *ref);
+    static void *ReadBarrier(void *obj, void *field);
+    static void *ReadBarrier(void *field);
+    static void *AtomicReadBarrier(void *obj, void *field, std::memory_order order);
     static void RequestGC(GcType type);
-    static bool ForEachObj(HeapVisitor& visitor, bool safe);
+    static bool ForEachObj(HeapVisitor &visitor, bool safe);
     static void WaitForGCFinish();
 
     HeapParam &GetHeapParam()
@@ -90,17 +90,18 @@ public:
     {
         return *heapManager_;
     }
+
 private:
     RuntimeParam param_ {};
 
-    HeapManager* heapManager_ = nullptr;
-    LogManager* logManager_ = nullptr;
-    MutatorManager* mutatorManager_ = nullptr;
-    ThreadHolderManager* threadHolderManager_  = nullptr;
+    HeapManager *heapManager_ = nullptr;
+    LogManager *logManager_ = nullptr;
+    MutatorManager *mutatorManager_ = nullptr;
+    ThreadHolderManager *threadHolderManager_ = nullptr;
 
     static std::mutex vmCreationLock_;
     static BaseRuntime *baseRuntimeInstance_;
     static bool initialized_;
 };
 }  // namespace panda
-#endif // COMMON_INTERFACES_BASE_RUNTIME_H
+#endif  // COMMON_INTERFACES_BASE_RUNTIME_H

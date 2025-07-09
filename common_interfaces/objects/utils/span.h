@@ -30,7 +30,7 @@ template <class T>
 class Span {
 public:
     using ElementType = T;
-    using value_type = std::remove_cv_t<T>;
+    using value_type = std::remove_cv_t<T>;  // NOLINT(readability-identifier-naming)
     using ValueType = value_type;
     using Reference = T &;
     using ConstReference = const T &;
@@ -47,7 +47,7 @@ public:
 
     // The following constructor is non-explicit to be aligned with std::span
     template <class U, size_t N>
-    constexpr Span(U (&array)[N]) : Span(array, N)
+    explicit constexpr Span(U (&array)[N]) : Span(array, N)  // NOLINT(modernize-avoid-c-arrays)
     {
     }
 
@@ -258,6 +258,6 @@ Span<std::byte> AsWritableBytes(Span<T> s) noexcept
     return {reinterpret_cast<std::byte *>(s.Data()), s.SizeBytes()};
 }
 
-}  // namespace panda
+}  // namespace panda::common
 
 #endif  // COMMON_INTERFACES_OBJECTS_UTILS_SPAN_H

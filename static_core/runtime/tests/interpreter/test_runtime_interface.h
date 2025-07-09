@@ -22,7 +22,7 @@
 #include "libpandafile/file.h"
 #include "libpandafile/file_items.h"
 #include "runtime/include/coretypes/array-inl.h"
-#include "runtime/include/coretypes/string.h"
+#include "runtime/include/coretypes/line_string.h"
 #include "runtime/include/method.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"

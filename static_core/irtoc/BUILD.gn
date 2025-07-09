@@ -24,6 +24,7 @@ if (enable_irtoc) {
       "$root_build_dir/generated",
       "$target_gen_dir",
       "$ark_root/irtoc",
+      "$ark_root/../common_interfaces",
     ]
 
     cflags_cc = [

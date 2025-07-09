@@ -19,8 +19,9 @@
 #include <cstdint>
 
 namespace panda {
+// NOLINTNEXTLINE(readability-identifier-naming, modernize-avoid-c-arrays)
 static constexpr unsigned char firstByteMark[7] = {0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC};
-class utf_utils {
+class utf_utils {  // NOLINT(readability-identifier-naming)
 public:
     static constexpr uint8_t UTF8_1B_MAX = 0x7f;
     static constexpr uint16_t UTF8_2B_MAX = 0x7ff;
@@ -37,8 +38,8 @@ public:
     static constexpr uint16_t DECODE_TRAIL_LOW = 0xDC00;
     static constexpr uint16_t DECODE_TRAIL_HIGH = 0xDFFF;
     static constexpr uint32_t DECODE_SECOND_FACTOR = 0x10000;
-    static constexpr uint8_t byteMask = 0xbf;
-    static constexpr uint8_t byteMark = 0x80;
+    static constexpr uint8_t BYTE_MASK = 0xbf;
+    static constexpr uint8_t BYTE_MARK = 0x80;
     static constexpr size_t HI_SURROGATE_MIN = 0xD800;
     static constexpr size_t HI_SURROGATE_MAX = 0xDBFF;
     static constexpr size_t LO_SURROGATE_MIN = 0xDC00;
@@ -66,14 +67,17 @@ public:
     static size_t FixUtf8Len(const uint8_t *utf8, size_t utf8Len)
     {
         size_t trimSize = 0;
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)
         if (utf8Len >= 1 && utf8[utf8Len - 1] >= 0xC0) {
             // The last one char claim there are more than 1 byte next to it, it's invalid, so drop the last one.
             trimSize = 1;
         }
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)
         if (utf8Len >= CONST_2 && utf8[utf8Len - CONST_2] >= 0xE0) {
             // The second to last char claim there are more than 2 bytes next to it, it's invalid, so drop the last two.
             trimSize = CONST_2;
         }
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)
         if (utf8Len >= CONST_3 && utf8[utf8Len - CONST_3] >= 0xF0) {
             // The third to last char claim there are more than 3 bytes next to it, it's invalid,
             // so drop the last three.
@@ -82,13 +86,15 @@ public:
         return utf8Len - trimSize;
     }
 
-        static size_t Utf8ToUtf16Size(const uint8_t *utf8, size_t utf8Len)
+    static size_t Utf8ToUtf16Size(const uint8_t *utf8, size_t utf8Len)
     {
+        // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)
         size_t safeUtf8Len = FixUtf8Len(utf8, utf8Len);
         size_t inPos = 0;
         size_t res = 0;
         while (inPos < safeUtf8Len) {
             uint8_t src = utf8[inPos];
+            // NOLINTNEXTLINE(hicpp-signed-bitwise)
             switch (src & 0xF0) {
                 case 0xF0: {
                     const uint8_t c2 = utf8[++inPos];
@@ -126,38 +132,36 @@ public:
         // The remain chars should be treated as single byte char.
         res += utf8Len - inPos;
         return res;
+        // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)
     }
 
     static size_t Utf16ToUtf8Size(const uint16_t *utf16, uint32_t length, bool modify = true,
                                   bool isGetBufferSize = false, bool cesu8 = false)
     {
-        size_t res = 1; // zero byte
+        // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        size_t res = 1;  // zero byte
         // when utf16 data length is only 1 and code in 0xd800-0xdfff,
         // means that is a single code point, it needs to be represented by three UTF8 code.
-        if (length == 1 && utf16[0] >= HI_SURROGATE_MIN && // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            utf16[0] <= LO_SURROGATE_MAX) {                // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        if (length == 1 && utf16[0] >= HI_SURROGATE_MIN && utf16[0] <= LO_SURROGATE_MAX) {
             res += UtfLength::THREE;
             return res;
         }
 
         for (uint32_t i = 0; i < length; ++i) {
-            if (utf16[i] == 0) { // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            if (utf16[i] == 0) {
                 if (isGetBufferSize) {
                     res += UtfLength::ONE;
                 } else if (modify) {
-                    res += UtfLength::TWO; // special case for U+0000 => C0 80
+                    res += UtfLength::TWO;  // special case for U+0000 => C0 80
                 }
-            } else if (utf16[i] <= UTF8_1B_MAX) { // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            } else if (utf16[i] <= UTF8_1B_MAX) {
                 res += 1;
-            } else if (utf16[i] <= UTF8_2B_MAX) { // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            } else if (utf16[i] <= UTF8_2B_MAX) {
                 res += UtfLength::TWO;
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             } else if (utf16[i] < HI_SURROGATE_MIN || utf16[i] > HI_SURROGATE_MAX) {
                 res += UtfLength::THREE;
             } else {
-                if (!cesu8 && i < length - 1 &&
-                    utf16[i + 1] >= LO_SURROGATE_MIN && // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                    utf16[i + 1] <= LO_SURROGATE_MAX) { // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                if (!cesu8 && i < length - 1 && utf16[i + 1] >= LO_SURROGATE_MIN && utf16[i + 1] <= LO_SURROGATE_MAX) {
                     res += UtfLength::FOUR;
                     ++i;
                 } else {
@@ -166,16 +170,19 @@ public:
             }
         }
         return res;
+        // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
 
     // CC-OFFNXT(huge_depth, huge_method, G.FUN.01-CPP) solid logic
     static size_t ConvertRegionUtf8ToUtf16(const uint8_t *utf8In, uint16_t *utf16Out, size_t utf8Len, size_t utf16Len)
     {
+        // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)
         size_t safeUtf8Len = FixUtf8Len(utf8In, utf8Len);
         size_t inPos = 0;
         size_t outPos = 0;
         while (inPos < safeUtf8Len && outPos < utf16Len) {
             uint8_t src = utf8In[inPos];
+            // NOLINTNEXTLINE(hicpp-signed-bitwise)
             switch (src & 0xF0) {
                 case 0xF0: {
                     const uint8_t c2 = utf8In[++inPos];
@@ -191,6 +198,7 @@ public:
                         }
                         codePoint -= SURROGATE_RAIR_START;
                         utf16Out[outPos++] = static_cast<uint16_t>((codePoint >> OFFSET_10POS) | H_SURROGATE_START);
+                        // NOLINTNEXTLINE(hicpp-signed-bitwise)
                         utf16Out[outPos++] = static_cast<uint16_t>((codePoint & 0x3FF) | L_SURROGATE_START);
                     } else {
                         utf16Out[outPos++] = static_cast<uint16_t>(codePoint);
@@ -202,7 +210,7 @@ public:
                     const uint8_t c2 = utf8In[++inPos];
                     const uint8_t c3 = utf8In[++inPos];
                     utf16Out[outPos++] = static_cast<uint16_t>(((src & LOW_4BITS) << OFFSET_12POS) |
-                                                                ((c2 & LOW_6BITS) << OFFSET_6POS) | (c3 & LOW_6BITS));
+                                                               ((c2 & LOW_6BITS) << OFFSET_6POS) | (c3 & LOW_6BITS));
                     inPos++;
                     break;
                 }
@@ -225,13 +233,14 @@ public:
             utf16Out[outPos++] = static_cast<uint16_t>(utf8In[inPos++]);
         }
         return outPos;
+        // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)
     }
 
     static size_t ConvertRegionUtf16ToLatin1(const uint16_t *utf16In, uint8_t *latin1Out, size_t utf16Len,
                                              size_t latin1Len);
 
-    static size_t ConvertRegionUtf16ToUtf8(const uint16_t *utf16In, uint8_t *utf8Out, size_t utf16Len,
-                                           size_t utf8Len, size_t start, bool modify = true, bool isWriteBuffer = false,
+    static size_t ConvertRegionUtf16ToUtf8(const uint16_t *utf16In, uint8_t *utf8Out, size_t utf16Len, size_t utf8Len,
+                                           size_t start, bool modify = true, bool isWriteBuffer = false,
                                            bool cesu8 = false)
     {
         if (utf16In == nullptr || utf8Out == nullptr || utf8Len == 0) {
@@ -243,13 +252,14 @@ public:
             uint32_t codepoint = DecodeUTF16(utf16In, end, &i, cesu8);
             if (codepoint == 0) {
                 if (isWriteBuffer) {
-                    utf8Out[utf8Pos++] = 0x00U;
+                    // NOLINTNEXTLINE(readability-magic-numbers)
+                    utf8Out[utf8Pos++] = 0x00U;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                     continue;
                 }
                 if (modify) {
                     // special case for \u0000 ==> C080 - 1100'0000 1000'0000
-                    utf8Out[utf8Pos++] = UTF8_2B_FIRST;
-                    utf8Out[utf8Pos++] = UTF8_2B_SECOND;
+                    utf8Out[utf8Pos++] = UTF8_2B_FIRST;   // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    utf8Out[utf8Pos++] = UTF8_2B_SECOND;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 }
                 continue;
             }
@@ -264,15 +274,16 @@ public:
     // Methods for decode utf16 to unicode
     static uint32_t DecodeUTF16(uint16_t const *utf16, size_t len, size_t *index, bool cesu8 = false)
     {
-        uint16_t high = utf16[*index];
+        uint16_t high = utf16[*index];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         if ((high & SURROGATE_MASK) != DECODE_LEAD_LOW || !IsUTF16HighSurrogate(high) || *index == len - 1) {
             return high;
         }
-        uint16_t low = utf16[*index + 1];
+        uint16_t low = utf16[*index + 1];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         if (!IsUTF16LowSurrogate(low) || cesu8) {
             return high;
         }
         (*index)++;
+        // NOLINTNEXTLINE(hicpp-signed-bitwise)
         return ((high - DECODE_LEAD_LOW) << UTF16_OFFSET) + (low - DECODE_TRAIL_LOW) + DECODE_SECOND_FACTOR;
     }
     static size_t UTF8Length(uint32_t codepoint)
@@ -291,11 +302,11 @@ public:
     static size_t EncodeUTF8(uint32_t codepoint, uint8_t *utf8, size_t index, size_t size)
     {
         for (size_t j = size - 1; j > 0; j--) {
-            uint8_t cont = ((codepoint | byteMark) & byteMask);
-            utf8[index + j] = cont;
+            uint8_t cont = ((codepoint | BYTE_MARK) & BYTE_MASK);
+            utf8[index + j] = cont;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             codepoint >>= UTF8_OFFSET;
         }
-        utf8[index] = codepoint | firstByteMark[size];
+        utf8[index] = codepoint | firstByteMark[size];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         return size;
     }
     static bool IsUTF16HighSurrogate(uint16_t ch)
@@ -306,8 +317,9 @@ public:
     {
         return DECODE_TRAIL_LOW <= ch && ch <= DECODE_TRAIL_HIGH;
     }
+
 private:
     static uint32_t HandleAndDecodeInvalidUTF16(uint16_t const *utf16, size_t len, size_t *index);
 };
-} // namespace panda
+}  // namespace panda
 #endif  // COMMON_INTERFACES_OBJECTS_UTILS_UTF_H

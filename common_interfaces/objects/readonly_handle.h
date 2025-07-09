@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,7 +50,7 @@ public:
         return ReadOnlyHandle<T>(handle.GetAddress());
     }
 
-    BaseObject* GetBaseObject() const
+    BaseObject *GetBaseObject() const
     {
         if (GetAddress() == 0U) {
             return nullptr;
@@ -89,9 +89,10 @@ public:
     {
         return reinterpret_cast<R *>(GetBaseObject());
     }
+
 private:
     uintptr_t address_;
 };
-}
+}  // namespace panda
 
-#endif //COMMON_INTERFACES_OBJECTS_READONLY_HANDLE_H
+#endif  // COMMON_INTERFACES_OBJECTS_READONLY_HANDLE_H

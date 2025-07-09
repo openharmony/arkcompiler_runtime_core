@@ -22,6 +22,7 @@
 #include "libpandabase/utils/utf.h"
 #include "runtime/include/thread.h"
 #include "runtime/include/panda_vm.h"
+#include "runtime/include/coretypes/string.h"
 #include "runtime/mem/free_object.h"
 #include "runtime/mem/gc/dynamic/gc_dynamic_data.h"
 
@@ -68,13 +69,16 @@ static void DumpArrayClassObject(ObjectHeader *objectHeader, std::basic_ostream<
 
 static void DumpStringClass(ObjectHeader *objectHeader, std::basic_ostream<char, std::char_traits<char>> *oStream)
 {
-    auto *strObject = static_cast<ark::coretypes::String *>(objectHeader);
-    if (strObject->GetLength() > 0 && !strObject->IsUtf16()) {
+    auto *strObject = static_cast<coretypes::String *>(objectHeader);
+    if (strObject->GetLength() > 0 && strObject->IsUtf8()) {
         *oStream << "length = " << std::dec << strObject->GetLength() << std::endl;
         constexpr size_t BUFF_SIZE = 256;
         std::array<char, BUFF_SIZE> buff {0};
-        auto strRes = strncpy_s(&buff[0], BUFF_SIZE, reinterpret_cast<const char *>(strObject->GetDataMUtf8()),
-                                std::min(BUFF_SIZE - 1, static_cast<size_t>(strObject->GetLength())));
+        PandaVector<uint8_t> srcVector(strObject->GetUtf8Length());
+        strObject->CopyDataRegionUtf8(srcVector.data(), 0, srcVector.size(), srcVector.size());
+
+        auto strRes = strncpy_s(&buff[0], BUFF_SIZE, reinterpret_cast<const char *>(srcVector.data()),
+                                std::min(BUFF_SIZE - 1, static_cast<size_t>(srcVector.size())));
         if (UNLIKELY(strRes != EOK)) {
             LOG(ERROR, RUNTIME) << "Couldn't copy string by strncpy_s, error code: " << strRes;
         }

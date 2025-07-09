@@ -13,26 +13,19 @@
  * limitations under the License.
  */
 
-import { launch } from 'std/concurrency'
-
-let arr: Int32Array = new Int32Array(1);
-const jobsCount = 5;
-
-function waiter(): String {
-    return Atomics.wait(arr, 0, 0);
+function main() {
+    let suite = new arktest.ArkTestsuite("string get");
+    suite.addTest("test", test);
+    return suite.run();
 }
 
-function main() {
-    let jobsArray = new Array<Job<String>>;
-    for (let i = 0; i < jobsCount; i++) {
-        jobsArray.push(launch<String, () => String>(waiter));
-    }
+function test() {
+    let basestring: String = "12345678901234";
+    let basestring2: String = "abcdefghijklmn";
+    let treestring: String = basestring.concat(basestring2); // "12345678901234abcdefghijklmn"
+    let slicedstring: String = basestring.substring(3, 19); // "4567890123"
 
-    Atomics.store(arr, 0, 1);
-    Atomics.notify(arr, 0);
-
-    for (let i = 0; i < jobsCount; i++) {
-        let res = jobsArray[i].Await();
-        arktest.assertTrue(res == 'ok' || res == 'not-equal')
-    }
+    arktest.assertEQ(treestring.charAt(5), c'6');
+    arktest.assertEQ(slicedstring.charAt(5), c'9');
+    arktest.assertEQ(treestring.substring(5, 6), '6');
 }

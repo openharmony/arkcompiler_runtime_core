@@ -116,13 +116,14 @@ public:
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         state_.bascClass_ = address;
     }
+
 private:
     // Little endian
     // NOLINTBEGIN(readability-identifier-naming)
     struct State {
-        StateWordType bascClass_   : BASECLASS_WIDTH;
-        StateWordType padding_     : PADDING_WIDTH;
-        Language language_         : LANGUAGE_WIDTH;
+        StateWordType bascClass_ : BASECLASS_WIDTH;
+        StateWordType padding_ : PADDING_WIDTH;
+        Language language_ : LANGUAGE_WIDTH;
         ForwardState forwardState_ : FORWARD_WIDTH;
     };
 
