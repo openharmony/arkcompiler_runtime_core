@@ -140,7 +140,7 @@ public:
         cloneMarker_ = markerHolder.GetMarker();
         auto unrollData = PrepareLoopToUnroll(loop, (TYPE & UnrollType::UNROLL_WITHOUT_SIDE_EXITS) == 0);
 
-        ASSERT(factor != 0);
+        ASSERT(factor > 0);
         auto cloneCount = factor - 1;
         for (size_t i = 0; i < cloneCount; i++) {
             ASSERT(unrollData != nullptr);

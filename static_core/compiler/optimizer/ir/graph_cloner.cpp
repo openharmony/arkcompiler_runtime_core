@@ -356,6 +356,7 @@ GraphCloner::LoopUnrollData *GraphCloner::PrepareLoopToUnroll(Loop *loop, bool c
     // Populate `LoopUnrollData`
     auto allocator = loop->GetHeader()->GetGraph()->GetLocalAllocator();
     auto unrollData = allocator->New<LoopUnrollData>();
+    ASSERT(unrollData != nullptr);
     unrollData->blocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
     unrollData->blocks->resize(loop->GetBlocks().size());
     std::copy(loop->GetBlocks().begin(), loop->GetBlocks().end(), unrollData->blocks->begin());
@@ -909,6 +910,7 @@ GraphCloner::LoopClonerData *GraphCloner::PopulateLoopClonerData(Loop *loop, Bas
 {
     auto allocator = GetGraph()->GetLocalAllocator();
     auto clonerData = allocator->New<LoopClonerData>();
+    ASSERT(clonerData != nullptr);
     clonerData->blocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
     ASSERT(clonerData->blocks != nullptr);
     clonerData->blocks->resize(loop->GetBlocks().size() + 1);

@@ -533,6 +533,7 @@ bool EscapeAnalysis::MergeProcessor::MergeFields(BasicBlock *block, BasicBlockSt
 {
     allFields_.clear();
     for (auto pred : block->GetPredsBlocks()) {
+        ASSERT(parent_->GetState(pred)->GetStateById(stateToMerge) != nullptr);
         for (auto &field : parent_->GetState(pred)->GetStateById(stateToMerge)->GetFields()) {
             allFields_.push_back(field.first);
         }
@@ -896,6 +897,7 @@ void EscapeAnalysis::MaterializeInBlock(StateOwner inst, BasicBlock *block)
     RegisterMaterialization(block, std::get<Inst *>(inst));
     auto instState = blockState->GetState(inst);
     blockState->Materialize(inst);
+    ASSERT(instState != nullptr);
     for (auto &t : instState->GetFields()) {
         auto &fieldInst = t.second;
         if (blockState->GetStateId(fieldInst) == MATERIALIZED_ID) {
