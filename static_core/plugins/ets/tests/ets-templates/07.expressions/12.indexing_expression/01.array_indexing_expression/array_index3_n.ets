@@ -25,7 +25,7 @@ let arr: number[] = [1, 2, 3]
 
 function main() {
     let v: number = {{c.expr}}  // Runtime error expected
-    let expectedException = (e: Error | Exception): boolean => {return (e instanceof NonIntegralIndexError)}
-    arktest.expectThrow(() => {arr[v] = 0;}, expectedException)
+    let expectedException = (e: Error): boolean => { return (e instanceof NonIntegralIndexError) }
+    arktest.expectThrow(() => { arr[v] = 0; }, expectedException)
 }
 {% endfor %}

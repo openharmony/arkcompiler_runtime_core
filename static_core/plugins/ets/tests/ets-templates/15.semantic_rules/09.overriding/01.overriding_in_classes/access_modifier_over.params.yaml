@@ -17,133 +17,133 @@ cases:
   - doc: Public member can be overridden and/or implemented by the public one.
     decl: |-
       class Derived extends Base {
-        public override public_foo() { res = 11;}
+        public override public_foo() { res = 11; }
       }
     use: |-
       new Derived().public_foo();
-      arktest.assertEQ( res, 11);
+      arktest.assertEQ(res, 11);
 
   - doc: Public member can be overridden and/or implemented by the public one.
     decl: |-
       class Derived implements Interface {
-        public override public_foo() { res = 11;}
+        public override public_foo() { res = 11; }
       }
     use: |-
       new Derived().public_foo();
-      arktest.assertEQ( res, 11);
+      arktest.assertEQ(res, 11);
 
   - doc: Public member can be overridden and/or implemented by the public one.
     decl: |-
       class Derived extends Base {
-        override public_foo() { res = 11;}
+        override public_foo() { res = 11; }
       }
     use: |-
       new Derived().public_foo();
-      arktest.assertEQ( res, 11);
+      arktest.assertEQ(res, 11);
 
   - doc: Public member can be overridden and/or implemented by the public one.
     tags: negative, compile-only
     decl: |-
       class Derived extends Base {
-        protected override public_foo() { res = 11;}
+        protected override public_foo() { res = 11; }
       }
 
   - doc: Public member can be overridden and/or implemented by the public one.
     tags: negative, compile-only
     decl: |-
       class Derived implements Interface {
-        protected override public_foo() { res = 11;}
+        protected override public_foo() { res = 11; }
       }
 
   - doc: Public member can be overridden and/or implemented by the public one.
     tags: negative, compile-only
     decl: |-
       class Derived extends Base {
-        private override public_foo() { res = 11;}
+        private override public_foo() { res = 11; }
       }
 
   - doc: Public member can be overridden and/or implemented by the public one.
     tags: negative, compile-only
     decl: |-
       class Derived implements Interface {
-        private override public_foo() { res = 11;}
+        private override public_foo() { res = 11; }
       }
 
   - doc: Public member can be overridden and/or implemented by the public one.
     tags: negative, compile-only
     decl: |-
       class Derived extends Base {
-        internal override public_foo() { res = 11;}
+        internal override public_foo() { res = 11; }
       }
 
   - doc: Public member can be overridden and/or implemented by the public one.
     tags: negative, compile-only
     decl: |-
       class Derived implements Interface {
-        internal override public_foo() { res = 11;}
+        internal override public_foo() { res = 11; }
       }
 
   # override internal
   - doc: Internal member can be overridden by the internal one only
     decl: |-
       class Derived extends Base {
-        internal override internal_foo() { res = 11;}
+        internal override internal_foo() { res = 11; }
       }
     use: |-
       new Derived().internal_foo();
-      arktest.assertEQ( res, 11);
+      arktest.assertEQ(res, 11);
 
   - doc: Internal member can be overridden by the internal one only
     tags: negative, compile-only
     decl: |-
       class Derived extends Base {
-        public override internal_foo() { res = 11;}
+        public override internal_foo() { res = 11; }
       }
 
   - tags: negative, compile-only
     decl: |-
       class Derived extends Base {
-        protected override internal_foo() { res = 11;}
+        protected override internal_foo() { res = 11; }
       }
 
   - tags: negative, compile-only
     decl: |-
       class Derived extends Base {
-        private override internal_foo() { res = 11;}
+        private override internal_foo() { res = 11; }
       }
 
   # Override protected
   - doc: Protected member can be overridden by the protected or public one.
     decl: |-
       class Derived extends Base {
-        public override protected_foo(i: Number) { res = 11;}
+        public override protected_foo(i: Number) { res = 11; }
       }
     use: |-
       new Derived().protected_foo(new Number());
-      arktest.assertEQ( res, 11);
+      arktest.assertEQ(res, 11);
 
   - doc: Protected member can be overridden by the protected or public one.
     decl: |-
       class Derived extends Base {
-        protected override protected_foo(i: Number) { res = 11;}
-        get_protected_foo(i: Number) {this.protected_foo(i);}
+        protected override protected_foo(i: Number) { res = 11; }
+        get_protected_foo(i: Number) { this.protected_foo(i); }
       }
     use: |-
       new Derived().get_protected_foo(new Number());
-      arktest.assertEQ( res, 11);
+      arktest.assertEQ(res, 11);
 
   - doc: Protected member can be overridden by the protected or public one.
     tags: negative, compile-only
     decl: |-
       class Derived extends Base {
-        internal override protected_foo(i: Number) { res = 11;}
+        internal override protected_foo(i: Number) { res = 11; }
       }
 
   - doc: Protected member can be overridden by the protected or public one.
     tags: negative, compile-only
     decl: |-
       class Derived extends Base {
-        private override protected_foo(i: Number) { res = 11;}
+        private override protected_foo(i: Number) { res = 11; }
       }
 
   # Override protected
@@ -151,54 +151,54 @@ cases:
     tags: negative, compile-only
     decl: |-
       class Derived extends Base {
-        override private_foo() { res = 11;}
+        override private_foo() { res = 11; }
       }
 
   - doc: A compile-time error occurs if an attempt is made to override private member
     tags: negative, compile-only
     decl: |-
       class Derived extends Base implements Interface {
-        public override private_foo() { res = 11;}
+        public override private_foo() { res = 11; }
       }
 
   - doc: A compile-time error occurs if an attempt is made to override private member
     tags: negative, compile-only
     decl: |-
       class Derived extends Base implements Interface {
-        protected override private_foo() { res = 11;}
+        protected override private_foo() { res = 11; }
       }
 
   - doc: A compile-time error occurs if an attempt is made to override private member
     tags: negative, compile-only
     decl: |-
       class Derived extends Base {
-        internal override private_foo() { res = 11;}
+        internal override private_foo() { res = 11; }
       }
 
   - doc: A compile-time error occurs if an attempt is made to override private member
     tags: negative, compile-only
     decl: |-
       class Derived extends Base implements Interface {
-        private override private_foo() { res = 11;}
+        private override private_foo() { res = 11; }
       }
 
   # use method with the same name as private method of the Base class
   - decl: |-
       class Derived extends Base implements Interface {
         public_foo() { this.private_foo(); }
-        private private_foo() { res = 11;}
+        private private_foo() { res = 11; }
       }
     use: |-
       new Derived().public_foo();
-      arktest.assertEQ( res, 11);
+      arktest.assertEQ(res, 11);
 
   - decl: |-
       class Derived extends Base {
-        public private_foo() { res = 11;}
+        public private_foo() { res = 11; }
       }
     use: |-
       new Derived().private_foo();
-      arktest.assertEQ( res, 11);
+      arktest.assertEQ(res, 11);
 
   # not override-compatible
   - tags: negative, compile-only
@@ -213,53 +213,53 @@ cases:
   - tags: negative, compile-only
     decl: |-
       class Derived<T> extends Base {
-        protected protected_foo(y: T) { res = 11;}
+        protected protected_foo(y: T) { res = 11; }
       }
 
   #override-compatible (without override keyword)
   - decl: |-
       class Derived extends Base implements Interface {
-        public public_foo() { res = 11;}
+        public public_foo() { res = 11; }
       }
     use: |-
       new Derived().public_foo();
-      arktest.assertEQ( res, 11);
+      arktest.assertEQ(res, 11);
 
   - decl: |-
       class Derived extends Base {
-        protected protected_foo(a: Number) { res = 11;}
-        get_protected_foo(i: Number) {this.protected_foo(i);}
+        protected protected_foo(a: Number) { res = 11; }
+        get_protected_foo(i: Number) { this.protected_foo(i); }
       }
     use: |-
       new Derived().get_protected_foo(new Number());
-      arktest.assertEQ( res, 11);
+      arktest.assertEQ(res, 11);
 
   - decl: |-
       class Derived<T,S> extends Gen2<T,S> {
-        protected foo(y: S) { res = 11;}
-        get_foo(y: S) {this.foo(y)}
+        protected foo(y: S) { res = 11; }
+        get_foo(y: S) { this.foo(y) }
       }
     use: |-
       new Derived<String, Number>().get_foo(new Number());
-      arktest.assertEQ( res, 11);
+      arktest.assertEQ(res, 11);
 
   - decl: |-
       class Derived extends Base {
-        internal internal_foo() { res = 11;}
+        internal internal_foo() { res = 11; }
       }
     use: |-
       new Derived().internal_foo();
-      arktest.assertEQ( res, 11);
+      arktest.assertEQ(res, 11);
 
   # not overload-equivalent
   - decl: |-
       class Derived extends Gen<Number> {
-        protected foo(y: String) { res = 11;}
-        get_foo(i: String) {this.foo(i);}
+        protected foo(y: String) { res = 11; }
+        get_foo(i: String) { this.foo(i); }
       }
     use: |-
       new Derived().get_foo(new String());
-      arktest.assertEQ( res, 11);
+      arktest.assertEQ(res, 11);
 
   - decl: |-
       class Derived extends Base {
@@ -271,56 +271,56 @@ cases:
     use: |-
       let a = new Derived();
       a.public_foo();
-      arktest.assertEQ( res, 1);
+      arktest.assertEQ(res, 1);
       a.public_foo(new Number());
-      arktest.assertEQ( res, 11);
+      arktest.assertEQ(res, 11);
 
   - decl: |-
       class Derived extends Base {
-        protected protected_foo(x: String) { res = 11;}
-        get_foo(a: Number) {this.protected_foo(a)}
-        get_foo(a: String) {this.protected_foo(a)}
+        protected protected_foo(x: String) { res = 11; }
+        get_foo(a: Number) { this.protected_foo(a) }
+        get_foo(a: String) { this.protected_foo(a) }
       }
     use: |-
       let a = new Derived();
       a.get_foo(new Number());
-      arktest.assertEQ( res, 2);
+      arktest.assertEQ(res, 2);
       a.get_foo("some str");
-      arktest.assertEQ( res, 11);
+      arktest.assertEQ(res, 11);
 
   - decl: |-
       class Derived extends Base {
-        protected protected_foo(i: Number, x: String) { res = 11;}
-        get_foo(a: Number) {this.protected_foo(a)}
-        get_foo(a: Number, b: String) {this.protected_foo(a, b)}
+        protected protected_foo(i: Number, x: String) { res = 11; }
+        get_foo(a: Number) { this.protected_foo(a) }
+        get_foo(a: Number, b: String) { this.protected_foo(a, b) }
       }
     use: |-
       let a = new Derived();
       a.get_foo(new Number());
-      arktest.assertEQ( res, 2);
+      arktest.assertEQ(res, 2);
       a.get_foo(new Number(), "some str");
-      arktest.assertEQ( res, 11);
+      arktest.assertEQ(res, 11);
 
   # access_modifier_over_34
   - decl: |-
       class Derived extends Base {
-        protected protected_foo(i: number) { res = 11;}
-        get_foo(a: Number) {this.protected_foo(a)}
+        protected protected_foo(i: number) { res = 11; }
+        get_foo(a: Number) { this.protected_foo(a) }
       }
     use: |-
       let a = new Derived();
       a.get_foo(1 as number);
-      arktest.assertEQ( res, 11);
+      arktest.assertEQ(res, 11);
 
   - decl: |-
       class Derived extends Base {
-        protected protected_foo(i: Gen2<Number, String>) { res = 11;}
-        get_foo(a: Number) {this.protected_foo(a)}
-        get_foo(a: Gen2<Number, String>) {this.protected_foo(a)}
+        protected protected_foo(i: Gen2<Number, String>) { res = 11; }
+        get_foo(a: Number) { this.protected_foo(a) }
+        get_foo(a: Gen2<Number, String>) { this.protected_foo(a) }
       }
     use: |-
       let a = new Derived();
       a.get_foo(new Number());
-      arktest.assertEQ( res, 2);
+      arktest.assertEQ(res, 2);
       a.get_foo(new Gen2<Number, String>());
-      arktest.assertEQ( res, 11);
+      arktest.assertEQ(res, 11);

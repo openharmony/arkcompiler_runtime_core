@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,21 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
+
 /*---
-desc: Hiding method of superclass.
-assert: It is a compile-time error if a static method hides an instance method.
-tags: [compile-only]
+desc: >-
+    A compile-time error occurs if at least two different overload signatures or implementation signatures have
+    different access modifiers.
+tags: [{{c.tags}}]
 ---*/
 
-class A {
- public m(): int {
-    return 1;
-  }
+{{c.decl}}
+
+function main() {
+    {{c.main|indent}}
 }
 
-class C extends A {
-  public static m(): int {
-    return 5;
-  }
-}
+{{c.error}}
+
+{% endfor %}

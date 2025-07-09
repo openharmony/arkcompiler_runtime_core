@@ -1204,3 +1204,18 @@
 15.semantic_rules/09.overriding/04.overriding_and_implement_signatures_in_interfaces/Sig_7.ets
 15.semantic_rules/09.overriding/04.overriding_and_implement_signatures_in_interfaces/Sig_8.ets
 14.ambient_declarations/03.class_declarations/class_declarations_neg_6.ets
+
+# 27886 Issues with default values
+09.classes/05.method_declarations/05.overriding_methods/override_method_with_default_params_0.ets
+09.classes/05.method_declarations/05.overriding_methods/override_method_with_default_params_1.ets
+09.classes/05.method_declarations/05.overriding_methods/override_method_with_default_params_2.ets
+09.classes/05.method_declarations/05.overriding_methods/override_method_with_default_params_3.ets
+09.classes/05.method_declarations/05.overriding_methods/override_method_with_default_params_4.ets
+09.classes/05.method_declarations/05.overriding_methods/override_method_with_default_params_5.ets
+09.classes/05.method_declarations/05.overriding_methods/override_method_with_default_params_6.ets
+09.classes/05.method_declarations/05.overriding_methods/override_method_with_default_params_7.ets
+09.classes/05.method_declarations/05.overriding_methods/override_method_with_default_params_8.ets
+09.classes/05.method_declarations/05.overriding_methods/override_method_with_default_params_9.ets
+09.classes/05.method_declarations/05.overriding_methods/override_method_with_default_params_10.ets
+09.classes/05.method_declarations/05.overriding_methods/override_method_with_default_params_11.ets
+09.classes/05.method_declarations/05.overriding_methods/override_method_with_default_params_12.ets

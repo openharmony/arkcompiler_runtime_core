@@ -13,14 +13,23 @@
  * limitations under the License.
  */
 
-
 /*---
-desc: Resizable array types
-
+desc: Overriding abstract method.
+assert: A compile-time error occurs if an abstract method overrides a non-abstract instance method
+tags: [compile-only, negative]
 ---*/
 
-function main() {
-    let SyntaxFormTwo: Array<String> = ["Hello", "World", "Of", "ArkTS"];
-    let expectedException = (e: Error): boolean => { return (e instanceof RangeError) }
-    arktest.expectThrow(() => { SyntaxFormTwo.length = 5 }, expectedException) // Attempting to increase the length of the array by assignment to length => CTE
+class A {
+  run(): number {
+    return 1
+  }
 }
+
+abstract class B extends A {
+  abstract run/* @ label */(): number;
+}
+
+/* @@@ label Error TypeError: run(): Double in B cannot override run():
+  Double in A because an abstract method cannot override a non-abstract instance method.*/
+/* @@@ label Error TypeError: run(): Double in B cannot override run(): Double in A
+  because an abstract method cannot override a non-abstract instance method.*/

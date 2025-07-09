@@ -23,7 +23,7 @@ desc: >-
 
 function main(): void {
   let src: {{c.stype}} = {{c.sval|safe}};
-  let expectedException = (e: Error | Exception): boolean => {return (e instanceof ClassCastError)};
-  arktest.expectThrow(() => {let dst: {{c.dtype}} = src as {{c.dtype}};}, expectedException);
+  let expectedException = (e: Error): boolean => { return (e instanceof ClassCastError) };
+  arktest.expectThrow(() => { let dst: {{c.dtype}} = src as {{c.dtype}}; }, expectedException);
   }
 {% endfor %}

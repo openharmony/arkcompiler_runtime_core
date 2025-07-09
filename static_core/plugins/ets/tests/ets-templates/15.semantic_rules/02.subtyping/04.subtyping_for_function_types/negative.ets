@@ -40,7 +40,7 @@ let dd: (p: Derived) => Derived = (p: Derived) => { return new Derived }
 {{c.decl}}
 
 function main() {
-    let exceptionCheck = (e: Error|Exception): boolean|String => {
+    let exceptionCheck = (e: Error): boolean|String => {
         return e instanceof ClassCastError
     }
     {{c.check}}

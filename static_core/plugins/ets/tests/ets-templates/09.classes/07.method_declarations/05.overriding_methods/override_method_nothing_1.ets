@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,29 +14,26 @@
  */
 
 /*---
-desc: Different return type in mA and mC.
+desc: Override method declaration.
 assert: >-
-    If a method declaration d1 with return type R1 overrides or hides the declaration of another method d2
-    with return type R2, then d1 must be return-type-substitutable for d2, or a compile-time error occurs.
-tags: [compile-only]
+    A compile-time error occurs if a method marked with the modifier override
+    does not override a method from a superclass
+tags: [compile-only, negative]
 ---*/
 
 class A {
-  public m(): B {
-    return new B;
+}
+
+final class B extends A {
+  override foo/* @ label*/(): int {
+    return 5;
   }
 }
 
-class B {
+function main(): void {
+  let instance: B = new B();
 
+  arktest.assertEQ( instance.foo(), 5 );
 }
 
-class D extends B {
-
-}
-
-class C extends A {
-  public m(): D {
-    return new D();
-  }
-}
+/* @@@ label Error TypeError: Method foo(): Int in B not overriding any method */

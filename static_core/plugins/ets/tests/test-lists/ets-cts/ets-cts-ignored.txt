@@ -89,7 +89,7 @@
 #24420
 03.types/20.union_types/ut_34.ets
 
-# 26826
+# 26826, 21255 (no type Exception)
 03.types/15.type_bigint/bint_n_0.ets
 03.types/15.type_bigint/bint_n_1.ets
 03.types/15.type_bigint/bint_n_2.ets
@@ -2060,3 +2060,27 @@
 
 # 27628
 15.semantic_rules/01.semantic_essentials/04.specifics_of_numeric_operator_contexts/negative_unary_operator.ets
+
+# 27886 Issues with default values
+09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_3.ets
+09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_4.ets
+09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_5.ets
+09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_8.ets
+09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_11.ets
+09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_12.ets
+
+# 21255 no type Exception
+03.types/17.array_types/01.resizable_array_types/grow_array_form_one_1.ets
+03.types/17.array_types/01.resizable_array_types/grow_array_form_two_0.ets
+03.types/17.array_types/01.resizable_array_types/grow_array_form_two_1.ets
+06.contexts_and_conversions/02.assignment-like_contexts/forbidden2_0.ets
+06.contexts_and_conversions/02.assignment-like_contexts/forbidden2_1.ets
+06.contexts_and_conversions/02.assignment-like_contexts/forbidden2_2.ets
+06.contexts_and_conversions/02.assignment-like_contexts/forbidden2_3.ets
+06.contexts_and_conversions/02.assignment-like_contexts/forbidden2_4.ets
+07.expressions/12.indexing_expression/01.array_indexing_expression/array_index3_n_0.ets
+07.expressions/12.indexing_expression/01.array_indexing_expression/array_index3_n_1.ets
+09.classes/07.method_declarations/05.overriding_methods/override_method_declaration_with_keywords_4.ets
+15.semantic_rules/02.subtyping/04.subtyping_for_function_types/negative_5.ets
+15.semantic_rules/02.subtyping/04.subtyping_for_function_types/negative_8.ets
+15.semantic_rules/02.subtyping/04.subtyping_for_function_types/negative_9.ets
