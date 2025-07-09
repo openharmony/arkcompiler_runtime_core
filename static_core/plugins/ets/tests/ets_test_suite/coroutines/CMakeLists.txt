@@ -445,3 +445,5 @@ add_ets_coroutines_test(FILE eworker_post_to_main.ets
                         WORKERS "AUTO"
                         MODE "INT"
 )
+
+add_subdirectory(dfx)
