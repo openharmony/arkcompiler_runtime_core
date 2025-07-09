@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -252,9 +252,9 @@ public:
         size_t res = 0;
         size_t i = 0;
         for (; (i + BITS_PER_UINT32) < length; i += BITS_PER_UINT32) {
-            res += ark::Popcount(Read(first + i, BITS_PER_UINT32));
+            res += static_cast<size_t>(ark::Popcount(Read(first + i, BITS_PER_UINT32)));
         }
-        return res + ark::Popcount(Read(first + i, length - i));
+        return res + static_cast<size_t>(ark::Popcount(Read(first + i, length - i)));
     }
 
     size_t Popcount() const

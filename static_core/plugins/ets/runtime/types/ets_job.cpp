@@ -25,8 +25,9 @@ EtsJob *EtsJob::Create(EtsCoroutine *coro)
 {
     [[maybe_unused]] EtsHandleScope scope(coro);
     auto *klass = PlatformTypes(coro)->coreJob;
-    auto hJob = EtsHandle<EtsJob>(coro, EtsJob::FromEtsObject(EtsObject::Create(coro, klass)));
-    ASSERT(hJob.GetPtr() != nullptr);
+    auto hJobObject = EtsObject::Create(coro, klass);
+    ASSERT(hJobObject != nullptr);
+    auto hJob = EtsHandle<EtsJob>(coro, EtsJob::FromEtsObject(hJobObject));
     auto *mutex = EtsMutex::Create(coro);
     hJob->SetMutex(coro, mutex);
     auto *event = EtsEvent::Create(coro);

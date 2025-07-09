@@ -293,7 +293,8 @@ private:
     void InitializeByDefault(EtsCoroutine *coro, size_t length)
     {
         ObjectAccessor::SetObject(coro, this, GetManagedDataOffset(), AllocateNonMovableArray(length));
-        byteLength_ = length;
+        ASSERT(length <= static_cast<size_t>(std::numeric_limits<EtsInt>::max()));
+        byteLength_ = static_cast<EtsInt>(length);
         nativeData_ =
             GetAddress(EtsByteArray::FromCoreType(ObjectAccessor::GetObject(coro, this, GetManagedDataOffset())));
         ASSERT(nativeData_ != 0);
@@ -305,7 +306,8 @@ private:
                                   void *data, EtsFinalize finalizerFunction, void *finalizerHint, size_t length)
     {
         ObjectAccessor::SetObject(coro, this, GetManagedDataOffset(), nullptr);
-        byteLength_ = length;
+        ASSERT(length <= static_cast<size_t>(std::numeric_limits<EtsInt>::max()));
+        byteLength_ = static_cast<EtsInt>(length);
         nativeData_ = reinterpret_cast<EtsLong>(data);
         ASSERT(nativeData_ != 0);
         isResizable_ = ToEtsBoolean(false);

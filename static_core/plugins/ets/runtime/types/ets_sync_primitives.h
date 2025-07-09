@@ -113,6 +113,7 @@ public:
     public:
         explicit LockHolder(EtsHandle<T> &hLock) : hLock_(hLock)
         {
+            ASSERT(hLock_.GetPtr() != nullptr);
             hLock_->Lock();
         }
 

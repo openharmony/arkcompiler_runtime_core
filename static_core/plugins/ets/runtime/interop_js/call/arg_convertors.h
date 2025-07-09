@@ -236,6 +236,7 @@ static ObjectHeader **DoPackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, 
 template <typename FRead>
 [[nodiscard]] static ALWAYS_INLINE inline bool ConvertRefArgToJS(InteropCtx *ctx, napi_value *resSlot, FRead &readVal)
 {
+    ASSERT(ctx != nullptr);
     auto env = ctx->GetJSEnv();
     auto setResult = [resSlot](napi_value res) {
         *resSlot = res;
