@@ -68,6 +68,8 @@ public:
     static void* AtomicReadBarrier(void* obj, void* field, std::memory_order order);
     static void RequestGC(GcType type);
     static void WaitForGCFinish();
+    static void EnterGCCriticalSection();
+    static void ExitGCCriticalSection();
     static bool ForEachObj(HeapVisitor& visitor, bool safe);
     static void NotifyNativeAllocation(size_t bytes);
     static void NotifyNativeFree(size_t bytes);
