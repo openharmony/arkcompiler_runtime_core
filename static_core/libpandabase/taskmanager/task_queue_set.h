@@ -62,20 +62,21 @@ inline TaskQueueInterface *TaskQueueSet::CreateQueue(QueuePriority priority)
 {
     size_t i = 0;
     auto *queue = internal::TaskQueue<Allocator>::Create(priority, waitList_, taskTimeStats_);
+    ASSERT(signalWorkersCallback_ != nullptr);
+    queue->SetCallbacks(signalWorkersCallback_);
     while (i != MAX_COUNT_OF_QUEUE) {
         for (i = 0; i < MAX_COUNT_OF_QUEUE; i++) {
             // Atomic with relaxed order reason: no order dependency with another variables
             if (queues_[i].load(std::memory_order_relaxed) != nullptr) {
                 continue;
             }
+            queue->Register(i);
             TaskQueueInterface *nullp = nullptr;
-            // Atomic with relaxed order reason: no order dependency with another variables
-            if (!queues_[i].compare_exchange_weak(nullp, queue, std::memory_order_relaxed)) {
+            // Atomic with release order reason: need guaranty that init of queue will be visible. For more info
+            // https://www.open-std.org/jtc1/sc22/wg21/docs/cwg_defects.html#710
+            if (!queues_[i].compare_exchange_weak(nullp, queue, std::memory_order_release)) {
                 break;
             }
-            queue->Register(i);
-            ASSERT(signalWorkersCallback_ != nullptr);
-            queue->SetCallbacks(signalWorkersCallback_);
             return queue;
         }
     }

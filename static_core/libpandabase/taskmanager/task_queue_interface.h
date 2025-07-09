@@ -96,7 +96,6 @@ inline QueueId TaskQueueInterface::GetQueueId() const
 
 inline void TaskQueueInterface::Register(QueueId id)
 {
-    ASSERT_PRINT(id_ == INVALID_ID, "Second registration");
     id_ = id;
 }
 

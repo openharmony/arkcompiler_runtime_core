@@ -66,7 +66,7 @@ public:
         } else {
             auto *bigNode = GetNewQueueBigNode();
             // Atomic with relaxed order reason: no order requirement
-            bigNode->toDeleteCount.fetch_sub(1, std::memory_order_relaxed);
+            bigNode->toDeleteCount.store(QUEUE_NODE_SIZE, std::memory_order_relaxed);
             node = bigNode;
         }
         // Atomic with relaxed order reason: no order requirement
@@ -123,6 +123,8 @@ public:
         auto pushNodeIndex = GetNodeIndex(pushIndex);
         if UNLIKELY (pushNodeIndex == 0) {
             auto *node = GetNewQueueBigNode();
+            // Atomic with relaxed order reason: set in local variable
+            node->toDeleteCount.store(QUEUE_NODE_SIZE + 1, std::memory_order_relaxed);
             // Atomic with relaxed order reason: set in local variable
             tail->next.store(node, std::memory_order_relaxed);
             // Atomic with relaxed order reason: set in local variable
@@ -196,12 +198,14 @@ public:
     static void TryDeleteNode(void *node)
     {
         static_assert(ALLOCATION_TYPE == QueueElemAllocationType::INPLACE);
-        auto inode = reinterpret_cast<QueueBigNode *>(node);
+        auto inode = static_cast<QueueBigNode *>(node);
+        TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
         // Atomic with relaxed order reason: gets correct value
         auto count = inode->toDeleteCount.fetch_sub(1, std::memory_order_relaxed);
         if (count == 1) {
             DeleteQueueBigNode(inode);
         }
+        TSAN_ANNOTATE_IGNORE_WRITES_END();
     }
 
 private:
