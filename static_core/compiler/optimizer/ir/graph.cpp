@@ -803,6 +803,7 @@ int64_t Graph::GetBranchCounter(const BasicBlock *block, bool trueSucc)
 {
     ASSERT(block->GetSuccsBlocks().size() == MAX_SUCCS_NUM);
     auto lastInst = block->GetLastInst();
+    ASSERT(lastInst != nullptr);
     if (lastInst->GetPc() == 0) {
         return 0;
     }
