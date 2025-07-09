@@ -38,7 +38,7 @@ public:
     PANDA_PUBLIC_API ~STSVMInterfaceImpl() override = default;
 
 #if defined(ARK_HYBRID)
-    PANDA_PUBLIC_API void MarkFromObject(void *obj, const panda::RefFieldVisitor &visitor) override;
+    PANDA_PUBLIC_API void MarkFromObject(void *obj, const common::RefFieldVisitor &visitor) override;
 #endif
     PANDA_PUBLIC_API void MarkFromObject(void *obj) override;
 

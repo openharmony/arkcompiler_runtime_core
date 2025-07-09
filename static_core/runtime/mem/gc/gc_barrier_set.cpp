@@ -224,8 +224,8 @@ void GCCMCBarrierSet::PostBarrier([[maybe_unused]] const void *objAddr, [[maybe_
                                   [[maybe_unused]] void *storedValAddr)
 {
 #ifdef ARK_HYBRID
-    panda::BaseRuntime::WriteBarrier(const_cast<void *>(objAddr), ToVoidPtr(ToUintPtr(objAddr) + offset),
-                                     storedValAddr);
+    common::BaseRuntime::WriteBarrier(const_cast<void *>(objAddr), ToVoidPtr(ToUintPtr(objAddr) + offset),
+                                      storedValAddr);
 #endif
 }
 
@@ -252,8 +252,8 @@ void GCCMCBarrierSet::PostBarrier([[maybe_unused]] const void *objAddr, [[maybe_
 #ifdef ARK_HYBRID
     const std::function<void(ObjectHeader *, ObjectHeader *, uint32_t)> visitor = [](ObjectHeader *obj,
                                                                                      ObjectHeader *ref, uint32_t off) {
-        panda::BaseRuntime::WriteBarrier(static_cast<void *>(obj), ToVoidPtr(ToUintPtr(obj) + off),
-                                         static_cast<void *>(ref));
+        common::BaseRuntime::WriteBarrier(static_cast<void *>(obj), ToVoidPtr(ToUintPtr(obj) + off),
+                                          static_cast<void *>(ref));
     };
     CMCWriteBarrierHandle handler(visitor);
     GCStaticObjectHelpers::TraverseAllObjectsWithInfo<false>(
@@ -265,7 +265,7 @@ void GCCMCBarrierSet::PostBarrier([[maybe_unused]] const void *objAddr, [[maybe_
 void *GCCMCBarrierSet::PreReadBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset)
 {
 #ifdef ARK_HYBRID
-    return panda::BaseRuntime::ReadBarrier(const_cast<void *>(objAddr), ToVoidPtr(ToUintPtr(objAddr) + offset));
+    return common::BaseRuntime::ReadBarrier(const_cast<void *>(objAddr), ToVoidPtr(ToUintPtr(objAddr) + offset));
 #endif
     return nullptr;
 }

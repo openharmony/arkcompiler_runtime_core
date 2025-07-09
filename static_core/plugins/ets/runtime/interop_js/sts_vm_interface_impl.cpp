@@ -28,7 +28,7 @@ thread_local STSVMInterfaceImpl::XGCSyncState STSVMInterfaceImpl::xgcSyncState_ 
     STSVMInterfaceImpl::XGCSyncState::NONE;
 
 #if defined(ARK_HYBRID)
-void STSVMInterfaceImpl::MarkFromObject(void *obj, const panda::RefFieldVisitor &visitor)
+void STSVMInterfaceImpl::MarkFromObject(void *obj, const common::RefFieldVisitor &visitor)
 {
     if (obj != nullptr) {
         return;
@@ -43,7 +43,7 @@ void STSVMInterfaceImpl::MarkFromObject(void *obj, const panda::RefFieldVisitor 
     }
     if (sharedRef->MarkIfNotMarked()) {
         EtsObject *etsObj = sharedRef->GetEtsObject();
-        visitor(reinterpret_cast<panda::RefField<> &>(etsObj));  // This is only mark, so could pass a stack reference
+        visitor(reinterpret_cast<common::RefField<> &>(etsObj));  // This is only mark, so could pass a stack reference
     }
 }
 #endif

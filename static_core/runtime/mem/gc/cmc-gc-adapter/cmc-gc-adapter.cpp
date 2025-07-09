@@ -52,7 +52,7 @@ template <class LanguageConfig>
 bool CMCGCAdapter<LanguageConfig>::WaitForGC([[maybe_unused]] GCTask task)
 {
 #ifdef ARK_HYBRID
-    panda::BaseRuntime::RequestGC(panda::GcType::FULL);
+    common::BaseRuntime::RequestGC(common::GcType::FULL);
 #endif
     return false;
 }
@@ -72,7 +72,7 @@ template <class LanguageConfig>
 bool CMCGCAdapter<LanguageConfig>::Trigger([[maybe_unused]] PandaUniquePtr<GCTask> task)
 {
 #ifdef ARK_HYBRID
-    panda::BaseRuntime::RequestGC(panda::GcType::FULL);
+    common::BaseRuntime::RequestGC(common::GcType::FULL);
 #endif
     return false;
 }
@@ -88,7 +88,7 @@ void CMCGCAdapter<LanguageConfig>::StopGC()
 {
 #ifdef ARK_HYBRID
     // Change to a more accurate function, when the function was provided (see #26240).
-    panda::BaseRuntime::RequestGC(panda::GcType::FULL);
+    common::BaseRuntime::RequestGC(common::GcType::FULL);
 #endif
 }
 

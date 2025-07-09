@@ -1581,7 +1581,7 @@ void Runtime::CheckOptionsFromOs() const
 void Runtime::InitBaseRuntime()
 {
 #ifdef ARK_HYBRID
-    auto *baseRuntime = panda::BaseRuntime::GetInstance();
+    auto *baseRuntime = common::BaseRuntime::GetInstance();
     ASSERT(baseRuntime != nullptr);
     baseRuntime->Init();
 #endif
@@ -1592,14 +1592,14 @@ void Runtime::PreFiniBaseRuntime()
 #ifdef ARK_HYBRID
     // Stop the current GC before all threads unregister
     // Change to a more accurate function, when the function was provided (see #26240).
-    panda::BaseRuntime::RequestGC(panda::GcType::FULL);
+    common::BaseRuntime::RequestGC(common::GcType::FULL);
 #endif
 }
 
 void Runtime::FiniBaseRuntime()
 {
 #ifdef ARK_HYBRID
-    auto *baseRuntime = panda::BaseRuntime::GetInstance();
+    auto *baseRuntime = common::BaseRuntime::GetInstance();
     ASSERT(baseRuntime != nullptr);
     baseRuntime->Fini();
 #endif

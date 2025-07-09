@@ -31,7 +31,7 @@ StaticObjectOperator StaticObjectOperator::instance_;
 #ifdef PANDA_JS_ETS_HYBRID_MODE
 class SkipReferentHandler {
 public:
-    explicit SkipReferentHandler(const panda::RefFieldVisitor &visitor, ObjectPointerType *weakReferentPointer)
+    explicit SkipReferentHandler(const common::RefFieldVisitor &visitor, ObjectPointerType *weakReferentPointer)
         : visitor_(visitor), weakReferentPointer_(weakReferentPointer)
     {
     }
@@ -45,51 +45,51 @@ public:
             return true;
         }
         if (*p != 0) {
-            visitor_(reinterpret_cast<panda::RefField<> &>(*reinterpret_cast<panda::BaseObject **>(p)));
+            visitor_(reinterpret_cast<common::RefField<> &>(*reinterpret_cast<common::BaseObject **>(p)));
         }
         return true;
     }
 
 private:
-    const panda::RefFieldVisitor &visitor_;
+    const common::RefFieldVisitor &visitor_;
     const ObjectPointerType *weakReferentPointer_ {nullptr};
 };
 #endif
 
 class Handler {
 public:
-    explicit Handler(const panda::RefFieldVisitor &visitor) : visitor_(visitor) {}
+    explicit Handler(const common::RefFieldVisitor &visitor) : visitor_(visitor) {}
 
     ~Handler() = default;
 
     bool ProcessObjectPointer(ObjectPointerType *p)
     {
         if (*p != 0) {
-            visitor_(reinterpret_cast<panda::RefField<> &>(*reinterpret_cast<panda::BaseObject **>(p)));
+            visitor_(reinterpret_cast<common::RefField<> &>(*reinterpret_cast<common::BaseObject **>(p)));
         }
         return true;
     }
 
 private:
-    const panda::RefFieldVisitor &visitor_;
+    const common::RefFieldVisitor &visitor_;
 };
 
 void StaticObjectOperator::Initialize(ark::ets::PandaEtsVM *vm)
 {
 #if defined(ARK_HYBRID)
     instance_.vm_ = vm;
-    panda::BaseObject::RegisterStatic(&instance_);
+    common::BaseObject::RegisterStatic(&instance_);
 
-    panda::RegisterStaticRootsProcessFunc();
+    common::RegisterStaticRootsProcessFunc();
 #endif
 }
 
 // A temporary impl only in interop
-void StaticObjectOperator::ForEachRefFieldSkipReferent(const panda::BaseObject *object,
-                                                       const panda::RefFieldVisitor &visitor) const
+void StaticObjectOperator::ForEachRefFieldSkipReferent(const common::BaseObject *object,
+                                                       const common::RefFieldVisitor &visitor) const
 {
 #ifdef PANDA_JS_ETS_HYBRID_MODE
-    auto *objHeader = reinterpret_cast<ObjectHeader *>(const_cast<panda::BaseObject *>(object));
+    auto *objHeader = reinterpret_cast<ObjectHeader *>(const_cast<common::BaseObject *>(object));
     auto *baseCls = objHeader->template ClassAddr<BaseClass>();
     auto *process = static_cast<ark::mem::ets::EtsReferenceProcessor *>(vm_->GetReferenceProcessor());
     ObjectPointerType *referentPointer = nullptr;
@@ -104,17 +104,17 @@ void StaticObjectOperator::ForEachRefFieldSkipReferent(const panda::BaseObject *
 #endif
 }
 
-void StaticObjectOperator::ForEachRefField(const panda::BaseObject *object, const panda::RefFieldVisitor &visitor) const
+void StaticObjectOperator::ForEachRefField(const common::BaseObject *object, const common::RefFieldVisitor &visitor) const
 {
     Handler handler(visitor);
-    auto *objHeader = reinterpret_cast<ObjectHeader *>(const_cast<panda::BaseObject *>(object));
+    auto *objHeader = reinterpret_cast<ObjectHeader *>(const_cast<common::BaseObject *>(object));
     ObjectIterator<LANG_TYPE_STATIC>::template Iterate<false>(objHeader->ClassAddr<Class>(), objHeader, &handler);
 }
 
-void StaticObjectOperator::IterateXRef(const panda::BaseObject *object, const panda::RefFieldVisitor &visitor) const
+void StaticObjectOperator::IterateXRef(const common::BaseObject *object, const common::RefFieldVisitor &visitor) const
 {
 #ifdef PANDA_JS_ETS_HYBRID_MODE
-    auto *obj = reinterpret_cast<ObjectHeader *>(const_cast<panda::BaseObject *>(object));
+    auto *obj = reinterpret_cast<ObjectHeader *>(const_cast<common::BaseObject *>(object));
     auto *etsObj = ark::ets::EtsObject::FromCoreType(obj);
     if (!etsObj->HasInteropIndex()) {
         return;
@@ -126,14 +126,14 @@ void StaticObjectOperator::IterateXRef(const panda::BaseObject *object, const pa
 #endif  // PANDA_JS_ETS_HYBRID_MODE
 }
 
-panda::BaseObject *StaticObjectOperator::GetForwardingPointer(const panda::BaseObject *object) const
+common::BaseObject *StaticObjectOperator::GetForwardingPointer(const common::BaseObject *object) const
 {
     // Overwrite class by forwarding address. Read barrier must be called before reading class.
     uint64_t fwdAddr = *reinterpret_cast<const uint64_t *>(object);
-    return reinterpret_cast<panda::BaseObject *>(fwdAddr & ObjectHeader::GetClassMask());
+    return reinterpret_cast<common::BaseObject *>(fwdAddr & ObjectHeader::GetClassMask());
 }
 
-void StaticObjectOperator::SetForwardingPointerAfterExclusive(panda::BaseObject *object, panda::BaseObject *fwdPtr)
+void StaticObjectOperator::SetForwardingPointerAfterExclusive(common::BaseObject *object, common::BaseObject *fwdPtr)
 {
     auto &word = *reinterpret_cast<uint64_t *>(object);
     uint64_t flags = word & (~ObjectHeader::GetClassMask());

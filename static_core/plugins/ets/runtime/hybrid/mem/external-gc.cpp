@@ -45,7 +45,7 @@ void UpdateVmRoots(const GCRootUpdater &updater, PandaVM *vm)
 
 }  // namespace ark::mem::ets
 
-namespace panda {
+namespace common {
 
 static ark::PandaVM *GetPandaVM()
 {
@@ -64,7 +64,7 @@ void VisitStaticRoots(const RefFieldVisitor &visitor)
     }
 
     ark::GCRootVisitor rootVisitor = [&visitor](const ark::mem::GCRoot &gcRoot) {
-        panda::RefField<> refField {reinterpret_cast<panda::BaseObject *>(gcRoot.GetObjectHeader())};
+        common::RefField<> refField {reinterpret_cast<common::BaseObject *>(gcRoot.GetObjectHeader())};
         visitor(refField);
     };
     ark::mem::ets::VisitVmRoots(rootVisitor, vm);
@@ -125,7 +125,7 @@ void RemoveXRefFromStaticRoots()
     ark::ets::interop::js::XGC::GetInstance()->RemoveXRefFromStaticRoots();
 }
 
-bool TryTransferCurrentCoroutineToNative(panda::ThreadHolder *current)
+bool TryTransferCurrentCoroutineToNative(common::ThreadHolder *current)
 {
     ark::Thread *thread = ark::Thread::GetCurrent();
     if (thread == nullptr) {
@@ -135,14 +135,14 @@ bool TryTransferCurrentCoroutineToNative(panda::ThreadHolder *current)
     if (co == nullptr) {
         return false;
     }
-    panda::ThreadHolder *holder = co->GetThreadHolder();
+    common::ThreadHolder *holder = co->GetThreadHolder();
     if (holder == current) {
         return false;
     }
     return holder->TransferToNativeIfInRunning();
 }
 
-bool TryTransferCurrentCoroutineToRunning(panda::ThreadHolder *current)
+bool TryTransferCurrentCoroutineToRunning(common::ThreadHolder *current)
 {
     ark::Thread *thread = ark::Thread::GetCurrent();
     if (thread == nullptr) {
@@ -152,7 +152,7 @@ bool TryTransferCurrentCoroutineToRunning(panda::ThreadHolder *current)
     if (co == nullptr) {
         return false;
     }
-    panda::ThreadHolder *holder = co->GetThreadHolder();
+    common::ThreadHolder *holder = co->GetThreadHolder();
     if (holder == current) {
         return false;
     }
@@ -175,4 +175,4 @@ void RegisterStaticRootsProcessFunc()
 #endif
 }
 
-}  // namespace panda
+}  // namespace common

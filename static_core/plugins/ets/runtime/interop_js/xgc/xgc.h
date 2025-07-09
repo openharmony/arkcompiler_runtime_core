@@ -122,7 +122,7 @@ public:
     void SweepUnmarkedXRefs();
     void AddXRefToStaticRoots();
     void RemoveXRefFromStaticRoots();
-    void IterateEtsObjectXRef(EtsObject *etsObj, const panda::RefFieldVisitor &visitor);
+    void IterateEtsObjectXRef(EtsObject *etsObj, const common::RefFieldVisitor &visitor);
 #endif
 
 private:

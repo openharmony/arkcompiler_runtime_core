@@ -24,11 +24,11 @@
 namespace ark::ets::interop::js {
 
 #if defined(ARK_HYBRID)
-void XGCVmAdaptor::MarkFromObject([[maybe_unused]] napi_ref ref, [[maybe_unused]] const panda::RefFieldVisitor &visitor)
+void XGCVmAdaptor::MarkFromObject([[maybe_unused]] napi_ref ref, [[maybe_unused]] const common::RefFieldVisitor &visitor)
 {
 #ifdef PANDA_JS_ETS_HYBRID_MODE
     std::function<void(uintptr_t)> visitorWrap = [&visitor](uintptr_t address) {
-        visitor(reinterpret_cast<panda::RefField<> &>(address));
+        visitor(reinterpret_cast<common::RefField<> &>(address));
     };
     napi_mark_from_object_for_cmc(env_, ref, visitorWrap);
 #endif  // PANDA_JS_ETS_HYBRID_MODE

@@ -54,7 +54,7 @@ public:
      * @param ref: ecma vm napi ref you want to start gc marking with
      * @param visitor: mark object callback.
      */
-    virtual void MarkFromObject([[maybe_unused]] napi_ref ref, [[maybe_unused]] const panda::RefFieldVisitor &visitor);
+    virtual void MarkFromObject([[maybe_unused]] napi_ref ref, [[maybe_unused]] const common::RefFieldVisitor &visitor);
 #endif
     /**
      * @brief Method use internal ecma interface to start ecma gc marking from specific reference

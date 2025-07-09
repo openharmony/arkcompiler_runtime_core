@@ -323,7 +323,7 @@ void XGC::RemoveXRefFromStaticRoots()
     vm_->RemoveRootProvider(storage_);
 }
 
-void XGC::IterateEtsObjectXRef(EtsObject *etsObj, const panda::RefFieldVisitor &visitor)
+void XGC::IterateEtsObjectXRef(EtsObject *etsObj, const common::RefFieldVisitor &visitor)
 {
     // NOTE(audovichenko): Handle multithreading issue.
     ark::ets::interop::js::ets_proxy::SharedReference::Iterator it(storage_->GetReference(etsObj));
@@ -423,7 +423,7 @@ bool XGC::Trigger([[maybe_unused]] mem::GC *gc, [[maybe_unused]] PandaUniquePtr<
 {
     ASSERT_MANAGED_CODE();
 #ifdef ARK_HYBRID
-    panda::BaseRuntime::GetInstance()->RequestGC(panda::GcType::FULL_WITH_XREF);
+    common::BaseRuntime::GetInstance()->RequestGC(common::GcType::FULL_WITH_XREF);
     // NOTE(ipetrov, XGC): if table will be cleared in concurrent, then compute the new size should not be based on
     // the current storage size, need storage size without dead references
     auto newTargetThreshold = this->ComputeNewSize();
