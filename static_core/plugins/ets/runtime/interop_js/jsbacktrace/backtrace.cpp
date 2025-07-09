@@ -90,7 +90,7 @@ int Backtrace::EtsSymbolize(uintptr_t pc, uintptr_t mapBase, uint32_t bcOffset, 
             if (size < 0) {
                 LOG(ERROR, RUNTIME) << "copy funtionname failed!";
             }
-            function->line = panda_file::debug_helpers::GetLineNumber(mda, bcOffset, file.get());
+            function->line = static_cast<int32_t>(panda_file::debug_helpers::GetLineNumber(mda, bcOffset, file.get()));
             function->column = 0;
             function->codeBegin = methodInfos[mid].codeBegin;
             function->codeSize = methodInfos[mid].codeSize;

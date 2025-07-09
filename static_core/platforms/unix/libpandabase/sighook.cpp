@@ -276,6 +276,7 @@ void SignalHook::Handler(int signo, siginfo_t *siginfo, void *ucontextRaw)
         if (handler == SIG_DFL) {  // NOLINT
             LOG(FATAL, RUNTIME) << "Actually signal:" << signo << " | register sigaction's handler == SIG_DFL";
         }
+        ASSERT(handler != nullptr);
         handler(signo);
     }
 
