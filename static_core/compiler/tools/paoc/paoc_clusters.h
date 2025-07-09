@@ -72,6 +72,7 @@ public:
         // Fill clusters_ in order of presence in JSON-obj:
         size_t nClusters = clustersJson->GetSize();
         for (size_t idx = 0; idx < nClusters; idx++) {
+            ASSERT(clustersJson->GetValue<JsonObjPointer>(idx) != nullptr);
             const auto clusterJson = clustersJson->GetValue<JsonObjPointer>(idx)->get();
             if (clusterJson == nullptr) {
                 LOG_PAOC_CLUSTERS(FATAL) << "Can't find a cluster (idx = " << idx << ")";
