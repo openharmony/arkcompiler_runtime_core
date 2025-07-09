@@ -15,7 +15,7 @@
 
 package escompat;
 
-type RejectedObjectListener = StdProcess.EventListener;
+type RejectedObjectListener = StdProcess.RejectedObjectListener;
 
 /**
  * @class Stores EventListener that handles rejected promises and jobs
@@ -47,12 +47,13 @@ class RejectedHandler {
      * Applies handler to a provided object
      * It is used to apply handler to a result of rejected promise or job
      *
-     * @param obj object on which the callback will be applied
+     * @param reason rejection result of an object
+     * @param obj the object itself
      *
      */
-    public apply(obj: Object): void {
-        this.callback(obj);
+    public apply(reason: Error, obj: Object): void {
+        this.callback(reason, obj);
     }
 
-    private callback: RejectedObjectListener = (obj: Object) => {};
+    private callback: RejectedObjectListener = (reason: Error, obj: Object) => {};
 };

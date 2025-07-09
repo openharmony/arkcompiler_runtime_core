@@ -928,28 +928,6 @@ ClassLinkerContext *PandaEtsVM::CreateApplicationRuntimeLinker(const PandaVector
     return linkerHandle->GetClassLinkerContext();
 }
 
-void PandaEtsVM::ListUnhandledFailedJobs()
-{
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    GetUnhandledObjectManager()->ListFailedJobs(coro);
-    if (coro->HasPendingException()) {
-        HandleUncaughtException();
-        UNREACHABLE();
-    }
-}
-
-void PandaEtsVM::ListUnhandledRejectedPromises()
-{
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    GetUnhandledObjectManager()->ListRejectedPromises(coro);
-    if (coro->HasPendingException()) {
-        HandleUncaughtException();
-        UNREACHABLE();
-    }
-}
-
 /* static */
 void PandaEtsVM::Abort(const char *message /* = nullptr */)
 {

@@ -37,7 +37,7 @@ class Event {
 }
 
 
-const kTotal = 5;
+const kTotal = 6;
 let current = 0;
 let event = new Event();
 
@@ -54,7 +54,7 @@ function WaitAll(): null {
     return null;
 }
 
-function Handler(obj: Object): void {
+function Handler(reason: Error, obj: Object): void {
     if (current == 0) {
         launch<null, () => null>(WaitAll);
     }
@@ -67,17 +67,24 @@ function Handler(obj: Object): void {
 }
 
 function testUnhandledRejection(): void {
-    StdProcess.on('unhandledJobRejection', (obj: Object): void => {
+    StdProcess.on('unhandledJobRejection', (reason: Error, obj: Object): void => {
+        arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
         arktest.assertTrue(false, 'Job handler not switched');
     });
-    
-    StdProcess.on('unhandledPromiseRejection', (obj: Object): void => {
+    StdProcess.on('unhandledPromiseRejection', (reason: Error, obj: Object): void => {
+        arktest.assertTrue(obj instanceof Promise, 'The object should be of type Promise');
         arktest.assertTrue(false, 'Promise handler not switched');
     });
-    
-    StdProcess.on('unhandledJobRejection', Handler);
-    StdProcess.on('unhandledPromiseRejection', Handler);
-    
+
+    StdProcess.on('unhandledJobRejection', (reason: Error, obj: Object): void => {
+        arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
+        Handler(reason, obj);
+    });
+    StdProcess.on('unhandledPromiseRejection',  (reason: Error, obj: Object): void => {
+        arktest.assertTrue(obj instanceof Promise, 'The object should be of type Promise');
+        Handler(reason, obj);
+    });
+
     let g = launch<string, () => string>(Failing);
     launch<Promise<string>, () => Promise<string>>(AsyncFailing);
     AsyncFailing();
@@ -88,6 +95,7 @@ function testUnhandledRejection(): void {
         procManager.exit(1);
     })
     Promise.reject(new Error('promise2'));
+    Promise.reject();
 }
 
 function main(): int {

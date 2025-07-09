@@ -268,28 +268,24 @@ void EtsCoroutine::OnHostWorkerChanged()
     UNREACHABLE();
 }
 
-void EtsCoroutine::ListUnhandledJobs()
-{
-    auto *vm = GetPandaVM();
-    vm->ListUnhandledFailedJobs();
-}
-
-void EtsCoroutine::ListUnhandledPromises()
-{
-    auto *vm = GetPandaVM();
-    vm->ListUnhandledRejectedPromises();
-}
-
 void EtsCoroutine::ListUnhandledEventsOnProgramExit()
 {
     if (Runtime::GetOptions().IsArkAot()) {
         return;
     }
-    if (Runtime::GetOptions().IsListUnhandledOnExitJobs(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
-        ListUnhandledJobs();
-    }
-    if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
-        ListUnhandledPromises();
+    auto *umanager = GetPandaVM()->GetUnhandledObjectManager();
+    ASSERT(umanager != nullptr);
+    bool listJobs =
+        Runtime::GetOptions().IsListUnhandledOnExitJobs(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
+    bool listPromises =
+        Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
+    while (umanager->HasObjects()) {
+        if (listJobs) {
+            umanager->ListFailedJobs(this);
+        }
+        if (listPromises) {
+            umanager->ListRejectedPromises(this);
+        }
     }
 }
 
