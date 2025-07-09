@@ -55,6 +55,7 @@
   "plugins/ets/stdlib/std/debug/README.md": "*",
   "plugins/ets/subproject_sources.gn": "*",
   "plugins/ets/tests/ani/tests": "*",
+  "plugins/ets/tests/arkts-cts-negative": "*",
   "plugins/ets/tests/benchmarks/interop_js": "*",
   "plugins/ets/tests/benchmarks/promise/bu_j2a/bench_j2a.js": "*",
   "plugins/ets/tests/benchmarks/promise/bu_j2j/bench_j2j.js": "*",

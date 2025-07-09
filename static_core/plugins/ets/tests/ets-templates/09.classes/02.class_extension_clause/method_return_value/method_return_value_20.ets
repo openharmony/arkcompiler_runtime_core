@@ -15,6 +15,7 @@
 
 /*---
 desc: The return value of the method is char, and the modifier is public.
+name: method_return_value_20
 ---*/
 
 class Parent {

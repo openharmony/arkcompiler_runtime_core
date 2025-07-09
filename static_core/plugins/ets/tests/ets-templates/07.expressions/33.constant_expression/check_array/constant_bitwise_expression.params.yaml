@@ -28,10 +28,6 @@ cases:
   - { type: long, value: 10, expression: '| 7', expected: 15 }
   - { type: long, value: 10, expression: '^ 7', expected: 13 }
 
-  - { type: char, value: c'C', expression: '& 7', expected: 3  }
-  - { type: char, value: c'C', expression: '| 7', expected: 71 }
-  - { type: char, value: c'C', expression: '^ 7', expected: 68 }
-
   - { type: float, value: 10.5f, expression: '& 7f', expected: 2  }
   - { type: float, value: 10.5f, expression: '| 7f', expected: 15 }
   - { type: float, value: 10.5f, expression: '^ 7f', expected: 13 }

@@ -100,11 +100,6 @@ cases:
           arktest.assertEQ( res, "A B C D " )
 
     - use: |-
-        let foo: () => String = ():String => { return "ABCD" }
-        for (let ch of foo()) res += ch
-        arktest.assertEQ( res, "ABCD" )
-
-    - use: |-
           let arr: Long[] = new Long[3]
           for (let i: int = 0; i < 3; i++) arr[i] = new Long(i as long)
           for (let i of arr) res += i

@@ -1353,26 +1353,25 @@
 # 46
 # Since floating point numbers no longer generate an error and floating point calculations are unstable
 # on certain platforms at the moment, these tests remain here.
+07.expressions/33.constant_expression/check_enum/constant_calculation_21.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_22.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_23.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_24.ets
 07.expressions/33.constant_expression/check_enum/constant_calculation_25.ets
 07.expressions/33.constant_expression/check_enum/constant_calculation_26.ets
 07.expressions/33.constant_expression/check_enum/constant_calculation_27.ets
 07.expressions/33.constant_expression/check_enum/constant_calculation_28.ets
 07.expressions/33.constant_expression/check_enum/constant_calculation_29.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_30.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_31.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_32.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_33.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_34.ets
 07.expressions/33.constant_expression/check_enum/constant_number_conversion_5.ets
 07.expressions/33.constant_expression/check_enum/constant_number_conversion_6.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_minus_10.ets
 07.expressions/33.constant_expression/check_enum/constant_unary_minus_11.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_minus_12.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_minus_15.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_minus_6.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_minus_14.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_minus_4.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_plus_10.ets
 07.expressions/33.constant_expression/check_enum/constant_unary_plus_11.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_plus_12.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_plus_4.ets
 07.expressions/33.constant_expression/check_enum/constant_unary_plus_5.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_plus_6.ets
 
 # 47 'VERIFIER_FAIL: [TID 000c96] E/verifier: Verifier error 8: Bad array element type3
 17.experimental_features/02.fixed_array_types/far3_6.ets

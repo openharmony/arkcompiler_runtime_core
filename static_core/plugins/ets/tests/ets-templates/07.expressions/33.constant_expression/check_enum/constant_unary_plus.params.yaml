@@ -14,7 +14,6 @@
 cases:
   - { type: byte,   value: 16,      expected: 16     }
   - { type: short,  value: 300,     expected: 300    }
-  - { type: char,   value: c'p',    expected: 112    }
   - { type: int,    value: 3000,    expected: 3000   }
   - { type: long,   value: 50000,   expected: 50000  }
   - { type: float,  value: 120.2f,  expected: 120.2  }

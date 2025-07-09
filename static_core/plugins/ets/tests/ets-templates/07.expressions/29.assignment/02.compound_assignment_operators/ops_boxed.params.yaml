@@ -43,10 +43,6 @@ cases:
   - { type: Double, v: Double.NEGATIVE_INFINITY, op: '+', q: Double.NEGATIVE_INFINITY }
   - { type: Double, v: 0.0, op: '+', q: -0.0 }
 
-  - { type: Char, v: "c'\\uFFFF'", op: '+', q: "c'\\u0001'" }
-  - { type: Char, v: "c'\\uFFFF'", op: '+', q: "c'\\uFFFF'" }
-  - { type: Char, v: "c'\\u0000'", op: '+', q: "c'\\uFFFF'" }
-
   - { type: Byte, v: 127, op: '-', q: -1 }
   - { type: Byte, v: -128, op: '-', q: -128 }
   - { type: Byte, v: -128, op: '-', q: 1 }
@@ -76,10 +72,6 @@ cases:
   - { type: Double, v: Double.POSITIVE_INFINITY, op: '-', q: Double.NEGATIVE_INFINITY }
   - { type: Double, v: Double.NEGATIVE_INFINITY, op: '-', q: Double.POSITIVE_INFINITY }
   - { type: Double, v: -0.0, op: '-', q: 0.0 }
-
-  - { type: Char, v: "c'\\uFFFF'", op: '-', q: "c'\\u0001'" }
-  - { type: Char, v: "c'\\uFFFF'", op: '-', q: "c'\\uFFFF'" }
-  - { type: Char, v: "c'\\u0000'", op: '-', q: "c'\\uFFFF'" }
 
   - { type: Byte, v: 127, op: '*', q: 1 }
   - { type: Byte, v: 127, op: '*', q: 127 }
@@ -111,10 +103,6 @@ cases:
   - { type: Double, v: Double.NEGATIVE_INFINITY, op: '*', q: Double.NEGATIVE_INFINITY }
   - { type: Double, v: 0.0, op: '*', q: -0.0 }
 
-  - { type: Char, v: "c'\\uFFFF'", op: '*', q: "c'\\u0001'" }
-  - { type: Char, v: "c'\\uFFFF'", op: '*', q: "c'\\uFFFF'" }
-  - { type: Char, v: "c'\\u0000'", op: '*', q: "c'\\uFFFF'" }
-
   - { type: Byte, v: 127, op: '/', q: 1 }
   - { type: Byte, v: 127, op: '/', q: 127 }
   - { type: Byte, v: -128, op: '/', q: -1 }
@@ -138,10 +126,6 @@ cases:
   - { type: Double, v: 1.7976931348623157e+308, op: '/', q: 1.0 }
   - { type: Double, v: 1.7976931348623157e+308, op: '/', q: 1.7976931348623157e+308 }
   - { type: Double, v: -1.7976931348623157e+308, op: '/', q: -1.0 }
-
-  - { type: Char, v: "c'\\uFFFF'", op: '/', q: "c'\\u0001'" }
-  - { type: Char, v: "c'\\uFFFF'", op: '/', q: "c'\\uFFFF'" }
-  - { type: Char, v: "c'\\u0000'", op: '/', q: "c'\\uFFFF'" }
 
   - { type: Byte, v: 127, op: '%', q: 1 }
   - { type: Byte, v: 127, op: '%', q: 127 }
@@ -167,10 +151,6 @@ cases:
   - { type: Double, v: 1.7976931348623157e+308, op: '%', q: 1.7976931348623157e+308 }
   - { type: Double, v: -1.7976931348623157e+308, op: '%', q: -1.0 }
 
-  - { type: Char, v: "c'\\uFFFF'", op: '%', q: "c'\\u0001'" }
-  - { type: Char, v: "c'\\uFFFF'", op: '%', q: "c'\\uFFFF'" }
-  - { type: Char, v: "c'\\u0000'", op: '%', q: "c'\\uFFFF'" }
-
   - { type: Byte, v: 127, op: '<<', q: 1 }
   - { type: Byte, v: 127, op: '<<', q: 127 }
   - { type: Byte, v: -128, op: '<<', q: -1 }
@@ -186,10 +166,6 @@ cases:
   - { type: Long, v: 9223372036854775807, op: '<<', q: 1 }
   - { type: Long, v: 9223372036854775807, op: '<<', q: 9223372036854775807 }
   - { type: Long, v: -9223372036854775808, op: '<<', q: -1 }
-
-  - { type: Char, v: "c'\\uFFFF'", op: '<<', q: "c'\\u0001'" }
-  - { type: Char, v: "c'\\uFFFF'", op: '<<', q: "c'\\uFFFF'" }
-  - { type: Char, v: "c'\\u0000'", op: '<<', q: "c'\\uFFFF'" }
 
   - { type: Byte, v: 127, op: '>>', q: 1 }
   - { type: Byte, v: 127, op: '>>', q: 127 }
@@ -207,10 +183,6 @@ cases:
   - { type: Long, v: 9223372036854775807, op: '>>', q: 9223372036854775807 }
   - { type: Long, v: -9223372036854775808, op: '>>', q: -1 }
 
-  - { type: Char, v: "c'\\uFFFF'", op: '>>', q: "c'\\u0001'" }
-  - { type: Char, v: "c'\\uFFFF'", op: '>>', q: "c'\\uFFFF'" }
-  - { type: Char, v: "c'\\u0000'", op: '>>', q: "c'\\uFFFF'" }
-
   - { type: Byte, v: 127, op: '>>>', q: 1 }
   - { type: Byte, v: 127, op: '>>>', q: 127 }
   - { type: Byte, v: -128, op: '>>>', q: -1 }
@@ -227,10 +199,6 @@ cases:
   - { type: Long, v: 9223372036854775807, op: '>>>', q: 9223372036854775807 }
   - { type: Long, v: -9223372036854775808, op: '>>>', q: -1 }
 
-  - { type: Char, v: "c'\\uFFFF'", op: '>>>', q: "c'\\u0001'" }
-  - { type: Char, v: "c'\\uFFFF'", op: '>>>', q: "c'\\uFFFF'" }
-  - { type: Char, v: "c'\\u0000'", op: '>>>', q: "c'\\uFFFF'" }
-
   - { type: Byte, v: 127, op: '&', q: 1 }
   - { type: Byte, v: 127, op: '&', q: 127 }
   - { type: Byte, v: -128, op: '&', q: -1 }
@@ -246,10 +214,6 @@ cases:
   - { type: Long, v: 9223372036854775807, op: '&', q: 1 }
   - { type: Long, v: 9223372036854775807, op: '&', q: 9223372036854775807 }
   - { type: Long, v: -9223372036854775808, op: '&', q: -1 }
-
-  - { type: Char, v: "c'\\uFFFF'", op: '&', q: "c'\\u0001'" }
-  - { type: Char, v: "c'\\uFFFF'", op: '&', q: "c'\\uFFFF'" }
-  - { type: Char, v: "c'\\u0000'", op: '&', q: "c'\\uFFFF'" }
 
   - { type: Boolean, v: 'true', op: '&', q: 'true' }
   - { type: Boolean, v: 'true', op: '&', q: 'false' }
@@ -271,10 +235,6 @@ cases:
   - { type: Long, v: 9223372036854775807, op: '|', q: 9223372036854775807 }
   - { type: Long, v: -9223372036854775808, op: '|', q: -1 }
 
-  - { type: Char, v: "c'\\uFFFF'", op: '|', q: "c'\\u0001'" }
-  - { type: Char, v: "c'\\uFFFF'", op: '|', q: "c'\\uFFFF'" }
-  - { type: Char, v: "c'\\u0000'", op: '|', q: "c'\\uFFFF'" }
-
   - { type: Boolean, v: 'false', op: '|', q: 'false' }
   - { type: Boolean, v: 'true', op: '|', q: 'false' }
   - { type: Boolean, v: 'false', op: '|', q: 'true' }
@@ -294,10 +254,6 @@ cases:
   - { type: Long, v: 9223372036854775807, op: '^', q: 1 }
   - { type: Long, v: 9223372036854775807, op: '^', q: 9223372036854775807 }
   - { type: Long, v: -9223372036854775808, op: '^', q: -1 }
-
-  - { type: Char, v: "c'\\uFFFF'", op: '^', q: "c'\\u0001'" }
-  - { type: Char, v: "c'\\uFFFF'", op: '^', q: "c'\\uFFFF'" }
-  - { type: Char, v: "c'\\u0000'", op: '^', q: "c'\\uFFFF'" }
 
   - { type: Boolean, v: 'true', op: '^', q: 'true' }
   - { type: Boolean, v: 'true', op: '^', q: 'false' }

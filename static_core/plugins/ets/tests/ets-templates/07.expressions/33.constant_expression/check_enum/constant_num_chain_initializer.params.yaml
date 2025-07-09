@@ -17,6 +17,5 @@ cases:
   - { type1: byte,  type2: int   }
   - { type1: short, type2: short }
   - { type1: short, type2: int   }
-  - { type1: char,  type2: int   }
   - { type1: int,   type2: int   }
       
