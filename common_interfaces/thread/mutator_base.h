@@ -46,13 +46,31 @@ class PUBLIC_API MutatorBase {
 public:
     // flag which indicates the reason why mutator should suspend. flag is set by some external thread.
     enum SuspensionType : uint32_t {
-        SUSPENSION_FOR_GC_PHASE = 1,
-        SUSPENSION_FOR_STW = 2,
-        SUSPENSION_FOR_EXIT = 4,
-        SUSPENSION_FOR_CPU_PROFILE = 8,
-        SUSPENSION_FOR_PENDING_CALLBACK = 16,
-        SUSPENSION_FOR_RUNNING_CALLBACK = 32,
-        SUSPENSION_FOR_FINALIZE = 64,
+        SUSPENSION_FOR_GC_PHASE = 1 << 0,
+        SUSPENSION_FOR_STW = 1 << 1,
+        SUSPENSION_FOR_EXIT = 1 << 2,
+        SUSPENSION_FOR_CPU_PROFILE = 1 << 3,
+        SUSPENSION_FOR_PENDING_CALLBACK = 1 << 4,
+        SUSPENSION_FOR_RUNNING_CALLBACK = 1 << 5,
+        /**
+         * The below ones are not actually suspension request, it's just some callbacks need to process
+         * at the beginning of transfering to RUNNING
+         * So This is equivalent to:
+         * ````    __attribute__((always_inline)) inline void DoLeaveSaferegion()
+         * ````    {
+         * ````        SetInSaferegion(SAFE_REGION_FALSE);
+         * ````        if (UNLIKELY_CC(HasAnySuspensionRequest())) {
+         * ````            HandleSuspensionRequest();
+         * ````        }
+         * ------>     if (UNLIKELY_CC(HasOtherCallback())) {
+         * ------>         ProcessCallback();
+         * ------>     }
+         * ````    }
+         * But this will make `DoLeaveSaferegion` cost more, so we just merge it into suspension request,
+         * and do some extra process at the end of `HandleSuspensionRequest`
+        */
+        SUSPENSION_FOR_FINALIZE = 1 << 31,
+        CALLBACKS_TO_PROCESS = SUSPENSION_FOR_FINALIZE,
     };
 
     enum GCPhaseTransitionState : uint32_t {
@@ -186,6 +204,13 @@ public:
     __attribute__((always_inline)) inline bool HasAnySuspensionRequest() const
     {
         return (suspensionFlag_.load(std::memory_order_acquire) != 0);
+    }
+
+    // Check whether current mutator needs to be suspended for GC or other request, see comments in `SuspensionType`
+    __attribute__((always_inline)) inline bool HasAnySuspensionRequestExceptCallbacks() const
+    {
+        uint32_t flag = suspensionFlag_.load(std::memory_order_acquire);
+        return (flag & ~CALLBACKS_TO_PROCESS) != 0;
     }
 
     __attribute__((always_inline)) inline bool CASSetSuspensionFlag(uint32_t oldFlag, uint32_t newFlag)
