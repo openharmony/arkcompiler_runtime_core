@@ -706,6 +706,7 @@ static std::optional<std::string> NapiTryDumpStack(napi_env env)
     for (auto stack = StackWalker::Create(coro); stack.HasFrame(); stack.NextFrame()) {
         printIstkFrames(istkIt->etsFrame);
         Method *method = stack.GetMethod();
+        ASSERT(method != nullptr);
         INTEROP_LOG(ERROR) << method->GetClass()->GetName() << "." << method->GetName().data << " at "
                            << method->GetLineNumberAndSourceFile(stack.GetBytecodePc());
     }

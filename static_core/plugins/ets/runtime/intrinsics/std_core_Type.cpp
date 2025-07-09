@@ -232,6 +232,7 @@ static EtsTypeAPIField *CreateField(const EtsClass *sourceClass, EtsField *field
     auto *apiField = EtsTypeAPIField::Create(coroutine);
     ASSERT(apiField != nullptr);
     EtsHandle<EtsTypeAPIField> typeapiField(coroutine, apiField);
+    ASSERT(typeapiField.GetPtr() != nullptr);
 
     // Set field's type, field's owner class type and name
     typeapiField->SetFieldType(fieldTypeHandle.GetPtr());
@@ -414,6 +415,7 @@ static EtsTypeAPIMethod *CreateMethodUnderHandleScope(EtsHandle<EtsTypeAPIType> 
     auto *apiMethod = EtsTypeAPIMethod::Create(coroutine);
     ASSERT(apiMethod != nullptr);
     EtsHandle<EtsTypeAPIMethod> typeapiMethod(coroutine, apiMethod);
+    ASSERT(typeapiMethod.GetPtr() != nullptr);
 
     // Set Type
     typeapiMethod->SetMethodType(methodTypeHandle.GetPtr());
@@ -504,6 +506,7 @@ static EtsObject *MakeObjectsArray(EtsString *elemTd, EtsRuntimeLinker *contextL
     auto *elementClass = TypeAPIGetClass(elemTd, contextLinker);
     ASSERT(elementClass != nullptr);
     EtsHandle arrayHandle(coro, EtsObjectArray::Create(elementClass, len));
+    ASSERT(arrayHandle.GetPtr() != nullptr);
     for (EtsLong i = 0; i < len; ++i) {
         auto *element = elementClass->CreateInstance();
         if (element == nullptr) {
@@ -580,6 +583,7 @@ static EtsTypeAPIParameter *CreateParameterUnderHandleScope(EtsHandle<EtsTypeAPI
 
     auto *coroutine = EtsCoroutine::GetCurrent();
     EtsHandle<EtsTypeAPIParameter> typeapiParameter(coroutine, EtsTypeAPIParameter::Create(coroutine));
+    ASSERT(typeapiParameter.GetPtr() != nullptr);
 
     // Set parameter's Type
     typeapiParameter->SetParameterType(paramTypeHandle.GetPtr());
@@ -661,7 +665,9 @@ EtsString *TypeAPIGetFunctionObjectNameFromAnnotation(EtsObject *functionObj)
     });
 
     if (retStrHandle.GetPtr() == nullptr) {
-        retStrHandle = VMHandle<EtsString>(thread, EtsString::CreateNewEmptyString()->GetCoreType());
+        auto *emptyString = EtsString::CreateNewEmptyString();
+        ASSERT(emptyString != nullptr);
+        retStrHandle = VMHandle<EtsString>(thread, emptyString->GetCoreType());
     }
 
     return retStrHandle.GetPtr();

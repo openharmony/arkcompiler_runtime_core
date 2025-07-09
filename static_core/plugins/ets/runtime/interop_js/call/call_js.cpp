@@ -166,6 +166,7 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertVarargsAndC
             EtsObject *etsElem = nullptr;
             etsArr->GetRef(el, &etsElem);
             auto refConv = JSRefConvertResolve<true>(ctx_, etsElem->GetClass()->GetRuntimeClass());
+            ASSERT(refConv != nullptr);
             allJsArgs[el + jsargs.size()] = refConv->Wrap(ctx_, etsElem);
         }
         return CallConverted<IS_NEWCALL>(*allJsArgs);
@@ -180,6 +181,7 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertVarargsAndC
     for (uint32_t el = 0; el < etsArr->GetLength(); ++el) {
         auto *etsElem = EtsObject::FromCoreType(etsArr->Get<ObjectHeader *>(el));
         auto refConv = JSRefConvertResolve<true>(ctx_, etsElem->GetClass()->GetRuntimeClass());
+        ASSERT(refConv != nullptr);
         allJsArgs[el + jsargs.size()] = refConv->Wrap(ctx_, etsElem);
     }
     return CallConverted<IS_NEWCALL>(*allJsArgs);
