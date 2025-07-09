@@ -13,7 +13,9 @@
     "component": {
         "name": "runtime_core",
         "subsystem": "arkcompiler",
-        "syscap": [],
+        "syscap": [
+            "SystemCapability.ArkCompiler.ANI"
+        ],
         "features": [
             "runtime_core_enable_codegen"
         ],
