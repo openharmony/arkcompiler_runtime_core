@@ -297,7 +297,8 @@ public:
     void CreateReadViaBarrier(Inst *inst, MemRef mem, Reg dstReg, bool isVolatile = false, RegMask preserved = {});
     void CreateReadPairViaBarrier(Inst *inst, MemRef mem, Reg dstReg1, Reg dstReg2, RegMask preserved = {});
     void CreateCmcPostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2 = INVALID_REGISTER, RegMask preserved = {});
-    void CreateCmcPostWRBCall(Inst *inst, MemRef mem, Reg dstReg, RegMask preserved = {});
+    void CreateCmcPostWRBCall(Inst *inst, MemRef mem, Reg srcReg, RegMask preserved = {});
+    void CreateCmcPostWRBCallWithPair(Inst *inst, MemRef mem, Reg srcReg1, Reg srcReg2, RegMask preserved = {});
     void CreateCmcReadViaBarrierCall(Inst *inst, MemRef mem, Reg dstReg, bool isVolatile = false,
                                      RegMask preserved = {});
     template <typename... Args>
@@ -397,6 +398,8 @@ protected:
     void EmitCallDynamic(CallInst *call);
     void EmitCallNative(CallInst *call);
     void FinalizeCall(CallInst *call);
+
+    void MemRefToOffset(Reg offsetReg, MemRef mem);
 
     uint32_t GetVtableShift();
     void CalculateCardIndex(Reg baseReg, ScopedTmpReg *tmp, ScopedTmpReg *tmp1);

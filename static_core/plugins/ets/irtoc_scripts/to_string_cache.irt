@@ -23,6 +23,7 @@ module Constants
   ELEM_STRING_OFFSET = ELEM_DATA_OFFSET
   ELEM_FLAG_OFFSET = "12"
   ELEM_NUMBER_OFFSET = "16"
+  OBJECT_POINTER_LOG2_SIZE = "OBJECT_POINTER_LOG2_SIZE"
 end
 
 function(:DoubleToStringDecimal,
@@ -42,7 +43,7 @@ function(:DoubleToStringDecimal,
   hash := Mul(numInt, mul).u64
   hash := ShrI(hash).Imm(56).u64
 
-  elem_offset := AddI(ShlI(hash).Imm(2).u64).Imm(Constants::ARRAY_DATA_OFFSET).u64
+  elem_offset := AddI(ShlI(hash).Imm(Constants::OBJECT_POINTER_LOG2_SIZE).u64).Imm(Constants::ARRAY_DATA_OFFSET).u64
   elem := Load(cache, elem_offset).Volatile.ref
   IfImm(Compare(elem, 0).EQ.b).Imm(0).NE.Unlikely {
     Goto(:SlowPath)

@@ -49,6 +49,7 @@ using ObjectPointerType = uintptr_t;
 #endif
 
 constexpr size_t OBJECT_POINTER_SIZE = sizeof(ObjectPointerType);
+constexpr size_t OBJECT_POINTER_LOG2_SIZE = Ctz(OBJECT_POINTER_SIZE);
 
 /// @brief Logarithmic/bit alignment
 enum Alignment {
