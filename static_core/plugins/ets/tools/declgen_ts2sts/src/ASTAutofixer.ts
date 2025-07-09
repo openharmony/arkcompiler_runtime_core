@@ -130,7 +130,8 @@ export class Autofixer {
     [ts.SyntaxKind.ImportSpecifier, [this[FaultID.NoETSKeyword].bind(this)]],
     [ts.SyntaxKind.ExportDeclaration, [this[FaultID.NoEmptyExport].bind(this)]],
     [ts.SyntaxKind.ExportSpecifier, [this[FaultID.NoETSKeyword].bind(this)]],
-    [ts.SyntaxKind.MappedType, [this[FaultID.MappedType].bind(this)]]
+    [ts.SyntaxKind.MappedType, [this[FaultID.MappedType].bind(this)]],
+    [ts.SyntaxKind.TupleType, [this[FaultID.TupleTypeToArray].bind(this)]]
   ]);
 
   fixNode(node: ts.Node): ts.VisitResult<ts.Node> {
@@ -1192,6 +1193,20 @@ export class Autofixer {
       return !(ts.isIdentifier(expression) && LIMIT_DECORATOR.includes(expression.text));
     });
     (node as any).illegalDecorators = filteredDecorators;
+
+    return node;
+  }
+
+  /**
+   * Rule: `tuple map to Array in type annotation`
+   */
+  private [FaultID.TupleTypeToArray](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (ts.isTupleTypeNode(node)) {
+      return this.context.factory.createTypeReferenceNode(
+        this.context.factory.createIdentifier('Array'),
+        [this.context.factory.createTypeReferenceNode(JSValue)]
+      );
+    }
 
     return node;
   }

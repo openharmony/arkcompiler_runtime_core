@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export type Class1<T> = ESObject;
-export type Nullable<T> = ESObject;
-export type Person = ESObject;
-export type ReadonlyPerson = ESObject;
-export type ArrayElementMap<T extends ESObject[], U> = ESObject;
-export type NumberArray = [number, number, number];
+export type Class1<T> = Any;
+export type Nullable<T> = Any;
+export type Person = Any;
+export type ReadonlyPerson = Any;
+export type ArrayElementMap<T extends Any[], U> = Any;
+export type NumberArray = Array<Any>;
 export type StringArray = ArrayElementMap<NumberArray, string>;
 export type Book = ESObject;
 export type SelectedKeys = 'title' | 'author';

@@ -16,7 +16,7 @@ export declare let s: Set<number>;
 export declare let ws: WeakSet<number>;
 export declare let m: Map<number, number>;
 export declare let wp: WeakMap<number, string>;
-export declare let tuple: [string, number];
+export declare let tuple: Array<Any>;
 export type User = Record<string, string>;
 export declare const rm: ReadonlyMap<string, number>;
 export declare const rs: ReadonlySet<number>;
