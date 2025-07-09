@@ -27,11 +27,11 @@ export final class DataView implements ArrayBufferView {
         return this.buffer_
     }
 
-    public get byteLength(): number {
+    public get byteLength(): int {
         return this.byteLength_
     }
 
-    public get byteOffset(): number {
+    public get byteOffset(): int {
         return this.byteOffset_
     }
 
@@ -41,23 +41,19 @@ export final class DataView implements ArrayBufferView {
      * Constructs view
      * @param buffer underlying buffer
      * @param byteOffset offset to start from
-     * @throws RangeError if offset is out of array
-     */
-    public constructor(buffer: ArrayBuffer, byteOffset: int) {
-        this(buffer, byteOffset, (buffer as Buffer).getByteLength() - byteOffset)
-    }
-
-    /**
-     * Constructs view
-     * @param buffer underlying buffer
-     * @param byteOffset offset to start from
      * @param byteLength lenth of bytes to take
      * @throws RangeError if provided indicies are invalid
      */
-    public constructor(buffer: ArrayBuffer, byteOffset: int, byteLength: int) {
+    public constructor(buffer: ArrayBuffer, byteOffset?: int, byteLength?: int) {
         this.buffer_ = buffer
         this.actualBuffer = buffer
-        const bufLen = this.actualBuffer.getByteLength()
+        if (byteOffset === undefined) {
+            byteOffset = 0
+        }
+        if (byteLength === undefined) {
+            byteLength = this.buffer_.getByteLength() - byteOffset
+        }
+        const bufLen = this.buffer_.getByteLength()
         if (byteOffset < 0 || byteLength < 0 || byteOffset > bufLen || byteOffset + byteLength > bufLen) {
             throw new RangeError("invalid arguments")
         }
@@ -65,20 +61,10 @@ export final class DataView implements ArrayBufferView {
         this.byteLength_ = byteLength
     }
 
-    /**
-     * Constructs view
-     * @param buffer underlying buffer
-     * @param byteOffset offset to start from
-     * @param byteLength lenth of bytes to take
-     * @throws RangeError if provided indicies are invalid
-     */
-    public constructor(buffer: ArrayBuffer, byteOffset?: Number, byteLength?: Number) {
-        this(buffer, asIntOrDefault(byteOffset, 0), asIntOrDefault(byteLength, (buffer as Buffer).getByteLength() - asIntOrDefault(byteOffset, 0)))
-    }
-
 {%- for bit in [8, 16, 32, 64] %}
 {%- for mode in ["Int", "Uint", "Float"] %}
 {%- if mode != "Float" or bit >= 32 %}
+
     // === {{mode}}{{bit}} ===
     {%- set impls = ['Little', 'Big'] if bit != 8 else ['Big'] %}
 
@@ -87,10 +73,13 @@ export final class DataView implements ArrayBufferView {
     {%- if mode == "Float" %}
     {%- set type2name = {32: "float", 64: "number"} %}
     {%- set type2nameCompat = {32: "number", 64: "number"} %}
+    {%- set returnType = {32: "number", 64: "number"} %}
     {%- elif mode == "Int" %}
     {%- set type2name = {8: "int", 16: "int", 32: "int", 64: "long"} %}
+    {%- set returnType = {8: "int", 16: "int", 32: "int", 64: "bigint"} %}
     {%- elif mode == "Uint" %}
     {%- set type2name = {8: "int", 16: "int", 32: "long", 64: "long"} %}
+    {%- set returnType = {8: "int", 16: "int", 32: "number", 64: "bigint"} %}
     {%- endif %}
     {%- set methodName = ('Big' if bit == 64 and mode != 'Float' else '') + mode + '{}'.format(bit) %}
 
@@ -99,7 +88,7 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to read
      * @returns read value (big endian)
      */
-    public get{{methodName}}(byteOffset: int): {{type2nameCompat[bit]}} {
+    public get{{methodName}}(byteOffset: int): {{returnType[bit]}} {
         return this.get{{methodName}}Big(byteOffset)
     }
 
@@ -114,35 +103,29 @@ export final class DataView implements ArrayBufferView {
     {%- if bit == 8 %}
 
     /**
-     * Read bytes as they represent given type
-     * @param byteOffset zero index to read
-     * @returns read value (big endian)
-     */
-    public get{{methodName}}(byteOffset: number): {{type2nameCompat[bit]}} {
-        return this.get{{methodName}}Big(byteOffset)
-    }
-
-    /**
      * Sets bytes as they represent given type
      * @param byteOffset zero index to write (big endian)
      */
-    public set{{methodName}}(byteOffset: number, value: {{type2nameCompat[bit]}}): void {
+    public set{{methodName}}(byteOffset: int, value: {{type2nameCompat[bit]}}): void {
         this.set{{methodName}}Big(byteOffset, value)
     }
 
     {%- else %}
+
     /**
      * Sets bytes as they represent given type
      * @param byteOffset zero index to write
      * @param littleEndian read as little or big endian
      */
-    public set{{methodName}}(byteOffset: number, value: {{type2nameCompat[bit]}}, littleEndian?: boolean): void {
+    public set{{methodName}}(byteOffset: int, value: {{type2nameCompat[bit]}}, littleEndian?: boolean): void {
         if (littleEndian !== undefined && littleEndian.valueOf() == true) {
             this.set{{methodName}}Little(byteOffset, value)
         } else {
             this.set{{methodName}}Big(byteOffset, value)
         }
     }
+
+    {%- if type2nameCompat[bit] != type2name[bit] %}
 
     /**
      * Sets bytes as they represent given type
@@ -156,6 +139,7 @@ export final class DataView implements ArrayBufferView {
             this.set{{methodName}}Big(byteOffset, value)
         }
     }
+    {%- endif %}
 
     /**
      * Read bytes as they represent given type
@@ -163,22 +147,8 @@ export final class DataView implements ArrayBufferView {
      * @param littleEndian read as little or big endian
      * @returns read value
      */
-    public get{{methodName}}(byteOffset: number, littleEndian?: boolean): {{type2nameCompat[bit]}} {
+    public get{{methodName}}(byteOffset: int, littleEndian?: boolean): {{returnType[bit]}} {
         if (littleEndian !== undefined && littleEndian.valueOf() == true) {
-            return this.get{{methodName}}Little(byteOffset)
-        } else {
-            return this.get{{methodName}}Big(byteOffset)
-        }
-    }
-
-    /**
-     * Read bytes as they represent given type
-     * @param byteOffset zero index to read
-     * @param littleEndian read as little or big endian
-     * @returns read value
-     */
-    public get{{methodName}}(byteOffset: int, littleEndian: boolean): {{type2nameCompat[bit]}} {
-        if (littleEndian) {
             return this.get{{methodName}}Little(byteOffset)
         } else {
             return this.get{{methodName}}Big(byteOffset)
@@ -188,8 +158,9 @@ export final class DataView implements ArrayBufferView {
 
     {%- for suffix in impls: %}
     {%- set getIdx = '+' if suffix == 'Little' else '+ {} -'.format(bit // 8 - 1) %}
-    private get{{methodName}}{{suffix}}(byteOffset: int): {{type2nameCompat[bit]}} {
-        if (byteOffset + {{bit // 8}} > this.byteLength_) {
+
+    private get{{methodName}}{{suffix}}(byteOffset: int): {{returnType[bit]}} {
+        if (byteOffset < 0 || byteOffset + {{bit // 8}} > this.byteLength_) {
             throw new RangeError("wrong index")
         }
         {%- set resType = type2nameBits[bit] if mode == "Float" else type2name[bit] %}
@@ -216,10 +187,6 @@ export final class DataView implements ArrayBufferView {
         return res
         {%- endif %}
     }
-    private get{{methodName}}{{suffix}}(byteOffset: number): {{type2nameCompat[bit]}} {
-        let res = this.get{{methodName}}{{suffix}}(byteOffset.toInt())
-        return res
-    }
 
     private set{{methodName}}{{suffix}}(byteOffset: int, value: {{type2name[bit]}}): void {
         if (byteOffset < 0 || byteOffset + {{bit / 8}} > this.byteLength_) {
@@ -243,7 +210,10 @@ export final class DataView implements ArrayBufferView {
             this.actualBuffer.set(startByte {{getIdx}} i,  byteVal)
         }
     }
-    private set{{methodName}}{{suffix}}(byteOffset: number, value: {{type2nameCompat[bit]}}): void {
+
+    {%- if type2nameCompat[bit] != type2name[bit] %}
+
+    private set{{methodName}}{{suffix}}(byteOffset: int, value: {{type2nameCompat[bit]}}): void {
         {%- if bit == 64 and mode == "Int" %}
         const val: {{type2name[bit]}} = value.getLong();
         {%- elif bit == 64 and mode == "Uint" %}
@@ -258,8 +228,9 @@ export final class DataView implements ArrayBufferView {
         {% set helpType = "Double" if (type2name[bit]|capitalize == "Number") else type2name[bit]|capitalize %}
         const val: {{type2name[bit]}} = value.to{{helpType}}();
         {%- endif %}
-        this.set{{methodName}}{{suffix}}(byteOffset.toInt(), val)
+        this.set{{methodName}}{{suffix}}(byteOffset, val)
     }
+    {%- endif %}
     {%- endfor %}
 
 {%- endif%}

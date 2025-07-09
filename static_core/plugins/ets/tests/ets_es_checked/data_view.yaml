@@ -17,13 +17,13 @@ self:
   - |
     new DataView(new ArrayBuffer(32))
 setup: |
-  self.setFloat64(0.0, 1.1)
-  self.setFloat32(8.0, 1.5)
-  self.setInt32(12.0, -1.0)
+  self.setFloat64(0, 1.1)
+  self.setFloat32(8, 1.5)
+  self.setInt32(12, -1.0)
   self.setInt32(24, 65535)
 # self.setBigUint64(16.0, 1n << 63n)
 vars:
-  default_inds: [-1.0, 0.0, 8.0, 12.0, 16.0, 24.0, 14.0, NaN, Infinity, -Infinity]
+  default_inds: [-1, 0, 8, 12, 16, 24, 14]
   default_ints_set: [-1.0, 0.0, 8.0, 65536, 65535, 16.0, 24.0, 14.0, NaN]
 sub:
   ### numeric getters
@@ -121,28 +121,28 @@ sub:
   ### floats
   # note that infinity and nan have more than one bit representation and hence not tested here
   - setup: |
-      self.setFloat32(0.0, 1.1)
-      self.setFloat32(4.0, 1.5)
-      self.setFloat64(8.0, -1.0)
-      self.setFloat64(16.0, 65536)
+      self.setFloat32(0, 1.1)
+      self.setFloat32(4, 1.5)
+      self.setFloat64(8, -1.0)
+      self.setFloat64(16, 65536)
     sub:
       - method: getFloat32
         params:
-          - paramOf 0.0, 4.0, 8.0, 16.0
+          - paramOf 0, 4, 8, 16
           - paramOf true, false
         mandatory: 1
       - method: getFloat64
         params:
-          - paramOf 0.0, 4.0, 8.0, 16.0
+          - paramOf 0, 4, 8, 16
           - paramOf true, false
         mandatory: 1
   - setup: |
-      self.setFloat64(0.0, pars)
-    expr: self.getFloat64(0.0)
+      self.setFloat64(0, pars)
+    expr: self.getFloat64(0)
     params:
       - paramOf 'Infinity', 'NaN', '-Infinity', '1e-30', '1e10'
   - setup: |
-      self.setFloat32(0.0, pars)
-    expr: self.getFloat32(0.0)
+      self.setFloat32(0, pars)
+    expr: self.getFloat32(0)
     params:
       - paramOf 'Infinity', 'NaN', '-Infinity', '1e-30', '1e10'

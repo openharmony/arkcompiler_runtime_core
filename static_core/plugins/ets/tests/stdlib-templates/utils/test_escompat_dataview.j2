@@ -64,16 +64,16 @@ function testProps(value: {{.item.primitive_type}}): int {
 function testMultiple(value: {{.item.primitive_type}}): int {
     const buffer = new ArrayBuffer({{.item.byte_length}})
     const view = new DataView(buffer)
-    const elementLength: number = {{.item.element_length}}
-    const elementsCount = Math.trunc({{.item.byte_length}} / elementLength)
+    const elementLength: int = {{.item.element_length}}
+    const elementsCount = Math.trunc({{.item.byte_length}} / elementLength).toInt()
     let failures = 0
-    for (let i: number = 0; i < elementsCount; ++i) {
+    for (let i: int = 0; i < elementsCount; ++i) {
         view.set{{.item.setter_getter_base}}(i * elementLength, value)
     }
 
     const goldString = new Number(value).toPrecision({{.item.precision}})
 
-    for (let i: number = 0; i < elementsCount; ++i) {
+    for (let i: int = 0; i < elementsCount; ++i) {
         const fromBuffer = new Number(view.get{{.item.setter_getter_base}}(i * elementLength))
         const fromBufferString = fromBuffer.toPrecision({{.item.precision}})
         if (fromBufferString != goldString)
