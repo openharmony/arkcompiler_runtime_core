@@ -183,9 +183,9 @@ export class Atomics {
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigUint64Array) {
-            return new BigInt(buffer.atomicAndI64(iindex, byteOffset, value.getULong()))
-        } else if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicAndU64(iindex, byteOffset, value.getLong()))
+        } else if (typedArray instanceof BigInt64Array) {
+            return new BigInt(buffer.atomicAndI64(iindex, byteOffset, value.getULong()))
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -239,9 +239,9 @@ export class Atomics {
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigUint64Array) {
-            return new BigInt(buffer.atomicCompareExchangeI64(iindex, byteOffset, expectedValue.getULong(), replacementValue.getULong()))
-        } else if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicCompareExchangeU64(iindex, byteOffset, expectedValue.getLong(), replacementValue.getLong()))
+        } else if (typedArray instanceof BigInt64Array) {
+            return new BigInt(buffer.atomicCompareExchangeI64(iindex, byteOffset, expectedValue.getULong(), replacementValue.getULong()))
         } else {
             throw new Error("Unhandled array type!")
         }
