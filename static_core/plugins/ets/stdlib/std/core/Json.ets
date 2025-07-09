@@ -411,7 +411,8 @@ export namespace jsonx {
          */
         setElement(key: string, value: JsonElement) {
             if (this.jsonType != JsonType.JsonObject) {
-                throw new JsonTypeError("This value's ValueKind is not Object.")
+                this.setUndefined();
+                this.maybeObjectValues = new Map<string, JsonElement>();
             }
             this.maybeObjectValues!.set(key, value)
         }
