@@ -49,8 +49,7 @@ export declare class C1 {
     constructor();
 }
 export declare interface I2 {
-    get a(): CI1;
-    set a(value: CI1);
+    a: CI1;
     foo(a: CI2): CI3;
 }
 export declare class C4<T extends CC4> {
