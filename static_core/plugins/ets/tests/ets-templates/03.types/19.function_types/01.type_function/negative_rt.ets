@@ -21,7 +21,6 @@ desc: >-
     This method checks the arguments of type Function,
     and calls the underlying function value if the number
     and types of the arguments are valid.
-tags: [negative]
 ---*/
 
 {{c}}

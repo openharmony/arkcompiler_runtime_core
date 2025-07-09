@@ -19,13 +19,13 @@ desc: >-
     if type of index expression is number or other floating-point type and its fractional part
     is different from 0 then it will be runtime error if such situation is identified during
     program execution and compile-time one if detected during compilation.
-tags: [negative]
 ---*/
 
 let arr: number[] = [1, 2, 3]
 
 function main() {
     let v: number = {{c.expr}}  // Runtime error expected
-    arr[v] = 0;
+    let expectedException = (e: Error | Exception): boolean => {return (e instanceof NonIntegralIndexError)}
+    arktest.expectThrow(() => {arr[v] = 0;}, expectedException)
 }
 {% endfor %}

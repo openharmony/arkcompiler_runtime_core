@@ -50,6 +50,20 @@
 #24420
 03.types/20.union_types/ut_34.ets
 
+# 26826
+03.types/15.type_bigint/bint_n_0.ets
+03.types/15.type_bigint/bint_n_1.ets
+03.types/15.type_bigint/bint_n_2.ets
+03.types/15.type_bigint/bint_n_3.ets
+03.types/15.type_bigint/bint_n_4.ets
+03.types/15.type_bigint/bint_n_5.ets
+03.types/15.type_bigint/bint_n_6.ets
+03.types/15.type_bigint/bint_n_7.ets
+03.types/15.type_bigint/bint_n_8.ets
+03.types/15.type_bigint/bint_n_9.ets
+03.types/15.type_bigint/bint_n_10.ets
+03.types/15.type_bigint/bint_n_11.ets
+
 #26072 expected equality failed: '0' === ' ''
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/assn_var/assn-var_1.ets
 
@@ -486,6 +500,12 @@
 
 #23238 Method returning 'this' returns wrong instance
 09.classes/05.method_declarations/08.methods_returning_this/met_ret_this_8.ets
+
+# 26983
+09.classes/04.field_declarations/06.overriding_fields/sample.ets
+
+# 26983
+09.classes/04.field_declarations/06.overriding_fields/sample.ets
 
 #16840
 10.interfaces/03.interface_members/methods_overriding.ets

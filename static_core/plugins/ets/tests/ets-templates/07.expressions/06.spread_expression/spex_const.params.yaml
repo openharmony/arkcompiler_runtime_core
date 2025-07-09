@@ -192,11 +192,10 @@ cases:
               }
           }
           let a1: Object[]|null = null
+          let expectedException = (e: Error | Exception): boolean => {return (e instanceof NullPointerError)}
       use: |-
           // ensure-not-nullish expression
-          let obj = new A(5, ...a1!)  // NPE expected
-          arktest.assertTrue(obj.fld == 7)
-      tags: 'negative'
+          arktest.expectThrow(() => {new A(5, ...a1!)}, expectedException)  // NPE expected
 
     - decl: |-
           class A {
@@ -549,10 +548,10 @@ cases:
               }
           }
           let a1: [Object, Error]|null = null
+          let expectedException = (e: Error | Exception): boolean => {return (e instanceof NullPointerError)}
       use: |-
           // ensure-not-nullish expression
-          arktest.assertTrue(new A(...a1!).fld == 3) // NPE expected
-      tags: 'negative'
+          arktest.expectThrow(() => {new A(...a1!).fld == 3}, expectedException) // NPE expected
 
     - decl: |-
           let a1: [Object, Error]|null = null
@@ -571,6 +570,7 @@ cases:
     - decl: |-
           let a1: [Object, Error]|null = null
           let a2: [Object, Error]|null = null
+          let expectedException = (e: Error | Exception): boolean => {return (e instanceof NullPointerError)}
           class A {
               fld: int
               constructor(...p: [Object, Error]) {
@@ -579,8 +579,7 @@ cases:
           }
       use: |-
           // nullish-coalescing expression
-          arktest.assertTrue(new A(...(a1 ?? a2)!).fld == 3) // NPE expected
-      tags: 'negative'
+          arktest.expectThrow(() => {new A(...(a1 ?? a2)!).fld == 3}, expectedException) // NPE expected
 
     - decl: |-
           let a1: [Object, Error]|null = null
