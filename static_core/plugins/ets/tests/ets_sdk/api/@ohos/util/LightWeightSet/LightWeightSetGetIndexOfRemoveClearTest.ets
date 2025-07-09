@@ -74,11 +74,11 @@ function testGetIndexOfDataInEmptySet() {
     assertEQ(lightWeightSet.length, 0, "The lightWeightSet length should be 0");
 }
 
+class C1 {
+    name: string = ""
+    age: string = ""
+}
 function testGetIndexOfComplexData() {
-    class C1 {
-        name: string = ""
-        age: string = ""
-    }
     let lightWeightSet: LightWeightSet<object> = new LightWeightSet<object>();
     let a: C1 = {
         name: "Dylon", age: "13"

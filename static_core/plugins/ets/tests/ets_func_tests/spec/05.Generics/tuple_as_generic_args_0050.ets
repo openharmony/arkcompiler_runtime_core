@@ -17,10 +17,10 @@
  desc: 5. Generics
  tags: [compile-only]
  ---*/
+class A<T> {
+    data: T
+}
 
 function main() {
-    class A<T> {
-        data: T
-    }
     let a: A<[number, int, long]> = new A<[number, int, long]>()
 }

@@ -62,12 +62,12 @@ function testConstructorWithSimpleData() {
     arktest.assertEQ(hashMap.get('li'), 1);
 }
 
+class Tmp {
+    name: number = 0
+}
+
 //Test cases ported from ArkTS 1.0:HASHMAP_CONSTRUCTOR_0200
 function testConstructorWithCustomData() {
-    class Tmp {
-        name: number = 0
-    }
-
     const hashMap = new HashMap<string, Tmp>();
     let param: Tmp = {
         name: 1
