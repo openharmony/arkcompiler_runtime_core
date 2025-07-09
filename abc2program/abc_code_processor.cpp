@@ -88,6 +88,9 @@ void AbcCodeProcessor::FillInsWithoutLabels()
     bc_ins = BytecodeInstruction(ins_arr);
     while (bc_ins.GetAddress() != bc_ins_last.GetAddress()) {
         pandasm::Ins *pa_ins = code_converter_->BytecodeInstructionToPandasmInstruction(bc_ins, method_id_);
+        if (pa_ins == nullptr) {
+            LOG(FATAL, ABC2PROGRAM) << "> Failed to convert Bytecode to Pandasm.";
+        }
         /*
          * Private field jump_inst_idx_vec_ store all jump inst idx in a pandasm::Function.
          * For example, a pandasm::Function has 100 pandasm::Ins with only 4 jump pandasm::Ins.
