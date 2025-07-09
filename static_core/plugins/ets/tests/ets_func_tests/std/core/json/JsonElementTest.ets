@@ -558,3 +558,11 @@ function testJsonElementFactoryMethods(): void {
     arktest.assertEQ(objectElem.getString("name"), "John Doe", "Factory method should preserve object property values");
     arktest.assertEQ(objectElem.getInteger("age"), 30, "Factory method should preserve object property values");
 }
+
+function testJsonElementSetElementChangeType(): void {
+    const root = new jsonx.JsonElement();
+    const prop = new jsonx.JsonElement();
+    prop.setDouble(10);
+    root.setElement("prop", prop);
+    arktest.assertEQ(root.getDouble("prop"), 10, "SetElement should automatically change type");
+}
