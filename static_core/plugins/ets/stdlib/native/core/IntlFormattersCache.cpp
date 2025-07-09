@@ -40,6 +40,9 @@ LocNumFmt &IntlFormattersCache::NumFmtsCacheInvalidation(ani_env *env, const Par
             // Number range formatter will be created via call NumRangeFmtsCacheInvalidation
             auto *ptr = new icu::number::LocalizedNumberFormatter();
             if (UNLIKELY(ptr == nullptr)) {
+                status = ANI_PENDING_ERROR;
+                std::string message = "Create Icu LocalizedNumberFormatter failed";
+                ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
                 return defaultLocNumFmt;
             }
 
@@ -53,12 +56,20 @@ LocNumFmt &IntlFormattersCache::NumFmtsCacheInvalidation(ani_env *env, const Par
             NumberFormatters f;
             f.numFmt.reset(ptr);
             auto [iter, isNumFmtInserted] = cache_.insert_or_assign(tag, std::move(f));
-            ASSERT(isNumFmtInserted);
+            if (!isNumFmtInserted) {
+                status = ANI_PENDING_ERROR;
+                std::string message = "Create and insert Icu LocalizedNumberFormatter failed";
+                ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+                return defaultLocNumFmt;
+            }
             it = iter;
         } else if (it->second.numFmt == nullptr) {
             // Still not created, now create new number formatter, range formatter is not changed
             auto *ptr = new icu::number::LocalizedNumberFormatter();
             if (UNLIKELY(ptr == nullptr)) {
+                status = ANI_PENDING_ERROR;
+                std::string message = "Create Icu LocalizedNumberFormatter failed";
+                ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
                 return defaultLocNumFmt;
             }
             status = InitNumFormatter(env, options, *ptr);
@@ -87,6 +98,9 @@ LocNumRangeFmt &IntlFormattersCache::NumRangeFmtsCacheInvalidation(ani_env *env,
             // Number formatter will be created via call IntlFormattersCacheInvalidation
             auto *ptr = new icu::number::LocalizedNumberRangeFormatter();
             if (UNLIKELY(ptr == nullptr)) {
+                status = ANI_PENDING_ERROR;
+                std::string message = "Create Icu LocalizedNumberRangeFormatter failed";
+                ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
                 return defaultLocNumRangeFmt;
             }
 
@@ -100,12 +114,20 @@ LocNumRangeFmt &IntlFormattersCache::NumRangeFmtsCacheInvalidation(ani_env *env,
             NumberFormatters f;
             f.numRangeFmt.reset(ptr);
             auto [iter, isNumRangeFmtInserted] = cache_.insert_or_assign(tag, std::move(f));
-            ASSERT(isNumRangeFmtInserted);
+            if (!isNumRangeFmtInserted) {
+                status = ANI_PENDING_ERROR;
+                std::string message = "Create and insert Icu LocalizedNumberRangeFormatter failed";
+                ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+                return defaultLocNumRangeFmt;
+            }
             it = iter;
         } else if (it->second.numRangeFmt == nullptr) {
             // Still not created, now create new number range formatter, number formatter is not changed
             auto *ptr = new icu::number::LocalizedNumberRangeFormatter();
             if (UNLIKELY(ptr == nullptr)) {
+                status = ANI_PENDING_ERROR;
+                std::string message = "Create Icu LocalizedNumberRangeFormatter failed";
+                ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
                 return defaultLocNumRangeFmt;
             }
 

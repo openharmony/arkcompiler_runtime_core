@@ -67,14 +67,15 @@ function main(): int {
         console.println("fail: decoded invalid")
         fails += 1
     }
-
+    // CC-OFFNXT(G.OTH.05) test logic
     fails += testEquals(encodeURI("https://ru.wikipedia.org/wiki/Радуга#Радуга_и_ассоциированные_термины"), 'https://ru.wikipedia.org/wiki/%D0%A0%D0%B0%D0%B4%D1%83%D0%B3%D0%B0#%D0%A0%D0%B0%D0%B4%D1%83%D0%B3%D0%B0_%D0%B8_%D0%B0%D1%81%D1%81%D0%BE%D1%86%D0%B8%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%BD%D1%8B%D0%B5_%D1%82%D0%B5%D1%80%D0%BC%D0%B8%D0%BD%D1%8B')
-
+    // CC-OFFNXT(G.OTH.05) test logic
     fails += testInverse("https://ru.wikipedia.org/wiki/Радуга#Радуга_и_ассоциированные_термины")
     fails += testInverse("🌈🌬️👩🏻‍🏭💅🏿")
     fails += testInverse("http://www.example.org:56789/a/b/c.txt?t=win&s=chess#para5")
-
+    // CC-OFFNXT(G.OTH.05) test logic
     fails += testInverse("https://zh-classical.wikipedia.org/wiki/自然數#溤諾曼定義")
+    // CC-OFFNXT(G.OTH.05) test logic
     fails += testEquals(encodeURI("https://zh-classical.wikipedia.org/wiki/自然數#溤諾曼定義"), 'https://zh-classical.wikipedia.org/wiki/%E8%87%AA%E7%84%B6%E6%95%B8#%E6%BA%A4%E8%AB%BE%E6%9B%BC%E5%AE%9A%E7%BE%A9')
 
     return fails

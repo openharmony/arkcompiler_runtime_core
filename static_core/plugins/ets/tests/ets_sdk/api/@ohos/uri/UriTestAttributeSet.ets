@@ -47,7 +47,7 @@ function SetUserInfoTest() {
     uriObj.userInfo = "testuri007"
     arktest.assertEQ(uriObj.userInfo, 'testuri007');
     arktest.assertEQ(uriObj.toString(), 'http://testuri007@www.hw.com:77/path/path23?query#qwer');
-
+    // CC-OFFNXT(G.OTH.05) test logic
     uriObj = new uri.URI("http://www.test.com:77/path/path23?query#qwer");
     uriObj.userInfo = "testuri008"
     arktest.assertEQ(uriObj.userInfo, 'testuri008');
@@ -66,7 +66,7 @@ function SetUserInfoTest() {
     uriObj = new uri.URI("http://userinfo@www.test.com:77/path/path23?query#qwer");
     uriObj.userInfo = ""
     arktest.assertEQ(uriObj.userInfo, null);
-    arktest.assertEQ(uriObj.toString(), 'http://www.test.com:77/path/path23?query#qwer');
+    arktest.assertEQ(uriObj.toString(), 'http://www.test.com:77/path/path23?query#qwer');  // CC-OFF(G.OTH.05) test logic
 }
 
 function SetPathTest() {
@@ -167,7 +167,7 @@ function SetAuthorityTest() {
     arktest.assertEQ(uriObj.userInfo, null);
     arktest.assertEQ(uriObj.host, "www.test11.cn");
     arktest.assertEQ(uriObj.port, "88");
-    arktest.assertEQ(uriObj.toString(), 'http://www.test11.cn:88/testuri017/p%E5%A4%A7p/?query#asd');
+    arktest.assertEQ(uriObj.toString(), 'http://www.test11.cn:88/testuri017/p%E5%A4%A7p/?query#asd');  // CC-OFF(G.OTH.05) test logic
 
     uriObj = new uri.URI("http://userinfo@www.test.com:77/testuri017/p大p/?query#asd");
     uriObj.authority = 'uusc@www.testuc.com:741';
@@ -243,7 +243,7 @@ function SetEncodedUserInfo() {
     arktest.assertEQ(uriObj.encodedUserInfo, 'testuri007');
     arktest.assertEQ(uriObj.toString(), 'http://testuri007@www.hw.com:77/path/path23?query#qwer');
 
-    uriObj = new uri.URI("http://www.test.com:77/path/path23?query#qwer");
+    uriObj = new uri.URI("http://www.test.com:77/path/path23?query#qwer");  // CC-OFF(G.OTH.05) test logic
     uriObj.encodedUserInfo = "testuri008"
     arktest.assertEQ(uriObj.encodedUserInfo, 'testuri008');
     arktest.assertEQ(uriObj.toString(), 'http://testuri008@www.test.com:77/path/path23?query#qwer');
@@ -258,7 +258,7 @@ function SetEncodedUserInfo() {
     uriObj = new uri.URI("http://userinfo@www.test.com:77/path/path23?query#qwer");
     uriObj.encodedUserInfo = ""
     arktest.assertEQ(uriObj.userInfo, null);
-    arktest.assertEQ(uriObj.toString(), 'http://www.test.com:77/path/path23?query#qwer');
+    arktest.assertEQ(uriObj.toString(), 'http://www.test.com:77/path/path23?query#qwer');  // CC-OFF(G.OTH.05) test logic
 }
 
 function SetEncodedPathTest() {
@@ -340,7 +340,7 @@ function SetEncodedAuthority() {
     arktest.assertEQ(uriObj.encodedUserInfo, null);
     arktest.assertEQ(uriObj.host, "www.test11.cn");
     arktest.assertEQ(uriObj.port, "88");
-    arktest.assertEQ(uriObj.toString(), 'http://www.test11.cn:88/testuri017/p%E5%A4%A7p/?query#asd');
+    arktest.assertEQ(uriObj.toString(), 'http://www.test11.cn:88/testuri017/p%E5%A4%A7p/?query#asd');  // CC-OFF(G.OTH.05) test logic
     uriObj = new uri.URI("http://userinfo@www.test.com:77/testuri017/p大p/?query#asd");
     uriObj.encodedAuthority = 'uusc@www.testuc.com:741';
     arktest.assertEQ(uriObj.encodedUserInfo, "uusc");
@@ -441,13 +441,13 @@ function UriSetNullAttribute() {
     arktest.assertEQ(gaogao.encodedFragment, "fagment");
     arktest.assertEQ(gaogao.encodedAuthority, "gg:gaogao@www.test.com:99");
 
-    // NOTE(zhangziye):#25267 Unable to use different getter/setter signature 
-    // arktest.assertEQ(gaogao.ssp, "//gg:gaogao@www.test.com:99/path/path?query");
-    // arktest.assertEQ(gaogao.encodedSSP, "//gg:gaogao@www.test.com:99/path/path?query");
+    // NOTE(zhangziye):#25267 Unable to use different getter/setter signature
+    // arktest.assertEQ(gaogao.ssp, "//gg:gaogao@www.test.com:99/path/path?query");  // CC-OFF(G.OTH.04) test logic
+    // arktest.assertEQ(gaogao.encodedSSP, "//gg:gaogao@www.test.com:99/path/path?query");  // CC-OFF(G.OTH.04) test logic
     // gaogao.ssp = null;
     // gaogao.encodedSSP = null;
-    // arktest.assertEQ(gaogao.ssp, "//gg:gaogao@www.test.com:99/path/path?query");
-    // arktest.assertEQ(gaogao.encodedSSP, "//gg:gaogao@www.test.com:99/path/path?query");
+    // arktest.assertEQ(gaogao.ssp, "//gg:gaogao@www.test.com:99/path/path?query");  // CC-OFF(G.OTH.04) test logic
+    // arktest.assertEQ(gaogao.encodedSSP, "//gg:gaogao@www.test.com:99/path/path?query");  // CC-OFF(G.OTH.04) test logic
 }
 
 function main(): int {

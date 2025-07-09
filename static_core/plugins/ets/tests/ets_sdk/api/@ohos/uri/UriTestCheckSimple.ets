@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import {uri} from "@ohos.uri";
- 
+
 function testCheckIsAbsolute001() {
   let gaogao = new uri.URI('f/tp://username:password@www.test.com:88/path?query#fagment');
   let res = gaogao.checkIsAbsolute();
@@ -45,7 +45,7 @@ function testCheckIsAbsolute005() {
 }
 
 function testCheckRelative001() {
-  let route = new uri.URI('http://www.test.com/images/pic.jpg');
+  let route = new uri.URI('http://www.test.com/images/pic.jpg');  // CC-OFF(G.OTH.05) test logic
   let res = route.checkRelative();
   arktest.assertFalse(res);
 }
@@ -57,7 +57,7 @@ function testCheckRelative002() {
 }
 
 function testCheckRelative003() {
-  let route = new uri.URI('https://www.test.com/images/logo.jpg');
+  let route = new uri.URI('https://www.test.com/images/logo.jpg');  // CC-OFF(G.OTH.05) test logic
   let res = route.checkRelative();
   arktest.assertFalse(res);
 }
@@ -74,7 +74,7 @@ function testCheckRelative005() {
 }
 
 function testCheckOpaque001() {
-  let route = new uri.URI('http://www.test.com/images/pic.jpg');
+  let route = new uri.URI('http://www.test.com/images/pic.jpg');  // CC-OFF(G.OTH.05) test logic
   let res = route.checkOpaque();
   arktest.assertFalse(res);
 }
@@ -97,7 +97,7 @@ function testCheckOpaque004() {
 }
 
 function testCheckHierarchical001() {
-  let route = new uri.URI('http://www.test.com/images/pic.jpg');
+  let route = new uri.URI('http://www.test.com/images/pic.jpg');  // CC-OFF(G.OTH.05) test logic
   let res = route.checkHierarchical();
   arktest.assertTrue(res);
 }
@@ -123,7 +123,7 @@ function testCheckHierarchical004() {
 
 function main(): int {
   let suite = new arktest.ArkTestsuite("URI XTS tests");
-  
+
   suite.addTest("testCheckIsAbsolute001", testCheckIsAbsolute001);
   suite.addTest("testCheckIsAbsolute002", testCheckIsAbsolute002);
   suite.addTest("testCheckIsAbsolute003", testCheckIsAbsolute003);
