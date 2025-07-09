@@ -1464,6 +1464,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     public override forEach(callbackfn: (value: T, index: number, array: Array<T>) => void): void {
         const len0 = this.actualLength;
         for (let i = 0; i < len0; i++) {
+            if (i >= this.actualLength) {
+                break
+            }
             callbackfn(this.$_get_unsafe(i), i.toDouble(), this)
         }
     }
