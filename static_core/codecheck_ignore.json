@@ -46,6 +46,7 @@
   "plugins/ets/RegisterPlugin.cmake": "*",
   "plugins/ets/runtime/ani/ani_interaction_api.cpp": "*",
   "plugins/ets/runtime/interpreter/any_opcodes.inc": {"G.INC.02": "*"},
+  "plugins/ets/runtime/ani/docs/ani.md": "*",
   "plugins/ets/runtime/napi": "*",
   "plugins/ets/sdk/api": "*",
   "plugins/ets/sdk/CMakeLists.txt": {"bc-40001": "*"},
