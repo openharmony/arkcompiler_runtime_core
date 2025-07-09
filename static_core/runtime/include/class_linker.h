@@ -251,6 +251,8 @@ public:
 
     Class *ObjectToClass(const ObjectHeader *object)
     {
+        ASSERT(object);
+        ASSERT(object->ClassAddr<Class>());
         ASSERT(object->ClassAddr<Class>()->IsClassClass());
         return extensions_[ark::panda_file::GetLangArrIndex(object->ClassAddr<BaseClass>()->GetSourceLang())]
             ->FromClassObject(const_cast<ObjectHeader *>(object));

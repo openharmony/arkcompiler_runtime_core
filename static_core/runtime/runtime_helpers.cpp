@@ -30,6 +30,7 @@ void PrintStackTrace()
     LOG(ERROR, RUNTIME) << "====================== Stack trace begin ======================";
     for (auto stack = StackWalker::Create(thread); stack.HasFrame(); stack.NextFrame()) {
         Method *method = stack.GetMethod();
+        ASSERT(method != nullptr);
         LOG(ERROR, RUNTIME) << method->GetClass()->GetName() << "." << method->GetName().data << " at "
                             << method->GetLineNumberAndSourceFile(stack.GetBytecodePc());
     }
