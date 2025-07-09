@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import { C1 } from './include/lib';
-export type CustomPromise<T> = ESObject;
+export type CustomPromise<T> = Any;
 export declare class Animal {
     move(): void;
 }
@@ -24,7 +24,7 @@ export declare class Dog extends Animal {
 export declare class test extends C1 {
     penWidth: number;
 }
-export type testPromise = ESObject;
+export type testPromise = Any;
 export declare interface Shape {
     color: string;
 }
@@ -34,4 +34,4 @@ export declare interface PenStroke {
 export declare interface Square extends Shape, PenStroke {
     sideLength: number;
 }
-export type SquareTest = ESObject;
+export type SquareTest = Any;

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-export const JSValue: string = 'ESObject';
+export const JSValue: string = 'Any';
 export const KitPrefix: string[] = [];
 export const BuiltInType: string[] = ['Symbol'];
 export const ETSKeyword: string[] = ['Class', 'ESObject', 'MethodType'];
