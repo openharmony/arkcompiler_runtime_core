@@ -15,8 +15,10 @@ limitations under the License.
 
 /*---
 desc: >-
-    Type string behaves like a reference type (see Reference Types) if it is created, assigned, or passed as an argument.
-    A string object is immutable, the value of a string object cannot be changed after the object is created. The value of a string object can be shared.
+    Type string behaves like a reference type (see Reference Types) if it is created, assigned,
+    or passed as an argument.
+    A string object is immutable, the value of a string object cannot be changed after the object is created.
+    The value of a string object can be shared.
 ---*/
 
 function f(a: string) {
