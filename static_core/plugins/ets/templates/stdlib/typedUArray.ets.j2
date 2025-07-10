@@ -120,6 +120,10 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         this(0)
     }
 
+    {%- if element.get('name') == 'Uint8Clamped' %}
+    public native static toUint8Clamped(val: double): int;
+    {%- endif %}
+
     /**
      * Creates an {{element['name']}}Array with respect to data accessed via Iterable<Number> interface
      */
@@ -134,10 +138,17 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 {%- if element.get('name') == 'BigUint64' %}
                 this.setUnsafeClamp(i, arr.$_get(i){{numberBigIntToPrimitive}})
+                {%- elif element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
+                let temp: double = arr.$_get(i);
+                if (Double.isNaN(temp) || temp == Double.POSITIVE_INFINITY || temp == Double.NEGATIVE_INFINITY) {
+                    this.setUnsafeClamp(i, 0);
+                } else {
+                    this.setUnsafeClamp(i, {{element.get('name')}}Array.doubleToInt(temp));
+                }
                 {%- elif element.get('name') != 'Uint8Clamped' %}
                 this.setUnsafeClamp(i, this.zeroIfInfinity(arr.$_get(i)).to{{element['primitiveType'].capitalize()}}())
                 {%- else %}
-                this.setUnsafeClamp(i, arr.$_get(i).to{{element['primitiveType'].capitalize()}}())
+                this.setUnsafeClamp(i, Uint8ClampedArray.toUint8Clamped(arr.$_get(i)))
                 {%- endif %}
             }
         } else {
@@ -148,6 +159,10 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             this.byteOffsetInt = x.byteOffsetInt
         }
     }
+
+    {%- if element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
+    public static native doubleToInt(d: double): {{element['primitiveType'].capitalize()}};
+    {%- endif %}
 
     /**
      * Creates an {{element['name']}}Array with respect to data, byteOffset and length.
@@ -856,7 +871,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = array.length - 1; i >= 0; --i) {
+        for (let i = 0; i < array.length; ++i) {
         {%- if not element.get('name') in ['Uint8Clamped', 'BigUint64'] %}
             let v = this.zeroIfInfinity(array[i])
             this.setUnsafeClamp(insertPos.toInt() + i.toInt(), {{fromElementCompat % 'v'}})

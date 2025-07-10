@@ -107,16 +107,22 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = new ArrayBuffer(this.byteLength.toInt())
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, arr.$_get(i).toByte())
+                let temp: double = arr.$_get(i);
+                if (Double.isNaN(temp) || temp == Double.POSITIVE_INFINITY || temp == Double.NEGATIVE_INFINITY) {
+                    this.setUnsafe(i, 0);
+                } else {
+                    this.setUnsafe(i, Int8Array.doubleToInt(temp));
+                }
             }
         } else {
-          let x = Int8Array.from(elements)
-          this.byteLength = x.byteLength
-          this.lengthInt = x.lengthInt
-          this.buffer = x.buffer
-          this.byteOffset = x.byteOffset
+            let x = Int8Array.from(elements)
+            this.byteLength = x.byteLength
+            this.lengthInt = x.lengthInt
+            this.buffer = x.buffer
+            this.byteOffset = x.byteOffset
         }
     }
+    public static native doubleToInt(d: double): byte;
 
     /**
      * Creates an Int8Array with respect to data, byteOffset and length.
@@ -725,7 +731,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = array.length.toInt() - 1; i >= 0; --i) {
+        for (let i = 0; i < array.length.toInt(); ++i) {
             let v = this.zeroIfInfinity(array[i])
             this.$_set(insertPos + i, v.toByte())
         }
@@ -741,7 +747,12 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     public static of(...items: FixedArray<number>): Int8Array {
         let res = new Int8Array(items.length.toInt())
         for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, res.zeroIfInfinity(items[i]).toByte())
+            let temp: double = items[i];
+            if (Double.isNaN(temp) || temp == Double.POSITIVE_INFINITY || temp == Double.NEGATIVE_INFINITY) {
+                res.setUnsafe(i, 0);
+            } else {
+                res.setUnsafe(i, Int8Array.doubleToInt(temp));
+            }
         }
         return res
     }
@@ -1847,16 +1858,22 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = new ArrayBuffer(this.byteLength.toInt())
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, arr.$_get(i).toShort())
+                let temp: double = arr.$_get(i);
+                if (Double.isNaN(temp) || temp == Double.POSITIVE_INFINITY || temp == Double.NEGATIVE_INFINITY) {
+                    this.setUnsafe(i, 0);
+                } else {
+                    this.setUnsafe(i, Int16Array.doubleToInt(temp));
+                }
             }
         } else {
-          let x = Int16Array.from(elements)
-          this.byteLength = x.byteLength
-          this.lengthInt = x.lengthInt
-          this.buffer = x.buffer
-          this.byteOffset = x.byteOffset
+            let x = Int16Array.from(elements)
+            this.byteLength = x.byteLength
+            this.lengthInt = x.lengthInt
+            this.buffer = x.buffer
+            this.byteOffset = x.byteOffset
         }
     }
+    public static native doubleToInt(d: double): short;
 
     /**
      * Creates an Int16Array with respect to data, byteOffset and length.
@@ -2472,7 +2489,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = array.length.toInt() - 1; i >= 0; --i) {
+        for (let i = 0; i < array.length.toInt(); ++i) {
             let v = this.zeroIfInfinity(array[i])
             this.$_set(insertPos + i, v.toShort())
         }
@@ -2488,7 +2505,12 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     public static of(...items: FixedArray<number>): Int16Array {
         let res = new Int16Array(items.length.toInt())
         for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, res.zeroIfInfinity(items[i]).toShort())
+            let temp: double = items[i];
+            if (Double.isNaN(temp) || temp == Double.POSITIVE_INFINITY || temp == Double.NEGATIVE_INFINITY) {
+                res.setUnsafe(i, 0);
+            } else {
+                res.setUnsafe(i, Int16Array.doubleToInt(temp));
+            }
         }
         return res
     }
@@ -3607,16 +3629,22 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = new ArrayBuffer(this.byteLength.toInt())
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, arr.$_get(i).toInt())
+                let temp: double = arr.$_get(i);
+                if (Double.isNaN(temp) || temp == Double.POSITIVE_INFINITY || temp == Double.NEGATIVE_INFINITY) {
+                    this.setUnsafe(i, 0);
+                } else {
+                    this.setUnsafe(i, Int32Array.doubleToInt(temp));
+                }
             }
         } else {
-          let x = Int32Array.from(elements)
-          this.byteLength = x.byteLength
-          this.lengthInt = x.lengthInt
-          this.buffer = x.buffer
-          this.byteOffset = x.byteOffset
+            let x = Int32Array.from(elements)
+            this.byteLength = x.byteLength
+            this.lengthInt = x.lengthInt
+            this.buffer = x.buffer
+            this.byteOffset = x.byteOffset
         }
     }
+    public static native doubleToInt(d: double): int;
 
     /**
      * Creates an Int32Array with respect to data, byteOffset and length.
@@ -4212,7 +4240,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = array.length.toInt() - 1; i >= 0; --i) {
+        for (let i = 0; i < array.length.toInt(); ++i) {
             let v = this.zeroIfInfinity(array[i])
             this.$_set(insertPos + i, v.toInt())
         }
@@ -4228,7 +4256,12 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public static of(...items: FixedArray<number>): Int32Array {
         let res = new Int32Array(items.length.toInt())
         for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, res.zeroIfInfinity(items[i]).toInt())
+            let temp: double = items[i];
+            if (Double.isNaN(temp) || temp == Double.POSITIVE_INFINITY || temp == Double.NEGATIVE_INFINITY) {
+                res.setUnsafe(i, 0);
+            } else {
+                res.setUnsafe(i, Int32Array.doubleToInt(temp));
+            }
         }
         return res
     }
@@ -5335,11 +5368,11 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
                 this.setUnsafe(i, arr.$_get(i).getLong())
             }
         } else {
-          let x = BigInt64Array.from(elements)
-          this.byteLength = x.byteLength
-          this.lengthInt = x.lengthInt
-          this.buffer = x.buffer
-          this.byteOffset = x.byteOffset
+            let x = BigInt64Array.from(elements)
+            this.byteLength = x.byteLength
+            this.lengthInt = x.lengthInt
+            this.buffer = x.buffer
+            this.byteOffset = x.byteOffset
         }
     }
 
@@ -5931,7 +5964,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = array.length.toInt() - 1; i >= 0; --i) {
+        for (let i = 0; i < array.length.toInt(); ++i) {
             let truncatedVal: BigInt = BigInt.asIntN(64, array[i])
             this.$_set(offset + i, truncatedVal.getLong())
         }
@@ -7082,14 +7115,14 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = new ArrayBuffer(this.byteLength.toInt())
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, arr.$_get(i).toFloat())
+                this.setUnsafe(i, arr.$_get(i).toFloat());
             }
         } else {
-          let x = Float32Array.from(elements)
-          this.byteLength = x.byteLength
-          this.lengthInt = x.lengthInt
-          this.buffer = x.buffer
-          this.byteOffset = x.byteOffset
+            let x = Float32Array.from(elements)
+            this.byteLength = x.byteLength
+            this.lengthInt = x.lengthInt
+            this.buffer = x.buffer
+            this.byteOffset = x.byteOffset
         }
     }
 
@@ -7666,7 +7699,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = array.length.toInt() - 1; i >= 0; --i) {
+        for (let i = 0; i < array.length.toInt(); ++i) {
             this.$_set(insertPos + i, array[i].toFloat())
         }
     }
@@ -8801,14 +8834,14 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = new ArrayBuffer(this.byteLength.toInt())
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, arr.$_get(i).toDouble())
+                this.setUnsafe(i, arr.$_get(i).toDouble());
             }
         } else {
-          let x = Float64Array.from(elements)
-          this.byteLength = x.byteLength
-          this.lengthInt = x.lengthInt
-          this.buffer = x.buffer
-          this.byteOffset = x.byteOffset
+            let x = Float64Array.from(elements)
+            this.byteLength = x.byteLength
+            this.lengthInt = x.lengthInt
+            this.buffer = x.buffer
+            this.byteOffset = x.byteOffset
         }
     }
 
@@ -9306,7 +9339,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = array.length.toInt() - 1; i >= 0; --i) {
+        for (let i = 0; i < array.length.toInt(); ++i) {
             this.$_set(insertPos + i, array[i].toDouble())
         }
     }
