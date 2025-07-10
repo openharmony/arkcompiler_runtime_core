@@ -399,37 +399,9 @@ escompat/JsonStringifyTest.ets
 # temporary place for the tests related to primitive types refactoring
 ############
 
-# 1.
-# TypeError: Reference to splice is ambiguous
-
-# 2.
-# TypeError: Property 'toBigInt' does not exist on type 'BigInt'
-spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-11.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-12.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-13.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-18.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-19.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-dec-1.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-dec-2.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-dec.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-4-1.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-4.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-5-1.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-5.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-inc-1.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-inc-2.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-inc.ets
-
 # 3.
 # TypeError: Value is possibly nullish
-std/containers/concurrent_hash_map/ConcurrentHashMap_ForEachTest.ets
-std/containers/concurrent_hash_map/ConcurrentHashMap_PressureTest_Remove.ets
 std/core/TypeCreateErasedBodyTest.ets
-std/core/TypeMethodInvoke.ets
-std/core/std_core_string_String_repeat_int.ets
-std/core/std_core_string_String_repeat_number.ets
-escompat/escompat_BigInt_instance_BigInt_toString_011.ets
-std/core/std_core_string_String_codePointCount_number_number.ets
 
 # 4.
 # TypeError: Reference to lastIndexOf is ambiguous
