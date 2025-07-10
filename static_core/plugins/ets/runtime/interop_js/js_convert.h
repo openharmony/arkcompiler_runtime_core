@@ -333,6 +333,7 @@ JSCONVERT_WRAP(Promise)
             auto refconv = JSRefConvertResolve(ctx, value->GetClass()->GetRuntimeClass());
             completionValue = refconv->Wrap(ctx, value.GetPtr());
         }
+        ScopedNativeCodeThread nativeScope(coro);
         if (hpromise->IsResolved()) {
             NAPI_CHECK_FATAL(napi_resolve_deferred(env, deferred, completionValue));
         } else {
