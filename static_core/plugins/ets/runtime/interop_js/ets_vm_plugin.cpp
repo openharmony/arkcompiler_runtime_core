@@ -26,6 +26,8 @@
 #include "compiler_options.h"
 #include "compiler/compiler_logger.h"
 #include "interop_js/napi_impl/napi_impl.h"
+#include "plugins/ets/runtime/ets_utils.h"
+#include "runtime/include/runtime.h"
 
 #include "os/thread.h"
 
@@ -122,6 +124,20 @@ static napi_value GetEtsInstance(napi_env env, napi_callback_info info)
 
     std::string classDescriptor = GetString(env, jsClassDescriptor);
     return ets_proxy::GetETSInstance(env, classDescriptor);
+}
+
+static napi_value GetEtsModule(napi_env env, napi_callback_info info)
+{
+    size_t argc = 1;
+    std::array<napi_value, 1> argv {};
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &argc, argv.data(), nullptr, nullptr));
+    if (argc != 1) {
+        InteropCtx::ThrowJSError(env, "GetEtsModule: expects exactly one argument (module name)");
+        return nullptr;
+    }
+
+    std::string moduleName = GetString(env, argv[0]);
+    return ets_proxy::GetETSModule(env, moduleName);
 }
 
 static std::optional<std::vector<std::string>> GetArgStrings(napi_env env, napi_value options,
@@ -318,6 +334,7 @@ static napi_value Init(napi_env env, napi_value exports)
         napi_property_descriptor {"getFunction", 0, GetEtsFunction, 0, 0, 0, napi_enumerable, 0},
         napi_property_descriptor {"getClass", 0, GetEtsClass, 0, 0, 0, napi_enumerable, 0},
         napi_property_descriptor {"getInstance", 0, GetEtsInstance, 0, 0, 0, napi_enumerable, 0},
+        napi_property_descriptor {"getModule", 0, GetEtsModule, 0, 0, 0, napi_enumerable, 0},
     };
 
     NAPI_CHECK_FATAL(napi_define_properties(env, exports, desc.size(), desc.data()));

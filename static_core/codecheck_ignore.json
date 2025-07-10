@@ -128,6 +128,7 @@
   "plugins/ets/tests/interop_js/tests/number_subtypes/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/interop_js/tests/number_subtypes/ts_to_sts_frontend/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/interop_js/tests/number_subtypes/ts_to_sts/CMakeLists.txt": {"bc-40001": "*"},
+  "plugins/ets/tests/interop_js/tests/dynamicimport/ets_to_ts/dynamic-import.ts": "*",
   "plugins/ets/tests/lookup_by_name": "*",
   "plugins/ets/tests/micro-benchmarks": "*",
   "plugins/ets/tests/mock": "*",
