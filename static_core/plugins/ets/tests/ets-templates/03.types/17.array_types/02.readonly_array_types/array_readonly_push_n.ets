@@ -13,14 +13,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-
-{% for c in cases %}
 /*---
 desc: Array type with prefix readonly.
+tags: [compile-only, negative]
 ---*/
 
 function main() {
-  let y: readonly Array<{{c.type}}> = [{{c.use}}]
+  let y: readonly Array<int> = [1]
+  y.push(2)
 }
-
-{% endfor %}

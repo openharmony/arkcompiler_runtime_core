@@ -13,18 +13,17 @@
  * limitations under the License.
  */
 
+{%- for c in cases %}
+
 /*---
-desc: Test increasing array length.
+desc: >-
+    A value of type Function cannot be called directly. A developer must use the unsafeCall method instead.
+    This method checks the arguments of type Function, and calls the underlying function value
+    if the number and types of the arguments are valid.
 ---*/
 
-function main(): int {
-   let array1: number[] = [0, 1, 2];
+function foo(n: {{c.type}}) {}
+const f: Function = foo
+f.unsafeCall({{c.use}})
 
-  try {
-   array1.length = 5;
-   let a: number = array1.length;
-  } catch(RangeError) {
-    return 0
-  }
-  return 1
-}
+{%- endfor %}

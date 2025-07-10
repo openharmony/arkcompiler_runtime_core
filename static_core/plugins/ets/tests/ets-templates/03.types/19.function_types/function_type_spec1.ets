@@ -13,14 +13,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-
-{% for c in cases %}
 /*---
-desc: Array type with prefix readonly.
+desc: Example for type function
 ---*/
 
-function main() {
-  let y: readonly Array<{{c.type}}> = [{{c.use}}]
-}
-
-{% endfor %}
+let binaryOp: (x: number, y: number) => number
+function evaluate(f: (x: number, y: number) => number) { }
