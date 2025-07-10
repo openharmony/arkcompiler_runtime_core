@@ -334,7 +334,8 @@ void SystemScheduleCoroutine()
 
 int32_t SystemCoroutineGetWorkerId()
 {
-    return os::thread::GetCurrentThreadId();
+    // return os::thread::GetCurrentThreadId();
+    return Coroutine::GetCurrent()->GetWorker()->GetId();
 }
 
 ObjectHeader *ObjectCreateNonMovable(coretypes::Class *cls)
@@ -448,6 +449,6 @@ void Memsetf64(ObjectHeader *array, double value, uint32_t initialIndex, uint32_
 }
 }  // namespace ark::intrinsics
 
-#include "core_any_intrinsics.inc"
+#include "runtime/include/core_any_intrinsics.inc"
 
 #include <intrinsics_gen.h>

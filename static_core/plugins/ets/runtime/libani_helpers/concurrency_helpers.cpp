@@ -138,4 +138,43 @@ WorkStatus DeleteAsyncWork(ani_env *env, AsyncWork *work)
     return WorkStatus::OK;
 }
 
+/**
+ * @brief ANI helper to execute job on specific worker
+ * @param[in] env current coro env
+ * @param[in] worker target worker id
+ * @param[in] event function to call
+ * @param[in] data pointer to additional data to use in event
+ * @param[in] timeout time in milliseconds before scheduling event
+ * @returns error code
+ */
+WorkStatus SendEvent(ani_env *env, AniWorkerId worker, EventCallback event, void *data, ani_long timeout)
+{
+    CHECK_PTR_ARG(env);
+    CHECK_PTR_ARG(event);
+
+    ani_class cls = nullptr;
+    env->FindClass("std.concurrency.NativeAsyncWorkHelper", &cls);
+    ani_static_method sendEvent {};
+    env->Class_FindStaticMethod(cls, "sendEvent", nullptr, &sendEvent);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
+    env->Class_CallStaticMethod_Void(cls, sendEvent, reinterpret_cast<int32_t>(worker),
+                                     reinterpret_cast<int64_t>(event), reinterpret_cast<int64_t>(data), timeout);
+    return WorkStatus::OK;
+}
+
+AniWorkerId GetWorkerId(ani_env *env)
+{
+    // NOTE(konstanting): replace with a proper check!
+    CHECK_RETURN_IF_EQ(env, nullptr, -1);
+
+    ani_class cls = nullptr;
+    env->FindClass("std.debug.concurrency.CoroutineExtras", &cls);
+    ani_static_method getWorkerId {};
+    env->Class_FindStaticMethod(cls, "getWorkerId", nullptr, &getWorkerId);
+    AniWorkerId id;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
+    env->Class_CallStaticMethod_Int(cls, getWorkerId, &id);
+    return id;
+}
+
 }  // namespace arkts::concurrency_helpers

@@ -184,9 +184,7 @@ extern "C" int32_t StdSystemGetCoroutineId()
 
 extern "C" EtsBoolean StdSystemIsMainWorker()
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    return static_cast<EtsBoolean>(coro->GetCoroutineManager()->IsMainWorker(coro));
+    return static_cast<EtsBoolean>(EtsCoroutine::GetCurrent()->GetWorker()->IsMainWorker());
 }
 
 extern "C" EtsBoolean StdSystemWorkerHasExternalScheduler()
