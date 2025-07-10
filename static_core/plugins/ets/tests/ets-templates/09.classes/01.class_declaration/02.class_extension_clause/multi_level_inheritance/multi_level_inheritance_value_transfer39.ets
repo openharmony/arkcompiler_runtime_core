@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Used to verify the concept of class inheritance in object-oriented programming and different access levels such as protected and public.
+desc: >-
+    Used to verify the concept of class inheritance in object-oriented programming and different access levels
+    such as protected and public.
 ---*/
 
 class A {

@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: It is used to verify the correct initialization and access of public member variables in a multi-level inheritance structure, demonstrating how to use inheritance mechanisms to share state between classes at different levels.
+desc: >-
+    It is used to verify the correct initialization and access of public member variables in a multi-level inheritance
+    structure, demonstrating how to use inheritance mechanisms to share state between classes at different levels.
 ---*/
 
 class A {

@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The child class calls the parent class method, and the parent class method uses the setter overridden by the child class.
+desc: >-
+    The child class calls the parent class method, and the parent class method
+    uses the setter overridden by the child class.
 tags: [compile-only, negative]
 ---*/
 

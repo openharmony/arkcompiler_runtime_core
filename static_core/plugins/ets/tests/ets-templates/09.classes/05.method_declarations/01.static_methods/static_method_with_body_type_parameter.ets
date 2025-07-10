@@ -15,7 +15,9 @@ limitations under the License.
 
 /*---
 desc: Static method declaration with parameter of type declared in body of method class.
-assert: It is a compile-time error to use the name of a parameter of any surrounding declaration in the header or body of a class. 
+assert: >-
+    It is a compile-time error to use the name of a parameter of any surrounding declaration
+    in the header or body of a class.
 tags: [compile-only, negative]
 ---*/
 

@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: A subclass calls a static method of its superclass, and the superclass method depends on a static method of the subclass.
+desc: >-
+    A subclass calls a static method of its superclass, and the superclass method
+    depends on a static method of the subclass.
 tags: [compile-only, negative]
 ---*/
 

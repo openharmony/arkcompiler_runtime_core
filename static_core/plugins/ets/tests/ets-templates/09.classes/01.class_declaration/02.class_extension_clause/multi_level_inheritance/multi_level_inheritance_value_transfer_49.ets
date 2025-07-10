@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that the protected member variable _public_var inherited from class a to class f is correctly initialized to the string'multi-level inheritance' after multi-level inheritance.
+desc: >-
+    Verify that the protected member variable _public_var inherited from class a to class f is correctly initialized
+    to the string'multi-level inheritance' after multi-level inheritance.
 ---*/
 
 class A {

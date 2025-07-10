@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: In multi-layer inheritance, the return value of the method is number, and the modifier is protected. Verify that the rewrite works correctly.
+desc: >-
+    In multi-layer inheritance, the return value of the method is number, and the modifier is protected.
+    Verify that the rewrite works correctly.
 ---*/
 
 class GrandParent {

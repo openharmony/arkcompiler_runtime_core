@@ -29,5 +29,5 @@ interface II {
     }
 }
 
-class C implements I, II{
+class C implements I, II {
 }

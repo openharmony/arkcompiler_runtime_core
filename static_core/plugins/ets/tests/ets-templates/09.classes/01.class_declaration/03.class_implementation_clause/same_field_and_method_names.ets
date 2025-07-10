@@ -15,7 +15,9 @@ limitations under the License.
 
 /*---
 desc: class field and a method from one of superinterfaces that a class implements have the same name
-assert: A compile-time error occurs if a class field and a method from one of superinterfaces that a class implements have the same name, except when one is static and the other is not.
+assert: >-
+    A compile-time error occurs if a class field and a method from one of superinterfaces that a class implements
+    have the same name, except when one is static and the other is not.
 tags: [compile-only,negative]
 ---*/
 

@@ -15,18 +15,20 @@
 
 /*---
 desc: Access to a hidden field by access expression with 'super' keyword.
-assert: A hidden field can be accessed by using a qualified name if it is static, or by using a field access expression that contains the keyword super or a cast to a superclass type.
+assert: >-
+    A hidden field can be accessed by using a qualified name if it is static, or by using a field access expression
+    that contains the keyword super or a cast to a superclass type.
 ---*/
 
 class A {
   private _x: int;
 
-  public get x(): int{
+  public get x(): int {
     return this._x;
   }
 }
 
-class B extends A{
+class B extends A {
 
   public getX(): int {
     return super.x;
@@ -36,5 +38,5 @@ class B extends A{
 function main(): void {
     let instance: B = new B();
 
-    arktest.assertTrue( instance.getX() == 0 );
+    arktest.assertTrue(instance.getX() == 0);
 }

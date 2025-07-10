@@ -15,7 +15,9 @@ limitations under the License.
 
 /*---
 desc: Declare field with name used in superinterface.
-assert: If a class declares a field with a certain name, then the declaration of that field is said to hide any and all accessible declarations of field with the same name in superclasses and superinterfaces if the class.
+assert: >-
+    If a class declares a field with a certain name, then the declaration of that field is said to hide any and all
+    accessible declarations of field with the same name in superclasses and superinterfaces if the class.
 ---*/
 
 interface A {

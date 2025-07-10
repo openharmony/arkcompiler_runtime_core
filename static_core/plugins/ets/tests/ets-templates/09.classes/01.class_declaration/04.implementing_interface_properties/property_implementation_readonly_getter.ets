@@ -40,5 +40,7 @@ function main() {
     write_into_read_only(new StyleClassTwo)
 }
 
-/* @@? 30:14 Error TypeError: Cannot implement interface Style: property 'color' must have a setter, but the implementation is readonly */
-/* @@? 31:14 Error TypeError: Cannot implement interface Style: property 'writable' must have a setter, but the implementation is readonly */
+/* @@? 30:14 Error TypeError: Cannot implement interface Style: property 'color' must have a setter,
+but the implementation is readonly */
+/* @@? 31:14 Error TypeError: Cannot implement interface Style: property 'writable' must have a setter, b
+ut the implementation is readonly */

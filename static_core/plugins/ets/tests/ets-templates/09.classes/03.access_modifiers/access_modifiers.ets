@@ -17,7 +17,9 @@ limitations under the License.
 {% for member in members %}
 /*---
 desc: Access modifiers.
-assert: Members and constructors may have either private, internal, internal protected, protected or public modifier to explicitly specify the desired accessibility.
+assert: >-
+    Members and constructors may have either private, internal, internal protected, protected or public modifier to
+    explicitly specify the desired accessibility.
 params: "{{mod}} {{member}}"
 {%- if member.unsupported == "true" %}
 tags: [negative, compile-only]

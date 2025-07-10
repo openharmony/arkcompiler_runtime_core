@@ -15,7 +15,9 @@
 
 /*---
 desc: Access to overridden method of superclass.
-assert: An overridden method can be accessed by using a method invocation expression (link to that exp) that contains the keyword super.
+assert: >-
+    An overridden method can be accessed by using a method invocation expression (link to that exp)
+    that contains the keyword super.
 ---*/
 
 class A {

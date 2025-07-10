@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Multi-level inheritance verifies that the public member variable _publicVar in class b is correctly initialized to a specific string value in subclass d.
+desc: >-
+    Multi-level inheritance verifies that the public member variable _publicVar in class b is correctly initialized
+    to a specific string value in subclass d.
 ---*/
 
 class A {

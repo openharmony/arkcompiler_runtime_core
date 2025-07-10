@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The subclass hides the initial value of the field with the same name of the parent class. The modifier is protected and the type is number.
+desc: >-
+    The subclass hides the initial value of the field with the same name of the parent class.
+    The modifier is protected and the type is number.
 ---*/
 
 class Parent {

@@ -19,8 +19,8 @@ desc: >-
     if it does, then the entire indexing-Expression equals undefined.
 ---*/
 
-function refNullish(): Record<string, number>|null {
-    let res: Record<string, number>|null = null
+function refNullish(): Record<string, number> | null {
+    let res: Record<string, number> | null = null
     return res
 }
 

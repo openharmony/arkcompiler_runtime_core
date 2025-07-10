@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: This test scenario is to verify whether an instance of class e in the inheritance chain can correctly inherit the initialization setting of the first element of the _publicVar array to 0 in the constructor of class d.
+desc: >-
+    This test scenario is to verify whether an instance of class e in the inheritance chain can correctly inherit
+    the initialization setting of the first element of the _publicVar array to 0 in the constructor of class d.
 ---*/
 
 class A {

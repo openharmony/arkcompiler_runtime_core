@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Ensure that their class design and inheritance structure work as expected and handle complex class hierarchies and member variables.
+desc: >-
+ Ensure that their class design and inheritance structure work as expected and handle complex class hierarchies
+ and member variables.
 ---*/
 
 class A {
