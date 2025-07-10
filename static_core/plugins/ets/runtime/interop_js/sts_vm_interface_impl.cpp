@@ -17,7 +17,7 @@
 #include "plugins/ets/runtime/interop_js/xgc/xgc.h"
 
 #if defined(ARK_HYBRID)
-#include "interfaces/inner_api/napi/native_node_api.h"
+#include "interfaces/inner_api/napi/native_node_hybrid_api.h"
 #include "native_engine/native_reference.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #endif

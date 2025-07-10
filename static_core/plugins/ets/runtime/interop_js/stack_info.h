@@ -19,7 +19,7 @@
 #include <memory>
 #include "libpandabase/macros.h"
 
-struct napi_stack_info;
+struct NapiStackInfo;
 
 namespace ark::ets {
 class EtsCoroutine;
@@ -64,7 +64,7 @@ public:
     NO_COPY_SEMANTIC(StackInfoManagerOhos);
 
 private:
-    std::unique_ptr<napi_stack_info> mainStackInfo_ {};
+    std::unique_ptr<NapiStackInfo> mainStackInfo_ {};
 };
 
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)

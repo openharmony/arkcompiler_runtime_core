@@ -26,16 +26,16 @@
 // CC-OFFNXT(G.NAM.03) has to be compatible with JS NAPI struct
 // NOLINTNEXTLINE(readability-identifier-naming)
 #ifndef PANDA_JS_ETS_HYBRID_MODE
-struct napi_stack_info {
+struct NapiStackInfo {
     size_t stackStart;
     size_t stackSize;
 };
 #endif
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-napi_status __attribute__((weak)) napi_set_stackinfo(napi_env env, napi_stack_info *info);
+napi_status __attribute__((weak)) napi_set_stackinfo(napi_env env, NapiStackInfo *info);
 // NOLINTNEXTLINE(readability-identifier-naming)
-napi_status __attribute__((weak)) napi_get_stackinfo(napi_env env, napi_stack_info *result);
+napi_status __attribute__((weak)) napi_get_stackinfo(napi_env env, NapiStackInfo *result);
 
 namespace ark::ets::interop::js {
 
@@ -48,7 +48,7 @@ void StackInfoManagerOhos::InitStackInfoIfNeeded()
 {
     ASSERT(EtsCoroutine::GetCurrent() == mainCoro_);
     if (LIKELY(!mainStackInfo_)) {
-        mainStackInfo_ = std::make_unique<napi_stack_info>();
+        mainStackInfo_ = std::make_unique<NapiStackInfo>();
         auto env = ctx_->GetJSEnv();
         napi_get_stackinfo(env, mainStackInfo_.get());
     }
@@ -68,7 +68,7 @@ void StackInfoManagerOhos::UpdateStackInfoIfNeeded()
         size_t guardSize {};
         ASSERT(coro != nullptr);
         coro->GetContext<StackfulCoroutineContext>()->RetrieveStackInfo(stackAddr, stackSize, guardSize);
-        napi_stack_info currentStackinfo {reinterpret_cast<size_t>(stackAddr), stackSize};
+        NapiStackInfo currentStackinfo {reinterpret_cast<size_t>(stackAddr), stackSize};
         napi_set_stackinfo(ctx_->GetJSEnv(), &currentStackinfo);
     }
 }
