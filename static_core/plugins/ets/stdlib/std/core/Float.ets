@@ -18,7 +18,7 @@ package std.core;
 /**
  * Represents boxed float value and related operations
  */
-export final class Float extends Floating implements Comparable<Float>, JSONable<Float> {
+export final class Float extends Floating implements Comparable<Float> {
     private value: float;
 
     /**
@@ -572,23 +572,4 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      * @returns int - bit representation
      */
     public static native bitCastToInt(val: float): int
-
-    /**
-     * Creates a Float instance based on JSONValue
-     *
-     * @param json: JSONValue - a JSON representation
-     *
-     * @throws JSONTypeError if json does not encode a valid float
-     *
-     * @returns Float - float value decoded from JSON
-     */
-    public createFromJSONValue(json: JSONValue): Float {
-        if (json instanceof JSONNumber) {
-            let val = (json as JSONNumber).value
-            if (-Float.MAX_VALUE <= val && val <= Float.MAX_VALUE) {
-                return Float.valueOf(((json as JSONNumber).value).toFloat())
-            }
-        }
-        throw new JSONTypeError("Cannot create Double from JSON", new ErrorOptions(json as Object))
-    }
 }

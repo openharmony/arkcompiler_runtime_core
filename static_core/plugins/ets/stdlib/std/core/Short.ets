@@ -18,7 +18,7 @@ package std.core;
 /**
  * Represents boxed short value and related operations
  */
-export final class Short extends Integral implements Comparable<Short>, JSONable<Short> {
+export final class Short extends Integral implements Comparable<Short> {
     private value: short;
 
     /**
@@ -419,24 +419,5 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      */
     public isGreaterEqualThan(other: Short): boolean {
         return this.value >= other.toShort();
-    }
-
-    /**
-     * Creates a Short instance based on JSONValue
-     *
-     * @param json: JSONValue - a JSON representation
-     *
-     * @throws JSONTypeError if json does not encode a valid short
-     *
-     * @returns Short - short value decoded from JSON
-     */
-    public createFromJSONValue(json: JSONValue): Short {
-        if (json instanceof JSONNumber) {
-            let num = (json as JSONNumber).value
-            if (Double.isInteger(num) && Short.MIN_VALUE <= num && num <= Short.MAX_VALUE) {
-                return Short.valueOf(num.toShort())
-            }
-        }
-        throw new JSONTypeError("Cannot create Short from JSON", new ErrorOptions(json as Object))
     }
 }

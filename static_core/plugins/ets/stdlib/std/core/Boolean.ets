@@ -109,7 +109,7 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @param value value to construct class instance with
      */
     public constructor(value: string) {
-        this.value = value != "";
+        this.value = value != '';
     }
 
     /**
@@ -137,7 +137,7 @@ export final class Boolean extends Object implements Comparable<Boolean> {
         } else if (value instanceof Short) {
             this.value = value.unboxed() != 0;
         } else if (value instanceof String) {
-            this.value = value != "";
+            this.value = value != '';
         } else if (value instanceof Object) {
             this.value = true;
         } else {
@@ -264,13 +264,13 @@ export final class Boolean extends Object implements Comparable<Boolean> {
     /**
      * Converts this object to a string
      *
-     * @returns "True" if this instance is true, "False" otherwise
+     * @returns 'True' if this instance is true, 'False' otherwise
      */
     public override toString(): String {
         if (this.value) {
-            return "true";
+            return 'true';
         }
-        return "false";
+        return 'false';
     }
 
     /**
@@ -345,23 +345,5 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      */
     public xor(other: Boolean): Boolean {
         return Boolean.valueOf(this.value ^ other.unboxed())
-    }
-
-    /**
-     * Creates a Boolean instance based on JSONValue
-     *
-     * @param json: JSONValue - a JSON representation
-     *
-     * @throws JSONTypeError if json does not encode a valid boolean literal
-     *
-     * @returns Boolean - true if JSON encodes true literal, false if JSON encodes false literal
-     */
-    public createFromJSONValue(json: JSONValue): Boolean {
-        if (json instanceof JSONFalse) {
-            return Boolean.FALSE
-        } else if (json instanceof JSONTrue) {
-            return Boolean.TRUE
-        }
-        throw new JSONTypeError("Cannot create Boolean from JSON", new ErrorOptions(json as Object))
     }
 }
