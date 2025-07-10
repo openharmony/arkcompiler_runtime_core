@@ -22,7 +22,7 @@
 #include <node_api.h>
 
 #if defined(PANDA_JS_ETS_HYBRID_MODE)
-#include "interfaces/inner_api/napi/native_node_api.h"
+#include "interfaces/inner_api/napi/native_node_hybrid_api.h"
 #endif
 
 namespace ark::ets::interop::js {

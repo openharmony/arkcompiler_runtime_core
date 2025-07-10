@@ -17,7 +17,7 @@
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "hybrid/ecma_vm_interface.h"
 
-#include "interfaces/inner_api/napi/native_node_api.h"
+#include "interfaces/inner_api/napi/native_node_hybrid_api.h"
 
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
 napi_vm_handshake([[maybe_unused]] napi_env env, [[maybe_unused]] void *stsIface, [[maybe_unused]] void **ecmaIface)

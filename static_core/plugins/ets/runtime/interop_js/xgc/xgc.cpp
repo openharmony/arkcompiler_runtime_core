@@ -23,7 +23,7 @@
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_storage_verifier.h"
 #ifdef PANDA_JS_ETS_HYBRID_MODE
 #include "native_engine/native_reference.h"
-#include "interfaces/inner_api/napi/native_node_api.h"
+#include "interfaces/inner_api/napi/native_node_hybrid_api.h"
 #endif  // PANDA_JS_ETS_HYBRID_MODE
 
 namespace ark::ets::interop::js {
