@@ -124,7 +124,7 @@ export final class AsyncLock {
         }
     }
 
-    private syncwrapper<T,U>(callback: AsyncLockCallback<T>, options : AsyncLockOptions<U>, asyncLockInfo: AsyncLockInfo) : Promise<T> {
+    private syncwrapper<T,U>(callback: AsyncLockCallback<T>, options : AsyncLockOptions<U>, asyncLockInfo: AsyncLockInfo) : Promise<Awaited<T>> {
         return Promise.resolve<T>(callback()).finally(() => {
             if (options.signal != null && options.signal!.aborted == true ) {
             this.fireCondEvent();
@@ -153,7 +153,7 @@ export final class AsyncLock {
         return p;
     }
 
-    private wrapper<T, U>(callback: AsyncLockCallback<T>, callerCID: int, mode: AsyncLockMode, options: AsyncLockOptions<U>, asyncLockInfo : AsyncLockInfo) : Promise<T> {
+    private wrapper<T, U>(callback: AsyncLockCallback<T>, callerCID: int, mode: AsyncLockMode, options: AsyncLockOptions<U>, asyncLockInfo : AsyncLockInfo) : Promise<Awaited<T>> {
 
         this.lock<U>(callerCID, mode,  asyncLockInfo, options);
         return Promise.resolve<T>(callback()).finally(() => {if (options.signal != null && options.signal!.aborted == true ) {

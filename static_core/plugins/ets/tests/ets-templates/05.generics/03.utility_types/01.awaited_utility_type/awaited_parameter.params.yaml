@@ -19,7 +19,7 @@ cases:
           "hello"
 
     - awaited_param: |-
-          await new Promise((resolve) => {
+          await new Promise<string>((resolve) => {
               setTimeout(() => {
                 resolve("hello")
               }, 1000)

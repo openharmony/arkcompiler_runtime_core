@@ -25,7 +25,7 @@ function foo<T>(): Awaited<T> {
 }
 
 function main() {
-    let actual = foo()
+    let actual = foo<string>()
     arktest.assertEQ(actual, {{c.expected_value}})
 }
 
