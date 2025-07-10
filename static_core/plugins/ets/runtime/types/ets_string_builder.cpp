@@ -53,8 +53,10 @@ static EtsObjectArray *ReallocateBuffer(EtsHandle<EtsObjectArray> &bufHandle, ui
     ASSERT(bufHandle.GetPtr() != nullptr);
     // Allocate the new buffer - may trigger GC
     auto *newBuf = EtsObjectArray::Create(bufHandle->GetClass(), bufLen);
-    /* nothing prevents this assertion from failing! */
-    ASSERT(newBuf != nullptr);
+    /* we need to return and report the OOM exception to ets world */
+    if (newBuf == nullptr) {
+        return nullptr;
+    }
     // Copy the old buffer data
     bufHandle->CopyDataTo(newBuf);
     EVENT_SB_BUFFER_REALLOC(ManagedThread::GetCurrent()->GetId(), newBuf, newBuf->GetLength(), newBuf->GetElementSize(),
@@ -85,6 +87,9 @@ ObjectHeader *AppendCharArrayToBuffer(VMHandle<EtsObject> &sbHandle, EtsCharArra
         EtsHandle<EtsObjectArray> bufHandle(coroutine, buf);
         // May trigger GC
         buf = ReallocateBuffer(bufHandle, GetNewBufferLength(bufHandle->GetLength(), 1U));
+        if (buf == nullptr) {
+            return nullptr;
+        }
         // Update sb and arr as corresponding objects might be moved by GC
         sb = sbHandle.GetPtr();
         arr = arrHandle.GetPtr();
@@ -277,6 +282,9 @@ VMHandle<EtsObject> &StringBuilderAppendString(VMHandle<EtsObject> &sbHandle, Et
         EtsHandle<EtsObjectArray> bufHandle(coroutine, buf);
         // May trigger GC
         buf = ReallocateBuffer(bufHandle, GetNewBufferLength(bufHandle->GetLength(), 1U));
+        if (buf == nullptr) {
+            return sbHandle;
+        }
         // Update sb and s as corresponding objects might be moved by GC
         sb = sbHandle->GetCoreType();
         str = strHandle.GetPtr();
@@ -326,6 +334,9 @@ VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHa
         EtsHandle<EtsObjectArray> bufHandle(coroutine, buf);
         // May trigger GC
         buf = ReallocateBuffer(bufHandle, GetNewBufferLength(bufHandle->GetLength(), 2U));
+        if (buf == nullptr) {
+            return sbHandle;
+        }
         // Update sb and strings as corresponding objects might be moved by GC
         sb = sbHandle->GetCoreType();
         str0 = str0Handle.GetPtr();
@@ -409,6 +420,9 @@ VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHa
         EtsHandle<EtsObjectArray> bufHandle(coroutine, buf);
         // May trigger GC
         buf = ReallocateBuffer(bufHandle, GetNewBufferLength(bufHandle->GetLength(), 3U));
+        if (buf == nullptr) {
+            return sbHandle;
+        }
         // Update sb and strings as corresponding objects might be moved by GC
         sb = sbHandle->GetCoreType();
         str0 = str0Handle.GetPtr();
@@ -507,6 +521,9 @@ VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHa
         EtsHandle<EtsObjectArray> bufHandle(coroutine, buf);
         // May trigger GC
         buf = ReallocateBuffer(bufHandle, GetNewBufferLength(bufHandle->GetLength(), 4U));
+        if (buf == nullptr) {
+            return sbHandle;
+        }
         // Update sb and strings as corresponding objects might be moved by GC
         sb = sbHandle->GetCoreType();
         str0 = str0Handle.GetPtr();
