@@ -18,6 +18,7 @@ import { BusinessError } from "@ohos.base";
 const TypeErrorCodeId: int = 401;
 const percentRate = 100;
 const syntaxErrorCode: int = 10200002;
+export type RecordData = undefined | null | Object | Record<string, RecordData> | Array<RecordData>;
 
 function createBusinessError(code: int, message: string) {
     let err = new BusinessError();
@@ -1674,11 +1675,14 @@ export namespace util {
 
     /**
      * Get the hash code of an object.
-     * @param { object } [obj] - The object that need to get hash code.
+     * @param { RecordData } [obj] - The object that need to get hash code.
      * @returns { number } Return a hash code of an object.
      */
-    export function getHash(obj: object): number {
-        let result: number = Runtime.getHashCodeByValue(obj);
+    export function getHash(obj: RecordData): number {
+        if (obj === undefined || obj === null) {
+            throw createBusinessError(TypeErrorCodeId, `Parameter error. The type of Parameter must be object.`);
+        }
+        let result: number = Runtime.getHashCodeByValue(obj!);
         return result;
     }
 
