@@ -41,12 +41,24 @@ set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
-set(TH_STDLIB_DIR "${CMAKE_SOURCE_DIR}/stdlib")
+function(execute_and_set_variable OUTPUT_VAR_NAME)
+  execute_process(
+    COMMAND taihec ${ARGN}
+    OUTPUT_VARIABLE _output
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE _result
+  )
 
-# taihe runtime .c/.cpp path
-set(TH_RUNTIME_DIR "${CMAKE_SOURCE_DIR}/runtime")
-set(TH_RUNTIME_INCLUDE_DIR "${TH_RUNTIME_DIR}/include")
-set(TH_RUNTIME_SOURCE_DIR "${TH_RUNTIME_DIR}/src")
+  if(_result EQUAL 0)
+    set(${OUTPUT_VAR_NAME} "${_output}" PARENT_SCOPE)
+    message(STATUS "${OUTPUT_VAR_NAME} set to: ${_output}")
+  else()
+    message(FATAL_ERROR "Failed to execute 'taihec ${COMMAND_ARGS}'. Error code: ${_result}")
+  endif()
+endfunction()
+
+execute_and_set_variable(TH_STDLIB_DIR "--print-stdlib-path")
+execute_and_set_variable(TH_RUNTIME_HEADER_DIR "--print-runtime-header-path")
 
 # 设置 Python
 set(Python3_EXECUTABLE "/usr/bin/python3")
@@ -56,6 +68,7 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter)
 option(ENABLE_COVERAGE "Enable coverage run for the Python command" OFF)
 
 # 编译 taihe runtime 静态库
+execute_and_set_variable(TH_RUNTIME_SOURCE_DIR "--print-runtime-source-path")
 set(TH_SOURCE
   "${TH_RUNTIME_SOURCE_DIR}/string.cpp"
   "${TH_RUNTIME_SOURCE_DIR}/object.cpp"
@@ -68,23 +81,7 @@ set_target_properties(th_runtime PROPERTIES
   ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 )
 
-target_include_directories(th_runtime PUBLIC ${TH_RUNTIME_INCLUDE_DIR})
-
-
-function(update_grammar)
-  add_custom_command(
-    OUTPUT ${CMAKE_SOURCE_DIR}/compiler/taihe/parse/antlr/TaiheAST.py
-    COMMAND ./generate-grammar
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/compiler # 设置工作目录
-    COMMENT "Update grammar"
-    DEPENDS ${CMAKE_SOURCE_DIR}/compiler/Taihe.g4
-  )
-
-  add_custom_target(UPDATE_GRAMMAR ALL
-    DEPENDS ${CMAKE_SOURCE_DIR}/compiler/taihe/parse/antlr/TaiheAST.py
-  )
-endfunction()
-
+target_include_directories(th_runtime PUBLIC ${TH_RUNTIME_HEADER_DIR})
 
 function(generate_code_from_idl target_name idl_files gen_ets_files generated_dir taihe_configs)
   set(IDL_FILES ${idl_files})
@@ -134,7 +131,7 @@ function(generate_code_from_idl target_name idl_files gen_ets_files generated_di
   add_custom_command(
     OUTPUT ${PROJ_HPP_FILES} ${IMPL_HPP_FILES} ${ABI_H_FILES} ${ABI_C_FILES} ${ANI_HPP_FILES} ${ANI_CPP_FILES} ${GEN_ETS_FILES}
     COMMAND ${COMMAND_TO_RUN}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/compiler
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     DEPENDS ${IDL_FILES} ${CMAKE_SOURCE_DIR}/compiler/taihe/parse/antlr/TaiheAST.py
     COMMENT "Generating Taihe C++ header and source files..."
     VERBATIM
@@ -166,85 +163,11 @@ function(setup_panda_sdk)
     set(ENV{PANDA_HOME} "${PANDA_HOME}")
     # 自动下载模式
   else()
-    # 设置 PANDA 路径
-    set(PANDA_SDK_FILENAME "sdk-1.5.0-dev.36922.tgz")
-    set(PANDA_SDK_URL "https://nexus.bz-openlab.ru:10443/repository/koala-npm/%40panda/sdk/-/${PANDA_SDK_FILENAME}")
-    set(PANDA_EXTRACT_DIR "${CMAKE_SOURCE_DIR}/.panda_vm")
-    set(PANDA_SDK_PATH "${PANDA_EXTRACT_DIR}/${PANDA_SDK_FILENAME}")
-    set(PANDA_HOME "${PANDA_EXTRACT_DIR}/package/linux_host_tools")
-    set(PANDA_SDK_VERSION_FILE "${PANDA_EXTRACT_DIR}/package/version.txt")
-
-    file(MAKE_DIRECTORY "${PANDA_EXTRACT_DIR}")
-    string(REPLACE ".tgz" "" PANDA_SDK_VERSION "${PANDA_SDK_FILENAME}")
-
-    # 检查当前已提取版本
-    if(EXISTS "${PANDA_SDK_VERSION_FILE}")
-      file(READ "${PANDA_SDK_VERSION_FILE}" EXISTING_PANDA_SDK_VERSION)
-      string(STRIP "${EXISTING_PANDA_SDK_VERSION}" EXISTING_PANDA_SDK_VERSION)
-    else()
-      set(EXISTING_PANDA_SDK_VERSION "")
-    endif()
-
-    # 检查版本是否匹配
-    if(NOT "${EXISTING_PANDA_SDK_VERSION}" STREQUAL "${PANDA_SDK_VERSION}")
-      message(STATUS "Panda SDK version mismatch or not found. Expected: ${PANDA_SDK_VERSION}, Found: ${EXISTING_PANDA_SDK_VERSION}")
-      if(NOT "${PANDA_HOME}" STREQUAL "")
-        file(REMOVE_RECURSE "${PANDA_HOME}")
-      endif()
-      set(NEED_DOWNLOAD TRUE)
-    else()
-      set(NEED_DOWNLOAD FALSE)
-    endif()
-
-    # 如果需要重新准备 SDK
-    if(NEED_DOWNLOAD)
-      # 先检查本地是否已有对应的 SDK 包
-      set(LOCAL_SDK_PATH "${PANDA_EXTRACT_DIR}/${PANDA_SDK_VERSION}.tgz")
-      if(EXISTS "${LOCAL_SDK_PATH}")
-        message(STATUS "Found local Panda SDK package: ${LOCAL_SDK_PATH}")
-        set(PANDA_SDK_PATH "${LOCAL_SDK_PATH}")
-        set(NEED_ACTUAL_DOWNLOAD FALSE)
-      else()
-        message(STATUS "No local Panda SDK package found, will download: ${PANDA_SDK_FILENAME}")
-        set(NEED_ACTUAL_DOWNLOAD TRUE)
-      endif()
-
-      # 如果确实找不到，就去下载
-      if(NEED_ACTUAL_DOWNLOAD)
-        message(STATUS "Downloading Panda SDK: ${PANDA_SDK_FILENAME}")
-        execute_process(
-          COMMAND curl -u koala-pub:y3t!n0therP -L -o "${PANDA_EXTRACT_DIR}/${PANDA_SDK_FILENAME}" "${PANDA_SDK_URL}"
-          RESULT_VARIABLE DOWNLOAD_RESULT
-        )
-        if(NOT DOWNLOAD_RESULT EQUAL 0)
-          message(FATAL_ERROR "Failed to download Panda SDK!")
-        endif()
-        set(PANDA_SDK_PATH "${PANDA_EXTRACT_DIR}/${PANDA_SDK_FILENAME}")
-      endif()
-
-      # 删除原来的解压目录
-      file(REMOVE_RECURSE "${PANDA_HOME}")
-    endif()
-
-    # Extract Panda SDK if needed
-    if(NOT EXISTS "${PANDA_HOME}")
-      message(STATUS "Extracting Panda SDK from ${PANDA_SDK_PATH} ...")
-      execute_process(
-        COMMAND ${CMAKE_COMMAND} -E tar xzf "${PANDA_SDK_PATH}"
-        WORKING_DIRECTORY "${PANDA_EXTRACT_DIR}"
-        RESULT_VARIABLE EXTRACT_RESULT
-      )
-      if(NOT EXTRACT_RESULT EQUAL 0)
-        message(FATAL_ERROR "Failed to extract Panda SDK!")
-      endif()
-
-      # 保存当前版本信息
-      file(WRITE "${PANDA_SDK_VERSION_FILE}" "${PANDA_SDK_VERSION}")
-    endif()
-
-    # Set environment variable
+    execute_and_set_variable(PANDA_EXTRACT_DIR "--print-panda-vm-path")
+    set(PANDA_HOME "${PANDA_EXTRACT_DIR}/linux_host_tools")
     set(ENV{PANDA_HOME} "${PANDA_HOME}")
     set(PANDA_HOME "${PANDA_HOME}" PARENT_SCOPE)
+    message(STATUS "PANDA_HOME set to: ${PANDA_HOME}")
   endif()
 
   # Set ETS compiler path
@@ -280,7 +203,7 @@ function(compile_dylib target_name include_dirs user_cpp_files)
   set_target_properties(${target_name} PROPERTIES LINKER_LANGUAGE CXX)
   target_link_libraries(${target_name} PRIVATE th_runtime)
   target_link_options(${target_name} PRIVATE "-Wl,--no-undefined")
-  target_include_directories(${target_name} PUBLIC ${include_dirs} TH_RUNTIME_INCLUDE_DIR)
+  target_include_directories(${target_name} PUBLIC ${include_dirs} TH_RUNTIME_HEADER_DIR)
 endfunction()
 
 
@@ -416,8 +339,6 @@ if(EXISTS "${ANI_HEADER}")
 else()
   message(FATAL_ERROR "Cannot find the path: ${ANI_HEADER}")
 endif()
-
-update_grammar()
 
 add_subdirectory(test)
 #add_subdirectory(cookbook)

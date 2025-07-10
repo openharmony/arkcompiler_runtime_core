@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "skill.proj.hpp"
 #include "skill.impl.hpp"
-#include "taihe/runtime.hpp"
-#include "stdexcept"
 #include <iostream>
 #include "skill.h"
+#include "skill.proj.hpp"
+#include "stdexcept"
+#include "taihe/runtime.hpp"
 
 using namespace taihe;
 using namespace skill;
@@ -28,6 +28,7 @@ namespace {
 class SkillUriImpl {
 public:
     int32_t skillUriImpl = 21474;
+
     SkillUriImpl() {}
 
     string GetScheme()

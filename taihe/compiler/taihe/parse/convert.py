@@ -23,9 +23,10 @@ from typing_extensions import override
 from taihe.parse.antlr.TaiheAST import TaiheAST as ast
 from taihe.parse.antlr.TaiheVisitor import TaiheVisitor as Visitor
 from taihe.parse.ast_generation import generate_ast
+from taihe.semantics.attributes import Argument, UncheckedAttribute
 from taihe.semantics.declarations import (
-    AttrItemDecl,
     CallbackTypeRefDecl,
+    Decl,
     DeclarationImportDecl,
     DeclarationRefDecl,
     EnumDecl,
@@ -262,31 +263,49 @@ class AstConverter(ExprEvaluator):
     """
 
     source: SourceBase
-    diag: DiagnosticsManager
+    dm: DiagnosticsManager
 
-    def __init__(self, source: SourceBase, diag: DiagnosticsManager):
+    def __init__(self, source: SourceBase, dm: DiagnosticsManager):
         self.source = source
-        self.diag = diag
+        self.dm = dm
+
+    # Attributes
+
+    @override
+    def visit_named_attr_arg(self, node: ast.NamedAttrArg) -> Argument:
+        return Argument(loc=node.loc, key=node.name.text, value=self.visit(node.val))
+
+    @override
+    def visit_unnamed_attr_arg(self, node: ast.UnnamedAttrArg) -> Argument:
+        return Argument(loc=node.loc, key=None, value=self.visit(node.val))
+
+    def add_attr(self, decl: Decl, attr: ast.DeclAttr | ast.ScopeAttr):
+        uncheck_attr = UncheckedAttribute(
+            loc=attr.name.loc,
+            name=attr.name.text,
+            args=[self.visit(arg) for arg in attr.args],
+        )
+        decl.attributes.setdefault(UncheckedAttribute, []).append(uncheck_attr)
 
     # Type References
 
     @override
     def visit_long_type(self, node: ast.LongType) -> LongTypeRefDecl:
         d = LongTypeRefDecl(node.loc, pkg2str(node.pkg_name), str(node.decl_name))
-        self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
+        self.dm.for_each(node.forward_attrs, lambda a: self.add_attr(d, a))
         return d
 
     @override
     def visit_short_type(self, node: ast.ShortType) -> ShortTypeRefDecl:
         d = ShortTypeRefDecl(node.loc, str(node.decl_name))
-        self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
+        self.dm.for_each(node.forward_attrs, lambda a: self.add_attr(d, a))
         return d
 
     @override
     def visit_generic_type(self, node: ast.GenericType) -> GenericTypeRefDecl:
         d = GenericTypeRefDecl(node.loc, str(node.decl_name))
-        self.diag.for_each(node.args, lambda a: d.add_arg_ty_ref(self.visit(a)))
-        self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
+        self.dm.for_each(node.args, lambda a: d.add_arg_ty_ref(self.visit(a)))
+        self.dm.for_each(node.forward_attrs, lambda a: self.add_attr(d, a))
         return d
 
     @override
@@ -295,8 +314,8 @@ class AstConverter(ExprEvaluator):
             d = CallbackTypeRefDecl(node.loc, self.visit(ty))
         else:
             d = CallbackTypeRefDecl(node.loc)
-        self.diag.for_each(node.parameters, lambda p: d.add_param(self.visit(p)))
-        self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
+        self.dm.for_each(node.parameters, lambda p: d.add_param(self.visit(p)))
+        self.dm.for_each(node.forward_attrs, lambda a: self.add_attr(d, a))
         return d
 
     # Uses
@@ -338,15 +357,15 @@ class AstConverter(ExprEvaluator):
     @override
     def visit_struct_property(self, node: ast.StructProperty) -> StructFieldDecl:
         d = StructFieldDecl(node.name.loc, str(node.name), self.visit(node.ty))
-        self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
+        self.dm.for_each(node.forward_attrs, lambda a: self.add_attr(d, a))
         return d
 
     @override
     def visit_struct(self, node: ast.Struct) -> StructDecl:
         d = StructDecl(node.name.loc, str(node.name))
-        self.diag.for_each(node.fields, lambda f: d.add_field(self.visit(f)))
-        self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
-        self.diag.for_each(node.inner_attrs, lambda a: d.add_attr(self.visit(a)))
+        self.dm.for_each(node.fields, lambda f: d.add_field(self.visit(f)))
+        self.dm.for_each(node.forward_attrs, lambda a: self.add_attr(d, a))
+        self.dm.for_each(node.inner_attrs, lambda a: self.add_attr(d, a))
         return d
 
     @override
@@ -355,14 +374,14 @@ class AstConverter(ExprEvaluator):
             d = EnumItemDecl(node.name.loc, str(node.name), self.visit(node.val))
         else:
             d = EnumItemDecl(node.name.loc, str(node.name))
-        self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
+        self.dm.for_each(node.forward_attrs, lambda a: self.add_attr(d, a))
         return d
 
     @override
     def visit_enum(self, node: ast.Enum) -> EnumDecl:
         d = EnumDecl(node.name.loc, str(node.name), self.visit(node.enum_ty))
-        self.diag.for_each(node.fields, lambda a: d.add_item(self.visit(a)))
-        self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
+        self.dm.for_each(node.fields, lambda a: d.add_item(self.visit(a)))
+        self.dm.for_each(node.forward_attrs, lambda a: self.add_attr(d, a))
         return d
 
     @override
@@ -371,21 +390,21 @@ class AstConverter(ExprEvaluator):
             d = UnionFieldDecl(node.name.loc, str(node.name), self.visit(ty))
         else:
             d = UnionFieldDecl(node.name.loc, str(node.name))
-        self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
+        self.dm.for_each(node.forward_attrs, lambda a: self.add_attr(d, a))
         return d
 
     @override
     def visit_union(self, node: ast.Union) -> UnionDecl:
         d = UnionDecl(node.name.loc, str(node.name))
-        self.diag.for_each(node.fields, lambda f: d.add_field(self.visit(f)))
-        self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
-        self.diag.for_each(node.inner_attrs, lambda a: d.add_attr(self.visit(a)))
+        self.dm.for_each(node.fields, lambda f: d.add_field(self.visit(f)))
+        self.dm.for_each(node.forward_attrs, lambda a: self.add_attr(d, a))
+        self.dm.for_each(node.inner_attrs, lambda a: self.add_attr(d, a))
         return d
 
     @override
     def visit_parameter(self, node: ast.Parameter) -> ParamDecl:
         d = ParamDecl(node.name.loc, str(node.name), self.visit(node.ty))
-        self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
+        self.dm.for_each(node.forward_attrs, lambda a: self.add_attr(d, a))
         return d
 
     @override
@@ -394,8 +413,8 @@ class AstConverter(ExprEvaluator):
             d = IfaceMethodDecl(node.name.loc, str(node.name), self.visit(ty))
         else:
             d = IfaceMethodDecl(node.name.loc, str(node.name))
-        self.diag.for_each(node.parameters, lambda p: d.add_param(self.visit(p)))
-        self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
+        self.dm.for_each(node.parameters, lambda p: d.add_param(self.visit(p)))
+        self.dm.for_each(node.forward_attrs, lambda a: self.add_attr(d, a))
         return d
 
     @override
@@ -406,10 +425,10 @@ class AstConverter(ExprEvaluator):
     @override
     def visit_interface(self, node: ast.Interface) -> IfaceDecl:
         d = IfaceDecl(node.name.loc, str(node.name))
-        self.diag.for_each(node.fields, lambda f: d.add_method(self.visit(f)))
-        self.diag.for_each(node.extends, lambda i: d.add_parent(self.visit(i)))
-        self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
-        self.diag.for_each(node.inner_attrs, lambda a: d.add_attr(self.visit(a)))
+        self.dm.for_each(node.fields, lambda f: d.add_method(self.visit(f)))
+        self.dm.for_each(node.extends, lambda i: d.add_parent(self.visit(i)))
+        self.dm.for_each(node.forward_attrs, lambda a: self.add_attr(d, a))
+        self.dm.for_each(node.inner_attrs, lambda a: self.add_attr(d, a))
         return d
 
     @override
@@ -418,30 +437,9 @@ class AstConverter(ExprEvaluator):
             d = GlobFuncDecl(node.name.loc, str(node.name), self.visit(ty))
         else:
             d = GlobFuncDecl(node.name.loc, str(node.name))
-        self.diag.for_each(node.parameters, lambda p: d.add_param(self.visit(p)))
-        self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
+        self.dm.for_each(node.parameters, lambda p: d.add_param(self.visit(p)))
+        self.dm.for_each(node.forward_attrs, lambda a: self.add_attr(d, a))
         return d
-
-    # Attributes
-
-    def visit_attr(self, node: ast.DeclAttr | ast.ScopeAttr) -> AttrItemDecl:
-        args: list[Any] = []
-        kwargs: dict[str, Any] = {}
-        for arg in node.args:
-            if isinstance(arg, ast.NamedAttrArg):
-                kwargs[str(arg.name)] = self.visit(arg.val)
-            else:
-                args.append(self.visit(arg.val))
-        d = AttrItemDecl(node.name.loc, str(node.name), args, kwargs)
-        return d
-
-    @override
-    def visit_decl_attr(self, node: ast.DeclAttr) -> AttrItemDecl:
-        return self.visit_attr(node)
-
-    @override
-    def visit_scope_attr(self, node: ast.ScopeAttr) -> AttrItemDecl:
-        return self.visit_attr(node)
 
     # Package
 
@@ -454,9 +452,9 @@ class AstConverter(ExprEvaluator):
             )
         pkg = PackageDecl(self.source.pkg_name, SourceLocation(self.source))
         for u in node.uses:
-            self.diag.for_each(self.visit(u), pkg.add_import)
-        self.diag.for_each(node.fields, lambda n: pkg.add_declaration(self.visit(n)))
-        self.diag.for_each(node.inner_attrs, lambda a: pkg.add_attr(self.visit(a)))
+            self.dm.for_each(self.visit(u), pkg.add_import)
+        self.dm.for_each(node.fields, lambda n: pkg.add_declaration(self.visit(n)))
+        self.dm.for_each(node.inner_attrs, lambda a: self.add_attr(pkg, a))
         return pkg
 
     def convert(self) -> PackageDecl:
@@ -469,5 +467,5 @@ class AstConverter(ExprEvaluator):
         Raises:
             InvalidPackageNameError: If the package name is invalid.
         """
-        ast_nodes = generate_ast(self.source, self.diag)
+        ast_nodes = generate_ast(self.source, self.dm)
         return self.visit_spec(ast_nodes)

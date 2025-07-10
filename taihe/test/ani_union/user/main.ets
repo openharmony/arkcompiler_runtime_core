@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {BusinessError} from "@ohos.base";
 import * as UnionTest1 from "test_union";
 import * as UnionTest from "union_ani";
-import {BusinessError} from "@ohos.base";
 
 loadLibrary("ani_union");
 
@@ -29,7 +29,7 @@ function test_printMyUnion_with_string() {
 }
 
 function test_printMyUnion_with_number() {
-    let res = UnionTest.printMyUnion(123.456 as float);
+    let res = UnionTest.printMyUnion(123.456f);
     arktest.assertEQ(res, "f")
 }
 
@@ -70,19 +70,19 @@ function test_primitives() {
     res = UnionTest1.printUnion("name")
     console.log(res)
 
-    res = UnionTest1.printUnion(1 as byte)
+    res = UnionTest1.printUnion((1).toByte())
     console.log(res)
 
-    res = UnionTest1.printUnion(123 as short)
+    res = UnionTest1.printUnion((123).toShort())
     console.log(res)
 
-    res = UnionTest1.printUnion(123456 as int)
+    res = UnionTest1.printUnion((123456).toInt())
     console.log(res)
 
-    res = UnionTest1.printUnion(1.23 as float)
+    res = UnionTest1.printUnion(1.23f)
     console.log(res)
 
-    res = UnionTest1.printUnion(1.2345 as double)
+    res = UnionTest1.printUnion((1.2345).toDouble())
     console.log(res)
 
     res = UnionTest1.printUnion(true)
@@ -94,120 +94,129 @@ function test_primitives() {
 // 定义 10 个测试函数
 function test_interface_Union_primitives1() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
-    instance.funcUnionPrimitive("Hello" as String, true);
+    instance.funcUnionPrimitive("Hello", true);
 }
 
 function test_interface_Union_primitives2() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
-    instance.funcUnionPrimitive("World" as String, 42 as byte);
+    instance.funcUnionPrimitive("World", (42).toByte());
 }
 
 function test_interface_Union_primitives3() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
-    instance.funcUnionPrimitive(1 as byte, 12 as short);
+    instance.funcUnionPrimitive((1).toByte(), (12).toShort());
 }
 
 function test_interface_Union_primitives4() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
-    instance.funcUnionPrimitive(12 as short, 123 as int);
+    instance.funcUnionPrimitive((12).toShort(), (123).toInt());
 }
 
 function test_interface_Union_primitives5() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
-    instance.funcUnionPrimitive(123 as int, 1.23 as float);
+    instance.funcUnionPrimitive((123).toInt(), 1.23f);
 }
 
 function test_interface_Union_primitives6() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
-    instance.funcUnionPrimitive(1.23 as float, 1.2345 as double);
+    instance.funcUnionPrimitive(1.23f, (1.2345).toDouble());
 }
 
 function test_interface_Union_primitives7() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
-    instance.funcUnionPrimitive(true, 42 as byte);
+    instance.funcUnionPrimitive(true, (42).toByte());
 }
 
 function test_interface_Union_primitives8() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
-    instance.funcUnionPrimitive(false, 123 as short);
+    instance.funcUnionPrimitive(false, (123).toShort());
 }
 
 function test_interface_Union_primitives9() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
-    instance.funcUnionPrimitive("Test" as String, 3.14 as float);
+    instance.funcUnionPrimitive("Test", 3.14f);
 }
 
 function test_interface_Union_primitives10() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
-    instance.funcUnionPrimitive(12345 as int, 2.71828 as double);
+    instance.funcUnionPrimitive((12345).toInt(), (2.71828).toDouble());
 }
 
 function test_interface_Union_10param_primitives1() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
     instance.funcUnionPrimitive5Param(
-        12345 as int, 2.71828 as double, 12 as short, 1 as byte, "hello");
+        (12345).toInt(), (2.71828).toDouble(), (12).toShort(), (1).toByte(),
+        "hello");
 }
 
 function test_interface_Union_10param_primitives2() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
     instance.funcUnionPrimitive5Param(
-        42 as int, 3.14 as double, 100 as short, 2 as byte, "world");
+        (42).toInt(), (3.14).toDouble(), (100).toShort(), (2).toByte(),
+        "world");
 }
 
 function test_interface_Union_10param_primitives3() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
     instance.funcUnionPrimitive5Param(
-        9876 as int, 1.414 as double, 50 as short, 3 as byte, "test");
+        (9876).toInt(), (1.414).toDouble(), (50).toShort(), (3).toByte(),
+        "test");
 }
 
 function test_interface_Union_10param_primitives4() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
     instance.funcUnionPrimitive5Param(
-        123 as int, 0.577 as double, 200 as short, 4 as byte, "example");
+        (123).toInt(), (0.577).toDouble(), (200).toShort(), (4).toByte(),
+        "example");
 }
 
 function test_interface_Union_10param_primitives5() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
     instance.funcUnionPrimitive5Param(
-        4567 as int, 1.618 as double, 150 as short, 5 as byte, "demo");
+        (4567).toInt(), (1.618).toDouble(), (150).toShort(), (5).toByte(),
+        "demo");
 }
 function test_interface_Union_10param_primitives6() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
     instance.funcUnionPrimitive5Param(
-        1000 as int, 2.5 as double, 10 as short, 6 as byte, "alpha");
+        (1000).toInt(), (2.5).toDouble(), (10).toShort(), (6).toByte(),
+        "alpha");
 }
 
 function test_interface_Union_10param_primitives7() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
     instance.funcUnionPrimitive5Param(
-        2000 as int, 3.0 as double, 20 as short, 7 as byte, "beta");
+        (2000).toInt(), (3.0).toDouble(), (20).toShort(), (7).toByte(), "beta");
 }
 
 function test_interface_Union_10param_primitives8() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
     instance.funcUnionPrimitive5Param(
-        3000 as int, 1.5 as double, 30 as short, 8 as byte, "gamma");
+        (3000).toInt(), (1.5).toDouble(), (30).toShort(), (8).toByte(),
+        "gamma");
 }
 
 function test_interface_Union_10param_primitives9() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
     instance.funcUnionPrimitive5Param(
-        4000 as int, 0.5 as double, 40 as short, 9 as byte, "delta");
+        (4000).toInt(), (0.5).toDouble(), (40).toShort(), (9).toByte(),
+        "delta");
 }
 
 function test_interface_Union_10param_primitives10() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
     instance.funcUnionPrimitive5Param(
-        5000 as int, 1.0 as double, 50 as short, 10 as byte, "epsilon");
+        (5000).toInt(), (1.0).toDouble(), (50).toShort(), (10).toByte(),
+        "epsilon");
 }
 
 
 
 function test_interface_Union_enum_map() {
     const studentScores: Record<String, byte> = {
-        "math": 90 as byte,
-        "english": 85 as byte,
-        "science": 95 as byte,
+        "math": (90).toByte(),
+        "english": (85).toByte(),
+        "science": (95).toByte(),
     };
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
 
@@ -219,9 +228,9 @@ function test_interface_Union_enum_map() {
 }
 function test_interface_Union_enum_map1() {
     const studentScores: Record<String, short> = {
-        "math": 90 as short,
-        "english": 85 as short,
-        "science": 95 as short,
+        "math": (90).toShort(),
+        "english": (85).toShort(),
+        "science": (95).toShort(),
     };
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
 
@@ -234,9 +243,9 @@ function test_interface_Union_enum_map1() {
 
 function test_interface_Union_enum_map2() {
     const studentScores: Record<String, int> = {
-        "math": 90 as int,
-        "english": 85 as int,
-        "science": 95 as int
+        "math": (90).toInt(),
+        "english": (85).toInt(),
+        "science": (95).toInt()
     };
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
     instance.funcColorMapValue3(studentScores);
@@ -244,25 +253,25 @@ function test_interface_Union_enum_map2() {
 
 
 function test_interface_Union_enum_map3() {
-    const studentScores:
-        Record<String, long> = {"math": 90 as long, "english": 85 as long};
+    const studentScores: Record<String, long> = {
+        "math": (90).toLong(),
+        "english": (85).toLong()
+    };
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
     instance.funcColorMapValue4(studentScores);
 }
 
 function test_interface_Union_enum_map4() {
-    let studentScores: Record<String, float> = {
-        "math": 123.45 as float,
-        "english": 57.89 as float
-    };
+    let studentScores:
+        Record<String, float> = {"math": 123.45f, "english": 57.89f};
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
     instance.funcColorMapValue5(studentScores);
 }
 
 function test_interface_Union_enum_map5() {
     const studentScores: Record<String, double> = {
-        "math": 90.5 as double,
-        "english": 85.3 as double
+        "math": (90.5).toDouble(),
+        "english": (85.3).toDouble()
     };
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
     instance.funcColorMapValue6(studentScores);
@@ -283,14 +292,14 @@ function test_interface_Union_enum_map7() {
 }
 
 function test_interface_Union_enum_map8() {
-    const scores: Record<int, int> = {100: 90 as int, 200: 85 as int};
+    const scores: Record<int, int> = {100: (90).toInt(), 200: (85).toInt()};
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
     instance.funcColorMapValue9(scores);
 }
 
 
 function test_interface_Union_enum_map9() {
-    const scores: Record<int, int> = {100: 90 as int, 200: 85 as int};
+    const scores: Record<int, int> = {100: (90).toInt(), 200: (85).toInt()};
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
     instance.funcColorMapValue10(scores, scores);
 }
@@ -300,9 +309,9 @@ function test_interface_Union_array_map() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
     let arri8: byte[] = [1, 2, 3, 4];
     const studentScores: Record<String, byte> = {
-        "math": 90 as byte,
-        "english": 85 as byte,
-        "science": 95 as byte,
+        "math": (90).toByte(),
+        "english": (85).toByte(),
+        "science": (95).toByte(),
     };
     console.log(instance.funcUnionArrayMap1(arri8, studentScores))
 }
@@ -310,43 +319,43 @@ function test_interface_Union_array_map1() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
     let arri8: byte[] = [1, 2, 3, 4];
     const studentScores: Record<String, short> = {
-        "math": 90 as short,
-        "english": 85 as short,
-        "science": 95 as short,
+        "math": (90).toShort(),
+        "english": (85).toShort(),
+        "science": (95).toShort(),
     };
     console.log(instance.funcUnionArrayMap2(arri8, studentScores))
 }
 function test_interface_Union_array_map2() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
     const studentScores: Record<String, int> = {
-        "math": 90 as int,
-        "english": 85 as int,
-        "science": 95 as int
+        "math": (90).toInt(),
+        "english": (85).toInt(),
+        "science": (95).toInt()
     };
     let arri8: byte[] = [1, 2, 3, 4]
     console.log(instance.funcUnionArrayMap3(arri8, studentScores))
 }
 function test_interface_Union_array_map3() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
-    const studentScores:
-        Record<String, long> = {"math": 90 as long, "english": 85 as long};
+    const studentScores: Record<String, long> = {
+        "math": (90).toLong(),
+        "english": (85).toLong()
+    };
     let arri8: byte[] = [1, 2, 3, 4]
     console.log(instance.funcUnionArrayMap4(arri8, studentScores))
 }
 function test_interface_Union_array_map4() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
-    let studentScores: Record<String, float> = {
-        "math": 123.45 as float,
-        "english": 57.89 as float
-    };
+    let studentScores:
+        Record<String, float> = {"math": 123.45f, "english": 57.89f};
     let arri8: byte[] = [1, 2, 3, 4]
     console.log(instance.funcUnionArrayMap5(arri8, studentScores))
 }
 function test_interface_Union_array_map5() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
     const studentScores: Record<String, double> = {
-        "math": 90.5 as double,
-        "english": 85.3 as double
+        "math": (90.5).toDouble(),
+        "english": (85.3).toDouble()
     };
     let arri8: byte[] = [1, 2, 3, 4]
     console.log(instance.funcUnionArrayMap6(arri8, studentScores))
@@ -377,14 +386,14 @@ function test_interface_Union_array_map8() {
 function test_interface_Union_array_map9() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
     const studentScores1: Record<String, byte> = {
-        "math": 90 as byte,
-        "english": 85 as byte,
-        "science": 95 as byte,
+        "math": (90).toByte(),
+        "english": (85).toByte(),
+        "science": (95).toByte(),
     };
     const studentScores2: Record<String, short> = {
-        "math": 90 as short,
-        "english": 85 as short,
-        "science": 95 as short,
+        "math": (90).toShort(),
+        "english": (85).toShort(),
+        "science": (95).toShort(),
     };
     let arri8: byte[] = [1, 2, 3, 4]
     console.log(instance.funcUnionArrayMap10(arri8, arri8))
@@ -399,7 +408,8 @@ function test_union_mix() {
     let arri8: byte[] = [1, 2, 3, 4];
     let color = UnionTest1.Color.RED;
 
-    console.log(instance.funcUnionMix(arri8, "hello", color, 1 as byte, true))
+    console.log(
+        instance.funcUnionMix(arri8, "hello", color, (1).toByte(), true))
 }
 function test_union_mix_10param1() {
     let instance: UnionTest1.MyInterface = UnionTest1.getInterface();
@@ -407,8 +417,8 @@ function test_union_mix_10param1() {
     let color = UnionTest1.Color.RED;
 
     console.log(instance.funcUnionMix10Param(
-        arri8, "hello", color, 1 as byte, true, 5000 as int, 1.0 as double,
-        50 as short, 10 as byte, "epsilon"));
+        arri8, "hello", color, (1).toByte(), true, (5000).toInt(),
+        (1.0).toDouble(), (50).toShort(), (10).toByte(), "epsilon"));
 }
 
 function test_union_mix_10param2() {
@@ -417,8 +427,8 @@ function test_union_mix_10param2() {
     let color = UnionTest1.Color.RED;
 
     console.log(instance.funcUnionMix10Param(
-        "hello", arri8, 1 as byte, color, true, 1.0 as double, 5000 as int,
-        50 as short, 10 as byte, "epsilon"));
+        "hello", arri8, (1).toByte(), color, true, (1.0).toDouble(),
+        (5000).toInt(), (50).toShort(), (10).toByte(), "epsilon"));
 }
 
 function test_union_mix_10param3() {
@@ -427,8 +437,8 @@ function test_union_mix_10param3() {
     let color = UnionTest1.Color.RED;
 
     console.log(instance.funcUnionMix10Param(
-        color, true, arri8, 1 as byte, "hello", 50 as short, 5000 as int,
-        1.0 as double, 10 as byte, "epsilon"));
+        color, true, arri8, (1).toByte(), "hello", (50).toShort(),
+        (5000).toInt(), (1.0).toDouble(), (10).toByte(), "epsilon"));
 }
 
 function test_union_mix_10param4() {
@@ -437,8 +447,8 @@ function test_union_mix_10param4() {
     let color = UnionTest1.Color.RED;
 
     console.log(instance.funcUnionMix10Param(
-        true, 1.0 as double, 5000 as int, 50 as short, 10 as byte, "epsilon",
-        arri8, "hello", color, 1 as byte));
+        true, (1.0).toDouble(), (5000).toInt(), (50).toShort(), (50).toShort(),
+        "epsilon", arri8, "hello", color, (1).toByte()));
 }
 
 function test_union_mix_10param5() {
@@ -447,8 +457,8 @@ function test_union_mix_10param5() {
     let color = UnionTest1.Color.RED;
 
     console.log(instance.funcUnionMix10Param(
-        5000 as int, 1.0 as double, 50 as short, 10 as byte, "epsilon", arri8,
-        "hello", color, 1 as byte, true));
+        (5000).toInt(), (1.0).toDouble(), (50).toShort(), (50).toShort(),
+        "epsilon", arri8, "hello", color, (1).toByte(), true));
 }
 
 // 2个组合primitive
@@ -537,32 +547,32 @@ function test_mix5_return5() {
 }
 
 
-function test_union_with_makeAndShowBasicUnion(){
+function test_union_with_makeAndShowBasicUnion() {
     // i8
-    let i8Result = UnionTest.makeAndShowBasicUnion(1 as byte);
+    let i8Result = UnionTest.makeAndShowBasicUnion((1).toByte());
     console.log("BasicUnion i8Result: ", i8Result);
     // i16
-    let i16Result = UnionTest.makeAndShowBasicUnion(123 as short);
+    let i16Result = UnionTest.makeAndShowBasicUnion((123).toShort());
     console.log("BasicUnion i16Result: ", i16Result);
     // i32
-    let i32Result = UnionTest.makeAndShowBasicUnion(123456 as int);
+    let i32Result = UnionTest.makeAndShowBasicUnion((123456).toInt());
     console.log("BasicUnion i32Result: ", i32Result);
     // i64
-    let i64Result = UnionTest.makeAndShowBasicUnion(123456789 as long);
+    let i64Result = UnionTest.makeAndShowBasicUnion((123456789).toLong());
     console.log("BasicUnion i64Result: ", i64Result);
-    //float32
-    let float32Result = UnionTest.makeAndShowBasicUnion(1.23 as float);
+    // float32
+    let float32Result = UnionTest.makeAndShowBasicUnion(1.23f);
     console.log("BasicUnion float32Result: ", float32Result);
-    //float64 
-    let float64Result = UnionTest.makeAndShowBasicUnion(1.2345 as double);
+    // float64
+    let float64Result = UnionTest.makeAndShowBasicUnion((1.2345).toDouble());
     console.log("BasicUnion float64Result: ", float64Result);
-    //string
+    // string
     let stringResult = UnionTest.makeAndShowBasicUnion("this is string data");
     console.log("BasicUnion stringResult: ", stringResult);
-    //bool true
+    // bool true
     let boolResult = UnionTest.makeAndShowBasicUnion(true);
     console.log("BasicUnion boolResult: ", boolResult);
-    //bool true
+    // bool true
     let boolResult1 = UnionTest.makeAndShowBasicUnion(false);
     console.log("BasicUnion boolResult1: ", boolResult1);
     // null
@@ -570,78 +580,101 @@ function test_union_with_makeAndShowBasicUnion(){
     console.log("BasicUnion nullResult: ", nullResult);
 }
 
-function test_union_with_makeAndShowTypedArrayUnion(){
-    //u8
+function test_union_with_makeAndShowTypedArrayUnion() {
+    // u8
     let u8Arr: Uint8Array = new Uint8Array([1, 2, 3]);
     let u8ArrResult = UnionTest.makeAndShowTypedArrayUnion(u8Arr) as Uint8Array;
     arktest.assertEQ(u8ArrResult.toString(), u8Arr.toString());
-    //i8
+    // i8
     let i8Arr: Int8Array = new Int8Array([-1, -2, -3]);
     let i8ArrResult = UnionTest.makeAndShowTypedArrayUnion(i8Arr) as Int8Array;
     arktest.assertEQ(i8ArrResult.toString(), i8Arr.toString());
-    //u16
+    // u16
     let u16Arr: Uint16Array = new Uint16Array([10, 20, 30]);
-    let u16ArrResult = UnionTest.makeAndShowTypedArrayUnion(u16Arr) as Uint16Array;
+    let u16ArrResult =
+        UnionTest.makeAndShowTypedArrayUnion(u16Arr) as Uint16Array;
     arktest.assertEQ(u16ArrResult.toString(), u16Arr.toString());
-    //i16
+    // i16
     let i16Arr: Int16Array = new Int16Array([-10, -20, -30]);
-    let i16ArrResult = UnionTest.makeAndShowTypedArrayUnion(i16Arr) as Int16Array;
+    let i16ArrResult =
+        UnionTest.makeAndShowTypedArrayUnion(i16Arr) as Int16Array;
     arktest.assertEQ(i16ArrResult.toString(), i16Arr.toString());
-    //u32
+    // u32
     let u32Arr: Uint32Array = new Uint32Array([100, 200, 300]);
-    let u32ArrResult = UnionTest.makeAndShowTypedArrayUnion(u32Arr) as Uint32Array;
+    let u32ArrResult =
+        UnionTest.makeAndShowTypedArrayUnion(u32Arr) as Uint32Array;
     arktest.assertEQ(u32ArrResult.toString(), u32Arr.toString());
-    //i32
+    // i32
     let i32Arr: Int32Array = new Int32Array([-100, -200, -300]);
-    let i32ArrResult = UnionTest.makeAndShowTypedArrayUnion(i32Arr) as Int32Array;
+    let i32ArrResult =
+        UnionTest.makeAndShowTypedArrayUnion(i32Arr) as Int32Array;
     arktest.assertEQ(i32ArrResult.toString(), i32Arr.toString());
-    //u64
+    // u64
     let u64Arr: BigUint64Array = new BigUint64Array([1000n, 2000n, 3000n]);
-    let u64ArrResult = UnionTest.makeAndShowTypedArrayUnion(u64Arr) as BigUint64Array;
+    let u64ArrResult =
+        UnionTest.makeAndShowTypedArrayUnion(u64Arr) as BigUint64Array;
     arktest.assertEQ(u64ArrResult.toString(), u64Arr.toString());
-    //i64
+    // i64
     let i64Arr: BigInt64Array = new BigInt64Array([-1000n, -2000n, -3000n]);
-    let i64ArrResult = UnionTest.makeAndShowTypedArrayUnion(i64Arr) as BigInt64Array;
+    let i64ArrResult =
+        UnionTest.makeAndShowTypedArrayUnion(i64Arr) as BigInt64Array;
     arktest.assertEQ(i64ArrResult.toString(), i64Arr.toString());
-    //f32
+    // f32
     let f32Arr: Float32Array = new Float32Array([1.23, -2.14, 3.16]);
-    let f32ArrResult = UnionTest.makeAndShowTypedArrayUnion(f32Arr) as Float32Array;
+    let f32ArrResult =
+        UnionTest.makeAndShowTypedArrayUnion(f32Arr) as Float32Array;
     arktest.assertEQ(f32ArrResult.toString(), f32Arr.toString());
-    //f64
-    let f64Arr: Float64Array = new Float64Array([1.234567, -2.145789, 3.161862]);
-    let f64ArrResult = UnionTest.makeAndShowTypedArrayUnion(f64Arr) as Float64Array;
+    // f64
+    let f64Arr: Float64Array =
+        new Float64Array([1.234567, -2.145789, 3.161862]);
+    let f64ArrResult =
+        UnionTest.makeAndShowTypedArrayUnion(f64Arr) as Float64Array;
     arktest.assertEQ(f64ArrResult.toString(), f64Arr.toString());
-    //null
+    // null
     let nullResult = UnionTest.makeAndShowTypedArrayUnion(null);
     arktest.assertEQ(nullResult, null);
 }
 
-function test_union_with_makeAndShowArrayUnion(){
-    //Array<f32> Array<f64>
-    let arrStruct: UnionTest.ArrayStruct = {float32Array: [1.23f, -2.14f, 3.16f], float64Array: [1.234567, -2.145789, 3.161862]};
-    let arrResult: UnionTest.ArrayUnion = UnionTest.makeAndShowArrayUnion(arrStruct);
-    console.log("ArrayUnion arrResult a: ", (arrResult as UnionTest.ArrayStruct)!.float32Array);
-    console.log("ArrayUnion arrResult b: ", (arrResult as UnionTest.ArrayStruct)!.float64Array);
+function test_union_with_makeAndShowArrayUnion() {
+    // Array<f32> Array<f64>
+    let arrStruct: UnionTest.ArrayStruct = {
+        float32Array: [1.23f, -2.14f, 3.16f],
+        float64Array: [1.234567, -2.145789, 3.161862]
+    };
+    let arrResult: UnionTest.ArrayUnion =
+        UnionTest.makeAndShowArrayUnion(arrStruct);
+    console.log(
+        "ArrayUnion arrResult a: ",
+        (arrResult as UnionTest.ArrayStruct)!.float32Array);
+    console.log(
+        "ArrayUnion arrResult b: ",
+        (arrResult as UnionTest.ArrayStruct)!.float64Array);
 
-    //null
+    // null
     let nullResult = UnionTest.makeAndShowArrayUnion(null);
-    console.log("ArrayUnion nullResult: ", nullResult); 
+    console.log("ArrayUnion nullResult: ", nullResult);
 }
 
-function test_union_with_makeAndShowStructUnion(){
-    //StrStruct
-    let strStruct: UnionTest.StrStruct= {a: "StrStruct a", b: "StrStruct b"};
-    let strResult: UnionTest.StructUnion = UnionTest.makeAndShowStructUnion(strStruct);
-    console.log("StructUnion strResult a: ", (strResult as UnionTest.StrStruct)!.a);
-    console.log("StructUnion strResult b: ", (strResult as UnionTest.StrStruct)!.b);
+function test_union_with_makeAndShowStructUnion() {
+    // StrStruct
+    let strStruct: UnionTest.StrStruct = {a: "StrStruct a", b: "StrStruct b"};
+    let strResult: UnionTest.StructUnion =
+        UnionTest.makeAndShowStructUnion(strStruct);
+    console.log(
+        "StructUnion strResult a: ", (strResult as UnionTest.StrStruct)!.a);
+    console.log(
+        "StructUnion strResult b: ", (strResult as UnionTest.StrStruct)!.b);
 
-    //IntStruct
-    let intStruct: UnionTest.IntStruct= {a: 1, b: 2 };
-    let intResult: UnionTest.StructUnion = UnionTest.makeAndShowStructUnion(intStruct);
-    console.log("StructUnion intResult a: ", (intResult as UnionTest.IntStruct)!.a);
-    console.log("StructUnion intResult b: ", (intResult as UnionTest.IntStruct)!.b);
+    // IntStruct
+    let intStruct: UnionTest.IntStruct = {a: 1, b: 2};
+    let intResult: UnionTest.StructUnion =
+        UnionTest.makeAndShowStructUnion(intStruct);
+    console.log(
+        "StructUnion intResult a: ", (intResult as UnionTest.IntStruct)!.a);
+    console.log(
+        "StructUnion intResult b: ", (intResult as UnionTest.IntStruct)!.b);
 
-    //null
+    // null
     let nullResult = UnionTest.makeAndShowStructUnion(null);
     console.log("StructUnion nullResult: ", nullResult);
 }
@@ -650,36 +683,69 @@ function main() {
     console.log("##############start#############");
     const suite = new arktest.ArkTestsuite("UnionTest Tests");
 
-    suite.addTest("test printMyUnion with undefined", test_printMyUnion_with_undefined);
-    suite.addTest("test printMyUnion with string", test_printMyUnion_with_string);
-    suite.addTest("test printMyUnion with number", test_printMyUnion_with_number);
+    suite.addTest(
+        "test printMyUnion with undefined", test_printMyUnion_with_undefined);
+    suite.addTest(
+        "test printMyUnion with string", test_printMyUnion_with_string);
+    suite.addTest(
+        "test printMyUnion with number", test_printMyUnion_with_number);
     suite.addTest("test printMyUnion with pair", test_printMyUnion_with_pair);
     suite.addTest("test makeMyUnion string", test_makeMyUnion_string);
     suite.addTest("test makeMyUnion number", test_makeMyUnion_number);
     suite.addTest("test makeMyUnion pair", test_makeMyUnion_pair);
     suite.addTest("test makeMyUnion undefined", test_makeMyUnion_undefined);
 
-    suite.addTest("test_interface_Union_primitives1", test_interface_Union_primitives1);
-    suite.addTest("test_interface_Union_primitives2", test_interface_Union_primitives2);
-    suite.addTest("test_interface_Union_primitives3", test_interface_Union_primitives3);
-    suite.addTest("test_interface_Union_primitives4", test_interface_Union_primitives4);
-    suite.addTest("test_interface_Union_primitives5", test_interface_Union_primitives5);
-    suite.addTest("test_interface_Union_primitives6", test_interface_Union_primitives6);
-    suite.addTest("test_interface_Union_primitives7", test_interface_Union_primitives7);
-    suite.addTest("test_interface_Union_primitives8", test_interface_Union_primitives8);
-    suite.addTest("test_interface_Union_primitives9", test_interface_Union_primitives9);
-    suite.addTest("test_interface_Union_primitives10", test_interface_Union_primitives10);
+    suite.addTest(
+        "test_interface_Union_primitives1", test_interface_Union_primitives1);
+    suite.addTest(
+        "test_interface_Union_primitives2", test_interface_Union_primitives2);
+    suite.addTest(
+        "test_interface_Union_primitives3", test_interface_Union_primitives3);
+    suite.addTest(
+        "test_interface_Union_primitives4", test_interface_Union_primitives4);
+    suite.addTest(
+        "test_interface_Union_primitives5", test_interface_Union_primitives5);
+    suite.addTest(
+        "test_interface_Union_primitives6", test_interface_Union_primitives6);
+    suite.addTest(
+        "test_interface_Union_primitives7", test_interface_Union_primitives7);
+    suite.addTest(
+        "test_interface_Union_primitives8", test_interface_Union_primitives8);
+    suite.addTest(
+        "test_interface_Union_primitives9", test_interface_Union_primitives9);
+    suite.addTest(
+        "test_interface_Union_primitives10", test_interface_Union_primitives10);
     // primitive_5param
-    suite.addTest("test_interface_Union_10param_primitives1",test_interface_Union_10param_primitives1);
-    suite.addTest("test_interface_Union_10param_primitives2",test_interface_Union_10param_primitives2);
-    suite.addTest("test_interface_Union_10param_primitives3",test_interface_Union_10param_primitives3);
-    suite.addTest("test_interface_Union_10param_primitives4",test_interface_Union_10param_primitives4);
-    suite.addTest("test_interface_Union_10param_primitives5",test_interface_Union_10param_primitives5);
-    suite.addTest("test_interface_Union_10param_primitives6",test_interface_Union_10param_primitives6);
-    suite.addTest("test_interface_Union_10param_primitives7",test_interface_Union_10param_primitives7);
-    suite.addTest("test_interface_Union_10param_primitives8",test_interface_Union_10param_primitives8);
-    suite.addTest("test_interface_Union_10param_primitives9",test_interface_Union_10param_primitives9);
-    suite.addTest("test_interface_Union_10param_primitives10",test_interface_Union_10param_primitives10);
+    suite.addTest(
+        "test_interface_Union_10param_primitives1",
+        test_interface_Union_10param_primitives1);
+    suite.addTest(
+        "test_interface_Union_10param_primitives2",
+        test_interface_Union_10param_primitives2);
+    suite.addTest(
+        "test_interface_Union_10param_primitives3",
+        test_interface_Union_10param_primitives3);
+    suite.addTest(
+        "test_interface_Union_10param_primitives4",
+        test_interface_Union_10param_primitives4);
+    suite.addTest(
+        "test_interface_Union_10param_primitives5",
+        test_interface_Union_10param_primitives5);
+    suite.addTest(
+        "test_interface_Union_10param_primitives6",
+        test_interface_Union_10param_primitives6);
+    suite.addTest(
+        "test_interface_Union_10param_primitives7",
+        test_interface_Union_10param_primitives7);
+    suite.addTest(
+        "test_interface_Union_10param_primitives8",
+        test_interface_Union_10param_primitives8);
+    suite.addTest(
+        "test_interface_Union_10param_primitives9",
+        test_interface_Union_10param_primitives9);
+    suite.addTest(
+        "test_interface_Union_10param_primitives10",
+        test_interface_Union_10param_primitives10);
 
     // mix_5param
     suite.addTest("test_union_mix", test_union_mix);
@@ -711,37 +777,65 @@ function main() {
     // 10组合所有类型return
 
     // enum map
-    suite.addTest("test_interface_Union_enum_map", test_interface_Union_enum_map);
-    suite.addTest("test_interface_Union_enum_map1", test_interface_Union_enum_map1);
-    suite.addTest("test_interface_Union_enum_map2", test_interface_Union_enum_map2);
-    suite.addTest("test_interface_Union_enum_map3", test_interface_Union_enum_map3);
-    suite.addTest("test_interface_Union_enum_map4", test_interface_Union_enum_map4);
-    suite.addTest("test_interface_Union_enum_map5", test_interface_Union_enum_map5);
-    suite.addTest("test_interface_Union_enum_map6", test_interface_Union_enum_map6);
-    suite.addTest("test_interface_Union_enum_map7", test_interface_Union_enum_map7);
-    suite.addTest("test_interface_Union_enum_map8", test_interface_Union_enum_map8);
-    suite.addTest("test_interface_Union_enum_map9", test_interface_Union_enum_map9);
+    suite.addTest(
+        "test_interface_Union_enum_map", test_interface_Union_enum_map);
+    suite.addTest(
+        "test_interface_Union_enum_map1", test_interface_Union_enum_map1);
+    suite.addTest(
+        "test_interface_Union_enum_map2", test_interface_Union_enum_map2);
+    suite.addTest(
+        "test_interface_Union_enum_map3", test_interface_Union_enum_map3);
+    suite.addTest(
+        "test_interface_Union_enum_map4", test_interface_Union_enum_map4);
+    suite.addTest(
+        "test_interface_Union_enum_map5", test_interface_Union_enum_map5);
+    suite.addTest(
+        "test_interface_Union_enum_map6", test_interface_Union_enum_map6);
+    suite.addTest(
+        "test_interface_Union_enum_map7", test_interface_Union_enum_map7);
+    suite.addTest(
+        "test_interface_Union_enum_map8", test_interface_Union_enum_map8);
+    suite.addTest(
+        "test_interface_Union_enum_map9", test_interface_Union_enum_map9);
 
     // arr
-    suite.addTest("test_interface_Union_array_map", test_interface_Union_array_map);
-    suite.addTest("test_interface_Union_array_map1", test_interface_Union_array_map1);
-    suite.addTest("test_interface_Union_array_map2", test_interface_Union_array_map2);
-    suite.addTest("test_interface_Union_array_map3", test_interface_Union_array_map3);
-    suite.addTest("test_interface_Union_array_map4", test_interface_Union_array_map4);
-    suite.addTest("test_interface_Union_array_map5", test_interface_Union_array_map5);
-    suite.addTest("test_interface_Union_array_map6", test_interface_Union_array_map6);
-    suite.addTest("test_interface_Union_array_map7", test_interface_Union_array_map7);
-    suite.addTest("test_interface_Union_array_map8", test_interface_Union_array_map8);
-    suite.addTest("test_interface_Union_array_map9", test_interface_Union_array_map9);
+    suite.addTest(
+        "test_interface_Union_array_map", test_interface_Union_array_map);
+    suite.addTest(
+        "test_interface_Union_array_map1", test_interface_Union_array_map1);
+    suite.addTest(
+        "test_interface_Union_array_map2", test_interface_Union_array_map2);
+    suite.addTest(
+        "test_interface_Union_array_map3", test_interface_Union_array_map3);
+    suite.addTest(
+        "test_interface_Union_array_map4", test_interface_Union_array_map4);
+    suite.addTest(
+        "test_interface_Union_array_map5", test_interface_Union_array_map5);
+    suite.addTest(
+        "test_interface_Union_array_map6", test_interface_Union_array_map6);
+    suite.addTest(
+        "test_interface_Union_array_map7", test_interface_Union_array_map7);
+    suite.addTest(
+        "test_interface_Union_array_map8", test_interface_Union_array_map8);
+    suite.addTest(
+        "test_interface_Union_array_map9", test_interface_Union_array_map9);
 
     // union basic
-    suite.addTest("test_union_with_makeAndShowBasicUnion", test_union_with_makeAndShowBasicUnion);
+    suite.addTest(
+        "test_union_with_makeAndShowBasicUnion",
+        test_union_with_makeAndShowBasicUnion);
     // union typedarray
-    suite.addTest("test_union_with_makeAndShowTypedArrayUnion", test_union_with_makeAndShowTypedArrayUnion);    
+    suite.addTest(
+        "test_union_with_makeAndShowTypedArrayUnion",
+        test_union_with_makeAndShowTypedArrayUnion);
     // union array
-    suite.addTest("test_union_with_makeAndShowArrayUnion", test_union_with_makeAndShowArrayUnion);    
-    //union struct 
-    suite.addTest("test_union_with_makeAndShowStructUnion", test_union_with_makeAndShowStructUnion);
+    suite.addTest(
+        "test_union_with_makeAndShowArrayUnion",
+        test_union_with_makeAndShowArrayUnion);
+    // union struct
+    suite.addTest(
+        "test_union_with_makeAndShowStructUnion",
+        test_union_with_makeAndShowStructUnion);
 
     exit(suite.run());
 }

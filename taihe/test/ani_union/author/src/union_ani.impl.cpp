@@ -117,7 +117,7 @@ string PrintMyUnion(::union_ani::MyUnion const &data)
 {
     switch (data.get_tag()) {
         case ::union_ani::TypedArrayUnion::tag_t::u8Value: {
-            const ::taihe::array<uint8_t> value = data.get_u8Value_ref();
+            ::taihe::array<uint8_t> const value = data.get_u8Value_ref();
             return ::union_ani::TypedArrayUnion::make_u8Value(value);
         }
         case ::union_ani::TypedArrayUnion::tag_t::i8Value: {

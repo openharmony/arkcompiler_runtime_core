@@ -51,34 +51,49 @@ from taihe.utils.analyses import AbstractAnalysis, AnalysisManager
 
 class PackageABIInfo(AbstractAnalysis[PackageDecl]):
     def __init__(self, am: AnalysisManager, p: PackageDecl) -> None:
-        super().__init__(am, p)
         self.header = f"{p.name}.abi.h"
-        self.src = f"{p.name}.abi.c"
+        self.source = f"{p.name}.abi.c"
+
+    @classmethod
+    @override
+    def create(cls, am: AnalysisManager, p: PackageDecl) -> "PackageABIInfo":
+        return PackageABIInfo(am, p)
 
 
 class GlobFuncABIInfo(AbstractAnalysis[GlobFuncDecl]):
     def __init__(self, am: AnalysisManager, f: GlobFuncDecl) -> None:
-        super().__init__(am, f)
         segments = [*f.parent_pkg.segments, f.name]
         self.mangled_name = encode(segments, DeclKind.FUNC)
+
+    @classmethod
+    @override
+    def create(cls, am: AnalysisManager, f: GlobFuncDecl) -> "GlobFuncABIInfo":
+        return GlobFuncABIInfo(am, f)
 
 
 class IfaceMethodABIInfo(AbstractAnalysis[IfaceMethodDecl]):
     def __init__(self, am: AnalysisManager, f: IfaceMethodDecl) -> None:
-        super().__init__(am, f)
         segments = [*f.parent_pkg.segments, f.parent_iface.name, f.name]
         self.mangled_name = encode(segments, DeclKind.FUNC)
+
+    @classmethod
+    @override
+    def create(cls, am: AnalysisManager, f: IfaceMethodDecl) -> "IfaceMethodABIInfo":
+        return IfaceMethodABIInfo(am, f)
 
 
 class EnumABIInfo(AbstractAnalysis[EnumDecl]):
     def __init__(self, am: AnalysisManager, d: EnumDecl) -> None:
-        super().__init__(am, d)
         self.abi_type = "int"
+
+    @classmethod
+    @override
+    def create(cls, am: AnalysisManager, d: EnumDecl) -> "EnumABIInfo":
+        return EnumABIInfo(am, d)
 
 
 class UnionABIInfo(AbstractAnalysis[UnionDecl]):
     def __init__(self, am: AnalysisManager, d: UnionDecl) -> None:
-        super().__init__(am, d)
         segments = [*d.parent_pkg.segments, d.name]
         self.decl_header = f"{d.parent_pkg.name}.{d.name}.abi.0.h"
         self.defn_header = f"{d.parent_pkg.name}.{d.name}.abi.1.h"
@@ -90,10 +105,14 @@ class UnionABIInfo(AbstractAnalysis[UnionDecl]):
         self.as_param = f"struct {self.mangled_name} const*"
         self.has_data = any(field.ty_ref for field in d.fields)
 
+    @classmethod
+    @override
+    def create(cls, am: AnalysisManager, d: UnionDecl) -> "UnionABIInfo":
+        return UnionABIInfo(am, d)
+
 
 class StructABIInfo(AbstractAnalysis[StructDecl]):
     def __init__(self, am: AnalysisManager, d: StructDecl) -> None:
-        super().__init__(am, d)
         segments = [*d.parent_pkg.segments, d.name]
         self.decl_header = f"{d.parent_pkg.name}.{d.name}.abi.0.h"
         self.defn_header = f"{d.parent_pkg.name}.{d.name}.abi.1.h"
@@ -101,6 +120,11 @@ class StructABIInfo(AbstractAnalysis[StructDecl]):
         self.mangled_name = encode(segments, DeclKind.TYPE)
         self.as_owner = f"struct {self.mangled_name}"
         self.as_param = f"struct {self.mangled_name} const*"
+
+    @classmethod
+    @override
+    def create(cls, am: AnalysisManager, d: StructDecl) -> "StructABIInfo":
+        return StructABIInfo(am, d)
 
 
 @dataclass
@@ -118,7 +142,6 @@ class AncestorDictItemInfo:
 
 class IfaceABIInfo(AbstractAnalysis[IfaceDecl]):
     def __init__(self, am: AnalysisManager, d: IfaceDecl) -> None:
-        super().__init__(am, d)
         segments = [*d.parent_pkg.segments, d.name]
         self.decl_header = f"{d.parent_pkg.name}.{d.name}.abi.0.h"
         self.defn_header = f"{d.parent_pkg.name}.{d.name}.abi.1.h"
@@ -155,8 +178,13 @@ class IfaceABIInfo(AbstractAnalysis[IfaceDecl]):
                 ),
             )
 
+    @classmethod
+    @override
+    def create(cls, am: AnalysisManager, d: IfaceDecl) -> "IfaceABIInfo":
+        return IfaceABIInfo(am, d)
 
-class AbstractTypeABIInfo(metaclass=ABCMeta):
+
+class TypeABIInfo(AbstractAnalysis[Type], metaclass=ABCMeta):
     defn_headers: list[str]
     impl_headers: list[str]
     # type as struct field / union field / return value
@@ -164,10 +192,14 @@ class AbstractTypeABIInfo(metaclass=ABCMeta):
     # type as parameter
     as_param: str
 
+    @classmethod
+    @override
+    def create(cls, am: AnalysisManager, t: Type) -> "TypeABIInfo":
+        return TypeABIInfoDispatcher(am).handle_type(t)
 
-class EnumTypeABIInfo(AbstractAnalysis[EnumType], AbstractTypeABIInfo):
+
+class EnumTypeABIInfo(TypeABIInfo):
     def __init__(self, am: AnalysisManager, t: EnumType) -> None:
-        super().__init__(am, t)
         enum_abi_info = EnumABIInfo.get(am, t.ty_decl)
         self.defn_headers = []
         self.impl_headers = []
@@ -175,9 +207,8 @@ class EnumTypeABIInfo(AbstractAnalysis[EnumType], AbstractTypeABIInfo):
         self.as_param = enum_abi_info.abi_type
 
 
-class UnionTypeABIInfo(AbstractAnalysis[UnionType], AbstractTypeABIInfo):
+class UnionTypeABIInfo(TypeABIInfo):
     def __init__(self, am: AnalysisManager, t: UnionType):
-        super().__init__(am, t)
         union_abi_info = UnionABIInfo.get(am, t.ty_decl)
         self.defn_headers = [union_abi_info.defn_header]
         self.impl_headers = [union_abi_info.impl_header]
@@ -185,9 +216,8 @@ class UnionTypeABIInfo(AbstractAnalysis[UnionType], AbstractTypeABIInfo):
         self.as_param = union_abi_info.as_param
 
 
-class StructTypeABIInfo(AbstractAnalysis[StructType], AbstractTypeABIInfo):
+class StructTypeABIInfo(TypeABIInfo):
     def __init__(self, am: AnalysisManager, t: StructType) -> None:
-        super().__init__(am, t)
         struct_abi_info = StructABIInfo.get(am, t.ty_decl)
         self.defn_headers = [struct_abi_info.defn_header]
         self.impl_headers = [struct_abi_info.impl_header]
@@ -195,9 +225,8 @@ class StructTypeABIInfo(AbstractAnalysis[StructType], AbstractTypeABIInfo):
         self.as_param = struct_abi_info.as_param
 
 
-class IfaceTypeABIInfo(AbstractAnalysis[IfaceType], AbstractTypeABIInfo):
+class IfaceTypeABIInfo(TypeABIInfo):
     def __init__(self, am: AnalysisManager, t: IfaceType) -> None:
-        super().__init__(am, t)
         iface_abi_info = IfaceABIInfo.get(am, t.ty_decl)
         self.defn_headers = [iface_abi_info.defn_header]
         self.impl_headers = [iface_abi_info.impl_header]
@@ -205,9 +234,8 @@ class IfaceTypeABIInfo(AbstractAnalysis[IfaceType], AbstractTypeABIInfo):
         self.as_param = iface_abi_info.as_param
 
 
-class ScalarTypeABIInfo(AbstractAnalysis[ScalarType], AbstractTypeABIInfo):
+class ScalarTypeABIInfo(TypeABIInfo):
     def __init__(self, am: AnalysisManager, t: ScalarType):
-        super().__init__(am, t)
         res = {
             ScalarKind.BOOL: "bool",
             ScalarKind.F32: "float",
@@ -229,134 +257,143 @@ class ScalarTypeABIInfo(AbstractAnalysis[ScalarType], AbstractTypeABIInfo):
         self.as_owner = res
 
 
-class OpaqueTypeABIInfo(AbstractAnalysis[OpaqueType], AbstractTypeABIInfo):
+class OpaqueTypeABIInfo(TypeABIInfo):
     def __init__(self, am: AnalysisManager, t: OpaqueType) -> None:
-        super().__init__(am, t)
         self.defn_headers = []
         self.impl_headers = []
         self.as_param = "uintptr_t"
         self.as_owner = "uintptr_t"
 
 
-class StringTypeABIInfo(AbstractAnalysis[StringType], AbstractTypeABIInfo):
+class StringTypeABIInfo(TypeABIInfo):
     def __init__(self, am: AnalysisManager, t: StringType) -> None:
-        super().__init__(am, t)
         self.defn_headers = ["taihe/string.abi.h"]
         self.impl_headers = ["taihe/string.abi.h"]
         self.as_owner = "struct TString"
         self.as_param = "struct TString"
 
 
-class ArrayTypeABIInfo(AbstractAnalysis[ArrayType], AbstractTypeABIInfo):
+class ArrayTypeABIInfo(TypeABIInfo):
     def __init__(self, am: AnalysisManager, t: ArrayType) -> None:
-        super().__init__(am, t)
         self.defn_headers = ["taihe/array.abi.h"]
         self.impl_headers = ["taihe/array.abi.h"]
         self.as_owner = "struct TArray"
         self.as_param = "struct TArray"
 
 
-class OptionalTypeABIInfo(AbstractAnalysis[OptionalType], AbstractTypeABIInfo):
+class OptionalTypeABIInfo(TypeABIInfo):
     def __init__(self, am: AnalysisManager, t: OptionalType) -> None:
-        super().__init__(am, t)
         self.defn_headers = ["taihe/optional.abi.h"]
         self.impl_headers = ["taihe/optional.abi.h"]
         self.as_owner = "struct TOptional"
         self.as_param = "struct TOptional"
 
 
-class CallbackTypeABIInfo(AbstractAnalysis[CallbackType], AbstractTypeABIInfo):
+class CallbackTypeABIInfo(TypeABIInfo):
     def __init__(self, am: AnalysisManager, t: CallbackType) -> None:
-        super().__init__(am, t)
         self.defn_headers = ["taihe/callback.abi.h"]
         self.impl_headers = ["taihe/callback.abi.h"]
         self.as_owner = "struct TCallback"
         self.as_param = "struct TCallback"
 
 
-class VectorTypeABIInfo(AbstractAnalysis[VectorType], AbstractTypeABIInfo):
+class VectorTypeABIInfo(TypeABIInfo):
     def __init__(self, am: AnalysisManager, t: VectorType) -> None:
-        super().__init__(am, t)
         self.defn_headers = []
         self.impl_headers = []
         self.as_owner = "void*"
         self.as_param = "void*"
 
 
-class MapTypeABIInfo(AbstractAnalysis[MapType], AbstractTypeABIInfo):
+class MapTypeABIInfo(TypeABIInfo):
     def __init__(self, am: AnalysisManager, t: MapType) -> None:
-        super().__init__(am, t)
         self.defn_headers = []
         self.impl_headers = []
         self.as_owner = "void*"
         self.as_param = "void*"
 
 
-class SetTypeABIInfo(AbstractAnalysis[SetType], AbstractTypeABIInfo):
+class SetTypeABIInfo(TypeABIInfo):
     def __init__(self, am: AnalysisManager, t: SetType) -> None:
-        super().__init__(am, t)
         self.defn_headers = []
         self.impl_headers = []
         self.as_owner = "void*"
         self.as_param = "void*"
 
 
-class TypeABIInfo(TypeVisitor[AbstractTypeABIInfo]):
+class TypeABIInfoDispatcher(TypeVisitor[TypeABIInfo]):
     def __init__(self, am: AnalysisManager):
         self.am = am
 
-    @staticmethod
-    def get(am: AnalysisManager, t: Type):
-        return TypeABIInfo(am).handle_type(t)
+    @override
+    def visit_enum_type(self, t: EnumType) -> TypeABIInfo:
+        return EnumTypeABIInfo(self.am, t)
 
     @override
-    def visit_enum_type(self, t: EnumType) -> AbstractTypeABIInfo:
-        return EnumTypeABIInfo.get(self.am, t)
+    def visit_union_type(self, t: UnionType) -> TypeABIInfo:
+        return UnionTypeABIInfo(self.am, t)
 
     @override
-    def visit_union_type(self, t: UnionType) -> AbstractTypeABIInfo:
-        return UnionTypeABIInfo.get(self.am, t)
+    def visit_struct_type(self, t: StructType) -> TypeABIInfo:
+        return StructTypeABIInfo(self.am, t)
 
     @override
-    def visit_struct_type(self, t: StructType) -> AbstractTypeABIInfo:
-        return StructTypeABIInfo.get(self.am, t)
+    def visit_iface_type(self, t: IfaceType) -> TypeABIInfo:
+        return IfaceTypeABIInfo(self.am, t)
 
     @override
-    def visit_iface_type(self, t: IfaceType) -> AbstractTypeABIInfo:
-        return IfaceTypeABIInfo.get(self.am, t)
+    def visit_scalar_type(self, t: ScalarType) -> TypeABIInfo:
+        return ScalarTypeABIInfo(self.am, t)
 
     @override
-    def visit_scalar_type(self, t: ScalarType) -> AbstractTypeABIInfo:
-        return ScalarTypeABIInfo.get(self.am, t)
+    def visit_opaque_type(self, t: OpaqueType) -> TypeABIInfo:
+        return OpaqueTypeABIInfo(self.am, t)
 
     @override
-    def visit_opaque_type(self, t: OpaqueType) -> AbstractTypeABIInfo:
-        return OpaqueTypeABIInfo.get(self.am, t)
+    def visit_string_type(self, t: StringType) -> TypeABIInfo:
+        return StringTypeABIInfo(self.am, t)
 
     @override
-    def visit_string_type(self, t: StringType) -> AbstractTypeABIInfo:
-        return StringTypeABIInfo.get(self.am, t)
+    def visit_array_type(self, t: ArrayType) -> TypeABIInfo:
+        return ArrayTypeABIInfo(self.am, t)
 
     @override
-    def visit_array_type(self, t: ArrayType) -> AbstractTypeABIInfo:
-        return ArrayTypeABIInfo.get(self.am, t)
+    def visit_vector_type(self, t: VectorType) -> TypeABIInfo:
+        return VectorTypeABIInfo(self.am, t)
 
     @override
-    def visit_vector_type(self, t: VectorType) -> AbstractTypeABIInfo:
-        return VectorTypeABIInfo.get(self.am, t)
+    def visit_optional_type(self, t: OptionalType) -> TypeABIInfo:
+        return OptionalTypeABIInfo(self.am, t)
 
     @override
-    def visit_optional_type(self, t: OptionalType) -> AbstractTypeABIInfo:
-        return OptionalTypeABIInfo.get(self.am, t)
+    def visit_map_type(self, t: MapType) -> TypeABIInfo:
+        return MapTypeABIInfo(self.am, t)
 
     @override
-    def visit_map_type(self, t: MapType) -> AbstractTypeABIInfo:
-        return MapTypeABIInfo.get(self.am, t)
+    def visit_set_type(self, t: SetType) -> TypeABIInfo:
+        return SetTypeABIInfo(self.am, t)
 
     @override
-    def visit_set_type(self, t: SetType) -> AbstractTypeABIInfo:
-        return SetTypeABIInfo.get(self.am, t)
+    def visit_callback_type(self, t: CallbackType) -> TypeABIInfo:
+        return CallbackTypeABIInfo(self.am, t)
 
+
+class PackageCImplInfo(AbstractAnalysis[PackageDecl]):
+    def __init__(self, am: AnalysisManager, p: PackageDecl) -> None:
+        self.header = f"{p.name}.impl.h"
+        self.source = f"{p.name}.impl.c"
+
+    @classmethod
     @override
-    def visit_callback_type(self, t: CallbackType) -> AbstractTypeABIInfo:
-        return CallbackTypeABIInfo.get(self.am, t)
+    def create(cls, am: AnalysisManager, p: PackageDecl) -> "PackageCImplInfo":
+        return PackageCImplInfo(am, p)
+
+
+class GlobFuncCImplInfo(AbstractAnalysis[GlobFuncDecl]):
+    def __init__(self, am: AnalysisManager, f: GlobFuncDecl) -> None:
+        self.macro = f"TH_EXPORT_C_API_{f.name}"
+
+    @classmethod
+    @override
+    def create(cls, am: AnalysisManager, f: GlobFuncDecl) -> "GlobFuncCImplInfo":
+        return GlobFuncCImplInfo(am, f)

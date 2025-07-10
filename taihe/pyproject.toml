@@ -12,7 +12,7 @@
 # limitations under the License.
 
 [project]
-# dynamic = ["version"]
+version = "0.37.0"
 name = "taihe"
 description = "Language-neutral API tooling"
 requires-python = ">=3.10"
@@ -20,12 +20,11 @@ dependencies = [
     "antlr4-python3-runtime>=4.13.2",
     "typing-extensions>=4.13.2",
 ]
-version = "0.34.1"
 
 [dependency-groups]
 dev = [
-    "black>=25.1.0",
     "coverage>=7.8.0",
+    "hatchling>=1.27.0",
     "pyright>=1.1.400",
     "pytest>=8.3.5",
     "removestar>=1.5.2",
@@ -39,48 +38,59 @@ default = true
 ### Build System ###
 
 [build-system]
-requires = ["hatchling", "hatch-vcs"]
+requires = ["hatchling", "hatch-vcs", "antlr4-python3-runtime", "typing-extensions"]
 build-backend = "hatchling.build"
 
 [project.scripts]
 taihec      = "taihe.cli.compiler:main"
 taihe-tryit = "taihe.cli.tryit:main"
 
-[tool.hatch.version]
-source = "vcs"
-
 [tool.hatch.version.raw-options]
 search_parent_directories = true
 local_scheme = "dirty-tag"
 version_scheme = "python-simplified-semver"
 
-[tool.hatch.build.hooks.vcs]
-version-file = "taihe/_version.py"
+[tool.hatch.build.hooks.custom]
+path = "compiler/hatch_build.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["compiler/taihe"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"./runtime" = "taihe/data/runtime"
+"./stdlib" = "taihe/data/stdlib"
 
 ### Linting ###
 
-[tool.black]
-exclude = "(taihe/parse/antlr|taihe/_version.py)"
-target-version = ['py310']
-
 [tool.pyright]
-include = ["taihe"]
-exclude = ["taihe/parse/antlr"]
+include = ["compiler"]
+exclude = ["compiler/taihe/parse/antlr"]
 pythonVersion = '3.10'
 
-# strict = ["taihe"]  # Maybe later: codegen
-strict = ["taihe/cli", "taihe/driver", "taihe/parse", "taihe/semantics", "taihe/utils"]
+# strict = ["compiler/taihe"]  # Maybe later: codegen
+strict = [
+  "compiler/taihe/cli",
+  "compiler/taihe/driver",
+  "compiler/taihe/parse",
+  "compiler/taihe/semantics",
+  "compiler/taihe/utils"
+]
+
+[[tool.pyright.executionEnvironments]]
+root = "compiler"
 
 ### Linting (Ruff Only) ###
 
 [tool.ruff]
 target-version = 'py310'
 
-# Don't check generated code.
-exclude = ["taihe/parse/antlr/*.py", "taihe/_version.py"]
+[tool.ruff.lint]
+pydocstyle.convention = "google"
+flake8-tidy-imports.ban-relative-imports = "all"
+flake8-type-checking.strict = true
 
 # See all rules at https://beta.ruff.rs/docs/rules/
-lint.select = [
+select = [
     "E", # pycodestyle
     "W", # pycodestyle
     "F", # Pyflakes
@@ -97,9 +107,7 @@ lint.select = [
     "RUF", # Ruff-specific rules
 ]
 
-lint.ignore = [
-    "E501", # "Line too long"
-    # -> "line length already regulated by black"
+ignore = [
     "PT011", # "pytest.raises() should specify expected exception"
     # -> "would imply to update tests every time you update exception message"
     "SIM108",
@@ -119,21 +127,5 @@ lint.ignore = [
     "TC003", # "unnecessary to move to a TYPE_CHECKING block"
     "TC006",
     "B007",
+    "E501", # TODO fix long lines
 ]
-
-[tool.ruff.lint.pydocstyle]
-# Automatically disable rules that are incompatible with Google docstring convention
-convention = "google"
-
-[tool.ruff.lint.pycodestyle]
-max-doc-length = 100
-
-[tool.ruff.lint.flake8-tidy-imports]
-ban-relative-imports = "all"
-
-[tool.ruff.lint.flake8-type-checking]
-strict = true
-runtime-evaluated-base-classes = ["pydantic.BaseModel"]
-# Pydantic needs to be able to evaluate types at runtime
-# see https://pypi.org/project/flake8-type-checking/ for flake8-type-checking documentation
-# see https://beta.ruff.rs/docs/settings/#flake8-type-checking-runtime-evaluated-base-classes for ruff documentation

@@ -12,21 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as skillTest from "skill";
 import * as abilityInfo from "abilityInfo";
-import * as overlayModuleInfo from "overlayModuleInfo";
-import * as metadata from "metadata";
-import * as hapModuleInfo from "hapModuleInfo";
-import * as extensionAbilityInfo from "extensionAbilityInfo";
 import * as applicationInfo from "applicationInfo";
-import * as elementName from "elementName";
 import * as bundleInfo from "bundleInfo";
+import * as elementName from "elementName";
+import * as extensionAbilityInfo from "extensionAbilityInfo";
+import * as hapModuleInfo from "hapModuleInfo";
+import * as metadata from "metadata";
+import * as overlayModuleInfo from "overlayModuleInfo";
+import * as skillTest from "skill";
 
 loadLibrary("ani_bundlemanager");
 
 let intDig = 21474;
 
-//Skill.d.ts
+// Skill.d.ts
 let skill: skillTest.Skill = skillTest.getSkill();
 function test_bundlemanager_interface_skill_with_actions() {
     let info = skill.actions[0];
@@ -120,7 +120,7 @@ function test_bundlemanager_interface_skilluri_with_linkFeature() {
     arktest.assertEQ(info, "SkillUriImpl::getLinkFeature");
 }
 
-//Abilityinfo.d.ts
+// Abilityinfo.d.ts
 let abiInfo: abilityInfo.AbilityInfo = abilityInfo.getAbilityInfo();
 function test_bundlemanager_interface_abilityinfo_with_bundleName() {
     let info = abiInfo.bundleName;
@@ -302,8 +302,9 @@ function test_bundlemanager_interface_abilityinfo_with_orientationId() {
     arktest.assertEQ(info, 506 as short);
 }
 
-//OverlayModuleInfo.d.ts
-let overInfo: overlayModuleInfo.OverlayModuleInfo = overlayModuleInfo.getOverlayModuleInfo();
+// OverlayModuleInfo.d.ts
+let overInfo: overlayModuleInfo.OverlayModuleInfo =
+    overlayModuleInfo.getOverlayModuleInfo();
 function test_bundlemanager_interface_overlaymoduleinfo_with_bundleName() {
     let info = overInfo.bundleName;
 
@@ -318,7 +319,8 @@ function test_bundlemanager_interface_overlaymoduleinfo_with_moduleName() {
     arktest.assertEQ(info, "OverlayModuleInfoImpl::getModuleName");
 }
 
-function test_bundlemanager_interface_overlaymoduleinfo_with_targetModuleName() {
+function
+test_bundlemanager_interface_overlaymoduleinfo_with_targetModuleName() {
     let info = overInfo.targetModuleName;
 
     console.log("overInfo.targetModuleName is: " + info);
@@ -339,7 +341,7 @@ function test_bundlemanager_interface_overlaymoduleinfo_with_state() {
     arktest.assertEQ(info, intDig);
 }
 
-//Metadata.d.ts
+// Metadata.d.ts
 let metadata_: metadata.Metadata = metadata.getMetadata();
 function test_bundlemanager_interface_metadata_with_name() {
     metadata_.name = "bob";
@@ -372,7 +374,7 @@ function test_bundlemanager_interface_metadata_with_valueId() {
     arktest.assertEQ(info, intDig);
 }
 
-//HapModuleInfo.d.ts
+// HapModuleInfo.d.ts
 let hapInfo: hapModuleInfo.HapModuleInfo = hapModuleInfo.getHapModuleInfo();
 let dependency: hapModuleInfo.Dependency = hapModuleInfo.getDependency();
 let preloadItem: hapModuleInfo.PreloadItem = hapModuleInfo.getPreloadItem();
@@ -455,7 +457,8 @@ function test_bundlemanager_interface_hapmoduleinfo_with_hashValue() {
     arktest.assertEQ(info, "HapModuleInfoImpl::getHashValue");
 }
 
-function test_bundlemanager_interface_hapmoduleinfo_with_fileContextMenuConfig() {
+function
+test_bundlemanager_interface_hapmoduleinfo_with_fileContextMenuConfig() {
     let info = hapInfo.fileContextMenuConfig;
 
     console.log("hapInfo.fileContextMenuConfig is: " + info);
@@ -546,8 +549,9 @@ function test_bundlemanager_interface_dataItem_with_value() {
     arktest.assertEQ(info, "DataItemImpl::getValue");
 }
 
-//ExtensionAbilityInfo.d.ts
-let exAbiInfo: extensionAbilityInfo.ExtensionAbilityInfo = extensionAbilityInfo.getExtensionAbilityInfo();
+// ExtensionAbilityInfo.d.ts
+let exAbiInfo: extensionAbilityInfo.ExtensionAbilityInfo =
+    extensionAbilityInfo.getExtensionAbilityInfo();
 function test_bundlemanager_interface_extensionAbilityInfo_with_bundleName() {
     let info = exAbiInfo.bundleName;
 
@@ -576,7 +580,8 @@ function test_bundlemanager_interface_extensionAbilityInfo_with_labelId() {
     arktest.assertEQ(info, intDig);
 }
 
-function test_bundlemanager_interface_extensionAbilityInfo_with_descriptionId() {
+function
+test_bundlemanager_interface_extensionAbilityInfo_with_descriptionId() {
     let info = exAbiInfo.descriptionId;
 
     console.log("abiIexAbiInfonfo.descriptionId is: " + info);
@@ -597,7 +602,8 @@ function test_bundlemanager_interface_extensionAbilityInfo_with_exported() {
     arktest.assertEQ(info, true);
 }
 
-function test_bundlemanager_interface_extensionAbilityInfo_with_extensionAbilityTypeName() {
+function
+test_bundlemanager_interface_extensionAbilityInfo_with_extensionAbilityTypeName() {
     let info = exAbiInfo.extensionAbilityTypeName;
 
     console.log("exAbiInfo.extensionAbilityTypeName is: " + info);
@@ -618,14 +624,16 @@ function test_bundlemanager_interface_extensionAbilityInfo_with_enabled() {
     arktest.assertEQ(info, true);
 }
 
-function test_bundlemanager_interface_extensionAbilityInfo_with_readPermission() {
+function
+test_bundlemanager_interface_extensionAbilityInfo_with_readPermission() {
     let info = exAbiInfo.readPermission;
 
     console.log("exAbiInfo.readPermission is: " + info);
     arktest.assertEQ(info, "ExtensionAbilityInfoImpl::getReadPermission");
 }
 
-function test_bundlemanager_interface_extensionAbilityInfo_with_writePermission() {
+function
+test_bundlemanager_interface_extensionAbilityInfo_with_writePermission() {
     let info = exAbiInfo.writePermission;
 
     console.log("exAbiInfo.writePermission is: " + info);
@@ -639,9 +647,11 @@ function test_bundlemanager_interface_extensionAbilityInfo_with_appIndex() {
     arktest.assertEQ(info, intDig);
 }
 
-//ApplicationInfo.d.ts
-let appLicaInfo: applicationInfo.ApplicationInfo = applicationInfo.getApplicationInfo();
-let moudleMData: applicationInfo.ModuleMetadata = applicationInfo.getModuleMetadata();
+// ApplicationInfo.d.ts
+let appLicaInfo: applicationInfo.ApplicationInfo =
+    applicationInfo.getApplicationInfo();
+let moudleMData: applicationInfo.ModuleMetadata =
+    applicationInfo.getModuleMetadata();
 let multiMode: applicationInfo.MultiAppMode = applicationInfo.getMultiAppMode();
 function test_bundlemanager_interface_applicationInfo_with_name() {
     let info = appLicaInfo.name;
@@ -741,7 +751,8 @@ function test_bundlemanager_interface_applicationInfo_with_uid() {
     arktest.assertEQ(info, intDig);
 }
 
-function test_bundlemanager_interface_applicationInfo_with_appDistributionType() {
+function
+test_bundlemanager_interface_applicationInfo_with_appDistributionType() {
     let info = appLicaInfo.appDistributionType;
 
     console.log("appLicaInfo.appDistributionType is: " + info);
@@ -804,7 +815,8 @@ function test_bundlemanager_interface_applicationInfo_with_releaseType() {
     arktest.assertEQ(info, "ApplicationInfoImpl::getReleaseType");
 }
 
-function test_bundlemanager_interface_applicationInfo_with_cloudFileSyncEnabled() {
+function
+test_bundlemanager_interface_applicationInfo_with_cloudFileSyncEnabled() {
     let info = appLicaInfo.cloudFileSyncEnabled;
 
     console.log("appLicaInfo.cloudFileSyncEnabled is: " + info);
@@ -825,7 +837,7 @@ function test_bundlemanager_interface_multiAppMode_with_maxCount() {
     arktest.assertEQ(info, intDig);
 }
 
-//ElementName.d.ts
+// ElementName.d.ts
 let eleName: elementName.ElementName = elementName.getElementName();
 function test_bundlemanager_interface_elementName_with_deviceId() {
     eleName.deviceId = "DI0428";
@@ -875,64 +887,66 @@ function test_bundlemanager_interface_elementName_with_shortName() {
     arktest.assertEQ(info, "SN0428");
 }
 
-//BundleInfo.d.ts
+// BundleInfo.d.ts
 let bundInfo: bundleInfo.BundleInfo = bundleInfo.getBundleInfo();
-let reqDetail: bundleInfo.ReqPermissionDetail = bundleInfo.getReqPermissionDetail();
+let reqDetail: bundleInfo.ReqPermissionDetail =
+    bundleInfo.getReqPermissionDetail();
 let used: bundleInfo.UsedScene = bundleInfo.getIUsedScene();
 let sigInfo: bundleInfo.SignatureInfo = bundleInfo.getISignatureInfo();
 let appClone: bundleInfo.AppCloneIdentity = bundleInfo.getAppCloneIdentity();
 function test_bundlemanager_interface_bundleinfo_with_name() {
     let info = bundInfo.name;
 
-    arktest.assertEQ(info,  "BundleInfoImpl::getName");
+    arktest.assertEQ(info, "BundleInfoImpl::getName");
 }
 
 function test_bundlemanager_interface_bundleinfo_with_vendor() {
     let info = bundInfo.vendor;
 
-    arktest.assertEQ(info,  "BundleInfoImpl::getVendor");
+    arktest.assertEQ(info, "BundleInfoImpl::getVendor");
 }
 
 function test_bundlemanager_interface_bundleinfo_with_versionCode() {
     let info = bundInfo.versionCode;
 
-    arktest.assertEQ(info,  intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 function test_bundlemanager_interface_bundleinfo_with_versionName() {
     let info = bundInfo.versionName;
 
-    arktest.assertEQ(info,  "BundleInfoImpl::getVersionName");
+    arktest.assertEQ(info, "BundleInfoImpl::getVersionName");
 }
 
-function test_bundlemanager_interface_bundleinfo_with_minCompatibleVersionCode() {
+function
+test_bundlemanager_interface_bundleinfo_with_minCompatibleVersionCode() {
     let info = bundInfo.minCompatibleVersionCode;
 
-    arktest.assertEQ(info,  "BundleInfoImpl::getMinCompatibleVersionCode");
+    arktest.assertEQ(info, "BundleInfoImpl::getMinCompatibleVersionCode");
 }
 
 function test_bundlemanager_interface_bundleinfo_with_targetVersion() {
     let info = bundInfo.targetVersion;
 
-    arktest.assertEQ(info,  intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 function test_bundlemanager_interface_bundleinfo_with_installTime() {
     let info = bundInfo.installTime;
 
-    arktest.assertEQ(info,  intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 function test_bundlemanager_interface_bundleinfo_with_updateTime() {
     let info = bundInfo.updateTime;
 
-    arktest.assertEQ(info,  intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 function test_bundlemanager_interface_bundleinfo_with_appIndex() {
     let info = bundInfo.appIndex;
 
-    arktest.assertEQ(info,  intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 function test_bundlemanager_interface_ReqPermissionDetail_with_name() {
@@ -1010,168 +1024,444 @@ function test_bundlemanager_interface_appCloneIdentity_with_bundleName() {
 function test_bundlemanager_interface_appCloneIdentity_with_appIndex() {
     let info = appClone.appIndex;
 
-    arktest.assertEQ(info,  intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 function main() {
     console.log("##############start#############");
     const suite = new arktest.ArkTestsuite("BundleManager Tests");
 
-    //Abilityinfo.d.ts
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_bundleName", test_bundlemanager_interface_abilityinfo_with_bundleName);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_moduleName", test_bundlemanager_interface_abilityinfo_with_moduleName);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_name", test_bundlemanager_interface_abilityinfo_with_name);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_label", test_bundlemanager_interface_abilityinfo_with_label);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_labelId", test_bundlemanager_interface_abilityinfo_with_labelId);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_description", test_bundlemanager_interface_abilityinfo_with_description);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_descriptionId", test_bundlemanager_interface_abilityinfo_with_descriptionId);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_icon", test_bundlemanager_interface_abilityinfo_with_icon);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_iconId", test_bundlemanager_interface_abilityinfo_with_iconId);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_process", test_bundlemanager_interface_abilityinfo_with_process);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_exported", test_bundlemanager_interface_abilityinfo_with_exported);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_type", test_bundlemanager_interface_abilityinfo_with_type);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_orientation", test_bundlemanager_interface_abilityinfo_with_orientation);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_launchType", test_bundlemanager_interface_abilityinfo_with_launchType);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_permissions", test_bundlemanager_interface_abilityinfo_with_permissions);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_readPermission", test_bundlemanager_interface_abilityinfo_with_readPermission);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_writePermission", test_bundlemanager_interface_abilityinfo_with_writePermission);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_uri", test_bundlemanager_interface_abilityinfo_with_uri);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_deviceTypes", test_bundlemanager_interface_abilityinfo_with_deviceTypes);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_metadata", test_bundlemanager_interface_abilityinfo_with_metadata);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_enabled", test_bundlemanager_interface_abilityinfo_with_enabled);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_supportWindowModes", test_bundlemanager_interface_abilityinfo_with_supportWindowModes);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_excludeFromDock", test_bundlemanager_interface_abilityinfo_with_excludeFromDock);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_skills", test_bundlemanager_interface_abilityinfo_with_skills);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_appIndex", test_bundlemanager_interface_abilityinfo_with_appIndex);
-    suite.addTest("test_bundlemanager_interface_abilityinfo_with_orientationId", test_bundlemanager_interface_abilityinfo_with_orientationId);
-    
-    //ApplicationInfo.d.ts
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_name", test_bundlemanager_interface_applicationInfo_with_name);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_description", test_bundlemanager_interface_applicationInfo_with_description);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_descriptionId", test_bundlemanager_interface_applicationInfo_with_descriptionId);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_enabled", test_bundlemanager_interface_applicationInfo_with_enabled);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_label", test_bundlemanager_interface_applicationInfo_with_label);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_labelId", test_bundlemanager_interface_applicationInfo_with_labelId);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_icon", test_bundlemanager_interface_applicationInfo_with_icon);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_iconId", test_bundlemanager_interface_applicationInfo_with_iconId);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_process", test_bundlemanager_interface_applicationInfo_with_process);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_permissions", test_bundlemanager_interface_applicationInfo_with_permissions);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_codePath", test_bundlemanager_interface_applicationInfo_with_codePath);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_removable", test_bundlemanager_interface_applicationInfo_with_removable);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_accessTokenId", test_bundlemanager_interface_applicationInfo_with_accessTokenId);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_uid", test_bundlemanager_interface_applicationInfo_with_uid);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_appDistributionType", test_bundlemanager_interface_applicationInfo_with_appDistributionType);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_appProvisionType", test_bundlemanager_interface_applicationInfo_with_appProvisionType);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_systemApp", test_bundlemanager_interface_applicationInfo_with_systemApp);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_debug", test_bundlemanager_interface_applicationInfo_with_debug);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_dataUnclearable", test_bundlemanager_interface_applicationInfo_with_dataUnclearable);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_nativeLibraryPath", test_bundlemanager_interface_applicationInfo_with_nativeLibraryPath);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_appIndex", test_bundlemanager_interface_applicationInfo_with_appIndex);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_installSource", test_bundlemanager_interface_applicationInfo_with_installSource);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_releaseType", test_bundlemanager_interface_applicationInfo_with_releaseType);
-    suite.addTest("test_bundlemanager_interface_applicationInfo_with_cloudFileSyncEnabled", test_bundlemanager_interface_applicationInfo_with_cloudFileSyncEnabled);
-    suite.addTest("test_bundlemanager_interface_moduleMetadata_with_moduleName", test_bundlemanager_interface_moduleMetadata_with_moduleName);
-    suite.addTest("test_bundlemanager_interface_multiAppMode_with_maxCount", test_bundlemanager_interface_multiAppMode_with_maxCount);  
+    // Abilityinfo.d.ts
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_bundleName",
+        test_bundlemanager_interface_abilityinfo_with_bundleName);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_moduleName",
+        test_bundlemanager_interface_abilityinfo_with_moduleName);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_name",
+        test_bundlemanager_interface_abilityinfo_with_name);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_label",
+        test_bundlemanager_interface_abilityinfo_with_label);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_labelId",
+        test_bundlemanager_interface_abilityinfo_with_labelId);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_description",
+        test_bundlemanager_interface_abilityinfo_with_description);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_descriptionId",
+        test_bundlemanager_interface_abilityinfo_with_descriptionId);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_icon",
+        test_bundlemanager_interface_abilityinfo_with_icon);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_iconId",
+        test_bundlemanager_interface_abilityinfo_with_iconId);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_process",
+        test_bundlemanager_interface_abilityinfo_with_process);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_exported",
+        test_bundlemanager_interface_abilityinfo_with_exported);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_type",
+        test_bundlemanager_interface_abilityinfo_with_type);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_orientation",
+        test_bundlemanager_interface_abilityinfo_with_orientation);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_launchType",
+        test_bundlemanager_interface_abilityinfo_with_launchType);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_permissions",
+        test_bundlemanager_interface_abilityinfo_with_permissions);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_readPermission",
+        test_bundlemanager_interface_abilityinfo_with_readPermission);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_writePermission",
+        test_bundlemanager_interface_abilityinfo_with_writePermission);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_uri",
+        test_bundlemanager_interface_abilityinfo_with_uri);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_deviceTypes",
+        test_bundlemanager_interface_abilityinfo_with_deviceTypes);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_metadata",
+        test_bundlemanager_interface_abilityinfo_with_metadata);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_enabled",
+        test_bundlemanager_interface_abilityinfo_with_enabled);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_supportWindowModes",
+        test_bundlemanager_interface_abilityinfo_with_supportWindowModes);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_excludeFromDock",
+        test_bundlemanager_interface_abilityinfo_with_excludeFromDock);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_skills",
+        test_bundlemanager_interface_abilityinfo_with_skills);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_appIndex",
+        test_bundlemanager_interface_abilityinfo_with_appIndex);
+    suite.addTest(
+        "test_bundlemanager_interface_abilityinfo_with_orientationId",
+        test_bundlemanager_interface_abilityinfo_with_orientationId);
 
-    //BundleInfo.d.ts
-    suite.addTest("test_bundlemanager_interface_bundleinfo_with_name", test_bundlemanager_interface_bundleinfo_with_name);
-    suite.addTest("test_bundlemanager_interface_bundleinfo_with_vendor", test_bundlemanager_interface_bundleinfo_with_vendor);
-    suite.addTest("test_bundlemanager_interface_bundleinfo_with_versionCode", test_bundlemanager_interface_bundleinfo_with_versionCode);
-    suite.addTest("test_bundlemanager_interface_bundleinfo_with_versionName", test_bundlemanager_interface_bundleinfo_with_versionName);
-    suite.addTest("test_bundlemanager_interface_bundleinfo_with_minCompatibleVersionCode", test_bundlemanager_interface_bundleinfo_with_minCompatibleVersionCode);
-    suite.addTest("test_bundlemanager_interface_bundleinfo_with_targetVersion", test_bundlemanager_interface_bundleinfo_with_targetVersion);
-    suite.addTest("test_bundlemanager_interface_bundleinfo_with_installTime", test_bundlemanager_interface_bundleinfo_with_installTime);
-    suite.addTest("test_bundlemanager_interface_bundleinfo_with_updateTime", test_bundlemanager_interface_bundleinfo_with_updateTime);
-    suite.addTest("test_bundlemanager_interface_bundleinfo_with_appIndex", test_bundlemanager_interface_bundleinfo_with_appIndex);
-    suite.addTest("test_bundlemanager_interface_ReqPermissionDetail_with_name", test_bundlemanager_interface_ReqPermissionDetail_with_name);
-    suite.addTest("test bundlemanager interface ReqPermissionDetail with moduleName", test_bundlemanager_interface_ReqPermissionDetail_with_moduleName);
-    suite.addTest("test_bundlemanager_interface_ReqPermissionDetail_with_reason", test_bundlemanager_interface_ReqPermissionDetail_with_reason);
-    suite.addTest("test_bundlemanager_interface_ReqPermissionDetail_with_reasonId", test_bundlemanager_interface_ReqPermissionDetail_with_reasonId);
-    suite.addTest("test_bundlemanager_interface_usedScene_with_abilities", test_bundlemanager_interface_usedScene_with_abilities);
-    suite.addTest("test_bundlemanager_interface_usedScene_with_when", test_bundlemanager_interface_usedScene_with_when);
-    suite.addTest("test_bundlemanager_interface_signatureInfo_with_appId", test_bundlemanager_interface_signatureInfo_with_appId);
-    suite.addTest("test_bundlemanager_interface_signatureInfo_with_fingerprint", test_bundlemanager_interface_signatureInfo_with_fingerprint);
-    suite.addTest("test_bundlemanager_interface_signatureInfo_with_appIdentifier", test_bundlemanager_interface_signatureInfo_with_appIdentifier);
-    suite.addTest("test_bundlemanager_interface_signatureInfo_with_certificate", test_bundlemanager_interface_signatureInfo_with_certificate);
-    suite.addTest("test_bundlemanager_interface_appCloneIdentity_with_bundleName", test_bundlemanager_interface_appCloneIdentity_with_bundleName);
-    suite.addTest("test_bundlemanager_interface_appCloneIdentity_with_appIndex", test_bundlemanager_interface_appCloneIdentity_with_appIndex);
+    // ApplicationInfo.d.ts
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_name",
+        test_bundlemanager_interface_applicationInfo_with_name);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_description",
+        test_bundlemanager_interface_applicationInfo_with_description);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_descriptionId",
+        test_bundlemanager_interface_applicationInfo_with_descriptionId);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_enabled",
+        test_bundlemanager_interface_applicationInfo_with_enabled);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_label",
+        test_bundlemanager_interface_applicationInfo_with_label);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_labelId",
+        test_bundlemanager_interface_applicationInfo_with_labelId);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_icon",
+        test_bundlemanager_interface_applicationInfo_with_icon);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_iconId",
+        test_bundlemanager_interface_applicationInfo_with_iconId);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_process",
+        test_bundlemanager_interface_applicationInfo_with_process);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_permissions",
+        test_bundlemanager_interface_applicationInfo_with_permissions);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_codePath",
+        test_bundlemanager_interface_applicationInfo_with_codePath);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_removable",
+        test_bundlemanager_interface_applicationInfo_with_removable);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_accessTokenId",
+        test_bundlemanager_interface_applicationInfo_with_accessTokenId);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_uid",
+        test_bundlemanager_interface_applicationInfo_with_uid);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_appDistributionType",
+        test_bundlemanager_interface_applicationInfo_with_appDistributionType);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_appProvisionType",
+        test_bundlemanager_interface_applicationInfo_with_appProvisionType);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_systemApp",
+        test_bundlemanager_interface_applicationInfo_with_systemApp);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_debug",
+        test_bundlemanager_interface_applicationInfo_with_debug);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_dataUnclearable",
+        test_bundlemanager_interface_applicationInfo_with_dataUnclearable);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_nativeLibraryPath",
+        test_bundlemanager_interface_applicationInfo_with_nativeLibraryPath);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_appIndex",
+        test_bundlemanager_interface_applicationInfo_with_appIndex);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_installSource",
+        test_bundlemanager_interface_applicationInfo_with_installSource);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_releaseType",
+        test_bundlemanager_interface_applicationInfo_with_releaseType);
+    suite.addTest(
+        "test_bundlemanager_interface_applicationInfo_with_cloudFileSyncEnabled",
+        test_bundlemanager_interface_applicationInfo_with_cloudFileSyncEnabled);
+    suite.addTest(
+        "test_bundlemanager_interface_moduleMetadata_with_moduleName",
+        test_bundlemanager_interface_moduleMetadata_with_moduleName);
+    suite.addTest(
+        "test_bundlemanager_interface_multiAppMode_with_maxCount",
+        test_bundlemanager_interface_multiAppMode_with_maxCount);
 
-    //ElementName.d.ts
-    suite.addTest("test_bundlemanager_interface_elementName_with_deviceId", test_bundlemanager_interface_elementName_with_deviceId);
-    suite.addTest("test_bundlemanager_interface_elementName_with_bundleName", test_bundlemanager_interface_elementName_with_bundleName);
-    suite.addTest("test_bundlemanager_interface_elementName_with_moduleName", test_bundlemanager_interface_elementName_with_moduleName);
-    suite.addTest("test_bundlemanager_interface_elementName_with_abilityName", test_bundlemanager_interface_elementName_with_abilityName);
-    suite.addTest("test_bundlemanager_interface_elementName_with_uri", test_bundlemanager_interface_elementName_with_uri);
-    suite.addTest("test_bundlemanager_interface_elementName_with_shortName", test_bundlemanager_interface_elementName_with_shortName);
+    // BundleInfo.d.ts
+    suite.addTest(
+        "test_bundlemanager_interface_bundleinfo_with_name",
+        test_bundlemanager_interface_bundleinfo_with_name);
+    suite.addTest(
+        "test_bundlemanager_interface_bundleinfo_with_vendor",
+        test_bundlemanager_interface_bundleinfo_with_vendor);
+    suite.addTest(
+        "test_bundlemanager_interface_bundleinfo_with_versionCode",
+        test_bundlemanager_interface_bundleinfo_with_versionCode);
+    suite.addTest(
+        "test_bundlemanager_interface_bundleinfo_with_versionName",
+        test_bundlemanager_interface_bundleinfo_with_versionName);
+    suite.addTest(
+        "test_bundlemanager_interface_bundleinfo_with_minCompatibleVersionCode",
+        test_bundlemanager_interface_bundleinfo_with_minCompatibleVersionCode);
+    suite.addTest(
+        "test_bundlemanager_interface_bundleinfo_with_targetVersion",
+        test_bundlemanager_interface_bundleinfo_with_targetVersion);
+    suite.addTest(
+        "test_bundlemanager_interface_bundleinfo_with_installTime",
+        test_bundlemanager_interface_bundleinfo_with_installTime);
+    suite.addTest(
+        "test_bundlemanager_interface_bundleinfo_with_updateTime",
+        test_bundlemanager_interface_bundleinfo_with_updateTime);
+    suite.addTest(
+        "test_bundlemanager_interface_bundleinfo_with_appIndex",
+        test_bundlemanager_interface_bundleinfo_with_appIndex);
+    suite.addTest(
+        "test_bundlemanager_interface_ReqPermissionDetail_with_name",
+        test_bundlemanager_interface_ReqPermissionDetail_with_name);
+    suite.addTest(
+        "test bundlemanager interface ReqPermissionDetail with moduleName",
+        test_bundlemanager_interface_ReqPermissionDetail_with_moduleName);
+    suite.addTest(
+        "test_bundlemanager_interface_ReqPermissionDetail_with_reason",
+        test_bundlemanager_interface_ReqPermissionDetail_with_reason);
+    suite.addTest(
+        "test_bundlemanager_interface_ReqPermissionDetail_with_reasonId",
+        test_bundlemanager_interface_ReqPermissionDetail_with_reasonId);
+    suite.addTest(
+        "test_bundlemanager_interface_usedScene_with_abilities",
+        test_bundlemanager_interface_usedScene_with_abilities);
+    suite.addTest(
+        "test_bundlemanager_interface_usedScene_with_when",
+        test_bundlemanager_interface_usedScene_with_when);
+    suite.addTest(
+        "test_bundlemanager_interface_signatureInfo_with_appId",
+        test_bundlemanager_interface_signatureInfo_with_appId);
+    suite.addTest(
+        "test_bundlemanager_interface_signatureInfo_with_fingerprint",
+        test_bundlemanager_interface_signatureInfo_with_fingerprint);
+    suite.addTest(
+        "test_bundlemanager_interface_signatureInfo_with_appIdentifier",
+        test_bundlemanager_interface_signatureInfo_with_appIdentifier);
+    suite.addTest(
+        "test_bundlemanager_interface_signatureInfo_with_certificate",
+        test_bundlemanager_interface_signatureInfo_with_certificate);
+    suite.addTest(
+        "test_bundlemanager_interface_appCloneIdentity_with_bundleName",
+        test_bundlemanager_interface_appCloneIdentity_with_bundleName);
+    suite.addTest(
+        "test_bundlemanager_interface_appCloneIdentity_with_appIndex",
+        test_bundlemanager_interface_appCloneIdentity_with_appIndex);
 
-    //ExtensionAbilityInfo.d.ts
-    suite.addTest("test_bundlemanager_interface_extensionAbilityInfo_with_bundleName", test_bundlemanager_interface_extensionAbilityInfo_with_bundleName);
-    suite.addTest("test_bundlemanager_interface_extensionAbilityInfo_with_moduleName", test_bundlemanager_interface_extensionAbilityInfo_with_moduleName);
-    suite.addTest("test_bundlemanager_interface_extensionAbilityInfo_with_name", test_bundlemanager_interface_extensionAbilityInfo_with_name);
-    suite.addTest("test_bundlemanager_interface_extensionAbilityInfo_with_labelId", test_bundlemanager_interface_extensionAbilityInfo_with_labelId);
-    suite.addTest("test_bundlemanager_interface_extensionAbilityInfo_with_descriptionId", test_bundlemanager_interface_extensionAbilityInfo_with_descriptionId);
-    suite.addTest("test_bundlemanager_interface_extensionAbilityInfo_with_iconId", test_bundlemanager_interface_extensionAbilityInfo_with_iconId);
-    suite.addTest("test_bundlemanager_interface_extensionAbilityInfo_with_exported", test_bundlemanager_interface_extensionAbilityInfo_with_exported);
-    suite.addTest("test_bundlemanager_interface_extensionAbilityInfo_with_extensionAbilityTypeName", test_bundlemanager_interface_extensionAbilityInfo_with_extensionAbilityTypeName);
-    suite.addTest("test_bundlemanager_interface_extensionAbilityInfo_with_permissions", test_bundlemanager_interface_extensionAbilityInfo_with_permissions);
-    suite.addTest("test_bundlemanager_interface_extensionAbilityInfo_with_enabled", test_bundlemanager_interface_extensionAbilityInfo_with_enabled);
-    suite.addTest("test_bundlemanager_interface_extensionAbilityInfo_with_readPermission", test_bundlemanager_interface_extensionAbilityInfo_with_readPermission);
-    suite.addTest("test_bundlemanager_interface_extensionAbilityInfo_with_writePermission", test_bundlemanager_interface_extensionAbilityInfo_with_writePermission);
-    suite.addTest("test_bundlemanager_interface_extensionAbilityInfo_with_appIndex", test_bundlemanager_interface_extensionAbilityInfo_with_appIndex);
+    // ElementName.d.ts
+    suite.addTest(
+        "test_bundlemanager_interface_elementName_with_deviceId",
+        test_bundlemanager_interface_elementName_with_deviceId);
+    suite.addTest(
+        "test_bundlemanager_interface_elementName_with_bundleName",
+        test_bundlemanager_interface_elementName_with_bundleName);
+    suite.addTest(
+        "test_bundlemanager_interface_elementName_with_moduleName",
+        test_bundlemanager_interface_elementName_with_moduleName);
+    suite.addTest(
+        "test_bundlemanager_interface_elementName_with_abilityName",
+        test_bundlemanager_interface_elementName_with_abilityName);
+    suite.addTest(
+        "test_bundlemanager_interface_elementName_with_uri",
+        test_bundlemanager_interface_elementName_with_uri);
+    suite.addTest(
+        "test_bundlemanager_interface_elementName_with_shortName",
+        test_bundlemanager_interface_elementName_with_shortName);
 
-    //HapModuleInfo.d.ts
-    suite.addTest("test_bundlemanager_interface_hapmoduleinfo_with_name", test_bundlemanager_interface_hapmoduleinfo_with_name);
-    suite.addTest("test_bundlemanager_interface_hapmoduleinfo_with_icon", test_bundlemanager_interface_hapmoduleinfo_with_icon);
-    suite.addTest("test_bundlemanager_interface_hapmoduleinfo_with_iconId", test_bundlemanager_interface_hapmoduleinfo_with_iconId);
-    suite.addTest("test_bundlemanager_interface_hapmoduleinfo_with_label", test_bundlemanager_interface_hapmoduleinfo_with_label);
-    suite.addTest("test_bundlemanager_interface_hapmoduleinfo_with_labelId", test_bundlemanager_interface_hapmoduleinfo_with_labelId);
-    suite.addTest("test_bundlemanager_interface_hapmoduleinfo_with_description", test_bundlemanager_interface_hapmoduleinfo_with_description);
-    suite.addTest("test_bundlemanager_interface_hapmoduleinfo_with_descriptionId", test_bundlemanager_interface_hapmoduleinfo_with_descriptionId);
-    suite.addTest("test_bundlemanager_interface_hapmoduleinfo_with_mainElementName", test_bundlemanager_interface_hapmoduleinfo_with_mainElementName);
-    suite.addTest("test_bundlemanager_interface_hapmoduleinfo_with_deviceTypes", test_bundlemanager_interface_hapmoduleinfo_with_deviceTypes);
-    suite.addTest("test_bundlemanager_interface_hapmoduleinfo_with_installationFree", test_bundlemanager_interface_hapmoduleinfo_with_installationFree);
-    suite.addTest("test_bundlemanager_interface_hapmoduleinfo_with_hashValue", test_bundlemanager_interface_hapmoduleinfo_with_hashValue);
-    suite.addTest("test_bundlemanager_interface_hapmoduleinfo_with_fileContextMenuConfig", test_bundlemanager_interface_hapmoduleinfo_with_fileContextMenuConfig);
-    suite.addTest("test_bundlemanager_interface_hapmoduleinfo_with_nativeLibraryPath", test_bundlemanager_interface_hapmoduleinfo_with_nativeLibraryPath);
-    suite.addTest("test_bundlemanager_interface_hapmoduleinfo_with_codePath", test_bundlemanager_interface_hapmoduleinfo_with_codePath);
-    suite.addTest("test_bundlemanager_interface_dependency_with_moduleName", test_bundlemanager_interface_dependency_with_moduleName);
-    suite.addTest("test_bundlemanager_interface_dependency_with_bundleName", test_bundlemanager_interface_dependency_with_bundleName);
-    suite.addTest("test_bundlemanager_interface_dependency_with_versionCode", test_bundlemanager_interface_dependency_with_versionCode);
-    suite.addTest("test_bundlemanager_interface_preloaditem_with_moduleName", test_bundlemanager_interface_preloaditem_with_moduleName);
-    suite.addTest("test_bundlemanager_interface_routerItem_with_name", test_bundlemanager_interface_routerItem_with_name);
-    suite.addTest("test_bundlemanager_interface_routerItem_with_pageSourceFile", test_bundlemanager_interface_routerItem_with_pageSourceFile);
-    suite.addTest("test_bundlemanager_interface_routerItem_with_buildFunction", test_bundlemanager_interface_routerItem_with_buildFunction);
-    suite.addTest("test_bundlemanager_interface_routerItem_with_customData", test_bundlemanager_interface_routerItem_with_customData);
-    suite.addTest("test_bundlemanager_interface_dataItem_with_key", test_bundlemanager_interface_dataItem_with_key);
-    suite.addTest("test_bundlemanager_interface_dataItem_with_value", test_bundlemanager_interface_dataItem_with_value);
+    // ExtensionAbilityInfo.d.ts
+    suite.addTest(
+        "test_bundlemanager_interface_extensionAbilityInfo_with_bundleName",
+        test_bundlemanager_interface_extensionAbilityInfo_with_bundleName);
+    suite.addTest(
+        "test_bundlemanager_interface_extensionAbilityInfo_with_moduleName",
+        test_bundlemanager_interface_extensionAbilityInfo_with_moduleName);
+    suite.addTest(
+        "test_bundlemanager_interface_extensionAbilityInfo_with_name",
+        test_bundlemanager_interface_extensionAbilityInfo_with_name);
+    suite.addTest(
+        "test_bundlemanager_interface_extensionAbilityInfo_with_labelId",
+        test_bundlemanager_interface_extensionAbilityInfo_with_labelId);
+    suite.addTest(
+        "test_bundlemanager_interface_extensionAbilityInfo_with_descriptionId",
+        test_bundlemanager_interface_extensionAbilityInfo_with_descriptionId);
+    suite.addTest(
+        "test_bundlemanager_interface_extensionAbilityInfo_with_iconId",
+        test_bundlemanager_interface_extensionAbilityInfo_with_iconId);
+    suite.addTest(
+        "test_bundlemanager_interface_extensionAbilityInfo_with_exported",
+        test_bundlemanager_interface_extensionAbilityInfo_with_exported);
+    suite.addTest(
+        "test_bundlemanager_interface_extensionAbilityInfo_with_extensionAbilityTypeName",
+        test_bundlemanager_interface_extensionAbilityInfo_with_extensionAbilityTypeName);
+    suite.addTest(
+        "test_bundlemanager_interface_extensionAbilityInfo_with_permissions",
+        test_bundlemanager_interface_extensionAbilityInfo_with_permissions);
+    suite.addTest(
+        "test_bundlemanager_interface_extensionAbilityInfo_with_enabled",
+        test_bundlemanager_interface_extensionAbilityInfo_with_enabled);
+    suite.addTest(
+        "test_bundlemanager_interface_extensionAbilityInfo_with_readPermission",
+        test_bundlemanager_interface_extensionAbilityInfo_with_readPermission);
+    suite.addTest(
+        "test_bundlemanager_interface_extensionAbilityInfo_with_writePermission",
+        test_bundlemanager_interface_extensionAbilityInfo_with_writePermission);
+    suite.addTest(
+        "test_bundlemanager_interface_extensionAbilityInfo_with_appIndex",
+        test_bundlemanager_interface_extensionAbilityInfo_with_appIndex);
 
-    //Metadata.d.ts
-    suite.addTest("test_bundlemanager_interface_metadata_with_name", test_bundlemanager_interface_metadata_with_name);
-    suite.addTest("test_bundlemanager_interface_metadata_with_value", test_bundlemanager_interface_metadata_with_value);
-    suite.addTest("test_bundlemanager_interface_metadata_with_resource", test_bundlemanager_interface_metadata_with_resource);
-    suite.addTest("test_bundlemanager_interface_metadata_with_valueId", test_bundlemanager_interface_metadata_with_valueId);
+    // HapModuleInfo.d.ts
+    suite.addTest(
+        "test_bundlemanager_interface_hapmoduleinfo_with_name",
+        test_bundlemanager_interface_hapmoduleinfo_with_name);
+    suite.addTest(
+        "test_bundlemanager_interface_hapmoduleinfo_with_icon",
+        test_bundlemanager_interface_hapmoduleinfo_with_icon);
+    suite.addTest(
+        "test_bundlemanager_interface_hapmoduleinfo_with_iconId",
+        test_bundlemanager_interface_hapmoduleinfo_with_iconId);
+    suite.addTest(
+        "test_bundlemanager_interface_hapmoduleinfo_with_label",
+        test_bundlemanager_interface_hapmoduleinfo_with_label);
+    suite.addTest(
+        "test_bundlemanager_interface_hapmoduleinfo_with_labelId",
+        test_bundlemanager_interface_hapmoduleinfo_with_labelId);
+    suite.addTest(
+        "test_bundlemanager_interface_hapmoduleinfo_with_description",
+        test_bundlemanager_interface_hapmoduleinfo_with_description);
+    suite.addTest(
+        "test_bundlemanager_interface_hapmoduleinfo_with_descriptionId",
+        test_bundlemanager_interface_hapmoduleinfo_with_descriptionId);
+    suite.addTest(
+        "test_bundlemanager_interface_hapmoduleinfo_with_mainElementName",
+        test_bundlemanager_interface_hapmoduleinfo_with_mainElementName);
+    suite.addTest(
+        "test_bundlemanager_interface_hapmoduleinfo_with_deviceTypes",
+        test_bundlemanager_interface_hapmoduleinfo_with_deviceTypes);
+    suite.addTest(
+        "test_bundlemanager_interface_hapmoduleinfo_with_installationFree",
+        test_bundlemanager_interface_hapmoduleinfo_with_installationFree);
+    suite.addTest(
+        "test_bundlemanager_interface_hapmoduleinfo_with_hashValue",
+        test_bundlemanager_interface_hapmoduleinfo_with_hashValue);
+    suite.addTest(
+        "test_bundlemanager_interface_hapmoduleinfo_with_fileContextMenuConfig",
+        test_bundlemanager_interface_hapmoduleinfo_with_fileContextMenuConfig);
+    suite.addTest(
+        "test_bundlemanager_interface_hapmoduleinfo_with_nativeLibraryPath",
+        test_bundlemanager_interface_hapmoduleinfo_with_nativeLibraryPath);
+    suite.addTest(
+        "test_bundlemanager_interface_hapmoduleinfo_with_codePath",
+        test_bundlemanager_interface_hapmoduleinfo_with_codePath);
+    suite.addTest(
+        "test_bundlemanager_interface_dependency_with_moduleName",
+        test_bundlemanager_interface_dependency_with_moduleName);
+    suite.addTest(
+        "test_bundlemanager_interface_dependency_with_bundleName",
+        test_bundlemanager_interface_dependency_with_bundleName);
+    suite.addTest(
+        "test_bundlemanager_interface_dependency_with_versionCode",
+        test_bundlemanager_interface_dependency_with_versionCode);
+    suite.addTest(
+        "test_bundlemanager_interface_preloaditem_with_moduleName",
+        test_bundlemanager_interface_preloaditem_with_moduleName);
+    suite.addTest(
+        "test_bundlemanager_interface_routerItem_with_name",
+        test_bundlemanager_interface_routerItem_with_name);
+    suite.addTest(
+        "test_bundlemanager_interface_routerItem_with_pageSourceFile",
+        test_bundlemanager_interface_routerItem_with_pageSourceFile);
+    suite.addTest(
+        "test_bundlemanager_interface_routerItem_with_buildFunction",
+        test_bundlemanager_interface_routerItem_with_buildFunction);
+    suite.addTest(
+        "test_bundlemanager_interface_routerItem_with_customData",
+        test_bundlemanager_interface_routerItem_with_customData);
+    suite.addTest(
+        "test_bundlemanager_interface_dataItem_with_key",
+        test_bundlemanager_interface_dataItem_with_key);
+    suite.addTest(
+        "test_bundlemanager_interface_dataItem_with_value",
+        test_bundlemanager_interface_dataItem_with_value);
 
-    //OverlayModuleInfo.d.ts
-    suite.addTest("test_bundlemanager_interface_overlaymoduleinfo_with_bundleName", test_bundlemanager_interface_overlaymoduleinfo_with_bundleName);
-    suite.addTest("test_bundlemanager_interface_overlaymoduleinfo_with_moduleName", test_bundlemanager_interface_overlaymoduleinfo_with_moduleName);
-    suite.addTest("test_bundlemanager_interface_overlaymoduleinfo_with_targetModuleName", test_bundlemanager_interface_overlaymoduleinfo_with_targetModuleName);
-    suite.addTest("test_bundlemanager_interface_overlaymoduleinfo_with_priority", test_bundlemanager_interface_overlaymoduleinfo_with_priority);
-    suite.addTest("test_bundlemanager_interface_overlaymoduleinfo_with_state", test_bundlemanager_interface_overlaymoduleinfo_with_state);
+    // Metadata.d.ts
+    suite.addTest(
+        "test_bundlemanager_interface_metadata_with_name",
+        test_bundlemanager_interface_metadata_with_name);
+    suite.addTest(
+        "test_bundlemanager_interface_metadata_with_value",
+        test_bundlemanager_interface_metadata_with_value);
+    suite.addTest(
+        "test_bundlemanager_interface_metadata_with_resource",
+        test_bundlemanager_interface_metadata_with_resource);
+    suite.addTest(
+        "test_bundlemanager_interface_metadata_with_valueId",
+        test_bundlemanager_interface_metadata_with_valueId);
 
-    //Skill.d.ts
-    suite.addTest("test_bundlemanager_interface_skill_with_actions", test_bundlemanager_interface_skill_with_actions);
-    suite.addTest("test_bundlemanager_interface_skill_with_entities", test_bundlemanager_interface_skill_with_entities);
-    suite.addTest("test_bundlemanager_interface_skill_with_domainVerify", test_bundlemanager_interface_skill_with_domainVerify);
-    suite.addTest("test_bundlemanager_interface_skilluri_with_scheme", test_bundlemanager_interface_skilluri_with_scheme);
-    suite.addTest("test_bundlemanager_interface_skilluri_with_host", test_bundlemanager_interface_skilluri_with_host);
-    suite.addTest("test_bundlemanager_interface_skilluri_with_port", test_bundlemanager_interface_skilluri_with_port);
-    suite.addTest("test_bundlemanager_interface_skilluri_with_path", test_bundlemanager_interface_skilluri_with_path);
-    suite.addTest("test_bundlemanager_interface_skilluri_with_pathStartWith", test_bundlemanager_interface_skilluri_with_pathStartWith);
-    suite.addTest("test_bundlemanager_interface_skilluri_with_pathRegex", test_bundlemanager_interface_skilluri_with_pathRegex);
-    suite.addTest("test_bundlemanager_interface_skilluri_with_type", test_bundlemanager_interface_skilluri_with_type);
-    suite.addTest("test_bundlemanager_interface_skilluri_with_utd", test_bundlemanager_interface_skilluri_with_utd);
-    suite.addTest("test_bundlemanager_interface_skilluri_with_maxFileSupported", test_bundlemanager_interface_skilluri_with_maxFileSupported);
-    suite.addTest("test_bundlemanager_interface_skilluri_with_linkFeature", test_bundlemanager_interface_skilluri_with_linkFeature);
+    // OverlayModuleInfo.d.ts
+    suite.addTest(
+        "test_bundlemanager_interface_overlaymoduleinfo_with_bundleName",
+        test_bundlemanager_interface_overlaymoduleinfo_with_bundleName);
+    suite.addTest(
+        "test_bundlemanager_interface_overlaymoduleinfo_with_moduleName",
+        test_bundlemanager_interface_overlaymoduleinfo_with_moduleName);
+    suite.addTest(
+        "test_bundlemanager_interface_overlaymoduleinfo_with_targetModuleName",
+        test_bundlemanager_interface_overlaymoduleinfo_with_targetModuleName);
+    suite.addTest(
+        "test_bundlemanager_interface_overlaymoduleinfo_with_priority",
+        test_bundlemanager_interface_overlaymoduleinfo_with_priority);
+    suite.addTest(
+        "test_bundlemanager_interface_overlaymoduleinfo_with_state",
+        test_bundlemanager_interface_overlaymoduleinfo_with_state);
+
+    // Skill.d.ts
+    suite.addTest(
+        "test_bundlemanager_interface_skill_with_actions",
+        test_bundlemanager_interface_skill_with_actions);
+    suite.addTest(
+        "test_bundlemanager_interface_skill_with_entities",
+        test_bundlemanager_interface_skill_with_entities);
+    suite.addTest(
+        "test_bundlemanager_interface_skill_with_domainVerify",
+        test_bundlemanager_interface_skill_with_domainVerify);
+    suite.addTest(
+        "test_bundlemanager_interface_skilluri_with_scheme",
+        test_bundlemanager_interface_skilluri_with_scheme);
+    suite.addTest(
+        "test_bundlemanager_interface_skilluri_with_host",
+        test_bundlemanager_interface_skilluri_with_host);
+    suite.addTest(
+        "test_bundlemanager_interface_skilluri_with_port",
+        test_bundlemanager_interface_skilluri_with_port);
+    suite.addTest(
+        "test_bundlemanager_interface_skilluri_with_path",
+        test_bundlemanager_interface_skilluri_with_path);
+    suite.addTest(
+        "test_bundlemanager_interface_skilluri_with_pathStartWith",
+        test_bundlemanager_interface_skilluri_with_pathStartWith);
+    suite.addTest(
+        "test_bundlemanager_interface_skilluri_with_pathRegex",
+        test_bundlemanager_interface_skilluri_with_pathRegex);
+    suite.addTest(
+        "test_bundlemanager_interface_skilluri_with_type",
+        test_bundlemanager_interface_skilluri_with_type);
+    suite.addTest(
+        "test_bundlemanager_interface_skilluri_with_utd",
+        test_bundlemanager_interface_skilluri_with_utd);
+    suite.addTest(
+        "test_bundlemanager_interface_skilluri_with_maxFileSupported",
+        test_bundlemanager_interface_skilluri_with_maxFileSupported);
+    suite.addTest(
+        "test_bundlemanager_interface_skilluri_with_linkFeature",
+        test_bundlemanager_interface_skilluri_with_linkFeature);
 
     exit(suite.run());
 }

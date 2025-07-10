@@ -15,6 +15,7 @@
 
 from dataclasses import dataclass, field
 from enum import Enum
+from types import UnionType
 from typing import TYPE_CHECKING
 
 from typing_extensions import override
@@ -23,7 +24,12 @@ from taihe.utils.diagnostics import DiagError, DiagFatalError, DiagNote, DiagWar
 from taihe.utils.sources import SourceLocation
 
 if TYPE_CHECKING:
+    from taihe.semantics.attributes import (
+        AnyAttribute,
+        Argument,
+    )
     from taihe.semantics.declarations import (
+        Decl,
         EnumDecl,
         EnumItemDecl,
         IfaceDecl,
@@ -34,6 +40,179 @@ if TYPE_CHECKING:
         TypeDecl,
         TypeRefDecl,
     )
+
+
+@dataclass
+class AttrArgOrderError(DiagError):
+    def __init__(self, arg: "Argument"):
+        super().__init__(loc=arg.loc)
+
+    @override
+    def describe(self) -> str:
+        return (
+            "Positioned arguments cannot follow keyword arguments in attribute calls."
+        )
+
+
+@dataclass
+class AttrArgRedefNote(DiagNote):
+    prev: "Argument"
+
+    def __init__(self, prev: "Argument"):
+        super().__init__(loc=prev.loc)
+        self.prev = prev
+
+    @override
+    def describe(self) -> str:
+        return "previously defined here"
+
+
+@dataclass
+class AttrArgRedefError(DiagError):
+    prev: "Argument"
+    current: "Argument"
+
+    def __init__(self, prev: "Argument", current: "Argument"):
+        super().__init__(loc=current.loc)
+        self.prev = prev
+        self.current = current
+
+    @override
+    def describe(self) -> str:
+        return f"redefinition of key {self.current.key!r}"
+
+    @override
+    def notes(self):
+        if self.prev.loc:
+            yield AttrArgRedefNote(self.prev)
+
+
+@dataclass
+class AttrArgMissingError(DiagError):
+    attr_name: str
+    arg_name: str
+    kw_only: bool = False
+
+    @override
+    def describe(self) -> str:
+        if self.kw_only:
+            kind = "keyword-only"
+        else:
+            kind = "positional or keyword"
+        return f"Missing {kind} argument {self.arg_name!r} in attribute {self.attr_name!r}."
+
+
+@dataclass
+class AttrArgUnrequiredError(DiagError):
+    attr_name: str
+    attr_arg: "Argument"
+
+    def __init__(self, attr_name: str, arg: "Argument"):
+        super().__init__(loc=arg.loc)
+        self.attr_name = attr_name
+        self.attr_arg = arg
+
+    @override
+    def describe(self) -> str:
+        if self.attr_arg.key is None:
+            argument = "positional argument"
+        else:
+            argument = f"keyword argument {self.attr_arg.key!r}"
+        return f"Unexpected {argument} in attribute {self.attr_name!r}."
+
+
+@dataclass
+class AttrArgTypeError(DiagError):
+    attr_name: str
+    arg_name: str
+    arg_type: type | UnionType
+    attr_arg: "Argument"
+
+    def __init__(
+        self,
+        attr_name: str,
+        arg_name: str,
+        arg_type: type | UnionType,
+        arg: "Argument",
+    ):
+        super().__init__(loc=arg.loc)
+        self.attr_name = attr_name
+        self.arg_name = arg_name
+        self.arg_type = arg_type
+        self.attr_arg = arg
+
+    @override
+    def describe(self) -> str:
+        if isinstance(self.arg_type, UnionType):
+            readable_type = " or ".join(t.__name__ for t in self.arg_type.__args__)
+        else:
+            readable_type = self.arg_type.__name__
+        return f"Argument {self.arg_name!r} in attribute {self.attr_name} must be of type {readable_type}, but got {self.attr_arg.value!r}"
+
+
+@dataclass
+class AttrNotExistError(DiagError):
+    name: str
+    suggestion: list[str]
+
+    @override
+    def describe(self) -> str:
+        msg = f"Unknown attribute: {self.name!r}"
+        if self.suggestion:
+            msg += ", possible candidates: "
+            msg += ", ".join(f"{s!r}" for s in self.suggestion)
+        return msg
+
+
+@dataclass
+class AttrConflictNote(DiagNote):
+    prev: "AnyAttribute"
+
+    def __init__(self, prev: "AnyAttribute"):
+        super().__init__(loc=prev.loc)
+        self.prev = prev
+
+    @override
+    def describe(self) -> str:
+        return f"conflicting with {self.prev.description}"
+
+
+@dataclass
+class AttrConflictError(DiagError):
+    current: "AnyAttribute"
+    prev: "AnyAttribute"
+
+    def __init__(
+        self,
+        current: "AnyAttribute",
+        prev: "AnyAttribute",
+    ):
+        super().__init__(loc=current.loc)
+        self.current = current
+        self.prev = prev
+
+    @override
+    def describe(self) -> str:
+        return f"cannot attach {self.current.description} due to conflict"
+
+    @override
+    def notes(self):
+        yield AttrConflictNote(self.prev)
+
+
+@dataclass
+class AttrTargetError(DiagError):
+    decl: "Decl"
+    attr: "AnyAttribute"
+
+    def __init__(self, decl: "Decl", attr: "AnyAttribute"):
+        super().__init__(loc=decl.loc)
+        self.decl = decl
+        self.attr = attr
+
+    @override
+    def describe(self) -> str:
+        return f"{self.attr.description} cannot be attached to {self.decl.description}"
 
 
 @dataclass
@@ -127,11 +306,17 @@ class PackageNotInScopeError(DiagError):
 
 @dataclass
 class GenericArgumentsError(DiagError):
-    name: str
+    ty_ref: "TypeRefDecl"
+
+    def __init__(self, ty_ref: "TypeRefDecl", expected: int, got: int):
+        super().__init__(loc=ty_ref.loc)
+        self.ty_ref = ty_ref
+        self.expected = expected
+        self.got = got
 
     @override
     def describe(self) -> str:
-        return f"Invalid generic arguments in {self.name!r}"
+        return f"Invalid generic arguments in {self.ty_ref.description!r}, expected {self.expected}, got {self.got}"
 
 
 @dataclass
@@ -184,8 +369,7 @@ class TypeUsageError(DiagError):
 
     def __init__(self, ty_ref: "TypeRefDecl"):
         super().__init__(loc=ty_ref.loc)
-        pass
-        self.ty = ty_ref.maybe_resolved_ty
+        self.ty = ty_ref.resolved_ty
 
     @override
     def describe(self) -> str:
@@ -204,8 +388,7 @@ class EnumValueError(DiagError):
 
     @override
     def describe(self) -> str:
-        pass
-        return f"value of {self.item.description} ({self.item.value}) is conflict with {self.enum.description} ({self.enum.ty_ref.maybe_resolved_ty.signature})"
+        return f"value of {self.item.description} ({self.item.value}) is conflict with {self.enum.description} ({self.enum.ty_ref.resolved_ty.signature})"
 
 
 @dataclass

@@ -58,20 +58,21 @@ fi
 # Python
 if "$run_python"; then
     log_stage "Formatting Python code"
-    removestar -i taihe tests || true
-    black taihe tests
-    ruff check taihe tests --fix
+    removestar -i compiler || true
+    # ruff check performs isort. Reformat later
+    ruff check --fix
+    ruff format
 fi
 
 # Cpp, runtime and tests
 if "$run_cpp"; then
     log_stage "Formatting C++ code"
     # Cpp, runtime
-    find ../runtime/include ../runtime/src -type f |
+    find runtime/include runtime/src -type f |
         clang-format-19 --verbose -i @/dev/stdin
 
     # Cpp, tests
-    find ../test ../cookbook \
+    find test cookbook \
          \( -name '*.c' -or -name '*.cpp' -or -name '*.h' -or -name '*.hpp' \) \
          -not -path '*generated*' -type f |
         clang-format-19 --verbose -i @/dev/stdin
@@ -80,7 +81,7 @@ fi
 # ArkTS
 if "$run_arkts"; then
     log_stage "Formatting ArkTS code"
-    find ../test ../cookbook -name '*.ets' -type f -print0 | while IFS= read -r -d $'\0' file; do
+    find test cookbook -name '*.ets' -type f -print0 | while IFS= read -r -d $'\0' file; do
         log_verbose "Formatting $file"
         clang-format-19 --assume-filename main.js <"$file" >"${file}.formatted" && mv "${file}.formatted" "$file"
     done

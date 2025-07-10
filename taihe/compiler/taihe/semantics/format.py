@@ -16,6 +16,7 @@
 """Format the IDL files."""
 
 from collections.abc import Callable
+from itertools import chain
 from typing import TYPE_CHECKING, Any
 
 from typing_extensions import override
@@ -25,6 +26,7 @@ from taihe.utils.diagnostics import AnsiStyle
 from taihe.utils.outputs import BaseWriter
 
 if TYPE_CHECKING:
+    from taihe.semantics.attributes import AnyAttribute
     from taihe.semantics.declarations import (
         CallbackTypeRefDecl,
         Decl,
@@ -71,20 +73,16 @@ class PrettyFormatter(DeclVisitor[str]):
             self.as_comment = lambda s: s
 
     def with_attr(self, d: "Decl", s: str) -> str:
-        if not d.attrs:
-            return s
-        fmt_attrs = " ".join(
-            self.as_attr(f"@{item}") for item in self.get_format_attr(d)
-        )
-        return f"{fmt_attrs} {s}"
+        for item in chain(*d.attributes.values()):
+            fmt_attrs = self.as_attr(f"@{self.get_format_attr(item)}")
+            s = f"{fmt_attrs} {s}"
+        return s
 
     def get_type_ref_decl(self, d: "TypeRefDecl"):
         type_ref_repr = self.handle_decl(d)
-        if not d.is_resolved or not self.show_resolved:
+        if not self.show_resolved:
             return type_ref_repr
-        real_type = (
-            d.maybe_resolved_ty.signature if d.maybe_resolved_ty else "<error type>"
-        )
+        real_type = d.resolved_ty.signature
         comment = self.as_comment(f"/* {real_type} */")
         return f"{type_ref_repr} {comment}"
 
@@ -112,9 +110,7 @@ class PrettyFormatter(DeclVisitor[str]):
         if not d.is_resolved or not self.show_resolved:
             return package_ref_repr
         real_package = (
-            d.maybe_resolved_pkg.description
-            if d.maybe_resolved_pkg
-            else "<error package>"
+            d.maybe_resolved_pkg.description if d.maybe_resolved_pkg else "<ERROR>"
         )
         comment = self.as_comment(f"/* {real_package} */")
         return f"{package_ref_repr} {comment}"
@@ -124,9 +120,7 @@ class PrettyFormatter(DeclVisitor[str]):
         if not d.is_resolved or not self.show_resolved:
             return decl_ref_repr
         real_decl = (
-            d.maybe_resolved_decl.description
-            if d.maybe_resolved_decl
-            else "<error declaration>"
+            d.maybe_resolved_decl.description if d.maybe_resolved_decl else "<ERROR>"
         )
         comment = self.as_comment(f"/* {real_decl} */")
         return f"{decl_ref_repr} {comment}"
@@ -150,16 +144,21 @@ class PrettyFormatter(DeclVisitor[str]):
             return f"{obj:f}"
         raise TypeError(f"Unsupported type: {type(obj)}")
 
-    def get_format_attr(self, d: "Decl") -> list[str]:
-        formatted_attributes: list[str] = []
-        for key, items in d.attrs.items():
-            for item in items:
-                if item.args:
-                    values_fmt = ", ".join(map(self.get_value, item.args))
-                    formatted_attributes.append(f"{key}({values_fmt})")
-                else:
-                    formatted_attributes.append(key)
-        return formatted_attributes
+    def get_format_attr(self, item: "AnyAttribute") -> str:
+        name = item.get_name()
+        args = item.get_args()
+        args_str: list[str] = []
+        for arg in args:
+            value = self.get_value(arg.value)
+            if arg.key:
+                arg_str = f"{arg.key}={value}"
+            else:
+                arg_str = value
+            args_str.append(arg_str)
+        if not args_str:
+            return name
+        args_fmt = ", ".join(args_str)
+        return f"{name}({args_fmt})"
 
 
 class PrettyPrinter(DeclVisitor[None]):
@@ -173,13 +172,13 @@ class PrettyPrinter(DeclVisitor[None]):
         self.fmt = PrettyFormatter(show_resolved, colorize)
 
     def write_pkg_attr(self, d: "PackageDecl"):
-        for item in self.fmt.get_format_attr(d):
-            attr = self.fmt.as_attr(f"@!{item}")
+        for item in chain(*d.attributes.values()):
+            attr = self.fmt.as_attr(f"@!{self.fmt.get_format_attr(item)}")
             self.out.writeln(f"{attr}")
 
     def write_attr(self, d: "Decl"):
-        for item in self.fmt.get_format_attr(d):
-            attr = self.fmt.as_attr(f"@{item}")
+        for item in chain(*d.attributes.values()):
+            attr = self.fmt.as_attr(f"@{self.fmt.get_format_attr(item)}")
             self.out.writeln(f"{attr}")
 
     @override

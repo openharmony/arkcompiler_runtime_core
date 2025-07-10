@@ -15,8 +15,8 @@
 #ifndef METADATA_H
 #define METADATA_H
 
-#include "stdexcept"
 #include <string>
+#include "stdexcept"
 
 using namespace taihe;
 
@@ -26,6 +26,7 @@ public:
     std::string value = "metadate.value";
     std::string resource = "metadate.resource";
     int32_t metadataImpl = 21474;
+
     MetadataImpl() {}
 
     std::string GetName()

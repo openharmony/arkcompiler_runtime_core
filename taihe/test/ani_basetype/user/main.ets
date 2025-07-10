@@ -64,7 +64,7 @@ function float_test() {
     arktest.assertLE(Math.abs(f - 1.3), eps);
 
     let h: float = 3.7f;
-    let i: double = 5.3f;
+    let i: double = 5.3;
     let j: double = base_test.AddF64(h, i);
     arktest.assertLE(Math.abs(j - 9.0), eps);
 

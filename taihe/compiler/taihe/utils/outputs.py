@@ -397,7 +397,6 @@ class CMakeOutputManager(OutputManager):
             self.emit_generated_dir("${CMAKE_CURRENT_LIST_DIR}", cmake_target)
             self.emit_generated_includes(cmake_target)
             self.emit_generated_sources(cmake_target)
-            self.emit_generated_ets_files(cmake_target)
             self.emit_set_cpp_standard(cmake_target)
 
     def emit_runtime_files_list(
@@ -413,7 +412,7 @@ class CMakeOutputManager(OutputManager):
                 f")",
             ):
                 cmake_target.writelns(
-                    f"{self.runtime_include_dir}",
+                    f"{self.runtime_include_dir.as_posix()}",
                 )
         with cmake_target.indented(
             f"if(NOT DEFINED TAIHE_RUNTIME_C_SRC_INNER)",
@@ -425,7 +424,7 @@ class CMakeOutputManager(OutputManager):
             ):
                 for runtime_src_file in self.runtime_c_src_files:
                     cmake_target.writelns(
-                        f"{runtime_src_file}",
+                        f"{runtime_src_file.as_posix()}",
                     )
         with cmake_target.indented(
             f"if(NOT DEFINED TAIHE_RUNTIME_CXX_SRC_INNER)",
@@ -437,7 +436,7 @@ class CMakeOutputManager(OutputManager):
             ):
                 for runtime_src_file in self.runtime_cxx_src_files:
                     cmake_target.writelns(
-                        f"{runtime_src_file}",
+                        f"{runtime_src_file.as_posix()}",
                     )
         with cmake_target.indented(
             f"set(TAIHE_RUNTIME_INCLUDE",
@@ -509,19 +508,6 @@ class CMakeOutputManager(OutputManager):
                 f"${{TAIHE_GEN_C_SRC}}",
                 f"${{TAIHE_GEN_CXX_SRC}}",
             )
-
-    def emit_generated_ets_files(
-        self,
-        cmake_target: CMakeWriter,
-    ):
-        with cmake_target.indented(
-            f"set(TAIHE_GEN_ETS_FILES",
-            f")",
-        ):
-            for file in self.get_files_by_kind(FileKind.ETS):
-                cmake_target.writelns(
-                    f"${{TAIHE_GEN_DIR}}/{file.relative_path}",
-                )
 
     def emit_set_cpp_standard(
         self,

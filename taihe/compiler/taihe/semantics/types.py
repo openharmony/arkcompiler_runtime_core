@@ -16,14 +16,18 @@
 """Defines the type system."""
 
 from abc import ABCMeta, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Protocol, TypeVar
 
 from typing_extensions import override
 
+from taihe.utils.exceptions import GenericArgumentsError
+
 if TYPE_CHECKING:
     from taihe.semantics.declarations import (
+        CallbackTypeRefDecl,
         EnumDecl,
         IfaceDecl,
         StructDecl,
@@ -64,13 +68,32 @@ class Type(metaclass=ABCMeta):
         """Accept a visitor."""
 
 
-##################
-# Built-in Types #
-##################
+@dataclass(frozen=True, repr=False)
+class ValidType(Type, metaclass=ABCMeta):
+    """Represents a valid type that can be used in the type system."""
 
 
 @dataclass(frozen=True, repr=False)
-class BuiltinType(Type, metaclass=ABCMeta):
+class InvalidType(Type):
+    """Represents an invalid type, usually due to unresolved references or errors."""
+
+    @property
+    @override
+    def signature(self):
+        return "<ERROR>"
+
+    @override
+    def _accept(self, v: "TypeVisitor[T]") -> T:
+        return v.visit_invalid_type(self)
+
+
+#################
+# Builtin Types #
+#################
+
+
+@dataclass(frozen=True, repr=False)
+class BuiltinType(ValidType, metaclass=ABCMeta):
     """Represents a built-in type."""
 
 
@@ -134,13 +157,8 @@ class StringType(BuiltinType):
         return v.visit_string_type(self)
 
 
-class BuiltinBuilder(Protocol):
-    def __call__(self, ty_ref: "TypeRefDecl") -> BuiltinType:
-        ...
-
-
 # Builtin Types Map
-BUILTIN_TYPES: dict[str, BuiltinBuilder] = {
+BUILTIN_TYPES: dict[str, Callable[["TypeRefDecl"], BuiltinType]] = {
     "bool": lambda ty_ref: ScalarType(ty_ref, ScalarKind.BOOL),
     "f32": lambda ty_ref: ScalarType(ty_ref, ScalarKind.F32),
     "f64": lambda ty_ref: ScalarType(ty_ref, ScalarKind.F64),
@@ -152,26 +170,32 @@ BUILTIN_TYPES: dict[str, BuiltinBuilder] = {
     "u16": lambda ty_ref: ScalarType(ty_ref, ScalarKind.U16),
     "u32": lambda ty_ref: ScalarType(ty_ref, ScalarKind.U32),
     "u64": lambda ty_ref: ScalarType(ty_ref, ScalarKind.U64),
-    "String": lambda ty_ref: StringType(ty_ref),
-    "Opaque": lambda ty_ref: OpaqueType(ty_ref),
+    "String": StringType,
+    "Opaque": OpaqueType,
 }
 
 
-####################
-# Builtin Generics #
-####################
+#################
+# Callback Type #
+#################
 
 
 @dataclass(frozen=True, repr=False)
-class CallbackType(Type):
-    return_ty: Type | None
-    params_ty: tuple[Type, ...]
+class CallbackType(ValidType):
+    ty_ref: "CallbackTypeRefDecl"
 
     @property
     @override
     def signature(self):
-        return_fmt = ty.signature if (ty := self.return_ty) else "void"
-        params_fmt = ", ".join(ty.signature for ty in self.params_ty)
+        params_fmt = ", ".join(
+            f"{param.name}: {param.ty_ref.resolved_ty.signature}"
+            for param in self.ty_ref.params
+        )
+        return_fmt = (
+            self.ty_ref.return_ty_ref.resolved_ty.signature
+            if self.ty_ref.return_ty_ref
+            else "void"
+        )
         return f"({params_fmt}) => {return_fmt}"
 
     @override
@@ -179,8 +203,16 @@ class CallbackType(Type):
         return v.visit_callback_type(self)
 
 
-class GenericType(Type, metaclass=ABCMeta):
-    pass
+####################
+# Builtin Generics #
+####################
+
+
+class GenericType(ValidType, metaclass=ABCMeta):
+    @classmethod
+    @abstractmethod
+    def try_construct(cls, ty_ref: "TypeRefDecl", *args_ty: Type) -> "GenericType":
+        ...
 
 
 @dataclass(frozen=True, repr=False)
@@ -191,6 +223,12 @@ class ArrayType(GenericType):
     @override
     def signature(self):
         return f"Array<{self.item_ty.signature}>"
+
+    @classmethod
+    def try_construct(cls, ty_ref: "TypeRefDecl", *args_ty: Type) -> "ArrayType":
+        if len(args_ty) != 1:
+            raise GenericArgumentsError(ty_ref, 1, len(args_ty))
+        return cls(ty_ref, args_ty[0])
 
     @override
     def _accept(self, v: "TypeVisitor[T]") -> T:
@@ -206,6 +244,12 @@ class OptionalType(GenericType):
     def signature(self):
         return f"Optional<{self.item_ty.signature}>"
 
+    @classmethod
+    def try_construct(cls, ty_ref: "TypeRefDecl", *args_ty: Type) -> "OptionalType":
+        if len(args_ty) != 1:
+            raise GenericArgumentsError(ty_ref, 1, len(args_ty))
+        return cls(ty_ref, args_ty[0])
+
     @override
     def _accept(self, v: "TypeVisitor[T]") -> T:
         return v.visit_optional_type(self)
@@ -219,6 +263,12 @@ class VectorType(GenericType):
     @override
     def signature(self):
         return f"Vector<{self.val_ty.signature}>"
+
+    @classmethod
+    def try_construct(cls, ty_ref: "TypeRefDecl", *args_ty: Type) -> "VectorType":
+        if len(args_ty) != 1:
+            raise GenericArgumentsError(ty_ref, 1, len(args_ty))
+        return cls(ty_ref, args_ty[0])
 
     @override
     def _accept(self, v: "TypeVisitor[T]") -> T:
@@ -235,6 +285,12 @@ class MapType(GenericType):
     def signature(self):
         return f"Map<{self.key_ty.signature}, {self.val_ty.signature}>"
 
+    @classmethod
+    def try_construct(cls, ty_ref: "TypeRefDecl", *args_ty: Type) -> "MapType":
+        if len(args_ty) != 2:
+            raise GenericArgumentsError(ty_ref, 2, len(args_ty))
+        return cls(ty_ref, args_ty[0], args_ty[1])
+
     @override
     def _accept(self, v: "TypeVisitor[T]") -> T:
         return v.visit_map_type(self)
@@ -249,23 +305,24 @@ class SetType(GenericType):
     def signature(self):
         return f"Set<{self.key_ty.signature}>"
 
+    @classmethod
+    def try_construct(cls, ty_ref: "TypeRefDecl", *args_ty: Type) -> "SetType":
+        if len(args_ty) != 1:
+            raise GenericArgumentsError(ty_ref, 1, len(args_ty))
+        return cls(ty_ref, args_ty[0])
+
     @override
     def _accept(self, v: "TypeVisitor[T]") -> T:
         return v.visit_set_type(self)
 
 
-class GenericBuilder(Protocol):
-    def __call__(self, ty_ref: "TypeRefDecl", *args: Type) -> GenericType:
-        ...
-
-
 # Builtin Generics Map
-BUILTIN_GENERICS: dict[str, GenericBuilder] = {
-    "Array": lambda ty_ref, *args: ArrayType(ty_ref, *args),
-    "Optional": lambda ty_ref, *args: OptionalType(ty_ref, *args),
-    "Vector": lambda ty_ref, *args: VectorType(ty_ref, *args),
-    "Map": lambda ty_ref, *args: MapType(ty_ref, *args),
-    "Set": lambda ty_ref, *args: SetType(ty_ref, *args),
+BUILTIN_GENERICS: dict[str, type[GenericType]] = {
+    "Array": ArrayType,
+    "Optional": OptionalType,
+    "Vector": VectorType,
+    "Map": MapType,
+    "Set": SetType,
 }
 
 
@@ -275,7 +332,7 @@ BUILTIN_GENERICS: dict[str, GenericBuilder] = {
 
 
 @dataclass(frozen=True, repr=False)
-class UserType(Type, metaclass=ABCMeta):
+class UserType(ValidType, metaclass=ABCMeta):
     ty_decl: "TypeDecl"
 
     @property

@@ -15,6 +15,7 @@
 from mate.bar use BarType;
 from pura use PuraType;
 
+@sts_export_default
 interface NovaType {}
 
 function testBar(bar: BarType): void;

@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {BusinessError} from "@ohos.base";
 import * as bigint_new from "bigint_new";
 import * as bigint_test from "bigint_test";
-import {BusinessError} from "@ohos.base";
 
 loadLibrary("ani_bigint");
 
@@ -36,11 +36,19 @@ function main() {
     suite.addTest("testProcessBigInt_6", testProcessBigInt_6);
 
     suite.addTest("test_bigint_with_printBigInt", test_bigint_with_printBigInt);
-    suite.addTest("test_bigint_with_createBigInt", test_bigint_with_createBigInt);
-    suite.addTest("test_bigint_with_setAndgetBigInt", test_bigint_with_setAndgetBigInt);
-    suite.addTest("test_bigint_with_setupStructAndPrint", test_bigint_with_setupStructAndPrint);
-    suite.addTest("test_bigint_with_getBigIntOptional_1", test_bigint_with_getBigIntOptional_1);
-    suite.addTest("test_bigint_with_getBigIntOptional_2", test_bigint_with_getBigIntOptional_2);
+    suite.addTest(
+        "test_bigint_with_createBigInt", test_bigint_with_createBigInt);
+    suite.addTest(
+        "test_bigint_with_setAndgetBigInt", test_bigint_with_setAndgetBigInt);
+    suite.addTest(
+        "test_bigint_with_setupStructAndPrint",
+        test_bigint_with_setupStructAndPrint);
+    suite.addTest(
+        "test_bigint_with_getBigIntOptional_1",
+        test_bigint_with_getBigIntOptional_1);
+    suite.addTest(
+        "test_bigint_with_getBigIntOptional_2",
+        test_bigint_with_getBigIntOptional_2);
     suite.addTest("test_bigint_with_mapBigInt", test_bigint_with_mapBigInt);
     suite.addTest("test_bigint_with_union", test_bigint_with_union);
 
@@ -137,7 +145,7 @@ function test_bigint_with_printBigInt() {
     bigint_new.printBigInt(num2);
 }
 
-//function createBigInt(a: @bigint Array<u64>): @bigint Array<u64>; 
+// function createBigInt(a: @bigint Array<u64>): @bigint Array<u64>;
 function test_bigint_with_createBigInt() {
     let num1: BigInt = 18446744073709551616n;
     let res = bigint_new.createBigInt(num1);
@@ -145,57 +153,59 @@ function test_bigint_with_createBigInt() {
     arktest.assertEQ(expect.toString(), num1.toString());
 }
 
-//BigInt set and get
+// BigInt set and get
 let want: bigint_new.Want = bigint_new.getWant();
-function test_bigint_with_setAndgetBigInt(){
+function test_bigint_with_setAndgetBigInt() {
     want.bigInt = 123n;
     let res = want.bigInt;
     arktest.assertEQ(res, 123n);
 }
 
-//function setupStructAndPrint(v: BigInt1): void;
-function test_bigint_with_setupStructAndPrint(){
+// function setupStructAndPrint(v: BigInt1): void;
+function test_bigint_with_setupStructAndPrint() {
     let a: bigint_new.BigInt1 = {a: 123n};
     bigint_new.setupStructAndPrint(a);
 }
 
-//function getBigIntOptional(a: Optional<@bigint Array<u64>>): @bigint Array<u64>; 
-function test_bigint_with_getBigIntOptional_1(){
+// function getBigIntOptional(a: Optional<@bigint Array<u64>>): @bigint
+// Array<u64>;
+function test_bigint_with_getBigIntOptional_1() {
     let a: BigInt = 123n;
     let res = bigint_new.getBigIntOptional(a);
     console.log("test_bigint_with_getBigIntOptional_1 have Optional: ", res);
 }
 
-function test_bigint_with_getBigIntOptional_2(){
+function test_bigint_with_getBigIntOptional_2() {
     let res = bigint_new.getBigIntOptional(undefined);
     console.log("test_bigint_with_getBigIntOptional_2 have no Optional: ", res);
 }
 
-//function mapBigInt(a: @record Map<String, @bigint Array<u64>>): @record Map<String, @bigint Array<u64>>;
-function test_bigint_with_mapBigInt(){
+// function mapBigInt(a: @record Map<String, @bigint Array<u64>>): @record
+// Map<String, @bigint Array<u64>>;
+function test_bigint_with_mapBigInt() {
     let data: Record<string, BigInt> = {"key1": 123n};
     let res = bigint_new.mapBigInt(data);
     console.log("test_bigint_with_mapBigInt result: ", res);
 }
 
-//union @bigint Array<u64> @null string
-function test_bigint_with_union(){
-    //union bigInt
+// union @bigint Array<u64> @null string
+function test_bigint_with_union() {
+    // union bigInt
     let bigIntData = 1020847100762815390427017310442723737601n;
     bigint_new.showMyUnion(bigIntData);
-    let bigIntResult = bigint_new.makeMyUnion(1) ;
+    let bigIntResult = bigint_new.makeMyUnion(1);
     console.log("bigIntResult: ", bigIntResult);
     arktest.assertEQ(bigIntData, bigIntResult);
 
-    //union string
+    // union string
     let strData = "this is string data";
     bigint_new.showMyUnion(strData);
-    let strResult = bigint_new.makeMyUnion(2) ;
+    let strResult = bigint_new.makeMyUnion(2);
     console.log("strResult: ", strResult);
     arktest.assertEQ(strData, strResult);
 
-    //union null
+    // union null
     bigint_new.showMyUnion(null);
-    let nullResult = bigint_new.makeMyUnion(0) ;
+    let nullResult = bigint_new.makeMyUnion(0);
     arktest.assertEQ(nullResult, null);
 }
