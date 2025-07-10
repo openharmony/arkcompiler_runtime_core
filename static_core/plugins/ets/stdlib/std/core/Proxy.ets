@@ -36,11 +36,11 @@ export final class Proxy {
     private static readonly SETTER_METHOD_PREFIX_LENGTH = Proxy.SETTER_METHOD_PREFIX.getLength()
 
     static tryGetTarget(obj: Object): NullishType {
-        return Reflect.get(obj, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+        return (reflect.Value.of(obj) as ClassValue).getFieldByName(Proxy.PROXY_INSTANCE_TARGET_FIELD).getData()
     }
 
     static tryGetHandler(obj: Object): NullishType {
-        return Reflect.get(obj, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+        return (reflect.Value.of(obj) as ClassValue).getFieldByName(Proxy.PROXY_INSTANCE_HANDLER_FIELD).getData()
     }
 
     static create<T extends Object>(target: T, handler: ProxyHandler<T>): T {
@@ -56,8 +56,9 @@ export final class Proxy {
         const proxyType = Proxy.INSTANCE.createProxyType(targetType, handlerType, targetLinker)
 
         const proxyInstance = proxyType.make() as T
-        Reflect.set(proxyInstance, Proxy.PROXY_INSTANCE_TARGET_FIELD, target)
-        Reflect.set(proxyInstance, Proxy.PROXY_INSTANCE_HANDLER_FIELD, handler)
+        const proxyValue = reflect.Value.of(proxyInstance) as ClassValue
+        proxyValue.setFieldByName(Proxy.PROXY_INSTANCE_TARGET_FIELD, reflect.Value.of(target))
+        proxyValue.setFieldByName(Proxy.PROXY_INSTANCE_HANDLER_FIELD, reflect.Value.of(handler))
 
         return proxyInstance
     }
@@ -246,9 +247,10 @@ export final class Proxy {
         if (resultType.isPrimitive()) {
             if (resultType instanceof IntType) {
                 getterCreator.addBody(new CallableBodyFunction((proxy: Object): Int => {
-                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    const proxyValue = reflect.Value.of(proxy) as ClassValue
+                    const handler = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_HANDLER_FIELD).getData()
                     if (handler instanceof ProxyHandler) {
-                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        const target = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_TARGET_FIELD).getData()
                         // using "wrapper" method to "capture" <T> after smartcast
                         return (this.handlerGet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName) as Numeric).toInt()
                     }
@@ -257,9 +259,10 @@ export final class Proxy {
                 }))
             } else if (resultType instanceof DoubleType) {
                 getterCreator.addBody(new CallableBodyFunction((proxy: Object): Double => {
-                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    const proxyValue = reflect.Value.of(proxy) as ClassValue
+                    const handler = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_HANDLER_FIELD).getData()
                     if (handler instanceof ProxyHandler) {
-                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        const target = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_TARGET_FIELD).getData()
                         // using "wrapper" method to "capture" <T> after smartcast
                         return (this.handlerGet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName) as Numeric).toDouble()
                     }
@@ -268,9 +271,10 @@ export final class Proxy {
                 }))
             } else if (resultType instanceof ShortType) {
                 getterCreator.addBody(new CallableBodyFunction((proxy: Object): Short => {
-                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    const proxyValue = reflect.Value.of(proxy) as ClassValue
+                    const handler = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_HANDLER_FIELD).getData()
                     if (handler instanceof ProxyHandler) {
-                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        const target = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_TARGET_FIELD).getData()
                         // using "wrapper" method to "capture" <T> after smartcast
                         return (this.handlerGet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName) as Numeric).toShort()
                     }
@@ -279,9 +283,10 @@ export final class Proxy {
                 }))
             } else if (resultType instanceof FloatType) {
                 getterCreator.addBody(new CallableBodyFunction((proxy: Object): Float => {
-                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    const proxyValue = reflect.Value.of(proxy) as ClassValue
+                    const handler = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_HANDLER_FIELD).getData()
                     if (handler instanceof ProxyHandler) {
-                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        const target = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_TARGET_FIELD).getData()
                         // using "wrapper" method to "capture" <T> after smartcast
                         return (this.handlerGet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName) as Numeric).toFloat()
                     }
@@ -290,9 +295,10 @@ export final class Proxy {
                 }))
             } else if (resultType instanceof ByteType) {
                 getterCreator.addBody(new CallableBodyFunction((proxy: Object): Byte => {
-                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    const proxyValue = reflect.Value.of(proxy) as ClassValue
+                    const handler = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_HANDLER_FIELD).getData()
                     if (handler instanceof ProxyHandler) {
-                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        const target = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_TARGET_FIELD).getData()
                         // using "wrapper" method to "capture" <T> after smartcast
                         return (this.handlerGet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName) as Numeric).toByte()
                     }
@@ -301,9 +307,10 @@ export final class Proxy {
                 }))
             } else if (resultType instanceof CharType) {
                 getterCreator.addBody(new CallableBodyFunction((proxy: Object): Char => {
-                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    const proxyValue = reflect.Value.of(proxy) as ClassValue
+                    const handler = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_HANDLER_FIELD).getData()
                     if (handler instanceof ProxyHandler) {
-                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        const target = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_TARGET_FIELD).getData()
                         // using "wrapper" method to "capture" <T> after smartcast
                         return this.handlerGet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName) as Char
                     }
@@ -312,9 +319,10 @@ export final class Proxy {
                 }))
             } else if (resultType instanceof LongType) {
                 getterCreator.addBody(new CallableBodyFunction((proxy: Object): Long => {
-                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    const proxyValue = reflect.Value.of(proxy) as ClassValue
+                    const handler = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_HANDLER_FIELD).getData()
                     if (handler instanceof ProxyHandler) {
-                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        const target = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_TARGET_FIELD).getData()
                         // using "wrapper" method to "capture" <T> after smartcast
                         return (this.handlerGet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName) as Numeric).toLong()
                     }
@@ -323,9 +331,10 @@ export final class Proxy {
                 }))
             } else {
                 getterCreator.addBody(new CallableBodyFunction((proxy: Object): NullishType => {
-                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    const proxyValue = reflect.Value.of(proxy) as ClassValue
+                    const handler = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_HANDLER_FIELD).getData()
                     if (handler instanceof ProxyHandler) {
-                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        const target = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_TARGET_FIELD).getData()
                         // using "wrapper" method to "capture" <T> after smartcast
                         return this.handlerGet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName)
                     }
@@ -335,9 +344,10 @@ export final class Proxy {
             }
         } else {
             getterCreator.addBody(new CallableBodyFunction((proxy: Object): NullishType => {
-                const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                const proxyValue = reflect.Value.of(proxy) as ClassValue
+                const handler = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_HANDLER_FIELD).getData()
                 if (handler instanceof ProxyHandler) {
-                    const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                    const target = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_TARGET_FIELD).getData()
                     // using "wrapper" method to "capture" <T> after smartcast
                     return this.handlerGet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName)
                 }
@@ -367,9 +377,10 @@ export final class Proxy {
         if (setterParamType.isPrimitive()) {
             if (setterParamType instanceof IntType) {
                 setterCreator.addBody(new CallableBodyFunction((proxy: Object, value: Int): void => {
-                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    const proxyValue = reflect.Value.of(proxy) as ClassValue
+                    const handler = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_HANDLER_FIELD).getData()
                     if (handler instanceof ProxyHandler) {
-                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        const target = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_TARGET_FIELD).getData()
                         // using "wrapper" method to "capture" <T> after smartcast
                         const success = this.handlerSet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName, value as object)
                         if (!success) {
@@ -381,9 +392,10 @@ export final class Proxy {
                 }))
             } else if (setterParamType instanceof DoubleType) {
                 setterCreator.addBody(new CallableBodyFunction((proxy: Object, value: Double): void => {
-                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    const proxyValue = reflect.Value.of(proxy) as ClassValue
+                    const handler = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_HANDLER_FIELD).getData()
                     if (handler instanceof ProxyHandler) {
-                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        const target = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_TARGET_FIELD).getData()
                         // using "wrapper" method to "capture" <T> after smartcast
                         const success = this.handlerSet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName, value as object)
                         if (!success) {
@@ -395,9 +407,10 @@ export final class Proxy {
                 }))
             } else if (setterParamType instanceof ShortType) {
                 setterCreator.addBody(new CallableBodyFunction((proxy: Object, value: Short): void => {
-                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    const proxyValue = reflect.Value.of(proxy) as ClassValue
+                    const handler = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_HANDLER_FIELD).getData()
                     if (handler instanceof ProxyHandler) {
-                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        const target = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_TARGET_FIELD).getData()
                         // using "wrapper" method to "capture" <T> after smartcast
                         const success = this.handlerSet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName, value as object)
                         if (!success) {
@@ -409,9 +422,10 @@ export final class Proxy {
                 }))
             } else if (setterParamType instanceof FloatType) {
                 setterCreator.addBody(new CallableBodyFunction((proxy: Object, value: Float): void => {
-                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    const proxyValue = reflect.Value.of(proxy) as ClassValue
+                    const handler = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_HANDLER_FIELD).getData()
                     if (handler instanceof ProxyHandler) {
-                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        const target = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_TARGET_FIELD).getData()
                         // using "wrapper" method to "capture" <T> after smartcast
                         const success = this.handlerSet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName, value as object)
                         if (!success) {
@@ -423,9 +437,10 @@ export final class Proxy {
                 }))
             } else if (setterParamType instanceof ByteType) {
                 setterCreator.addBody(new CallableBodyFunction((proxy: Object, value: Byte): void => {
-                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    const proxyValue = reflect.Value.of(proxy) as ClassValue
+                    const handler = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_HANDLER_FIELD).getData()
                     if (handler instanceof ProxyHandler) {
-                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        const target = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_TARGET_FIELD).getData()
                         // using "wrapper" method to "capture" <T> after smartcast
                         const success = this.handlerSet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName, value as object)
                         if (!success) {
@@ -437,9 +452,10 @@ export final class Proxy {
                 }))
             } else if (setterParamType instanceof CharType) {
                 setterCreator.addBody(new CallableBodyFunction((proxy: Object, value: Char): void => {
-                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    const proxyValue = reflect.Value.of(proxy) as ClassValue
+                    const handler = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_HANDLER_FIELD).getData()
                     if (handler instanceof ProxyHandler) {
-                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        const target = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_TARGET_FIELD).getData()
                         // using "wrapper" method to "capture" <T> after smartcast
                         const success = this.handlerSet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName, value as object)
                         if (!success) {
@@ -451,9 +467,10 @@ export final class Proxy {
                 }))
             } else if (setterParamType instanceof LongType) {
                 setterCreator.addBody(new CallableBodyFunction((proxy: Object, value: Long): void => {
-                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    const proxyValue = reflect.Value.of(proxy) as ClassValue
+                    const handler = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_HANDLER_FIELD).getData()
                     if (handler instanceof ProxyHandler) {
-                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        const target = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_TARGET_FIELD).getData()
                         // using "wrapper" method to "capture" <T> after smartcast
                         const success = this.handlerSet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName, value as object)
                         if (!success) {
@@ -465,9 +482,10 @@ export final class Proxy {
                 }))
             } else {
                 setterCreator.addBody(new CallableBodyFunction((proxy: Object, value: NullishType): void => {
-                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    const proxyValue = reflect.Value.of(proxy) as ClassValue
+                    const handler = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_HANDLER_FIELD).getData()
                     if (handler instanceof ProxyHandler) {
-                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        const target = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_TARGET_FIELD).getData()
                         // using "wrapper" method to "capture" <T> after smartcast
                         const success = this.handlerSet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName, value as object)
                         if (!success) {
@@ -480,9 +498,10 @@ export final class Proxy {
             }
         } else {
             setterCreator.addBody(new CallableBodyFunction((proxy: Object, value: NullishType): void => {
-                const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                const proxyValue = reflect.Value.of(proxy) as ClassValue
+                const handler = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_HANDLER_FIELD).getData()
                 if (handler instanceof ProxyHandler) {
-                    const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                    const target = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_TARGET_FIELD).getData()
                     // using "wrapper" method to "capture" <T> after smartcast
                     const success = this.handlerSet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName, value as object)
                     if (!success) {
@@ -513,9 +532,10 @@ export final class Proxy {
                 .addResult(methodType.getResultType())
                 .addBody(new CallableBodyErasedFunction((proxy: NullishType, args: FixedArray<NullishType>): NullishType => {
                     const proxyInstance = proxy as Object
-                    const handler = Reflect.get(proxyInstance, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    const proxyValue = reflect.Value.of(proxyInstance) as ClassValue
+                    const handler = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_HANDLER_FIELD).getData()
                     if (handler instanceof ProxyHandler) {
-                        const target = Reflect.get(proxyInstance, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        const target = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_TARGET_FIELD).getData()
                         return this.handlerInvoke(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), method, args)
                     }
 
@@ -611,11 +631,32 @@ export interface ProxyHandler<T extends Object> {
 
 export abstract class DefaultProxyHandler<T extends Object> implements ProxyHandler<T> {
     override get(target: T, name: string): NullishType {
-        return Reflect.get(target, name)
+        const GETTER_PREFIX = "<get>";
+        const targetType = Type.of(target) as ClassType
+
+        try {
+            const getter = targetType.getMethodByName(GETTER_PREFIX + name)
+            return getter.invoke(target, [])
+        } catch(e: Error) {
+            console.error(e)
+        }
+
+        return false
     }
 
     override set(target: T, name: string, value: NullishType): boolean {
-        return Reflect.set(target, name, value)
+        const SETTER_PREFIX = "<set>";
+        const targetType = Type.of(target) as ClassType
+
+        try {
+            const setter = targetType.getMethodByName(SETTER_PREFIX + name)
+            setter.invoke(target, [value])
+            return true
+        } catch(e: Error) {
+            console.error(e)
+        }
+
+        return false
     }
 
     override invoke(target: T, method: Method, args: FixedArray<NullishType>): NullishType {

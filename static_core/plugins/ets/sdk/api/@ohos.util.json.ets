@@ -37,7 +37,43 @@
      * @returns boolean
      */
     export function has(obj: Object, property: string): boolean {
-        return Reflect.has(obj, property)
+        if (!Object.hasOwn(obj, property)) {
+            const t = Type.of(obj)
+            if (t instanceof ClassType) {
+                const ct = t as ClassType
+                const mnum = ct.getMethodsNum()
+                for (let i = 0; i < mnum; ++i) {
+                    const m = ct.getMethod(i)
+                    if (m.isStatic()) {
+                        continue
+                    }
+
+                    const methodName = m.getName()
+                    if (methodName == property) {
+                        return true
+                    } else if (methodName == "<get>" + property) {
+                        return true
+                    } else if (methodName == "<set>" + property) {
+                        return true
+                    }
+                }
+            } else if (t instanceof StringType || t instanceof ArrayType || t instanceof LambdaType) {
+                return (property == OBJECT_TO_STRING_MEMBER_NAME ||
+                    property == OBJECT_TO_LOCALE_STRING_MEMBER_NAME ||
+                    property == OBJECT_HAS_OWN_PROPERTY_MEMBER_NAME)
+            } else if (t instanceof EnumType) {
+                // NOTE(shumilov-petr): Not implemented
+                throw new Error("Not implemented")
+            } else if (t instanceof UnionType) {
+                // NOTE(shumilov-petr): Not implemented
+                throw new Error("Not implemented")
+            } else if (t instanceof TupleType) {
+                // NOTE(shumilov-petr): Not implemented
+                throw new Error("Not implemented")
+            }
+            return false
+        }
+        return true
     }
 
     /**
@@ -45,7 +81,7 @@
      *
      * @param obj: NullishType An object to be converted.
      *
-     * @param replacer An array with elements indicating names of the properties in the object 
+     * @param replacer An array with elements indicating names of the properties in the object
      * or Transformer function changing field values
      * that should be included in the resulting JSON string
      *

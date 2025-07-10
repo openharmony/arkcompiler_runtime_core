@@ -25,15 +25,17 @@ function testObjectAssignKeys(): void {
 
 	const objKeys = Object.keys(obj)
 	const newObjKeys = Object.keys(newObj)
- arktest.assertEQ(objKeys.length,  newObjKeys.length, "unexpected keys number")
+ 	arktest.assertEQ(objKeys.length,  newObjKeys.length, "unexpected keys number")
 
 	for (let i = 0; i < objKeys.length; i++) {
-	 arktest.assertEQ(objKeys[i],  newObjKeys[i], "unexpected property name: " + newObjKeys[i])
+	 	arktest.assertEQ(objKeys[i],  newObjKeys[i], "unexpected property name: " + newObjKeys[i])
 
 		const propName = objKeys[i]
-		const propVal = Reflect.get(newObj, propName)
+		const newObjVal = reflect.Value.of(newObj) as ClassValue
+		const propVal = newObj[propName]
 
-	 arktest.assertEQ(Reflect.get(obj, propName),  propVal, `unexpected '${propName}' property value: ${propVal}`)
+		arktest.assertEQ((reflect.Value.of(obj) as ClassValue).getFieldByName(propName).getData(),
+					      propVal, `unexpected '${propName}' property value: ${propVal}`)
 	}
 }
 
