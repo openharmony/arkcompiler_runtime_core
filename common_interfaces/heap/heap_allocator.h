@@ -35,9 +35,9 @@ public:
     static uintptr_t AllocateLargeJitFortRegion(size_t size, LanguageType language);
     // below are interfaces used for serialize
     static Address AllocateNoGC(size_t size);
-    static Address AllocateOldNoGC(size_t size);
+    static Address AllocateOldOrLargeNoGC(size_t size);
     static Address AllocatePinNoGC(size_t size);
-    static Address AllocateRegion();
+    static Address AllocateOldRegion();
     static Address AllocatePinnedRegion();
     static Address AllocateLargeRegion(size_t size);
 };
