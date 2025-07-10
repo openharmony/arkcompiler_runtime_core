@@ -115,7 +115,7 @@ public:
         auto lr = codegen->GetTarget().GetLinkReg();
         auto fl = codegen->GetFrameLayout();
         codegen->CreateStackMap(saveState_->CastToSaveStateOsr());
-        ssize_t slot = CFrameLayout::LOCALS_START_SLOT + CFrameLayout::GetLocalsCount() - 1U;
+        auto slot = static_cast<ssize_t>(CFrameLayout::LOCALS_START_SLOT + CFrameLayout::GetLocalsCount() - 1U);
         encoder->EncodeStp(
             codegen->FpReg(), lr,
             MemRef(codegen->FpReg(),
@@ -1968,7 +1968,7 @@ void Codegen::CreatePostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2, RegMask 
             return;
         }
         // CallPostWRB only for second reg
-        auto secondMemOffset = reg1.GetSize() / BITS_PER_BYTE;
+        auto secondMemOffset = static_cast<ssize_t>(reg1.GetSize() / BITS_PER_BYTE);
         if (!mem.HasIndex()) {
             MemRef secondMem(mem.GetBase(), mem.GetDisp() + secondMemOffset);
             pwb.Encode(secondMem, reg2, INVALID_REGISTER, !IsInstNotNull(secondValue), preserved);

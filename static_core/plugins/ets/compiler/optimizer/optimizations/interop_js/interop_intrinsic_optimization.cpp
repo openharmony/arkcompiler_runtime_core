@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1101,7 +1101,7 @@ void InteropIntrinsicOptimization::DoRedundancyElimination(Inst *scopeStart, Ins
         block->SetMarker(eliminationCandidate_);
         MarkPartiallyAnticipated(block, boundary);
         GetInfo(block).maxChain++;
-        GetInfo(block).maxDepth = block->GetLoop()->GetDepth();
+        GetInfo(block).maxDepth = static_cast<int32_t>(block->GetLoop()->GetDepth());
     }
     CalculateDownSafe(boundary);
     HoistAndEliminate(boundary, boundaryInst);

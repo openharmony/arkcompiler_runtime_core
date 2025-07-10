@@ -56,6 +56,7 @@ Function::Result Function::Compile(Arch arch, ArenaAllocator *allocator, ArenaAl
 {
     IrtocRuntimeInterface runtime;
     graph_ = allocator->New<Graph>(Graph::GraphArgs {allocator, localAllocator, arch, this, &runtime}, false);
+    ASSERT(graph_ != nullptr);
     builder_ = std::make_unique<compiler::IrConstructor>();
 
     MakeGraphImpl();

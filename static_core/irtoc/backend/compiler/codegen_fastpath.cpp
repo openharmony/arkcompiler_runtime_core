@@ -27,7 +27,7 @@ static void SaveCallerRegistersInFrame(RegMask mask, Encoder *encoder, const CFr
     auto fpReg = Target(fl.GetArch()).GetFrameReg();
 
     mask &= GetCallerRegsMask(fl.GetArch(), isFp);
-    auto startSlot = fl.GetStackStartSlot() + fl.GetCallerLastSlot(isFp);
+    auto startSlot = static_cast<size_t>(fl.GetStackStartSlot()) + fl.GetCallerLastSlot(isFp);
     encoder->SaveRegisters(mask, isFp, -startSlot, fpReg, GetCallerRegsMask(fl.GetArch(), isFp));
 }
 
@@ -39,7 +39,7 @@ static void RestoreCallerRegistersFromFrame(RegMask mask, Encoder *encoder, cons
     auto fpReg = Target(fl.GetArch()).GetFrameReg();
 
     mask &= GetCallerRegsMask(fl.GetArch(), isFp);
-    auto startSlot = fl.GetStackStartSlot() + fl.GetCallerLastSlot(isFp);
+    auto startSlot = static_cast<size_t>(fl.GetStackStartSlot()) + fl.GetCallerLastSlot(isFp);
     encoder->LoadRegisters(mask, isFp, -startSlot, fpReg, GetCallerRegsMask(fl.GetArch(), isFp));
 }
 

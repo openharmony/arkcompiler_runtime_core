@@ -315,6 +315,7 @@ InstLiveSet *LivenessAnalyzer::GetInitInstLiveSet(BasicBlock *block)
 {
     unsigned instructionCount = instLifeIntervals_.size();
     auto liveSet = GetAllocator()->New<InstLiveSet>(instructionCount, GetAllocator());
+    ASSERT(liveSet != nullptr);
     for (auto succ : block->GetSuccsBlocks()) {
         // catch-begin is pseudo successor, its live set will be processed for blocks with throwable instructions
         if (succ->IsCatchBegin()) {
@@ -357,6 +358,7 @@ LifeNumber LivenessAnalyzer::GetLoopEnd(Loop *loop)
  */
 void LivenessAnalyzer::ProcessBlockLiveInstructions(BasicBlock *block, InstLiveSet *liveSet)
 {
+    ASSERT(liveSet != nullptr);
     // For each live instruction set initial life range equals to the block life range
     for (auto &interval : instLifeIntervals_) {
         if (liveSet->IsSet(interval->GetInst()->GetLinearNumber())) {
@@ -563,6 +565,7 @@ void LivenessAnalyzer::CreateIntervalForTemp(LifeNumber ln)
 {
     ASSERT(!finalized_);
     auto interval = GetAllocator()->New<LifeIntervals>(GetAllocator());
+    ASSERT(interval != nullptr);
     interval->AppendRange({ln - 1, ln});
     interval->AddUsePosition(ln);
     // DataType is INT64, since general register is reserved (for 32-bits arch will be converted to INT32)
@@ -852,6 +855,7 @@ void LivenessAnalyzer::BlockReg(Register reg, LifeNumber blockFrom, LifeNumber b
     auto interval = intervals.at(reg);
     if (interval == nullptr) {
         interval = GetGraph()->GetAllocator()->New<LifeIntervals>(GetGraph()->GetAllocator());
+        ASSERT(interval != nullptr);
         interval->SetPhysicalReg(reg, IS_FP ? DataType::FLOAT64 : DataType::UINT64);
         intervals.at(reg) = interval;
     }
@@ -877,6 +881,7 @@ LifeIntervals *LifeIntervals::SplitAt(LifeNumber ln, ArenaAllocator *alloc)
     ASSERT(!IsPhysical());
     ASSERT(ln > GetBegin() && ln <= GetEnd());
     auto splitChild = alloc->New<LifeIntervals>(alloc, GetInst());
+    ASSERT(splitChild != nullptr);
 #ifndef NDEBUG
     ASSERT(finalized_);
     splitChild->finalized_ = true;
