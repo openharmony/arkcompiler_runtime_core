@@ -104,7 +104,8 @@ public:
         ASSERT_EQ(reinterpret_cast<BoxType *>(baseObject)->GetValue(), value);
         ASSERT_EQ(staticObjectAccessor.HasProperty(nullptr, reinterpret_cast<common::BaseObject *>(obj), property),
                   true);
-        ASSERT_EQ(staticObjectAccessor.HasProperty(nullptr, reinterpret_cast<common::BaseObject *>(obj), "test"), false);
+        ASSERT_EQ(staticObjectAccessor.HasProperty(nullptr, reinterpret_cast<common::BaseObject *>(obj), "test"),
+                  false);
     }
 
     template <typename T, typename BoxType>
@@ -274,8 +275,8 @@ TEST_F(StaticObjectAccessorTest, SetAndGetElementByIdx1)
     staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<common::BaseObject *>(obj), "firSide",
                                      reinterpret_cast<common::BaseObject *>(valueObject));
     staticObjectAccessor.SetElementByIdx(nullptr,
-                                         reinterpret_cast<common::BaseObject *>(reinterpret_cast<EtsObject *>(array)), 1,
-                                         reinterpret_cast<common::BaseObject *>(obj));
+                                         reinterpret_cast<common::BaseObject *>(reinterpret_cast<EtsObject *>(array)),
+                                         1, reinterpret_cast<common::BaseObject *>(obj));
     common::BaseObject *baseObject =
         staticObjectAccessor.GetElementByIdx(nullptr, reinterpret_cast<common::BaseObject *>(array), 1);
     ASSERT_EQ(baseObject, reinterpret_cast<common::BaseObject *>(obj));

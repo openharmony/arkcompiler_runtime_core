@@ -104,7 +104,8 @@ void StaticObjectOperator::ForEachRefFieldSkipReferent(const common::BaseObject 
 #endif
 }
 
-void StaticObjectOperator::ForEachRefField(const common::BaseObject *object, const common::RefFieldVisitor &visitor) const
+void StaticObjectOperator::ForEachRefField(const common::BaseObject *object,
+                                           const common::RefFieldVisitor &visitor) const
 {
     Handler handler(visitor);
     auto *objHeader = reinterpret_cast<ObjectHeader *>(const_cast<common::BaseObject *>(object));

@@ -35,7 +35,7 @@ bool StaticObjectAccessor::HasProperty([[maybe_unused]] common::ThreadHolder *th
 }
 
 common::BoxedValue StaticObjectAccessor::GetProperty([[maybe_unused]] common::ThreadHolder *thread,
-                                                    const common::BaseObject *obj, const char *name)
+                                                     const common::BaseObject *obj, const char *name)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
@@ -79,7 +79,7 @@ bool StaticObjectAccessor::HasElementByIdx([[maybe_unused]] common::ThreadHolder
 }
 
 common::BoxedValue StaticObjectAccessor::GetElementByIdx([[maybe_unused]] common::ThreadHolder *thread,
-                                                        const common::BaseObject *obj, const uint32_t index)
+                                                         const common::BaseObject *obj, const uint32_t index)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
