@@ -909,3 +909,19 @@
 # 27159
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_27.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_28.ets
+
+# 27106 TypeError: Cannot find type 'Awaited'
+05.generics/03.utility_types/01.awaited_utility_type/awaited_parameter_0.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_parameter_1.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_return_0.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_return_1.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_return_2.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_simple_0.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_simple_1.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_simple_2.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_simple_3.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_simple_4.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_simple_5.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_simple_6.ets
+05.generics/03.utility_types/incorrect_utility_type_usage_3.ets
+05.generics/03.utility_types/incorrect_utility_type_usage_4.ets
