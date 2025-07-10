@@ -58,7 +58,9 @@ LocNumFmt &IntlFormattersCache::NumFmtsCacheInvalidation(ani_env *env, const Par
         } else if (it->second.numFmt == nullptr) {
             // Still not created, now create new number formatter, range formatter is not changed
             auto *ptr = new icu::number::LocalizedNumberFormatter();
-            ASSERT(ptr != nullptr);
+            if (UNLIKELY(ptr == nullptr)) {
+                return defaultLocNumFmt;
+            }
             status = InitNumFormatter(env, options, *ptr);
             if (status != ANI_OK) {
                 return defaultLocNumFmt;
@@ -103,7 +105,9 @@ LocNumRangeFmt &IntlFormattersCache::NumRangeFmtsCacheInvalidation(ani_env *env,
         } else if (it->second.numRangeFmt == nullptr) {
             // Still not created, now create new number range formatter, number formatter is not changed
             auto *ptr = new icu::number::LocalizedNumberRangeFormatter();
-            ASSERT(ptr != nullptr);
+            if (UNLIKELY(ptr == nullptr)) {
+                return defaultLocNumRangeFmt;
+            }
 
             status = InitNumRangeFormatter(env, options, *ptr);
             if (status != ANI_OK) {
