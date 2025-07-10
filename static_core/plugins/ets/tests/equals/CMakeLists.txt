@@ -74,16 +74,20 @@ foreach(NAME ${EQUALS_TEST_LIST})
     add_dependencies(ets_tests_equals ets_equals_${NAME}_irtoc_opt)
 
     if(PANDA_COMPILER_ENABLE AND NOT PANDA_TARGET_ARM32)
-        panda_add_asm_file(
-            FILE ${PANDA_ETS_PLUGIN_SOURCE}/tests/equals/${NAME}.pa
-            TARGET ets_equals_${NAME}_enforce_jit
-            DEPENDS etsstdlib
-            LANGUAGE_CONTEXT ets
-            ADDITIONAL_STDLIBS $<TARGET_PROPERTY:etsstdlib,FILE>
-            ASSEMBLER_OPTIONS "--optimize"
-            RUNTIME_OPTIONS "--compiler-enable-jit=true" "--compiler-hotness-threshold=0" "--no-async-jit"
-        )
-        add_dependencies(ets_tests_equals ets_equals_${NAME}_enforce_jit)
+
+        # 26982 64-bit pointer support
+        if (NOT PANDA_USE_64_BIT_POINTER OR NOT PANDA_TARGET_ARM64)
+            panda_add_asm_file(
+                FILE ${PANDA_ETS_PLUGIN_SOURCE}/tests/equals/${NAME}.pa
+                TARGET ets_equals_${NAME}_enforce_jit
+                DEPENDS etsstdlib
+                LANGUAGE_CONTEXT ets
+                ADDITIONAL_STDLIBS $<TARGET_PROPERTY:etsstdlib,FILE>
+                ASSEMBLER_OPTIONS "--optimize"
+                RUNTIME_OPTIONS "--compiler-enable-jit=true" "--compiler-hotness-threshold=0" "--no-async-jit"
+            )
+            add_dependencies(ets_tests_equals ets_equals_${NAME}_enforce_jit)
+        endif()
 
         if (PANDA_TARGET_ARM64 OR PANDA_TARGET_AMD64)
             panda_add_asm_file(
