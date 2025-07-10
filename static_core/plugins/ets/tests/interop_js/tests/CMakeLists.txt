@@ -60,7 +60,6 @@ set(DISABLES_TESTS
     test_intrins
     test_return_this
     test_undefined
-    interface_arg_impl
 )
 
 SUBDIRLIST(EXECUTED_TESTS
