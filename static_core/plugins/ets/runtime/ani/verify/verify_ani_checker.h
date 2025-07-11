@@ -23,78 +23,95 @@
 // clang-format off
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 // CC-OFFNXT(G.PRE.02-CPP, G.PRE.06) solid logic
-#define ANI_VERIFICATION_MAP                                    \
-    X(VERIFY_VM,                     VerifyVm)                  \
-    X(VERIFY_ENV,                    VerifyEnv)                 \
-    X(VERIFY_ENV_SKIP_PENDING_ERROR, VerifyEnvSkipPendingError) \
-    X(VERIFY_OPTIONS,                VerifyOptions)             \
-    X(VERIFY_ENV_VERSION,            VerifyEnvVersion)          \
-    X(VERIFY_NR_REFS,                VerifyNrRefs)              \
-    X(VERIFY_REF,                    VerifyRef)                 \
-    X(VERIFY_CLASS,                  VerifyClass)               \
-    X(VERIFY_STRING,                 VerifyString)              \
-    X(VERIFY_ERROR,                  VerifyError)               \
-    X(VERIFY_DEL_LOCAL_REF,          VerifyDelLocalRef)         \
-    X(VERIFY_CTOR,                   VerifyCtor)                \
-    X(VERIFY_METHOD,                 VerifyMethod)              \
-    X(VERIFY_METHOD_A_ARGS,          VerifyMethodAArgs)         \
-    X(VERIFY_METHOD_V_ARGS,          VerifyMethodVArgs)         \
-    X(VERIFY_VM_STORAGE,             VerifyVmStorage)           \
-    X(VERIFY_ENV_STORAGE,            VerifyEnvStorage)          \
-    X(VERIFY_BOOLEAN_STORAGE,        VerifyBooleanStorage)      \
-    X(VERIFY_REF_STORAGE,            VerifyRefStorage)          \
-    X(VERIFY_OBJECT_STORAGE,         VerifyObjectStorage)       \
-    X(VERIFY_STRING_STORAGE,         VerifyStringStorage)       \
-    X(VERIFY_SIZE_STORAGE,           VerifySizeStorage)         \
-    X(VERIFY_UTF16_BUFFER,           VerifyUTF16Buffer)         \
-    X(VERIFY_UTF16_STRING,           VerifyUTF16String)         \
-    X(VERIFY_UTF8_BUFFER,            VerifyUTF8Buffer)          \
-    X(VERIFY_UTF8_STRING,            VerifyUTF8String)          \
-    X(VERIFY_SIZE,                   VerifySize)                \
-    X(VERIFY_ERROR_STORAGE,          VerifyErrorStorage)        \
+#define ANI_VERIFICATION_MAP                                                      \
+    X(VERIFY_VM,                            VerifyVm)                             \
+    X(VERIFY_ENV,                           VerifyEnv)                            \
+    X(VERIFY_ENV_SKIP_PENDING_ERROR,        VerifyEnvSkipPendingError)            \
+    X(VERIFY_OPTIONS,                       VerifyOptions)                        \
+    X(VERIFY_ENV_VERSION,                   VerifyEnvVersion)                     \
+    X(VERIFY_NR_REFS,                       VerifyNrRefs)                         \
+    X(VERIFY_REF,                           VerifyRef)                            \
+    X(VERIFY_CLASS,                         VerifyClass)                          \
+    X(VERIFY_STRING,                        VerifyString)                         \
+    X(VERIFY_ERROR,                         VerifyError)                          \
+    X(VERIFY_DEL_LOCAL_REF,                 VerifyDelLocalRef)                    \
+    X(VERIFY_CTOR,                          VerifyCtor)                           \
+    X(VERIFY_METHOD,                        VerifyMethod)                         \
+    X(VERIFY_METHOD_A_ARGS,                 VerifyMethodAArgs)                    \
+    X(VERIFY_METHOD_V_ARGS,                 VerifyMethodVArgs)                    \
+    X(VERIFY_VM_STORAGE,                    VerifyVmStorage)                      \
+    X(VERIFY_ENV_STORAGE,                   VerifyEnvStorage)                     \
+    X(VERIFY_BOOLEAN_STORAGE,               VerifyBooleanStorage)                 \
+    X(VERIFY_REF_STORAGE,                   VerifyRefStorage)                     \
+    X(VERIFY_OBJECT_STORAGE,                VerifyObjectStorage)                  \
+    X(VERIFY_STRING_STORAGE,                VerifyStringStorage)                  \
+    X(VERIFY_SIZE_STORAGE,                  VerifySizeStorage)                    \
+    X(VERIFY_UTF16_BUFFER,                  VerifyUTF16Buffer)                    \
+    X(VERIFY_UTF16_STRING,                  VerifyUTF16String)                    \
+    X(VERIFY_UTF8_BUFFER,                   VerifyUTF8Buffer)                     \
+    X(VERIFY_UTF8_STRING,                   VerifyUTF8String)                     \
+    X(VERIFY_SIZE,                          VerifySize)                           \
+    X(VERIFY_ERROR_STORAGE,                 VerifyErrorStorage)                   \
+    X(VERIFY_FIXED_ARRAY_BOOLEAN_STORAGE,   VerifyFixedArrayBooleanStorage)       \
+    X(VERIFY_FIXED_ARRAY_CHAR_STORAGE,      VerifyFixedArrayCharStorage)          \
+    X(VERIFY_FIXED_ARRAY_BYTE_STORAGE,      VerifyFixedArrayByteStorage)          \
+    X(VERIFY_FIXED_ARRAY_SHORT_STORAGE,     VerifyFixedArrayShortStorage)         \
+    X(VERIFY_FIXED_ARRAY_INT_STORAGE,       VerifyFixedArrayIntStorage)           \
+    X(VERIFY_FIXED_ARRAY_LONG_STORAGE,      VerifyFixedArrayLongStorage)          \
+    X(VERIFY_FIXED_ARRAY_FLOAT_STORAGE,     VerifyFixedArrayFloatStorage)         \
+    X(VERIFY_FIXED_ARRAY_DOUBLE_STORAGE,    VerifyFixedArrayDoubleStorage)        \
 
 // CC-OFFNXT(G.PRE.02-CPP, G.PRE.06) solid logic
-#define ANI_ARG_TYPES_MAP                                                \
-    X(ANI_VM,              Vm,                      VVm *)               \
-    X(ANI_ENV,             Env,                     VEnv *)              \
-    X(ANI_OPTIONS,         Options,                 const ani_options *) \
-    X(ANI_SIZE,            Size,                    ani_size)            \
-    X(ANI_BOOLEAN,         Boolean,        ani_boolean)         \
-    X(ANI_CHAR,            Char,           ani_char)            \
-    X(ANI_BYTE,            Byte,           ani_byte)            \
-    X(ANI_SHORT,           Short,          ani_short)           \
-    X(ANI_INT,             Int,            ani_int)             \
-    X(ANI_LONG,            Long,           ani_long)            \
-    X(ANI_FLOAT,           Float,          ani_float)           \
-    X(ANI_DOUBLE,          Double,         ani_double)          \
-    X(ANI_REF,             Ref,                     VRef *)              \
-    X(ANI_CLASS,           Class,                   VClass *)            \
-    X(ANI_METHOD,          Method,                  ani_method)          \
-    X(ANI_STRING,          String,                  VString *)           \
-    X(ANI_ERROR,           Error,                   VError *)            \
-    X(ANI_VALUE_ARGS,      ValueArgs,               const ani_value *)   \
-    X(ANI_ENV_STORAGE,     EnvStorage,              VEnv **)             \
-    X(ANI_VM_STORAGE,      VmStorage,               ani_vm **)           \
-    X(ANI_BOOLEAN_STORAGE, BooleanStorage, ani_boolean *)       \
-    X(ANI_CHAR_STORAGE,    CharStorage,    ani_char *)          \
-    X(ANI_BYTE_STORAGE,    ByteStorage,    ani_byte *)          \
-    X(ANI_SHORT_STORAGE,   ShortStorage,   ani_short *)         \
-    X(ANI_INT_STORAGE,     IntStorage,     ani_int *)           \
-    X(ANI_LONG_STORAGE,    LontStorage,    ani_long *)          \
-    X(ANI_FLOAT_STORAGE,   FloatStorage,   ani_float *)         \
-    X(ANI_DOUBLE_STORAGE,  DoubleStorage,  ani_double *)        \
-    X(ANI_REF_STORAGE,     RefStorage,              VRef **)             \
-    X(ANI_OBJECT_STORAGE,  ObjectStorage,           VObject **)          \
-    X(ANI_STRING_STORAGE,  StringStorage,           VString **)          \
-    X(ANI_SIZE_STORAGE,    SizeStorage,             ani_size *)          \
-    X(ANI_UTF8_BUFFER,     UTF8Buffer,              char *)              \
-    X(ANI_UTF16_BUFFER,    UTF16Buffer,             uint16_t *)          \
-    X(ANI_UTF8_STRING,     UTF8String,              const char *)        \
-    X(ANI_UTF16_STRING,    UTF16String,             const uint16_t *)    \
-    X(ANI_ERROR_STORAGE,   ErrorStorage,            VError **)           \
-    X(UINT32,              U32,                     uint32_t)            \
-    X(UINT32x,             U32x,                    uint32_t)            \
-    X(METHOD_ARGS,         MethodArgs,              AniMethodArgs *)
+#define ANI_ARG_TYPES_MAP                                                                    \
+    X(ANI_VM,                           Vm,                        VVm *)                    \
+    X(ANI_ENV,                          Env,                       VEnv *)                   \
+    X(ANI_OPTIONS,                      Options,                   const ani_options *)      \
+    X(ANI_SIZE,                         Size,                      ani_size)                 \
+    X(ANI_BOOLEAN,                      Boolean,                   ani_boolean)              \
+    X(ANI_CHAR,                         Char,                      ani_char)                 \
+    X(ANI_BYTE,                         Byte,                      ani_byte)                 \
+    X(ANI_SHORT,                        Short,                     ani_short)                \
+    X(ANI_INT,                          Int,                       ani_int)                  \
+    X(ANI_LONG,                         Long,                      ani_long)                 \
+    X(ANI_FLOAT,                        Float,                     ani_float)                \
+    X(ANI_DOUBLE,                       Double,                    ani_double)               \
+    X(ANI_REF,                          Ref,                       VRef *)                   \
+    X(ANI_CLASS,                        Class,                     VClass *)                 \
+    X(ANI_METHOD,                       Method,                    ani_method)               \
+    X(ANI_STRING,                       String,                    VString *)                \
+    X(ANI_ERROR,                        Error,                     VError *)                 \
+    X(ANI_VALUE_ARGS,                   ValueArgs,                 const ani_value *)        \
+    X(ANI_ENV_STORAGE,                  EnvStorage,                VEnv **)                  \
+    X(ANI_VM_STORAGE,                   VmStorage,                 ani_vm **)                \
+    X(ANI_BOOLEAN_STORAGE,              BooleanStorage,            ani_boolean *)            \
+    X(ANI_CHAR_STORAGE,                 CharStorage,               ani_char *)               \
+    X(ANI_BYTE_STORAGE,                 ByteStorage,               ani_byte *)               \
+    X(ANI_SHORT_STORAGE,                ShortStorage,              ani_short *)              \
+    X(ANI_INT_STORAGE,                  IntStorage,                ani_int *)                \
+    X(ANI_LONG_STORAGE,                 LontStorage,               ani_long *)               \
+    X(ANI_FLOAT_STORAGE,                FloatStorage,              ani_float *)              \
+    X(ANI_DOUBLE_STORAGE,               DoubleStorage,             ani_double *)             \
+    X(ANI_REF_STORAGE,                  RefStorage,                VRef **)                  \
+    X(ANI_OBJECT_STORAGE,               ObjectStorage,             VObject **)               \
+    X(ANI_STRING_STORAGE,               StringStorage,             VString **)               \
+    X(ANI_SIZE_STORAGE,                 SizeStorage,               ani_size *)               \
+    X(ANI_UTF8_BUFFER,                  UTF8Buffer,                char *)                   \
+    X(ANI_UTF16_BUFFER,                 UTF16Buffer,               uint16_t *)               \
+    X(ANI_UTF8_STRING,                  UTF8String,                const char *)             \
+    X(ANI_UTF16_STRING,                 UTF16String,               const uint16_t *)         \
+    X(ANI_ERROR_STORAGE,                ErrorStorage,              VError **)                \
+    X(UINT32,                           U32,                       uint32_t)                 \
+    X(UINT32x,                          U32x,                      uint32_t)                 \
+    X(METHOD_ARGS,                      MethodArgs,                AniMethodArgs *)          \
+    X(ANI_FIXED_ARRAY_BOOLEAN_STORAGE,  FixedArrayBooleanStorage,  VFixedArrayBoolean **)    \
+    X(ANI_FIXED_ARRAY_CHAR_STORAGE,     FixedArrayCharStorage,     VFixedArrayChar **)       \
+    X(ANI_FIXED_ARRAY_BYTE_STORAGE,     FixedArrayByteStorage,     VFixedArrayByte **)       \
+    X(ANI_FIXED_ARRAY_SHORT_STORAGE,    FixedArrayShortStorage,    VFixedArrayShort **)      \
+    X(ANI_FIXED_ARRAY_INT_STORAGE,      FixedArrayIntStorage,      VFixedArrayInt **)        \
+    X(ANI_FIXED_ARRAY_LONG_STORAGE,     FixedArrayLongStorage,     VFixedArrayLong **)       \
+    X(ANI_FIXED_ARRAY_FLOAT_STORAGE,    FixedArrayFloatStorage,    VFixedArrayFloat **)      \
+    X(ANI_FIXED_ARRAY_DOUBLE_STORAGE,   FixedArrayDoubleStorage,   VFixedArrayDouble **)     \
+
 // NOLINTEND(cppcoreguidelines-macro-usage)
 // clang-format on
 
@@ -112,6 +129,14 @@ class VObject;
 class VClass;
 class VString;
 class VError;
+class VFixedArrayBoolean;
+class VFixedArrayChar;
+class VFixedArrayByte;
+class VFixedArrayShort;
+class VFixedArrayInt;
+class VFixedArrayLong;
+class VFixedArrayFloat;
+class VFixedArrayDouble;
 
 class ANIArg {
 public:
@@ -264,6 +289,46 @@ public:
     static ANIArg MakeForErrorStorage(VError **errStorage, std::string_view name)
     {
         return ANIArg(ArgValueByErrorStorage(errStorage), name, Action::VERIFY_ERROR_STORAGE);
+    }
+
+    static ANIArg MakeForArrayBooleanStorage(VFixedArrayBoolean **arrStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByFixedArrayBooleanStorage(arrStorage), name, Action::VERIFY_FIXED_ARRAY_BOOLEAN_STORAGE);
+    }
+
+    static ANIArg MakeForArrayCharStorage(VFixedArrayChar **arrStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByFixedArrayCharStorage(arrStorage), name, Action::VERIFY_FIXED_ARRAY_CHAR_STORAGE);
+    }
+
+    static ANIArg MakeForArrayByteStorage(VFixedArrayByte **arrStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByFixedArrayByteStorage(arrStorage), name, Action::VERIFY_FIXED_ARRAY_BYTE_STORAGE);
+    }
+
+    static ANIArg MakeForArrayShortStorage(VFixedArrayShort **arrStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByFixedArrayShortStorage(arrStorage), name, Action::VERIFY_FIXED_ARRAY_SHORT_STORAGE);
+    }
+
+    static ANIArg MakeForArrayIntStorage(VFixedArrayInt **arrStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByFixedArrayIntStorage(arrStorage), name, Action::VERIFY_FIXED_ARRAY_INT_STORAGE);
+    }
+
+    static ANIArg MakeForArrayLongStorage(VFixedArrayLong **arrStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByFixedArrayLongStorage(arrStorage), name, Action::VERIFY_FIXED_ARRAY_LONG_STORAGE);
+    }
+
+    static ANIArg MakeForArrayFloatStorage(VFixedArrayFloat **arrStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByFixedArrayFloatStorage(arrStorage), name, Action::VERIFY_FIXED_ARRAY_FLOAT_STORAGE);
+    }
+
+    static ANIArg MakeForArrayDoubleStorage(VFixedArrayDouble **arrStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByFixedArrayDoubleStorage(arrStorage), name, Action::VERIFY_FIXED_ARRAY_DOUBLE_STORAGE);
     }
 
     Action GetAction() const

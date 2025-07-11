@@ -13,6 +13,7 @@
 
 include(cmake/ani_verify_tests.cmake)
 
+add_subdirectory(array_ops)
 add_subdirectory(error_ops)
 add_subdirectory(object_ops)
 add_subdirectory(ref_ops)
