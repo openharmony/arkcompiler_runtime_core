@@ -139,6 +139,7 @@ export enum FaultID {
   NoBuiltInType,
   AddDeclareToTopLevelInterfaces,
   RemoveLimitDecorator,
+  TupleTypeToArray,
   // this should always be last enum
   LAST_ID
 }
