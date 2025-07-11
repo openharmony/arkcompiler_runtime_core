@@ -389,7 +389,7 @@ std/core/std_core_typedarrays_function2_Int8Array.ets
 #21382 - instance method on primitive
 std/core/std_core_char_instance_Char_toUpperCase.ets
 
-#24986 (17 tests)
+#24986 (16 tests)
 std/core/Object.ets
 std/math/std_math_sign_double.ets
 std/core/IntlPluralRulesTest.ets
@@ -398,7 +398,6 @@ std/core/std_core_char_instance_Char_toLowerCase.ets
 std/core/std_core_type_numeric_type_numeric_type.ets
 escompat/JsonTest.ets
 spec/09.classes/Accessor_Declarations/issue-15142_9.ets
-spec/03.types/References_Types/Tuples_type/tuple_write_3.ets
 std/core/NumberTest.ets
 escompat/JsonStringifyTest.ets
 
@@ -474,7 +473,6 @@ std/serialization/std_serialization_json_stringify_float_array.ets
 
 # 8.
 # abort
-spec/03.types/References_Types/Tuples_type/tuple_write_3.ets
 spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-03.ets
 std/core/NumberTest.ets
 
