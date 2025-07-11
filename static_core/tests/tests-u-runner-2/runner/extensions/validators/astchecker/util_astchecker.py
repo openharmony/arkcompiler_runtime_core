@@ -134,9 +134,7 @@ class UtilASTChecker:
         return True
 
     @staticmethod
-    def run_error_test(test_file: Path, test: _TestCase, actual_errors: AstCheckerErrorsSet, skip: bool) -> bool:
-        if test.test_type != UtilASTChecker._TestType.ERROR or skip:
-            return True
+    def run_error_test(test_file: Path, test: _TestCase, actual_errors: AstCheckerErrorsSet) -> bool:
         file_name: str = test_file.name if test.error_file == '' else test.error_file
         expected_error: AstCheckerError = f'{test.checks["error"]}', f'[{file_name}:{test.line}:{test.col}]'
         if expected_error in actual_errors:
@@ -346,11 +344,19 @@ class UtilASTChecker:
         failed_tests = 0
         actual_errors: AstCheckerErrorsSet = self.get_actual_errors(error)
         tests_set = set(test_cases.tests_list)
+        node_test_passed = True
+        error_test_passed = True
+        warning_test_passed = True
 
         for i, test in enumerate(tests_set):
-            node_test_passed = self.run_node_test(test, ast)
-            error_test_passed = self.run_error_test(test_file, test, actual_errors, test_cases.skip_errors)
-            warning_test_passed = self.run_error_test(test_file, test, actual_errors, test_cases.skip_warnings)
+            if test.test_type == UtilASTChecker._TestType.NODE:
+                node_test_passed = self.run_node_test(test, ast)
+            elif test.test_type == UtilASTChecker._TestType.ERROR:
+                error_test_passed = True if test_cases.skip_errors \
+                    else self.run_error_test(test_file, test, actual_errors)
+            elif test.test_type == UtilASTChecker._TestType.WARNING:
+                warning_test_passed = True if test_cases.skip_warnings \
+                    else self.run_error_test(test_file, test, actual_errors)
             test_name = f'Test {i + 1}' + ('' if test.name is None else f': {test.name}')
             if bool(node_test_passed and error_test_passed and warning_test_passed):
                 _LOGGER.all(f'PASS: {test_name}')
@@ -358,6 +364,17 @@ class UtilASTChecker:
                 _LOGGER.all(f'FAIL: {test_name} in {test_file}')
                 failed_tests += 1
 
+        failed_tests = self.check_remaining_errors(actual_errors, failed_tests)
+
+        if failed_tests == 0:
+            _LOGGER.all('All tests passed')
+            return True
+
+        _LOGGER.all(f'Failed {failed_tests} tests')
+        return False
+
+
+    def check_remaining_errors(self, actual_errors: AstCheckerErrorsSet, failed_tests: int) -> int:
         for actual_error in actual_errors:
             if actual_error[0].split()[0] == "Warning:" and not self.check_skip_warning():
                 _LOGGER.all(f'Unexpected warning {actual_error}')
@@ -367,9 +384,4 @@ class UtilASTChecker:
                 _LOGGER.all(f'Unexpected error {actual_error}')
                 failed_tests += 1
 
-        if failed_tests == 0:
-            _LOGGER.all('All tests passed')
-            return True
-
-        _LOGGER.all(f'Failed {failed_tests} tests')
-        return False
+        return failed_tests

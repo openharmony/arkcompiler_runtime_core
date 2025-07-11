@@ -131,7 +131,7 @@ class CoverageDir:
 
         Returns:
             Path: The full path to the coverage working directory.
-        """ 
+        """
         work_dir = self.root / "work_dir"
         work_dir.mkdir(parents=True, exist_ok=True)
         return work_dir
