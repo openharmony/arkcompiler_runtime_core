@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- /*---
+/*---
 desc: Verifying implicit conversion from array to string.
 tags: [compile-only, negative]
 ---*/
