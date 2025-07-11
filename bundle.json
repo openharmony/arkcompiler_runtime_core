@@ -169,6 +169,13 @@
                     }
                 },
                 {
+                    "name": "//arkcompiler/runtime_core/static_core/libpandabase:libarktsbase",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//arkcompiler/runtime_core/static_core/libpandabase"
+                    }
+                },
+                {
                     "name": "//arkcompiler/runtime_core/static_core/libpandabase:libarktsbase_package",
                     "header": {
                         "header_files": [],
