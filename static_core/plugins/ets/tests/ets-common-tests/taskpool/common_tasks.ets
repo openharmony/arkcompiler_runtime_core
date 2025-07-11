@@ -929,6 +929,43 @@ function taskDurationTest() {
     arktest.assertNE(task2.totalDuration, 0);
 }
 
+function taskAssigmentTest() {
+    let task1WorkerId = 0;
+    let task2WorkerId = 0;
+    let task1 = new taskpool.Task(() => {
+        longFunc(50);
+        task1WorkerId = CoroutineExtras.getWorkerId();
+    });
+    let task2 = new taskpool.Task(() => {
+        longFunc(50);
+        task2WorkerId = CoroutineExtras.getWorkerId();
+    });
+    let p1 = taskpool.execute(task1);
+    let p2 = taskpool.execute(task2);
+    await p1;
+    await p2;
+    arktest.assertNE(task1WorkerId, 0);
+    arktest.assertNE(task2WorkerId, 0);
+    arktest.assertNE(task1WorkerId, task2WorkerId);
+}
+
+class ArgTestClass {
+    a1: string = 'a1';
+    a2: number = 2.0;
+}
+
+function taskArgumentsTest() {
+    let taskFunc = (p1: string, p2: number, p3: int, p4: ArgTestClass) => { };
+    let argTestObj = new ArgTestClass();
+    let task = new taskpool.Task(taskFunc, 'p1', 2.0, 2, argTestObj);
+    let arguments = task.arguments as Array<Any>;
+    arktest.assertEQ(arguments.length, 4);
+    arktest.assertEQ(arguments[0], 'p1');
+    arktest.assertEQ(arguments[1], 2.0);
+    arktest.assertEQ(arguments[2], 2);
+    arktest.assertEQ(arguments[3], argTestObj);
+}
+
 function main(): int {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
@@ -961,6 +998,8 @@ function main(): int {
     commonTaskSuite.addTest('TaskSendDataTest', taskSendData);
     commonTaskSuite.addTest('TaskSendDataInAsyncFunction', taskSendDataInAsyncFunction);
     commonTaskSuite.addTest('testOnReceiveDataRestParameter', testOnReceiveDataRestParameter);
+    commonTaskSuite.addTest('taskAssigmentTest', taskAssigmentTest);
+    commonTaskSuite.addTest('taskArgumentsTest', taskArgumentsTest);
     let res = commonTaskSuite.run();
     CoroutineExtras.stopTaskpool();
     return res;
