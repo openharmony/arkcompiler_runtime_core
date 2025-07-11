@@ -1067,6 +1067,19 @@ static void MoveRangeAccordingCC(ConditionCode cc, BoundsRange &lowerRange, Boun
 
 bool BoundsAnalysis::ProcessIndexPhi(Loop *loop, BoundsRangeInfo *bri, CountableLoopInfo &loopInfoValue)
 {
+    if (loopInfoValue.update->IsAddSub()) {
+        return ProcessIndexPhiForAddSub(loop, bri, loopInfoValue);
+    }
+
+    if (loopInfoValue.update->IsShift()) {
+        return false;
+    }
+
+    UNREACHABLE();
+}
+
+bool BoundsAnalysis::ProcessIndexPhiForAddSub(Loop *loop, BoundsRangeInfo *bri, CountableLoopInfo &loopInfoValue)
+{
     auto *indexPhi = loopInfoValue.index;
     auto *phiBlock = indexPhi->GetBasicBlock();
     ASSERT(loopInfoValue.update->IsAddSub());
