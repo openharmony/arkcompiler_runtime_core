@@ -201,39 +201,55 @@
 06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_83.ets
 06.contexts_and_conversions/04.numeric_operator_contexts/unary_numeric_promotion/bitwise_complement_10.ets
 
-#22450 - should throw an exception
-06.contexts_and_conversions/04.casting_contexts_and_conversions/02.class_or_interface_casting_conversions/cce_5.ets
-
-#14001
-06.contexts_and_conversions/03.numeric_operator_contexts/unary_numeric_promotion/array_access_7.ets
-
-#24415
-06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_object/ref_type_from_object_6.ets
-
-#18118 No ClassCastError on casting to a wrong function type
-06.contexts_and_conversions/04.casting_contexts_and_conversions/06.casting_conversions_from_union/cce_5.ets
-
-#25224
-06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_2.ets
-06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_3.ets
-06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_4.ets
-06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_5.ets
-06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_6.ets
-06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_7.ets
-06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_8.ets
-06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_9.ets
+#27357
+06.contexts_and_conversions/05.implicit_conversions/02.enum_to_const_types_conversions/enum2double_0.ets
+06.contexts_and_conversions/05.implicit_conversions/02.enum_to_const_types_conversions/enum2double_1.ets
+06.contexts_and_conversions/05.implicit_conversions/02.enum_to_const_types_conversions/enum2double_2.ets
+06.contexts_and_conversions/05.implicit_conversions/02.enum_to_const_types_conversions/enum2double_3.ets
+06.contexts_and_conversions/05.implicit_conversions/02.enum_to_const_types_conversions/enum2double_4.ets
+06.contexts_and_conversions/05.implicit_conversions/02.enum_to_const_types_conversions/enum2double_5.ets
+06.contexts_and_conversions/05.implicit_conversions/02.enum_to_const_types_conversions/enum2double_6.ets
+06.contexts_and_conversions/05.implicit_conversions/02.enum_to_const_types_conversions/enum2double_7.ets
+06.contexts_and_conversions/05.implicit_conversions/02.enum_to_const_types_conversions/enum2double_8.ets
+06.contexts_and_conversions/05.implicit_conversions/02.enum_to_const_types_conversions/enum2double_9.ets
 
 #20766 - not yet implemented
-06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_0.ets
-06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_1.ets
-06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_2.ets
-06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_3.ets
-06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_4.ets
-06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_5.ets
-06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_6.ets
-06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_7.ets
-06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_8.ets
-06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_9.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/int2enum_0.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/int2enum_1.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/int2enum_2.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/int2enum_3.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/int2enum_4.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/int2enum_5.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/int2enum_6.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/int2enum_7.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/int2enum_8.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/int2enum_9.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_0.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_1.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_2.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_3.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_4.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_5.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_6.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_7.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_8.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_9.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/long2enum_0.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/long2enum_1.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/long2enum_2.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/long2enum_3.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/long2enum_4.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/long2enum_5.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/long2enum_6.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/long2enum_7.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/long2enum_8.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/long2enum_9.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/str2enum_0.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/str2enum_1.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/str2enum_2.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/str2enum_3.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/str2enum_4.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/str2enum_5.ets
 
 #24036
 07.expressions/01.evaluation_of_expressions/03.operator_precedence/typeof.ets
@@ -814,15 +830,11 @@
 07.expressions/33.constant_expression/check_annotation/constant_number_conversion_2.ets
 07.expressions/33.constant_expression/check_annotation/constant_unary_operation_2.ets
 
-# TypeError: Property 'fld' might not have been initialized.
-06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/comp_obj/comp-obj_p.ets
-
 # TypeError: Type '[String, Double]' is not compatible with the enclosing method's return type '[Object|null|undefined, Object|null|undefined]'
 05.generics/generic_declarations/generic_classes/test_bridge_methods_in_generic_overrides/bridge_methods_generic_5.ets
 
 # Negative tests passed successfully (narrowing conversion from int, function oveload and enum comparision...)
 03.types/16.literal_types/function_literal_type_7.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/07.casting_conversions_to_enumeration/cte_int_enum.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_cons/call-cons-n3_7.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_func/call-func-n3_7.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_lmbd/call-lmbd-n3_7.ets

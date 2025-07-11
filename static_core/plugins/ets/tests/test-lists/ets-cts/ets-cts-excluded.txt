@@ -62,8 +62,6 @@
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_arr/comp-arr_0.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_obj/comp-clss_0.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_obj/comp-intf_0.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-un_0.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-un_0.ets
 07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_cast_1.ets
 07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_cast_3.ets
 07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_decl_1.ets
@@ -179,11 +177,6 @@
 16.concurrency/03.asynchronous_api/03.async_methods/ameth_n_13.ets
 16.concurrency/03.asynchronous_api/03.async_methods/ameth_n_14.ets
 
-# std.core.Float cannot be cast to std.core.Double (class cast error in runtime)
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-un_2.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-un_4.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-un_2.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-un_4.ets
 
 # Promise lambda type errors
 16.concurrency/03.asynchronous_api/05.promise/p_6.ets
