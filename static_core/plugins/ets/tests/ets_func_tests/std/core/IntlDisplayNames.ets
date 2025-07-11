@@ -62,9 +62,8 @@ function testDisplayNamesCreation(): void {
     const displayNames = new Intl.DisplayNames("en", { type: "language" });
     arktest.assertTrue(displayNames instanceof Intl.DisplayNames);
 
-    // NOTE(igorlegalov): uncomment when the issue #25344 is fixed
-    // const displayNamesWithLocaleArray = new Intl.DisplayNames(["en", "fr"], { type: "language" });
-    // arktest.assertTrue(displayNamesWithLocaleArray instanceof Intl.DisplayNames);
+    const displayNamesWithLocaleArray = new Intl.DisplayNames(["en", "fr"], { type: "language" });
+    arktest.assertTrue(displayNamesWithLocaleArray instanceof Intl.DisplayNames);
 
     new Intl.DisplayNames("en", { type: "language" });
     new Intl.DisplayNames("en", { type: "region" });
@@ -72,8 +71,7 @@ function testDisplayNamesCreation(): void {
     new Intl.DisplayNames("en", { type: "currency" });
 }
 
-class DisplayNamesOptionsBuilder
-{
+class DisplayNamesOptionsBuilder {
     public type?: "language" | "region" | "script" | "currency";
     public style?: "long" | "short";
     public languageDisplay?: "standard" | "dialect";
@@ -196,9 +194,9 @@ function testScriptDisplayNames(): void {
         .with_fallback("code")
         .build();
 
-    testDisplayName(en_US, "LaT", "LaT", codeFallbackOptions);    // Invalid script format
-    testDisplayName(en_US, "LATN", "LATN", codeFallbackOptions);  // Invalid script format
-    testDisplayName(en_US, "Wxyz", "Wxyz", codeFallbackOptions);  // Non-existent script
+    testDisplayName(en_US, "LaT", "LaT", codeFallbackOptions); // Invalid script format
+    testDisplayName(en_US, "LATN", "LATN", codeFallbackOptions); // Invalid script format
+    testDisplayName(en_US, "Wxyz", "Wxyz", codeFallbackOptions); // Non-existent script
 }
 
 function testRegionDisplayNames(): void {
@@ -224,9 +222,9 @@ function testRegionDisplayNames(): void {
         .with_fallback("code")
         .build();
 
-    testDisplayName(en_US, "XX", "XX", codeFallbackOptions);      // Non-existent region
-    testDisplayName(en_US, "usa", "usa", codeFallbackOptions);    // Invalid region format
-    testDisplayName(en_US, "1234", "1234", codeFallbackOptions);  // Invalid region format
+    testDisplayName(en_US, "XX", "XX", codeFallbackOptions); // Non-existent region
+    testDisplayName(en_US, "usa", "usa", codeFallbackOptions); // Invalid region format
+    testDisplayName(en_US, "1234", "1234", codeFallbackOptions); // Invalid region format
 }
 
 function testCurrencyDisplayNames(): void {
@@ -246,7 +244,7 @@ function testCurrencyDisplayNames(): void {
         .with_fallback("code")
         .build();
 
-    testDisplayName(en_US, "XYZ", "XYZ", codeFallbackOptions);  // Non-existent currency
+    testDisplayName(en_US, "XYZ", "XYZ", codeFallbackOptions); // Non-existent currency
 }
 
 function testDisplayNamesStyles(): void {
@@ -395,8 +393,8 @@ function testInvalidCodes(): void {
         .with_fallback("code")
         .build();
 
-    testDisplayName(en_US, "LaT", "LaT", scriptFallbackOptions);    // Wrong format (lowercase T)
-    testDisplayName(en_US, "LATN", "LATN", scriptFallbackOptions);  // Wrong format (all uppercase)
+    testDisplayName(en_US, "LaT", "LaT", scriptFallbackOptions); // Wrong format (lowercase T)
+    testDisplayName(en_US, "LATN", "LATN", scriptFallbackOptions); // Wrong format (all uppercase)
 
     // Test malformed region codes
     const regionFallbackOptions = new DisplayNamesOptionsBuilder()
@@ -404,8 +402,8 @@ function testInvalidCodes(): void {
         .with_fallback("code")
         .build();
 
-    testDisplayName(en_US, "usa", "usa", regionFallbackOptions);    // Wrong format (lowercase)
-    testDisplayName(en_US, "1234", "1234", regionFallbackOptions);  // Wrong format (4 digits)
+    testDisplayName(en_US, "usa", "usa", regionFallbackOptions); // Wrong format (lowercase)
+    testDisplayName(en_US, "1234", "1234", regionFallbackOptions); // Wrong format (4 digits)
 }
 
 function testSupportedLocalesOf(): void {

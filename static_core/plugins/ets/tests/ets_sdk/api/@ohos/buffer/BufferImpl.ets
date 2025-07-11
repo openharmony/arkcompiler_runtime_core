@@ -538,8 +538,8 @@ function testBufferCompare() {
 function testBufferCompareUint8Array() {
     // Call Buffer.compare Uint8Array (no byteOffset) vs Uint8Array (byteOffset)
     let a = new ArrayBuffer(10)
-    let u1 = new Uint8Array(a, 0, 4)  // has no byteOffset
-    let u2 = new Uint8Array(a, 5, 3)  // has byteOffset
+    let u1 = new Uint8Array(a, 0, 4) // has no byteOffset
+    let u2 = new Uint8Array(a, 5, 3) // has byteOffset
     u1[0] = 1
     u1[1] = 1
     u1[2] = 1
@@ -586,7 +586,7 @@ function testBufferCopy() {
 function testBufferCopyWithParams() {
     let b1 = buffer.from("abcdefg")
     let b2 = buffer.from("1235789")
-    let num = b1.copy(b2, 2,1,3)
+    let num = b1.copy(b2, 2, 1, 3)
     arktest.assertEQ(num, 2)
     arktest.assertEQ(b2.toString(), "12bc789")
 }
@@ -1086,8 +1086,14 @@ function testByteOffset() {
     arktest.assertEQ(buf.byteOffset, 2)
     let byteOffset: number;
     arktest.expectError((): void => { byteOffset = -1; let f = new buffer.Buffer(a, byteOffset) });
-    arktest.expectError((): void => { byteOffset = a.getByteLength().toDouble(); let f = new buffer.Buffer(a, byteOffset) });
-    arktest.expectError((): void => { byteOffset = a.getByteLength().toDouble() + 1; let f = new buffer.Buffer(a, byteOffset) });
+    arktest.expectError((): void => {
+                                        byteOffset = a.getByteLength().toDouble();
+                                        let f = new buffer.Buffer(a, byteOffset)
+                        });
+    arktest.expectError((): void => {
+                                        byteOffset = a.getByteLength().toDouble() + 1;
+                                        let f = new buffer.Buffer(a, byteOffset)
+                        });
 }
 
 function testFillHex() {

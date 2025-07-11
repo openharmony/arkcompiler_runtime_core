@@ -16,7 +16,7 @@
 /*---
  desc: 17.3 Indexable Types
  tags:
- ---*/
+---*/
 
 interface IFooBar {
     $_get(index : int) : int;
@@ -26,21 +26,21 @@ interface IFooBar {
 class BarInt1 implements IFooBar {
     private data : int;
 
-    $_get (index: int) : int {
-        switch(index) {
-        case 0:
+    $_get(index: int) : int {
+        switch (index) {
+          case 0:
             return this.data;
-        default:
+          default:
             throw new Exception ("Hmm ...");
         }
     }
 
-    $_set (index: int, value: int) {
-        switch(index) {
-        case 0:
+    $_set(index: int, value: int) {
+        switch (index) {
+          case 0:
             this.data = value;
             break;
-        default:
+          default:
             throw new Exception ("Hmm ...");
         }
     }
@@ -55,26 +55,26 @@ class BarInt2 implements IFooBar {
     private data : int;
     private data2: int;
 
-    $_get (index: int) : int {
-        switch(index) {
-        case 0:
+    $_get(index: int) : int {
+        switch (index) {
+          case 0:
             return this.data;
-        case 1:
+          case 1:
             return this.data2;
-        default:
+          default:
             throw new Exception ("Hmm ...");
         }
     }
 
-    $_set (index: int, value: int) {
-        switch(index) {
-        case 0:
+    $_set(index: int, value: int) {
+        switch (index) {
+          case 0:
             this.data = value;
             break;
-        case 1:
+          case 1:
             this.data2 = value;
             break;
-        default:
+          default:
             throw new Exception ("Hmm ...");
         }
     }
@@ -90,7 +90,7 @@ function createTestObject1() : IFooBar {
 }
 
 function createTestObject2() : IFooBar {
-    return new BarInt2(1,2);
+    return new BarInt2(1, 2);
 }
 
 function test1() : int {
@@ -99,7 +99,7 @@ function test1() : int {
     let y = createTestObject2();
     try {
         arktest.assertEQ(x[0], 1)
-    } catch(e) {
+    } catch (e) {
         result++
         console.log("Unexpexted exception");
     }
@@ -107,15 +107,14 @@ function test1() : int {
     try {
         arktest.assertEQ(y[0], 1)
         arktest.assertEQ(y[1], 2)
-    } catch(e) {
+    } catch (e) {
         result++
         console.log("Unexpexted exception");
-
     }
 
     try {
         x[0] == 10
-    } catch(e) {
+    } catch (e) {
         result++
         console.log("Unexpexted exception");
     }
@@ -123,14 +122,14 @@ function test1() : int {
     try {
         y[0] = 10
         y[1] = 20
-    } catch(e) {
+    } catch (e) {
         result++
         console.log("Unexpexted exception");
     }
 
       try {
         arktest.assertEQ(x[0], 10)
-    } catch(e) {
+    } catch (e) {
         result++
         console.log("Unexpexted exception");
     }
@@ -138,10 +137,9 @@ function test1() : int {
     try {
         arktest.assertEQ(y[0], 10)
         arktest.assertEQ(y[1], 20)
-    } catch(e) {
+    } catch (e) {
         result++
         console.log("Unexpexted exception");
-
     }
 
 
@@ -154,14 +152,14 @@ function test2() : int {
     let y = createTestObject2();
     try {
         arktest.assertEQ(x[10], 1)
-    } catch(e) {
+    } catch (e) {
         result++
     }
 
     try {
         arktest.assertEQ(y[110], 1)
         arktest.assertEQ(y[120], 2)
-    } catch(e) {
+    } catch (e) {
         result++
     }
 

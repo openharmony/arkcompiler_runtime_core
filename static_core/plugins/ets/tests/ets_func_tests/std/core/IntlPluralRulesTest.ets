@@ -189,8 +189,7 @@ function testSelectWithOptions() {
 function runSupportedLocalesTest(
     locales: string | FixedArray<string>,
     options: Intl.SupportedLocalesOfOptions | undefined,
-    expected: string[])
-{
+    expected: string[]) {
     const result = Intl.PluralRules.supportedLocalesOf(locales, options)
     arktest.assertEQ(result.length, expected.length)
     for (let i = 0; i < result.length; i++) {

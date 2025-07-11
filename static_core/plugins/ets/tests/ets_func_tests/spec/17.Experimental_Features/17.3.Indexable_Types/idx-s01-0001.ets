@@ -16,7 +16,7 @@
 /*---
  desc: 17.3 Indexable Types
  tags:
- ---*/
+---*/
 
 
 class Bar {
@@ -24,31 +24,31 @@ class Bar {
     private data2: int;
     private data3: int;
 
-    $_get (index: int) : int {
-        switch(index) {
-        case 0:
+    $_get(index: int) : int {
+        switch (index) {
+          case 0:
             return this.data;
-        case 1:
+          case 1:
             return this.data2;
-        case 2:
+          case 2:
             return this.data3;
-        default:
+          default:
             throw new Exception ("Hmm ...");
         }
     }
 
-    $_set (index: int, value: int) {
-        switch(index) {
-        case 0:
+    $_set(index: int, value: int) {
+        switch (index) {
+          case 0:
             this.data = value;
             break;
-        case 1:
+          case 1:
             this.data2 = value;
             break;
-        case 2:
+          case 2:
             this.data3 = value;
             break;
-        default:
+          default:
             throw new Exception ("Hmm ...");
         }
     }
@@ -61,11 +61,11 @@ class Bar {
 }
 
 function main(): int {
-    let x : Bar = new Bar(1,2,3);
+    let x : Bar = new Bar(1, 2, 3);
     try {
         arktest.assertEQ(x.$_get(0), 1)
         arktest.assertEQ(x.$_get(1), 2)
-        arktest.assertTrue((x.$_get(2)== 3))
+        arktest.assertTrue((x.$_get(2) == 3))
     } catch (e) {
         console.log("1");
         return 1;

@@ -63,7 +63,7 @@ function test_iu64_array(): void {
 }
 
 function test_f32_array(): void {
-    let data = Float32Array.of(-3.4e+38, -2.02e+16, 1.06e+12, 2.8e+24,  3.4e+38)
+    let data = Float32Array.of(-3.4e+38, -2.02e+16, 1.06e+12, 2.8e+24, 3.4e+38)
     let data_rev = new Float32Array(data).reverse()
     let data_rev2 = data.toReversed()
     check_array(data, data_rev, data_rev2)
@@ -77,14 +77,14 @@ function test_f64_array(): void {
 }
 
 
-function check_array<T extends Number | BigInt>(data: ArrayLike<T>, data_rev: ArrayLike<T>, data_rev2: ArrayLike<T>): void {
+function check_array<T extends Number | BigInt>(data: ArrayLike<T>, dat_r: ArrayLike<T>, dat_r2: ArrayLike<T>): void {
     let size = data.length - 1
-    arktest.assertEQ(data.length, data_rev.length, "reverse(): bad array len")
-    arktest.assertEQ(data.length, data_rev2.length, "toReversed(): bad array len")
+    arktest.assertEQ(data.length, dat_r.length, "reverse(): bad array len")
+    arktest.assertEQ(data.length, dat_r2.length, "toReversed(): bad array len")
 
     for (let i: int = 0; i <= size; i++) {
-        arktest.assertEQ(data[i], data_rev[size - i], "reverse(): unexpected element: i: " + i)
-        arktest.assertEQ(data[i], data_rev2[size - i], "toReversed(): unexpected element: i: " + i)
+        arktest.assertEQ(data[i], dat_r[size - i], "reverse(): unexpected element: i: " + i)
+        arktest.assertEQ(data[i], dat_r2[size - i], "toReversed(): unexpected element: i: " + i)
     }
 }
 
