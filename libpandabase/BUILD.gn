@@ -21,10 +21,6 @@ config("arkbase_public_config") {
     "$target_gen_dir",
   ]
 
-  if (enable_hilog) {
-    include_dirs += [ "$hilog_root/include" ]
-  }
-
   include_dirs += platform_include_dirs
   if (is_arkui_x) {
     defines = [ "IS_ARKUI_X_TARGET" ]
@@ -264,8 +260,7 @@ ohos_source_set("libarkbase_frontend_set_static") {
       "json:nlohmann_json_static",
       sdk_libc_secshared_dep,
     ]
-    if (enable_hilog && defined(ohos_indep_compiler_enable) &&
-        ohos_indep_compiler_enable) {
+    if (enable_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }
   }
