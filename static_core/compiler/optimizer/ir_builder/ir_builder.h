@@ -64,6 +64,7 @@ class PANDA_PUBLIC_API IrBuilder : public Optimization {
             auto allocator = graph->GetLocalAllocator();
             catches = allocator->New<ArenaVector<CatchCodeBlock>>(allocator->Adapter());
             beginBb = graph->CreateEmptyBlock(boundaries.beginPc);
+            ASSERT(beginBb != nullptr);
             beginBb->SetTryBegin(true);
             endBb = graph->CreateEmptyBlock(boundaries.endPc);
             ASSERT(endBb != nullptr);

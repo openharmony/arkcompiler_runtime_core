@@ -459,7 +459,9 @@ void Lowering::ReplaceSignedModPowerOfTwo([[maybe_unused]] GraphVisitor *v, Inst
         addInst = graph->CreateInstAdd(inst, input0, valueMinus1Cnst);
     }
     Inst *selectInst;
-    if (graph->GetEncoder()->CanEncodeImmAddSubCmp(0, size, true)) {
+    auto encoder = graph->GetEncoder();
+    ASSERT(encoder != nullptr);
+    if (encoder->CanEncodeImmAddSubCmp(0, size, true)) {
         selectInst = graph->CreateInstSelectImm(inst, std::array<Inst *, 3U> {addInst, input0, input0}, 0,
                                                 inst->GetType(), ConditionCode::CC_LT);
     } else {
@@ -469,7 +471,6 @@ void Lowering::ReplaceSignedModPowerOfTwo([[maybe_unused]] GraphVisitor *v, Inst
     }
     auto maskValue = ~static_cast<uint64_t>(valueMinus1);
     Inst *andInst;
-    auto encoder = graph->GetEncoder();
     ASSERT(encoder != nullptr);
     if (encoder->CanEncodeImmLogical(maskValue, size)) {
         andInst = graph->CreateInstAndI(inst, selectInst, maskValue);

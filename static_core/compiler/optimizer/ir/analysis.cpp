@@ -130,6 +130,7 @@ bool HasOsrEntryBetween(T *dominate, T *current)
         dominateBb = dominate;
         bb = current;
     }
+    ASSERT(bb != nullptr);
     auto graph = bb->GetGraph();
     ASSERT(graph->IsOsrMode() || dominateBb != nullptr);
     if (!graph->IsOsrMode() && dominateBb->GetLoop() != bb->GetLoop()) {
