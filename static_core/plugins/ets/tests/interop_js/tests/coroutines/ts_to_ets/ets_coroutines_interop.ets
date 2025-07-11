@@ -18,14 +18,19 @@ import {
     createFooClassFromTs,
 } from 'main_js';
 
+import { launch } from "std/concurrency"
+
+function EtsGlobalInitPlaceholder() {}
+
 function Bar() {
     return createFooClassFromTs(JSRuntime.newJSValueInt(42));
 }
 
 function checkInteropNegative(): boolean {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
+    EtsGlobalInitPlaceholder();
     try {
-        await launch Bar();
+        launch<JSValue, () => JSValue>(Bar).Await();
     } catch (e: NoInteropContextError) {
         return true;
     }
@@ -33,6 +38,7 @@ function checkInteropNegative(): boolean {
 }
 
 function checkInteropPositive(): boolean {
+    EtsGlobalInitPlaceholder();
     try {
         Bar();
     } catch (e: Error) {

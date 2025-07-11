@@ -52,90 +52,89 @@ class Test {
         let obj = new Object();
         let objCls = Class.of(obj);
         let clsCls = Class.of(objCls);
-        assertEQ(Class.of(clsCls), clsCls);
-        assertEQ(objCls.getDescriptor(), "Lstd/core/Object;");
-        assertEQ(clsCls.getDescriptor(), "Lstd/core/Class;");
-        assertEQ(objCls.getSuper(), undefined, "std.core.Object must have no super class");
-        assertEQ(clsCls.getSuper(), objCls, "std.core.Class must extend std.core.Object");
+        arktest.assertEQ(Class.of(clsCls), clsCls);
+        arktest.assertEQ(objCls.getSuper(), undefined, "std.core.Object must have no super class");
+        arktest.assertEQ(clsCls.getSuper(), objCls, "std.core.Class must extend std.core.Object");
     }
 
     static testClassProps() {
         const objcls = Class.of(new Object());
         const acls = Class.of(new A());
         const bcls = Class.of(new B());
-        assertEQ(objcls.getName(), "std.core.Object");
-        assertEQ(objcls.getSuper(), undefined);
-        assertEQ(acls.getName(), cname("A"));
-        assertEQ(acls.getSuper(), objcls);
-        assertEQ(bcls.getName(), cname("B"));
-        assertEQ(bcls.getSuper(), acls);
+        arktest.assertEQ(objcls.getName(), "std.core.Object");
+        arktest.assertEQ(objcls.getSuper(), undefined);
+        arktest.assertEQ(acls.getName(), cname("A"));
+        arktest.assertEQ(acls.getSuper(), objcls);
+        arktest.assertEQ(bcls.getName(), cname("B"));
+        arktest.assertEQ(bcls.getSuper(), acls);
     }
 
     static testCaller() {
         let caller = Class.ofCaller();
-        assertEQ(caller.getName(), cname("Test"));
-        assertNE(Other.getCallerOfItself(), caller);
+        arktest.assertNE(caller, undefined);
+        arktest.assertEQ(caller!.getName(), cname("Test"));
+        arktest.assertNE(Other.getCallerOfItself(), caller);
     }
 
     static testRuntimeLinkerProperties() {
         // Check all booted Class refer to the same RuntimeLinker
         let objectLinker = Class.of(new Object()).getLinker();
-        assertNE(objectLinker, undefined);
-        assertEQ(objectLinker, getBootRuntimeLinker());
+        arktest.assertNE(objectLinker, undefined);
+        arktest.assertEQ(objectLinker, getBootRuntimeLinker());
         let doubleLinker = Class.of(new Double(1.0)).getLinker();
-        assertEQ(objectLinker, doubleLinker);
+        arktest.assertEQ(objectLinker, doubleLinker);
         // Check idempotence
         let objectLinker2 = Class.of(new Object()).getLinker();
-        assertEQ(objectLinker, objectLinker2);
+        arktest.assertEQ(objectLinker, objectLinker2);
     }
 
     static testLoadClass() {
-        let linker = Class.ofCaller().getLinker();
+        let linker = Class.ofCaller()!.getLinker();
         let clsName = cname("LoadTarget");
 
-        assertFalse(LoadTarget_init, "LoadTarget class must be lazily initialized");
+        arktest.assertFalse(LoadTarget_init, "LoadTarget class must be lazily initialized");
         let cls = linker.loadClass(clsName, false);
-        assertEQ(cls.getName(), clsName);
-        assertFalse(LoadTarget_init, "LoadTarget class must be loaded without initialization");
+        arktest.assertEQ(cls.getName(), clsName);
+        arktest.assertFalse(LoadTarget_init, "LoadTarget class must be loaded without initialization");
 
         let cls2 = linker.loadClass(clsName, true);
-        assertTrue(LoadTarget_init, "already loaded LoadTarget class must be initialized");
-        assertEQ(cls2, cls);
+        arktest.assertTrue(LoadTarget_init, "already loaded LoadTarget class must be initialized");
+        arktest.assertEQ(cls2, cls);
 
-        expectThrow(() => { linker.loadClass(cname("does.not.exist"), false) },
+        arktest.expectThrow(() => { linker.loadClass(cname("does.not.exist"), false) },
             (e) => e instanceof LinkerClassNotFoundError
         );
     }
 
     static testInitialize() {
-        let linker = Class.ofCaller().getLinker();
+        let linker = Class.ofCaller()!.getLinker();
         let clsName = cname("InitializeTarget");
 
-        assertFalse(InitializeTarget_init, "InitializeTarget class must be lazily initialized");
+        arktest.assertFalse(InitializeTarget_init, "InitializeTarget class must be lazily initialized");
         let cls = linker.loadClass(clsName, false);
-        assertFalse(InitializeTarget_init, "InitializeTarget class must be loaded without initialization");
+        arktest.assertFalse(InitializeTarget_init, "InitializeTarget class must be loaded without initialization");
         cls.initialize();
-        assertTrue(InitializeTarget_init, "InitializeTarget class must be initialized explicitly");
+        arktest.assertTrue(InitializeTarget_init, "InitializeTarget class must be initialized explicitly");
     }
 
     static testCreateInstance() {
-        let linker = Class.ofCaller().getLinker();
+        let linker = Class.ofCaller()!.getLinker();
 
         let acls = Class.of(new A());
-        assertEQ(Class.of(acls.createInstance()), acls);
+        arktest.assertEQ(Class.of(acls.createInstance()), acls);
 
-        assertFalse(CreateInstanceTarget_init, "CreateInstanceTarget class must be lazily initialized");
+        arktest.assertFalse(CreateInstanceTarget_init, "CreateInstanceTarget class must be lazily initialized");
         linker.loadClass(cname("CreateInstanceTarget"), false).createInstance();
-        assertTrue(CreateInstanceTarget_init, "CreateInstanceTarget class must be initialized after first instantiation");
+        arktest.assertTrue(CreateInstanceTarget_init, "CreateInstanceTarget class must be initialized after first instantiation");
 
-        expectThrow(() => { linker.loadClass(cname("I"), false).createInstance() },
+        arktest.expectThrow(() => { linker.loadClass(cname("I"), false).createInstance() },
             (e) => e instanceof Error
         );
-        assertFalse(HasNoDefaultConstructor_init);
-        expectThrow(() => { linker.loadClass(cname("HasNoDefaultConstructor"), false).createInstance() },
+        arktest.assertFalse(HasNoDefaultConstructor_init);
+        arktest.expectThrow(() => { linker.loadClass(cname("HasNoDefaultConstructor"), false).createInstance() },
             (e) => e instanceof Error
         );
-        assertFalse(HasNoDefaultConstructor_init);
+        arktest.assertFalse(HasNoDefaultConstructor_init);
     }
 
     static test() {

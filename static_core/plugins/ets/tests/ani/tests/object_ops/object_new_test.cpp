@@ -33,10 +33,10 @@ public:
     {
         const char m[] = "Pure P60";
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("Lobject_new_test/MobilePhone;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("object_new_test.MobilePhone", &cls), ANI_OK);
 
         ani_method ctor {};
-        ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;I:V", &ctor), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std.core.String}i:", &ctor), ANI_OK);
 
         ani_string model {};
         ASSERT_EQ(env_->String_NewUTF8(m, strlen(m), &model), ANI_OK);
@@ -87,6 +87,19 @@ public:
         ASSERT_NE(*tag, nullptr);
     }
 
+    void TestObjectNewV(ani_env *env, ani_class cls, ani_method method, ani_string tag, ani_ref animalRef)
+    {
+        ani_object object {};
+        ASSERT_EQ(TestFuncV(ParameterScence::NORMAL, cls, method, &object, VAL1, tag, animalRef), ANI_OK);
+
+        ani_method checkMethod {};
+        ASSERT_EQ(env->Class_FindMethod(cls, "checkValue", nullptr, &checkMethod), ANI_OK);
+        ASSERT_NE(checkMethod, nullptr);
+
+        ani_boolean result = ANI_FALSE;
+        ASSERT_EQ(env->Object_CallMethod_Boolean(object, checkMethod, &result), ANI_OK);
+        ASSERT_EQ(result, ANI_TRUE);
+    }
     static constexpr int32_t LOOP_COUNT = 3;
 };
 
@@ -300,10 +313,10 @@ TEST_F(ObjectNewTest, object_new_v_invalid_args3)
 TEST_F(ObjectNewTest, DISABLED_object_new_string)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
 
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":V", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
 
     ani_string str {};
     ASSERT_EQ(env_->c_api->Object_New(env_, cls, ctor, reinterpret_cast<ani_object *>(&str)), ANI_OK);
@@ -314,10 +327,10 @@ TEST_F(ObjectNewTest, DISABLED_object_new_string)
 TEST_F(ObjectNewTest, no_argument_constructor)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_new_test/A;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_new_test.A", &cls), ANI_OK);
 
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":V", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
     ASSERT_NE(ctor, nullptr);
 
     ani_object object {};
@@ -330,7 +343,7 @@ TEST_F(ObjectNewTest, no_argument_constructor)
     args[1].i = arg2;
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "boolean_method", "II:Z", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "boolean_method", "ii:z", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 
     ani_boolean res = ANI_TRUE;
@@ -356,10 +369,10 @@ TEST_F(ObjectNewTest, unmatch_argument)
 TEST_F(ObjectNewTest, throw_error_constructor)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_new_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_new_test.B", &cls), ANI_OK);
 
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":V", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
     ASSERT_NE(ctor, nullptr);
 
     ani_object object {};
@@ -394,11 +407,11 @@ TEST_F(ObjectNewTest, object_new_a_combination_objcet)
 
     auto animalRef = CallEtsFunction<ani_ref>("object_new_test", "newAnimalObject");
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_new_test/Test;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_new_test.Test", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "ILstd/core/String;Lobject_new_test/Animal;:V", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "iC{std.core.String}C{object_new_test.Animal}:", &ctor), ANI_OK);
     ASSERT_NE(ctor, nullptr);
 
     ani_value args[3U];
@@ -422,7 +435,7 @@ TEST_F(ObjectNewTest, object_new_a_combination_objcet)
     args[0U].i = value1;
     ani_method newTestMethod {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "newTestObject",
-                                     "ILstd/core/String;Lobject_new_test/Animal;:Lobject_new_test/Test;",
+                                     "iC{std.core.String}C{object_new_test.Animal}:C{object_new_test.Test}",
                                      &newTestMethod),
               ANI_OK);
     ASSERT_NE(newTestMethod, nullptr);
@@ -461,9 +474,11 @@ TEST_F(ObjectNewTest, object_new_a_loop)
 TEST_F(ObjectNewTest, object_new_a_multiple_parameters_method)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_new_test/Mixture;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_new_test.Mixture", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
-    const char *name = "Lstd/core/Object;[I[BIFDZJSLstd/core/String;Lobject_new_test/Animal;:Lobject_new_test/Mixture;";
+    const char *name =
+        "C{std.core.Object}C{escompat.Array}C{escompat.Array}ifdzlsC{std.core.String}C{object_new_test.Animal}:C{"
+        "object_new_test.Mixture}";
     ani_method newMethod {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "newMixtureObject", name, &newMethod), ANI_OK);
     ASSERT_NE(newMethod, nullptr);
@@ -473,8 +488,9 @@ TEST_F(ObjectNewTest, object_new_a_multiple_parameters_method)
     ASSERT_NE(checkMethod, nullptr);
 
     auto ref = CallEtsFunction<ani_ref>("object_new_test", "getNull");
-    const auto intArray = static_cast<ani_array_int>(CallEtsFunction<ani_ref>("object_new_test", "getIntArray"));
-    const auto byteArray = static_cast<ani_array_byte>(CallEtsFunction<ani_ref>("object_new_test", "getByteArray"));
+    const auto intArray = static_cast<ani_fixedarray_int>(CallEtsFunction<ani_ref>("object_new_test", "getIntArray"));
+    const auto byteArray =
+        static_cast<ani_fixedarray_byte>(CallEtsFunction<ani_ref>("object_new_test", "getByteArray"));
 
     ani_string tag {};
     GetTestString(&tag);
@@ -504,12 +520,12 @@ TEST_F(ObjectNewTest, object_new_a_multiple_parameters_method)
 TEST_F(ObjectNewTest, object_new_v_invalid_args)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_new_test/Test;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_new_test.Test", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method newTestMethod {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "newTestObject",
-                                     "ILstd/core/String;Lobject_new_test/Animal;:Lobject_new_test/Test;",
+                                     "iC{std.core.String}C{object_new_test.Animal}:C{object_new_test.Test}",
                                      &newTestMethod),
               ANI_OK);
     ASSERT_NE(newTestMethod, nullptr);
@@ -534,6 +550,77 @@ TEST_F(ObjectNewTest, object_new_v_invalid_args)
     ASSERT_EQ(TestFuncV(ObjectNewTest::ParameterScence::INVALID_ARG3, cls, newTestMethod, &object, arg0, arg1, arg2),
               ANI_INVALID_ARGS);
 }
+
+TEST_F(ObjectNewTest, object_new_v_ctor)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("object_new_test.Test", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_method ctor {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "iC{std.core.String}C{object_new_test.Animal}:", &ctor), ANI_OK);
+    ASSERT_NE(ctor, nullptr);
+
+    ani_string tag {};
+    GetTestString(&tag);
+    auto animalRef = CallEtsFunction<ani_ref>("object_new_test", "newAnimalObject");
+
+    TestObjectNewV(env_, cls, ctor, tag, animalRef);
+}
+
+TEST_F(ObjectNewTest, object_new_v_normal_method_loop)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("object_new_test.Test", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_method newTestMethod {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "newTestObject",
+                                     "iC{std.core.String}C{object_new_test.Animal}:C{object_new_test.Test}",
+                                     &newTestMethod),
+              ANI_OK);
+    ASSERT_NE(newTestMethod, nullptr);
+
+    ani_string tag {};
+    GetTestString(&tag);
+    auto animalRef = CallEtsFunction<ani_ref>("object_new_test", "newAnimalObject");
+
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
+        TestObjectNewV(env_, cls, newTestMethod, tag, animalRef);
+    }
+}
+
+TEST_F(ObjectNewTest, check_initialization)
+{
+    ani_class cls {};
+    ani_method ctor {};
+    ani_string model {};
+    ani_int weight = 0;
+    GetTestData(&cls, &ctor, &model, &weight);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("object_new_test.MobilePhone"));
+    ani_object phone {};
+    ASSERT_EQ(env_->Object_New(cls, ctor, &phone, model, weight), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("object_new_test.MobilePhone"));
+}
+
+TEST_F(ObjectNewTest, check_initialization_a)
+{
+    ani_class cls {};
+    ani_method ctor {};
+    ani_string model {};
+    ani_int weight = 0;
+    GetTestData(&cls, &ctor, &model, &weight);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("object_new_test.MobilePhone"));
+    ani_value args[2U];
+    args[0U].r = model;
+    args[1U].i = weight;
+    ani_object phone {};
+    ASSERT_EQ(env_->Object_New_A(cls, ctor, &phone, args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("object_new_test.MobilePhone"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, readability-magic-numbers, modernize-avoid-c-arrays)

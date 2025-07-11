@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 class TestSetChar {
-    static char_value: char = 'a';
+    static char_value: char = c'a';
     static string_value: string = "";
 }
 
 class TestSetCharA extends TestSetChar {
-    static char_value: char = 'a';
+    static char_value: char = c'a';
 }
 
 final class TestSetCharFinal extends TestSetChar {
-    static char_value: char = 'a';
+    static char_value: char = c'a';
 }

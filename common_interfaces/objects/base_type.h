@@ -22,7 +22,7 @@
 #include <memory>
 
 #include "objects/base_object.h"
-#include "objects/string/base_string_declare.h"
+#include "objects/string/base_string.h"
 
 namespace panda::ecmascript {
 class JSTaggedValue;

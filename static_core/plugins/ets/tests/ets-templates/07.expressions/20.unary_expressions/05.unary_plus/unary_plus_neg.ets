@@ -21,5 +21,5 @@ tags: [negative, compile-only]
 
 function main(): void {
   let c = "text"
-  assertEQ(+c, "text")
+  arktest.assertEQ(+c, "text")
 }

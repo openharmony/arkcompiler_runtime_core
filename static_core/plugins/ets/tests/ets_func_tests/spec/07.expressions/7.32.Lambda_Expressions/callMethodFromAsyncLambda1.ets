@@ -33,9 +33,9 @@ class LambdaTests {
             is_call_async_lambda = regularFunc();
         }
 
-        assertEQ(is_call_async_lambda, false)
+        arktest.assertEQ(is_call_async_lambda, false)
         await async_lambda();
-        assertEQ(is_call_async_lambda, true)
+        arktest.assertEQ(is_call_async_lambda, true)
     }
 }
 

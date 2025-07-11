@@ -38,12 +38,19 @@ EtsPromise *EtsPromise::Create(EtsCoroutine *coro)
 
 void EtsPromise::OnPromiseCompletion(EtsCoroutine *coro)
 {
-    // Unblock awaitee coros
-    GetEvent(coro)->Fire();
-
     auto *cbQueue = GetCallbackQueue(coro);
     auto *launchModeQueue = GetLaunchModeQueue(coro);
     auto queueSize = GetQueueSize();
+    ASSERT(queueSize == 0 || cbQueue != nullptr);
+    ASSERT(queueSize == 0 || launchModeQueue != nullptr);
+
+    if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)) &&
+        state_ == STATE_REJECTED && queueSize == 0) {
+        coro->GetPandaVM()->GetUnhandledObjectManager()->AddRejectedPromise(this);
+    }
+
+    // Unblock awaitee coros
+    GetEvent(coro)->Fire();
 
     for (int idx = 0; idx < queueSize; ++idx) {
         auto *thenCallback = cbQueue->Get(idx);
@@ -64,7 +71,8 @@ void EtsPromise::LaunchCallback(EtsCoroutine *coro, EtsObject *callback, Corouti
     auto *method = EtsMethod::ToRuntimeMethod(etsmethod);
     ASSERT(method != nullptr);
     auto args = PandaVector<Value> {Value(callback->GetCoreType())};
-    [[maybe_unused]] bool launchResult = coroManager->Launch(event, method, std::move(args), launchMode);
+    [[maybe_unused]] bool launchResult =
+        coroManager->Launch(event, method, std::move(args), launchMode, EtsCoroutine::PROMISE_CALLBACK, false);
     ASSERT(launchResult);
 }
 

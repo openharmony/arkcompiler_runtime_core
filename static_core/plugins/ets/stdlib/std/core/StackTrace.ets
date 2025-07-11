@@ -43,5 +43,5 @@ export class StackTrace {
     *
     * @returns stack trace
     */
-    static native provisionStackTrace(): StackTraceElement[]
+    static native provisionStackTrace(): FixedArray<StackTraceElement>
 }

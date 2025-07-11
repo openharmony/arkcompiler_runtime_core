@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,6 @@
 import os
 import shutil
 from pathlib import Path
-from typing import Set, List
 
 from runner.extensions.generators.ets_cts.benchmark import Benchmark
 from runner.extensions.generators.igenerator import IGenerator
@@ -33,7 +32,7 @@ class EtsTemplatesGenerator(IGenerator):
         super().__init__(source, target, config)
         self.extension = f".{self._config.test_suite.extension()}"
 
-    def generate(self) -> List[str]:
+    def generate(self) -> list[str]:
         _LOGGER.all("Starting generate test")
         if self._target.exists():
             shutil.rmtree(self._target)
@@ -47,7 +46,7 @@ class EtsTemplatesGenerator(IGenerator):
         bench = Benchmark(path, output, test_full_name, self.extension, self.extension)
         self.generated_tests.extend(bench.generate())
 
-    def __dfs(self, path: Path, seen: Set) -> None:
+    def __dfs(self, path: Path, seen: set) -> None:
         if not path.exists() or path in seen:
             return
         seen.add(path)

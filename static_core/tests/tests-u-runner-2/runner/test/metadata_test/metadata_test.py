@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 import os
 import unittest
 from pathlib import Path
-from typing import cast, List
+from typing import cast
 
 from runner.suites.test_metadata import TestMetadata
 
@@ -46,7 +46,7 @@ class MetadataTest(unittest.TestCase):
         self.assertFalse(metadata.tags.no_warmup)
         self.assertEqual(metadata.desc, "abc")
         self.assertIsNotNone(metadata.files)
-        self.assertListEqual(cast(List[str], metadata.files), [])
+        self.assertListEqual(cast(list[str], metadata.files), [])
 
     def test_metadata_tags_compile_only(self) -> None:
         metadata = TestMetadata.create_filled_metadata({
@@ -109,8 +109,8 @@ class MetadataTest(unittest.TestCase):
         }, Path(__file__))
         self.assertIsInstance(metadata, TestMetadata)
         self.assertIsNotNone(metadata)
-        self.assertEqual(len(cast(List[str], metadata.files)), 2)
-        self.assertListEqual(metadata.files, ['test1.sts', 'test2.sts'])
+        self.assertEqual(len(cast(list[str], metadata.files)), 2)
+        self.assertListEqual(cast(list[str], metadata.files), ['test1.sts', 'test2.sts'])
 
     def test_extra_key(self) -> None:
         with self.assertRaises(TypeError):

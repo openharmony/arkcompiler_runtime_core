@@ -1,5 +1,4 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/* Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +12,24 @@
  * limitations under the License.
  */
 class TestChar {
-    static char_value: char = 'c';
+    static char_value: char = c'c';
     static string_value: String = "c";
     static special1: string = "";
     static special2: null = null;
     static special3: undefined  = undefined ;
-    static special4: char = "\n";
-    static special5: char = "\r";
-    static special6: char = "\t";
-    static special7: char = "\b";
-    static special8: char = "\0";
+    static special4: char = c'\n';
+    static special5: char = c'\r';
+    static special6: char = c'\t';
+    static special7: char = c'\b';
+    static special8: char = c'\0';
     static charMin: char = 0;
     static charMax: char = 65535;
 }
 
 class TestCharA extends TestChar {
-    static char_value: char = 'c';
+    static char_value: char = c'c';
 }
 
 final class TestCharFinal extends TestChar {
-    static char_value: char = 'c';
+    static char_value: char = c'c';
 }

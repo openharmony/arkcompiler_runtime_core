@@ -19,7 +19,7 @@ const success = 0
 const fail = 1
 
 function main(): int {
-    const suite = new ArkTestsuite("LRUCache API tests")
+    const suite = new arktest.ArkTestsuite("LRUCache API tests")
 
     suite.addTest("LRUCache Length Zero", testLRUCacheLengthZero);
     suite.addTest("LRUCache Length One", testLRUCacheLengthOne);
@@ -45,7 +45,7 @@ function testLRUCacheKeysOnce() {
     let that = new util.LRUCache<string|number, string|number>();
     that.put('string','abc');
     let result = that.keys();
-    assertEQ(result[0], 'string');
+    arktest.assertEQ(result[0], 'string');
 }
 
 function testLRUCacheKeysMulti() {
@@ -55,10 +55,10 @@ function testLRUCacheKeysMulti() {
     that.put(5,15)
     that.put('abc',20);
     let result = that.keys();
-    assertEQ(result[0], 1);
-    assertEQ(result[1], 3);
-    assertEQ(result[2], 5);
-    assertEQ(result[3], 'abc');
+    arktest.assertEQ(result[0], 1);
+    arktest.assertEQ(result[1], 3);
+    arktest.assertEQ(result[2], 5);
+    arktest.assertEQ(result[3], 'abc');
 }
 
 function testLRUCacheKeysGetAndContains() {
@@ -70,10 +70,10 @@ function testLRUCacheKeysGetAndContains() {
     that.get(3);
     that.contains(1);
     let result = that.keys();
-    assertEQ(result[0], 5);
-    assertEQ(result[1], 'abc');
-    assertEQ(result[2], 3);
-    assertEQ(result[3], 1);
+    arktest.assertEQ(result[0], 5);
+    arktest.assertEQ(result[1], 'abc');
+    arktest.assertEQ(result[2], 3);
+    arktest.assertEQ(result[3], 1);
 }
 
 function testLRUCacheKeysCapacityChenged() {
@@ -88,16 +88,16 @@ function testLRUCacheKeysCapacityChenged() {
     that.put(1,11)
     that.contains('abc')
     let result = that.keys();
-    assertEQ(result[0], 3);
-    assertEQ(result[1], 1);
-    assertEQ(result[2], 'abc');
+    arktest.assertEQ(result[0], 3);
+    arktest.assertEQ(result[1], 1);
+    arktest.assertEQ(result[2], 'abc');
 }
 
 function testLRUCacheValuesOnce() {
     let that = new util.LRUCache<string|number, string|number>();
     that.put('string','abc');
     let result = that.values();
-    assertEQ(result[0], 'abc');
+    arktest.assertEQ(result[0], 'abc');
 }
 
 function testLRUCacheValuesMulti() {
@@ -107,10 +107,10 @@ function testLRUCacheValuesMulti() {
     that.put(5,15)
     that.put('abc',20);
     let result = that.values();
-    assertEQ(result[0], 2);
-    assertEQ(result[1], 10);
-    assertEQ(result[2], 15);
-    assertEQ(result[3], 20);
+    arktest.assertEQ(result[0], 2);
+    arktest.assertEQ(result[1], 10);
+    arktest.assertEQ(result[2], 15);
+    arktest.assertEQ(result[3], 20);
 }
 
 function testLRUCacheValuesGetAndContains() {
@@ -122,10 +122,10 @@ function testLRUCacheValuesGetAndContains() {
     that.get(3);
     that.contains(1);
     let result = that.values();
-    assertEQ(result[0], 15);
-    assertEQ(result[1], 20);
-    assertEQ(result[2], 10);
-    assertEQ(result[3], 2);
+    arktest.assertEQ(result[0], 15);
+    arktest.assertEQ(result[1], 20);
+    arktest.assertEQ(result[2], 10);
+    arktest.assertEQ(result[3], 2);
 }
 
 function testLRUCacheValuesCapacityChenged() {
@@ -140,9 +140,9 @@ function testLRUCacheValuesCapacityChenged() {
     that.put(1,11)
     that.contains('abc')
     let result = that.values();
-    assertEQ(result[0], 10);
-    assertEQ(result[1], 11);
-    assertEQ(result[2], 20);
+    arktest.assertEQ(result[0], 10);
+    arktest.assertEQ(result[1], 11);
+    arktest.assertEQ(result[2], 20);
 }
 
 function testLRUCacheEntriesIterator() {
@@ -172,28 +172,28 @@ function testLRUCacheEntriesIterator() {
         arr2.push(entry[1]);
         j++;
     }
-    assertEQ(arr[1], 10);
-    assertEQ(arr[2], 1);
-    assertEQ(arr[3], 2);
-    assertEQ(arr[4], 'abc');
-    assertEQ(arr[5], 20);
-    assertEQ(i, j);
+    arktest.assertEQ(arr[1], 10);
+    arktest.assertEQ(arr[2], 1);
+    arktest.assertEQ(arr[3], 2);
+    arktest.assertEQ(arr[4], 'abc');
+    arktest.assertEQ(arr[5], 20);
+    arktest.assertEQ(i, j);
     for (let k=0; k<i; k++) {
-        assertEQ(arr[k], arr2[k]);
+        arktest.assertEQ(arr[k], arr2[k]);
     }
 }
 
 function testLRUCacheLengthZero() {
     let that = new util.LRUCache<string|number, string|number>();
     let result = that.length;
-    assertEQ(result, 0);
+    arktest.assertEQ(result, 0);
 }
 
 function testLRUCacheLengthOne() {
     let that = new util.LRUCache<string|number, string|number>();
     that.put(1,2);
     let result = that.length;
-    assertEQ(result, 1);
+    arktest.assertEQ(result, 1);
 }
 
 function testLRUCacheLengthMulti() {
@@ -202,7 +202,7 @@ function testLRUCacheLengthMulti() {
     that.put('1','2');
     that.put('a',0xa);
     let result = that.length;
-    assertEQ(result, 3);
+    arktest.assertEQ(result, 3);
 }
 
 function testLRUCacheLengthCover() {
@@ -212,7 +212,7 @@ function testLRUCacheLengthCover() {
     that.put('abcd',15)
     that.put('abcd',20);
     let result = that.length;
-    assertEQ(result, 3);
+    arktest.assertEQ(result, 3);
 }
 
 function testLRUCacheLengthCapacity() {
@@ -225,7 +225,7 @@ function testLRUCacheLengthCapacity() {
     that.put(5,33);
     that.put(25,35);
     let result = that.length;
-    assertEQ(result, 3);
+    arktest.assertEQ(result, 3);
 }
 
 function testLRUCacheIsEmptyFalse() {
@@ -234,7 +234,7 @@ function testLRUCacheIsEmptyFalse() {
     that.put(2, 4);
     that.put(3, 8);
     let result = that.isEmpty();
-    assertEQ(result, false);
+    arktest.assertEQ(result, false);
 }
 
 function testLRUCacheIsEmptyTrue() {
@@ -243,6 +243,6 @@ function testLRUCacheIsEmptyTrue() {
     let result1 = that.isEmpty();
     that.clear();
     let result2 = that.isEmpty();
-    assertEQ(result1, false);
-    assertEQ(result2, true);
+    arktest.assertEQ(result1, false);
+    arktest.assertEQ(result2, true);
 }

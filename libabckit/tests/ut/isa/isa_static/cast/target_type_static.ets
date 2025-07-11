@@ -21,7 +21,7 @@ function ConsoleLog(a: double) {
 class MyClass {
   handle() {
     let a: double = 3.14
-    let b: double = a as int
+    let b: double = Double.toInt(a)
     ConsoleLog(b)
   }
 }
@@ -40,7 +40,7 @@ function main() {
 // class MyClass {
 //   handle() {
 //     let a: double = 3.14
-//     let b: int = a as double
+//     let b: int = Double.toInt(a)
 //     ConsoleLog(b)
 //   }
 // }

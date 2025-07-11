@@ -13,46 +13,78 @@
  * limitations under the License.
  */
 #include "taihe/callback.hpp"
-
 #include <iostream>
-
 #include "callbackTest.impl.hpp"
 #include "taihe/string.hpp"
+
 using namespace taihe;
 
 namespace {
-void test_cb_v(callback_view<void()> f)
+
+class MyInterfaceImpl {
+public:
+    static const int ten = 10;
+    static const int hundred = 100;
+    static const long long tenBillion = 1000000000LL;
+    MyInterfaceImpl() {}
+
+    ::taihe::string TestCbIntString(::taihe::callback_view<void(int8_t, int32_t)> f)
+    {
+        f(ten, hundred);
+        return "testCbIntString";
+    }
+
+    bool TestCbIntBool(::taihe::callback_view<void(int16_t, int64_t)> f)
+    {
+        f(hundred, tenBillion);
+        return true;
+    }
+
+    ::callbackTest::EnumData TestCbEnum(::taihe::callback_view<void(int32_t)> f)
+    {
+        f(ten);
+        return ::callbackTest::EnumData(::callbackTest::EnumData::key_t::F32_A);
+    }
+};
+
+void TestCbV(callback_view<void()> f)
 {
     f();
 }
 
-void test_cb_i(callback_view<void(int32_t)> f)
+void TestCbI(callback_view<void(int32_t)> f)
 {
-    f(1);
+    static const int one = 1;
+    f(one);
 }
 
-void test_cb_s(callback_view<void(string_view, bool)> f)
+void TestCbS(callback_view<void(string_view, bool)> f)
 {
     f("hello", true);
 }
 
-string test_cb_rs(callback_view<string(string_view)> f)
+string TestCbRs(callback_view<string(string_view)> f)
 {
     taihe::string out = f("hello");
     return out;
 }
 
-void test_cb_struct(callback_view<::callbackTest::Data(::callbackTest::Data const &)> f)
+void TestCbStruct(callback_view<::callbackTest::Data(::callbackTest::Data const &)> f)
 {
     ::callbackTest::Data result = f(::callbackTest::Data {"a", "b", 1});
     return;
 }
-} // namespace
-// The macros used below are automatically generated code.
-// NOLINTBEGIN
-TH_EXPORT_CPP_API_test_cb_v(test_cb_v);
-TH_EXPORT_CPP_API_test_cb_i(test_cb_i);
-TH_EXPORT_CPP_API_test_cb_s(test_cb_s);
-TH_EXPORT_CPP_API_test_cb_rs(test_cb_rs);
-TH_EXPORT_CPP_API_test_cb_struct(test_cb_struct);
+
+::callbackTest::MyInterface GetInterface()
+{
+    return taihe::make_holder<MyInterfaceImpl, ::callbackTest::MyInterface>();
+}
+}  // namespace
+
+TH_EXPORT_CPP_API_TestCbV(TestCbV);
+TH_EXPORT_CPP_API_TestCbI(TestCbI);
+TH_EXPORT_CPP_API_TestCbS(TestCbS);
+TH_EXPORT_CPP_API_TestCbRs(TestCbRs);
+TH_EXPORT_CPP_API_TestCbStruct(TestCbStruct);
+TH_EXPORT_CPP_API_GetInterface(GetInterface);
 // NOLINTEND

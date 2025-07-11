@@ -38,7 +38,7 @@ TEST_F(ClassSetStaticFieldByNameFloatTest, set_static_field_by_name_long_capi)
 {
     ani_class cls {};
     const ani_short setTarget = 2.0F;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_float_test/FloatStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_float_test.FloatStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Float(env_, cls, "float_value", setTarget), ANI_OK);
     ani_float resultValue = 0.0F;
@@ -50,7 +50,7 @@ TEST_F(ClassSetStaticFieldByNameFloatTest, set_static_field_by_name_long)
 {
     ani_class cls {};
     const ani_short setTarget = 2.0F;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_float_test/FloatStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_float_test.FloatStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Float(cls, "float_value", setTarget), ANI_OK);
     ani_float resultValue = 0.0F;
@@ -62,7 +62,7 @@ TEST_F(ClassSetStaticFieldByNameFloatTest, set_static_field_by_name_long_invalid
 {
     ani_class cls {};
     const ani_short setTarget = 2.0F;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_float_test/FloatStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_float_test.FloatStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Float(cls, "string_value", setTarget), ANI_INVALID_TYPE);
 }
@@ -71,7 +71,7 @@ TEST_F(ClassSetStaticFieldByNameFloatTest, set_static_field_by_name_long_invalid
 {
     ani_class cls {};
     const ani_short setTarget = 2.0F;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_float_test/FloatStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_float_test.FloatStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Float(nullptr, "float_value", setTarget), ANI_INVALID_ARGS);
 }
@@ -80,7 +80,7 @@ TEST_F(ClassSetStaticFieldByNameFloatTest, set_static_field_by_name_long_invalid
 {
     ani_class cls {};
     const ani_short setTarget = 2.0F;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_float_test/FloatStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_float_test.FloatStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Float(cls, nullptr, setTarget), ANI_INVALID_ARGS);
 }
@@ -88,7 +88,7 @@ TEST_F(ClassSetStaticFieldByNameFloatTest, set_static_field_by_name_long_invalid
 TEST_F(ClassSetStaticFieldByNameFloatTest, special_values)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_float_test/FloatStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_float_test.FloatStatic", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Float(cls, "float_value", static_cast<ani_float>(0)), ANI_OK);
     ani_float single = 0.0F;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Float(cls, "float_value", &single), ANI_OK);
@@ -121,7 +121,7 @@ TEST_F(ClassSetStaticFieldByNameFloatTest, combination_test1)
     const ani_short setTarget = 2.0F;
     const ani_short setTarget2 = 3.0F;
     ani_float single = 0.0F;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_float_test/FloatStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_float_test.FloatStatic", &cls), ANI_OK);
     const int32_t loopCount = 3;
     for (int32_t i = 0; i < loopCount; i++) {
         ASSERT_EQ(env_->Class_SetStaticFieldByName_Float(cls, "float_value", setTarget2), ANI_OK);
@@ -135,22 +135,38 @@ TEST_F(ClassSetStaticFieldByNameFloatTest, combination_test1)
 
 TEST_F(ClassSetStaticFieldByNameFloatTest, combination_test2)
 {
-    CheckFieldValue("Lclass_set_static_field_by_name_float_test/FloatStaticA;", "float_value");
+    CheckFieldValue("class_set_static_field_by_name_float_test.FloatStaticA", "float_value");
 }
 
 TEST_F(ClassSetStaticFieldByNameFloatTest, combination_test3)
 {
-    CheckFieldValue("Lclass_set_static_field_by_name_float_test/FloatStaticFinal;", "float_value");
+    CheckFieldValue("class_set_static_field_by_name_float_test.FloatStaticFinal", "float_value");
 }
 
 TEST_F(ClassSetStaticFieldByNameFloatTest, invalid_argument1)
 {
     ani_class cls {};
     const ani_short setTarget = 2.0F;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_float_test/FloatStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_float_test.FloatStatic", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Float(cls, "", setTarget), ANI_NOT_FOUND);
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Float(cls, "\n", setTarget), ANI_NOT_FOUND);
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Float(nullptr, cls, "float_value", setTarget), ANI_INVALID_ARGS);
 }
+
+TEST_F(ClassSetStaticFieldByNameFloatTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_float_test.FloatStatic", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_float_test.FloatStatic"));
+    const ani_float floatValue = 2.2;
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Float(cls, "float_valuex", floatValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_float_test.FloatStatic"));
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Float(cls, "float_value", floatValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_float_test.FloatStatic"));
+}
+
 }  // namespace ark::ets::ani::testing
    // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

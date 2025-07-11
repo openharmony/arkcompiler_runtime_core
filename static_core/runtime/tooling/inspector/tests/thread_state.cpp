@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#include "thread_state.h"
+#include "debugger/thread_state.h"
 
 #include "gtest/gtest.h"
 
+#include "evaluation/evaluation_engine.h"
 #include "file.h"
 #include "object_header.h"
 #include "runtime_options.h"
@@ -39,50 +40,52 @@ public:
 class ThreadStateTest : public testing::Test {
     void SetUp()
     {
-        state = std::make_unique<ThreadState>(mockEvaluationEngine_);
+        state = std::make_unique<ThreadState>(mockEvaluationEngine_, bpStorage_);
     }
 
 protected:
     MockEvaluationEngine mockEvaluationEngine_;
+    BreakpointStorage bpStorage_;
     std::unique_ptr<ThreadState> state;
     PtLocation fake = PtLocation("", {}, 0);
     PtLocation location0 = PtLocation("test.abc", panda_file::File::EntityId(1), 0);
     PtLocation location1 = PtLocation("test.abc", panda_file::File::EntityId(1), 1);
     PtLocation location2 = PtLocation("test.abc", panda_file::File::EntityId(1), 2);
     PtLocation location3 = PtLocation("test.abc", panda_file::File::EntityId(1), 3);
+    const char *source = "/test.ets";
 };
 
 TEST_F(ThreadStateTest, BreakOnStart)
 {
     ASSERT_FALSE(state->IsPaused());
-    state->OnSingleStep(fake);
+    state->OnSingleStep(fake, source);
     ASSERT_FALSE(state->IsPaused());
 
     state->BreakOnStart();
-    state->OnSingleStep(fake);
+    state->OnSingleStep(fake, source);
     ASSERT_TRUE(state->IsPaused());
 }
 
 TEST_F(ThreadStateTest, PauseAndContinue)
 {
     state->Pause();
-    state->OnSingleStep(fake);
+    state->OnSingleStep(fake, source);
     ASSERT_TRUE(state->IsPaused());
     state->Continue();
-    state->OnSingleStep(fake);
+    state->OnSingleStep(fake, source);
     ASSERT_FALSE(state->IsPaused());
 
     state->Pause();
     ASSERT_FALSE(state->IsPaused());
     state->Continue();
-    state->OnSingleStep(fake);
+    state->OnSingleStep(fake, source);
     ASSERT_FALSE(state->IsPaused());
 }
 
 TEST_F(ThreadStateTest, StepInto)
 {
     state->Pause();
-    state->OnSingleStep(fake);
+    state->OnSingleStep(fake, source);
 
     std::unordered_set<PtLocation, HashLocation> locs;
     locs.insert(location1);
@@ -90,16 +93,16 @@ TEST_F(ThreadStateTest, StepInto)
 
     ASSERT_TRUE(state->IsPaused());
     state->StepInto(locs);
-    state->OnSingleStep(location2);
+    state->OnSingleStep(location2, source);
     ASSERT_FALSE(state->IsPaused());
-    state->OnSingleStep(location3);
+    state->OnSingleStep(location3, source);
     ASSERT_TRUE(state->IsPaused());
 }
 
 TEST_F(ThreadStateTest, ContinueTo)
 {
     state->Pause();
-    state->OnSingleStep(fake);
+    state->OnSingleStep(fake, source);
 
     std::unordered_set<PtLocation, HashLocation> locs;
     locs.insert(location1);
@@ -107,34 +110,34 @@ TEST_F(ThreadStateTest, ContinueTo)
 
     ASSERT_TRUE(state->IsPaused());
     state->ContinueTo(locs);
-    state->OnSingleStep(location0);
+    state->OnSingleStep(location0, source);
     ASSERT_FALSE(state->IsPaused());
-    state->OnSingleStep(location1);
+    state->OnSingleStep(location1, source);
     ASSERT_TRUE(state->IsPaused());
 }
 
 TEST_F(ThreadStateTest, StepOut)
 {
     state->Pause();
-    state->OnSingleStep(fake);
+    state->OnSingleStep(fake, source);
 
     ASSERT_TRUE(state->IsPaused());
     state->StepOut();
-    state->OnSingleStep(location0);
+    state->OnSingleStep(location0, source);
     ASSERT_FALSE(state->IsPaused());
-    state->OnSingleStep(location1);
+    state->OnSingleStep(location1, source);
     ASSERT_FALSE(state->IsPaused());
-    state->OnSingleStep(location2);
+    state->OnSingleStep(location2, source);
     ASSERT_FALSE(state->IsPaused());
     state->OnFramePop();
-    state->OnSingleStep(fake);
+    state->OnSingleStep(fake, source);
     ASSERT_TRUE(state->IsPaused());
 }
 
 TEST_F(ThreadStateTest, StepOver)
 {
     state->Pause();
-    state->OnSingleStep(fake);
+    state->OnSingleStep(fake, source);
 
     std::unordered_set<PtLocation, HashLocation> locs;
     locs.insert(location1);
@@ -142,49 +145,17 @@ TEST_F(ThreadStateTest, StepOver)
 
     ASSERT_TRUE(state->IsPaused());
     state->StepOver(locs);
-    state->OnSingleStep(location1);
+    state->OnSingleStep(location1, source);
     ASSERT_FALSE(state->IsPaused());
     state->OnMethodEntry();
-    state->OnSingleStep(fake);
+    state->OnSingleStep(fake, source);
     ASSERT_FALSE(state->IsPaused());
     state->OnFramePop();
-    state->OnSingleStep(location2);
+    state->OnSingleStep(location2, source);
     ASSERT_FALSE(state->IsPaused());
     state->OnFramePop();
-    state->OnSingleStep(fake);
+    state->OnSingleStep(fake, source);
     ASSERT_TRUE(state->IsPaused());
-}
-
-TEST_F(ThreadStateTest, Breakpoint)
-{
-    std::vector<PtLocation> breaks = {location1, location2};
-    auto break_id = state->SetBreakpoint(breaks);
-
-    auto hit_breaks = state->GetBreakpointsByLocation(location3);
-    ASSERT_TRUE(hit_breaks.empty());
-    hit_breaks = state->GetBreakpointsByLocation(location2);
-    ASSERT_FALSE(hit_breaks.empty());
-    ASSERT_EQ(hit_breaks[0], break_id);
-
-    state->Continue();
-    state->OnSingleStep(location0);
-    ASSERT_FALSE(state->IsPaused());
-    state->OnSingleStep(location2);
-    ASSERT_TRUE(state->IsPaused());
-
-    state->SetBreakpointsActive(false);
-    state->Continue();
-    state->OnSingleStep(location2);
-    ASSERT_FALSE(state->IsPaused());
-    state->SetBreakpointsActive(true);
-
-    state->Pause();
-    state->OnSingleStep(fake);
-
-    state->RemoveBreakpoint(break_id);
-    state->Continue();
-    state->OnSingleStep(location2);
-    ASSERT_FALSE(state->IsPaused());
 }
 
 TEST_F(ThreadStateTest, OnException)

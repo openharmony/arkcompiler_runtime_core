@@ -22,6 +22,20 @@
 
 namespace ark {
 
+/**
+ * THE ORDER HAS MEANING
+ * ASCEDING ORDER - HIGHER PRIORITY
+ * DO NOT CHANGE INITIALIZATION VALUES
+ */
+enum class CoroutinePriority {
+    LOW_PRIORITY,
+    MEDIUM_PRIORITY,
+    DEFAULT_PRIORITY = MEDIUM_PRIORITY,
+    HIGH_PRIORITY,
+    CRITICAL_PRIORITY,
+    PRIORITY_COUNT
+};
+
 /// Represents a coroutine worker, which can host multiple coroutines and schedule them.
 class CoroutineWorker {
 public:
@@ -61,14 +75,9 @@ public:
         callbackPoster_ = std::move(poster);
     }
 
-    void SetExternalSchedulingEnabled()
-    {
-        externalSchedulingEnabled_ = true;
-    }
-
     bool IsExternalSchedulingEnabled() const
     {
-        return externalSchedulingEnabled_;
+        return callbackPoster_ != nullptr;
     }
 
     template <typename PosterCallback>
@@ -89,7 +98,6 @@ private:
     // event loop poster
     os::memory::Mutex posterLock_;
     PandaUniquePtr<CallbackPoster> callbackPoster_;
-    bool externalSchedulingEnabled_ = false;
 };
 
 }  // namespace ark

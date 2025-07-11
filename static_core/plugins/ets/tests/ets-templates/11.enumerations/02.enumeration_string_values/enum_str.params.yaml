@@ -16,16 +16,16 @@ cases:
     - decl: |-
           enum Enum { first = "A", second = "B", third = "B" }
       use: |-
-          assertEQ(Enum.first.valueOf(), "A")
-          assertEQ(Enum.second.valueOf(), "B")
-          assertEQ(Enum.third.valueOf(), "B")
+          arktest.assertEQ(Enum.first.valueOf(), "A")
+          arktest.assertEQ(Enum.second.valueOf(), "B")
+          arktest.assertEQ(Enum.third.valueOf(), "B")
 
     - decl: |-
           enum Enum { _first = "A", _second = "B", _third = "B" }
       use: |-
-          assertEQ(Enum._first.toString(), "A")
-          assertEQ(Enum._second.toString(),  "B")
-          assertEQ(Enum._third.toString(), "B")
+          arktest.assertEQ(Enum._first.toString(), "A")
+          arktest.assertEQ(Enum._second.toString(),  "B")
+          arktest.assertEQ(Enum._third.toString(), "B")
 
     - decl: |-
           enum Enum { first = "A", second = "B", third = "B" }
@@ -33,7 +33,7 @@ cases:
           let e2 = Enum.second
           let e3 = Enum.third
       use: |-
-          assertEQ("" + e1 + e2 + e3, "ABB")
+          arktest.assertEQ("" + e1 + e2 + e3, "ABB")
 
     - decl: |-
           enum Enum { first = "A", second = "B", third = "B" }
@@ -41,46 +41,46 @@ cases:
           const e2 = Enum.second
           const e3 = Enum.third
       use: |-
-          assertEQ("" + e1 + e2 + e3, "ABB")
+          arktest.assertEQ("" + e1 + e2 + e3, "ABB")
 
     - decl: |-
           enum Enum { first = "A", second = "B", third = "B" }
       use: |-
-          assertEQ(Enum.first as string, "A")
-          assertEQ(Enum.second as string, "B")
-          assertEQ(Enum.third as string, "B")
+          arktest.assertEQ(Enum.first as string, "A")
+          arktest.assertEQ(Enum.second as string, "B")
+          arktest.assertEQ(Enum.third as string, "B")
 
     - decl: |-
           const a = "ABC"
           enum Enum { e1 = a, e2 = "DEF" }  // constant expression
       use: |-
-          assertEQ(Enum.e1.toString(), "ABC")
-          assertEQ(Enum.e2.toString(), "DEF")
+          arktest.assertEQ(Enum.e1.toString(), "ABC")
+          arktest.assertEQ(Enum.e2.toString(), "DEF")
 
     - decl: |-
           const a = "ABC"
           enum Enum { e1 = a + a, e2 = a + "DEF" }  // constant expressions
       use: |-
-          assertEQ(Enum.e1.toString(), "ABCABC")
-          assertEQ(Enum.e2.toString(), "ABCDEF")
+          arktest.assertEQ(Enum.e1.toString(), "ABCABC")
+          arktest.assertEQ(Enum.e2.toString(), "ABCDEF")
 
     - decl: |-
           enum Enum { e1 = "A", e2 = "B", e3 = "C" }
       use: |-
           let v = Enum.e3
           switch (v) {
-              case Enum.e1: assertTrue(false); break;
-              case Enum.e2: assertTrue(false); break;
-              case Enum.e3: assertEQ(v.toString(), Enum.e3.toString()); break;
+              case Enum.e1: arktest.assertTrue(false); break;
+              case Enum.e2: arktest.assertTrue(false); break;
+              case Enum.e3: arktest.assertEQ(v.toString(), Enum.e3.toString()); break;
           }
 
     - decl: |-
           enum Color { Red = "red", Green = "green", Blue = "blue" }
       use: |-
           let r: string = Color.Red
-          assertEQ(r, "red")
+          arktest.assertEQ(r, "red")
           let g: string = Color.Green
-          assertEQ(g, "green")
+          arktest.assertEQ(g, "green")
 
     - decl: |-
           enum Color { Red = "red", Green = "green", Blue = "blue" }
@@ -88,8 +88,8 @@ cases:
               return p == "blue"
           }
       use: |-
-          assertEQ(foo(Color.Red), false)
-          assertEQ(foo(Color.Blue), true)
+          arktest.assertEQ(foo(Color.Red), false)
+          arktest.assertEQ(foo(Color.Blue), true)
 
     - decl: |-
           enum Template {
@@ -98,4 +98,4 @@ cases:
             }
       use: |-
           let v = Template.t1
-          assertEQ(v.toString(), "Line 1\nLine 2")
+          arktest.assertEQ(v.toString(), "Line 1\nLine 2")

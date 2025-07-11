@@ -22,6 +22,7 @@
 
 #include "runtime/include/external_callback_poster.h"
 #include "libpandabase/os/mutex.h"
+#include "plugins/ets/runtime/ets_vm.h"
 
 namespace ark {
 class Coroutine;
@@ -82,11 +83,11 @@ public:
 
 class EventLoop {
 public:
-    enum RunMode { RUN_DEFAULT = 0, RUN_ONCE, RUN_NOWAIT };
-
     static uv_loop_t *GetEventLoop();
 
-    static void RunEventLoop(RunMode mode = RunMode::RUN_DEFAULT);
+    static void RunEventLoop(EventLoopRunMode mode = EventLoopRunMode::RUN_DEFAULT);
+
+    static void WalkEventLoop(WalkEventLoopCallback &callback, void *args);
 };
 
 }  // namespace ark::ets::interop::js

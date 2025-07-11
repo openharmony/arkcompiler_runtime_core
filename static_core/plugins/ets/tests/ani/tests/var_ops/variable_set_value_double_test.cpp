@@ -24,7 +24,7 @@ public:
     void SetUp() override
     {
         AniTest::SetUp();
-        ASSERT_EQ(env_->FindNamespace("Lvariable_set_value_double_test/anyns;", &ns_), ANI_OK);
+        ASSERT_EQ(env_->FindNamespace("variable_set_value_double_test.anyns", &ns_), ANI_OK);
         ASSERT_NE(ns_, nullptr);
     }
 
@@ -84,11 +84,11 @@ TEST_F(VariableSetValueDoubleTest, invalid_args_variable)
 TEST_F(VariableSetValueDoubleTest, composite_case_1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns_, "LA;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindClass(ns_, "A", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "add", ":D", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "add", ":d", &method), ANI_OK);
 
     ani_double sum = 0.0F;
     ASSERT_EQ(env_->Class_CallStaticMethod_Double(cls, method, &sum), ANI_OK);
@@ -115,7 +115,7 @@ TEST_F(VariableSetValueDoubleTest, composite_case_2)
     ASSERT_EQ(env_->Namespace_FindVariable(ns_, "aDouble", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);
 
-    const ani_double values[] = {3.14F, 6.28F, 9.42F};
+    const ani_double values[] = {3.14F, 0, -9.42F};
     ani_double result = 0.0F;
     for (ani_double value : values) {
         ASSERT_EQ(env_->Variable_SetValue_Double(variable, value), ANI_OK);
@@ -127,7 +127,7 @@ TEST_F(VariableSetValueDoubleTest, composite_case_2)
 TEST_F(VariableSetValueDoubleTest, composite_case_3)
 {
     ani_namespace result {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns_, "Lsecond;", &result), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns_, "second", &result), ANI_OK);
     ASSERT_NE(result, nullptr);
 
     ani_variable variable1 {};
@@ -173,6 +173,18 @@ TEST_F(VariableSetValueDoubleTest, composite_case_4)
     ASSERT_EQ(env_->Variable_GetValue_Double(variable2, &getValue2), ANI_OK);
     ASSERT_EQ(getValue2, val2);
 }
+
+TEST_F(VariableSetValueDoubleTest, check_initialization)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "aDouble", &variable), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("variable_set_value_double_test.anyns"));
+    const ani_double x = 12.07F;
+    ASSERT_EQ(env_->Variable_SetValue_Double(variable, x), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("variable_set_value_double_test.anyns"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-identifier-naming)

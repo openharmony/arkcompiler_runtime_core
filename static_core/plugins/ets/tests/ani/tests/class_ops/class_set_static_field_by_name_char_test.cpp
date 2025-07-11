@@ -38,7 +38,7 @@ TEST_F(ClassSetStaticFieldByNameCharTest, set_static_field_by_name_char_capi)
 {
     ani_class cls {};
     const ani_char target = 'b';
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_char_test/CharStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_char_test.CharStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Char(env_, cls, "char_value", target), ANI_OK);
     ani_char resultValue;
@@ -50,7 +50,7 @@ TEST_F(ClassSetStaticFieldByNameCharTest, set_static_field_by_name_char)
 {
     ani_class cls {};
     const ani_char target = 'b';
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_char_test/CharStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_char_test.CharStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, "char_value", target), ANI_OK);
     ani_char resultValue;
@@ -62,7 +62,7 @@ TEST_F(ClassSetStaticFieldByNameCharTest, not_found)
 {
     ani_class cls {};
     const ani_char target = 'b';
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_char_test/CharStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_char_test.CharStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, "charValue", target), ANI_NOT_FOUND);
 }
@@ -70,7 +70,7 @@ TEST_F(ClassSetStaticFieldByNameCharTest, not_found)
 TEST_F(ClassSetStaticFieldByNameCharTest, set_static_field_by_name_char_invalid_field_type)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_char_test/CharStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_char_test.CharStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, "string_value", 'b'), ANI_INVALID_TYPE);
 }
@@ -78,7 +78,7 @@ TEST_F(ClassSetStaticFieldByNameCharTest, set_static_field_by_name_char_invalid_
 TEST_F(ClassSetStaticFieldByNameCharTest, set_static_field_by_name_char_invalid_args_object)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_char_test/CharStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_char_test.CharStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(nullptr, "char_value", 'b'), ANI_INVALID_ARGS);
 }
@@ -86,7 +86,7 @@ TEST_F(ClassSetStaticFieldByNameCharTest, set_static_field_by_name_char_invalid_
 TEST_F(ClassSetStaticFieldByNameCharTest, set_static_field_by_name_char_invalid_args_field)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_char_test/CharStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_char_test.CharStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, nullptr, 'b'), ANI_INVALID_ARGS);
 }
@@ -94,7 +94,7 @@ TEST_F(ClassSetStaticFieldByNameCharTest, set_static_field_by_name_char_invalid_
 TEST_F(ClassSetStaticFieldByNameCharTest, special_values)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_char_test/CharStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_char_test.CharStatic", &cls), ANI_OK);
     ani_char single = ' ';
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, "char_value", static_cast<ani_char>(NULL)), ANI_OK);
@@ -150,7 +150,7 @@ TEST_F(ClassSetStaticFieldByNameCharTest, combination_test1)
     const ani_short setTarget = 2U;
     const ani_short setTarget2 = 3U;
     ani_char single = ' ';
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_char_test/CharStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_char_test.CharStatic", &cls), ANI_OK);
     const int32_t loopCount = 3;
     for (int32_t i = 0; i < loopCount; i++) {
         ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, "char_value", setTarget2), ANI_OK);
@@ -164,22 +164,38 @@ TEST_F(ClassSetStaticFieldByNameCharTest, combination_test1)
 
 TEST_F(ClassSetStaticFieldByNameCharTest, combination_test2)
 {
-    CheckFieldValue("Lclass_set_static_field_by_name_char_test/CharStaticA;", "char_value");
+    CheckFieldValue("class_set_static_field_by_name_char_test.CharStaticA", "char_value");
 }
 
 TEST_F(ClassSetStaticFieldByNameCharTest, combination_test3)
 {
-    CheckFieldValue("Lclass_set_static_field_by_name_char_test/CharStaticFinal;", "char_value");
+    CheckFieldValue("class_set_static_field_by_name_char_test.CharStaticFinal", "char_value");
 }
 
 TEST_F(ClassSetStaticFieldByNameCharTest, invalid_argument1)
 {
     ani_class cls {};
     const ani_char setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_char_test/CharStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_char_test.CharStatic", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, "", setTarget), ANI_NOT_FOUND);
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, "\n", setTarget), ANI_NOT_FOUND);
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Char(nullptr, cls, "char_value", setTarget), ANI_INVALID_ARGS);
 }
+
+TEST_F(ClassSetStaticFieldByNameCharTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_char_test.CharStatic", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_char_test.CharStatic"));
+    const ani_char charValue = 'n';
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, "char_valuex", charValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_char_test.CharStatic"));
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, "char_value", charValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_char_test.CharStatic"));
+}
+
 }  // namespace ark::ets::ani::testing
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

@@ -19,33 +19,33 @@ class C {
     }
 
     static sum(a: int, b: int): long {
-        return a as long + b
+        return a.toLong() + b
     }
 
     a: int = 0
 }
 
 function testSum(sum: Method): void {
-    const args = new Object[2]
+    const args : FixedArray<NullishType> = new NullishType[2]
     args[0] = Int.MAX_VALUE
     args[1] = 30
-    const res = sum.invoke(null, args) as Long
-    assertEQ( res, (Int.MAX_VALUE as long + 30))
+    const res = sum.invoke(null, args)
+    arktest.assertEQ( res, (Int.MAX_VALUE.toLong() + 30))
 }
 
 function testGetIsEvenPlusX(getIsEvenPlusX: Method): void {
     const c = new C()
     c.a = 15
-    const args = new Object[1]
+    const args : FixedArray<NullishType> = new NullishType[1]
 
     args[0] = 13
-    assertEQ( getIsEvenPlusX.invoke(c, args) as Boolean, true)
+    arktest.assertEQ( getIsEvenPlusX.invoke(c, args), true)
 
     c.a = 14
-    assertEQ( getIsEvenPlusX.invoke(c, args) as Boolean, false)
+    arktest.assertEQ( getIsEvenPlusX.invoke(c, args), false)
 
     args[0] = 30
-    assertEQ( getIsEvenPlusX.invoke(c, args) as Boolean, true)
+    arktest.assertEQ( getIsEvenPlusX.invoke(c, args), true)
 }
 
 function main(): void {
@@ -64,5 +64,5 @@ function main(): void {
             got++
         }
     }
-    assertEQ( got, 2)
+    arktest.assertEQ( got, 2)
 }

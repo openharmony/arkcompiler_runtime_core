@@ -15,7 +15,7 @@
 // Before AOP:
 
 function store_element() {
-    let a:int[] = [1, 2, 3];
+    let a:FixedArray<int> = [1, 2, 3];
     return a;
 }
 

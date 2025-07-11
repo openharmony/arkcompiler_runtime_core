@@ -28,7 +28,7 @@
 
     let t3: FuncTuple3 = [(value: String) => { return value; }, (value: String) => { return value; }, () => { return 42.0 }];
 
-    assertEQ( t[0]("One"), "One")
-    assertEQ( t[1]("Two"), "Two")
-    assertEQ( t[2](), 42.0)
+    arktest.assertEQ( t[0]("One"), "One")
+    arktest.assertEQ( t[1]("Two"), "Two")
+    arktest.assertEQ( t[2](), 42.0)
  }

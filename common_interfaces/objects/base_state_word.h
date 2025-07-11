@@ -29,11 +29,20 @@ enum class LanguageType : uint64_t {
     STATIC = 1,
 };
 
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
 class BaseStateWord {
 public:
-    static constexpr size_t PADDING_WIDTH = 60;
+#ifdef BASE_CLASS_32BITS
+    static constexpr size_t BASECLASS_WIDTH = 32;
+    static constexpr size_t PADDING_WIDTH = 28;
+#else
+    static constexpr size_t BASECLASS_WIDTH = 48;
+    static constexpr size_t PADDING_WIDTH = 12;
+#endif
     static constexpr size_t FORWARD_WIDTH = 2;
     static constexpr size_t LANGUAGE_WIDTH = 2;
+    static constexpr uint64_t LOW_32_BITS_MASK = 0xFFFFFFFF;
+    static constexpr uint64_t HIGH_32_BITS_MASK = ~LOW_32_BITS_MASK;
 
     BaseStateWord() = default;
     BaseStateWord(MAddress header) : header_(header) {};
@@ -94,19 +103,20 @@ public:
 
     common::StateWordType GetBaseClassAddress() const
     {
-        return state_.padding_;
+        return state_.bascClass_;
     }
 
     void SetFullBaseClassAddress(common::StateWordType address)
     {
-        state_.padding_ = address;
+        state_.bascClass_ = address;
     }
 private:
     // Little endian
     struct State {
+        common::StateWordType bascClass_   : BASECLASS_WIDTH;
         common::StateWordType padding_     : PADDING_WIDTH;
-        LanguageType language_     : LANGUAGE_WIDTH;
-        ForwardState forwardState_ : FORWARD_WIDTH;
+        LanguageType language_             : LANGUAGE_WIDTH;
+        ForwardState forwardState_         : FORWARD_WIDTH;
     };
 
     union {

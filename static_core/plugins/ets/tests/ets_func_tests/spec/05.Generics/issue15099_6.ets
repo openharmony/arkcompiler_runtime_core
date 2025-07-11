@@ -25,5 +25,5 @@ interface IFace {
 
 function main(): void {
     let x = new Array<(IFace|((arg:string) => string)|undefined)>();
-    assertTrue( x != null)
+    arktest.assertTrue( x != null)
 }

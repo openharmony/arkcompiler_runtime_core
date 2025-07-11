@@ -27,5 +27,5 @@ const person: Person = {
 
 function main(): void {
   const obj1: object = person;
-  assertTrue(obj1 == person);
+  arktest.assertTrue(obj1 == person);
 }

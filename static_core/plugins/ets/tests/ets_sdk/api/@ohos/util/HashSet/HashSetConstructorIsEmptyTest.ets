@@ -15,11 +15,8 @@
 
 import {HashSet} from "@ohos.util.HashSet";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
-    const suite = new ArkTestsuite("HashSet Constructor IsEmpty API tests")
+    const suite = new arktest.ArkTestsuite("HashSet Constructor IsEmpty API tests")
 
     suite.addTest("HashSet construct create default empty hashSet", testConstructorCreatesDefaultEmptyHashSet)
     suite.addTest("HashSet construct create hashSet add custom type data", testConstructorWithCustomTypeData)
@@ -34,8 +31,8 @@ function main(): int {
 function testConstructorCreatesDefaultEmptyHashSet() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     hashSet.add("squirrel");
-    assertTrue(hashSet instanceof HashSet, "The hashSet should be of the same type as the HashSet");
-    assertEQ(hashSet.length, 1, "The hashSet length should be 1");
+    arktest.assertTrue(hashSet instanceof HashSet, "The hashSet should be of the same type as the HashSet");
+    arktest.assertEQ(hashSet.length, 1, "The hashSet length should be 1");
 }
 
 function testConstructorWithCustomTypeData() {
@@ -48,23 +45,23 @@ function testConstructorWithCustomTypeData() {
     };
     hashSet.add(param);
     let result = hashSet.has(param);
-    assertTrue(hashSet instanceof HashSet, "The hashSet should be of the same type as the HashSet");
-    assertEQ(result, true, "The hashSet should contain the specified value");
+    arktest.assertTrue(hashSet instanceof HashSet, "The hashSet should be of the same type as the HashSet");
+    arktest.assertEQ(result, true, "The hashSet should contain the specified value");
 }
 
 function testIsEmptyTrue() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     let result = hashSet.isEmpty();
-    assertEQ(result, true, "The hashSet should be empty");
-    assertEQ(hashSet.length, 0, "The hashSet length should be 0");
+    arktest.assertEQ(result, true, "The hashSet should be empty");
+    arktest.assertEQ(hashSet.length, 0, "The hashSet length should be 0");
 }
 
 function testIsEmptyFalse() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     hashSet.add("squirrel");
     let result = hashSet.isEmpty();
-    assertEQ(result, false, "The hashSet should not be empty");
-    assertEQ(hashSet.length, 1, "The hashSet length should be 1");
+    arktest.assertEQ(result, false, "The hashSet should not be empty");
+    arktest.assertEQ(hashSet.length, 1, "The hashSet length should be 1");
 }
 
 function testIsEmptyTrueAfterRemoveData() {
@@ -73,9 +70,9 @@ function testIsEmptyTrueAfterRemoveData() {
     let result1 = hashSet.isEmpty();
     hashSet.remove("squirrel");
     let result2 = hashSet.isEmpty();
-    assertEQ(result1, false, "The hashSet should not be empty");
-    assertEQ(result2, true, "The hashSet should be empty");
-    assertEQ(hashSet.length, 0, "The hashSet length should be 0");
+    arktest.assertEQ(result1, false, "The hashSet should not be empty");
+    arktest.assertEQ(result2, true, "The hashSet should be empty");
+    arktest.assertEQ(hashSet.length, 0, "The hashSet length should be 0");
 }
 
 function testIsEmptyTrueAfterClearData() {
@@ -84,7 +81,7 @@ function testIsEmptyTrueAfterClearData() {
     let result1 = hashSet.isEmpty();
     hashSet.clear();
     let result2 = hashSet.isEmpty();
-    assertEQ(result1, false, "The hashSet should not be empty");
-    assertEQ(result2, true, "The hashSet should be empty");
-    assertEQ(hashSet.length, 0, "The hashSet length should be 0");
+    arktest.assertEQ(result1, false, "The hashSet should not be empty");
+    arktest.assertEQ(result2, true, "The hashSet should be empty");
+    arktest.assertEQ(hashSet.length, 0, "The hashSet length should be 0");
 }

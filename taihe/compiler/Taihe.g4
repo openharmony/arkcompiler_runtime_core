@@ -23,14 +23,6 @@ spec
       EOF
     ;
 
-scopeAttr
-    : AT EXCLAMATION TOKEN_name = ID (LEFT_PARENTHESIS (AttrValLst_vals += attrVal (COMMA AttrValLst_vals += attrVal)* COMMA?)? RIGHT_PARENTHESIS)?
-    ;
-
-declAttr
-    : AT TOKEN_name = ID (LEFT_PARENTHESIS (AttrValLst_vals += attrVal (COMMA AttrValLst_vals += attrVal)* COMMA?)? RIGHT_PARENTHESIS)?
-    ;
-
 use
     : KW_USE PkgName_pkg_name = pkgName (KW_AS TOKENOpt_pkg_alias = ID)? SEMICOLON # usePackage
     | KW_FROM PkgName_pkg_name = pkgName KW_USE DeclAliasPairLst_decl_alias_pairs += declAliasPair (COMMA DeclAliasPairLst_decl_alias_pairs += declAliasPair)* SEMICOLON # useSymbol
@@ -46,7 +38,7 @@ declAliasPair
 
 specField
     : (DeclAttrLst_forward_attrs += declAttr)*
-      KW_ENUM TOKEN_name = ID (COLON TypeOpt_enum_ty = type)?
+      KW_ENUM TOKEN_name = ID COLON Type_enum_ty = type
       LEFT_BRACE (EnumItemLst_fields += enumItem (COMMA EnumItemLst_fields += enumItem)* COMMA?)? RIGHT_BRACE # enum
     | (DeclAttrLst_forward_attrs += declAttr)*
       KW_STRUCT TOKEN_name = ID
@@ -65,7 +57,7 @@ specField
 
 enumItem
     : (DeclAttrLst_forward_attrs += declAttr)*
-      TOKEN_name = ID (ASSIGN_TO AttrValOpt_val = attrVal)? # enumProperty
+      TOKEN_name = ID (ASSIGN_TO AnyExprOpt_val = anyExpr)? # enumProperty
     ;
 
 structField
@@ -100,16 +92,17 @@ parameter
 // Attribute //
 ///////////////
 
-attrItem
-    : TOKEN_name = ID (ASSIGN_TO AttrValOpt_val = attrVal)? # simpleAttrItem
-    | TOKEN_name = ID LEFT_PARENTHESIS (AttrValLst_vals += attrVal (COMMA AttrValLst_vals += attrVal)* COMMA?)? RIGHT_PARENTHESIS # tupleAttrItem
+scopeAttr
+    : AT EXCLAMATION TOKEN_name = ID (LEFT_PARENTHESIS (AttrArgLst_args += attrArg (COMMA AttrArgLst_args += attrArg)* COMMA?)? RIGHT_PARENTHESIS)?
     ;
 
-attrVal
-    : StringExpr_expr = stringExpr # stringAttrVal
-    | IntExpr_expr = intExpr # intAttrVal
-    | FloatExpr_expr = floatExpr # floatAttrVal
-    | BoolExpr_expr = boolExpr # boolAttrVal
+declAttr
+    : AT TOKEN_name = ID (LEFT_PARENTHESIS (AttrArgLst_args += attrArg (COMMA AttrArgLst_args += attrArg)* COMMA?)? RIGHT_PARENTHESIS)?
+    ;
+
+attrArg
+    : AnyExpr_val = anyExpr # unnamedAttrArg
+    | TOKEN_name = ID ASSIGN_TO AnyExpr_val = anyExpr # namedAttrArg
     ;
 
 //////////
@@ -117,16 +110,27 @@ attrVal
 //////////
 
 type
-    : PkgName_pkg_name = pkgName DOT TOKEN_decl_name = ID # longType
-    | TOKEN_decl_name = ID # shortType
-    | TOKEN_decl_name = ID LESS_THAN (TypeLst_args += type (COMMA TypeLst_args += type)* COMMA?)? GREATER_THAN # genericType
+    : (DeclAttrLst_forward_attrs += declAttr)*
+      PkgName_pkg_name = pkgName DOT TOKEN_decl_name = ID # longType
+    | (DeclAttrLst_forward_attrs += declAttr)*
+      TOKEN_decl_name = ID # shortType
+    | (DeclAttrLst_forward_attrs += declAttr)*
+      TOKEN_decl_name = ID LESS_THAN (TypeLst_args += type (COMMA TypeLst_args += type)* COMMA?)? GREATER_THAN # genericType
     | <assoc = right>
+      (DeclAttrLst_forward_attrs += declAttr)*
       LEFT_PARENTHESIS (ParameterLst_parameters += parameter (COMMA ParameterLst_parameters += parameter)* COMMA?)? RIGHT_PARENTHESIS ARROW (TypeOpt_return_ty = type | KW_VOID) # callbackType
     ;
 
 ////////////////
 // Expression //
 ////////////////
+
+anyExpr
+    : StringExpr_expr = stringExpr # stringAnyExpr
+    | IntExpr_expr = intExpr # intAnyExpr
+    | FloatExpr_expr = floatExpr # floatAnyExpr
+    | BoolExpr_expr = boolExpr # boolAnyExpr
+    ;
 
 floatExpr
     : TOKEN_val = FLOAT_LITERAL # literalFloatExpr
@@ -161,8 +165,9 @@ boolExpr
     ;
 
 stringExpr
-    : TOKENLst_vals += STRING_LITERAL+ # literalStringExpr
-    | LEFT_PARENTHESIS StringExpr_expr = stringExpr RIGHT_PARENTHESIS # parenthesisStringExpr
+    : TOKEN_val = STRING_LITERAL # literalStringExpr
+    | TOKEN_val = DOCSTRING_LITERAL # literalDocStringExpr
+    | StringExpr_left = stringExpr StringExpr_right = stringExpr # binaryStringExpr
     ;
 
 ///////////
@@ -346,11 +351,11 @@ KW_FUNCTION
     ;
 
 KW_TRUE
-    : 'TRUE'
+    : 'true'
     ;
 
 KW_FALSE
-    : 'FALSE'
+    : 'false'
     ;
 
 KW_VOID
@@ -359,7 +364,10 @@ KW_VOID
 
 STRING_LITERAL
     : '"' (ESCAPE_SEQUENCE | ~ ('\\' | '"'))* '"'
-    | '"""' .*? '"""'
+    ;
+
+DOCSTRING_LITERAL
+    : '"""' .*? '"""'
     ;
 
 fragment ESCAPE_SEQUENCE

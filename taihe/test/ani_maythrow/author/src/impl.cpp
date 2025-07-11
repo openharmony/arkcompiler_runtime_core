@@ -24,7 +24,7 @@ int32_t maythrow_impl(int32_t a)
         taihe::set_error("some error happen");
         return -1;
     } else {
-        int tempnum = 10;
+        int const tempnum = 10;
         return a + tempnum;
     }
 }
@@ -50,7 +50,8 @@ void noReturnBusinessError()
     taihe::set_business_error(errorcode, "error in noReturnBusinessError");
 }
 }  // namespace
-// The macros used below are automatically generated code.
+
+// because these macros are auto-generate, lint will cause false positive.
 // NOLINTBEGIN
 TH_EXPORT_CPP_API_maythrow(maythrow_impl);
 TH_EXPORT_CPP_API_getDataMaythrow(getDataMaythrow);

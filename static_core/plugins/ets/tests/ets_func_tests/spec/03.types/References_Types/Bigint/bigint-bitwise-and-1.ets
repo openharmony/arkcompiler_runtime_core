@@ -20,7 +20,7 @@ tags: []
 
 function match(a: bigint, b: bigint, c: bigint): void {
     let result: bigint = a & b
-    assertEQ(result, c)
+    arktest.assertEQ(result, c)
 }
 
 function main() : int {

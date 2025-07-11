@@ -138,4 +138,27 @@ ANI_EXPORT ani_string CreateUtf16String(ani_env *env, const uint16_t *data, ani_
     return result;
 }
 
+ANI_EXPORT std::string GetFieldStrUndefined(ani_env *env, ani_object obj, const char *name)
+{
+    ani_ref ref = nullptr;
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(obj, name, &ref));
+    ani_boolean isUndefined = ANI_FALSE;
+    ANI_FATAL_IF_ERROR(env->Reference_IsUndefined(ref, &isUndefined));
+    if (isUndefined == ANI_TRUE) {
+        return std::string();
+    }
+    auto aniStr = static_cast<ani_string>(ref);
+    ASSERT(aniStr != nullptr);
+    return ConvertFromAniString(env, aniStr);
+}
+
+ANI_EXPORT std::string GetFieldStr(ani_env *env, ani_object obj, const char *name)
+{
+    ani_ref ref = nullptr;
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(obj, name, &ref));
+    auto aniStr = static_cast<ani_string>(ref);
+    ASSERT(aniStr != nullptr);
+    return ConvertFromAniString(env, aniStr);
+}
+
 }  // namespace ark::ets::stdlib

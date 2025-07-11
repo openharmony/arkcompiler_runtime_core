@@ -19,31 +19,31 @@ cases:
           let c: int = 2147483647 - 2   // not a constant expression
           enum Enum { first = a, second = b, third = c }
       use: |-
-          assertEQ( Enum.first.valueOf(), a )
-          assertEQ( Enum.second.valueOf(), b )
-          assertEQ( Enum.third.valueOf(), c )
+          arktest.assertEQ( Enum.first.valueOf(), a )
+          arktest.assertEQ( Enum.second.valueOf(), b )
+          arktest.assertEQ( Enum.third.valueOf(), c )
 
     - decl: |-
           enum Enum { first = 1.0, second, third }  // wrong init type
       use: |-
-          assertEQ( Enum.first.valueOf(), 1.0 )
+          arktest.assertEQ( Enum.first.valueOf(), 1.0 )
 
     - decl: |-
           enum Enum { first = 10e1, second, third }  // wrong init type
       use: |-
-          assertEQ( Enum.first.valueOf(), 100 )
+          arktest.assertEQ( Enum.first.valueOf(), 100 )
 
     - decl: |-
           enum Enum { first = true, second = false }  // wrong init type
       use: |-
-          assertTrue( true )
+          arktest.assertTrue( true )
 
     - decl: |-
           enum Enum1 { first = 42, second }
           enum Enum2 { first = Enum1.first.valueOf(), second }  // not a constant expression
       use: |-
-          assertEQ( Enum2.first.valueOf(), 42 )
-          assertEQ( Enum2.second.valueOf(), 43 )
+          arktest.assertEQ( Enum2.first.valueOf(), 42 )
+          arktest.assertEQ( Enum2.second.valueOf(), 43 )
 
     - decl: |-
           enum Enum1 { first = 42, second }

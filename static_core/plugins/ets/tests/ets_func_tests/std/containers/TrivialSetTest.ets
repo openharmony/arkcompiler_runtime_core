@@ -19,14 +19,14 @@ function main(): void {
     s.add(2)
     s.add(3)
     s.add(1)
-    assertEQ( s.size, 3, "size")
-    assertTrue( s.has(1), "has 1")
-    assertTrue( s.has(2), "has 2")
-    assertTrue( s.has(3), "has 3")
+    arktest.assertEQ( s.size, 3, "size")
+    arktest.assertTrue( s.has(1), "has 1")
+    arktest.assertTrue( s.has(2), "has 2")
+    arktest.assertTrue( s.has(3), "has 3")
     const it = s.values()
-    assertEQ( it.next().value!, 1, "it1")
-    assertEQ( it.next().value!, 2, "it2")
-    assertEQ( it.next().value!, 3, "it3")
+    arktest.assertEQ( it.next().value!, 1, "it1")
+    arktest.assertEQ( it.next().value!, 2, "it2")
+    arktest.assertEQ( it.next().value!, 3, "it3")
 
     test_bad_hash()
     test_obj()
@@ -57,16 +57,16 @@ function test_bad_hash(): void {
     s.add(badHash5)
     s.add(badHash30)
 
-    assertTrue( s.has(badHash0), "has 0")
-    assertTrue( s.has(badHash1), "has 1")
-    assertTrue( s.has(badHash5), "has 5")
-    assertTrue( s.has(badHash30), "has 30")
+    arktest.assertTrue( s.has(badHash0), "has 0")
+    arktest.assertTrue( s.has(badHash1), "has 1")
+    arktest.assertTrue( s.has(badHash5), "has 5")
+    arktest.assertTrue( s.has(badHash30), "has 30")
 
-    assertTrue( !s.has(new BadHash(29)), "!has 29")
+    arktest.assertTrue( !s.has(new BadHash(29)), "!has 29")
 
     s.clear()
-    assertEQ( s.size, 0)
-    assertTrue( !s.has(new BadHash(0)), "!has 0")
+    arktest.assertEQ( s.size, 0)
+    arktest.assertTrue( !s.has(new BadHash(0)), "!has 0")
 }
 
 
@@ -75,8 +75,8 @@ function test_obj(): void {
     const b = new Object()
     const s = new Set<Object>()
     s.add(a)
-    assertTrue( !s.has(b))
-    assertTrue( s.has(a))
+    arktest.assertTrue( !s.has(b))
+    arktest.assertTrue( s.has(a))
 
     for (let i = 0; i < 100; i++) {
         const c = new Object()
@@ -84,5 +84,5 @@ function test_obj(): void {
             return;
         }
     }
-    assertTrue( false, "100 hashes were identical")
+    arktest.assertTrue( false, "100 hashes were identical")
 }

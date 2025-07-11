@@ -18,7 +18,11 @@
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from dataclasses import dataclass
+from io import StringIO
 from pathlib import Path
+from typing import NamedTuple
+
+from typing_extensions import override
 
 
 @dataclass(frozen=True)
@@ -27,16 +31,16 @@ class SourceBase(ABC):
 
     @property
     @abstractmethod
-    def source_identifier(self) -> str: 
+    def source_identifier(self) -> str:
         ...
 
     @property
     @abstractmethod
-    def pkg_name(self) -> str: 
+    def pkg_name(self) -> str:
         ...
 
     @abstractmethod
-    def read(self) -> list[str]: 
+    def read(self) -> str:
         ...
 
 
@@ -47,16 +51,19 @@ class SourceFile(SourceBase):
     path: Path
 
     @property
+    @override
     def source_identifier(self) -> str:
         return str(self.path)
 
     @property
+    @override
     def pkg_name(self) -> str:
         return self.path.stem
 
-    def read(self) -> list[str]:
-        with open(self.path) as f:
-            return f.readlines()
+    @override
+    def read(self) -> str:
+        with open(self.path, encoding="utf-8") as f:
+            return f.read()
 
 
 @dataclass(frozen=True)
@@ -64,34 +71,60 @@ class SourceBuffer(SourceBase):
     """Represents a string-based source code."""
 
     name: str
-    buf: str
+    buf: StringIO
 
     @property
+    @override
     def source_identifier(self) -> str:
         return f"<source-buffer-{self.pkg_name}>"
 
     @property
+    @override
     def pkg_name(self) -> str:
         return self.name
 
-    def read(self) -> list[str]:
-        return self.buf.splitlines()
+    @override
+    def read(self) -> str:
+        return self.buf.getvalue()
 
 
 class SourceManager:
     """Manages all input files throughout the compilation."""
 
-    src_list: list[SourceBase]
+    _source_collection: set[SourceBase]
 
     def __init__(self):
-        self.src_list = []
-
-    def add_source(self, sb: SourceBase):
-        self.src_list.append(sb)
+        self._source_collection = set()
 
     @property
     def sources(self) -> Iterable[SourceBase]:
-        return self.src_list
+        return self._source_collection
+
+    def add_source(self, sb: SourceBase):
+        self._source_collection.add(sb)
+
+
+class TextPosition(NamedTuple):
+    """Represents a position within a file (1-based)."""
+
+    row: int
+    col: int
+
+    def __str__(self) -> str:
+        return f"{self.row}:{self.col}"
+
+
+class TextSpan(NamedTuple):
+    """Represents a region within a file (1-based)."""
+
+    start: TextPosition
+    stop: TextPosition
+
+    def __or__(self, other: "TextSpan") -> "TextSpan":
+        return TextSpan(
+            start=min(self.start, other.start),
+            stop=max(self.stop, other.stop),
+        )
 
 
 @dataclass
@@ -101,38 +134,14 @@ class SourceLocation:
     file: SourceBase
     """Required: The source file associated with the location."""
 
-    has_pos: bool
-
-    start_row: int
-    """Optional: The start line number (1-based)."""
-
-    start_col: int
-    """Optional: The start column number (1-based)."""
-
-    stop_row: int
-    """Optional: The stop line number (1-based)."""
-
-    stop_col: int
-    """Optional: The stop column number (1-based)."""
-
-    def __init__(self, file: SourceBase, *pos: int):
-        self.file = file
-
-        if len(pos) == 4:
-            self.start_row, self.start_col, self.stop_row, self.stop_col = pos
-            self.has_pos = True
-        elif len(pos) == 0:
-            self.start_row, self.start_col, self.stop_row, self.stop_col = 0, 0, 0, 0
-            self.has_pos = False
-        else:
-            raise ValueError()
+    span: TextSpan | None = None
+    """Optional: The span of the location within the file."""
 
     def __str__(self) -> str:
-        r = self.file.source_identifier
-        if self.has_pos:
-            r = f"{r}:{self.start_row}:{self.start_col}"
-
-        return r
+        res = self.file.source_identifier
+        if self.span:
+            res = f"{res}:{self.span.start}"
+        return res
 
     @classmethod
     def with_path(cls, path: Path) -> "SourceLocation":

@@ -36,9 +36,9 @@ function getIfaces(): (InterfaceType | undefined)[] {
 	return r
 }
 
-function main(): void throws {
+function main(): void {
 	const ifaces = getIfaces()
-	assertEQ( ifaces.length, 2)
+ arktest.assertEQ( ifaces.length, 2)
 	const intType = Type.of(0)
 	const I3 = new InterfaceTypeCreator("I3")
 		.addInterface(ifaces[0]!)
@@ -66,6 +66,6 @@ function main(): void throws {
 		)
 	const ty = CI3.create()
 	const inst = ty.make()
-	assertEQ( (inst as I1).i(), 30)
-	assertEQ( (inst as I2).i(3), 12)
+ arktest.assertEQ( (inst as I1).i(), 30)
+ arktest.assertEQ( (inst as I2).i(3), 12)
 }

@@ -14,8 +14,8 @@
 
 #include <cassert>
 #include <cstdint>
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/extensions/js/metadata_js.h"
+#include "libabckit/c/abckit.h"
+#include "libabckit/c/extensions/js/metadata_js.h"
 
 #include "libabckit/src/macros.h"
 #include "libabckit/src/metadata_inspect_impl.h"

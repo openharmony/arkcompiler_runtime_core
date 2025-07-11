@@ -14,6 +14,13 @@
  */
 
 import { LinkedList, ListNode } from './@ohos.util.LinkedList';
+import { BusinessError } from "@ohos.base";
+
+const TypeErrorCodeId: number = 401;
+const OutOfBoundsErrorCodeId: number = 10200001;
+
+export type ListForEachCb<T> = (value: T, index: number, list: List<T>) => void;
+export type ListReplaceCb<T> = (value: T, index: number, list: List<T>) => T;
 
 export class List<T> implements Iterable<T> {
     private buffer: LinkedList<T>;
@@ -96,7 +103,7 @@ export class List<T> implements Iterable<T> {
      * @param callbackfn - The function to execute on each element, taking the value, index, and List as arguments.
      *
      */
-    public forEach(callbackfn: (value: T, index: number, list: List<T>) => void): void {
+    public forEach(callbackfn: ListForEachCb<T>): void {
         this.buffer.forEach((value: T, index: number) => {
             callbackfn(value, index, this);
         })
@@ -109,6 +116,8 @@ export class List<T> implements Iterable<T> {
      * @returns The element at the specified index, or undefined if the index is out of range.
      */
     public get(index: number): T | undefined {
+        this.checkIndexType(index);
+
         return this.buffer.get(index);
     }
 
@@ -116,7 +125,6 @@ export class List<T> implements Iterable<T> {
      * Gets the first element of the list.
      *
      * @returns The first element of the list.
-     * @throws RangeError if the list is empty.
      */
     public getFirst(): T | undefined {
         return this.buffer.getFirst();
@@ -158,12 +166,18 @@ export class List<T> implements Iterable<T> {
      * @param fromIndex The starting index of the sub list.
      * @param toIndex The ending index of the sub list.
      * @returns A new list containing the elements from the specified range.
-     * @throws RangeError if the indices are out of range.
+     * @throws BusinessError if the indices are out of range.
      */
     public getSubList(fromIndex: number, toIndex: number): List<T> {
-        if (fromIndex > toIndex || fromIndex < 0 || toIndex > this.length - 1) {
-            throw new RangeError('The value of fromIndex or toIndex is out of range.')
+        this.checkEmptyContainer();
+
+        if (fromIndex < 0 || fromIndex >= toIndex || fromIndex >= this.length) {
+            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"fromIndex\" is out of range. It must be >= 0 && <= ${min(this.length - 1, toIndex - 1)}. Received value is: ${fromIndex}`));
         }
+        if (toIndex > this.length) {
+            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"toIndex\" is out of range. It must be > 0 && <= ${this.length}. Received value is: ${toIndex}`));
+        }
+
         let subList: List<T> = new List<T>()
         let i: number = 0
         let currentNode: ListNode<T> | undefined = this.buffer.head
@@ -192,9 +206,10 @@ export class List<T> implements Iterable<T> {
      *
      * @param element The element to insert.
      * @param index The index at which to insert the element.
-     * @throws RangeError if the index is out of range.
+     * @throws BusinessError if the index is out of range.
      */
     public insert(element: T, index: number): void {
+        this.checkIndex(index, this.length);
         this.buffer.insert(index, element);
     }
 
@@ -222,9 +237,13 @@ export class List<T> implements Iterable<T> {
      *
      * @param index The index of the element to remove.
      * @returns The removed element, or undefined if the index is out of range.
-     * @throws RangeError if the index is out of range.
+     * @throws BusinessError if the index is out of range.
      */
     public removeByIndex(index: number): T | undefined {
+        this.checkIndexType(index);
+        this.checkEmptyContainer();
+        this.checkIndex(index, this.length -1);
+
         return this.buffer.removeByIndex(index);
     }
 
@@ -234,7 +253,7 @@ export class List<T> implements Iterable<T> {
      * @param callbackfn - The callback function taking the value, index, and the List as arguments.
      *
      */
-    public replaceAllElements(callbackfn: (value: T, index: number, list: List<T>) => T): void {
+    public replaceAllElements(callbackfn: ListReplaceCb<T>): void {
         let currentNode: ListNode<T> | undefined = this.buffer.head
         let index: number = 0;
         while (currentNode !== undefined) {
@@ -249,9 +268,13 @@ export class List<T> implements Iterable<T> {
      * @param index The index of the element to set.
      * @param element The new element.
      * @returns The previous element at the specified index, or undefined if the index is out of range.
-     * @throws RangeError if the index is out of range.
+     * @throws BusinessError if the index is out of range.
      */
     public set(index: number, element: T): T | undefined {
+        this.checkIndexType(index);
+        this.checkEmptyContainer();
+        this.checkIndex(index, this.length - 1);
+
         return this.buffer.set(index, element);
     }
 
@@ -262,9 +285,9 @@ export class List<T> implements Iterable<T> {
      */
     public sort(comparator: (firstValue: T, secondValue: T) => number): void {
         if (this.length == 0) {
-            return
+            return;
         } else {
-            this.quickSort(0, this.length - 1, comparator)
+            this.quickSort(0, this.length - 1, comparator);
         }
     }
 
@@ -349,6 +372,23 @@ export class List<T> implements Iterable<T> {
         return undefined;
     }
 
+    private checkIndexType(index: number): void {
+        if (index > Int.MAX_VALUE) {
+            throw new BusinessError(TypeErrorCodeId, new Error(`The type of \"index\" must be small integer. Received value is: ${index}`));
+        }
+    }
+    private checkEmptyContainer(): void {
+        if (this.isEmpty()) {
+            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`Container is empty`));
+        }
+    }
+
+    private checkIndex(index: number, length: number): void {
+        if (index > length || index < 0) {
+            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"index\" is out of range. It must be >= 0 && <= ${length}. Received value is: ${index}`));
+        }
+    }
+
     /**
      * Gets the element at the specified index.
      *
@@ -357,6 +397,12 @@ export class List<T> implements Iterable<T> {
      * @returns The element at the specified index. If the index is out of range, returns undefined.
      */
     public $_get(index: number): T | undefined {
+        if (index > Int.MAX_VALUE) {
+            throw new BusinessError(TypeErrorCodeId, new Error(`The type of \"index\" must be small integer.`));
+        }
+
+        this.checkIndex(index, this.length - 1);
+
         return this.buffer.get(index);
     }
 
@@ -368,6 +414,14 @@ export class List<T> implements Iterable<T> {
      * @param val - The value to set at the specified index.
      */
     public $_set(index: number, val: T): void {
+        if (index > Int.MAX_VALUE || index < 0) {
+            return;
+        }
+
+        this.checkEmptyContainer();
+
+        this.checkIndex(index, this.length - 1);
+
         this.buffer.set(index, val);
     }
 }

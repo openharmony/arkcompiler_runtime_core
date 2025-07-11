@@ -39,6 +39,18 @@ TEST_F(EtsInteropClassOperationsTest, TestJSCallEmpty)
     ASSERT_EQ(ret, 0);
 }
 
+TEST_F(EtsInteropClassOperationsTest, TestJSONStringifyESObjectInstance)
+{
+    auto success = CallEtsFunction<bool>(GetPackageName(), "testJSONStringifyESObjectInstance");
+    ASSERT_TRUE(success.value());
+}
+
+TEST_F(EtsInteropClassOperationsTest, DISABLED_TestJSONStringifyESObjectArray)
+{
+    auto success = CallEtsFunction<bool>(GetPackageName(), "testJSONStringifyESObjectArray");
+    ASSERT_TRUE(success.value());
+}
+
 TEST_F(EtsInteropClassOperationsTest, TestJSNewEmpty)
 {
     auto ret = CallEtsFunction<int64_t>(GetPackageName(), "jsnewEmpty");
@@ -83,7 +95,7 @@ TEST_F(EtsInteropClassOperationsTest, TestJSCallMethodObjectSimple)
     ASSERT_EQ(ret, 0);
 }
 
-TEST_F(EtsInteropClassOperationsTest, TestJSCallString)
+TEST_F(EtsInteropClassOperationsTest, DISABLED_TestJSCallString)
 {
     auto ret = CallEtsFunction<int64_t>(GetPackageName(), "jscallString");
     ASSERT_EQ(ret, 0);

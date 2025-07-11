@@ -37,7 +37,7 @@ function foo (partial: Partial<A>) {
 }
 
 function main() {
-  assertEQ( foo({property: 1}), 42) // No getter or setter from class A is called
+  arktest.assertEQ( foo({property: 1}), 42) // No getter or setter from class A is called
   // 42 is printed as object literal has its own setter and getter
-  assertEQ( i, 0 )
+  arktest.assertEQ( i, 0 )
 }

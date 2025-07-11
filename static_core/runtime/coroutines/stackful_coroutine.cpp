@@ -152,6 +152,10 @@ void StackfulCoroutineContext::ThreadProcImpl()
         // profiling: jump to the NATIVE EP, will end the SCH_ALL there
         co->GetNativeEntrypoint()(co->GetNativeEntrypointParam());
     }
+    if (co->HasPendingException() && co->HasAbortFlag()) {
+        co->HandleUncaughtException();
+        UNREACHABLE();
+    }
     SetStatus(Coroutine::Status::TERMINATING);
     co->GetManager()->TerminateCoroutine(co);
 }
@@ -169,11 +173,17 @@ bool StackfulCoroutineContext::SwitchTo(StackfulCoroutineContext *target)
 
 void StackfulCoroutineContext::RequestSuspend(bool getsBlocked)
 {
+#ifdef ARK_HYBRID
+    GetCoroutine()->UnbindMutator();
+#endif
     SetStatus(getsBlocked ? Coroutine::Status::BLOCKED : Coroutine::Status::RUNNABLE);
 }
 
 void StackfulCoroutineContext::RequestResume()
 {
+#ifdef ARK_HYBRID
+    GetCoroutine()->BindMutator();
+#endif
     UpdateId(os::thread::GetCurrentThreadId(), GetCoroutine());
     SetStatus(Coroutine::Status::RUNNING);
 }

@@ -21,7 +21,7 @@ params: 1 => false
 
 function main(): void {
   let a = "";
-  assertEQ(!a, true, "Empty string is false");
+  arktest.assertEQ(!a, true, "Empty string is false");
   a = "non empty string"
-  assertEQ(!a, false,"Non Empty string is true");
+  arktest.assertEQ(!a, false,"Non Empty string is true");
 }

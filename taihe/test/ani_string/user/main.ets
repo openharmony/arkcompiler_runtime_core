@@ -12,57 +12,57 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as StringIo from "@generated/string_io";
-import * as StringOp from "@generated/string_op";
-import * as System from "std/core/System";
+import {BusinessError} from "@ohos.base";
+import * as StringIo from "string_io";
+import * as StringOp from "string_op";
 
 loadLibrary("ani_string");
 
 function concatString() {
     let str = StringOp.concatString("abc", "d");
-    assertEQ(str, "abcd")
+    arktest.assertEQ(str, "abcd")
 }
 
 function makeString() {
     let str = StringOp.makeString("abc", 3);
-    assertEQ(str, "abcabcabc")
+    arktest.assertEQ(str, "abcabcabc")
 }
 
 function split() {
     let strPair = StringOp.split("abcd", 2);
-    assertEQ(strPair._0, "ab")
-    assertEQ(strPair._1, "cd")
+    arktest.assertEQ(strPair._0, "ab")
+    arktest.assertEQ(strPair._1, "cd")
 }
 
 function split2() {
     let strArray = StringOp.split2("abcd", 2);
-    assertEQ(strArray[0], "ab")
-    assertEQ(strArray[1], "cd")
+    arktest.assertEQ(strArray[0], "ab")
+    arktest.assertEQ(strArray[1], "cd")
 }
 
 function to_i32() {
     let num = StringOp.to_i32("123");
-    assertEQ(num, 123)
+    arktest.assertEQ(num, 123)
 }
 
 function from_i32() {
     let str = StringOp.from_i32(123);
-    assertEQ(str, "123")
+    arktest.assertEQ(str, "123")
 }
 
 function to_f32() {
     let num = StringOp.to_f32("123.123");
-    assertEQ((num - 123.123) > -1e-6 || (num - 123.123) < 1e-6, true)
+    arktest.assertEQ((num - 123.123) > -1e-6 || (num - 123.123) < 1e-6, true)
 }
 
 function from_f32() {
     let str = StringOp.from_f32(123.123f);
-    assertEQ(str, "123.123")
+    arktest.assertEQ(str, "123.123")
 }
 
 function input() {
     let str = StringIo.input();
-    assertEQ(str, "input")
+    arktest.assertEQ(str, "input")
 }
 
 function println() {
@@ -76,13 +76,13 @@ function print() {
 
 function testPlayString() {
     let playStr = StringOp.makePlayStringIface();
-    assertEQ(playStr.name, "PlayString")
+    arktest.assertEQ(playStr.name, "PlayString")
 
     let res = playStr.pickString(["abc", "edf", "xyz"], 1, 2)
-    assertEQ(res, "edfxyz")
+    arktest.assertEQ(res, "edfxyz")
 
     res = playStr.pickString(["abc", "edf", "xyz"], 0, 1)
-    assertEQ(res, "abcedf")
+    arktest.assertEQ(res, "abcedf")
 }
 
 function concatString2() {
@@ -93,15 +93,15 @@ function concatString2() {
     for (let i = 0; i < numbersU8.length; i++) {
         buffer.set(i, numbersU8[i]);
     }
-    assertEQ(StringOp.concatString2(s, 1, sArr, true, buffer), "abcd1234");
-    assertEQ(StringOp.concatString2(s, 1, sArr, false, buffer), "a");
+    arktest.assertEQ(StringOp.concatString2(s, 1, sArr, true, buffer), "abcd1234");
+    arktest.assertEQ(StringOp.concatString2(s, 1, sArr, false, buffer), "a");
 }
 
 
 function main() {
     console.log("run main ... StringTest ...")
 
-    const suite = new ArkTestsuite("StringTest")
+    const suite = new arktest.ArkTestsuite("StringTest")
     suite.addTest("concatString", concatString)
     suite.addTest("concatString2", concatString2)
     suite.addTest("makeString", makeString)
@@ -115,5 +115,5 @@ function main() {
     suite.addTest("println", println)
     suite.addTest("print", print)
     suite.addTest("testPlayString", testPlayString)
-    System.exit(suite.run())
+    exit(suite.run())
 }

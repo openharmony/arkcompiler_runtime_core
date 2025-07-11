@@ -18,8 +18,11 @@
 desc: Declaration context, static field declaration, constant narrowing integer conversion, implicit
 tags: [compile-only, negative]
 ---*/
+
+const s: {{c.from_type}} = {{c.expr|safe}}
+
 class A {
-    public static d: {{c.to_type}} = {{c.expr|safe}}  // constant expression value doesn't fit in the field type range
+    public static d: {{c.to_type}} = s  // constant expression value doesn't fit in the field type range
 }
 
 function main() {}

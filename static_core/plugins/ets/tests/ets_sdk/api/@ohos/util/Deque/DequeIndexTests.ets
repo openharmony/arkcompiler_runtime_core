@@ -19,7 +19,7 @@ import { BusinessError } from "@ohos.base";
 const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main(): int {
-    const suite = new ArkTestsuite("Deque API tests");
+    const suite = new arktest.ArkTestsuite("Deque API tests");
 
     suite.addTest("Deque index getter", testIndexGetter);
     suite.addTest("Deque index setter", testIndexSetter);
@@ -35,7 +35,7 @@ function testIndexGetter() {
     let deque = new Deque<number>();
     initializeDeque(deque, testNumbers);
     for (let i: int = 0; i < deque.length; i++) {
-        assertEQ(deque[i], testNumbers[i], `Element at index ${i} should match`);
+        arktest.assertEQ(deque[i], testNumbers[i], `Element at index ${i} should match`);
     }
 }
 
@@ -47,10 +47,10 @@ function testIndexSetter() {
     }
     let forEachCount = 0;
     deque.forEach((value: number) => {
-        assertEQ(value, 3, `Element should match`);
+        arktest.assertEQ(value, 3, `Element should match`);
         forEachCount++;
     });
-    assertEQ(deque.length, forEachCount, "Deque length should match forEach count");
+    arktest.assertEQ(deque.length, forEachCount, "Deque length should match forEach count");
 }
 
 function testIndexOutOfRange() {
@@ -58,11 +58,11 @@ function testIndexOutOfRange() {
     initializeDeque(deque, testNumbers);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
-            `The value of \"index\" is out of range. It must be >= 0 && <= ${Int.MAX_VALUE}. Received value is: 36`) &&
+            `The value of \"index\" is out of range. It must be >= 0 && <= 29. Received value is: -30`) &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    expectThrow(() => {deque[testNumbers.length + 6]}, exceptionCheck);
-    expectThrow(() => {deque[testNumbers.length + 6] = 0}, exceptionCheck);
+    arktest.expectThrow(() => {deque[-testNumbers.length]}, exceptionCheck);
+    arktest.expectThrow(() => {deque[-testNumbers.length] = 0}, exceptionCheck);
 }
 
 function initializeDeque<T>(deque: Deque<T>, sourceArray: T[]) {

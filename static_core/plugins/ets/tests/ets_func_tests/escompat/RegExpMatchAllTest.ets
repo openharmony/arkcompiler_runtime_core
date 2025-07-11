@@ -15,7 +15,7 @@
 
 function main(): int {
     let failure = 0
-    let emptyArray : RegExpMatchArray[] = []
+    let emptyArray : FixedArray<RegExpMatchArray> = []
     failure += test(new RegExp("c", "g"), "c", [new RegExpMatchArray(0, "c", ["c"])])
     failure += test(new RegExp("b", "g"), "a", emptyArray)
     failure += test(new RegExp(".", "g"), "ab", [new RegExpMatchArray(0, "ab", ["a"]), new RegExpMatchArray(1, "ab", ["b"])])
@@ -31,14 +31,14 @@ function main(): int {
     let regexp = new RegExp(".", "g")
     let s = "abc"
     regexp.exec(s)
-    failure += checkTestResult(regexp.lastIndex as int, 1)
+    failure += checkTestResult(regexp.lastIndex.toInt(), 1)
     let iter = s.matchAll(regexp)
     regexp.exec(s)
-    failure += checkTestResult(regexp.lastIndex as int, 2)
+    failure += checkTestResult(regexp.lastIndex.toInt(), 2)
     let next_result = iter.next()
     failure += checkTestResult(next_result.value!, new RegExpMatchArray(1, "abc", ["b"]))
     failure += checkTestResult(next_result.done, false)
-    failure += checkTestResult(regexp.lastIndex as int, 2)
+    failure += checkTestResult(regexp.lastIndex.toInt(), 2)
 
     let regexplastIndextest = new RegExp("(?:ab|cd)\\d?","g");
     regexplastIndextest.lastIndex = -1;
@@ -47,7 +47,7 @@ function main(): int {
     return failure
 }
 
-function test(r: RegExp, str: String, expected: RegExpMatchArray[]) {
+function test(r: RegExp, str: String, expected: FixedArray<RegExpMatchArray>) {
     let iter = r.matchAll(str)
     let failure = 0
     let v = iter.next();
@@ -121,8 +121,8 @@ function checkTestResult(actual : RegExpExecArray | null, expected : RegExpExecA
     }
 
     for (let i = 0; i < actual.indices.length; i++) {
-        let actInd = (Value.of(actual.indices) as ArrayValue).getElement(i).getData() as number[]
-        let expInd = (Value.of(expected.indices) as ArrayValue).getElement(i).getData() as number[]
+        let actInd = (reflect.Value.of(actual.indices) as ArrayValue).getElement(i).getData() as FixedArray<number>
+        let expInd = (reflect.Value.of(expected.indices) as ArrayValue).getElement(i).getData() as FixedArray<number>
         for (let j = 0; j < actInd.length; j++) {
             if (actInd[j] != expInd[j]) {
             console.println("check index: " + i);

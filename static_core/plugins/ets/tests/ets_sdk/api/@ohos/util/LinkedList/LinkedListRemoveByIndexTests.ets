@@ -14,9 +14,13 @@
  */
 
 import {LinkedList} from "@ohos.util.LinkedList";
+import {BusinessError} from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: number = 10200001;
+const EmptyContainerErrorCodeId: number = 10200010;
 
 function main() {
-    const suite = new ArkTestsuite("LinkedList API tests");
+    const suite = new arktest.ArkTestsuite("LinkedList API tests");
 
     suite.addTest("LinkedList removeByIndex with an index within the container's length range",
         testRemoveByIndexWithinRange);
@@ -60,128 +64,120 @@ class TestData {
 function testRemoveByIndexWithinRange() {
     let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
-    assertEQ(linkedList.removeByIndex(TestData.testNumber1), TestData.testNumber1, "Removed element should be 1");
-    assertEQ(linkedList.get(0), 0, "Element at index 0 should be 0");
+    arktest.assertEQ(linkedList.removeByIndex(TestData.testNumber1), TestData.testNumber1, "Removed element should be 1");
+    arktest.assertEQ(linkedList.get(0), 0, "Element at index 0 should be 0");
     for (let i: number = TestData.testNumber1; i < linkedList.length; i++) {
-        assertEQ(linkedList.get(i), TestData.arrayForNumber1[i + TestData.testNumber1], "Element should match");
+        arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber1[i + TestData.testNumber1], "Element should match");
     }
-    assertEQ(linkedList.length, TestData.arrayForNumber1.length - TestData.testNumber1,
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length - TestData.testNumber1,
         "LinkedList length should be - 1");
 }
 
 function testRemoveByIndexOutsideRange() {
     let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
-    let errorCount = 0;
-    try {
-        linkedList.removeByIndex(TestData.testNumber1w);
-    } catch (e) {
-        if (e instanceof RangeError) {
-            errorCount++;
-        }
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: 10000") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    try {
-        linkedList.removeByIndex(-TestData.testNumber6);
-    } catch (e) {
-        if (e instanceof RangeError) {
-            errorCount++;
-        }
+    let exceptionCheck1 = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: -6") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    assertEQ(errorCount, TestData.testNumber2, "Throw error when LinkedList index out of range");
+    arktest.expectThrow(() => {linkedList.removeByIndex(TestData.testNumber1w)}, exceptionCheck);
+    arktest.expectThrow(() => {linkedList.removeByIndex(-TestData.testNumber6)}, exceptionCheck1);
 }
 
 function testRemoveByIndexUndefined() {
     let linkedList = new LinkedList<number | string | boolean | null | object | undefined>();
     linkedList.add(undefined);
     linkedList.add(TestData.arrayForNumber1);
-    assertEQ(linkedList.removeByIndex(0), undefined, "The result should be undefined");
+    arktest.assertEQ(linkedList.removeByIndex(0), undefined, "The result should be undefined");
 }
 
 function testRemoveByIndexAtBoundary() {
     let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
-    assertEQ(linkedList.removeByIndex(TestData.arrayForNumber1.length - TestData.testNumber1), TestData.testNumber20,
+    arktest.assertEQ(linkedList.removeByIndex(TestData.arrayForNumber1.length - TestData.testNumber1), TestData.testNumber20,
         "Removed element should - 1");
-    assertEQ(linkedList.removeByIndex(0), 0, "Removed element should be 0");
+    arktest.assertEQ(linkedList.removeByIndex(0), 0, "Removed element should be 0");
     for (let i: number = 0; i < linkedList.length; i++) {
-        assertEQ(linkedList.get(i), TestData.arrayForNumber1[i + TestData.testNumber1], "Element should match");
+        arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber1[i + TestData.testNumber1], "Element should match");
     }
-    assertEQ(linkedList.length, TestData.arrayForNumber1.length - TestData.testNumber2,
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length - TestData.testNumber2,
         "LinkedList length should be - 2");
 }
 
 function testRemoveFirstFromEmptyContainer() {
     let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
-    assertEQ(linkedList.removeFirst(), 0, "Removed first element should be 0");
+    arktest.assertEQ(linkedList.removeFirst(), 0, "Removed first element should be 0");
     for (let i: number = 0; i < linkedList.length; i++) {
-        assertEQ(linkedList.get(i), TestData.arrayForNumber1[i + TestData.testNumber1], "Element should match");
+        arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber1[i + TestData.testNumber1], "Element should match");
     }
-    assertEQ(linkedList.length, TestData.arrayForNumber1.length - TestData.testNumber1, "LinkedList length should - 1");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length - TestData.testNumber1, "LinkedList length should - 1");
 }
 
 function testRemoveFirstFromNonEmptyContainer() {
     let linkedList = new LinkedList<number>();
-    try {
-        linkedList.removeFirst();
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "Throw error when LinkedList index out of range");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
+            ((e as BusinessError).code == EmptyContainerErrorCodeId);
     }
-    assertFalse(false, "Throw error when LinkedList index out of range");
+    arktest.expectThrow(() => {linkedList.removeFirst()}, exceptionCheck);
 }
 
 function testRemoveLastFromEmptyContainer() {
     let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
-    assertEQ(linkedList.removeLast(), TestData.testNumber20, "Removed first element should be 20");
+    arktest.assertEQ(linkedList.removeLast(), TestData.testNumber20, "Removed first element should be 20");
     for (let i: number = 0; i < linkedList.length; i++) {
-        assertEQ(linkedList.get(i), TestData.arrayForNumber1[i], "Element should match");
+        arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber1[i], "Element should match");
     }
-    assertEQ(linkedList.length, TestData.arrayForNumber1.length - TestData.testNumber1, "LinkedList length should - 1");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length - TestData.testNumber1, "LinkedList length should - 1");
 }
 
 function testRemoveLastFromNonEmptyContainer() {
     let linkedList = new LinkedList<number>();
-    try {
-        linkedList.removeLast();
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "Throw error when LinkedList index out of range");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
+            ((e as BusinessError).code == EmptyContainerErrorCodeId);
     }
-    assertFalse(false, "Throw error when LinkedList index out of range");
+    arktest.expectThrow(() => {linkedList.removeLast()}, exceptionCheck);
 }
 
 function testRemoveUniqueElement() {
     let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber2);
-    assertTrue(linkedList.remove(TestData.testNumber1), "Element 1 should be removed");
-    assertTrue(linkedList.remove(TestData.testNumber5), "Element 5 should be removed");
+    arktest.assertTrue(linkedList.remove(TestData.testNumber1), "Element 1 should be removed");
+    arktest.assertTrue(linkedList.remove(TestData.testNumber5), "Element 5 should be removed");
     for (let i: number = 0; i < linkedList.length; i++) {
-        assertEQ(linkedList.get(i), TestData.arrayForNumber2[i + TestData.testNumber1], "Element should match");
+        arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber2[i + TestData.testNumber1], "Element should match");
     }
-    assertEQ(linkedList.length, TestData.arrayForNumber2.length - TestData.testNumber2, "LinkedList length should - 2");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber2.length - TestData.testNumber2, "LinkedList length should - 2");
 }
 
 function testRemoveInexistentElement() {
     let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber2);
-    assertFalse(linkedList.remove(TestData.testNumber6), "Element 6 is inexistent");
+    arktest.assertFalse(linkedList.remove(TestData.testNumber6), "Element 6 is inexistent");
     for (let i: number = 0; i < linkedList.length; i++) {
-        assertEQ(linkedList.get(i), TestData.arrayForNumber2[i], "Element should match");
+        arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber2[i], "Element should match");
     }
-    assertEQ(linkedList.length, TestData.arrayForNumber2.length, "LinkedList length should should not change");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber2.length, "LinkedList length should should not change");
 }
 
 function testRemoveRepeatedElement() {
     let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber3);
-    assertTrue(linkedList.remove(TestData.testNumber2), "Element 2 should be removed");
-    assertEQ(linkedList.get(0), TestData.testNumber1, "First element should be 1");
+    arktest.assertTrue(linkedList.remove(TestData.testNumber2), "Element 2 should be removed");
+    arktest.assertEQ(linkedList.get(0), TestData.testNumber1, "First element should be 1");
     for (let i: number = TestData.testNumber1; i < linkedList.length - TestData.testNumber1; i++) {
-        assertEQ(linkedList.get(i), TestData.arrayForNumber3[i + TestData.testNumber1], "Element should match");
+        arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber3[i + TestData.testNumber1], "Element should match");
     }
-    assertEQ(linkedList.length, TestData.arrayForNumber3.length - TestData.testNumber1, "LinkedList length should - 1");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber3.length - TestData.testNumber1, "LinkedList length should - 1");
 }
 
 function initializeLinkedList<T>(linkedList: LinkedList<T>, sourceArray: Array<T>) {

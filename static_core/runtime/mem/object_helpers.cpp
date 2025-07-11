@@ -237,7 +237,7 @@ void DumpClass(const Class *cls, std::basic_ostream<char, std::char_traits<char>
     DumpObject(clsObject);
 }
 
-ObjectHeader *GetForwardAddress(ObjectHeader *objectHeader)
+ObjectHeader *GetForwardAddress(const ObjectHeader *objectHeader)
 {
     ASSERT(objectHeader->IsForwarded());
     MarkWord markWord = objectHeader->AtomicGetMark();

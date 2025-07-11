@@ -58,7 +58,8 @@ enum InstFlags {
     LITERALARRAY_ID = (1U << 12U),
     CALL_RANGE = (1U << 13U),
     STATIC_FIELD_ID = (1U << 14U),
-    STATIC_METHOD_ID = (1U << 15U)
+    STATIC_METHOD_ID = (1U << 15U),
+    ANY_CALL = (1U << 16U)
 };
 
 constexpr int INVALID_REG_IDX = -1;
@@ -176,6 +177,11 @@ struct Ins {
     bool IsPseudoCall() const
     {
         return HasFlag(InstFlags::PSEUDO) && HasFlag(InstFlags::CALL);
+    }
+
+    bool IsAnyCall() const
+    {
+        return HasFlag(InstFlags::ANY_CALL);
     }
 
     bool IsReturn() const

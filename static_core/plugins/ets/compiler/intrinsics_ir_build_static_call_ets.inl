@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_RUNTIME_IS_SAME_REFERENCE: {
+    Builder()->BuildStdRuntimeEquals(bcInst_, ACC_READ);
+    break;
+}
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_DOUBLE_IS_NAN:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_FLOAT_IS_NAN: {
     Builder()->BuildIsNanIntrinsic(bcInst_, ACC_READ);
@@ -85,5 +89,38 @@ case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_CHAR_IS_LOWER_CASE: {
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_CHAR_TO_LOWER_CASE: {
     Builder()->BuildCharToLowerCaseIntrinsic(bcInst_, ACC_READ);
+    break;
+}
+case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_WRITE_INT8:
+case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_WRITE_INT16:
+case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_WRITE_INT32:
+case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_WRITE_INT64:
+case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_WRITE_FLOAT32:
+case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_WRITE_FLOAT64:
+case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_WRITE_NUMBER:
+case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_WRITE_BOOLEAN: {
+    Builder()->BuildUnsafeStoreIntrinsic(bcInst_, ACC_READ);
+    break;
+}
+case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_READ_INT8:
+case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_READ_INT16:
+case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_READ_INT32:
+case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_READ_INT64:
+case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_READ_BOOLEAN:
+case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_READ_FLOAT32:
+case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_READ_FLOAT64:
+case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_READ_NUMBER: {
+    Builder()->BuildUnsafeLoadIntrinsic(bcInst_, ACC_READ);
+    break;
+}
+case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_GET_STRING_SIZE_IN_BYTES: {
+    Builder()->BuildStringSizeInBytes(bcInst_, ACC_READ);
+    break;
+}
+case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_READ_STRING:
+case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_WRITE_STRING: {
+    if (Builder()->IsInBootContext()) {
+        BuildDefaultStaticIntrinsic(intrinsicId);
+    }
     break;
 }

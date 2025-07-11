@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,22 +16,32 @@
 #ifndef COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_H
 #define COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_H
 
-#include "common_interfaces/objects/string/base_string_declare.h"
+#include "objects/string/base_string.h"
 
 namespace common {
 /*
- +-----------------------------+ <-- offset 0
- |      BaseObject fields      |
- +-----------------------------+
- | LengthAndFlags (uint32_t)   |
- +-----------------------------+
- | RawHashcode (uint32_t)      |
- +-----------------------------+ <-- offset = BaseString::SIZE
- | First (BaseString *)        | <-- FIRST_OFFSET
- +-----------------------------+
- | Second (BaseString *)       | <-- SECOND_OFFSET
- +-----------------------------+ <-- SIZE
+ +--------------------------------+ <-- offset 0
+ |      BaseObject fields         |
+ +--------------------------------+
+ | Padding (uint64_t)             |
+ +--------------------------------+
+ | LengthAndFlags (uint32_t)      |
+ +--------------------------------+
+ | RawHashcode (uint32_t)         |
+ +--------------------------------+ <-- offset = BaseString::SIZE
+ | LeftSubString (BaseString *)   | <-- LEFT_OFFSET
+ +--------------------------------+
+ | RightSubString (BaseString *)  | <-- RIGHT_OFFSET
+ +--------------------------------+ <-- SIZE
 */
+/**
+ * @class TreeString
+ * @brief Represents a concatenated string composed of two BaseString components.
+ *
+ * Used for efficient concatenation of two substrings without allocating a new flat buffer.
+ * TreeString keeps references to both left-hand and right-hand BaseStrings and calculates
+ * character data on demand.
+ */
 class TreeString : public BaseString {
 public:
     BASE_CAST_CHECK(TreeString, IsTreeString);
@@ -41,15 +51,50 @@ public:
     // Minimum length for a tree string
     static constexpr uint32_t MIN_TREE_STRING_LENGTH = 13;
 
-    static constexpr size_t FIRST_OFFSET = BaseString::SIZE;
-    POINTER_FIELD(First, FIRST_OFFSET, SECOND_OFFSET);
-    POINTER_FIELD(Second, SECOND_OFFSET, SIZE);
+    static constexpr size_t LEFT_OFFSET = BaseString::SIZE;
+    POINTER_FIELD(LeftSubString, LEFT_OFFSET, RIGHT_OFFSET)
+    POINTER_FIELD(RightSubString, RIGHT_OFFSET, SIZE)
 
+    /**
+     * @brief Create a TreeString by joining two substrings.
+     * @tparam Allocator Callable allocator.
+     * @tparam WriteBarrier A callable used to manage memory writes.
+     * @param allocator Allocator instance.
+     * @param writeBarrier Memory write barrier.
+     * @param left Left-hand string.
+     * @param right Right-hand string.
+     * @param length Total length of joined string.
+     * @param compressed Whether string is compressed (UTF-8).
+     * @return TreeString pointer.
+     */
+    template <typename Allocator, typename WriteBarrier,
+              objects_traits::enable_if_is_allocate<Allocator, BaseObject *>  = 0,
+              objects_traits::enable_if_is_write_barrier<WriteBarrier>  = 0>
+    static TreeString *Create(Allocator &&allocator, WriteBarrier &&writeBarrier, ReadOnlyHandle<BaseString> left,
+                              ReadOnlyHandle<BaseString> right, uint32_t length, bool compressed);
+
+    /**
+     * @brief Check if the TreeString can be flattened to a single buffer.
+     *
+     * A TreeString is flat if both its components are flat and directly accessible.
+     *
+     * @tparam ReadBarrier Callable for safe memory access.
+     * @param readBarrier Barrier function for accessing memory.
+     * @return true if the string is flat; false otherwise.
+     */
     template <typename ReadBarrier>
     bool IsFlat(ReadBarrier &&readBarrier) const;
 
+    /**
+     * @brief Get UTF-16 character at given index with optional bounds check.
+     * @tparam verify Whether to perform bounds checking.
+     * @tparam ReadBarrier Callable for memory access.
+     * @param readBarrier Barrier function.
+     * @param index Index in the TreeString.
+     * @return UTF-16 code unit at specified index.
+     */
     template <bool verify = true, typename ReadBarrier>
     uint16_t Get(ReadBarrier &&readBarrier, int32_t index) const;
 };
-}
+} // namespace common
 #endif //COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_H

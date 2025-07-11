@@ -101,7 +101,7 @@ cases:
       type B = A<X>[]
 
   - use: |-
-      let v: A<B> = new A<B>([new A<X>(new X())])
+      let v: A<B> = new A<B>([new A<X|null>(new X())])
     decl: |-
       type B = A<X|null>[]
     bound: ' extends Object|null'
@@ -123,7 +123,7 @@ cases:
   # not a reference type
   - use: |-
       let v: A<Color> = new A<Color>(Color.Red)
-      assertTrue(v != null)
+      arktest.assertTrue(v != null)
 
   - use: |-
       let v: A<B> = new A<B>([new A<X|null>(new X())])

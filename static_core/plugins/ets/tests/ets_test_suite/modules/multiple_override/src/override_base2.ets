@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/*---
+  tags: [not-a-test]
+  files: [base2.ets]
+  arktsconfig: arktsconfig.json
+---*/
+
 import { Base2 } from "./base2";
 
 export class OverrideBase2 extends Base2 {

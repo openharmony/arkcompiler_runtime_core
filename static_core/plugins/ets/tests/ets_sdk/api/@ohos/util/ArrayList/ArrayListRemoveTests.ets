@@ -19,7 +19,7 @@ import {BusinessError} from "@ohos.base";
 const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
-    const suite = new ArkTestsuite("ArrayList API tests");
+    const suite = new arktest.ArkTestsuite("ArrayList API tests");
 
     suite.addTest("ArrayList remove with unique element", testRemoveUniqueElement);
     suite.addTest("ArrayList remove with repeated element", testRemoveRepeatedElement);
@@ -59,9 +59,9 @@ function testRemoveUniqueElement() {
     arrayList.remove(TestData.testNumber1);
     arrayList.remove(TestData.testNumber2);
     for (let i: number = 0; i < arrayList.length; i++) {
-        assertEQ(arrayList[i], TestData.testNumber3, `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList[i], TestData.testNumber3, `Element at index ${i} should match`);
     }
-    assertEQ(arrayList.length, TestData.testNumber5, "ArrayList length should be 5 after remove operation");
+    arktest.assertEQ(arrayList.length, TestData.testNumber5, "ArrayList length should be 5 after remove operation");
 }
 
 function testRemoveRepeatedElement() {
@@ -72,9 +72,9 @@ function testRemoveRepeatedElement() {
     }
     arrayList.remove(TestData.testNumber3);
     for (let i: number = TestData.testNumber1; i < arrayList.length; i++) {
-        assertEQ(arrayList[i], TestData.testNumber3, `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList[i], TestData.testNumber3, `Element at index ${i} should match`);
     }
-    assertEQ(arrayList.length, TestData.testNumber5, "ArrayList length should be 5 after remove operation");
+    arktest.assertEQ(arrayList.length, TestData.testNumber5, "ArrayList length should be 5 after remove operation");
 }
 
 function testRemoveNonExistentElement() {
@@ -85,10 +85,10 @@ function testRemoveNonExistentElement() {
     }
     let array = arrayList.convertToArray();
     let result: boolean = arrayList.remove(TestData.testNumber6);
-    assertFalse(result, "Remove operation should return false for non-existent element");
-    assertEQ(arrayList.length, TestData.testNumber6, "ArrayList length should remain unchanged");
+    arktest.assertFalse(result, "Remove operation should return false for non-existent element");
+    arktest.assertEQ(arrayList.length, TestData.testNumber6, "ArrayList length should remain unchanged");
     for (let i: number = 0; i < arrayList.length; i++) {
-        assertEQ(arrayList[i], array[i], `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList[i], array[i], `Element at index ${i} should match`);
     }
 }
 
@@ -97,9 +97,9 @@ function testRemoveByRange() {
     initializeArrayList(arrayList, TestData.forNumber);
     arrayList.removeByRange(0, TestData.testNumber1);
     for (let i: int = 0; i < arrayList.length; i++) {
-        assertEQ(arrayList[i], TestData.result7[i], `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList[i], TestData.result7[i], `Element at index ${i} should match`);
     }
-    assertEQ(arrayList.length, TestData.testNumber5 - TestData.testNumber1,
+    arktest.assertEQ(arrayList.length, TestData.testNumber5 - TestData.testNumber1,
         "ArrayList length should be 4 after removeByRange operation");
 }
 
@@ -111,7 +111,7 @@ function testRemoveByRangeStartIndexOutOfRange() {
             "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 2. Received value is: -1") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    expectThrow(() => {arrayList.removeByRange(-TestData.testNumber1, TestData.testNumber3)}, exceptionCheck);
+    arktest.expectThrow(() => {arrayList.removeByRange(-TestData.testNumber1, TestData.testNumber3)}, exceptionCheck);
 }
 
 function testRemoveByRangeEndIndexOutOfRange() {
@@ -122,7 +122,7 @@ function testRemoveByRangeEndIndexOutOfRange() {
             "The value of \"toIndex\" is out of range. It must be >= 0 && <= 5. Received value is: 8") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    expectThrow(() => {arrayList.removeByRange(TestData.testNumber1, TestData.testNumber8)}, exceptionCheck);
+    arktest.expectThrow(() => {arrayList.removeByRange(TestData.testNumber1, TestData.testNumber8)}, exceptionCheck);
 }
 
 function testRemoveByRangeEndIndexSmallerThanStartIndex() {
@@ -133,7 +133,7 @@ function testRemoveByRangeEndIndexSmallerThanStartIndex() {
             "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 0. Received value is: 3") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    expectThrow(() => {arrayList.removeByRange(TestData.testNumber3, TestData.testNumber1)}, exceptionCheck);
+    arktest.expectThrow(() => {arrayList.removeByRange(TestData.testNumber3, TestData.testNumber1)}, exceptionCheck);
 }
 
 function testRemoveByRangeEmptyContainer() {
@@ -142,7 +142,7 @@ function testRemoveByRangeEmptyContainer() {
         return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    expectThrow(() => {arrayList.removeByRange(0, TestData.testNumber1)}, exceptionCheck);
+    arktest.expectThrow(() => {arrayList.removeByRange(0, TestData.testNumber1)}, exceptionCheck);
 }
 
 function testRemoveByRangeStartIndexEqualsEndIndex() {
@@ -153,14 +153,14 @@ function testRemoveByRangeStartIndexEqualsEndIndex() {
             "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 2. Received value is: 3") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    expectThrow(() => {arrayList.removeByRange(TestData.testNumber3, TestData.testNumber3)}, exceptionCheck);
+    arktest.expectThrow(() => {arrayList.removeByRange(TestData.testNumber3, TestData.testNumber3)}, exceptionCheck);
 }
 
 function testRemoveByRangeFullRange() {
     let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
     arrayList.removeByRange(0, TestData.testNumber5);
-    assertEQ(arrayList.length, 0, "ArrayList length should be 0 after removeByRange operation");
+    arktest.assertEQ(arrayList.length, 0, "ArrayList length should be 0 after removeByRange operation");
 }
 
 function initializeArrayList<T>(arrayList: ArrayList<T>, sourceArray: T[]) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,13 @@
 #include "libpandabase/mem/pool_map.h"
 
 namespace ark::mem {
+// Note: we only have 4GB of memory on arm32, so we need to limit the max size of the stack like allocator
+// details can be found in #26461
+#ifdef PANDA_TARGET_ARM32
+static constexpr size_t STACK_LIKE_ALLOCATOR_DEFAUL_MAX_SIZE = 2_MB;
+#else
 static constexpr size_t STACK_LIKE_ALLOCATOR_DEFAUL_MAX_SIZE = 48_MB;
+#endif
 
 //                                          Allocation flow looks like that:
 //

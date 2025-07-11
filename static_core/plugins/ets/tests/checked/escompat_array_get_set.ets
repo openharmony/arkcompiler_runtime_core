@@ -13,69 +13,71 @@
  * limitations under the License.
  */
 
-//! CHECKER JIT IR Builder inlining escompat.Array get/set operations.
-//! RUN     force_jit: true, options: "--compiler-regex='.*(test1)|(array[GS]et).*'", entry: "escompat_array_get_set.ETSGLOBAL::test1"
+//! CHECKER JIT IR Builder: Case #1: escompat.Array get/set operations.
+//! RUN     force_jit: true, options: "--compiler-regex='.*(test1|array[GS]et).*'", entry: "escompat_array_get_set.ETSGLOBAL::test1"
 //! METHOD  "escompat_array_get_set.ETSGLOBAL::arrayGet"
 //! PASS_AFTER "IrBuilder"
-//! INST_NOT   /CallVirtual/
-//! INST       /NullCheck/
-//! INST       /BoundsCheck/
-//! INST       /LoadArray/
+//! INST_NOT   /Intrinsic.EscompatArrayGet/
+//! INST       /CallVirtual.*escompat\.Array::\$_get/
+//! PASS_AFTER "Inline"
+//! INST_NOT   /Intrinsic.EscompatArrayGet/
 //! METHOD  "escompat_array_get_set.ETSGLOBAL::arraySet"
 //! PASS_AFTER "IrBuilder"
-//! INST_NOT   /CallVirtual/
-//! INST       /NullCheck/
-//! INST       /BoundsCheck/
-//! INST       /StoreArray/
+//! INST_NOT   /Intrinsic.EscompatArraySet/
+//! INST       /CallVirtual.*escompat\.Array::\$_set/
+//! PASS_AFTER "Inline"
+//! INST_NOT   /Intrinsic.EscompatArraySet/
 
-//! CHECKER AOT IR Builder inlining escompat.Array get/set operations.
+//! CHECKER AOT IR Builder: Case #1: IRBuilder pass must NOT inline Array get/set since neither class Array nor get/set method is final.
 //! SKIP_IF    @architecture == "arm32"
 //! RUN_PAOC   options: "--compiler-regex='.*array[GS]et.*'"
 //! METHOD  "escompat_array_get_set.ETSGLOBAL::arrayGet"
 //! PASS_AFTER "IrBuilder"
-//! INST_NOT   /CallVirtual/
-//! INST       /NullCheck/
-//! INST       /BoundsCheck/
-//! INST       /LoadArray/
+//! INST_NOT   /Intrinsic.EscompatArrayGet/
+//! INST       /CallVirtual.*escompat\.Array::\$_get/
+//! PASS_AFTER "Inline"
+//! INST_NOT   /Intrinsic.EscompatArrayGet/
+//! INST       /Call((Virtual)|(Static)) .*escompat\.Array::\$_get/
 //! METHOD  "escompat_array_get_set.ETSGLOBAL::arraySet"
 //! PASS_AFTER "IrBuilder"
-//! INST_NOT   /CallVirtual/
-//! INST       /NullCheck/
-//! INST       /BoundsCheck/
-//! INST       /StoreArray/
+//! INST_NOT   /Intrinsic.EscompatArraySet/
+//! INST       /CallVirtual.*escompat\.Array::\$_set/
+//! PASS_AFTER "Inline"
+//! INST_NOT   /Intrinsic.EscompatArraySet/
+//! INST       /Call((Virtual)|(Static)) .*escompat\.Array::\$_set/
 
-//! CHECKER JIT IR Builder inlining escompat.Array get/set operations (with exceptions).
+//! CHECKER JIT IR Builder: Case #2: escompat.Array get/set operations (with exceptions).
 //! RUN        force_jit: true, entry: "escompat_array_get_set.ETSGLOBAL::test2"
 //! EVENT      /Compilation,escompat_array_get_set.ETSGLOBAL::__noinline__testRangeError,.*,COMPILED/
 //! METHOD  "escompat_array_get_set.ETSGLOBAL::__noinline__testRangeError"
 //! PASS_AFTER "IrBuilder"
-//! INST_NOT   /CallVirtual/
-//! INST       /NullCheck/
-//! INST       /BoundsCheck/
-//! INST       /StoreArray/
+//! INST_NOT   /Intrinsic.EscompatArraySet/
+//! INST       /CallVirtual.*escompat\.Array::\$_set/
+//! PASS_AFTER "Inline"
+//! INST_NOT   /Intrinsic.EscompatArraySet/
 //! EVENT      /Compilation,escompat_array_get_set.ETSGLOBAL::__noinline__testClassCastError,.*,COMPILED/
 //! METHOD  "escompat_array_get_set.ETSGLOBAL::__noinline__testClassCastError"
 //! PASS_AFTER "IrBuilder"
-//! INST_NOT   /CallVirtual/
-//! INST       /NullCheck/
-//! INST       /BoundsCheck/
-//! INST       /LoadArray/
+//! INST_NOT   /Intrinsic.EscompatArrayGet/
+//! INST       /CallVirtual.*escompat\.Array::\$_get/
+//! PASS_AFTER "Inline"
+//! INST_NOT   /Intrinsic.EscompatArrayGet/
 
-//! CHECKER AOT IR Builder inlining escompat.Array get/set operations (with exceptions).
+//! CHECKER AOT IR Builder: Case #2: escompat.Array get/set operations (with exceptions).
 //! SKIP_IF    @architecture == "arm32"
 //! RUN_PAOC   options: ""
 //! METHOD  "escompat_array_get_set.ETSGLOBAL::__noinline__testRangeError"
 //! PASS_AFTER "IrBuilder"
-//! INST_NOT   /CallVirtual/
-//! INST       /NullCheck/
-//! INST       /BoundsCheck/
-//! INST       /StoreArray/
+//! INST_NOT   /Intrinsic.EscompatArraySet/
+//! INST       /CallVirtual.*escompat\.Array::\$_set/
+//! PASS_AFTER "Inline"
+//! INST_NOT   /Intrinsic.EscompatArraySet/
 //! METHOD  "escompat_array_get_set.ETSGLOBAL::__noinline__testClassCastError"
 //! PASS_AFTER "IrBuilder"
-//! INST_NOT   /CallVirtual/
-//! INST       /NullCheck/
-//! INST       /BoundsCheck/
-//! INST       /LoadArray/
+//! INST_NOT   /Intrinsic.EscompatArrayGet/
+//! INST       /CallVirtual.*escompat\.Array::\$_get/
+//! PASS_AFTER "Inline"
+//! INST_NOT   /Intrinsic.EscompatArrayGet/
 //! RUN        entry: "escompat_array_get_set.ETSGLOBAL::test2"
 
 function arraySet(arr: Array<int>): void {
@@ -122,7 +124,7 @@ function __noinline__testClassCastError(arr: Array<int>, index: int): int {
 function test1(): void {
     const arr = new Array<int>(16);
     arraySet(arr);
-    assertEQ(20, arrayGet(arr));
+    arktest.assertEQ(arrayGet(arr), 20);
 }
 
 function test2(): void {
@@ -130,11 +132,59 @@ function test2(): void {
     arraySet(arr);
 
     // Exception case #1: index < 0
-    assertEQ(CORRECT_EXCEPTION_THROWN, __noinline__testRangeError(arr, -1));
+    arktest.assertEQ(__noinline__testRangeError(arr, -1), CORRECT_EXCEPTION_THROWN);
 
     // Exception case #2: index >= length
-    assertEQ(CORRECT_EXCEPTION_THROWN, __noinline__testRangeError(arr, 16));
+    arktest.assertEQ(__noinline__testRangeError(arr, 16), CORRECT_EXCEPTION_THROWN);
 
     // Exception case #3: undefined -> Int cast error
-    assertEQ(CORRECT_EXCEPTION_THROWN, __noinline__testClassCastError(arr, 2));
+    arktest.assertEQ(__noinline__testClassCastError(arr, 2), CORRECT_EXCEPTION_THROWN);
+}
+
+class ExtArray<T> extends Array<T> {
+    public constructor(n: int) {
+        super(n)
+    }
+}
+
+//! CHECKER       Array getUnsafe cpp intrinsic
+//! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat.Array::pop", entry: "escompat_array_get_set.ETSGLOBAL::testGetUnsafe"
+//! METHOD        "escompat.Array::pop"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.EscompatArrayGetUnsafe"
+//! INST_NOT      /Call/
+
+//! CHECKER       Array getUnsafe IR intrinsic
+//! RUN           force_jit: true, options: "--compiler-regex=escompat.Array::pop", entry: "escompat_array_get_set.ETSGLOBAL::testGetUnsafe"
+//! METHOD        "escompat.Array::pop"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "LoadArray"
+//! INST_NOT      "Intrinsic.EscompatArrayGetUnsafe"
+//! INST_NOT      /BoundsCheck/
+//! INST_NOT      /Call/
+function testGetUnsafe() {
+    let a = new ExtArray<int>(1)
+    a[0] = 10
+    arktest.assertEQ(10, a.pop())
+}
+
+//! CHECKER       Array setUnsafe cpp intrinsic
+//! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat.Array::with", entry: "escompat_array_get_set.ETSGLOBAL::testSetUnsafe"
+//! METHOD        "escompat.Array::with"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.EscompatArraySetUnsafe"
+//! INST_NOT      /Call.*set_unsafe/
+
+//! CHECKER       Array setUnsafe IR intrinsic
+//! RUN           force_jit: true, options: "--compiler-regex=escompat.Array::with", entry: "escompat_array_get_set.ETSGLOBAL::testSetUnsafe"
+//! METHOD        "escompat.Array::with"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "StoreArray"
+//! INST_NOT      "Intrinsic.EscompatArraySetUnsafe"
+//! INST_NOT      /BoundsCheck/
+//! INST_NOT      /Call.*set_unsafe/
+function testSetUnsafe() {
+    let a = new ExtArray<int>(1)
+    let b = a.with(0, 10)
+    arktest.assertEQ(10, b[0])
 }

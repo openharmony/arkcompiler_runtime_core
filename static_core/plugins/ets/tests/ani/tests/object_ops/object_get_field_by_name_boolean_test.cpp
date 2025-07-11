@@ -30,30 +30,39 @@ TEST_F(ObjectGetFieldByNameBooleanTest, get_field)
 {
     ani_object animal = NewAnimal();
 
-    ani_boolean mammal;
+    ani_boolean mammal = ANI_FALSE;
     ASSERT_EQ(env_->Object_GetFieldByName_Boolean(animal, "mammal", &mammal), ANI_OK);
     ASSERT_EQ(mammal, true);
+}
+
+TEST_F(ObjectGetFieldByNameBooleanTest, invalid_env)
+{
+    ani_object animal = NewAnimal();
+
+    ani_boolean mammal = ANI_FALSE;
+    ASSERT_EQ(env_->c_api->Object_GetFieldByName_Boolean(nullptr, animal, "mammal", &mammal), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectGetFieldByNameBooleanTest, not_found)
 {
     ani_object animal = NewAnimal();
 
-    ani_boolean mammal;
+    ani_boolean mammal = ANI_FALSE;
     ASSERT_EQ(env_->Object_GetFieldByName_Boolean(animal, "x", &mammal), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_GetFieldByName_Boolean(animal, "", &mammal), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectGetFieldByNameBooleanTest, invalid_type)
 {
     ani_object animal = NewAnimal();
 
-    ani_boolean mammal;
+    ani_boolean mammal = ANI_FALSE;
     ASSERT_EQ(env_->Object_GetFieldByName_Boolean(animal, "name", &mammal), ANI_INVALID_TYPE);
 }
 
 TEST_F(ObjectGetFieldByNameBooleanTest, invalid_object)
 {
-    ani_boolean mammal;
+    ani_boolean mammal = ANI_FALSE;
     ASSERT_EQ(env_->Object_GetFieldByName_Boolean(nullptr, "mammal", &mammal), ANI_INVALID_ARGS);
 }
 
@@ -61,7 +70,7 @@ TEST_F(ObjectGetFieldByNameBooleanTest, invalid_name)
 {
     ani_object animal = NewAnimal();
 
-    ani_boolean mammal;
+    ani_boolean mammal = ANI_FALSE;
     ASSERT_EQ(env_->Object_GetFieldByName_Boolean(animal, nullptr, &mammal), ANI_INVALID_ARGS);
 }
 

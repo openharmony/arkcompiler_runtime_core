@@ -29,12 +29,15 @@ class Clazz{{loop.index0}} {
     method(): int { return 4; }
 }
 
-let instance{{loop.index0}}: Clazz{{loop.index0}} = new Clazz{{loop.index0}}();
+let instance{{loop.index0}}: Clazz{{loop.index0}};
+static {
+   instance{{loop.index0}} = new Clazz{{loop.index0}}();
+}
 
 {% if loop.last %}
 function main(): void {
     {% for qname1 in qualified_name %}
-	assertTrue( {{qname1}} )
+ arktest.assertTrue( {{qname1}} )
     {% endfor %}
 }
 {% endif %}

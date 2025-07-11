@@ -35,8 +35,11 @@ struct TimerInfo {
     napi_ref cb;
     std::vector<napi_ref> cbArgs;
     bool repeat;
-    uv_timer_t timer;
+    uv_timer_t *timer;
     uint32_t timerId;
+    static constexpr uv_close_cb kTimerCloseCallback = [](uv_handle_t *handle) {
+        delete reinterpret_cast<uv_timer_t *>(handle);
+    };
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
 

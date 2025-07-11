@@ -102,7 +102,7 @@ function testDateFormatUsingOptionsYear2Digit(): void {
 
 		const expectedResult = res[2]
 		if (actualResult !== expectedResult) {
-			assertEQ(actualResult, expectedResult, `Unexpected date formatting result for locale: ${locale} and options: ${options}`)
+		 arktest.assertEQ(actualResult, expectedResult, `Unexpected date formatting result for locale: ${locale} and options: ${options}`)
 		}
 	})
 }
@@ -110,7 +110,7 @@ function testDateFormatUsingOptionsYear2Digit(): void {
 function main(): int {
 	initFormatResults()
 
-	const suite = new ArkTestsuite("Intl.DateTimeFormat(en-US)")
+	const suite = new arktest.ArkTestsuite("Intl.DateTimeFormat(en-US)")
 	suite.addTest("format() using year format '2-digit'", testDateFormatUsingOptionsYear2Digit)
 	return suite.run()
 }

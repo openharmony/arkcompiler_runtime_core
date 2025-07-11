@@ -24,7 +24,7 @@
 //! INST_NOT     "LoadPairPart"
 //! INST_NOT     "StoreArrayPair"
 //! PASS_AFTER   "MemoryCoalescing"
-//! INST         "LoadArrayPair"
+//! INST_NOT     "LoadArrayPair"
 //! INST         "LoadPairPart"
 //! INST_NOT     "StoreArrayPair"
 //! INST_NOT     "StoreObjectPair"
@@ -74,7 +74,7 @@ export class Test {
         for (i = 0; i < n; i++) {
             vv += v1[i] + v2[i];
         }
-        assertEQ(vv, 7720)
+        arktest.assertEQ(vv, 7720)
     }
 }
 

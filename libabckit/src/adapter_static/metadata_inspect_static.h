@@ -16,7 +16,7 @@
 #ifndef LIBABCKIT_SRC_ADAPTER_STATIC_METADATA_INSPECT_STATIC_H
 #define LIBABCKIT_SRC_ADAPTER_STATIC_METADATA_INSPECT_STATIC_H
 
-#include "libabckit/include/c/metadata_core.h"
+#include "libabckit/c/metadata_core.h"
 
 #include <iostream>
 
@@ -33,11 +33,25 @@ bool ModuleEnumerateAnonymousFunctionsStatic(AbckitCoreModule *m, void *data,
 // Namespace
 // ========================================
 
+AbckitString *NamespaceGetNameStatic(AbckitCoreNamespace *ns);
+
 // ========================================
 // Class
 // ========================================
 
 AbckitString *ClassGetNameStatic(AbckitCoreClass *klass);
+
+// ========================================
+// Interface
+// ========================================
+
+AbckitString *InterfaceGetNameStatic(AbckitCoreInterface *iface);
+
+// ========================================
+// Enum
+// ========================================
+
+AbckitString *EnumGetNameStatic(AbckitCoreEnum *enm);
 
 // ========================================
 // Function

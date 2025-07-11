@@ -15,7 +15,6 @@
 {%- for c in cases %}
 /*---
 desc: Declaration context, instance field declaration, constant narrowing integer conversion, implicit
-tags: [compile-only, negative]
 params: from {{c.from_type}} to {{c.to_type}}
 ---*/
 {%- for v in c['values'] %}
@@ -24,21 +23,14 @@ const c{{loop.index}}: {{c.from_type}} = {{v.expr|safe}}
 
 {%- for v in c['values'] %}
 class A{{loop.index}} {
-    public d: {{c.to_type}} = {{v.expr|safe}}
     public e: {{c.to_type}} = c{{loop.index}}
 }
 {%- endfor %}
 
-function main(): int {
+function main() {
 {%- for v in c['values'] %}
     let a{{loop.index}}: A{{loop.index}} = new A{{loop.index}}()
-    if (a{{loop.index}}.d != {{v.val}}) {
-        return 1
-    }
-    if (a{{loop.index}}.e != {{v.val}}) {
-        return 1
-    }
-{%- endfor %}
-    return 0
+    arktest.assertEQ(a{{loop.index}}.e, {{v.val}})
+{% endfor %}
 }
 {%- endfor %}

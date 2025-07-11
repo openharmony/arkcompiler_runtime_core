@@ -25,7 +25,7 @@ public:
         auto bob = static_cast<ani_object>(bobRef);
 
         ani_class cls;
-        ASSERT_EQ(env_->FindClass("Lobject_get_field_ref_test/Man;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("object_get_field_ref_test.Man", &cls), ANI_OK);
 
         ani_field fieldName;
         ASSERT_EQ(env_->Class_FindField(cls, "name", &fieldName), ANI_OK);
@@ -46,15 +46,26 @@ TEST_F(ObjectGetFieldRefTest, get_field_ref)
     ani_field fieldAge {};
     GetTestData(&bob, &field, &fieldAge);
 
-    ani_ref nameRef;
+    ani_ref nameRef {};
     ASSERT_EQ(env_->Object_GetField_Ref(bob, field, &nameRef), ANI_OK);
 
     auto name = static_cast<ani_string>(nameRef);
     std::array<char, 6U> buffer {};
-    ani_size nameSize;
+    ani_size nameSize = 0;
     ASSERT_EQ(env_->String_GetUTF8SubString(name, 0U, 3U, buffer.data(), buffer.size(), &nameSize), ANI_OK);
     ASSERT_EQ(nameSize, 3U);
     ASSERT_STREQ(buffer.data(), "Bob");
+}
+
+TEST_F(ObjectGetFieldRefTest, get_field_ref_invalid_env)
+{
+    ani_object bob {};
+    ani_field field {};
+    ani_field fieldAge {};
+    GetTestData(&bob, &field, &fieldAge);
+
+    ani_ref nameRef {};
+    ASSERT_EQ(env_->c_api->Object_GetField_Ref(nullptr, bob, field, &nameRef), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectGetFieldRefTest, get_field_ref_invalid_field_type)
@@ -64,7 +75,7 @@ TEST_F(ObjectGetFieldRefTest, get_field_ref_invalid_field_type)
     ani_field fieldAge {};
     GetTestData(&bob, &field, &fieldAge);
 
-    ani_ref nameRef;
+    ani_ref nameRef {};
     ASSERT_EQ(env_->Object_GetField_Ref(bob, fieldAge, &nameRef), ANI_INVALID_TYPE);
 }
 
@@ -75,7 +86,7 @@ TEST_F(ObjectGetFieldRefTest, invalid_argument1)
     ani_field fieldAge {};
     GetTestData(&bob, &field, &fieldAge);
 
-    ani_ref nameRef;
+    ani_ref nameRef {};
     ASSERT_EQ(env_->Object_GetField_Ref(nullptr, field, &nameRef), ANI_INVALID_ARGS);
 }
 
@@ -86,7 +97,7 @@ TEST_F(ObjectGetFieldRefTest, invalid_argument2)
     ani_field fieldAge {};
     GetTestData(&bob, &field, &fieldAge);
 
-    ani_ref nameRef;
+    ani_ref nameRef {};
     ASSERT_EQ(env_->Object_GetField_Ref(bob, nullptr, &nameRef), ANI_INVALID_ARGS);
 }
 

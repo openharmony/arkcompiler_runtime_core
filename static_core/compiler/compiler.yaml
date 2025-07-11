@@ -157,6 +157,7 @@ options:
     - liveness-analyzer
     - loop-transform
     - lowering
+    - lower-boxed-boolean
     - lse-opt
     - memory-coalescing
     - monitor-analysis
@@ -203,6 +204,12 @@ options:
   type: bool
   default: true
   description: Enable Lowering Pass
+  tags: [perf]
+
+- name: compiler-lower-boxed-boolean
+  type: bool
+  default: true
+  description: Enable LowerBoxedBoolean Pass
   tags: [perf]
 
 - name: compiler-code-sink
@@ -764,7 +771,7 @@ options:
   type: bool
   default: false
   description: Emit virtual registers stack map for safe points
-  
+
 - name: compiler-scalar-replacement
   type: bool
   default: true
@@ -869,7 +876,7 @@ events:
       type: uint32_t
     - name: to_bb_id
       type: uint32_t
-      
+
 - name: checks-elimination
   fields:
     - name: name
@@ -973,7 +980,7 @@ events:
     - name: loop_exit_pc
       type: uint32_t
     - name: moved_inst_count
-      type: uint32_t      
+      type: uint32_t
 
 - name: memory-coalescing
   fields:
@@ -995,10 +1002,10 @@ events:
     - name: name
       type: const char*
     - name: inst_id
-      type: uint32_t 
+      type: uint32_t
     - name: pc
-      type: uint32_t  
-  
+      type: uint32_t
+
 - name: scheduler
   fields:
     - name: block_id

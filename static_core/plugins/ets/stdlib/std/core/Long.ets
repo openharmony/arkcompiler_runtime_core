@@ -38,15 +38,6 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
     }
 
     /**
-     * Constructs a new Long instance with provided initial value
-     *
-     * @param value the initial value
-     */
-    public constructor(value: Long) {
-        this.value = value.longValue();
-    }
-
-    /**
      * Returns value of this instance as a primitive
      *
      * @returns value of this instance
@@ -92,8 +83,19 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      *
      * @returns value as long
      */
+    public override toByte(): byte {
+        return this.value.toByte();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as byte
+     */
     public override byteValue(): byte {
-        return this.value as byte;
+        return this.toByte();
     }
 
     /**
@@ -101,8 +103,19 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      *
      * @returns value as short
      */
+    public override toShort(): short {
+        return this.value.toShort();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as short
+     */
     public override shortValue(): short {
-        return this.value as short;
+        return this.toShort();
     }
 
     /**
@@ -110,8 +123,19 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      *
      * @returns value as int
      */
+    public override toInt(): int {
+        return this.value.toInt();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as int
+     */
     public override intValue(): int {
-        return this.value as int;
+        return this.toInt();
     }
 
     /**
@@ -119,17 +143,39 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      *
      * @returns value as long
      */
-    public override longValue(): long {
+    public override toLong(): long {
         return this.value;
     }
 
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
      * @returns value as long
      */
+    public override longValue(): long {
+        return this.toLong();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as long
+     */
+    public override toFloat(): float {
+        return this.value.toFloat();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as float
+     */
     public override floatValue(): float {
-        return this.value as float;
+        return this.toFloat();
     }
 
     /**
@@ -137,8 +183,93 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      *
      * @returns value as double
      */
+    public override toDouble(): double {
+        return this.value.toDouble();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as double
+     */
     public override doubleValue(): double {
-        return this.value as double;
+        return this.toDouble();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as char
+     */
+    public toChar(): char {
+        return this.value.toChar();
+    }
+
+    /**
+     * Returns the primitive as byte value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toByte(value: long): byte;
+
+    /**
+     * Returns the primitive as short value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toShort(value: long): short;
+
+    /**
+     * Returns the primitive as int value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toInt(value: long): int;
+
+    /**
+     * Returns the primitive as float value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toFloat(value: long): float;
+
+    /**
+     * Returns the primitive as double value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toDouble(value: long): double;
+
+    /**
+     * Returns the primitive as char value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toChar(value: long): char;
+
+    /**
+     * Returns the primitive as long value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static toLong(value: long): long {
+        return value;
     }
 
     /**
@@ -152,7 +283,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      * @returns result of the comparison
      */
     public override compareTo(other: Long): int {
-        return (this.value - other.unboxed()) as int;
+        return (this.value - other.unboxed()).toInt();
     }
 
     /**
@@ -170,7 +301,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      * @returns result of the conversion
      */
     public toString(radix: number): string {
-        if ((radix as int) < 2 || (radix as int) > 36) {
+        if (radix.toInt() < 2 || radix.toInt() > 36) {
             throw new RangeError('Radix must be between 2 and 36');
         }
         if (this.value == 0) {
@@ -179,19 +310,19 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
         const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
         let val = this.value;
         let negative: boolean = (val < 0);
-        let digitsNum = (log(abs(val)) / log(radix as int) + 1) as int;
+        let digitsNum = (log(abs(val)) / log(radix.toInt()) + 1).toInt();
         if (negative) {
             ++digitsNum;
         }
-        let data = new char[digitsNum];
+        let data : FixedArray<char> = new char[digitsNum];
         let curPlace = digitsNum - 1;
         while (val != 0) {
-            let remainder = val % (radix as int);
+            let remainder = val % radix.toInt();
             if (negative) {
                 remainder = -remainder;
             }
-            data[curPlace] = chars.charAt(remainder as int);
-            val /= (radix as int);
+            data[curPlace] = chars.charAt(remainder.toInt());
+            val /= radix.toInt();
             curPlace -= 1;
         }
         if (negative) {
@@ -206,7 +337,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      * @returns representation of this instance
      */
     public override $_hashCode(): int {
-        return this.intValue();
+        return this.toInt();
     }
 
     /**
@@ -237,7 +368,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      * @returns Result of the addition
      */
     public add(other: Long): Long {
-        return Long.valueOf((this.value + other.longValue()) as long)
+        return Long.valueOf((this.value + other.toLong()) as long)
     }
 
     /**
@@ -248,7 +379,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      * @returns Result of the subtraction
      */
     public sub(other: Long): Long {
-        return Long.valueOf((this.value - other.longValue()) as long)
+        return Long.valueOf((this.value - other.toLong()) as long)
     }
 
     /**
@@ -259,7 +390,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      * @returns Result of the multiplication
      */
     public mul(other: Long): Long {
-        return Long.valueOf((this.value * other.longValue()) as long)
+        return Long.valueOf((this.value * other.toLong()) as long)
     }
 
     /**
@@ -270,7 +401,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      * @returns Result of the division
      */
     public div(other: Long): Long {
-        return Long.valueOf((this.value / other.longValue()) as long)
+        return Long.valueOf((this.value / other.toLong()) as long)
     }
 
     /**
@@ -281,7 +412,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      * @returns true if this value is less than provided, false otherwise
      */
     public isLessThan(other: Long): boolean {
-        return this.value < other.longValue();
+        return this.value < other.toLong();
     }
 
     /**
@@ -292,7 +423,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      * @returns true if this value is less than or equal to provided, false otherwise
      */
     public isLessEqualThan(other: Long): boolean {
-        return this.value <= other.longValue();
+        return this.value <= other.toLong();
     }
 
     /**
@@ -303,7 +434,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      * @returns true if this value is greater than provided, false otherwise
      */
     public isGreaterThan(other: Long): boolean {
-        return this.value > other.longValue();
+        return this.value > other.toLong();
     }
 
     /**
@@ -314,7 +445,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      * @returns true if this value is greater than or equal to provided, false otherwise
      */
     public isGreaterEqualThan(other: Long): boolean {
-        return this.value >= other.longValue();
+        return this.value >= other.toLong();
     }
 
     /**
@@ -330,7 +461,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
         if (json instanceof JSONNumber) {
             let num = (json as JSONNumber).value
             if (Double.isInteger(num) && Long.MIN_VALUE <= num && num <= Long.MAX_VALUE) {
-                return Long.valueOf(num as long)
+                return Long.valueOf(num.toLong())
             }
         }
         throw new JSONTypeError("Cannot create Long from JSON", new ErrorOptions(json as Object))

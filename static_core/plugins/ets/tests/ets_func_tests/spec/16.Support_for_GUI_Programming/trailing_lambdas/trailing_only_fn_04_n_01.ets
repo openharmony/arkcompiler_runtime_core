@@ -23,9 +23,9 @@ class A {}
 
 function no_param(fn: A | () => void) {
     if (fn instanceof A) {
-        assertEQ( a, 5)
+        arktest.assertEQ( a, 5)
     } else {
-        assertTrue( false,  "Not expected execution here")
+        arktest.assertTrue( false,  "Not expected execution here")
     }
 }
 
@@ -33,7 +33,7 @@ let a: int = 5
 
 function main(): void {
     no_param(new A()) {
-        assertEQ( a, 5)
+        arktest.assertEQ( a, 5)
     }
 }
 

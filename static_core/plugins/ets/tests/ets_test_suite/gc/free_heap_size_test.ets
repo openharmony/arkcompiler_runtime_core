@@ -13,24 +13,22 @@
  * limitations under the License.
  */
 
-import { random } from "std/math"
-
-function AllocMemoryAndReturnFreeHeapSize(): long throws {
-    const ALLOC_SIZE = 10000;
-    let mem = new long[ALLOC_SIZE];
+function AllocMemoryAndReturnFreeHeapSize(): long {
+    const ALLOC_SIZE: int = 10000;
+    let mem: FixedArray<long> = new long[ALLOC_SIZE];
     return GC.getFreeHeapSize();
 }
 
-function main(): void throws {
+function main(): void {
     // Free allocations done during runtime creation (i.e. application RuntimeLinker)
-    GC.startGC(GC.FULL_CAUSE);
+    GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
     let free_size_in_start = GC.getFreeHeapSize();
     let free_size_after_new = AllocMemoryAndReturnFreeHeapSize();
-    GC.startGC(GC.FULL_CAUSE);
+    GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
     let free_size_after_gc = GC.getFreeHeapSize();
 
-    assertLT(0, free_size_in_start);
-    assertLT(free_size_after_new, free_size_in_start, "After allocation free memory value should decrease");
-    assertLT(free_size_after_new, free_size_after_gc, "After in place gc free memory value should increase");
-    assertLE(free_size_after_gc, free_size_in_start);
+    arktest.assertLT(0, free_size_in_start);
+    arktest.assertLT(free_size_after_new, free_size_in_start, "After allocation free memory value should decrease");
+    arktest.assertLT(free_size_after_new, free_size_after_gc, "After in place gc free memory value should increase");
+    arktest.assertLE(free_size_after_gc, free_size_in_start);
 }

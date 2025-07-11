@@ -23,5 +23,5 @@ function main(): void {
   let x = arr[0];
   let y = arr[x];
   let z = arr[x+1];
-  assertTrue( x == 1 && y == 2 && z == 3 )
+  arktest.assertTrue( x == 1 && y == 2 && z == 3 )
 }

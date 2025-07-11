@@ -29,5 +29,5 @@ class Person {
 function main(): void {
   const bob = new Person("Bob");
   bob.spouse = new Person("Alice");
-  assertEQ(bob.spouse?.name, "Alice");
+  arktest.assertEQ(bob.spouse?.name, "Alice");
 }

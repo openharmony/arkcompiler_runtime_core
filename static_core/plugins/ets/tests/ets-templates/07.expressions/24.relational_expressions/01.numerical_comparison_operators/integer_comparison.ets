@@ -24,9 +24,9 @@ function main(): void {
   let bx: {{ic.xboxed}} = new {{ic.xboxed}}({{ic.xvalue}} as {{ic.xtype}});
   let y: {{ic.ytype}} = {{ic.yvalue}};
   let by: {{ic.yboxed}} = new {{ic.yboxed}}({{ic.yvalue}} as {{ic.ytype}});
-  assertEQ( (x {{ic.op}} y), {{ic.result}} )
-  assertEQ( (bx {{ic.op}} by), {{ic.result}} )
-  assertEQ( (x {{ic.op}} by), {{ic.result}} )
+  arktest.assertEQ( (x {{ic.op}} y), {{ic.result}} )
+  arktest.assertEQ( (bx {{ic.op}} by), {{ic.result}} )
+  arktest.assertEQ( (x {{ic.op}} by), {{ic.result}} )
 }
 
 {% endfor %}

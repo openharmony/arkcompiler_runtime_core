@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,28 +19,38 @@
 #include "runtime/coroutines/coroutine_events.h"
 #include "runtime/include/panda_vm.h"
 
+#include "runtime/trace.h"
+
 namespace ark {
+#ifdef ARK_HYBRID
+extern "C" void VisitCoroutine(void *coroutine, CommonRootVisitor visitor)
+{
+    reinterpret_cast<Coroutine *>(coroutine)->Visit(visitor);
+}
+#endif
 
 Coroutine *Coroutine::Create(Runtime *runtime, PandaVM *vm, PandaString name, CoroutineContext *context,
-                             std::optional<EntrypointInfo> &&epInfo, Type type)
+                             std::optional<EntrypointInfo> &&epInfo, Type type, CoroutinePriority priority)
 {
     mem::InternalAllocatorPtr allocator = runtime->GetInternalAllocator();
     auto *co = allocator->New<Coroutine>(os::thread::GetCurrentThreadId(), allocator, vm,
                                          ark::panda_file::SourceLang::PANDA_ASSEMBLY, std::move(name), context,
-                                         std::move(epInfo), type);
+                                         std::move(epInfo), type, priority);
+    ASSERT(co != nullptr);
     co->Initialize();
     return co;
 }
 
 Coroutine::Coroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,
                      ark::panda_file::SourceLang threadLang, PandaString name, CoroutineContext *context,
-                     std::optional<EntrypointInfo> &&epInfo, Type type)
+                     std::optional<EntrypointInfo> &&epInfo, Type type, CoroutinePriority priority)
     : ManagedThread(id, allocator, vm, Thread::ThreadType::THREAD_TYPE_TASK, threadLang),
       name_(std::move(name)),
       context_(context),
       manager_(static_cast<CoroutineManager *>(GetVM()->GetThreadManager())),
       startSuspended_(epInfo.has_value()),
-      type_(type)
+      type_(type),
+      priority_(priority)
 {
     ASSERT(vm != nullptr);
     ASSERT(context != nullptr);
@@ -54,7 +64,8 @@ Coroutine::~Coroutine()
     GetManager()->FreeCoroutineId(coroutineId_);
 }
 
-void Coroutine::ReInitialize(PandaString name, CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo)
+void Coroutine::ReInitialize(PandaString name, CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo,
+                             CoroutinePriority priority)
 {
     ASSERT(context != nullptr);
     name_ = std::move(name);
@@ -63,6 +74,7 @@ void Coroutine::ReInitialize(PandaString name, CoroutineContext *context, std::o
 
     SetEntrypointData(std::move(epInfo));
     context_->AttachToCoroutine(this);
+    priority_ = priority;
 }
 
 void Coroutine::SetEntrypointData(std::optional<EntrypointInfo> &&epInfo)
@@ -86,6 +98,7 @@ void Coroutine::CleanUp()
     name_ = "";
     entrypoint_ = std::monostate();
     startSuspended_ = false;
+    immediateLauncher_ = nullptr;
     worker_ = nullptr;
     context_->CleanUp();
 }
@@ -117,6 +130,7 @@ void Coroutine::OnStatusChanged(Status oldStatus, Status newStatus)
     bool hasWorker = (GetWorker() != nullptr);
     bool wasActive = hasWorker && (oldStatus == Coroutine::Status::RUNNABLE || oldStatus == Coroutine::Status::RUNNING);
     bool isActive = hasWorker && (newStatus == Coroutine::Status::RUNNABLE || newStatus == Coroutine::Status::RUNNING);
+    IssueTracingEvents(oldStatus, newStatus);
     if (UNLIKELY(wasActive != isActive)) {
         if (wasActive && !isActive) {
             GetManager()->OnCoroBecameNonActive(this);
@@ -124,6 +138,31 @@ void Coroutine::OnStatusChanged(Status oldStatus, Status newStatus)
             GetManager()->OnCoroBecameActive(this);
         }
     }
+}
+
+void Coroutine::IssueTracingEvents(Status oldStatus, Status newStatus)
+{
+    bool isMutator = this->GetType() == Coroutine::Type::MUTATOR;
+    if (isMutator && newStatus == Coroutine::Status::RUNNING && oldStatus != Coroutine::Status::RUNNING) {
+        Tracer::StartAsync(Tracer::COROUTINE_EXECUTION, this->GetCoroutineId());
+    }
+    if (isMutator && newStatus != Coroutine::Status::RUNNING && oldStatus == Coroutine::Status::RUNNING) {
+        Tracer::FinishAsync(Tracer::COROUTINE_EXECUTION, this->GetCoroutineId());
+    }
+}
+
+void Coroutine::LinkToExternalHolder([[maybe_unused]] bool useSharedHolder)
+{
+#ifdef ARK_HYBRID
+    auto wasCreated = CreateExternalHolderIfNeeded(useSharedHolder);
+    if (wasCreated) {
+        auto wasInRunning = GetThreadHolder()->TransferToNativeIfInRunning();
+        GetThreadHolder()->RegisterCoroutine(this);
+        if (wasInRunning) {
+            GetThreadHolder()->TransferToRunningIfInNative();
+        }
+    }
+#endif
 }
 
 void Coroutine::Destroy()
@@ -134,6 +173,14 @@ void Coroutine::Destroy()
 void Coroutine::Initialize()
 {
     context_->AttachToCoroutine(this);
+    // NOTE(cao ying, #26951): we need to remove this after refactoring the ark_aot initialization sequence,
+    // which should not include the unnecessary parts
+    // NOTE(cao ying, #26507): long command line causes SEGV under OHOS during the stack overflow
+    // checker initialization. Currently long command lines are not required for ark, but are required
+    // for ark_aot. So let's disable the stack overflow checker for ark_aot as a hotfix.
+    if (Runtime::GetCurrent()->GetOptions().IsArkAot()) {
+        return;
+    }
     InitForStackOverflowCheck(ManagedThread::STACK_OVERFLOW_RESERVED_SIZE,
                               ManagedThread::STACK_OVERFLOW_PROTECTED_SIZE);
 }
@@ -212,6 +259,24 @@ std::ostream &operator<<(std::ostream &os, Coroutine::Status status)
             break;
         case Coroutine::Status::AWAIT_LOOP:
             os << "AWAIT_LOOP";
+            break;
+        default:
+            break;
+    }
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os, Coroutine::Type type)
+{
+    switch (type) {
+        case Coroutine::Type::FINALIZER:
+            os << "FINALIZER";
+            break;
+        case Coroutine::Type::MUTATOR:
+            os << "MUTATOR";
+            break;
+        case Coroutine::Type::SCHEDULER:
+            os << "SCHEDULER";
             break;
         default:
             break;

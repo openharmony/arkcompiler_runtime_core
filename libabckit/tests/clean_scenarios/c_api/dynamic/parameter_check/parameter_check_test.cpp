@@ -15,8 +15,8 @@
 
 #include <gtest/gtest.h>
 
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/metadata_core.h"
+#include "libabckit/c/abckit.h"
+#include "libabckit/c/metadata_core.h"
 
 #include "helpers/helpers.h"
 #include "helpers/helpers_runtime.h"

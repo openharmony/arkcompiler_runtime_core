@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,7 +46,7 @@ public:
         return this;
     }
 
-    EtsObject *GetTarget(EtsCoroutine *coro)
+    EtsObject *GetTarget(EtsCoroutine *coro) const
     {
         auto *obj = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromiseRef, target_));
         return EtsObject::FromCoreType(obj);

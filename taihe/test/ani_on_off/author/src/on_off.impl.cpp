@@ -42,9 +42,32 @@ public:
         std::cout << "IBase::offSet" << std::endl;
     }
 
+    void mytestNew()
+    {
+        TH_THROW(std::runtime_error, "mytestNew not implemented");
+    }
+
+    int32_t onTest()
+    {
+        TH_THROW(std::runtime_error, "onTest not implemented");
+    }
+
 private:
     string str;
     string new_str;
+};
+
+class ColorImpl {
+public:
+    ColorImpl()
+    {
+        // Don't forget to implement the constructor.
+    }
+
+    int32_t add(int32_t a)
+    {
+        TH_THROW(std::runtime_error, "add not implemented");
+    }
 };
 
 class BaseCls {
@@ -55,6 +78,16 @@ public:
 ::on_off::IBase getIBase(string_view a, string_view b)
 {
     return make_holder<IBase, ::on_off::IBase>(a, b);
+}
+
+int32_t mytestGlobalnew()
+{
+    TH_THROW(std::runtime_error, "mytestGlobalnew not implemented");
+}
+
+int32_t onGlobalnew()
+{
+    TH_THROW(std::runtime_error, "onGlobalnew not implemented");
 }
 
 void onFoo(callback_view<void()> a)
@@ -104,9 +137,36 @@ void offFooStatic(callback_view<void()> a)
     a();
     std::cout << "offFooStatic" << std::endl;
 }
+
+void onFuncI(callback_view<void(int32_t)> a)
+{
+    int const i = 1;
+    a(i);
+    std::cout << "onFunI" << std::endl;
+}
+
+void onFuncB(callback_view<void(bool)> a)
+{
+    a(true);
+    std::cout << "onFunB" << std::endl;
+}
+
+void offFuncI(callback_view<void(int32_t)> a)
+{
+    int const i = 1;
+    a(i);
+    std::cout << "offFunI" << std::endl;
+}
+
+void offFuncB(callback_view<void(bool)> a)
+{
+    a(true);
+    std::cout << "offFunB" << std::endl;
+}
+
 }  // namespace
 
-// The macros used below are automatically generated code
+// because these macros are auto-generate, lint will cause false positive.
 // NOLINTBEGIN
 TH_EXPORT_CPP_API_getIBase(getIBase);
 TH_EXPORT_CPP_API_onFoo(onFoo);
@@ -117,4 +177,10 @@ TH_EXPORT_CPP_API_offBar(offBar);
 TH_EXPORT_CPP_API_offBaz(offBaz);
 TH_EXPORT_CPP_API_onFooStatic(onFooStatic);
 TH_EXPORT_CPP_API_offFooStatic(offFooStatic);
+TH_EXPORT_CPP_API_onFuncI(onFuncI);
+TH_EXPORT_CPP_API_onFuncB(onFuncB);
+TH_EXPORT_CPP_API_offFuncI(offFuncI);
+TH_EXPORT_CPP_API_offFuncB(offFuncB);
+TH_EXPORT_CPP_API_mytestGlobalnew(mytestGlobalnew);
+TH_EXPORT_CPP_API_onGlobalnew(onGlobalnew);
 // NOLINTEND

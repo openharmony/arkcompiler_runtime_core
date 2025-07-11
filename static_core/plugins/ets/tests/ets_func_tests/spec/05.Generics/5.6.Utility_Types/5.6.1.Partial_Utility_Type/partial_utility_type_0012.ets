@@ -23,5 +23,5 @@ import { ClassToBePartial } from './partial_utility_type_0013'
 
 function main(): void {
     let asd: Partial<ClassToBePartial> = {};
-    assertTrue( asd.fld === undefined)
+    arktest.assertTrue( asd.fld === undefined)
 }

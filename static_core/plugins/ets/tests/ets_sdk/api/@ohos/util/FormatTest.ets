@@ -56,33 +56,33 @@ function testUtilFormat(): int {
     const i: int = 35
     const fp : float = 1.7320534f
 
-    assertEQ(util.format("String: %s", s), "String: computer")
-    assertEQ(util.format("%s", s), "computer")
-    assertEQ(util.format("%s String", s), "computer String")
-    assertEQ(util.format("%s ", s), "computer ")
-    assertEQ(util.format(" %s", s), " computer")
-    assertEQ(util.format("%%s", s), "%s computer")
-    assertEQ(util.format("%%s%", s), "%s% computer")
-    assertEQ(util.format("s%", s), "s% computer")
-    assertEQ(util.format("%s%", s), "computer%")
+    arktest.assertEQ(util.format("String: %s", s), "String: computer")
+    arktest.assertEQ(util.format("%s", s), "computer")
+    arktest.assertEQ(util.format("%s String", s), "computer String")
+    arktest.assertEQ(util.format("%s ", s), "computer ")
+    arktest.assertEQ(util.format(" %s", s), " computer")
+    arktest.assertEQ(util.format("%%s", s), "%s computer")
+    arktest.assertEQ(util.format("%%s%", s), "%s% computer")
+    arktest.assertEQ(util.format("s%", s), "s% computer")
+    arktest.assertEQ(util.format("%s%", s), "computer%")
 
-    assertEQ(util.format("   Integer:   %d\n", i), "   Integer:   35\n")
-    assertEQ(util.format("   Real:      %f\n", fp), "   Real:      1.7320534\n")
+    arktest.assertEQ(util.format("   Integer:   %d\n", i), "   Integer:   35\n")
+    arktest.assertEQ(util.format("   Real:      %f\n", fp), "   Real:      1.7320534\n")
 
-    assertEQ(util.format("String: %s int %d !!! %d %f %d", s, 1, 2, 3, 4), "String: computer int 1 !!! 2 3 4")  // String: computer int 1 !!! 2 3.0 4 ???
+    arktest.assertEQ(util.format("String: %s int %d !!! %d %f %d", s, 1, 2, 3, 4), "String: computer int 1 !!! 2 3 4")  // String: computer int 1 !!! 2 3.0 4 ???
 
     return success
 }
 
 function testFormatLessArgsThanInFormat(): int {
     let res = util.format("example %d of invalid %f format string", 1)
-    assertEQ(res, "example 1 of invalid %f format string")
+    arktest.assertEQ(res, "example 1 of invalid %f format string")
     return success
 }
 
 function testFormatIncorrectArgs(): int {
     let res = util.format("example %X of invalid format string", 1)
-    assertEQ(res, "example %X of invalid format string 1")
+    arktest.assertEQ(res, "example %X of invalid format string 1")
     return success
 }
 
@@ -90,19 +90,19 @@ function testFormatNoMatchArgs(): int {
     {
         // NOTE(ekaterinazaytseva): converting string to int -> NaN
         let res = util.format("example %s of invalid %d format string %d", "string", 1, "string instead int")
-        assertEQ(res, "example string of invalid 1 format string NaN")
+        arktest.assertEQ(res, "example string of invalid 1 format string NaN")
     }
 
     {
         let res = util.format("example %s of invalid %d format string %o", "string", 1, "string as object")
-        assertEQ(res, "example string of invalid 1 format string 'string as object'")
+        arktest.assertEQ(res, "example string of invalid 1 format string 'string as object'")
     }
     return success
 }
 
 function testFormatMoreArgsThanInUtilFormat(): int {
     let res = util.format("Text: %s", "ddd", 44, "one more time text")
-    assertEQ(res, "Text: ddd 44 one more time text")
+    arktest.assertEQ(res, "Text: ddd 44 one more time text")
     return success
 }
 
@@ -121,7 +121,7 @@ function testFormatRemoveCSS(): int {
                         </head><body>Content</body>'
 
     let res = util.format("without css: %c", text)
-    assertEQ(res, "without css: Content")
+    arktest.assertEQ(res, "without css: Content")
     return success
 }
 
@@ -132,13 +132,13 @@ function testFormatJSON(): int {
     }
 
     // simple JSON
-    assertEQ(util.format("JSON : %j", new TestObject()), "JSON : {\"x\":5,\"y\":6}")
+    arktest.assertEQ(util.format("JSON : %j", new TestObject()), "JSON : {\"x\":5,\"y\":6}")
 
     // JSON with circular reference
     let jsonWithCircularRef : string = "{\"name\":\"Kris\", \"father\":{\"name\":\"Bill\",\"wife\":{\"name\":\"Karen\"}},\"mother\":{\"$ref\":\"#father.wife\"}}"
     let expected = "JSON : \"{\\\"name\\\":\\\"Kris\\\", \\\"father\\\":{\\\"name\\\":\\\"Bill\\\",\\\"wife\\\":{\\\"name\\\":\\\"Karen\\\"}},\\\"mother\\\":{\\\"$ref\\\":\\\"#father.wife\\\"}}\"";
     let res = util.format("JSON : %j", jsonWithCircularRef)
-    assertEQ(res, expected)
+    arktest.assertEQ(res, expected)
     return success
 }
 
@@ -156,7 +156,7 @@ function testFormatObject(): int {
     }
     let res = util.format("Object: %o", new TestObject("k28", 14, 0.1f))
     let expected = "Object: { strField: 'k28',\nintField: 14,\nfloatField: 0.1,\nboolField: false }"
-    assertEQ(res, expected)
+    arktest.assertEQ(res, expected)
     return success
 }
 
@@ -174,7 +174,7 @@ function testFormatObject2(): int {
     }
     let res = util.format("Object: %O", new TestObject("k28", 14, 0.1f))
     let expected = "Object: { strField: 'k28',\nintField: 14,\nfloatField: 0.1,\nboolField: false }"
-    assertEQ(res, expected)
+    arktest.assertEQ(res, expected)
     return success
 }
 
@@ -191,10 +191,10 @@ function testFormatCircularObject(): int {
     let expected = "{ prop: 'Circular Reference Example',\nreference: [Circular]\n }"
 
     let res = util.format("%o", circularObject)
-    assertEQ(res, expected)
+    arktest.assertEQ(res, expected)
 
     res = util.format("%O", circularObject)
-    assertEQ(res, expected)
+    arktest.assertEQ(res, expected)
 
     return success
 }
@@ -217,35 +217,35 @@ function testArrayOfCircularObjects() : int {
     let expected1 = "[ { prop: 'Circular Reference Example',\n  reference: [Circular]\n   }, \n{ prop: 'Circular Reference Example',\n  reference: [Circular]\n   } ]"
 
     let res = util.format("%o", arr)
-    assertEQ(res, expected)
+    arktest.assertEQ(res, expected)
 
     res = util.format("%O", arr)
-    assertEQ(res, expected1)
+    arktest.assertEQ(res, expected1)
 
     return success
 }
 
 function testEmptyFormatWithArgs(): int {
     let res = util.format("", 1, 2, 3, "test")
-    assertEQ(res, "1 2 3 test")
+    arktest.assertEQ(res, "1 2 3 test")
     return success
 }
 
 function testNonEmptyFormatWithArgs(): int {
     let res = util.format("Some important text!", 1, 2, 3, "test")
-    assertEQ(res, "Some important text! 1 2 3 test")
+    arktest.assertEQ(res, "Some important text! 1 2 3 test")
     return success
 }
 
 function testFormatWithoutArgs(): int {
     let res = util.format("%d %s  lalala %d %d")
-    assertEQ(res, "%d %s  lalala %d %d")
+    arktest.assertEQ(res, "%d %s  lalala %d %d")
     return success
 }
 
 function testFormatEscapePercent(): int {
     let res = util.format("%%  lalala %%%%")
-    assertEQ(res, "%  lalala %%")
+    arktest.assertEQ(res, "%  lalala %%")
     return success
 }
 
@@ -259,8 +259,8 @@ function testFormatArrayObect(): int {
     {
         let arr =  new Array<TestObject>()
 
-        assertEQ(util.format('Array: %o', arr), "Array: [ [length]: 0 ]")
-        assertEQ(util.format('Array: %O', arr), "Array: [  ]")
+        arktest.assertEQ(util.format('Array: %o', arr), "Array: [ [length]: 0 ]")
+        arktest.assertEQ(util.format('Array: %O', arr), "Array: [  ]")
     }
     {
         let arr =  new Array<TestObject>(1)
@@ -269,8 +269,8 @@ function testFormatArrayObect(): int {
         let expected = "Array: [ { f1: '',\n  k1: 8,\n  t: false }[length]: 1 ]"
         let expected1 = "Array: [ { f1: '',\n  k1: 8,\n  t: false } ]"
 
-        assertEQ(util.format('Array: %o', arr), expected)
-        assertEQ(util.format('Array: %O', arr), expected1)
+        arktest.assertEQ(util.format('Array: %o', arr), expected)
+        arktest.assertEQ(util.format('Array: %O', arr), expected1)
     }
 
     return success
@@ -283,8 +283,8 @@ function testFunctionAsObject() : int {
     let expected = "Function: { [Function: null]  [length]: 0,  [name] :'null',  [prototype]: null { [constructor]: [Circular] } }"
     let expected1 = "Function: { [Function: null] }"
 
-    assertEQ(util.format('Function: %o', func), expected)
-    assertEQ(util.format('Function: %O', func), expected1)
+    arktest.assertEQ(util.format('Function: %o', func), expected)
+    arktest.assertEQ(util.format('Function: %O', func), expected1)
 
     return success
 }
@@ -298,8 +298,8 @@ function testFunctionsArrayObject() : int {
     let expected = "Array of functions: [ { [Function: null]  [length]: 0,  [name] :'null',  [prototype]: null { [constructor]: [Circular] } }[length]: 1 ]"
     let expected1 = "Array of functions: [ [Function: null] ]"
 
-    assertEQ(util.format('Array of functions: %o', arr), expected)
-    assertEQ(util.format('Array of functions: %O', arr), expected1)
+    arktest.assertEQ(util.format('Array of functions: %o', arr), expected)
+    arktest.assertEQ(util.format('Array of functions: %O', arr), expected1)
 
     return success
 }
@@ -318,26 +318,26 @@ function testApiV1Tests() : int {
     let name = 'John';
     let age = 20;
     let formattedString = util.format('My name is %s and I am %s years old', name, age);
-    assertEQ(formattedString, "My name is John and I am 20 years old");
+    arktest.assertEQ(formattedString, "My name is John and I am 20 years old");
 
     let num = 10.5;
     formattedString = util.format('The number is %d', num);
-    assertEQ(formattedString, "The number is 10.5");
+    arktest.assertEQ(formattedString, "The number is 10.5");
 
     num = 100.5;
     formattedString = util.format('The number is %i', num);
-    assertEQ(formattedString, "The number is 100");
+    arktest.assertEQ(formattedString, "The number is 100");
 
     const pi = 3.141592653;
     formattedString = util.format('The value of pi is %f', pi);
-    assertEQ(formattedString, "The value of pi is 3.141592653");
+    arktest.assertEQ(formattedString, "The value of pi is 3.141592653");
 
     class Person {
         name: string = 'John'
         age: int  = 20
     }
     formattedString = util.format('The object is %j', new Person());
-    assertEQ(formattedString, "The object is {\"name\":\"John\",\"age\":20}")
+    arktest.assertEQ(formattedString, "The object is {\"name\":\"John\",\"age\":20}")
 
     class Address {
         city: string = 'New York'
@@ -360,13 +360,13 @@ function testApiV1Tests() : int {
     let expected1 = "Formatted object using %O: { name: 'John',\n\age: 20,\n\address:\n\{ city: 'New York',\n\  country: 'USA' } }"
     let expected2 = "Formatted object using %o: { name: 'John',\n\age: 20,\n\address:\n\{ city: 'New York',\n\  country: 'USA' } }"
 
-    assertEQ(util.format('Formatted object using %%O: %O', person), expected1);
-    assertEQ(util.format('Formatted object using %%o: %o', person), expected2);
+    arktest.assertEQ(util.format('Formatted object using %%O: %O', person), expected1);
+    arktest.assertEQ(util.format('Formatted object using %%o: %o', person), expected2);
 
     const percentage = 80;
     let arg = 'homework';
     formattedString = util.format('John finished %d%% of the %s', percentage, arg);
-    assertEQ(formattedString, "John finished 80% of the homework")
+    arktest.assertEQ(formattedString, "John finished 80% of the homework")
 
     return success
 }

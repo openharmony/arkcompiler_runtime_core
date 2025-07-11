@@ -18,6 +18,7 @@
 
 #include "runtime/include/object_header.h"
 #include "libpandabase/macros.h"
+#include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_sync_primitives.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
@@ -162,6 +163,11 @@ public:
         ASSERT(state_ == STATE_RUNNING);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsJob, value_), error->GetCoreType());
         state_ = STATE_FAILED;
+
+        if (Runtime::GetOptions().IsListUnhandledOnExitJobs(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
+            coro->GetPandaVM()->GetUnhandledObjectManager()->AddFailedJob(this);
+        }
+
         // Unblock awaitee coros
         GetEvent(coro)->Fire();
     }

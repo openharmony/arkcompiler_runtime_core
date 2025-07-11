@@ -16,8 +16,8 @@
 #include "../../src/mock/abckit_mock.h"
 #include "../../src/mock/mock_values.h"
 
-#include "../include/c/extensions/js/metadata_js.h"
-#include "../../include/c/metadata_core.h"
+#include "../include/libabckit/c/extensions/js/metadata_js.h"
+#include "../../include/libabckit/c/metadata_core.h"
 
 #include <cstring>
 #include <gtest/gtest.h>

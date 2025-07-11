@@ -20,5 +20,5 @@ desc: Convert to obj-othermap type.
 function main(): void {
   const nestedMap = new Map<string, Map<string, number>>();
   const obj1: object = nestedMap;
-  assertTrue(obj1 == nestedMap);
+  arktest.assertTrue(obj1 == nestedMap);
 }

@@ -76,9 +76,12 @@
     title: Multiline String Literal
     status: Finished
 2.9.8:
+    title: Regex Literal
+    status: ''
+2.9.9:
     title: Null Literal
     status: Finished
-2.9.9:
+2.9.10:
     title: Undefined Literal
     status: Finished
 '2.10':
@@ -577,12 +580,15 @@
     title: Enumeration Equality Operators
     status: ''
 7.25.6:
+    title: Function Type Equality Operators
+    status: ''
+7.25.7:
     title: Reference Equality Based on Actual Type
     status: Finished
-7.25.7:
+7.25.8:
     title: Reference Equality
     status: ''
-7.25.8:
+7.25.9:
     title: Extended Equality with null or undefined
     status: ''
 '7.26':

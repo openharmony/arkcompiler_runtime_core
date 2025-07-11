@@ -16,15 +16,15 @@ import {url} from "@ohos.url"
 
 function testParamsGet001() {
 	let params = new url.URLParams("key1=value1&key2=value2");
-	assertEQ(params.get("1"), undefined);
-	assertEQ(params.get("key2"), "value2");
+ arktest.assertEQ(params.get("1"), undefined);
+ arktest.assertEQ(params.get("key2"), "value2");
 	params.append("5", "JKL");
-	assertEQ(params.get("5"), "JKL");
+ arktest.assertEQ(params.get("5"), "JKL");
 }
 function testParamsGet005() {
 	let params = new url.URLParams("key1=value1&key2=value2");
 	params.append("jss", "JL")
-	assertEQ(params.get("jss"), "JL");
+ arktest.assertEQ(params.get("jss"), "JL");
 }
 /**
   * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_URL_03900
@@ -37,7 +37,7 @@ function testParamsGet005() {
 function testParamsGetAll001() {
 	let params = new url.URLParams("key1=value1&key2=value2");
 	params.append("key1", "AAA")
-	assertEQ(params.getAll("key1").toString(), "value1,AAA");
+ arktest.assertEQ(params.getAll("key1").toString(), "value1,AAA");
 }
 /**
    * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_URL_04000
@@ -50,7 +50,7 @@ function testParamsGetAll001() {
 function testParamsGetAll002() {
 	let params = new url.URLParams("key1=value1&8=DEF");
 	params.append("8", "A8A")
-	assertEQ(params.getAll("8").toString(), "DEF,A8A");
+ arktest.assertEQ(params.getAll("8").toString(), "DEF,A8A");
 }
 /**
    * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_URL_04100
@@ -63,7 +63,7 @@ function testParamsGetAll002() {
 function testParamsGetAll003() {
 	let params = new url.URLParams("key1=value1&key2=value2&key3=da");
 	params.append("key3", "A3A")
-	assertEQ(params.getAll("key3").toString(), "da,A3A");
+ arktest.assertEQ(params.getAll("key3").toString(), "da,A3A");
 }
 
 /**
@@ -78,7 +78,7 @@ function testParamsGetAll004() {
 	let params = new url.URLParams("key1=value1&key2=value2&key3=大")
 	params.append("key3", "A3A")
 	let result = params.getAll("key4")
-	assertEQ(result.toString(), '')
+ arktest.assertEQ(result.toString(), '')
 }
 
 /**
@@ -93,7 +93,7 @@ function testParamsGetAll005() {
 	let params = new url.URLParams("key1=value1&key2=value2&key3=大")
 	params.append("key3", "A3A")
 	let result = params.getAll("key2")
-	assertEQ(result.toString(), "value2")
+ arktest.assertEQ(result.toString(), "value2")
 }
 
 /**
@@ -111,7 +111,7 @@ function testParamsSet001() {
 	// params.append("11","ACA");
 	params.set("11", "CCC");
 	let res = params.toString();
-	assertEQ(res, "1=value1&2=value2&key3=3&11=CCC");
+ arktest.assertEQ(res, "1=value1&2=value2&key3=3&11=CCC");
 }
 
 /**
@@ -128,7 +128,7 @@ function testParamsSet002() {
 	let params = new url.URLParams("1=value1&2=value2&key3=3");
 	params.set('10', 'BBB');
 	let res = params.toString();
-	assertEQ(res, "1=value1&2=value2&key3=3&10=BBB");
+ arktest.assertEQ(res, "1=value1&2=value2&key3=3&10=BBB");
 }
 
 /**
@@ -145,7 +145,7 @@ function testParamsSet003() {
 	let params = new url.URLParams("1=value1&2=value2&key3=3");
 	params.set("ma 大", "10￥");
 	let res = params.toString();
-	assertEQ(res, "1=value1&2=value2&key3=3&ma+%E5%A4%A7=10%EF%BF%A5");
+ arktest.assertEQ(res, "1=value1&2=value2&key3=3&ma+%E5%A4%A7=10%EF%BF%A5");
 }
 
 /**
@@ -163,7 +163,7 @@ function testParamsSet004() {
 	// params.append("1","ACA");
 	params.set("1", "CCC");
 	let res = params.toString();
-	assertEQ(res, "1=CCC&2=value2&key3=3");
+ arktest.assertEQ(res, "1=CCC&2=value2&key3=3");
 }
 
 /**
@@ -180,7 +180,7 @@ function testParamsSet005() {
 	let params = new url.URLParams("1=value1&2=value2&key3=3");
 	params.set('12', 'BBB');
 	let res = params.toString();
-	assertEQ(res, "1=value1&2=value2&key3=3&12=BBB");
+ arktest.assertEQ(res, "1=value1&2=value2&key3=3&12=BBB");
 }
 
 /**
@@ -197,13 +197,13 @@ function testParamsSet006() {
 	let params = new url.URLParams('');
 	params.set('12', 'BBB');
 	let res = params.toString();
-	assertEQ(res, "12=BBB");
+ arktest.assertEQ(res, "12=BBB");
 }
 
 
 
 function main(): int {
-	let suite = new ArkTestsuite("URL UT tests");
+	let suite = new arktest.ArkTestsuite("URL UT tests");
 	suite.addTest("testParamsGet001", testParamsGet001);
 	suite.addTest("testParamsGet005", testParamsGet005);
 	suite.addTest("testParamsGetAll001", testParamsGetAll001);

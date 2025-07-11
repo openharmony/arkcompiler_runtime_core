@@ -15,11 +15,8 @@
 
 import {TreeSet} from "@ohos.util.TreeSet";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
-    const suite = new ArkTestsuite("TreeSet GetLowerValue GetHigherValue API tests")
+    const suite = new arktest.ArkTestsuite("TreeSet GetLowerValue GetHigherValue API tests")
 
     suite.addTest("TreeSet getLowerValue getHigherValue lower and higher value",
         testGetLowerValueGetHigherValueValidValues)
@@ -66,11 +63,11 @@ function testGetLowerValueGetHigherValueValidValues() {
     let lower_ = treeSet.getLowerValue("cc");
     let higher = treeSet.getHigherValue("aa");
     let higher_ = treeSet.getHigherValue("bb");
-    assertEQ(lower, "aa", "The treeSet should return the correct lower value");
-    assertEQ(lower_, "bb", "The treeSet should return the correct lower value");
-    assertEQ(higher, "bb", "The treeSet should return the correct higher value");
-    assertEQ(higher_, "cc", "The treeSet should return the correct higher value");
-    assertEQ(treeSet.length, 3, "The treeSet length should be 3")
+    arktest.assertEQ(lower, "aa", "The treeSet should return the correct lower value");
+    arktest.assertEQ(lower_, "bb", "The treeSet should return the correct lower value");
+    arktest.assertEQ(higher, "bb", "The treeSet should return the correct higher value");
+    arktest.assertEQ(higher_, "cc", "The treeSet should return the correct higher value");
+    arktest.assertEQ(treeSet.length, 3, "The treeSet length should be 3")
 }
 
 function testGetLowerValueGetHigherValueEmptyTreeSet() {
@@ -78,9 +75,9 @@ function testGetLowerValueGetHigherValueEmptyTreeSet() {
         secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let lower = treeSet.getLowerValue("bb");
     let higher = treeSet.getHigherValue("aa");
-    assertEQ(lower, undefined, "The treeSet should return undefined for the lower value in an empty set");
-    assertEQ(higher, undefined, "The treeSet should return undefined for the higher value in an empty set");
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0")
+    arktest.assertEQ(lower, undefined, "The treeSet should return undefined for the lower value in an empty set");
+    arktest.assertEQ(higher, undefined, "The treeSet should return undefined for the higher value in an empty set");
+    arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0")
 }
 
 function testGetLowerValueGetHigherValueBoundaryValues() {
@@ -91,9 +88,9 @@ function testGetLowerValueGetHigherValueBoundaryValues() {
     treeSet.add("cc");
     let lower = treeSet.getLowerValue("aa");
     let higher = treeSet.getHigherValue("cc");
-    assertEQ(lower, undefined, "The treeSet should return undefined for the lower value at the boundary value");
-    assertEQ(higher, undefined, "The treeSet should return undefined for the higher value at the boundary value");
-    assertEQ(treeSet.length, 3, "The treeSet length should be 3")
+    arktest.assertEQ(lower, undefined, "The treeSet should return undefined for the lower value at the boundary value");
+    arktest.assertEQ(higher, undefined, "The treeSet should return undefined for the higher value at the boundary value");
+    arktest.assertEQ(treeSet.length, 3, "The treeSet length should be 3")
 }
 
 function testGetLowerValueAndHigherValueNonExistingValue() {
@@ -111,11 +108,11 @@ function testGetLowerValueAndHigherValueNonExistingValue() {
     let lower = treeSet.getLowerValue("ff");
     let higher_ = treeSet.getHigherValue("pp");
     let higher = treeSet.getHigherValue("ff");
-    assertEQ(lower_, undefined, "The treeSet should return undefined when no data is found above this value");
-    assertEQ(higher_, undefined, "The treeSet should return undefined when no data is found below this value");
-    assertEQ(lower, "ee", "The treeSet should return the correct lower value");
-    assertEQ(higher, "gg", "The treeSet should return the correct higher value");
-    assertEQ(treeSet.length, 8, "The treeSet length should be 8");
+    arktest.assertEQ(lower_, undefined, "The treeSet should return undefined when no data is found above this value");
+    arktest.assertEQ(higher_, undefined, "The treeSet should return undefined when no data is found below this value");
+    arktest.assertEQ(lower, "ee", "The treeSet should return the correct lower value");
+    arktest.assertEQ(higher, "gg", "The treeSet should return the correct higher value");
+    arktest.assertEQ(treeSet.length, 8, "The treeSet length should be 8");
 }
 
 function testGetLowerValueGetHigherValueEmptyStringValue() {
@@ -123,9 +120,9 @@ function testGetLowerValueGetHigherValueEmptyStringValue() {
         secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let lower = treeSet.getLowerValue("");
     let higher = treeSet.getHigherValue("");
-    assertEQ(lower, undefined, "The treeSet should return undefined for the lower value in an empty set");
-    assertEQ(higher, undefined, "The treeSet should return undefined for the higher value in an empty set");
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0")
+    arktest.assertEQ(lower, undefined, "The treeSet should return undefined for the lower value in an empty set");
+    arktest.assertEQ(higher, undefined, "The treeSet should return undefined for the higher value in an empty set");
+    arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0")
 }
 
 function testGetLowerValueGetHigherValueDescendingOrder() {
@@ -137,9 +134,9 @@ function testGetLowerValueGetHigherValueDescendingOrder() {
     treeSet.add("a");
     let lower = treeSet.getLowerValue("c");
     let higher = treeSet.getHigherValue("c");
-    assertEQ(lower, "d", "The treeSet should return undefined for the lower value in an empty set");
-    assertEQ(higher, "b", "The treeSet should return undefined for the higher value in an empty set");
-    assertEQ(treeSet.length, 4, "The treeSet length should be 4")
+    arktest.assertEQ(lower, "d", "The treeSet should return undefined for the lower value in an empty set");
+    arktest.assertEQ(higher, "b", "The treeSet should return undefined for the higher value in an empty set");
+    arktest.assertEQ(treeSet.length, 4, "The treeSet length should be 4")
 }
 
 function testGetLowerValueGetHigherValueObjectValues() {
@@ -157,11 +154,11 @@ function testGetLowerValueGetHigherValueObjectValues() {
     let higher = treeSet.getHigherValue(obj);
     let higher_ = treeSet.getHigherValue(obj_sec);
     let lower = treeSet.getLowerValue(obj_sec);
-    assertTrue(equalObjects(lower!, obj), "The treeSet should return the correct lower value");
-    assertTrue(equalObjects(lower_!, obj_sec), "The treeSet should return the correct lower value");
-    assertTrue(equalObjects(higher!, obj_sec), "The treeSet should return the correct higher value");
-    assertTrue(equalObjects(higher_!, obj_trd), "The treeSet should return the correct higher value");
-    assertEQ(treeSet.length, 3, "The treeSet length should be 3")
+    arktest.assertTrue(equalObjects(lower!, obj), "The treeSet should return the correct lower value");
+    arktest.assertTrue(equalObjects(lower_!, obj_sec), "The treeSet should return the correct lower value");
+    arktest.assertTrue(equalObjects(higher!, obj_sec), "The treeSet should return the correct higher value");
+    arktest.assertTrue(equalObjects(higher_!, obj_trd), "The treeSet should return the correct higher value");
+    arktest.assertEQ(treeSet.length, 3, "The treeSet length should be 3")
 }
 
 function testGetLowerValueGetHigherValueObjectValuesBoundaryValues() {
@@ -177,7 +174,7 @@ function testGetLowerValueGetHigherValueObjectValuesBoundaryValues() {
     treeSet.add(obj_trd);
     let lower = treeSet.getLowerValue(obj);
     let higher = treeSet.getHigherValue(obj_trd);
-    assertEQ(lower, undefined, "The treeSet should return undefined for the lower value at the boundary value");
-    assertEQ(higher, undefined, "The treeSet should return undefined for the higher value at the boundary value");
-    assertEQ(treeSet.length, 3, "The treeSet length should be 3")
+    arktest.assertEQ(lower, undefined, "The treeSet should return undefined for the lower value at the boundary value");
+    arktest.assertEQ(higher, undefined, "The treeSet should return undefined for the higher value at the boundary value");
+    arktest.assertEQ(treeSet.length, 3, "The treeSet length should be 3")
 }

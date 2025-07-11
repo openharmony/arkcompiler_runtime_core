@@ -29,5 +29,5 @@ class Builder {
 
 function main(): void {
   const builder: Builder | null = null;
-  assertEQ(builder?.add(5), getResult());
+  arktest.assertEQ(builder?.add(5), getResult());
 }

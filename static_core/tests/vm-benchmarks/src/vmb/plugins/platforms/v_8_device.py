@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,9 +16,10 @@
 #
 
 import logging
-from typing import List
+from typing import List, Optional
 from vmb.unit import BenchUnit
 from vmb.platform import PlatformBase
+from vmb.gensettings import GenSettings
 from vmb.target import Target
 from vmb.cli import Args
 
@@ -46,12 +47,14 @@ class Platform(PlatformBase):
         return ['tsc', 'v_8'] if 'ts' in self.langs else ['v_8']
 
     @property
-    def required_hooks(self) -> List[str]:
-        return ['fix_print_call']
+    def template(self) -> Optional[GenSettings]:
+        """Special template because of print  method."""
+        return GenSettings(src=set(), template='', out='',
+                           print_func='console')
 
     @property
     def langs(self) -> List[str]:
-        return self.args_langs if self.args_langs else ['ts', 'js']
+        return list(self.args_langs) if self.args_langs else ['ts', 'js']
 
     def run_unit(self, bu: BenchUnit) -> None:
         if self.tsc:

@@ -30,7 +30,7 @@ let finreg = new FinalizationRegistry<int>((tag: int) => {
 function runGC(): void {
     try {
         // trigger FinalizationRegistry cleanup
-        let fullGcId = GC.startGC(GC.YOUNG_CAUSE);
+        let fullGcId = GC.startGC(GC.Cause.YOUNG);
         GC.waitForFinishGC(fullGcId);
     } catch (e) {
         throw new Error("Unexpected exception during GC");

@@ -72,10 +72,10 @@ class RunnerETSSystem(RunnerJS):
         self.collect_ignored_test_lists()
 
         ets_flags = [
+            f"--opt-level={self.config.es2panda.opt_level}",
             "--extension=ets",
-            "--output=/dev/null",
             f"--arktsconfig={self.arktsconfig}"
-        ]
+        ] + self.config.es2panda.es2panda_args
         all_warnings = ets_flags + SystemArkTSFlags.ALL_WARNINGS.value
         boost_equality_statements = ets_flags + SystemArkTSFlags.BOOST_EQUALITY_STATEMENTS.value
         implicit_boxing_unboxing = ets_flags + SystemArkTSFlags.IMPLICIT_BOXING_UNBOXING.value

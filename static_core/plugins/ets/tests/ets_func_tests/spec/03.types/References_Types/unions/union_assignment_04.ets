@@ -25,5 +25,5 @@ type ANumber = A | number
 function main(): void {
     let b2: ANumber = 5
     b2 = new A()
-    assertTrue( b2 instanceof A)
+    arktest.assertTrue( b2 instanceof A)
 }

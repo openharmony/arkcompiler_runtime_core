@@ -16,26 +16,26 @@ cases:
   - desc: no args
     impl: |-
         let f: () => int = () => { return 1234 }
-        assertEQ(f(), 1234, "no args failed")
+        arktest.assertEQ(f(), 1234, "no args failed")
 
   - desc: one arg
     impl: |-
         let f: (e: int) => int = (e: int) => { return e + 8 }
-        assertEQ(f(1), 9, "one arg failed")
+        arktest.assertEQ(f(1), 9, "one arg failed")
 
   - desc: two args
     impl: |-
         let f: (e: int, e2: int) => int = (e: int, e2: int) => { return e + e2 }
-        assertEQ(f(1, 2), 3, "two args failed")
+        arktest.assertEQ(f(1, 2), 3, "two args failed")
 
   - desc: optional arg
     impl: |-
         let f: (e: int, eo?: int) => int = (e: int, eo?: int) => { return e + (eo ? eo : 1) }
-        assertEQ(f(8), 9, "optional arg failed")
-        assertEQ(f(6, 7), 13, "optional arg[2] failed")
+        arktest.assertEQ(f(8), 9, "optional arg failed")
+        arktest.assertEQ(f(6, 7), 13, "optional arg[2] failed")
 
   - desc: rest arg
     impl: |-
-        let f: (e: int, ...es: int[]) => int = (e: int, ...es: int[]) => { return e + (es.lengh > 0 ? es[0] : 1 ) }
-        assertEQ(f(8), 9, "rest arg failed")
-        assertEQ(f(7, 1, 2, 3), 8, "rest arg[2] failed")
+        let f: (e: int, ...es: int[]) => int = (e: int, ...es: int[]) => { return e + (es.length > 0 ? es[0] : 1 ) }
+        arktest.assertEQ(f(8), 9, "rest arg failed")
+        arktest.assertEQ(f(7, 1, 2, 3), 8, "rest arg[2] failed")

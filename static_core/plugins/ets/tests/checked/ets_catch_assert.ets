@@ -30,7 +30,7 @@ function foo(): string {
 function main(): int {
     res = "";
     try {
-        assertTrue((a > b ? b == a : a < b), foo()); // foo must be called
+        arktest.assertTrue((a > b ? b == a : a < b), foo()); // foo must be called
     } catch(e) {
         // expected
     }

@@ -31,5 +31,5 @@ function main(): void {
     res = 0;
   }
 
-  assertEQ( res, 1, "NPE caught - correct" )
+  arktest.assertEQ( res, 1, "NPE caught - correct" )
 }

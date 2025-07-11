@@ -16,12 +16,15 @@
 #ifndef COMMON_INTERFACES_OBJECTS_STRING_SLICED_STRING_H
 #define COMMON_INTERFACES_OBJECTS_STRING_SLICED_STRING_H
 
-#include "common_interfaces/objects/string/base_string_declare.h"
+#include "objects/string/base_string.h"
+#include "base/bit_field.h"
 
 namespace common {
 /*
  +-----------------------------+ <-- offset 0
  |      BaseObject fields      |
+ +-----------------------------+
+ | Padding (uint64_t)          |
  +-----------------------------+
  | LengthAndFlags (uint32_t)   |
  +-----------------------------+
@@ -42,6 +45,14 @@ namespace common {
    [2 - 31]    : StartIndexBits             (30 bits)
  */
 // The substrings of another string use SlicedString to describe.
+
+/**
+ * @class SlicedString
+ * @brief Represents a substring that references a slice of another BaseString.
+ *
+ * Used for substring operations, SlicedString holds a reference to a parent BaseString
+ * and an offset indicating the starting index of the slice.
+ */
 class SlicedString : public BaseString {
 public:
     BASE_CAST_CHECK(SlicedString, IsSlicedString);
@@ -60,15 +71,54 @@ public:
     POINTER_FIELD(Parent, PARENT_OFFSET, STARTINDEX_AND_FLAGS_OFFSET);
     PRIMITIVE_FIELD(StartIndexAndFlags, uint32_t, STARTINDEX_AND_FLAGS_OFFSET, SIZE);
 
+    /**
+     * @brief Create a SlicedString backed by a parent BaseString.
+     * @tparam Allocator Callable allocator.
+     * @tparam WriteBarrier A callable used to manage memory writes.
+     * @param allocator Allocator instance.
+     * @param writeBarrier Memory write barrier.
+     * @param parent Read-only handle to parent string.
+     * @return SlicedString pointer.
+     */
+    template <typename Allocator, typename WriteBarrier,
+              objects_traits::enable_if_is_allocate<Allocator, BaseObject *>  = 0,
+              objects_traits::enable_if_is_write_barrier<WriteBarrier>  = 0>
+    static SlicedString *Create(Allocator &&allocator, WriteBarrier &&writeBarrier, ReadOnlyHandle<BaseString> parent);
+    /**
+     * @brief Get the start index of the sliced region.
+     * @return Start index into parent string.
+     */
     uint32_t GetStartIndex() const;
 
+    /**
+     * @brief Set the start index for this slice.
+     * @param startIndex Index value to set.
+     */
     void SetStartIndex(uint32_t startIndex);
 
+    /**
+     * @brief Check if the string has an allocated backing store.
+     * @return true if the string has its own buffer; false if it references parent.
+     */
     bool GetHasBackingStore() const;
 
+    /**
+     * @brief Set whether this sliced string has a backing store.
+     * @param hasBackingStore true if buffer is independently allocated.
+     */
     void SetHasBackingStore(bool hasBackingStore);
 
-    // Minimum length for a sliced string
+    /**
+     * @brief Get UTF-16 character at given index with optional bounds check.
+     *
+     * Computes the actual index relative to the parent BaseString.
+     *
+     * @tparam verify If true, index is verified for validity.
+     * @tparam ReadBarrier Callable for safe memory access.
+     * @param readBarrier Memory read barrier.
+     * @param index Index into the sliced string (not the parent).
+     * @return UTF-16 character code unit.
+     */
     template <bool verify = true, typename ReadBarrier>
     uint16_t Get(ReadBarrier &&readBarrier, int32_t index) const;
 };

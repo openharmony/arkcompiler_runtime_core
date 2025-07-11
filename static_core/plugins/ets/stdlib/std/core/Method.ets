@@ -15,8 +15,8 @@
 
 package std.core;
 
-native function TypeAPIMethodInvoke(methodType: MethodType, recv: NullishType, args: NullishType[]): NullishType
-native function TypeAPIMethodInvokeConstructor(methodType: MethodType, args: NullishType[]): Object
+native function TypeAPIMethodInvoke(methodType: MethodType, recv: NullishType, args: FixedArray<NullishType>): NullishType
+native function TypeAPIMethodInvokeConstructor(methodType: MethodType, args: FixedArray<NullishType>): Object
 
 /**
  * Represents method of class or interface
@@ -75,7 +75,7 @@ export final class Method extends Object {
         return this.getName() + ": " + this.getType().toString()
     }
 
-    public invoke(recv: NullishType, args: NullishType[]): NullishType {
+    public invoke(recv: NullishType, args: FixedArray<NullishType>): NullishType {
         const isCtor = this.isConstructor()
         const isStatic = this.isStatic()
         if ((isStatic || isCtor) != (recv == null)) {
@@ -85,7 +85,7 @@ export final class Method extends Object {
         if (thisType.getParametersNum() != args.length) {
             throw new Error("arguments length mismatch " + thisType.getParametersNum() + " != " + args.length)
         }
-        let convertedArgs: NullishType[] = new NullishType[args.length]
+        let convertedArgs: FixedArray<NullishType> = new NullishType[args.length]
         for (let i = 0; i < convertedArgs.length; i++) {
             convertedArgs[i] = thisType.getParameter(i).getType().convertObject(args[i])
         }

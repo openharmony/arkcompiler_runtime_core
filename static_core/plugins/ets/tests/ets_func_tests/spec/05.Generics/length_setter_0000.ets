@@ -21,6 +21,6 @@
 
 function main() : int {
     let x : Array<String> = new Array<String>();
-    assertEQ( x.length, 0)
+    arktest.assertEQ( x.length, 0)
     return 0;
 }

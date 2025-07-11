@@ -16,7 +16,7 @@
 function foo(): Void { return Void.void_instance }
 
 function test(a: Object): void {
-	assertTrue((a instanceof Void))
+ arktest.assertTrue((a instanceof Void))
 }
 
 class C {
@@ -24,7 +24,7 @@ class C {
 	bar(): Void { throw new Error("not overriden")  }
 }
 
-function main(): void throws {
+function main(): void {
 	test(foo());
 
 	const called = new boolean[1];

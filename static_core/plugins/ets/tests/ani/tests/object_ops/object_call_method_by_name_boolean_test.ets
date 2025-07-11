@@ -93,7 +93,7 @@ class B implements ji {
     }
 
     calculateSum(value1: int, value2: char, value3: double): boolean {
-        let aChar: char = 'A';
+        let aChar: char = c'A';
         if (value2 == aChar) {
             return true;
         }

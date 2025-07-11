@@ -19,7 +19,7 @@
 #include "../../src/mock/abckit_mock.h"
 #include "../../src/mock/mock_values.h"
 
-#include "../../include/c/metadata_core.h"
+#include "../../include/libabckit/c/metadata_core.h"
 
 #include <gtest/gtest.h>
 
@@ -110,6 +110,27 @@ bool ModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCo
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(m == DEFAULT_CORE_MODULE);
     return cb(DEFAULT_CORE_CLASS, data);
+}
+
+bool ModuleEnumerateInterfaces(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreInterface *iface, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(m == DEFAULT_CORE_MODULE);
+    return cb(DEFAULT_CORE_INTERFACE, data);
+}
+
+bool ModuleEnumerateEnums(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreEnum *enm, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(m == DEFAULT_CORE_MODULE);
+    return cb(DEFAULT_CORE_ENUM, data);
+}
+
+bool ModuleEnumerateFields(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreModuleField *field, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(m == DEFAULT_CORE_MODULE);
+    return cb(DEFAULT_CORE_MODULE_FIELD, data);
 }
 
 bool ModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data,
@@ -294,6 +315,13 @@ AbckitCoreNamespace *ClassGetParentNamespace(AbckitCoreClass *klass)
     return DEFAULT_CORE_NAMESPACE;
 }
 
+AbckitCoreClass *ClassGetSuperClass(AbckitCoreClass *klass)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(klass == DEFAULT_CORE_CLASS);
+    return DEFAULT_CORE_CLASS;
+}
+
 bool ClassEnumerateMethods(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreFunction *function, void *data))
 {
     g_calledFuncs.push(__func__);
@@ -306,6 +334,289 @@ bool ClassEnumerateAnnotations(AbckitCoreClass *klass, void *data, bool (*cb)(Ab
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(klass == DEFAULT_CORE_CLASS);
     return cb(DEFAULT_CORE_ANNOTATION, data);
+}
+
+bool ClassEnumerateInterfaces(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreInterface *iface, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(klass == DEFAULT_CORE_CLASS);
+    return cb(DEFAULT_CORE_INTERFACE, data);
+}
+
+bool ClassEnumerateFields(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreClassField *field, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(klass == DEFAULT_CORE_CLASS);
+    return cb(DEFAULT_CORE_CLASS_FIELD, data);
+}
+
+// ========================================
+// Interface
+// ========================================
+
+AbckitFile *InterfaceGetFile(AbckitCoreInterface *iface)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(iface == DEFAULT_CORE_INTERFACE);
+    return DEFAULT_FILE;
+}
+
+AbckitCoreModule *InterfaceGetModule(AbckitCoreInterface *iface)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(iface == DEFAULT_CORE_INTERFACE);
+    return DEFAULT_CORE_MODULE;
+}
+
+AbckitString *InterfaceGetName(AbckitCoreInterface *iface)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(iface == DEFAULT_CORE_INTERFACE);
+    return DEFAULT_STRING;
+}
+
+bool InterfaceEnumerateSuperInterfaces(AbckitCoreInterface *iface, void *data,
+                                       bool (*cb)(AbckitCoreInterface *iface, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(iface == DEFAULT_CORE_INTERFACE);
+    return cb(DEFAULT_CORE_INTERFACE, data);
+}
+
+bool InterfaceEnumerateMethods(AbckitCoreInterface *iface, void *data,
+                               bool (*cb)(AbckitCoreFunction *function, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(iface == DEFAULT_CORE_INTERFACE);
+    return cb(DEFAULT_CORE_FUNCTION, data);
+}
+
+bool InterfaceEnumerateAnnotations(AbckitCoreInterface *iface, void *data,
+                                   bool (*cb)(AbckitCoreAnnotation *anno, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(iface == DEFAULT_CORE_INTERFACE);
+    return cb(DEFAULT_CORE_ANNOTATION, data);
+}
+
+bool InterfaceEnumerateFields(AbckitCoreInterface *iface, void *data,
+                              bool (*cb)(AbckitCoreInterfaceField *field, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(iface == DEFAULT_CORE_INTERFACE);
+    return cb(DEFAULT_CORE_INTERFACE_FIELD, data);
+}
+
+// ========================================
+// Enum
+// ========================================
+
+AbckitString *EnumGetName(AbckitCoreEnum *enm)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(enm == DEFAULT_CORE_ENUM);
+    return DEFAULT_STRING;
+}
+
+bool EnumEnumerateMethods(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreFunction *function, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(enm == DEFAULT_CORE_ENUM);
+    return cb(DEFAULT_CORE_FUNCTION, data);
+}
+
+bool EnumEnumerateFields(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreEnumField *field, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(enm == DEFAULT_CORE_ENUM);
+    return cb(DEFAULT_CORE_ENUM_FIELD, data);
+}
+
+// ========================================
+// Module Field
+// ========================================
+
+AbckitCoreModule *ModuleFieldGetModule(AbckitCoreModuleField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_MODULE_FIELD);
+    return DEFAULT_CORE_MODULE;
+}
+
+AbckitString *ModuleFieldGetName(AbckitCoreModuleField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_MODULE_FIELD);
+    return DEFAULT_STRING;
+}
+
+AbckitType *ModuleFieldGetType(AbckitCoreModuleField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_MODULE_FIELD);
+    return DEFAULT_TYPE;
+}
+
+AbckitValue *ModuleFieldGetValue(AbckitCoreModuleField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_MODULE_FIELD);
+    return DEFAULT_VALUE;
+}
+
+bool ModuleFieldIsPublic(AbckitCoreModuleField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_MODULE_FIELD);
+    return DEFAULT_BOOL;
+}
+
+bool ModuleFieldIsPrivate(AbckitCoreModuleField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_MODULE_FIELD);
+    return DEFAULT_BOOL;
+}
+
+bool ModuleFieldEnumerateAnnotations(AbckitCoreModuleField *field, void *data,
+                                     bool (*cb)(AbckitCoreAnnotation *anno, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_MODULE_FIELD);
+    return cb(DEFAULT_CORE_ANNOTATION, data);
+}
+
+// ========================================
+// Class Field
+// ========================================
+
+AbckitCoreClass *ClassFieldGetClass(AbckitCoreClassField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_CLASS_FIELD);
+    return DEFAULT_CORE_CLASS;
+}
+
+AbckitString *ClassFieldGetName(AbckitCoreClassField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_CLASS_FIELD);
+    return DEFAULT_STRING;
+}
+
+AbckitType *ClassFieldGetType(AbckitCoreClassField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_CLASS_FIELD);
+    return DEFAULT_TYPE;
+}
+
+AbckitValue *ClassFieldGetValue(AbckitCoreClassField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_CLASS_FIELD);
+    return DEFAULT_VALUE;
+}
+
+bool ClassFieldIsPublic(AbckitCoreClassField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_CLASS_FIELD);
+    return DEFAULT_BOOL;
+}
+
+bool ClassFieldIsProtected(AbckitCoreClassField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_CLASS_FIELD);
+    return DEFAULT_BOOL;
+}
+
+bool ClassFieldIsPrivate(AbckitCoreClassField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_CLASS_FIELD);
+    return DEFAULT_BOOL;
+}
+
+bool ClassFieldIsStatic(AbckitCoreClassField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_CLASS_FIELD);
+    return DEFAULT_BOOL;
+}
+
+bool ClassFieldEnumerateAnnotations(AbckitCoreClassField *field, void *data,
+                                    bool (*cb)(AbckitCoreAnnotation *anno, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_CLASS_FIELD);
+    return cb(DEFAULT_CORE_ANNOTATION, data);
+}
+
+// ========================================
+// Interface Field
+// ========================================
+
+AbckitCoreInterface *InterfaceFieldGetInterface(AbckitCoreInterfaceField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_INTERFACE_FIELD);
+    return DEFAULT_CORE_INTERFACE;
+}
+
+AbckitString *InterfaceFieldGetName(AbckitCoreInterfaceField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_INTERFACE_FIELD);
+    return DEFAULT_STRING;
+}
+
+AbckitType *InterfaceFieldGetType(AbckitCoreInterfaceField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_INTERFACE_FIELD);
+    return DEFAULT_TYPE;
+}
+
+bool InterfaceFieldEnumerateAnnotations(AbckitCoreInterfaceField *field, void *data,
+                                        bool (*cb)(AbckitCoreAnnotation *anno, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_INTERFACE_FIELD);
+    return cb(DEFAULT_CORE_ANNOTATION, data);
+}
+
+// ========================================
+// Enum Field
+// ========================================
+
+AbckitCoreEnum *EnumFieldGetEnum(AbckitCoreEnumField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_ENUM_FIELD);
+    return DEFAULT_CORE_ENUM;
+}
+
+AbckitString *EnumFieldGetName(AbckitCoreEnumField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_ENUM_FIELD);
+    return DEFAULT_STRING;
+}
+
+AbckitType *EnumFieldGetType(AbckitCoreEnumField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_ENUM_FIELD);
+    return DEFAULT_TYPE;
+}
+
+AbckitValue *EnumFieldGetValue(AbckitCoreEnumField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_ENUM_FIELD);
+    return DEFAULT_VALUE;
 }
 
 // ========================================
@@ -476,6 +787,42 @@ bool FunctionIsAnonymous(AbckitCoreFunction *function)
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
     return DEFAULT_BOOL;
+}
+
+bool FunctionIsPublic(AbckitCoreFunction *function)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
+    return DEFAULT_BOOL;
+}
+
+bool FunctionIsProtected(AbckitCoreFunction *function)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
+    return DEFAULT_BOOL;
+}
+
+bool FunctionIsPrivate(AbckitCoreFunction *function)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
+    return DEFAULT_BOOL;
+}
+
+bool FunctionEnumerateParameters(AbckitCoreFunction *function, void *data,
+                                 bool (*cb)(AbckitCoreFunctionParam *param, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
+    return cb(DEFAULT_CORE_FUNCTION_PARAM, data);
+}
+
+AbckitType *FunctionGetReturnType(AbckitCoreFunction *function)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
+    return DEFAULT_TYPE;
 }
 
 // ========================================
@@ -786,6 +1133,9 @@ static AbckitInspectApi g_inspectApiImpl = {
     ModuleEnumerateExports,
     ModuleEnumerateNamespaces,
     ModuleEnumerateClasses,
+    ModuleEnumerateInterfaces,
+    ModuleEnumerateEnums,
+    ModuleEnumerateFields,
     ModuleEnumerateTopLevelFunctions,
     ModuleEnumerateAnonymousFunctions,
     ModuleEnumerateAnnotationInterfaces,
@@ -829,8 +1179,75 @@ static AbckitInspectApi g_inspectApiImpl = {
     ClassGetName,
     ClassGetParentFunction,
     ClassGetParentNamespace,
+    ClassGetSuperClass,
     ClassEnumerateMethods,
     ClassEnumerateAnnotations,
+    ClassEnumerateInterfaces,
+    ClassEnumerateFields,
+
+    // ========================================
+    // Interface
+    // ========================================
+
+    InterfaceGetFile,
+    InterfaceGetModule,
+    InterfaceGetName,
+    InterfaceEnumerateSuperInterfaces,
+    InterfaceEnumerateMethods,
+    InterfaceEnumerateAnnotations,
+    InterfaceEnumerateFields,
+
+    // ========================================
+    // Enum
+    // ========================================
+
+    EnumGetName,
+    EnumEnumerateMethods,
+    EnumEnumerateFields,
+
+    // ========================================
+    // Module Field
+    // ========================================
+
+    ModuleFieldGetModule,
+    ModuleFieldGetName,
+    ModuleFieldGetType,
+    ModuleFieldGetValue,
+    ModuleFieldIsPublic,
+    ModuleFieldIsPrivate,
+    ModuleFieldEnumerateAnnotations,
+
+    // ========================================
+    // Class Field
+    // ========================================
+
+    ClassFieldGetClass,
+    ClassFieldGetName,
+    ClassFieldGetType,
+    ClassFieldGetValue,
+    ClassFieldIsPublic,
+    ClassFieldIsProtected,
+    ClassFieldIsPrivate,
+    ClassFieldIsStatic,
+    ClassFieldEnumerateAnnotations,
+
+    // ========================================
+    // Interface Field
+    // ========================================
+
+    InterfaceFieldGetInterface,
+    InterfaceFieldGetName,
+    InterfaceFieldGetType,
+    InterfaceFieldEnumerateAnnotations,
+
+    // ========================================
+    // Enum Field
+    // ========================================
+
+    EnumFieldGetEnum,
+    EnumFieldGetName,
+    EnumFieldGetType,
+    EnumFieldGetValue,
 
     // ========================================
     // Function
@@ -849,6 +1266,11 @@ static AbckitInspectApi g_inspectApiImpl = {
     FunctionIsStatic,
     FunctionIsCtor,
     FunctionIsAnonymous,
+    FunctionIsPublic,
+    FunctionIsProtected,
+    FunctionIsPrivate,
+    FunctionEnumerateParameters,
+    FunctionGetReturnType,
 
     // ========================================
     // Annotation

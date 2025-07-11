@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TAIHE_VECTOR_HPP
-#define TAIHE_VECTOR_HPP
+#ifndef RUNTIME_INCLUDE_TAIHE_VECTOR_HPP_
+#define RUNTIME_INCLUDE_TAIHE_VECTOR_HPP_
+// NOLINTBEGIN
 
 #include <taihe/common.hpp>
 
@@ -22,9 +23,6 @@
 
 #define VEC_GROWTH_FACTOR 2
 
-// This file is used as a standard library and needs to be easy to use.
-// The rule that single-parameter constructors need to be explicit does not apply.
-// NOLINTBEGIN
 namespace taihe {
 template <typename T>
 struct vector_view;
@@ -39,8 +37,6 @@ public:
     using size_type = std::size_t;
     using reference = T &;
     using pointer = T *;
-    using iterator = T *;
-    using const_iterator = T const *;
 
     void reserve(std::size_t cap) const
     {
@@ -54,6 +50,11 @@ public:
     std::size_t size() const noexcept
     {
         return m_handle->len;
+    }
+
+    bool empty() const noexcept
+    {
+        return m_handle->len == 0;
     }
 
     std::size_t capacity() const noexcept
@@ -106,6 +107,9 @@ public:
         m_handle->len = 0;
     }
 
+    using iterator = T *;
+    using const_iterator = T const *;
+
     iterator begin() const
     {
         return m_handle->buffer;
@@ -138,8 +142,12 @@ protected:
 
     friend struct vector<T>;
 
-    friend bool taihe::same_impl(adl_helper_t, vector_view lhs, vector_view rhs);
-    friend std::size_t taihe::hash_impl(adl_helper_t, vector_view val);
+    friend struct std::hash<vector<T>>;
+
+    friend bool operator==(vector_view lhs, vector_view rhs)
+    {
+        return lhs.m_handle == rhs.m_handle;
+    }
 };
 
 template <typename T>
@@ -194,18 +202,6 @@ private:
 };
 
 template <typename T>
-inline bool same_impl(adl_helper_t, vector_view<T> lhs, vector_view<T> rhs)
-{
-    return lhs.m_handle == rhs.m_handle;
-}
-
-template <typename T>
-inline std::size_t hash_impl(adl_helper_t, vector_view<T> val)
-{
-    return reinterpret_cast<std::size_t>(val.m_handle);
-}
-
-template <typename T>
 struct as_abi<vector<T>> {
     using type = void *;
 };
@@ -220,10 +216,17 @@ struct as_param<vector<T>> {
     using type = vector_view<T>;
 };
 }  // namespace taihe
-// NOLINTEND
+
+template <typename T>
+struct std::hash<taihe::vector<T>> {
+    std::size_t operator()(taihe::vector_view<T> val) const noexcept
+    {
+        return reinterpret_cast<std::size_t>(val.m_handle);
+    }
+};
 
 #ifdef VEC_GROWTH_FACTOR
 #undef VEC_GROWTH_FACTOR
-#endif // VEC_GROWTH_FACTOR
-
-#endif // TAIHE_VECTOR_HPP
+#endif
+// NOLINTEND
+#endif  // RUNTIME_INCLUDE_TAIHE_VECTOR_HPP_

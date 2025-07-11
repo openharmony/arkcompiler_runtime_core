@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/*---
+  tags: [not-a-test]
+  files: [i1.ets]
+  arktsconfig: arktsconfig.json
+---*/
+
 import { I1 } from "./i1";
 
 export interface I2 extends I1 {

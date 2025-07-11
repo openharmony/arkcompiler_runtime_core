@@ -19,6 +19,7 @@
 #include "libpandabase/os/mem.h"
 #include "libpandabase/os/thread.h"
 #include "libpandabase/utils/time.h"
+#include "libpandabase/taskmanager/task_manager.h"
 #include "runtime/assert_gc_scope.h"
 #include "runtime/include/class.h"
 #include "runtime/include/coretypes/dyn_objects.h"
@@ -33,6 +34,7 @@
 #include "runtime/mem/gc/g1/g1-gc.h"
 #include "runtime/mem/gc/gen-gc/gen-gc.h"
 #include "runtime/mem/gc/stw-gc/stw-gc.h"
+#include "runtime/mem/gc/cmc-gc-adapter/cmc-gc-adapter.h"
 #include "runtime/mem/gc/workers/gc_workers_task_queue.h"
 #include "runtime/mem/gc/workers/gc_workers_thread_pool.h"
 #include "runtime/mem/pygote_space_allocator-inl.h"
@@ -57,9 +59,8 @@ GC::GC(ObjectAllocatorBase *objectAllocator, const GCSettings &settings)
 {
     if (gcSettings_.UseTaskManagerForGC()) {
         // Create gc task queue for task manager
-        auto *tm = taskmanager::TaskScheduler::GetTaskScheduler();
-        gcWorkersTaskQueue_ = tm->CreateAndRegisterTaskQueue<decltype(internalAllocator_->Adapter())>(
-            taskmanager::TaskType::GC, taskmanager::VMType::STATIC_VM, GC_TASK_QUEUE_PRIORITY);
+        gcWorkersTaskQueue_ = taskmanager::TaskManager::CreateTaskQueue<decltype(internalAllocator_->Adapter())>(
+            taskmanager::MAX_QUEUE_PRIORITY);
         ASSERT(gcWorkersTaskQueue_ != nullptr);
     }
 }
@@ -86,8 +87,7 @@ GC::~GC()
         allocator->Delete(workersTaskPool_);
     }
     if (gcWorkersTaskQueue_ != nullptr) {
-        taskmanager::TaskScheduler::GetTaskScheduler()->UnregisterAndDestroyTaskQueue<decltype(allocator->Adapter())>(
-            gcWorkersTaskQueue_);
+        taskmanager::TaskManager::DestroyTaskQueue<decltype(allocator->Adapter())>(gcWorkersTaskQueue_);
     }
 }
 
@@ -170,6 +170,7 @@ void GC::Initialize(PandaVM *vm)
     auto allocator = GetInternalAllocator();
     gcListenerManager_ = allocator->template New<GCListenerManager>();
     clearedReferencesLock_ = allocator->New<os::memory::Mutex>();
+    ASSERT(clearedReferencesLock_ != nullptr);
     os::memory::LockHolder holder(*clearedReferencesLock_);
     clearedReferences_ = allocator->New<PandaVector<ark::mem::Reference *>>(allocator->Adapter());
     this->SetPandaVM(vm);
@@ -280,23 +281,31 @@ void GC::RestoreCpuAffinity()
     ResetCpuAffinity(false);
 }
 
+bool GC::GetFastGCFlag() const
+{
+    // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
+    // on other reads or writes
+    return fastGC_.load(std::memory_order_relaxed);
+}
+
+void GC::SetFastGCFlag(bool fastGC)
+{
+    // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
+    // on other reads or writes
+    fastGC_.store(fastGC, std::memory_order_relaxed);
+}
+
 bool GC::NeedRunGCAfterWaiting(size_t counterBeforeWaiting, const GCTask &task) const
 {
     // Atomic with acquire order reason: data race with gc_counter_ with dependecies on reads after the load which
     // should become visible
     auto newCounter = gcCounter_.load(std::memory_order_acquire);
     ASSERT(newCounter >= counterBeforeWaiting);
-    bool isSensitiveState = false;
-    // NOTE(malinin, 24305): refactor appstate to be moved to another method
-#if defined(PANDA_TARGET_OHOS)
-    auto currentState = this->GetPandaVm()->GetAppState();
-    isSensitiveState = currentState.GetState() == AppState::State::SENSITIVE_START;
-#endif
-    bool shouldRunAccordingToAppState = !(isSensitiveState && task.reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE);
+    bool shouldRunGCAccordingToFlag = !(GetFastGCFlag() && task.reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE);
     // Atomic with acquire order reason: data race with last_cause_ with dependecies on reads after the load which
     // should become visible
     return (newCounter == counterBeforeWaiting || lastCause_.load(std::memory_order_acquire) < task.reason) &&
-           shouldRunAccordingToAppState;
+           shouldRunGCAccordingToFlag;
 }
 
 bool GC::GCPhasesPreparation(const GCTask &task)
@@ -419,6 +428,9 @@ GC *CreateGC(GCType gcType, ObjectAllocatorBase *objectAllocator, const GCSettin
             break;
         case GCType::G1_GC:
             ret = allocator->New<G1GC<LanguageConfig>>(objectAllocator, settings);
+            break;
+        case GCType::CMC_GC:
+            ret = allocator->New<CMCGCAdapter<LanguageConfig>>(objectAllocator, settings);
             break;
         default:
             LOG(FATAL, GC) << "Unknown GC type";
@@ -937,36 +949,6 @@ void GC::SetForwardAddress(ObjectHeader *src, ObjectHeader *dst)
             markWord.DecodeFromForwardingAddress(static_cast<MarkWord::MarkWordSize>(ToUintPtr(dst)));
         updateRes = src->AtomicSetMark<false>(markWord, fwdMarkWord);
     } while (!updateRes);
-}
-
-void GC::UpdateRefsInVRegs(ManagedThread *thread)
-{
-    LOG_DEBUG_GC << "Update frames for thread: " << thread->GetId();
-    for (auto pframe = StackWalker::Create(thread); pframe.HasFrame(); pframe.NextFrame()) {
-        LOG_DEBUG_GC << "Frame for method " << pframe.GetMethod()->GetFullName();
-        auto iterator = [&pframe, this](auto &regInfo, auto &vreg) {
-            ObjectHeader *objectHeader = vreg.GetReference();
-            if (objectHeader == nullptr) {
-                return true;
-            }
-            MarkWord markWord = objectHeader->AtomicGetMark();
-            if (markWord.GetState() != MarkWord::ObjectState::STATE_GC) {
-                return true;
-            }
-            MarkWord::MarkWordSize addr = markWord.GetForwardingAddress();
-            LOG_DEBUG_GC << "Update vreg, vreg old val = " << std::hex << objectHeader << ", new val = 0x" << addr;
-            LOG_IF(regInfo.IsAccumulator(), DEBUG, GC) << "^ acc reg";
-            if (!pframe.IsCFrame() && regInfo.IsAccumulator()) {
-                LOG_DEBUG_GC << "^ acc updated";
-                vreg.SetReference(reinterpret_cast<ObjectHeader *>(addr));
-            } else {
-                pframe.template SetVRegValue<std::is_same_v<decltype(vreg), interpreter::DynamicVRegisterRef &>>(
-                    regInfo, reinterpret_cast<ObjectHeader *>(addr));
-            }
-            return true;
-        };
-        pframe.IterateObjectsWithInfo(iterator);
-    }
 }
 
 const ObjectHeader *GC::PopObjectFromStack(GCMarkingStackType *objectsStack)

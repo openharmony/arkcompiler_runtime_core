@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "helpers.h"
 
 #include "utils/span.h"
+#include "panda_visibility.h"
 
 namespace panda::panda_file {
 using StringData = File::StringData;
@@ -60,12 +61,13 @@ enum class LiteralTag : uint8_t {
     BUILTINTYPEINDEX = 0x19,
     GETTER = 0x1a,
     SETTER = 0x1b,
+    ETS_IMPLEMENTS = 0x1c,
     NULLVALUE = 0xff
 };
 
 class LiteralDataAccessor {
 public:
-    LiteralDataAccessor(const File &panda_file, File::EntityId literal_data_id);
+    PANDA_PUBLIC_API LiteralDataAccessor(const File &panda_file, File::EntityId literal_data_id);
 
     template <class Callback>
     void EnumerateObjectLiterals(size_t index, const Callback &cb);

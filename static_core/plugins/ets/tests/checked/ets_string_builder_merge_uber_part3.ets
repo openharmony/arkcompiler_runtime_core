@@ -27,6 +27,6 @@ const uber_golden_FTFF = "_aaaa_cacaca_aaaa_dbdbdb_ddddd_aaaa_dbdbdb_acacac_aaaa
 const uber_golden_FTFT = "_aaaa_cbacbacba_aaaa_dcbdcbdcb_ddddd_aaaa_dcbdcbdcb_adcadcadc_aaaaa_dbddbd_adcadcadc_aaaa_dcbdcbdcb_adcadcadc_aaaaa_acaaca_";
 
 function main() {
-    assertEQ(uber_chain_concat4(false, "a", 4, "b", 3, "c", 5, "d", 2, false, true, false, false) , uber_golden_FTFF, "Wrong result at uber_golden_FTFF");
-    assertEQ(uber_chain_concat4(false, "a", 4, "b", 3, "c", 5, "d", 2, false, true, false, true)  , uber_golden_FTFT, "Wrong result at uber_golden_FTFT");
+    arktest.assertEQ(uber_chain_concat4(false, "a", 4, "b", 3, "c", 5, "d", 2, false, true, false, false) , uber_golden_FTFF, "Wrong result at uber_golden_FTFF");
+    arktest.assertEQ(uber_chain_concat4(false, "a", 4, "b", 3, "c", 5, "d", 2, false, true, false, true)  , uber_golden_FTFT, "Wrong result at uber_golden_FTFT");
 }

@@ -40,15 +40,6 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
     }
 
     /**
-     * constructor(Char) creates a Char object from another Char object.
-     *
-     * @param value a Char object to copy from.
-     */
-    public constructor(value: Char) {
-        this.value = value.unboxed();
-    }
-
-    /**
      * unboxed() returns an underlying primitive char.
      *
      * @returns the underlying primitive char.
@@ -98,7 +89,7 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      */
     public override toString(): String {
         // TODO(ivan-tyulyandin): if String(char) will be implemented, rewrite code below
-        let buf = new char[1];
+        let buf: FixedArray<char> = new char[1];
         buf[0] = this.value;
         return new String(buf);
     }
@@ -127,7 +118,7 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      * @returns result of the comparison
      */
     public override compareTo(other: Char): int {
-        return (this.value as int) - (other.unboxed() as int);
+        return Char.toInt(this.value) - Char.toInt(other);
     }
 
     /**
@@ -138,7 +129,7 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      * @returns the hash code.
      */
     public static $_hashCode(value: char): int {
-        return value as int;
+        return Char.toInt(value);
     }
 
     /**
@@ -151,7 +142,7 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
     }
 
     public static readonly CHAR_BIT_SIZE = 16;
-    public static readonly MAX_CODE_POINT = 0x10FFFF;
+    public static readonly MAX_CODE_POINT = 0x10FFFF
     public static readonly HIGH_SURROGATE_MIN: char = c'\uD800';
     public static readonly HIGH_SURROGATE_MAX: char = c'\uDBFF';
     public static readonly LOW_SURROGATE_MIN: char = c'\uDC00';
@@ -169,6 +160,141 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
     public static readonly MAX_VALUE: char = c'\uFFFF';
 
     /**
+     * Returns value of this instance
+     *
+     * @returns value as byte
+     * @tag arkts
+     */
+    public toByte(): byte {
+        return this.value.toByte();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as short
+     * @tag arkts
+     */
+    public toShort(): short {
+        return this.value.toShort();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as int
+     * @tag arkts
+     */
+    public toInt(): int {
+        return this.value.toInt();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as long
+     * @tag arkts
+     */
+    public toLong(): long {
+        return this.value.toLong();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as float
+     * @tag arkts
+     */
+    public toFloat(): float {
+        return this.value.toFloat();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as float
+     * @tag arkts
+     */
+    public toDouble(): double {
+        return this.value.toDouble();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as char
+     * @tag arkts
+     */
+    public toChar(): char {
+        return this.value;
+    }
+
+    /**
+     * Returns the primitive as byte value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toByte(value: char): byte;
+
+    /**
+     * Returns the primitive as short value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toShort(value: char): short;
+
+    /**
+     * Returns the primitive as int value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toInt(value: char): int;
+
+    /**
+     * Returns the primitive as long value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toLong(value: char): long;
+
+    /**
+     * Returns the primitive as float value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toFloat(value: char): float;
+
+    /**
+     * Returns the primitive as float value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toDouble(value: char): double;
+
+    /**
+     * Returns the primitive as char value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static toChar(value: char): char {
+        return value;
+    };
+
+    /**
      * isInBasicMultilingualPlane(char) checks if the char is in Basic Multilingual Plane.
      * See UTF-16 for more details.
      *
@@ -177,7 +303,10 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      * @returns if the char is in Basic Multilingual Plane.
      */
     public static isInBasicMultilingualPlane(value: char): boolean {
-        return (value < Char.HIGH_SURROGATE_MIN) || (value > Char.LOW_SURROGATE_MAX);
+        if (value < Char.BMP_BORDER) {
+            return (value < Char.HIGH_SURROGATE_MIN) || (value > Char.LOW_SURROGATE_MAX);
+        }
+        return false
     }
 
     /**
@@ -190,7 +319,7 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      */
     public static isInBasicMultilingualPlane(value: UTF_16_CodePoint): boolean {
         if (value < Char.BMP_BORDER) {
-            return Char.isInBasicMultilingualPlane(value as char);
+            return Char.isInBasicMultilingualPlane(UTF_16_CodePoint.toChar(value));
         }
         return false;
     }
@@ -213,8 +342,8 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      */
     public static isValidCodePoint(codePoint: UTF_16_CodePoint): boolean {
         return (codePoint >= 0 && codePoint <= Char.MAX_CODE_POINT &&
-            !(codePoint >= (Char.HIGH_SURROGATE_MIN as int) && codePoint <= (Char.LOW_SURROGATE_MAX as int)));
-     }
+            !(codePoint >= (Char.HIGH_SURROGATE_MIN.toInt()) && codePoint <= (Char.LOW_SURROGATE_MAX.toInt())));
+    }
 
     /**
      * codeUnitsToEncode(UTF_16_CodePoint) counts a number of code units to encode the UTF-16 code point.
@@ -264,7 +393,7 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      * @returns the high surrogate, possibly malformed.
      */
     public static getHighSurrogate(value: UTF_16_CodePoint): char {
-        return (((value - 0x10000) >>> 10) + Char.HIGH_SURROGATE_MIN) as char
+        return Int.toChar(((value - 0x10000) >>> 10) + Char.HIGH_SURROGATE_MIN)
     }
 
     /**
@@ -276,7 +405,7 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      * @returns the low surrogate, possibly malformed.
      */
     public static getLowSurrogate(value: UTF_16_CodePoint): char {
-        return (((value - 0x10000) & 0x3FF) + Char.LOW_SURROGATE_MIN) as char
+        return Int.toChar(((value - 0x10000) & 0x3FF) + Char.LOW_SURROGATE_MIN)
     }
 
     /**

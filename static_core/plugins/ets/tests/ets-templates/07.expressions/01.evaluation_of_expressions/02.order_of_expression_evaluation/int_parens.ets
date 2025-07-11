@@ -20,7 +20,7 @@ desc: Integer addition and multiplication are associative
 ---*/
 
 function main(): void {
-  assertEQ( {{ia.left}}, {{ia.right}} );
+  arktest.assertEQ( {{ia.left}}, {{ia.right}} );
 }
 
 {% endfor %}

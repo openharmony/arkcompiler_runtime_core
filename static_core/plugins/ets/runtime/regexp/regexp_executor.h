@@ -1,6 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,9 +22,19 @@
 
 namespace ark::ets {
 
+struct RegExpExecResult {
+    uint32_t endIndex = 0;
+    uint32_t index = 0;
+    PandaVector<std::pair<bool, PandaString>> captures;
+    PandaVector<std::pair<uint32_t, uint32_t>> indices;
+    std::map<PandaString, std::pair<int32_t, int32_t>> namedGroups;
+    bool isSuccess = false;
+    bool isWide = false;
+};
+
 class RegExpExecutor : public ark::RegExpExecutor {
 public:
-    RegExpMatchResult<PandaString> GetResult(bool isSuccess, bool hasIndices) const;
+    RegExpExecResult GetResult(bool isSuccess, bool hasIndices) const;
 
 private:
     std::pair<uint32_t, uint32_t> GetIndices(CaptureState *captureState) const;

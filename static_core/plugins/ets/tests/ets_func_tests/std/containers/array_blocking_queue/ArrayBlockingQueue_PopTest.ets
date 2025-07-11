@@ -14,81 +14,80 @@
  */
 
 const elementsNum: int = 100;
-let f1: int | null = 0;
 
 let testArrayInt: Array<int> = new Array<int>(elementsNum);
 let testArrayObj: Array<Object> = new Array<Object>(elementsNum);
 let testArrayStr: Array<String> = new Array<String>(elementsNum);
-let queueInt: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
-let queueObj: ArrayBlockingQueue<Object> = new ArrayBlockingQueue<Object>(200);
-let queueStr: ArrayBlockingQueue<String> = new ArrayBlockingQueue<String>(200);
-let queueIntPopN: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
+let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
+let queueObj: containers.ArrayBlockingQueue<Object> = new containers.ArrayBlockingQueue<Object>(200);
+let queueStr: containers.ArrayBlockingQueue<String> = new containers.ArrayBlockingQueue<String>(200);
+let queueIntPopN: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
 
 function main(): int {
-    let ArrayBlockingQueueTestsuite = new ArkTestsuite("ArrayBlockingQueuePopTest");
+    let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueuePopTest");
 
     ArrayBlockingQueueTestsuite.addTest("ConcurrentPushPopTestStr", () =>
     {
-        let p1 = launch pusherStr();
+        let p1 = launch<void, () => void>(pusherStr);
         let arrayToCheck = popperStr();
-        await p1;
+        p1.Await();
         for (let i = 0; i < elementsNum; i++) {
-            assertEQ(testArrayStr[i], arrayToCheck[i]);
+            arktest.assertEQ(testArrayStr[i], arrayToCheck[i]);
         }
-        assertEQ(queueStr.size, 0);
+        arktest.assertEQ(queueStr.size, 0);
     });
     ArrayBlockingQueueTestsuite.addTest("PopTestInt001", () =>
     {
-        let queueIntPop1: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
-        assertEQ(queueIntPop1.size, 0);
+        let queueIntPop1: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
+        arktest.assertEQ(queueIntPop1.size, 0);
         for (let i: int = 0; i < elementsNum; ++i) {
             queueIntPop1.push(i);
         }
-        assertEQ(queueIntPop1.getFirst(), 0);
+        arktest.assertEQ(queueIntPop1.getFirst(), 0);
         queueIntPop1.pop();
-        assertEQ(queueIntPop1.size, elementsNum - 1);
-        assertTrue(queueIntPop1.getFirst() != 0);
+        arktest.assertEQ(queueIntPop1.size, elementsNum - 1);
+        arktest.assertTrue(queueIntPop1.getFirst() != 0);
     });
     ArrayBlockingQueueTestsuite.addTest("PopTestInt002", () =>
     {
-        let queueIntPop2: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
+        let queueIntPop2: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
         for (let i: int = 0; i < elementsNum; ++i) {
             queueIntPop2.push(i);
         }
-        let num: int | null = queueIntPop2.getFirst();
-        assertEQ(num, queueIntPop2.pop());
-        assertEQ(queueIntPop2.size, elementsNum - 1);
+        let num = queueIntPop2.getFirst();
+        arktest.assertEQ(num, queueIntPop2.pop());
+        arktest.assertEQ(queueIntPop2.size, elementsNum - 1);
         while (!queueIntPop2.isEmpty()) {
             let el = queueIntPop2.getFirst();
-            assertEQ(el, queueIntPop2.pop());
+            arktest.assertEQ(el, queueIntPop2.pop());
         }
-        let p1 = launch ArrayBlockingQueuePop(queueIntPop2);
+        let p1 = launch<void, (queueIntPop2: containers.ArrayBlockingQueue<int>) => void>(ArrayBlockingQueuePop, queueIntPop2);
         let i = queueIntPop2.pop();
-        await p1;
-        assertEQ(i, 10);
+        p1.Await();
+        arktest.assertEQ(i, 10);
     });
     ArrayBlockingQueueTestsuite.addTest("PopTestInt003", () =>
     {
-        let p1 = launch queueIntPopNdata();
+        let p1 = launch<void, () => void>(queueIntPopNdata);
         for (let i: int = 0; i < elementsNum; ++i) {
             queueIntPopN.push(i);
         }
-        await p1;
-        assertEQ(queueIntPopN.size, 0);
+        p1.Await();
+        arktest.assertEQ(queueIntPopN.size, 0);
     });
     ArrayBlockingQueueTestsuite.addTest("PopTestInt004", () =>
     {
-        let queueIntPop: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
-        assertEQ(queueIntPop.size, 0);
+        let queueIntPop: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
+        arktest.assertEQ(queueIntPop.size, 0);
         for (let i: int = 0; i < elementsNum; ++i) {
-            let el = (random() * 10000) as int;
+            let el = (random() * 10000).toInt();
             queueIntPop.push(el);
         }
-        assertEQ(queueIntPop.size, elementsNum);
+        arktest.assertEQ(queueIntPop.size, elementsNum);
         let j: int = 1;
         for (let i = 0; i < elementsNum; i++) {
             queueIntPop.pop();
-            assertEQ(queueIntPop.size, elementsNum - j);
+            arktest.assertEQ(queueIntPop.size, elementsNum - j);
             j++;
         }
     });
@@ -97,17 +96,17 @@ function main(): int {
         while (!queueIntPopN.isEmpty()) {
             queueIntPopN.pop();
         }
-        let promises = new Array<Promise<void>>(100);
+        let jobs = new Array<Job<void>>(100);
         for (let i: int = 0; i < elementsNum; ++i) {
-           promises[i] = launch queueIntPopdata(); 
+           jobs[i] = launch<void, () => void>(queueIntPopdata); 
         }
         for (let i: int = 0; i < elementsNum; ++i) {
             queueIntPopN.push(i);
         }
         for (let i: int = 0; i < 100; i++) {
-            await promises[i];
+            jobs[i].Await();
         }
-        assertEQ(queueIntPopN.size, 0);
+        arktest.assertEQ(queueIntPopN.size, 0);
     });
     ArrayBlockingQueueTestsuite.addTest("PopTestInt006", () =>
     {
@@ -117,11 +116,11 @@ function main(): int {
         for (let i: int = 0; i < elementsNum; ++i) {
             queueInt.push(i);
         }
-        let p1 = launch queueIntFrontF1data();
-        let p2 = launch queueIntPopFdata();
-        await p1;
-        await p2;
-        assertEQ(queueInt.size, elementsNum - 1);
+        let p1 = launch<void, () => void>(queueIntFrontF1data);
+        let p2 = launch<void, () => void>(queueIntPopFdata);
+        p1.Await();
+        p2.Await();
+        arktest.assertEQ(queueInt.size, elementsNum - 1);
     });
 
     return ArrayBlockingQueueTestsuite.run();
@@ -129,7 +128,7 @@ function main(): int {
 
 function pusherInt() {
     for (let i = 0; i < elementsNum; i++) {
-        let el = (random() * 10000) as int;
+        let el = (random() * 10000).toInt();
         testArrayInt[i] = el;
         queueInt.push(el);
     }
@@ -162,7 +161,7 @@ function popperInt(): Array<int> {
     for (let i = 0; i < elementsNum; i++) {
         let el = queueInt.getFirst();
         arr[i] = queueInt.pop();
-        assertEQ(el, arr[i]);
+        arktest.assertEQ(el, arr[i]);
     }
     return arr;
 }
@@ -172,7 +171,7 @@ function popperObj(): Array<Object> {
     for (let i = 0; i < elementsNum; i++) {
         let el = queueObj.getFirst();
         arr[i] = queueObj.pop();
-        assertEQ(el, arr[i]);
+        arktest.assertEQ(el, arr[i]);
     }
     return arr;
 }
@@ -193,7 +192,7 @@ function queueIntPopFdata() {
     queueInt.pop();
 }
 
-function ArrayBlockingQueuePop (queueIntPop2: ArrayBlockingQueue<int>) {
+function ArrayBlockingQueuePop (queueIntPop2: containers.ArrayBlockingQueue<int>) {
     queueIntPop2.push(10);
 }
 
@@ -204,5 +203,5 @@ function queueIntPopNdata () {
 }
 
 function queueIntFrontF1data() {
-    f1 = queueInt.getFirst();
+    queueInt.getFirst();
 }

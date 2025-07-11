@@ -18,12 +18,12 @@ desc: 8.9 for-of Statements. 17.4, 17.5.1 - iterable
 tags: []
 ---*/
 
-function doit(ch : char) : char[] {
-    return [ch, ch];
+function doit(ch : string) : string {
+    return ch + ch;
 }
 
 function main() : int {
-    let tmp : char = c'z';
+    let tmp : string = 'z';
     let initialString : String = "abcdef";
     let workString : String = "";
     for (tmp of initialString) {

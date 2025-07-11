@@ -21,14 +21,14 @@ function TestFunctionArgTypeConflictArray(): boolean {
     const EXPECTED_INT = 123;
     const EXPECTED_STRING = 'foo';
 
-    assertTrue(array.length == EXPECTED_LENGTH);
+    arktest.assertTrue(array.length == EXPECTED_LENGTH);
 
     return (array.at(0) as Number == EXPECTED_INT) && (array.at(1) as string == EXPECTED_STRING);
 }
 
 function TestFunctionArgTypeConflictArraybuffer(): boolean {
-    const buffer = js.functionArgTypeConflictArrayBuffer() as ArrayBuffer;
-    const view = new Int32Array(buffer);
+    const buffer = InteropTransferHelper.transferArrayBufferToStatic(js.functionArgTypeConflictArrayBuffer());
+    const view = new Int32Array(buffer as ArrayBuffer);
     const EXPECTED_INT = 123;
 
     return view.at(0) == EXPECTED_INT;

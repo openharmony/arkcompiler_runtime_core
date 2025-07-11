@@ -23,5 +23,5 @@ type Dimension = "px" | "em" | number | Number
 
 function main(): void {
     let a: Dimension = new Number(56.7)
-    assertEQ( a, 56.7)
+    arktest.assertEQ( a, 56.7)
 }

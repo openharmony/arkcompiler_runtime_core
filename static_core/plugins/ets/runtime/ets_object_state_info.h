@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <limits>
 #include "libpandabase/macros.h"
+#include "libpandabase/mem/mem.h"
 
 namespace ark::ets {
 
@@ -28,7 +29,7 @@ class EtsCoroutine;
 
 class EtsObjectStateInfo {
 public:
-    using Id = uint32_t;
+    using Id = ObjectPointerType;
     static constexpr uint32_t INVALID_INTEROP_INDEX = std::numeric_limits<uint32_t>::max();
 
     EtsObjectStateInfo(EtsObject *obj, Id id) : obj_(obj), id_(id) {}

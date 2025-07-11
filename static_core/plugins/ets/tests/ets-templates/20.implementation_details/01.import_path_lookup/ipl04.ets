@@ -22,5 +22,5 @@ files:
 import {b} from "./test_file_04";
 
 function main(): void {
-  assertEQ(b, 10);
+  arktest.assertEQ(b, 10);
 }

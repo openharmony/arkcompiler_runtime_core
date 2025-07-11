@@ -35,5 +35,5 @@ function process(issue: Partial<Issue>) {
 }
 
 function main() {
-  assertEQ(process({title: "aa"}), 0) // description is undefined
+  arktest.assertEQ(process({title: "aa"}), 0) // description is undefined
 }

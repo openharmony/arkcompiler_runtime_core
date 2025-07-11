@@ -281,7 +281,7 @@ export class FloatBox {
     private value: float;
 
     public constructor() {
-        this.value = 0.0;
+        this.value = 0.0f;
     }
 
     public constructor(value: float) {

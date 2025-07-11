@@ -5,7 +5,8 @@ platforms and languages.
 
 ## Quick start
 
-The only requirement is python3 (3.7+), no additional modules needed.
+Prerequisites are `python3` (3.7+) with `jinja2` module installed.
+(`make vmb` will install missed modules).
 Virtual Machine to test should be installed on host and/or device.
 See [Notes on setup for platforms](#platforms).
 
@@ -39,7 +40,7 @@ running and reporting tests.
 ```sh
 # This command will build and install VMB python module on your machine.
 # No root permissions required.
-# After that `vmb` cli will appear in your $PATH
+# After that `vmb` cli will appear in your $PATH (if not, please try adding $HOME/.local/bin)
 
 make vmb
 
@@ -68,6 +69,18 @@ vmb report --compare int.json jit.json
     ========================================
     Time: 1.99e+05->3.80e+04(better -80.9%); Size: 9.17e+04->9.17e+04(same); RSS: 4.94e+04->5.34e+04(worse +8.1%)
     =============================================================================================================
+```
+
+#### Usage example: Re-run failed tests
+
+```shell
+# provide option to save lists of failed tests:
+vmb all -p node_host --fail-list ./failures.lst <path-to-test-src>
+# this will produce two files:
+# failures.lst - list file with paths to generate failed tests from
+# failures.txt - filter test list to use with --test-list
+# Re-run only failed tests:
+vmb all -p node_host -fi 1 --test-list=./failures.txt ./failures.lst
 ```
 
 ## Commands:
@@ -101,13 +114,18 @@ Each platform defines languages it can deal with,
 and each language defines its source file extension.
 Defaults are:
 
-| platform      | langs      | sources         |
-|---------------|------------|-----------------|
-| `arkts_*`     | `ets`      | `*.ets`, `*.ts` |
-| `ark_js_vm_*` | `ts`       | `*.ts`          |
-| `swift_*`     | `swift`    | `*.swift`       |
-| `v_8_*`       | `ts`, `js` | `*.ts`, `*.js`  |
-| `node_*`      | `ts`, `js` | `*.ts`, `*.js`  |
+| platform      | langs      | sources                     |
+|---------------|------------|-----------------------------|
+| `arkts_*`     | `ets`      | `*.ets`                     |
+| `ark_js_vm_*` | `ts`       | `*.ts`                      |
+| `swift_*`     | `swift`    | `*.swift`                   |
+| `v_8_*`       | `ts`, `js` | `*.ts`, `*.js`              |
+| `node_*`      | `ts`, `js` | `*.ts`, `*.js`              |
+| `interop_s2d` | `ets`      | `*.ets` + `lib*.*`          |
+| `interop_d2s` | `ts`, `js` | `*.ts`, `*.js` + `lib*.ets` |
+| `interop_d2d` | `ts`, `js` | `*.ts`, `*.js` + `lib*.*`   |
+| `hap_s2*`     | `ets`      | `*.ets` + `lib*.*`          |
+| `hap_d2*`     | `ts`       | `*.ts` + `lib*.*`           |
 
 ## Selecting and filtering tests:
 - Any positional argument to `all` or `gen` command would be treated
@@ -116,9 +134,19 @@ as path to doclets: `vmb all -p x ./test1/test1.js ./more-tests/ ./even-more`
 as path to generated tests: `vmb run -p x ./generated`
 - Files with `.lst` extension would be treated as lists of paths, relative to `CWD`
 - `--tags=sanity,my` (`-T`) will generate and run only tests tagged with `sanity` OR `my`
-- `--tests=my_test` (`-t`) will run only tests containing `my_test` in name
+- `--tests=Test1,'Foo_.*'` (`-t`) will run tests with names matching one of the pattern provided
+- `--test-list=/path/to/list.txt` will do the same as `-t`
+but reading names and/or name patterns from file (line by line)
 - To exclude some tests from run point `--exclude-list` to the file with test names to exclude
 - To exclude tests with tags use `-ST` (`--skip-tags`) option. F.e. `--skip-tags=negative,flaky`
+
+Note: `--tests` option expects comma-separated list of exact test names
+or regular expression (using python syntax), f.e.:
+- `-t foo,bar` will select only `foo` and `bar`
+- `-t '[^f]oo',foo` will select both `foo` and `boo` (selection by OR condition)
+- `--tests='.*foo(_\d+)?',bar` will select `Test_foo_1 ; foo ; bar` but skip `Test_bar ; bar_1 ; foo_test`
+
+Note: options `--tests` and `--test-list` could be combined (by OR condition) in one command line
 
 ## Benchmark's measurement options:
 * `-wi` (`--warmup-iters`) controls the number of warmup iterations,
@@ -148,7 +176,38 @@ To provide additional option to compiler or virtual machine
   `--report-json-compact` disables prettifying of json.
 * `--report-csv=path.csv` to save results in csv format. Only basic info included.
 
-## Controlling log:
+Apart from saved report files text report will always be printed in console.
+Also json files could be displayed in separate command:
+`vmb report <options> report.json`
+For full list of options issue: `vmb report --help`
+
+Note that in saved reports time (or speed) values are _nanoseconds_ (or ns/operation)
+and sizes are bytes, while in console output time comes in _seconds_.
+
+Output format could be controlled by `--number-format` option to `run|all|report` command:
+- `auto` (default) : `1µ 1m 1K ..`
+- `nano`: `1n 1000n ..`
+- `expo`: `7.00e-02 5.01e+03 ..`
+
+### Comparison of full test time
+
+Two runs could be compared test by test on total bench time (including compilation, device interactions etc):
+
+```shell
+vmb report --compare-meta --tolerance 10 ./{1,2}.json
+
+Full test time comparison (seconds)
+===================================
+name             | r1 | r2 |
+============================
+Sample_testSum   |  18|  18|1.77e+01->1.83e+01(same)
+VoidBench_test   |   9|  11|9.21e+00->1.13e+01(worse +22.6%)
+
+```
+
+## Log and output:
+
+### Log level
 There are several log levels which could be set via `--log-level` option.
 - `fatal`: only critical errors will be printed
 - `pass`: print single line for each test after it finishes
@@ -157,6 +216,12 @@ There are several log levels which could be set via `--log-level` option.
 - `info`: default level
 - `debug`
 - `trace`: most verbose
+
+### Print test list
+`vmb gen -l ts --show-list ./examples/benchmarks`
+
+### Produce lists for re-run failed tests
+`vmb all -p node_host --fail-list ./failures.lst ./examples/benchmarks`
 
 Each level prints in its own color.
 `--no-color` disables color and adds `[%LEVEL]` prefix to each message.
@@ -203,6 +268,8 @@ Supported doclets are:
    Attribute define values to create several benchmarks using same code,
    and all combinations of params.
    Value can be an int, a string or a comma separated list of ints or strings.
+* `@Import {x, y...} from ./libX.ext` produces import statement and compile `libX.ext` if needed.
+* `@Include ./f.ext` paste contents of `f.ext` into generated source.
 * `@Tags t1 [, t2...]` on a root class or method. List of benchmark tags.
 * `@Bugs b1 [, b2...]` on a root class or method. List of associated issues.
 
@@ -244,38 +311,62 @@ For device platforms: required binaries should be pushed to device.
 Default place is `/data/local/tmp/vmb/v_8`.
 `/data/local/tmp/vmb` part could be configured via `--device-dir`
 
+### Hap (Ability Package) - Experimental
+This platform allows to run `arkts/ets` benchmarks as application ability
+
+##### Prerequisites:
+- `PANDA_SDK` env var should point to unpacked Panda OHOS SDK (package dir)
+- `OHOS_BASE_SDK_HOME` env var should point to unpacked OHOS SDK
+- `hvigorw` should be in PATH or `HVIGORW` env var should point to hvigor script or binary
+- `hdc` should be in PATH or `HDC` env var should point to hdc script or binary
+- For signing package `HAP_SIGNING_CONFIG` env var should point to json config 
+    as in `app/signingConfigs/material` section of `build-profile.json5`
+
+##### Run
+```sh
+vmb all -p hap -A examples/benchmarks/ets
+
+# --tests-per-batch option could be used to tune amount of benchmarks per one hap package (25 is the default)
+```
+##### Limitations
+- Total test run inside app is limited to 5 sec, so `-wi` is limited to 0..1 and `-mi` to 1..2.
+    `-wt` and `it` has no effect for `hap` platform.
+- "Macro" benchmarks (i.e. test functions which run longer than 1 sec) won't produce benchmark result.
+
+
 ## Platform Features
 
-| platform          | int-mode | aot-mode | jit-mode | gc-stats | jit-stats | aot-stats | imports |
-|-------------------|:--------:|:--------:|:--------:|:--------:|:---------:|:---------:|:-------:|
-| ark_js_vm_host    |   n/a    |    V     |    V     |   n/a    |    n/a    |    n/a    |    V    |
-| ark_js_vm_ohos    |   n/a    |    V     |    V     |   n/a    |    n/a    |    n/a    |    V    |
-| arkts_device      |    V     |    V     |    V     |    V     |     V     |     V     |    V    |
-| arkts_host        |    V     |    V     |    V     |    V     |     V     |     V     |    V    |
-| arkts_ohos        |    V     |    V     |    V     |    V     |     V     |     V     |    V    |
-| node_host         |   n/a    |   n/a    |    V     |   n/a    |    n/a    |    n/a    |    V    |
-| swift_device      |   n/a    |   n/a    |   n/a    |   n/a    |    n/a    |    n/a    |    X    |
-| swift_host        |   n/a    |   n/a    |   n/a    |   n/a    |    n/a    |    n/a    |    X    |
-| v_8_device        |    V     |   n/a    |    V     |   n/a    |    n/a    |    n/a    |    V    |
-| v_8_host          |    V     |   n/a    |    V     |   n/a    |    n/a    |    n/a    |    V    |
-| v_8_ohos          |    V     |   n/a    |    V     |   n/a    |    n/a    |    n/a    |    V    |
-
+| platform       | int-mode | aot-mode | jit-mode | gc-stats | jit-stats | aot-stats | imports |
+|----------------|:--------:|:--------:|:--------:|:--------:|:---------:|:---------:|:-------:|
+| ark_js_vm_host |   n/a    |    V     |    V     |   n/a    |    n/a    |    n/a    |    V    |
+| ark_js_vm_ohos |   n/a    |    V     |    V     |   n/a    |    n/a    |    n/a    |    V    |
+| arkts_device   |    V     |    V     |    V     |    V     |     V     |     V     |    V    |
+| arkts_host     |    V     |    V     |    V     |    V     |     V     |     V     |    V    |
+| arkts_ohos     |    V     |    V     |    V     |    V     |     V     |     V     |    V    |
+| node_host      |   n/a    |   n/a    |    V     |   n/a    |    n/a    |    n/a    |    V    |
+| swift_device   |   n/a    |   n/a    |   n/a    |   n/a    |    n/a    |    n/a    |    X    |
+| swift_host     |   n/a    |   n/a    |   n/a    |   n/a    |    n/a    |    n/a    |    X    |
+| v_8_device     |    V     |   n/a    |    V     |   n/a    |    n/a    |    n/a    |    V    |
+| v_8_host       |    V     |   n/a    |    V     |   n/a    |    n/a    |    n/a    |    V    |
+| v_8_ohos       |    V     |   n/a    |    V     |   n/a    |    n/a    |    n/a    |    V    |
+| interop_d2s    |    V     |   n/a    |   n/a    |   n/a    |    n/a    |    n/a    |    V    |
+| interop_s2d    |    V     |   n/a    |   n/a    |   n/a    |    n/a    |    n/a    |    V    |
+| interop_d2d    |    V     |   n/a    |   n/a    |   n/a    |    n/a    |    n/a    |    V    |
+| hap_d2s        |    V     |    X     |    X     |   n/a    |    n/a    |    n/a    |    V    |
+| hap_s2d        |    V     |    X     |    X     |   n/a    |    n/a    |    n/a    |    V    |
+| hap_d2d        |    V     |    X     |    X     |   n/a    |    n/a    |    n/a    |    V    |
+| hap_s2s        |    V     |    X     |    X     |   n/a    |    n/a    |    n/a    |    V    |
 
 ## Interoperability tests:
 
-#### Freestyle
-Please refer to [this manual](./interop.readme.md) for freestyle benchmark development and running guide.
+Please refer to [this manual](./examples/benchmarks/interop/readme.md) and [examples](./examples/benchmarks/interop).
 
-#### Doclet
-Allows use corpus of existing VMB tests in interop mode.
-Benchmarks are generated from ets [doclets](#doclet-format).
-
-```shell
-export PANDA_BUILD=$HOME/ark-built-with-interop/runtime_core/static_core/build
-vmb all -p arkts_node_interop_host -v debug ./examples/benchmarks/ets
-```
+See also [readme here](../../plugins/ets/tests/benchmarks/interop_js/README.md)
 
 ## Self tests and linters
+
+To run all unit tests and linters ussue following command:
+
 ```sh
 make tox
 ```

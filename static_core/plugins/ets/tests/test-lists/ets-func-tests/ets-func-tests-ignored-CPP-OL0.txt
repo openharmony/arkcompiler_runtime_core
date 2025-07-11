@@ -1,0 +1,20 @@
+#24986 (17 tests)
+std/core/Object.ets
+std/core/TypedArrayConstructorNumbersInts.ets
+std/math/std_math_sign_double.ets
+std/core/IntlPluralRulesTest.ets
+std/core/TypeAssignableFromTest.ets
+std/core/std_core_char_instance_Char_toLowerCase.ets
+std/core/std_core_type_numeric_type_numeric_type.ets
+escompat/JsonTest.ets
+regression/15867_spread_in_arrayof_segfaut.ets
+spec/05.Generics/callFromAsyncLambda.ets
+spec/09.classes/Accessor_Declarations/issue-15142_9.ets
+spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0020.ets
+spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0030.ets
+std/containers/concurrent_set/ConcurrentSet_ConstructorTest.ets
+std/containers/linked_blocking_queue/LinkedBlockingQueue_ConstructorTest.ets
+spec/03.types/References_Types/Tuples_type/tuple_write_3.ets
+std/core/NumberTest.ets
+escompat/JsonStringifyTest.ets
+

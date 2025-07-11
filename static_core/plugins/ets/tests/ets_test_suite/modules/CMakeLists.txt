@@ -27,6 +27,24 @@ function(compile_arktsconfig_unit TARGET ABC_FILES WORK_DIR ARKTS_CONFIG ETS_SOU
     set(${ABC_FILES} ${RESULT} PARENT_SCOPE)
 endfunction()
 
+function(compile_pandasm_source ABC_TARGET ABC_FILES WORK_DIR PA_SOURCES)
+    add_custom_target(${ABC_TARGET})
+    set(RESULT "")
+    foreach(PA_SOURCE ${PA_SOURCES})
+        get_filename_component(SOURCE_FNAME ${PA_SOURCE} NAME_WE)
+        set(SOURCE_ABC ${WORK_DIR}/${ABC_TARGET}-${SOURCE_FNAME}.abc)
+        set(SOURCE_ABC_TARGET ${ABC_TARGET}-${SOURCE_FNAME}-ets-asm)
+        add_custom_command(OUTPUT "${SOURCE_ABC}"
+                COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark_asm> ${PA_SOURCE} ${SOURCE_ABC}
+                DEPENDS ${assembler} "${PA_SOURCE}"
+                WORKING_DIRECTORY "${ARG_WORKING_DIR}")
+        set(RESULT ${RESULT} ${SOURCE_ABC})
+        add_custom_target(${SOURCE_ABC_TARGET} DEPENDS ${SOURCE_ABC})
+        add_dependencies(${ABC_TARGET} ${SOURCE_ABC_TARGET})
+    endforeach()
+    set(${ABC_FILES} ${RESULT} PARENT_SCOPE)
+endfunction()
+
 function(build_spawn_native_module TARGET OUTPUT_DIR)
     panda_add_library(${TARGET} SHARED spawn/spawn.cpp)
     set_target_properties(${TARGET} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR})
@@ -116,7 +134,6 @@ function(run_sts_app_mode TARGET WORK_DIR APP_MAIN_ABILITY_CLASS APP_ABC_FILES)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "" ${ARGN})
     set(RUNTIME_EXTRA_OPTIONS
         "--load-runtimes=ets"
-        "--verification-enabled=true"
         "--verification-mode=on-the-fly"
         "--gc-type=g1-gc"
     )
@@ -170,7 +187,7 @@ endfunction()
 # the app dir contains main entry to run the case
 function(prepare_incompatible_app TARGET ABC_FILES WORK_DIR SOURCE_DIR MODULE_NAME)
     set(RESULT "")
-    set(oneValueArgs )
+    set(oneValueArgs ASM_SOURCE)
     set(multiValueArgs IGNORE_REPLACE_FILES)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     # src package
@@ -181,10 +198,15 @@ function(prepare_incompatible_app TARGET ABC_FILES WORK_DIR SOURCE_DIR MODULE_NA
     )
     # incompatible package
     set(TARGET_INCOMPATIABLE ${TARGET}-${MODULE_NAME}-incompatible-abc)
-    file(GLOB SOURCES_INCOMPATIABLE "${SOURCE_DIR}/${MODULE_NAME}/incompatible/*.ets")
-    compile_arktsconfig_unit(${TARGET_INCOMPATIABLE} ABCS_INCOMPATIABLE ${WORK_DIR} ${SOURCE_DIR}/${MODULE_NAME}/incompatible/arktsconfig.json
-                             "${SOURCES_INCOMPATIABLE}"
-    )
+    if (ARG_ASM_SOURCE)
+        file(GLOB SOURCES_INCOMPATIABLE "${SOURCE_DIR}/${MODULE_NAME}/incompatible/*.pa")
+        compile_pandasm_source(${TARGET_INCOMPATIABLE} ABCS_INCOMPATIABLE ${WORK_DIR} "${SOURCES_INCOMPATIABLE}")
+    else()
+        file(GLOB SOURCES_INCOMPATIABLE "${SOURCE_DIR}/${MODULE_NAME}/incompatible/*.ets")
+        compile_arktsconfig_unit(${TARGET_INCOMPATIABLE} ABCS_INCOMPATIABLE ${WORK_DIR} ${SOURCE_DIR}/${MODULE_NAME}/incompatible/arktsconfig.json
+                                "${SOURCES_INCOMPATIABLE}"
+        )
+    endif()
 
     # replace the same name with incompatiable file, but do not replace files set by the IGNORE_REPLACE_FILES parameter
     foreach(SRC ${ABCS_SRC})
@@ -399,12 +421,11 @@ endfunction()
 
 create_multiple_implement_test(ets_modules_multiple_implement_test ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
-function(create_verification_mode_test TARGET WORK_DIR SOURCE_DIR)
-    prepare_incompatible_app(${TARGET}-app ABC_FILES ${WORK_DIR} ${SOURCE_DIR} "verification_mode")
+function(create_verification_mode_test TARGET WORK_DIR SOURCE_DIR TEST_NAME ASM_SOURCE)
+    prepare_incompatible_app(${TARGET}-app ABC_FILES ${WORK_DIR} ${SOURCE_DIR} ${TEST_NAME} ASM_SOURCE ${ASM_SOURCE})
     # test --verification-mode on-the-fly mode
     set(RUNTIME_EXTRA_OPTIONS
         "--load-runtimes=ets"
-        "--verification-enabled=true"
         "--verification-mode=on-the-fly"
         "--gc-type=g1-gc"
     )
@@ -419,7 +440,6 @@ function(create_verification_mode_test TARGET WORK_DIR SOURCE_DIR)
     # test --verification-mode ahead-of-time mode
     set(RUNTIME_EXTRA_OPTIONS
         "--load-runtimes=ets"
-        "--verification-enabled=true"
         "--verification-mode=ahead-of-time"
         "--gc-type=g1-gc"
     )
@@ -435,7 +455,9 @@ function(create_verification_mode_test TARGET WORK_DIR SOURCE_DIR)
     )
 endfunction()
 
-create_verification_mode_test(ets_modules_verification_mode_test ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+create_verification_mode_test(ets_modules_verification_mode_test ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} "verification_mode" FALSE)
+create_verification_mode_test(ets_modules_verification_i32f64misuse_test ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} "verification_i32f64misuse" TRUE)
+create_verification_mode_test(ets_modules_verification_wrong_this_test ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} "verification_wrong_this" TRUE)
 
 add_custom_target(ets_modules_tests
                   DEPENDS

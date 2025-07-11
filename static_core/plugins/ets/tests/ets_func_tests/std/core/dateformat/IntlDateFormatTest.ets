@@ -137,7 +137,7 @@ function initFormatResults(): void {
             {year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',  hour12: false, timeZone: "UTC"}, 
             "23/10/11 00:20")
 
-    FORMAT_RESULTS_UNDEF_OPTS = FORMAT_RESULTS.filter((res: FormatResult) => res === undefined)
+    FORMAT_RESULTS_UNDEF_OPTS = FORMAT_RESULTS.filter((res: FormatResult) => res[1] === undefined)
     FORMAT_RESULTS_CUSTOM_OPTS = FORMAT_RESULTS.filter((res: FormatResult) => res[1] !== undefined)
 }
 
@@ -151,10 +151,10 @@ function dateFormatWithDefaultOptions(): void {
         const undefOptsFmtResult = undefOptsFmt.format(TEST_DATE)
 
         const expected = res[2]
-        assertEQ(undefOptsFmtResult, expected, `unexpected date format result for locale: ${locale} and undefined format options`)
+        arktest.assertEQ(undefOptsFmtResult, expected, `unexpected date format result for locale: ${locale} and undefined format options`)
 
         const emptyOptsFmtResult = emptyOptsFmt.format(TEST_DATE)
-        assertEQ(undefOptsFmtResult, emptyOptsFmtResult, `unexpected date format result for locale: ${locale} and empty format options`)
+        arktest.assertEQ(undefOptsFmtResult, emptyOptsFmtResult, `unexpected date format result for locale: ${locale} and empty format options`)
     })
 }
 
@@ -168,7 +168,7 @@ function dateFormatwithCustomOptions(): void {
         const actualResult = formatter.format(TEST_DATE)
 
         if (actualResult !== expectedResult) {
-            assertEQ(actualResult, expectedResult, `unexpected date format result for locale: ${locale} and options: ${options}`)
+            arktest.assertEQ(actualResult, expectedResult, `unexpected date format result for locale: ${locale} and options: ${options}`)
         }
     })
 }
@@ -176,7 +176,7 @@ function dateFormatwithCustomOptions(): void {
 function main(): int {
     initFormatResults()
 
-    const suite = new ArkTestsuite("Intl.DateTimeFormat date formatting tests") 
+    const suite = new arktest.ArkTestsuite("Intl.DateTimeFormat date formatting tests") 
     suite.addTest("date format with default locale", dateFormatWithDefaultOptions)
     suite.addTest("date format with custom options", dateFormatwithCustomOptions)
     return suite.run()

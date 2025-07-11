@@ -20,6 +20,10 @@ namespace ark::ets::ani::testing {
 class TupleValueGetItemByteTest : public AniGTestTupleOps {
 public:
     static constexpr ani_byte EXPECTED_RESULT = 125;
+    static constexpr ani_byte EXPECTED_RESULT_2 = 126;
+    static constexpr ani_byte EXPECTED_RESULT_3 = 127;
+    static constexpr ani_byte EXPECTED_RESULT_4 = 1;
+    static constexpr ani_byte EXPECTED_RESULT_5 = 2;
 };
 
 TEST_F(TupleValueGetItemByteTest, tupleValueGetItemByte)
@@ -55,6 +59,28 @@ TEST_F(TupleValueGetItemByteTest, tupleValueGetItemByteIndexOutOfRange2)
     auto tuple = GetTupleWithCheck("tuplevalue_getitem_byte_test", "getByteTuple");
     ani_byte result = 0;
     ASSERT_EQ(env_->TupleValue_GetItem_Byte(tuple, -1U, &result), ANI_OUT_OF_RANGE);
+}
+
+TEST_F(TupleValueGetItemByteTest, tupleValueGetItemByteIndexOutOfRange3)
+{
+    const ani_size maxNum = std::numeric_limits<ani_size>::max();
+    auto tuple = GetTupleWithCheck("tuplevalue_getitem_byte_test", "getByteTuple");
+    ani_byte result = 0;
+    ASSERT_EQ(env_->TupleValue_GetItem_Byte(tuple, maxNum, &result), ANI_OUT_OF_RANGE);
+}
+
+TEST_F(TupleValueGetItemByteTest, tupleValueGetItemByteCompositeScene)
+{
+    auto tuple = GetTupleWithCheck("tuplevalue_getitem_byte_test", "getByteTuple");
+
+    const std::array<ani_byte, 5U> expectedValues = {EXPECTED_RESULT, EXPECTED_RESULT_2, EXPECTED_RESULT_3,
+                                                     EXPECTED_RESULT_4, EXPECTED_RESULT_5};
+
+    ani_byte result = 0;
+    for (size_t i = 0; i < expectedValues.size(); ++i) {
+        ASSERT_EQ(env_->TupleValue_GetItem_Byte(tuple, i, &result), ANI_OK);
+        ASSERT_EQ(result, expectedValues[i]);
+    }
 }
 
 TEST_F(TupleValueGetItemByteTest, tupleValueGetItemByteNullResult)

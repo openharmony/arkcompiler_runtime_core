@@ -27,15 +27,15 @@ public:
     void GetMethod(ani_namespace *nsResult, ani_function *fnResult)
     {
         ani_module module {};
-        ASSERT_EQ(env_->FindModule("L@functionModule/function_call_long_test;", &module), ANI_OK);
+        ASSERT_EQ(env_->FindModule("@functionModule.function_call_long_test", &module), ANI_OK);
         ASSERT_NE(module, nullptr);
 
         ani_namespace ns {};
-        ASSERT_EQ(env_->Module_FindNamespace(module, "Lops;", &ns), ANI_OK);
+        ASSERT_EQ(env_->Module_FindNamespace(module, "ops", &ns), ANI_OK);
         ASSERT_NE(ns, nullptr);
 
         ani_function fn {};
-        ASSERT_EQ(env_->Namespace_FindFunction(ns, "sum", "JJ:J", &fn), ANI_OK);
+        ASSERT_EQ(env_->Namespace_FindFunction(ns, "sum", "ll:l", &fn), ANI_OK);
         ASSERT_NE(fn, nullptr);
 
         *nsResult = ns;
@@ -141,14 +141,14 @@ TEST_F(FunctionCallTest, function_call_long_v_invalid_result)
 TEST_F(FunctionCallTest, function_call_long_001)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_long_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_long_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "longFunctionA", "JJ:J", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "longFunctionA", "ll:l", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_long value {};
@@ -165,17 +165,17 @@ TEST_F(FunctionCallTest, function_call_long_001)
 TEST_F(FunctionCallTest, function_call_long_002)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_long_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_long_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace nA {};
     ani_namespace nB {};
     ani_function fB {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA/B;", &nB), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A.B", &nB), ANI_OK);
     ASSERT_NE(nB, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nB, "longFunctionB", "JJ:J", &fB), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nB, "longFunctionB", "ll:l", &fB), ANI_OK);
     ASSERT_NE(fB, nullptr);
 
     ani_long value {};
@@ -192,14 +192,14 @@ TEST_F(FunctionCallTest, function_call_long_002)
 TEST_F(FunctionCallTest, function_call_long_003)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_long_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_long_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "longFunctionA", "JJJ:J", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "longFunctionA", "lll:l", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_long value {};
@@ -217,11 +217,11 @@ TEST_F(FunctionCallTest, function_call_long_003)
 TEST_F(FunctionCallTest, function_call_long_004)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_long_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_long_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "moduleFunction", "JJ:J", &fA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "moduleFunction", "ll:l", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_long value {};
@@ -238,12 +238,12 @@ TEST_F(FunctionCallTest, function_call_long_004)
 TEST_F(FunctionCallTest, function_call_long_005)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_long_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_long_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_long value {};
     ani_function fB {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "moduleFunction", "JJJ:J", &fB), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "moduleFunction", "lll:l", &fB), ANI_OK);
     ASSERT_NE(fB, nullptr);
 
     ani_value argsB[3U];
@@ -259,14 +259,14 @@ TEST_F(FunctionCallTest, function_call_long_005)
 TEST_F(FunctionCallTest, function_call_long_006)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_long_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_long_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "nestedFunction", "JJ:J", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "nestedFunction", "ll:l", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_long value {};
@@ -283,14 +283,14 @@ TEST_F(FunctionCallTest, function_call_long_006)
 TEST_F(FunctionCallTest, function_call_long_007)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_long_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_long_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "recursiveFunction", "I:J", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "recursiveFunction", "i:l", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_long value {};
@@ -308,14 +308,14 @@ TEST_F(FunctionCallTest, function_call_long_007)
 TEST_F(FunctionCallTest, function_call_long_008)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_long_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_long_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "calculateSum", "JJCD:J", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "calculateSum", "llcd:l", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_long value {};
@@ -341,14 +341,14 @@ TEST_F(FunctionCallTest, function_call_long_008)
 TEST_F(FunctionCallTest, function_call_long_009)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_long_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_long_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "longFunctionA", "JJ:J", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "longFunctionA", "ll:l", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_long value {};
@@ -374,6 +374,58 @@ TEST_F(FunctionCallTest, function_call_long_009)
     ASSERT_EQ(env_->Function_Call_Long(fA, &value, value3, value4), ANI_OK);
     ASSERT_EQ(value, value3 + value4);
 }
+
+TEST_F(FunctionCallTest, function_call_long_010)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ani_value args[2U];
+    args[0U].l = LONG_VAL1;
+    args[1U].l = LONG_VAL2;
+
+    ani_long result = 0;
+    ASSERT_EQ(env_->c_api->Function_Call_Long(nullptr, fn, &result, LONG_VAL1, LONG_VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Function_Call_Long_A(nullptr, fn, &result, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Long(nullptr, &result, LONG_VAL1, LONG_VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Function_Call_Long_A(nullptr, &result, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Long(fn, nullptr, LONG_VAL1, LONG_VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Function_Call_Long_A(fn, nullptr, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Long(fn, &result, nullptr), ANI_OK);
+    ASSERT_EQ(env_->Function_Call_Long_A(fn, &result, nullptr), ANI_INVALID_ARGS);
+}
+
+TEST_F(FunctionCallTest, check_initialization_long)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@functionModule.function_call_long_test.ops"));
+    ani_long result {};
+    ASSERT_EQ(env_->Function_Call_Long(fn, &result, LONG_VAL1, LONG_VAL2), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("@functionModule.function_call_long_test.ops"));
+}
+
+TEST_F(FunctionCallTest, check_initialization_long_a)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@functionModule.function_call_long_test.ops"));
+    ani_long result {};
+    ani_value args[2U];
+    args[0U].l = LONG_VAL1;
+    args[1U].l = LONG_VAL2;
+    ASSERT_EQ(env_->Function_Call_Long_A(fn, &result, args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("@functionModule.function_call_long_test.ops"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

@@ -20,13 +20,13 @@ desc: >-
 ---*/
 
 function add(p: Char, q: Char): Char {
-    return (p + q) as Char
+    return (p + q).toChar()
 }
 
 function main() {
     const v1 = new Char({{v.v1}})
     const v2 = new Char({{v.v2}})
 
-    assertEQ(({{v.exp}}), {{v.r}})
+    arktest.assertEQ(({{v.exp}}), {{v.r}})
 }
 {%- endfor %}

@@ -25,27 +25,32 @@
 #include <node_api.h>
 
 #include <functional>
+#include <string_view>
 
 #if defined(PANDA_JS_ETS_HYBRID_MODE)
 #include "interfaces/inner_api/napi/native_node_api.h"
 #else
-// NOLINTBEGIN(readability-identifier-naming)
+// NOLINTBEGIN(readability-identifier-naming, modernize-use-using)
+typedef napi_value (*proxy_object_attach_cb)(napi_env env, void *data);
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_wrap_with_xref(napi_env env, napi_value js_object, void *native_object, napi_finalize finalize_cb,
-                    napi_ref *result);
+                    proxy_object_attach_cb proxy_cb, napi_ref *result);
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
+napi_mark_attach_with_xref(napi_env env, napi_value js_object, void *attach_data, proxy_object_attach_cb attach_cb);
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_xref_unwrap(napi_env env, napi_value js_object, void **result);
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_create_xref(napi_env env, napi_value value, uint32_t initial_refcount, napi_ref *result);
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_register_appstate_callback(napi_env env, void (*f)(int a1, int64_t a2));
-// NOLINTEND(readability-identifier-naming)
+// NOLINTEND(readability-identifier-naming, modernize-use-using)
 #endif
 
 namespace ark::ets::interop::js {
 
 constexpr size_t BIGINT_BITS_NUM = 32;
 constexpr size_t BIT_64 = 64;
+constexpr std::string_view IS_STATIC_PROXY = "_isStaticProxy";
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
@@ -115,6 +120,17 @@ void InteropTrace(const char *func, const char *file, int line);
         if (UNLIKELY(_status != napi_ok)) { \
             return false;                   \
         }                                   \
+    } while (0)
+
+#define CHECK_NAPI_STATUS(jsStatus, ctx, coro, result)   \
+    do {                                                 \
+        napi_status local_status = (jsStatus);           \
+        if (local_status != napi_ok) {                   \
+            if ((ctx) != nullptr && (coro) != nullptr) { \
+                (ctx)->ForwardJSException(coro);         \
+            }                                            \
+            (result) = false;                            \
+        }                                                \
     } while (0)
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
@@ -202,6 +218,13 @@ inline napi_value GetGlobal(napi_env env)
     napi_value jsValueGlobal {};
     NAPI_CHECK_FATAL(napi_get_global(env, &jsValueGlobal));
     return jsValueGlobal;
+}
+
+inline napi_value GetBooleanValue(napi_env env, bool val)
+{
+    napi_value jsValueBoolean {};
+    NAPI_CHECK_FATAL(napi_get_boolean(env, val, &jsValueBoolean));
+    return jsValueBoolean;
 }
 
 inline bool IsNull(napi_env env, napi_value val)

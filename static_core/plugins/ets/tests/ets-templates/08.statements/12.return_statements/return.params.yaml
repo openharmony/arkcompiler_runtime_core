@@ -54,7 +54,7 @@ block_statements:
   - decl: |
       function test(): void {
         return;
-        assertTrue(true);
+        arktest.assertTrue(true);
       }
     use: |
       test()

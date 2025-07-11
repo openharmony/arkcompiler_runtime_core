@@ -38,7 +38,8 @@ class SharedReferenceStorage1GTest;
 
 class SharedReference {
 public:
-    static constexpr size_t MAX_MARK_BITS = MarkWord::MarkWordRepresentation::HASH_SIZE;
+    static constexpr size_t MAX_MARK_BITS = 27U;
+    static_assert(MAX_MARK_BITS <= EtsMarkWord::INTEROP_INDEX_SIZE);
 
     // Actual state of shared object is contained in ETS
     void InitETSObject(InteropCtx *ctx, EtsObject *etsObject, napi_ref jsRef, uint32_t refIdx);

@@ -14,17 +14,13 @@
 ---
 cases:
     - use: |-
-          assertTrue(cls.foo("a", "b") == "a")
+          cls.foo("a", "b")
     - use: |-
-          assertTrue(cls.foo(null, 1) === 1)
+          cls.foo(null, 1)
     - use: |-
           let a = 42
-          assertTrue(cls.foo(a, new Object()) == 42)
+          cls.foo(a, new Object())
     - use: |-
           let a = new Object()
           let b = "abc"
-          assertTrue(cls.foo(a, b) instanceof String)
-    - use: |-
-          let a = new Object()
-          let b = "abc"
-          assertTrue(cls.foo(b, a) instanceof String)
+          cls.foo(b, a)

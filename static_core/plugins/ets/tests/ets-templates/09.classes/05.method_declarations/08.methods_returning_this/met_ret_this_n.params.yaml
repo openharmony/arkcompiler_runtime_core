@@ -1,0 +1,203 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - decl: |-
+          f: int
+          class A {
+              static foo(): this {  // CTE, 'this' cannot be used as return type of static method
+                  if (f == 0) {
+                      return this
+                  }
+                  throw new Error
+              }
+          }
+      use: |-
+          let x = A.foo()
+
+    - decl: |-
+          class A {
+              fld: int
+              foo(): this|A {  // CTE, 'this' cannot be used as a part of union type
+                  if (this.fld == 0) {
+                      return this
+                  }
+                  throw new Error
+              }
+          }
+      use: |-
+          let x = new A().foo()
+
+    - decl: |-
+          class A {
+              fld: int
+              foo(): A|this {  // CTE, 'this' cannot be used as a part of union type
+                  if (this.fld == 0) {
+                      return this
+                  }
+                  throw new Error
+              }
+          }
+      use: |-
+          let x = new A().foo()
+
+    - decl: |-
+          class A {
+              fld: int
+              foo(): [A, this] {  // CTE, 'this' cannot be used as a part of tuple type
+                  if (this.fld == 0) {
+                      return [this, this]
+                  }
+                  throw new Error
+              }
+          }
+      use: |-
+          let x = new A().foo()
+
+    - decl: |-
+          class A {
+              fld: int
+              foo(): FixedArray<this> {  // CTE, 'this' cannot be used as type of array
+                  if (this.fld == 0) {
+                      return [this, this]
+                  }
+                  throw new Error
+              }
+          }
+      use: |-
+          let x = new A().foo()
+
+    - decl: |-
+          class A {
+              fld: int
+              foo(): this {
+                  if (this.fld == 0) {
+                      return this.bar()  // CTE, only 'this' is allowed in return
+                  }
+                  throw new Error
+              }
+              bar(): this {
+                  if (this.fld == 0) {
+                      return this
+                  }
+                  throw new Error
+              }
+          }
+      use: |-
+          let x = new A().foo()
+
+    - decl: |-
+          class A {
+              fld: int
+              foo(): this {
+                  return this.fld == 0 ? this : this.bar()  // CTE, only 'this' is allowed in return
+              }
+              bar(): this {
+                  if (this.fld == 0) {
+                      return this
+                  }
+                  throw new Error
+              }
+          }
+      use: |-
+          let x = new A().foo()
+
+    - decl: |-
+          abstract class Super {
+              fld: int
+              foo(): this {
+                  if (this.fld == 0) {
+                      return this
+                  }
+                  throw new Error
+              }
+          }
+          class A extends Super {
+              foo(): this {
+                  if (this.fld == 999) {
+                      return this
+                  }
+                  return super.foo()  // CTE, only 'this' is allowed in return
+              }
+          }
+      use: |-
+          let x = new A().foo()
+
+    - decl: |-
+          abstract class Super {
+              fld: int
+              foo(): this {
+                  if (this.fld == 0) {
+                      return this
+                  }
+                  throw new Error
+              }
+          }
+          class A extends Super {
+              foo(): A {  // CTE, type must be 'this' in overridden method
+                  if (this.fld == 0) {
+                      return this
+                  }
+                  throw new Error
+              }
+          }
+      use: |-
+          let x = new A().foo()
+
+    - decl: |-
+          abstract class Super {
+              fld: int
+              foo(): this {
+                  if (this.fld == 0) {
+                      return this
+                  }
+                  throw new Error
+              }
+          }
+          class A extends Super {
+              foo(): Super {  // CTE, type must be 'this' in overridden method
+                  if (this.fld == 0) {
+                      return this
+                  }
+                  throw new Error
+              }
+          }
+      use: |-
+          let x = new A().foo()
+
+    - decl: |-
+          class A {
+              fld: A
+              constructor() {
+                  this.fld = this
+              }
+              foo(): this {
+                  return this.fld  // CTE, only 'this' is allowed in return
+              }
+          }
+      use: |-
+          let x = new A().foo()
+
+    - decl: |-
+          class A {
+              fld: int
+              get instance(): this {  // CTE, cannot be used in getter
+                  if (this.fld == 0) {
+                      return this
+                  }
+                  throw new Error
+              }
+          }
+      use: |-
+          let x = new A().instance

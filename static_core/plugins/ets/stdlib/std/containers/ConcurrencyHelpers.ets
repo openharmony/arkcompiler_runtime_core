@@ -31,6 +31,14 @@ final class ConcurrencyHelpers {
         }
     }
 
+    // Spinlock api 
+    public static native spinlockCreate(): Object;
+    public static spinlockGuard(spinlock: Object, callback: () => void) {
+        ConcurrencyHelpers.spinlockGuard(spinlock, callback as Object);
+    }
+
+    private static native spinlockGuard(spinlock: Object, callback: Object): void;
+
     // Event api
     public static native eventCreate(): Object;
     public static native eventWait(event: Object): void;

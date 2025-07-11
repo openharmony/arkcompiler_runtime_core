@@ -45,53 +45,92 @@ public:
 
 TEST_F(IsAssignableFromTest, is_assignable)
 {
-    CheckIsAssignableFrom<true>("Lis_assignable_from_test/A;", "Lis_assignable_from_test/A;");
-    CheckIsAssignableFrom<true>("Lis_assignable_from_test/B;", "Lis_assignable_from_test/A;");
-    CheckIsAssignableFrom<true>("Lis_assignable_from_test/A;", "Lstd/core/Object;");
-    CheckIsAssignableFrom<true>("Lis_assignable_from_test/B;", "Lstd/core/Object;");
-    CheckIsAssignableFrom<true>("Lis_assignable_from_test/A;", "Lis_assignable_from_test/I;");
-    CheckIsAssignableFrom<true>("Lis_assignable_from_test/B;", "Lis_assignable_from_test/I;");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.A", "is_assignable_from_test.A");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.B", "is_assignable_from_test.A");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.A", "std.core.Object");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.B", "std.core.Object");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.A", "is_assignable_from_test.I");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.B", "is_assignable_from_test.I");
 }
 
 TEST_F(IsAssignableFromTest, not_assignable)
 {
-    CheckIsAssignableFrom<false>("Lis_assignable_from_test/A;", "Lis_assignable_from_test/B;");
-    CheckIsAssignableFrom<false>("Lstd/core/Object;", "Lis_assignable_from_test/A;");
-    CheckIsAssignableFrom<false>("Lstd/core/Object;", "Lis_assignable_from_test/B;");
-    CheckIsAssignableFrom<false>("Lis_assignable_from_test/I;", "Lis_assignable_from_test/B;");
-    CheckIsAssignableFrom<false>("Lis_assignable_from_test/I;", "Lis_assignable_from_test/A;");
+    CheckIsAssignableFrom<false>("is_assignable_from_test.A", "is_assignable_from_test.B");
+    CheckIsAssignableFrom<false>("std.core.Object", "is_assignable_from_test.A");
+    CheckIsAssignableFrom<false>("std.core.Object", "is_assignable_from_test.B");
+    CheckIsAssignableFrom<false>("is_assignable_from_test.I", "is_assignable_from_test.B");
+    CheckIsAssignableFrom<false>("is_assignable_from_test.I", "is_assignable_from_test.A");
 }
 
 TEST_F(IsAssignableFromTest, ani_invalid_args)
 {
     ani_class clsA;
 
-    ASSERT_EQ(env_->FindClass("Lis_assignable_from_test/A;", &clsA), ANI_OK);
+    ASSERT_EQ(env_->FindClass("is_assignable_from_test.A", &clsA), ANI_OK);
     ASSERT_NE(clsA, nullptr);
 
     ani_boolean result;
     ASSERT_EQ(env_->Type_IsAssignableFrom(nullptr, clsA, &result), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Type_IsAssignableFrom(clsA, nullptr, &result), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Type_IsAssignableFrom(clsA, clsA, nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Type_IsAssignableFrom(nullptr, clsA, clsA, &result), ANI_INVALID_ARGS);
 }
 
 TEST_F(IsAssignableFromTest, is_assignable_combind_scenes_001)
 {
-    CheckIsAssignableFrom<true>("Lis_assignable_from_test/BaseA;", "Lis_assignable_from_test/BaseA;");
-    CheckIsAssignableFrom<true>("Lis_assignable_from_test/SubB;", "Lis_assignable_from_test/SubB;");
-    CheckIsAssignableFrom<true>("Lis_assignable_from_test/SubB;", "Lis_assignable_from_test/BaseA;");
-    CheckIsAssignableFrom<true>("Lis_assignable_from_test/SubC;", "Lis_assignable_from_test/SubC;");
-    CheckIsAssignableFrom<true>("Lis_assignable_from_test/SubC;", "Lis_assignable_from_test/SubB;");
-    CheckIsAssignableFrom<true>("Lis_assignable_from_test/SubC;", "Lis_assignable_from_test/BaseA;");
-    CheckIsAssignableFrom<true>("Lis_assignable_from_test/D;", "Lis_assignable_from_test/D;");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.BaseA", "is_assignable_from_test.BaseA");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.SubB", "is_assignable_from_test.SubB");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.SubB", "is_assignable_from_test.BaseA");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.SubC", "is_assignable_from_test.SubC");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.SubC", "is_assignable_from_test.SubB");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.SubC", "is_assignable_from_test.BaseA");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.D", "is_assignable_from_test.D");
 
-    CheckIsAssignableFrom<false>("Lis_assignable_from_test/BaseA;", "Lis_assignable_from_test/SubB;");
-    CheckIsAssignableFrom<false>("Lis_assignable_from_test/BaseA;", "Lis_assignable_from_test/SubC;");
-    CheckIsAssignableFrom<false>("Lis_assignable_from_test/SubB;", "Lis_assignable_from_test/SubC;");
-    CheckIsAssignableFrom<false>("Lis_assignable_from_test/SubC;", "Lis_assignable_from_test/D;");
-    CheckIsAssignableFrom<false>("Lis_assignable_from_test/SubB;", "Lis_assignable_from_test/D;");
-    CheckIsAssignableFrom<false>("Lis_assignable_from_test/BaseA;", "Lis_assignable_from_test/D;");
+    CheckIsAssignableFrom<false>("is_assignable_from_test.BaseA", "is_assignable_from_test.SubB");
+    CheckIsAssignableFrom<false>("is_assignable_from_test.BaseA", "is_assignable_from_test.SubC");
+    CheckIsAssignableFrom<false>("is_assignable_from_test.SubB", "is_assignable_from_test.SubC");
+    CheckIsAssignableFrom<false>("is_assignable_from_test.SubC", "is_assignable_from_test.D");
+    CheckIsAssignableFrom<false>("is_assignable_from_test.SubB", "is_assignable_from_test.D");
+    CheckIsAssignableFrom<false>("is_assignable_from_test.BaseA", "is_assignable_from_test.D");
 }
+
+TEST_F(IsAssignableFromTest, is_assignable_from_multiple_inheritance)
+{
+    CheckIsAssignableFrom<true>("is_assignable_from_test.InterfaceA", "is_assignable_from_test.InterfaceA");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.InterfaceB", "is_assignable_from_test.InterfaceB");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.InterfaceC", "is_assignable_from_test.InterfaceC");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.MyClass", "is_assignable_from_test.MyClass");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.MyClass", "is_assignable_from_test.InterfaceC");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.MyClass", "is_assignable_from_test.InterfaceB");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.MyClass", "is_assignable_from_test.InterfaceA");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.InterfaceC", "is_assignable_from_test.InterfaceA");
+    CheckIsAssignableFrom<true>("is_assignable_from_test.InterfaceC", "is_assignable_from_test.InterfaceB");
+
+    CheckIsAssignableFrom<false>("is_assignable_from_test.InterfaceC", "is_assignable_from_test.MyClass");
+    CheckIsAssignableFrom<false>("is_assignable_from_test.InterfaceA", "is_assignable_from_test.InterfaceB");
+    CheckIsAssignableFrom<false>("is_assignable_from_test.InterfaceB", "is_assignable_from_test.InterfaceA");
+    CheckIsAssignableFrom<false>("is_assignable_from_test.InterfaceB", "is_assignable_from_test.InterfaceC");
+    CheckIsAssignableFrom<false>("is_assignable_from_test.InterfaceB", "is_assignable_from_test.MyClass");
+    CheckIsAssignableFrom<false>("is_assignable_from_test.InterfaceA", "is_assignable_from_test.InterfaceC");
+    CheckIsAssignableFrom<false>("is_assignable_from_test.InterfaceA", "is_assignable_from_test.MyClass");
+}
+
+TEST_F(IsAssignableFromTest, check_initialization)
+{
+    ani_class fromCls;
+    ASSERT_EQ(env_->FindClass("is_assignable_from_test.InterfaceA", &fromCls), ANI_OK);
+
+    ani_class toCls;
+    ASSERT_EQ(env_->FindClass("is_assignable_from_test.InterfaceB", &toCls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("is_assignable_from_test.InterfaceA"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("is_assignable_from_test.InterfaceB"));
+    ani_boolean result;
+    ASSERT_EQ(env_->Type_IsAssignableFrom(fromCls, toCls, &result), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("is_assignable_from_test.InterfaceB"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("is_assignable_from_test.InterfaceA"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

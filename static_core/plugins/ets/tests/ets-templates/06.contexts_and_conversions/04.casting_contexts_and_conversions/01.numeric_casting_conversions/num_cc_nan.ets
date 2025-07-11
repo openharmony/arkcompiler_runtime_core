@@ -26,7 +26,7 @@ function main(): int {
     }
 
     let s2: float = Float.NaN
-    let d2: double = s2 as double
+    let d2: double = s2.toDouble()
     if (!Double.isNaN(d2)) {
         return 1
     }
@@ -38,7 +38,7 @@ function main(): int {
     }
 
     let s4: double = Double.NaN
-    let d4: float = s4 as float
+    let d4: float = s4.toFloat()
     if (!Float.isNaN(d4)) {
         return 1
     }

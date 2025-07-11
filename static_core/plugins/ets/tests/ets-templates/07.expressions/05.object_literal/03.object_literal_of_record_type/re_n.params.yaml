@@ -161,7 +161,7 @@ cases:
               },
               "b": {},
           }
-          assertTrue(a["a"]![1]!)
+          arktest.assertTrue(a["a"]![1]!)
 
     - tags: ['negative']
       use: |-
@@ -172,5 +172,5 @@ cases:
               },
               "b": {},
           }
-          assertTrue(!(a["a"]![42]!))
+          arktest.assertTrue(!(a["a"]![42]!))
           

@@ -38,6 +38,15 @@ class TestXGCEcmaVmAdaptor : public TestXGCVmAdaptor {
 public:
     TestXGCEcmaVmAdaptor(napi_env env, TestXGCEcmaAdaptorValues *values) : TestXGCVmAdaptor(env), values_(values) {}
 
+#if defined(ARK_HYBRID)
+    void MarkFromObject([[maybe_unused]] napi_ref obj, [[maybe_unused]] const common::RefFieldVisitor &visitor) override
+    {
+        std::stringstream err;
+        err << "Unexpected call of MarkFromObject";
+        values_->errors.push_back(err.str());
+    }
+#endif
+
     void MarkFromObject([[maybe_unused]] napi_ref obj) override
     {
         std::stringstream err;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,11 +78,11 @@ function check(result: number, message: String): number {
   return fail;
 }
 
-const normalSource: {{.item.sourceElementsType}}[] = {{.item.data}};
-const abnormalSource: {{.item.sourceElementsType}}[] = {{.item.abnormalData}};
+const normalSource: FixedArray<{{.item.sourceElementsType}}> = {{.item.data}};
+const abnormalSource: FixedArray<{{.item.sourceElementsType}}> = {{.item.abnormalData}};
 
 function testSubarrayWithOutParam(): int {
-  let source: {{.item.type}}[] = [
+  let source: FixedArray<{{.item.type}}> = [
       {{.item.create}}(10),
       {{.item.create}}(20),
       {{.item.create}}(30),
@@ -90,7 +90,7 @@ function testSubarrayWithOutParam(): int {
       {{.item.create}}(50),
       {{.item.create}}(60)
   ];
-  let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
+  let ss = new ArrayBuffer(source.length.toInt() * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
 
@@ -111,13 +111,13 @@ function testSubarrayWithOutParam(): int {
     return fail;
   }
 
-  if (target.length as int != origin.length as int) {
+  if (target.length.toInt() != origin.length.toInt()) {
     console.log("Array length mismatch on slice");
     return fail;
   }
 
   //Check all the data copied;
-  for (let i: int = 0; i< origin.length as int; i++) {
+  for (let i: int = 0; i< origin.length.toInt(); i++) {
     let tv = target[i] as {{.item.type}};
     let ov = origin[i] as {{.item.type}};
     console.log(source[i] + "->" + tv + "->" + ov);
@@ -128,7 +128,7 @@ function testSubarrayWithOutParam(): int {
   }
 
   origin= new {{.item.objectType}}(0);
-  if (origin.length as int != 0){
+  if (origin.length.toInt() != 0){
     return fail;
   }
 
@@ -139,14 +139,14 @@ function testSubarrayWithOutParam(): int {
     return fail;
   }
 
-  if (target.length as int != 0){
+  if (target.length.toInt() != 0){
     return fail;
   }
   return success;
 }
 
 function testSubarrayOneParam(): int {
-  let source: {{.item.type}}[] = [
+  let source: FixedArray<{{.item.type}}> = [
     {{.item.create}}(10),
     {{.item.create}}(20),
     {{.item.create}}(30),
@@ -154,7 +154,7 @@ function testSubarrayOneParam(): int {
     {{.item.create}}(50),
     {{.item.create}}(60)
   ];
-  let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
+  let ss = new ArrayBuffer(source.length.toInt() * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
 
@@ -167,7 +167,7 @@ function testSubarrayOneParam(): int {
   }
 
   let subarrayStart: int = 1;
-  let subarrayEnd: int = origin.length as int;
+  let subarrayEnd: int = origin.length.toInt();
 
   let target: {{.item.objectType}};
 
@@ -178,7 +178,7 @@ function testSubarrayOneParam(): int {
     return fail;
   }
 
-  if (target.length as int != origin.length as int - subarrayStart) {
+  if (target.length.toInt() != origin.length.toInt() - subarrayStart) {
     console.log("Array length mismatch on subarray One Params" + target.length);
     return fail;
   }
@@ -202,7 +202,7 @@ function testSubarrayOneParam(): int {
     return fail;
   }
 
-  if (target.length as int != origin.length as int) {
+  if (target.length.toInt() != origin.length.toInt()) {
     console.log("Array length mismatch on subarray One Params" + target.length);
     return fail;
   }
@@ -245,7 +245,7 @@ function testSubarrayOneParam(): int {
 }
 
 function testSubarrayTwoParams(): int {
-  let source: {{.item.type}}[] = [
+  let source: FixedArray<{{.item.type}}> = [
       {{.item.create}}(10),
       {{.item.create}}(20),
       {{.item.create}}(30),
@@ -253,7 +253,7 @@ function testSubarrayTwoParams(): int {
       {{.item.create}}(50),
       {{.item.create}}(60)
   ];
-  let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
+  let ss = new ArrayBuffer(source.length.toInt() * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
 
@@ -265,8 +265,8 @@ function testSubarrayTwoParams(): int {
     return fail;
   }
 
-  let subarrayStart: int = 2;
-  let subarrayEnd: int = 4;
+  let subarrayStart: int | undefined = 2;
+  let subarrayEnd: int | undefined = 4;
 
   let target: {{.item.objectType}};
 
@@ -277,7 +277,7 @@ function testSubarrayTwoParams(): int {
     return fail;
   }
 
-  if (target.length as int != subarrayEnd - subarrayStart) {
+  if (target.length.toInt() != subarrayEnd - subarrayStart) {
     console.log("Array length mismatch on subarray2");
     return fail;
   }
@@ -294,7 +294,7 @@ function testSubarrayTwoParams(): int {
   }
 
   subarrayStart = 0;
-  subarrayEnd = origin.length as int;
+  subarrayEnd = origin.length.toInt();
   try {
     target = origin.subarray(subarrayStart, subarrayEnd);
   } catch(e) {
@@ -302,7 +302,7 @@ function testSubarrayTwoParams(): int {
     return fail;
   }
 
-  if (target.length as int != subarrayEnd - subarrayStart) {
+  if (target.length.toInt() != subarrayEnd - subarrayStart) {
     console.log("Array length mismatch on subarray2");
     return fail;
   }
@@ -325,7 +325,7 @@ function testSubarrayTwoParams(): int {
     return fail;
   }
 
-  if (target.length as int != subarrayEnd - subarrayStart) {
+  if (target.length.toInt() != subarrayEnd - subarrayStart) {
     console.log("Array length mismatch on subarray2");
     return fail;
   }
@@ -348,7 +348,7 @@ function testSubarrayTwoParams(): int {
     return fail;
   }
 
-  if (target.length as int != subarrayEnd - subarrayStart) {
+  if (target.length.toInt() != subarrayEnd - subarrayStart) {
     console.log("Array length mismatch on subarray2");
     return fail;
   }
@@ -371,7 +371,7 @@ function testSubarrayTwoParams(): int {
     return fail;
   }
 
-  if (target.length as int != subarrayEnd - subarrayStart) {
+  if (target.length.toInt() != subarrayEnd - subarrayStart) {
     console.log("Array length mismatch on subarray2");
     return fail;
   }
@@ -394,7 +394,7 @@ function testSubarrayTwoParams(): int {
     return fail;
   }
 
-  if (target.length as int != 0) {
+  if (target.length.toInt() != 0) {
     console.log("Array length mismatch on subarray2");
     return fail;
   }
@@ -403,7 +403,7 @@ function testSubarrayTwoParams(): int {
 }
 
 function testSubarrayTwoParamsWithOtherNumber(): int {
-  let source: {{.item.type}}[] = [
+  let source: FixedArray<{{.item.type}}> = [
       {{.item.create}}(10),
       {{.item.create}}(20),
       {{.item.create}}(30),
@@ -411,7 +411,7 @@ function testSubarrayTwoParamsWithOtherNumber(): int {
       {{.item.create}}(50),
       {{.item.create}}(60)
   ];
-  let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
+  let ss = new ArrayBuffer(source.length.toInt() * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
 
@@ -423,8 +423,8 @@ function testSubarrayTwoParamsWithOtherNumber(): int {
     return fail;
   }
 
-  let subarrayStart: int = 4;
-  let subarrayEnd: int = 2;
+  let subarrayStart: int | undefined = 4;
+  let subarrayEnd: int | undefined = 2;
 
   let target: {{.item.objectType}};
 
@@ -434,26 +434,26 @@ function testSubarrayTwoParamsWithOtherNumber(): int {
     return fail;
   }
 
-  if (target.length as int != 0) {
+  if (target.length.toInt() != 0) {
     console.log("Array length mismatch on subarray2");
     return fail;
   }
 
   subarrayStart = -1;
-  subarrayEnd = origin.length as int;
+  subarrayEnd = origin.length.toInt();
   try {
     target = origin.subarray(subarrayStart, subarrayEnd);
   } catch(e) {
     return fail;
   }
 
-  if (target.length as int != subarrayEnd - (origin.length + subarrayStart)) {
+  if (target.length.toInt() != subarrayEnd - (origin.length + subarrayStart)) {
     console.log("Array length mismatch on subarray2");
     return fail;
   }
 
   //Check all the data copied;
-  for (let i: int = (origin.length + subarrayStart) as int; i< subarrayEnd; i++) {
+  for (let i: int = (origin.length + subarrayStart).toInt(); i< subarrayEnd; i++) {
     let tv = target[i - (origin.length + subarrayStart)] as {{.item.type}};
     let ov = origin[i] as {{.item.type}};
     console.log(source[i] + "->" + tv + "->" + ov);
@@ -464,7 +464,7 @@ function testSubarrayTwoParamsWithOtherNumber(): int {
   }
 
   subarrayStart = 0;
-  subarrayEnd = -origin.length as int;
+  subarrayEnd = -origin.length.toInt();
   try {
     target = origin.subarray(subarrayStart, subarrayEnd);
   } catch(e) {
@@ -472,7 +472,7 @@ function testSubarrayTwoParamsWithOtherNumber(): int {
     return fail;
   }
 
-  if (target.length as int != (origin.length + subarrayEnd) - subarrayStart) {
+  if (target.length.toInt() != (origin.length + subarrayEnd) - subarrayStart) {
     console.log("Array length mismatch on subarray2");
     return fail;
   }
@@ -481,8 +481,8 @@ function testSubarrayTwoParamsWithOtherNumber(): int {
 }
 
 function testSubarrayOneLengthTwoParams(): int {
-  let source: {{.item.type}}[] = [{{.item.create}}(10)];
-  let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
+  let source: FixedArray<{{.item.type}}> = [{{.item.create}}(10)];
+  let ss = new ArrayBuffer(source.length.toInt() * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
 
@@ -494,8 +494,8 @@ function testSubarrayOneLengthTwoParams(): int {
     return fail;
   }
 
-  let subarrayStart: int = 4;
-  let subarrayEnd: int = 2;
+  let subarrayStart: int | undefined = 4;
+  let subarrayEnd: int | undefined = 2;
 
   let target: {{.item.objectType}};
 
@@ -505,7 +505,7 @@ function testSubarrayOneLengthTwoParams(): int {
     return fail;
   }
 
-  if (target.length as int != 0) {
+  if (target.length.toInt() != 0) {
     console.log("Array length mismatch on subarray2");
     return fail;
   }
@@ -518,7 +518,7 @@ function testSubarrayOneLengthTwoParams(): int {
     return fail;
   }
 
-  if (target.length as int != 0) {
+  if (target.length.toInt() != 0) {
     console.log("Array length mismatch on subarray2");
     return fail;
   }
@@ -561,15 +561,15 @@ function testNonEmptyTypedUArraySetValue(): number {
   }
 
   {%- if item.objectType == 'Uint8Array' %}
-    let expectedArray: {{.item.sourceElementsType}}[] = [1, 2, 255, 1, 0];
+    let expectedArray: FixedArray<{{.item.sourceElementsType}}> = [1, 2, 255, 1, 0];
   {%- elif item.objectType == 'Uint8ClampedArray' %}
-    let expectedArray: {{.item.sourceElementsType}}[] = [1, 2, 255, 255, 255];
+    let expectedArray: FixedArray<{{.item.sourceElementsType}}> = [1, 2, 255, 255, 255];
   {%- elif item.objectType == 'Uint16Array' %}
-    let expectedArray: {{.item.sourceElementsType}}[] = [1, 2, 65535, 1, 0];
+    let expectedArray: FixedArray<{{.item.sourceElementsType}}> = [1, 2, 65535, 1, 0];
   {% elif item.objectType == 'BigUint64Array' %}
-    let expectedArray: {{.item.sourceElementsType}}[] = [1, 2, 4294967295, 4294967297, 4294967296*2]
+    let expectedArray: FixedArray<{{.item.sourceElementsType}}> = [1, 2, 4294967295, 4294967297, 4294967296*2]
   {%- else %}
-    let expectedArray: {{.item.sourceElementsType}}[] = [1, 2, 4294967295, 1, 0];
+    let expectedArray: FixedArray<{{.item.sourceElementsType}}> = [1, 2, 4294967295, 1, 0];
   {%- endif %}
 
   for (let i = 0; i < typedUArray.length; i++) {
@@ -594,7 +594,7 @@ function testNonEmptyTypedUArraySetValue(): number {
 
 // Test case for typedUArray.includes(searchElement) with Normal Number
 function testTypedUArrayIncludesOneParamWithNormalNum(): number {
-  let ss = new ArrayBuffer(normalSource.length as int * {{.item.primitiveSizeBytes}});
+  let ss = new ArrayBuffer(normalSource.length.toInt() * {{.item.primitiveSizeBytes}});
   let typedUArray: {{.item.objectType}};
 
   try {
@@ -605,7 +605,7 @@ function testTypedUArrayIncludesOneParamWithNormalNum(): number {
     return fail;
   }
 
-  let searchElementArray: {{.item.sourceElementsType}}[] =  {{.item.data}};
+  let searchElementArray: FixedArray<{{.item.sourceElementsType}}> =  {{.item.data}};
 
   for (let i = 0; i < searchElementArray.length; i++) {
     if (!typedUArray.includes({{.item.create}}(searchElementArray[i]))) {
@@ -629,7 +629,7 @@ function testTypedUArrayIncludesOneParamWithNormalNum(): number {
 {%- if item.objectType != 'BigUint64Array' %}
 // Test case for typedUArray.includes(searchElement) with abnormal number
 function testTypedUArrayIncludesOneParamWithAbnormalNum(): number {
-  let ss = new ArrayBuffer(abnormalSource.length as int * {{.item.primitiveSizeBytes}});
+  let ss = new ArrayBuffer(abnormalSource.length.toInt() * {{.item.primitiveSizeBytes}});
   let typedUArray: {{.item.objectType}};
 
   try {
@@ -641,13 +641,13 @@ function testTypedUArrayIncludesOneParamWithAbnormalNum(): number {
   }
 
   {%- if item.objectType == 'Uint8Array' %}
-    let searchElementArray: {{.item.type}}[] = [255, 0, 1, Byte.MAX_VALUE, Byte.MAX_VALUE - 1, Byte.MAX_VALUE + 1];
+    let searchElementArray: FixedArray<{{.item.type}}> = [255, 0, 1, Byte.MAX_VALUE, Byte.MAX_VALUE - 1, Byte.MAX_VALUE + 1];
   {%- elif item.objectType == 'Uint8ClampedArray' %}
-    let searchElementArray: {{.item.type}}[] = [255, 255, 255, 0, 0,  Byte.MAX_VALUE + 1];
+    let searchElementArray: FixedArray<{{.item.type}}> = [255, 255, 255, 0, 0,  Byte.MAX_VALUE + 1];
   {%- elif item.objectType == 'Uint16Array' %}
-    let searchElementArray: {{.item.type}}[] = [65535, 0, 1, Short.MAX_VALUE, Short.MAX_VALUE - 1, Short.MAX_VALUE + 1];
+    let searchElementArray: FixedArray<{{.item.type}}> = [65535, 0, 1, Short.MAX_VALUE, Short.MAX_VALUE - 1, Short.MAX_VALUE + 1];
   {%- else %}
-    let searchElementArray: {{.item.type}}[] = [4294967295, 0, 1, Int.MAX_VALUE, Int.MAX_VALUE - 1, Int.MAX_VALUE as number + 1];
+    let searchElementArray: FixedArray<{{.item.type}}> = [4294967295, 0, 1, Int.MAX_VALUE, Int.MAX_VALUE - 1, Int.MAX_VALUE.toDouble() + 1];
   {%- endif %}
 
   for (let i = 0; i < searchElementArray.length; i++) {
@@ -659,7 +659,7 @@ function testTypedUArrayIncludesOneParamWithAbnormalNum(): number {
 
   // as int
   for (let i = 0; i < searchElementArray.length; i++) {
-    if (!typedUArray.includes(searchElementArray[i] as int)) {
+    if (!typedUArray.includes(searchElementArray[i].toInt())) {
       console.log("Test failed. testTypedUArrayIncludesOneParamWithAbnormalNum: as int" + JSON.stringify(searchElementArray[i]));
       return fail;
     }
@@ -675,13 +675,13 @@ function testTypedUArrayIncludesOneParamWithAbnormalNum(): number {
   }
 
   //with large Number
-  let large_number: number[] = [-0x8000000000000000, 0x7FFFFFFFFFFFFFFF];
+  let large_number: FixedArray<number> = [-0x8000000000000000, 0x7FFFFFFFFFFFFFFF];
   {%- if item.objectType == 'Uint32Array' %}
-    let convertedValues: number[] = [0, 4294967295];
+    let convertedValues: FixedArray<number> = [0, 4294967295];
   {%- elif item.objectType == 'Uint16Array'%}
-    let convertedValues: number[] = [0, 0xFFFF];
+    let convertedValues: FixedArray<number> = [0, 0xFFFF];
   {%- else %}
-    let convertedValues: number[] = [0, 0xFF];
+    let convertedValues: FixedArray<number> = [0, 0xFF];
   {%- endif %}
   typedUArray = new {{.item.objectType}}(large_number);
 
@@ -698,7 +698,7 @@ function testTypedUArrayIncludesOneParamWithAbnormalNum(): number {
 
 // Test case for typedUArray.includes(searchElement, fromIndex)
 function testTypedUArrayIncludesTwoParamWithNormalIndex(): number {
-  let source: {{.item.type}}[] = [
+  let source: FixedArray<{{.item.type}}> = [
       {{.item.create}}(1),
       {{.item.create}}(2),
       {{.item.create}}(3),
@@ -727,7 +727,7 @@ function testTypedUArrayIncludesTwoParamWithNormalIndex(): number {
     return fail;
   }
   //as int
-  result = typedUArray.includes((searchElement{{.item.cast2primitive}}) as int, fromIndex as int);
+  result = typedUArray.includes((searchElement{{.item.cast2primitive}}).toInt(), fromIndex.toInt());
   if (result) {
     console.log(`Includes ${searchElement} from index ${fromIndex}? true`);
   } else {
@@ -744,7 +744,7 @@ function testTypedUArrayIncludesTwoParamWithNormalIndex(): number {
     console.log(`Includes ${searchElement} from index ${fromIndex}? false`);
   }
   //as int
-  result = typedUArray.includes((searchElement{{.item.cast2primitive}}) as int, fromIndex as int);
+  result = typedUArray.includes((searchElement{{.item.cast2primitive}}).toInt(), fromIndex.toInt());
   if (result) {
     console.log(`Includes ${searchElement} from index ${fromIndex}? true`);
     return fail;
@@ -758,7 +758,7 @@ function testTypedUArrayIncludesTwoParamWithNormalIndex(): number {
 {%- if item.objectType != 'BigUint64Array' %}
 // Test case for typedUArray.includes(searchElement, fromIndex)
 function testTypedUArrayIncludesTwoParamWithAbnormalIndex(): number {
-  let source: {{.item.type}}[] = [
+  let source: FixedArray<{{.item.type}}> = [
       {{.item.create}}(1),
       {{.item.create}}(2),
       {{.item.create}}(3),
@@ -791,7 +791,7 @@ function testTypedUArrayIncludesTwoParamWithAbnormalIndex(): number {
   //a. Let k be len + n.
   let arrayLen = typedUArray.length;
   for (let i = 0 as int; i < arrayLen; i++) {
-    fromIndex = (- arrayLen + i) as int;
+    fromIndex = (- arrayLen + i).toInt();
     result = typedUArray.includes(searchElement, fromIndex);
     let exceptResult = typedUArray.includes(searchElement, i);
     if (result == exceptResult) {
@@ -803,7 +803,7 @@ function testTypedUArrayIncludesTwoParamWithAbnormalIndex(): number {
   }
 
   //b. If k < 0, set k to 0.
-  fromIndex = (-arrayLen -1) as int;
+  fromIndex = (-arrayLen -1).toInt();
   result = typedUArray.includes(searchElement, fromIndex);
   if (result) {
     console.log(`Includes ${searchElement} from index ${fromIndex}? true`);
@@ -857,7 +857,7 @@ function testTypedUArrayJoinWithEmptyArray(): number {
   } catch(e) {
     return fail;
   }
-  if (typedUArray.length as number != 0 || typedUArray.byteOffset as number != 0) {
+  if (typedUArray.length.toDouble() != 0 || typedUArray.byteOffset.toDouble() != 0) {
     return fail;
   }
 
@@ -883,7 +883,7 @@ function testTypedUArrayJoinWithEmptyArray(): number {
 }
 
 function testTypedUArrayJoinWithNonEmptyArray(): number {
-  let source: {{.item.type}}[] = [
+  let source: FixedArray<{{.item.type}}> = [
       {{.item.create}}(1),
       {{.item.create}}(2),
       {{.item.create}}(3),
@@ -932,7 +932,7 @@ function testTypedUArrayJoinWithNonEmptyArray(): number {
 }
 
 function testTypedUArrayJoinWithNonEmptyArrayAndAbnormalStr(): number {
-  let source: {{.item.type}}[] = [
+  let source: FixedArray<{{.item.type}}> = [
       {{.item.create}}(1),
       {{.item.create}}(2),
       {{.item.create}}(3),
@@ -973,7 +973,7 @@ function testTypedUArrayKeysWithEmptyArray(): number {
   } catch(e) {
     return fail;
   }
-  if (typedUArray.length as number != 0 || typedUArray.byteOffset as number != 0) {
+  if (typedUArray.length.toDouble() != 0 || typedUArray.byteOffset.toDouble() != 0) {
     return fail;
   }
 
@@ -1062,7 +1062,7 @@ function testTypedUArrayKeysWithMultipleElementArray(): number {
 
 // Test case for forEach(callbackFn)
 function testTypedUArrayForEach(): number {
-  let source: {{.item.type}}[] = [
+  let source: FixedArray<{{.item.type}}> = [
       {{.item.create}}(1),
       {{.item.create}}(2),
       {{.item.create}}(3),
@@ -1098,7 +1098,7 @@ function testTypedUArrayForEach(): number {
 
 // Test case for forEach(callbackFn: (value: number, index: number) => void)
 function testTypedUArrayForEachValueIndexCallback(): number {
-    let source: {{.item.type}}[] = [
+    let source: FixedArray<{{.item.type}}> = [
         {{.item.create}}(1),
         {{.item.create}}(2),
         {{.item.create}}(3),
@@ -1134,7 +1134,7 @@ function testTypedUArrayForEachValueIndexCallback(): number {
 
 // Test case for forEach(callbackFn: (value: number) => void)
 function testTypedUArrayForEachValueCallback(): number {
-    let source: {{.item.type}}[] = [
+    let source: FixedArray<{{.item.type}}> = [
       {{.item.create}}(1),
       {{.item.create}}(2),
       {{.item.create}}(3),
@@ -1172,7 +1172,7 @@ function testTypedUArrayForEachValueCallback(): number {
 
 // Test case for forEach(callbackFn: () => void)
 function testTypedUArrayForEachNoArgsCallback(): number {
-    let source: {{.item.type}}[] = [
+    let source: FixedArray<{{.item.type}}> = [
       {{.item.create}}(1),
       {{.item.create}}(2),
       {{.item.create}}(3),
@@ -1244,7 +1244,7 @@ const testTypedArrayGet = parametrize<ObjectTypeAndExpectations<boolean[]>>(
     failures += check(boolToResult(isPosInfThrows == expected[3]), `didn't throw: array[+Infinity]`)
     failures += check(boolToResult(isNanZero == expected[4]), `failed: array[NaN] == array[0]`)
     failures += check(boolToResult(isCorrectValues == expected[5]), `failed: array[i] == (i + 1) * 10`)
-    
+
     return failures == 0 ? success: fail
   }
 )
@@ -1283,18 +1283,18 @@ const testTypedArraySet = parametrize<ObjectTypeAndExpectations<boolean[]>>(
 
     {%- if item.objectType != 'BigUint64Array' %}
 
-    array[0 as number] = (value + 1) as number
+    array[0] = (value + 1).toDouble()
     const isNumberNumberCorrect = array[0] == {{.item.create}}(value + 1)
 
-    array[0 as int] = (value + 2) as number
+    array[0] = (value + 2).toDouble()
     const isIntNumberCorrect = array[0] == {{.item.create}}(value + 2)
 
     {%- endif %}
 
-    array[0 as number] = (value + 3) as int
+    array[0] = (value + 3).toInt()
     const isNumberIntCorrect = array[0] == {{.item.create}}(value + 3)
 
-    array[0 as int] = (value + 4) as int
+    array[0] = (value + 4).toInt()
     const isIntIntCorrect = array[0] == {{.item.create}}(value + 4)
 
     let failures = 0
@@ -1305,12 +1305,12 @@ const testTypedArraySet = parametrize<ObjectTypeAndExpectations<boolean[]>>(
     failures += check(boolToResult(isPosInfThrows == expected[3]), `didn't throw: array[+Infinity] = value`)
     failures += check(boolToResult(isNanZero == expected[4]), `failed: array[NaN] = value`)
     {%- if item.objectType != 'BigUint64Array' %}
-    failures += check(boolToResult(isNumberNumberCorrect == expected[5]), `failed: array[0 as number] = value as number`)
-    failures += check(boolToResult(isIntNumberCorrect == expected[6]), `failed: array[0 as int] = value as number`)
+    failures += check(boolToResult(isNumberNumberCorrect == expected[5]), `failed: array[0.toDouble()] = value.toDouble()`)
+    failures += check(boolToResult(isIntNumberCorrect == expected[6]), `failed: array[0 as int] = value.toDouble()`)
     {%- endif %}
-    failures += check(boolToResult(isNumberIntCorrect == expected[7]), `failed: array[0 as number] = value as int`)
+    failures += check(boolToResult(isNumberIntCorrect == expected[7]), `failed: array[0.toDouble()] = value as int`)
     failures += check(boolToResult(isIntIntCorrect == expected[8]), `failed: array[0 as int] = value as int`)
-    
+
     return failures == 0 ? success: fail
   }
 )

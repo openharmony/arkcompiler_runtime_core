@@ -24,7 +24,7 @@ class Bar {
     private data2: int;
     private data3: int;
 
-    $_get (index: int) : int throws {
+    $_get (index: int) : int {
         switch(index) {
         case 0:
             return this.data;
@@ -37,7 +37,7 @@ class Bar {
         }
     }
 
-    $_set (index: int, value: int)  throws {
+    $_set (index: int, value: int) {
         switch(index) {
         case 0:
             this.data = value;
@@ -63,9 +63,9 @@ class Bar {
 function main(): int {
     let x : Bar = new Bar(1,2,3);
     try {
-        assertEQ(x.$_get(0), 1)
-        assertEQ(x.$_get(1), 2)
-        assertTrue((x.$_get(2)== 3))
+        arktest.assertEQ(x.$_get(0), 1)
+        arktest.assertEQ(x.$_get(1), 2)
+        arktest.assertTrue((x.$_get(2)== 3))
     } catch (e) {
         console.log("1");
         return 1;
@@ -81,9 +81,9 @@ function main(): int {
     }
 
     try {
-        assertEQ(x.$_get(0), 4)
-        assertEQ(x.$_get(1), 5)
-        assertEQ(x.$_get(2), 6)
+        arktest.assertEQ(x.$_get(0), 4)
+        arktest.assertEQ(x.$_get(1), 5)
+        arktest.assertEQ(x.$_get(2), 6)
     } catch (e) {
         console.log("3");
         return 1;

@@ -19,10 +19,10 @@ desc: getValueOf(string) returns an enumeration constant with the given name, or
 
 enum Color {Red, Green, Blue}
 
-function main(): void throws {
+function main(): void {
   let c: Color = Color.Red;
   let colors = Color.values();
   let red = Color.getValueOf("Red");
-  assertEQ( red, colors[0])
-  assertTrue(c == red);
+  arktest.assertEQ( red, colors[0])
+  arktest.assertTrue(c == red);
 }

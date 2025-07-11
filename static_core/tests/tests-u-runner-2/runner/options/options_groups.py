@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,7 @@
 import argparse
 from functools import cached_property
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any
 
 from runner.options.options import IOptions
 from runner.utils import check_int, is_file
@@ -35,7 +35,7 @@ class GroupsOptions(IOptions):
     __DEFAULT_CHAPTERS_FILE = "chapters.yaml"
     __CHAPTERS_DELIMITER = ";"
 
-    def __init__(self, parameters: Dict[str, Any]):
+    def __init__(self, parameters: dict[str, Any]):  # type: ignore[explicit-any]
         super().__init__()
         self.__parameters = parameters
 
@@ -43,7 +43,7 @@ class GroupsOptions(IOptions):
         return self._to_str(indent=2)
 
     @staticmethod
-    def add_cli_args(parser: argparse.ArgumentParser) -> None:
+    def add_cli_args(parser: argparse.ArgumentParser, dest: str | None = None) -> None:
         # Test groups options
         test_groups = parser.add_argument_group(
             "Test groups",
@@ -52,24 +52,28 @@ class GroupsOptions(IOptions):
             f'--{GroupsOptions.__GROUPS}', action='store',
             type=lambda arg: check_int(arg, f"--{GroupsOptions.__GROUPS}", is_zero_allowed=False),
             default=GroupsOptions.__DEFAULT_GROUPS,
+            dest=f"{dest}{GroupsOptions.__GROUPS}",
             help='Quantity of groups used for automatic division. '
                  f'By default {GroupsOptions.__DEFAULT_GROUPS} - all tests in one group')
         test_groups.add_argument(
             f'--{GroupsOptions.__GROUP_NUMBER}', action='store',
             type=lambda arg: check_int(arg, f"--{GroupsOptions.__GROUP_NUMBER}", is_zero_allowed=False),
             default=GroupsOptions.__DEFAULT_GROUP_NUMBER,
+            dest=f"{dest}{GroupsOptions.__GROUP_NUMBER}",
             help='run tests only of specified group number. Used only if --groups is set. '
                  f'Default value {GroupsOptions.__DEFAULT_GROUP_NUMBER} - the first available group. '
                  'If the value is more than the total number of groups the latest group is taken.')
         test_groups.add_argument(
-            f'--{GroupsOptions.__CHAPTERS}', action='store', dest='chapters',
+            f'--{GroupsOptions.__CHAPTERS}', action='store',
             type=str, default=None,
+            dest=f"{dest}{GroupsOptions.__CHAPTERS}",
             help='run tests only of specified chapters. '
                  f'Divide several chapters with `{GroupsOptions.__CHAPTERS_DELIMITER}`')
         test_groups.add_argument(
             f'--{GroupsOptions.__CHAPTERS_FILE}', action='store',
             type=lambda arg: is_file(arg) if arg != GroupsOptions.__DEFAULT_CHAPTERS_FILE else arg,
             default=GroupsOptions.__DEFAULT_CHAPTERS_FILE,
+            dest=f"{dest}{GroupsOptions.__CHAPTERS_FILE}",
             help='Full name to the file with chapter description. '
                  f'By default {GroupsOptions.__DEFAULT_CHAPTERS_FILE} file located along with test lists.')
 
@@ -84,7 +88,7 @@ class GroupsOptions(IOptions):
         return value if isinstance(value, int) else int(value)
 
     @cached_property
-    def chapters(self) -> List[str]:
+    def chapters(self) -> list[str]:
         chapters = self.__parameters[self.__CHAPTERS]
         if chapters is None:
             return []

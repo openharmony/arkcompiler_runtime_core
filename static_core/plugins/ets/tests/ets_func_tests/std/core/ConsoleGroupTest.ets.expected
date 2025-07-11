@@ -17,10 +17,10 @@ User Details
   Email: john@example.com
 Application Info
   Version: 1.0.0
-    System Details
+  System Details
     OS: Windows
     Browser: Chrome
-    Performance
+  Performance
     Memory: 4GB
     CPU: 2.4GHz
 Debug Information
@@ -29,8 +29,20 @@ Debug Information
   Logging: Enabled
 API Calls
   GET /users
-    Request Details
+  Request Details
     Headers: ConsoleGroupTest.RequestHeaders {Authorization: Bearer token}
-    Response
+  Response
     Status: 200
     Data: [ConsoleGroupTest.User {id: 1, name: John}]
+outter
+  level 1
+  in level 1
+    level 2
+outter Collapsed
+  level 1 Collapsed
+  in level 1 Collapsed
+    level 2 Collapsed
+1,str
+  str
+    count %d
+        1,str,sdsf

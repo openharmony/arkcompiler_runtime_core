@@ -13,7 +13,12 @@
  * limitations under the License.
  */
 
-import { GetObject, GetNumber, GetString, Nop } from "js_code";
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/perf/code');
+let getObject = module.getProperty('getObject')
+let getNumber = module.getProperty('GetNumber')
+let getString = module.getProperty('getString')
+let nop = module.getProperty('nop')
+
 
 function voidCall(iters: int): boolean {
     for (let i = 0; i < iters; ++i) {
@@ -61,35 +66,35 @@ class Empty {
 
 function strCall(iters: int): boolean {
     for (let i = 0; i < iters; ++i) {
-        let r = GetString() as String;
+        let r = getString().invoke().toString();
     }
     return true;
 }
 
 function anystrCall(iters: int): boolean {
     for (let i = 0; i < iters; ++i) {
-        let r = GetString();
+        let r = getString().invoke();
     }
     return true;
 }
 
 function dblCall(iters: int): boolean {
     for (let i = 0; i < iters; ++i) {
-        let r = GetNumber() as number;
+        let r = getNumber().invoke().toNumber();
     }
     return true;
 }
 
 function anydblCall(iters: int): boolean {
     for (let i = 0; i < iters; ++i) {
-        let r = GetNumber();
+        let r = getNumber().invoke();
     }
     return true;
 }
 
 function anyobjCall(iters: int): boolean {
     for (let i = 0; i < iters; ++i) {
-        let r = GetObject();
+        let r = getObject.invoke();
     }
     return true;
 }

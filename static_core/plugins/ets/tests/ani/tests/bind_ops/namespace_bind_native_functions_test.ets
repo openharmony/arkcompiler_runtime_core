@@ -30,3 +30,16 @@ function checkSumA(): boolean {
 function checkConcat(): boolean {
     return ops.concat("abc", "def") == "abcdef";
 }
+
+namespace A {
+    export native function recursiveFunction(value: int): int;
+    namespace B {
+        export native function sumB(a: int, b: int): int;
+    }
+    function checkSumB(): boolean {
+        return B.sumB(8, 16) == 24;
+    }
+}
+function checkRecursive(): boolean {
+    return A.recursiveFunction(5) == 15;
+}

@@ -15,7 +15,7 @@
 
 /*---
 desc: >-
-      Module imports top-level declaration - types, classes, interfaces, enums, variables (including const) and functions
+      Module exports top-level declaration - types, classes, interfaces, enums, variables (including const) and functions
       to reexport them.
 tags: [compile-only, not-a-test]
 files:
@@ -23,38 +23,38 @@ files:
 ---*/
 
 // classes, interfaces, enum
-import {A as RA} from "./declarations.ets"
-import {B as RB} from "./declarations.ets"
-import {AC as RAC} from "./declarations.ets"
-import {C as RC} from "./declarations.ets"
-import {I as RI} from "./declarations.ets"
-import {II as RII} from "./declarations.ets"
-import {D as RD} from "./declarations.ets"
-import {ENUM as RENUM} from "./declarations.ets"
+export {A as RA} from "./declarations.ets"
+export {B as RB} from "./declarations.ets"
+export {AC as RAC} from "./declarations.ets"
+export {C as RC} from "./declarations.ets"
+export {I as RI} from "./declarations.ets"
+export {II as RII} from "./declarations.ets"
+export {D as RD} from "./declarations.ets"
+export {ENUM as RENUM} from "./declarations.ets"
 
 // variables
-import {a as ra} from "./declarations.ets"
-import {i as ri} from "./declarations.ets"
-import {n as rn} from "./declarations.ets"
-import {s as rs} from "./declarations.ets"
-import {c as rc} from "./declarations.ets"
-import {u as ru} from "./declarations.ets"
-import {arr as rarr} from "./declarations.ets"
+export {a as ra} from "./declarations.ets"
+export {i as ri} from "./declarations.ets"
+export {n as rn} from "./declarations.ets"
+export {s as rs} from "./declarations.ets"
+export {c as rc} from "./declarations.ets"
+export {u as ru} from "./declarations.ets"
+export {arr as rarr} from "./declarations.ets"
 
 // constants
-import { ca as rca } from "./declarations.ets"
-import { cs as rcs } from "./declarations.ets"
-import { ci as rci } from "./declarations.ets"
+export { ca as rca } from "./declarations.ets"
+export { cs as rcs } from "./declarations.ets"
+export { ci as rci } from "./declarations.ets"
 
 // functions
-import { NoArg as RNoArg } from "./declarations.ets"
-import { OneArg as ROneArg } from "./declarations.ets"
-import { TwoArgs as RTwoArgs } from "./declarations.ets"
-import { Gen as RGen } from "./declarations.ets"
-import { ArgFun as RArgFun } from "./declarations.ets"
-import { ArgFun2 as RArgFun2 } from "./declarations.ets"
+export { NoArg as RNoArg } from "./declarations.ets"
+export { OneArg as ROneArg } from "./declarations.ets"
+export { TwoArgs as RTwoArgs } from "./declarations.ets"
+export { Gen as RGen } from "./declarations.ets"
+export { ArgFun as RArgFun } from "./declarations.ets"
+export { ArgFun2 as RArgFun2 } from "./declarations.ets"
 
 // types
-import { CLASS_A as RCLASS_A } from "./declarations.ets"
-import { VAR_i as RVAR_i } from "./declarations.ets"
-import { TPL as RTPL } from "./declarations.ets"
+export { CLASS_A as RCLASS_A } from "./declarations.ets"
+export { VAR_i as RVAR_i } from "./declarations.ets"
+export { TPL as RTPL } from "./declarations.ets"

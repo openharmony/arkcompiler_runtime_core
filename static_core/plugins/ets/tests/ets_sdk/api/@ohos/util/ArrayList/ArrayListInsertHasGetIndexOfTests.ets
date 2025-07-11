@@ -16,10 +16,11 @@
 import {ArrayList} from "@ohos.util.ArrayList";
 import {BusinessError} from "@ohos.base";
 
+const TypeErrorCodeId: number = 401;
 const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
-    const suite = new ArkTestsuite("ArrayList API tests");
+    const suite = new arktest.ArkTestsuite("ArrayList API tests");
 
     suite.addTest("ArrayList insert", testInsertAtIndex);
     suite.addTest("ArrayList insert with index 0 and length", testInsertAtStartAndEnd);
@@ -68,9 +69,9 @@ function testInsertAtIndex() {
     initializeArrayList(arrayList, TestData.forNumber);
     arrayList.insert(TestData.testNumber3, TestData.testNumber3);
     for (let i: int = 0; i < arrayList.length; i++) {
-        assertEQ(arrayList[i], TestData.result2[i], `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList[i], TestData.result2[i], `Element at index ${i} should match`);
     }
-    assertEQ(arrayList.length, TestData.testNumber6, "ArrayList length should be 6 after insert operation");
+    arktest.assertEQ(arrayList.length, TestData.testNumber6, "ArrayList length should be 6 after insert operation");
 }
 
 function testInsertAtStartAndEnd() {
@@ -79,9 +80,9 @@ function testInsertAtStartAndEnd() {
     arrayList.insert(TestData.testNumber3, 0);
     arrayList.insert(TestData.testNumber3, TestData.testNumber6);
     for (let i: int = 0; i < arrayList.length; i++) {
-        assertEQ(arrayList[i], TestData.result3[i], `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList[i], TestData.result3[i], `Element at index ${i} should match`);
     }
-    assertEQ(arrayList.length, TestData.testNumber5 + TestData.testNumber2,
+    arktest.assertEQ(arrayList.length, TestData.testNumber5 + TestData.testNumber2,
         "ArrayList length should be 7 after insert operations");
 }
 
@@ -98,42 +99,44 @@ function testInsertWithNegativeIndex() {
             "The value of \"index\" is out of range. It must be >= 0 && <= 5. Received value is: 8") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    expectThrow(() => {arrayList.insert(TestData.testNumber3, -TestData.testNumber1)}, exceptionCheck);
-    expectThrow(() => {arrayList.insert(TestData.testNumber3, TestData.testNumber8)}, exceptionCheck1);
+    arktest.expectThrow(() => {arrayList.insert(TestData.testNumber3, -TestData.testNumber1)}, exceptionCheck);
+    arktest.expectThrow(() => {arrayList.insert(TestData.testNumber3, TestData.testNumber8)}, exceptionCheck1);
 }
 
 function testInsertWithDoubleIndex() {
     let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
-    arrayList.insert(TestData.testNumber3, TestData.testDouble1);
-    for (let i: int = 0; i < arrayList.length; i++) {
-        assertEQ(arrayList[i], TestData.result4[i], `Element at index ${i} should match`);
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+    return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            `Index must be an integer. Received value is: ${TestData.testDouble1}`) &&
+            ((e as BusinessError).code == TypeErrorCodeId);
     }
-    assertEQ(arrayList.length, TestData.testNumber6, "ArrayList length should be 6 after insert operation");
+    arktest.expectThrow(() => {arrayList.insert(TestData.testNumber3, TestData.testDouble1)}, exceptionCheck);
 }
 
 function testInsertWithDoubleIndex2() {
     let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
-    arrayList.insert(TestData.testNumber3, TestData.testDouble2);
-    for (let i: int = 0; i < arrayList.length; i++) {
-        assertEQ(arrayList[i], TestData.result4[i], `Element at index ${i} should match`);
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+    return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            `Index must be an integer. Received value is: ${TestData.testDouble2}`) &&
+            ((e as BusinessError).code == TypeErrorCodeId);
     }
-    assertEQ(arrayList.length, TestData.testNumber6, "ArrayList length should be 6 after insert operation");
+    arktest.expectThrow(() => {arrayList.insert(TestData.testNumber3, TestData.testDouble2)}, exceptionCheck);
 }
 
 function testHasElement() {
     let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
     let result: boolean = arrayList.has(TestData.testNumber3);
-    assertTrue(result, "ArrayList should contain the element");
+    arktest.assertTrue(result, "ArrayList should contain the element");
 }
 
 function testHasNonExistentElement() {
     let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
     let result: boolean = arrayList.has(TestData.testNumber6);
-    assertFalse(result, "ArrayList should not contain the element");
+    arktest.assertFalse(result, "ArrayList should not contain the element");
 }
 
 function testHasVariousTypes() {
@@ -150,17 +153,17 @@ function testHasVariousTypes() {
     arrayList.add(TestData.testString3);
     arrayList.add(TestData.testString4);
     arrayList.add(TestData.testString5);
-    assertTrue(arrayList.has(TestData.testString1), "Elements should be added");
-    assertTrue(arrayList.has(TestData.testNumber1), "Elements should be added");
-    assertTrue(arrayList.has(TestData.testObject1), "Elements should be added");
-    assertTrue(arrayList.has(undefined), "Elements should be added");
-    assertTrue(arrayList.has(null), "Elements should be added");
-    assertTrue(arrayList.has(true), "Elements should be added");
-    assertTrue(arrayList.has(TestData.testObject2), "Elements should be added");
-    assertTrue(arrayList.has(TestData.testString2), "Elements should be added");
-    assertTrue(arrayList.has(TestData.testString3), "Elements should be added");
-    assertTrue(arrayList.has(TestData.testString4), "Elements should be added");
-    assertTrue(arrayList.has(TestData.testString5), "Elements should be added");
+    arktest.assertTrue(arrayList.has(TestData.testString1), "Elements should be added");
+    arktest.assertTrue(arrayList.has(TestData.testNumber1), "Elements should be added");
+    arktest.assertTrue(arrayList.has(TestData.testObject1), "Elements should be added");
+    arktest.assertTrue(arrayList.has(undefined), "Elements should be added");
+    arktest.assertTrue(arrayList.has(null), "Elements should be added");
+    arktest.assertTrue(arrayList.has(true), "Elements should be added");
+    arktest.assertTrue(arrayList.has(TestData.testObject2), "Elements should be added");
+    arktest.assertTrue(arrayList.has(TestData.testString2), "Elements should be added");
+    arktest.assertTrue(arrayList.has(TestData.testString3), "Elements should be added");
+    arktest.assertTrue(arrayList.has(TestData.testString4), "Elements should be added");
+    arktest.assertTrue(arrayList.has(TestData.testString5), "Elements should be added");
 
     arrayList.remove(TestData.testString1);
     arrayList.remove(TestData.testNumber1);
@@ -173,17 +176,17 @@ function testHasVariousTypes() {
     arrayList.remove(TestData.testString3);
     arrayList.remove(TestData.testString4);
     arrayList.remove(TestData.testString5);
-    assertFalse(arrayList.has(TestData.testString1), "Elements should be removed");
-    assertFalse(arrayList.has(TestData.testNumber1), "Elements should be removed");
-    assertFalse(arrayList.has(TestData.testObject1), "Elements should be removed");
-    assertFalse(arrayList.has(undefined), "Elements should be removed");
-    assertFalse(arrayList.has(null), "Elements should be removed");
-    assertFalse(arrayList.has(true), "Elements should be removed");
-    assertFalse(arrayList.has(TestData.testObject2), "Elements should be removed");
-    assertFalse(arrayList.has(TestData.testString2), "Elements should be removed");
-    assertFalse(arrayList.has(TestData.testString3), "Elements should be removed");
-    assertFalse(arrayList.has(TestData.testString4), "Elements should be removed");
-    assertFalse(arrayList.has(TestData.testString5), "Elements should be removed");
+    arktest.assertFalse(arrayList.has(TestData.testString1), "Elements should be removed");
+    arktest.assertFalse(arrayList.has(TestData.testNumber1), "Elements should be removed");
+    arktest.assertFalse(arrayList.has(TestData.testObject1), "Elements should be removed");
+    arktest.assertFalse(arrayList.has(undefined), "Elements should be removed");
+    arktest.assertFalse(arrayList.has(null), "Elements should be removed");
+    arktest.assertFalse(arrayList.has(true), "Elements should be removed");
+    arktest.assertFalse(arrayList.has(TestData.testObject2), "Elements should be removed");
+    arktest.assertFalse(arrayList.has(TestData.testString2), "Elements should be removed");
+    arktest.assertFalse(arrayList.has(TestData.testString3), "Elements should be removed");
+    arktest.assertFalse(arrayList.has(TestData.testString4), "Elements should be removed");
+    arktest.assertFalse(arrayList.has(TestData.testString5), "Elements should be removed");
 }
 
 function testGetIndexOfUniqueElement() {
@@ -193,8 +196,8 @@ function testGetIndexOfUniqueElement() {
         arrayList.add(TestData.testNumber3);
     }
     arrayList.add(TestData.testNumber2);
-    assertEQ(arrayList.getIndexOf(TestData.testNumber1), 0, "Index of first element should be 0");
-    assertEQ(arrayList.getIndexOf(TestData.testNumber2), TestData.testNumber6, "Index of last element should be 6");
+    arktest.assertEQ(arrayList.getIndexOf(TestData.testNumber1), 0, "Index of first element should be 0");
+    arktest.assertEQ(arrayList.getIndexOf(TestData.testNumber2), TestData.testNumber6, "Index of last element should be 6");
 }
 
 function testGetIndexOfRepeatedElement() {
@@ -203,7 +206,7 @@ function testGetIndexOfRepeatedElement() {
     for (let i: number = TestData.testNumber1; i < TestData.testNumber6; i++) {
         arrayList.add(TestData.testNumber3);
     }
-    assertEQ(arrayList.getIndexOf(TestData.testNumber3), TestData.testNumber1, "Index of element should be 1");
+    arktest.assertEQ(arrayList.getIndexOf(TestData.testNumber3), TestData.testNumber1, "Index of element should be 1");
 }
 
 function testGetIndexOfNonExistentElement() {
@@ -212,7 +215,7 @@ function testGetIndexOfNonExistentElement() {
     for (let i: number = TestData.testNumber1; i < TestData.testNumber6; i++) {
         arrayList.add(TestData.testNumber3);
     }
-    assertEQ(arrayList.getIndexOf(TestData.testNumber5), -TestData.testNumber1,
+    arktest.assertEQ(arrayList.getIndexOf(TestData.testNumber5), -TestData.testNumber1,
         "Index of non-existent element should be -1");
 }
 

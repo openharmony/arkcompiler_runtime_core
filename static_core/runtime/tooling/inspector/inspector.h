@@ -27,13 +27,19 @@
 #include "include/tooling/debug_interface.h"
 #include "include/tooling/pt_thread.h"
 
-#include "debug_info_cache.h"
-#include "debuggable_thread.h"
+#include "debugger/breakpoint_storage.h"
+#include "debugger/debug_info_cache.h"
+#include "debugger/debuggable_thread.h"
+#include "debugger/object_repository.h"
+
+#include "common.h"
 #include "inspector_server.h"
-#include "object_repository.h"
+#include "runtime/tooling/tools.h"
+#include "os/mutex.h"
 #include "types/evaluation_result.h"
 #include "types/numeric_id.h"
 #include "types/pause_on_exceptions_state.h"
+#include "types/profile_result.h"
 #include "types/property_descriptor.h"
 #include "types/remote_object.h"
 
@@ -65,6 +71,10 @@ public:
     void ThreadEnd(PtThread thread) override;
     void VmDeath() override;
 
+    void Run();
+    void Stop();
+    void WaitForDebugger();
+
 private:
     void RuntimeEnable(PtThread thread);
 
@@ -85,12 +95,10 @@ private:
     void SetMixedDebugEnabled(PtThread thread, bool mixedDebugEnabled);
     std::set<size_t> GetPossibleBreakpoints(std::string_view sourceFile, size_t startLine, size_t endLine,
                                             bool restrictToFunction);
-    std::optional<BreakpointId> SetBreakpoint(PtThread thread,
-                                              const InspectorServer::SourceFileFilter &sourceFilesFilter,
-                                              size_t lineNumber, std::set<std::string_view> &sourceFiles,
-                                              const std::string *condition);
+    std::optional<BreakpointId> SetBreakpoint(PtThread thread, SourceFileFilter &&sourceFilesFilter, size_t lineNumber,
+                                              std::set<std::string_view> &sourceFiles, const std::string *condition);
     void RemoveBreakpoint(PtThread thread, BreakpointId id);
-    void RemoveBreakpoints(PtThread thread, const InspectorServer::SourceFileFilter &sourceFilesFilter);
+    void RemoveBreakpoints(PtThread thread, const SourceFileFilter &sourceFilesFilter);
 
     void SetPauseOnExceptions(PtThread thread, PauseOnExceptionsState state);
 
@@ -105,12 +113,16 @@ private:
     std::string GetSourceCode(std::string_view sourceFile);
 
     void DebuggableThreadPostSuspend(PtThread thread, ObjectRepository &objectRepository,
-                                     const std::vector<BreakpointId> &hitBreakpoints, ObjectHeader *exception);
+                                     const std::vector<BreakpointId> &hitBreakpoints, ObjectHeader *exception,
+                                     PauseReason pauseReason);
 
     void NotifyExecutionEnded();
 
     Expected<EvaluationResult, std::string> Evaluate(PtThread thread, const std::string &bytecodeBase64,
                                                      size_t frameNumber);
+    void ProfilerSetSamplingInterval(uint32_t interval);
+    Expected<bool, std::string> ProfilerStart();
+    Expected<Profile, std::string> ProfilerStop();
 
     ALWAYS_INLINE bool CheckVmDead() REQUIRES_SHARED(vmDeathLock_)
     {
@@ -131,6 +143,11 @@ private:
 
     void RegisterMethodHandlers();
 
+    void ResolveBreakpoints(const panda_file::File &file, const panda_file::DebugInfoExtractor *debugInfoCache);
+    void CollectModules();
+    void DebuggerEnable();
+    void SourceNameInsert(const panda_file::DebugInfoExtractor *extractor);
+
 private:
     bool breakOnStart_;
 
@@ -147,7 +164,14 @@ private:
     os::memory::RWLock vmDeathLock_;
     bool isVmDead_ GUARDED_BY(vmDeathLock_) {false};
 
+    BreakpointStorage breakpointStorage_;
+
     std::thread serverThread_;
+    uint32_t samplingInterval_ {0};
+    std::shared_ptr<sampler::SamplesRecord> profileInfoBuffer_ = nullptr;
+    bool cpuProfilerStarted_ = false;
+    os::memory::Mutex waitDebuggerMutex_;
+    os::memory::ConditionVariable waitDebuggerCond_ GUARDED_BY(waitDebuggerMutex_);
 };
 }  // namespace inspector
 }  // namespace ark::tooling

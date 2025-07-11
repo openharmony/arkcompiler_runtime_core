@@ -16,7 +16,7 @@
 {% for item in compound_assignment_01 %}
 
 /*---
-desc: {function: {{.item.type1}}_{{.item.op_name}}_{{.item.type2}}}
+desc: {function: {{.item.type1|lower}}_{{.item.op_name}}_{{.item.type2|lower}}}
 tags: []
 ---*/
 
@@ -30,9 +30,11 @@ function foo(count: {{.item.type2}}): EasingCurve {
 }
 
 function main(): void {
-  let curve: EasingCurve = foo({{.item.value2}} as {{.item.type2}})
-  let value = curve({{.item.value1}} as {{.item.type1}})
-  assertEQ(value {{.item.casting}}, {{.item.result}}, "value = " + value)
+  let val1: {{.item.type2}} = {{.item.value2}}
+  let val2: {{.item.type1}} = {{.item.value1}}
+  let curve: EasingCurve = foo(val1)
+  let value = curve(val2)
+  arktest.assertEQ(value {{.item.casting}}, {{.item.result}}, "value = " + value)
 }
 
 {%- endfor %}

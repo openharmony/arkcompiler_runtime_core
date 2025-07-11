@@ -16,26 +16,26 @@ cases:
   - desc: no args
     impl: |-
         let f = () => { return "Hello, World!" }
-        assertEQ(f(), "Hello, World!", "no arg failed")
+        arktest.assertEQ(f(), "Hello, World!", "no arg failed")
 
   - desc: one args
     impl: |-
         let f = (e: Object) => { return "Hello, " + e + "!" }
-        assertEQ(f("World"), "Hello, World!", "one arg failed")
+        arktest.assertEQ(f("World"), "Hello, World!", "one arg failed")
 
   - desc: two args
     impl: |-
         let f = (e: Object, e2: Object) => { return e + ", " + e2 + "!" }
-        assertEQ(f("Hello", "World"), "Hello, World!", "two args failed")
+        arktest.assertEQ(f("Hello", "World"), "Hello, World!", "two args failed")
 
   - desc: optional arg
     impl: |-
         let f = (e: Object, eo?: Object) => { return e + ", " + eo + "!" }
-        assertEQ(f("Hello"), "Hello, undefined!", "optional arg failed")
-        assertEQ(f("Hello", "World"), "Hello, World!", "optional arg[2] failed")
+        arktest.assertEQ(f("Hello"), "Hello, undefined!", "optional arg failed")
+        arktest.assertEQ(f("Hello", "World"), "Hello, World!", "optional arg[2] failed")
 
   - desc: rest arg
     impl: |-
-        let f = (e: Object, ...es: Object[]) => { return e + ", " + es.length > 0 : "" : es[0] + "!" }
-        assertEQ(f("Hello"), "Hello, !", "rest arg failed")
-        assertEQ(f("Hello", "World", "a", "b"), "Hello, World!", "rest arg[2] failed")
+        let f = (e: Object, ...es: Object[]) => { return e + ", " + (es.length > 0 ? es[0] : "") + "!" }
+        arktest.assertEQ(f("Hello"), "Hello, !", "rest arg failed")
+        arktest.assertEQ(f("Hello", "World", "a", "b"), "Hello, World!", "rest arg[2] failed")

@@ -45,7 +45,7 @@
 class Exception0 extends Exception {}
 class Exception1 extends Exception {}
 
-function throw_exceptions(i: int): void throws {
+function throw_exceptions(i: int): void {
  switch (i) {
  case 0:
       throw new Exception0();

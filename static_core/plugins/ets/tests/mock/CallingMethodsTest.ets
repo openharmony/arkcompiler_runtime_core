@@ -60,7 +60,7 @@ class C {
 
     public float_method(a: float, b: int): float
     {
-        return 0.0;
+        return 0.0f;
     }
 
     public double_method(a: double, b: int): double
@@ -118,7 +118,7 @@ final class D extends C {
 
     public override float_method(a: float, b: int): float
     {
-        return 1.0;
+        return 1.0f;
     }
 
     public override double_method(a: double, b: int): double

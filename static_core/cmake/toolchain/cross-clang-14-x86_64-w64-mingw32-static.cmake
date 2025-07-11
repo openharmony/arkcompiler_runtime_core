@@ -43,9 +43,14 @@ add_compile_options(
     --target=${PANDA_TRIPLET}
 )
 
+# here we need to strip debuginfo due to the debuginfo is too large otherwise we will encounter the following issue:
+# lib/libes2panda-public.a(es2panda_lib.cpp.obj):es2panda_lib.cpp:(.debug_info+0x16): relocation truncated to fit: IMAGE_REL_AMD64_SECREL against `.debug_line'
+# clang: error: linker command failed with exit code 1 (use -v to see invocation)
+# previously we considered to switch to lld, however lld will complain  duplicated symbol issues caused by static linking, so currently we just strip debuginfo
+
 # NB! For Windows we link everything statically (incl. standard library, pthread, etc.):
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/lib/gcc/${PANDA_TRIPLET}/${MINGW_VERSION} -static-libstdc++ -static-libgcc -Wl,-Bstatic")
-set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/lib/gcc/${PANDA_TRIPLET}/${MINGW_VERSION} -Wl,--allow-multiple-definition -static-libstdc++ -static-libgcc -Bstatic -Wl,--image-base=0x10000000 -Wl,--disable-stdcall-fixup")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/lib/gcc/${PANDA_TRIPLET}/${MINGW_VERSION} -Wl,--strip-debug -static-libstdc++ -static-libgcc -Wl,-Bstatic")
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/lib/gcc/${PANDA_TRIPLET}/${MINGW_VERSION} -Wl,--strip-debug -Wl,--allow-multiple-definition -static-libstdc++ -static-libgcc -Bstatic -Wl,--image-base=0x10000000 -Wl,--disable-stdcall-fixup")
 
 include(${CMAKE_CURRENT_LIST_DIR}/common.cmake)
 set_c_compiler(clang-14)

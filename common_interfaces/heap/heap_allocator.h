@@ -19,12 +19,13 @@
 #include <cstddef>
 #include <cstdint>
 #include "objects/base_state_word.h"
+#include "base/common.h"
 
 namespace common {
 using Address32 = uint32_t;
 using Address = uint64_t;
 
-class HeapAllocator {
+class PUBLIC_API HeapAllocator {
 public:
     static Address Allocate(size_t size, LanguageType language);
     static Address AllocateInNonmove(size_t size, LanguageType language);

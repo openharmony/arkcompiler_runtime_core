@@ -32,5 +32,5 @@ function main(): void {
     callRef = 0;
     let t = new Clazz();
     t.is();
-    assertEQ( callRef, 1)
+    arktest.assertEQ( callRef, 1)
 }

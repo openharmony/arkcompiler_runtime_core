@@ -23,5 +23,5 @@ function strictType(param: number): number {
 
 function main(): void {
   let x: number = strictType(10);
-  assertEQ(x, 10);
+  arktest.assertEQ(x, 10);
 }

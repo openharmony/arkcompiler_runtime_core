@@ -27,7 +27,7 @@ export class Methods {
         return a + b;
     }
 
-    SumIntArray(a: int[]): int {
+    SumIntArray(a: FixedArray<int>): int {
         let res: int = 0;
         for (let i = 0; i < a.length; i++) {
             res += a[i];
@@ -39,7 +39,7 @@ export class Methods {
         return a;
     }
 
-    SumIntVariadic(a: int, ...b: int[]): int {
+    SumIntVariadic(a: int, ...b: FixedArray<int>): int {
        for (let i = 0; i < b.length; i++) {
            a += b[i];
        }

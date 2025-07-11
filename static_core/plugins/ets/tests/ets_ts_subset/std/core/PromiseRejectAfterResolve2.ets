@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-let thenable = new Error("abc");
-let p = new Promise<string>((resolve: (value: string) => void, reject: (err: Object) => void): void => {
-    resolve("abc");
+let thenable = new Error('abc');
+let p = new Promise<string>((resolve: (value: string) => void, reject: (err: Error) => void): void => {
+    resolve('abc');
     reject(thenable);
 });
 
 p.then<void, void>((value: string): void => {
-    if (value != "abc") {
-        console.log("Test failed. Expected value 'abc' but got " + value + ".");
+    if (value != 'abc') {
+        console.log('Test failed. Expected value \'abc\' but got ' + value + '.');
         return;
     }
-    console.log("Test passed.");
-}, (err: Object): void => {
-    console.log("Test failed. The promise should not be rejected.");
+    console.log('Test passed.');
+}, (err: Error): void => {
+    console.log('Test failed. The promise should not be rejected.');
 });

@@ -16,7 +16,7 @@
 import {Stack} from "@ohos.util.Stack";
 
 function main() {
-    const suite = new ArkTestsuite("Stack API tests");
+    const suite = new arktest.ArkTestsuite("Stack API tests");
 
     suite.addTest("Stack locate with unique element", testLocateWithUniqueElement);
     suite.addTest("Stack locate with repeated element", testLocateWithRepeatedElement);
@@ -26,6 +26,8 @@ function main() {
     suite.addTest("Stack forEach with function with value and index", testForEachWithValueAndIndex);
     suite.addTest("Stack forEach with function with value, index and stack", testForEachWithValueIndexAndStack);
     suite.addTest("Stack forEach with changing the elements", testForEachWithChangingElements);
+    suite.addTest("Stack isEmpty with empty container", testIsEmptyWithEmpty);
+    suite.addTest("Stack isEmpty with non-empty container", testIsEmptyWithNonEmpty);
     suite.addTest("Stack iterate with empty stack", testIteratorWithEmptyStack);
     suite.addTest("Stack iterate", testIterator);
     suite.addTest("Stack interface composition testing", testInterfaceComposition);
@@ -52,8 +54,8 @@ function testLocateWithUniqueElement() {
     stack.push(TestData.testNumber3);
     stack.push(TestData.testNumber2);
     stack.push(TestData.testNumber4);
-    assertEQ(stack.locate(TestData.testNumber1), 0, "Locate should return the correct index of the element");
-    assertEQ(stack.locate(TestData.testNumber4), stack.length - TestData.testNumber1,
+    arktest.assertEQ(stack.locate(TestData.testNumber1), 0, "Locate should return the correct index of the element");
+    arktest.assertEQ(stack.locate(TestData.testNumber4), stack.length - TestData.testNumber1,
         "Locate should return the correct index of the element");
 }
 
@@ -64,7 +66,7 @@ function testLocateWithRepeatedElement() {
     stack.push(TestData.testNumber3);
     stack.push(TestData.testNumber2);
     stack.push(TestData.testNumber4);
-    assertEQ(stack.locate(TestData.testNumber2), TestData.testNumber1,
+    arktest.assertEQ(stack.locate(TestData.testNumber2), TestData.testNumber1,
         "Locate should return the correct index of the element");
 
 }
@@ -76,7 +78,7 @@ function testLocateWithInexistentElement() {
     stack.push(TestData.testNumber3);
     stack.push(TestData.testNumber2);
     stack.push(TestData.testNumber4);
-    assertEQ(stack.locate(TestData.testNumber5), -TestData.testNumber1, "Locate of inexistent element should be -1");
+    arktest.assertEQ(stack.locate(TestData.testNumber5), -TestData.testNumber1, "Locate of inexistent element should be -1");
 }
 
 function testForEachNoParameter() {
@@ -86,7 +88,7 @@ function testForEachNoParameter() {
     stack.forEach(() => {
         forEachCount++;
     });
-    assertEQ(forEachCount, stack.length, "ForEach count should match stack length");
+    arktest.assertEQ(forEachCount, stack.length, "ForEach count should match stack length");
 }
 
 function testForEachWithValue() {
@@ -94,10 +96,10 @@ function testForEachWithValue() {
     initializeStack(stack, TestData.forNumber);
     let forEachCount: int = 0;
     stack.forEach((value: number) => {
-        assertEQ(value, TestData.forNumber[forEachCount], "ForEach should iterate elements in correct order");
+        arktest.assertEQ(value, TestData.forNumber[forEachCount], "ForEach should iterate elements in correct order");
         forEachCount++;
     });
-    assertEQ(forEachCount, TestData.forNumber.length, "ForEach count should match stack length");
+    arktest.assertEQ(forEachCount, TestData.forNumber.length, "ForEach count should match stack length");
 }
 
 function testForEachWithValueAndIndex() {
@@ -105,11 +107,11 @@ function testForEachWithValueAndIndex() {
     initializeStack(stack, TestData.forNumber);
     let forEachCount: int = 0;
     stack.forEach((value: number, index: number) => {
-        assertEQ(value, TestData.forNumber[forEachCount], "ForEach should iterate elements in correct order");
-        assertEQ(index, forEachCount, "ForEach should iterate elements in correct order");
+        arktest.assertEQ(value, TestData.forNumber[forEachCount], "ForEach should iterate elements in correct order");
+        arktest.assertEQ(index, forEachCount, "ForEach should iterate elements in correct order");
         forEachCount++;
     });
-    assertEQ(forEachCount, TestData.forNumber.length, "ForEach count should match stack length");
+    arktest.assertEQ(forEachCount, TestData.forNumber.length, "ForEach count should match stack length");
 }
 
 function testForEachWithValueIndexAndStack() {
@@ -117,14 +119,14 @@ function testForEachWithValueIndexAndStack() {
     initializeStack(stack, TestData.forNumber);
     let forEachCount: int = 0;
     stack.forEach((value: number, index: number, tempStack: Stack<number>) => {
-        assertEQ(stack, tempStack, "TempStack should be this");
-        assertEQ(value, TestData.forNumber[forEachCount], "ForEach should iterate elements in correct order");
-        assertEQ(index, forEachCount, "ForEach should iterate elements in correct order");
-        assertEQ(stack.locate(value), tempStack.locate(value), "Locate should return the correct index of the element");
+        arktest.assertEQ(stack, tempStack, "TempStack should be this");
+        arktest.assertEQ(value, TestData.forNumber[forEachCount], "ForEach should iterate elements in correct order");
+        arktest.assertEQ(index, forEachCount, "ForEach should iterate elements in correct order");
+        arktest.assertEQ(stack.locate(value), tempStack.locate(value), "Locate should return the correct index of the element");
 
         forEachCount++;
     });
-    assertEQ(forEachCount, TestData.forNumber.length, "ForEach count should match stack length");
+    arktest.assertEQ(forEachCount, TestData.forNumber.length, "ForEach count should match stack length");
 }
 
 function testForEachWithChangingElements() {
@@ -137,9 +139,20 @@ function testForEachWithChangingElements() {
 
     let forEachCount: int = 0;
     stack.forEach((value: number) => {
-        assertEQ(value, TestData.forNumber[forEachCount], "ForEach should iterate elements in correct order");
+        arktest.assertEQ(value, TestData.forNumber[forEachCount], "ForEach should iterate elements in correct order");
         forEachCount++;
     });
+}
+
+function testIsEmptyWithEmpty() {
+    let stack = new Stack<number>();
+    arktest.assertTrue(stack.isEmpty(), "The container should be empty");
+}
+
+function testIsEmptyWithNonEmpty() {
+    let stack = new Stack<number>();
+    initializeStack(stack, TestData.forNumber);
+    arktest.assertFalse(stack.isEmpty(), "The container should not be empty");
 }
 
 function testIteratorWithEmptyStack() {
@@ -153,7 +166,7 @@ function testIteratorWithEmptyStack() {
     while (!temp.done) {
         elem = TestData.testNumber1;
     }
-    assertEQ(elem, 0, "Iterator over empty stack should not iterate any elements");
+    arktest.assertEQ(elem, 0, "Iterator over empty stack should not iterate any elements");
 }
 
 function testIterator() {
@@ -163,39 +176,39 @@ function testIterator() {
     }
     let elem1: number = TestData.testNumber1;
     for (let item of stack) {
-        assertEQ(item, elem1++, "Iterator should iterate elements in correct order");
+        arktest.assertEQ(item, elem1++, "Iterator should iterate elements in correct order");
     }
-    assertEQ(elem1, TestData.testNumber6, "Iterator should iterate all elements correctly");
+    arktest.assertEQ(elem1, TestData.testNumber6, "Iterator should iterate all elements correctly");
     let iter = stack.$_iterator();
     let temp: IteratorResult<number> = iter.next();
     let elem2: number = TestData.testNumber1;
     while (!temp.done) {
-        assertEQ(temp.value, elem2++, "Iterator should iterate elements in correct order");
+        arktest.assertEQ(temp.value, elem2++, "Iterator should iterate elements in correct order");
         temp = iter.next();
     }
-    assertEQ(elem2, TestData.testNumber6, "Iterator should iterate all elements correctly");
+    arktest.assertEQ(elem2, TestData.testNumber6, "Iterator should iterate all elements correctly");
 }
 
 function testInterfaceComposition() {
     let stack = new Stack<number>();
-    assertTrue(stack.isEmpty(), "Stack is empty");
+    arktest.assertTrue(stack.isEmpty(), "Stack is empty");
 
     initializeStack(stack, TestData.forNumber);
-    assertFalse(stack.isEmpty(), "Stack is not empty after adding elements");
+    arktest.assertFalse(stack.isEmpty(), "Stack is not empty after adding elements");
 
-    assertEQ(stack.peek(), stack.pop(), "Pop first from stack should return first element");
-    assertEQ(stack.locate(TestData.testNumber2), TestData.testNumber8,
+    arktest.assertEQ(stack.peek(), stack.pop(), "Pop first from stack should return first element");
+    arktest.assertEQ(stack.locate(TestData.testNumber2), TestData.testNumber8,
         "Locate should return the correct index of the element");
 
     let forEachCount: number = 0;
     stack.forEach(() => {
         forEachCount++;
     });
-    assertEQ(forEachCount, stack.length, "ForEach count should match stack length");
+    arktest.assertEQ(forEachCount, stack.length, "ForEach count should match stack length");
 }
 
 function initializeStack<T>(stack: Stack<T>, sourceArray: T[]) {
     for (let i = 0; i < sourceArray.length; i++) {
-        assertEQ(stack.push(sourceArray[i]), sourceArray[i], "The result should be the added element");
+        arktest.assertEQ(stack.push(sourceArray[i]), sourceArray[i], "The result should be the added element");
     }
 }

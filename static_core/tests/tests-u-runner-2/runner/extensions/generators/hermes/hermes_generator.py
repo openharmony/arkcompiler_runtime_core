@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,14 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 import os
 import re
 import subprocess
 from glob import glob
-from os import path, makedirs
+from os import makedirs, path
 from pathlib import Path
-from typing import Optional, List, cast
+from typing import cast
 
+from runner.common_exceptions import InvalidConfiguration, RunnerException
 from runner.extensions.generators.igenerator import IGenerator
 from runner.logger import Log
 from runner.options.config import Config
@@ -30,7 +32,7 @@ from runner.utils import download_and_generate
 _LOGGER = Log.get_logger(__file__)
 
 
-class HermesGeneratorException(Exception):
+class HermesGeneratorException(RunnerException):
     pass
 
 
@@ -47,16 +49,16 @@ class HermesGenerator(IGenerator):
         self.show_progress = self._config.general.show_progress
         self.force_download = cast(bool, self._config.test_suite.get_parameter(self.__FORCE_DOWNLOAD, False))
 
-        url: Optional[str] = self._config.test_suite.get_parameter(self.__URL)
+        url: str | None = self._config.test_suite.get_parameter(self.__URL)
         if url is None:
-            raise EnvironmentError(f"No {self.__URL} parameter set in "
-                                   "`hermes.yaml` config file")
+            raise InvalidConfiguration(f"No {self.__URL} parameter set in "
+                                       "`hermes.yaml` config file")
         self.url: str = url
 
-        revision: Optional[str] = self._config.test_suite.get_parameter(self.__REVISION)
+        revision: str | None = self._config.test_suite.get_parameter(self.__REVISION)
         if revision is None:
-            raise EnvironmentError(f"No {self.__REVISION} parameter set in "
-                                   "`hermes.yaml` config file")
+            raise InvalidConfiguration(f"No {self.__REVISION} parameter set in "
+                                       "`hermes.yaml` config file")
         self.revision: str = revision
 
     @staticmethod
@@ -69,7 +71,7 @@ class HermesGenerator(IGenerator):
         with os.fdopen(os.open(dest_file, os.O_RDWR | os.O_CREAT, 0o755), 'w', encoding="utf-8") as output:
             output.write(out_str)
 
-    def generate(self) -> List[str]:
+    def generate(self) -> list[str]:
         stamp_name = f"hermes-{self.revision}"
         test_root = download_and_generate(
             name="hermes",
@@ -98,7 +100,7 @@ class HermesGenerator(IGenerator):
             self.create_file(src_file, dest_file)
 
     def run_filecheck(self, test_file: str, actual_output: str) -> bool:
-        with open(test_file, 'r', encoding="utf-8") as file_pointer:
+        with open(test_file, encoding="utf-8") as file_pointer:
             input_str = file_pointer.read()
         if not re.match(self.check_expr, input_str):
             return True

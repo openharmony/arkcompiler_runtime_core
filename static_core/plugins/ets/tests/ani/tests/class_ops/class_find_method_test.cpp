@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "ani/ani.h"
 #include "ani_gtest.h"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
@@ -43,7 +42,7 @@ private:
     void GetFunc(ani_function *fn, const char *funcName)
     {
         ani_module module;
-        ASSERT_EQ(env_->FindModule("Ltest;", &module), ANI_OK);
+        ASSERT_EQ(env_->FindModule("test", &module), ANI_OK);
         ASSERT_NE(module, nullptr);
 
         ASSERT_EQ(env_->Module_FindFunction(module, funcName, nullptr, fn), ANI_OK);
@@ -53,18 +52,19 @@ private:
     void GetObject(ani_object *objectResult, ani_class cls)
     {
         ani_method ctor;
-        ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":V", &ctor), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
         ASSERT_EQ(env_->Object_New(cls, ctor, objectResult), ANI_OK);
     }
 
 public:
     template <bool HAS_METHOD>
-    void CheckClassFindMethod(const std::string &clsName, const char *methodName, const char *methodSignature,
+    void CheckClassFindMethod(const char *clsDescriptor, const char *methodName, const char *methodSignature,
                               const ani_value *args = nullptr, ani_int expectedResult = TEST_EXPECTED_VALUE1)
     {
+        ani_module module;
+        ASSERT_EQ(env_->FindModule("test", &module), ANI_OK);
         ani_class cls;
-        std::string clsDescriptor = "Ltest/" + clsName + ";";
-        ASSERT_EQ(env_->FindClass(clsDescriptor.c_str(), &cls), ANI_OK);
+        ASSERT_EQ(env_->Module_FindClass(module, clsDescriptor, &cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         ani_method method;
@@ -83,7 +83,22 @@ public:
 
         ani_int result;
         ASSERT_EQ(env_->Object_CallMethod_Int_A(obj, method, &result, args), ANI_OK);
+        std::cout << result << std::endl;
         ASSERT_EQ(result, expectedResult);
+    }
+
+    void CheckIntrinsicsFindMethod(const char *moduleDescriptor, const char *clsDescriptor, const char *methodName,
+                                   const char *methodSignature)
+    {
+        ani_module module;
+        ASSERT_EQ(env_->FindModule(moduleDescriptor, &module), ANI_OK);
+        ani_class cls;
+        ASSERT_EQ(env_->Module_FindClass(module, clsDescriptor, &cls), ANI_OK);
+        ASSERT_NE(cls, nullptr);
+
+        ani_method method;
+        auto status = env_->Class_FindMethod(cls, methodName, methodSignature, &method);
+        ASSERT_EQ(status, ANI_OK);
     }
 
     void TupleCreator(ani_ref *result)
@@ -119,22 +134,22 @@ public:
 
     void RecordCreator(ani_class *cls, ani_object *result)
     {
-        ASSERT_EQ(env_->FindClass("Lescompat/Record;", cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("escompat.Record", cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         ani_method ctor;
-        ASSERT_EQ(env_->Class_FindMethod(*cls, "<ctor>", ":V", &ctor), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(*cls, "<ctor>", ":", &ctor), ANI_OK);
 
         ASSERT_EQ(env_->Object_New(*cls, ctor, result), ANI_OK);
     }
 
     void BigintCreator(ani_class *cls, ani_object *result)
     {
-        ASSERT_EQ(env_->FindClass("Lescompat/BigInt;", cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("escompat.BigInt", cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         ani_method ctor;
-        ASSERT_EQ(env_->Class_FindMethod(*cls, "<ctor>", "I:V", &ctor), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(*cls, "<ctor>", "i:", &ctor), ANI_OK);
 
         ani_int arg = TEST_ARG1;
 
@@ -151,13 +166,20 @@ public:
     void Int(ani_object *obj, ani_int value)
     {
         ani_class cls;
-        ASSERT_EQ(env_->FindClass("Lstd/core/Int;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("std.core.Int", &cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         ani_method ctor;
-        ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &ctor), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &ctor), ANI_OK);
 
         ASSERT_EQ(env_->Object_New(cls, ctor, obj, value), ANI_OK);
+    }
+
+    // NOLINTNEXTLINE(readability-named-parameter)
+    static ani_int NativeMethodsFooNative(ani_env *, ani_class)
+    {
+        const ani_int answer = 42U;
+        return answer;
     }
 };
 
@@ -167,15 +189,15 @@ TEST_F(ClassFindMethodTest, has_method__A_B)
     args[0U].i = TEST_ARG1;
     args[1U].i = TEST_ARG2;
 
-    CheckClassFindMethod<true>("A", "int_method", "II:I", args, TEST_EXPECTED_VALUE1);
+    CheckClassFindMethod<true>("A", "int_method", "ii:i", args, TEST_EXPECTED_VALUE1);
     CheckClassFindMethod<true>("A", "int_method", nullptr, args, TEST_EXPECTED_VALUE1);
-    CheckClassFindMethod<true>("B", "int_method", "II:I", args, TEST_EXPECTED_VALUE1);
+    CheckClassFindMethod<true>("B", "int_method", "ii:i", args, TEST_EXPECTED_VALUE1);
     CheckClassFindMethod<true>("B", "int_method", nullptr, args, TEST_EXPECTED_VALUE1);
 
-    CheckClassFindMethod<true>("A", "int_override_method", "II:I", args, TEST_EXPECTED_VALUE2);
+    CheckClassFindMethod<true>("A", "int_override_method", "ii:i", args, TEST_EXPECTED_VALUE2);
     CheckClassFindMethod<true>("A", "int_override_method", nullptr, args, TEST_EXPECTED_VALUE2);
 
-    CheckClassFindMethod<true>("B", "int_override_method", "II:I", args, TEST_EXPECTED_VALUE3);
+    CheckClassFindMethod<true>("B", "int_override_method", "ii:i", args, TEST_EXPECTED_VALUE3);
     CheckClassFindMethod<true>("B", "int_override_method", nullptr, args, TEST_EXPECTED_VALUE3);
 }
 
@@ -184,13 +206,13 @@ TEST_F(ClassFindMethodTest, has_method_C)
     ani_value arg;
     arg.i = TEST_ARG1;
 
-    CheckClassFindMethod<true>("C", "imethod", "I:I", &arg, TEST_EXPECTED_VALUE4);
+    CheckClassFindMethod<true>("C", "imethod", "i:i", &arg, TEST_EXPECTED_VALUE4);
 
     ani_string string {};
     ASSERT_EQ(env_->String_NewUTF8(ARG_STRING.data(), ARG_STRING.size(), &string), ANI_OK);
     arg.r = string;
 
-    CheckClassFindMethod<true>("C", "imethod", "Lstd/core/String;:I", &arg, TEST_EXPECTED_VALUE2);
+    CheckClassFindMethod<true>("C", "imethod", "C{std.core.String}:i", &arg, TEST_EXPECTED_VALUE2);
 }
 
 TEST_F(ClassFindMethodTest, has_method_C_unusual_types)
@@ -210,11 +232,11 @@ TEST_F(ClassFindMethodTest, has_method_C_unusual_types)
         CheckClassFindMethod<true>("C", "imethod_tuple", nullptr, &args, TEST_EXPECTED_VALUE1);
     }
     {
-        ani_array_int params;
-        ASSERT_EQ(env_->Array_New_Int(2U, &params), ANI_OK);
+        ani_fixedarray_int params;
+        ASSERT_EQ(env_->FixedArray_New_Int(2U, &params), ANI_OK);
         ani_int nativeParams[] = {TEST_NATIVE_PARAM1, TEST_NATIVE_PARAM2};
         const ani_size offset = 0;
-        ASSERT_EQ(env_->Array_SetRegion_Int(params, offset, 2U, nativeParams), ANI_OK);
+        ASSERT_EQ(env_->FixedArray_SetRegion_Int(params, offset, 2U, nativeParams), ANI_OK);
 
         args.r = params;
         CheckClassFindMethod<true>("C", "method_rest", nullptr, &args, TEST_EXPECTED_VALUE1);
@@ -244,15 +266,15 @@ TEST_F(ClassFindMethodTest, has_method_Overload)
 {
     ani_value args;
     args.i = TEST_ARG1;
-    CheckClassFindMethod<true>("Overload", "method", "I:I", &args, TEST_EXPECTED_VALUE4);
+    CheckClassFindMethod<true>("Overload", "method", "i:i", &args, TEST_EXPECTED_VALUE4);
 
     ani_value params[2U];
     params[0U].i = TEST_ARG1;
     params[1U].z = TEST_ARG4;
-    CheckClassFindMethod<true>("Overload", "method", "IZ:I", params, TEST_EXPECTED_VALUE2);
+    CheckClassFindMethod<true>("Overload", "method", "iz:i", params, TEST_EXPECTED_VALUE2);
 
     params[1U].d = TEST_ARG3;
-    CheckClassFindMethod<true>("Overload", "method", "ID:I", params, TEST_EXPECTED_VALUE5);
+    CheckClassFindMethod<true>("Overload", "method", "id:i", params, TEST_EXPECTED_VALUE5);
 }
 
 TEST_F(ClassFindMethodTest, special_types1)
@@ -348,12 +370,62 @@ TEST_F(ClassFindMethodTest, generics)
     CheckClassFindMethod<true>("Generic1", "method", nullptr, &arg, TEST_EXPECTED_VALUE4);
 }
 
+TEST_F(ClassFindMethodTest, binded_method)
+{
+    ani_module module;
+    ASSERT_EQ(env_->FindModule("test", &module), ANI_OK);
+    ani_class cls;
+    ASSERT_EQ(env_->Module_FindClass(module, "FindNativeMethods", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    std::array methods = {
+        ani_native_function {"foo", ":I", reinterpret_cast<void *>(NativeMethodsFooNative)},
+    };
+    ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
+
+    ani_method method;
+    ASSERT_EQ(env_->Class_FindMethod(cls, "foo", ":i", &method), ANI_OK);
+    ASSERT_NE(method, nullptr);
+}
+
+TEST_F(ClassFindMethodTest, find_intrinsics)
+{
+    {
+        const char *moduleName = "std.core";
+        const char *className = "String";
+
+        CheckIntrinsicsFindMethod(moduleName, className, "compareTo", "C{std.core.String}:i");
+        CheckIntrinsicsFindMethod(moduleName, className, "repeat", "i:C{std.core.String}");
+    }
+    {
+        const char *moduleName = "escompat";
+        const char *className = "ArrayBuffer";
+
+        CheckIntrinsicsFindMethod(moduleName, className, "set", "ib:");
+        CheckIntrinsicsFindMethod(moduleName, className, "setValues", "C{escompat.ArrayBuffer}i:");
+    }
+    {
+        const char *moduleName = "std.core";
+        const char *className = "Class";
+
+        CheckIntrinsicsFindMethod(moduleName, className, "createInstance", ":C{std.core.Object}");
+        CheckIntrinsicsFindMethod(moduleName, className, "getDescriptor", ":C{std.core.String}");
+    }
+    {
+        const char *moduleName = "escompat";
+        const char *className = "ArrayBuffer";
+
+        CheckIntrinsicsFindMethod(moduleName, className, "atomicAndI32", "iii:d");
+        CheckIntrinsicsFindMethod(moduleName, className, "atomicXorI32", "iii:d");
+    }
+}
+
 TEST_F(ClassFindMethodTest, method_not_found)
 {
     CheckClassFindMethod<false>("A", "bla_bla_bla", nullptr);
     CheckClassFindMethod<false>("A", "int_method", "bla_bla_bla");
-    CheckClassFindMethod<false>("Overload", "method", "DD:I");
-    CheckClassFindMethod<false>("Overload", "method", "ILstd/core/String;:I");
+    CheckClassFindMethod<false>("Overload", "method", "dd:i");
+    CheckClassFindMethod<false>("Overload", "method", "iC{std.core.String}:i");
 }
 
 TEST_F(ClassFindMethodTest, invalid_argument_name)
@@ -371,30 +443,39 @@ TEST_F(ClassFindMethodTest, invalid_argument_cls)
     ASSERT_EQ(env_->Class_FindMethod(nullptr, "int_method", nullptr, &method), ANI_INVALID_ARGS);
 }
 
-TEST_F(ClassFindMethodTest, invalid_argument_result)
+TEST_F(ClassFindMethodTest, invalid_arguments)
 {
-    ani_class cls;
-    ASSERT_EQ(env_->FindClass("Ltest/A;", &cls), ANI_OK);
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("test.A", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
+    ani_method method {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "int_method", nullptr, nullptr), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->c_api->Class_FindMethod(nullptr, cls, "int_method", nullptr, &method), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Class_FindMethod(cls, "", "ii:i", &method), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "\t", "ii:i", &method), ANI_NOT_FOUND);
+
+    ASSERT_EQ(env_->Class_FindMethod(cls, "int_method", "", &method), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "int_method", "\t", &method), ANI_NOT_FOUND);
 }
 
 TEST_F(ClassFindMethodTest, has_static_method_1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/Phone;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.Phone", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", ":[Lstd/core/String;", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", ":C{escompat.Array}", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 }
 
 TEST_F(ClassFindMethodTest, has_static_method_2)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/Phone;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.Phone", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
@@ -405,7 +486,7 @@ TEST_F(ClassFindMethodTest, has_static_method_2)
 TEST_F(ClassFindMethodTest, static_method_not_found_1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/Phone;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.Phone", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
@@ -415,7 +496,7 @@ TEST_F(ClassFindMethodTest, static_method_not_found_1)
 TEST_F(ClassFindMethodTest, static_method_not_found_2)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/Phone;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.Phone", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
@@ -425,7 +506,7 @@ TEST_F(ClassFindMethodTest, static_method_not_found_2)
 TEST_F(ClassFindMethodTest, static_method_invalid_argument_name)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/Phone;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.Phone", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
@@ -438,23 +519,31 @@ TEST_F(ClassFindMethodTest, static_method_invalid_argument_cls)
     ASSERT_EQ(env_->Class_FindStaticMethod(nullptr, "get_button_names", nullptr, &method), ANI_INVALID_ARGS);
 }
 
-TEST_F(ClassFindMethodTest, static_method_invalid_argument_result)
+TEST_F(ClassFindMethodTest, static_method_invalid_arguments)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/Phone;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.Phone", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
+    ani_static_method method {};
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", nullptr, nullptr), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->c_api->Class_FindStaticMethod(nullptr, cls, "get_button_names", nullptr, &method),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "", ":A{C{std.core.String}}", &method), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "\t", ":A{C{std.core.String}}", &method), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", "", &method), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", "\t", &method), ANI_NOT_FOUND);
 }
 
 TEST_F(ClassFindMethodTest, static_method_find_static_method_001)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/Operations;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.Operations", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "sum", "II:I", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "sum", "ii:i", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 
     ani_int sum = 0;
@@ -465,15 +554,15 @@ TEST_F(ClassFindMethodTest, static_method_find_static_method_001)
 TEST_F(ClassFindMethodTest, static_method_find_static_method_002)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/ClassA;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.ClassA", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method methodA {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "calculateSquareArea", "II:I", &methodA), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "calculateSquareArea", "ii:i", &methodA), ANI_OK);
     ASSERT_NE(methodA, nullptr);
 
     ani_static_method methodB {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "calculateSquareArea", "III:I", &methodB), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "calculateSquareArea", "iii:i", &methodB), ANI_OK);
     ASSERT_NE(methodB, nullptr);
 
     ani_int sumA = 0;
@@ -495,11 +584,11 @@ TEST_F(ClassFindMethodTest, static_method_find_static_method_002)
 TEST_F(ClassFindMethodTest, static_method_find_static_method_003)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/ClassA;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.ClassA", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method methodB {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "sumB", "III:I", &methodB), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "sumB", "iii:i", &methodB), ANI_OK);
     ASSERT_NE(methodB, nullptr);
 
     ani_int sumB = 0;
@@ -514,11 +603,11 @@ TEST_F(ClassFindMethodTest, static_method_find_static_method_003)
 TEST_F(ClassFindMethodTest, static_method_find_static_method_004)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/ClassB;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.ClassB", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method methodA {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "sumA", "II:I", &methodA), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "sumA", "ii:i", &methodA), ANI_OK);
     ASSERT_NE(methodA, nullptr);
 
     ani_int sumB = 0;
@@ -532,11 +621,11 @@ TEST_F(ClassFindMethodTest, static_method_find_static_method_004)
 TEST_F(ClassFindMethodTest, static_method_find_static_method_005)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/ClassA;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.ClassA", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method methodA {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "calculateSquareArea", "II:I", &methodA), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "calculateSquareArea", "ii:i", &methodA), ANI_OK);
     ASSERT_NE(methodA, nullptr);
 
     ani_int sumA = 0;
@@ -550,11 +639,11 @@ TEST_F(ClassFindMethodTest, static_method_find_static_method_005)
 TEST_F(ClassFindMethodTest, static_method_find_static_method_006)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/BasicCalculator;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.BasicCalculator", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method staticMethod {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "multiply", "II:I", &staticMethod), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "multiply", "ii:i", &staticMethod), ANI_OK);
     ASSERT_NE(staticMethod, nullptr);
     ani_int multiply = 0;
     ASSERT_EQ(
@@ -563,7 +652,7 @@ TEST_F(ClassFindMethodTest, static_method_find_static_method_006)
     ASSERT_EQ(multiply, TEST_EXPECTED_VALUE1 * TEST_EXPECTED_VALUE5);
 
     ani_class subCls {};
-    ASSERT_EQ(env_->FindClass("Ltest/SubCalculator;", &subCls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.SubCalculator", &subCls), ANI_OK);
     ASSERT_NE(subCls, nullptr);
 
     ani_method constructorMethod {};
@@ -599,19 +688,19 @@ TEST_F(ClassFindMethodTest, static_method_find_static_method_006)
 TEST_F(ClassFindMethodTest, find_method_combine_scenes_002)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Ltest/test002A;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("test.test002A", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_namespace result {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "Ltest002B;", &result), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "test002B", &result), ANI_OK);
     ASSERT_NE(result, nullptr);
 
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(result, "LTestA002;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindClass(result, "TestA002", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "sum", "II:I", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "sum", "ii:i", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 
     ani_object object {};
@@ -631,7 +720,7 @@ TEST_F(ClassFindMethodTest, find_method_combine_scenes_002)
 TEST_F(ClassFindMethodTest, find_method_combine_scenes_003)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/TestA003;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.TestA003", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method constructorMethod {};
@@ -683,7 +772,7 @@ TEST_F(ClassFindMethodTest, find_method_combine_scenes_003)
 TEST_F(ClassFindMethodTest, find_method_combine_scenes_004)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/TestA004;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.TestA004", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method constructorMethod {};
@@ -735,7 +824,7 @@ TEST_F(ClassFindMethodTest, find_method_combine_scenes_004)
 TEST_F(ClassFindMethodTest, find_method_combine_scenes_005)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/TestA005;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.TestA005", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method constructorMethod {};
@@ -763,7 +852,7 @@ TEST_F(ClassFindMethodTest, find_method_combine_scenes_005)
 TEST_F(ClassFindMethodTest, find_method_combine_scenes_006)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/Child;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.Child", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method constructorMethod {};
@@ -791,7 +880,7 @@ TEST_F(ClassFindMethodTest, find_method_combine_scenes_006)
 TEST_F(ClassFindMethodTest, find_method_combine_scenes_007)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/Student;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.Student", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method constructorMethod {};
@@ -819,11 +908,11 @@ TEST_F(ClassFindMethodTest, find_method_combine_scenes_007)
 TEST_F(ClassFindMethodTest, find_method_combine_scenes_008)
 {
     ani_class clsB {};
-    ASSERT_EQ(env_->FindClass("Ltest/TestB008;", &clsB), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.TestB008", &clsB), ANI_OK);
     ASSERT_NE(clsB, nullptr);
 
     ani_class clsA {};
-    ASSERT_EQ(env_->FindClass("Ltest/TestA008;", &clsA), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.TestA008", &clsA), ANI_OK);
     ASSERT_NE(clsA, nullptr);
 
     ani_method constructorMethodB {};
@@ -835,7 +924,7 @@ TEST_F(ClassFindMethodTest, find_method_combine_scenes_008)
     ASSERT_NE(constructorMethodA, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(clsB, "int_method", "Ltest/TestA008;:I", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(clsB, "int_method", "C{test.TestA008}:i", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 
     ani_object objectB {};
@@ -856,17 +945,17 @@ TEST_F(ClassFindMethodTest, find_method_combine_scenes_008)
 TEST_F(ClassFindMethodTest, find_func_abstract)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/CombineA;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.CombineA", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "func", "II:I", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "func", "ii:i", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 
     ani_class clsB {};
-    ASSERT_EQ(env_->FindClass("Ltest/CombineB;", &clsB), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.CombineB", &clsB), ANI_OK);
     ASSERT_NE(clsB, nullptr);
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":V", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
 
     ani_object object {};
     ASSERT_EQ(env_->Object_New(clsB, ctor, &object), ANI_OK);
@@ -883,14 +972,14 @@ TEST_F(ClassFindMethodTest, find_func_abstract)
 TEST_F(ClassFindMethodTest, find_func_final)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/AF;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.AF", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "func", "II:I", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "func", "ii:i", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":V", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
 
     ani_object object {};
     ASSERT_EQ(env_->Object_New(cls, ctor, &object), ANI_OK);
@@ -907,14 +996,14 @@ TEST_F(ClassFindMethodTest, find_func_final)
 TEST_F(ClassFindMethodTest, find_func_in_class_c)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/CombineC;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.CombineC", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "func", "II:I", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "func", "ii:i", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":V", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
 
     ani_object object {};
     ASSERT_EQ(env_->Object_New(cls, ctor, &object), ANI_OK);
@@ -931,14 +1020,14 @@ TEST_F(ClassFindMethodTest, find_func_in_class_c)
 TEST_F(ClassFindMethodTest, find_func_in_namespace)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/nsa/nsb/A;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.nsa.nsb.A", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "func", "II:I", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "func", "ii:i", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":V", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
 
     ani_object object {};
     ASSERT_EQ(env_->Object_New(cls, ctor, &object), ANI_OK);
@@ -955,14 +1044,14 @@ TEST_F(ClassFindMethodTest, find_func_in_namespace)
 TEST_F(ClassFindMethodTest, duplicate_no_signature)
 {
     ani_class baseCls {};
-    ASSERT_EQ(env_->FindClass("Ltest/A;", &baseCls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.A", &baseCls), ANI_OK);
     ASSERT_NE(baseCls, nullptr);
 
     ani_method method {};
     ASSERT_EQ(env_->Class_FindMethod(baseCls, "overloadedBase", nullptr, &method), ANI_AMBIGUOUS);
 
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("Ltest/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ASSERT_EQ(env_->Class_FindMethod(cls, "overloadedBase", nullptr, &method), ANI_AMBIGUOUS);
     ASSERT_EQ(env_->Class_FindMethod(cls, "overloaded", nullptr, &method), ANI_AMBIGUOUS);
@@ -971,14 +1060,14 @@ TEST_F(ClassFindMethodTest, duplicate_no_signature)
 TEST_F(ClassFindMethodTest, static_duplicate_no_signature)
 {
     ani_class baseCls {};
-    ASSERT_EQ(env_->FindClass("Ltest/A;", &baseCls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.A", &baseCls), ANI_OK);
     ASSERT_NE(baseCls, nullptr);
 
     ani_static_method method {};
     ASSERT_EQ(env_->Class_FindStaticMethod(baseCls, "staticOverloadedBase", nullptr, &method), ANI_AMBIGUOUS);
 
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("Ltest/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticOverloadedBase", nullptr, &method), ANI_AMBIGUOUS);
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticOverloaded", nullptr, &method), ANI_AMBIGUOUS);
@@ -987,19 +1076,19 @@ TEST_F(ClassFindMethodTest, static_duplicate_no_signature)
 TEST_F(ClassFindMethodTest, same_name_static_virtual_function)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/AllFunctions;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.AllFunctions", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":V", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
     ASSERT_NE(ctor, nullptr);
 
     ani_static_method staticMethod {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "foo", ":I", &staticMethod), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "foo", ":i", &staticMethod), ANI_OK);
     ASSERT_NE(staticMethod, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "foo", ":I", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "foo", ":i", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 
     ani_object object {};
@@ -1018,20 +1107,20 @@ TEST_F(ClassFindMethodTest, same_name_static_virtual_function)
 TEST_F(ClassFindMethodTest, no_static_virtual_function)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Ltest/MixedFunctions;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.MixedFunctions", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method staticMethod {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "bar", ":I", &staticMethod), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "bar", ":i", &staticMethod), ANI_NOT_FOUND);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "foo", ":I", &method), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "foo", ":i", &method), ANI_NOT_FOUND);
 }
 
 TEST_F(ClassFindMethodTest, static_no_duplicate)
 {
     ani_class baseCls {};
-    ASSERT_EQ(env_->FindClass("Ltest/NotOverloaded;", &baseCls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.NotOverloaded", &baseCls), ANI_OK);
     ASSERT_NE(baseCls, nullptr);
 
     ani_static_method smethod {};
@@ -1039,6 +1128,17 @@ TEST_F(ClassFindMethodTest, static_no_duplicate)
 
     ani_method method {};
     ASSERT_EQ(env_->Class_FindMethod(baseCls, "notOverloaded", nullptr, &method), ANI_OK);
+}
+
+TEST_F(ClassFindMethodTest, check_initalization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("test.NotOverloaded", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.NotOverloaded"));
+    ani_method method {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "notOverloaded", nullptr, &method), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.NotOverloaded"));
 }
 
 }  // namespace ark::ets::ani::testing

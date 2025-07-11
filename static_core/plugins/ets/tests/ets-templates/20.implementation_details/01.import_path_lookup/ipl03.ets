@@ -22,6 +22,6 @@ files:
 import {a, b} from "./test_file_04.ets";
 
 function main(): void {
-  assertEQ(a, "test");
-  assertEQ(b, 10);
+  arktest.assertEQ(a, "test");
+  arktest.assertEQ(b, 10);
 }

@@ -13,22 +13,24 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 let strAll: string = "zero,zero,one,one,two,two,three,three,four,four,five,five,six,six,seven,seven,eight,eight,nine,nine";
 
-let ConcurrentSetTestOne: ConcurrentSet<number> = new ConcurrentSet<number>();
+let ConcurrentSetTestOne: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
 
 function main(): int {
-    let ConcurrentSetTestsuite = new ArkTestsuite("ConcurrentSetEntriesTest");
+    let ConcurrentSetTestsuite = new arktest.ArkTestsuite("ConcurrentSetEntriesTest");
     // Single Thread Test
     ConcurrentSetTestsuite.addTest("EntriesTest001", () =>
     {
-        let ConcurrentSetTestNull: ConcurrentSet<string> = new ConcurrentSet<string>();
+        let ConcurrentSetTestNull: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
         let res = ConcurrentSetTestNull.size;
-        assertEQ(res, 0);
+        arktest.assertEQ(res, 0);
         let iterValue: IterableIterator<[string, string]> = ConcurrentSetTestNull.entries();
-        assertEQ(iterValue.next().value, undefined);
+        arktest.assertEQ(iterValue.next().value, undefined);
     });
     // Multiple Threads Test
     // Unexpected exception: ClassCastError: [Lstd/core/Object; cannot be cast to [Double, Double]|undefined
@@ -36,35 +38,35 @@ function main(): int {
     ConcurrentSetTestsuite.addTest("Entries&AddTest001", () =>
     {
         ConcurrentSetTestOne.clear();
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addFront();
-        let p1 = launch addBack();
-        let p2 = launch entriesAll();
-        await p1;
-        await p2;
-        assertEQ(ConcurrentSetTestOne.size, 10);
+        let p1 = launch<void, () => void>(addBack);
+        let p2 = launch<void, () => void>(entriesAll);
+        p1.Await();
+        p2.Await();
+        arktest.assertEQ(ConcurrentSetTestOne.size, 10);
     });
     ConcurrentSetTestsuite.addTest("Entries&DeteleTest001", () =>
     {
         ConcurrentSetTestOne.clear();
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
-        let p1 = launch deleteAll();
-        let p2 = launch entriesAll();
-        await p1;
-        await p2;
-        assertTrue(ConcurrentSetTestOne.size < 10);
+        let p1 = launch<void, () => void>(deleteAll);
+        let p2 = launch<void, () => void>(entriesAll);
+        p1.Await();
+        p2.Await();
+        arktest.assertTrue(ConcurrentSetTestOne.size < 10);
     });
     ConcurrentSetTestsuite.addTest("Entries&ClearTest001", () =>
     {
         ConcurrentSetTestOne.clear();
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
-        let p1 = launch entriesAll();
-        let p2 = launch clearTest();
-        await p1;
-        await p2;
-        assertTrue(ConcurrentSetTestOne.size < 10);
+        let p1 = launch<void, () => void>(entriesAll);
+        let p2 = launch<void, () => void>(clearTest);
+        p1.Await();
+        p2.Await();
+        arktest.assertTrue(ConcurrentSetTestOne.size < 10);
     });
     */
 
@@ -72,14 +74,14 @@ function main(): int {
     /*
     ConcurrentSetTestsuite.addTest("EntriesTest001", () =>
     {
-        let ConcurrentSetTest: ConcurrentSet<string> = new ConcurrentSet<string>();
+        let ConcurrentSetTest: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
         let res = ConcurrentSetTest.size;
-        assertEQ(res, 0);
+        arktest.assertEQ(res, 0);
         for (let i: int = 0; i < 10 ; i++) {
             ConcurrentSetTest.add(arrValues[i]);
         }
         res = ConcurrentSetTest.size;
-        assertEQ(res, 10);
+        arktest.assertEQ(res, 10);
         let iterValues = ConcurrentSetTest.entries();
         let str = "";
         for (let i: int = 0; i < 10; i++) {
@@ -88,8 +90,8 @@ function main(): int {
                 str += ",";
             }
         }
-        assertEQ(str, strAll);
-        assertEQ(iterValues.next().value, undefined);
+        arktest.assertEQ(str, strAll);
+        arktest.assertEQ(iterValues.next().value, undefined);
     });
     */
 

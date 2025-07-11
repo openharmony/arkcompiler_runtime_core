@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+ export type StackForEachCb<T> = (value: T, index: number, stack: Stack<T>) => void;
+
 export class Stack<T> implements Iterable<T> {
     private buffer: Array<T>;
 
@@ -60,7 +62,7 @@ export class Stack<T> implements Iterable<T> {
      *
      * @param callbackfn - The function to execute on each element, taking the value, index, and Stack as arguments.
      */
-    public forEach(callbackfn: (value: T, index: number, stack: Stack<T>) => void): void {
+    public forEach(callbackfn: StackForEachCb<T>): void {
         this.buffer.forEach(((val: T, idx: number) => callbackfn(val, idx, this)));
     }
 

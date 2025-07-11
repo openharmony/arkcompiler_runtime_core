@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/*---
+  tags: [not-a-test]
+  files: [final.ets]
+  arktsconfig: arktsconfig.json
+---*/
+
 import { Final } from "./final";
 
 export class ExtendsFinal extends Final { }

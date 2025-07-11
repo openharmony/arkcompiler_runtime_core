@@ -28,7 +28,7 @@ class Bar {
           return this.data;
     }
 
-    async $_set (index: int, value: int)  throws {
+    async $_set (index: int, value: int) {
          this.data = value;
     }
 

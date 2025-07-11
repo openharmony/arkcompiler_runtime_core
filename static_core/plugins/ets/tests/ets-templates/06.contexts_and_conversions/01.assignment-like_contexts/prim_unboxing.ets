@@ -26,7 +26,7 @@ let dest:   {{conv.dest}};
 
 function main(): void {
   dest = origin;
-  assertTrue(dest == origin.unboxed());
+  arktest.assertTrue(dest == origin.unboxed());
 }
 
 {% endfor %}

@@ -19,7 +19,7 @@ import {BusinessError} from "@ohos.base";
 const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
-    const suite = new ArkTestsuite("ArrayList API tests");
+    const suite = new arktest.ArkTestsuite("ArrayList API tests");
 
     suite.addTest("ArrayList sort", testSortNumbers);
     suite.addTest("ArrayList sort with different types in ascending order", testSortDifferentTypesAscending);
@@ -34,11 +34,18 @@ function main() {
     suite.addTest("ArrayList subArrayList with change subArrayList", testSubArrayListWithChange);
     suite.addTest("ArrayList subArrayList with empty container", testSubArrayListEmptyContainer);
     suite.addTest("ArrayList subArrayList with start index = 0 and end index = length - 1", testSubArrayListFullRange);
+    suite.addTest("ArrayList JSON stringify", testArrayListJsonStringify);
 
     return suite.run();
 }
 
+class Temp {
+    age: number = 0;
+    name: string = "";
+}
+
 class TestData {
+    static readonly testNumber0: number = 0;
     static readonly testNumber1: number = 1;
     static readonly testNumber3: number = 3;
     static readonly testNumber5: number = 5;
@@ -47,9 +54,14 @@ class TestData {
     static readonly forString: String[] = ["ssss", "2", "%", "Z"];
     static readonly forBoolean: Boolean[] = [true, false, false, true];
     static readonly forObject: Object[] = [[1], [2, 3, 4], [1, 2], [5]];
+    static readonly testString1: string = "zhangsan";
+    static readonly testString2: string = "insert";
+    static readonly testObject: Temp = { age: 10, name: "zhang"};
+    static readonly testTrue: Boolean = true;
     static readonly result1: Number[] = [5, 4, 3, 2, 1];
     static readonly result6: Number[] = [2, 3, 4];
     static readonly result7: Number[] = [2, 3, 4, 5];
+    static readonly result8: String = `{"0":"zhangsan","1":1,"2":{"age":10,"name":"zhang"},"4":null,"5":true}`;
 }
 
 function testSortNumbers() {
@@ -59,7 +71,7 @@ function testSortNumbers() {
     arrayList1.sort();
     array1.sort();
     for (let i: number = 0; i < arrayList1.length; i++) {
-        assertEQ(arrayList1[i], array1[i], `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList1[i], array1[i], `Element at index ${i} should match`);
     }
 
     let arrayList2 = new ArrayList<string>();
@@ -68,7 +80,7 @@ function testSortNumbers() {
     arrayList2.sort();
     array2.sort();
     for (let i: number = 0; i < arrayList2.length; i++) {
-        assertEQ(arrayList2[i], array2[i], `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList2[i], array2[i], `Element at index ${i} should match`);
     }
 
     let arrayList3 = new ArrayList<boolean>();
@@ -77,7 +89,7 @@ function testSortNumbers() {
     arrayList3.sort();
     array3.sort();
     for (let i: number = 0; i < arrayList3.length; i++) {
-        assertEQ(arrayList3[i], array3[i], `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList3[i], array3[i], `Element at index ${i} should match`);
     }
 
     let arrayList4 = new ArrayList<object>();
@@ -86,7 +98,7 @@ function testSortNumbers() {
     arrayList4.sort();
     array4.sort();
     for (let i: number = 0; i < arrayList4.length; i++) {
-        assertEQ(arrayList4[i], array4[i], `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList4[i], array4[i], `Element at index ${i} should match`);
     }
 }
 
@@ -108,7 +120,7 @@ function testSortMultipleTypes() {
     arrayList.sort();
     array.sort();
     for (let i: number = 0; i < arrayList.length; i++) {
-        assertEQ(arrayList[i], array[i], `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList[i], array[i], `Element at index ${i} should match`);
     }
 }
 
@@ -117,7 +129,7 @@ function testSortDifferentTypesAscending() {
     initializeArrayList(arrayList1, TestData.result1);
     arrayList1.sort((a: number, b: number) => a - b);
     for (let i: int = 0; i < arrayList1.length; i++) {
-        assertEQ(arrayList1[i], TestData.forNumber[i], `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList1[i], TestData.forNumber[i], `Element at index ${i} should match`);
     }
 
     let arrayList2 = new ArrayList<string>();
@@ -126,7 +138,7 @@ function testSortDifferentTypesAscending() {
     arrayList2.sort((a: string, b: string) => a.compareTo(b));
     array2.sort((a: string, b: string) => a.compareTo(b));
     for (let i: number = 0; i < arrayList2.length; i++) {
-        assertEQ(arrayList2[i], array2[i], `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList2[i], array2[i], `Element at index ${i} should match`);
     }
 
     let arrayList3 = new ArrayList<boolean>();
@@ -135,7 +147,7 @@ function testSortDifferentTypesAscending() {
     arrayList3.sort((a: boolean, b: boolean) => (a ? 1 : 0) - (b ? 1 : 0));
     array3.sort((a: boolean, b: boolean) => (a ? 1 : 0) - (b ? 1 : 0));
     for (let i: number = 0; i < arrayList3.length; i++) {
-        assertEQ(arrayList3[i], array3[i], `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList3[i], array3[i], `Element at index ${i} should match`);
     }
 
     let arrayList4 = new ArrayList<object>();
@@ -152,7 +164,7 @@ function testSortDifferentTypesAscending() {
         return sa.compareTo(sb);
     });
     for (let i: number = 0; i < arrayList4.length; i++) {
-        assertEQ(arrayList4[i], array4[i], `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList4[i], array4[i], `Element at index ${i} should match`);
     }
 }
 
@@ -163,7 +175,7 @@ function testSortWithContainerChange() {
         arrayList.clear();
         return a - b;
     });
-    assertEQ(arrayList.length, 0, "ArrayList length should be 0 after clear");
+    arktest.assertEQ(arrayList.length, 0, "ArrayList length should be 0 after clear");
 }
 
 function testSortDifferentTypesDescending() {
@@ -171,7 +183,7 @@ function testSortDifferentTypesDescending() {
     initializeArrayList(arrayList1, TestData.forNumber);
     arrayList1.sort((a: number, b: number) => b - a);
     for (let i: int = 0; i < arrayList1.length; i++) {
-        assertEQ(arrayList1[i], TestData.result1[i], `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList1[i], TestData.result1[i], `Element at index ${i} should match`);
     }
 
     let arrayList2 = new ArrayList<string>();
@@ -180,7 +192,7 @@ function testSortDifferentTypesDescending() {
     arrayList2.sort((a: string, b: string) => b.compareTo(a));
     array2.sort((a: string, b: string) => b.compareTo(a));
     for (let i: number = 0; i < arrayList2.length; i++) {
-        assertEQ(arrayList2[i], array2[i], `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList2[i], array2[i], `Element at index ${i} should match`);
     }
 
     let arrayList3 = new ArrayList<boolean>();
@@ -189,7 +201,7 @@ function testSortDifferentTypesDescending() {
     arrayList3.sort((a: boolean, b: boolean) => (b ? 1 : 0) - (a ? 1 : 0));
     array3.sort((a: boolean, b: boolean) => (b ? 1 : 0) - (a ? 1 : 0));
     for (let i: number = 0; i < arrayList3.length; i++) {
-        assertEQ(arrayList3[i], array3[i], `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList3[i], array3[i], `Element at index ${i} should match`);
     }
 
     let arrayList4 = new ArrayList<object>();
@@ -206,7 +218,7 @@ function testSortDifferentTypesDescending() {
         return sb.compareTo(sa);
     });
     for (let i: number = 0; i < arrayList4.length; i++) {
-        assertEQ(arrayList4[i], array4[i], `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList4[i], array4[i], `Element at index ${i} should match`);
     }
 }
 
@@ -215,10 +227,10 @@ function testSubArrayList() {
     initializeArrayList(arrayList, TestData.forNumber);
     let subArrayList = arrayList.subArrayList(TestData.testNumber1, TestData.testNumber5 - TestData.testNumber1);
     for (let i: int = 0; i < arrayList.length; i++) {
-        assertEQ(arrayList[i], TestData.forNumber[i], `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList[i], TestData.forNumber[i], `Element at index ${i} should match`);
     }
     for (let i: int = 0; i < subArrayList.length; i++) {
-        assertEQ(subArrayList[i], TestData.result6[i], `Element at index ${i} should match`);
+        arktest.assertEQ(subArrayList[i], TestData.result6[i], `Element at index ${i} should match`);
     }
 }
 
@@ -230,7 +242,7 @@ function testSubArrayListStartIndexOutOfRange() {
             "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 4. Received value is: -1") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    expectThrow(() => {arrayList.subArrayList(-TestData.testNumber1, TestData.testNumber5)}, exceptionCheck);
+    arktest.expectThrow(() => {arrayList.subArrayList(-TestData.testNumber1, TestData.testNumber5)}, exceptionCheck);
 }
 
 function testSubArrayListEndIndexOutOfRange() {
@@ -241,7 +253,7 @@ function testSubArrayListEndIndexOutOfRange() {
             "The value of \"toIndex\" is out of range. It must be >= 0 && <= 5. Received value is: 8") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    expectThrow(() => {arrayList.subArrayList(TestData.testNumber1, TestData.testNumber8)}, exceptionCheck);
+    arktest.expectThrow(() => {arrayList.subArrayList(TestData.testNumber1, TestData.testNumber8)}, exceptionCheck);
 }
 
 function testSubArrayListEndIndexSmallerThanStartIndex() {
@@ -252,7 +264,7 @@ function testSubArrayListEndIndexSmallerThanStartIndex() {
             "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 0. Received value is: 5") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    expectThrow(() => {arrayList.subArrayList(TestData.testNumber5, TestData.testNumber1)}, exceptionCheck);
+    arktest.expectThrow(() => {arrayList.subArrayList(TestData.testNumber5, TestData.testNumber1)}, exceptionCheck);
 }
 
 function testSubArrayListWithChange() {
@@ -261,10 +273,10 @@ function testSubArrayListWithChange() {
     let subArrayList = arrayList.subArrayList(TestData.testNumber1, TestData.testNumber5 - TestData.testNumber1);
     subArrayList.add(TestData.testNumber5);
     for (let i: int = 0; i < arrayList.length; i++) {
-        assertEQ(arrayList[i], TestData.forNumber[i], `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList[i], TestData.forNumber[i], `Element at index ${i} should match`);
     }
     for (let i: int = 0; i < subArrayList.length; i++) {
-        assertEQ(subArrayList[i], TestData.result7[i], `Element at index ${i} should match`);
+        arktest.assertEQ(subArrayList[i], TestData.result7[i], `Element at index ${i} should match`);
     }
 }
 
@@ -274,7 +286,7 @@ function testSubArrayListEmptyContainer() {
         return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    expectThrow(() => {arrayList.subArrayList(TestData.testNumber1, TestData.testNumber3)}, exceptionCheck);
+    arktest.expectThrow(() => {arrayList.subArrayList(TestData.testNumber1, TestData.testNumber3)}, exceptionCheck);
 }
 
 function testSubArrayListFullRange() {
@@ -282,9 +294,24 @@ function testSubArrayListFullRange() {
     initializeArrayList(arrayList, TestData.forNumber);
     let subArrayList = arrayList.subArrayList(0, TestData.testNumber5);
     for (let i: number = 0; i < subArrayList.length; i++) {
-        assertEQ(subArrayList[i], arrayList[i], `Element at index ${i} should match`);
+        arktest.assertEQ(subArrayList[i], arrayList[i], `Element at index ${i} should match`);
     }
-    assertEQ(subArrayList.length, TestData.testNumber5, "SubArrayList length should be 5");
+    arktest.assertEQ(subArrayList.length, TestData.testNumber5, "SubArrayList length should be 5");
+}
+
+function testArrayListJsonStringify() {
+    let arrayList: ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null | Object> =
+    new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null | Object>();
+    arrayList.add(TestData.testString1);
+    arrayList.add(TestData.testNumber1);
+    arrayList.add(TestData.testObject);
+    arrayList.add(undefined);
+    arrayList.add(null);
+    arrayList.add(TestData.testTrue);
+    arrayList.insert(TestData.testString2, TestData.testNumber0);
+    arrayList.removeByIndex(TestData.testNumber0);
+    let jsonResult = JSON.stringify(arrayList);
+    arktest.assertEQ(jsonResult, TestData.result8, `jsonResult should be ${TestData.result8}`);
 }
 
 function initializeArrayList<T>(arrayList: ArrayList<T>, sourceArray: T[]) {

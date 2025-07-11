@@ -27,5 +27,5 @@ function main(): void {
   let x: float = 0 as float
   let y: double = 1 as double
 
-  assertTrue( arr[x] == 1 && arr[y] == 2 )
+  arktest.assertTrue( arr[x] == 1 && arr[y] == 2 )
 }

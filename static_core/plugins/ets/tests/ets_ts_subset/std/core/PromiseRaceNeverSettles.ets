@@ -15,7 +15,7 @@
 
 let array: Object[] = [];
 Promise.race<Object>(array).then<void, void>((value: Object): void => {
-    console.log("Test failed. The promise should not be resolved.");
+    console.log('Test failed. The promise should not be resolved.');
 }, (err: Error): void => {
-    console.log("Test failed. The promise should not be rejected.");
+    console.log('Test failed. The promise should not be rejected.');
 });

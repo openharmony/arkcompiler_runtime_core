@@ -15,7 +15,7 @@
 
 #include "libabckit/src/adapter_dynamic/convert.h"
 
-#include "libabckit/include/c/metadata_core.h"
+#include "libabckit/c/metadata_core.h"
 #include "libabckit/src/logger.h"
 
 #include "abc2program/abc2program_driver.h"

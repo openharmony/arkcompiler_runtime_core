@@ -16,48 +16,65 @@
 #ifndef COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_INL_H
 #define COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_INL_H
 
-#include "common_interfaces/objects/string/base_string_declare.h"
-#include "common_interfaces/objects/string/tree_string.h"
+#include "objects/string/base_string.h"
+#include "objects/string/tree_string.h"
 
 namespace common {
+template <typename Allocator, typename WriteBarrier,
+          objects_traits::enable_if_is_allocate<Allocator, BaseObject *>,
+          objects_traits::enable_if_is_write_barrier<WriteBarrier>>
+TreeString *TreeString::Create(Allocator &&allocator, WriteBarrier &&writeBarrier, ReadOnlyHandle<BaseString> left,
+                               ReadOnlyHandle<BaseString> right, uint32_t length, bool compressed)
+{
+    auto string = TreeString::Cast(
+        std::invoke(std::forward<Allocator>(allocator), TreeString::SIZE, ObjectType::TREE_STRING));
+    string->InitLengthAndFlags(length, compressed);
+    string->SetRawHashcode(0);
+    string->SetLeftSubString(std::forward<WriteBarrier>(writeBarrier), left.GetBaseObject());
+    string->SetRightSubString(std::forward<WriteBarrier>(writeBarrier), right.GetBaseObject());
+    return string;
+}
+
+
 template <typename ReadBarrier>
 bool TreeString::IsFlat(ReadBarrier &&readBarrier) const
 {
-    auto strSecond = BaseString::Cast(GetSecond<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
-    return strSecond->GetLength() == 0;
+    auto strRight = BaseString::Cast(GetRightSubString<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
+    return strRight->GetLength() == 0;
 }
 
 template <bool verify, typename ReadBarrier>
 uint16_t TreeString::Get(ReadBarrier &&readBarrier, int32_t index) const
 {
     int32_t length = static_cast<int32_t>(GetLength());
-    if (verify) {
+    if constexpr (verify) {
         if ((index < 0) || (index >= length)) {
             return 0;
         }
     }
 
     if (IsFlat(std::forward<ReadBarrier>(readBarrier))) {
-        BaseString *first = BaseString::Cast(GetFirst<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
-        return first->At<verify>(std::forward<ReadBarrier>(readBarrier), index);
+        BaseString *left = BaseString::Cast(GetLeftSubString<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
+        return left->At<verify>(std::forward<ReadBarrier>(readBarrier), index);
     }
-    BaseString *string = const_cast<TreeString *>(this);
+    const BaseString *string = this;
     while (true) {
         if (string->IsTreeString()) {
-            BaseString *first = BaseString::Cast(
-                TreeString::Cast(string)->GetFirst<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
-            if (static_cast<int32_t>(first->GetLength()) > index) {
-                string = first;
+            BaseString *left = BaseString::Cast(
+                TreeString::ConstCast(string)->GetLeftSubString<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
+            if (static_cast<int32_t>(left->GetLength()) > index) {
+                string = left;
             } else {
-                index -= static_cast<int32_t>(first->GetLength());
+                index -= static_cast<int32_t>(left->GetLength());
                 string = BaseString::Cast(
-                    TreeString::Cast(string)->GetSecond<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
+                    TreeString::ConstCast(string)->GetRightSubString<BaseObject *>(
+                        std::forward<ReadBarrier>(readBarrier)));
             }
         } else {
             return string->At<verify>(std::forward<ReadBarrier>(readBarrier), index);
         }
     }
-    UNREACHABLE();
+    UNREACHABLE_CC();
 }
 }
 #endif //COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_INL_H

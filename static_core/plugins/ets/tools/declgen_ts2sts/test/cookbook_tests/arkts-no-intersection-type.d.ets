@@ -1,3 +1,4 @@
+'use static'
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,11 +24,11 @@ declare class Logger {
 declare class Validator {
     validate(data: ESObject): boolean;
 }
-interface Person {
+export declare interface Person {
     name: string;
     age: number;
 }
-interface Employee {
+export declare interface Employee {
     employeeId: string;
     department: string;
 }

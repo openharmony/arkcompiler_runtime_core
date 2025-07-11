@@ -38,7 +38,7 @@ TEST_F(ClassSetStaticFieldByNameDoubleTest, set_static_field_by_name_double_capi
 {
     ani_class cls {};
     const ani_double age = 2.0;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_double_test/DoubleStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_double_test.DoubleStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Double(env_, cls, "double_value", age), ANI_OK);
     ani_double resultValue;
@@ -50,7 +50,7 @@ TEST_F(ClassSetStaticFieldByNameDoubleTest, set_static_field_by_name_double)
 {
     ani_class cls {};
     const ani_double age = 2.0;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_double_test/DoubleStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_double_test.DoubleStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Double(cls, "double_value", age), ANI_OK);
     ani_double resultValue;
@@ -62,7 +62,7 @@ TEST_F(ClassSetStaticFieldByNameDoubleTest, invalid_argument1)
 {
     ani_class cls {};
     const ani_double age = 2.0;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_double_test/DoubleStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_double_test.DoubleStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Double(cls, "string_value", age), ANI_INVALID_TYPE);
 }
@@ -71,7 +71,7 @@ TEST_F(ClassSetStaticFieldByNameDoubleTest, invalid_argument2)
 {
     ani_class cls {};
     const ani_double age = 2.0;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_double_test/DoubleStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_double_test.DoubleStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Double(nullptr, "double_value", age), ANI_INVALID_ARGS);
 }
@@ -80,7 +80,7 @@ TEST_F(ClassSetStaticFieldByNameDoubleTest, invalid_argument3)
 {
     ani_class cls {};
     const ani_double age = 2.0;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_double_test/DoubleStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_double_test.DoubleStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Double(cls, nullptr, age), ANI_INVALID_ARGS);
 }
@@ -89,7 +89,7 @@ TEST_F(ClassSetStaticFieldByNameDoubleTest, invalid_argument4)
 {
     ani_class cls {};
     const ani_double age = 2.0;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_double_test/DoubleStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_double_test.DoubleStatic", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Double(cls, "", age), ANI_NOT_FOUND);
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Double(cls, "\n", age), ANI_NOT_FOUND);
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Double(nullptr, cls, "double_value", age), ANI_INVALID_ARGS);
@@ -98,7 +98,7 @@ TEST_F(ClassSetStaticFieldByNameDoubleTest, invalid_argument4)
 TEST_F(ClassSetStaticFieldByNameDoubleTest, special_values)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_double_test/DoubleStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_double_test.DoubleStatic", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Double(cls, "double_value", static_cast<ani_double>(0)), ANI_OK);
     ani_double single = 0.0;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Double(cls, "double_value", &single), ANI_OK);
@@ -132,7 +132,7 @@ TEST_F(ClassSetStaticFieldByNameDoubleTest, combination_test1)
     const ani_short setTarget = 2U;
     const ani_short setTarget2 = 3U;
     ani_double single = 0.0;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_double_test/DoubleStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_double_test.DoubleStatic", &cls), ANI_OK);
     const int32_t loopCount = 3;
     for (int32_t i = 0; i < loopCount; i++) {
         ASSERT_EQ(env_->Class_SetStaticFieldByName_Double(cls, "double_value", setTarget2), ANI_OK);
@@ -146,12 +146,28 @@ TEST_F(ClassSetStaticFieldByNameDoubleTest, combination_test1)
 
 TEST_F(ClassSetStaticFieldByNameDoubleTest, combination_test2)
 {
-    CheckFieldValue("Lclass_set_static_field_by_name_double_test/DoubleStaticA;", "double_value");
+    CheckFieldValue("class_set_static_field_by_name_double_test.DoubleStaticA", "double_value");
 }
 
 TEST_F(ClassSetStaticFieldByNameDoubleTest, combination_test3)
 {
-    CheckFieldValue("Lclass_set_static_field_by_name_double_test/DoubleStaticFinal;", "double_value");
+    CheckFieldValue("class_set_static_field_by_name_double_test.DoubleStaticFinal", "double_value");
 }
+
+TEST_F(ClassSetStaticFieldByNameDoubleTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_double_test.DoubleStaticA", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_double_test.DoubleStaticA"));
+    const ani_double doubleValue = 2.2;
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Double(cls, "double_valuex", doubleValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_double_test.DoubleStaticA"));
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Double(cls, "double_value", doubleValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_double_test.DoubleStaticA"));
+}
+
 }  // namespace ark::ets::ani::testing
    // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

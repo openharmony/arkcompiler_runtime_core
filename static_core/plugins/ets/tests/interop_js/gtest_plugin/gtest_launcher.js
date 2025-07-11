@@ -64,23 +64,8 @@ function main() {
 
 	let stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
 	let gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
+	let asmAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ASM_ABC_PATH');
 
-	const etsVmRes = globalThis.gtest.etsVm.createRuntime({
-		'log-level': 'info',
-		'log-components': 'ets_interop_js',
-		'boot-panda-files': stdlibPath + ':' + gtestAbcPath,
-		'panda-files': gtestAbcPath,
-		'gc-trigger-type': 'heap-trigger',
-		'compiler-enable-jit': 'false',
-        'coroutine-enable-external-scheduling': 'true',
-	});
-
-	if (!etsVmRes) {
-		print('Failed to create ETS runtime');
-		return 1;
-	}
-
-	globalThis.require = require;
 
 	let argv = helper.getArgv();
 	const arkJsNapiCliLastArgIdx = 5;
@@ -90,6 +75,34 @@ function main() {
 		print(`Usage: ${argv[0]} ${argv[1]} ${argv[2]} ${argv[3]} ${argv[4]} <test name>`);
 		return 1;
 	}
+
+	let userPandaFiles = gtestAbcPath;
+	if (asmAbcPath !== '') {
+		if (userPandaFiles === '') {
+			userPandaFiles += asmAbcPath;
+		} else {
+			userPandaFiles += (':' + asmAbcPath);
+		}
+	}
+
+	let createRuntimeOptions = {
+		'log-level': 'info',
+		'log-components': 'ets_interop_js',
+		'boot-panda-files': stdlibPath + ':' + userPandaFiles,
+		'panda-files': userPandaFiles,
+		'gc-trigger-type': 'heap-trigger',
+		'compiler-enable-jit': 'false',
+		'interpreter-type': 'irtoc',
+		'taskpool-support-interop': 'true',
+	};
+
+	const etsVmRes = globalThis.gtest.etsVm.createRuntime(createRuntimeOptions);
+	if (!etsVmRes) {
+		print('Failed to create ETS runtime');
+		return 1;
+	}
+
+	globalThis.require = require;
 
 	let gtestDir = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_DIR');
 	if (gtestDir === undefined) {

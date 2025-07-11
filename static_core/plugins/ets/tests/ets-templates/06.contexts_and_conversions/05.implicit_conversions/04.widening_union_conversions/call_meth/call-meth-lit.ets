@@ -35,7 +35,7 @@ class A {
 function main() {
     let a: A = new A()
 {%- for t in c['values'] %}
-    assertTrue( a.meth(s{{loop.index}}) == {{t.expr|safe}} )
+    arktest.assertTrue( a.meth(s{{loop.index}}) == {{t.expr|safe}} )
 {%- endfor %}
 }
 {%- endfor %}

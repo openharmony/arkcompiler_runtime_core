@@ -14,14 +14,14 @@
  */
 
 class ArrayClass {
-    public static array: byte[] = [1, 2, 3, 4, 5];
+    public static array: byte[] = [1, 2, 3, 4, 5]
 
-    public static ChangeStaticArray() {
-        ArrayClass.array[2] = 22;
-        ArrayClass.array[4] = 44;
+    public static changeStaticArray() {
+        ArrayClass.array[2] = 22 as byte
+        ArrayClass.array[4] = 44 as byte
     }
 
-    public static CheckStaticArray(): boolean {
+    public static checkStaticArray(): boolean {
         return (
             ArrayClass.array[0] == 1 &&
             ArrayClass.array[1] == 2 &&
@@ -32,13 +32,13 @@ class ArrayClass {
     }
 }
 
-function GetArray(): byte[] {
-    let a : byte[] = [1, 2, 3, 4, 5]
+function getArray(): byte[] {
+    let a: byte[] = [1, 2, 3, 4, 5]
     return a
 }
 
-function GetEscompatArray(): Array<byte> {
-    let a : Array<byte> = new Array<byte>(5)
+function getEscompatArray(): Array<byte> {
+    let a: Array<byte> = new Array<byte>(5)
     a[0] = 1 as byte
     a[1] = 2 as byte
     a[2] = 3 as byte
@@ -47,18 +47,18 @@ function GetEscompatArray(): Array<byte> {
     return a
 }
 
-function CheckArray(a: byte[]): boolean {
+function checkArray(a: byte[]): boolean {
     return a[0] == 1 && a[1] == 2 && a[2] == 30 && a[3] == 40 && a[4] == 50
 }
 
-function GetSpecialArray(): byte[] {
+function getSpecialArray(): byte[] {
 	let min: byte = -128
 	let max: byte = 127
     let a : byte[] = [min, max, 0, 0, 0]
     return a
 }
 
-function CheckEscompatArray(a: Array<byte>): boolean {
+function checkEscompatArray(a: Array<byte>): boolean {
     return a[0] == 1 &&
            a[1] == 2 &&
            a[2] == 30 &&

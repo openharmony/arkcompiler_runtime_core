@@ -33,13 +33,13 @@ cases:
     - use: |-
           for (const ch of "ABCD") {
               res += ch
-              ch = ' '   // shouldn't be allowed
+              ch = c' '   // shouldn't be allowed
               res += ch
           }
           if (res == "A B C D ") return 0;
 
     - use: |-
-          const ch: char = ' ';
+          const ch: char = c' ';
           for (ch of "ABCD") res += ch  // shouldn't be allowed
           if (res == "ABCD") return 0;
 

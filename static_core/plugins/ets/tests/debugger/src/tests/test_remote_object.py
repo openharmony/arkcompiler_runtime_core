@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,15 +23,15 @@ from pytest import mark
 
 from arkdb.debug import StopOnPausedType
 from arkdb.logs import RichLogger
-from arkdb.mirrors import mirror_object, mirror_primitive
+from arkdb.mirrors import mirror_primitive
 
 
 @mark.parametrize(
     "line,meta",
     [
-        ("Number = 1", mirror_object("std.core.Double", value=1)),
+        ("Number = 1", mirror_primitive("number", 1)),
         ("int = 1", 1),
-        ("float = 1.0", 1),
+        ("float = 1.0f", 1),
     ],
 )
 async def test_const_var(
@@ -66,7 +66,7 @@ async def test_let_vars(
         let n: Number = 1.3;
         let i0: int = 1;
         let i: int = 30 + i0;
-        let f: float = 1.2;
+        let f: float = 1.2f;
         let b: boolean = true;
         let s: String = "str";
         foo(n, i, f, b, s);
@@ -80,7 +80,7 @@ async def test_let_vars(
             "b": value("boolean", True),
             "f": value("number", 1.2),
             "i": value("number", 31),
-            "n": mirror_object("std.core.Double", value=1.3),
+            "n": value("number", 1.3),
             "s": value("string", "str"),
         }
         log.info("Variables: %s", rich.pretty.pretty_repr(scope_vars))

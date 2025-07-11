@@ -15,11 +15,8 @@
 
 import {TreeSet} from "@ohos.util.TreeSet";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
-    const suite = new ArkTestsuite("TreeSet Constructor IsEmpty API tests")
+    const suite = new arktest.ArkTestsuite("TreeSet Constructor IsEmpty API tests")
 
     suite.addTest("TreeSet construct default empty string treeSet", testConstructDefaultEmptyStringTreeSet)
     suite.addTest("TreeSet construct default empty number treeSet", testConstructDefaultEmptyNumberTreeSet)
@@ -44,8 +41,8 @@ function testConstructDefaultEmptyStringTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
         secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
-    assertTrue(treeSet instanceof TreeSet, "The treeSet should be of the same type as the TreeSet");
-    assertEQ(treeSet.length, 1, "The treeSet length should be 1");
+    arktest.assertTrue(treeSet instanceof TreeSet, "The treeSet should be of the same type as the TreeSet");
+    arktest.assertEQ(treeSet.length, 1, "The treeSet length should be 1");
 }
 
 function testConstructDefaultEmptyNumberTreeSet() {
@@ -54,8 +51,8 @@ function testConstructDefaultEmptyNumberTreeSet() {
     treeSet.add(111);
     treeSet.add(222);
     treeSet.add(333);
-    assertTrue(treeSet instanceof TreeSet, "The treeSet should be of the same type as the TreeSet");
-    assertEQ(treeSet.length, 3, "The treeSet length should be 3");
+    arktest.assertTrue(treeSet instanceof TreeSet, "The treeSet should be of the same type as the TreeSet");
+    arktest.assertEQ(treeSet.length, 3, "The treeSet length should be 3");
 }
 
 function testConstructDefaultEmptyObjectTreeSet() {
@@ -65,8 +62,8 @@ function testConstructDefaultEmptyObjectTreeSet() {
         });
     let obj: MyObject = new MyObject(1);
     treeSet.add(obj);
-    assertTrue(treeSet instanceof TreeSet, "The treeSet should be of the same type as the TreeSet");
-    assertEQ(treeSet.length, 1, "The treeSet length should be 1");
+    arktest.assertTrue(treeSet instanceof TreeSet, "The treeSet should be of the same type as the TreeSet");
+    arktest.assertEQ(treeSet.length, 1, "The treeSet length should be 1");
 }
 
 function testConstructNoComparatorTreeSet() {
@@ -74,16 +71,16 @@ function testConstructNoComparatorTreeSet() {
     treeSet.add(111);
     treeSet.add(222);
     treeSet.add(333);
-    assertTrue(treeSet instanceof TreeSet, "The treeSet should be of the same type as the TreeSet");
-    assertEQ(treeSet.length, 3, "The treeSet length should be 3");
+    arktest.assertTrue(treeSet instanceof TreeSet, "The treeSet should be of the same type as the TreeSet");
+    arktest.assertEQ(treeSet.length, 3, "The treeSet length should be 3");
 }
 
 function testIsEmptyReturnsTrue() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
         secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let result = treeSet.isEmpty();
-    assertEQ(result, true, "The treeSet should be empty");
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0");
+    arktest.assertEQ(result, true, "The treeSet should be empty");
+    arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0");
 }
 
 function testIsEmptyReturnsFalse() {
@@ -91,8 +88,8 @@ function testIsEmptyReturnsFalse() {
         secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     let result = treeSet.isEmpty();
-    assertEQ(result, false, "The treeSet should not be empty");
-    assertEQ(treeSet.length, 1, "The treeSet length should be 1");
+    arktest.assertEQ(result, false, "The treeSet should not be empty");
+    arktest.assertEQ(treeSet.length, 1, "The treeSet length should be 1");
 }
 
 function testIsEmptyReturnsTrueAfterRemove() {
@@ -101,6 +98,6 @@ function testIsEmptyReturnsTrueAfterRemove() {
     treeSet.add("aa");
     treeSet.remove("aa");
     let result = treeSet.isEmpty();
-    assertEQ(result, true, "The treeSet should be empty");
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0");
+    arktest.assertEQ(result, true, "The treeSet should be empty");
+    arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0");
 }

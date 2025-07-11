@@ -27,7 +27,7 @@ function main(): int {
     failures += test(testSetUTCFullYear(), "Set UTC full year");
 
 
-    // next test raises assertTrue( "Invalid year/month pair")
+    // next test raises arktest.assertTrue( "Invalid year/month pair")
     //failures += test(testDateChangeMonthBad(), "Try to change month to bad value");
     return failures;
 }
@@ -43,14 +43,14 @@ function test(result: int, message: String ): int {
 function testSetFromLeapYear(): int {
     let d = new Date(2024, 11, 31, 11, 59)
     d.setFullYear(2023)
-    assertEQ(d.getFullYear(), 2023)
+    arktest.assertEQ(d.getFullYear(), 2023)
     return 0
 }
 
 function testSetToLeapYear(): int {
     let d = new Date(2023, 11, 31, 11, 59)
     d.setFullYear(2024)
-    assertEQ(d.getFullYear(), 2024)
+    arktest.assertEQ(d.getFullYear(), 2024)
     return 0
 }
 
@@ -77,7 +77,7 @@ function testDateChangeMonthImpl(date: Date, change: int) {
     let dmc = daysInMonth(date.getFullYear(), newMonth);
     if(dmc < dmo) newMonth++;
     date.setMonth(newMonth);
-    assertEQ( date.getMonth(), newMonth)
+    arktest.assertEQ( date.getMonth(), newMonth)
 }
 
 function testDateChangeMonth(): int {
@@ -96,18 +96,19 @@ function testDateChangeMonth(): int {
 
 function testDateChangeMonthBad(): int {
     let date: Date = new Date();
-    try {
-        date.setMonth(13);
-    } catch(id: InvalidDate) {
-        return 0;
+    date.setMonth(13);
+
+    if (isNaN(date.valueOf())) {
+        return 0
     }
+
     return 1;
 }
 
 
 function testDateChangeDay(): int {
     let date: Date = new Date();
-    let day: byte = date.getDate() as byte;
+    let day: byte = date.getDate().toByte();
     let newDay: byte = 15;
     if(newDay == day) newDay++;
     date.setDate(newDay);
@@ -118,7 +119,7 @@ function testDateChangeDay(): int {
 
 function testDateChangeHour(): int {
     let date: Date = new Date();
-    let hour: byte = date.getHours() as byte;
+    let hour: byte = date.getHours().toByte();
     let newHour: byte = 12;
     if(newHour == hour) newHour = 11;
     date.setHours(newHour);
@@ -129,7 +130,7 @@ function testDateChangeHour(): int {
 
 function testDateChangeMinutes(): int {
     let date: Date = new Date();
-    let minutes: byte = date.getMinutes() as byte;
+    let minutes: byte = date.getMinutes().toByte();
     let newMinutes: byte = 30;
     if(newMinutes == minutes) newMinutes = 21;
     date.setMinutes(newMinutes);
@@ -140,7 +141,7 @@ function testDateChangeMinutes(): int {
 
 function testDateChangeSeconds(): int {
     let date: Date = new Date();
-    let seconds: byte = date.getSeconds() as byte;
+    let seconds: byte = date.getSeconds().toByte();
     let newSeconds: byte = 30;
     if(newSeconds == seconds) newSeconds = 21;
     date.setSeconds(newSeconds);
@@ -151,12 +152,12 @@ function testDateChangeSeconds(): int {
 
 function testSetUTCFullYear(): int {
     let date: Date =  new Date(Date.UTC(96, 1, 2, 3, 4, 5));
-    assertEQ(date.getUTCFullYear(), 1996);
-    assertEQ(date.valueOf(), 823230245000);
-    assertEQ(date.toUTCString(), "Fri, 02 Feb 1996 03:04:05 GMT");
+    arktest.assertEQ(date.getUTCFullYear(), 1996);
+    arktest.assertEQ(date.valueOf(), 823230245000);
+    arktest.assertEQ(date.toUTCString(), "Fri, 02 Feb 1996 03:04:05 GMT");
     date.setUTCFullYear(96);
-    assertEQ(date.getUTCFullYear(), 96);
-    assertEQ(date.valueOf(), -59134913755000);
-    assertEQ(date.toUTCString(), "Thu, 02 Feb 0096 03:04:05 GMT");
+    arktest.assertEQ(date.getUTCFullYear(), 96);
+    arktest.assertEQ(date.valueOf(), -59134913755000);
+    arktest.assertEQ(date.toUTCString(), "Thu, 02 Feb 0096 03:04:05 GMT");
     return 0;
 }

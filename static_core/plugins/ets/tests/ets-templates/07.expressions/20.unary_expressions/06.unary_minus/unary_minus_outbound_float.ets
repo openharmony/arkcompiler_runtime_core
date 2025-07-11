@@ -20,5 +20,5 @@ desc: Unary minus operator. The range of two’s-complement value is not symmetr
 function main(): void {
   let a: long = -9223372036854775808
   let b: long = -a
-  assertEQ(b, a)
+  arktest.assertEQ(b, a)
 }

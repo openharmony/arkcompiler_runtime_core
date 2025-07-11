@@ -12,24 +12,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <iostream>
 #include <taihe/runtime.hpp>
-#include "ani.h"
+
+#include <iostream>
 
 namespace taihe {
-__thread ani_env *cur_env;
+ani_vm *global_vm = nullptr;
 
-void set_env(ani_env *env)
+void set_vm(ani_vm *vm)
 {
-    cur_env = env;
+    global_vm = vm;
 }
 
-ani_env *get_env()
+ani_vm *get_vm()
 {
-    return cur_env;
+    return global_vm;
 }
 
-static ani_object create_ani_error(ani_env *env, taihe::string_view msg)
+static ani_error create_ani_error(ani_env *env, taihe::string_view msg)
 {
     ani_class errCls;
     char const *className = "Lescompat/Error;";
@@ -47,44 +47,53 @@ static ani_object create_ani_error(ani_env *env, taihe::string_view msg)
     ani_string result_string {};
     env->String_NewUTF8(msg.c_str(), msg.size(), &result_string);
 
-    ani_object errObj;
-    if (ANI_OK != env->Object_New(errCls, errCtor, &errObj, result_string)) {
+    ani_ref undefined;
+    env->GetUndefined(&undefined);
+
+    ani_error errObj;
+    if (ANI_OK != env->Object_New(errCls, errCtor, reinterpret_cast<ani_object *>(&errObj), result_string, undefined)) {
         std::cerr << "Create Object Failed'" << className << "'" << std::endl;
         return nullptr;
     }
     return errObj;
 }
 
-void ani_set_error(ani_env *env, taihe::string_view msg)
+static ani_error create_ani_business_error(ani_env *env, int32_t err_code, taihe::string_view msg)
 {
-    ani_object errObj = create_ani_error(env, msg);
-    env->ThrowError(static_cast<ani_error>(errObj));
-}
-
-void ani_set_business_error(ani_env *env, int32_t err_code, taihe ::string_view msg)
-{
-    ani_object errObj = create_ani_error(env, msg);
+    ani_error errObj = create_ani_error(env, msg);
 
     ani_class errCls;
     char const *className = "L@ohos/base/BusinessError;";
     if (ANI_OK != env->FindClass(className, &errCls)) {
         std::cerr << "Not found '" << className << std::endl;
-        return;
+        return nullptr;
     }
 
     ani_method errCtor;
     if (ANI_OK != env->Class_FindMethod(errCls, "<ctor>", "DLescompat/Error;:V", &errCtor)) {
         std::cerr << "get errCtor Failed'" << className << "'" << std::endl;
-        return;
+        return nullptr;
     }
 
-    ani_object businessErrObj;
-    if (ANI_OK != env->Object_New(errCls, errCtor, &businessErrObj, (ani_double)err_code, errObj)) {
+    ani_error businessErrObj;
+    if (ANI_OK != env->Object_New(errCls, errCtor, reinterpret_cast<ani_object *>(&businessErrObj),
+                                  static_cast<ani_double>(err_code), errObj)) {
         std::cerr << "Create Object Failed'" << className << "'" << std::endl;
-        return;
+        return nullptr;
     }
+    return businessErrObj;
+}
 
-    env->ThrowError(static_cast<ani_error>(businessErrObj));
+void ani_set_error(ani_env *env, taihe::string_view msg)
+{
+    ani_error errObj = create_ani_error(env, msg);
+    env->ThrowError(errObj);
+}
+
+void ani_set_business_error(ani_env *env, int32_t err_code, taihe::string_view msg)
+{
+    ani_error businessErrObj = create_ani_business_error(env, err_code, msg);
+    env->ThrowError(businessErrObj);
 }
 
 void ani_reset_error(ani_env *env)

@@ -14,8 +14,8 @@
 version: 0.0.0.1
 type: test-suite
 suite-name: ets-cts
-test-root: ${PANDA_SOURCE_PATH}/runtime_core/static_core/plugins/ets/tests/ets-templates
-list-root: ${PANDA_SOURCE_PATH}/runtime_core/static_core/plugins/ets/tests/test-lists/ets-cts
+test-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/ets-templates
+list-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/test-lists/ets-cts
 generator-class: runner.extensions.generators.ets_cts.ets_templates_generator.EtsTemplatesGenerator
 
 parameters:

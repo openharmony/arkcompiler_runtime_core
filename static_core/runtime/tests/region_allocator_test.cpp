@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -168,7 +168,7 @@ public:
     void *AllocateYoungRegular(NonObjectRegionAllocator &allocator, size_t size)
     {
         auto alignSize = AlignUp(size, GetAlignmentInBytes(DEFAULT_ALIGNMENT));
-        return allocator.AllocRegular<RegionFlag::IS_EDEN>(alignSize);
+        return allocator.AllocRegular<RegionFlag::IS_EDEN>(alignSize).mem;
     }
 
     auto ObjectChecker(size_t &objectFound)

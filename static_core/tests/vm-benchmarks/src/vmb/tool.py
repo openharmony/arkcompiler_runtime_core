@@ -17,6 +17,7 @@
 
 import os
 import logging
+import re
 import shutil
 import json
 from pathlib import Path
@@ -51,6 +52,7 @@ class ToolMode(StringEnum):
     INT_IRTOC = 'int-irtoc'
     INT_LLVM = 'int-llvm'
     LLVMAOT = 'llvmaot'
+    AOTPGO = 'aot-pgo'
     DEFAULT = 'default'
 
 
@@ -69,6 +71,7 @@ class OptFlags(Flag):
     INT_IRTOC = auto()
     INT_LLVM = auto()
     LLVMAOT = auto()
+    AOTPGO = auto()
 
 
 class ToolBase(CrossShell, ABC):
@@ -82,11 +85,10 @@ class ToolBase(CrossShell, ABC):
     def __init__(self,
                  target: Target = Target.HOST,
                  flags: OptFlags = OptFlags.NONE,
-                 custom: str = ''):
+                 custom_opts: Optional[List[str]] = None):
         self._target = target
         self.flags = flags
-        self.custom = custom
-        self.custom_opts: Dict[str, List[str]] = {}
+        self.custom_opts = custom_opts if custom_opts else []
 
     def __call__(self, bu: BenchUnit) -> None:
         self.exec(bu)
@@ -116,8 +118,14 @@ class ToolBase(CrossShell, ABC):
     def hdc(self) -> ShellDevice:
         return ToolBase.hdc_
 
+    @property
+    def custom(self) -> str:
+        return ' '.join(self.custom_opts)
+
     @staticmethod
     def rename_suffix(old: Path, new_suffix: str) -> Path:
+        if new_suffix == old.suffix:
+            return old
         new = old.with_suffix(new_suffix)
         old.rename(new)
         return new
@@ -200,5 +208,13 @@ class ToolBase(CrossShell, ABC):
                 aot_opts = conf_data.get('aot_opts', '')
         return flags, aot_opts
 
-    def set_custom_opts(self, custom_opts: Dict[str, List[str]]):
-        self.custom_opts = custom_opts
+    def custom_opts_obj(self) -> Dict[str, str]:
+        re_opts = re.compile(r'^(-+)?(?P<opt>[\w\-]+)(=|\s+)(?P<val>.+)$')
+        opts = {}
+        for opt in self.custom_opts:
+            m = re.search(re_opts, opt.strip("'\""))
+            if m:
+                opts[m.group("opt")] = m.group("val")
+            else:
+                log.warning('Custom option malformed: %s', opt)
+        return opts

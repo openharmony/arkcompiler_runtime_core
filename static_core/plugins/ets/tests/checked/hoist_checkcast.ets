@@ -38,11 +38,11 @@
 class A {}
 class B {}
 
-function set(arr: A[], i: int, value : A | B) {
+function set(arr: FixedArray<A>, i: int, value : A | B) {
     arr[i] = value as A;
 }
 
-function test(arr: A[], value: A | B) : int {
+function test(arr: FixedArray<A>, value: A | B) : int {
     let iters = 0;
     try {
         for (let i: int = 0; i < arr.length; ++i) {
@@ -50,14 +50,14 @@ function test(arr: A[], value: A | B) : int {
             set(arr, i, value);
         }
     } catch (e: ClassCastError) {
-        assertNE(e.toString().match('ClassCastError: hoist_checkcast.B cannot be cast to hoist_checkcast.A'), null);
+        arktest.assertNE(e.toString().match('ClassCastError: hoist_checkcast.B cannot be cast to hoist_checkcast.A'), null);
         return -iters;
     }
     return iters;
 }
 
 function main(): int {
-    let arr = new A[5];
+    let arr: FixedArray<A> = new A[5];
     if (test(arr, new A()) != 5) {
         return 1;
     }
@@ -96,7 +96,7 @@ function main(): int {
 //! CHECKER      Check stacktrace for starr_obj with wrong type, irtoc interpreter
 //! RUN          options: "--compiler-enable-jit=false --interpreter-type=irtoc", entry: "hoist_checkcast.ETSGLOBAL::main2"
 
-function test2(arr: Object[], value: A | B) : int {
+function test2(arr: FixedArray<Object>, value: A | B) : int {
     let iters = 0;
     try {
         for (let i: int = 0; i < arr.length; ++i) {
@@ -105,14 +105,14 @@ function test2(arr: Object[], value: A | B) : int {
         }
     } catch (e: ArrayStoreError) {
         // NOTE: line number is invalid in interpreter, see #17098
-        assertNE(e.toString().match('ArrayStoreError: hoist_checkcast.B cannot be stored in an array of type \\[Lhoist_checkcast/A;'), null);
+        arktest.assertNE(e.toString().match('ArrayStoreError: hoist_checkcast.B cannot be stored in an array of type \\[Lhoist_checkcast/A;'), null);
         return -iters;
     }
     return iters;
 }
 
 function main2(): int {
-    let arr = new A[5];
+    let arr: FixedArray<A> = new A[5];
     if (test2(arr, new A()) != 5) {
         return 1;
     }

@@ -37,7 +37,7 @@ public:
 TEST_F(ClassGetStaticFieldByNameIntTest, get_static_field_int_capi)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_int_test/GetIntStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_int_test.GetIntStatic", &cls), ANI_OK);
     ani_int age = 0;
     ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_Int(env_, cls, "age", &age), ANI_OK);
     ASSERT_EQ(age, static_cast<ani_int>(20U));
@@ -46,7 +46,7 @@ TEST_F(ClassGetStaticFieldByNameIntTest, get_static_field_int_capi)
 TEST_F(ClassGetStaticFieldByNameIntTest, get_static_field_int)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_int_test/GetIntStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_int_test.GetIntStatic", &cls), ANI_OK);
     ani_int age = 0;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Int(cls, "age", &age), ANI_OK);
     ASSERT_EQ(age, static_cast<ani_int>(20U));
@@ -55,7 +55,7 @@ TEST_F(ClassGetStaticFieldByNameIntTest, get_static_field_int)
 TEST_F(ClassGetStaticFieldByNameIntTest, get_static_field_int_invalid_field_type)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_int_test/GetIntStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_int_test.GetIntStatic", &cls), ANI_OK);
 
     ani_int age = 0;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Int(cls, "name", &age), ANI_INVALID_TYPE);
@@ -64,7 +64,7 @@ TEST_F(ClassGetStaticFieldByNameIntTest, get_static_field_int_invalid_field_type
 TEST_F(ClassGetStaticFieldByNameIntTest, invalid_argument1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_int_test/GetIntStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_int_test.GetIntStatic", &cls), ANI_OK);
     ani_int age = 0;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Int(nullptr, "name", &age), ANI_INVALID_ARGS);
 }
@@ -72,7 +72,7 @@ TEST_F(ClassGetStaticFieldByNameIntTest, invalid_argument1)
 TEST_F(ClassGetStaticFieldByNameIntTest, invalid_argument2)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_int_test/GetIntStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_int_test.GetIntStatic", &cls), ANI_OK);
     ani_int age = 0;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Int(cls, nullptr, &age), ANI_INVALID_ARGS);
 }
@@ -80,14 +80,14 @@ TEST_F(ClassGetStaticFieldByNameIntTest, invalid_argument2)
 TEST_F(ClassGetStaticFieldByNameIntTest, invalid_argument3)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_int_test/GetIntStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_int_test.GetIntStatic", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Int(cls, "name", nullptr), ANI_INVALID_ARGS);
 }
 
 TEST_F(ClassGetStaticFieldByNameIntTest, invalid_argument4)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_int_test/GetIntStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_int_test.GetIntStatic", &cls), ANI_OK);
     ani_int age = 0;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Int(cls, "", &age), ANI_NOT_FOUND);
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Int(cls, "\n", &age), ANI_NOT_FOUND);
@@ -97,7 +97,7 @@ TEST_F(ClassGetStaticFieldByNameIntTest, invalid_argument4)
 TEST_F(ClassGetStaticFieldByNameIntTest, special_values)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_int_test/GetIntStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_int_test.GetIntStatic", &cls), ANI_OK);
     ani_int single = 0;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Int(cls, "specia1", &single), ANI_OK);
     ASSERT_EQ(single, static_cast<ani_int>(0));
@@ -118,7 +118,7 @@ TEST_F(ClassGetStaticFieldByNameIntTest, combination_test1)
     const ani_int setTarget = 2U;
     const ani_int setTarget2 = 3U;
     ani_int single = 0;
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_int_test/GetIntStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_int_test.GetIntStatic", &cls), ANI_OK);
     const int32_t loopCount = 3;
     for (int32_t i = 0; i < loopCount; i++) {
         ASSERT_EQ(env_->Class_SetStaticFieldByName_Int(cls, "age", setTarget2), ANI_OK);
@@ -132,18 +132,34 @@ TEST_F(ClassGetStaticFieldByNameIntTest, combination_test1)
 
 TEST_F(ClassGetStaticFieldByNameIntTest, combination_test2)
 {
-    CheckFieldValue("Lclass_get_static_field_by_name_int_test/GetIntStatic;", "age");
+    CheckFieldValue("class_get_static_field_by_name_int_test.GetIntStatic", "age");
 }
 
 TEST_F(ClassGetStaticFieldByNameIntTest, combination_test3)
 {
-    CheckFieldValue("Lclass_get_static_field_by_name_int_test/PackstaticA;", "int_value");
+    CheckFieldValue("class_get_static_field_by_name_int_test.PackstaticA", "int_value");
 }
 
 TEST_F(ClassGetStaticFieldByNameIntTest, combination_test4)
 {
-    CheckFieldValue("Lclass_get_static_field_by_name_int_test/PackstaticFinal;", "int_value");
+    CheckFieldValue("class_get_static_field_by_name_int_test.PackstaticFinal", "int_value");
 }
+
+TEST_F(ClassGetStaticFieldByNameIntTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_int_test.GetIntStatic", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_int_test.GetIntStatic"));
+    ani_int intValue {};
+
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Int(cls, "agex", &intValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_int_test.GetIntStatic"));
+
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Int(cls, "age", &intValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_int_test.GetIntStatic"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

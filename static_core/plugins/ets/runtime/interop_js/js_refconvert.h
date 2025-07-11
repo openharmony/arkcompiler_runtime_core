@@ -19,6 +19,7 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "libpandabase/macros.h"
 #include <node_api.h>
 #include <unordered_map>
@@ -183,6 +184,11 @@ inline bool IsStdClass(Class *klass)
 inline bool IsStdClass(EtsClass *klass)
 {
     return IsStdClass(klass->GetRuntimeClass());
+}
+
+inline bool IsSubClassOfError(EtsClass *klass)
+{
+    return klass->IsSubClass(PlatformTypes()->escompatError);
 }
 
 }  // namespace ark::ets::interop::js

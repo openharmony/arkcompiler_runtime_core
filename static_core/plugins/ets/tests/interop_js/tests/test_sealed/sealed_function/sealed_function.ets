@@ -15,7 +15,10 @@
 
 package sealed_function.test;
 
-const arrow_func = (x: double) => x * x;
+const arrow_func: (x: double) => double;
+static {
+    arrow_func = (x: double) => x * x
+}
 
 function sum_double(v0: double, v1: double): double {
     return v0 + v1;

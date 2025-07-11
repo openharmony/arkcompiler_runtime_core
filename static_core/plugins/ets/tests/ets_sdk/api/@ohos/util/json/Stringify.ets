@@ -38,15 +38,15 @@ function main(): void {
 }
 
 function testStringigyEmptyStr() {
-    assertEQ(json.stringify(""), "\"\"")
+    arktest.assertEQ(json.stringify(""), "\"\"")
 }
 
 function testStringifyObj() {
-    assertEQ(json.stringify(new ObjToDump()), "{\"a\":1,\"b\":\"abcbcb\",\"c\":21222.22219,\"e\":{\"s\":\"qwerty\"}}")
+    arktest.assertEQ(json.stringify(new ObjToDump()), "{\"a\":1,\"b\":\"abcbcb\",\"c\":21222.22219,\"e\":{\"s\":\"qwerty\"}}")
 }
 
 function testStringifyObjWithArrayReplacer() {
-    assertEQ(json.stringify(new ObjToDump(), ["a", "b"]), "{\"a\":1,\"b\":\"abcbcb\"}" )
+    arktest.assertEQ(json.stringify(new ObjToDump(), ["a", "b"]), "{\"a\":1,\"b\":\"abcbcb\"}" )
 }
 
 function testStringifyObjWithFuncReplacer() {
@@ -58,22 +58,22 @@ function testStringifyObjWithFuncReplacer() {
         }
         return value
     }
-    assertEQ(json.stringify(new ObjToDump(), f, " "), "{\n" + " \"a\": 77777,\n" + " \"b\": \"abcbcb\",\n" + 
+    arktest.assertEQ(json.stringify(new ObjToDump(), f, " "), "{\n" + " \"a\": 77777,\n" + " \"b\": \"abcbcb\",\n" + 
         " \"c\": 21222.22219,\n" + " \"e\": {\n" + "  \"s\": \"qwerty\"\n" + " }\n" +"}")
 }
 
 function testStringifyObjNullReplacer() {
-    assertEQ(json.stringify(new ObjToDump(), null, 0), "{\"a\":1,\"b\":\"abcbcb\",\"c\":21222.22219,\"e\":{\"s\":\"qwerty\"}}")
+    arktest.assertEQ(json.stringify(new ObjToDump(), null, 0), "{\"a\":1,\"b\":\"abcbcb\",\"c\":21222.22219,\"e\":{\"s\":\"qwerty\"}}")
 }
 
 function testStringifyObjUndefReplacer() {
-    assertEQ(json.stringify(new ObjToDump(), undefined, 0), "{\"a\":1,\"b\":\"abcbcb\",\"c\":21222.22219,\"e\":{\"s\":\"qwerty\"}}")
+    arktest.assertEQ(json.stringify(new ObjToDump(), undefined, 0), "{\"a\":1,\"b\":\"abcbcb\",\"c\":21222.22219,\"e\":{\"s\":\"qwerty\"}}")
 }
 
 function testStringifyNull() {
-    assertEQ(json.stringify(null, undefined, 0), "null")
+    arktest.assertEQ(json.stringify(null, undefined, 0), "null")
 }
 
 function testStringifyUndefined() {
-    assertEQ(json.stringify(undefined, undefined, 0), "undefined")
+    arktest.assertEQ(json.stringify(undefined, undefined, 0), "undefined")
 }

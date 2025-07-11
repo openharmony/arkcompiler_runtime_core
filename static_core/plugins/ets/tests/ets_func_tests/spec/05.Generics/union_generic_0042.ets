@@ -77,8 +77,8 @@ function main(): int {
     var2 = new A11<Number>("Hello", 497);
     var3 = new A20("Bye", 28);
 
-    assertEQ( var1.foo(), "Hello496")
-    assertEQ( var2.foo(), "Hello497")
-    assertEQ( var3.bar(), "Bye28")
+    arktest.assertEQ( var1.foo(), "Hello496")
+    arktest.assertEQ( var2.foo(), "Hello497")
+    arktest.assertEQ( var3.bar(), "Bye28")
     return 0;
 }

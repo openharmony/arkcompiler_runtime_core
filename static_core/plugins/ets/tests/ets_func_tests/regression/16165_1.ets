@@ -23,11 +23,11 @@ enum OnPause {
 }
 
 function runState0(state?: OnPause) {
-    assertEQ(undefined, state)
+    arktest.assertEQ(undefined, state)
 }
 
 function runState1(state?: OnPause) {
-    assertEQ(OnPause.Nothing, state)
+    arktest.assertEQ(OnPause.Nothing, state)
 }
 
 function main() {

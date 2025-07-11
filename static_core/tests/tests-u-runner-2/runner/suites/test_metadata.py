@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,10 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import json
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional, Any, List, Dict
+from typing import Any
 
 import yaml
 
@@ -40,8 +41,8 @@ class Tags:
         NOT_A_TEST = "not-a-test"
         NEGATIVE = "negative"
 
-    def __init__(self, tags: Optional[List[str]] = None) -> None:
-        self.__values: Dict[Tags.EtsTag, bool] = {
+    def __init__(self, tags: list[str] | None = None) -> None:
+        self.__values: dict[Tags.EtsTag, bool] = {
             Tags.EtsTag.COMPILE_ONLY: Tags.__contains(Tags.EtsTag.COMPILE_ONLY.value, tags),
             Tags.EtsTag.NEGATIVE: Tags.__contains(Tags.EtsTag.NEGATIVE.value, tags),
             Tags.EtsTag.NOT_A_TEST: Tags.__contains(Tags.EtsTag.NOT_A_TEST.value, tags),
@@ -69,34 +70,35 @@ class Tags:
         return self.__values.get(Tags.EtsTag.NO_WARMUP, False)
 
     @staticmethod
-    def __contains(tag: str, tags: Optional[List[str]]) -> bool:
+    def __contains(tag: str, tags: list[str] | None) -> bool:
         return tag in tags if tags is not None else False
 
 
 @dataclass
-class TestMetadata:
+class TestMetadata:     # type: ignore[explicit-any]
     tags: Tags = field(default_factory=Tags)
-    desc: Optional[str] = None
-    files: Optional[List[str]] = None
-    assertion: Optional[str] = None
-    params: Optional[Any] = None
-    name: Optional[str] = None
-    package: Optional[str] = None
-    ark_options: List[str] = field(default_factory=list)
-    timeout: Optional[int] = None
-    es2panda_options: List[str] = field(default_factory=list)
-    spec: Optional[str] = None
+    desc: str | None = None
+    files: list[str] | None = None
+    assertion: str | None = None
+    params: Any | None = None   # type: ignore[explicit-any]
+    name: str | None = None
+    package: str | None = None
+    ark_options: list[str] = field(default_factory=list)
+    timeout: int | None = None
+    es2panda_options: list[str] = field(default_factory=list)
+    spec: str | None = None
+    arktsconfig: Path | None = None
     # Test262 specific metadata keys
-    description: Optional[str] = None
-    defines: Optional[str] = None
-    includes: Optional[str] = None
-    features: Optional[str] = None
-    esid: Optional[str] = None
-    es5id: Optional[str] = None
-    es6id: Optional[str] = None
-    author: Optional[str] = None
-    info: Optional[str] = None
-    locale: Optional[str] = None
+    description: str | None = None
+    defines: str | None = None
+    includes: str | None = None
+    features: str | None = None
+    esid: str | None = None
+    es5id: str | None = None
+    es6id: str | None = None
+    author: str | None = None
+    info: str | None = None
+    locale: str | None = None
 
     @classmethod
     def get_metadata(cls, path: Path) -> 'TestMetadata':
@@ -114,7 +116,7 @@ class TestMetadata:
             return cls.create_empty_metadata(path)
 
     @classmethod
-    def create_filled_metadata(cls, metadata: Dict[str, Any], path: Path) -> 'TestMetadata':
+    def create_filled_metadata(cls, metadata: dict[str, Any], path: Path) -> 'TestMetadata':# type: ignore[explicit-any]
         metadata['tags'] = Tags(metadata.get('tags'))
         if 'assert' in metadata:
             metadata['assertion'] = metadata.get('assert')
@@ -128,20 +130,24 @@ class TestMetadata:
             del metadata['flags']
         if isinstance(type(metadata.get('ark_options')), str):
             metadata['ark_options'] = [metadata['ark_options']]
-        metadata['package'] = metadata.get("package")
-        if metadata['package'] is None:
-            metadata['package'] = cls.get_package_statement(path)
+        arktsconfig = metadata.get('arktsconfig')
+        package = metadata.get("package")
+        if arktsconfig is not None:
+            arktsconfig_path = (path.parent / arktsconfig).resolve()
+            metadata['arktsconfig'] = arktsconfig_path if arktsconfig_path.exists() else None
+            package = cls.get_package_statement_from_arktsconfig(path, arktsconfig_path)
+        metadata['package'] = cls.get_package_statement_from_source(path) if package is None else package
         return TestMetadata(**metadata)
 
     @classmethod
     def create_empty_metadata(cls, path: Path) -> 'TestMetadata':
         metadata = cls()
         if metadata.package is None:
-            metadata.package = cls.get_package_statement(path)
+            metadata.package = cls.get_package_statement_from_source(path)
         return metadata
 
     @classmethod
-    def get_package_statement(cls, path: Path) -> Optional[str]:
+    def get_package_statement_from_source(cls, path: Path) -> str | None:
         data = Path.read_text(path)
         match = PACKAGE_PATTERN.search(data)
         if match is None:
@@ -149,3 +155,13 @@ class TestMetadata:
         if (stmt := match.group("package_name")) is not None:
             return stmt
         return path.stem
+
+    @classmethod
+    def get_package_statement_from_arktsconfig(cls, path: Path, arktsconfig_path: Path) -> str | None:
+        with open(arktsconfig_path, encoding="utf-8") as json_handler:
+            data = json.load(json_handler)
+        package = data.get("compilerOptions", {}).get('package', None)
+        return f"{package}.{path.stem}" if package is not None else None
+
+    def get_package_name(self) -> str:
+        return self.package if self.package is not None else ""

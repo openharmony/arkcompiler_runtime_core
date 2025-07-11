@@ -14,29 +14,29 @@
 
 set -e -o pipefail
 
+verifier=$1
+stdlib=$2
+etssdk=$3
+
 function log() {
     if [ $# -eq 1 ]; then
         echo -e "$(basename "$0") : $1"
     fi
 }
 
-if [ "$#" -ne 2 ]; then
-    log "no enough params"
+if [ "$#" -lt 2 ]; then
+    log "not enough params"
     exit 1
 fi
 
-verifier=$1
-stdlib=$2
-
-
-if [[ -f "$verifier" && -f "$stdlib" ]]; then
-    $("${verifier}" --boot-panda-files="${stdlib}"    --load-runtimes=ets    --verify-runtime-libraries=true)
-else
-    if [[ ! -f "$verifier" ]];  then
-        log "\nno verifier $verifier found!\n"
-    fi
-    if [[ ! -f "$stdlib" ]]; then
-        log "\nno stdlib $stdlib found!\n"
-    fi
+if [[ ! -f "${verifier}" ]];  then
+    log "\nno verifier ${verifier} found!\n"
     exit 1
 fi
+
+if [[ ! -f "${stdlib}" ]]; then
+    log "\nno stdlib ${stdlib} found!\n"
+    exit 1
+fi
+
+"${verifier}" --boot-panda-files="${stdlib}" --load-runtimes=ets --verify-runtime-libraries=true "${etssdk}"

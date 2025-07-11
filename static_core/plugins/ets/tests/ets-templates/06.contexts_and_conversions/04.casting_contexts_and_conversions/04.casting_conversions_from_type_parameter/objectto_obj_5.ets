@@ -34,5 +34,5 @@ type Animal = Cat | Dog | Frog | number;
 function main(): void {
   let animal: Animal = new Cat();
   const obj1: object = animal;
-  assertTrue(obj1 == animal);
+  arktest.assertTrue(obj1 == animal);
 }

@@ -31,7 +31,7 @@ cases:
           }
       use: |-
           let i: I = new B()
-          assertEQ( i.met(), "BA" )
+          arktest.assertEQ( i.met(), "BA" )
 
     - decl: |-
           interface I {
@@ -49,4 +49,4 @@ cases:
           }
       use: |-
           let a: A = new B()
-          assertEQ( a.met(), "BA" )
+          arktest.assertEQ( a.met(), "BA" )

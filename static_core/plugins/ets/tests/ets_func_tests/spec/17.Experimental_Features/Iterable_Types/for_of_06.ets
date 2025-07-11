@@ -36,12 +36,12 @@ function main() : int {
         doit(bar);
     }
 
-    assertEQ(barArray[0].index, 4)
-    assertEQ(barArray[1].index, 6)
-    assertEQ(barArray[2].index, 8)
-    assertEQ(barArray[3].index, 10)
-    assertEQ(barArray[4].index, 12)
-    assertEQ(barArray[5].index, 14)
+    arktest.assertEQ(barArray[0].index, 4)
+    arktest.assertEQ(barArray[1].index, 6)
+    arktest.assertEQ(barArray[2].index, 8)
+    arktest.assertEQ(barArray[3].index, 10)
+    arktest.assertEQ(barArray[4].index, 12)
+    arktest.assertEQ(barArray[5].index, 14)
 
     return 0;
 }

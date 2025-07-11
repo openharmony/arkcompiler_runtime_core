@@ -52,6 +52,7 @@ macro(add_ets_interop_js_benchmark BENCHMARK CALLER CALLEE)
         JS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/callee.js ${CMAKE_CURRENT_LIST_DIR}/caller.js
         LAUNCHER_ARGS ${BENCHMARK} ${CALLER} ${CALLEE} ${WARMUP} ${ITERS}
         COMPILATION_JS_WITH_CJS_ON
+        PACKAGE_NAME "caller"
     )
     add_dependencies(ets_interop_js_perf_benchmarks_${CALLER}_${CALLEE} ets_interop_js_perf_benchmarks_${CALLER}_${CALLEE}_${BENCHMARK})
 endmacro()

@@ -25,10 +25,56 @@ export abstract class Numeric extends Object {
      *
      * @returns object's value
      */
+    public abstract toByte(): byte;
+
+    /**
+     * Returns the value of an object as an int
+     *
+     * @returns object's value
+     */
+    public abstract toInt(): int;
+
+    /**
+     * Returns the value of an object as a short
+     *
+     * @returns object's value
+     */
+    public abstract toShort(): short;
+
+    /**
+     * Returns the value of an object as a long
+     *
+     * @returns object's value
+     */
+    public abstract toLong(): long;
+
+    /**
+     * Returns the value of an object as a float
+     *
+     * @returns object's value
+     */
+    public abstract toFloat(): float;
+
+    /**
+     * Returns the value of an object as a double
+     *
+     * @returns object's value
+     */
+    public abstract toDouble(): double;
+
+    /**
+     * Returns the value of an object as a byte
+     *
+     * Supportive interface
+     *
+     * @returns object's value
+     */
     public abstract byteValue(): byte;
 
     /**
      * Returns the value of an object as an int
+     *
+     * Supportive interface
      *
      * @returns object's value
      */
@@ -37,12 +83,16 @@ export abstract class Numeric extends Object {
     /**
      * Returns the value of an object as a short
      *
+     * Supportive interface
+     *
      * @returns object's value
      */
     public abstract shortValue(): short;
 
     /**
      * Returns the value of an object as a long
+     *
+     * Supportive interface
      *
      * @returns object's value
      */
@@ -51,12 +101,16 @@ export abstract class Numeric extends Object {
     /**
      * Returns the value of an object as a float
      *
+     * Supportive interface
+     *
      * @returns object's value
      */
     public abstract floatValue(): float;
 
     /**
      * Returns the value of an object as a double
+     *
+     * Supportive interface
      *
      * @returns object's value
      */

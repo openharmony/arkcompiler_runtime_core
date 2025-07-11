@@ -25,7 +25,7 @@ const num = 1;
 const str = 'str';
 const foo = () => { }
 const obj: object = {}
-const arr: int[] = []
+const arr: FixedArray<int> = []
 
 function checkCreateClassFunctionInt(): boolean {
     try {

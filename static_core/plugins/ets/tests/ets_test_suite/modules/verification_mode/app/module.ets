@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+  arktsconfig: arktsconfig.json
+---*/
+
 import { bar } from "@verification_mode/bar";
 import { Ability } from "@spawn/ability";
 

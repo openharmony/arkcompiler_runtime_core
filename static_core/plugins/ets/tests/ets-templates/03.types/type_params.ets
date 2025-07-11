@@ -37,7 +37,7 @@ class C<T> {
 
 function main() {
 {%- for v in c['vals'] %}
-    assertEQ( {{v.expr}}, "{{v.type}}" )
+    arktest.assertEQ( {{v.expr}}, "{{v.type}}" )
 {%- endfor %}
 }
 {%- endfor %}

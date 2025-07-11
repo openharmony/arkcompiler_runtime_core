@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,6 +19,7 @@ import re
 import os
 import logging
 import signal
+import time
 from typing import Union, Optional
 from pathlib import Path
 from subprocess import Popen, PIPE
@@ -55,6 +56,11 @@ class ShellResult:
                 return m.group(1)
         return ''
 
+    def replace_out(self, regex: re.Pattern, repl: str = '') -> None:
+        out = self.out.split("\n")
+        new_lines = [regex.sub(repl, line) for line in out if line.strip()]
+        self.out = "\n".join(new_lines)
+
     def set_ret_val(self) -> None:
         if not self.out:
             log.error("No shell output")
@@ -64,7 +70,11 @@ class ShellResult:
             log.error("No shell ret val; out:")
             self.ret = -13
         else:
-            self.ret = int(matches.groups()[0])
+            try:
+                self.ret = int(matches.groups()[0])
+            except ValueError:
+                log.error('Error parsing return code')
+                self.ret = -14
 
     def set_time(self) -> None:
         # expecting output of '\time -v' to stderr
@@ -119,6 +129,15 @@ class ShellBase(metaclass=Singleton):
     def run_async(self, cmd: str) -> None:
         raise NotImplementedError
 
+    def run_syslog(self, cmd: str,
+                   finished_marker: str,
+                   measure_time: bool = False,
+                   timeout: Optional[float] = None,
+                   cwd: str = '',
+                   ping_interval: int = 5,
+                   tag: str = 'VMB') -> ShellResult:
+        raise NotImplementedError
+
     def push(self,
              src: Union[str, Path],
              dst: Union[str, Path]) -> ShellResult:
@@ -127,6 +146,9 @@ class ShellBase(metaclass=Singleton):
     def pull(self,
              src: Union[str, Path],
              dst: Union[str, Path]) -> ShellResult:
+        raise NotImplementedError
+
+    def install(self, package: Union[str, Path], name: str = '') -> ShellResult:
         raise NotImplementedError
 
     def get_filesize(self, filepath: Union[str, Path]) -> int:
@@ -167,6 +189,15 @@ class ShellUnix(ShellBase):
     def pull(self,
              src: Union[str, Path],
              dst: Union[str, Path]) -> ShellResult:
+        raise NotImplementedError
+
+    def run_syslog(self, cmd: str,
+                   finished_marker: str,
+                   measure_time: bool = False,
+                   timeout: Optional[float] = None,
+                   cwd: str = '',
+                   ping_interval: int = 5,
+                   tag: str = 'VMB') -> ShellResult:
         raise NotImplementedError
 
     def run_async(self, cmd: str) -> None:
@@ -216,8 +247,8 @@ class ShellUnix(ShellBase):
             ret_code = proc.poll()
             if ret_code is not None:
                 result.ret = ret_code
-            result.out = out.decode('utf-8')
-            result.err = err.decode('utf-8')
+            result.out = out.decode('utf-8', errors='replace')
+            result.err = err.decode('utf-8', errors='replace')
         return result
 
 
@@ -261,6 +292,15 @@ class ShellDevice(ShellBase):
             res.err = ''
         return res
 
+    def run_syslog(self, cmd: str,
+                   finished_marker: str,
+                   measure_time: bool = False,
+                   timeout: Optional[float] = None,
+                   cwd: str = '',
+                   ping_interval: int = 5,
+                   tag: str = 'VMB') -> ShellResult:
+        raise NotImplementedError
+
     def run_async(self, cmd: str) -> None:
         self._sh.run_async(f"{self._devsh} shell '{cmd}'")
 
@@ -278,6 +318,9 @@ class ShellDevice(ShellBase):
     def pull(self,
              src: Union[str, Path],
              dst: Union[str, Path]) -> ShellResult:
+        raise NotImplementedError
+
+    def install(self, package: Union[str, Path], name: str = '') -> ShellResult:
         raise NotImplementedError
 
     def mk_tmp_dir(self):
@@ -314,8 +357,14 @@ class ShellAdb(ShellDevice):
         return self._sh.run(f'{self._devsh} pull {src} {dst}',
                             measure_time=False)
 
+    def install(self, package: Union[str, Path], name: str = '') -> ShellResult:
+        raise NotImplementedError
+
 
 class ShellHdc(ShellDevice):
+    # hardcoded tag and app name for now
+    hilog_re = re.compile(r'^.*com.example.helllopanda/VMB: ')
+
     def __init__(self,
                  dev_serial: str = '',
                  dev_host: str = '',
@@ -343,3 +392,54 @@ class ShellHdc(ShellDevice):
              dst: Union[str, Path]) -> ShellResult:
         return self._sh.run(f'{self._devsh} file recv {src} {dst}',
                             measure_time=False)
+
+    def install(self, package: Union[str, Path], name: str = '') -> ShellResult:
+        if name:
+            self._sh.run(f'{self._devsh} uninstall {name}', measure_time=False)
+        return self._sh.run(f'{self._devsh} aa install {package}', measure_time=False)
+
+    def grab_log(self, tag: str, finished_marker: str) -> Optional[ShellResult]:
+        opts = f' -T {tag}' if tag else ''
+        res = self.run(f'hilog -x{opts}')
+        if res.grep(finished_marker):
+            # success. strip hilog data
+            res.replace_out(self.hilog_re)
+            return res
+        return None
+
+    def run_syslog(self, cmd: str,
+                   finished_marker: str,
+                   measure_time: bool = False,
+                   timeout: Optional[float] = None,
+                   cwd: str = '',
+                   ping_interval: int = 5,
+                   tag: str = 'VMB') -> ShellResult:
+        self.run('rm -f /data/log/faultlog/faultlogger/*')
+        self.run('hilog -r')  # clear log buffer
+        res = self.run(cmd=cmd, measure_time=measure_time, cwd=cwd)
+        if res.ret != 0:
+            log.error('Command failed. Skippping results.')
+            return res
+        res_log = None
+        if 0 == ping_interval:  # synchronous cmd
+            res_log = self.grab_log(tag, finished_marker)
+        else:  # async cmd
+            to = 30 if timeout is None else timeout
+            elapsed = 0
+            while elapsed < to:
+                log.debug("Waiting  %d sec for [%s]", ping_interval, finished_marker)
+                time.sleep(ping_interval)
+                elapsed += ping_interval
+                res_log = self.grab_log(tag, finished_marker)
+                if res_log:
+                    break
+        if res_log:
+            res.out = res_log.out
+            return res
+        # error. save full log
+        res.ret = 1
+        try:
+            res.out = self.run('cat /data/log/faultlog/faultlogger/* | head -40').out
+        except Exception:  # pylint: disable=broad-exception-caught
+            log.warning('Error getting fault logs!')
+        return res

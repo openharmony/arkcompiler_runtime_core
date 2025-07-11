@@ -15,7 +15,7 @@
 import {xml} from "@ohos.xml"
 
 function main(): int {
-    const suite = new ArkTestsuite("XmlPullParser API tests");
+    const suite = new arktest.ArkTestsuite("XmlPullParser API tests");
 
     suite.addTest("Test create XmlPullParser with empty buffer & default Encoding", testXmlPullParserDefault)
     suite.addTest("Test XmlPullParser with TagValueCallback with supportDocType", testWithTagValueCb)
@@ -37,7 +37,7 @@ function main(): int {
 function testXmlPullParserDefault(){
     let buffer = new ArrayBuffer(0)
     let parser = new xml.XmlPullParser(buffer)
-    assertNE(parser, null)
+    arktest.assertNE(parser, null)
     parser.parseXml({} as xml.ParseOptions)
 }
 
@@ -87,7 +87,7 @@ function testWithTagValueCb() {
 { todo :  }; {  : go there }; { a :  }; { b :  }; { b :  }; { a :  }; { table :  }; { tr :  }; { td :  }; {  : Apples }; \
 { td :  }; { td :  }; {  : Bananas }; { td :  }; { tr :  }; { table :  }; { note :  }; '
 
-    assertEQ(processStr(g_testStr), processStr(res))
+    arktest.assertEQ(processStr(g_testStr), processStr(res))
 }
 
 function testWithTagValueCbWithIgnoreNS() {
@@ -120,7 +120,7 @@ function testWithTagValueCbWithIgnoreNS() {
 {  : Happy }; { title :  }; { todo :  }; {  : Work }; { todo :  }; { todo :  }; {  : Play }; { todo :  }; \
 {  : go there }; { a :  }; { b :  }; { b :  }; { a :  }; { h:table :  }; { h:tr :  }; { h:td :  }; {  : Apples }; { h:td :  }; \
 { h:td :  }; {  : Bananas }; { h:td :  }; { h:tr :  }; { h:table :  }; { note :  }; '
-    assertEQ(processStr(g_testStr), processStr(res))
+    arktest.assertEQ(processStr(g_testStr), processStr(res))
 }
 
 function testWithTagValueCbWithSupportDocTypeAndIgnoreNS() {
@@ -155,7 +155,7 @@ function testWithTagValueCbWithSupportDocTypeAndIgnoreNS() {
 { todo :  }; {  : go there }; { a :  }; { b :  }; { b :  }; { a :  }; { h:table :  }; { h:tr :  }; { h:td :  }; {  : Apples }; \
 { h:td :  }; { h:td :  }; {  : Bananas }; { h:td :  }; { h:tr :  }; { h:table :  }; { note :  }; '
 
-    assertEQ(processStr(g_testStr), processStr(res))
+    arktest.assertEQ(processStr(g_testStr), processStr(res))
 }
 
 function eventName(type: xml.EventType): string {
@@ -237,7 +237,7 @@ function testWithTokenValueCb() {
 { lineNumber : 6}; { attributeCount : 0}; { isEmptyElementTag : false}; { isWhitespace : true}; { namespace : }; { name : }; \
 { prefix : }; { text : } }; '
 
-    assertEQ(processStr(g_testStr), processStr(expected))
+    arktest.assertEQ(processStr(g_testStr), processStr(expected))
 }
 
 // testParseXml013
@@ -272,8 +272,8 @@ function testReplaceXmlSpecChars() {
     let expectedTextStr = 'Hello>World\'Wo"rk'
     let expectedAttrStr = "{ importance : hi&gh }; { logged : <true }; "
 
-    assertEQ(attStr, expectedAttrStr)
-    assertEQ(textStr, expectedTextStr)
+    arktest.assertEQ(attStr, expectedAttrStr)
+    arktest.assertEQ(textStr, expectedTextStr)
 }
 
 // testParse012
@@ -302,7 +302,7 @@ function testCDATA() {
 
     let expectedTextStr = 'Hello\nWorld Work\n This is a \n CDATA section '
 
-    assertEQ(textStr, expectedTextStr)
+    arktest.assertEQ(textStr, expectedTextStr)
 }
 
 // testParseXml010
@@ -333,10 +333,10 @@ function testIsEmptyElementTag() {
 
     let expectedTextStr = '{ note : false }; { title : true }; { todo : false }; { todo : true }; '
 
-    assertEQ(textStr, expectedTextStr)
+    arktest.assertEQ(textStr, expectedTextStr)
 
     const expectedOld = 'key:2 value:false key:2 value:true key:2 value:false key:2 value:true '
-    assertEQ(expectedOld, oldStr)
+    arktest.assertEQ(expectedOld, oldStr)
 }
 
 // testParseXml009
@@ -367,10 +367,10 @@ function testGetText() {
 
     let expectedTextStr = '{  : Happy }; {  : Work }; {  : Play }; '
 
-    assertEQ(textStr, expectedTextStr)
+    arktest.assertEQ(textStr, expectedTextStr)
 
     let expectedOld = "key:4 value:Happy key:4 value:Work key:4 value:Play "
-    assertEQ(oldStr, expectedOld)
+    arktest.assertEQ(oldStr, expectedOld)
 }
 
 // testParseXml008
@@ -401,11 +401,11 @@ function testGetPrefix() {
 
     let expectedTextStr = '{ note :  }; { table : h }; { tr : h }; { td : h }; { td : h }; { tr : h }; { table : h }; { note :  }; '
 
-    assertEQ(textStr, expectedTextStr)
+    arktest.assertEQ(textStr, expectedTextStr)
 
     let oldExpected = "key:2 value: key:2 value:h key:2 value:h key:2 value:h " +
     "key:3 value:h key:3 value:h key:3 value:h key:3 value: "
-    assertEQ(oldExpected, oldStr)
+    arktest.assertEQ(oldExpected, oldStr)
 }
 
 // testParseXml007
@@ -436,11 +436,11 @@ function testGetNamespace() {
 
     let expectedTextStr = '{ note :  }; { table : html4 }; { tr : html4 }; { td : html4 }; { td : html4 }; { tr : html4 }; { table : html4 }; { note :  }; '
 
-    assertEQ(textStr, expectedTextStr)
+    arktest.assertEQ(textStr, expectedTextStr)
 
     let oldExpected = "key:2 value: key:2 value:html4 key:2 value:html4 key:2 value:html4 " +
     "key:3 value:html4 key:3 value:html4 key:3 value:html4 key:3 value: "
-    assertEQ(oldStr, oldExpected)
+    arktest.assertEQ(oldStr, oldExpected)
 }
 
 // testParseXml002
@@ -474,11 +474,11 @@ function testTagValue() {
 {  :      }; { company :  }; {  : John & Hans }; { company :  }; {  :      }; { title :  }; {  : Happy }; { title :  }; \
 {  :      }; { lens :  }; {  : Play }; { lens :  }; {  :      }; {  : go there }; { note :  }; '
 
-    assertEQ(textStr, expectedTextStr)
+    arktest.assertEQ(textStr, expectedTextStr)
 
     let oldExpectedStr = 'note    function \n matchwo(a,6)    Hello, World!    companyJohn & Hanscompany\
     titleHappytitle    lensPlaylens    go therenote'
-    assertEQ(oldTextStr, oldExpectedStr)
+    arktest.assertEQ(oldTextStr, oldExpectedStr)
 }
 
 let testXml =
@@ -520,11 +520,11 @@ let testXml =
                 supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
             }
             parser.parseXml(options);
-            assertTrue(str.includes("key:2 value:true"))
+            arktest.assertTrue(str.includes("key:2 value:true"))
         } catch (err) {
             const TAG = 'testXmlIsWhitespace0001';
             console.error(`${TAG} failed, error: ${err}`);
-            assertTrue(false)
+            arktest.assertTrue(false)
         }
     }
 

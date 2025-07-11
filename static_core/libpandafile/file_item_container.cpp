@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -433,6 +433,86 @@ void ItemContainer::DeduplicateItems(bool computeLayout)
     }
     DeduplicateCodeAndDebugInfo();
     DeduplicateAnnotations();
+}
+
+void ItemContainer::MarkLiteralarrayMap()
+{
+    for (auto &entry : literalarrayMap_) {
+        entry.second->SetDependencyMark();
+    }
+}
+
+void ItemContainer::CleanupArrayValueItems(ValueItem *value)
+{
+    auto arrayValue = value->GetAsArray();
+    auto *vecItems = arrayValue->GetMutableItems();
+    auto newEnd = std::partition(vecItems->begin(), vecItems->end(), [](const ScalarValueItem &valueItem) {
+        if (valueItem.GetType() == ValueItem::Type::ID) {
+            auto realitem = valueItem.GetIdItem();
+            return realitem->GetDependencyMark();
+        }
+        return true;
+    });
+    vecItems->erase(newEnd, vecItems->end());
+}
+
+void ItemContainer::DeleteReferenceFromAnno(AnnotationItem *annoItem)
+{
+    auto &elements = *annoItem->GetElements();
+    for (auto element = elements.begin(); element != elements.end();) {
+        bool nodelete = true;
+        auto *value = element->GetValue();
+        if (value->GetType() == ValueItem::Type::ARRAY) {
+            CleanupArrayValueItems(value);
+        } else if (value->GetType() == ValueItem::Type::ID) {
+            auto scalarValue = value->GetAsScalar();
+            nodelete = scalarValue->GetIdItem()->GetDependencyMark();
+        }
+        if (nodelete) {
+            ++element;
+        } else {
+            element = elements.erase(element);
+        }
+    }
+}
+
+uint32_t ItemContainer::DeleteItems()
+{
+    // ANNOTATION_ITEM reference other item by
+    // AnnotationItem->std::vector<Elem>
+    // Elem->ValueItem
+    // ValueItem->BaseItem if ValueItem::Type == Type::ID
+    // BaseItem should be remove from AnnotationItem before delete
+    auto shouldRemoveAnnotationItem = [this](const std::unique_ptr<BaseItem> &item) -> bool {
+        if (item->GetItemType() != ItemTypes::ANNOTATION_ITEM) {
+            return false;
+        }
+        auto annoItem = static_cast<AnnotationItem *>(item.get());
+        DeleteReferenceFromAnno(annoItem);
+        return !item->GetDependencyMark() && item->NeedsEmit();
+    };
+    items_.remove_if(shouldRemoveAnnotationItem);
+    items_.remove_if([this](const std::unique_ptr<BaseItem> &item) {
+        if (!item->GetDependencyMark()) {
+            // lineNumberProgramIndexItem_ reference LineNumberProgramItem.
+            // remove from lnp before item deleted if item not necessary.
+            if (item->GetItemType() == ItemTypes::LINE_NUMBER_PROGRAM_ITEM) {
+                auto lnpitem = static_cast<LineNumberProgramItem *>(item.get());
+                lineNumberProgramIndexItem_.Remove(lnpitem);
+            }
+        }
+        return !item->GetDependencyMark() && item->NeedsEmit();
+    });
+    return 0;
+}
+
+uint32_t ItemContainer::DeleteForeignItems()
+{
+    auto newEnd = std::partition(foreignItems_.begin(), foreignItems_.end(), [](const std::unique_ptr<BaseItem> &item) {
+        return item->GetDependencyMark() || !item->NeedsEmit();
+    });
+    foreignItems_.erase(newEnd, foreignItems_.end());
+    return 0;
 }
 
 uint32_t ItemContainer::ComputeLayout()

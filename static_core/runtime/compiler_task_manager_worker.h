@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,17 +20,13 @@
 #include "runtime/include/mem/panda_containers.h"
 #include "libpandabase/taskmanager/task.h"
 #include "libpandabase/taskmanager/task_queue.h"
-#include "libpandabase/taskmanager/task_scheduler.h"
+#include "libpandabase/taskmanager/task_manager.h"
 
 namespace ark {
 
 /// @brief Compiler worker task pool based on common TaskManager (TaskQueue)
 class CompilerTaskManagerWorker : public CompilerWorker {
 public:
-    /* Compiler task queue (TaskManager) specific variables */
-    static constexpr taskmanager::TaskProperties JIT_TASK_PROPERTIES {
-        taskmanager::TaskType::JIT, taskmanager::VMType::STATIC_VM, taskmanager::TaskExecutionMode::BACKGROUND};
-
     CompilerTaskManagerWorker(mem::InternalAllocatorPtr internalAllocator, Compiler *compiler);
 
     NO_COPY_SEMANTIC(CompilerTaskManagerWorker);
@@ -57,8 +53,7 @@ public:
 
     ~CompilerTaskManagerWorker() override
     {
-        taskmanager::TaskScheduler::GetTaskScheduler()
-            ->UnregisterAndDestroyTaskQueue<decltype(internalAllocator_->Adapter())>(compilerTaskManagerQueue_);
+        taskmanager::TaskManager::DestroyTaskQueue<decltype(internalAllocator_->Adapter())>(compilerTaskManagerQueue_);
     }
 
 private:

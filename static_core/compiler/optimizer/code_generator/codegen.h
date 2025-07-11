@@ -292,9 +292,16 @@ public:
     template <bool IS_CLASS = false>
     void CreatePreWRB(Inst *inst, MemRef mem, RegMask preserved = {}, bool storePair = false);
     void CreatePostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2 = INVALID_REGISTER, RegMask preserved = {});
-    void CreatePostWRBForDynamic(Inst *inst, MemRef mem, Reg reg1, Reg reg2, RegMask preserved = {});
+    void CreatePostWRBImpl(Inst *inst, MemRef mem, Reg reg1, Reg reg2 = INVALID_REGISTER, RegMask preserved = {});
+    void CreatePostWRBForDynamicImpl(Inst *inst, MemRef mem, Reg reg1, Reg reg2, RegMask preserved = {});
+    void CreateReadViaBarrier(Inst *inst, MemRef mem, Reg dstReg, bool isVolatile = false, RegMask preserved = {});
+    void CreateReadPairViaBarrier(Inst *inst, MemRef mem, Reg dstReg1, Reg dstReg2, RegMask preserved = {});
+    void CreateCmcPostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2 = INVALID_REGISTER, RegMask preserved = {});
+    void CreateCmcPostWRBCall(Inst *inst, MemRef mem, Reg dstReg, RegMask preserved = {});
+    void CreateCmcReadViaBarrierCall(Inst *inst, MemRef mem, Reg dstReg, bool isVolatile = false,
+                                     RegMask preserved = {});
     template <typename... Args>
-    void CallBarrier(RegMask liveRegs, VRegMask liveVregs, std::variant<EntrypointId, Reg> entrypoint,
+    void CallBarrier(RegMask liveRegs, VRegMask liveVregs, std::variant<EntrypointId, Reg> entrypoint, Reg dstReg,
                      Args &&...params);
     void CreateLoadClassFromPLT(Inst *inst, Reg tmpReg, Reg dst, size_t classId);
     void CreateJumpToClassResolverPltShared(Inst *inst, Reg tmpReg, RuntimeInterface::EntrypointId id);

@@ -25,5 +25,5 @@ enum ColorSet {
 
 function main(): void {
   let c: number = ColorSet.Green;
-  assertEQ(c, 1);
+  arktest.assertEQ(c, 1);
 }

@@ -44,7 +44,7 @@ class Test {
         const placeholderClass = Class.of(new A());
         const testLoadObject = (runtimeLinker: RuntimeLinker) => {
             const cls = runtimeLinker.loadClass(Test.stdCoreObjectName);
-            assertEQ(cls, placeholderClass, "dummy linker must always return class A");
+            arktest.assertEQ(cls, placeholderClass, "dummy linker must always return class A");
         };
 
         const dummyLinker = new DummyRuntimeLinker(placeholderClass);
@@ -56,11 +56,11 @@ class Test {
 
     private static testEmptyLinker(linker: RuntimeLinker) {
         const cls1 = linker.loadClass(Test.stdCoreObjectName);
-        assertEQ(cls1, Class.of(new Object()));
+        arktest.assertEQ(cls1, Class.of(new Object()));
         // Object must be returned from BootRuntimeLinker
-        assertEQ(cls1.getLinker(), getBootRuntimeLinker(), "std.core.Object must be loaded by BootRuntimeLinker");
+        arktest.assertEQ(cls1.getLinker(), getBootRuntimeLinker(), "std.core.Object must be loaded by BootRuntimeLinker");
         const cls2 = getBootRuntimeLinker().loadClass(Test.stdCoreObjectName);
-        assertEQ(cls1, cls2, "loadClass must be idempotent");
+        arktest.assertEQ(cls1, cls2, "loadClass must be idempotent");
     }
 
     static testEmptyAbcRuntimeLinker() {
@@ -73,19 +73,20 @@ class Test {
         Test.testEmptyLinker(linker);
     }
 
-    private static native loadFile(path: string): byte[] | undefined;
+    private static native loadFile(path: string): FixedArray<byte> | undefined;
 
     private static getAdditionalFilesList(): string[] {
-        const abcFiles = ProcessManager.getEnvironmentVar("ADDITIONAL_ABC_FILES");
-        assertLT(0, abcFiles.length, "this test must have additional abc files")
+        let procManager = new StdProcess.ProcessManager();
+        const abcFiles = procManager.getEnvironmentVar("ADDITIONAL_ABC_FILES");
+        arktest.assertLT(0, abcFiles.length, "this test must have additional abc files")
         return abcFiles.split(":");
     }
 
-    private static loadRawFiles(paths: string[]): byte[][] {
-        const rawFiles = new byte[paths.length as int][0];
+    private static loadRawFiles(paths: string[]): Array<FixedArray<byte>> {
+        const rawFiles = new Array<FixedArray<byte>>(paths.length as int);
         for (let i = 0; i < rawFiles.length; i++) {
             const raw = Test.loadFile(paths[i]);
-            assertNE(raw, undefined, "failed to load file " + paths[i]);
+            arktest.assertNE(raw, undefined, "failed to load file " + paths[i]);
             rawFiles[i] = raw!;
         }
         return rawFiles;
@@ -93,31 +94,31 @@ class Test {
 
     private static testOnAdditionalFiles(linker: RuntimeLinker) {
         const objectClass = linker.loadClass(Test.stdCoreObjectName);
-        assertEQ(objectClass, Class.of(new Object()));
-        assertEQ(objectClass.getLinker(), getBootRuntimeLinker(), "std.core.Object must be loaded by BootRuntimeLinker");
+        arktest.assertEQ(objectClass, Class.of(new Object()));
+        arktest.assertEQ(objectClass.getLinker(), getBootRuntimeLinker(), "std.core.Object must be loaded by BootRuntimeLinker");
 
         // Load class from "additional1.ets"
         const cls1 = linker.loadClass(Test.additionalClass1Name, true);
-        assertNE(cls1, undefined, "AdditionalClass1 must be found");
-        assertEQ(cls1.getLinker(), linker, "AdditionalClass1 must be loaded by custom linker");
+        arktest.assertNE(cls1, undefined, "AdditionalClass1 must be found");
+        arktest.assertEQ(cls1.getLinker(), linker, "AdditionalClass1 must be loaded by custom linker");
 
         // Load class from "additional2.ets"
         // As side effect, this must load "additional3.ets" and execute code from it
         const cls2 = linker.loadClass(Test.additionalClass2Name, true);
-        assertNE(cls2, undefined, "AdditionalClass2 must be found");
-        assertEQ(cls2.getLinker(), linker, "AdditionalClass2 must be loaded by custom linker");
+        arktest.assertNE(cls2, undefined, "AdditionalClass2 must be found");
+        arktest.assertEQ(cls2.getLinker(), linker, "AdditionalClass2 must be loaded by custom linker");
 
         // Check that RuntimeLinker loads into an isolated context
         const abcLinker2 = new AbcRuntimeLinker(undefined, Test.getAdditionalFilesList());
         // Load firstly "AdditionalClass2", which must trigger load of "AdditionalClass1"
         const otherLinkerClass2 = abcLinker2.loadClass(Test.additionalClass2Name, true);
-        assertNE(otherLinkerClass2, undefined);
-        assertEQ(otherLinkerClass2.getLinker(), abcLinker2, "linker contexts must be isolated");
-        assertNE(cls2, otherLinkerClass2, "classes from different contexts must not conflict");
+        arktest.assertNE(otherLinkerClass2, undefined);
+        arktest.assertEQ(otherLinkerClass2.getLinker(), abcLinker2, "linker contexts must be isolated");
+        arktest.assertNE(cls2, otherLinkerClass2, "classes from different contexts must not conflict");
         const otherLinkerClass1 = abcLinker2.loadClass(Test.additionalClass1Name, true);
-        assertNE(otherLinkerClass1, undefined);
-        assertEQ(otherLinkerClass1.getLinker(), abcLinker2, "linker contexts must be isolated");
-        assertNE(cls1, otherLinkerClass1, "classes from different contexts must not conflict");
+        arktest.assertNE(otherLinkerClass1, undefined);
+        arktest.assertEQ(otherLinkerClass1.getLinker(), abcLinker2, "linker contexts must be isolated");
+        arktest.assertNE(cls1, otherLinkerClass1, "classes from different contexts must not conflict");
     }
 
     static testAbcRuntimeLinker() {
@@ -143,11 +144,11 @@ class Test {
         // Load firstly "AdditionalClass2", which must trigger load of "AdditionalClass1"
         // - "A" must be loaded instead of "AdditionalClass1"
         const cls2 = linker.loadClass(Test.additionalClass2Name, true);
-        assertNE(cls2, undefined);
-        assertEQ(cls2.getLinker(), baseLinker);
+        arktest.assertNE(cls2, undefined);
+        arktest.assertEQ(cls2.getLinker(), baseLinker);
         const cls1 = linker.loadClass(Test.additionalClass1Name, true);
-        assertEQ(cls1, placeholderClass);
-        assertEQ(cls1.getLinker(), getBootRuntimeLinker());
+        arktest.assertEQ(cls1, placeholderClass);
+        arktest.assertEQ(cls1.getLinker(), getBootRuntimeLinker());
     }
 
     static testClassInitializationFail() {
@@ -160,17 +161,17 @@ class Test {
 
         // Load "AdditionalClass2" without initialization
         const cls2 = linker.loadClass(Test.additionalClass2Name, false);
-        assertNE(cls2, undefined);
-        assertEQ(cls2.getLinker(), linker);
+        arktest.assertNE(cls2, undefined);
+        arktest.assertEQ(cls2.getLinker(), linker);
         // Trigger class initialization, which will not find "AdditionalClass1"
-        expectThrow(() => { linker.loadClass(Test.additionalClass2Name, true); },
+        arktest.expectThrow(() => { linker.loadClass(Test.additionalClass2Name, true); },
             (e) => e instanceof LinkerUnresolvedClassError
         );
     }
 
     private static triggerGC() {
-        expectNoThrow((): void throws => {
-            GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE, GC.IN_PLACE_MODE));
+        arktest.expectNoThrow((): void => {
+            GC.waitForFinishGC(GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE));
         });
     }
 
@@ -179,21 +180,21 @@ class Test {
         const abcLinker = new AbcRuntimeLinker(undefined, Test.getAdditionalFilesList());
 
         const objectClass = abcLinker.loadClass(Test.stdCoreObjectName);
-        assertEQ(objectClass, Class.of(new Object()));
-        assertEQ(objectClass.getLinker(), getBootRuntimeLinker(), "std.core.Object must be loaded by BootRuntimeLinker");
+        arktest.assertEQ(objectClass, Class.of(new Object()));
+        arktest.assertEQ(objectClass.getLinker(), getBootRuntimeLinker(), "std.core.Object must be loaded by BootRuntimeLinker");
 
         // Load class from "additional1.ets"
         const cls1 = abcLinker.loadClass(Test.additionalClass1Name, true);
-        assertNE(cls1, undefined, "AdditionalClass1 must be found");
-        assertEQ(cls1.getLinker(), abcLinker, "AdditionalClass1 must be loaded by custom linker");
+        arktest.assertNE(cls1, undefined, "AdditionalClass1 must be found");
+        arktest.assertEQ(cls1.getLinker(), abcLinker, "AdditionalClass1 must be loaded by custom linker");
 
         Test.triggerGC();
 
         // Load class from "additional2.ets"
         // As side effect, this must load "additional3.ets" and execute code from it
         const cls2 = abcLinker.loadClass(Test.additionalClass2Name, true);
-        assertNE(cls2, undefined, "AdditionalClass2 must be found");
-        assertEQ(cls2.getLinker(), abcLinker, "AdditionalClass2 must be loaded by custom linker");
+        arktest.assertNE(cls2, undefined, "AdditionalClass2 must be found");
+        arktest.assertEQ(cls2.getLinker(), abcLinker, "AdditionalClass2 must be loaded by custom linker");
 
         return new WeakRef<AbcRuntimeLinker>(abcLinker);
     }
@@ -201,14 +202,14 @@ class Test {
     static testAbcRuntimeLinkerUnload() {
         const abcLinkerRef = Test.createWeakRef();
         Test.triggerGC();
-        assertEQ(abcLinkerRef.deref(), undefined, "AbcRuntimeLinker must be collected");
+        arktest.assertEQ(abcLinkerRef.deref(), undefined, "AbcRuntimeLinker must be collected");
     }
 
     private static testAddAbcFiles(linker: AbcRuntimeLinker, newFiles: string[]) {
         // Load "AdditionalClass2" without initialization
         const cls2 = linker.loadClass(Test.additionalClass2Name, false);
-        assertNE(cls2, undefined);
-        assertEQ(cls2.getLinker(), linker);
+        arktest.assertNE(cls2, undefined);
+        arktest.assertEQ(cls2.getLinker(), linker);
 
         // Add the missing file
         linker.addAbcFiles(newFiles);
@@ -239,31 +240,31 @@ class Test {
         Test.testAddAbcFiles(linker, [allAbcFiles[0]]);
     }
 
-    private static addSingleAbcFile(linker: AbcRuntimeLinker, path: string): void {
+    public static addSingleAbcFile(linker: AbcRuntimeLinker, path: string): void {
         linker.addAbcFiles([path]);
     }
 
     static testConcurrentAddAbcFiles() {
         const linker = new AbcRuntimeLinker(undefined, []);
         const allAbcFiles = Test.getAdditionalFilesList();
-        const promises = new Array<Promise<void>>();
+        const promises = new Array<Job<void>>();
         // Add all files except "additional1.ets"
         for (let i = 1; i < allAbcFiles.length; i++) {
-            promises.push(launch Test.addSingleAbcFile(linker, allAbcFiles[i]));
+            promises.push(launch<void, (l: AbcRuntimeLinker, p: string) => void>(Test.addSingleAbcFile, linker, allAbcFiles[i]));
         }
         // Try to load a class from "additional1.ets"
-        expectThrow(() => { linker.loadClass(Test.additionalClass1Name, true); },
+        arktest.expectThrow(() => { linker.loadClass(Test.additionalClass1Name, true); },
             (e) => e instanceof LinkerClassNotFoundError
         );
-        promises.forEach((p: Promise<void>): void => { await p; });
+        promises.forEach((p: Job<void>): void => { p.Await(); });
         Test.addSingleAbcFile(linker, allAbcFiles[0]);
         // Now class must be found
-        expectNoThrow(() => { linker.loadClass(Test.additionalClass1Name, true); });
+        arktest.expectNoThrow(() => { linker.loadClass(Test.additionalClass1Name, true); });
     }
 
     static testAbcRuntimeLinkerLoadErrorPath() {
         const path: string[] = ["null"];
-        expectThrow(() => { new AbcRuntimeLinker(undefined, path) },
+        arktest.expectThrow(() => { new AbcRuntimeLinker(undefined, path) },
             (e) => e instanceof AbcFileNotFoundError
         );
     }
@@ -284,6 +285,5 @@ class Test {
 }
 
 function main() {
-    loadLibrary("runtime_linker_extensions-shared-lib");
     Test.test();
 }

@@ -22,10 +22,10 @@ function main(): void {
   let ii: Int|undefined = undefined;
   try {
     (1 ? ii : i)!;
-    assertTrue( false, "evaluation of e seems to be e" )
+    arktest.assertTrue( false, "evaluation of e seems to be e" )
   } catch(npe: NullPointerError) {
-    assertTrue( true, "NPE caught - correct")
+    arktest.assertTrue( true, "NPE caught - correct")
   } catch(e) {
-    assertTrue( false, "Some other Error thrown, not correct")
+    arktest.assertTrue( false, "Some other Error thrown, not correct")
   }
 }

@@ -48,9 +48,9 @@ cases:
   - { type: float, value: -123.2f, sign: '<<',  expected: -984 }
   - { type: float, value: -123.2f, sign: '>>',  expected: -16  }
 
-  - { type: number, value: 5051.9,  sign: '<<',  expected: 40408,  conversion: as int }
-  - { type: number, value: 5051.9,  sign: '>>',  expected: 631,    conversion: as int }
-  - { type: number, value: 5051.9,  sign: '>>>', expected: 631,    conversion: as int }
-  - { type: number, value: -5051.9, sign: '<<',  expected: -40408, conversion: as int }
-  - { type: number, value: -5051.9, sign: '>>',  expected: -632,   conversion: as int }
+  - { type: number, value: 5051.9,  sign: '<<',  expected: 40408   }
+  - { type: number, value: 5051.9,  sign: '>>',  expected: 631     }
+  - { type: number, value: 5051.9,  sign: '>>>', expected: 631     }
+  - { type: number, value: -5051.9, sign: '<<',  expected: -40408  }
+  - { type: number, value: -5051.9, sign: '>>',  expected: -632    }
       

@@ -17,77 +17,77 @@ function testInt8ArraySet() {
     let sample = new Int8Array([1, 2, 3, 4])
     let src = new Int8Array(sample.buffer, 0, 2)
     sample.set(src, 1)
-    assertEQ(sample.toString(), '1,1,2,4')
+    arktest.assertEQ(sample.toString(), '1,1,2,4')
 }
 
 function testInt16ArraySet() {
     let sample = new Int16Array([1, 2, 3, 4])
     let src = new Int16Array(sample.buffer, 0, 2)
     sample.set(src, 1)
-    assertEQ(sample.toString(), '1,1,2,4')
+    arktest.assertEQ(sample.toString(), '1,1,2,4')
 }
 
 function testInt32ArraySet() {
     let sample = new Int32Array([1, 2, 3, 4])
     let src = new Int32Array(sample.buffer, 0, 2)
     sample.set(src, 1)
-    assertEQ(sample.toString(), '1,1,2,4')
+    arktest.assertEQ(sample.toString(), '1,1,2,4')
 }
 
 function testBigInt64ArraySet() {
     let sample = new BigInt64Array([1, 2, 3, 4])
     let src = new BigInt64Array(sample.buffer, 0, 2)
     sample.set(src, 1)
-    assertEQ(sample.toString(), '1,1,2,4')
+    arktest.assertEQ(sample.toString(), '1,1,2,4')
 }
 
 function testFloat32ArraySet() {
     let sample = new Float32Array([1, 2, 3, 4])
     let src = new Float32Array(sample.buffer, 0, 2)
     sample.set(src, 1)
-    assertEQ(sample.toString(), '1,1,2,4')
+    arktest.assertEQ(sample.toString(), '1,1,2,4')
 }
 
 function testFloat64ArraySet() {
     let sample = new Float64Array([1, 2, 3, 4])
     let src = new Float64Array(sample.buffer, 0, 2)
     sample.set(src, 1)
-    assertEQ(sample.toString(), '1,1,2,4')
+    arktest.assertEQ(sample.toString(), '1,1,2,4')
 }
 
 function testUint8ClampedArraySet() {
     let sample = new Uint8ClampedArray([1, 2, 3, 4])
     let src = new Uint8ClampedArray(sample.buffer, 0, 2)
     sample.set(src, 1)
-    assertEQ(sample.toString(), '1,1,2,4')
+    arktest.assertEQ(sample.toString(), '1,1,2,4')
 }
 
 function testUint8ArraySet() {
     let sample = new Uint8Array([1, 2, 3, 4])
     let src = new Uint8Array(sample.buffer, 0, 2)
     sample.set(src, 1)
-    assertEQ(sample.toString(), '1,1,2,4')
+    arktest.assertEQ(sample.toString(), '1,1,2,4')
 }
 
 function testUint16ArraySet() {
     let sample = new Uint16Array([1, 2, 3, 4])
     let src = new Uint16Array(sample.buffer, 0, 2)
     sample.set(src, 1)
-    assertEQ(sample.toString(), '1,1,2,4')
+    arktest.assertEQ(sample.toString(), '1,1,2,4')
 }
 
 function testUint32ArraySet() {
     let sample = new Uint32Array([1, 2, 3, 4])
     let src = new Uint32Array(sample.buffer, 0, 2)
     sample.set(src, 1)
-    assertEQ(sample.toString(), '1,1,2,4')
+    arktest.assertEQ(sample.toString(), '1,1,2,4')
 }
 
 function testBigUint64ArraySet() {
     let sample = new BigUint64Array([1, 2, 3, 4])
     let src = new BigUint64Array(sample.buffer, 0, 2)
     sample.set(src, 1)
-    assertEQ(sample.toString(), '1,1,2,4')
+    arktest.assertEQ(sample.toString(), '1,1,2,4')
 }
 
 

@@ -28,28 +28,28 @@ function Test_indirect_call_test_return_value(): boolean {
 
 function Test_indirect_call_type_any_call(): boolean {
     let result = js.indirectCallTypeAny.call(null, 1) as int;
-    assertTrue(result == 1);
+    arktest.assertTrue(result == 1);
 
     return true;
 }
 
 function Test_indirect_call_type_any_apply(): boolean {
-    let result = js.indirectCallTypeAny.apply(null, [1]) as int;
-    assertTrue(result == 1);
+    let result = js.indirectCallTypeAny.apply(null, [1] as FixedArray<int>) as int;
+    arktest.assertTrue(result == 1);
 
     return true;
 }
 
 function Test_indirect_call_type_any_bind_with_arg(): boolean {
     let boundWithArg = js.indirectCallTypeAny.bind(null, 1);
-    assertTrue(boundWithArg() as int == 1);
+    arktest.assertTrue(boundWithArg() as int == 1);
 
     return true;
 }
 
 function Test_indirect_call_type_any_bind_without_arg(): boolean {
     let boundWithoutArg = js.indirectCallTypeAny.bind(null);
-    assertTrue(boundWithoutArg(1) as int == 1);
+    arktest.assertTrue(boundWithoutArg(1) as int == 1);
 
     return true;
 }

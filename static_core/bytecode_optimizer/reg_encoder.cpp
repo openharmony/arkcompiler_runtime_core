@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,8 +67,6 @@ static bool CanHoldRange(Inst *inst)
     switch (inst->GetOpcode()) {
         case compiler::Opcode::CallStatic:
         case compiler::Opcode::CallVirtual:
-        case compiler::Opcode::CallLaunchStatic:
-        case compiler::Opcode::CallLaunchVirtual:
         case compiler::Opcode::InitObject:
         case compiler::Opcode::Intrinsic:
             return true;
@@ -90,11 +88,6 @@ static compiler::Register CalculateNumNeededRangeTemps(const compiler::Graph *gr
             if (inst->GetOpcode() == compiler::Opcode::InitObject) {
                 ASSERT(nargs > 0U);
                 nargs -= 1;  // exclude LoadAndInitClass
-            }
-            if (inst->GetOpcode() == compiler::Opcode::CallLaunchVirtual ||
-                inst->GetOpcode() == compiler::Opcode::CallLaunchStatic) {
-                ASSERT(nargs > 0U);
-                nargs -= 1;  // exclude NewObject
             }
             if (ret < nargs && (nargs > MAX_NUM_NON_RANGE_ARGS || IsIntrinsicRange(inst))) {
                 ret = nargs;
@@ -544,11 +537,7 @@ void RegEncoder::InsertSpillsForDynInputsInst(compiler::Inst *inst)
 
 size_t RegEncoder::GetStartInputIndex(compiler::Inst *inst)
 {
-    return (inst->GetOpcode() == compiler::Opcode::InitObject ||
-            inst->GetOpcode() == compiler::Opcode::CallLaunchStatic ||
-            inst->GetOpcode() == compiler::Opcode::CallLaunchVirtual)
-               ? 1U
-               : 0U;  // exclude LoadAndInitClass and NewObject
+    return inst->GetOpcode() == compiler::Opcode::InitObject ? 1U : 0U;  // exclude LoadAndInitClass and NewObject
 }
 
 static bool IsBoundDstSrc(const compiler::Inst *inst)

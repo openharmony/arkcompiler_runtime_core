@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,9 +31,12 @@ collections = {
         'parameters': {
             'arktsconfig': '${parameters.build}/tools/es2panda/generated/arktsconfig.json',
             'extension': 'sts',
-            'es2panda-full-args': [
-                '--dump-ast', '--extension=${parameters.extension}', '--thread=0',
-                '--output=/dev/null', '--arktsconfig=${parameters.arktsconfig}']
+            "es2panda-full-args": [
+                "--dump-ast",
+                "--extension=${parameters.extension}",
+                "--thread=0",
+                "--arktsconfig=${parameters.arktsconfig}",
+            ],
         }
     }
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,6 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, List, Set, Optional, Dict
 
 from runner.code_coverage.coverage import LlvmCov
 from runner.options.config import Config
@@ -29,24 +28,22 @@ from runner.suites.work_dir import WorkDir
 class TestEnv:
     config: Config
 
-    cmd_prefix: List[str]
-    cmd_env: Dict[str, str]
+    cmd_prefix: list[str]
+    cmd_env: dict[str, str]
 
     timestamp: int
-    report_formats: Set[ReportFormat]
+    report_formats: set[ReportFormat]
     work_dir: WorkDir
 
-    coverage: Optional[LlvmCov] = None
-
-    util: Any = None
+    coverage: LlvmCov | None = None
 
 
 @dataclass(frozen=True)
 class BinaryParams:
     timeout: int
     executor: Path
-    flags: List[str]
-    env: Dict[str, str]
+    flags: list[str]
+    env: dict[str, str]
 
 
 @dataclass

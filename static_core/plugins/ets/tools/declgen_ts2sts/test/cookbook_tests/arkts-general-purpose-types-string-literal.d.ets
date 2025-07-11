@@ -1,3 +1,4 @@
+'use static'
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,5 +14,5 @@
  * limitations under the License.
  */
 export type Greeting = string;
-export declare let a: string;
+export declare let a: "Hello";
 export declare let b: Greeting;

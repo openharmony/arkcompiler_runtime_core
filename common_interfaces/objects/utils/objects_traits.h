@@ -16,7 +16,7 @@
 #ifndef COMMON_INTERFACES_OBJECTS_TRAITS_H
 #define COMMON_INTERFACES_OBJECTS_TRAITS_H
 
-#include "common_interfaces/objects/base_object.h"
+#include "objects/base_object.h"
 #include <type_traits>
 
 namespace common::objects_traits {
@@ -39,7 +39,7 @@ constexpr bool is_read_barrier_callable_v =
 // Allocator: U (size_t, CommonType)
 template <typename F, typename U>
 constexpr bool is_allocate_callable_v =
-    is_heap_object_v<U> && std::is_invocable_r_v<U, F, size_t, CommonType>;
+    is_heap_object_v<U> && std::is_invocable_r_v<U, F, size_t, ObjectType>;
 
 // ---- enable_if_is_* traits ----
 template <typename F>

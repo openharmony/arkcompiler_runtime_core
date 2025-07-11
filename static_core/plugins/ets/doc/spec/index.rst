@@ -33,7 +33,7 @@
    /13_modules
    /14_ambients
    /15_semantics
-   /16_gui
+   /16_concurrency
    /17_experimental
    /18_annotations
    /19_stdlib

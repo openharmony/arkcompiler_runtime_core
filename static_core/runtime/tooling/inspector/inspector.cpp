@@ -20,12 +20,15 @@
 #include <utility>
 #include <vector>
 
+#include "debugger/breakpoint.h"
 #include "macros.h"
+#include "os/mutex.h"
 #include "runtime.h"
 #include "utils/logger.h"
 
 #include "error.h"
 #include "evaluation/base64.h"
+#include "sampler/sampling_profiler.h"
 #include "types/remote_object.h"
 #include "types/scope.h"
 
@@ -52,12 +55,6 @@ Inspector::Inspector(Server &server, DebugInterface &debugger, bool breakOnStart
     });
     inspectorServer_.OnOpen([this]() NO_THREAD_SAFETY_ANALYSIS {
         ASSERT(connecting_);  // NOLINT(bugprone-lambda-function-name)
-
-        for (auto &[_, dbgThread] : threads_) {
-            (void)_;
-            dbgThread.Reset();
-        }
-
         connecting_ = false;
         debuggerEventsLock_.Unlock();
     });
@@ -69,9 +66,6 @@ Inspector::Inspector(Server &server, DebugInterface &debugger, bool breakOnStart
     });
 
     RegisterMethodHandlers();
-
-    serverThread_ = std::thread(&InspectorServer::Run, &inspectorServer_);
-    os::thread::SetThreadName(serverThread_.native_handle(), "InspectorServer");
 }
 
 Inspector::~Inspector()
@@ -81,6 +75,29 @@ Inspector::~Inspector()
     inspectorServer_.Kill();
     serverThread_.join();
     HandleError(debugger_.UnregisterHooks());
+}
+
+void Inspector::CollectModules()
+{
+    os::memory::ReadLockHolder lock(debuggerEventsLock_);
+    Runtime::GetCurrent()->GetClassLinker()->EnumeratePandaFiles([this](auto &file) {
+        debugInfoCache_.AddPandaFile(file);
+        // Do not call server, cause no connection at this stage
+        return true;
+    });
+}
+
+void Inspector::Run()
+{
+    CollectModules();
+
+    serverThread_ = std::thread(&InspectorServer::Run, &inspectorServer_);
+    os::thread::SetThreadName(serverThread_.native_handle(), "InspectorServer");
+}
+
+void Inspector::Stop()
+{
+    serverThread_.join();
 }
 
 void Inspector::ConsoleCall(PtThread thread, ConsoleCallType type, uint64_t timestamp,
@@ -124,6 +141,20 @@ void Inspector::MethodEntry(PtThread thread, Method * /* method */)
     }
 }
 
+void Inspector::SourceNameInsert(const panda_file::DebugInfoExtractor *extractor)
+{
+    const auto &methodList = extractor->GetMethodIdList();
+    std::unordered_set<std::string> sourceNames;
+    for (const auto &method : methodList) {
+        sourceNames.insert(extractor->GetSourceFile(method));
+    }
+    for (const auto &sourceName : sourceNames) {
+        // Get src file name
+        auto scriptId = inspectorServer_.GetSourceManager().GetScriptId(sourceName);
+        inspectorServer_.CallDebuggerScriptParsed(scriptId, sourceName);
+    }
+}
+
 void Inspector::LoadModule(std::string_view fileName)
 {
     os::memory::ReadLockHolder lock(debuggerEventsLock_);
@@ -132,6 +163,9 @@ void Inspector::LoadModule(std::string_view fileName)
         [this, fileName](auto &file) {
             if (file.GetFilename() == fileName) {
                 debugInfoCache_.AddPandaFile(file);
+                const auto *extractor = debugInfoCache_.GetDebugInfo(&file);
+                SourceNameInsert(extractor);
+                ResolveBreakpoints(file, extractor);
             }
 
             return true;
@@ -139,13 +173,24 @@ void Inspector::LoadModule(std::string_view fileName)
         !fileName.empty());
 }
 
-void Inspector::SingleStep(PtThread thread, Method * /* method */, const PtLocation &location)
+void Inspector::ResolveBreakpoints(const panda_file::File &file, const panda_file::DebugInfoExtractor *debugInfo)
+{
+    breakpointStorage_.ResolveBreakpoints(file, debugInfo);
+}
+
+void Inspector::SingleStep(PtThread thread, Method *method, const PtLocation &location)
 {
     os::memory::ReadLockHolder lock(debuggerEventsLock_);
 
+    auto sourceFile = debugInfoCache_.GetSourceFile(method);
+    // NOTE(fangting, #IC98Z2): etsstdlib.ets should not call loadModule in pytest.
+    if ((sourceFile == nullptr) || (strcmp(sourceFile, "etsstdlib.ets") == 0)) {
+        return;
+    }
+
     auto *debuggableThread = GetDebuggableThread(thread);
     ASSERT(debuggableThread != nullptr);
-    debuggableThread->OnSingleStep(location);
+    debuggableThread->OnSingleStep(location, sourceFile);
 }
 
 void Inspector::ThreadStart(PtThread thread)
@@ -159,15 +204,15 @@ void Inspector::ThreadStart(PtThread thread)
     // NOLINTBEGIN(modernize-avoid-bind)
     auto callbacks = DebuggableThread::SuspensionCallbacks {
         [](auto &, auto &, auto) {},
-        std::bind(&Inspector::DebuggableThreadPostSuspend, this, thread, _1, _2, _3),
+        std::bind(&Inspector::DebuggableThreadPostSuspend, this, thread, _1, _2, _3, _4),
         [this]() NO_THREAD_SAFETY_ANALYSIS { debuggerEventsLock_.Unlock(); },
         [this]() NO_THREAD_SAFETY_ANALYSIS { debuggerEventsLock_.ReadLock(); },
         []() {},
         [this, thread]() { inspectorServer_.CallDebuggerResumed(thread); }};
     // NOLINTEND(modernize-avoid-bind)
-    auto [it, inserted] =
-        threads_.emplace(std::piecewise_construct, std::forward_as_tuple(thread),
-                         std::forward_as_tuple(thread.GetManagedThread(), &debugger_, std::move(callbacks)));
+    auto [it, inserted] = threads_.emplace(
+        std::piecewise_construct, std::forward_as_tuple(thread),
+        std::forward_as_tuple(thread.GetManagedThread(), &debugger_, std::move(callbacks), breakpointStorage_));
     (void)inserted;
     ASSERT(inserted);
 
@@ -219,6 +264,15 @@ void Inspector::RunIfWaitingForDebugger(PtThread thread)
     if (debuggableThread != nullptr) {
         debuggableThread->Touch();
     }
+
+    os::memory::LockHolder<os::memory::Mutex> lockHolder(waitDebuggerMutex_);
+    waitDebuggerCond_.Signal();
+}
+
+void Inspector::WaitForDebugger()
+{
+    os::memory::LockHolder<os::memory::Mutex> lock(waitDebuggerMutex_);
+    waitDebuggerCond_.Wait(&waitDebuggerMutex_);
 }
 
 void Inspector::Pause(PtThread thread)
@@ -247,17 +301,14 @@ void Inspector::Continue(PtThread thread)
     }
 }
 
-void Inspector::SetBreakpointsActive(PtThread thread, bool active)
+void Inspector::SetBreakpointsActive([[maybe_unused]] PtThread thread, bool active)
 {
     os::memory::ReadLockHolder lock(vmDeathLock_);
     if (UNLIKELY(CheckVmDead())) {
         return;
     }
 
-    auto *debuggableThread = GetDebuggableThread(thread);
-    if (debuggableThread != nullptr) {
-        debuggableThread->SetBreakpointsActive(active);
-    }
+    breakpointStorage_.SetBreakpointsActive(active);
 }
 
 void Inspector::SetSkipAllPauses(PtThread thread, bool skip)
@@ -297,9 +348,9 @@ std::set<size_t> Inspector::GetPossibleBreakpoints(std::string_view sourceFile, 
     return debugInfoCache_.GetValidLineNumbers(sourceFile, startLine, endLine, restrictToFunction);
 }
 
-std::optional<BreakpointId> Inspector::SetBreakpoint(PtThread thread,
-                                                     const InspectorServer::SourceFileFilter &sourceFilesFilter,
-                                                     size_t lineNumber, std::set<std::string_view> &sourceFiles,
+std::optional<BreakpointId> Inspector::SetBreakpoint([[maybe_unused]] PtThread thread,
+                                                     SourceFileFilter &&sourceFilesFilter, size_t lineNumber,
+                                                     std::set<std::string_view> &sourceFiles,
                                                      const std::string *condition)
 {
     os::memory::ReadLockHolder lock(vmDeathLock_);
@@ -307,12 +358,6 @@ std::optional<BreakpointId> Inspector::SetBreakpoint(PtThread thread,
         return {};
     }
 
-    auto *debuggableThread = GetDebuggableThread(thread);
-    if (debuggableThread == nullptr) {
-        return {};
-    }
-
-    auto locations = debugInfoCache_.GetBreakpointLocations(sourceFilesFilter, lineNumber, sourceFiles);
     std::string optBytecode;
     if (condition != nullptr) {
         if (condition->empty()) {
@@ -323,23 +368,22 @@ std::optional<BreakpointId> Inspector::SetBreakpoint(PtThread thread,
             condition = &optBytecode;
         }
     }
-    return debuggableThread->SetBreakpoint(locations, condition);
+
+    return breakpointStorage_.SetBreakpoint(std::move(sourceFilesFilter), lineNumber, sourceFiles, condition,
+                                            debugInfoCache_);
 }
 
-void Inspector::RemoveBreakpoint(PtThread thread, BreakpointId id)
+void Inspector::RemoveBreakpoint([[maybe_unused]] PtThread thread, BreakpointId id)
 {
     os::memory::ReadLockHolder lock(vmDeathLock_);
     if (UNLIKELY(CheckVmDead())) {
         return;
     }
 
-    auto *debuggableThread = GetDebuggableThread(thread);
-    if (debuggableThread != nullptr) {
-        debuggableThread->RemoveBreakpoint(id);
-    }
+    breakpointStorage_.RemoveBreakpoint(id);
 }
 
-void Inspector::RemoveBreakpoints(PtThread thread, const InspectorServer::SourceFileFilter &sourceFilesFilter)
+void Inspector::RemoveBreakpoints(PtThread thread, const SourceFileFilter &sourceFilesFilter)
 {
     os::memory::ReadLockHolder lock(vmDeathLock_);
     if (UNLIKELY(CheckVmDead())) {
@@ -354,7 +398,8 @@ void Inspector::RemoveBreakpoints(PtThread thread, const InspectorServer::Source
     if (pandaFilesPaths.empty()) {
         return;
     }
-    debuggableThread->RemoveBreakpoints([pfs = std::as_const(pandaFilesPaths)](const auto &loc) {
+
+    breakpointStorage_.RemoveBreakpoints([pfs = std::as_const(pandaFilesPaths)](const auto &loc) {
         for (const auto &pf : pfs) {
             if (pf == loc.GetPandaFile()) {
                 return true;
@@ -520,13 +565,14 @@ std::string Inspector::GetSourceCode(std::string_view sourceFile)
 }
 
 void Inspector::DebuggableThreadPostSuspend(PtThread thread, ObjectRepository &objectRepository,
-                                            const std::vector<BreakpointId> &hitBreakpoints, ObjectHeader *exception)
+                                            const std::vector<BreakpointId> &hitBreakpoints, ObjectHeader *exception,
+                                            PauseReason pauseReason)
 {
     auto exceptionRemoteObject = exception != nullptr ? objectRepository.CreateObject(TypedValue::Reference(exception))
                                                       : std::optional<RemoteObject>();
 
     inspectorServer_.CallDebuggerPaused(
-        thread, hitBreakpoints, exceptionRemoteObject, [this, thread, &objectRepository](auto &handler) {
+        thread, hitBreakpoints, exceptionRemoteObject, pauseReason, [this, thread, &objectRepository](auto &handler) {
             FrameId frameId = 0;
             HandleError(debugger_.EnumerateFrames(thread, [this, &objectRepository, &handler,
                                                            &frameId](const PtFrame &frame) {
@@ -534,6 +580,9 @@ void Inspector::DebuggableThreadPostSuspend(PtThread thread, ObjectRepository &o
                 std::string_view methodName;
                 size_t lineNumber;
                 debugInfoCache_.GetSourceLocation(frame, sourceFile, methodName, lineNumber);
+                if (sourceFile.empty()) {
+                    return false;
+                }
 
                 std::optional<RemoteObject> objThis;
                 auto frameObject = objectRepository.CreateFrameObject(frame, debugInfoCache_.GetLocals(frame), objThis);
@@ -660,10 +709,73 @@ void Inspector::ReplyNativeCalling(PtThread thread)
     Continue(thread);
 }
 
+void Inspector::ProfilerSetSamplingInterval(uint32_t interval)
+{
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return;
+    }
+    samplingInterval_ = interval;
+}
+
+Expected<bool, std::string> Inspector::ProfilerStart()
+{
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return Unexpected(std::string("Fatal, VM is dead"));
+    }
+    if (cpuProfilerStarted_) {
+        return Unexpected(std::string("Fatal, profiling operation is already running."));
+    }
+    cpuProfilerStarted_ = true;
+    profileInfoBuffer_ = std::make_shared<sampler::SamplesRecord>();
+    profileInfoBuffer_->SetThreadStartTime(sampler::Sampler::GetMicrosecondsTimeStamp());
+    Runtime::GetCurrent()->GetTools().StartSamplingProfiler(
+        std::make_unique<sampler::InspectorStreamWriter>(profileInfoBuffer_), samplingInterval_);
+    return true;
+}
+
+Expected<Profile, std::string> Inspector::ProfilerStop()
+{
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return Unexpected(std::string("Fatal, VM is dead"));
+    }
+
+    if (!cpuProfilerStarted_) {
+        return Unexpected(std::string("Fatal, profiler inactive"));
+    }
+
+    Runtime::GetCurrent()->GetTools().StopSamplingProfiler();
+    auto profileInfoPtr = profileInfoBuffer_->GetAllThreadsProfileInfos();
+    if (!profileInfoPtr) {
+        return Unexpected(std::string("Fatal, profiler info is empty"));
+    }
+    profileInfoBuffer_.reset();
+    cpuProfilerStarted_ = false;
+    return Profile(std::move(profileInfoPtr));
+}
+
+void Inspector::DebuggerEnable()
+{
+    os::memory::WriteLockHolder lock(debuggerEventsLock_);
+    for (auto &[_, dbgThread] : threads_) {
+        (void)_;
+        dbgThread.Reset();
+    }
+    breakpointStorage_.Reset();
+    Runtime::GetCurrent()->GetClassLinker()->EnumeratePandaFiles([this](auto &file) {
+        const auto *extractor = debugInfoCache_.GetDebugInfo(&file);
+        SourceNameInsert(extractor);
+        return true;
+    });
+}
+
 void Inspector::RegisterMethodHandlers()
 {
     // NOLINTBEGIN(modernize-avoid-bind)
     inspectorServer_.OnCallDebuggerContinueToLocation(std::bind(&Inspector::ContinueToLocation, this, _1, _2, _3));
+    inspectorServer_.OnCallDebuggerEnable(std::bind(&Inspector::DebuggerEnable, this));
     inspectorServer_.OnCallDebuggerGetPossibleBreakpoints(
         std::bind(&Inspector::GetPossibleBreakpoints, this, _1, _2, _3, _4));
     inspectorServer_.OnCallDebuggerGetScriptSource(std::bind(&Inspector::GetSourceCode, this, _1));
@@ -697,6 +809,11 @@ void Inspector::RegisterMethodHandlers()
     inspectorServer_.OnCallRuntimeGetProperties(std::bind(&Inspector::GetProperties, this, _1, _2, _3));
     inspectorServer_.OnCallRuntimeRunIfWaitingForDebugger(std::bind(&Inspector::RunIfWaitingForDebugger, this, _1));
     inspectorServer_.OnCallRuntimeEvaluate(std::bind(&Inspector::Evaluate, this, _1, _2, 0));
+    inspectorServer_.OnCallProfilerEnable();
+    inspectorServer_.OnCallProfilerDisable();
+    inspectorServer_.OnCallProfilerSetSamplingInterval(std::bind(&Inspector::ProfilerSetSamplingInterval, this, _1));
+    inspectorServer_.OnCallProfilerStart(std::bind(&Inspector::ProfilerStart, this));
+    inspectorServer_.OnCallProfilerStop(std::bind(&Inspector::ProfilerStop, this));
     // NOLINTEND(modernize-avoid-bind)
 }
 }  // namespace ark::tooling::inspector

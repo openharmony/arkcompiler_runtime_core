@@ -15,6 +15,9 @@
 
 /*---
 desc: Casting conversions to enumeration int.
+tags:
+- compile-only
+- negative
 ---*/
 
 enum Status {
@@ -25,5 +28,5 @@ enum Status {
 
 function main(): void {
   let numericValue: number = 1;
-  assertTrue(numericValue == Status.Approved);
+  arktest.assertTrue(numericValue == Status.Approved);
 }

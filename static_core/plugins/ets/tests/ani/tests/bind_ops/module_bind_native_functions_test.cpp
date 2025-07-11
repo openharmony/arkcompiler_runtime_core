@@ -27,6 +27,11 @@ static ani_int Sum([[maybe_unused]] ani_env *env, ani_int a, ani_int b)
     return a + b;
 }
 
+static ani_double Abs([[maybe_unused]] ani_env *env, ani_double a)
+{
+    return a;
+}
+
 static ani_int SumA([[maybe_unused]] ani_env *env, ani_int a, ani_int b, ani_int c)
 {
     return a + b + c;
@@ -295,6 +300,31 @@ TEST_F(ModuleBindNativeFunctionsTest, module_bind_native_functions_003)
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, &NATIVE_FUNC_CONCAT, 1), ANI_OK);
     ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkConcat"), ANI_TRUE);
 }
+
+TEST_F(ModuleBindNativeFunctionsTest, module_bind_native_functions_004)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    std::array functions = {
+        ani_native_function {"undefined", "II:I", reinterpret_cast<void *>(Sum)},
+    };
+    ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_NOT_FOUND);
+}
+TEST_F(ModuleBindNativeFunctionsTest, bind_intrinsic)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule("Lstd/math;", &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    std::array functions = {
+        ani_native_function {"abs", "D:D", reinterpret_cast<void *>(Abs)},
+    };
+
+    ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_ALREADY_BINDED);
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-identifier-naming)

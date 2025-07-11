@@ -194,6 +194,23 @@ bool SharedReferenceStorage::HasReferenceWithCtx(SharedReference *ref, InteropCt
     return false;
 }
 
+#if defined(PANDA_JS_ETS_HYBRID_MODE) || defined(PANDA_TARGET_OHOS)
+static napi_value ProxObjectAttachCb([[maybe_unused]] napi_env env, void *data)
+{
+    auto *coro = Coroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    auto *ctx = InteropCtx::Current(coro);
+    ASSERT(ctx != nullptr);
+    auto *ref = AtomicLoad(static_cast<ets_proxy::SharedReference **>(data), std::memory_order_acquire);
+    ScopedManagedCodeThread v(coro);
+    EtsObject *etsObject = ref->GetEtsObject();
+    auto klass = etsObject->GetClass()->GetRuntimeClass();
+    JSRefConvert *refConv = JSRefConvertResolve<true>(ctx, klass);
+    napi_value res = refConv->Wrap(ctx, etsObject);
+    return res;
+}
+#endif
+
 static void DeleteSharedReferenceRefCallback([[maybe_unused]] napi_env env, void *data, [[maybe_unused]] void *hint)
 {
     delete static_cast<SharedReference **>(data);
@@ -220,7 +237,7 @@ static SharedReference **CreateXRef(InteropCtx *ctx, napi_value jsObject, napi_r
     }
     napi_status status = napi_ok;
 #if defined(PANDA_JS_ETS_HYBRID_MODE) || defined(PANDA_TARGET_OHOS)
-    status = napi_wrap_with_xref(env, jsObject, refRef, DeleteSharedReferenceRefCallback, result);
+    status = napi_wrap_with_xref(env, jsObject, refRef, DeleteSharedReferenceRefCallback, ProxObjectAttachCb, result);
 #else
     status = napi_wrap(env, jsObject, refRef, DeleteSharedReferenceRefCallback, nullptr, nullptr);
     if (status == napi_ok) {
@@ -272,8 +289,9 @@ SharedReference *SharedReferenceStorage::CreateReference(InteropCtx *ctx, EtsHan
     return sharedRef;
 }
 
-SharedReference *SharedReferenceStorage::CreateETSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject,
-                                                            const PreInitJSObjectCallback &callback)
+template <SharedReference::InitFn REF_INIT>
+SharedReference *SharedReferenceStorage::CreateRefCommon(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject,
+                                                         const PreInitJSObjectCallback &callback)
 {
     auto *coro = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope hScope(coro);
@@ -286,11 +304,17 @@ SharedReference *SharedReferenceStorage::CreateETSObjectRef(InteropCtx *ctx, Ets
         return nullptr;
     }
     os::memory::WriteLockHolder lock(storageLock_);
-    auto *sharedRef = CreateReference<&SharedReference::InitETSObject>(ctx, hobject, jsRef);
+    auto *sharedRef = CreateReference<REF_INIT>(ctx, hobject, jsRef);
     // Atomic with release order reason: XGC thread should see all writes (initialization of SharedReference) before
     // check initialization status
     AtomicStore(refRef, sharedRef, std::memory_order_release);
     return sharedRef;
+}
+
+SharedReference *SharedReferenceStorage::CreateETSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject,
+                                                            const PreInitJSObjectCallback &callback)
+{
+    return CreateRefCommon<&SharedReference::InitETSObject>(ctx, etsObject, jsObject, callback);
 }
 
 SharedReference *SharedReferenceStorage::CreateJSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject)
@@ -310,25 +334,16 @@ SharedReference *SharedReferenceStorage::CreateJSObjectRef(InteropCtx *ctx, EtsO
     return sharedRef;
 }
 
+SharedReference *SharedReferenceStorage::CreateJSObjectRefwithWrap(InteropCtx *ctx, EtsObject *etsObject,
+                                                                   napi_value jsObject)
+{
+    return CreateRefCommon<&SharedReference::InitJSObject>(ctx, etsObject, jsObject);
+}
+
 SharedReference *SharedReferenceStorage::CreateHybridObjectRef(InteropCtx *ctx, EtsObject *etsObject,
                                                                napi_value jsObject)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope hScope(coro);
-    EtsHandle<EtsObject> hobject(coro, etsObject);
-    TriggerXGCIfNeeded(ctx);
-    napi_ref jsRef;
-    // Create XRef before SharedReferenceStorage lock to avoid deadlock situation with JS mutator lock in napi calls
-    SharedReference **refRef = CreateXRef(ctx, jsObject, &jsRef);
-    if (refRef == nullptr) {
-        return nullptr;
-    }
-    os::memory::WriteLockHolder lock(storageLock_);
-    auto *sharedRef = CreateReference<&SharedReference::InitHybridObject>(ctx, hobject, jsRef);
-    // Atomic with release order reason: XGC thread should see all writes (initialization of SharedReference) before
-    // check initialization status
-    AtomicStore(refRef, sharedRef, std::memory_order_release);
-    return sharedRef;
+    return CreateRefCommon<&SharedReference::InitHybridObject>(ctx, etsObject, jsObject);
 }
 
 void SharedReferenceStorage::RemoveReference(SharedReference *sharedRef)
@@ -480,7 +495,7 @@ void SharedReferenceStorage::VisitRoots(const GCRootVisitor &visitor)
     }
 }
 
-void SharedReferenceStorage::UpdateRefs()
+void SharedReferenceStorage::UpdateRefs(const GCRootUpdater &gcRootUpdater)
 {
     // No need lock, because we visit roots on pause and we wait XGC ConcurrentSweep for local GCs
     size_t capacity = Capacity();
@@ -490,8 +505,8 @@ void SharedReferenceStorage::UpdateRefs()
             continue;
         }
         ObjectHeader *obj = ref->GetEtsObject()->GetCoreType();
-        if (obj->IsForwarded()) {
-            ref->SetETSObject(EtsObject::FromCoreType(ark::mem::GetForwardAddress(obj)));
+        if (gcRootUpdater(&obj)) {
+            ref->SetETSObject(EtsObject::FromCoreType(obj));
         }
     }
 }

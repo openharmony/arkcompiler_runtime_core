@@ -31,11 +31,11 @@ class Bar<T> {
 function main() {
     let x : Bar<Int> = new Bar<Int>(1);
     console.log("1");
-    assertEQ(x[1], 1)
+    arktest.assertEQ(x[1], 1)
     console.log("2");
     x[1] = 2;
     console.log("3");
-    assertEQ(x[1], 2)
+    arktest.assertEQ(x[1], 2)
     console.log("4");
     return 0;
 }

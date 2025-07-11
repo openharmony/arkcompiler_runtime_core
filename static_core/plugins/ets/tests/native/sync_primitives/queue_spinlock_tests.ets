@@ -19,17 +19,17 @@ native function spinlockIsHeld(spinlock: Object): boolean;
 
 function runConcurrently(coroutinesCount: number, callback: () => void) {
     let spinlock = spinlockCreate();
-    let jobs = new Array<Promise<boolean>>;
+    let jobs = new Array<Job<boolean>>;
     let guard = () => {
         spinlockGuard(spinlock, callback);
         return true;
     };
     for (let i = 0; i < coroutinesCount; ++i) {
-        let j = launch guard();
+        let j = launch<boolean, () => boolean>(guard);
         jobs.push(j);
     }
     for (let job of jobs) {
-        await job;
+        job.Await();
     }
 }
 
@@ -42,7 +42,7 @@ function exclusiveAccess(): void {
             count++;
         }
     });
-    assertTrue(count == workload * coroutinesCount);
+    arktest.assertTrue(count == workload * coroutinesCount);
 }
 
 function objectAllocationsUnderLock() {
@@ -64,7 +64,7 @@ function throwingExceptionUnderLock() {
         spinlockGuard(spinlock, () => { throw new Error(); });
     } catch (e: Error) {
         errorCatched = true;
-        assertTrue(!spinlockIsHeld(spinlock));
+        arktest.assertTrue(!spinlockIsHeld(spinlock));
     }
-    assertTrue(errorCatched);
+    arktest.assertTrue(errorCatched);
 }

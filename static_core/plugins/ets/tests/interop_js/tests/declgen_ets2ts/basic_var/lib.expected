@@ -12,14 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export declare let arr: number[];
+export declare let arr: Array<number>;
 export declare let w: bigint;
 export declare let w1: boolean;
 export declare let w2: string;
 export declare let w3: number;
 export declare let w4: number;
 export declare let d2: Date;
-export declare let ab: ArrayBuffer;
 export declare const a: number;
 export declare const b: number;
 export declare const c: number;
@@ -45,4 +44,10 @@ export declare const k1: bigint;
 export declare let s: string;
 export declare let a2: "Hello";
 export declare let b2: Greeting;
+export declare let a3: Record<string, string>;
 export type Greeting = "Hello";
+
+// generated for static Record
+type Record<K extends keyof any, T> = {
+    [P in K]: T;
+};

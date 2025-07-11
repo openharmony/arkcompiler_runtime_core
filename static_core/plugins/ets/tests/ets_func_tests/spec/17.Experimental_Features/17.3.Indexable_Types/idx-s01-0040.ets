@@ -30,15 +30,15 @@ class Bar {
 
 function main() {
     let x : Bar = new Bar([1,2,3]);
-    assertEQ(x[0], 1)
-    assertEQ(x[1], 2)
-    assertEQ(x[2], 3)
+    arktest.assertEQ(x[0], 1)
+    arktest.assertEQ(x[1], 2)
+    arktest.assertEQ(x[2], 3)
 
     x[0] = 6;
     x[1] = 7;
     x[2] = 8;
-    assertEQ(x[0], 6)
-    assertEQ(x[1], 7)
-    assertEQ(x[2], 8)
+    arktest.assertEQ(x[0], 6)
+    arktest.assertEQ(x[1], 7)
+    arktest.assertEQ(x[2], 8)
 
 }

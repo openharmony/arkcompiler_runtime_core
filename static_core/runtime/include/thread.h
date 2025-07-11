@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 #ifndef PANDA_RUNTIME_THREAD_H_
 #define PANDA_RUNTIME_THREAD_H_
 
+#include <cstdint>
 #include <memory>
 #include <chrono>
 #include <limits>
@@ -35,6 +36,7 @@
 #include "runtime/include/object_header-inl.h"
 #include "runtime/include/stack_walker.h"
 #include "runtime/include/language_context.h"
+#include "runtime/include/thread_proxy.h"
 #include "runtime/include/locks.h"
 #include "runtime/include/thread_status.h"
 #include "runtime/interpreter/cache.h"
@@ -74,8 +76,6 @@ namespace tooling {
 class PtThreadInfo;
 }  // namespace tooling
 
-enum ThreadFlag { NO_FLAGS = 0, SUSPEND_REQUEST = 2, RUNTIME_TERMINATION_REQUEST = 4, SAFEPOINT_REQUEST = 8 };
-
 struct CustomTLSData {
     CustomTLSData() = default;
     virtual ~CustomTLSData() = default;
@@ -95,6 +95,11 @@ public:
     inline void SetObject(ObjectHeader *objNew)
     {
         object_ = objNew;
+    }
+
+    ALWAYS_INLINE void UpdateObject(const GCRootUpdater &gcRootUpdater)
+    {
+        gcRootUpdater(&object_);
     }
 
     inline void *GetStack() const
@@ -248,7 +253,7 @@ private:
 
 /// @brief Class represents arbitrary runtime thread
 // NOLINTNEXTLINE(clang-analyzer-optin.performance.Padding)
-class Thread {
+class Thread : public ThreadProxy {
 public:
     using ThreadId = uint32_t;
     enum class ThreadType {
@@ -283,16 +288,6 @@ public:
         vm_ = vm;
     }
 
-    MutatorLock *GetMutatorLock()
-    {
-        return mutatorLock_;
-    }
-
-    const MutatorLock *GetMutatorLock() const
-    {
-        return mutatorLock_;
-    }
-
     void *GetPreWrbEntrypoint() const
     {
         // Atomic with relaxed order reason: only atomicity and modification order consistency needed
@@ -314,18 +309,6 @@ public:
         return barrierSet_;
     }
 
-#ifndef NDEBUG
-    MutatorLock::MutatorLockState GetLockState() const
-    {
-        return lockState_;
-    }
-
-    void SetLockState(MutatorLock::MutatorLockState state)
-    {
-        lockState_ = state;
-    }
-#endif
-
     // pre_buff_ may be destroyed during Detach(), so it should be initialized once more
     void InitPreBuff();
 
@@ -334,28 +317,18 @@ public:
         return MEMBER_OFFSET(Thread, vm_);
     }
 
+    uint64_t *GetThreadRandomState()
+    {
+        return &threadRandomState_;
+    }
+
 private:
     void InitCardTableData(mem::GCBarrierSet *barrier);
+    void InitThreadRandomState();
 
 protected:
-    union __attribute__((__aligned__(4))) FlagsAndThreadStatus {
-        FlagsAndThreadStatus() = default;
-        ~FlagsAndThreadStatus() = default;
-        struct __attribute__((packed)) {
-            volatile uint16_t flags;
-            volatile enum ThreadStatus status;
-        } asStruct;
-        volatile uint32_t asInt;
-        uint32_t asNonvolatileInt;
-        std::atomic_uint32_t asAtomic;
-
-        NO_COPY_SEMANTIC(FlagsAndThreadStatus);
-        NO_MOVE_SEMANTIC(FlagsAndThreadStatus);
-    };
-
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     bool isCompiledFrame_ {false};
-    FlagsAndThreadStatus fts_ {};
     ThreadId internalId_ {0};
 
     EntrypointsTable entrypoints_ {};
@@ -380,17 +353,13 @@ protected:
 #ifndef NDEBUG
     uintptr_t runtimeCallEnabled_ {1};
 #endif
-    PANDA_PUBLIC_API static ThreadFlag initialThreadFlag_;
+    uint64_t threadRandomState_ {0};
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 
 private:
     PandaVM *vm_ {nullptr};
     ThreadType threadType_ {ThreadType::THREAD_TYPE_NONE};
     mem::GCBarrierSet *barrierSet_ {nullptr};
-    MutatorLock *mutatorLock_;
-#ifndef NDEBUG
-    MutatorLock::MutatorLockState lockState_ = MutatorLock::UNLOCKED;
-#endif
 #ifndef PANDA_TARGET_WINDOWS
     stack_t signalStack_ {};
 #endif

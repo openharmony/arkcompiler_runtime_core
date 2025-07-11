@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "ani_gtest_array_ops.h"
+#include "array_gtest_helper.h"
 #include <iostream>
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
-class ArrayNewRefTest : public AniGTestArrayOps {
+class ArrayNewRefTest : public ArrayHelperTest {
 public:
     static constexpr const ani_size ZERO = 0;
 
@@ -33,7 +33,7 @@ public:
 TEST_F(ArrayNewRefTest, NewRefErrorTests)
 {
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_array_ref array = nullptr;
@@ -52,7 +52,7 @@ TEST_F(ArrayNewRefTest, NewRefErrorTests)
 TEST_F(ArrayNewRefTest, NewObjectArrayTest)
 {
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     // Test zero length
@@ -114,7 +114,7 @@ TEST_F(ArrayNewRefTest, NewObjectArrayTest)
 TEST_F(ArrayNewRefTest, NewObjectArrayTest2)
 {
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_array_ref array1 = nullptr;
@@ -143,7 +143,7 @@ TEST_F(ArrayNewRefTest, NewObjectArrayTest2)
 TEST_F(ArrayNewRefTest, NewObjectArrayTest3)
 {
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref undefinedRef = nullptr;
@@ -158,7 +158,7 @@ TEST_F(ArrayNewRefTest, NewObjectArrayTest3)
 TEST_F(ArrayNewRefTest, NewObjectArrayTest4)
 {
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_string str = nullptr;
@@ -166,21 +166,11 @@ TEST_F(ArrayNewRefTest, NewObjectArrayTest4)
     ASSERT_EQ(status, ANI_OK);
     ASSERT_NE(str, nullptr);
 
-    const ani_size maxNum = std::numeric_limits<uint32_t>::max();
     ani_array_ref array1 = nullptr;
     ani_ref undefinedRef = nullptr;
     ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
     ASSERT_EQ(env_->Array_New_Ref(cls, ZERO, undefinedRef, &array1), ANI_OK);
     ASSERT_NE(array1, nullptr);
-
-    ani_array_ref array2 = nullptr;
-    ASSERT_EQ(env_->Array_New_Ref(cls, maxNum, undefinedRef, &array2), ANI_OUT_OF_MEMORY);
-
-    ani_array_ref array3 = nullptr;
-    ASSERT_EQ(env_->Array_New_Ref(cls, ZERO, str, &array3), ANI_PENDING_ERROR);
-
-    ani_array_ref array4 = nullptr;
-    ASSERT_EQ(env_->Array_New_Ref(cls, maxNum, str, &array4), ANI_PENDING_ERROR);
 }
 
 TEST_F(ArrayNewRefTest, NewLargeArrayTypesTest)

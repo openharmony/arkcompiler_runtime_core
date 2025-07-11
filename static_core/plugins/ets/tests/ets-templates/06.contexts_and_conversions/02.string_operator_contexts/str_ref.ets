@@ -39,7 +39,7 @@ function main() {
   let src_{{loop.index}}: {{t.type}} = new {{t.type}}();
   let dst_{{loop.index}}: string = "" + src_{{loop.index}};
   let exp_{{loop.index}}: string = src_{{loop.index}}.toString();
-  assertTrue( dst_{{loop.index}} == exp_{{loop.index}} )
+  arktest.assertTrue( dst_{{loop.index}} == exp_{{loop.index}} )
   {% endfor %}
 }
 {% endfor %}

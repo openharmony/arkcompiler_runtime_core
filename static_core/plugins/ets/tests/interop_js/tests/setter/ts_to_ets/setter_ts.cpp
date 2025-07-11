@@ -20,7 +20,7 @@ namespace ark::ets::interop::js::testing {
 
 class EtsSetterTsToEtsTest : public EtsInteropTest {};
 
-TEST_F(EtsSetterTsToEtsTest, check_abstract_сlass_setter)
+TEST_F(EtsSetterTsToEtsTest, check_abstract_class_setter)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAbstractClassSetter"));
 }

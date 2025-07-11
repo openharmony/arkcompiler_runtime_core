@@ -32,8 +32,35 @@ EtsMutex *EtsMutex::Create(EtsCoroutine *coro)
     return hMutex.GetPtr();
 }
 
+ALWAYS_INLINE inline static void BackOff(uint32_t i)
+{
+    volatile uint32_t x;  // Volatile to make sure loop is not optimized out.
+    const uint32_t spinCount = 10 * i;
+    for (uint32_t spin = 0; spin < spinCount; spin++) {
+        x = x + 1;
+    }
+}
+
+static bool TrySpinLockFor(std::atomic<uint32_t> &waiters, uint32_t expected, uint32_t desired)
+{
+    static constexpr uint32_t maxBackOff = 3;  // NOLINT(readability-identifier-naming)
+    static constexpr uint32_t maxIter = 3;     // NOLINT(readability-identifier-naming)
+    uint32_t exp;
+    for (uint32_t i = 1; i <= maxIter; ++i) {
+        exp = expected;
+        if (waiters.compare_exchange_weak(exp, desired, std::memory_order_acq_rel, std::memory_order_relaxed)) {
+            return true;
+        }
+        BackOff(std::min<uint32_t>(i, maxBackOff));
+    }
+    return false;
+}
+
 void EtsMutex::Lock()
 {
+    if (TrySpinLockFor(waiters_, 0, 1)) {
+        return;
+    }
     // Atomic with acq_rel order reason: sync Lock/Unlock in other threads
     if (waiters_.fetch_add(1, std::memory_order_acq_rel) == 0) {
         return;

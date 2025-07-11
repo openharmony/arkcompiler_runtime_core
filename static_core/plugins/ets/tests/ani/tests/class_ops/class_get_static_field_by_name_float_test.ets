@@ -20,9 +20,9 @@ class GetFloatStatic {
     static specia3: string = "";
     static specia4: null = null;
     static specia5: undefined  = undefined ;
-    static floatMin: float = -3.40282346638528860e+38;
-    static minpositive: float =  1.17549435e-38;
-    static floatMax: float = 3.40282346638528860e+38;
+    static floatMin: float = -3.40282346638528860e+38f;
+    static minpositive: float =  1.17549435e-38f;
+    static floatMax: float = 3.40282346638528860e+38f;
 }
 
 class FloatStaticA extends GetFloatStatic {

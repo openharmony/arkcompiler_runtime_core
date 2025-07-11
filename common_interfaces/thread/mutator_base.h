@@ -101,14 +101,26 @@ public:
         return inSaferegion_.load(std::memory_order_seq_cst) != SAFE_REGION_FALSE;
     }
 
-    inline void IncObserver() { observerCnt_.fetch_add(1); }
+    inline void IncObserver()
+    {
+        observerCnt_.fetch_add(1);
+    }
 
-    inline void DecObserver() { observerCnt_.fetch_sub(1); }
+    inline void DecObserver()
+    {
+        observerCnt_.fetch_sub(1);
+    }
 
     // Return true indicate there are some observer is visitting this mutator
-    inline bool HasObserver() { return observerCnt_.load() != 0; }
+    inline bool HasObserver()
+    {
+        return observerCnt_.load() != 0;
+    }
 
-    inline size_t GetObserverCount() const { return observerCnt_.load(); }
+    inline size_t GetObserverCount() const
+    {
+        return observerCnt_.load();
+    }
 
     // Force current mutator enter saferegion, internal use only.
     __attribute__((always_inline)) inline void DoEnterSaferegion();
@@ -130,12 +142,12 @@ public:
     __attribute__((always_inline)) inline bool LeaveSaferegion() noexcept;
 
     // Called if current mutator should do corresponding task by suspensionFlag value
-    void HandleSuspensionRequest();
+    __attribute__((visibility ("default"))) void HandleSuspensionRequest();
     // Called if current mutator should handle stw request
     void SuspendForStw();
 
     // temporary impl to clean GC callback, and need to refact to flip function
-    void HandleJSGCCallback();
+    __attribute__((visibility ("default"))) void HandleJSGCCallback();
 
     static uint32_t ConstructSuspensionFlag(uint32_t flag, uint32_t clearFlag, uint32_t setFlag)
     {
@@ -260,9 +272,14 @@ public:
         return safepointActive_;
     }
 
-    void MutatorBaseLock() { mutatorBaseLock_.lock(); }
+    void MutatorBaseLock()
+    {
+        mutatorBaseLock_.lock();
+    }
 
-    void MutatorBaseUnlock() { mutatorBaseLock_.unlock(); }
+    void MutatorBaseUnlock() {
+        mutatorBaseLock_.unlock();
+    }
 
     void RegisterJSThread(void *jsThread)
     {

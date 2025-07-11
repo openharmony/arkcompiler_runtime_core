@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_STUBS_H
 
 #include <cstdint>
+#include "plugins/ets/runtime/types/ets_bigint.h"
 
 namespace ark::ets {
 
@@ -36,6 +37,8 @@ inline bool EtsReferenceNullish(EtsCoroutine *coro, EtsObject *ref);
 // Comparison slowpath for value-typed references
 bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2);
 
+bool EtsBigIntEquality(EtsBigInt *obj1, EtsBigInt *obj2);
+
 // Obtain owner class of method in ets frames
 inline EtsClass *GetMethodOwnerClassInFrames(EtsCoroutine *coro, uint32_t depth);
 
@@ -43,6 +46,27 @@ inline EtsClass *GetMethodOwnerClassInFrames(EtsCoroutine *coro, uint32_t depth)
 EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj);
 
 bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj);
+
+EtsObject *EtsLdbyname(EtsCoroutine *coro, EtsObject *thisObj, panda_file::File::StringData name);
+
+void EtsStbyname(EtsCoroutine *coro, EtsObject *obj, panda_file::File::StringData propName, EtsObject *value);
+
+EtsObject *EtsLdbyidx(EtsCoroutine *coro, EtsObject *thisObj, uint32_t index);
+
+bool EtsStbyidx(EtsCoroutine *coro, EtsObject *obj, uint32_t idx, EtsObject *value);
+
+bool EtsStbyval(EtsCoroutine *coro, EtsObject *obj, EtsObject *key, EtsObject *value);
+
+EtsObject *EtsLdbyval(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *valObj);
+
+bool EtsIsinstance(EtsCoroutine *coro, EtsObject *lhsObj, EtsObject *rhsObj);
+
+EtsObject *EtsCall(EtsCoroutine *coro, EtsObject *funcObj, Span<VMHandle<ObjectHeader>> args);
+
+EtsObject *EtsCallThis(EtsCoroutine *coro, EtsObject *thisObj, panda_file::File::StringData name,
+                       Span<VMHandle<ObjectHeader>> args);
+
+EtsObject *EtsCallNew(EtsCoroutine *coro, EtsObject *ctor, Span<VMHandle<ObjectHeader>> args);
 
 template <bool IS_GETTER>
 inline void LookUpException(ark::Class *klass, Field *rawField);

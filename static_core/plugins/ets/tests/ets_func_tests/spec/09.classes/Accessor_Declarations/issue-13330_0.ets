@@ -33,9 +33,9 @@ function main(): void {
     accessCounter = 0;
     let vv = new Base();
 
-    assertEQ( vv.base, 41)
-    assertEQ( accessCounter, 1)
-    assertEQ( vv.base, 41)
-    assertEQ( accessCounter, 2)
+    arktest.assertEQ( vv.base, 41)
+    arktest.assertEQ( accessCounter, 1)
+    arktest.assertEQ( vv.base, 41)
+    arktest.assertEQ( accessCounter, 2)
 
 }

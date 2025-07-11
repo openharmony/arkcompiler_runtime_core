@@ -23,10 +23,10 @@
 import {TestNullishType} from './issue15013_to_export'
 
 function foo<T>(x: T): TestNullishType {
-  return x
+  return x as Object | null | undefined
 }
 
 function main(): void {
   let y = foo(undefined)
-  assertEQ( y, undefined)
+  arktest.assertEQ( y, undefined)
 }

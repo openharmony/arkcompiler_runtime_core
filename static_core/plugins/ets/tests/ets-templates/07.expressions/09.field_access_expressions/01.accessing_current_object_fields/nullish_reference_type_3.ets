@@ -24,5 +24,5 @@ class A {
 function main(): void {
   let instance: A|null|undefined = new A();
   instance.x = 1;
-  assertTrue( instance.x == 1 )
+  arktest.assertTrue( instance.x == 1 )
 }

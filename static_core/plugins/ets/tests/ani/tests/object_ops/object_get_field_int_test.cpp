@@ -25,7 +25,7 @@ public:
         auto sarah = static_cast<ani_object>(sarahRef);
 
         ani_class cls;
-        ASSERT_EQ(env_->FindClass("Lobject_get_field_int_test/Woman;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("object_get_field_int_test.Woman", &cls), ANI_OK);
 
         ani_field fieldName;
         ASSERT_EQ(env_->Class_FindField(cls, "name", &fieldName), ANI_OK);
@@ -46,9 +46,20 @@ TEST_F(ObjectGetFieldIntTest, get_field_int)
     ani_field fieldAge {};
     GetTestData(&sarah, &field, &fieldAge);
 
-    ani_int age {};
+    ani_int age = 0U;
     ASSERT_EQ(env_->Object_GetField_Int(sarah, fieldAge, &age), ANI_OK);
     ASSERT_EQ(age, 24U);
+}
+
+TEST_F(ObjectGetFieldIntTest, get_field_int_invalid_env)
+{
+    ani_object sarah {};
+    ani_field field {};
+    ani_field fieldAge {};
+    GetTestData(&sarah, &field, &fieldAge);
+
+    ani_int age = 0U;
+    ASSERT_EQ(env_->c_api->Object_GetField_Int(nullptr, sarah, fieldAge, &age), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectGetFieldIntTest, get_field_int_invalid_field_type)
@@ -58,7 +69,7 @@ TEST_F(ObjectGetFieldIntTest, get_field_int_invalid_field_type)
     ani_field fieldAge {};
     GetTestData(&sarah, &field, &fieldAge);
 
-    ani_int age {};
+    ani_int age = 0U;
     ASSERT_EQ(env_->Object_GetField_Int(sarah, field, &age), ANI_INVALID_TYPE);
 }
 
@@ -69,7 +80,7 @@ TEST_F(ObjectGetFieldIntTest, invalid_argument1)
     ani_field fieldAge {};
     GetTestData(&sarah, &field, &fieldAge);
 
-    ani_int age {};
+    ani_int age = 0U;
     ASSERT_EQ(env_->Object_GetField_Int(nullptr, field, &age), ANI_INVALID_ARGS);
 }
 
@@ -80,7 +91,7 @@ TEST_F(ObjectGetFieldIntTest, invalid_argument2)
     ani_field fieldAge {};
     GetTestData(&sarah, &field, &fieldAge);
 
-    ani_int age {};
+    ani_int age = 0U;
     ASSERT_EQ(env_->Object_GetField_Int(sarah, nullptr, &age), ANI_INVALID_ARGS);
 }
 

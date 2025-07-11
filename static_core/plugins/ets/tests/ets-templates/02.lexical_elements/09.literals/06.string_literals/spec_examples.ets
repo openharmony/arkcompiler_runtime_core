@@ -27,11 +27,11 @@ let g = 'don\'t do it'
 let h = 'don\u0027t do it'
 
 function main(): void {
-    assertTrue(b instanceof string)
-    assertTrue(c instanceof string)
-    assertTrue(d instanceof string)
-    assertTrue(e instanceof string)
-    assertTrue(f instanceof string)
-    assertTrue(g instanceof string)
-    assertTrue(h instanceof string)
+    arktest.assertTrue(b instanceof string)
+    arktest.assertTrue(c instanceof string)
+    arktest.assertTrue(d instanceof string)
+    arktest.assertTrue(e instanceof string)
+    arktest.assertTrue(f instanceof string)
+    arktest.assertTrue(g instanceof string)
+    arktest.assertTrue(h instanceof string)
 }

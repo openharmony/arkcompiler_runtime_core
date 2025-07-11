@@ -27,9 +27,9 @@ class A<T0, T1=string, T2=Long> {
 
 function main() : void {
     let a: A<Short> = new A();
-    assertTrue( a.data0 instanceof Short)
-    assertTrue( a.data1 instanceof string)
-    assertTrue( a.data2 instanceof Long)
+    arktest.assertTrue( a.data0 instanceof Short)
+    arktest.assertTrue( a.data1 instanceof string)
+    arktest.assertTrue( a.data2 instanceof Long)
 }
 
 

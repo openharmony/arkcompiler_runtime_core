@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,7 @@ protected:
 
         options_.SetLoadRuntimes({"core"});
 
-        options_.SetGcType("gen-gc");
+        options_.SetGcType("g1-gc");
 
         auto execPath = ark::os::file::File::GetExecutablePath();
         std::string pandaStdLib =
@@ -166,14 +166,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallShortINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -251,14 +251,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallShortJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -339,14 +339,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -428,14 +428,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -518,14 +518,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallRangeINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -608,14 +608,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallRangeJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -694,14 +694,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallAccShortINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -780,14 +780,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallAccShortJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -868,14 +868,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallAccINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -956,14 +956,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallAccJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1042,14 +1042,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallShortINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1128,14 +1128,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallShortJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1217,14 +1217,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1306,14 +1306,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1396,14 +1396,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallRangeINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1486,14 +1486,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallRangeJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1572,14 +1572,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallAccShortINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1658,14 +1658,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallAccShortJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1746,14 +1746,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallAccINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1834,14 +1834,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallAccJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1915,14 +1915,14 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectShortINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1996,14 +1996,14 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectShortJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -2081,14 +2081,14 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -2166,14 +2166,14 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -2252,14 +2252,14 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectRangeINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -2338,14 +2338,14 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectRangeJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expectedResult = 0;
-    int64_t unexpectedException = 2;
-    int64_t noExceptions = -1;
+    int32_t expectedResult = 0;
+    int32_t unexpectedException = 2;
+    int32_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
+    ASSERT_NE(result.GetAs<int32_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int32_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int32_t>(), expectedResult) << "Unexpected error";
 }
 
 }  // namespace ark::test

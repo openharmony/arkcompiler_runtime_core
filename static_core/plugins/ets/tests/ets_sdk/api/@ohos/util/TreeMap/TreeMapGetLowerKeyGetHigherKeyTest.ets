@@ -15,11 +15,8 @@
 
 import TreeMap from "@ohos.util.TreeMap";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
-    const suite = new ArkTestsuite("TreeMap GetLowerKey GetHigherKey API tests")
+    const suite = new arktest.ArkTestsuite("TreeMap GetLowerKey GetHigherKey API tests")
 
     suite.addTest("TreeMap getLowerKey getHigherKey lower and higher key", testGetLowerKeyAndHigherKeyValidKeys)
     suite.addTest("TreeMap getLowerKey getHigherKey lower and higher key from the null treeMap",
@@ -65,11 +62,11 @@ function testGetLowerKeyAndHigherKeyValidKeys() {
     let lower_ = treeMap.getLowerKey("cc");
     let higher = treeMap.getHigherKey("aa");
     let higher_ = treeMap.getHigherKey("bb");
-    assertEQ(lower, "aa", "The treeMap should return the correct lower key");
-    assertEQ(lower_, "bb", "The treeMap should return the correct lower key");
-    assertEQ(higher, "bb", "The treeMap should return the correct higher key");
-    assertEQ(higher_, "cc", "The treeMap should return the correct higher key");
-    assertEQ(treeMap.length, 3, "The treeMap length should be 3");
+    arktest.assertEQ(lower, "aa", "The treeMap should return the correct lower key");
+    arktest.assertEQ(lower_, "bb", "The treeMap should return the correct lower key");
+    arktest.assertEQ(higher, "bb", "The treeMap should return the correct higher key");
+    arktest.assertEQ(higher_, "cc", "The treeMap should return the correct higher key");
+    arktest.assertEQ(treeMap.length, 3, "The treeMap length should be 3");
 }
 
 function testGetLowerKeyAndHigherKeyEmptyTreeMap() {
@@ -79,9 +76,9 @@ function testGetLowerKeyAndHigherKeyEmptyTreeMap() {
         });
     let lower = treeMap.getLowerKey("bb");
     let higher = treeMap.getHigherKey("aa");
-    assertEQ(lower, undefined, "The treeMap should return undefined for the lower key in an empty map");
-    assertEQ(higher, undefined, "The treeMap should return undefined for the higher key in an empty map");
-    assertEQ(treeMap.length, 0, "The treeMap length should be 0");
+    arktest.assertEQ(lower, undefined, "The treeMap should return undefined for the lower key in an empty map");
+    arktest.assertEQ(higher, undefined, "The treeMap should return undefined for the higher key in an empty map");
+    arktest.assertEQ(treeMap.length, 0, "The treeMap length should be 0");
 }
 
 function testGetLowerKeyAndHigherKeyBoundaryData() {
@@ -94,9 +91,9 @@ function testGetLowerKeyAndHigherKeyBoundaryData() {
     treeMap.set("cc", "789");
     let lower = treeMap.getLowerKey("aa");
     let higher = treeMap.getHigherKey("cc");
-    assertEQ(lower, undefined, "The treeMap should return undefined for the lower key at the boundary value");
-    assertEQ(higher, undefined, "The treeMap should return undefined for the higher key at the boundary value");
-    assertEQ(treeMap.length, 3, "The treeMap length should be 3");
+    arktest.assertEQ(lower, undefined, "The treeMap should return undefined for the lower key at the boundary value");
+    arktest.assertEQ(higher, undefined, "The treeMap should return undefined for the higher key at the boundary value");
+    arktest.assertEQ(treeMap.length, 3, "The treeMap length should be 3");
 }
 
 function testGetLowerKeyAndHigherKeyNonExistingKey() {
@@ -116,11 +113,11 @@ function testGetLowerKeyAndHigherKeyNonExistingKey() {
     let lower = treeMap.getLowerKey("ff");
     let higher_ = treeMap.getHigherKey("pp");
     let higher = treeMap.getHigherKey("ff");
-    assertEQ(lower_, undefined, "The treeMap should return undefined when no data is found above this key");
-    assertEQ(higher_, undefined, "The treeMap should return undefined when no data is found below this key");
-    assertEQ(lower, "ee", "The treeMap should return the correct lower key");
-    assertEQ(higher, "gg", "The treeMap should return the correct higher key");
-    assertEQ(treeMap.length, 8, "The treeMap length should be 8");
+    arktest.assertEQ(lower_, undefined, "The treeMap should return undefined when no data is found above this key");
+    arktest.assertEQ(higher_, undefined, "The treeMap should return undefined when no data is found below this key");
+    arktest.assertEQ(lower, "ee", "The treeMap should return the correct lower key");
+    arktest.assertEQ(higher, "gg", "The treeMap should return the correct higher key");
+    arktest.assertEQ(treeMap.length, 8, "The treeMap length should be 8");
 }
 
 function testGetLowerKeyAndHigherKeyEmptyStringKey() {
@@ -130,9 +127,9 @@ function testGetLowerKeyAndHigherKeyEmptyStringKey() {
         });
     let lower = treeMap.getLowerKey("");
     let higher = treeMap.getHigherKey("");
-    assertEQ(lower, undefined, "The treeMap should return undefined for the lower key at the boundary value");
-    assertEQ(higher, undefined, "The treeMap should return undefined for the higher key at the boundary value");
-    assertEQ(treeMap.length, 0, "The treeMap length should be 0");
+    arktest.assertEQ(lower, undefined, "The treeMap should return undefined for the lower key at the boundary value");
+    arktest.assertEQ(higher, undefined, "The treeMap should return undefined for the higher key at the boundary value");
+    arktest.assertEQ(treeMap.length, 0, "The treeMap length should be 0");
 }
 
 function testGetLowerKeyAndHigherKeyObjectKeys() {
@@ -154,11 +151,11 @@ function testGetLowerKeyAndHigherKeyObjectKeys() {
     let lower_ = treeMapo.getLowerKey(obj_trd);
     let higher = treeMapo.getHigherKey(obj);
     let higher_ = treeMapo.getHigherKey(obj_sec);
-    assertTrue(equalObjects(lower!, obj!), "The treeMap should return the correct lower key");
-    assertTrue(equalObjects(lower_!, obj_sec!), "The treeMap should return the correct lower key");
-    assertTrue(equalObjects(higher!, obj_sec!), "The treeMap should return the correct higher key");
-    assertTrue(equalObjects(higher_!, obj_trd!), "The treeMap should return the correct higher key");
-    assertEQ(treeMapo.length, 3, "The treeMap length should be 3");
+    arktest.assertTrue(equalObjects(lower!, obj!), "The treeMap should return the correct lower key");
+    arktest.assertTrue(equalObjects(lower_!, obj_sec!), "The treeMap should return the correct lower key");
+    arktest.assertTrue(equalObjects(higher!, obj_sec!), "The treeMap should return the correct higher key");
+    arktest.assertTrue(equalObjects(higher_!, obj_trd!), "The treeMap should return the correct higher key");
+    arktest.assertEQ(treeMapo.length, 3, "The treeMap length should be 3");
 }
 
 function testGetLowerKeyAndHigherKeyObjectKeysBoundaryData() {
@@ -177,7 +174,7 @@ function testGetLowerKeyAndHigherKeyObjectKeysBoundaryData() {
     treeMapo.set(obj_trd, obj_trd_v);
     let lower = treeMapo.getLowerKey(obj);
     let higher = treeMapo.getHigherKey(obj_trd);
-    assertEQ(lower, undefined, "The treeMap should return undefined for the lower key at the boundary value");
-    assertEQ(higher, undefined, "The treeMap should return undefined for the higher key at the boundary value");
-    assertEQ(treeMapo.length, 3, "The treeMap length should be 3");
+    arktest.assertEQ(lower, undefined, "The treeMap should return undefined for the lower key at the boundary value");
+    arktest.assertEQ(higher, undefined, "The treeMap should return undefined for the higher key at the boundary value");
+    arktest.assertEQ(treeMapo.length, 3, "The treeMap length should be 3");
 }

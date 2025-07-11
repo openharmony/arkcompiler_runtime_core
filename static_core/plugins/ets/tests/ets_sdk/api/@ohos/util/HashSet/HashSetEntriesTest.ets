@@ -15,11 +15,8 @@
 
 import {HashSet} from "@ohos.util.HashSet";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
-    const suite = new ArkTestsuite("HashSet Entries API tests")
+    const suite = new arktest.ArkTestsuite("HashSet Entries API tests")
 
     suite.addTest("HashSet entries return iterator by key and value",
         testEntriesReturnIteratorByKeyValue)
@@ -44,12 +41,12 @@ function testEntriesReturnIteratorByKeyValue() {
         }
     }
     let strAll = "1,1,2,2,3,3,4,4";
-    assertEQ(str, strAll, "The hashSet entries iterator should return all key-value pairs");
+    arktest.assertEQ(str, strAll, "The hashSet entries iterator should return all key-value pairs");
 }
 
 function testEntriesReturnIteratorByKeyValueWithEmptyHashSet() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     let iteratorSetValues = hashSet.entries();
-    assertEQ(iteratorSetValues.next().value, undefined,
-        "The hashSet entries iterator should return undefined when the hashSet is empty");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The hashSet entries iterator.done should true when the hashSet is empty");
 }

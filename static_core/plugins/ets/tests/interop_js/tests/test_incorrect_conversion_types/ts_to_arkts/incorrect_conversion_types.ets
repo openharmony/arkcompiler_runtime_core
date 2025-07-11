@@ -31,7 +31,7 @@ import {
     tsNull,
     tsUndefined,
     tsBigInt,
-    tsArrayNum, 
+    tsArrayNum,
     tsArrayStr
 } from 'js_code';
 
@@ -170,8 +170,8 @@ function conversionTsNumToLong(): boolean {
 
 function conversionTsNumToChar(): boolean {
     try {
-        const expValLR: char = '\uF8FF';
-        const expValRR: char = '\u0100';
+        const expValLR: char = c'\uF8FF';
+        const expValRR: char = c'\u0100';
 
         const testValLR = tsNumberToCharLR as char;
         const testValRR = tsNumberToCharRR as char;

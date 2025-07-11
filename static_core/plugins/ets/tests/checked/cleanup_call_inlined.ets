@@ -26,17 +26,17 @@
 //! METHOD        "cleanup_call_inlined.ETSGLOBAL::test_after_escape"
 //! PASS_AFTER    "Inline"
 //! INST_COUNT    /Call.*Inlined/, 9
-//! INST_COUNT    /ReturnInlined/, 13
+//! INST_COUNT    /ReturnInlined/, 11
 //! PASS_AFTER    "EscapeAnalysis"
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_NOT      /Inlined/
 
-function sum2(a: int[]): int {
+function sum2(a: FixedArray<int>): int {
     return a[0] + a[1];
 }
 
 function test_after_checks_elim(): int {
-    let a = new int[2];
+    let a: FixedArray<int> = new int[2];
     a[0] = 2;
     a[1] = 3;
     return sum2(a);

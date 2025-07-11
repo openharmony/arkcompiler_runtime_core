@@ -21,7 +21,7 @@ tags: []
 function main(): int {
     let emptyString:  String = "";
     try {
-        assertTrue( !!emptyString)
+        arktest.assertTrue( !!emptyString)
     } catch (e) {
         console.println("Way ...");
         return 0;

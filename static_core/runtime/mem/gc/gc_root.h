@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,6 +83,7 @@ private:
 template <class LanguageConfig>
 class RootManager final {
 public:
+    explicit RootManager(PandaVM *vm) : vm_(vm) {};
     /// Visit all non-heap roots(registers, thread locals, etc)
     void VisitNonHeapRoots(const GCRootVisitor &gcRootVisitor,
                            VisitGCRootFlags flags = VisitGCRootFlags::ACCESS_ROOT_ALL) const;
@@ -110,21 +111,7 @@ public:
 
     void VisitAotStringRoots(const GCRootVisitor &gcRootVisitor, VisitGCRootFlags flags) const;
 
-    /// Updates references to moved objects in TLS
-    void UpdateThreadLocals();
-
-    void UpdateVmRefs();
-
-    void UpdateGlobalObjectStorage();
-
-    void UpdateClassLinkerContextRoots();
-
-    void UpdateAotStringRoots();
-
-    void SetPandaVM(PandaVM *vm)
-    {
-        vm_ = vm;
-    }
+    void UpdateRefsToMovedObjects(const GCRootUpdater &gcRootUpdater);
 
 private:
     /// Visit VM-specific roots
@@ -140,6 +127,19 @@ private:
      * @param thread
      */
     void VisitRootsForThread(ManagedThread *thread, const GCRootVisitor &gcRootVisitor) const;
+
+    void UpdateRefsInVRegs(ManagedThread *thread, const GCRootUpdater &gcRootUpdater);
+
+    /// Updates references to moved objects in TLS
+    void UpdateThreadLocals(const GCRootUpdater &gcRootUpdater);
+
+    void UpdateVmRefs(const GCRootUpdater &gcRootUpdater);
+
+    void UpdateGlobalObjectStorage(const GCRootUpdater &gcRootUpdater);
+
+    void UpdateClassLinkerContextRoots(const GCRootUpdater &gcRootUpdater);
+
+    void UpdateAotStringRoots(const GCRootUpdater &gcRootUpdater);
 
     PandaVM *vm_ {nullptr};
 };

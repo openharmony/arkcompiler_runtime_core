@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,10 +51,6 @@ private:
 
     /// @brief Add a new process cards task in task manager wait list. @returns id of waiter in wait list
     void AddToWaitList() REQUIRES(this->updateRemsetLock_);
-
-    /* TaskManager specific variables */
-    static constexpr taskmanager::TaskProperties UPDATE_REMSET_TASK_PROPERTIES = {
-        taskmanager::TaskType::GC, taskmanager::VMType::STATIC_VM, taskmanager::TaskExecutionMode::FOREGROUND};
 
     bool hasTaskInTaskmanager_ GUARDED_BY(this->updateRemsetLock_) {false};
 

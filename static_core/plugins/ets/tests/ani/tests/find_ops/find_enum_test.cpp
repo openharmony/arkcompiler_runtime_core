@@ -36,15 +36,15 @@ void RetrieveStringFromAni(ani_env *env, ani_string string, std::string &resStri
 TEST_F(EnumFindTest, find_enum)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("Lfind_enum_test/Color;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("find_enum_test.Color", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum aniEnumInt {};
-    ASSERT_EQ(env_->FindEnum("Lfind_enum_test/ColorInt;", &aniEnumInt), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("find_enum_test.ColorInt", &aniEnumInt), ANI_OK);
     ASSERT_NE(aniEnumInt, nullptr);
 
     ani_enum aniEnumString {};
-    ASSERT_EQ(env_->FindEnum("Lfind_enum_test/ColorString;", &aniEnumString), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("find_enum_test.ColorString", &aniEnumString), ANI_OK);
     ASSERT_NE(aniEnumString, nullptr);
 }
 
@@ -53,19 +53,27 @@ TEST_F(EnumFindTest, invalid_arg_enum)
     ani_enum en {};
     ASSERT_EQ(env_->FindEnum(nullptr, &en), ANI_INVALID_ARGS);
 
-    ASSERT_EQ(env_->FindEnum("Lfind_enum_test/Color;", nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->FindEnum("find_enum_test.Color", nullptr), ANI_INVALID_ARGS);
 }
 
 TEST_F(EnumFindTest, invalid_arg_name)
 {
     ani_enum en {};
-    ASSERT_EQ(env_->FindEnum("Lfind_enum_test/NotFound;", &en), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindEnum("find_enum_test.NotFound", &en), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindEnum("", &en), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindEnum("\t", &en), ANI_NOT_FOUND);
+}
+
+TEST_F(EnumFindTest, invalid_arg_env)
+{
+    ani_enum en {};
+    ASSERT_EQ(env_->c_api->FindEnum(nullptr, "#Color", &en), ANI_INVALID_ARGS);
 }
 
 TEST_F(EnumFindTest, find_enum_combine_scenes_001)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("Lfind_enum_test/EnumA001;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("find_enum_test.EnumA001", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};
@@ -120,7 +128,7 @@ TEST_F(EnumFindTest, find_enum_combine_scenes_001)
 TEST_F(EnumFindTest, find_enum_combine_scenes_001_1)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("Lfind_enum_test/EnumA001;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("find_enum_test.EnumA001", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};
@@ -171,15 +179,15 @@ TEST_F(EnumFindTest, find_enum_combine_scenes_001_1)
 TEST_F(EnumFindTest, find_enum_combine_scenes_003)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lfind_enum_test/test003A;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("find_enum_test.test003A", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_namespace result {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "Ltest003B;", &result), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "test003B", &result), ANI_OK);
     ASSERT_NE(result, nullptr);
 
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->Namespace_FindEnum(result, "LEnumA003;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindEnum(result, "EnumA003", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};
@@ -213,11 +221,11 @@ TEST_F(EnumFindTest, find_enum_combine_scenes_003)
 TEST_F(EnumFindTest, find_enum_combine_scenes_004)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lfind_enum_test/test004A;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("find_enum_test.test004A", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->Namespace_FindEnum(ns, "LEnumA004;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindEnum(ns, "EnumA004", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};
@@ -241,4 +249,13 @@ TEST_F(EnumFindTest, find_enum_combine_scenes_004)
     RetrieveStringFromAni(env_, blueName, itemName);
     ASSERT_STREQ(itemName.data(), "BLUE");
 }
+
+TEST_F(EnumFindTest, check_initialization)
+{
+    ASSERT_FALSE(IsRuntimeClassInitialized("find_enum_test.EnumA001"));
+    ani_enum aniEnum {};
+    ASSERT_EQ(env_->FindEnum("find_enum_test.EnumA001", &aniEnum), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("find_enum_test.EnumA001"));
+}
+
 }  // namespace ark::ets::ani::testing

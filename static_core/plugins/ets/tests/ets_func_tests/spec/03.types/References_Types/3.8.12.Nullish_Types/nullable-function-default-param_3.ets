@@ -20,7 +20,7 @@ name: nullable-function-default-param_3.ets
 ---*/
 
 function test(required: String, param: Int | null = null): void {
-    assertTrue( param === null)
+    arktest.assertTrue( param === null)
 }
 
 function main(): void {

@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 class TestFloat {
-    static float_value: float = 18.0;
+    static float_value: float = 18.0f;
     static string_value: String = "18.0";
     static specia1: int = 0;
     static specia3: string = "";
     static specia4: null = null;
     static specia5: undefined  = undefined ;
-    static floatMin: float = -3.40282346638528860e+38;
-    static minpositive: float =  1.17549435e-38;
-    static floatMax: float = 3.40282346638528860e+38;
+    static floatMin: float = -3.40282346638528860e+38f;
+    static minpositive: float =  1.17549435e-38f;
+    static floatMax: float = 3.40282346638528860e+38f;
 }
 
 class TestFloatA extends TestFloat {
-    static float_value: float = 18.0;
+    static float_value: float = 18.0f;
 }
 
 final class TestFloatFinal extends TestFloat {
-    static float_value: float = 18.0;
+    static float_value: float = 18.0f;
 }

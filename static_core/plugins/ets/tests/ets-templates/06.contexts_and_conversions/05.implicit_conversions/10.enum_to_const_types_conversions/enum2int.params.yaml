@@ -19,23 +19,23 @@ cases:
       use: |-
           // assignment-like context, variable declaration
           let v1: number = Color.Red
-          assertEQ(v1, 0)
+          arktest.assertEQ(v1, 0)
 
           let v2: number = Color.Green + Color.Blue
-          assertEQ(v2, 201)
+          arktest.assertEQ(v2, 201)
 
           let v3: number = s + Color.Blue + 33
-          assertEQ(v3, 176)
+          arktest.assertEQ(v3, 176)
 
           // assignment-like context, constant declaration
           const c1: number = Color.Red
-          assertEQ(c1, 0)
+          arktest.assertEQ(c1, 0)
 
           const c2: number = Color.Green + Color.Blue
-          assertEQ(c2, 201)
+          arktest.assertEQ(c2, 201)
 
           const c3: number = s + Color.Blue + 34
-          assertEQ(c3, 177)
+          arktest.assertEQ(c3, 177)
 
     - decl: |-
           let s: int = 42
@@ -43,13 +43,13 @@ cases:
       use: |-
           // assignment-like context, variable assignment
           v = Color.Red
-          assertEQ(v, 0)
+          arktest.assertEQ(v, 0)
 
           v = Color.Green + Color.Blue
-          assertEQ(v, 201)
+          arktest.assertEQ(v, 201)
 
           v = s + Color.Blue + 12
-          assertEQ(v, 155)
+          arktest.assertEQ(v, 155)
 
     - decl: |-
           let s: int = 42
@@ -61,9 +61,9 @@ cases:
       use: |-
           // assignment-like context, field declaration
           let a: A = new A()
-          assertEQ(a.fld1, 0)
-          assertEQ(a.fld2, 201)
-          assertEQ(a.fld3, 100)
+          arktest.assertEQ(a.fld1, 0)
+          arktest.assertEQ(a.fld2, 201)
+          arktest.assertEQ(a.fld3, 100)
 
     - decl: |-
           let s: int = 42
@@ -78,9 +78,9 @@ cases:
           a.fld1 = Color.Red
           a.fld2 = Color.Blue + Color.Green
           a.fld3 = s + Color.Green + 1
-          assertEQ(a.fld1, 0)
-          assertEQ(a.fld2, 201)
-          assertEQ(a.fld3, 143)
+          arktest.assertEQ(a.fld1, 0)
+          arktest.assertEQ(a.fld2, 201)
+          arktest.assertEQ(a.fld3, 143)
 
     - decl: |-
           let s: int = 42
@@ -89,9 +89,9 @@ cases:
           }
       use: |-
           // call context, function
-          assertEQ(foo(Color.Red), 1)
-          assertEQ(foo(Color.Green + Color.Blue), 202)
-          assertEQ(foo(s + Color.Blue + 2), 146)
+          arktest.assertEQ(foo(Color.Red), 1)
+          arktest.assertEQ(foo(Color.Green + Color.Blue), 202)
+          arktest.assertEQ(foo(s + Color.Blue + 2), 146)
 
     - decl: |-
           let s: number = 42.0
@@ -103,9 +103,9 @@ cases:
       use: |-
           // call context, method
           let a: A = new A()
-          assertEQ(a.meth(Color.Red), 2.0)
-          assertEQ(a.meth(Color.Green + Color.Blue), 203.0)
-          assertEQ(a.meth(s + Color.Blue), 145.0)
+          arktest.assertEQ(a.meth(Color.Red), 2.0)
+          arktest.assertEQ(a.meth(Color.Green + Color.Blue), 203.0)
+          arktest.assertEQ(a.meth(s + Color.Blue), 145.0)
 
     - decl: |-
           let s: int = 42
@@ -117,17 +117,17 @@ cases:
           }
       use: |-
           // call context, constructor
-          assertEQ(new A(Color.Red).fld, 0)
-          assertEQ(new A(Color.Green + Color.Blue).fld, 201)
-          assertEQ(new A(s + Color.Blue + 10).fld, 153)
+          arktest.assertEQ(new A(Color.Red).fld, 0)
+          arktest.assertEQ(new A(Color.Green + Color.Blue).fld, 201)
+          arktest.assertEQ(new A(s + Color.Blue + 10).fld, 153)
 
     - decl: |-
           let s: int = 42
       use: |-
           // call context, lambda
-          assertEQ(((p: number): number => { return p })(Color.Red), 0.0)
-          assertEQ(((p: int): int => { return p })(Color.Green + Color.Blue), 201)
-          assertEQ(((p: int): number => { return p })(s + Color.Blue + 5), 148.0)
+          arktest.assertEQ(((p: number): number => { return p })(Color.Red), 0.0)
+          arktest.assertEQ(((p: int): int => { return p })(Color.Green + Color.Blue), 201)
+          arktest.assertEQ(((p: int): number => { return p })(s + Color.Blue + 5), 148.0)
 
     - decl: |-
           let s: number = 42
@@ -137,18 +137,18 @@ cases:
       use: |-
           // composite object
           let a: A = { fld: Color.Red }
-          assertEQ(a.fld, 0)
+          arktest.assertEQ(a.fld, 0)
           a = { fld: Color.Blue + Color.Green }
-          assertEQ(a.fld, 201)
+          arktest.assertEQ(a.fld, 201)
           a = { fld: s + Color.Blue + 1 }
-          assertEQ(a.fld, 144)
+          arktest.assertEQ(a.fld, 144)
 
     - decl: |-
           let s: number = 42.0
       use: |-
           // composite array
           let v: number[] = [ Color.Red ]
-          assertEQ(v[0], 0.0)
+          arktest.assertEQ(v[0], 0.0)
           v = [ Color.Green + Color.Blue, Color.Blue + s ]
-          assertEQ(v[0], 201.0)
-          assertEQ(v[1], 143.0)
+          arktest.assertEQ(v[0], 201.0)
+          arktest.assertEQ(v[1], 143.0)

@@ -14,3 +14,4 @@
 add_subdirectory(asm)
 add_subdirectory(managed)
 add_subdirectory(native)
+add_subdirectory(sampler_ani)

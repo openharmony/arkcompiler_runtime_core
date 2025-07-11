@@ -25,7 +25,7 @@ function main() {
   let src_{{loop.index}}: {{t.type}} = ({{t.val|safe}}) as {{t.type}};
   let dst_{{loop.index}}: string = "" + src_{{loop.index}};
   let exp_{{loop.index}}: string = (new {{t.type|capitalize}}(src_{{loop.index}})).toString();
-  assertTrue( dst_{{loop.index}} == exp_{{loop.index}} )
+  arktest.assertTrue( dst_{{loop.index}} == exp_{{loop.index}} )
   {% endfor %}
 }
 {% endfor %}

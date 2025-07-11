@@ -1,4 +1,5 @@
 build-sdk/sdk/windows_host_tools
 build-sdk/sdk/windows_host_tools/bin
 build-sdk/sdk/windows_host_tools/bin/ark_link.exe
+build-sdk/sdk/windows_host_tools/bin/dependency_analyzer.exe
 build-sdk/sdk/windows_host_tools/bin/es2panda.exe

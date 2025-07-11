@@ -1,3 +1,4 @@
+'use static'
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +18,6 @@ export type OptionalMethodInterface = ESObject;
 export type MixedInterface = ESObject;
 export type CallableInterface1 = ESObject;
 export type OptionalMethodInterface1 = ESObject;
-export interface NormalInterface {
+export declare interface NormalInterface {
     method2(): void;
 }

@@ -25,5 +25,5 @@ type Two = [One|null]
 function main(): void {
     let t: Two = [null];
 
-    assertEQ( t[0], null)
+    arktest.assertEQ( t[0], null)
 }

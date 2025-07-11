@@ -15,11 +15,8 @@
 
 import {TreeSet} from "@ohos.util.TreeSet";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
-    const suite = new ArkTestsuite("TreeSet Entries API tests")
+    const suite = new arktest.ArkTestsuite("TreeSet Entries API tests")
 
     suite.addTest("TreeSet entries return iterator by key and value",
         testEntriesReturnIteratorByKeyValue)
@@ -47,12 +44,12 @@ function testEntriesReturnIteratorByKeyValue() {
         }
     }
     let strAll = "123,123,222,222,333,333,456,456";
-    assertEQ(str, strAll, "The treeSet entries iterator should return the first value");
+    arktest.assertEQ(str, strAll, "The treeSet entries iterator should return the first value");
 }
 
 function testEntriesReturnIteratorByKeyValueWithEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
         secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let it = treeSet.entries();
-    assertEQ(it.next().value, undefined, "The treeSet entries iterator should return undefined when treeSet is empty");
+    arktest.assertTrue(it.next().done, "The treeSet entries iterator.done should true when treeSet is empty");
 }

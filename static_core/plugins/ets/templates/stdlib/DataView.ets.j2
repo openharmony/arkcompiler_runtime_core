@@ -17,13 +17,13 @@ package escompat;
 
 export final class DataView implements ArrayBufferView {
     /** Underlying buffer */
-    private readonly buffer_: ArrayBufferLike
+    private readonly buffer_: ArrayBuffer
     /** Count of bytes in a view */
     private readonly byteLength_: int
     /** Offset from start of {@link buffer} */
     private readonly byteOffset_: int
 
-    public get buffer(): ArrayBufferLike {
+    public get buffer(): ArrayBuffer {
         return this.buffer_
     }
 
@@ -43,7 +43,7 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset offset to start from
      * @throws RangeError if offset is out of array
      */
-    public constructor(buffer: ArrayBufferLike, byteOffset: int) {
+    public constructor(buffer: ArrayBuffer, byteOffset: int) {
         this(buffer, byteOffset, (buffer as Buffer).getByteLength() - byteOffset)
     }
 
@@ -54,7 +54,7 @@ export final class DataView implements ArrayBufferView {
      * @param byteLength lenth of bytes to take
      * @throws RangeError if provided indicies are invalid
      */
-    public constructor(buffer: ArrayBufferLike, byteOffset: int, byteLength: int) {
+    public constructor(buffer: ArrayBuffer, byteOffset: int, byteLength: int) {
         this.buffer_ = buffer
         this.actualBuffer = buffer
         const bufLen = this.actualBuffer.getByteLength()
@@ -72,7 +72,7 @@ export final class DataView implements ArrayBufferView {
      * @param byteLength lenth of bytes to take
      * @throws RangeError if provided indicies are invalid
      */
-    public constructor(buffer: ArrayBufferLike, byteOffset?: Number, byteLength?: Number) {
+    public constructor(buffer: ArrayBuffer, byteOffset?: Number, byteLength?: Number) {
         this(buffer, asIntOrDefault(byteOffset, 0), asIntOrDefault(byteLength, (buffer as Buffer).getByteLength() - asIntOrDefault(byteOffset, 0)))
     }
 
@@ -196,9 +196,10 @@ export final class DataView implements ArrayBufferView {
         let res: {{resType}} = 0;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < {{bit // 8}}; i++) {
-            let byteVal = this.actualBuffer.at(startByte {{getIdx}} i) as {{resType}};
+            {% set helpTypeForNumber = "Double" if (resType|capitalize == "Number") else resType|capitalize %}
+            let byteVal = (this.actualBuffer.at(startByte {{getIdx}} i)).to{{helpTypeForNumber}}();
             byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as {{resType}};
+            res = (res | byteVal << (8 * i)).to{{helpTypeForNumber}}();
         }
         {%- if bit == 32 and mode == "Float" %}
         return Float.bitCastFromInt(res)
@@ -209,13 +210,14 @@ export final class DataView implements ArrayBufferView {
         {%- elif bit == 64 and mode == "Uint" %}
         return DataView.bigintFromULong(res)
         {%- elif mode == 'Int' %}
-        return (res as {{type2nameBits[bit]}}) as {{resType}}
+        {% set helpTypeForNumber = "Double" if (type2nameBits[bit]|capitalize == "Number") else type2nameBits[bit]|capitalize %}
+        return res.to{{helpTypeForNumber}}()
         {%- else %}
         return res
         {%- endif %}
     }
     private get{{methodName}}{{suffix}}(byteOffset: number): {{type2nameCompat[bit]}} {
-        let res = this.get{{methodName}}{{suffix}}(byteOffset as int)
+        let res = this.get{{methodName}}{{suffix}}(byteOffset.toInt())
         return res
     }
 
@@ -237,7 +239,7 @@ export final class DataView implements ArrayBufferView {
         {%- endif %}
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < {{bit // 8}}; i++) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
             this.actualBuffer.set(startByte {{getIdx}} i,  byteVal)
         }
     }
@@ -247,15 +249,16 @@ export final class DataView implements ArrayBufferView {
         {%- elif bit == 64 and mode == "Uint" %}
         const val: {{type2name[bit]}} = value.getLong();
         {%- elif type2name[bit] == "int" %}
-        let temp: long = value as long;
+        let temp: long = value.toLong();
         if (temp == Long.MAX_VALUE || temp == Long.MIN_VALUE) {
             temp = 0;
         }
-        const val: {{type2name[bit]}} = temp as {{type2name[bit]}};
+        const val: {{type2name[bit]}} = temp.to{{type2name[bit]|capitalize}}();
         {%- else %}
-        const val: {{type2name[bit]}} = value as {{type2name[bit]}};
+        {% set helpType = "Double" if (type2name[bit]|capitalize == "Number") else type2name[bit]|capitalize %}
+        const val: {{type2name[bit]}} = value.to{{helpType}}();
         {%- endif %}
-        this.set{{methodName}}{{suffix}}(byteOffset as int, val)
+        this.set{{methodName}}{{suffix}}(byteOffset.toInt(), val)
     }
     {%- endfor %}
 

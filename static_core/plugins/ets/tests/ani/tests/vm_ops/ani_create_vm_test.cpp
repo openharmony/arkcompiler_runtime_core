@@ -44,9 +44,11 @@ TEST_F(CreateVMTest, create_vm_and_destroy_vm)
     options.push_back(bootFileOption);
     ani_options optionsPtr = {options.size(), options.data()};
 
-    const int32_t version = 2;
+    const int32_t versionNew = 2;
+    const int32_t versionOld = 0;
     ASSERT_EQ(ANI_CreateVM(nullptr, ANI_VERSION_1, &vm), ANI_INVALID_ARGS);
-    ASSERT_EQ(ANI_CreateVM(&optionsPtr, version, &vm), ANI_INVALID_VERSION);
+    ASSERT_EQ(ANI_CreateVM(&optionsPtr, versionNew, &vm), ANI_INVALID_VERSION);
+    ASSERT_EQ(ANI_CreateVM(&optionsPtr, versionOld, &vm), ANI_INVALID_VERSION);
     ASSERT_EQ(ANI_CreateVM(&optionsPtr, ANI_VERSION_1, nullptr), ANI_INVALID_ARGS);
     ASSERT_EQ(ANI_CreateVM(&optionsPtr, ANI_VERSION_1, &vm), ANI_OK);
     ASSERT_EQ(vm->c_api->DestroyVM(nullptr), ANI_INVALID_ARGS);

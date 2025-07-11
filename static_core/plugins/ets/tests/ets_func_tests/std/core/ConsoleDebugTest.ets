@@ -44,26 +44,18 @@ class Info {
     }
 }
 
-class Connection {
-    id: number;
-    user: string;
-
-    constructor(id: number, user: string) {
-        this.id = id;
-        this.user = user;
-    }
-}
-
 function main() {
     // Basic debug messages
     console.debug("Debug message");
     console.debug(42);
     console.debug(undefined);
-    
+    console.debug(null);
+    console.debug()
+
     // Multiple arguments
     console.debug("Debug:", "Database connection established");
     console.debug("Query params:", new QueryParams(1, "active"));
-    
+
     // Debug with objects
     const systemInfo = new SystemInfo("1.2GB", "45%");
     const debugData = new Info(
@@ -72,17 +64,19 @@ function main() {
         systemInfo
     );
     console.debug("System status:", debugData);
-    
-    // Debug arrays
-    console.debug("Active connections:", [
-        new Connection(1, "user1"),
-        new Connection(2, "user2")
-    ]);
-    
+
     // Debug with Error objects
     try {
         throw new Error("Test error");
     } catch (error) {
         console.debug("Caught error:", error);
     }
+
+    // Formatted strings
+    console.debug("%d")
+    console.debug("%d", 1)
+    console.debug("%d", 1, 2)
+
+    console.debug("%s %s", "37", 37)
+    console.debug("%s %s", "19.5", 19.5)
 }

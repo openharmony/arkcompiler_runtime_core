@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 let counter = 0;
 
 function body(): Object {
@@ -20,19 +22,21 @@ function body(): Object {
 }
 
 export function main(): int {
+    // call Logger.enableLogging to get the debug messages...
     try {
-        for (let i = 0; i < 50000; ++i) {
-            launch body();
-            ++counter;
+        const veryBigNumberOfCoroutines: int = 500000000;
+        for (let i = 0; i < veryBigNumberOfCoroutines; ++i) {
+            launch<Object, () => Object>(body);
         }
     } catch (e) {
-        if (e instanceof OutOfMemoryError) {
+        if (e instanceof CoroutinesLimitExceedError) {
+            StdDebug.Logger.log("Successfully caught: " + e);
             return 0;
         } else {
-            console.println("Wrong exception thrown!");
+            StdDebug.Logger.log("Wrong exception thrown: " + e);
             return 1;
         }
     }
-    console.println("No exception thrown but should be!");
+    StdDebug.Logger.log("No exception thrown but should be!");
     return 1;
 }

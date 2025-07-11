@@ -20,6 +20,10 @@ class StringArrayProxyHandler extends DefaultArrayProxyHandler<string> {
     popTrapped: boolean = false
     spliceTrapped: boolean = false
     shiftTrapped: boolean = false
+    pushTrapped: boolean = false
+    concatTrapped: boolean = false
+    unshiftTrapped: boolean = false
+    toSplicedTrapped: boolean = false
 
     override get(target: Array<string>, index: int): string {
         this.getTrapped = true
@@ -50,13 +54,22 @@ class StringArrayProxyHandler extends DefaultArrayProxyHandler<string> {
         return super.set(target, name, value)
     }
 
-    override invoke(target: Array<string>, method: Method, args: NullishType[]): NullishType {
-        if (method.getName() == "pop") {
+    override invoke(target: Array<string>, method: Method, args: FixedArray<NullishType>): NullishType {
+        const methodName = method.getName()
+        if (methodName == "pop") {
             this.popTrapped = true
-        } else if (method.getName() == "splice") {
+        } else if (methodName == "splice") {
             this.spliceTrapped = true
-        } else if (method.getName() == "shift") {
+        } else if (methodName == "shift") {
             this.shiftTrapped = true
+        } else if (methodName == "push") {
+            this.pushTrapped = true
+        } else if (methodName == "concat") {
+            this.concatTrapped = true
+        } else if (methodName == "unshift") {
+            this.unshiftTrapped = true
+        } else if (methodName == "toSpliced") {
+            this.toSplicedTrapped = true
         }
 
         return super.invoke(target, method, args)
@@ -66,46 +79,64 @@ class StringArrayProxyHandler extends DefaultArrayProxyHandler<string> {
 function verifyArrayProxyOps(array: Array<string>, handler: StringArrayProxyHandler): void {
     let arrayProxy: Array<string> = Proxy.create(array, handler)
 
-    assertEQ(arrayProxy.length, 3, "unexpected arrayProxy.length")
+    arktest.assertEQ(arrayProxy.length, 3, "unexpected arrayProxy.length")
 
-    assertFalse(handler.getTrapped)
-    assertEQ(arrayProxy[0],  "zero")
-    assertTrue(handler.getTrapped)
+    arktest.assertFalse(handler.getTrapped)
+    arktest.assertEQ(arrayProxy[0],  "zero")
+    arktest.assertTrue(handler.getTrapped)
 
-    assertFalse(handler.setTrapped)
+    arktest.assertFalse(handler.setTrapped)
     arrayProxy[2] = "3"
-    assertTrue(handler.setTrapped)
-    assertEQ(arrayProxy[2],  "two")
+    arktest.assertTrue(handler.setTrapped)
+    arktest.assertEQ(arrayProxy[2],  "two")
 
-    assertFalse(handler.setLengthTrapped)
+    arktest.assertFalse(handler.setLengthTrapped)
     arrayProxy.length = 2
-    assertTrue(handler.setLengthTrapped)
-    assertEQ(arrayProxy.length, 3, "arrayProxy.length updated")
+    arktest.assertTrue(handler.setLengthTrapped)
+    arktest.assertEQ(arrayProxy.length, 3, "arrayProxy.length updated")
 
-    assertFalse(handler.popTrapped)
+    arktest.assertFalse(handler.popTrapped)
     const popped = arrayProxy.pop()
-    assertEQ(popped, "two", "unexpected Array.pop() result")
-    assertTrue(handler.popTrapped)
+    arktest.assertEQ(popped, "two", "unexpected Array.pop() result")
+    arktest.assertTrue(handler.popTrapped)
 
-    arrayProxy.push("5")
+    const lengthAfterPush = arrayProxy.push("5")
+    arktest.assertTrue(handler.pushTrapped)
+    arktest.assertEQ(lengthAfterPush, 3)
+
     const lastElem = arrayProxy.pop()
-    assertEQ(lastElem, "5", "unexpected Array.pop() after Array.push() result")
+    arktest.assertEQ(lastElem, "5", "unexpected Array.pop() after Array.push() result")
 
-    assertFalse(handler.spliceTrapped)
+    arktest.assertFalse(handler.spliceTrapped)
     let arrayTail = arrayProxy.splice(1, 0, "2")
-    assertEQ(arrayTail.length, 0, "unexpected Array.splice() result length")
-    assertEQ(arrayProxy.length, 3, "unexpected array length after splice")
-    assertTrue(handler.spliceTrapped)
+    arktest.assertEQ(arrayTail.length, 0, "unexpected Array.splice() result length")
+    arktest.assertEQ(arrayProxy.length, 3, "unexpected array length after splice")
+    arktest.assertTrue(handler.spliceTrapped)
 
-    assertFalse(handler.shiftTrapped)
+    arktest.assertFalse(handler.shiftTrapped)
     const shifted = arrayProxy.shift()
-    assertEQ(shifted, "0")
-    assertEQ(arrayProxy.length, 2)
-    assertTrue(handler.shiftTrapped)
+    arktest.assertEQ(shifted, "0")
+    arktest.assertEQ(arrayProxy.length, 2)
+    arktest.assertTrue(handler.shiftTrapped)
 
     arrayTail = arrayProxy.splice(1)
-    assertEQ(arrayTail.length, 1, "unexpected Array.splice() result length")
-    assertEQ(arrayProxy.length, 1, "unexpected array length after splice")
+    arktest.assertEQ(arrayTail.length, 1, "unexpected Array.splice() result length")
+    arktest.assertEQ(arrayProxy.length, 1, "unexpected array length after splice")
+
+    const lengthAfterUnshift = arrayProxy.unshift("I", "II")
+    arktest.assertTrue(handler.unshiftTrapped)
+    arktest.assertEQ(arrayProxy.length, 3)
+
+    const tail = ["V"]
+    const concatResult = arrayProxy.concat(tail)
+    arktest.assertTrue(handler.concatTrapped)
+    arktest.assertEQ(concatResult.length, 4)
+
+    const arrayLengthBefore = arrayProxy.length
+    const toSplicedResult = arrayProxy.toSpliced(1, 1)
+    arktest.assertTrue(handler.toSplicedTrapped)
+    arktest.assertEQ(toSplicedResult.length, 2)
+    arktest.assertEQ(arrayProxy.length, arrayLengthBefore)
 }
 
 function testArrayProxyOps(): void {
@@ -113,7 +144,7 @@ function testArrayProxyOps(): void {
 }
 
 function main(): int {
-    const suite = new ArkTestsuite("Proxy API")
+    const suite = new arktest.ArkTestsuite("Proxy API")
 
     suite.addTest("Array proxy operations", testArrayProxyOps)
 

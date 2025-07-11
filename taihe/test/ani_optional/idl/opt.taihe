@@ -12,13 +12,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-function showOptionalInt(x: Optional<i32>): void;
+function ShowOptionalInt(x: Optional<i32>): void;
 
-function makeOptionalInt(b: bool): Optional<i32>;
+function MakeOptionalInt(b: bool): Optional<i32>;
 
-function makeOptionalArray(b: bool, val: i32, num: i32): Optional<Array<i32>>;
+function MakeOptionalArray(b: bool, val: i32, num: i32): Optional<Array<i32>>;
 
 struct ReturnResult {
     results: Optional<Array<String>>;
 }
-function sendReturnResult(result: ReturnResult): Optional<String>;
+function SendReturnResult(result: ReturnResult): Optional<String>;
+
+struct MyStruct {
+    param1: i32;
+    param2: String;
+}
+
+interface Test {
+    @set("string") Setstring(a: Optional<String>): void;
+    @get("string") Getstring(): Optional<String>;
+    SetIntData(a: String): void;
+
+    ShowOptionalString(a: Optional<String>): Optional<String>;
+    ShowOptionalInt32(a: Optional<i32>): Optional<i32>;
+    ShowOptionalBool(a: Optional<bool>): Optional<bool>;
+    ShowOptionalRecord(a: Optional<@record Map<String, bool>>): Optional<@record Map<String, bool>>;
+    ShowOptionalStruct(a: Optional<MyStruct>): Optional<MyStruct>;
+}
+
+function GetTest(): Test;

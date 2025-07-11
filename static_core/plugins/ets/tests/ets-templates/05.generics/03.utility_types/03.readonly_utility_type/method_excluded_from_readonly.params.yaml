@@ -128,7 +128,7 @@ cases:
       }
     check: |-
       let a: Readonly<C> = {_i: 1.9}
-      assertEQ( a.i , 1.9 )
+      arktest.assertEQ( a.i , 1.9 )
 
   - decl: |-
       class C {
@@ -148,7 +148,7 @@ cases:
       }
     check: |-
       let a: Readonly<C> = {_i: 1.9}
-      assertEQ( a.i , 1.9 )
+      arktest.assertEQ( a.i , 1.9 )
 
   - decl: |-
       abstract class C {

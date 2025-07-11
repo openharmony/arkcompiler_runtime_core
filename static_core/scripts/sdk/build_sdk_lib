@@ -65,6 +65,15 @@ function copy_into_sdk() {
     done
 }
 
+function copy_abc_files() {
+    local build_dir="$1"
+    mkdir -p "$PANDA_SDK_PATH"/ets
+    if [[ -f "$build_dir"/plugins/ets/sdk/etssdk.abc ]]; then
+        [[ -f "$PANDA_SDK_PATH"/ets/etssdk.abc ]] || cp "$build_dir"/plugins/ets/sdk/etssdk.abc "$PANDA_SDK_PATH"/ets
+    fi
+    [[ -f "$PANDA_SDK_PATH"/ets/etsstdlib.abc ]] || cp "$build_dir"/plugins/ets/etsstdlib.abc "$PANDA_SDK_PATH"/ets
+}
+
 function linux_arm64_tools() {
     echo "> Building linux arm64 tools..."
     local extra_llvm_opts=""
@@ -88,9 +97,10 @@ function linux_arm64_tools() {
         ${extra_llvm_opts} \
         -DPANDA_BUILD_LLVM_BINARIES=${PANDA_BUILD_LLVM_BINARIES} \
         -DPANDA_BUILD_LLVM_BINARIES_PATH_ROOT=${SDK_BUILD_ROOT}/llvm_binaries"
-    local linux_arm64_build_targets="ark ark_aot ark_disasm ark_link es2panda e2p_test_plugin etsnative verifier ani_helpers aspt_converter"
+    local linux_arm64_build_targets="ark ark_aot ark_disasm ark_link es2panda e2p_test_plugin etsnative verifier ani_helpers aspt_converter dependency_analyzer"
     build_panda "$linux_arm64_build_dir" "$linux_arm64_cmake_args" "$linux_arm64_build_targets"
     copy_into_sdk "$linux_arm64_build_dir" "$PANDA_SDK_PATH/linux_arm64_host_tools" "$SCRIPT_DIR"/linux_arm64_host_tools.txt
+    copy_abc_files "$linux_arm64_build_dir"
 }
 
 function linux_tools() {
@@ -118,16 +128,17 @@ function linux_tools() {
         ${extra_llvm_opts} \
         -DPANDA_BUILD_LLVM_BINARIES=${PANDA_BUILD_LLVM_BINARIES} \
         -DPANDA_BUILD_LLVM_BINARIES_PATH_ROOT=${SDK_BUILD_ROOT}/llvm_binaries"
-    local linux_build_targets="ark ark_aot ark_disasm ark_link es2panda e2p_test_plugin etsnative verifier ani_helpers aspt_converter"
+    local linux_build_targets="ark ark_aot ark_disasm ark_link es2panda etssdk e2p_test_plugin etsnative verifier ani_helpers aspt_converter dependency_analyzer"
     build_panda "$linux_build_dir" "$linux_cmake_args" "$linux_build_targets"
     copy_into_sdk "$linux_build_dir" "$PANDA_SDK_PATH/linux_host_tools" "$SCRIPT_DIR"/linux_host_tools.txt
+    copy_abc_files "$linux_build_dir"
 }
 
 function windows_tools() {
     echo "> Building windows tools..."
     local windows_build_dir="$SDK_BUILD_ROOT/windows_host_tools"
     local windows_cmake_args="-DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/cross-clang-14-x86_64-w64-mingw32-static.cmake"
-    local windows_build_targets="es2panda ark_link"
+    local windows_build_targets="es2panda ark_link dependency_analyzer"
     build_panda "$windows_build_dir" "$windows_cmake_args" "$windows_build_targets"
     copy_into_sdk "$windows_build_dir" "$PANDA_SDK_PATH/windows_host_tools" "$SCRIPT_DIR"/windows_host_tools.txt
 }
@@ -159,7 +170,7 @@ function ohos_arm64() {
         ${extra_llvm_opts} \
         -DPANDA_BUILD_LLVM_BINARIES=${PANDA_BUILD_LLVM_BINARIES} \
         -DPANDA_BUILD_LLVM_BINARIES_PATH_ROOT=${SDK_BUILD_ROOT}/llvm_binaries"
-    local ohos_build_targets="ark ark_aot arkruntime arkassembler ets_interop_js_napi e2p_test_plugin etsnative ani_helpers aspt_converter"
+    local ohos_build_targets="ark ark_aot arkruntime arkassembler ets_interop_js_napi e2p_test_plugin etsnative ani_helpers aspt_converter dependency_analyzer"
     build_panda "$ohos_build_dir" "$target_cmake_args" "$ohos_build_targets"
     copy_into_sdk "$ohos_build_dir" "$taget_sdk_dir" "$SCRIPT_DIR"/ohos_arm64.txt
 
@@ -169,9 +180,7 @@ function ohos_arm64() {
     copy_into_sdk "$ARK_ROOT" "$headers_dst" "$SCRIPT_DIR"/headers.txt '\(\.h$\|\.inl$\|\.inc$\)'
     # Generated headers
     copy_into_sdk "$ohos_build_dir" "$headers_dst" "$SCRIPT_DIR"/gen_headers.txt '\(\.h$\|\.inl$\|\.inc$\|\.idl$\)'
-    # Copy compiled etsstdlib into Panda SDK
-    mkdir -p "$PANDA_SDK_PATH"/ets
-    cp -r "$ohos_build_dir"/plugins/ets/etsstdlib.abc "$PANDA_SDK_PATH"/ets
+    copy_abc_files "$ohos_build_dir"
 }
 
 function ohos_arm32() {
@@ -186,9 +195,10 @@ function ohos_arm32() {
         -DPANDA_LLVM_BACKEND=${PANDA_LLVM_BACKEND} \
         -DPANDA_BUILD_LLVM_BINARIES=${PANDA_BUILD_LLVM_BINARIES} \
         -DPANDA_BUILD_LLVM_BINARIES_PATH_ROOT=${SDK_BUILD_ROOT}/llvm_binaries"
-    local ohos_build_targets="ark arkruntime arkassembler ets_interop_js_napi etsnative ani_helpers aspt_converter"
+    local ohos_build_targets="ark arkruntime arkassembler ets_interop_js_napi etsnative ani_helpers aspt_converter dependency_analyzer"
     build_panda "$ohos_build_dir" "$target_cmake_args" "$ohos_build_targets"
     copy_into_sdk "$ohos_build_dir" "$taget_sdk_dir" "$SCRIPT_DIR"/ohos_arm32.txt
+    copy_abc_files "$ohos_build_dir"
 }
 
 function ts_linter() {
@@ -216,6 +226,12 @@ function ets_std_lib() {
     mkdir -p "$PANDA_SDK_PATH"/ets/stdlib
     cp -r "$ARK_ROOT"/plugins/ets/stdlib/std "$PANDA_SDK_PATH"/ets/stdlib
     cp -r "$ARK_ROOT"/plugins/ets/stdlib/escompat "$PANDA_SDK_PATH"/ets/stdlib
+}
+
+function ets_sdk() {
+    echo "> Copying ets sdk into SDK..."
+    mkdir -p "$PANDA_SDK_PATH"/ets/sdk
+    cp -r "$ARK_ROOT"/plugins/ets/sdk "$PANDA_SDK_PATH"/ets/sdk
 }
 
 function icu_dat_file() {
@@ -251,6 +267,8 @@ function print_help() {
     --ts_linter             Run building ts_linter
 
     --ets_std_lib           Copy ets std lib into SDK
+
+    --ets_sdk               Copy ets sdk into SDK
 
     --icu_dat_file          Copy icu data file into SDK
 
@@ -323,6 +341,7 @@ function set_default() {
     WINDOWS_TOOLS="true"
     TS_LINTER="true"
     ETS_STD_LIB="true"
+    ETS_SDK="true"
     ICU_DAT_FILE="true"
 }
 
@@ -380,6 +399,11 @@ function parse_options() {
             ;;
         --ets_std_lib)
             ETS_STD_LIB="true"
+            has_args="true"
+            shift
+            ;;
+        --ets_sdk)
+            ETS_SDK="true"
             has_args="true"
             shift
             ;;
@@ -463,6 +487,10 @@ function build_sdk_targets() {
 
     if [ "$ETS_STD_LIB" = "true" ]; then
         ets_std_lib
+    fi
+
+    if [ "$ETS_SDK" = "true" ]; then
+        ets_sdk
     fi
 
     if [ "$ICU_DAT_FILE" = "true" ]; then

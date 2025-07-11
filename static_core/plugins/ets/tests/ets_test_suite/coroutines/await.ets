@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+import {launch} from "std/concurrency";
+import {Job} from "std/core";
+
 let flag = false
 
 function set_flag(): String {
@@ -21,22 +24,22 @@ function set_flag(): String {
 }
 
 export function main(): int {
-    let p = launch set_flag();
-    let result = p.awaitResolution();
+    let p = launch<String, () => String>(set_flag);
+    let result = p.Await();
 
     if (!flag) {
         console.print("Flag is not set!");
         return 1;
     } else {
         console.print("First await result: " + result);
-        let result2 = p.awaitResolution();
+        let result2 = p.Await();
         console.print("Second await result: " + result2);
         if (!(result === result2)) {
-            console.print("Await results do not match!");
+            console.print("await results do not match!");
             return 1;
         }
         if (!(result instanceof String)) {
-            console.print("Await result is not String!");
+            console.print("await result is not String!");
             return 1;
         }
     }

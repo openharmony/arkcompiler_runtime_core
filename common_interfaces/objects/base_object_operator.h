@@ -33,8 +33,12 @@ public:
     virtual size_t GetSize(const BaseObject *object) const = 0;
     // Check is valid object.
     virtual bool IsValidObject(const BaseObject *object) const = 0;
+    // Iterate object field, and skit the weak referent, ONLY used in interop.
+    virtual void ForEachRefFieldSkipReferent(const BaseObject *object, const RefFieldVisitor &visitor) const = 0;
     // Iterate object field.
     virtual void ForEachRefField(const BaseObject *object, const RefFieldVisitor &visitor) const = 0;
+    // Iterate XRef.
+    virtual void IterateXRef(const BaseObject *object, const RefFieldVisitor &visitor) const = 0;
     // Get forwarding pointer.
     virtual BaseObject *GetForwardingPointer(const BaseObject *object) const = 0;
     // Set forwarding pointer.

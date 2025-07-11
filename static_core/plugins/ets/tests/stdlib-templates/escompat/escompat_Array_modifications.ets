@@ -98,7 +98,7 @@ function testPop(): int {
         return FAILURE
     }
 
-    if (popped != source[length as int] as Object) {
+    if (popped != source[length] as Object) {
         console.println("Unexpected value returned at pop")
         return FAILURE
     }
@@ -156,7 +156,7 @@ function testSplice1(): int {
     const arr = Array.from<object>(source)
     let length = arr.length
 
-    arr.splice(2)
+    arr.splice(2 as int)
     if (arr.length == 2) return SUCCESS
     console.println("Unexected size after splice")
     return FAILURE
@@ -166,7 +166,7 @@ function testSplice2(): int {
     const arr = Array.from<object>(source)
     let length = arr.length
 
-    arr.splice(2, 1)
+    arr.splice(2 as int, 1 as int)
     if (arr.length == 4) return SUCCESS
     console.println("Unexected size after splice")
     return FAILURE
@@ -176,7 +176,7 @@ function testSplice3(): int {
     const arr = Array.from<object>(source)
     let length = arr.length
 
-    arr.splice(-1)
+    arr.splice(-1 as int)
     if (arr.length == 4) return SUCCESS
     console.println("Unexected size after splice")
     return FAILURE

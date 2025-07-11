@@ -19,8 +19,6 @@
 desc: If evaluation causes an error, then the result of a typeof expression cannot be determined.
 ---*/
 
-//tags: [negative]
-
 {{c.decl}}
 
 function main() {
@@ -28,11 +26,11 @@ function main() {
 
     try {
         t = typeof {{c.exp}}
-    }catch (error) {
+    } catch (error) {
         // do nothing
     }
 
-    assertEQ(t, "initial value")
+    arktest.assertEQ(t, "initial value")
 }
 
 {%- endfor %}

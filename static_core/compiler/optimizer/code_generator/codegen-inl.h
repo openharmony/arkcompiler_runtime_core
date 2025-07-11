@@ -175,7 +175,7 @@ void Codegen::CallRuntimeWithMethod(Inst *inst, void *method, EntrypointId eid, 
 }
 
 template <typename... Args>
-void Codegen::CallBarrier(RegMask liveRegs, VRegMask liveVregs, std::variant<EntrypointId, Reg> entrypoint,
+void Codegen::CallBarrier(RegMask liveRegs, VRegMask liveVregs, std::variant<EntrypointId, Reg> entrypoint, Reg dstReg,
                           Args &&...params)
 {
     bool isFastpath = GetGraph()->GetMode().IsFastPath();
@@ -184,9 +184,15 @@ void Codegen::CallBarrier(RegMask liveRegs, VRegMask liveVregs, std::variant<Ent
         liveRegs = GetCallerRegsMask(GetArch(), false);
         liveVregs = GetCallerRegsMask(GetArch(), true);
     }
+    GetEncoder()->SetRegister(&liveRegs, nullptr, dstReg, false);
     SaveCallerRegisters(liveRegs, liveVregs, !isFastpath);
     FillCallParams(std::forward<Args>(params)...);
     EmitCallRuntimeCode(nullptr, entrypoint);
+    if (dstReg.IsValid()) {
+        ASSERT(dstReg.IsScalar());
+        Reg retReg = GetTarget().GetReturnReg(dstReg.GetType());
+        GetEncoder()->EncodeMov(dstReg, retReg);
+    }
     LoadCallerRegisters(liveRegs, liveVregs, !isFastpath);
 }
 

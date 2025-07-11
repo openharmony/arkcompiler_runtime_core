@@ -110,6 +110,12 @@ public:
         return *currentDefs_;
     }
 
+    bool IsInBootContext()
+    {
+        auto method = static_cast<ark::Method *>(GetGraph()->GetMethod());
+        return method->GetClass()->GetLoadContext()->IsBootContext();
+    }
+
     void AddCatchPhiInputs(const ArenaUnorderedSet<BasicBlock *> &catchHandlers, const InstVector &defs,
                            Inst *throwableInst);
 
@@ -251,6 +257,7 @@ private:
     public:
         BuildCallHelper(const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput = nullptr);
 
+        bool TryBuildIntrinsic();
         void BuildIntrinsic();
         void BuildDefaultIntrinsic(RuntimeInterface::IntrinsicId intrinsicId, bool isVirtual);
         void BuildDefaultStaticIntrinsic(RuntimeInterface::IntrinsicId intrinsicId);
@@ -373,6 +380,19 @@ private:
     }
 
     bool TryBuildStringCharAtIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+
+    template <bool IS_ACC_WRITE>
+    void BuildLoadFromAnyByName(const BytecodeInstruction *bcInst, DataType::Type type);
+    template <bool IS_ACC_WRITE>
+    void BuildStoreFromAnyByName(const BytecodeInstruction *bcInst, DataType::Type type);
+    void BuildLoadFromAnyByIdx(const BytecodeInstruction *bcInst, DataType::Type type);
+    void BuildStoreFromAnyByIdx(const BytecodeInstruction *bcInst, DataType::Type type);
+    void BuildLoadFromAnyByVal(const BytecodeInstruction *bcInst, DataType::Type type);
+    void BuildStoreFromAnyByVal(const BytecodeInstruction *bcInst, DataType::Type type);
+    void BuildIsInstanceAny(const BytecodeInstruction *bcInst, DataType::Type type);
+    template <bool IS_ACC_WRITE>
+    void BuildAnyCall(const BytecodeInstruction *bcInst);
+
 #include "inst_builder_extensions.inl.h"
 
     auto GetClassId() const

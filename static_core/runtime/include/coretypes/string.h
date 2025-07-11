@@ -29,6 +29,8 @@ namespace ark::coretypes {
 class Array;
 class String : public ObjectHeader {
 public:
+    static constexpr uint32_t STRING_LENGTH_SHIFT = 2U;
+
     static String *Cast(ObjectHeader *object)
     {
         // NOTE(linxiang) to do assert
@@ -56,6 +58,10 @@ public:
     PANDA_PUBLIC_API static String *CreateFromUtf8(const uint8_t *utf8Data, uint32_t utf8Length,
                                                    const LanguageContext &ctx, PandaVM *vm, bool movable = true,
                                                    bool pinned = false);
+
+    PANDA_PUBLIC_API static String *CreateFromUtf16(const uint16_t *utf16Data, uint32_t utf16Length,
+                                                    bool canBeCompressed, const LanguageContext &ctx, PandaVM *vm,
+                                                    bool movable = true, bool pinned = false);
 
     PANDA_PUBLIC_API static String *CreateFromUtf16(const uint16_t *utf16Data, uint32_t utf16Length,
                                                     const LanguageContext &ctx, PandaVM *vm, bool movable = true,
@@ -242,7 +248,7 @@ public:
     {
         uint32_t length;
         if (compressedStringsEnabled_) {
-            length = length_ >> 1U;
+            length = length_ >> STRING_LENGTH_SHIFT;
         } else {
             length = length_;
         }
@@ -359,9 +365,10 @@ protected:
     void SetLength(uint32_t length, bool compressed = false)
     {
         if (compressedStringsEnabled_) {
-            ASSERT(length < 0x80000000U);
+            ASSERT(length <= MAX_STRING_LENGTH);
             // Use 0u for compressed/utf8 expression
-            length_ = (length << 1U) | (compressed ? STRING_COMPRESSED : STRING_UNCOMPRESSED);
+            length_ = (length << STRING_LENGTH_SHIFT) | (static_cast<uint32_t>(NON_INTERNED) << 1U) |
+                      (compressed ? STRING_COMPRESSED : STRING_UNCOMPRESSED);
         } else {
             length_ = length;
         }
@@ -381,9 +388,16 @@ protected:
 private:
     PANDA_PUBLIC_API static bool compressedStringsEnabled_;
     static constexpr uint32_t STRING_COMPRESSED_BIT = 0x1;
+    static constexpr uint32_t MAX_STRING_LENGTH = (1U << 30U) - 1U;  // reserve 30 free slots for length
+
     enum CompressedStatus {
         STRING_COMPRESSED,
         STRING_UNCOMPRESSED,
+    };
+
+    enum InternStatus {
+        NON_INTERNED,
+        INTERNED,
     };
 
     static bool CanBeCompressedMUtf8(const uint8_t *mutf8Data, uint32_t mutf8Length);
@@ -412,11 +426,11 @@ private:
     __extension__ uint16_t dataUtf16_[0];  // NOLINT(modernize-avoid-c-arrays)
 };
 
-constexpr uint32_t STRING_LENGTH_OFFSET = 8U;
+constexpr uint32_t STRING_LENGTH_OFFSET = sizeof(ObjectHeader);
 static_assert(STRING_LENGTH_OFFSET == ark::coretypes::String::GetLengthOffset());
-constexpr uint32_t STRING_HASHCODE_OFFSET = 12U;
+constexpr uint32_t STRING_HASHCODE_OFFSET = STRING_LENGTH_OFFSET + sizeof(uint32_t);
 static_assert(STRING_HASHCODE_OFFSET == ark::coretypes::String::GetHashcodeOffset());
-constexpr uint32_t STRING_DATA_OFFSET = 16U;
+constexpr uint32_t STRING_DATA_OFFSET = STRING_HASHCODE_OFFSET + sizeof(uint32_t);
 static_assert(STRING_DATA_OFFSET == ark::coretypes::String::GetDataOffset());
 
 }  // namespace ark::coretypes

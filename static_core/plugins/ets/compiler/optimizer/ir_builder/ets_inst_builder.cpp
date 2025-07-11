@@ -26,35 +26,6 @@
 
 namespace ark::compiler {
 
-template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
-void InstBuilder::BuildLaunch(const BytecodeInstruction *bcInst)
-{
-    if (graph_->GetArch() == Arch::AARCH32) {
-        failed_ = true;
-        return;
-    }
-    auto pc = GetPc(bcInst->GetAddress());
-    auto inst = graph_->CreateInstLoadRuntimeClass(
-        DataType::REFERENCE, pc, TypeIdMixin {TypeIdMixin::MEM_PROMISE_CLASS_ID, GetGraph()->GetMethod()}, nullptr);
-    auto saveState = CreateSaveState(Opcode::SaveState, pc);
-    auto newObj = CreateNewObjectInst(pc, TypeIdMixin::MEM_PROMISE_CLASS_ID, saveState, inst);
-    AddInstruction(saveState, inst, newObj);
-    if (GetGraph()->IsAbcKit()) {
-        BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, false>(bcInst, this, newObj);
-    } else {
-        BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, true>(bcInst, this, newObj);
-    }
-    UpdateDefinitionAcc(newObj);
-}
-
-template void InstBuilder::BuildLaunch<Opcode::CallLaunchStatic, false, true>(const BytecodeInstruction *bc_inst);
-template void InstBuilder::BuildLaunch<Opcode::CallLaunchStatic, true, false>(const BytecodeInstruction *bcInst);
-template void InstBuilder::BuildLaunch<Opcode::CallLaunchStatic, false, false>(const BytecodeInstruction *bcInst);
-
-template void InstBuilder::BuildLaunch<Opcode::CallLaunchVirtual, false, true>(const BytecodeInstruction *bc_inst);
-template void InstBuilder::BuildLaunch<Opcode::CallLaunchVirtual, true, false>(const BytecodeInstruction *bcInst);
-template void InstBuilder::BuildLaunch<Opcode::CallLaunchVirtual, false, false>(const BytecodeInstruction *bcInst);
-
 static RuntimeInterface::IntrinsicId GetIntrinsicId(DataType::Type type)
 {
     switch (type) {
@@ -125,7 +96,7 @@ void InstBuilder::BuildLdObjByName(const BytecodeInstruction *bcInst, compiler::
 template void InstBuilder::BuildLdObjByName<true>(const BytecodeInstruction *bcInst, compiler::DataType::Type type);
 template void InstBuilder::BuildLdObjByName<false>(const BytecodeInstruction *bcInst, compiler::DataType::Type type);
 
-std::pair<RuntimeInterface::IntrinsicId, DataType::Type> ExtractIntrinsicIdByType(DataType::Type type)
+static std::pair<RuntimeInterface::IntrinsicId, DataType::Type> ExtractIntrinsicIdByType(DataType::Type type)
 {
     switch (type) {
         case DataType::REFERENCE:
@@ -366,5 +337,31 @@ void InstBuilder::BuildCallByName(const BytecodeInstruction *bcInst)
 
 template void InstBuilder::BuildCallByName<true>(const BytecodeInstruction *bcInst);
 template void InstBuilder::BuildCallByName<false>(const BytecodeInstruction *bcInst);
+
+void InstBuilder::BuildNullcheck(const BytecodeInstruction *bcInst)
+{
+    auto pc = GetPc(bcInst->GetAddress());
+    Inst *obj = GetDefinitionAcc();
+
+    auto saveState = CreateSaveState(Opcode::SaveState, pc);
+    AddInstruction(saveState);
+
+    if (GetGraph()->IsBytecodeOptimizer()) {
+        RuntimeInterface::IntrinsicId intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_NULLCHECK;
+        auto intrinsic = GetGraph()->CreateInstIntrinsic(DataType::BOOL, pc, intrinsicId);
+
+        intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 2_I);
+        intrinsic->AppendInput(obj);
+        intrinsic->AddInputType(DataType::REFERENCE);
+        intrinsic->AppendInput(saveState);
+        intrinsic->AddInputType(DataType::NO_TYPE);
+
+        AddInstruction(intrinsic);
+    } else {
+        auto nullCheck = GetGraph()->CreateInstNullCheck(DataType::REFERENCE, pc, obj, saveState);
+        AddInstruction(nullCheck);
+        UpdateDefinitionAcc(nullCheck);
+    }
+}
 
 }  // namespace ark::compiler

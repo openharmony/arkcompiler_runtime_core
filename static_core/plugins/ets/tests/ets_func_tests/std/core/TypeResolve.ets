@@ -28,23 +28,23 @@ class AHAH {
 
 function main() {
     const typ = Type.resolve("TypeResolve.AHAH")
-    assertNE(typ, undefined)
-    assertTrue(typ instanceof ClassType)
+    arktest.assertNE(typ, undefined)
+    arktest.assertTrue(typ instanceof ClassType)
     const cType = typ as ClassType
     const ctorsN = cType.getConstructorsNum()
 
-    assertEQ(cType.getConstructorsNum(), 2)
+    arktest.assertEQ(cType.getConstructorsNum(), 2)
     cType.getConstructor(1).getName()
 
     let ok = false
     for (let i = 0; i < cType.getMethodsNum(); i++) {
         const m = cType.getMethod(i)
         if (m.getName() == "meth") {
-            assertTrue( m.getType().getResultType() instanceof IntType)
+            arktest.assertTrue( m.getType().getResultType() instanceof IntType)
             ok = true
             break
         }
     }
-    assertTrue(ok)
-    assertEQ((cType.make() as AHAH).meth(), 3)
+    arktest.assertTrue(ok)
+    arktest.assertEQ((cType.make() as AHAH).meth(), 3)
 }

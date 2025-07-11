@@ -21,6 +21,7 @@
 
 #include "objects/base_class.h"
 #include "base/common.h"
+#include "objects/base_class.h"
 #include "objects/base_object_operator.h"
 #include "objects/base_state_word.h"
 
@@ -49,9 +50,20 @@ public:
         return GetOperator()->IsValidObject(this);
     }
 
+    // Iterate object field, and skit the weak referent, ONLY used in interop.
+    void ForEachRefFieldSkipReferent(const RefFieldVisitor &visitor)
+    {
+        GetOperator()->ForEachRefFieldSkipReferent(this, visitor);
+    }
+
     void ForEachRefField(const RefFieldVisitor &visitor)
     {
         GetOperator()->ForEachRefField(this, visitor);
+    }
+
+    void IterateXRef(const RefFieldVisitor &visitor)
+    {
+        GetOperator()->IterateXRef(this, visitor);
     }
 
     inline BaseObject *GetForwardingPointer() const
@@ -191,13 +203,12 @@ public:
     {
         return sizeof(BaseObject);
     }
-protected:
-    static BaseObject *SetClassInfo(MAddress address, TypeInfo *klass)
-    {
-        auto ref = reinterpret_cast<BaseObject *>(address);
-        return ref;
-    }
 
+    bool IsString() const
+    {
+        return GetBaseClass()->IsString();
+    }
+protected:
     inline BaseObjectOperatorInterfaces *GetOperator() const
     {
         if (state_.IsStatic()) {
@@ -209,5 +220,7 @@ protected:
     static BaseObjectOperator operator_;
     BaseStateWord state_;
 };
+
+static_assert(sizeof(BaseObject) == sizeof(BaseClass::HeaderType));
 }  // namespace common
 #endif  // COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H

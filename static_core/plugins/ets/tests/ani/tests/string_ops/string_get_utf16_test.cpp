@@ -32,6 +32,19 @@ TEST_F(StringGetUtf16Test, StringGetUTF16_NullUtf16String)
     ASSERT_EQ(result, 0U);
 }
 
+TEST_F(StringGetUtf16Test, StringGetUTF16_NullEnv)
+{
+    const uint16_t example[] = {0x0048, 0x0065, 0x006C, 0x006C, 0x006F, 0x0000};
+    ani_string string = nullptr;
+    auto status = env_->String_NewUTF16(example, sizeof(example) / sizeof(uint16_t) - 1U, &string);
+    ASSERT_EQ(status, ANI_OK);
+    const ani_size bufferSize = 10U;
+    uint16_t utf16Buffer[bufferSize] = {0U};
+    ani_size result = 0U;
+    auto status2 = env_->c_api->String_GetUTF16(nullptr, string, utf16Buffer, bufferSize, &result);
+    ASSERT_EQ(status2, ANI_INVALID_ARGS);
+}
+
 TEST_F(StringGetUtf16Test, StringGetUTF16_EmptyString)
 {
     const uint16_t example[] = {0x0000};
@@ -44,6 +57,23 @@ TEST_F(StringGetUtf16Test, StringGetUTF16_EmptyString)
     status = env_->String_GetUTF16(string, utf16Buffer, bufferSize, &result);
     ASSERT_EQ(status, ANI_OK);
     ASSERT_EQ(result, 0U);
+}
+
+TEST_F(StringGetUtf16Test, StringGetUTF16_SpecialString)
+{
+    const std::string example {"hello\nworld\r, hi\\?"};
+    ani_string string = nullptr;
+    auto status = env_->String_NewUTF8(example.c_str(), example.size(), &string);
+    ASSERT_EQ(status, ANI_OK);
+    const ani_size bufferSize = 30U;
+    uint16_t utf16Buffer[bufferSize] = {0U};
+    ani_size result = 0U;
+    status = env_->String_GetUTF16(string, utf16Buffer, bufferSize, &result);
+    ASSERT_EQ(status, ANI_OK);
+    ASSERT_EQ(result, example.size());
+    for (ani_size i = 0; i < result; ++i) {
+        ASSERT_EQ(utf16Buffer[i], example[i]);
+    }
 }
 
 TEST_F(StringGetUtf16Test, StringGetUTF16_AsciiString)
@@ -88,6 +118,31 @@ TEST_F(StringGetUtf16Test, StringGetUTF16_NonAsciiString)
     status = env_->String_GetUTF16(string, utf16Buffer, bufferSize, &result);
     ASSERT_EQ(status, ANI_OK);
     ASSERT_EQ(result, 6U);
+}
+
+TEST_F(StringGetUtf16Test, StringGetutf16_NullResult)
+{
+    const uint16_t example[] = {0x4F60};
+    ani_string string = nullptr;
+    auto status = env_->String_NewUTF16(example, sizeof(example) / sizeof(uint16_t), &string);
+    ASSERT_EQ(status, ANI_OK);
+    const ani_size bufferSize = 1U;
+    uint16_t utf16Buffer[bufferSize] = {0U};
+    status = env_->String_GetUTF16(string, utf16Buffer, bufferSize, nullptr);
+    ASSERT_EQ(status, ANI_INVALID_ARGS);
+}
+
+TEST_F(StringGetUtf16Test, StringGetutf16_BufferEmpty)
+{
+    const uint16_t example[] = {0x4F60};
+    ani_string string = nullptr;
+    auto status = env_->String_NewUTF16(example, sizeof(example) / sizeof(uint16_t), &string);
+    ASSERT_EQ(status, ANI_OK);
+    const ani_size bufferSize = 1U;
+    uint16_t utf16Buffer[bufferSize] = {0U};
+    ani_size result = 0U;
+    status = env_->String_GetUTF16(string, utf16Buffer, bufferSize, &result);
+    ASSERT_EQ(status, ANI_BUFFER_TO_SMALL);
 }
 
 TEST_F(StringGetUtf16Test, StringGetutf16BufferBound1)

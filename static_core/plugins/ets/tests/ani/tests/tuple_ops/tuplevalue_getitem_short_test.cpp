@@ -20,6 +20,10 @@ namespace ark::ets::ani::testing {
 class TupleValueGetItemShortTest : public AniGTestTupleOps {
 public:
     static constexpr ani_short EXPECTED_RESULT = 300;
+    static constexpr ani_short EXPECTED_RESULT_2 = 350;
+    static constexpr ani_short EXPECTED_RESULT_3 = 200;
+    static constexpr ani_short EXPECTED_RESULT_4 = 100;
+    static constexpr ani_short EXPECTED_RESULT_5 = 50;
 };
 
 TEST_F(TupleValueGetItemShortTest, tupleValueGetItemShort)
@@ -55,6 +59,28 @@ TEST_F(TupleValueGetItemShortTest, tupleValueGetItemShortIndexOutOfRange2)
     auto tuple = GetTupleWithCheck("tuplevalue_getitem_short_test", "getShortTuple");
     ani_short result = 0;
     ASSERT_EQ(env_->TupleValue_GetItem_Short(tuple, -1U, &result), ANI_OUT_OF_RANGE);
+}
+
+TEST_F(TupleValueGetItemShortTest, tupleValueGetItemIntIndexOutOfRange3)
+{
+    const ani_size maxNum = std::numeric_limits<ani_size>::max();
+    auto tuple = GetTupleWithCheck("tuplevalue_getitem_short_test", "getShortTuple");
+    ani_short result = 0;
+    ASSERT_EQ(env_->TupleValue_GetItem_Short(tuple, maxNum, &result), ANI_OUT_OF_RANGE);
+}
+
+TEST_F(TupleValueGetItemShortTest, tupleValueGetItemIntCompositeScene)
+{
+    auto tuple = GetTupleWithCheck("tuplevalue_getitem_short_test", "getShortTuple");
+
+    const std::array<ani_short, 5U> expectedValues = {EXPECTED_RESULT, EXPECTED_RESULT_2, EXPECTED_RESULT_3,
+                                                      EXPECTED_RESULT_4, EXPECTED_RESULT_5};
+
+    ani_short result = 0;
+    for (size_t i = 0; i < expectedValues.size(); ++i) {
+        ASSERT_EQ(env_->TupleValue_GetItem_Short(tuple, i, &result), ANI_OK);
+        ASSERT_EQ(result, expectedValues[i]);
+    }
 }
 
 TEST_F(TupleValueGetItemShortTest, tupleValueGetItemShortNullResult)

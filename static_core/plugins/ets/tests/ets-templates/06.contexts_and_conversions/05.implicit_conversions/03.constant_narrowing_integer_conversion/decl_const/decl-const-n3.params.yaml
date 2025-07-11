@@ -16,48 +16,48 @@ cases:
     - from_type: short
       to_type: byte
       values:
-          - { expr: 0 as short, val: 0 as byte }
-          - { expr: -128 as short, val: -128 as byte }
-          - { expr: 0x7F as short, val: 0x7F as byte }
+          - { expr: 0, val: 0 }
+          - { expr: -128, val: -128 }
+          - { expr: 0x7F, val: 0x7F }
 
     - from_type: int
       to_type: byte
       values:
-          - { expr: 0 as int, val: 0 as byte }
-          - { expr: -128 as int, val: -128 as byte }
-          - { expr: 0x7F as int, val: 0x7F as byte }
+          - { expr: 0, val: 0 }
+          - { expr: -128, val: -128 }
+          - { expr: 0x7F, val: 0x7F }
 
     - from_type: int
       to_type: short
       values:
-          - { expr: 0 as int, val: 0 as short }
-          - { expr: -32768 as int, val: -32768 as short }
-          - { expr: 32767 as int, val: 32767 as short }
+          - { expr: 0, val: 0 }
+          - { expr: -32768, val: -32768 }
+          - { expr: 32767, val: 32767 }
 
     - from_type: long
       to_type: byte
       values:
-          - { expr: 0 as long, val: 0 as byte }
-          - { expr: -128 as long, val: -128 as byte }
-          - { expr: 0x7F as long, val: 0x7F as byte }
+          - { expr: 0, val: 0 }
+          - { expr: -128, val: -128 }
+          - { expr: 0x7F, val: 0x7F }
 
     - from_type: long
       to_type: short
       values:
-          - { expr: 0 as long, val: 0 as short }
-          - { expr: -32768 as long, val: -32768 as short }
-          - { expr: 32767 as long, val: 32767 as short }
+          - { expr: 0, val: 0 }
+          - { expr: -32768, val: -32768 }
+          - { expr: 32767, val: 32767 }
 
     - from_type: long
       to_type: int
       values:
-          - { expr: 0 as long, val: 0 as int }
-          - { expr: -2147483648 as long, val: -2147483648 as int }
-          - { expr: 2147483647 as long, val: 2147483647 as int }
+          - { expr: 0, val: 0 }
+          - { expr: -2147483648, val: -2147483648 }
+          - { expr: 2147483647, val: 2147483647 }
 
     - from_type: long
       to_type: char
       values:
-          - { expr: 0 as long, val: "c'\\u0000'" }
-          - { expr: 32767 as long, val: "c'\\u7fff'" }
-          - { expr: 65535 as long, val: "c'\\uFFFF'" }
+          - { expr: 0, val: "c'\\u0000'" }
+          - { expr: 32767, val: "c'\\u7fff'" }
+          - { expr: 65535, val: "c'\\uFFFF'" }

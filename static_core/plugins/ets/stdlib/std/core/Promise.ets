@@ -20,9 +20,12 @@ package std.core;
  */
 export interface PromiseLike<out T> {
     then<U = T, E = never>(onFulfilled: (value: T) => U|PromiseLike<U>,
-            onRejected?: (error: NullishType) => E|PromiseLike<E>): PromiseLike<U|E>;
+            onRejected?: (error: Error) => E|PromiseLike<E>): PromiseLike<U|E>;
 }
 
+/**
+ * Class represents the promise status.
+ */
 export class PromiseStatus{
     static readonly fulfilled = "fulfilled";
     static readonly rejected = "rejected";
@@ -39,6 +42,7 @@ class PromiseSettledResultBase {
  * The class describes fulfillment result of Promise.allSettled's argument.
  */
 export class PromiseFulfilledResult<T> extends PromiseSettledResultBase {
+    constructor(){}
 
     constructor(value: T) {
         this.status = PromiseStatus.fulfilled;
@@ -52,6 +56,9 @@ export class PromiseFulfilledResult<T> extends PromiseSettledResultBase {
  * The class describes rejection result of Promise.allSettled's argument.
  */
 export class PromiseRejectedResult extends PromiseSettledResultBase {
+    constructor(){
+        this.reason =  new Error();
+    }
 
     constructor(reason: Error) {
         this.status = PromiseStatus.rejected;
@@ -70,28 +77,32 @@ export final class Promise<out T> implements PromiseLike<T> {
     private constructor() {
     }
 
+    /**
+     * Creates an instance of a Promise class
+     *
+     * @param callback callback that is called in the constructor
+     * Takes resolve and reject function that would complete the promise
+     */
     constructor(callback: (resolve: (value: T|PromiseLike<T>) => void,
-            reject: (error: NullishType) => void) => void) {
-        // This variable will be remove after changing of reject arg type
-        let shouldTrowCCE: boolean = false;
+            reject: (error: Error) => void) => void) {
         try {
             callback((value: T|PromiseLike<T>): void => {
                 this.doResolve<T>(value);
-            }, (error: NullishType): void => {
-                if(!(error instanceof Error)) {
-                    shouldTrowCCE = true;
-                } else {
-                    this.rejectImpl(error as Error, false);
-                }
+            }, (error: Error): void => {
+                this.rejectImpl(error as Error, false);
             });
         } catch (error: Error) {
             this.rejectImpl(error, false);
         }
-        if(shouldTrowCCE) {
-            throw new ClassCastError("Promise must be rejected by Error.");
-        }
     }
 
+    /**
+     * Schedule callback to execute after the promise is resolved
+     *
+     * @param onFulfilled callback that will be called after the promise is resolved
+     * @returns { Promise } new promise that will be resolved after the execution of the callback
+     *     or rejected if current promise is rejected or the callback finished with an exception
+     */
     then<U = T>(onFulfilled: () => U|PromiseLike<U>): Promise<U> {
         let promise = new Promise<U>();
         let fn: () => void = (): void => {
@@ -99,7 +110,7 @@ export final class Promise<out T> implements PromiseLike<T> {
                 if (this.state == Promise.STATE_RESOLVED) {
                     promise.doResolve<U>(onFulfilled());
                 } else {
-                    promise.rejectImpl(this.value, false);
+                    promise.rejectImpl(this.value as Error, false);
                 }
             } catch (error: Error) {
                 promise.rejectImpl(error, false);
@@ -109,8 +120,16 @@ export final class Promise<out T> implements PromiseLike<T> {
         return promise;
     }
 
+    /**
+     * Schedule callbacks to execute after the promise is completed
+     *
+     * @param onFulfilled callback that will be called after the promise is resolved
+     * @param [onRejected] callback that will be called after the promise is rejected
+     * @returns { Promise } new promise that will be resolved after the execution of one of the callbacks
+     *     or rejected in the callback finished with an exception
+     */
     then<U = T, E = never>(onFulfilled: (value: T) => U|PromiseLike<U>,
-            onRejected?: (error: NullishType) => E|PromiseLike<E>): Promise<U|E> {
+            onRejected?: (error: Error) => E|PromiseLike<E>): Promise<U|E> {
         let promise = new Promise<U|E>();
         let fn: () => void = (): void => {
             try {
@@ -118,7 +137,7 @@ export final class Promise<out T> implements PromiseLike<T> {
                     promise.doResolve<U>(onFulfilled(this.value as T));
                 } else {
                     if (onRejected) {
-                        promise.doResolve<E>(onRejected(this.value));
+                        promise.doResolve<E>(onRejected(this.value as Error));
                     } else {
                         promise.rejectImpl(this.value as Error, false);
                     }
@@ -132,6 +151,13 @@ export final class Promise<out T> implements PromiseLike<T> {
     }
 
     // NOTE(audovichenko): Add '?' to onRejection param. Issue #20001
+    /**
+     * Schedule callback to execute after the promise is rejected
+     *
+     * @param onRejected callback that will be called after the promise is rejected
+     * @returns { Promise } new promise that will be resolved after the execution of the callback
+     *     or rejected if current promise is rejected or the callback finished with an exception
+     */
     catch<U = never>(onRejected: () => U|PromiseLike<U>): Promise<T|U> {
         let promise = new Promise<T|U>();
         let fn: () => void = (): void => {
@@ -150,16 +176,23 @@ export final class Promise<out T> implements PromiseLike<T> {
         return promise;
     }
 
-    catch<U = never>(onRejected?: (error: NullishType) => U|PromiseLike<U>): Promise<T|U> {
+    /**
+     * Schedule callback to execute after the promise is rejected
+     *
+     * @param [onRejected] callback that will be called after the promise is rejected
+     * @returns { Promise } new promise that will be resolved after the execution of the callback
+     *     or rejected or the callback finished with an exception
+     */
+    catch<U = never>(onRejected?: (error: Error) => U|PromiseLike<U>): Promise<T|U> {
         let promise = new Promise<T|U>();
         let fn: () => void = (): void => {
             try {
                 if (this.state == Promise.STATE_REJECTED) {
                     if (onRejected) {
-                        let res: U|PromiseLike<U> = onRejected(this.value as Object);
+                        let res: U|PromiseLike<U> = onRejected(this.value as Error);
                         promise.doResolve<U>(res);
                     } else {
-                        promise.rejectImpl(this.value, false);
+                        promise.rejectImpl(this.value as Error, false);
                     }
                 } else {
                     promise.doResolve<T>(this.value as T);
@@ -172,6 +205,13 @@ export final class Promise<out T> implements PromiseLike<T> {
         return promise;
     }
 
+    /**
+     * Schedule callback to execute after the promise is completed
+     *
+     * @param [onFinally] callback that will be called after the promise is completed
+     * @returns { Promise } new promise that will be completed the same way as the current promise after the execution of the callback
+     *     or rejected if the callback finished with an exception
+     */
     finally(onFinally?: () => void): Promise<T> {
         let promise = new Promise<T>();
         let fn: () => void = (): void => {
@@ -196,12 +236,23 @@ export final class Promise<out T> implements PromiseLike<T> {
         return promise;
     }
 
+    /**
+     * Create a resolved promise
+     *
+     * @returns { Promise<void> } resolved promise
+     */
     static resolve(): Promise<void> {
         let p = new Promise<void>();
         p.resolveImpl(undefined, false);
         return p;
     }
 
+    /**
+     * Create a resolved promise
+     *
+     * @param value value to resolve promise with
+     * @returns { Promise } resolved promise
+     */
     static resolve<U>(value: U|PromiseLike<U>): Promise<U> {
         if (value instanceof Promise) {
             return value as Promise<U>;
@@ -211,24 +262,49 @@ export final class Promise<out T> implements PromiseLike<T> {
         return p;
     }
 
+    /**
+     * Create a rejected promise
+     *
+     * @returns { Promise<void> } rejected promise
+     */
     static reject(): Promise<void> {
         let p = new Promise<void>();
         p.rejectImpl(new Error(), false);
         return p;
     }
 
+    /**
+     * Create a rejected promise
+     *
+     * @param { Error } value value to reject promise with
+     * @returns { Promise } rejected promise
+     */
     static reject<U = never>(error: Error): Promise<U> {
         let p = new Promise<U>();
         p.rejectImpl(error, false);
         return p;
     }
 
-    static all<U>(promises: (U|PromiseLike<U>|undefined)[]): Promise<Array<U>> {
-        return new Promise<Array<U>>((resolve: (value: Array<U>) => void, reject: (error: NullishType) => void): void => {
+    /**
+     * Create a promise that will be resolved after all promises are resolved
+     *
+     * @param promises array of promise-like objects
+     * @returns { Promise } promise that will be resolved after all promises are resolved with an array of results
+     *     or rejected if at least one promise is rejected with the rejection result
+     */
+    static all<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<Array<U>> {
+        return new Promise<Array<U>>((resolve: (value: Array<U>) => void, reject: (error: Error) => void): void => {
             new AllPromiseConcurrency<U>(resolve, reject).all(promises);
         });
     }
 
+    /**
+     * Create a promise that will be resolved after all promises are resolved
+     *
+     * @param promises iterable object with promise-like objets
+     * @returns { Promise } promise that will be resolved after all promises are resolved with an array of results
+     *     or rejected if at least one promise is rejected with the rejection result
+     */
     static all<U>(promises: Iterable<U|PromiseLike<U>>): Promise<Array<U>> {
         try {
             return Promise.all<U>(Promise.toArray(promises));
@@ -237,13 +313,25 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
-    static allSettled<U>(promises: (U|PromiseLike<U>|undefined)[]): Promise<PromiseSettledResult<U>[]> {
-        return new Promise<PromiseSettledResult<U>[]>((resolve: (value: PromiseSettledResult<U>[]) => void, reject: (error: NullishType) => void): void => {
+    /**
+     * Create a promise that will be resolved after all promises are completed
+     *
+     * @param promises array of promise-like objects
+     * @returns { Promise } promise that will be resolved after all promises are completed with an array of results
+     */
+    static allSettled<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<PromiseSettledResult<U>[]> {
+        return new Promise<PromiseSettledResult<U>[]>((resolve: (value: PromiseSettledResult<U>[]) => void, reject: (error: Error) => void): void => {
             // This temp object is needed because es2panda cannot change captured primitives
             new AllSettledPromiseConcurrency<U>(resolve, reject).allSettled(promises);
         });
     }
 
+    /**
+     * Create a promise that will be resolved after all promises are completed
+     *
+     * @param promises iterable object of promise-like objects
+     * @returns { Promise } promise that will be resolved after all promises are completed with an array of results
+     */
     static allSettled<U>(promises: Iterable<U|PromiseLike<U>>): Promise<PromiseSettledResult<U>[]> {
         try {
             return Promise.allSettled<U>(Promise.toArray(promises));
@@ -252,13 +340,27 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
+    /**
+     * Create a promise that will be resolved after all promises are completed and at least one is resolved
+     *
+     * @param promises array of promise-like objects
+     * @returns { Promise } promise that will be resolved if at least one promise is resolved with the result of resolved promise
+     * or rejected with AggregateError if all promises are rejected
+     */
     static any<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<U> {
-        return new Promise<U>((resolve: (value: U) => void, reject: (error: Object) => void): void => {
+        return new Promise<U>((resolve: (value: U) => void, reject: (error: Error) => void): void => {
             // This temp object is needed because es2panda cannot change captured primitives
             new AnyPromiseConcurrency<U>(resolve, reject).any(promises);
         });
     }
 
+    /**
+     * Create a promise that will be resolved after all promises are completed and at least one is resolved
+     *
+     * @param promises iterable object of promise-like objects
+     * @returns { Promise } promise that will be resolved if at least one promise is resolved with the result of resolved promise
+     *     or rejected with AggregateError if all promises are rejected
+     */
     static any<U>(promises: Iterable<U|PromiseLike<U>>): Promise<U> {
         try {
             return Promise.any<U>(Promise.toArray(promises));
@@ -267,13 +369,25 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
+    /**
+     * Create a promise that will be completed after at least one promise is completed
+     *
+     * @param promises array of promise-like objects
+     * @returns { Promise } promise that will completed with the same value as one of the promises in the argument
+     */
     static race<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<U> {
-        return new Promise<U>((resolve: (value: U) => void, reject: (error: Object) => void): void => {
+        return new Promise<U>((resolve: (value: U) => void, reject: (error: Error) => void): void => {
             // This temp object is needed because es2panda cannot change captured primitives
             new RacePromiseConcurrency<U>(resolve, reject).race(promises);
         });
     }
 
+    /**
+     * Create a promise that will be completed after at least one promise is completed
+     *
+     * @param promises iterable object of promise-like objects
+     * @returns { Promise } promise that will completed with the same value as one of the promises in the argument
+     */
     static race<U>(promises: Iterable<U|PromiseLike<U>>): Promise<U> {
         try {
             return Promise.race<U>(Promise.toArray(promises));
@@ -282,13 +396,13 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
-    private static toArray<U>(values: Iterable<U>): (U | undefined)[] {
+    private static toArray<U>(values: Iterable<U>): FixedArray<U | undefined> {
         let it = values.$_iterator();
         let v = it.next();
         if (v.done) {
             return new (U | undefined)[0];
         }
-        let array = new (U | undefined)[1];
+        let array : FixedArray<U | undefined> = new (U | undefined)[1];
         array[0] = v.value!;
         let len = 1;
         while (true) {
@@ -302,22 +416,22 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
-    private static trim<U>(array: U[], length: int): (U | undefined)[] {
+    private static trim<U>(array: FixedArray<U>, length: int): FixedArray<U | undefined> {
         if (array.length == length) {
             return array;
         }
-        let result = new (U | undefined)[length];
+        let result : FixedArray<U | undefined> = new (U | undefined)[length];
         for (let i = 0; i < length; ++i) {
             result[i] = array[i];
         }
         return result;
     }
 
-    private static ensureCapacity<U>(queue: U[], size: int): (U | undefined)[] {
+    private static ensureCapacity<U>(queue: FixedArray<U>, size: int): FixedArray<U | undefined> {
         if (size <= queue.length) {
             return queue;
         }
-        let newQueue = new (U | undefined)[size * 2];
+        let newQueue : FixedArray<U | undefined> = new (U | undefined)[size * 2];
         for (let i = 0; i < queue.length; ++i) {
             newQueue[i] = queue[i];
         }
@@ -337,10 +451,10 @@ export final class Promise<out T> implements PromiseLike<T> {
             try{
                 internalPromise.then<void, void>((value: U): void => {
                     thisPromise.resolveImpl(value, true);
-                }, (error: NullishType): void => {
+                }, (error: Error): void => {
                     thisPromise.rejectImpl(error, true);
                 });
-            } catch(error) {
+            } catch(error: Error) {
                 thisPromise.rejectImpl(error, true);
             }
         }
@@ -363,10 +477,15 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
+    /**
+     * Suspend coroutine until the promise is completed
+     *
+     * @returns promise completion value
+     */
     public native awaitResolution(): T;
 
     private native resolveImpl<U>(value: U, wasLinked: boolean): void;
-    private native rejectImpl(error: NullishType, wasLinked: boolean): void;
+    private native rejectImpl(error: Object, wasLinked: boolean): void;
     private native submitCallback(callback: Object): void;
 
     private static STATE_PENDING = 0;
@@ -408,7 +527,7 @@ class AllPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
         this.reject = reject;
     }
 
-    all(promises: (T|PromiseLike<T>|undefined)[]): void {
+    all(promises: FixedArray<T|PromiseLike<T>|undefined>): void {
         if (promises.length == 0) {
             this.resolve(this.values);
             return;
@@ -419,7 +538,7 @@ class AllPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
             let idx = i;
             this.toPromiseLike(promises[idx]!).then<void, void>((value: T): void => {
                 this.resolveImpl(value, idx);
-            }, (error: NullishType): void => {
+            }, (error: Error): void => {
                 this.reject(error as Error);
             });
         }
@@ -446,7 +565,7 @@ class AllSettledPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
         this.reject = reject;
     }
 
-    allSettled(promises: (T|PromiseLike<T>|undefined)[]): void {
+    allSettled(promises: FixedArray<T|PromiseLike<T>|undefined>): void {
         this.values = new PromiseSettledResultBase[promises.length];
         if (promises.length == 0) {
             this.resolve(this.getValues());
@@ -456,7 +575,7 @@ class AllSettledPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
             let idx = i;
             this.toPromiseLike(promises[idx]!).then<void, void>((value: T): void => {
                 this.resolveImpl(value as T, idx);
-            }, (error: NullishType): void => {
+            }, (error: Error): void => {
                 this.rejectImpl(error as Error, idx);
             });
         }
@@ -495,7 +614,7 @@ class AnyPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
         this.reject = reject;
     }
 
-    any(promises: (T|PromiseLike<T>|undefined)[]): void {
+    any(promises: FixedArray<T|PromiseLike<T>|undefined>): void {
         this.errors = new Error[promises.length];
         if (promises.length == 0) {
             this.reject(new AggregateError(this.errors!, "All promises are rejected"));
@@ -506,7 +625,7 @@ class AnyPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
             try {
                 this.toPromiseLike(promises[idx]!).then<void, void>((value: T): void => {
                     this.resolveImpl(value as T);
-                }, (error: NullishType): void => {
+                }, (error: Error): void => {
                     this.rejectImpl(error as Error, idx);
                 });
             } catch (e: Error) {
@@ -547,12 +666,12 @@ class RacePromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
         this.reject = reject;
     }
 
-    race(promises: (T|PromiseLike<T>|undefined)[]): void {
+    race(promises: FixedArray<T|PromiseLike<T>|undefined>): void {
         for (let i = 0; i < promises.length; ++i) {
             let idx = i;
             this.toPromiseLike(promises[idx]!).then<void, void>((value: T): void => {
                 this.resolveImpl(value as T);
-            }, (error: NullishType): void => {
+            }, (error: Error): void => {
                 this.rejectImpl(error as Error);
             });
         }

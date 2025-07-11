@@ -14,9 +14,12 @@
  */
 
 import {List} from '@ohos.util.List';
+import {BusinessError} from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
-    const suite = new ArkTestsuite("List API tests");
+    const suite = new arktest.ArkTestsuite("List API tests");
 
     suite.addTest("List clear a non-empty container", testClearNonEmptyContainer);
     suite.addTest("List clear an empty container", testClearEmptyContainer);
@@ -62,16 +65,16 @@ class TestData {
 function testClearNonEmptyContainer() {
     let list = new List<number>();
     initializeList(list, TestData.arrayForNumber1);
-    assertEQ(list.length, TestData.arrayForNumber1.length, "List length should be same as TestData.arrayForNumber1");
+    arktest.assertEQ(list.length, TestData.arrayForNumber1.length, "List length should be same as TestData.arrayForNumber1");
     list.clear();
-    assertEQ(list.length, 0, "List length should be 0 after clear");
+    arktest.assertEQ(list.length, 0, "List length should be 0 after clear");
 }
 
 function testClearEmptyContainer() {
     let list = new List<number>();
-    assertEQ(list.length, 0, "List length should be 0");
+    arktest.assertEQ(list.length, 0, "List length should be 0");
     list.clear();
-    assertEQ(list.length, 0, "List length should be 0 after clear");
+    arktest.assertEQ(list.length, 0, "List length should be 0 after clear");
 }
 
 function testSetMultipleTypes() {
@@ -80,25 +83,23 @@ function testSetMultipleTypes() {
         list.add(i);
     }
 
-    assertEQ(list.set(0, TestData.testString1), TestData.testString1, "Set successful");
-    assertEQ(list.set(TestData.testNumber1, TestData.testNumber3), TestData.testNumber3, "Set successful");
-    assertEQ(list.set(TestData.testNumber2, null), null, "Set successful");
-    assertEQ(list.set(TestData.testNumber3, true), true, "Set successful");
-    assertEQ(list.set(TestData.testNumber4, TestData.testObject2), TestData.testObject2, "Set successful");
-    assertEQ(list.set(TestData.testNumber5, undefined), undefined, "Set successful");
+    arktest.assertEQ(list.set(0, TestData.testString1), TestData.testString1, "Set successful");
+    arktest.assertEQ(list.set(TestData.testNumber1, TestData.testNumber3), TestData.testNumber3, "Set successful");
+    arktest.assertEQ(list.set(TestData.testNumber2, null), null, "Set successful");
+    arktest.assertEQ(list.set(TestData.testNumber3, true), true, "Set successful");
+    arktest.assertEQ(list.set(TestData.testNumber4, TestData.testObject2), TestData.testObject2, "Set successful");
+    arktest.assertEQ(list.set(TestData.testNumber5, undefined), undefined, "Set successful");
 }
 
 function testSetElementsInEmptyContainer() {
     let list = new List<number>();
-    try {
-        list.set(0, TestData.testNumber3);
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "Container is empty") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    assertFalse(false, "The result should be 'RangeError'");
+
+    arktest.expectThrow(() => {list.set(0, TestData.testNumber3)}, exceptionCheck);
 }
 
 function testSetGetIndexOfRemoveByIndex() {
@@ -113,7 +114,7 @@ function testSetGetIndexOfRemoveByIndex() {
     let index = list.getIndexOf(TestData.testObject1);
     let elem1 = list.set(Math.floor(index), TestData.testString2);
     let elem2 = list.removeByIndex(Math.floor(index));
-    assertEQ(elem1, elem2, "The result should be the same for both operations");
+    arktest.assertEQ(elem1, elem2, "The result should be the same for both operations");
 }
 
 function testSetGetIndexOfHas() {
@@ -127,7 +128,7 @@ function testSetGetIndexOfHas() {
 
     let index = list.getIndexOf(TestData.testObject1);
     let elem = list.set(Math.floor(index), TestData.testString2);
-    assertTrue(list.has(elem), "The element set successful");
+    arktest.assertTrue(list.has(elem), "The element set successful");
 }
 
 function testSetGetLast() {
@@ -141,7 +142,7 @@ function testSetGetLast() {
 
     let elem1 = list.set(list.length - TestData.testNumber1, TestData.testString2);
     let elem2 = list.getLast();
-    assertEQ(elem1, elem2, "The result should be the same for both operations");
+    arktest.assertEQ(elem1, elem2, "The result should be the same for both operations");
 }
 
 function testSetGetFirst() {
@@ -155,24 +156,24 @@ function testSetGetFirst() {
 
     let elem1 = list.set(0, TestData.testString2);
     let elem2 = list.getFirst();
-    assertEQ(elem1, elem2, "The result should be the same for both operations");
+    arktest.assertEQ(elem1, elem2, "The result should be the same for both operations");
 }
 
 function testConvertToArrayNonEmptyContainer() {
     let list = new List<number>();
     initializeList(list, TestData.arrayForNumber1);
     let array = list.convertToArray();
-    assertTrue(Array.isArray(array), "The result should be an Array");
-    assertEQ(array.length, list.length, "Array length should be same as List length");
+    arktest.assertTrue(Array.isArray(array), "The result should be an Array");
+    arktest.assertEQ(array.length, list.length, "Array length should be same as List length");
     for (let i = 0; i < TestData.arrayForNumber1.length; i++) {
-        assertEQ(array[i], list.get(i), `Element at index ${i} should be equal`);
+        arktest.assertEQ(array[i], list.get(i), `Element at index ${i} should be equal`);
     }
 }
 
 function testConvertToArrayEmptyContainer() {
     let list = new List<number>();
     let array = list.convertToArray();
-    assertEQ(array.length, 0, "Array length should be 0");
+    arktest.assertEQ(array.length, 0, "Array length should be 0");
 }
 
 function testConvertToArrayChangeArray() {
@@ -180,9 +181,9 @@ function testConvertToArrayChangeArray() {
     initializeList(list, TestData.arrayForNumber1);
     let array = list.convertToArray();
     array.push(TestData.testNumber1);
-    assertEQ(array.length, list.length + TestData.testNumber1, "Array length should be List length + 1");
-    assertEQ(list.length, TestData.arrayForNumber1.length, "List length should not change");
+    arktest.assertEQ(array.length, list.length + TestData.testNumber1, "Array length should be List length + 1");
+    arktest.assertEQ(list.length, TestData.arrayForNumber1.length, "List length should not change");
     for (let i = 0; i < TestData.arrayForNumber1.length; i++) {
-        assertEQ(list.get(i), TestData.arrayForNumber1[i], `Element at index ${i} should be equal`);
+        arktest.assertEQ(list.get(i), TestData.arrayForNumber1[i], `Element at index ${i} should be equal`);
     }
 }

@@ -26,5 +26,5 @@ const point: Point = { x: 10, y: 20 };
 
 function main(): void {
   const obj1: object = point;
-  assertTrue(obj1 == point);
+  arktest.assertTrue(obj1 == point);
 }

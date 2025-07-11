@@ -24,5 +24,5 @@ class A {
 
 function main(): void {
     let instance: A|null = new A();
-    assertTrue( instance?.x instanceof Int )
+    arktest.assertTrue( instance?.x instanceof Int )
 }

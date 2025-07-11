@@ -24,7 +24,7 @@ function main(): int {
     tuple[0] = 12;
     tuple[1] = 24;
 
-    assertEQ( tuple[0], 12)
-    assertEQ( tuple[1], 24)
+    arktest.assertEQ( tuple[0], 12)
+    arktest.assertEQ( tuple[1], 24)
     return 0;
   }

@@ -100,10 +100,12 @@ export namespace MyNamespace {
     export class Kitten {
         id: number;
         name: string;
+        male: boolean;
 
         constructor(id: number, name: string) {
             this.id = id;
             this.name = name;
+            this.male = false;
         }
     }
 

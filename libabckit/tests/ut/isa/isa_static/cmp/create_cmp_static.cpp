@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/src/include_v2/c/isa/isa_static.h"
-#include "libabckit/include/c/metadata_core.h"
+#include "libabckit/c/abckit.h"
+#include "libabckit/c/isa/isa_static.h"
+#include "libabckit/c/metadata_core.h"
 
 #include "helpers/helpers.h"
 #include "helpers/helpers_runtime.h"
-#include "libabckit/include/c/statuses.h"
+#include "libabckit/c/statuses.h"
 #include "statuses_impl.h"
 
 #include <gtest/gtest.h>

@@ -98,10 +98,6 @@ private:
     }
     void CommonUpdateRefsToMovedObjects() override {}
     void UpdateRefsToMovedObjectsInPygoteSpace() override {}
-    void UpdateVmRefs() override {}
-    void UpdateGlobalObjectStorage() override {}
-    void UpdateClassLinkerContextRoots() override {}
-    void UpdateThreadLocals() override {}
     void ClearLocalInternalAllocatorPools() override {}
 };
 

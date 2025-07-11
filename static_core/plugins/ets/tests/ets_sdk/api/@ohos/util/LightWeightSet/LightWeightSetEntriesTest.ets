@@ -15,11 +15,8 @@
 
 import {LightWeightSet} from "@ohos.util.LightWeightSet";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
-    const suite = new ArkTestsuite("LightWeightSet Entries API tests")
+    const suite = new arktest.ArkTestsuite("LightWeightSet Entries API tests")
 
     suite.addTest("LightWeightSet entries return iterator by key and value",
         testEntriesReturnIteratorByKeyValue)
@@ -44,12 +41,11 @@ function testEntriesReturnIteratorByKeyValue() {
         }
     }
     let strAll = "123,123,222,222,333,333,456,456";
-    assertEQ(str, strAll, "The lightWeightSet entries iterator should return all key-value pairs");
+    arktest.assertEQ(str, strAll, "The lightWeightSet entries iterator should return all key-value pairs");
 }
 
 function testEntriesReturnIteratorByKeyValueWithEmptySet() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     let it = lightWeightSet.entries();
-    assertEQ(it.next().value, undefined,
-        "The lightWeightSet entries iterator should return undefined for an empty set");
+    arktest.assertTrue(it.next().done, "The lightWeightSet entries iterator.done should true for an empty set");
 }

@@ -26,10 +26,10 @@ class A {}
 function main(): void {
     let a: Margin = 5.5
     let b: Margin = 6.5
-    assertTrue( (a as number) < b as number)
-    assertTrue( b as number > a as number)
+    arktest.assertTrue( (a as number) < b as number)
+    arktest.assertTrue( b as number > a as number)
 
     let c: Margin = 5.5
-    assertTrue( a as number <= c as number)
-    assertTrue( c as number >= a as number)
+    arktest.assertTrue( a as number <= c as number)
+    arktest.assertTrue( c as number >= a as number)
 }

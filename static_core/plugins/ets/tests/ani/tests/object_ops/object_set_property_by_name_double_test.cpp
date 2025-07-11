@@ -38,30 +38,82 @@ public:
     }
 };
 
+TEST_F(ObjectSetPropertyByNameDoubleTest, set_field)
+{
+    ani_object car = NewCar();
+
+    ani_double highPerformance = 0U;
+    ASSERT_EQ(env_->Object_GetPropertyByName_Double(car, "highPerformance", &highPerformance), ANI_OK);
+    ASSERT_EQ(highPerformance, 0U);
+
+    const ani_double value = 1.02;
+    const ani_double value1 = 1.03;
+    ASSERT_EQ(env_->Object_SetPropertyByName_Double(car, "highPerformance", value), ANI_OK);
+    ASSERT_EQ(env_->Object_GetPropertyByName_Double(car, "highPerformance", &highPerformance), ANI_OK);
+    ASSERT_EQ(highPerformance, value);
+
+    ASSERT_EQ(env_->Object_SetPropertyByName_Double(car, "ecoFriendly", value1), ANI_OK);
+    ASSERT_EQ(env_->Object_GetPropertyByName_Double(car, "ecoFriendly", &highPerformance), ANI_OK);
+    ASSERT_EQ(highPerformance, value1);
+}
+
 TEST_F(ObjectSetPropertyByNameDoubleTest, set_field_property)
 {
     ani_object car = NewCar();
 
-    ani_double highPerformance;
+    ani_double highPerformance = 0U;
     ASSERT_EQ(env_->Object_GetPropertyByName_Double(car, "highPerformance", &highPerformance), ANI_OK);
     ASSERT_EQ(static_cast<int32_t>(highPerformance), 0U);
 
-    ASSERT_EQ(env_->Object_SetPropertyByName_Double(car, "highPerformance", 1U), ANI_OK);
-    ASSERT_EQ(env_->Object_GetPropertyByName_Double(car, "highPerformance", &highPerformance), ANI_OK);
-    ASSERT_EQ(static_cast<int32_t>(highPerformance), 1U);
+    const int32_t loopCount = 3;
+    const ani_double value = -1.7976931348623157E308;
+    const ani_double value1 = 1.7976931348623157E308;
+    for (int32_t i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetPropertyByName_Double(car, "highPerformance", value), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Double(car, "highPerformance", &highPerformance), ANI_OK);
+        ASSERT_EQ(highPerformance, value);
+
+        ASSERT_EQ(env_->Object_SetPropertyByName_Double(car, "highPerformance", value1), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Double(car, "highPerformance", &highPerformance), ANI_OK);
+        ASSERT_EQ(highPerformance, value1);
+    }
 }
 
 TEST_F(ObjectSetPropertyByNameDoubleTest, set_setter_property)
 {
     ani_object car = NewCar();
 
-    ani_double ecoFriendly;
+    ani_double ecoFriendly = 0U;
     ASSERT_EQ(env_->Object_GetPropertyByName_Double(car, "ecoFriendly", &ecoFriendly), ANI_OK);
     ASSERT_EQ(static_cast<int32_t>(ecoFriendly), 0U);
 
-    ASSERT_EQ(env_->Object_SetPropertyByName_Double(car, "ecoFriendly", 1U), ANI_OK);
-    ASSERT_EQ(env_->Object_GetPropertyByName_Double(car, "ecoFriendly", &ecoFriendly), ANI_OK);
-    ASSERT_EQ(static_cast<int32_t>(ecoFriendly), 1U);
+    const int32_t loopCount = 3;
+    const ani_double value = -1.7976931348623157E308;
+    const ani_double value1 = 1.7976931348623157E308;
+    for (int32_t i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetPropertyByName_Double(car, "ecoFriendly", value), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Double(car, "ecoFriendly", &ecoFriendly), ANI_OK);
+        ASSERT_EQ(ecoFriendly, value);
+
+        ASSERT_EQ(env_->Object_SetPropertyByName_Double(car, "ecoFriendly", value1), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Double(car, "ecoFriendly", &ecoFriendly), ANI_OK);
+        ASSERT_EQ(ecoFriendly, value1);
+    }
+}
+
+TEST_F(ObjectSetPropertyByNameDoubleTest, invalid_env)
+{
+    ani_object car = NewCar();
+
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_Double(nullptr, car, "ecoFriendly", 1U), ANI_INVALID_ARGS);
+}
+
+TEST_F(ObjectSetPropertyByNameDoubleTest, invalid_parameter)
+{
+    ani_object car = NewCar();
+
+    ASSERT_EQ(env_->Object_SetPropertyByName_Double(car, "ecoFriendlyA", 1U), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_SetPropertyByName_Double(car, "", 1U), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectSetPropertyByNameDoubleTest, invalid_argument)
@@ -90,7 +142,7 @@ TEST_F(ObjectSetPropertyByNameDoubleTest, set_interface_field)
 {
     ani_object c1 = NewC1();
 
-    ani_double prop;
+    ani_double prop = 0U;
     ASSERT_EQ(env_->Object_GetPropertyByName_Double(c1, "prop", &prop), ANI_OK);
     ASSERT_EQ(static_cast<int32_t>(prop), 0U);
 
@@ -103,7 +155,7 @@ TEST_F(ObjectSetPropertyByNameDoubleTest, set_interface_property)
 {
     ani_object c2 = NewC2();
 
-    ani_double prop;
+    ani_double prop = 0U;
     ASSERT_EQ(env_->Object_SetPropertyByName_Double(c2, "prop", 0U), ANI_OK);
     ASSERT_EQ(env_->Object_GetPropertyByName_Double(c2, "prop", &prop), ANI_OK);
     ASSERT_EQ(static_cast<int32_t>(prop), 0U);

@@ -60,28 +60,28 @@ class FindGetterSetterTest : public AniTest {};
 
 TEST_F(FindSetterTest, has_set_methods)
 {
-    CheckClassFindSetter<true>("Lclass_find_setter_getter_test/ExplicitMethods;", "age");
-    CheckClassFindSetter<true>("Lclass_find_setter_getter_test/StyledRectangle;", "color");
-    CheckClassFindSetter<true>("Lclass_find_setter_getter_test/OnlySet;", "field");
+    CheckClassFindSetter<true>("class_find_setter_getter_test.ExplicitMethods", "age");
+    CheckClassFindSetter<true>("class_find_setter_getter_test.StyledRectangle", "color");
+    CheckClassFindSetter<true>("class_find_setter_getter_test.OnlySet", "field");
 }
 
 TEST_F(FindGetterTest, has_get_method)
 {
-    CheckClassFindGetter<true>("Lclass_find_setter_getter_test/ExplicitMethods;", "age");
-    CheckClassFindGetter<true>("Lclass_find_setter_getter_test/StyledRectangle;", "color");
-    CheckClassFindGetter<true>("Lclass_find_setter_getter_test/OnlyGet;", "field");
+    CheckClassFindGetter<true>("class_find_setter_getter_test.ExplicitMethods", "age");
+    CheckClassFindGetter<true>("class_find_setter_getter_test.StyledRectangle", "color");
+    CheckClassFindGetter<true>("class_find_setter_getter_test.OnlyGet", "field");
 }
 
 TEST_F(FindSetterTest, no_set_method)
 {
-    CheckClassFindSetter<false>("Lclass_find_setter_getter_test/ImplicitMethods;", "field");
-    CheckClassFindSetter<false>("Lclass_find_setter_getter_test/OnlyGet;", "field");
+    CheckClassFindSetter<false>("class_find_setter_getter_test.ImplicitMethods", "field");
+    CheckClassFindSetter<false>("class_find_setter_getter_test.OnlyGet", "field");
 }
 
 TEST_F(FindGetterTest, no_get_method)
 {
-    CheckClassFindGetter<false>("Lclass_find_setter_getter_test/ImplicitMethods;", "field");
-    CheckClassFindGetter<false>("Lclass_find_setter_getter_test/OnlySet;", "field");
+    CheckClassFindGetter<false>("class_find_setter_getter_test.ImplicitMethods", "field");
+    CheckClassFindGetter<false>("class_find_setter_getter_test.OnlySet", "field");
 }
 
 TEST_F(FindGetterSetterTest, invalid_args)
@@ -89,6 +89,28 @@ TEST_F(FindGetterSetterTest, invalid_args)
     ani_method method;
     ASSERT_EQ(env_->Class_FindSetter(nullptr, "field", &method), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Class_FindGetter(nullptr, "field", &method), ANI_INVALID_ARGS);
+}
+
+TEST_F(FindSetterTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_find_setter_getter_test.ExplicitMethods", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_setter_getter_test.ExplicitMethods"));
+    ani_method method {};
+    ASSERT_EQ(env_->Class_FindSetter(cls, "age", &method), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_setter_getter_test.ExplicitMethods"));
+}
+
+TEST_F(FindGetterTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_find_setter_getter_test.ExplicitMethods", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_setter_getter_test.ExplicitMethods"));
+    ani_method method {};
+    ASSERT_EQ(env_->Class_FindGetter(cls, "age", &method), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_setter_getter_test.ExplicitMethods"));
 }
 
 }  // namespace ark::ets::ani::testing

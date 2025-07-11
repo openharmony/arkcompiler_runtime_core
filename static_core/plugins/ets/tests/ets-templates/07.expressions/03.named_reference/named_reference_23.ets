@@ -23,5 +23,5 @@ namespace MyModule {
 
 function main(): void {
   let x: string = MyModule.moduleVar;
-  assertEQ(x, "Module Variable");
+  arktest.assertEQ(x, "Module Variable");
 }

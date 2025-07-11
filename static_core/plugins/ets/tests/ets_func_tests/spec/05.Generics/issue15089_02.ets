@@ -28,5 +28,5 @@ class A<T> {
 
 function main(): void {
   let x = new A<Boolean>(true)
-  assertTrue( x.data instanceof Boolean)
+  arktest.assertTrue( x.data instanceof Boolean)
 }

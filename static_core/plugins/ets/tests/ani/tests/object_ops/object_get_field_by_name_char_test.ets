@@ -23,5 +23,5 @@ class Animal {
 }
 
 function newAnimalObject() {
-    return new Animal("Cat", 'a');
+    return new Animal("Cat", c'a');
 }

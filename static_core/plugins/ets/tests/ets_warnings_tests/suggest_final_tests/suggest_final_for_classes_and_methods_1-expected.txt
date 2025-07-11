@@ -1,6 +1,5 @@
 Warning: Suggest 'final' modifier for class. [suggest_final_for_classes_and_methods_1.ets:22:7]
 Warning: Suggest 'final' modifier for method. [suggest_final_for_classes_and_methods_1.ets:22:7]
-Warning: Suggest 'final' modifier for method. [suggest_final_for_classes_and_methods_1.ets:22:7]
 Warning: Suggest 'final' modifier for class. [suggest_final_for_classes_and_methods_1.ets:29:7]
 Warning: Suggest 'final' modifier for method. [suggest_final_for_classes_and_methods_1.ets:29:7]
 Warning: Suggest 'final' modifier for class. [suggest_final_for_classes_and_methods_1.ets:35:7]

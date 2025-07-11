@@ -15,11 +15,8 @@
 
 import LightWeightMap from "@ohos.util.LightWeightMap";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
-    const suite = new ArkTestsuite("LightWeightMap Entries API tests")
+    const suite = new arktest.ArkTestsuite("LightWeightMap Entries API tests")
 
     suite.addTest("LightWeightMap entries return iterator by key and value with LightWeightMap",
         testEntriesReturnIteratorByKeyValue)
@@ -46,14 +43,14 @@ function testEntriesReturnIteratorByKeyValue() {
         }
     }
     let strAll = "gull,357,test,111,apply,222,sparrow,123";
-    assertEQ(str, strAll, "The lightWeightMap entries iterator should return the correct key-value pairs");
+    arktest.assertEQ(str, strAll, "The lightWeightMap entries iterator should return the correct key-value pairs");
 }
 
 function testEntriesReturnIteratorByKeyValueWithEmptyMap() {
     let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     let iteratorSetValues = lightWeightMap.entries();
-    assertEQ(iteratorSetValues.next().value, undefined,
-        "The lightWeightMap entries iterator should return undefined for an empty map");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The lightWeightMap entries iterator.done should true for an empty map");
 }
 
 function testEntriesReturnIteratorByLongStrKey() {
@@ -66,5 +63,5 @@ function testEntriesReturnIteratorByLongStrKey() {
         str += iterator.next().value!.toString();
     }
     let strAll = "sparrow123squirrel357";
-    assertEQ(str, strAll, "The lightWeightMap entries iterator should return the correct key-value pairs");
+    arktest.assertEQ(str, strAll, "The lightWeightMap entries iterator should return the correct key-value pairs");
 }

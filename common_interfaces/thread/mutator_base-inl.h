@@ -27,7 +27,7 @@ inline void MutatorBase::DoEnterSaferegion()
     SetInSaferegion(SAFE_REGION_TRUE);
 }
 
-inline bool MutatorBase::EnterSaferegion(bool updateUnwindContext) noexcept
+inline bool MutatorBase::EnterSaferegion([[maybe_unused]] bool updateUnwindContext) noexcept
 {
     if (LIKELY_CC(!InSaferegion())) {
         DoEnterSaferegion();

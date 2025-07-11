@@ -39,5 +39,25 @@ void VisitMutatorRoot(const RefFieldVisitor &visitor, Mutator &mutator);
 void VisitWeakMutatorRoot(const WeakRefFieldVisitor &visitor, Mutator &mutator);
 // Static VM Roots scanning
 void VisitStaticRoots(const RefFieldVisitor &visitor);
+void UnmarkAllXRefs();
+void SweepUnmarkedXRefs();
+void AddXRefToRoots();
+void RemoveXRefFromRoots();
+
+using VisitStaticRootsHookFunc = void (*)(const RefFieldVisitor &visitor);
+using UpdateStaticRootsHookFunc = void (*)(const RefFieldVisitor &visitor);
+using SweepStaticRootsHookFunc = void (*)(const WeakRefFieldVisitor &visitor);
+using UnmarkAllXRefsHookFunc = void (*)();
+using SweepUnmarkedXRefsHookFunc = void (*)();
+using AddXRefToStaticRootsHookFunc = void (*)();
+using RemoveXRefFromStaticRootsHookFunc = void (*)();
+
+PUBLIC_API void RegisterVisitStaticRootsHook(VisitStaticRootsHookFunc func);
+PUBLIC_API void RegisterUpdateStaticRootsHook(UpdateStaticRootsHookFunc func);
+PUBLIC_API void RegisterSweepStaticRootsHook(SweepStaticRootsHookFunc func);
+PUBLIC_API void RegisterUnmarkAllXRefsHook(UnmarkAllXRefsHookFunc func);
+PUBLIC_API void RegisterSweepUnmarkedXRefsHook(SweepUnmarkedXRefsHookFunc func);
+PUBLIC_API void RegisterAddXRefToStaticRootsHook(AddXRefToStaticRootsHookFunc func);
+PUBLIC_API void RegisterRemoveXRefFromStaticRootsHook(RemoveXRefFromStaticRootsHookFunc func);
 }  // namespace common
 #endif  // COMMON_INTERFACES_HEAP_VISITOR_H

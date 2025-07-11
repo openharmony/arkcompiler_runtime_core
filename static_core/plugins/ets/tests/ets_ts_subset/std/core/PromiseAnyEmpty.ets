@@ -14,12 +14,12 @@
  */
 
 let array: Promise<string>[] = [];
-Promise.any(array).then<void, void>((value: string): void => {
-    console.log("Test failed. The promise should not be resolved.");
-}, (err: AggregateError): void => {
-    if (err.errors.length != 0) {
-        console.log("Test failed. Expected errors count 0 but got " + err.errors.length + ".");
+Promise.any<string>(array).then<void, void>((value): void => {
+    console.log('Test failed. The promise should not be resolved.');
+}, (err): void => {
+    if ((err as AggregateError).errors.length != 0) {
+        console.log('Test failed. Expected errors count 0 but got ' + (err as AggregateError).errors.length + '.');
         return;
     }
-    console.log("Test passed.");
+    console.log('Test passed.');
 });

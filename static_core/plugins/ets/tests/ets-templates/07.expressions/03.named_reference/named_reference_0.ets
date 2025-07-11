@@ -21,5 +21,5 @@ let x: string = 'abc';
 
 function main(): void {
   let y: string = x;
-  assertEQ(y, 'abc');
+  arktest.assertEQ(y, 'abc');
 }

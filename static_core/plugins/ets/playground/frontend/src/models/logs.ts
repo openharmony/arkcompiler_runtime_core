@@ -138,7 +138,7 @@ export const handleResponseLogs = createAsyncThunk(
                         from: logTypeErr
                     })
                 ));
-            } else if (data.exit_code === 0 && data.output && !data.error) {
+            } else if ((data.exit_code === 0 || data.exit_code === 254) && data.output && !data.error) {
                 thunkAPI.dispatch(setOutAction(
                     logsState.out.concat({
                         message: data.output,
@@ -168,7 +168,7 @@ export const handleResponseLogs = createAsyncThunk(
                         from: logTypeOut
                     })
                 ));
-            } else if (data.exit_code && data.exit_code !== 0) {
+            } else if (data.exit_code && data.exit_code !== 0 && data.exit_code !== 254) {
                 thunkAPI.dispatch(setErrAction(
                     logsState.err.concat({
                         message: data.output || `Exit code: ${data.exit_code}`,

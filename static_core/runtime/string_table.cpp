@@ -68,9 +68,9 @@ void StringTable::Sweep(const GCObjectVisitor &gcObjectVisitor)
     table_.Sweep(gcObjectVisitor);
 }
 
-bool StringTable::UpdateMoved()
+bool StringTable::UpdateMoved(const GCRootUpdater &gcRootUpdater)
 {
-    return table_.UpdateMoved();
+    return table_.UpdateMoved(gcRootUpdater);
 }
 
 size_t StringTable::Size()
@@ -213,18 +213,17 @@ coretypes::String *StringTable::Table::GetOrInternString(coretypes::String *stri
     return result;
 }
 
-bool StringTable::Table::UpdateMoved()
+bool StringTable::Table::UpdateMoved(const GCRootUpdater &gcRootUpdater)
 {
     os::memory::WriteLockHolder holder(tableLock_);
     LOG(DEBUG, GC) << "=== StringTable Update moved. BEGIN ===";
     LOG(DEBUG, GC) << "Iterate over: " << table_.size() << " elements in string table";
     bool updated = false;
     for (auto it = table_.begin(), end = table_.end(); it != end;) {
-        auto *object = it->second;
-        if (object->IsForwarded()) {
-            ObjectHeader *fwdString = ark::mem::GetForwardAddress(object);
-            it->second = static_cast<coretypes::String *>(fwdString);
-            LOG(DEBUG, GC) << "StringTable: forward " << std::hex << object << " -> " << fwdString;
+        ObjectHeader *object = it->second;
+        if (gcRootUpdater(&object)) {
+            it->second = static_cast<coretypes::String *>(object);
+            LOG(DEBUG, GC) << "StringTable: forwarded " << std::hex << object;
             updated = true;
         }
         ++it;
@@ -241,18 +240,14 @@ void StringTable::Table::Sweep(const GCObjectVisitor &gcObjectVisitor)
     LOG(DEBUG, GC) << "StringTable iterate over: " << table_.size() << " elements in string table";
     for (auto it = table_.begin(), end = table_.end(); it != end;) {
         auto *object = it->second;
-        if (object->IsForwarded()) {
-            ASSERT(gcObjectVisitor(object) != ObjectStatus::DEAD_OBJECT);
-            ObjectHeader *fwdString = ark::mem::GetForwardAddress(object);
-            it->second = static_cast<coretypes::String *>(fwdString);
+        if (gcObjectVisitor(object) == ObjectStatus::ALIVE_OBJECT) {
+            // All references in the string table must be updated before.
+            ASSERT(!object->IsForwarded());
             ++it;
-            LOG(DEBUG, GC) << "StringTable: forward " << std::hex << object << " -> " << fwdString;
         } else if (gcObjectVisitor(object) == ObjectStatus::DEAD_OBJECT) {
             LOG(DEBUG, GC) << "StringTable: delete string " << std::hex << object
                            << ", val = " << ConvertToString(object);
             table_.erase(it++);
-        } else {
-            ++it;
         }
     }
     LOG(DEBUG, GC) << "StringTable size after sweep = " << table_.size();

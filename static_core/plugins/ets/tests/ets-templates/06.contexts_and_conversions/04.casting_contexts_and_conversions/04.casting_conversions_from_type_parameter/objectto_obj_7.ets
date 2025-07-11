@@ -22,5 +22,5 @@ let c: ColorSet = ColorSet.Red;
 
 function main(): void {
   const obj1: object = c;
-  assertTrue(obj1 == c);
+  arktest.assertTrue(obj1 == c);
 }

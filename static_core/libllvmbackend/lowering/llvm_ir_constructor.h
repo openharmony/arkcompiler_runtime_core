@@ -62,7 +62,9 @@ private:
     bool EmitMemoryFenceFull(Inst *inst);
     bool EmitMemoryFenceRelease(Inst *inst);
     bool EmitMemoryFenceAcquire(Inst *inst);
+    bool EmitRoundToPInf(Inst *inst);
     bool EmitFround(Inst *inst);
+    bool EmitJsCastDoubleToChar(Inst *inst);
     bool EmitCtlz(Inst *inst);
     bool EmitCttz(Inst *inst);
     bool EmitSignbit(Inst *inst);
@@ -164,8 +166,6 @@ private:
     llvm::Value *CreateRoundArm64(Inst *inst, bool is64);
     llvm::Value *CreateNewStringFromCharsTlab(Inst *inst, llvm::Value *offset, llvm::Value *length, llvm::Value *array);
     llvm::Value *CreateNewStringFromStringTlab(Inst *inst, llvm::Value *stringVal);
-    llvm::Value *CreateLaunchArgsArray(CallInst *callInst, uint32_t argStart);
-    void CreateLaunchCall([[maybe_unused]] CallInst *callInst);
     void CreateDeoptimizationBranch(Inst *inst, llvm::Value *deoptimize, RuntimeInterface::EntrypointId exception,
                                     llvm::ArrayRef<llvm::Value *> arguments = llvm::None);
     llvm::CallInst *CreateDeoptimizeCall(Inst *inst, llvm::ArrayRef<llvm::Value *> arguments,
@@ -389,9 +389,6 @@ protected:
     static void VisitCatchPhi(GraphVisitor *v, Inst *inst);
     static void VisitLoadRuntimeClass(GraphVisitor *v, Inst *inst);
     static void VisitLoadUniqueObject(GraphVisitor *v, Inst *inst);
-    static void VisitCallLaunchVirtual(GraphVisitor *v, Inst *inst);
-    static void VisitCallResolvedLaunchStatic(GraphVisitor *v, Inst *inst);
-    static void VisitCallResolvedLaunchVirtual(GraphVisitor *v, Inst *inst);
     static void VisitLoadImmediate(GraphVisitor *v, Inst *inst);
 
     void VisitDefault(Inst *inst) override;

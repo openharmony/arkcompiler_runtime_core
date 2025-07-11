@@ -74,5 +74,5 @@ function main(): void {
     }
     .width(20)
     // Each function called once and A.__initializeStruct twice
-    assertEQ( global, 7)
+    arktest.assertEQ( global, 7)
 }

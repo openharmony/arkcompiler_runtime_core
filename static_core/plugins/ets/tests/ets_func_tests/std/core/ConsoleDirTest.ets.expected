@@ -15,3 +15,6 @@
 {"name":"Tech Corp","employees":[{"id":1,"name":"Alice"},{"id":2,"name":"Bob"}],"address":{"street":"123 Main St","city":"Tech City","country":"Techland"}}
 {}
 [1,"string",[1,2,3]]
+1
+"str"
+"count: %d"

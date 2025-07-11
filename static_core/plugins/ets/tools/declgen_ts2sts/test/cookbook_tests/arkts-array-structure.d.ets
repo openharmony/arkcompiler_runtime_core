@@ -1,3 +1,4 @@
+'use static'
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +24,6 @@ export declare class C {
     static foo(a: Array<string>): void;
     bar(a: Array<string>): void;
 }
-export interface Iface {
+export declare interface Iface {
     foo(a: Array<string>): void;
 }

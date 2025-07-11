@@ -13,21 +13,22 @@
  * limitations under the License.
  */
 
-let error = new Error("error");
+let error = new Error('error');
 
 class Thenable implements PromiseLike<string> {
-    then<U, E>(onFulfilled?: (value: string) => U|PromiseLike<U>, onRejected?: (error: Error) => E|PromiseLike<E>): PromiseLike<U|E> {
+    then<U, E>(onFulfilled?: (value: string) => U | PromiseLike<U>, onRejected?:
+            (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
         throw error;
     }
 };
 
 let poisonedThen = new Thenable();
 Promise.resolve(poisonedThen).then(() : void => {
-    console.log("Test failed. The promise shouldn`t be fulfilled.");
+    console.log('Test failed. The promise shouldn`t be fulfilled.');
 }, (val: Error) :void => {
     if(val == error) {
-        console.log("Test passed.");
+        console.log('Test passed.');
     } else {
-        console.log("Test failed. The promise should be rejected with the provided value.");
-    } 
+        console.log('Test failed. The promise should be rejected with the provided value.');
+    }
 })

@@ -41,9 +41,9 @@ function main(): void {
     accessCounter = 0;
     let vv = new Derive();
     vv.base = 42;
-    assertEQ( accessCounter, 1)
+    arktest.assertEQ( accessCounter, 1)
 
     vv.derive = 43;
-    assertEQ( accessCounter, 3)
+    arktest.assertEQ( accessCounter, 3)
 
 }

@@ -132,3 +132,12 @@ cases:
     stype: Object
     sval: new A[1]
     dtype: A[][]
+
+  - defs: |-
+      type func = (a: int, b: int) => Int;
+      function foo(a: int, b: int): Int {
+        return new Int(a + b);
+      }
+    stype: func
+    sval: foo
+    dtype: Object[]

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,7 +54,6 @@ void RunManagedThread(std::atomic<bool> *sync_flag, [[maybe_unused]] PtThread *t
 
 TEST_F(SourceManagerTest, General)
 {
-    auto pt_thread0 = PtThread(ManagedThread::GetCurrent());
     std::atomic<bool> sync_flag1 = false;
     PtThread pt_thread1 = PtThread::NONE;
     std::thread mthread1(RunManagedThread, &sync_flag1, &pt_thread1);
@@ -63,34 +62,29 @@ TEST_F(SourceManagerTest, General)
         ;
     }
 
-    auto test_id0 = sm_.GetScriptId(pt_thread0, "test.pa");
-    ASSERT_EQ(test_id0.first, ScriptId(0));
-    ASSERT_EQ(test_id0.second, true);
+    auto test_id0 = sm_.GetScriptId("test.pa");
+    ASSERT_EQ(test_id0, ScriptId(0));
 
-    ASSERT_EQ(sm_.GetSourceFileName(test_id0.first), "test.pa");
+    ASSERT_EQ(sm_.GetSourceFileName(test_id0), "test.pa");
     ASSERT_EQ(sm_.GetSourceFileName(ScriptId(1)), "");
 
-    test_id0 = sm_.GetScriptId(pt_thread0, "test.pa");
-    ASSERT_EQ(test_id0.first, ScriptId(0));
-    ASSERT_EQ(test_id0.second, false);
+    test_id0 = sm_.GetScriptId("test.pa");
+    ASSERT_EQ(test_id0, ScriptId(0));
 
-    auto test_id1 = sm_.GetScriptId(pt_thread1, "test1.pa");
-    ASSERT_EQ(test_id1.first, ScriptId(1));
-    ASSERT_EQ(test_id1.second, true);
+    auto test_id1 = sm_.GetScriptId("test1.pa");
+    ASSERT_EQ(test_id1, ScriptId(1));
 
-    auto test_id2 = sm_.GetScriptId(pt_thread0, "test2.pa");
-    auto test_id3 = sm_.GetScriptId(pt_thread1, "test3.pa");
-    ASSERT_EQ(sm_.GetSourceFileName(test_id2.first), "test2.pa");
-    ASSERT_EQ(sm_.GetSourceFileName(test_id3.first), "test3.pa");
+    auto test_id2 = sm_.GetScriptId("test2.pa");
+    auto test_id3 = sm_.GetScriptId("test3.pa");
+    ASSERT_EQ(sm_.GetSourceFileName(test_id2), "test2.pa");
+    ASSERT_EQ(sm_.GetSourceFileName(test_id3), "test3.pa");
 
     ASSERT_EQ(sm_.GetSourceFileName(ScriptId(5U)), "");
 
-    sm_.RemoveThread(pt_thread0);
-    ASSERT_EQ(sm_.GetSourceFileName(test_id2.first), "test2.pa");
+    ASSERT_EQ(sm_.GetSourceFileName(test_id2), "test2.pa");
 
-    test_id0 = sm_.GetScriptId(pt_thread0, "test.pa");
-    ASSERT_EQ(test_id0.first, ScriptId(0));
-    ASSERT_EQ(test_id0.second, true);
+    test_id0 = sm_.GetScriptId("test.pa");
+    ASSERT_EQ(test_id0, ScriptId(0));
 
     sync_flag1 = false;
 

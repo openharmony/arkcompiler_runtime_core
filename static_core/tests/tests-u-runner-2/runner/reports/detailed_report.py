@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,6 @@
 from datetime import date
 from os import path
 from pathlib import Path
-from typing import List, Dict, Optional
 
 from runner.logger import Log
 from runner.reports.summary import Summary
@@ -38,9 +37,9 @@ class DetailedReport:
     EXCLUDED_HEADER = " Excluded after |"
     EXCLUDED_DIVIDER = "-------|"
 
-    def __init__(self, results: List[Test], test_suite: str, report_path: Path, report_file: Optional[Path]):
-        self.tests: List[Test] = results
-        self.result: Dict[str, Summary] = {}
+    def __init__(self, results: list[Test], test_suite: str, report_path: Path, report_file: Path | None):
+        self.tests: list[Test] = results
+        self.result: dict[str, Summary] = {}
         self.test_suite = test_suite
         self.has_excluded = False
         if report_file is None:
@@ -50,7 +49,7 @@ class DetailedReport:
         self.__calculate()
 
     @staticmethod
-    def __get_paths(test_id: str) -> List[str]:
+    def __get_paths(test_id: str) -> list[str]:
         """
         :param test_id: test_id or file path delimited by '/'
         :return: list of iterative partial parts
@@ -61,7 +60,7 @@ class DetailedReport:
         if len(parts) < 2:
             return parts
         partial_path = ''
-        paths: List[str] = []
+        paths: list[str] = []
         for part in parts:
             partial_path += part + '/'
             paths.append(partial_path)
@@ -70,7 +69,7 @@ class DetailedReport:
 
     def populate_report(self) -> None:
         template_path = path.join(path.dirname(path.abspath(__file__)), self.TEMPLATE)
-        with open(template_path, "r", encoding="utf-8") as file_pointer:
+        with open(template_path, encoding="utf-8") as file_pointer:
             report = file_pointer.read()
         report = report.replace(self.REPORT_DATE, str(date.today()))
         report = report.replace(self.REPORT_TEST_SUITE, self.test_suite)
@@ -80,7 +79,7 @@ class DetailedReport:
         else:
             report = report.replace(self.REPORT_EXCLUDED_HEADER, self.EXCLUDED_HEADER)
             report = report.replace(self.REPORT_EXCLUDED_DIVIDER, self.EXCLUDED_DIVIDER)
-        lines: List[str] = []
+        lines: list[str] = []
         for partial_path, summary in self.result.items():
             lines.append(self.__report_one_line(partial_path, summary))
         result = "\n".join(sorted(lines))

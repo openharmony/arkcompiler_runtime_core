@@ -33,8 +33,8 @@ class Student {
 function main() : void {
   let s0 : Student = new Student();
 
-  assertEQ( s0.name, undefined)
-  assertEQ( s0.age, undefined)
-  assertEQ( s0.desc, undefined)
-  assertEQ( s0.teacher, undefined)
+  arktest.assertEQ( s0.name, undefined)
+  arktest.assertEQ( s0.age, undefined)
+  arktest.assertEQ( s0.desc, undefined)
+  arktest.assertEQ( s0.teacher, undefined)
 }

@@ -20,7 +20,7 @@ function test1(shor: String): int {
     let lambda : (str: String, args: Object[]) => String = (str: String, args: Object[]) : String => {
         failure += checkTestResult(str, "x")
         failure += checkTestResult(args[0] as Double, new Double(0.0))
-        failure += checkTestResult(args[1] as String, shor)
+        failure += checkTestResult(args[1].toString(), shor)
         let ans = ctr.toString();
         ctr++;
         return ans;
@@ -37,7 +37,7 @@ function test2(shor: String): int {
     let lambda : (str: String, args: Object[]) => String = (str: String, args: Object[]) : String => {
         failure += checkTestResult(str, "x")
         failure += checkTestResult(args[0] as Double, new Double(0.0))
-        failure += checkTestResult(args[1] as String, shor)
+        failure += checkTestResult(args[1].toString(), shor)
         let ans = ctr.toString();
         ctr++;
         return ans;
@@ -54,8 +54,8 @@ function test3(shor: String): int {
 
     let lambda : (str: String, args: Object[]) => String = (str: String, args: Object[]) : String => {
         failure += checkTestResult(str, "x")
-        failure += checkTestResult(args[0] as Double, new Double((ctr.unboxed() * 2) as double))
-        failure += checkTestResult(args[1] as String, shor)
+        failure += checkTestResult(args[0] as Double, new Double((ctr.unboxed() * 2).toDouble()))
+        failure += checkTestResult(args[1].toString(), shor)
         let ans = ctr.toString();
         ctr++;
         return ans;
@@ -72,10 +72,10 @@ function test4(shor: String): int {
     let test : String[] = ["a", "b", "c"]
     let lambda : (str: String, args: Object[]) => String = (str: String, args: Object[]) : String => {
         failure += checkTestResult(str, "x")
-        failure += checkTestResult(args[0] as String, "x")
-        failure += checkTestResult(args[1] as String, test[ctr.unboxed()])
-        failure += checkTestResult(args[2] as Double, new Double((ctr.unboxed() * 2) as double))
-        failure += checkTestResult(args[3] as String, shor)
+        failure += checkTestResult(args[0].toString(), "x")
+        failure += checkTestResult(args[1].toString(), test[ctr.unboxed()])
+        failure += checkTestResult(args[2] as Double, new Double((ctr.unboxed() * 2).toDouble()))
+        failure += checkTestResult(args[3].toString(), shor)
         let ans = ctr.toString();
         ctr++;
         return ans;
@@ -130,6 +130,30 @@ function test7(): int {
     return failure
 }
 
+function test8(): int {
+    let failure = 0
+    let pattern = "(?<fst>.)(?<snd>.)|(?<thd>x)"
+    for (let flags of ["", "u"]) {
+        let re = new RegExp(pattern, flags)
+        failure += checkTestResult("cd", "abcd".replace(re, "$<42$1>"))
+        failure += checkTestResult("cd", "abcd".replace(re, "$<fth>"))
+        failure += checkTestResult("cd", "abcd".replace(re, "$<$1>"))
+        failure += checkTestResult("cd", "abcd".replace(re, "$<>"))
+        failure += checkTestResult("cd", "abcd".replace(re, "$<thd>"))
+        failure += checkTestResult("bacd", "abcd".replace(re, "$<snd>$<fst>"))
+    }
+    for (let flags of ["g", "gu"]) {
+        let re = new RegExp(pattern, flags)
+        failure += checkTestResult("", "abcd".replace(re, "$<42$1>"))
+        failure += checkTestResult("", "abcd".replace(re, "$<fth>"))
+        failure += checkTestResult("", "abcd".replace(re, "$<$1>"))
+        failure += checkTestResult("", "abcd".replace(re, "$<>"))
+        failure += checkTestResult("", "abcd".replace(re, "$<thd>"))
+        failure += checkTestResult("badc", "abcd".replace(re, "$<snd>$<fst>"))
+    }
+    return failure
+}
+
 function main(): int {
     let str = "xaxbxcx"
     let failure = 0
@@ -138,8 +162,9 @@ function main(): int {
     failure += test3(str)
     failure += test4(str)
     failure += test5("abcd")
-    // failure += test6()
+    failure += test6()
     failure += test7()
+    failure += test8()
     console.println(failure)
     return failure
 }

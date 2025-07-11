@@ -2308,7 +2308,7 @@ bool Parser::ParseFunctionArg()
     ++context_;
 
     Function::Parameter parameter(type, program_.lang);
-    metadata_ = parameter.metadata.get();
+    metadata_ = &parameter.GetOrCreateMetadata();
 
     if (*context_ == Token::Type::DEL_LT && !ParseMetaDef()) {
         return false;

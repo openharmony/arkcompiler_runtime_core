@@ -423,21 +423,6 @@ EtsString *DoubleToPrecision(double number, int digit)
     return DoubleToExponential(number, digit - 1);
 }
 
-double GetStdDoubleArgument(ObjectHeader *obj)
-{
-    auto *cls = obj->ClassAddr<Class>();
-
-    // Assume std.core.Double has only one `double` field
-    ASSERT(cls->GetInstanceFields().size() == 1);
-
-    Field &fieldVal = cls->GetInstanceFields()[0];
-
-    ASSERT(fieldVal.GetTypeId() == panda_file::Type::TypeId::F64);
-
-    size_t offset = fieldVal.GetOffset();
-    return obj->GetFieldPrimitive<double>(offset);
-}
-
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true>
 void GetBase(FpType d, int digits, int *decpt, Span<char> buf)

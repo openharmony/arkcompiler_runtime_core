@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,7 +53,7 @@ inline Pool MmapPoolMap::PopFreePool(size_t size)
     }
 
     mmapPool->SetFreePoolsIter(freePools_.end());
-    Pool pool(size, elementMem);
+    Pool pool(size, elementMem, mmapPool->IsReturnedToOS());
     freePools_.erase(element);
     if (size < elementSize) {
         Pool newPool(elementSize - size, ToVoidPtr(ToUintPtr(elementMem) + size));
@@ -70,6 +70,7 @@ inline Pool MmapPoolMap::PopFreePool(size_t size)
         LOG_MMAP_MEM_POOL(DEBUG) << "Return pages to OS from Free Pool to get zeroed memory: start = " << pool.GetMem()
                                  << " with size " << poolSize;
         os::mem::ReleasePages(poolStart, poolStart + poolSize);
+        pool.SetZeroFlag();
     }
     return pool;
 }
@@ -330,18 +331,18 @@ inline void *MmapMemPool::AllocRawMemNonObjectImpl(size_t size, SpaceType spaceT
 }
 
 template <OSPagesAllocPolicy OS_ALLOC_POLICY>
-inline void *MmapMemPool::AllocRawMemObjectImpl(size_t size, SpaceType type)
+inline std::pair<void *, bool> MmapMemPool::AllocRawMemObjectImpl(size_t size, SpaceType type)
 {
     ASSERT(IsHeapSpace(type));
-    void *mem = commonSpace_.template AllocRawMem<OS_ALLOC_POLICY>(size, &commonSpacePools_);
+    auto p = commonSpace_.template AllocRawMem<OS_ALLOC_POLICY>(size, &commonSpacePools_);
     LOG_MMAP_MEM_POOL(DEBUG) << "Occupied memory for " << SpaceTypeToString(type) << " - " << std::dec
                              << commonSpace_.GetOccupiedMemorySize();
-    return mem;
+    return p;
 }
 
 template <OSPagesAllocPolicy OS_ALLOC_POLICY>
 // CC-OFFNXT(G.FUD.06) perf critical, solid logic, ODR
-inline void *MmapMemPool::AllocRawMemImpl(size_t size, SpaceType type)
+inline std::pair<void *, bool> MmapMemPool::AllocRawMemImpl(size_t size, SpaceType type)
 {
     os::memory::LockHolder lk(lock_);
     ASSERT(size % ark::os::mem::GetPageSize() == 0);
@@ -349,6 +350,7 @@ inline void *MmapMemPool::AllocRawMemImpl(size_t size, SpaceType type)
     // which require PANDA_POOL_ALIGNMENT_IN_BYTES alignment
     ASSERT(size == AlignUp(size, PANDA_POOL_ALIGNMENT_IN_BYTES));
     void *mem = nullptr;
+    bool isZero = false;
     switch (type) {
         // Internal spaces
         case SpaceType::SPACE_TYPE_COMPILER:
@@ -362,9 +364,12 @@ inline void *MmapMemPool::AllocRawMemImpl(size_t size, SpaceType type)
         // Heap spaces:
         case SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT:
         case SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT:
-        case SpaceType::SPACE_TYPE_OBJECT:
-            mem = AllocRawMemObjectImpl<OS_ALLOC_POLICY>(size, type);
+        case SpaceType::SPACE_TYPE_OBJECT: {
+            std::pair<void *, bool> result = AllocRawMemObjectImpl<OS_ALLOC_POLICY>(size, type);
+            mem = result.first;
+            isZero = result.second;
             break;
+        }
         default:
             LOG_MMAP_MEM_POOL(FATAL) << "Try to use incorrect " << SpaceTypeToString(type) << " for AllocRawMem.";
     }
@@ -376,7 +381,7 @@ inline void *MmapMemPool::AllocRawMemImpl(size_t size, SpaceType type)
         LOG_MMAP_MEM_POOL(DEBUG) << "Allocate raw memory with size " << size << " at addr = " << mem << " for "
                                  << SpaceTypeToString(type);
     }
-    return mem;
+    return {mem, isZero};
 }
 
 /* static */
@@ -421,10 +426,8 @@ inline Pool MmapMemPool::AllocPoolUnsafe(size_t size, SpaceType spaceType, Alloc
                                  << " for " << SpaceTypeToString(spaceType);
     }
     if (pool.GetMem() == nullptr) {
-        void *mem = AllocRawMemImpl<OS_ALLOC_POLICY>(size, spaceType);
-        if (mem != nullptr) {
-            pool = Pool(size, mem);
-        }
+        std::pair<void *, bool> result = AllocRawMemImpl<OS_ALLOC_POLICY>(size, spaceType);
+        pool = Pool(size, result.first, result.second);
     }
     if (pool.GetMem() == nullptr) {
         return pool;
@@ -439,7 +442,7 @@ inline Pool MmapMemPool::AllocPoolUnsafe(size_t size, SpaceType spaceType, Alloc
                               allocatorType, allocatorAddr);
 #ifdef PANDA_QEMU_BUILD
         // Unfortunately, madvise on QEMU works differently, and we should zeroed pages by hand.
-        if (OS_ALLOC_POLICY == OSPagesAllocPolicy::ZEROED_MEMORY) {
+        if (OS_ALLOC_POLICY == OSPagesAllocPolicy::ZEROED_MEMORY || pool.IsZeroed()) {
             memset_s(pool.GetMem(), pool.GetSize(), 0, pool.GetSize());
         }
 #endif

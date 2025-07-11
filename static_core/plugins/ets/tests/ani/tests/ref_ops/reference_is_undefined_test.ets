@@ -14,13 +14,13 @@
  */
 
 function GetNull(): null {
-    return null;
+    return null
 }
 
 function GetUndefined(): undefined {
-    return undefined;
+    return undefined
 }
 
-function GetObject(): Object {
-    return new String("Hello World!");
+function getObject(): Object {
+    return "Hello World!"
 }

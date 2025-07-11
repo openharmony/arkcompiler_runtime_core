@@ -15,7 +15,10 @@
 
 import { BusinessError } from "@ohos.base";
 
+const TypeErrorCodeId: number = 401;
 const OutOfBoundsErrorCodeId: number = 10200001;
+
+export type DequeforEachCb<T> = (value: T, index: number, deque: Deque<T>) => void;
 
 function createBusinessError(code: number, message: string) {
     let err = new BusinessError();
@@ -25,12 +28,22 @@ function createBusinessError(code: number, message: string) {
     return err;
 }
 
-export default class Deque<T> implements Iterable<T> {
+export default class Deque<T> implements Iterable<T>, JsonReplacer {
     private readonly DEFAULT_CAPACITY = 8;
     internal capacity: int = this.DEFAULT_CAPACITY;
     internal buffer: Array<T>;
     internal front: int = 0;
     internal rear: int = 0;
+
+    public jsonReplacer(): Record<String, NullishType> {
+        const buf = this.buffer;
+        const len = buf.length;
+        let arrayObj: Record<String, NullishType> = {};
+        for (let i = 0; i < len; i++) {
+            arrayObj[String(i)] = buf[i];
+        }
+        return arrayObj;
+    }
 
     /**
      * property: The number of elements in the ArrayList.
@@ -62,7 +75,7 @@ export default class Deque<T> implements Iterable<T> {
             return undefined;
         }
 
-        return this.buffer[this.rear - 1];
+        return this.buffer[(this.rear - 1 + this.capacity) % this.capacity];
     }
 
     /**
@@ -128,7 +141,7 @@ export default class Deque<T> implements Iterable<T> {
      * @param callbackfn - The function to execute on each element, taking the value, index, and Deque as arguments.
      *
      */
-    public forEach(callbackfn: (value: T, index: number, deque: Deque<T>) => void): void {
+    public forEach(callbackfn: DequeforEachCb<T>): void {
         let i: int = this.front, k = 0;
         while (i != this.rear) {
             callbackfn(this.buffer[i], k++, this);
@@ -194,13 +207,9 @@ export default class Deque<T> implements Iterable<T> {
     /**
      * Increases the capacity of the deque.
      *
-     * @throws {RangeError} If the current capacity has reached the maximum limit.
+     * @throws {BusinessError} If the current capacity has reached the maximum limit.
      */
     private increaseCapacity(): void {
-        if (this.capacity == Int.MAX_VALUE) {
-            throw new RangeError("The current capacity has reached the maximum limit.");
-        }
-
         let newCap: int = min(this.capacity * 2, Int.MAX_VALUE);
 
         let newBuffer = new Array<T>(newCap);
@@ -211,7 +220,7 @@ export default class Deque<T> implements Iterable<T> {
             i = (i + 1) % this.capacity;
         }
 
-        this.rear = this.length as int;
+        this.rear = this.length.toInt();
         this.front = 0;
         this.capacity = newCap;
         this.buffer = newBuffer;
@@ -223,12 +232,16 @@ export default class Deque<T> implements Iterable<T> {
      * @param index - The index of the element to retrieve.
      *
      * @returns The element at the specified index.
-     * @throws { BusinessError } 10200001 - The value of "index" is out of range. It must be >= 0 && <= 2147483647.
+     * @throws { BusinessError } 401 - The type of "index" must be small integer.
+     * @throws { BusinessError } 10200001 - The value of "index" is out of range. It must be >= 0 && <= ${length - 1}.
+     *  Received value is: ${index}
      */
     public $_get(index: number): T {
-        if (index >= this.length || index < 0) {
-            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"index\" is out of range. It must be >= 0 && <= ${Int.MAX_VALUE}. Received value is: ${index}`);
+        this.checkEmptyContainer();
+        if (index > Int.MAX_VALUE) {
+            throw new BusinessError(TypeErrorCodeId, new Error(`The type of \"index\" must be small integer.`));
         }
+        this.checkIndex(index);
 
         return this.buffer[this.getRealIndex(index)];
     }
@@ -239,18 +252,29 @@ export default class Deque<T> implements Iterable<T> {
      * @param index - The index of the element to set.
      *
      * @param val - The value to set at the specified index.
-     * @throws { BusinessError } 10200001 - The value of "index" is out of range. It must be >= 0 && <= 2147483647.
+     * @throws { BusinessError } 10200001 - The value of "index" is out of range. It must be >= 0 && <= ${length - 1}.
+     *  Received value is: ${index}
      */
     public $_set(index: number, val: T): void {
-        if (index >= this.length || index < 0) {
-            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"index\" is out of range. It must be >= 0 && <= ${Int.MAX_VALUE}. Received value is: ${index}`);
-        }
+        this.checkIndex(index);
 
         this.buffer[this.getRealIndex(index)] = val;
     }
 
     private getRealIndex(index: number): number {
         return (this.front + index) % this.capacity;
+    }
+
+    private checkEmptyContainer(): void {
+        if (this.isEmpty()) {
+            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`Container is empty`));
+        }
+    }
+
+    private checkIndex(index: number): void {
+        if (index < 0) {
+            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"index\" is out of range. It must be >= 0 && <= ${this.length - 1}. Received value is: ${index}`));
+        }
     }
 }
 

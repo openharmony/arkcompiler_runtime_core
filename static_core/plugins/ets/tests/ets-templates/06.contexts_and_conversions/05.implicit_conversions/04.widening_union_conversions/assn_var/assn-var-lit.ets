@@ -31,7 +31,7 @@ let d: {{c.to_type}}
 function main() {
 {%- for t in c['values'] %}
     d = s{{loop.index}}
-    assertTrue( d == {{t.expr|safe}} )
+    arktest.assertTrue( d == {{t.expr|safe}} )
 {%- endfor %}
 }
 {%- endfor %}

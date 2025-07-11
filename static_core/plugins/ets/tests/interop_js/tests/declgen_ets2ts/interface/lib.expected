@@ -23,7 +23,7 @@ export declare interface Iface2 {
     foo1(): void;
 }
 export declare interface Iface3 {
-    foo2(...nums: number[]): void;
+    foo2(...nums: Array<number>): void;
 }
 export declare class C {
     public static foo3(a: Array<string>): void;

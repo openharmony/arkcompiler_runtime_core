@@ -44,10 +44,6 @@
 //! RUN           force_jit: true, options: "--compiler-reserve-string-builder-buffer=true --compiler-inlining=true", entry: "ets_string_builder_reserve_uber.ETSGLOBAL::main"
 //! EVENT_NOT     "SbBufferRealloc"
 
-//! CHECKER       JIT IR Builder, check StringBuilder internal buffer reallocation events not occured (uber_only, --gc-type=gen-gc)
-//! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--gc-type=gen-gc --no-async-jit=false --compiler-reserve-string-builder-buffer=true --compiler-inlining=true", entry: "ets_string_builder_reserve_uber.ETSGLOBAL::main"
-
 //! CHECKER       JIT IR Builder, check StringBuilder internal buffer reallocation events not occured (uber_only, --gc-type=g1-gc)
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true, options: "--gc-type=g1-gc --no-async-jit=false --compiler-reserve-string-builder-buffer=true --compiler-inlining=true", entry: "ets_string_builder_reserve_uber.ETSGLOBAL::main"
@@ -62,18 +58,18 @@ function uber_reserve38(cond: boolean) : string
         switch (i) {
             case 0:
                 sb.append(i)
-                sb.append((i as Number).toString())
-                sb.append(i as number)
-                sb.append(i as long)
+                sb.append((i.toDouble()).toString())
+                sb.append(i.toDouble().toString())
+                sb.append(i.toLong().toString())
                 sb.append("-")
             break
             case 1:
                 sb.append(i)
                 if (cond)
-                    sb.append((i as Number).toString())
+                    sb.append((i.toDouble()).toString())
                 else
-                    sb.append(i as number)
-                sb.append(i as long)
+                    sb.append(i.toDouble().toString())
+                sb.append(i.toLong().toString())
                 sb.append("-")
             break
             case 2:
@@ -120,6 +116,6 @@ function uber_reserve38(cond: boolean) : string
 }
 
 function main() : void {
-    assertEQ(uber_reserve38(false), "null-0000-111-210111213142-31224577891212123-494-null", "Wrong result at uber_reserve38")
-    assertEQ(uber_reserve38(true), "null-0000-111-210111213142-31224577891212123-4512569104-null", "Wrong result at uber_reserve38")
+    arktest.assertEQ(uber_reserve38(false), "null-0000-111-210111213142-31224577891212123-494-null", "Wrong result at uber_reserve38")
+    arktest.assertEQ(uber_reserve38(true), "null-0000-111-210111213142-31224577891212123-4512569104-null", "Wrong result at uber_reserve38")
 }

@@ -31,7 +31,7 @@ function main() {
     let a{{loop.index}}: {{c.to_type}}[] = [s{{loop.index}}]
     a{{loop.index}} = []
     a{{loop.index}} = [s{{loop.index}}, s{{loop.index}}]
-    assertTrue( a{{loop.index}}[1] == {{t.expr|safe}} )
+    arktest.assertTrue( a{{loop.index}}[1] == {{t.expr|safe}} )
 {%- endfor %}
 }
 {%- endfor %}

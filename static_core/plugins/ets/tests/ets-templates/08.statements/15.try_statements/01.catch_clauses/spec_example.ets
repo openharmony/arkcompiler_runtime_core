@@ -39,6 +39,6 @@ function processNumbers(a: number, b: number): number {
 }
 
 function main() {
-    assertEQ( processNumbers(4, 2), 2 )
-    assertEQ( processNumbers(4, 0), -1 )
+    arktest.assertEQ( processNumbers(4, 2), 2 )
+    arktest.assertEQ( processNumbers(4, 0), -1 )
 }

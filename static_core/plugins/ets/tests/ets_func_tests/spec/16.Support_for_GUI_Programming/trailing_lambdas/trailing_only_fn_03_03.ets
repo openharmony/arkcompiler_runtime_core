@@ -22,7 +22,7 @@ tags: []
 
 function no_param(fn: number | () => void) {
     if (fn instanceof number) {
-        assertTrue( false,  "Not expected execution here")
+        arktest.assertTrue( false,  "Not expected execution here")
     } else {
         fn()
     }
@@ -32,7 +32,7 @@ let a: int = 5
 
 function main(): void {
     no_param() {
-        assertEQ( a, 5)
+        arktest.assertEQ( a, 5)
     }
 }
 

@@ -1,0 +1,7 @@
+{
+    "compilerOptions": {
+        "dependencies": {
+            "@panda/lib":  { "path": "${LIB_SOURCE_ABC}" }
+        }
+    }
+}

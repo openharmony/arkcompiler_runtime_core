@@ -16,7 +16,7 @@ import {xml} from "@ohos.xml"
 import { BusinessError } from "@ohos.base";
 
 function main(): int {
-    const suite = new ArkTestsuite("XmlPullParser API tests, part10");
+    const suite = new arktest.ArkTestsuite("XmlPullParser API tests, part10");
 
     suite.addTest("Testing the XML PullParser without <>.", testXmlPullParserConstructor0020)
     suite.addTest("Testing the XML PullParser with special characters in content. Verifies that it can handle such cases correctly.", testXmlPullParserConstructor0019)
@@ -62,7 +62,7 @@ function testXmlPullParserConstructor0007() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 }
 
@@ -84,10 +84,10 @@ function testXmlPullParserConstructor0008() {
             tagValueCallbackFunction: (name: string, value: string) => true
         };
         parser.parseXml(options);
-        assertTrue(false)
+        arktest.assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertEQ((err as BusinessError).code, 401);
+        arktest.assertEQ((err as BusinessError).code, 401);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
     }
@@ -118,10 +118,10 @@ function testXmlPullParserConstructor0013() {
             tagValueCallbackFunction: (name: string, value: string) => true
         };
         parser.parseXml(options);
-        assertTrue(false)
+        arktest.assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertEQ((err as BusinessError).code, 401);
+        arktest.assertEQ((err as BusinessError).code, 401);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
     }
@@ -151,10 +151,10 @@ function testXmlPullParserConstructor0014() {
             tagValueCallbackFunction: (name: string, value: string) => true
         };
         parser.parseXml(options);
-        assertTrue(false)
+        arktest.assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertEQ((err as BusinessError).code, 401);
+        arktest.assertEQ((err as BusinessError).code, 401);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
     }
@@ -184,10 +184,10 @@ function testXmlPullParserConstructor0015() {
             tagValueCallbackFunction: (name: string, value: string) => true
         };
         parser.parseXml(options);
-        assertTrue(false)
+        arktest.assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertEQ((err as BusinessError).code, 401);
+        arktest.assertEQ((err as BusinessError).code, 401);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
     }
@@ -219,7 +219,7 @@ function testXmlPullParserConstructor0016() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 }
 
@@ -249,7 +249,7 @@ function testXmlPullParserConstructor0017() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 }
 
@@ -271,10 +271,10 @@ function testXmlPullParserConstructor0018() {
             tagValueCallbackFunction: (name: string, value: string) => true
         };
         parser.parseXml(options);
-        assertTrue(false)
+        arktest.assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertEQ((err as BusinessError).code, 401);
+        arktest.assertEQ((err as BusinessError).code, 401);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
     }
@@ -295,10 +295,10 @@ function testXmlPullParserConstructor0019() {
             tagValueCallbackFunction: (name: string, value: string) => true
         };
         parser.parseXml(options);
-        assertTrue(false)
+        arktest.assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertEQ((err as BusinessError).code, 401);
+        arktest.assertEQ((err as BusinessError).code, 401);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
     }
@@ -322,10 +322,10 @@ function testXmlPullParserConstructor0020() {
             tagValueCallbackFunction: (name: string, value: string) => true
         };
         parser.parseXml(options);
-        assertTrue(false)
+        arktest.assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertEQ((err as BusinessError).code, 401);
+        arktest.assertEQ((err as BusinessError).code, 401);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
     }

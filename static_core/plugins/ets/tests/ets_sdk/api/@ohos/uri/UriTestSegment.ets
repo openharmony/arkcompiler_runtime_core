@@ -18,37 +18,37 @@ import { BusinessError } from "@ohos.base";
 function testUriGetLastSegment001() {
   let route = new uri.URI('content://com.test.uri/files/image.jpg');
   let lastSegment = route.getLastSegment();
-  assertEQ(lastSegment, "image.jpg");
+  arktest.assertEQ(lastSegment, "image.jpg");
 }
 
 function testUriGetLastSegment002() {
   let route = new uri.URI('content://com.test.uri/');
   let lastSegment = route.getLastSegment();
-  assertEQ(lastSegment, "");
+  arktest.assertEQ(lastSegment, "");
 }
 
 function testUriGetLastSegment003() {
   let route = new uri.URI('content://com.test.uri');
   let lastSegment = route.getLastSegment();
-  assertEQ(lastSegment, "");
+  arktest.assertEQ(lastSegment, "");
 }
 
 function testUriGetLastSegment004() {
   let route = new uri.URI('content://com.test.uri/files/');
   let lastSegment = route.getLastSegment();
-  assertEQ(lastSegment, "files");
+  arktest.assertEQ(lastSegment, "files");
 }
 
 function testUriGetLastSegment005() {
   let route = new uri.URI('content://com.test.uri/files/my%20file.jpg');
   let lastSegment = route.getLastSegment();
-  assertEQ(lastSegment, "my file.jpg");
+  arktest.assertEQ(lastSegment, "my file.jpg");
 }
 
 function testUriGetLastSegment006() {
   let route = new uri.URI('content://com.test.uri/files/my+file.jpg');
   let lastSegment = route.getLastSegment();
-  assertEQ(lastSegment, "my+file.jpg");
+  arktest.assertEQ(lastSegment, "my+file.jpg");
 }
 
 function testUriGetLastSegment007() {
@@ -56,114 +56,114 @@ function testUriGetLastSegment007() {
     let route = new uri.URI('content://com.test.uri/files/a a');
     let segments = route.getSegment();
   } catch (err: BusinessError) {
-    assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string.");
-    assertEQ(err.code, 10200002);
-    assertEQ(err.message, "Syntax Error. Invalid Uri string.");
+    arktest.assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string.");
+    arktest.assertEQ(err.code, 10200002);
+    arktest.assertEQ(err.message, "Syntax Error. Invalid Uri string.");
   }
 }
 
 function testUriGetSegment001() {
   let route = new uri.URI('content://com.test.uri/files/images');
   let segments = route.getSegment();
-  assertEQ(segments.length, 2);
-  assertEQ(segments[0], "files");
-  assertEQ(segments[1], "images");
+  arktest.assertEQ(segments.length, 2);
+  arktest.assertEQ(segments[0], "files");
+  arktest.assertEQ(segments[1], "images");
 }
 
 function testUriGetSegment002() {
   let route = new uri.URI('content://com.test.uri/');
   let segments = route.getSegment();
-  assertEQ(segments.length, 0);
+  arktest.assertEQ(segments.length, 0);
 }
 
 function testUriGetSegment003() {
   let route = new uri.URI('content://com.test.uri/files/');
   let segments = route.getSegment();
-  assertEQ(segments.length, 1);
+  arktest.assertEQ(segments.length, 1);
 }
 
 function testUriGetSegment004() {
   let route = new uri.URI('content://com.test.uri');
   let segments = route.getSegment();
-  assertEQ(segments.length, 0);
+  arktest.assertEQ(segments.length, 0);
   let mailRoute = new uri.URI('mailto:people');
-  assertEQ(mailRoute.getSegment().length, 0);
+  arktest.assertEQ(mailRoute.getSegment().length, 0);
 }
 
 function testUriGetSegment005() {
   let route = new uri.URI('content://com.test.uri/files/a%20a/b%20b');
   let segments = route.getSegment();
-  assertEQ(segments[0], "files");
-  assertEQ(segments[1], "a a");
-  assertEQ(segments[2], "b b");
+  arktest.assertEQ(segments[0], "files");
+  arktest.assertEQ(segments[1], "a a");
+  arktest.assertEQ(segments[2], "b b");
 }
 
 function testUriGetSegment006() {
   let route = new uri.URI('http://www.test.com/path/to/image.jpg');
   let segments = route.getSegment();
-  assertEQ(segments[2], "image.jpg");
+  arktest.assertEQ(segments[2], "image.jpg");
 }
 
 function testUriAddSegment001() {
   let route = new uri.URI('http://www.test.com/');
   let newRoute = route.addSegment("files").addSegment("image.jpg");
-  assertEQ(newRoute.toString(), "http://www.test.com/files/image.jpg");
-  assertEQ(newRoute.getLastSegment(), "image.jpg");
+  arktest.assertEQ(newRoute.toString(), "http://www.test.com/files/image.jpg");
+  arktest.assertEQ(newRoute.getLastSegment(), "image.jpg");
 }
 
 function testUriAddSegment002() {
   let route1 = new uri.URI('http://www.test.com');
   let newRoute1 = route1.addSegment("files").addSegment("my image.jpg");
-  assertEQ(newRoute1.toString(), "http://www.test.com/files/my%20image.jpg");
+  arktest.assertEQ(newRoute1.toString(), "http://www.test.com/files/my%20image.jpg");
   let route2 = new uri.URI('http://www.test.com');
   let newRoute2 = route2.addSegment("files").addSegment("my+image.jpg");
-  assertEQ(newRoute2.toString(), "http://www.test.com/files/my%2Bimage.jpg");
+  arktest.assertEQ(newRoute2.toString(), "http://www.test.com/files/my%2Bimage.jpg");
   let route3 = new uri.URI('http://www.test.com');
   let newRoute3 = route3.addSegment("files").addSegment("my%20image.jpg");
-  assertEQ(newRoute3.toString(), "http://www.test.com/files/my%2520image.jpg");
+  arktest.assertEQ(newRoute3.toString(), "http://www.test.com/files/my%2520image.jpg");
 }
 
 function testUriAddSegment003() {
   let route = new uri.URI('http://www.test.com');
   let newRoute = route.addSegment("files");
-  assertEQ(newRoute.getLastSegment(), "files");
-  assertEQ(newRoute.getSegment().length, 1);
+  arktest.assertEQ(newRoute.getLastSegment(), "files");
+  arktest.assertEQ(newRoute.getSegment().length, 1);
 }
 
 function testUriAddEncodedSegment001() {
   let route = new uri.URI('http://www.test.com');
   let newRoute = route.addEncodedSegment("files").addEncodedSegment("image.jpg");
-  assertEQ(newRoute.getSegment()[1], "image.jpg");
+  arktest.assertEQ(newRoute.getSegment()[1], "image.jpg");
 }
 
 function testUriAddEncodedSegment002() {
   let route1 = new uri.URI('http://www.test.com?param%2B1=value1&param+2=value%202#fra+gemnt');
   let newRoute1 = route1.addSegment("my+files").addEncodedSegment("my+image.jpg");
-  assertEQ(newRoute1.toString(), "http://www.test.com/my%2Bfiles/my+image.jpg?param%2B1=value1&param+2=value%202#fra+gemnt");
-  assertEQ(newRoute1.encodedUserInfo, null);
-  assertEQ(newRoute1.encodedPath, "/my%2Bfiles/my+image.jpg");
-  assertEQ(newRoute1.encodedQuery, 'param%2B1=value1&param+2=value%202');
-  assertEQ(newRoute1.encodedFragment, "fra+gemnt");
-  assertEQ(newRoute1.encodedAuthority, "www.test.com");
-  assertEQ(newRoute1.encodedSSP, "//www.test.com/my%2Bfiles/my+image.jpg?param%2B1=value1&param+2=value%202");
+  arktest.assertEQ(newRoute1.toString(), "http://www.test.com/my%2Bfiles/my+image.jpg?param%2B1=value1&param+2=value%202#fra+gemnt");
+  arktest.assertEQ(newRoute1.encodedUserInfo, null);
+  arktest.assertEQ(newRoute1.encodedPath, "/my%2Bfiles/my+image.jpg");
+  arktest.assertEQ(newRoute1.encodedQuery, 'param%2B1=value1&param+2=value%202');
+  arktest.assertEQ(newRoute1.encodedFragment, "fra+gemnt");
+  arktest.assertEQ(newRoute1.encodedAuthority, "www.test.com");
+  arktest.assertEQ(newRoute1.encodedSSP, "//www.test.com/my%2Bfiles/my+image.jpg?param%2B1=value1&param+2=value%202");
   let route2 = new uri.URI('http://www.test.com/');
   let newRoute2 = route2.addSegment("my files").addEncodedSegment("my%20image.jpg");
-  assertEQ(newRoute2.toString(), "http://www.test.com/my%20files/my%20image.jpg");
-  assertEQ(newRoute2.encodedUserInfo, null);
-  assertEQ(newRoute2.encodedPath, "/my%20files/my%20image.jpg");
-  assertEQ(newRoute2.encodedQuery, null);
-  assertEQ(newRoute2.encodedFragment, null);
-  assertEQ(newRoute2.encodedAuthority, "www.test.com");
-  assertEQ(newRoute2.encodedSSP, "//www.test.com/my%20files/my%20image.jpg");
+  arktest.assertEQ(newRoute2.toString(), "http://www.test.com/my%20files/my%20image.jpg");
+  arktest.assertEQ(newRoute2.encodedUserInfo, null);
+  arktest.assertEQ(newRoute2.encodedPath, "/my%20files/my%20image.jpg");
+  arktest.assertEQ(newRoute2.encodedQuery, null);
+  arktest.assertEQ(newRoute2.encodedFragment, null);
+  arktest.assertEQ(newRoute2.encodedAuthority, "www.test.com");
+  arktest.assertEQ(newRoute2.encodedSSP, "//www.test.com/my%20files/my%20image.jpg");
   let route3 = new uri.URI('http://username:my%20name@www.test.com/');
   let newRoute3 = route3.addSegment("my%2Bfiles").addEncodedSegment("my%2Bimage.jpg");
-  assertEQ(newRoute3.toString(), "http://username:my%20name@www.test.com/my%252Bfiles/my%2Bimage.jpg");
-  assertEQ(newRoute3.encodedUserInfo, "username:my%20name");
-  assertEQ(newRoute3.encodedPath, "/my%252Bfiles/my%2Bimage.jpg");
-  assertEQ(newRoute3.encodedQuery, null);
-  assertEQ(newRoute3.encodedFragment, null);
-  assertEQ(newRoute3.encodedAuthority, "username:my%20name@www.test.com");
-  assertEQ(newRoute3.encodedSSP, "//username:my%20name@www.test.com/my%252Bfiles/my%2Bimage.jpg");
+  arktest.assertEQ(newRoute3.toString(), "http://username:my%20name@www.test.com/my%252Bfiles/my%2Bimage.jpg");
+  arktest.assertEQ(newRoute3.encodedUserInfo, "username:my%20name");
+  arktest.assertEQ(newRoute3.encodedPath, "/my%252Bfiles/my%2Bimage.jpg");
+  arktest.assertEQ(newRoute3.encodedQuery, null);
+  arktest.assertEQ(newRoute3.encodedFragment, null);
+  arktest.assertEQ(newRoute3.encodedAuthority, "username:my%20name@www.test.com");
+  arktest.assertEQ(newRoute3.encodedSSP, "//username:my%20name@www.test.com/my%252Bfiles/my%2Bimage.jpg");
 }
 
 function testUriAddEncodedSegment003() {
@@ -171,9 +171,9 @@ function testUriAddEncodedSegment003() {
     let route = new uri.URI('http://www.test.com/');
     let newRoute = route.addEncodedSegment("my files");
   } catch (err: BusinessError) {
-    assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string.");
-    assertEQ(err.code, 10200002);
-    assertEQ(err.message, "Syntax Error. Invalid Uri string.");
+    arktest.assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string.");
+    arktest.assertEQ(err.code, 10200002);
+    arktest.assertEQ(err.message, "Syntax Error. Invalid Uri string.");
   }
 }
 
@@ -182,14 +182,14 @@ function testUriAddEncodedSegment004() {
     let route = new uri.URI('http://www.test.com/');
     let newRoute = route.addEncodedSegment("my`files");
   } catch (err: BusinessError) {
-    assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string: The Path does not conform to the rule.");
-    assertEQ(err.code, 10200002);
-    assertEQ(err.message, "Syntax Error. Invalid Uri string: The Path does not conform to the rule.");
+    arktest.assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string: The Path does not conform to the rule.");
+    arktest.assertEQ(err.code, 10200002);
+    arktest.assertEQ(err.message, "Syntax Error. Invalid Uri string: The Path does not conform to the rule.");
   }
 }
 
 function main(): int {
-  let suite = new ArkTestsuite("URI XTS tests");
+  let suite = new arktest.ArkTestsuite("URI XTS tests");
   suite.addTest("testUriGetLastSegment001", testUriGetLastSegment001);
   suite.addTest("testUriGetLastSegment002", testUriGetLastSegment002);
   suite.addTest("testUriGetLastSegment003", testUriGetLastSegment003);

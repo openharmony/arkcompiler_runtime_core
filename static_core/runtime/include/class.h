@@ -38,6 +38,7 @@ class ObjectHeader;
 class BaseClass {
 public:
     static constexpr uint32_t DYNAMIC_CLASS = 1U;
+    using HeaderType = uint64_t;
 
 public:
     explicit BaseClass(panda_file::SourceLang lang) : lang_(lang) {}
@@ -107,6 +108,8 @@ protected:
     }
 
 private:
+    FIELD_UNUSED HeaderType hclass_ {0};  // store ptr
+    FIELD_UNUSED uint64_t bitField_ {0};  // store StringType
     uint32_t flags_ {0};
     // Size of the object of this class. In case of static classes it is 0
     // for abstract classes, interfaces and classes whose objects
@@ -121,6 +124,7 @@ public:
     using UniqId = uint64_t;
     static constexpr uint32_t STRING_CLASS = DYNAMIC_CLASS << 1U;
     static constexpr uint32_t IS_CLONEABLE = STRING_CLASS << 1U;
+    static constexpr uint32_t XREF_CLASS = IS_CLONEABLE << 1U;
     static constexpr size_t IMTABLE_SIZE = 32;
 
     enum {
@@ -210,6 +214,16 @@ public:
     Span<Field> GetFields() const
     {
         return {fields_, numFields_};
+    }
+
+    Field *GetRawFirstFieldAddr() const
+    {
+        return fields_;
+    }
+
+    uint32_t GetNumFields() const
+    {
+        return numFields_;
     }
 
     Span<Field> GetStaticFields() const
@@ -355,6 +369,11 @@ public:
         return (GetFlags() & STRING_CLASS) != 0;
     }
 
+    bool IsXRefClass() const
+    {
+        return (GetFlags() & XREF_CLASS) != 0;
+    }
+
     void SetStringClass()
     {
         SetFlags(GetFlags() | STRING_CLASS);
@@ -363,6 +382,11 @@ public:
     void SetCloneable()
     {
         SetFlags(GetFlags() | IS_CLONEABLE);
+    }
+
+    void SetXRefClass()
+    {
+        SetFlags(GetFlags() | XREF_CLASS);
     }
 
     bool IsVariableSize() const

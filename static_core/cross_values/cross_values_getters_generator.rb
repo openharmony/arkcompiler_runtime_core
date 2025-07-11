@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -35,13 +35,14 @@ $header += "#include \"runtime/entrypoints/entrypoints.h\"\n\n"
 def generate(input_file, output_file)
     data = File.read(input_file)
     names = data.scan /DEFINE_VALUE\((\w+),/
+    names.concat data.scan /DEFINE_VALUE_WITH_TYPE\((\w+), .*, ([\w\s]+)\)$/
     File.open(output_file, "w") do |file|
         file.puts $header
         file.puts "namespace ark::cross_values {"
 
         names.sort_by(&:first).each do |define|
             file.puts %<
-[[maybe_unused]] static constexpr ptrdiff_t Get#{define[0].split('_').collect(&:capitalize).join}(Arch arch)
+[[maybe_unused]] static constexpr #{define[1].nil? ? "ptrdiff_t" : define[1]}  Get#{define[0].split('_').collect(&:capitalize).join}(Arch arch)
 {
     switch (arch) {
 >

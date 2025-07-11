@@ -16,10 +16,23 @@
 #ifndef COMMON_INTERFACES_OBJECTS_STRING_SLICED_STRING_INL_H
 #define COMMON_INTERFACES_OBJECTS_STRING_SLICED_STRING_INL_H
 
-#include "common_interfaces/objects/string/base_string_declare.h"
-#include "common_interfaces/objects/string/sliced_string.h"
+#include "objects/string/base_string.h"
+#include "objects/string/sliced_string.h"
 
 namespace common {
+template <typename Allocator, typename WriteBarrier,
+          objects_traits::enable_if_is_allocate<Allocator, BaseObject *>,
+          objects_traits::enable_if_is_write_barrier<WriteBarrier>>
+SlicedString *SlicedString::Create(Allocator &&allocate, WriteBarrier &&writeBarrier,
+                                   ReadOnlyHandle<BaseString> parent)
+{
+    SlicedString *slicedString = SlicedString::Cast(
+        std::invoke(std::forward<Allocator>(allocate), SlicedString::SIZE, ObjectType::SLICED_STRING));
+    slicedString->SetRawHashcode(0);
+    slicedString->SetParent(std::forward<WriteBarrier>(writeBarrier), parent.GetBaseObject());
+    return slicedString;
+}
+
 inline uint32_t SlicedString::GetStartIndex() const
 {
     uint32_t bits = GetStartIndexAndFlags();
@@ -52,18 +65,18 @@ template <bool verify, typename ReadBarrier>
 uint16_t SlicedString::Get(ReadBarrier &&readBarrier, int32_t index) const
 {
     int32_t length = static_cast<int32_t>(GetLength());
-    if (verify) {
+    if constexpr (verify) {
         if ((index < 0) || (index >= length)) {
             return 0;
         }
     }
-    BaseString *parent = BaseString::Cast(GetParent<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
+    LineString *parent = LineString::Cast(GetParent<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
     DCHECK_CC(parent->IsLineString());
     if (parent->IsUtf8()) {
-        Span<const uint8_t> sp(parent->GetDataUtf8() + GetStartIndex(), length);
+        common::Span<const uint8_t> sp(parent->GetDataUtf8() + GetStartIndex(), length);
         return sp[index];
     }
-    Span<const uint16_t> sp(parent->GetDataUtf16() + GetStartIndex(), length);
+    common::Span<const uint16_t> sp(parent->GetDataUtf16() + GetStartIndex(), length);
     return sp[index];
 }
 }

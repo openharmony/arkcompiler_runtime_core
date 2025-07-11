@@ -19,11 +19,15 @@
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_array.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_function.h"
+#include "plugins/ets/runtime/interop_js/js_refconvert_record.h"
 
 namespace ark::ets::interop::js {
 
 static bool IsFunctionClass(InteropCtx *ctx, Class *klass)
 {
+    if (panda_file_items::class_descriptors::FUNCTION.compare(utf::Mutf8AsCString(klass->GetDescriptor())) == 0) {
+        return true;
+    }
     if (ctx->IsFunctionalInterface(klass)) {
         return true;
     }
@@ -33,6 +37,11 @@ static bool IsFunctionClass(InteropCtx *ctx, Class *klass)
         }
     }
     return false;
+}
+
+static bool IsRecord(Class *klass)
+{
+    return PlatformTypes()->escompatRecord->GetRuntimeClass()->IsAssignableFrom(klass);
 }
 
 static std::unique_ptr<JSRefConvert> JSRefConvertCreateImpl(InteropCtx *ctx, Class *klass)
@@ -55,6 +64,10 @@ static std::unique_ptr<JSRefConvert> JSRefConvertCreateImpl(InteropCtx *ctx, Cla
         return std::make_unique<JSRefConvertFunction>(klass);
     }
 
+    if (IsRecord(klass)) {
+        return std::make_unique<JSRefConvertRecord>(ctx);
+    }
+
     if (klass->IsInterface()) {
         return ets_proxy::EtsClassWrapper::CreateJSRefConvertEtsInterface(ctx, klass);
     }
@@ -71,7 +84,10 @@ JSRefConvert *JSRefConvertCreate(InteropCtx *ctx, Class *klass)
     }
     auto conv = JSRefConvertCreateImpl(ctx, klass);
     if (UNLIKELY(conv == nullptr)) {
-        ctx->Fatal(std::string("Can't create convertor for ") + utf::Mutf8AsCString(klass->GetDescriptor()));
+        ctx->ThrowETSError(EtsCoroutine::GetCurrent(), std::string("Seamless conversion for class ") +
+                                                           utf::Mutf8AsCString(klass->GetDescriptor()) +
+                                                           std::string(" is not supported"));
+        return nullptr;
     }
     return ctx->GetRefConvertCache()->Insert(klass, std::move(conv));
 }

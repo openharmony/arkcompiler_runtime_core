@@ -52,6 +52,9 @@ class AsyncLockManager {
             if (lock == undefined) {
                 throw new Error("AsyncLock " + name + " not found");
             }
+            if (name.includes("__AnonymousLockName__")) {
+                throw new Error("Lock cannot be found");
+            }
             let state = lock.query();
             return state;
         } finally {
@@ -66,7 +69,7 @@ class AsyncLockManager {
     */
     public queryAll(): AsyncLockState[] {
         ConcurrencyHelpers.mutexLock(this.mutex);
-        let result = new AsyncLockState[this.locks.size as int];  // Statement "as int" to be removed after fixing issue 19773.
+        let result = new AsyncLockState[Double.toInt(this.locks.size)];  // Statement "as int" to be removed after fixing issue 19773.
         let idx = 0;
         this.locks.forEach((val: AsyncLock, key: string): void => {
             result[idx++] = val.query();
@@ -79,7 +82,7 @@ class AsyncLockManager {
     private mutex: Object = ConcurrencyHelpers.mutexCreate();
 }
 
-const asyncLockManager = new AsyncLockManager();
+const asyncLockManager: AsyncLockManager;
 
 /**
  * Information about all lock operations on the AsyncLock instance.
@@ -97,7 +100,7 @@ export class AsyncLockState {
     }
 
     private toArray(set: Set<AsyncLockInfo>) : AsyncLockInfo[] {
-        let array = new AsyncLockInfo[set.size as int]; // Statement "as int" to be removed after fixing issue 19773.
+        let array = new AsyncLockInfo[Double.toInt(set.size)]; // Statement "as int" to be removed after fixing issue 19773.
         let idx = 0;
         set.forEach((val: AsyncLockInfo): void => {
             array[idx++] = val;

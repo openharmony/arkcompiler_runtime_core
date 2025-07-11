@@ -25,8 +25,8 @@ cases:
         }
       use: |-
         let cls = new Cls<number, string>(1, "abc")
-        assertEQ(typeof cls.a, 'number')
-        assertEQ(typeof cls.b, 'string')
+        arktest.assertEQ(typeof cls.a, 'number')
+        arktest.assertEQ(typeof cls.b, 'string')
     # case 1
     - decl: |-
         class Cls<T, U> {
@@ -37,9 +37,9 @@ cases:
         }
       use: |-
         let cls = new Cls<number, string>(1, "abc")
-        assertEQ(typeof cls.a, 'object')
-        assertEQ(typeof cls.a[0], 'number')
-        assertEQ(typeof cls.a[1], 'string')
+        arktest.assertEQ(typeof cls.a, 'object')
+        arktest.assertEQ(typeof cls.a[0], 'number')
+        arktest.assertEQ(typeof cls.a[1], 'string')
     # case 2
     - decl: |-
         class A<T>{
@@ -58,8 +58,8 @@ cases:
         }
       use: |-
         let cls: B<number, string> = new B<number, string>(1, "abc")
-        assertEQ(typeof cls.a, 'number')
-        assertEQ(typeof cls.b, 'string')
+        arktest.assertEQ(typeof cls.a, 'number')
+        arktest.assertEQ(typeof cls.b, 'string')
     # case 3
     - decl: |-
         class A {}

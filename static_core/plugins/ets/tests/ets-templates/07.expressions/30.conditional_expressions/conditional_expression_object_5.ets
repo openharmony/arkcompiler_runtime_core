@@ -26,5 +26,5 @@ function main(): void {
   let d: D = new D();
 
   let x = false ? a : d;
-  assertTrue( x instanceof A )
+  arktest.assertTrue( x instanceof A )
 }

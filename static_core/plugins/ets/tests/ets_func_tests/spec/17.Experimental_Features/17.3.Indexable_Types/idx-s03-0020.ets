@@ -21,7 +21,7 @@
 class BarInt1<T>  {
     private data1 : T;
 
-    $_get (index: int) : T throws {
+    $_get (index: int) : T {
         switch(index) {
         case 0:
             return this.data1;
@@ -30,7 +30,7 @@ class BarInt1<T>  {
         }
     }
 
-    $_set (index: int, value: T)  throws {
+    $_set (index: int, value: T) {
         switch(index) {
         case 0:
             this.data1 = value;
@@ -50,7 +50,7 @@ class BarInt2<T> extends BarInt1<T> {
     private data2 : T;
     private data21: T;
 
-    override $_get (index: int) : T throws {
+    override $_get (index: int) : T {
         switch(index) {
         case 0:
             return this.data2;
@@ -61,7 +61,7 @@ class BarInt2<T> extends BarInt1<T> {
         }
     }
 
-    override $_set (index: int, value: T)  throws {
+    override $_set (index: int, value: T) {
         switch(index) {
         case 0:
             this.data2 = value;
@@ -94,15 +94,15 @@ function test1() : int {
     let x = createTestObject1();
     let y = createTestObject2();
     try {
-        assertEQ(x[0], 1)
+        arktest.assertEQ(x[0], 1)
     } catch(e) {
         result++
         console.log("Unexpexted exception 1");
     }
 
     try {
-        assertEQ(y[0], 1)
-        assertEQ(y[1], 2)
+        arktest.assertEQ(y[0], 1)
+        arktest.assertEQ(y[1], 2)
     } catch(e) {
         result++
         console.log("Unexpexted exception 2");
@@ -125,15 +125,15 @@ function test1() : int {
     }
 
       try {
-        assertEQ(x[0], 10)
+        arktest.assertEQ(x[0], 10)
     } catch(e) {
         result++
         console.log("Unexpexted exception 5");
     }
 
     try {
-        assertEQ(y[0], 10)
-        assertEQ(y[1], 20)
+        arktest.assertEQ(y[0], 10)
+        arktest.assertEQ(y[1], 20)
     } catch(e) {
         result++
         console.log("Unexpexted exception 6");
@@ -149,14 +149,14 @@ function test2() : int {
     let x = createTestObject1();
     let y = createTestObject2();
     try {
-        assertEQ(x[10], 1)
+        arktest.assertEQ(x[10], 1)
     } catch(e) {
         result++
     }
 
     try {
-        assertEQ(y[110], 1)
-        assertEQ(y[120], 2)
+        arktest.assertEQ(y[110], 1)
+        arktest.assertEQ(y[120], 2)
     } catch(e) {
         result++
     }
@@ -165,7 +165,7 @@ function test2() : int {
 }
 
 function main() {
-    assertEQ(test1(), 0)
-    assertEQ(test2(), 2)
+    arktest.assertEQ(test1(), 0)
+    arktest.assertEQ(test2(), 2)
 }
 

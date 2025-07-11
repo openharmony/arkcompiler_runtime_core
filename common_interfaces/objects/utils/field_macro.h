@@ -16,11 +16,11 @@
 #ifndef COMMON_INTERFACES_OBJECTS_UTILS_FIELD_MACRO_H
 #define COMMON_INTERFACES_OBJECTS_UTILS_FIELD_MACRO_H
 
+#include "objects/utils/objects_traits.h"
+#include "base_runtime.h"
+#include "base/mem.h"
 #include <type_traits>
 #include <utility>
-
-#include "common_interfaces/objects/utils/objects_traits.h"
-#include "common_interfaces/base_runtime.h"
 
 // CC-OFFNXT(C_RULE_ID_DEFINE_LENGTH_LIMIT) solid logic
 // CC-OFFNXT(G.PRE.02) code readability
@@ -53,7 +53,7 @@ inline void Set##name(WriteBarrier &&writeBarrier, PointerType value)           
 {                                                                                                 \
     /* CC-OFFNXT(G.PRE.02) code readability */                                                    \
     void *obj = static_cast<void *>(this);                                                        \
-    std::invoke(writeBarrier, obj, offset, value);                                                \
+    std::invoke(std::forward<WriteBarrier>(writeBarrier), obj, offset, value);                    \
 }                                                                                                 \
                                                                                                   \
 template <typename PointerType, typename ReadBarrier,                                             \
@@ -62,7 +62,8 @@ inline PointerType Get##name(ReadBarrier &&readBarrier) const                   
 {                                                                                                 \
     /* CC-OFFNXT(G.PRE.02) code readability */                                                    \
     /* CC-OFFNXT(G.PRE.05) C_RULE_ID_KEYWORD_IN_DEFINE */                                         \
-    return std::invoke(readBarrier, const_cast<void *>(static_cast<const void *>(this)), offset); \
+    return std::invoke(std::forward<ReadBarrier>(readBarrier),                                    \
+        const_cast<void *>(static_cast<const void *>(this)), offset);                             \
 }
 
 #if !defined(NDEBUG)

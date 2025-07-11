@@ -16,12 +16,11 @@
 /*---
 desc: 13.compilation_units\13.06.export_directives\13.06.03.re-export_directives\issue_15669_04
 name: issue15669_04.ets
-tags:
-files: ['./issue_15669_01.ets', './issue_15669_02.ets', './issue_15669_03.ets']
+files: [./issue_15669_03.ets]
 ---*/
 
 import { foo } from './issue_15669_03'
 
 function main(): void {
-  assertEQ( foo(2), 2)
+  arktest.assertEQ( foo(2), 4)
 }

@@ -24,17 +24,13 @@ const c{{loop.index}}: {{c.from_type}} = {{v.expr|safe}}
 
 class A { fld: {{c.to_type}} }
 
-function main(): int {
+function main() {
 {%- for v in c['values'] %}
-    let d{{loop.index}}: A = { fld: {{v.expr|safe}} }
-    if (d{{loop.index}}.fld != {{v.val}}) {
-        return 1
-    }
-    d{{loop.index}} = { fld: c{{loop.index}} }
-    if (d{{loop.index}}.fld != {{v.val}}) {
-        return 1
-    }
+    let d{{loop.index}}: A = { fld: ({{v.expr|safe}}).to{{c.to_type}}() }
+    arktest.assertEQ(d{{loop.index}}.fld, {{v.val}})
+
+    d{{loop.index}} = { fld: c{{loop.index}}.to{{c.to_type}}() }
+    arktest.assertEQ(d{{loop.index}}.fld, {{v.val}})
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

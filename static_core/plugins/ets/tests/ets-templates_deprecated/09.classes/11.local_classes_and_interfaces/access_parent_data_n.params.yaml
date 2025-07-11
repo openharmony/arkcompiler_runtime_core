@@ -30,7 +30,7 @@ cases:
     check: |-
       function main() {
         let a: A = new A();
-        assertTrue(a.foo() == 2);
+        arktest.assertTrue(a.foo() == 2);
       }
 
   - decl: |-
@@ -50,7 +50,7 @@ cases:
     check: |-
       function main() {
         let a: A = new A();
-        assertTrue(a.foo() == 2);
+        arktest.assertTrue(a.foo() == 2);
       }
 
   - decl: |-
@@ -70,7 +70,7 @@ cases:
     check: |-
       function main() {
         let a: A = new A();
-        assertTrue(a.foo() == 2);
+        arktest.assertTrue(a.foo() == 2);
       }
 
   - decl: |-
@@ -90,7 +90,7 @@ cases:
     check: |-
       function main() {
         let a: A = new A();
-        assertTrue(a.foo() == 2);
+        arktest.assertTrue(a.foo() == 2);
       }
 
   - decl: |-
@@ -114,7 +114,7 @@ cases:
     check: |-
       function main() {
         let a: A = new A();
-        assertTrue(a.foo() == 2);
+        arktest.assertTrue(a.foo() == 2);
       }
 
   - decl: |-
@@ -138,7 +138,7 @@ cases:
     check: |-
       function main() {
         let a: A = new A();
-        assertTrue(a.foo() == 2);
+        arktest.assertTrue(a.foo() == 2);
       }
 
   - decl: |-
@@ -158,7 +158,7 @@ cases:
       }
     check: |-
       function main() {
-        assertTrue(foo() == 1);
+        arktest.assertTrue(foo() == 1);
       }
 
   - decl: |-
@@ -177,13 +177,13 @@ cases:
             i = new A().a;
             break;
           default:
-            assertTrue(false);
+            arktest.assertTrue(false);
         }
         return i;
       }
     check: |-
       function main() {
-        assertTrue(foo() == 3);
+        arktest.assertTrue(foo() == 3);
       }
 
   - decl: |-
@@ -203,7 +203,7 @@ cases:
       }
     check: |-
       function main() {
-        assertTrue(foo() == 2);
+        arktest.assertTrue(foo() == 2);
       }
 
   - decl: |-
@@ -219,13 +219,13 @@ cases:
             }
           return new A().a;
         } catch(e) {
-          assertTrue(false);
+          arktest.assertTrue(false);
         };
         return 0;
       }
     check: |-
       function main() {
-        assertTrue(foo() == 3);
+        arktest.assertTrue(foo() == 3);
       }
 
   - decl: |-
@@ -233,7 +233,7 @@ cases:
       function foo(): int {
         let i: int = 1;
         try {
-          assertTrue(false);
+          arktest.assertTrue(false);
         } catch(e) {
           let ii: int = 2;
           class A {
@@ -247,7 +247,7 @@ cases:
       }
     check: |-
       function main() {
-        assertTrue(foo() == 3);
+        arktest.assertTrue(foo() == 3);
       }
 
   - decl: |-
@@ -268,5 +268,5 @@ cases:
       }
     check: |-
       function main() {
-        assertTrue(a.foo(1,2) == 3);
+        arktest.assertTrue(a.foo(1,2) == 3);
       }

@@ -28,7 +28,7 @@ function testUrlSet003() {
 	let params = new url.URLParams("1=value1&2=value2&key3=3");
 	params.set("ma 大", "10￥");
 	let res = params.toString();
-	assertEQ(res, "1=value1&2=value2&key3=3&ma+%E5%A4%A7=10%EF%BF%A5");
+ arktest.assertEQ(res, "1=value1&2=value2&key3=3&ma+%E5%A4%A7=10%EF%BF%A5");
 }
 
 /**
@@ -46,7 +46,7 @@ function testUrlSet004() {
 	// params.append("1","ACA");
 	params.set("1", "CCC");
 	let res = params.toString();
-	assertEQ(res, "1=CCC&2=value2&key3=3");
+ arktest.assertEQ(res, "1=CCC&2=value2&key3=3");
 }
 
 /**
@@ -63,7 +63,7 @@ function testUrlSet005() {
 	let params = new url.URLParams("1=value1&2=value2&key3=3");
 	params.set('12', 'BBB');
 	let res = params.toString();
-	assertEQ(res, "1=value1&2=value2&key3=3&12=BBB");
+ arktest.assertEQ(res, "1=value1&2=value2&key3=3&12=BBB");
 }
 
 /**
@@ -82,9 +82,9 @@ function testUrlSet006() {
 	//     let a = 12;
 	//     params.set(a, 'BBB');
 	// } catch(err) {
-	//     assertEQ(err.toString(),`BusinessError: Parameter error. The type of ${a} must be string`)
-	//     assertEQ(err.code,401)
-	//     assertEQ(err.message,`Parameter error. The type of ${a} must be string`);
+	//     arktest.assertEQ(err.toString(),`BusinessError: Parameter error. The type of ${a} must be string`)
+	//     arktest.assertEQ(err.code,401)
+	//     arktest.assertEQ(err.message,`Parameter error. The type of ${a} must be string`);
 	// }
 }
 
@@ -102,7 +102,7 @@ function testUrlSet007() {
 	let params = new url.URLParams();
 	params.set('name', 'value');
 	let res = params.toString();
-	assertEQ(res, "name=value");
+ arktest.assertEQ(res, "name=value");
 }
 
 /**
@@ -117,7 +117,7 @@ function testUrlSort001() {
 	let params = new url.URLParams("1=value1&3=value3&2=key2");
 	params.sort();
 	let res = params.toString();
-	assertEQ(res, "1=value1&2=key2&3=value3");
+ arktest.assertEQ(res, "1=value1&2=key2&3=value3");
 }
 
 /**
@@ -132,7 +132,7 @@ function testUrlSort002() {
 	let params = new url.URLParams("a=value1&c=value2&b=key2");
 	params.sort();
 	let res = params.toString();
-	assertEQ(res, "a=value1&b=key2&c=value2");
+ arktest.assertEQ(res, "a=value1&b=key2&c=value2");
 }
 
 /**
@@ -148,7 +148,7 @@ function testUrlSort003() {
 	params.append("a", "ACA");
 	params.sort();
 	let res = params.toString();
-	assertEQ(res, "a=ACA&b=33&c=value2&d=value1");
+ arktest.assertEQ(res, "a=ACA&b=33&c=value2&d=value1");
 }
 
 /**
@@ -163,7 +163,7 @@ function testUrlSort004() {
 	let params = new url.URLParams("1=value1&3=value3&2=key2&4=key4");
 	params.sort();
 	let res = params.toString();
-	assertEQ(res, "1=value1&2=key2&3=value3&4=key4");
+ arktest.assertEQ(res, "1=value1&2=key2&3=value3&4=key4");
 }
 
 /**
@@ -178,7 +178,7 @@ function testUrlSort005() {
 	let params = new url.URLParams("a=value1&c=value2&4=key4&b=key2");
 	params.sort();
 	let res = params.toString();
-	assertEQ(res, "4=key4&a=value1&b=key2&c=value2");
+ arktest.assertEQ(res, "4=key4&a=value1&b=key2&c=value2");
 }
 
 /**
@@ -197,7 +197,7 @@ function testUrlValues001() {
 		arr.push(value);
 		i++
 	}
-	assertEQ(arr[0], "value1")
+ arktest.assertEQ(arr[0], "value1")
 }
 
 /**
@@ -216,7 +216,7 @@ function testUrlValues002() {
 		arr.push(value);
 		i++
 	}
-	assertEQ(arr[1], "value2")
+ arktest.assertEQ(arr[1], "value2")
 }
 
 /**
@@ -236,7 +236,7 @@ function testUrlValues003() {
 		arr.push(value);
 		i++
 	}
-	assertEQ(arr[3], "ACA")
+ arktest.assertEQ(arr[3], "ACA")
 }
 
 /**
@@ -255,7 +255,7 @@ function testUrlValues004() {
 		arr.push(value);
 		i++
 	}
-	assertEQ(arr[3], "key4")
+ arktest.assertEQ(arr[3], "key4")
 }
 
 /**
@@ -274,7 +274,7 @@ function testUrlValues005() {
 		arr.push(value);
 		i++
 	}
-	assertEQ(arr[4], "key5")
+ arktest.assertEQ(arr[4], "key5")
 }
 /**
 * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_URL_16700
@@ -287,10 +287,10 @@ function testUrlValues005() {
 function testNewUrl001() {
 	let params = url.URL.parseURL('http://username:password@host:8080/directory/file?query#fragment', undefined)
 	let result = params.toString()
-	assertEQ(result, "http://username:password@host:8080/directory/file?query#fragment")
+ arktest.assertEQ(result, "http://username:password@host:8080/directory/file?query#fragment")
 	let params1 = url.URL.parseURL('http://username:password@host:8080/directory/file?query#fragment')
 	let result2 = params1.toString()
-	assertEQ(result2, "http://username:password@host:8080/directory/file?query#fragment")
+ arktest.assertEQ(result2, "http://username:password@host:8080/directory/file?query#fragment")
 }
 
 /**
@@ -304,7 +304,7 @@ function testNewUrl001() {
 function testUrlToString001() {
 	let params = url.URL.parseURL('http://username:password@host:8080/directory/file?query#fragment')
 	let result = params.toString()
-	assertEQ(result, "http://username:password@host:8080/directory/file?query#fragment")
+ arktest.assertEQ(result, "http://username:password@host:8080/directory/file?query#fragment")
 }
 
 /**
@@ -318,7 +318,7 @@ function testUrlToString001() {
 function testUrlToString002() {
 	let params = url.URL.parseURL('http://username:password@host:8080/directory/file')
 	let result = params.toString()
-	assertEQ(result, "http://username:password@host:8080/directory/file")
+ arktest.assertEQ(result, "http://username:password@host:8080/directory/file")
 }
 
 /**
@@ -332,7 +332,7 @@ function testUrlToString002() {
 function testUrlToString003() {
 	let params = url.URL.parseURL('http://username:password@host:8080#fragment')
 	let result = params.toString()
-	assertEQ(result, "http://username:password@host:8080/#fragment")
+ arktest.assertEQ(result, "http://username:password@host:8080/#fragment")
 }
 
 /**
@@ -346,7 +346,7 @@ function testUrlToString003() {
 function testUrlToString004() {
 	let params = url.URL.parseURL('http1://host/directory/file?query#fragment')
 	let result = params.toString()
-	assertEQ(result, "http1://host/directory/file?query#fragment")
+ arktest.assertEQ(result, "http1://host/directory/file?query#fragment")
 }
 
 /**
@@ -360,7 +360,7 @@ function testUrlToString004() {
 function testUrlToString005() {
 	let params = url.URL.parseURL('http:host:8080/directory/file?query#fragment')
 	let result = params.toString()
-	assertEQ(result, "http://host:8080/directory/file?query#fragment")
+ arktest.assertEQ(result, "http://host:8080/directory/file?query#fragment")
 }
 
 /**
@@ -374,7 +374,7 @@ function testUrlToString005() {
 function testUrlToString006() {
 	let params = url.URL.parseURL('https://255.16581375')
 	let result = params.toString()
-	assertEQ(result, "https://255.253.2.255/")
+ arktest.assertEQ(result, "https://255.253.2.255/")
 }
 
 /**
@@ -388,7 +388,7 @@ function testUrlToString006() {
 function testUrlToString007() {
 	let params = url.URL.parseURL('https://192.1.')
 	let result = params.toString()
-	assertEQ(result, "https://192.0.0.1/")
+ arktest.assertEQ(result, "https://192.0.0.1/")
 }
 
 /**
@@ -402,7 +402,7 @@ function testUrlToString007() {
 function testUrlToString008() {
 	let params = url.URL.parseURL('https://192.1..')
 	let result = params.toString()
-	assertEQ(result, "https://192.1../")
+ arktest.assertEQ(result, "https://192.1../")
 }
 
 /**
@@ -416,7 +416,7 @@ function testUrlToString008() {
 function testUrlToString009() {
 	let params = url.URL.parseURL('https://192.95645654354.8.f')
 	let result = params.toString()
-	assertEQ(result, "https://192.95645654354.8.f/")
+ arktest.assertEQ(result, "https://192.95645654354.8.f/")
 }
 
 /**
@@ -430,7 +430,7 @@ function testUrlToString009() {
 function testUrlToString010() {
 	let params = url.URL.parseURL('coap://?key=value#hash')
 	let result = params.toString()
-	assertEQ(result, "coap://?key=value#hash")
+ arktest.assertEQ(result, "coap://?key=value#hash")
 }
 
 /**
@@ -444,7 +444,7 @@ function testUrlToString010() {
 function testUrlToString011() {
 	let params = url.URL.parseURL('upcad://akls/casd/saqe/ss/?dalks=ccc')
 	let result = params.toString()
-	assertEQ(result, "upcad://akls/casd/saqe/ss/?dalks=ccc")
+ arktest.assertEQ(result, "upcad://akls/casd/saqe/ss/?dalks=ccc")
 }
 
 /**
@@ -471,11 +471,12 @@ function testUrlToString012() {
         + "%92%C3%93%C3%94%C3%95%C3%96%C3%97%C3%98%C3%99%C3%9A%C3%9B%C3%9C%C3%9D%C3%9E%C3%9F%C3%A0%C3"
         + "%A1%C3%A2%C3%A3%C3%A4%C3%A5%C3%A6%C3%A7%C3%A8%C3%A9%C3%AA%C3%AB%C3%AC%C3%AD%C3%AE%C3%AF%C3"
         + "%B0%C3%B1%C3%B2%C3%B3%C3%B4%C3%B5%C3%B6%C3%B7%C3%B8%C3%B9%C3%BA%C3%BB%C3%BC%C3%BD%C3%BE%C3%BF";
-	assertEQ(result, urlEncode);
+ arktest.assertEQ(result, urlEncode);
 }
 
+
 function main(): int {
-	let suite = new ArkTestsuite("URL UT tests");
+	let suite = new arktest.ArkTestsuite("URL UT tests");
 	suite.addTest("testUrlSet003", testUrlSet003);
 	suite.addTest("testUrlSet004", testUrlSet004);
 	suite.addTest("testUrlSet005", testUrlSet005);
@@ -503,7 +504,7 @@ function main(): int {
 	suite.addTest("testUrlToString009", testUrlToString009);
     suite.addTest("testUrlToString010", testUrlToString010);
     suite.addTest("testUrlToString011", testUrlToString011);
-	suite.addTest("testUrlToString012", testUrlToString012);
+    suite.addTest("testUrlToString012", testUrlToString012);
 
 	//passed
 	return suite.run();

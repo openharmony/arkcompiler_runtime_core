@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
+#include "profiling_loader.h"
 #include "profiling_saver.h"
 
 namespace ark {
 void ProfilingSaver::UpdateInlineCaches(pgo::AotProfilingData::AotCallSiteInlineCache *ic,
                                         std::vector<Class *> &runtimeClasses, pgo::AotProfilingData *profileData)
 {
-    for (uint32_t i = 0; i < runtimeClasses.size();) {
+    for (uint32_t i = 0; i < runtimeClasses.size(); i++) {
         auto storedClass = ic->classes[i];
 
         auto runtimeCls = runtimeClasses[i];
@@ -38,7 +39,6 @@ void ProfilingSaver::UpdateInlineCaches(pgo::AotProfilingData::AotCallSiteInline
         auto clsIdx = runtimeCls->GetFileId().GetOffset();
 
         ic->classes[i] = {clsIdx, pfIdx};
-        i++;
     }
 }
 
@@ -80,7 +80,7 @@ void ProfilingSaver::CreateThrowData(pgo::AotProfilingData::AotMethodProfilingDa
     }
 }
 
-void ProfilingSaver::AddMethod(pgo::AotProfilingData *profileData, const Method *method, int32_t pandaFileIdx)
+void ProfilingSaver::AddMethod(pgo::AotProfilingData *profileData, Method *method, int32_t pandaFileIdx)
 {
     auto *runtimeProfData = method->GetProfilingData();
     auto runtimeICs = runtimeProfData->GetInlineCaches();
@@ -103,11 +103,21 @@ void ProfilingSaver::AddMethod(pgo::AotProfilingData *profileData, const Method 
     profileData->AddMethod(pandaFileIdx, methodIdx, std::move(profilingData));
 }
 
-void ProfilingSaver::AddProfiledMethods(pgo::AotProfilingData *profileData,
-                                        PandaVector<const Method *> &profiledMethods)
+void ProfilingSaver::AddProfiledMethods(pgo::AotProfilingData *profileData, PandaList<Method *> &profiledMethods,
+                                        PandaList<Method *>::const_iterator profiledMethodsFinal)
 {
     auto pfMap = profileData->GetPandaFileMap();
-    for (auto method : profiledMethods) {
+    bool notFinal = true;
+    for (auto it = profiledMethods.cbegin(); notFinal; it++) {
+        if ((*it) == (*profiledMethodsFinal)) {
+            notFinal = false;
+        }
+        auto method = *it;
+        if (method->GetProfilingData()->IsUpdateSinceLastSave()) {
+            method->GetProfilingData()->DataSaved();
+        } else {
+            continue;
+        }
         auto pandaFileName = method->GetPandaFile()->GetFullFileName();
         if (pfMap.find(PandaString(pandaFileName)) == pfMap.end()) {
             continue;
@@ -118,20 +128,33 @@ void ProfilingSaver::AddProfiledMethods(pgo::AotProfilingData *profileData,
 }
 
 void ProfilingSaver::SaveProfile(const PandaString &saveFilePath, const PandaString &classCtxStr,
-                                 PandaVector<const Method *> profiledMethods,
+                                 PandaList<Method *> &profiledMethods,
+                                 PandaList<Method *>::const_iterator profiledMethodsFinal,
                                  PandaUnorderedSet<std::string_view> &profiledPandaFiles)
 {
+    ProfilingLoader profilingLoader;
     pgo::AotProfilingData profData;
+    // Load previous profile data if available
+    auto profileCtxOrError = profilingLoader.LoadProfile(saveFilePath);
+    if (!profileCtxOrError) {
+        LOG(INFO, RUNTIME) << "[profile_saver] No previous profile data found. Saving new profile data.";
+    } else {
+        LOG(INFO, RUNTIME) << "[profile_saver] Previous profile data found. Merging with new profile data.";
+        profData = std::move(profilingLoader.GetAotProfilingData());
+    }
+
+    // Add new profile data to the existing data
     profData.AddPandaFiles(profiledPandaFiles);
+    AddProfiledMethods(&profData, profiledMethods, profiledMethodsFinal);
 
-    AddProfiledMethods(&profData, profiledMethods);
-
+    // Save the updated profile data
     pgo::AotPgoFile pgoFile;
     auto writtenBytes = pgoFile.Save(saveFilePath, &profData, classCtxStr);
     if (writtenBytes > 0) {
-        LOG(INFO, RUNTIME) << "Profile data saved to " << saveFilePath << " with " << writtenBytes << " bytes.";
+        LOG(INFO, RUNTIME) << "[profile_saver] Profile data saved to " << saveFilePath << " with " << writtenBytes
+                           << " bytes.";
     } else {
-        LOG(ERROR, RUNTIME) << "Failed to save profile data to " << saveFilePath << ".";
+        LOG(ERROR, RUNTIME) << "[profile_saver] Failed to save profile data to " << saveFilePath << ".";
     }
 }
 }  // namespace ark

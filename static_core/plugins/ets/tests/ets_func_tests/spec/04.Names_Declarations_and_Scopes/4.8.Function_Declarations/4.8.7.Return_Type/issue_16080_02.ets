@@ -28,5 +28,5 @@ class Foo {
 function main(): void {
   let foo = new Foo()
 
-  assertEQ( foo.barString(), "barString")
+  arktest.assertEQ( foo.barString(), "barString")
 }

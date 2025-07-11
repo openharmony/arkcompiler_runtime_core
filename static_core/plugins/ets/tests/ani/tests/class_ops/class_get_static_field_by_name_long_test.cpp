@@ -37,7 +37,7 @@ public:
 TEST_F(ClassGetStaticFieldByNameLongTest, get_static_field_long_capi)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_long_test/GetLongStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_long_test.GetLongStatic", &cls), ANI_OK);
     ani_long age = 0L;
     ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_Long(env_, cls, "age", &age), ANI_OK);
     ASSERT_EQ(age, static_cast<ani_long>(20L));
@@ -46,7 +46,7 @@ TEST_F(ClassGetStaticFieldByNameLongTest, get_static_field_long_capi)
 TEST_F(ClassGetStaticFieldByNameLongTest, get_static_field_long)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_long_test/GetLongStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_long_test.GetLongStatic", &cls), ANI_OK);
     ani_long age = 0L;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Long(cls, "age", &age), ANI_OK);
     ASSERT_EQ(age, static_cast<ani_long>(20L));
@@ -55,7 +55,7 @@ TEST_F(ClassGetStaticFieldByNameLongTest, get_static_field_long)
 TEST_F(ClassGetStaticFieldByNameLongTest, get_static_field_long_invalid_field_type)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_long_test/GetLongStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_long_test.GetLongStatic", &cls), ANI_OK);
 
     ani_long age = 0L;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Long(cls, "name", &age), ANI_INVALID_TYPE);
@@ -64,7 +64,7 @@ TEST_F(ClassGetStaticFieldByNameLongTest, get_static_field_long_invalid_field_ty
 TEST_F(ClassGetStaticFieldByNameLongTest, invalid_argument1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_long_test/GetLongStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_long_test.GetLongStatic", &cls), ANI_OK);
     ani_long age = 0L;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Long(nullptr, "name", &age), ANI_INVALID_ARGS);
 }
@@ -72,7 +72,7 @@ TEST_F(ClassGetStaticFieldByNameLongTest, invalid_argument1)
 TEST_F(ClassGetStaticFieldByNameLongTest, invalid_argument2)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_long_test/GetLongStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_long_test.GetLongStatic", &cls), ANI_OK);
     ani_long age = 0L;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Long(cls, nullptr, &age), ANI_INVALID_ARGS);
 }
@@ -80,14 +80,14 @@ TEST_F(ClassGetStaticFieldByNameLongTest, invalid_argument2)
 TEST_F(ClassGetStaticFieldByNameLongTest, invalid_argument3)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_long_test/GetLongStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_long_test.GetLongStatic", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Long(cls, "name", nullptr), ANI_INVALID_ARGS);
 }
 
 TEST_F(ClassGetStaticFieldByNameLongTest, invalid_argument4)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_long_test/GetLongStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_long_test.GetLongStatic", &cls), ANI_OK);
     ani_long age = 0L;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Long(cls, "", &age), ANI_NOT_FOUND);
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Long(cls, "\n", &age), ANI_NOT_FOUND);
@@ -97,7 +97,7 @@ TEST_F(ClassGetStaticFieldByNameLongTest, invalid_argument4)
 TEST_F(ClassGetStaticFieldByNameLongTest, special_values)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_long_test/GetLongStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_long_test.GetLongStatic", &cls), ANI_OK);
     ani_long single = 0L;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Long(cls, "specia1", &single), ANI_INVALID_TYPE);
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Long(cls, "specia3", &single), ANI_INVALID_TYPE);
@@ -117,7 +117,7 @@ TEST_F(ClassGetStaticFieldByNameLongTest, combination_test1)
     const ani_long setTarget = 2L;
     const ani_long setTarget2 = 3L;
     ani_long single = 0L;
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_long_test/GetLongStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_long_test.GetLongStatic", &cls), ANI_OK);
     const int32_t loopCount = 3;
     for (int32_t i = 0; i < loopCount; i++) {
         ASSERT_EQ(env_->Class_SetStaticFieldByName_Long(cls, "age", setTarget2), ANI_OK);
@@ -131,18 +131,34 @@ TEST_F(ClassGetStaticFieldByNameLongTest, combination_test1)
 
 TEST_F(ClassGetStaticFieldByNameLongTest, combination_test2)
 {
-    CheckFieldValue("Lclass_get_static_field_by_name_long_test/GetLongStatic;", "age");
+    CheckFieldValue("class_get_static_field_by_name_long_test.GetLongStatic", "age");
 }
 
 TEST_F(ClassGetStaticFieldByNameLongTest, combination_test3)
 {
-    CheckFieldValue("Lclass_get_static_field_by_name_long_test/PackageStaticA;", "long_value");
+    CheckFieldValue("class_get_static_field_by_name_long_test.PackageStaticA", "long_value");
 }
 
 TEST_F(ClassGetStaticFieldByNameLongTest, combination_test4)
 {
-    CheckFieldValue("Lclass_get_static_field_by_name_long_test/PackageStaticFinal;", "long_value");
+    CheckFieldValue("class_get_static_field_by_name_long_test.PackageStaticFinal", "long_value");
 }
+
+TEST_F(ClassGetStaticFieldByNameLongTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_long_test.GetLongStatic", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_long_test.GetLongStatic"));
+    ani_long longValue {};
+
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Long(cls, "agex", &longValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_long_test.GetLongStatic"));
+
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Long(cls, "age", &longValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_long_test.GetLongStatic"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

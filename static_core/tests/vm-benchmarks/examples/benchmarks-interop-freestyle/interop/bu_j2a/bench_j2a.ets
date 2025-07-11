@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-export class J2a {
+export class D2s {
     private isReady: boolean = false;
     setup(): void {
         this.isReady = true;

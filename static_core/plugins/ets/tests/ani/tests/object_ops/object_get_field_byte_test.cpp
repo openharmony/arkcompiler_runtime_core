@@ -25,7 +25,7 @@ public:
         auto sarah = static_cast<ani_object>(sarahRef);
 
         ani_class cls;
-        ASSERT_EQ(env_->FindClass("Lobject_get_field_byte_test/Woman;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("object_get_field_byte_test.Woman", &cls), ANI_OK);
 
         ani_field fieldName;
         ASSERT_EQ(env_->Class_FindField(cls, "name", &fieldName), ANI_OK);
@@ -49,6 +49,17 @@ TEST_F(ObjectGetFieldByteTest, get_field_byte)
     ani_byte age {};
     ASSERT_EQ(env_->Object_GetField_Byte(sarah, fieldAge, &age), ANI_OK);
     ASSERT_EQ(age, 24L);
+}
+
+TEST_F(ObjectGetFieldByteTest, get_field_byte_invalid_env)
+{
+    ani_object sarah {};
+    ani_field field {};
+    ani_field fieldAge {};
+    GetTestData(&sarah, &field, &fieldAge);
+
+    ani_byte age {};
+    ASSERT_EQ(env_->c_api->Object_GetField_Byte(nullptr, sarah, fieldAge, &age), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectGetFieldByteTest, get_field_byte_invalid_field_type)

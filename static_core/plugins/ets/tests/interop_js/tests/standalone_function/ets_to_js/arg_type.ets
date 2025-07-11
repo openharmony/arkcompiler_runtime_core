@@ -81,8 +81,8 @@ function functionArgTypeClassEts(arg: ClassWithMethodEts): number {
     return x.methodInClass();
 }
 
-function functionArgTypeArrayEts(arg: string[]): string[] {
-    let x: string[] = arg;
+function functionArgTypeArrayEts(arg: FixedArray<string>): FixedArray<string> {
+    let x: FixedArray<string> = arg;
     return x;
 }
 

@@ -51,7 +51,6 @@ function runTest(test, pandaOptions) {
 		'xgc-trigger-type': 'never',
 		'panda-files': testAbcPath,
 		'boot-panda-files': `${stdlibPath}:${testAbcPath}`,
-		'coroutine-enable-external-scheduling': 'true',
 	};
 	const transformedPandaOptions = parseArgs(pandaOptions.toString());
 	const etsOpts = { ...options, ...transformedPandaOptions };

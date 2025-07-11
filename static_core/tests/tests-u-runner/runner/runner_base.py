@@ -230,6 +230,10 @@ class Runner(ABC):
     def create_coverage_html(self) -> None:
         pass
 
+    @abstractmethod
+    def clear_gcda_files(self) -> None:
+        pass
+
     def run(self) -> None:
         Log.all(_LOGGER, "Start test running")
         with multiprocessing.Pool(processes=self.config.general.processes,

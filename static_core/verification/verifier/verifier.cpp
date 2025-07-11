@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,9 @@
 #include "verification/util/is_system.h"
 #include "verification/util/optional_ref.h"
 #include "generated/base_options.h"
+#ifdef ARK_HYBRID
+#include <node_api.h>
+#endif
 
 // generated
 #include "ark_version.h"
@@ -49,8 +52,8 @@ void Worker(PandaDeque<Method *> *queue, os::memory::Mutex *lock, size_t threadN
     }
 
     auto *service = Runtime::GetCurrent()->GetVerifierService();
-    auto options = Runtime::GetCurrent()->GetOptions();
-    auto mode = options.GetVerificationMode();
+    const auto &options = Runtime::GetCurrent()->GetOptions();
+    auto mode = verifier::VerificationModeFromString(options.GetVerificationMode());
 
     ManagedThread *thread = nullptr;
     panda_file::SourceLang currentLang = panda_file::SourceLang::INVALID;
@@ -387,8 +390,7 @@ static int Run(Options &cliOptions, RuntimeOptions &runtimeOptions, base_options
     runtimeOptions.SetInternalAllocatorType(cliOptions.GetInternalAllocatorType());
     runtimeOptions.SetInternalMemorySizeLimit(cliOptions.GetInternalMemorySizeLimit());
 
-    runtimeOptions.SetVerificationMode(cliOptions.IsDebugMode() ? VerificationMode::DEBUG
-                                                                : VerificationMode::AHEAD_OF_TIME);
+    runtimeOptions.SetVerificationMode(cliOptions.IsDebugMode() ? "debug" : "ahead-of-time");
     runtimeOptions.SetVerificationConfigFile(cliOptions.GetConfigFile());
     runtimeOptions.SetVerificationCacheFile(cliOptions.GetCacheFile());
     runtimeOptions.SetVerificationUpdateCache(cliOptions.IsUpdateCache());
@@ -415,6 +417,15 @@ int Main(int argc, const char **argv)
     paParser.Add(&options);
     paParser.PushBackTail(&file);
     paParser.EnableTail();
+
+#ifdef ARK_HYBRID
+    // This workaround is needed to define weak symbols of napi in hybrid libarkruntime.so
+    // It will be removed after #26269 fix
+    volatile bool initNapi = false;
+    if (initNapi) {
+        napi_module_register(nullptr);
+    }
+#endif
 
     if (!paParser.Parse(argc, argv)) {
         PrintHelp(paParser);

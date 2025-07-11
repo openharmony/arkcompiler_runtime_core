@@ -25,6 +25,6 @@ tags: [compile-only, negative]
 function main(): void {
   let c1 = {{c.c1}}
   let c2 = {{c.c2}}
-  assertTrue( c1 {{c.op}} c2 )
+  arktest.assertTrue( c1 {{c.op}} c2 )
 }
 {% endfor %}

@@ -31,7 +31,7 @@ class Z{{loop.index}} {
 function main() {
 {%- for v in c['vals'] %}
     let z{{loop.index}}: Z{{loop.index}} = { fld: {{v.expr}} }
-    assertEQ( typeof z{{loop.index}}.fld, "{{c.res}}" )
+    arktest.assertEQ( typeof z{{loop.index}}.fld, "{{c.res}}" )
 {%- endfor %}
 }
 {%- endfor %}

@@ -14,16 +14,16 @@
  */
 
 let error = new Error();
-Promise.any<Error>([Promise.reject<Error>(error)]).then<void, void>((err: Error): void => {
-    console.log("Test failed. The promise should not be resolved.");
-}, (err: AggregateError): void => {
-    if (err.errors.length != 1) {
-        console.log("Test failed. Expected errors count 1 but got " + err.errors.length + ".");
+Promise.any<Error>([Promise.reject<Error>(error)]).then<void, void>((err): void => {
+    console.log('Test failed. The promise should not be resolved.');
+}, (err): void => {
+    if ((err as AggregateError).errors.length != 1) {
+        console.log('Test failed. Expected errors count 1 but got ' + (err as AggregateError).errors.length + '.');
         return;
     }
-    if (err.errors[0] != error) {
-        console.log("Test failed. The error should contain the specified value.");
+    if ((err as AggregateError).errors[0] != error) {
+        console.log('Test failed. The error should contain the specified value.');
         return;
     }
-    console.log("Test passed.");
+    console.log('Test passed.');
 });

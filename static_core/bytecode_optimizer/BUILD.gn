@@ -24,7 +24,9 @@ if (ark_standalone_build) {
 ohos_static_library("libarktsbytecodeopt_package") {
   deps = []
   if (enable_static_vm) {
-    if (abckit_enable) {
+    # NOTE: in GN build static and dynamic libraries are mixed.
+    # To remove this if GN refactoring is needed
+    if (ark_static_standalone_build || ark_standalone_build || abckit_enable) {
       deps += [ ":libarktsbytecodeopt" ]
     } else {
       deps += [ ":libarktsbytecodeopt_frontend_static" ]

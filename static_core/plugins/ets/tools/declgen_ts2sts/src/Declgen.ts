@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import * as fs from 'fs';
 import * as ts from 'typescript';
 import * as path from 'path';
 
@@ -37,6 +38,7 @@ export class Declgen {
   private readonly hookedHost: ts.CompilerHost;
   private readonly rootFiles: readonly string[];
   private readonly compilerOptions: ts.CompilerOptions;
+  private readonly declgenOptions: DeclgenCLIOptions;
 
   constructor(
     declgenOptions: DeclgenCLIOptions,
@@ -46,6 +48,7 @@ export class Declgen {
     const { rootNames, options } = Declgen.parseDeclgenOptions(declgenOptions);
 
     this.rootFiles = rootNames;
+    this.declgenOptions = declgenOptions;
 
     this.sourceFileMap = new Map<string, ts.SourceFile>();
     this.compilerOptions = Object.assign({}, options, {
@@ -70,6 +73,12 @@ export class Declgen {
      */
     let program = this.recompile();
 
+    /**
+     * If the rootFiles contains declaration files,
+     * process the declaration files here.
+     */
+    this.processDeclarationFiles(program);
+
     const emitResult = program.emit(undefined, undefined, undefined, true, {
       before: [],
       after: [],
@@ -93,13 +102,65 @@ export class Declgen {
     return compile(this.rootFiles, this.compilerOptions, this.hookedHost);
   }
 
-  private checkProgram(program: ts.Program): CheckerResult {
-    const checker = new Checker(program.getTypeChecker());
+  private processDeclarationFiles(program: ts.Program): void {
+    const typeChecker = program.getTypeChecker();
 
-    void checker;
-    void this;
+    this.rootFiles.forEach((fileName) => {
+      const sourceFile = program.getSourceFile(fileName);
+      if (sourceFile && sourceFile.isDeclarationFile) {
+        this.processDeclarationFile(program, sourceFile, typeChecker);
+      }
+    });
+  }
 
-    return [];
+  private processDeclarationFile(program: ts.Program, sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker): void {
+    const compilerOptions = program.getCompilerOptions();
+    const outDir = compilerOptions.outDir || path.dirname(sourceFile.fileName);
+    const rootDir = compilerOptions.rootDir || path.dirname(sourceFile.fileName);
+    const relativePath = path.relative(rootDir, sourceFile.fileName);
+    const fileNameWithoutExt = relativePath.replace(/\.d\.(ts|ets)$/, '');
+    const dEtsFilePath = path.join(outDir, `${fileNameWithoutExt}${Extension.DETS}`);
+
+    const result = this.transformDeclarationFiles(program, sourceFile, typeChecker);
+    const printer = ts.createPrinter();
+    const transformedCode = printer.printFile(result.transformed[0] as ts.SourceFile);
+
+    if (Declgen.isFileInAllowedPath(this.declgenOptions, [sourceFile])) {
+      const outPath = path.dirname(dEtsFilePath);
+      const finalCode = `'use static'\n${transformedCode}`;
+      if (!fs.existsSync(outPath)) {
+        fs.mkdirSync(outPath, { recursive: true });
+      }
+      fs.writeFileSync(dEtsFilePath, finalCode, { encoding: 'utf8' });
+    }
+  }
+
+  private transformDeclarationFiles(program: ts.Program, sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker,): ts.TransformationResult<ts.Node> {
+    const result = ts.transform(
+      sourceFile,
+      [
+        (context: ts.TransformationContext): ts.Transformer<ts.SourceFile> => {
+          const autofixer = new Autofixer(typeChecker, context);
+          const visit = (node: ts.Node): ts.Node | undefined => {
+            const fixedNode = autofixer.fixNode(node);
+
+            if (fixedNode === undefined) {
+              return node;
+            } else if (Array.isArray(fixedNode)) {
+              return context.factory.createBlock(fixedNode as readonly ts.Statement[]);
+            } else {
+              return ts.visitEachChild(fixedNode, visit, context);
+            }
+          };
+          return (sourceFile: ts.SourceFile): ts.SourceFile => {
+            return visit(sourceFile) as ts.SourceFile;
+          };
+        }
+      ],
+      program.getCompilerOptions()
+    );
+
+    return result;
   }
 
   private static createHookedCompilerHost(
@@ -134,6 +195,7 @@ export class Declgen {
         if (!Declgen.isFileInAllowedPath(declgenOptions, sourceFiles)) {
           return;
         }
+        const newText = `'use static'\n${text}`;
         const parsedPath = path.parse(fileName);
         fallbackWriteFile(
           /*
@@ -141,7 +203,7 @@ export class Declgen {
            * use `Extension.Ets` for output file name generation.
            */
           path.join(parsedPath.dir, `${parsedPath.name}${Extension.ETS}`),
-          text,
+          newText,
           writeByteOrderMark,
           onError,
           sourceFiles,

@@ -13,35 +13,38 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+import { Job } from "std/core"
+
 let pressureFlag: number = 0;
 
-let concurrentHashMapOne: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
+let concurrentHashMapOne: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
 
 function main(): int {
 
-    let concurrentHashMapTestsuite = new ArkTestsuite("concurrentHashMapPressureTest");
+    let concurrentHashMapTestsuite = new arktest.ArkTestsuite("concurrentHashMapPressureTest");
 
     concurrentHashMapTestsuite.addTest("replacePressureTest_002", () =>
     {
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         for (let i: int = 0; i < 100; i++) {
             let j: string = `${i}`;
             concurrentHashMapOne.set(i, j);
         }
-        let promises = new Array<Promise<void>>(100);
+        let jobs = new Array<Job<void>>(100);
         pressureFlag = 0;
         for (let i: int = 0; i < 100; i++) {
-            promises[i] = launch replaceForPressure(pressureFlag);
+            jobs[i] = launch<void, (i: number) => void>(replaceForPressure, pressureFlag);
             pressureFlag += 1;
         }
         for (let i: int = 0; i < 100; i++) {
-            await promises[i];
+            jobs[i].Await();
         }
-        assertEQ(concurrentHashMapOne.size, 100);
+        arktest.assertEQ(concurrentHashMapOne.size, 100);
         for (let i: int = 0; i < 100; i++) {
             let j: string = `${i}` + "-re";
-            assertEQ(concurrentHashMapOne.get(i), j);
+            arktest.assertEQ(concurrentHashMapOne.get(i), j);
         }
     });
 

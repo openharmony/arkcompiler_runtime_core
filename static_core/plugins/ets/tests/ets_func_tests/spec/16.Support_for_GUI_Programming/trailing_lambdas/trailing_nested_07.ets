@@ -42,5 +42,5 @@ function main(): void {
         }
         global *= 5
     }
-    assertEQ( global, 360)
+    arktest.assertEQ( global, 360)
 }

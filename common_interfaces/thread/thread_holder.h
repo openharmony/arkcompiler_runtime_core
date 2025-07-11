@@ -34,6 +34,19 @@ class Coroutine;
 }
 
 namespace common {
+// This is a temporary impl to adapt interop to cmc, because some interop call napi
+// without transfering to NATIVE
+using InterOpCoroutineToNativeHookFunc = bool (*)(ThreadHolder *current);
+using InterOpCoroutineToRunningHookFunc = bool (*)(ThreadHolder *current);
+
+PUBLIC_API bool InterOpCoroutineToNative(ThreadHolder *current);
+PUBLIC_API bool InterOpCoroutineToRunning(ThreadHolder *current);
+
+PUBLIC_API void RegisterInterOpCoroutineToNativeHook(InterOpCoroutineToNativeHookFunc func);
+PUBLIC_API void RegisterInterOpCoroutineToRunningHook(InterOpCoroutineToRunningHookFunc func);
+}  // namespace common
+
+namespace common {
 class BaseThread;
 class ThreadHolderManager;
 
@@ -47,12 +60,14 @@ class ThreadHolderManager;
  * ThreadHolder is a package of execution BaseThreads which must run in the same OS Thread and so could
  * share ThreadState.
  */
-class ThreadHolder {
+class PUBLIC_API ThreadHolder {
 public:
     using JSThread = panda::ecmascript::JSThread;
     using Coroutine = ark::Coroutine;
     using MutatorBase = common::MutatorBase;
 
+    // CC-OFFNXT(WordsTool.95 Google) sensitive word conflict
+    // NOLINTNEXTLINE(google-explicit-constructor)
     ThreadHolder(MutatorBase *mutatorBase) : mutatorBase_(mutatorBase)
     {
         SetCurrent(this);
@@ -137,9 +152,11 @@ public:
     }
 
     // Return if thread has already binded mutator.
+    // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
     class TryBindMutatorScope {
     public:
-        TryBindMutatorScope(ThreadHolder *holder);
+        // CC-OFFNXT(WordsTool.95 Google) sensitive word conflict
+        TryBindMutatorScope(ThreadHolder *holder);  // NOLINT(google-explicit-constructor)
         ~TryBindMutatorScope();
 
     private:

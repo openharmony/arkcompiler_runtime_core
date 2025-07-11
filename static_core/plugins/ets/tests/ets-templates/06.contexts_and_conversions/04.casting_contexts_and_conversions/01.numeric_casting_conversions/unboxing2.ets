@@ -21,7 +21,7 @@ desc: Casting contexts allow the use of an unboxing conversion followed by a wid
 function main(): int {
   {%- for t in c['types'] %}
   let s{{loop.index}}: {{t.type}} = new {{t.type}}({{t.val}});
-  let d{{loop.index}}: {{t.dtype}} = s{{loop.index}} as {{t.dtype}};
+  let d{{loop.index}}: {{t.dtype}} = s{{loop.index}}.to{{t.dtype}}();
   if (d{{loop.index}} != {{t.dval}}) {
       return 1;
   }

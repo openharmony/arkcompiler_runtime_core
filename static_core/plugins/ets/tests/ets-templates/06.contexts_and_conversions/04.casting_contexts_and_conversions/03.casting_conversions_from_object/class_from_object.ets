@@ -42,6 +42,6 @@ function convertObject(obj: Object): {{c.type}} {
 function main() {
     let obj: Object = new TestClass("Casting")
     let target: {{c.type}} = convertObject(obj)
-    assertEQ(target.{{c.call}}, "{{c.expected}}")
+    arktest.assertEQ(target.{{c.call}}, "{{c.expected}}")
 }
 {% endfor %}

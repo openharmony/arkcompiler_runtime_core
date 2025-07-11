@@ -26,47 +26,59 @@ const vals: bigint[] = [
 function testBigInt64ArraySet1() {
     let typedArray = new BigInt64Array(1)
     typedArray[0] = vals[0]
-    assertEQ(typedArray[0], 2n)
+    arktest.assertEQ(typedArray[0], 2n)
 }
 
 function testBigInt64ArraySet2() {
     let typedArray = new BigInt64Array(1)
     typedArray[0] = vals[1]
-    assertEQ(typedArray[0], -9223372036854775806n)
+    arktest.assertEQ(typedArray[0], -9223372036854775806n)
 }
 
 function testBigInt64ArraySet3() {
     let typedArray = new BigInt64Array(1)
     typedArray[0] = vals[2]
-    assertEQ(typedArray[0], 2n)
+    arktest.assertEQ(typedArray[0], 2n)
 }
 
 function testBigInt64ArraySet4() {
     let typedArray = new BigInt64Array(1)
     typedArray[0] = vals[3]
-    assertEQ(typedArray[0], 0n)
+    arktest.assertEQ(typedArray[0], 0n)
 }
 
 function testBigInt64ArraySet5() {
     let typedArray = new BigInt64Array(1)
     typedArray[0] = vals[4]
-    assertEQ(typedArray[0], -2n)
+    arktest.assertEQ(typedArray[0], -2n)
 }
 
 function testBigInt64ArraySet6() {
     let typedArray = new BigInt64Array(1)
     typedArray[0] = vals[5]
-    assertEQ(typedArray[0], 9223372036854775806n)
+    arktest.assertEQ(typedArray[0], 9223372036854775806n)
 }
 
 function testBigInt64ArraySet7() {
     let typedArray = new BigInt64Array(1)
     typedArray[0] = vals[6]
-    assertEQ(typedArray[0], -2n)
+    arktest.assertEQ(typedArray[0], -2n)
+}
+
+function testBigInt64ArraySetWithVals() {
+    let typedArray = new BigInt64Array(vals.length);
+    typedArray.set(vals);
+    arktest.assertEQ(typedArray[0], 2n);
+    arktest.assertEQ(typedArray[1], -9223372036854775806n);
+    arktest.assertEQ(typedArray[2], 2n);
+    arktest.assertEQ(typedArray[3], 0n);
+    arktest.assertEQ(typedArray[4], -2n);
+    arktest.assertEQ(typedArray[5], 9223372036854775806n)
+    arktest.assertEQ(typedArray[6], -2n)
 }
 
 function main(): int {
-	const suite = new ArkTestsuite("test conversion between bigint and BigInt64Array")
+	const suite = new arktest.ArkTestsuite("test conversion between bigint and BigInt64Array")
 
 	suite.addTest("convert 18446744073709551618n to BigInt64Array element", testBigInt64ArraySet1)
 	suite.addTest("convert 9223372036854775810n to BigInt64Array element", testBigInt64ArraySet2)
@@ -75,6 +87,7 @@ function main(): int {
 	suite.addTest("convert -2n to BigInt64Array element", testBigInt64ArraySet5)
 	suite.addTest("convert -9223372036854775810n to BigInt64Array element", testBigInt64ArraySet6)
 	suite.addTest("convert -18446744073709551618n to BigInt64Array element", testBigInt64ArraySet7)
+    suite.addTest("setBigInt64Array with vals", testBigInt64ArraySetWithVals)
 
 	return suite.run()
 }

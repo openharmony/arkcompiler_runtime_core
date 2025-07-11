@@ -145,7 +145,6 @@ function(run_ets_code_impl TARGET WORK_DIR ETS_SOURCES)
         --boot-panda-files=${BOOT_PANDA_FILES}
         --panda-files=${ABC_FILES}
         --load-runtimes=ets
-        --verification-enabled=true
         --verification-mode=on-the-fly
         ${ARG_RUNTIME_EXTRA_OPTIONS}
         ${ENTRY_ABC}
@@ -155,7 +154,7 @@ function(run_ets_code_impl TARGET WORK_DIR ETS_SOURCES)
     string(FIND "${RUNTIME_ARGUMENTS}" "--gc-type" GC_TYPE_SET)
     if(NOT PANDA_LLVM_INTERPRETER AND ${GC_TYPE_SET} EQUAL -1)
         add_custom_target(${TARGET}
-            COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=gen-gc
+            COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=g1-gc
             COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=stw
         )
     else()
@@ -388,10 +387,13 @@ function(run_int_jit_aot_ets_code ETS_SRC WORK_DIR TARGET)
 endfunction()
 
 function(run_int_jit_aot_ets_code_foreach_gc PARENT_TARGET ETS_SRC WORK_DIR TARGET)
-    set(gc_types g1-gc gen-gc stw)
+    set(multiValueArgs RUNTIME_EXTRA_OPTIONS)
+    cmake_parse_arguments(ARG "" "" "${multiValueArgs}" ${ARGN})
+
+    set(gc_types g1-gc stw)
 
     foreach(gc_type ${gc_types})
-        set(extra_options RUNTIME_EXTRA_OPTIONS "--gc-type=${gc_type}")
+        set(extra_options RUNTIME_EXTRA_OPTIONS "--gc-type=${gc_type};${ARG_RUNTIME_EXTRA_OPTIONS}")
         run_int_jit_aot_ets_code(${ETS_SRC} ${WORK_DIR}-${gc_type} ${TARGET}-${gc_type} ${extra_options})
         add_dependencies(${PARENT_TARGET} ${TARGET}-${gc_type})
     endforeach()
@@ -433,9 +435,9 @@ function(compile_stdlib TARGET_ARCH)
             DEPENDS ark_aot etsstdlib
         )
         add_dependencies(
-                ets-compile-stdlib
-                ets-compile-stdlib-llvm-${TARGET_ARCH}
-                ets-compile-stdlib-llvm-pre-opt-2-${TARGET_ARCH}
+            ets-compile-stdlib
+            ets-compile-stdlib-llvm-${TARGET_ARCH}
+            ets-compile-stdlib-llvm-pre-opt-2-${TARGET_ARCH}
         )
     endif()
     if (TARGET_ARCH STREQUAL "arm64")
@@ -473,8 +475,9 @@ if(PANDA_TEST_COMPILE_STDLIB)
     set (COMPILER_OPTIONS_NO_INLINE "--compiler-inlining=false" ${COMPILER_OPTIONS})
     set (COMPILER_OPTIONS_GC_STW "--gc-type=stw" ${COMPILER_OPTIONS})
     if (PANDA_LLVM_AOT)
-        set (COMPILER_OPTIONS_LLVM ${COMPILER_OPTIONS})
-        set (COMPILER_OPTIONS_LLVM_PRE_OPT "--llvm-pre-opt=2" ${COMPILER_OPTIONS})
+        set (COMPILER_LLVMAOT_FIXUP "--llvm-gc=true") # Investigate in #26733
+        set (COMPILER_OPTIONS_LLVM ${COMPILER_LLVMAOT_FIXUP} ${COMPILER_OPTIONS})
+        set (COMPILER_OPTIONS_LLVM_PRE_OPT "--llvm-pre-opt=2" ${COMPILER_LLVMAOT_FIXUP} ${COMPILER_OPTIONS})
         # NOTE(zdenis): False positives come from libLLVM.so
         if (NOT PANDA_ENABLE_THREAD_SANITIZER)
             set (COMPILER_OPTIONS_LLVM "--llvmaot-threads=4" "--llvmaot-methods-per-module=512" ${COMPILER_OPTIONS_LLVM})

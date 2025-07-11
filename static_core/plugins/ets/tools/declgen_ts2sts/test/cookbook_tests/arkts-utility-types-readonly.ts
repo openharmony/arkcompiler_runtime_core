@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-interface Person {
+export interface Person {
     name: string
     age: number
     address: string

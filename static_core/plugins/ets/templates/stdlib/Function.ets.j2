@@ -33,21 +33,21 @@ P{{i + 1}}, {{""}}
 {%- endmacro %}
 
 {% macro erasedTypeArgsList(narg) -%}
-<{% for i in range(narg) %}__T, {% endfor %}__T>
+<{% for i in range(narg) %}Any, {% endfor %}Any>
 {%- endmacro %}
 
 {%- macro signature(narg, rest) -%}
 ({% for i in range(narg) -%}
 p{{i + 1}}: P{{i + 1}}{% if not loop.last or rest %}, {% endif %}
 {%- endfor -%}
-{%- if rest %}...r: PR[]{% endif %}): R
+{%- if rest %}...r: FixedArray<PR>{% endif %}): R
 {%- endmacro %}
 
 {%- macro erasedSignature(narg, rest) -%}
 ({% for i in range(narg) -%}
-p{{i + 1}}: __T{% if not loop.last or rest %}, {% endif %}
+p{{i + 1}}: Any{% if not loop.last or rest %}, {% endif %}
 {%- endfor -%}
-{%- if rest %}...r: __T[]{% endif %}): __T
+{%- if rest %}...r: FixedArray<Any>{% endif %}): Any
 {%- endmacro %}
 
 {%- macro listArgs(from, to) -%}
@@ -64,17 +64,22 @@ r[{{i}}]{% if not loop.last %}, {% endif %}
 
 {%- macro invokeName(narg, suffix) %}invoke{{suffix}}{{narg}}{% endmacro %}
 
-type __T = object | null | undefined;
+native function getFunctionObjectNameFromAnnotation(func: Object): string;
+
+export @interface NamedFunctionObject {
+    name: string;
+}
 
 export interface Function {
-    unsafeCall(...r: __T[]): __T
+    unsafeCall(...r: FixedArray<Any>): Any
+    get name(): string;
 }
 
 export interface FunctionN<R> extends Function {
-    invokeN(...r: __T[]): R;
+    invokeN(...r: FixedArray<Any>): R;
 }
 
-export interface __FunctionN extends FunctionN<__T> {}
+export interface __FunctionN extends FunctionN<Any> {}
 
 export abstract class LambdaN implements __FunctionN {}
 
@@ -93,20 +98,25 @@ export interface FunctionR{{ narg }}{{ typeParamsDeclList(narg, True) }}
     {{invokeName(narg, "R")}}{{ signature(narg, True) }};
 }
 export interface Function{{ narg }}{{ typeParamsDeclList(narg) }}
-    extends FunctionR{{narg}}{{ typeParamsList(narg, "__T") }}{% if not loop.last %}, __Function{{narg + 1}}{% endif %}
+    extends FunctionR{{narg}}{{ typeParamsList(narg, "Any") }}{% if not loop.last %}, __Function{{narg + 1}}{% endif %}
 {
     {{invokeName(narg)}}{{ signature(narg) }};
 }
 {{ defineChainingHelper("FunctionR", narg, narg + 1) }} {}
 {{ defineChainingHelper("Function", narg, narg) }} {}
 {{ defineLambdaHelper("LambdaR", "FunctionR", narg) }} {
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
+    }
+
     abstract {{invokeName(narg, "R")}}{{erasedSignature(narg, True)}};
 {%- if narg == 0 %}
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<Any>): Any {
         return this.{{invokeName(narg, "R")}}(...r)
     }
 {%- else %}
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < {{narg}}) { throw new ArgumentsUnderapplicationError() }
         return this.{{invokeName(narg, "R")}}({{listArgArrayLoads(narg)}}{{", " if narg != 0 }}
             ...Runtime.removeFrontElementsStub(r, {{narg}}))
@@ -121,10 +131,15 @@ export interface Function{{ narg }}{{ typeParamsDeclList(narg) }}
 }
 {{ defineLambdaHelper("Lambda", "Function", narg) }} {
     abstract {{invokeName(narg)}}{{erasedSignature(narg)}};
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < {{narg}}) { throw new ArgumentsUnderapplicationError() }
         return this.{{invokeName(narg)}}({{listArgArrayLoads(narg)}})
     }
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
+    }
+
 {%- for extNarg in range(narg + 1, maxarity + 1) %}
     final {{invokeName(extNarg)}} {{erasedSignature(extNarg, False)}} {
         return this.{{invokeName(narg)}}({{listArgs(0, narg)}})

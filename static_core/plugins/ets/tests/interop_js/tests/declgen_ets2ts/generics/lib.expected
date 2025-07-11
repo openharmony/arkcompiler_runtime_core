@@ -15,6 +15,9 @@
 export declare function Identity<T>(x: T): T;
 export declare function ForEach<T extends Object>(a: T[], cb: (e: T, idx: number) => void): void;
 export declare function foo1<T>(x: Partial<C1<T>>): void;
+export declare let cb1: <T>(x: T) => T;
+export declare let cb2: <T>(x: T) => T;
+export declare let cb3: <T, U>(p: T, q: U) => [T , U];
 export declare class GenericClass<T extends Object> {
     public identity(x: T): T;
     constructor();

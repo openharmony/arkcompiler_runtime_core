@@ -82,3 +82,9 @@ panda_ets_interop_js_test(ets_interop_js_test_setinterval_with_string
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
     LAUNCHER_ARGS "testSetIntervalWithString"
 )
+
+panda_ets_interop_js_test(ets_interop_js_test_clear_timer_cross_worker
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
+    LAUNCHER_ARGS "testClearTimerCrossWorker"
+)

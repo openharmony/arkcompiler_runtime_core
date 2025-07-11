@@ -47,7 +47,7 @@ let arrayCopyWithin1: Array<Number> = arrCopyWithin1 as Array<Number>
 let arrayCopyWithin2: Array<Number> = arrCopyWithin2 as Array<Number>
 let arrayCopyWithin3: Array<Number> = arrCopyWithin3 as Array<Number>
 let arrayFill: Array<Number> = arrFill as Array<Number>
-let arrayFlat: Array<Number> = arrFlat as Array<Number>
+let arrayFlat: Array<Array<Number>> = arrFlat as Array<Array<Number>>
 let arrayFlatMap: Array<Number> = arrFlatMap as Array<Number>
 let arrayIndex: Array<Number> = arrIndex as Array<Number>
 let arrayPop: Array<Number> = arrPop as Array<Number>
@@ -69,7 +69,7 @@ const funcPredicate2 = (num: number, index: number, array: Array<Number>): boole
 
 const mapAndFlatten = (num: number, k: number, arr: Array<Number>): Number => num * num
 
-const flatMapAndFlatten = (num: number, k: number, arr: Array<Number>): Number[] => [num * num]
+const flatMapAndFlatten = (num: number, k: number, arr: Array<Number>): FixedArray<Number> => [num * num]
 
 const processElement = (element: number, index: number, array: Array<Number>): void => result = (element === index + 1)
 
@@ -83,7 +83,7 @@ const concatenateReducer = (previousValue: string, currentValue: string, index: 
 
 class A {
     style: string
-    currency: string 
+    currency: string
     constructor(style: string, currency: string) {
         this.style = style
         this.currency = currency
@@ -120,7 +120,7 @@ function testConcat(): boolean {
 }
 
 function testCopyWithin(): boolean {
-    return arrayCopyWithin1.copyWithin(1).toString() === "1,1,2,3" && arrayCopyWithin2.copyWithin(0, 2).toString() === "3,4,3,4" && arrayCopyWithin3.copyWithin(0, 1, 3).toString() === "2,3,3,4"
+    return arrayCopyWithin1.copyWithin(1).toString() === "1,1,2,3" && arrayCopyWithin2.copyWithin(0, 2).toString() === "3,4,3,4" && arrayCopyWithin3.copyWithin(0.0, 1, 3).toString() === "2,3,3,4"
 }
 
 function testEntries(): boolean {
@@ -132,7 +132,7 @@ return !array.every(funcPredicate1) && array.every(funcPredicate2)
 }
 
 function testFill(): boolean {
-    return arrayFill.fill(8, 1, 3).toString() === "1,8,8,4"
+    return arrayFill.fill(8.0, 1.0, 3.0).toString() === "1,8,8,4"
 }
 
 function testFilter(): boolean {
@@ -242,7 +242,7 @@ function testSort(): boolean {
 }
 
 function testSplice(): boolean {
-    return arraySplice1.splice(1).toString() === "2,3,4" && arraySplice3.splice(1, 1, 2).toString() === "2"  && arraySplice4.splice(1, 2, 6, 7).toString() === "2,3"
+    return arraySplice1.splice(1).toString() === "2,3,4" && arraySplice3.splice(1.0, 1, 2).toString() === "2"  && arraySplice4.splice(1.0, 2, 6, 7).toString() === "2,3"
 }
 
 function testToLocaleString(): boolean {
@@ -258,7 +258,7 @@ function testToSorted(): boolean {
 }
 
 function testToSpliced(): boolean {
-    return array.toSpliced(1).toString() === "1" && array.toSpliced(1, 2).toString() === "1,4" && array.toSpliced(1, 2, 3).toString() === "1,3,4" && array.toSpliced(1, 2, 6, 7).toString() === "1,6,7,4" 
+    return array.toSpliced(1).toString() === "1" && array.toSpliced(1, 2).toString() === "1,4" && array.toSpliced(1, 2, 3).toString() === "1,3,4" && array.toSpliced(1, 2, 6, 7).toString() === "1,6,7,4"
 }
 
 function testUnShift(): boolean {
@@ -276,6 +276,6 @@ function testValues(): boolean {
 }
 
 function testWith(): boolean {
-    let a = array.with(1, 8)
+    let a = array.with(1.0, 8.0)
     return a.toString() === "1,8,3,4"
 }

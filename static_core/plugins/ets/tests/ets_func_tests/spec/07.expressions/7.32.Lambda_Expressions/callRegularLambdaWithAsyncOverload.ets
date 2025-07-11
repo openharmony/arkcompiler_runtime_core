@@ -30,10 +30,10 @@ class Test {
 
     callOverloadRegularFunc(): void {
         let is_call_regular_func1 = await this.regularFunc((): boolean => { return true });
-        assertEQ(is_call_regular_func1, true)
+        arktest.assertEQ(is_call_regular_func1, true)
 
         let is_call_regular_func2 = await this.regularFunc((): boolean => { return false });
-        assertEQ(is_call_regular_func2, false)
+        arktest.assertEQ(is_call_regular_func2, false)
     }
 }
 

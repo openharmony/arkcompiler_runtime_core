@@ -31,5 +31,5 @@ const dog: Animal = new Dog();
 
 function main(): void {
   const obj1: object = dog;
-  assertTrue(obj1 == dog);
+  arktest.assertTrue(obj1 == dog);
 }

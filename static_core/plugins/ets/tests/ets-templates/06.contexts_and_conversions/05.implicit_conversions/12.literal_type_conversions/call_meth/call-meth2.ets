@@ -37,7 +37,7 @@ class A{{loop.index}} {
 
 function main() {
 {%- for v in c['values'] %}
-    assertTrue(new A{{loop.index}}().meth({{v.expr}}) == {{v.val or v.expr}})
+    arktest.assertTrue(new A{{loop.index}}().meth({{v.expr}}) == {{v.val or v.expr}})
 {%- endfor %}
 }
 {%- endfor %}

@@ -20,12 +20,24 @@ package std.core;
  */
 export class AbcRuntimeLinker extends RuntimeLinker {
     private parentLinker: RuntimeLinker;
-    private abcFiles: (AbcFile | undefined)[] = [];
+    private abcFiles: FixedArray<AbcFile | undefined> = [];
+    private sharedLibraryLoaders: AbcRuntimeLinker[];
 
     public constructor(parentLinker: RuntimeLinker | undefined, paths: string[]) {
         super();
         this.parentLinker = parentLinker ?? getBootRuntimeLinker();
         this.abcFiles = new (AbcFile | undefined)[paths.length];
+        this.sharedLibraryLoaders = [];
+        for (let i = 0; i < paths.length; i++) {
+            this.abcFiles[i] = AbcFile.loadAbcFile(this, paths[i]);
+        }
+    }
+
+    public constructor(parentLinker: RuntimeLinker | undefined, paths: string[], sharedLibraryLoaders: AbcRuntimeLinker[]) {
+        super();
+        this.parentLinker = parentLinker ?? getBootRuntimeLinker();
+        this.abcFiles = new (AbcFile | undefined)[paths.length];
+        this.sharedLibraryLoaders = sharedLibraryLoaders;
         for (let i = 0; i < paths.length; i++) {
             this.abcFiles[i] = AbcFile.loadAbcFile(this, paths[i]);
         }
@@ -39,7 +51,7 @@ export class AbcRuntimeLinker extends RuntimeLinker {
      * @throws errors happened on loading ABC file.
      */
     public addAbcFiles(paths: string[]): void {
-        const newFiles = new (AbcFile | undefined)[paths.length];
+        const newFiles : FixedArray<AbcFile | undefined> = new (AbcFile | undefined)[paths.length];
         for (let i = 0; i < paths.length; i++) {
             newFiles[i] = AbcFile.loadAbcFile(this, paths[i]);
         }
@@ -63,6 +75,15 @@ export class AbcRuntimeLinker extends RuntimeLinker {
         if (optClass) {
             return optClass;
         }
+        for(let sharedLibraryLoader of this.sharedLibraryLoaders) {
+            if (sharedLibraryLoader == null) {
+                continue;
+            }
+            let sharedClass = sharedLibraryLoader.loadClassSafe(clsName, init);
+            if (sharedClass) {
+                return sharedClass;
+            }
+        }
         return this.loadClassFromAbcFiles(clsName, init);
     }
 
@@ -71,7 +92,7 @@ export class AbcRuntimeLinker extends RuntimeLinker {
      *
      * @param newFiles ABC files loaded into current context.
      */
-    protected final native addAbcFiles(newFiles: (AbcFile | undefined)[]): void
+    protected final native addAbcFiles(newFiles: FixedArray<AbcFile | undefined>): void
 
     private native loadClassFromAbcFiles(clsName: string, init: boolean): Class | undefined
 }

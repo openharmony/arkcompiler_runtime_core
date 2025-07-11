@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,16 +37,13 @@ public:
     NO_COPY_SEMANTIC(SourceManager);
     NO_MOVE_SEMANTIC(SourceManager);
 
-    std::pair<ScriptId, bool> GetScriptId(PtThread thread, std::string_view fileName);
+    ScriptId GetScriptId(std::string_view fileName);
     [[nodiscard]] std::string_view GetSourceFileName(ScriptId id) const;
-
-    void RemoveThread(PtThread thread);
 
 private:
     mutable os::memory::Mutex mutex_;
     std::unordered_map<std::string, ScriptId> fileNameToId_ GUARDED_BY(mutex_);
     std::unordered_map<ScriptId, std::string_view> idToFileName_ GUARDED_BY(mutex_);
-    std::map<PtThread, std::unordered_set<ScriptId>> knownSources_ GUARDED_BY(mutex_);
 };
 }  // namespace ark::tooling::inspector
 

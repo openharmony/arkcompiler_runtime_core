@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,16 +15,20 @@
 # limitations under the License.
 #
 
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
+from collections.abc import Mapping
 from os import path
-from typing import Dict, Mapping, Type, List, Tuple, Any
+from typing import TYPE_CHECKING
 
-from runner.enum_types.params import TestEnv
-from runner.enum_types.params import TestReport
+from runner.common_exceptions import InvalidConfiguration
+from runner.enum_types.params import TestEnv, TestReport
 from runner.enum_types.verbose_format import VerboseFilter
 from runner.logger import Log
 from runner.reports.report_format import ReportFormat
 from runner.utils import write_2_file
+
+if TYPE_CHECKING:
+    from runner.runner_base import Test
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -36,12 +40,12 @@ class ReportGenerator:
         self.__repeat = repeat
         self.__generate_for_passed = test_env.config.general.verbose_filter == VerboseFilter.ALL
 
-    def generate_reports(self, test_result: Any) -> Dict[ReportFormat, str]:
+    def generate_reports(self, test_result: 'Test') -> dict[ReportFormat, str]:
         if test_result.passed and not self.__generate_for_passed:
             return {}
 
         reports_format_to_paths = {}
-        format_to_report: Mapping[ReportFormat, Type[Report]] = {
+        format_to_report: Mapping[ReportFormat, type[Report]] = {
             ReportFormat.HTML: HtmlReport,
             ReportFormat.MD: MdReport,
             ReportFormat.LOG: TextReport
@@ -54,7 +58,9 @@ class ReportGenerator:
             report_path = path.join(
                 report_root,
                 f"{test_result.test_id}.report{repeat_str}-{self.__test_env.timestamp}.{report_format.value}")
-            report = format_to_report.get(report_format)(test_result)
+            if (formatter := format_to_report.get(report_format)) is None:
+                raise InvalidConfiguration(f"Incorrect report format {report_format}")
+            report = formatter(test_result)
             _LOGGER.all(f"{self.__test_id}: Report is saved to {report_path}")
             write_2_file(report_path, report.make_report())
             reports_format_to_paths[report_format] = report_path
@@ -82,12 +88,12 @@ STATUS_FAILED_CLASS = "test_status--failed"
 NO_TIME = "not measured"
 
 
-def convert_to_array(output: str) -> List[str]:
+def convert_to_array(output: str) -> list[str]:
     return [line.strip() for line in output.split("\n") if len(line.strip()) > 0]
 
 
 class Report(ABC):
-    def __init__(self, test: Any) -> None:
+    def __init__(self, test: 'Test') -> None:
         self.test = test
 
     @abstractmethod
@@ -110,11 +116,11 @@ class HtmlReport(Report):
         test_expected, test_actual = "\n".join(expected), "\n".join(actual)
 
         report_path = path.join(path.dirname(path.abspath(__file__)), "report_template.html")
-        with open(report_path, "r", encoding="utf-8") as file_pointer:
+        with open(report_path, encoding="utf-8") as file_pointer:
             report = file_pointer.read()
 
         report = report.replace(REPORT_TITLE, self.test.test_id)
-        report = report.replace(REPORT_PATH, self.test.path)
+        report = report.replace(REPORT_PATH, str(self.test.path))
         if self.test.passed:
             report = report.replace(REPORT_STATUS_CLASS, STATUS_PASSED_CLASS)
             report = report.replace(REPORT_STATUS, STATUS_PASSED)
@@ -137,7 +143,7 @@ class HtmlReport(Report):
 
         return report
 
-    def __make_output_diff_html(self, expected: str, actual: str) -> Tuple[List[str], List[str]]:
+    def __make_output_diff_html(self, expected: str, actual: str) -> tuple[list[str], list[str]]:
         expected_list = convert_to_array(expected)
         actual_list = convert_to_array(actual)
         result_expected = []
@@ -184,11 +190,11 @@ class MdReport(Report):
         test_result = "\n".join(result)
 
         report_path = path.join(path.dirname(path.abspath(__file__)), "report_template.md")
-        with open(report_path, "r", encoding="utf-8") as file_pointer:
+        with open(report_path, encoding="utf-8") as file_pointer:
             report = file_pointer.read()
 
         report = report.replace(REPORT_TITLE, self.test.test_id)
-        report = report.replace(REPORT_PATH, self.test.path)
+        report = report.replace(REPORT_PATH, str(self.test.path))
         if self.test.passed:
             report = report.replace(REPORT_STATUS_CLASS, STATUS_PASSED_CLASS)
             report = report.replace(REPORT_STATUS, STATUS_PASSED)
@@ -210,7 +216,7 @@ class MdReport(Report):
 
         return report
 
-    def __make_output_diff_md(self, expected: str, actual: str) -> List[str]:
+    def __make_output_diff_md(self, expected: str, actual: str) -> list[str]:
         expected_list = convert_to_array(expected)
         actual_list = convert_to_array(actual)
         result = []

@@ -31,7 +31,7 @@ function main() {
     let r: Record<{{c.type}}, {{c.type}}> = {}
 {%- for v in c['values'] %}
     r[key{{loop.index}}] = val{{loop.index}}
-    assertTrue(r[key{{loop.index}}] == val{{loop.index}})
+    arktest.assertTrue(r[key{{loop.index}}] == val{{loop.index}})
 {%- endfor %}
 }
 {% endfor %}

@@ -16,7 +16,7 @@
 import Deque from "@ohos.util.Deque";
 
 function main(): int {
-    const suite = new ArkTestsuite("Deque API tests");
+    const suite = new arktest.ArkTestsuite("Deque API tests");
 
     suite.addTest("Deque create an instance that stores single-type data", testCreateSingleTypeInstance);
     suite.addTest("Deque create an instance that stores multiple types of data", testCreateMultiTypeInstance);
@@ -53,53 +53,37 @@ class TestData {
 
 function testCreateSingleTypeInstance() {
     let deque: Deque<number>;
-    try {
-        deque = new Deque<number>();
-    } catch (e) {
-        assertTrue(false, "Failed to create a single-type instance of Deque");
-        return;
-    }
-    deque.insertFront(TestData.testNumber3);
-    assertEQ(deque.length, TestData.testNumber1, "Deque length should be 1 after inserting one element at the front");
+    arktest.expectNoThrow(() => {deque = new Deque<number>()});
 }
 
 function testCreateMultiTypeInstance() {
     let deque: Deque<number | string>;
-    try {
-        deque = new Deque<number | string>();
-    } catch (e) {
-        assertTrue(false, "Failed to create a single-type instance of Deque");
-        return;
-    }
-    deque.insertFront(TestData.testString1);
-    deque.insertFront(TestData.testNumber3);
-    deque.insertFront(TestData.testString1);
-    assertEQ(deque.length, TestData.testNumber3, "Deque length should be 3 after inserting three elements at the front");
+    arktest.expectNoThrow(() => {deque = new Deque<number | string>()});
 }
 
 function testDequeLength() {
     let deque = new Deque<number>();
-    assertEQ(deque.length, 0, "Initial deque length should be 0");
+    arktest.assertEQ(deque.length, 0, "Initial deque length should be 0");
     deque.insertEnd(TestData.testNumber3);
     deque.insertEnd(TestData.testNumber1);
     deque.insertEnd(TestData.testNumber2);
-    assertEQ(deque.length, TestData.testNumber3, "Deque length should be 3 after inserting three elements at the end");
+    arktest.assertEQ(deque.length, TestData.testNumber3, "Deque length should be 3 after inserting three elements at the end");
     deque.popLast();
     deque.popLast();
-    assertEQ(deque.length, TestData.testNumber1, "Deque length should be 1 after popping two elements from the end");
+    arktest.assertEQ(deque.length, TestData.testNumber1, "Deque length should be 1 after popping two elements from the end");
 }
 
 function testDequeLengthMixedTypes() {
     let deque = new Deque<number | string | boolean>();
-    assertEQ(deque.length, 0, "Initial deque length should be 0");
+    arktest.assertEQ(deque.length, 0, "Initial deque length should be 0");
     deque.insertEnd(TestData.testNumber3);
     deque.insertEnd(TestData.testString1);
     deque.insertEnd(true);
-    assertEQ(deque.length, TestData.testNumber3,
+    arktest.assertEQ(deque.length, TestData.testNumber3,
         "Deque length should be 3 after inserting three elements of mixed types at the end");
     deque.popLast();
     deque.popLast();
-    assertEQ(deque.length, TestData.testNumber1, "Deque length should be 1 after popping two elements from the end");
+    arktest.assertEQ(deque.length, TestData.testNumber1, "Deque length should be 1 after popping two elements from the end");
 }
 
 function testDequeLengthLargeNumber() {
@@ -107,7 +91,7 @@ function testDequeLengthLargeNumber() {
     for (let i: number = 0; i < TestData.testNumber1w; i++) {
         deque.insertEnd(TestData.testNumber1);
     }
-    assertEQ(deque.length, TestData.testNumber1w, "Deque length should be 10000 after adding elements");
+    arktest.assertEQ(deque.length, TestData.testNumber1w, "Deque length should be 10000 after adding elements");
 }
 
 function testInsertElementsFront() {
@@ -117,34 +101,34 @@ function testInsertElementsFront() {
     }
     let countForEach = 0;
     deque.forEach((value: number) => {
-        assertEQ(value, TestData.forNumber[TestData.testInt29 - countForEach++], "Element should match");
+        arktest.assertEQ(value, TestData.forNumber[TestData.testInt29 - countForEach++], "Element should match");
     });
-    assertEQ(countForEach, deque.length, "Deque length same as foreach");
-    assertEQ(deque.length, TestData.forNumber.length, "Deque length same as TestData.forNumber");
+    arktest.assertEQ(countForEach, deque.length, "Deque length same as foreach");
+    arktest.assertEQ(deque.length, TestData.forNumber.length, "Deque length same as TestData.forNumber");
 }
 
 function testInsertObjectFront() {
     let deque = new Deque<object>();
     deque.insertFront(TestData.testObject1);
-    assertEQ(deque.getFirst(), TestData.testObject1, "Get first from non-empty deque should return first element")
+    arktest.assertEQ(deque.getFirst(), TestData.testObject1, "Get first from non-empty deque should return first element")
 
     deque.insertFront(TestData.testObject2);
-    assertEQ(deque.getFirst(), TestData.testObject2, "Get first from non-empty deque should return first element")
+    arktest.assertEQ(deque.getFirst(), TestData.testObject2, "Get first from non-empty deque should return first element")
 
     deque.insertFront(TestData.testObject3);
-    assertEQ(deque.getFirst(), TestData.testObject3, "Get first from non-empty deque should return first element")
+    arktest.assertEQ(deque.getFirst(), TestData.testObject3, "Get first from non-empty deque should return first element")
 }
 
 function testInsertAllTypesFront() {
     let deque = new Deque<number | string | object>();
     deque.insertFront(TestData.testObject1);
-    assertEQ(deque.getFirst(), TestData.testObject1, "Get first from non-empty deque should return first element")
+    arktest.assertEQ(deque.getFirst(), TestData.testObject1, "Get first from non-empty deque should return first element")
 
     deque.insertFront(TestData.testString1);
-    assertEQ(deque.getFirst(), TestData.testString1, "Get first from non-empty deque should return first element")
+    arktest.assertEQ(deque.getFirst(), TestData.testString1, "Get first from non-empty deque should return first element")
 
     deque.insertFront(TestData.testNumber1);
-    assertEQ(deque.getFirst(), TestData.testNumber1, "Get first from non-empty deque should return first element")
+    arktest.assertEQ(deque.getFirst(), TestData.testNumber1, "Get first from non-empty deque should return first element")
 }
 
 function testInsertElementsEnd() {
@@ -152,22 +136,22 @@ function testInsertElementsEnd() {
     initializeDeque(deque, TestData.forNumber);
     let countForEach = 0;
     deque.forEach((value: number) => {
-        assertEQ(value, TestData.forNumber[countForEach++], "Element should match");
+        arktest.assertEQ(value, TestData.forNumber[countForEach++], "Element should match");
     });
-    assertEQ(countForEach, deque.length, "Deque length same as foreach");
-    assertEQ(deque.length, TestData.forNumber.length, "Deque length same as TestData.forNumber");
+    arktest.assertEQ(countForEach, deque.length, "Deque length same as foreach");
+    arktest.assertEQ(deque.length, TestData.forNumber.length, "Deque length same as TestData.forNumber");
 }
 
 function testInsertObjectEnd() {
     let deque = new Deque<object>();
     deque.insertEnd(TestData.testObject1);
-    assertEQ(deque.getLast(), TestData.testObject1, "Get last from non-empty deque should return last element")
+    arktest.assertEQ(deque.getLast(), TestData.testObject1, "Get last from non-empty deque should return last element")
 
     deque.insertEnd(TestData.testObject2);
-    assertEQ(deque.getLast(), TestData.testObject2, "Get last from non-empty deque should return last element")
+    arktest.assertEQ(deque.getLast(), TestData.testObject2, "Get last from non-empty deque should return last element")
 
     deque.insertEnd(TestData.testObject3);
-    assertEQ(deque.getLast(), TestData.testObject3, "Get last from non-empty deque should return last element")
+    arktest.assertEQ(deque.getLast(), TestData.testObject3, "Get last from non-empty deque should return last element")
 }
 
 function initializeDeque<T>(deque: Deque<T>, sourceArray: T[]) {

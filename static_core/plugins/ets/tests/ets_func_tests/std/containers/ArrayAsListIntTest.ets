@@ -45,13 +45,13 @@ function main(): int {
 
 
 function createDefault(): int {
-    let list = new ArrayAsListInt();
+    let list = new containers.ArrayAsListInt();
     return list.size();
 }
 
 function createWithNegativeInitialCapacity(): int {
     try {
-        new ArrayAsListInt(-1);
+        new containers.ArrayAsListInt(-1);
     } catch(nse: NegativeArraySizeError) {
         return 0;
     }
@@ -59,7 +59,7 @@ function createWithNegativeInitialCapacity(): int {
 }
 
 function accessOutOfBoundsValue(): int {
-    let list = new ArrayAsListInt(10);
+    let list = new containers.ArrayAsListInt(10);
     try {
         list.at(0);
         list.at(12);
@@ -71,13 +71,13 @@ function accessOutOfBoundsValue(): int {
 
 
 function createWithGivenZeroSize(): int {
-    let list = new ArrayAsListInt(0);
+    let list = new containers.ArrayAsListInt(0);
     let result = list.size() == 0 ? 0 : 1; 
     return result;
 }
 
 function createWithGivenSize(): int {
-    let list = new ArrayAsListInt(10);
+    let list = new containers.ArrayAsListInt(10);
     for(let i: int = 0; i< 10; i++) {
         if(list.at(i) != 0) return 1;
     }
@@ -87,7 +87,7 @@ function createWithGivenSize(): int {
 
 function createWithGivenSizeAndValue0(): int {
     let value = 0;
-    let list = new ArrayAsListInt(10, value);
+    let list = new containers.ArrayAsListInt(10, value);
     for(let i: int = 0; i< 10; i++) {
         if(list.at(i) != value) return 1;
     }
@@ -97,7 +97,7 @@ function createWithGivenSizeAndValue0(): int {
 
 function createWithGivenSizeAndValue1(): int {
     let value = 10;
-    let list = new ArrayAsListInt(10, value);
+    let list = new containers.ArrayAsListInt(10, value);
     for(let i: int; i< 10; i++) {
         if(list.at(i) != value) return 1;
     }
@@ -107,7 +107,7 @@ function createWithGivenSizeAndValue1(): int {
 
 function createWithGivenSizeAndValue2(): int {
     let value = -10;
-    let list = new ArrayAsListInt(10, value);
+    let list = new containers.ArrayAsListInt(10, value);
     for(let i: int; i< 10; i++) {
         if(list.at(i) != value) return 1;
     }
@@ -117,7 +117,7 @@ function createWithGivenSizeAndValue2(): int {
 
 function pushFrontToEmptyList(): int {
     let value = -10;
-    let list = new ArrayAsListInt();
+    let list = new containers.ArrayAsListInt();
     list.pushFront(value);
 
     let expected: Int = list.at(0);
@@ -127,7 +127,7 @@ function pushFrontToEmptyList(): int {
 
 function pushBackToEmptyList(): int {
     let value = -10;
-    let list = new ArrayAsListInt();
+    let list = new containers.ArrayAsListInt();
     list.pushBack(value);
 
     let expected: Int = list.at(0);
@@ -137,7 +137,7 @@ function pushBackToEmptyList(): int {
 
 function pushFrontToNonEmptyList(): int {
     let value = -10;
-    let list = new ArrayAsListInt(9, 9);
+    let list = new containers.ArrayAsListInt(9, 9);
     list.pushFront(value);
 
     let expected: Int = list.at(0);
@@ -147,7 +147,7 @@ function pushFrontToNonEmptyList(): int {
 
 function pushBackToNonEmptyList(): int {
     let value = -10;
-    let list = new ArrayAsListInt(9, 9);
+    let list = new containers.ArrayAsListInt(9, 9);
     list.pushBack(value);
 
     let expected: Int = list.at(9);
@@ -157,7 +157,7 @@ function pushBackToNonEmptyList(): int {
 
 function pushAndPopFrontFromNonEmptyList(): int {
     let init = 10;
-    let list = new ArrayAsListInt(10, init);
+    let list = new containers.ArrayAsListInt(10, init);
     let value = 9;
     
     list.pushFront(value);
@@ -171,7 +171,7 @@ function pushAndPopFrontFromNonEmptyList(): int {
 
 function pushAndPopBackFromNonEmptyList(): int {
     let init = 10;
-    let list = new ArrayAsListInt(10, init);
+    let list = new containers.ArrayAsListInt(10, init);
     let value = 9;
     
     list.pushBack(value);
@@ -184,7 +184,7 @@ function pushAndPopBackFromNonEmptyList(): int {
 }
 
 function emptyToArray(): int {
-    let list = new ArrayAsListInt();
+    let list = new containers.ArrayAsListInt();
     let target: Int[] = list.toArray();
     if(target.length == 0) {
         return 0;
@@ -195,7 +195,7 @@ function emptyToArray(): int {
 
 function toArray(): int {
     let value: Int = 44;
-    let list = new ArrayAsListInt(10);
+    let list = new containers.ArrayAsListInt(10);
 
     for(let j: int = 0; j< 10; j++) {
         list.set(j, value);    
@@ -216,21 +216,21 @@ function toArray(): int {
 }
 
 function updateCapacityNoChange(): int {
-    let list = new ArrayAsListInt(100);
+    let list = new containers.ArrayAsListInt(100);
     list.reserve(100);
     let result = list.size() == 100 ? 0: 1;
     return result;
 }
 
 function updateCapacityWithIncrease(): int {
-    let list = new ArrayAsListInt(100);
+    let list = new containers.ArrayAsListInt(100);
     list.reserve(200);
     let result = list.size() == 100 ? 0: 1;
     return result;
 }
 
 function updateCapacityWithDecrease(): int {
-    let list = new ArrayAsListInt(100);
+    let list = new containers.ArrayAsListInt(100);
     list.reserve(50);
 
     let result = list.size() == 100 ? 0: 1;

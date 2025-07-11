@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,11 @@
 #include "runtime/mem/rem_set.h"
 #include "runtime/mem/gc/heap-space-misc/crossing_map.h"
 #include <atomic>
+
+#ifdef ARK_HYBRID
+#include "base_runtime.h"
+#include "runtime/mem/object_helpers-inl.h"
+#endif
 
 namespace ark::mem {
 
@@ -214,4 +219,55 @@ void GCG1BarrierSet::Enqueue(CardTable::CardPtr card)
         updatedRefsQueue_->push_back(card);
     }
 }
+
+void GCCMCBarrierSet::PostBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset,
+                                  [[maybe_unused]] void *storedValAddr)
+{
+#ifdef ARK_HYBRID
+    common::BaseRuntime::WriteBarrier(const_cast<void *>(objAddr), ToVoidPtr(ToUintPtr(objAddr) + offset),
+                                      storedValAddr);
+#endif
+}
+
+class GCCMCBarrierSet::CMCWriteBarrierHandle {
+public:
+    explicit CMCWriteBarrierHandle(const std::function<void(ObjectHeader *, ObjectHeader *, uint32_t)> &callback)
+        : callback_(callback)
+    {
+    }
+
+    bool operator()(ObjectHeader *obj, ObjectHeader *field, uint32_t offset, [[maybe_unused]] bool isVolatile)
+    {
+        callback_(obj, field, offset);
+        return true;
+    }
+
+private:
+    const std::function<void(ObjectHeader *, ObjectHeader *, uint32_t)> &callback_;
+};
+
+void GCCMCBarrierSet::PostBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset,
+                                  [[maybe_unused]] size_t count)
+{
+#ifdef ARK_HYBRID
+    const std::function<void(ObjectHeader *, ObjectHeader *, uint32_t)> visitor = [](ObjectHeader *obj,
+                                                                                     ObjectHeader *ref, uint32_t off) {
+        common::BaseRuntime::WriteBarrier(static_cast<void *>(obj), ToVoidPtr(ToUintPtr(obj) + off),
+                                          static_cast<void *>(ref));
+    };
+    CMCWriteBarrierHandle handler(visitor);
+    GCStaticObjectHelpers::TraverseAllObjectsWithInfo<false>(
+        reinterpret_cast<ObjectHeader *>(const_cast<void *>(objAddr)), handler, ToVoidPtr(ToUintPtr(objAddr) + offset),
+        ToVoidPtr(ToUintPtr(objAddr) + offset + count));
+#endif
+}
+
+void *GCCMCBarrierSet::PreReadBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset)
+{
+#ifdef ARK_HYBRID
+    return common::BaseRuntime::ReadBarrier(const_cast<void *>(objAddr), ToVoidPtr(ToUintPtr(objAddr) + offset));
+#endif
+    return nullptr;
+}
+
 }  // namespace ark::mem

@@ -24,6 +24,7 @@
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
+#include "plugins/ets/runtime/types/ets_escompat_array.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/types/ets_string_builder.h"
@@ -56,8 +57,8 @@ static inline bool Launch(EtsCoroutine *currentCoro, Method *method, const EtsHa
     auto promiseRef = etsVm->GetGlobalObjectStorage()->Add(promiseHandle.GetPtr(), mem::Reference::ObjectType::GLOBAL);
     auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, coroManager);
     // create the coro and put it to the ready queue
-    bool launchResult =
-        currentCoro->GetCoroutineManager()->Launch(evt, method, std::move(args), CoroutineLaunchMode::DEFAULT);
+    bool launchResult = currentCoro->GetCoroutineManager()->Launch(
+        evt, method, std::move(args), CoroutineLaunchMode::DEFAULT, EtsCoroutine::LAUNCH, false);
     if (UNLIKELY(!launchResult)) {
         // OOM
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
@@ -363,7 +364,9 @@ extern "C" ObjectHeader *StringBuilderToStringEntrypoint(ObjectHeader *sb)
 
 extern "C" ObjectHeader *DoubleToStringDecimalEntrypoint(ObjectHeader *cache, uint64_t number)
 {
-    ASSERT(cache != nullptr);
+    if (UNLIKELY(cache == nullptr)) {
+        return DoubleToStringDecimalNoCacheEntrypoint(number);
+    }
     return DoubleToStringCache::FromCoreType(cache)
         ->GetOrCache(EtsCoroutine::GetCurrent(), bit_cast<double>(number))
         ->GetCoreType();
@@ -372,7 +375,9 @@ extern "C" ObjectHeader *DoubleToStringDecimalEntrypoint(ObjectHeader *cache, ui
 extern "C" ObjectHeader *DoubleToStringDecimalStoreEntrypoint(ObjectHeader *elem, uint64_t number, uint64_t cached)
 {
     auto *cache = PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
-    ASSERT(cache != nullptr);
+    if (UNLIKELY(cache == nullptr)) {
+        return DoubleToStringDecimalNoCacheEntrypoint(number);
+    }
     return cache->CacheAndGetNoCheck(EtsCoroutine::GetCurrent(), bit_cast<double>(number), elem, cached)->GetCoreType();
 }
 
@@ -470,6 +475,17 @@ extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveCallByNameEntrypoint(const Metho
 
     HandlePendingException();
     UNREACHABLE();
+}
+
+extern "C" coretypes::String *CreateStringFromCharCodeEntrypoint(ObjectHeader *array)
+{
+    auto *charCodes = EtsEscompatArray::FromEtsObject(EtsObject::FromCoreType(array));
+    return EtsString::CreateNewStringFromCharCode(charCodes->GetData())->GetCoreType();
+}
+
+extern "C" coretypes::String *CreateStringFromCharCodeSingleEntrypoint(uint64_t charCode)
+{
+    return EtsString::CreateNewStringFromCharCode(bit_cast<double>(charCode))->GetCoreType();
 }
 
 }  // namespace ark::ets

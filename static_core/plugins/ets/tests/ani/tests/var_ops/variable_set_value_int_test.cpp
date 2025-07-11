@@ -24,7 +24,7 @@ public:
     void SetUp() override
     {
         AniTest::SetUp();
-        ASSERT_EQ(env_->FindNamespace("Lvariable_set_value_int_test/anyns;", &ns_), ANI_OK);
+        ASSERT_EQ(env_->FindNamespace("variable_set_value_int_test.anyns", &ns_), ANI_OK);
         ASSERT_NE(ns_, nullptr);
     }
 
@@ -89,11 +89,11 @@ TEST_F(VariableSetValueIntTest, other_type_value)
 TEST_F(VariableSetValueIntTest, composite_case_1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns_, "LA;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindClass(ns_, "A", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "add", ":I", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "add", ":i", &method), ANI_OK);
 
     ani_int sum = 0;
     ASSERT_EQ(env_->Class_CallStaticMethod_Int(cls, method, &sum), ANI_OK);
@@ -120,7 +120,7 @@ TEST_F(VariableSetValueIntTest, composite_case_2)
     ASSERT_EQ(env_->Namespace_FindVariable(ns_, "intValue", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);
 
-    const ani_int values[] = {3U, 6U, 9U};
+    const ani_int values[] = {3U, 0, -9};
     ani_int result = 0;
     for (ani_int value : values) {
         ASSERT_EQ(env_->Variable_SetValue_Int(variable, value), ANI_OK);
@@ -132,7 +132,7 @@ TEST_F(VariableSetValueIntTest, composite_case_2)
 TEST_F(VariableSetValueIntTest, composite_case_3)
 {
     ani_namespace result {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns_, "Lsecond;", &result), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns_, "second", &result), ANI_OK);
     ASSERT_NE(result, nullptr);
 
     ani_variable variable1 {};
@@ -178,6 +178,18 @@ TEST_F(VariableSetValueIntTest, composite_case_4)
     ASSERT_EQ(env_->Variable_GetValue_Int(variable2, &getValue2), ANI_OK);
     ASSERT_EQ(getValue2, val2);
 }
+
+TEST_F(VariableSetValueIntTest, check_initialization)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "intValue", &variable), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("variable_set_value_int_test.anyns"));
+    const ani_int x = 217U;
+    ASSERT_EQ(env_->Variable_SetValue_Int(variable, x), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("variable_set_value_int_test.anyns"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-identifier-naming)

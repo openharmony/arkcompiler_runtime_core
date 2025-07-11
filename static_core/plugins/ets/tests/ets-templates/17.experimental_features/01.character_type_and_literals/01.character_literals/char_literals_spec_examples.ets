@@ -28,8 +28,8 @@ function main() {
     let c3b = new Char(c3)
     let c4b = new Char(c4)
 
-    assertEQ( c1b.unboxed(), c1 )
-    assertEQ( c2b.unboxed(), c2 )
-    assertEQ( c3b.unboxed(), c3 )
-    assertEQ( c4b.unboxed(), c4 )
+    arktest.assertEQ( c1b.unboxed(), c1 )
+    arktest.assertEQ( c2b.unboxed(), c2 )
+    arktest.assertEQ( c3b.unboxed(), c3 )
+    arktest.assertEQ( c4b.unboxed(), c4 )
 }

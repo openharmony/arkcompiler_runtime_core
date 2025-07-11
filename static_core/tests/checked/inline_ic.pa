@@ -17,6 +17,14 @@
 #! EVENT_NEXT   /Inline,Test1::__noinline__call_func,B1::func,.*VIRTUAL_MONOMORPHIC,SUCCESS/
 #! EVENT_NOT    /Deoptimization,.*/
 
+#! CHECKER      Monomorphic call AOT PGO
+#! RUN_PGO_PROF entry: "Test1::main", result: 20
+#! EVENT        /InterpProfiling,START,Test1::__noinline__call_func,1/
+#! RUN_PGO_PAOC options: "--compiler-regex=[[:alpha:]]+1\\..*[cn]"
+#! EVENT_NEXT   /Inline,Test1::__noinline__call_func,B1::func,.*VIRTUAL_MONOMORPHIC,SUCCESS/
+#! RUN          entry: "Test1::main", result: 20
+#! EVENT_NOT    /Deoptimization,.*/
+
 .record Test1 {}
 .record A1 {}
 .record B1 <extends=A1> {}
@@ -61,9 +69,19 @@ exit:
 #! EVENT_NEXT   /Compilation,Test1::__noinline__call_func,.*,COMPILED/
 #! EVENT_NEXT   /Deoptimization,Test1::__noinline__call_func.*/
 
+#! CHECKER      Miss in monomorphic call AOT PGO
+#! RUN_PGO_PROF entry: "Test1::main", result: 20
+#! EVENT        /InterpProfiling,START,Test1::__noinline__call_func,1/
+#! RUN_PGO_PAOC options: "--compiler-regex=[[:alpha:]]+1\\..*[cns]"
+#! EVENT_NEXT   /Inline,Test1::__noinline__call_func,B1::func,.*VIRTUAL_MONOMORPHIC,SUCCESS/
+#! EVENT_NEXT   /Compilation,Test1::__noinline__call_func,.*,COMPILED/
+#! RUN          entry: "Test1::main_miss", result: 5
+#! EVENT_NEXT   /Deoptimization,Test1::__noinline__call_func.*/
+
 .function i32 Test1.main_miss() {
     newobj v4, A1
     newobj v5, B1
+    movi v3, 0
 
     call.short Test1.__noinline__call_func, v4
     add2 v3
@@ -91,9 +109,38 @@ exit:
 #! EVENT_NEXT        /Compilation,Test1::__noinline__call_func,.*,COMPILED/
 #! EVENT_NEXT_NOT    /Deoptimization,.*/
 
+#! CHECKER           Miss in monomorphic call and recompile with polymorphic AOT PGO
+#! RUN_PGO_PROF      entry: "Test1::main_recompile_prof", result: 3
+#! EVENT             /InterpProfiling,START,Test1::__noinline__call_func,1/
+#! RUN_PGO_PAOC      options: "--compiler-regex=[[:alpha:]]+1\\..*"
+#! EVENT_NEXT        /Inline,Test1::__noinline__call_func,A1::func,.*VIRTUAL_MONOMORPHIC,SUCCESS/
+#! EVENT_NEXT        /Compilation,Test1::__noinline__call_func,.*,COMPILED/
+#! RUN               entry: "Test1::main_recompile", result: 10
+#! EVENT             "AotEntrypointFound,Test1::__noinline__call_func"
+#! EVENT_NEXT        /Deoptimization,Test1::__noinline__call_func.*/
+
+.function i32 Test1.main_recompile_prof() {
+    newobj v4, A1
+    newobj v5, B1
+    movi v3, 0
+
+    call.short Test1.__noinline__call_func, v4
+    add2 v3
+    sta v3
+    call.short Test1.__noinline__call_func, v4
+    add2 v3
+    sta v3
+    call.short Test1.__noinline__call_func, v4
+    add2 v3
+    sta v3
+
+    return
+}
+
 .function i32 Test1.main_recompile() {
     newobj v4, A1
     newobj v5, B1
+    movi v3, 0
 
     call.short Test1.__noinline__call_func, v4
     add2 v3
@@ -128,6 +175,16 @@ exit:
 #! EVENT             /InterpProfiling,START,B2::func,1/
 #! EVENT_NEXT        /Inline,B2::func,C2::func,.*VIRTUAL_MONOMORPHIC,SUCCESS/
 #! EVENT_NEXT        /Inline,Test2::__noinline__call_func,B2::func,.*VIRTUAL_MONOMORPHIC,SUCCESS/
+#! EVENT_NEXT_NOT    /Deoptimization,.*/
+
+#! CHECKER           Inline monomorphic nested call AOT PGO
+#! RUN_PGO_PROF      entry: "Test2::main", result: 50
+#! EVENT             /InterpProfiling,START,Test2::__noinline__call_func,1/
+#! EVENT             /InterpProfiling,START,B2::func,1/
+#! RUN_PGO_PAOC      options: "--compiler-regex=[[:alpha:]]+2\\..*"
+#! EVENT_NEXT        /Inline,B2::func,C2::func,.*VIRTUAL_MONOMORPHIC,SUCCESS/
+#! EVENT_NEXT        /Inline,Test2::__noinline__call_func,B2::func,.*VIRTUAL_MONOMORPHIC,SUCCESS/
+#! RUN               entry: "Test2::main", result: 50
 #! EVENT_NEXT_NOT    /Deoptimization,.*/
 
 .record Test2 {}
@@ -188,6 +245,21 @@ exit:
 #! INST_NOT          "CallVirtual.Inlined"
 #! INST_NOT          "ReturnInlined"
 
+#! CHECKER           Inline polymorphic call AOT PGO
+#! RUN_PGO_PROF      entry: "Test3::main", result: 60
+#! EVENT             /InterpProfiling,START,Test3::__noinline__call_func,1/
+#! RUN_PGO_PAOC      options: "--compiler-regex=[[:alpha:]]+3\\..*"
+#! EVENT             /Inline,Test3::__noinline__call_func,A3::func,.*VIRTUAL_POLYMORPHIC,SUCCESS/
+#! EVENT             /Inline,Test3::__noinline__call_func,B3::func,.*VIRTUAL_POLYMORPHIC,SUCCESS/
+#! EVENT             /Inline,Test3::__noinline__call_func,C3::func,.*VIRTUAL_POLYMORPHIC,SUCCESS/
+#! EVENT_NEXT        /Compilation,Test3::__noinline__call_func,.*,COMPILED/
+#! METHOD            "Test3::__noinline__call_func"
+#! PASS_AFTER        "Inline"
+#! INST_NOT          "CallVirtual.Inlined"
+#! INST_NOT          "ReturnInlined"
+#! RUN               entry: "Test3::main", result: 60
+#! EVENT_NOT         /Deoptimization,.*/
+
 .record Test3 {}
 .record A3 {}
 .record B3 <extends=A3> {}
@@ -246,6 +318,17 @@ exit:
 #! EVENT_NEXT        /Inline,Test3::__noinline__call_func,.*VIRTUAL_POLYMORPHIC,FAIL_MEGAMORPHIC/
 #! EVENT_NEXT        /Compilation,Test3::__noinline__call_func,.*,COMPILED/
 #! EVENT_NOT         /Inline,Test3::__noinline__call_func,.*VIRTUAL_.*,SUCCESS/
+#! EVENT_NOT         /Deoptimization,.*/
+
+#! CHECKER           Inline megamorphic call AOT PGO
+#! SKIP_IF           true # TODO fix profdata write for Test3::__noinline__call_func
+#! RUN_PGO_PROF      entry: "Test3::main2", result: 150
+#! EVENT             /InterpProfiling,START,Test3::__noinline__call_func,1/
+#! RUN_PGO_PAOC      options: "--compiler-regex=[[:alpha:]]+3\\..*"
+#! EVENT_NEXT        /Inline,Test3::__noinline__call_func,.*VIRTUAL_POLYMORPHIC,FAIL_MEGAMORPHIC/
+#! EVENT_NEXT        /Compilation,Test3::__noinline__call_func,.*,COMPILED/
+#! EVENT_NOT         /Inline,Test3::__noinline__call_func,.*VIRTUAL_.*,SUCCESS/
+#! RUN               entry: "Test3::main2", result: 150
 #! EVENT_NOT         /Deoptimization,.*/
 
 .record D3 <extends=A3> {}
@@ -311,6 +394,21 @@ exit:
 #! INST              "ReturnInlined"
 #! INST              "ReturnInlined"
 
+#! CHECKER           Inline polymorphic call with runtime call AOT PGO
+#! RUN_PGO_PROF      entry: "Test4::main", result: 60
+#! EVENT             /InterpProfiling,START,Test4::__noinline__call_func,1/
+#! RUN_PGO_PAOC      options: "--compiler-regex=[[:alpha:]]+4\\..*"
+#! EVENT             /Inline,Test4::__noinline__call_func,A4::func,.*VIRTUAL_POLYMORPHIC,SUCCESS/
+#! EVENT             /Inline,Test4::__noinline__call_func,B4::func,.*VIRTUAL_POLYMORPHIC,SUCCESS/
+#! EVENT             /Inline,Test4::__noinline__call_func,C4::func,.*VIRTUAL_POLYMORPHIC,SUCCESS/
+#! EVENT_NEXT        /Compilation,Test4::__noinline__call_func,.*,COMPILED/
+#! EVENT_NOT         /Deoptimization,.*/
+#! RUN               entry: "Test4::main", result: 60
+#! METHOD            "Test4::__noinline__call_func"
+#! PASS_AFTER        "Inline"
+#! INST              /CallVirtual.Inlined.*C4::func/
+#! INST              "ReturnInlined"
+
 .record Test4 {}
 .record A4 {}
 .record B4 <extends=A4> {}
@@ -374,6 +472,17 @@ exit:
 #! EVENT_NEXT        /Compilation,Test4::__noinline__call_func,.*,COMPILED/
 #! EVENT_NEXT        /Deoptimization,Test4::__noinline__call_func.*/
 
+#! CHECKER           Miss in polymorphic call with runtime call AOT PGO
+#! RUN_PGO_PROF      entry: "Test4::main", result: 60
+#! EVENT             /InterpProfiling,START,Test4::__noinline__call_func,1/
+#! RUN_PGO_PAOC      options: "--compiler-regex=[[:alpha:]]+4\\..*"
+#! EVENT             /Inline,Test4::__noinline__call_func,A4::func,.*VIRTUAL_POLYMORPHIC,SUCCESS/
+#! EVENT             /Inline,Test4::__noinline__call_func,B4::func,.*VIRTUAL_POLYMORPHIC,SUCCESS/
+#! EVENT             /Inline,Test4::__noinline__call_func,C4::func,.*VIRTUAL_POLYMORPHIC,SUCCESS/
+#! RUN               entry: "Test4::main_miss", result: 10
+#! EVENT_NEXT        /AotEntrypointFound,Test4::__noinline__call_func/
+#! EVENT_NEXT        /Deoptimization,Test4::__noinline__call_func.*/
+
 .record D4 <extends=A4> {}
 
 .function i32 D4.func(D4 a0) {
@@ -386,7 +495,9 @@ exit:
     newobj v5, B4
     newobj v6, C4
     newobj v7, D4
-    
+
+    movi v3, 0
+
     call.short Test4.__noinline__call_func, v4
     add2 v3
     sta v3

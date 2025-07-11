@@ -15,41 +15,41 @@
 
 package rest_spread.test;
 
-function checkRestOfNumber(f: JSValue) {
-    return f([11, 22, 33], 11, 22, 33);
+function checkRestOfNumber(f: JSValue): boolean {
+    return ESValue.wrap(f).invoke([11, 22, 33], 11, 22, 33).toBoolean();
 }
 
-function checkRestOfString(f: JSValue) {
-    return f(['aa', 'bb', 'cc'], 'aa', 'bb', 'cc');
+function checkRestOfString(f: JSValue): boolean {
+    return ESValue.wrap(f).invoke(['aa', 'bb', 'cc'], 'aa', 'bb', 'cc').toBoolean();
 }
 
-function checkRestOfObject(f: JSValue) {
+function checkRestOfObject(f: JSValue): boolean {
     class A{}
     let a = new A();
     interface B{name: string}
     let b: B = {name: "bbb"};
     let c = () => {};
-    let objArr: object[] = [a, b, c];
-    return f(objArr, a, b, c);
+    let objArr: FixedArray<object> = [a, b, c];
+    return ESValue.wrap(f).invoke(objArr, a, b, c).toBoolean();
 }
 
-function checkRestOfTuple(f: JSValue) {
+function checkRestOfTuple(f: JSValue): boolean {
     let tuple1: [int, string] = [1, 'a'];
     let tuple2: [int, string] = [2, 'b'];
     let tuple3: [int, string] = [3, 'c'];
     let tuple4: [int, string][] = [tuple1, tuple2, tuple3];
-    return f(tuple4, tuple1, tuple2, tuple3);
+    return ESValue.wrap(f).invoke(tuple4, tuple1, tuple2, tuple3).toBoolean();
 }
 
-function checkRestofUnion(f: JSValue) {
-    let unionArr1: (int | string | boolean)[] = [1, false];
-    let unionArr2: (int | string | boolean)[] = [2, 3, true, 'a', 'b'];
-    return f([unionArr1, unionArr2], unionArr1, unionArr2);
+function checkRestofUnion(f: JSValue): boolean {
+    let unionArr1: FixedArray<int | string | boolean> = [1, false];
+    let unionArr2: FixedArray<int | string | boolean> = [2, 3, true, 'a', 'b'];
+    return ESValue.wrap(f).invoke([unionArr1, unionArr2], unionArr1, unionArr2).toBoolean();
 }
 
-function checkRestOfJSValue(f: JSValue) {
-    let a: JSValue = 1;
-    let b: JSValue = "b";
-    let c: JSValue = true;
-    return f([a, b, c], a, b, c);
+function checkRestOfJSValue(f: JSValue): boolean {
+    let a = 1;
+    let b = "b";
+    let c = true;
+    return ESValue.wrap(f).invoke([a, b, c], a, b, c).toBoolean();
 }

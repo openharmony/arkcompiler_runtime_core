@@ -31,7 +31,6 @@ import {
 
 
 class A {}
-class B extends BDeclared {}
 class C extends A {}
 
 

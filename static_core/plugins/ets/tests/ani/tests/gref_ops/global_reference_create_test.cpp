@@ -43,7 +43,7 @@ TEST_F(GlobalReferenceCreateTest, from_undefined_ref)
 
 TEST_F(GlobalReferenceCreateTest, from_object_ref)
 {
-    auto ref = CallEtsFunction<ani_ref>("global_reference_create_test", "GetObject");
+    auto ref = CallEtsFunction<ani_ref>("global_reference_create_test", "getObject");
     ani_ref gref;
     ASSERT_EQ(env_->GlobalReference_Create(ref, &gref), ANI_OK);
 
@@ -80,7 +80,7 @@ TEST_F(GlobalReferenceCreateTest, from_undefined_gref)
 
 TEST_F(GlobalReferenceCreateTest, from_object_gref)
 {
-    auto ref = CallEtsFunction<ani_ref>("global_reference_create_test", "GetObject");
+    auto ref = CallEtsFunction<ani_ref>("global_reference_create_test", "getObject");
     ani_ref gref;
     ASSERT_EQ(env_->GlobalReference_Create(ref, &gref), ANI_OK);
 
@@ -92,7 +92,7 @@ TEST_F(GlobalReferenceCreateTest, from_object_gref)
 
 TEST_F(GlobalReferenceCreateTest, delete_as_local_ref)
 {
-    auto ref = CallEtsFunction<ani_ref>("global_reference_create_test", "GetObject");
+    auto ref = CallEtsFunction<ani_ref>("global_reference_create_test", "getObject");
     ani_ref gref;
     ASSERT_EQ(env_->GlobalReference_Create(ref, &gref), ANI_OK);
 
@@ -101,19 +101,27 @@ TEST_F(GlobalReferenceCreateTest, delete_as_local_ref)
 
 TEST_F(GlobalReferenceCreateTest, invalid_result)
 {
-    auto ref = CallEtsFunction<ani_ref>("global_reference_create_test", "GetObject");
+    auto ref = CallEtsFunction<ani_ref>("global_reference_create_test", "getObject");
     ASSERT_EQ(env_->GlobalReference_Create(ref, nullptr), ANI_INVALID_ARGS);
 }
 
 TEST_F(GlobalReferenceCreateTest, global_reference_create_test)
 {
-    auto ref = CallEtsFunction<ani_ref>("global_reference_create_test", "GetObject");
+    auto ref = CallEtsFunction<ani_ref>("global_reference_create_test", "getObject");
     ani_ref gref;
     ASSERT_EQ(env_->GlobalReference_Create(ref, &gref), ANI_OK);
 
     ASSERT_EQ(CallEtsFunction<ani_boolean>("global_reference_create_test", "CheckObject", ref, gref), ANI_TRUE);
 
     ASSERT_EQ(env_->GlobalReference_Delete(gref), ANI_OK);
+}
+
+TEST_F(GlobalReferenceCreateTest, invalid_env)
+{
+    ani_ref undefinedRef;
+    ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
+    ani_ref gref {};
+    ASSERT_EQ(env_->c_api->GlobalReference_Create(nullptr, undefinedRef, &gref), ANI_INVALID_ARGS);
 }
 
 }  // namespace ark::ets::ani::testing

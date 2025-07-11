@@ -19,12 +19,12 @@
 desc: Boxing conversion for floating-point types (NaN)
 ---*/
 
-let origin: {{conv.origin}} = 0.0 / 0.0;
+let origin: {{conv.origin}} = 0.0f / 0.0f;
 let dest:   {{conv.dest}};
 
 function main(): void {
   dest = origin;
-  assertTrue(dest.isNaN());
+  arktest.assertTrue(dest.isNaN());
 }
 
 {% endfor %}

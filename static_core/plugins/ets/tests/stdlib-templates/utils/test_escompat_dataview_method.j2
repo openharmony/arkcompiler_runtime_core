@@ -28,7 +28,7 @@ function test_{{.data}}_{{.key}}(dataView: DataView): void {
     {%- else %}
     ret = dataView.{{.item.method_name2[key]}}({{.item.method_params2[paramKey]["byteOffset"]}})
     {%- endif %}
-    assertTrue(ret == {{.item.expected_test_result[key][paramKey]}})
+    arktest.assertTrue(ret == {{.item.expected_test_result[key][paramKey]}})
 {%endfor %}}
 {%endfor %}
 

@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-let error = new Error("abc");
-let p = new Promise<string>((_: (v: string) => void, reject: (error: Object) => void) => {
+let error = new Error('abc');
+let p = new Promise<string>((_: (v: string) => void, reject: (error: Error) => void) => {
     reject(error);
 });
 
 p.then<void, void>((value: string): void => {
-    console.log("Test failed. The promise should not be fulfilled.");
-}, (err: Object): void => {
+    console.log('Test failed. The promise should not be fulfilled.');
+}, (err: Error): void => {
     if (err !== error) {
-        console.log("Test failed. The promise should be rejected with the resolution value.");
+        console.log('Test failed. The promise should be rejected with the resolution value.');
         return;
     }
-    console.log("Test passed.");
+    console.log('Test passed.');
 });

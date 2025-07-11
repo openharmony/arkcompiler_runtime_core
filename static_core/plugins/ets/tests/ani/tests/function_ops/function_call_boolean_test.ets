@@ -75,7 +75,7 @@ namespace A {
     }
 
     function calculateBoolean(value1: int, value2: int, value3: char, value4: double): boolean {
-        let aChar: char = 'A';
+        let aChar: char = c'A';
         if (value3 == aChar) {
             return true;
         }

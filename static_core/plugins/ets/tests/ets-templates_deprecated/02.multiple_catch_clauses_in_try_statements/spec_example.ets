@@ -40,6 +40,6 @@ function processNumbers(a: int, b: int): int {
 }
 
 function main() {
-    assertEQ( processNumbers(4, 2), 2 )
-    assertEQ( processNumbers(4, 0), MaxInt )
+    arktest.assertEQ( processNumbers(4, 2), 2 )
+    arktest.assertEQ( processNumbers(4, 0), MaxInt )
 }

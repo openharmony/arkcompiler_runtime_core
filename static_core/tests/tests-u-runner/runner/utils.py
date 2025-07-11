@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -129,6 +129,19 @@ def write_2_file(file_path: Union[Path, str], content: str) -> None:
     f_descriptor = os.open(file_path, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o755)
     with os.fdopen(f_descriptor, mode='w+', encoding="utf-8") as f_handle:
         f_handle.write(content)
+
+
+def get_opener(mode: int) -> Callable[[Union[str, Path], int], int]:
+    def opener(path_name: Union[str, Path], flags: int) -> int:
+        return os.open(path_name, os.O_RDWR | os.O_APPEND | os.O_CREAT | flags, mode)
+    return opener
+
+
+def write_list_to_file(list_for_write: list, file_path: Path, mode: int = 0o644) -> None:
+    custom_opener = get_opener(mode)
+    with open(file_path, mode='w+', encoding='utf-8', opener=custom_opener) as file:
+        for entity in list_for_write:
+            file.write(f"{entity}\n")
 
 
 def purify(line: str) -> str:

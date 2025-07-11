@@ -32,5 +32,5 @@ class Person {
 function main(): void {
   let person: Person = new Person("Bob");
 
-  assertEQ( person.parent.name, "Bob" )
+  arktest.assertEQ( person.parent.name, "Bob" )
 }

@@ -23,5 +23,5 @@ function main(): void {
     [4, 5, 6],
   ];
   const obj1: object = matrix;
-  assertTrue(obj1 == matrix);
+  arktest.assertTrue(obj1 == matrix);
 }

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
 # limitations under the License.
 #
 
-from typing import Optional, Any, Dict
+from typing import Any
 
 from runner.logger import Log
 
@@ -22,8 +23,8 @@ _LOGGER = Log.get_logger(__file__)
 
 
 class CliArgsWrapper:
-    args: Optional[Dict[str, Any]] = None
+    args: dict[str, Any] | None = None  # type: ignore[explicit-any]
 
     @staticmethod
-    def setup(args: Dict[str, Any]) -> None:
+    def setup(args: dict[str, Any]) -> None:  # type: ignore[explicit-any]
         CliArgsWrapper.args = args

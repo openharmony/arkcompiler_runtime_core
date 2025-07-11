@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,7 +13,11 @@
 
 ---
 cases:
-  - { argument: "{i: 3.9, j: \"some str\"}", result: 3 }
-  - { argument: "{i: 1.9}", result: -1 }
-  - { argument: "{j: \"some str\"}", result: -1 }
-  - { argument: "{}", result: -1 }
+  - { argument: "{i: 3.9, j: \"some str\"}", class: "A", num: "3.9", str: "\"some str\"" }
+  - { argument: "{i: 3.9, j: \"some str\"}", class: "C", num: "3.9", str: "\"some str\"" }
+  - { argument: "{i: 3.9}", class: "A", num: "3.9", str: "\"A\"" }
+  - { argument: "{i: 3.9}", class: "C", num: "3.9", str: "\"C\"" }
+  - { argument: "{j: \"some str\"}", class: "A", num: "1.7", str: "\"some str\"" }
+  - { argument: "{j: \"some str\"}", class: "C", num: "2.6", str: "\"some str\"" }
+  - { argument: "{}", class: "A", num: "1.7", str: "\"A\"" }
+  - { argument: "{}", class: "C", num: "2.6", str: "\"C\"" }

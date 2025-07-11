@@ -35,11 +35,11 @@ cases:
       use: |-
           // using class type references
           let a: A = new A()
-          assertEQ( a.met(), "A" )
+          arktest.assertEQ( a.met(), "A" )
           let b: B = new B()
-          assertEQ( b.met(), "B" )
+          arktest.assertEQ( b.met(), "B" )
           let c: C = new C()
-          assertEQ( c.met(), "C" )
+          arktest.assertEQ( c.met(), "C" )
 
     - decl: |-
           interface I {
@@ -66,11 +66,11 @@ cases:
       use: |-
           // using type aliases
           let a: TA = new TA()
-          assertEQ( a.met(), "A" )
+          arktest.assertEQ( a.met(), "A" )
           let b: TB = new TB()
-          assertEQ( b.met(), "B" )
+          arktest.assertEQ( b.met(), "B" )
           let c: TC = new TC()
-          assertEQ( c.met(), "C" )
+          arktest.assertEQ( c.met(), "C" )
 
     - decl: |-
           interface I {
@@ -91,9 +91,9 @@ cases:
           class C implements I {}
       use: |-
           // using super for referring immediate superclass
-          assertEQ( new A().met(), "A" )
-          assertEQ( new B().met(), "BA" )
-          assertEQ( new C().met(), "I" )
+          arktest.assertEQ( new A().met(), "A" )
+          arktest.assertEQ( new B().met(), "BA" )
+          arktest.assertEQ( new C().met(), "I" )
 
     - decl: |-
           class Base {
@@ -109,9 +109,9 @@ cases:
           }
       use: |-
           // using super for referring 2nd level superclass
-          assertEQ( new Base().met(), "Base" )
-          assertEQ( new A().met(), "Base" )
-          assertEQ( new B().met(), "BBase" )
+          arktest.assertEQ( new Base().met(), "Base" )
+          arktest.assertEQ( new A().met(), "Base" )
+          arktest.assertEQ( new B().met(), "BBase" )
 
     - decl: |-
           interface I {
@@ -141,9 +141,9 @@ cases:
           }
       use: |-
           // using class type expression
-          assertEQ( createA().met(), "A" )
-          assertEQ( createB().met(), "BA" )
-          assertEQ( createC().met(), "I" )
+          arktest.assertEQ( createA().met(), "A" )
+          arktest.assertEQ( createB().met(), "BA" )
+          arktest.assertEQ( createC().met(), "I" )
 
     - decl: |-
           class X {
@@ -168,7 +168,7 @@ cases:
           // using type parameter constraint
           let v: A<Z> = new A<Z>()
           v.setFld(new Z())
-          assertEQ( v.m(), "X" )
+          arktest.assertEQ( v.m(), "X" )
 
     - decl: |-
           class X {
@@ -197,4 +197,4 @@ cases:
           // using type parameter constraint
           let v: A<Z> = new A<Z>()
           v.setFld(new Z())
-          assertEQ( v.m(), "Y" )
+          arktest.assertEQ( v.m(), "Y" )

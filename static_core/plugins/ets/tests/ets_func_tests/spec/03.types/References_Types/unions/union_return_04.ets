@@ -27,5 +27,5 @@ function format_number(): Margin {
 
 function main(): void {
     let c: Margin = format_number()
-    assertEQ( c as number, 5)
+    arktest.assertEQ( c as number, 5)
 }

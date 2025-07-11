@@ -89,4 +89,9 @@ TEST_F(EnsureEnoughReferencesTest, testHugeNrRefs)
     ASSERT_EQ(env_->EnsureEnoughReferences(ani_size(std::numeric_limits<ani_size>::max()) - 0), ANI_OUT_OF_MEMORY);
 }
 
+TEST_F(EnsureEnoughReferencesTest, ensure_enough_references_invalid_env)
+{
+    ASSERT_EQ(env_->c_api->EnsureEnoughReferences(nullptr, MIN_CAPACITY), ANI_INVALID_ARGS);
+}
+
 }  // namespace ark::ets::ani::testing

@@ -15,78 +15,80 @@
 
 package std.containers;
 
-/**
- * List interface
- */
-export interface ListObject {
+export namespace containers {
     /**
-     * Pushes a value to the begin of the List
-     *
-     * @param e value to push
-     */
-    pushFront(e: Object): void;
+    * List interface
+    */
+    export interface ListObject {
+        /**
+        * Pushes a value to the begin of the List
+        *
+        * @param e value to push
+        */
+        pushFront(e: Object): void;
 
-    /**
-     * Pops a value from the begin of the List
-     *
-     * @returns popped value
-     */
-    popFront(): Object;
+        /**
+        * Pops a value from the begin of the List
+        *
+        * @returns popped value
+        */
+        popFront(): Object;
 
-    /**
-     * Pushes a value to the end of the List
-     *
-     * @param e value to push
-     */
-    pushBack(e: Object): void;
+        /**
+        * Pushes a value to the end of the List
+        *
+        * @param e value to push
+        */
+        pushBack(e: Object): void;
 
-    /**
-     * Pops a value from the end of the List
-     *
-     * @returns popped value
-     */
-    popBack(): Object;
+        /**
+        * Pops a value from the end of the List
+        *
+        * @returns popped value
+        */
+        popBack(): Object;
 
-    /**
-     * Returns number of elements in the List
-     *
-     * @returns number of elements in the List
-     */
-    size(): int;
+        /**
+        * Returns number of elements in the List
+        *
+        * @returns number of elements in the List
+        */
+        size(): int;
 
-    /**
-     * Returns an element at the specified index
-     *
-     * @param index element position
-     *
-     * @returns an element
-     */
-    at(index: int): Object;
+        /**
+        * Returns an element at the specified index
+        *
+        * @param index element position
+        *
+        * @returns an element
+        */
+        at(index: int): Object;
 
-    /**
-     * Sets an element at the specified index
-     *
-     * @param index element position
-     *
-     * @param e new value
-     */
-    set(index: int, e: Object): void;
+        /**
+        * Sets an element at the specified index
+        *
+        * @param index element position
+        *
+        * @param e new value
+        */
+        set(index: int, e: Object): void;
 
-    /**
-     * Checks if an element is in the List
-     *
-     * @param e value to find
-     *
-     * @returns true if value present, false otherwise
-     */
-    has(e: Object): boolean;
+        /**
+        * Checks if an element is in the List
+        *
+        * @param e value to find
+        *
+        * @returns true if value present, false otherwise
+        */
+        has(e: Object): boolean;
 
-/*  Code below is blocked by internal issue with lambdas #9994
-    forEach(fn: (e: Object): Object): ListObject;
-    map(fn: (e: Object): ): ;
-    fold(combine: (lhs: Object, rhs: Object): Object): Object;
-    foldWith(combine: (lhs: Object, rhs: Object): , initVal: ): ;
-    filter(filterCond: (e: Object): boolean): ListObject;
-    sort(comparator: (lhs: Object, rhs: Object): boolean): ListObject;
-*/
+    /*  Code below is blocked by internal issue with lambdas #9994
+        forEach(fn: (e: Object): Object): ListObject;
+        map(fn: (e: Object): ): ;
+        fold(combine: (lhs: Object, rhs: Object): Object): Object;
+        foldWith(combine: (lhs: Object, rhs: Object): , initVal: ): ;
+        filter(filterCond: (e: Object): boolean): ListObject;
+        sort(comparator: (lhs: Object, rhs: Object): boolean): ListObject;
+    */
+    }
 }

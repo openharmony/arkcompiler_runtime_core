@@ -14,8 +14,8 @@
 version: 0.0.0.1
 type: test-suite
 suite-name: sts-func
-list-root: ${PANDA_SOURCE_PATH}/runtime_core/static_core/plugins/ets/tests/test-lists/ets-func-tests
-test-root: ${PANDA_SOURCE_PATH}/runtime_core/static_core/plugins/ets/tests
+list-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/test-lists/ets-func-tests
+test-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests
 
 parameters:
     extension: ets

@@ -103,6 +103,8 @@ add_ets_gc_test(FILE concurrent_start_gc.ets OPTIONS "--gc-type=g1-gc" "--gc-tri
 add_ets_gc_test(FILE register_native_allocation_test.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(FILE finalization_registry_test.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(TIMEOUT_CMD timeout TIMEOUT_TIME 10m FILE test_finreg_in_different_coros.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
+add_ets_gc_test(FILE finalization_registry_coro_test.ets OPTIONS  "--coroutine-workers-count=10" "--gc-type=g1-gc" "--run-gc-in-place"  "--gc-trigger-type=debug-never" MODE "INT")
+
 add_ets_gc_test(TIMEOUT_CMD timeout TIMEOUT_TIME 10m FILE finalization_registry_deadlock_test.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(FILE scheduled_gc.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" "--gc-use-nth-alloc-trigger=true" MODE "INT")
 add_ets_gc_test(FILE scheduled_gc_trigger_exception.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" MODE "INT")

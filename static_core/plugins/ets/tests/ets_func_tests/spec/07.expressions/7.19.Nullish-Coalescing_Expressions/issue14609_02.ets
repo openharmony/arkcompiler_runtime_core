@@ -35,6 +35,6 @@ function main(): void {
   let aa = a.foo()
   let b = new A<null>(null)
   let bb = b.foo()
-  assertTrue( aa instanceof A)
-  assertTrue( bb instanceof A)
+  arktest.assertTrue( aa instanceof A)
+  arktest.assertTrue( bb instanceof A)
 }

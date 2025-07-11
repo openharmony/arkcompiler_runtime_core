@@ -23,6 +23,7 @@
 
 namespace common {
 
+// NOLINTBEGIN(hicpp-signed-bitwise)
 enum ThreadFlag : uint16_t {
     NO_FLAGS = 0 << 0,
     SUSPEND_REQUEST = 1 << 0,
@@ -31,6 +32,7 @@ enum ThreadFlag : uint16_t {
 
 constexpr uint32_t THREAD_STATE_OFFSET = 16;
 constexpr uint32_t THREAD_FLAGS_MASK = (0x1 << THREAD_STATE_OFFSET) - 1;
+// NOLINTEND(hicpp-signed-bitwise)
 enum class ThreadState : uint16_t {
     CREATED = 0,
     RUNNING = 1,
@@ -40,6 +42,7 @@ enum class ThreadState : uint16_t {
     TERMINATED = 5,
 };
 
+// NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
 union ThreadStateAndFlags {
     explicit ThreadStateAndFlags(uint32_t val = 0) : asInt(val) {}
     struct {

@@ -31,5 +31,5 @@ function main(): void {
   const bob = new Person("Bob");
   const key = "address";
   bob.details = {address: "123"};
-  assertEQ(bob.details?.[key], "123");
+  arktest.assertEQ(bob.details?.[key], "123");
 }

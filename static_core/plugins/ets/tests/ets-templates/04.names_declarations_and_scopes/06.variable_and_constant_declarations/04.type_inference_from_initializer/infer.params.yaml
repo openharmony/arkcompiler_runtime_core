@@ -1,0 +1,72 @@
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - decl: 'const INT = 1 + 2 + 3 * 4;  // inferred int'
+    assert: new Int(INT).unboxed() == 15
+
+  - decl: 'let DOUBLE = 3.0 / 2.0;  // inferred double'
+    assert: new Double(DOUBLE).unboxed() == 1.5
+
+  - decl: 'const arr = new long[1];  // inferred array of longs'
+    assert: new Long(arr[0]).unboxed() == 0 as long
+
+  - decl: 'let arr = new Object[1];  // inferred array of Objects'
+    use: ' arr[0] = new Object();'
+    assert: arr[0] instanceof Object
+
+  - decl: 'let arr = new (Error|undefined)[1];  // inferred array of Error|undefined'
+    assert: arr[0] == undefined
+
+  - decl: 'const obj = new Object[1];  // inferred array of Objects'
+    use: 'obj[0] = new Long(Long.MAX_VALUE);'
+    assert: obj instanceof Object[] && obj[0] instanceof Long && (obj[0] as Long).unboxed() == Long.MAX_VALUE
+
+  - decl: 'let arr:FixedArray<FixedArray<FixedArray<byte>>> = new byte[1][2][3];  // inferred three-dimensional array of bytes'
+    assert: arr instanceof FixedArray<FixedArray<FixedArray<byte>>> && arr[0][0][0] == 0
+
+  - decl: |-
+      enum Color { Red, Green, Blue }
+      let c = Color.Red;  // inferred enum type
+      let d: Color = c;
+    assert: c == d
+
+  - decl: |-
+      class A {}
+      class B extends A {}
+      let a = new A();  // inferred type A
+      const b = new B();  // inferred type B
+    use: a = b;
+    assert: a instanceof A && b instanceof B && a === b
+
+  - decl: let myV = undefined
+    assert: typeof myV == "undefined"
+
+  - decl: let myV = true
+    assert: typeof myV == "boolean"
+
+  - decl: let myV = "true"
+    assert: typeof myV == "string"
+
+  - decl: declare const myC = 1
+    assert: typeof myC == "number"
+
+  - decl: declare const myC = 2.0
+    assert: typeof myC == "number"
+
+  - decl: declare const myC = "1"
+    assert: typeof myC == "string"
+
+  - decl: declare const myC = "string"
+    assert: typeof myC == "string"

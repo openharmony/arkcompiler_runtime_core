@@ -85,29 +85,29 @@ function callToLowerCase(ch: Char): char {
 }
 
 function main(): int {
-    assertTrue(!callIsUpperCase(c'a'));
-    assertTrue(!callIsUpperCase(c'z'));
-    assertTrue(callIsUpperCase(c'A'));
-    assertTrue(callIsUpperCase(c'Z'));
-    assertTrue(!callIsUpperCase(c'+'));
+    arktest.assertTrue(!callIsUpperCase(c'a'));
+    arktest.assertTrue(!callIsUpperCase(c'z'));
+    arktest.assertTrue(callIsUpperCase(c'A'));
+    arktest.assertTrue(callIsUpperCase(c'Z'));
+    arktest.assertTrue(!callIsUpperCase(c'+'));
 
-    assertTrue(callIsLowerCase(c'a'));
-    assertTrue(callIsLowerCase(c'z'));
-    assertTrue(!callIsLowerCase(c'A'));
-    assertTrue(!callIsLowerCase(c'Z'));
-    assertTrue(!callIsLowerCase(c'+'));
+    arktest.assertTrue(callIsLowerCase(c'a'));
+    arktest.assertTrue(callIsLowerCase(c'z'));
+    arktest.assertTrue(!callIsLowerCase(c'A'));
+    arktest.assertTrue(!callIsLowerCase(c'Z'));
+    arktest.assertTrue(!callIsLowerCase(c'+'));
 
-    assertEQ(c'A', callToUpperCase(c'a'));
-    assertEQ(c'Z', callToUpperCase(c'z'));
-    assertEQ(c'A', callToUpperCase(c'A'));
-    assertEQ(c'Z', callToUpperCase(c'Z'));
-    assertEQ(c'+', callToUpperCase(c'+'));
+    arktest.assertEQ(c'A', callToUpperCase(c'a'));
+    arktest.assertEQ(c'Z', callToUpperCase(c'z'));
+    arktest.assertEQ(c'A', callToUpperCase(c'A'));
+    arktest.assertEQ(c'Z', callToUpperCase(c'Z'));
+    arktest.assertEQ(c'+', callToUpperCase(c'+'));
 
-    assertEQ(c'a', callToLowerCase(c'a'));
-    assertEQ(c'z', callToLowerCase(c'z'));
-    assertEQ(c'a', callToLowerCase(c'A'));
-    assertEQ(c'z', callToLowerCase(c'Z'));
-    assertEQ(c'+', callToLowerCase(c'+'));
+    arktest.assertEQ(c'a', callToLowerCase(c'a'));
+    arktest.assertEQ(c'z', callToLowerCase(c'z'));
+    arktest.assertEQ(c'a', callToLowerCase(c'A'));
+    arktest.assertEQ(c'z', callToLowerCase(c'Z'));
+    arktest.assertEQ(c'+', callToLowerCase(c'+'));
 
     return 0;
 }

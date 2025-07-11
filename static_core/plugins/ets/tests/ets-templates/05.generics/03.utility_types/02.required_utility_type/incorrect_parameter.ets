@@ -31,7 +31,7 @@ function foo(i: Required<C>) {
 }
 
 function main() {
-  assertTrue( foo( {{c.argument}} ) == 1 )
+  arktest.assertTrue( foo( {{c.argument}} ) == 1 )
 }
 
 {% endfor %}

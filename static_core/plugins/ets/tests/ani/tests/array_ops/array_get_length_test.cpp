@@ -13,13 +13,61 @@
  * limitations under the License.
  */
 
-#include "ani_gtest_array_ops.h"
-#include <iostream>
+#include <limits>
+#include "ani.h"
+#include "array_gtest_helper.h"
+#include "macros.h"
 
-// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
+// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
-class ArrayGetLengthTest : public AniGTestArrayOps {};
+class ArrayGetLengthTest : public ArrayHelperTest {};
+
+TEST_F(ArrayGetLengthTest, GetLengthTest)
+{
+    InitTest();
+
+    ani_array array {};
+    ASSERT_EQ(env_->Array_New(1U, nullptr, &array), ANI_OK);
+    ani_size sz {};
+    ASSERT_EQ(env_->Array_GetLength(array, &sz), ANI_OK);
+    ASSERT_EQ(sz, 1U);
+
+    ani_object boxedBoolean {};
+    env_->Object_New(booleanClass, booleanCtor, &boxedBoolean, ANI_TRUE);
+    ani_array arrayBoolean {};
+    ASSERT_EQ(env_->Array_New(5U, boxedBoolean, &arrayBoolean), ANI_OK);
+    ASSERT_EQ(env_->Array_GetLength(arrayBoolean, &sz), ANI_OK);
+    ASSERT_EQ(sz, 5U);
+
+    ani_object boxedInt {};
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    ASSERT_EQ(env_->Object_New(intClass, intCtor, &boxedInt, 10U), ANI_OK);
+    ani_array arrayInt {};
+    ASSERT_EQ(env_->Array_New(42U, boxedInt, &arrayInt), ANI_OK);
+    ASSERT_EQ(env_->Array_GetLength(arrayInt, &sz), ANI_OK);
+    ASSERT_EQ(sz, 42U);
+}
+
+TEST_F(ArrayGetLengthTest, GetLengthErrorTest)
+{
+    InitTest();
+
+    ani_size szOverflow = std::numeric_limits<uint32_t>::max();
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    szOverflow += 10U;
+
+    ani_array array {};
+#ifndef PANDA_TARGET_ARM32
+    ASSERT_EQ(env_->Array_New(szOverflow, nullptr, &array), ANI_INVALID_ARGS);
+#endif
+    ASSERT_EQ(env_->Array_New(szOverflow, nullptr, nullptr), ANI_INVALID_ARGS);
+
+    ani_size sz {};
+    ASSERT_EQ(env_->Array_GetLength(nullptr, &sz), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Array_New(5U, nullptr, &array), ANI_OK);
+    ASSERT_EQ(env_->Array_GetLength(array, nullptr), ANI_INVALID_ARGS);
+}
 
 TEST_F(ArrayGetLengthTest, GetLengthErrorTests)
 {

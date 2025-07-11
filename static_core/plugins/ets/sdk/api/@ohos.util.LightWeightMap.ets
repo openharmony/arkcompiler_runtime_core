@@ -13,6 +13,13 @@
  * limitations under the License.
  */
 
+import { BusinessError } from "@ohos.base";
+
+const TypeErrorCodeId: number = 401;
+const OutOfBoundsErrorCodeId: number = 10200001;
+
+export type LightWeightMapCbFn<K, V> = (value: V, key: K, map: LightWeightMap<K, V>) => void;
+
 interface ReadonlyLightWeightMap<K, V> extends Iterable<[K, V]> {
     /**
      * Returns number of Entries with unique keys in the LightWeightMap
@@ -178,7 +185,7 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
      * @returns number of Entries with unique keys in the LightWeightMap
      */
     get length(): number {
-        return this.buckets.actualLength as number;
+        return this.buckets.actualLength.toDouble();
     }
 
     /**
@@ -201,7 +208,7 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
      *
      * @param callbackFn to apply
      */
-    forEach(callbackFn: (value: V, key: K, map: LightWeightMap<K, V>) => void): void {
+    forEach(callbackFn: LightWeightMapCbFn<K, V>): void {
         const iter = this.entries();
         let res = iter.next();
         while (!res.done) {
@@ -276,11 +283,14 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
      * @param index the index to get the key from
      *
      * @returns the key at the specified index
+     * 
+     * @throws BusinessError if the index is out of range, the container is empty or the index exceeds Int.MAX_VALUE.
      */
-    getKeyAt(index: number): K | undefined {
-        if (index > Int.MAX_VALUE || index < 0 || this.buckets.actualLength <= index) {
-            throw new RangeError("The value of index is out of range.");
-        }
+    getKeyAt(index: number): K {
+        this.checkIndex(index);
+        this.checkEmptyContainer();
+        this.checkRange(index, this.buckets.actualLength);
+
         return this.buckets.entryKeys[index];
     }
 
@@ -290,11 +300,14 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
      * @param index the index to get the value from
      *
      * @returns the value at the specified index
+     * 
+     * @throws BusinessError if the index is out of range, the container is empty or the index exceeds Int.MAX_VALUE.
      */
-    getValueAt(index: number): V | undefined {
-        if (index > Int.MAX_VALUE || index < 0 || this.buckets.actualLength <= index) {
-            throw new RangeError("The value of index is out of range.");
-        }
+    getValueAt(index: number): V {
+        this.checkIndex(index);
+        this.checkEmptyContainer();
+        this.checkRange(index, this.buckets.actualLength);
+
         return this.buckets.entryValues[index];
     }
 
@@ -355,7 +368,7 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
         if (minimumCapacity > Int.MAX_VALUE) {
             return;
         }
-        this.buckets.increaseCapacityTo(minimumCapacity as int);
+        this.buckets.increaseCapacityTo(minimumCapacity.toInt());
     }
 
     /**
@@ -390,9 +403,12 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
      * @param index the index to remove the entry from
      *
      * @returns true if the entry was removed, false otherwise
+     * 
+     * @throws BusinessError if the index exceeds Int.MAX_VALUE.
      */
     removeAt(index: number): boolean {
-        if (index < 0 || this.buckets.actualLength <= (index as int)) {
+        this.checkIndex(index);
+        if (index < 0 || this.buckets.actualLength <= (index.toInt())) {
             return false;
         }
         this.buckets.remove(index);
@@ -437,12 +453,15 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
      * @param index the index to set the value at
      * @param newValue the new value to set at the specified index
      *
-     * @returns true if the value was set, false otherwise
+     * @returns true if the value was set
+     * 
+     * @throws BusinessError if the index is out of range, the container is empty or the index exceeds Int.MAX_VALUE.
      */
     setValueAt(index: number, newValue: V): boolean {
-        if (index < 0 || index >= this.buckets.actualLength) {
-            throw new RangeError("The value of index is out of range.");
-        }
+        this.checkIndex(index);
+        this.checkEmptyContainer();
+        this.checkRange(index, this.buckets.actualLength);
+
         this.buckets.entryValues[index] = newValue;
         return true;
     }
@@ -474,14 +493,14 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
             let right = index;
             while ((right < this.buckets.actualLength) && (this.buckets.entryHashs[right] === hashCode)) {
                 if (this.buckets.entryKeys[right] === key) {
-                    return right as number;
+                    return right.toDouble();
                 }
                 right++;
             }
             let left = index - 1;
             while ((left > 0) && (this.buckets.entryHashs[right] === hashCode)) {
                 if (this.buckets.entryKeys[left] === key) {
-                    return left as number;
+                    return left.toDouble();
                 }
                 left--;
             }
@@ -498,7 +517,7 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
             return 1;
         }
 
-        const keyHash: int = key!.$_hashCode();
+        const keyHash: int = (key! as object).$_hashCode(); // #26217
         const positiveMask: int = 1 << LightWeightMap.SHIFT_COUNT;
         if (keyHash >= 0) {
             return (keyHash | positiveMask)
@@ -522,5 +541,24 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
             }
         }
         return -(low + 1);
+    }
+
+    private checkIndex(index: number): void {
+        if (index > Int.MAX_VALUE) {
+            throw new BusinessError(TypeErrorCodeId,
+                new Error(`The type of "index" must be small integer. Received value is: ${index}`))
+        }
+    }
+
+    private checkRange(index: number, length: number): void {
+        if (index < 0 || index >= this.buckets.actualLength) {
+            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"index\" is out of range. It must be >= 0 && <= ${this.buckets.actualLength - 1}. Received value is: ${index}`));
+        }
+    }
+
+    private checkEmptyContainer(): void {
+        if(this.isEmpty()) {
+            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`Container is empty`));
+        }
     }
 }

@@ -16,8 +16,8 @@
 #include "../../src/mock/abckit_mock.h"
 #include "../../src/mock/mock_values.h"
 
-#include "../include/c/extensions/arkts/metadata_arkts.h"
-#include "../../include/c/metadata_core.h"
+#include "../include/libabckit/c/extensions/arkts/metadata_arkts.h"
+#include "../../include/libabckit/c/metadata_core.h"
 
 #include <cstring>
 #include <gtest/gtest.h>
@@ -114,6 +114,139 @@ AbckitArktsClass *CoreClassToArktsClass(AbckitCoreClass *klass)
     return DEFAULT_ARKTS_CLASS;
 }
 
+bool ArktsClassIsFinal(AbckitArktsClass *klass)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(klass == DEFAULT_ARKTS_CLASS);
+    return DEFAULT_BOOL;
+}
+
+bool ArktsClassIsAbstract(AbckitArktsClass *klass)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(klass == DEFAULT_ARKTS_CLASS);
+    return DEFAULT_BOOL;
+}
+
+AbckitCoreInterface *ArktsInterfaceToCoreInterface(AbckitArktsInterface *iface)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(iface == DEFAULT_ARKTS_INTERFACE);
+    return DEFAULT_CORE_INTERFACE;
+}
+
+AbckitArktsInterface *CoreInterfaceToArktsInterface(AbckitCoreInterface *iface)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(iface == DEFAULT_CORE_INTERFACE);
+    return DEFAULT_ARKTS_INTERFACE;
+}
+
+AbckitCoreEnum *ArktsEnumToCoreEnum(AbckitArktsEnum *enm)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(enm == DEFAULT_ARKTS_ENUM);
+    return DEFAULT_CORE_ENUM;
+}
+
+AbckitArktsEnum *CoreEnumToArktsEnum(AbckitCoreEnum *enm)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(enm == DEFAULT_CORE_ENUM);
+    return DEFAULT_ARKTS_ENUM;
+}
+
+AbckitCoreModuleField *ArktsModuleFieldToCoreModuleField(AbckitArktsModuleField *field)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(field == DEFAULT_ARKTS_MODULE_FIELD);
+    return DEFAULT_CORE_MODULE_FIELD;
+}
+
+AbckitArktsModuleField *CoreModuleFieldToArktsModuleField(AbckitCoreModuleField *field)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(field == DEFAULT_CORE_MODULE_FIELD);
+    return DEFAULT_ARKTS_MODULE_FIELD;
+}
+
+bool ArktsModuleFieldIsReadonly(AbckitArktsModuleField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_ARKTS_MODULE_FIELD);
+    return DEFAULT_BOOL;
+}
+
+AbckitCoreClassField *ArktsClassFieldToCoreClassField(AbckitArktsClassField *field)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(field == DEFAULT_ARKTS_CLASS_FIELD);
+    return DEFAULT_CORE_CLASS_FIELD;
+}
+
+AbckitArktsClassField *CoreClassFieldToArktsClassField(AbckitCoreClassField *field)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(field == DEFAULT_CORE_CLASS_FIELD);
+    return DEFAULT_ARKTS_CLASS_FIELD;
+}
+
+bool ArktsClassFieldIsReadonly(AbckitArktsClassField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_ARKTS_CLASS_FIELD);
+    return DEFAULT_BOOL;
+}
+
+AbckitCoreInterfaceField *ArktsInterfaceFieldToCoreInterfaceField(AbckitArktsInterfaceField *field)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(field == DEFAULT_ARKTS_INTERFACE_FIELD);
+    return DEFAULT_CORE_INTERFACE_FIELD;
+}
+
+AbckitArktsInterfaceField *CoreInterfaceFieldToArktsInterfaceField(AbckitCoreInterfaceField *field)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(field == DEFAULT_CORE_INTERFACE_FIELD);
+    return DEFAULT_ARKTS_INTERFACE_FIELD;
+}
+
+bool ArktsInterfaceFieldIsReadonly(AbckitArktsInterfaceField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_ARKTS_INTERFACE_FIELD);
+    return DEFAULT_BOOL;
+}
+
+AbckitCoreEnumField *ArktsEnumFieldToCoreEnumField(AbckitArktsEnumField *field)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(field == DEFAULT_ARKTS_ENUM_FIELD);
+    return DEFAULT_CORE_ENUM_FIELD;
+}
+
+AbckitArktsEnumField *CoreEnumFieldToArktsEnumField(AbckitCoreEnumField *field)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(field == DEFAULT_CORE_ENUM_FIELD);
+    return DEFAULT_ARKTS_ENUM_FIELD;
+}
+
 AbckitCoreFunction *ArktsFunctionToCoreFunction(AbckitArktsFunction *function)
 {
     g_calledFuncs.push(__func__);
@@ -134,6 +267,29 @@ bool FunctionIsNative(AbckitArktsFunction *function)
 {
     g_calledFuncs.push(__func__);
 
+    EXPECT_TRUE(function == DEFAULT_ARKTS_FUNCTION);
+    return DEFAULT_BOOL;
+}
+
+bool FunctionIsAsync(AbckitArktsFunction *function)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(function == DEFAULT_ARKTS_FUNCTION);
+    return DEFAULT_BOOL;
+}
+
+bool FunctionIsFinal(AbckitArktsFunction *function)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(function == DEFAULT_ARKTS_FUNCTION);
+    return DEFAULT_BOOL;
+}
+
+bool FunctionIsAbstract(AbckitArktsFunction *function)
+{
+    g_calledFuncs.push(__func__);
     EXPECT_TRUE(function == DEFAULT_ARKTS_FUNCTION);
     return DEFAULT_BOOL;
 }
@@ -239,13 +395,50 @@ AbckitArktsInspectApi g_arktsInspectApiImpl = {
     // Class
     // ========================================
 
-    ArktsClassToCoreClass, CoreClassToArktsClass,
+    ArktsClassToCoreClass, CoreClassToArktsClass, ArktsClassIsFinal, ArktsClassIsAbstract,
+
+    // ========================================
+    // Interface
+    // ========================================
+
+    ArktsInterfaceToCoreInterface, CoreInterfaceToArktsInterface,
+
+    // ========================================
+    // Enum
+    // ========================================
+
+    ArktsEnumToCoreEnum, CoreEnumToArktsEnum,
+
+    // ========================================
+    // Module Field
+    // ========================================
+
+    ArktsModuleFieldToCoreModuleField, CoreModuleFieldToArktsModuleField, ArktsModuleFieldIsReadonly,
+
+    // ========================================
+    // Class Field
+    // ========================================
+
+    ArktsClassFieldToCoreClassField, CoreClassFieldToArktsClassField, ArktsClassFieldIsReadonly,
+
+    // ========================================
+    // Interface Field
+    // ========================================
+
+    ArktsInterfaceFieldToCoreInterfaceField, CoreInterfaceFieldToArktsInterfaceField, ArktsInterfaceFieldIsReadonly,
+
+    // ========================================
+    // Enum Field
+    // ========================================
+
+    ArktsEnumFieldToCoreEnumField, CoreEnumFieldToArktsEnumField,
 
     // ========================================
     // Function
     // ========================================
 
-    ArktsFunctionToCoreFunction, CoreFunctionToArktsFunction, FunctionIsNative,
+    ArktsFunctionToCoreFunction, CoreFunctionToArktsFunction, FunctionIsNative, FunctionIsAsync, FunctionIsFinal,
+    FunctionIsAbstract,
 
     // ========================================
     // Annotation

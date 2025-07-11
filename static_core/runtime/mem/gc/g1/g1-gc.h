@@ -208,6 +208,8 @@ private:
 
     bool NeedToRunGC(const ark::GCTask &task);
 
+    void StartGCCollection(ark::GCTask &task);
+
     void RunPhasesImpl(GCTask &task) override;
 
     void RunFullGC(ark::GCTask &task);
@@ -260,6 +262,8 @@ private:
 
     /// Caches refs from remset and marks objects in collection set (young-generation + maybe some tenured regions).
     void MixedMarkAndCacheRefs(const GCTask &task, const CollectionSet &collectibleRegions);
+
+    void FastYoungMark(const CollectionSet &collectibleRegions);
 
     template <typename Marker, typename Predicate>
     GCRootVisitor CreateGCRootVisitor(GCMarkingStackType &objectsStack, Marker &marker, const Predicate &refPred);
@@ -524,6 +528,7 @@ private:
     double g1PromotionRegionAliveRate_ {0.0};
     bool g1TrackFreedObjects_ {false};
     bool isExplicitConcurrentGcEnabled_ {false};
+    bool fullCollectionSetPromotion_ {false};
     // There are may be some regions with pinned objects that GC cannot collect
     PandaVector<std::pair<uint32_t, Region *>> topGarbageRegions_ {};
     CollectionSet collectionSet_;
@@ -557,7 +562,7 @@ private:
     size_t copiedBytesOld_ {0};
     bool singlePassCompactionEnabled_ {false};
 
-    template <class>
+    template <class, bool>
     friend class RefCacheBuilder;
     friend class G1GCTest;
     friend class RemSetChecker;

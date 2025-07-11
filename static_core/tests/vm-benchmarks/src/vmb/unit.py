@@ -38,7 +38,7 @@ class BenchUnit:
     """
 
     __result_patt = re.compile(
-        r'.*: ([\w-]+) (-?\d+(\.\d+)?([eE][+\-]\d+)?)')
+        r'.*Benchmark result: ([\w-]+) (-?\d+(\.\d+)?([eE][+\-]\d+)?)')
     __warmup_patt = re.compile(
         r'.*Warmup \d+:.* (?P<value>\d+(\.\d+)?) ns/op')
     __iter_patt = re.compile(
@@ -54,12 +54,14 @@ class BenchUnit:
                  tags: Optional[Iterable[str]] = None,
                  bugs: Optional[Iterable[str]] = None) -> None:
         self.path: Path = Path(path)
-        self.src_for_es2panda_override: Optional[Path] = None
         self.__src: Optional[Path] = self.path.joinpath(src) if src else None
         self.__libs: List[Path] = [
             self.path.joinpath(lib) for lib in libs] if libs else []
         self.name: str = remove_prefix(self.path.name, UNIT_PREFIX)
-        self.binaries: List[Path] = []
+        # default main binary is abc
+        self.__main_bin: Path = self.path.joinpath(f'{BENCH_PREFIX}{self.name}.abc')
+        self.__main_lib: Path = self.path.joinpath(f'lib{self.name}.abc')
+        self.binaries: List[Path] = []  # binaries to clean up after test
         self.device_path: Optional[Path] = None
         self.result: TestResult = TestResult(
             self.name,
@@ -80,6 +82,22 @@ class BenchUnit:
     def status(self, stat: BUStatus) -> None:
         self.result._status = stat  # pylint: disable=protected-access
 
+    @property
+    def main_bin(self) -> Path:
+        return self.__main_bin
+
+    @main_bin.setter
+    def main_bin(self, path: Path) -> None:
+        self.__main_bin = path
+
+    @property
+    def main_lib(self) -> Path:
+        return self.__main_lib
+
+    @main_lib.setter
+    def main_lib(self, path: Path) -> None:
+        self.__main_lib = path
+
     def parse_ext_time(self, rss_out: str) -> float:
         m = re.search(self.__real_tm_patt, rss_out)
         if m is None:
@@ -98,6 +116,7 @@ class BenchUnit:
             if mtch.groups()[0] != self.name:
                 log.warning('Name mismatch: %s vs %s',
                             mtch.groups()[0], self.name)
+                log.warning(res.out)
             avg_time = float(mtch.groups()[1])
             warms = [
                 float(m.group("value"))
@@ -125,7 +144,7 @@ class BenchUnit:
         if len(files) > 0:
             return files[0]
         if die_on_zero_matches:
-            raise FileNotFoundError()
+            raise RuntimeError(f'Files {self.path}/{BENCH_PREFIX}{self.name}*[{",".join(ext)}] not found!')
         # fallback: return unexistent
         return self.path.joinpath(f'{BENCH_PREFIX}{self.name}')
 

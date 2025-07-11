@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,7 +22,7 @@ from runner.enum_types.configuration_kind import ConfigurationKind
 from runner.enum_types.fail_kind import FailKind
 from runner.options.config import Config
 from runner.reports.report_format import ReportFormat
-from runner.code_coverage.coverage import LlvmCov
+from runner.code_coverage.coverage_manager import CoverageManager
 from runner.plugins.work_dir import WorkDir
 
 
@@ -35,7 +35,7 @@ class TestEnv:
     cmd_prefix: List[str]
     cmd_env: Dict[str, str]
 
-    coverage: LlvmCov
+    coverage: CoverageManager
 
     # Path and parameters for es2panda binary
     es2panda: str

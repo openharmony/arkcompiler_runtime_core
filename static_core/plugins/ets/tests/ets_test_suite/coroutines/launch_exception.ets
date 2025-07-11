@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 let counter = 0;
 
 function stack_eater(): void {
@@ -30,7 +32,7 @@ function coro_error(): Object {
 
 function test_stack_overflow(): boolean {
     try {
-        await launch coro_stack_overflow();
+        launch<Object | null, () => Object | null>(coro_stack_overflow).Await();
         console.println("No exceptions thrown by coro_stack_overflow() but should be!")
         return false;
     } catch (e) {
@@ -44,7 +46,7 @@ function test_stack_overflow(): boolean {
 
 function test_error(): boolean {
     try {
-        await launch coro_error();
+        launch<Object, () => Object>(coro_error).Await();
         console.println("No exceptions thrown by coro_error() but should be!")
         return false;
     } catch (e) {

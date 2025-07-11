@@ -20,17 +20,17 @@ desc: >-
 ---*/
 
 function incPre(p: Char): Char {
-    return ++p
+    return (++p).toChar()
 }
 
 function incPost(p: Char): Char {
     p++
-    return p
+    return (p).toChar()
 }
 
 function main() {
     const v1 = new Char({{v.v1}})
 
-    assertEQ( ({{v.exp}}), {{v.res}} )
+    arktest.assertEQ( ({{v.exp}}), {{v.res}} )
 }
 {%- endfor %}

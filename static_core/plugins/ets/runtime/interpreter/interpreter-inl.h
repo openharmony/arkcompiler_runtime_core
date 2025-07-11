@@ -43,64 +43,6 @@ public:
     }
 
     template <BytecodeInstruction::Format FORMAT>
-    ALWAYS_INLINE void HandleEtsLaunchShort()
-    {
-        auto id = this->GetInst().template GetId<FORMAT>();
-        LOG_INST() << "launch.short v" << this->GetInst().template GetVReg<FORMAT, 0>() << ", v"
-                   << this->GetInst().template GetVReg<FORMAT, 1>() << ", " << std::hex << "0x" << id;
-        HandleLaunch<FORMAT, false>(id);
-    }
-
-    template <BytecodeInstruction::Format FORMAT>
-    ALWAYS_INLINE void HandleEtsLaunch()
-    {
-        auto id = this->GetInst().template GetId<FORMAT>();
-        LOG_INST() << "launch v" << this->GetInst().template GetVReg<FORMAT, 0>() << ", v"
-                   << this->GetInst().template GetVReg<FORMAT, 1>() << ", v"
-                   << this->GetInst().template GetVReg<FORMAT, 2>() << ", v"
-                   << this->GetInst().template GetVReg<FORMAT, 3>() << ", " << std::hex << "0x" << id;
-        HandleLaunch<FORMAT, false>(id);
-    }
-
-    template <BytecodeInstruction::Format FORMAT>
-    ALWAYS_INLINE void HandleEtsLaunchRange()
-    {
-        auto id = this->GetInst().template GetId<FORMAT>();
-        LOG_INST() << "launch.range v" << this->GetInst().template GetVReg<FORMAT, 0>() << ", " << std::hex << "0x"
-                   << id;
-        HandleLaunch<FORMAT, true>(id);
-    }
-
-    template <BytecodeInstruction::Format FORMAT>
-    ALWAYS_INLINE void HandleEtsLaunchVirtShort()
-    {
-        auto id = this->GetInst().template GetId<FORMAT>();
-        LOG_INST() << "launch.virt.short v" << this->GetInst().template GetVReg<FORMAT, 0>() << ", v"
-                   << this->GetInst().template GetVReg<FORMAT, 1>() << ", " << std::hex << "0x" << id;
-        HandleLaunchVirt<FORMAT, false>(id);
-    }
-
-    template <BytecodeInstruction::Format FORMAT>
-    ALWAYS_INLINE void HandleEtsLaunchVirt()
-    {
-        auto id = this->GetInst().template GetId<FORMAT>();
-        LOG_INST() << "launch.virt v" << this->GetInst().template GetVReg<FORMAT, 0>() << ", v"
-                   << this->GetInst().template GetVReg<FORMAT, 1>() << ", v"
-                   << this->GetInst().template GetVReg<FORMAT, 2>() << ", v"
-                   << this->GetInst().template GetVReg<FORMAT, 3>() << ", " << std::hex << "0x" << id;
-        HandleLaunchVirt<FORMAT, false>(id);
-    }
-
-    template <BytecodeInstruction::Format FORMAT>
-    ALWAYS_INLINE void HandleEtsLaunchVirtRange()
-    {
-        auto id = this->GetInst().template GetId<FORMAT>();
-        LOG_INST() << "launch.virt.range v" << this->GetInst().template GetVReg<FORMAT, 0>() << ", " << std::hex << "0x"
-                   << id;
-        HandleLaunchVirt<FORMAT, true>(id);
-    }
-
-    template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleEtsLdobjName()
     {
         uint16_t vs = this->GetInst().template GetVReg<FORMAT>();
@@ -121,6 +63,8 @@ public:
             Field *field = GetFieldByName<true>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
                                                 this->GetInst().GetAddress(), klass);
             if (field != nullptr) {
+                // GetFieldByName can trigger GC hanse need to reread
+                obj = this->GetFrame()->GetVReg(vs).GetReference();
                 this->LoadPrimitiveField(obj, field);
                 this->template MoveToNextInst<FORMAT, true>();
                 return;
@@ -158,6 +102,8 @@ public:
             Field *field = GetFieldByName<true>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
                                                 this->GetInst().GetAddress(), klass);
             if (field != nullptr) {
+                // GetFieldByName can trigger GC hanse need to reread
+                obj = this->GetFrame()->GetVReg(vs).GetReference();
                 this->LoadPrimitiveField(obj, field);
                 this->template MoveToNextInst<FORMAT, true>();
                 return;
@@ -195,6 +141,8 @@ public:
             Field *field = GetFieldByName<true>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
                                                 this->GetInst().GetAddress(), klass);
             if (field != nullptr) {
+                // GetFieldByName can trigger GC hanse need to reread
+                obj = this->GetFrame()->GetVReg(vs).GetReference();
                 ASSERT(field->GetType().IsReference());
                 this->GetAccAsVReg().SetReference(
                     obj->GetFieldObject<RuntimeIfaceT::NEED_READ_BARRIER>(this->GetThread(), *field));
@@ -234,6 +182,8 @@ public:
             Field *field = GetFieldByName<false>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
                                                  this->GetInst().GetAddress(), klass);
             if (field != nullptr) {
+                // GetFieldByName can trigger GC hanse need to reread
+                obj = this->GetFrame()->GetVReg(vs).GetReference();
                 this->StorePrimitiveField(obj, field);
                 this->template MoveToNextInst<FORMAT, true>();
                 return;
@@ -271,6 +221,8 @@ public:
             Field *field = GetFieldByName<false>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
                                                  this->GetInst().GetAddress(), klass);
             if (field != nullptr) {
+                // GetFieldByName can trigger GC hanse need to reread
+                obj = this->GetFrame()->GetVReg(vs).GetReference();
                 this->StorePrimitiveField(obj, field);
                 this->template MoveToNextInst<FORMAT, true>();
                 return;
@@ -308,6 +260,8 @@ public:
             Field *field = GetFieldByName<false>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
                                                  this->GetInst().GetAddress(), klass);
             if (field != nullptr) {
+                // GetFieldByName can trigger GC hanse need to reread
+                obj = this->GetFrame()->GetVReg(vs).GetReference();
                 ASSERT(field->GetType().IsReference());
                 obj->SetFieldObject<RuntimeIfaceT::NEED_WRITE_BARRIER>(this->GetThread(), *field,
                                                                        this->GetAcc().GetReference());
@@ -484,6 +438,19 @@ public:
         this->template MoveToNextInst<FORMAT, true>();
     }
 
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleEtsNullcheck()
+    {
+        LOG_INST() << "ets.nullcheck";
+
+        if (UNLIKELY(this->GetAcc().GetReference() == nullptr)) {
+            RuntimeIfaceT::ThrowNullPointerException();
+            this->MoveToExceptionHandler();
+            return;
+        }
+        this->template MoveToNextInst<FORMAT, true>();
+    }
+
 private:
     ALWAYS_INLINE bool IsNull(ObjectHeader *obj)
     {
@@ -503,112 +470,6 @@ private:
     ALWAYS_INLINE EtsCoroutine *GetCoro() const
     {
         return EtsCoroutine::CastFromThread(this->GetThread());
-    }
-
-    template <BytecodeInstruction::Format FORMAT, bool IS_RANGE>
-    ALWAYS_INLINE void HandleLaunchVirt(BytecodeId methodId)
-    {
-        auto *method = ResolveMethod(methodId);
-        if (LIKELY(method != nullptr)) {
-            ObjectHeader *obj = this->GetCallerObject<FORMAT>();
-            if (UNLIKELY(obj == nullptr)) {
-                return;
-            }
-            auto *cls = obj->ClassAddr<Class>();
-            ASSERT(cls != nullptr);
-            method = cls->ResolveVirtualMethod(method);
-            ASSERT(method != nullptr);
-            HandleLaunch<FORMAT, IS_RANGE>(method);
-        } else {
-            this->MoveToExceptionHandler();
-        }
-    }
-
-    template <BytecodeInstruction::Format FORMAT, bool IS_RANGE>
-    ALWAYS_INLINE void HandleLaunch(BytecodeId methodId)
-    {
-        auto *method = ResolveMethod(methodId);
-        if (LIKELY(method != nullptr)) {
-            HandleLaunch<FORMAT, IS_RANGE>(method);
-        } else {
-            this->MoveToExceptionHandler();
-        }
-    }
-
-    template <BytecodeInstruction::Format FORMAT, bool IS_RANGE>
-    ALWAYS_INLINE void HandleLaunch(Method *method)
-    {
-        if (UNLIKELY(!method->Verify())) {
-            RuntimeIfaceT::ThrowVerificationException(method->GetFullName());
-            this->MoveToExceptionHandler();
-            return;
-        }
-
-        // this promise is going to be resolved on coro completion
-        EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-        EtsPromise *promise = EtsPromise::Create(coroutine);
-        if (UNLIKELY(promise == nullptr)) {
-            this->MoveToExceptionHandler();
-            return;
-        }
-        PandaEtsVM *etsVm = coroutine->GetPandaVM();
-        auto *coroManager = coroutine->GetCoroutineManager();
-        auto promiseRef = etsVm->GetGlobalObjectStorage()->Add(promise, mem::Reference::ObjectType::GLOBAL);
-        auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, coroManager);
-
-        // create the coro and put it to the ready queue
-        [[maybe_unused]] EtsHandleScope scope(coroutine);
-        EtsHandle<EtsPromise> promiseHandle(coroutine, promise);
-
-        // since transferring arguments from frame registers (which are local roots for GC) to a C++ vector
-        // introduces the potential risk of pointer invalidation in case GC moves the referenced objects,
-        // we would like to do this transfer below all potential GC invocation points (e.g. Promise::Create)
-        size_t numArgs = method->GetNumArgs();
-        PandaVector<Value> args(numArgs);
-        FillArgs<FORMAT, IS_RANGE>(args);
-
-        bool launchResult =
-            coroutine->GetCoroutineManager()->Launch(evt, method, std::move(args), CoroutineLaunchMode::DEFAULT);
-        if (UNLIKELY(!launchResult)) {
-            // OOM
-            Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
-            this->MoveToExceptionHandler();
-            return;
-        }
-
-        this->GetAccAsVReg().SetReference(promiseHandle.GetPtr());
-        this->GetFrame()->SetAcc(this->GetAcc());
-        this->template MoveToNextInst<FORMAT, false>();
-    }
-
-    template <BytecodeInstruction::Format FORMAT, bool IS_RANGE>
-    ALWAYS_INLINE void FillArgs(PandaVector<Value> &args)
-    {
-        if (args.empty()) {
-            return;
-        }
-
-        auto curFrameHandler = this->template GetFrameHandler<false>();
-        if constexpr (IS_RANGE) {
-            uint16_t startReg = this->GetInst().template GetVReg<FORMAT, 0>();
-            for (size_t i = 0; i < args.size(); ++i) {
-                args[i] = Value::FromVReg(curFrameHandler.GetVReg(startReg + i));
-            }
-        } else {
-            // launch.short of launch
-            args[0] = Value::FromVReg(curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 0U>()));
-            if (args.size() > 1U) {
-                args[1] = Value::FromVReg(curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 1U>()));
-            }
-            if constexpr (FORMAT == BytecodeInstruction::Format::PREF_V4_V4_V4_V4_ID16) {
-                if (args.size() > 2U) {
-                    args[2] = Value::FromVReg(curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 2U>()));
-                }
-                if (args.size() > 3U) {
-                    args[3] = Value::FromVReg(curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 3U>()));
-                }
-            }
-        }
     }
 
     template <BytecodeInstruction::Format FORMAT>

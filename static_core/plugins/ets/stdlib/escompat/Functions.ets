@@ -15,7 +15,8 @@
 
 package escompat;
 
-const hexChars: char[] = [c'0', c'1', c'2', c'3', c'4', c'5', c'6', c'7', c'8', c'9', c'A', c'B', c'C', c'D', c'E', c'F'];
+// initialized in _initializerBlock_.ets
+const hexChars: char[];
 
 function fillInCommonURI(): boolean[] {
     const arr = new boolean[128]
@@ -40,7 +41,8 @@ function fillInCommonURI(): boolean[] {
     return arr
 }
 
-const uriArray: boolean[] = fillInURINotComponent()
+// initialized in _initializerBlock_.ets
+const uriArray: boolean[];
 
 function fillInURISpecial(arr: boolean[]) {
     arr[c';'] = true
@@ -62,7 +64,8 @@ function createAndFillInURISpecial(): boolean[] {
     return arr
 }
 
-const uriSpecialChars = createAndFillInURISpecial()
+// initialized in _initializerBlock_.ets
+const uriSpecialChars: boolean[];
 
 function fillInURINotComponent(): boolean[] {
     const arr = fillInCommonURI()
@@ -70,7 +73,8 @@ function fillInURINotComponent(): boolean[] {
     return arr
 }
 
-const uriArrayComponent: boolean[] = fillInCommonURI()
+// initialized in _initializerBlock_.ets
+const uriArrayComponent: boolean[];
 
 /**
  * The decodeURI() function decodes a Uniform Resource Identifier
@@ -83,7 +87,7 @@ export function decodeURI(uri: string): string {
             if (unit < 128 && uriSpecialChars[unit]) {
                 ret.append(str.slice(i, i + 3))
             } else {
-                ret.append(unit as char)
+                ret.append(unit.toChar())
             }
         }
     )
@@ -128,13 +132,12 @@ function encodeCharAsHex(ret: StringBuilder, c: int): void {
 }
 
 function encodeURIImpl(uri: string, ok: boolean[]): string {
-    assertEQ(ok.length, 128)
     let ret = new StringBuilder()
     let i = 0
     while (i < uri.getLength()) {
         let d: int
         try {
-            d = uri.codePointAt(i) as int
+            d = (uri.codePointAt(i) as number).toInt()
         } catch (e) {
             throw new URIError("malformed URI sequence")
         }
@@ -179,7 +182,7 @@ export function decodeURIComponent(uriComponent: string): string {
     return unescapeImpl(
         uriComponent,
         (str: string, i: int, ret: StringBuilder, unit: int): void => {
-            ret.append(unit as char)
+            ret.append(unit.toChar())
         }
     )
 }
@@ -230,11 +233,9 @@ export function escape(str: string): string {
     let ret = new StringBuilder()
     for (let i = 0; i < str.getLength(); i++) {
         const d = str.charAt(i)
-        const c = (d as int) & 0xffff
-        assertLE(0, c)
-        assertEQ(hexChars.length, 16)
+        const c = d.toInt() & 0xffff
         if (c >= c'a' && c <= c'z' || c >= c'A' && c <= c'Z' || c >= c'0' && c <= c'9' || c >= 42 && c <= 47 && c != 44 || c == c'_' || c == c'@') {
-            ret.append(c as char)
+            ret.append(c.toChar())
         } else {
             encodeCharAsHex(ret, c)
         }
@@ -257,7 +258,9 @@ function unhex(c: char): int {
 
 function encodedURIHexAt(str: string, i: int): int {
     try {
-        assertEQ(str.charAt(i), c'%');
+        if (str.charAt(i) !== c'%') {
+            throw new AssertionError("Char at " + i + "equals c'%'")
+        }
         return unhex(str.charAt(i + 1)) << 4 | unhex(str.charAt(i + 2))
     } catch (e) {
         throw new URIError("malformed URI sequence")
@@ -279,7 +282,7 @@ function unescapeImpl(str: string, push: (str: string, i: int, ret: StringBuilde
         let chr0 = encodedURIHexAt(str, i);
         let chrsCnt: int
         if ((chr0 & 0x80) == 0) {
-            push(str, i, ret, chr0 as char)
+            push(str, i, ret, chr0.toChar())
             i += 2
             continue
         } else if ((chr0 & 0xe0) == 0xc0) {
@@ -305,7 +308,7 @@ function unescapeImpl(str: string, push: (str: string, i: int, ret: StringBuilde
         i += chrsCnt * 3 - 1
 
         if (chr0 >= 0 && chr0 <= 0xd7ff || chr0 >= 0xe000 && chr0 <= 0xffff) {
-            push(str, i, ret, chr0 as char)
+            push(str, i, ret, chr0.toChar())
         } else {
             ret.append(Char.getHighSurrogate(chr0))
             ret.append(Char.getLowSurrogate(chr0))
@@ -350,7 +353,7 @@ export function unescape(str: string): string {
                 ret.append(d)
                 continue
             }
-            ret.append(unit as char)
+            ret.append(unit.toChar())
             i += 5
             continue
         }
@@ -361,7 +364,7 @@ export function unescape(str: string): string {
                 ret.append(d)
                 continue
             }
-            ret.append(unit as char)
+            ret.append(unit.toChar())
             i += 2
             continue
         }

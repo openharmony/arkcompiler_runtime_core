@@ -20,7 +20,11 @@
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/xgc/xgc.h"
+#include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_storage_verifier.h"
 #ifdef PANDA_JS_ETS_HYBRID_MODE
+#ifdef ARK_HYBRID
+#include "base_runtime.h"
+#endif
 #include "native_engine/native_reference.h"
 #include "interfaces/inner_api/napi/native_node_api.h"
 #endif  // PANDA_JS_ETS_HYBRID_MODE
@@ -74,7 +78,8 @@ XGC::XGC(PandaEtsVM *vm, STSVMInterfaceImpl *stsVmIface, ets_proxy::SharedRefere
       minimalThresholdSize_(Runtime::GetCurrent()->GetOptions().GetXgcMinTriggerThreshold()),
       increaseThresholdPercent_(
           std::min(PERCENT_100_U32, Runtime::GetCurrent()->GetOptions().GetXgcTriggerPercentThreshold())),
-      treiggerPolicy_(GetXGCTriggerPolicyByString(Runtime::GetCurrent()->GetOptions().GetXgcTriggerType()))
+      treiggerPolicy_(GetXGCTriggerPolicyByString(Runtime::GetCurrent()->GetOptions().GetXgcTriggerType())),
+      enableXgcVerifier_(Runtime::GetCurrent()->GetOptions().IsEnableXgcVerifier())
 {
     ASSERT(minimalThresholdSize_ <= storage->MaxSize());
     ASSERT(treiggerPolicy_ != XGC::TriggerPolicy::INVALID);
@@ -214,6 +219,11 @@ void XGC::GCStarted(const GCTask &task, [[maybe_unused]] size_t heapSize)
     beforeGCStorageSize_ = storage_->Size();
 }
 
+void XGC::VerifySharedReferences(ets_proxy::XgcStatus status)
+{
+    ets_proxy::SharedReferenceStorageVerifier::TraverseAllItems(storage_, status);
+}
+
 void XGC::GCFinished(const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeGc, [[maybe_unused]] size_t heapSize)
 {
     if (task.reason != GCTaskCause::CROSSREF_CAUSE) {
@@ -292,9 +302,48 @@ void XGC::GCPhaseFinished(mem::GCPhase phase)
     }
 }
 
+#ifdef ARK_HYBRID
+void XGC::UnmarkAllXRefs()
+{
+    storage_->UnmarkAll();
+}
+
+void XGC::SweepUnmarkedXRefs()
+{
+    storage_->SweepUnmarkedRefs();
+}
+
+void XGC::AddXRefToStaticRoots()
+{
+    vm_->AddRootProvider(storage_);
+}
+
+void XGC::RemoveXRefFromStaticRoots()
+{
+    vm_->RemoveRootProvider(storage_);
+}
+
+void XGC::IterateEtsObjectXRef(EtsObject *etsObj, const common::RefFieldVisitor &visitor)
+{
+    // NOTE(audovichenko): Handle multithreading issue.
+    ark::ets::interop::js::ets_proxy::SharedReference::Iterator it(storage_->GetReference(etsObj));
+    ark::ets::interop::js::ets_proxy::SharedReference::Iterator end;
+    do {
+        if (it->HasJSFlag() && it->MarkIfNotMarked()) {
+            ark::ets::interop::js::ets_proxy::SharedReference *ref = *it;
+            ASSERT(ref->HasJSFlag());
+            ref->GetCtx()->GetXGCVmAdaptor()->MarkFromObject(ref->GetJsRef(), visitor);
+        }
+        ++it;
+    } while (it != end);
+}
+#endif
+
 void XGC::MarkFromObject([[maybe_unused]] void *data)
 {
-    ASSERT(data != nullptr);
+    if (data == nullptr) {
+        return;
+    }
 #if defined(PANDA_JS_ETS_HYBRID_MODE)
     auto *nativeRef = static_cast<NativeReference *>(data);
     auto *refRef = static_cast<ets_proxy::SharedReference **>(nativeRef->GetData());
@@ -348,6 +397,9 @@ void XGC::Finish()
         // XGC was not interrupted
         Sweep();
     }
+    if (enableXgcVerifier_) {
+        VerifySharedReferences(ets_proxy::XgcStatus::XGC_FINISHED);
+    }
     storage_->NotifyXGCFinished();
     // Sweep should be done on common STW, so it's critical to have the barrier here
     stsVmIface_->FinishXGCBarrier();
@@ -367,9 +419,20 @@ size_t XGC::ComputeNewSize()
     return std::min(std::max(currentStorageSize + delta, minimalThresholdSize_), storage_->MaxSize());
 }
 
-bool XGC::Trigger(mem::GC *gc, PandaUniquePtr<GCTask> task)
+bool XGC::Trigger([[maybe_unused]] mem::GC *gc, [[maybe_unused]] PandaUniquePtr<GCTask> task)
 {
     ASSERT_MANAGED_CODE();
+#ifdef ARK_HYBRID
+    common::BaseRuntime::GetInstance()->RequestGC(common::GcType::FULL_WITH_XREF);
+    // NOTE(ipetrov, XGC): if table will be cleared in concurrent, then compute the new size should not be based on
+    // the current storage size, need storage size without dead references
+    auto newTargetThreshold = this->ComputeNewSize();
+    LOG(DEBUG, GC_TRIGGER) << "XGC's new target threshold storage size = " << newTargetThreshold;
+    // Atomic with relaxed order reason: data race with targetThreasholdSize_ with no synchronization or ordering
+    // constraints imposed on other reads or writes
+    targetThreasholdSize_.store(newTargetThreshold, std::memory_order_relaxed);
+    return false;
+#else
     LOG(DEBUG, GC_TRIGGER) << "Trigger XGC. Current storage size = " << storage_->Size();
     // NOTE(ipetrov, #20146): Iterate over all contexts
     auto *coro = EtsCoroutine::GetCurrent();
@@ -386,6 +449,7 @@ bool XGC::Trigger(mem::GC *gc, PandaUniquePtr<GCTask> task)
         return false;
     }
     return true;
+#endif
 }
 
 ALWAYS_INLINE bool XGC::NeedToTriggerXGC([[maybe_unused]] const mem::GC *gc) const
@@ -412,7 +476,7 @@ ALWAYS_INLINE bool XGC::NeedToTriggerXGC([[maybe_unused]] const mem::GC *gc) con
     }
 #if defined(PANDA_TARGET_OHOS)
     // Don't trigger XGC in high sensitive case
-    if (gc->GetPandaVm()->GetAppState().GetState() == AppState::State::SENSITIVE_START) {
+    if (AppStateManager::GetCurrent()->GetAppState().GetState() == AppState::State::SENSITIVE_START) {
         return false;
     }
 #endif  // PANDA_TARGET_OHOS

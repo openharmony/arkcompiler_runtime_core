@@ -40,7 +40,7 @@ let s{{loop.index}}: {{v.type}} = {{v.expr}};
 function main() {
     let a: A = new A();
 {%- for v in c['values'] %}
-    assertEQ(a.meth(s{{loop.index}}), {{v.val or v.expr}})
+    arktest.assertEQ(a.meth(s{{loop.index}}), {{v.val or v.expr}})
 {%- endfor %}
 }
 {%- endfor %}

@@ -279,12 +279,38 @@ void TestMultiple(const std::string &path, std::vector<std::string> perms, bool 
 }
 
 #ifdef TEST_STATIC_LINKER_WITH_STS
-void TestSts(const std::string &path, const std::vector<std::string> &files, bool isGood = true)
-{
-    const auto sourcePathPrefix = "data/ets/" + path + "/";
-    const auto targetPathPrefix = "data/output/" + path + "/";
+// NOLINTBEGIN(misc-non-private-member-variables-in-classes)
+struct StripOptions {
+    bool stripUnused = false;
+    std::optional<std::string> stripUnusedSkiplist;
+    bool IsEmpty() const
+    {
+        return !stripUnused && !stripUnusedSkiplist.has_value();
+    }
+    StripOptions() = default;
+};
 
+struct TestStsConfig {
+    std::string entryPoint = "1/ETSGLOBAL::main";
+    std::string outputFileName = "out.gold";
+    TestStsConfig() = default;
+};
+// NOLINTEND(misc-non-private-member-variables-in-classes)
+
+std::string BuildLinkerCommand(const std::string &path, const std::vector<std::string> &files,
+                               const StripOptions &stripOptions, const std::string &targetPathPrefix)
+{
     std::string linkerCommand = "../../bin/ark_link";
+
+    if (stripOptions.stripUnused) {
+        linkerCommand.append(" --strip-unused");
+    }
+
+    if (stripOptions.stripUnusedSkiplist.has_value()) {
+        linkerCommand.append(" --strip-unused-skiplist=");
+        linkerCommand.append(stripOptions.stripUnusedSkiplist.value());
+    }
+
     linkerCommand.append(" --output " + targetPathPrefix + "linked.abc");
     linkerCommand.append(" -- ");
     for (const auto &f : files) {
@@ -292,18 +318,29 @@ void TestSts(const std::string &path, const std::vector<std::string> &files, boo
             f.substr(f.length() - ABC_FILE_EXTENSION_LENGTH) != ABC_FILE_EXTENSION) {
             linkerCommand.push_back('@');  // test filesinfo
         }
-        linkerCommand.append(sourcePathPrefix + f);
+        linkerCommand.append(path + f);
         linkerCommand.push_back(' ');
     }
+
+    return linkerCommand;
+}
+
+void TestSts(const std::string &path, const std::vector<std::string> &files, bool isGood = true,
+             const StripOptions &deleteOptions = {}, const TestStsConfig &config = {})
+{
+    const auto sourcePathPrefix = "data/ets/" + path + "/";
+    const auto targetPathPrefix = "data/output/" + path + "/";
+
+    std::string linkerCommand = BuildLinkerCommand(sourcePathPrefix, files, deleteOptions, targetPathPrefix);
     // NOLINTNEXTLINE(cert-env33-c)
     auto linkRes = std::system(linkerCommand.c_str());
 
     if (isGood) {
         ASSERT_EQ(linkRes, 0);
         auto gold = std::string {};
-        ASSERT_TRUE(ReadFile<false>(sourcePathPrefix + "out.gold", gold));
+        ASSERT_TRUE(ReadFile<false>(sourcePathPrefix + config.outputFileName, gold));
         NormalizeGold(gold);
-        auto ret = ExecPanda(targetPathPrefix + "linked.abc", "ets", "1/ETSGLOBAL::main");
+        auto ret = ExecPanda(targetPathPrefix + "linked.abc", "ets", config.entryPoint);
         ASSERT_EQ(ret.first, 0);
         ASSERT_EQ(ret.second, gold);
     } else {
@@ -515,6 +552,111 @@ TEST(linkertests, Mix)
 {
 #ifdef TEST_STATIC_LINKER_WITH_STS
     TestSts("mix", {"1.ets.abc", "2.ets.abc"});
+#endif
+}
+
+TEST(linkertests, ClassCallNoDeleteDependency)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    TestStsConfig config;
+    config.entryPoint = "dependency/ETSGLOBAL::main";
+    TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, true, {}, config);
+#endif
+}
+
+TEST(linkertests, ClassCallDeleteDependency)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    StripOptions opts;
+    opts.stripUnused = true;
+    TestStsConfig config;
+    config.entryPoint = "dependency/ETSGLOBAL::main";
+    TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, true, opts, config);
+#endif
+}
+
+TEST(linkertests, ClassCallDeleteDependencyFromEntryInputError)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    StripOptions opts;
+    opts.stripUnused = true;
+    opts.stripUnusedSkiplist = "\"1/ETSGLOBAL\"";
+    TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, false, opts);
+#endif
+}
+
+TEST(linkertests, MethodCallDeleteDependencyFromEntryInputError)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    StripOptions opts;
+    opts.stripUnused = true;
+    opts.stripUnusedSkiplist = "\"1/ETSGLOBAL/main\"";
+    TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, false, opts);
+#endif
+}
+
+TEST(linkertests, CallDeleteDependencyFromConfigFileNotExist)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    StripOptions opts;
+    opts.stripUnused = true;
+    opts.stripUnusedSkiplist = "@data/ets/classcall_doublefile/methodconfig1.txt";
+    TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, false, opts);
+#endif
+}
+
+TEST(linkertests, CallDeleteDependencyFromEntryFileNotExist)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    StripOptions opts;
+    opts.stripUnused = true;
+    opts.stripUnusedSkiplist = "\"1.ets\"";
+    TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, false, opts);
+#endif
+}
+
+TEST(linkertests, MultiClassCallNoDeleteDependency)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    TestStsConfig config;
+    config.entryPoint = "main_dependencyUser/ETSGLOBAL::main";
+    TestSts("classcall_multifile",
+            {"main_dependencyUser.ets.abc", "dependency.ets.abc", "user_dependency.ets.abc", "product_user.ets.abc"},
+            true, {}, config);
+#endif
+}
+
+TEST(linkertests, MultiClassCallDeleteDependency)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    StripOptions opts;
+    opts.stripUnused = true;
+    TestStsConfig config;
+    config.entryPoint = "main_dependencyUser/ETSGLOBAL::main";
+    TestSts("classcall_multifile",
+            {"main_dependencyUser.ets.abc", "dependency.ets.abc", "user_dependency.ets.abc", "product_user.ets.abc"},
+            true, opts, config);
+#endif
+}
+
+TEST(linkertests, ClassCallDeleteDependencyAll)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    StripOptions opts;
+    opts.stripUnused = true;
+    opts.stripUnusedSkiplist = "*";
+    TestStsConfig config;
+    config.entryPoint = "dependency/ETSGLOBAL::main";
+    TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, true, opts, config);
+#endif
+}
+
+TEST(linkertests, CallDeleteDependencyNoStripUnusedArg)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    StripOptions opts;
+    opts.stripUnusedSkiplist = "\"dependency/ETSGLOBAL/main\"";
+    TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, false, opts);
 #endif
 }
 

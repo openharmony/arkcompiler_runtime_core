@@ -16,7 +16,7 @@
 #ifndef COMMON_INTERFACES_OBJECTS_READONLY_HANDLE_H
 #define COMMON_INTERFACES_OBJECTS_READONLY_HANDLE_H
 
-#include "common_interfaces/objects/base_object.h"
+#include "objects/base_object.h"
 
 namespace common {
 template <typename T>
@@ -46,7 +46,7 @@ public:
     template <typename S>
     static ReadOnlyHandle<T> Cast(const ReadOnlyHandle<S> &handle)
     {
-        T::Cast(handle.GetTaggedValue().GetTaggedObject());
+        T::Cast(handle.GetBaseObject());
         return ReadOnlyHandle<T>(handle.GetAddress());
     }
 

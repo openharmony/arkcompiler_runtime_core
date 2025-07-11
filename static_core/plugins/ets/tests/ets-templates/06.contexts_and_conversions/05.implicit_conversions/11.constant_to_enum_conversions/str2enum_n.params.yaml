@@ -17,9 +17,9 @@ cases:
           const s: string = "g"
       use: |-
           const v1: Color = s
-          assertEQ(v1, Color.Green)
+          arktest.assertEQ(v1, Color.Green)
     - decl: |-
           let s: string = "r"
       use: |-
           let v1: Color = s
-          assertEQ(v1, Color.Red)
+          arktest.assertEQ(v1, Color.Red)

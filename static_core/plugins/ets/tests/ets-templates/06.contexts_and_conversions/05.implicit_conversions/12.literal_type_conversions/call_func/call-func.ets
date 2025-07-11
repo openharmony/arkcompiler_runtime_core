@@ -32,7 +32,7 @@ let s{{loop.index}}: {{v.type}} = {{v.expr}};
 function main() {
 {%- for v in c['values'] %}
     foo(s{{loop.index}});
-    assertEQ(d, {{v.val or v.expr}})
+    arktest.assertEQ(d, {{v.val or v.expr}})
 {%- endfor %}
 }
 {%- endfor %}

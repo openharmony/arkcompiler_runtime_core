@@ -17,12 +17,12 @@
 desc: 13.compilation_units\13.06.export_directives\13.06.03.re-export_directives\issue_15669_05
 name: issue15669_05.ets
 tags: [negative, compile-only]
-files: ['./issue_15669_03.ets']
+files: [./issue_15669_03.ets]
 ---*/
 
 import { bar } from './issue_15669_03'
 
 function main(): void {
-  assertEQ( bar(2), 4)
-  assertEQ( bar(2), 2)
+   arktest.assertEQ( bar(2), 4)
+   arktest.assertEQ( bar(2), 2)
 }

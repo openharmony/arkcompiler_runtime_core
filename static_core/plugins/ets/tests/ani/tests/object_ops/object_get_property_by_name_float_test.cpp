@@ -30,7 +30,7 @@ TEST_F(ObjectGetPropertyByNameFloatTest, get_field_property)
 {
     ani_object car = NewCar();
 
-    ani_float length;
+    ani_float length = 0.0F;
     ASSERT_EQ(env_->Object_GetPropertyByName_Float(car, "length", &length), ANI_OK);
     ASSERT_EQ(length, 4275.0F);
 }
@@ -39,16 +39,33 @@ TEST_F(ObjectGetPropertyByNameFloatTest, get_getter_property)
 {
     ani_object car = NewCar();
 
-    ani_float year;
+    ani_float year = 0.0F;
     ASSERT_EQ(env_->Object_GetPropertyByName_Float(car, "year", &year), ANI_OK);
     ASSERT_EQ(year, 1989.0F);
+}
+
+TEST_F(ObjectGetPropertyByNameFloatTest, invalid_env)
+{
+    ani_object car = NewCar();
+
+    ani_float year = 0.0F;
+    ASSERT_EQ(env_->c_api->Object_GetPropertyByName_Float(nullptr, car, "year", &year), ANI_INVALID_ARGS);
+}
+
+TEST_F(ObjectGetPropertyByNameFloatTest, invalid_parameter)
+{
+    ani_object car = NewCar();
+
+    ani_float year = 0.0F;
+    ASSERT_EQ(env_->Object_GetPropertyByName_Float(car, "yearA", &year), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_GetPropertyByName_Float(car, "", &year), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectGetPropertyByNameFloatTest, invalid_argument)
 {
     ani_object car = NewCar();
 
-    ani_float length;
+    ani_float length = 0.0F;
     ASSERT_EQ(env_->Object_GetPropertyByName_Float(nullptr, "length", &length), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Object_GetPropertyByName_Float(car, nullptr, &length), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Object_GetPropertyByName_Float(car, "length", nullptr), ANI_INVALID_ARGS);
@@ -58,7 +75,7 @@ TEST_F(ObjectGetPropertyByNameFloatTest, get_field_property_invalid_type)
 {
     ani_object car = NewCar();
 
-    ani_float manufacturer;
+    ani_float manufacturer = 0.0F;
     ASSERT_EQ(env_->Object_GetPropertyByName_Float(car, "manufacturer", &manufacturer), ANI_INVALID_TYPE);
 }
 
@@ -66,7 +83,7 @@ TEST_F(ObjectGetPropertyByNameFloatTest, get_getter_property_invalid_type)
 {
     ani_object car = NewCar();
 
-    ani_float model;
+    ani_float model = 0.0F;
     ASSERT_EQ(env_->Object_GetPropertyByName_Float(car, "model", &model), ANI_INVALID_TYPE);
 }
 

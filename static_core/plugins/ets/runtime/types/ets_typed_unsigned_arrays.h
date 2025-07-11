@@ -17,8 +17,14 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPED_UNSIGNED_ARRAYS_H
 
 #include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/types/ets_string.h"
 
 namespace ark::ets {
+
+namespace test {
+class EtsEscompatTypedUArrayBaseTest;
+}  // namespace test
+
 class EtsEscompatTypedUArrayBase : public EtsObject {
 public:
     EtsEscompatTypedUArrayBase() = delete;
@@ -27,9 +33,19 @@ public:
     NO_COPY_SEMANTIC(EtsEscompatTypedUArrayBase);
     NO_MOVE_SEMANTIC(EtsEscompatTypedUArrayBase);
 
+    static constexpr size_t GetClassSize()
+    {
+        return sizeof(EtsEscompatTypedUArrayBase);
+    }
+
     static constexpr size_t GetBufferOffset()
     {
         return MEMBER_OFFSET(EtsEscompatTypedUArrayBase, buffer_);
+    }
+
+    static constexpr size_t GetBytesPerElementOffset()
+    {
+        return MEMBER_OFFSET(EtsEscompatTypedUArrayBase, bytesPerElement_);
     }
 
     static constexpr size_t GetByteOffsetOffset()
@@ -47,54 +63,79 @@ public:
         return MEMBER_OFFSET(EtsEscompatTypedUArrayBase, lengthInt_);
     }
 
-    static constexpr size_t GetArrayBufferBackedOffset()
+    ObjectPointer<EtsObject> GetBuffer() const
     {
-        return MEMBER_OFFSET(EtsEscompatTypedUArrayBase, arrayBufferBacked_);
+        return EtsObject::FromCoreType(ObjectAccessor::GetObject(this, GetBufferOffset()));
     }
 
-    ObjectPointer<EtsObject> GetBuffer()
+    void SetBuffer(ObjectPointer<EtsObject> buffer)
     {
-        return buffer_;
+        buffer_ = buffer;
     }
 
-    EtsDouble GetByteOffset()
+    EtsDouble GetByteOffset() const
     {
         return byteOffset_;
     }
 
-    EtsDouble GetByteLength()
+    void SetByteOffset(EtsDouble offset)
+    {
+        byteOffset_ = offset;
+    }
+
+    EtsDouble GetByteLength() const
     {
         return byteLength_;
     }
 
-    EtsDouble GetBytesPerElement()
+    void SetByteLength(EtsDouble byteLength)
+    {
+        byteLength_ = byteLength;
+    }
+
+    EtsInt GetBytesPerElement() const
     {
         return bytesPerElement_;
     }
 
-    EtsInt GetLengthInt()
+    EtsInt GetLengthInt() const
     {
         return lengthInt_;
     }
 
-    bool IsArrayBufferBacked()
+    void SetLengthInt(EtsInt length)
     {
-        return arrayBufferBacked_ != 0;
+        lengthInt_ = length;
     }
 
-    ObjectPointer<EtsString> GetName()
+    ObjectPointer<EtsString> GetName() const
     {
-        return name_;
+        return reinterpret_cast<EtsString *>(
+            ObjectAccessor::GetObject(this, MEMBER_OFFSET(EtsEscompatTypedUArrayBase, name_)));
+    }
+
+    void Initialize(EtsCoroutine *coro, EtsInt lengthInt, EtsInt bytesPerElement, EtsInt byteOffset, EtsObject *buffer,
+                    EtsString *name)
+    {
+        ASSERT(buffer != nullptr);
+        ObjectAccessor::SetObject(coro, this, GetBufferOffset(), buffer->GetCoreType());
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsEscompatTypedUArrayBase, name_),
+                                  name != nullptr ? name->GetCoreType() : nullptr);
+        bytesPerElement_ = bytesPerElement;
+        byteOffset_ = byteOffset;
+        byteLength_ = lengthInt * bytesPerElement;
+        lengthInt_ = lengthInt;
     }
 
 private:
     ObjectPointer<EtsObject> buffer_;
     ObjectPointer<EtsString> name_;
-    EtsDouble bytesPerElement_;
+    EtsInt bytesPerElement_;
     EtsInt byteOffset_;
     EtsInt byteLength_;
     EtsInt lengthInt_;
-    EtsBoolean arrayBufferBacked_;
+
+    friend class test::EtsEscompatTypedUArrayBaseTest;
 };
 
 template <typename T>

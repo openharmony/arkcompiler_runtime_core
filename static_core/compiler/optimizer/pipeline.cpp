@@ -43,6 +43,7 @@
 #include "optimizer/optimizations/loop_peeling.h"
 #include "optimizer/optimizations/loop_unswitch.h"
 #include "optimizer/optimizations/loop_unroll.h"
+#include "optimizer/optimizations/lower_boxed_boolean.h"
 #include "optimizer/optimizations/lowering.h"
 #include "optimizer/optimizations/lse.h"
 #include "optimizer/optimizations/memory_barriers.h"
@@ -189,6 +190,7 @@ bool Pipeline::RunOptimizations()
     }
     graph->RunPass<CatchInputs>();
     graph->RunPass<TryCatchResolving>();
+    graph->RunPass<LowerBoxedBoolean>();
     if (!graph->RunPass<MonitorAnalysis>()) {
         LOG(WARNING, COMPILER) << "Compiler detected incorrect monitor policy";
         return false;

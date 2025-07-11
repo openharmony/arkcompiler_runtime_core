@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <llvm/IR/Intrinsics.h>
 #include "optimizer/code_generator/codegen.h"
 #include "runtime/include/coretypes/string.h"
 
@@ -1053,6 +1054,27 @@ bool LLVMIrConstructor::EmitMemoryFenceAcquire([[maybe_unused]] Inst *inst)
     return true;
 }
 
+bool LLVMIrConstructor::EmitRoundToPInf(Inst *inst)
+{
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr double HALF = 0.5;
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr double ONE = 1.0;
+
+    auto input = GetInputValue(inst, 0);
+    ASSERT_TYPE(input, builder_.getDoubleTy());
+
+    auto ceil = builder_.CreateIntrinsic(llvm::Intrinsic::ceil, {builder_.getDoubleTy()}, {input});
+    auto diff = builder_.CreateFSub(ceil, input);
+    auto roundBias = llvm::ConstantFP::get(builder_.getDoubleTy(), HALF);
+    auto cmp = builder_.CreateFCmpOGT(diff, roundBias);
+    auto compensation = llvm::ConstantFP::get(builder_.getDoubleTy(), ONE);
+    auto adjusted = builder_.CreateFSub(ceil, compensation);
+    auto result = builder_.CreateSelect(cmp, adjusted, ceil);
+    ValueMapAdd(inst, result);
+    return true;
+}
+
 bool LLVMIrConstructor::EmitFround(Inst *inst)
 {
     llvm::Value *input = GetInputValue(inst, 0);
@@ -1062,6 +1084,40 @@ bool LLVMIrConstructor::EmitFround(Inst *inst)
     auto casted = builder_.CreateCast(llvm::Instruction::FPExt, floatCasted, builder_.getDoubleTy());
     llvm::Value *nan = llvm::ConstantFP::getQNaN(builder_.getDoubleTy());
     auto result = builder_.CreateSelect(isNan, nan, casted);
+    ValueMapAdd(inst, result);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitJsCastDoubleToChar([[maybe_unused]] Inst *inst)
+{
+    ASSERT(GetGraph()->GetArch() == Arch::AARCH64);
+    ASSERT(GetGraph()->GetMode().IsFastPath());
+    ASSERT_DO(!g_options.IsCpuFeatureEnabled(CpuFeature::JSCVT),
+              std::cerr << "The LLVM backend doesn't support the aarch64_fjcvtzs intrinsic yet." << std::endl);
+    llvm::Value *input = GetInputValue(inst, 0);
+    auto sourceType = input->getType();
+    ASSERT_DO(sourceType->isDoubleTy(), std::cerr << "Unexpected source type: " << GetTypeName(sourceType)
+                                                  << ". Should be a double." << std::endl);
+    auto targetType = inst->GetType();
+    ASSERT_DO(targetType == DataType::UINT32,
+              std::cerr << "Unexpected target type: " << targetType << ". Should be a uint32_t." << std::endl);
+
+    // infinite and big numbers will overflow here to INT64_MIN or INT64_MAX, but NaN casts to 0
+    auto *doubleToInt =
+        builder_.CreateIntrinsic(llvm::Intrinsic::fptosi_sat, {builder_.getInt64Ty(), sourceType}, {input}, nullptr);
+
+    auto *int64min = builder_.CreateICmpEQ(doubleToInt, builder_.getInt64(std::numeric_limits<int64_t>::min()));
+    auto *int64max = builder_.CreateICmpEQ(doubleToInt, builder_.getInt64(std::numeric_limits<int64_t>::max()));
+    auto *overflow = builder_.CreateLogicalOr(int64min, int64max);
+
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr uint64_t UTF16_CHAR_MASK = 0xffff;
+    auto *character = builder_.CreateTrunc(builder_.CreateAnd(doubleToInt, builder_.getInt64(UTF16_CHAR_MASK)),
+                                           GetExactType(targetType));
+
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr uint32_t FAILURE_RESULT_FLAG = (1U << 16U);
+    auto *result = builder_.CreateSelect(overflow, builder_.getInt32(FAILURE_RESULT_FLAG), character);
     ValueMapAdd(inst, result);
     return true;
 }
@@ -2213,79 +2269,6 @@ llvm::Value *LLVMIrConstructor::CreateNewStringFromStringTlab(Inst *inst, llvm::
     result->setCallingConv(llvm::CallingConv::ArkFast1);
     MarkAsAllocation(result);
     return result;
-}
-
-llvm::Value *LLVMIrConstructor::CreateLaunchArgsArray(CallInst *callInst, uint32_t argStart)
-{
-    auto callArgsCount = callInst->GetInputsCount() - argStart - 1U;  // last arg is a SaveState
-    auto callArgs = CreateAllocaForArgs(builder_.getInt64Ty(), callArgsCount);
-
-    // Store actual call arguments
-    for (size_t i = 0; i < callArgsCount; i++) {
-        auto arg = GetInputValue(callInst, argStart + i);
-
-        auto type = callInst->GetInputType(argStart + i);
-        auto typeSize = DataType::GetTypeSize(type, GetGraph()->GetArch());
-        if (typeSize < DataType::GetTypeSize(DataType::INT32, GetGraph()->GetArch())) {
-            arg = CoerceValue(arg, type, DataType::INT32);
-        }
-
-        auto gep = builder_.CreateConstInBoundsGEP1_32(builder_.getInt64Ty(), callArgs, i);
-        builder_.CreateStore(arg, gep);
-    }
-    return callArgs;
-}
-
-void LLVMIrConstructor::CreateLaunchCall([[maybe_unused]] CallInst *callInst)
-{
-#ifdef PANDA_WITH_ETS
-    ArenaVector<llvm::Value *> args(GetGraph()->GetLocalAllocator()->Adapter());
-
-    if (callInst->GetOpcode() == Opcode::CallResolvedLaunchStatic ||
-        callInst->GetOpcode() == Opcode::CallResolvedLaunchVirtual) {
-        args.push_back(GetInputValue(callInst, 0));
-        args.push_back(GetInputValue(callInst, 1));
-
-        auto argStart = callInst->GetOpcode() == Opcode::CallResolvedLaunchVirtual ? 3U : 2U;
-        auto callArgs = CreateLaunchArgsArray(callInst, argStart);
-
-        args.push_back(callArgs);
-
-        if (callInst->GetOpcode() == Opcode::CallResolvedLaunchVirtual) {
-            args.push_back(GetInputValue(callInst, 2U));
-        }
-    } else {
-        if (callInst->GetOpcode() != Opcode::CallLaunchVirtual) {
-            ASSERT_DO(false, (std::cerr << "Unexpected Launch Call: \n", callInst->Dump(&std::cerr, true)));
-            UNREACHABLE();
-        }
-
-        ASSERT(GetGraph()->GetAotData()->GetUseCha());
-
-        auto method = ark::llvmbackend::utils::CreateLoadMethodUsingVTable(
-            GetInputValue(callInst, 1), func_, callInst->GetCallMethodId(), &builder_, arkInterface_);
-        args.push_back(method);
-        args.push_back(GetInputValue(callInst, 0));
-
-        auto callArgs = CreateLaunchArgsArray(callInst, 2U);
-        args.push_back(callArgs);
-        args.push_back(GetInputValue(callInst, 1));
-    }
-
-    auto eid = callInst->IsStaticLaunchCall() ? RuntimeInterface::EntrypointId::CREATE_LAUNCH_STATIC_COROUTINE
-                                              : RuntimeInterface::EntrypointId::CREATE_LAUNCH_VIRTUAL_COROUTINE;
-    auto entryCall = CreateEntrypointCall(eid, callInst, args);
-    if (callInst->GetOpcode() == Opcode::CallResolvedLaunchVirtual) {
-        entryCall->addFnAttr(llvm::Attribute::get(entryCall->getContext(), "original-method-id",
-                                                  std::to_string(callInst->GetCallMethodId())));
-        entryCall->addFnAttr(llvm::Attribute::get(entryCall->getContext(), "is-launch-call"));
-    }
-    if (callInst->GetFlag(inst_flags::MEM_BARRIER)) {
-        entryCall->addFnAttr(llvm::Attribute::get(entryCall->getContext(), "needs-mem-barrier"));
-    }
-#else
-    UNREACHABLE();
-#endif
 }
 
 void LLVMIrConstructor::CreateDeoptimizationBranch(Inst *inst, llvm::Value *deoptimize,
@@ -5078,24 +5061,6 @@ void LLVMIrConstructor::VisitLoadUniqueObject(GraphVisitor *v, Inst *inst)
     auto result = llvmbackend::runtime_calls::LoadTLSValue(&ctor->builder_, ctor->arkInterface_, offset,
                                                            ctor->builder_.getPtrTy(LLVMArkInterface::GC_ADDR_SPACE));
     ctor->ValueMapAdd(inst, result);
-}
-
-void LLVMIrConstructor::VisitCallLaunchVirtual(GraphVisitor *v, Inst *inst)
-{
-    auto ctor = static_cast<LLVMIrConstructor *>(v);
-    ctor->CreateLaunchCall(inst->CastToCallLaunchVirtual());
-}
-
-void LLVMIrConstructor::VisitCallResolvedLaunchStatic(GraphVisitor *v, Inst *inst)
-{
-    auto ctor = static_cast<LLVMIrConstructor *>(v);
-    ctor->CreateLaunchCall(inst->CastToCallResolvedLaunchStatic());
-}
-
-void LLVMIrConstructor::VisitCallResolvedLaunchVirtual(GraphVisitor *v, Inst *inst)
-{
-    auto ctor = static_cast<LLVMIrConstructor *>(v);
-    ctor->CreateLaunchCall(inst->CastToCallResolvedLaunchVirtual());
 }
 
 void LLVMIrConstructor::VisitLoadImmediate(GraphVisitor *v, Inst *inst)

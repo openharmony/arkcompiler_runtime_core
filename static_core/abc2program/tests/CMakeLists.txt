@@ -29,7 +29,7 @@ add_custom_target(abc2program_gen)
 foreach(NAME ${abc2progTestFiles})
     add_custom_target(abc2program_gen_${NAME} COMMENT "Generating ${NAME} for abc2program"
         COMMAND ${PANDA_BINARY_ROOT}/bin/es2panda ${CMAKE_CURRENT_SOURCE_DIR}/ets/${NAME}.ets
-        --output=${CMAKE_CURRENT_BINARY_DIR}/ets/${NAME}.abc
+        --opt-level=0 --output=${CMAKE_CURRENT_BINARY_DIR}/ets/${NAME}.abc
         DEPENDS es2panda)
     add_dependencies(abc2program_gen abc2program_gen_${NAME})
 endforeach()
@@ -40,6 +40,7 @@ panda_add_gtest(
         abc2program_test.cpp
     LIBRARIES
         abc2program
+        gmock
     SANITIZERS
         ${PANDA_SANITIZERS_LIST}
     DEPS_TARGETS

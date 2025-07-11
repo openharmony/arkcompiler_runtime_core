@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,10 +18,10 @@
 #include <gtest/gtest.h>
 #include <numeric>
 
-#include "libabckit/include/c/abckit.h"
+#include "libabckit/c/abckit.h"
 #include "helpers/helpers.h"
-#include "libabckit/include/c/metadata_core.h"
-#include "libabckit/include/c/statuses.h"
+#include "libabckit/c/metadata_core.h"
+#include "libabckit/c/statuses.h"
 
 namespace libabckit::test {
 

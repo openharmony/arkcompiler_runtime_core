@@ -23,5 +23,5 @@ class MyClass {
 
 function main(): void {
   let x = MyClass.staticProp;
-  assertEQ(x, "static");
+  arktest.assertEQ(x, "static");
 }

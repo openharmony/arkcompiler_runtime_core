@@ -16,7 +16,7 @@
 import {ArrayList} from "@ohos.util.ArrayList";
 
 function main() {
-    const suite = new ArkTestsuite("ArrayList API tests");
+    const suite = new arktest.ArkTestsuite("ArrayList API tests");
 
     suite.addTest("ArrayList clear", testArrayListClear);
     suite.addTest("ArrayList clear with empty container", testArrayListClearEmpty);
@@ -49,24 +49,24 @@ function testArrayListClear() {
     arrayList.subArrayList(TestData.testNumber1, TestData.testNumber3);
     let length: number = arrayList.length;
     arrayList.clear();
-    assertEQ(length, TestData.testNumber6, "ArrayList length should be 6 before clear");
-    assertEQ(arrayList.length, 0, "ArrayList length should be 0 after clear");
-    assertTrue(arrayList.isEmpty(), "ArrayList should be empty after clear");
-    assertEQ(arrayList.getCapacity(), TestData.testNumber10, "ArrayList capacity should be 10 after clear");
+    arktest.assertEQ(length, TestData.testNumber6, "ArrayList length should be 6 before clear");
+    arktest.assertEQ(arrayList.length, 0, "ArrayList length should be 0 after clear");
+    arktest.assertTrue(arrayList.isEmpty(), "ArrayList should be empty after clear");
+    arktest.assertEQ(arrayList.getCapacity(), TestData.testNumber10, "ArrayList capacity should be 10 after clear");
 }
 
 function testArrayListClearEmpty() {
     let arrayList = new ArrayList<number>();
     let length: number = arrayList.length;
     arrayList.clear();
-    assertEQ(length, 0, "Initial ArrayList length should be 0");
-    assertEQ(arrayList.length, 0, "ArrayList length should be 0 after clear");
+    arktest.assertEQ(length, 0, "Initial ArrayList length should be 0");
+    arktest.assertEQ(arrayList.length, 0, "ArrayList length should be 0 after clear");
 }
 
 function testArrayListCloneEmpty() {
     let arrayList = new ArrayList<number>();
     let cloneArrayList = arrayList.clone();
-    assertEQ(cloneArrayList.length, 0, "Cloned ArrayList should have length 0");
+    arktest.assertEQ(cloneArrayList.length, 0, "Cloned ArrayList should have length 0");
 }
 
 function testArrayListClone() {
@@ -76,9 +76,9 @@ function testArrayListClone() {
     arrayList.subArrayList(TestData.testNumber1, TestData.testNumber3);
     let cloneArrayList = arrayList.clone();
     for (let i: number = 0; i < arrayList.length; i++) {
-        assertEQ(cloneArrayList[i], arrayList[i], `Element at index ${i} should match`);
+        arktest.assertEQ(cloneArrayList[i], arrayList[i], `Element at index ${i} should match`);
     }
-    assertEQ(cloneArrayList.length, arrayList.length, "Cloned ArrayList should have the same length");
+    arktest.assertEQ(cloneArrayList.length, arrayList.length, "Cloned ArrayList should have the same length");
 }
 
 function testArrayListCloneModify() {
@@ -86,18 +86,18 @@ function testArrayListCloneModify() {
     initializeArrayList(arrayList, TestData.result4);
     let cloneArrayList = arrayList.clone();
     for (let i: number = 0; i < arrayList.length; i++) {
-        assertEQ(cloneArrayList[i], arrayList[i], `Element at index ${i} should match`);
+        arktest.assertEQ(cloneArrayList[i], arrayList[i], `Element at index ${i} should match`);
     }
     cloneArrayList.add(TestData.testNumber3);
     for (let i: int = 0; i < arrayList.length; i++) {
-        assertEQ(arrayList[i], TestData.result4[i], `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList[i], TestData.result4[i], `Element at index ${i} should match`);
     }
     for (let i: int = 0; i < cloneArrayList.length; i++) {
-        assertEQ(cloneArrayList[i], TestData.result3[i], `Element at index ${i} should match`);
+        arktest.assertEQ(cloneArrayList[i], TestData.result3[i], `Element at index ${i} should match`);
     }
-    assertEQ(cloneArrayList.length, TestData.testNumber6 + TestData.testNumber1,
+    arktest.assertEQ(cloneArrayList.length, TestData.testNumber6 + TestData.testNumber1,
         "Cloned ArrayList should have the correct length after modification");
-    assertEQ(arrayList.length, TestData.testNumber6,
+    arktest.assertEQ(arrayList.length, TestData.testNumber6,
         "Original ArrayList should remain unchanged after clone modification");
 }
 
@@ -107,9 +107,9 @@ function testArrayListCloneAfterClear() {
     initializeArrayList(arrayList, TestData.forNumber);
     arrayList.subArrayList(TestData.testNumber1, TestData.testNumber3);
     arrayList.clear();
-    assertEQ(arrayList.length, 0, "ArrayList length should be 0 after clear");
+    arktest.assertEQ(arrayList.length, 0, "ArrayList length should be 0 after clear");
     let cloneArrayList = arrayList.clone();
-    assertEQ(cloneArrayList.length, arrayList.length, "Cloned ArrayList should have the same length");
+    arktest.assertEQ(cloneArrayList.length, arrayList.length, "Cloned ArrayList should have the same length");
 }
 
 function testArrayListGetCapacity() {
@@ -122,13 +122,13 @@ function testArrayListGetCapacity() {
     arrayList.subArrayList(TestData.testNumber1, TestData.testNumber3);
     let cap: number = arrayList.getCapacity();
     initializeArrayList(arrayList, TestData.forNumber);
-    assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
-    assertEQ(arrayList.getCapacity(), TestData.testNumber15, "ArrayList capacity should be updated correctly");
+    arktest.assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
+    arktest.assertEQ(arrayList.getCapacity(), TestData.testNumber15, "ArrayList capacity should be updated correctly");
 }
 
 function testArrayListGetCapacityEmpty() {
     let arrayList = new ArrayList<number>();
-    assertEQ(arrayList.getCapacity(), TestData.testNumber10, "Initial ArrayList capacity should be 10");
+    arktest.assertEQ(arrayList.getCapacity(), TestData.testNumber10, "Initial ArrayList capacity should be 10");
 }
 
 function testArrayListGetCapacityAfterClear() {
@@ -141,8 +141,8 @@ function testArrayListGetCapacityAfterClear() {
     arrayList.subArrayList(TestData.testNumber1, TestData.testNumber3);
     let cap: number = arrayList.getCapacity();
     arrayList.clear();
-    assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
-    assertEQ(arrayList.getCapacity(), TestData.testNumber10, "ArrayList capacity should be updated correctly");
+    arktest.assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
+    arktest.assertEQ(arrayList.getCapacity(), TestData.testNumber10, "ArrayList capacity should be updated correctly");
 }
 
 function initializeArrayList<T>(arrayList: ArrayList<T>, sourceArray: T[]) {

@@ -38,6 +38,7 @@ enum class GcType : uint8_t {
     SYNC,
     FULL,  // Waiting finish
     APPSPAWN,
+    FULL_WITH_XREF,     // Waiting finish
 };
 using HeapVisitor = const std::function<void(BaseObject*)>;
 
@@ -52,9 +53,12 @@ public:
     void PreFork(ThreadHolder *holder);
     void PostFork();
 
+    bool HasBeenInitialized();
     void Init(const RuntimeParam &param);   // Support setting custom parameters
     void Init();                            // Use default parameters
+    void InitFromDynamic(const RuntimeParam &param);
     void Fini();
+    void FiniFromDynamic();
 
     // Need refactor, move to other file
     static void WriteBarrier(void* obj, void* field, void* ref);

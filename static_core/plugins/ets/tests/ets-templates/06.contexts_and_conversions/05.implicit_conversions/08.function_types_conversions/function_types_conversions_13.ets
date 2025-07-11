@@ -21,5 +21,5 @@ tags : [compile-only, positive]
 function main(): void {
     type A = string | number;
     let b: A = 10;
-    assertTrue(typeof b == "number");
+    arktest.assertTrue(typeof b == "number");
 }

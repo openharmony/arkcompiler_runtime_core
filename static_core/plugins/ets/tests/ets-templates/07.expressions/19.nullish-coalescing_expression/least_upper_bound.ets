@@ -33,5 +33,5 @@ function main(): void {
   let a: CAAA | null = null;
   let b: CBBB = new CBBB();
   let c = a ?? b;
-  assertTrue( c instanceof ACB )
+  arktest.assertTrue( c instanceof ACB )
 }

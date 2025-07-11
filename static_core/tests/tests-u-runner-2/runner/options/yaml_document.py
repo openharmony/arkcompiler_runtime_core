@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@
 #
 
 from pathlib import Path
-from typing import Dict, Optional, List, Any
+from typing import Any
 
 import yaml
 
@@ -30,16 +30,16 @@ class YamlDocument:
 
     def __init__(self) -> None:
         super().__init__()
-        self._document: Optional[Dict[str, Any]] = None
-        self._warnings: List[str] = []
+        self._document: dict[str, Any] | None = None  # type: ignore[explicit-any]
+        self._warnings: list[str] = []
 
     @staticmethod
-    def load(config_path: Path) -> Dict[str, Any]:
-        with open(config_path, "r", encoding="utf-8") as stream:
-            data: Dict[str, Any] = yaml.safe_load(stream)
+    def load(config_path: Path) -> dict[str, Any]:  # type: ignore[explicit-any]
+        with open(config_path, encoding="utf-8") as stream:
+            data: dict[str, Any] = yaml.safe_load(stream)   # type: ignore[explicit-any]
             return data
 
     @staticmethod
-    def save(config_path: str, data: Dict[str, Any]) -> None:
+    def save(config_path: str, data: dict[str, Any]) -> None:   # type: ignore[explicit-any]
         data_to_save = yaml.dump(data, indent=4)
         utils.write_2_file(config_path, data_to_save)

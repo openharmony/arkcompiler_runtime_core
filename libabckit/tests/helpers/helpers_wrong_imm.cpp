@@ -15,7 +15,7 @@
 
 #include "helpers/helpers_wrong_imm.h"
 
-#include "libabckit/include/c/abckit.h"
+#include "libabckit/c/abckit.h"
 
 #include <gtest/gtest.h>
 

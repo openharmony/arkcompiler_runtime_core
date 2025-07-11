@@ -133,9 +133,9 @@ TEST_F(ArrayBufferGetInfoTest, GetInfoFromManagedBuffer)
 TEST_F(ArrayBufferGetInfoTest, GetInfoFromResizableBuffer)
 {
     ani_class boxedIntClass {};
-    ASSERT_EQ(env_->FindClass("Lstd/core/Int;", &boxedIntClass), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.Int", &boxedIntClass), ANI_OK);
     ani_ref maxByteLength {};
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(boxedIntClass, "valueOf", "I:Lstd/core/Int;", &maxByteLength,
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(boxedIntClass, "valueOf", "i:C{std.core.Int}", &maxByteLength,
                                                      static_cast<ani_int>(EXPECTED_SIZE)),
               ANI_OK);
 
@@ -157,7 +157,7 @@ TEST_F(ArrayBufferGetInfoTest, GetInfoFromResizableBuffer)
     ASSERT_EQ(byteData[2U], THREE);
 
     ani_class arrayBufferClass {};
-    ASSERT_EQ(env_->FindClass("Lescompat/ArrayBuffer;", &arrayBufferClass), ANI_OK);
+    ASSERT_EQ(env_->FindClass("escompat.ArrayBuffer", &arrayBufferClass), ANI_OK);
     ani_method resizableGetter {};
     ASSERT_EQ(env_->Class_FindGetter(arrayBufferClass, "resizable", &resizableGetter), ANI_OK);
     ani_boolean isResizable = ANI_FALSE;

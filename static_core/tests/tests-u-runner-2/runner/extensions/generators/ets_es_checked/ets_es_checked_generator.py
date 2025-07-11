@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,6 @@ import sys
 from glob import glob
 from os import path
 from pathlib import Path
-from typing import List
 
 from runner.common_exceptions import SetupException
 from runner.extensions.generators.igenerator import IGenerator
@@ -29,7 +28,7 @@ _LOGGER = Log.get_logger(__file__)
 
 
 class EsCheckedGenerator(IGenerator):
-    def generate(self) -> List[str]:
+    def generate(self) -> list[str]:
         confs = list(glob(path.join(self._source, "**/*.yaml"), recursive=True))
         generator_root = Path(__file__).parent / "generate-es-checked"
         generator_executable = generator_root / "main.rb"

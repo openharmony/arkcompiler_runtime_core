@@ -24,7 +24,7 @@ type ML = (required: String, param: Int | null = 100) => void;
 
 function main(): void {
     let mi: ML = (required: String, param: Int | null = 100): void => {
-        assertTrue( param === null)
+        arktest.assertTrue( param === null)
     }
     mi("Hello World", null);
 

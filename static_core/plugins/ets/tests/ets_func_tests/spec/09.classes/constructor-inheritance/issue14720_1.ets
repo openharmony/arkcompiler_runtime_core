@@ -30,5 +30,5 @@ tags: []
 
  function main(): void {
     let b = new Derive2();
-    assertEQ( b.age, 42)
+    arktest.assertEQ( b.age, 42)
  }

@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "ani_gtest_array_ops.h"
+#include "array_gtest_helper.h"
 #include <iostream>
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
-class ArraySetGetRegionFloatTest : public AniGTestArrayOps {
+class ArraySetGetRegionFloatTest : public ArrayHelperTest {
 protected:
     static constexpr float TEST_VALUE_1 = 1.0F;
     static constexpr float TEST_VALUE_2 = 2.0F;
@@ -53,12 +53,34 @@ TEST_F(ArraySetGetRegionFloatTest, GetFloatArrayRegionErrorTests)
     ani_float nativeBuffer[LENGTH_5] = {TEST_VALUE_1, TEST_VALUE_2, TEST_VALUE_3, TEST_VALUE_4, TEST_VALUE_5};
     ASSERT_EQ(env_->Array_GetRegion_Float(array, OFFSET_0, LENGTH_1, nullptr), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Array_GetRegion_Float(array, OFFSET_5, LENGTH_10, nativeBuffer), ANI_OUT_OF_RANGE);
+    // Should change to ANI_OK when std lib array will work according to spec
+    ASSERT_EQ(env_->Array_GetRegion_Float(array, OFFSET_0, LENGTH_1, nativeBuffer), ANI_ERROR);
+}
+
+TEST_F(ArraySetGetRegionFloatTest, SetFloatFixedArrayRegionErrorTests)
+{
+    ani_array_float array = nullptr;
+    ASSERT_EQ(env_->FixedArray_New_Float(LENGTH_5, reinterpret_cast<ani_fixedarray_float *>(&array)), ANI_OK);
+    ani_float nativeBuffer[LENGTH_5] = {TEST_VALUE_1, TEST_VALUE_2, TEST_VALUE_3, TEST_VALUE_4, TEST_VALUE_5};
+    const ani_size offset1 = -1;
+    ASSERT_EQ(env_->Array_SetRegion_Float(array, offset1, LENGTH_2, nativeBuffer), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->Array_SetRegion_Float(array, OFFSET_5, LENGTH_10, nativeBuffer), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->Array_SetRegion_Float(array, OFFSET_0, LENGTH_5, nativeBuffer), ANI_OK);
+}
+
+TEST_F(ArraySetGetRegionFloatTest, GetFloatFixedArrayRegionErrorTests)
+{
+    ani_array_float array = nullptr;
+    ASSERT_EQ(env_->FixedArray_New_Float(LENGTH_5, reinterpret_cast<ani_fixedarray_float *>(&array)), ANI_OK);
+    ani_float nativeBuffer[LENGTH_5] = {TEST_VALUE_1, TEST_VALUE_2, TEST_VALUE_3, TEST_VALUE_4, TEST_VALUE_5};
+    ASSERT_EQ(env_->Array_GetRegion_Float(array, OFFSET_0, LENGTH_1, nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Array_GetRegion_Float(array, OFFSET_5, LENGTH_10, nativeBuffer), ANI_OUT_OF_RANGE);
     ASSERT_EQ(env_->Array_GetRegion_Float(array, OFFSET_0, LENGTH_1, nativeBuffer), ANI_OK);
 }
 
 TEST_F(ArraySetGetRegionFloatTest, GetRegionFloatTest)
 {
-    const auto array = static_cast<ani_array_float>(CallEtsFunction<ani_ref>("array_region_float_test", "GetArray"));
+    const auto array = static_cast<ani_array_float>(CallEtsFunction<ani_ref>("array_region_float_test", "getArray"));
 
     ani_float nativeBuffer[LENGTH_5] = {0.0F};
     const float epsilon = 1e-6;  // Define acceptable tolerance
@@ -72,16 +94,16 @@ TEST_F(ArraySetGetRegionFloatTest, GetRegionFloatTest)
 
 TEST_F(ArraySetGetRegionFloatTest, SetRegionFloatTest)
 {
-    const auto array = static_cast<ani_array_float>(CallEtsFunction<ani_ref>("array_region_float_test", "GetArray"));
+    const auto array = static_cast<ani_array_float>(CallEtsFunction<ani_ref>("array_region_float_test", "getArray"));
     ani_float nativeBuffer1[LENGTH_5] = {TEST_UPDATE_1, TEST_UPDATE_2, TEST_UPDATE_3};
     ASSERT_EQ(env_->Array_SetRegion_Float(array, OFFSET_2, LENGTH_3, nativeBuffer1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_float_test", "CheckArray", array), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_float_test", "checkArray", array), ANI_TRUE);
 }
 
 TEST_F(ArraySetGetRegionFloatTest, CheckChangeFromManagedRegionFloatTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Larray_region_float_test/ArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("array_region_float_test.ArrayClass", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;
@@ -99,7 +121,7 @@ TEST_F(ArraySetGetRegionFloatTest, CheckChangeFromManagedRegionFloatTest)
     ASSERT_NEAR(nativeBuffer[3U], TEST_VALUE_4, epsilon);
     ASSERT_NEAR(nativeBuffer[4U], TEST_VALUE_5, epsilon);
 
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "ChangeStaticArray", nullptr), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "changeStaticArray", nullptr), ANI_OK);
     ASSERT_EQ(env_->Array_GetRegion_Float(array, OFFSET_0, LENGTH_5, nativeBuffer), ANI_OK);
     ASSERT_NEAR(nativeBuffer[0U], TEST_VALUE_1, epsilon);
     ASSERT_NEAR(nativeBuffer[1U], TEST_VALUE_2, epsilon);
@@ -111,7 +133,7 @@ TEST_F(ArraySetGetRegionFloatTest, CheckChangeFromManagedRegionFloatTest)
 TEST_F(ArraySetGetRegionFloatTest, CheckChangeFromApiRegionFloatTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Larray_region_float_test/ArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("array_region_float_test.ArrayClass", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;
@@ -124,14 +146,14 @@ TEST_F(ArraySetGetRegionFloatTest, CheckChangeFromApiRegionFloatTest)
     ASSERT_EQ(env_->Array_SetRegion_Float(array, OFFSET_2, LENGTH_3, nativeBuffer), ANI_OK);
 
     ani_boolean result = ANI_FALSE;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "CheckStaticArray", nullptr, &result), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "checkStaticArray", nullptr, &result), ANI_OK);
     ASSERT_EQ(result, ANI_TRUE);
 }
 
 TEST_F(ArraySetGetRegionFloatTest, GetSpecialValueToArrayTest)
 {
     const auto array =
-        static_cast<ani_array_float>(CallEtsFunction<ani_ref>("array_region_float_test", "GetSpecialArray"));
+        static_cast<ani_array_float>(CallEtsFunction<ani_ref>("array_region_float_test", "getSpecialArray"));
 
     std::array<ani_float, LENGTH_6> nativeBuffer = {};
     ASSERT_EQ(env_->Array_GetRegion_Float(array, OFFSET_0, LENGTH_6, nativeBuffer.data()), ANI_OK);
@@ -147,7 +169,7 @@ TEST_F(ArraySetGetRegionFloatTest, GetSpecialValueToArrayTest)
 TEST_F(ArraySetGetRegionFloatTest, SetSpecialValueToArrayTest)
 {
     ani_array_float array = nullptr;
-    ASSERT_EQ(env_->Array_New_Float(LENGTH_6, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Float(LENGTH_6, reinterpret_cast<ani_fixedarray_float *>(&array)), ANI_OK);
     ani_float max = std::numeric_limits<float>::max();
     ani_float minPositive = std::numeric_limits<float>::min();
     ani_float min = -std::numeric_limits<float>::max();
@@ -166,7 +188,7 @@ TEST_F(ArraySetGetRegionFloatTest, SetSpecialValueToArrayTest)
 TEST_F(ArraySetGetRegionFloatTest, SetGetUnionToArrayTest)
 {
     ani_array_float array = nullptr;
-    ASSERT_EQ(env_->Array_New_Float(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Float(LENGTH_5, reinterpret_cast<ani_fixedarray_float *>(&array)), ANI_OK);
 
     std::array<ani_float, LENGTH_5> nativeBuffer = {TEST_VALUE_1, TEST_VALUE_2, TEST_VALUE_3, TEST_VALUE_4,
                                                     TEST_VALUE_5};
@@ -202,7 +224,7 @@ TEST_F(ArraySetGetRegionFloatTest, SetGetUnionToArrayTest)
 TEST_F(ArraySetGetRegionFloatTest, SetGetStabilityToArrayTest)
 {
     ani_array_float array = nullptr;
-    ASSERT_EQ(env_->Array_New_Float(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Float(LENGTH_5, reinterpret_cast<ani_fixedarray_float *>(&array)), ANI_OK);
 
     std::array<ani_float, LENGTH_5> nativeBuffer = {TEST_VALUE_1, TEST_VALUE_2, TEST_VALUE_3, TEST_VALUE_4,
                                                     TEST_VALUE_5};
@@ -231,7 +253,7 @@ TEST_F(ArraySetGetRegionFloatTest, SetGetStabilityToArrayTest)
 TEST_F(ArraySetGetRegionFloatTest, EscompatGetRegionFloatTest)
 {
     const auto array =
-        static_cast<ani_array_float>(CallEtsFunction<ani_ref>("array_region_float_test", "GetEscompatArray"));
+        static_cast<ani_array_float>(CallEtsFunction<ani_ref>("array_region_float_test", "getEscompatArray"));
 
     ani_float nativeBuffer[5U] = {0.0F};
     const ani_size offset3 = 0;
@@ -248,18 +270,18 @@ TEST_F(ArraySetGetRegionFloatTest, EscompatGetRegionFloatTest)
 TEST_F(ArraySetGetRegionFloatTest, EscompatSetRegionFloatTest)
 {
     const auto array =
-        static_cast<ani_array_float>(CallEtsFunction<ani_ref>("array_region_float_test", "GetEscompatArray"));
+        static_cast<ani_array_float>(CallEtsFunction<ani_ref>("array_region_float_test", "getEscompatArray"));
     ani_float nativeBuffer1[5U] = {TEST_UPDATE_1, TEST_UPDATE_2, TEST_UPDATE_3};
     const ani_size offset4 = 2;
     const ani_size len4 = 3;
     ASSERT_EQ(env_->Array_SetRegion_Float(array, offset4, len4, nativeBuffer1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_float_test", "CheckEscompatArray", array), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_float_test", "checkEscompatArray", array), ANI_TRUE);
 }
 
 TEST_F(ArraySetGetRegionFloatTest, EscompatInvalidFloatTest)
 {
     const auto array =
-        static_cast<ani_array_float>(CallEtsFunction<ani_ref>("array_region_float_test", "GetEscompatArray"));
+        static_cast<ani_array_float>(CallEtsFunction<ani_ref>("array_region_float_test", "getEscompatArray"));
     ani_float nativeBuffer1[5U] = {TEST_UPDATE_1, TEST_UPDATE_2, TEST_UPDATE_3};
     const ani_size offset4 = 3;
     const ani_size len4 = 3;

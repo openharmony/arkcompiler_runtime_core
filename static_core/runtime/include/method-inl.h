@@ -460,6 +460,9 @@ inline bool Method::DecrementHotnessCounter(ManagedThread *thread, uintptr_t bcO
 {
     // The compilation process will start performing
     // once the counter value decreases to a value that is or less than 0
+
+    Runtime::GetCurrent()->TryCreateSaverTask();
+
     if (GetHotnessCounter() > 0) {
         if (TryVerify<IS_CALL>()) {
             DecrementHotnessCounter();
@@ -467,7 +470,7 @@ inline bool Method::DecrementHotnessCounter(ManagedThread *thread, uintptr_t bcO
         return false;
     }
 
-    if (!Runtime::GetCurrent()->IsJitEnabled()) {
+    if (!Runtime::GetCurrent()->IsProfilerEnabled()) {
         if (TryVerify<IS_CALL>()) {
             ResetHotnessCounter();
         }
@@ -490,7 +493,7 @@ inline bool Method::DecrementHotnessCounter(ManagedThread *thread, uintptr_t bcO
         if (!IsProfiling()) {
             SetProfiled();
         }
-    } else {
+    } else if (Runtime::GetCurrent()->IsJitEnabled()) {
         CompilationStage status = GetCompilationStatus();
         if (!(status == FAILED || status == WAITING || status == COMPILATION)) {
             ASSERT((!osr) == (acc == nullptr));

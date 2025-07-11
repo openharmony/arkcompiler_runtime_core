@@ -20,5 +20,5 @@ desc: Convert to number-notANumber type.
 function main(): void {
   let notANumber: number = NaN;
   const obj1: object = notANumber;
-  assertTrue(obj1 !== notANumber);
+  arktest.assertTrue(obj1 !== notANumber);
 }

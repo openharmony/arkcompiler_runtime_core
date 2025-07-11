@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "assembly-context.h"
 #include "assembly-emitter.h"
 #include "file_items.h"
 #include "file_writer.h"
@@ -24,8 +23,6 @@
 #include "libpandafile/type_helper.h"
 
 #include <algorithm>
-#include <cstddef>
-#include <cstdint>
 #include <iostream>
 
 namespace {
@@ -257,7 +254,7 @@ panda_file::LiteralItem *AsmEmitter::CreateLiteralItemFromMethod(const Value *va
 {
     auto name = value->GetAsScalar()->GetValue<std::string>();
     ASSERT(value->GetType() == Value::Type::METHOD);
-    auto *methodItem = FindAmongAllMethods(name, entities);
+    auto *methodItem = FindAmongAllMethods(name, entities, value);
     out->emplace_back(methodItem);
     return &out->back();
 }
@@ -510,7 +507,7 @@ ScalarValueItem *AsmEmitter::CreateScalarMethodValueItem(ItemContainer *containe
             methodItem = it->second;
         }
     } else {
-        methodItem = FindAmongAllMethods(name, entities);
+        methodItem = FindAmongAllMethods(name, entities, value);
     }
     if (methodItem == nullptr) {
         return nullptr;
@@ -889,11 +886,6 @@ void AsmEmitter::MakeStringItems(ItemContainer *items, const Program &program,
     for (const auto &s : program.strings) {
         auto *item = items->GetOrCreateStringItem(s);
         entities.stringItems.insert({s, item});
-    }
-
-    for (const auto &s : program.exportStrMap) {
-        auto *item = items->GetOrCreateStringItem(s.first);
-        entities.stringItems.insert({s.first, item});
     }
 }
 
@@ -1535,7 +1527,7 @@ bool AsmEmitter::AddMethodAndParamsAnnotations(ItemContainer *items, const Progr
         size_t paramIdx = method->IsStatic() ? protoIdx : protoIdx + 1;
         auto &param = func.params[paramIdx];
         auto &paramItem = paramItems[protoIdx];
-        if (!AddAnnotations(&paramItem, items, *param.metadata, program, entities)) {
+        if (!AddAnnotations(&paramItem, items, param.GetOrCreateMetadata(), program, entities)) {
             SetLastError("Cannot emit annotations for parameter a" + std::to_string(paramIdx) + " of function " +
                          func.name + ": " + GetLastError());
             return false;
@@ -1565,14 +1557,20 @@ ark::panda_file::MethodItem *AsmEmitter::FindMethod(const Function &func, const 
 
 /* static */
 ark::panda_file::MethodItem *AsmEmitter::FindAmongAllMethods(const std::string &name,
-                                                             const AsmEmitter::AsmEntityCollections &entities)
+                                                             const AsmEmitter::AsmEntityCollections &entities,
+                                                             const Value *value)
 {
-    auto res = entities.staticMethodItems.find(name);
-    if (res != entities.staticMethodItems.cend()) {
+    bool isStatic = value->GetAsScalar()->IsStatic();
+    auto &primaryMap = isStatic ? entities.staticMethodItems : entities.methodItems;
+    auto &secondaryMap = isStatic ? entities.methodItems : entities.staticMethodItems;
+
+    auto res = primaryMap.find(name);
+    if (res != primaryMap.cend()) {
         return static_cast<MethodItem *>(res->second);
     }
-    res = entities.methodItems.find(name);
-    return res == entities.methodItems.cend() ? nullptr : static_cast<MethodItem *>(res->second);
+
+    res = secondaryMap.find(name);
+    return res == secondaryMap.cend() ? nullptr : static_cast<MethodItem *>(res->second);
 }
 
 /* static */
@@ -1649,68 +1647,6 @@ void AsmEmitter::FillMap(PandaFileToPandaAsmMaps *maps, AsmEmitter::AsmEntityCol
 
     for (const auto &[name, arr] : entities.literalarrayItems) {
         maps->literalarrays.emplace(arr->GetFileId().GetOffset(), name);
-    }
-}
-
-static uint32_t FindOffset(AsmEmitter::AsmEntityCollections &entities, const std::string &name)
-{
-    auto methodIt = entities.methodItems.find(name);
-    if (methodIt != entities.methodItems.end()) {
-        return methodIt->second->GetOffset();
-    }
-    auto staticMethodIt = entities.staticMethodItems.find(name);
-    if (staticMethodIt != entities.staticMethodItems.end()) {
-        return staticMethodIt->second->GetOffset();
-    }
-    auto fieldIt = entities.fieldItems.find(name);
-    if (fieldIt != entities.fieldItems.end()) {
-        return fieldIt->second->GetOffset();
-    }
-    auto staticFieldIt = entities.staticFieldItems.find(name);
-    if (staticFieldIt != entities.staticFieldItems.end()) {
-        return staticFieldIt->second->GetOffset();
-    }
-    auto classIt = entities.classItems.find(name);
-    if (classIt != entities.classItems.end()) {
-        return classIt->second->GetOffset();
-    }
-    UNREACHABLE();
-}
-
-/* static */
-static void SetOffsetForExportTable(std::vector<std::pair<std::string, std::string>> &declToAssmb,
-                                    const std::string &literalArrayName, AsmEmitter::AsmEntityCollections &entities)
-{
-    // export entities are align as:
-    // exportentites{
-    //    Type: uint32_t
-    //    declTextOffset: offset to decl string
-    //    Type: uint32_t
-    //    entitiesType: type of function,class,const,interface
-    //    Type: uint32_t
-    //    abcOffset: offset to effective bytecode
-    //    ...
-    // }
-    constexpr size_t FIELDS_PER_ENTITY = 6;
-    constexpr size_t ABC_OFFSET_RELATIVE_POS = 4;  // Position of abcOffset relative to declTextOffset
-
-    auto arrayItemIt = entities.literalarrayItems.find(literalArrayName);
-    if (arrayItemIt == entities.literalarrayItems.end()) {
-        return;
-    }
-    auto &exportEntitiesList = arrayItemIt->second->GetItemsUnsafe();
-    ASSERT(exportEntitiesList.size() == declToAssmb.size() * FIELDS_PER_ENTITY);
-
-    for (size_t declTextOffsetIndex = 1; declTextOffsetIndex < exportEntitiesList.size();
-         declTextOffsetIndex += FIELDS_PER_ENTITY) {
-        auto stringIt = entities.stringItems.find(declToAssmb[declTextOffsetIndex / FIELDS_PER_ENTITY].first);
-        ASSERT(stringIt != entities.stringItems.end());
-        uint32_t declTextOffset = stringIt->second->GetOffset();
-        exportEntitiesList[declTextOffsetIndex].SetValueUnsafe<uint32_t>(declTextOffset);
-
-        Type recordName = Type::FromName(declToAssmb[declTextOffsetIndex / FIELDS_PER_ENTITY].second);
-        uint32_t abcOffset = FindOffset(entities, recordName.GetName());
-        exportEntitiesList[declTextOffsetIndex + ABC_OFFSET_RELATIVE_POS].SetValueUnsafe<uint32_t>(abcOffset);
     }
 }
 
@@ -1849,8 +1785,6 @@ bool AsmEmitter::Emit(ItemContainer *items, Program &program, PandaFileToPandaAs
     }
 
     items->ComputeLayout();
-
-    SetOffsetForExportTable(program.exportStrMap, "export_entities", entities);
 
     if (maps != nullptr) {
         FillMap(maps, entities);

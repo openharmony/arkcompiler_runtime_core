@@ -13,12 +13,15 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+import { Job } from "std/core"
+
 const stressNum: int = 100;
 
-let sMTQueueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(stressNum);
+let sMTQueueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(stressNum);
 
 function main(): int {
-    let LinkedBlockingQueueTestsuite = new ArkTestsuite("LinkedBlockingQueuePollTest");
+    let LinkedBlockingQueueTestsuite = new arktest.ArkTestsuite("LinkedBlockingQueuePollTest");
 
     LinkedBlockingQueueTestsuite.addTest("ThreadsPollStressTest003", () =>
     {
@@ -28,15 +31,15 @@ function main(): int {
         for (let i = 0; i < stressNum; i++) {
             sMTQueueInt.add(i);
         }
-        let promises = new Array<Promise<void>>(100);
+        let jobs = new Array<Job<void>>(100);
         let p = 0;
         for (let i = 0; i < stressNum; i++) {
-            promises[p++] = launch sQueuePollData();
+            jobs[p++] = launch<void, () => void>(sQueuePollData);
         }
         for (let i: int = 0; i < 100; i++) {
-            await promises[i];
+            jobs[i].Await();
         }
-        assertEQ(sMTQueueInt.size, 0);
+        arktest.assertEQ(sMTQueueInt.size, 0);
     });
 
     return LinkedBlockingQueueTestsuite.run();

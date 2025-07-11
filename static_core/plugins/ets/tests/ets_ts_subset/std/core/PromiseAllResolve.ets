@@ -18,22 +18,22 @@ let v2 = new Object();
 let v3 = new Object();
 Promise.all([v1, v2, v3]).then<void, void>((values: Array<Object>): void => {
     if (values.length != 3) {
-        console.log("Test failed. Expected object array of length 3 but get length " + values.length + ".");
+        console.log('Test failed. Expected object array of length 3 but get length ' + values.length + '.');
         return;
     }
     if (values[0] != v1) {
-        console.log("Test failed. Unexpected value at index 0.");
+        console.log('Test failed. Unexpected value at index 0.');
         return;
     }
     if (values[1] != v2) {
-        console.log("Test failed. Unexpected value at index 0.");
+        console.log('Test failed. Unexpected value at index 0.');
         return;
     }
     if (values[2] != v3) {
-        console.log("Test failed. Unexpected value at index 0.");
+        console.log('Test failed. Unexpected value at index 0.');
         return;
     }
-    console.log("Test passed.");
-}, (error: Object): void => {
-    console.log("Test failed. The promise should not be rejected.");
+    console.log('Test passed.');
+}, (error: Error): void => {
+    console.log('Test failed. The promise should not be rejected.');
 });

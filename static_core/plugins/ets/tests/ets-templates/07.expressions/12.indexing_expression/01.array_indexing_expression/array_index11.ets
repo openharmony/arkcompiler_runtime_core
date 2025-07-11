@@ -22,5 +22,5 @@ let nestedArray: number[][] | null = [
   [1, 2],
   [3, 4]
 ];
-  assertEQ(nestedArray?.[1]?.[0], 3);
+  arktest.assertEQ(nestedArray?.[1]?.[0], 3);
 }

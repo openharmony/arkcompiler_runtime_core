@@ -16,12 +16,12 @@
 function UseAndCheckScheduleGcTest(): void {
     let detected = false;
     try {
-        GC.scheduleGcAfterNthAlloc(1, GC.YOUNG_CAUSE);
+        GC.scheduleGcAfterNthAlloc(1, GC.Cause.YOUNG);
     } catch (e: UnsupportedOperationException) {
         detected = true;
     }
     catch (e) {}
-    assertTrue(detected, "scheduleGcAfterNthAlloc must throw UnsupportedOperationException if you don't use it with needed flag");
+    arktest.assertTrue(detected, "scheduleGcAfterNthAlloc must throw UnsupportedOperationException if you don't use it with needed flag");
 }
 
 function main(): int {

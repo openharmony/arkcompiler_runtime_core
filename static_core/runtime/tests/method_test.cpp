@@ -183,7 +183,7 @@ TEST_F(MethodTest, Invoke)
     gMethod->SetCompiledEntryPoint(reinterpret_cast<const void *>(EntryPoint));
 
     EXPECT_EQ(fMethod->GetHotnessCounter(),
-              Runtime::GetCurrent()->IsJitEnabled() ? 1500U : std::numeric_limits<int16_t>::max());
+              Runtime::GetCurrent()->IsProfilerEnabled() ? 1500U : std::numeric_limits<int16_t>::max());
 
     auto frameDeleter = [](Frame *frame) { FreeFrame(frame); };
     std::unique_ptr<Frame, decltype(frameDeleter)> frame(CreateFrame(0, mainMethod, nullptr), frameDeleter);
@@ -197,7 +197,7 @@ TEST_F(MethodTest, Invoke)
     Value v = fMethod->Invoke(ManagedThread::GetCurrent(), args.data());
     EXPECT_EQ(v.GetAs<int64_t>(), 0);
     EXPECT_EQ(fMethod->GetHotnessCounter(),
-              Runtime::GetCurrent()->IsJitEnabled() ? 1499U : std::numeric_limits<int16_t>::max() - 1);
+              Runtime::GetCurrent()->IsProfilerEnabled() ? 1499U : std::numeric_limits<int16_t>::max() - 1);
     EXPECT_EQ(ManagedThread::GetCurrent(), thread);
 
     // Invoke f called compiled code
@@ -207,7 +207,7 @@ TEST_F(MethodTest, Invoke)
     v = fMethod->Invoke(ManagedThread::GetCurrent(), args.data());
     EXPECT_EQ(v.GetAs<int64_t>(), 0);
     EXPECT_EQ(fMethod->GetHotnessCounter(),
-              Runtime::GetCurrent()->IsJitEnabled() ? 1498U : std::numeric_limits<int16_t>::max() - 2U);
+              Runtime::GetCurrent()->IsProfilerEnabled() ? 1498U : std::numeric_limits<int16_t>::max() - 2U);
     EXPECT_EQ(ManagedThread::GetCurrent(), thread);
 }
 

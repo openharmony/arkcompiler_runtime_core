@@ -14,32 +14,32 @@
  */
 
 class ArrayClass {
-    public static array: float[] = [1.0, 2.0, 3.0, 4.0, 5.0];
+    public static array: float[] = [1.0f, 2.0f, 3.0f, 4.0f, 5.0f]
 
-    public static ChangeStaticArray() {
-        ArrayClass.array[2] = 22.0;
-        ArrayClass.array[4] = 44.0;
+    public static changeStaticArray() {
+        ArrayClass.array[2] = 22.0 as float
+        ArrayClass.array[4] = 44.0 as float
     }
 
-    public static CheckStaticArray(): boolean {
+    public static checkStaticArray(): boolean {
         return (
-            ArrayClass.array[0] as int == 1.0 &&
-            ArrayClass.array[1] as int == 2.0 &&
-            ArrayClass.array[2] as int == 22.0 &&
-            ArrayClass.array[3] as int == 33.0 &&
-            ArrayClass.array[4] as int == 44.0
+            ArrayClass.array[0].toInt() == 1.0 &&
+            ArrayClass.array[1].toInt() == 2.0 &&
+            ArrayClass.array[2].toInt() == 22.0 &&
+            ArrayClass.array[3].toInt() == 33.0 &&
+            ArrayClass.array[4].toInt() == 44.0
         )
 
     }
 }
 
-function GetArray(): float[] {
-    let a : float[] = [1.0, 2.0, 3.0, 4.0, 5.0]
+function getArray(): float[] {
+    let a: float[] = [1.0f, 2.0f, 3.0f, 4.0f, 5.0f]
     return a
 }
 
-function GetEscompatArray(): Array<float> {
-    let a : Array<float> = new Array<float>(5)
+function getEscompatArray(): Array<float> {
+    let a: Array<float> = new Array<float>(5)
     a[0] = 1.0 as float
     a[1] = 2.0 as float
     a[2] = 3.0 as float
@@ -48,22 +48,22 @@ function GetEscompatArray(): Array<float> {
     return a
 }
 
-function CheckArray(a: float[]): boolean {
-    return a[0] as int == 1 && a[1] as int == 2 && a[2] as int == 30 && a[3] as int == 40 && a[4] as int == 50
+function checkArray(a: float[]): boolean {
+    return a[0].toInt() == 1 && a[1].toInt() == 2 && a[2].toInt() == 30 && a[3].toInt() == 40 && a[4].toInt() == 50
 }
 
-function GetSpecialArray(): float[] {
+function getSpecialArray(): float[] {
 	let min: float = new Float(1.40129846432481707e-45)
 	let max: float = new Float(3.40282346638528860e+38)
 	let minus: float = new Float(-3.40282346638528860e+38)
-    let a : float[] = [min, max, minus, 0.0, 0.0, 0.0]
+    let a: float[] = [min, max, minus, 0.0f, 0.0f, 0.0f]
     return a
 }
 
-function CheckEscompatArray(a: Array<float>): boolean {
-    return a[0] as int == 1 &&
-           a[1] as int == 2 &&
-           a[2] as int == 30 &&
-           a[3] as int == 40 &&
-           a[4] as int == 50
+function checkEscompatArray(a: Array<float>): boolean {
+    return a[0].toInt() == 1 &&
+           a[1].toInt() == 2 &&
+           a[2].toInt() == 30 &&
+           a[3].toInt() == 40 &&
+           a[4].toInt() == 50
 }

@@ -23,6 +23,8 @@ desc: Annotations can be applied to the following
         Parameters;
         A lambda expression;
         Local declarations.
+        Namespace
+        Functions
 tags: [compile-only]
 ---*/
 
@@ -51,12 +53,35 @@ const t: SomeType<number> = [100, 200]
 
 let x = @SomeAnnotation({field1: {{ case.value1 }}, field2: {{ case.value2 }} }) () => { return 1 }
 
-class Receiver {}
+interface IReceiver {}
+class Receiver implements IReceiver {}
+
 let lrc = @SomeAnnotation({field1: {{ case.value1 }}, field2: {{ case.value2 }} }) (this: Receiver) => { return 1 }
 
 @SomeAnnotation({field1: {{ case.value1 }}, field2: {{ case.value2 }} })
 function foo(@SomeAnnotation a: int, @Optional b?: string) {
     return a;
+}
+
+@Retention("SOURCE")
+@interface ReceiverFunctionAnnotation {}
+
+@Retention("SOURCE")
+@interface ReceiverParamAnnotation {}
+
+@ReceiverFunctionAnnotation
+function receiverFunction0(@ReceiverParamAnnotation this: IReceiver) {
+}
+
+@ReceiverFunctionAnnotation
+function receiverFunction1(@ReceiverParamAnnotation this: Receiver) {
+}
+
+@Retention("SOURCE")
+@interface NamespaceAnnotation {}
+
+@NamespaceAnnotation
+namespace annotatedNS {
 }
 
 function goo(@Optional b: string = "Optional value") {
@@ -94,6 +119,11 @@ class MyClass {
         return a
     }
 }
+
+@SomeAnnotation
+abstract class MyAbstractClass {
+}
+
 
 @SomeAnnotation({field1: {{ case.value1 }}, field2: {{ case.value2 }} })
 interface MyInterface {}

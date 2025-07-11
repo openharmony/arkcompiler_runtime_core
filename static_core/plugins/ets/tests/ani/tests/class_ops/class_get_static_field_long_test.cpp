@@ -42,7 +42,7 @@ public:
 TEST_F(ClassGetStaticFieldLongTest, get_long)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_long_test/TestLong;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_long_test.TestLong", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "long_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -54,7 +54,7 @@ TEST_F(ClassGetStaticFieldLongTest, get_long)
 TEST_F(ClassGetStaticFieldLongTest, get_long_c_api)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_long_test/TestLong;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_long_test.TestLong", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "long_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -66,7 +66,7 @@ TEST_F(ClassGetStaticFieldLongTest, get_long_c_api)
 TEST_F(ClassGetStaticFieldLongTest, get_invalid_field_type)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_long_test/TestLong;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_long_test.TestLong", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -77,7 +77,7 @@ TEST_F(ClassGetStaticFieldLongTest, get_invalid_field_type)
 TEST_F(ClassGetStaticFieldLongTest, invalid_argument1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_long_test/TestLong;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_long_test.TestLong", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "long_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -88,7 +88,7 @@ TEST_F(ClassGetStaticFieldLongTest, invalid_argument1)
 TEST_F(ClassGetStaticFieldLongTest, invalid_argument2)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_long_test/TestLong;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_long_test.TestLong", &cls), ANI_OK);
     ani_long result = 0L;
     ASSERT_EQ(env_->Class_GetStaticField_Long(cls, nullptr, &result), ANI_INVALID_ARGS);
 }
@@ -96,7 +96,7 @@ TEST_F(ClassGetStaticFieldLongTest, invalid_argument2)
 TEST_F(ClassGetStaticFieldLongTest, invalid_argument3)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_long_test/TestLong;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_long_test.TestLong", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "long_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -106,7 +106,7 @@ TEST_F(ClassGetStaticFieldLongTest, invalid_argument3)
 TEST_F(ClassGetStaticFieldLongTest, invalid_argument4)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_long_test/TestLong;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_long_test.TestLong", &cls), ANI_OK);
     ani_static_field field = nullptr;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "long_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -117,7 +117,7 @@ TEST_F(ClassGetStaticFieldLongTest, invalid_argument4)
 TEST_F(ClassGetStaticFieldLongTest, special_values)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_long_test/TestLong;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_long_test.TestLong", &cls), ANI_OK);
     ani_static_field field {};
     ani_long single = 0L;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "specia1", &field), ANI_OK);
@@ -141,7 +141,7 @@ TEST_F(ClassGetStaticFieldLongTest, special_values)
 TEST_F(ClassGetStaticFieldLongTest, combination_test1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_long_test/TestLong;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_long_test.TestLong", &cls), ANI_OK);
     ani_static_field field {};
     const ani_long setTar = 30L;
     const ani_long setTar2 = 10L;
@@ -161,18 +161,33 @@ TEST_F(ClassGetStaticFieldLongTest, combination_test1)
 
 TEST_F(ClassGetStaticFieldLongTest, combination_test2)
 {
-    CheckFieldValue("Lclass_get_static_field_long_test/TestLong;", "long_value");
+    CheckFieldValue("class_get_static_field_long_test.TestLong", "long_value");
 }
 
 TEST_F(ClassGetStaticFieldLongTest, combination_test3)
 {
-    CheckFieldValue("Lclass_get_static_field_long_test/TestLongA;", "long_value");
+    CheckFieldValue("class_get_static_field_long_test.TestLongA", "long_value");
 }
 
 TEST_F(ClassGetStaticFieldLongTest, combination_test4)
 {
-    CheckFieldValue("Lclass_get_static_field_long_test/TestLongFinal;", "long_value");
+    CheckFieldValue("class_get_static_field_long_test.TestLongFinal", "long_value");
 }
+
+TEST_F(ClassGetStaticFieldLongTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_long_test.TestLong", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "long_value", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_long_test.TestLong"));
+    ani_long longValue {};
+    ASSERT_EQ(env_->Class_GetStaticField_Long(cls, field, &longValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_long_test.TestLong"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

@@ -20,7 +20,7 @@ name: nullable-function-default-param_8.ets
 ---*/
 
 function test<NullableInt = int | null>(required: String, param: NullableInt = 42): void {
-    assertTrue( param === 42)
+    arktest.assertTrue( param === 42)
 }
 
 function main(): void {

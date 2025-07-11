@@ -14,8 +14,8 @@
  */
 
 #include <cassert>
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/ir_core.h"
+#include "libabckit/c/abckit.h"
+#include "libabckit/c/ir_core.h"
 
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/ir_impl.h"

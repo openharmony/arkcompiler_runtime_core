@@ -29,8 +29,8 @@ import {
 const TEST_STRING: string = 'This is a test string'
 const TEST_INT: int = 100
 const TEST_BOOLEAN: boolean = true
-const EXP_STR_ARRAY: string[] = ["One", "Two", "Three"]
-const EXP_NUM_ARRAY: int[] = [1, 2, 3]
+const EXP_STR_ARRAY: FixedArray<string> = ["One", "Two", "Three"]
+const EXP_NUM_ARRAY: FixedArray<int> = [1, 2, 3]
 
 type ETSTupleType = [ string, int, boolean ]
 

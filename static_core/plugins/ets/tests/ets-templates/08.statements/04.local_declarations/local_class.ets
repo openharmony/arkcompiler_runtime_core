@@ -15,11 +15,10 @@ limitations under the License.
 
 /*---
 desc: Local declaration in statement (const)
-tags: [compile-only, negative]
 ---*/
 
 function main(): void {
   class A {};
   let a: A = new A;
-  assertNE(a, null)
+  arktest.assertNE(a, null)
 }

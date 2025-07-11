@@ -36,5 +36,5 @@ const car: Vehicle = new Car();
 
 function main(): void {
   const obj1: object = car;
-  assertTrue(obj1 == car);
+  arktest.assertTrue(obj1 == car);
 }

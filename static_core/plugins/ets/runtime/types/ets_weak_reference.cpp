@@ -18,9 +18,23 @@
 
 namespace ark::ets {
 
+#if defined(ARK_HYBRID) && defined(PANDA_JS_ETS_HYBRID_MODE)
+EtsObject *EtsWeakReference::GetReferentFromGCThread() const
+{
+    // Skip read-barrier
+    auto *obj = ObjectAccessor::GetObject<false, false, false>(this, MEMBER_OFFSET(EtsWeakReference, referent_));
+    return EtsObject::FromCoreType(obj);
+}
+void EtsWeakReference::ClearReferentFromGCCthread()
+{
+    // Skip write-barrier
+    ObjectAccessor::SetObject<false, false, false>(this, MEMBER_OFFSET(EtsWeakReference, referent_), nullptr);
+}
+#endif
+
 void EtsWeakReference::ClearReferent()
 {
-    referent_ = nullptr;
+    ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsWeakReference, referent_), nullptr);
 }
 
 void EtsWeakReference::SetReferent(EtsObject *addr)

@@ -61,5 +61,5 @@ function f(): D {
 function main() {
   let x : I = f()
   
-  assertEQ(x.foo(), 486 + 486)
+  arktest.assertEQ(x.foo(), 486 + 486)
 }

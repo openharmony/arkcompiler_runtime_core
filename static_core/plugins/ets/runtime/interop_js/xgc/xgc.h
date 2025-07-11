@@ -17,10 +17,15 @@
 #define PANDA_PLUGINGS_ETS_RUNTIME_INTEROP_JS_HYBRID_XGC_XGC_H
 
 #include "hybrid/ecma_vm_interface.h"
+#include "plugins/ets/runtime/interop_js/app_state_manager.h"
 #include "plugins/ets/runtime/interop_js/sts_vm_interface_impl.h"
 #include "runtime/mem/gc/gc_trigger.h"
+#if defined(ARK_HYBRID)
+#include "heap/heap_visitor.h"
+#endif
 
 namespace ark::ets {
+class EtsObject;
 class PandaEtsVM;
 }  // namespace ark::ets
 
@@ -29,6 +34,8 @@ namespace ark::ets::interop::js {
 class InteropCtx;
 namespace ets_proxy {
 class SharedReferenceStorage;
+class SharedReferenceStorageVerifier;
+enum class XgcStatus;
 }  // namespace ets_proxy
 
 /**
@@ -109,6 +116,15 @@ public:
     void GCPhaseStarted(mem::GCPhase phase) override;
     void GCPhaseFinished(mem::GCPhase phase) override;
 
+#ifdef ARK_HYBRID
+    /// Methods to adatp XRef to cmc-gc ///
+    void UnmarkAllXRefs();
+    void SweepUnmarkedXRefs();
+    void AddXRefToStaticRoots();
+    void RemoveXRefFromStaticRoots();
+    void IterateEtsObjectXRef(EtsObject *etsObj, const common::RefFieldVisitor &visitor);
+#endif
+
 private:
     // For allocation of XGC with the private constructor by internal allocator
     friend mem::Allocator;
@@ -155,6 +171,8 @@ private:
      */
     void WaitForFinishXGC();
 
+    void VerifySharedReferences(ets_proxy::XgcStatus status);
+
     /// External specific fields ///
 
     PandaEtsVM *vm_ {nullptr};
@@ -176,6 +194,7 @@ private:
     // We can load a value of the variable from several threads, so need to use atomic
     std::atomic<size_t> targetThreasholdSize_ {0U};
     const TriggerPolicy treiggerPolicy_ {TriggerPolicy::INVALID};
+    const bool enableXgcVerifier_ {false};
 };
 
 }  // namespace ark::ets::interop::js

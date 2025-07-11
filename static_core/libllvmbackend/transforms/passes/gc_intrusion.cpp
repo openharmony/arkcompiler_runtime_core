@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "transforms/passes/gc_intrusion.h"
 
+#include "llvm_compiler_options.h"
 #include "transforms/gc_utils.h"
 #include "transforms/transform_utils.h"
 
@@ -230,6 +231,11 @@ void GcRefLiveness::ComputeLiveSets(Function *function)
             worklist.insert(pred_begin(block), pred_end(block));
         }
     }
+}
+
+bool GcIntrusion::ShouldInsert(const ark::llvmbackend::LLVMCompilerOptions *options)
+{
+    return options->gcIntrusion;
 }
 
 llvm::PreservedAnalyses GcIntrusion::run(Function &function, FunctionAnalysisManager & /*AM*/)

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,9 @@
 #include "gtest/gtest.h"
 #include "runtime/include/managed_thread.h"
 #include "runtime/mark_word.cpp"
+
+// Test addresses should be aligned by 4
+static constexpr size_t ADDRESS_ALIGNMENT = ~3U;
 
 namespace ark {
 
@@ -89,7 +92,9 @@ protected:
 
         MarkWord::MarkWordSize GetForwardingAddress()
         {
-            return forwardingAddressRange_(gen_) & MarkWord::MarkWordRepresentation::FORWARDING_ADDRESS_MASK_IN_PLACE;
+            return (forwardingAddressRange_(gen_) &
+                    MarkWord::MarkWordRepresentation::FORWARDING_ADDRESS_MASK_IN_PLACE) &
+                   ADDRESS_ALIGNMENT;
         }
 
         uint32_t GetSeed()
@@ -131,7 +136,7 @@ protected:
 
         MarkWord::MarkWordSize GetForwardingAddress() const
         {
-            return MAX_FORWARDING_ADDRESS;
+            return MAX_FORWARDING_ADDRESS & ADDRESS_ALIGNMENT;
         }
 
         uint32_t GetSeed() const

@@ -26,12 +26,12 @@ public:
     void GetMethodData(ani_object *objectResult)
     {
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_boolean_test/A;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("object_call_method_by_name_boolean_test.A", &cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         ani_static_method newMethod {};
         ASSERT_EQ(
-            env_->Class_FindStaticMethod(cls, "new_A", ":Lobject_call_method_by_name_boolean_test/A;", &newMethod),
+            env_->Class_FindStaticMethod(cls, "new_A", ":C{object_call_method_by_name_boolean_test.A}", &newMethod),
             ANI_OK);
         ani_ref ref {};
         ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, newMethod, &ref), ANI_OK);
@@ -49,7 +49,7 @@ TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_boolean_a)
     args[1U].i = VAL2;
 
     ani_boolean res = ANI_FALSE;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(object, "booleanByNameMethod", "II:Z", &res, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(object, "booleanByNameMethod", "ii:z", &res, args), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
 }
 
@@ -59,7 +59,7 @@ TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_boolean_v)
     GetMethodData(&object);
 
     ani_boolean res = ANI_FALSE;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(object, "booleanByNameMethod", "II:Z", &res, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(object, "booleanByNameMethod", "ii:z", &res, VAL1, VAL2), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
 }
 
@@ -69,9 +69,9 @@ TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_boolean_v_abnormal)
     GetMethodData(&object);
 
     ani_boolean res = ANI_FALSE;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(object, "booleanByNameMethod", "II:X", &res, VAL1, VAL2),
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(object, "booleanByNameMethod", "ii:x", &res, VAL1, VAL2),
               ANI_NOT_FOUND);
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(object, "unknown_function", "II:Z", &res, VAL1, VAL2),
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(object, "unknown_function", "ii:z", &res, VAL1, VAL2),
               ANI_NOT_FOUND);
 }
 
@@ -82,7 +82,7 @@ TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_boolean)
 
     ani_boolean res = ANI_FALSE;
     ASSERT_EQ(
-        env_->c_api->Object_CallMethodByName_Boolean(env_, object, "booleanByNameMethod", "II:Z", &res, VAL1, VAL2),
+        env_->c_api->Object_CallMethodByName_Boolean(env_, object, "booleanByNameMethod", "ii:z", &res, VAL1, VAL2),
         ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
 }
@@ -93,7 +93,7 @@ TEST_F(CallObjectMethodBooleanByNameTest, call_method_boolean_v_invalid_method)
     GetMethodData(&object);
 
     ani_boolean res = ANI_FALSE;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(object, nullptr, "II:Z", &res, VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(object, nullptr, "ii:z", &res, VAL1, VAL2), ANI_INVALID_ARGS);
 }
 
 TEST_F(CallObjectMethodBooleanByNameTest, call_method_boolean_v_invalid_result)
@@ -101,7 +101,7 @@ TEST_F(CallObjectMethodBooleanByNameTest, call_method_boolean_v_invalid_result)
     ani_object object {};
     GetMethodData(&object);
 
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(object, "booleanByNameMethod", "II:Z", nullptr, VAL1, VAL2),
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(object, "booleanByNameMethod", "ii:z", nullptr, VAL1, VAL2),
               ANI_INVALID_ARGS);
 }
 
@@ -111,7 +111,7 @@ TEST_F(CallObjectMethodBooleanByNameTest, call_method_boolean_v_invalid_object)
     GetMethodData(&object);
 
     ani_boolean res = ANI_FALSE;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(nullptr, "booleanByNameMethod", "II:Z", &res, VAL1, VAL2),
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(nullptr, "booleanByNameMethod", "ii:z", &res, VAL1, VAL2),
               ANI_INVALID_ARGS);
 }
 
@@ -121,42 +121,42 @@ TEST_F(CallObjectMethodBooleanByNameTest, call_method_boolean_a_invalid_args)
     GetMethodData(&object);
 
     ani_boolean res = ANI_FALSE;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(nullptr, "booleanByNameMethod", "II:Z", &res, nullptr),
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(nullptr, "booleanByNameMethod", "ii:z", &res, nullptr),
               ANI_INVALID_ARGS);
 }
 
 TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_001)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_boolean_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_boolean_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     const ani_int arg = 100;
     ASSERT_EQ(env_->Object_New(cls, method, &obj, arg), ANI_OK);
 
     ani_boolean res = ANI_FALSE;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "booleanMethod", "II:Z", &res, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "booleanMethod", "ii:z", &res, VAL1, VAL2), ANI_OK);
     ASSERT_EQ(res, ANI_FALSE);
 
     ani_value args[2U];
     args[0U].i = VAL1;
     args[1U].i = VAL2;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "booleanMethod", "II:Z", &res, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "booleanMethod", "ii:z", &res, args), ANI_OK);
     ASSERT_EQ(res, ANI_FALSE);
 }
 
 TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_002)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_boolean_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_boolean_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     const ani_int arg = 100;
@@ -164,71 +164,71 @@ TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_002
 
     const ani_int value = 5;
     ani_boolean res = ANI_FALSE;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "booleanMethod", "I:Z", &res, value), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "booleanMethod", "i:z", &res, value), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
 
     ani_value args[1U];
     args[0U].i = value;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "booleanMethod", "I:Z", &res, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "booleanMethod", "i:z", &res, args), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
 }
 
 TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_003)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_boolean_test/C;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_boolean_test.C", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     const ani_int arg = 100;
     ASSERT_EQ(env_->Object_New(cls, method, &obj, arg), ANI_OK);
 
     ani_boolean res = ANI_FALSE;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "booleanCompareMethod", "II:Z", &res, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "booleanCompareMethod", "ii:z", &res, VAL1, VAL2), ANI_OK);
     ASSERT_EQ(res, ANI_FALSE);
 
     ani_value args[2U];
     args[0U].i = VAL1;
     args[1U].i = VAL2;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "booleanCompareMethod", "II:Z", &res, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "booleanCompareMethod", "ii:z", &res, args), ANI_OK);
     ASSERT_EQ(res, ANI_FALSE);
 }
 
 TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_004)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_boolean_test/C;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_boolean_test.C", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     const ani_int arg = 100;
     ASSERT_EQ(env_->Object_New(cls, method, &obj, arg), ANI_OK);
 
     ani_boolean res = ANI_FALSE;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "booleanMethod", "II:Z", &res, VAL1, VAL1), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "booleanMethod", "ii:z", &res, VAL1, VAL1), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
 
     ani_value args[2U];
     args[0U].i = VAL1;
     args[1U].i = VAL1;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "booleanMethod", "II:Z", &res, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "booleanMethod", "ii:z", &res, args), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
 }
 
 TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_005)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_boolean_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_boolean_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     const ani_int arg = 5;
@@ -237,56 +237,56 @@ TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_005
     ani_boolean res = ANI_FALSE;
     ani_value args[1U];
     args[0U].i = VAL1;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "protectedMethod", "I:Z", &res, VAL1), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "protectedMethod", "i:z", &res, VAL1), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "protectedMethod", "I:Z", &res, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "protectedMethod", "i:z", &res, args), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
 
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "privateMethod", "I:Z", &res, VAL1), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "privateMethod", "i:z", &res, VAL1), ANI_OK);
     ASSERT_EQ(res, ANI_FALSE);
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "privateMethod", "I:Z", &res, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "privateMethod", "i:z", &res, args), ANI_OK);
     ASSERT_EQ(res, ANI_FALSE);
 
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_boolean_test/C;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_boolean_test.C", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", nullptr, &method), ANI_OK);
     ASSERT_EQ(env_->Object_New(cls, method, &obj, arg), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "callProtected", "I:Z", &res, VAL1), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "callProtected", "i:z", &res, VAL1), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "callProtected", "I:Z", &res, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "callProtected", "i:z", &res, args), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
 }
 
 TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_006)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_boolean_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_boolean_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     ASSERT_EQ(env_->Object_New(cls, method, &obj, VAL1), ANI_OK);
 
     ani_boolean res = ANI_FALSE;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "nestedMethod", "I:Z", &res, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "nestedMethod", "i:z", &res, VAL2), ANI_OK);
     ASSERT_EQ(res, ANI_FALSE);
 
     ani_value args[1U];
     args[0U].i = VAL2;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "nestedMethod", "I:Z", &res, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "nestedMethod", "i:z", &res, args), ANI_OK);
     ASSERT_EQ(res, ANI_FALSE);
 }
 
 TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_007)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_boolean_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_boolean_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     ASSERT_EQ(env_->Object_New(cls, method, &obj, VAL2), ANI_OK);
@@ -294,28 +294,28 @@ TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_007
     ani_boolean res = ANI_FALSE;
     ani_value argsA[1];
     argsA[0].i = VAL1;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "recursiveMethod", "I:Z", &res, VAL1), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "recursiveMethod", "i:z", &res, VAL1), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "recursiveMethod", "I:Z", &res, argsA), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "recursiveMethod", "i:z", &res, argsA), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
 
     const ani_int value1 = -5;
     ani_value argsB[1];
     argsB[0].i = value1;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "recursiveMethod", "I:Z", &res, value1), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "recursiveMethod", "i:z", &res, value1), ANI_OK);
     ASSERT_EQ(res, ANI_FALSE);
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "recursiveMethod", "I:Z", &res, argsB), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "recursiveMethod", "i:z", &res, argsB), ANI_OK);
     ASSERT_EQ(res, ANI_FALSE);
 }
 
 TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_008)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_boolean_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_boolean_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     ASSERT_EQ(env_->Object_New(cls, method, &obj, VAL2), ANI_OK);
@@ -344,11 +344,11 @@ TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_008
 TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_009)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_boolean_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_boolean_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     const ani_int arg = 15;
@@ -357,37 +357,37 @@ TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_009
     ani_boolean res = ANI_FALSE;
     const ani_int value1 = 5;
     const ani_int value2 = 6;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "booleanMethod", "II:Z", &res, value1, value2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "booleanMethod", "ii:z", &res, value1, value2), ANI_OK);
     ASSERT_EQ(res, ANI_FALSE);
 
     const ani_int value3 = 7;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "booleanMethod", "II:Z", &res, value1, value3), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "booleanMethod", "ii:z", &res, value1, value3), ANI_OK);
     ASSERT_EQ(res, ANI_FALSE);
 
     const ani_int value4 = 3;
     ani_value args[2U];
     args[0U].i = value1;
     args[1U].i = value4;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "booleanMethod", "II:Z", &res, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "booleanMethod", "ii:z", &res, args), ANI_OK);
     ASSERT_EQ(res, ANI_FALSE);
 
     const ani_int value5 = 5;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "booleanMethod", "II:Z", &res, value1, value5), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "booleanMethod", "ii:z", &res, value1, value5), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
 
     const ani_int value6 = 12;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "booleanMethod", "II:Z", &res, value1, value6), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "booleanMethod", "ii:z", &res, value1, value6), ANI_OK);
     ASSERT_EQ(res, ANI_FALSE);
 }
 
 TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_010)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_boolean_test/C;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_boolean_test.C", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     const ani_int arg = 10;
@@ -395,13 +395,88 @@ TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_010
 
     ani_boolean res = ANI_FALSE;
     const ani_int value = 10;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "jf", "I:Z", &res, value), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(obj, "jf", "i:z", &res, value), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
 
     ani_value args[1U];
     args[0U].i = value;
-    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "jf", "I:Z", &res, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "jf", "i:z", &res, args), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
+}
+
+TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_011)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+
+    ani_boolean res = ANI_FALSE;
+    ASSERT_EQ(
+        env_->c_api->Object_CallMethodByName_Boolean(nullptr, object, "booleanByNameMethod", "ii:z", &res, VAL1, VAL2),
+        ANI_INVALID_ARGS);
+    ASSERT_EQ(
+        env_->c_api->Object_CallMethodByName_Boolean_A(nullptr, object, "booleanByNameMethod", "ii:z", &res, args),
+        ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(nullptr, "booleanByNameMethod", "ii:z", &res, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(nullptr, "booleanByNameMethod", "ii:z", &res, args),
+              ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(object, nullptr, "ii:z", &res, VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(object, nullptr, "ii:z", &res, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(object, "booleanByNameMethod", nullptr, &res, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(object, "booleanByNameMethod", nullptr, &res, args), ANI_OK);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(object, "booleanByNameMethod", "ii:z", nullptr, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(object, "booleanByNameMethod", "ii:z", nullptr, args),
+              ANI_INVALID_ARGS);
+}
+
+TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_012)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    ani_boolean res = ANI_FALSE;
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(env_->Object_CallMethodByName_Boolean(object, methodName.data(), "ii:z", &res, VAL1, VAL2),
+                  ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(object, methodName.data(), "ii:z", &res, args),
+                  ANI_NOT_FOUND);
+    }
+}
+
+TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_013)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    ani_boolean res = ANI_FALSE;
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(
+            env_->Object_CallMethodByName_Boolean(object, "booleanByNameMethod", methodName.data(), &res, VAL1, VAL2),
+            ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(object, "booleanByNameMethod", methodName.data(), &res, args),
+                  ANI_NOT_FOUND);
+    }
 }
 }  // namespace ark::ets::ani::testing
 

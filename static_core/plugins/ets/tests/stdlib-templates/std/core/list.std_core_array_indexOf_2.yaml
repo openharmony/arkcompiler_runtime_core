@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,7 +15,7 @@
     method_name: indexOf,
     method_nature: function,
     result_type: number,
-    method_signature: { arr: "boolean[]", key: "boolean" },
+    method_signature: { arr: "FixedArray<boolean>", key: "boolean" },
     method_signature_desc: {arr: "boolean_array", key: "boolean"},
     method_throws: "false",
     method_test_index_data:
@@ -65,7 +65,7 @@
     method_name: indexOf,
     method_nature: function,
     result_type: number,
-    method_signature:  { arr: "byte[]", key: "byte" },
+    method_signature:  { arr: "FixedArray<byte>", key: "byte" },
     method_signature_desc: {arr: "byte_array", key: "byte"},
     method_throws: "false",
     method_test_index_data:
@@ -133,7 +133,7 @@
     method_name: indexOf,
     method_nature: function,
     result_type: number,
-    method_signature:  { arr: "short[]", key: "short" },
+    method_signature:  { arr: "FixedArray<short>", key: "short" },
     method_signature_desc: {arr: "short_array", key: "short"},
     method_throws: "false",
     method_test_index_data:
@@ -201,7 +201,7 @@
     method_name: indexOf,
     method_nature: function,
     result_type: number,
-    method_signature: { arr: "int[]", key: "int" },
+    method_signature: { arr: "FixedArray<int>", key: "int" },
     method_signature_desc: {arr: "int_array", key: "int"},
     method_throws: "false",
     method_test_index_data:
@@ -269,7 +269,7 @@
     method_name: indexOf,
     method_nature: function,
     result_type: number,
-    method_signature: { arr: "long[]", key: "long" },
+    method_signature: { arr: "FixedArray<long>", key: "long" },
     method_signature_desc: {arr: "long_array", key: "long"},
     method_throws: "false",
     method_test_index_data:
@@ -338,60 +338,60 @@
     method_name: indexOf,
     method_nature: function,
     result_type: number,
-    method_signature:  { arr: "float[]", key: "float" },
+    method_signature:  { arr: "FixedArray<float>", key: "float" },
     method_signature_desc: {arr: "float_array", key: "float"},
     method_throws: "false",
     method_test_index_data:
       {
         test1:
           {
-            arr: "[120.0, 100.0, 99.0, 21.0]",
-            key: 33.0,
+            arr: "[120.0f, 100.0f, 99.0f, 21.0f]",
+            key: 33.0f,
           },
         test2:
           {
-            arr: "[33.0, 120.0, 121.0, 99.0, 77.0, 33.0, 33.0]",
-            key: 33.0,
+            arr: "[33.0f, 120.0f, 121.0f, 99.0f, 77.0f, 33.0f, 33.0f]",
+            key: 33.0f,
           },
         test3:
           {
-            arr: "[121.0, 122.0, 34.0, 35.0, 45.0, 33.0]",
-            key: 33.0,
+            arr: "[121.0f, 122.0f, 34.0f, 35.0f, 45.0f, 33.0f]",
+            key: 33.0f,
           },
         test4:
           {
-            arr: "[121.0, 33.0, 77.0, 33.0, 45.0, 44.0]",
-            key: 33.0,
+            arr: "[121.0f, 33.0f, 77.0f, 33.0f, 45.0f, 44.0f]",
+            key: 33.0f,
           },
         test5:
           {
-            arr: "[121.121, -33.33, 77.77, 33.44, 45.45, 44.44]",
-            key: -33.33,
+            arr: "[121.121f, -33.33f, 77.77f, 33.44f, 45.45f, 44.44f]",
+            key: -33.33f,
           },
         test6:
           {
-            arr: "[121.121, -33.33, 77.77, 33.33, 45.45, 44.44]",
-            key: -35.35,
+            arr: "[121.121f, -33.33f, 77.77f, 33.33f, 45.45f, 44.44f]",
+            key: -35.35f,
           },
         test7:
           {
-            arr: "[121.121, -33.33, 77.77, 33.33, 45.45, 44.44]",
-            key: 0,
+            arr: "[121.121f, -33.33f, 77.77f, 33.33f, 45.45f, 44.44f]",
+            key: 0f,
           },
         test8:
           {
-            arr: "[121.121, -33.33, 77.77, 0, 45.45, 44.44]",
-            key: 0,
+            arr: "[121.121f, -33.33f, 77.77f, 0f, 45.45f, 44.44f]",
+            key: 0f,
           },
         test9:
           {
-            arr: "[121.121, -33.33, 77.77, -0.0, 45.45, 44.44]",
-            key: -0.0,
+            arr: "[121.121f, -33.33f, 77.77f, -0.0f, 45.45f, 44.44f]",
+            key: -0.0f,
           },
         test10:
           {
             arr: "[]",
-            key: 1,
+            key: 1f,
           },
       },
     method_expected_data:
@@ -412,7 +412,7 @@
     method_name: indexOf,
     method_nature: function,
     result_type: number,
-    method_signature:  { arr: "double[]", key: "double" },
+    method_signature:  { arr: "FixedArray<double>", key: "double" },
     method_signature_desc: {arr: "double_array", key: "double"},
     method_throws: "false",
     method_test_index_data:
@@ -486,7 +486,7 @@
     method_name: indexOf,
     method_nature: function,
     result_type: number,
-    method_signature:  { arr: "char[]", key: "char"},
+    method_signature:  { arr: "FixedArray<char>", key: "char"},
     method_signature_desc: {arr: "char_array", key: "char"},
     method_throws: "false",
     method_test_index_data:

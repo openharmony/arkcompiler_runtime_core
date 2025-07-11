@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "ets_coroutine.h"
-#include "types/ets_string.h"
-#include "types/ets_array.h"
+#include "include/mem/panda_string.h"
 #include "libpandabase/utils/utf.h"
+#include "types/ets_array.h"
+#include "types/ets_string.h"
+#include <gtest/gtest.h>
+#include <cstdint>
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -614,6 +616,28 @@ TEST_F(EtsStringTest, GetMutf8)
     ASSERT_EQ(strcmp(pandaString.data(), "hello"), 0);
 }
 
+TEST_F(EtsStringTest, ConvertToStringView)
+{
+    PandaVector<uint8_t> buf;
+    auto emptyString = EtsString::CreateNewEmptyString();
+    auto emptyStringView = emptyString->ConvertToStringView(&buf);
+    ASSERT_EQ(emptyStringView, "");
+
+    std::vector<uint8_t> data1 {0, 'H', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd', '!'};
+    std::vector<uint8_t> data2 {'H', 'e', 'l', 'l', 'o', 0, 'w', 'o', 'r', 'l', 'd', '!'};
+    std::vector<uint8_t> data3 {'H', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd', '!', 0};
+    auto testString1 = EtsString::CreateFromMUtf8(reinterpret_cast<const char *>(data1.data()));
+    auto testString2 = EtsString::CreateFromMUtf8(reinterpret_cast<const char *>(data2.data()));
+    auto testString3 = EtsString::CreateFromMUtf8(reinterpret_cast<const char *>(data3.data()));
+
+    auto testString1View = testString1->ConvertToStringView(&buf);
+    ASSERT_EQ(testString1View, "");
+    auto testString2View = testString2->ConvertToStringView(&buf);
+    ASSERT_EQ(testString2View, "Hello");
+    auto testString3View = testString3->ConvertToStringView(&buf);
+    ASSERT_EQ(testString3View, "Helloworld!");
+}
+
 TEST_F(EtsStringTest, Resolve)
 {
     std::vector<uint8_t> data {'H', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd', '!', 0};
@@ -625,6 +649,60 @@ TEST_F(EtsStringTest, Resolve)
     ASSERT_EQ(string1, string2);
     ASSERT_TRUE(string1->StringsAreEqual(reinterpret_cast<EtsObject *>(string3)));
     ASSERT_TRUE(string2->StringsAreEqual(reinterpret_cast<EtsObject *>(string3)));
+}
+
+void CheckConvertString(EtsString *str)
+{
+    const std::vector<uint16_t> referenceUtf16 {'a', '\0', 'b', 0x20AC, 'z', '\n'};
+    const std::vector<uint8_t> referenceUtf8 {'a', '\0', 'b', 0xe2, 0x82, 0xac, 'z', '\n'};
+    const std::vector<uint8_t> referenceMUtf8 {'a', 0xc0, 0x80, 'b', 0xe2, 0x82, 0xac, 'z', '\n'};
+
+    PandaString utf8 = str->GetUtf8();
+    PandaString mutf8 = str->GetMutf8();
+    ASSERT_EQ(utf8.size(), referenceUtf8.size());
+    ASSERT_EQ(mutf8.size(), referenceMUtf8.size());
+
+    for (size_t i = 0; i < referenceUtf8.size(); ++i) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        ASSERT_EQ(static_cast<uint8_t>(utf8[i]), referenceUtf8[i]);
+    }
+    for (size_t i = 0; i < referenceMUtf8.size(); ++i) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        ASSERT_EQ(static_cast<uint8_t>(mutf8[i]), referenceMUtf8[i]);
+    }
+
+    auto utf16Data = str->GetDataUtf16();
+    auto utf16Len = str->GetUtf16Length();
+    ASSERT_EQ(utf16Len, referenceUtf16.size());
+
+    for (size_t i = 0; i < utf16Len; ++i) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        ASSERT_EQ(utf16Data[i], referenceUtf16[i]);
+    }
+}
+
+TEST_F(EtsStringTest, ConvertFromUtf16)
+{
+    std::vector<uint16_t> data {'a', '\0', 'b', 0x20AC, 'z', '\n'};
+    EtsString *str = EtsString::CreateFromUtf16(data.data(), data.size());
+    CheckConvertString(str);
+}
+
+TEST_F(EtsStringTest, ConvertFromUtf8)
+{
+    std::vector<uint8_t> data {'a', '\0', 'b', 0xe2, 0x82, 0xac, 'z', '\n'};
+    auto *utf8Data = reinterpret_cast<const char *>(data.data());
+    EtsString *str = EtsString::CreateFromUtf8(utf8Data, data.size());
+    CheckConvertString(str);
+}
+
+TEST_F(EtsStringTest, ConvertFromMUtf8)
+{
+    std::vector<uint8_t> data {'a', 0xc0, 0x80, 'b', 0xe2, 0x82, 0xac, 'z', '\n'};
+    size_t strLen = 6U;
+    auto *utf8Data = reinterpret_cast<const char *>(data.data());
+    EtsString *str = EtsString::CreateFromMUtf8(utf8Data, strLen);
+    CheckConvertString(str);
 }
 
 }  // namespace ark::ets::test

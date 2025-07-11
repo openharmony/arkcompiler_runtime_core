@@ -19,51 +19,51 @@ function testResolvedOptionsRetrieval(): void {
     const formatter = new Intl.DateTimeFormat(locale, opts)
     const resolvedOpts = formatter.resolvedOptions()
 
-    assertEQ(resolvedOpts.locale, locale)
-    assertEQ(resolvedOpts.calendar, "gregorian")
-    assertEQ(resolvedOpts.numberingSystem, "latn")
-    assertEQ(resolvedOpts.timeZone, opts.timeZone)
-    assertEQ(resolvedOpts.hourCycle, "h12")
-    assertEQ(resolvedOpts.hour12, true)
+    arktest.assertEQ(resolvedOpts.locale, locale)
+    arktest.assertEQ(resolvedOpts.calendar, "gregorian")
+    arktest.assertEQ(resolvedOpts.numberingSystem, "latn")
+    arktest.assertEQ(resolvedOpts.timeZone, opts.timeZone)
+    arktest.assertEQ(resolvedOpts.hourCycle, "h12")
+    arktest.assertEQ(resolvedOpts.hour12, true)
 }
 
 function testSupportedLocalesOfStringArray(): void {
     const requestedLocales = ["en-US-u-hc-h23", "zh-CN", "foo", "en-US"]
     const supportedLocales = Intl.DateTimeFormat.supportedLocalesOf(requestedLocales)
 
-    assertEQ(supportedLocales.length, 3)
-    assertEQ(supportedLocales[0], requestedLocales[0])
-    assertEQ(supportedLocales[1], requestedLocales[1])
-    assertEQ(supportedLocales[2], requestedLocales[3])
+    arktest.assertEQ(supportedLocales.length, 3)
+    arktest.assertEQ(supportedLocales[0], requestedLocales[0])
+    arktest.assertEQ(supportedLocales[1], requestedLocales[1])
+    arktest.assertEQ(supportedLocales[2], requestedLocales[3])
 }
 
 function testSupportedLocalesOfString(): void {
     const requestedLocale = "en-US-u-hc-h23"
     const supportedLocales = Intl.DateTimeFormat.supportedLocalesOf(requestedLocale)
 
-    assertEQ(supportedLocales.length, 1)
-    assertEQ(supportedLocales[0], requestedLocale)
+    arktest.assertEQ(supportedLocales.length, 1)
+    arktest.assertEQ(supportedLocales[0], requestedLocale)
 }
 
 function testSupportedLocalesOfLocaleArray(): void {
     const requestedLocales = [new Intl.Locale("en-US-u-hc-h23"), new Intl.Locale("foo"), new Intl.Locale("zh-CN")]
     const supportedLocales = Intl.DateTimeFormat.supportedLocalesOf(requestedLocales)
 
-    assertEQ(supportedLocales.length, 2)
-    assertEQ(supportedLocales[0], requestedLocales[0].toString())
-    assertEQ(supportedLocales[1], requestedLocales[2].toString())
+    arktest.assertEQ(supportedLocales.length, 2)
+    arktest.assertEQ(supportedLocales[0], requestedLocales[0].toString())
+    arktest.assertEQ(supportedLocales[1], requestedLocales[2].toString())
 }
 
 function testSupportedLocalesOfLocale(): void {
     const requestedLocale = new Intl.Locale("en-US-u-hc-h23")
     const supportedLocales = Intl.DateTimeFormat.supportedLocalesOf(requestedLocale)
 
-    assertEQ(supportedLocales.length, 1)
-    assertEQ(supportedLocales[0], requestedLocale.toString())
+    arktest.assertEQ(supportedLocales.length, 1)
+    arktest.assertEQ(supportedLocales[0], requestedLocale.toString())
 }
 
 function main(): int {
-    const suite = new ArkTestsuite("Intl.DateTimeFormat")
+    const suite = new arktest.ArkTestsuite("Intl.DateTimeFormat")
     suite.addTest("resolved options retrieval", testResolvedOptionsRetrieval)
     suite.addTest("supportedLocalesOf(string[])", testSupportedLocalesOfStringArray)
     suite.addTest("supportedLocalesOf(string)", testSupportedLocalesOfString)

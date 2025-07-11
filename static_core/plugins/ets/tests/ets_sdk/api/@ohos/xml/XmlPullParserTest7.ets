@@ -16,7 +16,7 @@ import {xml} from "@ohos.xml"
 import { BusinessError } from "@ohos.base";
 
 function main(): int {
-    const suite = new ArkTestsuite("XmlPullParser API tests, part7");
+    const suite = new arktest.ArkTestsuite("XmlPullParser API tests, part7");
 
     suite.addTest("Testing XML PullParser with attributeValueCallbackFunction as function.", testXmlPullParserParseOptions0007)
     suite.addTest("Testing XML PullParser with attributeValueCallbackFunction as undefined.", testXmlPullParserParseOptions0010)
@@ -94,7 +94,7 @@ function testWithAttributeValueCb() {
     parser.parseXml(options)
 
     const expected = "{ importance : high }; { logged : true }; { xmln:h : http://www.w3.org/TR/html4/ }; "
-    assertEQ(processStr(g_testStr), processStr(expected))
+    arktest.assertEQ(processStr(g_testStr), processStr(expected))
 }
 
 function testWithAttributeValueCbWithSupportDocTypeAndIgnoreNS() {
@@ -124,7 +124,7 @@ function testWithAttributeValueCbWithSupportDocTypeAndIgnoreNS() {
     parser.parseXml(options)
 
     const expected = "{ importance : high }; { logged : true }; { xmln:h : http://www.w3.org/TR/html4/ }; "
-    assertEQ(processStr(g_testStr), processStr(expected));
+    arktest.assertEQ(processStr(g_testStr), processStr(expected));
 }
 
 // testParseXml011
@@ -155,10 +155,10 @@ function testGetAttributeCount() {
 
     let expectedTextStr = '{ note : 2 }; { title : 0 }; { todo : 0 }; { todo : 0 }; '
 
-    assertEQ(textStr, expectedTextStr)
+    arktest.assertEQ(textStr, expectedTextStr)
 
     let expectedOld = "key:2 value:2 key:2 value:0 key:2 value:0 key:2 value:0 "
-    assertEQ(oldStr, expectedOld)
+    arktest.assertEQ(oldStr, expectedOld)
 }
 
 //testParseXml001
@@ -190,7 +190,7 @@ function testGetAttributeValue() {
 
     let expectedTextStr = '{ importance : heigh }; { logged : true }; { xmlns:h : http://www.w3.org/TR/html4/ }; '
 
-    assertEQ(textStr, expectedTextStr)
+    arktest.assertEQ(textStr, expectedTextStr)
 }
 
 function testXmlGetAttributeCount0001() {
@@ -208,11 +208,11 @@ function testXmlGetAttributeCount0001() {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
         parser.parseXml(options);
-        assertTrue(str.includes("key:2 value:1"));
+        arktest.assertTrue(str.includes("key:2 value:1"));
     } catch (err) {
         const TAG = 'testXmlGetAttributeCount0001';
         console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 }
 
@@ -232,10 +232,10 @@ function testXmlGetAttributeCount0002() {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
         parser.parseXml(options);
-        assertTrue(str.includes("key:2 value:2"))
+        arktest.assertTrue(str.includes("key:2 value:2"))
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 }
 
@@ -253,10 +253,10 @@ function testXmlGetAttributeCount0003() {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
         parser.parseXml(options);
-        assertTrue(false)
+        arktest.assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertEQ((err as BusinessError).code, 401);
+        arktest.assertEQ((err as BusinessError).code, 401);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
     }
@@ -281,7 +281,7 @@ function testXmlPullParserParseOptions0007() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 }
 
@@ -304,7 +304,7 @@ function testXmlPullParserParseOptions0010() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 }
 

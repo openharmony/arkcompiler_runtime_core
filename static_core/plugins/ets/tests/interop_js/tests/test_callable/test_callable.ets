@@ -13,39 +13,38 @@
  * limitations under the License.
  */
 
-import {
-    callNamedFunction,
-    callAnonymousFunction,
-    callArrowFunction,
-    callConstructedFunction,
-    callBoundFunction
-} from 'js_code';
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_callable/test_callable')
+let callNamedFunction = module.getProperty('callNamedFunction');
+let callAnonymousFunction = module.getProperty('callAnonymousFunction');
+let callArrowFunction = module.getProperty('callArrowFunction');
+let callConstructedFunction = module.getProperty('callConstructedFunction');
+let callBoundFunction = module.getProperty('callBoundFunction');
 
-const FIRST_VALUE = 5
-const SECONT_VALUE = 5
-const EXP_SUM = 10
+const FIRST_VALUE = 5;
+const SECONT_VALUE = 5;
+const EXP_SUM = 10;
 
 function TestNamedFunction(): boolean {
-    const testVal = callNamedFunction(FIRST_VALUE, SECONT_VALUE) as number
-    return testVal == EXP_SUM
+    const testVal = callNamedFunction.invoke(FIRST_VALUE, SECONT_VALUE).toNumber();
+    return testVal === EXP_SUM;
 }
 
 function TestAnonymousFunction(): boolean {
-    const testVal = callAnonymousFunction(FIRST_VALUE, SECONT_VALUE) as number
-    return testVal == EXP_SUM
+    const testVal = callAnonymousFunction.invoke(FIRST_VALUE, SECONT_VALUE).toNumber();
+    return testVal === EXP_SUM;
 }
 
 function TestArrowFunction(): boolean {
-    const testVal = callArrowFunction(FIRST_VALUE, SECONT_VALUE) as number
-    return testVal == EXP_SUM
+    const testVal = callArrowFunction.invoke(FIRST_VALUE, SECONT_VALUE).toNumber();
+    return testVal === EXP_SUM;
 }
 
 function TestConstructedFunction(): boolean {
-    const testVal = callConstructedFunction(FIRST_VALUE, SECONT_VALUE) as number
-    return testVal == EXP_SUM
+    const testVal = callConstructedFunction.invoke(FIRST_VALUE, SECONT_VALUE).toNumber();
+    return testVal === EXP_SUM;
 }
 
 function TestCallBoundFunction(): boolean {
-    const testVal = callBoundFunction(FIRST_VALUE, SECONT_VALUE) as number
-    return testVal == EXP_SUM
+    const testVal = callBoundFunction.invoke(FIRST_VALUE, SECONT_VALUE).toNumber();
+    return testVal === EXP_SUM;
 }

@@ -24,5 +24,5 @@ class MyClass {
 function main(): void {
   let obj = new MyClass();
   let x = obj.instanceProp;
-  assertEQ(x, "instance");
+  arktest.assertEQ(x, "instance");
 }

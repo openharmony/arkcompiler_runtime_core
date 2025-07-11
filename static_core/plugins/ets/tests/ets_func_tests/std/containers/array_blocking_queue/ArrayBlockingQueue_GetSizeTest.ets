@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 const elementsNum: int = 100;
 let sizeNum: int = 0;
 
-let queueInt: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
+let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
 
 function main(): int {
-    let ArrayBlockingQueueTestsuite = new ArkTestsuite("ArrayBlockingQueueGetSizeTest");
+    let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueueGetSizeTest");
 
     ArrayBlockingQueueTestsuite.addTest("GetSizeTestInt003", () =>
     {
@@ -29,15 +31,15 @@ function main(): int {
         for (let i: int = 0; i < elementsNum; ++i) {
             queueInt.push(i);
         }
-        let p1 = launch queueIntSizedata();
-        let p2 = launch queueIntSizedata();
-        let p3 = launch queueIntSizedata();
-        let p4 = launch queueIntSizedata();
-        await p1; 
-        await p2; 
-        await p3; 
-        await p4; 
-        assertEQ(queueInt.size, elementsNum);
+        let p1 = launch<void, () => void>(queueIntSizedata);
+        let p2 = launch<void, () => void>(queueIntSizedata);
+        let p3 = launch<void, () => void>(queueIntSizedata);
+        let p4 = launch<void, () => void>(queueIntSizedata);
+        p1.Await(); 
+        p2.Await(); 
+        p3.Await(); 
+        p4.Await(); 
+        arktest.assertEQ(queueInt.size, elementsNum);
     });
 
     return ArrayBlockingQueueTestsuite.run();

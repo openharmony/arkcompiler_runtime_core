@@ -21,11 +21,11 @@ function main() {
             eaWorkers.push(new EAWorker());
         }
     } catch (e) {
-        assertEQ(e.toString(), "CoroutinesLimitExceedError: The limit of Exclusive Workers has been reached");
+        arktest.assertEQ(e.toString(), "CoroutinesLimitExceedError: The limit of Exclusive Workers has been reached");
         exceptionWasCatched = true;
     }
     eaWorkers.forEach((eaWorker: EAWorker) => {
-        eaWorker.stop();
+        eaWorker.join();
     });
-    assertTrue(exceptionWasCatched);
+    arktest.assertTrue(exceptionWasCatched);
 }

@@ -22,7 +22,7 @@ tags: []
 type Pair = [number, number];
 
 function receiver(...values: Pair[]): void {
-    assertEQ( values.length, 2)
+    arktest.assertEQ( values.length, 2)
 }
 
 function main(): void {

@@ -13,17 +13,20 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+import { Job } from "std/core"
+
 function return_value(i: int): String {
     return "value " + i;
 }
 
 function n_cor_launch(n_cor: int): int {
-    let p: NullablePromise<String>[] = new NullablePromise<String>[n_cor];
+    let p: (Job<String> | undefined)[] = new (Job<String> | undefined)[n_cor];
     for (let i = 0; i < n_cor; ++i) {
-        p[i] = launch return_value(i);
+        p[i] = launch<String, (i: int) => String>(return_value, i);
     }
     for (let i = 0; i < n_cor; ++i) {
-        let val = await p[i]!;
+        let val = (p[i]!).Await();
         if(val != return_value(i)) {
             console.println("p[" + i + "] = \"" + val + "\" instead of \"" + return_value(i) + "\"");
             return 1;
@@ -37,13 +40,13 @@ function throw_exception(): Object {
 }
 
 function n_cor_exection_launch(n_cor: int): int { 
-    let p: NullablePromise<Object>[] = new NullablePromise<Object>[n_cor];
+    let p: (Job<Object> | undefined)[] = new (Job<Object> | undefined)[n_cor];
     for (let i = 0; i < n_cor; ++i) {
-        p[i] = launch throw_exception();
+        p[i] = launch<Object, () => Object>(throw_exception);
     }
     for (let i = 0; i < n_cor; ++i) {
         try {
-            await p[i]!
+            (p[i]!).Await();
         } catch (e) {
             if (!(e instanceof Error)) {
               console.println("Expected Error but another exception has been thrown!: " + e);

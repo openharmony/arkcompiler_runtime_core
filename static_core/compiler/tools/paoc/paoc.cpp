@@ -164,7 +164,7 @@ private:
         }
         ValidateCompilerOptions();
 
-        if (paoc_->paocOptions_->WasSetPaocMethodsFromFile()) {
+        if (paoc_->paocOptions_->WasSetPaocMethodsFromFilePath()) {
             InitPaocMethodsFromFile();
         }
         paoc_->skipInfo_.isFirstCompiled = !paoc_->paocOptions_->WasSetPaocSkipUntil();
@@ -246,7 +246,7 @@ private:
 
     void InitPaocMethodsFromFile()
     {
-        std::ifstream mfile(paoc_->paocOptions_->GetPaocMethodsFromFile());
+        std::ifstream mfile(paoc_->paocOptions_->GetPaocMethodsFromFilePath());
         std::string line;
         if (mfile) {
             while (getline(mfile, line)) {
@@ -295,6 +295,12 @@ private:
 
         // Initialize GC:
         auto runtimeLang = paoc_->runtimeOptions_->GetRuntimeType();
+#ifdef ARK_HYBRID
+        if (!paoc_->runtimeOptions_->WasSetGcType(runtimeLang)) {
+            paoc_->runtimeOptions_->SetGcType("cmc-gc");
+            LOG_PAOC(INFO) << "Not set the GC type, and use cmc-gc by default when Ark hybrid mode is enable";
+        }
+#endif
         // Fix it in issue 8164:
         auto gcType = ark::mem::GCTypeFromString(paoc_->runtimeOptions_->GetGcType(runtimeLang));
         ASSERT(gcType != ark::mem::GCType::INVALID_GC);
@@ -809,7 +815,8 @@ bool Paoc::Compile(Class *klass, const panda_file::File &pfileRef)
         // in this case it should not be added into AOT file.
         auto methodName = runtime_->GetMethodFullName(&method, g_options.WasSetCompilerRegexWithSignature());
         if (method.GetPandaFile()->GetFilename() == pfileRef.GetFilename() && !Skip(&method) &&
-            IsMethodInList(methodName) && g_options.MatchesRegex(methodName) && !Compile(&method, methodIndex)) {
+            IsMethodShouldBeCompiled(methodName) && g_options.MatchesRegex(methodName) &&
+            !Compile(&method, methodIndex)) {
             errorOccurred = true;
         }
         methodIndex++;
@@ -1077,7 +1084,7 @@ void Paoc::PrintUsage(const ark::PandArgParser &paParser)
                  " the AOT file\n";
     std::cerr << "    --paoc-skip-until           first method to compile, skip all previous\n";
     std::cerr << "    --paoc-compile-until        last method to compile, skip all following\n";
-    std::cerr << "    --paoc-methods-from-file    path to file which contains methods to compile\n";
+    std::cerr << "    --paoc-methods-from-file    use white or black lists to filter methods to compile\n";
 #ifndef NDEBUG
     std::cerr << "    --paoc-generate-symbols     generate symbols for compiled methods, disabled by default\n";
 #endif
@@ -1087,9 +1094,17 @@ void Paoc::PrintUsage(const ark::PandArgParser &paParser)
     std::cerr << paParser.GetHelpString() << std::endl;
 }
 
-bool Paoc::IsMethodInList(const std::string &methodFullName)
+bool Paoc::IsMethodShouldBeCompiled(const std::string &methodFullName)
 {
-    return !paocOptions_->WasSetPaocMethodsFromFile() || (methodsList_.find(methodFullName) != methodsList_.end());
+    if (paocOptions_->IsPaocMethodsFromFileIswhite()) {
+        return !paocOptions_->WasSetPaocMethodsFromFilePath() ||
+               (methodsList_.find(methodFullName) != methodsList_.end());
+    }
+    if (!paocOptions_->IsPaocMethodsFromFileIswhite()) {
+        return !(paocOptions_->WasSetPaocMethodsFromFilePath() &&
+                 (methodsList_.find(methodFullName) != methodsList_.end()));
+    }
+    return true;
 }
 
 /*

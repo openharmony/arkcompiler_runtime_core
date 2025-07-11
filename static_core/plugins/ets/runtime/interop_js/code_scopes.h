@@ -20,59 +20,51 @@
 
 namespace ark::ets::interop::js {
 
-template <bool IN_ETS_MANAGED = false>
-class InteropCodeScope {
+/// @brief RAII-style class for registering interop call stack information
+class ScopedInteropCallStackRecord {
 public:
-    explicit InteropCodeScope(EtsCoroutine *coro, char const *descr = nullptr) : coro_(coro)
-    {
-        ASSERT(coro_ == ManagedThread::GetCurrent());
-        auto ctx = InteropCtx::Current(coro_);
-
-        if constexpr (IN_ETS_MANAGED) {
-            ctx->UpdateInteropStackInfoIfNeeded();
-        }
-        ctx->CallStack().AllocRecord(coro_->GetCurrentFrame(), descr);
-    }
-
-    ~InteropCodeScope()
-    {
-        auto ctx = InteropCtx::Current(EtsCoroutine::CastFromThread(coro_));
-
-        ctx->CallStack().PopRecord();
-    }
+    explicit ScopedInteropCallStackRecord(EtsCoroutine *coro, char const *descr = nullptr);
+    ~ScopedInteropCallStackRecord();
 
 private:
     EtsCoroutine *coro_;
 
-    NO_COPY_SEMANTIC(InteropCodeScope);
-    NO_MOVE_SEMANTIC(InteropCodeScope);
+    NO_COPY_SEMANTIC(ScopedInteropCallStackRecord);
+    NO_MOVE_SEMANTIC(ScopedInteropCallStackRecord);
 };
 
-using InteropCodeScopeETS = InteropCodeScope<true>;
-
-class InteropCodeScopeJS {
+/// @brief RAII-style class for switching from ETS state to JS
+class InteropETSToJSCodeScope {
 public:
-    explicit InteropCodeScopeJS(EtsCoroutine *coro, char const *descr = nullptr) : codeScope_(coro, descr) {}
-
-    ~InteropCodeScopeJS()
-    {
-        auto ctx = InteropCtx::Current();
-        ctx->UpdateInteropStackInfoIfNeeded();
-    }
+    explicit InteropETSToJSCodeScope(EtsCoroutine *coro, char const *descr = nullptr);
+    ~InteropETSToJSCodeScope();
 
 private:
-    NO_COPY_SEMANTIC(InteropCodeScopeJS);
-    NO_MOVE_SEMANTIC(InteropCodeScopeJS);
+    EtsCoroutine *coro_;
 
-    InteropCodeScope<false> codeScope_;
+    NO_COPY_SEMANTIC(InteropETSToJSCodeScope);
+    NO_MOVE_SEMANTIC(InteropETSToJSCodeScope);
+};
+
+/// @brief RAII-style class for switching from JS state to ETS
+class InteropJSToETSCodeScope {
+public:
+    explicit InteropJSToETSCodeScope(EtsCoroutine *coro, char const *descr = nullptr);
+    ~InteropJSToETSCodeScope();
+
+private:
+    EtsCoroutine *coro_;
+
+    NO_COPY_SEMANTIC(InteropJSToETSCodeScope);
+    NO_MOVE_SEMANTIC(InteropJSToETSCodeScope);
 };
 
 // CC-OFFNXT(G.PRE.02-CPP) for readability and ease of use
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define INTEROP_CODE_SCOPE_JS(coro) InteropCodeScopeJS codeScope(coro, __PRETTY_FUNCTION__)
+#define INTEROP_CODE_SCOPE_JS_TO_ETS(coro) InteropJSToETSCodeScope codeScope(coro, __PRETTY_FUNCTION__)
 // CC-OFFNXT(G.PRE.02-CPP) for readability and ease of use
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define INTEROP_CODE_SCOPE_ETS(coro) InteropCodeScopeETS codeScope(coro, __PRETTY_FUNCTION__)
+#define INTEROP_CODE_SCOPE_ETS_TO_JS(coro) InteropETSToJSCodeScope codeScope(coro, __PRETTY_FUNCTION__)
 
 }  // namespace ark::ets::interop::js
 

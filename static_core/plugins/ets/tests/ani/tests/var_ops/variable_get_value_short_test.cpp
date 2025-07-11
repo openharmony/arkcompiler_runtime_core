@@ -23,7 +23,7 @@ public:
     void SetUp() override
     {
         AniTest::SetUp();
-        ASSERT_EQ(env_->FindNamespace("Lvariable_get_value_short_test/anyns;", &ns_), ANI_OK);
+        ASSERT_EQ(env_->FindNamespace("variable_get_value_short_test.anyns", &ns_), ANI_OK);
         ASSERT_NE(ns_, nullptr);
     }
 
@@ -74,6 +74,17 @@ TEST_F(VariableGetValueShortTest, invalid_args_value)
     ASSERT_NE(variable, nullptr);
 
     ASSERT_EQ(env_->Variable_GetValue_Short(variable, nullptr), ANI_INVALID_ARGS);
+}
+
+TEST_F(VariableGetValueShortTest, check_initialization)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "x", &variable), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("variable_get_value_short_test.anyns"));
+    ani_short x;
+    ASSERT_EQ(env_->Variable_GetValue_Short(variable, &x), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("variable_get_value_short_test.anyns"));
 }
 
 }  // namespace ark::ets::ani::testing

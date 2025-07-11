@@ -626,13 +626,13 @@ public:
 
     float getf32testattribute()
     {
-        const float getf32TestAttributeValue = 3.14;
+        float const getf32TestAttributeValue = 3.14;
         return getf32TestAttributeValue;
     }
 
     double getf64testattribute()
     {
-        const double getf64TestAttributeValue = 123.45678;
+        double const getf64TestAttributeValue = 123.45678;
         return getf64TestAttributeValue;
     }
 };
@@ -931,7 +931,7 @@ bool TestBaseBoolFunc6()
 
 }  // namespace
 
-// The macros used below are automatically generated code
+// because these macros are auto-generate, lint will cause false positive.
 // NOLINTBEGIN
 TH_EXPORT_CPP_API_Multiply(Multiply);
 TH_EXPORT_CPP_API_BaseCFunc(BaseCFunc);

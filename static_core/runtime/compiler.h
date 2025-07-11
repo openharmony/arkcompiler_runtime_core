@@ -37,6 +37,7 @@
 #include "runtime/include/thread.h"
 
 #include "runtime/osr.h"
+#include "source_language.h"
 
 namespace ark {
 
@@ -274,17 +275,24 @@ public:
 
     bool IsMethodExternal(MethodPtr parentMethod, MethodPtr calleeMethod) const override;
 
-    bool IsMethodIntrinsic(MethodPtr method) const override
-    {
-        return MethodCast(method)->IsIntrinsic();
-    }
+    bool IsClassExternal(MethodPtr method, ClassPtr calleeClass) const override;
 
     bool IsMethodAbstract(MethodPtr method) const override
     {
         return MethodCast(method)->IsAbstract();
     }
 
-    bool IsMethodIntrinsic(MethodPtr parentMethod, MethodId id) const override;
+    bool IsMethodIntrinsic(MethodPtr method) const override
+    {
+        return MethodCast(method)->IsIntrinsic();
+    }
+
+    bool IsMethodIntrinsic(MethodPtr parentMethod, MethodId id) const override
+    {
+        return GetMethodAsIntrinsic(parentMethod, id) != nullptr;
+    }
+
+    MethodPtr GetMethodAsIntrinsic(MethodPtr parentMethod, MethodId id) const override;
 
     bool IsMethodFinal(MethodPtr method) const override
     {
@@ -297,7 +305,9 @@ public:
     bool IsMethodCanBeInlined(MethodPtr method) const override
     {
         auto methodPtr = MethodCast(method);
-        if (Runtime::GetCurrent()->GetOptions().GetVerificationMode() == VerificationMode::ON_THE_FLY &&
+        const auto &options = Runtime::GetCurrent()->GetOptions();
+        if (verifier::VerificationModeFromString(options.GetVerificationMode()) ==
+                verifier::VerificationMode::ON_THE_FLY &&
             methodPtr->GetVerificationStage() != Method::VerificationStage::VERIFIED_OK) {
             return false;
         }
@@ -397,6 +407,8 @@ public:
 
     /**********************************************************************************/
     /// Thread information
+    ::ark::mem::BarrierType GetPreReadType() const override;
+
     ::ark::mem::BarrierType GetPreType() const override;
 
     ::ark::mem::BarrierType GetPostType() const override;
@@ -532,7 +544,8 @@ public:
     bool IsFieldFinal(FieldPtr field) const override;
     bool IsFieldReadonly(FieldPtr field) const override;
     bool HasFieldMetadata(FieldPtr field) const override;
-    uint64_t GetStaticFieldValue(FieldPtr fieldPtr) const override;
+    uint64_t GetStaticFieldIntegerValue(FieldPtr fieldPtr) const override;
+    double GetStaticFieldFloatValue(FieldPtr fieldPtr) const override;
 
     std::string GetFieldName(FieldPtr field) const override
     {
@@ -681,7 +694,7 @@ public:
             return;
         }
 
-        if ((Runtime::GetTaskScheduler() == nullptr) || noAsyncJit_) {
+        if (!Runtime::IsTaskManagerUsed() || noAsyncJit_) {
             compilerWorker_ =
                 internalAllocator_->New<CompilerThreadPoolWorker>(internalAllocator_, this, noAsyncJit_, options);
         } else {
@@ -783,7 +796,7 @@ protected:
 
     ThreadPool<CompilerTask, CompilerProcessor, Compiler *> *GetThreadPool()
     {
-        ASSERT(Runtime::GetTaskScheduler() == nullptr || noAsyncJit_);
+        ASSERT(!Runtime::IsTaskManagerUsed() || noAsyncJit_);
         if (compilerWorker_ != nullptr) {
             return static_cast<CompilerThreadPoolWorker *>(compilerWorker_)->GetThreadPool();
         }
@@ -814,7 +827,9 @@ private:
 };
 
 #ifndef PANDA_PRODUCT_BUILD
-uint8_t CompileMethodImpl(coretypes::String *fullMethodName, panda_file::SourceLang sourceLang);
+// Exists only for tests purposes, must not be used in release builds
+uint8_t CompileMethodImpl(coretypes::String *fullMethodName, ClassLinkerContext *ctx);
+uint8_t CompileMethodImpl(coretypes::String *fullMethodName, SourceLanguage sourceLang);
 #endif
 
 }  // namespace ark

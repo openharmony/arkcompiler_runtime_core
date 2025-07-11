@@ -13,6 +13,14 @@
  * limitations under the License.
  */
 
+import {BusinessError} from "@ohos.base";
+
+const TypeErrorCodeId: number = 401;
+const OutOfBoundsErrorCodeId: number = 10200001;
+const EmptyContainerErrorCodeId: number = 10200010;
+
+export type LinkedListForEachCb<T> = (value: T, index: number, linkedList: LinkedList<T>) => void;
+
 /**
  * Represents a node in the linked list.
  */
@@ -136,7 +144,7 @@ export class LinkedList<T> implements Iterable<T> {
     * @param callbackfn.index - The index of the current element being processed in the linked list.
     * @param callbackfn.linkedList - The linked list that forEach is being applied to.
     */
-    public forEach(callbackfn: (value: T, index: number, linkedList: LinkedList<T>) => void): void {
+    public forEach(callbackfn: LinkedListForEachCb<T>): void {
         let index: number = 0;
         let currentNode: ListNode<T> | undefined = this.head;
         while (currentNode !== undefined) {
@@ -151,6 +159,8 @@ export class LinkedList<T> implements Iterable<T> {
      * @returns The element at the specified index, or undefined if the index is out of range.
      */
     public get(index: number): T | undefined {
+        this.checkIndexType(index);
+
         if (index >= 0 && index < this.elementNum) {
             let currentNode: ListNode<T> | undefined = this.getNode(index);
             return currentNode!.element;
@@ -238,44 +248,43 @@ export class LinkedList<T> implements Iterable<T> {
      * Inserts an element at the specified index.
      * @param index The index at which to insert the element.
      * @param element The element to insert.
-     * @throws RangeError if the index is out of range.
+     * @throws BusinessError if the index is out of range.
      */
     public insert(index: number, element: T): void {
-        if (index >= 0 && index <= this.elementNum) {
-            let newNode: ListNode<T> = new ListNode<T>(element);
-            if (this.elementNum == 0) {
-                this.head = this.tail = newNode;
+        this.checkIndexType(index);
+        this.checkIndex(index, this.length);
 
-                this.elementNum++;
-                return;
-            }
+        let newNode: ListNode<T> = new ListNode<T>(element);
+        if (this.elementNum == 0) {
+            this.head = this.tail = newNode;
 
-            if (index == 0) {
-                this.head!.prev = newNode;
-                newNode.next = this.head;
-                this.head = newNode;
-
-                this.elementNum++;
-                return;
-            }
-
-            if (index == this.elementNum) {
-                this.tail!.next = newNode;
-                newNode.prev = this.tail;
-                this.tail = newNode;
-
-                this.elementNum++;
-                return;
-            }
-            let currentNode: ListNode<T> | undefined = this.getNode(index);
-            newNode.next = currentNode;
-            newNode.prev = currentNode!.prev;
-            currentNode!.prev!.next = newNode;
-            currentNode!.prev = newNode;
             this.elementNum++;
-        } else {
-            throw new RangeError('The value of index is out of range.');
+            return;
         }
+
+        if (index == 0) {
+            this.head!.prev = newNode;
+            newNode.next = this.head;
+            this.head = newNode;
+
+            this.elementNum++;
+            return;
+        }
+
+        if (index == this.elementNum) {
+            this.tail!.next = newNode;
+            newNode.prev = this.tail;
+            this.tail = newNode;
+
+            this.elementNum++;
+            return;
+        }
+        let currentNode: ListNode<T> | undefined = this.getNode(index);
+        newNode.next = currentNode;
+        newNode.prev = currentNode!.prev;
+        currentNode!.prev!.next = newNode;
+        currentNode!.prev = newNode;
+        this.elementNum++;
     }
 
     /**
@@ -309,31 +318,31 @@ export class LinkedList<T> implements Iterable<T> {
      * Removes the element at the specified index.
      * @param index The index of the element to remove.
      * @returns The removed element, or undefined if the index is out of range.
-     * @throws RangeError if the index is out of range.
+     * @throws BusinessError if the index is out of range.
      */
     public removeByIndex(index: number): T | undefined {
-        if (index >= 0 && index < this.elementNum) {
-            let removedNode: ListNode<T> | undefined;
-            if (index == 0) {
-                removedNode = this.head!;
-                this.head = this.head!.next;
-                if (this.head !== undefined) {
-                    this.head!.prev = undefined;
-                }
-            } else if (index == this.elementNum - 1) {
-                removedNode = this.tail!;
-                this.tail = this.tail!.prev;
-                this.tail!.next = undefined;
-            } else {
-                removedNode = this.getNode(index);
-                removedNode!.prev!.next = removedNode!.next;
-                removedNode!.next!.prev = removedNode!.prev;
+        this.checkIndexType(index);
+        this.checkEmptyContainer(OutOfBoundsErrorCodeId);
+        this.checkIndex(index, this.length - 1);
+
+        let removedNode: ListNode<T> | undefined;
+        if (index == 0) {
+            removedNode = this.head!;
+            this.head = this.head!.next;
+            if (this.head !== undefined) {
+                this.head!.prev = undefined;
             }
-            this.elementNum--;
-            return removedNode!.element;
+        } else if (index == this.elementNum - 1) {
+            removedNode = this.tail!;
+            this.tail = this.tail!.prev;
+            this.tail!.next = undefined;
         } else {
-            throw new RangeError('The value of index is out of range.');
+            removedNode = this.getNode(index);
+            removedNode!.prev!.next = removedNode!.next;
+            removedNode!.next!.prev = removedNode!.prev;
         }
+        this.elementNum--;
+        return removedNode!.element;
     }
 
     /**
@@ -341,6 +350,7 @@ export class LinkedList<T> implements Iterable<T> {
      * @returns The removed element, or undefined if the list is empty.
      */
     public removeFirst(): T | undefined {
+        this.checkEmptyContainer(EmptyContainerErrorCodeId);
         return this.removeByIndex(0);
     }
 
@@ -358,6 +368,7 @@ export class LinkedList<T> implements Iterable<T> {
      * @returns The removed element, or undefined if the list is empty.
      */
     public removeLast(): T | undefined {
+        this.checkEmptyContainer(EmptyContainerErrorCodeId);
         return this.removeByIndex(this.elementNum - 1);
     }
 
@@ -395,9 +406,9 @@ export class LinkedList<T> implements Iterable<T> {
      * @returns The replaced element, or undefined if the index is out of range.
      */
     public set(index: number, element: T): T | undefined {
-        if (index < 0 || index >= this.elementNum) {
-            throw new RangeError('The value of index is out of range.');
-        }
+        this.checkIndexType(index);
+        this.checkEmptyContainer(OutOfBoundsErrorCodeId);
+        this.checkIndex(index, this.length - 1);
 
         let currentNode: ListNode<T> | undefined = this.getNode(index);
         if (currentNode !== undefined) {
@@ -437,5 +448,23 @@ export class LinkedList<T> implements Iterable<T> {
      */
     public override $_iterator(): IterableIterator<T> {
         return new LinkedListIterator_T<T>(this.head);
+    }
+
+    private checkIndexType(index: number): void {
+        if (index > Int.MAX_VALUE) {
+            throw new BusinessError(TypeErrorCodeId, new Error(`The type of "index" must be small integer. Received value is: ${index}`));
+        }
+    }
+
+    private checkIndex(index: number, length: number): void {
+        if (index > length || index < 0) {
+            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"index\" is out of range. It must be >= 0 && <= ${length}. Received value is: ${index}`));
+        }
+    }
+
+    private checkEmptyContainer(id: number): void {
+        if (this.elementNum == 0) {
+            throw new BusinessError(id, new Error(`Container is empty`));
+        }
     }
 }

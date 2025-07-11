@@ -25,6 +25,6 @@ import {x as xx, y as yy} from "./to_export"
 function main(): void {
   let x1 = xx
   let y1 = yy
-  assertEQ(x1, 1)
-  assertEQ(y1, 2)
+  arktest.assertEQ(x1, 1)
+  arktest.assertEQ(y1, 2)
 }

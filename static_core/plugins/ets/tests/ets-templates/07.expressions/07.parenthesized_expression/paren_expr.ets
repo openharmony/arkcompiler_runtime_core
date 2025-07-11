@@ -23,7 +23,7 @@ let x = 1;
 let y = {{e}};
 
 function main(): void {
-  assertEQ( x, y )
+  arktest.assertEQ( x, y )
 }
 
 {% endfor %}

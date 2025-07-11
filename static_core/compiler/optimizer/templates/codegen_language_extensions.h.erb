@@ -39,18 +39,6 @@ inline void CreateStoreObjectDynamic([[maybe_unused]] Inst *inst)
     GetEncoder()->SetFalseResult();
 }
 
-inline void CreateLaunchCall([[maybe_unused]] CallInst *inst)
-{
-% Common::each_plugin_suboption("compiler_extensions", "launch_call_codegen") do |launch_call_codegen|
-    if (<%= launch_call_codegen %>(inst)) {
-        return;
-    }
-% end
-
-    LOG(WARNING, COMPILER) << "Cannot encode StoreObjectDynamic";
-    GetEncoder()->SetFalseResult();
-}
-
 inline void ResolveCallByName([[maybe_unused]] ResolveVirtualInst *inst)
 {
 % Common::each_plugin_suboption("compiler_extensions", "resolve_call_by_name") do |resolve_call_by_name|

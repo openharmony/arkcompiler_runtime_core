@@ -122,6 +122,18 @@ namespace common {
 
 #endif  // defined(__cplusplus)
 
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define MEMBER_OFFSET_CC(T, F) offsetof(T, F)
+
+#ifdef __clang__
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define FIELD_UNUSED_CC __attribute__((__unused__))
+#else
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define FIELD_UNUSED_CC
+#endif
+
+// NOLINTNEXTLINE(readability-identifier-naming)
 enum class PUBLIC_API LOG_LEVEL : uint8_t {
     DEBUG = 0,
     INFO = 1,
@@ -130,6 +142,8 @@ enum class PUBLIC_API LOG_LEVEL : uint8_t {
     FATAL = 4,
     FOLLOW = 100, // if hilog enabled follow hilog, otherwise use INFO level
 };
-}  // namespace common
+
+static constexpr size_t BITS_PER_BYTE = 8;
+} // namespace common
 
 #endif  // COMMON_INTERFACES_BASE_COMMON_H

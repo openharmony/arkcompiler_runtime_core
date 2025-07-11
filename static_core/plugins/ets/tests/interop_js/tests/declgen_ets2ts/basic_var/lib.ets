@@ -26,8 +26,6 @@ export let w4 = new Byte()
 
 export let d2 = new Date()
 
-export let ab = new ArrayBuffer(128)
-
 export const a: number = 1
 export const b: byte = 1
 export const c: short = 1
@@ -35,7 +33,7 @@ export const d: int = 1
 export const e: long = 1
 export const f: float = 1
 export const g: double = 1
-export const h: char = "1"
+export const h: char = c'1'
 export const i: boolean = true
 export const j: string = "1"
 export const k: bigint = 1n
@@ -57,3 +55,5 @@ export let s : string = "Hi"
 export type Greeting = "Hello"
 export let a2: "Hello" = "Hello"
 export let b2: Greeting = "Hello"
+
+export let a3: Record<string, string>;

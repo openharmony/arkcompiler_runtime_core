@@ -1,3 +1,4 @@
+'use static'
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,3 +35,9 @@ export declare let threeBitLet: bigint;
 export declare const negZero: bigint;
 export declare const baseChange: bigint;
 export declare const leadingZeros: bigint;
+export declare let bigint_v: bigint;
+export declare const baseChange_v: bigint;
+export declare let zero_v: bigint;
+export declare let oneBit_v: bigint;
+export declare let twoBit_v: bigint;
+export declare let threeBit_v: bigint;

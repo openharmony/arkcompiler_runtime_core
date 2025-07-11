@@ -24,5 +24,5 @@ function main(): void {
     let cmp1 = a != b;
     let cmp2 = !(a == b);
 
-    assertEQ( cmp1, cmp2 )
+    arktest.assertEQ( cmp1, cmp2 )
 }

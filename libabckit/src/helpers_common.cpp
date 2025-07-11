@@ -18,10 +18,50 @@
 
 namespace libabckit {
 
+bool ModuleEnumerateNamespacesHelper(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreNamespace *ns, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(m, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &[_, ns] : m->nt) {
+        if (!cb(ns.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool ModuleEnumerateClassesHelper(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreClass *klass, void *data))
 {
     for (auto &[className, klass] : m->ct) {
         if (!cb(klass.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool ModuleEnumerateInterfacesHelper(AbckitCoreModule *m, void *data,
+                                     bool (*cb)(AbckitCoreInterface *iface, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(m, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &[_, iface] : m->it) {
+        if (!cb(iface.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool ModuleEnumerateEnumsHelper(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreEnum *enm, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(m, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &[_, enm] : m->et) {
+        if (!cb(enm.get(), data)) {
             return false;
         }
     }
@@ -36,6 +76,19 @@ bool ModuleEnumerateTopLevelFunctionsHelper(AbckitCoreModule *m, void *data,
     LIBABCKIT_BAD_ARGUMENT(cb, false)
     for (auto &function : m->functions) {
         if (!cb(function.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool ModuleEnumerateFieldsHelper(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreModuleField *field, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(m, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &field : m->fields) {
+        if (!cb(field.get(), data)) {
             return false;
         }
     }
@@ -61,6 +114,73 @@ bool ClassEnumerateMethodsHelper(AbckitCoreClass *klass, void *data, bool (*cb)(
     LIBABCKIT_LOG_FUNC;
     for (auto &method : klass->methods) {
         if (!cb(method.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool ClassEnumerateFieldsHelper(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreClassField *field, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(klass, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &field : klass->fields) {
+        if (!cb(field.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool InterfaceEnumerateMethodsHelper(AbckitCoreInterface *iface, void *data,
+                                     bool (*cb)(AbckitCoreFunction *method, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(iface, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &method : iface->methods) {
+        if (!cb(method.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool InterfaceEnumerateFieldsHelper(AbckitCoreInterface *iface, void *data,
+                                    bool (*cb)(AbckitCoreInterfaceField *field, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(iface, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &[_, field] : iface->fields) {
+        if (!cb(field.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool EnumEnumerateMethodsHelper(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreFunction *method, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(enm, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &method : enm->methods) {
+        if (!cb(method.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool EnumEnumerateFieldsHelper(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreEnumField *field, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(enm, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &field : enm->fields) {
+        if (!cb(field.get(), data)) {
             return false;
         }
     }

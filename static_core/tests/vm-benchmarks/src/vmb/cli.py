@@ -37,6 +37,7 @@ class Command(StringEnum):
     ALL = 'all'
     VERSION = 'version'
     LIST = 'list'
+    LOG = 'log'
 
 
 def comma_separated_list(arg_val: str) -> Set[str]:
@@ -75,42 +76,34 @@ def add_measurement_opts(parser: argparse.ArgumentParser) -> None:
 
 
 def add_gen_opts(parser: argparse.ArgumentParser, command: Command) -> None:
-    parser.add_argument('-l', '--langs',
-                        type=comma_separated_list,
-                        default=set(),
-                        required=(command == Command.GEN),
-                        help='Comma-separated list of lang plugins')
+    parser.add_argument('-l', '--langs', type=comma_separated_list, default=set(),
+                        required=(command == Command.GEN), help='Comma-separated list of lang plugins')
     parser.add_argument('-o', '--outdir', default='generated', type=str,
                         help='Dir for generated benches')
-    parser.add_argument('-t', '--tests',
-                        default=set(),
-                        type=comma_separated_list,
-                        help='Filter by name (comma-separated list)')
-    parser.add_argument('-L', '--src-langs',
-                        default=set(),
-                        type=comma_separated_list,
-                        help='Override src file extentions '
-                             '(comma-separated list)')
+    parser.add_argument('-t', '--tests', default=set(),
+                        type=comma_separated_list, help='Filter by name (comma-separated list)')
+    parser.add_argument('-L', '--src-langs', default=set(), type=comma_separated_list,
+                        help='Override src file extentions (comma-separated list)')
+    parser.add_argument('--template', type=str, default='',
+                        metavar='FILE_NAME', help='Override template')
+    parser.add_argument('--test-list', type=str, default='',
+                        metavar='FILE_NAME', help='Test list (generated names)')
+    parser.add_argument('--show-list', action='store_true',
+                        help='Print generated tests')
 
 
 def add_run_opts(parser: argparse.ArgumentParser) -> None:
     parser.add_argument('-p', '--platform', type=str, required=True,
                         help='Platform plugin name')
     parser.add_argument('-m', '--mode', type=str,
-                        default='default',
-                        choices=ToolMode.getall(),
-                        help='Run VM mode')
+                        default='default', choices=ToolMode.getall(), help='Run VM mode')
     parser.add_argument('-n', '--name', type=str,
                         default='', help='Description of run')
-    parser.add_argument('--timeout', default=None, type=float,
-                        help='Timeout (seconds)')
-    parser.add_argument('--device', type=str,
-                        default='', help='Device ID (serial)')
+    parser.add_argument('--timeout', default=None, type=float, help='Timeout (seconds)')
+    parser.add_argument('--device', type=str, default='', help='Device ID (serial)')
     parser.add_argument('--device-host', type=str, default='',
-                        help='device server in form server:port '
-                             'in case you use remote device')
-    parser.add_argument('--device-dir', type=str,
-                        default='/data/local/tmp/vmb',
+                        help='device server in form server:port in case you use remote device')
+    parser.add_argument('--device-dir', type=str, default='/data/local/tmp/vmb',
                         help='Base dir on device (%(default)s)')
     parser.add_argument('--hooks', type=str, default='',
                         help='Comma-separated list of hook plugins')
@@ -120,20 +113,16 @@ def add_run_opts(parser: argparse.ArgumentParser) -> None:
                         help='Runs benchmark with GC logs enabled')
     parser.add_argument('--dry-run', action='store_true',
                         help='Generate and compile, no execution')
-    parser.add_argument('--report-json', default='', type=str,
-                        metavar='FILE_NAME',
+    parser.add_argument('--report-json', default='', type=str, metavar='FILE_NAME',
                         help='Save json report as FILE_NAME')
     parser.add_argument('--report-json-compact', action='store_true',
                         help='Json file without indentation')
     parser.add_argument('--report-csv', default='', type=str,
-                        metavar='FILE_NAME',
-                        help='Save csv report as FILE_NAME')
+                        metavar='FILE_NAME', help='Save csv report as FILE_NAME')
     parser.add_argument('--exclude-list', default='', type=str,
-                        metavar='EXCLUDE_LIST',
-                        help='Path to exclude list')
+                        metavar='EXCLUDE_LIST', help='Path to exclude list')
     parser.add_argument('--fail-logs', default='', type=str,
-                        metavar='FAIL_LOGS_DIR',
-                        help='Save failure messages to folder')
+                        metavar='FAIL_LOGS_DIR', help='Save failure messages to folder')
     parser.add_argument('--cpumask', default='', type=str,
                         help='Use cores mask in hex or bin format. '
                              'E.g., 0x38 or 0b111000 = high cores')
@@ -142,8 +131,11 @@ def add_run_opts(parser: argparse.ArgumentParser) -> None:
     parser.add_argument('--jit-stats', action='store_true',
                         help='Collect jit compilation data')
     parser.add_argument('--aot-whitelist', default='', type=str,
-                        metavar='FILE_NAME',
-                        help='Get methods names from FILE_NAME')
+                        metavar='FILE_NAME', help='Get methods names from FILE_NAME')
+    parser.add_argument('--tests-per-batch', default=25, type=int,
+                        help='Test count per one batch run (%(default)s)')
+    parser.add_argument('--fail-list', default='', type=str,
+                        metavar='FILE_NAME', help='Create test list for failures')
 
 
 def add_report_opts(parser: argparse.ArgumentParser) -> None:
@@ -164,6 +156,14 @@ def add_report_opts(parser: argparse.ArgumentParser) -> None:
                         help='Exclude list file')
     parser.add_argument('--tolerance', default=0.5, type=float,
                         help='Percentage of tolerance in comparison')
+    parser.add_argument('--status-only', action='store_true',
+                        help='Set exit code 1 if run has fails')
+    parser.add_argument('--status-by-compare', action='store_true',
+                        help='Set exit code 1 if second run has performance regressions')
+    parser.add_argument('--compare-meta', action='store_true',
+                        help='Compare meta info between 2 reports')
+    parser.add_argument('--compile-time', action='store_true',
+                        help='Print compile time stats')
 
 
 def add_filter_opts(parser: argparse.ArgumentParser) -> None:
@@ -175,6 +175,16 @@ def add_filter_opts(parser: argparse.ArgumentParser) -> None:
                         default=set(),
                         type=comma_separated_list,
                         help='Skip if tagged (comma-separated list)')
+
+
+def add_presentation_opts(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument('--number-format', type=str, default='auto',
+                        choices=('nano', 'auto', 'expo'), help='Number format')
+
+
+def add_logparser_opts(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument('--out', type=str, default='vmb-run.csv',
+                        metavar='FILE_NAME', help='Save log statistics as FILE_NAME')
 
 
 class _ArgumentParser(argparse.ArgumentParser):
@@ -196,6 +206,8 @@ class _ArgumentParser(argparse.ArgumentParser):
                           help='Abort run on first error')
         self.add_argument('--no-color', action='store_true',
                           help='Disable color logging')
+        self.add_argument('--timestamps', action='store_true',
+                          help='Print timestamps in console log')
         # Generator-specific options
         if command in (Command.GEN, Command.ALL):
             add_gen_opts(self, command)
@@ -204,9 +216,14 @@ class _ArgumentParser(argparse.ArgumentParser):
         # Runner-specific options
         if command in (Command.RUN, Command.ALL):
             add_run_opts(self)
+            add_presentation_opts(self)
+        # Report-specific options
         if command in (Command.REPORT,):
             add_report_opts(self)
             add_filter_opts(self)
+            add_presentation_opts(self)
+        if command in (Command.LOG,):
+            add_logparser_opts(self)
 
     @staticmethod
     def __epilog() -> str:
@@ -253,6 +270,12 @@ class Args(argparse.Namespace):
         self.fail_logs = self.get('fail_logs', '')
         if self.fail_logs:
             Path(self.fail_logs).mkdir(exist_ok=True)
+        # pseudo declarations to make linters happy
+        self.fail_list = self.get('fail_list', '')
+        self.test_list = self.get('test_list', '')
+        self.tests = self.get('tests', set())
+        if self.test_list:
+            self.tests = self.tests.union(read_list_file(self.test_list))
 
     def __repr__(self) -> str:
         return '\n'.join(super().__repr__().split(','))
@@ -284,6 +307,8 @@ class Args(argparse.Namespace):
         mode = ToolMode(self.get('mode'))
         if ToolMode.AOT == mode:
             flags |= OptFlags.AOT
+        elif ToolMode.AOTPGO == mode:
+            flags |= OptFlags.AOTPGO
         elif ToolMode.LLVMAOT == mode:
             flags |= OptFlags.AOT | OptFlags.LLVMAOT
         elif ToolMode.INT == mode:
@@ -310,10 +335,6 @@ class Args(argparse.Namespace):
         if 'false' == self.get('compiler_inlining', ''):
             flags |= OptFlags.DISABLE_INLINING
         return flags
-
-    def get_custom_opts(self, name: str) -> str:
-        opts = self.custom_opts.get(name, [])
-        return ' '.join(opts)
 
     def get_shared_path(self) -> str:
         path = self.get('outdir', '')

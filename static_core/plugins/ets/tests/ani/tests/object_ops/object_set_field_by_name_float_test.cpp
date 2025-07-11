@@ -55,7 +55,7 @@ TEST_F(ObjectSetFieldByNameFloatTest, set_field02)
               ANI_TRUE);
 
     const int32_t loopCount = 3;
-    for (int i = 1; i <= loopCount; i++) {
+    for (int32_t i = 1; i <= loopCount; i++) {
         ASSERT_EQ(env_->Object_SetFieldByName_Float(animal, "value", static_cast<ani_float>(SET_VALUE)), ANI_OK);
         ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_by_name_float_test", "checkObjectField", animal,
                                                static_cast<ani_float>(SET_VALUE)),
@@ -75,27 +75,34 @@ TEST_F(ObjectSetFieldByNameFloatTest, set_field02)
     }
 }
 
+TEST_F(ObjectSetFieldByNameFloatTest, invalid_env)
+{
+    ani_object animal = NewAnimal();
+    ASSERT_EQ(env_->c_api->Object_SetFieldByName_Float(nullptr, animal, "value", SET_VALUE), ANI_INVALID_ARGS);
+}
+
 TEST_F(ObjectSetFieldByNameFloatTest, not_found_name)
 {
     ani_object animal = NewAnimal();
-    ASSERT_EQ(env_->Object_SetFieldByName_Float(animal, "x", static_cast<ani_float>(SET_VALUE)), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_SetFieldByName_Float(animal, "x", SET_VALUE), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_SetFieldByName_Float(animal, "", SET_VALUE), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectSetFieldByNameFloatTest, invalid_type)
 {
     ani_object animal = NewAnimal();
-    ASSERT_EQ(env_->Object_SetFieldByName_Float(animal, "name", static_cast<ani_float>(SET_VALUE)), ANI_INVALID_TYPE);
+    ASSERT_EQ(env_->Object_SetFieldByName_Float(animal, "name", SET_VALUE), ANI_INVALID_TYPE);
 }
 
 TEST_F(ObjectSetFieldByNameFloatTest, invalid_object)
 {
-    ASSERT_EQ(env_->Object_SetFieldByName_Float(nullptr, "x", static_cast<ani_float>(SET_VALUE)), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_SetFieldByName_Float(nullptr, "x", SET_VALUE), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectSetFieldByNameFloatTest, invalid_name)
 {
     ani_object animal = NewAnimal();
-    ASSERT_EQ(env_->Object_SetFieldByName_Float(animal, nullptr, static_cast<ani_float>(SET_VALUE)), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_SetFieldByName_Float(animal, nullptr, SET_VALUE), ANI_INVALID_ARGS);
 }
 
 }  // namespace ark::ets::ani::testing

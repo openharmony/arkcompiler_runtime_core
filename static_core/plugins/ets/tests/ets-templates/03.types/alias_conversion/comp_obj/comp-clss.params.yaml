@@ -248,10 +248,10 @@ cases:
       values:
           - { expr: +0.0 as float, val: +0.0 as double }
           - { expr: -0.0 as float, val: -0.0 as double }
-          - { expr: Float.MIN_VALUE, val: Float.MIN_VALUE as double}
-          - { expr: Float.MAX_VALUE, val: Float.MAX_VALUE as double }
-          - { expr: Float.NEGATIVE_INFINITY, val: Float.NEGATIVE_INFINITY as double }
-          - { expr: Float.POSITIVE_INFINITY, val: Float.POSITIVE_INFINITY as double }
+          - { expr: Float.MIN_VALUE, val: Float.MIN_VALUE.toDouble() }
+          - { expr: Float.MAX_VALUE, val: Float.MAX_VALUE.toDouble() }
+          - { expr: Float.NEGATIVE_INFINITY, val: Float.NEGATIVE_INFINITY.toDouble() }
+          - { expr: Float.POSITIVE_INFINITY, val: Float.POSITIVE_INFINITY.toDouble() }
 
     - from_type: double
       to_type: Double

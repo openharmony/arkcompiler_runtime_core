@@ -17,13 +17,13 @@ package escompat;
 
 export final class DataView implements ArrayBufferView {
     /** Underlying buffer */
-    private readonly buffer_: ArrayBufferLike
+    private readonly buffer_: ArrayBuffer
     /** Count of bytes in a view */
     private readonly byteLength_: int
     /** Offset from start of {@link buffer} */
     private readonly byteOffset_: int
 
-    public get buffer(): ArrayBufferLike {
+    public get buffer(): ArrayBuffer {
         return this.buffer_
     }
 
@@ -43,7 +43,7 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset offset to start from
      * @throws RangeError if offset is out of array
      */
-    public constructor(buffer: ArrayBufferLike, byteOffset: int) {
+    public constructor(buffer: ArrayBuffer, byteOffset: int) {
         this(buffer, byteOffset, (buffer as Buffer).getByteLength() - byteOffset)
     }
 
@@ -54,7 +54,7 @@ export final class DataView implements ArrayBufferView {
      * @param byteLength lenth of bytes to take
      * @throws RangeError if provided indicies are invalid
      */
-    public constructor(buffer: ArrayBufferLike, byteOffset: int, byteLength: int) {
+    public constructor(buffer: ArrayBuffer, byteOffset: int, byteLength: int) {
         this.buffer_ = buffer
         this.actualBuffer = buffer
         const bufLen = this.actualBuffer.getByteLength()
@@ -72,7 +72,7 @@ export final class DataView implements ArrayBufferView {
      * @param byteLength lenth of bytes to take
      * @throws RangeError if provided indicies are invalid
      */
-    public constructor(buffer: ArrayBufferLike, byteOffset?: Number, byteLength?: Number) {
+    public constructor(buffer: ArrayBuffer, byteOffset?: Number, byteLength?: Number) {
         this(buffer, asIntOrDefault(byteOffset, 0), asIntOrDefault(byteLength, (buffer as Buffer).getByteLength() - asIntOrDefault(byteOffset, 0)))
     }
     // === Int8 ===
@@ -117,14 +117,16 @@ export final class DataView implements ArrayBufferView {
         let res: int = 0;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 1; i++) {
-            let byteVal = this.actualBuffer.at(startByte + 0 - i) as int;
+            
+            let byteVal = (this.actualBuffer.at(startByte + 0 - i)).toInt();
             byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as int;
+            res = (res | byteVal << (8 * i)).toInt();
         }
-        return (res as byte) as int
+        
+        return res.toByte()
     }
     private getInt8Big(byteOffset: number): number {
-        let res = this.getInt8Big(byteOffset as int)
+        let res = this.getInt8Big(byteOffset.toInt())
         return res
     }
 
@@ -135,17 +137,17 @@ export final class DataView implements ArrayBufferView {
         let bits = value;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 1; i++) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
             this.actualBuffer.set(startByte + 0 - i,  byteVal)
         }
     }
     private setInt8Big(byteOffset: number, value: number): void {
-        let temp: long = value as long;
+        let temp: long = value.toLong();
         if (temp == Long.MAX_VALUE || temp == Long.MIN_VALUE) {
             temp = 0;
         }
-        const val: int = temp as int;
-        this.setInt8Big(byteOffset as int, val)
+        const val: int = temp.toInt();
+        this.setInt8Big(byteOffset.toInt(), val)
     }
     // === Uint8 ===
 
@@ -189,14 +191,15 @@ export final class DataView implements ArrayBufferView {
         let res: int = 0;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 1; i++) {
-            let byteVal = this.actualBuffer.at(startByte + 0 - i) as int;
+            
+            let byteVal = (this.actualBuffer.at(startByte + 0 - i)).toInt();
             byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as int;
+            res = (res | byteVal << (8 * i)).toInt();
         }
         return res
     }
     private getUint8Big(byteOffset: number): number {
-        let res = this.getUint8Big(byteOffset as int)
+        let res = this.getUint8Big(byteOffset.toInt())
         return res
     }
 
@@ -207,17 +210,17 @@ export final class DataView implements ArrayBufferView {
         let bits = value;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 1; i++) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
             this.actualBuffer.set(startByte + 0 - i,  byteVal)
         }
     }
     private setUint8Big(byteOffset: number, value: number): void {
-        let temp: long = value as long;
+        let temp: long = value.toLong();
         if (temp == Long.MAX_VALUE || temp == Long.MIN_VALUE) {
             temp = 0;
         }
-        const val: int = temp as int;
-        this.setUint8Big(byteOffset as int, val)
+        const val: int = temp.toInt();
+        this.setUint8Big(byteOffset.toInt(), val)
     }
     // === Int16 ===
 
@@ -297,14 +300,16 @@ export final class DataView implements ArrayBufferView {
         let res: int = 0;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 2; i++) {
-            let byteVal = this.actualBuffer.at(startByte + i) as int;
+            
+            let byteVal = (this.actualBuffer.at(startByte + i)).toInt();
             byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as int;
+            res = (res | byteVal << (8 * i)).toInt();
         }
-        return (res as short) as int
+        
+        return res.toShort()
     }
     private getInt16Little(byteOffset: number): number {
-        let res = this.getInt16Little(byteOffset as int)
+        let res = this.getInt16Little(byteOffset.toInt())
         return res
     }
 
@@ -315,17 +320,17 @@ export final class DataView implements ArrayBufferView {
         let bits = value;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 2; i++) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
             this.actualBuffer.set(startByte + i,  byteVal)
         }
     }
     private setInt16Little(byteOffset: number, value: number): void {
-        let temp: long = value as long;
+        let temp: long = value.toLong();
         if (temp == Long.MAX_VALUE || temp == Long.MIN_VALUE) {
             temp = 0;
         }
-        const val: int = temp as int;
-        this.setInt16Little(byteOffset as int, val)
+        const val: int = temp.toInt();
+        this.setInt16Little(byteOffset.toInt(), val)
     }
     private getInt16Big(byteOffset: int): number {
         if (byteOffset + 2 > this.byteLength_) {
@@ -334,14 +339,16 @@ export final class DataView implements ArrayBufferView {
         let res: int = 0;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 2; i++) {
-            let byteVal = this.actualBuffer.at(startByte + 1 - i) as int;
+            
+            let byteVal = (this.actualBuffer.at(startByte + 1 - i)).toInt();
             byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as int;
+            res = (res | byteVal << (8 * i)).toInt();
         }
-        return (res as short) as int
+        
+        return res.toShort()
     }
     private getInt16Big(byteOffset: number): number {
-        let res = this.getInt16Big(byteOffset as int)
+        let res = this.getInt16Big(byteOffset.toInt())
         return res
     }
 
@@ -352,17 +359,17 @@ export final class DataView implements ArrayBufferView {
         let bits = value;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 2; i++) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
             this.actualBuffer.set(startByte + 1 - i,  byteVal)
         }
     }
     private setInt16Big(byteOffset: number, value: number): void {
-        let temp: long = value as long;
+        let temp: long = value.toLong();
         if (temp == Long.MAX_VALUE || temp == Long.MIN_VALUE) {
             temp = 0;
         }
-        const val: int = temp as int;
-        this.setInt16Big(byteOffset as int, val)
+        const val: int = temp.toInt();
+        this.setInt16Big(byteOffset.toInt(), val)
     }
     // === Uint16 ===
 
@@ -442,14 +449,15 @@ export final class DataView implements ArrayBufferView {
         let res: int = 0;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 2; i++) {
-            let byteVal = this.actualBuffer.at(startByte + i) as int;
+            
+            let byteVal = (this.actualBuffer.at(startByte + i)).toInt();
             byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as int;
+            res = (res | byteVal << (8 * i)).toInt();
         }
         return res
     }
     private getUint16Little(byteOffset: number): number {
-        let res = this.getUint16Little(byteOffset as int)
+        let res = this.getUint16Little(byteOffset.toInt())
         return res
     }
 
@@ -460,17 +468,17 @@ export final class DataView implements ArrayBufferView {
         let bits = value;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 2; i++) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
             this.actualBuffer.set(startByte + i,  byteVal)
         }
     }
     private setUint16Little(byteOffset: number, value: number): void {
-        let temp: long = value as long;
+        let temp: long = value.toLong();
         if (temp == Long.MAX_VALUE || temp == Long.MIN_VALUE) {
             temp = 0;
         }
-        const val: int = temp as int;
-        this.setUint16Little(byteOffset as int, val)
+        const val: int = temp.toInt();
+        this.setUint16Little(byteOffset.toInt(), val)
     }
     private getUint16Big(byteOffset: int): number {
         if (byteOffset + 2 > this.byteLength_) {
@@ -479,14 +487,15 @@ export final class DataView implements ArrayBufferView {
         let res: int = 0;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 2; i++) {
-            let byteVal = this.actualBuffer.at(startByte + 1 - i) as int;
+            
+            let byteVal = (this.actualBuffer.at(startByte + 1 - i)).toInt();
             byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as int;
+            res = (res | byteVal << (8 * i)).toInt();
         }
         return res
     }
     private getUint16Big(byteOffset: number): number {
-        let res = this.getUint16Big(byteOffset as int)
+        let res = this.getUint16Big(byteOffset.toInt())
         return res
     }
 
@@ -497,17 +506,17 @@ export final class DataView implements ArrayBufferView {
         let bits = value;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 2; i++) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
             this.actualBuffer.set(startByte + 1 - i,  byteVal)
         }
     }
     private setUint16Big(byteOffset: number, value: number): void {
-        let temp: long = value as long;
+        let temp: long = value.toLong();
         if (temp == Long.MAX_VALUE || temp == Long.MIN_VALUE) {
             temp = 0;
         }
-        const val: int = temp as int;
-        this.setUint16Big(byteOffset as int, val)
+        const val: int = temp.toInt();
+        this.setUint16Big(byteOffset.toInt(), val)
     }
     // === Int32 ===
 
@@ -587,14 +596,16 @@ export final class DataView implements ArrayBufferView {
         let res: int = 0;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 4; i++) {
-            let byteVal = this.actualBuffer.at(startByte + i) as int;
+            
+            let byteVal = (this.actualBuffer.at(startByte + i)).toInt();
             byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as int;
+            res = (res | byteVal << (8 * i)).toInt();
         }
-        return (res as int) as int
+        
+        return res.toInt()
     }
     private getInt32Little(byteOffset: number): number {
-        let res = this.getInt32Little(byteOffset as int)
+        let res = this.getInt32Little(byteOffset.toInt())
         return res
     }
 
@@ -605,17 +616,17 @@ export final class DataView implements ArrayBufferView {
         let bits = value;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 4; i++) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
             this.actualBuffer.set(startByte + i,  byteVal)
         }
     }
     private setInt32Little(byteOffset: number, value: number): void {
-        let temp: long = value as long;
+        let temp: long = value.toLong();
         if (temp == Long.MAX_VALUE || temp == Long.MIN_VALUE) {
             temp = 0;
         }
-        const val: int = temp as int;
-        this.setInt32Little(byteOffset as int, val)
+        const val: int = temp.toInt();
+        this.setInt32Little(byteOffset.toInt(), val)
     }
     private getInt32Big(byteOffset: int): number {
         if (byteOffset + 4 > this.byteLength_) {
@@ -624,14 +635,16 @@ export final class DataView implements ArrayBufferView {
         let res: int = 0;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 4; i++) {
-            let byteVal = this.actualBuffer.at(startByte + 3 - i) as int;
+            
+            let byteVal = (this.actualBuffer.at(startByte + 3 - i)).toInt();
             byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as int;
+            res = (res | byteVal << (8 * i)).toInt();
         }
-        return (res as int) as int
+        
+        return res.toInt()
     }
     private getInt32Big(byteOffset: number): number {
-        let res = this.getInt32Big(byteOffset as int)
+        let res = this.getInt32Big(byteOffset.toInt())
         return res
     }
 
@@ -642,17 +655,17 @@ export final class DataView implements ArrayBufferView {
         let bits = value;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 4; i++) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
             this.actualBuffer.set(startByte + 3 - i,  byteVal)
         }
     }
     private setInt32Big(byteOffset: number, value: number): void {
-        let temp: long = value as long;
+        let temp: long = value.toLong();
         if (temp == Long.MAX_VALUE || temp == Long.MIN_VALUE) {
             temp = 0;
         }
-        const val: int = temp as int;
-        this.setInt32Big(byteOffset as int, val)
+        const val: int = temp.toInt();
+        this.setInt32Big(byteOffset.toInt(), val)
     }
     // === Uint32 ===
 
@@ -732,14 +745,15 @@ export final class DataView implements ArrayBufferView {
         let res: long = 0;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 4; i++) {
-            let byteVal = this.actualBuffer.at(startByte + i) as long;
+            
+            let byteVal = (this.actualBuffer.at(startByte + i)).toLong();
             byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as long;
+            res = (res | byteVal << (8 * i)).toLong();
         }
         return res
     }
     private getUint32Little(byteOffset: number): number {
-        let res = this.getUint32Little(byteOffset as int)
+        let res = this.getUint32Little(byteOffset.toInt())
         return res
     }
 
@@ -753,13 +767,14 @@ export final class DataView implements ArrayBufferView {
         }
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 4; i++) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
             this.actualBuffer.set(startByte + i,  byteVal)
         }
     }
     private setUint32Little(byteOffset: number, value: number): void {
-        const val: long = value as long;
-        this.setUint32Little(byteOffset as int, val)
+        
+        const val: long = value.toLong();
+        this.setUint32Little(byteOffset.toInt(), val)
     }
     private getUint32Big(byteOffset: int): number {
         if (byteOffset + 4 > this.byteLength_) {
@@ -768,14 +783,15 @@ export final class DataView implements ArrayBufferView {
         let res: long = 0;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 4; i++) {
-            let byteVal = this.actualBuffer.at(startByte + 3 - i) as long;
+            
+            let byteVal = (this.actualBuffer.at(startByte + 3 - i)).toLong();
             byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as long;
+            res = (res | byteVal << (8 * i)).toLong();
         }
         return res
     }
     private getUint32Big(byteOffset: number): number {
-        let res = this.getUint32Big(byteOffset as int)
+        let res = this.getUint32Big(byteOffset.toInt())
         return res
     }
 
@@ -789,13 +805,14 @@ export final class DataView implements ArrayBufferView {
         }
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 4; i++) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
             this.actualBuffer.set(startByte + 3 - i,  byteVal)
         }
     }
     private setUint32Big(byteOffset: number, value: number): void {
-        const val: long = value as long;
-        this.setUint32Big(byteOffset as int, val)
+        
+        const val: long = value.toLong();
+        this.setUint32Big(byteOffset.toInt(), val)
     }
     // === Float32 ===
 
@@ -875,14 +892,15 @@ export final class DataView implements ArrayBufferView {
         let res: int = 0;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 4; i++) {
-            let byteVal = this.actualBuffer.at(startByte + i) as int;
+            
+            let byteVal = (this.actualBuffer.at(startByte + i)).toInt();
             byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as int;
+            res = (res | byteVal << (8 * i)).toInt();
         }
         return Float.bitCastFromInt(res)
     }
     private getFloat32Little(byteOffset: number): number {
-        let res = this.getFloat32Little(byteOffset as int)
+        let res = this.getFloat32Little(byteOffset.toInt())
         return res
     }
 
@@ -893,13 +911,14 @@ export final class DataView implements ArrayBufferView {
         let bits = Float.bitCastToInt(value);
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 4; i++) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
             this.actualBuffer.set(startByte + i,  byteVal)
         }
     }
     private setFloat32Little(byteOffset: number, value: number): void {
-        const val: float = value as float;
-        this.setFloat32Little(byteOffset as int, val)
+        
+        const val: float = value.toFloat();
+        this.setFloat32Little(byteOffset.toInt(), val)
     }
     private getFloat32Big(byteOffset: int): number {
         if (byteOffset + 4 > this.byteLength_) {
@@ -908,14 +927,15 @@ export final class DataView implements ArrayBufferView {
         let res: int = 0;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 4; i++) {
-            let byteVal = this.actualBuffer.at(startByte + 3 - i) as int;
+            
+            let byteVal = (this.actualBuffer.at(startByte + 3 - i)).toInt();
             byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as int;
+            res = (res | byteVal << (8 * i)).toInt();
         }
         return Float.bitCastFromInt(res)
     }
     private getFloat32Big(byteOffset: number): number {
-        let res = this.getFloat32Big(byteOffset as int)
+        let res = this.getFloat32Big(byteOffset.toInt())
         return res
     }
 
@@ -926,13 +946,14 @@ export final class DataView implements ArrayBufferView {
         let bits = Float.bitCastToInt(value);
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 4; i++) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
             this.actualBuffer.set(startByte + 3 - i,  byteVal)
         }
     }
     private setFloat32Big(byteOffset: number, value: number): void {
-        const val: float = value as float;
-        this.setFloat32Big(byteOffset as int, val)
+        
+        const val: float = value.toFloat();
+        this.setFloat32Big(byteOffset.toInt(), val)
     }
     // === Int64 ===
 
@@ -1012,14 +1033,15 @@ export final class DataView implements ArrayBufferView {
         let res: long = 0;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 8; i++) {
-            let byteVal = this.actualBuffer.at(startByte + i) as long;
+            
+            let byteVal = (this.actualBuffer.at(startByte + i)).toLong();
             byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as long;
+            res = (res | byteVal << (8 * i)).toLong();
         }
         return new BigInt(res)
     }
     private getBigInt64Little(byteOffset: number): bigint {
-        let res = this.getBigInt64Little(byteOffset as int)
+        let res = this.getBigInt64Little(byteOffset.toInt())
         return res
     }
 
@@ -1030,13 +1052,13 @@ export final class DataView implements ArrayBufferView {
         let bits = value;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 8; i++) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
             this.actualBuffer.set(startByte + i,  byteVal)
         }
     }
     private setBigInt64Little(byteOffset: number, value: bigint): void {
         const val: long = value.getLong();
-        this.setBigInt64Little(byteOffset as int, val)
+        this.setBigInt64Little(byteOffset.toInt(), val)
     }
     private getBigInt64Big(byteOffset: int): bigint {
         if (byteOffset + 8 > this.byteLength_) {
@@ -1045,14 +1067,15 @@ export final class DataView implements ArrayBufferView {
         let res: long = 0;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 8; i++) {
-            let byteVal = this.actualBuffer.at(startByte + 7 - i) as long;
+            
+            let byteVal = (this.actualBuffer.at(startByte + 7 - i)).toLong();
             byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as long;
+            res = (res | byteVal << (8 * i)).toLong();
         }
         return new BigInt(res)
     }
     private getBigInt64Big(byteOffset: number): bigint {
-        let res = this.getBigInt64Big(byteOffset as int)
+        let res = this.getBigInt64Big(byteOffset.toInt())
         return res
     }
 
@@ -1063,13 +1086,13 @@ export final class DataView implements ArrayBufferView {
         let bits = value;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 8; i++) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
             this.actualBuffer.set(startByte + 7 - i,  byteVal)
         }
     }
     private setBigInt64Big(byteOffset: number, value: bigint): void {
         const val: long = value.getLong();
-        this.setBigInt64Big(byteOffset as int, val)
+        this.setBigInt64Big(byteOffset.toInt(), val)
     }
     // === Uint64 ===
 
@@ -1149,14 +1172,15 @@ export final class DataView implements ArrayBufferView {
         let res: long = 0;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 8; i++) {
-            let byteVal = this.actualBuffer.at(startByte + i) as long;
+            
+            let byteVal = (this.actualBuffer.at(startByte + i)).toLong();
             byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as long;
+            res = (res | byteVal << (8 * i)).toLong();
         }
         return DataView.bigintFromULong(res)
     }
     private getBigUint64Little(byteOffset: number): bigint {
-        let res = this.getBigUint64Little(byteOffset as int)
+        let res = this.getBigUint64Little(byteOffset.toInt())
         return res
     }
 
@@ -1167,13 +1191,13 @@ export final class DataView implements ArrayBufferView {
         let bits = value;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 8; i++) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
             this.actualBuffer.set(startByte + i,  byteVal)
         }
     }
     private setBigUint64Little(byteOffset: number, value: bigint): void {
         const val: long = value.getLong();
-        this.setBigUint64Little(byteOffset as int, val)
+        this.setBigUint64Little(byteOffset.toInt(), val)
     }
     private getBigUint64Big(byteOffset: int): bigint {
         if (byteOffset + 8 > this.byteLength_) {
@@ -1182,14 +1206,15 @@ export final class DataView implements ArrayBufferView {
         let res: long = 0;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 8; i++) {
-            let byteVal = this.actualBuffer.at(startByte + 7 - i) as long;
+            
+            let byteVal = (this.actualBuffer.at(startByte + 7 - i)).toLong();
             byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as long;
+            res = (res | byteVal << (8 * i)).toLong();
         }
         return DataView.bigintFromULong(res)
     }
     private getBigUint64Big(byteOffset: number): bigint {
-        let res = this.getBigUint64Big(byteOffset as int)
+        let res = this.getBigUint64Big(byteOffset.toInt())
         return res
     }
 
@@ -1200,13 +1225,13 @@ export final class DataView implements ArrayBufferView {
         let bits = value;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 8; i++) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
             this.actualBuffer.set(startByte + 7 - i,  byteVal)
         }
     }
     private setBigUint64Big(byteOffset: number, value: bigint): void {
         const val: long = value.getLong();
-        this.setBigUint64Big(byteOffset as int, val)
+        this.setBigUint64Big(byteOffset.toInt(), val)
     }
     // === Float64 ===
 
@@ -1286,14 +1311,15 @@ export final class DataView implements ArrayBufferView {
         let res: long = 0;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 8; i++) {
-            let byteVal = this.actualBuffer.at(startByte + i) as long;
+            
+            let byteVal = (this.actualBuffer.at(startByte + i)).toLong();
             byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as long;
+            res = (res | byteVal << (8 * i)).toLong();
         }
         return Double.bitCastFromLong(res)
     }
     private getFloat64Little(byteOffset: number): number {
-        let res = this.getFloat64Little(byteOffset as int)
+        let res = this.getFloat64Little(byteOffset.toInt())
         return res
     }
 
@@ -1304,13 +1330,14 @@ export final class DataView implements ArrayBufferView {
         let bits = Double.bitCastToLong(value);
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 8; i++) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
             this.actualBuffer.set(startByte + i,  byteVal)
         }
     }
     private setFloat64Little(byteOffset: number, value: number): void {
-        const val: number = value as number;
-        this.setFloat64Little(byteOffset as int, val)
+        
+        const val: number = value.toDouble();
+        this.setFloat64Little(byteOffset.toInt(), val)
     }
     private getFloat64Big(byteOffset: int): number {
         if (byteOffset + 8 > this.byteLength_) {
@@ -1319,14 +1346,15 @@ export final class DataView implements ArrayBufferView {
         let res: long = 0;
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 8; i++) {
-            let byteVal = this.actualBuffer.at(startByte + 7 - i) as long;
+            
+            let byteVal = (this.actualBuffer.at(startByte + 7 - i)).toLong();
             byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as long;
+            res = (res | byteVal << (8 * i)).toLong();
         }
         return Double.bitCastFromLong(res)
     }
     private getFloat64Big(byteOffset: number): number {
-        let res = this.getFloat64Big(byteOffset as int)
+        let res = this.getFloat64Big(byteOffset.toInt())
         return res
     }
 
@@ -1337,13 +1365,14 @@ export final class DataView implements ArrayBufferView {
         let bits = Double.bitCastToLong(value);
         const startByte = this.byteOffset_ + byteOffset
         for (let i = 0; i < 8; i++) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
             this.actualBuffer.set(startByte + 7 - i,  byteVal)
         }
     }
     private setFloat64Big(byteOffset: number, value: number): void {
-        const val: number = value as number;
-        this.setFloat64Big(byteOffset as int, val)
+        
+        const val: number = value.toDouble();
+        this.setFloat64Big(byteOffset.toInt(), val)
     }
 
     private static bigintFromULong(x: long): bigint {

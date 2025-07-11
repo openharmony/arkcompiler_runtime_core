@@ -13,24 +13,52 @@
  * limitations under the License.
  */
 
-package ets_functions;
-
-let callback_ets_function_js: JSValue;
+let callbackEtsFunctionJs: Any = 0;
 
 function testCallBackEtsFunctionLambda(): number {
-    return callback_ets_function_js((x: number) => x + 1);
+    return ESValue.wrap(callbackEtsFunctionJs).invoke((x: number) => x + 1).toNumber();
 }
 
 function testCallBackEtsFunctionLambdaCapture(): number {
     let bias = 1;
-    return callback_ets_function_js((x: number) => x + bias);
+    return ESValue.wrap(callbackEtsFunctionJs).invoke((x: number) => x + bias).toNumber();
 }
 
-function plus_one(x: number): number {
+function plusOne(x: number): number {
     return x + 1;
 }
 
 function testCallBackEtsFunctionOuter(): number {
-    return callback_ets_function_js(plus_one);
+    return ESValue.wrap(callbackEtsFunctionJs).invoke(plusOne).toNumber();
 }
 
+function sumFunc(...items: number[]) : number {
+    let sum: number = 0;
+    for (let i: int = 0; i < items.length; i++) {
+        sum += items[i];
+    }
+    return sum;
+}
+
+class Sum implements Function {
+    unsafeCall(...items: FixedArray<Any>): Any {
+        let sum: number = 0;
+        for (let i: int = 0; i < items.length; i++) {
+            sum += (items[i] as number);
+        }
+        return sum;
+    }
+    get name(): string {
+        return 'Sum';
+    }
+}
+
+let sum: Sum = new Sum();
+
+let sumFunction: Function = (...items: number[]) => {
+    let sum: number = 0;
+    for (let i: int = 0; i < items.length; i++) {
+        sum += items[i];
+    }
+    return sum;
+};

@@ -22,9 +22,13 @@ cases:
       exp: array[4]
 
     - decl: |-
-        const a:int = 4
-        const b:int = 0
-      exp: (a / b)
+        let a: int = 4
+        let b: int = 0
+
+        function foo(): string|int {
+            return a > b ? a/b : ""
+        }
+      exp: foo()
 
     - decl: |-
         function foo(flag: boolean) {

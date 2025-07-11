@@ -23,5 +23,5 @@ import {identity} from './named_reference_export9.ets';
 
 function main(): void {
   const result = identity<string>("hello");
-  assertEQ(result, "hello");
+  arktest.assertEQ(result, "hello");
 }

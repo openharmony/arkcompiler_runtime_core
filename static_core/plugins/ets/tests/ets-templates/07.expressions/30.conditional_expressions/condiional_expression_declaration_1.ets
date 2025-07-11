@@ -19,5 +19,5 @@ desc: First expression is of the type Boolean.
 
 function main(): void {
   let a = new Boolean(true) ? 0 : 1;
-  assertTrue( a == 0 )
+  arktest.assertTrue( a == 0 )
 }
