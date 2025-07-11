@@ -83,13 +83,13 @@ host_unittest_action("AssemblerTest") {
     "$ark_root/libziparchive:libarkziparchive",
   ]
 
+  external_deps = [ sdk_libc_secshared_dep ]
   if (ark_standalone_build) {
     deps += [ "$build_root/third_party_gn/googletest:gtest_main" ]
   } else {
-    deps += [ "//third_party/googletest:gtest_main" ]
+    external_deps += [ "googletest:gtest_main" ]
   }
 
-  external_deps = [ sdk_libc_secshared_dep ]
   test_abc_dir = rebase_path(target_out_dir)
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
   foreach(file, assembler_test_js_files) {
