@@ -77,6 +77,7 @@ public:
 
     bool IsNull(ani_ref ref)
     {
+        ASSERT(!IsUndefined(ref));
         return ToInternalType(ref)->GetCoreType() == GetCoroutine()->GetNullValue();
     }
 

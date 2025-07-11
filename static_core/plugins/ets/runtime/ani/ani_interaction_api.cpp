@@ -68,6 +68,7 @@ static inline bool IsUndefined(ani_ref ref)
 
 static inline ani_field ToAniField(EtsField *field)
 {
+    ASSERT(field != nullptr);
     ASSERT(!field->IsStatic());
     return reinterpret_cast<ani_field>(field);
 }
@@ -75,12 +76,14 @@ static inline ani_field ToAniField(EtsField *field)
 static inline EtsField *ToInternalField(ani_field field)
 {
     auto *f = reinterpret_cast<EtsField *>(field);
+    ASSERT(f != nullptr);
     ASSERT(!f->IsStatic());
     return f;
 }
 
 static inline ani_static_field ToAniStaticField(EtsField *field)
 {
+    ASSERT(field != nullptr);
     ASSERT(field->IsStatic());
     return reinterpret_cast<ani_static_field>(field);
 }
@@ -105,6 +108,7 @@ static inline EtsVariable *ToInternalVariable(ani_variable variable)
 static inline EtsMethod *ToInternalMethod(ani_method method)
 {
     auto *m = reinterpret_cast<EtsMethod *>(method);
+    ASSERT(m != nullptr);
     ASSERT(!m->IsStatic());
     ASSERT(!m->IsFunction());
     return m;
@@ -112,6 +116,7 @@ static inline EtsMethod *ToInternalMethod(ani_method method)
 
 static inline ani_method ToAniMethod(EtsMethod *method)
 {
+    ASSERT(method != nullptr);
     ASSERT(!method->IsStatic());
     ASSERT(!method->IsFunction());
     return reinterpret_cast<ani_method>(method);
@@ -120,6 +125,7 @@ static inline ani_method ToAniMethod(EtsMethod *method)
 static inline EtsMethod *ToInternalMethod(ani_static_method method)
 {
     auto *m = reinterpret_cast<EtsMethod *>(method);
+    ASSERT(m != nullptr);
     ASSERT(m->IsStatic());
     ASSERT(!m->IsFunction());
     return m;
@@ -127,6 +133,7 @@ static inline EtsMethod *ToInternalMethod(ani_static_method method)
 
 static inline ani_static_method ToAniStaticMethod(EtsMethod *method)
 {
+    ASSERT(method != nullptr);
     ASSERT(method->IsStatic());
     ASSERT(!method->IsFunction());
     return reinterpret_cast<ani_static_method>(method);
@@ -135,6 +142,7 @@ static inline ani_static_method ToAniStaticMethod(EtsMethod *method)
 static inline EtsMethod *ToInternalFunction(ani_function fn)
 {
     auto *m = reinterpret_cast<EtsMethod *>(fn);
+    ASSERT(m != nullptr);
     ASSERT(m->IsStatic());
     ASSERT(m->IsFunction());
     return m;
@@ -142,6 +150,7 @@ static inline EtsMethod *ToInternalFunction(ani_function fn)
 
 static inline ani_function ToAniFunction(EtsMethod *method)
 {
+    ASSERT(method != nullptr);
     ASSERT(method->IsStatic());
     ASSERT(method->IsFunction());
     return reinterpret_cast<ani_function>(method);
@@ -187,6 +196,7 @@ static ClassLinkerContext *GetClassLinkerContext(EtsCoroutine *coroutine)
 
 static ani_status DoGetInternalClass(ScopedManagedCodeFix &s, EtsClass *klass, EtsClass **result)
 {
+    ASSERT(klass != nullptr);
     if (klass->IsInitialized()) {
         *result = klass;
         return ANI_OK;
@@ -241,12 +251,13 @@ static Value ConstructValueFromFloatingPoint(double val)
     return Value(bit_cast<int64_t>(val));
 }
 
-static ArgVector<Value> GetArgValues(ScopedManagedCodeFix *s, EtsMethod *method, va_list args, ani_object object)
+static ArgVector<Value> GetArgValues(ScopedManagedCodeFix &s, EtsMethod *method, va_list args, ani_object object)
 {
+    ASSERT(method != nullptr);
     ArgVector<Value> parsedArgs;
     parsedArgs.reserve(method->GetNumArgs());
     if (object != nullptr) {
-        parsedArgs.emplace_back(s->ToInternalType(object)->GetCoreType());
+        parsedArgs.emplace_back(s.ToInternalType(object)->GetCoreType());
     }
 
     panda_file::ShortyIterator it(method->GetPandaMethod()->GetShorty());
@@ -275,7 +286,7 @@ static ArgVector<Value> GetArgValues(ScopedManagedCodeFix *s, EtsMethod *method,
                 parsedArgs.push_back(ConstructValueFromFloatingPoint(va_arg(args, double)));
                 break;
             case TypeId::REFERENCE: {
-                auto *param = s->ToInternalType(va_arg(args, ani_ref));
+                auto *param = s.ToInternalType(va_arg(args, ani_ref));
                 parsedArgs.emplace_back(param != nullptr ? param->GetCoreType() : nullptr);
                 break;
             }
@@ -289,13 +300,15 @@ static ArgVector<Value> GetArgValues(ScopedManagedCodeFix *s, EtsMethod *method,
 }
 
 // CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
-static ArgVector<Value> GetArgValues(ScopedManagedCodeFix *s, EtsMethod *method, const ani_value *args,
+static ArgVector<Value> GetArgValues(ScopedManagedCodeFix &s, EtsMethod *method, const ani_value *args,
                                      ani_object object)
 {
+    ASSERT(method != nullptr);
+    ASSERT(args != nullptr);
     ArgVector<Value> parsedArgs;
     parsedArgs.reserve(method->GetNumArgs());
     if (object != nullptr) {
-        parsedArgs.emplace_back(s->ToInternalType(object)->GetCoreType());
+        parsedArgs.emplace_back(s.ToInternalType(object)->GetCoreType());
     }
 
     panda_file::ShortyIterator it(method->GetPandaMethod()->GetShorty());
@@ -330,7 +343,7 @@ static ArgVector<Value> GetArgValues(ScopedManagedCodeFix *s, EtsMethod *method,
                 parsedArgs.push_back(ConstructValueFromFloatingPoint(arg->d));
                 break;
             case TypeId::REFERENCE: {
-                auto *param = s->ToInternalType(arg->r);
+                auto *param = s.ToInternalType(arg->r);
                 parsedArgs.emplace_back(param != nullptr ? param->GetCoreType() : nullptr);
                 break;
             }
@@ -342,14 +355,14 @@ static ArgVector<Value> GetArgValues(ScopedManagedCodeFix *s, EtsMethod *method,
     return parsedArgs;
 }
 
-static inline EtsMethod *ResolveVirtualMethod(ScopedManagedCodeFix *s, ani_object object, ani_method method)
+static inline EtsMethod *ResolveVirtualMethod(ScopedManagedCodeFix &s, ani_object object, ani_method method)
 {
     EtsMethod *m = ToInternalMethod(method);
     if (UNLIKELY(m->IsStatic())) {
         LOG(FATAL, ANI) << "Called ResolveVirtualMethod of static method, invalid ANI usage";
         return m;
     }
-    EtsObject *obj = s->ToInternalType(object);
+    EtsObject *obj = s.ToInternalType(object);
     return obj->GetClass()->ResolveVirtualMethod(m);
 }
 
@@ -357,12 +370,13 @@ template <typename EtsValueType, typename AniType, typename MethodType, typename
 static ani_status DoGeneralMethodCall(ScopedManagedCodeFix &s, ani_object obj, MethodType method, AniType *result,
                                       Args args)
 {
+    ASSERT(result != nullptr);
     // Trigger coroutine manager native call events
     ScopedCoroutineNativeCall c(s.GetCoroutine());
 
     EtsMethod *m = nullptr;
     if constexpr (std::is_same_v<MethodType, ani_method>) {
-        m = ResolveVirtualMethod(&s, obj, method);
+        m = ResolveVirtualMethod(s, obj, method);
     } else if constexpr (std::is_same_v<MethodType, ani_static_method>) {
         m = ToInternalMethod(method);
     } else if constexpr (std::is_same_v<MethodType, ani_function>) {
@@ -375,7 +389,7 @@ static ani_status DoGeneralMethodCall(ScopedManagedCodeFix &s, ani_object obj, M
     ASSERT(m != nullptr);
 
     EtsValue res {};
-    ArgVector<Value> values = GetArgValues(&s, m, args, obj);
+    ArgVector<Value> values = GetArgValues(s, m, args, obj);
     ani_status status = m->Invoke(s, values.data(), &res);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     // Now AniType and EtsValueType are the same, but later it could be changed
@@ -500,6 +514,9 @@ static ani_status ClassSetStaticFieldByName(ani_env *env, ani_class cls, const c
 template <bool IS_MODULE, typename T>
 static ani_status DoFind(PandaEnv *pandaEnv, const char *descriptor, ScopedManagedCodeFix &s, T *result)
 {
+    ASSERT(pandaEnv != nullptr);
+    ASSERT(descriptor != nullptr);
+    ASSERT(result != nullptr);
     EtsClassLinker *classLinker = pandaEnv->GetEtsVM()->GetClassLinker();
     EtsClass *klass = classLinker->GetClass(descriptor, true, GetClassLinkerContext(s.GetCoroutine()));
     if (UNLIKELY(pandaEnv->HasPendingException())) {
@@ -531,6 +548,8 @@ static ani_status DoFind(ani_env *env, const char *descriptor, T *result)
 template <bool IS_STATIC>
 static bool CheckUniqueMethod(EtsClass *klass, const char *name)
 {
+    ASSERT(klass != nullptr);
+    ASSERT(name != nullptr);
     size_t nameCounter = 0;
     for (auto &method : klass->GetMethods()) {
         if (method->IsStatic() == IS_STATIC && ::strcmp(method->GetName(), name) == 0) {
@@ -572,6 +591,7 @@ static std::optional<std::string> ReplaceArrayInSignature(const char *signature)
 {
     static constexpr std::string_view ESCOMPAT_ARRAY = "Lescompat/Array;";
 
+    ASSERT(signature != nullptr);
     std::string_view signatureView(signature);
     auto pos = signatureView.find('[');
     if (pos == std::string_view::npos) {
@@ -621,6 +641,8 @@ template <bool IS_STATIC_METHOD>
 static ani_status DoGetClassMethod(EtsClass *klass, const char *name, const char *signature, EtsMethod **result)
 {
     ASSERT_MANAGED_CODE();
+    ASSERT(klass != nullptr);
+    ASSERT(result != nullptr);
     if (signature == nullptr && !CheckUniqueMethod<IS_STATIC_METHOD>(klass, name)) {
         return ANI_AMBIGUOUS;
     }
@@ -1103,7 +1125,6 @@ template <typename InternalType, typename AniFixedArrayType>
 static ani_status NewPrimitiveTypeArray(ani_env *env, ani_size length, AniFixedArrayType *result)
 {
     ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
-    // EtsArray
     auto *array = InternalType::Create(length);
     ANI_CHECK_RETURN_IF_EQ(array, nullptr, ANI_OUT_OF_MEMORY);
     return s.AddLocalRef(reinterpret_cast<EtsObject *>(array), reinterpret_cast<ani_ref *>(result));
@@ -1759,7 +1780,8 @@ NO_UB_SANITIZE static ani_status FunctionalObject_Call(ani_env *env, ani_fn_obje
     args.emplace_back(s.ToInternalType(fn)->GetCoreType());
     for (ani_size i = 0; i < argc; ++i) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        args.emplace_back(s.ToInternalType(argv[i])->GetCoreType());
+        auto *internalType = s.ToInternalType(argv[i]);
+        args.emplace_back(internalType != nullptr ? internalType->GetCoreType() : nullptr);
     }
 
     EtsValue res {};
@@ -1837,6 +1859,8 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Ref(ani_env *env, ani_variabl
 template <bool IS_STATIC_FIELD>
 static ani_status DoGetField(ScopedManagedCodeFix &s, ani_class cls, const char *name, EtsField **result)
 {
+    ASSERT(name != nullptr);
+    ASSERT(result != nullptr);
     EtsClass *klass;
     ani_status status = GetInternalClass(s, cls, &klass);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
@@ -3078,6 +3102,9 @@ static ani_status DoGetPropertyByName(ani_env *env, ani_object object, const cha
     static constexpr auto IS_REF = std::is_same_v<R, ani_ref>;
     using Res = std::conditional_t<IS_REF, EtsObject *, R>;
 
+    ASSERT(name != nullptr);
+    ASSERT(result != nullptr);
+
     ScopedManagedCodeFix s(env);
     EtsCoroutine *coroutine = s.GetCoroutine();
     EtsHandleScope scope(coroutine);
@@ -3241,6 +3268,8 @@ template <typename R>
 static ani_status DoSetPropertyByName(ani_env *env, ani_object object, const char *name, R value)
 {
     static constexpr auto IS_REF = std::is_same_v<R, ani_ref>;
+
+    ASSERT(name != nullptr);
 
     ScopedManagedCodeFix s(env);
     EtsCoroutine *coroutine = s.GetCoroutine();
@@ -6130,6 +6159,7 @@ NO_UB_SANITIZE static ani_status EnumItem_GetEnum(ani_env *env, ani_enum_item en
 template <typename T>
 static T *GetArrayFromInternalEnum(EtsHandle<EtsClass> enumClass, const char *name)
 {
+    ASSERT(enumClass.GetPtr() != nullptr);
     EtsField *field = enumClass->GetStaticFieldIDByName(name, nullptr);
     if (field == nullptr) {
         return nullptr;
