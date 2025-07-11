@@ -1828,7 +1828,13 @@ public:
 
         ScopedChangeThreadStatus st {ManagedThread::GetCurrent(), ThreadStatus::RUNNING};
         Job::ErrorHandler handler;
-        auto typeCls = field->ResolveTypeClass(&handler);
+        Class *typeCls {nullptr};
+        if (field->GetType().IsReference()) {
+            auto classId = panda_file::FieldDataAccessor::GetTypeId(*field->GetPandaFile(), field->GetFileId());
+            typeCls = job_->GetClass(classId, field->GetClass()->GetLoadContext(), field->GetPandaFile(), &handler);
+        } else {
+            typeCls = field->ResolveTypeClass(&handler);
+        }
         if (typeCls == nullptr) {
             return Type {};
         }

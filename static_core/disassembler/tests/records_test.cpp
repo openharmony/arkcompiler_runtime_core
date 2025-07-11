@@ -156,6 +156,93 @@ TEST(RecordTest, RecordWithRecord)
     EXPECT_EQ("\ti64 aw", line);
 }
 
+TEST(RecordTest, TestUnionCanonicalization)
+{
+    auto program = ark::pandasm::Parser().Parse(
+        ".record std.core.Object <external>\n"
+        ".record A <extends=std.core.Object, access.record=public> {}\n"
+        ".record B <extends=std.core.Object, access.record=public> {}\n"
+        ".record C <extends=std.core.Object, access.record=public> {}\n"
+        ".record D <extends=std.core.Object, access.record=public> {}\n"
+
+        ".record {UC,C,B,C,B} <external>\n"
+        ".record {UD,C,B,A} <external>\n"
+        ".record {UA,A,A,B} <external>\n"
+        ".record {UA,std.core.Double} <external>\n"
+        ".record {Ustd.core.Double,std.core.Double,std.core.Long} <external>\n"
+        ".record {Ustd.core.Double,std.core.Int,std.core.Long} <external>\n"
+        ".record {UA,B,C,B,A} <external>\n"
+        ".record {UA,D,D,D} <external>");
+
+    ASSERT(program);
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
+    ASSERT(pf);
+
+    ark::disasm::Disassembler d {};
+    std::stringstream ss {};
+
+    d.Disassemble(pf);
+    d.Serialize(ss);
+
+    EXPECT_TRUE(ss.str().find(".record {UB,C} <external>") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".record {UA,B,C,D} <external>") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".record {UA,B} <external>") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".record {UA,std.core.Double} <external>") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".record {Ustd.core.Double,std.core.Long} <external>") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".record {Ustd.core.Double,std.core.Int,std.core.Long} <external>") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".record {UA,B,C} <external>") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".record {UA,D} <external>") != std::string::npos);
+}
+
+TEST(RecordTest, TestUnionCanonicalizationArrays)
+{
+    auto program = ark::pandasm::Parser().Parse(
+        ".record std.core.Object <external>\n"
+        ".record A <extends=std.core.Object, access.record=public> {}\n"
+        ".record B <extends=std.core.Object, access.record=public> {}\n"
+        ".record C <extends=std.core.Object, access.record=public> {}\n"
+        ".record D <extends=std.core.Object, access.record=public> {}\n"
+
+        ".record {UB,C,{UA,D,std.core.Double}[],A} <external>\n"
+        ".record {U{UD,A,std.core.Int}[],{UA,D,std.core.Double}[],{Ustd.core.Long,D,A}[]} <external>\n"
+        ".record {UB,C,{UA,B}[],A} <external>\n"
+        ".record {UB,{UA,D}[],{UD,B}[],{UC,B}[],{UC,D}[]} <external>\n"
+        ".record {U{UA,D}[],{UD,B}[],{UD,B}[],{UC,D}[]} <external>\n"
+        ".record {U{UA,D}[],{UD,B}[][],{UD,B}[],{UC,D}[]} <external>\n"
+        ".record {U{UA,D}[][],{UD,B}[]} <external>\n"
+        ".record {U{UD,C}[],{UC,B}[]} <external>\n"
+        ".record {U{UD,C}[],C,B} <external>\n"
+        ".record {U{Ustd.core.Int,std.core.Double}[],std.core.Long,std.core.Double} <external>\n"
+        ".record {U{Ustd.core.Int[],std.core.Double[]}[],std.core.Long[],std.core.Double[]} <external>");
+    ASSERT(program);
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
+    ASSERT(pf);
+
+    ark::disasm::Disassembler d {};
+    std::stringstream ss {};
+
+    d.Disassemble(pf);
+    d.Serialize(ss);
+
+    EXPECT_TRUE(ss.str().find(".record {UA,B,C,{UA,B}[]} <external>") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".record {UA,B,C,{UA,D,std.core.Double}[]} <external>") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".record {UB,C,{UC,D}[]} <external>") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".record {UB,{UA,D}[],{UB,C}[],{UB,D}[],{UC,D}[]} <external>") != std::string::npos);
+    EXPECT_TRUE(
+        ss.str().find(".record {Ustd.core.Double,std.core.Long,{Ustd.core.Double,std.core.Int}[]} <external>") !=
+        std::string::npos);
+    EXPECT_TRUE(ss.str().find(
+                    ".record {Ustd.core.Double[],std.core.Long[],{Ustd.core.Double[],std.core.Int[]}[]} <external>") !=
+                std::string::npos);
+    EXPECT_TRUE(
+        ss.str().find(".record {U{UA,D,std.core.Double}[],{UA,D,std.core.Int}[],{UA,D,std.core.Long}[]} <external>") !=
+        std::string::npos);
+    EXPECT_TRUE(ss.str().find(".record {U{UA,D}[],{UB,D}[],{UC,D}[]} <external>") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".record {U{UA,D}[],{UB,D}[],{UB,D}[][],{UC,D}[]} <external>") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".record {U{UA,D}[][],{UB,D}[]} <external>") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".record {U{UB,C}[],{UC,D}[]} <external>") != std::string::npos);
+}
+
 #undef DISASM_BIN_DIR
 
 }  // namespace ark::disasm::test

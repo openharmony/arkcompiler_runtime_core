@@ -32,7 +32,7 @@ function testUnionType(): void {
   try {
     testChildUnion(new TestClass());
   } catch (err) {
-    ASSERT_EQ(err.toString(), 'TypeError: Value is not assignable to Lunion/test/UnionClass;');
+    ASSERT_EQ(err.toString(), 'TypeError: Lstd/interop/js/JSValue; is not assignable to {ULunion/test/Child1;Lunion/test/Child2;}');
   }
 }
 

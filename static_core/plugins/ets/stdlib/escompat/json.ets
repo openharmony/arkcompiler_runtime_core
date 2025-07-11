@@ -598,6 +598,9 @@ export class JSON {
         } else if (typ instanceof ArrayType) {
             let et = (typ as ArrayType).getElementType()
             ok = JSON.checkType(et, used)
+        } else if (typ instanceof UnionType) {
+            // NOTE(lyupaanastasia) parse union #27136
+            throw new Error("UnionType is not supported yet")
         } else if (typ instanceof StringType
                     || typ instanceof DoubleType
                     || typ instanceof BooleanType
@@ -1713,6 +1716,9 @@ class JSONValueParser {
     parse(value: JSONValue, typ: Type): NullishType {
         if (value instanceof JSONObject && typ instanceof ClassType) {
             return this.parseObject(value as JSONObject, typ as ClassType)
+        } else if (value instanceof JSONObject && typ instanceof UnionType) {
+            // NOTE(lyupaanastasia) parse union #27136
+            throw new Error("UnionType is not supported yet")
         } else if (value instanceof JSONArray && typ instanceof ArrayType) {
             return this.parseArray(value as JSONArray, typ as ArrayType)
         } else if (value instanceof JSONNumber && (typ instanceof DoubleType || typ.equals(BigIntType) || typ instanceof IntType || typ instanceof LongType || typ instanceof ByteType || typ instanceof ShortType || typ instanceof FloatType)) {

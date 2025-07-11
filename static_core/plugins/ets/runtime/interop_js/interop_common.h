@@ -64,6 +64,8 @@ std::vector<EtsInt> ConvertBigIntArrayFromJsToEts(SmallVector<uint64_t, 4U> &jsA
 
 PANDA_PUBLIC_API void ThrowNoInteropContextException();
 
+void ThrowJSErrorNotAssignable(napi_env env, const EtsClass *fromKlass, EtsClass *toKlass);
+
 bool NapiGetProperty(napi_env env, napi_value object, napi_value key, napi_value *result);
 bool NapiGetNamedProperty(napi_env env, napi_value object, const char *utf8name, napi_value *result);
 

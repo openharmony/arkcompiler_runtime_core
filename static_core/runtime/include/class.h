@@ -354,9 +354,25 @@ public:
         componentType_ = type;
     }
 
+    Span<Class *> GetConstituentTypes() const
+    {
+        return {constituentTypes_, numConsTypes_};
+    }
+
+    void SetConstituentTypes(Span<Class *> types)
+    {
+        constituentTypes_ = types.data();
+        numConsTypes_ = types.size();
+    }
+
     bool IsArrayClass() const
     {
         return componentType_ != nullptr;
+    }
+
+    bool IsUnionClass() const
+    {
+        return constituentTypes_ != nullptr;
     }
 
     bool IsObjectArrayClass() const
@@ -433,7 +449,7 @@ public:
 
     bool IsObjectClass() const
     {
-        return !IsPrimitive() && GetBase() == nullptr;
+        return !IsPrimitive() && GetBase() == nullptr && !IsUnionClass();
     }
 
     /**
@@ -938,12 +954,16 @@ private:
     uint32_t numFields_ {0};
     uint32_t numSfields_ {0};
     uint32_t numIfaces_ {0};
+    uint32_t numConsTypes_ {0};
     uint32_t initTid_ {0};
 
     ITable itable_;
 
     // For array types this field contains array's element size, for non-array type it should be zero.
     Class *componentType_ {nullptr};
+
+    // For union types his field contains union's constituent types, for other types it should be nullptr.
+    Class **constituentTypes_ {nullptr};
 
     ClassLinkerContext *loadContext_ {nullptr};
 

@@ -13,14 +13,25 @@
  * limitations under the License.
  */
 
-package std.core;
+/*---
+desc: Subclasses not override superclass methods with union type arguments.
+tags: [compile-only, negative]
+---*/
 
-final class __NullValue {
-    private constructor() { };
-
-    public override toString(): String { return "null"; }
-
-    public equals(to: NullishType): boolean {
-        throw new Error("Internal error: null.equals was called!")
+class Base1 {}
+class Base2 {}
+class Child extends Base2 {}
+class TestBase {
+    foo(a: Base1 | Base2) {
+        return 1;
     }
+}
+class Test extends TestBase {
+    override foo(a: Base1 | Child) {
+        return 3;
+    }
+}
+
+function main(): void {
+    let test = new Test();
 }

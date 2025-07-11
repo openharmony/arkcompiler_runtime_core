@@ -23,7 +23,8 @@ function main(): int {
 
     suite.addTest("Testing LightWeightMap remove data by key", testRemoveExistingKey)
     suite.addTest("Testing LightWeightMap remove data by not existed key", testRemoveNonExistingKey)
-    suite.addTest("Testing LightWeightMap remove data by large string key", testRemoveLargeStringKey)
+    // NOTE(#27627): enable after fix CheckSaveStateInputs
+    // suite.addTest("Testing LightWeightMap remove data by large string key", testRemoveLargeStringKey)
     suite.addTest("Testing LightWeightMap remove data by large number key", testRemoveLargeNumberKey)
     suite.addTest("Testing LightWeightMap get key by index", testGetKeyAtValidIndex)
     suite.addTest("Testing LightWeightMap get key by outside length index", testGetKeyAtInvalidIndex)

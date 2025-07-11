@@ -86,6 +86,7 @@ class Int8ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
 export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: int = 1
     public readonly BYTES_PER_ELEMENT: int = Int8Array.BYTES_PER_ELEMENT
+    public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
     internal readonly lengthInt: int
 
     /**
@@ -1244,7 +1245,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int8Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: number, end?: number): Int8Array {
+    public subarrayNN(begin?: number, end?: number): Int8Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
@@ -1257,7 +1258,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int8Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: int, end?: number): Int8Array {
+    public subarrayIN(begin?: int, end?: number): Int8Array {
         return this.subarray(begin ?? 0, asIntOrDefault(end, this.lengthInt))
     }
 
@@ -1270,7 +1271,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int8Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: number, end?: int): Int8Array {
+    public subarrayNI(begin?: number, end?: int): Int8Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), end ?? this.lengthInt)
     }
 
@@ -1283,7 +1284,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int8Array with the same underlying ArrayBuffer
      */
-    public subarray(begin: int | undefined = 0, end: int | undefined = this.lengthInt): Int8Array {
+    public subarrayII(begin: int | undefined = 0, end: int | undefined = this.lengthInt): Int8Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin ?? 0, len)
         const relEnd = normalizeIndex(end ?? this.lengthInt, len)
@@ -1837,6 +1838,7 @@ class Int16ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
 export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: int = 2
     public readonly BYTES_PER_ELEMENT: int = Int16Array.BYTES_PER_ELEMENT
+    public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
     internal readonly lengthInt: int
 
     /**
@@ -3002,7 +3004,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int16Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: number, end?: number): Int16Array {
+    public subarrayNN(begin?: number, end?: number): Int16Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
@@ -3015,7 +3017,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int16Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: int, end?: number): Int16Array {
+    public subarrayIN(begin?: int, end?: number): Int16Array {
         return this.subarray(begin ?? 0, asIntOrDefault(end, this.lengthInt))
     }
 
@@ -3028,7 +3030,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int16Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: number, end?: int): Int16Array {
+    public subarrayNI(begin?: number, end?: int): Int16Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), end ?? this.lengthInt)
     }
 
@@ -3041,7 +3043,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int16Array with the same underlying ArrayBuffer
      */
-    public subarray(begin: int | undefined = 0, end: int | undefined = this.lengthInt): Int16Array {
+    public subarrayII(begin: int | undefined = 0, end: int | undefined = this.lengthInt): Int16Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin ?? 0, len)
         const relEnd = normalizeIndex(end ?? this.lengthInt, len)
@@ -3608,6 +3610,7 @@ class Int32ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
 export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: int = 4
     public readonly BYTES_PER_ELEMENT: int = Int32Array.BYTES_PER_ELEMENT
+    public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
     internal readonly lengthInt: int
 
     /**
@@ -4738,7 +4741,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int32Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: number, end?: number): Int32Array {
+    public subarrayNN(begin?: number, end?: number): Int32Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
@@ -4751,7 +4754,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int32Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: int, end?: number): Int32Array {
+    public subarrayIN(begin?: int, end?: number): Int32Array {
         return this.subarray(begin ?? 0, asIntOrDefault(end, this.lengthInt))
     }
 
@@ -4764,7 +4767,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int32Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: number, end?: int): Int32Array {
+    public subarrayNI(begin?: number, end?: int): Int32Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), end ?? this.lengthInt)
     }
 
@@ -4777,7 +4780,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int32Array with the same underlying ArrayBuffer
      */
-    public subarray(begin: int | undefined = 0, end: int | undefined = this.lengthInt): Int32Array {
+    public subarrayII(begin: int | undefined = 0, end: int | undefined = this.lengthInt): Int32Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin ?? 0, len)
         const relEnd = normalizeIndex(end ?? this.lengthInt, len)
@@ -5344,6 +5347,7 @@ class BigInt64ArrayIteratorEntries implements IterableIterator<[Number, BigInt]>
 export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
     public static readonly BYTES_PER_ELEMENT: int = 8
     public readonly BYTES_PER_ELEMENT: int = BigInt64Array.BYTES_PER_ELEMENT
+    public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
     internal readonly lengthInt: int
 
     /**
@@ -6484,7 +6488,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns new BigInt64Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: number, end?: number): BigInt64Array {
+    public subarrayNN(begin?: number, end?: number): BigInt64Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
@@ -6497,7 +6501,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns new BigInt64Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: int, end?: number): BigInt64Array {
+    public subarrayIN(begin?: int, end?: number): BigInt64Array {
         return this.subarray(begin ?? 0, asIntOrDefault(end, this.lengthInt))
     }
 
@@ -6510,7 +6514,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns new BigInt64Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: number, end?: int): BigInt64Array {
+    public subarrayNI(begin?: number, end?: int): BigInt64Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), end ?? this.lengthInt)
     }
 
@@ -6523,7 +6527,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns new BigInt64Array with the same underlying ArrayBuffer
      */
-    public subarray(begin: int | undefined = 0, end: int | undefined = this.lengthInt): BigInt64Array {
+    public subarrayII(begin: int | undefined = 0, end: int | undefined = this.lengthInt): BigInt64Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin ?? 0, len)
         const relEnd = normalizeIndex(end ?? this.lengthInt, len)
@@ -7094,6 +7098,7 @@ class Float32ArrayIteratorEntries implements IterableIterator<[Number, Number]> 
 export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: int = 4
     public readonly BYTES_PER_ELEMENT: int = Float32Array.BYTES_PER_ELEMENT
+    public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
     internal readonly lengthInt: int
 
     /**
@@ -8207,7 +8212,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float32Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: number, end?: number): Float32Array {
+    public subarrayNN(begin?: number, end?: number): Float32Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
@@ -8220,7 +8225,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float32Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: int, end?: number): Float32Array {
+    public subarrayIN(begin?: int, end?: number): Float32Array {
         return this.subarray(begin ?? 0, asIntOrDefault(end, this.lengthInt))
     }
 
@@ -8233,7 +8238,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float32Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: number, end?: int): Float32Array {
+    public subarrayNI(begin?: number, end?: int): Float32Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), end ?? this.lengthInt)
     }
 
@@ -8246,7 +8251,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float32Array with the same underlying ArrayBuffer
      */
-    public subarray(begin: int | undefined = 0, end: int | undefined = this.lengthInt): Float32Array {
+    public subarrayII(begin: int | undefined = 0, end: int | undefined = this.lengthInt): Float32Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin ?? 0, len)
         const relEnd = normalizeIndex(end ?? this.lengthInt, len)
@@ -8813,6 +8818,7 @@ class Float64ArrayIteratorEntries implements IterableIterator<[Number, Number]> 
 export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: int = 8
     public readonly BYTES_PER_ELEMENT: int = Float64Array.BYTES_PER_ELEMENT
+    public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
     internal readonly lengthInt: int
 
     /**
@@ -9806,7 +9812,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float64Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: number, end?: number): Float64Array {
+    public subarrayNN(begin?: number, end?: number): Float64Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
@@ -9819,7 +9825,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float64Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: int, end?: number): Float64Array {
+    public subarrayIN(begin?: int, end?: number): Float64Array {
         return this.subarray(begin ?? 0, asIntOrDefault(end, this.lengthInt))
     }
 
@@ -9832,7 +9838,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float64Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: number, end?: int): Float64Array {
+    public subarrayNI(begin?: number, end?: int): Float64Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), end ?? this.lengthInt)
     }
 
@@ -9845,7 +9851,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float64Array with the same underlying ArrayBuffer
      */
-    public subarray(begin: int | undefined = 0, end: int | undefined = this.lengthInt): Float64Array {
+    public subarrayII(begin: int | undefined = 0, end: int | undefined = this.lengthInt): Float64Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin ?? 0, len)
         const relEnd = normalizeIndex(end ?? this.lengthInt, len)

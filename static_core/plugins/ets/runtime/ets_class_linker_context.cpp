@@ -159,7 +159,7 @@ bool TryEnumeratePandaFilesInChain(const ClassLinkerContext *ctx,
         return false;
     }
 
-    parentContext->EnumeratePandaFiles(cb);
+    ctx->EnumeratePandaFiles(cb);
     return true;
 }
 

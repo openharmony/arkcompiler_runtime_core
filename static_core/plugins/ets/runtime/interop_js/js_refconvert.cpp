@@ -22,6 +22,7 @@
 #include "plugins/ets/runtime/interop_js/js_refconvert_function.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_record.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_tuple.h"
+#include "plugins/ets/runtime/interop_js/js_refconvert_union.h"
 
 namespace ark::ets::interop::js {
 
@@ -88,6 +89,10 @@ static std::unique_ptr<JSRefConvert> JSRefConvertCreateImpl(InteropCtx *ctx, Cla
 
         // handle TupleN
         return std::make_unique<JSRefConvertTuple<true>>(ctx, klass);
+    }
+
+    if (klass->IsUnionClass()) {
+        return std::make_unique<JSRefConvertUnion>(klass);
     }
 
     if (klass->IsInterface()) {

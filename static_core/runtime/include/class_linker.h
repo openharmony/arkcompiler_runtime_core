@@ -102,6 +102,9 @@ public:
     Field *GetField(const Method &caller, panda_file::File::EntityId id, bool isStatic,
                     ClassLinkerErrorHandler *errorHandler = nullptr);
 
+    Field *GetField(Class *klass, const panda_file::FieldDataAccessor &fda, bool isStatic,
+                    ClassLinkerErrorHandler *errorHandler = nullptr);
+
     PANDA_PUBLIC_API void AddPandaFile(std::unique_ptr<const panda_file::File> &&pf,
                                        ClassLinkerContext *context = nullptr);
 
@@ -269,6 +272,8 @@ public:
 
     Class *CreateArrayClass(ClassLinkerExtension *ext, const uint8_t *descriptor, bool needCopyDescriptor,
                             Class *componentClass);
+    Class *CreateUnionClass(ClassLinkerExtension *ext, const uint8_t *descriptor, bool needCopyDescriptor,
+                            Span<Class *> constituentClasses, ClassLinkerContext *commonContext);
 
     void FreeClassData(Class *classPtr);
 
@@ -348,6 +353,13 @@ private:
 
     Class *LoadArrayClass(const uint8_t *descriptor, bool needCopyDescriptor, ClassLinkerContext *context,
                           ClassLinkerErrorHandler *errorHandler);
+
+    Class *LoadUnionClass(const uint8_t *descriptor, bool needCopyDescriptor, ClassLinkerContext *context,
+                          ClassLinkerErrorHandler *errorHandler);
+
+    std::optional<Span<Class *>> LoadConstituentClasses(const uint8_t *descriptor, bool needCopyDescriptor,
+                                                        ClassLinkerContext *context,
+                                                        ClassLinkerErrorHandler *errorHandler);
 
     Class *LoadClass(const panda_file::File *pf, panda_file::File::EntityId classId, const uint8_t *descriptor,
                      ClassLinkerContext *context, ClassLinkerErrorHandler *errorHandler, bool addToRuntime = true);

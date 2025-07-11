@@ -41,7 +41,9 @@ bool Job::UpdateTypes(TypeSystem *types) const
         result = result && hasType(field->GetClass());
         if (field->GetType().IsReference()) {
             ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
-            result = result && hasType(field->ResolveTypeClass(&handler));
+            auto typeId = panda_file::FieldDataAccessor::GetTypeId(*field->GetPandaFile(), field->GetFileId());
+            auto *klass = GetClass(typeId, field->GetClass()->GetLoadContext(), field->GetPandaFile(), &handler);
+            result = result && hasType(klass);
         }
     });
     return result;
@@ -100,6 +102,34 @@ bool Job::DoChecks(TypeSystem *types)
 void Job::ErrorHandler::OnError([[maybe_unused]] ClassLinker::Error error, PandaString const &message)
 {
     LOG(ERROR, VERIFIER) << "Cannot link class: " << message;
+}
+
+Class *Job::GetClass(panda_file::File::EntityId classId, ClassLinkerContext *ctx, const panda_file::File *pfile,
+                     ErrorHandler *errorHandler) const
+{
+    const auto *desc = pfile->GetStringData(classId).data;
+    if (ClassHelper::IsUnionOrArrayUnionDescriptor(desc)) {
+        return ClassHelper::GetUnionLUBClass(desc, classLinker_, ctx, classLinker_->GetExtension(langContext_),
+                                             errorHandler);
+    }
+    return classLinker_->GetClass(desc, true, ctx, errorHandler);
+}
+
+Class *Job::GetClass(panda_file::File::EntityId classId, ErrorHandler *errorHandler) const
+{
+    return GetClass(classId, method_->GetClass()->GetLoadContext(), method_->GetPandaFile(), errorHandler);
+}
+
+Field *Job::GetField(panda_file::File::EntityId fieldIdx, bool isStatic, ErrorHandler *errorHandler) const
+{
+    Field *field = method_->GetPandaFile()->GetPandaCache()->GetFieldFromCache(fieldIdx);
+    if (field != nullptr) {
+        return field;
+    }
+    panda_file::FieldDataAccessor const fda(*method_->GetPandaFile(), fieldIdx);
+    auto *klass =
+        GetClass(fda.GetClassId(), method_->GetClass()->GetLoadContext(), method_->GetPandaFile(), errorHandler);
+    return classLinker_->GetField(klass, fda, isStatic, errorHandler);
 }
 
 }  // namespace ark::verifier

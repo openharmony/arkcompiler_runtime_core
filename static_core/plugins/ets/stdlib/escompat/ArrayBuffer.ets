@@ -49,12 +49,14 @@ export interface ArrayBufferView {
  */
 export class ArrayBuffer extends Buffer
 {
+    public overload constructor { fromInt, fromNumber }
+
     /**
      * Creates ArrayBuffer with size equal to length parameter
      *
      * @param length size of ArrayBuffer
      */
-    public constructor(length: int, maxByteLength?: int)
+    public constructor fromInt(length: int, maxByteLength?: int)
     {
         super()
         if (length < 0) {
@@ -79,7 +81,7 @@ export class ArrayBuffer extends Buffer
      *
      * @param length size of ArrayBuffer
      */
-    public constructor(length: number, maxByteLength?: number)
+    public constructor fromNumber(length: number, maxByteLength?: number)
     {
         this(length.toInt(), (maxByteLength !== undefined) ? maxByteLength.toInt() : undefined)
     }
