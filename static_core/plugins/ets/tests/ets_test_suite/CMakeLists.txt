@@ -85,6 +85,7 @@ macro(get_ets_int_targets_list RESULT ETS_INT_TARGET)
 endmacro()
 
 add_subdirectory(ani)
+add_subdirectory(backtrace)
 add_subdirectory(coroutines)
 add_subdirectory(gc)
 add_subdirectory(linker)
