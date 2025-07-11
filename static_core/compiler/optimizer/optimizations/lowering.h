@@ -354,13 +354,18 @@ private:
 
 #include "optimizer/ir/visitor.inc"
 
-    static void InsertInstruction(Inst *inst, Inst *newInst)
+    static void ReplaceInstruction(Inst *inst, Inst *newInst)
     {
-        inst->InsertBefore(newInst);
         inst->ReplaceUsers(newInst);
         newInst->GetBasicBlock()->GetGraph()->GetEventWriter().EventLowering(GetOpcodeString(inst->GetOpcode()),
                                                                              inst->GetId(), inst->GetPc());
         COMPILER_LOG(DEBUG, LOWERING) << "Lowering is applied for " << GetOpcodeString(inst->GetOpcode());
+    }
+
+    static void InsertInstruction(Inst *inst, Inst *newInst)
+    {
+        inst->InsertBefore(newInst);
+        ReplaceInstruction(inst, newInst);
     }
 
     template <size_t MAX_OPERANDS>
@@ -411,6 +416,8 @@ private:
     static void ReplaceUnsignedModPowerOfTwo(GraphVisitor *v, Inst *inst, uint64_t absValue);
     static void ReplaceSignedDivPowerOfTwo(GraphVisitor *v, Inst *inst, int64_t sValue);
     static void ReplaceUnsignedDivPowerOfTwo(GraphVisitor *v, Inst *inst, uint64_t uValue);
+    static bool TryReplaceModIfModInputIsAdd(GraphVisitor *v, Inst *inst);
+    static Inst *IdentifyBaseModIfModInputIsAdd(Inst *inst, const Inst *modInst, uint64_t modVal);
 
 private:
     SaveStateBridgesBuilder ssb_;
