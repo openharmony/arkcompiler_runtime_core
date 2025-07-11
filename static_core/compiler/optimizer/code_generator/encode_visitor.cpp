@@ -38,16 +38,18 @@ namespace ark::compiler {
         enc->GetEncoder()->Encode##opc(dst, src0, src1);                        \
     }
 
+// CC-OFFNXT(G.PRE.06) solid logic
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BINARY_SHIFTED_REGISTER_OPERATION(opc)                                                  \
-    void EncodeVisitor::Visit##opc##SR(GraphVisitor *visitor, Inst *inst)                       \
-    {                                                                                           \
-        EncodeVisitor *enc = static_cast<EncodeVisitor *>(visitor);                             \
-        auto [dst, src0, src1] = enc->GetCodegen()->ConvertRegisters<2U>(inst);                 \
-        auto imm_shift_inst = static_cast<BinaryShiftedRegisterOperation *>(inst);              \
-        auto imm_value = static_cast<uint32_t>(imm_shift_inst->GetImm()) & (dst.GetSize() - 1); \
-        auto shift = Shift(src1, imm_shift_inst->GetShiftType(), imm_value);                    \
-        enc->GetEncoder()->Encode##opc(dst, src0, shift);                                       \
+#define BINARY_SHIFTED_REGISTER_OPERATION(opc)                                        \
+    void EncodeVisitor::Visit##opc##SR(GraphVisitor *visitor, Inst *inst)             \
+    {                                                                                 \
+        EncodeVisitor *enc = static_cast<EncodeVisitor *>(visitor);                   \
+        auto [dst, src0, src1] = enc->GetCodegen()->ConvertRegisters<2U>(inst);       \
+        auto imm_shift_inst = static_cast<BinaryShiftedRegisterOperation *>(inst);    \
+        auto dstSize = dst.GetSize() > 1 ? dst.GetSize() - 1 : 0;                     \
+        auto imm_value = static_cast<uint32_t>(imm_shift_inst->GetImm()) & (dstSize); \
+        auto shift = Shift(src1, imm_shift_inst->GetShiftType(), imm_value);          \
+        enc->GetEncoder()->Encode##opc(dst, src0, shift);                             \
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
