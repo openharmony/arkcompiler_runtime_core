@@ -124,6 +124,7 @@ public:
     void Fini();
 
     // Need refactor, move to other file
+    static void WriteRoot(void* obj);
     static void WriteBarrier(void* obj, void* field, void* ref);
     static void* ReadBarrier(void* obj, void* field);
     static void* ReadBarrier(void* field);
