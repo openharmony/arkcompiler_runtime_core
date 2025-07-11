@@ -36,21 +36,21 @@ function main(): int {
 }
 
 function performXmlTest(
-    errorCodeId: number, 
-    errorMessage: string, 
-    setupFunction: (serializer: xml.XmlDynamicSerializer) => void, 
+    errorCodeId: number,
+    errorMessage: string,
+    setupFunction: (serializer: xml.XmlDynamicSerializer) => void,
     testFunction: (serializer: xml.XmlDynamicSerializer) => void
 ) {
     let thatSer = new xml.XmlDynamicSerializer();
-    
+
     setupFunction(thatSer);
-    
+
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && 
+        return (e instanceof BusinessError) &&
                ((e as BusinessError).code == errorCodeId) &&
                ((e as BusinessError).message == errorMessage);
     }
-    
+
     arktest.expectThrow(() => { testFunction(thatSer) }, exceptionCheck);
 }
 
@@ -77,7 +77,7 @@ function testSetNamespaceWithEmptyPrefix() {
         EmptyErrorCodeId,
         'Parameter error. Parameter cannot be empty',
         (serializer) => {},
-        (serializer) => { serializer.setNamespace('', 'http://www.w3.org/TR/html4/'); }
+        (serializer) => { serializer.setNamespace('', 'http://www.w3.org/TR/html4/'); }   // CC-OFF(G.OTH.05) test logic
     );
 }
 
@@ -94,7 +94,7 @@ function testAddEmptyElementWithEmptyName() {
     performXmlTest(
         EmptyErrorCodeId,
         'Parameter error. Parameter cannot be empty',
-        (serializer) => { 
+        (serializer) => {
             serializer.setDeclaration();
             serializer.startElement('note');
         },
@@ -106,7 +106,7 @@ function testSetEmptyComment() {
     performXmlTest(
         EmptyErrorCodeId,
         'Parameter error. Parameter cannot be empty',
-        (serializer) => { 
+        (serializer) => {
             serializer.setDeclaration();
             serializer.startElement('note');
         },
@@ -118,7 +118,7 @@ function testSetEmptyCDATA() {
     performXmlTest(
         EmptyErrorCodeId,
         'Parameter error. Parameter cannot be empty',
-        (serializer) => { 
+        (serializer) => {
             serializer.setDeclaration();
             serializer.startElement('note');
         },
@@ -130,7 +130,7 @@ function testSetEmptyText() {
     performXmlTest(
         EmptyErrorCodeId,
         'Parameter error. Parameter cannot be empty',
-        (serializer) => { 
+        (serializer) => {
             serializer.setDeclaration();
             serializer.startElement('note');
         },
@@ -142,7 +142,7 @@ function testSetEmptyDocType() {
     performXmlTest(
         EmptyErrorCodeId,
         'Parameter error. Parameter cannot be empty',
-        (serializer) => { 
+        (serializer) => {
             serializer.setDeclaration();
             serializer.startElement('note');
         },

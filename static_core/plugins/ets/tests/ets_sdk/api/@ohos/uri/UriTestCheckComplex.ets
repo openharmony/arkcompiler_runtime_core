@@ -30,7 +30,7 @@ function IsAbsoluteTest003() {
 }
 
 function IsRelativeTest001() {
-  let muri = new uri.URI("https://www.example.com/aaa");
+  let muri = new uri.URI("https://www.example.com/aaa");  // CC-OFF(G.OTH.05) test logic
   arktest.assertFalse(muri.checkRelative());
 }
 
@@ -50,7 +50,7 @@ function IsOpaqueTest002() {
 }
 
 function IsHierarchicalTest001() {
-  let muri = new uri.URI("https://www.example.com/path/to/resource");
+  let muri = new uri.URI("https://www.example.com/path/to/resource");  // CC-OFF(G.OTH.05) test logic
   arktest.assertTrue(muri.checkHierarchical());
 }
 

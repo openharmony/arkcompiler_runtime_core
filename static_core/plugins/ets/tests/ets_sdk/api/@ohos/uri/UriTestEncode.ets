@@ -30,31 +30,31 @@ function testUriEncodedUserInfo003() {
 }
 
 function testUriEncodedUserInfo004() {
-    let route = new uri.URI('http://www.test.com');
+    let route = new uri.URI('http://www.test.com');  // CC-OFF(G.OTH.05) test logic
     arktest.assertEQ(route.encodedUserInfo, null);
     let mailRoute = new uri.URI('mailto:body');
     arktest.assertEQ(mailRoute.encodedUserInfo, null);
 }
 
 function testUriEncodedPath001() {
-    let route = new uri.URI('http://www.test.com/file/image.jpg');
+    let route = new uri.URI('http://www.test.com/file/image.jpg');  // CC-OFF(G.OTH.05) test logic
     arktest.assertEQ(route.encodedPath, "/file/image.jpg");
 }
 
 function testUriEncodedPath002() {
-    let route = new uri.URI('http://www.test.com/');
+    let route = new uri.URI('http://www.test.com/');  // CC-OFF(G.OTH.05) test logic
     arktest.assertEQ(route.encodedPath, "/");
 }
 
 function testUriEncodedPath003() {
-    let route = new uri.URI('http://www.test.com');
+    let route = new uri.URI('http://www.test.com');  // CC-OFF(G.OTH.05) test logic
     arktest.assertEQ(route.encodedPath, null);
     let mailRoute = new uri.URI('mailto:body');
     arktest.assertEQ(mailRoute.encodedUserInfo, null);
 }
 
 function testUriEncodedPath004() {
-    let route = new uri.URI('http://www.test.com/my%20file');
+    let route = new uri.URI('http://www.test.com/my%20file');  // CC-OFF(G.OTH.05) test logic
     arktest.assertEQ(route.encodedPath, "/my%20file");
 }
 
@@ -80,7 +80,7 @@ function testUriEncodedFragment004() {
 }
 
 function testUriEncodedAuthority001() {
-    let route = new uri.URI('https://www.test.com/search?query=name&query=my');
+    let route = new uri.URI('https://www.test.com/search?query=name&query=my');  // CC-OFF(G.OTH.05) test logic
     arktest.assertEQ(route.encodedAuthority, "www.test.com");
 }
 
@@ -95,7 +95,7 @@ function testUriEncodedAuthority003() {
 }
 
 function testUriEncodedAuthority004() {
-    let route = new uri.URI('https://www.test.com:8080/');
+    let route = new uri.URI('https://www.test.com:8080/');  // CC-OFF(G.OTH.05) test logic
     arktest.assertEQ(route.encodedAuthority, "www.test.com:8080");
 }
 
@@ -112,7 +112,7 @@ function testUriEncodedSSP002() {
 }
 
 function testUriEncodedSSP003() {
-    let route = new uri.URI('https://www.test.com/');
+    let route = new uri.URI('https://www.test.com/');  // CC-OFF(G.OTH.05) test logic
     arktest.assertEQ(route.encodedSSP, "//www.test.com/");
 }
 

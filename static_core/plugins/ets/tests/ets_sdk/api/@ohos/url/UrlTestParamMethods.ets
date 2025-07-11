@@ -386,7 +386,7 @@ function testUrlAppend001() {
 * @tc.level: Level 2
 */
 function testUrlAppend002() {
-	let that = url.URL.parseURL('https://example.com?foo=1&bar=2')
+	let that = url.URL.parseURL('https://example.com?foo=1&bar=2')  // CC-OFF(G.OTH.05) test logic
 	let params = new url.URLParams(that.search)
 	params.append("ma 大", "jk￥")
 	let result = params.toString()
@@ -402,7 +402,7 @@ function testUrlAppend002() {
 * @tc.level: Level 2
 */
 function testUrlAppend003() {
-	let that = url.URL.parseURL('https://example.com?foo=1&bar=2')
+	let that = url.URL.parseURL('https://example.com?foo=1&bar=2')  // CC-OFF(G.OTH.05) test logic
 	let params = new url.URLParams(that.search)
 	params.append("foo~!@#$%^&*()_+-=", "jk")
 	let result = params.toString()
@@ -418,7 +418,7 @@ function testUrlAppend003() {
 * @tc.level: Level 2
 */
 function testUrlAppend004() {
-	let that = url.URL.parseURL('https://example.com?foo=1&bar=2')
+	let that = url.URL.parseURL('https://example.com?foo=1&bar=2')  // CC-OFF(G.OTH.05) test logic
 	let params = new url.URLParams(that.search)
 	params.append("app", "par")
 	let result = params.toString()
@@ -434,7 +434,7 @@ function testUrlAppend004() {
 * @tc.level: Level 2
 */
 function testUrlAppend005() {
-	let that = url.URL.parseURL('https://example.com?foo=1&bar=2')
+	let that = url.URL.parseURL('https://example.com?foo=1&bar=2')  // CC-OFF(G.OTH.05) test logic
 	let params = new url.URLParams(that.search)
 	params.append("123", "456")
 	let result = params.toString()
@@ -471,7 +471,7 @@ function testUrlAppend005() {
 * @tc.level: Level 2
 */
 function testUrlDelete001() {
-	let that = url.URL.parseURL('https://example.com?foo=1&bar=2')
+	let that = url.URL.parseURL('https://example.com?foo=1&bar=2')  // CC-OFF(G.OTH.05) test logic
 	let params = new url.URLParams(that.search)
 	params.delete("foo")
 	let result = params.toString()
@@ -487,7 +487,7 @@ function testUrlDelete001() {
 * @tc.level: Level 2
 */
 function testUrlDelete002() {
-	let that = url.URL.parseURL('https://example.com?foo大=1&bar=2');
+	let that = url.URL.parseURL('https://example.com?foo大=1&bar=2');  // CC-OFF(G.OTH.05) test logic
 	let params = new url.URLParams(that.search);
 	params.delete('foo');
 	let result = params.toString();
@@ -503,7 +503,7 @@ function testUrlDelete002() {
 * @tc.level: Level 2
 */
 function testUrlDelete003() {
-	let that = url.URL.parseURL('https://example.com?foo大=1&bar=2');
+	let that = url.URL.parseURL('https://example.com?foo大=1&bar=2');  // CC-OFF(G.OTH.05) test logic
 	let params = new url.URLParams(that.search);
 	params.delete("foo大");
 	let result = params.toString();
@@ -519,7 +519,7 @@ function testUrlDelete003() {
 * @tc.level: Level 2
 */
 function testUrlDelete004() {
-	let that = url.URL.parseURL('https://example.com?foo=1&bar=2');
+	let that = url.URL.parseURL('https://example.com?foo=1&bar=2');  // CC-OFF(G.OTH.05) test logic
 	let params = new url.URLParams(that.search);
 	params.delete('bar');
 	let result = params.toString();
@@ -535,7 +535,7 @@ function testUrlDelete004() {
 * @tc.level: Level 2
 */
 function testUrlDelete005() {
-	let that = url.URL.parseURL('https://example.com?foo=1&bar=2');
+	let that = url.URL.parseURL('https://example.com?foo=1&bar=2');  // CC-OFF(G.OTH.05) test logic
 	let params = new url.URLParams(that.search);
 	params.delete("faa");
 	let result = params.toString();

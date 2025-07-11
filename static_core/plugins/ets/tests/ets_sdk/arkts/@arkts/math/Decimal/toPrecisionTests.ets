@@ -93,9 +93,9 @@ function testToPrecisionWithSpecificConfig002() {
     arktest.assertEQ(new Decimal(-Infinity).toPrecision(2), '-Infinity');
     arktest.assertEQ(new Decimal(0.000000555).toPrecision(15), '5.55000000000000e-7');
     arktest.assertEQ(new Decimal(-0.000000555).toPrecision(15), '-5.55000000000000e-7');
-    arktest.assertEQ(new Decimal(-.0000000012345).toPrecision(2), '-1.2e-9');
-    arktest.assertEQ(new Decimal(-.000000012345).toPrecision(2), '-1.2e-8');
-    arktest.assertEQ(new Decimal(-.00000012345).toPrecision(2), '-1.2e-7');
+    arktest.assertEQ(new Decimal(-0.0000000012345).toPrecision(2), '-1.2e-9');
+    arktest.assertEQ(new Decimal(-0.000000012345).toPrecision(2), '-1.2e-8');
+    arktest.assertEQ(new Decimal(-0.00000012345).toPrecision(2), '-1.2e-7');
     arktest.assertEQ(new Decimal(123456789).toPrecision(1), '1e+8');
     arktest.assertEQ(new Decimal(123456789).toPrecision(9), '123456789');
     arktest.assertEQ(new Decimal(123456789).toPrecision(8), '1.2345679e+8');
@@ -104,12 +104,12 @@ function testToPrecisionWithSpecificConfig002() {
 }
 
 function testToPrecisionWithSpecificConfig003() {
-    arktest.assertEQ(new Decimal(-.0000012345).toPrecision(2), '-0.0000012');
-    arktest.assertEQ(new Decimal(-.000012345).toPrecision(2), '-0.000012');
-    arktest.assertEQ(new Decimal(-.00012345).toPrecision(2), '-0.00012');
-    arktest.assertEQ(new Decimal(-.0012345).toPrecision(2), '-0.0012');
-    arktest.assertEQ(new Decimal(-.012345).toPrecision(2), '-0.012');
-    arktest.assertEQ(new Decimal(-.12345).toPrecision(2), '-0.12');
+    arktest.assertEQ(new Decimal(-0.0000012345).toPrecision(2), '-0.0000012');
+    arktest.assertEQ(new Decimal(-0.000012345).toPrecision(2), '-0.000012');
+    arktest.assertEQ(new Decimal(-0.00012345).toPrecision(2), '-0.00012');
+    arktest.assertEQ(new Decimal(-0.0012345).toPrecision(2), '-0.0012');
+    arktest.assertEQ(new Decimal(-0.012345).toPrecision(2), '-0.012');
+    arktest.assertEQ(new Decimal(-0.12345).toPrecision(2), '-0.12');
     arktest.assertEQ(new Decimal(-1.2345).toPrecision(2), '-1.2');
     arktest.assertEQ(new Decimal(-12.345).toPrecision(2), '-12');
     arktest.assertEQ(new Decimal(-123.45).toPrecision(2), '-1.2e+2');

@@ -16,78 +16,78 @@ import {uri} from "@ohos.uri"
 
 
 function testUriGetQueryValue001() {
-  let route = new uri.URI('https://www.test.com?param1=value1&param2=value2');
+  let route = new uri.URI('https://www.test.com?param1=value1&param2=value2');  // CC-OFF(G.OTH.05) test logic
   let param1Value = route.getQueryValue("param1");
   let param2Value = route.getQueryValue("param2");
   arktest.assertEQ(param1Value, "value1");
-  arktest.assertEQ(param2Value, "value2");    
+  arktest.assertEQ(param2Value, "value2");
 }
 
 function testUriGetQueryValue002() {
-  let route = new uri.URI('https://www.test.com');
+  let route = new uri.URI('https://www.test.com');  // CC-OFF(G.OTH.05) test logic
   arktest.assertEQ(route.getQueryValue("param1"), null);
-  let include = new uri.URI('https://www.test.com?param1=value1');
+  let include = new uri.URI('https://www.test.com?param1=value1');  // CC-OFF(G.OTH.05) test logic
   arktest.assertEQ(include.getQueryValue("param"), null);
 }
 
 function testUriGetQueryValue003() {
-  let route = new uri.URI('https://www.test.com?param1=value1&param1=value2&param1=value3');
+  let route = new uri.URI('https://www.test.com?param1=value1&param1=value2&param1=value3');  // CC-OFF(G.OTH.05) test logic
   let param1Value = route.getQueryValue("param1");
-  arktest.assertEQ(param1Value, "value1");    
+  arktest.assertEQ(param1Value, "value1");
   arktest.assertEQ(route.getQueryValues("param1")[0], "value1");
 }
 
 function testUriGetQueryValue004() {
-  let route = new uri.URI('https://www.test.com?param1=hello%20world');
+  let route = new uri.URI('https://www.test.com?param1=hello%20world');  // CC-OFF(G.OTH.05) test logic
   arktest.assertEQ(route.getQueryValue("param1"), "hello world");
-  let specialSymbol = new uri.URI('https://www.test.com?param1=hello+world');
+  let specialSymbol = new uri.URI('https://www.test.com?param1=hello+world');  // CC-OFF(G.OTH.05) test logic
   arktest.assertEQ(specialSymbol.getQueryValue("param1"), "hello world");
 }
 
 function testUriGetQueryValue005() {
-  let route = new uri.URI('https://www.test.com?param%201=hello');
+  let route = new uri.URI('https://www.test.com?param%201=hello');  // CC-OFF(G.OTH.05) test logic
   arktest.assertEQ(route.getQueryValue("param 1"), "hello");
   arktest.assertEQ(route.getQueryValue("1"), null);
   arktest.assertEQ(route.getQueryValue(" 1"), null);
 }
 
 function testUriGetQueryValue006() {
-  let route = new uri.URI('https://www.test.com?param1=&param2=');
+  let route = new uri.URI('https://www.test.com?param1=&param2=');  // CC-OFF(G.OTH.05) test logic
   arktest.assertEQ(route.getQueryValue("param1"), "");
   arktest.assertEQ(route.getQueryValue("param2"), "");
-  let noNameUri = new uri.URI('https://www.test.com?=value');
+  let noNameUri = new uri.URI('https://www.test.com?=value');  // CC-OFF(G.OTH.05) test logic
   arktest.assertEQ(noNameUri.getQueryValue(""), "value");
 }
 
 function testUriGetQueryValue007() {
-  let emptyParameter1 = new uri.URI('https://www.test.com?param1=value1&&param3=value3');
+  let emptyParameter1 = new uri.URI('https://www.test.com?param1=value1&&param3=value3');  // CC-OFF(G.OTH.05) test logic
   arktest.assertEQ(emptyParameter1.getQueryValue(""), "");
-  let emptyParameter12 = new uri.URI('https://www.test.com?param1=value1&');
+  let emptyParameter12 = new uri.URI('https://www.test.com?param1=value1&');  // CC-OFF(G.OTH.05) test logic
   arktest.assertEQ(emptyParameter12.getQueryValue(""), "");
-  let router = new uri.URI('https://www.test.com?');
+  let router = new uri.URI('https://www.test.com?');  // CC-OFF(G.OTH.05) test logic
   arktest.assertEQ(router.getQueryValue(""), null);
 }
 
 function testUriAddQueryValue001() {
-  let route = new uri.URI('https://www.test.com');
+  let route = new uri.URI('https://www.test.com');  // CC-OFF(G.OTH.05) test logic
   let newRoute = route.addQueryValue("param1", "value1");
   arktest.assertEQ(newRoute.getQueryValue("param1"), "value1");
   let clearRoute = newRoute.clearQuery();
-  arktest.assertEQ(clearRoute.toString(), "https://www.test.com");
+  arktest.assertEQ(clearRoute.toString(), "https://www.test.com");  // CC-OFF(G.OTH.05) test logic
 }
 
 function testUriAddQueryValue002() {
-  let route = new uri.URI('https://www.test.com');
+  let route = new uri.URI('https://www.test.com');  // CC-OFF(G.OTH.05) test logic
   let newRoute = route.addQueryValue("param1", "value1").addQueryValue("param2", "value2");
   arktest.assertEQ(newRoute.getQueryValue('param1'), "value1");
   arktest.assertEQ(newRoute.getQueryValue('param2'), "value2");
-  arktest.assertEQ(newRoute.toString(), "https://www.test.com?param1=value1&param2=value2");
+  arktest.assertEQ(newRoute.toString(), "https://www.test.com?param1=value1&param2=value2");  // CC-OFF(G.OTH.05) test logic
 }
 
 function testUriAddQueryValue003() {
-  let route = new uri.URI('https://www.test.com');
+  let route = new uri.URI('https://www.test.com');  // CC-OFF(G.OTH.05) test logic
   let newRoute = route.addQueryValue("param1", "hello world");
-  arktest.assertEQ(newRoute.toString(), "https://www.test.com?param1=hello%20world");
+  arktest.assertEQ(newRoute.toString(), "https://www.test.com?param1=hello%20world");  // CC-OFF(G.OTH.05) test logic
   arktest.assertEQ(newRoute.getQueryValue("param1"), "hello world");
   let paramNames = newRoute.getQueryNames();
   arktest.assertEQ(paramNames.length, 1);
@@ -95,45 +95,45 @@ function testUriAddQueryValue003() {
 }
 
 function testUriAddQueryValue004() {
-  let route = new uri.URI('https://www.test.com');
+  let route = new uri.URI('https://www.test.com');  // CC-OFF(G.OTH.05) test logic
   let newRoute = route.addQueryValue("param1", "value1").addQueryValue("param1", "value2");
-  arktest.assertEQ(newRoute.toString(), "https://www.test.com?param1=value1&param1=value2");
+  arktest.assertEQ(newRoute.toString(), "https://www.test.com?param1=value1&param1=value2");  // CC-OFF(G.OTH.05) test logic
 }
 
 function testUriAddQueryValue005() {
-  let route = new uri.URI('https://www.test.com');
+  let route = new uri.URI('https://www.test.com');  // CC-OFF(G.OTH.05) test logic
   let newRoute = route.addQueryValue("param1", "value1").addQueryValue("param2", "null")
-  arktest.assertEQ(newRoute.toString(), "https://www.test.com?param1=value1&param2=null");
+  arktest.assertEQ(newRoute.toString(), "https://www.test.com?param1=value1&param2=null");  // CC-OFF(G.OTH.05) test logic
   let values = newRoute.getQueryValues("param1");
   arktest.assertEQ(values[0], "value1");
 }
 
 function testUriAddQueryValue006() {
   let value = "value";
-  let testUri = new uri.URI('https://www.test.com');
+  let testUri = new uri.URI('https://www.test.com');  // CC-OFF(G.OTH.05) test logic
   let addQuery = testUri.addQueryValue("param", value);
   arktest.assertEQ(addQuery.getQueryValue("param"), value);
   arktest.assertEQ(addQuery.getQueryValues("param")[0], value);
-  arktest.assertEQ(addQuery.toString(), "https://www.test.com?param=value");
+  arktest.assertEQ(addQuery.toString(), "https://www.test.com?param=value");  // CC-OFF(G.OTH.05) test logic
   value = "value1";
   let valueChange = testUri.addQueryValue("param", value);
-  arktest.assertEQ(valueChange.toString(), "https://www.test.com?param=value1");
+  arktest.assertEQ(valueChange.toString(), "https://www.test.com?param=value1");  // CC-OFF(G.OTH.05) test logic
   let newChange = addQuery.addQueryValue("param", value);
-  arktest.assertEQ(newChange.toString(), "https://www.test.com?param=value&param=value1");
+  arktest.assertEQ(newChange.toString(), "https://www.test.com?param=value&param=value1");  // CC-OFF(G.OTH.05) test logic
 }
 
 function testUriAddQueryValue007() {
-  let route = new uri.URI('https://www.test.com');
+  let route = new uri.URI('https://www.test.com');  // CC-OFF(G.OTH.05) test logic
   let newRoute = route.addQueryValue("param 1", "value 1");
   arktest.assertEQ(newRoute.getQueryValue("param 1"), "value 1");
-  let mui = new uri.URI('http://www.test.com?sa%3D=\ud83d\ude0a')
+  let mui = new uri.URI('http://www.test.com?sa%3D=\ud83d\ude0a')  // CC-OFF(G.OTH.05) test logic
   arktest.assertEQ(mui.getQueryValue('sa='), "\ud83d\ude0a");
 }
 
 function testUriAddQueryValue008() {
-  let route = new uri.URI('https://www.com?param1=\ud83d\ude0a&param2=value2');
+  let route = new uri.URI('https://www.com?param1=\ud83d\ude0a&param2=value2');  // CC-OFF(G.OTH.05) test logic
   arktest.assertEQ(route.getQueryValue("abc"), null);
-  let newRoute = new uri.URI('http://www.test.com?sa%3D=\ud83d\ude0a')
+  let newRoute = new uri.URI('http://www.test.com?sa%3D=\ud83d\ude0a')  // CC-OFF(G.OTH.05) test logic
   arktest.assertEQ(newRoute.getQueryValue('aa'), null);
 }
 
