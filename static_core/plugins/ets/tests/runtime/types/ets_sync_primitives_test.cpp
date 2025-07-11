@@ -84,6 +84,14 @@ public:
         return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsQueueSpinlock, tail_, "tail")};
     }
 
+    static std::vector<MirrorFieldInfo> GetRWLockMembers()
+    {
+        return std::vector<MirrorFieldInfo> {
+            MIRROR_FIELD_INFO(EtsRWLock, rLock_, "rLock"), MIRROR_FIELD_INFO(EtsRWLock, wLock_, "wLock"),
+            MIRROR_FIELD_INFO(EtsRWLock, readers_, "readers"), MIRROR_FIELD_INFO(EtsRWLock, writers_, "writers"),
+            MIRROR_FIELD_INFO(EtsRWLock, state_, "state")};
+    }
+
 protected:
     PandaEtsVM *vm_ = nullptr;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
@@ -126,6 +134,14 @@ TEST_F(EtsSyncPrimitivesTest, QueueSpinlockMemoryLayout)
 {
     auto *queueSpinlockClass = PlatformTypes(vm_)->coreQueueSpinlock;
     MirrorFieldInfo::CompareMemberOffsets(queueSpinlockClass, GetQueueSpinlockMembers());
+}
+
+// Check both EtsRWLock and ark::Class<RWLock> has the same number of fields
+// and at the same offsets
+TEST_F(EtsSyncPrimitivesTest, RWLockMemoryLayout)
+{
+    auto *rwLockClass = PlatformTypes(vm_)->coreRWLock;
+    MirrorFieldInfo::CompareMemberOffsets(rwLockClass, GetRWLockMembers());
 }
 
 }  // namespace ark::ets::test

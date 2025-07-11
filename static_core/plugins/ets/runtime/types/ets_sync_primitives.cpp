@@ -232,4 +232,79 @@ EtsQueueSpinlock::Guard::~Guard()
     spinlock_->Release(this);
 }
 
+void EtsRWLock::ReadLock()
+{
+    // Atomic with relaxed order reason: sync is not needed here because CAS has acq_rel order
+    uint64_t oldState = state_.load(std::memory_order_relaxed);
+    uint64_t newState = 0;
+    do {
+        newState = State::IncReaders(oldState) | (State::HasWriteLock(oldState) ? 0 : State::READ_LOCK_STATE);
+        // Atomic with acq_rel order reason: sync Lock/Unlock in other threads
+    } while (!state_.compare_exchange_weak(oldState, newState, std::memory_order_acq_rel, std::memory_order_relaxed));
+
+    if (!State::HasReadLock(newState)) {
+        auto *coro = EtsCoroutine::GetCurrent();
+        auto *coroManager = coro->GetCoroutineManager();
+        auto readAwaitee = EtsWaitersList::Node(coroManager);
+        EtsSyncPrimitive<EtsRWLock>::SuspendCoroutine(GetReaders(coro), &readAwaitee);
+    }
+}
+
+void EtsRWLock::WriteLock()
+{
+    // Atomic with relaxed order reason: sync is not needed here because CAS has acq_rel order
+    uint64_t oldState = state_.load(std::memory_order_relaxed);
+    uint64_t newState = 0;
+    do {
+        newState = State::IncWriters(oldState) | (State::HasReadLock(oldState) ? 0 : State::WRITE_LOCK_STATE);
+        // Atomic with acq_rel order reason: sync Lock/Unlock in other threads
+    } while (!state_.compare_exchange_weak(oldState, newState, std::memory_order_acq_rel, std::memory_order_relaxed));
+
+    if (!State::HasWriteLock(newState) || State::HasWriteLock(oldState)) {
+        auto *coro = EtsCoroutine::GetCurrent();
+        auto *coroManager = coro->GetCoroutineManager();
+        auto writeAwaitee = EtsWaitersList::Node(coroManager);
+        EtsSyncPrimitive<EtsRWLock>::SuspendCoroutine(GetWriters(coro), &writeAwaitee);
+    }
+}
+
+void EtsRWLock::Unlock()
+{
+    ASSERT(!State::IsUnlocked(GetState()));
+    // Atomic with relaxed order reason: sync is not needed here because CAS has acq_rel order
+    uint64_t oldState = state_.load(std::memory_order_relaxed);
+    uint64_t newState = 0;
+    do {
+        newState = State::HasReadLock(oldState) ? State::DecReadersClearState(oldState)
+                                                : State::DecWritersClearState(oldState);
+        newState |= State::HasReaders(newState)   ? State::READ_LOCK_STATE
+                    : State::HasWriters(newState) ? State::WRITE_LOCK_STATE
+                                                  : State::UNLOCKED_STATE;
+        // Atomic with acq_rel order reason: sync Lock/Unlock in other threads
+    } while (!state_.compare_exchange_weak(oldState, newState, std::memory_order_acq_rel, std::memory_order_relaxed));
+
+    if (newState == State::UNLOCKED_STATE || (State::HasReadLock(oldState) && State::HasReadLock(newState))) {
+        return;
+    }
+    if (State::HasWriteLock(newState)) {
+        EtsSyncPrimitive<EtsRWLock>::ResumeCoroutine(GetWriters(EtsCoroutine::GetCurrent()));
+        return;
+    }
+    for (auto readers = State::GetReaders(newState); readers != 0; --readers) {
+        EtsSyncPrimitive<EtsRWLock>::ResumeCoroutine(GetReaders(EtsCoroutine::GetCurrent()));
+    }
+}
+
+uint64_t EtsRWLock::GetState() const
+{
+    // Atomic with relaxed order reason: sync is not needed here
+    // because it is expected that method is not called concurrently with Lock/Unlock
+    return state_.load(std::memory_order_relaxed);
+}
+
+bool EtsRWLock::IsHeld() const
+{
+    return !State::IsUnlocked(GetState());
+}
+
 }  // namespace ark::ets
