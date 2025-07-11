@@ -17,6 +17,7 @@
 #include "plugins/ets/runtime/types/ets_sync_primitives.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_utils.h"
+#include "plugins/ets/runtime/ets_exceptions.h"
 
 namespace ark::ets::intrinsics {
 
@@ -34,6 +35,11 @@ void EtsMutexLock(EtsObject *mutex)
 void EtsMutexUnlock(EtsObject *mutex)
 {
     ASSERT(mutex->GetClass() == PlatformTypes()->coreMutex);
+    if (!EtsMutex::FromEtsObject(mutex)->IsHeld()) {
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::ILLEGAL_LOCK_STATE_ERROR,
+                          "Unable to unlock Mutex: state is already unlocked");
+        return;
+    }
     EtsMutex::FromEtsObject(mutex)->Unlock();
 }
 
@@ -97,6 +103,42 @@ void EtsQueueSpinlockGuard(EtsObject *spinlock, EtsObject *callback)
     EtsHandle<EtsObject> hCallback(coro, callback);
     EtsQueueSpinlock::Guard guard(hSpinlock);
     LambdaUtils::InvokeVoid(coro, hCallback.GetPtr());
+}
+
+void EtsReadLock(EtsObject *rwLock)
+{
+    ASSERT(rwLock->GetClass() == PlatformTypes()->coreRWLock);
+    EtsRWLock::FromEtsObject(rwLock)->ReadLock();
+}
+
+void EtsReadUnlock(EtsObject *rwLock)
+{
+    ASSERT(rwLock->GetClass() == PlatformTypes()->coreRWLock);
+    auto state = EtsRWLock::FromEtsObject(rwLock)->GetState();
+    if (EtsRWLock::State::IsUnlocked(state) || EtsRWLock::State::HasWriteLock(state)) {
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::ILLEGAL_LOCK_STATE_ERROR,
+                          "Unable to unlock ReadLock: state is already unlocked or write-locked");
+        return;
+    }
+    EtsRWLock::FromEtsObject(rwLock)->Unlock();
+}
+
+void EtsWriteLock(EtsObject *rwLock)
+{
+    ASSERT(rwLock->GetClass() == PlatformTypes()->coreRWLock);
+    EtsRWLock::FromEtsObject(rwLock)->WriteLock();
+}
+
+void EtsWriteUnlock(EtsObject *rwLock)
+{
+    ASSERT(rwLock->GetClass() == PlatformTypes()->coreRWLock);
+    auto state = EtsRWLock::FromEtsObject(rwLock)->GetState();
+    if (EtsRWLock::State::IsUnlocked(state) || EtsRWLock::State::HasReadLock(state)) {
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::ILLEGAL_LOCK_STATE_ERROR,
+                          "Unable to unlock WriteLock: state is already unlocked or read-locked");
+        return;
+    }
+    EtsRWLock::FromEtsObject(rwLock)->Unlock();
 }
 
 }  // namespace ark::ets::intrinsics

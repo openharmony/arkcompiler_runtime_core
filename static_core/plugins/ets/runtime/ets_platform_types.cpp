@@ -208,6 +208,7 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     findType(&EtsPlatformTypes::coreEvent, EVENT);
     findType(&EtsPlatformTypes::coreCondVar, COND_VAR);
     findType(&EtsPlatformTypes::coreQueueSpinlock, QUEUE_SPINLOCK);
+    findType(&EtsPlatformTypes::coreRWLock, RW_LOCK);
 
     findType(&EtsPlatformTypes::coreFinalizableWeakRef, FINALIZABLE_WEAK_REF);
     findType(&EtsPlatformTypes::coreFinalizationRegistry, FINALIZATION_REGISTRY);

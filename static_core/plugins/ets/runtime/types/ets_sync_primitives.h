@@ -74,7 +74,7 @@ public:
      * @param awaitee - EtsWaitersList node that contains GenericEvent and probably other useful data
      * NOTE: `this` and all other raw ObjectHeaders may become invalid after this call due to GC
      */
-    ALWAYS_INLINE void SuspendCoroutine(EtsWaitersList::Node *awaitee)
+    static ALWAYS_INLINE void SuspendCoroutine(EtsWaitersList *waiters, EtsWaitersList::Node *awaitee)
     {
         auto *coro = EtsCoroutine::GetCurrent();
         ASSERT(coro != nullptr);
@@ -83,7 +83,7 @@ public:
         // Need to lock event before PushBack
         // to avoid use-after-free in CoroutineEvent::Happen method
         event.Lock();
-        GetWaitersList(coro)->PushBack(awaitee);
+        waiters->PushBack(awaitee);
         ScopedNativeCodeThread nativeCode(coro);
         coroManager->Await(&event);
     }
@@ -92,11 +92,20 @@ public:
      * Unblocks suspended coroutine. It can be used concurrently with Suspend,
      * BUT not with other Resume (PopFront is not thread-safety)
      */
-    ALWAYS_INLINE void ResumeCoroutine()
+    static ALWAYS_INLINE void ResumeCoroutine(EtsWaitersList *waiters)
     {
-        auto *coro = EtsCoroutine::GetCurrent();
-        auto *awaitee = GetWaitersList(coro)->PopFront();
+        auto *awaitee = waiters->PopFront();
         awaitee->GetEvent().Happen();
+    }
+
+    void SuspendCoroutine(EtsWaitersList::Node *awaitee)
+    {
+        SuspendCoroutine(GetWaitersList(EtsCoroutine::GetCurrent()), awaitee);
+    }
+
+    void ResumeCoroutine()
+    {
+        ResumeCoroutine(GetWaitersList(EtsCoroutine::GetCurrent()));
     }
 
 private:
@@ -283,6 +292,147 @@ private:
     alignas(alignof(EtsLong)) std::atomic<Guard *> tail_;
 
     friend class test::EtsSyncPrimitivesTest;
+};
+
+class EtsRWLock : public EtsObject {
+public:
+    /// Acquires lock and allows to get shared with other readers access to the critical seciton
+    void ReadLock();
+
+    /// Acquires lock and allows to get exclusive access to the critical seciton
+    void WriteLock();
+
+    /**
+     * Releases lock and unblocks waiters
+     * NOTE: readers have higher priority for unblocking than writers
+     */
+    void Unlock();
+
+    static EtsRWLock *FromCoreType(ObjectHeader *rwLock)
+    {
+        return reinterpret_cast<EtsRWLock *>(rwLock);
+    }
+
+    static EtsRWLock *FromEtsObject(EtsObject *rwLock)
+    {
+        return reinterpret_cast<EtsRWLock *>(rwLock);
+    }
+
+    EtsObject *AsObject()
+    {
+        return this;
+    }
+
+    const EtsObject *AsObject() const
+    {
+        return this;
+    }
+
+    /// This method should not be used concurrently with Lock/Unlock
+    uint64_t GetState() const;
+
+    /// This method should be used to make sure that the lock is acquired by current coroutine
+    bool IsHeld() const;
+
+    class State;
+
+private:
+    EtsWaitersList *GetReaders(EtsCoroutine *coro)
+    {
+        return EtsWaitersList::FromCoreType(ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsRWLock, readers_)));
+    }
+
+    EtsWaitersList *GetWriters(EtsCoroutine *coro)
+    {
+        return EtsWaitersList::FromCoreType(ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsRWLock, writers_)));
+    }
+
+    ObjectPointer<EtsObject> rLock_;
+    ObjectPointer<EtsObject> wLock_;
+    ObjectPointer<EtsWaitersList> readers_;
+    ObjectPointer<EtsWaitersList> writers_;
+
+    /*
+     * 63          32          1       0
+     * ---------------------------------
+     * |  writers  |  readers  | state |
+     * ---------------------------------
+     *
+     * state: 00 - unlocked
+     * state: 01 - read locked
+     * state: 10 - write locked
+     */
+    alignas(alignof(EtsLong)) std::atomic<uint64_t> state_;
+
+    friend class test::EtsSyncPrimitivesTest;
+};
+
+class EtsRWLock::State {
+public:
+    static bool IsUnlocked(uint64_t state)
+    {
+        return state == UNLOCKED_STATE;
+    }
+
+    static bool HasReadLock(uint64_t state)
+    {
+        return (state & STATE_MASK) == READ_LOCK_STATE;
+    }
+
+    static bool HasWriteLock(uint64_t state)
+    {
+        return (state & STATE_MASK) == WRITE_LOCK_STATE;
+    }
+
+    static bool HasReaders(uint64_t state)
+    {
+        return (state & READERS_MASK) != 0;
+    }
+
+    static bool HasWriters(uint64_t state)
+    {
+        return (state & WRITERS_MASK) != 0;
+    }
+
+    static uint64_t GetReaders(uint64_t state)
+    {
+        return (state & READERS_MASK) >> STATE_BITS;
+    }
+
+    static uint64_t IncReaders(uint64_t state)
+    {
+        return state + ONE_READER;
+    }
+
+    static uint64_t IncWriters(uint64_t state)
+    {
+        return state + ONE_WRITER;
+    }
+
+    static uint64_t DecReadersClearState(uint64_t state)
+    {
+        return (state - ONE_READER) & ~STATE_MASK;
+    }
+
+    static uint64_t DecWritersClearState(uint64_t state)
+    {
+        return (state - ONE_WRITER) & ~STATE_MASK;
+    }
+
+    static constexpr uint64_t UNLOCKED_STATE = 0;
+    static constexpr uint64_t READ_LOCK_STATE = 1;
+    static constexpr uint64_t WRITE_LOCK_STATE = 1U << 1U;
+
+private:
+    static constexpr uint64_t STATE_MASK = 0x3;
+    static constexpr uint64_t READERS_MASK = 0xFFFFFFFEULL << 1U;
+    static constexpr uint64_t WRITERS_MASK = 0xFFFFFFFEULL << 32U;
+
+    static constexpr uint64_t STATE_BITS = 2;
+    static constexpr uint64_t READER_BITS = 31;
+
+    static constexpr uint64_t ONE_READER = 1ULL << STATE_BITS;
+    static constexpr uint64_t ONE_WRITER = 1ULL << (STATE_BITS + READER_BITS);
 };
 
 }  // namespace ark::ets
