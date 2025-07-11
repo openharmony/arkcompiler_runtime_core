@@ -20,9 +20,6 @@ if (!defined(ark_standalone_build)) {
 if (!defined(ark_hybrid)) {
   ark_hybrid = false
 }
-if (!defined(ark_hybrid)) {
-  ark_hybrid = false
-}
 if (!defined(support_jsapi)) {
   support_jsapi = false
 }

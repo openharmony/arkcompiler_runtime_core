@@ -372,7 +372,7 @@ private:
 
 #if defined(ARK_HYBRID) && defined(PANDA_TARGET_32)
 constexpr uint32_t OBJECT_HEADER_CLASS_OFFSET = 0U;
-static_assert(OBJECT_HEADER_CLASS_OFFSET == ark::ObjectHeader::GetMarkOffset());
+static_assert(OBJECT_HEADER_CLASS_OFFSET == ark::ObjectHeader::GetMarkWordOffset());
 #else
 constexpr uint32_t OBJECT_HEADER_CLASS_OFFSET = 0U;
 static_assert(OBJECT_HEADER_CLASS_OFFSET == ark::ObjectHeader::GetClassOffset());
