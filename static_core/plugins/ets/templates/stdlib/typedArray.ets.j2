@@ -1651,30 +1651,47 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         }
 
         let cmp = (l: {{T}}, r: {{T}}): number => {
-                return (l - r).toDouble()
+            const result = compareFn!({{asElementCompat % 'l'}}, {{asElementCompat % 'r'}})
+            {%- if N == 'BigInt64' %}
+            if (result instanceof BigInt) {
+                return result.getLong()
+            } else {
+                return result.toDouble()
             }
-        if (compareFn != undefined) {
-            cmp = (l: {{T}}, r: {{T}}): number => {
-                const result = compareFn!({{asElementCompat % 'l'}}, {{asElementCompat % 'r'}})
-                {%- if N == 'BigInt64' %}
-                if (result instanceof BigInt) {
-                    return result.getLong()
-                } else {
-                    return result as number
-                }
-                {%- else %}
-                return result
-                {%- endif %}
-            }
+            {%- else %}
+            return result
+            {%- endif %}
         }
+
         const MAX_SHORT_LENGTH = 24
+        {%- if N in ['Float32', 'Float64'] %}
+        let naNCounter = 0
+        {%- endif%}
+
         if (this.lengthInt > MAX_SHORT_LENGTH) {
             let arr: FixedArray<{{T}}> = new {{T}}[this.lengthInt]
             for (let i = 0; i < this.lengthInt; ++i) {
+            {%- if N in ['Float32', 'Float64'] %}
+                let val = this.getUnsafe(i)
+                if (isNaN(val)) {
+                    naNCounter++
+                } else {
+                    arr[i - naNCounter] = val
+                }
+            {%- else %}
                 arr[i] = this.getUnsafe(i)
+            {%- endif %}
             }
+            {%- if N in ['Float32', 'Float64'] %}
+            for (let i = 0; i < naNCounter; ++i) {
+                arr[this.lengthInt - 1 - i] = NaN.to{{TBoxed}}()
+            }
+            const arrLength = this.lengthInt - naNCounter
+            {%- else %}
+            const arrLength = this.lengthInt
+            {%- endif %}
 
-            arr = mergeSort(arr, cmp)
+            arr = mergeSort(arr, cmp, 0, arrLength)
 
             for (let i = 0; i < arr.length; ++i) {
                 this.setUnsafe(i, arr[i])
@@ -1682,9 +1699,27 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         } else {
             let buffer: FixedArray<{{BT}}> = new {{BT}}[this.lengthInt]
             for (let i = 0; i < this.lengthInt; ++i) {
+            {%- if N in ['Float32', 'Float64'] %}
+                let val = this.getUnsafe(i)
+                if (isNaN(val)) {
+                    naNCounter++
+                } else {
+                    buffer[i - naNCounter] = val
+                }
+            {%- else %}
                 buffer[i] = this.getUnsafe(i)
+            {%- endif %}
             }
-            arr_sort_stable(buffer, 0, buffer.length as int, cmp)
+            {%- if N in ['Float32', 'Float64'] %}
+            for (let i = 0; i < naNCounter; ++i) {
+                buffer[this.lengthInt - 1 - i] = NaN.to{{BT}}()
+            }
+            const arrLength = this.lengthInt - naNCounter
+            {%- else %}
+            const arrLength = this.lengthInt
+            {%- endif %}
+
+            arr_sort_stable(buffer, 0, arrLength, cmp)
             for (let i = 0; i < buffer.length; ++i) {
                 this.setUnsafe(i, buffer[i].to{{BT}}())
             }

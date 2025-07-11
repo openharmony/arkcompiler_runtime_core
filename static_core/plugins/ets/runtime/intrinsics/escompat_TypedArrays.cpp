@@ -15,6 +15,7 @@
 
 #include <charconv>
 #include <type_traits>
+#include <cmath>
 #include "ets_handle.h"
 #include "libpandabase/utils/utf.h"
 #include "libpandabase/utils/utils.h"
@@ -820,7 +821,21 @@ ETS_ESCOMPAT_COPY_WITHIN(UInt8Clamped)
 #undef ETS_ESCOMPAT_COPY_WITHIN
 
 template <typename T>
-T *EtsEscompatTypedArraySort(T *thisArray)
+bool Cmp(const typename T::ElementType &left, const typename T::ElementType &right)
+{
+    const auto lNumber = static_cast<double>(left);
+    const auto rNumber = static_cast<double>(right);
+    if (std::isnan(lNumber)) {
+        return false;
+    }
+    if (std::isnan(rNumber)) {
+        return true;
+    }
+    return left < right;
+}
+
+template <typename T>
+T *EtsEscompatTypedArraySortWrapper(T *thisArray, bool withNaN = false)
 {
     using ElementType = typename T::ElementType;
 
@@ -844,27 +859,24 @@ T *EtsEscompatTypedArraySort(T *thisArray)
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     Span<EtsByte> data(static_cast<EtsByte *>(dataPtr) + static_cast<size_t>(thisArray->GetByteOffset()), nBytes);
-    if constexpr (std::is_same_v<ElementType, EtsFloat> || std::is_same_v<ElementType, EtsDouble>) {
-        std::sort(reinterpret_cast<typename T::ElementType *>(data.begin()),
-                  reinterpret_cast<typename T::ElementType *>(data.end()),
-                  [](const typename T::ElementType &a, const typename T::ElementType &b) {
-                      if (std::isnan(a) && std::isnan(b)) {
-                          return false;  // Keep order of NaN elements
-                      }
-                      if (std::isnan(a)) {
-                          return false;  // NaN is greater than any number
-                      }
-                      if (std::isnan(b)) {
-                          return true;  // Any number is less than NaN
-                      }
-                      return a < b;
-                  });
-        return thisArray;
+    if (withNaN) {
+        std::sort(reinterpret_cast<ElementType *>(data.begin()), reinterpret_cast<ElementType *>(data.end()), Cmp<T>);
     } else {
-        std::sort(reinterpret_cast<typename T::ElementType *>(data.begin()),
-                  reinterpret_cast<typename T::ElementType *>(data.end()));
-        return thisArray;
+        std::sort(reinterpret_cast<ElementType *>(data.begin()), reinterpret_cast<ElementType *>(data.end()));
     }
+    return thisArray;
+}
+
+template <typename T>
+T *EtsEscompatTypedArraySortWithNaN(T *thisArray)
+{
+    return EtsEscompatTypedArraySortWrapper(thisArray, true);
+}
+
+template <typename T>
+T *EtsEscompatTypedArraySort(T *thisArray)
+{
+    return EtsEscompatTypedArraySortWrapper(thisArray);
 }
 
 extern "C" ark::ets::EtsEscompatInt8Array *EtsEscompatInt8ArraySort(ark::ets::EtsEscompatInt8Array *thisArray)
@@ -890,12 +902,12 @@ extern "C" ark::ets::EtsEscompatBigInt64Array *EtsEscompatBigInt64ArraySort(
 
 extern "C" ark::ets::EtsEscompatFloat32Array *EtsEscompatFloat32ArraySort(ark::ets::EtsEscompatFloat32Array *thisArray)
 {
-    return EtsEscompatTypedArraySort(thisArray);
+    return EtsEscompatTypedArraySortWithNaN(thisArray);
 }
 
 extern "C" ark::ets::EtsEscompatFloat64Array *EtsEscompatFloat64ArraySort(ark::ets::EtsEscompatFloat64Array *thisArray)
 {
-    return EtsEscompatTypedArraySort(thisArray);
+    return EtsEscompatTypedArraySortWithNaN(thisArray);
 }
 
 template <typename Array, typename = std::enable_if_t<std::is_floating_point_v<typename Array::ElementType>>>
