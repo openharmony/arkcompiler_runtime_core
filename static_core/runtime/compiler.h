@@ -129,6 +129,12 @@ public:
         return const_cast<panda_file::File *>(MethodCast(method)->GetPandaFile());
     }
 
+    uint32_t GetAOTBinaryFileSnapshotIndexForMethod(MethodPtr method) const override;
+
+    BinaryFilePtr GetAOTBinaryFileBySnapshotIndex(uint32_t index) const override;
+
+    uint32_t GetAOTBinaryFileSnapshotIndex(BinaryFilePtr file) const override;
+
     MethodId ResolveMethodIndex(MethodPtr parentMethod, MethodIndex index) const override;
 
     FieldId ResolveFieldIndex(MethodPtr parentMethod, FieldIndex index) const override;

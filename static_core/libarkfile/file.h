@@ -385,6 +385,28 @@ public:
         classHashTable_ = classHashTable;
     }
 
+    static constexpr uint32_t FILE_INDEX_MASK = UINT32_MAX;
+    static constexpr uint32_t FILE_INDEX_SHIFT = 32;
+    static constexpr uint32_t INVALID_FILE_INDEX = 0;
+    static constexpr uint32_t FILE_INDEX_BASE_OFFSET = 1;
+
+    static constexpr uint64_t PackFileEntityIdWithIndex(uint32_t entityIdOffset, uint32_t index)
+    {
+        return entityIdOffset | (static_cast<uint64_t>(index) & FILE_INDEX_MASK) << FILE_INDEX_SHIFT;
+    }
+
+    static constexpr std::pair<File::EntityId, uint32_t> UnpackFileEntityIdWithIndex(
+        uint64_t packedFileEntityIdWithIndex)
+    {
+        return {EntityId(static_cast<uint32_t>(packedFileEntityIdWithIndex)),
+                static_cast<uint32_t>((packedFileEntityIdWithIndex >> FILE_INDEX_SHIFT) & FILE_INDEX_MASK)};
+    }
+
+    static constexpr bool IsFileEntityIdWithIndex(uint64_t value)
+    {
+        return ((value >> FILE_INDEX_SHIFT) & FILE_INDEX_MASK) != INVALID_FILE_INDEX;
+    }
+
     PANDA_PUBLIC_API ~File();
 
     NO_COPY_SEMANTIC(File);

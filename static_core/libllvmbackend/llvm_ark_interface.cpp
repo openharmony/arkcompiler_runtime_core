@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -134,6 +134,7 @@ int32_t LLVMArkInterface::CreateIntfInlineCacheSlotId(const llvm::Function *call
     int32_t slot = aotData.GetIntfInlineCacheSlotId(intfInlineCacheIndex);
     intfInlineCacheIndex++;
     aotData.SetIntfInlineCacheIndex(intfInlineCacheIndex);
+    aotData.SetIsLLVMAotMode(true);
     return slot;
 }
 
@@ -669,14 +670,16 @@ int32_t LLVMArkInterface::GetPltSlotId(const llvm::Function *caller, const llvm:
     ASSERT_PRINT(callerOriginFile != nullptr,
                  std::string("No origin for function = '") + callerName.str() +
                      "'. Use RememberFunctionOrigin to store the origin before calling GetPltSlotId");
-    return GetAotDataFromBuilder(callerOriginFile, aotBuilder_).GetPltSlotId(GetMethodId(caller, callee));
+    auto aotData = GetAotDataFromBuilder(callerOriginFile, aotBuilder_);
+    aotData.SetIsLLVMAotMode(true);
+    return aotData.GetPltSlotId(GetMethodId(caller, callee), 0);
 }
 
 int32_t LLVMArkInterface::GetClassIndexInAotGot(ark::compiler::AotData *aotData, uint32_t klassId, bool initialized)
 {
     ASSERT(aotData != nullptr);
     llvm::sys::ScopedLock scopedLock {*lock_};
-    auto index = aotData->GetClassSlotId(klassId);
+    auto index = aotData->GetClassSlotId(klassId, 0);
     if (initialized) {
         return index - 1;
     }
@@ -687,7 +690,7 @@ int32_t LLVMArkInterface::GetStringSlotId(AotData *aotData, uint32_t typeId)
 {
     ASSERT(aotData != nullptr);
     llvm::sys::ScopedLock scopedLock {*lock_};
-    return aotData->GetStringSlotId(typeId);
+    return aotData->GetStringSlotId(typeId, 0);
 }
 
 LLVMArkInterface::RuntimeCallee LLVMArkInterface::GetEntrypointCallee(EntrypointId id) const

@@ -45,6 +45,8 @@ public:
 
     const AotPandaFile *FindPandaFile(const std::string &fileName);
 
+    bool IsFileInAotClassContext(const std::string &fileName, bool isAotVerifyAbsPath) const;
+
     PandaString GetBootClassContext() const
     {
         return bootClassContext_;
@@ -52,10 +54,11 @@ public:
 
     void ParseClassContextToFile(std::string_view context);
 
-    void SetBootClassContext(PandaString context)
+    void SetBootClassContext(PandaString context, bool isArkAot)
     {
         bootClassContext_ = std::move(context);
         ParseClassContextToFile(bootClassContext_);
+        UpdatePandaFilesSnapshot(isArkAot, true, false);
     }
 
     PandaString GetAppClassContext() const
@@ -63,10 +66,11 @@ public:
         return appClassContext_;
     }
 
-    void SetAppClassContext(PandaString context)
+    void SetAppClassContext(PandaString context, bool isArkAot)
     {
         appClassContext_ = std::move(context);
         ParseClassContextToFile(appClassContext_);
+        UpdatePandaFilesSnapshot(isArkAot, false, true);
     }
 
     void VerifyClassHierarchy();
@@ -185,6 +189,12 @@ public:
         return profiledPandaFiles_;
     }
 
+    using PandaFileLoadData = std::pair<const panda_file::File *, ClassLinkerContext *>;
+
+    void UpdatePandaFilesSnapshot(const panda_file::File *pf, ClassLinkerContext *ctx, bool isArkAot);
+    uint32_t GetPandaFileSnapshotIndex(const std::string &fileName);
+    const panda_file::File *GetPandaFileBySnapshotIndex(uint32_t index) const;
+
 private:
     PandaVector<std::unique_ptr<AotFile>> aotFiles_;
     PandaUnorderedMap<std::string, AotPandaFile> filesMap_;
@@ -200,6 +210,11 @@ private:
     std::atomic_uint32_t aotStringGcRootsCount_ {0};
     bool hasYoungAotStringRefs_ {false};
     PandaVector<BitSetElement> aotStringYoungSet_;
+
+    PandaVector<std::pair<std::string_view, PandaFileLoadData>> pandaFilesSnapshot_;
+    PandaUnorderedMap<std::string_view, PandaFileLoadData> pandaFilesLoaded_;
+
+    void UpdatePandaFilesSnapshot(bool isArkAot, bool bootContext, bool appContext);
 };
 
 class AotClassContextCollector {

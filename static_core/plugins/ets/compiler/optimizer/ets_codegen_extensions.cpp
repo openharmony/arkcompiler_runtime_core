@@ -36,7 +36,7 @@ void Codegen::EtsGetNativeMethod(IntrinsicInst *inst, Reg dst, [[maybe_unused]] 
         encoder->EncodeJump(skipLabel, methodReg, Condition::NE);
         LoadMethod(methodReg);
         CallRuntime(inst, EntrypointId::GET_CALLEE_METHOD, methodReg, RegMask::GetZeroMask(), methodReg,
-                    TypedImm(methodId));
+                    GetTypeIdImm(inst, methodId));
         encoder->EncodeStr(methodReg, MemRef(addrReg));
         encoder->BindLabel(skipLabel);
     }

@@ -83,6 +83,12 @@ public:
             return "-";
         }
         auto fileId = panda_file::File::EntityId(id);
+        // NOTE(igozman): Temporary fix for case when file's index from AOT context do not know about "in-memory" files
+        //                which were counted during compilation so fileId  is not from this file #27916
+        if (fileId.GetOffset() >= file_->GetHeader()->fileSize) {
+            return "-";
+        }
+
         panda_file::MethodDataAccessor mda(*file_, fileId);
         panda_file::ProtoDataAccessor pda(*file_, panda_file::MethodDataAccessor::GetProtoId(*file_, fileId));
         std::ostringstream ss;
@@ -120,6 +126,11 @@ public:
         return ClassHelper::GetName(file_->GetStringData(panda_file::File::EntityId(id)).data);
     }
 
+    const std::string &GetFilename() const
+    {
+        return file_->GetFilename();
+    }
+
 private:
     std::unique_ptr<const panda_file::File> file_;
 };
@@ -130,6 +141,44 @@ public:
     NO_COPY_SEMANTIC(AotDump);
     NO_MOVE_SEMANTIC(AotDump);
     ~AotDump() = default;
+
+    std::string GetFilePathFromContext(size_t index) const
+    {
+        std::string_view context = aotFile_->GetClassContext();
+        if (context.empty()) {
+            return "";
+        }
+
+        size_t start = 0;
+        size_t end = context.find(AotClassContextCollector::DELIMETER, start);
+        size_t currentIndex = 1;
+
+        while (end != std::string::npos) {
+            if (currentIndex == index) {
+                auto fileContext = context.substr(start, end - start);
+                size_t hashPos = fileContext.find(AotClassContextCollector::HASH_DELIMETER);
+                if (hashPos == std::string::npos) {
+                    return "";
+                }
+                return std::string(fileContext.substr(0, hashPos));
+            }
+            start = end + 1;
+            end = context.find(AotClassContextCollector::DELIMETER, start);
+            currentIndex++;
+        }
+
+        // Check last file
+        if (currentIndex == index) {
+            auto fileContext = context.substr(start);
+            size_t hashPos = fileContext.find(AotClassContextCollector::HASH_DELIMETER);
+            if (hashPos == std::string::npos) {
+                return "";
+            }
+            return std::string(fileContext.substr(0, hashPos));
+        }
+
+        return "";
+    }
 
     int Run(int argc, const char *argv[])  // NOLINT(modernize-avoid-c-arrays)
     {
@@ -397,15 +446,28 @@ public:
         (*stream_) << prefix << "          ";
         codeInfo.Dump(*stream_, stackmap, arch);
         (*stream_) << std::endl;
-        if (stackmap.HasInlineInfoIndex()) {
-            for (auto ii : const_cast<CodeInfo &>(codeInfo).GetInlineInfos(stackmap)) {
-                (*stream_) << prefix << "          ";
-                codeInfo.DumpInlineInfo(*stream_, stackmap, ii.GetRow() - stackmap.GetInlineInfoIndex());
-                auto id =
-                    const_cast<CodeInfo &>(codeInfo).GetMethod(stackmap, ii.GetRow() - stackmap.GetInlineInfoIndex());
-                (*stream_) << ", method: " << pfile.GetMethodName(std::get<uint32_t>(id));
-                (*stream_) << std::endl;
+        if (!stackmap.HasInlineInfoIndex()) {
+            return;
+        }
+        for (auto ii : const_cast<CodeInfo &>(codeInfo).GetInlineInfos(stackmap)) {
+            (*stream_) << prefix << "          ";
+            codeInfo.DumpInlineInfo(*stream_, stackmap, ii.GetRow() - stackmap.GetInlineInfoIndex());
+            auto id = const_cast<CodeInfo &>(codeInfo).GetMethod(stackmap, ii.GetRow() - stackmap.GetInlineInfoIndex());
+            std::string methodName;
+
+            auto i = ii.GetFileIndex();
+            if (i > 0) {
+                auto filePath = GetFilePathFromContext(i);
+                if (pfile.GetFilename() != filePath) {
+                    methodName = PandaFileHelper(filePath.c_str()).GetMethodName(std::get<uint32_t>(id));
+                }
             }
+            if (methodName.empty()) {
+                methodName = pfile.GetMethodName(std::get<uint32_t>(id));
+            }
+
+            (*stream_) << ", method: " << methodName;
+            (*stream_) << std::endl;
         }
     }
 

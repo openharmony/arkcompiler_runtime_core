@@ -161,64 +161,64 @@ function __noinline__getLength(flag: boolean): int {
 //!
 //! METHOD        "ETSGLOBAL::test_temp_arrays"
 //! PASS_BEFORE   "Escape"
-//! INST_COUNT    /NewArray/, 2
-//! INST_COUNT    /StoreArray/, 8
-//! INST_COUNT    /LoadArray/, 5
+//! INST_COUNT    /NewArray/, 4
+//! INST_COUNT    /StoreArray/, 12
+//! INST_COUNT    /LoadArray/, 9
 //! INST_COUNT    /ref.*Phi/, 1
-//! INST_COUNT    /i32.*Phi/, 2
+//! INST_NOT      /i32.*Phi/
 //! PASS_AFTER    "Escape"
-//! INST_COUNT    /NewArray/, 2
-//! INST_COUNT    /StoreArray/, 8
-//! INST_COUNT    /LoadArray/, 5
+//! INST_COUNT    /NewArray/, 4
+//! INST_COUNT    /StoreArray/, 12
+//! INST_COUNT    /LoadArray/, 9
 //! INST_COUNT    /ref.*Phi/, 1
-//! INST_COUNT    /i32.*Phi/, 2
+//! INST_NOT      /i32.*Phi/
 //!
 //! METHOD        "ETSGLOBAL::test_temp_arrays_diff_length1"
 //! PASS_BEFORE   "Escape"
-//! INST_COUNT    /NewArray/, 2
-//! INST_COUNT    /StoreArray/, 9
-//! INST_COUNT    /LoadArray/, 6
+//! INST_COUNT    /NewArray/, 4
+//! INST_COUNT    /StoreArray/, 14
+//! INST_COUNT    /LoadArray/, 11
 //! INST_COUNT    /ref.*Phi/, 1
 //! PASS_AFTER    "Escape"
-//! INST_COUNT    /NewArray/, 2
-//! INST_COUNT    /StoreArray/, 9
-//! INST_COUNT    /LoadArray/, 6
+//! INST_COUNT    /NewArray/, 4
+//! INST_COUNT    /StoreArray/, 14
+//! INST_COUNT    /LoadArray/, 11
 //! INST_COUNT    /ref.*Phi/, 1
 //!
 //! METHOD        "ETSGLOBAL::test_temp_arrays_diff_length2"
 //! PASS_BEFORE   "Escape"
-//! INST_COUNT    /NewArray/, 0
-//! INST_COUNT    /StoreArray/, 4
+//! INST_COUNT    /NewArray/, 2
+//! INST_COUNT    /StoreArray/, 20
 //! INST_COUNT    /LoadArray/, 4
-//! INST_COUNT    /ref.*Phi/, 1
+//! INST_COUNT    /ref.*Phi/, 5
 //! PASS_AFTER    "Escape"
-//! INST_COUNT    /NewArray/, 0
-//! INST_COUNT    /StoreArray/, 4
+//! INST_COUNT    /NewArray/, 2
+//! INST_COUNT    /StoreArray/, 20
 //! INST_COUNT    /LoadArray/, 4
-//! INST_COUNT    /ref.*Phi/, 1
+//! INST_COUNT    /ref.*Phi/, 5
 //!
 //! METHOD        "ETSGLOBAL::test_arrays_materialize"
 //! PASS_BEFORE   "Escape"
-//! INST_COUNT    /NewArray/, 2
-//! INST_COUNT    /StoreArray/, 8
-//! INST_COUNT    /LoadArray/, 5
+//! INST_COUNT    /NewArray/, 4
+//! INST_COUNT    /StoreArray/, 12
+//! INST_COUNT    /LoadArray/, 9
 //! INST_COUNT    /ref.*Phi/, 1
 //! PASS_AFTER    "Escape"
-//! INST_COUNT    /NewArray/, 2
-//! INST_COUNT    /StoreArray/, 8
-//! INST_COUNT    /LoadArray/, 5
+//! INST_COUNT    /NewArray/, 4
+//! INST_COUNT    /StoreArray/, 12
+//! INST_COUNT    /LoadArray/, 9
 //! INST_COUNT    /ref.*Phi/, 1
 //!
 //! METHOD        "ETSGLOBAL::test_arrays_materialize_in_slowpath"
 //! PASS_BEFORE   "Escape"
-//! INST_COUNT    /NewArray/, 2
-//! INST_COUNT    /StoreArray/, 8
-//! INST_COUNT    /LoadArray/, 8
+//! INST_COUNT    /NewArray/, 4
+//! INST_COUNT    /StoreArray/, 12
+//! INST_COUNT    /LoadArray/, 12
 //! INST_COUNT    /ref.*Phi/, 1
 //! PASS_AFTER    "Escape"
-//! INST_COUNT    /NewArray/, 2
-//! INST_COUNT    /StoreArray/, 8
-//! INST_COUNT    /LoadArray/, 8
+//! INST_COUNT    /NewArray/, 4
+//! INST_COUNT    /StoreArray/, 12
+//! INST_COUNT    /LoadArray/, 12
 //! INST_COUNT    /ref.*Phi/, 1
 
 //! CHECKER       JIT Escape eliminate phi with objects

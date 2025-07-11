@@ -155,6 +155,21 @@ public:
         return nullptr;
     }
 
+    virtual uint32_t GetAOTBinaryFileSnapshotIndexForMethod([[maybe_unused]] MethodPtr method) const
+    {
+        return 0;
+    }
+
+    virtual BinaryFilePtr GetAOTBinaryFileBySnapshotIndex([[maybe_unused]] uint32_t index) const
+    {
+        return nullptr;
+    }
+
+    virtual uint32_t GetAOTBinaryFileSnapshotIndex([[maybe_unused]] BinaryFilePtr file) const
+    {
+        return 0;
+    }
+
     // File offsets
     uint32_t GetBinaryFileBaseOffset(Arch arch) const
     {

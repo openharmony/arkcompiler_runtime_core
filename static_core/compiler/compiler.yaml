@@ -463,6 +463,12 @@ options:
   description: Enable inlining external methods in JIT mode
   tags: [perf]
 
+- name: compiler-inline-external-methods-aot
+  type: bool
+  default: true
+  description: Enable inlining external methods in AOT mode
+  tags: [perf]
+
 - name: compiler-inlining-blacklist
   type: arg_list_t
   default: []

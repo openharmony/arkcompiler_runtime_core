@@ -64,6 +64,29 @@ bool PandaRuntimeInterface::IsGcValidForFastPath(SourceLanguage lang) const
     return gcType == mem::GCType::G1_GC;
 }
 
+uint32_t PandaRuntimeInterface::GetAOTBinaryFileSnapshotIndexForMethod(MethodPtr method) const
+{
+    const auto *pfile = const_cast<panda_file::File *>(MethodCast(method)->GetPandaFile());
+    return panda_file::File::FILE_INDEX_BASE_OFFSET +
+           Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->GetPandaFileSnapshotIndex(
+               pfile->GetFullFileName());
+}
+
+compiler::RuntimeInterface::BinaryFilePtr PandaRuntimeInterface::GetAOTBinaryFileBySnapshotIndex(uint32_t index) const
+{
+    ASSERT(index != panda_file::File::INVALID_FILE_INDEX);
+    index -= panda_file::File::FILE_INDEX_BASE_OFFSET;
+    auto pfile = Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->GetPandaFileBySnapshotIndex(index);
+    return const_cast<BinaryFilePtr>(reinterpret_cast<const void *>(pfile));
+}
+
+uint32_t PandaRuntimeInterface::GetAOTBinaryFileSnapshotIndex(BinaryFilePtr file) const
+{
+    return panda_file::File::FILE_INDEX_BASE_OFFSET +
+           Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->GetPandaFileSnapshotIndex(
+               reinterpret_cast<const panda_file::File *>(file)->GetFullFileName());
+}
+
 compiler::RuntimeInterface::MethodId PandaRuntimeInterface::ResolveMethodIndex(MethodPtr parentMethod,
                                                                                MethodIndex index) const
 {

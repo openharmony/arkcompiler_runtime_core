@@ -36,7 +36,11 @@ class Array;
 class String;
 }  // namespace coretypes
 
+#ifdef PANDA_TARGET_ARM32
 using FileEntityId = uint32_t;
+#else
+using FileEntityId = uint64_t;
+#endif
 
 }  // namespace ark
 

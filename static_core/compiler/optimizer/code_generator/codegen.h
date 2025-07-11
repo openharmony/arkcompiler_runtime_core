@@ -213,6 +213,9 @@ public:
         return runtime_->IsCompressedStringsEnabled();
     }
 
+    uint32_t GetAOTBinaryFileSnapshotIndexForInst(const Inst *inst) const;
+    TypedImm GetTypeIdImm(const Inst *inst, uint32_t typeId) const;
+
     void CreateStackMap(Inst *inst, Inst *user = nullptr);
 
     void CreateStackMapRec(SaveStateInst *saveState, bool requireVregMap, Inst *targetSite);

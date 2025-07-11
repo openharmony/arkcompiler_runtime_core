@@ -1058,6 +1058,7 @@ void Paoc::MakeAotData(CompilingContext *ctx, uintptr_t codeAddress)
     ASSERT(aotData != nullptr);
     aotData->SetUseCha(paocOptions_->IsPaocUseCha());
     aotData->SetHasProfileData(ctx->method->GetProfilingData() != nullptr);
+    aotData->SetIsLLVMAotMode(IsLLVMAotMode());
     ctx->graph->SetAotData(aotData);
 }
 

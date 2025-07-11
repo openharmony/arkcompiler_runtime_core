@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -124,7 +124,8 @@ void CodeInfoBuilder::DumpCurrentStackMap(std::ostream &stream) const
     }
 }
 
-void CodeInfoBuilder::BeginInlineInfo(void *method, uint32_t methodId, uint32_t bpc, uint32_t vregsCount)
+void CodeInfoBuilder::BeginInlineInfo(void *method, uint32_t methodId, uint32_t bpc, uint32_t vregsCount,
+                                      uint32_t pandaFileIndex)
 {
 #ifndef NDEBUG
     ASSERT(wasMethodBegin_);
@@ -135,6 +136,7 @@ void CodeInfoBuilder::BeginInlineInfo(void *method, uint32_t methodId, uint32_t 
     currentVregsCount_ += vregsCount;
 
     inlineInfo[InlineInfo::COLUMN_IS_LAST] = static_cast<uint32_t>(false);
+    inlineInfo[InlineInfo::COLUMN_FILE_INDEX] = pandaFileIndex;
     inlineInfo[InlineInfo::COLUMN_BYTECODE_PC] = bpc;
     inlineInfo[InlineInfo::COLUMN_VREGS_COUNT] = currentVregsCount_;
     if (method != nullptr) {

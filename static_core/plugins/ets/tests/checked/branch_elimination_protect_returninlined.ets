@@ -167,8 +167,8 @@ function complex_inlined_inf_loop(): int {
 //! METHOD           "branch_elimination_protect_returninlined.ETSGLOBAL::test_eliminate_throw"
 //! PASS_AFTER       "Inline"
 //! INST             /Call.*Inlined.*eliminate_throw/
-//! INST_COUNT       "CallStatic.Inlined", 3
-//! INST_COUNT       "ReturnInlined", 6
+//! INST_COUNT       "CallStatic.Inlined", 7
+//! INST_COUNT       "ReturnInlined", 10
 //! INST_COUNT       "Throw", 2
 //! PASS_BEFORE_NTH  "BranchElimination", 2
 //! INST             /Call.*Inlined.*eliminate_throw/
@@ -179,7 +179,7 @@ function complex_inlined_inf_loop(): int {
 //! INST_NEXT        "ReturnInlined"
 //! INST_NEXT        "Throw"
 //! INST_COUNT       "Throw", 2
-//! INST_COUNT       "ReturnInlined", 6
+//! INST_COUNT       "ReturnInlined", 10
 //! PASS_AFTER_NTH   "BranchElimination", 2
 //! INST             /Call.*Inlined.*eliminate_throw/
 //! INST_NEXT        "ReturnInlined"

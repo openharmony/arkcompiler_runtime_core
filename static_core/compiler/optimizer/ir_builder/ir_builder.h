@@ -221,6 +221,26 @@ private:
     bool hasRuntimeCalls_ {false};
 };
 
+class IrBuilderExternalInliningAnalysisForLLVMAot : public IrBuilderInliningAnalysis {
+public:
+    IrBuilderExternalInliningAnalysisForLLVMAot(Graph *graph, RuntimeInterface::MethodPtr method)
+        : IrBuilderInliningAnalysis(graph, method)
+    {
+    }
+
+    NO_COPY_SEMANTIC(IrBuilderExternalInliningAnalysisForLLVMAot);
+    NO_MOVE_SEMANTIC(IrBuilderExternalInliningAnalysisForLLVMAot);
+    ~IrBuilderExternalInliningAnalysisForLLVMAot() override = default;
+
+    const char *GetPassName() const override
+    {
+        return "IrBuilderExternalInliningAnalysisForLLVMAot";
+    }
+
+private:
+    bool IsSuitableForInline(const BytecodeInstruction *inst) override;
+};
+
 class IrBuilderExternalInliningAnalysis : public IrBuilderInliningAnalysis {
 public:
     IrBuilderExternalInliningAnalysis(Graph *graph, RuntimeInterface::MethodPtr method)
