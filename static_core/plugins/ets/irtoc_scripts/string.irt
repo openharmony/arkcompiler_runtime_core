@@ -322,6 +322,8 @@ function(:StringTrimLeft,
     ReturnVoid().void
     next
   end
+  
+  check_string_type(str)
 
   length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   If(length_packed, 1).LE.Unlikely.b {
@@ -349,6 +351,10 @@ Label(:L1)
   LiveOut(unused2).DstReg(regmap[:arg2]).i32
   entrypoint2 = get_entrypoint_offset("STRING_TRIM_LEFT_BASE")
   Intrinsic(:TAIL_CALL).AddImm(entrypoint2).MethodAsImm("StringTrimLeftBase").Terminator.ptr
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_TRIM_LEFT_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, str).AddImm(entrypoint).MethodAsImm("StringTrimLeft3ArgBridge").Terminator.ptr
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
 
@@ -417,6 +423,8 @@ function(:StringTrimRight,
     ReturnVoid().void
     next
   end
+  
+  check_string_type(str)
 
   length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   If(length_packed, 1).LE.Unlikely.b {
@@ -446,6 +454,10 @@ Label(:L1)
   LiveOut(unused2).DstReg(regmap[:arg2]).i32
   entrypoint2 = get_entrypoint_offset("STRING_TRIM_RIGHT_BASE")
   Intrinsic(:TAIL_CALL).AddImm(entrypoint2).MethodAsImm("StringTrimRightBase").Terminator.ptr
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_TRIM_RIGHT_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, str).AddImm(entrypoint).MethodAsImm("StringTrimRight3ArgBridge").Terminator.ptr
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
 
@@ -532,6 +544,8 @@ function(:StringTrim,
     next
   end
 
+  check_string_type(str)
+
   length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   # length == 0
   If(length_packed, 1).LE.Unlikely.b {
@@ -592,6 +606,10 @@ Label(:FirstCharWhitespace)
   LiveOut(unused2).DstReg(regmap[:arg2]).i32
   entrypoint3 = get_entrypoint_offset("STRING_TRIM_LEFT_BASE")
   Intrinsic(:TAIL_CALL).AddImm(entrypoint3).MethodAsImm("StringTrimLeftBase").Terminator.ptr
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_TRIM_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, str).AddImm(entrypoint).MethodAsImm("StringTrim3ArgBridge").Terminator.ptr
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
 
@@ -660,6 +678,9 @@ function(:StringStartsWith,
     next
   end
 
+  check_string_type(str)
+  check_string_type(pfx)
+
   pfx_len_packed := LoadI(pfx).Imm(Constants::STRING_LENGTH_OFFSET).u32
   # Return 'true' if prefix is empty
   # The least significant bit indicates COMPRESSED/UNCOMPRESSED,
@@ -694,6 +715,10 @@ function(:StringStartsWith,
   LiveOut(from_index2).DstReg(regmap[:arg2]).i32
   entrypoint = get_entrypoint_offset("STRING_STARTS_WITH_BASE")
   Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringStartsWithBase").Terminator.b
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_STARTS_WITH_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, str, pfx, from_index).AddImm(entrypoint).MethodAsImm("StringStartsWithOddSavedBridge").Terminator.b
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
 
@@ -751,6 +776,9 @@ function(:StringEndsWith,
     next
   end
 
+  check_string_type(str)
+  check_string_type(sfx)
+
   sfx_len_packed := LoadI(sfx).Imm(Constants::STRING_LENGTH_OFFSET).u32
   # Return 'true' if suffix is empty
   # The least significant bit indicates COMPRESSED/UNCOMPRESSED,
@@ -788,6 +816,10 @@ function(:StringEndsWith,
   LiveOut(end_index2).DstReg(regmap[:arg2]).i32
   entrypoint = get_entrypoint_offset("STRING_ENDS_WITH_BASE")
   Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringEndsWithBase").Terminator.b
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_ENDS_WITH_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, str, sfx, end_index).AddImm(entrypoint).MethodAsImm("StringEndsWithOddSavedBridge").Terminator.b
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
 function(:StringGetBytesTlab,
@@ -802,6 +834,8 @@ function(:StringGetBytesTlab,
     next
   end
 
+  check_string_type(str)
+
   If(begin_index, end_index).GT.Unlikely.b {
     Goto(:SlowPathEntrypoint)  # Out of range
   }
@@ -809,6 +843,8 @@ function(:StringGetBytesTlab,
   If(begin_index, Cast(0).i32).LT.Unlikely.b {
     Goto(:SlowPathEntrypoint)  # Out of range
   }
+
+  check_string_type(str)
 
   # Note, 'str' is checked against nullptr in the InstBuilder (see AddArgNullcheckIfNeeded)
   length := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32;
@@ -1421,6 +1457,8 @@ function(:StringIndexOf,
     next
   end
 
+  check_string_type(str)
+
   str_len_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
 
   # Return '-1' if 'str' is empty.
@@ -1491,6 +1529,10 @@ function(:StringIndexOf,
   LiveOut(ch).DstReg(regmap[:arg2]).u8
   entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED")
   Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressed").Terminator.i32
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_INDEX_OF_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, str, ch).AddImm(entrypoint).MethodAsImm("StringIndexOf3ArgBridge").Terminator.i32
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
 
@@ -1511,6 +1553,8 @@ function(:StringIndexOfAfter,
     ReturnVoid().void
     next
   end
+
+  check_string_type(str)
 
   str_len_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   # Return '-1' if 'str' is empty.
@@ -1593,6 +1637,10 @@ function(:StringIndexOfAfter,
   LiveOut(ch).DstReg(regmap[:arg2]).u8
   entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED")
   Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressed").Terminator.i32
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_INDEX_OF_AFTER_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, str, ch, start_index).AddImm(entrypoint).MethodAsImm("StringIndexOfAfterOddSavedBridge").Terminator.i32
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
 function(:StringRepeatTlab,
@@ -1610,6 +1658,8 @@ function(:StringRepeatTlab,
   IfImm(Compare(count, 0).LT.b).Imm(0).NE {
     Goto(:SlowPathEntrypoint)
   }
+
+  check_string_type(str)
 
   IfImm(Compare(count, 0).EQ.b).Imm(0).NE {
     klass := load_class(str)
@@ -1682,6 +1732,8 @@ function(:WriteStringToMem,
     next
   end
 
+  check_string_type(str)
+
   buf := Bitcast(mem).ptr
   len := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   utf16 := AndI(len).Imm(1).u32
@@ -1711,6 +1763,10 @@ function(:WriteStringToMem,
 Label(:End)
   len := Phi(len_0, len, len_1).u32
   Return(len).u32
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("WRITE_STRING_TO_MEM_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, mem, str).AddImm(entrypoint).MethodAsImm("WriteStringToMemUsualBridge").Terminator.u32
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
 function(:CreateStringFromMem,

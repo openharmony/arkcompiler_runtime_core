@@ -42,6 +42,9 @@ function(:StringConcat2Tlab,
       Intrinsic(:UNREACHABLE).void.Terminator
       next
     end
+    
+    check_string_type(str1)
+    check_string_type(str2)
 
     klass := load_class(str1)
     length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -115,6 +118,10 @@ function(:StringConcat3Tlab,
       Intrinsic(:UNREACHABLE).void.Terminator
       next
     end
+
+    check_string_type(str1)
+    check_string_type(str2)
+    check_string_type(str3)
 
     klass := load_class(str1)
     length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -204,6 +211,11 @@ function(:StringConcat4Tlab,
       Intrinsic(:UNREACHABLE).void.Terminator
       next
     end
+
+    check_string_type(str1)
+    check_string_type(str2)
+    check_string_type(str3)
+    check_string_type(str4)
 
     klass := load_class(str1)
     length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -388,6 +400,9 @@ function(:StringCompareTo,
     Intrinsic(:UNREACHABLE).void.Terminator
     next
   end
+  
+  check_string_type(str1)
+  check_string_type(str2)
 
   Return(macroStringCompareTo(str1, str2)).i32
 }

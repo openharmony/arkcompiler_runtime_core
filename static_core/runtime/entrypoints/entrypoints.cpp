@@ -1940,4 +1940,9 @@ extern "C" coretypes::String *CoreStringConcat4(coretypes::String *str1, coretyp
     return str;
 }
 
+extern "C" uint8_t CoreStringEquals(coretypes::String *str1, coretypes::String *str2)
+{
+    return coretypes::String::StringsAreEqual(str1, str2);
+}
+
 }  // namespace ark

@@ -207,6 +207,10 @@ module Constants
     STRING_LENGTH_SHIFT = "ark::coretypes::String::STRING_LENGTH_SHIFT"
     STRING_HASHCODE_OFFSET = "ark::coretypes::STRING_HASHCODE_OFFSET"
     STRING_DATA_OFFSET = "ark::coretypes::STRING_DATA_OFFSET"
+    STRING_TYPE_OFFSET = "cross_values::GetBaseClassStringTypeOffset(GetArch())"
+    STRING_TYPE_LINE = "ark::coretypes::STRING_TYPE_LINE"
+    STRING_TYPE_SLICE = "ark::coretypes::STRING_TYPE_SLICE"
+    STRING_TYPE_TREE = "ark::coretypes::STRING_TYPE_TREE"
     ALIGNMENT_MASK = "~(TLAB_ALIGNMENT - 1)"
 
     # shift one bit less to keep ACC_INTRINSIC bit

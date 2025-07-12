@@ -528,6 +528,7 @@ Label(:ForEachBufferSlot)
   # -------------------
   # Object is a string
   # -------------------
+  check_string_type(obj)
   str_len := LoadI(obj).Imm(Constants::STRING_LENGTH_OFFSET).i32
   src_data := AddI(Cast(obj).SrcType(Constants::COMPILER_REFERENCE).ptr).Imm(Constants::STRING_DATA_OFFSET).ptr
   src_len := ShrI(str_len).Imm(Constants::STRING_LENGTH_SHIFT).i32
