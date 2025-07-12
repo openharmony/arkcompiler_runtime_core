@@ -18,6 +18,8 @@
 desc: Full declaration with reference arguments, {{c.desc}}
 ---*/
 
-{{c.impl}}
+function main() {
+    {{c.impl|indent}}
+}
 
 {% endfor %}

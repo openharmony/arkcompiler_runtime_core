@@ -13,14 +13,17 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Body, {{c.desc}}
+desc: Lambda signature positive
+
 ---*/
 
-{{c.impl}}
+class A {
+  age: number = 0
+  name: string = "testSubject"
+}
 
 function main() {
-    {{c.call|indent}}
+    let test = <T extends keyof A>(x: T): T => { return x }
+    arktest.assertEQ('age',  test<'age'>('age'))
 }
-{% endfor %}

@@ -13,14 +13,18 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: Return type can be inferred from the lambda body
-tags:
-- compile-only
+desc: Lambda signature positive case examples
 ---*/
+type LT<T> = (p1: T, ...p2: T[]) => T
 
-let f1 = (a:int, b: int) => a + b
-let x: int = f1(1, 2)
+function foo<T> (a: LT<T>) {}
+function bar<T> (a: (...p: T[]) => T) {}
+function goo<T> (a: (p?: T) => T) {}
 
-let f2 = (a:String, b: String) => a + b
-let y: String = f2("Hello", "World")
+function main() {
+    {{c.call}}
+}
+
+{% endfor %}

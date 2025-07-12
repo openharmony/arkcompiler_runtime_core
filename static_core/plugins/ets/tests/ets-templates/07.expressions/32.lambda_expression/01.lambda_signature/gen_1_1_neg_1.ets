@@ -13,15 +13,24 @@
  * limitations under the License.
  */
 
+
 /*---
-desc: Negative cases for return type inference
+desc: Lambda signature negative
 tags:
 - compile-only
 - negative
 ---*/
 
-let f1 = (a:int, b: int) => a + b
-let x: String = f1(1, 2)
+interface IFoo {
+}
 
-let f2 = (a:String, b: String) => a + b
-let y: int = f2("Hello", "World")
+class A implements IFoo {
+}
+
+class B extends A {}
+
+function main() {
+    let test = <T extends IFoo> (x: T): T => { return x }
+
+    test<B>(new A)  // TypeError: Type 'A' is not compatible with type 'B'
+}

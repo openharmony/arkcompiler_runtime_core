@@ -13,14 +13,17 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Body, {{c.desc}}
+desc: Return type can be inferred from the lambda body
+tags:
 ---*/
 
-{{c.impl}}
-
 function main() {
-    {{c.call|indent}}
+    let f2 = (a:int, b: int) => a + b
+    let x: int = f2(1, 2)
+
+    arktest.assertTrue(f2 instanceof Function2)
+    arktest.assertTrue(x instanceof int)
+    arktest.assertEQ(3, x)
 }
-{% endfor %}
+

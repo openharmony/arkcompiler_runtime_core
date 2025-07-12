@@ -13,14 +13,25 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-/*---
-desc: Body, {{c.desc}}
----*/
 
-{{c.impl}}
+/*---
+desc: Lambda signature positive
+---*/
+interface IFoo {
+}
+
+class A implements IFoo {
+}
+
+class B extends A {}
 
 function main() {
-    {{c.call|indent}}
+    let test = <T extends IFoo> (x: T): T => { return x }
+    test<IFoo>(new A)
+    test<IFoo>(new B)
+
+    test<A>(new A)
+    test<A>(new B)
+
+    test<B>(new B)
 }
-{% endfor %}

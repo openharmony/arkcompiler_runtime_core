@@ -13,14 +13,19 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Body, {{c.desc}}
+desc: Return type can be inferred from the lambda body
+tags:
+
 ---*/
 
-{{c.impl}}
 
 function main() {
-    {{c.call|indent}}
+    let F0 = (flag: boolean) => () => flag ? 'Hello World' : 12
+
+    let r = F0(true)
+    arktest.assertTrue(r instanceof Function)
+
+    arktest.assertEQ('Hello World', F0(true)())
+    arktest.assertEQ(12, F0(false)())
 }
-{% endfor %}

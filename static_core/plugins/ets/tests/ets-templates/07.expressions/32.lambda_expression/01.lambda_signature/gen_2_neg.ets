@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+
 /*---
-desc: Body, {{c.desc}}
+desc: Lambda signature negative
+tags:
+- compile-only
+- negative
 ---*/
 
-{{c.impl}}
-
 function main() {
-    {{c.call|indent}}
+    let test = <T extends 'aa'| 'bb'> (x: T): T => { return x }
+    arktest.assertEQ('aa', test<'aa'>('cc')) // TypeError: Type '"cc"' is not compatible with type '"aa"
 }
-{% endfor %}

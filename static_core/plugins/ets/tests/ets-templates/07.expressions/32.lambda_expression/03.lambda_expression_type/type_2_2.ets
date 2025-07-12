@@ -13,14 +13,21 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Body, {{c.desc}}
+desc: Return type can be inferred from the lambda body
+tags:
+
 ---*/
 
-{{c.impl}}
+function sum(a:int, b: int) {
+    return a + b
+}
 
 function main() {
-    {{c.call|indent}}
+    let FO = (a:int, b: int) => () => sum(a, b)
+
+    let F1 = FO(40, 2)
+    let R = F1()
+    arktest.assertTrue(F1 instanceof Function0)
+    arktest.assertEQ(42, R)
 }
-{% endfor %}

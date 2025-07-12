@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+
 /*---
-desc: Body, {{c.desc}}
+desc: Lambda signature positive
 ---*/
 
-{{c.impl}}
-
 function main() {
-    {{c.call|indent}}
+    let test = <T> (x: T): T => { return x }
+
+    arktest.assertFalse(test<Boolean>(false))
+    arktest.assertEQ(12345.0f, test<float>(12345.0f))
+    arktest.assertEQ('12345.0f', test<string>('12345.0f'))
 }
-{% endfor %}

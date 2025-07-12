@@ -13,14 +13,12 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+
 /*---
-desc: Body, {{c.desc}}
+desc: Lambda signature positive
 ---*/
 
-{{c.impl}}
-
 function main() {
-    {{c.call|indent}}
+    let test = <T extends 'aa'| 'bb'> (x: T): T => { return x }
+    test<'aa'>('aa')
 }
-{% endfor %}

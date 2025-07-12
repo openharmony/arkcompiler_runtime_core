@@ -15,19 +15,21 @@
 cases:
   - desc: single expression
     impl: |-
-        let f = () => "Hello, World!"
-        arktest.assertEQ(f(), "Hello, World!", "single expression failed")
+    call: |-
+        let f = () => 'Hello, World!'
+        arktest.assertEQ(f(), 'Hello, World!', 'single expression failed')
 
   - desc: block
     impl: |-
+    call: |-
         let f = () => {
-            let a = "Hello"
-            let b = ", "
-            let c = "World!"
-
-            return a + b + c
+        let a = 'Hello'
+        let b = ", "
+        let c = 'World!'
+        
+        return a + b + c
         }
-        arktest.assertEQ(f(), "Hello, World!", "block failed")
+        arktest.assertEQ(f(), 'Hello, World!', "block failed")
 
   - desc: capture "this"
     impl: |-
@@ -43,6 +45,7 @@ cases:
             }
         }
 
+    call: |-
         let a = new A()
         a.increment()
         arktest.assertEQ(a.count, 1, "capture \"this\" failed")
@@ -70,7 +73,7 @@ cases:
                 this.test(() => { super.count-- })
             }
         }
-
+    call: |-
         let b = new B()
         b.decrement()
         arktest.assertEQ(b.count, -1, "capture \"super\" failed")
@@ -82,7 +85,8 @@ cases:
             let x = () => { return y + 1 }
             return x()
         }
-        arktest.assertEQ(f(), 2, "use local variable failed")
+    call: |-
+        arktest.assertEQ(f(), 2, 'use local variable failed')
 
   - desc: capture local variable
     impl: |-
@@ -92,7 +96,8 @@ cases:
             x()
             return y
         }
-        arktest.assertEQ(f(), 2, "modify local variable failed")
+    call: |-
+        arktest.assertEQ(f(), 2, 'modify local variable failed')
 
   - desc: capture formal parameter
     impl: |-
@@ -100,7 +105,8 @@ cases:
             let x = () => { return y + 1 }
             return x()
         }
-        arktest.assertEQ(f(4), 5, "use formal parameter failed")
+    call: |-
+        arktest.assertEQ(f(4), 5, 'use formal parameter failed')
 
   - desc: capture formal parameter
     impl: |-
@@ -109,4 +115,20 @@ cases:
             x()
             return y
         }
-        arktest.assertEQ(f(6), 7, "modify formal parameter failed")
+    call: |-
+        arktest.assertEQ(f(6), 7, 'modify formal parameter failed')
+
+  - desc: capture constant from global scope
+    impl: |-
+      const helloWorld = 'Hello, World!'
+    call: |-
+      let f = () => helloWorld
+      arktest.assertTrue(f instanceof Function0)
+      arktest.assertEQ(f(), 'Hello, World!', 'capture constant failed')
+
+  - desc: capture constant function from global scope
+    impl: |-
+      const helloWorld = () => 'Hello, World!'
+    call: |-
+      let f = () => helloWorld
+      arktest.assertEQ(f()(), 'Hello, World!', 'capture constant failed')
