@@ -77,11 +77,11 @@ function main(): void {
     testErrorCall(()=> {
         let sumClass = etsVm.getClass('Lets_functions/Sum;');
         callbackEtsFunctionSum(new sumClass());
-    }, 'TypeError: is not callable');
+    }, 'TypeError: Object is not callable');
 
     testErrorCall(()=> {
         callbackEtsFunctionSum(ets_global.sum);
-    }, 'TypeError: is not callable');
+    }, 'TypeError: Object is not callable');
 }
 
 main();
