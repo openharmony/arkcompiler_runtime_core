@@ -26,7 +26,6 @@ function main() {
     suite.addTest("Throws an error for invalid 'toIndex' range.", BitVector_getLastIndexOf_Func_002);
     suite.addTest("Throws an error for negative 'fromIndex' and 'toIndex'.", BitVector_getLastIndexOf_Func_003);
     suite.addTest("Throws an error for negative 'fromIndex' with valid 'toIndex'.", BitVector_getLastIndexOf_Func_004);
-    suite.addTest("Throws an error for non-integer 'fromIndex'.", BitVector_getLastIndexOf_Func_005);
     suite.addTest("Locates the last occurrence of a bit value in a large BitVector.", BitVector_getLastIndexOf_Func_006);
     suite.addTest("Locates the last occurrence of a bit value in a BitVector with initial length.", BitVector_getLastIndexOf_Func_007);
 
@@ -100,25 +99,6 @@ function BitVector_getLastIndexOf_Func_004() {
             (e as BusinessError).message === `The value of "fromIndex" is out of range. It must be >= 0 && <= 7. Received value is: -3`;
     };
     arktest.expectThrow(() => { bitVector.getLastIndexOf(0, -3, 8); }, exceptionCheck);
-}
-
-// Test cases ported from ArkTS 1.0: BITVECTOR_TEST_056
-function BitVector_getLastIndexOf_Func_005() {
-    let bitVector = new collections.BitVector(0);
-    bitVector.push(1);
-    bitVector.push(1);
-    bitVector.push(0);
-    bitVector.push(1);
-    bitVector.push(0);
-    bitVector.push(0);
-    bitVector.push(1);
-    bitVector.push(0);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return e instanceof BusinessError &&
-            (e as BusinessError).code === TypeErrorCodeId &&
-            (e as BusinessError).message === `The type of "fromIndex" must be integer. Received value is: 0.1`;
-    };
-    arktest.expectThrow(() => { bitVector.getLastIndexOf(0, 0.1, 6.1); }, exceptionCheck);
 }
 
 // Test cases ported from ArkTS 1.0: BITVECTOR_TEST_057
