@@ -27,7 +27,7 @@
 
 namespace ark {
 #ifdef ARK_HYBRID
-using CommonRootVisitor = panda::CommonRootVisitor;
+using CommonRootVisitor = common::CommonRootVisitor;
 
 extern "C" void VisitCoroutine(void *coroutine, CommonRootVisitor visitor);
 #endif

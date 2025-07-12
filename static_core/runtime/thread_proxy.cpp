@@ -219,7 +219,7 @@ void ThreadProxyStatic::MakeTSANHappyForThreadState()
 
 #ifdef ARK_HYBRID
 
-using namespace panda;
+using namespace common;
 
 static thread_local ThreadHolder *g_SharedExternalHolder = nullptr;
 

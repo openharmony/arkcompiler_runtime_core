@@ -71,17 +71,17 @@ public:
     /// @returns true if holder was created
     bool CreateExternalHolderIfNeeded(bool useSharedHolder);
 
-    panda::ThreadHolder *GetThreadHolder() const
+    common::ThreadHolder *GetThreadHolder() const
     {
         ASSERT(threadHolder_ != nullptr);
         return threadHolder_;
     }
 
 private:
-    static void SetSharedExternalHolder(panda::ThreadHolder *externalHolder);
-    static panda::ThreadHolder *GetSharedExternalHolder();
+    static void SetSharedExternalHolder(common::ThreadHolder *externalHolder);
+    static common::ThreadHolder *GetSharedExternalHolder();
 
-    panda::ThreadHolder *threadHolder_ = nullptr;
+    common::ThreadHolder *threadHolder_ = nullptr;
 };
 
 }  // namespace ark
