@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef PLUGINS_ETS_RUNTIME_ASM_DEFINES_DEFINES_H
-#define PLUGINS_ETS_RUNTIME_ASM_DEFINES_DEFINES_H
-
-#include "plugins/ets/runtime/ets_coroutine.h"
-#include "plugins/ets/runtime/ets_vm.h"
-#include "plugins/ets/runtime/types/ets_arraybuffer.h"
-#include "plugins/ets/runtime/types/ets_escompat_array.h"
-#include "plugins/ets/runtime/types/ets_typed_arrays.h"
-#include "plugins/ets/runtime/types/ets_typed_unsigned_arrays.h"
-#include "plugins/ets/runtime/types/ets_map.h"
 #include "plugins/ets/runtime/types/ets_set.h"
+#include "intrinsics.h"
 
-#endif  // PLUGINS_ETS_RUNTIME_ASM_DEFINES_DEFINES_H
+namespace ark::ets::intrinsics {
+
+extern "C" EtsBoolean EtsEscompatSetHas(EtsEscompatSet *set, EtsObject *key)
+{
+    return EtsEscompatMapHas(set->GetElements(), key);
+}
+
+extern "C" EtsBoolean EtsEscompatSetDelete(EtsEscompatSet *set, EtsObject *key)
+{
+    return EtsEscompatMapDelete(set->GetElements(), key);
+}
+
+}  // namespace ark::ets::intrinsics

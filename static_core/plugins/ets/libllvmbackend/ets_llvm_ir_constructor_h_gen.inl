@@ -169,3 +169,28 @@ bool EmitUint8ClampedArraySlice(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::UINT8_CLAMPED_ARRAY_SLICE, 3U);
 }
+
+bool EmitMapGet(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_GET_FAST_PATH, 2U);
+}
+
+bool EmitMapHas(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_HAS_FAST_PATH, 2U);
+}
+
+bool EmitMapDelete(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_DELETE, 2U);
+}
+
+bool EmitSetHas(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::SET_HAS, 2U);
+}
+
+bool EmitSetDelete(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::SET_DELETE, 2U);
+}

@@ -16,10 +16,15 @@
 DEFINE_VALUE(ETS_COROUTINE_PROMISE_CLASS_OFFSET, ark::ets::EtsCoroutine::GetTlsPromiseClassPointerOffset())
 DEFINE_VALUE(ETS_COROUTINE_NULL_VALUE_OFFSET, ark::ets::EtsCoroutine::GetTlsNullValueOffset())
 DEFINE_VALUE(ETS_COROUTINE_ANI_ENV_OFFSET, ark::ets::EtsCoroutine::GetTlsNapiEnvOffset())
+DEFINE_VALUE(ETS_COROUTINE_LOCAL_STORAGE_OFFSET, ark::ets::EtsCoroutine::GetLocalStorageOffset())
 
 DEFINE_VALUE(ETS_VM_DOUBLE_TO_STRING_CACHE_OFFSET, ark::ets::PandaEtsVM::GetDoubleToStringCacheOffset())
 
 DEFINE_VALUE(ETS_CLASS_RUNTIME_CLASS_OFFSET, ark::ets::EtsClass::GetRuntimeClassOffset())
+DEFINE_VALUE(ETS_CLASS_FLAGS_OFFSET, ark::ets::EtsClass::GetFlagsOffset())
+
+DEFINE_VALUE(ETS_CLASS_IS_NULLVALUE_FLAG, ark::ets::EtsClass::GetIsNullvalueFlag())
+DEFINE_VALUE(ETS_CLASS_IS_BOXED_FLAG, ark::ets::EtsClass::GetIsBoxedFlag())
 
 DEFINE_VALUE(ESCOMPAT_ARRAY_BUFFER_OFFSET, ark::ets::EtsEscompatArray::GetBufferOffset())
 DEFINE_VALUE(ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET,
@@ -47,6 +52,20 @@ DEFINE_VALUE(ARRAY_BUFFER_BYTE_LENGTH_OFFSET, ark::ets::EtsEscompatArrayBuffer::
 DEFINE_VALUE(ARRAY_BUFFER_NATIVE_DATA_OFFSET, ark::ets::EtsEscompatArrayBuffer::GetNativeDataOffset())
 DEFINE_VALUE(ARRAY_BUFFER_MANAGED_DATA_OFFSET, ark::ets::EtsEscompatArrayBuffer::GetManagedDataOffset())
 DEFINE_VALUE(ARRAY_BUFFER_IS_RESIZABLE_OFFSET, ark::ets::EtsEscompatArrayBuffer::GetIsResizableOffset())
+
+DEFINE_VALUE(PLATFORM_TYPES_CORE_LONG_TYPE_OFFSET, ark::ets::EtsPlatformTypes::GetCoreLongTypeOffset())
+DEFINE_VALUE(PLATFORM_TYPES_CORE_FLOAT_TYPE_OFFSET, ark::ets::EtsPlatformTypes::GetCoreFloatTypeOffset())
+DEFINE_VALUE(PLATFORM_TYPES_CORE_DOUBLE_TYPE_OFFSET, ark::ets::EtsPlatformTypes::GetCoreDoubleTypeOffset())
+
+DEFINE_VALUE(ESCOMPAT_MAP_SIZE_OFFSET, ark::ets::EtsEscompatMap::GetSizeOffset())
+DEFINE_VALUE(ESCOMPAT_MAP_BUCKETS_OFFSET, ark::ets::EtsEscompatMap::GetBucketsOffset())
+
+DEFINE_VALUE(ESCOMPAT_MAP_ENTRY_KEY_OFFSET, ark::ets::EtsEscompatMapEntry::GetKeyOffset())
+DEFINE_VALUE(ESCOMPAT_MAP_ENTRY_VAL_OFFSET, ark::ets::EtsEscompatMapEntry::GetValOffset())
+DEFINE_VALUE(ESCOMPAT_MAP_ENTRY_PREV_OFFSET, ark::ets::EtsEscompatMapEntry::GetPrevOffset())
+DEFINE_VALUE(ESCOMPAT_MAP_ENTRY_NEXT_OFFSET, ark::ets::EtsEscompatMapEntry::GetNextOffset())
+
+DEFINE_VALUE(ESCOMPAT_SET_ELEMENTS_OFFSET, ark::ets::EtsEscompatSet::GetElementsOffset())
 
 DEFINE_VALUE(ETS_BOX_PRIMITIVE_VALUE_OFFSET, ark::ets::EtsBoxPrimitive<ark::ets::EtsBoolean>::GetValueOffset())
 // NOLINTEND(readability-identifier-naming)

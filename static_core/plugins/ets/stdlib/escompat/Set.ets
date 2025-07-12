@@ -142,9 +142,7 @@ export class Set<K> implements ReadonlySet<K> {
      *
      * @returns true if the value is in the Set
      */
-    override has(val: K): boolean {
-        return this.elements.has(val)
-    }
+    override native has(val: K): boolean;
 
     /**
      * Returns number of unique elements in the Set
@@ -160,9 +158,7 @@ export class Set<K> implements ReadonlySet<K> {
      *
      * @param val the value to remove
      */
-    delete(val: K): boolean {
-        return this.elements.delete(val)
-    }
+    native delete(val: K): boolean;
 
     /**
      * Deletes all elements from the Set

@@ -200,6 +200,8 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays_reverse.ets)
         # Issue 26080 (work only with disabled jit)
         # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays_fill.ets)
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_map_intrinsics.ets)
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_set_intrinsics.ets)
     endif()
     if (PANDA_TARGET_ARM64)
         # Disabled as stdlib API was required to change. issue 25232
