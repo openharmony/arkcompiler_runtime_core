@@ -158,6 +158,7 @@ std/core/std_core_typedarrays__Float64Array_001.ets
 std/core/std_core_typedarrays__Int16Array.ets
 std/core/std_core_typedarrays__Int32Array.ets
 std/core/std_core_typedarrays__Int8Array.ets
+escompat/ReadonlyArrayProxyTest.ets
 escompat/JsonReplacerTest.ets
 regression/23623.ets
 regression/23735.ets
