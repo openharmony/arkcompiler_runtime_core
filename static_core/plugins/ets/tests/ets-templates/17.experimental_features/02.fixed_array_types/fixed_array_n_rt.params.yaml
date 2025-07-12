@@ -15,4 +15,5 @@
 cases:
   - use: |-
       let a = [3, 4, 5]
-      a[3] = 7 // Runtime Error ArrayIndexOutOfBoundsError: idx = 3; length = 3
+      let expectedException = (e: Error | Exception): boolean => {return (e instanceof RangeError)}
+      arktest.expectThrow(() => {a[3] = 7}, expectedException) // Runtime Error RangeError: idx = 3; length = 3

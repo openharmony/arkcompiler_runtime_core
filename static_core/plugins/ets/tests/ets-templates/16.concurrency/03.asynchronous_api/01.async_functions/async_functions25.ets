@@ -31,7 +31,7 @@ async function methodConcurrentExecution(): Promise<Array<Promise<String | numbe
     methodReturnString(),
     methodReturnNumber(),
   ));
-  return result as Array<Promise<String|number>>;
+  return result as Array<Promise<String | number>>;
 }
 
 async function startTest() {

@@ -129,6 +129,7 @@ void PassManager::DumpGraph([[maybe_unused]] const char *passName)
     ASSERT(strm.is_open());
     if (g_options.IsCompilerDumpNoChecks()) {
         auto clone = GraphCloner(GetGraph(), GetAllocator(), GetLocalAllocator()).CloneGraph();
+        ASSERT(clone != nullptr);
         clone->GetPassManager()->SetCheckMode(true);
         CleanupChecksForDump(clone);
         clone->Dump(&strm);

@@ -30,7 +30,7 @@ thread_local STSVMInterfaceImpl::XGCSyncState STSVMInterfaceImpl::xgcSyncState_ 
 #if defined(ARK_HYBRID)
 void STSVMInterfaceImpl::MarkFromObject(void *obj, const common::RefFieldVisitor &visitor)
 {
-    if (obj != nullptr) {
+    if (obj == nullptr) {
         return;
     }
     auto *nativeRef = static_cast<NativeReference *>(obj);

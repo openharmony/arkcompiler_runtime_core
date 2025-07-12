@@ -75,7 +75,7 @@ export namespace GC {
      * - -1 in case the task is canceled
      */
     export function startGC(cause: Cause, callback: () => void, inPlaceMode: boolean = GC.NOT_IN_PLACE_MODE): long {
-        return startGCImpl(cause as int, callback as Object, inPlaceMode);
+        return startGCImpl(cause, callback as Object, inPlaceMode);
     }
 
     /**
@@ -94,7 +94,7 @@ export namespace GC {
      * - -1 in case the task is canceled.
      */
     export function startGC(cause: Cause, inPlaceMode: boolean = GC.NOT_IN_PLACE_MODE): long {
-        return startGCImpl(cause as int, undefined, inPlaceMode);
+        return startGCImpl(cause, undefined, inPlaceMode);
     }
     
     native function startGCImpl(cause: int, callback: Object | undefined, runInPlace: boolean): long;
@@ -120,7 +120,7 @@ export namespace GC {
     native function scheduleGcAfterNthAllocImpl(counter: int, cause: int): void;
 
     export function scheduleGcAfterNthAlloc(counter: int, cause: Cause) {
-        scheduleGcAfterNthAllocImpl(counter, cause as int);
+        scheduleGcAfterNthAllocImpl(counter, cause);
     }
 
     /**
@@ -310,7 +310,7 @@ export namespace GC {
 
     export function getObjectSpaceType(obj: Object): ObjectSpaceType {
         let spaceType: int = getObjectSpaceTypeImpl(obj);
-        return spaceType as ObjectSpaceType;
+        return ObjectSpaceType.fromValue(spaceType);
     }
 
     /**

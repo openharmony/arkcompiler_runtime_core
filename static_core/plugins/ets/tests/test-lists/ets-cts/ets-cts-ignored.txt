@@ -33,6 +33,15 @@
 03.types/06.value_types/03.floating-point_types_and_operations/multiplication/multiplication_double_51.ets
 03.types/06.value_types/03.floating-point_types_and_operations/subtraction/subtraction_double_51.ets
 
+#27134
+03.types/14.type_string/string_length_type.ets
+
+#18080 Push method works for ReadonlyArray
+03.types/17.array_types/02.readonly_array_types/array_readonly_push_n.ets
+
+#27329 Incorrect property 'name' of function object it lambdas
+03.types/19.function_types/01.type_function/positive_8.ets
+
 #25512
 03.types/20.union_types/united_switch_ext_1.ets
 03.types/20.union_types/united_switch_ext_3.ets
@@ -46,6 +55,20 @@
 
 #24420
 03.types/20.union_types/ut_34.ets
+
+# 26826
+03.types/15.type_bigint/bint_n_0.ets
+03.types/15.type_bigint/bint_n_1.ets
+03.types/15.type_bigint/bint_n_2.ets
+03.types/15.type_bigint/bint_n_3.ets
+03.types/15.type_bigint/bint_n_4.ets
+03.types/15.type_bigint/bint_n_5.ets
+03.types/15.type_bigint/bint_n_6.ets
+03.types/15.type_bigint/bint_n_7.ets
+03.types/15.type_bigint/bint_n_8.ets
+03.types/15.type_bigint/bint_n_9.ets
+03.types/15.type_bigint/bint_n_10.ets
+03.types/15.type_bigint/bint_n_11.ets
 
 #26072 expected equality failed: '0' === ' ''
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/assn_var/assn-var_1.ets
@@ -87,6 +110,77 @@
 #26981
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/record_to_rest.ets
 
+#26730
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_0.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_10.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_11.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_12.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_13.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_14.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_15.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_1.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_2.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_3.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_4.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_5.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_6.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_7.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_8.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_9.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_0.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_10.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_11.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_12.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_13.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_14.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_15.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_16.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_17.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_18.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_19.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_1.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_20.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_21.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_22.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_23.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_24.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_25.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_2.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_3.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_4.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_5.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_6.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_7.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_8.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_cte_9.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_rte_0.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_rte_10.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_rte_1.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_rte_2.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_rte_3.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_rte_4.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_rte_5.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_rte_6.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_rte_7.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_rte_8.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_rte_9.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_import_0.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_import_10.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_import_11.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_import_12.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_import_13.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_import_14.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_import_15.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_import_1.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_import_2.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_import_3.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_import_4.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_import_5.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_import_6.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_import_7.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_import_8.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_import_9.ets
+
 #24441
 05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/type_parameter_variance_out_1.ets
 05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/type_parameter_variance_out_2.ets
@@ -118,39 +212,39 @@
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/meth_8.ets
 
 #24167 no methods should be inherited using readonly utility type
-05.generics/03.utility_types/01.partial_utility_type/method_excluded_from_partial_10.ets
-05.generics/03.utility_types/01.partial_utility_type/method_excluded_from_partial_11.ets
-05.generics/03.utility_types/01.partial_utility_type/method_excluded_from_partial_12.ets
-05.generics/03.utility_types/01.partial_utility_type/method_excluded_from_partial_9.ets
-05.generics/03.utility_types/03.readonly_utility_type/method_excluded_from_readonly_0.ets
+05.generics/03.utility_types/03.partial_utility_type/method_excluded_from_partial_10.ets
+05.generics/03.utility_types/03.partial_utility_type/method_excluded_from_partial_11.ets
+05.generics/03.utility_types/03.partial_utility_type/method_excluded_from_partial_12.ets
+05.generics/03.utility_types/03.partial_utility_type/method_excluded_from_partial_9.ets
+05.generics/03.utility_types/05.readonly_utility_type/method_excluded_from_readonly_0.ets
 
 #24168
-05.generics/03.utility_types/02.required_utility_type/method_excluded_from_required_0.ets
-05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_neg_1.ets
-05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_neg_2.ets
+05.generics/03.utility_types/04.required_utility_type/method_excluded_from_required_0.ets
+05.generics/03.utility_types/04.required_utility_type/required_getter_and_setter_neg_1.ets
+05.generics/03.utility_types/04.required_utility_type/required_getter_and_setter_neg_2.ets
 
 #24165
-05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_int.ets
+05.generics/03.utility_types/04.required_utility_type/required_getter_and_setter_int.ets
 
 #24168 no methods should be inherited using required utility type
-05.generics/03.utility_types/02.required_utility_type/method_excluded_from_required_1.ets
-05.generics/03.utility_types/02.required_utility_type/method_excluded_from_required_5.ets
-05.generics/03.utility_types/02.required_utility_type/method_excluded_from_required_6.ets
-05.generics/03.utility_types/02.required_utility_type/method_excluded_from_required_7.ets
-05.generics/03.utility_types/02.required_utility_type/method_excluded_from_required_8.ets
-05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_neg_0.ets
-05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_neg_3.ets
+05.generics/03.utility_types/04.required_utility_type/method_excluded_from_required_1.ets
+05.generics/03.utility_types/04.required_utility_type/method_excluded_from_required_5.ets
+05.generics/03.utility_types/04.required_utility_type/method_excluded_from_required_6.ets
+05.generics/03.utility_types/04.required_utility_type/method_excluded_from_required_7.ets
+05.generics/03.utility_types/04.required_utility_type/method_excluded_from_required_8.ets
+05.generics/03.utility_types/04.required_utility_type/required_getter_and_setter_neg_0.ets
+05.generics/03.utility_types/04.required_utility_type/required_getter_and_setter_neg_3.ets
 
 #24167 no methods should be inherited using readonly utility type
-05.generics/03.utility_types/03.readonly_utility_type/method_excluded_from_readonly_1.ets
-05.generics/03.utility_types/03.readonly_utility_type/method_excluded_from_readonly_11.ets
-05.generics/03.utility_types/03.readonly_utility_type/method_excluded_from_readonly_3.ets
-05.generics/03.utility_types/03.readonly_utility_type/method_excluded_from_readonly_4.ets
-05.generics/03.utility_types/03.readonly_utility_type/method_excluded_from_readonly_5.ets
-05.generics/03.utility_types/03.readonly_utility_type/method_excluded_from_readonly_6.ets
-05.generics/03.utility_types/03.readonly_utility_type/method_excluded_from_readonly_7.ets
-05.generics/03.utility_types/03.readonly_utility_type/method_excluded_from_readonly_8.ets
-05.generics/03.utility_types/03.readonly_utility_type/method_excluded_from_readonly_9.ets
+05.generics/03.utility_types/05.readonly_utility_type/method_excluded_from_readonly_1.ets
+05.generics/03.utility_types/05.readonly_utility_type/method_excluded_from_readonly_11.ets
+05.generics/03.utility_types/05.readonly_utility_type/method_excluded_from_readonly_3.ets
+05.generics/03.utility_types/05.readonly_utility_type/method_excluded_from_readonly_4.ets
+05.generics/03.utility_types/05.readonly_utility_type/method_excluded_from_readonly_5.ets
+05.generics/03.utility_types/05.readonly_utility_type/method_excluded_from_readonly_6.ets
+05.generics/03.utility_types/05.readonly_utility_type/method_excluded_from_readonly_7.ets
+05.generics/03.utility_types/05.readonly_utility_type/method_excluded_from_readonly_8.ets
+05.generics/03.utility_types/05.readonly_utility_type/method_excluded_from_readonly_9.ets
 
 #25175
 05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_12.ets
@@ -158,39 +252,75 @@
 05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_14.ets
 05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_15.ets
 
-#22450 - should throw an exception
-06.contexts_and_conversions/04.casting_contexts_and_conversions/02.class_or_interface_casting_conversions/cce_5.ets
+#27058
+06.contexts_and_conversions/01.type_of_expression/standalone_expression_n_1.ets
 
-#14001
-06.contexts_and_conversions/03.numeric_operator_contexts/unary_numeric_promotion/array_access_7.ets
+#27123
+06.contexts_and_conversions/04.numeric_operator_contexts/unary_numeric_promotion/unary_minus_14.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/unary_numeric_promotion/unary_plus_14.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_72.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_73.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_74.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_75.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_76.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_77.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_78.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_79.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_80.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_81.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_82.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_83.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/unary_numeric_promotion/bitwise_complement_10.ets
 
-#24415
-06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_object/ref_type_from_object_6.ets
-
-#18118 No ClassCastError on casting to a wrong function type
-06.contexts_and_conversions/04.casting_contexts_and_conversions/06.casting_conversions_from_union/cce_5.ets
-
-#25224
-06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_2.ets
-06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_3.ets
-06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_4.ets
-06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_5.ets
-06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_6.ets
-06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_7.ets
-06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_8.ets
-06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_9.ets
+#27357
+06.contexts_and_conversions/05.implicit_conversions/02.enum_to_const_types_conversions/enum2double_0.ets
+06.contexts_and_conversions/05.implicit_conversions/02.enum_to_const_types_conversions/enum2double_1.ets
+06.contexts_and_conversions/05.implicit_conversions/02.enum_to_const_types_conversions/enum2double_2.ets
+06.contexts_and_conversions/05.implicit_conversions/02.enum_to_const_types_conversions/enum2double_3.ets
+06.contexts_and_conversions/05.implicit_conversions/02.enum_to_const_types_conversions/enum2double_4.ets
+06.contexts_and_conversions/05.implicit_conversions/02.enum_to_const_types_conversions/enum2double_5.ets
+06.contexts_and_conversions/05.implicit_conversions/02.enum_to_const_types_conversions/enum2double_6.ets
+06.contexts_and_conversions/05.implicit_conversions/02.enum_to_const_types_conversions/enum2double_7.ets
+06.contexts_and_conversions/05.implicit_conversions/02.enum_to_const_types_conversions/enum2double_8.ets
+06.contexts_and_conversions/05.implicit_conversions/02.enum_to_const_types_conversions/enum2double_9.ets
 
 #20766 - not yet implemented
-06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_0.ets
-06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_1.ets
-06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_2.ets
-06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_3.ets
-06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_4.ets
-06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_5.ets
-06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_6.ets
-06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_7.ets
-06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_8.ets
-06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_9.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/int2enum_0.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/int2enum_1.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/int2enum_2.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/int2enum_3.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/int2enum_4.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/int2enum_5.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/int2enum_6.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/int2enum_7.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/int2enum_8.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/int2enum_9.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_0.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_1.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_2.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_3.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_4.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_5.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_6.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_7.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_8.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_9.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/long2enum_0.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/long2enum_1.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/long2enum_2.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/long2enum_3.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/long2enum_4.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/long2enum_5.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/long2enum_6.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/long2enum_7.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/long2enum_8.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/long2enum_9.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/str2enum_0.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/str2enum_1.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/str2enum_2.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/str2enum_3.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/str2enum_4.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/str2enum_5.ets
 
 #24036
 07.expressions/01.evaluation_of_expressions/03.operator_precedence/typeof.ets
@@ -296,6 +426,34 @@
 
 #23062
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_23.ets
+
+#27157
+07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_rte_n_0.ets
+07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_rte_n_1.ets
+07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_rte_n_2.ets
+
+#27155
+07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_outofbounds_n_0.ets
+07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_outofbounds_n_1.ets
+07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_outofbounds_n_2.ets
+07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_res_n_0.ets
+07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_res_n_1.ets
+07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_res_n_2.ets
+07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_res_n_3.ets
+07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_res_n_4.ets
+07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_res_n_5.ets
+
+#27156
+07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_res_type.ets
+
+#27158
+07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_cte_n_0.ets
+07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_cte_n_1.ets
+07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_cte_n_2.ets
+07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_cte_n_3.ets
+07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_cte_n_4.ets
+07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_cte_n_5.ets
+07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_cte_n_6.ets
 
 #26256 Uninitialized value access
 07.expressions/17.typeof_expression/tof_const_11.ets
@@ -435,6 +593,12 @@
 
 #23238 Method returning 'this' returns wrong instance
 09.classes/05.method_declarations/08.methods_returning_this/met_ret_this_8.ets
+
+# 26983
+09.classes/04.field_declarations/06.overriding_fields/sample.ets
+
+# 26983
+09.classes/04.field_declarations/06.overriding_fields/sample.ets
 
 #16840
 10.interfaces/03.interface_members/methods_overriding.ets
@@ -697,9 +861,33 @@
 
 # 40
 # FailKind.ES2PANDA_NEG_FAIL - 24 tests:
-05.generics/03.utility_types/02.required_utility_type/method_excluded_from_required_0.ets
-05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_neg_1.ets
-05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_neg_2.ets
+05.generics/03.utility_types/04.required_utility_type/method_excluded_from_required_0.ets
+05.generics/03.utility_types/04.required_utility_type/required_getter_and_setter_neg_1.ets
+05.generics/03.utility_types/04.required_utility_type/required_getter_and_setter_neg_2.ets
+
+# 46
+# Since floating point numbers no longer generate an error and floating point calculations are unstable
+# on certain platforms at the moment, these tests remain here.
+07.expressions/33.constant_expression/check_enum/constant_calculation_25.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_26.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_27.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_28.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_29.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_30.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_31.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_32.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_33.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_34.ets
+07.expressions/33.constant_expression/check_enum/constant_number_conversion_5.ets
+07.expressions/33.constant_expression/check_enum/constant_number_conversion_6.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_minus_11.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_minus_12.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_minus_15.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_minus_6.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_plus_11.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_plus_12.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_plus_5.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_plus_6.ets
 
 # 47 'VERIFIER_FAIL: [TID 000c96] E/verifier: Verifier error 8: Bad array element type3
 17.experimental_features/02.fixed_array_types/far3_6.ets
@@ -707,21 +895,17 @@
 # 41 (divided into groups)
 
 # Runtime Fail Ignore list (looks like should work)
-05.generics/03.utility_types/01.partial_utility_type/partial_inherit3.ets
+05.generics/03.utility_types/03.partial_utility_type/partial_inherit3.ets
 
 # Invalid annotation field type. Only numeric, boolean, string, enum, or arrays of these types are permitted for annotation fields.
 07.expressions/33.constant_expression/check_annotation/constant_number_conversion_2.ets
 07.expressions/33.constant_expression/check_annotation/constant_unary_operation_2.ets
-
-# TypeError: Property 'fld' might not have been initialized.
-06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/comp_obj/comp-obj_p.ets
 
 # TypeError: Type '[String, Double]' is not compatible with the enclosing method's return type '[Object|null|undefined, Object|null|undefined]'
 05.generics/generic_declarations/generic_classes/test_bridge_methods_in_generic_overrides/bridge_methods_generic_5.ets
 
 # Negative tests passed successfully (narrowing conversion from int, function oveload and enum comparision...)
 03.types/16.literal_types/function_literal_type_7.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/07.casting_conversions_to_enumeration/cte_int_enum.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_cons/call-cons-n3_7.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_func/call-func-n3_7.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_lmbd/call-lmbd-n3_7.ets
@@ -750,8 +934,9 @@
 05.generics/generic_declarations/generic_in_out/generic_in_out_2.ets
 05.generics/generic_declarations/generic_in_out/generic_in_out_5.ets
 
-# 52 ES2PANDA_NEG_FAIL missed cte: implicit cast T -> primitive
-06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_2.ets
+# 51 ASSERT IN ES2PANDA 'SyntaxError: Invalid number.' This line should be unreachable: lexer/token/number.h:169
+07.expressions/20.unary_expressions/07.bitwise_complement/bitwise_complement_neg.ets
+04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.assignability_with_initializer/initializer_compatibility_n_13.ets
 
 # 54 RUNTIME_FAIL ClassCastError: std.core.Float cannot be cast to std.core.Double
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-un_2.ets
@@ -791,6 +976,16 @@
 07.expressions/06.spread_expression/spex_lmbd_46.ets
 07.expressions/06.spread_expression/spex_lmbd_48.ets
 
+#27465
+07.expressions/32.lambda_expression/01.lambda_signature/positive_0.ets
+07.expressions/32.lambda_expression/01.lambda_signature/positive_1.ets
+07.expressions/32.lambda_expression/01.lambda_signature/positive_2.ets
+07.expressions/32.lambda_expression/01.lambda_signature/positive_3.ets
+07.expressions/32.lambda_expression/01.lambda_signature/positive_4.ets
+
+#24472
+07.expressions/32.lambda_expression/01.lambda_signature/positive_5.ets
+
 # #25111
 17.experimental_features/02.fixed_array_types/far3_0.ets
 17.experimental_features/02.fixed_array_types/far3_1.ets
@@ -805,8 +1000,21 @@
 02.lexical_elements/07.keywords/soft_13.ets
 
 # 27159
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_27.ets
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_28.ets
-
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_27.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_28.ets
+
+# 27106 TypeError: Cannot find type 'Awaited'
+05.generics/03.utility_types/01.awaited_utility_type/awaited_parameter_0.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_parameter_1.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_return_0.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_return_1.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_return_2.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_simple_0.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_simple_1.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_simple_2.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_simple_3.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_simple_4.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_simple_5.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_simple_6.ets
+05.generics/03.utility_types/incorrect_utility_type_usage_3.ets
+05.generics/03.utility_types/incorrect_utility_type_usage_4.ets

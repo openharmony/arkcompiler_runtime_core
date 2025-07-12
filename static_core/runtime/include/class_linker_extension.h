@@ -42,6 +42,12 @@ public:
 
     virtual bool InitializeArrayClass(Class *arrayClass, Class *componentClass) = 0;
 
+    virtual bool InitializeUnionClass([[maybe_unused]] Class *unionClass,
+                                      [[maybe_unused]] Span<Class *> constituentClasses)
+    {
+        return false;
+    }
+
     virtual void InitializePrimitiveClass(Class *primitiveClass) = 0;
 
     virtual size_t GetClassVTableSize(ClassRoot root) = 0;
@@ -89,6 +95,17 @@ public:
     virtual ClassLinkerErrorHandler *GetErrorHandler() = 0;
 
     virtual ClassLinkerContext *CreateApplicationClassLinkerContext(const PandaVector<PandaString> &path);
+
+    virtual ClassLinkerContext *GetCommonContext([[maybe_unused]] Span<Class *> classes) const
+    {
+        UNREACHABLE();
+    }
+
+    virtual const uint8_t *ComputeLUB([[maybe_unused]] const ClassLinkerContext *ctx,
+                                      [[maybe_unused]] const uint8_t *descriptor)
+    {
+        UNREACHABLE();
+    }
 
     Class *GetClassRoot(ClassRoot root) const
     {

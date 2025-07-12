@@ -37,3 +37,23 @@ cases:
         const f: Function = (n: number) => {}
         const g = f as F
         g(4.4)
+    - |-
+        function print_name(f: Function): string { return f.name }
+        function foo() {}
+        arktest.assertEQ(print_name(foo), 'foo')
+    - |-
+        function print_name(f: Function): string { return f.name }
+        class A {
+            static sm() {}
+            m() {}
+        }
+        arktest.assertEQ(print_name(A.sm), 'sm')
+        arktest.assertEQ(print_name(new A().m), 'm')
+    - |-
+        function print_name(f: Function): string { return f.name }
+        let x: Function = (): void => {}
+        let y = x
+        arktest.assertEQ(print_name(x), 'x')
+        arktest.assertEQ(print_name(y), 'x')
+        arktest.assertEQ((): void => {}, '')
+

@@ -15,7 +15,9 @@
 
 /*---
 desc: Override method declaration.
-assert: The override keyword is mandatory if an instance method overrides the corresponding instance method from a superclass.
+assert: >-
+    The override keyword is mandatory if an instance method overrides the corresponding instance method
+    from a superclass.
 ---*/
 
 class A {

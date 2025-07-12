@@ -40,7 +40,7 @@ void ValueAPISetFieldObject(EtsObject *obj, EtsLong i, EtsObject *val)
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> objHandle(coroutine, obj->GetCoreType());
     VMHandle<EtsObject> valHandle(coroutine, val->GetCoreType());
-
+    ASSERT(objHandle.GetPtr() != nullptr);
     auto typeClass = objHandle->GetClass();
     auto fieldObject = typeClass->GetFieldByIndex(i);
     objHandle->SetFieldObject(fieldObject, valHandle.GetPtr());
@@ -52,7 +52,7 @@ void SetFieldValue(EtsObject *obj, EtsLong i, T val)
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> objHandle(coroutine, obj->GetCoreType());
-
+    ASSERT(objHandle.GetPtr() != nullptr);
     auto typeClass = objHandle->GetClass();
     auto fieldObject = typeClass->GetFieldByIndex(i);
     if (fieldObject->GetType()->IsBoxed()) {
@@ -110,7 +110,8 @@ void ValueAPISetFieldByNameObject(EtsObject *obj, EtsString *name, EtsObject *va
     VMHandle<EtsObject> objHandle(coroutine, obj->GetCoreType());
     VMHandle<EtsString> nameHandle(coroutine, name->GetCoreType());
     VMHandle<EtsObject> valHandle(coroutine, val->GetCoreType());
-
+    ASSERT(objHandle.GetPtr() != nullptr);
+    ASSERT(nameHandle.GetPtr() != nullptr);
     auto typeClass = objHandle->GetClass();
     auto fieldObject = ManglingUtils::GetFieldIDByDisplayName(typeClass, nameHandle->GetMutf8());
     objHandle->SetFieldObject(fieldObject, valHandle.GetPtr());
@@ -123,7 +124,8 @@ void SetFieldByNameValue(EtsObject *obj, EtsString *name, T val)
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> objHandle(coroutine, obj->GetCoreType());
     VMHandle<EtsString> nameHandle(coroutine, name->GetCoreType());
-
+    ASSERT(objHandle.GetPtr() != nullptr);
+    ASSERT(nameHandle.GetPtr() != nullptr);
     auto typeClass = objHandle->GetClass();
     auto fieldObject = ManglingUtils::GetFieldIDByDisplayName(typeClass, nameHandle->GetMutf8());
     if (fieldObject->GetType()->IsBoxed()) {
@@ -179,7 +181,7 @@ EtsObject *ValueAPIGetFieldObject(EtsObject *obj, EtsLong i)
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> objHandle(coroutine, obj->GetCoreType());
-
+    ASSERT(objHandle.GetPtr() != nullptr);
     auto typeClass = objHandle->GetClass();
     auto fieldObject = typeClass->GetFieldByIndex(i);
     return objHandle->GetFieldObject(fieldObject);
@@ -191,7 +193,7 @@ T GetFieldValue(EtsObject *obj, EtsLong i)
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> objHandle(coroutine, obj->GetCoreType());
-
+    ASSERT(objHandle.GetPtr() != nullptr);
     auto typeClass = objHandle->GetClass();
     auto fieldObject = typeClass->GetFieldByIndex(i);
     if (fieldObject->GetType()->IsBoxed()) {
@@ -245,7 +247,7 @@ EtsObject *ValueAPIGetFieldByNameObject(EtsObject *obj, EtsString *name)
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> objHandle(coroutine, obj->GetCoreType());
-
+    ASSERT(objHandle.GetPtr() != nullptr);
     auto typeClass = objHandle->GetClass();
     auto fieldObject = ManglingUtils::GetFieldIDByDisplayName(typeClass, name->GetMutf8());
     return objHandle->GetFieldObject(fieldObject);
@@ -257,7 +259,7 @@ T GetFieldByNameValue(EtsObject *obj, EtsString *name)
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> objHandle(coroutine, obj->GetCoreType());
-
+    ASSERT(objHandle.GetPtr() != nullptr);
     auto typeClass = objHandle->GetClass();
     auto fieldObject = ManglingUtils::GetFieldIDByDisplayName(typeClass, name->GetMutf8());
     if (fieldObject->GetType()->IsBoxed()) {
@@ -311,6 +313,7 @@ EtsLong ValueAPIGetArrayLength(EtsObject *obj)
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsArray> arrHandle(coroutine, obj->GetCoreType());
+    ASSERT(arrHandle.GetPtr() != nullptr);
     return arrHandle->GetLength();
 }
 
@@ -320,7 +323,7 @@ void ValueAPISetElementObject(EtsObject *obj, EtsLong i, EtsObject *val)
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObjectArray> arrHandle(coroutine, obj->GetCoreType());
     VMHandle<EtsObject> valHandle(coroutine, val->GetCoreType());
-
+    ASSERT(arrHandle.GetPtr() != nullptr);
     arrHandle->Set(i, valHandle.GetPtr());
 }
 
@@ -332,9 +335,11 @@ void SetElement(EtsObject *obj, EtsLong i, T val)
     auto typeClass = obj->GetClass();
     if (!typeClass->GetComponentType()->IsBoxed()) {
         VMHandle<P> arrHandle(coroutine, obj->GetCoreType());
+        ASSERT(arrHandle.GetPtr() != nullptr);
         arrHandle->Set(i, val);
     } else {
         VMHandle<EtsObjectArray> arrHandle(coroutine, obj->GetCoreType());
+        ASSERT(arrHandle.GetPtr() != nullptr);
         // Don't inline boxedVal.
         // In case it is inlined, the handle may be dereferenced before
         // call Create which leads to invalid raw pointer to the managed object.
@@ -388,7 +393,7 @@ EtsObject *ValueAPIGetElementObject(EtsObject *obj, EtsLong i)
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObjectArray> arrHandle(coroutine, obj->GetCoreType());
-
+    ASSERT(arrHandle.GetPtr() != nullptr);
     return arrHandle->Get(i);
 }
 
@@ -400,9 +405,11 @@ typename P::ValueType GetElement(EtsObject *obj, EtsLong i)
     auto typeClass = obj->GetClass();
     if (!typeClass->GetComponentType()->IsBoxed()) {
         VMHandle<P> arrHandle(coroutine, obj->GetCoreType());
+        ASSERT(arrHandle.GetPtr() != nullptr);
         return arrHandle->Get(i);
     }
     VMHandle<EtsObjectArray> arrHandle(coroutine, obj->GetCoreType());
+    ASSERT(arrHandle.GetPtr() != nullptr);
     auto value = EtsBoxPrimitive<typename P::ValueType>::FromCoreType(arrHandle->Get(i));
     return value->GetValue();
 }

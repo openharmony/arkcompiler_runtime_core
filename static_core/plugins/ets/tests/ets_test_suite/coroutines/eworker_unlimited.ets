@@ -75,7 +75,7 @@ function CheckUnique(arr: Array<int>) {
     arktest.assertEQ(s.size, arr.length);
 }
 
-function main() {
+function testEworkerUnlimited(): void {
     let workers = CreateWorkers();
 
     if (!CheckLimitReached()) {
@@ -87,4 +87,11 @@ function main() {
     let ids = AwaitJobs(jobs);
     CheckUnique(ids);
     JoinWorkers(workers);
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.eworker_unlimited');
+    testSuite.addTest('testEworkerUnlimited', testEworkerUnlimited);
+    let res = testSuite.run();
+    return res;
 }

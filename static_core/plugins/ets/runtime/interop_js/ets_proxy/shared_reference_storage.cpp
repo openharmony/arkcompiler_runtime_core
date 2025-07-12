@@ -44,6 +44,7 @@ class ScopedNativeCodeThreadIfNeeded {
 public:
     explicit ScopedNativeCodeThreadIfNeeded(ManagedThread *thread) : thread_(thread)
     {
+        ASSERT(thread_ != nullptr);
         if (thread_->IsInNativeCode()) {
             needToEndNativeCode_ = false;
         } else {
@@ -267,6 +268,7 @@ SharedReference *SharedReferenceStorage::CreateReference(InteropCtx *ctx, EtsHan
     SharedReference *lastRefInChain = nullptr;
     // If EtsObject has been already marked as interop object then add new created SharedReference for a new interop
     // context to chain of references with this EtsObject
+    ASSERT(etsObject.GetPtr() != nullptr);
     if (etsObject->HasInteropIndex()) {
         lastRefInChain = GetItemByIndex(etsObject->GetInteropIndex());
         ASSERT(!HasReferenceWithCtx(lastRefInChain, ctx));

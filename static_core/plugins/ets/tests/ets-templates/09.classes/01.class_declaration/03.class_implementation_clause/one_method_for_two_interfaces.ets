@@ -15,7 +15,8 @@
 
 /*---
 desc: Declare one method from two interfaces.
-assert: It is permitted for a single method declaration in a class to implement methods of more than one superinterface.
+assert: >-
+    It is permitted for a single method declaration in a class to implement methods of more than one superinterface.
 tags: [compile-only]
 ---*/
 

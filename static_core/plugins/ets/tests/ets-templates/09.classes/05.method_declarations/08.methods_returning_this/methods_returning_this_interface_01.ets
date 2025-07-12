@@ -21,7 +21,7 @@ interface I {
     foo(): this
 }
 
-class C implements I{
+class C implements I {
     foo(): this {
         return this
     }

@@ -18,7 +18,7 @@ desc: Rest function spread with generic tuple
 ---*/
 
 
-function genericRestFunction<A,B,C>(...tuple: [A, B, C]) {
+function genericRestFunction<A, B, C>(...tuple: [A, B, C]) {
 }
 
 class TH<A,B,C> {
@@ -26,7 +26,7 @@ class TH<A,B,C> {
         genericRestFunction<A, B, C>(...tuple)
     }
 
-    static restMethod<A,B,C>(...v: [A, B, C]) {
+    static restMethod<A, B, C>(...v: [A, B, C]) {
     }
 }
 
@@ -38,4 +38,3 @@ function main() {
 
     TH.restMethod<number, string, boolean>(1, "2", false);
 }
-

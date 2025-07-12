@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: This test scenario verifies that subclasses d and e correctly reinitialize the protected member variable _public_var to the number 20 in a multi-level inheritance chain.
+desc: >-
+    This test scenario verifies that subclasses d and e correctly reinitialize the protected member variable
+    _public_var to the number 20 in a multi-level inheritance chain.
 ---*/
 
 class A {

@@ -169,6 +169,7 @@ bool IsIntrinsicStringConcat(const Inst *inst)
 
 void InsertBeforeWithSaveState(Inst *inst, Inst *before)
 {
+    ASSERT(before != nullptr);
     if (inst->RequireState()) {
         before->InsertBefore(inst->GetSaveState());
     }
@@ -193,6 +194,7 @@ void InsertBeforeWithInputs(Inst *inst, Inst *before)
     }
 
     if (inst->GetBasicBlock() == nullptr) {
+        ASSERT(before != nullptr);
         before->InsertBefore(inst);
     }
 }

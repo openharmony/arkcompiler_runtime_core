@@ -25,6 +25,7 @@ from unittest.mock import patch
 
 import pytz
 
+from runner.code_coverage.coverage_manager import CoverageManager
 from runner.enum_types.params import TestEnv
 from runner.options.cli_options import get_args
 from runner.options.config import Config
@@ -68,7 +69,8 @@ class OptionsTest(TestCase):
             cmd_env={},
             timestamp=timestamp,
             report_formats={config.general.report_format},
-            work_dir=work_dir
+            work_dir=work_dir,
+            coverage=CoverageManager(Path().cwd(), work_dir.coverage_dir)
         )
         test_root = self.data_folder
         return test_env, test_root, work_dir

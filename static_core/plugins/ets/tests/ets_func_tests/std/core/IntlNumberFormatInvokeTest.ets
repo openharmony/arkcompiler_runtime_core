@@ -49,8 +49,8 @@ function testInvokeUndefinedLocale() {
     let getOptions = numberFormat.resolvedOptions();
     let s: string = printResolvedOptions(getOptions);
     arktest.assertEQ(getOptions.locale, Intl.Locale.defaultTag(), "Error. Got: " + s);
-    arktest.assertEQ(getOptions.numberingSystem,"latn", "Error. Got: " + s);
-    arktest.assertEQ(getOptions.style,"decimal", "Error. Got: " + s);
+    arktest.assertEQ(getOptions.numberingSystem, "latn", "Error. Got: " + s);
+    arktest.assertEQ(getOptions.style, "decimal", "Error. Got: " + s);
     arktest.assertEQ(getOptions.minimumIntegerDigits, 1.0, "Error. Got: " + s);
     arktest.assertEQ(getOptions.minimumFractionDigits, 0.0, "Error. Got: " + s);
     arktest.assertEQ(getOptions.maximumFractionDigits, 3.0, "Error. Got: " + s);
@@ -81,7 +81,7 @@ function equaledNumberFormats(a: Intl.NumberFormat, b: Intl.NumberFormat, value:
 
 function printResolvedOptions(options: Intl.ResolvedNumberFormatOptions): string {
     let parts = new Array<string>
-    let addValue = (value: number|string|boolean|undefined, name: string) => {
+    let addValue = (value: number | string | boolean | undefined, name: string) => {
         let s = name + " : " + (value === undefined ? "undefined" : String(value));
         parts.push(s);
     };

@@ -18,9 +18,11 @@ desc: String literals are of type string, which is a predefined reference type.
 ---*/
 
 function main() {
-    let s: string[] = [ "", '', "\x00", '\u0000', "\u{CAFE}", "\uBABE", '生日快乐!', "С Днём рождения!" ]
+    let s: [string, int][] = [ ["", 0], ['', 0], ["\x00", 1], ['\u0000', 1], ["\u{CAFE}", 1], ["\uBABE", 1], ['生日快乐!', 5], ["С Днём рождения!", 16] ]
 
+	arktest.assertEQ(s.length, 8)
     for (let i = 0; i < s.length; i++) {
-        arktest.assertTrue( s[i] instanceof string , s[i] + " is not a string" )
+        arktest.assertTrue( s[i][0] instanceof string , s[i][0] + " is not a string" )
+        arktest.assertEQ(s[i][0].length, s[i][1])
     }
 }

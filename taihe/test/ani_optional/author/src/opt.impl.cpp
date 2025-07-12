@@ -27,6 +27,7 @@ class TestImpl {
 public:
     string str = "this is str";
     optional<string> a_;
+
     TestImpl() {}
 
     void Setstring(::taihe::optional_view<::taihe::string> a)
@@ -90,6 +91,7 @@ public:
         }
     }
 };
+
 void ShowOptionalInt(optional_view<int32_t> x)
 {
     if (x) {

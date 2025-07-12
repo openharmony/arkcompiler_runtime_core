@@ -26,15 +26,15 @@ import { default as export_newclass, a as a3, b as b3 } from "./export_default_a
 
 function main() {
     arktest.assertEQ(export_string, "export_string")
-    arktest.assertEQ(a1,100)
-    arktest.assertEQ(b1,"export_string")
+    arktest.assertEQ(a1, 100)
+    arktest.assertEQ(b1, "export_string")
 
     arktest.assertEQ(export_number, 123456)
-    arktest.assertEQ(a2,100)
-    arktest.assertEQ(b2,"export_string")
+    arktest.assertEQ(a2, 100)
+    arktest.assertEQ(b2, "export_string")
 
     arktest.assertEQ(export_newclass.foo(), "export_newclass_A_foo is invoked")
     arktest.assertEQ(export_newclass.field, "export_newclass_A_field")
-    arktest.assertEQ(a2,100)
-    arktest.assertEQ(b2,"export_string")
+    arktest.assertEQ(a2, 100)
+    arktest.assertEQ(b2, "export_string")
 }

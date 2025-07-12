@@ -151,7 +151,9 @@ Type Parameter Constraint
 
 If possible instantiations need to be constrained, then an individual
 *constraint* can be set for each type parameter after the keyword ``extends``.
-A constraint can have the form of any type. If no constraint is specified,
+A constraint can have the form of any type.
+
+If no constraint is specified,
 then the constraint is :ref:`Type Any`, i.e., the lacking explicit constraint
 effectively means ``extends Any``. As a consequence, the type parameter is not
 compatible with :ref:`Type Object`, and has neither methods nor fields available
@@ -687,8 +689,8 @@ Utility Types
 |LANG| supports several embedded types, called *utility* types. Utility types
 allow constructing new types by adjusting properties of initial types. If the
 initial types are class or interface, then the resultant utility types are also
-handled as class or interface types. Below is the list of the utility types,
-sorted alphabetically.
+handled as class or interface types. An alphabetically sorted list of utility
+types is provided below.
 
 .. index::
    embedded type
@@ -704,11 +706,11 @@ Awaited Utility Type
 .. meta:
     frontend_status: None
 
-Type ``Awaited<T>`` constructs a type which has no type ``Promise`` in it. It
-is like await in async functions, or the .then() method on Promises. All
-occurencies of type ``Promise`` are recursively removed.
+Type ``Awaited<T>`` constructs a type which includes no type ``Promise``. It
+is similar to ``await`` in ``async`` functions, or to the method ``.then()``
+in *Promises*. Any occurence of type ``Promise`` is recursively removed.
 
-It is represented in the example below:
+Type ``Awaited<T>`` is represented by the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -731,19 +733,17 @@ NonNullable Utility Type
     frontend_status: None
 
 Type ``NonNullable<T>`` constructs a type by excluding ``null`` and ``undefined``
-types.
-
-It is represented in the example below:
+types. Type ``NonNullable<T>`` is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
 
     type X = Object | null | undefined
-    type Y = NonNullable<X> // That is Object
+    type Y = NonNullable<X> // type of 'Y' is Object
 
     class A <T> {
-      field: NonNullable<T> // That non-nullable version of the type parameter
-      constructor (field: NonNullable<T>) {
+      field: NonNullable<T> // This is a non-nullable version of the type
+      parameter constructor (field: NonNullable<T>) {
         this.field = field
       }
     }
@@ -1085,6 +1085,41 @@ example below:
    bar ({public_field: 777, private_field: ""}) // compile-time error, incorrect field name
 
    bar (new A) // OK, object of type Readonly<A> has field `private_field`
+
+.. index::
+   utility type
+   private field
+   type
+   access
+   accessibility
+
+.. raw:: pdf
+
+   PageBreak
+
+
+.. _Nesting Utility Types:
+
+Nesting Utility Types
+===========================
+
+.. meta:
+    frontend_status: Partly
+
+If more than one utility types are required then they can be nested as in example below:
+
+.. code-block:: typescript
+   :linenos:
+
+   interface Issue {
+     title?: string
+   }
+
+   const myIssue: Required<Readonly<Issue>> = {
+      title: "One"
+   };
+   console.log(myIssue.title)  // safe: required property
+   myIssue.title = "Two" // compile-time error: readonly property
 
 .. index::
    utility type

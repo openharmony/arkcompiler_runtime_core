@@ -15,11 +15,14 @@
 
 #include "plugins/ets/runtime/interop_js/js_refconvert.h"
 
+#include "libpandabase/utils/utf.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_class_wrapper.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_array.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_function.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_record.h"
+#include "plugins/ets/runtime/interop_js/js_refconvert_tuple.h"
+#include "plugins/ets/runtime/interop_js/js_refconvert_union.h"
 
 namespace ark::ets::interop::js {
 
@@ -44,6 +47,16 @@ static bool IsRecord(Class *klass)
     return PlatformTypes()->escompatRecord->GetRuntimeClass()->IsAssignableFrom(klass);
 }
 
+static bool IsTupleClass(Class *klass)
+{
+    return klass->Implements(PlatformTypes()->coreTuple->GetRuntimeClass());
+}
+
+static bool IsTupleNClass(Class *klass)
+{
+    return PlatformTypes()->coreTupleN->GetRuntimeClass()->IsAssignableFrom(klass);
+}
+
 static std::unique_ptr<JSRefConvert> JSRefConvertCreateImpl(InteropCtx *ctx, Class *klass)
 {
     INTEROP_FATAL_IF(klass->IsClassClass());
@@ -66,6 +79,20 @@ static std::unique_ptr<JSRefConvert> JSRefConvertCreateImpl(InteropCtx *ctx, Cla
 
     if (IsRecord(klass)) {
         return std::make_unique<JSRefConvertRecord>(ctx);
+    }
+
+    if (IsTupleClass(klass)) {
+        // handle Tuple0, Tuple1, ..., Tuple16
+        if (!IsTupleNClass(klass)) {
+            return std::make_unique<JSRefConvertTuple<false>>(ctx, klass);
+        }
+
+        // handle TupleN
+        return std::make_unique<JSRefConvertTuple<true>>(ctx, klass);
+    }
+
+    if (klass->IsUnionClass()) {
+        return std::make_unique<JSRefConvertUnion>(klass);
     }
 
     if (klass->IsInterface()) {

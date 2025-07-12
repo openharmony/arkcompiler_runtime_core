@@ -26,6 +26,7 @@ namespace ark::ets {
 // plugins/ecmascript/es2panda/compiler/scripts/signatures.yaml
 static constexpr char ARRAY_TYPE_PREFIX = '[';
 static constexpr char CLASS_TYPE_PREFIX = 'L';
+static constexpr char UNION_OR_ENUM_TYPE_PREFIX = '{';
 static constexpr char METHOD_PREFIX = 'M';
 static constexpr const char *TYPE_API_UNDEFINED_TYPE_DESC = "__TYPE_API_UNDEFINED";
 static constexpr const char *INVOKE_METHOD_NAME = "$_invoke";

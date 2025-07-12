@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Test whether class f can correctly obtain the initial null value of the public variable _publicVar in class a after inheriting from class a through multiple layers.
+desc: >-
+    Test whether class f can correctly obtain the initial null value of the public variable _publicVar
+    in class a after inheriting from class a through multiple layers.
 ---*/
 
 class A {

@@ -113,6 +113,7 @@ public:
 
     EtsReference *NewEtsRef(EtsObject *obj, EtsReference::EtsObjectType objType)
     {
+        ASSERT(obj != nullptr);
         mem::Reference *ref = NewRef(obj->GetCoreType(), objType);
         return EtsReference::CastFromReference(ref);
     }

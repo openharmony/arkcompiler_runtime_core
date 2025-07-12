@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: In the constructor function, the subclass calls the parent class constructor function and passes in the initial value. The modifier is public and the type is number.
+desc: >-
+    In the constructor function, the subclass calls the parent class constructor function and passes
+    in the initial value. The modifier is public and the type is number.
 ---*/
 
 class Parent {

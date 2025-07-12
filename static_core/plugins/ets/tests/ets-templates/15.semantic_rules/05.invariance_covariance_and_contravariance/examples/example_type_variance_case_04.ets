@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- /*---
+/*---
 desc: Ensuring that method_one in subclasses allows contravariant parameter types with interface.
 tags: [compile-only, negative]
 ---*/

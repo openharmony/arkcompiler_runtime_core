@@ -16,16 +16,19 @@ cases:
   - desc: no args
     impl: |-
         let f: () => int = () => { return 1234 }
+        arktest.assertTrue(f instanceof Function0)
         arktest.assertEQ(f(), 1234, "no args failed")
 
   - desc: one arg
     impl: |-
         let f: (e: int) => int = (e: int) => { return e + 8 }
+        arktest.assertTrue(f instanceof Function1)
         arktest.assertEQ(f(1), 9, "one arg failed")
 
   - desc: two args
     impl: |-
         let f: (e: int, e2: int) => int = (e: int, e2: int) => { return e + e2 }
+        arktest.assertTrue(f instanceof Function2)
         arktest.assertEQ(f(1, 2), 3, "two args failed")
 
   - desc: optional arg

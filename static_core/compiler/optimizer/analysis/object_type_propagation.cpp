@@ -326,6 +326,7 @@ bool ObjectTypePropagationVisitor::RunImpl()
         UNREACHABLE();
     }
     auto *graph = GetGraph();
+    ASSERT(graph != nullptr);
     graph->RunPass<LoopAnalyzer>();
     MarkerHolder holder(graph);
     visited_ = holder.GetMarker();
@@ -746,6 +747,7 @@ bool ObjectTypePropagationVisitor::AddStoreEdge(const Inst *fromObj, const Point
                                                 const ArenaTypedRefSet &srcRefSet)
 {
     COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << " STORE";
+    ASSERT(fromObj != nullptr);
     if (!fromObj->IsReferenceOrAny()) {
         // primitive ANY type or null as integer is stored
         return false;
@@ -925,8 +927,10 @@ void BasicBlockState::CreateFieldRefSetForNewObject(Ref base, bool defaultConstr
     ASSERT(inserted);
     auto &objectInfos = it->second;
     const auto &refs = defaultConstructed ? visitor_->GetNullSet() : escaped_;
+    auto mut = objectInfos.Mut(GetLocalAllocator());
+    ASSERT(mut != nullptr);
     // create "other refs" entry
-    if (!objectInfos.Mut(GetLocalAllocator())->try_emplace(PointerOffset::CreateDefaultField(), refs).second) {
+    if (!mut->try_emplace(PointerOffset::CreateDefaultField(), refs).second) {
         UNREACHABLE();
     }
 }
@@ -938,8 +942,10 @@ ArenaTypedRefSet &BasicBlockState::CreateFieldRefSet(Ref base, const PointerOffs
     changed |= ins1;
     auto &objectInfos = it1->second;
     if (ins1) {
+        auto mut = objectInfos.Mut(GetLocalAllocator());
+        ASSERT(mut != nullptr);
         // create "other refs" entry
-        if (!objectInfos.Mut(GetLocalAllocator())->try_emplace(PointerOffset::CreateDefaultField(), escaped_).second) {
+        if (!mut->try_emplace(PointerOffset::CreateDefaultField(), escaped_).second) {
             UNREACHABLE();
         }
     }
@@ -1011,7 +1017,9 @@ void BasicBlockState::Merge(BasicBlockState *other)
                                [&it](auto otherElem) { return otherElem.first >= it->first; });
         auto &[ref, refFields] = *it;
         if (otherIt != other->fieldRefs_.end() && otherIt->first == ref) {
-            MergeFieldSets(*refFields.Mut(GetLocalAllocator()), *otherIt->second);
+            auto mut = refFields.Mut(GetLocalAllocator());
+            ASSERT(mut != nullptr);
+            MergeFieldSets(*mut, *otherIt->second);
             if (IsEscaped(ref) != other->IsEscaped(ref)) {
                 ForceEscape(ref);
             }
@@ -1108,6 +1116,7 @@ void BasicBlockState::InvalidateEscapedRef(Ref ref)
         return;
     }
     auto *refFields = it->second.Mut(GetLocalAllocator());
+    ASSERT(refFields != nullptr);
     auto oldDefault = refFields->find(PointerOffset::CreateDefaultField());
     ASSERT(oldDefault != refFields->end());
     // erase all except `default value`

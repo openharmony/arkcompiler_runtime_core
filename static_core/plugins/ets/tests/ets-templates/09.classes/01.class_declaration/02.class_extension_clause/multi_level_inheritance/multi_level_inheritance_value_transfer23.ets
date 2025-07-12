@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that the instance of the multi-layer inheritance class f can correctly access and obtain the initial value of the public boolean variable _publicVar defined in class a.
+desc: >-
+    Verify that the instance of the multi-layer inheritance class f can correctly access and obtain the initial value
+    of the public boolean variable _publicVar defined in class a.
 ---*/
 
 class A {

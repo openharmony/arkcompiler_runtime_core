@@ -191,48 +191,53 @@ if (NOT PANDA_TARGET_ARM32)
                             MODE "AOT"
     )
 
-    add_ets_coroutines_test(FILE class_load_race.ets
-                            SKIP_ARM32_COMPILER
-                            IMPL "THREADED" "STACKFUL"
-                            OPTION_SETS_THREADED "DEFAULT"
-                            OPTION_SETS_STACKFUL "DEFAULT" "POOL"
-                            WORKERS "AUTO" "ONE"
-                            MODE "INT" "JIT"
-    )
+    # NOTE: will be enabled after #26611 fix
+    # add_ets_coroutines_test(FILE class_load_race.ets
+    #                         SKIP_ARM32_COMPILER
+    #                         IMPL "THREADED" "STACKFUL"
+    #                         OPTION_SETS_THREADED "DEFAULT"
+    #                         OPTION_SETS_STACKFUL "DEFAULT" "POOL"
+    #                         WORKERS "AUTO" "ONE"
+    #                         MODE "INT" "JIT"
+    # )
 
-    add_ets_coroutines_test(FILE launch_n_workers.ets
-                            SKIP_ARM32_COMPILER
-                            IMPL "STACKFUL"
-                            OPTION_SETS_STACKFUL "DEFAULT"
-                            WORKERS "AUTO"
-                            MODE "INT" "JIT" "AOT"
-    )
+    # NOTE: will be enabled after #26611 fix
+    # add_ets_coroutines_test(FILE launch_n_workers.ets
+    #                         SKIP_ARM32_COMPILER
+    #                         IMPL "STACKFUL"
+    #                         OPTION_SETS_STACKFUL "DEFAULT"
+    #                         WORKERS "AUTO"
+    #                         MODE "INT" "JIT" "AOT"
+    # )
 
-    add_ets_coroutines_test(FILE launch_n_workers.ets
-                            SKIP_ARM32_COMPILER
-                            IMPL "STACKFUL"
-                            OPTION_SETS_STACKFUL "POOL"
-                            WORKERS "AUTO"
-                            MODE "INT" "JIT"
-    )
+    # NOTE: will be enabled after #26611 fix
+    # add_ets_coroutines_test(FILE launch_n_workers.ets
+    #                         SKIP_ARM32_COMPILER
+    #                         IMPL "STACKFUL"
+    #                         OPTION_SETS_STACKFUL "POOL"
+    #                         WORKERS "AUTO"
+    #                         MODE "INT" "JIT"
+    # )
 
-    add_ets_coroutines_test(FILE launch_oom.ets
-                            SKIP_ARM32_COMPILER
-                            OPTIONS "--gc-type=epsilon"
-                            IMPL "STACKFUL"
-                            OPTION_SETS_STACKFUL "POOL"
-                            WORKERS "ONE"
-                            MODE "INT" "JIT" "AOT"
-    )
+    # NOTE: will be enabled after #26611 fix
+    # add_ets_coroutines_test(FILE launch_oom.ets
+    #                         SKIP_ARM32_COMPILER
+    #                         OPTIONS "--gc-type=epsilon"
+    #                         IMPL "STACKFUL"
+    #                         OPTION_SETS_STACKFUL "POOL"
+    #                         WORKERS "ONE"
+    #                         MODE "INT" "JIT" "AOT"
+    # )
 
-    add_ets_coroutines_test(FILE launch_oom.ets
-                            SKIP_ARM32_COMPILER
-                            OPTIONS "--gc-type=epsilon"
-                            IMPL "STACKFUL"
-                            OPTION_SETS_STACKFUL "DEFAULT"
-                            WORKERS "ONE"
-                            MODE "INT" "JIT"
-    )
+    # NOTE: will be enabled after #26611 fix
+    # add_ets_coroutines_test(FILE launch_oom.ets
+    #                         SKIP_ARM32_COMPILER
+    #                         OPTIONS "--gc-type=epsilon"
+    #                         IMPL "STACKFUL"
+    #                         OPTION_SETS_STACKFUL "DEFAULT"
+    #                         WORKERS "ONE"
+    #                         MODE "INT" "JIT"
+    # )
 
     # Depends on issue 12886
     add_ets_coroutines_test(FILE multiple_launch.ets
@@ -440,3 +445,5 @@ add_ets_coroutines_test(FILE eworker_post_to_main.ets
                         WORKERS "AUTO"
                         MODE "INT"
 )
+
+add_subdirectory(dfx)

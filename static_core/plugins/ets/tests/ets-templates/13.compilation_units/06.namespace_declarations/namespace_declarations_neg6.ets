@@ -14,8 +14,8 @@ limitations under the License.
 ---*/
 
 /*---
-desc: CTE - there is no function 'foo()'
-tags: [negative]
+desc: CTE - there is no function 'sayHello' for local MyClass obj
+tags: [negative, compile-only]
 files:
 - ./namespace_storage.ets
 ---*/
@@ -27,12 +27,12 @@ class myClass {
     public constructor(newMessage : string) {
         this.message = newMessage
     }
-    public sayHello() {
+    public sayHelloLocal() {
         return "Hello from Class"
     }
 }
 
 function main() {
     let NS2: myClass = new myClass("New message")
-    arktest.assertEQ(NS2.sayHello(),"Test should fail")
+    arktest.assertEQ(NS2.sayHello(), "Test should fail")
 }

@@ -176,7 +176,11 @@ export default namespace buffer {
     export function from(arrayBuffer: ArrayBuffer, byteOffset?: number, length?: number): Buffer {
         const resolvedByteOffset: number = byteOffset ?? 0;
         const resolvedLength: number = length ?? arrayBuffer.byteLength - resolvedByteOffset;
-        return new Buffer(ArrayBuffer.from(arrayBuffer, resolvedByteOffset, resolvedLength), resolvedByteOffset);
+        if ((byteOffset != undefined) || (length != undefined)) {
+            return new Buffer(ArrayBuffer.from(arrayBuffer, resolvedByteOffset, resolvedLength), resolvedByteOffset);
+        }
+        let buffer = new Buffer(arrayBuffer, resolvedByteOffset)
+        return buffer
     }
 
     /**
@@ -468,8 +472,21 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
      * 2. Parameter verification failed.
      */
     export function transcode(source: Buffer | Uint8Array, fromEnc: string, toEnc: string): Buffer {
-        const resolvedSource = getArrayBufferFrom(source);
-        const sourceBytesLength = resolvedSource.byteLength.toInt();
+        let resolvedSource = getArrayBufferFrom(source);
+        let sourceBytesLength = resolvedSource.byteLength.toInt();
+        if (toEnc == 'ascii') {
+            const sourceStr = ArrayBuffer.stringify(resolvedSource, fromEnc, 0, sourceBytesLength);
+            let asciiSource = new StringBuilder("")
+            for (let i = 0; i < sourceStr.length; ++i) {
+                if (sourceStr[i].toInt() <= 128) {
+                    asciiSource.append(sourceStr[i])
+                } else {
+                    asciiSource.append('?')
+                }
+            }
+            resolvedSource = ArrayBuffer.from(asciiSource.toString(), fromEnc)
+            sourceBytesLength = resolvedSource.byteLength.toInt();
+        }
         const str = ArrayBuffer.stringify(resolvedSource, toEnc, 0, sourceBytesLength);
         const newBytes = ArrayBuffer.from(str, toEnc);
         return new Buffer(newBytes);
@@ -534,7 +551,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
      * A class representing a fixed-length sequence of bytes.
      * Provides methods for reading and manipulating binary data with various encodings.
      */
-    export class Buffer {
+    export class Buffer implements JsonElementDeserializable {
         /** The underlying ArrayBuffer storing the binary data */
         public buffer: ArrayBuffer;
         /** The offset into the buffer where this Buffer instance starts */
@@ -1093,6 +1110,39 @@ Received value is: ${value}`)
             return offset + byteLength;
         }
 
+        internal getMultiplier(i : number): number {
+            return Math.pow(2, i * 8)
+        }
+
+        internal toUByte(b: byte): int {
+            if (b < 0) {
+                return b + 256;
+            }
+            return b;
+        }
+
+        internal readBytes(view: DataView, offset: number, byteLength: number, LE: boolean = false): number {
+            let val: number = 0;
+            for (let i = 0; i < byteLength; i++) {
+                let idx = LE ? i : byteLength - i - 1
+                const byt: int = this.toUByte(this.$_get(offset + idx)!.toByte())
+                val += byt * this.getMultiplier(i);
+            }
+            return val
+        }
+
+        internal toSigned(val: number, byteLength: number)
+        {
+            const unsignedMax = this.getMultiplier(byteLength)
+            const half = unsignedMax / 2
+            const max = half - 1
+
+            if (val > max) {
+                return val - unsignedMax
+            }
+            return val
+        }
+
         /**
         * Reads a signed integer from the buffer at the specified offset using big-endian format
         *
@@ -1103,19 +1153,8 @@ Received value is: ${value}`)
         */
         public readIntBE(offset: number, byteLength: number): number {
             Buffer.checkByteLengthConstraint(byteLength);
-            const view = this.getDataView();
-            let val: number = 0;
-            let multiplier = 1 << (8 * (byteLength - 1));
-            for (let i = 0; i < byteLength; i++) {
-                const byt = view.getUint8(offset + i);
-                val += byt * multiplier;
-                multiplier >>= 8;
-            }
-            const signBit = 1 << (8 * byteLength - 1);
-            if (val >= signBit) {
-                val -= (signBit * 2);
-            }
-            return val;
+            let val = this.readBytes(this.getDataView(), offset, byteLength)
+            return this.toSigned(val, byteLength)
         }
 
         /**
@@ -1148,18 +1187,8 @@ Received value is: ${value}`)
         */
         public readIntLE(offset: number, byteLength: number): number {
             Buffer.checkByteLengthConstraint(byteLength);
-            const view = this.getDataView();
-            let val: number = 0;
-            let multiplier = 1;
-            for (let i = 0; i < byteLength; i++) {
-                const byt = view.getUint8(offset + i);
-                val += byt * multiplier;
-                multiplier <<= 8;
-            }
-            if (val >= (1 << (8 * byteLength - 1))) {
-                val -= (1 << (8 * byteLength));
-            }
-            return val;
+            let val = this.readBytes(this.getDataView(), offset, byteLength, true)
+            return this.toSigned(val, byteLength)
         }
 
         /**
@@ -1192,12 +1221,7 @@ Received value is: ${value}`)
         */
         public readUIntBE(offset: number, byteLength: number): number {
             Buffer.checkByteLengthConstraint(byteLength);
-            let val: number = 0;
-            const view = this.getDataView();
-            for (let i = 0; i < byteLength; i++) {
-                val = (val * 256) + view.getUint8(offset + i);
-            }
-            return val;
+            return this.readBytes(this.getDataView(), offset, byteLength)
         }
 
         /**
@@ -1230,14 +1254,7 @@ Received value is: ${value}`)
         */
         public readUIntLE(offset: number, byteLength: number): number {
             Buffer.checkByteLengthConstraint(byteLength);
-            const view = this.getDataView();
-            let val: number = 0;
-            let multiplier = 1;
-            for (let i = 0; i < byteLength; i++) {
-                val += view.getUint8(offset + i) * multiplier;
-                multiplier <<= 8;
-            }
-            return val;
+            return this.readBytes(this.getDataView(), offset, byteLength, true)
         }
 
         /**
@@ -1673,13 +1690,17 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         }
 
         /**
-         * Returns the byte at the specified index.
-         * @param {number} index – byte index to read
-         * @returns {number} the byte value at `index`
-         */
-        $_get(index: number): number | undefined {
+        * Returns the item at that index.
+        *
+        * @param { number } index - The zero-based index of the desired code unit.
+        *     Throws error if index < 0 or index >= buffer.length.
+        * @returns { number } The element in the buffer matching the given index. 
+        * @throws { BusinessError } 10200001 - The value of index is out of range.
+        */
+        $_get(index: number): number {
             if (index < 0 || index >= this.length) {
-                return undefined;
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "length" is out of range. \
+It must be >= 0 and <= ${this.length}. Received value is: ${index}`)
             }
             return this.getDataView().getUint8(index);
         }

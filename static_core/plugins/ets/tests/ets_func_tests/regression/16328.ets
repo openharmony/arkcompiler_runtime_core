@@ -14,18 +14,14 @@
  */
 
 
- /*---
- desc: Issue 16328. Overloading with function type parameter
- tags: [compile-only, negative]
-
- ---*/
-
+/*---
+desc: Issue 16328. Overloading with function type parameter
+tags: [compile-only, negative]
+---*/
 
 class Base {
     bar(p: (p: Base) => void) {}
     bar(p: (p: Derived) => void) {}
-
-
 }
 
 class Derived extends Base {}

@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Verify that a child interface resolves method conflicts when three parent interfaces have the same default method.
+desc: Verify that a child interface resolves method conflicts when three parent interfaces have the same default method
 ---*/
 
 interface Parent1 {

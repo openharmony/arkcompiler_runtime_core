@@ -16,7 +16,6 @@
 
 /*---
 desc: Resizable array types
-tags: [negative]
 
 ---*/
 
@@ -26,6 +25,6 @@ function grow(seed: int): int {
 
 function main() {
     let SyntaxFormOne: String[] = ["Hello", "World", "Of", "ArkTS"];
-    SyntaxFormOne.length = grow(0); // Attempting to increase the length of the array by assignment to length causes a compile-time error or RTE
-
+    let expectedException = (e: Error | Exception): boolean => {return (e instanceof RangeError)}
+    arktest.expectThrow(() => {SyntaxFormOne.length = grow(0);}, expectedException) // Attempting to incr. the length of the array by assignment to length => CTE or RTE
 }

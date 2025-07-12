@@ -12,11 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "moduleInfo.proj.hpp"
 #include "moduleInfo.impl.hpp"
-#include "taihe/runtime.hpp"
+#include "moduleInfo.proj.hpp"
 #include "stdexcept"
+#include "taihe/runtime.hpp"
 
 using namespace taihe;
 using namespace moduleInfo;
@@ -28,6 +27,7 @@ class ModuleInfoImpl {
 public:
     string moduleName_ = "this is moduleinfo with name";
     string moduleSourceDir_ = "this is moduleinfo with moduleSourceDir";
+
     ModuleInfoImpl() {}
 
     string GetModuleName()

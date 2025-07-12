@@ -40,6 +40,7 @@ void SubscribePromiseOnResultObject(EtsPromise *outsidePromise, EtsPromise *inte
 
 static void EnsureCapacity(EtsCoroutine *coro, EtsHandle<EtsPromise> &hpromise)
 {
+    ASSERT(hpromise.GetPtr() != nullptr);
     ASSERT(hpromise->IsLocked());
     int queueLength = hpromise->GetCallbackQueue(coro) == nullptr ? 0 : hpromise->GetCallbackQueue(coro)->GetLength();
     if (hpromise->GetQueueSize() != queueLength) {
@@ -133,8 +134,8 @@ void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)
 {
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
-    auto *coroManager = coro->GetCoroutineManager();
-    auto launchMode = coroManager->IsMainWorker(coro) ? CoroutineLaunchMode::MAIN_WORKER : CoroutineLaunchMode::DEFAULT;
+    auto launchMode =
+        coro->GetWorker()->IsMainWorker() ? CoroutineLaunchMode::MAIN_WORKER : CoroutineLaunchMode::DEFAULT;
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle<EtsPromise> hpromise(coro, promise);
     EtsHandle<EtsObject> hcallback(coro, callback);
@@ -169,7 +170,7 @@ static EtsObject *AwaitProxyPromise(EtsCoroutine *currentCoro, EtsHandle<EtsProm
      *          (the last two steps are actually the cm->await()'s job)
      *      - return promise.value() if resolved or throw() it if rejected
      */
-
+    ASSERT(promiseHandle.GetPtr() != nullptr);
     promiseHandle->Wait();
     ASSERT(!promiseHandle->IsPending() && !promiseHandle->IsLinked());
 

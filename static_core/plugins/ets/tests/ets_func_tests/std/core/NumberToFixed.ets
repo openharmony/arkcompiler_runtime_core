@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- /*---
+/*---
 desc: Number toFixed tests
 ---*/
 
@@ -46,7 +46,7 @@ class TestData {
             expected: "100000000000000000000"
         },
         {
-            numb: 1e20/1e21,
+            numb: 1e20 / 1e21,
             fractionDigits: 3,
             expected: "0.100"
         },

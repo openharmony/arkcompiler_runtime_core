@@ -32,6 +32,16 @@ static ani_int SumA([[maybe_unused]] ani_env *env, ani_int a, ani_int b, ani_int
     return a + b + c;
 }
 
+static ani_int Foo([[maybe_unused]] ani_env *env, ani_int a, ani_int b)
+{
+    return a + b;
+}
+
+static ani_int FooA([[maybe_unused]] ani_env *env, ani_int a, ani_int b, ani_int c)
+{
+    return a + b + c;
+}
+
 static ani_string Concat(ani_env *env, ani_string s0, ani_string s1)
 {
     std::string str0;
@@ -132,6 +142,26 @@ TEST_F(NamespaceBindNativeFunctionsTest, function_not_found)
         ani_native_function {"sumX", "II:I", reinterpret_cast<void *>(Sum)},
         ani_native_function {"concat", concatSignature, reinterpret_cast<void *>(Concat)},
     };
+    ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()), ANI_NOT_FOUND);
+}
+
+TEST_F(NamespaceBindNativeFunctionsTest, new_overload_bind)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    ani_namespace ns {};
+    ASSERT_EQ(env_->Module_FindNamespace(module, "Lops;", &ns), ANI_OK);
+    ASSERT_NE(ns, nullptr);
+
+    const char *concatSignature = "Lstd/core/String;Lstd/core/String;:Lstd/core/String;";
+    std::array functions = {
+        ani_native_function {"foo", "II:I", reinterpret_cast<void *>(Foo)},
+        ani_native_function {"foo", "III:I", reinterpret_cast<void *>(FooA)},
+        ani_native_function {"concat", concatSignature, reinterpret_cast<void *>(Concat)},
+    };
+    // Note: will set as ANI_OK when FE #ICIITH solved
     ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()), ANI_NOT_FOUND);
 }
 

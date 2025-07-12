@@ -72,89 +72,89 @@ function mustCallUint8Array(fn?: Function, times: number = 1) {
     return wrappedFn;
 }
 
+class MyDuplex1 extends stream.Duplex {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+        let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
+            arktest.assertEQ(encoding, 'gbk');
+            callback.unsafeCall();
+        }
+        let wrappedFn = mustCallUint8Array(fn);
+        wrappedFn(chunk, encoding, callback);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamEncoding023
 function testDuplexStreamSetDefaultEncodingGbk() {
-    class MyDuplex extends stream.Duplex {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-            let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
-                arktest.assertEQ(encoding, 'gbk');
-                callback.unsafeCall();
-            }
-            let wrappedFn = mustCallUint8Array(fn);
-            wrappedFn(chunk, encoding, callback);
-        }
-    }
-    let duplex = new MyDuplex();
+    let duplex = new MyDuplex1();
     let result = duplex.setDefaultEncoding('gbk');
     duplex.write('你好');
     arktest.assertTrue(result);
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyDuplex2 extends stream.Duplex {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+        let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
+            arktest.assertEQ(encoding, 'gb2312');
+            callback.unsafeCall();
+        }
+        let wrappedFn = mustCallUint8Array(fn);
+        wrappedFn(chunk, encoding, callback);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamEncoding024
 function testDuplexStreamSetDefaultEncodingGb2312() {
-    class MyDuplex extends stream.Duplex {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-            let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
-                arktest.assertEQ(encoding, 'gb2312');
-                callback.unsafeCall();
-            }
-            let wrappedFn = mustCallUint8Array(fn);
-            wrappedFn(chunk, encoding, callback);
-        }
-    }
-    let duplex = new MyDuplex();
+    let duplex = new MyDuplex2();
     let result = duplex.setDefaultEncoding('gb2312');
     duplex.write('你好');
     arktest.assertTrue(result);
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyTransform3 extends stream.Transform {
+    constructor() {
+        super()
+    }
+    doTransform(chunk: string, encoding: string, callback: Function): void {
+        let fn = (chunk: string, encoding: string, callback: Function) => {
+            arktest.assertEQ(encoding, 'gb18030');
+            arktest.assertEQ(chunk, '你好123');
+            callback.unsafeCall();
+        }
+        let wrappedFn = mustCallFn(fn);
+        wrappedFn(chunk, encoding, callback);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamEncoding025
 function testTransformStreamWriteEncodingGb18030() {
-    class MyTransform extends stream.Transform {
-        constructor() {
-            super()
-        }
-        doTransform(chunk: string, encoding: string, callback: Function): void {
-            let fn = (chunk: string, encoding: string, callback: Function) => {
-                arktest.assertEQ(encoding, 'gb18030');
-                arktest.assertEQ(chunk, '你好123');
-                callback.unsafeCall();
-            }
-            let wrappedFn = mustCallFn(fn);
-            wrappedFn(chunk, encoding, callback);
-        }
-    }
-    let transform = new MyTransform();
+    let transform = new MyTransform3();
     transform.write('你好123', 'gb18030');
     transform.end();
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyTransform4 extends stream.Transform {
+    constructor() {
+        super()
+    }
+    doTransform(chunk: string, encoding: string, callback: Function): void {
+        let fn = (chunk: string, encoding: string, callback: Function) => {
+            arktest.assertEQ(encoding, 'gbk');
+            arktest.assertEQ(chunk, '你好123');
+            callback.unsafeCall();
+        }
+        let wrappedFn = mustCallFn(fn);
+        wrappedFn(chunk, encoding, callback);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamEncoding026
 function testTransformStreamWriteEncodingGbk() {
-    class MyTransform extends stream.Transform {
-        constructor() {
-            super()
-        }
-        doTransform(chunk: string, encoding: string, callback: Function): void {
-            let fn = (chunk: string, encoding: string, callback: Function) => {
-                arktest.assertEQ(encoding, 'gbk');
-                arktest.assertEQ(chunk, '你好123');
-                callback.unsafeCall();
-            }
-            let wrappedFn = mustCallFn(fn);
-            wrappedFn(chunk, encoding, callback);
-        }
-    }
-    let transform = new MyTransform();
+    let transform = new MyTransform4();
     transform.write('你好123', 'gbk');
     transform.end();
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });

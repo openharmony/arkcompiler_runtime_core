@@ -14,7 +14,7 @@
  */
 
 
- /*---
+/*---
  desc: Issue 23659. Smartcast error when default type of parameter is void
  tags: [compile-only, negative]
 

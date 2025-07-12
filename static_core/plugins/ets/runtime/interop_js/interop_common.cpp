@@ -121,10 +121,18 @@ std::vector<EtsInt> ConvertBigIntArrayFromJsToEts(SmallVector<uint64_t, 4U> &jsA
 void ThrowNoInteropContextException()
 {
     auto *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
     auto ctx = thread->GetVM()->GetLanguageContext();
     auto descriptor = utf::CStringAsMutf8(panda_file_items::class_descriptors::NO_INTEROP_CONTEXT_ERROR.data());
     PandaString msg = "Interop call may be done only from _main_ or exclusive worker";
     ThrowException(ctx, thread, descriptor, utf::CStringAsMutf8(msg.c_str()));
+}
+
+void ThrowJSErrorNotAssignable(napi_env env, const EtsClass *fromKlass, EtsClass *toKlass)
+{
+    const char *from = fromKlass->GetDescriptor();
+    const char *to = toKlass->GetDescriptor();
+    InteropCtx::ThrowJSTypeError(env, std::string(from) + " is not assignable to " + to);
 }
 
 static bool GetPropertyStatusHandling([[maybe_unused]] napi_env env, napi_status rc)

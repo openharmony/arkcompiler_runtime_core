@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -123,7 +123,7 @@ inline std::tuple<T, size_t, bool> DecodeSigned(const uint8_t *data)
             // NOLINTNEXTLINE(hicpp-signed-bitwise)
             auto signedExtended = static_cast<int8_t>(static_cast<int8_t>(byte << 1) >> 1);
             // NOLINTNEXTLINE(hicpp-signed-bitwise)
-            uint8_t masked = (signedExtended ^ (signedExtended >> PAYLOAD_WIDTH)) | 1;
+            auto masked = static_cast<uint8_t>((signedExtended ^ (signedExtended >> PAYLOAD_WIDTH)) | 1);
             bool isFull = MinimumBitsToStore(masked) <= shift;
             if (shift > PAYLOAD_WIDTH) {
                 shift -= PAYLOAD_WIDTH;

@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that a child interface inherits the default method implementation when one parent has a default method and another has a regular method.
+desc: >-
+    Verify that a child interface inherits the default method implementation when one parent has a default method and
+    another has a regular method.
 ---*/
 
 interface Parent1 {

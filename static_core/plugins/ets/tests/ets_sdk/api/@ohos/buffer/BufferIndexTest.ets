@@ -14,6 +14,7 @@
  */
 
 import buffer from "@ohos.buffer";
+import { BusinessError } from "@ohos.base";
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("Buffer indexer methods")
@@ -51,9 +52,21 @@ function testIndexerGetSet() {
 
 function testIndexerOutOfBounds() {
     const buf = buffer.from([1, 2, 3])
-    arktest.assertEQ(buf[-1], undefined)
-    arktest.assertEQ(buf[5], undefined)
+    checkOutsideRangeError(buf, -1);
+    checkOutsideRangeError(buf, 5);
     buf[10] = 99
     arktest.assertEQ(buf.length, 3)
     arktest.assertEQ(buf.toString(), "\u0001\u0002\u0003")
+}
+
+function checkOutsideRangeError(buf: buffer.Buffer, index: number) {
+    let errMsg = `The value of "length" is out of range. \
+It must be >= 0 and <= ${buf.length}. Received value is: ${index}`;
+    const OutOfBoundsErrorCodeId: number = 10200001;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) &&
+            ((e as BusinessError).message == errMsg) &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    }
+    arktest.expectThrow((): void => { buf[index] }, exceptionCheck)
 }

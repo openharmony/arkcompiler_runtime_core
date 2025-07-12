@@ -3740,6 +3740,16 @@ intrinsics:
     codegen_func: CreateBigUint64ArrayWith
     llvm_codegen_func: EmitBigUint64ArrayWith
 
+  - name: Uint8ClampedArrayToUint8Clamped
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: toUint8Clamped
+    static: true
+    signature:
+      ret: i32
+      args: [f64]
+    impl: ark::ets::intrinsics::EtsEscompatUint8ClampedArrayToUint8Clamped
+
 ########################
 # escompat.taskpool #
 ########################
@@ -3959,17 +3969,6 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreFloatToDouble
     safe_intrinsic: true
 
-  - name: StdCoreFloatToChar
-    space: ets
-    class_name: std.core.Float
-    method_name: toChar
-    static: true
-    signature:
-      ret: u16
-      args: [ f32 ]
-    impl: ark::ets::intrinsics::StdCoreFloatToChar
-    safe_intrinsic: true
-
 ###################
 # std.core.Double #
 ###################
@@ -4159,6 +4158,72 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreDoubleToInt
     safe_intrinsic: true
 
+  - name: Int32ArrayDoubleToInt
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: doubleToInt
+    static: true
+    signature:
+      ret: i32
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::TypedArrayDoubleToInt32
+    safe_intrinsic: true
+  
+  - name: Int16ArrayDoubleToInt
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: doubleToInt
+    static: true
+    signature:
+      ret: i16
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::TypedArrayDoubleToInt16
+    safe_intrinsic: true
+
+  - name: Int8ArrayDoubleToInt
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: doubleToInt
+    static: true
+    signature:
+      ret: i8
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::TypedArrayDoubleToInt8
+    safe_intrinsic: true
+
+  - name: Uint32ArrayDoubleToInt
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: doubleToInt
+    static: true
+    signature:
+      ret: i64
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::TypedArrayDoubleToUint32
+    safe_intrinsic: true
+  
+  - name: Uint16ArrayDoubleToInt
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: doubleToInt
+    static: true
+    signature:
+      ret: i32
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::TypedArrayDoubleToUint16
+    safe_intrinsic: true
+
+  - name: Uint8ArrayDoubleToInt
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: doubleToInt
+    static: true
+    signature:
+      ret: i32
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::TypedArrayDoubleToUint8
+    safe_intrinsic: true
+
   - name: StdCoreDoubleToLong
     space: ets
     class_name: std.core.Double
@@ -4179,17 +4244,6 @@ intrinsics:
       ret: f32
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdCoreDoubleToFloat
-    safe_intrinsic: true
-
-  - name: StdCoreDoubleToChar
-    space: ets
-    class_name: std.core.Double
-    method_name: toChar
-    static: true
-    signature:
-      ret: u16
-      args: [ f64 ]
-    impl: ark::ets::intrinsics::StdCoreDoubleToChar
     safe_intrinsic: true
 
 ##############
@@ -4451,6 +4505,9 @@ intrinsics:
     signature:
       ret: std.core.Object[]
       args:
+        - i32
+        - U{std.core.Null,std.core.Object}
+      impl_args:
         - i32
         - std.core.Object
     impl: ark::ets::intrinsics::StdCoreAllocGenericArray
@@ -5824,6 +5881,10 @@ intrinsics:
       args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferXorU64
 
+############################################
+#   std.debug.concurrency.CoroutineExtras  #
+############################################
+
   - name: StdCoroutineGetWorkerId
     space: ets
     class_name: std.debug.concurrency.CoroutineExtras
@@ -5924,6 +5985,10 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::StdSystemIncreaseTaskpoolWorkersToN
 
+####################################
+# std.debug.concurrency.AtomicFlag #
+####################################
+
   - name: StdAtomicFlagSet
     space: ets
     class_name: std.debug.concurrency.AtomicFlag
@@ -5943,6 +6008,7 @@ intrinsics:
       ret: u1
       args: []
     impl: ark::ets::intrinsics::StdSystemAtomicFlagGet
+
 ####################
 # std.core.Runtime #
 ####################
@@ -5985,7 +6051,7 @@ intrinsics:
     static: true
     signature:
       ret: std.core.ClassCastError
-      args: [ std.core.Object, std.core.String ]
+      args: [ std.core.Object, std.core.String, u1 ]
     impl: ark::ets::intrinsics::StdCoreRuntimeFailedTypeCastException
     clear_flags: [ ]
 
@@ -8163,6 +8229,10 @@ intrinsics:
       args: [ std.core.Object, std.core.Object ]
     impl: ark::ets::intrinsics::EtsQueueSpinlockGuard
 
+#########################################
+# std.concurrency.NativeAsyncWorkHelper #
+#########################################
+
   - name: stdConcurrencyNativeAsyncWorkHelperAsyncWorkNativeInvoke
     space: ets
     class_name: std.concurrency.NativeAsyncWorkHelper
@@ -8172,6 +8242,30 @@ intrinsics:
       ret: void
       args: [ i64, i64, u1 ]
     impl: ark::ets::intrinsics::AsyncWorkNativeInvoke
+
+  - name: stdConcurrencyNativeAsyncWorkHelperEventNativeInvoke
+    space: ets
+    class_name: std.concurrency.NativeAsyncWorkHelper
+    method_name: eventNativeInvoke
+    static: true
+    signature:
+      ret: void
+      args: [ i64, i64, u1 ]
+    impl: ark::ets::intrinsics::EventNativeInvoke
+
+######################################
+# std.concurrency.WorkerGroup        #
+######################################
+
+  - name: StdConcurrencyWorkerGroupGenerateGroupIdImpl
+    space: ets
+    class_name: std.concurrency.WorkerGroup
+    method_name: generateGroupIdImpl
+    static: true
+    signature:
+      ret: i64
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::WorkerGroupGenerateGroupIdImpl
 
 ###############################
 # std.core.ExclusiveLauncher #
@@ -8255,6 +8349,7 @@ intrinsics:
         - std.core.Object
         - std.core.Object[]
         - u1
+        - i64
     impl: ark::ets::intrinsics::EtsLaunchInternalJobNative
 
   - name: EtsLaunchOnTheSameWorker

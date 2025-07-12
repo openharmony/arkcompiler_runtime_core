@@ -80,7 +80,7 @@ ohos_shared_library("arktsdisassembler") {
   ]
 
   configs = arkdisassembler_configs
-
+  public_configs = [ ":arkdisassembler_public_config" ]
   deps = [
     ":disasm_plugins_inc",
     ":get_language_specific_metadata_inc",

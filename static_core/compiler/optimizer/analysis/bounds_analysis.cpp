@@ -721,7 +721,7 @@ BoundsRange BoundsRangeInfo::FindBoundsRange(const BasicBlock *block, const Inst
             if (typeInfo) {
                 auto klass = typeInfo.GetClass();
                 auto runtime = inst->GetBasicBlock()->GetGraph()->GetRuntime();
-                maxLength = runtime->GetMaxArrayLength(klass);
+                maxLength = static_cast<int32_t>(runtime->GetMaxArrayLength(klass));
             }
         }
         return BoundsRange(0, maxLength, nullptr, inst->GetType());
@@ -1066,6 +1066,19 @@ static void MoveRangeAccordingCC(ConditionCode cc, BoundsRange &lowerRange, Boun
 }
 
 bool BoundsAnalysis::ProcessIndexPhi(Loop *loop, BoundsRangeInfo *bri, CountableLoopInfo &loopInfoValue)
+{
+    if (loopInfoValue.update->IsAddSub()) {
+        return ProcessIndexPhiForAddSub(loop, bri, loopInfoValue);
+    }
+
+    if (loopInfoValue.update->IsShift()) {
+        return false;
+    }
+
+    UNREACHABLE();
+}
+
+bool BoundsAnalysis::ProcessIndexPhiForAddSub(Loop *loop, BoundsRangeInfo *bri, CountableLoopInfo &loopInfoValue)
 {
     auto *indexPhi = loopInfoValue.index;
     auto *phiBlock = indexPhi->GetBasicBlock();

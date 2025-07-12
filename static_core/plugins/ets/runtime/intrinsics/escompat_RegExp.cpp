@@ -134,7 +134,11 @@ void SetFlags(EtsObject *regexpObject, EtsString *checkStr)
 
     auto flags = checkStr->GetMutf8();
     std::sort(flags.begin(), flags.end());
-    VMHandle<EtsString> newFlags(coroutine, EtsString::CreateFromMUtf8(flags.c_str())->GetCoreType());
+    auto *flagsEtsString = EtsString::CreateFromMUtf8(flags.c_str());
+    if (flagsEtsString == nullptr) {
+        return;
+    }
+    VMHandle<EtsString> newFlags(coroutine, flagsEtsString->GetCoreType());
     regexp->SetFieldObject(flagsField, newFlags->AsObject());
 }
 

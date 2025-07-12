@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Demonstrate the rewriting of member variables and the verification of final values in a multi-level inheritance structure.
+desc: >-
+    Demonstrate the rewriting of member variables and the verification of final values
+    in a multi-level inheritance structure.
 ---*/
 
 class A {

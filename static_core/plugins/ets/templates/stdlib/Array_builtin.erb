@@ -176,10 +176,10 @@ export function concat<%= ctx.this_generic %>(self: <%= ctx.this_type %>, fst: <
  *
  * @note Mutating method
  */
-export function sort<%= ctx.this_generic %>(<%= ctx.this_arg %>comparator: (a: <%= ctx.el_type %>, b: <%= ctx.el_type %>) => number): <%= ctx.this_return_type %> {
+export function sort<%= ctx.this_generic %>(<%= ctx.this_arg %>comparator: (a: <%= ctx.el_type %>, b: <%= ctx.el_type %>) => number, start?: int, end?: int): <%= ctx.this_return_type %> {
 %   sort_elem_type = ctx.el_type == 'T' ? 'NullishType' : ctx.el_type
 %   from_sort_elem_type = ctx.el_type == 'T' ? ' as T' : ''
-    sort_subarray(self<%= ctx.el_type == 'T' ? ' as FixedArray<NullishType>' : '' %>, 0, self.length, (l: <%= sort_elem_type %>, r: <%= sort_elem_type %>): boolean => {
+    sort_subarray(self<%= ctx.el_type == 'T' ? ' as FixedArray<NullishType>' : '' %>, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: <%= sort_elem_type %>, r: <%= sort_elem_type %>): boolean => {
         return comparator(l<%= from_sort_elem_type %>, r <%= from_sort_elem_type %>) < 0;
     });
     return self;

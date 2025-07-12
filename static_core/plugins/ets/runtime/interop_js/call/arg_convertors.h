@@ -31,6 +31,7 @@ static ALWAYS_INLINE bool UnwrapVal(InteropCtx *ctx, napi_env env, napi_value js
         return false;
     }
     if constexpr (std::is_pointer_v<cpptype>) {
+        ASSERT(res.value() != nullptr);
         storeRes(AsEtsObject(res.value())->GetCoreType());
     } else {
         storeRes(Value(res.value()).GetAsLong());
@@ -45,6 +46,10 @@ template <typename FStore>
     auto env = ctx->GetJSEnv();
 
     // start fastpath
+    if (IsUndefined(env, jsVal)) {
+        storeRes(nullptr);
+        return true;
+    }
     if (IsNull(env, jsVal)) {
         if (LIKELY(klass->IsAssignableFrom(ctx->GetNullValueClass()))) {
             storeRes(ctx->GetNullValue()->GetCoreType());
@@ -113,12 +118,7 @@ template <typename FStore, typename GetClass>
                                                                const GetClass &getClass, napi_value jsVal)
 {
     auto id = type.GetId();
-    auto env = ctx->GetJSEnv();
     if (id == panda_file::Type::TypeId::REFERENCE) {
-        if (IsUndefined(env, jsVal)) {
-            storeRes(nullptr);
-            return true;
-        }
         return ConvertRefArgToEts(ctx, getClass(), storeRes, jsVal);
     }
     return ConvertPrimArgToEts(ctx, id, storeRes, jsVal);
@@ -192,6 +192,7 @@ static ObjectHeader **DoPackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, 
         const size_t numRestParams = jsargv.size();
 
         EtsEscompatArray *objArr = EtsEscompatArray::Create(numRestParams);
+        ASSERT(objArr != nullptr);
         VMHandle<EtsEscompatArray> restArgsArray(coro, objArr->GetCoreType());
         for (uint32_t restArgIdx = 0; restArgIdx < numRestParams; ++restArgIdx) {
             auto jsVal = jsargv[restArgIdx];
@@ -237,6 +238,7 @@ static ObjectHeader **DoPackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, 
 template <typename FRead>
 [[nodiscard]] static ALWAYS_INLINE inline bool ConvertRefArgToJS(InteropCtx *ctx, napi_value *resSlot, FRead &readVal)
 {
+    ASSERT(ctx != nullptr);
     auto env = ctx->GetJSEnv();
     auto setResult = [resSlot](napi_value res) {
         *resSlot = res;

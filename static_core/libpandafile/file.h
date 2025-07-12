@@ -128,6 +128,11 @@ public:
             return l.offset_ == r.offset_;
         }
 
+        friend bool operator!=(const EntityId &l, const EntityId &r)
+        {
+            return l.offset_ != r.offset_;
+        }
+
         friend std::ostream &operator<<(std::ostream &stream, const EntityId &id)
         {
             return stream << id.offset_;

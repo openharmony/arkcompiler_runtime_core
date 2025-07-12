@@ -76,7 +76,7 @@ class MultipleCatch {
     }
     return res;
   }
-  wrapper(a :int, b :int, c :int , d :int): int {
+  wrapper(a :int, b :int, c :int, d :int): int {
     return d + this.multipleCatch(a, b, c);
   }
 }

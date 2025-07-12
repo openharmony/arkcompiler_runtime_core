@@ -143,6 +143,7 @@ void EtsRegExp::SetFlags(EtsString *flagsStr)
     auto *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsString> flagsHandle(coroutine, flagsStr->GetCoreType());
+    ASSERT(flagsHandle.GetPtr() != nullptr);
     for (int i = 0; i < flagsHandle.GetPtr()->GetLength(); i++) {
         SetFlag(flagsHandle.GetPtr()->At(i));
     }

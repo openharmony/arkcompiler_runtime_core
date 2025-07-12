@@ -13,6 +13,14 @@
 
 --- # Full declaration with reference arguments
 cases:
+  - desc: no args, no return
+    impl: |-
+      type LT = () => void
+      let arg = 0
+      let lf: LT = () => { arg++ }
+      lf()
+      arktest.assertEQ(1, arg, "lambda call failed")
+
   - desc: no args
     impl: |-
         let f: () => Object = () => { return "Hello, World!" }

@@ -12,12 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "customizeData.proj.hpp"
 #include "customizeData.impl.hpp"
-#include "taihe/runtime.hpp"
-#include "stdexcept"
 #include <iostream>
+#include "customizeData.proj.hpp"
+#include "stdexcept"
+#include "taihe/runtime.hpp"
 
 using namespace taihe;
 using namespace customizeData;
@@ -29,6 +28,7 @@ public:
     string name_ = "bob";
     string value_ = "jack";
     string extra_ = "john";
+
     CustomizeDataImpl() {}
 
     void SetName(string_view name)

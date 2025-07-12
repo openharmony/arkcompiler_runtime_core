@@ -42,18 +42,18 @@ function provide() {
 function main() {
     callC = 0;
     let a: Consumer = new Consumer
-    a.run("Test", (args?: Array<Object>) => {})
+    a.run('Test', (args?: Array<Object>) => {})
     arktest.assertEQ(1, callC)
 
     const tc0 = (args?: Array<Object>) => {}
     const tc1: TCallback = (args?: Array<Object>) => {}
     const ta: CBA = [(args?: Array<Object>) => {}]
 
-    a.run("Test", tc0)
-    a.run("Test", tc1)
-    a.run("Test", ta[0])
-    a.run("Test", provide())
-    a.run("Test", new Provider().provide())
+    a.run('Test', tc0)
+    a.run('Test', tc1)
+    a.run('Test', ta[0])
+    a.run('Test', provide())
+    a.run('Test', new Provider().provide())
 
     arktest.assertEQ(6, callC)
 }

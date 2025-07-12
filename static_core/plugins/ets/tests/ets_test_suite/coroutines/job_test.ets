@@ -13,17 +13,24 @@
  * limitations under the License.
  */
 
-function main() {
+function testJobTest() {
     let job1 = new CompletableJob<int>();
     job1.finish(1);
 
     arktest.assertEQ(job1.Await(), 1);
 
     let job2 = new CompletableJob<int>();
-    job2.fail(new Error("Test error"));
+    job2.fail(new Error('Test error'));
     try {
         job2.Await();
     } catch (e) {
-        arktest.assertEQ(e.toString(), "Error: Test error");
+        arktest.assertEQ(e.toString(), 'Error: Test error');
     }
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.job_test');
+    testSuite.addTest('testJobTest', testJobTest);
+    let res = testSuite.run();
+    return res;
 }

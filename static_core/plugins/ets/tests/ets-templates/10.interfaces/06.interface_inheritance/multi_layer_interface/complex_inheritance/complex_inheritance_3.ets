@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify multi-level inheritance of interfaces, classes and abstract classes to ensure correct access to constants and methods.
+desc: >-
+    Verify multi-level inheritance of interfaces, classes and abstract classes to ensure
+    correct access to constants and methods.
 ---*/
 
 interface A {

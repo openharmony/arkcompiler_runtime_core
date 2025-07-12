@@ -207,7 +207,7 @@ function testJsonElementObjectOperations(): void {
     // Test iterator
     let propertyCount = 0;
     let it = objectElem.$_iterator();
-    while(true) {
+    while (true) {
         const v = it.next();
         if (v.done) {
             break;
@@ -461,7 +461,7 @@ function testJsonElementTypeMutation(): void {
     // Test ability to change element type
     const elem = new jsonx.JsonElement();
 
-    // Start as string
+    // Start with string
     elem.setString("Hello");
     arktest.assertEQ(elem.jsonType, jsonx.JsonType.JsonString, "Element should be string type initially");
     arktest.assertEQ(elem.asString(), "Hello", "Element should have correct string value");

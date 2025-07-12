@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Class d inherits class c and indirectly inherits class b can the actual instance correctly obtain the initial null value of the public variable _publicVar in class b.
+desc: >-
+    Class d inherits class c and indirectly inherits class b can the actual instance correctly obtain
+    the initial null value of the public variable _publicVar in class b.
 ---*/
 
 class A {

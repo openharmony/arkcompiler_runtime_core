@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The child class calls the parent class method, and the protected method newly added by the child class is used in the parent class method.
+desc: >-
+    The child class calls the parent class method, and the protected method newly added by the child class
+    is used in the parent class method.
 ---*/
 
 class Parent {
@@ -45,3 +47,4 @@ function main(): void {
   const child = new Child();
   arktest.assertEQ(child.callParentFarewell(), "Custom Protected Method from Child! Goodbye from Parent!");
 }
+

@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that a class implementing an interface with a constant and having a mutable property with the same name causes a compile-time error.
+desc: >-
+    Verify that a class implementing an interface with a constant and having a mutable property with the same name
+    causes a compile-time error.
 ---*/
 
 interface InterfaceA {

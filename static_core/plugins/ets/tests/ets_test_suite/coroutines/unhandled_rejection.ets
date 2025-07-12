@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-import {AtomicFlag} from 'std/debug/concurrency'
+import {AtomicFlag} from "std/debug/concurrency"
+
+type L = StdDebug.Logger
 
 class Event {
     constructor() {
@@ -35,7 +37,7 @@ class Event {
 }
 
 
-const kTotal = 5;
+const kTotal = 6;
 let current = 0;
 let event = new Event();
 
@@ -52,7 +54,7 @@ function WaitAll(): null {
     return null;
 }
 
-function Handler(obj: Object): void {
+function Handler(reason: Error, obj: Object): void {
     if (current == 0) {
         launch<null, () => null>(WaitAll);
     }
@@ -64,25 +66,41 @@ function Handler(obj: Object): void {
     }
 }
 
-function main(): void {
-    StdProcess.on('unhandledJobRejection', (obj: Object): void => {
-        arktest.assertTrue(false, "Job handler didn't switch");
+function testUnhandledRejection(): void {
+    StdProcess.on('unhandledJobRejection', (reason: Error, obj: Object): void => {
+        arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
+        arktest.assertTrue(false, 'Job handler not switched');
     });
-    StdProcess.on('unhandledPromiseRejection', (obj: Object): void => {
-        arktest.assertTrue(false, "Promise handler didn't switch");
+    StdProcess.on('unhandledPromiseRejection', (reason: Error, obj: Object): void => {
+        arktest.assertTrue(obj instanceof Promise, 'The object should be of type Promise');
+        arktest.assertTrue(false, 'Promise handler not switched');
     });
 
-    StdProcess.on('unhandledJobRejection', Handler);
-    StdProcess.on('unhandledPromiseRejection', Handler);
+    StdProcess.on('unhandledJobRejection', (reason: Error, obj: Object): void => {
+        arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
+        Handler(reason, obj);
+    });
+    StdProcess.on('unhandledPromiseRejection',  (reason: Error, obj: Object): void => {
+        arktest.assertTrue(obj instanceof Promise, 'The object should be of type Promise');
+        Handler(reason, obj);
+    });
 
     let g = launch<string, () => string>(Failing);
     launch<Promise<string>, () => Promise<string>>(AsyncFailing);
     AsyncFailing();
     let p = Promise.reject(new Error('promise1'));
     let q = p.then(() => {
-        console.println('Test failed: Unreachable code');
+        L.log('Test failed: Unreachable code');
         let procManager = new StdProcess.ProcessManager();
         procManager.exit(1);
     })
     Promise.reject(new Error('promise2'));
+    Promise.reject();
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.unhandled_rejection');
+    testSuite.addTest('testUnhandledRejection', testUnhandledRejection);
+    let res = testSuite.run();
+    return res;
 }

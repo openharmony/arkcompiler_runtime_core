@@ -45,11 +45,12 @@ public:
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
     bool Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag) override;
+                CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag,
+                CoroutineWorkerGroup::Id groupId) override;
     bool LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
                            CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag) override;
     bool LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName, CoroutineLaunchMode mode,
-                      CoroutinePriority priority, bool abortFlag) override;
+                      CoroutinePriority priority, bool abortFlag, CoroutineWorkerGroup::Id groupId) override;
     void Schedule() override;
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(CoroutineEvent *blocker) override;
@@ -73,8 +74,6 @@ public:
     {
         return false;
     };
-
-    bool IsMainWorker(Coroutine *co) const override;
 
 protected:
     bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int incMask,

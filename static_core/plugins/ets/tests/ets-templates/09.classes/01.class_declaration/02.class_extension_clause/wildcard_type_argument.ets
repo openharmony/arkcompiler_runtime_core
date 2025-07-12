@@ -17,7 +17,9 @@ limitations under the License.
 
 /*---
 desc: Use wildcard in type arguments.
-assert: If the typeReference has type arguments, none of the type arguments may be wildcard type arguments, or a compile-time error occurs.
+assert: >-
+    If the typeReference has type arguments, none of the type arguments may be wildcard type arguments,
+    or a compile-time error occurs.
 tags: [compile-only]
 ---*/
 

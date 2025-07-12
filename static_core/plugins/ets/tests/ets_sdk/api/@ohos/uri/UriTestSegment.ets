@@ -99,56 +99,56 @@ function testUriGetSegment005() {
 }
 
 function testUriGetSegment006() {
-  let route = new uri.URI('http://www.test.com/path/to/image.jpg');
+  let route = new uri.URI('http://www.test.com/path/to/image.jpg');  // CC-OFF(G.OTH.05) test logic
   let segments = route.getSegment();
   arktest.assertEQ(segments[2], "image.jpg");
 }
 
 function testUriAddSegment001() {
-  let route = new uri.URI('http://www.test.com/');
+  let route = new uri.URI('http://www.test.com/');  // CC-OFF(G.OTH.05) test logic
   let newRoute = route.addSegment("files").addSegment("image.jpg");
-  arktest.assertEQ(newRoute.toString(), "http://www.test.com/files/image.jpg");
+  arktest.assertEQ(newRoute.toString(), "http://www.test.com/files/image.jpg");  // CC-OFF(G.OTH.05) test logic
   arktest.assertEQ(newRoute.getLastSegment(), "image.jpg");
 }
 
 function testUriAddSegment002() {
-  let route1 = new uri.URI('http://www.test.com');
+  let route1 = new uri.URI('http://www.test.com');  // CC-OFF(G.OTH.05) test logic
   let newRoute1 = route1.addSegment("files").addSegment("my image.jpg");
-  arktest.assertEQ(newRoute1.toString(), "http://www.test.com/files/my%20image.jpg");
-  let route2 = new uri.URI('http://www.test.com');
+  arktest.assertEQ(newRoute1.toString(), "http://www.test.com/files/my%20image.jpg");   // CC-OFF(G.OTH.05) test logic
+  let route2 = new uri.URI('http://www.test.com');  // CC-OFF(G.OTH.05) test logic
   let newRoute2 = route2.addSegment("files").addSegment("my+image.jpg");
-  arktest.assertEQ(newRoute2.toString(), "http://www.test.com/files/my%2Bimage.jpg");
-  let route3 = new uri.URI('http://www.test.com');
+  arktest.assertEQ(newRoute2.toString(), "http://www.test.com/files/my%2Bimage.jpg");  // CC-OFF(G.OTH.05) test logic
+  let route3 = new uri.URI('http://www.test.com');  // CC-OFF(G.OTH.05) test logic
   let newRoute3 = route3.addSegment("files").addSegment("my%20image.jpg");
-  arktest.assertEQ(newRoute3.toString(), "http://www.test.com/files/my%2520image.jpg");
+  arktest.assertEQ(newRoute3.toString(), "http://www.test.com/files/my%2520image.jpg");  // CC-OFF(G.OTH.05) test logic
 }
 
 function testUriAddSegment003() {
-  let route = new uri.URI('http://www.test.com');
+  let route = new uri.URI('http://www.test.com');  // CC-OFF(G.OTH.05) test logic
   let newRoute = route.addSegment("files");
   arktest.assertEQ(newRoute.getLastSegment(), "files");
   arktest.assertEQ(newRoute.getSegment().length, 1);
 }
 
 function testUriAddEncodedSegment001() {
-  let route = new uri.URI('http://www.test.com');
+  let route = new uri.URI('http://www.test.com');  // CC-OFF(G.OTH.05) test logic
   let newRoute = route.addEncodedSegment("files").addEncodedSegment("image.jpg");
   arktest.assertEQ(newRoute.getSegment()[1], "image.jpg");
 }
 
 function testUriAddEncodedSegment002() {
-  let route1 = new uri.URI('http://www.test.com?param%2B1=value1&param+2=value%202#fra+gemnt');
+  let route1 = new uri.URI('http://www.test.com?param%2B1=value1&param+2=value%202#fra+gemnt');  // CC-OFF(G.OTH.05) test logic
   let newRoute1 = route1.addSegment("my+files").addEncodedSegment("my+image.jpg");
-  arktest.assertEQ(newRoute1.toString(), "http://www.test.com/my%2Bfiles/my+image.jpg?param%2B1=value1&param+2=value%202#fra+gemnt");
+  arktest.assertEQ(newRoute1.toString(), "http://www.test.com/my%2Bfiles/my+image.jpg?param%2B1=value1&param+2=value%202#fra+gemnt");  // CC-OFF(G.OTH.05) test logic
   arktest.assertEQ(newRoute1.encodedUserInfo, null);
   arktest.assertEQ(newRoute1.encodedPath, "/my%2Bfiles/my+image.jpg");
   arktest.assertEQ(newRoute1.encodedQuery, 'param%2B1=value1&param+2=value%202');
   arktest.assertEQ(newRoute1.encodedFragment, "fra+gemnt");
   arktest.assertEQ(newRoute1.encodedAuthority, "www.test.com");
   arktest.assertEQ(newRoute1.encodedSSP, "//www.test.com/my%2Bfiles/my+image.jpg?param%2B1=value1&param+2=value%202");
-  let route2 = new uri.URI('http://www.test.com/');
+  let route2 = new uri.URI('http://www.test.com/');  // CC-OFF(G.OTH.05) test logic
   let newRoute2 = route2.addSegment("my files").addEncodedSegment("my%20image.jpg");
-  arktest.assertEQ(newRoute2.toString(), "http://www.test.com/my%20files/my%20image.jpg");
+  arktest.assertEQ(newRoute2.toString(), "http://www.test.com/my%20files/my%20image.jpg");  // CC-OFF(G.OTH.05) test logic
   arktest.assertEQ(newRoute2.encodedUserInfo, null);
   arktest.assertEQ(newRoute2.encodedPath, "/my%20files/my%20image.jpg");
   arktest.assertEQ(newRoute2.encodedQuery, null);
@@ -168,7 +168,7 @@ function testUriAddEncodedSegment002() {
 
 function testUriAddEncodedSegment003() {
   try {
-    let route = new uri.URI('http://www.test.com/');
+    let route = new uri.URI('http://www.test.com/');  // CC-OFF(G.OTH.05) test logic
     let newRoute = route.addEncodedSegment("my files");
   } catch (err: BusinessError) {
     arktest.assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string.");
@@ -179,7 +179,7 @@ function testUriAddEncodedSegment003() {
 
 function testUriAddEncodedSegment004() {
   try {
-    let route = new uri.URI('http://www.test.com/');
+    let route = new uri.URI('http://www.test.com/');  // CC-OFF(G.OTH.05) test logic
     let newRoute = route.addEncodedSegment("my`files");
   } catch (err: BusinessError) {
     arktest.assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string: The Path does not conform to the rule.");
@@ -214,7 +214,7 @@ function main(): int {
   suite.addTest("testUriAddEncodedSegment003", testUriAddEncodedSegment003);
 
   suite.addTest("testUriAddEncodedSegment004", testUriAddEncodedSegment004);
-  
+
   //passed
   return suite.run();
 }

@@ -71,6 +71,10 @@ PANDA_PUBLIC_API void ETSAni::Postfork(ani_env *env, const std::vector<ani_optio
 
 void ETSAni::LoadAotFileForApp(std::string const &aotFileName)
 {
+    if (AotEscapeSignalHandler::IsEscapeSignalFlagExists()) {
+        LOG(WARNING, AOT) << "LoadAotFileForApp: AOT mode has escaped and roll back to interpreter mode";
+        return;
+    }
     auto res = FileManager::LoadAnFile(aotFileName, true);
     if (!res) {
         LOG(ERROR, AOT) << "Failed to load AOT file: " << res.Error();
@@ -84,6 +88,10 @@ void ETSAni::LoadAotFileForApp(std::string const &aotFileName)
 
 void ETSAni::TryLoadAotFileForBoot()
 {
+    if (AotEscapeSignalHandler::IsEscapeSignalFlagExists()) {
+        LOG(WARNING, AOT) << "TryLoadAotFileForBoot: AOT mode has escaped and roll back to interpreter mode";
+        return;
+    }
     Runtime *runtime = Runtime::GetCurrent();
     ClassLinker *linker = runtime->GetClassLinker();
     const PandaVector<const panda_file::File *> bootPandaFiles = linker->GetBootPandaFiles();

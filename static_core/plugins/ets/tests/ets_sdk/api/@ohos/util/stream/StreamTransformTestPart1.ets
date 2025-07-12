@@ -99,18 +99,18 @@ function mustCallChunk(fn?: Function, times: number = 1) {
     return wrappedFn;
 }
 
+class MyTransform1 extends stream.Transform {
+    constructor() {
+        super();
+    }
+    doTransform(chunk: string, encoding: string, callback: Function): void {
+        callback.unsafeCall();
+        callback.unsafeCall();
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamTransformCallbackTwice001
 function testTransformCallbackTwice() {
-    class MyTransform extends stream.Transform {
-        constructor() {
-            super();
-        }
-        doTransform(chunk: string, encoding: string, callback: Function): void {
-            callback.unsafeCall();
-            callback.unsafeCall();
-        }
-    }
-    let transform = new MyTransform();
+    let transform = new MyTransform1();
     transform.on('error', mustCall((error: Error): void => {
         arktest.assertEQ(error.name, 'BusinessError');
         arktest.assertEQ(error.message, 'Callback called multiple times');
@@ -133,19 +133,19 @@ function testTransformConstructor() {
     arktest.expectThrow(() => { test(); }, exceptionCheck);
 }
 
+class MyTransform2 extends stream.Transform {
+    constructor() {
+        super();
+    }
+    doTransform(chunk: string, encoding: string, callback: Function): void {
+        let transformedChunk = chunk.toString().toUpperCase();
+        this.push(transformedChunk);
+        callback.unsafeCall();
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamTransform001
 function testTransformEventTriggering() {
-    class MyTransform extends stream.Transform {
-        constructor() {
-            super();
-        }
-        doTransform(chunk: string, encoding: string, callback: Function): void {
-            let transformedChunk = chunk.toString().toUpperCase();
-            this.push(transformedChunk);
-            callback.unsafeCall();
-        }
-    }
-    let transform = new MyTransform();
+    let transform = new MyTransform2();
     let transformedData = '';
     transform.on('data', (chunk: buffer.Buffer): void => {
         transformedData += chunk.toString();
@@ -157,18 +157,18 @@ function testTransformEventTriggering() {
     transform.end();
 }
 
+class Transform3 extends stream.Transform {
+    constructor() {
+        super();
+    }
+    doTransform(chunk: string, encoding: string, callback: Function): void {
+        this.push(chunk + ' ');
+        callback.unsafeCall();
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamTransform002
 function testTransformEventHandling() {
-    class Transform extends stream.Transform {
-        constructor() {
-            super();
-        }
-        doTransform(chunk: string, encoding: string, callback: Function): void {
-            this.push(chunk + ' ');
-            callback.unsafeCall();
-        }
-    }
-    let transform = new Transform();
+    let transform = new Transform3();
     let endCalled = false;
     transform.on('end', (): void => {
         endCalled = true;
@@ -178,23 +178,23 @@ function testTransformEventHandling() {
     arktest.assertFalse(endCalled);
 }
 
+class MyTransform4 extends stream.Transform {
+    doInitializeCalled: boolean = false;
+    doInitialize(callback: Function) {
+        super.doInitialize(callback);
+        this.doInitializeCalled = true;
+    }
+
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        super.doWrite(chunk, encoding, callback);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamTransform003
 function testTransformInitialization() {
-    let doInitializeCalled: boolean = false;
-    class MyTransform extends stream.Transform {
-        doInitialize(callback: Function) {
-            super.doInitialize(callback);
-            doInitializeCalled = true;
-        }
-
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            super.doWrite(chunk, encoding, callback);
-        }
-    }
-    let myTransform = new MyTransform();
+    let myTransform = new MyTransform4();
     myTransform.on('data', (): void => {
     });
-    arktest.assertTrue(doInitializeCalled);
+    arktest.assertTrue(myTransform.doInitializeCalled);
 }
 
 // Test cases ported from ArkTS 1.0:testStreamTransform004
@@ -253,30 +253,30 @@ function testTransformPauseState() {
     arktest.assertTrue(transformStream.isPaused());
 }
 
+class TestTransform5 extends stream.Transform {
+    doReadCalled = false;
+    constructor() {
+        super();
+    }
+
+    doTransform(chunk: string, encoding: string, callback: Function): void {
+        callback.unsafeCall();
+    }
+    doRead(size: number) {
+        let fn = () => {
+            this.doReadCalled = true;
+        }
+        let wrappedFn = mustCallArgSize(fn, 1);
+        wrappedFn(size);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamTransform012
 function testTransformReadCallback() {
-    let doReadCalled = false;
-    class TestTransform extends stream.Transform {
-        constructor() {
-            super();
-        }
-
-        doTransform(chunk: string, encoding: string, callback: Function): void {
-            callback.unsafeCall();
-        }
-        doRead(size: number) {
-            let fn = () => {
-                doReadCalled = true;
-            }
-            let wrappedFn = mustCallArgSize(fn, 1);
-            wrappedFn(size);
-        }
-    }
-    let transform = new TestTransform();
+    let transform = new TestTransform5();
     transform.on('data', (): void => {
     });
     setTimeout(() => {
-        arktest.assertTrue(doReadCalled);
+        arktest.assertTrue(transform.doReadCalled);
     }, 0);
     setTimeout(() => {
         arktest.expectNoThrow(() => { await mustCallCheckAll(); });

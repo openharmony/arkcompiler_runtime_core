@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function main() {
+function testScaleWorkersPool() {
     let mainId = CoroutineExtras.getWorkerId();
 
     CoroutineExtras.scaleWorkersPool(1);
@@ -25,4 +25,11 @@ function main() {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
     workerId = launch<Int, () => Int>((): Int => { return CoroutineExtras.getWorkerId(); }).Await();
     arktest.assertEQ(mainId, workerId);
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.scale_workers_pool');
+    testSuite.addTest('testScaleWorkersPool', testScaleWorkersPool);
+    let res = testSuite.run();
+    return res;
 }

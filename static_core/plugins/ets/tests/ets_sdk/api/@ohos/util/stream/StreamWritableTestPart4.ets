@@ -68,19 +68,19 @@ function mustCall(fn?: Function, times: number = 1) {
     return wrappedFn;
 }
 
+class MyWritable1 extends stream.Writable {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        setTimeout(() => {
+            callback.unsafeCall();
+        });
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamWritableWritevFinish006
 function testStreamWritableWriteAfterFinishError() {
-    class MyWritable extends stream.Writable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            setTimeout(() => {
-                callback.unsafeCall();
-            });
-        }
-    }
-    let writableStream = new MyWritable();
+    let writableStream = new MyWritable1();
     writableStream.on('error', mustCall((error: Error): void => {
         arktest.assertEQ(error.message, 'write after end');
     }));
@@ -103,19 +103,19 @@ function testStreamWritableConstructorSetMethodsError() {
     arktest.expectThrow(() => { test(); }, exceptionCheck);
 }
 
+class MyWritable2 extends stream.Writable {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        arktest.assertEQ(this.writableEnded, false);
+        callback.unsafeCall();
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamWritableEndedState001
 function testWritableEndedState() {
     let endCalled = false;
-    class MyWritable extends stream.Writable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            arktest.assertEQ(this.writableEnded, false);
-            callback.unsafeCall();
-        }
-    }
-    let writableStream = new MyWritable();
+    let writableStream = new MyWritable2();
     arktest.assertEQ(writableStream.writable, true);
     arktest.assertEQ(writableStream.writableEnded, false);
     writableStream.end('testing ended', 'utf8', (): void => {
@@ -130,18 +130,18 @@ function testWritableEndedState() {
     });
 }
 
+class MyWritable3 extends stream.Writable {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        arktest.assertEQ(this.writableFinished, false);
+        callback.unsafeCall();
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamWritableFinished002
 function testWritableFinishedState() {
-    class MyWritable extends stream.Writable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            arktest.assertEQ(this.writableFinished, false);
-            callback.unsafeCall();
-        }
-    }
-    let writable = new MyWritable();
+    let writable = new MyWritable3();
     writable.on('finish', mustCall((): void => {
         arktest.assertEQ(writable.writableFinished, true);
     }));
@@ -151,17 +151,17 @@ function testWritableFinishedState() {
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyWritable4 extends stream.Writable {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        callback.unsafeCall();
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamWritableFinished003
 function testWritableFinishEvent() {
-    class MyWritable extends stream.Writable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            callback.unsafeCall();
-        }
-    }
-    let writableStream = new MyWritable();
+    let writableStream = new MyWritable4();
     let finishCalled = false;
     writableStream.end();
     writableStream.on('finish', (): void => {
@@ -172,17 +172,17 @@ function testWritableFinishEvent() {
     });
 }
 
+class MyWritable5 extends stream.Writable {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        callback.unsafeCall();
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamWritableFinished004
 function testWritablePrefinishEvent() {
-    class MyWritable extends stream.Writable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            callback.unsafeCall();
-        }
-    }
-    let writableStream = new MyWritable();
+    let writableStream = new MyWritable5();
     let sync = true;
     writableStream.on('prefinish', (): void => {
         arktest.assertTrue(sync);
@@ -191,17 +191,17 @@ function testWritablePrefinishEvent() {
     sync = false;
 }
 
+class MyWritable6 extends stream.Writable {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        callback.unsafeCall();
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamWritableFinished005
 function testWritableFinishSyncState() {
-    class MyWritable extends stream.Writable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            callback.unsafeCall();
-        }
-    }
-    let writableStream = new MyWritable();
+    let writableStream = new MyWritable6();
     let sync = true;
     writableStream.on('finish', (): void => {
         sync = false;

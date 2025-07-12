@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
- /*---
- desc: Issue 21051. Import entity from namespace is not working
- tags: [compile-only, negative]
+/*---
+desc: Issue 21051. Import entity from namespace is not working
+tags: [compile-only, negative]
+---*/
 
- ---*/
-
- import { TS.B } from './other'
+import { TS.B } from './other'

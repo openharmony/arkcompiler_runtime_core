@@ -69,6 +69,8 @@ components:
   - name: task_manager
   - name: stdlib
   - name: sdk
+  - name: ark_guard
+  - name: abckit_wrapper
 
 dfx_components:
   - name: common

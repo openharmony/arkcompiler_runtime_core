@@ -13,12 +13,16 @@
 # limitations under the License.
 
 
+_run() {
+    coverage run --parallel-mode --module "$@"
+}
+
 _tryit() {
-    coverage run --parallel-mode --module taihe.cli.tryit "$@"
+    _run taihe.cli.tryit "$@"
 }
 
 run-core-tests() {
-    for test_dir in ../test/rgb ../test/object; do
+    for test_dir in test/rgb test/object; do
         echo "Testing: $test_dir"
         _tryit test -u cpp $test_dir
     done
@@ -27,7 +31,6 @@ run-core-tests() {
 run-ani-tests() {
     echo "Running ANI tests..."
 
-    cd ..
     if [ -d "build" ]; then
         echo "Build directory found. Skipping CMake configuration."
     else
@@ -41,31 +44,29 @@ run-ani-tests() {
         fi
     fi
     cmake --build build --verbose
-    cd compiler
 }
 
 run-cmake-test() {
-    test_dir=../test/cmake_test
+    test_dir=test/cmake_test
     echo "Testing: $test_dir"
     _tryit generate -u sts $test_dir --cmake
-    cd ../test/cmake_test/
+    cd test/cmake_test/
     cmake -B build/generated \
-        -D EXTERNAL_INCLUDE=$(realpath ../../.panda_vm/package/ohos_arm64/include/plugins/ets/runtime/ani)
+        -D EXTERNAL_INCLUDE=$(taihec --print-panda-vm-path)/ohos_arm64/include/plugins/ets/runtime/ani
     cmake --build build/generated
     cd ../..
-    cd compiler
 }
 
 run-pytest() {
     echo "Running pytest..."
-    coverage run --parallel-mode --module pytest
+    _run pytest
 }
 
 source "$(dirname "$0")/common_lib.sh"
 init_py_env
 
 # Add trap to ensure coverage is reported even if script exits early
-trap "coverage combine && coverage report" EXIT
+trap "(coverage combine && coverage report)" EXIT
 
 run-pytest
 if [ $# -eq 0 ]; then

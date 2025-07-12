@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "bundleInfo.proj.hpp"
 #include "bundleInfo.impl.hpp"
-#include "taihe/runtime.hpp"
+#include "bundleInfo.proj.hpp"
 #include "stdexcept"
+#include "taihe/runtime.hpp"
 
 using namespace taihe;
 using namespace bundleInfo;
@@ -146,6 +146,7 @@ public:
 class BundleInfoImpl {
 public:
     int32_t version = 21474;
+
     BundleInfoImpl() {}
 
     string GetName()

@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The parent class initializes member variables in the constructor, with the modifier being private and the type being number.
+desc: >-
+    The parent class initializes member variables in the constructor, with the modifier being private
+    and the type being number.
 ---*/
 
 class Parent {

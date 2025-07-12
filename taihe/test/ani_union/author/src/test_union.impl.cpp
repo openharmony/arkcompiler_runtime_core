@@ -213,8 +213,8 @@ public:
 
     ::test_union::union_primitive_2 FuncUnionPrimitiveReturn(string_view kind)
     {
-        static const std::string sValue = "string";
-        static const int8_t i8Value = 1;
+        static std::string const sValue = "string";
+        static int8_t const i8Value = 1;
         if (kind == "s") {
             return ::test_union::union_primitive_2::make_sValue(sValue);
         } else {
@@ -224,8 +224,8 @@ public:
 
     ::test_union::union_primitive_2_1 FuncUnionPrimitiveReturn1(string_view kind)
     {
-        static const int8_t i8Value = 1;
-        static const int16_t i16Value = 12;
+        static int8_t const i8Value = 1;
+        static int16_t const i16Value = 12;
         if (kind == "i8") {
             return ::test_union::union_primitive_2_1::make_i8Value(i8Value);
         } else {
@@ -235,8 +235,8 @@ public:
 
     ::test_union::union_primitive_2_2 FuncUnionPrimitiveReturn2(string_view kind)
     {
-        static const int8_t i8Value = 1;
-        static const int i8Value2 = 2;
+        static int8_t const i8Value = 1;
+        static int const i8Value2 = 2;
         if (kind == "i8_1") {
             return ::test_union::union_primitive_2_2::make_i8Value(i8Value);
         } else {
@@ -246,8 +246,8 @@ public:
 
     ::test_union::union_primitive_2_3 FuncUnionPrimitiveReturn3(string_view kind)
     {
-        static const int16_t i16Value = 12;
-        static const int i32Value = 123;
+        static int16_t const i16Value = 12;
+        static int const i32Value = 123;
         if (kind == "i16") {
             return ::test_union::union_primitive_2_3::make_i16Value(i16Value);
         } else {
@@ -257,8 +257,8 @@ public:
 
     ::test_union::union_primitive_2_4 FuncUnionPrimitiveReturn4(string_view kind)
     {
-        static const int i32Value = 123;
-        static const float f32Value = 1.1f;
+        static int const i32Value = 123;
+        static float const f32Value = 1.1f;
         if (kind == "i32") {
             return ::test_union::union_primitive_2_4::make_i32Value(i32Value);
         } else {
@@ -268,8 +268,8 @@ public:
 
     ::test_union::union_primitive_2_5 FuncUnionPrimitiveReturn5(string_view kind)
     {
-        static const float f32Value = 1.1f;
-        static const double f64Value = 1.234;
+        static float const f32Value = 1.1f;
+        static double const f64Value = 1.234;
         if (kind == "f32") {
             return ::test_union::union_primitive_2_5::make_f32Value(f32Value);
         } else {
@@ -320,7 +320,7 @@ public:
             return ::test_union::union_mix_5::make_sValue("hello");
         }
         if (kind == "i8") {
-            static const int8_t i8Value = 1;
+            static int8_t const i8Value = 1;
             return ::test_union::union_mix_5::make_i8Value(i8Value);
         }
         if (kind == "b") {
@@ -329,8 +329,8 @@ public:
         if (kind == "c") {
             return ::test_union::union_mix_5::make_enumValue((::test_union::Color::key_t)((int)(1)));
         } else {
-            static const int arrSize = 5;
-            static const int arrNum = 3;
+            static int const arrSize = 5;
+            static int const arrNum = 3;
             array<int32_t> result = array<int32_t>::make(arrSize);
             std::fill(result.begin(), result.end(), arrNum);
             return ::test_union::union_mix_5::make_arr32(result);

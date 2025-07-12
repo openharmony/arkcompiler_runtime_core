@@ -23,11 +23,11 @@ interface IAnimal {
 }
 
 class Dog implements IAnimal {
-  speak(): string{
+  speak(): string {
     return "speaking.";
   }
     
-  move(): string{
+  move(): string {
     return "moveing.";
   }
 }

@@ -34,6 +34,10 @@
 #include "runtime/handle_scope-inl.h"
 #include "types/ets_primitives.h"
 
+#ifndef UINT8_MAX
+#define UINT8_MAX (255)
+#endif  // UINT8_MAX
+
 namespace ark::ets::intrinsics {
 
 extern "C" EtsInt CountInstancesOfClass(EtsTypeAPIType *paramType)
@@ -147,6 +151,7 @@ extern "C" void LoadLibrary(ark::ets::EtsString *name)
 extern "C" void StdSystemScheduleCoroutine()
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     if (coro->GetCoroutineManager()->IsCoroutineSwitchDisabled()) {
         ThrowEtsException(coro, panda_file_items::class_descriptors::INVALID_COROUTINE_OPERATION_ERROR,
                           "Cannot switch coroutines in the current context!");
@@ -164,24 +169,28 @@ extern "C" void StdSystemSetCoroutineSchedulingPolicy(int32_t policy)
     ASSERT((policy >= 0) && (static_cast<size_t>(policy) < POLICIES_MAPPING.size()));
     CoroutineSchedulingPolicy newPolicy = POLICIES_MAPPING[policy];
 
-    auto *cm = static_cast<CoroutineManager *>(Coroutine::GetCurrent()->GetVM()->GetThreadManager());
+    Coroutine *coro = Coroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    auto *cm = static_cast<CoroutineManager *>(coro->GetVM()->GetThreadManager());
     cm->SetSchedulingPolicy(newPolicy);
 }
 
 extern "C" int32_t StdSystemGetCoroutineId()
 {
-    return EtsCoroutine::GetCurrent()->GetCoroutineId();
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    return coro->GetCoroutineId();
 }
 
 extern "C" EtsBoolean StdSystemIsMainWorker()
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    return static_cast<EtsBoolean>(coro->GetCoroutineManager()->IsMainWorker(coro));
+    return static_cast<EtsBoolean>(EtsCoroutine::GetCurrent()->GetWorker()->IsMainWorker());
 }
 
 extern "C" EtsBoolean StdSystemWorkerHasExternalScheduler()
 {
     auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     return static_cast<EtsBoolean>(coro->GetWorker()->IsExternalSchedulingEnabled());
 }
 
@@ -198,7 +207,9 @@ extern "C" void StdSystemScaleWorkersPool(int32_t scaler)
         return;
     }
     ScopedNativeCodeThread nativeScope(coro);
-    Coroutine::GetCurrent()->GetManager()->FinalizeWorkers(std::abs(scaler), runtime, vm);
+    auto *coroutine = Coroutine::GetCurrent();
+    ASSERT(coroutine != nullptr);
+    coroutine->GetManager()->FinalizeWorkers(std::abs(scaler), runtime, vm);
 }
 
 extern "C" void StdSystemStopTaskpool()
@@ -245,6 +256,18 @@ extern "C" void StdSystemAtomicFlagSet(EtsAtomicFlag *instance, EtsBoolean v)
 extern "C" EtsBoolean StdSystemAtomicFlagGet(EtsAtomicFlag *instance)
 {
     return instance->GetValue();
+}
+
+extern "C" EtsInt EtsEscompatUint8ClampedArrayToUint8Clamped(EtsDouble val)
+{
+    // Convert the double value to uint8_t with clamping
+    if (val <= 0 || std::isnan(val)) {
+        return 0;
+    }
+    if (val > UINT8_MAX) {
+        return UINT8_MAX;
+    }
+    return std::lrint(val);
 }
 
 }  // namespace ark::ets::intrinsics

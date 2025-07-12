@@ -526,8 +526,10 @@ constexpr size_t MaxChars()
         auto bits = std::numeric_limits<double>::digits;
         auto digitPerBit = std::log10(std::numeric_limits<double>::radix);
         auto digits = std::ceil(bits * digitPerBit) + static_cast<int>(std::is_signed_v<double>);
-        // digits + point + "+e308"
-        return digits + 1U + std::char_traits<char>::length("+e308");
+        // MaxChars for double
+        // integer part + decimal point + digits + e+308
+        //     1        +     1         +   17   +   5
+        return 1U + 1U + digits + std::char_traits<char>::length("+e308");
     }
 }
 

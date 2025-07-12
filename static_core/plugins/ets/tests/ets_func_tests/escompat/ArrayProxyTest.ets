@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-class StringArrayProxyHandler extends DefaultArrayProxyHandler<string> {
+class StringArrayProxyHandler extends proxy.DefaultArrayProxyHandler<string> {
     getTrapped: boolean = false
     setTrapped: boolean = false
     setLengthTrapped: boolean = false
@@ -77,7 +77,7 @@ class StringArrayProxyHandler extends DefaultArrayProxyHandler<string> {
 }
 
 function verifyArrayProxyOps(array: Array<string>, handler: StringArrayProxyHandler): void {
-    let arrayProxy: Array<string> = Proxy.create(array, handler)
+    let arrayProxy: Array<string> = proxy.Proxy.create(array, handler)
 
     arktest.assertEQ(arrayProxy.length, 3, "unexpected arrayProxy.length")
 
@@ -140,7 +140,7 @@ function verifyArrayProxyOps(array: Array<string>, handler: StringArrayProxyHand
 }
 
 function testArrayProxyOps(): void {
-    verifyArrayProxyOps(Array.of<string>("0", "1", "2"), new StringArrayProxyHandler())
+    verifyArrayProxyOps(Array.of<string>("0", "1", "2"), new proxy.StringArrayProxyHandler())
 }
 
 function main(): int {

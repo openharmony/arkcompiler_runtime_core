@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Test whether class d can correctly access the public variable _publicVar defined in class b and obtain the value of its first element after inheriting from class b.
+desc: >-
+    Test whether class d can correctly access the public variable _publicVar defined in class b and obtain the value
+    of its first element after inheriting from class b.
 ---*/
 
 class A {

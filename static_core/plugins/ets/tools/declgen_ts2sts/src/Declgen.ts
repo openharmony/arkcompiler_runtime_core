@@ -135,7 +135,7 @@ export class Declgen {
     }
   }
 
-  private transformDeclarationFiles(program: ts.Program, sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker,): ts.TransformationResult<ts.Node> {
+  private transformDeclarationFiles(program: ts.Program, sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker): ts.TransformationResult<ts.Node> { 
     const result = ts.transform(
       sourceFile,
       [

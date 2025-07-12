@@ -243,6 +243,30 @@ void CodePatcher::AddStringDependency()
     }
 }
 
+void Context::HandleStringId(CodePatcher &p, const BytecodeInstruction &inst, const panda_file::File *filePtr,
+                             CodeData *data)
+{
+    BytecodeId bId = inst.GetId();
+    auto oldId = bId.AsFileId();
+    auto sData = filePtr->GetStringData(oldId);
+    auto itemStr = std::string(utf::Mutf8AsCString(sData.data));
+    p.Add(CodePatcher::StringChange {inst, std::move(itemStr), data->nmi});
+}
+
+void Context::HandleLiteralArrayId(CodePatcher &p, const BytecodeInstruction &inst, const panda_file::File *filePtr,
+                                   const std::map<panda_file::File::EntityId, panda_file::BaseItem *> *items)
+{
+    BytecodeId bId = inst.GetId();
+    auto oldIdx = bId.AsRawValue();
+    auto arrs = filePtr->GetLiteralArrays();
+    ASSERT(oldIdx < arrs.size());
+    auto off = arrs[oldIdx];
+    auto iter = items->find(panda_file::File::EntityId(off));
+    ASSERT(iter != items->end());
+    ASSERT(iter->second->GetItemType() == panda_file::ItemTypes::LITERAL_ARRAY_ITEM);
+    p.Add(CodePatcher::LiteralArrayChange {inst, static_cast<panda_file::LiteralArrayItem *>(iter->second)});
+}
+
 void Context::MakeChangeWithId(CodePatcher &p, CodeData *data)
 {
     using Flags = ark::BytecodeInst<ark::BytecodeInstMode::FAST>::Flags;
@@ -270,6 +294,11 @@ void Context::MakeChangeWithId(CodePatcher &p, CodeData *data)
     };
 
     while (offset < limit) {
+        if (offset + inst.GetSize() > limit) {
+            LOG(FATAL, STATIC_LINKER) << "Invalid code size: " << limit << ", offset: " << offset
+                                      << ", instruction size: " << inst.GetSize();
+            break;
+        }
         if (inst.HasFlag(Flags::TYPE_ID)) {
             makeWithId(&panda_file::File::ResolveClassIndex);
             // inst.UpdateId()
@@ -278,26 +307,16 @@ void Context::MakeChangeWithId(CodePatcher &p, CodeData *data)
         } else if (inst.HasFlag(Flags::FIELD_ID) || inst.HasFlag(Flags::STATIC_FIELD_ID)) {
             makeWithId(&panda_file::File::ResolveFieldIndex);
         } else if (inst.HasFlag(Flags::STRING_ID)) {
-            BytecodeId bId = inst.GetId();
-            auto oldId = bId.AsFileId();
-
-            auto sData = filePtr->GetStringData(oldId);
-            auto itemStr = std::string(utf::Mutf8AsCString(sData.data));
-            p.Add(CodePatcher::StringChange {inst, std::move(itemStr), data->nmi});
+            HandleStringId(p, inst, filePtr, data);
         } else if (inst.HasFlag(Flags::LITERALARRAY_ID)) {
-            BytecodeId bId = inst.GetId();
-            auto oldIdx = bId.AsRawValue();
-            auto arrs = filePtr->GetLiteralArrays();
-            ASSERT(oldIdx < arrs.size());
-            auto off = arrs[oldIdx];
-            auto iter = items->find(EntityId(off));
-            ASSERT(iter != items->end());
-            ASSERT(iter->second->GetItemType() == panda_file::ItemTypes::LITERAL_ARRAY_ITEM);
-            p.Add(CodePatcher::LiteralArrayChange {inst, static_cast<panda_file::LiteralArrayItem *>(iter->second)});
+            HandleLiteralArrayId(p, inst, filePtr, items);
         }
 
         offset += inst.GetSize();
         inst = inst.GetNext();
+    }
+    if (offset != limit) {
+        LOG(FATAL, STATIC_LINKER) << "Code size mismatch: expected " << limit << ", got " << offset;
     }
 }
 

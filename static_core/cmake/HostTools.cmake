@@ -48,6 +48,7 @@ function(panda_configure_host_tools)
     add_custom_target(host_tools_depends)
 
     set(HOST_TOOLS_CMAKE_ARGS
+        -DPANDA_USE_64_BIT_POINTER=${PANDA_USE_64_BIT_POINTER}
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         -DPANDA_ROOT=${PANDA_ROOT}
         -DPANDA_BINARY_ROOT=${PANDA_BINARY_ROOT}

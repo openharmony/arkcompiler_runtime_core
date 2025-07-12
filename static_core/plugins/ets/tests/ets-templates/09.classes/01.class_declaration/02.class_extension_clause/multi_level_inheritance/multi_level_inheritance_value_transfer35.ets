@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Make sure that the public member variable _publicVar is properly initialized in base class a and that the value remains unchanged in the lowest subclass c.
+desc: >-
+    Make sure that the public member variable _publicVar is properly initialized in base class a and that
+    the value remains unchanged in the lowest subclass c.
 ---*/
 
 class A {

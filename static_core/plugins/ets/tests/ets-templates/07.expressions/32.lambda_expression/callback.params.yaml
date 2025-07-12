@@ -20,7 +20,8 @@ cases:
             const arg = 4
             return op(arg)
         }
-        arktest.assertEQ(test((n) => n + n), 8, "Dub failed")
+    call:
+        arktest.assertEQ(test((n) => n + n), 8, 'Dub failed')
 
   - desc: two value args
     impl: |-
@@ -29,21 +30,24 @@ cases:
             const b = 3
             return op(a, b)
         }
-        arktest.assertEQ(test((a, b) => a + b), 8, "Sum failed")
+    call:
+        arktest.assertEQ(test((a, b) => a + b), 8, 'Sum failed')
 
   - desc: two reference args
     impl: |-
         function test(op: (a: String, b: String) => String) {
-            const a = "Hello, "
-            const b = "World!"
+            const a = 'Hello, '
+            const b = 'World!'
             return op(a, b)
         }
-        arktest.assertEQ(test((a, b) => a + b), "Hello, World!", "Concat failed")
+    call:
+        arktest.assertEQ(test((a, b) => a + b), 'Hello, World!', 'Concatenation failed')
 
-  - desc: one value arg without parenseses
+  - desc: one value arg without parentheses
     impl: |-
         function test(op: (a: int) => int) {
             const arg = 4
             return op(arg)
         }
-        arktest.assertEQ(test(n => n), 4, "Same failed")
+    call:
+        arktest.assertEQ(test(n => n), 4, 'Same failed')

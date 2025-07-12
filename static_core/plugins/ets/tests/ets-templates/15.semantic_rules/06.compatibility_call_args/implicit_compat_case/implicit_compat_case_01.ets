@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- /*---
+/*---
 desc: Verifying implicit conversion from number to string.
 tags: [compile-only, negative]
 ---*/

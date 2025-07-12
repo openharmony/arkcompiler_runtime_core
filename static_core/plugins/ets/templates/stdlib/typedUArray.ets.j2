@@ -24,6 +24,7 @@ const IS_LITTLE_ENDIAN: boolean;
                     {'name': 'Uint16',       'subsetType': 'number', 'subsetTypeValues': 'Number', 'primitiveType': 'int', 'bytes': 2, 'primitiveTypeWide': 'int'},
                     {'name': 'Uint32',       'subsetType': 'number', 'subsetTypeValues': 'Number', 'primitiveType': 'long', 'bytes': 4, 'primitiveTypeWide': 'long'},
                     {'name': 'BigUint64',    'subsetType': 'BigInt', 'subsetTypeValues': 'BigInt', 'primitiveType': 'long', 'bytes': 8, 'primitiveTypeWide': 'long'}] %}
+
     {%- set _ = element.update({'subsetTypeBoxed':  element['subsetType'][0].upper() + element['subsetType'][1:], 'primitiveTypeBoxed':  element['primitiveType'][0].upper() + element['primitiveType'][1:]}) %}
     {%- set asElementCompat = ('%s.toDouble()') if element['subsetType'] != 'BigInt' else 'new BigInt(%s)' %}
     {%- set fromElementCompat = ('%s.to' + element['primitiveType'].capitalize() + '()') if element['subsetType'] != 'BigInt' else '%s.getULong()' %}
@@ -104,6 +105,7 @@ class {{element['name']}}ArrayIteratorEntries implements IterableIterator<{{subs
 export final class {{element['name']}}Array implements Iterable<{{element['subsetTypeValues']}}>, ArrayLike<{{element['subsetTypeValues']}}> {
     public static readonly BYTES_PER_ELEMENT: int = {{element['bytes']}}
     public readonly BYTES_PER_ELEMENT: int = {{element['name']}}Array.BYTES_PER_ELEMENT
+    public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
 
     /** Underlying Buffer */
     public readonly buffer: ArrayBuffer
@@ -119,6 +121,10 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         this(0)
     }
 
+    {%- if element.get('name') == 'Uint8Clamped' %}
+    public native static toUint8Clamped(val: double): int;
+    {%- endif %}
+
     /**
      * Creates an {{element['name']}}Array with respect to data accessed via Iterable<Number> interface
      */
@@ -133,10 +139,17 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 {%- if element.get('name') == 'BigUint64' %}
                 this.setUnsafeClamp(i, arr.$_get(i){{numberBigIntToPrimitive}})
+                {%- elif element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
+                let temp: double = arr.$_get(i);
+                if (Double.isNaN(temp) || temp == Double.POSITIVE_INFINITY || temp == Double.NEGATIVE_INFINITY) {
+                    this.setUnsafeClamp(i, 0);
+                } else {
+                    this.setUnsafeClamp(i, {{element.get('name')}}Array.doubleToInt(temp));
+                }
                 {%- elif element.get('name') != 'Uint8Clamped' %}
                 this.setUnsafeClamp(i, this.zeroIfInfinity(arr.$_get(i)).to{{element['primitiveType'].capitalize()}}())
                 {%- else %}
-                this.setUnsafeClamp(i, arr.$_get(i).to{{element['primitiveType'].capitalize()}}())
+                this.setUnsafeClamp(i, Uint8ClampedArray.toUint8Clamped(arr.$_get(i)))
                 {%- endif %}
             }
         } else {
@@ -147,6 +160,10 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             this.byteOffsetInt = x.byteOffsetInt
         }
     }
+
+    {%- if element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
+    public static native doubleToInt(d: double): {{element['primitiveType'].capitalize()}};
+    {%- endif %}
 
     /**
      * Creates an {{element['name']}}Array with respect to data, byteOffset and length.
@@ -855,7 +872,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = array.length - 1; i >= 0; --i) {
+        for (let i = 0; i < array.length; ++i) {
         {%- if not element.get('name') in ['Uint8Clamped', 'BigUint64'] %}
             let v = this.zeroIfInfinity(array[i])
             this.setUnsafeClamp(insertPos.toInt() + i.toInt(), {{fromElementCompat % 'v'}})
@@ -1408,10 +1425,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             this.sort()
             return this
         }
-        let arr: FixedArray<{{element['primitiveType']}}> = new {{element['primitiveType']}}[this.lengthInt]
-        for (let i = 0; i < this.lengthInt; ++i) {
-            arr[i] = this.getUnsafe(i)
-        }
 
         let cmp = (l: {{element['primitiveType']}}, r: {{element['primitiveType']}}): number => {
                 return (l - r).toDouble()
@@ -1431,13 +1444,24 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             }
         }
         const MAX_SHORT_LENGTH = 24
-        if (arr.length > MAX_SHORT_LENGTH) {
+        if (this.lengthInt > MAX_SHORT_LENGTH) {
+            let arr: FixedArray<{{element['primitiveType']}}> = new {{element['primitiveType']}}[this.lengthInt]
+            for (let i = 0; i < this.lengthInt; ++i) {
+                arr[i] = this.getUnsafe(i)
+            }
             arr = mergeSort(arr, cmp)
+            for (let i = 0; i < arr.length; ++i) {
+                this.setUnsafe(i, arr[i])
+            }
         } else {
-            sort(arr, cmp)
-        }
-        for (let i = 0; i < arr.length; ++i) {
-            this.setUnsafe(i, arr[i])
+            let buffer: FixedArray<{{element['primitiveTypeBoxed']}}> = new {{element['primitiveTypeBoxed']}}[this.lengthInt]
+            for (let i = 0; i < this.lengthInt; ++i) {
+                buffer[i] = this.getUnsafe(i)
+            }
+            arr_sort_stable(buffer, 0, buffer.length as int, cmp)
+            for (let i = 0; i < buffer.length; ++i) {
+                this.setUnsafe(i, buffer[i])
+            }
         }
         return this
     }
@@ -1451,7 +1475,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns new {{element['name']}}Array with the same underlying Buffer
      */
-    public subarray(begin?: number, end?: number): {{element['name']}}Array {
+    public subarrayNN(begin?: number, end?: number): {{element['name']}}Array {
         return this.subarray(asIntOrDefault(begin, 0), asIntOrDefault(end, this.lengthInt))
     }
 
@@ -1464,7 +1488,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns new {{element['name']}}Array with the same underlying Buffer
      */
-    public subarray(begin?: number, end?: int): {{element['name']}}Array {
+    public subarrayNI(begin?: number, end?: int): {{element['name']}}Array {
         return this.subarray(asIntOrDefault(begin, 0), end)
     }
 
@@ -1477,7 +1501,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns new {{element['name']}}Array with the same underlying Buffer
      */
-    public subarray(begin?: int, end?: number): {{element['name']}}Array {
+    public subarrayIN(begin?: int, end?: number): {{element['name']}}Array {
         return this.subarray(begin, asIntOrDefault(end, this.lengthInt))
     }
 
@@ -1490,7 +1514,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns new {{element['name']}}Array with the same underlying Buffer
      */
-    public subarray(begin: int | undefined = 0, end: int | undefined = this.lengthInt): {{element['name']}}Array {
+    public subarrayII(begin: int | undefined = 0, end: int | undefined = this.lengthInt): {{element['name']}}Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin ?? 0, len)
         const relEnd = normalizeIndex(end ?? this.lengthInt, len)

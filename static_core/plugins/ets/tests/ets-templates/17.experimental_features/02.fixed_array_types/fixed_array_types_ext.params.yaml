@@ -58,11 +58,10 @@ cases:
       let arr: FixedArray<number> = [];
   - desc: |-
       The index exceeds the array length.
-      tags:
-        - negative
     logic: |-
       let x: FixedArray<number> = [1, 2, 3];
-      let y = x[3];
+      let expectedException = (e: Error | Exception): boolean => {return (e instanceof ArrayIndexOutOfBoundsError)}
+      arktest.expectThrow(() => {x[3];}, expectedException)
   - desc: Changing the values of array elements.
     logic: |-
       let x: FixedArray<number> = [1, 2, 3]; 

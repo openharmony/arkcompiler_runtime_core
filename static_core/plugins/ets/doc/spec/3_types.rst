@@ -421,8 +421,9 @@ The syntax of *type reference* is presented below:
 
     let map: Map<string, number> // Map<string, number> is the type reference
 
-    class A<T> {
-       field1: A<T>  // A<T> is a type reference - class type reference
+    class A<T> {...}
+    class C<T> {
+       field1: A<T>  // A<T> is a class type reference - class type reference
        field2: A<number> // A<number> is a type reference - class type reference
        foo (p: T) {} // T is a type reference - type parameter
        constructor () { /* some body to init fields */ }
@@ -773,7 +774,7 @@ discussed below.
 
 An operation is called a *floating-point operation* if at least one of the
 operands in a binary operator is of a floating-point type (even if the
-other operand is integer) and that is not string concatenation.
+other operand is integer), and that is not a string concatenation.
 
 If at least one operand of the numerical operator is of type ``double``,
 then the operation implementation uses the 64-bit floating-point arithmetic.
@@ -1069,7 +1070,8 @@ Type ``never`` has no instance. Type ``never`` is used as one of the following:
 
 - Return type for functions or methods that never return a value, but
   throw an error when completing an operation.
-- Type of variables that never get value (note however that assignment statement with both left and right types ``never`` is legal).
+- Type of variables that never get a value (however, an assignment statement
+  with types ``never`` in both left- and right-hand-sides is valid).
 - Type of parameters of a function or a method to prevent the body of that
   function or method from being executed.
 
@@ -1172,13 +1174,30 @@ type with type ``undefined`` (see :ref:`Type undefined`) as follows:
    }
    let a1 = new A<void>(undefined)      // ok, type parameter is irrelevant
    let a2 = new A<undefined>(undefined) // ok, the same
+   let a3 = new A<void>(void)           // compile-time error: void is used as value
 
-   console.log (a1.f, a2.m()) // Will output "undefined" "undefined"
+   console.log (a1.f, a2.m()) // Output is "undefined" "undefined"
 
-   function foo<T>(x: T) {}
+   function foo<T>(p: T): T { return p }
+   console.log (foo<void>(undefined)) // ok, output is "undefined"
+   foo<void>(void)                    // compile-time error: void is used as value
 
-   foo<void>(undefined) // ok
-   foo<void>(void)      // compile-time error: void is used as value
+If type argument of a generic function type is ``void``, then a return type
+equal to the generic parameter is simply removed or replaced for ``: void``.
+If used as a type argument, a type parameter is replaced for ``undefined``.
+
+.. code-block:: typescript
+   :linenos:
+
+   type F1<T> = () => T
+   const f1: F1<void> = (): void => {}
+   const f2: F1<void> = () => {}
+
+   type F2<T> = () => T[]
+   type F3<T> = () => Array<T>
+   const f3: F2<void> = (): Array<void> => { return [undefined] }
+   const f4: F3<void> = (): Array<undefined> => { return [undefined] }
+
 
 .. index::
    type void
@@ -1268,15 +1287,15 @@ shared.
 
 Type ``string`` has dual semantics, i.e.:
 
--  If is created, assigned, or passed as an argument, type ``string`` behaves
-   like a reference type (see :ref:`Reference Types`).
--  All ``string`` operations (see :ref:`String Concatenation`,
-   :ref:`Equality Expressions`, and :ref:`String Relational Operators`)
-   handle type ``string`` as a value (see :ref:`Value Types`).
+-  Type ``string`` behaves like a reference type (see :ref:`Reference Types`)
+   if created, assigned, or passed as an argument;
+-  Type ``string`` is handled as a value (see :ref:`Value Types`) by all
+   ``string`` operations (see :ref:`String Concatenation`,
+   :ref:`Equality Expressions`, and :ref:`String Relational Operators`).
 
 A number of operators can act on ``string`` values as follows:
 
--  Accessing the ``length`` property returns the string length as ``int``
+-  Accessing the ``length`` property returns string length as ``int``
    type value. String length is a non-negative integer number.
    String length is set once at runtime and cannot be changed after that.
 
@@ -1288,9 +1307,9 @@ A number of operators can act on ``string`` values as follows:
 -  Indexing a string value (see :ref:`String Indexing Expression`) returns a
    value of type ``string``. A new ``string`` object can be created implicitly.
 
-A string value can contain any character. There is no way to indicate end of
-string using some character. The following example illustrate that character
-with value '\0' is an ordinary character inside string:
+A string value can contain any character, i.e., no character can be used to
+indicate the end of a string. A character with the value '\0' is an ordinary
+character inside a string as represented by the following example:
 
 .. code-block:: typescript
    :linenos:
@@ -1439,8 +1458,9 @@ Array Types
 .. meta:
     frontend_status: Partly
 
-*Array types* are types that consist of more than one element. |LANG| supports
-the following two predefined array types:
+*Array type* is a data structure intended to comprise any number of same-type
+elements, including zero elements. |LANG| supports the following two predefined
+array types:
 
 - :ref:`Resizable Array Types`; and
 
@@ -1481,7 +1501,8 @@ Resizable Array Types
 *Resizable array type* is a built-in type characterized by the following:
 
 -  Any object of resizable array type contains elements. The number of elements
-   is known as *array length* and can be accessed using ``length`` property.
+   is known as *array length*, and can be accessed by using the ``length``
+   property.
 -  Array length is a non-negative integer number.
 -  Array length can be set and changed at runtime.
 -  Array element is accessed by its index. The index is an integer number
@@ -1509,7 +1530,7 @@ Resizable Array Types
    array
 
 *Resizable array type* with elements of type ``T`` can have the following two
-syntax forms:
+forms of syntax:
 
 - ``T[]``, and
 - ``Array<T>``.
@@ -1522,8 +1543,8 @@ The first form uses the following syntax:
        type '[' ']'
        ;
 
-**Note**.  ``T[]`` and ``Array<T>`` specify identical (indistinguishable) types
-(see :ref:`Type Identity`).
+**Note**.  ``T[]`` and ``Array<T>`` specify identical, i.e., indistinguishable
+types (see :ref:`Type Identity`).
 
 .. index::
    type identity
@@ -1545,11 +1566,19 @@ An array can be created by using :ref:`Array Literal`,
 defined in :ref:`Standard Library`.
 
 |LANG| allows setting a new value to ``length`` to shrink an array and provide
-better |TS| compatibility. The new value must be equal to or less than the
-previous length. Attempting to increase the length of an array by assignment
-to ``length`` causes a :index:`compile-time error` (if the compiler has the
-information sufficient to determine this) or a runtime error as in the
-examples below:
+better |TS| compatibility. An error is caused by the following situations:
+
+-  The value is of type ``number`` or other floating-point type,
+   and the fractional part differs from 0;
+-  The value is less then zero; or
+-  The value is greater then previous length.
+
+The above situations cause errors as follows:
+
+-  A runtime error, if the situation is identified at runtime, i.e., during
+   program execution; and
+-  A :index:`compile-time error`, if the situation is detected during
+   compilation.
 
 .. index::
    method
@@ -1558,6 +1587,8 @@ examples below:
    access
    property length
    standard library
+
+Array operations are illustrated below:
 
 .. code-block:: typescript
    :linenos:
@@ -1611,21 +1642,13 @@ Readonly Array Types
 .. meta:
     frontend_status: Partly
 
-*Readonly array type* with elements of type ``T`` can have the following two
-syntax forms:
+*Readonly array type* is immutable, i.e.:
 
-- ``readonly T[]``, and
-- ``ReadonlyArray<T>``.
+- Length of a variable of a *readonly array type* cannot be changed;
+- Elements of a *readonly array type* cannot be modified after the initial
+  assignment directly nor through a function or method call.
 
-Both forms specify identical (indistinguishable) types (see :ref:`Type Identity`).
-
-Any varaible of a *readonly array type* is characterized by the following:
-
-- Its length cannot be changed;
-- Its elements cannot be modified after the initial assignment directly or
-  through a function or method call.
-
-A :index:`compile-time error` occurs otherwise.
+Otherwise, a :index:`compile-time error` occurs.
 
 
 .. code-block-meta:
@@ -1637,6 +1660,13 @@ A :index:`compile-time error` occurs otherwise.
     let x: readonly number [] = [1, 2, 3]
     x[0] = 42 // compile-time error as array itself is readonly
 
+*Readonly array type* with elements of type ``T`` can have the following two
+syntax forms:
+
+- ``readonly T[]``, and
+- ``ReadonlyArray<T>``.
+
+Both forms specify identical (indistinguishable) types (see :ref:`Type Identity`).
 
 **Note.** In multidimensional arrays, all dimensions are ``readonly``.
 
@@ -1727,7 +1757,7 @@ Readonly Tuple Types
 
 If an *tuple* type has the prefix ``readonly``, then its elements cannot be
 modified after the initial assignment directly or through a function or method
-call. Otherwise, a :index:`compile-time error` occurs:
+call. Otherwise, a :index:`compile-time error` occurs as follows:
 
 .. code-block-meta:
    expect-cte:
@@ -1900,14 +1930,14 @@ of the arguments are valid.
    f(1) // compile-time error: cannot be called
 
    f.unsafeCall(3.14) // correct call and execution
-   f.unsafeCall() // run-time error: wrong number of arguments
+   f.unsafeCall() // runtime error: wrong number of arguments
 
 Another important property of type ``Function`` is ``name``.
 It is a string that contains the name associated with the function object
 in the following way:
 
 -  If a function or a method is assigned to a function object, then the
-   associated name is that of the function or the method;
+   associated name is that of the function or of the method;
 
 -  If a lambda is assigned to a variable of ``Function`` type, then the
    associated name is that of the variable;
@@ -2018,7 +2048,7 @@ Typical usage examples of *union* types are represented below:
     type Union1 = string | StringEnum // OK, will be reduced during normalization
 
 Values of particular types can be received from a *union* by using different
-mechanisms as folllows:
+mechanisms as follows:
 
 .. code-block:: typescript
    :linenos:
@@ -2133,13 +2163,10 @@ after another:
    removed.
 #. If positioned among union types, type ``never`` is removed.
 #. If one type in a union is ``string``, then all string literal types (if
-   any) and all enumerations with constants of type ``string`` (if any) are
-   removed.
-#. If one type in a union is an integer type, then all enumerations with
-   constants of the same integer type or of a shorter type (if any) are removed.
+   any) are removed.
 
    This procedure is performed recursively until none of the above steps can
-   can be performed.
+   can be performed again.
 
 .. index::
    union type
@@ -2175,12 +2202,6 @@ is represented by the examples below:
     (number[]) | (readonly number[]) // normalized as readonly number[]. Readonly version wins
 
     "1" | string | number // normalized as  string | number. Literal type value belongs to another type values
-
-    enum ES {A = "AA", B = "BB"}
-    string | ES // normalized as "string", as all enumeration constants values are of type "string"
-
-    enum EI {A, B}
-    int | EI // normalized as "int", as all enumeration constants values are of type "int"
 
     class Base {}
     class Derived extends Base {}

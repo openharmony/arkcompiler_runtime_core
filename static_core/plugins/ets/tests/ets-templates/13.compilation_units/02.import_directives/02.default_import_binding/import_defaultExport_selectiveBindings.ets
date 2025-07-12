@@ -22,12 +22,12 @@ files:
 import a,{b as b,c as c} from "./export_default/single_export.ets";
 import a2,{b as b2,c as c2} from "./export_default/selective_export.ets";
 
-function main(){
-    arktest.assertEQ(a,100)
-    arktest.assertEQ(b,10000)
-    arktest.assertEQ(c,"export_string")
+function main() {
+    arktest.assertEQ(a, 100)
+    arktest.assertEQ(b, 10000)
+    arktest.assertEQ(c, "export_string")
 
-    arktest.assertEQ(a2,100)
-    arktest.assertEQ(b2,10000)
-    arktest.assertEQ(c2,"export_string")
+    arktest.assertEQ(a2, 100)
+    arktest.assertEQ(b2, 10000)
+    arktest.assertEQ(c2, "export_string")
 }

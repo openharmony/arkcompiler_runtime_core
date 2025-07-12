@@ -21,8 +21,8 @@ init_py_env
 ret=0
 
 set -x
-black --diff --check taihe tests || ret=1
-ruff check taihe tests || ret=1
-pyright || ret=1
+ruff format --check || ret=1
+ruff check || ret=1
+pyright compiler || ret=1
 
 exit "$ret"

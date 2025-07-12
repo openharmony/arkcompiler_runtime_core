@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that the public member variable _publicVar inherited from class a is correctly initialized to null in subclass c.
+desc: >-
+    Verify that the public member variable _publicVar inherited from class a is correctly
+    initialized to null in subclass c.
 ---*/
 
 class A {

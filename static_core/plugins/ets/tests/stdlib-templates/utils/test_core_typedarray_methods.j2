@@ -39,6 +39,10 @@ function main(): int {
     failures += check(testTypedArrayEvery(), "Test .every method")
     failures += check(testTypedArraySome(), "Test .some method")
     failures += check(testTypedArraySort(), "Test .sort method")
+    {%- if (item.objectType == 'Float32Array') or (item.objectType == 'Float64Array') %}
+    failures += check(testTypedArraySortWithNaN(), "Test .sort with NaN method")
+    failures += check(testTypedArraySortWithNaNReversed(), "Test .sort in reversed order with NaN method")
+    {%- endif%}
     failures += check(testTypedArrayFindAndFindIndex(), "Test .find and .findIndex method")
     failures += check(testTypedArrayMap(), "Test .map method")
     failures += check(testTypedArrayOf(), "Test .of method")
@@ -599,7 +603,7 @@ const testTypedArraySort = parametrize<ObjectTypeAndExpectations<number[]>>(
         array.sort()
 
         const isEqualToGold =
-            array.every((x: {{.item.type}}, index: number) => x == expected[index.toInt()])
+            array.every((x: {{.item.type}}, index: number) => x == expected[index])
 
         // descending
         array.sort(
@@ -619,6 +623,109 @@ const testTypedArraySort = parametrize<ObjectTypeAndExpectations<number[]>>(
         return failures == 0 ? success: fail
     }
 )
+
+{%- if (item.objectType == 'Float32Array') or (item.objectType == 'Float64Array') %}
+
+function isEqualOrNaN(x: {{.item.type}}, y: {{.item.type}}) {
+    return ((x == y) || (isNaN(x) && isNaN(y)))
+}
+
+const testTypedArraySortWithNaN = parametrize<ObjectTypeAndExpectations<number[]>>(
+    "testTypedArraySortWithNaN",
+    [
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(-1),
+                {{.item.create}}(-100),
+                {{.item.create}}(NaN),
+                {{.item.create}}(0),
+                {{.item.create}}(111),
+                {{.item.create}}(-50)
+            ),
+            [-100, -50, -1, 0, 111, NaN] as number[]
+        ] as ObjectTypeAndExpectations<number[]>,
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(NaN),
+                {{.item.create}}(-1),
+                {{.item.create}}(-1),
+                {{.item.create}}(0),
+                {{.item.create}}(-1),
+                {{.item.create}}(2)
+            ),
+            [-1, -1, -1, 0, 2, NaN] as number[]
+        ] as ObjectTypeAndExpectations<number[]>,
+    ],
+    (args: ObjectTypeAndExpectations<number[]>): number => {
+        const array = new {{.item.objectType}}(args[0])
+        const expected = new {{.item.objectType}}(args[1])
+
+        array.sort()
+
+        const isEqualToGold =
+            array.every((x: {{.item.type}}, index: number) => isEqualOrNaN(x, expected[index]))
+
+        // asc
+        array.sort((x: {{.item.type}}, y: {{.item.type}}) => {
+                return new Number(x - y)
+        })
+
+        const isEqualToGoldAsc =
+            array.every((x: {{.item.type}}, index: number) => isEqualOrNaN(x, expected[index]))
+
+
+        let failures = 0
+        failures += check(boolToResult(isEqualToGold), "is equal to gold result")
+        failures += check(boolToResult(isEqualToGoldAsc), "is equal to gold asc result")
+        return failures == 0 ? success: fail
+    }
+)
+
+const testTypedArraySortWithNaNReversed = parametrize<ObjectTypeAndExpectations<number[]>>(
+    "testTypedArraySortWithNaNReversed",
+    [
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(-1),
+                {{.item.create}}(-100),
+                {{.item.create}}(NaN),
+                {{.item.create}}(0),
+                {{.item.create}}(111),
+                {{.item.create}}(-50)
+            ),
+            [111, 0, -1, -50, -100, NaN] as number[]
+        ] as ObjectTypeAndExpectations<number[]>,
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(NaN),
+                {{.item.create}}(-1),
+                {{.item.create}}(-1),
+                {{.item.create}}(0),
+                {{.item.create}}(-1),
+                {{.item.create}}(2)
+            ),
+            [2, 0, -1, -1, -1, NaN] as number[],
+        ] as ObjectTypeAndExpectations<number[]>,
+    ],
+    (args: ObjectTypeAndExpectations<number[]>): number => {
+        const array = new {{.item.objectType}}(args[0])
+        const expected = new {{.item.objectType}}(args[1])
+
+        // desc
+        array.sort((x: {{.item.type}}, y: {{.item.type}}) => {
+            return new Number(y - x)
+        })
+
+        const isEqualToGold =
+            array.every((x: {{.item.type}}, index: number) => isEqualOrNaN(x, expected[index]))
+
+        let failures = 0
+        failures += check(boolToResult(isEqualToGold), "is equal to gold result")
+        return failures == 0 ? success: fail
+    }
+)
+
+{%- endif %}
 
 type ApplyFunction<T> =
     (element: {{.item.type}}, index: number, array: {{.item.objectType}}) => T

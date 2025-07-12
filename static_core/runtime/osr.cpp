@@ -172,7 +172,7 @@ extern "C" void *PrepareOsrEntry(const Frame *iframe, uintptr_t bcOffset, const 
                 break;
             case VRegInfo::Location::REGISTER:
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                regBuffer[vreg.GetValue()] = value;
+                regBuffer[vreg.GetValue()] = static_cast<uint64_t>(value);
                 break;
             case VRegInfo::Location::FP_REGISTER:
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)

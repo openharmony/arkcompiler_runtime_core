@@ -28,17 +28,23 @@ function doFullGC() {
 function test_finalization() {
     let flag: int = 0;
 
-    let foo: Test.Foo|null = Test.makeFoo();
-    foo.addCallback(() => {
-        flag = 42;
-    })
+    let foo: Test.Foo|null = new Test.Foo();
+
     foo.addCallback(() => {
         console.log("Bye!");
     })
+
+    console.log("Doing full GC before setting foo to null...");
+    doFullGC()
+    Coroutine.Schedule()
+
+    foo.addCallback(() => {
+        flag = 42;
+    })
+
     foo = null;
 
-    console.log("...")
-
+    console.log("Doing full GC after setting foo to null...");
     doFullGC()
     Coroutine.Schedule()
 

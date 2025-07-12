@@ -37,7 +37,6 @@ function main() {
 
     // Objects and arrays
     console.error(new A("John", 30));
-    console.error([1, 2, 3, 4, 5]);
 
     // Template strings
     const name = "Alice";

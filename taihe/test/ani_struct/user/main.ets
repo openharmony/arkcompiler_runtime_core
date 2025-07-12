@@ -58,7 +58,7 @@ function test_struct_funion() {
     let str: StructTest.FUnion = {
         param1: "optionalStr",
         param2: "unionStr",
-        param3: {"today":"19"}
+        param3: {"today": "19"}
     };
     structF.structF = str;
 
@@ -76,10 +76,7 @@ function test_struct_array() {
         arrayBuffer.set(i, numbersU8[i]);
     }
 
-    let str: StructTest.GArray = {
-        param1: i8Array,
-        param2: arrayBuffer
-    };
+    let str: StructTest.GArray = {param1: i8Array, param2: arrayBuffer};
     structG.gArray = str;
     let info = structG.gArray;
 
@@ -95,14 +92,15 @@ function test_struct_addNewCanvas() {
     canvas1.r += 255;
     canvas1.g += 0;
     canvas1.b += 0;
-    console.log("canvas1's color is " + canvas1.r + "," + canvas1.g + "," + canvas1.b);
+    console.log(
+        "canvas1's color is " + canvas1.r + "," + canvas1.g + "," + canvas1.b);
 }
 
 function test_struct_dbase5readonly() {
     let info = structDB5.dB5Readonly;
 
     console.log("StructTest.DB5Readonly: " + info.param1);
-    arktest.assertEQ(info.param1, 1 as byte);
+    arktest.assertEQ(info.param1, (1).toByte());
 }
 
 function test_struct_sebreadonly() {
@@ -148,5 +146,5 @@ function main() {
     suite.addTest("test_struct_sebreadonly", test_struct_sebreadonly);
     suite.addTest("test_struct_addNewDraw", test_struct_addNewDraw);
 
-    exit(suite.run());    
+    exit(suite.run());
 }

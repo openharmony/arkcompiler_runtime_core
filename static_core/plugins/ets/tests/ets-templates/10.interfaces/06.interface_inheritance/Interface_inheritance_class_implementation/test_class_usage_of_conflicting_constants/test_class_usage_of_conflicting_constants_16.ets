@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that a class can distinguish the same - named constants between an interface constant and a class nullish - coalescing property by nullish - coalescing access.
+desc: >-
+    Verify that a class can distinguish the same - named constants between an interface constant and
+    a class nullish - coalescing property by nullish - coalescing access.
 ---*/
 
 interface NullishCoalescingConflictInterface {

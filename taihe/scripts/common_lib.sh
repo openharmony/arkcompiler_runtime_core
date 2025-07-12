@@ -30,12 +30,12 @@ init_shell_options() { set -eu -o pipefail; }
 chdir_root() { cd "$PROJECT_ROOT"; }
 
 # Shorthand for running the standard uv.
-_uv() { uv --directory="$PROJECT_ROOT/compiler" "$@"; }
+_uv() { uv --directory="$PROJECT_ROOT" "$@"; }
 
 init_py_env() {
     init_shell_options
     chdir_root
-    cd compiler
     source .venv/bin/activate
+    export PYTHONPATH="$PROJECT_ROOT/compiler"
     set -x
 }

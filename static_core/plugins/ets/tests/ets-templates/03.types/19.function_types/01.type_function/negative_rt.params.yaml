@@ -14,10 +14,12 @@
 ---
 cases:
     - |-
+        let exceptionCheck = (e: Error | Exception): boolean => {return (e instanceof ClassCastError)}
         function foo(n: number) {}
         const f: Function = foo
-        f.unsafeCall("just a test")
+        arktest.expectThrow(() => {f.unsafeCall("just a test")}, exceptionCheck)
     - |-
+        let exceptionCheck = (e: Error | Exception): boolean => {return (e instanceof ArgumentsUnderapplicationError)}
         function foo(a: number, b: number) {}
         const f: Function = foo
-        f.unsafeCall(4.4)
+        arktest.expectThrow(() => {f.unsafeCall(4.4)}, exceptionCheck)

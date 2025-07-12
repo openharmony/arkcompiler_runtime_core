@@ -42,12 +42,12 @@ class Tool(ToolBase):
         else:
             raise NotImplementedError(f'Wrong target: {self.target}!')
         opts = '--gc-trigger-type=heap-trigger '
-        an_files = []
+        self.an_files = []
         if OptFlags.AOT_SKIP_LIBS not in self.flags:
             stdlib = str(ToolBase.libs / 'etsstdlib.an') \
                 if Target.HOST == self.target \
                 else str(self.dev_dir / 'etsstdlib.an')
-            an_files.append(stdlib)
+            self.an_files.append(stdlib)
         if OptFlags.INT in self.flags:
             opts += '--compiler-enable-jit=false ' \
                     '--profiler-enabled=false '
@@ -63,20 +63,25 @@ class Tool(ToolBase):
                     '--log-file={gclog} '
         if OptFlags.JIT_STATS in self.flags:
             opts += '--compiler-dump-jit-stats-csv={abc}.dump.csv '
-        if OptFlags.AOT in self.flags or OptFlags.AOTPGO in self.flags:
-            an_files.append('{an}')
-        if an_files:
-            enable_an = '' if Target.HOST == self.target else '--enable-an:force'
-            opts += f'{enable_an} --aot-files=' + \
-                    ":".join(an_files) + ' '
         self.cmd = f'LD_LIBRARY_PATH={self.ark_lib} {self.ark} ' \
                    f'--boot-panda-files={self.etsstdlib} ' \
-                   f'--load-runtimes=ets {opts} {self.custom} ' \
+                   f'--load-runtimes=ets {opts} {{aot_opts}} {self.custom} ' \
                    '{options} {abc} {name}.VmbLauncher::main'
 
     @property
     def name(self) -> str:
         return 'Ark VM'
+
+    def get_cmd(self, name: str, abc: str, options: str, gclog: str, an: str) -> str:
+        an_files = self.an_files + [an] \
+            if an and (OptFlags.AOT in self.flags or OptFlags.AOTPGO in self.flags) \
+            else self.an_files
+        aot_opts = ''
+        if an_files:
+            enable_an = '' if Target.HOST == self.target else '--enable-an:force'
+            aot_opts = f'{enable_an} --aot-files={":".join([x for x in an_files if x])}'
+        return self.cmd.format(
+            name=name, abc=abc, options=options, gclog=gclog, aot_opts=aot_opts)
 
     def do_exec(self, bu: BenchUnit, profile: bool = False) -> None:
         bu_flags, _ = self.get_bu_opts(bu)
@@ -89,8 +94,9 @@ class Tool(ToolBase):
                 else bu.device_path
             options += f'--ets.native-library-path={natives} '
         abc = self.x_src(bu, '.abc')
-        an_files = [str(f) for f in self.x_libs(bu, '.an')] + \
-                   [str(abc.with_suffix('.an'))]
+        an_files = [str(f) for f in self.x_libs(bu, '.an')]
+        if not profile:
+            an_files.append(str(abc.with_suffix('.an')))
         an = ':'.join(an_files) if an_files else ''
         if OptFlags.DISABLE_INLINING in bu_flags:
             options += '--compiler-inlining=false '
@@ -100,8 +106,8 @@ class Tool(ToolBase):
             options += ('--compiler-profiling-threshold=0 '
                         '--profilesaver-enabled=true '
                         f'--profile-output={abc}.profdata ')
-        arkts_cmd = self.cmd.format(
-            name=bu.name, abc=abc, options=options, gclog=gclog, an=an)
+        arkts_cmd = self.get_cmd(
+            name=bu.name, abc=str(abc), options=options, gclog=gclog, an=an)
         if Target.OHOS == self.target:  # console writes to hilog on OHOS
             res = self.hdc.run_syslog(
                 cmd=arkts_cmd,
@@ -111,6 +117,8 @@ class Tool(ToolBase):
                 tag='ArkTSApp')   # grep only bench-related records
         else:
             res = self.x_run(arkts_cmd)
+        if profile:
+            return  # profiling run should not affect bu.result
         bu.parse_run_output(res)
         if OptFlags.JIT_STATS in bu_flags:
             csv = Path(f'{abc}.dump.csv')

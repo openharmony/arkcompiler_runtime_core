@@ -31,11 +31,11 @@ interface Deleter {
 
 class FileManager implements Reader, Writer, Deleter {
   read(file: string) {
-  return `Reading content from ${file}`;
+    return `Reading content from ${file}`;
   }
 
   write(content: string, file: string) {
-  return`Writing ${content} to ${file}`;
+    return `Writing ${content} to ${file}`;
   }
   
   delete(file: string) {

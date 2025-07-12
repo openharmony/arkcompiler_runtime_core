@@ -1347,7 +1347,7 @@ EtsString *JSONStringify(JSValue *jsvalue)
 void SettleJsPromise(EtsObject *value, napi_deferred deferred, EtsInt state)
 {
     auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro->GetCoroutineManager()->IsMainWorker(coro));
+    ASSERT(coro->GetWorker()->IsMainWorker());
     auto *ctx = InteropCtx::Current(coro);
     if (ctx == nullptr) {
         ThrowNoInteropContextException();

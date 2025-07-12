@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that a child class can extend the parent's default method when there is no conflict in the parent interface.
+desc: >-
+    Verify that a child class can extend the parent's default method when
+    there is no conflict in the parent interface.
 ---*/
 
 interface Parent {

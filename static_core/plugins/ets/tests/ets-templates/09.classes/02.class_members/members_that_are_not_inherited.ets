@@ -32,5 +32,5 @@ class CB extends CA {
 
 function main(): void {
     let a = new CB();
-    arktest.assertEQ( a.f, 6 );
+    arktest.assertEQ(a.f, 6);
 }

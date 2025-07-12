@@ -40,9 +40,9 @@ function main() {
     arktest.assertEQ(new RestClass(...emp).res, 0);
     arktest.assertEQ(new RestClass(...tmp).res, 2);
     arktest.assertEQ(new RestClass(...arr).res, 3);
-    arktest.assertEQ(new RestClass(...new Array<string>("1","2","3","4")).res, 4);
+    arktest.assertEQ(new RestClass(...new Array<string>("1", "2", "3", "4")).res, 4);
 
-    let lc: () => Array<string> = () => new Array<string>("1","2","3","4")
+    let lc: () => Array<string> = () => new Array<string>("1", "2", "3", "4")
     arktest.assertEQ(new RestClass(...lc()).res, 4);
 
 

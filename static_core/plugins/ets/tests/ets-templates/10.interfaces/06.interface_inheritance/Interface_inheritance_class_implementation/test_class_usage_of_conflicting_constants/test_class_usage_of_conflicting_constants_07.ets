@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that a class can handle the conflict of the same - named constants between an interface and a class property by overriding in a class method.
+desc: >-
+    Verify that a class can handle the conflict of the same - named constants between an interface and a class
+    property by overriding in a class method.
 ---*/
 
 interface InterfacePropConflictInterface {

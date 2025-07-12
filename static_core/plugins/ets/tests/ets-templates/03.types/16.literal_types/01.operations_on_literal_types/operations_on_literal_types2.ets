@@ -20,13 +20,13 @@ desc: >-
     In most cases, it is the supertype itself.
 ---*/
 
-type VER = "top" | "middle" | "bottom"| "same";
-type HOR = "left" | "center" | "right"| "same";
+type VER = "top" | "middle" | "bottom" | "same";
+type HOR = "left" | "center" | "right" | "same";
 let s: string[] = ["left", "top", "center", "same", "bottom", "middle", "right"]
 
 function main() {
-    let i: (VER|HOR)[] = ["left", "top", "center", "same", "bottom", "middle", "right"]
-    for(let j = 0; j < s.length; j++) {
+    let i: (VER | HOR)[] = ["left", "top", "center", "same", "bottom", "middle", "right"]
+    for (let j = 0; j < s.length; j++) {
         arktest.assertEQ( i[j], s[j] )
     }
 }

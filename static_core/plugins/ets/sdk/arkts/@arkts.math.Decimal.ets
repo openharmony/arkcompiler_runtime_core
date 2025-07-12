@@ -17,7 +17,7 @@ import { BusinessError } from "@ohos.base";
 
 export type Rounding = number
 export type Modulo = number
-export type DecimalValue = Decimal | number | string;
+export type Value = Decimal | number | string;
 
 const RANGE_ERROR_CODE = 10200001;
 const TYPE_ERROR_CODE = 401;
@@ -127,9 +127,9 @@ export class Decimal {
     /**
      * Return a new Decimal whose value is the absolute value of this Decimal.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      */
-    constructor(n: DecimalValue) {
+    constructor(n: Value) {
         if (Utils.isDecimalInstance(n)) {
             this.initializeByDecimal(n as Decimal);
         } else if (typeof n === 'number') {
@@ -188,12 +188,12 @@ export class Decimal {
      * Return a new Decimal whose value is the value of this Decimal clamped to the range
      * delineated by `min` and `max`.
      *
-     * @param { DecimalValue } min {number | string | Decimal}
-     * @param { DecimalValue } max {number | string | Decimal}
+     * @param { Value } min {number | string | Decimal}
+     * @param { Value } max {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200001 - The value of `min` is out of range.
      */
-    public clamp(min: DecimalValue, max: DecimalValue): Decimal {
+    public clamp(min: Value, max: Value): Decimal {
         let minDecimal = new Decimal(min);
         let maxDecimal = new Decimal(max);
         if (!minDecimal.s || !maxDecimal.s) {
@@ -257,7 +257,7 @@ export class Decimal {
      *
      * @returns { boolean } the boolean type
      */
-    public isZero (): boolean {
+    public isZero(): boolean {
         return !!this.digits && this.digits![0] === 0;
     }
 
@@ -265,10 +265,10 @@ export class Decimal {
      * Return a new Decimal whose value is the integer part of dividing the value of this Decimal
      * by the value of `n`, rounded to `precision` significant digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    public dividedToIntegerBy(n: DecimalValue): Decimal {
+    public dividedToIntegerBy(n: Value): Decimal {
         return Utils.finalise(Utils.divide(this, new Decimal(n), 0, 1, true), Decimal.precision, Decimal.rounding);
     }
 
@@ -398,10 +398,10 @@ export class Decimal {
      * numerator and an integer denominator. The denominator will be a positive non-zero value
      * less than or equal to `max_denominator`.
      *
-     * @param { DecimalValue } maxDenominator {number | string | Decimal}
+     * @param { Value } maxDenominator {number | string | Decimal}
      * @returns { Decimal[] } the Decimal[] type
      */
-    public toFraction(maxDenominator: DecimalValue): Decimal[] {
+    public toFraction(maxDenominator: Value): Decimal[] {
         return this.fraction(maxDenominator);
     }
 
@@ -521,10 +521,10 @@ export class Decimal {
     /**
      * Returns a new Decimal whose value is the nearest multiple of `n`.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    public toNearest(n: DecimalValue): Decimal {
+    public toNearest(n: Value): Decimal {
         return this.toNearest(n, Decimal.rounding);
     }
 
@@ -532,12 +532,12 @@ export class Decimal {
      * Returns a new Decimal whose value is the nearest multiple of `n` in the direction of rounding
      * mode `rounding`, to the value of this Decimal.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @param { Rounding } rounding Rounding mode. Integer, 0 to 8 inclusive.
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200001 - The value of `rounding` is out of range.
      */
-    public toNearest(n: DecimalValue, rounding: Rounding): Decimal {
+    public toNearest(n: Value, rounding: Rounding): Decimal {
         let x = new Decimal(this);
         let y = new Decimal(n);
         Utils.checkInt32(rounding, 0, 8);
@@ -745,52 +745,52 @@ export class Decimal {
     /**
      * Return a new Decimal whose value is the absolute value of `n`.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    static abs(n: DecimalValue): Decimal {
+    static abs(n: Value): Decimal {
         return new Decimal(n).abs();
     }
 
     /**
      * Return a new Decimal whose value is `n` round to an integer using `ROUND_FLOOR`.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    static floor(n: DecimalValue): Decimal {
+    static floor(n: Value): Decimal {
         return new Decimal(n).floor();
     }
 
     /**
      * Return a new Decimal whose value is `n` rounded to an integer using `ROUND_CEIL`.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    static ceil(n: DecimalValue): Decimal {
+    static ceil(n: Value): Decimal {
         return new Decimal(n).ceil();
     }
 
     /**
      * Return a new Decimal whose value is `n` truncated to an integer.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    static trunc(n: DecimalValue): Decimal {
+    static trunc(n: Value): Decimal {
         return new Decimal(n).trunc();
     }
 
     /**
      * Return a new Decimal whose value is `n` clamped to the range delineated by `min` and `max`.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
-     * @param { DecimalValue } min {number | string | Decimal}
-     * @param { DecimalValue } max {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
+     * @param { Value } min {number | string | Decimal}
+     * @param { Value } max {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    static clamp(n: DecimalValue, min: DecimalValue, max: DecimalValue): Decimal {
+    static clamp(n: Value, min: Value, max: Value): Decimal {
         return new Decimal(n).clamp(min, max);
     }
 
@@ -798,11 +798,11 @@ export class Decimal {
      * Return a new Decimal whose value is the sum of `x` and `y`, rounded to `precision` significant
      * digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } x {number | string | Decimal}
-     * @param { DecimalValue } y {number | string | Decimal}
+     * @param { Value } x {number | string | Decimal}
+     * @param { Value } y {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    static add(x: DecimalValue, y: DecimalValue): Decimal {
+    static add(x: Value, y: Value): Decimal {
         return new Decimal(x).add(y);
     }
 
@@ -812,10 +812,10 @@ export class Decimal {
      *
      * Only the result is rounded, not the intermediate calculations.
      *
-     * @param { DecimalValue[] } n {number | string | Decimal}
+     * @param { Value[] } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    static sum(...values: DecimalValue[]): Decimal {
+    static sum(...values: Value[]): Decimal {
         let result = new Decimal(values[0]);
         external = false;
         for (let i = 1; i < values.length; i++) {
@@ -832,11 +832,11 @@ export class Decimal {
      * Return a new Decimal whose value is `x` minus `y`, rounded to `precision` significant digits
      * using rounding mode `rounding`.
      *
-     * @param { DecimalValue } x {number | string | Decimal}
-     * @param { DecimalValue } y {number | string | Decimal}
+     * @param { Value } x {number | string | Decimal}
+     * @param { Value } y {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    static sub(x: DecimalValue, y: DecimalValue): Decimal {
+    static sub(x: Value, y: Value): Decimal {
         return new Decimal(x).sub(y);
     }
 
@@ -844,34 +844,57 @@ export class Decimal {
      * Return a new Decimal whose value is `x` multiplied by `y`, rounded to `precision` significant
      * digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } x {number | string | Decimal}
-     * @param { DecimalValue } y {number | string | Decimal}
+     * @param { Value } x {number | string | Decimal}
+     * @param { Value } y {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    static mul(x: DecimalValue, y: DecimalValue): Decimal {
+    static mul(x: Value, y: Value): Decimal {
         return new Decimal(x).mul(y);
+    }
+
+    /**
+     * Return a new Decimal whose value is `x` divided by `y`, rounded to `precision` significant
+     * digits using rounding mode `rounding`.
+     *
+     * @param { Value } x {number | string | Decimal}
+     * @param { Value } y {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     */
+    static div(x: Value, y: Value): Decimal {
+        return new Decimal(x).div(y);
     }
 
     /**
      * Return a new Decimal whose value is `x` modulo `y`, rounded to `precision` significant digits
      * using rounding mode `rounding`.
      *
-     * @param { DecimalValue } x {number | string | Decimal}
-     * @param { DecimalValue } y {number | string | Decimal}
+     * @param { Value } x {number | string | Decimal}
+     * @param { Value } y {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    static mod(x: DecimalValue, y: DecimalValue): Decimal {
+    static mod(x: Value, y: Value): Decimal {
         return new Decimal(x).mod(y);
+    }
+
+    /**
+     * Return a new Decimal whose value is the square root of `n`, rounded to `precision` significant
+     * digits using rounding mode `rounding`.
+     *
+     * @param { Value } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     */
+    static sqrt(n: Value): Decimal {
+        return new Decimal(n).sqrt();
     }
 
     /**
      * Return a new Decimal whose value is the cube root of `n`, rounded to `precision` significant
      * digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    static cbrt(n: DecimalValue): Decimal {
+    static cbrt(n: Value): Decimal {
         return new Decimal(n).cbrt();
     }
 
@@ -879,12 +902,12 @@ export class Decimal {
      * Return a new Decimal whose value is `base` raised to the power `exponent`, rounded to precision
      * significant digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } base {number | string | Decimal} The base.
-     * @param { DecimalValue } exponent {number | string | Decimal} The exponent.
+     * @param { Value } base {number | string | Decimal} The base.
+     * @param { Value } exponent {number | string | Decimal} The exponent.
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
-    static pow(base: DecimalValue, exponent: DecimalValue): Decimal {
+    static pow(base: Value, exponent: Value): Decimal {
         return new Decimal(base).pow(exponent);
     }
 
@@ -892,11 +915,11 @@ export class Decimal {
      * Return a new Decimal whose value is the natural exponential of `n`, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
-    static exp(n: DecimalValue): Decimal {
+    static exp(n: Value): Decimal {
         return new Decimal(n).exp();
     }
 
@@ -904,12 +927,12 @@ export class Decimal {
      * Return a new Decimal whose value is the log of `n` to the base `base`, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
-     * @param { DecimalValue } base {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
+     * @param { Value } base {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
-    static log(n: DecimalValue, base: DecimalValue): Decimal {
+    static log(n: Value, base: Value): Decimal {
         return new Decimal(n).log(base);
     }
 
@@ -921,7 +944,7 @@ export class Decimal {
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
-    static ln(n: DecimalValue): Decimal {
+    static ln(n: Value): Decimal {
         return new Decimal(n).ln();
     }
 
@@ -933,7 +956,7 @@ export class Decimal {
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
-    static log2(n: DecimalValue): Decimal {
+    static log2(n: Value): Decimal {
         return new Decimal(n).log(2);
     }
 
@@ -945,7 +968,7 @@ export class Decimal {
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
-    static log10(n: DecimalValue): Decimal {
+    static log10(n: Value): Decimal {
         return new Decimal(n).log(10);
     }
 
@@ -953,10 +976,10 @@ export class Decimal {
      * Return a new Decimal whose value is the cosine of `n`, rounded to `precision` significant
      * digits using rounding mode `rounding`
      *
-     * @param { DecimalValue } n {number | string | Decimal} A value in radians.
+     * @param { Value } n {number | string | Decimal} A value in radians.
      * @returns { Decimal } the Decimal type
      */
-    static cos(n: DecimalValue): Decimal {
+    static cos(n: Value): Decimal {
         return new Decimal(n).cos();
     }
 
@@ -964,10 +987,10 @@ export class Decimal {
      * Return a new Decimal whose value is the sine of `n`, rounded to `precision` significant digits
      * using rounding mode `rounding`.
      *
-     * @param { DecimalValue } n {number | string | Decimal} A value in radians.
+     * @param { Value } n {number | string | Decimal} A value in radians.
      * @returns { Decimal } the Decimal type
      */
-    static sin(n: DecimalValue): Decimal {
+    static sin(n: Value): Decimal {
         return new Decimal(n).sin();
     }
 
@@ -975,10 +998,10 @@ export class Decimal {
      * Return a new Decimal whose value is the tangent of `n`, rounded to `precision` significant
      * digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } n {number | string | Decimal} A value in radians.
+     * @param { Value } n {number | string | Decimal} A value in radians.
      * @returns { Decimal } the Decimal type
      */
-    static tan(n: DecimalValue): Decimal {
+    static tan(n: Value): Decimal {
         return new Decimal(n).tan();
     }
 
@@ -986,10 +1009,10 @@ export class Decimal {
      * Return a new Decimal whose value is the hyperbolic cosine of `n`, rounded to precision
      * significant digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } n {number | string | Decimal} A value in radians.
+     * @param { Value } n {number | string | Decimal} A value in radians.
      * @returns { Decimal } the Decimal type
      */
-    static cosh(n: DecimalValue): Decimal {
+    static cosh(n: Value): Decimal {
         return new Decimal(n).cosh();
     }
 
@@ -997,10 +1020,10 @@ export class Decimal {
      * Return a new Decimal whose value is the hyperbolic sine of `n`, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    static sinh(n: DecimalValue): Decimal {
+    static sinh(n: Value): Decimal {
         return new Decimal(n).sinh();
     }
 
@@ -1008,21 +1031,21 @@ export class Decimal {
      * Return a new Decimal whose value is the hyperbolic tangent of `n`, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } n {number | string | Decimal} A value in radians.
+     * @param { Value } n {number | string | Decimal} A value in radians.
      * @returns { Decimal } the Decimal type
      */
-    static tanh(n: DecimalValue): Decimal {
+    static tanh(n: Value): Decimal {
         return new Decimal(n).tanh();
     }
 
     /**
      * Return a new Decimal whose value is the arccosine in radians of `n`.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
-    static acos(n: DecimalValue): Decimal {
+    static acos(n: Value): Decimal {
         return new Decimal(n).acos();
     }
 
@@ -1030,11 +1053,11 @@ export class Decimal {
      * Return a new Decimal whose value is the arcsine in radians of `n`, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
-    static asin(n: DecimalValue): Decimal {
+    static asin(n: Value): Decimal {
         return new Decimal(n).asin();
     }
 
@@ -1042,11 +1065,11 @@ export class Decimal {
      * Return a new Decimal whose value is the arctangent in radians of `n`, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
-    static atan(n: DecimalValue): Decimal {
+    static atan(n: Value): Decimal {
         return new Decimal(n).atan();
     }
 
@@ -1054,11 +1077,11 @@ export class Decimal {
      * Return a new Decimal whose value is the inverse of the hyperbolic cosine of `n`, rounded to
      * `precision` significant digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
-    static acosh(n: DecimalValue): Decimal {
+    static acosh(n: Value): Decimal {
         return new Decimal(n).acosh();
     }
 
@@ -1066,12 +1089,12 @@ export class Decimal {
      * Return a new Decimal whose value is the inverse of the hyperbolic sine of `n`, rounded to
      * `precision` significant digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } n {number | string | Decimal} A value in radians.
+     * @param { Value } n {number | string | Decimal} A value in radians.
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
 
      */
-    static asinh(n: DecimalValue): Decimal {
+    static asinh(n: Value): Decimal {
         return new Decimal(n).asinh();
     }
 
@@ -1079,11 +1102,11 @@ export class Decimal {
      * Return a new Decimal whose value is the inverse of the hyperbolic tangent of `n`, rounded to
      * `precision` significant digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } n {number | string | Decimal} A value in radians.
+     * @param { Value } n {number | string | Decimal} A value in radians.
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
-    static atanh(n: DecimalValue): Decimal {
+    static atanh(n: Value): Decimal {
         return new Decimal(n).atanh();
     }
 
@@ -1091,12 +1114,12 @@ export class Decimal {
      * Return a new Decimal whose value is the arctangent in radians of `y/x` in the range -pi to pi
      * (inclusive), rounded to `precision` significant digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } y {number | string | Decimal} The y-coordinate.
-     * @param { DecimalValue } x {number | string | Decimal} The x-coordinate.
+     * @param { Value } y {number | string | Decimal} The y-coordinate.
+     * @param { Value } x {number | string | Decimal} The x-coordinate.
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
-    static atan2(y: DecimalValue, x: DecimalValue): Decimal {
+    static atan2(y: Value, x: Value): Decimal {
         y = new Decimal(y);
         x = new Decimal(x);
         let pr = Decimal.precision;
@@ -1134,10 +1157,10 @@ export class Decimal {
      * Return a new Decimal whose value is the square root of the sum of the squares of the arguments,
      * rounded to `precision` significant digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue[] } n {number | string | Decimal} Decimal
+     * @param { Value[] } n {number | string | Decimal} Decimal
      * @returns { Decimal } the Decimal type
      */
-    static hypot(...n: DecimalValue[]): Decimal {
+    static hypot(...n: Value[]): Decimal {
         let t = new Decimal(0);
         external = false;
         for (let i = 0; i < n.length;) {
@@ -1159,10 +1182,10 @@ export class Decimal {
     /**
      * Return a new Decimal whose value is the maximum of the arguments.
      *
-     * @param { DecimalValue[] } n {number | string | Decimal}
+     * @param { Value[] } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    static max(...values: DecimalValue[]): Decimal {
+    static max(...values: Value[]): Decimal {
         let result = new Decimal(values[0]);
         for (let i = 1; i < values.length; i++) {
             let other = new Decimal(values[i]);
@@ -1179,10 +1202,10 @@ export class Decimal {
     /**
      * Return a new Decimal whose value is the minimum of the arguments.
      *
-     * @param { DecimalValue[] } n {number | string | Decimal}
+     * @param { Value[] } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    static min(...values: DecimalValue[]): Decimal {
+    static min(...values: Value[]): Decimal {
         let result = new Decimal(values[0]);
         for (let i = 1; i < values.length; i++) {
             let other = new Decimal(values[i]);
@@ -1226,10 +1249,10 @@ export class Decimal {
      *  -0    if x is -0,
      *   NaN  otherwise
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    static sign(n: DecimalValue): number {
+    static sign(n: Value): number {
         let x = new Decimal(n);
         return x.d ? (x.d![0] ? x.s : 0 * x.s) : x.s || NaN;
     }
@@ -1237,10 +1260,10 @@ export class Decimal {
     /**
      * Return a new Decimal whose value is `n` rounded to an integer using rounding mode `rounding`.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    static round(n: DecimalValue): Decimal {
+    static round(n: Value): Decimal {
         let x = new Decimal(n)
         return Utils.finalise(x, x.e + 1, Decimal.rounding);
     }
@@ -1447,10 +1470,10 @@ export class Decimal {
     /**
      * Return true if the value of this Decimal is equal to the value of `n`, otherwise return false.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { boolean } the boolean type
      */
-    public equals(n: DecimalValue): boolean {
+    public equals(n: Value): boolean {
         return this.comparedTo(n) === 0;
     }
 
@@ -1461,10 +1484,10 @@ export class Decimal {
      *   0    if they have the same value,
      *   NaN  if the value of either Decimal is NaN.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { number } the number type
      */
-    public comparedTo(n: DecimalValue): number {
+    public comparedTo(n: Value): number {
         let y = new Decimal(n);
         let xd = this.d;
         let yd = y.d;
@@ -1502,10 +1525,10 @@ export class Decimal {
      * Return a new Decimal whose value is the value of this Decimal divided by `n`, rounded to
      * `precision` significant digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    public div(n: DecimalValue): Decimal {
+    public div(n: Value): Decimal {
         return Utils.divide(this, new Decimal(n));
     }
 
@@ -1513,10 +1536,10 @@ export class Decimal {
      * Return a new Decimal whose value is the value of this Decimal modulo `n`, rounded to
      * `precision` significant digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { Decimal }the Decimal type
      */
-    public mod(n: DecimalValue): Decimal {
+    public mod(n: Value): Decimal {
         let y = new Decimal(n);
         if (!this.d || !y.s || y.d && !y.d![0]) {
             return new Decimal(NaN);
@@ -1544,10 +1567,10 @@ export class Decimal {
      * Return a new Decimal whose value is the value of this Decimal raised to the power `n`, rounded
      * to `precision` significant digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    public pow(n: DecimalValue): Decimal {
+    public pow(n: Value): Decimal {
         let y = new Decimal(n);
         let yn = +y.toNumber();
         if (!this.d || !y.d || !this.d![0] || !y.d![0]) {
@@ -1633,11 +1656,11 @@ export class Decimal {
      * Return the logarithm of the value of this Decimal to the specified base, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
-    public log(n: DecimalValue): Decimal {
+    public log(n: Value): Decimal {
         let base = new Decimal(n);
         let d = base.d;
 
@@ -1930,10 +1953,10 @@ export class Decimal {
     /**
      * Return true if the value of this Decimal is greater than the value of `n`, otherwise return false.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { boolean } the boolean type
      */
-    public greaterThan(n: DecimalValue): boolean {
+    public greaterThan(n: Value): boolean {
         return this.comparedTo(n) > 0;
     }
 
@@ -1941,10 +1964,10 @@ export class Decimal {
      * Return true if the value of this Decimal is greater than or equal to the value of `n`,
      * otherwise return false.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { boolean } the boolean type
      */
-    public greaterThanOrEqualTo(n: DecimalValue): boolean {
+    public greaterThanOrEqualTo(n: Value): boolean {
         let k = this.comparedTo(n);
         return k == 1 || k === 0;
     }
@@ -1952,20 +1975,20 @@ export class Decimal {
     /**
      * Return true if the value of this Decimal is less than `n`, otherwise return false.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { boolean } the boolean type
      */
-    public lessThan(n: DecimalValue): boolean {
+    public lessThan(n: Value): boolean {
         return this.comparedTo(n) < 0;
     }
 
     /**
      * Return true if the value of this Decimal is less than or equal to `n`, otherwise return false.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { boolean } the boolean type
      */
-    public lessThanOrEqualTo(n: DecimalValue): boolean {
+    public lessThanOrEqualTo(n: Value): boolean {
         return this.comparedTo(n) <= 0;
     }
 
@@ -2213,10 +2236,10 @@ export class Decimal {
      * Return a new Decimal whose value is the value of this Decimal plus `n`, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    public add(n: DecimalValue): Decimal {
+    public add(n: Value): Decimal {
         let y = new Decimal(n);
         if (!this.d || !y.d) {
             if (!this.s || !y.s) {
@@ -2303,10 +2326,10 @@ export class Decimal {
      * Return a new Decimal whose value is the value of this Decimal minus `n`, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    public sub(n: DecimalValue): Decimal {
+    public sub(n: Value): Decimal {
         let y: Decimal = new Decimal(n);
         let x = this;
         if (!x.d || !y.d) {
@@ -2429,10 +2452,10 @@ export class Decimal {
      * Return a new Decimal whose value is this Decimal times `n`, rounded to `precision` significant
      * digits using rounding mode `rounding`.
      *
-     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Value } n {number | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    public mul(n: DecimalValue): Decimal {
+    public mul(n: Value): Decimal {
         let xd = this.digits;
         let y = new Decimal(n);
         let yd = y.d;
@@ -3078,7 +3101,7 @@ export class Decimal {
         return t;
     }
 
-    private fraction(maxD?: DecimalValue): Decimal[] {
+    private fraction(maxD?: Value): Decimal[] {
         let x: Decimal = this;
         let xd = x.d;
         if (!xd) {

@@ -239,36 +239,4 @@
         test3: "[]"
       },
   }
-- {
-    method_name: map,
-    method_nature: function,
-    result_nature: array,
-    result_type: "FixedArray<char>",
-    method_signature: { arr: "FixedArray<char>", fn : "(value:char,index:number,self:FixedArray<char>)=>char" },
-    method_throws: "false",
-    method_signature_desc: {arr: "char_array", fn: "func_char_int_char_array"},
-    method_test_index_data:
-      {
-        test1:
-          {
-            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:char,index:number,self:FixedArray<char>): char =>  {return ((value * 2).toChar())}',
-          },
-        test2:
-          {
-            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:char,index:number,self:FixedArray<char>): char =>  {return ((value + index).toChar())}',
-          },
-        test3:
-          {
-            arr: "[]",
-            fn: '(value:char,index:number,self:FixedArray<char>): char =>  {return ((value + index).toChar())}',
-          },
-      },
-    method_expected_data:
-      {
-        test1: "[0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]",
-        test2: "[0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]",
-        test3: "[]"
-      },
-  }
+

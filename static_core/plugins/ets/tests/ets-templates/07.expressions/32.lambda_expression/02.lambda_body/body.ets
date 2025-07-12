@@ -20,4 +20,7 @@ desc: Body, {{c.desc}}
 
 {{c.impl}}
 
+function main() {
+    {{c.call|indent}}
+}
 {% endfor %}

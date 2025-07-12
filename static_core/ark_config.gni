@@ -122,7 +122,7 @@ if (ark_standalone_build ||
     ((!ark_static_standalone_build &&
       (target_cpu == "x64" || target_cpu == "x86_64")) ||
      (current_os == "win" || current_os == "mingw" ||
-      current_os == "winuwp"))) {
+      current_os == "winuwp")) || ark_hybrid) {
   is_llvmbackend = false
   is_llvm_interpreter = false
   is_llvm_fastpath = false

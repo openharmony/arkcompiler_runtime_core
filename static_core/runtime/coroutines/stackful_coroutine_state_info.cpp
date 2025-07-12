@@ -57,7 +57,6 @@ PandaString StackfulCoroutineStateInfo::OutputInfo() const
     // Stack Trace
     this->GetStackWalker().Dump(sstream);
 
-    sstream << "\n";
     return sstream.str();
 }
 

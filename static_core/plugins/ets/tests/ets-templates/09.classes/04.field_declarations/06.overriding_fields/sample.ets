@@ -18,7 +18,7 @@ desc: >-
     While extending a class or implementing interfaces, a field declared in a superclass or
     a superintertafce can be overridden by field with the same name and the same static or
     non-static status.
-tags: [negative]
+tags: [negative, compile-only]
 ---*/
 
 class Base1 {

@@ -42,7 +42,7 @@ function testParamsAppend003() {
 
 
 function testParamsAppend004() {
-	let that = url.URL.parseURL('https://example.com?foo=1&bar=2');
+	let that = url.URL.parseURL('https://example.com?foo=1&bar=2');  // CC-OFF(G.OTH.05) test logic
 	let params = new url.URLParams(that.search);
 	params.append("app", "par")
 	let result = params.toString()
@@ -50,7 +50,7 @@ function testParamsAppend004() {
 }
 
 function testParamsAppend005() {
-	let that = url.URL.parseURL('https://example.com?foo=1&bar=2');
+	let that = url.URL.parseURL('https://example.com?foo=1&bar=2');  // CC-OFF(G.OTH.05) test logic
 	let params = new url.URLParams(that.search);
 	params.append("123", "456")
 	let result = params.toString()

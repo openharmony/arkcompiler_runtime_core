@@ -27,8 +27,7 @@ function AllocateAndMoveTest(): void {
     arktest.assertEQ(GC.getObjectSpaceType(obj), GC.ObjectSpaceType.TENURED, "Must be tenured space");
 }
 
-function HumongousObjectTest(): void
-{
+function HumongousObjectTest(): void {
     let h_obj: FixedArray<long> = new long[1024 * 1024];
     arktest.assertEQ(GC.getObjectSpaceType(h_obj), GC.ObjectSpaceType.HUMONGOUS, "Must be humongous space");
 }

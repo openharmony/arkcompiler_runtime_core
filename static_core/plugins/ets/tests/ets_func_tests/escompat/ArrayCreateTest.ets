@@ -40,7 +40,7 @@ function testCreatePosLength() {
     arktest.assertTrue(result, "Error. Got: " + a + ". Expected: " + TestData.expected2);
 }
 
-function equaled(arr1:  Array<number>, arr2:  Array<number>): boolean {
+function equaled(arr1: Array<number>, arr2: Array<number>): boolean {
     if (arr1.length != arr2.length) {
         return false;
     }

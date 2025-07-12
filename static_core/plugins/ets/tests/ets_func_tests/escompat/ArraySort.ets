@@ -23,14 +23,14 @@ function main(): int {
 function SortWithUndefined() {
     let myComparefn_1 = (x: number | undefined, y: number | undefined) => {
         if (x == undefined) {
-            return -1.
+            return -1.0
         }
         if (y == undefined) {
-            return 1.
+            return 1.0
         }
-        return 0.
+        return 0.0
     }
-    let x: Array<number | undefined> = new Array<number | undefined>(undefined, 1., undefined, 5., 2., 3.)
+    let x: Array<number | undefined> = new Array<number | undefined>(undefined, 1.0, undefined, 5.0, 2.0, 3.0)
     x.sort(myComparefn_1)
     arktest.assertEQ(x.length, 6)
     arktest.assertEQ(x[0], 1)
@@ -42,12 +42,12 @@ function SortWithUndefined() {
     let y: Array<int | undefined> = new Array<int | undefined>(3, undefined, 1, undefined, 5, 2)
     let myComparefn_2 = (x: int | undefined, y: int | undefined) => {
         if (x == undefined) {
-            return 1.
+            return 1.0
         }
         if (y == undefined) {
-            return -1.
+            return -1.0
         }
-        return 0.
+        return 0.0
     }
     y.sort(myComparefn_2)
     arktest.assertEQ(y.length, 6)
@@ -60,7 +60,7 @@ function SortWithUndefined() {
 }
 
 function SortWithUndefinedAndNull() {
-    let arr: Array<number | undefined | null> = new Array<number | undefined | null>(1., 1000., 3., null, undefined, -2., undefined, 0.)
+    let arr: Array<number | undefined | null> = new Array<number | undefined | null>(1.0, 1000.0, 3.0, null, undefined, -2.0, undefined, 0.0)
     arr.sort()
     arktest.assertEQ(arr.length, 8)
     arktest.assertEQ(arr[0], -2)

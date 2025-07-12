@@ -27,8 +27,8 @@ extern "C" EtsInt StdFinalizationRegistryRegisterInstance(EtsObject *instance)
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
     coro->GetPandaVM()->GetFinalizationRegistryManager()->RegisterInstance(instance);
-    auto launchMode = coro->GetCoroutineManager()->IsMainWorker(coro) ? CoroutineLaunchMode::MAIN_WORKER
-                                                                      : CoroutineLaunchMode::DEFAULT;
+    auto launchMode =
+        coro->GetWorker()->IsMainWorker() ? CoroutineLaunchMode::MAIN_WORKER : CoroutineLaunchMode::DEFAULT;
     return static_cast<EtsInt>(launchMode);
 }
 

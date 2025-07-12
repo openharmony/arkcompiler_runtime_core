@@ -66,6 +66,7 @@ static ets_proxy::EtsClassWrapper *RegisterEtsProxyForStdClass(
     const ets_proxy::EtsClassWrapper::OverloadsMap *overloads = nullptr)
 {
     auto coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     PandaEtsVM *vm = coro->GetPandaVM();
     EtsClassLinker *etsClassLinker = vm->GetClassLinker();
     auto etsClass = etsClassLinker->GetClass(descriptor.data());
@@ -252,14 +253,16 @@ private:
     void RegisterMap()
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_MAP_OVERLOADS = {
-            {utf::CStringAsMutf8("<ctor>"), std::make_pair("Lstd/core/Object;:V", 2)}};
+            {utf::CStringAsMutf8("<ctor>"),
+             std::make_pair("{ULescompat/Array;Lescompat/Iterable;Lstd/core/Null;}:V", 2)}};
         wMap_ = RegisterClassWithLeafMatcher(descriptors::MAP, "Map", &W_MAP_OVERLOADS);
     }
 
     void RegisterSet()
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_SET_OVERLOADS = {
-            {utf::CStringAsMutf8("<ctor>"), std::make_pair("Lstd/core/Object;:V", 2)}};
+            {utf::CStringAsMutf8("<ctor>"),
+             std::make_pair("{ULescompat/Iterable;Lstd/core/Null;[Lstd/core/Object;}:V", 2)}};
         wSet_ = RegisterClassWithLeafMatcher(descriptors::SET, "Set", &W_SET_OVERLOADS);
     }
 
@@ -530,6 +533,7 @@ void RegisterBuiltinJSRefConvertors(InteropCtx *ctx)
 {
     auto cache = ctx->GetRefConvertCache();
     auto coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     PandaEtsVM *vm = coro->GetPandaVM();
     EtsClassLinkerExtension *linkerExt = vm->GetClassLinker()->GetEtsClassLinkerExtension();
     auto ptypes = PlatformTypes(coro);

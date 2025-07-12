@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -396,7 +396,9 @@ bool Licm::IsInstHoistable(Inst *inst)
         return false;
     }
     // Do not hoist the resolver if it came from an inlined function.
-    if (inst->IsResolver() && inst->GetSaveState()->GetCallerInst() != nullptr) {
+    auto saveState = inst->GetSaveState();
+    ASSERT(!inst->IsResolver() || saveState != nullptr);
+    if (inst->IsResolver() && saveState->GetCallerInst() != nullptr) {
         return false;
     }
     if (inst->GetOpcode() == Opcode::LenArray &&

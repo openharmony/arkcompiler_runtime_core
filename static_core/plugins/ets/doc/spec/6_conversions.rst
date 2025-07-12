@@ -73,7 +73,15 @@ Otherwise, the expression is *non-standalone*:
 The type of some expressions cannot be inferred (see :ref:`Type Inference`)
 from the expression itself (see :ref:`Object Literal` as an example).
 A :index:`compile-time error` occurs if such an expression
-is used as a *standalone expression*.
+is used as a *standalone expression*:
+
+.. code-block:: typescript
+   :linenos:
+
+    class P { x: number, y: number }
+
+    let x = { x: 10, y: 10 } // standalone object literal - compile time error
+    let y: P = { x: 10, y: 10 } // OK, type of object literal is inferred
 
 There are two ways to facilitate the compatibility of a *non-standalone
 expression* with its surrounding context:
@@ -297,7 +305,7 @@ String Operator Contexts
      - Operand ``null`` is converted to string ``null``.
      - Operand ``undefined`` is converted to string ``undefined``.
 
--  An operand of a reference type or ``enum`` type is converted by applying the
+-  An operand of a reference type or of ``enum`` type with non-*string* values is converted by applying the
    method call ``toString()``.
 
 If there is no applicable conversion, then a :index:`compile-time error` occurs.
@@ -506,9 +514,12 @@ Enumeration to Constants Type Conversions
 .. meta:
     frontend_status: Done
 
-A value of *enumeration* type is converted to type ``int``
-if enumeration constants of this type are of type ``int``.
-This conversion never causes a runtime error.
+-  A value of *enumeration* type without explicit base type is converted to
+   the corresponding integer type (see :ref:`Enumerations`).
+-  A value of *enumeration* type with explicit numeric base type
+   (see :ref:`Enumeration with Explicit Type`) is converted to the base type.
+
+These conversions never cause a runtime error.
 
 .. code-block:: typescript
    :linenos:
@@ -527,9 +538,7 @@ This conversion never causes a runtime error.
    runtime error
    type int
 
-
-A value of *enumeration* type is converted to type ``string`` if enumeration
-constants of this type are of type ``string``. This conversion never causes
+A value of *enumeration* type with ``string`` constants is converted to type ``string``. This conversion never causes
 a runtime error.
 
 .. code-block:: typescript
@@ -642,17 +651,17 @@ Numeric Casting Conversions
     frontend_status: Done
 
 A *numeric casting conversion* occurs if the *target type* and the expression
-type are both ``numeric``. 
-There are two contexts when *numeric casting conversion* are applied:
+type are both ``numeric``.
+There are two contexts where *numeric casting conversion* is applied:
 
 -  Using conversion methods defined in the standard library
    (see :ref:`Standard Library`);
 
 -  Or, implicitly in the following arithmetic operations:
-   :ref:`Postfix Increment`, :ref:`Postfix Decrement`, 
+   :ref:`Postfix Increment`, :ref:`Postfix Decrement`,
    :ref:`Prefix Increment`, :ref:`Prefix Decrement`.
 
-The following example illustrates explicit use of 
+The following example illustrates explicit use of
 methods for *numeric cast conversions*:
 
 .. code-block-meta:

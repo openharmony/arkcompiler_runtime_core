@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The consistency and accessibility of member variables in the inheritance chain and demonstrates the effectiveness of the combination of inheritance and modifiers.
+desc: >-
+    The consistency and accessibility of member variables in the inheritance chain and demonstrates the effectiveness
+    of the combination of inheritance and modifiers.
 ---*/
 
 class A {
@@ -46,7 +48,7 @@ class F extends E {
         this._publicVar
         arktest.assertEQ(this._publicVar[0], 1);
     }
-    test(){
+    test() {
         arktest.assertEQ(this._publicVar[0], 1);
     }
 }

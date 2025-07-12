@@ -30,3 +30,6 @@ ets-common-tests/intrinsics/typed_arrays_reverse.ets
 
 # 26776
 ets-common-tests/atomics/base_operator_exchange.ets
+
+# 27436
+ets-common-tests/atomics/concurrent_wait_notify_all.ets

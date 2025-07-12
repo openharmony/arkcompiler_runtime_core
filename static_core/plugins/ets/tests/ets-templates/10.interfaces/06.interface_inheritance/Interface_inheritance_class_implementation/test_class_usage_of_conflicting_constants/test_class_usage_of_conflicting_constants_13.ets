@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that a class can distinguish the same - named constants between an interface constant and a private class property by internal access.
+desc: >-
+    Verify that a class can distinguish the same - named constants between an interface constant and a private class
+    property by internal access.
 ---*/
 
 interface PrivatePropConflictInterface {

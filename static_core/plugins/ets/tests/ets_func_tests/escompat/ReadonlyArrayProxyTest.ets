@@ -13,20 +13,19 @@
  * limitations under the License.
  */
 
+class ProxyHandler extends proxy.DefaultReadonlyArrayProxyHandler<string> {
+    getTrapped = false
+
+    override get(target: ReadonlyArray<string>, index: int): string {
+        this.getTrapped = true
+        return super.get(target, index)
+    }
+}
+
 function testReadonlyArrayProxyOps(): void {
     const array: ReadonlyArray<string> = Array.of<string>("I", "II", "III")
-
-    class ProxyHandler extends DefaultReadonlyArrayProxyHandler<string> {
-        getTrapped = false
-
-        override get(target: ReadonlyArray<string>, index: int): string {
-            this.getTrapped = true
-            return super.get(target, index)
-        }
-    }
-
     const handler = new ProxyHandler()
-    const arrayProxy = Proxy.create(array, handler)
+    const arrayProxy = proxy.Proxy.create(array, handler)
 
     arktest.assertEQ(arrayProxy.length, 3, "unexpected ReadonlyArray proxy length")
     arktest.assertEQ(arrayProxy[0], "I", "ReadonlyArray proxy first element unexpected value")
@@ -40,3 +39,4 @@ function main(): int {
 
     return suite.run()
 }
+

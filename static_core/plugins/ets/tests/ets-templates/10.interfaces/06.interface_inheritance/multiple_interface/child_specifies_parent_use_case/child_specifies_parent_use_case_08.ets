@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that a child interface without implementation causes an error when three parent interfaces have the same default method.
+desc: >-
+    Verify that a child interface without implementation causes an error when three parent interfaces have the same
+    default method.
 tags: [compile-only, negative]
 ---*/
 

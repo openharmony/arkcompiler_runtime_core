@@ -38,8 +38,8 @@ function test_data_struct() {
 function test_union() {
     // Test showUnion with different types
     ani_test.showUnion(null);
-    ani_test.showUnion(1 as int);
-    ani_test.showUnion(2 as float);
+    ani_test.showUnion((1).toInt());
+    ani_test.showUnion(2f);
     ani_test.showUnion("Hello from STS!");
 
     // Test makeUnion returns expected values
@@ -58,7 +58,7 @@ function test_union() {
 
 function test_optional() {
     // Test showOptionalInt with value and undefined
-    ani_test.showOptionalInt(100 as int);
+    ani_test.showOptionalInt((100).toInt());
     ani_test.showOptionalInt(undefined);
 
     // Test makeOptionalInt returns expected values
@@ -81,6 +81,17 @@ function test_array() {
     }
 }
 
+// Test UserFoo implementation
+class UserFoo implements ani_test.Foo {
+    name: string;
+    constructor(name: string) {
+        this.name = name;
+    }
+    bar(): void {
+        console.log("UserFoo(" + this.name + ") is calling bar()");
+    }
+}
+
 function test_interface() {
     // Test makeFoo implementation
     let impl_foo_list = ani_test.makeFoo(["A", "B", "C"]);
@@ -89,16 +100,6 @@ function test_interface() {
         impl_foo_list[i].bar();
     }
 
-    // Test UserFoo implementation
-    class UserFoo implements ani_test.Foo {
-        name: string;
-        constructor(name: string) {
-            this.name = name;
-        }
-        bar(): void {
-            console.log("UserFoo(" + this.name + ") is calling bar()");
-        }
-    }
     const X: ani_test.Foo = new UserFoo("X")
     const Y: ani_test.Foo = new UserFoo("Y")
     const Z: ani_test.Foo = new UserFoo("Z")

@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "applicationInfo.proj.hpp"
 #include "applicationInfo.impl.hpp"
-#include "taihe/runtime.hpp"
+#include "applicationInfo.proj.hpp"
 #include "stdexcept"
+#include "taihe/runtime.hpp"
 
 using namespace taihe;
 using namespace applicationInfo;
@@ -26,6 +26,7 @@ namespace {
 class ApplicationInfoImpl {
 public:
     int32_t applicationInfoImpl = 21474;
+
     ApplicationInfoImpl() {}
 
     string GetName()
@@ -163,6 +164,7 @@ public:
 class MultiAppModeImpl {
 public:
     int32_t multiAppModeImpl = 21474;
+
     MultiAppModeImpl() {}
 
     int32_t GetMaxCount()

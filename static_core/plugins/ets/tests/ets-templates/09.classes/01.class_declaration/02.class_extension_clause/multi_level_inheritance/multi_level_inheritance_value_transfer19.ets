@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Check whether the instance of class b inherits class a and class b can accurately obtain the initial value of the public variable _publicVar in class a.
+desc: >-
+    Check whether the instance of class b inherits class a and class b can accurately obtain the initial value
+    of the public variable _publicVar in class a.
 ---*/
 
 class A {

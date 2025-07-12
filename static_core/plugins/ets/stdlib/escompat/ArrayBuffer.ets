@@ -49,12 +49,14 @@ export interface ArrayBufferView {
  */
 export class ArrayBuffer extends Buffer
 {
+    public overload constructor { fromInt, fromNumber }
+
     /**
      * Creates ArrayBuffer with size equal to length parameter
      *
      * @param length size of ArrayBuffer
      */
-    public constructor(length: int, maxByteLength?: int)
+    public constructor fromInt(length: int, maxByteLength?: int)
     {
         super()
         if (length < 0) {
@@ -79,7 +81,7 @@ export class ArrayBuffer extends Buffer
      *
      * @param length size of ArrayBuffer
      */
-    public constructor(length: number, maxByteLength?: number)
+    public constructor fromNumber(length: number, maxByteLength?: number)
     {
         this(length.toInt(), (maxByteLength !== undefined) ? maxByteLength.toInt() : undefined)
     }
@@ -315,7 +317,6 @@ export class ArrayBuffer extends Buffer
     *
     * @param {string} str - The string to be converted.
     * @param {string} encoding - The encoding to use for converting the string.
-    * @param {int} length - The desired length of the resulting ArrayBuffer.
     * @returns {ArrayBuffer} A new ArrayBuffer containing the encoded string data.
     */
     public static native from(str: string, encoding: string): ArrayBuffer;

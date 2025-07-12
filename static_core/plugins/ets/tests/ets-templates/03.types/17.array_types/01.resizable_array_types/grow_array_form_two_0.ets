@@ -16,12 +16,11 @@
 
 /*---
 desc: Resizable array types
-tags: [negative]
 
 ---*/
 
 function main() {
     let SyntaxFormTwo: Array<String> = ["Hello", "World", "Of", "ArkTS"];
-    SyntaxFormTwo.length = 5 // CTE: Attempting to increase the length of the array by assignment to length causes a compile-time error
-
+    let expectedException = (e: Error | Exception): boolean => {return (e instanceof RangeError)}
+    arktest.expectThrow(() => {SyntaxFormTwo.length = 5}, expectedException) // Attempting to increase the length of the array by assignment to length => CTE
 }

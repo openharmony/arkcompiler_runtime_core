@@ -1,0 +1,67 @@
+/**
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License"
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <gtest/gtest.h>
+
+#include "runtime/include/runtime.h"
+
+namespace ark::ets::test {
+
+class UnhandledRejectionRecursiveTest : public testing::Test {
+protected:
+    void SetUp() override
+    {
+        RuntimeOptions options;
+        options.SetShouldLoadBootPandaFiles(true);
+        options.SetShouldInitializeIntrinsics(true);
+        options.SetCompilerEnableJit(false);
+        options.SetGcType("epsilon");
+        options.SetLoadRuntimes({"ets"});
+        options.SetListUnhandledOnExitPromises(true);
+        auto stdlib = std::getenv("PANDA_STD_LIB");
+        if (stdlib == nullptr) {
+            std::cerr << "PANDA_STD_LIB env variable should be set and point to mock_stdlib.abc" << std::endl;
+            std::abort();
+        }
+        options.SetBootPandaFiles({stdlib, "UnhandledRejectionRecursiveTest.abc"});
+        options.SetCoroutineImpl("stackful");
+
+        Runtime::Create(options);
+        if (Runtime::GetCurrent() == nullptr) {
+            std::cerr << "Can't create runtime" << std::endl;
+            std::abort();
+        }
+    }
+
+    void RunTest()
+    {
+        const std::string mainFunc = "UnhandledRejectionRecursiveTest.ETSGLOBAL::main";
+        Runtime::GetCurrent()->ExecutePandaFile(abcFile_.c_str(), mainFunc.c_str(), {});
+        Runtime::Destroy();
+    }
+
+    // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
+    const std::string abcFile_ = "UnhandledRejectionRecursiveTest.abc";
+};
+
+using UnhandledRejectionRecursiveDeathTest = UnhandledRejectionRecursiveTest;
+
+/// Rejects promise inside a rejected promise handler
+TEST_F(UnhandledRejectionRecursiveDeathTest, Recursive)
+{
+    EXPECT_EXIT(RunTest(), testing::ExitedWithCode(2U), ".*");
+}
+
+}  // namespace ark::ets::test

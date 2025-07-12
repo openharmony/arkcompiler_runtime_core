@@ -15,8 +15,8 @@
 #ifndef SCENENODEPARAMETERS_H
 #define SCENENODEPARAMETERS_H
 
-#include "stdexcept"
 #include <string>
+#include "stdexcept"
 
 using namespace taihe;
 
@@ -24,6 +24,7 @@ class SceneNodeParametersImpl {
 public:
     string name = "name";
     optional<string> path;
+
     SceneNodeParametersImpl() {}
 
     string GetName()

@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Multilevel inheritance, child interfaces inherit abstract methods from multiple parent interfaces(verify that the child interface inherits the abstract method2 of the first parent interface).
+desc: >-
+    Multilevel inheritance, child interfaces inherit abstract methods from multiple parent interfaces
+    (verify that the child interface inherits the abstract method2 of the first parent interface).
 ---*/
 
 interface ParentInterface1 {
@@ -25,7 +27,7 @@ interface ParentInterface2 {
   parentMethod2(): string;
 }
 
-interface ChildInterface extends ParentInterface1,  ParentInterface2 {
+interface ChildInterface extends ParentInterface1, ParentInterface2 {
   childMethod(): string;
 }
 
@@ -44,6 +46,6 @@ class ChildClass implements ChildInterface {
 }
 
 function main(): void {
-  let instance: ChildInterface  = new ChildClass();
+  let instance: ChildInterface = new ChildClass();
   arktest.assertEQ(instance.parentMethod2(), "Parent method2 implementation");
 }

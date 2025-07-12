@@ -168,6 +168,7 @@ public:
         // NOTE(konstanting): we may want to optimize this and take the cached pointer from the coroutine
         // itself. Just need to make sure that the worker's interop context ptr state is coherent
         // with coroutine's.
+        ASSERT(coro != nullptr);
         auto *w = coro->GetWorker();
         return Current(w);
     }

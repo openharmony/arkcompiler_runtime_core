@@ -27,6 +27,6 @@ function main() {
     arktest.assertEQ(genericRestFunction<number>(1), 1);
     arktest.assertEQ(genericRestFunction<number>(1, 2), 2);
 
-    let rest: number[] = [1,2,3,4]
+    let rest: number[] = [1, 2, 3, 4]
     arktest.assertEQ(genericRestFunction<number>(...rest), 4);
 }

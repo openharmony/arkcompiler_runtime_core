@@ -17,11 +17,11 @@ limitations under the License.
 desc: Function return null type
 ---*/
 
-function f(): Int|null {
+function f(): Int | null {
     return 5;
 }
 
 function main(): void {
     let a = f();
-    arktest.assertEQ( a, 5 )
+    arktest.assertEQ(a, 5)
 }

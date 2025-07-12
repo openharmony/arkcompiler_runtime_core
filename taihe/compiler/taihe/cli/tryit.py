@@ -23,15 +23,22 @@ import sys
 import tarfile
 import time
 from collections.abc import Iterable, Mapping, Sequence
-from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
+from typing import cast
 
 from taihe.driver.backend import BackendRegistry
 from taihe.driver.contexts import CompilerInstance, CompilerInvocation
 from taihe.utils.logging import setup_logger
 from taihe.utils.outputs import CMakeOutputConfig, DebugLevel, OutputConfig
-from taihe.utils.resources import ResourceLocator, ResourceType
+from taihe.utils.resources import (
+    PandaVm,
+    ResourceContext,
+    RuntimeHeader,
+    RuntimeSource,
+    StandardLibrary,
+    fetch_url,
+)
 
 # A lower value means more verbosity
 TRACE_CONCISE = logging.DEBUG - 1
@@ -45,19 +52,10 @@ class UserType(Enum):
     CPP = "cpp"
 
 
-@dataclass
-class UserInfo:
-    """User information for authentication."""
-
-    username: str
-    password: str
-
-
 class BuildUtils:
     """Utility class for common operations."""
 
-    def __init__(self, verbosity: int):
-        setup_logger(verbosity)
+    def __init__(self):
         self.logger = logging.getLogger("build_system")
 
     def run_command(
@@ -117,33 +115,6 @@ class BuildUtils:
         shutil.copytree(src, dst, dirs_exist_ok=True)
         self.logger.debug("Copied directory from %s to %s", src, dst)
 
-    def download_file(
-        self,
-        target_file: Path,
-        url: str,
-        user_info: UserInfo | None = None,
-    ) -> None:
-        """Download a file from a URL."""
-        if target_file.exists():
-            self.logger.info("Already found %s, skipping download", target_file)
-            return
-
-        temp_file = target_file.with_suffix(".tmp")
-
-        command = ["curl", "-L", "--progress-bar", url, "-o", temp_file]
-
-        if user_info:
-            command.extend(["-u", f"{user_info.username}:{user_info.password}"])
-
-        self.run_command(command)
-
-        if temp_file.exists():
-            temp_file.rename(target_file)
-            self.logger.info("Downloaded %s to %s", url, target_file)
-        else:
-            self.logger.error("Failed to download %s", url)
-            raise FileNotFoundError(f"Failed to download {url}")
-
     def extract_file(
         self,
         target_file: Path,
@@ -170,26 +141,15 @@ class BuildUtils:
 class BuildConfig:
     """Configuration for the build process."""
 
-    def __init__(self):
+    def __init__(self, vm: PandaVm | None):
         self.cxx = os.getenv("CXX", "clang++")
         self.cc = os.getenv("CC", "clang")
-        self.panda_userinfo = UserInfo(
-            username=os.getenv("PANDA_USERNAME", "koala-pub"),
-            password=os.getenv("PANDA_PASSWORD", "y3t!n0therP"),
-        )
-        self.panda_url = "https://nexus.bz-openlab.ru:10443/repository/koala-npm/%40panda/sdk/-/sdk-1.5.0-dev.36922.tgz"
+        self._vm = vm
 
-        self.locator = ResourceLocator.detect()
-        self.panda_extract_dir = self.locator.get(ResourceType.DEV_PANDA_VM)
-        self.panda_package_dir = self.panda_extract_dir / "package"
-        self.panda_ets_dir = self.panda_package_dir / "ets"
-        self.panda_tool_dir = self.panda_package_dir / "linux_host_tools"
-        self.panda_include_dir = (
-            self.panda_package_dir / "ohos_arm64/include/plugins/ets/runtime/ani"
-        )
-        # TODO this should be removed
-        self.taihe_version_file = self.locator.root_dir / "version.txt"
-        self.panda_version_file = self.panda_package_dir / "version.txt"
+    @property
+    def vm(self) -> PandaVm:
+        pass
+        return self._vm
 
 
 def _map_output_debug_level(verbosity: int) -> DebugLevel:
@@ -210,7 +170,7 @@ class BuildSystem(BuildUtils):
         config: BuildConfig,
         verbosity: int = logging.INFO,
     ):
-        super().__init__(verbosity)
+        super().__init__()
         self.config = config
         self.should_run_pretty_print = verbosity <= logging.DEBUG
         self.codegen_debug_level = _map_output_debug_level(verbosity)
@@ -235,9 +195,9 @@ class BuildSystem(BuildUtils):
         self.user_include_dir = self.user_dir / "include"
         self.user_src_dir = self.user_dir / "src"
 
-        self.runtime_includes = [self.config.locator.get(ResourceType.RUNTIME_HEADER)]
+        self.runtime_includes = [RuntimeHeader.resolve_path()]
         if self.user == UserType.STS:
-            self.runtime_includes.append(self.config.panda_include_dir)
+            self.runtime_includes.append(config.vm.ani_header_dir)
         self.generated_includes = [*self.runtime_includes, self.generated_include_dir]
         self.author_includes = [*self.generated_includes, self.author_include_dir]
         self.user_includes = [*self.generated_includes, self.user_include_dir]
@@ -331,11 +291,14 @@ class BuildSystem(BuildUtils):
 
         self.logger.info("Generating author and ani codes...")
 
+        idls = list(self.idl_dir.glob("*.taihe"))
+
         registry = BackendRegistry()
         registry.register_all()
         backend_names = ["cpp-author"]
         if self.user == UserType.STS:
             backend_names.append("ani-bridge")
+            idls.append(StandardLibrary.resolve_path() / "taihe.platform.ani.taihe")
         if self.user == UserType.CPP:
             backend_names.append("cpp-user")
         if self.should_run_pretty_print:
@@ -346,10 +309,8 @@ class BuildSystem(BuildUtils):
         if cmake:
             output_config = CMakeOutputConfig(
                 dst_dir=Path(self.generated_dir),
-                runtime_include_dir=self.config.locator.get(
-                    ResourceType.RUNTIME_HEADER
-                ),
-                runtime_src_dir=self.config.locator.get(ResourceType.RUNTIME_SOURCE),
+                runtime_include_dir=RuntimeHeader.resolve_path(),
+                runtime_src_dir=RuntimeSource.resolve_path(),
             )
         else:
             output_config = OutputConfig(
@@ -357,14 +318,7 @@ class BuildSystem(BuildUtils):
             )
 
         invocation = CompilerInvocation(
-            src_files=[
-                src_file
-                for src_dir in [
-                    self.idl_dir,
-                    self.config.locator.get(ResourceType.STDLIB),
-                ]
-                for src_file in src_dir.glob("*.taihe")
-            ],
+            src_files=idls,
             output_config=output_config,
             backends=resolved_backends,
             sts_keep_name=sts_keep_name,
@@ -381,9 +335,6 @@ class BuildSystem(BuildUtils):
         self.setup_build_directories()
 
         if self.user == UserType.STS:
-            # Set up paths for Panda VM
-            self.prepare_panda_vm()
-
             # Compile the shared library
             self.compile_shared_library(opt_level=opt_level)
 
@@ -408,7 +359,7 @@ class BuildSystem(BuildUtils):
         """Compile the shared library."""
         self.logger.info("Compiling shared library...")
 
-        runtime_src_dir = self.config.locator.get(ResourceType.RUNTIME_SOURCE)
+        runtime_src_dir = RuntimeSource.resolve_path()
         runtime_sources = [
             runtime_src_dir / "string.cpp",
             runtime_src_dir / "object.cpp",
@@ -543,43 +494,6 @@ class BuildSystem(BuildUtils):
         self.create_directory(self.build_generated_dir)
         self.create_directory(self.build_user_dir)
 
-    def prepare_panda_vm(self):
-        """Download and extract Panda VM."""
-        self.create_directory(self.config.panda_extract_dir)
-
-        url = self.config.panda_url
-        filename = url.split("/")[-1]
-        target_file = self.config.panda_extract_dir / filename
-        version = Path(filename).stem  # Use the filename without extension as version
-
-        if not self.check_local_version(version):
-            self.clean_directory(self.config.panda_package_dir)
-            self.logger.info("Downloading panda VM version: %s", version)
-            self.download_file(target_file, url, self.config.panda_userinfo)
-            self.extract_file(target_file, self.config.panda_extract_dir)
-            self.write_local_version(version)
-            self.logger.info("Completed download and extraction.")
-
-    def check_local_version(self, version: str) -> bool:
-        """Check if the local version matches the desired version."""
-        if not self.config.panda_version_file.exists():
-            return False
-        try:
-            with open(self.config.panda_version_file) as vf:
-                local_version = vf.read().strip()
-                return local_version == version
-        except OSError as e:
-            self.logger.warning("Failed to read version file: %s", e)
-            return False
-
-    def write_local_version(self, version: str) -> None:
-        """Write the local version to the version file."""
-        try:
-            with open(self.config.panda_version_file, "w") as vf:
-                vf.write(version)
-        except OSError as e:
-            self.logger.warning("Failed to write version file: %s", e)
-
     def compile(
         self,
         output_dir: Path,
@@ -671,20 +585,15 @@ class BuildSystem(BuildUtils):
     def create_arktsconfig(
         self,
         arktsconfig_file: Path,
-        app_paths: Mapping[str, Path] | None = None,
+        app_paths: dict[str, Path] | None = None,
     ) -> None:
         """Create ArkTS configuration file."""
-        paths = {
-            "std": self.config.panda_ets_dir / "stdlib/std",
-            "escompat": self.config.panda_ets_dir / "stdlib/escompat",
-        }
-
-        if app_paths is not None:
-            paths.update(app_paths)
+        vm = PandaVm.resolve()
+        paths = vm.stdlib_sources | (app_paths or {})
 
         config_content = {
             "compilerOptions": {
-                "baseUrl": str(self.config.panda_tool_dir),
+                "baseUrl": str(vm.host_tools_dir),
                 "paths": {key: [str(value)] for key, value in paths.items()},
             }
         }
@@ -708,10 +617,8 @@ class BuildSystem(BuildUtils):
             output_file = output_dir / f"{name}.abc"
             output_dump = output_dir / f"{name}.abc.dump"
 
-            es2panda_path = self.config.panda_tool_dir / "bin/es2panda"
-
             gen_abc_command = [
-                es2panda_path,
+                self.config.vm.tool("es2panda"),
                 input_file,
                 "--output",
                 output_file,
@@ -725,7 +632,7 @@ class BuildSystem(BuildUtils):
 
             output_files.append(output_file)
 
-            ark_disasm_path = self.config.panda_tool_dir / "bin/ark_disasm"
+            ark_disasm_path = self.config.vm.tool("ark_disasm")
             if not ark_disasm_path.exists():
                 self.logger.warning(
                     "ark_disasm not found at %s, skipping disassembly", ark_disasm_path
@@ -752,10 +659,8 @@ class BuildSystem(BuildUtils):
             self.logger.warning("No input files to link")
             return
 
-        ark_link_path = self.config.panda_tool_dir / "bin/ark_link"
-
         command = [
-            ark_link_path,
+            self.config.vm.tool("ark_link"),
             "--output",
             target,
             "--",
@@ -771,9 +676,8 @@ class BuildSystem(BuildUtils):
         entry: str,
     ) -> float:
         """Run the compiled ABC file with the Ark runtime."""
-        ark_path = self.config.panda_tool_dir / "bin/ark"
-
-        etsstdlib_path = self.config.panda_ets_dir / "etsstdlib.abc"
+        ark_path = self.config.vm.tool("ark")
+        etsstdlib_path = self.config.vm.stdlib_lib
 
         command = [
             ark_path,
@@ -792,30 +696,25 @@ class BuildSystem(BuildUtils):
 class RepositoryUpgrader(BuildUtils):
     """Upgrade the code from a specified URL."""
 
-    def __init__(
-        self,
-        repo_url: str,
-        config: BuildConfig,
-        verbosity: int = logging.INFO,
-    ):
-        super().__init__(verbosity)
+    def __init__(self, repo_url: str, config: BuildConfig):
+        super().__init__()
         self.config = config
-
         self.repo_url = repo_url
 
     def fetch_and_upgrade(self):
         filename = self.repo_url.split("/")[-1]
         version = self.repo_url.split("/")[-2]
 
-        extract_dir = self.config.locator.root_dir / "../tmp"
+        base_dir = ResourceContext.instance().base_dir
+        extract_dir = base_dir / "../tmp"
         target_file = extract_dir / filename
         self.create_directory(extract_dir)
-        self.download_file(target_file, self.repo_url)
+        fetch_url(self.repo_url, target_file)
         self.extract_file(target_file, extract_dir)
 
         tmp_taihe_pkg_dir = extract_dir / "taihe"
-        self.clean_directory(self.config.locator.root_dir)
-        self.move_directory(tmp_taihe_pkg_dir, self.config.locator.root_dir)
+        self.clean_directory(base_dir)
+        self.move_directory(tmp_taihe_pkg_dir, base_dir)
         self.clean_directory(extract_dir)
 
         self.logger.info("Successfully upgraded code to version %s", version)
@@ -879,7 +778,7 @@ class TaiheTryitParser(argparse.ArgumentParser):
         )
 
 
-def main(config: BuildConfig | None = None):
+def main():
     parser = TaiheTryitParser(
         prog="taihe-tryit",
         description="Build and run project from a target directory",
@@ -927,7 +826,9 @@ def main(config: BuildConfig | None = None):
     parser_upgrade.register_common_configs()
     parser_upgrade.register_update_configs()
 
+    ResourceContext.register_cli_options(parser)
     args = parser.parse_args()
+    ResourceContext.initialize(args)
 
     match args.verbose:
         case 0:
@@ -938,17 +839,15 @@ def main(config: BuildConfig | None = None):
             verbosity = TRACE_CONCISE
         case _:
             verbosity = TRACE_VERBOSE
+    setup_logger(verbosity)
 
-    if config is None:
-        config = BuildConfig()
+    user = cast(UserType, args.user)
+    vm = PandaVm.resolve() if user == UserType.STS else None
+    config = BuildConfig(vm)
 
     try:
         if args.command == "upgrade":
-            upgrader = RepositoryUpgrader(
-                args.URL,
-                config=config,
-                verbosity=verbosity,
-            )
+            upgrader = RepositoryUpgrader(args.URL, config=config)
             upgrader.fetch_and_upgrade()
         else:
             build_system = BuildSystem(

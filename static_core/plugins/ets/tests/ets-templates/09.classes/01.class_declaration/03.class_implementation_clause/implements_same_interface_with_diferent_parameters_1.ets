@@ -15,7 +15,9 @@ limitations under the License.
 
 /*---
 desc: Class implements two instances of generic superinterface.
-assert: A compile-time error occurs if a class is at the same time a subtype of two interface types that represent different instantiations of the same generic interface.
+assert: >-
+    A compile-time error occurs if a class is at the same time a subtype of two interface types that represent
+    different instantiations of the same generic interface.
 tags: [compile-only, negative]
 ---*/
 

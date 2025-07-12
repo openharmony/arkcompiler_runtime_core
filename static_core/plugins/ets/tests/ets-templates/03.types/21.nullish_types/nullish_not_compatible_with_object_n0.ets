@@ -20,7 +20,7 @@ tags:
 - negative
 ---*/
 
-function nullish (
+function nullish(
     o: Object, nullish1: null
 ) {
     o = nullish1 /* compile-time error - type 'null' is not compatible with Object */

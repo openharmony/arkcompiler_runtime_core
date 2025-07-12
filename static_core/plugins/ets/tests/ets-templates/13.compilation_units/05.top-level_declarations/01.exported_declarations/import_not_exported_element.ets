@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: A declared name is considered private if not exported; a private declared name can be used only inside the package it is declared in.
+desc: >-
+    A declared name is considered private if not exported; a private declared name can be used only inside the
+    package it is declared in.
 tags: [compile-only, negative]
 ---*/
 

@@ -30,6 +30,14 @@ std::string GetHelper()
     return ecmascript::COMMON_HELP_HEAD_MSG + ecmascript::HELP_OPTION_MSG;
 }
 
+ArkJsRuntime::~ArkJsRuntime()
+{
+    if (engine_ != nullptr) {
+        delete engine_;
+        engine_ = nullptr;
+    }
+}
+
 bool ArkJsRuntime::ProcessOptions(int argc, const char **argv, arg_list_t *filenames)
 {
     if (argc < 2) {  // 2: at least have two arguments
@@ -74,7 +82,7 @@ bool ArkJsRuntime::Init()
         return false;
     }
 
-    engine_ = std::make_unique<ArkNativeEngine>(vm_, nullptr);
+    engine_ = new ArkNativeEngine(vm_, nullptr);
 
     engine_->SetGetAssetFunc(utils::GetAsset);
     engine_->SetCleanEnv([this] { JSNApi::DestroyJSVM(vm_); });

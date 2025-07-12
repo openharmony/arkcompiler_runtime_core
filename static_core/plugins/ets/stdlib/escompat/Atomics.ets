@@ -52,6 +52,22 @@ class Waiter {
         return true;
     }
 
+    public notifyAll(val: string): int {
+        let count = 0;
+        ConcurrencyHelpers.mutexLock(this.mutex);
+        for (let i: int = 0; i < this.promiseQueue.size; i++) {
+            let res = this.promiseQueue.poll();
+            if(res == null) {
+                break;
+            }
+            res!.finish(val);
+            count++;
+        }
+        ConcurrencyHelpers.mutexUnlock(this.mutex);
+        return count;
+    }
+
+
     private mutex: Object = ConcurrencyHelpers.mutexCreate();
     private promiseQueue: containers.BlockingQueue<CompletableJob<string>> = new containers.LinkedBlockingQueue<CompletableJob<string>>();
 }
@@ -167,9 +183,9 @@ export class Atomics {
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigUint64Array) {
-            return new BigInt(buffer.atomicAndI64(iindex, byteOffset, value.getULong()))
-        } else if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicAndU64(iindex, byteOffset, value.getLong()))
+        } else if (typedArray instanceof BigInt64Array) {
+            return new BigInt(buffer.atomicAndI64(iindex, byteOffset, value.getULong()))
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -223,9 +239,9 @@ export class Atomics {
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigUint64Array) {
-            return new BigInt(buffer.atomicCompareExchangeI64(iindex, byteOffset, expectedValue.getULong(), replacementValue.getULong()))
-        } else if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicCompareExchangeU64(iindex, byteOffset, expectedValue.getLong(), replacementValue.getLong()))
+        } else if (typedArray instanceof BigInt64Array) {
+            return new BigInt(buffer.atomicCompareExchangeI64(iindex, byteOffset, expectedValue.getULong(), replacementValue.getULong()))
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -690,7 +706,7 @@ export class Atomics {
         return p;
     }
 
-    private static notifyImpl(typedArray: Int32Array | BigInt64Array, index: number, count: number = 1): int {
+    private static notifyImpl(typedArray: Int32Array | BigInt64Array, index: number, count?: number): int {
         let buffer = typedArray.buffer
         let offset = 0;
         let byteOffset = typedArray.byteOffset.toInt()
@@ -701,9 +717,13 @@ export class Atomics {
         }
         let waiter = Atomics.getWaiter(buffer, offset);
         let notified = 0;
-        for(let i = 0; i < count; i++) {
-            if (waiter!.notify(Waiter.okStatus)) {
-                notified++;
+        if (count == undefined) {
+            notified = waiter!.notifyAll(Waiter.okStatus);
+        } else {
+            for(let i = 0; i < count; i++) {
+                if (waiter!.notify(Waiter.okStatus)) {
+                    notified++;
+                }
             }
         }
         return notified;

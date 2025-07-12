@@ -82,7 +82,7 @@ function test_iface_subBaseFun_base() {
     let info = sub.base();
 
     console.log("sub.base is " + info)
-    arktest.assertEQ(info, "SubBaseFun.base")    
+    arktest.assertEQ(info, "SubBaseFun.base")
 }
 
 function test_iface_subBaseElem_base() {
@@ -91,7 +91,7 @@ function test_iface_subBaseElem_base() {
     let info = sub.base;
 
     console.log("SubBaseElem.base is " + info)
-    arktest.assertEQ(info, "SubBaseElem.base")    
+    arktest.assertEQ(info, "SubBaseElem.base")
 }
 
 function main() {

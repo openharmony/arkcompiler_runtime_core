@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -136,6 +136,10 @@ PandaUniquePtr<CflowMethodInfo> GetCflowMethodInfo(Method const *method)
 
     // 1. fill instructions map
     LOG(DEBUG, VERIFIER) << "Build instructions map.";
+    if (cflowInfo == nullptr) {
+        LOG(ERROR, VERIFIER) << "cflowInfo is nullptr ";
+        return {};
+    }
     if (cflowInfo->FillCodeMaps(method) == VerificationStatus::ERROR) {
         return {};
     }

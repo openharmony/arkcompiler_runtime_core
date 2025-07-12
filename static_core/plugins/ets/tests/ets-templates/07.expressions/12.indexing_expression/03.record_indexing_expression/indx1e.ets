@@ -20,8 +20,8 @@ desc: >-
 tags: [compile-only, negative]
 ---*/
 
-function refNullish(): Record<string, number>|undefined {
-    let res: Record<string, number>|undefined = undefined
+function refNullish(): Record<string, number> | undefined {
+    let res: Record<string, number> | undefined = undefined
     return res
 }
 

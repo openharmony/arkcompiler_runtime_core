@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: To verify that class c indirectly inherits class a from class b and can correctly obtain the initial value of the public variable _publicVar defined by class a.
+desc: >-
+    To verify that class c indirectly inherits class a from class b and can correctly obtain the initial value
+    of the public variable _publicVar defined by class a.
 ---*/
 
 class A {

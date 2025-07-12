@@ -1811,6 +1811,7 @@ void G1GC<LanguageConfig>::UpdateMovedObjectsReferences(MovedObjectsContainer<FU
                                                         const Visitor &refUpdater)
 {
     ScopedTiming t("UpdateMovedObjectsReferences", *this->GetTiming());
+    ASSERT(movedObjectsContainer != nullptr);
     for (auto *movedObjects : *movedObjectsContainer) {
         if constexpr (ENABLE_WORKERS) {
             ProcessMovedObjects(movedObjects);

@@ -389,7 +389,7 @@ static ani_string PManagerGetEnvironmentVar(ani_env *env, [[maybe_unused]] ani_o
 
 static void PManagerExit([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process, ani_double code)
 {
-    std::exit(code);
+    std::exit(code);  // CC-OFF(G.STD.16-CPP) solid logic
 }
 
 static ani_boolean PManagerKill(ani_env *env, [[maybe_unused]] ani_object process, ani_double signal, ani_double pid)
@@ -511,7 +511,7 @@ static ani_double GetProcessPastCpuTime([[maybe_unused]] ani_env *env)
 
 static void AbortProcess([[maybe_unused]] ani_env *env)
 {
-    std::abort();
+    std::abort();  // CC-OFF(G.STD.16-CPP) solid logic
 }
 
 static ani_string GetCurrentWorkingDirectory(ani_env *env)

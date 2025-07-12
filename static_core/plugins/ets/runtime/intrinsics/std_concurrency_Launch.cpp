@@ -90,7 +90,8 @@ static PandaVector<Value> CreateArgsVector(VMHandle<EtsObject> func, EtsMethod *
 
 template <typename CoroResult>
 // CC-OFFNXT(huge_method) solid logic
-ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag, bool postToMain = false)
+ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag,
+                     CoroutineWorkerGroup::Id groupId = CoroutineWorkerGroup::ANY_ID, bool postToMain = false)
 {
     static_assert(std::is_same<CoroResult, EtsJob>::value || std::is_same<CoroResult, EtsPromise>::value);
 
@@ -137,7 +138,7 @@ ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag, bool postTo
     PandaVector<Value> realArgs = CreateArgsVector(function, method, array);
     auto mode = postToMain ? CoroutineLaunchMode::MAIN_WORKER : CoroutineLaunchMode::DEFAULT;
     bool launchResult = coro->GetCoroutineManager()->Launch(evt, method->GetPandaMethod(), std::move(realArgs), mode,
-                                                            EtsCoroutine::LAUNCH, abortFlag);
+                                                            EtsCoroutine::LAUNCH, abortFlag, groupId);
     if (UNLIKELY(!launchResult)) {
         // Launch failed. The exception in the current coro should be already set by Launch(),
         // just return null as the result and clean up the allocated resources.
@@ -152,14 +153,13 @@ ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag, bool postTo
 extern "C" {
 EtsJob *PostToMainThread(EtsObject *func, EtsArray *arr, EtsBoolean abortFlag)
 {
-    return static_cast<EtsJob *>(Launch<EtsJob>(func, arr, abortFlag != 0U, true));
-}
+    return static_cast<EtsJob *>(Launch<EtsJob>(func, arr, abortFlag != 0U, CoroutineWorkerGroup::ANY_ID, true));
 }
 
-extern "C" {
-EtsJob *EtsLaunchInternalJobNative(EtsObject *func, EtsArray *arr, EtsBoolean abortFlag)
+EtsJob *EtsLaunchInternalJobNative(EtsObject *func, EtsArray *arr, EtsBoolean abortFlag, EtsLong groupId)
 {
-    return static_cast<EtsJob *>(Launch<EtsJob>(func, arr, abortFlag != 0U));
+    return static_cast<EtsJob *>(
+        Launch<EtsJob>(func, arr, abortFlag != 0U, static_cast<CoroutineWorkerGroup::Id>(groupId)));
 }
 
 void EtsLaunchSameWorker(EtsObject *callback)
@@ -174,8 +174,22 @@ void EtsLaunchSameWorker(EtsObject *callback)
     auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroMan);
     [[maybe_unused]] auto launched =
         coroMan->Launch(evt, method->GetPandaMethod(), std::move(args), CoroutineLaunchMode::SAME_WORKER,
-                        EtsCoroutine::TIMER_CALLBACK, true);
+                        EtsCoroutine::TIMER_CALLBACK, true, CoroutineWorkerGroup::ANY_ID);
     ASSERT(launched);
 }
+
+EtsLong WorkerGroupGenerateGroupIdImpl(EtsInt domain, EtsInt hint)
+{
+    auto workerId = static_cast<CoroutineWorker::Id>(hint);
+    auto domainId = static_cast<CoroutineWorkerDomain>(domain);
+
+    ASSERT(workerId != CoroutineWorker::INVALID_ID);
+    // NOTE(konstanting): we need to support all domains!
+    ASSERT(domainId == CoroutineWorkerDomain::EXACT_ID);
+
+    return CoroutineWorkerGroup::GenerateId(domainId, workerId);
 }
+
+}  // extern "C"
+
 }  // namespace ark::ets::intrinsics

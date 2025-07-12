@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "hapModuleInfo.proj.hpp"
 #include "hapModuleInfo.impl.hpp"
-#include "taihe/runtime.hpp"
-#include "stdexcept"
 #include <iostream>
+#include "hapModuleInfo.proj.hpp"
+#include "stdexcept"
+#include "taihe/runtime.hpp"
 
 using namespace taihe;
 using namespace hapModuleInfo;
@@ -27,6 +27,7 @@ namespace {
 class HapModuleInfoImpl {
 public:
     int32_t hapModuleInfoImpl = 21474;
+
     HapModuleInfoImpl() {}
 
     string GetName()
@@ -104,6 +105,7 @@ public:
 class DependencyImpl {
 public:
     int32_t dependencyImpl = 21474;
+
     DependencyImpl() {}
 
     string GetModuleName()

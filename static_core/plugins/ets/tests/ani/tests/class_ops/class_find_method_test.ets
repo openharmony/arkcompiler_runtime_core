@@ -34,25 +34,29 @@ class A {
         return a0 * a0;
     }
 
-    public overloadedBase(): int
+    public overloadedBase1(): int
     {
         return 1
     }
 
-    public overloadedBase(i: int): int
+    public overloadedBase2(i: int): int
     {
         return 1
     }
 
-    public static staticOverloadedBase(): int
+    overload overloadedBase {overloadedBase1, overloadedBase2}
+
+    public static staticOverloadedBase1(): int
     {
         return 1
     }
 
-    public static staticOverloadedBase(i: int): int
+    public static staticOverloadedBase2(i: int): int
     {
         return 1
     }
+
+    static overload staticOverloadedBase {staticOverloadedBase1, staticOverloadedBase2}
 }
 
 final class B extends A {
@@ -63,29 +67,32 @@ final class B extends A {
         return a1 * a1;
     }
 
-    public overloaded(): int
+    public overloaded1(): int
     {
         return 1
     }
 
-    public overloaded(i: int): int
+    public overloaded2(i: int): int
     {
         return 1
     }
 
-    public static staticOverloaded(): int
+    overload overloaded {overloaded1, overloaded2}
+
+    public static staticOverloaded1(): int
     {
         return 1
     }
 
-    public static staticOverloaded(i: int): int
+    public static staticOverloaded2(i: int): int
     {
         return 1
     }
+    static overload staticOverloaded {staticOverloaded2, staticOverloaded1}
 }
 
 interface I {
-    imethod(x: int): int
+    imethod1(x: int): int
     imethod_tuple(tuple: [int, long]): int
 }
 
@@ -93,16 +100,17 @@ class C implements I {
     constructor() {
     }
 
-    public override imethod(x: int): int
+    public override imethod1(x: int): int
     {
         return x
     }
 
-    public imethod(x: string): int
+    public imethod2(x: string): int
     {
         return x.length.toInt()
     }
 
+    overload imethod {imethod1, imethod2}
     public override imethod_tuple(tuple: [int, long]): int
     {
         return (tuple[0] + tuple[1]).toInt()
@@ -157,19 +165,21 @@ class Overload {
     constructor() {
     }
     
-    private method(x: int): int
+    private method1(x: int): int
     {
         return x;
     }
     
-    private method(x: int, y: boolean): int
+    private method2(x: int, y: boolean): int
     {
         return 2 * x;
     }
-    private method(x: int, y: double): int
+    private method3(x: int, y: double): int
     {
         return 3 * x;
     }
+
+    overload method {method1, method2, method3}
 }
 
 function CreatePartial(a: int): Partial<UnusualTypes> {
@@ -447,15 +457,16 @@ final class Operations {
 }
 
 class ClassA {
-    static calculateSquareArea(length: int, wide: int, height: int): int {
+    static calculateSquareArea1(length: int, wide: int, height: int): int {
         return length * wide * height;
     }
-    static calculateSquareArea(length: int, wide: int): int {
+    static calculateSquareArea2(length: int, wide: int): int {
         return length * wide;
     }
     calculateSquareArea(length: int): int {
         return length;
     }
+    static overload calculateSquareArea {calculateSquareArea1, calculateSquareArea2}
 
     static sumA(a0: int, a1: int): int {
         return a0 + a1;

@@ -27,12 +27,22 @@ static ani_int Sum([[maybe_unused]] ani_env *env, ani_int a, ani_int b)
     return a + b;
 }
 
+static ani_int Foo([[maybe_unused]] ani_env *env, ani_int a, ani_int b)
+{
+    return a + b;
+}
+
 static ani_double Abs([[maybe_unused]] ani_env *env, ani_double a)
 {
     return a;
 }
 
 static ani_int SumA([[maybe_unused]] ani_env *env, ani_int a, ani_int b, ani_int c)
+{
+    return a + b + c;
+}
+
+static ani_int FooA([[maybe_unused]] ani_env *env, ani_int a, ani_int b, ani_int c)
 {
     return a + b + c;
 }
@@ -144,11 +154,40 @@ TEST_F(ModuleBindNativeFunctionsTest, function_not_found)
 
     std::array functions = {
         ani_native_function {"sum", "II:I", reinterpret_cast<void *>(Sum)},
+        ani_native_function {"foo", "II:I", reinterpret_cast<void *>(Foo)},
+        ani_native_function {"foo", "III:I", reinterpret_cast<void *>(FooA)},
         ani_native_function {"concatX", CONCAT_SIGNATURE, reinterpret_cast<void *>(Concat)},
     };
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_NOT_FOUND);
 }
 
+TEST_F(ModuleBindNativeFunctionsTest, new_overload_bind)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    std::array functions = {
+        ani_native_function {"sum", "II:I", reinterpret_cast<void *>(Sum)},
+        ani_native_function {"foo", "II:I", reinterpret_cast<void *>(Foo)},
+        ani_native_function {"foo", "III:I", reinterpret_cast<void *>(FooA)},
+    };
+    ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_OK);
+}
+
+TEST_F(ModuleBindNativeFunctionsTest, new_overload_direct_bind)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    std::array functions = {
+        ani_native_function {"sum", "II:I", reinterpret_cast<void *>(Sum)},
+        ani_native_function {"foo1", "II:I", reinterpret_cast<void *>(Foo)},
+        ani_native_function {"foo2", "III:I", reinterpret_cast<void *>(FooA)},
+    };
+    ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_OK);
+}
 // NOLINTNEXTLINE(readability-named-parameter)
 static ani_int NativeMethodsFooNative(ani_env *, ani_class)
 {

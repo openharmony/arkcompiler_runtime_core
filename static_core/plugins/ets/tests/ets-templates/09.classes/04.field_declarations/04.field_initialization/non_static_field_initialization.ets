@@ -15,7 +15,9 @@ limitations under the License.
 
 /*---
 desc: Non-static field initialization.
-assert: If there is an initializer in a non-static field declaration, then the initializer has the semantics of an assigment to the declared variable.
+assert: >-
+    If there is an initializer in a non-static field declaration, then the initializer has the semantics
+    of an assigment to the declared variable.
 ---*/
 
 class A {

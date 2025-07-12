@@ -49,3 +49,13 @@ export interface Iface5 {
 export function foo6(iface5 : Iface5) {
   console.log(iface5 instanceof Iface5) // true
 }
+
+export interface I01 {
+  str: string;
+  readonly s_read: string;
+  s_optional?: string;
+  get num1(): int;
+  set num2(p1: int);
+  clsMethod:(args: string)=> string;
+  clsMethod1:(args: string)=> string;
+}

@@ -23,6 +23,7 @@ namespace ark::ets {
 void FinalizationRegistryManager::SortInstancies()
 {
     auto *objArray = EtsObjectArray::FromCoreType(vm_->GetGlobalObjectStorage()->Get(finRegInstancies_));
+    ASSERT(objArray != nullptr);
     size_t head = 0;
     size_t localIndex = objArray->GetLength();
     size_t tail = localIndex - 1;
@@ -47,6 +48,7 @@ void FinalizationRegistryManager::EnsureCapacity(EtsCoroutine *coro)
     EtsClass *objectClass = vm_->GetClassLinker()->GetClassRoot(EtsClassRoot::OBJECT);
     if (finRegInstancies_ == nullptr) {
         auto *objArray = EtsObjectArray::Create(objectClass, INIT_SIZE, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+        ASSERT(objArray != nullptr);
         finRegInstancies_ =
             vm_->GetGlobalObjectStorage()->Add(objArray->GetCoreType(), ark::mem::Reference::ObjectType::GLOBAL);
         finRegLastIndex_ = 0;
@@ -76,6 +78,7 @@ void FinalizationRegistryManager::RegisterInstance(EtsObject *instance)
     EtsHandle<EtsObject> instanceHandle(coroutine, instance);
     EnsureCapacity(coroutine);
     auto *objArray = EtsObjectArray::FromCoreType(vm_->GetGlobalObjectStorage()->Get(finRegInstancies_));
+    ASSERT(objArray != nullptr);
     ASSERT(objArray->GetLength() != 0);
     objArray->Set(finRegLastIndex_, instanceHandle.GetPtr());
     finRegLastIndex_++;
@@ -104,6 +107,7 @@ bool FinalizationRegistryManager::UpdateFinRegCoroCountAndCheckIfCleanupNeeded()
 
 void FinalizationRegistryManager::StartCleanupCoroIfNeeded(EtsCoroutine *coro)
 {
+    ASSERT(coro != nullptr);
     auto *coroManager = coro->GetCoroutineManager();
 
     if (finRegLastIndex_ != 0 && UpdateFinRegCoroCountAndCheckIfCleanupNeeded()) {
@@ -111,10 +115,11 @@ void FinalizationRegistryManager::StartCleanupCoroIfNeeded(EtsCoroutine *coro)
         auto *event = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroManager);
         Method *cleanup = PlatformTypes(vm_)->coreFinalizationRegistryExecCleanup->GetPandaMethod();
         auto launchMode =
-            coroManager->IsMainWorker(coro) ? CoroutineLaunchMode::MAIN_WORKER : CoroutineLaunchMode::DEFAULT;
+            coro->GetWorker()->IsMainWorker() ? CoroutineLaunchMode::MAIN_WORKER : CoroutineLaunchMode::DEFAULT;
         auto args = PandaVector<Value> {Value(objArray->GetCoreType()), Value(static_cast<uint32_t>(launchMode))};
-        [[maybe_unused]] bool launchResult = coroManager->Launch(event, cleanup, std::move(args), launchMode,
-                                                                 CoroutinePriority::DEFAULT_PRIORITY, false);
+        [[maybe_unused]] bool launchResult =
+            coroManager->Launch(event, cleanup, std::move(args), launchMode, CoroutinePriority::DEFAULT_PRIORITY, false,
+                                CoroutineWorkerGroup::ANY_ID);
         ASSERT(launchResult);
     }
 }

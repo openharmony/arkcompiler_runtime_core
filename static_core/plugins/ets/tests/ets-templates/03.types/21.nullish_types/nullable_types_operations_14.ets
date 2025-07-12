@@ -26,5 +26,5 @@ class A {
 
 function main(): void {
   let b: A | null = null;
-  let x: int = b.foo();    // NPE
+  let x: int = b.foo(); // NPE
 }

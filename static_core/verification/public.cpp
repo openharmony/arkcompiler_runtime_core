@@ -62,10 +62,18 @@ Service *CreateService(Config const *config, ark::mem::InternalAllocatorPtr allo
         VerificationResultCache::Initialize(cacheFileName);
     }
     auto res = allocator->New<Service>();
+    if (res == nullptr) {
+        LOG(ERROR, VERIFIER) << "Verifier Error: res is nullptr";
+        return nullptr;
+    }
     res->config = config;
     res->classLinker = linker;
     res->allocator = allocator;
     res->verifierService = allocator->New<VerifierService>(allocator, linker);
+    if (res->verifierService == nullptr) {
+        LOG(ERROR, VERIFIER) << "Verifier Error: res->verifierService is nullptr";
+        return nullptr;
+    }
     res->verifierService->Init();
     res->debugCtx.SetConfig(&config->debugCfg);
     return res;

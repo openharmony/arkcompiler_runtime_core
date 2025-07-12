@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that the instance of class b inherits from class a can correctly obtain the initial string value of the public variable _publicVar in class a.
+desc: >-
+    Verify that the instance of class b inherits from class a can correctly obtain the initial string value
+    of the public variable _publicVar in class a.
 ---*/
 
 class A {
@@ -30,7 +32,7 @@ class B extends A {
     super();
   }
 
-  test(){
+  test() {
   }
 }
 

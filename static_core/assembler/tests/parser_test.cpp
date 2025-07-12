@@ -4818,4 +4818,94 @@ TEST(parsertests, test_final)
     }
 }
 
+TEST(parsertests, test_union_canonicalization)
+{
+    Parser p;
+    std::string source =
+        ".record std.core.Object <external>\n"
+        ".record A <extends=std.core.Object, access.record=public> {}\n"
+        ".record B <extends=std.core.Object, access.record=public> {}\n"
+        ".record C <extends=std.core.Object, access.record=public> {}\n"
+        ".record D <extends=std.core.Object, access.record=public> {}\n"
+
+        ".record {UC,C,B,C,B} <external>\n"
+        ".record {UD,C,B,A} <external>\n"
+        ".record {UA,A,A,B} <external>\n"
+        ".record {UA,std.core.Double} <external>\n"
+        ".record {Ustd.core.Double,std.core.Double,std.core.Long} <external>\n"
+        ".record {Ustd.core.Long,std.core.Double,std.core.Int} <external>\n"
+        ".record {UA,B,C,B,A} <external>\n"
+        ".record {UA,D,D,D} <external>";
+
+    auto res = p.Parse(source);
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
+
+    auto &program = res.Value();
+
+    std::map<std::string, std::string> records {
+        {"{UC,C,B,C,B}", "{UB,C}"},
+        {"{UD,C,B,A}", "{UA,B,C,D}"},
+        {"{UA,A,A,B}", "{UA,B}"},
+        {"", "{UA,std.core.Double}"},
+        {"{Ustd.core.Double,std.core.Double,std.core.Long}", "{Ustd.core.Double,std.core.Long}"},
+        {"{Ustd.core.Long,std.core.Double,std.core.Int}", "{Ustd.core.Double,std.core.Int,std.core.Long}"},
+        {"{UA,B,C,B,A}", "{UA,B,C}"},
+        {"{UA,D,D,D}", "{UA,D}"}};
+
+    for (const auto &[notCanonRec, canonRec] : records) {
+        ASSERT_EQ(program.recordTable.find(notCanonRec), program.recordTable.end());
+        ASSERT_NE(program.recordTable.find(canonRec), program.recordTable.end());
+    }
+}
+
+TEST(parsertests, test_union_canonicalization_arrays)
+{
+    Parser p;
+
+    std::string source =
+        ".record std.core.Object <external>\n"
+        ".record A <extends=std.core.Object, access.record=public> {}\n"
+        ".record B <extends=std.core.Object, access.record=public> {}\n"
+        ".record C <extends=std.core.Object, access.record=public> {}\n"
+        ".record D <extends=std.core.Object, access.record=public> {}\n"
+
+        ".record {UB,C,{UA,D,std.core.Double}[],A} <external>\n"
+        ".record {U{UD,A,std.core.Int}[],{UA,D,std.core.Double}[],{Ustd.core.Long,D,A}[]} <external>\n"
+        ".record {UB,C,{UA,B}[],A} <external>\n"
+        ".record {UB,{UA,D}[],{UD,B}[],{UC,B}[],{UC,D}[]} <external>\n"
+        ".record {U{UA,D}[],{UD,B}[],{UD,B}[],{UC,D}[]} <external>\n"
+        ".record {U{UA,D}[],{UD,B}[][],{UD,B}[],{UC,D}[]} <external>\n"
+        ".record {U{UA,D}[][],{UD,B}[]} <external>\n"
+        ".record {U{UD,C}[],{UC,B}[]} <external>\n"
+        ".record {U{UD,C}[],C,B} <external>\n"
+        ".record {U{Ustd.core.Int,std.core.Double}[],std.core.Long,std.core.Double} <external>\n"
+        ".record {U{Ustd.core.Int[],std.core.Double[]}[],std.core.Long[],std.core.Double[]} <external>";
+
+    auto res = p.Parse(source);
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
+
+    auto &program = res.Value();
+
+    std::map<std::string, std::string> records {
+        {"{UB,C,{UA,D,std.core.Double}[],A}", "{UA,B,C,{UA,D,std.core.Double}[]}"},
+        {"{U{UD,A,std.core.Int}[],{UA,D,std.core.Double}[],{Ustd.core.Long,D,A}[]}",
+         "{U{UA,D,std.core.Double}[],{UA,D,std.core.Int}[],{UA,D,std.core.Long}[]}"},
+        {"{UB,C,{UA,B}[],A}", "{UA,B,C,{UA,B}[]}"},
+        {"{UB,{UA,D}[],{UD,B}[],{UC,B}[],{UC,D}[]}", "{UB,{UA,D}[],{UB,C}[],{UB,D}[],{UC,D}[]}"},
+        {"{U{UA,D}[],{UD,B}[],{UD,B}[],{UC,D}[]}", "{U{UA,D}[],{UB,D}[],{UC,D}[]}"},
+        {"{U{UA,D}[],{UD,B}[][],{UD,B}[],{UC,D}[]}", "{U{UA,D}[],{UB,D}[],{UB,D}[][],{UC,D}[]}"},
+        {"{U{UA,D}[][],{UD,B}[]}", "{U{UA,D}[][],{UB,D}[]}"},
+        {"{U{UD,C}[],{UC,B}[]}", "{U{UB,C}[],{UC,D}[]}"},
+        {"{U{UD,C}[],C,B}", "{UB,C,{UC,D}[]}"},
+        {"{U{Ustd.core.Int,std.core.Double}[],std.core.Long,std.core.Double}",
+         "{Ustd.core.Double,std.core.Long,{Ustd.core.Double,std.core.Int}[]}"},
+        {"{U{Ustd.core.Int[],std.core.Double[]}[],std.core.Long[],std.core.Double[]}",
+         "{Ustd.core.Double[],std.core.Long[],{Ustd.core.Double[],std.core.Int[]}[]}"}};
+
+    for (const auto &[notCanonRec, canonRec] : records) {
+        ASSERT_EQ(program.recordTable.find(notCanonRec), program.recordTable.end());
+        ASSERT_NE(program.recordTable.find(canonRec), program.recordTable.end());
+    }
+}
+
 }  // namespace ark::test

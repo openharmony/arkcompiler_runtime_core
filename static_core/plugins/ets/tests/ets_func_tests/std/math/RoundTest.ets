@@ -21,19 +21,19 @@ function main(): int {
 }
 
 function roundNormals() {
-    arktest.assertEQ(Math.round(0.), 0.)
-    arktest.assertEQ(Math.round(1.), 1.)
-    arktest.assertEQ(Math.round(-1.), -1.)
-    arktest.assertEQ(Math.round(1.3), 1.)
-    arktest.assertEQ(Math.round(-1.3), -1.)
+    arktest.assertEQ(Math.round(0.0), 0.0)
+    arktest.assertEQ(Math.round(1.0), 1.0)
+    arktest.assertEQ(Math.round(-1.0), -1.0)
+    arktest.assertEQ(Math.round(1.3), 1.0)
+    arktest.assertEQ(Math.round(-1.3), -1.0)
     arktest.assertEQ(Math.round(1.5), 2)
     arktest.assertEQ(Math.round(-1.5), -1)
-    arktest.assertEQ(Math.round(1.6), 2.)
-    arktest.assertEQ(Math.round(-1.6), -2.)
-    arktest.assertEQ(Math.round(0.1 + 0.4), 1.)
-    arktest.assertEQ(Math.round(-0.1 - 0.4), -0.)
-    arktest.assertEQ(Math.round(0.3), 0.)
-    arktest.assertEQ(Math.round(-0.3), -0.)
+    arktest.assertEQ(Math.round(1.6), 2.0)
+    arktest.assertEQ(Math.round(-1.6), -2.0)
+    arktest.assertEQ(Math.round(0.1 + 0.4), 1.0)
+    arktest.assertEQ(Math.round(-0.1 - 0.4), -0.0)
+    arktest.assertEQ(Math.round(0.3), 0.0)
+    arktest.assertEQ(Math.round(-0.3), -0.0)
 }
 
 function roundBoundaries() {
@@ -41,12 +41,12 @@ function roundBoundaries() {
     arktest.assertEQ(Math.round(Double.NEGATIVE_INFINITY), Double.NEGATIVE_INFINITY, "round(Double.NEGATIVE_INFINITY)")
     arktest.assertEQ(Double.toString(Math.round(Double.NaN)), Double.toString(Double.NaN), "Double.toString(Math.round(Double.NaN))")
     arktest.assertEQ(Double.toString(Math.round(-Double.NaN)), Double.toString(-Double.NaN), "Double.toString(Math.round(-Double.NaN))")
-    arktest.assertEQ(Math.round(3.5000000000000000000000000001), 4., "round(3.5000000000000000000000000001)")       //Exceeds double storage precision, actual storage is 3.5
-    arktest.assertEQ(Math.round(-3.5000000000000000000000000001), -3., "round(-3.5000000000000000000000000001)")    //Exceeds double storage precision, actual storage is -3.5
-    arktest.assertEQ(Math.round(3.500000000000001), 4., "round(3.500000000000001)")
-    arktest.assertEQ(Math.round(-3.500000000000001), -4., "round(-3.500000000000001)")
-    arktest.assertEQ(Math.round(5.4999999999999999999999999999), 6., "round(5.4999999999999999999999999999)")       //Exceeds double storage precision, actual storage is 5.5
-    arktest.assertEQ(Math.round(-5.4999999999999999999999999999), -5., "round(-5.4999999999999999999999999999)")    //Exceeds double storage precision, actual storage is -5.5
-    arktest.assertEQ(Math.round(5.499999999999), 5., "round(5.499999999999)")
-    arktest.assertEQ(Math.round(-5.499999999999), -5., "round(-5.499999999999)")
+    arktest.assertEQ(Math.round(3.5000000000000000000000000001), 4.0, "round(3.5000000000000000000000000001)")       //Exceeds double storage precision, actual storage is 3.5
+    arktest.assertEQ(Math.round(-3.5000000000000000000000000001), -3.0, "round(-3.5000000000000000000000000001)")    //Exceeds double storage precision, actual storage is -3.5
+    arktest.assertEQ(Math.round(3.500000000000001), 4.0, "round(3.500000000000001)")
+    arktest.assertEQ(Math.round(-3.500000000000001), -4.0, "round(-3.500000000000001)")
+    arktest.assertEQ(Math.round(5.4999999999999999999999999999), 6.0, "round(5.4999999999999999999999999999)")       //Exceeds double storage precision, actual storage is 5.5
+    arktest.assertEQ(Math.round(-5.4999999999999999999999999999), -5.0, "round(-5.4999999999999999999999999999)")    //Exceeds double storage precision, actual storage is -5.5
+    arktest.assertEQ(Math.round(5.499999999999), 5.0, "round(5.499999999999)")
+    arktest.assertEQ(Math.round(-5.499999999999), -5.0, "round(-5.499999999999)")
 }

@@ -36,5 +36,5 @@ class C implements B {}
 function main(): void {
   let instance: C = new C();
 
-  arktest.assertEQ( instance.foo(), 2 )
+  arktest.assertEQ(instance.foo(), 2)
 }

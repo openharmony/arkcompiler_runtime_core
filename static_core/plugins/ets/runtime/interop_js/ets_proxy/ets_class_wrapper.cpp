@@ -167,13 +167,6 @@ EtsObject *EtsClassWrapper::UnwrapEtsProxy(InteropCtx *ctx, napi_value jsValue)
     return nullptr;
 }
 
-void EtsClassWrapper::ThrowJSErrorNotAssignable(napi_env env, EtsClass *fromKlass, EtsClass *toKlass)
-{
-    const char *from = fromKlass->GetDescriptor();
-    const char *to = toKlass->GetDescriptor();
-    InteropCtx::ThrowJSTypeError(env, std::string(from) + " is not assignable to " + to);
-}
-
 EtsObject *EtsClassWrapper::CreateJSBuiltinProxy(InteropCtx *ctx, napi_value jsValue)
 {
     ASSERT(jsproxyWrapper_ != nullptr);
@@ -259,9 +252,10 @@ public:
             return etsObject;
         }
         if (IsStdClass(klass_)) {
-            auto objectConverter =
+            auto *objectConverter =
                 ctx->GetEtsClassWrappersCache()->Lookup(EtsClass::FromRuntimeClass(ctx->GetObjectClass()));
-            auto ret = objectConverter->Unwrap(ctx, jsValue);
+            auto *ret = objectConverter->Unwrap(ctx, jsValue);
+            ASSERT(ret != nullptr);
             if (!ret->IsInstanceOf(EtsClass::FromRuntimeClass(klass_))) {
                 ctx->ThrowJSTypeError(ctx->GetJSEnv(), "object of type " +
                                                            ret->GetClass()->GetRuntimeClass()->GetName() +
@@ -312,6 +306,7 @@ protected:
         std::istringstream iss {interfaces};
         std::string descriptor;
         auto *coro = EtsCoroutine::GetCurrent();
+        ASSERT(coro != nullptr);
         while (std::getline(iss, descriptor, ',')) {
             auto interfaceCls =
                 coro->GetPandaVM()->GetClassLinker()->GetClass(descriptor.data(), true, ctx->LinkerCtx());
@@ -341,6 +336,7 @@ public:
     {
         auto objectConverter =
             ctx->GetEtsClassWrappersCache()->Lookup(EtsClass::FromRuntimeClass(ctx->GetObjectClass()));
+        ASSERT(objectConverter != nullptr);
         auto ret = objectConverter->Unwrap(ctx, jsValue);
 
         std::array args = {Value {ret->GetCoreType()}};

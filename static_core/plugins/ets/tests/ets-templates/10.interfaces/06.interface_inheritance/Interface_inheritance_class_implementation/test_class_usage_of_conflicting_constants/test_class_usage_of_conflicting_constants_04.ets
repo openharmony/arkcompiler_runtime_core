@@ -14,7 +14,8 @@
  */
 
 /*---
-desc: Verify the conflict of the same - named constants when a class extends a parent class and implements an interface.
+desc: >-
+    Verify the conflict of the same - named constants when a class extends a parent class and implements an interface.
 ---*/
 
 class ParentClass {

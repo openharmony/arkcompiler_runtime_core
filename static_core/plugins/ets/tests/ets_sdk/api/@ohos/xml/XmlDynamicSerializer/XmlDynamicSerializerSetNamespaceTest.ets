@@ -44,7 +44,7 @@ function testNamespaceWithoutAttributes() {
     performXmlTest(
         (serializer) => {
             serializer.setDeclaration();
-            serializer.setNamespace('h', 'http://www.w3.org/TR/html4/');
+            serializer.setNamespace('h', 'http://www.w3.org/TR/html4/');  // CC-OFF(G.OTH.05) test logic
             serializer.startElement('note');
             serializer.endElement();
         },
@@ -57,7 +57,7 @@ function testNamespaceWithSingleAttribute() {
     performXmlTest(
         (serializer) => {
             serializer.setDeclaration();
-            serializer.setNamespace('b', 'http://www.w3.org/TR/html4/');
+            serializer.setNamespace('b', 'http://www.w3.org/TR/html4/');  // CC-OFF(G.OTH.05) test logic
             serializer.startElement('note');
             serializer.setAttributes('a', '1');
             serializer.endElement();
@@ -71,7 +71,7 @@ function testSetNamespaceWithAttributesAndText() {
     performXmlTest(
         (serializer) => {
             serializer.setDeclaration();
-            serializer.setNamespace('b', 'http://www.w3.org/TR/html4/');
+            serializer.setNamespace('b', 'http://www.w3.org/TR/html4/');  // CC-OFF(G.OTH.05) test logic
             serializer.startElement('note');
             serializer.setAttributes('a','1');
             serializer.setText('cat');
@@ -86,7 +86,7 @@ function testNamespaceWithNestedElements() {
     performXmlTest(
         (serializer) => {
             serializer.setDeclaration();
-            serializer.setNamespace('h', 'http://www.w3.org/TR/html4/');
+            serializer.setNamespace('h', 'http://www.w3.org/TR/html4/');  // CC-OFF(G.OTH.05) test logic
             serializer.startElement('note1');
             serializer.startElement('note2');
             serializer.endElement();

@@ -38,7 +38,7 @@ static constexpr std::string_view MUTEX                                = "Lstd/c
 static constexpr std::string_view EVENT                                = "Lstd/core/Event;";
 static constexpr std::string_view COND_VAR                             = "Lstd/core/CondVar;";
 static constexpr std::string_view QUEUE_SPINLOCK                       = "Lstd/core/QueueSpinlock;";
-static constexpr std::string_view NULL_VALUE                           = "Lstd/core/__NullValue;";
+static constexpr std::string_view NULL_VALUE                           = "Lstd/core/Null;";
 static constexpr std::string_view STRING                               = "Lstd/core/String;";
 static constexpr std::string_view WEAK_REF                             = "Lstd/core/WeakRef;";
 static constexpr std::string_view FINALIZABLE_WEAK_REF                 = "Lstd/core/FinalizableWeakRef;";
@@ -244,6 +244,10 @@ static constexpr std::string_view OPTIONAL_PARAMETERS_ANNOTATION       =
 // Annotation for function reference
 static constexpr std::string_view ANNOTATION_FUNCTIONAL_REFERENCE      =
     "Lets/annotation/FunctionalReference;";
+
+// Annotation for function overload
+static constexpr std::string_view ANNOTATION_FUNCTIONAL_OVERLOAD       =
+    "Lets/annotation/FunctionOverload;";
 
 }  // namespace class_descriptors
 

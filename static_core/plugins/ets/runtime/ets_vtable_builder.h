@@ -25,15 +25,22 @@
 
 namespace ark::ets {
 
-bool ETSProtoIsOverriddenBy(const ClassLinkerContext *ctx, Method::ProtoId const &base, Method::ProtoId const &derv);
+class RefTypeLink;
+
+bool ETSProtoIsOverriddenBy(const ClassLinkerContext *ctx, Method::ProtoId const &base, Method::ProtoId const &derv,
+                            bool isStrict = false);
+std::optional<RefTypeLink> GetClosestCommonAncestor(ClassLinker *cl, const ClassLinkerContext *ctx, RefTypeLink source,
+                                                    RefTypeLink target);
+std::pair<panda_file::File const *, panda_file::File::EntityId> GetClassInfo(const ClassLinkerContext *ctx,
+                                                                             const uint8_t *desc);
 
 class EtsVTableCompatibleSignatures {
 public:
     explicit EtsVTableCompatibleSignatures(const ClassLinkerContext *ctx) : ctx_(ctx) {}
 
-    bool operator()(const Method::ProtoId &base, const Method::ProtoId &derv) const
+    bool operator()(const Method::ProtoId &base, const Method::ProtoId &derv, bool isStrict = false) const
     {
-        return ETSProtoIsOverriddenBy(ctx_, base, derv);
+        return ETSProtoIsOverriddenBy(ctx_, base, derv, isStrict);
     }
 
 private:
@@ -58,6 +65,64 @@ struct EtsVTableOverridePred {
 };
 
 using EtsVTableBuilder = VarianceVTableBuilder<EtsVTableCompatibleSignatures, EtsVTableOverridePred>;
+
+class RefTypeLink {
+public:
+    explicit RefTypeLink(const ClassLinkerContext *ctx, uint8_t const *descr) : ctx_(ctx), descriptor_(descr) {}
+    RefTypeLink(const ClassLinkerContext *ctx, panda_file::File const *pf, panda_file::File::EntityId idx)
+        : ctx_(ctx), pf_(pf), id_(idx), descriptor_(pf->GetStringData(idx).data)
+    {
+    }
+
+    static RefTypeLink InPDA(const ClassLinkerContext *ctx, panda_file::ProtoDataAccessor &pda, uint32_t idx)
+    {
+        return RefTypeLink(ctx, &pda.GetPandaFile(), pda.GetReferenceType(idx));
+    }
+
+    uint8_t const *GetDescriptor()
+    {
+        return descriptor_;
+    }
+
+    panda_file::File::EntityId GetId() const
+    {
+        return id_;
+    }
+
+    panda_file::File const *GetPandaFile() const
+    {
+        return pf_;
+    }
+
+    ALWAYS_INLINE static bool AreEqual(RefTypeLink const &a, RefTypeLink const &b)
+    {
+        if (LIKELY(a.pf_ == b.pf_ && a.pf_ != nullptr)) {
+            return a.id_ == b.id_;
+        }
+        return utf::IsEqual(a.descriptor_, b.descriptor_);
+    }
+
+    ALWAYS_INLINE std::optional<panda_file::ClassDataAccessor> CreateCDA()
+    {
+        if (UNLIKELY(!Resolve())) {
+            return std::nullopt;
+        }
+        return panda_file::ClassDataAccessor(*pf_, id_);
+    }
+
+private:
+    bool Resolve();
+
+    bool IsResolved() const
+    {
+        return (pf_ != nullptr) && !pf_->IsExternal(id_);
+    }
+
+    const ClassLinkerContext *ctx_ {};
+    panda_file::File const *pf_ {};
+    panda_file::File::EntityId id_ {};
+    uint8_t const *descriptor_ {};
+};
 
 }  // namespace ark::ets
 

@@ -20,7 +20,7 @@ tags:
 - not-a-test
 ---*/
 
-export type TPL =  [Number, String];
+export type TPL = [Number, String];
 
 export function foo(i: TPL): int {
     return 1;

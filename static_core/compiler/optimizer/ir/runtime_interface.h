@@ -42,6 +42,7 @@ enum class ClassType {
     INTERFACE_CLASS,
     OTHER_CLASS,
     FINAL_CLASS,
+    UNION_CLASS,
     COUNT
 };
 

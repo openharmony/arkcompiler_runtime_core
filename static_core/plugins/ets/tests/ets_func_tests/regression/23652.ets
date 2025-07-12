@@ -14,11 +14,10 @@
  */
 
 
- /*---
- desc: Issue 23652. Crash about IF branch
- tags: [compile-only]
-
- ---*/
+/*---
+desc: Issue 23652. Crash about IF branch
+tags: [compile-only]
+---*/
 
 interface I {
     goo(): void;

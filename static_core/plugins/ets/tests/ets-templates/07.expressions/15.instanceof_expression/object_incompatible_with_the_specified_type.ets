@@ -15,12 +15,11 @@ limitations under the License.
 
 /*---
 desc: Test with an object incompatible with the specified type
-tags: [negative]
 ---*/
 
 class A {}
 
 function main(): void {
   let a = new A();
-  arktest.assertTrue( a instanceof String )
+  arktest.assertFalse( a instanceof String )
 }

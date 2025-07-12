@@ -15,7 +15,8 @@ limitations under the License.
 
 /*---
 desc: Class initializer with return statement.
-assert: It is a compile-time error if a return statement appears anywhere within a class initializer. Abstract class case.
+assert: >-
+    It is a compile-time error if a return statement appears anywhere within a class initializer. Abstract class case.
 tags: [compile-only, negative]
 ---*/
 

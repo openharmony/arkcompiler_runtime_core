@@ -24,18 +24,74 @@ static std::unordered_map<std::string_view, std::string_view> g_primitiveTypes =
     {"u1", "Z"},  {"i8", "B"},  {"u8", "H"},  {"i16", "S"}, {"u16", "C"},  {"i32", "I"}, {"u32", "U"},
     {"f32", "F"}, {"f64", "D"}, {"i64", "J"}, {"u64", "Q"}, {"void", "V"}, {"any", "A"}};
 
-std::string Type::GetDescriptor(bool ignorePrimitive) const
+std::string Type::GetComponentDescriptor(bool ignorePrimitive) const
 {
     if (!ignorePrimitive) {
-        auto it = g_primitiveTypes.find(componentName_);
+        auto it = g_primitiveTypes.find(GetComponentName());
         if (it != g_primitiveTypes.cend()) {
-            return std::string(rank_, '[') + it->second.data();
+            return it->second.data();
+        }
+    }
+    auto res = "L" + GetComponentName() + ";";
+    std::replace(res.begin(), res.end(), '.', '/');
+    return res;
+}
+
+std::string GetDescriptorImpl(const std::string &componentName, bool ignorePrimitive)
+{
+    if (!ignorePrimitive) {
+        auto it = g_primitiveTypes.find(componentName);
+        if (it != g_primitiveTypes.cend()) {
+            return it->second.data();
         }
     }
 
-    std::string res = std::string(rank_, '[') + "L" + componentName_ + ";";
-    std::replace(res.begin(), res.end(), '.', '/');
+    auto compTypeRaw = Type::FromName(componentName);
+    auto compType = Type(compTypeRaw.GetNameWithoutRank(), 0);
+    auto res = std::string(compTypeRaw.GetRank(), '[');
+    if (compType.IsUnion()) {
+        return res + compType.GetDescriptor();
+    }
+    return res + compType.GetComponentDescriptor(ignorePrimitive);
+}
+
+std::string Type::GetDescriptor(bool ignorePrimitive) const
+{
+    std::string res = std::string(rank_, '[');
+    if ((componentNames_.size() == 1)) {
+        return res + GetDescriptorImpl(componentNames_[0], ignorePrimitive);
+    }
+    res += "{U";
+    for (const auto &it : componentNames_) {
+        res += GetDescriptorImpl(it, ignorePrimitive);
+    }
+    res += "}";
     return res;
+}
+
+void Type::Canonicalize()
+{
+    if (!IsUnion()) {
+        return;
+    }
+    for (auto &componentName : componentNames_) {
+        Type rawCompType = Type::FromName(componentName);
+        Type compType = Type(rawCompType.GetNameWithoutRank(), 0);
+        componentName = Type(compType.GetName(), rawCompType.GetRank()).GetName();
+    }
+
+    std::sort(componentNames_.begin(), componentNames_.end());
+    auto duplicateBeginIt = unique(componentNames_.begin(), componentNames_.end());
+    componentNames_.erase(duplicateBeginIt, componentNames_.end());
+    name_ = GetName(GetComponentName(), GetRank());
+}
+
+/* static */
+std::string Type::CanonicalizeDescriptor(std::string_view descriptor)
+{
+    auto type = Type::FromDescriptor(descriptor);
+    type.Canonicalize();
+    return type.GetDescriptor();
 }
 
 /* static */
@@ -85,53 +141,86 @@ std::string Type::GetName(std::string_view componentName, size_t rank)
     return name;
 }
 
-/* static */
-Type Type::FromDescriptor(std::string_view descriptor)
+static std::pair<std::string_view, size_t> FromDescriptorComponent(std::string_view descriptor)
 {
     static std::unordered_map<std::string_view, std::string_view> reversePrimitiveTypes = {
         {"Z", "u1"},  {"B", "i8"},  {"H", "u8"},  {"S", "i16"}, {"C", "u16"},  {"I", "i32"}, {"U", "u32"},
         {"F", "f32"}, {"D", "f64"}, {"J", "i64"}, {"Q", "u64"}, {"V", "void"}, {"A", "any"}};
 
+    bool isRefType = descriptor[0] == 'L';
+    if (isRefType) {
+        auto len = descriptor.find(';');
+        return {descriptor.substr(1, len - 1), len + 1};
+    }
+
+    auto prim = reversePrimitiveTypes.find(descriptor.substr(0, 1));
+    if (prim == reversePrimitiveTypes.end()) {
+        LOG(FATAL, ASSEMBLER) << "The map 'reversePrimitiveTypes' don't contain the descriptor [" << descriptor << "].";
+        return {"", 0};
+    }
+
+    return {prim->second, 1};
+}
+
+static std::pair<std::string, size_t> FromDescriptorImpl(std::string_view descriptor)
+{
+    bool isUnionType = descriptor[0] == '{';
+    if (!isUnionType) {
+        auto [name, len] = FromDescriptorComponent(descriptor);
+        return {std::string(name), len};
+    }
+
+    std::string name = "{U";
+    size_t unionLen = 3;
+    descriptor.remove_prefix(Type::UNION_PREFIX_LEN);
+    while (descriptor[0] != '}') {
+        size_t rank = 0;
+        while (descriptor[rank] == '[') {
+            ++rank;
+        }
+        unionLen += rank;
+        descriptor.remove_prefix(rank);
+        auto [componentDesc, len] = FromDescriptorImpl(descriptor);
+        unionLen += len;
+        name += componentDesc;
+        while (rank-- > 0) {
+            name += "[]";
+        }
+        name += ",";
+        descriptor.remove_prefix(len);
+    }
+    name.pop_back();  // remove the extra comma
+    name += "}";
+    return {name, unionLen};
+}
+
+/* static */
+Type Type::FromDescriptor(std::string_view descriptor)
+{
     size_t i = 0;
     while (descriptor[i] == '[') {
         ++i;
     }
 
     size_t rank = i;
-    bool isRefType = descriptor[i] == 'L';
-    if (isRefType) {
-        descriptor.remove_suffix(1); /* Remove semicolon */
-        ++i;
-    }
-
-    descriptor.remove_prefix(i);
-
-    if (isRefType) {
-        return Type(descriptor, rank);
-    }
-
-    auto it = reversePrimitiveTypes.find(descriptor);
-    if (it == reversePrimitiveTypes.end()) {
-        LOG(FATAL, ASSEMBLER) << "The map 'reversePrimitiveTypes' don't contain the descriptor [" << descriptor << "].";
-    }
-    return Type(reversePrimitiveTypes[descriptor], rank);
+    descriptor.remove_prefix(rank);
+    auto [name, _] = FromDescriptorImpl(descriptor);
+    return Type(name, rank);
 }
 
 /* static */
 Type Type::FromName(std::string_view name, bool ignorePrimitive)
 {
-    constexpr size_t STEP = 2;
-
     size_t size = name.size();
     size_t i = 0;
 
     while (name[size - i - 1] == ']') {
-        i += STEP;
+        i += Type::RANK_STEP;
     }
 
     name.remove_suffix(i);
 
-    return Type(name, i / STEP, ignorePrimitive);
+    return Type(name, i / Type::RANK_STEP, ignorePrimitive);
 }
 
 /* static */

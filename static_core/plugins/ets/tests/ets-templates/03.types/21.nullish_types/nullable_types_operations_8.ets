@@ -19,6 +19,6 @@ desc: Nullable types
 
 function main(): void {
   let b: int = 5
-  let x: Int|null = b;
+  let x: Int | null = b;
   arktest.assertTrue(x == 5)
 }

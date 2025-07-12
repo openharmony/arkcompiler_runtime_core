@@ -14,7 +14,10 @@ limitations under the License.
 ---*/
 
 /*---
-desc: If two variables contain references to the same object, the state of the object can be modified using one variable' s reference to the object, and then the altered state can be observed through the reference in the other variable.
+desc: >-
+    If two variables contain references to the same object, the state of the object can be modified
+    using one variable' s reference to the object, and then the altered state can be observed through the reference
+    in the other variable.
 ---*/
 
 class A {

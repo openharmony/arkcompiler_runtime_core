@@ -73,87 +73,91 @@ function mustCall(fn?: Function, times: number = 1) {
     return wrappedFn;
 }
 
+class MyWrite1 extends stream.Writable {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+        let fn: Function = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
+            arktest.assertEQ(chunk, '你好');
+            arktest.assertEQ(encoding, 'gbk');
+            callback.unsafeCall();
+        }
+        let wrappedFn = mustCallUint8Array(fn);
+        wrappedFn(chunk, encoding, callback);
+    }
+}
+
 // Test cases ported from ArkTS 1.0:testStreamEncoding005
 function testWritableStreamEndEncodingGbk() {
-    class MyWrite extends stream.Writable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-            let fn: Function = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
-                arktest.assertEQ(chunk, '你好');
-                arktest.assertEQ(encoding, 'gbk');
-                callback.unsafeCall();
-            }
-            let wrappedFn = mustCallUint8Array(fn);
-            wrappedFn(chunk, encoding, callback);
-        }
-    }
-    let writable = new MyWrite();
+    let writable = new MyWrite1();
     writable.end('你好', 'gbk', mustCall());
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyWrite2 extends stream.Writable {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+        let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
+            arktest.assertEQ(chunk, '你好');
+            arktest.assertEQ(encoding, 'gb2312');
+            callback.unsafeCall();
+        }
+        let wrappedFn = mustCallUint8Array(fn);
+        wrappedFn(chunk, encoding, callback);
+    }
+}
+
 // Test cases ported from ArkTS 1.0:testStreamEncoding006
 function testWritableStreamEndEncodingGb2312() {
-    class MyWrite extends stream.Writable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-            let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
-                arktest.assertEQ(chunk, '你好');
-                arktest.assertEQ(encoding, 'gb2312');
-                callback.unsafeCall();
-            }
-            let wrappedFn = mustCallUint8Array(fn);
-            wrappedFn(chunk, encoding, callback);
-        }
-    }
-    let writable = new MyWrite();
+    let writable = new MyWrite2();
     writable.end('你好', 'gb2312', mustCall());
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyWrite3 extends stream.Writable {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+        let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
+            arktest.assertEQ(chunk, '你好');
+            arktest.assertEQ(encoding, 'gb18030');
+            callback.unsafeCall();
+        }
+        let wrappedFn = mustCallUint8Array(fn);
+        wrappedFn(chunk, encoding, callback);
+    }
+}
+
 // Test cases ported from ArkTS 1.0:testStreamEncoding007
 function testWritableStreamSetDefaultEncodingGb18030() {
-    class MyWrite extends stream.Writable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-            let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
-                arktest.assertEQ(chunk, '你好');
-                arktest.assertEQ(encoding, 'gb18030');
-                callback.unsafeCall();
-            }
-            let wrappedFn = mustCallUint8Array(fn);
-            wrappedFn(chunk, encoding, callback);
-        }
-    }
-    let writable = new MyWrite();
+    let writable = new MyWrite3();
     writable.setDefaultEncoding('gb18030');
     writable.write('你好');
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyWrite4 extends stream.Writable {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+        let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
+            arktest.assertEQ(chunk, '你好');
+            arktest.assertEQ(encoding, 'gbk');
+            callback.unsafeCall();
+        }
+        let wrappedFn = mustCallUint8Array(fn);
+        wrappedFn(chunk, encoding, callback);
+    }
+}
+
 // Test cases ported from ArkTS 1.0:testStreamEncoding008
 function testWritableStreamSetDefaultEncodingGbk() {
-    class MyWrite extends stream.Writable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-            let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
-                arktest.assertEQ(chunk, '你好');
-                arktest.assertEQ(encoding, 'gbk');
-                callback.unsafeCall();
-            }
-            let wrappedFn = mustCallUint8Array(fn);
-            wrappedFn(chunk, encoding, callback);
-        }
-    }
-    let writable = new MyWrite();
+    let writable = new MyWrite4();
     writable.setDefaultEncoding('gbk');
     writable.write('你好');
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });

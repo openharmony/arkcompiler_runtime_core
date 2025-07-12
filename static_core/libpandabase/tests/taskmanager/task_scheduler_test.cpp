@@ -261,7 +261,7 @@ TEST_F(TaskSchedulerTest, TasksWithMutex)
     constexpr uint8_t QUEUE_PRIORITY = DEFAULT_QUEUE_PRIORITY;
     TaskQueueInterface *gcQueue = TaskManager::CreateTaskQueue(QUEUE_PRIORITY);
     TaskQueueInterface *jitQueue = TaskManager::CreateTaskQueue(QUEUE_PRIORITY);
-    // Fill queues with tasks that increment counter with its type.
+    //  Fill queues with tasks that increment counter with its type.
     constexpr size_t COUNT_OF_TASK = 1000U;
     std::array<size_t, 2U> counters = {0U, 0U};
     os::memory::Mutex mainMutex;
@@ -280,6 +280,7 @@ TEST_F(TaskSchedulerTest, TasksWithMutex)
     gcQueue->WaitTasks();
     jitQueue->WaitTasks();
     for (auto &counter : counters) {
+        os::memory::LockHolder lockHolder(mainMutex);
         ASSERT_EQ(counter, COUNT_OF_TASK) << "seed:" << GetSeed();
     }
     TaskManager::DestroyTaskQueue(gcQueue);

@@ -13,11 +13,49 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from abc import ABC, abstractmethod
 from typing import TextIO
 
 from typing_extensions import override
 
 from taihe.utils.outputs import DEFAULT_INDENT, FileKind, FileWriter, OutputManager
+
+
+class Naming(ABC):
+    """Base class for naming conventions."""
+
+    @abstractmethod
+    def as_func(self, name: str) -> str:
+        """Convert a name to a function name."""
+
+    @abstractmethod
+    def as_field(self, name: str) -> str:
+        """Convert a name to a field name."""
+
+
+class DefaultNaming(Naming):
+    """Default naming convention that converts names to camelCase."""
+
+    @override
+    def as_func(self, name: str) -> str:
+        return name[0].lower() + name[1:]
+
+    @override
+    def as_field(self, name: str) -> str:
+        return name[0].lower() + name[1:]
+
+
+class KeepNaming(Naming):
+    """Naming convention that keeps the name unchanged."""
+
+    @override
+    def as_func(self, name: str) -> str:
+        return name
+
+    @override
+    def as_field(self, name: str) -> str:
+        # TODO: remove all `keep-name` options in tests and fix this
+        return name[0].lower() + name[1:]
 
 
 class StsWriter(FileWriter):

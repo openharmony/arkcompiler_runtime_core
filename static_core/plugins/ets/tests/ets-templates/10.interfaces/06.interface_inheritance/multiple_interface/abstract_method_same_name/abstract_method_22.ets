@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The method with the same name has the same type and number of parameters, but a method has joint types and cross types.
+desc: >-
+    The method with the same name has the same type and number of parameters, but a method has joint types
+    and cross types.
 tags: [compile-only, negative]
 ---*/
 

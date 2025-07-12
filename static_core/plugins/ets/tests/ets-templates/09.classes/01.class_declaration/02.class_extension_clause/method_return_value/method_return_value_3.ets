@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: In multi-layer inheritance, the parent class method is called in the subclass method method, with the modifier public, to verify that the rewrite works correctly.
+desc: >-
+    In multi-layer inheritance, the parent class method is called in the subclass method method,
+    with the modifier public, to verify that the rewrite works correctly.
 ---*/
 
 class GrandParent {

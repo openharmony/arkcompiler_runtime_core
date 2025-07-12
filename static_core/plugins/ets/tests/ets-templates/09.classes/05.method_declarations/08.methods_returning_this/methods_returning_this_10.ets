@@ -28,5 +28,5 @@ class C {
 
 function main(): void {
     let x: C = new C()
-    x=x.foo().foo2(1, new object).foo().foo2(2, new object).foo().foo2(3, new object)
+    x = x.foo().foo2(1, new object).foo().foo2(2, new object).foo().foo2(3, new object)
 }

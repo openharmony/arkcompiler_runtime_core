@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that the instance of class e can correctly obtain the null value of the variable after multiple layers of inheritance and class d resets the value of the inherited variable.
+desc: >-
+    Verify that the instance of class e can correctly obtain the null value of the variable after multiple layers
+    of inheritance and class d resets the value of the inherited variable.
 ---*/
 
 class A {
