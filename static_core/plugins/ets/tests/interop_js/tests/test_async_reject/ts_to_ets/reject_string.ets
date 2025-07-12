@@ -15,17 +15,32 @@
 
 let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_async_reject/ts_to_ets/reject_string');
 
-function TestInteropAsyncRejectStringCatch(): int {
-    let func = module.getProperty("AsyncFunctionRejectString")
+function testInteropRejectStringCatch(): int {
+    let func = module.getProperty('AsyncFunctionRejectString')
     let rejectedPromise = func.invoke().toPromise()
     rejectedPromise.catch((res: Error): void => {
-        console.log("res's type " + typeof (res));
-        if ((res as ESError).getValue().toString() === "MyError") {
-            console.log("catch success!");
+        if ((res as ESError).getValue().toString() === 'MyError') {
+            console.log('catch success!');
         } else {
-            console.log("catch failed!");
+            console.log('catch failed!');
             console.log(res.message)
         }
     })
+    return 0
+}
+
+function testInteropRejectStringThen(): int {
+    let func = module.getProperty('AsyncFunctionRejectString')
+    let rejectedPromise = func.invoke().toPromise()
+    rejectedPromise.then(
+        (value): void => { },
+        (res: Error): void => {
+            if ((res as ESError).getValue().toString() === 'MyError') {
+                console.log('then success!');
+            } else {
+                console.log('then failed!');
+                console.log(res.message)
+            }
+        });
     return 0
 }

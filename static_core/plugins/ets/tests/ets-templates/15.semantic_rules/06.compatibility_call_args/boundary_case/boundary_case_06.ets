@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- /*---
+/*---
 desc: Verifying compatibility between never and null.
 tags: [compile-only, negative]
 ---*/

@@ -120,21 +120,21 @@ function changeStructArray() {
 function fetchBinaryData() {
     let promise = new Promise<Array<float>>(
         (resolve, reject) => {ArrayTest.fetchBinaryData(
-            5, (error: BusinessError, data: Array<float>) => {
-                if (error.code !== 0) {
+            5, (error: BusinessError|null, data?: Array<float>) => {
+                if (error !== null && error.code !== 0) {
                     reject(error);
                 } else {
-                    resolve(data);
+                    resolve(data as Array<float>);
                 }
             })});
-    let data: Array<float> = new Array<float>(0);
-    let error: BusinessError;
+    let data: Array<float>|undefined;
+    let error: BusinessError|undefined;
     try {
         data = await promise;
     } catch (e) {
         error = e as BusinessError;
     }
-    arktest.assertEQ(data.length, 5);
+    arktest.assertEQ(data?.length, 5);
 }
 
 function makeStructArrayArray() {
@@ -185,18 +185,18 @@ function test_ani_array_with_arrayi64() {
 
 function test_ani_array_with_arrayf32() {
     let arrayf32: ArrayTest.ArrayF32 = ArrayTest.getArrayF32();
-    let info = arrayf32.arrayF32Value(202510.25 as float);
+    let info = arrayf32.arrayF32Value((202510.25).toFloat());
 
     console.log("arrayf32.arrayF32Value is: " + info);
-    arktest.assertEQ(info[0], 202510.25 as float);
+    arktest.assertEQ(info[0], (202510.25).toFloat());
 }
 
 function test_ani_array_with_arrayf64() {
     let arrayf64: ArrayTest.ArrayF64 = ArrayTest.getArrayF64();
-    let info = arrayf64.arrayF64Value(20250521.1027 as double);
+    let info = arrayf64.arrayF64Value((20250521.1027).toDouble());
 
     console.log("arrayf64.arrayF64Value is: " + info);
-    arktest.assertEQ(info[0], 20250521.1027 as double);
+    arktest.assertEQ(info[0], (20250521.1027).toDouble());
 }
 
 function test_ani_array_with_arrayString() {
@@ -241,7 +241,7 @@ function test_ani_array_with_arrayRecord_stri8() {
 
 function test_ani_array_with_arrayRecord_strf32() {
     let arr: ArrayTest.ArrayRecordStrF32 = ArrayTest.getArrayRecordStrF32();
-    let info = arr.arrayRecordValue("Color", 52115.24 as float);
+    let info = arr.arrayRecordValue("Color", (52115.24).toFloat());
 
     console.log("arr.arrayRecordValue is: " + info);
     arktest.assertEQ(info[0].size, 1);
@@ -249,7 +249,7 @@ function test_ani_array_with_arrayRecord_strf32() {
 
 function test_ani_array_with_arrayRecord_strf64() {
     let arr: ArrayTest.ArrayRecordStrF64 = ArrayTest.getArrayRecordStrF64();
-    let info = arr.arrayRecordValue("Color", 202552115.24 as double);
+    let info = arr.arrayRecordValue("Color", (202552115.24).toDouble());
 
     console.log("arr.arrayRecordValue is: " + info);
     arktest.assertEQ(info[0].size, 1);
@@ -281,10 +281,10 @@ let arrStr: ArrayTest.ArrayPromiseString = ArrayTest.getArrayPromiseString();
 let arrBool: ArrayTest.ArrayPromiseBool = ArrayTest.getArrayPromiseBool();
 let arrU8: ArrayTest.ArrayPromiseU8 = ArrayTest.getArrayPromiseU8();
 let arrU16: ArrayTest.ArrayPromiseU16 = ArrayTest.getArrayPromiseU16();
-function test_ani_array_with_PromiseI8() { 
+function test_ani_array_with_PromiseI8() {
     let info: byte[] = new Array<byte>(0);
     let err: BusinessError = new BusinessError();
-    try {   
+    try {
         info = arrI8.fetchDataI8();
     } catch (e) {
         err = e as BusinessError;
@@ -296,16 +296,16 @@ function test_ani_array_with_PromiseI8() {
 
 function test_ani_array_with_PromiseI8_sync() {
     let promise = new Promise<byte[]>((resolve, reject) => {
-        arrI8.fetchData((err: BusinessError, data: byte[]) => {
-            if (err.code !== 0) {
+        arrI8.fetchData((err: BusinessError|null, data?: byte[]) => {
+            if (err !== null && err.code !== 0) {
                 reject(err);
             } else {
-                resolve(data);
+                resolve(data as byte[]);
             }
         });
     });
     let info: byte[] = new Array<byte>(0);
-    let err: BusinessError = new BusinessError();
+    let err: BusinessError|undefined;
     try {
         info = await promise;
         console.log("info is: " + info);
@@ -329,7 +329,7 @@ function test_ani_array_with_PromiseI8_promise() {
 function test_ani_array_with_PromiseI16() {
     let info: short[] = new Array<short>(0);
     let err: BusinessError = new BusinessError();
-    try {   
+    try {
         info = arrI16.fetchDataI16();
     } catch (e) {
         err = e as BusinessError;
@@ -341,11 +341,11 @@ function test_ani_array_with_PromiseI16() {
 
 function test_ani_array_with_PromiseI16_sync() {
     let promise = new Promise<short[]>((resolve, reject) => {
-        arrI16.fetchData((err: BusinessError, data: short[]) => {
-            if (err.code !== 0) {
+        arrI16.fetchData((err: BusinessError|null, data?: short[]) => {
+            if (err !== null && err.code !== 0) {
                 reject(err);
             } else {
-                resolve(data);
+                resolve(data as short[]);
             }
         });
     });
@@ -374,7 +374,7 @@ function test_ani_array_with_PromiseI16_promise() {
 function test_ani_array_with_PromiseI32() {
     let info: int[] = new Array<int>(0);
     let err: BusinessError = new BusinessError();
-    try {   
+    try {
         info = arrI32.fetchDataI32();
     } catch (e) {
         err = e as BusinessError;
@@ -386,11 +386,11 @@ function test_ani_array_with_PromiseI32() {
 
 function test_ani_array_with_PromiseI32_sync() {
     let promise = new Promise<int[]>((resolve, reject) => {
-        arrI32.fetchData((err: BusinessError, data: int[]) => {
-            if (err.code !== 0) {
+        arrI32.fetchData((err: BusinessError|null, data?: int[]) => {
+            if (err !== null && err.code !== 0) {
                 reject(err);
             } else {
-                resolve(data);
+                resolve(data as int[]);
             }
         });
     });
@@ -419,7 +419,7 @@ function test_ani_array_with_PromiseI32_promise() {
 function test_ani_array_with_PromiseI64() {
     let info: long[] = new Array<long>(0);
     let err: BusinessError = new BusinessError();
-    try {   
+    try {
         info = arrI64.fetchDataI64();
     } catch (e) {
         err = e as BusinessError;
@@ -431,11 +431,11 @@ function test_ani_array_with_PromiseI64() {
 
 function test_ani_array_with_PromiseI64_sync() {
     let promise = new Promise<long[]>((resolve, reject) => {
-        arrI64.fetchData((err: BusinessError, data: long[]) => {
-            if (err.code !== 0) {
+        arrI64.fetchData((err: BusinessError|null, data?: long[]) => {
+            if (err !== null && err.code !== 0) {
                 reject(err);
             } else {
-                resolve(data);
+                resolve(data as long[]);
             }
         });
     });
@@ -464,23 +464,23 @@ function test_ani_array_with_PromiseI64_promise() {
 function test_ani_array_with_PromiseF32() {
     let info: float[] = new Array<float>(0);
     let err: BusinessError = new BusinessError();
-    try {   
+    try {
         info = arrF32.fetchDataF32();
     } catch (e) {
         err = e as BusinessError;
     }
 
     console.log("arr.fetchDataF32 is: " + info);
-    arktest.assertEQ(info[0], -202505.22 as float);
+    arktest.assertEQ(info[0], (-202505.22).toFloat());
 }
 
 function test_ani_array_with_PromiseF32_sync() {
     let promise = new Promise<float[]>((resolve, reject) => {
-        arrF32.fetchData((err: BusinessError, data: float[]) => {
-            if (err.code !== 0) {
+        arrF32.fetchData((err: BusinessError|null, data?: float[]) => {
+            if (err !== null && err.code !== 0) {
                 reject(err);
             } else {
-                resolve(data);
+                resolve(data as float[]);
             }
         });
     });
@@ -492,7 +492,7 @@ function test_ani_array_with_PromiseF32_sync() {
     } catch (e) {
         err = e as BusinessError;
     }
-    arktest.assertEQ(info[0], -202505.22 as float);
+    arktest.assertEQ(info[0], (-202505.22).toFloat());
 }
 
 function test_ani_array_with_PromiseF32_promise() {
@@ -503,29 +503,29 @@ function test_ani_array_with_PromiseF32_promise() {
     } catch (e) {
         err = e as BusinessError;
     }
-    arktest.assertEQ(info[0], -202505.22 as float);
+    arktest.assertEQ(info[0], (-202505.22).toFloat());
 }
 
 function test_ani_array_with_PromiseF64() {
     let info: double[] = new Array<double>(0);
     let err: BusinessError = new BusinessError();
-    try {   
+    try {
         info = arrF64.fetchDataF64();
     } catch (e) {
         err = e as BusinessError;
     }
 
     console.log("arr.fetchDataF64 is: " + info);
-    arktest.assertEQ(info[0], -202505.221539 as double);
+    arktest.assertEQ(info[0], (-202505.221539).toDouble());
 }
 
 function test_ani_array_with_PromiseF64_sync() {
     let promise = new Promise<double[]>((resolve, reject) => {
-        arrF64.fetchData((err: BusinessError, data: double[]) => {
-            if (err.code !== 0) {
+        arrF64.fetchData((err: BusinessError|null, data?: double[]) => {
+            if (err !== null && err.code !== 0) {
                 reject(err);
             } else {
-                resolve(data);
+                resolve(data as double[]);
             }
         });
     });
@@ -554,7 +554,7 @@ function test_ani_array_with_PromiseF64_promise() {
 function test_ani_array_with_PromiseString() {
     let info: string[] = new Array<string>(0);
     let err: BusinessError = new BusinessError();
-    try {   
+    try {
         info = arrStr.fetchDataString();
     } catch (e) {
         err = e as BusinessError;
@@ -566,11 +566,11 @@ function test_ani_array_with_PromiseString() {
 
 function test_ani_array_with_PromiseString_sync() {
     let promise = new Promise<string[]>((resolve, reject) => {
-        arrStr.fetchData((err: BusinessError, data: string[]) => {
-            if (err.code !== 0) {
+        arrStr.fetchData((err: BusinessError|null, data?: string[]) => {
+            if (err !== null && err.code !== 0) {
                 reject(err);
             } else {
-                resolve(data);
+                resolve(data as string[]);
             }
         });
     });
@@ -599,7 +599,7 @@ function test_ani_array_with_PromiseString_promise() {
 function test_ani_array_with_PromiseBool() {
     let info: boolean[] = new Array<boolean>(0);
     let err: BusinessError = new BusinessError();
-    try {   
+    try {
         info = arrBool.fetchDataBool();
     } catch (e) {
         err = e as BusinessError;
@@ -611,11 +611,11 @@ function test_ani_array_with_PromiseBool() {
 
 function test_ani_array_with_PromiseBool_sync() {
     let promise = new Promise<boolean[]>((resolve, reject) => {
-        arrBool.fetchData((err: BusinessError, data: boolean[]) => {
-            if (err.code !== 0) {
+        arrBool.fetchData((err: BusinessError|null, data?: boolean[]) => {
+            if (err !== null && err.code !== 0) {
                 reject(err);
             } else {
-                resolve(data);
+                resolve(data as boolean[]);
             }
         });
     });
@@ -641,11 +641,11 @@ function test_ani_array_with_PromiseBool_promise() {
     arktest.assertEQ(info[0], true);
 }
 
-function test_ani_array_with_PromiseU8() { 
+function test_ani_array_with_PromiseU8() {
     let a = new ArrayBuffer(10);
     let info = new Uint8Array(a);
     let err: BusinessError = new BusinessError();
-    try {   
+    try {
         info = arrU8.fetchDataPro();
     } catch (e) {
         err = e as BusinessError;
@@ -657,11 +657,11 @@ function test_ani_array_with_PromiseU8() {
 
 function test_ani_array_with_PromiseU8_sync() {
     let promise = new Promise<Uint8Array>((resolve, reject) => {
-        arrU8.fetchData((err: BusinessError, data: Uint8Array) => {
-            if (err.code !== 0) {
+        arrU8.fetchData((err: BusinessError|null, data?: Uint8Array) => {
+            if (err !== null && err.code !== 0) {
                 reject(err);
             } else {
-                resolve(data);
+                resolve(data as Uint8Array);
             }
         });
     });
@@ -687,10 +687,10 @@ function test_ani_array_with_PromiseU8_promise() {
     arktest.assertEQ(info[1], 255);
 }
 
-function test_ani_array_with_PromiseU16() { 
+function test_ani_array_with_PromiseU16() {
     let info: Uint16Array = new Uint16Array(0);
     let err: BusinessError = new BusinessError();
-    try {   
+    try {
         info = arrU16.fetchDataPro();
     } catch (e) {
         err = e as BusinessError;
@@ -702,11 +702,11 @@ function test_ani_array_with_PromiseU16() {
 
 function test_ani_array_with_PromiseU16_sync() {
     let promise = new Promise<Uint16Array>((resolve, reject) => {
-        arrU16.fetchData((err: BusinessError, data: Uint16Array) => {
-            if (err.code !== 0) {
+        arrU16.fetchData((err: BusinessError|null, data?: Uint16Array) => {
+            if (err !== null && err.code !== 0) {
                 reject(err);
             } else {
-                resolve(data);
+                resolve(data as Uint16Array);
             }
         });
     });
@@ -748,7 +748,7 @@ function test_ani_array_with_nest_i16() {
 }
 
 function test_ani_array_with_nest_f32() {
-    let info = arrNest.arrayNestF32(202505.28 as float);
+    let info = arrNest.arrayNestF32((202505.28).toFloat());
 
     console.log("arrNest.ArrayNestF32 is: " + info);
     arktest.assertEQ(info.length, 4);
@@ -800,51 +800,115 @@ function main() {
     suite.addTest("test_ani_array_with_arrayi64", test_ani_array_with_arrayi64)
     suite.addTest("test_ani_array_with_arrayf32", test_ani_array_with_arrayf32)
     suite.addTest("test_ani_array_with_arrayf64", test_ani_array_with_arrayf64)
-    suite.addTest("test_ani_array_with_arrayString", test_ani_array_with_arrayString)
-    suite.addTest("test_ani_array_with_arrayBool", test_ani_array_with_arrayBool)
-    suite.addTest("test_ani_array_with_arrayEnum", test_ani_array_with_arrayEnum)
-    suite.addTest("test_ani_array_with_arrayRecord", test_ani_array_with_arrayRecord)
-    suite.addTest("test_ani_array_with_arrayRecord", test_ani_array_with_arrayRecord_stri8)
-    suite.addTest("test_ani_array_with_arrayRecord", test_ani_array_with_arrayRecord_strf32)
-    suite.addTest("test_ani_array_with_arrayRecord", test_ani_array_with_arrayRecord_strf64)
-    suite.addTest("test_ani_array_with_arrayRecord", test_ani_array_with_arrayRecord_strbool)
+    suite.addTest(
+        "test_ani_array_with_arrayString", test_ani_array_with_arrayString)
+    suite.addTest(
+        "test_ani_array_with_arrayBool", test_ani_array_with_arrayBool)
+    suite.addTest(
+        "test_ani_array_with_arrayEnum", test_ani_array_with_arrayEnum)
+    suite.addTest(
+        "test_ani_array_with_arrayRecord", test_ani_array_with_arrayRecord)
+    suite.addTest(
+        "test_ani_array_with_arrayRecord",
+        test_ani_array_with_arrayRecord_stri8)
+    suite.addTest(
+        "test_ani_array_with_arrayRecord",
+        test_ani_array_with_arrayRecord_strf32)
+    suite.addTest(
+        "test_ani_array_with_arrayRecord",
+        test_ani_array_with_arrayRecord_strf64)
+    suite.addTest(
+        "test_ani_array_with_arrayRecord",
+        test_ani_array_with_arrayRecord_strbool)
     suite.addTest("test_ani_array_with_union", test_ani_array_with_union)
-    suite.addTest("test_ani_array_with_PromiseI8", test_ani_array_with_PromiseI8)
-    suite.addTest("test_ani_array_with_PromiseI8_sync", test_ani_array_with_PromiseI8_sync)
-    suite.addTest("test_ani_array_with_PromiseI8_promise", test_ani_array_with_PromiseI8_promise)
-    suite.addTest("test_ani_array_with_PromiseI16", test_ani_array_with_PromiseI16)
-    suite.addTest("test_ani_array_with_PromiseI16_sync", test_ani_array_with_PromiseI16_sync)
-    suite.addTest("test_ani_array_with_PromiseI16_promise", test_ani_array_with_PromiseI16_promise)
-    suite.addTest("test_ani_array_with_PromiseI32", test_ani_array_with_PromiseI32)
-    suite.addTest("test_ani_array_with_PromiseI32_sync", test_ani_array_with_PromiseI32_sync)
-    suite.addTest("test_ani_array_with_PromiseI32_promise", test_ani_array_with_PromiseI32_promise)
-    suite.addTest("test_ani_array_with_PromiseI64", test_ani_array_with_PromiseI64)
-    suite.addTest("test_ani_array_with_PromiseI64_sync", test_ani_array_with_PromiseI64_sync)
-    suite.addTest("test_ani_array_with_PromiseI64_promise", test_ani_array_with_PromiseI64_promise)    
-    suite.addTest("test_ani_array_with_PromiseF32", test_ani_array_with_PromiseF32)
-    suite.addTest("test_ani_array_with_PromiseF32_sync", test_ani_array_with_PromiseF32_sync)
-    suite.addTest("test_ani_array_with_PromiseF32_promise", test_ani_array_with_PromiseF32_promise)
-    suite.addTest("test_ani_array_with_PromiseF64", test_ani_array_with_PromiseF64)
-    suite.addTest("test_ani_array_with_PromiseF64_sync", test_ani_array_with_PromiseF64_sync)
-    suite.addTest("test_ani_array_with_PromiseF64_promise", test_ani_array_with_PromiseF64_promise)
-    suite.addTest("test_ani_array_with_PromiseString", test_ani_array_with_PromiseString)
-    suite.addTest("test_ani_array_with_PromiseString_sync", test_ani_array_with_PromiseString_sync)
-    suite.addTest("test_ani_array_with_PromiseString_promise", test_ani_array_with_PromiseString_promise)
-    suite.addTest("test_ani_array_with_PromiseBool", test_ani_array_with_PromiseBool)
-    suite.addTest("test_ani_array_with_PromiseBool_sync", test_ani_array_with_PromiseBool_sync)
-    suite.addTest("test_ani_array_with_PromiseBool_promise", test_ani_array_with_PromiseBool_promise)
-    suite.addTest("test_ani_array_with_PromiseU8", test_ani_array_with_PromiseU8)
-    suite.addTest("test_ani_array_with_PromiseU8_sync", test_ani_array_with_PromiseU8_sync)
-    suite.addTest("test_ani_array_with_PromiseU8_promise", test_ani_array_with_PromiseU8_promise)
-    suite.addTest("test_ani_array_with_PromiseU16", test_ani_array_with_PromiseU16)
-    suite.addTest("test_ani_array_with_PromiseU16_sync", test_ani_array_with_PromiseU16_sync)
-    suite.addTest("test_ani_array_with_PromiseU16_promise", test_ani_array_with_PromiseU16_promise)
+    suite.addTest(
+        "test_ani_array_with_PromiseI8", test_ani_array_with_PromiseI8)
+    suite.addTest(
+        "test_ani_array_with_PromiseI8_sync",
+        test_ani_array_with_PromiseI8_sync)
+    suite.addTest(
+        "test_ani_array_with_PromiseI8_promise",
+        test_ani_array_with_PromiseI8_promise)
+    suite.addTest(
+        "test_ani_array_with_PromiseI16", test_ani_array_with_PromiseI16)
+    suite.addTest(
+        "test_ani_array_with_PromiseI16_sync",
+        test_ani_array_with_PromiseI16_sync)
+    suite.addTest(
+        "test_ani_array_with_PromiseI16_promise",
+        test_ani_array_with_PromiseI16_promise)
+    suite.addTest(
+        "test_ani_array_with_PromiseI32", test_ani_array_with_PromiseI32)
+    suite.addTest(
+        "test_ani_array_with_PromiseI32_sync",
+        test_ani_array_with_PromiseI32_sync)
+    suite.addTest(
+        "test_ani_array_with_PromiseI32_promise",
+        test_ani_array_with_PromiseI32_promise)
+    suite.addTest(
+        "test_ani_array_with_PromiseI64", test_ani_array_with_PromiseI64)
+    suite.addTest(
+        "test_ani_array_with_PromiseI64_sync",
+        test_ani_array_with_PromiseI64_sync)
+    suite.addTest(
+        "test_ani_array_with_PromiseI64_promise",
+        test_ani_array_with_PromiseI64_promise)
+    suite.addTest(
+        "test_ani_array_with_PromiseF32", test_ani_array_with_PromiseF32)
+    suite.addTest(
+        "test_ani_array_with_PromiseF32_sync",
+        test_ani_array_with_PromiseF32_sync)
+    suite.addTest(
+        "test_ani_array_with_PromiseF32_promise",
+        test_ani_array_with_PromiseF32_promise)
+    suite.addTest(
+        "test_ani_array_with_PromiseF64", test_ani_array_with_PromiseF64)
+    suite.addTest(
+        "test_ani_array_with_PromiseF64_sync",
+        test_ani_array_with_PromiseF64_sync)
+    suite.addTest(
+        "test_ani_array_with_PromiseF64_promise",
+        test_ani_array_with_PromiseF64_promise)
+    suite.addTest(
+        "test_ani_array_with_PromiseString", test_ani_array_with_PromiseString)
+    suite.addTest(
+        "test_ani_array_with_PromiseString_sync",
+        test_ani_array_with_PromiseString_sync)
+    suite.addTest(
+        "test_ani_array_with_PromiseString_promise",
+        test_ani_array_with_PromiseString_promise)
+    suite.addTest(
+        "test_ani_array_with_PromiseBool", test_ani_array_with_PromiseBool)
+    suite.addTest(
+        "test_ani_array_with_PromiseBool_sync",
+        test_ani_array_with_PromiseBool_sync)
+    suite.addTest(
+        "test_ani_array_with_PromiseBool_promise",
+        test_ani_array_with_PromiseBool_promise)
+    suite.addTest(
+        "test_ani_array_with_PromiseU8", test_ani_array_with_PromiseU8)
+    suite.addTest(
+        "test_ani_array_with_PromiseU8_sync",
+        test_ani_array_with_PromiseU8_sync)
+    suite.addTest(
+        "test_ani_array_with_PromiseU8_promise",
+        test_ani_array_with_PromiseU8_promise)
+    suite.addTest(
+        "test_ani_array_with_PromiseU16", test_ani_array_with_PromiseU16)
+    suite.addTest(
+        "test_ani_array_with_PromiseU16_sync",
+        test_ani_array_with_PromiseU16_sync)
+    suite.addTest(
+        "test_ani_array_with_PromiseU16_promise",
+        test_ani_array_with_PromiseU16_promise)
 
     suite.addTest("test_ani_array_with_nest_i8", test_ani_array_with_nest_i8)
     suite.addTest("test_ani_array_with_nest_i16", test_ani_array_with_nest_i16)
     suite.addTest("test_ani_array_with_nest_f32", test_ani_array_with_nest_f32)
-    suite.addTest("test_ani_array_with_nest_string", test_ani_array_with_nest_string)
-    suite.addTest("test_ani_array_with_nest_bool", test_ani_array_with_nest_bool)
+    suite.addTest(
+        "test_ani_array_with_nest_string", test_ani_array_with_nest_string)
+    suite.addTest(
+        "test_ani_array_with_nest_bool", test_ani_array_with_nest_bool)
     suite.addTest("test_ani_array_with_optional", test_ani_array_with_optional)
 
     exit(suite.run())

@@ -1,0 +1,41 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//arkcompiler/runtime_core/ark_config.gni")
+
+config("abckit_wrapper_public_config") {
+  include_dirs = [ "$ark_root/ark_guard/abckit_wrapper/include" ]
+}
+
+abckit_wrapper_sources = [ "library/file_view.cpp" ]
+
+ohos_static_library("abckit_wrapper_static") {
+  sources = abckit_wrapper_sources
+
+  include_dirs = [ "$ark_root/libabckit/include" ]
+
+  configs = [
+    "$ark_root/libabckit:abckit_config",
+    "$ark_root/static_core/libpandabase:arkbase_public_config",
+  ]
+
+  public_configs = [ ":abckit_wrapper_public_config" ]
+
+  deps = [
+    "$ark_root/libabckit/src:libabckit",
+    "$ark_root/static_core/libpandabase:libarktsbase_frontend_static",
+  ]
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
+}

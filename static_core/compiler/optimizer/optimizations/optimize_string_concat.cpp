@@ -195,6 +195,7 @@ void OptimizeStringConcat::CreateAppendArgsIntrinsics(Inst *instance, Inst *args
 
 Inst *CreateSafePoint(Graph *graph, uint32_t pc, SaveStateInst *saveState)
 {
+    ASSERT(saveState != nullptr);
     auto safePoint =
         graph->CreateInstSafePoint(pc, graph->GetMethod(), saveState->GetCallerInst(), saveState->GetInliningDepth());
 

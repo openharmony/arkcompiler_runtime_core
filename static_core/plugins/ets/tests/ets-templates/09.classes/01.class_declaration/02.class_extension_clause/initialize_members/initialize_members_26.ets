@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The parent class directly initializes member variables, with the modifier being internal and the type being number.
+desc: >-
+    The parent class directly initializes member variables, with the modifier being internal
+    and the type being number.
 ---*/
 
 class Parent {

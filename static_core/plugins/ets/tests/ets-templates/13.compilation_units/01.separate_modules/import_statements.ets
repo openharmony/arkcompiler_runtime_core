@@ -15,7 +15,8 @@
 
 /*---
 desc: >-
-    If used for import, a separate module is initialized only once with the details listed in Compilation Unit Initialization.
+    If used for import, a separate module is initialized only once with the details listed in Compilation Unit
+    Initialization.
     The initialization process is performed in the following steps
     • If the separate module has variable or constant declarations (see Variable and Constant Declarations), then their
       initializers are executed to ensure that they all have valid initial values

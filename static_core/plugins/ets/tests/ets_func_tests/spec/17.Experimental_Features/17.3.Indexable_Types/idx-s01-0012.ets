@@ -16,7 +16,7 @@
 /*---
  desc: 17.3 Indexable Types
  tags: [compile-only,negative]
- ---*/
+---*/
 
 
 class Bar {
@@ -24,11 +24,11 @@ class Bar {
     private data2: int;
     private data3: int;
 
-    async $_get (index: int) : int {
+    async $_get(index: int) : int {
           return this.data;
     }
 
-    $_set (index: int, value: int) {
+    $_set(index: int, value: int) {
          this.data = value;
     }
 
@@ -40,6 +40,6 @@ class Bar {
 }
 
 function main(): int {
-    let x : Bar = new Bar(1,2,3);
+    let x : Bar = new Bar(1, 2, 3);
 
 }

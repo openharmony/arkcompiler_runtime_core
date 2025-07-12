@@ -33,6 +33,7 @@ if (NOT CROSS_VALUES_CONFIG)
         set(PANDA_AUX_BINARY_DIR auxiliary_panda_binary_dirs/${arch})
         set(CMAKE_VARIABLES
             "'-G${CMAKE_GENERATOR}'
+            -DPANDA_USE_64_BIT_POINTER=${PANDA_USE_64_BIT_POINTER}
             -DES2PANDA_PATH=${ES2PANDA_PATH}
             -DCMAKE_TOOLCHAIN_FILE=${toolchain}
             -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}

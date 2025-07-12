@@ -147,7 +147,7 @@ We use the following easily readable name format to display all the mangled name
 
     mangledName:
         specialCharacter
-        '-' elementType
+        elementType
         ('-' additionalInformation)?
         ('-' counter)?
 
@@ -161,17 +161,17 @@ where:
 The following table lists all the currently used **elementType** values:
 
 .. table::
-    :widths: 25, 25, 25, 25
+    :widths: 30, 30, 30
 
-    ==================== ==================== ==================== ====================
-    ``annotation``       ``get``              ``lit_array_prop``   ``property``        
-    -------------------- -------------------- -------------------- --------------------
-    ``async``            ``lambda_invoke``    ``local_class``      ``set``             
-    -------------------- -------------------- -------------------- --------------------
-    ``array_type``       ``lambda_obj``       ``module_init``      ``union_prop``      
-    -------------------- -------------------- -------------------- --------------------
-    ``enum``             ``lit_array``        ``partial``                              
-    ==================== ==================== ==================== ====================
+    ==================== ==================== ====================
+    ``annotation``       ``lambda_invoke``    ``set``             
+    -------------------- -------------------- --------------------
+    ``async``            ``module_init``      ``union_prop``      
+    -------------------- -------------------- --------------------
+    ``get``              ``partial``                              
+    -------------------- -------------------- --------------------
+    ``lambda``           ``property``                             
+    ==================== ==================== ====================
 
 
 All the currently used mangled names in the bytecode can be found in this table:
@@ -179,76 +179,60 @@ All the currently used mangled names in the bytecode can be found in this table:
 .. table::
     :widths: 35, 65
 
-    ========================================== =========================================================
+    ========================================== ====================================================
     **Entity type**                            **Mangled name**                                     
-    ========================================== =========================================================
-    ``annotation``                             ``%%-annotation-annotation_name``                    
-    ------------------------------------------ ---------------------------------------------------------
-    ``async``                                  ``%%-async-function_name``                       
-    ------------------------------------------ ---------------------------------------------------------
-    ``array_type``                             ``%%-array_type-base_name-classProp_name``           
-    ------------------------------------------ ---------------------------------------------------------
-    ``enum``                                   ``%%-enum-enum_name``                                
-    ------------------------------------------ ---------------------------------------------------------
-    ``get``                                    ``%%-get-member_name``                               
-    ------------------------------------------ ---------------------------------------------------------
-    ``lambda_invoke``                          ``%%-lambda_invoke-counter``                         
-    ------------------------------------------ ---------------------------------------------------------
-    ``lambda_obj``                             ``%%-lambda_obj-lambda_invoke-counter``
-    ------------------------------------------ ---------------------------------------------------------
-    ``lit_array``                              ``%%-lit_array-base_name``                           
-    ------------------------------------------ ---------------------------------------------------------
-    ``lit_array_prop``                         ``%%-lit_array_prop-base_name-field_name``           
-    ------------------------------------------ ---------------------------------------------------------
-    ``local_class``                            ``%%-local_class-class_name-counter``                
-    ------------------------------------------ ---------------------------------------------------------
-    ``module_init``                            ``%%init``
-    ------------------------------------------ ---------------------------------------------------------
-    ``partial``                                ``%%-partial-class_name``                            
-    ------------------------------------------ ---------------------------------------------------------
-    ``property``                               ``%%-property-member_name``                            
-    ------------------------------------------ ---------------------------------------------------------
-    ``set``                                    ``%%-set-member_name``                               
-    ------------------------------------------ ---------------------------------------------------------
-    ``union_prop``                             ``%%-union_prop-prop_type-prop_name``                
-    ========================================== =========================================================
+    ========================================== ====================================================
+    ``annotation``                             ``%%annotation-annotation_name-member_name-counter``
+    ------------------------------------------ ----------------------------------------------------
+    ``async``                                  ``%%async-function_name``                       
+    ------------------------------------------ ----------------------------------------------------
+    ``get``                                    ``%%get-member_name``                               
+    ------------------------------------------ ----------------------------------------------------
+    ``lambda``                                 ``%%lambda-lambda_invoke-counter``
+    ------------------------------------------ ----------------------------------------------------
+    ``lambda_invoke``                          ``lambda_invoke-counter``                         
+    ------------------------------------------ ----------------------------------------------------
+    ``partial``                                ``%%partial-class_name``                            
+    ------------------------------------------ ----------------------------------------------------
+    ``property``                               ``%%property-member_name``                            
+    ------------------------------------------ ----------------------------------------------------
+    ``set``                                    ``%%set-member_name``                               
+    ------------------------------------------ ----------------------------------------------------
+    ``union_prop``                             ``%%union_prop-prop_type-prop_name``                
+    ========================================== ====================================================
 
 Simple examples to show from which STS code what mangled name is created:
 
 .. table::
-    :widths: 45, 55
+    :widths: 40, 60
 
     +----------------------------------------------------+-------------------------------------------------------+
     | **Annotation**                                     | **Mangled name**                                      |
     +====================================================+=======================================================+
     | .. code-block:: typescript                         | .. code-block:: typescript                            |
     |                                                    |                                                       |
-    |     @interface ExampleAnnotation {}                |     %%-annotation-ExampleAnnotation                   |
+    |     @interface ExampleAnnotation {                 |                                                       |
+    |       testArr: int[] = [0, 1, 2]                   |                                                       |
+    |     }                                              |                                                       |
+    |                                                    |                                                       |
+    |     class MyClass {                                |                                                       |
+    |         @ExampleAnnotation()                       |                                                       |
+    |         foo() {}                                   |     //The 'foo' method will have the annotation on it.|
+    |     }                                              |     %%annotation-ExampleAnnotation-testArr-1          |
     +----------------------------------------------------+-------------------------------------------------------+
 
 .. table::
-    :widths: 60, 40
+    :widths: 55, 45
 
     +----------------------------------------------------+-------------------------------------------------------+
     | **Async function**                                 | **Mangled name**                                      |
     +====================================================+=======================================================+
     | .. code-block:: typescript                         | .. code-block:: typescript                            |
     |                                                    |                                                       |
-    |     async function exampleFunc() {}                |     the original name will not change                 |
+    |     async function exampleFunc() {}                |     //the original name will not change               |
     |                                                    |                                                       |
-    |     //The generated pair of the original.          |     %%-async-exampleFunc                              |
-    |     public static %%-async-exampleFunc(): Object {}|                                                       |
-    +----------------------------------------------------+-------------------------------------------------------+
-
-.. table::
-    :widths: 45, 55
-
-    +----------------------------------------------------+-------------------------------------------------------+
-    | **Enum**                                           | **Mangled name**                                      |
-    +====================================================+=======================================================+
-    | .. code-block:: typescript                         | .. code-block:: typescript                            |
-    |                                                    |                                                       |
-    |     enum exampleEnum {Red, Blue, Green}            |     %%-enum-exampleEnum                               |
+    |     //The generated pair of the original.          |     %%async-exampleFunc                               |
+    |     public static %%async-exampleFunc(): Object {} |                                                       |
     +----------------------------------------------------+-------------------------------------------------------+
 
 .. table::
@@ -259,7 +243,7 @@ Simple examples to show from which STS code what mangled name is created:
     +====================================================+=======================================================+
     | .. code-block:: typescript                         | .. code-block:: typescript                            |
     |                                                    |                                                       |
-    |     interface ExampleInterface {                   |     %%-get-testMember                                 |
+    |     interface ExampleInterface {                   |     %%get-testMember                                  |
     |         get testMember(): String                   |                                                       |
     |     }                                              |                                                       |
     +----------------------------------------------------+-------------------------------------------------------+
@@ -268,24 +252,11 @@ Simple examples to show from which STS code what mangled name is created:
     :widths: 40, 60
 
     +----------------------------------------------------+-------------------------------------------------------+
-    | **Lambda object**                                  | **Mangled name**                                      |
+    | **Lambda**                                         | **Mangled name**                                      |
     +====================================================+=======================================================+
     | .. code-block:: typescript                         | .. code-block:: typescript                            |
     |                                                    |                                                       |
-    |     let exampleFunc = (): void => {}               |     %%-lambda_obj-lambda_invoke-0                     |
-    +----------------------------------------------------+-------------------------------------------------------+
-
-.. table::
-    :widths: 40, 60
-
-    +----------------------------------------------------+-------------------------------------------------------+
-    | **Local class**                                    | **Mangled name**                                      |
-    +====================================================+=======================================================+
-    | .. code-block:: typescript                         | .. code-block:: typescript                            |
-    |                                                    |                                                       |
-    |     function exampleFunc() {                       |     %%-local_class-LClass-0                           |
-    |       class LClass {}                              |                                                       |
-    |     }                                              |                                                       |
+    |     let exampleFunc = (): void => {}               |     %%lambda-lambda_invoke-0                          |
     +----------------------------------------------------+-------------------------------------------------------+
 
 .. table::
@@ -296,7 +267,7 @@ Simple examples to show from which STS code what mangled name is created:
     +====================================================+=======================================================+
     | .. code-block:: typescript                         | .. code-block:: typescript                            |
     |                                                    |                                                       |
-    |     interface TestType {}                          |     %%-partial-TestType                               |
+    |     interface TestType {}                          |     %%partial-TestType                                |
     |                                                    |                                                       |
     |     function exampleFunc(a0: Partial<TestType>) {} |                                                       |
     +----------------------------------------------------+-------------------------------------------------------+
@@ -309,7 +280,7 @@ Simple examples to show from which STS code what mangled name is created:
     +====================================================+=======================================================+
     | .. code-block:: typescript                         | .. code-block:: typescript                            |
     |                                                    |                                                       |
-    |     interface TestInterface {                      |     %%-property-testMember                            |
+    |     interface TestInterface {                      |     %%property-testMember                             |
     |       testMember: String                           |                                                       |
     |     }                                              |                                                       |
     |                                                    |                                                       |
@@ -326,7 +297,7 @@ Simple examples to show from which STS code what mangled name is created:
     +====================================================+=======================================================+
     | .. code-block:: typescript                         | .. code-block:: typescript                            |
     |                                                    |                                                       |
-    |     interface ExampleInterface {                   |     %%-set-testMember                                 |
+    |     interface ExampleInterface {                   |     %%set-testMember                                  |
     |       set testMember(a0: String): void             |                                                       |
     |     }                                              |                                                       |
     +----------------------------------------------------+-------------------------------------------------------+
@@ -341,7 +312,7 @@ Simple examples to show from which STS code what mangled name is created:
     |                                                    |                                                       |
     |     class A {                                      |     //it will only be generated when accessing        |
     |       testMember: Number = 9                       |     //the 'testMember' member in 'foo' through 'a0'   |
-    |     }                                              |     %%-union_prop-std_core_Double-testMember          |
+    |     }                                              |     %%union_prop-std_core_Double-testMember           |
     |                                                    |                                                       |
     |     class B {                                      |                                                       |
     |       testMember: Number = 8                       |                                                       |

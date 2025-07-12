@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "scene.proj.hpp"
 #include "scene.impl.hpp"
-#include "taihe/runtime.hpp"
-#include "stdexcept"
+#include "scene.proj.hpp"
 #include "sceneNodeParameters.h"
+#include "stdexcept"
+#include "taihe/runtime.hpp"
 
 namespace {
 // To be implemented.
@@ -24,6 +24,7 @@ namespace {
 class CameraImpl {
 public:
     float fov_ = 5.24;
+
     CameraImpl() {}
 
     void SetFov(float fov)
@@ -40,6 +41,7 @@ public:
 class LightImpl {
 public:
     float intens_ = 5.24;
+
     LightImpl() {}
 
     void SetIntensity(float intens)
@@ -57,6 +59,7 @@ class NodeImpl {
 public:
     bool visible_ = true;
     ::taihe::string path = "test\ani_graphics3d";
+
     NodeImpl() {}
 
     void SetVisible(bool visible)
@@ -78,6 +81,7 @@ public:
 class SceneResourceParametersImpl {
 public:
     std::string name_ = "Scene";
+
     SceneResourceParametersImpl() {}
 
     void SetName(::taihe::string_view name)
@@ -94,6 +98,7 @@ public:
 class MaterialImpl {
 public:
     int8_t materialType = 122;
+
     MaterialImpl() {}
 
     int8_t GetMaterialType()
@@ -109,7 +114,7 @@ public:
     ::taihe::map<::taihe::string, int32_t> GetInputs()
     {
         ::taihe::map<::taihe::string, int32_t> res;
-        static const int32_t input = 2025;
+        static int32_t const input = 2025;
         res.emplace("banana", input);
         return res;
     }
@@ -119,6 +124,7 @@ class ImageImpl {
 public:
     float width = 800;
     float height = 600;
+
     ImageImpl() {}
 
     float GetWidth()

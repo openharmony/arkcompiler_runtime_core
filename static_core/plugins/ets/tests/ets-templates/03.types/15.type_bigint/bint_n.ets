@@ -18,12 +18,12 @@
 desc: >-
     Values of type bigint can be created from Numeric types, by using
     a call to the standard library (see Standard Library) class BigInt method
-tags: [negative]
 ---*/
 let b: bigint
 
 function main() {
     let s: {{c.from_type}} = {{c.expr|safe}}
-    b = new BigInt(s)
+    let checkException = (e: Error | Exception): boolean => {return (e instanceof RangeError)}
+    arktest.expectThrow(() => {b = new BigInt(s)}, checkException)
 }
 {%- endfor %}

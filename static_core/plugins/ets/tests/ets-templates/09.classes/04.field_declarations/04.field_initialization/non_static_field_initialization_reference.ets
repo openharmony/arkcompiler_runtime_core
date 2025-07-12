@@ -15,7 +15,9 @@ limitations under the License.
 
 /*---
 desc: Static field 'f' have reference in static variable.
-assert: For a reference to a non-static field f declared in class or interface C, it is a compile-time error if. The reference appears either in a non-static variable's initializer of C or in a static initializer of C.
+assert: >-
+    For a reference to a non-static field f declared in class or interface C, it is a compile-time error if.
+    The reference appears either in a non-static variable's initializer of C or in a static initializer of C.
 tags: [compile-only, negative]
 ---*/
 

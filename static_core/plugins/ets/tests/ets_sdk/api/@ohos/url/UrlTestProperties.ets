@@ -152,7 +152,7 @@ function testUrlTest086() {
 }
 
 function testUrlTest087() {
-	let murl = url.URL.parseURL("https://example.com?d=value1&c=value2&b=大&4=key4");
+	let murl = url.URL.parseURL("https://example.com?d=value1&c=value2&b=大&4=key4");  // CC-OFF(G.OTH.05) test logic
  arktest.assertEQ(murl.search, "?d=value1&c=value2&b=%E5%A4%A7&4=key4");
 	console.log('-------------------------87 done')
 }

@@ -21,8 +21,8 @@ tags:
 ---*/
 class A {}
 
-function nullish (
-    o: Object, nullish4: A|null|undefined
+function nullish(
+    o: Object, nullish4: A | null | undefined
 ) {
     o = nullish4 /* compile-time error - type 'AnyClassOrInterfaceType|null|undefined' is not compatible with Object */
 }

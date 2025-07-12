@@ -71,6 +71,7 @@ void GCTaskTracker::GCPhaseStarted(mem::GCPhase phase)
         return;
     }
     auto *coroutine = EtsCoroutine::GetCurrent();
+    ASSERT(coroutine != nullptr);
     auto *obj = reinterpret_cast<EtsObject *>(coroutine->GetPandaVM()->GetGlobalObjectStorage()->Get(callbackRef_));
     Value arg(obj->GetCoreType());
     os::memory::ReadLockHolder lock(*coroutine->GetPandaVM()->GetRendezvous()->GetMutatorLock());
@@ -87,7 +88,9 @@ void GCTaskTracker::RemoveId(uint64_t id)
 {
     currentTaskId_ = 0;
     if (id == callbackTaskId_ && callbackRef_ != nullptr) {
-        EtsCoroutine::GetCurrent()->GetPandaVM()->GetGlobalObjectStorage()->Remove(callbackRef_);
+        auto *coroutine = EtsCoroutine::GetCurrent();
+        ASSERT(coroutine != nullptr);
+        coroutine->GetPandaVM()->GetGlobalObjectStorage()->Remove(callbackRef_);
         callbackRef_ = nullptr;
     }
     if (id != 0) {

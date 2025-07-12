@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The class implements multiple interfaces to verify the correctness of the type system, but it does not fully implement the methods of the interfaces.
+desc: >-
+    The class implements multiple interfaces to verify the correctness of the type system,
+    but it does not fully implement the methods of the interfaces.
 tags: [compile-only, negative]
 ---*/
 

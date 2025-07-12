@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The child class calls the parent class method, and the new methods and properties of the child class are used in the parent class method.
+desc: >-
+    The child class calls the parent class method, and the new methods and properties of the child class
+    are used in the parent class method.
 ---*/
 
 class Parent {

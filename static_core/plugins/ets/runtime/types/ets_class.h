@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include "include/mem/panda_containers.h"
+#include "include/mem/panda_string.h"
 #include "include/object_header.h"
 #include "include/runtime.h"
 #include "libpandabase/mem/object_pointer.h"
@@ -47,6 +48,37 @@ class EtsTypeAPIMethod;
 class EtsTypeAPIParameter;
 
 enum class EtsType;
+
+class OverloadKey {
+public:
+    OverloadKey(PandaString n, bool s) : name_(std::move(n)), isStatic_(s) {}
+
+    const PandaString &GetName() const noexcept
+    {
+        return name_;
+    }
+    bool IsStatic() const noexcept
+    {
+        return isStatic_;
+    }
+
+    bool operator==(const OverloadKey &o) const noexcept
+    {
+        return isStatic_ == o.isStatic_ && name_ == o.name_;
+    }
+
+private:
+    PandaString name_;
+    bool isStatic_;
+};
+
+class OverloadKeyHash {
+public:
+    size_t operator()(const OverloadKey &key) const noexcept
+    {
+        return std::hash<PandaString> {}(key.GetName()) + static_cast<size_t>(key.IsStatic());
+    }
+};
 
 namespace test {
 class EtsClassTest;
@@ -98,8 +130,8 @@ public:
     EtsField *GetStaticFieldIDByOffset(uint32_t fieldOffset);
 
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const char *name);
-    PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const uint8_t *name, const char *signature);
-    PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const char *name, const char *signature);
+    PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const uint8_t *name, const char *signature, bool isANIFormat = false);
+    PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const char *name, const char *signature, bool isANIFormat = false);
 
     PANDA_PUBLIC_API EtsMethod *GetStaticMethod(const char *name, const char *signature, bool isANIFormat = false) const
     {
@@ -116,6 +148,24 @@ public:
             return GetMethodInternal<FindFilter::INSTANCE>(name);
         }
         return GetMethodInternal<FindFilter::INSTANCE>(name, signature, isANIFormat);
+    }
+
+    PANDA_PUBLIC_API PandaVector<EtsMethod *> GetStaticMethodOverload(const char *name, const char *signature,
+                                                                      bool isANIFormat = false)
+    {
+        return GetMethodOverloadInternal<FindFilter::STATIC, false>(name, signature, isANIFormat);
+    }
+
+    PANDA_PUBLIC_API PandaVector<EtsMethod *> GetInstanceMethodOverload(const char *name, const char *signature,
+                                                                        bool isANIFormat = false)
+    {
+        return GetMethodOverloadInternal<FindFilter::INSTANCE, false>(name, signature, isANIFormat);
+    }
+
+    PANDA_PUBLIC_API PandaVector<EtsMethod *> GetDirectMethodOverload(const char *name, const char *signature,
+                                                                      bool isANIFormat = false)
+    {
+        return GetMethodOverloadInternal<FindFilter::ALL, true>(name, signature, isANIFormat);
     }
 
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const PandaString &name, const PandaString &signature)
@@ -221,6 +271,11 @@ public:
         return GetRuntimeClass()->IsArrayClass();
     }
 
+    bool IsUnionClass() const
+    {
+        return GetRuntimeClass()->IsUnionClass();
+    }
+
     bool IsInterface() const
     {
         return GetRuntimeClass()->IsInterface();
@@ -306,6 +361,18 @@ public:
     }
 
     template <class Callback>
+    void EnumerateConstituentClasses(const Callback &callback)
+    {
+        for (Class *runtimeClasses : GetRuntimeClass()->GetConstituentTypes()) {
+            EtsClass *klass = EtsClass::FromRuntimeClass(runtimeClasses);
+            bool finished = callback(klass);
+            if (finished) {
+                break;
+            }
+        }
+    }
+
+    template <class Callback>
     void EnumerateBaseClasses(const Callback &callback)
     {
         PandaVector<EtsClass *> inherChain;
@@ -379,6 +446,11 @@ public:
         return MEMBER_OFFSET(EtsClass, typeMetaData_);
     }
 
+    static constexpr size_t GetOverloadMapOffset()
+    {
+        return MEMBER_OFFSET(EtsClass, overloadMap_);
+    }
+
     static constexpr size_t GetHeaderOffset()
     {
         return MEMBER_OFFSET(EtsClass, header_);
@@ -405,6 +477,8 @@ public:
 
     void Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPrimitiveType,
                     ClassLinkerErrorHandler *errorHandler);
+
+    void RemoveOverloadMap();
 
     void SetComponentType(EtsClass *componentType);
 
@@ -534,7 +608,27 @@ public:
     }
 
 private:
-    enum class FindFilter { STATIC, INSTANCE };
+    enum class FindFilter { STATIC, INSTANCE, ALL };
+
+    PandaUnorderedMap<OverloadKey, PandaVector<EtsMethod *>, OverloadKeyHash> *GetOverloadMap()
+    {
+        return reinterpret_cast<PandaUnorderedMap<OverloadKey, PandaVector<EtsMethod *>, OverloadKeyHash> *>(
+            overloadMap_);
+    }
+
+    void SetOverloadMap(EtsLong overloadMap)
+    {
+        overloadMap_ = overloadMap;
+    }
+
+    bool FunctionalOverloadAnnotationCallBack(const panda_file::File *pfile, panda_file::AnnotationDataAccessor *ada,
+                                              ClassLinkerErrorHandler *errorHandler);
+
+    void VerifyOverloadMap(ClassLinkerErrorHandler *errorHandler, bool isOverloadCbOk);
+
+    PandaVector<EtsMethod *> ProcessOverloadAnnotation(const panda_file::File *pfile,
+                                                       panda_file::ArrayValue &overloadArray);
+    bool CheckBaseClassOverload(const OverloadKey &overloadKey, PandaVector<EtsMethod *> &overloadDeclRecords);
 
     template <FindFilter FILTER>
     EtsMethod *GetMethodInternal(const char *name) const
@@ -592,6 +686,38 @@ private:
         return reinterpret_cast<EtsMethod *>(coreMethod);
     }
 
+    bool FindMethodFromOverloadMap(OverloadKey &overloadKey, PandaVector<EtsMethod *> &dstEtsMethod,
+                                   std::optional<EtsMethodSignature> &methodSignature);
+
+    template <FindFilter FILTER, bool IS_DIRECT>
+    PandaVector<EtsMethod *> GetMethodOverloadInternal(const char *name, const char *signature, bool isANIFormat)
+    {
+        PandaVector<EtsMethod *> etsMethods;
+        auto overloadName = PandaString(name);
+        std::optional<EtsMethodSignature> methodSignature;
+        auto staticOverloadKey = OverloadKey(overloadName, true);
+        auto instanceOverloadKey = OverloadKey(overloadName, false);
+        if (signature) {
+            methodSignature.emplace(signature, isANIFormat);
+        }
+        for (auto curClass = this; curClass != nullptr; curClass = curClass->GetBase()) {
+            if constexpr (FILTER == FindFilter::ALL || FILTER == FindFilter::STATIC) {
+                if (curClass->FindMethodFromOverloadMap(staticOverloadKey, etsMethods, methodSignature)) {
+                    return etsMethods;
+                }
+            }
+            if constexpr (FILTER == FindFilter::ALL || FILTER == FindFilter::INSTANCE) {
+                if (curClass->FindMethodFromOverloadMap(instanceOverloadKey, etsMethods, methodSignature)) {
+                    return etsMethods;
+                }
+            }
+            if constexpr (IS_DIRECT) {
+                break;
+            }
+        }
+        return etsMethods;
+    }
+
     ObjectHeader *GetObjectHeader()
     {
         return &header_;
@@ -633,6 +759,7 @@ private:
     FIELD_UNUSED ObjectPointer<EtsClass> superClass_;  // Class<? super T>
     FIELD_UNUSED uint32_t flags_;
     FIELD_UNUSED EtsLong typeMetaData_;
+    FIELD_UNUSED EtsLong overloadMap_;
     // ets.Class fields END
 
     ark::Class klass_;

@@ -16,12 +16,12 @@
 /*---
  desc: 17.3 Indexable Types
  tags:
- ---*/
+---*/
 
 class Index {
     public index : int;
 
-    constructor (index : int) {
+    constructor(index : int) {
         this.index = index;
     }
 }
@@ -31,31 +31,31 @@ class Bar {
     private data2: int;
     private data3: int;
 
-    $_get (index: Index) : int {
-        switch(index.index) {
-        case 0:
+    $_get(index: Index) : int {
+        switch (index.index) {
+          case 0:
             return this.data;
-        case 1:
+          case 1:
             return this.data2;
-        case 2:
+          case 2:
             return this.data3;
-        default:
+          default:
             throw new Exception ("Hmm ...");
         }
     }
 
-    $_set (index: Index, value: int) {
-        switch(index.index) {
-        case 0:
+    $_set(index: Index, value: int) {
+        switch (index.index) {
+          case 0:
             this.data = value;
             break;
-        case 1:
+          case 1:
             this.data2 = value;
             break;
-        case 2:
+          case 2:
             this.data3 = value;
             break;
-        default:
+          default:
             throw new Exception ("Hmm ...");
         }
     }
@@ -68,7 +68,7 @@ class Bar {
 }
 
 function main(): int {
-    let x : Bar = new Bar(1,2,3);
+    let x : Bar = new Bar(1, 2, 3);
     try {
         arktest.assertEQ(x[new Index(0)], 1)
         arktest.assertEQ(x[new Index(1)], 2)

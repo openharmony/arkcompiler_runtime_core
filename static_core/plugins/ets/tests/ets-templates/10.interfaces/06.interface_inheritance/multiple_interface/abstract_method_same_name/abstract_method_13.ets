@@ -40,5 +40,5 @@ class ChildClass implements Child {
 function main(): void {
   const child = new ChildClass();
   child.print("Hello");
-  arktest.assertEQ(result,"Value: Hello");
+  arktest.assertEQ(result, "Value: Hello");
 }

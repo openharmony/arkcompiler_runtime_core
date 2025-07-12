@@ -448,8 +448,9 @@ The syntax of *ambient interface declaration* is presented below:
 an ambient class (see :ref:`Ambient Indexer`, and :ref:`Ambient Iterable`).
 
 
-if interface method declaration is marked with the keyword ``default`` then the
-non-ambient interface must contain the default implementation for this method.
+If an interface method declaration is marked with the keyword ``default``, then
+a non-ambient interface must contain the default implementation for the method
+as follows:
 
 .. code-block:: typescript
    :linenos:

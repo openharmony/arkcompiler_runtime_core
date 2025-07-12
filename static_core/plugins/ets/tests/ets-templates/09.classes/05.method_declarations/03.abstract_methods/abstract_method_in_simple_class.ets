@@ -15,7 +15,9 @@ limitations under the License.
 
 /*---
 desc: Abstract method declaration.
-assert: The declaration of an abstract method m must appear directly within an abstract class; otherwise a compile-time error occurs.
+assert: >-
+    The declaration of an abstract method m must appear directly within an abstract class;
+    otherwise a compile-time error occurs.
 tags: [compile-only, negative]
 ---*/
 

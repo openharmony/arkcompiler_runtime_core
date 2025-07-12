@@ -15,19 +15,21 @@
 
 /*---
 desc: Access to a hidden field using cast.
-assert: A hidden field can be accessed by using a qualified name if it is static, or by using a field access expression that contains the keyword super or a cast to a superclass type.
+assert: >-
+    A hidden field can be accessed by using a qualified name if it is static, or by using a field access expression
+    that contains the keyword super or a cast to a superclass type.
 ---*/
 
 class A {
   public x: int;
 }
 
-class B extends A{
+class B extends A {
   public x: boolean = true;
 }
 
 function main(): void {
     let instance: A = new B();
 
-    arktest.assertTrue( instance.x );   // Smart type of 'instance' is 'B'!
+    arktest.assertTrue(instance.x); // Smart type of 'instance' is 'B'!
 }

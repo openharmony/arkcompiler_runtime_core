@@ -22,6 +22,7 @@ function main() {
     arktest.assertEQ("\x61{\u{1D306}\r}", "a{𝌆\x0D}")
     arktest.assertEQ("\ud834\udf06", "𝌆")
     arktest.assertEQ("\\\\\uFFFFFFFF".length, 7)
+    arktest.assertEQ("a\0b".length, 3)
 
     // string with code points
     let s = "\u{0}\u{7537}\u{ea6e}\u{15fa5}\u{1d4dc}\u{24a13}\u{2bf4a}\u{33481}\u{3a9b8}\u{41eef}\u{49426}\u{5095d}\u{57e94}\u{5f3cb}\u{66902}\u{6de39}\u{75370}\u{7c8a7}\u{83dde}\u{8b315}\u{9284c}\u{99d83}\u{a12ba}\u{a87f1}\u{afd28}\u{b725f}\u{be796}\u{c5ccd}\u{cd204}\u{d473b}\u{dbc72}\u{e31a9}\u{ea6e0}\u{f1c17}\u{f914e}\u{100685}\u{107bbc}\u{10f0f3}"

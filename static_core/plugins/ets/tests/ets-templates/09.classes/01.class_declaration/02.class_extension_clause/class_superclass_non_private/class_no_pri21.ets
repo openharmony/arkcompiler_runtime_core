@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The child class calls the parent class method, and the getter overridden by the child class is used in the parent class method.
+desc: >-
+    The child class calls the parent class method, and the getter overridden by the child class
+    is used in the parent class method.
 ---*/
 
 class Parent {

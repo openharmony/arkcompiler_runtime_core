@@ -20,3 +20,15 @@ cases:
   - desc: A formal parameter contains no type provided, and the type cannot be derived by type inference
     impl: |-
         let f = (a, b) => a + b
+
+  - desc: CTE. A required parameter cannot follow an optional parameter.
+    impl: |-
+      let f = (a?: String, b: String) => a + b
+
+  - desc: CTE. A compile-time error occurs if function or method type parameters have a variance modifier specified.
+    impl: |-
+      let assign = <out T> (x: T): T => { return x }
+
+  - desc: CTE. A compile-time error occurs if function or method type parameters have a variance modifier specified.
+    impl: |-
+      let assign = <in T> (x: T): T => { return x }

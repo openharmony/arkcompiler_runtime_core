@@ -48,7 +48,7 @@ function main() {
     arktest.assertEQ(rc.sum(), 0);
     arktest.assertEQ(rc.sum(...emp), 0);
 
-    arktest.assertEQ(rc.sum(1,2,3), 6);
+    arktest.assertEQ(rc.sum(1, 2, 3), 6);
     arktest.assertEQ(rc.sum(...tmp), 6);
     arktest.assertEQ(rc.sum(...arr), 1);
     arktest.assertEQ(rc.rsum(...roo), 6);

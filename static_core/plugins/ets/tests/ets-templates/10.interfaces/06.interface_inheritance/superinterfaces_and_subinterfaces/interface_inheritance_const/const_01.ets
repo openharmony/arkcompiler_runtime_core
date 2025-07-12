@@ -14,7 +14,8 @@
  */
 
 /*---
-desc: Test whether the constant name is correct when the subclass interface inherits the parent class interface constant.
+desc: >-
+    Test whether the constant name is correct when the subclass interface inherits the parent class interface constant
 ---*/
 
 interface ParentInterface {

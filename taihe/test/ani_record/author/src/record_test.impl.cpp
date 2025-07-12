@@ -14,7 +14,7 @@
  */
 #include "record_test.impl.hpp"
 
-#include "record_test.Color.proj.0.hpp"
+#include "record_test.Color.proj.1.hpp"
 #include "record_test.Data.proj.1.hpp"
 #include "record_test.ICpu.proj.2.hpp"
 #include "record_test.ICpuInfo.proj.2.hpp"

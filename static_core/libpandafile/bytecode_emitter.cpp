@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -208,6 +208,8 @@ BytecodeEmitter::ErrorCode BytecodeEmitter::DoReserveSpaceForOffset(const Byteco
             UNREACHABLE();  // no revcc and no far opcode
             return ErrorCode::INTERNAL_ERROR;
         }
+        ASSERT(insnPc < bytecode_.size());
+        ASSERT(insnPc + insnSize <= bytecode_.size());
         UpdateBranchOffs(&bytecode_[insnPc], static_cast<int32_t>(insnSize + GetSizeByOpcode(Opcode::JMP_IMM32)));
         *targetPtr = insnPc + insnSize;
         Emit<Format::IMM32>(bytecode_.begin() + *targetPtr, Opcode::JMP_IMM32, 0);

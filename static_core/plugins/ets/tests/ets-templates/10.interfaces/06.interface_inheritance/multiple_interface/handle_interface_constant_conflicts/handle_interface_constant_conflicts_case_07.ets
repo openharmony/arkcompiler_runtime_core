@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that a class implementing two interfaces with the same constant name but different values (1 and 2) causes a compile-time error.
+desc: >-
+    Verify that a class implementing two interfaces with the same constant name but different values (1 and 2)
+    causes a compile-time error.
 tags: [compile-only, negative]
 ---*/
 

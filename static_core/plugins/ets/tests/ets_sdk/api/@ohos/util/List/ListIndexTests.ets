@@ -85,36 +85,32 @@ function testIndexInputNegative() {
 function testEmptyGetterOutOfRange() {
     let list = new List<number>();
 
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message ==
-            "The value of \"index\" is out of range. It must be >= 0 && <= -1. Received value is: 10000") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
-    }
-    arktest.expectThrow(() => {let a = list[10000]}, exceptionCheck);
-
-    let exceptionCheck1 = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message ==
-            "The value of \"index\" is out of range. It must be >= 0 && <= -1. Received value is: -1") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
-    }
-    arktest.expectThrow(() => {let a = list[-1]}, exceptionCheck1);
+    checkOutsideRangeError(list, -1);
+    checkOutsideRangeError(list, 10000);
+    checkOutsideRangeError(list, Int.MAX_VALUE + 1);
 }
 
 function testGetterOutOfRange() {
     let list = new List<number>();
     initializeList(list, testNumbers);
 
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message ==
-            "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: 10000") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
-    }
-    arktest.expectThrow(() => {let a = list[10000]}, exceptionCheck);
+    arktest.assertEQ(list[1], testNumbers[1], `Element at index 0 should match`)
+    checkOutsideRangeError(list, -1);
+    checkOutsideRangeError(list, 10000);
+    checkOutsideRangeError(list, Int.MAX_VALUE + 1);
+}
 
-    let exceptionCheck1 = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message ==
-            "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: -1") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+function checkOutsideRangeError(list: List<number>, index: number) {
+    let errMsg = `The value of \"index\" is out of range. It must be >= 0 && <= ${list.length - 1}. Received value is: ${index}`;
+    let errCode = 10200001;
+    if (index > Int.MAX_VALUE) {
+        errMsg = `The type of \"index\" must be small integer.`
+        errCode = 401;
     }
-    arktest.expectThrow(() => {let a = list[-1]}, exceptionCheck1);
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) &&
+            ((e as BusinessError).message == errMsg) &&
+            ((e as BusinessError).code == errCode);
+    }
+    arktest.expectThrow((): void => { list[index] }, exceptionCheck)
 }

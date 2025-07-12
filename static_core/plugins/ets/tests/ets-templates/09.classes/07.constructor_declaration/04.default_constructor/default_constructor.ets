@@ -15,7 +15,9 @@
 
 /*---
 desc: Default class constructor.
-assert: If a class contains no constructor declarations, then a default constructor is implicitly declared. The semantics of such constructor is to provide default values to class fields which have default values.
+assert: >-
+    If a class contains no constructor declarations, then a default constructor is implicitly declared.
+    The semantics of such constructor is to provide default values to class fields which have default values.
 ---*/
 
 class A {

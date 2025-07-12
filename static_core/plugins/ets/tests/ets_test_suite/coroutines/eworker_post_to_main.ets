@@ -15,7 +15,7 @@
 
  let mainId = CoroutineExtras.getWorkerId();
 
-function main() {
+function testEworkerPost2Main() {
     let job1 = EAWorker.postToMain<int>(():int => {
         let runId = CoroutineExtras.getWorkerId();
         arktest.assertEQ(runId, mainId);
@@ -42,4 +42,10 @@ function main() {
     arktest.assertNE(runId1, runId3);
 }
 
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.eworker_post_to_main');
+    testSuite.addTest('testEworkerPost2Main', testEworkerPost2Main);
+    let res = testSuite.run();
+    return res;
+}
 

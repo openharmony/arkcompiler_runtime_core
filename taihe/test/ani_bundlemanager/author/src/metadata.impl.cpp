@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "metadata.proj.hpp"
 #include "metadata.impl.hpp"
-#include "taihe/runtime.hpp"
 #include "metadata.h"
+#include "metadata.proj.hpp"
 #include "stdexcept"
+#include "taihe/runtime.hpp"
 
 using namespace taihe;
 using namespace metadata;

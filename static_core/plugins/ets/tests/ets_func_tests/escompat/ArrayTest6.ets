@@ -34,9 +34,9 @@ const d: Number[] = [10, -1, 237, -5, 148, 65, 3, 34, 0, 12];
 const dd: Number[] = [1, 0, 3, 4, 0, 6];
 
 function newProxy<T>(a: Array<T>): Array<T> {
-    class Handler<T> extends DefaultArrayProxyHandler<T> {}
+    class Handler<T> extends proxy.DefaultArrayProxyHandler<T> {}
 
-    return Proxy.create<T>(a, new Handler<T>())
+    return proxy.Proxy.create<T>(a, new Handler<T>())
 }
 
 function check<T>(newArrayFn: () => Array<T>, testFn: (a: Array<T>) => int): int {

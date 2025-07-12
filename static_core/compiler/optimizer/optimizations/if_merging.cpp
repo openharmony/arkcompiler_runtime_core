@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -235,6 +235,7 @@ std::optional<bool> IfMerging::GetUserBranch(Inst *userInst, BasicBlock *bb, Bas
 // from its predecessor to target_bb
 bool IfMerging::IsDominateEdge(BasicBlock *edgeBb, BasicBlock *targetBb)
 {
+    ASSERT(edgeBb != nullptr);
     return edgeBb->IsDominate(targetBb) && edgeBb->GetPredsBlocks().size() == 1;
 }
 
@@ -323,6 +324,7 @@ BasicBlock *IfMerging::SplitBlock(BasicBlock *bb)
     for (auto inst : bb->InstsSafeReverse()) {
         if (inst->IsMarked(trueBranchMarker_)) {
             bb->EraseInst(inst);
+            ASSERT(trueBranchBb != nullptr);
             trueBranchBb->PrependInst(inst);
         }
     }

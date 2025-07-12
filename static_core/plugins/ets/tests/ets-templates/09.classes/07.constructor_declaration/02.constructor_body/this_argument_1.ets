@@ -14,7 +14,9 @@ limitations under the License.
 ---*/
 
 /*---
-desc: this can be passed as an argument no matter if fields are inited. If an uninited fields is used. NullPointerError should happen
+desc: >-
+    this can be passed as an argument no matter if fields are inited.
+    If an uninited fields is used. NullPointerError should happen
 ---*/
 
 class A {
@@ -31,8 +33,8 @@ class A {
   }
 }
 
-function main(){
-  try{
+function main() {
+  try {
     let a = new A
   } catch (e) {
     arktest.assertTrue( e instanceof NullPointerError )

@@ -20,7 +20,7 @@ desc: Array type with prefix readonly.
 ---*/
 
 function main() {
-  let y: readonly {{c.type}}[] = [{{c.use}}]
+  let y: readonly Array<{{c.type}}> = [{{c.use}}]
 }
 
 {% endfor %}

@@ -21,7 +21,7 @@ tags:
 ---*/
 
 interface PromiseLikeT<T> {
-    then<U, V>(onFulfilled: (value: T) => U, onRejected: (error: Object|null) => V): PromiseLikeT<U|V>;
+    then<U, V>(onFulfilled: (value: T) => U, onRejected: (error: Object | null) => V): PromiseLikeT<U|V>;
 }
 
 function main(): void {

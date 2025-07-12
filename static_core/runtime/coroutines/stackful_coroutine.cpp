@@ -122,7 +122,7 @@ void StackfulCoroutineContext::CleanUp()
     RetrieveStackInfo(contextStackP, contextStackSize, contextGuardSize);
     ASAN_UNPOISON_MEMORY_REGION(contextStackP, contextStackSize);
 #endif  // PANDA_ASAN_ON
-    affinityMask_ = stackful_coroutines::AFFINITY_MASK_NONE;
+    affinityMask_ = AffinityMask::Empty();
 }
 
 /*static*/

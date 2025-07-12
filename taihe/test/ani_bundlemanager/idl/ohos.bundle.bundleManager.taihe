@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@!namespace("ohos", "bundle", "bundleManager")
+@!namespace("ohos", "bundle.bundleManager")
 enum AbilityType: i8 {
     PAGE = 1,
     SERVICE = 2,

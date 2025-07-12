@@ -15,7 +15,11 @@
 
 /*---
 desc: Overload two methods in same class.
-assert: If two methods of a class (whether both declared in the same class, or both inherited by a class, or one declared and one inherited) have the same name but signatures that are not override-equivalent, then the method name is said to be overloaded. This fact causes no difficulty and never of itself results in a compile-time error.
+assert: >-
+    If two methods of a class (whether both declared in the same class, or both inherited by a class,
+    or one declared and one inherited) have the same name but signatures that are not override-equivalent,
+    then the method name is said to be overloaded. This fact causes no difficulty and never of itself results
+    in a compile-time error.
 ---*/
 
 class A {

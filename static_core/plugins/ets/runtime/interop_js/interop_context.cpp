@@ -76,6 +76,8 @@ static constexpr std::string_view const FUNCTION_INTERFACE_DESCRIPTORS[] = {
 
 static Class *CacheClass(EtsClassLinker *etsClassLinker, std::string_view descriptor)
 {
+    ASSERT(etsClassLinker != nullptr);
+    ASSERT(etsClassLinker->GetClass(descriptor.data()));
     auto klass = etsClassLinker->GetClass(descriptor.data())->GetRuntimeClass();
     ASSERT(klass != nullptr);
     return klass;
@@ -134,6 +136,7 @@ static bool RegisterTimerModule()
 
 static void RegisterEventLoopModule(EtsCoroutine *coro)
 {
+    ASSERT(coro != nullptr);
     ASSERT(coro == coro->GetPandaVM()->GetCoroutineManager()->GetMainThread());
     coro->GetPandaVM()->CreateCallbackPosterFactory<EventLoopCallbackPosterFactoryImpl>();
     coro->GetPandaVM()->SetRunEventLoopFunction(
@@ -449,6 +452,7 @@ void InteropCtx::InitJsValueFinalizationRegistry(EtsCoroutine *coro)
     }
     ASSERT(!coro->HasPendingException());
     auto queue = EtsObject::FromCoreType(res.GetAs<ObjectHeader *>());
+    ASSERT(queue != nullptr);
     jsvalueFregistryRef_ = Refstor()->Add(queue->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
     ASSERT(jsvalueFregistryRef_ != nullptr);
     jsvalueFregistryRegister_ =
@@ -510,6 +514,7 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
     bool isInstanceof = false;
     NAPI_CHECK_FATAL(napi_is_error(env, val, &isInstanceof));
     auto objRefconv = JSRefConvertResolve(ctx, isInstanceof ? ctx->GetErrorClass() : ctx->GetESErrorClass());
+    ASSERT(objRefconv != nullptr);
     LocalObjectHandle<EtsObject> etsObj(coro, objRefconv->Unwrap(ctx, val));
     if (UNLIKELY(etsObj.GetPtr() == nullptr)) {
         INTEROP_LOG(INFO) << "Something went wrong while unwrapping pending js exception";
@@ -608,6 +613,7 @@ void InteropCtx::SetDefaultLinkerContext(EtsRuntimeLinker *linker)
 void InteropCtx::ForwardEtsException(EtsCoroutine *coro)
 {
     auto env = GetJSEnv();
+    ASSERT(coro != nullptr);
     ASSERT(coro->HasPendingException());
     LocalObjectHandle<ObjectHeader> exc(coro, coro->GetException());
     coro->ClearException();
@@ -736,6 +742,7 @@ static std::optional<std::string> NapiTryDumpStack(napi_env env)
     for (auto stack = StackWalker::Create(coro); stack.HasFrame(); stack.NextFrame()) {
         printIstkFrames(istkIt->etsFrame);
         Method *method = stack.GetMethod();
+        ASSERT(method != nullptr);
         INTEROP_LOG(ERROR) << method->GetClass()->GetName() << "." << method->GetName().data << " at "
                            << method->GetLineNumberAndSourceFile(stack.GetBytecodePc());
     }
@@ -768,6 +775,7 @@ static std::optional<std::string> NapiTryDumpStack(napi_env env)
 void InteropCtx::Init(EtsCoroutine *coro, napi_env env)
 {
     auto *ctx = Runtime::GetCurrent()->GetInternalAllocator()->New<InteropCtx>(coro, env);
+    ASSERT(ctx != nullptr);
     auto *worker = coro->GetWorker();
     worker->GetLocalStorage().Set<CoroutineWorker::DataIdx::INTEROP_CTX_PTR>(ctx, Destroy);
     worker->GetLocalStorage().Set<CoroutineWorker::DataIdx::EXTERNAL_IFACES>(&ctx->interfaceTable_);
@@ -793,6 +801,7 @@ void InteropCtx::Destroy(void *ptr)
 static bool CheckRuntimeOptions([[maybe_unused]] const ark::ets::EtsCoroutine *mainCoro)
 {
 #if defined(PANDA_JS_ETS_HYBRID_MODE) && !defined(ARK_HYBRID)
+    ASSERT(mainCoro != nullptr);
     auto gcType = mainCoro->GetVM()->GetGC()->GetType();
     if ((Runtime::GetOptions().GetXgcTriggerType() != "never") &&
         (gcType != mem::GCType::G1_GC || Runtime::GetOptions().IsNoAsyncJit())) {

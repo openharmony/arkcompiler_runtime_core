@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that a class implementing an interface with a constant and having a property with the same name and type does not cause a conflict.
+desc: >-
+    Verify that a class implementing an interface with a constant and having a property with the same name and type
+    does not cause a conflict.
 ---*/
 
 interface InterfaceA {

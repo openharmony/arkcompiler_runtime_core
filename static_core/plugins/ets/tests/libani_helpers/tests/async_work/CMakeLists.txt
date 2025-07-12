@@ -14,3 +14,12 @@
 ani_helpers_add_gtest(ani_helpers_test_async_work
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/async_work_test.cpp
 )
+
+ani_helpers_add_gtest(ani_helpers_test_send_event
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/send_event_test.cpp
+)
+
+ani_helpers_add_gtest(ani_helpers_test_send_event_managed
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/send_event_test_managed.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/send_event_test_managed.ets
+)

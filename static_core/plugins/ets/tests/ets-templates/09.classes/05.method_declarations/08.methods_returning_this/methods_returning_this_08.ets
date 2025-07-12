@@ -18,7 +18,7 @@ desc: methods return type is this or object, return this, negative.
 tags: [negative, compile-only]
 ---*/
 class C {
-    foo(): this|object {
+    foo(): this | object {
 	    return this
     }
 }

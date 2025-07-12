@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that a child class does not need to override a default method when there is no conflict in the parent interface.
+desc: >-
+    Verify that a child class does not need to override a default method when there is no conflict
+    in the parent interface.
 ---*/
 
 interface Parent {

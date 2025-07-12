@@ -284,7 +284,9 @@ void Cleanup::MarkInlinedCaller(Marker liveMrk, Inst *saveState)
 bool Cleanup::IsRemovableCall(Inst *inst)
 {
     if (inst->IsCall() && static_cast<CallInst *>(inst)->IsInlined() && !static_cast<CallInst *>(inst)->GetIsNative()) {
-        for (auto &ssUser : inst->GetSaveState()->GetUsers()) {
+        auto saveState = inst->GetSaveState();
+        ASSERT(saveState != nullptr);
+        for (auto &ssUser : saveState->GetUsers()) {
             if (ssUser.GetInst()->GetOpcode() == Opcode::ReturnInlined &&
                 ssUser.GetInst()->GetFlag(inst_flags::MEM_BARRIER)) {
                 return false;
@@ -354,8 +356,10 @@ bool Cleanup::TryToRemoveNonLiveInst(Inst *inst, BasicBlock *bb, ArenaSet<BasicB
 {
     bool modified = false;
     if (inst->IsMarked(liveMrk)) {
-        if (LIGHT_MODE ||
-            !(inst->GetOpcode() == Opcode::ReturnInlined && inst->GetSaveState()->GetBasicBlock() == nullptr)) {
+        auto saveState = inst->GetSaveState();
+        auto opcode = inst->GetOpcode();
+        ASSERT((LIGHT_MODE || opcode != Opcode::ReturnInlined) || saveState != nullptr);
+        if (LIGHT_MODE || !(opcode == Opcode::ReturnInlined && saveState->GetBasicBlock() == nullptr)) {
             return modified;
         }
     }

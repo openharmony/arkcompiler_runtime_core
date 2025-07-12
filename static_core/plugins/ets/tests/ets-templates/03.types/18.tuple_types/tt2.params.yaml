@@ -33,6 +33,17 @@ cases:
     - { type: Double, val: '3.1415926 * 2' }
     - { type: Number, val: '-0.0000001 + 0.0001' }
 
+    - { type: Any, val: 1 }
+    - { type: "null", val: "null" }
+    - { type: "undefined", val: "undefined" }
+    - { type: "int | string", val: "1" }
+    - { type: "int | string", val: "'abc'" }
+    - { type: "int[]", val: "[1, 0]" }
+    - { type: "Array<int>", val: "[1]" }
+    - { type: "FixedArray<int>", val: "[1, 0]" }
+    - { type: "() => void", val: "(): void => {}" }
+    - { type: "'abc' | 'def'", val: "'abc'" }
+
     - decl: |-
         class A {}
       type: A

@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The return value of the parent class method is number, and the return value of the subclass method is number []. An error is reported when the subclass recompiles the parent class method.
+desc: >-
+    The return value of the parent class method is number, and the return value of the subclass method is number [].
+    An error is reported when the subclass recompiles the parent class method.
 tags:
 - negative
 - compile-only

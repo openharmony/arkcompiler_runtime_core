@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -140,6 +140,24 @@ bool CoreClassLinkerExtension::InitializeArrayClass(Class *arrayClass, Class *co
     accessFlags |= ACC_FINAL | ACC_ABSTRACT;
     arrayClass->SetAccessFlags(accessFlags);
     arrayClass->SetState(Class::State::INITIALIZED);
+    return true;
+}
+
+bool CoreClassLinkerExtension::InitializeUnionClass(Class *unionClass, Span<Class *> constituentClasses)
+{
+    ASSERT(IsInitialized());
+
+    auto *objectClass = GetClassRoot(ClassRoot::OBJECT);
+    unionClass->SetBase(objectClass);
+    unionClass->SetConstituentTypes(constituentClasses);
+    uint32_t accessFlags = ACC_FILE_MASK;
+    for (auto cl : constituentClasses) {
+        accessFlags &= cl->GetAccessFlags();
+    }
+    accessFlags &= ~ACC_INTERFACE;
+    accessFlags |= ACC_FINAL | ACC_ABSTRACT;
+    unionClass->SetAccessFlags(accessFlags);
+    unionClass->SetState(Class::State::INITIALIZED);
     return true;
 }
 

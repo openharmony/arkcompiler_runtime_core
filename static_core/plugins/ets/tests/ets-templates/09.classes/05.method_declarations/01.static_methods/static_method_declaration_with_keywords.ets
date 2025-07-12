@@ -17,7 +17,9 @@
 
 /*---
 desc: Static method declaration with '{{mod}}' keyword.
-assert: It is compile-time error if a method declaration that contains the keyword static also contains any one of the keywords abstract, open, override, or synchronized.
+assert: >-
+    It is compile-time error if a method declaration that contains the keyword static also contains any one
+    of the keywords abstract, open, override, or synchronized.
 params: {{mod}}
 tags: [compile-only, negative]
 ---*/

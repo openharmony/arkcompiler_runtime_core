@@ -68,7 +68,7 @@ The type of a *standalone expression* is determined as follows:
   a :index:`compile-time error` occurs if an *object literal* is used
   as a *standalone expression*.
 
-The situation is represented by the example below:
+The situation is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -215,7 +215,7 @@ even where a type parameter constraint is set.
 If the *target type* of an expression is a *type parameter*, then the type of
 the expression is inferred as the type of a *standalone expression*.
 
-The semantics is represented by the example below:
+The semantics is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -275,9 +275,9 @@ of type ``S``. The set of *supertypes* includes all *direct supertypes*
 More formally speaking, the set is obtained by reflexive and transitive
 closure over the direct supertype relation.
 
-If the subtyping relation of two types is not defined in a section below,
-then such types are not related to each other. Specifically,
-two :ref:`Resizable Array Types`, and two :ref:`Tuple Types`
+If a relationship of two types is not described in one of the following
+sections, then the types are not related to each other. Specifically,
+two :ref:`Resizable Array Types` and two :ref:`Tuple Types`
 are not related to each other, except where they are identical
 (see :ref:`Type Identity`).
 
@@ -430,7 +430,7 @@ Subtyping for Union Types
 .. meta:
     frontend_status: Done
 
-A union type ``U`` participates in subtyping relations
+A union type ``U`` participates in a subtyping relationship
 (see :ref:`Subtyping`) in the following cases:
 
 1. Union type ``U`` (``U``:sub:`1` ``| ... | U``:sub:`n`) is a subtype of
@@ -483,7 +483,7 @@ type ``T`` if each ``U``:sub:`i` is a subtype of ``T``.
 
 **Note**. If union type normalization produces a single type, then this type
 is used instead of the initial set of union types. This concept is represented
-by the example below:
+in the example below:
 
 .. index::
    union type
@@ -508,7 +508,7 @@ Subtyping for Function Types
 Function type ``F`` with parameters ``FP``:sub:`1` ``, ... , FP``:sub:`m`
 and return type ``FR``  is a *subtype* of function type ``S`` with parameters
 ``SP``:sub:`1` ``, ... , SP``:sub:`n` and return type ``SR`` if **all** of the
-following conditions are  met:
+following conditions are met:
 
 -  ``m <= n``
 
@@ -583,23 +583,23 @@ following conditions are  met:
 Subtyping for Fixed-Size Array Types
 ====================================
 
-Fixed-size array types are covariant, meaning that
+Fixed-size array types are covariant and are formally defined as follows:
 
 ``FixedSize<B> <: FixedSize<A>`` if ``B <: A``.
 
-The following example illustrate this:
+The situation is represented in the following example:
 
 .. code-block:: typescript
    :linenos:
 
     let x: FixedArray<number> = [1, 2, 3]
     let y: FixedArray<Object> = x // ok, as number <: Object
-    y = x // compile-time error
+    x = y // compile-time error
 
 Covariant array assignment can lead to ``ArrayStoreError`` runtime error
-if a value of incorrect type is put into the array. The runtime
-system performs run-time checks to ensure type-safety. It is illustrated
-in the example below:
+if a value of a wrong type is put into the array. Type safety is ensured by the
+runtime checks performed by the runtime system as represented in the example
+below:
 
 .. code-block:: typescript
    :linenos:
@@ -614,7 +614,7 @@ in the example below:
     let da: FixedArray<D> = [new D()]
     let ca: FixedArray<C> = da
 
-    foo(ca) // run-time error in 'foo'
+    foo(ca) // runtime error in 'foo'
 
 |
 
@@ -635,14 +635,14 @@ Identity relation for types ``A`` and ``B`` is defined as follows:
 
 - Tuple types ``A`` = [``T``:sub:`1`, ``T``:sub:`2`, ``...``, ``T``:sub:`n`] and
   ``B`` = [``U``:sub:`1`, ``U``:sub:`2`, ``...``, ``U``:sub:`m`]
-  are identical if the following conditions are met:
+  are identical on condition that:
 
   - ``n`` is equal to ``m``, i.e., the types have the same number of elements;
   - Every *T*:sub:`i` is identical to *U*:sub:`i` for any *i* in ``1 .. n``.
 
 - Union types ``A`` = ``T``:sub:`1` | ``T``:sub:`2` | ``...`` | ``T``:sub:`n` and
   ``B`` = ``U``:sub:`1` | ``U``:sub:`2` | ``...`` | ``U``:sub:`m`
-  are identical if the following conditions are met:
+  are identical on condition that:
 
   - ``n`` is equal to ``m``, i.e., the types have the same number of elements;
   - *U*:sub:`i` in ``U`` undergoes a permutation after which every *T*:sub:`i`
@@ -1011,14 +1011,18 @@ first evaluated from the expression as follows:
 - Type of a :ref:`Cast expression` is specified in the expression target type.
 
 The evaluated numeric result type can be inferred to a numeric *target type*
-from the context if the following conditions are met:
+from the context on condition that:
 
 #. Last executed operator in the expression is not a cast operator ``as``;
 
-#. The *target type* is a larger numeric type then the evaluated result type or
-   the evaluated result type is an integer type,
-   the *target type* is a smaller integer type
-   and value of the expression fits into the range of the *target type*.
+#. *Target type* is a numeric type larger then the evaluated result type;
+   or
+
+#. The evaluated result type is an integer type, the *target type* is a smaller
+   integer type with the value of the expression fiting into its range; or
+
+#. The *target type* is ``float``, the evaluated result type is ``double`` and  
+   the value of the expression fits into the range of type ``float``.
 
 A :index:`compile-time error` occurs if the context is a union type,
 and the evaluated value can be treated
@@ -1229,8 +1233,8 @@ in a supertype    (see :ref:`Override-Compatible Signatures`).
    runtime
    override-compatibility
 
-In some case of *method overriding* an implementation is forced to
-:ref:`Make a Bridge Method for Overriding Method`.
+An implementation is forced to :ref:`Make a Bridge Method for Overriding Method`
+in some cases of *method overriding*.
 
 |
 
@@ -1542,7 +1546,7 @@ The following rule applies to generics:
    class B2 <ContravariantTypeParameter extends Base> extends A2<ContravariantTypeParameter> {}
        // Compile-time error, derived class cannot have non-compatible constraints of type parameters
 
-The semantics is illustrated by the examples below:
+The semantics is represented in the examples below:
 
 1. **Class/Interface Types**
 
@@ -1630,7 +1634,7 @@ The semantics is illustrated by the examples below:
     }
 
 
-Override compatibility with ``Object`` is represented by the example below:
+Override compatibility with ``Object`` is represented in the example below:
 
 .. index::
    contravariance
@@ -1713,7 +1717,7 @@ interface*), and the base interface has a set of overload signatures, then the
 derived interface must provide a valid overriding overload signature (or
 signatures) for all overload signatures of the base interface. The derived
 interface can introduce additional overload signatures. The situation is
-represented by the example below:
+represented in the example below:
 
 
 .. code-block:: typescript
@@ -1744,7 +1748,7 @@ additional overload signatures. The implementation body must have
 the signature ``(...p: Any[]): Any`` (see
 :ref:`Overload Signatures Implementation Body`). This signature is a valid
 overriding for any overloaded signature. The same works if one class extends
-another class. The situation is represented by the example below:
+another class. The situation is represented in the example below:
 
 
 .. code-block:: typescript
@@ -2005,7 +2009,8 @@ Type mapping determines the *effective types* as follows:
 
    - *Contravariant* type parameters are instantiated with the type ``never``;
 
-   - *Invariant* type parameters have no corresponding type argument, **TBD**
+   - *Invariant* type parameters are instantiated with no type argument, i.e.,
+     ``Array<T>`` is instantiated as ``Array<>``.
 
 -  Union type constructed from the effective types of types ``T1 | T2 ... Tn``
    within the original union type for :ref:`Union Types` in the form
@@ -2024,7 +2029,7 @@ Type mapping determines the *effective types* as follows:
 
 -  Instantiation of an internal generic tuple type with respect to
    the number of element types *n* for :ref:`Tuple Types` in the form
-   ``[T1, T2 ..., Tn]``. **TBD**
+   ``[T1, T2 ..., Tn]``.
 
 -  String for :ref:`String Literal Types`.
 

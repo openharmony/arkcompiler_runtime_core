@@ -20,14 +20,14 @@ desc: Test cases for various usage scenarios of asynchronous method.
 
 class MethodReturnArray {
   async methodReturnArray(): Promise<Array<number>> {
-    return new Array<number>(1,2, 3);
+    return new Array<number>(1, 2, 3);
   }
 }
 
 async function startTest() {
   const example = new MethodReturnArray();
   const result = await example.methodReturnArray();
-  const resTemp = new Array<number>(1,2, 3);
+  const resTemp = new Array<number>(1, 2, 3);
   arktest.assertEQ(result === resTemp, true);
 }
 

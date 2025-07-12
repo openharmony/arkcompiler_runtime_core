@@ -13,14 +13,21 @@
  * limitations under the License.
  */
 
-function main() {
+function testAwaitStandalonePromise(): void {
     let value = await Promise.resolve(42);
-    arktest.assertEQ(value, 42, "Awaited value of resolved promise is different\
-                          from the expected value. Actual value: " + value);
+    arktest.assertEQ(value, 42, 'Awaited value of resolved promise is different\
+                          from the expected value. Actual value: ' + value);
     try {
-        await Promise.reject(new Error("Panda"));
+        await Promise.reject(new Error('Panda'));
     } catch (err: Error) {
-        arktest.assertTrue(err.toString().contains("Panda", 0), "Awaited value of rejected promise is different\
-                                                          from the expected value. Actual value: " + err);
+        arktest.assertTrue(err.toString().contains('Panda', 0), 'Awaited value of rejected promise is different\
+                                                          from the expected value. Actual value: ' + err);
     }
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.await_standalone_promise');
+    testSuite.addTest('testAwaitStandalonePromise', testAwaitStandalonePromise);
+    let res = testSuite.run();
+    return res;
 }

@@ -17,6 +17,9 @@ const etsVm = globalThis.gtest.etsVm;
 const testBasicUnion = etsVm.getFunction('Lunion/test/ETSGLOBAL;', 'testBasicUnion');
 const testChildUnion = etsVm.getFunction('Lunion/test/ETSGLOBAL;', 'testChildUnion');
 
+class TestClass {
+  prop: number = 1;
+}
 function testUnionType(): void {
   let numType = typeof testBasicUnion(1);
   let strType = typeof testBasicUnion('1');
@@ -27,12 +30,9 @@ function testUnionType(): void {
   ASSERT_EQ(boolType, 'boolean');
 
   try {
-    class TestClass {
-      prop: number = 1;
-    }
     testChildUnion(new TestClass());
   } catch (err) {
-    ASSERT_EQ(err.toString(), 'TypeError: Value is not assignable to Lunion/test/UnionClass;');
+    ASSERT_EQ(err.toString(), 'TypeError: Lstd/interop/js/JSValue; is not assignable to {ULunion/test/Child1;Lunion/test/Child2;}');
   }
 }
 

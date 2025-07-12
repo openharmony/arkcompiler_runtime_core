@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,10 +21,16 @@ namespace ark::compiler {
 static void PushStackRegister(Encoder *encoder, Target target, Reg threadReg, size_t tlsFrameOffset)
 {
     static constexpr ssize_t FP_OFFSET = 2;
-    ASSERT(sizeof(FrameBridgeKind) <= target.WordSize());
-    encoder->EncodeSti(FrameBridgeKind::COMPILED_CODE_TO_INTERPRETER, target.WordSize(),
-                       MemRef(target.GetStackReg(), -1 * target.WordSize()));
-    encoder->EncodeStr(target.GetFrameReg(), MemRef(target.GetStackReg(), -FP_OFFSET * target.WordSize()));
+    const auto wordSize = static_cast<ssize_t>(target.WordSize());
+    ASSERT(sizeof(FrameBridgeKind) <= static_cast<size_t>(wordSize));
+    constexpr ssize_t MAX_ALLOWED = std::numeric_limits<ssize_t>::max() / FP_OFFSET;
+    if (wordSize > MAX_ALLOWED) {
+        LOG(FATAL, IRTOC) << "WordSize too large for signed offset";
+        return;
+    }
+    encoder->EncodeSti(FrameBridgeKind::COMPILED_CODE_TO_INTERPRETER, wordSize,
+                       MemRef(target.GetStackReg(), -wordSize));
+    encoder->EncodeStr(target.GetFrameReg(), MemRef(target.GetStackReg(), -FP_OFFSET * wordSize));
 
     {
         ScopedTmpReg tmp(encoder);
@@ -125,7 +131,7 @@ void CodegenBoundary::CreateFrameInfo()
         CHECK_EQ(frameSize % target.GetSpAlignment(), target.GetSpAlignment() - target.WordSize());
     }
 
-    ssize_t offset = spillsCount;
+    auto offset = static_cast<ssize_t>(spillsCount);
     frame->SetFpCallersOffset(offset);
     offset += helpers::ToSigned(GetCallerRegsCount(target.GetArch(), true));
     frame->SetCallersOffset(offset);
@@ -190,10 +196,14 @@ void CodegenBoundary::RemoveBoundaryFrame(const BasicBlock *bb) const
 
     if (GetTarget().SupportLinkReg()) {
         static constexpr ssize_t FP_OFFSET = -3;
-        encoder->EncodeLdr(GetTarget().GetLinkReg(), false,
-                           MemRef(GetTarget().GetStackReg(), -1 * GetTarget().WordSize()));
-        encoder->EncodeLdr(GetTarget().GetFrameReg(), false,
-                           MemRef(GetTarget().GetStackReg(), FP_OFFSET * GetTarget().WordSize()));
+        const auto wordSize = static_cast<ssize_t>(GetTarget().WordSize());
+        constexpr ssize_t MAX_ALLOWED = std::numeric_limits<ssize_t>::max() / -FP_OFFSET;
+        if (wordSize > MAX_ALLOWED) {
+            LOG(FATAL, IRTOC) << "Frame offset calculation overflow";
+            return;
+        }
+        encoder->EncodeLdr(GetTarget().GetLinkReg(), false, MemRef(GetTarget().GetStackReg(), -wordSize));
+        encoder->EncodeLdr(GetTarget().GetFrameReg(), false, MemRef(GetTarget().GetStackReg(), FP_OFFSET * wordSize));
     }
 }
 }  // namespace ark::compiler

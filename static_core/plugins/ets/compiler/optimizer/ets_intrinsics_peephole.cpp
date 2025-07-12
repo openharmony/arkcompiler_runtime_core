@@ -412,7 +412,11 @@ bool Peepholes::PeepholeGetTypeInfo([[maybe_unused]] GraphVisitor *v, IntrinsicI
 #endif  // COMPILER_DEBUG_CHECKS
     auto obj = intrinsic->GetInput(0).GetInst();
     auto typeInfo = obj->GetObjectTypeInfo();
-    if (typeInfo) {
+    // When encoding LoadType, we call resolveType from the method and id,
+    // but the union class has no methods -- no vtable/itable is built for it,
+    // so there cannot be an instance of the union class.
+    // #27093
+    if (typeInfo && (graph->GetRuntime()->GetClassType(typeInfo.GetClass()) != ClassType::UNION_CLASS)) {
         auto loadType = graph->CreateInstLoadType(DataType::REFERENCE, intrinsic->GetPc());
         loadType->SetMethod(graph->GetMethod());
         loadType->SetTypeId(graph->GetRuntime()->GetClassIdWithinFile(graph->GetMethod(), typeInfo.GetClass()));

@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The subclass modifies the value of the member variable directly initialized by the parent class in the constructor function. The modifier is public and the type is number.
+desc: >-
+    The subclass modifies the value of the member variable directly initialized by the parent class
+    in the constructor function. The modifier is public and the type is number.
 ---*/
 
 class Parent {

@@ -423,3 +423,36 @@ if (!ark_standalone_build) {
     deps = [ "$ark_root/arkplatform/tests:unittest" ]
   }
 }
+
+group("ark_guard_packages_linux") {
+  deps = []
+  if (host_os != "mac") {
+    deps += [
+      "$ark_root/ark_guard:ark_guard(${host_toolchain})",
+    ]
+  }
+  foreach(plugin, enabled_plugins) {
+    deps += [ "$ark_root/plugins/$plugin:ark_host_linux_tools_packages" ]
+  }
+}
+
+group("ark_guard_packages_windows") {
+  deps = []
+  if (host_os != "mac") {
+    deps += [
+      "$ark_root/ark_guard:ark_guard($build_root/toolchain/mingw:mingw_x86_64)",
+    ]
+  }
+
+  foreach(plugin, enabled_plugins) {
+    deps += [ "$ark_root/plugins/$plugin:ark_host_windows_tools_packages" ]
+  }
+}
+
+group("ark_guard_host_unittest") {
+  testonly = true
+  deps = [
+    "$ark_root/ark_guard/tests:host_unittest",
+    "$ark_root/ark_guard/abckit_wrapper/tests:host_unittest",
+  ]
+}

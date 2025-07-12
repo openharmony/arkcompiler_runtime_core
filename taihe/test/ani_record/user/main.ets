@@ -182,41 +182,44 @@ function testMapfunc01() {
 // function mapfunc02(m: Record<string, byte>): boolean
 function testMapfunc02() {
     let testData:
-        Record<string, byte> = {"key1": 123 as byte, "key2": 45 as byte};
+        Record<string, byte> = {"key1": (123).toByte(), "key2": (45).toByte()};
     let result: boolean = record_test.Mapfunc02(testData);
     arktest.assertEQ(result, true);
 }
 
 // function mapfunc03(m: Record<string, short>): boolean
 function testMapfunc03() {
-    let testData:
-        Record<string, short> = {"key1": 1234 as short, "key2": 5678 as short};
+    let testData: Record<string, short> = {
+        "key1": (1234).toShort(),
+        "key2": (5678).toShort()
+    };
     let result: boolean = record_test.Mapfunc03(testData);
     arktest.assertEQ(result, true);
 }
 
 // function mapfunc04(m: Record<string, int>): boolean
 function testMapfunc04() {
-    let testData:
-        Record<string, int> = {"key1": 12345 as int, "key2": 67890 as int};
+    let testData: Record<string, int> = {
+        "key1": (12345).toInt(),
+        "key2": (67890).toInt()
+    };
     let result: boolean = record_test.Mapfunc04(testData);
     arktest.assertEQ(result, true);
 }
 
 // function mapfunc05(m: Record<string, long>): boolean
 function testMapfunc05() {
-    let testData:
-        Record<string, long> = {"key1": 123456 as long, "key2": 789012 as long};
+    let testData: Record<string, long> = {
+        "key1": (123456).toLong(),
+        "key2": (789012).toLong()
+    };
     let result: boolean = record_test.Mapfunc05(testData);
     arktest.assertEQ(result, true);
 }
 
 // function mapfunc06(m: Record<string, float>): boolean
 function testMapfunc06() {
-    let testData: Record<string, float> = {
-        "key1": 123.45 as float,
-        "key2": 67.89 as float
-    };
+    let testData: Record<string, float> = {"key1": 123.45f, "key2": 67.89f};
     let result: boolean = record_test.Mapfunc06(testData);
     arktest.assertEQ(result, true);
 }
@@ -224,8 +227,8 @@ function testMapfunc06() {
 // function mapfunc07(m: Record<string, double>): boolean
 function testMapfunc07() {
     let testData: Record<string, double> = {
-        "key1": 123.456 as double,
-        "key2": 789.012 as double
+        "key1": (123.456).toDouble(),
+        "key2": (789.012).toDouble()
     };
     let result: boolean = record_test.Mapfunc07(testData);
     arktest.assertEQ(result, true);
@@ -241,8 +244,8 @@ function testMapfunc08() {
 // function mapfunc09(m: Record<string, (byte[])>): boolean
 function testMapfunc09() {
     let testData: Record<string, (byte[])> = {
-        "key1": [1 as byte, 2 as byte, 3 as byte],
-        "key2": [4 as byte, 5 as byte, 6 as byte]
+        "key1": [(1).toByte(), (2).toByte(), (3).toByte()],
+        "key2": [(4).toByte(), (5).toByte(), (6).toByte()]
     };
     let result: boolean = record_test.Mapfunc09(testData);
     arktest.assertEQ(result, true);
@@ -251,8 +254,8 @@ function testMapfunc09() {
 // function mapfunc10(m: Record<string, (short[])>): boolean
 function testMapfunc10() {
     let testData: Record<string, (short[])> = {
-        "key1": [123 as short, 456 as short],
-        "key2": [789 as short, 1011 as short]
+        "key1": [(123).toShort(), (456).toShort()],
+        "key2": [(789).toShort(), (1011).toShort()]
     };
     let result: boolean = record_test.Mapfunc10(testData);
     arktest.assertEQ(result, true);
@@ -261,8 +264,8 @@ function testMapfunc10() {
 // function mapfunc11(m: Record<string, (int[])>): boolean
 function testMapfunc11() {
     let testData: Record<string, (int[])> = {
-        "key1": [1234 as int, 5678 as int],
-        "key2": [9012 as int, 3456 as int]
+        "key1": [(1234).toInt(), (5678).toInt()],
+        "key2": [(9012).toInt(), (3456).toInt()]
     };
     let result: boolean = record_test.Mapfunc11(testData);
     arktest.assertEQ(result, true);
@@ -271,8 +274,8 @@ function testMapfunc11() {
 // function mapfunc12(m: Record<string, (long[])>): boolean
 function testMapfunc12() {
     let testData: Record<string, (long[])> = {
-        "key1": [12345 as long, 67890 as long],
-        "key2": [11111 as long, 22222 as long]
+        "key1": [(12345).toLong(), (67890).toLong()],
+        "key2": [(11111).toLong(), (22222).toLong()]
     };
     let result: boolean = record_test.Mapfunc12(testData);
     arktest.assertEQ(result, true);

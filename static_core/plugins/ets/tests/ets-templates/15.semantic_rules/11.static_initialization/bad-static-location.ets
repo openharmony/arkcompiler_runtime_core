@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
- /*---
+/*---
  desc: Initializer block is used in classes, packages, and namespaces
  tags: [compile-only, negative]
- ---*/
+---*/
 
 static {
 }

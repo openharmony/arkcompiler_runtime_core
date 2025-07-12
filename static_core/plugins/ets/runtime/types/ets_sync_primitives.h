@@ -16,6 +16,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_MUTEX_H
 
 #include "libpandabase/mem/object_pointer.h"
+#include "macros.h"
 #include "runtime/include/thread_scopes.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/types/ets_object.h"
@@ -76,6 +77,7 @@ public:
     ALWAYS_INLINE void SuspendCoroutine(EtsWaitersList::Node *awaitee)
     {
         auto *coro = EtsCoroutine::GetCurrent();
+        ASSERT(coro != nullptr);
         auto *coroManager = coro->GetCoroutineManager();
         auto &event = awaitee->GetEvent();
         // Need to lock event before PushBack
@@ -111,6 +113,7 @@ public:
     public:
         explicit LockHolder(EtsHandle<T> &hLock) : hLock_(hLock)
         {
+            ASSERT(hLock_.GetPtr() != nullptr);
             hLock_->Lock();
         }
 
@@ -119,6 +122,7 @@ public:
 
         ~LockHolder()
         {
+            ASSERT(hLock_.GetPtr() != nullptr);
             hLock_->Unlock();
         }
 

@@ -31,9 +31,9 @@ const arrayShortMaxStrRes2 = "-32768test0test1test2test3test4test5test6test7test
 const arrayFloatMaxStrRes = "1.401298464324817e-45,NaN,2,4,6,8,3.4028234663852886e+38";
 const arrayFloatMaxStrRes1 = "1.401298464324817e-45|NaN|2|4|6|8|3.4028234663852886e+38";
 const arrayFloatMaxStrRes2 = "1.401298464324817e-45testNaNtest2test4test6test8test3.4028234663852886e+38";
-const arrayDoubleMaxStrRes = "5e-324,NaN,2,4,6,8,1.7976931348623157e+308";
-const arrayDoubleMaxStrRes1 = "5e-324|NaN|2|4|6|8|1.7976931348623157e+308";
-const arrayDoubleMaxStrRes2 = "5e-324testNaNtest2test4test6test8test1.7976931348623157e+308";
+const arrayDoubleMaxStrRes = "5e-324,NaN,2,4,6,8,1.7976931348623157e+308,-1.7976931348623157e+308";
+const arrayDoubleMaxStrRes1 = "5e-324|NaN|2|4|6|8|1.7976931348623157e+308|-1.7976931348623157e+308";
+const arrayDoubleMaxStrRes2 = "5e-324testNaNtest2test4test6test8test1.7976931348623157e+308test-1.7976931348623157e+308";
 const arrayStrRes = "This,is,hello,world";
 const arrayStrRes1 = "Thisishelloworld";
 const arrayStrRes2 = "This|is|hello|world";
@@ -162,7 +162,8 @@ function test_array_float_join() {
 //! INST          /Call.*escompat.Array::join*/
 function test_array_double_join() {
     let arrayEmpty: Array<double> = new Array<double>(0);
-    let arrayMax: Array<double> = [Number.MIN_VALUE, Number.NaN, 2, 4, 6, 8, Number.MAX_VALUE];
+    let maxCharsDouble: double = -1.7976931348623157e+308;
+    let arrayMax: Array<double> = [Number.MIN_VALUE, Number.NaN, 2, 4, 6, 8, Number.MAX_VALUE, maxCharsDouble];
     let arrayEmptyStr = arrayEmpty.join();
     let arrayEmptyStr1 = arrayEmpty.join("|");
     let arrayEmptyStr2 = arrayEmpty.join("test");

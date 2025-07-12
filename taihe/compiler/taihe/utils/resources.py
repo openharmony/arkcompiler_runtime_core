@@ -18,11 +18,17 @@
 import logging
 import shutil
 import subprocess
-from collections.abc import Callable
+import tarfile
+from abc import ABC, abstractmethod
+from argparse import ArgumentParser, Namespace
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
-from typing import Final
+from sys import exit
+from typing import ClassVar, Final, cast
+
+from typing_extensions import Self, override
 
 
 class DeploymentMode(Enum):
@@ -31,170 +37,85 @@ class DeploymentMode(Enum):
     BUNDLE = auto()  # Bundled with a python executable (taihe-pkg)
 
 
-# TODO: CLI: override and print the paths
-class ResourceType(Enum):
-    """Identifier of resources."""
+def fetch_url(url: str, output: Path, curl_extra_args: Sequence[str] | None = None):
+    """Downloads a file from a given URL to a specified output path using curl.
 
-    RUNTIME_SOURCE = "runtime-source"
-    RUNTIME_HEADER = "runtime-header"
-    STDLIB = "stdlib"
-    DOCUMENTATION = "doc"
+    Args:
+        url: The URL of the file to download.
+        output: The local path where the downloaded file will be saved.
+        curl_extra_args: Optional sequence of additional arguments to pass to curl.
 
-    # Things that should not be copied to packages should be prefixed with "DEV_"
-    DEV_PANDA_VM = "panda-vm"
-    DEV_ANTLR = "antlr"
-    DEV_PYTHON_BUILD = "python-build"
+    Raises:
+        RuntimeError: If the curl command fails.
+        FileNotFoundError: If the curl command is not found.
+    """
+    output.unlink(missing_ok=True)
+    output.parent.mkdir(exist_ok=True, parents=True)
 
-    def is_packagable(self) -> bool:
-        return not self.name.startswith("DEV_")
+    curl_args = [
+        "curl",
+        "--location",  # Follow redirects
+        "--fail",  # Fail on HTTP errors
+        "--progress-bar",
+        "--output",
+        str(output),
+        *(curl_extra_args or []),
+        url,
+    ]
+    ok = False
+    try:
+        logging.info(f"Downloading {url} to {output}")
+        subprocess.check_call(curl_args)
+        ok = output.exists()
+        return output
+    except subprocess.CalledProcessError as e:
+        logging.error("curl failed")
+        raise RuntimeError(f"Failed to download {url}") from e
+    except FileNotFoundError as e:
+        raise FileNotFoundError("curl command not found.") from e
+    finally:
+        if ok:
+            logging.info(f"Successfully downloaded to {output}")
+        else:
+            output.unlink(missing_ok=True)
 
 
-ResourceT = str | Path | Callable[["ResourceLocator"], Path]
-
-
-class CacheManager:
-    def __init__(self, root_dir: Path):
-        self.root_dir = Path(root_dir)
-        self.root_dir.mkdir(parents=True, exist_ok=True)
-
-    def get_cache_dir(self, cache_key: str) -> Path:
-        cache_dir = self.root_dir / cache_key
-        cache_dir.mkdir(exist_ok=True)
-        return cache_dir
-
-    def fetch_url(
-        self,
-        cache_key: str,
-        url: str,
-        filename: str = "",
-        curl_extra_args: list[str] | None = None,
-        force_download: bool = False,
-    ) -> Path:
-        """Fetches a simple URL to a local cache directory if it doesn't already exist.
-
-        Args:
-            url: The simple, file-based URL to fetch (e.g., "http://example.com/foo.zip")
-            cache_key: Cache directory key
-            filename: Optional custom filename for the downloaded file
-            curl_extra_args: Additional arguments to pass to curl
-            force_download: If True, download even if file already exists
-
-        Returns:
-            Path to the downloaded file
-
-        Raises:
-            ValueError: If URL or cache_dir is invalid
-            subprocess.CalledProcessError: If curl command fails
-            FileNotFoundError: If curl is not available
-
-        Example:
-            fetch_url("hxxp://example.com/foo.zip", cache_dir="bar")
-            --> Downloads to and returns "/path/to/root/.cache/bar/foo.zip"
-
-            fetch_url("hxxp://example.com/foo.zip", cache_dir="bar", filename="baz.zip")
-            --> Downloads to and returns "/path/to/root/.cache/bar/baz.zip"
-        """
-        if not filename:
-            filename = url.split("/")[-1]
-        output_path = self.get_cache_dir(cache_key) / filename
-
-        # Check if file already exists and we're not forcing download
-        if output_path.exists() and not force_download:
-            logging.debug(f"Skip fetching, already exists: {output_path}")
-            return output_path
-
-        # Prepare curl args
-        curl_args = [
-            "curl",
-            "--location",  # Follow redirects
-            "--fail",  # Fail on HTTP errors
-            "--progress-bar",
-            "--retry",
-            "5",  # Retry for 5 times
-            "--output",
-            str(output_path),
-            *(curl_extra_args or []),
-            url,
-        ]
-        ok = False
-        try:
-            logging.info(f"Downloading {url} to {output_path}")
-            subprocess.run(curl_args, check=True)
-            logging.info(f"Successfully downloaded to {output_path}")
-            ok = True
-            return output_path
-        except subprocess.CalledProcessError as e:
-            logging.error(f"curl failed for {url}")
-            raise RuntimeError(f"Failed to download {url}") from e
-        except FileNotFoundError as e:
-            raise FileNotFoundError("curl command not found.") from e
-        finally:
-            if not ok:
-                output_path.unlink(missing_ok=True)
-
-    def fetch_git_repo(
-        self, cache_key: str, url: str, force_refresh: bool = False
-    ) -> Path:
-        """Clone or update a git repository."""
-        repo_dir = self.get_cache_dir(cache_key)
-
-        def git(args: list[str]):
-            try:
-                subprocess.run(["git", *args], cwd=repo_dir, check=True)
-            except subprocess.CalledProcessError as e:
-                logging.error(f"Git command failed: {e}")
-                raise
-
-        if force_refresh and repo_dir.exists():
-            shutil.rmtree(repo_dir)
-            repo_dir.mkdir()
-
-        if not (repo_dir / ".git").exists():
-            logging.info(f"Downloading repo from {url}")
-            git(["clone", url, str(repo_dir)])
-        return repo_dir
+ResourceT = type["Resource"]
 
 
 @dataclass
-class ResourceLocator:
-    mode: DeploymentMode
-    root_dir: Path = field(default_factory=Path)
-    caches: CacheManager = field(init=False)
+class ResourceContext:
+    """Central configuration and state manager for all resources.
 
-    # Path means a overridden value.
-    # str means a pre-configured relative path.
-    _layout: dict[ResourceType, ResourceT] = field(init=False)
+    - Determines the current DeploymentMode.
+    - Handles command-line arguments to override resource paths.
+    - Provides runtime cache for constructed Resource objects, ensuring that
+      each resource is located and processed only once.
+    """
+
+    deployment_mode: DeploymentMode
+    base_dir: Path = field(default_factory=Path)
+    cache_dir: Path = field(default_factory=Path)
+
+    resolved: dict[ResourceT, "Resource"] = field(init=False)
 
     def __post_init__(self):
-        # Clone the configuration for later modification.
-        self._layout = dict(_MODE_TO_LAYOUT[self.mode])
-        self.caches = CacheManager(self._get_cache_root())
+        self.cache_dir = self._determine_cache_dir()
+        self.resolved = {}
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
 
-    def _get_cache_root(self) -> Path:
-        cache_dirs = {
-            DeploymentMode.DEV: self.root_dir / ".cache",
-            DeploymentMode.PKG: Path("~/.cache/taihe").expanduser(),
-            DeploymentMode.BUNDLE: self.root_dir / "cache",
-        }
-        return cache_dirs[self.mode]
+    def _determine_cache_dir(self) -> Path:
+        match self.deployment_mode:
+            case DeploymentMode.DEV:
+                return self.base_dir / ".cache"
+            case DeploymentMode.BUNDLE | DeploymentMode.PKG:
+                return Path("~/.cache/taihe").expanduser()
 
-    def get(self, t: ResourceType) -> Path:
-        descriptor = self._layout[t]
-        match descriptor:
-            case Path():
-                return descriptor
-            case str():
-                resolved = self.root_dir / descriptor
-            case Callable():
-                resolved = descriptor(self)
-        self._layout[t] = resolved
-        return resolved
-
-    def override(self, t: ResourceType, p: Path):
-        self._layout[t] = p.resolve()
+    def set_path(self, t: ResourceT, p: Path):
+        self.resolved[t] = t(p)
 
     @classmethod
-    def detect(cls, file: str = __file__):
+    def from_path(cls, file: str) -> Self:
         # The directory looks like:
         #   7    6     5   4      3            2         1     0
         #                      repo_root/     compiler/taihe/utils/resources.py
@@ -209,60 +130,382 @@ class ResourceLocator:
         DEPTH_PKG_ROOT = 7
         parents = Path(file).absolute().parents
 
-        def get(i: int) -> Path:
+        def parent_at(i: int) -> Path:
             if i < len(parents):
                 return parents[i]
             return Path()
 
-        repo_dir = get(DEPTH_REPO)
+        repo_dir = parent_at(DEPTH_REPO)
         if repo_dir.name == "compiler":
-            return ResourceLocator(DeploymentMode.DEV, get(DEPTH_REPO + 1))
+            return cls(DeploymentMode.DEV, parent_at(DEPTH_REPO + 1))
 
         if repo_dir.name == "site-packages":
-            if get(DEPTH_PYRT).name == BUNDLE_PYTHON_RUNTIME_DIR_NAME:
-                return ResourceLocator(DeploymentMode.BUNDLE, get(DEPTH_PKG_ROOT))
+            if parent_at(DEPTH_PYRT).name == PythonBuild.BUNDLE_DIR_NAME:
+                return cls(DeploymentMode.BUNDLE, parent_at(DEPTH_PKG_ROOT))
             else:
-                return ResourceLocator(DeploymentMode.PKG, get(DEPTH_REPO - 1))
+                return cls(DeploymentMode.PKG, parent_at(DEPTH_REPO - 1) / "data")
 
         raise RuntimeError(f"cannot determine deployment layout ({repo_dir=})")
 
+    @staticmethod
+    def initialize(
+        cli_args: Namespace | None = None, resources: Sequence[ResourceT] | None = None
+    ) -> "ResourceContext":
+        global _singleton
+        if _singleton is not None:
+            raise ValueError("already constructed")
+        _singleton = ResourceContext.from_path(__file__)
+        if cli_args:
+            _singleton.apply_cli_args(
+                ALL_RESOURCES if resources is None else resources, cli_args
+            )
+        return _singleton
 
-BUNDLE_PYTHON_RUNTIME_DIR_NAME: Final = "pyrt"
+    @staticmethod
+    def instance() -> "ResourceContext":
+        global _singleton
+        if _singleton is None:
+            raise ValueError("must be constructed before")
+        return _singleton
 
-ANTLR_VERSION: Final = "4.13.2"
-ANTLR_MAVEN_REPO: Final = "https://mirrors.huaweicloud.com/repository/maven"
+    @staticmethod
+    def register_cli_options(
+        parser: ArgumentParser,
+        resources: Sequence[ResourceT] | None = None,
+        use_print: bool = True,
+        use_override: bool = True,
+    ) -> None:
+        """Register --print and --override CLI arguments to the parser."""
+        resources = ALL_RESOURCES if resources is None else resources
+        if use_print:
+            # Add --print-paths argument
+            parser.add_argument(
+                "--print-paths",
+                action="store_true",
+                help="Print all resource paths and exit",
+            )
 
-PYTHON_REPO_URL: Final = "https://gitee.com/ASeaSalt/python-multi-platform.git"
+            # Dynamically add --print-<resourcetype>-path arguments
+            for r in resources:
+                parser.add_argument(
+                    f"--print-{r.CLI_NAME}-path",
+                    action="store_true",
+                    help=f"Print {r.CLI_NAME} path and exit",
+                )
+
+        if use_override:
+            # Dynamically add --override-<resourcetype>-path arguments
+            for r in resources:
+                parser.add_argument(
+                    f"--override-{r.CLI_NAME}-path",
+                    type=str,
+                    metavar="PATH",
+                    help=f"Override {r.CLI_NAME} path",
+                )
+
+    def apply_cli_args(
+        self, resources: Sequence[ResourceT], args: Namespace, auto_exit: bool = True
+    ) -> bool:
+        """Process CLI arguments. Returns True if program should exit."""
+
+        def key_of(res: ResourceT, prefix: str):
+            return f"{prefix}_{res.CLI_NAME.replace('-', '_')}_path"
+
+        # Apply overrides
+        for r in resources:
+            if path := getattr(args, key_of(r, "override"), None):
+                self.set_path(r, Path(path))
+
+        should_exit = False
+        # Handle print requests
+        if args.print_paths:
+            print(f"<mode>: {self.deployment_mode.name}")
+            print(f"<base>: {self.base_dir}")
+            for r in resources:
+                if issubclass(r, CachedResource):
+                    prefix = "<pending> "
+                    value = r.locate(self)
+                else:
+                    prefix = ""
+                    value = r.resolve_path(self)
+                print(f"{prefix}{r.CLI_NAME}: {value}")
+            should_exit = True
+
+        # Check individual print requests
+        for r in resources:
+            if getattr(args, key_of(r, "print"), False):
+                print(r.resolve_path(self))
+                should_exit = True
+
+        if should_exit and auto_exit:
+            exit(0)
+
+        return should_exit
 
 
-def _resolve_antlr(locator: ResourceLocator) -> Path:
-    url = f"{ANTLR_MAVEN_REPO}/org/antlr/antlr4/{ANTLR_VERSION}/antlr4-{ANTLR_VERSION}-complete.jar"
-    return locator.caches.fetch_url(cache_key="antlr", url=url)
+_singleton: ResourceContext | None = None
 
 
-def _resolve_python_build(locator: ResourceLocator) -> Path:
-    return locator.caches.fetch_git_repo(
-        cache_key="python-packages", url=PYTHON_REPO_URL
+@dataclass
+class Resource(ABC):
+    """Abstract base class representing an external dependency or asset."""
+
+    CLI_NAME: ClassVar[str]
+    base_path: Path
+
+    @classmethod
+    @abstractmethod
+    def construct(cls, ctx: ResourceContext) -> Self:
+        """Returns a instance by auto detection."""
+
+    @classmethod
+    def resolve(cls, ctx: ResourceContext | None = None) -> Self:
+        """Resolves the resource from cache, creating one if not exists."""
+        ctx = ctx or ResourceContext.instance()
+        if (res := ctx.resolved.get(cls, None)) is None:
+            res = cls.construct(ctx)
+            ctx.resolved[cls] = res
+        return cast(Self, res)
+
+    @classmethod
+    def resolve_path(cls, ctx: ResourceContext | None = None) -> Path:
+        """Resolves the path from cache, creating an instance if not exists."""
+        return cls.resolve(ctx).base_path
+
+
+@dataclass
+class PathResource(Resource):
+    """Resources bundled with the application distribution.
+
+    The path to the resource is determined by the active `DeploymentMode` and
+    is constructed by joining the `ResourceContext.base_dir` with one of the
+    class-level path variables (`PATH_DEV`, `PATH_PKG`, `PATH_BUNDLE`). This
+    allows the application to locate bundled assets correctly, regardless of
+    whether it is running from a source checkout, an installed package, or a
+    self-contained bundle.
+
+    Attributes:
+        PATH_PKG: The relative path to the resource in `PKG` mode.
+        PATH_DEV: The relative path to the resource in `DEV` mode.
+        PATH_BUNDLE: The relative path to the resource in `BUNDLE` mode.
+    """
+
+    PATH_PKG: ClassVar[str]
+    PATH_DEV: ClassVar[str]
+    PATH_BUNDLE: ClassVar[str]
+
+    @override
+    @classmethod
+    def construct(cls, ctx: ResourceContext) -> Self:
+        match ctx.deployment_mode:
+            case DeploymentMode.DEV:
+                return cls(ctx.base_dir / cls.PATH_DEV)
+            case DeploymentMode.PKG:
+                return cls(ctx.base_dir / cls.PATH_PKG)
+            case DeploymentMode.BUNDLE:
+                return cls(ctx.base_dir / cls.PATH_BUNDLE)
+
+
+class CachedResource(Resource, ABC):
+    """Resources that must be fetched from an external source and cached locally.
+
+    This class is for dependencies that are not included in the application
+    package, such as large binaries, toolchains, or source repositories.
+    Normally, the resource is stored in a subdirectory of the
+    `ResourceContext.cache_dir`, determined by the `PATH_CACHE` class variable.
+    The `construct` method ensures the resource is available by checking
+    `exists()` and calling `fetch()` if it is missing or outdated.
+
+    Attributes:
+        PATH_CACHE: The relative path within the cache directory where the
+                    resource should be stored.
+    """
+
+    PATH_CACHE: ClassVar[str]
+
+    @classmethod
+    def locate(cls, ctx: ResourceContext) -> Path:
+        """Returns the path of the resource."""
+        return ctx.cache_dir / cls.PATH_CACHE
+
+    def exists(self) -> bool:
+        """Validates that the resource exists."""
+        return self.base_path.exists()
+
+    @abstractmethod
+    def fetch(self):
+        """Acquires the resource (e.g., downloading a file, cloning a git repository)."""
+
+    @override
+    @classmethod
+    def construct(cls, ctx: ResourceContext) -> Self:
+        self = cls(cls.locate(ctx))
+        if not self.exists():
+            self.fetch()
+        return self
+
+
+class RuntimeSource(PathResource):
+    CLI_NAME = "runtime-source"
+    PATH_PKG = PATH_DEV = "runtime/src"
+    PATH_BUNDLE = "src/taihe/runtime"
+
+
+class RuntimeHeader(PathResource):
+    CLI_NAME = "runtime-header"
+    PATH_PKG = PATH_DEV = "runtime/include"
+    PATH_BUNDLE = "include"
+
+
+class StandardLibrary(PathResource):
+    CLI_NAME = "stdlib"
+    PATH_PKG = PATH_DEV = "stdlib"
+    PATH_BUNDLE = "lib/taihe/stdlib"
+
+
+class Documentation(PathResource):
+    CLI_NAME = "doc"
+    PATH_PKG = PATH_DEV = "doc"
+    PATH_BUNDLE = "share/doc/taihe"
+
+
+class _LegacyPandaVm(PathResource):
+    PATH_DEV = ".panda_vm"
+    PATH_PKG = "<no-panda-vm-in-pkg-mode>"
+    PATH_BUNDLE = "var/lib/panda_vm"
+
+
+@dataclass
+class PandaVm(CachedResource):
+    CLI_NAME = "panda-vm"
+    PATH_CACHE = "panda-vm"
+    VERSION: Final = "sdk-1.5.0-dev.35451"
+    CREDENTIAL = "koala-pub:y3t!n0therP"
+    URL: Final = (
+        "https://nexus.cn.bz-openlab.ru:10443/repository/koala-npm/@panda/sdk/-"
     )
 
+    # Computed attributes
+    ani_header_dir: Path = field(init=False)
+    stdlib_sources: dict[str, Path] = field(init=False)
+    stdlib_lib: Path = field(init=False)
+    host_tools_dir: Path = field(init=False)
 
-_MODE_TO_LAYOUT: Final[dict[DeploymentMode, dict[ResourceType, ResourceT]]] = {
-    DeploymentMode.DEV: {
-        ResourceType.RUNTIME_SOURCE: "runtime/src",
-        ResourceType.RUNTIME_HEADER: "runtime/include",
-        ResourceType.STDLIB: "stdlib",
-        ResourceType.DOCUMENTATION: "cookbook",
-        ResourceType.DEV_PANDA_VM: ".panda_vm",
-        ResourceType.DEV_ANTLR: _resolve_antlr,
-        ResourceType.DEV_PYTHON_BUILD: _resolve_python_build,
-    },
-    # Python packaging is not supported yet
-    DeploymentMode.PKG: {},
-    DeploymentMode.BUNDLE: {
-        ResourceType.RUNTIME_SOURCE: "src/taihe/runtime",
-        ResourceType.RUNTIME_HEADER: "include",
-        ResourceType.STDLIB: "lib/taihe/stdlib",
-        ResourceType.DOCUMENTATION: "share/doc/taihe",
-        ResourceType.DEV_PANDA_VM: "var/lib/panda_vm",
-    },
-}
+    def __post_init__(self):
+        self.ani_header_dir = (
+            self.base_path / "ohos_arm64/include/plugins/ets/runtime/ani"
+        )
+        self.stdlib_sources = {
+            dir: self.base_path / "ets/stdlib" / dir for dir in ["std", "escompat"]
+        }
+        self.stdlib_lib = self.base_path / "ets" / "etsstdlib.abc"
+        self.host_tools_dir = self.base_path / "linux_host_tools"
+
+    def tool(self, binary: str) -> Path:
+        return self.host_tools_dir / "bin" / binary
+
+    def _read_version(self) -> str:
+        try:
+            version_file = self.base_path / "version.txt"
+            return version_file.read_text().strip()
+        except (FileNotFoundError, OSError):
+            return ""
+
+    def _write_version(self, version: str):
+        version_file = self.base_path / "version.txt"
+        version_file.write_text(version)
+
+    @override
+    @classmethod
+    def locate(cls, ctx: ResourceContext) -> Path:
+        # Migrate from legacy location if needed
+        base_dir = super().locate(ctx)
+        old = _LegacyPandaVm.construct(ctx).base_path
+        if old.exists():
+            new = base_dir
+            logging.info("Migrating %s -> %s", old, new)
+            try:
+                new.rmdir()  # Already created by `get_cache_dir`
+                old.rename(new)
+            except OSError:  # new has contents
+                logging.warning("Cannot migrate: the new directory already exists")
+                logging.warning("Purging the old directory to avoid futher migration")
+                shutil.rmtree(old, ignore_errors=True)
+
+        return base_dir / "package"
+
+    @override
+    def exists(self) -> bool:
+        return self._read_version() == self.VERSION
+
+    @override
+    def fetch(self):
+        tgz = self.base_path.parent / f"{self.VERSION}.tgz"
+        url = f"{self.URL}/{self.VERSION}.tgz"
+        if not tgz.exists():
+            fetch_url(url, tgz, curl_extra_args=("--user", self.CREDENTIAL))
+
+        shutil.rmtree(self.base_path, ignore_errors=True)
+        with tarfile.open(tgz, "r:gz") as tar:
+            tar.extractall(self.base_path.parent, filter="tar")
+
+        self._write_version(self.VERSION)
+
+
+class PythonBuild(CachedResource):
+    CLI_NAME = "python-packages"
+    PATH_CACHE = "python-packages"
+
+    REPO: Final = "https://gitee.com/ASeaSalt/python-multi-platform.git"
+    BUNDLE_DIR_NAME: Final = "pyrt"
+
+    @override
+    def fetch(self):
+        shutil.rmtree(self.base_path, ignore_errors=True)
+        logging.info(f"Cloning repo from {self.REPO} to {self.base_path}")
+        subprocess.run(["git", "clone", self.REPO, self.base_path], check=True)
+
+    def extract_to(self, target_dir: Path, *, system: str):
+        tgz = self.base_path / f"{system}-python.tar.gz"
+
+        parent_dir = target_dir.parent
+        with tarfile.open(tgz, "r:gz") as tar:
+            tar.extractall(parent_dir, filter="tar")
+        # Next, rename "dist/lib/python" to "dist/lib/pyrt"
+        old_dir = parent_dir / "python"
+        if target_dir.exists():
+            target_dir.rmdir()
+        old_dir.rename(target_dir)
+
+
+class Antlr(CachedResource):
+    CLI_NAME = "antlr"
+
+    VERSION: Final = "4.13.2"
+    MAVEN_REMOTE: Final = "https://mirrors.huaweicloud.com/repository/maven"
+    MAVEN_LOCAL: Final = "~/.m2/repository"
+    MAVEN_PATH: Final = f"org/antlr/antlr4/{VERSION}/antlr4-{VERSION}-complete.jar"
+
+    @override
+    @classmethod
+    def locate(cls, ctx: ResourceContext) -> Path:
+        del ctx
+        return Path(f"{cls.MAVEN_LOCAL}/{cls.MAVEN_PATH}").expanduser()
+
+    @override
+    def fetch(self):
+        fetch_url(f"{self.MAVEN_REMOTE}/{self.MAVEN_PATH}", self.base_path)
+
+    def run_tool(self, args: list[str]):
+        subprocess.check_call(
+            ["java", "-cp", str(self.base_path), "org.antlr.v4.Tool", *args], env={}
+        )
+
+
+BUILTIN_RESOURCES: Sequence[ResourceT] = [
+    RuntimeSource,
+    RuntimeHeader,
+    StandardLibrary,
+    Documentation,
+]
+ALL_RESOURCES: Sequence[ResourceT] = [*BUILTIN_RESOURCES, PandaVm, PythonBuild, Antlr]

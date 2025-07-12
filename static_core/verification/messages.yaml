@@ -565,6 +565,13 @@ messages:
     short_message: >
       Expected instance field.
 
+  NotCanonicalizedUnionType:
+    number: 71
+    args: type, expected_type
+    level: error
+    short_message: >
+      Union type is not canonized: '${type}'. Expected: '${expected_type}'.
+
   CflowInvalidJumpOutsideMethodBody:
     number: 1000
     args: method_name, jump_target_offset, jump_instruction_offset

@@ -16,7 +16,6 @@
 /*---
 desc: Resizable array types
 tags: []
-
 ---*/
 
 function main() {
@@ -25,5 +24,4 @@ function main() {
     arr[0] = "Hello"
     arktest.assertEQ(1, arr.length);
     arktest.assertEQ("Hello", arr[0]);
-
 }

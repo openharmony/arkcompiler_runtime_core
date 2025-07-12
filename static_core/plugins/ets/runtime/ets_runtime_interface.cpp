@@ -132,6 +132,7 @@ compiler::RuntimeInterface::InteropCallKind EtsRuntimeInterface::GetInteropCallK
         uint32_t const argReftypeShift = method->GetReturnType().IsReference() ? 1 : 0;
         ScopedMutatorLock lock;
         auto cls = classLinker->GetClass(*pf, pda.GetReferenceType(1 + argReftypeShift), linkerCtx);
+        ASSERT(cls != nullptr);
         if (!cls->IsStringClass()) {
             return InteropCallKind::CALL_BY_VALUE;
         }

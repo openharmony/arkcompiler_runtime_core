@@ -319,8 +319,8 @@ function abortTest() {
         (v: Double) => {
             throw new Error('Test failed. Promise is fulfilled.')
         },
-        (err: string): void => {
-             arktest.assertEQ(err, "Aborted", 'Test failed. Wrong error value.');
+        (err: Error): void => {
+             arktest.assertEQ(err.message, "Aborted", 'Test failed. Wrong error value.');
     }
     );
     return check(p1, "abortTest");
@@ -751,7 +751,8 @@ function main(): int {
     asyncLockTestsuite.addTest('asynclockStateTest2', assertasynclockStateTest2);
     asyncLockTestsuite.addTest('asynclockStateTest3', assertasynclockStateTest3);
     asyncLockTestsuite.addTest('asynclockStateTest4', assertasynclockStateTest4);
-
+    asyncLockTestsuite.addTest('asynclockabortTest', () => { arktest.assertTrue(abortTest()); });
+    
     let summ = 0;
     summ += asyncLockTestsuite.run();
     summ += asyncLockAppTestsuite.run();

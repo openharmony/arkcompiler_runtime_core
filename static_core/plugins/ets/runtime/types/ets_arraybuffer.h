@@ -59,7 +59,9 @@ public:
      */
     ALWAYS_INLINE static ObjectHeader *AllocateNonMovableArray(EtsInt length)
     {
-        return EtsByteArray::Create(length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT)->GetCoreType();
+        auto byteArray = EtsByteArray::Create(length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+        ASSERT(byteArray != nullptr);
+        return byteArray->GetCoreType();
     }
 
     ALWAYS_INLINE static EtsLong GetAddress(const EtsByteArray *array)
@@ -269,6 +271,7 @@ private:
         auto *allocator = static_cast<mem::Allocator *>(Runtime::GetCurrent()->GetInternalAllocator());
         auto *pandaVm = coro->GetPandaVM();
 
+        ASSERT(arrayBufferHandle.GetPtr() != nullptr);
         auto *finalizationInfo =
             allocator->New<FinalizationInfo>(arrayBufferHandle.GetPtr()->GetData(), finalizerFunction, finalizerHint);
         EtsHandle<EtsObject> handle(arrayBufferHandle);
@@ -301,7 +304,8 @@ private:
     void InitializeByDefault(EtsCoroutine *coro, size_t length)
     {
         ObjectAccessor::SetObject(coro, this, GetManagedDataOffset(), AllocateNonMovableArray(length));
-        byteLength_ = length;
+        ASSERT(length <= static_cast<size_t>(std::numeric_limits<EtsInt>::max()));
+        byteLength_ = static_cast<EtsInt>(length);
         nativeData_ =
             GetAddress(EtsByteArray::FromCoreType(ObjectAccessor::GetObject(coro, this, GetManagedDataOffset())));
         ASSERT(nativeData_ != 0);
@@ -313,7 +317,8 @@ private:
                                   void *data, EtsFinalize finalizerFunction, void *finalizerHint, size_t length)
     {
         ObjectAccessor::SetObject(coro, this, GetManagedDataOffset(), nullptr);
-        byteLength_ = length;
+        ASSERT(length <= static_cast<size_t>(std::numeric_limits<EtsInt>::max()));
+        byteLength_ = static_cast<EtsInt>(length);
         nativeData_ = reinterpret_cast<EtsLong>(data);
         ASSERT(nativeData_ != 0);
         isResizable_ = ToEtsBoolean(false);

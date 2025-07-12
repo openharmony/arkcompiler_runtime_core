@@ -24,8 +24,8 @@ class StaticObjectAccessor : public common::StaticObjectAccessorInterface {
 public:
     bool HasProperty(common::ThreadHolder *thread, const common::BaseObject *obj, const char *name) override;
 
-    common::BoxedValue GetProperty(common::ThreadHolder *thread,
-                                   const common::BaseObject *obj, const char *name) override;
+    common::BoxedValue GetProperty(common::ThreadHolder *thread, const common::BaseObject *obj,
+                                   const char *name) override;
 
     bool SetProperty(common::ThreadHolder *thread, common::BaseObject *obj, const char *name,
                      common::BoxedValue value) override;

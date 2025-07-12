@@ -62,8 +62,13 @@ class TestA005 {
 };
 
 class TestA006 {
-    public native foo(x: int, y: int): int;
-    public native foo(x: int, y: int, z: int): int;
+    public native foo1(x: int, y: int): int;
+    public native foo2(x: int, y: int, z: int): int;
+    overload foo {foo1, foo2};
+
+    public static native sum1(x: int, y: int): int;
+    public static native sum2(x: int, y: int, z: int): int;
+    static overload sum {sum1, sum2};
 }
 
 interface Iface {

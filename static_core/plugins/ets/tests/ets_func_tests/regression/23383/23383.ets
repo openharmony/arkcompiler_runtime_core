@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
- /*---
- desc: Issue 23383. Cannot find type
- tags: [compile-only]
+/*---
+desc: Issue 23383. Cannot find type
+tags: [compile-only]
+---*/
 
- ---*/
+import { TextEditControllerEx, PreviewText } from './other'
 
- import { TextEditControllerEx, PreviewText } from './other'
-
- export declare class RichEditorBaseController implements TextEditControllerEx {
-    getPreviewText: () => PreviewText
- }
+export declare class RichEditorBaseController implements TextEditControllerEx {
+   getPreviewText: () => PreviewText
+}

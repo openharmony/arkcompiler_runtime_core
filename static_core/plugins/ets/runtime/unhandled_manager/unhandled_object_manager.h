@@ -18,6 +18,7 @@
 
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/ets_handle.h"
 
 namespace ark::ets {
 
@@ -51,6 +52,9 @@ public:
     /// @brief Invokes managed method to apply custom handler on stored rejected promises
     void ListRejectedPromises(EtsCoroutine *coro);
 
+    /// @brief Checks if manager has unhandled objects captured
+    bool HasObjects() const;
+
     /// @brief Updates references to objects moved by GC
     void UpdateObjects(const GCRootUpdater &gcRootUpdater);
 
@@ -59,7 +63,7 @@ public:
 
 private:
     PandaEtsVM *vm_;
-    os::memory::Mutex mutex_;
+    mutable os::memory::Mutex mutex_;
     PandaUnorderedSet<EtsObject *> failedJobs_ GUARDED_BY(mutex_);
     PandaUnorderedSet<EtsObject *> rejectedPromises_ GUARDED_BY(mutex_);
 };

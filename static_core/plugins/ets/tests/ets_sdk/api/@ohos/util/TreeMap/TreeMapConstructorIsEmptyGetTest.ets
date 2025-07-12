@@ -60,12 +60,13 @@ function testConstructorCustomStringComparatorSetStringKeys() {
     arktest.assertEQ(treeMap.length, 3);
 }
 
+
+class TestEntry {
+    id: number = 0;
+}
+
 //Test cases ported from ArkTS 1.0:TREEMAP_0300
 function testConstructorCustomObjectComparatorSetCustomObjectKeys() {
-    class TestEntry {
-        id: number = 0;
-    }
-
     let ts1: TreeMap<TestEntry, string> =
         new TreeMap<TestEntry, string>((t1: TestEntry, t2: TestEntry): number => {
             return t2.id - t1.id;
@@ -85,10 +86,6 @@ function testConstructorCustomObjectComparatorSetCustomObjectKeys() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_0400
 function testConstructorNoComparatorSetCustomObjectKeys() {
-    class TestEntry {
-        id: number = 0;
-    }
-
     let ts1 = new TreeMap<TestEntry, string>();
     let entry1: TestEntry = {
         id: 0

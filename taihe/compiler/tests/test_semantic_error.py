@@ -16,13 +16,18 @@
 from io import StringIO
 
 import pytest
-from typing_extensions import override
-
 from taihe.driver.backend import BackendRegistry
 from taihe.driver.contexts import CompilerInstance, CompilerInvocation
 from taihe.utils.diagnostics import DiagBase, DiagnosticsManager
 from taihe.utils.exceptions import (
-    AdhocError,
+    AttrArgMissingError,
+    AttrArgOrderError,
+    AttrArgRedefError,
+    AttrArgTypeError,
+    AttrArgUnrequiredError,
+    AttrConflictError,
+    AttrNotExistError,
+    AttrTargetError,
     DeclarationNotInScopeError,
     DeclNotExistError,
     DeclRedefError,
@@ -38,6 +43,7 @@ from taihe.utils.exceptions import (
     TypeUsageError,
 )
 from taihe.utils.sources import SourceBuffer
+from typing_extensions import override
 
 
 class SemanticTestDiagnosticsManager(DiagnosticsManager):
@@ -399,511 +405,130 @@ ani_invocation = CompilerInvocation(
 )
 
 
-def test_namespace():
+def test_attr_arg_order_error():
     # fmt: off
     test_instance = SemanticTestCompilerInstance(ani_invocation)
     test_instance.add_source(
         "package",
-        "@!namespace(0)\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_iface_set_1():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
+        '@!namespace(module="abc", "a.b")\n'
         "interface IFoo {\n"
-        "    @set SetName(): String;\n"
-        "}"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_iface_set_2():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "interface IFoo {\n"
-        "    @set Name(name: String): void;\n"
-        "}"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_set_1():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "interface IFoo {\n"
-        "    f(): String;\n"
-        "}\n"
-        "@set\n"
-        '@static("IFoo")\n'
-        "function setName(): String;\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_set_2():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "interface IFoo {\n"
-        "    f(): String;\n"
-        "}\n"
-        "@set\n"
-        '@static("IFoo")\n'
-        "function name(name: String): void;\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_iface_get_1():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "interface IFoo {\n"
-        "    @get GetName(name: String): void;\n"
-        "}"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_iface_get_2():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "interface IFoo {\n"
-        "    @get Name(): String;\n"
-        "}"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_get_1():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "interface IFoo {\n"
-        "    f(): String;\n"
-        "}\n"
-        "@get\n"
-        '@static("IFoo")\n'
-        "function getName(name: String): void;\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_get_2():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "interface IFoo {\n"
-        "    f(): String;\n"
-        "}\n"
-        "@get\n"
-        '@static("IFoo")\n'
-        "function name(): String;\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_onoff_1():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "@on_off\n"
-        "function a(): void;\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_onoff_2():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "@on_off(0)\n"
-        "function a(): void;\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_onoff_overload_1():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "@on_off\n"
-        "@overload\n"
-        "function ona(): void;\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_onoff_overload_2():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "@on_off\n"
-        '@overload("reon")\n'
-        "function ona(): void;\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_iface_onoff_1():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "interface IFoo {\n"
-        "    @on_off(0)\n"
         "    a(): void;\n"
         "}\n"
     )
     test_instance.run()
-    test_instance.assert_has_error(AdhocError)
+    test_instance.assert_has_error(AttrArgOrderError)
 
 
-def test_iface_onoff_2():
+def test_attr_arg_redef_error():
+    # fmt: off
+    test_instance = SemanticTestCompilerInstance(ani_invocation)
+    test_instance.add_source(
+        "package",
+        '@!namespace(module="abc", module="def")\n'
+        "interface IFoo {\n"
+        "    a(): void;\n"
+        "}\n"
+    )
+    test_instance.run()
+    test_instance.assert_has_error(AttrArgRedefError)
+
+
+def test_attr_arg_missing_error():
     # fmt: off
     test_instance = SemanticTestCompilerInstance(ani_invocation)
     test_instance.add_source(
         "package",
         "interface IFoo {\n"
-        "    @on_off\n"
         "    a(): void;\n"
         "}\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_iface_onoff_overload_1():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "interface IFoo {\n"
-        "    @on_off\n"
-        "    @overload\n"
-        "    a(): void;\n"
-        "}\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_iface_onoff_overload_2():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "interface IFoo {\n"
-        "    @on_off\n"
-        '    @overload("reon")\n'
-        "    a(): void;\n"
-        "}\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_iface_overload():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "interface IFoo {\n"
-        "    @overload\n"
-        "    a(): void;\n"
-        "}\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_iface_async_overload():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "interface IFoo {\n"
-        "    @gen_async\n"
-        "    @overload\n"
-        "    a(): void;\n"
-        "}\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_iface_async():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "interface IFoo {\n"
-        "    @gen_async\n"
-        "    a(): void;\n"
-        "}\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_iface_promise_overload():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "interface IFoo {\n"
-        "    @gen_promise\n"
-        "    @overload\n"
-        "    a(): void;\n"
-        "}\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_iface_promise():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "interface IFoo {\n"
-        "    @gen_promise\n"
-        "    a(): void;\n"
-        "}\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_async_overload():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "@gen_async\n"
-        "@overload\n"
-        "function a(): void;\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_async():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "@gen_async\n"
-        "function a(): void;\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_promise_overload():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "@gen_promise\n"
-        "@overload\n"
-        "function a(): void;\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_promise():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "@gen_promise\n"
-        "function a(): void;\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_overload():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "@overload\n"
-        "function a(): void;\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_ctor():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "@ctor\n"
-        "function f(): String;\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_static():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
         "@static\n"
-        "function f(): String;\n"
+        "function f(): void;\n"
     )
     test_instance.run()
-    test_instance.assert_has_error(AdhocError)
+    test_instance.assert_has_error(AttrArgMissingError)
 
 
-def test_bigint():
+def test_attr_arg_unrequired_error():
     # fmt: off
     test_instance = SemanticTestCompilerInstance(ani_invocation)
     test_instance.add_source(
         "package",
-        "struct A {\n"
-        "    a: @bigint Array<f32>;\n"
+        "interface IFoo {\n"
+        "    a(): void;\n"
         "}\n"
+        '@static("IFoo", xxx="b")\n'
+        "function f(): void;\n"
     )
     test_instance.run()
-    test_instance.assert_has_error(AdhocError)
+    test_instance.assert_has_error(AttrArgUnrequiredError)
 
 
-def test_typedarray():
+def test_attr_arg_type_error():
     # fmt: off
     test_instance = SemanticTestCompilerInstance(ani_invocation)
     test_instance.add_source(
         "package",
-        "struct A {\n"
-        "    a: @typedarray Array<String>;\n"
+        "interface IFoo {\n"
+        "    a(): void;\n"
         "}\n"
+        "@static(123)\n"
+        "function f(): void;\n"
     )
     test_instance.run()
-    test_instance.assert_has_error(AdhocError)
+    test_instance.assert_has_error(AttrArgTypeError)
 
 
-def test_arraybuffer():
+def test_attr_not_exist_error():
     # fmt: off
     test_instance = SemanticTestCompilerInstance(ani_invocation)
     test_instance.add_source(
         "package",
-        "struct A {\n"
-        "    a: @arraybuffer Array<u64>;\n"
+        "@clasz\n"
+        "interface IFoo {\n"
+        "    a(): void;\n"
         "}\n"
     )
     test_instance.run()
-    test_instance.assert_has_error(AdhocError)
+    test_instance.assert_has_error(AttrNotExistError)
 
 
-def test_sts_type():
+def test_attr_conflict_error_1():
     # fmt: off
     test_instance = SemanticTestCompilerInstance(ani_invocation)
     test_instance.add_source(
         "package",
-        "struct A {\n"
-        '    a: @sts_type("xxx", "yyy") Opaque;\n'
+        "union MyUnion {\n"
+        "    @null\n"
+        "    @undefined\n"
+        "    a;\n"
         "}\n"
     )
     test_instance.run()
-    test_instance.assert_has_error(AdhocError)
+    test_instance.assert_has_error(AttrConflictError)
 
 
-def test_struct_extend():
+def test_attr_conflict_error_2():
+    # fmt: off
+    test_instance = SemanticTestCompilerInstance(ani_invocation)
+    test_instance.add_source(
+        "package",
+        "interface IFoo {\n"
+        '    @get("a")\n'
+        '    @get("b")\n'
+        "    getX(): String;\n"
+        "}\n"
+    )
+    test_instance.run()
+    test_instance.assert_has_error(AttrConflictError)
+
+
+def test_attr_target_error():
     # fmt: off
     test_instance = SemanticTestCompilerInstance(ani_invocation)
     test_instance.add_source(
         "package",
         "@class\n"
-        "struct A {\n"
-        "    @extends base: i32;\n"
-        "}\n"
+        "function a(): void;\n"
     )
     test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_const_enum():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "@const\n"
-        "enum E: i32 {\n"
-        "    A = 1,\n"
-        "    B = 2,\n"
-        "}\n"
-        "function f(a: E): void;\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_const():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "enum A: f32 {}\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_union():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "union U {\n"
-        "    a;\n"
-        "}\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
-
-
-def test_map():
-    # fmt: off
-    test_instance = SemanticTestCompilerInstance(ani_invocation)
-    test_instance.add_source(
-        "package",
-        "function a(x: Map<String, i32>): Map<String, i32>;\n"
-    )
-    test_instance.run()
-    test_instance.assert_has_error(AdhocError)
+    test_instance.assert_has_error(AttrTargetError)

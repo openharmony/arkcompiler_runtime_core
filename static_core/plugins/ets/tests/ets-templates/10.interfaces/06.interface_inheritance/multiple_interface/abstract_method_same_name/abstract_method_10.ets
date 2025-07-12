@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The method with the same name has the same parameter type but different return types, redefine the calculated method.
+desc: >-
+    The method with the same name has the same parameter type but different return types,
+    redefine the calculated method.
 ---*/
 
 interface Parent1 {

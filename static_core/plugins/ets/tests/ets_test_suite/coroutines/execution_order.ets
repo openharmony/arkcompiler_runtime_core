@@ -21,7 +21,7 @@ class StepSequence {
 
     checkOrder() {
         arktest.assertEQ(this.sequence.length, this.numCheckpoints,
-                 "Test failed. Expected " + this.numCheckpoints + " checkpoints, but got " + this.sequence.length);
+                 'Test failed. Expected ' + this.numCheckpoints + ' checkpoints, but got ' + this.sequence.length);
         for (let step = 0; step < this.sequence.length; ++step) {
             arktest.assertEQ(step, this.sequence[step], `Failed at step: ${step}. Got ${this.sequence[step]}`);
         }
@@ -89,7 +89,7 @@ function testPromiseBeforeAsync() {
 
 async function dealPromise(asyncThen: boolean) {
     const p: Promise<string> = new Promise<string>((resolve, reject) => {
-        resolve("resolve");
+        resolve('resolve');
         executionOrder.checkpoint(0);
     });
     if (asyncThen) {
@@ -128,11 +128,13 @@ function testWithAsyncPromiseThen() {
     executionOrder.checkOrder();
 }
 
-
-function main() {
-    testWithPendingPromise();
-    testWithResolvedPromise();
-    testPromiseBeforeAsync();
-    testWithPromiseThen();
-    testWithAsyncPromiseThen();
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.execution_order');
+    testSuite.addTest('testWithPendingPromise', testWithPendingPromise);
+    testSuite.addTest('testWithResolvedPromise', testWithResolvedPromise);
+    testSuite.addTest('testPromiseBeforeAsync', testPromiseBeforeAsync);
+    testSuite.addTest('testWithPromiseThen', testWithPromiseThen);
+    testSuite.addTest('testWithAsyncPromiseThen', testWithAsyncPromiseThen);
+    let res = testSuite.run();
+    return res;
 }

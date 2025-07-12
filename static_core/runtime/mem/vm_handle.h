@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,7 @@ public:
     explicit VMHandle(ManagedThread *thread, ObjectHeader *object)
     {
         if (object != nullptr) {
+            ASSERT(thread != nullptr);
             auto scope = thread->GetTopScope<ObjectHeader *>();
             ASSERT(scope != nullptr);
             address_ = scope->NewHandle(object);
@@ -75,7 +76,9 @@ public:
 
     T *operator->()
     {
-        return GetPtr();
+        T *ptr = GetPtr();
+        ASSERT(ptr != nullptr);
+        return ptr;
     }
 };
 

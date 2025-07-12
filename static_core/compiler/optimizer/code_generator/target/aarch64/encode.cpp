@@ -477,11 +477,11 @@ void Aarch64Encoder::LoadPcRelative(Reg reg, intptr_t offset, Reg regAddr)
     } else {
         size_t pc = GetCodeOffset() + GetCursorOffset();
         size_t addr;
-        if (intptr_t res = helpers::ToSigned(pc) + offset; res < 0) {
+        if (auto res = static_cast<intptr_t>(helpers::ToSigned(pc) + offset); res < 0) {
             // Make both, pc and addr, positive
             ssize_t extend = RoundUp(std::abs(res), vixl::aarch64::kPageSize);
-            addr = res + extend;
-            pc += extend;
+            addr = static_cast<size_t>(res + extend);
+            pc += static_cast<size_t>(extend);
         } else {
             addr = res;
         }
@@ -512,7 +512,7 @@ void Aarch64Encoder::MakeCallAot(intptr_t offset)
 bool Aarch64Encoder::CanMakeCallByOffset(intptr_t offset)
 {
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
-    auto off = (offset >> vixl::aarch64::kInstructionSizeLog2);
+    auto off = (static_cast<uintptr_t>(offset) >> vixl::aarch64::kInstructionSizeLog2);
     return vixl::aarch64::Instruction::IsValidImmPCOffset(vixl::aarch64::ImmBranchType::UncondBranchType, off);
 }
 
@@ -2413,7 +2413,7 @@ void Aarch64Encoder::CheckAlignment(MemRef mem, size_t size)
         // We need additional tmp register for check base + offset.
         // The case when separately the base and the offset are not aligned, but in sum there are aligned very rarely.
         // Therefore, the alignment check for base and offset takes place separately
-        [[maybe_unused]] size_t offset = mem.GetDisp();
+        [[maybe_unused]] auto offset = static_cast<size_t>(mem.GetDisp());
         ASSERT((offset & alignmentMask) == 0);
     }
     auto baseReg = mem.GetBase();
@@ -3309,7 +3309,7 @@ void Aarch64Encoder::LoadStoreRegisters(RegMask registers, ssize_t slot, size_t 
     if (registers.none()) {
         return;
     }
-    int32_t lastReg = registers.size() - 1;
+    auto lastReg = static_cast<int32_t>(registers.size() - 1);
     for (; lastReg >= 0; --lastReg) {
         if (registers.test(lastReg)) {
             break;
@@ -3317,12 +3317,12 @@ void Aarch64Encoder::LoadStoreRegisters(RegMask registers, ssize_t slot, size_t 
     }
     // Construct single add for big offset
     size_t spOffset;
-    auto lastOffset = (slot + lastReg - startReg) * DOUBLE_WORD_SIZE_BYTES;
+    auto lastOffset = (slot + lastReg - static_cast<ssize_t>(startReg)) * static_cast<ssize_t>(DOUBLE_WORD_SIZE_BYTES);
 
     if (!vixl::aarch64::Assembler::IsImmLSPair(lastOffset, vixl::aarch64::kXRegSizeInBytesLog2)) {
         ScopedTmpReg lrReg(this, true);
         auto tmp = VixlReg(lrReg);
-        spOffset = slot * DOUBLE_WORD_SIZE_BYTES;
+        spOffset = static_cast<size_t>(slot * DOUBLE_WORD_SIZE_BYTES);
         slot = 0;
         if (vixl::aarch64::Assembler::IsImmAddSub(spOffset)) {
             GetMasm()->Add(tmp, vixl::aarch64::sp, VixlImm(spOffset));
@@ -3547,7 +3547,7 @@ void Aarch64Encoder::PopRegisters(RegMask registers, bool isFp)
         registers.reset(lastReg);
     }
     lastReg = INVALID_REG;
-    for (ssize_t i = registers.size() - 1; i >= 0; i--) {
+    for (auto i = static_cast<ssize_t>(registers.size() - 1); i >= 0; i--) {
         if (registers[i]) {
             if (lastReg == INVALID_REG) {
                 lastReg = i;
@@ -3616,8 +3616,8 @@ size_t Aarch64Encoder::DisasmInstr([[maybe_unused]] std::ostream &stream, size_t
         stream << GetDisasm().GetOutput();
     } else {
         stream << std::setw(0x4) << std::right << std::setfill('0') << std::hex
-               << reinterpret_cast<uintptr_t>(instr) - bufferStart + codeOffset << ": " << GetDisasm().GetOutput()
-               << std::setfill(' ') << std::dec;
+               << reinterpret_cast<uintptr_t>(instr) - bufferStart + static_cast<size_t>(codeOffset) << ": "
+               << GetDisasm().GetOutput() << std::setfill(' ') << std::dec;
     }
 
 #endif

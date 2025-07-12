@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that a child interface combines implementations from multiple parent interfaces when three parent interfaces have the same default method.
+desc: >-
+    Verify that a child interface combines implementations from multiple parent interfaces when three parent interfaces
+    have the same default method.
 ---*/
 
 interface Parent1 {

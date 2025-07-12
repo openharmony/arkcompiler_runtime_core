@@ -14,13 +14,15 @@
  */
 
 /*---
-desc: Test whether the instance of class e can obtain the overridden value of the variable _public_var inherited from class a by overriding the multi-layer inheritance class d.
+desc: >-
+    Test whether the instance of class e can obtain the overridden value of the variable _public_var inherited
+    from class a by overriding the multi-layer inheritance class d.
 ---*/
 
 class A {
   public _publicVar: boolean;
   constructor() {
-    this._publicVar =  true;
+    this._publicVar = true;
   }
 }
 

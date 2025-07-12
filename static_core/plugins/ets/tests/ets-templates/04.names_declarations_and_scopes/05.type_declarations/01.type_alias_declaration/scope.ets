@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 {%- for c in cases %}
- /*---
+/*---
 desc: >-
     Scopes of type aliases are package or module level scopes.
     Names of all type aliases must be unique across all types in the current context.

@@ -21,7 +21,7 @@ interface ParentInterface {
   readonly myConstant: number;
 }
 
-class Parent implements ParentInterface  {
+class Parent implements ParentInterface {
   readonly myConstant: number = 42.3;
 }
 

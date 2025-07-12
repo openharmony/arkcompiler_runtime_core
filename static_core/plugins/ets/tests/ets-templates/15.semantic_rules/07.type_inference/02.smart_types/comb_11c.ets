@@ -23,11 +23,11 @@ desc: >-
 
 let str: string = "";
 
-function foo(p: null|string): number {
+function foo(p: null | string): number {
     if (!(p instanceof string)) {
         return 2
     } else {
-        str = p.substr(0, 1)  // calling string method without cast
+        str = p.substr(0, 1) // calling string method without cast
     }
     return 1
 }

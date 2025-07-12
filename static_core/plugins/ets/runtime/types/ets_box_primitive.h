@@ -16,6 +16,7 @@
 #ifndef PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_BOX_CLASSES_H_
 #define PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_BOX_CLASSES_H_
 
+#include "macros.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 
 namespace ark::ets {
@@ -34,7 +35,9 @@ public:
 
     static T Unbox(EtsObject *obj)
     {
-        return EtsBoxPrimitive<T>::FromCoreType(obj)->GetValue();
+        auto val = EtsBoxPrimitive<T>::FromCoreType(obj);
+        ASSERT(val != nullptr);
+        return val->GetValue();
     }
 
     static constexpr EtsBoxPrimitive *FromCoreType(EtsObject *obj)

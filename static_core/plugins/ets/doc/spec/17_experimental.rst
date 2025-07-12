@@ -62,7 +62,7 @@ and useful mechanisms for the inclusion of components written in other languages
 into a program written in |LANG|.
 
 Sections :ref:`Final Classes` and :ref:`Final Methods`
-discusses the well-known feature that
+discuss the well-known feature that
 in many OOP languages provides a way to restrict class inheritance and method
 overriding. Making a class *final* prohibits defining classes derived from it,
 whereas making a method *final* prevents it from overriding in derived classes.
@@ -256,8 +256,8 @@ Fixed-Size Array Types
 *Fixed-size array type*, written as ``FixedArray<T>``, is the built-in type
 characterized by the following:
 
--  Any object of array type contains elements. The number of elements
-   is known as *array length* and can be accessed using ``length`` property.
+-  Any instance of array type contains elements. The number of elements is known
+   as *array length*, and can be accessed by using the ``length`` property.
 -  Array length is a non-negative integer number.
 -  Array length is set once at runtime and cannot be changed after that.
 -  Array element is accessed by its index. *Index* is an integer number
@@ -665,10 +665,13 @@ Enumeration with Explicit Type
         'const'? 'enum' identifier ':' type '{' enumConstantList? '}'
         ;
 
+If *Explicit type* is an integer type then omitted values for constants allowed, 
+the same rules applied as for enum with non-explicit type (see :ref:`Enumeration Integer Values`).
+
 A :index:`compile-time error` occurs in the following situations:
 
 - *Explicit type* is different from any numeric or string type.
-- Enumeration constant has no value.
+- Enumeration constant has no value and *Explicit type* is not not an integer type.
 - Enumeration constant type is not assignable (see :ref:`Assignability`)
   to the *explicit type*.
 
@@ -919,12 +922,12 @@ Iterable Types
     frontend_status: Done
 
 A class or an interface is *iterable* if it implements the interface ``Iterable``
-defined in the standard library (see :ref:`Standard Library`) and thus has an
-accessible parameterless method with the name ``$_iterator`` and a return type
-that is a subtype (see :ref:`Subtyping`) of type ``Iterator`` as defined in the
-standard library. It guarantees that an object returned by the ``$_iterator``
-method is of the type which implements ``Iterator``, and thus allows traversing
-an object of the *iterable* type.
+defined in the :ref:`Standard Library`, and thus has an accessible parameterless
+method with the name ``$_iterator`` and a return type that is a subtype (see
+:ref:`Subtyping`) of type ``Iterator`` as defined in the :ref:`Standard Library`.
+It guarantees that an object returned by the ``$_iterator`` method is of the
+type which implements ``Iterator``, and thus allows traversing an object of the
+*iterable* type.
 
 A union of iterable types is also *iterable*. It means that instances of such
 types can be used in ``for-of`` statements (see :ref:`For-Of Statements`).
@@ -1135,7 +1138,8 @@ parameters, then the call must contain corresponding arguments.
    type call expression
    argument
 
-If a type contains an instance method ``$_invoke`` it does not make the type *callable*.
+That a type contains the instance method ``$_invoke`` does not make the type
+*callable*.
 
 |
 
@@ -1224,7 +1228,8 @@ if:
     }
     let x = C() // compile-time error, wrong '$_instantiate' 1st parameter
 
-If a type contains an instance method ``$_instantiate`` it does not make the type *callable*.
+That a type contains the instance method ``$_instantiate`` does not make the
+type *callable*.
 
 |
 
@@ -1321,7 +1326,7 @@ declares an *overload alias* for a set of explicitly listed entities as follows:
 
 The semantics of an entity included into an overloaded set does not change.
 Such entities follow the ordinary accessibility rules, and can be used
-separately from an overload alias, e.g., called explicitly:
+separately from the overload alias, e.g., called explicitly as follows:
 
 .. code-block:: typescript
    :linenos:
@@ -1400,7 +1405,7 @@ Function Overload Declarations
 .. meta:
     frontend_status: None
 
-An *overload function declaration* allows to declare an *overload alias*
+An *overload function declaration* allows declaring an *overload alias*
 for a set of functions (see :ref:`Function Declarations`).
 
 The syntax is presented below:
@@ -1450,7 +1455,7 @@ Class Method Overload Declarations
 .. meta:
     frontend_status: None
 
-An *overload method declaration* allows to declare an *overload alias*
+An *overload method declaration* allows declaring an *overload alias*
 as a class member (see :ref:`Class Members`)
 for a set of static or instance methods (see :ref:`Method Declarations`).
 
@@ -1474,7 +1479,7 @@ are illustrated by the example below:
     class Processor {
         overload process { processNumber, processString }
         processNumber(n: number) {/*body*/}
-        processString(n: number) {/*body*/}
+        processString(s: string) {/*body*/}
     }
 
     let c = new C()
@@ -1492,27 +1497,25 @@ are illustrated by the example below:
         static overload foo { one, two }
     }
 
-A :index:`compile-time error` occurs, if
+A :index:`compile-time error` occurs if:
 
--  The method modifier appears more than once in
-   a overload method declaration.
+-  Method modifier appears more than once in an overload method declaration;
 
--  an *identifier* in the overloaded methods list does not refer
-   to an accessible method of the current class
-   (either declared or inherited);
+-  *Identifier* in the overloaded methods list does not refer to an accessible
+   method (either declared or inherited) of the current class;
 
--  an *identifier* in the overloaded methods list refers
-   to a method with overload signatures
-   (see :ref:`Class Method with Overload Signatures`).
+-  *Identifier* in the overloaded methods list refers to a method with overload
+   signatures (see :ref:`Class Method with Overload Signatures`);
 
--  An overloaded method is *abstract*.
+-  Overloaded method is *abstract*;
 
--  *Overload alias* is *static* but an overloaded method is not.
+-  *Overload alias* is *static* but the overloaded method is not;
 
--  *Overload alias* is *non-static* but an overloaded method is.
+-  *Overload alias* is *non-static* but the overloaded method is not;
 
--  *Overload alias* is marked ``async`` but an overloaded method is not,
-   or *overload alias* is not ``async`` but  an overloaded method is.
+-  *Overload alias* is marked ``async`` but the overloaded method is not; or
+
+-  *Overload alias* is not ``async`` but the overloaded method is.
 
 Overloaded methods and overload aliases can have different access modifiers.
 If an *overload alias* is accessible in some context but not all overloaded
@@ -1566,7 +1569,7 @@ subclass, if not, the declaration from the superclass in used.
 overloaded in a superclass, otherwise a :index:`compile-time error` occurs.
 *Overload declaration* can add new methods and change methods order.
 
-An *overload alias* is used the same as ordinary class method, except that
+An *overload alias* is used the same as an ordinary class method, except that
 in a call it is replaced (in compile-time) by one of overloaded method using
 the type of *object reference*.
 
@@ -1578,7 +1581,7 @@ The example below illustrates *overload declaration* in subtypes:
     class Base {
         overload process { processNumber, processString }
         processNumber(n: number) {/*body*/}
-        processString(n: string) {/*body*/}
+        processString(s: string) {/*body*/}
     }
 
     class D1 extends Base {
@@ -1601,7 +1604,7 @@ The example below illustrates *overload declaration* in subtypes:
 
 Methods with special names (see :ref:`Indexable Types`, :ref:`Iterable Types`,
 and :ref:`Callable Types`) can be overloaded in the same manner as ordinary
-methods:
+methods are:
 
 .. code-block:: typescript
    :linenos:
@@ -1617,6 +1620,40 @@ methods:
     c[1]     // getByNumber is used
     c["abc"] // getByString is used
 
+If a class implements some interfaces where *overload declarations* for the
+same alias then new *overload declaration* which includes all overloaded
+methods is to be defined, otherwise a :index:`compile-time error` occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I1 {
+        overload foo {f1, f2}
+        // f1 and f2 are declared in I1
+    }
+    interface I2 {
+        overload foo {f3, f4}
+        // f3 and f4 are declared in I2
+    }
+    class C implements I1, I2 {
+       // compile-time error as no new overload is defined 
+    }
+    class D implements I1, I2 {
+        overload foo { f2, f3, f1, f4 } // OK, as new overload is defined
+    }
+    class E implements I1, I2 {
+        overload foo { f2, f4 } // compile-time error as not all methods are used
+    }
+
+    const i1: I1 = new D
+    i1.foo(<arguments>) // call is valid if arguments fit first signature of {f1, f2} set
+    
+    const i2: I2 = new D
+    i2.foo(<arguments>) // call is valid if arguments fit first signature of {f3, f4} set
+
+    const d: D = new D
+    d.foo(<arguments>) // call is valid if arguments fit first signature of {f2, f3, f1, f4} set
+
 |
 
 .. _Interface Method Overload Declarations:
@@ -1627,7 +1664,7 @@ Interface Method Overload Declarations
 .. meta:
     frontend_status: None
 
-*Interface method overload declaration* allows to declare an *overload alias*
+*Interface method overload declaration* allows declaring an *overload alias*
 as an interface member (see :ref:`Interface Members`)
 for a set of interface methods (see :ref:`Interface Method Declarations`).
 
@@ -1656,13 +1693,13 @@ Using *overload method declaration* is illustrated by the example below:
         i.bar()        // explicit call: i.bar(undefined)
     }
 
-An *overload alias* is used the same as ordinary interface method, except that
-in a call it is replaced (in compile-time) by one of overloaded method using
+An *overload alias* is used like an ordinary interface method, except that in
+a call it is replaced at compile time by one of overloaded methods by using
 the type of *object reference*.
 
-A class that implements an interface with *overload alias* must implement
-(as usual) all interface methods, except those having default body
-(see :ref:`Default Interface Method Declarations`):
+A class that implements an interface with an *overload alias* usually implements
+all interface methods, except those having a default body (see
+:ref:`Default Interface Method Declarations`):
 
 .. code-block:: typescript
    :linenos:
@@ -1676,9 +1713,9 @@ A class that implements an interface with *overload alias* must implement
    let c = new C()
    c.goo() // calls c.foo()
 
-An interface *overload alias* can be redefined in the class,
-in this case the *overload declaration* in the class must contain all methods
-overloaded in the interface, otherwise a :index:`compile-time error` occurs.
+An interface *overload alias* can be redefined in a class. In this case, the
+*overload declaration* in the class must contain all methods overloaded in the
+interface. Otherwise, a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
@@ -1692,10 +1729,36 @@ overloaded in the interface, otherwise a :index:`compile-time error` occurs.
    let d = new D()
    d.goo() // d.bar(undefined) is used, as it is the first appropriate method
 
-The *overload alias* defined in a superinterface can be redefined
-in a subinterface. In this case the *overload declaration*
-in the subinterface must contain all methods overloaded in superinterface,
-otherwise a :index:`compile-time error` occurs.
+An *overload alias* defined in a superinterface can be redefined in a
+subinterface. In this case, the *overload declaration* of the subinterface
+must contain all methods overloaded in superinterface. Otherwise, a
+:index:`compile-time error` occurs.
+
+The *overload alias* defined in superinterfaces must be redefined
+in a subinterface if several *overload declarations* for the same alias are
+inherited into the interface, otherwise a :index:`compile-time error` occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I1 {
+        overload foo {f1, f2}
+        // f1 and f2 are declared in I1
+    }
+    interface I2 {
+        overload foo {f3, f4}
+        // f3 and f4 are declared in I2
+    }
+    interface I3 extends I1, I2 {
+       // compile-time error as no new overload for 'foo' is defined 
+    }
+    interface I4 extends I1, I2 {
+        overload foo { f4, f1, f3, f2 } // OK, as new overload is defined
+    }
+    interface I5 extends I1, I2 {
+        overload foo { f1, f3 } // compile-time error as not all mehtods are included
+    }
+
 
 |
 
@@ -1704,8 +1767,8 @@ otherwise a :index:`compile-time error` occurs.
 Constructor Overload Declarations
 =================================
 
-An *overload constructor declaration* allows to define an *overload alias*
-and set an order of constructors.
+An *overload constructor declaration* allows declaring an *overload alias*
+and setting an order of constructors for the call in new expressions.
 
 The syntax is presented below:
 
@@ -1715,11 +1778,9 @@ The syntax is presented below:
         'overload' 'constructor' '{' identifier (',' identifier)* ','? '}'
         ;
 
-This feature can be used if there are more then one constructors declared
+This feature can be used if there are more then one constructors declared 
 in the class, and maximum one of them is anonymous (see
 :ref:`Constructor Names`).
-If there are two or more anonymous constructors, they constitute
-:ref:`Constructor with Overload Signatures`.
 
 Only a single *overload constructor declaration* is allowed in a class.
 Otherwise, a :index:`compile-time error` occurs.
@@ -1734,13 +1795,13 @@ below:
    :linenos:
 
     class BigFloat {
-        constructor fromNumber(n: number) {/*body*/}
-        constructor fromString(s: string) {/*body*/}
+        constructor fromNumber(n: number) {/*body1*/}
+        constructor fromString(s: string) {/*body2*/}
 
         overload constructor { fromNumber, fromString }
     }
 
-    new BigFloat(1) // fromNumber is used
+    new BigFloat(1)      // fromNumber is used
     new BigFloat("3.14") // fromString is used
 
 
@@ -1757,25 +1818,28 @@ position in a list of overloaded constructors:
         overload constructor { fromString }
     }
 
-    new C() // anonymous constructor is used
-    new C("abc") // fromString is used
+    new C()                // anonymous constructor is used
+    new C("abc")           // fromString is used
     new C.fromString("aa") // fromString is explicitly used
 
-A :index:`compile-time error` occurs if an *overload constructor declaration* or
-a named constructor (see :ref:`Constructor Names`) is used in a class where a
-:ref:`Constructor with Overload Signatures` is defined:
+A :index:`compile-time error` occurs if both *overload constructor declaration* and
+constructor *overload signature* (see
+:ref:`Declarations with Overload Signatures`) are used: 
 
 .. code-block:: typescript
    :linenos:
 
     class C {
+        // overload signature
         constructor (n: number)
         constructor (b: boolean)
-        constructor (...x: Any[]) {/*body*/}
+        constructor (...x: Any[]) {/*body1*/}
 
-        constructor fromString(s: string) {} // compile-time error: named constructor
+        constructor fromString(s: string) {/*body2*/} 
 
-        overload constructor { fromString } // compile-time error
+        // overload declaration
+        overload constructor { fromString } 
+        // compile-time error: mix of both overload schemes
     }
 
 |
@@ -2076,51 +2140,40 @@ Constructor Names
 .. meta:
     frontend_status: None
 
-A :ref:`Constructor Declaration` allows a developer
-to set a name used to explicitly specify constructor to call
-in :ref:`New Expressions`:
+A :ref:`Constructor Declaration` allows a developer to set a name used to
+explicitly specify constructor to call in :ref:`New Expressions`:
 
 .. code-block:: typescript
    :linenos:
 
     class Temperature{
         // use specified scale:
-        constructor Celsius(n: double) {/*body*/}
-        constructor Fahrenheit(n: double) {/*body*/}
+        constructor Celsius(n: double)    {/*body1*/}
+        constructor Fahrenheit(n: double) {/*body2*/}
     }
 
     new Temperature.Celsius(0)
     new Temperature.Fahrenheit(32)
 
+If a constructor has a name then the direct application of this constructor in 
+the new expression implies explicit usage of the constructor name: 
+
+.. code-block:: typescript
+   :linenos:
+
+    class X{
+        constructor ctor1(p: number) {/*body1*/}
+        constructor ctor2(p: string) {/*body2*/}
+    }
+
+    new X(1)      // compile-time error
+    new X("abs")  // compile-time error
+    new X.ctor1(1)      // OK
+    new X.ctor2("abs")  // OK
+
+
+
 The feature is also important for :ref:`Constructor Overload Declarations`.
-
-A :index:`compile-time error` occurs if a named constructor
-is used in a class where a
-:ref:`Constructor with Overload Signatures` is defined:
-
-.. code-block:: typescript
-   :linenos:
-
-    class C {
-        constructor (n: number)
-        constructor (b: boolean)
-        constructor (...x: Any[]) {/*body*/}
-
-        constructor fromString(s: string) {} // compile-time error: named constructor
-    }
-
-Access modifiers do not influence this :index:`compile-time error`:
-
-.. code-block:: typescript
-   :linenos:
-
-    class C {
-        public constructor (n: number)
-        public constructor (b: boolean)
-        public constructor (...x: Any[]) {/*body*/}
-
-        private constructor fromString(s: string) {} // compile-time error
-    }
 
 |
 

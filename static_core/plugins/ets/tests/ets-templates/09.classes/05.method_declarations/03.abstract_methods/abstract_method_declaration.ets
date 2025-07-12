@@ -15,7 +15,9 @@
 
 /*---
 desc: Abstract method declaration.
-assert: An abstract method declaration introduces the method as a member, providing its signature, but does not provide an implementation.
+assert: >-
+    An abstract method declaration introduces the method as a member, providing its signature,
+    but does not provide an implementation.
 tags: [compile-only]
 ---*/
 

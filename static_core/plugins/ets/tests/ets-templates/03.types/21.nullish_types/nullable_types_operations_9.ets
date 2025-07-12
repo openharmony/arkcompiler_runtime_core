@@ -19,6 +19,6 @@ tags: [negative, compile-only]
 ---*/
 
 function main(): void {
-  let b: Int|null = null;
+  let b: Int | null = null;
   let x: int = b;
 }

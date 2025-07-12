@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The subclass initializes member variables in the constructor, with the modifier being public and the type being boolean[].
+desc: >-
+    The subclass initializes member variables in the constructor, with the modifier being public
+    and the type being boolean[].
 ---*/
 
 class Parent {

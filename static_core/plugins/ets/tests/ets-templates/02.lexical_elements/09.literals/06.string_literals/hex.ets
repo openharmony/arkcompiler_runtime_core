@@ -23,4 +23,5 @@ function main() {
     for (let i = 0; i < s.length; i++) {
         arktest.assertTrue( s.charAt(i) == i + 1 )
     }
+    arktest.assertEQ(s.length, 255)
 }

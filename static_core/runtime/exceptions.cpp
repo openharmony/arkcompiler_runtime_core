@@ -449,6 +449,7 @@ void ThrowCloneNotSupportedException()
 void HandlePendingException(UnwindPolicy policy)
 {
     auto *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
     ASSERT(thread->HasPendingException());
     LOG(DEBUG, INTEROP) << "HandlePendingException";
 

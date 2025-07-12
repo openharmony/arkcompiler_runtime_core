@@ -15,7 +15,10 @@ limitations under the License.
 
 /*---
 desc: Several paths by which the same field declaration is inherited from an interface.
-assert: There might be several paths by which the same field declaration is inherited from an interface. In such asituation, the field is considered to be inherited only once, and it may be referred to by its simple name without ambiguity.
+assert: >-
+    There might be several paths by which the same field declaration is inherited from an interface.
+    In such a situation, the field is considered to be inherited only once,
+    and it may be referred to by its simple name without ambiguity.
 ---*/
 
 interface A {

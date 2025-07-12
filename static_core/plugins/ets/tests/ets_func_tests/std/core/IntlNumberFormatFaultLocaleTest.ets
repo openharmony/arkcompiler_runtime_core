@@ -22,7 +22,8 @@ function main(): int {
 
 function testNumberFormatConstructorNew0008() {
     // NOTE(igorlegalov): uncomment when the issue #25344 is fixed
-    arktest.expectError((): void => { let locales = ["zh", "en-US", "de", "test"];
+    arktest.expectError((): void => {
+        let locales = ["zh", "en-US", "de", "test"];
         Intl.NumberFormat.$_invoke(locales);
     });
 }

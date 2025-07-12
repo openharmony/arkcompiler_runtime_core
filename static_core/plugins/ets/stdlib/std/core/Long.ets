@@ -18,7 +18,7 @@ package std.core;
 /**
  * Represents boxed long value and related operations
  */
-export final class Long extends Integral implements Comparable<Long>, JSONable<Long> {
+export final class Long extends Integral implements Comparable<Long> {
     private value: long;
 
     /**
@@ -305,7 +305,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
             throw new RangeError('Radix must be between 2 and 36');
         }
         if (this.value == 0) {
-            return "0";
+            return '0';
         }
         const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
         let val = this.value;
@@ -446,24 +446,5 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      */
     public isGreaterEqualThan(other: Long): boolean {
         return this.value >= other.toLong();
-    }
-
-    /**
-     * Creates a Long instance based on JSONValue
-     *
-     * @param json: JSONValue - a JSON representation
-     *
-     * @throws JSONTypeError if json does not encode a valid long
-     *
-     * @returns Long - long value decoded from JSON
-     */
-    public createFromJSONValue(json: JSONValue): Long {
-        if (json instanceof JSONNumber) {
-            let num = (json as JSONNumber).value
-            if (Double.isInteger(num) && Long.MIN_VALUE <= num && num <= Long.MAX_VALUE) {
-                return Long.valueOf(num.toLong())
-            }
-        }
-        throw new JSONTypeError("Cannot create Long from JSON", new ErrorOptions(json as Object))
     }
 }

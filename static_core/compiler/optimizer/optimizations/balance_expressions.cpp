@@ -131,7 +131,8 @@ Inst *BalanceExpressions::AllocateSourcesRec(size_t firstIdx, size_t lastIdx)
 {
     ASSERT(lastIdx > firstIdx);
     COMPILER_LOG(DEBUG, BALANCE_EXPR) << "Allocating operators for sources_[" << firstIdx << " to " << lastIdx << "]";
-    size_t splitIdx = firstIdx + GetBitFloor(lastIdx - firstIdx + 1) - 1;
+    size_t memSize = firstIdx + GetBitFloor(lastIdx - firstIdx + 1);
+    size_t splitIdx = memSize > 0 ? memSize - 1 : 0;
 
     Inst *lhs = GetOperand(firstIdx, splitIdx);
     Inst *rhs = LIKELY((splitIdx + 1) != lastIdx) ? GetOperand(splitIdx + 1, lastIdx) : sources_[splitIdx + 1];

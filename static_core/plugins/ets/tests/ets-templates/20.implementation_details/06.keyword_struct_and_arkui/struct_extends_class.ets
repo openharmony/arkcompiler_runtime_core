@@ -26,7 +26,7 @@ class Test {
     }
 }
 
-struct StructClass extends Test{
+struct StructClass extends Test {
     field: int
     constructor(f: int, a: double) {
         this.field = f

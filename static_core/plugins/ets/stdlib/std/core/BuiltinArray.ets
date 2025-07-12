@@ -441,6 +441,9 @@ export function reduceRight<U>(self: FixedArray<boolean>, callbackfn: (previousV
 export function forEach(self: FixedArray<boolean>, callbackfn: (value: boolean, index: number, array: FixedArray<boolean>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
         callbackfn(self[i], i.toDouble(), self)
     }
 }
@@ -951,8 +954,8 @@ export function concat(self: FixedArray<boolean>, fst: FixedArray<boolean>, ...m
  *
  * @note Mutating method
  */
-export function sort(self: FixedArray<boolean>, comparator: (a: boolean, b: boolean) => number): FixedArray<boolean> {
-    sort_subarray(self, 0, self.length, (l: boolean, r: boolean): boolean => {
+export function sort(self: FixedArray<boolean>, comparator: (a: boolean, b: boolean) => number, start?: int, end?: int): FixedArray<boolean> {
+    sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: boolean, r: boolean): boolean => {
         return comparator(l, r ) < 0;
     });
     return self;
@@ -1401,6 +1404,9 @@ export function reduceRight<U>(self: FixedArray<byte>, callbackfn: (previousValu
 export function forEach(self: FixedArray<byte>, callbackfn: (value: byte, index: number, array: FixedArray<byte>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
         callbackfn(self[i], i.toDouble(), self)
     }
 }
@@ -1911,8 +1917,8 @@ export function concat(self: FixedArray<byte>, fst: FixedArray<byte>, ...more: F
  *
  * @note Mutating method
  */
-export function sort(self: FixedArray<byte>, comparator: (a: byte, b: byte) => number): FixedArray<byte> {
-    sort_subarray(self, 0, self.length, (l: byte, r: byte): boolean => {
+export function sort(self: FixedArray<byte>, comparator: (a: byte, b: byte) => number, start?: int, end?: int): FixedArray<byte> {
+    sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: byte, r: byte): boolean => {
         return comparator(l, r ) < 0;
     });
     return self;
@@ -2361,6 +2367,9 @@ export function reduceRight<U>(self: FixedArray<short>, callbackfn: (previousVal
 export function forEach(self: FixedArray<short>, callbackfn: (value: short, index: number, array: FixedArray<short>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
         callbackfn(self[i], i.toDouble(), self)
     }
 }
@@ -2871,8 +2880,8 @@ export function concat(self: FixedArray<short>, fst: FixedArray<short>, ...more:
  *
  * @note Mutating method
  */
-export function sort(self: FixedArray<short>, comparator: (a: short, b: short) => number): FixedArray<short> {
-    sort_subarray(self, 0, self.length, (l: short, r: short): boolean => {
+export function sort(self: FixedArray<short>, comparator: (a: short, b: short) => number, start?: int, end?: int): FixedArray<short> {
+    sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: short, r: short): boolean => {
         return comparator(l, r ) < 0;
     });
     return self;
@@ -3321,6 +3330,9 @@ export function reduceRight<U>(self: FixedArray<int>, callbackfn: (previousValue
 export function forEach(self: FixedArray<int>, callbackfn: (value: int, index: number, array: FixedArray<int>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
         callbackfn(self[i], i.toDouble(), self)
     }
 }
@@ -3831,8 +3843,8 @@ export function concat(self: FixedArray<int>, fst: FixedArray<int>, ...more: Fix
  *
  * @note Mutating method
  */
-export function sort(self: FixedArray<int>, comparator: (a: int, b: int) => number): FixedArray<int> {
-    sort_subarray(self, 0, self.length, (l: int, r: int): boolean => {
+export function sort(self: FixedArray<int>, comparator: (a: int, b: int) => number, start?: int, end?: int): FixedArray<int> {
+    sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: int, r: int): boolean => {
         return comparator(l, r ) < 0;
     });
     return self;
@@ -4281,6 +4293,9 @@ export function reduceRight<U>(self: FixedArray<long>, callbackfn: (previousValu
 export function forEach(self: FixedArray<long>, callbackfn: (value: long, index: number, array: FixedArray<long>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
         callbackfn(self[i], i.toDouble(), self)
     }
 }
@@ -4791,8 +4806,8 @@ export function concat(self: FixedArray<long>, fst: FixedArray<long>, ...more: F
  *
  * @note Mutating method
  */
-export function sort(self: FixedArray<long>, comparator: (a: long, b: long) => number): FixedArray<long> {
-    sort_subarray(self, 0, self.length, (l: long, r: long): boolean => {
+export function sort(self: FixedArray<long>, comparator: (a: long, b: long) => number, start?: int, end?: int): FixedArray<long> {
+    sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: long, r: long): boolean => {
         return comparator(l, r ) < 0;
     });
     return self;
@@ -5241,6 +5256,9 @@ export function reduceRight<U>(self: FixedArray<float>, callbackfn: (previousVal
 export function forEach(self: FixedArray<float>, callbackfn: (value: float, index: number, array: FixedArray<float>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
         callbackfn(self[i], i.toDouble(), self)
     }
 }
@@ -5759,8 +5777,8 @@ export function concat(self: FixedArray<float>, fst: FixedArray<float>, ...more:
  *
  * @note Mutating method
  */
-export function sort(self: FixedArray<float>, comparator: (a: float, b: float) => number): FixedArray<float> {
-    sort_subarray(self, 0, self.length, (l: float, r: float): boolean => {
+export function sort(self: FixedArray<float>, comparator: (a: float, b: float) => number, start?: int, end?: int): FixedArray<float> {
+    sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: float, r: float): boolean => {
         return comparator(l, r ) < 0;
     });
     return self;
@@ -6209,6 +6227,9 @@ export function reduceRight<U>(self: FixedArray<double>, callbackfn: (previousVa
 export function forEach(self: FixedArray<double>, callbackfn: (value: double, index: number, array: FixedArray<double>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
         callbackfn(self[i], i.toDouble(), self)
     }
 }
@@ -6727,8 +6748,8 @@ export function concat(self: FixedArray<double>, fst: FixedArray<double>, ...mor
  *
  * @note Mutating method
  */
-export function sort(self: FixedArray<double>, comparator: (a: double, b: double) => number): FixedArray<double> {
-    sort_subarray(self, 0, self.length, (l: double, r: double): boolean => {
+export function sort(self: FixedArray<double>, comparator: (a: double, b: double) => number, start?: int, end?: int): FixedArray<double> {
+    sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: double, r: double): boolean => {
         return comparator(l, r ) < 0;
     });
     return self;
@@ -7177,6 +7198,9 @@ export function reduceRight<U>(self: FixedArray<char>, callbackfn: (previousValu
 export function forEach(self: FixedArray<char>, callbackfn: (value: char, index: number, array: FixedArray<char>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
         callbackfn(self[i], i.toDouble(), self)
     }
 }
@@ -7687,8 +7711,8 @@ export function concat(self: FixedArray<char>, fst: FixedArray<char>, ...more: F
  *
  * @note Mutating method
  */
-export function sort(self: FixedArray<char>, comparator: (a: char, b: char) => number): FixedArray<char> {
-    sort_subarray(self, 0, self.length, (l: char, r: char): boolean => {
+export function sort(self: FixedArray<char>, comparator: (a: char, b: char) => number, start?: int, end?: int): FixedArray<char> {
+    sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: char, r: char): boolean => {
         return comparator(l, r ) < 0;
     });
     return self;

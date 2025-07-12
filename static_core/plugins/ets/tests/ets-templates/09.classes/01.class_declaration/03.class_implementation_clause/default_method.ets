@@ -15,7 +15,9 @@ limitations under the License.
 
 /*---
 desc: Override default method from superinterface
-assert: Each default method of a superinterface of the class may optionally be overridden by a method in the class; if not, the default method is typically inherited and its behavior is as specified by its default body.
+assert: >-
+    Each default method of a superinterface of the class may optionally be overridden by a method in the class;
+    if not, the default method is typically inherited and its behavior is as specified by its default body.
 ---*/
 
 class A implements C {

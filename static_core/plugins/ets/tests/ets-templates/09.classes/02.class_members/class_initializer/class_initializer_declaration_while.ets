@@ -22,12 +22,12 @@ class A {
 
   static {
     let i = 0
-    while(i++<10) {
+    while (i++ < 10) {
       A.a += i
     }
   }
 }
 
 function main(): void {
-  arktest.assertEQ( A.a, 55 );
+  arktest.assertEQ(A.a, 55);
 }

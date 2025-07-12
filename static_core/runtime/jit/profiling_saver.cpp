@@ -83,6 +83,7 @@ void ProfilingSaver::CreateThrowData(pgo::AotProfilingData::AotMethodProfilingDa
 void ProfilingSaver::AddMethod(pgo::AotProfilingData *profileData, Method *method, int32_t pandaFileIdx)
 {
     auto *runtimeProfData = method->GetProfilingData();
+    ASSERT(runtimeProfData != nullptr);
     auto runtimeICs = runtimeProfData->GetInlineCaches();
     uint32_t vcallsCount = runtimeICs.size();
 
@@ -113,6 +114,7 @@ void ProfilingSaver::AddProfiledMethods(pgo::AotProfilingData *profileData, Pand
             notFinal = false;
         }
         auto method = *it;
+        ASSERT((method->GetProfilingData()) != nullptr);
         if (method->GetProfilingData()->IsUpdateSinceLastSave()) {
             method->GetProfilingData()->DataSaved();
         } else {

@@ -15,7 +15,9 @@ limitations under the License.
 
 /*---
 desc: Non-static method call.
-assert: An instance method is always invoked with respect to an object, which becomes the current object to which the keyword this and super refer during execution of the method body.
+assert: >-
+    An instance method is always invoked with respect to an object, which becomes the current object
+    to which the keyword this and super refer during execution of the method body.
 ---*/
 
 class A {

@@ -243,7 +243,9 @@ void CheckTag(int64_t reg, int64_t expected)
 {
     constexpr int ACC_NUM = std::numeric_limits<uint16_t>::max() + 1;
     int64_t tag = 0;
-    StaticFrameHandler handler(ManagedThread::GetCurrent()->GetCurrentFrame());
+    auto *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    StaticFrameHandler handler(thread->GetCurrentFrame());
     if (reg == ACC_NUM) {
         auto vreg = handler.GetAcc();
         tag = vreg.GetTag();
@@ -324,13 +326,16 @@ void SystemExit(int32_t status)
 
 void SystemScheduleCoroutine()
 {
-    auto *cm = static_cast<CoroutineManager *>(Coroutine::GetCurrent()->GetVM()->GetThreadManager());
+    auto *coro = Coroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    auto *cm = static_cast<CoroutineManager *>(coro->GetVM()->GetThreadManager());
     cm->Schedule();
 }
 
 int32_t SystemCoroutineGetWorkerId()
 {
-    return os::thread::GetCurrentThreadId();
+    // return os::thread::GetCurrentThreadId();
+    return Coroutine::GetCurrent()->GetWorker()->GetId();
 }
 
 ObjectHeader *ObjectCreateNonMovable(coretypes::Class *cls)
@@ -444,6 +449,6 @@ void Memsetf64(ObjectHeader *array, double value, uint32_t initialIndex, uint32_
 }
 }  // namespace ark::intrinsics
 
-#include "core_any_intrinsics.inc"
+#include "runtime/include/core_any_intrinsics.inc"
 
 #include <intrinsics_gen.h>

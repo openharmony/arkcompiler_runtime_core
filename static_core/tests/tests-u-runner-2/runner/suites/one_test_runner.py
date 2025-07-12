@@ -18,6 +18,7 @@
 import subprocess
 from collections.abc import Callable
 from copy import deepcopy
+from pathlib import Path
 
 from runner.enum_types.params import BinaryParams, TestEnv, TestReport
 from runner.logger import Log
@@ -32,6 +33,8 @@ class OneTestRunner:
     def __init__(self, test_env: TestEnv) -> None:
         self.test_env = test_env
         self.reproduce = ""
+        self.coverage_config = self.test_env.config.general.coverage
+        self.coverage_manager = test_env.coverage
 
     @staticmethod
     def __fail_kind_fail(name: str) -> str:
@@ -52,16 +55,20 @@ class OneTestRunner:
     def run_with_coverage(self, name: str, params: BinaryParams, result_validator: ResultValidator,
                           return_code_interpreter: ReturnCodeInterpreter = lambda _, _2, rtc: rtc) \
             -> tuple[bool, TestReport, str | None]:
-        profraw_file, profdata_file = "", ""
-        if self.test_env.config.general.coverage.use_llvm_cov and self.test_env.coverage is not None:
+
+        coverage_per_binary = self.coverage_config.coverage_per_binary
+        profraw_file, profdata_file, params = self.__get_prof_files(name, params)
+
+        if self.coverage_config.use_lcov and coverage_per_binary:
+            gcov_prefix, gcov_prefix_strip = self.coverage_manager.lcov_tool.get_gcov_prefix(name)
             params = deepcopy(params)
-            profraw_file, profdata_file = self.test_env.coverage.get_uniq_profraw_profdata_file_paths()
-            params.env['LLVM_PROFILE_FILE'] = profraw_file
+            params.env['GCOV_PREFIX'] = gcov_prefix
+            params.env['GCOV_PREFIX_STRIP'] = gcov_prefix_strip
 
         passed, report, fail_kind = self.run_one_step(name, params, result_validator, return_code_interpreter)
 
-        if self.test_env.config.general.coverage.use_llvm_cov and self.test_env.coverage is not None:
-            self.test_env.coverage.merge_and_delete_prowraw_files(profraw_file, profdata_file)
+        if self.coverage_config.use_llvm_cov and profraw_file and profdata_file:
+            self.coverage_manager.llvm_cov_tool.merge_and_delete_profraw_files(profraw_file, profdata_file)
 
         return passed, report, fail_kind
 
@@ -132,3 +139,24 @@ class OneTestRunner:
                 return_code = process.returncode
                 process.kill()
         return passed, fail_kind, output, error, return_code
+
+    def __get_prof_files(
+            self,
+            name: str,
+            params: BinaryParams
+    ) -> tuple[Path | None, Path | None, BinaryParams]:
+        profraw_file, profdata_file = None, None
+        llvm_cov_tool = self.coverage_manager.llvm_cov_tool
+
+        if not self.coverage_config.use_llvm_cov:
+            return profraw_file, profdata_file, params
+
+        if self.coverage_config.coverage_per_binary:
+            profraw_file, profdata_file = llvm_cov_tool.get_uniq_profraw_profdata_file_paths(name)
+        else:
+            profraw_file, profdata_file = llvm_cov_tool.get_uniq_profraw_profdata_file_paths()
+
+        params = deepcopy(params)
+        params.env['LLVM_PROFILE_FILE'] = str(profraw_file)
+
+        return profraw_file, profdata_file, params

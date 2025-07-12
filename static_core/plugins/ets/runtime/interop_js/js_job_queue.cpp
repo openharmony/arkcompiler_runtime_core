@@ -124,7 +124,8 @@ static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callb
         vm->GetGlobalObjectStorage()->Remove(promiseRef);
 
         if (isResolved) {
-            auto jsval = JSValue::Create(coro, ctx, value);
+            auto *jsval = JSValue::Create(coro, ctx, value);
+            ASSERT(jsval != nullptr);
             ark::ets::intrinsics::EtsPromiseResolve(promiseHandle.GetPtr(), jsval->AsObject(),
                                                     ark::ets::ToEtsBoolean(false));
         } else {
@@ -146,8 +147,6 @@ static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callb
         }
     }
 
-    vm->GetCoroutineManager()->Schedule();
-
     napi_value undefined;
     napi_get_undefined(env, &undefined);
     return undefined;
@@ -166,6 +165,7 @@ static napi_value OnJsPromiseRejected(napi_env env, [[maybe_unused]] napi_callba
 void JsJobQueue::CreatePromiseLink(EtsObject *jsObject, EtsPromise *etsPromise)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     PandaEtsVM *vm = coro->GetPandaVM();
     InteropCtx *ctx = InteropCtx::Current(coro);
     if (ctx == nullptr) {
@@ -223,6 +223,7 @@ JsJobQueue::JsCallback *JsJobQueue::JsCallback::Create(EtsCoroutine *coro, const
 void JsJobQueue::JsCallback::Run()
 {
     auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     auto *refStorage = coro->GetPandaVM()->GetGlobalObjectStorage();
     auto *callback = EtsObject::FromCoreType(refStorage->Get(jsCallbackRef_));
     LambdaUtils::InvokeVoid(coro, callback);
@@ -230,7 +231,9 @@ void JsJobQueue::JsCallback::Run()
 
 JsJobQueue::JsCallback::~JsCallback()
 {
-    auto *refStorage = EtsCoroutine::GetCurrent()->GetPandaVM()->GetGlobalObjectStorage();
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    auto *refStorage = coro->GetPandaVM()->GetGlobalObjectStorage();
     refStorage->Remove(jsCallbackRef_);
 }
 

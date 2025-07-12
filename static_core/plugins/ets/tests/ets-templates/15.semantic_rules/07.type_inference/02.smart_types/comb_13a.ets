@@ -23,9 +23,9 @@ desc: >-
 
 let str: string = "";
 
-function foo(p: null|number|string): number {
+function foo(p: null | number | string): number {
     if (p != null && !(p instanceof Number)) {
-        str = p.substr(0, 1)  // string method without cast
+        str = p.substr(0, 1) // string method without cast
         return 1
     }
     return 2

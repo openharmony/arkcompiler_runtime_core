@@ -14,7 +14,9 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Sample from spec, Namespaces with identical namespace names in a single compilation unit merge their exported declarations into a single namespace.
+desc: >-
+    Sample from spec, Namespaces with identical namespace names in a single compilation unit merge their exported
+    declarations into a single namespace.
 ---*/
 
 namespace A {

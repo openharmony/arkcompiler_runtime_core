@@ -14,8 +14,8 @@ limitations under the License.
 
 /*---
 desc: >-
-    When a class is initialized, the class initializer declared in the class is executed along with all class initializers of all superclasses.
-    The order of execution is from the top superclass to the current class.
+    When a class is initialized, the class initializer declared in the class is executed along with all class
+    initializers of all superclasses. The order of execution is from the top superclass to the current class.
 ---*/
 
 class A {

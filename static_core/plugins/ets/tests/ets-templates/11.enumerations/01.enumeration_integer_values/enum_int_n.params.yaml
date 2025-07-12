@@ -24,14 +24,9 @@ cases:
           arktest.assertEQ( Enum.third.valueOf(), c )
 
     - decl: |-
-          enum Enum { first = 1.0, second, third }  // wrong init type
+          enum Enum { first = 1, second = 1.2, third }  // wrong init type
       use: |-
-          arktest.assertEQ( Enum.first.valueOf(), 1.0 )
-
-    - decl: |-
-          enum Enum { first = 10e1, second, third }  // wrong init type
-      use: |-
-          arktest.assertEQ( Enum.first.valueOf(), 100 )
+          arktest.assertEQ( Enum.second.valueOf(), 1.2 )
 
     - decl: |-
           enum Enum { first = true, second = false }  // wrong init type

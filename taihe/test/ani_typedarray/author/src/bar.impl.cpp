@@ -12,18 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "bar.impl.hpp"
 #include "bar.TypedArray1.proj.0.hpp"
 #include "bar.TypedArray1.proj.1.hpp"
-#include "bar.impl.hpp"
 #include "bar.proj.hpp"
 #include "stdexcept"
-#include "taihe/runtime.hpp"
 #include "taihe/map.hpp"
+#include "taihe/runtime.hpp"
 
-#include <numeric>
-#include <limits>
 #include <cmath>
 #include <iomanip>
+#include <limits>
+#include <numeric>
 
 using namespace taihe;
 using namespace bar;
@@ -423,7 +423,7 @@ public:
         if (!a.has_value()) {
             return ::taihe::array<int32_t>(0);
         }
-        const auto &src = a.value();
+        auto const &src = a.value();
         ::taihe::array<int32_t> result(src.size());
         for (size_t i = 0; i < src.size(); ++i) {
             result[i] = static_cast<int32_t>(src[i]);
@@ -436,7 +436,7 @@ public:
         if (!a.has_value()) {
             return ::taihe::array<int32_t>(0);
         }
-        const auto &src = a.value();
+        auto const &src = a.value();
         ::taihe::array<int32_t> result(src.size());
         for (size_t i = 0; i < src.size(); ++i) {
             result[i] = static_cast<int32_t>(src[i]);
@@ -449,7 +449,7 @@ public:
         if (!a.has_value()) {
             return ::taihe::array<int32_t>(0);
         }
-        const auto &src = a.value();
+        auto const &src = a.value();
         ::taihe::array<int32_t> result(src.size());
         for (size_t i = 0; i < src.size(); ++i) {
             result[i] = static_cast<int32_t>(src[i]);
@@ -462,7 +462,7 @@ public:
         if (!a.has_value()) {
             return ::taihe::array<int32_t>(0);
         }
-        const auto &src = a.value();
+        auto const &src = a.value();
         ::taihe::array<int32_t> result(src.size());
         for (size_t i = 0; i < src.size(); ++i) {
             result[i] = static_cast<int32_t>(src[i]);
@@ -475,7 +475,7 @@ public:
         if (!a.has_value()) {
             return ::taihe::array<int32_t>(0);
         }
-        const auto &src = a.value();
+        auto const &src = a.value();
         ::taihe::array<int32_t> result(src.size());
         for (size_t i = 0; i < src.size(); ++i) {
             if (src[i] > static_cast<uint32_t>(std::numeric_limits<int32_t>::max())) {
@@ -500,10 +500,10 @@ public:
         if (!a.has_value()) {
             return ::taihe::array<int32_t>(0);
         }
-        const auto &src = a.value();
+        auto const &src = a.value();
         ::taihe::array<int32_t> result(src.size());
         for (size_t i = 0; i < src.size(); ++i) {
-            const uint64_t val = src[i];
+            uint64_t const val = src[i];
             if (val > static_cast<uint64_t>(std::numeric_limits<int32_t>::max())) {
                 result[i] = std::numeric_limits<int32_t>::max();
             } else {
@@ -518,10 +518,10 @@ public:
         if (!a.has_value()) {
             return ::taihe::array<int32_t>(0);
         }
-        const auto &src = a.value();
+        auto const &src = a.value();
         ::taihe::array<int32_t> result(src.size());
         for (size_t i = 0; i < src.size(); ++i) {
-            const int64_t val = src[i];
+            int64_t const val = src[i];
             if (val < std::numeric_limits<int32_t>::min()) {
                 result[i] = std::numeric_limits<int32_t>::min();
             } else if (val > std::numeric_limits<int32_t>::max()) {
@@ -538,10 +538,10 @@ public:
         if (!a.has_value()) {
             return ::taihe::array<int32_t>(0);
         }
-        const auto &src = a.value();
+        auto const &src = a.value();
         ::taihe::array<int32_t> result(src.size());
         for (size_t i = 0; i < src.size(); ++i) {
-            const float val = src[i];
+            float const val = src[i];
             if (std::isnan(val)) {
                 // 处理非数字
                 std::cout << "NaN" << std::endl;
@@ -564,10 +564,10 @@ public:
         if (!a.has_value()) {
             return ::taihe::array<int32_t>(0);
         }
-        const auto &src = a.value();
+        auto const &src = a.value();
         ::taihe::array<int32_t> result(src.size());
         for (size_t i = 0; i < src.size(); ++i) {
-            const double val = src[i];
+            double const val = src[i];
             if (std::isnan(val)) {
                 std::cout << "NaN" << std::endl;
                 taihe::set_error("NaN value is not allowed!");
@@ -587,7 +587,7 @@ public:
         ::taihe::map_view<::taihe::string, ::taihe::array<uint8_t>> m)
     {
         ::taihe::map<::taihe::string, ::taihe::array<uint8_t>> result;
-        for (const auto &val : m) {
+        for (auto const &val : m) {
             result.emplace(val.first, val.second);
         }
         return result;
@@ -597,7 +597,7 @@ public:
         ::taihe::map_view<::taihe::string, ::taihe::array<int8_t>> m)
     {
         ::taihe::map<::taihe::string, ::taihe::array<int8_t>> result;
-        for (const auto &val : m) {
+        for (auto const &val : m) {
             result.emplace(val.first, val.second);
         }
         return result;
@@ -607,7 +607,7 @@ public:
         ::taihe::map_view<::taihe::string, ::taihe::array<uint16_t>> m)
     {
         ::taihe::map<::taihe::string, ::taihe::array<uint16_t>> result;
-        for (const auto &val : m) {
+        for (auto const &val : m) {
             result.emplace(val.first, val.second);
         }
         return result;
@@ -617,7 +617,7 @@ public:
         ::taihe::map_view<::taihe::string, ::taihe::array<int16_t>> m)
     {
         ::taihe::map<::taihe::string, ::taihe::array<int16_t>> result;
-        for (const auto &val : m) {
+        for (auto const &val : m) {
             result.emplace(val.first, val.second);
         }
         return result;
@@ -627,7 +627,7 @@ public:
         ::taihe::map_view<::taihe::string, ::taihe::array<uint32_t>> m)
     {
         ::taihe::map<::taihe::string, ::taihe::array<uint32_t>> result;
-        for (const auto &val : m) {
+        for (auto const &val : m) {
             result.emplace(val.first, val.second);
         }
         return result;
@@ -637,7 +637,7 @@ public:
         ::taihe::map_view<::taihe::string, ::taihe::array<int32_t>> m)
     {
         ::taihe::map<::taihe::string, ::taihe::array<int32_t>> result;
-        for (const auto &val : m) {
+        for (auto const &val : m) {
             result.emplace(val.first, val.second);
         }
         return result;
@@ -647,7 +647,7 @@ public:
         ::taihe::map_view<::taihe::string, ::taihe::array<uint64_t>> m)
     {
         ::taihe::map<::taihe::string, ::taihe::array<uint64_t>> result;
-        for (const auto &val : m) {
+        for (auto const &val : m) {
             result.emplace(val.first, val.second);
         }
         return result;
@@ -657,7 +657,7 @@ public:
         ::taihe::map_view<::taihe::string, ::taihe::array<int64_t>> m)
     {
         ::taihe::map<::taihe::string, ::taihe::array<int64_t>> result;
-        for (const auto &val : m) {
+        for (auto const &val : m) {
             result.emplace(val.first, val.second);
         }
         return result;
@@ -667,7 +667,7 @@ public:
         ::taihe::map_view<::taihe::string, ::taihe::array<float>> m)
     {
         ::taihe::map<::taihe::string, ::taihe::array<float>> result;
-        for (const auto &val : m) {
+        for (auto const &val : m) {
             result.emplace(val.first, val.second);
         }
         return result;
@@ -677,7 +677,7 @@ public:
         ::taihe::map_view<::taihe::string, ::taihe::array<double>> m)
     {
         ::taihe::map<::taihe::string, ::taihe::array<double>> result;
-        for (const auto &val : m) {
+        for (auto const &val : m) {
             result.emplace(val.first, val.second);
         }
         return result;
@@ -810,7 +810,7 @@ TypedArrInfo GetTypedArrInfo()
 }
 
 template <typename Iterator>
-void PrintArray(const std::string &name, Iterator begin, Iterator end)
+void PrintArray(std::string const &name, Iterator begin, Iterator end)
 {
     std::cout << name << ": ";
     for (auto it = begin; it != end; ++it) {
@@ -826,7 +826,7 @@ void PrintArray(const std::string &name, Iterator begin, Iterator end)
             }
         } else if constexpr (std::is_floating_point_v<ValueType>) {
             // 处理浮点类型（float, double）
-            const int precision = 6;
+            int const precision = 6;
             std::cout << std::fixed << std::setprecision(precision) << *it << " ";
         } else {
             // 其他未知类型（如 bool、char 等）
@@ -900,12 +900,12 @@ void SetupStructAndPrint(::bar::TypedArray1 const &v)
     }
 }
 
-void ShowMyUnion(const ::bar::MyUnion &u)
+void ShowMyUnion(::bar::MyUnion const &u)
 {
-    auto printArray = [](const auto &ptr, const char *typeName) {
+    auto printArray = [](auto const &ptr, char const *typeName) {
         std::cout << typeName << ": [";
         bool first = true;
-        for (const auto &val : *ptr) {
+        for (auto const &val : *ptr) {
             if (!first)
                 std::cout << ", ";
             if constexpr (std::is_same_v<std::decay_t<decltype(val)>, uint8_t> ||

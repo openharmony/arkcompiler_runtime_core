@@ -26,10 +26,10 @@ class Base {
 }
 
 class Derived extends Base {
-  public value1 :string[]
+  public value1: string[]
   constructor() {
     super();
-    this.value1=this.value;
+    this.value1 = this.value;
   }
 }
 

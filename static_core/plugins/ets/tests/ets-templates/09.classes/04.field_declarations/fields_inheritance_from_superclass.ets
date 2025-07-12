@@ -15,7 +15,9 @@ limitations under the License.
 
 /*---
 desc: A class inherits from its direct superclass.
-assert: A class inherits from its direct superclass and direct superinterfaces all non-private fields of the superclass and superinterfaces that are both accessible to code in the class and not hidden by a declaration in the class.
+assert: >-
+    A class inherits from its direct superclass and direct superinterfaces all non-private fields of the superclass
+    and superinterfaces that are both accessible to code in the class and not hidden by a declaration in the class.
 ---*/
 
 class A {
@@ -24,7 +26,7 @@ class A {
   public y: boolean;
 }
 
-class B extends A{
+class B extends A {
 }
 
 function main(): void {

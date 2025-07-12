@@ -14,11 +14,10 @@
  */
 
 
- /*---
- desc: Issue 25834. No CTE on overloading interface property with field
- tags: [compile-only]
-
- ---*/
+/*---
+desc: Issue 25834. No CTE on overloading interface property with field
+tags: [compile-only]
+---*/
 
 
 class C {

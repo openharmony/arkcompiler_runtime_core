@@ -173,8 +173,7 @@ function testFormatToParts() {
 function runSupportedLocalesTest(
     locales: string | string[],
     options: Intl.ListFormatLocaleMatcher | undefined,
-    expected: string[])
-{
+    expected: string[]) {
     const result = Intl.ListFormat.supportedLocalesOf(locales, options)
     arktest.assertEQ(result.length, expected.length)
     for (let i = 0; i < result.length; i++) {

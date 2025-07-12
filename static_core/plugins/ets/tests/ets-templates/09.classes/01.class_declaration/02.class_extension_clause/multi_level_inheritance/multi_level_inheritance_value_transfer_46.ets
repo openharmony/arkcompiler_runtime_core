@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that the protected property _public_var inherited from class a is'multi-level inheritance' in the test method of class c.
+desc: >-
+    Verify that the protected property _public_var inherited from class a is'multi-level inheritance'
+    in the test method of class c.
 ---*/
 
 class A {

@@ -104,6 +104,7 @@ class {{N}}ArrayIteratorEntries implements IterableIterator<{{subsetTypeValuesEn
 export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLike<{{subsetTypeValues}}> {
     public static readonly BYTES_PER_ELEMENT: int = {{S}}
     public readonly BYTES_PER_ELEMENT: int = {{N}}Array.BYTES_PER_ELEMENT
+    public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
     internal readonly lengthInt: int
 
     /**
@@ -127,18 +128,29 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 {%- if N == 'BigInt64' %}
                 this.setUnsafe(i, arr.$_get(i).getLong())
+                {%- elif N == 'Int32' or N == 'Int16' or N == 'Int8' %}
+                let temp: double = arr.$_get(i);
+                if (Double.isNaN(temp) || temp == Double.POSITIVE_INFINITY || temp == Double.NEGATIVE_INFINITY) {
+                    this.setUnsafe(i, 0);
+                } else {
+                    this.setUnsafe(i, {{N}}Array.doubleToInt(temp));
+                }
                 {%- else %}
-                this.setUnsafe(i, arr.$_get(i).to{{T.capitalize()}}())
+                this.setUnsafe(i, arr.$_get(i).to{{T.capitalize()}}());
                 {%- endif %}
             }
         } else {
-          let x = {{N}}Array.from(elements)
-          this.byteLength = x.byteLength
-          this.lengthInt = x.lengthInt
-          this.buffer = x.buffer
-          this.byteOffset = x.byteOffset
+            let x = {{N}}Array.from(elements)
+            this.byteLength = x.byteLength
+            this.lengthInt = x.lengthInt
+            this.buffer = x.buffer
+            this.byteOffset = x.byteOffset
         }
     }
+
+    {%- if N == 'Int32' or N == 'Int16' or N == 'Int8' %}
+    public static native doubleToInt(d: double): {{T}};
+    {%- endif %}
 
     /**
      * Creates an {{N}}Array with respect to data, byteOffset and length.
@@ -867,7 +879,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = array.length.toInt() - 1; i >= 0; --i) {
+        for (let i = 0; i < array.length.toInt(); ++i) {
         {%- if (N == 'BigInt64') %}
             let truncatedVal: BigInt = BigInt.asIntN(64, array[i])
             this.$_set(offset + i, truncatedVal{{fromElementCompat}})
@@ -897,8 +909,13 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         {%- if argType == 'number' %}
             {%- if N == 'BigInt64' %}
             res.setUnsafe(i, items[i].toLong())
-            {%- elif (N != 'Float32') and (N != 'Float64') %}
-            res.setUnsafe(i, res.zeroIfInfinity(items[i]){{fromElementCompat}})
+            {%- elif N == 'Int32' or N == 'Int16' or N == 'Int8' %}
+            let temp: double = items[i];
+            if (Double.isNaN(temp) || temp == Double.POSITIVE_INFINITY || temp == Double.NEGATIVE_INFINITY) {
+                res.setUnsafe(i, 0);
+            } else {
+                res.setUnsafe(i, {{N}}Array.doubleToInt(temp));
+            }
             {%- else %}
             res.setUnsafe(i, items[i]{{ '.to' + BT + '()' if argType != T and T != 'double' else ''}})
             {%- endif %}
@@ -1418,7 +1435,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns new {{N}}Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: number, end?: number): {{N}}Array {
+    public subarrayNN(begin?: number, end?: number): {{N}}Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
@@ -1431,7 +1448,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns new {{N}}Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: int, end?: number): {{N}}Array {
+    public subarrayIN(begin?: int, end?: number): {{N}}Array {
         return this.subarray(begin ?? 0, asIntOrDefault(end, this.lengthInt))
     }
 
@@ -1444,7 +1461,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns new {{N}}Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: number, end?: int): {{N}}Array {
+    public subarrayNI(begin?: number, end?: int): {{N}}Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), end ?? this.lengthInt)
     }
 
@@ -1457,7 +1474,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns new {{N}}Array with the same underlying ArrayBuffer
      */
-    public subarray(begin: int | undefined = 0, end: int | undefined = this.lengthInt): {{N}}Array {
+    public subarrayII(begin: int | undefined = 0, end: int | undefined = this.lengthInt): {{N}}Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin ?? 0, len)
         const relEnd = normalizeIndex(end ?? this.lengthInt, len)
@@ -1632,36 +1649,80 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             this.sort()
             return this
         }
-        let arr: FixedArray<{{T}}> = new {{T}}[this.lengthInt]
-        for (let i = 0; i < this.lengthInt; ++i) {
-            arr[i] = this.getUnsafe(i)
-        }
 
         let cmp = (l: {{T}}, r: {{T}}): number => {
-                return (l - r).toDouble()
+            const result = compareFn!({{asElementCompat % 'l'}}, {{asElementCompat % 'r'}})
+            {%- if N == 'BigInt64' %}
+            if (result instanceof BigInt) {
+                return result.getLong()
+            } else {
+                return result.toDouble()
             }
-        if (compareFn != undefined) {
-            cmp = (l: {{T}}, r: {{T}}): number => {
-                const result = compareFn!({{asElementCompat % 'l'}}, {{asElementCompat % 'r'}})
-                {%- if N == 'BigInt64' %}
-                if (result instanceof BigInt) {
-                    return result.getLong()
-                } else {
-                    return result as number
-                }
-                {%- else %}
-                return result
-                {%- endif %}
-            }
+            {%- else %}
+            return result
+            {%- endif %}
         }
+
         const MAX_SHORT_LENGTH = 24
-        if (arr.length > MAX_SHORT_LENGTH) {
-            arr = mergeSort(arr, cmp)
+        {%- if N in ['Float32', 'Float64'] %}
+        let naNCounter = 0
+        {%- endif%}
+
+        if (this.lengthInt > MAX_SHORT_LENGTH) {
+            let arr: FixedArray<{{T}}> = new {{T}}[this.lengthInt]
+            for (let i = 0; i < this.lengthInt; ++i) {
+            {%- if N in ['Float32', 'Float64'] %}
+                let val = this.getUnsafe(i)
+                if (isNaN(val)) {
+                    naNCounter++
+                } else {
+                    arr[i - naNCounter] = val
+                }
+            {%- else %}
+                arr[i] = this.getUnsafe(i)
+            {%- endif %}
+            }
+            {%- if N in ['Float32', 'Float64'] %}
+            for (let i = 0; i < naNCounter; ++i) {
+                arr[this.lengthInt - 1 - i] = NaN.to{{TBoxed}}()
+            }
+            const arrLength = this.lengthInt - naNCounter
+            {%- else %}
+            const arrLength = this.lengthInt
+            {%- endif %}
+
+            arr = mergeSort(arr, cmp, 0, arrLength)
+
+            for (let i = 0; i < arr.length; ++i) {
+                this.setUnsafe(i, arr[i])
+            }
         } else {
-            sort(arr, cmp)
-        }
-        for (let i = 0; i < arr.length; ++i) {
-            this.setUnsafe(i, arr[i])
+            let buffer: FixedArray<{{BT}}> = new {{BT}}[this.lengthInt]
+            for (let i = 0; i < this.lengthInt; ++i) {
+            {%- if N in ['Float32', 'Float64'] %}
+                let val = this.getUnsafe(i)
+                if (isNaN(val)) {
+                    naNCounter++
+                } else {
+                    buffer[i - naNCounter] = val
+                }
+            {%- else %}
+                buffer[i] = this.getUnsafe(i)
+            {%- endif %}
+            }
+            {%- if N in ['Float32', 'Float64'] %}
+            for (let i = 0; i < naNCounter; ++i) {
+                buffer[this.lengthInt - 1 - i] = NaN.to{{BT}}()
+            }
+            const arrLength = this.lengthInt - naNCounter
+            {%- else %}
+            const arrLength = this.lengthInt
+            {%- endif %}
+
+            arr_sort_stable(buffer, 0, arrLength, cmp)
+            for (let i = 0; i < buffer.length; ++i) {
+                this.setUnsafe(i, buffer[i].to{{BT}}())
+            }
         }
         return this
     }

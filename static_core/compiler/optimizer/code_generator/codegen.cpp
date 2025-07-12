@@ -115,7 +115,7 @@ public:
         auto lr = codegen->GetTarget().GetLinkReg();
         auto fl = codegen->GetFrameLayout();
         codegen->CreateStackMap(saveState_->CastToSaveStateOsr());
-        ssize_t slot = CFrameLayout::LOCALS_START_SLOT + CFrameLayout::GetLocalsCount() - 1U;
+        auto slot = static_cast<ssize_t>(CFrameLayout::LOCALS_START_SLOT + CFrameLayout::GetLocalsCount() - 1U);
         encoder->EncodeStp(
             codegen->FpReg(), lr,
             MemRef(codegen->FpReg(),
@@ -211,6 +211,7 @@ void Codegen::CreateFrameInfo()
     auto frame = GetGraph()->GetLocalAllocator()->New<FrameInfo>(
         FrameInfo::PositionedCallers::Encode(true) | FrameInfo::PositionedCallees::Encode(true) |
         FrameInfo::CallersRelativeFp::Encode(false) | FrameInfo::CalleesRelativeFp::Encode(true));
+    ASSERT(frame != nullptr);
     frame->SetFrameSize(fl.GetFrameSize<CFrameLayout::OffsetUnit::BYTES>());
     frame->SetSpillsCount(fl.GetSpillsCount());
 
@@ -1109,6 +1110,7 @@ bool Codegen::EmitCallRuntimeCode(Inst *inst, std::variant<EntrypointId, Reg> en
 
 void Codegen::SaveRegistersForImplicitRuntime(Inst *inst, RegMask *paramsMask, RegMask *mask)
 {
+    ASSERT(inst->GetSaveState() != nullptr);
     auto &rootsMask = inst->GetSaveState()->GetRootsRegsMask();
     for (auto i = 0U; i < inst->GetInputsCount(); i++) {
         auto input = inst->GetDataFlowInput(i);
@@ -1718,6 +1720,7 @@ void Codegen::EmitResolveStatic(ResolveStaticInst *resolver)
     auto method = GetCallerOfUnresolvedMethod(resolver);
     ScopedTmpReg tmp(GetEncoder());
     auto utypes = GetRuntime()->GetUnresolvedTypes();
+    ASSERT(utypes != nullptr);
     auto skind = UnresolvedTypesInterface::SlotKind::METHOD;
     auto methodAddr = utypes->GetTableSlot(method, resolver->GetCallMethodId(), skind);
     GetEncoder()->EncodeMov(tmp.GetReg(), Imm(methodAddr));
@@ -1877,6 +1880,41 @@ void Codegen::FinalizeCall(CallInst *call)
     }
 }
 
+void Codegen::MemRefToOffset(Reg offsetReg, MemRef mem)
+{
+    constexpr unsigned HAS_INDEX = 4;  // CC-OFF(G.NAM.03-CPP) project code style
+    constexpr unsigned HAS_SCALE = 2;  // CC-OFF(G.NAM.03-CPP) project code style
+    constexpr unsigned HAS_DISP = 1;   // CC-OFF(G.NAM.03-CPP) project code style
+    constexpr unsigned NONE = 0;       // CC-OFF(G.NAM.03-CPP) project code style
+
+    unsigned caseIndex = HAS_INDEX * static_cast<unsigned>(mem.HasIndex()) +
+                         HAS_SCALE * static_cast<unsigned>(mem.HasScale()) +
+                         HAS_DISP * static_cast<unsigned>(mem.HasDisp());
+    switch (caseIndex) {
+        case NONE:
+        case HAS_DISP:
+        case HAS_SCALE:
+        case HAS_SCALE | HAS_DISP:
+            enc_->EncodeMov(offsetReg, Imm(mem.GetDisp()));
+            break;
+        case HAS_INDEX:
+            enc_->EncodeMov(offsetReg, mem.GetIndex());
+            break;
+        case HAS_INDEX | HAS_DISP:
+            enc_->EncodeAdd(offsetReg, mem.GetIndex(), Imm(mem.GetDisp()));
+            break;
+        case HAS_INDEX | HAS_SCALE:
+        case HAS_INDEX | HAS_SCALE | HAS_DISP:
+            enc_->EncodeShl(offsetReg, mem.GetIndex(), Imm(mem.GetScale()));
+            if ((caseIndex & HAS_DISP) != 0) {
+                enc_->EncodeAdd(offsetReg, offsetReg, Imm(mem.GetDisp()));
+            }
+            break;
+        default:
+            UNREACHABLE();
+    }
+}
+
 template <bool IS_CLASS>
 void Codegen::CreatePreWRB(Inst *inst, MemRef mem, RegMask preserved, bool storePair)
 {
@@ -1951,29 +1989,39 @@ template void Codegen::CreatePreWRB<false>(Inst *inst, MemRef mem, RegMask prese
  * Note, only CALLER_REG_MASK registers are taken into account.
  */
 
-void Codegen::CreateCmcPostWRBCall(Inst *inst, MemRef mem, Reg dstReg, RegMask preserved)
+void Codegen::CreateCmcPostWRBCall(Inst *inst, MemRef mem, Reg srcReg, RegMask preserved)
 {
-    ScopedTmpReg offset(GetEncoder());
-    if (mem.HasIndex()) {
-        GetEncoder()->EncodeShl(offset, mem.GetIndex(), Imm(mem.GetScale()));
-        GetEncoder()->EncodeAdd(offset, offset, Imm(mem.GetDisp()));
-    } else {
-        GetEncoder()->EncodeMov(offset, Imm(mem.GetDisp()));
-    }
     auto [live_regs, live_vregs] = GetLiveRegisters<true>(inst);
     live_regs |= preserved;
+
+    if (!mem.HasIndex()) {
+        CallBarrier(live_regs, live_vregs, EntrypointId::CMC_POST_WRITE_BARRIER, INVALID_REGISTER, mem.GetBase(),
+                    TypedImm(mem.GetDisp()), srcReg);
+        return;
+    }
+    ScopedTmpReg offset(GetEncoder());
+    MemRefToOffset(offset, mem);
     CallBarrier(live_regs, live_vregs, EntrypointId::CMC_POST_WRITE_BARRIER, INVALID_REGISTER, mem.GetBase(), offset,
-                dstReg);
+                srcReg);
+}
+
+void Codegen::CreateCmcPostWRBCallWithPair(Inst *inst, MemRef mem, Reg srcReg1, Reg srcReg2, RegMask preserved)
+{
+    auto [live_regs, live_vregs] = GetLiveRegisters<true>(inst);
+    live_regs |= preserved;
+
+    ASSERT(!mem.HasIndex());
+    CallBarrier(live_regs, live_vregs, EntrypointId::CMC_POST_WRITE_PAIR_BARRIER, INVALID_REGISTER, mem.GetBase(),
+                TypedImm(mem.GetDisp()), srcReg1, srcReg2);
 }
 
 void Codegen::CreateCmcPostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2, RegMask preserved)
 {
     SCOPED_DISASM_STR(this, "Post-write barrier with CMC-GC");
-    CreateCmcPostWRBCall(inst, mem, reg1, preserved);
     if (reg2.IsValid()) {
-        auto delta = 1U << DataType::ShiftByType(DataType::REFERENCE, GetArch());
-        auto secondMem = MemRef(mem.GetBase(), mem.GetIndex(), mem.GetScale(), mem.GetDisp() + delta);
-        CreateCmcPostWRBCall(inst, secondMem, reg2, preserved);
+        CreateCmcPostWRBCallWithPair(inst, mem, reg1, reg2, preserved);
+    } else {
+        CreateCmcPostWRBCall(inst, mem, reg1, preserved);
     }
 }
 
@@ -2007,6 +2055,7 @@ void Codegen::CreatePostWRBImpl(Inst *inst, MemRef mem, Reg reg1, Reg reg2, RegM
     PostWriteBarrier pwb(this, inst);
     Inst *secondValue;
     Inst *val = InstStoredValue(inst, &secondValue);
+    ASSERT(val != nullptr);
     ASSERT(secondValue == nullptr || reg2 != INVALID_REGISTER);
     if (val->GetOpcode() == Opcode::NullPtr) {
         // We can don't encode Post barrier for nullptr
@@ -2014,7 +2063,7 @@ void Codegen::CreatePostWRBImpl(Inst *inst, MemRef mem, Reg reg1, Reg reg2, RegM
             return;
         }
         // CallPostWRB only for second reg
-        auto secondMemOffset = reg1.GetSize() / BITS_PER_BYTE;
+        auto secondMemOffset = static_cast<ssize_t>(reg1.GetSize() / BITS_PER_BYTE);
         if (!mem.HasIndex()) {
             MemRef secondMem(mem.GetBase(), mem.GetDisp() + secondMemOffset);
             pwb.Encode(secondMem, reg2, INVALID_REGISTER, !IsInstNotNull(secondValue), preserved);
@@ -2083,22 +2132,20 @@ void Codegen::CreatePostWRBForDynamicImpl(Inst *inst, MemRef mem, Reg reg1, Reg 
 
 void Codegen::CreateCmcReadViaBarrierCall(Inst *inst, MemRef mem, Reg dstReg, bool isVolatile, RegMask preserved)
 {
-    ScopedTmpRegLazy tmp(GetEncoder());
-    auto offset = dstReg.As(INT64_TYPE);
-    if (offset.GetId() == mem.GetBase().GetId()) {
-        tmp.Acquire();
-        offset = tmp.GetReg().As(INT64_TYPE);
-    }
-    if (mem.HasIndex()) {
-        GetEncoder()->EncodeShl(offset, mem.GetIndex(), Imm(mem.GetScale()));
-        GetEncoder()->EncodeAdd(offset, offset, Imm(mem.GetDisp()));
-    } else {
-        GetEncoder()->EncodeMov(offset, Imm(mem.GetDisp()));
-    }
     auto [live_regs, live_vregs] = GetLiveRegisters<true>(inst);
     live_regs |= preserved;
     auto entrypointId = isVolatile ? EntrypointId::CMC_ATOMIC_READ_VIA_BARRIER : EntrypointId::CMC_READ_VIA_BARRIER;
-    CallBarrier(live_regs, live_vregs, entrypointId, dstReg, mem.GetBase(), offset);
+
+    if (!mem.HasIndex()) {
+        CallBarrier(live_regs, live_vregs, entrypointId, dstReg, mem.GetBase(), TypedImm(mem.GetDisp()));
+    } else if (dstReg.GetId() != mem.GetBase().GetId()) {
+        MemRefToOffset(dstReg /* as offset */, mem);
+        CallBarrier(live_regs, live_vregs, entrypointId, dstReg, mem.GetBase(), dstReg /* as offset */);
+    } else {
+        ScopedTmpReg offset(GetEncoder());
+        MemRefToOffset(offset, mem);
+        CallBarrier(live_regs, live_vregs, entrypointId, dstReg, mem.GetBase(), offset);
+    }
 }
 
 void Codegen::CreateReadViaBarrier(Inst *inst, MemRef mem, Reg dstReg, bool isVolatile, RegMask preserved)
@@ -2121,21 +2168,33 @@ void Codegen::CreateReadViaBarrier(Inst *inst, MemRef mem, Reg dstReg, bool isVo
 
 void Codegen::CreateReadPairViaBarrier(Inst *inst, MemRef mem, Reg dstReg1, Reg dstReg2, RegMask preserved)
 {
+    ASSERT(dstReg1.IsValid() && dstReg2.IsValid());
+    ASSERT(dstReg1.GetId() != dstReg2.GetId());
+
     if (!GetRuntime()->NeedsPreReadBarrier()) {
         // Fallback to load without barrier
         GetEncoder()->EncodeLdp(dstReg1, dstReg2, IsTypeSigned(inst->GetType()), mem);
         return;
     }
     ASSERT(GetRuntime()->GetPreReadType() == ark::mem::BarrierType::PRE_CMC_READ_BARRIER);
-    ASSERT(!mem.HasIndex() && !mem.HasScale());
     SCOPED_DISASM_STR(this, "Load pair via CMC-GC read barrier.");
 
-    CreateCmcReadViaBarrierCall(inst, mem, dstReg1, false, preserved);
-    if (!dstReg2.IsValid()) {
-        return;
+    auto callBarrier1st = [this, inst, mem, dstReg1, preserved]() {
+        CreateCmcReadViaBarrierCall(inst, mem, dstReg1, false, preserved);
+    };
+    auto callBarrier2nd = [this, inst, mem, dstReg2, preserved]() {
+        auto secondDisp = mem.GetDisp() + (1U << DataType::ShiftByType(DataType::REFERENCE, GetArch()));
+        auto secondMem = MemRef(mem.GetBase(), mem.GetIndex(), mem.GetScale(), secondDisp);
+        CreateCmcReadViaBarrierCall(inst, secondMem, dstReg2, false, preserved);
+    };
+    // We need to flip the order when destination registers overlap with mem.GetBase().
+    if (dstReg1.GetId() == mem.GetBase().GetId()) {
+        callBarrier2nd();
+        callBarrier1st();
+    } else {
+        callBarrier1st();
+        callBarrier2nd();
     }
-    auto secondOffset = 1U << DataType::ShiftByType(DataType::REFERENCE, GetArch());
-    CreateCmcReadViaBarrierCall(inst, MemRef(mem.GetBase(), mem.GetDisp() + secondOffset), dstReg2, false, preserved);
 }
 
 void Codegen::CheckObject(Reg reg, LabelHolder::LabelId label)

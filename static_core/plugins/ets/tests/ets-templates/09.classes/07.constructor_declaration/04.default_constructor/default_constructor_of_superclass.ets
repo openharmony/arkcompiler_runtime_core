@@ -15,7 +15,9 @@
 
 /*---
 desc: Default class constructor invoke default constructor of superclass.
-assert: If the class being declared is the primordial class Object, then the default constructor has an empty body. Otherwise, the default constructor simply invokes the superclass constructor with no arguments.
+assert: >-
+    If the class being declared is the primordial class Object, then the default constructor has an empty body.
+    Otherwise, the default constructor simply invokes the superclass constructor with no arguments.
 ---*/
 
 class A {
@@ -24,7 +26,7 @@ class A {
   public b2: B | null = null;
 }
 
-class B extends A{
+class B extends A {
 
 }
 

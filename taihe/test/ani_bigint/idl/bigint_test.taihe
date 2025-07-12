@@ -27,7 +27,7 @@ function bigIntToArrayInt64(a : BigInt) : long[] {
     }
     let out : long[] = new long[array.length];
     for (let i = 0; i < array.length; i++) {
-        out[array.length as int - 1 - i] = array[i];
+        out[(array.length).toInt() - 1 - i] = array[i];
         console.info("array:" + array[i]);
     }
     return out;

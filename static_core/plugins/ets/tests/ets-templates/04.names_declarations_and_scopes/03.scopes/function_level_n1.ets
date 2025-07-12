@@ -28,5 +28,5 @@ function f1() {
 
 function main() {
     f1()
-    arktest.assertEQ( x, 9 )  // CTE
+    arktest.assertEQ( x, 9 ) // CTE
 }

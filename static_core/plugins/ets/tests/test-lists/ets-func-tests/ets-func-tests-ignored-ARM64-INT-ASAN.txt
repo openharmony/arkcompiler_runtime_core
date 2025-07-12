@@ -4,7 +4,7 @@ std/core/std_core_array_exception_copyTo_ArrayIndexOutOfBoundsError_char_array_c
 std/core/std_core_array_exception_copyTo_ArrayIndexOutOfBoundsError_float_array_float_array_int_int_int.ets
 std/core/std_core_array_exception_copyTo_ArrayIndexOutOfBoundsError_double_array_double_array_int_int_int.ets
 
-#24986 (17 tests)
+#24986 (16 tests)
 std/core/Object.ets
 std/core/TypedArrayConstructorNumbersInts.ets
 std/math/std_math_sign_double.ets
@@ -20,7 +20,6 @@ spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0020.ets
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0030.ets
 std/containers/concurrent_set/ConcurrentSet_ConstructorTest.ets
 std/containers/linked_blocking_queue/LinkedBlockingQueue_ConstructorTest.ets
-spec/03.types/References_Types/Tuples_type/tuple_write_3.ets
 std/core/NumberTest.ets
 escompat/JsonStringifyTest.ets
 

@@ -25,9 +25,9 @@ function main(): int {
 }
 
 function newProxy<T>(a: Array<T>): Array<T> {
-    class Handler<T> extends DefaultArrayProxyHandler<T> {}
+    class Handler<T> extends proxy.DefaultArrayProxyHandler<T> {}
 
-    return Proxy.create<T>(a, new Handler<T>())
+    return proxy.Proxy.create<T>(a, new Handler<T>())
 }
 
 function check<T>(newArrayFn: () => Array<T>, testFn: (a: Array<T>) => int): int {

@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The child interface overrides the abstract method of the parent interface(parentinterface call parentinterface abstract).
+desc: >-
+    The child interface overrides the abstract method of the parent interface
+    (parentinterface call parentinterface abstract).
 ---*/
 
 interface ParentInterface {
@@ -41,6 +43,6 @@ class ChildClass implements ChildInterface {
 }
 
 function main(): void {
-  let instance: ParentInterface  = new ChildClass();
+  let instance: ParentInterface = new ChildClass();
   arktest.assertEQ(instance.parentMethod(), "Parent method implementation");
 }

@@ -36,7 +36,7 @@ type StringOrRegExp = String | RegExp
 /**
  * Unicode string
  */
-export final class String extends Object implements Comparable<String>, JSONable<String>, Iterable<String> {
+export final class String extends Object implements Comparable<String>, Iterable<String> {
 
     // The constructors below are implemented via initobj instruction
     /**
@@ -153,7 +153,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      */
     public charAt(index: number): String {
         if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
-            return "";
+            return '';
         }
         let c : FixedArray<char> = new char[1];
         c[0] = this.charAt(index.toInt())
@@ -276,7 +276,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      */
     public codePointCount(begin: int, end: int): int {
         if (begin > end) {
-            throw new AssertionError("Begin idx must be less than end idx")
+            throw new AssertionError('Begin idx must be less than end idx')
         }
         let counter: int = 0;
         for (let i: int = begin; i < end; i++) {
@@ -648,7 +648,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      */
     // TODO(ivan-tyulyandin): uncomment when #12735 will be fixed
     // public static raw(d: String, substs: ...String): String {
-    //     throw new Error("String.raw: not implemented")
+    //     throw new Error('String.raw: not implemented')
     // }
 
     /**
@@ -801,7 +801,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @returns newly created string from string array and delimiter
      */
     public static join(strings: String[], delim: String): String {
-        return String.join(strings, delim, "", "");
+        return String.join(strings, delim, '', '');
     }
 
     /**
@@ -823,7 +823,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @returns newly created string from string array, prefix, suffix and delimiter
      */
     public static join(strings: String[], delim: String, prefix: String, suffix: String): String {
-        let resStr: String = "";
+        let resStr: String = '';
         for (let i: int = 0; i < strings.length; i++) {
             resStr += prefix + strings[i] + suffix;
             if (i != strings.length - 1) {
@@ -1009,8 +1009,8 @@ export final class String extends Object implements Comparable<String>, JSONable
 
     /**
      * Repeats this string count times, i.e.
-     *    a = "A",
-     *    a.repeat(2) == "AA"
+     *    a = 'A',
+     *    a.repeat(2) == 'AA'
      *
      * @param count number of repetitions of this String
      *
@@ -1024,8 +1024,8 @@ export final class String extends Object implements Comparable<String>, JSONable
 
     /**
      * Repeats this string count times, i.e.
-     *    a = "A",
-     *    a.repeat(2) == "AA"
+     *    a = 'A',
+     *    a.repeat(2) == 'AA'
     *
     * @param count number of repetitions of this String
     *
@@ -1077,7 +1077,7 @@ export final class String extends Object implements Comparable<String>, JSONable
     }
 
     private CreateHTMLString(tag: String, param: String): String{
-        return "<" + tag + param + ">" + (this) + "</" + tag + ">"
+        return '<' + tag + param + '>' + (this) + '</' + tag + '>'
     }
 
     /**
@@ -1087,14 +1087,14 @@ export final class String extends Object implements Comparable<String>, JSONable
      * then the text str, and then an </a> end tag.
      */
     public anchor(name: String): String {
-        return this.CreateHTMLString("a", " name=\"" + name + "\"")
+        return this.CreateHTMLString('a', ' name=\"' + name + '\"')
     }
 
     /*
      * The big() method creates a string that embeds a string in a <big> element (<big>str</big>), which causes a string to be displayed in a big font.
      */
     public big(): String{
-        return this.CreateHTMLString("big", "")
+        return this.CreateHTMLString('big', '')
     }
 
 
@@ -1102,91 +1102,91 @@ export final class String extends Object implements Comparable<String>, JSONable
      * The small() method creates a string that embeds a string in a <small> element (<small>str</small>), which causes a string to be displayed in a big font.
      */
     public small(): String{
-        return this.CreateHTMLString("small", "")
+        return this.CreateHTMLString('small', '')
     }
 
     /*
      * The blink() method creates a string that embeds a string in a <blink> element (<blink>str</blink>), which causes a string to be displayed in a big font.
      */
     public blink(): String{
-        return this.CreateHTMLString("blink", "")
+        return this.CreateHTMLString('blink', '')
     }
 
     /*
      * The bold() method creates a string that embeds a string in a <bold> element (<b>str</b>), which causes a string to be displayed in a big font.
      */
     public bold(): String{
-        return this.CreateHTMLString("b", "")
+        return this.CreateHTMLString('b', '')
     }
 
     /*
      * The italics() method creates a string that embeds a string in a <i> element (<i>str</i>), which causes a string to be displayed in a big font.
      */
     public italics(): String{
-        return this.CreateHTMLString("i", "")
+        return this.CreateHTMLString('i', '')
     }
 
     /*
      * The strike() method creates a string that embeds a string in a <strike> element (<strike>str</strike>), which causes a string to be displayed in a big font.
      */
     public strike(): String{
-        return this.CreateHTMLString("strike", "")
+        return this.CreateHTMLString('strike', '')
     }
 
     /*
      * The sub() method creates a string that embeds a string in a <sub> element (<sub>str</sub>), which causes a string to be displayed in a big font.
      */
     public sub(): String{
-        return this.CreateHTMLString("sub", "")
+        return this.CreateHTMLString('sub', '')
     }
 
     /*
      * The sup() method creates a string that embeds a string in a <sup> element (<sup>str</sup>), which causes a string to be displayed in a big font.
      */
     public sup(): String{
-        return this.CreateHTMLString("sup", "")
+        return this.CreateHTMLString('sup', '')
     }
 
     /*
      * The fixed() method creates a string that embeds a string in a <tt> element (<tt>str</tt>), which causes a string to be displayed in a big font.
      */
     public fixed(): String{
-        return this.CreateHTMLString("tt", "")
+        return this.CreateHTMLString('tt', '')
     }
 
     /*
      * The fontcolor() method creates a string that embeds a string in a <font> element (<font color="...">str</font>), which causes a string to be displayed in the specified font color.
      */
     public fontcolor(color: String): String{
-        return this.CreateHTMLString("font", " color=\"" + color + "\"")
+        return this.CreateHTMLString('font', ' color=\"' + color + '\"')
     }
 
     /*
      * The fontsize() method creates a string that embeds a string in a <font> element (<font size="...">str</font>), which causes a string to be displayed in the specified font size.
      */
     public fontsize(size: String): String {
-        return this.CreateHTMLString("font", " size=\"" + size.replaceAll("\"", "&quot;") + "\"")
+        return this.CreateHTMLString('font', ' size=\"' + size.replaceAll('\"', '&quot;') + '\"')
     }
 
     /*
      * The fontsize() method creates a string that embeds a string in a <font> element (<font size="...">str</font>), which causes a string to be displayed in the specified font size.
      */
     public fontsize(size: number): String {
-        return this.CreateHTMLString("font", " size=\"" + size + "\"")
+        return this.CreateHTMLString('font', ' size=\"' + size + '\"')
     }
 
     /*
      * The fontsize() method creates a string that embeds a string in a <font> element (<font size="...">str</font>), which causes a string to be displayed in the specified font size.
      */
     public fontsize(size: int): String{
-        return this.CreateHTMLString("font", " size=\"" + size + "\"")
+        return this.CreateHTMLString('font', ' size=\"' + size + '\"')
     }
 
     /*
      * The link() method creates a string that embeds a string in an <a> element (<a href="...">str</a>), to be used as a hypertext link to another URL.
      */
     public link(link: String): String{
-        return this.CreateHTMLString("a", " href=\"" + link + "\"")
+        return this.CreateHTMLString('a', ' href=\"' + link + '\"')
     }
 
     /*
@@ -1263,7 +1263,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @returns string with the padString applied at the end of the current str
      */
     public padEnd(maxLength: number, fillString?: String): String {
-        const str = (fillString == undefined) ? "\u0020" : fillString
+        const str = (fillString == undefined) ? '\u0020' : fillString
         return this.padEnd(maxLength.toInt(), str)
     }
 
@@ -1321,7 +1321,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @returns string with the padString applied at the end of the current str
      */
     public padStart(maxLength: number, fillString?: String): String {
-        const str = (fillString == undefined) ? "\u0020" : fillString
+        const str = (fillString == undefined) ? '\u0020' : fillString
         return this.padStart(maxLength.toInt(), str)
     }
 
@@ -1397,7 +1397,7 @@ export final class String extends Object implements Comparable<String>, JSONable
             end = this.getLength()
         }
         if (end <= begin) {
-            return "";
+            return '';
         }
         return this.substring(begin, end);
     }
@@ -1438,7 +1438,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         begin = normalizeIndex(begin, this.getLength())
         end = normalizeIndex(end, this.getLength())
         if (end <= begin) {
-            return "";
+            return '';
         }
         return this.substring(begin, end)
     }
@@ -1447,11 +1447,11 @@ export final class String extends Object implements Comparable<String>, JSONable
         let matchLength = matched.getLength()
         let stringLength = str.getLength()
         if (position < 0 || position > stringLength) {
-            throw new AssertionError("Position " + position + " has to be in range 0.." + stringLength)
+            throw new AssertionError('Position ' + position + ' has to be in range 0..' + stringLength)
         }
         let tailPos = position + matchLength
         let m = captures.length
-        let result = ""
+        let result = ''
         let doubleCapture = true;
         for (let i: int = 0; i < replacement.getLength();) {
             if (i + 1 < replacement.getLength()
@@ -1511,7 +1511,7 @@ export final class String extends Object implements Comparable<String>, JSONable
                             && replacement.charAt(i) == c'$'
                             && replacement.charAt(i + 1) == c'<') {
                 if (namedCaptures == undefined) {
-                    result += "$<";
+                    result += '$<';
                     i += 2;
                 } else {
                     let j = i + 2;
@@ -1524,7 +1524,7 @@ export final class String extends Object implements Comparable<String>, JSONable
                         }
                         i = j + 1;
                     } else {
-                        result += "$<";
+                        result += '$<';
                         i += 2;
                     }
                 }
@@ -1613,7 +1613,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (searchValue instanceof RegExp) {
             const re = searchValue as RegExp
             if (!re.global) {
-                throw new Error("Global flag expected for regexp")
+                throw new Error('Global flag expected for regexp')
             }
             return re.replace(this, replaceValue)
         }
@@ -1622,7 +1622,7 @@ export final class String extends Object implements Comparable<String>, JSONable
 
     public replaceAll(searchValue: RegExp, replaceValue: String): String {
         if (!searchValue.global) {
-            throw new Error("Global flag expected for regexp")
+            throw new Error('Global flag expected for regexp')
         }
         return searchValue.replace(this, replaceValue)
     }
@@ -1640,7 +1640,7 @@ export final class String extends Object implements Comparable<String>, JSONable
             position = this.indexOf(searchValue, position + advanceBy)
         }
         let endOfLastMatch = 0
-        let result = ""
+        let result = ''
         let arrayMatchPositions = matchPositions.toArray()
         for (let i = 0; i < arrayMatchPositions.length; ++i) {
             let p = arrayMatchPositions[i].unboxed()
@@ -1668,7 +1668,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (searchValue instanceof RegExp) {
             const re = searchValue as RegExp
             if (!re.global) {
-                throw new Error("Global flag expected for regexp")
+                throw new Error('Global flag expected for regexp')
             }
             return re.replace(this, replacer)
         }
@@ -1677,7 +1677,7 @@ export final class String extends Object implements Comparable<String>, JSONable
 
     public replaceAll(searchValue: RegExp, replacer: (substr: String, args: Object[]) => String): String {
         if (!searchValue.global) {
-            throw new Error("Global flag expected for regexp")
+            throw new Error('Global flag expected for regexp')
         }
         return searchValue.replace(this, replacer)
     }
@@ -1692,7 +1692,7 @@ export final class String extends Object implements Comparable<String>, JSONable
             position = this.indexOf(searchValue, position + advanceBy)
         }
         let endOfLastMatch = 0
-        let result = ""
+        let result = ''
         let arrayMatchPositions = matchPositions.toArray()
         for (let i = 0; i < arrayMatchPositions.length; ++i) {
             let p = arrayMatchPositions[i].unboxed()
@@ -1743,11 +1743,11 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (locale.length != 0) {
             return this.toLocaleLowerCase(locale[0]);
         }
-        return this.toLocaleLowerCase("");
+        return this.toLocaleLowerCase('');
     }
 
     public toLocaleLowerCase(): String {
-        return this.toLocaleLowerCase("");
+        return this.toLocaleLowerCase('');
     }
 
     /*
@@ -1760,11 +1760,11 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (locale.length != 0) {
             return this.toLocaleUpperCase(locale[0]);
         }
-        return this.toLocaleUpperCase("");
+        return this.toLocaleUpperCase('');
     }
 
     public toLocaleUpperCase(): String {
-        return this.toLocaleUpperCase("");
+        return this.toLocaleUpperCase('');
     }
     /**
      * Retrieves the result of matching a string against a regular expression
@@ -1801,7 +1801,7 @@ export final class String extends Object implements Comparable<String>, JSONable
     public matchAll(reg: RegExp): IterableIterator<RegExpMatchArray> {
         let flags = reg.flags;
         if (!reg.global) {
-            throw new Error("matchAll must be called with a global RegExp")
+            throw new Error('matchAll must be called with a global RegExp')
         }
         return reg.matchAll(this)
     }
@@ -1817,25 +1817,25 @@ export final class String extends Object implements Comparable<String>, JSONable
     /**
      * The normalize() method of String values returns the Unicode Normalization Form of this string
      *
-     * @param form is "NFC" or "NFD" or "NFKC" or "NFKD"
+     * @param form is 'NFC' or 'NFD' or 'NFKC' or 'NFKD'
      *
-     * @throws RangeError if form is not "NFC" or "NFD" or "NFKC" or "NFKD"
+     * @throws RangeError if form is not 'NFC' or 'NFD' or 'NFKC' or 'NFKD'
      *
      * @returns the Unicode Normalization Form of the string
      */
     public normalize(form?: String): String {
-        const f = (form == undefined) ? "NFC" : form
+        const f = (form == undefined) ? 'NFC' : form
         switch (f) {
-        case "NFC":
+        case 'NFC':
             return this.normalizeNFC()
-        case "NFD":
+        case 'NFD':
             return this.normalizeNFD()
-        case "NFKC":
+        case 'NFKC':
             return this.normalizeNFKC()
-        case "NFKD":
+        case 'NFKD':
             return this.normalizeNFKD()
         default:
-            throw new RangeError("The normalization form should be one of NFC, NFD, NFKC, NFKD.")
+            throw new RangeError('The normalization form should be one of NFC, NFD, NFKC, NFKD.')
         }
     }
 
@@ -1912,7 +1912,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         let res = new StringBuilder();
         for (const cp of codePoints) {
             if (cp < 0 || cp > MAX_CODE_POINT || isNaN(cp) || !Number.isInteger(cp)) {
-                throw new RangeError("Invalid code point: " + new Number(cp).toString())
+                throw new RangeError('Invalid code point: ' + new Number(cp).toString())
             }
             let chrs = String.codePointToChar(cp.toInt());
             res.append((chrs & 0xffff).toChar())
@@ -1928,22 +1928,6 @@ export final class String extends Object implements Comparable<String>, JSONable
      * The isWellFormed() method of String values returns a boolean indicating whether this string contains any lone surrogates.
      */
     public native isWellFormed(): boolean;
-
-    /**
-     * Creates a String instance based on JSONValue
-     *
-     * @param json: JSONValue - a JSON representation
-     *
-     * @throws JSONTypeError if json does not encode a valid String
-     *
-     * @returns String - string value decoded from JSON
-     */
-    public createFromJSONValue(json: JSONValue): String {
-        if (json instanceof JSONString) {
-            return (json as JSONString).value
-        }
-        throw new JSONTypeError("Cannot create String from JSON", new ErrorOptions(json as Object))
-    }
 
     /**
      * Check if a string is compressed

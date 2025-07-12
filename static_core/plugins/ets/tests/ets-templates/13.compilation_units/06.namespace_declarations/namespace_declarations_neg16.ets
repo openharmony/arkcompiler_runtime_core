@@ -14,7 +14,9 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Transit namespace usage. TypeError Namespace 'Transit1' is already defined. TypeError Property 'foo' does not exist on type 'Transit1'
+desc: >-
+    Transit namespace usage. TypeError Namespace 'Transit1' is already defined.
+    TypeError Property 'foo' does not exist on type 'Transit1'
 files:
 - ./namespace_storage.ets
 tags: [compile-only, negative]

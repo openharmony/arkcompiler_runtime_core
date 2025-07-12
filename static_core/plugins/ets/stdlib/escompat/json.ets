@@ -598,6 +598,9 @@ export class JSON {
         } else if (typ instanceof ArrayType) {
             let et = (typ as ArrayType).getElementType()
             ok = JSON.checkType(et, used)
+        } else if (typ instanceof UnionType) {
+            // NOTE(lyupaanastasia) parse union #27136
+            throw new Error("UnionType is not supported yet")
         } else if (typ instanceof StringType
                     || typ instanceof DoubleType
                     || typ instanceof BooleanType
@@ -665,6 +668,14 @@ export class JSON {
     static parseJsonElement(text: string, reviver: (key: string, value: jsonx.JsonElement) => jsonx.JsonElement): jsonx.JsonElement {
         return new JsonElementParser(text, reviver).parse()
     }
+}
+
+export interface JsonElementDeserializable {
+    /**
+        * Serializes an object to a JsonElement.
+        * @returns {JsonElement} The JSON representation of the object
+        */
+    toJSON(): jsonx.JsonElement
 }
 
 class JSONWriter {
@@ -737,14 +748,17 @@ class JSONWriter {
             this.writeESCompatRecord(temp)
         } else if (obj instanceof ESValue) {
             this.writeInteropESValue(obj)
+        } else if (obj instanceof JsonElementDeserializable) {
+            this.buffer.append(JSON.stringifyJsonElement((obj as JsonElementDeserializable).toJSON()))
         } else if (this.writeValueTypeWrapper(obj)) {
             // nothing to do - write completed successfully
         } else {
             const objType = Type.of(obj)
             if (objType.getName() == "escompat.Date") {
                 this.buffer.append("\"").append((obj as Date).toISOString()).append("\"")
-            }
-            else if (objType.getName() == JSONWriter.STD_CORE_INTEROP_JSVALUE_TYPE.getName()) {
+            // } else if (objType.getName() == "@ohos.buffer.buffer.Buffer") {
+            //     this.buffer.append(JSON.stringifyJsonElement((obj as JsonElementDeserializable).toJSON()))
+            } else if (objType.getName() == JSONWriter.STD_CORE_INTEROP_JSVALUE_TYPE.getName()) {
                 this.buffer.append(JSON.stringify(obj as JSValue))
             } else if (objType instanceof ArrayType) {
                 this.writeArrayValue(reflect.Value.of(obj) as ArrayValue, objType as ArrayType)
@@ -1702,6 +1716,9 @@ class JSONValueParser {
     parse(value: JSONValue, typ: Type): NullishType {
         if (value instanceof JSONObject && typ instanceof ClassType) {
             return this.parseObject(value as JSONObject, typ as ClassType)
+        } else if (value instanceof JSONObject && typ instanceof UnionType) {
+            // NOTE(lyupaanastasia) parse union #27136
+            throw new Error("UnionType is not supported yet")
         } else if (value instanceof JSONArray && typ instanceof ArrayType) {
             return this.parseArray(value as JSONArray, typ as ArrayType)
         } else if (value instanceof JSONNumber && (typ instanceof DoubleType || typ.equals(BigIntType) || typ instanceof IntType || typ instanceof LongType || typ instanceof ByteType || typ instanceof ShortType || typ instanceof FloatType)) {
@@ -2418,11 +2435,5 @@ export class JSONNull extends JSONValue {
 
     public override toString(): String {
         return JSONNull.value
-    }
-}
-
-export interface JSONable<T> {
-    createFromJSONValue(json: JSONValue): T {
-        throw new JSONTypeError("createFromJSONValue was not overrided")
     }
 }

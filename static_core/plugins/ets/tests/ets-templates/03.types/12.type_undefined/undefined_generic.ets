@@ -14,7 +14,9 @@ limitations under the License.
 ---*/
 
 /*---
-desc: The undefined type can be used as the type argument that instantiates a generic type if specific value of the type argument is irrelevant.
+desc: >-
+    The undefined type can be used as the type argument that instantiates a generic type if specific value
+    of the type argument is irrelevant.
 tags: [negative, compile-only]
 ---*/
 

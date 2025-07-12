@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Create an inheritance chain a -> b -> c and verify that the protected property _public_var inherited from class a is null in the test method of class c.
+desc: >-
+    Create an inheritance chain a -> b -> c and verify that the protected property _public_var inherited from class
+    a is null in the test method of class c.
 ---*/
 
 class A {
@@ -36,7 +38,7 @@ class C extends B {
     super();
   }
 
-  test(){
+  test() {
     arktest.assertEQ(this._publicVar, null);
   }
 }

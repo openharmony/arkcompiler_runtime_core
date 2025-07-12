@@ -85,10 +85,12 @@ static bool InitializeGlobal(ani_env *env)
     status = env->Class_FindMethod(esobjectClass, "getPropertySafe", "d:C{std.interop.ESValue}",
                                    &g_methodGetPropertyByIndex);
     ASSERT(status == ANI_OK);
-    status = env->Class_FindMethod(esobjectClass, "setProperty",
-                                   "C{std.core.String}C{std.core.Object}:", &g_methodSetPropertyByName);
+    status =
+        env->Class_FindMethod(esobjectClass, "setProperty",
+                              "C{std.core.String}X{C{std.core.Null}C{std.core.Object}}:", &g_methodSetPropertyByName);
     ASSERT(status == ANI_OK);
-    status = env->Class_FindMethod(esobjectClass, "setProperty", "dC{std.core.Object}:", &g_methodSetPropertyByIndex);
+    status = env->Class_FindMethod(esobjectClass, "setProperty",
+                                   "dX{C{std.core.Null}C{std.core.Object}}:", &g_methodSetPropertyByIndex);
     ASSERT(status == ANI_OK);
     status =
         env->Class_FindStaticMethod(esobjectClass, "<get>Undefined", ":C{std.interop.ESValue}", &g_methodGetUndefined);

@@ -13,52 +13,50 @@
  * limitations under the License.
  */
 
-
- /*---
- desc: Issue 24747. Switch case
- tags: []
-
- ---*/
+/*---
+desc: Issue 24747. Switch case
+tags: []
+---*/
 
 type Func = () => void
 
 let rc = 0;
 
 class A {
-    bar() {}
-    foo(v: int) {
-        switch(v) {
-            case 2: {
-                const x = 2;
-                const y: number = 2.0;
-                const c = "Case 2"
-                const f: Func = () => { rc = v }
-                f()
-                break
-            }
+  bar() {}
+  foo(v: int) {
+    switch (v) {
+      case 2: {
+        const x = 2;
+        const y: number = 2.0;
+        const c = "Case 2"
+        const f: Func = () => { rc = v }
+        f()
+        break
+      }
 
-            case 1: {
-                const x = 1;
-                const y: number = 1.0;
-                const c = "Case 1"
-                const f: Func = () => { rc = v }
-                f()
-                break
-            }
+      case 1: {
+        const x = 1;
+        const y: number = 1.0;
+        const c = "Case 1"
+        const f: Func = () => { rc = v }
+        f()
+        break
+      }
 
-            default: {
-                const x = 3;
-                const y: number = 3.0;
-                const c = "Case 3"
-                const f: Func = () => { rc = v }
-                f()
-            }
-        }
+      default: {
+        const x = 3;
+        const y: number = 3.0;
+        const c = "Case 3"
+        const f: Func = () => { rc = v }
+        f()
+      }
     }
+  }
 }
 
 function main() {
-    rc = 0;
-    new A().foo(-1)
-    arktest.assertEQ(-1, rc)
+  rc = 0;
+  new A().foo(-1)
+  arktest.assertEQ(-1, rc)
 }

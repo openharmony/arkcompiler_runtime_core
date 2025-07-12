@@ -52,8 +52,6 @@ ohos_shared_library("interop_test_helper") {
     "$js_root:ark_jsruntime_public_config",
   ]
 
-  include_dirs = [ "$js_root/../../foundation/arkui/napi" ]
-
   if (ark_standalone_build) {
     public_configs += [ ":interop_test_helper_config" ]
 

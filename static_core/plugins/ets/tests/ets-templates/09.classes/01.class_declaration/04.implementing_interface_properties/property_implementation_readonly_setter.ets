@@ -32,7 +32,7 @@ class StyleClassThree implements Style {
     readable: number = 0 // OK!
 }
 
-function how_to_write (s: Style) {
+function how_to_write(s: Style) {
     if (s instanceof StyleClassThree) {
         let s1 = s as StyleClassThree
         s1.color = "Black" // OK!
@@ -41,5 +41,5 @@ function how_to_write (s: Style) {
 }
 
 function main() {
-    how_to_write (new StyleClassThree)
+    how_to_write(new StyleClassThree)
 }

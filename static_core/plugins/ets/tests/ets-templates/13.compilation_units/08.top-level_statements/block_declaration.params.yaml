@@ -18,11 +18,8 @@ statements:
   - block: |-
           if (check())
             arktest.assertTrue(true);
-  - block: 'class Point {}'
-  - block: 'interface A {}'
   - block: 'enum Enum { v1, v2 }'
   - block: 'const b: int = 1;'
-  - block: 'class Dict { constructor(x: int, y: int) {} }'
   - block: |-
           let i: int = 1;
           do i++; while (i < 10)
@@ -48,7 +45,6 @@ statements:
           }
   - block: 'arktest.assertTrue( true )'
   - block: |-
-          class Ex extends Error {}
           try {
             throw new Error();
           } catch (e) {

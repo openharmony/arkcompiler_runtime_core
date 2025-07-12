@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function main() {
+function testEworkerInteropException() {
     let exceptionWasCaught = false;
     try {
         let eaw : EAWorker = new EAWorker(true);
@@ -24,4 +24,11 @@ function main() {
         }
     }
     arktest.assertTrue(exceptionWasCaught);
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.eworker_interop_exception');
+    testSuite.addTest('testEworkerInteropException', testEworkerInteropException);
+    let res = testSuite.run();
+    return res;
 }

@@ -21,7 +21,7 @@ let f = <T1, T2>(a: T1, b: T2): [T1, T2] => [a, b]
 
 
 let x = f(true, 1234.0)
-assertTrue(x[0] == true && x[1] == 1234.0, "boolean/float failed")
+arktest.assertTrue(x[0] == true && x[1] == 1234.0, 'boolean/float failed')
 
 let y = f(1, "test")
-assertTrue(y[0] == 1 && y[1] == "test", "int/string failed")
+arktest.assertTrue(y[0] == 1 && y[1] == 'test', 'int/string failed')

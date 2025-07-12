@@ -19,5 +19,5 @@ tags: [not-a-test, compile-only]
 
 import {TestType } from "./b";
 
-export default class A{
+export default class A {
 }

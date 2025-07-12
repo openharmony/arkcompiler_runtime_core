@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
- /*---
- desc: Issue 21051. Import entity from namespace is not working
- tags: [compile-only, not-a-test]
+/*---
+desc: Issue 21051. Import entity from namespace is not working
+tags: [compile-only, not-a-test]
+---*/
 
- ---*/
-
- export namespace TS {
-    export type B = number
- }
+export namespace TS {
+   export type B = number
+}

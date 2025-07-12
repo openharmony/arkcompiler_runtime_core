@@ -15,8 +15,8 @@ limitations under the License.
 
 /*---
 desc: >-
-    Class initializers (along with field initializers for static fields as described in Field Initialization) ensure that all
-    static fields receive their initial values before they are used for the first time.
+    Class initializers (along with field initializers for static fields as described in Field Initialization) ensure
+    that all static fields receive their initial values before they are used for the first time.
 tags: [compile-only, negative]
 ---*/
 

@@ -58,24 +58,14 @@
 03.types/20.union_types/ut_n2_9.ets
 
 # primitives
-06.contexts_and_conversions/03.numeric_operator_contexts/unary_numeric_promotion/array_access_7.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/assn_var/assn-var_0.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_arr/comp-arr_0.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_obj/comp-clss_0.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_obj/comp-intf_0.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-un_0.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-un_0.ets
 07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_cast_1.ets
 07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_cast_3.ets
 07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_decl_1.ets
 07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_decl_3.ets
-06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_19.ets
-06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_20.ets
-06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_21.ets
-06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_22.ets
-06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_23.ets
-06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_24.ets
-06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_25.ets
 07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_32.ets
 07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_33.ets
 07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_34.ets
@@ -105,16 +95,36 @@
 07.expressions/33.constant_expression/check_annotation/constant_unary_operation_5.ets
 07.expressions/33.constant_expression/check_annotation/constant_unary_operation_6.ets
 07.expressions/33.constant_expression/check_array/constant_number_conversion_2.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_25.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_26.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_27.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_28.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_29.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_30.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_31.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_32.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_33.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_34.ets
 07.expressions/33.constant_expression/check_enum/constant_number_conversion_0.ets
 07.expressions/33.constant_expression/check_enum/constant_number_conversion_1.ets
 07.expressions/33.constant_expression/check_enum/constant_number_conversion_2.ets
 07.expressions/33.constant_expression/check_enum/constant_number_conversion_3.ets
 07.expressions/33.constant_expression/check_enum/constant_number_conversion_4.ets
+07.expressions/33.constant_expression/check_enum/constant_number_conversion_5.ets
+07.expressions/33.constant_expression/check_enum/constant_number_conversion_6.ets
 07.expressions/33.constant_expression/check_enum/constant_shift_30.ets
 07.expressions/33.constant_expression/check_enum/constant_shift_31.ets
 07.expressions/33.constant_expression/check_enum/constant_shift_32.ets
 07.expressions/33.constant_expression/check_enum/constant_shift_33.ets
 07.expressions/33.constant_expression/check_enum/constant_shift_34.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_minus_11.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_minus_12.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_minus_5.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_minus_6.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_plus_11.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_plus_12.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_plus_5.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_plus_6.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/addition/add_arr_val_0.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/addition/add_arr_val_1.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/addition/add_arr_val_2.ets
@@ -134,7 +144,7 @@
 17.experimental_features/02.fixed_array_types/far3_6.ets
 17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/cm_over1_7.ets
 17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co1_over_8.ets
-06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_2.ets
+
 
 # Runtime Fail Exclude list (Type changes from byte -> std.core.Byte)
 20.implementation_details/03.getting_type_via_reflection/how_to_get_type_via_reflection_ext_13.ets
@@ -167,11 +177,6 @@
 16.concurrency/03.asynchronous_api/03.async_methods/ameth_n_13.ets
 16.concurrency/03.asynchronous_api/03.async_methods/ameth_n_14.ets
 
-# std.core.Float cannot be cast to std.core.Double (class cast error in runtime)
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-un_2.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-un_4.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-un_2.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-un_4.ets
 
 # Promise lambda type errors
 16.concurrency/03.asynchronous_api/05.promise/p_6.ets

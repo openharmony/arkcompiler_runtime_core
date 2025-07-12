@@ -20,6 +20,8 @@
 
 namespace ark::ets {
 
+static constexpr uint32_t ASSIGNABILITY_MAX_DEPTH = 256U;
+
 bool EtsVTableOverridePred::IsInSamePackage(const MethodInfo &info1, const MethodInfo &info2) const
 {
     if (info1.GetLoadContext() != info2.GetLoadContext()) {
@@ -58,71 +60,25 @@ bool EtsVTableOverridePred::IsInSamePackage(const MethodInfo &info1, const Metho
     return isSamePackage;
 }
 
-class RefTypeLink {
-public:
-    explicit RefTypeLink(const ClassLinkerContext *ctx, uint8_t const *descr) : ctx_(ctx), descriptor_(descr) {}
-    RefTypeLink(const ClassLinkerContext *ctx, panda_file::File const *pf, panda_file::File::EntityId idx)
-        : ctx_(ctx), pf_(pf), id_(idx), descriptor_(pf->GetStringData(idx).data)
-    {
+bool RefTypeLink::Resolve()
+{
+    if (IsResolved()) {
+        return true;
     }
 
-    static RefTypeLink InPDA(const ClassLinkerContext *ctx, panda_file::ProtoDataAccessor &pda, uint32_t idx)
-    {
-        return RefTypeLink(ctx, &pda.GetPandaFile(), pda.GetReferenceType(idx));
-    }
-
-    uint8_t const *GetDescriptor()
-    {
-        return descriptor_;
-    }
-
-    ALWAYS_INLINE static bool AreEqual(RefTypeLink const &a, RefTypeLink const &b)
-    {
-        if (LIKELY(a.pf_ == b.pf_ && a.pf_ != nullptr)) {
-            return a.id_ == b.id_;
+    // Need to traverse `RuntimeLinker` chain, which is why `EnumeratePandaFilesInChain` is used
+    // NOTE(vpukhov): speedup lookup with tls cache
+    ctx_->EnumeratePandaFilesInChain([this](panda_file::File const &itpf) {
+        auto itClassId = itpf.GetClassId(descriptor_);
+        if (itClassId.IsValid() && !itpf.IsExternal(itClassId)) {
+            pf_ = &itpf;
+            id_ = itClassId;
+            return false;
         }
-        return utf::IsEqual(a.descriptor_, b.descriptor_);
-    }
-
-    ALWAYS_INLINE std::optional<panda_file::ClassDataAccessor> CreateCDA()
-    {
-        if (UNLIKELY(!Resolve())) {
-            return std::nullopt;
-        }
-        return panda_file::ClassDataAccessor(*pf_, id_);
-    }
-
-private:
-    bool Resolve()
-    {
-        if (IsResolved()) {
-            return true;
-        }
-
-        // Need to traverse `RuntimeLinker` chain, which is why `EnumeratePandaFilesInChain` is used
-        // NOTE(vpukhov): speedup lookup with tls cache
-        ctx_->EnumeratePandaFilesInChain([this](panda_file::File const &itpf) {
-            auto itClassId = itpf.GetClassId(descriptor_);
-            if (itClassId.IsValid() && !itpf.IsExternal(itClassId)) {
-                pf_ = &itpf;
-                id_ = itClassId;
-                return false;
-            }
-            return true;
-        });
-        return IsResolved();
-    }
-
-    bool IsResolved() const
-    {
-        return (pf_ != nullptr) && !pf_->IsExternal(id_);
-    }
-
-    const ClassLinkerContext *ctx_ {};
-    panda_file::File const *pf_ {};
-    panda_file::File::EntityId id_ {};
-    uint8_t const *descriptor_ {};
-};
+        return true;
+    });
+    return IsResolved();
+}
 
 static inline bool IsPrimitveDescriptor(uint8_t const *descr)
 {
@@ -163,6 +119,71 @@ static bool RefExtendsOrImplements(const ClassLinkerContext *ctx, RefTypeLink su
     return RefIsAssignableToImpl(ctx, RefTypeLink(ctx, &subCDA.GetPandaFile(), subCDA.GetSuperClassId()), super, depth);
 }
 
+// NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+template <bool IS_STRICT, bool IS_SUPERTYPE_OF>
+static bool UnionIsAssignableToRef(const ClassLinkerContext *ctx, RefTypeLink sub, RefTypeLink unionRef, uint32_t depth)
+{
+    auto res = false;
+    auto idx = 2U;
+    const auto *descriptor = unionRef.GetDescriptor();
+    while (descriptor[idx] != '}') {
+        auto typeSp = ClassHelper::GetUnionComponent(&(descriptor[idx]));
+        idx += typeSp.Size();
+        PandaString typeDescCopy(utf::Mutf8AsCString(typeSp.Data()), typeSp.Size());
+        auto [typePf, typeClassId] = GetClassInfo(ctx, utf::CStringAsMutf8(typeDescCopy.c_str()));
+        auto type = RefTypeLink(ctx, typePf, typeClassId);
+
+        bool isAssignableTo;
+        if constexpr (IS_SUPERTYPE_OF) {
+            isAssignableTo = RefIsAssignableToImpl(ctx, sub, type, depth);
+        } else {
+            isAssignableTo = RefIsAssignableToImpl(ctx, type, sub, depth);
+        }
+
+        res |= isAssignableTo;
+        if constexpr (!IS_STRICT) {
+            continue;
+        }
+        if (!isAssignableTo) {
+            return false;
+        }
+    }
+    return res;
+}
+
+bool UnionIsAssignableToUnion(const ClassLinkerContext *ctx, RefTypeLink sub, RefTypeLink super, uint32_t depth)
+{
+    auto idx = 2;
+    const auto *descriptor = sub.GetDescriptor();
+    while (descriptor[idx] != '}') {
+        auto typeSp = ClassHelper::GetUnionComponent(&(descriptor[idx]));
+        idx += typeSp.Size();
+
+        PandaString typeDescCopy(utf::Mutf8AsCString(typeSp.Data()), typeSp.Size());
+        auto [typePf, typeClassId] = GetClassInfo(ctx, utf::CStringAsMutf8(typeDescCopy.c_str()));
+        auto type = RefTypeLink(ctx, typePf, typeClassId);
+        if (UnionIsAssignableToRef<true, true>(ctx, type, super, depth)) {
+            return true;
+        }
+    }
+    return true;
+}
+// NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
+bool IsAssignableToUnion([[maybe_unused]] const ClassLinkerContext *ctx, [[maybe_unused]] RefTypeLink sub,
+                         [[maybe_unused]] RefTypeLink super, [[maybe_unused]] uint32_t depth)
+{
+    if (!ClassHelper::IsUnionDescriptor(super.GetDescriptor())) {
+        return UnionIsAssignableToRef<true, false>(ctx, super, sub, depth);
+    }
+
+    if (!ClassHelper::IsUnionDescriptor(sub.GetDescriptor())) {
+        return UnionIsAssignableToRef<false, true>(ctx, sub, super, depth);
+    }
+
+    return UnionIsAssignableToUnion(ctx, sub, super, depth);
+}
+
 static bool RefIsAssignableToImpl(const ClassLinkerContext *ctx, RefTypeLink sub, RefTypeLink super, uint32_t depth)
 {
     if (UNLIKELY(depth-- == 0)) {
@@ -186,6 +207,9 @@ static bool RefIsAssignableToImpl(const ClassLinkerContext *ctx, RefTypeLink sub
         RefTypeLink superComp(ctx, ClassHelper::GetComponentDescriptor(super.GetDescriptor()));
         return RefIsAssignableToImpl(ctx, subComp, superComp, depth);
     }
+    if (ClassHelper::IsUnionDescriptor(super.GetDescriptor()) || ClassHelper::IsUnionDescriptor(sub.GetDescriptor())) {
+        return IsAssignableToUnion(ctx, sub, super, depth);
+    }
     // Assume array does not implement interfaces
     if (ClassHelper::IsArrayDescriptor(sub.GetDescriptor())) {
         return false;
@@ -196,11 +220,26 @@ static bool RefIsAssignableToImpl(const ClassLinkerContext *ctx, RefTypeLink sub
 
 static inline bool RefIsAssignableTo(const ClassLinkerContext *ctx, RefTypeLink sub, RefTypeLink super)
 {
-    static constexpr uint32_t ASSIGNABILITY_MAX_DEPTH = 256U;
     return RefIsAssignableToImpl(ctx, sub, super, ASSIGNABILITY_MAX_DEPTH);
 }
 
-bool ETSProtoIsOverriddenBy(const ClassLinkerContext *ctx, Method::ProtoId const &base, Method::ProtoId const &derv)
+static inline bool IsAssignableRefs(const ClassLinkerContext *ctx, const RefTypeLink &dervRef,
+                                    const RefTypeLink &baseRef, size_t idx, bool isStrict)
+{
+    if (isStrict) {
+        if ((dervRef.GetId()) != baseRef.GetId()) {
+            return false;
+        }
+    } else {
+        if (!(idx == 0 ? RefIsAssignableTo(ctx, dervRef, baseRef) : RefIsAssignableTo(ctx, baseRef, dervRef))) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool ETSProtoIsOverriddenBy(const ClassLinkerContext *ctx, Method::ProtoId const &base, Method::ProtoId const &derv,
+                            bool isStrict)
 {
     ASSERT(ctx != nullptr);
     auto basePDA = panda_file::ProtoDataAccessor(base.GetPandaFile(), base.GetEntityId());
@@ -217,14 +256,48 @@ bool ETSProtoIsOverriddenBy(const ClassLinkerContext *ctx, Method::ProtoId const
         if (dervPDA.GetType(i).IsReference()) {
             auto dervRef = RefTypeLink::InPDA(ctx, dervPDA, refIdx);
             auto baseRef = RefTypeLink::InPDA(ctx, basePDA, refIdx);
-            auto res = i == 0 ? RefIsAssignableTo(ctx, dervRef, baseRef) : RefIsAssignableTo(ctx, baseRef, dervRef);
-            if (!res) {
+            if (!IsAssignableRefs(ctx, dervRef, baseRef, i, isStrict)) {
                 return false;
             }
             refIdx++;
         }
     }
     return true;
+}
+
+std::pair<panda_file::File const *, panda_file::File::EntityId> GetClassInfo(const ClassLinkerContext *ctx,
+                                                                             const uint8_t *desc)
+{
+    auto cda = RefTypeLink(ctx, desc).CreateCDA();
+    ASSERT(cda.has_value());
+    return {&cda.value().GetPandaFile(), cda.value().GetClassId()};
+}
+
+panda_file::ClassDataAccessor GetClassDataAccessor(ClassLinkerContext *ctx, const uint8_t *desc)
+{
+    auto cda = RefTypeLink(ctx, desc).CreateCDA();
+    ASSERT(cda.has_value());
+    return cda.value();
+}
+
+std::optional<RefTypeLink> GetClosestCommonAncestor(ClassLinker *cl, const ClassLinkerContext *ctx, RefTypeLink source,
+                                                    RefTypeLink target)
+{
+    panda_file::ClassDataAccessor const &targetCDA =
+        GetClassDataAccessor(const_cast<ClassLinkerContext *>(ctx), target.GetDescriptor());
+
+    if (targetCDA.IsInterface() || targetCDA.GetSuperClassId().GetOffset() == 0) {
+        return std::nullopt;
+    }
+
+    auto targetSuper = RefTypeLink(ctx, &targetCDA.GetPandaFile(), targetCDA.GetSuperClassId());
+    if (RefTypeLink::AreEqual(source, targetSuper)) {
+        return targetSuper;
+    }
+    if (RefExtendsOrImplements(ctx, source, targetSuper, ASSIGNABILITY_MAX_DEPTH)) {
+        return targetSuper;
+    }
+    return GetClosestCommonAncestor(cl, ctx, source, targetSuper);
 }
 
 }  // namespace ark::ets

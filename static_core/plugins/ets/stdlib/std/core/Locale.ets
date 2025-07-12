@@ -370,15 +370,15 @@
             let argsStr : string = this.parseTagImpl(this.tag)
             let args = argsStr.split(" ")
             let getVale = (val: string) : string|undefined => {return (val == "") ? undefined : val}
-            this.language = args[LocaleInfoKeys.LANG as int]
-            this.script = getVale(args[LocaleInfoKeys.SCRIPT as int])
-            this.region = getVale(args[LocaleInfoKeys.COUNTRY as int])
-            this.calendar = getVale(args[LocaleInfoKeys.U_CA as int])
-            this.collation = getVale(args[LocaleInfoKeys.U_CO as int])
-            this.numberingSystem = getVale(args[LocaleInfoKeys.U_NU as int])
-            this.hourCycle = getVale(args[LocaleInfoKeys.U_HC as int])
-            this.numeric = (args[LocaleInfoKeys.U_KN as int] == "true") ? true : false
-            this.caseFirst = getVale(args[LocaleInfoKeys.U_KF as int])
+            this.language = args[LocaleInfoKeys.LANG]
+            this.script = getVale(args[LocaleInfoKeys.SCRIPT])
+            this.region = getVale(args[LocaleInfoKeys.COUNTRY])
+            this.calendar = getVale(args[LocaleInfoKeys.U_CA])
+            this.collation = getVale(args[LocaleInfoKeys.U_CO])
+            this.numberingSystem = getVale(args[LocaleInfoKeys.U_NU])
+            this.hourCycle = getVale(args[LocaleInfoKeys.U_HC])
+            this.numeric = (args[LocaleInfoKeys.U_KN] == "true") ? true : false
+            this.caseFirst = getVale(args[LocaleInfoKeys.U_KF])
 
             if (this.tag.includes("-u")) {
                if (this.language != undefined && !this.langList().includes(this.language as string)) {

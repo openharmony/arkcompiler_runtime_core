@@ -45,9 +45,9 @@ function main(): int {
 function performXmlTest(serializerOperation: (serializer: xml.XmlSerializer) => void, expectedResult: string): void {
     let arrayBuffer = new ArrayBuffer(MaxBufferLength);
     let serializer = new xml.XmlSerializer(arrayBuffer);
-    
+
     serializerOperation(serializer);
-    
+
     let view = new Uint8Array(arrayBuffer);
     let result = '';
     for (let i = 0; i < expectedResult.length; ++i) {
@@ -64,7 +64,7 @@ function testEmptyPrefixForNamespace() {
         return (e instanceof BusinessError) && ((e as BusinessError).code == TypeErrorCodeId) &&
             ((e as BusinessError).message == 'Parameter error. Parameter cannot be empty');
     }
-    arktest.expectThrow(() => {thatSer.setNamespace("","http://www.w3.org/TR/html4/")}, exceptionCheck);
+    arktest.expectThrow(() => {thatSer.setNamespace("","http://www.w3.org/TR/html4/")}, exceptionCheck);  // CC-OFF(G.OTH.05) test logic
 }
 
 function testEmptyNamespaceValue() {
@@ -96,7 +96,7 @@ function testNamespaceSettingWithOverflow() {
 function testSetNamespaceWithPrefixH() {
     performXmlTest((serializer) => {
         serializer.setDeclaration();
-        serializer.setNamespace('h', 'http://www.w3.org/TR/html4/');
+        serializer.setNamespace('h', 'http://www.w3.org/TR/html4/');  // CC-OFF(G.OTH.05) test logic
         serializer.startElement('note');
         serializer.endElement();
     }, '<?xml version="1.0" encoding="utf-8"?>\r\n<h:note xmlns:h="http://www.w3.org/TR/html4/"/>');
@@ -106,7 +106,7 @@ function testSetNamespaceWithPrefixH() {
 function testSetNamespaceWithPrefixB() {
     performXmlTest((serializer) => {
         serializer.setDeclaration();
-        serializer.setNamespace('b', 'http://www.w3.org/TR/html4/');
+        serializer.setNamespace('b', 'http://www.w3.org/TR/html4/');  // CC-OFF(G.OTH.05) test logic
         serializer.startElement('note');
         serializer.endElement();
     }, '<?xml version="1.0" encoding="utf-8"?>\r\n<b:note xmlns:b="http://www.w3.org/TR/html4/"/>');
@@ -126,7 +126,7 @@ function testSetNamespaceWithDifferentURI() {
 function testNestedElementsWithNamespace() {
     performXmlTest((serializer) => {
         serializer.setDeclaration();
-        serializer.setNamespace('h', 'http://www.w3.org/TR/html4/');
+        serializer.setNamespace('h', 'http://www.w3.org/TR/html4/');  // CC-OFF(G.OTH.05) test logic
         serializer.startElement('note1');
         serializer.startElement('note2');
         serializer.endElement();

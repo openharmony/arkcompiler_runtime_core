@@ -20,6 +20,6 @@ desc: Accessing common methods.
 function main(): void {
     let tmp: string = '5';
     let tmp1: string = '10';
-    let result = tmp+tmp1
+    let result = tmp + tmp1
     arktest.assertTrue(result === '510');
 }

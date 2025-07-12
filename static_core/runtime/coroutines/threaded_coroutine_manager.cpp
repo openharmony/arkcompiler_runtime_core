@@ -53,7 +53,8 @@ void ThreadedCoroutineManager::CreateWorkers(size_t howMany, Runtime *runtime, P
 {
     auto allocator = runtime->GetInternalAllocator();
     for (size_t id = 0; id < howMany; ++id) {
-        auto *w = allocator->New<CoroutineWorker>(runtime, vm);
+        auto *w =
+            allocator->New<CoroutineWorker>(runtime, vm, "worker", static_cast<CoroutineWorker::Id>(id), (id == 0));
         workers_.push_back(w);
         ASSERT(workers_[id] == w);
     }
@@ -180,7 +181,8 @@ bool ThreadedCoroutineManager::TerminateCoroutine(Coroutine *co)
 
 bool ThreadedCoroutineManager::Launch(CompletionEvent *completionEvent, Method *entrypoint,
                                       PandaVector<Value> &&arguments, [[maybe_unused]] CoroutineLaunchMode mode,
-                                      CoroutinePriority priority, [[maybe_unused]] bool abortFlag)
+                                      CoroutinePriority priority, [[maybe_unused]] bool abortFlag,
+                                      [[maybe_unused]] CoroutineWorkerGroup::Id groupId)
 {
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::Launch started";
     auto epInfo = Coroutine::ManagedEntrypointInfo {completionEvent, entrypoint, std::move(arguments)};
@@ -209,7 +211,8 @@ bool ThreadedCoroutineManager::LaunchImmediately([[maybe_unused]] CompletionEven
 
 bool ThreadedCoroutineManager::LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
                                             [[maybe_unused]] CoroutineLaunchMode mode, CoroutinePriority priority,
-                                            [[maybe_unused]] bool abortFlag)
+                                            [[maybe_unused]] bool abortFlag,
+                                            [[maybe_unused]] CoroutineWorkerGroup::Id groupId)
 {
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::LaunchNative started";
     auto epInfo = Coroutine::NativeEntrypointInfo {epFunc, param};
@@ -471,10 +474,5 @@ void ThreadedCoroutineManager::MainCoroutineCompleted()
 }
 
 void ThreadedCoroutineManager::Finalize() {}
-
-bool ThreadedCoroutineManager::IsMainWorker(Coroutine *co) const
-{
-    return co == GetMainThread();
-}
 
 }  // namespace ark

@@ -43,25 +43,44 @@ EtsInt StdCoreRuntimeGetHashCode(EtsObject *source)
     return bit_cast<EtsInt>(source->GetHashCode());
 }
 
-static char const *ReferenceTypeString(EtsCoroutine *coro, EtsObject *obj)
+static char const *ReferenceTypeString(EtsObject *obj)
 {
     if (obj == nullptr) {
         return "undefined";
     }
-    if (obj == EtsObject::FromCoreType(coro->GetNullValue())) {
-        return "null";
-    }
     return obj->GetClass()->GetDescriptor();
 }
 
-ObjectHeader *StdCoreRuntimeFailedTypeCastException(EtsObject *source, EtsString *target)
+ObjectHeader *StdCoreRuntimeFailedTypeCastException(EtsObject *source, EtsString *target,
+                                                    EtsBoolean isUndefinedInTarget)
 {
     auto coro = EtsCoroutine::GetCurrent();
 
-    auto message = PandaString(ReferenceTypeString(coro, source)) + " cannot be cast to " + target->GetMutf8();
+    ASSERT(coro != nullptr);
 
-    return ets::SetupEtsException(coro, panda_file_items::class_descriptors::CLASS_CAST_ERROR.data(), message.data())
-        ->GetCoreType();
+    auto message = PandaString(ReferenceTypeString(source)) + " cannot be cast to ";
+    if (isUndefinedInTarget != 0U) {
+        if (!ClassHelper::IsUnionDescriptor(target->GetDataMUtf8())) {
+            message += "{U" + target->GetMutf8();
+            message += EtsString::FastSubString(target, 0, target->GetLength() - 1)->GetMutf8();
+        } else {
+            message += EtsString::FastSubString(target, 0, target->GetLength() - 1)->GetMutf8();
+        }
+        message += ",undefined}";
+    } else {
+        message += target->GetMutf8();
+    }
+
+    auto *exc =
+        ets::SetupEtsException(coro, panda_file_items::class_descriptors::CLASS_CAST_ERROR.data(), message.data());
+
+    if (LIKELY(exc != nullptr)) {
+        return exc->GetCoreType();
+    }
+
+    ASSERT(coro->HasPendingException());
+
+    return nullptr;
 }
 
 EtsClass *StdCoreRuntimeGetTypeInfo([[maybe_unused]] EtsObject *header)

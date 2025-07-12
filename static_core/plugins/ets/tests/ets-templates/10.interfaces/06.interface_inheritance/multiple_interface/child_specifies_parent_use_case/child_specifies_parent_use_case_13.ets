@@ -14,7 +14,8 @@
  */
 
 /*---
-desc: Verify that a child interface uses the default implementation from one parent when no implementation is provided.
+desc: >-
+    Verify that a child interface uses the default implementation from one parent when no implementation is provided.
 ---*/
 
 abstract class Parent1 {

@@ -28,6 +28,7 @@ set(SOURCES
     class_linker.cpp
     class_linker_extension.cpp
     class_initializer.cpp
+    tooling/backtrace/backtrace.cpp
     tooling/debugger.cpp
     tooling/evaluation/expression_loader.cpp
     tooling/inspector/debugger_arkapi.cpp
@@ -606,7 +607,7 @@ panda_target_include_directories(arkruntime_obj
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/tooling/inspector
 )
 
-panda_target_link_libraries(arkruntime_obj arkbase arkfile arkcompiler dprof arkaotmanager arktarget_options)
+panda_target_link_libraries(arkruntime_obj arkbase arkfile arkcompiler dprof arkaotmanager arktarget_options arkassembler)
 if (NOT PANDA_TARGET_OHOS)
   panda_target_link_libraries(arkruntime_obj atomic)
 endif()

@@ -147,9 +147,11 @@ export final class Runtime {
      *
      * @param dstStr target type string
      *
+     * @param isUndef true if undefined is in target type
+     *
      * @returns exception object to throw
      */
-    static native failedTypeCastException(src: Any, dstStr: string): ClassCastError
+    static native failedTypeCastException(src: Any, dstStr: string, isUndef: boolean): ClassCastError
 
     native static __getTypeInfo(o: Any): Class|undefined;
 

@@ -72,12 +72,12 @@ function testConstructorAndAddSimpleType() {
     arktest.assertEQ(hashSet.length, 1);
 }
 
+class Tmp {
+    name: number = 0
+}
+
 //Test cases ported from ArkTS 1.0:HASHSET_CONSTRUCTOR_0200
 function testConstructorAndAddCustomType() {
-    class Tmp {
-        name: number = 0
-    }
-
     const hashSet = new HashSet<Tmp>();
     let param: Tmp = {
         name: 1

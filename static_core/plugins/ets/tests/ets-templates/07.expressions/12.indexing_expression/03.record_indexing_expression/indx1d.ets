@@ -20,8 +20,8 @@ desc: >-
 tags: [compile-only, negative]
 ---*/
 
-function refNullish(): Record<string, number>|null {
-    let res: Record<string, number>|null = null
+function refNullish(): Record<string, number> | null {
+    let res: Record<string, number> | null = null
     return res
 }
 

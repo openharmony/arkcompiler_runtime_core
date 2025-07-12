@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that the protected member variable _public_var, inherited from the parent class a, is correctly initialized to null.
+desc: >-
+    Verify that the protected member variable _public_var, inherited from the parent class a,
+    is correctly initialized to null.
 ---*/
 
 class A {

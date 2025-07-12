@@ -23,9 +23,9 @@ desc: >-
 
 let str: string = "";
 
-function foo(p: null|string): number {
+function foo(p: null | string): number {
     return p != null ?
-        ((): number => { str = p.substr(0, 1); return 1 })()  // calling string method without cast
+        ((): number => { str = p.substr(0, 1); return 1 })() // calling string method without cast
         : 2
 }
 

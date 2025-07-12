@@ -14,16 +14,16 @@
  */
 
 class TestA {
-    public a:string = "";
+    public a:string = '';
 }
 
 function tesObject(a:TestA) : TestA {
-    a.a = "bbb";
+    a.a = 'bbb';
     return a;
 }
 
 function testReturnArray(a:TestA, b:TestA, c:string) : Array<TestA> {
-    a.a = "bbb";
+    a.a = 'bbb';
     b.a = c;
     let arr = new Array<TestA>();
     arr.push(a);
@@ -32,32 +32,32 @@ function testReturnArray(a:TestA, b:TestA, c:string) : Array<TestA> {
 }
 
 function testArrayObjects(arr:Array<TestA>) : Array<TestA> {
-    arr[0].a = "value1";
-    arr[1].a = "value2";
+    arr[0].a = 'value1';
+    arr[1].a = 'value2';
     return arr;
 }
 
 function testPrimitive(a:int, b:string, c:boolean, d:double) {
     arktest.assertEQ(a, 1);
-    arktest.assertEQ(b, "bbb");
+    arktest.assertEQ(b, 'bbb');
     arktest.assertEQ(c, true);
     arktest.assertEQ(d, 1.0);
 }
 
 function singleObject():void {
     let job = eaw.run<TestA>(tesObject, new TestA());
-    arktest.assertEQ(job.Await().a, "bbb");
+    arktest.assertEQ(job.Await().a, 'bbb');
 }
 
 function returnArray():void {
     let a1 = new TestA();
     let a2 = new TestA();
-    let job = eaw.run<Array<TestA>>(testReturnArray, a1, a2, "ccc");
+    let job = eaw.run<Array<TestA>>(testReturnArray, a1, a2, 'ccc');
     let arr = job.Await();
-    arktest.assertEQ(arr[0].a, "bbb");
-    arktest.assertEQ(arr[1].a, "ccc");
-    arktest.assertEQ(a1.a, "bbb");
-    arktest.assertEQ(a2.a, "ccc");
+    arktest.assertEQ(arr[0].a, 'bbb');
+    arktest.assertEQ(arr[1].a, 'ccc');
+    arktest.assertEQ(a1.a, 'bbb');
+    arktest.assertEQ(a2.a, 'ccc');
 }
 
 function arrayParameter():void {
@@ -68,25 +68,26 @@ function arrayParameter():void {
     arr.push(a2);
     let job = eaw.run<Array<TestA>>(testArrayObjects, arr);
     let arr2 = job.Await();
-    arktest.assertEQ(arr2[0].a, "value1");
-    arktest.assertEQ(arr2[1].a, "value2");
+    arktest.assertEQ(arr2[0].a, 'value1');
+    arktest.assertEQ(arr2[1].a, 'value2');
     arktest.assertEQ(arr2, arr);
-    arktest.assertEQ(a1.a, "value1");
-    arktest.assertEQ(a2.a, "value2");
+    arktest.assertEQ(a1.a, 'value1');
+    arktest.assertEQ(a2.a, 'value2');
 }
 
 function primitiveParameter() : void {
-    eaw.run<void>(testPrimitive, 1, "bbb", true, 1.0).Await();
+    eaw.run<void>(testPrimitive, 1, 'bbb', true, 1.0).Await();
 }
 
-
 let eaw:EAWorker = new EAWorker();
-function main() {
-    const testSuite = new arktest.ArkTestsuite("EAWorkerParameterTest");
-    testSuite.addTest("singleObject", singleObject);
-    testSuite.addTest("returnArray", returnArray);
-    testSuite.addTest("arrayParameter", arrayParameter);
-    testSuite.addTest("primitiveParameter", primitiveParameter);
-    testSuite.run();
+
+function main(): int {
+    const testSuite = new arktest.ArkTestsuite('EAWorkerParameterTest');
+    testSuite.addTest('singleObject', singleObject);
+    testSuite.addTest('returnArray', returnArray);
+    testSuite.addTest('arrayParameter', arrayParameter);
+    testSuite.addTest('primitiveParameter', primitiveParameter);
+    let res = testSuite.run();
     eaw.join();
+    return res;
 }

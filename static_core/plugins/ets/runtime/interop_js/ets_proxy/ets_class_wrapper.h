@@ -138,8 +138,6 @@ private:
     static napi_value JSCtorCallback(napi_env env, napi_callback_info cinfo);
     bool CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_value jsThis, Span<napi_value> jsArgs);
 
-    static void ThrowJSErrorNotAssignable(napi_env env, EtsClass *fromKlass, EtsClass *toKlass);
-
     Span<EtsFieldWrapper> GetFields()
     {
         return Span<EtsFieldWrapper>(etsFieldWrappers_.get(), numFields_);

@@ -156,7 +156,7 @@ function testUrlTest118() {
 	let murl = url.URL.parseURL("http://username:password@host:8080/directory/file?query=pppppp#123456");
  arktest.assertEQ(murl.origin, "http://host:8080");
 	murl.host = 'salkjf.com';
- arktest.assertEQ(murl.origin, "http://salkjf.com:8080");
+ arktest.assertEQ(murl.origin, "http://salkjf.com:8080");  // CC-OFF(G.OTH.05) test logic
 	console.log('-------------------------118 done')
 }
 

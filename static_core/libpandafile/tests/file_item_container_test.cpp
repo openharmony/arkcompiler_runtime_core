@@ -1029,6 +1029,9 @@ TEST(ItemContainer, GettersTest)
     std::function<bool(BaseItem *)> testField = [&](BaseItem *field) {
         auto *fieldItem = static_cast<panda_file::FieldItem *>(field);
         ASSERT(fieldItem != nullptr && fieldItem->GetItemType() == ItemTypes::FIELD_ITEM);
+        ASSERT(fieldItem->GetBaseItemType() == ItemTypes::ANNOTATION_ITEM);
+        fieldItem->SetBaseItemType(ItemTypes::FIELD_ITEM);
+        ASSERT(fieldItem->GetBaseItemType() == ItemTypes::FIELD_ITEM);
         fName = fieldItem->GetNameItem()->GetData();
         fName.pop_back();  // remove '\0'
         ASSERT(fName == "field");
@@ -1125,6 +1128,179 @@ TEST(ItemContainer, AnnotationDeduplicationReading)
     annots->insert(annots->begin(), annot3);
     reader.GetContainerPtr()->DeduplicateItems(true);
     reader.GetContainerPtr()->DeduplicateItems(true);
+}
+
+TEST(ItemContainer, CodeSizeZeroShouldFatal)
+{
+    EXPECT_DEATH(
+        {
+            ItemContainer container;
+            auto *klass = container.GetOrCreateClassItem("DeathTest_ZeroCodeSize");
+            auto *methodName = container.GetOrCreateStringItem("test_method_zero");
+            auto *proto =
+                container.GetOrCreateProtoItem(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID), {});
+            auto *method =
+                klass->AddMethod(methodName, proto, ACC_PUBLIC | ACC_STATIC, std::vector<MethodParamItem> {});
+
+            std::vector<uint8_t> code {};
+            auto *codeItem = container.CreateItem<CodeItem>(0, 0, code);
+            method->SetCode(codeItem);
+
+            CodeItem::CatchBlock cb(method, nullptr, 0);
+            CodeItem::TryBlock tryBlock(0, 1, {cb});
+            codeItem->AddTryBlock(tryBlock);
+
+            MemoryWriter writer;
+            ASSERT_TRUE(container.Write(&writer));
+            auto data = writer.GetData();
+
+            auto pandaFile = GetPandaFile(data);
+            ASSERT_NE(pandaFile, nullptr);
+
+            ClassDataAccessor cda(*pandaFile, File::EntityId(klass->GetOffset()));
+            cda.EnumerateMethods([&](MethodDataAccessor &mda) {
+                CodeDataAccessor codeData(*pandaFile, mda.GetCodeId().value());
+                codeData.EnumerateTryBlocks([](const CodeDataAccessor::TryBlock &) { return true; });
+            });
+        },
+        ".*");
+}
+
+TEST(ItemContainer, StartPcTooBigShouldFatal)
+{
+    EXPECT_DEATH(
+        {
+            ItemContainer container;
+            auto *klass = container.GetOrCreateClassItem("DeathTestKlass");
+            auto *methodName = container.GetOrCreateStringItem("test_method");
+            auto *proto =
+                container.GetOrCreateProtoItem(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID), {});
+            auto *method =
+                klass->AddMethod(methodName, proto, ACC_PUBLIC | ACC_STATIC, std::vector<MethodParamItem> {});
+
+            std::vector<uint8_t> instructions(4, 0);
+            auto *codeItem = container.CreateItem<CodeItem>(0, 0, instructions);
+            method->SetCode(codeItem);
+
+            CodeItem::CatchBlock cb(method, nullptr, 0);
+            CodeItem::TryBlock tryBlock(4, 1, std::vector {cb});
+            codeItem->AddTryBlock(tryBlock);
+
+            MemoryWriter writer;
+            ASSERT_TRUE(container.Write(&writer));
+            auto data = writer.GetData();
+
+            auto pandaFile = GetPandaFile(data);
+            ASSERT_NE(pandaFile, nullptr);
+
+            ClassDataAccessor cda(*pandaFile, File::EntityId(klass->GetOffset()));
+            cda.EnumerateMethods([&](MethodDataAccessor &mda) {
+                CodeDataAccessor codeData(*pandaFile, mda.GetCodeId().value());
+                codeData.EnumerateTryBlocks([&](const CodeDataAccessor::TryBlock &) { return true; });
+            });
+        },
+        ".*");
+}
+
+TEST(ItemContainer, LengthTooBigShouldFatal)
+{
+    EXPECT_DEATH(
+        {
+            ItemContainer container;
+            auto *klass = container.GetOrCreateClassItem("DeathTest_LengthTooBig");
+            auto *methodName = container.GetOrCreateStringItem("test_method_len");
+            auto *proto =
+                container.GetOrCreateProtoItem(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID), {});
+            auto *method =
+                klass->AddMethod(methodName, proto, ACC_PUBLIC | ACC_STATIC, std::vector<MethodParamItem> {});
+
+            std::vector<uint8_t> code(4, 0);
+            auto *codeItem = container.CreateItem<CodeItem>(0, 0, code);
+            method->SetCode(codeItem);
+
+            CodeItem::CatchBlock cb(method, nullptr, 0);
+            CodeItem::TryBlock tryBlock(0, 5, {cb});
+            codeItem->AddTryBlock(tryBlock);
+
+            MemoryWriter writer;
+            ASSERT_TRUE(container.Write(&writer));
+            auto data = writer.GetData();
+
+            auto pandaFile = GetPandaFile(data);
+            ASSERT_NE(pandaFile, nullptr);
+
+            ClassDataAccessor cda(*pandaFile, File::EntityId(klass->GetOffset()));
+            cda.EnumerateMethods([&](MethodDataAccessor &mda) {
+                CodeDataAccessor codeData(*pandaFile, mda.GetCodeId().value());
+                codeData.EnumerateTryBlocks([](const CodeDataAccessor::TryBlock &) { return true; });
+            });
+        },
+        ".*");
+}
+
+class FakeCatchBlock : public ark::panda_file::CodeItem::CatchBlock {
+public:
+    using CodeItem::CatchBlock::CatchBlock;
+
+    size_t CalculateSize() const override
+    {
+        return std::numeric_limits<size_t>::max();
+    }
+
+    bool Write(Writer *writer) override
+    {
+        writer->Write<uint32_t>(0);
+        return true;
+    }
+
+    ItemTypes GetItemType() const override
+    {
+        return ItemTypes::CATCH_BLOCK_ITEM;
+    }
+
+    bool IsValid() const
+    {
+        return true;
+    }
+};
+
+void TriggerFatalTryBlock()
+{
+    ItemContainer container;
+    auto *klass = container.GetOrCreateClassItem("DeathTestFatal");
+    auto *methodName = container.GetOrCreateStringItem("test_fatal");
+    auto *proto = container.GetOrCreateProtoItem(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID), {});
+    auto *method = klass->AddMethod(methodName, proto, ACC_PUBLIC | ACC_STATIC, std::vector<MethodParamItem> {});
+
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    constexpr uint32_t kCodeSize = 2;
+    std::vector<uint8_t> code(kCodeSize, 0);
+    auto *codeItem = container.CreateItem<CodeItem>(0, 0, code);
+    method->SetCode(codeItem);
+
+    CodeItem::CatchBlock cb(method, nullptr, 0);
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    constexpr uint32_t kTryBlockLength = 10;
+    CodeItem::TryBlock tryBlock(0, kTryBlockLength, {cb});
+    codeItem->AddTryBlock(tryBlock);
+
+    MemoryWriter writer;
+    ASSERT_TRUE(container.Write(&writer));
+    auto buf = writer.GetData();
+
+    auto pandaFile = GetPandaFile(buf);
+    ASSERT_NE(pandaFile, nullptr);
+
+    ClassDataAccessor cda(*pandaFile, File::EntityId(klass->GetOffset()));
+    cda.EnumerateMethods([&](MethodDataAccessor &mda) {
+        CodeDataAccessor codeData(*pandaFile, mda.GetCodeId().value());
+        codeData.EnumerateTryBlocks([](const CodeDataAccessor::TryBlock &) { return true; });
+    });
+}
+
+TEST(ItemContainer, TryBlockDeclaredSizeOverflowShouldFatal)
+{
+    EXPECT_DEATH(TriggerFatalTryBlock(), ".*");
 }
 
 }  // namespace ark::panda_file::test

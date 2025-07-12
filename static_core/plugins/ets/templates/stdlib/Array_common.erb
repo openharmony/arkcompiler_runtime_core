@@ -387,6 +387,9 @@
 <%= access_public %> <%= override %> forEach<%= this_generic %>(<%= this_arg %>callbackfn: (value: <%= el_type %><%= lambda_params %>) => void): void {
     const len0 = <%= this_len_int %>;
     for (let i = 0; i < len0; i++) {
+        if (i >= <%= this_len_int %>) {
+            break
+        }
         callbackfn(<%= get_unsafe.(this, 'i') %><%= lambda_args %>)
     }
 }

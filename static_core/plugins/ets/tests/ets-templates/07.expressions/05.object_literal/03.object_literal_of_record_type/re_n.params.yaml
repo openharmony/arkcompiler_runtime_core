@@ -152,7 +152,7 @@ cases:
           }
           let b = a[2]  // CTE, wrong key
 
-    - tags: ['negative']
+    - tags: []
       use: |-
           // string to Record
           let a: Record<string, Record<number, boolean>> = {
@@ -161,9 +161,10 @@ cases:
               },
               "b": {},
           }
-          arktest.assertTrue(a["a"]![1]!)
+          let expectedException = (e: Error | Exception): boolean => {return (e instanceof NullPointerError)}
+          arktest.expectThrow(() => {a["a"]![1]!}, expectedException)
 
-    - tags: ['negative']
+    - tags: []
       use: |-
           // string to Record
           let a: Record<string, Record<number, boolean>> = {
@@ -172,5 +173,6 @@ cases:
               },
               "b": {},
           }
-          arktest.assertTrue(!(a["a"]![42]!))
+          let expectedException = (e: Error | Exception): boolean => {return (e instanceof NullPointerError)}
+          arktest.expectThrow(() => {!a["a"]![42]!}, expectedException)
           

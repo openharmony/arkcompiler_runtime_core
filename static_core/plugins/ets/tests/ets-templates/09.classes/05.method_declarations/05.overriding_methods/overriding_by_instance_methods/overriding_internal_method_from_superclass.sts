@@ -15,7 +15,10 @@
 
 /*---
 desc: Overriding internal method of superclass.
-assert: An instance method mC declared in or inherited by class C, overrides from C another method mA declared in class A, if all of the following are true. C is a subclass of A. C does not inherit mA. The signature of mC is a subsignature (link to signatures) of the signature of mA.
+assert: >-
+    An instance method mC declared in or inherited by class C, overrides from C another method mA declared in class A,
+    if all of the following are true. C is a subclass of A. C does not inherit mA.
+    The signature of mC is a subsignature (link to signatures) of the signature of mA.
 ---*/
 
 class A {

@@ -16,7 +16,7 @@ limitations under the License.
 {% for c in cases %}
 
 /*---
-desc: Utility types Required, Readonly and Partial are case-sensitive.
+desc: Utility types Required, Readonly, Partial, Awaited and NonNullable are case-sensitive.
 tags: [compile-only, negative]
 ---*/
 

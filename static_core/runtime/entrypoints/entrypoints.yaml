@@ -263,6 +263,17 @@ entrypoints:
     - int32_t
     - ark::ObjectHeader*
 
+- name: CmcPostWritePairBarrier
+  entrypoint: CmcPostWritePairBarrier
+  bridge: none
+  properties: []
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+
 - name: CmcReadViaBarrier
   entrypoint: CmcReadViaBarrier
   bridge: none

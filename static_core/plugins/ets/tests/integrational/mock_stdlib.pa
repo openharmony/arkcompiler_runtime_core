@@ -17,7 +17,7 @@
 .record std.core.StringBuilder
 .record std.core.Object
 .record std.core.Class
-.record std.core.__NullValue
+.record std.core.Null
 .record std.core.StackOverflowError
 .record std.core.DoubleToStringCacheElement
 .record std.core.FloatToStringCacheElement

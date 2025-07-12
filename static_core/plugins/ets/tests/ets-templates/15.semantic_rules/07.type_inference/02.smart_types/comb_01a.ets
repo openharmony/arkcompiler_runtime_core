@@ -21,39 +21,39 @@ desc: >-
     and allow operations which are specific to such narrowed type.
 ---*/
 class A {}
-let a: A|undefined = new A()
+let a: A | undefined = new A()
 
 let num: Number = 0;
 let str: string = "";
 let err: Error = new Error();
 let bool: Boolean = false;
 
-let not_undef: number|string|Error|boolean = false;
-let not_num: string|Error|boolean = false;
-let not_err: string|boolean = false;
+let not_undef: number | string | Error | boolean = false;
+let not_num: string | Error | boolean = false;
+let not_err: string | boolean = false;
 
-function foo(p: number|string|undefined|Error|boolean): number {
+function foo(p: number | string | undefined | Error | boolean): number {
     if (p === undefined) {
         a = p
         return 1
     } else {
-        not_undef = p  // narrowing union conversion
+        not_undef = p // narrowing union conversion
         if (p instanceof Number) {
-            num = p * 2  // numeric operation without cast
+            num = p * 2 // numeric operation without cast
             return 2
         } else {
-            not_num = p  // narrowing union conversion
+            not_num = p // narrowing union conversion
             if (p instanceof Error) {
                 err = p
-                str = p.message  // field access without cast
+                str = p.message // field access without cast
                 return 3
             } else {
-                not_err = p  // narrowing union conversion
+                not_err = p // narrowing union conversion
                 if (p instanceof string) {
-                    str = p.substr(0, 1)  // string method without cast
+                    str = p.substr(0, 1) // string method without cast
                     return 4
                 } else {
-                    bool = !p  // boolean operator without cast
+                    bool = !p // boolean operator without cast
                     return 5
                 }
             }

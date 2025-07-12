@@ -77,21 +77,21 @@ function mustCall(fn?: Function, times: number = 1) {
     return wrappedFn;
 }
 
+class TestTransform1 extends stream.Transform {
+    constructor() {
+        super();
+    }
+
+    doTransform(chunk: string, encoding: string, callback: Function): void {
+        let transformedChunk = chunk.toUpperCase();
+        this.push(transformedChunk);
+        callback.unsafeCall();
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamTransformEvent001
 function testTransformDataEvent() {
     let transformedData = '';
-    class TestTransform extends stream.Transform {
-        constructor() {
-            super();
-        }
-
-        doTransform(chunk: string, encoding: string, callback: Function): void {
-            let transformedChunk = chunk.toUpperCase();
-            this.push(transformedChunk);
-            callback.unsafeCall();
-        }
-    }
-    let transform = new TestTransform();
+    let transform = new TestTransform1();
     transform.on('data', (chunk: buffer.Buffer): void => {
         transformedData += chunk.toString();
     });
@@ -102,27 +102,27 @@ function testTransformDataEvent() {
     transform.end();
 }
 
-// Test cases ported from ArkTS 1.0:testStreamTransformEvent002
-function testTransformCorkUncork() {
-    class TestTransform extends stream.Transform {
-        constructor() {
-            super();
-        }
+class TestTransform2 extends stream.Transform {
+    constructor() {
+        super();
+    }
 
-        doWritev(chunks: string[] | Uint8Array[], callback: Function) {
+    doWritev(chunks: string[] | Uint8Array[], callback: Function) {
+        callback.unsafeCall();
+    }
+
+    doTransform(chunk: string, encoding: string, callback: Function): void {
+        let fn = (chunk: string, encoding: string, callback: Function) => {
+            arktest.assertEQ(chunk, 'data1');
             callback.unsafeCall();
         }
-
-        doTransform(chunk: string, encoding: string, callback: Function): void {
-            let fn = (chunk: string, encoding: string, callback: Function) => {
-                arktest.assertEQ(chunk, 'data1');
-                callback.unsafeCall();
-            }
-            let wrappedFn = mustCallFn(fn);
-            wrappedFn(chunk, encoding, callback);
-        }
+        let wrappedFn = mustCallFn(fn);
+        wrappedFn(chunk, encoding, callback);
     }
-    let transformStream = new TestTransform();
+}
+// Test cases ported from ArkTS 1.0:testStreamTransformEvent002
+function testTransformCorkUncork() {
+    let transformStream = new TestTransform2();
     transformStream.cork();
     transformStream.write('data1', 'utf8');
     transformStream.uncork();
@@ -134,22 +134,22 @@ function testTransformCorkUncork() {
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class TestTransform3 extends stream.Transform {
+    constructor() {
+        super();
+    }
+    doTransform(chunk: string, encoding: string, callback: Function): void {
+        let fn = (chunk: string, encoding: string, callback: Function) => {
+            arktest.assertEQ(chunk, 'test');
+            callback.unsafeCall(new Error('Write error'));
+        }
+        let wrappedFn = mustCallFn(fn);
+        wrappedFn(chunk, encoding, callback);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamTransformEvent003
 function testTransformErrorEvent() {
-    class TestTransform extends stream.Transform {
-        constructor() {
-            super();
-        }
-        doTransform(chunk: string, encoding: string, callback: Function): void {
-            let fn = (chunk: string, encoding: string, callback: Function) => {
-                arktest.assertEQ(chunk, 'test');
-                callback.unsafeCall(new Error('Write error'));
-            }
-            let wrappedFn = mustCallFn(fn);
-            wrappedFn(chunk, encoding, callback);
-        }
-    }
-    let transformStream = new TestTransform();
+    let transformStream = new TestTransform3();
     transformStream.on('error', mustCall());
     transformStream.write('test');
     setTimeout(() => {
@@ -193,23 +193,23 @@ function testTransformMultipleListeners() {
     }, 0);
 }
 
+class TestTransform4 extends stream.Transform {
+    expected = 'test';
+    constructor() {
+        super();
+    }
+    doTransform(chunk: string, encoding: string, callback: Function): void {
+        callback.unsafeCall();
+    }
+    doFlush(callback: Function): void {
+        callback.unsafeCall(this.expected);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamTransformFlushData001
 function testTransformFlushOperation() {
-    let expected = 'test';
-    class TestTransform extends stream.Transform {
-        constructor() {
-            super();
-        }
-        doTransform(chunk: string, encoding: string, callback: Function): void {
-            callback.unsafeCall();
-        }
-        doFlush(callback: Function): void {
-            callback.unsafeCall(expected);
-        }
-    }
-    let transform = new TestTransform();
+    let transform = new TestTransform4();
     transform.end('my test');
     transform.on('data', (data: string): void => {
-        arktest.assertEQ(data.toString(), expected);
+        arktest.assertEQ(data.toString(), transform.expected);
     });
 }

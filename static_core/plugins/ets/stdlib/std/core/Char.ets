@@ -20,7 +20,7 @@ export type UTF_16_CodePoint = int;
 /**
  * Represents boxed char value and related operations
  */
-export final class Char extends Object implements Comparable<Char>, JSONable<Char> {
+export final class Char extends Object implements Comparable<Char> {
     private value: char;
 
     /**
@@ -607,24 +607,5 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      */
      public isWhiteSpace(): boolean {
         return Char.isWhiteSpace(this.value);
-    }
-
-    /**
-     * Creates a Char instance based on JSONValue
-     *
-     * @param json: JSONValue - a JSON representation
-     *
-     * @throws JSONTypeError if json does not encode a valid char
-     *
-     * @returns char - char value decoded from JSON
-     */
-    public createFromJSONValue(json: JSONValue): Char {
-        if (json instanceof JSONString) {
-            let str = (json as JSONString).value
-            if (str.getLength() == 1) {
-                return Char.valueOf(str.charAt(0))
-            }
-        }
-        throw new JSONTypeError("Cannot create Char from JSON", new ErrorOptions(json as Object))
     }
 }

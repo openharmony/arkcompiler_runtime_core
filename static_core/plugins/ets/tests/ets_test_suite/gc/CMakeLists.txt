@@ -82,6 +82,7 @@ add_dependencies(mm_tests
                 ets_test_suite_coroutines
                 ets_test_suite_gc
                 ets_test_suite_strings
+                ets_test_suite_unions
                 bouncing_pandas_ets-ets-int
                 bouncing_pandas_ets-ets-int-cpp
                 bouncing_pandas_ets-ets-jit

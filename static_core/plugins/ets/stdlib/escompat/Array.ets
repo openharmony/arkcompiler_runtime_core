@@ -749,7 +749,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
                 idxNonUndef++
             }
         }
-        let sortTo = idxNonUndef
+        let sortTo: int = idxNonUndef
         for (let i = idxNonUndef; i < this.actualLength; i++) {
             this.$_set_unsafe(i, undefined as T)
         }
@@ -795,7 +795,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             return this
         }
 
-        const compareTo = this.move_undefined_end()
+        const compareTo: int = this.move_undefined_end()
         let cmp: (l: NullishType, r: NullishType) => number = (l: NullishType, r: NullishType): number => {
             return comparator!(l as T, r as T)
         }
@@ -1464,6 +1464,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     public override forEach(callbackfn: (value: T, index: number, array: Array<T>) => void): void {
         const len0 = this.actualLength;
         for (let i = 0; i < len0; i++) {
+            if (i >= this.actualLength) {
+                break
+            }
             callbackfn(this.$_get_unsafe(i), i.toDouble(), this)
         }
     }

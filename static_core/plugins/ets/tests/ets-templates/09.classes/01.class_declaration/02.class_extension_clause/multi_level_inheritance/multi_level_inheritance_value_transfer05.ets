@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: To verify whether the instance of class c can accurately obtain the initial value of the public variable _publicVar in class a after class c indirectly inherits class a through class b.
+desc: >-
+    To verify whether the instance of class c can accurately obtain the initial value of the public variable
+    _publicVar in class a after class c indirectly inherits class a through class b.
 ---*/
 
 class A {
@@ -36,7 +38,7 @@ class C extends B {
     super();
   }
 
-  test(){
+  test() {
   }
 }
 

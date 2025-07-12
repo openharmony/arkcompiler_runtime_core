@@ -16,12 +16,12 @@
 /*---
  desc: 17.3 Indexable Types
  tags:
- ---*/
+---*/
 
 class Bar<T> {
     private data : T
-    $_get (index: int) : T {throw new Exception("Hmm ...")}
-    $_set (index: int, value: T) {throw new Exception("Hmm ...")}
+    $_get(index: int) : T {throw new Exception("Hmm ...")}
+    $_set(index: int, value: T) {throw new Exception("Hmm ...")}
 
     constructor(data : T) {
         this.data = data;

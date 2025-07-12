@@ -23,6 +23,7 @@ export final class Class {
     private superClass: Class | undefined
     private flags: int
     private typeMetaData: long
+    private overloadMap: long
 
     private constructor() { throw new Error("Class constructor called") }
     private native getNameInternal(): string;

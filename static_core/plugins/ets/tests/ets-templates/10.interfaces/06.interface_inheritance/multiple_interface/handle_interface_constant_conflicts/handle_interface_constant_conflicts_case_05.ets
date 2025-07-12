@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that a class implementing two interfaces with the same constant name and using one of the interface's values.
+desc: >-
+    Verify that a class implementing two interfaces with the same constant name and using one of
+    the interface's values.
 tags: [compile-only, negative]
 ---*/
 

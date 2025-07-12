@@ -101,9 +101,10 @@ options.api.zip(options.data).each do |api_file, data_file|
   else
     data = YAML.load_file(File.expand_path(data_file), aliases: true)
   end
-  data = JSON.parse(data.to_json, object_class: OpenStruct).freeze
+  data = JSON.parse(data.to_json, object_class: OpenStruct)
   require File.expand_path(api_file)
   Gen.on_require(data)
+  data.freeze
 end
 options.require&.each { |r| require File.expand_path(r) }
 

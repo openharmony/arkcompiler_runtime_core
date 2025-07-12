@@ -23,7 +23,11 @@ function main() {
     testSupportedLocalesOf()
 }
 
-function runFormatTest(locale: Intl.UnicodeBCP47LocaleIdentifier, value: number, unit: Intl.RelativeTimeFormatUnit, expected: string, options?: Intl.RelativeTimeFormatOptions) {
+function runFormatTest(locale: Intl.UnicodeBCP47LocaleIdentifier,
+                       value: number,
+                       unit: Intl.RelativeTimeFormatUnit,
+                       expected: string,
+                       options?: Intl.RelativeTimeFormatOptions) {
     const format = new Intl.RelativeTimeFormat(locale, options)
     const result = format.format(value, unit)
     arktest.assertEQ(result, expected)
@@ -112,7 +116,7 @@ function formatToPartsForDayTest() {
         let expected: FixedArray<string> = ['今天', '明天', '后天', '3天后', '昨天', '前天', '3天前'];
         runFormatToPartsTest('zh', values, units[i], expected, options);
 
-        expected = ['сегодня', 'завтра', 'послезавтра', 'через 3 дня', 'вчера', 'позавчера',  '3 дня назад'];
+        expected = ['сегодня', 'завтра', 'послезавтра', 'через 3 дня', 'вчера', 'позавчера', '3 дня назад'];
         runFormatToPartsTest('ru', values, units[i], expected, options);
 
         expected = ['today', 'tomorrow', 'in 2 days', 'in 3 days', 'yesterday', '2 days ago', '3 days ago'];
@@ -231,7 +235,11 @@ function testResolvedOptions() {
     }
 }
 
-function runTestWithOptions(locale: Intl.UnicodeBCP47LocaleIdentifier, value: number, unit: Intl.RelativeTimeFormatUnit, options: Intl.RelativeTimeFormatOptions, expected: string) {
+function runTestWithOptions(locale: Intl.UnicodeBCP47LocaleIdentifier,
+                            value: number,
+                            unit: Intl.RelativeTimeFormatUnit,
+                            options: Intl.RelativeTimeFormatOptions,
+                            expected: string) {
     const format = new Intl.RelativeTimeFormat(locale, options)
     const result = format.format(value, unit)
     arktest.assertEQ(result, expected)
@@ -246,7 +254,9 @@ function testSelectWithOptions() {
     runTestWithOptions("zh", -7, "day", { style: "short" }, "7天前")
 }
 
-function runSupportedLocalesStringTest(locales: string, options: Intl.RelativeTimeFormatOptions | undefined, expected: string[]) {
+function runSupportedLocalesStringTest(locales: string,
+                                       options: Intl.RelativeTimeFormatOptions | undefined,
+                                       expected: string[]) {
     const result = Intl.RelativeTimeFormat.supportedLocalesOf(locales, options)
     arktest.assertEQ(result.length, expected.length)
     for (let i: int = 0; i < result.length; i++) {
@@ -255,7 +265,9 @@ function runSupportedLocalesStringTest(locales: string, options: Intl.RelativeTi
     }
 }
 
-function runSupportedLocalesArrayTest(locales: string[], options: Intl.RelativeTimeFormatOptions | undefined, expected: string[]) {
+function runSupportedLocalesArrayTest(locales: string[],
+                                      options: Intl.RelativeTimeFormatOptions | undefined,
+                                      expected: string[]) {
     const result = Intl.RelativeTimeFormat.supportedLocalesOf(locales, options)
     arktest.assertEQ(result.length, expected.length)
     for (let i: int = 0; i < result.length; i++) {

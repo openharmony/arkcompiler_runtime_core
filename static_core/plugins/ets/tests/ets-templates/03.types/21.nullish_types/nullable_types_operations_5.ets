@@ -19,10 +19,10 @@ tags: [negative, compile-only]
 ---*/
 
 function main(): int {
-  let a: Int|null = null;
-  let b: Int|null = 4;
+  let a: Int | null = null;
+  let b: Int | null = 4;
   try {
-      let x: Int|null = b + a;
+      let x: Int | null = b + a;
   } catch (e: NullPointerError) {
       return 0;
   }

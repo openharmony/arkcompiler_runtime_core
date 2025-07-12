@@ -20,7 +20,9 @@ desc: Test cases for various usage scenarios of asynchronous method.
 
 class MethodWithRecursion {
     async methodWithRecursion(n: number): Promise<number> {
-        if (n <= 1) return 1.0;
+        if (n <= 1) {
+            return 1.0;
+        }
         return n + (await this.methodWithRecursion(n - 1.0));
     }
 }

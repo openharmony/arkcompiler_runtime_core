@@ -119,55 +119,55 @@ function mustCall(fn?: Function, times: number = 1) {
     return wrappedFn;
 }
 
+class MyTransform1 extends stream.Transform {
+    constructor() {
+        super()
+    }
+    doTransform(chunk: string, encoding: string, callback: Function): void {
+        let fn = (chunk: string, encoding: string, callback: Function) => {
+            arktest.assertEQ(encoding, 'gb2312');
+            arktest.assertEQ(chunk, '你好123');
+            callback.unsafeCall();
+        }
+        let wrappedFn = mustCallFn(fn);
+        wrappedFn(chunk, encoding, callback);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamEncoding027
 function testTransformStreamWriteEncodingGb2312() {
-    class MyTransform extends stream.Transform {
-        constructor() {
-            super()
-        }
-        doTransform(chunk: string, encoding: string, callback: Function): void {
-            let fn = (chunk: string, encoding: string, callback: Function) => {
-                arktest.assertEQ(encoding, 'gb2312');
-                arktest.assertEQ(chunk, '你好123');
-                callback.unsafeCall();
-            }
-            let wrappedFn = mustCallFn(fn);
-            wrappedFn(chunk, encoding, callback);
-        }
-    }
-    let transform = new MyTransform();
+    let transform = new MyTransform1();
     transform.write('你好123', 'gb2312');
     transform.end();
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyReadable1 extends stream.Readable {
+    constructor() {
+        super();
+    }
+
+    doRead(size: number) {
+
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamEncoding031
 function testReadableStreamReadableFlowingState() {
-    class MyReadable extends stream.Readable {
-        constructor() {
-            super();
-        }
-
-        doRead(size: number) {
-
-        }
-    }
-    let readable = new MyReadable()
+    let readable = new MyReadable1()
     arktest.assertEQ(readable.readableFlowing, null);
 }
 
+class MyReadable2 extends stream.Readable {
+    constructor() {
+        super();
+    }
+
+    doRead(size: number) {
+
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamEncoding032
 function testReadableStreamOnReadableEventCount3() {
-    class MyReadable extends stream.Readable {
-        constructor() {
-            super();
-        }
-
-        doRead(size: number) {
-
-        }
-    }
-    let readable = new MyReadable()
+    let readable = new MyReadable2()
     let readableTest = 0;
     readable.on('readable', () => {
         readableTest++;
@@ -180,18 +180,18 @@ function testReadableStreamOnReadableEventCount3() {
     })
 }
 
+class MyReadable3 extends stream.Readable {
+    constructor() {
+        super();
+    }
+
+    doRead(size: number) {
+
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamEncoding033
 function testReadableStreamOnReadableEventCount4() {
-    class MyReadable extends stream.Readable {
-        constructor() {
-            super();
-        }
-
-        doRead(size: number) {
-
-        }
-    }
-    let readable = new MyReadable()
+    let readable = new MyReadable3()
     let readableTest = 0;
     readable.on('readable', () => {
         readableTest++;
@@ -205,18 +205,18 @@ function testReadableStreamOnReadableEventCount4() {
     })
 }
 
+class MyReadable4 extends stream.Readable {
+    constructor() {
+        super();
+    }
+
+    doRead(size: number) {
+
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamEncoding034
 function testReadableStreamOnReadableEventCount5() {
-    class MyReadable extends stream.Readable {
-        constructor() {
-            super();
-        }
-
-        doRead(size: number) {
-
-        }
-    }
-    let readable = new MyReadable()
+    let readable = new MyReadable4()
     let readableTest = 0;
     readable.on('readable', () => {
         readableTest++;
@@ -231,129 +231,131 @@ function testReadableStreamOnReadableEventCount5() {
     })
 }
 
+class MyReadable5 extends stream.Readable {
+    constructor() {
+        super();
+    }
+
+    doRead(size: number) {
+        this.push('test');
+        this.push(null)
+    }
+}
+class MyWritable5 extends stream.Writable {
+    data = ''
+    constructor() {
+        super()
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        this.data = (this.data) + JSON.stringify(chunk as Uint8Array);
+        callback.unsafeCall()
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamEncoding035
 function testPipeDataValidationWithWritableStream() {
     const str = "{\"0\":116,\"1\":101,\"2\":115,\"3\":116}";
-    class MyReadable extends stream.Readable {
-        constructor() {
-            super();
-        }
 
-        doRead(size: number) {
-            this.push('test');
-            this.push(null)
-        }
-    }
-    class MyWritable extends stream.Writable {
-        data = ''
-        constructor() {
-            super()
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            this.data = (this.data) + JSON.stringify(chunk as Uint8Array);
-            callback.unsafeCall()
-        }
-    }
-
-    let src = new MyReadable();
-    let dest = new MyWritable();
+    let src = new MyReadable5();
+    let dest = new MyWritable5();
     src.pipe(dest);
     setTimeout(() => {
         arktest.assertEQ(dest.data, str);
     })
 }
 
+class MyReadable6 extends stream.Readable {
+    constructor() {
+        super();
+    }
+
+    doRead(size: number) {
+        this.push('abc');
+        this.push(null)
+    }
+}
+class MyWritable6 extends stream.Writable {
+    data = ''
+    constructor() {
+        super()
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        this.data = (this.data) + JSON.stringify(chunk as Uint8Array);
+        callback.unsafeCall()
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamEncoding036
 function testPipeDataValidationAbc() {
     const str = "{\"0\":97,\"1\":98,\"2\":99}";
-    class MyReadable extends stream.Readable {
-        constructor() {
-            super();
-        }
 
-        doRead(size: number) {
-            this.push('abc');
-            this.push(null)
-        }
-    }
-    class MyWritable extends stream.Writable {
-        data = ''
-        constructor() {
-            super()
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            this.data = (this.data) + JSON.stringify(chunk as Uint8Array);
-            callback.unsafeCall()
-        }
-    }
-
-    let src = new MyReadable();
-    let dest = new MyWritable();
+    let src = new MyReadable6();
+    let dest = new MyWritable6();
     src.pipe(dest);
     setTimeout(() => {
         arktest.assertEQ(dest.data, str);
     })
+}
+
+class MyReadable7 extends stream.Readable {
+    constructor() {
+        super();
+    }
+
+    doRead(size: number) {
+        this.push('123');
+        this.push(null)
+    }
+}
+class MyWritable7 extends stream.Writable {
+    data = ''
+    constructor() {
+        super()
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        this.data = (this.data) + JSON.stringify(chunk as Uint8Array);
+        callback.unsafeCall()
+    }
 }
 
 // Test cases ported from ArkTS 1.0:testStreamEncoding037
 function testPipeDataValidationNumericData() {
     const str = "{\"0\":49,\"1\":50,\"2\":51}";
-    class MyReadable extends stream.Readable {
-        constructor() {
-            super();
-        }
 
-        doRead(size: number) {
-            this.push('123');
-            this.push(null)
-        }
-    }
-    class MyWritable extends stream.Writable {
-        data = ''
-        constructor() {
-            super()
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            this.data = (this.data) + JSON.stringify(chunk as Uint8Array);
-            callback.unsafeCall()
-        }
-    }
-
-    let src = new MyReadable();
-    let dest = new MyWritable();
+    let src = new MyReadable7();
+    let dest = new MyWritable7();
     src.pipe(dest);
     setTimeout(() => {
         arktest.assertEQ(dest.data, str);
     })
 }
 
+class MyReadable8 extends stream.Readable {
+    constructor() {
+        super();
+    }
+
+    doRead(size: number) {
+        this.push('123');
+        this.push(null)
+    }
+}
+class MyWritable8 extends stream.Writable {
+    count: number
+    constructor() {
+        super()
+        this.count = 0
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        this.count++
+        callback.unsafeCall()
+    }
+}
+
 // Test cases ported from ArkTS 1.0:testStreamEncoding038
 function testPipeDataValidationMultipleDestinations() {
-    class MyReadable extends stream.Readable {
-        constructor() {
-            super();
-        }
 
-        doRead(size: number) {
-            this.push('123');
-            this.push(null)
-        }
-    }
-    class MyWritable extends stream.Writable {
-        count: number
-        constructor() {
-            super()
-            this.count = 0
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            this.count++
-            callback.unsafeCall()
-        }
-    }
-
-    let src = new MyReadable();
-    let dest1 = new MyWritable();
-    let dest2 = new MyWritable();
+    let src = new MyReadable8();
+    let dest1 = new MyWritable8();
+    let dest2 = new MyWritable8();
     src.pipe(dest1);
     src.pipe(dest2);
     setTimeout(() => {
@@ -361,34 +363,34 @@ function testPipeDataValidationMultipleDestinations() {
     })
 }
 
+class MyReadable9 extends stream.Readable {
+    constructor() {
+        super();
+    }
+
+    doRead(size: number) {
+        this.push('123');
+        this.push(null)
+    }
+}
+class MyWritable9 extends stream.Writable {
+    count: number
+    constructor() {
+        super()
+        this.count = 0
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        this.count++
+        callback.unsafeCall()
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamEncoding039
 function testPipeDataValidationThreeDestinations() {
-    class MyReadable extends stream.Readable {
-        constructor() {
-            super();
-        }
 
-        doRead(size: number) {
-            this.push('123');
-            this.push(null)
-        }
-    }
-    class MyWritable extends stream.Writable {
-        count: number
-        constructor() {
-            super()
-            this.count = 0
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            this.count++
-            callback.unsafeCall()
-        }
-    }
-
-    let src = new MyReadable();
-    let dest1 = new MyWritable();
-    let dest2 = new MyWritable();
-    let dest3 = new MyWritable();
+    let src = new MyReadable9();
+    let dest1 = new MyWritable9();
+    let dest2 = new MyWritable9();
+    let dest3 = new MyWritable9();
     src.pipe(dest1);
     src.pipe(dest2);
     src.pipe(dest3);
@@ -397,71 +399,77 @@ function testPipeDataValidationThreeDestinations() {
     })
 }
 
+class MyWrite10 extends stream.Writable {
+    idx = 0;
+    constructor(i: int) {
+        super();
+        this.idx = i;
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+        let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
+            arktest.assertEQ(chunk, '测试');
+            arktest.assertEQ(encoding, newArr[this.idx]);
+            callback.unsafeCall();
+        }
+        let wrappedFn = mustCallUint8Array(fn);
+        wrappedFn(chunk, encoding, callback);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamExtraEncoding001
 function testWritableStreamWriteMultipleEncodings() {
     for (let i = 0; i < 43; i++) {
-        class MyWrite extends stream.Writable {
-            constructor() {
-                super();
-            }
-            doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-                let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
-                    arktest.assertEQ(chunk, '测试');
-                    arktest.assertEQ(encoding, newArr[i]);
-                    callback.unsafeCall();
-                }
-                let wrappedFn = mustCallUint8Array(fn);
-                wrappedFn(chunk, encoding, callback);
-            }
-        }
-        let writable = new MyWrite();
+        let writable = new MyWrite10(i);
         let result = writable.write('测试', newArr[i]);
         arktest.assertEQ(result, true);
     }
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyWrite11 extends stream.Writable {
+    idx = 0;
+    constructor(i: int) {
+        super();
+        this.idx = i;
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+        let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
+            arktest.assertEQ(chunk, '测试');
+            arktest.assertEQ(encoding, newArr[this.idx]);
+            callback.unsafeCall();
+        }
+        let wrappedFn = mustCallUint8Array(fn);
+        wrappedFn(chunk, encoding, callback);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamExtraEncoding002
 function testWritableStreamEndMultipleEncodings() {
     for (let i = 0; i < 43; i++) {
-        class MyWrite extends stream.Writable {
-            constructor() {
-                super();
-            }
-            doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-                let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
-                    arktest.assertEQ(chunk, '测试');
-                    arktest.assertEQ(encoding, newArr[i]);
-                    callback.unsafeCall();
-                }
-                let wrappedFn = mustCallUint8Array(fn);
-                wrappedFn(chunk, encoding, callback);
-            }
-        }
-        let writable = new MyWrite();
+        let writable = new MyWrite11(i);
         writable.end('测试', newArr[i], mustCall());
     }
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyWrite12 extends stream.Writable {
+    idx = 0;
+    constructor(i: int) {
+        super();
+        this.idx = i;
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+        let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
+            arktest.assertEQ(chunk, '你好');
+            arktest.assertEQ(encoding, resArr[this.idx].toLowerCase());
+            callback.unsafeCall();
+        }
+        let wrappedFn = mustCallUint8Array(fn);
+        wrappedFn(chunk, encoding, callback);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamExtraEncoding003
 function testWritableStreamSetDefaultEncodingMultipleEncodings() {
     for (let i = 0; i < 43; i++) {
-        class MyWrite extends stream.Writable {
-            constructor() {
-                super();
-            }
-            doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-                let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
-                    arktest.assertEQ(chunk, '你好');
-                    arktest.assertEQ(encoding, resArr[i].toLowerCase());
-                    callback.unsafeCall();
-                }
-                let wrappedFn = mustCallUint8Array(fn);
-                wrappedFn(chunk, encoding, callback);
-            }
-        }
-        let writable = new MyWrite();
+        let writable = new MyWrite12(i);
         writable.setDefaultEncoding(newArr[i]);
         writable.write('你好');
     }

@@ -158,3 +158,9 @@ panda_ets_napi_add_gtest(
     CPP_SOURCE abort_flag_launch_test.cpp
     ETS_SOURCE AbortFlagLaunchTest.ets
 )
+
+panda_ets_napi_add_gtest(
+    NAME unhandled_rejection_recursive
+    CPP_SOURCE unhandled_rejection_recursive_test.cpp
+    ETS_SOURCE UnhandledRejectionRecursiveTest.ets
+)

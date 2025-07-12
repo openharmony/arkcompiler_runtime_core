@@ -21,7 +21,7 @@ class A {};
 
 function main(): void {
   let b: A = new A();
-  let x: A|null = b;
+  let x: A | null = b;
 
   arktest.assertTrue(x == b)
 }

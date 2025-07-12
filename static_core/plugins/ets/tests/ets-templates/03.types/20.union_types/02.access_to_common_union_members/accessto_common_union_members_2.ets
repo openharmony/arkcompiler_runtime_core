@@ -23,7 +23,7 @@ class A {
         return this._x;
     }
 
-    constructor(){
+    constructor() {
         arktest.assertTrue(this._x === 1);
     }
 }
@@ -33,7 +33,7 @@ class B {
     get x() {
         return this._x;
     }
-    constructor(){
+    constructor() {
         arktest.assertTrue(this._x === 2);
     }
 }

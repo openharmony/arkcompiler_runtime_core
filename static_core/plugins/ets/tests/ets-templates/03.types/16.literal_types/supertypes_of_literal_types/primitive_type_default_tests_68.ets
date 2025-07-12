@@ -19,7 +19,7 @@ desc: Type compatibility test for string type in ternary operator return value.
 
 function ternaryTest() {
     let condition = true;
-    let value = condition? "trueValue" : "falseValue";
+    let value = condition ? "trueValue" : "falseValue";
     return value;
 }
 

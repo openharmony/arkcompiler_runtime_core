@@ -18,9 +18,9 @@ desc: Interface field declaration
 ---*/
 
 interface BaseColors {
-  RED:   int;
+  RED: int;
   GREEN: int;
-  BLUE:  int;
+  BLUE: int;
 }
 
 interface ExtendedColors extends BaseColors {

@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "extensionAbilityInfo.proj.hpp"
 #include "extensionAbilityInfo.impl.hpp"
-#include "taihe/runtime.hpp"
-#include "stdexcept"
 #include <iostream>
+#include "extensionAbilityInfo.proj.hpp"
+#include "stdexcept"
+#include "taihe/runtime.hpp"
 
 using namespace taihe;
 using namespace extensionAbilityInfo;
@@ -27,6 +27,7 @@ namespace {
 class ExtensionAbilityInfoImpl {
 public:
     int32_t extensionAbilityInfoImpl = 21474;
+
     ExtensionAbilityInfoImpl() {}
 
     string GetBundleName()

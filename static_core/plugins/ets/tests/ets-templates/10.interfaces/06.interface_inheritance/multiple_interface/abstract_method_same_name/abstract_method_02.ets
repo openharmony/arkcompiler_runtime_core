@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The method with the same name has the different parameters parameter type but same return types, valid overloading.
+desc: >-
+    The method with the same name has the different parameters parameter type but same return types,
+    valid overloading.
 ---*/
 
 let resultString: string = "";

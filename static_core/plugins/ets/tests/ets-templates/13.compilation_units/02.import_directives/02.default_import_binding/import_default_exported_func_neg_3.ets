@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Import a default exported function using its name in a selective import. TypeError Use the default import syntax to import a default exported element
+desc: >-
+    Import a default exported function using its name in a selective import.
+    TypeError Use the default import syntax to import a default exported element
 files:
 - ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function.ets
 tags:

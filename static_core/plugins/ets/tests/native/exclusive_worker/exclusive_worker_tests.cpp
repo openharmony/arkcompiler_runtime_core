@@ -139,7 +139,7 @@ public:
             status = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &workerEnv);
             ASSERT(status == ANI_ERROR);
 
-            ani_int eWorkerId = os::thread::GetCurrentThreadId();
+            ani_int eWorkerId = Coroutine::GetCurrent()->GetWorker()->GetId();
             CallStaticVoidMethod(workerEnv, "setWorkerId", "I:V", eWorkerId);
 
             ani_boolean res {};
@@ -182,7 +182,7 @@ private:
 
         event.Fire();
 
-        ani_int eWorkerId = os::thread::GetCurrentThreadId();
+        ani_int eWorkerId = Coroutine::GetCurrent()->GetWorker()->GetId();
         CallStaticVoidMethod(workerEnv, "setWorkerId", "I:V", eWorkerId);
 
         ani_boolean res {};

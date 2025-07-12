@@ -15,13 +15,16 @@
 
 /*---
 desc: Test increasing array length.
-tags: [compile-only, negative]
 ---*/
 
-function main(): void {
+function main(): int {
    let array1: number[] = [0, 1, 2];
+
+  try {
    array1.length = 5;
    let a: number = array1.length;
-   arktest.assertTrue(a === 3);
-   arktest.assertNEQ(a, 5);
+  } catch(RangeError) {
+    return 0
+  }
+  return 1
 }

@@ -24,7 +24,7 @@ class C {
 }
 
 class D extends C {
-    foo(): this|object {
+    foo(): this | object {
         return this
     }
 }

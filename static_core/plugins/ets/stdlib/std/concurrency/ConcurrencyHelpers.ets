@@ -49,4 +49,25 @@ class NativeAsyncWorkHelper {
     static asyncWorkNativeInvokeInternal(nativeCb: long, data: long, needNativeScope: boolean) {
         NativeAsyncWorkHelper.asyncWorkNativeInvoke(nativeCb, data, needNativeScope);
     }
+
+    static sendEvent(workerId: int, executeCb: long, data: long, timeout: long): void {
+        NativeAsyncWorkHelper.sendEventInternal(workerId, executeCb, data, timeout);
+    }
+    static async sendEventInternal(workerId: int, executeCb: long, data: long, timeout: long) {
+        let launchParams: LaunchParams = {
+            abortFlag: false,
+            workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EXACT_ID, [workerId])
+        };
+        if (timeout > 0) {
+            setTimeout(() => {
+                launch<void, (nativeCb: long, data: long, needNativeScope: boolean) => void>(NativeAsyncWorkHelper.eventNativeInvokeInternal, launchParams, executeCb, data, true);
+            }, timeout);
+        } else {
+            launch<void, (nativeCb: long, data: long, needNativeScope: boolean) => void>(NativeAsyncWorkHelper.eventNativeInvokeInternal, launchParams, executeCb, data, true);
+        }
+    }
+    static eventNativeInvokeInternal(nativeCb: long, data: long, needNativeScope: boolean) {
+        NativeAsyncWorkHelper.eventNativeInvoke(nativeCb, data, needNativeScope);
+    }
+    static native eventNativeInvoke(nativeCb: long, data: long, needNativeScope: boolean): void;
 }

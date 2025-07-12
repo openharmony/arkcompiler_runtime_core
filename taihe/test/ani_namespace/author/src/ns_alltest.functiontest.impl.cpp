@@ -16,7 +16,7 @@
 
 #include <iostream>
 
-#include "ns_alltest.functiontest.Color.proj.0.hpp"
+#include "ns_alltest.functiontest.Color.proj.1.hpp"
 #include "ns_alltest.functiontest.Data.proj.1.hpp"
 #include "taihe/array.hpp"
 #include "taihe/map.hpp"

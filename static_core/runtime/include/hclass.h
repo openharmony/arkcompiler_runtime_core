@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,19 +99,19 @@ public:
         return (nativeFields_ & FieldOffsetToMask(offset)) != 0;
     }
 
-    uint32_t GetNativeFieldMask() const
+    uint64_t GetNativeFieldMask() const
     {
         return nativeFields_;
     }
 
-    void SetNativeFieldMask(uint32_t mask)
+    void SetNativeFieldMask(uint64_t mask)
     {
         nativeFields_ = mask;
     }
 
-    static constexpr uint32_t FieldOffsetToMask(size_t offset)
+    static constexpr uint64_t FieldOffsetToMask(size_t offset)
     {
-        uint32_t index = (offset - ObjectHeader::ObjectHeaderSize()) / TaggedValue::TaggedTypeSize();
+        uint64_t index = (offset - ObjectHeader::ObjectHeaderSize()) / TaggedValue::TaggedTypeSize();
         return 1U << index;
     }
 
@@ -146,7 +146,7 @@ private:
 
     friend class coretypes::DynClass;
 
-    uint32_t nativeFields_ {0};
+    uint64_t nativeFields_ {0};
 
     // Data for language extension flags
     // NOTE(maksenov): maybe merge this with BaseClass flags

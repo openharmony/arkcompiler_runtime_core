@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that a child interface overrides and calls parent implementations when three parent interfaces have the same default method.
+desc: >-
+    Verify that a child interface overrides and calls parent implementations when three parent interfaces have the same
+    default method.
 ---*/
 
 interface Parent1 {

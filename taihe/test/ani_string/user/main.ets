@@ -93,7 +93,8 @@ function concatString2() {
     for (let i = 0; i < numbersU8.length; i++) {
         buffer.set(i, numbersU8[i]);
     }
-    arktest.assertEQ(StringOp.concatString2(s, 1, sArr, true, buffer), "abcd1234");
+    arktest.assertEQ(
+        StringOp.concatString2(s, 1, sArr, true, buffer), "abcd1234");
     arktest.assertEQ(StringOp.concatString2(s, 1, sArr, false, buffer), "a");
 }
 

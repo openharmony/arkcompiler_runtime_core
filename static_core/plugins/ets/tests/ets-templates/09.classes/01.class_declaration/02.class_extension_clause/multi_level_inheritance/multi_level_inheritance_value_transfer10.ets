@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Multi-level inheritance verifies that the public member variable _publicVar in class a is passed correctly in subclass c and maintains its initial value.
+desc: >-
+    Multi-level inheritance verifies that the public member variable _publicVar in class a is passed correctly in
+    subclass c and maintains its initial value.
 ---*/
 
 class A {
@@ -36,7 +38,7 @@ class C extends B {
     super();
   }
 
-  test(){
+  test() {
   }
 }
 

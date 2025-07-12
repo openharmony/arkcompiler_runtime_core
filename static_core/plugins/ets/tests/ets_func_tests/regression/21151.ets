@@ -14,11 +14,11 @@
  */
 
 
- /*---
- desc: Issue 21151. Trailing comma in tuple causes SyntaxError
- tags: [compile-only]
+/*---
+desc: Issue 21151. Trailing comma in tuple causes SyntaxError
+tags: [compile-only]
+---*/
 
- ---*/
 interface II {
 }
 
