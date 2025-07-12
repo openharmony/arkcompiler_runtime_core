@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { ILogger } from "./Logger";
+import { ILogger } from './Logger';
 
 export const logMessages: string[] = [];
 
@@ -26,19 +26,19 @@ export class SilentLogger implements ILogger {
     logMessages.push(`[${level}] ${message}`);
   }
   doTrace(message: string): void {
-    this.log("TRACE",message);
+    this.log('TRACE',message);
   }
   doDebug(message: string): void {
-    this.log("DEBUG",message);
+    this.log('DEBUG',message);
   }
   doInfo(message: string): void {
-    this.log("INFO",message);
+    this.log('INFO',message);
   }
   doWarn(message: string): void {
-    this.log("WARN",message);
+    this.log('WARN',message);
   }
   doError(message: string): void {
-    this.log("ERROR",message);
+    this.log('ERROR',message);
   }
 
 }

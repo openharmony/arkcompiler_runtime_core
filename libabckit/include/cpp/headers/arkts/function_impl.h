@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@ inline AbckitArktsFunction *Function::TargetCast() const
     return ret;
 }
 
-inline Function::Function(const core::Function &coreOther) : core::Function(coreOther), targetChecker_(this) {};
+inline Function::Function(const core::Function &other) : core::Function(other), targetChecker_(this) {};
 
 inline bool Function::IsNative() const
 {

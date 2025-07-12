@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -155,44 +155,44 @@ inline Value File::CreateLiteralArrayValue(std::vector<Value> &value, size_t siz
     return Value(arr, GetApiConfig(), this);
 }
 
-inline abckit::Literal File::CreateLiteralU8(uint8_t val) const
+inline abckit::Literal File::CreateLiteralU8(uint8_t value) const
 {
-    AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralU8(GetResource(), val);
+    AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralU8(GetResource(), value);
     CheckError(GetApiConfig());
     return abckit::Literal(literal, GetApiConfig(), this);
 }
 
-inline abckit::Literal File::CreateLiteralU16(uint16_t val) const
+inline abckit::Literal File::CreateLiteralU16(uint16_t value) const
 {
-    AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralU16(GetResource(), val);
+    AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralU16(GetResource(), value);
     CheckError(GetApiConfig());
     return abckit::Literal(literal, GetApiConfig(), this);
 }
 
-inline Literal File::CreateLiteralMethodAffiliate(uint16_t val) const
+inline Literal File::CreateLiteralMethodAffiliate(uint16_t value) const
 {
-    AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralMethodAffiliate(GetResource(), val);
+    AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralMethodAffiliate(GetResource(), value);
     CheckError(GetApiConfig());
     return abckit::Literal(literal, GetApiConfig(), this);
 }
 
-inline Literal File::CreateLiteralU32(uint32_t val) const
+inline Literal File::CreateLiteralU32(uint32_t value) const
 {
-    AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralU32(GetResource(), val);
+    AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralU32(GetResource(), value);
     CheckError(GetApiConfig());
     return abckit::Literal(literal, GetApiConfig(), this);
 }
 
-inline Literal File::CreateLiteralU64(uint64_t val) const
+inline Literal File::CreateLiteralU64(uint64_t value) const
 {
-    AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralU64(GetResource(), val);
+    AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralU64(GetResource(), value);
     CheckError(GetApiConfig());
     return abckit::Literal(literal, GetApiConfig(), this);
 }
 
-inline Literal File::CreateLiteralFloat(float val) const
+inline Literal File::CreateLiteralFloat(float value) const
 {
-    AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralFloat(GetResource(), val);
+    AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralFloat(GetResource(), value);
     CheckError(GetApiConfig());
     return abckit::Literal(literal, GetApiConfig(), this);
 }
