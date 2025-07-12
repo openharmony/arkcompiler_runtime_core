@@ -1899,6 +1899,7 @@ std::unique_ptr<const panda_file::File> AsmEmitter::Emit(Program &program, Panda
 
     auto writer = MemoryBufferWriter(reinterpret_cast<uint8_t *>(buffer), size);
     if (!items.Write(&writer)) {
+        delete[] buffer;
         return nullptr;
     }
 
