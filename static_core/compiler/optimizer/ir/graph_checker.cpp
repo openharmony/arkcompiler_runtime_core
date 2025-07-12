@@ -1757,7 +1757,8 @@ void GraphChecker::VisitLoadClass([[maybe_unused]] GraphVisitor *v, Inst *inst)
                 userInst->GetOpcode() == Opcode::DeoptimizeCompare ||
                 userInst->GetOpcode() == Opcode::DeoptimizeCompareImm ||
                 userInst->GetOpcode() == Opcode::DeoptimizeIf || userInst->GetOpcode() == Opcode::Load ||
-                userInst->GetOpcode() == Opcode::If || userInst->GetOpcode() == Opcode::IfImm,
+                userInst->GetOpcode() == Opcode::If || userInst->GetOpcode() == Opcode::IfImm ||
+                userInst->GetOpcode() == Opcode::Compare || userInst->GetOpcode() == Opcode::Cmp,
             (std::cerr << "Incorrect user of the LoadClass", inst->Dump(&std::cerr), userInst->Dump(&std::cerr)));
     }
 }
@@ -1781,7 +1782,11 @@ void GraphChecker::VisitLoadAndInitClass([[maybe_unused]] GraphVisitor *v, Inst 
                 userInst->GetOpcode() == Opcode::MultiArray || userInst->GetOpcode() == Opcode::InitObject ||
                 userInst->GetOpcode() == Opcode::UnresolvedStoreStatic || userInst->GetOpcode() == Opcode::Intrinsic ||
                 userInst->GetOpcode() == Opcode::NewArray || userInst->GetOpcode() == Opcode::IsInstance ||
-                userInst->GetOpcode() == Opcode::CheckCast,
+                userInst->GetOpcode() == Opcode::CheckCast || userInst->GetOpcode() == Opcode::DeoptimizeCompare ||
+                userInst->GetOpcode() == Opcode::DeoptimizeCompareImm ||
+                userInst->GetOpcode() == Opcode::DeoptimizeIf || userInst->GetOpcode() == Opcode::Load ||
+                userInst->GetOpcode() == Opcode::If || userInst->GetOpcode() == Opcode::IfImm ||
+                userInst->GetOpcode() == Opcode::Compare || userInst->GetOpcode() == Opcode::Cmp,
             (std::cerr << "Incorrect user of the LoadAndInitClass", inst->Dump(&std::cerr),
              userInst->Dump(&std::cerr)));
     }
@@ -1807,7 +1812,12 @@ void GraphChecker::VisitUnresolvedLoadAndInitClass([[maybe_unused]] GraphVisitor
             userInst->GetOpcode() == Opcode::LoadStatic || userInst->GetOpcode() == Opcode::StoreStatic ||
                 userInst->GetOpcode() == Opcode::NewObject || userInst->GetOpcode() == Opcode::NewArray ||
                 userInst->GetOpcode() == Opcode::Phi || userInst->GetOpcode() == Opcode::MultiArray ||
-                userInst->GetOpcode() == Opcode::UnresolvedStoreStatic,
+                userInst->GetOpcode() == Opcode::UnresolvedStoreStatic ||
+                userInst->GetOpcode() == Opcode::DeoptimizeCompare ||
+                userInst->GetOpcode() == Opcode::DeoptimizeCompareImm ||
+                userInst->GetOpcode() == Opcode::DeoptimizeIf || userInst->GetOpcode() == Opcode::Load ||
+                userInst->GetOpcode() == Opcode::If || userInst->GetOpcode() == Opcode::IfImm ||
+                userInst->GetOpcode() == Opcode::Compare || userInst->GetOpcode() == Opcode::Cmp,
             (std::cerr << "Incorrect user of the UnresolvedLoadAndInitClass", inst->Dump(&std::cerr),
              userInst->Dump(&std::cerr)));
     }

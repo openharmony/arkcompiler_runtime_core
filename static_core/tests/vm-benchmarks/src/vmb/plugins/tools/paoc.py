@@ -74,9 +74,11 @@ class Tool(ToolBase):
                                             for f in files])
 
     def do_exec(self, bu: BenchUnit, profdata: bool = False) -> None:
+        abc = self.x_src(bu, '.abc')
+        an = abc.with_suffix('.an')
         _, bu_opts = self.get_bu_opts(bu)
         libs = self.x_libs(bu, '.abc')
-        opts = self.panda_files(libs)
+        opts = self.panda_files(list(libs) + [abc] if profdata else libs)
         if bu_opts:
             opts += ' ' + bu_opts
         for lib in libs:
@@ -86,8 +88,6 @@ class Tool(ToolBase):
             if 0 != res.ret:
                 bu.status = BUStatus.COMPILATION_FAILED
                 raise VmbToolExecError(f'{self.name} failed', res)
-        abc = self.x_src(bu, '.abc')
-        an = abc.with_suffix('.an')
         if profdata:
             opts += f' --paoc-use-profile:path={abc}.profdata,force '
         res = self.run_paoc(abc, an, opts=opts)
