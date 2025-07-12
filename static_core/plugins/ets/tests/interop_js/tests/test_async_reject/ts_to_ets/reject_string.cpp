@@ -20,10 +20,17 @@ namespace ark::ets::interop::js::testing {
 
 class EtsAsyncInteropTest : public EtsInteropTest {};
 
-TEST_F(EtsAsyncInteropTest, TestReturnIntegerAsAny)
+TEST_F(EtsAsyncInteropTest, TestRejectStringCatch)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsFunction<int>(GetPackageName(), "TestInteropAsyncRejectStringCatch");
+    auto ret = CallEtsFunction<int>(GetPackageName(), "testInteropRejectStringCatch");
+    ASSERT_EQ(ret, 0);
+}
+
+TEST_F(EtsAsyncInteropTest, TestRejectStringThen)
+{
+    // NOLINTNEXTLINE(modernize-use-auto)
+    auto ret = CallEtsFunction<int>(GetPackageName(), "testInteropRejectStringThen");
     ASSERT_EQ(ret, 0);
 }
 
