@@ -83,13 +83,13 @@ function testGetBlankKey() {
     assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
 }
 
-function testGetKeyWithComplexValue() {
-    interface ComplexValue {
-        name: string;
-        gender: string;
-        age: number;
-    }
+interface ComplexValue {
+    name: string;
+    gender: string;
+    age: number;
+}
 
+function testGetKeyWithComplexValue() {
     const value: ComplexValue = {
         name: 'squirrel',
         gender: 'male',
@@ -102,13 +102,13 @@ function testGetKeyWithComplexValue() {
     assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
 }
 
-function testGetComplexKey() {
-    interface ComplexKey {
-        name: string;
-        gender: string;
-        age: number;
-    }
+interface ComplexKey {
+    name: string;
+    gender: string;
+    age: number;
+}
 
+function testGetComplexKey() {
     const key: ComplexKey = {
         name: 'squirrel',
         gender: 'male',

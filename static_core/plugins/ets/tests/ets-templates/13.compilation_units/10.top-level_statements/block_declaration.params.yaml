@@ -18,7 +18,6 @@ statements:
   - block: |-
           if (check())
             assertTrue(true);
-  - block: 'interface A {}'
   - block: 'enum Enum { v1, v2 }'
   - block: 'const b: int = 1;'
   - block: |- 

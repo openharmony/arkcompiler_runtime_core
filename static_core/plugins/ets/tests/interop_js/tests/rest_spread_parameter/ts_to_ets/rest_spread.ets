@@ -23,11 +23,12 @@ function checkRestOfString(f: JSValue) {
     return f(['aa', 'bb', 'cc'], 'aa', 'bb', 'cc');
 }
 
+interface B{name: string}
+
 class A{}
 
 function checkRestOfObject(f: JSValue) {
     let a = new A();
-    interface B{name: string}
     let b: B = {name: "bbb"};
     let c = () => {};
     let objArr: object[] = [a, b, c];
