@@ -246,6 +246,11 @@ public:
         return GetRuntimeClass()->IsFinal();
     }
 
+    bool IsExtensible() const
+    {
+        return GetRuntimeClass()->IsExtensible();
+    }
+
     bool IsAnnotation() const
     {
         return GetRuntimeClass()->IsAnnotation();

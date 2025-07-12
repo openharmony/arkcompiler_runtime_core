@@ -28,6 +28,7 @@
 #include "runtime/include/exceptions.h"
 #include "runtime/include/compiler_interface.h"
 #include "runtime/include/coretypes/array.h"
+#include "runtime/include/coretypes/line_string.h"
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime.h"
@@ -164,18 +165,10 @@ template <bool IS_ERR>
 void PrintStringInternal(coretypes::String *v)
 {
     static auto &outstream = IS_ERR ? std::cerr : std::cout;
-    if (v->IsUtf16()) {
-        uint16_t *vdataPtr = v->GetDataUtf16();
-        uint32_t vlength = v->GetLength();
-        size_t mutf8Len = utf::Utf16ToMUtf8Size(vdataPtr, vlength);
-
-        PandaVector<uint8_t> out(mutf8Len);
-        utf::ConvertRegionUtf16ToMUtf8(vdataPtr, out.data(), vlength, mutf8Len, 0);
-
-        outstream << reinterpret_cast<const char *>(out.data());
-    } else {
-        outstream << std::string_view(reinterpret_cast<const char *>(v->GetDataMUtf8()), v->GetLength());
-    }
+    size_t len = v->GetUtf8Length();
+    PandaVector<uint8_t> out(len);
+    v->CopyDataRegionUtf8(out.data(), 0, len, len);
+    outstream << std::string_view(reinterpret_cast<const char *>(out.data()), out.size());
 }
 
 void PrintString(coretypes::String *v)

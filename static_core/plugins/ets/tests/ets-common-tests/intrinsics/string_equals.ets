@@ -13,11 +13,37 @@
  * limitations under the License.
  */
 
-function main(): int {
-    let str = 'abc';
-    let NULL_STR: String | null = null;
+const NULL_STR: String | null = null;
+let str = 'abc';
+function testLineStringEquals() {
     arktest.assertNE(str, NULL_STR, 'String must not be equal to null');
     arktest.assertNE(NULL_STR, str, 'Null string must not be equal to non-null one');
     arktest.assertEQ(NULL_STR, NULL_STR, 'Null values of type String must be equal');
-    return 0;
+    arktest.assertEQ(str, str, "String must be equal to itself");
+    arktest.assertEQ(str, "abc", "String must be equal to 'abc'");
+}
+
+function testTreeStringEquals() {
+    let treeStr = str.concat("defghijklmnopqrstuvwxyz");
+    arktest.assertNE(treeStr, NULL_STR, "TreeString must not be equal to null");
+    arktest.assertNE(NULL_STR, treeStr, "Null string must not be equal to non-null one");
+    arktest.assertEQ(treeStr, treeStr, "TreeString must be equal to itself");
+    arktest.assertEQ(treeStr, "abcdefghijklmnopqrstuvwxyz", "TreeString must be equal to 'abcdefghijklmnopqrstuvwxyz'");
+}
+
+function testSlicedStringEquals() {
+    let treeStr = str.concat("defghijklmnopqrstuvwxyz");
+    let slicedStr = treeStr.substring(1, 17);  // "bcdefghijklmnopq"
+    arktest.assertNE(slicedStr, NULL_STR, "SlicedString must not be equal to null");
+    arktest.assertNE(NULL_STR, slicedStr, "Null string must not be equal to non-null one");
+    arktest.assertEQ(slicedStr, slicedStr, "SlicedString must be equal to itself");
+    arktest.assertEQ(slicedStr, "bcdefghijklmnopq", "SlicedString must be equal to 'bcde'");
+}
+
+function main(): int {
+    let suite = new arktest.ArkTestsuite("StringEquals");
+    suite.addTest("testLineStringEquals", testLineStringEquals);
+    suite.addTest("testTreeStringEquals", testTreeStringEquals);
+    suite.addTest("testSlicedStringEquals", testSlicedStringEquals);
+    return suite.run();
 }

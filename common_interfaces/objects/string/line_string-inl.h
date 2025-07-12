@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "objects/string/line_string.h"
 #include "objects/utils/utf_utils.h"
 #include "securec.h"
+#include <vector>
 
 namespace panda {
 template <typename Allocator, objects_traits::enable_if_is_allocate<Allocator, BaseObject *>>
@@ -30,14 +31,14 @@ LineString *LineString::CreateFromUtf8(Allocator &&allocator, const uint8_t *utf
     if (canBeCompress) {
         string = Create(std::forward<Allocator>(allocator), utf8Len, true);
         ASSERT_COMMON(string != nullptr);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::copy(utf8Data, utf8Data + utf8Len, LineString::Cast(string)->GetDataUtf8Writable());
     } else {
         auto utf16Len = panda::utf_utils::Utf8ToUtf16Size(utf8Data, utf8Len);
         string = Create(allocator, utf16Len, false);
         ASSERT_COMMON(string != nullptr);
-        [[maybe_unused]] auto len =
-            panda::utf_utils::ConvertRegionUtf8ToUtf16(utf8Data, LineString::Cast(string)->GetDataUtf16Writable(),
-                                                       utf8Len, utf16Len);
+        [[maybe_unused]] auto len = panda::utf_utils::ConvertRegionUtf8ToUtf16(
+            utf8Data, LineString::Cast(string)->GetDataUtf16Writable(), utf8Len, utf16Len);
         ASSERT_COMMON(len == utf16Len);
     }
 
@@ -47,13 +48,14 @@ LineString *LineString::CreateFromUtf8(Allocator &&allocator, const uint8_t *utf
 
 template <typename Allocator, objects_traits::enable_if_is_allocate<Allocator, BaseObject *>>
 LineString *LineString::CreateFromUtf8CompressedSubString(Allocator &&allocator,
-                                                          const ReadOnlyHandle<BaseString> string,
-                                                          uint32_t offset, uint32_t utf8Len)
+                                                          const ReadOnlyHandle<BaseString> string, uint32_t offset,
+                                                          uint32_t utf8Len)
 {
     LineString *subString = Create(std::forward<Allocator>(allocator), utf8Len, true);
     ASSERT_COMMON(subString != nullptr);
-
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     auto *utf8Data = ReadOnlyHandle<LineString>::Cast(string)->GetDataUtf8() + offset;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     std::copy(utf8Data, utf8Data + utf8Len, subString->GetDataUtf8Writable());
     ASSERT_PRINT_COMMON(LineString::CanBeCompressed(subString), "String cannot be compressed!");
     return subString;
@@ -112,11 +114,11 @@ inline size_t LineString::DataSize(BaseString *str)
     return str->IsUtf16() ? length * sizeof(uint16_t) : length;
 }
 
-template <bool verify>
+template <bool VERIFY>
 uint16_t LineString::Get(int32_t index) const
 {
-    int32_t length = static_cast<int32_t>(GetLength());
-    if constexpr (verify) {
+    auto length = static_cast<int32_t>(GetLength());
+    if constexpr (VERIFY) {
         if ((index < 0) || (index >= length)) {
             return 0;
         }
@@ -155,9 +157,9 @@ void LineString::WriteData(ReadBarrier &&readBarrier, BaseString *src, uint32_t 
             UNREACHABLE_COMMON();
         }
     } else if (src->IsUtf8()) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::vector<uint8_t> buf;
         const uint8_t *data = BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), src, buf);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         common::Span<uint16_t> to(GetDataUtf16Writable() + start, length);
         common::Span<const uint8_t> from(data, length);
         for (uint32_t i = 0; i < length; i++) {
@@ -167,8 +169,8 @@ void LineString::WriteData(ReadBarrier &&readBarrier, BaseString *src, uint32_t 
         std::vector<uint16_t> buf;
         const uint16_t *data = BaseString::GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), src, buf);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        if (length != 0 && memcpy_s(GetDataUtf16Writable() + start,
-                                    destSize * sizeof(uint16_t), data, length * sizeof(uint16_t)) != EOK) {
+        if (length != 0 && memcpy_s(GetDataUtf16Writable() + start, destSize * sizeof(uint16_t), data,
+                                    length * sizeof(uint16_t)) != EOK) {
             UNREACHABLE_COMMON();
         }
     }
@@ -181,5 +183,6 @@ inline bool LineString::CanBeCompressed(const LineString *string)
     }
     return BaseString::CanBeCompressed(string->GetDataUtf16(), string->GetLength());
 }
-}
-#endif //COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_INL_H
+}  // namespace panda
+
+#endif  // COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_INL_H

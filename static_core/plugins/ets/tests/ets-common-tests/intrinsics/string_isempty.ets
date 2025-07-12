@@ -13,14 +13,42 @@
  * limitations under the License.
  */
 
-function newString(): String {
-    return new String('abcde');
-}
 
 function main(): int {
-    let s = newString();
-    if (s.isEmpty()) {
-        return 1;
-    }
-    return 0;
+    let suite = new arktest.ArkTestsuite("StringIsEmpty");
+    suite.addTest("test LineString", isEmptyLineTest);
+    suite.addTest("test SlicedString", isEmptySlicedTest);
+    suite.addTest("test TreeString", isEmptyTreeTest);
+    return suite.run();
+}
+
+function isEmptyLineTest() {
+    let str: String = new String();
+    let result: boolean = str.isEmpty();
+    arktest.assertEQ(result, true);
+    str = "abcde";
+    result = str.isEmpty();
+    arktest.assertEQ(result, false);
+}
+
+function isEmptySlicedTest() {
+    let strutf8: String = "abcdefghijklmnopqrstuvwxyz";
+    let slicedStr = strutf8.substring(1, 25); // slicedStr is SliceString
+    arktest.assertEQ(slicedStr.length, 24);
+    arktest.assertEQ(slicedStr.isEmpty(), false);
+    let strutf16: String = "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя";
+    let slicedStrutf16 = strutf8.substring(1, 25); // slicedStr is SliceString
+    arktest.assertEQ(slicedStrutf16.length, 24);
+    arktest.assertEQ(slicedStrutf16.isEmpty(), false);
+}
+
+function isEmptyTreeTest() {
+    let str1: String = "abcdefghijklmn";
+    let str2: String = "opqrstuvwxyz";
+    let treeStr = str1.concat(str2); // treeStr is TreeString
+    arktest.assertEQ(treeStr.isEmpty(), false);
+    let str1Utf16: String = "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛ";
+    let str2Utf16: String = "лМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя";
+    let treeStrUtf16 = str1Utf16.concat(str2Utf16); // treeStr is TreeString
+    arktest.assertEQ(treeStrUtf16.isEmpty(), false);
 }

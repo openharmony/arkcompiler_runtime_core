@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -129,6 +129,7 @@ public:
         ALL = 0xFFFFFFFF
     };
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     explicit RuntimeNotificationManager(mem::AllocatorPtr<mem::AllocatorPurpose::ALLOCATOR_PURPOSE_INTERNAL> allocator)
         : bytecodePcListeners_(allocator->Adapter()),
           loadModuleListeners_(allocator->Adapter()),
@@ -467,7 +468,7 @@ public:
     }
 
     void ConsoleCallEvent(ManagedThread *thread, ConsoleCallType type, uint64_t timestamp,
-                          const PandaVector<TypedValue> &arguments) const
+                          [[maybe_unused]] const PandaVector<TypedValue> &arguments) const
     {
         if (UNLIKELY(hasConsoleListeners_)) {
             for (auto listener : consoleListeners_) {
@@ -523,6 +524,7 @@ public:
     }
 
 private:
+    // NOLINTBEGIN(misc-unused-parameters)
     template <typename FlagType>
     static void AddListenerIfMatches(RuntimeListener *listener, uint32_t eventMask,
                                      PandaList<RuntimeListener *> *listenerGroup, Event eventModifier,
@@ -567,6 +569,7 @@ private:
             }
         }
     }
+    // NOLINTEND(misc-unused-parameters)
 
     PandaList<RuntimeListener *> bytecodePcListeners_;
     PandaList<RuntimeListener *> loadModuleListeners_;

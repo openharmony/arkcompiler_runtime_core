@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,30 +17,30 @@
 #define COMMON_INTERFACES_OBJECTS_TRAITS_H
 
 #include "objects/base_object.h"
+#include <vector>
 #include <type_traits>
 
 namespace panda::objects_traits {
 
-
 template <typename U>
+// NOLINTNEXTLINE(readability-identifier-naming)
 constexpr bool is_heap_object_v = std::is_base_of_v<BaseObject, std::remove_pointer_t<U>>;
 
 // WriteBarrier: void (void*, size_t, U)
 template <typename F>
-constexpr bool is_write_barrier_callable_v =
-    std::is_invocable_r_v<void, F, void*, size_t, BaseObject*>;
+// NOLINTNEXTLINE(readability-identifier-naming)
+constexpr bool is_write_barrier_callable_v = std::is_invocable_r_v<void, F, void *, size_t, BaseObject *>;
 
 // ReadBarrier: U (void*, size_t)
 template <typename F, typename U>
-constexpr bool is_read_barrier_callable_v =
-    is_heap_object_v<U> &&
-    std::is_invocable_v<F, void*, size_t> &&
-    std::is_convertible_v<std::invoke_result_t<F, void*, size_t>, U>;
+// NOLINTNEXTLINE(readability-identifier-naming)
+constexpr bool is_read_barrier_callable_v = is_heap_object_v<U> &&std::is_invocable_v<F, void *, size_t>
+    &&std::is_convertible_v<std::invoke_result_t<F, void *, size_t>, U>;
 
 // Allocator: U (size_t, CommonType)
 template <typename F, typename U>
-constexpr bool is_allocate_callable_v =
-    is_heap_object_v<U> && std::is_invocable_r_v<U, F, size_t, ObjectType>;
+// NOLINTNEXTLINE(readability-identifier-naming)
+constexpr bool is_allocate_callable_v = is_heap_object_v<U> &&std::is_invocable_r_v<U, F, size_t, ObjectType>;
 
 // ---- enable_if_is_* traits ----
 template <typename F>
@@ -50,30 +50,30 @@ template <typename F, typename U>
 using enable_if_is_read_barrier = std::enable_if_t<is_read_barrier_callable_v<F, U>, int>;
 
 template <typename F, typename U>
+// NOLINTNEXTLINE(readability-identifier-naming)
 using enable_if_is_allocate = std::enable_if_t<is_allocate_callable_v<F, U>, int>;
 
 template <typename Container, typename T>
-struct is_std_vector_of : std::false_type {};
+struct is_std_vector_of : std::false_type {  // NOLINT(readability-identifier-naming)
+};
 
 template <typename Alloc, typename T>
-struct is_std_vector_of<std::vector<T, Alloc>, T> : std::true_type {};
+struct is_std_vector_of<std::vector<T, Alloc>, T> : std::true_type {
+};
 
 template <typename Container, typename T>
-constexpr bool is_std_vector_of_v = is_std_vector_of<Container, T>::value;
-
+constexpr bool is_std_vector_of_v = is_std_vector_of<Container, T>::value;  // NOLINT(readability-identifier-naming)
 
 template <typename Vec>
-using get_allocator_type_t = typename std::decay_t<Vec>::allocator_type;
+using get_allocator_type_t = typename std::decay_t<Vec>::allocator_type;  // NOLINT(readability-identifier-naming)
 
 template <typename Alloc, typename U>
-using rebind_alloc_t = typename std::allocator_traits<Alloc>::template rebind_alloc<U>;
-
+using rebind_alloc_t =  // NOLINT(readability-identifier-naming)
+    typename std::allocator_traits<Alloc>::template rebind_alloc<U>;
 template <typename Vec, typename NewT>
-using vector_with_same_alloc_t =
+using vector_with_same_alloc_t =  // NOLINT(readability-identifier-naming)
     std::vector<NewT, rebind_alloc_t<get_allocator_type_t<Vec>, NewT>>;
 
+}  // namespace panda::objects_traits
 
-} // namespace panda::objects_traits
-
-
-#endif //COMMON_INTERFACES_OBJECTS_TRAITS_H
+#endif  // COMMON_INTERFACES_OBJECTS_TRAITS_H

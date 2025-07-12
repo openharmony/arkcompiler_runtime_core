@@ -38,9 +38,12 @@ public:
     static constexpr uint32_t ASCII_CHAR_TABLE_SIZE = 128;
 
     /* Core runtime type system */
-    EtsClass *coreObject {};  // IsObjectClass
-    EtsClass *coreClass {};   // IsClassClass
-    EtsClass *coreString {};  // IsStringClass
+    EtsClass *coreObject {};        // IsObjectClass
+    EtsClass *coreClass {};         // IsClassClass
+    EtsClass *coreString {};        // IsStringClass
+    EtsClass *coreLineString {};    // IsLineStringClass
+    EtsClass *coreSlicedString {};  // IsSlicedStringClass
+    EtsClass *coreTreeString {};    // IsTreeStringClass
 
     /* ets numeric classes */
     EtsClass *coreBoolean {};

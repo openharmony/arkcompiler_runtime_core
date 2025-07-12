@@ -17,10 +17,17 @@ function newString(): String {
     return 'abcde';
 }
 
-function main(): int {
+function testLength() {
     let s = newString();
-    if (s.length != 5) {
-        return 1;
-    }
-    return 0;
+    arktest.assertEQ(s.length, 5, "s.length != 5");
+    let treeStr = s.concat("fghijklmnopqrstuvwxyz")
+    arktest.assertEQ(treeStr.length, 26, "treeStr.length != 26");
+    let slicedStr = treeStr.substring(1, 20)
+    arktest.assertEQ(slicedStr.length, 19, "slicedStr.length != 4");
+}
+
+function main(): int {
+    let suite = new arktest.ArkTestsuite("StringLength");
+    suite.addTest('testLength', testLength);
+    return suite.run();
 }

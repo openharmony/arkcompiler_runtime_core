@@ -438,6 +438,9 @@ public:
     ObjectPointerType GetNonMovableString(MethodPtr method, StringId id) const override;
 
     ClassPtr GetStringClass(MethodPtr method, uint32_t *typeId) const override;
+
+    ClassPtr GetLineStringClass(MethodPtr method, uint32_t *typeId) const override;
+
     ClassPtr GetNumberClass(MethodPtr method, const char *name, uint32_t *typeId) const override;
 
     std::string GetStringValue(MethodPtr method, size_t id) const override
@@ -572,6 +575,12 @@ public:
     {
         auto *kls = ClassCast(klass);
         return kls->IsFinal() && !kls->IsUnionClass();
+    }
+
+    bool IsClassFinalOrString(ClassPtr klass) const override
+    {
+        ark::Class *cls = ClassCast(klass);
+        return cls->IsFinal() || cls->IsStringClass();
     }
 
     bool IsInterface(ClassPtr klass) const override

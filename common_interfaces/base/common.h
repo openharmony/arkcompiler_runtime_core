@@ -96,56 +96,56 @@ namespace panda {
     NO_MOVE_OPERATOR_CC(TypeName)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEFAULT_MOVE_CTOR_CC(TypeName)       \
-/* NOLINTNEXTLINE(misc-macro-parentheses) */ \
-TypeName(TypeName &&) = default
+#define DEFAULT_MOVE_CTOR_CC(TypeName)           \
+    /* NOLINTNEXTLINE(misc-macro-parentheses) */ \
+    TypeName(TypeName &&) = default
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEFAULT_MOVE_OPERATOR_CC(TypeName)   \
-/* NOLINTNEXTLINE(misc-macro-parentheses) */ \
-TypeName &operator=(TypeName &&) = default
+#define DEFAULT_MOVE_OPERATOR_CC(TypeName)       \
+    /* NOLINTNEXTLINE(misc-macro-parentheses) */ \
+    TypeName &operator=(TypeName &&) = default
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEFAULT_MOVE_SEMANTIC_CC(TypeName)   \
-DEFAULT_MOVE_CTOR_CC(TypeName);              \
-DEFAULT_MOVE_OPERATOR_CC(TypeName)
+#define DEFAULT_MOVE_SEMANTIC_CC(TypeName) \
+    DEFAULT_MOVE_CTOR_CC(TypeName);        \
+    DEFAULT_MOVE_OPERATOR_CC(TypeName)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_COPY_CTOR_CC(TypeName) TypeName(const TypeName &) = default
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEFAULT_COPY_OPERATOR_CC(TypeName)   \
-/* NOLINTNEXTLINE(misc-macro-parentheses) */ \
-TypeName &operator=(const TypeName &) = default
+#define DEFAULT_COPY_OPERATOR_CC(TypeName)       \
+    /* NOLINTNEXTLINE(misc-macro-parentheses) */ \
+    TypeName &operator=(const TypeName &) = default
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEFAULT_COPY_SEMANTIC_CC(TypeName)   \
-DEFAULT_COPY_CTOR_CC(TypeName);              \
-DEFAULT_COPY_OPERATOR_CC(TypeName)
+#define DEFAULT_COPY_SEMANTIC_CC(TypeName) \
+    DEFAULT_COPY_CTOR_CC(TypeName);        \
+    DEFAULT_COPY_OPERATOR_CC(TypeName)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEFAULT_NOEXCEPT_MOVE_CTOR_CC(TypeName) \
-/* NOLINTNEXTLINE(misc-macro-parentheses) */    \
-TypeName(TypeName &&) noexcept = default
+#define DEFAULT_NOEXCEPT_MOVE_CTOR_CC(TypeName)  \
+    /* NOLINTNEXTLINE(misc-macro-parentheses) */ \
+    TypeName(TypeName &&) noexcept = default
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_NOEXCEPT_MOVE_OPERATOR_CC(TypeName) \
-/* NOLINTNEXTLINE(misc-macro-parentheses) */        \
-TypeName &operator=(TypeName &&) noexcept = default
+    /* NOLINTNEXTLINE(misc-macro-parentheses) */    \
+    TypeName &operator=(TypeName &&) noexcept = default
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_NOEXCEPT_MOVE_SEMANTIC_CC(TypeName) \
-DEFAULT_NOEXCEPT_MOVE_CTOR_CC(TypeName);            \
-DEFAULT_NOEXCEPT_MOVE_OPERATOR_CC(TypeName)
+    DEFAULT_NOEXCEPT_MOVE_CTOR_CC(TypeName);        \
+    DEFAULT_NOEXCEPT_MOVE_OPERATOR_CC(TypeName)
 
 #endif  // defined(__cplusplus)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ABORT_AND_UNREACHABLE_COMMON()                                      \
-    do {                                                                    \
-        std::cerr << "This line should be unreachable" << std::endl;        \
-        std::abort();                                                       \
-        __builtin_unreachable();                                            \
+#define ABORT_AND_UNREACHABLE_COMMON()                               \
+    do {                                                             \
+        std::cerr << "This line should be unreachable" << std::endl; \
+        std::abort();                                                \
+        __builtin_unreachable();                                     \
     } while (0)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -154,11 +154,11 @@ DEFAULT_NOEXCEPT_MOVE_OPERATOR_CC(TypeName)
 #if !defined(NDEBUG)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ASSERT_FAIL_COMMON(expr)                                                                        \
-    do {                                                                                                \
-        /* CC-OFFNXT(G.PRE.02) code readability */                                                      \
-        std::cerr << "ASSERT_FAILED: " << (expr) << std::endl; /* NOLINT(misc-static-assert) */         \
-        __builtin_unreachable();                                                                        \
+#define ASSERT_FAIL_COMMON(expr)                                                                \
+    do {                                                                                        \
+        /* CC-OFFNXT(G.PRE.02) code readability */                                              \
+        std::cerr << "ASSERT_FAILED: " << (expr) << std::endl; /* NOLINT(misc-static-assert) */ \
+        __builtin_unreachable();                                                                \
     } while (0)
 
 // CC-OFFNXT(G.PRE.06) code readability
@@ -191,28 +191,28 @@ DEFAULT_NOEXCEPT_MOVE_OPERATOR_CC(TypeName)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ASSERT_COMMON(cond)        \
-    if (UNLIKELY_CC(!(cond))) {       \
-        ASSERT_FAIL_COMMON(#cond);        \
+    if (UNLIKELY_CC(!(cond))) {    \
+        ASSERT_FAIL_COMMON(#cond); \
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ASSERT_DO_COMMON(cond, func)                              \
-    do {                                                          \
-        /* CC-OFFNXT(G.PRE.02) code readability */                \
-        if (auto cond_val = cond; UNLIKELY_CC(!(cond_val))) {     \
-            func;                                                 \
-            ASSERT_FAIL_COMMON(#cond);                            \
-        }                                                         \
+#define ASSERT_DO_COMMON(cond, func)                          \
+    do {                                                      \
+        /* CC-OFFNXT(G.PRE.02) code readability */            \
+        if (auto cond_val = cond; UNLIKELY_CC(!(cond_val))) { \
+            func;                                             \
+            ASSERT_FAIL_COMMON(#cond);                        \
+        }                                                     \
     } while (0)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ASSERT_PRINT_COMMON(cond, message)                        \
-    do {                                                          \
-        /* CC-OFFNXT(G.PRE.02) code readability */                \
-        if (auto cond_val = cond; UNLIKELY_CC(!(cond_val))) {     \
-            /* CC-OFFNXT(G.PRE.02) code readability */            \
-            std::cerr << (message) << std::endl;                  \
-            ASSERT_FAIL_COMMON(#cond);                            \
-        }                                                         \
+#define ASSERT_PRINT_COMMON(cond, message)                    \
+    do {                                                      \
+        /* CC-OFFNXT(G.PRE.02) code readability */            \
+        if (auto cond_val = cond; UNLIKELY_CC(!(cond_val))) { \
+            /* CC-OFFNXT(G.PRE.02) code readability */        \
+            std::cerr << (message) << std::endl;              \
+            ASSERT_FAIL_COMMON(#cond);                        \
+        }                                                     \
     } while (0)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ASSERT_RETURN_COMMON(cond) assert(cond)
@@ -223,20 +223,20 @@ DEFAULT_NOEXCEPT_MOVE_OPERATOR_CC(TypeName)
         ASSERT_PRINT_COMMON(false, "This line should be unreachable"); /* NOLINT(misc-static-assert) */ \
         __builtin_unreachable();                                                                        \
     } while (0)
-#else                                                     // NDEBUG
-#define ASSERT_COMMON(cond) static_cast<void>(0)          // NOLINT(cppcoreguidelines-macro-usage)
-#define ASSERT_DO_COMMON(cond, func) static_cast<void>(0)  // NOLINT(cppcoreguidelines-macro-usage)
+#else                                                            // NDEBUG
+#define ASSERT_COMMON(cond) static_cast<void>(0)                 // NOLINT(cppcoreguidelines-macro-usage)
+#define ASSERT_DO_COMMON(cond, func) static_cast<void>(0)        // NOLINT(cppcoreguidelines-macro-usage)
 #define ASSERT_PRINT_COMMON(cond, message) static_cast<void>(0)  // NOLINT(cppcoreguidelines-macro-usage)
 #define ASSERT_RETURN_COMMON(cond) static_cast<void>(cond)       // NOLINT(cppcoreguidelines-macro-usage)
 #define UNREACHABLE_COMMON() ABORT_AND_UNREACHABLE_COMMON()      // NOLINT(cppcoreguidelines-macro-usage)
-#define ASSERT_OP_COMMON(lhs, op, rhs)                          // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CHECK_LE_COMMON(lhs, rhs)                               // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CHECK_LT_COMMON(lhs, rhs)                               // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CHECK_GE_COMMON(lhs, rhs)                               // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CHECK_GT_COMMON(lhs, rhs)                               // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CHECK_EQ_COMMON(lhs, rhs)                               // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CHECK_NE_COMMON(lhs, rhs)                               // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#endif                                                    // !NDEBUG
+#define ASSERT_OP_COMMON(lhs, op, rhs)                           // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CHECK_LE_COMMON(lhs, rhs)                                // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CHECK_LT_COMMON(lhs, rhs)                                // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CHECK_GE_COMMON(lhs, rhs)                                // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CHECK_GT_COMMON(lhs, rhs)                                // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CHECK_EQ_COMMON(lhs, rhs)                                // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CHECK_NE_COMMON(lhs, rhs)                                // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#endif                                                           // !NDEBUG
 
 #ifdef __clang__
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -247,7 +247,7 @@ DEFAULT_NOEXCEPT_MOVE_OPERATOR_CC(TypeName)
 #endif
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-enum class PUBLIC_API LOG_LEVEL : uint8_t {
+enum class LOG_LEVEL : uint8_t {
     DEBUG = 0,
     INFO = 1,
     WARN = 2,
@@ -257,7 +257,7 @@ enum class PUBLIC_API LOG_LEVEL : uint8_t {
 };
 
 namespace common {
-    static constexpr size_t BITS_PER_BYTE = 8;
+static constexpr size_t BITS_PER_BYTE = 8;
 }  // namespace common
 }  // namespace panda
 

@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-function main(): int {
-
+function testStringFromString() {
     const uncompressableStringsTable: String[] = [
         '\u00b0',
         '\u00b0\u00b1',
@@ -60,16 +59,16 @@ function main(): int {
     ];
 
     for (let i: int = 0; i < compressableStringsTable.length; i++) {
-        let tmp = compressableStringsTable[i];
-        if (tmp != compressableStringsTable[i]) {
-            return 1;
-        }
+        let tmp = new String(compressableStringsTable[i]);
+        arktest.assertEQ(tmp, compressableStringsTable[i]);
     }
     for (let i: int = 0; i < uncompressableStringsTable.length; i++) {
-        let tmp = uncompressableStringsTable[i];
-        if (tmp != uncompressableStringsTable[i]) {
-            return 2;
-        }
+        let tmp = new String(uncompressableStringsTable[i]);
+        arktest.assertEQ(tmp, uncompressableStringsTable[i]);
     }
-    return 0;
+}
+function main(): int {
+    let suite = new arktest.ArkTestsuite("StringFromString");
+    suite.addTest('testStringFromString', testStringFromString);
+    return suite.run();
 }

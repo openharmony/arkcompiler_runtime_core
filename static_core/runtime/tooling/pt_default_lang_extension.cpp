@@ -17,10 +17,12 @@
 
 #include "include/class.h"
 #include "include/coretypes/array-inl.h"
-#include "include/coretypes/string-inl.h"
+#include "include/coretypes/line_string.h"
 #include "include/object_header.h"
 #include "include/hclass.h"
 #include "runtime/mem/object_helpers-inl.h"
+#include "runtime/include/coretypes/string.h"
+#include "runtime/include/runtime.h"
 
 namespace ark::tooling {
 

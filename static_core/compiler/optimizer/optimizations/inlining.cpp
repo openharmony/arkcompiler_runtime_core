@@ -1617,7 +1617,7 @@ bool Inlining::ResolveTarget(CallInst *callInst, InlineContext *ctx)
     }
 
     // If class or method are final we can resolve the method
-    if (runtime->IsMethodFinal(method) || runtime->IsClassFinal(runtime->GetClass(method))) {
+    if (runtime->IsMethodFinal(method) || runtime->IsClassFinalOrString(runtime->GetClass(method))) {
         ctx->method = method;
         return true;
     }

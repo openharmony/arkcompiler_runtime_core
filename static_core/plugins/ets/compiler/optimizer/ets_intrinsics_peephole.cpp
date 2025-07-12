@@ -78,7 +78,7 @@ static bool ReplaceTypeofWithIsInstance(IntrinsicInst *intrinsic)
     auto *bb = saveState->GetBasicBlock();
     bb->InsertAfter(loadClass, saveState);
     auto isInstance = graph->CreateInstIsInstance(DataType::BOOL, pc, typeOf->GetInput(0).GetInst(), loadClass,
-                                                  saveState, TypeIdMixin {typeId, method}, ClassType::FINAL_CLASS);
+                                                  saveState, TypeIdMixin {typeId, method}, ClassType::OTHER_CLASS);
     intrinsic->ReplaceUsers(isInstance);
     bb->InsertAfter(isInstance, loadClass);
     return true;

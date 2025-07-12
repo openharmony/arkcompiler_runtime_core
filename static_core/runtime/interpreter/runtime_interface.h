@@ -22,7 +22,7 @@
 #include "runtime/entrypoints/entrypoints.h"
 #include "runtime/include/class_linker-inl.h"
 #include "runtime/include/coretypes/array.h"
-#include "runtime/include/coretypes/string.h"
+#include "runtime/include/coretypes/line_string.h"
 #include "runtime/include/exceptions.h"
 #include "runtime/include/field.h"
 #include "runtime/include/method.h"

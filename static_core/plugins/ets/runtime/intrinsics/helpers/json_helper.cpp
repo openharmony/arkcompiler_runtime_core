@@ -453,7 +453,10 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
         isSuccessful = SerializeJSONBoxedPrimitiveNoCache<EtsChar>(value);
     } else if (desc == panda_file_items::class_descriptors::BOX_INT) {
         isSuccessful = SerializeJSONBoxedPrimitiveNoCache<EtsInt>(value);
-    } else if (desc == panda_file_items::class_descriptors::STRING) {
+    } else if (desc == panda_file_items::class_descriptors::STRING ||
+               desc == panda_file_items::class_descriptors::LINE_STRING ||
+               desc == panda_file_items::class_descriptors::SLICED_STRING ||
+               desc == panda_file_items::class_descriptors::TREE_STRING) {
         isSuccessful = SerializeJSONString(value);
     } else if (desc == panda_file_items::class_descriptors::RECORD) {
         coro->ManagedCodeEnd();

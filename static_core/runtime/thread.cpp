@@ -561,7 +561,7 @@ MTManagedThread::MTManagedThread(ThreadId id, mem::InternalAllocatorPtr allocato
 
     auto ext = Runtime::GetCurrent()->GetClassLinker()->GetExtension(GetThreadLang());
     if (ext != nullptr) {
-        stringClassPtr_ = ext->GetClassRoot(ClassRoot::STRING);
+        stringClassPtr_ = ext->GetClassRoot(ClassRoot::LINE_STRING);
     }
 
     auto *rs = allocator->New<mem::ReferenceStorage>(pandaVm->GetGlobalObjectStorage(), allocator, false);

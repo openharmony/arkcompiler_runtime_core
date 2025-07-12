@@ -408,7 +408,7 @@ void Codegen::CreateStringBuilderToString(IntrinsicInst *inst, Reg dst, SRCREGS 
         CallFastPath(inst, entrypoint, dst, {}, sb, klass);
     } else {
         auto klass =
-            TypedImm(reinterpret_cast<uintptr_t>(GetRuntime()->GetStringClass(GetGraph()->GetMethod(), nullptr)));
+            TypedImm(reinterpret_cast<uintptr_t>(GetRuntime()->GetLineStringClass(GetGraph()->GetMethod(), nullptr)));
         CallFastPath(inst, entrypoint, dst, {}, sb, klass);
     }
 }
@@ -567,7 +567,7 @@ void Codegen::CreateStringFromCharCode(IntrinsicInst *inst, Reg dst, SRCREGS src
         CallFastPath(inst, getEntryId(), dst, RegMask::GetZeroMask(), array, klassReg);
     } else {
         auto klassImm =
-            TypedImm(reinterpret_cast<uintptr_t>(GetRuntime()->GetStringClass(GetGraph()->GetMethod(), nullptr)));
+            TypedImm(reinterpret_cast<uintptr_t>(GetRuntime()->GetLineStringClass(GetGraph()->GetMethod(), nullptr)));
         CallFastPath(inst, getEntryId(), dst, RegMask::GetZeroMask(), array, klassImm);
     }
 }
@@ -720,7 +720,7 @@ void Codegen::CreateReadString(IntrinsicInst *inst, Reg dst, SRCREGS src)
         enc->EncodeLdr(klass, false, MemRef(ThreadReg(), offset));
         CallFastPath(inst, entrypointId, dst, {}, buf, len, klass);
     } else {
-        auto klass = GetRuntime()->GetStringClass(GetGraph()->GetMethod(), nullptr);
+        auto klass = GetRuntime()->GetLineStringClass(GetGraph()->GetMethod(), nullptr);
         auto klassImm = TypedImm(reinterpret_cast<uintptr_t>(klass));
         CallFastPath(inst, entrypointId, dst, {}, buf, len, klassImm);
     }

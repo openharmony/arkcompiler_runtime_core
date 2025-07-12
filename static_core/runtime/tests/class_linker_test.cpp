@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -122,6 +122,7 @@ std::set<std::string> GetClassesForEnumerateClassesTest()
 {
     return {"panda.Object",
             "panda.String",
+            "panda.LineString",
             "panda.Class",
             "[Lpanda/String;",
             "u1",
@@ -287,6 +288,7 @@ static void TestArrayClassRoots(const ClassLinkerExtension &ext)
     TestArrayClassRoot(ext, ClassRoot::ARRAY_F64, ClassRoot::F64);
 }
 
+// CC-OFFNXT(G.FUD.05) solid logic
 TEST_F(ClassLinkerTest, TestClassRoots)
 {
     auto classLinker = CreateClassLinker(thread_);
@@ -337,6 +339,22 @@ TEST_F(ClassLinkerTest, TestClassRoots)
     EXPECT_FALSE(stringClass->IsPrimitive());
     EXPECT_TRUE(stringClass->IsClass());
     EXPECT_FALSE(stringClass->IsInterface());
+    EXPECT_FALSE(stringClass->IsFinal());
+
+    Class *lineStringClass = ext->GetClassRoot(ClassRoot::LINE_STRING);
+    ASSERT_NE(lineStringClass, nullptr);
+    EXPECT_EQ(lineStringClass->GetBase(), stringClass);
+    EXPECT_EQ(lineStringClass->GetComponentSize(), 0U);
+    EXPECT_EQ(lineStringClass->GetFlags(), Class::STRING_CLASS);
+    EXPECT_EQ(lineStringClass->GetType().GetId(), panda_file::Type::TypeId::REFERENCE);
+    EXPECT_FALSE(lineStringClass->IsObjectClass());
+    EXPECT_FALSE(lineStringClass->IsArrayClass());
+    EXPECT_FALSE(lineStringClass->IsObjectArrayClass());
+    EXPECT_TRUE(lineStringClass->IsStringClass());
+    EXPECT_FALSE(lineStringClass->IsPrimitive());
+    EXPECT_TRUE(lineStringClass->IsClass());
+    EXPECT_FALSE(lineStringClass->IsInterface());
+    EXPECT_TRUE(lineStringClass->IsFinal());
 
     TestPrimitiveClassRoots(*ext);
     TestArrayClassRoots(*ext);

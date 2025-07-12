@@ -17,14 +17,14 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_STRING_H_
 
 #include <cmath>
-
+#include "objects/string/base_string-inl.h"
 #include "libpandabase/utils/utf.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/napi/ets_napi.h"
 #include "runtime/include/runtime.h"
-#include "runtime/include/coretypes/string-inl.h"
+#include "runtime/include/coretypes/string.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 
 namespace ark::ets {
@@ -32,195 +32,29 @@ namespace ark::ets {
 // Private inheritance, because need to disallow implicit conversion to core type
 class EtsString : private coretypes::String {
 public:
-    static EtsString *CreateFromMUtf8(const char *mutf8)
-    {
-        ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
-        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        if (mutf8 == nullptr) {
-            ThrowNullPointerException(ctx, ManagedThread::GetCurrent());
-            return nullptr;
-        }
-        const auto *data = reinterpret_cast<const uint8_t *>(mutf8);
-        coretypes::String *s = coretypes::String::CreateFromMUtf8(data, ctx, Runtime::GetCurrent()->GetPandaVM());
-        return reinterpret_cast<EtsString *>(s);
-    }
+    static EtsString *CreateFromMUtf8(const char *mutf8);
 
-    static EtsString *CreateFromMUtf8(const char *mutf8, uint32_t utf16Length)
-    {
-        ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
-        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        if (utf16Length == 0) {
-            return reinterpret_cast<EtsString *>(
-                coretypes::String::CreateEmptyString(ctx, Runtime::GetCurrent()->GetPandaVM()));
-        }
-        if (mutf8 == nullptr) {
-            ThrowNullPointerException(ctx, ManagedThread::GetCurrent());
-            return nullptr;
-        }
-        const auto *data = reinterpret_cast<const uint8_t *>(mutf8);
-        coretypes::String *s =
-            coretypes::String::CreateFromMUtf8(data, utf16Length, ctx, Runtime::GetCurrent()->GetPandaVM());
-        return reinterpret_cast<EtsString *>(s);
-    }
+    static EtsString *CreateFromMUtf8(const char *mutf8, uint32_t utf16Length);
 
-    static EtsString *CreateFromUtf8(const char *utf8, uint32_t length)
-    {
-        ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
-        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        if (length == 0) {
-            return reinterpret_cast<EtsString *>(
-                coretypes::String::CreateEmptyString(ctx, Runtime::GetCurrent()->GetPandaVM()));
-        }
-        if (utf8 == nullptr) {
-            ThrowNullPointerException(ctx, ManagedThread::GetCurrent());
-            return nullptr;
-        }
-        const auto *data = reinterpret_cast<const uint8_t *>(utf8);
-        return reinterpret_cast<EtsString *>(
-            coretypes::String::CreateFromUtf8(data, length, ctx, Runtime::GetCurrent()->GetPandaVM()));
-    }
+    static EtsString *CreateFromUtf8(const char *utf8, uint32_t length);
 
-    static EtsString *CreateFromAscii(const char *str, uint32_t length)
-    {
-        ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
-        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        const auto *data = reinterpret_cast<const uint8_t *>(str);
-        return reinterpret_cast<EtsString *>(
-            coretypes::String::CreateFromMUtf8(data, length, length, true, ctx, Runtime::GetCurrent()->GetPandaVM()));
-    }
+    static EtsString *CreateFromAscii(const char *str, uint32_t length);
 
-    static EtsString *CreateFromUtf16(const ets_char *utf16, ets_int length)
-    {
-        ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
-        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        if (length == 0) {
-            return reinterpret_cast<EtsString *>(
-                coretypes::String::CreateEmptyString(ctx, Runtime::GetCurrent()->GetPandaVM()));
-        }
-        if (utf16 == nullptr) {
-            ThrowNullPointerException(ctx, ManagedThread::GetCurrent());
-            return nullptr;
-        }
-        coretypes::String *s =
-            coretypes::String::CreateFromUtf16(utf16, length, ctx, Runtime::GetCurrent()->GetPandaVM());
-        return reinterpret_cast<EtsString *>(s);
-    }
+    static EtsString *CreateFromUtf16(const ets_char *utf16, ets_int length);
 
     using CharCodeArray = EtsObjectArray;
 
-    static EtsString *CreateNewStringFromCharCode(CharCodeArray *charCodes)
-    {
-        const size_t length = charCodes->GetLength();
-        if (length == 0) {
-            return CreateNewEmptyString();
-        }
+    static EtsString *CreateNewStringFromCharCode(CharCodeArray *charCodes);
 
-        // allocator may trig gc and move the 'charCodes' array, need to hold it
-        EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-        [[maybe_unused]] EtsHandleScope scope(coroutine);
-        EtsHandle arrayHandle(coroutine, charCodes);
+    static EtsString *CreateNewStringFromCharCode(EtsDouble charCode);
 
-        auto isCompressed = [](CharCodeArray *codes) -> bool {
-            if (!Runtime::GetOptions().IsRuntimeCompressedStringsEnabled()) {
-                return false;
-            }
+    static EtsString *CreateNewStringFromChars(uint32_t offset, uint32_t length, EtsArray *chararray);
 
-            for (size_t i = 0; i < codes->GetLength(); ++i) {
-                if (!IsASCIICharacter(
-                        // CC-OFFNXT(G.FMT.06-CPP) project code style
-                        CodeToChar(EtsBoxPrimitive<EtsDouble>::FromCoreType(codes->Get(i))->GetValue()))) {
-                    return false;
-                }
-            }
-            return true;
-        };
+    static EtsString *CreateNewStringFromBytes(EtsArray *bytearray, ets_int high, ets_int offset, ets_int length);
 
-        auto copyCharsIntoString = [](CharCodeArray *codes, auto *dstData) {
-            Span<std::remove_pointer_t<decltype(dstData)>> to(dstData, codes->GetLength());
-            for (size_t i = 0; i < codes->GetLength(); ++i) {
-                to[i] = CodeToChar(EtsBoxPrimitive<EtsDouble>::FromCoreType(codes->Get(i))->GetValue());
-            }
-        };
+    static EtsString *CreateNewStringFromString(EtsString *etsString);
 
-        bool compress = isCompressed(arrayHandle.GetPtr());
-        EtsString *s = AllocateNonInitializedString(length, compress);
-        if (compress) {
-            copyCharsIntoString(arrayHandle.GetPtr(), s->GetDataMUtf8());
-        } else {
-            copyCharsIntoString(arrayHandle.GetPtr(), s->GetDataUtf16());
-        }
-        return s;
-    }
-
-    static EtsString *CreateNewStringFromCharCode(EtsDouble charCode)
-    {
-        constexpr size_t SINGLE_CHAR_LENGTH = 1U;
-        uint16_t character = CodeToChar(charCode);
-        bool compress = Runtime::GetOptions().IsRuntimeCompressedStringsEnabled() && IsASCIICharacter(character);
-        EtsString *s = AllocateNonInitializedString(SINGLE_CHAR_LENGTH, compress);
-        ASSERT(s != nullptr);
-        auto putCharacterIntoString = [character](auto *dstData) {
-            Span<std::remove_pointer_t<decltype(dstData)>> to(dstData, SINGLE_CHAR_LENGTH);
-            to[0] = character;
-        };
-        if (compress) {
-            putCharacterIntoString(s->GetDataMUtf8());
-        } else {
-            putCharacterIntoString(s->GetDataUtf16());
-        }
-        return s;
-    }
-
-    static EtsString *CreateNewStringFromChars(uint32_t offset, uint32_t length, EtsArray *chararray)
-    {
-        ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
-        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        return reinterpret_cast<EtsString *>(coretypes::String::CreateNewStringFromChars(
-            offset, length, reinterpret_cast<coretypes::Array *>(chararray), ctx, Runtime::GetCurrent()->GetPandaVM()));
-    }
-
-    static EtsString *CreateNewStringFromBytes(EtsArray *bytearray, ets_int high, ets_int offset, ets_int length)
-    {
-        ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
-        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        if (length == 0) {
-            return reinterpret_cast<EtsString *>(
-                coretypes::String::CreateEmptyString(ctx, Runtime::GetCurrent()->GetPandaVM()));
-        }
-        if (bytearray == nullptr) {
-            ThrowNullPointerException(ctx, ManagedThread::GetCurrent());
-            return nullptr;
-        }
-        if (offset < 0 || length < 0 || bytearray->GetLength() < static_cast<uint32_t>(offset + length)) {
-            ThrowArrayIndexOutOfBoundsException(static_cast<uint32_t>(offset + length), bytearray->GetLength(), ctx,
-                                                ManagedThread::GetCurrent());
-            return nullptr;
-        }
-        return reinterpret_cast<EtsString *>(coretypes::String::CreateNewStringFromBytes(
-            offset, length, static_cast<uint32_t>(high), reinterpret_cast<coretypes::Array *>(bytearray), ctx,
-            Runtime::GetCurrent()->GetPandaVM()));
-    }
-
-    static EtsString *CreateNewStringFromString(EtsString *etsString)
-    {
-        ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
-        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        if (etsString == nullptr) {
-            ThrowNullPointerException(ctx, ManagedThread::GetCurrent());
-            return nullptr;
-        }
-        coretypes::String *string = etsString->GetCoreType();
-        return reinterpret_cast<EtsString *>(
-            coretypes::String::CreateFromString(string, ctx, Runtime::GetCurrent()->GetPandaVM()));
-    }
-
-    static EtsString *CreateNewEmptyString()
-    {
-        ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
-        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        return reinterpret_cast<EtsString *>(
-            coretypes::String::CreateEmptyString(ctx, Runtime::GetCurrent()->GetPandaVM()));
-    }
+    static EtsString *CreateNewEmptyString();
 
     static EtsString *Resolve(const uint8_t *mutf8, uint32_t length)
     {
@@ -242,118 +76,20 @@ public:
         return reinterpret_cast<EtsString *>(string3);
     }
 
-    EtsString *TrimLeft()
-    {
-        if (IsEmpty() || !utf::IsWhiteSpaceChar(At(0))) {
-            return this;
-        }
-        const auto numChars = GetLength();
-        auto notWhiteSpaceIndex = numChars;
-        for (int i = 1; i < numChars; ++i) {
-            if (!utf::IsWhiteSpaceChar(At(i))) {
-                notWhiteSpaceIndex = i;
-                break;
-            }
-        }
-        auto len = numChars - notWhiteSpaceIndex;
-        return FastSubString(this, static_cast<uint32_t>(notWhiteSpaceIndex), static_cast<uint32_t>(len));
-    }
+    EtsString *TrimLeft();
 
-    EtsString *TrimRight()
-    {
-        if (IsEmpty()) {
-            return this;
-        }
-        auto last = GetLength() - 1;
-        if (!utf::IsWhiteSpaceChar(At(last))) {
-            return this;
-        }
-        int notWhiteSpaceIndex = -1;
-        for (int i = last - 1; i >= 0; --i) {
-            if (!utf::IsWhiteSpaceChar(At(i))) {
-                notWhiteSpaceIndex = i;
-                break;
-            }
-        }
-        auto len = notWhiteSpaceIndex + 1;
-        return EtsString::FastSubString(this, 0, static_cast<uint32_t>(len));
-    }
+    EtsString *TrimRight();
 
-    EtsString *Trim()
-    {
-        if (IsEmpty()) {
-            return this;
-        }
-        int left = 0;
-        int right = GetLength() - 1;
-        while (utf::IsWhiteSpaceChar(At(right))) {
-            if (right == left) {
-                return EtsString::CreateNewEmptyString();
-            }
-            --right;
-        }
-        while (left < right && utf::IsWhiteSpaceChar(At(left))) {
-            ++left;
-        }
-        return EtsString::FastSubString(this, left, static_cast<uint32_t>(right - left + 1));
-    }
+    EtsString *Trim();
 
-    EtsBoolean StartsWith(EtsString *prefix, EtsInt fromIndex)
-    {
-        ASSERT(prefix != nullptr);
-        if (fromIndex < 0) {
-            fromIndex = 0;
-        }
-        auto prefixLen = prefix->GetLength();
-        ASSERT(prefixLen >= 0);
-        if (fromIndex > GetLength() - prefixLen) {
-            return ToEtsBoolean(prefix->IsEmpty());
-        }
-        auto *thisCoreType = GetCoreType();
-        auto *prefCoreType = prefix->GetCoreType();
-        for (EtsInt i = 0; i < prefixLen; ++i) {
-            if (thisCoreType->At<false>(fromIndex + i) != prefCoreType->At<false>(i)) {
-                return ToEtsBoolean(false);
-            }
-        }
-        return ToEtsBoolean(true);
-    }
+    EtsBoolean StartsWith(EtsString *prefix, EtsInt fromIndex);
 
-    EtsBoolean EndsWith(EtsString *suffix, EtsInt endIndex)
-    {
-        ASSERT(suffix != nullptr);
-        if (suffix->IsEmpty()) {
-            return ToEtsBoolean(true);
-        }
-        auto strLen = GetLength();
-        if (strLen == 0) {
-            return ToEtsBoolean(false);
-        }
-        if (endIndex <= 0) {
-            return ToEtsBoolean(false);
-        }
-        if (endIndex > strLen) {
-            endIndex = strLen;
-        }
-        ASSERT(endIndex > 0);
-        auto suffixLen = suffix->GetLength();
-        auto fromIndex = endIndex - suffixLen;
-        if (fromIndex < 0) {
-            return ToEtsBoolean(false);
-        }
-        auto *thisCoreType = GetCoreType();
-        auto *suffCoreType = suffix->GetCoreType();
-        for (EtsInt i = 0; i < suffixLen; ++i) {
-            if (thisCoreType->At<false>(fromIndex + i) != suffCoreType->At<false>(i)) {
-                return ToEtsBoolean(false);
-            }
-        }
-        return ToEtsBoolean(true);
-    }
+    EtsBoolean EndsWith(EtsString *suffix, EtsInt endIndex);
 
     int32_t Compare(EtsString *rhs)
     {
-        return GetCoreType()->Compare(rhs->GetCoreType());
+        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+        return GetCoreType()->Compare(rhs->GetCoreType(), ctx);
     }
 
     uint16_t At(int32_t index)
@@ -361,17 +97,7 @@ public:
         return GetCoreType()->At(index);
     }
 
-    static EtsString *DoReplace(EtsString *src, ets_char oldC, ets_char newC)
-    {
-        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        if (src->GetLength() == 0) {
-            return reinterpret_cast<EtsString *>(
-                coretypes::String::CreateEmptyString(ctx, Runtime::GetCurrent()->GetPandaVM()));
-        }
-        coretypes::String *result = coretypes::String::DoReplace(reinterpret_cast<coretypes::String *>(src), oldC, newC,
-                                                                 ctx, Runtime::GetCurrent()->GetPandaVM());
-        return reinterpret_cast<EtsString *>(result);
-    }
+    static EtsString *DoReplace(EtsString *src, ets_char oldC, ets_char newC);
 
     static EtsString *FastSubString(EtsString *src, uint32_t start, uint32_t length)
     {
@@ -396,6 +122,16 @@ public:
     bool IsUtf16()
     {
         return GetCoreType()->IsUtf16();
+    }
+
+    bool IsUtf8()
+    {
+        return IsMUtf8();
+    }
+
+    bool IsMUtf8()
+    {
+        return !IsUtf16();
     }
 
     ets_int GetLength()
@@ -428,16 +164,7 @@ public:
         return GetCoreType()->CopyDataRegionUtf16(reinterpret_cast<uint16_t *>(buf), start, length, maxLength);
     }
 
-    std::string_view ConvertToStringView(PandaVector<uint8_t> *buf)
-    {
-        if (IsUtf16()) {
-            size_t len = utf::Utf16ToUtf8Size(GetDataUtf16(), GetUtf16Length(), false) - 1;
-            buf->reserve(len);
-            utf::ConvertRegionUtf16ToUtf8(GetDataUtf16(), buf->data(), GetUtf16Length(), len, 0, false);
-            return {utf::Mutf8AsCString(buf->data()), len};
-        }
-        return {utf::Mutf8AsCString(GetDataMUtf8()), static_cast<size_t>(GetLength())};
-    }
+    std::string_view ConvertToStringView([[maybe_unused]] PandaVector<uint8_t> *buf);
 
     uint32_t GetMUtf8Length()
     {
@@ -502,6 +229,36 @@ public:
         return GetCoreType()->IsEmpty();
     }
 
+    uint32_t GetHashcode()
+    {
+        return GetCoreType()->GetHashcode();
+    }
+
+    /**
+     * @brief read data from src to dest
+     * @param [in] dest : dest string
+     * @param [in] src : src string
+     * @param [in] start : write to dest positioned at start offset
+     * @param [in] destSize :  dest max size
+     * @param [in] length : how many chars to copy
+     */
+    static void ReadData(EtsString *dest, EtsString *src, uint32_t start, uint32_t destSize, uint32_t length)
+    {
+        dest->WriteData(src, start, destSize, length);
+    }
+
+    /**
+     * @brief copy data from src to dest , dest is specified by this string
+     * @param [in] src : original data
+     * @param [in] start : write to dest positioned at start offset
+     * @param [in] destSize :  dest max size
+     * @param [in] length : how many chars to copy
+     */
+    void WriteData(EtsString *src, uint32_t start, uint32_t destSize, uint32_t length)
+    {
+        GetCoreType()->WriteData(src->GetCoreType(), start, destSize, length);
+    }
+
     bool StringsAreEqual(EtsObject *obj)
     {
         return coretypes::String::StringsAreEqual(GetCoreType(), FromEtsObject(obj)->GetCoreType());
@@ -533,12 +290,27 @@ public:
         return reinterpret_cast<EtsString *>(str);
     }
 
+    static EtsString *FromCoreType(coretypes::LineString *str)
+    {
+        return reinterpret_cast<EtsString *>(str);
+    }
+
     static EtsString *FromEtsObject(EtsObject *obj)
     {
-        ASSERT(obj->GetClass()->GetRuntimeClass() == Runtime::GetCurrent()
-                                                         ->GetClassLinker()
-                                                         ->GetExtension(panda_file::SourceLang::ETS)
-                                                         ->GetClassRoot(ClassRoot::STRING));
+        [[maybe_unused]] Class *cls = obj->GetClass()->GetRuntimeClass();
+        [[maybe_unused]] Class *lineStrCls = Runtime::GetCurrent()
+                                                 ->GetClassLinker()
+                                                 ->GetExtension(panda_file::SourceLang::ETS)
+                                                 ->GetClassRoot(ClassRoot::LINE_STRING);
+        [[maybe_unused]] Class *slicedStrCls = Runtime::GetCurrent()
+                                                   ->GetClassLinker()
+                                                   ->GetExtension(panda_file::SourceLang::ETS)
+                                                   ->GetClassRoot(ClassRoot::SLICED_STRING);
+        [[maybe_unused]] Class *treeStrCls = Runtime::GetCurrent()
+                                                 ->GetClassLinker()
+                                                 ->GetExtension(panda_file::SourceLang::ETS)
+                                                 ->GetClassRoot(ClassRoot::TREE_STRING);
+        ASSERT(cls == lineStrCls || cls == slicedStrCls || cls == treeStrCls);
         return reinterpret_cast<EtsString *>(obj);
     }
 
@@ -548,7 +320,7 @@ public:
         ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
         return reinterpret_cast<EtsString *>(
-            coretypes::String::AllocStringObject(length, compressed, ctx, Runtime::GetCurrent()->GetPandaVM()));
+            coretypes::LineString::AllocLineStringObject(length, compressed, ctx, Runtime::GetCurrent()->GetPandaVM()));
     }
 
     EtsString() = delete;

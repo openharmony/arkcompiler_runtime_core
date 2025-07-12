@@ -124,14 +124,14 @@ bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
 
     auto ptypes = PlatformTypes(coro);
     ASSERT(ptypes != nullptr);
-
     if (cls1->IsStringClass()) {
         if (UNLIKELY(cls2->IsEtsEnum())) {
             obj2 = EtsBaseEnum::FromEtsObject(obj2)->GetValue();
             cls2 = obj2->GetClass();
         }
-        return cls2->IsStringClass() &&
-               coretypes::String::Cast(obj1->GetCoreType())->Compare(coretypes::String::Cast(obj2->GetCoreType())) == 0;
+        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+        return cls2->IsStringClass() && coretypes::String::Cast(obj1->GetCoreType())
+                                                ->Compare(coretypes::String::Cast(obj2->GetCoreType()), ctx) == 0;
     }
     if (cls1 == ptypes->coreBoolean) {
         return cls2 == ptypes->coreBoolean && CompareBoxedPrimitive<EtsBoolean>(obj1, obj2);

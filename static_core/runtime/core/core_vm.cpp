@@ -252,7 +252,6 @@ static coretypes::Array *CreateArgumentsArray(const std::vector<std::string> &ar
         auto *str = coretypes::String::CreateFromMUtf8(utf::CStringAsMutf8(args[i].data()), args[i].length(), ctx, vm);
         arrayHandle.GetPtr()->Set(i, str);
     }
-
     return arrayHandle.GetPtr();
 }
 

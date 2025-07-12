@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,14 +20,13 @@
 #include "objects/string/tree_string.h"
 
 namespace panda {
-template <typename Allocator, typename WriteBarrier,
-          objects_traits::enable_if_is_allocate<Allocator, BaseObject *>,
+template <typename Allocator, typename WriteBarrier, objects_traits::enable_if_is_allocate<Allocator, BaseObject *>,
           objects_traits::enable_if_is_write_barrier<WriteBarrier>>
 TreeString *TreeString::Create(Allocator &&allocator, WriteBarrier &&writeBarrier, ReadOnlyHandle<BaseString> left,
                                ReadOnlyHandle<BaseString> right, uint32_t length, bool compressed)
 {
-    auto string = TreeString::Cast(
-        std::invoke(std::forward<Allocator>(allocator), TreeString::SIZE, ObjectType::TREE_STRING));
+    auto string =
+        TreeString::Cast(std::invoke(std::forward<Allocator>(allocator), TreeString::SIZE, ObjectType::TREE_STRING));
     string->InitLengthAndFlags(length, compressed);
     string->SetRawHashcode(0);
     string->SetLeftSubString(std::forward<WriteBarrier>(writeBarrier), left.GetBaseObject());
@@ -42,11 +41,11 @@ bool TreeString::IsFlat(ReadBarrier &&readBarrier) const
     return strRight->GetLength() == 0;
 }
 
-template <bool verify, typename ReadBarrier>
+template <bool VERIFY, typename ReadBarrier>
 uint16_t TreeString::Get(ReadBarrier &&readBarrier, int32_t index) const
 {
-    int32_t length = static_cast<int32_t>(GetLength());
-    if constexpr (verify) {
+    auto length = static_cast<int32_t>(GetLength());
+    if constexpr (VERIFY) {
         if ((index < 0) || (index >= length)) {
             return 0;
         }
@@ -54,7 +53,7 @@ uint16_t TreeString::Get(ReadBarrier &&readBarrier, int32_t index) const
 
     if (IsFlat(std::forward<ReadBarrier>(readBarrier))) {
         BaseString *left = BaseString::Cast(GetLeftSubString<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
-        return left->At<verify>(std::forward<ReadBarrier>(readBarrier), index);
+        return left->At<VERIFY>(std::forward<ReadBarrier>(readBarrier), index);
     }
     const BaseString *string = this;
     while (true) {
@@ -65,15 +64,14 @@ uint16_t TreeString::Get(ReadBarrier &&readBarrier, int32_t index) const
                 string = left;
             } else {
                 index -= static_cast<int32_t>(left->GetLength());
-                string = BaseString::Cast(
-                    TreeString::ConstCast(string)->GetRightSubString<BaseObject *>(
-                        std::forward<ReadBarrier>(readBarrier)));
+                string = BaseString::Cast(TreeString::ConstCast(string)->GetRightSubString<BaseObject *>(
+                    std::forward<ReadBarrier>(readBarrier)));
             }
         } else {
-            return string->At<verify>(std::forward<ReadBarrier>(readBarrier), index);
+            return string->At<VERIFY>(std::forward<ReadBarrier>(readBarrier), index);
         }
     }
     UNREACHABLE_COMMON();
 }
-}
-#endif //COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_INL_H
+}  // namespace panda
+#endif  // COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_INL_H

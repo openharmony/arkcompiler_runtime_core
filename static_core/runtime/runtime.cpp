@@ -916,7 +916,7 @@ void Runtime::SetThreadClassPointers()
     classLinker_->InitializeRoots(thread);
     auto ext = GetClassLinker()->GetExtension(GetLanguageContext(GetRuntimeType()));
     if (ext != nullptr) {
-        thread->SetStringClassPtr(ext->GetClassRoot(ClassRoot::STRING));
+        thread->SetStringClassPtr(ext->GetClassRoot(ClassRoot::LINE_STRING));
         thread->SetArrayU16ClassPtr(ext->GetClassRoot(ClassRoot::ARRAY_U16));
         thread->SetArrayU8ClassPtr(ext->GetClassRoot(ClassRoot::ARRAY_U8));
     }
