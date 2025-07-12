@@ -306,7 +306,7 @@ cases:
           let a: FixedArray<Number>|FixedArray<String>|FixedArray<Boolean>|null
       use: |-
           // assignment context, union of arrays
-          a = [false, true, false]
+          a = [false, true, false] as FixedArray<Boolean>
           arktest.assertEQ((a as FixedArray<Boolean>)[0], false)
           arktest.assertEQ((a as FixedArray<Boolean>)[1], true)
           arktest.assertEQ((a as FixedArray<Boolean>)[2], false)
@@ -316,7 +316,7 @@ cases:
           let a: FixedArray<Number>|FixedArray<String>|FixedArray<Boolean>|null
       use: |-
           // assignment context, union of arrays
-          a = [1, 2, 43]
+          a = [1, 2, 43] as FixedArray<Number>
           arktest.assertEQ((a as FixedArray<Number>)[0], 1)
           arktest.assertEQ((a as FixedArray<Number>)[1], 2)
           arktest.assertEQ((a as FixedArray<Number>)[2], 43)
@@ -327,7 +327,7 @@ cases:
           let s = '4'
       use: |-
           // assignment context, union of arrays
-          a = ['1', '2', s + '3']
+          a = ['1', '2', s + '3']  as FixedArray<String>
           arktest.assertEQ((a as FixedArray<String>)[0], '1')
           arktest.assertEQ((a as FixedArray<String>)[1], '2')
           arktest.assertEQ((a as FixedArray<String>)[2], '43')

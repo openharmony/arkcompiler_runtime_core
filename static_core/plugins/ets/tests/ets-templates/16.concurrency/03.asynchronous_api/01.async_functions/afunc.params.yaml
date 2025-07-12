@@ -493,3 +493,59 @@ cases:
               .then((p: string): string => p + p)
 
           arktest.assertTrue((await r) == 'AAAAAAAA')
+
+    - decl: |-
+        type EN = Error|null
+        let s = 'A'
+        async function foo(p: string): Promise<string> {
+            return p + p
+        }
+      use: |-
+        // Throw error in chained "then" and catch them in the following chained "catch"
+        let r: Promise<string> = foo(s)
+            .then((p: string): string => { throw new Error(p) })
+            .catch((p: EN): string => p!.message + p!.message)
+
+        arktest.assertTrue((await r) == 'AAAA')
+
+    - decl: |-
+        type EN = Error|null
+        let s = 'A'
+        async function foo(p: string): Promise<string> {
+            if (p == 'A') {
+                throw new Error('E')
+            }
+            return 'X'
+        }
+      use: |-
+        // Throw error in chained catch
+        // await is forbidden for non-async functions
+        let r: Promise<string> = foo(s)
+            .then((p: string): string => p + p)
+            .catch((p: EN): string => { throw p! })
+
+        try {
+            await r
+        } catch (e) {
+            arktest.assertTrue((e as Error).message == 'E')
+            return
+        }
+        arktest.assertTrue(false)
+
+    - decl: |-
+        type EN = Error|null
+        let s = 'A'
+        async function foo(p: string): Promise<string> {
+            if (p == 'A') {
+                throw new Error('E')
+            }
+            return 'X'
+        }
+      use: |-
+        // Catch error in chained catch
+        let r = foo(s)
+            .then((p: string): string => p + p)  // skipped
+            .catch((p: EN): string => p!.message)
+            .then((p: string): string => p + p)
+
+        arktest.assertTrue((await r) == 'EE')
