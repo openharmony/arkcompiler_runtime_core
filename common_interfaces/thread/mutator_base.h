@@ -13,6 +13,15 @@
  * limitations under the License.
  */
 
+// NOLINTBEGIN(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//             cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//             readability-else-after-return, readability-duplicate-include,
+//             misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//             google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//             modernize-use-auto, llvm-namespace-comment,
+//             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//             readability-implicit-bool-conversion)
+
 #ifndef COMMON_INTERFACES_THREAD_MUTATOR_BASE_H
 #define COMMON_INTERFACES_THREAD_MUTATOR_BASE_H
 
@@ -20,7 +29,6 @@
 #include <mutex>
 #include <pthread.h>
 #include "base/common.h"
-
 namespace common {
 class Mutator;
 class ThreadHolder;
@@ -329,3 +337,11 @@ private:
 };
 }  // namespace common
 #endif  // COMMON_INTERFACES_THREAD_MUTATOR_BASE_H
+// NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//           readability-else-after-return, readability-duplicate-include,
+//           misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//           google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//           modernize-use-auto, llvm-namespace-comment,
+//           cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//           readability-implicit-bool-conversion)

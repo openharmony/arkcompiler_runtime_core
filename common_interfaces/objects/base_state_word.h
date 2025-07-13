@@ -13,12 +13,20 @@
  * limitations under the License.
  */
 
+// NOLINTBEGIN(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//             cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//             readability-else-after-return, readability-duplicate-include,
+//             misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//             google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//             modernize-use-auto, llvm-namespace-comment,
+//             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//             readability-implicit-bool-conversion)
+
 #ifndef COMMON_INTERFACES_OBJECTS_BASE_STATE_WORD_H
 #define COMMON_INTERFACES_OBJECTS_BASE_STATE_WORD_H
 
 #include <stddef.h>
 #include <cstdint>
-
 namespace common {
 using StateWordType = uint64_t;
 using MAddress = uint64_t;
@@ -179,3 +187,11 @@ private:
 static_assert(sizeof(BaseStateWord) == sizeof(uint64_t), "Excepts 8 bytes");
 }  // namespace common
 #endif  // COMMON_INTERFACES_OBJECTS_BASE_STATE_WORD_H
+// NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//           readability-else-after-return, readability-duplicate-include,
+//           misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//           google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//           modernize-use-auto, llvm-namespace-comment,
+//           cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//           readability-implicit-bool-conversion)

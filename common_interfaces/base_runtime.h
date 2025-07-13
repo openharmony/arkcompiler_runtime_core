@@ -13,6 +13,15 @@
  * limitations under the License.
  */
 
+// NOLINTBEGIN(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//             cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//             readability-else-after-return, readability-duplicate-include,
+//             misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//             google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//             modernize-use-auto, llvm-namespace-comment,
+//             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//             readability-implicit-bool-conversion)
+
 #ifndef COMMON_INTERFACES_BASE_RUNTIME_H
 #define COMMON_INTERFACES_BASE_RUNTIME_H
 
@@ -21,7 +30,6 @@
 #include <mutex>
 
 #include "base/runtime_param.h"
-
 namespace common {
 class BaseStringTableImpl;
 template <typename Impl>
@@ -121,3 +129,11 @@ private:
 };
 }  // namespace common
 #endif // COMMON_INTERFACES_BASE_RUNTIME_H
+// NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//           readability-else-after-return, readability-duplicate-include,
+//           misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//           google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//           modernize-use-auto, llvm-namespace-comment,
+//           cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//           readability-implicit-bool-conversion)

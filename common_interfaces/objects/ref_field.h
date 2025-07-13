@@ -13,13 +13,21 @@
  * limitations under the License.
  */
 
+// NOLINTBEGIN(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//             cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//             readability-else-after-return, readability-duplicate-include,
+//             misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//             google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//             modernize-use-auto, llvm-namespace-comment,
+//             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//             readability-implicit-bool-conversion)
+
 #ifndef COMMON_INTERFACES_OBJECTS_REF_FIELD_H
 #define COMMON_INTERFACES_OBJECTS_REF_FIELD_H
 
 #include <atomic>
 #include <functional>
 #include "objects/base_state_word.h"
-
 namespace common {
 class BaseObject;
 
@@ -173,6 +181,12 @@ private:
     };
 };
 }  // namespace common
-// NOLINTEND(readability-identifier-naming, readability-else-after-return,-warnings-as-errors,
-// cppcoreguidelines-pro-type-union-access)
 #endif  // COMMON_INTERFACES_OBJECTS_REF_FIELD_H
+// NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//           readability-else-after-return, readability-duplicate-include,
+//           misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//           google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//           modernize-use-auto, llvm-namespace-comment,
+//           cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//           readability-implicit-bool-conversion)
