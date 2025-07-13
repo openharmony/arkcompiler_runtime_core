@@ -335,8 +335,10 @@ config("ark_config") {
 
   if (ark_hybrid) {
     defines += [ "ARK_HYBRID" ]
+  } else {
+    defines += [ "BASE_CLASS_32BITS" ]
   }
-
+    
   if (current_cpu == "arm") {
     cflags_cc += [
       "-march=armv7-a",

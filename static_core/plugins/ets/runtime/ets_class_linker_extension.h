@@ -71,6 +71,12 @@ public:
 
     void InitializeClassRoots();
 
+    Class *CreateStringSubClass(const uint8_t *descriptor, Class *stringClass, ClassRoot type);
+
+    const uint8_t *GetStringClassDescriptor(ClassRoot strCls);
+
+    bool InitializeStringClass(Class *classClass);
+
     bool InitializeClass(Class *klass) override;
 
     bool InitializeClass(Class *klass, ClassLinkerErrorHandler *handler) override;

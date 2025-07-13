@@ -18,7 +18,7 @@
 #include "runtime/cha.h"
 #include "runtime/class_initializer.h"
 #include "runtime/include/coretypes/array.h"
-#include "runtime/include/coretypes/string.h"
+#include "runtime/include/coretypes/line_string.h"
 #include "runtime/include/field.h"
 #include "runtime/include/itable_builder.h"
 #include "runtime/include/method.h"

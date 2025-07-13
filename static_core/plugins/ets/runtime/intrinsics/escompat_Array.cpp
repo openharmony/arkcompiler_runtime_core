@@ -17,6 +17,7 @@
 #include <cstddef>
 #include "cross_values.h"
 #include <endian.h>
+#include "runtime/include/coretypes/string.h"
 #include "intrinsics.h"
 #include "libpandabase/utils/utf.h"
 #include "libpandabase/utils/utils.h"
@@ -87,11 +88,15 @@ EtsInt NormalizeArrayIndex(EtsInt index, EtsInt actualLength)
 
 EtsDouble EtsEscompatArrayIndexOfString(EtsObjectArray *buffer, EtsObject *value, EtsInt fromIndex, EtsInt actualLength)
 {
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coroutine);
     auto valueString = coretypes::String::Cast(value->GetCoreType());
+    VMHandle<coretypes::String> strHandle(coroutine, valueString);
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
     for (EtsInt index = fromIndex; index < actualLength; index++) {
         auto element = buffer->Get(index);
         if (element != nullptr && element->IsStringClass() &&
-            valueString->Compare(coretypes::String::Cast(element->GetCoreType())) == 0) {
+            strHandle->Compare(coretypes::String::Cast(element->GetCoreType()), ctx) == 0) {
             return index;
         }
     }
@@ -100,11 +105,15 @@ EtsDouble EtsEscompatArrayIndexOfString(EtsObjectArray *buffer, EtsObject *value
 
 EtsDouble EtsEscompatArrayLastIndexOfString(EtsObjectArray *buffer, EtsObject *value, EtsInt fromIndex)
 {
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coroutine);
     auto valueString = coretypes::String::Cast(value->GetCoreType());
+    VMHandle<coretypes::String> strHandle(coroutine, valueString);
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
     for (EtsInt index = fromIndex; index >= 0; index--) {
         auto element = buffer->Get(index);
         if (element != nullptr && element->IsStringClass() &&
-            valueString->Compare(coretypes::String::Cast(element->GetCoreType())) == 0) {
+            strHandle->Compare(coretypes::String::Cast(element->GetCoreType()), ctx) == 0) {
             return index;
         }
     }
@@ -114,13 +123,15 @@ EtsDouble EtsEscompatArrayLastIndexOfString(EtsObjectArray *buffer, EtsObject *v
 EtsDouble EtsEscompatArrayIndexOfEnum(EtsObjectArray *buffer, EtsCoroutine *coro, EtsObject *value, EtsInt fromIndex,
                                       EtsInt actualLength)
 {
+    [[maybe_unused]] EtsHandleScope scope(coro);
     auto *valueEnum = EtsBaseEnum::FromEtsObject(value)->GetValue();
+    VMHandle<EtsBaseEnum> valueEnumHandle(coro, valueEnum->GetCoreType());
     for (EtsInt index = fromIndex; index < actualLength; index++) {
         auto element = buffer->Get(index);
         auto elementClass = element->GetClass();
         if (elementClass->IsEtsEnum()) {
             auto *elementEnum = EtsBaseEnum::FromEtsObject(element)->GetValue();
-            if (EtsReferenceEquals(coro, valueEnum, elementEnum)) {
+            if (EtsReferenceEquals(coro, valueEnumHandle.GetPtr(), elementEnum)) {
                 return index;
             }
         }
@@ -131,13 +142,15 @@ EtsDouble EtsEscompatArrayIndexOfEnum(EtsObjectArray *buffer, EtsCoroutine *coro
 EtsDouble EtsEscompatArrayLastIndexOfEnum(EtsObjectArray *buffer, EtsCoroutine *coro, EtsObject *value,
                                           EtsInt fromIndex)
 {
+    [[maybe_unused]] EtsHandleScope scope(coro);
     auto *valueEnum = EtsBaseEnum::FromEtsObject(value)->GetValue();
+    VMHandle<EtsBaseEnum> valueEnumHandle(coro, valueEnum->GetCoreType());
     for (EtsInt index = fromIndex; index >= 0; index--) {
         auto element = buffer->Get(index);
         auto elementClass = element->GetClass();
         if (elementClass->IsEtsEnum()) {
             auto *elementEnum = EtsBaseEnum::FromEtsObject(element)->GetValue();
-            if (EtsReferenceEquals(coro, valueEnum, elementEnum)) {
+            if (EtsReferenceEquals(coro, valueEnumHandle.GetPtr(), elementEnum)) {
                 return index;
             }
         }

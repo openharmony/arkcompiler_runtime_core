@@ -48,6 +48,10 @@ public:
 
     void FreeClass(Class *klass) override;
 
+    const uint8_t *GetStringClassDescriptor(ClassRoot strCls);
+
+    bool InitializeStringClass();
+
     bool InitializeClass([[maybe_unused]] Class *klass) override
     {
         return true;

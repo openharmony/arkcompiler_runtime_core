@@ -867,6 +867,11 @@ public:
         return nullptr;
     }
 
+    virtual ClassPtr GetLineStringClass([[maybe_unused]] MethodPtr method, [[maybe_unused]] uint32_t *typeId) const
+    {
+        return nullptr;
+    }
+
     virtual ClassPtr GetNumberClass([[maybe_unused]] MethodPtr method, [[maybe_unused]] const char *name,
                                     [[maybe_unused]] uint32_t *typeId) const
     {
@@ -1331,6 +1336,11 @@ public:
     }
 
     virtual bool IsClassFinal([[maybe_unused]] ClassPtr unused) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassFinalOrString([[maybe_unused]] ClassPtr unused) const
     {
         return false;
     }

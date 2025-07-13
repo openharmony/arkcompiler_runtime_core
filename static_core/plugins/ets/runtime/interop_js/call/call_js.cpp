@@ -516,7 +516,7 @@ static void *SelectCallJSEntrypoint(InteropCtx *ctx, Method *method)
         }
         return reinterpret_cast<void *>(JSRuntimeCallJSBridge);
     }
-    if (protoReader.GetClass() == ctx->GetStringClass()) {
+    if (protoReader.GetClass()->IsStringClass()) {
         return reinterpret_cast<void *>(JSRuntimeCallJSQNameBridge);
     }
     if (protoReader.GetClass() == ctx->GetJSValueClass()) {

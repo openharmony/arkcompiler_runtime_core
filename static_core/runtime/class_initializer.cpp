@@ -151,7 +151,7 @@ static bool IsBadSuperClass(const Class *base, ManagedThread *thread, const Clas
         return true;
     }
 
-    if (base->IsFinal()) {
+    if (!base->IsExtensible() && !klass->IsStringClass()) {
         ThrowVerifyError(thread, klass);
         return true;
     }

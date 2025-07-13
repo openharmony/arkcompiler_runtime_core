@@ -103,9 +103,29 @@ function testUtf16() {
     }
 }
 
-function main(): int {
-    testLatin();
-    testMixed();
-    testUtf16();
-    return 0;
+function testTree() {
+    let basestring: String = '12345678901234'
+    let basestring2 = 'abcdefghijklmn'
+    let treestring: String = basestring.concat(basestring2)
+
+    let re = treestring.compareTo('12345678901234abcdefghijklmn')
+    arktest.assertEQ(re, 0);
 }
+
+function testSliced() {
+    let basestring: String = '12345678901234567890'
+    let slicedstring: String = basestring.substring(1, 15) // 23456789012345
+    let re = slicedstring.compareTo('23456789012345')
+    arktest.assertEQ(re, 0);
+}
+
+function main(): int {
+    let suite = new arktest.ArkTestsuite('StringCompareTo');
+    suite.addTest('testLatin', testLatin);
+    suite.addTest('testMixed', testMixed);
+    suite.addTest('testUtf16', testUtf16);
+    suite.addTest('testTree', testTree);
+    suite.addTest('testSliced', testSliced);
+    return suite.run();
+}
+

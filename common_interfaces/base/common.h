@@ -142,7 +142,7 @@ namespace common {
 #endif
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-enum class PUBLIC_API LOG_LEVEL : uint8_t {
+enum class LOG_LEVEL : uint8_t {
     DEBUG = 0,
     INFO = 1,
     WARN = 2,

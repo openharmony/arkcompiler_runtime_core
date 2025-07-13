@@ -27,6 +27,8 @@
 
 #include "objects/base_object.h"
 #include <type_traits>
+#include <vector>
+
 namespace common::objects_traits {
 
 template <typename U>

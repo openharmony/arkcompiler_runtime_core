@@ -15,9 +15,11 @@
 
 #include "runtime/core/core_class_linker_extension.h"
 
+#include "include/class_root.h"
 #include "runtime/include/coretypes/class.h"
 #include "runtime/include/exceptions.h"
 #include "runtime/include/panda_vm.h"
+#include "libpandabase/utils/utf.h"
 
 namespace ark {
 
@@ -88,6 +90,58 @@ void CoreClassLinkerExtension::InitializeClassRoots(const LanguageContext &ctx)
                              utf::Mutf8AsCString(ctx.GetStringArrayClassDescriptor()));
 }
 
+const uint8_t *CoreClassLinkerExtension::GetStringClassDescriptor(ClassRoot strCls)
+{
+    switch (strCls) {
+        case ClassRoot::LINE_STRING:
+            return utf::CStringAsMutf8("Lpanda/LineString;");
+
+        default:
+            UNREACHABLE();
+    }
+}
+
+bool CoreClassLinkerExtension::InitializeStringClass()
+{
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(GetLanguage());
+    auto *objCls = GetClassRoot(ClassRoot::OBJECT);
+    // 1. create StringClass
+    ClassRoot flag = ClassRoot::STRING;
+    auto *strCls = CreateClass(ctx.GetStringClassDescriptor(), GetClassVTableSize(flag), GetClassIMTSize(flag),
+                               GetClassSize(flag));
+    if (strCls == nullptr) {
+        LOG(ERROR, CLASS_LINKER) << "Cannot create string class '" << ctx.GetStringClassDescriptor() << "'";
+        return false;
+    }
+    strCls->SetBase(objCls);
+    strCls->SetStringClass();
+    strCls->RemoveFinal();
+    strCls->SetState(Class::State::LOADED);
+    strCls->SetLoadContext(GetBootContext());
+    GetClassLinker()->AddClassRoot(flag, strCls);
+
+    // 2. create LineStringClass
+    flag = ClassRoot::LINE_STRING;
+    uint32_t accessFlags = strCls->GetAccessFlags() | ACC_FINAL;
+    Span<Field> fields {};
+    Span<Method> methodsSpan {};
+    Span<Class *> interfacesSpan {};
+    const uint8_t *descriptor = GetStringClassDescriptor(flag);
+    Class *lineStrCls = GetClassLinker()->BuildClass(descriptor, true, accessFlags, methodsSpan, fields, strCls,
+                                                     interfacesSpan, GetBootContext(), false);
+    if (lineStrCls == nullptr) {
+        LOG(ERROR, CLASS_LINKER) << "Cannot create string class '" << descriptor << "'";
+        return false;
+    }
+    lineStrCls->SetState(Class::State::INITIALIZING);
+    lineStrCls->SetStringClass();
+    lineStrCls->SetLineStringClass();
+    lineStrCls->SetState(Class::State::INITIALIZED);
+    lineStrCls->SetFinal();
+    GetClassLinker()->AddClassRoot(flag, lineStrCls);
+    return true;
+}
+
 bool CoreClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
 {
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(GetLanguage());
@@ -112,14 +166,11 @@ bool CoreClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
     }
     classClass->SetBase(objClass);
 
-    auto *stringClass = CreateClass(ctx.GetStringClassDescriptor(), GetClassVTableSize(ClassRoot::STRING),
-                                    GetClassIMTSize(ClassRoot::STRING), GetClassSize(ClassRoot::STRING));
-    stringClass->SetBase(objClass);
-    stringClass->SetStringClass();
     coretypes::String::SetCompressedStringsEnabled(compressedStringEnabled);
-    stringClass->SetState(Class::State::LOADED);
-    stringClass->SetLoadContext(GetBootContext());
-    GetClassLinker()->AddClassRoot(ClassRoot::STRING, stringClass);
+    if (!InitializeStringClass()) {
+        LOG(ERROR, CLASS_LINKER) << "Cannot create string classes";
+        return false;
+    }
 
     InitializeArrayClassRoot(ClassRoot::ARRAY_CLASS, ClassRoot::CLASS,
                              utf::Mutf8AsCString(ctx.GetClassArrayClassDescriptor()));
@@ -205,6 +256,7 @@ size_t CoreClassLinkerExtension::GetClassVTableSize(ClassRoot root)
         case ClassRoot::OBJECT:
         case ClassRoot::CLASS:
         case ClassRoot::STRING:
+        case ClassRoot::LINE_STRING:
             return 0;
         default: {
             break;
@@ -250,6 +302,7 @@ size_t CoreClassLinkerExtension::GetClassIMTSize(ClassRoot root)
         case ClassRoot::OBJECT:
         case ClassRoot::CLASS:
         case ClassRoot::STRING:
+        case ClassRoot::LINE_STRING:
             return 0;
         default: {
             break;
@@ -295,6 +348,7 @@ size_t CoreClassLinkerExtension::GetClassSize(ClassRoot root)
         case ClassRoot::OBJECT:
         case ClassRoot::CLASS:
         case ClassRoot::STRING:
+        case ClassRoot::LINE_STRING:
             return Class::ComputeClassSize(GetClassVTableSize(root), GetClassIMTSize(root), 0, 0, 0, 0, 0, 0);
         default: {
             break;

@@ -42,6 +42,7 @@
 #include "utils/cframe_layout.h"
 #include "intrinsics.h"
 #include "runtime/interpreter/vregister_iterator.h"
+#include "runtime/include/coretypes/string.h"
 
 #ifdef ARK_HYBRID
 #include "base_runtime.h"

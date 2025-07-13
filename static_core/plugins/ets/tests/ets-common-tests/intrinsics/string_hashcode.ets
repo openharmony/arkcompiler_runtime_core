@@ -108,57 +108,74 @@ let hashCollisionB: FixedArray<char> = [0, 31];
 let hashCollisionC: FixedArray<char> = [2, 0];
 let hashCollisionD: FixedArray<char> = [1, 31];
 
-function main(): int {
+function testLineStringHashCode() {
     for (let i: int = 0; i < compressableStringsTable.length; i++) {
         let hashcode: int = compressableStringsTable[i].$_hashCode();
-        if (hashcode != compressable_hashcode_table[i]) {
-            console.println('Expected hashcode: ' + compressable_hashcode_table[i] +
-                            ', computed hashcode: ' + hashcode +
-                            ' (compressable, i = ' + i + ')');
-            console.println('FAIL');
-            return 1;
+        arktest.assertEQ(hashcode, compressable_hashcode_table[i],
+            'Expected hashcode: ' + compressable_hashcode_table[i] +
+            ', computed hashcode: ' + hashcode +
+            ' (compressable, i = ' + i + ')');
+
+        for (let i: int = 0; i < uncompressableStringsTable.length; i++) {
+            let hashcode: int = uncompressableStringsTable[i].$_hashCode();
+            arktest.assertEQ(hashcode, uncompressable_hashcode_table[i],
+                'Expected hashcode: ' + uncompressable_hashcode_table[i] +
+                ', computed hashcode: ' + hashcode +
+                ' (uncompressable, i = ' + i + ')');
         }
     }
+}
 
-    for (let i: int = 0; i < uncompressableStringsTable.length; i++) {
-        let hashcode: int = uncompressableStringsTable[i].$_hashCode();
-        if (hashcode != uncompressable_hashcode_table[i]) {
-            console.println('Expected hashcode: ' + uncompressable_hashcode_table[i] +
-                            ', computed hashcode: ' + hashcode +
-                            ' (uncompressable, i = ' + i + ')');
-            console.println('FAIL');
-            return 2;
-        }
-    }
+function testTreeStringHashCode() {
+    let TreeCompressableStr_0: String = '0123456789abcdef';
+    let TreeCompressableStr_1: String = 'ghijk';
+    let TreeCompressableStr = TreeCompressableStr_0.concat(TreeCompressableStr_1);
+    arktest.assertTrue(TreeCompressableStr === compressableStringsTable[compressableStringsTable.length - 1]);
+    arktest.assertEQ(TreeCompressableStr.$_hashCode(), 
+         compressable_hashcode_table[compressableStringsTable.length - 1]);
 
-    // Test hash collisions
+    let TreeUncompressableStr_0: String = '\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6\u00b7';
+    let TreeUncompressableStr_1: String = '\u00b8\u00b9\u00ba\u00bb\u00bc\u00bd\u00be\u00bf';
+    let TreeUncompressableStr = TreeUncompressableStr_0.concat(TreeUncompressableStr_1);
+    arktest.assertTrue(TreeUncompressableStr === uncompressableStringsTable[uncompressableStringsTable.length - 1]);
+    arktest.assertEQ(TreeUncompressableStr.$_hashCode(), 
+      uncompressable_hashcode_table[uncompressable_hashcode_table.length - 1]);
+
+}
+
+function testSlicedStringHashCode() {
+    let ToSliceCompressableStr: String = '123_0123456789abcdefghijk_456';
+    let SliceCompressableStr: String = ToSliceCompressableStr.substring(4, ToSliceCompressableStr.getLength() - 4);
+    arktest.assertTrue(SliceCompressableStr === compressableStringsTable[compressableStringsTable.length - 1]);
+    arktest.assertEQ(SliceCompressableStr.$_hashCode(), 
+       compressable_hashcode_table[compressableStringsTable.length - 1]);
+
+    let ToSliceUncompressableStr: 
+      String = '\u00b0\u00b0\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6\u00b7\u00b8\u00b9\u00ba\u00bb\u00bc\u00bd\u00be\u00bf\u00b0\u00b0';
+    let SliceUncompressableStr: String = 
+      ToSliceUncompressableStr.substring(2, ToSliceUncompressableStr.getLength() - 2);
+    arktest.assertTrue(SliceUncompressableStr === uncompressableStringsTable[uncompressableStringsTable.length - 1]);
+    arktest.assertEQ(SliceUncompressableStr.$_hashCode(), 
+      uncompressable_hashcode_table[uncompressable_hashcode_table.length - 1]);
+}
+
+function testHashCollision() {
     let hcA: String = new String(hashCollisionA);
-    let hcB: String = new String(hashCollisionB);
-    if (hcA.$_hashCode() != 31) {
-      console.println('hcA hashcode: ' + hcA.$_hashCode());
-      console.println('FAIL');
-      return 3;
-    }
-    if (hcA.$_hashCode() != hcB.$_hashCode()) {
-      console.println('hcA hashcode: ' + hcA.$_hashCode());
-      console.println('hcB hashcode: ' + hcB.$_hashCode());
-      console.println('FAIL');
-      return 4;
-    }
+    let hcB: String =  new String(hashCollisionB);
+    arktest.assertTrue(hcA.$_hashCode() === 31);
+    arktest.assertEQ(hcA.$_hashCode(), hcB.$_hashCode());
 
-    let hcC: String = new String(hashCollisionC);
-    let hcD: String = new String(hashCollisionD);
-    if (hcC.$_hashCode() != 62) {
-      console.println('hcC hashcode: ' + hcC.$_hashCode());
-      console.println('FAIL');
-      return 5;
-    }
-    if (hcC.$_hashCode() != hcD.$_hashCode()) {
-      console.println('hcC hashcode: ' + hcC.$_hashCode());
-      console.println('hcD hashcode: ' + hcD.$_hashCode());
-      console.println('FAIL');
-      return 6;
-    }
+    let hcC: String =  new String(hashCollisionC);
+    let hcD: String =  new String(hashCollisionD);
+    arktest.assertTrue(hcC.$_hashCode() === 62);
+    arktest.assertEQ(hcC.$_hashCode(), hcD.$_hashCode());
+}
 
-    return 0;
+function main(): int {
+    let suite = new arktest.ArkTestsuite('StringHashCode');
+    suite.addTest('testLineStringHashCode', testLineStringHashCode);
+    suite.addTest('testTreeStringHashCode', testTreeStringHashCode);
+    suite.addTest('testSlicedStringHashCode', testSlicedStringHashCode);
+    suite.addTest('testHashCollision', testHashCollision);
+    return suite.run();
 }

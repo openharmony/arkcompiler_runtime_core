@@ -15,7 +15,7 @@
 #ifndef PANDA_RUNTIME_PANDA_VM_H
 #define PANDA_RUNTIME_PANDA_VM_H
 
-#include "include/coretypes/string.h"
+#include "include/coretypes/line_string.h"
 #include "include/runtime_options.h"
 #include "jit/profile_saver_worker.h"
 #include "runtime/include/locks.h"

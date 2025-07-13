@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+// NOLINTBEGIN(cppcoreguidelines-special-member-functions)
+
 #ifndef COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_H
 #define COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_H
 
@@ -48,10 +50,10 @@ public:
     NO_MOVE_SEMANTIC_CC(LineString);
     NO_COPY_SEMANTIC_CC(LineString);
 
-    static constexpr uint32_t MAX_LENGTH = (1 << 28) - 16;
+    static constexpr uint32_t MAX_LENGTH = 0x0FFFFFF0U;  // Maximum of the string, (1 << 28) -16
     // DATA_OFFSET: the string data stored after the string header.
     // Data can be stored in utf8 or utf16 form according to compressed bit.
-    static constexpr size_t DATA_OFFSET = BaseString::SIZE; // DATA_OFFSET equal to Empty String size
+    static constexpr size_t DATA_OFFSET = BaseString::SIZE;  // DATA_OFFSET equal to Empty String size
 
     /**
      * @brief Create a line string from UTF-8 encoded data.
@@ -62,8 +64,8 @@ public:
      * @param canBeCompress Whether data is ASCII-only and compressible.
      * @return Pointer to created LineString instance.
      */
-    template <typename Allocator, objects_traits::enable_if_is_allocate<Allocator, BaseObject *>  = 0>
-    static LineString *CreateFromUtf8(Allocator &&allocate, const uint8_t *utf8Data, uint32_t utf8Len,
+    template <typename Allocator, objects_traits::enable_if_is_allocate<Allocator, BaseObject *> = 0>
+    static LineString *CreateFromUtf8(Allocator &&allocator, const uint8_t *utf8Data, uint32_t utf8Len,
                                       bool canBeCompress);
 
     /**
@@ -75,7 +77,7 @@ public:
      * @param utf8Len Number of bytes to extract.
      * @return Pointer to created LineString instance.
      */
-    template <typename Allocator, objects_traits::enable_if_is_allocate<Allocator, BaseObject *>  = 0>
+    template <typename Allocator, objects_traits::enable_if_is_allocate<Allocator, BaseObject *> = 0>
     static LineString *CreateFromUtf8CompressedSubString(Allocator &&allocator, const ReadOnlyHandle<BaseString> string,
                                                          uint32_t offset, uint32_t utf8Len);
 
@@ -87,7 +89,7 @@ public:
      * @param compressed Whether to use UTF-8 compression.
      * @return LineString pointer.
      */
-    template <typename Allocator, objects_traits::enable_if_is_allocate<Allocator, BaseObject *>  = 0>
+    template <typename Allocator, objects_traits::enable_if_is_allocate<Allocator, BaseObject *> = 0>
     static LineString *Create(Allocator &&allocator, size_t length, bool compressed);
 
     /**
@@ -99,7 +101,7 @@ public:
      * @param canBeCompress Whether string can be compressed.
      * @return Pointer to created LineString instance.
      */
-    template <typename Allocator, objects_traits::enable_if_is_allocate<Allocator, BaseObject *>  = 0>
+    template <typename Allocator, objects_traits::enable_if_is_allocate<Allocator, BaseObject *> = 0>
     static LineString *CreateFromUtf16(Allocator &&allocator, const uint16_t *utf16Data, uint32_t utf16Len,
                                        bool canBeCompress);
 
@@ -140,7 +142,7 @@ public:
      * @param index Index into the character buffer.
      * @return UTF-16 code unit at the given index.
      */
-    template <bool verify = true>
+    template <bool VERIFY = true>
     uint16_t Get(int32_t index) const;
 
     /**
@@ -201,5 +203,7 @@ public:
      */
     static bool CanBeCompressed(const LineString *string);
 };
-} // namespace common
-#endif //COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_H
+}  // namespace common
+#endif  // COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_H
+
+// NOLINTEND(cppcoreguidelines-special-member-functions)

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -223,9 +223,9 @@ private:
     const uint32_t fieldCacheSize_;
     const uint32_t classCacheSize_;
 
-    std::vector<MethodCachePair> methodCache_;
-    std::vector<FieldCachePair> fieldCache_;
-    std::vector<ClassCachePair> classCache_;
+    std::vector<MethodCachePair> methodCache_ {};
+    std::vector<FieldCachePair> fieldCache_ {};
+    std::vector<ClassCachePair> classCache_ {};
 };
 
 }  // namespace panda_file

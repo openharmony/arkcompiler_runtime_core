@@ -40,7 +40,7 @@
 #include "runtime/include/class.h"
 #include "runtime/include/coretypes/array-inl.h"
 #include "runtime/include/coretypes/dyn_objects.h"
-#include "runtime/include/coretypes/string.h"
+#include "runtime/include/coretypes/line_string.h"
 #include "runtime/include/exceptions.h"
 #include "runtime/include/locks.h"
 #include "runtime/include/method-inl.h"

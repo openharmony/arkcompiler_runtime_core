@@ -550,8 +550,8 @@ bool InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::T
     auto runtime = GetRuntime();
     auto isMethodStatic = runtime->IsMethodStatic(method_);
     auto isMethodFinal = runtime->IsMethodFinal(method_);
-    auto isClassFinal = runtime->IsClassFinal(runtime->GetClass(method_));
-    if (isMethodStatic || isMethodFinal || isClassFinal) {
+    auto isClassFinalOrString = runtime->IsClassFinalOrString(runtime->GetClass(method_));
+    if (isMethodStatic || isMethodFinal || isClassFinalOrString) {
         BuildIntrinsic();
         return true;
     }
@@ -1086,7 +1086,7 @@ void InstBuilder::BuildUnfoldLoadConstArray(const BytecodeInstruction *bcInst, D
     }
 
     [[maybe_unused]] auto arrayClass = GetRuntime()->ResolveType(method, typeId);
-    ASSERT(GetRuntime()->CheckStoreArray(arrayClass, GetRuntime()->GetStringClass(method, nullptr)));
+    ASSERT(GetRuntime()->CheckStoreArray(arrayClass, GetRuntime()->GetLineStringClass(method, nullptr)));
     // Special case for string array
     BuildUnfoldLoadConstStringArray<T>(bcInst, type, litArray, arrayInst);
 }

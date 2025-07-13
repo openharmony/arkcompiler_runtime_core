@@ -146,6 +146,9 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     findType(&EtsPlatformTypes::coreObject, OBJECT);
     findType(&EtsPlatformTypes::coreClass, CLASS);
     findType(&EtsPlatformTypes::coreString, STRING);
+    findType(&EtsPlatformTypes::coreLineString, LINE_STRING);
+    findType(&EtsPlatformTypes::coreSlicedString, SLICED_STRING);
+    findType(&EtsPlatformTypes::coreTreeString, TREE_STRING);
 
     findType(&EtsPlatformTypes::coreBoolean, BOX_BOOLEAN);
     findType(&EtsPlatformTypes::coreByte, BOX_BYTE);

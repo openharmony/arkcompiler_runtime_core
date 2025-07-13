@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+// NOLINTBEGIN(cppcoreguidelines-special-member-functions)
+
 #ifndef COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_H
 #define COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_H
 
@@ -68,8 +70,8 @@ public:
      * @return TreeString pointer.
      */
     template <typename Allocator, typename WriteBarrier,
-              objects_traits::enable_if_is_allocate<Allocator, BaseObject *>  = 0,
-              objects_traits::enable_if_is_write_barrier<WriteBarrier>  = 0>
+              objects_traits::enable_if_is_allocate<Allocator, BaseObject *> = 0,
+              objects_traits::enable_if_is_write_barrier<WriteBarrier> = 0>
     static TreeString *Create(Allocator &&allocator, WriteBarrier &&writeBarrier, ReadOnlyHandle<BaseString> left,
                               ReadOnlyHandle<BaseString> right, uint32_t length, bool compressed);
 
@@ -93,8 +95,10 @@ public:
      * @param index Index in the TreeString.
      * @return UTF-16 code unit at specified index.
      */
-    template <bool verify = true, typename ReadBarrier>
+    template <bool VERIFY = true, typename ReadBarrier>
     uint16_t Get(ReadBarrier &&readBarrier, int32_t index) const;
 };
-} // namespace common
-#endif //COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_H
+}  // namespace common
+#endif  // COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_H
+
+// NOLINTEND(cppcoreguidelines-special-member-functions)

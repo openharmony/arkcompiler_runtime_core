@@ -52,6 +52,7 @@ public:
         return numVregs + numDeclaredArgs;
     }
 
+    // NOLINTNEXTLINE(misc-unused-parameters)
     ALWAYS_INLINE inline static void InitActualArgs(Frame *frame, Span<Value> argsSpan, uint32_t numVregs,
                                                     [[maybe_unused]] uint32_t numDeclaredArgs)
     {
@@ -89,8 +90,10 @@ public:
         return numVregs + std::max(numDeclaredArgs, numActualArgs);
     }
 
+    // NOLINTNEXTLINE(misc-unused-parameters)
     ALWAYS_INLINE inline static void InitActualArgs(Frame *frame, Span<coretypes::TaggedValue> argsSpan,
-                                                    uint32_t numVregs, [[maybe_unused]] uint32_t numDeclaredArgs)
+                                                    [[maybe_unused]] uint32_t numVregs,
+                                                    [[maybe_unused]] uint32_t numDeclaredArgs)
     {
         frame->SetDynamic();
 

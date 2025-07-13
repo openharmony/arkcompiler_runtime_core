@@ -59,7 +59,7 @@ template <typename FStore>
     if (klass == ctx->GetJSValueClass()) {
         return UnwrapVal<JSConvertJSValue>(ctx, env, jsVal, storeRes);
     }
-    if (klass == ctx->GetStringClass()) {
+    if (klass->IsStringClass()) {
         return UnwrapVal<JSConvertString>(ctx, env, jsVal, storeRes);
     }
     // start slowpath
@@ -266,7 +266,7 @@ template <typename FRead>
     if (klass == ctx->GetJSValueClass()) {
         return wrapRef(helpers::TypeIdentity<JSConvertJSValue>(), ref);
     }
-    if (klass == ctx->GetStringClass()) {
+    if (klass->IsStringClass()) {
         return wrapRef(helpers::TypeIdentity<JSConvertString>(), ref);
     }
     // start slowpath

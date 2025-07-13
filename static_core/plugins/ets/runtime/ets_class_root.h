@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,9 @@ enum class EtsClassRoot {
     CLASS = helpers::ToUnderlying(ClassRoot::CLASS),
     OBJECT = helpers::ToUnderlying(ClassRoot::OBJECT),
     STRING = helpers::ToUnderlying(ClassRoot::STRING),
+    LINE_STRING = helpers::ToUnderlying(ClassRoot::LINE_STRING),
+    SLICED_STRING = helpers::ToUnderlying(ClassRoot::SLICED_STRING),
+    TREE_STRING = helpers::ToUnderlying(ClassRoot::TREE_STRING),
     STRING_ARRAY = helpers::ToUnderlying(ClassRoot::ARRAY_STRING),
 };
 
