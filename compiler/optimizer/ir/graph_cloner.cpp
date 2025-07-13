@@ -467,6 +467,7 @@ void GraphCloner::BuildLoopUnrollDataFlow(LoopUnrollData *unroll_data)
     // TODO (a.popov) use temp container after if would be possible to reset local allocator
     if (unroll_data->phi_replaced_inputs == nullptr) {
         unroll_data->phi_replaced_inputs = allocator_->New<PhiInputsMap>(allocator_->Adapter());
+        CHECK_NOT_NULL(unroll_data->phi_replaced_inputs);
     } else {
         unroll_data->phi_replaced_inputs->clear();
     }

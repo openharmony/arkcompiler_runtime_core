@@ -493,6 +493,7 @@ bool OptimizePandaFile(pandasm::Program *prog, const pandasm::AsmEmitter::PandaF
 
     bool result = true;
 
+    CHECK_NOT_NULL(pfile);
     for (uint32_t id : pfile->GetClasses()) {
         panda_file::File::EntityId record_id {id};
 
