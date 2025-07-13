@@ -117,13 +117,13 @@ function testGetIndexOfKeyAndValueDifferentLength() {
     assertNE(result2, -1, "The lightWeightMap should return the correct index for the value");
 }
 
-function testGetIndexOfKeyAndValueComplex() {
-    interface Complex {
-        name: string;
-        gender: string;
-        age: number;
-    }
+interface Complex {
+    name: string;
+    gender: string;
+    age: number;
+}
 
+function testGetIndexOfKeyAndValueComplex() {
     const key: Complex = {
         name: 'squirrel',
         gender: 'male',

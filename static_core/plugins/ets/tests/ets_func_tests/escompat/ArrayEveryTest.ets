@@ -91,13 +91,12 @@ function testModifyDuringIteration() {
     assertEQ(arr3[2], 4)
 }
 
+interface Person {
+    name: string;
+    age: number;
+}
 
 function testObjectArray() {
-    interface Person {
-        name: string
-        age: number
-    }
-    
     const people: Array<Person> = Array.of<Person>(
         { name: 'Alice', age: 25 } as Person,
         { name: 'Bob', age: 30 } as Person,
