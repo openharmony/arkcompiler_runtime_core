@@ -14,3 +14,4 @@
 # This file should be deleted after # 26910 is fixed
 #
 E/verifier: Verifier error 16: Bad accumulator return value type with subtype
+E/verifier: Verifier error 16: Bad accumulator return value type with subtype

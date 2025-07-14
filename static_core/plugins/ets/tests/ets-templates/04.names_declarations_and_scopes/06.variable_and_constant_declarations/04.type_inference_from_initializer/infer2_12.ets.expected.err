@@ -13,3 +13,10 @@
 #
 E/runtime: Unhandled exception: std.core.AssertionError
 E/runtime: AssertionError: expected equality failed: 'undefined' === '[object Object]'
+E/runtime: 	at std.core.AssertionError.<ctor> (etsstdlib.ets:23:0)
+E/runtime: 	at std.core.AssertionError.<ctor> (etsstdlib.ets:22:0)
+E/runtime: 	at std.testing.arktest.failingAssertion (etsstdlib.ets:39:0)
+E/runtime: 	at std.testing.arktest.assertCommon (etsstdlib.ets:28:0)
+E/runtime: 	at std.testing.arktest.assertEQ (etsstdlib.ets:70:0)
+E/runtime: 	at infer2_12.ETSGLOBAL.main (infer2_12.ets:26:0)
+E/runtime:
