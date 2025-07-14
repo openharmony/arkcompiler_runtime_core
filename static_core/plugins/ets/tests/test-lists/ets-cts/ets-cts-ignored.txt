@@ -1013,6 +1013,9 @@
 # 26983
 09.classes/06.field_declarations/06.overriding_fields/sample.ets
 
+#28160 Cannot initialize function type interface property with rest parameter
+10.interfaces/04.interface_properties/01.required_interface_properties/required_interface_properties_17.ets
+
 #16840
 10.interfaces/03.interface_members/methods_overriding.ets
 10.interfaces/05.interface_method_declarations/overriding_by_instance_methods/overriding_public_method.ets
