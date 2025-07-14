@@ -35,8 +35,8 @@ function main(): int {
 }
 
 class MyObject extends Object {
-    size: number;
-    constructor(size: number) {
+    size: double;
+    constructor(size: double) {
         super();
         this.size = size;
     }
@@ -44,7 +44,7 @@ class MyObject extends Object {
 
 function testGetFirstKeyAndLastKeySingleElement() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return secondValue.compareTo(firstValue);
         });
     treeMap.set("aa", "123");
@@ -59,7 +59,7 @@ function testGetFirstKeyAndLastKeySingleElement() {
 
 function testGetFirstKeyAndLastKeyEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return secondValue.compareTo(firstValue);
         });
     let first = treeMap.getFirstKey();
@@ -71,7 +71,7 @@ function testGetFirstKeyAndLastKeyEmptyTreeMap() {
 
 function testGetFirstKeyAndLastKeyMultipleElements() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return secondValue.compareTo(firstValue);
         });
     treeMap.set("aa", "123");
@@ -84,7 +84,7 @@ function testGetFirstKeyAndLastKeyMultipleElements() {
 
 function testGetFirstKeyAndLastKeyDescendingOrder() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return firstValue.compareTo(secondValue);
         });
     treeMap.set("aa", "123");
@@ -99,7 +99,7 @@ function testGetFirstKeyAndLastKeyDescendingOrder() {
 
 function testGetFirstKeyAndLastKeyObjectKeys() {
     let treeMapo: TreeMap<MyObject, MyObject> =
-        new TreeMap<MyObject, MyObject>((firstValue: MyObject, secondValue: MyObject): number => {
+        new TreeMap<MyObject, MyObject>((firstValue: MyObject, secondValue: MyObject): double => {
             return secondValue.size - firstValue.size;
         });
     let obj: MyObject = new MyObject(1);
@@ -120,7 +120,7 @@ function testGetFirstKeyAndLastKeyObjectKeys() {
 
 function testGetFirstKeyAndLastKeyMultipleObjectKeys() {
     let treeMapo: TreeMap<MyObject, MyObject> =
-    new TreeMap<MyObject, MyObject>((firstValue: MyObject, secondValue: MyObject): number => {
+    new TreeMap<MyObject, MyObject>((firstValue: MyObject, secondValue: MyObject): double => {
         return secondValue.size - firstValue.size;
     });
     let obj: MyObject = new MyObject(1);

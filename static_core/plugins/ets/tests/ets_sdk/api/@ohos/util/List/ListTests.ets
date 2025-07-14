@@ -16,8 +16,8 @@
 import {List} from '@ohos.util.List';
 import {BusinessError} from "@ohos.base";
 
-const OutOfBoundsErrorCodeId: number = 10200001;
-const TypeErrorCodeId: number = 401;
+const OutOfBoundsErrorCodeId: int = 10200001;
+const TypeErrorCodeId: int = 401;
 
 // Test cases ported from ArkTS 1.0: container_list.js
 function main() {
@@ -29,8 +29,6 @@ function main() {
     suite.addTest("Testing List getSubList functionality", testGetSubListFunctionality);
     suite.addTest("Testing List with index access", testIndexAccess);
     suite.addTest("Testing List exception handling with empty container", testExceptionHandlingWithEmptyContainer);
-    suite.addTest("Testing List with large array indices", testLargeArrayIndices);
-    suite.addTest("Testing List exception handling for out-of-range indices", testExceptionHandlingOutOfRangeIndices);
     suite.addTest("Testing List methods with Math.floor indices", testMethodsWithMathFloorIndices);
 
     return suite.run();
@@ -54,7 +52,7 @@ function testCopyArray() {
         "hello9"
     ]
     let list = new List<string>();
-    for (let i = 0; i <= 10; i++) {
+    for (let i: int = 0; i <= 10; i++) {
         list.add("hello" + i);
     }
     myList = list;
@@ -72,16 +70,16 @@ function testCopyArray() {
     tmp4.remove("hello9");
     tmp4.insert("hello9", 0);
     myList = tmp4;
-    for (let i = 0; i < myList.length; i++) {
+    for (let i: int = 0; i < myList.length; i++) {
         arktest.assertEQ(myList.get(i), result[i]);
     }
 }
 
 function testBasicOperationsAndMethods() {
-    let list = new List<number>();
-    let testArray: Array<number> = new Array<number>();
+    let list = new List<double>();
+    let testArray: Array<double> = new Array<double>();
     arktest.assertTrue(list.isEmpty(), "The list should be empty initially");
-    for (let i = 0; i < 10; i++) {
+    for (let i: int = 0; i < 10; i++) {
         list.add(i);
         testArray.push(i);
     }
@@ -89,13 +87,13 @@ function testBasicOperationsAndMethods() {
     let s = Math.trunc(1.33);
     arktest.assertFalse(list.isEmpty(), "The list should not be empty after adding elements");
     arktest.assertEQ(list.get(1), 1);
-    arktest.assertEQ(list.get(s), 1);
-    arktest.assertTrue(list.has(8), "The list should contain the number 8");
-    arktest.assertFalse(list.has(123), "The list should not contain the number 123");
+    arktest.assertEQ(list.get(s.toInt()), 1);
+    arktest.assertTrue(list.has(8), "The list should contain the double 8");
+    arktest.assertFalse(list.has(123), "The list should not contain the double 123");
 
-    let list1 = new List<number>();
-    let testArray2 = new Array<number>();
-    for (let i = 0; i < 10; i++) {
+    let list1 = new List<double>();
+    let testArray2 = new Array<double>();
+    for (let i: int = 0; i < 10; i++) {
         list1.add(i)
         testArray2.push(i);
     }
@@ -109,13 +107,13 @@ function testBasicOperationsAndMethods() {
 
     list.removeByIndex(10);
     testArray.splice(10.0, 1.0);
-    for (let i = 0; i < testArray.length; i++) {
+    for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(list[i], testArray[i]);
     }
 
     list.remove(9);
     testArray.splice(9.0, 1.0);
-    for (let i = 0; i < testArray.length; i++) {
+    for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(list[i], testArray[i]);
         testArray[i] = testArray[i] * 2;
     }
@@ -124,35 +122,35 @@ function testBasicOperationsAndMethods() {
         return item * 2;
     })
 
-    for (let i = 0; i < testArray.length; i++) {
+    for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(list[i], testArray[i]);
     }
     arktest.assertEQ(list.getFirst(), 0);
     arktest.assertEQ(list.getLast(), 16);
     list.insert(999, 3);
     testArray.splice(3.0, 0.0, 999);
-    for (let i = 0; i < testArray.length; i++) {
+    for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(list[i], testArray[i]);
     }
 
     list.set(5, 888);
     testArray[5] = 888;
-    for (let i = 0; i < testArray.length; i++) {
+    for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(list[i], testArray[i]);
     }
 
     let subList = list.getSubList(1, 3);
     let newTestArray = testArray.slice(1, 3);
-    for (let i = 0; i < subList.length; i++) {
+    for (let i: int = 0; i < subList.length; i++) {
         arktest.assertEQ(newTestArray[i], subList[i]);
     }
 
     let arr = list.convertToArray();
-    for (let i = 0; i < arr.length; i++) {
+    for (let i: int = 0; i < arr.length; i++) {
         arktest.assertEQ(arr[i], testArray[i]);
     }
 
-    let i = 0;
+    let i: int = 0;
     for (let data of list) {
         arktest.assertEQ(data, testArray[i]);
         i++;
@@ -171,52 +169,52 @@ function testBasicOperationsAndMethods() {
 }
 
 function testSortAndClearOperations() {
-    let list2 = new List<number>();
+    let list2 = new List<double>();
     list2.add(4);
     list2.add(3);
     list2.add(1);
     list2.add(2);
     list2.add(0);
     list2.sort((a,b) => a-b);
-    for (let i = 0; i < 5; i++) {
+    for (let i: int = 0; i < 5; i++) {
         arktest.assertEQ(list2[i], i);
     }
     list2.clear();
     arktest.assertEQ(list2.length, 0);
 
-    let testArrayClear = new Array<number>();
-    for (let i = 0; i < 10; i++) {
+    let testArrayClear = new Array<double>();
+    for (let i: int = 0; i < 10; i++) {
         list2.add(i);
         testArrayClear.push(i);
     }
-    for (let i = 0; i < testArrayClear.length; i++) {
+    for (let i: int = 0; i < testArrayClear.length; i++) {
         arktest.assertEQ(list2[i], testArrayClear[i]);
     }
 }
 
 function testGetSubListFunctionality() {
-    let list6 = new List<number>();
-    let testArray1 = new Array<number>();
-    for (let i = 0; i < 4; i++) {
+    let list6 = new List<double>();
+    let testArray1 = new Array<double>();
+    for (let i: int = 0; i < 4; i++) {
         list6.add(i);
         testArray1.push(i);
     }
     let subList11 = list6.getSubList(1, 4);
     let newTestArrayList1 = testArray1.slice(1, 4);
-    for (let i = 0; i < subList11.length; i++) {
+    for (let i: int = 0; i < subList11.length; i++) {
         arktest.assertEQ(newTestArrayList1[i], subList11[i]);
     }
 }
 
 function testIndexAccess() {
-    let testList = new List<number>();
+    let testList = new List<double>();
     testList.add(7);
     testList.add(8);
     arktest.assertEQ(testList[1], 8);
 }
 
 function testExceptionHandlingWithEmptyContainer() {
-    let empty_l = new List<number>();
+    let empty_l = new List<double>();
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
@@ -234,36 +232,14 @@ function testExceptionHandlingWithEmptyContainer() {
     arktest.expectThrow(() => {empty_l.getSubList(0, 1)}, exceptionCheck2);
 }
 
-function testLargeArrayIndices() {
-    let myList = new List<number>();
-    myList.add(1);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message ==
-            "The type of \"index\" must be small integer.") &&
-            ((e as BusinessError).code == TypeErrorCodeId);
-    }
-    arktest.expectThrow(() => {myList[2147483648];}, exceptionCheck);
-}
-
-function testExceptionHandlingOutOfRangeIndices() {
-    let myList = new List<number>();
-    myList.add(1);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message ==
-            `The value of \"fromIndex\" is out of range. It must be >= 0 && <= 0. Received value is: 2147483648`) &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
-    }
-    arktest.expectThrow(() => {myList.getSubList(2147483648, 2147483649)}, exceptionCheck);
-}
-
 function testMethodsWithMathFloorIndices() {
-    let myList1 = new List<number>();
+    let myList1 = new List<double>();
     myList1.add(1);
     myList1.add(2);
     myList1.add(3);
-    myList1.insert(999, Math.floor(1.5));
-    arktest.assertEQ(myList1.get(Math.floor(1.5)), 999);
-    myList1.set(Math.floor(1.5), 888);
-    myList1.removeByIndex(Math.floor(1.5));
+    myList1.insert(999, Math.floor(1.5).toInt());
+    arktest.assertEQ(myList1.get(Math.floor(1.5).toInt()), 999);
+    myList1.set(Math.floor(1.5).toInt(), 888);
+    myList1.removeByIndex(Math.floor(1.5).toInt());
     arktest.assertEQ(myList1.length, 3);
 }

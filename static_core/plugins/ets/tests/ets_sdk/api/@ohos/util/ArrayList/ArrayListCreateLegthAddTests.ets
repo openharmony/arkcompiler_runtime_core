@@ -30,12 +30,12 @@ function main() {
 }
 
 class TestData {
-    static readonly testNumber1: number = 1;
-    static readonly testNumber2: number = 2;
-    static readonly testNumber3: number = 3;
-    static readonly testNumber5: number = 5;
-    static readonly testNumber8: number = 8;
-    static readonly testNumber1w: number = 10000;
+    static readonly testNumber1: double | int = 1;
+    static readonly testNumber2: double | int = 2;
+    static readonly testNumber3: double | int = 3;
+    static readonly testNumber5: double | int = 5;
+    static readonly testNumber8: double | int = 8;
+    static readonly testNumber1w: double | int = 10000;
     static readonly testString1: string = "string";
     static readonly testString2: string = "";
     static readonly testString4: string = "%";
@@ -44,17 +44,17 @@ class TestData {
 }
 
 function testCreateSingleTypeInstance() {
-    let arrayList: ArrayList<number>;
-    arktest.expectNoThrow(() => {arrayList = new ArrayList<number>()});
+    let arrayList: ArrayList<double>;
+    arktest.expectNoThrow(() => {arrayList = new ArrayList<double>()});
 }
 
 function testCreateMultiTypeInstance() {
-    let arrayList: ArrayList<number | string>;
-    arktest.expectNoThrow(() => {arrayList = new ArrayList<number | string>()});
+    let arrayList: ArrayList<double | string>;
+    arktest.expectNoThrow(() => {arrayList = new ArrayList<double | string>()});
 }
 
 function testArrayListLength() {
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     arktest.assertEQ(arrayList.length, 0, "Initial ArrayList length should be 0");
     arrayList.add(TestData.testNumber3);
     arrayList.add(TestData.testNumber1);
@@ -66,7 +66,7 @@ function testArrayListLength() {
 }
 
 function testArrayListLengthMixedTypes() {
-    let arrayList = new ArrayList<number | string | boolean>();
+    let arrayList = new ArrayList<double | string | boolean>();
     arktest.assertEQ(arrayList.length, 0, "Initial ArrayList length should be 0");
     arrayList.add(TestData.testNumber3);
     arrayList.add(TestData.testString1);
@@ -79,15 +79,15 @@ function testArrayListLengthMixedTypes() {
 }
 
 function testArrayListLengthSetterLarge() {
-    let arrayList = new ArrayList<number>();
-    for (let i: number = 0; i < TestData.testNumber1w; i++) {
+    let arrayList = new ArrayList<double>();
+    for (let i: int = 0; i < TestData.testNumber1w; i++) {
         arrayList.add(TestData.testNumber1);
     }
     arktest.assertEQ(arrayList.length, TestData.testNumber1w, "ArrayList length should be 10000 after adding elements");
 }
 
 function testArrayListAdd() {
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     initializeArrayList(arrayList, TestData.forNumber);
     for (let i: int = 0; i < arrayList.length; i++) {
         arktest.assertEQ(arrayList[i], TestData.forNumber[i], `Element at index ${i} should match`);
@@ -96,7 +96,7 @@ function testArrayListAdd() {
 }
 
 function testArrayListAddSpecialCharacters() {
-    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
         Object>();
     arrayList.add(TestData.testString1);
     arrayList.add(TestData.testString2);
@@ -105,7 +105,7 @@ function testArrayListAddSpecialCharacters() {
 }
 
 function initializeArrayList<T>(arrayList: ArrayList<T>, sourceArray: T[]) {
-    for (let i = 0; i < sourceArray.length; i++) {
+    for (let i: int = 0; i < sourceArray.length; i++) {
         arrayList.add(sourceArray[i]);
     }
 }

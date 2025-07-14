@@ -35,8 +35,8 @@ function main(): int {
 }
 
 class MyObject extends Object {
-    size: number;
-    constructor(size: number) {
+    size: double;
+    constructor(size: double) {
         super();
         this.size = size;
     }
@@ -44,7 +44,7 @@ class MyObject extends Object {
 
 function testGetFirstValueGetLastValueSingleElement() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return secondValue.compareTo(firstValue) });
+        secondValue: string): double => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     treeSet.add("bb");
     let result1 = treeSet.getFirstValue();
@@ -56,7 +56,7 @@ function testGetFirstValueGetLastValueSingleElement() {
 
 function testGetFirstValueGetLastValueEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return secondValue.compareTo(firstValue) });
+        secondValue: string): double => { return secondValue.compareTo(firstValue) });
     let result1 = treeSet.getFirstValue();
     let result2 = treeSet.getLastValue();
     arktest.assertEQ(result1, undefined, "The treeSet should return undefined for the first value in an empty set");
@@ -66,7 +66,7 @@ function testGetFirstValueGetLastValueEmptyTreeSet() {
 
 function testGetFirstValueGetLastValueMultipleElements() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return secondValue.compareTo(firstValue) });
+        secondValue: string): double => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     let result1 = treeSet.getFirstValue();
     let result2 = treeSet.getLastValue();
@@ -77,7 +77,7 @@ function testGetFirstValueGetLastValueMultipleElements() {
 
 function testGetFirstValueGetLastValueDescendingOrder() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return firstValue.compareTo(secondValue) });
+        secondValue: string): double => { return firstValue.compareTo(secondValue) });
     treeSet.add("aa");
     treeSet.add("bb");
     treeSet.add("cc");
@@ -91,7 +91,7 @@ function testGetFirstValueGetLastValueDescendingOrder() {
 
 function testGetFirstValueGetLastValueObjectValues() {
     let treeSet: TreeSet<MyObject> =
-        new TreeSet<MyObject>((firstValue: MyObject, secondValue: MyObject): number => {
+        new TreeSet<MyObject>((firstValue: MyObject, secondValue: MyObject): double => {
             return secondValue.size - firstValue.size;
         });
     let obj: MyObject = new MyObject(1);
@@ -109,7 +109,7 @@ function testGetFirstValueGetLastValueObjectValues() {
 
 function testGetFirstValueGetLastValueMultipleObjectValues() {
     let treeSet: TreeSet<MyObject> =
-        new TreeSet<MyObject>((firstValue: MyObject, secondValue: MyObject): number => {
+        new TreeSet<MyObject>((firstValue: MyObject, secondValue: MyObject): double => {
             return secondValue.size - firstValue.size;
         });
     let obj: MyObject = new MyObject(1);

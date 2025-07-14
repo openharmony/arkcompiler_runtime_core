@@ -34,28 +34,28 @@ function main() {
 }
 
 class TestData {
-    static readonly testNumber1: number = 1;
-    static readonly testNumber3: number = 3;
-    static readonly testNumber5: number = 5;
-    static readonly testNumber12: number = 12;
+    static readonly testNumber1: double | int = 1;
+    static readonly testNumber3: double | int = 3;
+    static readonly testNumber5: double | int = 5;
+    static readonly testNumber12: double | int = 12;
     static readonly forNumber: Number[] = [1, 2, 3, 4, 5];
 }
 
 function testReplaceAllElementsWithConstantValue() {
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     initializeArrayList(arrayList, TestData.forNumber);
-    arrayList.replaceAllElements((): number => {
+    arrayList.replaceAllElements((): double => {
         return TestData.testNumber3;
     });
-    for (let i: number = 0; i < arrayList.length; i++) {
+    for (let i: int = 0; i < arrayList.length; i++) {
         arktest.assertEQ(arrayList[i], TestData.testNumber3, `Element at index ${i} should match`);
     }
 }
 
 function testReplaceAllElementsWithLambda() {
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     initializeArrayList(arrayList, TestData.forNumber);
-    arrayList.replaceAllElements((value: number): number => {
+    arrayList.replaceAllElements((value: double): double => {
         return value + TestData.testNumber3;
     });
     for (let i: int = 0; i < arrayList.length; i++) {
@@ -64,9 +64,9 @@ function testReplaceAllElementsWithLambda() {
 }
 
 function testReplaceAllElementsWithLambdaAndIndex() {
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     initializeArrayList(arrayList, TestData.forNumber);
-    arrayList.replaceAllElements((value: number, index: number): number => {
+    arrayList.replaceAllElements((value: double, index: int): double => {
         return value + index;
     });
     for (let i: int = 0; i < arrayList.length; i++) {
@@ -75,9 +75,9 @@ function testReplaceAllElementsWithLambdaAndIndex() {
 }
 
 function testReplaceAllElementsWithLambdaIndexAndTempArrayList() {
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     initializeArrayList(arrayList, TestData.forNumber);
-    arrayList.replaceAllElements((value: number, index: number, tempArrayList: ArrayList<number>): number => {
+    arrayList.replaceAllElements((value: double, index: int, tempArrayList: ArrayList<double>): double => {
         arktest.assertEQ(arrayList, tempArrayList, "TempArrayList should be this");
         return value + tempArrayList[index];
     });
@@ -87,9 +87,9 @@ function testReplaceAllElementsWithLambdaIndexAndTempArrayList() {
 }
 
 function testForEachNoParameterFunction() {
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     initializeArrayList(arrayList, TestData.forNumber);
-    let forEachCount: number = 0;
+    let forEachCount: int = 0;
     arrayList.forEach(() => {
         forEachCount++;
     });
@@ -97,11 +97,11 @@ function testForEachNoParameterFunction() {
 }
 
 function testForEachFunctionWithValue() {
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     initializeArrayList(arrayList, TestData.forNumber);
-    let forEachCount: number = 0;
-    let forEachFlag: number = 0;
-    arrayList.forEach((value: number) => {
+    let forEachCount: int = 0;
+    let forEachFlag: double = 0;
+    arrayList.forEach((value: double) => {
         if (value != arrayList[forEachCount++]) {
             forEachFlag = TestData.testNumber1;
         }
@@ -111,11 +111,11 @@ function testForEachFunctionWithValue() {
 }
 
 function testForEachFunctionWithValueAndIndex() {
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     initializeArrayList(arrayList, TestData.forNumber);
-    let forEachCount: number = 0;
-    let forEachFlag: number = 0;
-    arrayList.forEach((value: number, index: number) => {
+    let forEachCount: int = 0;
+    let forEachFlag: double = 0;
+    arrayList.forEach((value: double, index: int) => {
         if (value != arrayList[forEachCount] || index != forEachCount) {
             forEachFlag = TestData.testNumber1;
         }
@@ -126,11 +126,11 @@ function testForEachFunctionWithValueAndIndex() {
 }
 
 function testForEachFunctionWithValueIndexAndTempArrayList() {
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     initializeArrayList(arrayList, TestData.forNumber);
-    let forEachCount: number = 0;
-    let forEachFlag: number = 0;
-    arrayList.forEach((value: number, index: number, tempArrayList: ArrayList<number>) => {
+    let forEachCount: int = 0;
+    let forEachFlag: double = 0;
+    arrayList.forEach((value: double, index: int, tempArrayList: ArrayList<double>) => {
         arktest.assertEQ(arrayList, tempArrayList, "TempArrayList should be this");
         if (value != arrayList[forEachCount] || index != forEachCount ||
             tempArrayList[forEachCount] != arrayList[forEachCount]) {
@@ -143,10 +143,10 @@ function testForEachFunctionWithValueIndexAndTempArrayList() {
 }
 
 function testForEachChangeElements() {
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     initializeArrayList(arrayList, TestData.forNumber);
 
-    arrayList.forEach((value: number) => {
+    arrayList.forEach((value: double) => {
         value = TestData.testNumber12;
     });
     for (let i: int = 0; i < arrayList.length; i++) {
@@ -155,7 +155,7 @@ function testForEachChangeElements() {
 }
 
 function initializeArrayList<T>(arrayList: ArrayList<T>, sourceArray: T[]) {
-    for (let i = 0; i < sourceArray.length; i++) {
+    for (let i: int = 0; i < sourceArray.length; i++) {
         arrayList.add(sourceArray[i]);
     }
 }

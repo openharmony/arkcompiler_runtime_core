@@ -33,10 +33,10 @@ function main(): int {
 }
 
 function testForEachWithoutReference() {
-    let hashMap: HashMap<string, number> = new HashMap<string, number>();
+    let hashMap: HashMap<string, double> = new HashMap<string, double>();
     hashMap.set("sparrow", 123);
     hashMap.set("gull", 357);
-    let count: number = 0;
+    let count: int = 0;
     hashMap.forEach(() => {
         count++;
     });
@@ -44,23 +44,23 @@ function testForEachWithoutReference() {
 }
 
 function testForEachWithValueReference() {
-    let hashMap: HashMap<string, number> = new HashMap<string, number>();
+    let hashMap: HashMap<string, double> = new HashMap<string, double>();
     hashMap.set("sparrow", 123);
     hashMap.set("gull", 357);
     let flag: boolean = false;
-    hashMap.forEach((value: number) => {
+    hashMap.forEach((value: double) => {
         flag = hashMap.hasValue(value);
         arktest.assertEQ(flag, true, "The hashMap forEach should iterate over all values");
     });
 }
 
 function testForEachWithKeyAndValueReference() {
-    let hashMap: HashMap<string, number> = new HashMap<string, number>();
+    let hashMap: HashMap<string, double> = new HashMap<string, double>();
     hashMap.set("sparrow", 123);
     hashMap.set("gull", 357);
     let flag1: boolean = false;
     let flag2: boolean = false;
-    hashMap.forEach((value: number, key: string) => {
+    hashMap.forEach((value: double, key: string) => {
         flag1 = hashMap.hasValue(value);
         flag2 = hashMap.hasKey(key);
         arktest.assertEQ(flag1, true, "The hashMap forEach should iterate over all values");
@@ -69,12 +69,12 @@ function testForEachWithKeyAndValueReference() {
 }
 
 function testForEachWithThreeReferences() {
-    let hashMap: HashMap<string, number> = new HashMap<string, number>();
+    let hashMap: HashMap<string, double> = new HashMap<string, double>();
     hashMap.set("sparrow", 123);
     hashMap.set("gull", 357);
     let flag1: boolean = false;
     let flag2: boolean = false;
-    hashMap.forEach((value: number, key: string, tempHashMap: HashMap<string, number>) => {
+    hashMap.forEach((value: double, key: string, tempHashMap: HashMap<string, double>) => {
         flag1 = tempHashMap.hasValue(value);
         flag2 = tempHashMap.hasKey(key);
         arktest.assertEQ(flag1, true, "The hashMap forEach should iterate over all values");
@@ -83,7 +83,7 @@ function testForEachWithThreeReferences() {
 }
 
 function testKeysIterator() {
-    let hashMap: HashMap<string, number> = new HashMap<string, number>();
+    let hashMap: HashMap<string, double> = new HashMap<string, double>();
     hashMap.set("sparrow", 123);
     hashMap.set("gull", 357);
     let iteratorSetValues = hashMap.keys();
@@ -94,14 +94,14 @@ function testKeysIterator() {
 }
 
 function testKeysIteratorWithEmptyHashMap() {
-    let hashMap: HashMap<string, number> = new HashMap<string, number>();
+    let hashMap: HashMap<string, double> = new HashMap<string, double>();
     let iteratorSetValues = hashMap.keys();
     arktest.assertTrue(iteratorSetValues.next().done,
         "The hashMap keys iterator.done should true when the hashMap is empty");
 }
 
 function testValuesIterator() {
-    let hashMap: HashMap<string, number> = new HashMap<string, number>();
+    let hashMap: HashMap<string, double> = new HashMap<string, double>();
     hashMap.set("sparrow", 123);
     hashMap.set("gull", 357);
     let iteratorSetValues = hashMap.values();
@@ -112,14 +112,14 @@ function testValuesIterator() {
 }
 
 function testValuesIteratorWithEmptyHashMap() {
-    let hashMap: HashMap<string, number> = new HashMap<string, number>();
+    let hashMap: HashMap<string, double> = new HashMap<string, double>();
     let iteratorSetValues = hashMap.values();
     arktest.assertTrue(iteratorSetValues.next().done,
         "The hashMap values iterator.done should true when the hashMap is empty");
 }
 
 function testIterator() {
-    let hashMap: HashMap<string, number> = new HashMap<string, number>();
+    let hashMap: HashMap<string, double> = new HashMap<string, double>();
     hashMap.set("sparrow", 123);
     hashMap.set("gull", 357);
     hashMap.set("test", 111);
@@ -137,7 +137,7 @@ function testIterator() {
 }
 
 function testIteratorWithEmptyHashMap() {
-    let hashMap: HashMap<string, number> = new HashMap<string, number>();
+    let hashMap: HashMap<string, double> = new HashMap<string, double>();
     let iteratorSetValues = hashMap.$_iterator();
     arktest.assertTrue(iteratorSetValues.next().done,
         "The hashMap iterator.done should true when the hashMap is empty");

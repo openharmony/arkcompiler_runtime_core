@@ -34,9 +34,9 @@ function main() {
 }
 
 class Person {
-    id: number = 0;
+    id: double = 0;
     name: string = '';
-    constructor(id: number, name: string) {
+    constructor(id: double, name: string) {
         this.id = id;
         this.name = name;
     }
@@ -102,19 +102,19 @@ function testBasicOperations(){
 }
 
 function testCustomStringComparatorClearSetAllRemove() {
-    let cmmp: TreeMap<string, number> =
-        new TreeMap<string, number>((firstValue: string, secondValue: string): number => {
+    let cmmp: TreeMap<string, double> =
+        new TreeMap<string, double>((firstValue: string, secondValue: string): double => {
             return firstValue.compareTo(secondValue);
         });
     cmmp.set("aa", 1);
     cmmp.set("bb", 1);
     cmmp.clear();
-    let commap1 = new TreeMap<string, number>();
+    let commap1 = new TreeMap<string, double>();
     commap1.setAll(cmmp);
     arktest.assertEQ(commap1.length, 0);
 
     let commap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return firstValue.compareTo(secondValue);
         });
     commap.set("c","1");
@@ -132,7 +132,7 @@ function testCustomStringComparatorClearSetAllRemove() {
 
 function testCustomObjectKeysComparatorsClearRepopulate() {
     let commap: TreeMap<Person, string> =
-        new TreeMap<Person, string>((firstValue: Person, secondValue: Person): number => {
+        new TreeMap<Person, string>((firstValue: Person, secondValue: Person): double => {
             return firstValue.id - secondValue.id
         });
     let personone = new Person(1,'张三');
@@ -145,7 +145,7 @@ function testCustomObjectKeysComparatorsClearRepopulate() {
     arktest.assertEQ(commap.get(commap.getFirstKey()!), "1");
     commap.clear();
     let commap1: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return secondValue.compareTo(firstValue);
         });
     commap1.set("c","1");
@@ -173,7 +173,7 @@ function testSetClearRepopulateGet() {
 }
 
 function testMultipleSetRemoveSameKeyGet() {
-    let growMap = new TreeMap<string, number>();
+    let growMap = new TreeMap<string, double>();
     const keyStr = 'KEY_TEST_MAP';
     growMap.set(keyStr,21)
     growMap.set(keyStr,68)
@@ -206,7 +206,7 @@ function testEntriesIteratorAndForOfIteration() {
     arktest.assertEQ(iteratorEntries.next().value, undefined);
 
     let arr = ["aa", "bb", "cc"];
-    let i = 0;
+    let i: int = 0;
     for (const item of map) {
         arktest.assertEQ(item[1], arr[i]);
         i++;

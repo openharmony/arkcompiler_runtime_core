@@ -78,7 +78,7 @@ function testForEachOnPopulatedSetAndVerifyWithValuesIterator() {
 
 //Test cases ported from ArkTS 1.0:TREESET_7600
 function testForEachAndVerifyWithValuesIterator() {
-    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string, secondValue: string): number => {
+    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string, secondValue: string): double => {
         return firstValue.compareTo(secondValue)
     });
     treeSet.add('AAA');
@@ -231,7 +231,7 @@ function testEntriesOnPopulatedSetAndVerifyPairs() {
 
 //Test cases ported from ArkTS 1.0:TREESET_8100
 function testEntriesAndVerifyPairs() {
-    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string, secondValue: string): number => {
+    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string, secondValue: string): double => {
         return firstValue.compareTo(secondValue)
     });
     treeSet.add('AAA');

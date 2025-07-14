@@ -36,7 +36,7 @@ function main() {
 
 // Test cases ported from ArkTS 1.0: STACK_LOCATE_01100
 function testStackLocateWithExistingElement() {
-    let stack = new Stack<number | string | object>();
+    let stack = new Stack<double | string | object>();
     let a: C1 = {
         name: "Dylon", age: "13"
     };
@@ -51,7 +51,7 @@ function testStackLocateWithExistingElement() {
 
 // Test cases ported from ArkTS 1.0: STACK_LOCATE_1200
 function testStackLocateWithNonExistingElement() {
-    let stack = new Stack<number>();
+    let stack = new Stack<double>();
     stack.push(1);
     stack.push(2);
     stack.push(3);
@@ -61,7 +61,7 @@ function testStackLocateWithNonExistingElement() {
 
 // Test cases ported from ArkTS 1.0: STACK_LOCATE_1300
 function testStackLocateWithDuplicateElements() {
-    let stack = new Stack<number>();
+    let stack = new Stack<double>();
     stack.push(1);
     stack.push(2);
     stack.push(3);
@@ -72,7 +72,7 @@ function testStackLocateWithDuplicateElements() {
 
 // Test cases ported from ArkTS 1.0: STACK_PUSH_1500
 function testStackLengthAfterPush() {
-    let stack = new Stack<number>();
+    let stack = new Stack<double>();
     stack.push(1);
     stack.push(2);
     stack.push(3);
@@ -82,7 +82,7 @@ function testStackLengthAfterPush() {
 
 // Test cases ported from ArkTS 1.0: STACK_FOREACH_1600
 function testStackForEachWithSingleElement() {
-    let stack = new Stack<number>();
+    let stack = new Stack<double>();
     stack.push(1);
     let count = 0;
     stack.forEach((value) => {
@@ -94,7 +94,7 @@ function testStackForEachWithSingleElement() {
 
 // Test cases ported from ArkTS 1.0: STACK_FOREACH_1700
 function testStackForEachWithValueAndIndexValidation() {
-    let stack = new Stack<number>();
+    let stack = new Stack<double>();
     stack.push(1);
     let count = 0;
     stack.forEach((value, index, stack) => {

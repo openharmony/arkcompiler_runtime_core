@@ -27,12 +27,12 @@ function main() {
 }
 
 function testStackBasicOperations() {
-    let stack = new Stack<number>();
-    let testArray = new Array<number>();
+    let stack = new Stack<double>();
+    let testArray = new Array<double>();
 
     arktest.assertTrue(stack.isEmpty(), "The stack should be empty initially");
 
-    for (let i = 0; i < 10; i++) {
+    for (let i: int = 0; i < 10; i++) {
         stack.push(i);
         testArray.push(i);
     }
@@ -58,11 +58,11 @@ function testStackBasicOperations() {
 }
 
 function testStackPopAndLengthValidation() {
-    let popStack = new Stack<number>();
-    for (let i = 0; i < 10; i++) {
+    let popStack = new Stack<double>();
+    for (let i: int = 0; i < 10; i++) {
         popStack.push(i);
     }
-    for (let i = 9; i >= 0; i--) {
+    for (let i: int = 9; i >= 0; i--) {
         arktest.assertEQ(popStack.pop(), i);
         arktest.assertEQ(popStack.length, i);
     }
@@ -70,12 +70,12 @@ function testStackPopAndLengthValidation() {
 }
 
 function testStackKeyIteration() {
-    let test1 = new Stack<number>();
+    let test1 = new Stack<double>();
     for (let k = 0; k < 10; k++) {
         test1.push(k);
     }
     let keyName = "";
-    let key: number = 0;
+    let key: double = 0;
     for (key in test1) {
         keyName += key;
     }

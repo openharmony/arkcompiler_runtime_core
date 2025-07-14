@@ -39,7 +39,7 @@ function main() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_GETINDEXOF_0100
 function testLinkedListGetIndexOfDuplicateData() {
-    let linkList = new LinkedList<number>();
+    let linkList = new LinkedList<double>();
     linkList.add(1);
     linkList.add(2);
     let index1 = linkList.getIndexOf(2);
@@ -53,7 +53,7 @@ function testLinkedListGetIndexOfDuplicateData() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_GETINDEXOF_0200
 function testLinkedListGetIndexOfAddRemove() {
-    let linkList = new LinkedList<number>();
+    let linkList = new LinkedList<double>();
     linkList.add(1);
     linkList.add(2);
     linkList.add(2);
@@ -69,7 +69,7 @@ function testLinkedListGetIndexOfAddRemove() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_GETINDEXOF_0300
 function testLinkedListGetIndexOfRemoveFirstReAdd() {
-    let linkList = new LinkedList<number>();
+    let linkList = new LinkedList<double>();
     linkList.add(1);
     linkList.add(2);
     linkList.add(3);
@@ -82,7 +82,7 @@ function testLinkedListGetIndexOfRemoveFirstReAdd() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_GETINDEXOF_0400
 function testLinkedListGetIndexOfRemoveLastReAdd() {
-    let linkList = new LinkedList<number>();
+    let linkList = new LinkedList<double>();
     linkList.add(1);
     linkList.add(2);
     linkList.add(3);
@@ -95,7 +95,7 @@ function testLinkedListGetIndexOfRemoveLastReAdd() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_GETLASTINDEXOF_0100
 function testLinkedListGetLastIndexOfDuplicateData() {
-    let linkList = new LinkedList<number>();
+    let linkList = new LinkedList<double>();
     linkList.add(1);
     linkList.add(2);
     let index1 = linkList.getLastIndexOf(2);
@@ -109,7 +109,7 @@ function testLinkedListGetLastIndexOfDuplicateData() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_GETLASTINDEXOF_0200
 function testLinkedListGetLastIndexOfAddRemove() {
-    let linkList = new LinkedList<number>();
+    let linkList = new LinkedList<double>();
     linkList.add(1);
     linkList.add(2);
     linkList.add(2);
@@ -125,7 +125,7 @@ function testLinkedListGetLastIndexOfAddRemove() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_GETLASTINDEXOF_0300
 function testLinkedListGetLastIndexOfRemoveFirstReAdd() {
-    let linkList = new LinkedList<number>();
+    let linkList = new LinkedList<double>();
     linkList.add(1);
     linkList.add(2);
     linkList.add(3);
@@ -138,7 +138,7 @@ function testLinkedListGetLastIndexOfRemoveFirstReAdd() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_GETLASTINDEXOF_0400
 function testLinkedListGetLastIndexOfRemoveLastReAdd() {
-    let linkList = new LinkedList<number>();
+    let linkList = new LinkedList<double>();
     linkList.add(1);
     linkList.add(2);
     linkList.add(3);
@@ -151,7 +151,7 @@ function testLinkedListGetLastIndexOfRemoveLastReAdd() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_GETLASTINDEXOF_0500
 function testLinkedListGetAndRemoveFirstFound() {
-    let linkList = new LinkedList<number>();
+    let linkList = new LinkedList<double>();
     linkList.add(1);
     linkList.add(2);
     linkList.add(3);

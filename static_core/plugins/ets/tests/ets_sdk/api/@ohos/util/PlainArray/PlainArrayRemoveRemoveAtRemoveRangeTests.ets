@@ -16,8 +16,8 @@
 import { PlainArray } from "@ohos.util.PlainArray";
 import { BusinessError } from "@ohos.base";
 
-const TypeErrorCodeId: number = 401;
-const OutOfBoundsErrorCodeId: number = 10200001;
+const TypeErrorCodeId: int = 401;
+const OutOfBoundsErrorCodeId: int = 10200001;
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("PlainArray API tests");
@@ -25,7 +25,6 @@ function main(): int {
     suite.addTest("PlainArray remove with exist key", testRemoveWithExistKey);
     suite.addTest("PlainArray remove with non-exist key", testRemoveWithNonExistKey);
     suite.addTest("PlainArray remove empty container", testRemoveWithEmpty);
-    suite.addTest("PlainArray remove out-of-range key", testRemoveOutOfRangeKey);
     suite.addTest("PlainArray removeAt by valid index", testRemoveAtValidIndex);
     suite.addTest("PlainArray removeAt by boundary index", testRemoveAtBoundaryIndex);
     suite.addTest("PlainArray removeAt by exceeded index", testRemoveAtExceededIndex);
@@ -40,17 +39,17 @@ function main(): int {
 }
 
 function initializePlainArray<T>(plainArray: PlainArray<T>, sourceArray: T[]) {
-    for (let i = 0; i < sourceArray.length; i++) {
+    for (let i: int = 0; i < sourceArray.length; i++) {
         plainArray.add(i, sourceArray[i]);
     }
 }
 
 class TestData {
-    static readonly testNumber1: number = 1;
-    static readonly testNumber2: number = 2;
-    static readonly testNumber3: number = 3;
-    static readonly testNumber4: number = 4;
-    static readonly testNumber6: number = 6;
+    static readonly testNumber1: double | int = 1;
+    static readonly testNumber2: double | int = 2;
+    static readonly testNumber3: double | int = 3;
+    static readonly testNumber4: double | int = 4;
+    static readonly testNumber6: double | int = 6;
     static readonly testString1: string = "0:0,1:2,2:2,4:4";
     static readonly testString2: string = "0:0,1:2,2:2,3:3,4:4";
     static readonly testString3: string = "1:2,2:2,3:3";
@@ -61,14 +60,14 @@ class TestData {
 }
 
 function testRemoveWithExistKey() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber2);
     arktest.assertEQ(plainArray.remove(TestData.testNumber3), TestData.testNumber3, "The result should be removed value");
     arktest.assertEQ(plainArray.toString(), TestData.testString1, "The removed sequence is normal");
 }
 
 function testRemoveWithNonExistKey() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber2);
     arktest.assertEQ(plainArray.remove(TestData.testNumber6), undefined,
         "The result should be undefined when key is not exist");
@@ -76,32 +75,21 @@ function testRemoveWithNonExistKey() {
 }
 
 function testRemoveWithEmpty() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     arktest.assertEQ(plainArray.remove(TestData.testNumber1), undefined,
         "The result should be undefined when container is empty");
     arktest.assertEQ(plainArray.length, 0, "The sequence should not change");
 }
 
-function testRemoveOutOfRangeKey() {
-    let plainArray = new PlainArray<number>();
-    plainArray.add(TestData.testNumber1, TestData.testNumber1);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message ==
-            "The type of \"key\" must be small integer. Received value is: 2147483648") &&
-            ((e as BusinessError).code == TypeErrorCodeId);
-    }
-    arktest.expectThrow(() => {plainArray.remove(2147483648)}, exceptionCheck);
-}
-
 function testRemoveAtValidIndex() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber2);
     arktest.assertEQ(plainArray.removeAt(TestData.testNumber3), TestData.testNumber3, "The result should be removed value");
     arktest.assertEQ(plainArray.toString(), TestData.testString1, "The removed sequence is normal");
 }
 
 function testRemoveAtBoundaryIndex() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber2);
     arktest.assertEQ(plainArray.removeAt(TestData.testNumber4), TestData.testNumber4, "The result should be removed value");
     arktest.assertEQ(plainArray.removeAt(0), 0, "The result should be removed value");
@@ -109,19 +97,19 @@ function testRemoveAtBoundaryIndex() {
 }
 
 function testRemoveAtExceededIndex() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber2);
     arktest.assertEQ(plainArray.removeAt(-TestData.testNumber1), undefined);
     arktest.assertEQ(plainArray.removeAt(TestData.testNumber6), undefined);
 }
 
 function testRemoveAtWithEmpty() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     arktest.assertEQ(plainArray.removeAt(0), undefined);
 }
 
 function testRangeFromValidRange() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber2);
     arktest.assertEQ(plainArray.removeRangeFrom(TestData.testNumber2, TestData.testNumber2), TestData.testNumber2,
         "The result should be 2");
@@ -129,7 +117,7 @@ function testRangeFromValidRange() {
 }
 
 function testRangeFromExceededRange() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber2);
     arktest.assertEQ(plainArray.removeRangeFrom(TestData.testNumber2, TestData.testNumber6), TestData.testNumber3,
         "The result should be 3");
@@ -137,7 +125,7 @@ function testRangeFromExceededRange() {
 }
 
 function testRangeFromExceededIndex() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber2);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
@@ -155,7 +143,7 @@ function testRangeFromExceededIndex() {
 }
 
 function testRangeFromWithEmpty() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
@@ -165,9 +153,9 @@ function testRangeFromWithEmpty() {
 }
 
 function testRangeFromWithDouble() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber2);
-    arktest.assertEQ(plainArray.removeRangeFrom(TestData.testNumber2, Math.floor(TestData.testDouble)), TestData.testNumber3,
+    arktest.assertEQ(plainArray.removeRangeFrom(TestData.testNumber2, Math.floor(TestData.testDouble).toInt()), TestData.testNumber3,
         "The result should be 3");
     arktest.assertEQ(plainArray.toString(), TestData.testString5, "The removed sequence is normal");
 }

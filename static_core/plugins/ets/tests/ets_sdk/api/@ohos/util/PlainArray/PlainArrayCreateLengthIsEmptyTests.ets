@@ -16,7 +16,7 @@
 import { PlainArray } from "@ohos.util.PlainArray";
 import { BusinessError } from "@ohos.base";
 
-const TypeErrorCodeId: number = 401;
+const TypeErrorCodeId: int = 401;
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("PlainArray API tests");
@@ -30,47 +30,45 @@ function main(): int {
     suite.addTest("PlainArray isEmpty is true", testIsEmptyInitially);
     suite.addTest("PlainArray has", testHasWithExisting);
     suite.addTest("PlainArray has with inexistent key", testHasWithNonExisting);
-    suite.addTest("PlainArray has out-of-range key", testHasOutOfRangeKey);
-
     return suite.run();
 }
 
 function initializePlainArray<T>(plainArray: PlainArray<T>, sourceArray: T[]) {
-    for (let i = 0; i < sourceArray.length; i++) {
+    for (let i: int = 0; i < sourceArray.length; i++) {
         plainArray.add(i, sourceArray[i]);
     }
 }
 
 class Temp {
-    age: number = 0;
+    age: double = 0;
     name: string = "";
 }
 
 class TestData {
-    static readonly testNumber1: number = 1;
-    static readonly testNumber2: number = 2;
-    static readonly testNumber3: number = 3;
-    static readonly testNumber4: number = 4;
-    static readonly testNumber5: number = 5;
-    static readonly testNumber6: number = 6;
-    static readonly testNumber1w: number = 10000;
+    static readonly testNumber1: double | int = 1;
+    static readonly testNumber2: double | int = 2;
+    static readonly testNumber3: double | int = 3;
+    static readonly testNumber4: double | int = 4;
+    static readonly testNumber5: double | int = 5;
+    static readonly testNumber6: double | int = 6;
+    static readonly testNumber1w: double | int = 10000;
     static readonly testString1: string = "squirrel";
     static readonly testObject1: Temp = { age: 10, name: "li" };
     static readonly forNumber1: Number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 }
 
 function testCreateSingleTypeInstance() {
-    let plainArray: PlainArray<number>;
-    arktest.expectNoThrow(() => {plainArray = new PlainArray<number>()});
+    let plainArray: PlainArray<double>;
+    arktest.expectNoThrow(() => {plainArray = new PlainArray<double>()});
 }
 
 function testCreateCompositeTypeContainer() {
-    let plainArray: PlainArray<number | string | boolean | object | null | undefined>;
-    arktest.expectNoThrow(() => {plainArray = new PlainArray<number | string | boolean | object | null | undefined>()});
+    let plainArray: PlainArray<double | string | boolean | object | null | undefined>;
+    arktest.expectNoThrow(() => {plainArray = new PlainArray<double | string | boolean | object | null | undefined>()});
 }
 
 function testLengthSyncSingleType() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     arktest.assertEQ(plainArray.length, 0, "PlainArray length should be 0");
     initializePlainArray(plainArray, TestData.forNumber1);
     arktest.assertEQ(plainArray.length, TestData.forNumber1.length,
@@ -80,7 +78,7 @@ function testLengthSyncSingleType() {
 }
 
 function testLengthSyncMultiType() {
-    let plainArray = new PlainArray<number | string | boolean | null | object | undefined>();
+    let plainArray = new PlainArray<double | string | boolean | null | object | undefined>();
     arktest.assertEQ(plainArray.length, 0, "PlainArray length should be 0");
     plainArray.add(TestData.testNumber1, TestData.testNumber1);
     plainArray.add(TestData.testNumber2, TestData.testString1);
@@ -95,15 +93,15 @@ function testLengthSyncMultiType() {
 }
 
 function testLengthWithLargeValue() {
-    let plainArray = new PlainArray<number>();
-    for (let i: number = 0; i < TestData.testNumber1w; i++) {
+    let plainArray = new PlainArray<double>();
+    for (let i: int = 0; i < TestData.testNumber1w; i++) {
         plainArray.add(i, TestData.testNumber1);
     }
     arktest.assertEQ(plainArray.length, TestData.testNumber1w, "PlainArray length should be 10000 after adding elements");
 }
 
 function testIsEmptyAfterAddingElement() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber1);
     arktest.assertFalse(plainArray.isEmpty(), "The plainArray should not be empty");
     arktest.assertEQ(plainArray.length, TestData.forNumber1.length,
@@ -111,15 +109,15 @@ function testIsEmptyAfterAddingElement() {
 }
 
 function testIsEmptyInitially() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     arktest.assertTrue(plainArray.isEmpty(), "The plainArray should be empty");
     arktest.assertEQ(plainArray.length, 0, "The plainArray length should be 0");
 }
 
 function testHasWithExisting() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber1);
-    for (let i = 0; i < plainArray.length; i++) {
+    for (let i: int = 0; i < plainArray.length; i++) {
         arktest.assertEQ(plainArray.getKeyAt(i), i, "The key should be exist");
         arktest.assertEQ(plainArray.getValueAt(i), TestData.forNumber1[i], "The value should be exist");
     }
@@ -127,22 +125,11 @@ function testHasWithExisting() {
 }
 
 function testHasWithNonExisting() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber1);
-    for (let i = 0; i < plainArray.length; i++) {
+    for (let i: int = 0; i < plainArray.length; i++) {
         arktest.assertEQ(plainArray.getKeyAt(i), i, "The key should be exist");
         arktest.assertEQ(plainArray.getValueAt(i), TestData.forNumber1[i], "The value should be exist");
     }
     arktest.assertFalse(plainArray.has(TestData.testNumber1w), "The plainArray should not contain the key");
-}
-
-function testHasOutOfRangeKey() {
-    let plainArray = new PlainArray<number>();
-    plainArray.add(TestData.testNumber1, TestData.testNumber1);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message ==
-            "The type of \"key\" must be small integer. Received value is: 2147483648") &&
-            ((e as BusinessError).code == TypeErrorCodeId);
-    }
-    arktest.expectThrow(() => {plainArray.has(2147483648)}, exceptionCheck);
 }

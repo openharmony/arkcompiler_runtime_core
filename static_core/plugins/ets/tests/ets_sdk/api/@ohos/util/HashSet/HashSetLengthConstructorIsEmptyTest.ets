@@ -34,20 +34,20 @@ function main(): int {
 
 //Test cases ported from ArkTS 1.0:HASHSET_LENGTH_0100
 function testLengthOnNewSet() {
-    const hashSet = new HashSet<number>();
+    const hashSet = new HashSet<double>();
     arktest.assertEQ(hashSet.length, 0);
 }
 
 //Test cases ported from ArkTS 1.0:HASHSET_LENGTH_0200
 function testLengthAfterAdd() {
-    const hashSet = new HashSet<number>();
+    const hashSet = new HashSet<double>();
     hashSet.add(1);
     arktest.assertEQ(hashSet.length, 1);
 }
 
 //Test cases ported from ArkTS 1.0:HASHSET_LENGTH_0300
 function testLengthAfterRACSequence() {
-    const hashSet = new HashSet<number>();
+    const hashSet = new HashSet<double>();
     hashSet.remove(1);
     arktest.assertFalse(hashSet.has(1),
         "Expected HashSet.has(1) to return false as 1 was not added or removed from an empty set");
@@ -59,7 +59,7 @@ function testLengthAfterRACSequence() {
 
 //Test cases ported from ArkTS 1.0:HASHSET_LENGTH_0400
 function testLengthWithDuplicates() {
-    const hashSet = new HashSet<number>();
+    const hashSet = new HashSet<double>();
     hashSet.add(1);
     hashSet.add(1);
     arktest.assertEQ(hashSet.length, 1);
@@ -67,7 +67,7 @@ function testLengthWithDuplicates() {
 
 //Test cases ported from ArkTS 1.0:HASHSET_CONSTRUCTOR_0100
 function testConstructorAndAddSimpleType() {
-    const hashSet = new HashSet<number>();
+    const hashSet = new HashSet<double>();
     hashSet.add(1);
     arktest.assertEQ(hashSet.length, 1);
 }
@@ -89,20 +89,20 @@ function testConstructorAndAddCustomType() {
 
 //Test cases ported from ArkTS 1.0:HASHSET_IS_EMPTY_0100
 function testIsEmptyOnNewSet() {
-    const hashSet = new HashSet<number>();
+    const hashSet = new HashSet<double>();
     arktest.assertTrue(hashSet.isEmpty(), "Expected HashSet to be empty after initialization");
 }
 
 //Test cases ported from ArkTS 1.0:HASHSET_IS_EMPTY_0200
 function testIsEmptyAfterAdd() {
-    const hashSet = new HashSet<number>();
+    const hashSet = new HashSet<double>();
     hashSet.add(1);
     arktest.assertFalse(hashSet.isEmpty(), "Expected HashSet to not be empty after adding an element");
 }
 
 //Test cases ported from ArkTS 1.0:HASHSET_IS_EMPTY_0300
 function testIsEmptyAfterAddRemove() {
-    const hashSet = new HashSet<number>();
+    const hashSet = new HashSet<double>();
     hashSet.add(1);
     hashSet.remove(1);
     arktest.assertFalse(hashSet.has(1), "Expected HashSet.has(1) to return false after removing 1");
@@ -111,7 +111,7 @@ function testIsEmptyAfterAddRemove() {
 
 //Test cases ported from ArkTS 1.0:HASHSET_IS_EMPTY_0400
 function testIsEmptyAfterAddClear() {
-    const hashSet = new HashSet<number>();
+    const hashSet = new HashSet<double>();
     hashSet.add(1);
     hashSet.clear();
     arktest.assertTrue(hashSet.isEmpty(), "Expected HashSet to be empty after clearing all elements");

@@ -67,11 +67,11 @@ function testAddDataStringLength2048() {
 }
 
 function testAddDataLoop1000() {
-    let hashSet: HashSet<number | null> = new HashSet<number | null>();
-    for (let i = 0; i < 1000; i++) {
+    let hashSet: HashSet<double | null> = new HashSet<double | null>();
+    for (let i: int = 0; i < 1000; i++) {
         hashSet.add(i);
     }
-    for (let i = 0; i < hashSet.length; i++) {
+    for (let i: int = 0; i < hashSet.length; i++) {
         let result = hashSet.has(i);
         arktest.assertEQ(result, true, "The hashSet should contain the added value");
     }

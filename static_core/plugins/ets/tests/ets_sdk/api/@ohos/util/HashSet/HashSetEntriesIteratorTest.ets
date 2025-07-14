@@ -32,7 +32,7 @@ function main(): int {
 
 //Test cases ported from ArkTS 1.0:HASHSET_ENTRIES_0100
 function testEntriesEmptySet() {
-    const hashSet = new HashSet<number>();
+    const hashSet = new HashSet<double>();
     let entries = hashSet.entries();
     let temp = entries.next();
     arktest.assertTrue(temp.done, "Expected iterator to be done for an empty set");
@@ -40,7 +40,7 @@ function testEntriesEmptySet() {
 
 //Test cases ported from ArkTS 1.0:HASHSET_ENTRIES_0200
 function testEntriesNonEmptySet() {
-    const hashSet = new HashSet<number>();
+    const hashSet = new HashSet<double>();
     hashSet.add(1);
     hashSet.add(2);
     hashSet.add(3);
@@ -57,7 +57,7 @@ function testEntriesNonEmptySet() {
 
 //Test cases ported from ArkTS 1.0:HASHSET_ENTRIES_0300
 function testEntriesAddDuringIteration() {
-    const hashSet = new HashSet<number>();
+    const hashSet = new HashSet<double>();
     hashSet.add(1);
     let entries = hashSet.entries();
     let temp = entries.next();
@@ -73,7 +73,7 @@ function testEntriesAddDuringIteration() {
 
 //Test cases ported from ArkTS 1.0:HASHSET_ENTRIES_0400
 function testEntriesClearDuringIteration() {
-    const hashSet = new HashSet<number>();
+    const hashSet = new HashSet<double>();
     hashSet.add(1);
     let entries = hashSet.entries();
     let temp = entries.next();
@@ -86,20 +86,20 @@ function testEntriesClearDuringIteration() {
 
 //Test cases ported from ArkTS 1.0:HASHSET_SYMBOL_ITERATOR_0100
 function testSymbolIteratorEmptySet() {
-    const hashSet = new HashSet<number>();
+    const hashSet = new HashSet<double>();
     let iter = hashSet.$_iterator();
-    let temp: IteratorResult<number> = iter.next();
+    let temp: IteratorResult<double> = iter.next();
     arktest.assertTrue(temp.done, "Expected iterator to be done for an empty set");
 }
 
 //Test cases ported from ArkTS 1.0:HASHSET_SYMBOL_ITERATOR_0200
 function testSymbolIteratorNonEmptySet() {
-    const hashSet = new HashSet<number>();
+    const hashSet = new HashSet<double>();
     hashSet.add(1);
     hashSet.add(2);
     hashSet.add(3);
     let iter = hashSet.$_iterator();
-    let temp: IteratorResult<number>;
+    let temp: IteratorResult<double>;
     for (let index = 1; index <= 3; index++) {
         temp = iter.next();
         arktest.assertFalse(temp.done, `Iteration ${index}: done should be false`);

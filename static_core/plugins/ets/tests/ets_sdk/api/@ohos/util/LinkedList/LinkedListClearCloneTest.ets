@@ -36,7 +36,7 @@ function main() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_REMOVELASTFOUND_0100
 function testLinkedListRemoveLastFoundMultiple() {
-    let linkList = new LinkedList<number>();
+    let linkList = new LinkedList<double>();
     linkList.add(2);
     let index1 = linkList.getLastIndexOf(2);
     linkList.add(2);
@@ -52,14 +52,14 @@ function testLinkedListRemoveLastFoundMultiple() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_REMOVELASTFOUND_0200
 function testLinkedListRemoveLastFoundNonExisting() {
-    let linkList = new LinkedList<number>();
+    let linkList = new LinkedList<double>();
     arktest.assertFalse(linkList.removeLastFound(2),
         "The removeLastFound method should return false for a non-existing element");
 }
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_CLONE_0100
 function testLinkedListCloneVerifyValues() {
-    let linkList = new LinkedList<number>();
+    let linkList = new LinkedList<double>();
     linkList.add(2);
     linkList.add(3);
     linkList.add(4);
@@ -71,7 +71,7 @@ function testLinkedListCloneVerifyValues() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_CLONE_0200
 function testLinkedListCloneInsert() {
-    let linkList = new LinkedList<number>();
+    let linkList = new LinkedList<double>();
     linkList.add(2);
     linkList.add(3);
     linkList.add(4);
@@ -85,7 +85,7 @@ function testLinkedListCloneInsert() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_CLONE_0300
 function testLinkedListCloneRemoveFirstFound() {
-    let linkList = new LinkedList<number>();
+    let linkList = new LinkedList<double>();
     linkList.add(2);
     linkList.add(3);
     linkList.add(4);
@@ -99,7 +99,7 @@ function testLinkedListCloneRemoveFirstFound() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_CLONE_0400
 function testLinkedListCloneAddFirst() {
-    let linkList = new LinkedList<number>();
+    let linkList = new LinkedList<double>();
     linkList.add(2);
     linkList.add(3);
     linkList.add(4);
@@ -113,7 +113,7 @@ function testLinkedListCloneAddFirst() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_CLONE_0500
 function testLinkedListCloneForEach() {
-    let linkList = new LinkedList<number>();
+    let linkList = new LinkedList<double>();
     linkList.add(2);
     linkList.add(3);
     linkList.add(4);
@@ -125,7 +125,7 @@ function testLinkedListCloneForEach() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_CLONE_0600
 function testLinkedListClearClonedList() {
-    let linkList = new LinkedList<number>();
+    let linkList = new LinkedList<double>();
     linkList.add(2);
     linkList.add(3);
     linkList.add(4);
@@ -138,7 +138,7 @@ function testLinkedListClearClonedList() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_CLONE_0700
 function testLinkedListClearOriginalList() {
-    let linkList = new LinkedList<number>();
+    let linkList = new LinkedList<double>();
     linkList.add(2);
     linkList.add(3);
     linkList.add(4);

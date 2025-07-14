@@ -33,7 +33,7 @@ function main() {
 }
 
 function testLightWeightSetComprehensiveFunctionality() {
-    let lightWeightSet = new LightWeightSet<number>();
+    let lightWeightSet = new LightWeightSet<double>();
     arktest.assertTrue(lightWeightSet.isEmpty(), "Expected new LightWeightSet to be empty");
     lightWeightSet.add(1);
     lightWeightSet.add(2);
@@ -50,8 +50,8 @@ function testLightWeightSetComprehensiveFunctionality() {
     arktest.assertEQ(iteratorValues1.next().value, undefined);
 
     let itemArr = [1, 2, 3]
-    let item: number = 0;
-    let i = 0;
+    let item: double = 0;
+    let i: int = 0;
     for (item in lightWeightSet) {
         arktest.assertEQ(item, itemArr[i]);
         i++;
@@ -62,7 +62,7 @@ function testLightWeightSetComprehensiveFunctionality() {
         arktest.assertTrue(lightWeightSet.has(value), "Expected set to have the value during forEach iteration");
     });
 
-    let dlightWeightSet = new LightWeightSet<number>();
+    let dlightWeightSet = new LightWeightSet<double>();
     dlightWeightSet.add(4);
     dlightWeightSet.add(5);
     dlightWeightSet.add(6);
@@ -88,9 +88,9 @@ function testLightWeightSetComprehensiveFunctionality() {
 
 function testToArraySnapshotBehaviorAndArrayLengthAfterAdditions() {
     let LOOP_COUNT = 5;
-    let myTest = new LightWeightSet<number>();
+    let myTest = new LightWeightSet<double>();
 
-    for (let i = 0; i < LOOP_COUNT; i++) {
+    for (let i: int = 0; i < LOOP_COUNT; i++) {
         myTest.add(i);
     }
 
@@ -106,12 +106,12 @@ function testGetValueAtRemoveAtWithFlooredNonIntegerIndices() {
     let myLs = new LightWeightSet<string>();
     myLs.add("a");
     myLs.add("b");
-    arktest.assertEQ(myLs.getValueAt(Math.floor(1.5)), "b");
-    arktest.assertTrue(myLs.removeAt(Math.floor(1.5)), "Expected removeAt(1) to return true");
+    arktest.assertEQ(myLs.getValueAt(Math.floor(1.5).toInt()), "b");
+    arktest.assertTrue(myLs.removeAt(Math.floor(1.5).toInt()), "Expected removeAt(1) to return true");
 }
 
 function testEntriesIteratorAndForOfIterationBehavior() {
-    let lightWeightSet = new LightWeightSet<number>();
+    let lightWeightSet = new LightWeightSet<double>();
 
     lightWeightSet.add(1);
     lightWeightSet.add(2);
@@ -132,7 +132,7 @@ function testEntriesIteratorAndForOfIterationBehavior() {
 }
 
 function testEntriesVerifyingKeyEqualsValueForEachEntry() {
-    let lightWeightSeten = new LightWeightSet<number>();
+    let lightWeightSeten = new LightWeightSet<double>();
     lightWeightSeten.add(1);
     lightWeightSeten.add(2);
     lightWeightSeten.add(3);

@@ -39,10 +39,10 @@ function main(): int {
 }
 
 function testForEachNoReference() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 357);
-    let count: number = 0;
+    let count: int = 0;
     lightWeightMap.forEach(() => {
         count++;
     });
@@ -50,23 +50,23 @@ function testForEachNoReference() {
 }
 
 function testForEachValueReference() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 357);
     let flag: boolean = false;
-    lightWeightMap.forEach((value: number) => {
+    lightWeightMap.forEach((value: double) => {
         flag = lightWeightMap.hasValue(value);
         arktest.assertEQ(flag, true, "The lightWeightMap forEach should iterate over all values");
     });
 }
 
 function testForEachKeyValueReference() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 357);
     let flag1: boolean = false;
     let flag2: boolean = false;
-    lightWeightMap.forEach((value: number, key: string) => {
+    lightWeightMap.forEach((value: double, key: string) => {
         flag1 = lightWeightMap.hasValue(value);
         flag2 = lightWeightMap.hasKey(key);
         arktest.assertEQ(flag1, true, "The lightWeightMap forEach should iterate over all values");
@@ -75,12 +75,12 @@ function testForEachKeyValueReference() {
 }
 
 function testForEachThreeReferences() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 357);
     let flag1: boolean = false;
     let flag2: boolean = false;
-    lightWeightMap.forEach((value: number, key: string, lightWeightMap: LightWeightMap<string, number>) => {
+    lightWeightMap.forEach((value: double, key: string, lightWeightMap: LightWeightMap<string, double>) => {
         flag1 = lightWeightMap.hasValue(value);
         flag2 = lightWeightMap.hasKey(key);
         arktest.assertEQ(flag1, true, "The lightWeightMap forEach should iterate over all elements with three references");
@@ -89,7 +89,7 @@ function testForEachThreeReferences() {
 }
 
 function testKeysIterator() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 357);
     let iteratorSetValues = lightWeightMap.keys();
@@ -101,14 +101,14 @@ function testKeysIterator() {
 }
 
 function testKeysIteratorWithEmptyMap() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     let iteratorSetValues = lightWeightMap.keys();
     arktest.assertTrue(iteratorSetValues.next().done,
         "The lightWeightMap keys iterator.done should true for an empty map");
 }
 
 function testValuesIterator() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 357);
     let iteratorSetValues = lightWeightMap.values();
@@ -119,7 +119,7 @@ function testValuesIterator() {
 }
 
 function testValuesIteratorWithEmptyMap() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     let iteratorSetValues = lightWeightMap.values();
     arktest.assertTrue(iteratorSetValues.next().done,
         "The lightWeightMap values iterator.done should true for an empty map");

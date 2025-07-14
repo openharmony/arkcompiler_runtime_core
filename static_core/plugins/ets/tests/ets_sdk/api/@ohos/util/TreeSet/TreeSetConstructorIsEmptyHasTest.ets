@@ -32,7 +32,7 @@ function main(): int {
     suite.addTest("Test has() for an empty string on an empty TreeSet.", testHasEmptyStringOnEmptySet)
     suite.addTest("Test has() for an empty string on a TreeSet containing a different element.",
         testHasEmptyStringOnNonEmptySetWithoutIt)
-    suite.addTest("Test has() for a number on an empty TreeSet.", testHasNumberOnEmptySet)
+    suite.addTest("Test has() for a double on an empty TreeSet.", testHasNumberOnEmptySet)
     suite.addTest("Test has() for an existing element in a TreeSet.", testHasExistingElement)
     suite.addTest("Test has() for a non-existing element in a TreeSet.", testHasNonExistingElement)
     suite.addTest("Test has() and length after multiple add, remove, and clear operations.",
@@ -43,7 +43,7 @@ function main(): int {
 
 //Test cases ported from ArkTS 1.0:TREESET_0100
 function testConstructorAndAddSingleElement() {
-    const treeSet = new TreeSet<number>();
+    const treeSet = new TreeSet<double>();
     treeSet.add(65536);
     arktest.assertEQ(treeSet.length, 1);
 }
@@ -51,7 +51,7 @@ function testConstructorAndAddSingleElement() {
 //Test cases ported from ArkTS 1.0:TREESET_0200
 function testConstructorWithCustomComparatorAndAddElements() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return firstValue.compareTo(secondValue) });
+        secondValue: string): double => { return firstValue.compareTo(secondValue) });
     treeSet.add('AAA');
     treeSet.add('BBB');
     treeSet.add('CCC');
@@ -65,7 +65,7 @@ class TestEntry {
 //Test cases ported from ArkTS 1.0:TREESET_0300
 function testConstructorWithCustomObjectsAndCustomComparator() {
 
-    let ts1: TreeSet<TestEntry> = new TreeSet<TestEntry>((t1: TestEntry, t2: TestEntry): number => {
+    let ts1: TreeSet<TestEntry> = new TreeSet<TestEntry>((t1: TestEntry, t2: TestEntry): double => {
         return t1.id - t2.id;
     });
     let entry1: TestEntry = {
@@ -95,7 +95,7 @@ function testConstructorWithCustomObjectsAndDefaultComparator() {
 
 //Test cases ported from ArkTS 1.0:TREESET_0500
 function testIsEmptyOnNewSet() {
-    const treeSet = new TreeSet<string | number | boolean | Object>();
+    const treeSet = new TreeSet<string | double | boolean | Object>();
     let result = treeSet.isEmpty();
     arktest.assertTrue(result, "Expected isEmpty() to return true for a new TreeSet");
 }
@@ -119,14 +119,14 @@ function testIsEmptyAfterAddAndRemove() {
 
 //Test cases ported from ArkTS 1.0:TREESET_0800
 function testHasEmptyStringOnEmptySet() {
-    let treeSet = new TreeSet<string | number | boolean | Object>();
+    let treeSet = new TreeSet<string | double | boolean | Object>();
     let result = treeSet.has("");
     arktest.assertFalse(result, "Expected has('') to return false for an empty TreeSet");
 }
 
 //Test cases ported from ArkTS 1.0:TREESET_0900
 function testHasEmptyStringOnNonEmptySetWithoutIt() {
-    let treeSet = new TreeSet<string | number | boolean | Object>();
+    let treeSet = new TreeSet<string | double | boolean | Object>();
     treeSet.add("squirrel");
     let result = treeSet.has("");
     arktest.assertFalse(result, "Expected has('') to return false when the TreeSet contains 'squirrel' but not ''");
@@ -134,7 +134,7 @@ function testHasEmptyStringOnNonEmptySetWithoutIt() {
 
 //Test cases ported from ArkTS 1.0:TREESET_1400
 function testHasNumberOnEmptySet() {
-    let treeSet = new TreeSet<string | number | boolean | Object>();
+    let treeSet = new TreeSet<string | double | boolean | Object>();
     let result = treeSet.has(123);
     arktest.assertFalse(result, "Expected has(123) to return false for an empty TreeSet");
 }

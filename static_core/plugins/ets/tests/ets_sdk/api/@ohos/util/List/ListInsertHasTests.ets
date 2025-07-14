@@ -16,7 +16,7 @@
 import {List} from '@ohos.util.List';
 
 class Temp {
-    age: number = 0
+    age: double = 0
     name: string = ""
 }
 
@@ -35,7 +35,7 @@ function main() {
 
 // Test cases ported from ArkTS 1.0: LIST_INSERT_0100
 function testInsertAndValidateWithGetIndexOf() {
-    let list = new List<number | string>();
+    let list = new List<double | string>();
     let param = "!\"#$%'()+,-./:;<=>?@[\\]^_`{|}~";
     list.insert(1, 0);
     list.insert(2, 1);
@@ -48,7 +48,7 @@ function testInsertAndValidateWithGetIndexOf() {
 
 // Test cases ported from ArkTS 1.0: LIST_INSERT_0200
 function testInsertAddAndValidateWithGetLastIndexOf() {
-    let list = new List<number | string>();
+    let list = new List<double | string>();
     let param = "!\"#$%'()+,-./:;<=>?@[\\]^_`{|}~";
     list.insert(1, 0);
     list.insert(2, 1);
@@ -61,7 +61,7 @@ function testInsertAddAndValidateWithGetLastIndexOf() {
 
 // Test cases ported from ArkTS 1.0: LIST_HAS_0100
 function testHasMethodWithVariousDataTypes() {
-    let list = new List<number | string | boolean | undefined | null | Object>();
+    let list = new List<double | string | boolean | undefined | null | Object>();
     list.add("zhang san");
     list.add(1);
     let temp: Temp = {
@@ -76,7 +76,7 @@ function testHasMethodWithVariousDataTypes() {
     let param = "!\"#$%'()+,-./:;<=>?@[\\]^_`{|}~";
     list.add(param);
     arktest.assertTrue(list.has("zhang san"), "The list should contain the string 'zhang san'");
-    arktest.assertTrue(list.has(1), "The list should contain the number 1");
+    arktest.assertTrue(list.has(1), "The list should contain the double 1");
     arktest.assertTrue(list.has(temp), "The list should contain the Temp object");
     arktest.assertTrue(list.has(undefined), "The list should contain 'undefined'");
     arktest.assertTrue(list.has(null), "The list should contain 'null'");
@@ -87,7 +87,7 @@ function testHasMethodWithVariousDataTypes() {
 
 // Test cases ported from ArkTS 1.0: LIST_GET_0100
 function testGetMethodWithVariousDataTypes() {
-    let list = new List<number | string | boolean | undefined | null | Object>();
+    let list = new List<double | string | boolean | undefined | null | Object>();
     list.add("zhang san");
     list.add(1);
     let temp: Temp = {

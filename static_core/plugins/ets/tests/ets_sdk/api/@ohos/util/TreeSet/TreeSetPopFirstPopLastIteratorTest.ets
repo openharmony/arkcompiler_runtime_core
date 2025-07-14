@@ -38,7 +38,7 @@ function main(): int {
 
 function testPopFirstPopLastValidValues() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return secondValue.compareTo(firstValue) });
+        secondValue: string): double => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     treeSet.add("bb");
     treeSet.add("cc");
@@ -56,7 +56,7 @@ function testPopFirstPopLastValidValues() {
 
 function testPopFirstPopLastEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return secondValue.compareTo(firstValue) });
+        secondValue: string): double => { return secondValue.compareTo(firstValue) });
     let result_popFirst = treeSet.popFirst();
     let result_popLast = treeSet.popLast();
     arktest.assertEQ(result_popFirst, undefined, "The treeSet should return undefined for popping first value in an empty set");
@@ -66,7 +66,7 @@ function testPopFirstPopLastEmptyTreeSet() {
 
 function testPopFirstPopLastMultipleValues() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return secondValue.compareTo(firstValue) });
+        secondValue: string): double => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     let result_popFirst = treeSet.popFirst();
     let result_popLast = treeSet.popLast();
@@ -77,7 +77,7 @@ function testPopFirstPopLastMultipleValues() {
 
 function testPopFirstPopLastDescendingOrder() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return firstValue.compareTo(secondValue) });
+        secondValue: string): double => { return firstValue.compareTo(secondValue) });
     treeSet.add("b");
     treeSet.add("c");
     treeSet.add("a");
@@ -91,7 +91,7 @@ function testPopFirstPopLastDescendingOrder() {
 
 function testPopFirstPopLastAfterClear() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return firstValue.compareTo(secondValue) });
+        secondValue: string): double => { return firstValue.compareTo(secondValue) });
     treeSet.add("squirrel");
     treeSet.add("sparrow");
     treeSet.clear();
@@ -110,7 +110,7 @@ function testPopFirstPopLastAfterClear() {
 
 function testIterator() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return secondValue.compareTo(firstValue) });
+        secondValue: string): double => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     treeSet.add("bb");
     let it = treeSet.$_iterator();
@@ -121,7 +121,7 @@ function testIterator() {
 
 function testIteratorEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return secondValue.compareTo(firstValue) });
+        secondValue: string): double => { return secondValue.compareTo(firstValue) });
     let it = treeSet.$_iterator();
     arktest.assertTrue(it.next().done, "The treeSet iterator.done should true when treeSet is empty");
 }

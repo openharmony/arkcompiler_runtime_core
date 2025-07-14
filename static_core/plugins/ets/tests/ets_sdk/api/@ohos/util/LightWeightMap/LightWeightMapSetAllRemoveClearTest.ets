@@ -23,7 +23,7 @@ function main(): int {
     suite.addTest("LightWeightMap remove key", testRemoveExistingKey)
     suite.addTest("LightWeightMap remove not set key", testRemoveNonExistingKey)
     suite.addTest("LightWeightMap remove key from the null LightWeightMap", testRemoveKeyFromEmptyMap)
-    suite.addTest("LightWeightMap remove large number key", testRemoveLargeNumberKey)
+    suite.addTest("LightWeightMap remove large double key", testRemoveLargeNumberKey)
     suite.addTest("LightWeightMap clear data", testClearData)
     suite.addTest("LightWeightMap clear the null LightWeightMap", testClearEmptyMap)
     suite.addTest("LightWeightMap clear data and set data again", testClearAndSetDataAgain)
@@ -32,10 +32,10 @@ function main(): int {
 }
 
 function testSetAllFromMap2ToMap1() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("squirrel", 123);
     lightWeightMap.set("sparrow", 356);
-    let newLightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let newLightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     newLightWeightMap.setAll(lightWeightMap);
     let result = newLightWeightMap.get("sparrow");
     arktest.assertEQ(result, 356, "The newLightWeightMap should return the correct value for the key");
@@ -44,10 +44,10 @@ function testSetAllFromMap2ToMap1() {
 }
 
 function testSetAllFromEmptyMap2ToMap1() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("squirrel", 123);
     lightWeightMap.set("sparrow", 356);
-    let newLightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let newLightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.setAll(newLightWeightMap);
     let result = lightWeightMap.get("sparrow");
     arktest.assertEQ(result, 356, "The lightWeightMap should return the correct value for the key");
@@ -56,7 +56,7 @@ function testSetAllFromEmptyMap2ToMap1() {
 }
 
 function testRemoveExistingKey() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("squirrel", 123);
     let result = lightWeightMap.remove("squirrel");
     arktest.assertEQ(result, 123, "The lightWeightMap should remove the key and return its value");
@@ -64,7 +64,7 @@ function testRemoveExistingKey() {
 }
 
 function testRemoveNonExistingKey() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("squirrel", 123);
     let result = lightWeightMap.remove("test");
     arktest.assertEQ(result, undefined, "The lightWeightMap should return undefined for the key that is not set");
@@ -72,14 +72,14 @@ function testRemoveNonExistingKey() {
 }
 
 function testRemoveKeyFromEmptyMap() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     let result = lightWeightMap.remove("squirrel");
     arktest.assertEQ(result, undefined, "The lightWeightMap should return undefined for the key in an empty map");
     arktest.assertEQ(lightWeightMap.length, 0, "The lightWeightMap length should be 0");
 }
 
 function testRemoveLargeNumberKey() {
-    let lightWeightMap: LightWeightMap<number, string> = new LightWeightMap<number, string>();
+    let lightWeightMap: LightWeightMap<double, string> = new LightWeightMap<double, string>();
     lightWeightMap.set(Number.MAX_VALUE, "squirrel");
     let result = lightWeightMap.remove(Number.MAX_VALUE);
     arktest.assertEQ(result, "squirrel", "The lightWeightMap should remove the key and return its value");
@@ -87,7 +87,7 @@ function testRemoveLargeNumberKey() {
 }
 
 function testClearData() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("squirrel", 123);
     let result1 = lightWeightMap.isEmpty();
     lightWeightMap.clear();
@@ -98,13 +98,13 @@ function testClearData() {
 }
 
 function testClearEmptyMap() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.clear();
     arktest.assertEQ(lightWeightMap.length, 0, "The lightWeightMap length should be 0");
 }
 
 function testClearAndSetDataAgain() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("squirrel", 123);
     lightWeightMap.clear();
     let result = lightWeightMap.isEmpty();

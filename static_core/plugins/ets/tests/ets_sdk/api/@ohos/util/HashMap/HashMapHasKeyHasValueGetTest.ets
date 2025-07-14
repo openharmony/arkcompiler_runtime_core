@@ -40,26 +40,26 @@ function main(): int {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_HAS_KEY_0100
 function testHasKeyEmptyMapEmptyString() {
-    const hashMap = new HashMap<string, number>();
+    const hashMap = new HashMap<string, double>();
     arktest.assertFalse(hashMap.hasKey(""), "hasKey('') on an empty HashMap should return false");
 }
 
 //Test cases ported from ArkTS 1.0:HASHMAP_HAS_KEY_0400
 function testHasKeyEmptyMapNonExistentKey() {
-    const hashMap = new HashMap<string, number>();
+    const hashMap = new HashMap<string, double>();
     arktest.assertFalse(hashMap.hasKey('key'), "hasKey('key') on an empty HashMap should return false");
 }
 
 //Test cases ported from ArkTS 1.0:HASHMAP_HAS_KEY_0500
 function testHasKeyPopulatedMapExistingKey() {
-    const hashMap = new HashMap<string, number>();
+    const hashMap = new HashMap<string, double>();
     hashMap.set("ji", 1);
     arktest.assertTrue(hashMap.hasKey('ji'), "hasKey('ji') should return true when the key exists");
 }
 
 //Test cases ported from ArkTS 1.0:HASHMAP_HAS_KEY_0600
 function testHasKeyPopulatedMapNonExistentKey() {
-    const hashMap = new HashMap<string, number>();
+    const hashMap = new HashMap<string, double>();
     hashMap.set("ji", 1);
     arktest.assertFalse(hashMap.hasKey('li'), "hasKey('li') should return false when the key does not exist");
 }

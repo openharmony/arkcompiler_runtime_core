@@ -16,7 +16,7 @@
 import { PlainArray } from "@ohos.util.PlainArray";
 import { BusinessError } from "@ohos.base";
 
-const TypeErrorCodeId: number = 401;
+const TypeErrorCodeId: int = 401;
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("PlainArray API tests");
@@ -28,35 +28,34 @@ function main(): int {
     suite.addTest("PlainArray add to composite-type container", testAddCompositeType);
     suite.addTest("PlainArray add same key", testAddSameKey);
     suite.addTest("PlainArray add same value", testAddSameValue);
-    suite.addTest("PlainArray add special number", testAddSpecialNumber);
-    suite.addTest("PlainArray add out-of-range key", testAddOutOfRangeKey);
+    suite.addTest("PlainArray add special double", testAddSpecialNumber);
 
     return suite.run();
 }
 
 function initializePlainArray<T>(plainArray: PlainArray<T>, sourceArray: T[]) {
-    for (let i = 0; i < sourceArray.length; i++) {
+    for (let i: int = 0; i < sourceArray.length; i++) {
         plainArray.add(i, sourceArray[i]);
     }
 }
 
 class Tmp {
-  age: number = 0;
+  age: double = 0;
 
-  constructor(age: number) {
+  constructor(age: double) {
     this.age = age;
   }
 }
 
 class TestData {
-    static readonly testNumber1: number = 1;
-    static readonly testNumber2: number = 2;
-    static readonly testNumber3: number = 3;
-    static readonly testNumber4: number = 4;
-    static readonly testNumber5: number = 5;
-    static readonly testNumber6: number = 6;
-    static readonly testNumberMax: number = 2147483647;
-    static readonly testNumberMin: number = -2147483648;
+    static readonly testNumber1: double | int = 1;
+    static readonly testNumber2: double | int = 2;
+    static readonly testNumber3: double | int = 3;
+    static readonly testNumber4: double | int = 4;
+    static readonly testNumber5: double | int = 5;
+    static readonly testNumber6: double | int = 6;
+    static readonly testNumberMax: double | int = 2147483647;
+    static readonly testNumberMin: double | int = -2147483648;
     static readonly testString1: string = "squirrel";
     static readonly testString2: string = "1:1,2:squirrel,3:false,4:[object Object],5:null,6:undefined";
     static readonly testString3: string = "1:1,2:1";
@@ -65,21 +64,21 @@ class TestData {
 }
 
 function testCloneWithNonEmpty() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber2);
     let clonePlainArray = plainArray.clone();
     arktest.assertEQ(plainArray.toString(), clonePlainArray.toString(), "The elements of both containers should be same");
 }
 
 function testCloneWithEmpty() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     let clonePlainArray = plainArray.clone();
     arktest.assertEQ(plainArray.length, clonePlainArray.length, "The length should be same as original plainArray");
     arktest.assertEQ(clonePlainArray.length, 0, "The length should be 0");
 }
 
 function testCloneWithChanging() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber2);
     let clonePlainArray = plainArray.clone();
     arktest.assertEQ(plainArray.toString(), clonePlainArray.toString(), "The elements of both containers should be same");
@@ -90,13 +89,13 @@ function testCloneWithChanging() {
 }
 
 function testAddSingleType() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     plainArray.add(TestData.testNumber1, TestData.testNumber1);
     arktest.assertEQ(plainArray.length, TestData.testNumber1, "PlainArray length should be 1");
 }
 
 function testAddCompositeType() {
-    let plainArray = new PlainArray<number | string | boolean | object | null | undefined>();
+    let plainArray = new PlainArray<double | string | boolean | object | null | undefined>();
     plainArray.add(TestData.testNumber1, TestData.testNumber1);
     plainArray.add(TestData.testNumber2, TestData.testString1);
     plainArray.add(TestData.testNumber3, false);
@@ -109,7 +108,7 @@ function testAddCompositeType() {
 }
 
 function testAddSameKey() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     plainArray.add(TestData.testNumber1, TestData.testNumber1);
     plainArray.add(TestData.testNumber1, TestData.testNumber2);
     arktest.assertEQ(plainArray.length, TestData.testNumber1, "PlainArray length should be 1");
@@ -118,7 +117,7 @@ function testAddSameKey() {
 }
 
 function testAddSameValue() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     plainArray.add(TestData.testNumber1, TestData.testNumber1);
     plainArray.add(TestData.testNumber2, TestData.testNumber1);
     arktest.assertEQ(plainArray.length, TestData.testNumber2, "PlainArray length should be 2");
@@ -126,7 +125,7 @@ function testAddSameValue() {
 }
 
 function testAddSpecialNumber() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     plainArray.add(-TestData.testNumber1, TestData.testNumber1);
     plainArray.add(0, TestData.testNumber1);
     plainArray.add(TestData.testNumberMax, TestData.testNumber1);
@@ -135,14 +134,4 @@ function testAddSpecialNumber() {
     arktest.assertTrue(plainArray.has(0), "The key should be added");
     arktest.assertTrue(plainArray.has(TestData.testNumberMax), "The key should be added");
     arktest.assertTrue(plainArray.has(TestData.testNumberMin), "The key should be added");
-}
-
-function testAddOutOfRangeKey() {
-    let plainArray = new PlainArray<number>();
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message ==
-            "The type of \"key\" must be small integer. Received value is: 2147483648") &&
-            ((e as BusinessError).code == TypeErrorCodeId);
-    }
-    arktest.expectThrow(() => {plainArray.add(2147483648, TestData.testNumber1)}, exceptionCheck);
 }

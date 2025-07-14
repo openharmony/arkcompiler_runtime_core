@@ -16,7 +16,7 @@
 import LightWeightMap from "@ohos.util.LightWeightMap";
 import { BusinessError } from "@ohos.base";
 
-const OutOfBoundsErrorCodeId: number = 10200001;
+const OutOfBoundsErrorCodeId: int = 10200001;
 
 //Test cases ported from ArkTS 1.0:container_lightweightmap.js
 function main() {
@@ -50,7 +50,7 @@ function testGeneralFunctionalities() {
     arktest.assertEQ(map.getIndexOfKey("a"), 0);
     arktest.assertEQ(map.getIndexOfValue("bb"), 1);
     arktest.assertEQ(map.getKeyAt(1), "b");
-    arktest.assertEQ(map.getKeyAt(Math.floor(1.3)), "b");
+    arktest.assertEQ(map.getKeyAt(Math.floor(1.3).toInt()), "b");
     let iteratorKey1 = map.keys();
     arktest.assertEQ(iteratorKey1.next().value, "a");
     arktest.assertEQ(iteratorKey1.next().value, "b");
@@ -82,15 +82,15 @@ function testGeneralFunctionalities() {
     arktest.assertTrue(dmap.setValueAt(dmap.getIndexOfKey("d"), "ee"),
         "Expected setValueAt(indexOf('d'), 'ee') to be true");
     arktest.assertEQ(dmap.getValueAt(dmap.getIndexOfKey("d")), "ee");
-    arktest.assertEQ(dmap.getValueAt(Math.floor(0)), "cc");
-    arktest.assertEQ(dmap.getValueAt(Math.floor(1)), "ee");
-    arktest.assertTrue(dmap.setValueAt(Math.floor(1.3), "ff"), "Expected setValueAt(Math.floor(1.3), 'ff') to be true");
-    arktest.assertEQ(dmap.getValueAt(Math.floor(1.3)), "ff");
+    arktest.assertEQ(dmap.getValueAt(Math.floor(0).toInt()), "cc");
+    arktest.assertEQ(dmap.getValueAt(Math.floor(1).toInt()), "ee");
+    arktest.assertTrue(dmap.setValueAt(Math.floor(1.3).toInt(), "ff"), "Expected setValueAt(Math.floor(1.3).toInt(), 'ff') to be true");
+    arktest.assertEQ(dmap.getValueAt(Math.floor(1.3).toInt()), "ff");
     arktest.assertEQ(dmap.toString(), "c:cc,d:ff,e:ee");
-    arktest.assertTrue(dmap.removeAt(Math.floor(1.3)), "Expected removeAt(Math.floor(1.3)) to return true");
+    arktest.assertTrue(dmap.removeAt(Math.floor(1.3).toInt()), "Expected removeAt(Math.floor(1.3).toInt()) to return true");
     arktest.assertEQ(dmap.length, 2);
     dmap.increaseCapacityTo(20)
-    dmap.increaseCapacityTo(Math.floor(1.3));
+    dmap.increaseCapacityTo(Math.floor(1.3).toInt());
     dmap.clear();
     arktest.assertEQ(dmap.length, 0);
 }
@@ -118,11 +118,11 @@ function testIndexAccessWithFlooredNumbers() {
     let myLm = new LightWeightMap<string, string>();
     myLm.set("a", "aa");
     myLm.set("b", "bb");
-    arktest.assertEQ(myLm.getKeyAt(Math.floor(1.5)), "b");
-    arktest.assertEQ(myLm.getValueAt(Math.floor(1.5)), "bb");
-    arktest.assertTrue(myLm.setValueAt(Math.floor(1.5), "cc"),
-        "Expected setValueAt(Math.floor(1.5), 'cc') to return true");
-    arktest.assertTrue(myLm.removeAt(Math.floor(1.5)), "Expected removeAt(Math.floor(1.5)) to return true");
+    arktest.assertEQ(myLm.getKeyAt(Math.floor(1.5).toInt()), "b");
+    arktest.assertEQ(myLm.getValueAt(Math.floor(1.5).toInt()), "bb");
+    arktest.assertTrue(myLm.setValueAt(Math.floor(1.5).toInt(), "cc"),
+        "Expected setValueAt(Math.floor(1.5).toInt(), 'cc') to return true");
+    arktest.assertTrue(myLm.removeAt(Math.floor(1.5).toInt()), "Expected removeAt(Math.floor(1.5).toInt()) to return true");
 }
 
 function testEntriesIteratorAndForOf() {

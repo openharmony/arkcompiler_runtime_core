@@ -36,19 +36,19 @@ function main() {
 }
 
 class TestData {
-    static readonly testNumber1: number = 1;
-    static readonly testNumber2: number = 2;
-    static readonly testNumber3: number = 3;
-    static readonly testNumber4: number = 4;
-    static readonly testNumber5: number = 5;
-    static readonly testNumber6: number = 6;
-    static readonly testNumber8: number = 8;
+    static readonly testNumber1: double | int = 1;
+    static readonly testNumber2: double | int = 2;
+    static readonly testNumber3: double | int = 3;
+    static readonly testNumber4: double | int = 4;
+    static readonly testNumber5: double | int = 5;
+    static readonly testNumber6: double | int = 6;
+    static readonly testNumber8: double | int = 8;
     static readonly forNumber: Number[] = [17, 3, 22, 8, 29, 11, 5, 19, 2, 26, 14, 7, 28, 10, 1, 24, 16, 13,
         21, 6, 27, 18, 4, 25, 12, 23, 9, 15, 20, 30];
 }
 
 function testLocateWithUniqueElement() {
-    let stack = new Stack<number>();
+    let stack = new Stack<double>();
     stack.push(TestData.testNumber1);
     stack.push(TestData.testNumber2);
     stack.push(TestData.testNumber3);
@@ -60,7 +60,7 @@ function testLocateWithUniqueElement() {
 }
 
 function testLocateWithRepeatedElement() {
-    let stack = new Stack<number>();
+    let stack = new Stack<double>();
     stack.push(TestData.testNumber1);
     stack.push(TestData.testNumber2);
     stack.push(TestData.testNumber3);
@@ -72,7 +72,7 @@ function testLocateWithRepeatedElement() {
 }
 
 function testLocateWithInexistentElement() {
-    let stack = new Stack<number>();
+    let stack = new Stack<double>();
     stack.push(TestData.testNumber1);
     stack.push(TestData.testNumber2);
     stack.push(TestData.testNumber3);
@@ -82,9 +82,9 @@ function testLocateWithInexistentElement() {
 }
 
 function testForEachNoParameter() {
-    let stack = new Stack<number>();
+    let stack = new Stack<double>();
     initializeStack(stack, TestData.forNumber);
-    let forEachCount: number = 0;
+    let forEachCount: int = 0;
     stack.forEach(() => {
         forEachCount++;
     });
@@ -92,10 +92,10 @@ function testForEachNoParameter() {
 }
 
 function testForEachWithValue() {
-    let stack = new Stack<number>();
+    let stack = new Stack<double>();
     initializeStack(stack, TestData.forNumber);
     let forEachCount: int = 0;
-    stack.forEach((value: number) => {
+    stack.forEach((value: double) => {
         arktest.assertEQ(value, TestData.forNumber[forEachCount], "ForEach should iterate elements in correct order");
         forEachCount++;
     });
@@ -103,10 +103,10 @@ function testForEachWithValue() {
 }
 
 function testForEachWithValueAndIndex() {
-    let stack = new Stack<number>();
+    let stack = new Stack<double>();
     initializeStack(stack, TestData.forNumber);
     let forEachCount: int = 0;
-    stack.forEach((value: number, index: number) => {
+    stack.forEach((value: double, index: int) => {
         arktest.assertEQ(value, TestData.forNumber[forEachCount], "ForEach should iterate elements in correct order");
         arktest.assertEQ(index, forEachCount, "ForEach should iterate elements in correct order");
         forEachCount++;
@@ -115,10 +115,10 @@ function testForEachWithValueAndIndex() {
 }
 
 function testForEachWithValueIndexAndStack() {
-    let stack = new Stack<number>();
+    let stack = new Stack<double>();
     initializeStack(stack, TestData.forNumber);
     let forEachCount: int = 0;
-    stack.forEach((value: number, index: number, tempStack: Stack<number>) => {
+    stack.forEach((value: double, index: int, tempStack: Stack<double>) => {
         arktest.assertEQ(stack, tempStack, "TempStack should be this");
         arktest.assertEQ(value, TestData.forNumber[forEachCount], "ForEach should iterate elements in correct order");
         arktest.assertEQ(index, forEachCount, "ForEach should iterate elements in correct order");
@@ -130,39 +130,39 @@ function testForEachWithValueIndexAndStack() {
 }
 
 function testForEachWithChangingElements() {
-    let stack = new Stack<number>();
+    let stack = new Stack<double>();
     initializeStack(stack, TestData.forNumber);
 
-    stack.forEach((value: number) => {
+    stack.forEach((value: double) => {
         value = 0;
     });
 
     let forEachCount: int = 0;
-    stack.forEach((value: number) => {
+    stack.forEach((value: double) => {
         arktest.assertEQ(value, TestData.forNumber[forEachCount], "ForEach should iterate elements in correct order");
         forEachCount++;
     });
 }
 
 function testIsEmptyWithEmpty() {
-    let stack = new Stack<number>();
+    let stack = new Stack<double>();
     arktest.assertTrue(stack.isEmpty(), "The container should be empty");
 }
 
 function testIsEmptyWithNonEmpty() {
-    let stack = new Stack<number>();
+    let stack = new Stack<double>();
     initializeStack(stack, TestData.forNumber);
     arktest.assertFalse(stack.isEmpty(), "The container should not be empty");
 }
 
 function testIteratorWithEmptyStack() {
-    let stack = new Stack<number>();
-    let elem: number = 0;
+    let stack = new Stack<double>();
+    let elem: double = 0;
     for (let item of stack) {
         elem = TestData.testNumber1;
     }
     let iter = stack.$_iterator();
-    let temp: IteratorResult<number> = iter.next();
+    let temp: IteratorResult<double> = iter.next();
     while (!temp.done) {
         elem = TestData.testNumber1;
     }
@@ -170,18 +170,18 @@ function testIteratorWithEmptyStack() {
 }
 
 function testIterator() {
-    let stack = new Stack<number>();
-    for (let i: number = TestData.testNumber1; i < TestData.testNumber6; i++) {
+    let stack = new Stack<double>();
+    for (let i: int = TestData.testNumber1; i < TestData.testNumber6; i++) {
         stack.push(i);
     }
-    let elem1: number = TestData.testNumber1;
+    let elem1: int = TestData.testNumber1;
     for (let item of stack) {
         arktest.assertEQ(item, elem1++, "Iterator should iterate elements in correct order");
     }
     arktest.assertEQ(elem1, TestData.testNumber6, "Iterator should iterate all elements correctly");
     let iter = stack.$_iterator();
-    let temp: IteratorResult<number> = iter.next();
-    let elem2: number = TestData.testNumber1;
+    let temp: IteratorResult<double> = iter.next();
+    let elem2: int = TestData.testNumber1;
     while (!temp.done) {
         arktest.assertEQ(temp.value, elem2++, "Iterator should iterate elements in correct order");
         temp = iter.next();
@@ -190,7 +190,7 @@ function testIterator() {
 }
 
 function testInterfaceComposition() {
-    let stack = new Stack<number>();
+    let stack = new Stack<double>();
     arktest.assertTrue(stack.isEmpty(), "Stack is empty");
 
     initializeStack(stack, TestData.forNumber);
@@ -200,7 +200,7 @@ function testInterfaceComposition() {
     arktest.assertEQ(stack.locate(TestData.testNumber2), TestData.testNumber8,
         "Locate should return the correct index of the element");
 
-    let forEachCount: number = 0;
+    let forEachCount: int = 0;
     stack.forEach(() => {
         forEachCount++;
     });
@@ -208,7 +208,7 @@ function testInterfaceComposition() {
 }
 
 function initializeStack<T>(stack: Stack<T>, sourceArray: T[]) {
-    for (let i = 0; i < sourceArray.length; i++) {
+    for (let i: int = 0; i < sourceArray.length; i++) {
         arktest.assertEQ(stack.push(sourceArray[i]), sourceArray[i], "The result should be the added element");
     }
 }

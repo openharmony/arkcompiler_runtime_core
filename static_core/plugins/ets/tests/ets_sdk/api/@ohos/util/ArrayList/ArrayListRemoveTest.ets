@@ -16,10 +16,10 @@
 import {ArrayList} from "@ohos.util.ArrayList";
 import {BusinessError} from "@ohos.base";
 
-const OutOfBoundsErrorCodeId: number = 10200001;
+const OutOfBoundsErrorCodeId: int = 10200001;
 
 class Temp {
-    age: number = 0;
+    age: double = 0;
     name: string = "";
 }
 
@@ -38,7 +38,7 @@ function main() {
 }
 
 function testArrayListRemoveByIndexOf0001() {
-    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
     Object>();
     arrayList.add("zhang san");
     arrayList.add(1);
@@ -66,7 +66,7 @@ function testArrayListRemoveByIndexOf0001() {
 }
 
 function testArrayListRemoveByIndexOf0002() {
-    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
     Object>();
     arrayList.add("zhang san");
     arrayList.add(1);
@@ -98,7 +98,7 @@ function testArrayListRemoveByIndexOf0002() {
 }
 
 function testArrayListRemoveByIndexOf0003() {
-    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
     Object>();
     arrayList.add("zhang san");
     arrayList.add(1);
@@ -124,7 +124,7 @@ function testArrayListRemoveByIndexOf0003() {
 }
 
 function testArrayListRemove0001() {
-    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
     Object>();
     arrayList.add("zhang san");
     arrayList.add(1);
@@ -163,7 +163,7 @@ function testArrayListRemove0001() {
 }
 
 function testArrayListRemove0002() {
-    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
     Object>();
     arrayList.add("zhang san");
     arrayList.add(1);
@@ -202,7 +202,7 @@ function testArrayListRemove0002() {
 }
 
 function testArrayListRemoveByRange0001() {
-    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
     Object>();
     arrayList.add("zhang san");
     arrayList.add(1);
@@ -228,7 +228,7 @@ function testArrayListRemoveByRange0001() {
 }
 
 function testArrayListRemoveByRange0002() {
-    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
     Object>();
     arrayList.add("zhang san");
     arrayList.add(1);

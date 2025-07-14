@@ -16,7 +16,7 @@
 import {ArrayList} from "@ohos.util.ArrayList";
 
 class Temp {
-    age: number = 0;
+    age: double = 0;
     name: string = "";
 }
 
@@ -37,19 +37,19 @@ function main() {
 }
 
 function testArrayListLength0001() {
-    const arrayList = new ArrayList<number>();
+    const arrayList = new ArrayList<double>();
     arktest.assertEQ(arrayList.length, 0, "The length of a newly created ArrayList should be 0");
 }
 
 function testArrayListConstructor0001() {
-    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | bigint | Int8Array |
+    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | bigint | Int8Array |
     Int16Array | Int32Array | undefined | null | Uint8Array | Uint16Array | Uint32Array |
     BigInt64Array | BigUint64Array>();
     arktest.assertEQ(arrayList.length, 0, "The length of a newly created ArrayList with various data types should be 0");
 }
 
 function testArrayListAdd0001() {
-    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
     Object>();
     arrayList.add("zhang san");
     arrayList.add(1);
@@ -70,14 +70,14 @@ function testArrayListAdd0001() {
     arktest.assertEQ(arrayList[3], undefined, "The fourth element should be undefined");
     arktest.assertEQ(arrayList[4], null, "The fifth element should be null");
     arktest.assertEQ(arrayList[5], true, "The sixth element should be true");
-    for (let i = 0; i < 4; i++) {
+    for (let i: int = 0; i < 4; i++) {
         arktest.assertEQ((arrayList[6]! as Array<int>)[i], [0, 1, 2, 4][i],
             `The element at index ${i} of the seventh element should be ${[0, 1, 2, 4][i]}`);
     }
 }
 
 function testArrayListAdd0002() {
-    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
     Object>();
     arrayList.add("");
     arrayList.add("`");
@@ -91,7 +91,7 @@ function testArrayListAdd0002() {
 }
 
 function testArrayListInsert0001() {
-    let arrayList = new ArrayList<number | string>();
+    let arrayList = new ArrayList<double | string>();
     arrayList.add("zhang");
     arrayList.insert("start", 0);
     arrayList.insert("end", arrayList.length);
@@ -104,7 +104,7 @@ function testArrayListInsert0001() {
 }
 
 function testArrayListInsert0002() {
-    let arrayList = new ArrayList<number | string>();
+    let arrayList = new ArrayList<double | string>();
     arrayList.insert("`", 0);
     arrayList.insert("%", 1);
     arrayList.insert(`"`, 2);
@@ -120,7 +120,7 @@ function testArrayListInsert0002() {
 }
 
 function testArrayListHas0001() {
-    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
     Object>();
     arrayList.add("zhang san");
     arrayList.add(1);
@@ -138,7 +138,7 @@ function testArrayListHas0001() {
     arrayList.add("%");
     arrayList.add(`"`);
     arktest.assertTrue(arrayList.has("zhang san"), "The ArrayList should contain 'zhang san'");
-    arktest.assertTrue(arrayList.has(1), "The ArrayList should contain the number 1");
+    arktest.assertTrue(arrayList.has(1), "The ArrayList should contain the double 1");
     arktest.assertTrue(arrayList.has(temp), "The ArrayList should contain the Temp object");
     arktest.assertTrue(arrayList.has(undefined), "The ArrayList should contain undefined");
     arktest.assertTrue(arrayList.has(null), "The ArrayList should contain null");
@@ -160,7 +160,7 @@ function testArrayListHas0001() {
     arrayList.remove("%");
     arrayList.remove(`"`);
     arktest.assertFalse(arrayList.has("zhang san"), "The ArrayList should not contain 'zhang san' after removal");
-    arktest.assertFalse(arrayList.has(1), "The ArrayList should not contain the number 1 after removal");
+    arktest.assertFalse(arrayList.has(1), "The ArrayList should not contain the double 1 after removal");
     arktest.assertFalse(arrayList.has(temp), "The ArrayList should not contain the Temp object after removal");
     arktest.assertFalse(arrayList.has(undefined), "The ArrayList should not contain undefined after removal");
     arktest.assertFalse(arrayList.has(null), "The ArrayList should not contain null after removal");
@@ -173,7 +173,7 @@ function testArrayListHas0001() {
 }
 
 function testArrayListGetIndexOf0001() {
-    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
     Object>();
     arrayList.add("zhang san");
     arrayList.add(1);
@@ -195,16 +195,16 @@ function testArrayListGetIndexOf0001() {
     let index1 = arrayList.getIndexOf("zhang san");
     arktest.assertEQ(index1, 0, "The index of 'zhang san' should be 0");
     let index2 = arrayList.getIndexOf(1);
-    arktest.assertEQ(index2, 1, "The index of the number 1 should be 1");
+    arktest.assertEQ(index2, 1, "The index of the double 1 should be 1");
     arrayList.remove(1);
     arrayList.remove("zhang san");
     arktest.assertTrue(arrayList.has("zhang san"),
         "The ArrayList should still contain 'zhang san' after removing another instance");
-    arktest.assertTrue(arrayList.has(1), "The ArrayList should still contain the number 1 after removing another instance");
+    arktest.assertTrue(arrayList.has(1), "The ArrayList should still contain the double 1 after removing another instance");
 }
 
 function testArrayListGetLastIndexOf0001() {
-    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
     Object>();
     arrayList.add("zhang san");
     arrayList.add(1);
@@ -226,10 +226,10 @@ function testArrayListGetLastIndexOf0001() {
     let index1 = arrayList.getLastIndexOf("zhang san");
     arktest.assertEQ(index1, 11, "The last index of 'zhang san' should be 11");
     let index2 = arrayList.getLastIndexOf(1);
-    arktest.assertEQ(index2, 12, "The last index of the number 1 should be 12");
+    arktest.assertEQ(index2, 12, "The last index of the double 1 should be 12");
     arrayList.remove(1);
     arrayList.remove("zhang san");
     arktest.assertTrue(arrayList.has("zhang san"),
         "The ArrayList should still contain 'zhang san' after removing another instance");
-    arktest.assertTrue(arrayList.has(1), "The ArrayList should still contain the number 1 after removing another instance");
+    arktest.assertTrue(arrayList.has(1), "The ArrayList should still contain the double 1 after removing another instance");
 }

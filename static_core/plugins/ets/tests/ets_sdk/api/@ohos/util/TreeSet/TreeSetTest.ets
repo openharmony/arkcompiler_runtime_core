@@ -31,16 +31,16 @@ function main() {
 }
 
 class c {
-    n: number = 0;
-    constructor(a: number) {
+    n: double = 0;
+    constructor(a: double) {
         this.n = a;
     }
 }
 
 class Person {
-    id: number = 0;
+    id: double = 0;
     name: string = '';
-    constructor(id: number, name: string) {
+    constructor(id: double, name: string) {
         this.id = id;
         this.name = name;
     }
@@ -72,7 +72,7 @@ function testBasicOperations() {
 
     let itemArr = ["aa", "bb", "cc"]
     let item: string;
-    let i = 0;
+    let i: int = 0;
     for (item in treeSet) {
         arktest.assertEQ(item, itemArr[i]);
         i++;
@@ -103,12 +103,12 @@ function testBasicOperations() {
 
 function testCustomStringComparatorsAddRemove() {
     let cmmp = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return firstValue.compareTo(secondValue) });
+        secondValue: string): double => { return firstValue.compareTo(secondValue) });
     cmmp.add("aa");
     cmmp.add("bb");
 
     let comtreeSet =  new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return secondValue.compareTo(firstValue) });
+        secondValue: string): double => { return secondValue.compareTo(firstValue) });
     comtreeSet.add("c");
     comtreeSet.add("a");
     comtreeSet.add("b");
@@ -124,7 +124,7 @@ function testCustomStringComparatorsAddRemove() {
 
 function testCustomObjectComparatorClearRepopulateStrings() {
     let comtreeSet =  new TreeSet<Person>((firstValue: Person,
-        secondValue: Person): number => {return secondValue.id - firstValue.id});
+        secondValue: Person): double => {return secondValue.id - firstValue.id});
     let personone = new Person(3,'张三');
     let persontwo = new Person(1,'李四');
     let personsec = new Person(2,'王五');
@@ -134,7 +134,7 @@ function testCustomObjectComparatorClearRepopulateStrings() {
     arktest.assertEQ(comtreeSet.getFirstValue()!.id, 1);
     comtreeSet.clear();
     let comtreeSet1 =  new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return firstValue.compareTo(secondValue) });
+        secondValue: string): double => { return firstValue.compareTo(secondValue) });
     comtreeSet1.add("c");
     comtreeSet1.add("a");
     comtreeSet1.add("b");
@@ -148,7 +148,7 @@ function testCustomObjectComparatorClearRepopulateStrings() {
 }
 
 function testCustomObjectComparatorGetHigherLowerValue() {
-    let newtreeSet = new TreeSet<c>((x: c, y: c): number => y.n - x.n);
+    let newtreeSet = new TreeSet<c>((x: c, y: c): double => y.n - x.n);
     newtreeSet.add(new c(3));
     let tmp_c = new c(5);
     newtreeSet.add(tmp_c);
@@ -170,7 +170,7 @@ function testEntriesIteratorAndForOfLoop() {
     arktest.assertEQ(iteratorSetEntries.next().value, undefined);
 
     let arr = ["aa", "bb", "cc"];
-    let i = 0;
+    let i: int = 0;
     for (const item of treeSet) {
         arktest.assertEQ(item, arr[i]);
         i++;

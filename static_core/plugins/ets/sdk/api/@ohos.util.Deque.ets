@@ -15,18 +15,10 @@
 
 import { BusinessError } from "@ohos.base";
 
-const TypeErrorCodeId: number = 401;
-const OutOfBoundsErrorCodeId: number = 10200001;
+const TypeErrorCodeId: int = 401;
+const OutOfBoundsErrorCodeId: int = 10200001;
 
-export type DequeforEachCb<T> = (value: T, index: number, deque: Deque<T>) => void;
-
-function createBusinessError(code: number, message: string) {
-    let err = new BusinessError();
-    err.code = code;
-    err.name = 'BusinessError';
-    err.message = message;
-    return err;
-}
+export type DequeforEachCb<T> = (value: T, index: int, deque: Deque<T>) => void;
 
 export default class Deque<T> implements Iterable<T>, JsonReplacer {
     private readonly DEFAULT_CAPACITY = 8;
@@ -48,7 +40,7 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
     /**
      * property: The number of elements in the ArrayList.
      */
-    get length(): number {
+    get length(): int {
         return (this.rear - this.front + this.capacity) % this.capacity;
     }
 
@@ -236,7 +228,7 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
      * @throws { BusinessError } 10200001 - The value of "index" is out of range. It must be >= 0 && <= ${length - 1}.
      *  Received value is: ${index}
      */
-    public $_get(index: number): T {
+    public $_get(index: int): T {
         this.checkEmptyContainer();
         if (index > Int.MAX_VALUE) {
             throw new BusinessError(TypeErrorCodeId, new Error(`The type of \"index\" must be small integer.`));
@@ -255,13 +247,13 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
      * @throws { BusinessError } 10200001 - The value of "index" is out of range. It must be >= 0 && <= ${length - 1}.
      *  Received value is: ${index}
      */
-    public $_set(index: number, val: T): void {
+    public $_set(index: int, val: T): void {
         this.checkIndex(index);
 
         this.buffer[this.getRealIndex(index)] = val;
     }
 
-    private getRealIndex(index: number): number {
+    private getRealIndex(index: int): int {
         return (this.front + index) % this.capacity;
     }
 
@@ -271,7 +263,7 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
         }
     }
 
-    private checkIndex(index: number): void {
+    private checkIndex(index: int): void {
         if (index < 0) {
             throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"index\" is out of range. It must be >= 0 && <= ${this.length - 1}. Received value is: ${index}`));
         }

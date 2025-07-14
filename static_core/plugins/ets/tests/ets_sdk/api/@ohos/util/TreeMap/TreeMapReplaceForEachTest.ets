@@ -49,21 +49,21 @@ function main(): int {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_6800
 function testReplaceWithEmptyStringKeyOnEmptyMap() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     let result = treeMap.replace("", 123);
     arktest.assertFalse(result, "Expected replace on an empty map with an empty string key to return false");
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_7100
 function testReplaceWithNonExistingKeyOnEmptyMap() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     let result = treeMap.replace('key', 123);
     arktest.assertFalse(result, "Expected replace on an empty map with a non-existing key to return false");
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_7200
 function testReplaceWithExistingKeySameValue() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set("sparrow", 123);
     let result = treeMap.replace("sparrow", 123);
     let result1 = treeMap.get("sparrow");
@@ -73,7 +73,7 @@ function testReplaceWithExistingKeySameValue() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_7300
 function testReplaceWithExistingKeyDifferentValue() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set("sparrow", 123);
     let result = treeMap.replace("sparrow", 456);
     let result1 = treeMap.get("sparrow");
@@ -83,7 +83,7 @@ function testReplaceWithExistingKeyDifferentValue() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_7400
 function testReplaceWithNonExistingKeyOnNonEmptyMap() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set("sparrow", 123);
     let result = treeMap.replace("sparrow1", 456);
     let result1 = treeMap.get("sparrow1");
@@ -93,9 +93,9 @@ function testReplaceWithNonExistingKeyOnNonEmptyMap() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_8500
 function testForEachOnEmptyMap() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     let count = 0;
-    treeMap.forEach((value?: number, key?: string): void => {
+    treeMap.forEach((value?: double, key?: string): void => {
         count++;
     });
     arktest.assertEQ(count, 0);
@@ -103,13 +103,13 @@ function testForEachOnEmptyMap() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_8600
 function testForEachNaturalOrder() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set('AAA', 123);
     treeMap.set('BBB', 456);
     treeMap.set('CCC', 789);
     treeMap.set('DDD', 666);
     let count = 0;
-    treeMap.forEach((value?: number, key?: string): void => {
+    treeMap.forEach((value?: double, key?: string): void => {
         count++;
     });
     arktest.assertEQ(count, 4);
@@ -125,7 +125,7 @@ function testForEachNaturalOrder() {
 //Test cases ported from ArkTS 1.0:TREEMAP_8700
 function testForEachCustomReverseComparator() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return firstValue.compareTo(secondValue);
         });
     treeMap.set('AAA', '123');
@@ -148,13 +148,13 @@ function testForEachCustomReverseComparator() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_8800
 function testForEachThenRemove() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set('AAA', 123);
     treeMap.set('BBB', 456);
     treeMap.set('CCC', 789);
     treeMap.set('DDD', 666);
     let count = 0;
-    treeMap.forEach((value?: number, key?: string): void => {
+    treeMap.forEach((value?: double, key?: string): void => {
         count++;
     });
     arktest.assertEQ(count, 4);
@@ -169,13 +169,13 @@ function testForEachThenRemove() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_8900
 function testForEachThenReplace() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set('AAA', 123);
     treeMap.set('BBB', 456);
     treeMap.set('CCC', 789);
     treeMap.set('DDD', 666);
     let count = 0;
-    treeMap.forEach((value?: number, key?: string): void => {
+    treeMap.forEach((value?: double, key?: string): void => {
         count++;
     });
     arktest.assertEQ(count, 4);
@@ -191,13 +191,13 @@ function testForEachThenReplace() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_9000
 function testForEachThenClear() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set('AAA', 123);
     treeMap.set('BBB', 456);
     treeMap.set('CCC', 789);
     treeMap.set('DDD', 666);
     let count = 0;
-    treeMap.forEach((value?: number, key?: string): void => {
+    treeMap.forEach((value?: double, key?: string): void => {
         count++;
     });
     arktest.assertEQ(count, 4);
@@ -208,7 +208,7 @@ function testForEachThenClear() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_9700
 function testForEachNoCallbackParamsThenClear() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set('AAA', 123);
     treeMap.set('BBB', 456);
     treeMap.set('CCC', 789);
@@ -225,7 +225,7 @@ function testForEachNoCallbackParamsThenClear() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_9800
 function testForEachOnlyValueCallbackParam() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set('AAA', 123);
     let count = 0;
     treeMap.forEach((value): void => {
@@ -240,10 +240,10 @@ function testForEachOnlyValueCallbackParam() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_9900
 function testForEachCheckValueExistenceThenClear() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set('AAA', 123);
     let count = 0;
-    treeMap.forEach((value, index, treeMap: TreeMap<string, number>): void => {
+    treeMap.forEach((value, index, treeMap: TreeMap<string, double>): void => {
         count++;
         arktest.assertTrue(treeMap.hasValue(value), "Expected TreeMap to have the iterated value");
     });
@@ -255,10 +255,10 @@ function testForEachCheckValueExistenceThenClear() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_100000
 function testForEachCheckValueExistenceAndMapState() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set('AAA', 123);
     let count = 0;
-    treeMap.forEach((value, index, treeMap: TreeMap<string, number>): void => {
+    treeMap.forEach((value, index, treeMap: TreeMap<string, double>): void => {
         count++;
         arktest.assertTrue(treeMap.hasValue(value), "The result should be true");
     });

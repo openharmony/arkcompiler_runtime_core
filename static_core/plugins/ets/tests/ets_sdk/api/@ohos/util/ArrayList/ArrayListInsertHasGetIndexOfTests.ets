@@ -16,8 +16,8 @@
 import {ArrayList} from "@ohos.util.ArrayList";
 import {BusinessError} from "@ohos.base";
 
-const TypeErrorCodeId: number = 401;
-const OutOfBoundsErrorCodeId: number = 10200001;
+const TypeErrorCodeId: int = 401;
+const OutOfBoundsErrorCodeId: int = 10200001;
 
 function main() {
     const suite = new arktest.ArkTestsuite("ArrayList API tests");
@@ -25,8 +25,6 @@ function main() {
     suite.addTest("ArrayList insert", testInsertAtIndex);
     suite.addTest("ArrayList insert with index 0 and length", testInsertAtStartAndEnd);
     suite.addTest("ArrayList insert with negative index", testInsertWithNegativeIndex);
-    suite.addTest("ArrayList insert with double index", testInsertWithDoubleIndex);
-    suite.addTest("ArrayList insert with double index 2", testInsertWithDoubleIndex2);
     suite.addTest("ArrayList has", testHasElement);
     suite.addTest("ArrayList has with inexistent element", testHasNonExistentElement);
     suite.addTest("ArrayList has with every type", testHasVariousTypes);
@@ -38,17 +36,17 @@ function main() {
 }
 
 class Temp {
-    age: number = 0;
+    age: double = 0;
     name: string = "";
 }
 
 class TestData {
-    static readonly testNumber1: number = 1;
-    static readonly testNumber2: number = 2;
-    static readonly testNumber3: number = 3;
-    static readonly testNumber5: number = 5;
-    static readonly testNumber6: number = 6;
-    static readonly testNumber8: number = 8;
+    static readonly testNumber1: double | int = 1;
+    static readonly testNumber2: double | int = 2;
+    static readonly testNumber3: double | int = 3;
+    static readonly testNumber5: double | int = 5;
+    static readonly testNumber6: double | int = 6;
+    static readonly testNumber8: double | int = 8;
     static readonly testString1: string = "string";
     static readonly testString2: string = "";
     static readonly testString3: string = "`";
@@ -65,7 +63,7 @@ class TestData {
 }
 
 function testInsertAtIndex() {
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     initializeArrayList(arrayList, TestData.forNumber);
     arrayList.insert(TestData.testNumber3, TestData.testNumber3);
     for (let i: int = 0; i < arrayList.length; i++) {
@@ -75,7 +73,7 @@ function testInsertAtIndex() {
 }
 
 function testInsertAtStartAndEnd() {
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     initializeArrayList(arrayList, TestData.forNumber);
     arrayList.insert(TestData.testNumber3, 0);
     arrayList.insert(TestData.testNumber3, TestData.testNumber6);
@@ -87,7 +85,7 @@ function testInsertAtStartAndEnd() {
 }
 
 function testInsertWithNegativeIndex() {
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     initializeArrayList(arrayList, TestData.forNumber);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
@@ -103,44 +101,22 @@ function testInsertWithNegativeIndex() {
     arktest.expectThrow(() => {arrayList.insert(TestData.testNumber3, TestData.testNumber8)}, exceptionCheck1);
 }
 
-function testInsertWithDoubleIndex() {
-    let arrayList = new ArrayList<number>();
-    initializeArrayList(arrayList, TestData.forNumber);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-    return (e instanceof BusinessError) && ((e as BusinessError).message ==
-            `Index must be an integer. Received value is: ${TestData.testDouble1}`) &&
-            ((e as BusinessError).code == TypeErrorCodeId);
-    }
-    arktest.expectThrow(() => {arrayList.insert(TestData.testNumber3, TestData.testDouble1)}, exceptionCheck);
-}
-
-function testInsertWithDoubleIndex2() {
-    let arrayList = new ArrayList<number>();
-    initializeArrayList(arrayList, TestData.forNumber);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-    return (e instanceof BusinessError) && ((e as BusinessError).message ==
-            `Index must be an integer. Received value is: ${TestData.testDouble2}`) &&
-            ((e as BusinessError).code == TypeErrorCodeId);
-    }
-    arktest.expectThrow(() => {arrayList.insert(TestData.testNumber3, TestData.testDouble2)}, exceptionCheck);
-}
-
 function testHasElement() {
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     initializeArrayList(arrayList, TestData.forNumber);
     let result: boolean = arrayList.has(TestData.testNumber3);
     arktest.assertTrue(result, "ArrayList should contain the element");
 }
 
 function testHasNonExistentElement() {
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     initializeArrayList(arrayList, TestData.forNumber);
     let result: boolean = arrayList.has(TestData.testNumber6);
     arktest.assertFalse(result, "ArrayList should not contain the element");
 }
 
 function testHasVariousTypes() {
-    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
         Object>();
     arrayList.add(TestData.testString1);
     arrayList.add(TestData.testNumber1);
@@ -190,9 +166,9 @@ function testHasVariousTypes() {
 }
 
 function testGetIndexOfUniqueElement() {
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     arrayList.add(TestData.testNumber1);
-    for (let i: number = TestData.testNumber1; i < TestData.testNumber6; i++) {
+    for (let i: int = TestData.testNumber1; i < TestData.testNumber6; i++) {
         arrayList.add(TestData.testNumber3);
     }
     arrayList.add(TestData.testNumber2);
@@ -201,18 +177,18 @@ function testGetIndexOfUniqueElement() {
 }
 
 function testGetIndexOfRepeatedElement() {
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     arrayList.add(TestData.testNumber1);
-    for (let i: number = TestData.testNumber1; i < TestData.testNumber6; i++) {
+    for (let i: int = TestData.testNumber1; i < TestData.testNumber6; i++) {
         arrayList.add(TestData.testNumber3);
     }
     arktest.assertEQ(arrayList.getIndexOf(TestData.testNumber3), TestData.testNumber1, "Index of element should be 1");
 }
 
 function testGetIndexOfNonExistentElement() {
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     arrayList.add(TestData.testNumber1);
-    for (let i: number = TestData.testNumber1; i < TestData.testNumber6; i++) {
+    for (let i: int = TestData.testNumber1; i < TestData.testNumber6; i++) {
         arrayList.add(TestData.testNumber3);
     }
     arktest.assertEQ(arrayList.getIndexOf(TestData.testNumber5), -TestData.testNumber1,
@@ -220,7 +196,7 @@ function testGetIndexOfNonExistentElement() {
 }
 
 function initializeArrayList<T>(arrayList: ArrayList<T>, sourceArray: T[]) {
-    for (let i = 0; i < sourceArray.length; i++) {
+    for (let i: int = 0; i < sourceArray.length; i++) {
         arrayList.add(sourceArray[i]);
     }
 }

@@ -31,8 +31,8 @@ function main(): int {
 }
 
 class MyObject extends Object {
-    size: number;
-    constructor(size: number) {
+    size: double;
+    constructor(size: double) {
         super();
         this.size = size;
     }
@@ -40,7 +40,7 @@ class MyObject extends Object {
 
 function testSetData() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("a", "123");
@@ -51,7 +51,7 @@ function testSetData() {
 
 function testSetDataWithSameKeyDifferentValues() {
     let treeMap: TreeMap<MyObject, string> =
-        new TreeMap<MyObject, string>((firstValue: MyObject, secondValue: MyObject): number => {
+        new TreeMap<MyObject, string>((firstValue: MyObject, secondValue: MyObject): double => {
             return secondValue.size - firstValue.size
         });
     let obj: MyObject = new MyObject(1);
@@ -65,7 +65,7 @@ function testSetDataWithSameKeyDifferentValues() {
 
 function testSetEmptyStringData() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("", "123");
@@ -77,11 +77,11 @@ function testSetEmptyStringData() {
 
 function testLoopSetData() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return secondValue.compareTo(firstValue)
         });
     let arr = 'abc';
-    for (let i = 0; i < 1000; i++) {
+    for (let i: int = 0; i < 1000; i++) {
         treeMap.set(arr + i, "123");
     }
     let length = treeMap.length;
@@ -95,7 +95,7 @@ function testLoopSetData() {
 
 function testGetData() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
@@ -106,7 +106,7 @@ function testGetData() {
 
 function testGetNonExistingData() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
@@ -117,7 +117,7 @@ function testGetNonExistingData() {
 
 function testGetDataFromEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return secondValue.compareTo(firstValue)
         });
     let result = treeMap.get("aa");
@@ -127,7 +127,7 @@ function testGetDataFromEmptyTreeMap() {
 
 function testGetEmptyStringDataFromEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return secondValue.compareTo(firstValue)
         });
     let result = treeMap.get("");

@@ -16,7 +16,7 @@
 import {List} from '@ohos.util.List';
 import {BusinessError} from "@ohos.base";
 
-const OutOfBoundsErrorCodeId: number = 10200001;
+const OutOfBoundsErrorCodeId: int = 10200001;
 
 function main() {
     const suite = new arktest.ArkTestsuite("LinkedList API tests");
@@ -39,27 +39,27 @@ function main() {
 }
 
 function initializeList<T>(list: List<T>, sourceArray: Array<T>) {
-    for (let i = 0; i < sourceArray.length; i++) {
+    for (let i: int = 0; i < sourceArray.length; i++) {
         list.add(sourceArray[i]);
     }
 }
 
 class Temp {
-    age: number = 0;
+    age: double = 0;
     name: string = "";
 }
 
 class TestData {
-    static readonly testNumber1: number = 1;
-    static readonly testNumber3: number = 3;
-    static readonly testNumber5: number = 5;
-    static readonly testNumber8: number = 8;
+    static readonly testNumber1: double | int = 1;
+    static readonly testNumber3: double | int = 3;
+    static readonly testNumber5: double | int = 5;
+    static readonly testNumber8: double | int = 8;
     static readonly testObject1: Temp = { age: 10, name: "zhang" };
     static readonly testObject2: Temp = { age: 8, name: "li" };
     static readonly testObject3: Temp = { age: 12, name: "wang" };
     static readonly testObject4: Temp = { age: 1, name: "liu" };
     static readonly forNumber: Number[] = [1, 2, 3, 4, 5];
-    static readonly arrayForNumber = Array.from<number>(TestData.forNumber);
+    static readonly arrayForNumber = Array.from<double>(TestData.forNumber);
     static readonly forString: String[] = ["ssss", "2", "%", "Z"];
     static readonly arrayForString = Array.from<String>(TestData.forString);
     static readonly forBoolean: Boolean[] = [true, false, false, true];
@@ -67,18 +67,18 @@ class TestData {
     static readonly forObject: Object[] = [[1], [2, 3, 4], [1, 2], [5]];
     static readonly arrayForObject = Array.from<Object>(TestData.forObject);
     static readonly result1: Number[] = [5, 4, 3, 2, 1];
-    static readonly arrayResult1 = Array.from<number>(TestData.result1);
+    static readonly arrayResult1 = Array.from<double>(TestData.result1);
     static readonly result6: Number[] = [2, 3, 4];
-    static readonly arrayResult6 = Array.from<number>(TestData.result6);
+    static readonly arrayResult6 = Array.from<double>(TestData.result6);
     static readonly result7: Number[] = [2, 3, 4, 5];
-    static readonly arrayResult7 = Array.from<number>(TestData.result7);
+    static readonly arrayResult7 = Array.from<double>(TestData.result7);
 }
 
 function testSortDifferentTypesAscending() {
-    let list1 = new List<number>();
+    let list1 = new List<double>();
     initializeList(list1, TestData.arrayResult1);
-    list1.sort((a: number, b: number) => a - b);
-    for (let i: number = 0; i < list1.length; i++) {
+    list1.sort((a: double, b: double) => a - b);
+    for (let i: int = 0; i < list1.length; i++) {
         arktest.assertEQ(list1.get(i), TestData.arrayForNumber[i], `Element at index ${i} should match`);
     }
 
@@ -87,7 +87,7 @@ function testSortDifferentTypesAscending() {
     let array2 = list2.convertToArray();
     list2.sort((a: string, b: string) => a.compareTo(b));
     array2.sort((a: string, b: string) => a.compareTo(b));
-    for (let i: number = 0; i < list2.length; i++) {
+    for (let i: int = 0; i < list2.length; i++) {
         arktest.assertEQ(list2.get(i), array2[i], `Element at index ${i} should match`);
     }
 
@@ -96,7 +96,7 @@ function testSortDifferentTypesAscending() {
     let array3 = list3.convertToArray();
     list3.sort((a: boolean, b: boolean) => (a ? 1 : 0) - (b ? 1 : 0));
     array3.sort((a: boolean, b: boolean) => (a ? 1 : 0) - (b ? 1 : 0));
-    for (let i: number = 0; i < list3.length; i++) {
+    for (let i: int = 0; i < list3.length; i++) {
         arktest.assertEQ(list3.get(i), array3[i], `Element at index ${i} should match`);
     }
 }
@@ -105,17 +105,17 @@ function testSortObjectAscending() {
     let list1 = new List<object>();
     initializeList(list1, TestData.arrayForObject);
     let array1 = list1.convertToArray();
-    list1.sort((a: object, b: object): number => {
+    list1.sort((a: object, b: object): double => {
         let sa = new String(a);
         let sb = new String(b);
         return sa.compareTo(sb);
     });
-    array1.sort((a: object, b: object): number => {
+    array1.sort((a: object, b: object): double => {
         let sa = new String(a);
         let sb = new String(b);
         return sa.compareTo(sb);
     });
-    for (let i: number = 0; i < list1.length; i++) {
+    for (let i: int = 0; i < list1.length; i++) {
         arktest.assertEQ(list1.get(i), array1[i], `Element at index ${i} should match`);
     }
 
@@ -127,16 +127,16 @@ function testSortObjectAscending() {
     let array2 = list2.convertToArray();
     list2.sort((a: Temp, b: Temp) => a.age - b.age);
     array2.sort((a: Temp, b: Temp) => a.age - b.age);
-    for (let i: number = 0; i < list2.length; i++) {
+    for (let i: int = 0; i < list2.length; i++) {
         arktest.assertEQ(list2.get(i), array2[i], `Element at index ${i} should match`);
     }
 }
 
 function testSortDifferentTypesDescending() {
-    let list1 = new List<number>();
+    let list1 = new List<double>();
     initializeList(list1, TestData.arrayForNumber);
-    list1.sort((a: number, b: number) => b - a);
-    for (let i: number = 0; i < list1.length; i++) {
+    list1.sort((a: double, b: double) => b - a);
+    for (let i: int = 0; i < list1.length; i++) {
         arktest.assertEQ(list1.get(i), TestData.arrayResult1[i], `Element at index ${i} should match`);
     }
 
@@ -145,7 +145,7 @@ function testSortDifferentTypesDescending() {
     let array2 = list2.convertToArray();
     list2.sort((a: string, b: string) => b.compareTo(a));
     array2.sort((a: string, b: string) => b.compareTo(a));
-    for (let i: number = 0; i < list2.length; i++) {
+    for (let i: int = 0; i < list2.length; i++) {
         arktest.assertEQ(list2.get(i), array2[i], `Element at index ${i} should match`);
     }
 
@@ -154,7 +154,7 @@ function testSortDifferentTypesDescending() {
     let array3 = list3.convertToArray();
     list3.sort((a: boolean, b: boolean) => (b ? 1 : 0) - (a ? 1 : 0));
     array3.sort((a: boolean, b: boolean) => (b ? 1 : 0) - (a ? 1 : 0));
-    for (let i: number = 0; i < list3.length; i++) {
+    for (let i: int = 0; i < list3.length; i++) {
         arktest.assertEQ(list3.get(i), array3[i], `Element at index ${i} should match`);
     }
 }
@@ -163,17 +163,17 @@ function testSortObjectDescending() {
     let list1 = new List<object>();
     initializeList(list1, TestData.arrayForObject);
     let array1 = list1.convertToArray();
-    list1.sort((a: object, b: object): number => {
+    list1.sort((a: object, b: object): double => {
         let sa = new String(a);
         let sb = new String(b);
         return sb.compareTo(sa);
     });
-    array1.sort((a: object, b: object): number => {
+    array1.sort((a: object, b: object): double => {
         let sa = new String(a);
         let sb = new String(b);
         return sb.compareTo(sa);
     });
-    for (let i: number = 0; i < list1.length; i++) {
+    for (let i: int = 0; i < list1.length; i++) {
         arktest.assertEQ(list1.get(i), array1[i], `Element at index ${i} should match`);
     }
 
@@ -185,25 +185,25 @@ function testSortObjectDescending() {
     let array2 = list2.convertToArray();
     list2.sort((a: Temp, b: Temp) => b.age - a.age);
     array2.sort((a: Temp, b: Temp) => b.age - a.age);
-    for (let i: number = 0; i < list2.length; i++) {
+    for (let i: int = 0; i < list2.length; i++) {
         arktest.assertEQ(list2.get(i), array2[i], `Element at index ${i} should match`);
     }
 }
 
 function testGetSubList() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.arrayForNumber);
     let getSubList = list.getSubList(TestData.testNumber1, TestData.testNumber5 - TestData.testNumber1);
-    for (let i: number = 0; i < list.length; i++) {
+    for (let i: int = 0; i < list.length; i++) {
         arktest.assertEQ(list.get(i), TestData.arrayForNumber[i], `Element at index ${i} should match`);
     }
-    for (let i: number = 0; i < getSubList.length; i++) {
+    for (let i: int = 0; i < getSubList.length; i++) {
         arktest.assertEQ(getSubList.get(i), TestData.arrayResult6[i], `Element at index ${i} should match`);
     }
 }
 
 function testGetSubListStartIndexOutOfRange() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.arrayForNumber);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
@@ -215,7 +215,7 @@ function testGetSubListStartIndexOutOfRange() {
 }
 
 function testGetSubListEndIndexOutOfRange() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.arrayForNumber);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
@@ -227,7 +227,7 @@ function testGetSubListEndIndexOutOfRange() {
 }
 
 function testGetSubListEndIndexSmallerThanStartIndex() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.arrayForNumber);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
@@ -239,20 +239,20 @@ function testGetSubListEndIndexSmallerThanStartIndex() {
 }
 
 function testGetSubListWithChange() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.arrayForNumber);
     let getSubList = list.getSubList(TestData.testNumber1, TestData.testNumber5 - TestData.testNumber1);
     getSubList.add(TestData.testNumber5);
-    for (let i: number = 0; i < list.length; i++) {
+    for (let i: int = 0; i < list.length; i++) {
         arktest.assertEQ(list.get(i), TestData.arrayForNumber[i], `Element at index ${i} should match`);
     }
-    for (let i: number = 0; i < getSubList.length; i++) {
+    for (let i: int = 0; i < getSubList.length; i++) {
         arktest.assertEQ(getSubList.get(i), TestData.arrayResult7[i], `Element at index ${i} should match`);
     }
 }
 
 function testGetSubListEmptyContainer() {
-    let list = new List<number>();
+    let list = new List<double>();
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
@@ -262,17 +262,17 @@ function testGetSubListEmptyContainer() {
 }
 
 function testGetSubListFullRange() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.arrayForNumber);
     let getSubList = list.getSubList(0, TestData.testNumber5);
-    for (let i: number = 0; i < getSubList.length; i++) {
+    for (let i: int = 0; i < getSubList.length; i++) {
         arktest.assertEQ(getSubList.get(i), list.get(i), `Element at index ${i} should match`);
     }
     arktest.assertEQ(getSubList.length, TestData.testNumber5);
 }
 
 function testGetSubListWithEqualStartAndEndIndex() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.forNumber);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==

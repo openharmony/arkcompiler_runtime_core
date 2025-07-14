@@ -33,19 +33,19 @@ function main() {
 }
 
 class Temp {
-    age: number = 0;
+    age: double = 0;
     name: string = "";
 }
 
 class TestData {
-    static readonly testNumber1: number = 1;
-    static readonly testNumber2: number = 2;
-    static readonly testNumber3: number = 3;
-    static readonly testNumber6: number = 6;
-    static readonly testNumber10: number = 10;
-    static readonly testNumber12: number = 12;
-    static readonly testNumber18: number = 18;
-    static readonly testNumber1w: number = 10000;
+    static readonly testNumber1: double | int = 1;
+    static readonly testNumber2: double | int = 2;
+    static readonly testNumber3: double | int = 3;
+    static readonly testNumber6: double | int = 6;
+    static readonly testNumber10: double | int = 10;
+    static readonly testNumber12: double | int = 12;
+    static readonly testNumber18: double | int = 18;
+    static readonly testNumber1w: double | int = 10000;
     static readonly testString1: string = "string";
     static readonly testString2: string = "";
     static readonly testString3: string = "`";
@@ -59,17 +59,17 @@ class TestData {
 }
 
 function testIncreaseCapacityToBiggerValue() {
-    let arrayList = new ArrayList<number>();
-    for (let i: number = 0; i < TestData.testNumber6; i++) {
+    let arrayList = new ArrayList<double>();
+    for (let i: int = 0; i < TestData.testNumber6; i++) {
         arrayList.add(i);
     }
-    let cap: number = arrayList.getCapacity();
+    let cap: double = arrayList.getCapacity();
     arrayList.increaseCapacityTo(TestData.testNumber12);
-    let cap1: number = arrayList.getCapacity();
+    let cap1: double = arrayList.getCapacity();
     for (let i: int = 0; i < TestData.testNumber3; i++) {
         arrayList.add(TestData.forNumber[i]);
     }
-    let cap2: number = arrayList.getCapacity();
+    let cap2: double = arrayList.getCapacity();
     initializeArrayList(arrayList, TestData.forNumber);
     arktest.assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
     arktest.assertEQ(cap1, TestData.testNumber12, "ArrayList capacity should be 12 after increaseCapacityTo");
@@ -83,11 +83,11 @@ function testIncreaseCapacityToBiggerValue() {
 }
 
 function testIncreaseCapacityToSmallerValue() {
-    let arrayList = new ArrayList<number>();
-    for (let i: number = 1; i < TestData.testNumber6; i++) {
+    let arrayList = new ArrayList<double>();
+    for (let i: int = 1; i < TestData.testNumber6; i++) {
         arrayList.add(i);
     }
-    let cap: number = arrayList.getCapacity();
+    let cap: double = arrayList.getCapacity();
     arrayList.increaseCapacityTo(TestData.testNumber2);
     arktest.assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
     arktest.assertEQ(arrayList.getCapacity(), TestData.testNumber10,
@@ -95,24 +95,24 @@ function testIncreaseCapacityToSmallerValue() {
 }
 
 function testTrimToCurrentLength() {
-    let arrayList = new ArrayList<number>();
-    for (let i: number = 1; i < TestData.testNumber6; i++) {
+    let arrayList = new ArrayList<double>();
+    for (let i: int = 1; i < TestData.testNumber6; i++) {
         arrayList.add(i);
     }
-    let cap: number = arrayList.getCapacity();
+    let cap: double = arrayList.getCapacity();
     arrayList.trimToCurrentLength();
     arktest.assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
     arktest.assertEQ(arrayList.getCapacity(), arrayList.length, "ArrayList capacity should be trimmed to current length");
 }
 
 function testIteratorEmptyContainer() {
-    let arrayList = new ArrayList<number>();
-    let elem: number = 0;
+    let arrayList = new ArrayList<double>();
+    let elem: double = 0;
     for (let item of arrayList) {
         elem = TestData.testNumber1;
     }
     let iter = arrayList.$_iterator();
-    let temp: IteratorResult<number> = iter.next();
+    let temp: IteratorResult<double> = iter.next();
     while (!temp.done) {
         elem = TestData.testNumber1;
     }
@@ -120,17 +120,17 @@ function testIteratorEmptyContainer() {
 }
 
 function testIterator() {
-    let arrayList = new ArrayList<number>();
-    for (let i: number = TestData.testNumber1; i < TestData.testNumber6; i++) {
+    let arrayList = new ArrayList<double>();
+    for (let i: int = TestData.testNumber1; i < TestData.testNumber6; i++) {
         arrayList.add(i);
     }
-    let elem1: number = TestData.testNumber1;
+    let elem1: int = TestData.testNumber1;
     for (let item of arrayList) {
         arktest.assertEQ(item, elem1++, "Element mismatch during iteration");
     }
     let iter = arrayList.$_iterator();
-    let temp: IteratorResult<number> = iter.next();
-    let elem2: number = TestData.testNumber1;
+    let temp: IteratorResult<double> = iter.next();
+    let elem2: int = TestData.testNumber1;
     while (!temp.done) {
         arktest.assertEQ(temp.value, elem2++, "Element mismatch during iteration");
         temp = iter.next();
@@ -142,12 +142,12 @@ function testIterator() {
 function testAPIComposition() {
     extendTestInterfaceComposition();
 
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     initializeArrayList(arrayList, TestData.result1);
     let array = arrayList.convertToArray();
     arrayList.sort();
     array.sort();
-    for (let i: number = 0; i < arrayList.length; i++) {
+    for (let i: int = 0; i < arrayList.length; i++) {
         arktest.assertEQ(arrayList[i], array[i], `Element at index ${i} should match`);
     }
 
@@ -159,12 +159,12 @@ function testAPIComposition() {
     arrayList.trimToCurrentLength();
     arktest.assertEQ(arrayList.getCapacity(), arrayList.length, "ArrayList capacity should be updated correctly");
 
-    arrayList.replaceAllElements((): number => {
+    arrayList.replaceAllElements((): double => {
         return TestData.testNumber3;
     });
 
     arrayList.clear();
-    let elem: number = 0;
+    let elem: double = 0;
     for (let item of arrayList) {
         elem = TestData.testNumber1;
     }
@@ -172,7 +172,7 @@ function testAPIComposition() {
 }
 
 function testAddInsertRemoveByIndex() {
-    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
         Object>();
     arrayList.add(TestData.testString1);
     arrayList.add(TestData.testNumber1);
@@ -187,7 +187,7 @@ function testAddInsertRemoveByIndex() {
 }
 
 function testGetIndexOfRemoveByIndexHas1() {
-    let arrayList = new ArrayList<number | string>();
+    let arrayList = new ArrayList<double | string>();
     arrayList.add(TestData.testString1);
     arrayList.insert(TestData.testString2, 0);
     arrayList.insert(TestData.testString3, arrayList.length);
@@ -200,7 +200,7 @@ function testGetIndexOfRemoveByIndexHas1() {
 }
 
 function testGetIndexOfRemoveByIndexHas2() {
-    let arrayList = new ArrayList<number | string>();
+    let arrayList = new ArrayList<double | string>();
     arrayList.insert(TestData.testString3, 0);
     arrayList.insert(TestData.testString4, TestData.testNumber1);
     arrayList.insert(TestData.testString5, TestData.testNumber2);
@@ -216,13 +216,13 @@ function testGetIndexOfRemoveByIndexHas2() {
 }
 
 function initializeArrayList<T>(arrayList: ArrayList<T>, sourceArray: T[]) {
-    for (let i = 0; i < sourceArray.length; i++) {
+    for (let i: int = 0; i < sourceArray.length; i++) {
         arrayList.add(sourceArray[i]);
     }
 }
 
 function extendTestInterfaceComposition() {
-    let arrayList = new ArrayList<number | string | boolean | undefined | null | Object>();
+    let arrayList = new ArrayList<double | string | boolean | undefined | null | Object>();
     arktest.assertEQ(arrayList.length, 0, "Initial ArrayList length should be 0");
 
     let result: boolean = arrayList.add(TestData.testNumber3);

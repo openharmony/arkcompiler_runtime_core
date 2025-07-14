@@ -45,7 +45,7 @@ function testEntriesReturnIteratorByKeyValue() {
 }
 
 function testEntriesReturnIteratorByKeyValueWithEmptyHashMap() {
-    let hashMap: HashMap<string, number> = new HashMap<string, number>();
+    let hashMap: HashMap<string, double> = new HashMap<string, double>();
     let iteratorSetValues = hashMap.entries();
     arktest.assertTrue(iteratorSetValues.next().done,
         "The hashMap entries iterator.done should true when the hashMap is empty");

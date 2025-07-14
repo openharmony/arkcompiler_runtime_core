@@ -16,7 +16,7 @@
 import { PlainArray } from "@ohos.util.PlainArray";
 import { BusinessError } from "@ohos.base";
 
-const OutOfBoundsErrorCodeId: number = 10200001;
+const OutOfBoundsErrorCodeId: int = 10200001;
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("PlainArray API tests");
@@ -34,63 +34,63 @@ function main(): int {
 }
 
 function initializePlainArray<T>(plainArray: PlainArray<T>, sourceArray: T[]) {
-    for (let i = 0; i < sourceArray.length; i++) {
+    for (let i: int = 0; i < sourceArray.length; i++) {
         plainArray.add(i, sourceArray[i]);
     }
 }
 
 class TestData {
-    static readonly testNumber1: number = 1;
-    static readonly testNumber2: number = 2;
-    static readonly testNumber4: number = 4;
-    static readonly testNumber6: number = 6;
+    static readonly testNumber1: double | int = 1;
+    static readonly testNumber2: double | int = 2;
+    static readonly testNumber4: double | int = 4;
+    static readonly testNumber6: double | int = 6;
     static readonly forNumber2: Number[] = [0, 2, 2, 3, 4];
 }
 
 function testGetKeyAtValidIndex() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber2);
     arktest.assertEQ(plainArray.getKeyAt(TestData.testNumber1), TestData.testNumber1,
         "The plainArray should return the correct key at the specified index");
 }
 
 function testGetKeyAtBoundaryIndex() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber2);
     arktest.assertEQ(plainArray.getKeyAt(0), 0, "The plainArray should return the correct key at index 0");
-    arktest.assertEQ(plainArray.getKeyAt(TestData.forNumber2.length - TestData.testNumber1), TestData.testNumber4,
+    arktest.assertEQ(plainArray.getKeyAt(TestData.forNumber2.length.toInt() - TestData.testNumber1), TestData.testNumber4,
         "The plainArray should return the correct key at index length - 1");
 }
 
 function testGetKeyAtExceededIndex() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber2);
     arktest.assertEQ(plainArray.getKeyAt(-TestData.testNumber1), undefined);
     arktest.assertEQ(plainArray.getKeyAt(TestData.testNumber6), undefined);
 }
 
 function testGetKeyAtIndexOfEmpty() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     arktest.assertEQ(plainArray.getKeyAt(0), undefined);
 }
 
 function testGetValueAtValidIndex() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber2);
     arktest.assertEQ(plainArray.getValueAt(TestData.testNumber1), TestData.testNumber2,
         "The plainArray should return the correct value at the specified index");
 }
 
 function testGetValueAtBoundaryIndex() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber2);
     arktest.assertEQ(plainArray.getValueAt(0), 0, "The plainArray should return the correct value at index 0");
-    arktest.assertEQ(plainArray.getValueAt(TestData.forNumber2.length - TestData.testNumber1), TestData.testNumber4,
+    arktest.assertEQ(plainArray.getValueAt(TestData.forNumber2.length.toInt() - TestData.testNumber1), TestData.testNumber4,
         "The plainArray should return the correct value at index length - 1");
 }
 
 function testGetValueAtExceededIndex() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber2);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
@@ -108,7 +108,7 @@ function testGetValueAtExceededIndex() {
 }
 
 function testGetValueAtWithEmpty() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message == `Container is empty`) &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);

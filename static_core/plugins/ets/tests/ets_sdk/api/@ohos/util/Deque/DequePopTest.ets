@@ -26,7 +26,7 @@ function main() {
 
 // Test cases ported from ArkTS 1.0: DEQUE_1400
 function testPopLastAndVerifyNewLast() {
-    let deque = new Deque<number>();
+    let deque = new Deque<double>();
     deque.insertFront(1);
     deque.insertFront(2);
     deque.insertEnd(4);
@@ -37,7 +37,7 @@ function testPopLastAndVerifyNewLast() {
 }
 
 function testPopLastAfterExpansionAndReset() {
-    let deque = new Deque<number>();
+    let deque = new Deque<double>();
     deque.insertFront(1);
     deque.insertFront(2);
     deque.insertEnd(8);
