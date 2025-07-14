@@ -640,7 +640,7 @@ export abstract class DefaultArrayProxyHandler<T> extends DefaultProxyHandler<Ar
 
     override set(target: Array<T>, name: string, value: NullishType): boolean {
         if (name == ArrayProxy.LENGTH_PROP_NAME) {
-            if (value instanceof Number) {
+            if (value instanceof Int) {
                 target.length = value
                 return true
             }
@@ -776,9 +776,9 @@ abstract class ArrayProxy<T> extends Array<T> {
         return handler.get(target, name)
     }
 
-    override get length(): number {
+    override get length(): int {
         const length = this.handlerGet(this.target, this.handler, ArrayProxy.LENGTH_PROP_NAME)
-        if (length instanceof Number) {
+        if (length instanceof Int) {
             return length.unboxed()
         }
 
@@ -792,7 +792,7 @@ abstract class ArrayProxy<T> extends Array<T> {
         }
     }
 
-    override set length(length: number) {
+    override set length(length: int) {
         this.handlerSet(this.target, this.handler, ArrayProxy.LENGTH_PROP_NAME, length)
     }
 

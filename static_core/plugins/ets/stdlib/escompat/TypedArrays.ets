@@ -369,7 +369,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     public native $_set(index: int, val: byte): void
 
     /** Number of byte stored in Int8Array */
-    public get length(): number {
+    public get length(): int {
         return this.lengthInt
     }
 
@@ -2133,7 +2133,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     public native $_set(index: int, val: short): void
 
     /** Number of short stored in Int16Array */
-    public get length(): number {
+    public get length(): int {
         return this.lengthInt
     }
 
@@ -3890,7 +3890,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public native $_set(index: int, val: int): void
 
     /** Number of int stored in Int32Array */
-    public get length(): number {
+    public get length(): int {
         return this.lengthInt
     }
 
@@ -5621,7 +5621,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     public native $_set(index: int, val: long): void
 
     /** Number of long stored in BigInt64Array */
-    public get length(): number {
+    public get length(): int {
         return this.lengthInt
     }
 
@@ -7366,7 +7366,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     public native $_set(index: int, val: float): void
 
     /** Number of float stored in Float32Array */
-    public get length(): number {
+    public get length(): int {
         return this.lengthInt
     }
 
@@ -9085,7 +9085,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     public native $_set(index: int, val: double): void
 
     /** Number of double stored in Float64Array */
-    public get length(): number {
+    public get length(): int {
         return this.lengthInt
     }
 
