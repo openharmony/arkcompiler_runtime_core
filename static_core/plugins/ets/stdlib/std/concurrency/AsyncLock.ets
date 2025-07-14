@@ -184,7 +184,11 @@ export final class AsyncLock {
             if(isTimeoutExec == true) {
                 throw new Error('AsyncLock timeout');
             }
-           
+
+            if(options.isAvailable) {
+                throw new Error("AsyncLock is not available");
+            }
+            
             ConcurrencyHelpers.mutexLock(this.mutex);
             if (this.holderCID == 0) {
                 this.holderCID = callerCID;
@@ -204,11 +208,7 @@ export final class AsyncLock {
             ConcurrencyHelpers.mutexUnlock(this.mutex);
 
             if (isDone == false) {
-                if (options.isAvailable) {
-                    throw new Error('AsyncLock is not available');
-                } else {
-                    ConcurrencyHelpers.eventWait(this.event)
-                }
+                ConcurrencyHelpers.eventWait(this.event)
             }
         } 
     }
