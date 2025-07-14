@@ -548,6 +548,7 @@ bool EscapeAnalysis::MergeProcessor::MergeFields(BasicBlock *block, BasicBlockSt
         // When it'll come to scalar replacement this placeholder will be
         // replaced with actual zero or nullptr const.
         auto mergeState = parent_->GetState(block->GetPredsBlocks().front())->GetStateById(stateToMerge);
+        ASSERT(mergeState != nullptr);
         StateOwner commonId = mergeState->GetFieldOrDefault(field, ZERO_INST);
         bool needMerge = false;
         for (auto predBlock : block->GetPredsBlocks()) {
