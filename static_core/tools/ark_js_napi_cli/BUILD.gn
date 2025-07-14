@@ -17,6 +17,8 @@ if (!ark_standalone_build) {
 }
 
 ark_js_napi_cli_sources = [
+  "$ark_root/static_core/plugins/ets/runtime/interop_js/timer_helper/timer.cpp",
+  "$ark_root/static_core/plugins/ets/runtime/interop_js/timer_helper/interop_timer_helper.cpp",
   "ark_hz/ark_js_runtime.cpp",
   "js_runtime.cpp",
   "main.cpp",

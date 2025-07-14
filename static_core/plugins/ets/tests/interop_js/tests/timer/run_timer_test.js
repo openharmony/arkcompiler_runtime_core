@@ -33,7 +33,7 @@ function runTest(test) {
 	if (!etsVm.createRuntime(etsOpts)) {
 		throw Error('Cannot create ETS runtime');
 	}
-	
+
 	const runTestImpl = etsVm.getFunction(globalName, test);
 	runTestImpl();
 	let counter = 0;
@@ -48,10 +48,10 @@ function runTest(test) {
 		const check = etsVm.getFunction(globalName, 'check');
 		let result = check();
 		if (result) {
-			helper.clearInterval(tId);
+			clearInterval(tId);
 		}
 	};
-	tId = helper.setInterval(checkCallback, checkDelay);
+	tId = setInterval(checkCallback, checkDelay);
 }
 
 let args = helper.getArgv();
