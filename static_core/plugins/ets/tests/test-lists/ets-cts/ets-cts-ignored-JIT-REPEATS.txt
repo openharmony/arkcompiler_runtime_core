@@ -1,6 +1,9 @@
 #25109
 03.types/20.union_types/02.access_to_common_union_members/cm_meth1_3.ets
 
+#27374
+03.types/20.union_types/02.access_to_common_union_members/cm_meth2_10.ets
+
 #25236
 03.types/20.union_types/02.access_to_common_union_members/cm_meth3_4.ets
 

@@ -4,6 +4,9 @@ escompat/JsonReplacerTest.ets
 #24951
 std/core/SortNotFromBeginningTest.ets
 
+#27145
+std/core/dateformat/IntlDateFormatTest.ets
+
 #24986 (16 tests)
 std/core/Object.ets
 std/core/TypedArrayConstructorNumbersInts.ets
