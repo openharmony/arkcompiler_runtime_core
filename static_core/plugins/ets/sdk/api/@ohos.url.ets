@@ -15,7 +15,6 @@
 
 import { BusinessError } from "@ohos.base";
 
-const TypeErrorCodeId: number = 401;
 const SyntaxErrorCodeId: number = 10200002;
 
 function createBusinessError(code: number, message: string) {
@@ -189,19 +188,30 @@ export namespace url {
     }
 
     function deleteC0OrSpace(input: string): string {
-        return input.trim([c'\0', c' ']);
+        const codeC0 = '\0'.charCodeAt(0);
+        const codeSpace = ' '.charCodeAt(0);
+        let left = 0;
+        let right = input.length - 1;
+        while (left <= right &&
+            input.charCodeAt(left) <= codeSpace &&
+            input.charCodeAt(left) >= codeC0) {
+            left++;
+        }
+        while (right >= left &&
+            input.charCodeAt(right) <= codeSpace &&
+            input.charCodeAt(right) >= codeC0) {
+            right--;
+        }
+        return left > right ? "" : input.slice(left, right + 1);
     }
 
-    function isAlpha(ch: string): boolean {
-        return ch.length == 1 && ((ch[0] >= c'a' && ch[0] <= c'z') || (ch[0] >= c'A' && ch[0] <= c'Z'));
+    function deleteTabOrNewline(input: string): string {
+        let reg = new RegExp('\\t|\\r|\\n', 'g');
+        return input.replaceAll(reg, '');
     }
 
-    function isNum(ch: string): boolean {
-        return ch.length == 1 && (ch[0] >= c'0' && ch[0] <= c'9');
-    }
-
-    function isAlphaNum(ch: string): boolean {
-        return isAlpha(ch) || isNum(ch);
+    function isAlphaNum(ch: char): boolean {
+        return Char.isLetter(ch) || Char.isDecDigit(ch);
     }
 
     function isSpecialScheme(scheme: string) {
@@ -209,12 +219,7 @@ export namespace url {
     }
 
     function isFileNotHost(input: string) {
-        return isAlpha(input.substring(0, 1)) && (input[1] == c':' || input[1] == c'|');
-    }
-
-    function isHexDigit(ch: string): boolean {
-        let charCode = ch.charCodeAt(0);
-        return isNum(ch) || (charCode >= c'A' && charCode <= c'F') || (charCode >= c'a' && charCode <= c'f');
+        return Char.isLetter(input[0]) && (input[1] == c':' || input[1] == c'|');
     }
 
     function DecodeSpecialChars(input: string): string {
@@ -225,7 +230,7 @@ export namespace url {
         }
         let pos: number = temp.indexOf("%");
         while ((pos != -1) && (pos < len - 2)) {
-            if (isHexDigit(temp.charAt(pos + 1)) && isHexDigit(temp.charAt(pos + 2))) {
+            if (Char.isHexDigit(temp[pos + 1]) && Char.isHexDigit(temp[pos + 2])) {
                 let subStr = temp.substring(pos + 1, pos + 3);
                 let octNum: number = parseInt(subStr, 16);
                 if (isNaN(octNum)) {
@@ -241,33 +246,27 @@ export namespace url {
         return temp;
     }
 
-    function dealIPv4(str: string): string {
-        const pos = str.lastIndexOf(":");
-        if (pos === -1) {
-            return "";
-        }
+    function dealIPv4(input: string): string {
+        const hexSegments = new Array<string>();
+        const lastColonPos = input.lastIndexOf(':');
+        let currentPosition = lastColonPos + 1;
+        while (currentPosition < input.length) {
+            const dotPos = input.indexOf('.', currentPosition);
+            const segmentEnd = dotPos === -1 ? input.length : dotPos;
 
-        const prefix = str.substring(0, pos + 1);
-        const ipv4Part = str.substring(pos + 1);
+            const segmentValue = input.substring(currentPosition, segmentEnd);
+            const numericValue = parseInt(segmentValue, 10);
 
-        const parts = ipv4Part.split(".");
-        if (parts.length !== 4) {
-            return "";
-        }
-
-        let result = new StringBuilder(prefix);
-
-        for (let i = 0; i < parts.length; i++) {
-            const part = parts[i];
-            const num = parseInt(part, 10);
-            if (isNaN(num)) {
-                return part;
+            if (isNaN(numericValue) || numericValue > 255 || numericValue < 0) {
+                return segmentValue;
             }
-            const hexPart = ("0" + num.toString(16)).slice(-2);
-            result.append(":" + hexPart);
-        }
 
-        return result.toString();
+            const hexValue = numericValue.toString(16).padStart(2, '0');
+            hexSegments.push(hexValue);
+            currentPosition = segmentEnd + 1;
+        }
+        const prefix = input.substring(0, lastColonPos);
+        return `${prefix}:${hexSegments[0]}${hexSegments[1]}:${hexSegments[2]}${hexSegments[3]}`;
     }
 
     function formatIPv6(input: string): string {
@@ -332,7 +331,7 @@ export namespace url {
     }
 
     function compress(input: string): string {
-       let array = Array.from<string, string>(
+        let array = Array.from<string, string>(
             input.split(':'),
             (it) => it.trimLeft([c'0'])
         )
@@ -464,15 +463,13 @@ export namespace url {
         private ipv4Array: Array<string> = new Array<string>();
 
         analysizeScheme(input: string): boolean {
-            let ch = new Char(input[0]);
-            if (!isAlpha(ch.toString())) {
+            if (!Char.isLetter(input[0])) {
                 this.flags[INDEX_INVALID] = true;
                 return false;
             }
             let sizeLen: number = input.length;
             for (let i = 1; i < sizeLen - 1; i++) {
-                let ch1 = new Char(input[i]);
-                if (!isAlphaNum(ch1.toString()) && input[i] != c'+' && input[i] != c'-' && input[i] != c'.') {
+                if (!isAlphaNum(input[i]) && input[i] != c'+' && input[i] != c'-' && input[i] != c'.') {
                     this.flags[INDEX_INVALID] = true;
                     return false;
                 }
@@ -527,8 +524,7 @@ export namespace url {
             }
 
             let it = this.cPath[0];
-            let ch = new Char(it[0]);
-            if (isAlpha(ch.toString()) && (it[1] == c':' || it[1] == c'|')) {
+            if (Char.isLetter(it[0]) && (it[1] == c':' || it[1] == c'|')) {
                 if (it.length == 2) {
                     this.cPath[0] = it[0] + ':';
                     this.flags[INDEX_HOST] = false;
@@ -796,8 +792,7 @@ export namespace url {
                 return;
             }
             for (let i = 0; i < port.length; i++) {
-                let ch = new Char(port[i]);
-                if (!isNum(ch.toString())) {
+                if (!Char.isDecDigit(port[i])) {
                     this.flags[INDEX_INVALID] = true;
                     return;
                 }
@@ -1030,7 +1025,7 @@ export namespace url {
             } else {
                 let inputLen: number = input.length;
                 if (inputLen > 0) {
-                    this.cIsSpecialPath = input[0] != c'/' ? true : false;
+                    this.cIsSpecialPath = input[0] != c'/';
                 }
                 if (this.flags[INDEX_DOUBLE_SLASH] && inputLen == 2) {
                     return;
@@ -1092,8 +1087,7 @@ export namespace url {
                 this.analysizeQuery(query);
                 input = input.substring(0, pos);
             }
-            let special: boolean = this.flags[INDEX_SPECIAL] ? true : false;
-            // let pathStr: string = input;
+            let special: boolean = this.flags[INDEX_SPECIAL];
             this.analysizePath(input, special);
             return input;
         }
@@ -1109,8 +1103,9 @@ export namespace url {
         }
 
         parseSingleUrl(inputUrl: string): string {
-            let trimedStr = deleteC0OrSpace(inputUrl);
-            return this.initOnlyInput(trimedStr);
+            inputUrl = deleteC0OrSpace(inputUrl);
+            inputUrl = deleteTabOrNewline(inputUrl);
+            return this.initOnlyInput(inputUrl);
         }
 
         constructor() {}
@@ -1447,7 +1442,7 @@ export namespace url {
         }
 
         getIsIpv6(): boolean {
-            return this.flags[INDEX_IPV6] ? true : false;
+            return this.flags[INDEX_IPV6];
         }
 
         hasDoubleSlash(): boolean {
@@ -1495,8 +1490,9 @@ export namespace url {
             return;
         }
 
-        let ch = new Char(baseUrl.cPath[0].charAt(0));
-        if ((baseUrl.cPath.length == 1) && isFile && isAlpha(ch.toString()) && (baseUrl.cPath[0].charAt(1) == c':')) {
+        let ch: char = baseUrl.cPath[0][0];
+        let ch1: char = baseUrl.cPath[0][1];
+        if ((baseUrl.cPath.length == 1) && isFile && Char.isLetter(ch) && ch1 == c':') {
             return;
         }
         baseUrl.cPath.pop();
@@ -1533,9 +1529,8 @@ export namespace url {
     }
 
     function containIllegalCode(str: string): Boolean {
-        const unpairedSurrogateRe = new RegExp("(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])");
-        const regex = new RegExp(unpairedSurrogateRe);
-        return regex.test(str)
+        const regex = new RegExp("(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])");
+        return regex.test(str);
     }
 
     function fixIllegalString(str: string): string {
@@ -1586,22 +1581,21 @@ export namespace url {
         */
         static parseURL(inputUrl: string, inputBase?: string | URL): URL {
             let nativeUrl: URL;
-
-            if (!inputBase) {
+            if (inputBase == undefined) {
                 nativeUrl = URL.parseSingleInput(fixIllegalString(inputUrl));
             } else {
-                if (typeof inputBase == 'string') {
-                    let inputBaseStr = inputBase as string;
-                    nativeUrl = URL.parseBaseInput(fixIllegalString(inputUrl), fixIllegalString(inputBaseStr));
-                } else {
-                    nativeUrl = URL.parseBaseUrl(fixIllegalString(inputUrl), inputBase as URL);
+                if (inputBase instanceof string) {
+                    nativeUrl = URL.parseBaseInput(fixIllegalString(inputUrl), fixIllegalString(inputBase));
+                }
+                if (inputBase instanceof URL) {
+                    nativeUrl = URL.parseBaseUrl(fixIllegalString(inputUrl), inputBase);
                 }
             }
-            if (nativeUrl.urlInner.flags[INDEX_INVALID]) {
-                throw createBusinessError(SyntaxErrorCodeId,'Syntax Error. Invalid Url string.');
+            if (nativeUrl!.urlInner.flags[INDEX_INVALID]) {
+                throw createBusinessError(SyntaxErrorCodeId, 'Syntax Error. Invalid Url string.');
             }
-            setEncodedData(nativeUrl, nativeUrl.urlInner);
-            return nativeUrl;
+            setEncodedData(nativeUrl!, nativeUrl!.urlInner);
+            return nativeUrl!;
         }
 
         /**
@@ -1918,53 +1912,52 @@ export namespace url {
         }
 
         static parseBaseInput(input: string, base: string): URL {
+            if (base.length == 0) {
+                throw createBusinessError(SyntaxErrorCodeId, 'Parameter error. The type of  must be string')
+            }
             let result = new URL();
             let possibleBaseURL = new InnerURL();
             let resUrl = new InnerURL();
             let strInput = input;
-            if (base.length == 0) {
-                possibleBaseURL.flags[INDEX_INVALID] = true
-            }
             possibleBaseURL.parseSingleUrl(base);
             if (possibleBaseURL.flags[INDEX_INVALID]) {
                 resUrl.flags[INDEX_INVALID] = true
                 result.urlInner = resUrl;
                 return result;
-            } else if (!possibleBaseURL.flags[INDEX_INVALID]) {
-                strInput = resUrl.parseSingleUrl(strInput);
-                if (!resUrl.flags[INDEX_INVALID]) {
-                    result.urlInner = resUrl;
-                    return result;
+            }
+            strInput = resUrl.parseSingleUrl(strInput);
+            if (!resUrl.flags[INDEX_INVALID]) {
+                result.urlInner = resUrl;
+                return result;
+            }
+            if ((input[0] == c'/') && (input[1] == c'/' || (input[1] == c'\\' && possibleBaseURL.flags[INDEX_SPECIAL]))) {
+                let newInput: string = possibleBaseURL.cScheme + input;
+                resUrl.flags[INDEX_INVALID] = false
+                resUrl.parseSingleUrl(newInput);
+                result.urlInner = resUrl;
+                return result;
+            }
+            if (!possibleBaseURL.flags[INDEX_INFOPATH]) {
+                resUrl.flags[INDEX_INVALID] = false
+                baseIntoUrl(possibleBaseURL, resUrl, input.length == 0);
+                strInput = resUrl.toolHasBase(input, strInput);
+                if (input.length != 0 && input[0] != c'/' && resUrl.cPath.length == 0) {
+                    resUrl.cPath = possibleBaseURL.cPath;
+                    resUrl.flags[INDEX_PATH] = possibleBaseURL.flags[INDEX_PATH];
                 }
-                if ((input[0] == c'/') && (input[1] == c'/' || (input[1] == c'\\' && possibleBaseURL.flags[INDEX_SPECIAL]))) {
-                    let newInput: string = possibleBaseURL.cScheme + input;
-                    resUrl.flags[INDEX_INVALID] = false
-                    resUrl.parseSingleUrl(newInput);
-                    result.urlInner = resUrl;
-                    return result;
+                if (input.length != 0 && input[0] != c'/' && resUrl.cPath.length != 0) {
+                    let isFile: boolean = resUrl.cScheme == "file:";
+                    shorteningPath(resUrl, possibleBaseURL, isFile);
+                    let basePathStr: string = basePathToString(possibleBaseURL);
+                    basePathStr == "" ? basePathStr = strInput : basePathStr += '/' + strInput;
+                    resUrl.cPath = new Array<string>();
+                    resUrl.analysizeInput(basePathStr);
+                    resUrl.flags[INDEX_PATH] = true
                 }
-                if (!possibleBaseURL.flags[INDEX_INFOPATH]) {
-                    resUrl.flags[INDEX_INVALID] = false
-                    baseIntoUrl(possibleBaseURL, resUrl, input.length == 0);
-                    strInput = resUrl.toolHasBase(input, strInput);
-                    if (input.length != 0 && input[0] != c'/' && resUrl.cPath.length == 0) {
-                        resUrl.cPath = possibleBaseURL.cPath;
-                        resUrl.flags[INDEX_PATH] = possibleBaseURL.flags[INDEX_PATH];
-                    }
-                    if (input.length != 0 && input[0] != c'/' && resUrl.cPath.length != 0) {
-                        let isFile: boolean = ((resUrl.cScheme == "file:") ? true : false);
-                        shorteningPath(resUrl, possibleBaseURL, isFile);
-                        let basePathStr: string = basePathToString(possibleBaseURL);
-                        basePathStr == "" ? basePathStr = strInput : basePathStr += '/' + strInput;
-                        resUrl.cPath = new Array<string>();
-                        resUrl.analysizeInput(basePathStr);
-                        resUrl.flags[INDEX_PATH] = true
-                    }
-                } else if (possibleBaseURL.flags[INDEX_INFOPATH]) {
-                    resUrl.flags[INDEX_INVALID] = true
-                    result.urlInner = resUrl;
-                    return result;
-                }
+            } else if (possibleBaseURL.flags[INDEX_INFOPATH]) {
+                resUrl.flags[INDEX_INVALID] = true
+                result.urlInner = resUrl;
+                return result;
             }
             result.urlInner = resUrl;
             return result;
@@ -1998,7 +1991,7 @@ export namespace url {
                     resUrl.flags[INDEX_PATH] = base.flags[INDEX_PATH];
                 }
                 if (input.length != 0 && input[0] != c'/' && resUrl.cPath.length != 0) {
-                    let isFile: boolean = ((resUrl.cScheme == "file:") ? true : false);
+                    let isFile: boolean = resUrl.cScheme == "file:";
                     shorteningPath(resUrl, base, isFile);
                     let basePathStr: string = basePathToString(base);
                     basePathStr == "" ? basePathStr = strInput : basePathStr += "/" + strInput;
@@ -2436,9 +2429,6 @@ export namespace url {
         let result: string = '';
         let i = 0;
         const UNICODE_0x80 = 0x80;
-        const UNICODE_0x800 = 0x800;
-        const UNICODE_0xD800 = 0xD800;
-        const UNICODE_0xE000 = 0xE000;
         const UNICODE_0xC0 = 0xC0;
         const UNICODE_0x3F = 0x3F;
         const UNICODE_0xF0 = 0xF0;
@@ -2499,86 +2489,106 @@ export namespace url {
     }
 
     function unescapeBuffer(s: string): Uint8Array {
-        const outBuffer: Uint8Array = new Uint8Array(s.length);
-        let index = 0;
+        const outBuffer = new Uint8Array(s.length * 4);
         let outIndex = 0;
-        let currentChar: number = 0;
-        let nextChar = 0;
-        let hexHigh: number = 0;
-        let hexLow: number = 0;
-        const maxLength = s.length - 2;
-        // Flag to know if some hex chars have been decoded
-        let hasHex = false;
-        let code_plus = 43;
-        let code_percent = 37;
-        let code_space = 32;
-        while (index < s.length) {
-            currentChar = s.charCodeAt(index);
-            if (currentChar == code_plus) {
-                outBuffer[outIndex++] = code_space;
-                index++;
-                continue;
+        let srcIndex = 0;
+
+        // UTF-8 encoding function
+        const encodeUtf8 = (codePoint: number) => {
+            if (codePoint <= 0x7F) {
+                outBuffer[outIndex++] = codePoint;
+            } else if (codePoint <= 0x7FF) {
+                outBuffer[outIndex++] = 0xC0 | (codePoint >> 6);
+                outBuffer[outIndex++] = 0x80 | (codePoint & 0x3F);
+            } else if (codePoint <= 0xFFFF) {
+                outBuffer[outIndex++] = 0xE0 | (codePoint >> 12);
+                outBuffer[outIndex++] = 0x80 | ((codePoint >> 6) & 0x3F);
+                outBuffer[outIndex++] = 0x80 | (codePoint & 0x3F);
+            } else if (codePoint <= 0x10FFFF) {
+                outBuffer[outIndex++] = 0xF0 | (codePoint >> 18);
+                outBuffer[outIndex++] = 0x80 | ((codePoint >> 12) & 0x3F);
+                outBuffer[outIndex++] = 0x80 | ((codePoint >> 6) & 0x3F);
+                outBuffer[outIndex++] = 0x80 | (codePoint & 0x3F);
+            } else {
+                // Invalid code point
+                outBuffer[outIndex++] = 0xEF;
+                outBuffer[outIndex++] = 0xBF;
+                outBuffer[outIndex++] = 0xBD; // U+FFFD
             }
-            if (currentChar == code_percent && index < maxLength) {
-                currentChar = s.charCodeAt(++index);
-                hexHigh = Helper.unhexTable[currentChar];
-                if (hexHigh < 0) {
-                    outBuffer[outIndex++] = code_percent;
-                    continue;
-                } else {
-                    nextChar = s.charCodeAt(++index);
-                    hexLow = Helper.unhexTable[nextChar];
-                    if (!(hexLow >= 0)) {
-                        outBuffer[outIndex++] = code_percent;
-                        index--;
-                    } else {
-                        hasHex = true;
-                        currentChar = hexHigh * 16 + hexLow;
-                    }
+        };
+
+        // Process '%' encoding
+        const handlePercentEncoding = () => {
+            if (srcIndex + 2 < s.length) {
+                const hex1 = Helper.unhexTable[s.charCodeAt(srcIndex + 1)];
+                const hex2 = Helper.unhexTable[s.charCodeAt(srcIndex + 2)];
+
+                if (hex1 !== -1 && hex2 !== -1) {
+                    outBuffer[outIndex++] = hex1 * 16 + hex2;
+                    // skip %XX
+                    srcIndex += 3;
+                    return true;
                 }
             }
-            outBuffer[outIndex++] = currentChar;
-            index++;
+            return false;
+        };
+
+        while (srcIndex < s.length) {
+            const code = s.charCodeAt(srcIndex);
+
+            // Process '%' encoding
+            if (code === 0x25) { // '%'
+                if (handlePercentEncoding()) {
+                    //Successfully processed '%' encoding, proceed to next char
+                    continue;
+                }
+            }
+
+            // Handling bit agents
+            if (isHighSurrogate(code)) {
+                if (srcIndex + 1 < s.length) {
+                    const nextCode = s.charCodeAt(srcIndex + 1);
+                    if (isLowSurrogate(nextCode)) {
+                        const codePoint = combineSurrogates(code, nextCode);
+                        encodeUtf8(codePoint);
+                        //Skip high-bit agents and low-bit agents
+                        srcIndex += 2;
+                        continue;
+                    }
+                }
+                // No matching low-bit agent
+                encodeUtf8(0xFFFD);
+            } else if (isLowSurrogate(code)) {
+                // Isolated low-bit agents
+                encodeUtf8(0xFFFD);
+            } else {
+                encodeUtf8(code);
+            }
+            srcIndex++;
         }
-        return hasHex ? outBuffer.slice(0, outIndex) : outBuffer;
+        return outBuffer.slice(0, outIndex);
+    }
+
+    function isHighSurrogate(code: number): boolean {
+        return code >= 0xD800 && code <= 0xDBFF;
+    }
+
+    function isLowSurrogate(code: number): boolean {
+        return code >= 0xDC00 && code <= 0xDFFF;
+    }
+
+    function combineSurrogates(high: number, low: number): number {
+        return (high - 0xD800) * 0x400 + (low - 0xDC00) + 0x10000;
     }
 
     function decodeStringParmas(input: string): string {
-        let strVal = '';
+        let result = '';
         try {
-            strVal = decodeURIComponent(input);
+            result = decodeURIComponent(input);
         } catch (e) {
-            strVal = utf8Decode(unescapeBuffer(input));
+            result = utf8Decode(unescapeBuffer(input));
         }
-        return strVal;
-    }
-
-    function decodeSafelyOut(input: string): string {
-        let decodedString: string = '';
-        let decodedTemp: string = '';
-        let index: number = 0;
-        while (index < input.length) {
-            if (input[index] == c'%' && new RegExp('[0-9A-Fa-f]{2}').test(input.slice(index + 1, index + 3))) {
-                const encodedChar = input.slice(index, index + 3);
-                try {
-                    decodedString += decodeURIComponent(decodedTemp + encodedChar);
-                    decodedTemp = '';
-                } catch (e) {
-                    decodedTemp += encodedChar;
-                }
-                index += 3;
-                continue;
-            }
-            if (decodedTemp == '') {
-                decodedString += input[index];
-            } else {
-                decodedString += decodedTemp;
-                decodedString += input[index];
-                decodedTemp = '';
-            }
-            index++;
-        }
-        return decodedTemp == '' ? decodedString : decodedString += decodedTemp;
+        return result;
     }
 
     function stringParmas(stringParm: string): Array<string> {
@@ -2596,10 +2606,9 @@ export namespace url {
                         if (strStartPos == i) {
                             strLastPos = i + 1;
                             strStartPos = i + 1;
-                            continue;
                         }
                         if (strLastPos < i) {
-                            buf += stringParm.substr(strLastPos, i - strLastPos);
+                            buf += stringParm.substring(strLastPos, i);
                         }
                         seachParasVec.push(buf);
                         if (!isHasSpace) {
@@ -2618,7 +2627,7 @@ export namespace url {
                             break;
                         }
                         if (strLastPos < i) {
-                            buf += stringParm.substr(strLastPos, i - strLastPos);
+                            buf += stringParm.substring(strLastPos, i);
                         }
                         seachParasVec.push(buf);
                         buf = "";
@@ -2633,7 +2642,7 @@ export namespace url {
             return seachParasVec;
         }
         if (strLastPos < i) {
-            buf += stringParm.substr(strLastPos, i - strLastPos);
+            buf += stringParm.substring(strLastPos, i);
         }
         seachParasVec.push(buf);
         if (!isHasSpace) {
@@ -2643,22 +2652,8 @@ export namespace url {
         return seachParasVec;
     }
 
-    const unpairedSurrogateRe: RegExp =
-        new RegExp("(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])");
-
     function fixUSVstring(str: string) {
         return str.toWellFormed();
-    }
-
-    function join(arr: Array<string>, s: string): string {
-        let result = '';
-        for (let i = 0; i < arr.length; i++) {
-            result += arr[i];
-            if (i != arr.length - 1) {
-                result += s;
-            }
-        }
-        return result;
     }
 
     function encodePercentEncoding(str: string, noEscapeTable: Int8Array) {

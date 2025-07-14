@@ -210,8 +210,8 @@ function testUrlTest124() {
 
 function testUrlTest125() {
 	let params = new url.URLParams('aa=%E4%B8%AD%E5%9B%BD%BD中国');
- arktest.assertEQ(params.get('aa'), '中国�-�')
- arktest.assertEQ(params.toString(), 'aa=%E4%B8%AD%E5%9B%BD%EF%BF%BD-%EF%BF%BD')
+	arktest.assertEQ(params.get('aa'), '中国�中国')
+	arktest.assertEQ(params.toString(), 'aa=%E4%B8%AD%E5%9B%BD%EF%BF%BD%E4%B8%AD%E5%9B%BD')
 }
 
 function testUrlTest126() {
@@ -227,7 +227,7 @@ function testUrlTest126() {
 
 function testUrlTest127() {
 	let Params2 = new url.URLParams('ssa=s&&&hs==jj&&kk===');
- arktest.assertEQ(Params2.toString(), 'ssa=s&hs=%3Djj&kk=%3D%3D');
+	arktest.assertEQ(Params2.toString(), 'ssa=s&=&=&hs=%3Djj&=&kk=%3D%3D');
 }
 
 function testUrlTest128() {
