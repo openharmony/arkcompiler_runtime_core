@@ -19,7 +19,7 @@ import { stream } from "@ohos.util.stream";
 const mustChecks: Array<Function> = new Array<Function>();
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Stream API tests")
+    const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addTest("Create a writable stream", testWritableCreation);
     suite.addTest("The state when closing the flow", testWritableCloseState);
@@ -42,9 +42,10 @@ async function mustCallCheckAll() {
                 mustChecks.length = 0;
                 resolve(undefined);
             } catch (e: Error) {
-                reject(e)
+                mustChecks.length = 0;
+                reject(e);
             }
-        }, 2000)
+        }, 2000);
     })
 }
 
@@ -71,7 +72,7 @@ function mustCallNoArgs(fn?: Function, times: number = 1) {
 
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
@@ -86,7 +87,7 @@ function mustCall(fn?: Function, times: number = 1) {
 
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
@@ -114,6 +115,7 @@ class MyWritable1 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         callback.unsafeCall(new Error());
         arktest.assertEQ(this.writable, false);
@@ -123,9 +125,9 @@ class MyWritable1 extends stream.Writable {
 function testWritableAttributeState() {
     let writableStream = new MyWritable1();
     arktest.assertEQ(writableStream.writable, true);
+    writableStream.on('error', mustCall());
     writableStream.write('test');
     arktest.assertEQ(writableStream.writable, false);
-    writableStream.on('error', mustCall());
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
@@ -133,6 +135,7 @@ class MyWritable2 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         arktest.assertEQ((chunk as string).toString(), 'write content');
         callback.unsafeCall();
@@ -151,18 +154,25 @@ function testWritableWriteData() {
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+let callCount_MyWritable3 = 0;
 class MyWritable3 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-        let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => { }
-        let wrappedFn = mustCallUint8Array(fn, 0);
-        wrappedFn(chunk, encoding, callback);
+        callCount_MyWritable3++;
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamWritable005
 function testWritableDoWriteNotCalled() {
+    mustChecks.push(() => {
+        if (callCount_MyWritable3 !== 0) {
+            throw new Error(`Function was expected to be called 0 times, `
+                            + `but was called ${callCount_MyWritable3} times.`);
+        }
+    });
+
     let writableStream = new MyWritable3();
     arktest.assertEQ(writableStream.writable, true);
     writableStream.end();
@@ -174,6 +184,7 @@ class MyWritable4 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         callback.unsafeCall(new Error());
     }
@@ -196,6 +207,7 @@ class MyWritable5 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         callback.unsafeCall(new Error());
     }

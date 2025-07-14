@@ -19,16 +19,17 @@ import { stream } from "@ohos.util.stream";
 const mustChecks: Array<Function> = new Array<Function>();
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Stream API tests")
+    const suite = new arktest.ArkTestsuite("Stream API tests");
 
-    suite.addTest("Resume behavior of readable stream", testReadableStreamResumeBehavior)
-    suite.addTest("Data event handling in readable stream", testReadableStreamDataEventBehavior)
-    suite.addTest("Set encoding parameter error in readable stream", testReadableStreamSetEncodingParameterError)
-    suite.addTest("Emit readable event after data push", testReadableStreamEmitReadableBehavior)
-    suite.addTest("Emit readable event for short stream", testReadableStreamEmitReadableShortStreamBehavior)
-    suite.addTest("Readable ended state verification", testReadableStreamReadableEndedBehavior)
-    suite.addTest("Edge case for readable ended state", testReadableStreamReadableEndedEdgeCase)
-    suite.addTest("High watermark async behavior in readable stream", testReadableStreamHighWaterMarkAsyncBehavior)
+    suite.addTest("Resume behavior of readable stream", testReadableStreamResumeBehavior);
+    suite.addTest("Set encoding and readable behavior", testStreamReadableSetEncodingAndReadableBehavior);
+    suite.addTest("Data event handling in readable stream", testReadableStreamDataEventBehavior);
+    suite.addTest("Set encoding parameter error in readable stream", testReadableStreamSetEncodingParameterError);
+    suite.addTest("Emit readable event after data push", testReadableStreamEmitReadableBehavior);
+    suite.addTest("Emit readable event for short stream", testReadableStreamEmitReadableShortStreamBehavior);
+    suite.addTest("Readable ended state verification", testReadableStreamReadableEndedBehavior);
+    suite.addTest("Edge case for readable ended state", testReadableStreamReadableEndedEdgeCase);
+    suite.addTest("High watermark async behavior in readable stream", testReadableStreamHighWaterMarkAsyncBehavior);
 
     return suite.run();
 }
@@ -48,9 +49,10 @@ async function mustCallCheckAll() {
                 mustChecks.length = 0;
                 resolve(undefined);
             } catch (e: Error) {
-                reject(e)
+                mustChecks.length = 0;
+                reject(e);
             }
-        }, 2000)
+        }, 2000);
     })
 }
 
@@ -63,7 +65,22 @@ function mustCall(fn?: Function, times: number = 1) {
 
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
+        }
+    });
+    return wrappedFn;
+}
+
+function mustCallString(fn?: Function, times: number = 1) {
+    let callCount = 0;
+    let wrappedFn: Function = (str: string): void => {
+        callCount++;
+        fn?.unsafeCall(str);
+    }
+
+    mustChecks.push((): void => {
+        if (callCount !== times) {
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
@@ -71,10 +88,12 @@ function mustCall(fn?: Function, times: number = 1) {
 
 class MyRead1 extends stream.Readable {
     doReadCalled = true;
+
     constructor() {
         super();
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
         this.push(null);
         this.doReadCalled = true;
     }
@@ -87,18 +106,43 @@ function testReadableStreamResumeBehavior() {
 }
 
 class MyRead2 extends stream.Readable {
-    dataSource = new Array<string>("x");
     constructor() {
         super();
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
+    }
+}
+// Test cases ported from ArkTS 1.0:testStreamReadableData001
+function testStreamReadableSetEncodingAndReadableBehavior() {
+    let readable = new MyRead2();
+    readable.setEncoding('utf8');
+    readable.on('readable', (): void => {
+    });
+    readable.off('readable');
+    setTimeout(() => {
+        readable.on('data', mustCallString());
+        readable.push('hello');
+        arktest.assertTrue(readable.readable, "readable should be true");
+    }, 0);
+    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+}
+
+class MyRead3 extends stream.Readable {
+    dataSource = new Array<string>("x");
+
+    constructor() {
+        super();
+    }
+
+    doRead(size: int) {
         let data = this.dataSource.shift();
         this.push(data as string);
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamReadableData002
 function testReadableStreamDataEventBehavior() {
-    let readableStream = new MyRead2();
+    let readableStream = new MyRead3();
     readableStream.on('data', (chunk: string): void => {
         arktest.assertEQ(chunk.toString(), 'x');
     });
@@ -108,11 +152,11 @@ function testReadableStreamDataEventBehavior() {
 function testReadableStreamSetEncodingParameterError() {
     const test: Function = () => {
         let readableStream = new stream.Readable();
-        readableStream.setEncoding('my valid encoding')
+        readableStream.setEncoding('my valid encoding');
     }
 
     let exceptionCheck = (e: Error | Exception): string | boolean => {
-        return ((e as BusinessError).message == "Parameter error. Incorrect parameter.")
+        return ((e as BusinessError).message == "Unknown encoding: my valid encoding");
     }
     arktest.expectThrow(() => {test()}, exceptionCheck);
 }
@@ -151,11 +195,12 @@ function testReadableStreamEmitReadableShortStreamBehavior() {
     readableStream.push(null);
 }
 
-class MyRead3 extends stream.Readable {
+class MyRead4 extends stream.Readable {
     constructor() {
         super();
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
         arktest.assertFalse(this.readableEnded, "readableEnded should be false");
         this.push('asd');
         arktest.assertFalse(this.readableEnded, "readableEnded should be false");
@@ -165,7 +210,7 @@ class MyRead3 extends stream.Readable {
 }
 // Test cases ported from ArkTS 1.0:testStreamReadableEnded002
 function testReadableStreamReadableEndedBehavior() {
-    let readableStream = new MyRead3();
+    let readableStream = new MyRead4();
     readableStream.on('end', (): void => {
         arktest.assertTrue(readableStream.readableEnded, "readableEnded should be true");
     });
@@ -189,12 +234,14 @@ function testReadableStreamReadableEndedEdgeCase() {
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
-class MyRead4 extends stream.Readable {
+class MyRead5 extends stream.Readable {
     count = 5;
+
     constructor() {
         super();
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
         setTimeout(() => {
             if (this.count--) {
                 this.push('a');
@@ -208,7 +255,7 @@ class MyRead4 extends stream.Readable {
 function testReadableStreamHighWaterMarkAsyncBehavior() {
     let dataTimes = 0;
 
-    let readable = new MyRead4();
+    let readable = new MyRead5();
     readable.on('end', (): void => {
         arktest.assertEQ(dataTimes, 5);
     });
@@ -222,7 +269,6 @@ class TestReadable extends stream.Readable {
         super();
     }
 
-    doRead(size: number) {
+    doRead(size: int) {
     }
-
 }

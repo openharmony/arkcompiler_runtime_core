@@ -19,7 +19,7 @@ import { stream } from "@ohos.util.stream";
 const mustChecks: Array<Function> = new Array<Function>();
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Stream API tests")
+    const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addTest("Writable cork uncork", testWritableCorkUncork);
     suite.addTest("Writable cork uncork multiple times", testWritableCorkUncorkMultipleTimes);
@@ -59,9 +59,10 @@ async function mustCallCheckAll() {
                 mustChecks.length = 0;
                 resolve(undefined);
             } catch (e: Error) {
-                reject(e)
+                mustChecks.length = 0;
+                reject(e);
             }
-        }, 2000)
+        }, 2000);
     })
 }
 
@@ -74,7 +75,7 @@ function mustCallNoArgs(fn?: Function, times: number = 1) {
 
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
@@ -82,9 +83,11 @@ function mustCallNoArgs(fn?: Function, times: number = 1) {
 
 class MyWritable1 extends stream.Writable {
     dataWritten: string = '';
+
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         this.dataWritten += chunk;
         callback.unsafeCall();
@@ -102,9 +105,11 @@ function testWritableCorkUncork() {
 
 class MyWritable2 extends stream.Writable {
     dataWritten = '';
+
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
         this.dataWritten += chunk;
         callback.unsafeCall();
@@ -127,9 +132,11 @@ function testWritableCorkUncorkMultipleTimes() {
 
 class MyWritable3 extends stream.Writable {
     dataWritten = '';
+
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         this.dataWritten += chunk;
         callback.unsafeCall();
@@ -152,6 +159,7 @@ class MyWritable4 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         callback.unsafeCall();
     }
@@ -176,6 +184,7 @@ class MyWritable5 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         callback.unsafeCall();
     }
@@ -242,6 +251,7 @@ class MyWritable6 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         setTimeout(() => {
             callback.unsafeCall()
@@ -260,22 +270,29 @@ function testWritableDrainEventHighWatermark() {
     writableStream.end();
 }
 
+let callCount_MyWritable7 = 0;
 class MyWritable7 extends stream.Writable {
     doWriteVCalled = false;
+
     constructor() {
         super();
     }
+
     doWritev(chunks: string[] | Uint8Array[], callback: Function): void {
-        let fn = (chunks: string[] | Uint8Array[], callback: Function) => {
-            this.doWriteVCalled = true;
-            callback.unsafeCall();
-        }
-        let wrappedFn = mustCallTwoArgs(fn);
-        wrappedFn(chunks, callback);
+        callCount_MyWritable7++;
+        this.doWriteVCalled = true;
+        callback.unsafeCall();
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamWritableWritev001
 function testWritableDrainEventAsyncHighWatermark() {
+    mustChecks.push(() => {
+        if (callCount_MyWritable7 !== 1) {
+            throw new Error(`Function was expected to be called 1 times, `
+                            + `but was called ${callCount_MyWritable7} times.`);
+        }
+    });
+
     let writable = new MyWritable7();
     writable.write('test', 'utf8', mustCallNoArgs((): void => {
     }))
@@ -285,10 +302,12 @@ function testWritableDrainEventAsyncHighWatermark() {
 
 class TestWritable extends stream.Writable {
     private fn: (chunk: string | Uint8Array, type: string, enc: string) => void;
+
     constructor(fn: (chunk: string | Uint8Array, type: string, enc: string) => void) {
         super();
         this.fn = fn;
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         this.fn(chunk, typeof chunk, encoding);
         callback.unsafeCall();

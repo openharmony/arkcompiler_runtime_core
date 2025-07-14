@@ -20,14 +20,14 @@ import buffer from '@ohos.buffer';
 const mustChecks: Array<Function> = new Array<Function>();
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Stream API tests")
+    const suite = new arktest.ArkTestsuite("Stream API tests");
 
-    suite.addTest("Data event of Transform.", testTransformDataEvent)
-    suite.addTest("Cork and uncork of Transform.", testTransformCorkUncork)
-    suite.addTest("Error event of Transform.", testTransformErrorEvent)
-    suite.addTest("Remove listener of Transform.", testTransformRemoveListener)
-    suite.addTest("Multiple listeners of Transform.", testTransformMultipleListeners)
-    suite.addTest("Flush operation of Transform.", testTransformFlushOperation)
+    suite.addTest("Data event of Transform.", testTransformDataEvent);
+    suite.addTest("Cork and uncork of Transform.", testTransformCorkUncork);
+    suite.addTest("Error event of Transform.", testTransformErrorEvent);
+    suite.addTest("Remove listener of Transform.", testTransformRemoveListener);
+    suite.addTest("Multiple listeners of Transform.", testTransformMultipleListeners);
+    suite.addTest("Flush operation of Transform.", testTransformFlushOperation);
 
     return suite.run();
 }
@@ -42,9 +42,10 @@ async function mustCallCheckAll() {
                 mustChecks.length = 0;
                 resolve(undefined);
             } catch (e: Error) {
-                reject(e)
+                mustChecks.length = 0;
+                reject(e);
             }
-        }, 2000)
+        }, 2000);
     })
 }
 
@@ -71,7 +72,7 @@ function mustCall(fn?: Function, times: number = 1) {
 
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
@@ -102,6 +103,7 @@ function testTransformDataEvent() {
     transform.end();
 }
 
+let callCount_TestTransform2 = 0;
 class TestTransform2 extends stream.Transform {
     constructor() {
         super();
@@ -112,16 +114,20 @@ class TestTransform2 extends stream.Transform {
     }
 
     doTransform(chunk: string, encoding: string, callback: Function): void {
-        let fn = (chunk: string, encoding: string, callback: Function) => {
-            arktest.assertEQ(chunk, 'data1');
-            callback.unsafeCall();
-        }
-        let wrappedFn = mustCallFn(fn);
-        wrappedFn(chunk, encoding, callback);
+        callCount_TestTransform2++;
+        arktest.assertEQ(chunk, 'data1');
+        callback.unsafeCall();
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamTransformEvent002
 function testTransformCorkUncork() {
+    mustChecks.push(() => {
+        if (callCount_TestTransform2 !== 1) {
+            throw new Error(`Function was expected to be called 1 times, `
+                            + `but was called ${callCount_TestTransform2} times.`);
+        }
+    });
+
     let transformStream = new TestTransform2();
     transformStream.cork();
     transformStream.write('data1', 'utf8');
@@ -134,21 +140,27 @@ function testTransformCorkUncork() {
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+let callCount_TestTransform3 = 0;
 class TestTransform3 extends stream.Transform {
     constructor() {
         super();
     }
+
     doTransform(chunk: string, encoding: string, callback: Function): void {
-        let fn = (chunk: string, encoding: string, callback: Function) => {
-            arktest.assertEQ(chunk, 'test');
-            callback.unsafeCall(new Error('Write error'));
-        }
-        let wrappedFn = mustCallFn(fn);
-        wrappedFn(chunk, encoding, callback);
+        callCount_TestTransform3++;
+        arktest.assertEQ(chunk, 'test');
+        callback.unsafeCall(new Error('Write error'));
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamTransformEvent003
 function testTransformErrorEvent() {
+    mustChecks.push(() => {
+        if (callCount_TestTransform3 !== 1) {
+            throw new Error(`Function was expected to be called 1 times, `
+                            + `but was called ${callCount_TestTransform3} times.`);
+        }
+    });
+
     let transformStream = new TestTransform3();
     transformStream.on('error', mustCall());
     transformStream.write('test');
@@ -195,12 +207,15 @@ function testTransformMultipleListeners() {
 
 class TestTransform4 extends stream.Transform {
     expected = 'test';
+
     constructor() {
         super();
     }
+
     doTransform(chunk: string, encoding: string, callback: Function): void {
         callback.unsafeCall();
     }
+
     doFlush(callback: Function): void {
         callback.unsafeCall(this.expected);
     }

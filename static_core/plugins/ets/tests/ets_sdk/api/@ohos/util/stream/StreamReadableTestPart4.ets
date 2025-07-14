@@ -19,20 +19,20 @@ import { stream } from "@ohos.util.stream";
 const mustChecks: Array<Function> = new Array<Function>();
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Stream API tests")
+    const suite = new arktest.ArkTestsuite("Stream API tests");
 
-    suite.addTest("Readable does not implement DoRead.", testReadableErrorOnUnimplementedDoRead)
-    suite.addTest("Reads a buffer of a specified size from the buffer001.", testReadableSetEncodingUtf8)
-    suite.addTest("Reads a buffer of a specified size from the buffer002.", testReadableSetEncodingUtf8Alias)
-    suite.addTest("Reads a buffer of a specified size from the buffer003.", testReadablePushAndReadWithInvalidEncoding)
-    suite.addTest("Reads a buffer of a specified size from the buffer004.", testReadablePushAndReadUtf8)
+    suite.addTest("Readable does not implement DoRead.", testReadableErrorOnUnimplementedDoRead);
+    suite.addTest("Reads a buffer of a specified size from the buffer001.", testReadableSetEncodingUtf8);
+    suite.addTest("Reads a buffer of a specified size from the buffer002.", testReadableSetEncodingUtf8Alias);
+    suite.addTest("Reads a buffer of a specified size from the buffer003.", testReadablePushAndReadWithInvalidEncoding);
+    suite.addTest("Reads a buffer of a specified size from the buffer004.", testReadablePushAndReadUtf8);
     suite.addTest("Reads a buffer of a specified size from the buffer005.",
-        testReadablePushAndReadWithUtf8EncodingOption)
+        testReadablePushAndReadWithUtf8EncodingOption);
     suite.addTest("Reads a buffer of a specified size from the buffer006.",
-        testReadablePushAndReadWithWindows1250EncodingOption)
-    suite.addTest("Reads a buffer of a specified size from the buffer007.", testReadableEncodingPropertyWindows1250)
-    suite.addTest("Reads a buffer of a specified size from the buffer008.", testReadableEncodingPropertyDefaultUtf8)
-    suite.addTest("Reads a buffer of a specified size from the buffer009.", testReadablePushAndReadDefaultUtf8)
+        testReadablePushAndReadWithWindows1250EncodingOption);
+    suite.addTest("Reads a buffer of a specified size from the buffer007.", testReadableEncodingPropertyWindows1250);
+    suite.addTest("Reads a buffer of a specified size from the buffer008.", testReadableEncodingPropertyDefaultUtf8);
+    suite.addTest("Reads a buffer of a specified size from the buffer009.", testReadablePushAndReadDefaultUtf8);
 
     return suite.run();
 }
@@ -47,9 +47,10 @@ async function mustCallCheckAll() {
                 mustChecks.length = 0;
                 resolve(undefined);
             } catch (e: Error) {
-                reject(e)
+                mustChecks.length = 0;
+                reject(e);
             }
-        }, 2000)
+        }, 2000);
     })
 }
 
@@ -62,7 +63,7 @@ function mustCall(fn?: Function, times: number = 1) {
 
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
@@ -73,7 +74,7 @@ function testReadableErrorOnUnimplementedDoRead() {
     let readable = new stream.Readable();
     readable.on('error', mustCall((error: Error): void => {
         arktest.assertEQ(error.name, 'BusinessError');
-        arktest.assertEQ(error.message, 'The doRead() method is not implemented');
+        arktest.assertEQ(error.message, 'The doRead() method is not implemented.');
     }));
     readable.on('close', mustCall());
     readable.read();
@@ -122,7 +123,7 @@ function testReadablePushAndReadWithUtf8EncodingOption() {
     let input = new Uint8Array([0xE4, 0xBD, 0xA0, 0xE5, 0xA5, 0xBD]);
     const stringdecoder = new StringDecoderReadable(enc);
     stringdecoder.push(input);
-    let res = stringdecoder.read(input.length);
+    let res = stringdecoder.read(input.length.toInt());
     arktest.assertEQ(res, null);
 }
 
@@ -170,9 +171,11 @@ class StringDecoderReadable extends stream.Readable {
     constructor() {
         super();
     }
+
     constructor(opt: stream.ReadableOptions) {
         super(opt);
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
     }
 }

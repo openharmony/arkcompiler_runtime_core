@@ -19,7 +19,7 @@ import { stream } from "@ohos.util.stream";
 const mustChecks: Array<Function> = new Array<Function>();
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Stream API tests")
+    const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addTest("Pause and Resume in Readable Stream.", testReadablePauseAndResume)
     suite.addTest("Readable property in Readable.", testReadablePropertyReadable)
@@ -43,9 +43,10 @@ async function mustCallCheckAll() {
                 mustChecks.length = 0;
                 resolve(undefined);
             } catch (e: Error) {
-                reject(e)
+                mustChecks.length = 0;
+                reject(e);
             }
-        }, 2000)
+        }, 2000);
     })
 }
 
@@ -58,7 +59,7 @@ function mustCall(fn?: Function, times: number = 1) {
 
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
@@ -68,8 +69,8 @@ class MyRead1 extends stream.Readable {
     constructor() {
         super();
     }
-    doRead(size: number) {
 
+    doRead(size: int) {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamReadablePauseAndResume001
@@ -89,7 +90,8 @@ class MyRead2 extends stream.Readable {
     constructor() {
         super();
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamReadableReadable001

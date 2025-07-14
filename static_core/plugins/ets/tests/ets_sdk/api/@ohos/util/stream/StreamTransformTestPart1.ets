@@ -20,21 +20,22 @@ import buffer from '@ohos.buffer';
 const mustChecks: Array<Function> = new Array<Function>();
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Stream API tests")
+    const suite = new arktest.ArkTestsuite("Stream API tests");
 
-    suite.addTest("Call Callback twice in Transform.", testTransformCallbackTwice)
-    suite.addTest("Transform constructor.", testTransformConstructor)
-    suite.addTest("Event triggering of Transform.", testTransformEventTriggering)
-    suite.addTest("Event handling of Transform.", testTransformEventHandling)
-    suite.addTest("Initialization of Transform.", testTransformInitialization)
-    suite.addTest("Default encoding of Transform.", testTransformDefaultEncoding)
-    suite.addTest("Pause behavior of Transform.", testTransformPauseBehavior)
-    suite.addTest("Resume behavior of Transform.", testTransformResumeBehavior)
-    suite.addTest("Set encoding of Transform.", testTransformSetEncoding)
-    suite.addTest("Pause state of Transform.", testTransformPauseState)
-    suite.addTest("Read callback of Transform.", testTransformReadCallback)
-    suite.addTest("Writable properties of Transform.", testTransformWritableProperties)
-    suite.addTest("Readable properties of Transform.", testTransformReadableProperties)
+    suite.addTest("Call Callback twice in Transform.", testTransformCallbackTwice);
+    suite.addTest("Transform constructor.", testTransformConstructor);
+    suite.addTest("Event triggering of Transform.", testTransformEventTriggering);
+    suite.addTest("Event handling of Transform.", testTransformEventHandling);
+    suite.addTest("Initialization of Transform.", testTransformInitialization);
+    suite.addTest("Default encoding of Transform.", testTransformDefaultEncoding);
+    suite.addTest("Read operation of Transform.", testTransformReadOperation);
+    suite.addTest("Pause behavior of Transform.", testTransformPauseBehavior);
+    suite.addTest("Resume behavior of Transform.", testTransformResumeBehavior);
+    suite.addTest("Set encoding of Transform.", testTransformSetEncoding);
+    suite.addTest("Pause state of Transform.", testTransformPauseState);
+    suite.addTest("Read callback of Transform.", testTransformReadCallback);
+    suite.addTest("Writable properties of Transform.", testTransformWritableProperties);
+    suite.addTest("Readable properties of Transform.", testTransformReadableProperties);
 
     return suite.run();
 }
@@ -49,15 +50,16 @@ async function mustCallCheckAll() {
                 mustChecks.length = 0;
                 resolve(undefined);
             } catch (e: Error) {
-                reject(e)
+                mustChecks.length = 0;
+                reject(e);
             }
-        }, 2000)
+        }, 2000);
     })
 }
 
 function mustCallArgSize(fn?: Function, times: number = 1) {
     let callCount = 0;
-    let wrappedFn = (size: number) => {
+    let wrappedFn = (size: int) => {
         callCount++;
         fn?.unsafeCall(size);
     }
@@ -78,7 +80,7 @@ function mustCall(fn?: Function, times: number = 1) {
 
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
@@ -93,7 +95,7 @@ function mustCallChunk(fn?: Function, times: number = 1) {
 
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
@@ -103,6 +105,7 @@ class MyTransform1 extends stream.Transform {
     constructor() {
         super();
     }
+
     doTransform(chunk: string, encoding: string, callback: Function): void {
         callback.unsafeCall();
         callback.unsafeCall();
@@ -113,7 +116,7 @@ function testTransformCallbackTwice() {
     let transform = new MyTransform1();
     transform.on('error', mustCall((error: Error): void => {
         arktest.assertEQ(error.name, 'BusinessError');
-        arktest.assertEQ(error.message, 'Callback called multiple times');
+        arktest.assertEQ(error.message, 'Callback called multiple times.');
     }));
 
     transform.write('test');
@@ -128,7 +131,7 @@ function testTransformConstructor() {
     }
 
     let exceptionCheck = (e: Error | Exception): string | boolean => {
-        return ((e as BusinessError).message == "The doTransform() method is not implemented")
+        return ((e as BusinessError).message == "The doTransform() method is not implemented.");
     }
     arktest.expectThrow(() => { test(); }, exceptionCheck);
 }
@@ -137,6 +140,7 @@ class MyTransform2 extends stream.Transform {
     constructor() {
         super();
     }
+
     doTransform(chunk: string, encoding: string, callback: Function): void {
         let transformedChunk = chunk.toString().toUpperCase();
         this.push(transformedChunk);
@@ -161,6 +165,7 @@ class Transform3 extends stream.Transform {
     constructor() {
         super();
     }
+
     doTransform(chunk: string, encoding: string, callback: Function): void {
         this.push(chunk + ' ');
         callback.unsafeCall();
@@ -180,6 +185,7 @@ function testTransformEventHandling() {
 
 class MyTransform4 extends stream.Transform {
     doInitializeCalled: boolean = false;
+
     doInitialize(callback: Function) {
         super.doInitialize(callback);
         this.doInitializeCalled = true;
@@ -202,6 +208,29 @@ function testTransformDefaultEncoding() {
     let transformStream = new stream.Transform();
     let result = transformStream.setDefaultEncoding('utf8');
     arktest.assertTrue(result);
+}
+class MyTransform5 extends stream.Transform {
+    dataSource = new Array<string>("x");
+
+    doRead(size: int) {
+        let data = this.dataSource.shift();
+        if (data) {
+            this.push(data as string);
+        } else {
+            this.push(null);
+        }
+    }
+}
+// Test cases ported from ArkTS 1.0:testStreamTransform005
+function testTransformReadOperation() {
+    let transformStream = new MyTransform5();
+    let func: Function = mustCallChunk((chunk: Object): void => {
+        arktest.assertEQ(chunk.toString(), 'x');
+    })
+    transformStream.on('data', (chunk: Object): void => {
+        func.unsafeCall(chunk);
+    });
+    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
 // Test cases ported from ArkTS 1.0:testStreamTransform006
@@ -253,8 +282,10 @@ function testTransformPauseState() {
     arktest.assertTrue(transformStream.isPaused());
 }
 
-class TestTransform5 extends stream.Transform {
+let callCount_MyTransform6 = 0;
+class MyTransform6 extends stream.Transform {
     doReadCalled = false;
+
     constructor() {
         super();
     }
@@ -262,17 +293,22 @@ class TestTransform5 extends stream.Transform {
     doTransform(chunk: string, encoding: string, callback: Function): void {
         callback.unsafeCall();
     }
-    doRead(size: number) {
-        let fn = () => {
-            this.doReadCalled = true;
-        }
-        let wrappedFn = mustCallArgSize(fn, 1);
-        wrappedFn(size);
+
+    doRead(size: int) {
+        callCount_MyTransform6++;
+        this.doReadCalled = true;
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamTransform012
 function testTransformReadCallback() {
-    let transform = new TestTransform5();
+    mustChecks.push(() => {
+        if (callCount_MyTransform6 !== 1) {
+            throw new Error(`Function was expected to be called 1 times, `
+                            + `but was called ${callCount_MyTransform6} times.`);
+        }
+    });
+
+    let transform = new MyTransform6();
     transform.on('data', (): void => {
     });
     setTimeout(() => {

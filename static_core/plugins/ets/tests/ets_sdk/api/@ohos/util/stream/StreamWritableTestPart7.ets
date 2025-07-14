@@ -19,7 +19,7 @@ import { stream } from "@ohos.util.stream";
 const mustChecks: Array<Function> = new Array<Function>();
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Stream API tests")
+    const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addTest("Verify drain event after end", testWritableDrainEventAfterEnd);
     suite.addTest("Handle doWritev event", testWritableDoWritevEvent);
@@ -53,9 +53,10 @@ async function mustCallCheckAll() {
                 mustChecks.length = 0;
                 resolve(undefined);
             } catch (e: Error) {
-                reject(e)
+                mustChecks.length = 0;
+                reject(e);
             }
-        }, 2000)
+        }, 2000);
     })
 }
 
@@ -68,7 +69,7 @@ function mustCall(fn?: Function, times: number = 1) {
 
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
@@ -78,6 +79,7 @@ class MyWritable1 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         callback.unsafeCall();
     }
@@ -93,6 +95,7 @@ class MyWritable2 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         setTimeout(() => {
             callback.unsafeCall();
@@ -110,6 +113,7 @@ class MyWritable3 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         callback.unsafeCall();
     }
@@ -130,6 +134,7 @@ class MyWritable4 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWritev(chunks: string[] | Uint8Array[], callback: Function) {
         callback.unsafeCall();
     }
@@ -150,6 +155,7 @@ class MyWritable5 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWritev(chunks: string[] | Uint8Array[], callback: Function) {
         setTimeout(() => {
             callback.unsafeCall();
@@ -170,9 +176,11 @@ function testWritableLengthAfterCorkUncork() {
 
 class MyWritable6 extends stream.Writable {
     chunks = '';
+
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         callback.unsafeCall();
         arktest.assertEQ(typeof chunk, 'string');
@@ -192,10 +200,12 @@ function testWritableLengthAfterDoWritev() {
 }
 
 class MyWritable7 extends stream.Writable {
-    num = 0
+    num = 0;
+
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         this.num++;
         if (chunk === 'end test') {
@@ -219,9 +229,11 @@ function testWritableLengthAfterAsyncDoWritev() {
 
 class MyWritable8 extends stream.Writable {
     chunksBuffer = '';
+
     constructor() {
         super();
     }
+
     doWritev(chunks: string[] | Uint8Array[], callback: Function) {
         (chunks as string[]).forEach((chunk: string) => {
             this.chunksBuffer = this.chunksBuffer + chunk.toString();
@@ -249,6 +261,7 @@ class MyWritable9 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         setTimeout(() => {
             callback.unsafeCall();
@@ -263,12 +276,12 @@ function testWritableDoWriteOrder() {
     writableStream.end();
     let func1: Function = (error: Error) => {
         arktest.assertEQ(ticked, true);
-        arktest.assertEQ(error.message, 'write after end');
+        arktest.assertEQ(error.message, 'Write after end.');
     }
     writableStream.write('test', 'utf8', mustCall(func1));
     ticked = true;
     let func2: Function = (error: Error) => {
-        arktest.assertEQ(error.message, 'write after end');
+        arktest.assertEQ(error.message, 'Write after end.');
     }
     writableStream.on('error', mustCall(func2));
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
@@ -276,9 +289,11 @@ function testWritableDoWriteOrder() {
 
 class MyWritable10 extends stream.Writable {
     ticked = false;
+
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         if (chunk === 'end test') {
             this.ticked = true;
@@ -299,6 +314,7 @@ class MyWritable11 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         callback.unsafeCall();
     }
@@ -318,6 +334,7 @@ class MyWritable12 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         setTimeout(() => {
             callback.unsafeCall();
@@ -338,6 +355,7 @@ class MyWritable13 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWritev(chunks: string[] | Uint8Array[], callback: Function) {
         callback.unsafeCall();
     }
@@ -365,6 +383,7 @@ class MyWritable14 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         if (chunk === 'test1') {
             arktest.assertEQ(encoding, 'gbk');
@@ -385,11 +404,13 @@ function testStreamWritableFinishAndCloseAsync() {
 
 class MyWritable15 extends stream.Writable {
     needDrain = false;
+
     constructor() {
         super();
     }
+
     doWritev(chunks: string[] | Uint8Array[], callback: Function) {
-        if ((this.writableLength as number) >= (this.writableHighWatermark as number)) {
+        if (this.writableLength! >= this.writableHighWatermark!) {
             this.needDrain = true;
         }
         callback.unsafeCall();
@@ -402,18 +423,21 @@ function testWritableDrainEventHighWatermark() {
     writableStream.cork();
     let ret = writableStream.write('test');
     while (ret) {
-        ret = writableStream.write('test2kshngnseio  oioo i哦啊贵妃红 O哦i奥i鞥 aiofjoioj oa jioa ajg io id noa id ofean io');
+        ret = writableStream.write('test2kshngnseio  oioo i哦啊贵妃红 O哦i奥i鞥 '
+                                   + 'aiofjoioj oa jioa ajg io id noa id ofean io');
     }
     writableStream.uncork();
 }
 
 class MyWritable16 extends stream.Writable {
     needDrain = false;
+
     constructor() {
         super();
     }
+
     doWritev(chunks: string[] | Uint8Array[], callback: Function) {
-        if ((this.writableLength as number) >= (this.writableHighWatermark as number)) {
+        if (this.writableLength! >= this.writableHighWatermark!) {
             this.needDrain = true;
         }
         setTimeout(() => {
@@ -427,7 +451,8 @@ function testWritableDrainEventHighWatermarkAsync() {
     writableStream.on('drain', () => { arktest.assertEQ(writableStream.needDrain, true); })
     let ret = writableStream.write('test');
     while (ret) {
-        ret = writableStream.write('test2kshngnseio  oioo i哦啊贵妃红 O哦i奥i鞥 aiofjoioj oa jioa ajg io id noa id ofean io');
+        ret = writableStream.write('test2kshngnseio  oioo i哦啊贵妃红 O哦i奥i鞥 '
+                                   + 'aiofjoioj oa jioa ajg io id noa id ofean io');
     }
 }
 
@@ -435,6 +460,7 @@ class MyWritable17 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWritev(chunks: string[] | Uint8Array[], callback: Function) {
         setTimeout(() => {
             callback.unsafeCall();
@@ -449,7 +475,8 @@ function testStreamWritableDrainEventAfterEnd() {
     writableStream.on('finish', () => { arktest.assertEQ(needDrain, true); })
     let ret = writableStream.write('test');
     while (ret) {
-        ret = writableStream.write('test2kshngnseio  oioo i哦啊贵妃红 O哦i奥i鞥 aiofjoioj oa jioa ajg io id noa id ofean io');
+        ret = writableStream.write('test2kshngnseio  oioo i哦啊贵妃红 O哦i奥i鞥 '
+                                   + 'aiofjoioj oa jioa ajg io id noa id ofean io');
     }
     writableStream.end();
 }
@@ -458,6 +485,7 @@ class MyWritable18 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         arktest.assertEQ((chunk as Uint8Array).toString(), '11,22,33,44,55,66');
         callback.unsafeCall();

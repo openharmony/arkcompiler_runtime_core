@@ -20,31 +20,31 @@ import buffer from '@ohos.buffer';
 const mustChecks: Array<Function> = new Array<Function>();
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Stream API tests")
+    const suite = new arktest.ArkTestsuite("Stream API tests");
 
-    suite.addTest("Readable resume and pause functionality", testReadableResumeAndPause)
-    suite.addTest("Readable pause and read data", testReadablePauseAndRead)
-    suite.addTest("Readable resume triggers readable event", testReadableResumeTriggersEvent)
-    suite.addTest("Readable isPaused returns false initially", testReadableInitialIsPaused)
-    suite.addTest("Readable isPaused returns true after pause", testReadablePauseUpdatesState)
-    suite.addTest("Readable isPaused returns false after resume", testReadableResumeUpdatesState)
-    suite.addTest("Readable object mode property validation", testReadableObjectModeProperty)
-    suite.addTest("Readable property validation", testReadableDefaultProperty)
-    suite.addTest("Readable error handling and property update", testReadableErrorHandling)
-    suite.addTest("Readable high watermark property validation", testReadableHighWatermarkProperty)
-    suite.addTest("Readable flowing state validation", testReadableFlowingState)
-    suite.addTest("Readable flowing state after resume", testReadableResumeFlowingState)
-    suite.addTest("Readable length property validation (empty)", testReadableLengthEmpty)
-    suite.addTest("Readable length property validation (with data)", testReadableLengthWithData)
-    suite.addTest("Readable length property validation (partial read)", testReadableLengthPartialRead)
-    suite.addTest("Readable length property validation (end event)", testReadableLengthAfterEnd)
-    suite.addTest("Readable length property validation (multiple pushes)", testReadableLengthMultiplePushes)
-    suite.addTest("Readable ended property validation (not ended)", testReadableEndedNotFinished)
-    suite.addTest("Readable property validation (default state)", testReadableDefaultState)
-    suite.addTest("Readable flowing state validation (with data)", testReadableFlowingWithData)
-    suite.addTest("Readable ended property validation (default state)", testReadableEndedDefaultState)
-    suite.addTest("Readable ended property validation (after finish)", testReadableEndedAfterFinish)
-    suite.addTest("Readable property validation (pause and resume)", testReadablePauseAndResumeState)
+    suite.addTest("Readable resume and pause functionality", testReadableResumeAndPause);
+    suite.addTest("Readable pause and read data", testReadablePauseAndRead);
+    suite.addTest("Readable resume triggers readable event", testReadableResumeTriggersEvent);
+    suite.addTest("Readable isPaused returns false initially", testReadableInitialIsPaused);
+    suite.addTest("Readable isPaused returns true after pause", testReadablePauseUpdatesState);
+    suite.addTest("Readable isPaused returns false after resume", testReadableResumeUpdatesState);
+    suite.addTest("Readable object mode property validation", testReadableObjectModeProperty);
+    suite.addTest("Readable property validation", testReadableDefaultProperty);
+    suite.addTest("Readable error handling and property update", testReadableErrorHandling);
+    suite.addTest("Readable high watermark property validation", testReadableHighWatermarkProperty);
+    suite.addTest("Readable flowing state validation", testReadableFlowingState);
+    suite.addTest("Readable flowing state after resume", testReadableResumeFlowingState);
+    suite.addTest("Readable length property validation (empty)", testReadableLengthEmpty);
+    suite.addTest("Readable length property validation (with data)", testReadableLengthWithData);
+    suite.addTest("Readable length property validation (partial read)", testReadableLengthPartialRead);
+    suite.addTest("Readable length property validation (end event)", testReadableLengthAfterEnd);
+    suite.addTest("Readable length property validation (multiple pushes)", testReadableLengthMultiplePushes);
+    suite.addTest("Readable ended property validation (not ended)", testReadableEndedNotFinished);
+    suite.addTest("Readable property validation (default state)", testReadableDefaultState);
+    suite.addTest("Readable flowing state validation (with data)", testReadableFlowingWithData);
+    suite.addTest("Readable ended property validation (default state)", testReadableEndedDefaultState);
+    suite.addTest("Readable ended property validation (after finish)", testReadableEndedAfterFinish);
+    suite.addTest("Readable property validation (pause and resume)", testReadablePauseAndResumeState);
 
     return suite.run();
 }
@@ -59,9 +59,10 @@ async function mustCallCheckAll() {
                 mustChecks.length = 0;
                 resolve(undefined);
             } catch (e: Error) {
-                reject(e)
+                mustChecks.length = 0;
+                reject(e);
             }
-        }, 2000)
+        }, 2000);
     })
 }
 
@@ -74,7 +75,7 @@ function mustCall(fn?: Function, times: number = 1) {
 
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
@@ -89,7 +90,7 @@ function mustCallNoArgs(fn?: Function, times: number = 1) {
 
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
@@ -180,11 +181,11 @@ class MyRead1 extends stream.Readable {
     constructor() {
         super();
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
         throw new Error('Simulated error');
     }
 }
-
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties003
 function testReadableErrorHandling() {
     let readable = new MyRead1();
@@ -206,7 +207,8 @@ class MyRead2 extends stream.Readable {
     constructor() {
         super();
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties005
@@ -221,7 +223,8 @@ class MyRead3 extends stream.Readable {
     constructor() {
         super();
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties006
@@ -241,7 +244,8 @@ class MyRead4 extends stream.Readable {
     constructor() {
         super();
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties008
@@ -256,7 +260,8 @@ class MyRead5 extends stream.Readable {
     constructor() {
         super();
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties009
@@ -264,11 +269,11 @@ function testReadableLengthPartialRead() {
     let readable = new MyRead5();
     let testData = 'Hello world!';
     readable.push(testData);
-    let chunk = readable.read(testData.length / 2);
+    let chunk = readable.read((testData.length / 2).toInt());
     arktest.assertTrue(chunk !== null);
     arktest.assertEQ(chunk!.length, testData.length / 2);
     arktest.assertEQ(readable.readableLength, testData.length / 2);
-    let remainingChunk = readable.read(testData.length / 2);
+    let remainingChunk = readable.read((testData.length / 2).toInt());
     arktest.assertTrue(remainingChunk !== null);
     arktest.assertEQ(remainingChunk!.length, testData.length / 2);
     arktest.assertEQ(readable.readableLength, 0);
@@ -278,7 +283,8 @@ class MyRead6 extends stream.Readable {
     constructor() {
         super();
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties010
@@ -297,7 +303,8 @@ class MyRead7 extends stream.Readable {
     constructor() {
         super();
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties011
@@ -315,7 +322,8 @@ class MyRead8 extends stream.Readable {
     constructor() {
         super();
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties012
@@ -338,7 +346,8 @@ class MyRead9 extends stream.Readable {
     constructor() {
         super();
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties014
@@ -352,7 +361,8 @@ class MyRead10 extends stream.Readable {
     constructor() {
         super();
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties015
@@ -365,7 +375,8 @@ class MyRead11 extends stream.Readable {
     constructor() {
         super();
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties016
@@ -383,7 +394,8 @@ class MyRead12 extends stream.Readable {
     constructor() {
         super();
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties017
@@ -399,6 +411,7 @@ class TestReadable extends stream.Readable {
     constructor() {
         super();
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
     }
 }

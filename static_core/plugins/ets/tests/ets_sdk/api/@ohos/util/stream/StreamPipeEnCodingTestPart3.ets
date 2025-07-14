@@ -18,12 +18,12 @@ import { stream } from "@ohos.util.stream";
 
 const mustChecks: Array<Function> = new Array<Function>();
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Stream API tests")
+    const suite = new arktest.ArkTestsuite("Stream API tests");
 
-    suite.addTest("Writable stream end method validation (gbk).", testWritableStreamEndEncodingGbk)
-    suite.addTest("Writable stream end method validation (gb2312).", testWritableStreamEndEncodingGb2312)
-    suite.addTest("Set default encoding validation (gb18030).", testWritableStreamSetDefaultEncodingGb18030)
-    suite.addTest("Set default encoding validation (gbk).", testWritableStreamSetDefaultEncodingGbk)
+    suite.addTest("Writable stream end method validation (gbk).", testWritableStreamEndEncodingGbk);
+    suite.addTest("Writable stream end method validation (gb2312).", testWritableStreamEndEncodingGb2312);
+    suite.addTest("Set default encoding validation (gb18030).", testWritableStreamSetDefaultEncodingGb18030);
+    suite.addTest("Set default encoding validation (gbk).", testWritableStreamSetDefaultEncodingGbk);
 
     return suite.run();
 }
@@ -38,9 +38,10 @@ async function mustCallCheckAll() {
                 mustChecks.length = 0;
                 resolve(undefined);
             } catch (e: Error) {
-                reject(e)
+                mustChecks.length = 0;
+                reject(e);
             }
-        }, 2000)
+        }, 2000);
     })
 }
 
@@ -52,7 +53,7 @@ function mustCallUint8Array(fn?: Function, times: number = 1) {
     }
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
@@ -67,96 +68,112 @@ function mustCall(fn?: Function, times: number = 1) {
 
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
 }
 
+let callCount_MyWrite1 = 0;
 class MyWrite1 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-        let fn: Function = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
-            arktest.assertEQ(chunk, '你好');
-            arktest.assertEQ(encoding, 'gbk');
-            callback.unsafeCall();
-        }
-        let wrappedFn = mustCallUint8Array(fn);
-        wrappedFn(chunk, encoding, callback);
+        callCount_MyWrite1++;
+        arktest.assertEQ(chunk, '你好');
+        arktest.assertEQ(encoding, 'gbk');
+        callback.unsafeCall();
     }
 }
-
 // Test cases ported from ArkTS 1.0:testStreamEncoding005
 function testWritableStreamEndEncodingGbk() {
+    mustChecks.push(() => {
+        if (callCount_MyWrite1 !== 1) {
+            throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyWrite1} times.`);
+        }
+    });
+
     let writable = new MyWrite1();
     writable.end('你好', 'gbk', mustCall());
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+let callCount_MyWrite2 = 0;
 class MyWrite2 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-        let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
-            arktest.assertEQ(chunk, '你好');
-            arktest.assertEQ(encoding, 'gb2312');
-            callback.unsafeCall();
-        }
-        let wrappedFn = mustCallUint8Array(fn);
-        wrappedFn(chunk, encoding, callback);
+        callCount_MyWrite2++;
+        arktest.assertEQ(chunk, '你好');
+        arktest.assertEQ(encoding, 'gb2312');
+        callback.unsafeCall();
     }
 }
-
 // Test cases ported from ArkTS 1.0:testStreamEncoding006
 function testWritableStreamEndEncodingGb2312() {
+    mustChecks.push(() => {
+        if (callCount_MyWrite2 !== 1) {
+            throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyWrite2} times.`);
+        }
+    });
+
     let writable = new MyWrite2();
     writable.end('你好', 'gb2312', mustCall());
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+let callCount_MyWrite3 = 0;
 class MyWrite3 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-        let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
-            arktest.assertEQ(chunk, '你好');
-            arktest.assertEQ(encoding, 'gb18030');
-            callback.unsafeCall();
-        }
-        let wrappedFn = mustCallUint8Array(fn);
-        wrappedFn(chunk, encoding, callback);
+        callCount_MyWrite3++;
+        arktest.assertEQ(chunk, '你好');
+        arktest.assertEQ(encoding, 'gb18030');
+        callback.unsafeCall();
     }
 }
-
 // Test cases ported from ArkTS 1.0:testStreamEncoding007
 function testWritableStreamSetDefaultEncodingGb18030() {
+    mustChecks.push(() => {
+        if (callCount_MyWrite3 !== 1) {
+            throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyWrite3} times.`);
+        }
+    });
+
     let writable = new MyWrite3();
     writable.setDefaultEncoding('gb18030');
     writable.write('你好');
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+let callCount_MyWrite4 = 0;
 class MyWrite4 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-        let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
-            arktest.assertEQ(chunk, '你好');
-            arktest.assertEQ(encoding, 'gbk');
-            callback.unsafeCall();
-        }
-        let wrappedFn = mustCallUint8Array(fn);
-        wrappedFn(chunk, encoding, callback);
+        callCount_MyWrite4++;
+        arktest.assertEQ(chunk, '你好');
+        arktest.assertEQ(encoding, 'gbk');
+        callback.unsafeCall();
     }
 }
-
 // Test cases ported from ArkTS 1.0:testStreamEncoding008
 function testWritableStreamSetDefaultEncodingGbk() {
+    mustChecks.push(() => {
+        if (callCount_MyWrite4 !== 1) {
+            throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyWrite4} times.`);
+        }
+    });
+
     let writable = new MyWrite4();
     writable.setDefaultEncoding('gbk');
     writable.write('你好');
