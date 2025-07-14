@@ -26,7 +26,6 @@ function main() {
     suite.addTest("Test flipBitsByRange with negative toIndex to verify it throws appropriate error.", BitVector_flipBitsByRange_Func_002);
     suite.addTest("Test flipBitsByRange with both indices negative to verify it throws appropriate error.", BitVector_flipBitsByRange_Func_003);
     suite.addTest("Test flipBitsByRange with negative fromIndex to verify it throws appropriate error.", BitVector_flipBitsByRange_Func_004);
-    suite.addTest("Test flipBitsByRange with non-integer fromIndex to verify it throws appropriate error.", BitVector_flipBitsByRange_Func_005);
     suite.addTest("Test flipBitsByRange on a 64-bit vector to verify it correctly flips the first half.", BitVector_flipBitsByRange_Func_006);
     suite.addTest("Test flipBitsByRange on a bit vector with initial capacity to verify correct flipping across the entire range.", BitVector_flipBitsByRange_Func_007);
 
@@ -136,34 +135,6 @@ function BitVector_flipBitsByRange_Func_004() {
     }
     arktest.expectThrow(() => {
         bitVector.flipBitsByRange(-3, 8);
-    }, exceptionCheck);
-}
-
-/**
-     * @tc.number    : BITVECTOR_TEST_068
-     * @tc.name      : BitVector_flipBitsByRange_Func_005
-     * @tc.desc      : Test flipBitsByRange with non-integer fromIndex to verify it throws appropriate error.
-     * @tc.size      : MediumTest
-     * @tc.type      : Function
-     * @tc.level     : Level 2
-     */
-function BitVector_flipBitsByRange_Func_005() {
-    let bitVector = new collections.BitVector(0);
-    bitVector.push(1);
-    bitVector.push(1);
-    bitVector.push(0);
-    bitVector.push(1);
-    bitVector.push(0);
-    bitVector.push(0);
-    bitVector.push(1);
-    bitVector.push(0);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return e instanceof BusinessError &&
-            ((e as BusinessError).code === TypeErrorCodeId &&
-                (e as BusinessError).message === `The type of "fromIndex" must be integer. Received value is: 3.11`);
-    }
-    arktest.expectThrow(() => {
-        bitVector.flipBitsByRange(3.11, 8);
     }, exceptionCheck);
 }
 

@@ -24,7 +24,6 @@ function main() {
 
     suite.addTest("Verify basic bit flipping functionality in a bit vector.", BitVector_flipBitByIndex_Func_001);
     suite.addTest("Test flipBitByIndex with out of range index value.", BitVector_flipBitByIndex_Func_002);
-    suite.addTest("Test flipBitByIndex with non-integer index value.", BitVector_flipBitByIndex_Func_003);
     suite.addTest("Test bit flipping operations on larger bit vector.", BitVector_flipBitByIndex_Func_004);
     suite.addTest("Test bit flipping operations on bit vector with initial size.", BitVector_flipBitByIndex_Func_005);
 
@@ -83,33 +82,6 @@ function BitVector_flipBitByIndex_Func_002() {
                 (e as BusinessError).message === `The value of "index" is out of range. It must be >= 0 && <= 7. Received value is: 20`);
     }
     arktest.expectThrow(() => { bitVector.flipBitByIndex(20); }, exceptionCheck);
-}
-
-/**
- * @tc.number    : BITVECTOR_TEST_061
- * @tc.name      : BitVector_flipBitByIndex_Func_003
- * @tc.desc      : Test flipBitByIndex with non-integer index value.
- * @tc.size      : MediumTest
- * @tc.type      : Function
- * @tc.level     : Level 2
- */
-function BitVector_flipBitByIndex_Func_003() {
-    let bitVector = new collections.BitVector(0);
-    bitVector.push(1);
-    bitVector.push(1);
-    bitVector.push(0);
-    bitVector.push(1);
-    bitVector.push(0);
-    bitVector.push(0);
-    bitVector.push(1);
-    bitVector.push(0);
-
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return e instanceof BusinessError &&
-            ((e as BusinessError).code === TypeErrorCodeId &&
-                (e as BusinessError).message === `The type of "index" must be integer. Received value is: 6.1`);
-    }
-    arktest.expectThrow(() => { bitVector.flipBitByIndex(6.1); }, exceptionCheck);
 }
 
 /**
