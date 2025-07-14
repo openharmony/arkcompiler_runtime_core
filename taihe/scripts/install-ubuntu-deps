@@ -17,6 +17,48 @@ source "$(dirname "$0")/common_lib.sh"
 MIRROR_BASE=mirrors.tuna.tsinghua.edu.cn
 MIRROR_APT="http://$MIRROR_BASE/ubuntu"
 MIRROR_PYPI="http://$MIRROR_BASE/pypi/web/simple"
+MODE=""
+
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --mode)
+                MODE="$2"
+                shift 2
+                ;;
+            --mode=*)
+                MODE="${1#*=}"
+                shift
+                ;;
+            --help|-h)
+                echo "Usage: $0 --mode [ggw-ci|taihe-dev]"
+                exit 0
+                ;;
+            *)
+                log_error "Unknown argument: $1"
+                exit 1
+                ;;
+        esac
+    done
+
+    # default
+    if [[ -z "$MODE" ]]; then
+        MODE="taihe-dev"
+    fi
+
+    case "$MODE" in
+        ggw-ci|taihe-dev) ;; # valid
+        "")
+            log_error "--mode is required (ggw-ci or taihe-dev)"
+            exit 1
+            ;;
+        *)
+            log_error "Invalid mode: $MODE"
+            echo "Allowed values: ggw-ci, taihe-dev"
+            exit 1
+            ;;
+    esac
+}
 
 # This function is called magically when bash cannot find a command
 command_not_found_handle() {
@@ -59,15 +101,23 @@ install_pip_pkgs() {
 }
 
 main() {
+    log_action "Mode: $MODE"
+
+    if [[ "$MODE" == "ggw-ci" ]]; then
+        log_stage "Running in ggw-ci mode"
+    elif [[ "$MODE" == "taihe-dev" ]]; then
+        log_stage "Running in taihe-dev mode"
+    fi
     # "uv bulid" runs ANTLR using java. Ensure java exists here.
     # Since we cannot intercept a missing command in Python.
     log_stage "Checking uv deps" && ensure_command java uv
     log_stage "Syncing compiler deps" && _uv sync
-    log_stage "Generate grammer" && _uv build
     log_stage "Checking build deps" && ensure_command python curl cmake clang ninja
+    log_stage "Generate grammar" && _uv build
     log_stage "Done!"
 }
 
 init_shell_options
 chdir_root
-main "$@"
+parse_args "$@"
+main
