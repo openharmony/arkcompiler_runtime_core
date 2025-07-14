@@ -165,14 +165,13 @@ The syntax of *local declaration* is presented below:
         ;
 
 The visibility of a local declaration name is determined by the surrounding
-function or method, and by the block scope rules (see :ref:`Scopes`).
+function or method, and by the block scope rules (see :ref:`Scopes`). In order
+to avoid ambiguous interpretation, appropriate sections of this Specification
+are dedicated to a detailed discussion of the following entities:
 
-For some statements, scope rules details explained
-in corresponding sections in order to avoid ambiguous interpretation:
-
-- :ref:`if Statements`
-- :ref:`For Statements`
-- :ref:`For-Of Statements`
+- :ref:`if Statements`,
+- :ref:`For Statements`,
+- :ref:`For-Of Statements`.
 
 The usage of annotations is discussed in :ref:`Using Annotations`.
 
@@ -227,8 +226,8 @@ Type of expression must be ``boolean``, or a type mentioned in
    statement
    expression
 
-If an expression is successfully evaluated as ``true``, then *thenStatement* is
-executed. Otherwise, *elseStatement* is executed (if provided).
+If an expression is successfully evaluated as ``true``, then a ``thenStatement``
+is executed. Otherwise, an ``elseStatement`` is executed (if provided).
 
 Any ``else`` corresponds to the nearest preceding ``if`` of an ``if``
 statement:
@@ -240,8 +239,8 @@ statement:
     if (Cond2) statement1
     else statement2 // Executes only if: Cond1 && !Cond2
 
-A list of statements in braces (see :ref:`Block`) is used to combine the
-``else`` part with the first ``if``:
+A :ref:`Block` can be used to combine the ``else`` part with the initial ``if``
+as follows:
 
 .. code-block:: typescript
    :linenos:
@@ -251,9 +250,9 @@ A list of statements in braces (see :ref:`Block`) is used to combine the
     }
     else statement2 // Executes if: !Cond1
 
-Without braces, ``if`` statement does not form a distinct scope. When
-braces are used ``if``-part and ``else``-part form distinct block scopes
-(see *block scope* in :ref:`Scopes`). Next example illustrates that:
+If ``thenStatement`` or ``elseStatement`` is any kind of a statement but not a
+block (see :ref:`Block`), then no *block scope* (see :ref:`Scopes`) is created
+for such a statement.
 
 .. code-block:: typescript
    :linenos:
@@ -263,7 +262,7 @@ braces are used ``if``-part and ``else``-part form distinct block scopes
       x = 2 // OK
 
       if (Cond1) {
-        let x: number = 10;   // OK, if-block scope
+        let x: number = 10;   // OK, then-block scope
         let y: number = x;
       }
       else {
@@ -291,9 +290,9 @@ Loop Statements
 .. meta:
     frontend_status: Done
 
-|LANG| has four kinds of loops. A loop of each kind can have an optional loop
-label that can be used only by ``break`` and ``continue`` statements contained
-in the body of the loop. The label is characterized by an *identifier*.
+|LANG| has four kinds of loops. A loop of each kind can be optionally labelled
+with an *identifier*. The *identifier* can be used only by the
+:ref:`Break Statements` and :ref:`Continue Statements` contained in the loop body.
 
 .. index::
    loop statement
@@ -315,11 +314,26 @@ The syntax of *loop statements* is presented below:
         | forOfStatement
         ;
 
-An ``identifier`` at the beginning of a loop statement denotes a *label*
-that can be used in :ref:`Break Statements` and :ref:`Continue Statements`.
-
 A :index:`compile-time error` occurs if the label *identifier* is not used
-within ``loopStatement``.
+within ``loopStatement``, or is used in lambda expressions (see
+:ref:`Lambda Expressions`) within a loop body.
+
+.. code-block:: typescript
+   :linenos:
+
+    label: for (i = 1; i < 10; i++) {
+        const f1 = () => {
+            while (true) {
+                continue label // Compile-time error
+            }
+        }
+        const f2 = () => {
+            do 
+                break label // Compile-time error
+            while (true)
+        }
+    }
+
 
 .. index::
    loop statement
@@ -340,8 +354,8 @@ within ``loopStatement``.
 
 A ``while`` statement and a ``do`` statement evaluate an expression and
 execute the statement repeatedly till the expression value is ``true``.
-The key difference is that *whileStatement* starts from evaluating and
-checking the expression value, and *doStatement* starts from executing
+The key difference is that a ``whileStatement`` starts from evaluating and
+checking the expression value, and a ``doStatement`` starts from executing
 the statement.
 
 The syntax of *while and do statements* is presented below:
@@ -427,11 +441,9 @@ mentioned in :ref:`Extended Conditional Expressions`. Otherwise, a
 .. index::
    for statement
 
-|
-
-The variable declared in *forInit* part has the loop scope - can be used
-in the *forContinue* and *forUpdate* expressions and also in the single
-body statement or (when braces used) in body block:
+A variable declared in the *forInit*-part has the loop scope. It can be used
+in a *forContinue* expression, a *forUpdate* expression, a single-body
+statement, or in a body block if enclosed in parentheses:
 
 .. code-block:: typescript
    :linenos:
@@ -451,7 +463,7 @@ body statement or (when braces used) in body block:
 
 .. meta:
     frontend_status: Partly
-	todo: type of element for strings
+    todo: type of element for strings
 
 A ``for-of`` loop iterates elements of ``array`` or ``string``, or an instance
 of *iterable* class or interface (see :ref:`Iterable Types`).
@@ -497,7 +509,7 @@ body. Otherwise, the variable is as declared above.
 The modifier ``const`` prohibits assignments into *forVariable*,
 while ``let`` allows modifications.
 
-If *forVariable* is declared inside loop, then its type is inferred to be that
+The type of *forVariable* declared inside loop is inferred to be that
 of the *iterated* elements, namely:
 
 -  ``T``, if ``Array<T>`` or ``FixedArray<T>`` instance is iterated;
@@ -559,9 +571,10 @@ feature (see :ref:`For-of Explicit Type Annotation`).
     frontend_status: Done
     todo: break with label causes compile time assertion
 
-A ``break`` statement transfers control out of the enclosing *loopStatement*
-or *switchStatement*. When used out of *loopStatement*
-or *switchStatement*, causes a compile-time error
+A ``break`` statement transfers control out of the enclosing ``loopStatement``
+or ``switchStatement``. If a ``break`` statement is used outside a
+``loopStatement`` or a ``switchStatement``, then a :index:`compile-time error`
+occurs.
 
 .. index::
    break statement
@@ -585,10 +598,10 @@ surrounding function or method), then a :index:`compile-time error` occurs.
 
 A statement without a label transfers control out of the innermost enclosing
 ``switch``, ``while``, ``do``, ``for``, or ``for-of`` statement. If
-``breakStatement`` is placed outside *loopStatement* or *switchStatement*, then
-a :index:`compile-time error` occurs.
+``breakStatement`` is placed outside ``loopStatement`` or ``switchStatement``,
+then a :index:`compile-time error` occurs.
 
-Here is an example with ``break`` with and without label:
+Examples of ``break`` statements with and without a label are presented below:
 
 .. code-block:: typescript
    :linenos:
@@ -648,10 +661,10 @@ The syntax of *continue statement* is presented below:
         'continue' identifier?
         ;
 
-A ``continue`` statement without the label transfers control
-to the next iteration of the enclosing loop statement. If there is no
-enclosing loop statement (within the body of the surrounding function
-or method), then a :index:`compile-time error` occurs.
+A ``continue`` statement with no label transfers control to the next iteration
+of the enclosing ``loop`` statement. If there is no enclosing ``loop`` statement
+within the body of the surrounding function or method, then a
+:index:`compile-time error` occurs.
 
 A ``continue`` statement with the label *identifier* transfers control
 to the next iteration of the enclosing loop statement
@@ -660,7 +673,7 @@ If there is no enclosing loop statement with the same label *identifier*
 (within the body of the surrounding function or method),
 then a :index:`compile-time error` occurs.
 
-Here is an example with ``continue`` with and without label:
+Examples of ``continue`` statements with and without a label are presented below:
 
 .. code-block:: typescript
    :linenos:
@@ -718,8 +731,8 @@ The syntax of *return statement* is presented below:
         'return' expression?
         ;
 
-A ``return`` statement with *expression* can only occur inside a function or a
-method or lambda body with non-``void`` return type.
+A ``return`` statement with *expression* can only occur inside a function, a
+method, or a lambda body with non-``void`` return type.
 
 .. index::
    return statement
@@ -735,7 +748,7 @@ following:
 
 - Initializer block;
 - Constructor body;
-- Function or method or lambda body with the return type ``void`` (see
+- Function, method, or lambda body with return type ``void`` (see
   :ref:`Type void`);
 
 A :index:`compile-time error` occurs if a ``return`` statement is found in:
@@ -762,7 +775,7 @@ A :index:`compile-time error` occurs if a ``return`` statement is found in:
    constructor body
    return type
 
-The execution of *returnStatement* leads to the termination of the
+The execution of a ``returnStatement`` leads to the termination of the
 surrounding function, method, or initializer. If an *expression* is
 provided, the resultant value is the evaluated *expression*.
 
@@ -832,12 +845,18 @@ The syntax of *switch statement* is presented below:
 
 A ``switch`` expression can be of any type.
 
-An optional identifier, when present, allows the ``break`` operator
-to transfer control out of nested switch or loop statements
-(see :ref:`Break statements`).
+If available, an optional identifier allows the ``break`` statement to transfer
+control out of a nested ``switch`` or ``loop`` statement (see
+:ref:`Break statements`).
 
 .. index::
    expression type
+   identifier
+   control transfer
+   nested statement
+   switch statement
+   loop statement
+   break statement
 
 A :index:`compile-time error` occurs if at least one of case expression types
 is not assignable (see :ref:`Assignability`) to the type of the ``switch``
@@ -855,13 +874,13 @@ statement expression.
     switch (arg) {
       case '0':
       case '1':
-        alert('One or zero')
+        console.log('One or zero')
         break
       case '2':
-        alert('Two')
+        console.log('Two')
         break
       default:
-        alert('An unknown value')
+        console.log('An unknown value')
     }
 
     class A {}
@@ -893,11 +912,11 @@ execution is transferred to the set of statements of the *caseClause* where the
 match occurred. If this set of statements executes a ``break`` statement, then
 the entire ``switch`` statement terminates. If no ``break`` statement is
 executed, then the execution continues through statements of any remaining
-*caseClause*(s) and *defaultClause* until first ``break`` statement occurs
-or switch statement ends.
+*caseClause* and *defaultClause* until the first ``break`` statement occurs,
+or until the ``switch`` statement ends.
 
-If no *match* occurs but *defaultClause* is present,
-then execution is transferred to statements in *defaultClause*.
+If no *match* occurs while a *defaultClause* is present, then the execution is
+transferred to the statements of the *defaultClause*.
 
 .. index::
    execution
@@ -1057,6 +1076,7 @@ The type of *catch identifier* inside the block is ``Error`` (see
         let res = divide(a, b)
 
         // further processing ...
+        return res
       }
       catch (e) {
         return e instanceof ZeroDivisor? -1 : 0

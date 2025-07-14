@@ -815,9 +815,11 @@ The syntax is presented below:
         annotationUsage?
         accessModifier?
         ( constructorDeclaration
+        | constructorWithOverloadSignatures
         | overloadConstructorDeclaration
         | classFieldDeclaration
         | classMethodDeclaration
+        | classMethodWithOverloadSignatures
         | overloadMethodDeclaration
         | classAccessorDeclaration
         )
@@ -1099,7 +1101,9 @@ Field Declarations
     todo: syntax for definite assignment
 
 *Field declarations* represent data members in class instances or static data
-members (see :ref:`Static and Instance Fields`).
+members (see :ref:`Static and Instance Fields`). Class instance
+*field declarations* are its *own fields* in constrast to the inherited ones.
+
 Syntactically, a field declaration is similar to a variable declaration.
 
 .. code-block:: abnf
@@ -1327,7 +1331,7 @@ subsequent assignment are only performed once.
    this
    super
 
-In a non-static field declaration, an initializer is evaluated at runtime.
+The initializer of a non-static field declaration is evaluated at runtime.
 The assignment is performed each time an instance of the class is created.
 
 The instance field initializer expression cannot do the following:
@@ -1443,50 +1447,54 @@ Overriding Fields
 .. meta:
     frontend_status: None
 
-
 When extending a class or implementing interfaces, a field declared in a
 superclass or a superinterface can be overridden by a field with the same name,
-the same type, and the same ``static`` or non-``static`` modifier status.
+and the same ``static`` or non-``static`` modifier status.
 Using the keyword ``override`` is not required. The new declaration acts as
-redeclaration. The type of the overriding field is to be the same as that of
-the overridden field. Otherwise, a :index:`compile-time error` occurs.
-Initializers of overridden fields are preserved for execution, and the
-initialization is normally performed in the context of *superclass* constructors.
-A :index:`compile-time error` occurs if a field is not declared as ``readonly``
-in a superclass, while an overriding field is marked as ``readonly``.
+redeclaration.
+
+The type of the overriding field is to be the same as that of
+the overridden field. Otherwise, a :index:`compile-time error` occurs:
 
 .. code-block:: typescript
    :linenos:
 
-    class Base1 {
-        field: number = this.init_in_base_1()
-        private init_in_base_1() {
-           console.log ("Base1 field initialization")
+    class C {
+        field: number = 1
+    }
+    class D extends C {
+        field: string = "aa" // compile-time error: type is not the same
+    }
+
+Initializers of overridden fields are preserved for execution, and the
+initialization is normally performed in the context of *superclass* constructors.
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        field: number = this.init()
+        private init() {
+           console.log ("Field initialization in C")
            return 123
         }
     }
-    interface Base2 {
-        field: number
+    class D extends C {
+        override field: number = 123 // field can be explicitly marked as overridden
     }
 
-    class Base3 extends Base1 {
-        override field: number = 123 // Explicitly mark the field as overridden
-    }
-    console.log (Base1.field, Base3.field)
-
-    class Derived extends Base3 implements Base2 {
-        field = this.init_in_derived() // overriding 'field' and providing new initial value
+    class Derived extends D {
+        field = this.init_in_derived()
         private init_in_derived() {
-           console.log ("Derived field initialization")
+           console.log ("Field initialization in Derived")
            return 42
         }
     }
     new Derived()
     /* Output:
-        Base1 field initialization
-        Derived field initialization
+        Field initialization in C
+        Field initialization in Derived
     */
-
 
 .. index::
    overriding
@@ -1501,6 +1509,71 @@ in a superclass, while an overriding field is marked as ``readonly``.
    keyword override
    readonly
    field
+
+A :index:`compile-time error` occurs if a field is not declared as ``readonly``
+in a superclass, while an overriding field is marked as ``readonly``:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        field = 1
+    }
+    class D extends C {
+        readonly field = 2 // compile-time error, wrong overriding
+    }
+
+A :index:`compile-time error` occurs if a field overrides getter or setter
+in a superclass:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        get num(): number { return 42 }
+        set num(x: number) {}
+    }
+    class D extends C {
+        num = 2 // compile-time error, wrong overriding
+    }
+
+The same :index:`compile-time error` occurs in more complex case, where
+a field simultaneously overrides a field from a superclass and
+a property from a superinterface:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        num = 1
+    }
+    interface I {
+        num: number
+    }
+    class D extends C implements I {
+        num = 2 // compile-time error, conflict in overriding
+    }
+
+The overriding conflict occurs as ``num`` must be implemented
+in ``D``
+
+-  As the field, as it is defined as field in superclass ``C``;
+-  As accessors (see :ref:`Accessor Declarations`), as ``num`` is
+   an interface property in superinterface 'I'
+   (see :ref:`Implementing Required Interface Properties`).
+
+Overriding a field by an accessor is also prohibited:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        num = 1
+    }
+    class D extends C {
+        get num(): number { return 42 } // compile-time error, wrong overriding
+        set num(x: number) {}           // compile-time error, wrong overriding
+    }
 
 |
 
@@ -1543,14 +1616,18 @@ A :index:`compile-time error` occurs if:
 -  The body of a class declaration declares a method but the name of that
    method is already used for a field in the same declaration.
 
-A non-static method declared in a class can 
-- implement a method inherited from superinterface(s) (see :ref:`Implementing Interface Methods`),
-- override a method inherited from a superclass (see :ref:`Overriding in Classes`),
-- be a new method method declaration.
+A non-static method declared in a class can do the following:
 
-A static method declared in a class can 
-- shadow a static method inherited from a superclass (see :ref:`Static Methods`),
-- be a new static method method declaration.
+- Implement a method inherited from a superinterface or superinterfaces
+  (see :ref:`Implementing Interface Methods`);
+- Override a method inherited from a superclass (see :ref:`Overriding in Classes`);
+- Act as method declaration of a new method.
+
+
+A static method declared in a class can do the following:
+
+- Shadow a static method inherited from a superclass (see :ref:`Static Methods`);
+- Act as method declaration of a new static method.
 
 
 .. index::
@@ -1588,7 +1665,7 @@ Static methods are always called without reference to a particular object. As
 a result, a :index:`compile-time error` occurs if the keywords ``this`` or
 ``super`` are used inside a static method.
 
-Static methods can be inherited from the superclass or shadowed by name
+Static methods can be inherited from a superclass or shadowed by name
 regardless of the their signature:
 
 .. code-block:: typescript
@@ -1754,14 +1831,11 @@ A :index:`compile-time error` occurs if:
    ``override``.
 
 If the signature of an overridden method contains parameters with default
-values (see :ref:`Optional Parameters`), then the overriding method always
-uses the default parameter values of the overridden method.
+values (see :ref:`Optional Parameters`), then the overriding method must
+always use the same default parameter values for the overridden method.
+Otherwise, a :index:`compile-time error` occurs.
 
-A :index:`compile-time error` occurs if a parameter in the overriding method
-has a default value.
-
-More details on overriding are provided
-in :ref:`Overriding in Classes` and
+More details on overriding are provided in :ref:`Overriding in Classes` and
 :ref:`Overriding and Overload Signatures in Interfaces`.
 
 
@@ -1891,6 +1965,12 @@ The return type of an overridden method in a subclass must also be ``this``:
 .. code-block:: typescript
    :linenos:
 
+    class C {
+        foo(): this {
+            return this
+        }
+    }
+
     class D extends C {
         foo(): this {
             return this
@@ -1922,7 +2002,7 @@ The syntax of *accessor declarations* is presented below:
 
     classAccessorDeclaration:
         accessorModifier*
-        ( 'get' identifier '(' ')' returnType block?
+        ( 'get' identifier '(' ')' returnType? block?
         | 'set' identifier '(' parameter ')' block?
         )
         ;
@@ -1978,12 +2058,14 @@ modifier ``final``, :ref:`Overriding Methods` for the modifier ``override``, and
       }
     }
 
-A *get-accessor* (*getter*) must have an explicit return type but no parameters.
+A *get-accessor* (*getter*) must have an explicit return type and no parameters,
+or no return type at all on condition it can be inferred from the getter body.
 A *set-accessor* (*setter*) must have a single parameter and no return type. The
 use of getters and setters looks the same as the use of fields.
 A :index:`compile-time error` occurs if:
 
 -  Getters or setters are used as methods;
+-  Getter return type cannot be inferred from the getter body;
 -  *Set-accessor* (*setter*) has a single parameter that is optional (see
    :ref:`Optional Parameters`):
 
@@ -2019,6 +2101,18 @@ A :index:`compile-time error` occurs if:
    set-accessor
    setter
    field
+
+If a getter has no return type specified, then the type is inferred as in
+:ref:`Return Type Inference`.
+
+.. code-block:: typescript
+   :linenos:
+
+    class Person {
+      private _age: number = 0
+      get age() { return this._age } // retuirn type is inferred as number
+    }
+
 
 A class can define a getter, a setter, or both with the same name.
 If both a getter and a setter with a particular name are defined,
@@ -2117,7 +2211,7 @@ Constructor Declaration
     todo: optional constructor names
     todo: Explicit Constructor Call - "Qualified superclass constructor calls" - not implemented, need more investigation (inner class)
 
-*Constructors* are used to initialize objects that are instances of class. A
+*Constructors* are used to initialize objects that are instances of a class. A
 *constructor declaration* starts with the keyword ``constructor``, and has optional
 name. In any other syntactical aspect, a constructor declaration is similar to
 a method declaration with no return type:
@@ -2225,7 +2319,7 @@ The syntax of *constructor body* is presented below:
 The constructor body must provide correct initialization of new class instances.
 Constructors have two variations:
 
-- *Primary constructor* that initializes its instance own fields [1]_ directly;
+- *Primary constructor* that initializes instance own fields directly;
 
 - *Secondary constructor* that uses another same-class constructor to initialize
   its instance fields.
@@ -2242,7 +2336,7 @@ The high-level sequence of a *primary constructor* body includes the following:
 
 1. Optional arbitrary code that does not use ``this`` or ``super``.
 
-2. Mandatory call to ``super(`` *arguments* ``)`` (see :ref:`Explicit Constructor Call`)
+2. Mandatory call to a superconstructor (see :ref:`Explicit Constructor Call`)
    if a class has an extension clause (see :ref:`Class Extension Clause`) on all
    execution paths of the constructor body.
 
@@ -2255,7 +2349,6 @@ The high-level sequence of a *primary constructor* body includes the following:
      initialization of all instance fields except
      :ref:`Fields with Late Initialization`.
 
-
 .. index::
    primary constructor
    this
@@ -2265,7 +2358,6 @@ The high-level sequence of a *primary constructor* body includes the following:
    execution path
    constructor body
    compiler-generated code
-   instance own field
    circular reference
    extension clause
    compiler
@@ -2301,29 +2393,23 @@ The example below represents *primary constructors*:
       }
     }
 
-    class Base {
-       field: string
-       constructor(field: string) {
-          this.field = field
-       }
-    }
-    class Derived extends Base {
-      constructor(condition: boolean) {
-        console.log ("Code which does not use this")
+   class BWPoint extends ColoredPoint {
+      constructor(x: number, y: number, black: boolean) {
+        console.log ("Code which does not use 'this'")
         // zone where super() is called
-        if (condition) { super ("abc") }
-        else { super ("cba") }
+        if (black) { super (x, y, ColoredPoint.BLACK) }
+        else { super (x, y, ColoredPoint.WHITE) }
         console.log ("Any code as this was initialized")
       }
     }
-
 
 The high-level sequence of a *secondary constructor* body includes the following:
 
 1. Optional arbitrary code that does not use ``this`` or ``super``.
 
-2. Call to another same-class constructor ``this(`` *arguments_if_any* ``)`` on all
-   execution paths of the constructor body.
+2. Call to another same-class constructor that uses the keyword ``this`` (see
+   :ref:`Explicit Constructor Call`) on all execution paths of the constructor
+   body.
 
 3. Optional arbitrary code.
 
@@ -2333,6 +2419,15 @@ The example below represents *primary* and *secondary* constructors:
 
 .. code-block:: typescript
    :linenos:
+
+    class Point {
+      x: number
+      y: number
+      constructor(x: number, y: number) {
+        this.x = x
+        this.y = y
+      }
+    }
 
     class ColoredPoint extends Point {
       static readonly WHITE = 0
@@ -2345,22 +2440,8 @@ The example below represents *primary* and *secondary* constructors:
         this.color = color
       }
       // secondary constructor:
-      constructor(color: number) {
+      constructor zero(color: number) {
         this(0, 0, color)
-      }
-    }
-
-    class ClasWithTwoConstructors {
-       field: string
-       constructor(field: string) {
-          this.field = field
-       }
-      constructor(condition: boolean) {
-        console.log ("Code which does not use this or super")
-        // zone where this() is called
-        if (condition) { this ("abc") }
-        else { this ("cba") }
-        console.log ("Any code as this was initialized")
       }
     }
 
@@ -2416,24 +2497,51 @@ There are two kinds of *explicit constructor calls*:
 
 -  *Superclass constructor calls* (used to call a constructor from
    the direct superclass) that begin with the keyword ``super``.
--  *Alternate constructor calls* that begin with the keyword ``this``
-   (used to call an alternate same-class constructor).
+-  *Other constructor calls* that begin with the keyword ``this``
+   (used to call another same-class constructor).
 
-A :index:`compile-time error` occurs if arguments of an explicit
-constructor call:
+To call a named constructor (:ref:`Constructor Names`), the name of the
+constructor must be provided while calling a superclass or another same-class
+constructor.
 
--  Refers to any non-static field or instance method; or
--  Uses the keywords ``this`` or ``super`` in any expression.
+A :index:`compile-time error` occurs if arguments of an explicit constructor
+call refer to one of the following:
+
+-  Any non-static field or instance method; or
+-  ``this`` or ``super``.
+
+.. code-block:: typescript
+   :linenos:
+
+   // Class declarations without constructors
+   class Base {
+       constructor () {}
+       constructor base() {}
+   }
+   class Derived1 extends Base {
+       constructor () {
+           super()        // Call Base class constructor
+       }
+   }
+   class Derived2 extends Base {
+       constructor () {
+           super.base()   // Call Base class named constructor
+       }
+   }
+   class Derived3 extends Base {
+       constructor () {
+           this.derived() // Call same class named constructor
+       }
+       constructor derived() {}
+   }
 
 .. index::
    explicit constructor call
-   alternate constructor call
    constructor call
-   keyword this
+   this
    superclass
    superclass constructor call
-   unqualified superclass constructor call
-   keyword super
+   super
    constructor call
    non-static field
    instance method
@@ -2481,12 +2589,12 @@ the superclass has no accessible constructor without parameters
    :linenos:
 
    // Class declarations without constructors
-   class Object {}
-   class Base {}
-   class Derived extends Base {}
+   class Obj_no_ctor {}
+   class Base_no_ctor {}
+   class Derived_no_ctor extends Base_no_ctor {}
 
    // Class declarations with default constructors declared implicitly
-   class Object {
+   class Obj {
      constructor () {} // Empty body - as there is no superclass
    }
    // Default constructors added
@@ -2497,11 +2605,16 @@ the superclass has no accessible constructor without parameters
    class A {
        private constructor () {}
    }
-   class B extends A {} // No constructor in B
-   // During compilation of B
-   class B extends A { constructor () { super () } } // Default constructor added
-   // that leads to compile-time error as default constructor calls super()
-   // which is private and inaccessible
+   class B0 extends A {} // OK. No constructor in B
+                         // During compilation of B
+   class B1 extends A {
+        constructor () { // Default constructor added
+                         // that leads to compile-time error
+                         // as default constructor calls super()
+                        // which is private and inaccessible
+            super ()
+        }
+   }
 
 |
 
@@ -2524,70 +2637,10 @@ The method of each inherited abstract method must be defined with
 Semantic checks for inherited method and accessors are described in
 :ref:`Overriding in Classes`.
 
-Constructors from the direct superclass of ``C``  are not subject of overloading
-and overriding because such constructors are not accessible (see
+Constructors from the direct superclass of ``C``  are not subject of
+overriding because such constructors are not accessible (see
 :ref:`Accessible`) in ``C`` directly, and can only be called from a constructor
-of ``C`` (see :ref:`Constructor Body`). There is an exception when derived
-class has no own fields which require initialization within the constructor
-body and no constructors are delcared in the derived class. In such case base
-class constructors are accessible and are to be used for the creation of the
-derived class instances.
-
-.. code-block:: typescript
-   :linenos:
-
-   class Base {
-      constructor (p: number) {}
-   }
-   class Derived1 extends Base {
-      new_field = 123
-   }
-   new Derived1(5) // It is safe to use Base constructor 
-
-   class Derived2 extends Base {
-      constructor (p: string) {}
-   }
-   new Derived2(5) // compile-time error as Derived2 has its own constructor 
-
-   class Base11{
-       constructor ctor1(p: number) {/*body1*/}
-       constructor ctor2(p: string) {/*body2*/}
-   }
-   class Derived11 extends Base11 {
-      new_field = 123
-   }
-   new Derived11.ctor1(5) // It is safe to use Base constructor 
-   new Derived11.ctor2("a string") // It is safe to use Base constructor 
-
-   class Base12{
-       constructor (p: number)
-       constructor (p: string)
-       constructor (...p: Any[]) {}
-   }
-   class Derived12 extends Base12 {
-      new_field = 123
-   }
-   new Derived12(5)          // It is safe to use Base constructor 
-   new Derived12("a string") // It is safe to use Base constructor 
-
-   class Base13{
-       constructor ctor1(p: number) {/*body1*/}
-       constructor ctor2(p: string) {/*body2*/}
-       overload constructor {ctor1, ctor2}
-   }
-   class Derived13 extends Base13 {
-      new_field = 123
-   }
-   new Derived13(5)          // It is safe to use Base constructor 
-   new Derived13("a string") // It is safe to use Base constructor 
-   new Derived13.ctor1(5)          // It is safe to use Base constructor 
-   new Derived13.ctor2("a string") // It is safe to use Base constructor 
-
-
-
-If ``C`` defines a static or instance field ``F`` with the same name as that of
-a field accessible from its direct superclass (see :ref:`Accessible`), then ``F``
-hides the inherited field:
+of ``C`` (see :ref:`Constructor Body`).
 
 .. index::
    class
@@ -2598,59 +2651,11 @@ hides the inherited field:
    direct superclass
    direct superinterface
    overriding
-   overloading
    semantic check
-   public member
-   protected member
    abstract method
    override-compatible signature
    constructor
    constructor body
-   inherited field
-   static field
-   instance field
-
-.. code-block:: typescript
-   :linenos:
-
-   interface Interface {
-      foo()
-   }
-   class Base {
-      foo() { /* Base class method body */ }
-      // foo() is declared in class Base
-
-      static foo () { /* Base class static method body */ }
-   }
-   class Derived extends Base implements Interface {
-      override foo() { /* Derived class method body */ }
-      // foo() is both
-      //   - overridden in class Derived, and
-      //   - implements foo() from the Interface
-      static foo () { /* Derived class static method body */ }
-   }
-
-   let target: Interface = new Derived
-   target.foo()  // this is a call to an instance method foo() overridden in class Derived
-
-   Base.foo()    // this is a call to a static method foo() declared in Base
-   Derived.foo() // this is a call to a static method foo() declared in Derived
-
-.. index::
-   inheritance
-   direct superclass
-   static method
-   instance method
-   method body
-   interface
-   overriding
-   call
-   static method
-
--------------
-
-.. [1]
-   *Instance own fields* here means fields declared within an instance.
 
 .. raw:: pdf
 

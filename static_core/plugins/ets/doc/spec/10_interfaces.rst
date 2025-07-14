@@ -333,17 +333,14 @@ The usage of annotations is discussed in :ref:`Using Annotations`.
    inheritance
    annotation
 
-*Interface members* includes:
+*Interface members* include:
 
 -  Members declared explicitly in the interface declaration;
 -  Members inherited from a direct superinterface (see
    :ref:`Superinterfaces and Subinterfaces`).
 
 A :index:`compile-time error` occurs if the method explicitly declared by the
-interface has the same name as the ``Object``'s ``public`` method, but their
-signatures are different or override-compatible (see
-:ref:`Override-Compatible Signatures`) with default implementations (see
-:ref:`Default Interface Method Declarations`).
+interface has the same name as the ``Object``'s ``public`` method.
 
 .. code-block:: typescript
    :linenos:
@@ -434,7 +431,7 @@ Required Interface Properties
 .. meta:
     frontend_status: Done
 
-A *requied property* defined in the form of a field implicitly
+A *required property* defined in the form of a field implicitly
 defines the following:
 
 -  A getter, if the property is marked as ``readonly``;
@@ -467,7 +464,7 @@ As a result, the following definitions have the same effect:
         set color(s: string)
     }
 
-**Note.** A *requied property* defined in a form of accessors does not
+**Note.** A *required property* defined in a form of accessors does not
 define any additional entities in the interface.
 
 A class that implements an interface with properties can also use a field or
@@ -542,7 +539,7 @@ Interface Method Declarations
     frontend_status: Done
 
 An ordinary *interface method declaration* specifies the method's name and
-signature, and is called *abstract*.
+signature, and is called *abstract*. Its implicit accessibility is ``public``.
 
 An interface method can have a body (see :ref:`Default Interface Method Declarations`)
 as an experimental feature.
@@ -567,14 +564,10 @@ The syntax of *interface method declaration* is presented below:
         | interfaceDefaultMethodDeclaration
         ;
 
-The methods declared within interface bodies are implicitly ``public``.
-
-A :index:`compile-time error` occurs if the body of an interface declares a
-method with a name that is already used for a property in this declaration.
 
 .. index::
    public method
-   method
+   abstract method
    interface
    property
    declaration

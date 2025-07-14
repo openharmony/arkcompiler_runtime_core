@@ -622,9 +622,11 @@ Grammar Summary
         annotationUsage?
         accessModifier?
         ( constructorDeclaration
+        | constructorWithOverloadSignatures
         | overloadConstructorDeclaration
         | classFieldDeclaration
         | classMethodDeclaration
+        | classMethodWithOverloadSignatures
         | overloadMethodDeclaration
         | classAccessorDeclaration
         )
@@ -677,7 +679,7 @@ Grammar Summary
 
     classAccessorDeclaration:
         accessorModifier*
-        ( 'get' identifier '(' ')' returnType block?
+        ( 'get' identifier '(' ')' returnType? block?
         | 'set' identifier '(' parameter ')' block?
         )
         ;
@@ -810,6 +812,7 @@ Grammar Summary
         | variableDeclarations
         | constantDeclarations
         | functionDeclaration
+        | functionWithOverloadSignatures
         | overloadFunctionDeclaration
         | functionWithReceiverDeclaration
         | accessorWithReceiverDeclaration

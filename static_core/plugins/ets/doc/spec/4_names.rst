@@ -211,7 +211,7 @@ Scopes
     frontend_status: Done
 
 Different entity declarations introduce new names in different *scopes*. Scope
-(see :ref:`Scopes`) is the region of program text where an entity is declared,
+is the region of program text where an entity is declared,
 along with other regions it can be used in. The following entities are always
 referred to by their qualified names only:
 
@@ -247,28 +247,34 @@ Entities within the scope are accessible (see :ref:`Accessible`).
    function call
    accessibility
 
-The scope of an entity depends on the context the entity is declared in:
+The scope level of an entity depends on the context the entity is
+declared in:
 
 .. _module-access:
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
 
--  *Module level scope* is applicable to modules only. A name
-   declared on the module level is accessible (see :ref:`Accessible`)
-   throughout the entire module. If exported, a name can be accessed in other
+-  *Module level scope* is applicable to modules only. *Constants*
+   and *variables* are accessible (see :ref:`Accessible`)
+   from their respective points of declaration to the end of the module.
+   Other entities are accessible through the entire scope level.
+   If exported, a name can be accessed in other
    compilation units.
 
 .. _namespace-access:
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
 
--  *Namespace level scope* is applicable to namespaces only. A name
-   declared in a namespace is accessible (see :ref:`Accessible`)
-   throughout the entire namespace and in all embedded namespaces. If exported,
-   a name can be accessed outside the namespace with mandatory namespace name
-   qualification.
+-  *Namespace level scope* is applicable to namespaces only. 
+   *Constants*   and *variables* are accessible 
+   (see :ref:`Accessible`) from their respective points of declaration
+   to the end of the namespace including all embedded namespaces.
+   Other entities are accessible through the entire namespace scope level
+   including embedded namespaces.
+   If exported, a name can be accessed outside the namespace with mandatory
+   namespace name qualification.
 
 .. index::
    module level scope
@@ -377,10 +383,10 @@ The scope of an entity depends on the context the entity is declared in:
 .. meta:
     frontend_status: Done
 
--  The scope of a name declared immediately inside the body of a function
-   or a method declaration is the body of that declaration from the point of
-   declaration and up to the end of the body (*method* or *function scope*).
-   This scope is also applied to function or method parameter names.
+-  The scope of a name declared inside the body of a function or a method
+   declaration is the body of that declaration from the point of declaration
+   and up to the end of the body (*method* or *function scope*). This scope is
+   also applied to function or method parameter names.
 
 .. index::
    scope
@@ -395,12 +401,12 @@ The scope of an entity depends on the context the entity is declared in:
 .. meta:
     frontend_status: Done
 
--  The scope of a name declared inside a statement block is the body of
-   the statement block from the point of declaration and up to the end
-   of the block (*block scope*).
+-  The scope of a name declared inside a block is the body of the block from
+   the point of the name declaration and up to the end of the block
+   (*block scope*).
 
 .. index::
-   statement block
+   block
    body
    point of declaration
    block scope
@@ -790,7 +796,7 @@ Every variable in a program must have an initial value before it can be used:
    non-initialized variable
 
 
-The example below illustrates invalid initialization:
+Invalid initialization is represented in the example below:
 
 .. code-block-meta:
    expect-cte:
@@ -1207,6 +1213,22 @@ omitted in a function or method call:
     pair(1, 2) // prints: 1 2
     pair(1) // prints: 1 7
 
+This form with the *default value* can be used only for functions or methods
+with an implementation body provided. Otherwise, a :index:`compile-time error`
+occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo (p: number|undefined = undefined): void // compile-time error
+    function foo (...p: Any[]): Any {}
+
+    class X {
+        foo (p: number|undefined = undefined): void // compile-time error
+        foo (...p: Any[]): Any {}
+    }
+
+
 The second form is a short-cut notation and ``identifier '?' ':' type``
 effectively means that ``identifier`` has type ``T | undefined`` with the
 default value ``undefined``.
@@ -1562,104 +1584,6 @@ then the function, method, or lambda return type is ``void`` (see
    type annotation
    class instance method
 
-|
-
-.. _Return Type Inference:
-
-Return Type Inference
-=====================
-
-.. meta:
-    frontend_status: Done
-
-A missing function, method, or lambda return type can be inferred from the
-function, method, or lambda body. A :index:`compile-time error` occurs if
-return type is missing from a native function (see :ref:`Native Functions`).
-
-The current version of |LANG| allows inferring return types at least under
-the following conditions:
-
--  If there is no return statement, or if all return statements have no
-   expressions, then the return type is ``void`` (see :ref:`Type void`).
--  If there are *k* return statements (where *k* is 1 or more) with
-   the same type expression *R*, then ``R`` is the return type.
--  If there are *k* return statements (where *k* is 2 or more) with
-   expressions of types ``T``:sub:`1`, ``...``, ``T``:sub:`k`, then ``R`` is the
-   *union type* (see :ref:`Union Types`) of these types (``T``:sub:`1` | ... |
-   ``T``:sub:`k`), and its normalized version (see :ref:`Union Types Normalization`)
-   is the return type. If at least one of return statements has no expression, then
-   type ``undefined`` is added to the return type union.
--  If a lambda body contains no return statement but at least one throw statement
-   (see :ref:`Throw Statements`), then the lambda return type is ``never`` (see
-   :ref:`Type never`).
--  If a function, a method, or a lambda is ``async`` (see
-   :ref:`Async Functions and Methods`), a return type is inferred by applying
-   the above rules, and the return type ``T`` is not ``Promise``, then the return
-   type is assumed to be ``Promise<T>``.
-
-Future compiler implementations are to infer the return type in more cases.
-Type inference is represented in the example below:
-
-.. index::
-   return type
-   function
-   method
-   lambda
-   function return type
-   method return type
-   native function
-   void type
-   type inference
-   inferred type
-   method body
-   return statement
-   normalization
-   expression type
-   expression
-   function
-   implementation
-   compiler
-   union type
-   never type
-   async type
-
-.. code-block:: typescript
-
-    // Explicit return type
-    function foo(): string { return "foo" }
-
-    // Implicit return type inferred as string
-    function goo() { return "goo" }
-
-    class Base {}
-    class Derived1 extends Base {}
-    class Derived2 extends Base {}
-
-    function bar (condition: boolean) {
-        if (condition)
-            return new Derived1()
-        else
-            return new Derived2()
-    }
-    // Return type of bar will be Derived1|Derived2 union type
-
-    function boo (condition: boolean) {
-        if (condition) return 1
-    }
-    // That is a compile-time error as there is an execution path with no return
-
-If the compiler fails to recognize a particular type inference case, then
-a corresponding :index:`compile-time error` occurs.
-
-.. index::
-   inference
-   boolean
-   string
-   union type
-   compiler
-   type inference
-   inferred type
-   compiler
 
 |
 

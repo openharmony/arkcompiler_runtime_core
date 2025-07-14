@@ -166,20 +166,31 @@ is an implicit coroutine that can be called as a regular method.
 
 |
 
-.. _await:
+.. _await Expression:
 
-await
-=====
+``await``
+=========
 
 .. meta:
     frontend_status: Done
+
+The syntax of *await expression* is presented below:
+
+.. code-block:: abnf
+
+    awaitExpression:
+        'await' expression
+        ;
+
+The expression is a sub-type of :ref:`Promise<Concurrency Promise Class>`.
+If expression is `Promise<T>`, then type of *awaitExpression* is `Awaited<T>`.
 
 ``await`` is used to wait for :ref:`Promise<Concurrency Promise Class>`
 
 If ``Promise`` not resolved, then the current coroutine is suspended until
 it is resolved.
 
-If :ref:'Promise<Concurrency Promise Class>' is rejected, then the reason of
+If :ref:`Promise<Concurrency Promise Class>` is rejected, then the reason of
 the rejection is thrown.
 
 Using ``await`` outside of :ref:`async functions<async functions>` is forbidden.
@@ -200,8 +211,8 @@ semantics of ``Promise`` is similar to the semantics of ``Promise`` in |JS|/|TS|
 if it is used in the context of a single coroutine.
 
 ``Promise object`` represents the values returned by the call of an ``async``
-function. ``Promise object`` is defined in the :ref:`Standard Library` and thus
-it can be used without any qualification.
+function. ``Promise object`` can be used without any qualification as it is
+defined in the :ref:`Standard Library`.
 
 The ``Promise`` lifetime is not limited to the lifetime of the root coroutine
 as it is created.
@@ -246,18 +257,18 @@ The methods are used as follows:
 
 .. code-block:: typescript
 
-        Promise<U>::then<U, E = never>(onFulfilled: ((value: T) => U|PromiseLike<U> throws)|undefined, onRejected: ((error: NullishType) => E|PromiseLike<E> throws)|undefined): Promise<U|E>
+        Promise<U>::then<U, E = never>(onFulfilled: ((value: T) => U|PromiseLike<U> throws)|undefined, onRejected: ((error: NullishType) => E|PromiseLike<E> throws)|undefined): Promise<Awaited<U|E>>
 
--  ``catch`` takes one argument(the callback called after promise is rejected) and returns ``Promise<U|T>``
+-  ``catch`` takes one argument(the callback called after promise is rejected) and returns ``Promise<Awaited<U|T>>``
 
 .. code-block-meta:
 
 .. code-block:: typescript
 
-        Promise<U>::catch<U = never>(onRejected?: (error: NullishType) => U|PromiseLike<U> throws): Promise<T|U>
+        Promise<U>::catch<U = never>(onRejected?: (error: NullishType) => U|PromiseLike<U> throws): Promise<Awaited<T | U>>
 
 -  ``finally`` takes one argument (the callback called after ``promise`` is
-   either fulfilled or rejected) and returns ``Promise<T>``.
+   either fulfilled or rejected) and returns ``Promise<Awaited<T>>``.
 
 .. index::
    alias
@@ -266,7 +277,7 @@ The methods are used as follows:
 
 .. code-block:: typescript
 
-        finally(onFinally?: () => void throws): Promise<T>
+        finally(onFinally?: () => void throws): Promise<Awaited<T>>
 
 .. _Unhandled Rejected Promises:
 
@@ -302,3 +313,8 @@ to be awaited. Details are provided in :ref:`Standard Library`.
    coroutine
 
 |
+
+
+.. raw:: pdf
+
+   PageBreak

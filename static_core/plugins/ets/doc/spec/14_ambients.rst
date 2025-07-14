@@ -51,6 +51,7 @@ The syntax of *ambient declaration* is presented below:
         'declare'
         ( ambientConstantDeclaration
         | ambientFunctionDeclaration
+        | overloadFunctionDeclaration
         | ambientClassDeclaration
         | ambientInterfaceDeclaration
         | ambientNamespaceDeclaration
@@ -83,6 +84,35 @@ context that is already ambient:
    keyword const
    compatibility
    ambient
+
+A :index:`compile-time error` occurs if an ambient function, constructor, or
+method is in the same compilation unit (see :ref:`Compilation Units`) with
+a non-ambient function, constructor, or method:
+
+.. code-block:: typescript
+   :linenos:
+
+    // The same module
+    declare function foo (): void
+    function bar (): void { foo() }
+
+It implies that an import (see :ref:`Import Directives`), which is allowed,
+can lead to the following situation:
+
+.. code-block:: typescript
+   :linenos:
+
+    // DeclarationModule
+    declare function foo (): void
+
+    // Module
+    export declare function bar(): void
+
+    // Program
+    import {foo} from "DeclarationModule"  // OK
+    import {bar} from "Module"             // OK
+    foo()
+    bar()
 
 |
 
@@ -184,6 +214,43 @@ Ambient function declarations cannot specify function bodies.
    function body
    ambient context
 
+
+|
+
+.. _Ambient Overlaod Function Declarations:
+
+Ambient Overlaod Function Declarations
+**************************************
+
+.. meta:
+    frontend_status: None
+
+The syntax of *ambient overload function declaration* is identical to that of
+:ref:`Function Overload Declarations`. The semantics of such declarations is
+defined by the same rules.
+
+
+.. code-block:: typescript
+   :linenos:
+
+   // Top-level functions are overloaded
+   declare function foo1(p: string): void
+   declare function foo2(p: number): void
+   declare overload foo {foo1, foo2}
+
+   // Namespace functions are overloaded
+   declare namespace N {
+      function foo1(p: string): void
+      function foo2(p: number): void
+      overload foo {foo1, foo2}
+   }
+
+   // All calls are valid
+   foo("a string")
+   foo(5)
+   N.foo("a string")
+   N.foo(5)
+
 |
 
 .. _Ambient Class Declarations:
@@ -209,6 +276,7 @@ The syntax of *ambient class declaration* is presented below:
         ( ambientFieldDeclaration
         | ambientConstructorDeclaration
         | ambientMethodDeclaration
+        | overloadMethodDeclaration
         | ambientAccessorDeclaration
         | ambientIndexerDeclaration
         | ambientCallSignatureDeclaration
@@ -263,6 +331,27 @@ Their syntax is presented below:
         )
         ;
 
+Ambient methods can be overloaded similarly to non-ambient methods with the
+same syntax and semantics (see :ref:`Class Method Overload Declarations`).
+
+.. code-block:: typescript
+   :linenos:
+
+
+   // Class methods are overloaded
+   declare class A {
+      foo1(p: string): void
+      foo2(p: number): void
+      overload foo {foo1, foo2}
+   }
+
+   // All methods calls are valid
+   function demo (a: A) {
+      a.foo("a string")
+      a.foo(5)
+   }
+
+
 .. index::
    constructor
    method
@@ -298,7 +387,7 @@ The syntax of *ambient indexer declaration* is presented below:
    restriction
    ambient class declaration
 
-The use of *ambient indexer declarations* is represented by the example below:
+The use of *ambient indexer declarations* is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -313,7 +402,7 @@ The use of *ambient indexer declarations* is represented by the example below:
         [index: string]: string
     }
 
-The following restrictions applies: 
+The following restrictions apply:
 
 - Only one *ambient indexer declaration* is allowed in an ambient class declaration.
 

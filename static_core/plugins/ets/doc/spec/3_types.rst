@@ -536,6 +536,11 @@ Larger type values include all values of smaller types:
 A value of a smaller type can be assigned to a variable of a larger type as
 a consequence (see :ref:`Widening Numeric Conversions`).
 
+In terms of operations available for the numeric types (see
+:ref:`Multiplication`, :ref:`Division`, :ref:`Remainder`,
+:ref:`Additive Expressions`) we state that ``number`` or ``double`` is the
+largest type and ``long`` is larger than ``int`` and so on respectively.
+
 Type ``bigint`` does not belong to this hierarchy. No implicit conversion from
 numeric types (see :ref:`Numeric Types`) to ``bigint`` occurs in any assignment
 context (see :ref:`Assignment-like Contexts`). The methods of class ``BigInt``
@@ -593,12 +598,12 @@ below.
 
 -  Comparison operators that produce a value of type ``boolean``:
 
-   +  Numerical relational operators '``<``', '``<=``', '``>``', and '``>=``'
-      (see :ref:`Numerical Relational Operators`);
-   +  Numerical equality operators '``==``' and '``!=``' (see
-      :ref:`Numerical Equality Operators`);
+   +  Numeric relational operators '``<``', '``<=``', '``>``', and '``>=``'
+      (see :ref:`Numeric Relational Operators`);
+   +  Numeric equality operators '``==``' and '``!=``' (see
+      :ref:`Numeric Equality Operators`);
 
--  Numerical operators that produce values of types ``int``, ``long``, or
+-  Numeric operators that produce values of types ``int``, ``long``, or
    ``bigint``:
 
    + Unary plus '``+``' and minus '``-``' operators (see :ref:`Unary Plus` and
@@ -631,10 +636,10 @@ below.
    bigint
    integer value
    comparison operator
-   numerical relational operator
-   numerical equality operator
+   numeric relational operator
+   numeric equality operator
    equality operator
-   numerical operator
+   numeric operator
    type reference
    type name
    simple type name
@@ -648,8 +653,8 @@ below.
    additive operator
    multiplicative operator
    increment operator
-   numerical relational operator
-   numerical equality operator
+   numeric relational operator
+   numeric equality operator
    decrement operator
    signed shift operator
    unsigned shift operator
@@ -665,19 +670,19 @@ below.
 
 If either operand of a binary integer operation except :ref:`Shift Expressions`
 is of type ``long`` and the other operand is of a lesser type, then numeric
-conversion (see :ref:Widening Numeric Conversions) must be used first to widen
+conversion (see :ref:`Widening Numeric Conversions`) must be used first to widen
 the second operand to type ``long``. In this case:
 
 -  Operation implementation uses 64-bit precision; and
--  Result of the numerical operator is of type ``long``.
+-  Result of the numeric operator is of type ``long``.
 
 
-If otherwise neither operand is of type ``long`` and any operand if of a type
-other than``int``, then numeric conversion must be used to widen the latter
+If otherwise neither operand is of type ``long`` and any operand is of a type
+other than ``int``, then numeric conversion must be used to widen the latter
 to type ``int``. In this case:
 
 -  Operation implementation uses 32-bit precision; and
--  Result of the numerical operator is of type ``int``.
+-  Result of the numeric operator is of type ``int``.
 
 
 Conversions between integer types and type ``boolean`` are not allowed.
@@ -756,12 +761,12 @@ discussed below.
 
 -  Comparison operators that produce a value of type *boolean*:
 
-   - Numerical relational operators '``<``', '``<=``', '``>``', and '``>=``'
-     (see :ref:`Numerical Relational Operators`);
-   - Numerical equality operators '``==``' and '``!=``' (see
-     :ref:`Numerical Equality Operators`);
+   - Numeric relational operators '``<``', '``<=``', '``>``', and '``>=``'
+     (see :ref:`Numeric Relational Operators`);
+   - Numeric equality operators '``==``' and '``!=``' (see
+     :ref:`Numeric Equality Operators`);
 
--  Numerical operators that produce values of type ``float`` or ``double``:
+-  Numeric operators that produce values of type ``float`` or ``double``:
 
    + Unary plus '``+``' and minus '``-``' operators (see :ref:`Unary Plus` and
      :ref:`Unary Minus`);
@@ -773,7 +778,7 @@ discussed below.
    + Decrement operator '``--``' used as prefix (see :ref:`Prefix Decrement`)
      or postfix (see :ref:`Postfix Decrement`);
 
--  Numerical operators that produce values of type ``int`` or ``long``:
+-  Numeric operators that produce values of type ``int`` or ``long``:
 
    + Signed and unsigned shift operators '``<<``', '``>>``', and '``>>>``' (see
      :ref:`Shift Expressions`);
@@ -794,11 +799,11 @@ discussed below.
    floating-point number
    operator
    value
-   numerical relational operator
-   numerical equality operator
+   numeric relational operator
+   numeric equality operator
    comparison operator
    boolean type
-   numerical operator
+   numeric operator
    float
    double
    unary operator
@@ -830,16 +835,16 @@ An operation is called a *floating-point operation* if at least one of the
 operands in a binary operator is of a floating-point type (even if the
 other operand is integer), and that is not a string concatenation.
 
-If at least one operand of the numerical operator is of type ``double``,
+If at least one operand of the numeric operator is of type ``double``,
 then the operation implementation uses the 64-bit floating-point arithmetic.
-The result of the numerical operator is a value of type ``double``.
+The result of the numeric operator is a value of type ``double``.
 
 If the other operand is not of type ``double``, then the numeric conversion (see
 :ref:`Widening Numeric Conversions`) must be used to widen the operand first to
 type ``double``.
 
 If neither operand is of type ``double``, then the operation implementation
-is to use the 32-bit floating-point arithmetic. The result of the numerical
+is to use the 32-bit floating-point arithmetic. The result of the numeric
 operator is a value of type ``float``.
 
 If the other operand is not of type ``float``, then the numeric conversion
@@ -864,7 +869,7 @@ Any floating-point type value can be cast to or from any numeric type (see
    float
    double
    numeric promotion
-   numerical operator
+   numeric operator
    binary operator
    floating-point type
 
@@ -874,7 +879,7 @@ Operators on floating-point numbers, except the remainder operator (see
 :ref:`Remainder`), behave in compliance with the IEEE 754 Standard.
 For example, |LANG| requires the support of IEEE 754 *denormalized*
 floating-point numbers and *gradual underflow* which facilitate proving
-the desirable properties of a particular numerical algorithm. Floating-point
+the desirable properties of a particular numeric algorithm. Floating-point
 operations do not *flush to zero* if the calculated result is a
 denormalized number.
 
@@ -1140,7 +1145,7 @@ Type ``never`` has no instance. Type ``never`` is used as one of the following:
 - Return type for functions or methods that never return a value, but
   throw an error when completing an operation.
 - Type of variables that never get a value (however, an assignment statement
-  with types ``never`` in both left- and right-hand-sides is valid).
+  with type ``never`` in both left-hand and right-hand sides is valid).
 - Type of parameters of a function or a method to prevent the body of that
   function or method from being executed.
 
@@ -1160,7 +1165,7 @@ Type ``never`` has no instance. Type ``never`` is used as one of the following:
     bar (foo()) // neither foo nor bar are executed
 
 .. index::
-   type never
+   never type
    instance
    return type
    method
@@ -1184,8 +1189,8 @@ Type ``void``
     frontend_status: Done
 
 Type ``void`` is used as a return type to highlight that a function, a method,
-or a lambda may contain no return statement or a return statement(s) (see
-:ref:`Return Statements`) with no expression:
+or a lambda can contain :ref:`Return Statements` with no expression, or no
+return statement at all:
 
 .. code-block:: typescript
    :linenos:
@@ -1205,11 +1210,11 @@ or a lambda may contain no return statement or a return statement(s) (see
 A :index:`compile-time error` occurs if:
 
 -  Type ``void`` is used as type annotation;
--  Expression of type ``void`` is used as a value
+-  Expression of type ``void`` is used as a value.
 
-Type ``void`` has no instances itself. At the same time it is a supertype of type
-``undefined`` (see :ref:`Type undefined`) and that affects assignability (see
-:ref:`Assignability`).
+Type ``void`` has no instance by itself. However, that it is a supertype of type
+``undefined`` (see :ref:`Type undefined`) affects the :ref:`Assignability` as
+follows:
 
 .. code-block-meta:
    expect-cte:
@@ -1245,7 +1250,7 @@ Type ``void`` has no instances itself. At the same time it is a supertype of typ
    type annotation
 
 Type ``void`` can be used as a type argument that instantiates a generic type,
-function or method as follows:
+function, or method as follows:
 
 .. code-block-meta:
    expect-cte:

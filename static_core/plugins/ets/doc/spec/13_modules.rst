@@ -30,7 +30,7 @@ needs to use them.
 
 .. Only exported declarations are available for the 3rd party tools and programs written in other programming languages.
 
-There are three kinds of compilation units:
+Compilation units can be of three kinds:
 
 - *Modules* (discussed below),
 - *Declaration modules* (discussed in detail in :ref:`Declaration Modules`),
@@ -490,14 +490,12 @@ Import Path
 *Import path* is a string literal that determines how an imported
 compilation unit must be placed.
 
-*Import path*
+*Import path* can include the following:
 
-- can contain preceding dot  '``.``' or two dots '``..``' followed by a
-  slash character '``/``',
-- a number of slash characters separating path components,
-- one or more path components. A subset of characters and case
-  sensitivity of path components follow rules for paths on host
-  filesystem.
+- Initial dot  '``.``' or two dots '``..``' followed by the slash character '``/``'.
+- One or more path components (the subset of characters and case sensitivity of
+  path components must follow the path rules of a host filesystem).
+- Slash characters separating components of the path.
 
 The slash character '``/``' is used in import paths irrespective of the host
 system. The backslash character is not used in this context.
@@ -559,8 +557,8 @@ compilation units, and the exact placement of the source code:
    filename
    module
 
-A *relative import path* starts with '``./``' or '``../``'.
-Here is an example of relative paths:
+A *relative import path* starts with '``./``' or '``../``'. Examples of relative
+paths are presented below:
 
 .. code-block:: typescript
    :linenos:
@@ -600,10 +598,10 @@ and ``std/components/treemap`` to ``/arkts/stdlib/components/treemap``.
 
 File name, placement, and format are implementation-specific.
 
-Here are an examples of non-relative path. With configuration above in
-effect, the first one directly maps to filesystem (after applying
-``baseUrl``) while in the second one the ``std`` will be replaced with
-``/arkts/stdlib``
+If the above configuration is in effect, the first path maps directly to
+filesystem after applying ``baseUrl``, while ``std`` in the second path is
+replaced for ``/arkts/stdlib``. Examples of non-relative paths are presented
+below.
 
 .. code-block:: typescript
    :linenos:
@@ -879,6 +877,7 @@ The syntax of *top-level declarations* is presented below:
         | variableDeclarations
         | constantDeclarations
         | functionDeclaration
+        | functionWithOverloadSignatures
         | overloadFunctionDeclaration
         | functionWithReceiverDeclaration
         | accessorWithReceiverDeclaration
@@ -1035,9 +1034,14 @@ The syntax of *namespace declarations* is presented below:
         topDeclaration | exportDirective
         ;
 
-Namespace can have an initializer block (see :ref:`Static Initialization`).
+Namespace can have an initializer block (*staticBlock*
+in *namespace declaration*  syntax above).
+The initializer block is called only in case when at least one
+of exported namespace members is used in the program. It is guaranteed
+that its code is called before any use of namespace members (see
+:ref:`Static Initialization` for detail).
 
-An usage example is presented below:
+The usage of a namespace is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -1047,8 +1051,20 @@ An usage example is presented below:
         export let variable = 1234
         export const constant = 1234
         export let someVar: string
+
+        // Will be called before any use of NS1 members
         static {
             someVar = "some string"
+            console.log("Init for NS1 done")
+        }
+        export function bar() {}
+    }
+
+    namespace NS2 {
+        export const constant = 1
+        // Will never be called since NS2 members are never used
+        static {
+            console.log("Init for NS2 done")
         }
         export function bar() {}
     }
@@ -1378,8 +1394,8 @@ The syntax of *single export directive* is presented below:
 .. index::
    export directive
    declaration
+   declaration name
    compilation unit
-   own name
    syntax
 
 If ``default`` is present, then only one such export directive is possible in
