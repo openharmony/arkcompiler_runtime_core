@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,12 @@
  * limitations under the License.
  */
 
+// NOLINTBEGIN(cppcoreguidelines-special-member-functions)
+
 #ifndef COMMON_INTERFACES_OBJECTS_STRING_SLICED_STRING_H
 #define COMMON_INTERFACES_OBJECTS_STRING_SLICED_STRING_H
+
+#include <vector>
 
 #include "objects/string/base_string.h"
 #include "base/bit_field.h"
@@ -61,14 +65,15 @@ public:
     static constexpr uint32_t MIN_SLICED_STRING_LENGTH = 13;
     static constexpr size_t PARENT_OFFSET = BaseString::SIZE;
     static constexpr uint32_t START_INDEX_BITS_NUM = 30U;
-    using HasBackingStoreBit = BitField<bool, 0>;                                 // 1
-    using ReserveBit = HasBackingStoreBit::NextFlag;                              // 1
-    using StartIndexBits = ReserveBit::NextField<uint32_t, START_INDEX_BITS_NUM>; // 30
+    using HasBackingStoreBit = BitField<bool, 0>;                                  // 1
+    using ReserveBit = HasBackingStoreBit::NextFlag;                               // 1
+    using StartIndexBits = ReserveBit::NextField<uint32_t, START_INDEX_BITS_NUM>;  // 30
     static_assert(StartIndexBits::START_BIT + StartIndexBits::SIZE == sizeof(uint32_t) * BITS_PER_BYTE,
                   "StartIndexBits does not match the field size");
+    // NOLINTNEXTLINE(misc-redundant-expression)
     static_assert(StartIndexBits::SIZE == LengthBits::SIZE, "The size of startIndex should be same with Length");
 
-    POINTER_FIELD(Parent, PARENT_OFFSET, STARTINDEX_AND_FLAGS_OFFSET);
+    POINTER_FIELD(Parent, PARENT_OFFSET, STARTINDEX_AND_FLAGS_OFFSET)
     PRIMITIVE_FIELD(StartIndexAndFlags, uint32_t, STARTINDEX_AND_FLAGS_OFFSET, SIZE);
 
     /**
@@ -81,8 +86,8 @@ public:
      * @return SlicedString pointer.
      */
     template <typename Allocator, typename WriteBarrier,
-              objects_traits::enable_if_is_allocate<Allocator, BaseObject *>  = 0,
-              objects_traits::enable_if_is_write_barrier<WriteBarrier>  = 0>
+              objects_traits::enable_if_is_allocate<Allocator, BaseObject *> = 0,
+              objects_traits::enable_if_is_write_barrier<WriteBarrier> = 0>
     static SlicedString *Create(Allocator &&allocator, WriteBarrier &&writeBarrier, ReadOnlyHandle<BaseString> parent);
     /**
      * @brief Get the start index of the sliced region.
@@ -119,8 +124,10 @@ public:
      * @param index Index into the sliced string (not the parent).
      * @return UTF-16 character code unit.
      */
-    template <bool verify = true, typename ReadBarrier>
+    template <bool VERIFY = true, typename ReadBarrier>
     uint16_t Get(ReadBarrier &&readBarrier, int32_t index) const;
 };
-}
-#endif //COMMON_INTERFACES_OBJECTS_STRING_SLICED_STRING_H
+}  // namespace common
+#endif  // COMMON_INTERFACES_OBJECTS_STRING_SLICED_STRING_H
+
+// NOLINTEND(cppcoreguidelines-special-member-functions)

@@ -17,11 +17,13 @@
 #include <cstdint>
 #include <regex>
 #include "include/mem/panda_string.h"
+#include "include/object_header.h"
 #include "intrinsics.h"
 #include "libpandabase/utils/logger.h"
 #include "macros.h"
 #include "napi/ets_napi.h"
 #include "runtime/handle_scope-inl.h"
+#include "runtime/include/coretypes/string.h"
 #include "runtime/entrypoints/string_index_of.h"
 #include "runtime/arch/memory_helpers.h"
 #include "plugins/ets/runtime/types/ets_string.h"
@@ -44,23 +46,34 @@ constexpr const uint32_t CHAR0X1FFC00 = 0x1ffc00;
 constexpr const uint16_t CHAR0XD800 = 0xd800;
 constexpr const uint16_t CHAR0XDC00 = 0xdc00;
 
-static ObjectHeader *StdCoreStringDataAsArray(EtsString *s, ets_int begin, ets_int end, bool isUtf16)
+static bool CheckStringIndex(EtsString *s, ets_int begin, ets_int end)
 {
     ASSERT(s != nullptr);
     ets_int length = s->GetLength();
-    if (UNLIKELY(begin > end || begin > length || begin < 0)) {
+    if (UNLIKELY(begin > end)) {
         ark::ThrowStringIndexOutOfBoundsException(begin, length);
-        return nullptr;
+        return false;
+    }
+    if (UNLIKELY(begin > length || begin < 0)) {
+        ark::ThrowStringIndexOutOfBoundsException(begin, length);
+        return false;
     }
     if (UNLIKELY(end > length)) {
         ark::ThrowStringIndexOutOfBoundsException(end, length);
+        return false;
+    }
+    return true;
+}
+
+static ObjectHeader *StdCoreStringGetDataAsArray(EtsString *s, ets_int begin, ets_int end, bool isUtf16)
+{
+    if (!CheckStringIndex(s, begin, end)) {
         return nullptr;
     }
-
-    auto thread = ManagedThread::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-    VMHandle<coretypes::String> sHandle(thread, s->GetCoreType());
-    ASSERT(sHandle.GetPtr() != nullptr);
+    ets_int length = s->GetLength();
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coroutine);
+    VMHandle<EtsString> sHandle(coroutine, reinterpret_cast<ObjectHeader *>(s));
     ets_int n = end - begin;
     void *array = nullptr;
     if (isUtf16) {
@@ -74,20 +87,22 @@ static ObjectHeader *StdCoreStringDataAsArray(EtsString *s, ets_int begin, ets_i
     if (isUtf16) {
         auto charArray = reinterpret_cast<EtsCharArray *>(array);
         Span<ets_char> out(charArray->GetData<ets_char>(), charArray->GetLength());
-        sHandle.GetPtr()->CopyDataRegionUtf16(&out[0], begin, charArray->GetLength(), sHandle.GetPtr()->GetLength());
+        sHandle->CopyDataRegionUtf16(&(out[0]), begin, n, n);
     } else {
         auto byteArray = reinterpret_cast<EtsByteArray *>(array);
         Span<uint8_t> out(byteArray->GetData<uint8_t>(), byteArray->GetLength());
 
         /* as we need only one LSB no sophisticated conversion is needed */
-        if (sHandle.GetPtr()->IsUtf16()) {
-            auto in = sHandle.GetPtr()->GetDataUtf16();
+        if (sHandle->IsUtf16()) {
+            PandaVector<uint16_t> in(length);
+            sHandle->CopyDataUtf16(in.data(), length);
             for (int i = 0; i < n; ++i) {
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 out[i] = in[i + begin];
             }
         } else {
-            auto in = sHandle.GetPtr()->GetDataMUtf8();
+            PandaVector<uint8_t> in(length);
+            sHandle->CopyDataRegionUtf8(in.data(), 0, length, length);
             for (int i = 0; i < n; ++i) {
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 out[i] = in[i + begin];
@@ -99,18 +114,45 @@ static ObjectHeader *StdCoreStringDataAsArray(EtsString *s, ets_int begin, ets_i
 
 ObjectHeader *StdCoreStringGetChars(EtsString *s, ets_int begin, ets_int end)
 {
-    return StdCoreStringDataAsArray(s, begin, end, true);
+    return StdCoreStringGetDataAsArray(s, begin, end, true);
 }
 
 ObjectHeader *StdCoreStringGetBytes(EtsString *s, ets_int begin, ets_int end)
 {
-    return StdCoreStringDataAsArray(s, begin, end, false);
+    return StdCoreStringGetDataAsArray(s, begin, end, false);
+}
+
+static std::pair<int32_t, int32_t> NormalizeSubStringIndexes(int32_t beginIndex, int32_t endIndex, EtsString *str)
+{
+    auto strLen = str->GetLength();
+    std::pair<int32_t, int32_t> normIndexes = {beginIndex, endIndex};
+
+    // If begin_index < 0, then it is assumed to be equal to zero.
+    if (normIndexes.first < 0) {
+        normIndexes.first = 0;
+    } else if (static_cast<decltype(strLen)>(normIndexes.first) > strLen) {
+        // If begin_index > str_len, then it is assumed to be equal to str_len.
+        normIndexes.first = static_cast<int32_t>(strLen);
+    }
+    // If end_index < 0, then it is assumed to be equal to zero.
+    if (normIndexes.second < 0) {
+        normIndexes.second = 0;
+    } else if (static_cast<decltype(strLen)>(normIndexes.second) > strLen) {
+        // If end_index > str_len, then it is assumed to be equal to str_len.
+        normIndexes.second = static_cast<int32_t>(strLen);
+    }
+    // If begin_index > end_index, then these are swapped.
+    if (normIndexes.first > normIndexes.second) {
+        std::swap(normIndexes.first, normIndexes.second);
+    }
+    ASSERT((normIndexes.second - normIndexes.first) >= 0);
+    return normIndexes;
 }
 
 EtsString *StdCoreStringSubstring(EtsString *str, ets_int begin, ets_int end)
 {
     ASSERT(str != nullptr);
-    auto indexes = coretypes::String::NormalizeSubStringIndexes(begin, end, str->GetCoreType());
+    auto indexes = NormalizeSubStringIndexes(begin, end, str);
     if (UNLIKELY(indexes.first == 0 && indexes.second == str->GetLength())) {
         return str;
     }
@@ -127,14 +169,7 @@ uint16_t StdCoreStringCharAt(EtsString *s, int32_t index)
         ark::ThrowStringIndexOutOfBoundsException(index, length);
         return 0;
     }
-
-    if (s->IsUtf16()) {
-        Span<uint16_t> sp(s->GetDataUtf16(), length);
-        return sp[index];
-    }
-
-    Span<uint8_t> sp(s->GetDataMUtf8(), length);
-    return sp[index];
+    return s->At(index);
 }
 
 int32_t StdCoreStringGetLength(EtsString *s)
@@ -169,14 +204,17 @@ uint8_t StdCoreStringEquals(EtsString *owner, EtsObject *s)
 EtsString *StringNormalize(EtsString *str, const Normalizer2 *normalizer)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-
+    [[maybe_unused]] EtsHandleScope scope(coroutine);
+    VMHandle<coretypes::String> strHandle(coroutine, reinterpret_cast<ObjectHeader *>(str));
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+    auto flatStringInfo = coretypes::FlatStringInfo::FlattenAllString(strHandle, ctx);
     icu::UnicodeString utf16Str;
-    if (str->IsUtf16()) {
-        utf16Str = icu::UnicodeString {str->GetDataUtf16(), static_cast<int32_t>(str->GetUtf16Length())};
-    } else {
+    if (flatStringInfo.IsUtf16()) {
         utf16Str =
-            icu::UnicodeString {utf::Mutf8AsCString(str->GetDataMUtf8()), static_cast<int32_t>(str->GetLength())};
+            icu::UnicodeString {flatStringInfo.GetDataUtf16(), static_cast<int32_t>(strHandle->GetUtf16Length())};
+    } else {
+        utf16Str = icu::UnicodeString {utf::Mutf8AsCString(flatStringInfo.GetDataUtf8()),
+                                       static_cast<int32_t>(flatStringInfo.GetLength())};
     }
 
     UErrorCode errorCode = U_ZERO_ERROR;
@@ -246,16 +284,15 @@ uint8_t StdCoreStringIsWellFormed(EtsString *thisStr)
         return UINT8_C(1);
     }
     auto length = thisStr->GetUtf16Length();
-    auto codeUnits = Span<uint16_t>(thisStr->GetDataUtf16(), length);
     for (size_t i = 0; i < length; ++i) {
-        uint16_t codeUnit = codeUnits[i];
+        uint16_t codeUnit = thisStr->At(i);
         if ((codeUnit & CHAR0X1FFC00) == CHAR0XD800) {
             // Code unit is a leading surrogate
             if (i == length - 1) {
                 return UINT8_C(0);
             }
             // Is not trail surrogate
-            if ((codeUnits[i + 1] & CHAR0X1FFC00) != CHAR0XDC00) {
+            if ((thisStr->At(i + 1) & CHAR0X1FFC00) != CHAR0XDC00) {
                 return UINT8_C(0);
             }
             // Skip the paired trailing surrogate
@@ -271,14 +308,17 @@ uint8_t StdCoreStringIsWellFormed(EtsString *thisStr)
 EtsString *ToLowerCase(EtsString *thisStr, const icu::Locale &locale)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-
+    [[maybe_unused]] EtsHandleScope scope(coroutine);
+    VMHandle<coretypes::String> strHandle(coroutine, thisStr->GetCoreType());
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+    auto flatStringInfo = coretypes::FlatStringInfo::FlattenAllString(strHandle, ctx);
     icu::UnicodeString utf16Str;
-    if (thisStr->IsUtf16()) {
-        utf16Str = icu::UnicodeString {thisStr->GetDataUtf16(), static_cast<int32_t>(thisStr->GetUtf16Length())};
+    if (flatStringInfo.IsUtf16()) {
+        utf16Str =
+            icu::UnicodeString {flatStringInfo.GetDataUtf16(), static_cast<int32_t>(strHandle->GetUtf16Length())};
     } else {
-        utf16Str = icu::UnicodeString {utf::Mutf8AsCString(thisStr->GetDataMUtf8()),
-                                       static_cast<int32_t>(thisStr->GetLength())};
+        utf16Str = icu::UnicodeString {utf::Mutf8AsCString(flatStringInfo.GetDataUtf8()),
+                                       static_cast<int32_t>(flatStringInfo.GetLength())};
     }
     auto res = utf16Str.toLower(locale);
     return EtsString::CreateFromUtf16(reinterpret_cast<const uint16_t *>(res.getTerminatedBuffer()), res.length());
@@ -287,14 +327,17 @@ EtsString *ToLowerCase(EtsString *thisStr, const icu::Locale &locale)
 EtsString *ToUpperCase(EtsString *thisStr, const icu::Locale &locale)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-
+    [[maybe_unused]] EtsHandleScope scope(coroutine);
+    VMHandle<coretypes::String> strHandle(coroutine, thisStr->GetCoreType());
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+    auto flatStringInfo = coretypes::FlatStringInfo::FlattenAllString(strHandle, ctx);
     icu::UnicodeString utf16Str;
-    if (thisStr->IsUtf16()) {
-        utf16Str = icu::UnicodeString {thisStr->GetDataUtf16(), static_cast<int32_t>(thisStr->GetUtf16Length())};
+    if (flatStringInfo.IsUtf16()) {
+        utf16Str =
+            icu::UnicodeString {flatStringInfo.GetDataUtf16(), static_cast<int32_t>(strHandle->GetUtf16Length())};
     } else {
-        utf16Str = icu::UnicodeString {utf::Mutf8AsCString(thisStr->GetDataMUtf8()),
-                                       static_cast<int32_t>(thisStr->GetLength())};
+        utf16Str = icu::UnicodeString {utf::Mutf8AsCString(flatStringInfo.GetDataUtf8()),
+                                       static_cast<int32_t>(flatStringInfo.GetLength())};
     }
     auto res = utf16Str.toUpper(locale);
     return EtsString::CreateFromUtf16(reinterpret_cast<const uint16_t *>(res.getTerminatedBuffer()), res.length());
@@ -306,9 +349,14 @@ UErrorCode ParseSingleBCP47LanguageTag(EtsString *langTag, icu::Locale &locale)
         locale = icu::Locale::getDefault();
         return U_ZERO_ERROR;
     }
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coroutine);
+    VMHandle<coretypes::String> langTagHandle(coroutine, reinterpret_cast<ObjectHeader *>(langTag));
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+    auto flatStringInfo = coretypes::FlatStringInfo::FlattenAllString(langTagHandle, ctx);
 
     PandaVector<uint8_t> buf;
-    std::string_view locTag = langTag->ConvertToStringView(&buf);
+    std::string_view locTag = EtsString::FromCoreType(flatStringInfo.GetString())->ConvertToStringView(&buf);
     icu::StringPiece sp {locTag.data(), static_cast<int32_t>(locTag.size())};
     UErrorCode status = U_ZERO_ERROR;
     locale = icu::Locale::forLanguageTag(sp, status);
@@ -328,34 +376,43 @@ EtsString *StdCoreStringToLowerCase(EtsString *thisStr)
 EtsString *StdCoreStringToLocaleUpperCase(EtsString *thisStr, EtsString *langTag)
 {
     ASSERT(langTag != nullptr);
-
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coroutine);
     icu::Locale locale;
+    VMHandle<EtsString> langTagHandle(coroutine, langTag->GetCoreType());
+    VMHandle<EtsString> thisStrHandle(coroutine, thisStr->GetCoreType());
     auto localeParseStatus = ParseSingleBCP47LanguageTag(langTag, locale);
     if (UNLIKELY(U_FAILURE(localeParseStatus))) {
-        auto message = "Language tag '" + ConvertToString(langTag->GetCoreType()) + "' is invalid or not supported";
+        auto message =
+            "Language tag '" + ConvertToString(langTagHandle->GetCoreType()) + "' is invalid or not supported";
         ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
         return nullptr;
     }
-    return ToUpperCase(thisStr, locale);
+    return ToUpperCase(thisStrHandle.GetPtr(), locale);
 }
 
 EtsString *StdCoreStringToLocaleLowerCase(EtsString *thisStr, EtsString *langTag)
 {
     ASSERT(langTag != nullptr);
-
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coroutine);
     icu::Locale locale;
+    VMHandle<EtsString> langTagHandle(coroutine, langTag->GetCoreType());
+    VMHandle<EtsString> thisStrHandle(coroutine, thisStr->GetCoreType());
     auto localeParseStatus = ParseSingleBCP47LanguageTag(langTag, locale);
     if (UNLIKELY(U_FAILURE(localeParseStatus))) {
-        auto message = "Language tag '" + ConvertToString(langTag->GetCoreType()) + "' is invalid or not supported";
+        auto message =
+            "Language tag '" + ConvertToString(langTagHandle->GetCoreType()) + "' is invalid or not supported";
         ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
         return nullptr;
     }
-    return ToLowerCase(thisStr, locale);
+    return ToLowerCase(thisStrHandle.GetPtr(), locale);
 }
 
 ets_int StdCoreStringIndexOfAfter(EtsString *s, uint16_t ch, ets_int fromIndex)
 {
-    return ark::intrinsics::StringIndexOfU16(s, ch, fromIndex);
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+    return ark::intrinsics::StringIndexOfU16(s, ch, fromIndex, ctx);
 }
 
 ets_int StdCoreStringIndexOf(EtsString *s, uint16_t ch)
@@ -366,14 +423,16 @@ ets_int StdCoreStringIndexOf(EtsString *s, uint16_t ch)
 ets_int StdCoreStringIndexOfString(EtsString *thisStr, EtsString *patternStr, ets_int fromIndex)
 {
     ASSERT(thisStr != nullptr && patternStr != nullptr);
-    return thisStr->GetCoreType()->IndexOf(patternStr->GetCoreType(), fromIndex);
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+    return thisStr->GetCoreType()->IndexOf(patternStr->GetCoreType(), ctx, fromIndex);
 }
 
 ets_int StdCoreStringLastIndexOfString(EtsString *thisStr, EtsString *patternStr, ets_int fromIndex)
 {
     ASSERT(thisStr != nullptr && patternStr != nullptr);
     // "abc".lastIndexOf("ab", -10) will return 0
-    return thisStr->GetCoreType()->LastIndexOf(patternStr->GetCoreType(), std::max(fromIndex, 0));
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+    return thisStr->GetCoreType()->LastIndexOf(patternStr->GetCoreType(), ctx, std::max(fromIndex, 0));
 }
 
 ets_int StdCoreStringCodePointToChar(ets_int codePoint)
@@ -392,37 +451,85 @@ ets_int StdCoreStringCodePointToChar(ets_int codePoint)
 int32_t StdCoreStringHashCode(EtsString *thisStr)
 {
     ASSERT(thisStr != nullptr);
-    return thisStr->GetCoreType()->GetHashcode();
+    return thisStr->GetHashcode();
 }
 
 EtsBoolean StdCoreStringIsCompressed(EtsString *thisStr)
 {
     ASSERT(thisStr != nullptr);
-    return ToEtsBoolean(thisStr->GetCoreType()->IsMUtf8());
+    return ToEtsBoolean(thisStr->IsMUtf8());
+}
+
+static coretypes::String *StringConcat2(coretypes::String *str1, coretypes::String *str2)
+{
+    auto *vm = Runtime::GetCurrent()->GetPandaVM();
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+    return coretypes::String::Concat(str1, str2, ctx, vm);
+}
+
+static coretypes::String *StringConcat3(coretypes::String *str1, coretypes::String *str2, coretypes::String *str3)
+{
+    auto *vm = Runtime::GetCurrent()->GetPandaVM();
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coroutine);
+    VMHandle<coretypes::String> str3Handle(coroutine, str3);
+    auto str = coretypes::String::Concat(str1, str2, ctx, vm);
+    if (UNLIKELY(str == nullptr)) {
+        HandlePendingException();
+        UNREACHABLE();
+    }
+    str = coretypes::String::Concat(str, str3Handle.GetPtr(), ctx, vm);
+    return str;
+}
+
+static coretypes::String *StringConcat4(coretypes::String *str1, coretypes::String *str2, coretypes::String *str3,
+                                        coretypes::String *str4)
+{
+    auto *vm = Runtime::GetCurrent()->GetPandaVM();
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coroutine);
+    VMHandle<coretypes::String> str3Handle(coroutine, str3);
+    VMHandle<coretypes::String> str4Handle(coroutine, str4);
+    auto str = coretypes::String::Concat(str1, str2, ctx, vm);
+    if (UNLIKELY(str == nullptr)) {
+        HandlePendingException();
+        UNREACHABLE();
+    }
+    str3 = str3Handle.GetPtr();
+    str = coretypes::String::Concat(str, str3, ctx, vm);
+    if (UNLIKELY(str == nullptr)) {
+        HandlePendingException();
+        UNREACHABLE();
+    }
+    str4 = str4Handle.GetPtr();
+    str = coretypes::String::Concat(str, str4, ctx, vm);
+    return str;
 }
 
 EtsString *StdCoreStringConcat2(EtsString *str1, EtsString *str2)
 {
-    auto s1 = reinterpret_cast<coretypes::String *>(str1);
-    auto s2 = reinterpret_cast<coretypes::String *>(str2);
-    return reinterpret_cast<EtsString *>(CoreStringConcat2(s1, s2));
+    auto s1 = str1->GetCoreType();
+    auto s2 = str2->GetCoreType();
+    return reinterpret_cast<EtsString *>(StringConcat2(s1, s2));
 }
 
 EtsString *StdCoreStringConcat3(EtsString *str1, EtsString *str2, EtsString *str3)
 {
-    auto s1 = reinterpret_cast<coretypes::String *>(str1);
-    auto s2 = reinterpret_cast<coretypes::String *>(str2);
-    auto s3 = reinterpret_cast<coretypes::String *>(str3);
-    return reinterpret_cast<EtsString *>(CoreStringConcat3(s1, s2, s3));
+    auto s1 = str1->GetCoreType();
+    auto s2 = str2->GetCoreType();
+    auto s3 = str3->GetCoreType();
+    return reinterpret_cast<EtsString *>(StringConcat3(s1, s2, s3));
 }
 
 EtsString *StdCoreStringConcat4(EtsString *str1, EtsString *str2, EtsString *str3, EtsString *str4)
 {
-    auto s1 = reinterpret_cast<coretypes::String *>(str1);
-    auto s2 = reinterpret_cast<coretypes::String *>(str2);
-    auto s3 = reinterpret_cast<coretypes::String *>(str3);
-    auto s4 = reinterpret_cast<coretypes::String *>(str4);
-    return reinterpret_cast<EtsString *>(CoreStringConcat4(s1, s2, s3, s4));
+    auto s1 = str1->GetCoreType();
+    auto s2 = str2->GetCoreType();
+    auto s3 = str3->GetCoreType();
+    auto s4 = str4->GetCoreType();
+    return reinterpret_cast<EtsString *>(StringConcat4(s1, s2, s3, s4));
 }
 
 ets_int StdCoreStringCompareTo(EtsString *str1, EtsString *str2)
@@ -436,7 +543,7 @@ ets_int StdCoreStringCompareTo(EtsString *str1, EtsString *str2)
     }
 
     /* use the default implementation otherwise */
-    return str1->GetCoreType()->Compare(str2->GetCoreType());
+    return str1->Compare(str2);
 }
 
 EtsString *StdCoreStringTrimLeft(EtsString *thisStr)
@@ -496,48 +603,33 @@ extern "C" EtsString *AllocateStringObject(size_t length, bool compressed)
 EtsString *StdCoreStringRepeat(EtsString *str, EtsInt count)
 {
     auto length = str->GetLength();
-
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coroutine);
     if (UNLIKELY(count < 0)) {
         PandaString message = "repeat: count is negative";
-        auto coroutine = EtsCoroutine::GetCurrent();
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::RANGE_ERROR, message);
         return nullptr;
     }
 
     if (length == 0 || count == 0) {
-        return EtsString::CreateFromUtf8(nullptr, 0);
+        return EtsString::CreateNewEmptyString();
     }
-
-    auto thread = ManagedThread::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-    VMHandle<coretypes::String> sHandle(thread, str->GetCoreType());
+    VMHandle<EtsString> sHandle(coroutine, reinterpret_cast<ObjectHeader *>(str));
 
     int size = length * count;
-    auto compressed = str->GetCoreType()->IsMUtf8();
-    auto rep = AllocateStringObject(size, compressed);
-    if (UNLIKELY(rep == nullptr)) {
+    auto compressed = str->IsMUtf8();
+    auto result = AllocateStringObject(size, compressed);
+    if (UNLIKELY(result == nullptr)) {
         PandaString message = "repeat: memory allocation failed";
-        auto coroutine = EtsCoroutine::GetCurrent();
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::OUT_OF_MEMORY_ERROR, message);
+        auto coro = EtsCoroutine::GetCurrent();
+        ThrowEtsException(coro, panda_file_items::class_descriptors::OUT_OF_MEMORY_ERROR, message);
         return nullptr;
     }
 
-    if (compressed) {
-        auto strData = sHandle.GetPtr()->GetDataMUtf8();
-        auto repData = rep->GetDataMUtf8();
-        for (int i = 0; i < count; ++i) {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            std::copy_n(strData, length, repData + i * length);
-        }
-    } else {
-        auto strData = sHandle.GetPtr()->GetDataUtf16();
-        auto repData = rep->GetDataUtf16();
-        for (int i = 0; i < count; ++i) {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            std::copy_n(strData, length, repData + i * length);
-        }
+    for (uint32_t i = 0; i < static_cast<uint32_t>(count); i++) {
+        EtsString::ReadData(result, sHandle.GetPtr(), i * length, (count - i) * length, length);
     }
-    return rep;
+    return result;
 }
 
 uint16_t StdCoreStringGet(EtsString *str, EtsInt index)

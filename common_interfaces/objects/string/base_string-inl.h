@@ -13,8 +13,13 @@
  * limitations under the License.
  */
 
+// NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers,
+// readability-else-after-return, hicpp-signed-bitwise)
+
 #ifndef COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_IMPL_H
 #define COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_IMPL_H
+
+#include <vector>
 
 #include "objects/string/base_string.h"
 #include "objects/string/line_string-inl.h"
@@ -23,13 +28,12 @@
 #include "objects/utils/utf_utils.h"
 #include "objects/utils/span.h"
 #include "securec.h"
-
 namespace common {
 template <typename ReadBarrier>
 size_t BaseString::GetUtf8Length(ReadBarrier &&readBarrier, bool modify, bool isGetBufferSize) const
 {
     if (!IsUtf16()) {
-        return GetLength() + 1; // add place for zero in the end
+        return GetLength() + 1;  // add place for zero in the end
     }
     std::vector<uint16_t> tmpBuf;
     const uint16_t *data = GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), this, tmpBuf);
@@ -71,22 +75,22 @@ inline ObjectType BaseString::GetStringType() const
     return type;
 }
 
-template <bool verify, typename ReadBarrier>
+template <bool VERIFY, typename ReadBarrier>
 uint16_t BaseString::At(ReadBarrier &&readBarrier, int32_t index) const
 {
-    int32_t length = static_cast<int32_t>(GetLength());
-    if constexpr (verify) {
+    auto length = static_cast<int32_t>(GetLength());
+    if constexpr (VERIFY) {
         if ((index < 0) || (index >= length)) {
             return 0;
         }
     }
     switch (GetStringType()) {
         case ObjectType::LINE_STRING:
-            return LineString::ConstCast(this)->Get<verify>(index);
+            return LineString::ConstCast(this)->Get<VERIFY>(index);
         case ObjectType::SLICED_STRING:
-            return SlicedString::ConstCast(this)->Get<verify>(std::forward<ReadBarrier>(readBarrier), index);
+            return SlicedString::ConstCast(this)->Get<VERIFY>(std::forward<ReadBarrier>(readBarrier), index);
         case ObjectType::TREE_STRING:
-            return TreeString::ConstCast(this)->Get<verify>(std::forward<ReadBarrier>(readBarrier), index);
+            return TreeString::ConstCast(this)->Get<VERIFY>(std::forward<ReadBarrier>(readBarrier), index);
         default:
             UNREACHABLE_CC();
     }
@@ -153,10 +157,10 @@ void BaseString::WriteToFlat(ReadBarrier &&readBarrier, const BaseString *src, C
             }
             case ObjectType::TREE_STRING: {
                 const TreeString *treeSrc = TreeString::ConstCast(src);
-                BaseString *left = BaseString::Cast(
-                    treeSrc->GetLeftSubString<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
-                BaseString *right = BaseString::Cast(
-                    treeSrc->GetRightSubString<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
+                BaseString *left =
+                    BaseString::Cast(treeSrc->GetLeftSubString<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
+                BaseString *right =
+                    BaseString::Cast(treeSrc->GetRightSubString<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
                 uint32_t leftLength = left->GetLength();
                 uint32_t rightLength = right->GetLength();
                 // NOLINTNEXTLINE(C_RULE_ID_FUNCTION_NESTING_LEVEL)
@@ -181,8 +185,8 @@ void BaseString::WriteToFlat(ReadBarrier &&readBarrier, const BaseString *src, C
                     // CC-OFFNXT(G.FUN.01-CPP) solid logic
                     if (length > leftLength) {
                         if (rightLength == 1) {
-                            buf[leftLength] = static_cast<Char>(right->At<false>(
-                                std::forward<ReadBarrier>(readBarrier), 0));
+                            buf[leftLength] =
+                                static_cast<Char>(right->At<false>(std::forward<ReadBarrier>(readBarrier), 0));
                         } else if ((right->IsLineString()) && right->IsUtf8()) {
                             CopyChars(buf + leftLength, LineString::Cast(right)->GetDataUtf8(), rightLength);
                         } else {
@@ -200,13 +204,13 @@ void BaseString::WriteToFlat(ReadBarrier &&readBarrier, const BaseString *src, C
                 BaseString *parent = BaseString::Cast(
                     SlicedString::ConstCast(src)->GetParent<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
                 if (src->IsUtf8()) {
-                    CopyChars(
-                        buf, LineString::Cast(parent)->GetDataUtf8() + SlicedString::ConstCast(src)->GetStartIndex(),
-                        length);
+                    CopyChars(buf,
+                              LineString::Cast(parent)->GetDataUtf8() + SlicedString::ConstCast(src)->GetStartIndex(),
+                              length);
                 } else {
-                    CopyChars(
-                        buf, LineString::Cast(parent)->GetDataUtf16() + SlicedString::ConstCast(src)->GetStartIndex(),
-                        length);
+                    CopyChars(buf,
+                              LineString::Cast(parent)->GetDataUtf16() + SlicedString::ConstCast(src)->GetStartIndex(),
+                              length);
                 }
                 return;
             }
@@ -216,13 +220,12 @@ void BaseString::WriteToFlat(ReadBarrier &&readBarrier, const BaseString *src, C
     }
 }
 
-
 template <typename Char, typename ReadBarrier>
 void BaseString::WriteToFlatWithPos(ReadBarrier &&readBarrier, BaseString *src, Char *buf, uint32_t length,
                                     uint32_t pos)
 {
     // DISALLOW_GARBAGE_COLLECTION;
-    [[ maybe_unused ]] uint32_t maxLength = src->GetLength();
+    [[maybe_unused]] uint32_t maxLength = src->GetLength();
     if (length == 0) {
         return;
     }
@@ -241,8 +244,8 @@ void BaseString::WriteToFlatWithPos(ReadBarrier &&readBarrier, BaseString *src, 
             }
             case ObjectType::TREE_STRING: {
                 TreeString *treeSrc = TreeString::Cast(src);
-                BaseString *left = BaseString::Cast(
-                    treeSrc->GetLeftSubString<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
+                BaseString *left =
+                    BaseString::Cast(treeSrc->GetLeftSubString<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
                 DCHECK_CC(left->IsLineString());
                 src = left;
                 continue;
@@ -251,13 +254,13 @@ void BaseString::WriteToFlatWithPos(ReadBarrier &&readBarrier, BaseString *src, 
                 BaseString *parent = BaseString::Cast(
                     SlicedString::Cast(src)->GetParent<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
                 if (src->IsUtf8()) {
-                    CopyChars(
-                        buf, LineString::Cast(parent)->GetDataUtf8() + SlicedString::Cast(src)->GetStartIndex() + pos,
-                        length);
+                    CopyChars(buf,
+                              LineString::Cast(parent)->GetDataUtf8() + SlicedString::Cast(src)->GetStartIndex() + pos,
+                              length);
                 } else {
-                    CopyChars(
-                        buf, LineString::Cast(parent)->GetDataUtf16() + SlicedString::Cast(src)->GetStartIndex() + pos,
-                        length);
+                    CopyChars(buf,
+                              LineString::Cast(parent)->GetDataUtf16() + SlicedString::Cast(src)->GetStartIndex() + pos,
+                              length);
                 }
                 return;
             }
@@ -272,18 +275,18 @@ template <typename ReadBarrier>
 size_t BaseString::WriteUtf8(ReadBarrier &&readBarrier, uint8_t *buf, size_t maxLength, bool isWriteBuffer) const
 {
     if (maxLength == 0) {
-        return 1; // maxLength was -1 at napi
+        return 1;  // maxLength was -1 at napi
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     buf[maxLength - 1] = '\0';
     return CopyDataRegionUtf8(std::forward<ReadBarrier>(readBarrier), buf, 0, GetLength(), maxLength, true,
-                              isWriteBuffer) + 1;
+                              isWriteBuffer) +
+           1;
 }
 
 // It allows user to copy into buffer even if maxLength < length
 template <typename ReadBarrier>
-size_t BaseString::WriteUtf16(ReadBarrier &&readBarrier, uint16_t *buf, uint32_t targetLength,
-                              uint32_t bufLength) const
+size_t BaseString::WriteUtf16(ReadBarrier &&readBarrier, uint16_t *buf, uint32_t targetLength, uint32_t bufLength) const
 {
     if (bufLength == 0) {
         return 0;
@@ -291,7 +294,6 @@ size_t BaseString::WriteUtf16(ReadBarrier &&readBarrier, uint16_t *buf, uint32_t
     // Returns a number representing a valid backrest length.
     return CopyDataToUtf16(std::forward<ReadBarrier>(readBarrier), buf, targetLength, bufLength);
 }
-
 
 template <typename ReadBarrier>
 size_t BaseString::WriteOneByte(ReadBarrier &&readBarrier, uint8_t *buf, size_t maxLength) const
@@ -322,7 +324,6 @@ size_t BaseString::WriteOneByte(ReadBarrier &&readBarrier, uint8_t *buf, size_t 
     return UtfUtils::ConvertRegionUtf16ToLatin1(data, buf, length, maxLength);
 }
 
-
 template <typename ReadBarrier>
 uint32_t BaseString::CopyDataUtf16(ReadBarrier &&readBarrier, uint16_t *buf, uint32_t maxLength) const
 {
@@ -343,7 +344,6 @@ uint32_t BaseString::CopyDataUtf16(ReadBarrier &&readBarrier, uint16_t *buf, uin
     const uint8_t *data = GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), this, tmpBuf);
     return UtfUtils::ConvertRegionUtf8ToUtf16(data, buf, length, maxLength);
 }
-
 
 template <typename ReadBarrier, typename Vec,
           std::enable_if_t<objects_traits::is_std_vector_of_v<std::decay_t<Vec>, uint8_t>, int>>
@@ -366,7 +366,6 @@ common::Span<const uint8_t> BaseString::ToUtf8Span(ReadBarrier &&readBarrier, Ve
     }
     return str;
 }
-
 
 template <typename ReadBarrier, typename Vec,
           std::enable_if_t<objects_traits::is_std_vector_of_v<std::decay_t<Vec>, uint8_t>, int>>
@@ -423,7 +422,6 @@ const uint8_t *BaseString::GetUtf8DataFlat(ReadBarrier &&readBarrier, const Base
     return LineString::ConstCast(src)->GetDataUtf8();
 }
 
-
 template <typename ReadBarrier>
 size_t BaseString::CopyDataRegionUtf8(ReadBarrier &&readBarrier, uint8_t *buf, size_t start, size_t length,
                                       size_t maxLength, bool modify, bool isWriteBuffer) const
@@ -448,16 +446,13 @@ size_t BaseString::CopyDataRegionUtf8(ReadBarrier &&readBarrier, uint8_t *buf, s
     std::vector<uint16_t> tmpBuf;
     const uint16_t *data = GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), this, tmpBuf);
     if (length > maxLength) {
-        return UtfUtils::ConvertRegionUtf16ToUtf8(data, buf, maxLength, maxLength, start,
-                                                  modify, isWriteBuffer);
+        return UtfUtils::ConvertRegionUtf16ToUtf8(data, buf, maxLength, maxLength, start, modify, isWriteBuffer);
     }
-    return UtfUtils::ConvertRegionUtf16ToUtf8(data, buf, length, maxLength, start,
-                                              modify, isWriteBuffer);
+    return UtfUtils::ConvertRegionUtf16ToUtf8(data, buf, length, maxLength, start, modify, isWriteBuffer);
 }
 
 template <typename ReadBarrier>
-size_t BaseString::CopyDataToUtf16(ReadBarrier &&readBarrier, uint16_t *buf, uint32_t length,
-                                   uint32_t bufLength) const
+size_t BaseString::CopyDataToUtf16(ReadBarrier &&readBarrier, uint16_t *buf, uint32_t length, uint32_t bufLength) const
 {
     if (IsUtf16()) {
         std::vector<uint16_t> tmpBuf;
@@ -544,15 +539,13 @@ uint32_t BaseString::ComputeRawHashcode(ReadBarrier &&readBarrier) const
         const uint8_t *data = BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), this, buf);
         // String can not convert to integer number, using normal hashcode computing algorithm.
         return ComputeHashForData(data, length, 0);
-    } else {
-        std::vector<uint16_t> buf;
-        const uint16_t *data = BaseString::GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), this, buf);
-        // If rawSeed has certain value, and second string uses UTF16 encoding,
-        // then merged string can not be small integer number.
-        return ComputeHashForData(data, length, 0);
     }
+    std::vector<uint16_t> buf;
+    const uint16_t *data = BaseString::GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), this, buf);
+    // If rawSeed has certain value, and second string uses UTF16 encoding,
+    // then merged string can not be small integer number.
+    return ComputeHashForData(data, length, 0);
 }
-
 
 template <typename ReadBarrier>
 bool BaseString::EqualToSplicedString(ReadBarrier &&readBarrier, const BaseString *str1, const BaseString *str2)
@@ -575,8 +568,7 @@ bool BaseString::EqualToSplicedString(ReadBarrier &&readBarrier, const BaseStrin
         if (BaseString::StringIsEqualUint8Data(std::forward<ReadBarrier>(readBarrier), str1, data, str1->GetLength(),
                                                this->IsUtf8())) {
             return BaseString::StringIsEqualUint8Data(std::forward<ReadBarrier>(readBarrier), str2,
-                                                      data + str1->GetLength(),
-                                                      str2->GetLength(), this->IsUtf8());
+                                                      data + str1->GetLength(), str2->GetLength(), this->IsUtf8());
         }
     }
     return false;
@@ -613,7 +605,6 @@ const uint8_t *BaseString::GetNonTreeUtf8Data(ReadBarrier &&readBarrier, const B
     return LineString::ConstCast(src)->GetDataUtf8();
 }
 
-
 template <typename ReadBarrier>
 const uint16_t *BaseString::GetNonTreeUtf16Data(ReadBarrier &&readBarrier, const BaseString *src)
 {
@@ -628,7 +619,6 @@ const uint16_t *BaseString::GetNonTreeUtf16Data(ReadBarrier &&readBarrier, const
     return LineString::ConstCast(src)->GetDataUtf16();
 }
 
-
 /* static */
 template <typename ReadBarrier>
 bool BaseString::StringsAreEqualDiffUtfEncoding(ReadBarrier &&readBarrier, BaseString *left, BaseString *right)
@@ -637,37 +627,36 @@ bool BaseString::StringsAreEqualDiffUtfEncoding(ReadBarrier &&readBarrier, BaseS
     std::vector<uint16_t> bufRightUft16;
     std::vector<uint8_t> bufLeftUft8;
     std::vector<uint8_t> bufRightUft8;
-    int32_t lhsCount = static_cast<int32_t>(left->GetLength());
-    int32_t rhsCount = static_cast<int32_t>(right->GetLength());
+    auto lhsCount = static_cast<int32_t>(left->GetLength());
+    auto rhsCount = static_cast<int32_t>(right->GetLength());
     if (!left->IsUtf16() && !right->IsUtf16()) {
         const uint8_t *data1 = BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), left, bufLeftUft8);
         const uint8_t *data2 = BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), right, bufRightUft8);
         common::Span<const uint8_t> lhsSp(data1, lhsCount);
         common::Span<const uint8_t> rhsSp(data2, rhsCount);
         return BaseString::StringsAreEquals(lhsSp, rhsSp);
-    } else if (!left->IsUtf16()) {
+    }
+    if (!left->IsUtf16()) {
         const uint8_t *data1 = BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), left, bufLeftUft8);
-        const uint16_t *data2 = BaseString::GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), right,
-                                                             bufRightUft16);
+        const uint16_t *data2 =
+            BaseString::GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), right, bufRightUft16);
         common::Span<const uint8_t> lhsSp(data1, lhsCount);
         common::Span<const uint16_t> rhsSp(data2, rhsCount);
         return BaseString::StringsAreEquals(lhsSp, rhsSp);
-    } else if (!right->IsUtf16()) {
+    }
+    if (!right->IsUtf16()) {
         const uint16_t *data1 =
             BaseString::GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), left, bufLeftUft16);
         const uint8_t *data2 = BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), right, bufRightUft8);
         common::Span<const uint16_t> lhsSp(data1, lhsCount);
         common::Span<const uint8_t> rhsSp(data2, rhsCount);
         return BaseString::StringsAreEquals(lhsSp, rhsSp);
-    } else {
-        const uint16_t *data1 =
-            BaseString::GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), left, bufLeftUft16);
-        const uint16_t *data2 = BaseString::GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), right,
-                                                             bufRightUft16);
-        common::Span<const uint16_t> lhsSp(data1, lhsCount);
-        common::Span<const uint16_t> rhsSp(data2, rhsCount);
-        return BaseString::StringsAreEquals(lhsSp, rhsSp);
     }
+    const uint16_t *data1 = BaseString::GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), left, bufLeftUft16);
+    const uint16_t *data2 = BaseString::GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), right, bufRightUft16);
+    common::Span<const uint16_t> lhsSp(data1, lhsCount);
+    common::Span<const uint16_t> rhsSp(data2, rhsCount);
+    return BaseString::StringsAreEquals(lhsSp, rhsSp);
 }
 
 /* static */
@@ -697,7 +686,6 @@ bool BaseString::StringsAreEqual(ReadBarrier &&readBarrier, BaseString *str1, Ba
     return StringsAreEqualDiffUtfEncoding(std::forward<ReadBarrier>(readBarrier), str1, str2);
 }
 
-
 /* static */
 template <typename ReadBarrier>
 bool BaseString::StringIsEqualUint8Data(ReadBarrier &&readBarrier, const BaseString *str1, const uint8_t *dataAddr,
@@ -712,8 +700,7 @@ bool BaseString::StringIsEqualUint8Data(ReadBarrier &&readBarrier, const BaseStr
     if (str1->IsUtf8()) {
         std::vector<uint8_t> buf;
         common::Span<const uint8_t> data1(
-            BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), str1, buf),
-            dataLen);
+            BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), str1, buf), dataLen);
         common::Span<const uint8_t> data2(dataAddr, dataLen);
         return BaseString::StringsAreEquals(data1, data2);
     }
@@ -736,13 +723,12 @@ bool BaseString::StringsAreEqualUtf16(ReadBarrier &&readBarrier, const BaseStrin
         std::vector<uint8_t> buf;
         const uint8_t *data = BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), str1, buf);
         return IsUtf8EqualsUtf16(data, length, utf16Data, utf16Len);
-    } else {
-        std::vector<uint16_t> buf;
-        common::Span<const uint16_t> data1(
-            BaseString::GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), str1, buf), length);
-        common::Span<const uint16_t> data2(utf16Data, utf16Len);
-        return BaseString::StringsAreEquals(data1, data2);
     }
+    std::vector<uint16_t> buf;
+    common::Span<const uint16_t> data1(BaseString::GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), str1, buf),
+                                       length);
+    common::Span<const uint16_t> data2(utf16Data, utf16Len);
+    return BaseString::StringsAreEquals(data1, data2);
 }
 
 template <typename T>
@@ -786,7 +772,6 @@ int32_t BaseString::LastIndexOf(common::Span<const T1> &lhsSp, common::Span<cons
 template <typename T1, typename T2>
 int32_t BaseString::IndexOf(common::Span<const T1> &lhsSp, common::Span<const T2> &rhsSp, int32_t pos, int32_t max)
 {
-    DCHECK_CC(rhsSp.size() > 0);
     auto first = static_cast<int32_t>(rhsSp[0]);
     for (int32_t i = pos; i <= max; i++) {
         if (static_cast<int32_t>(lhsSp[i]) != first) {
@@ -817,12 +802,12 @@ int32_t BaseString::IndexOf(common::Span<const T1> &lhsSp, common::Span<const T2
 inline bool BaseString::CanBeCompressed(const uint8_t *utf8Data, uint32_t utf8Len)
 {
     uint32_t index = 0;
-    for (; index + 4 <= utf8Len; index += 4) { // 4: process the data in chunks of 4 elements to improve speed
+    for (; index + 4 <= utf8Len; index += 4) {  // 4: process the data in chunks of 4 elements to improve speed
         // Check if all four characters in the current block are ASCII characters
         if (!IsASCIICharacter(utf8Data[index]) ||
-            !IsASCIICharacter(utf8Data[index + 1]) || // 1: the second element of the block
-            !IsASCIICharacter(utf8Data[index + 2]) || // 2: the third element of the block
-            !IsASCIICharacter(utf8Data[index + 3])) { // 3: the fourth element of the block
+            !IsASCIICharacter(utf8Data[index + 1]) ||  // 1: the second element of the block
+            !IsASCIICharacter(utf8Data[index + 2]) ||  // 2: the third element of the block
+            !IsASCIICharacter(utf8Data[index + 3])) {  // 3: the fourth element of the block
             return false;
         }
     }
@@ -841,12 +826,12 @@ inline bool BaseString::CanBeCompressed(const uint8_t *utf8Data, uint32_t utf8Le
 inline bool BaseString::CanBeCompressed(const uint16_t *utf16Data, uint32_t utf16Len)
 {
     uint32_t index = 0;
-    for (; index + 4 <= utf16Len; index += 4) { // 4: process the data in chunks of 4 elements to improve speed
+    for (; index + 4 <= utf16Len; index += 4) {  // 4: process the data in chunks of 4 elements to improve speed
         // Check if all four characters in the current block are ASCII characters
         if (!IsASCIICharacter(utf16Data[index]) ||
-            !IsASCIICharacter(utf16Data[index + 1]) || // 1: the second element of the block
-            !IsASCIICharacter(utf16Data[index + 2]) || // 2: the third element of the block
-            !IsASCIICharacter(utf16Data[index + 3])) { // 3: the fourth element of the block
+            !IsASCIICharacter(utf16Data[index + 1]) ||  // 1: the second element of the block
+            !IsASCIICharacter(utf16Data[index + 2]) ||  // 2: the third element of the block
+            !IsASCIICharacter(utf16Data[index + 3])) {  // 3: the fourth element of the block
             return false;
         }
     }
@@ -879,16 +864,12 @@ inline uint32_t BaseString::ComputeHashcodeUtf8(const uint8_t *utf8Data, size_t 
 {
     if (canBeCompress) {
         return ComputeHashForData(utf8Data, utf8Len, 0);
-    } else {
-        auto utf16Len = UtfUtils::Utf8ToUtf16Size(utf8Data, utf8Len);
-        std::vector<uint16_t> tmpBuffer(utf16Len);
-        [[maybe_unused]] auto len = UtfUtils::ConvertRegionUtf8ToUtf16(utf8Data, tmpBuffer.data(), utf8Len,
-                                                                       utf16Len);
-        DCHECK_CC(len == utf16Len);
-        return ComputeHashForData(tmpBuffer.data(), utf16Len, 0);
     }
-    // LOG_ECMA(FATAL) << "this branch is unreachable";
-    UNREACHABLE_CC();
+    auto utf16Len = UtfUtils::Utf8ToUtf16Size(utf8Data, utf8Len);
+    std::vector<uint16_t> tmpBuffer(utf16Len);
+    [[maybe_unused]] auto len = UtfUtils::ConvertRegionUtf8ToUtf16(utf8Data, tmpBuffer.data(), utf8Len, utf16Len);
+    DCHECK_CC(len == utf16Len);
+    return ComputeHashForData(tmpBuffer.data(), utf16Len, 0);
 }
 
 /* static */
@@ -917,7 +898,6 @@ static size_t FixUtf8Len(const uint8_t *utf8, size_t utf8Len)
     return utf8Len - trimSize;
 }
 
-
 /* static */
 // CC-OFFNXT(C_RULE_ID_INLINE_FUNCTION_SIZE) Perf critical common runtime code stub
 // CC-OFFNXT(G.FUD.06) perf critical
@@ -942,7 +922,7 @@ inline bool BaseString::IsUtf8EqualsUtf16(const uint8_t *utf8Data, size_t utf8Le
     const uint16_t *utf16End = utf16Data + utf16Len;
     while (utf8Data < utf8SafeEnd && utf16Data < utf16End) {
         uint8_t src = *utf8Data;
-        switch (src & 0xF0) {
+        switch (src & 0xF0) {  // NOLINT(hicpp-signed-bitwise)
             case 0xF0: {
                 const uint8_t c2 = *(++utf8Data);
                 const uint8_t c3 = *(++utf8Data);
@@ -959,6 +939,7 @@ inline bool BaseString::IsUtf8EqualsUtf16(const uint8_t *utf8Data, size_t utf8Le
                     if (*utf16Data++ != static_cast<uint16_t>((codePoint >> OFFSET_10POS) | H_SURROGATE_START)) {
                         return false;
                         // CC-OFFNXT(G.FUN.01-CPP) solid logic
+                        // NOLINT(hicpp-signed-bitwise)
                     } else if (*utf16Data++ != static_cast<uint16_t>((codePoint & 0x3FF) | L_SURROGATE_START)) {
                         return false;
                     }
@@ -1009,6 +990,8 @@ inline bool BaseString::IsUtf8EqualsUtf16(const uint8_t *utf8Data, size_t utf8Le
     }
     return utf8Data == utf8End && utf16Data == utf16End;
 }
-} // namespace panda::ecmascript
+}  // namespace common
 
-#endif //COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_IMPL_H
+#endif  // COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_IMPL_H
+// NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers, readability-else-after-return,
+// hicpp-signed-bitwise)

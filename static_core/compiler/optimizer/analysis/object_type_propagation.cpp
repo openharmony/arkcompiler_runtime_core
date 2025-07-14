@@ -1218,7 +1218,7 @@ void TypePropagationVisitor::VisitLoadString(GraphVisitor *v, Inst *i)
 {
     auto *self = static_cast<TypePropagationVisitor *>(v);
     auto inst = i->CastToLoadString();
-    auto klass = self->GetGraph()->GetRuntime()->GetStringClass(inst->GetMethod(), nullptr);
+    auto klass = self->GetGraph()->GetRuntime()->GetLineStringClass(inst->GetMethod(), nullptr);
     if (klass != nullptr) {
         self->SetTypeInfo(inst, {klass, true});
     }

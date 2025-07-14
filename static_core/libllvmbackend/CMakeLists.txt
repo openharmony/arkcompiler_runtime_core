@@ -220,6 +220,7 @@ panda_target_include_directories(llvmbackend PRIVATE .)
 panda_target_include_directories(llvmbackend
         PRIVATE ${PANDA_ROOT}/compiler
         PUBLIC ${GENERATED_DIR}
+        PUBLIC ${PANDA_ROOT}/../common_interfaces
 )
 
 panda_target_link_libraries(llvmbackend arkcompiler arkbase arkfile aot_builder ${LIB_LLVM})

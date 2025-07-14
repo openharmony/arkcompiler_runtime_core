@@ -43,6 +43,7 @@ config("arkruntime_public_config") {
   ]
 
   include_dirs += platform_include_dirs
+  include_dirs += [ "$ark_root/../common_interfaces" ]
 
   if (ark_hybrid) {
     include_dirs += [ "$ark_root/../common_interfaces" ]
@@ -172,6 +173,7 @@ ohos_source_set("libarkruntime_set_static") {
     "compiler_task_manager_worker.cpp",
     "compiler_thread_pool_worker.cpp",
     "coretypes/array.cpp",
+    "coretypes/line_string.cpp",
     "coretypes/string.cpp",
     "coroutines/coroutine.cpp",
     "coroutines/coroutine_events.cpp",

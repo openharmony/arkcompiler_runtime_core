@@ -14,7 +14,7 @@
  */
 
 #include "plugins/ets/runtime/regexp/regexp_executor.h"
-#include "include/coretypes/string.h"
+#include "include/coretypes/line_string.h"
 #include "include/mem/panda_string.h"
 #include "runtime/handle_scope-inl.h"
 #include "types/ets_array.h"

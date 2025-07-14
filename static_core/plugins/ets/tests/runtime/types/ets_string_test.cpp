@@ -190,6 +190,44 @@ TEST_F(EtsStringTest, CreateNewStringFromString)
                                                     reinterpret_cast<coretypes::String *>(createdString)));
 }
 
+TEST_F(EtsStringTest, CreateNewStringFromConcatString)
+{
+    EtsString *str1 = EtsString::CreateFromMUtf8("canjie_language");
+    EtsString *str2 = EtsString::CreateFromMUtf8("arkts_language");
+    EtsString *concat = EtsString::Concat(str1, str2);
+    EtsString *createdString = EtsString::CreateNewStringFromString(concat);
+    EtsString *equal = EtsString::CreateFromMUtf8("canjie_languagearkts_language");
+
+    ASSERT_TRUE(coretypes::String::StringsAreEqual(reinterpret_cast<coretypes::String *>(concat),
+                                                   reinterpret_cast<coretypes::String *>(createdString)));
+
+    ASSERT_TRUE(coretypes::String::StringsAreEqual(reinterpret_cast<coretypes::String *>(equal),
+                                                   reinterpret_cast<coretypes::String *>(createdString)));
+
+    ASSERT_FALSE(coretypes::String::StringsAreEqual(reinterpret_cast<coretypes::String *>(str1),
+                                                    reinterpret_cast<coretypes::String *>(createdString)));
+
+    ASSERT_FALSE(coretypes::String::StringsAreEqual(reinterpret_cast<coretypes::String *>(str2),
+                                                    reinterpret_cast<coretypes::String *>(createdString)));
+}
+
+TEST_F(EtsStringTest, CreateNewStringFromSlicedString)
+{
+    EtsString *string1 = EtsString::CreateFromMUtf8("canjie_languagearkts_language");
+    EtsString *slicedStr = EtsString::FastSubString(string1, 0, 17);
+    EtsString *createdString = EtsString::CreateNewStringFromString(slicedStr);
+    EtsString *equal = EtsString::CreateFromMUtf8("canjie_languagear");
+
+    ASSERT_TRUE(coretypes::String::StringsAreEqual(reinterpret_cast<coretypes::String *>(slicedStr),
+                                                   reinterpret_cast<coretypes::String *>(createdString)));
+
+    ASSERT_TRUE(coretypes::String::StringsAreEqual(reinterpret_cast<coretypes::String *>(equal),
+                                                   reinterpret_cast<coretypes::String *>(createdString)));
+
+    ASSERT_FALSE(coretypes::String::StringsAreEqual(reinterpret_cast<coretypes::String *>(string1),
+                                                    reinterpret_cast<coretypes::String *>(createdString)));
+}
+
 TEST_F(EtsStringTest, CreateNewEmptyString)
 {
     ets_char data = 0;

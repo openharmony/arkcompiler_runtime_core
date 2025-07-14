@@ -345,7 +345,7 @@ protected:
     void *postWrbOneObject_ {nullptr};
     // keeps IRtoC GC PostWrb impl for storing two objects
     void *postWrbTwoObjects_ {nullptr};
-    void *stringClassPtr_ {nullptr};    // ClassRoot::STRING
+    void *stringClassPtr_ {nullptr};    // ClassRoot::LINE_STRING
     void *arrayU16ClassPtr_ {nullptr};  // ClassRoot::ARRAY_U16
     void *arrayU8ClassPtr_ {nullptr};   // ClassRoot::ARRAY_U8
     PandaVector<ObjectHeader *> *preBuff_ {nullptr};

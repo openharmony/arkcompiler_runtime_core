@@ -1215,7 +1215,7 @@ void *CompilerConvertRefTypeToLocal(EtsObject *etsValue)
         }
         return res;
     }
-    if (klass == ctx->GetStringClass()) {
+    if (klass->IsStringClass()) {
         auto value = EtsString::FromEtsObject(EtsObject::FromCoreType(ref));
         napi_value res = JSConvertString::Wrap(env, value);
         if (UNLIKELY(res == nullptr)) {

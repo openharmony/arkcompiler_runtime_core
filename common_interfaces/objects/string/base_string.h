@@ -33,6 +33,7 @@
 #include "objects/utils/span.h"
 
 #include <type_traits>
+#include <vector>
 namespace common {
 class LineString;
 class TreeString;

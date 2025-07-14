@@ -150,7 +150,7 @@ void SetGroupNames(EtsObject *regexpObject, const RegExpParser &parser)
     auto *regexpClass = regexp->GetClass();
 
     auto *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    auto *stringClass = classLinker->GetClassRoot(EtsClassRoot::STRING);
+    auto *stringClass = classLinker->GetClassRoot(EtsClassRoot::LINE_STRING);
 
     auto groupName = parser.GetGroupNames();
     EtsObjectArray *etsGroupNames = EtsObjectArray::Create(stringClass, groupName.size());
@@ -322,7 +322,7 @@ void SetResultField(EtsObject *regexpExecArrayObj, const PandaVector<std::pair<b
     EtsClass *resultClass = regexpExecArray->GetClass();
 
     auto *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    auto *stringClass = classLinker->GetClassRoot(EtsClassRoot::STRING);
+    auto *stringClass = classLinker->GetClassRoot(EtsClassRoot::LINE_STRING);
 
     auto *resultField = resultClass->GetDeclaredFieldIDByName(RESULT_FIELD_NAME);
     VMHandle<EtsObjectArray> resultArray(coroutine, EtsObjectArray::Create(stringClass, matches.size())->GetCoreType());

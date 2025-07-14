@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import {launch} from "std/concurrency"
-import {Job} from "std/core"
+import {launch} from 'std/concurrency'
+import {Job} from 'std/core'
 
 // simple fast pseudo-random generator
 function xorshift(state: long): long {
@@ -30,7 +30,7 @@ function parseLong(s: String): long|null {
     if (s.length == 0) {
         return null;
     }
-    if (s == "0") {
+    if (s == '0') {
         return 0;
     }
     let negative = s.charAt(0) == c'-';
@@ -66,7 +66,7 @@ function isEqual<T>(s: String, number: T): boolean {
     }
     if (number instanceof Double) {
         if (Double.isNaN(number)) {
-            return s == "NaN";
+            return s == 'NaN';
         }
         let eps = Math.abs(number.toDouble()) * 2 * Double.EPSILON;
         if (eps < 1e-307) {
@@ -87,7 +87,7 @@ function isEqual<T>(s: String, number: T): boolean {
     }
     if (number instanceof Float) {
         if (Float.isNaN(number)) {
-            return s == "NaN";
+            return s == 'NaN';
         }
         let eps: float = Math.abs(number.toFloat()) * 2 * Float.EPSILON as float;
         let parsed = Double.parseFloat(s) as float;
@@ -99,7 +99,7 @@ function isEqual<T>(s: String, number: T): boolean {
         }
         return true;
     }
-    throw new Error("Unknown type: " + number);
+    throw new Error('Unknown type: ' + number);
 }
 
 class Worker<T> {
@@ -132,7 +132,7 @@ class Worker<T> {
                 arktest.assertTrue(isEqual(strings[i], numbers[i]), `not equal: string ${strings[i]}, number ${numbers[i]}`)
             }
         }
-        return "OK";
+        return 'OK';
     }
 }
 
@@ -154,12 +154,12 @@ function doTest<T>(values: T[], workers: int) {
     }
     for (let i = 0; i < workers; i++) {
         let res = jobs[i]!.Await();
-        arktest.assertEQ(res, "OK");
+        arktest.assertEQ(res, 'OK');
     }
 }
 
 function testDoubles() {
-    // console.println("testDoubles")
+    // console.println('testDoubles')
     let values = new Double[valueCount];
     for (let i = 0; i < valueCount; i++) {
         let exp = (Math.random() * 2 - 1) * 310 as int
@@ -169,7 +169,7 @@ function testDoubles() {
 }
 
 function testDoublesBitcast() {
-    // console.println("testDoublesBitcast");
+    // console.println('testDoublesBitcast');
     let values = new Double[valueCount];
     let state = 42 as long;
     for (let i = 0; i < valueCount; i++) {
@@ -180,7 +180,7 @@ function testDoublesBitcast() {
 }
 
 function testFloats() {
-    // console.println("testFloats");
+    // console.println('testFloats');
     let values = new Float[valueCount];
     for (let i = 0; i < valueCount; i++) {
         let exp = (Math.random() * 2 - 1) * 39 as int
@@ -190,7 +190,7 @@ function testFloats() {
 }
 
 function testFloatsBitcast() {
-    // console.println("testFloatsBitcast");
+    // console.println('testFloatsBitcast');
     let values = new Float[valueCount];
     let state = 42 as long;
     for (let i = 0; i < valueCount; i++) {
@@ -201,7 +201,7 @@ function testFloatsBitcast() {
 }
 
 function testLongs() {
-    // console.println("testLongs");
+    // console.println('testLongs');
     let values = new Long[valueCount];
     let state = 42 as long;
     for (let i = 0; i < valueCount; i++) {

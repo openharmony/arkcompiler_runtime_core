@@ -24,7 +24,7 @@
 #include "runtime/mem/vm_handle.h"
 #include "runtime/handle_scope-inl.h"
 #include "runtime/include/coretypes/array.h"
-#include "runtime/include/coretypes/string.h"
+#include "runtime/include/coretypes/line_string.h"
 #include "runtime/mem/gc/card_table.h"
 #include "runtime/mem/gc/g1/g1-allocator.h"
 #include "runtime/mem/rem_set-inl.h"

@@ -2675,7 +2675,7 @@ export final class StringType extends Type {
     public static readonly REF: StringType = new StringType()
 
     internal constructor() {
-        super(TypeAPI.getTypeDescriptor(""), getBootRuntimeLinker())
+        super(TypeAPI.convertTypeDescriptor("std.core.String"), getBootRuntimeLinker())
     }
 
     /**

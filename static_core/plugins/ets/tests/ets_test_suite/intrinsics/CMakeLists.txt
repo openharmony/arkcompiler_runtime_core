@@ -22,23 +22,40 @@ set(intrinsics_tests
     isFinite
     isInteger
     isSafeInteger
+    string_array
+    string_charat
+    string_compare_to
+    string_concat
+    string_endswith
     string_equals
-    string_length
-    string_isempty
-    string_from_string
+    string_from_char_code_escape
     string_from_char_code
     string_from_chars
-    string_substring
-    string_getchars
+    string_from_string
+    string_fromcodepoint
+    string_get
     string_getbytes
+    string_getchars
+    string_getlength
     string_hashcode
-    string_concat
-    string_trim
-    string_startswith
-    string_endswith
     string_indexof
+    string_indexofstring
+    string_iscompressed
+    string_isempty
+    string_iswellformed
+    string_lastindexof
+    string_length
+    string_normalize
     string_repeat
-    string_compare_to
+    string_startswith
+    string_substring
+    string_tolocalelowercase
+    string_tolocaleuppercase
+    string_tolowercase
+    string_touppercase
+    string_trim
+    stringbuilder_oom
+    stringbuilder
     typed_arrays_reverse
     char_isuppercase
     abs
@@ -48,8 +65,6 @@ set(intrinsics_tests
     floor
     ceil
     trunc
-    stringbuilder_oom
-    stringbuilder
     uint8array_sort
     uint8clampedarray_sort
     uint16array_sort
