@@ -52,7 +52,8 @@ enum GCReason : uint32_t {
     GC_REASON_APPSPAWN,                // appspawn gc is triggered when prefork.
     GC_REASON_BACKGROUND,              // trigger gc caused by switching to background.
     GC_REASON_HINT,                    // trigger gc caused by hint gc.
-    GC_REASON_END = GC_REASON_HINT,
+    GC_REASON_IDLE,                    // When in a low activity state, trigger gc to reduce resicdent memory.
+    GC_REASON_END = GC_REASON_IDLE,
     GC_REASON_INVALID = std::numeric_limits<uint32_t>::max(),
 };
 
