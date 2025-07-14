@@ -92,8 +92,12 @@ class MyWrite1 extends CustomWritable {
     }
 
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+        this.doWrite(chunk as Uint8Array, encoding, callback)
+    }
+
+    private doWrite(chunk: Uint8Array, encoding: string, callback: Function): void {
         callCount_MyWrite1++;
-        arktest.assertEQ(JSON.stringify(chunk as Uint8Array), this.str);
+        arktest.assertEQ(JSON.stringify(chunk), this.str);
         callback.unsafeCall();
     }
 }
@@ -180,13 +184,25 @@ class MyWrite3 extends stream.Writable {
 
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
         callCount_MyWrite3++;
-        this.sum += chunk.length;
+        if (chunk instanceof string) {
+            this.sumAdd(chunk)
+        } else if (chunk instanceof Uint8Array) {
+            this.sumAdd(chunk)
+        }
         if (callCount_MyWrite3 === 6) {
             arktest.assertEQ(this.sum, 41000);
         }
         setTimeout(() => {
             callback.unsafeCall();
         }, 100);
+    }
+
+    private sumAdd(chunk: string): void {
+        this.sum += chunk.length
+    }
+
+    private sumAdd(chunk: Uint8Array): void {
+        this.sum += chunk.length
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamPipe005

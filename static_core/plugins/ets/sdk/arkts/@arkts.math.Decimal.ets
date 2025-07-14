@@ -1513,8 +1513,8 @@ export class Decimal {
             return this.e > y.e ^ xs < 0 ? 1 : -1;
         }
 
-        let xdL = xd.length;
-        let ydL = yd.length;
+        let xdL: number = xd.length;
+        let ydL: number = yd.length;
 
         for (let i = 0, j = xdL < ydL ? xdL : ydL; i < j; ++i) {
             if (xd![i] !== yd![i]) {
@@ -1855,7 +1855,7 @@ export class Decimal {
         let rm = Decimal.rounding;
         Decimal.precision = pr + Math.max(x.e, x.precision()) + 4;
         Decimal.rounding = 1;
-        let len = x.d!.length;
+        let len: number = x.d!.length;
 
         // Argument reduction: cos(4x) = 1 - 8cos^2(x) + 8cos^4(x) + 1
         // i.e. cos(x) = 1 - cos^2(x/4)(8 - 8cos^2(x/4))
@@ -1899,7 +1899,7 @@ export class Decimal {
         let rm = Decimal.rounding;
         Decimal.precision = pr + Math.max(x.e, x.precision()) + 4;
         Decimal.rounding = 1;
-        let len = x.d!.length;
+        let len: number = x.d!.length;
 
         if (len < 3) {
             x = this.taylorSeries(2, x, x, true);
@@ -2470,8 +2470,8 @@ export class Decimal {
                 : (!xd || !yd) ? y.s / 0 : y.s * 0);
         }
         let e = Math.floor(this.exponent / LOG_BASE) + Math.floor(y.e / LOG_BASE);
-        let xdL = xd!.length;
-        let ydL = yd!.length;
+        let xdL: double = xd!.length;
+        let ydL: double = yd!.length;
         let r: Array<double> | null;
         let rL: double;
         if (xdL < ydL) {
@@ -2777,7 +2777,7 @@ export class Decimal {
 
     private truncate(arr: Array<double>, len: double): boolean {
         if (arr.length > len) {
-            arr.length = len;
+            arr.length = len.toInt();
             return true;
         }
         return false;
@@ -3021,7 +3021,7 @@ export class Decimal {
         // Argument reduction: cos(4x) = 8*(cos^4(x) - cos^2(x)) + 1
         // i.e. cos(x) = 8*(cos^4(x/4) - cos^2(x/4)) + 1
         // Estimate the optimum number of times to use the argument reduction.
-        let len = x.d!.length;
+        let len: double = x.d!.length;
         let k: double = 0;
         let y: string = '';
         if (len < 32) {
@@ -3046,7 +3046,7 @@ export class Decimal {
     }
 
     private sine(x: Decimal): Decimal {
-        let len = x.d!.length;
+        let len: number = x.d!.length;
         if (len < 3) {
           return x.isZero() ? x : this.taylorSeries(2, x, x);
         }
@@ -3101,7 +3101,7 @@ export class Decimal {
             i++;
         }
         external = true;
-        t.d!.length = k + 1;
+        t.d!.length = (k + 1).toInt();
         return t;
     }
 
@@ -3265,8 +3265,8 @@ export class Decimal {
                 y.exponent = y.d!.length;
             }
             let xd = this.convertBase(str, 10, base);
-            let e = xd.length;
-            let len = xd.length;
+            let e: number = xd.length;
+            let len: number = xd.length;
             for (; len >= 1 && xd[--len] == 0;) {
                 xd.pop();
             }
@@ -3296,7 +3296,7 @@ export class Decimal {
 
                 // ArkTs1.2's Array can't change length to bigger or negative.
                 if (sd! <= xd.length) {
-                    xd.length = sd!;
+                    xd.length = sd!.toInt();
                 } else {
                     xd.extendTo(sd!, 0);
                 }
@@ -3318,7 +3318,7 @@ export class Decimal {
                     }
                 }
 
-                len = this.getDigitsValidIndex(xd);
+                len = this.getDigitsValidIndex(xd).toInt();
                 str = this.digitsToString(xd, 0, '', len);
                 str = this.completeStringWithZero(isExp, len, baseOut, str, base, e);
             }
@@ -3540,7 +3540,7 @@ class Utils {
     }
 
     public static getPrecision(digits: Array<double>) {
-        let w = digits.length - 1;
+        let w: double = digits.length - 1;
         let len = w * LOG_BASE + 1;
 
         w = digits[w];
@@ -3665,11 +3665,11 @@ class Utils {
             }
 
             if (i == 0) {
-                xd!.length = xdi;
+                xd!.length = xdi.toInt();
                 k = 1;
                 xdi--;
             } else {
-               xd!.length = xdi + 1;
+               xd!.length = (xdi + 1).toInt();
                k = Math.pow(10, LOG_BASE - i);
                xd![xdi] = j > 0 ? (w / Math.pow(10, digits - j) % Math.pow(10, j) | 0) * k : 0;
             }
@@ -3755,8 +3755,8 @@ class Utils {
             logBase = LOG_BASE;
             e = Math.floor(x.e / logBase) - Math.floor(y.e / logBase);
         }
-        let yL = yd.length;
-        let xL = xd.length;
+        let yL: number = yd.length;
+        let xL: number = xd.length;
         let q = new Decimal(sign);
         let qd = new Array<double>();
         q.digits = qd;
@@ -3804,7 +3804,7 @@ class Utils {
                 }
                 let xi = yL;
                 let rem: Array<double> | undefined = xd.slice(0, yL);
-                let remL = rem.length;
+                let remL: double = rem.length;
                 for (; remL < yL;) {
                     if (remL == rem.length) {
                         rem.push(0);
@@ -3834,7 +3834,7 @@ class Utils {
                                 k = base - 1;
                             }
                             prod = Utils.multiplyInteger(yd, k, base);
-                            let prodL = prod.length;
+                            let prodL: number = prod.length;
                             remL = rem!.length;
                             cmp = Utils.compare(prod, rem!, prodL, remL);
                             if (cmp == 1) {
