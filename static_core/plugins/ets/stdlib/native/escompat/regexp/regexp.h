@@ -13,21 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_REGEXP_H
-#define PANDA_RUNTIME_REGEXP_H
+#ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REGEXP_H
+#define PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REGEXP_H
 
-#include "plugins/ets/runtime/regexp/regexp_executor.h"
-#include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/stdlib/native/escompat/regexp/regexp_exec_result.h"
 
-namespace ark::ets {
+#include <ani.h>
+
+namespace ark::ets::stdlib {
 
 class pcre2_code;
 
 class EtsRegExp {
 public:
-    void SetFlags(EtsString *flagsStr);
-    bool Compile(const PandaVector<uint8_t> &pattern, const bool isUtf16, const int len);
-    RegExpExecResult Execute(const PandaVector<uint8_t> &str, const int len, const int startOffset);
+    EtsRegExp() = delete;
+    explicit EtsRegExp(ani_env *env)
+    {
+        env_ = env;
+    }
+    void SetFlags(const std::string &flagsStr);
+    bool Compile(const std::vector<uint8_t> &pattern, const bool isUtf16, const int len);
+    RegExpExecResult Execute(const std::vector<uint8_t> &str, const int len, const int startOffset);
     void Destroy();
 
     bool IsUtf16() const
@@ -39,7 +45,7 @@ private:
     void SetFlag(const char &chr);
     void SetUnicodeFlag(const char &chr);
     void SetIfNotSet(bool &flag);
-    void ThrowBadFlagsException();
+    static void ThrowBadFlagsException(ani_env *env);
 
     void *re_ = nullptr;
     bool flagGlobal_ = false;           // g
@@ -51,7 +57,9 @@ private:
     bool flagDotAll_ = false;           // s
     bool flagIndices_ = false;          // d
     bool utf16_ = false;
+
+    ani_env *env_ = nullptr;
 };
 
-}  // namespace ark::ets
-#endif  // PANDA_RUNTIME_REGEXP_H
+}  // namespace ark::ets::stdlib
+#endif  // PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REGEXP_H

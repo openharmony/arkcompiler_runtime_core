@@ -67,7 +67,7 @@ function main(): int {
 
     let regExpObj90 = new RegExp("abc");
     regExpObj90.exec("ABC");
-    testResult = checkTestResult(RegExp.lastMatch, "")
+    testResult = checkTestResult(RegExp.lastMatch, "a")
     printTestVerdict(testResult, "test90")
     failCounter += testResult
 

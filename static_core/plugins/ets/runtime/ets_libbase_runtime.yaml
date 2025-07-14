@@ -6279,26 +6279,6 @@ intrinsics:
 ###################
 # std.core.RegExp #
 ###################
-  - name: EscompatRegExpCompile
-    space: ets
-    class_name: escompat.RegExp
-    method_name: compile
-    static: false
-    signature:
-      ret: escompat.RegExp
-      args: []
-    impl: ark::ets::intrinsics::EscompatRegExpCompile
-
-  - name: EscompatRegExpExec
-    space: ets
-    class_name: escompat.RegExp
-    method_name: execImpl
-    static: false
-    signature:
-      ret: escompat.RegExpExecArray
-      args: [ std.core.String, std.core.String, std.core.String, u1]
-    impl: ark::ets::intrinsics::EscompatRegExpExec
-
   - name: EscompatRegExpParse
     space: ets
     class_name: escompat.RegExp

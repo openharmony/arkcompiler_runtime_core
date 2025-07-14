@@ -15,13 +15,13 @@
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("RegExpExec Tests");
-    suite.addTest("test RegExp.exce1", testRegExpExec1);
-    suite.addTest("test RegExp.exce2", testRegExpExec2);
-    suite.addTest("test RegExp.exce3", testRegExpExec3);
-    suite.addTest("test RegExp.exce4", testRegExpExec4);
-    suite.addTest("test RegExp.exce5", testRegExpExec5);
-    suite.addTest("test RegExp.exce6", testRegExpExec6);
-    suite.addTest("test RegExp.exce7", testRegExpExec7);
+    suite.addTest("test RegExp.exec1", testRegExpExec1);
+    suite.addTest("test RegExp.exec2", testRegExpExec2);
+    suite.addTest("test RegExp.exec3", testRegExpExec3);
+    suite.addTest("test RegExp.exec4", testRegExpExec4);
+    suite.addTest("test RegExp.exec5", testRegExpExec5);
+    suite.addTest("test RegExp.exec6", testRegExpExec6);
+    suite.addTest("test RegExp.exec7", testRegExpExec7);
 
     return suite.run();
 }
@@ -68,7 +68,7 @@ function testRegExpExec6(): void {
     let arr = new RegExp("").exec("\u0000");
     arktest.assertNE(arr, null);
     if (arr != null) {
-        arktest.assertEQ(arr[0].codePointAt(0), undefined, "testRegExpExec6");
+        arktest.assertEQ(arr[0].length, 0, "testRegExpExec6");
     }
 }
 
@@ -76,6 +76,6 @@ function testRegExpExec7(): void {
     let arr = new RegExp("").exec("");
     arktest.assertNE(arr, null);
     if (arr != null) {
-        arktest.assertEQ(arr[0].codePointAt(0), undefined, "testRegExpExec7");
+        arktest.assertEQ(arr[0].length, 0, "testRegExpExec7");
     }
 }

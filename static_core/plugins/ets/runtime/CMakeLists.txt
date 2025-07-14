@@ -39,10 +39,10 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_vtable_builder.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Array.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_ArrayBuffer.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/escompat_RegExp.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_TypedArrays.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Date.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_JSON.cpp
-    ${ETS_EXT_SOURCES}/intrinsics/escompat_RegExp.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_taskpool.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Reflect.cpp
     ${ETS_EXT_SOURCES}/intrinsics/compiler_intrinsics.cpp
@@ -92,10 +92,6 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/napi/ets_napi_invoke_interface.cpp
     ${ETS_EXT_SOURCES}/napi/ets_napi_native_interface.cpp
     ${ETS_EXT_SOURCES}/napi/ets_mangle.cpp
-    ${ETS_EXT_SOURCES}/regexp/regexp_executor.cpp
-    ${ETS_EXT_SOURCES}/regexp/regexp.cpp
-    ${ETS_EXT_SOURCES}/regexp/regexp_16.cpp
-    ${ETS_EXT_SOURCES}/regexp/regexp_8.cpp
     ${ETS_EXT_SOURCES}/ets_coroutine.cpp
     ${ETS_EXT_SOURCES}/ets_entrypoints.cpp
     ${ETS_EXT_SOURCES}/types/ets_class.cpp
@@ -123,6 +119,10 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/static_type_converter.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/init_native_methods.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/Process.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/RegExp.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/regexp/regexp.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/regexp/regexp_16.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/regexp/regexp_8.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/etsstdlib.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/Intl.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlCommon.cpp

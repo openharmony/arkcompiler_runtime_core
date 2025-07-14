@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,15 @@
  * limitations under the License.
  */
 
-#include "plugins/ets/stdlib/native/init_native_methods.h"
-#include "plugins/ets/stdlib/native/escompat/Process.h"
-#include "plugins/ets/stdlib/native/escompat/RegExp.h"
-#include "plugins/ets/stdlib/native/core/Intl.h"
-#include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
+#ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REG_EXP_H
+#define PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REG_EXP_H
+
+#include <ani.h>
 
 namespace ark::ets::stdlib {
-void InitNativeMethods(ani_env *env)
-{
-    RegisterProcessNativeMethods(env);
-    RegisterRegExpNativeMethods(env);
-    // NOTE (ikorobkov): EtsNapiOnLoad needs to implement issue #18135
-    ANI_FATAL_IF_ERROR(intl::InitCoreIntl(env));
-}
+
+void RegisterRegExpNativeMethods(ani_env *env);
 
 }  // namespace ark::ets::stdlib
+
+#endif  // namespace PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REG_EXP_H
