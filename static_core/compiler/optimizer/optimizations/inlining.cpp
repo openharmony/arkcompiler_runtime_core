@@ -1288,6 +1288,13 @@ InlinedGraph Inlining::BuildGraph(InlineContext *ctx, CallInst *callInst, CallIn
     auto objectTypeApplied = graphInl->RunPass<ObjectTypeCheckElimination>();
     if (peepholeApplied || objectTypeApplied) {
         graphInl->RunPass<BranchElimination>();
+        // after BranchElimination pass, we should do InfiniteLoop check again.
+        graphInl->RunPass<LoopAnalyzer>();
+        if (graphInl->HasInfiniteLoop()) {
+            EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::INF_LOOP);
+            stats->SetPbcInstNum(savedPbcInstNum);
+            return InlinedGraph();
+        }
     }
     graphInl->RunPass<Cleanup>(false);
     graphInl->RunPass<OptimizeStringConcat>();
