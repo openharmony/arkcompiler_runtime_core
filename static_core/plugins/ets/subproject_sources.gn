@@ -239,6 +239,8 @@ if (ark_ets_interop_js) {
     "runtime/interop_js/ets_proxy/shared_reference_storage.cpp",
     "runtime/interop_js/ets_proxy/shared_reference_storage_verifier.cpp",
     "runtime/interop_js/event_loop_module.cpp",
+    "runtime/interop_js/timer_helper/timer.cpp",
+    "runtime/interop_js/timer_helper/interop_timer_helper.cpp",
     "runtime/interop_js/interop_common.cpp",
     "runtime/interop_js/interop_context.cpp",
     "runtime/interop_js/intrinsics/std_js_jsruntime.cpp",

@@ -33,6 +33,7 @@
 #include "plugins/ets/runtime/interop_js/xgc/xgc.h"
 #include "plugins/ets/runtime/interop_js/handshake.h"
 #include "plugins/ets/runtime/interop_js/napi_impl/napi_impl.h"
+#include "plugins/ets/runtime/interop_js/timer_helper/interop_timer_helper.h"
 
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
 // NOLINTBEGIN(readability-identifier-naming, readability-redundant-declaration)
@@ -381,6 +382,9 @@ void InteropCtx::InitExternalInterfaces()
         napi_env resultJsEnv = nullptr;
         [[maybe_unused]] auto status = napi_create_runtime(env, &resultJsEnv);
         ASSERT(status == napi_ok);
+        napi_value global = nullptr;
+        napi_get_global(resultJsEnv, &global);
+        ark::ets::interop::js::helper::Init(resultJsEnv, global);
         return resultJsEnv;
     });
 #endif

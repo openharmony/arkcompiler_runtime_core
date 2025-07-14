@@ -44,7 +44,6 @@ config("interop_test_helper_config") {
 ohos_shared_library("interop_test_helper") {
   sources = [
     "interop_test_helper.cpp",
-    "timer.cpp",
   ]
 
   public_configs = [

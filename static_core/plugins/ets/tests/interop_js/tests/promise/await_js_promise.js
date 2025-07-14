@@ -104,14 +104,14 @@ function runAwaitTest(name, promiseCreator, promiseResolver) {
 	let anotherRes = doAwait(res);
 	msg('Called doAwait OK, res: ', INFO);
 	msg(anotherRes, INFO);
-	helper.setTimeout(() => {
+	setTimeout(() => {
 		if (testSuccess) {
 			throw Error('Promise must not be resolved until JS resolves the passed one');
 		}
 		// resolve the passed promise if necessary
 		promiseResolver(PROMISE_RESOLVE_VALUE);
 		// after Q is processed, the test should pass
-		helper.setTimeout(async () => {
+		setTimeout(async () => {
 			msg('Starting await of doAwait() result, its state is:', INFO);
 			msg(anotherRes, INFO);
 			await anotherRes;
