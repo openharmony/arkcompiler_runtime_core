@@ -63,6 +63,6 @@ function checkNotImplError() {
     }
 }
 
-// checkSingleObject();
-// checkCommonObj();
-// checkNotImplError();
+checkSingleObject();
+checkCommonObj();
+checkNotImplError();
