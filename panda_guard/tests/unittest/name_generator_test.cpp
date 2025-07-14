@@ -84,3 +84,28 @@ HWTEST(NameGeneratotUnitTest, name_mapping_get_name_test_002, TestSize.Level4)
     obfName = nameMapping->GetFileName("fileName_test0");
     EXPECT_EQ(obfName, "a");
 }
+
+/**
+ * @tc.name: name_mapping_get_name_test_003
+ * @tc.desc: test name mapping get multiple method name is same
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST(NameGeneratotUnitTest, name_mapping_get_name_test_003, TestSize.Level4)
+{
+    auto options = std::make_shared<GuardOptions>();
+    auto nameCache = std::make_shared<NameCache>(options);
+    auto nameMapping = std::make_shared<NameMapping>(nameCache);
+
+    std::string obfName = nameMapping->GetName("foo");
+    EXPECT_EQ(obfName, "a");
+
+    obfName = nameMapping->GetName("foo^1");
+    EXPECT_EQ(obfName, "a^1");
+
+    obfName = nameMapping->GetName("foo^a");
+    EXPECT_EQ(obfName, "a^a");
+
+    obfName = nameMapping->GetName("foo^1a");
+    EXPECT_EQ(obfName, "a^1a");
+}
