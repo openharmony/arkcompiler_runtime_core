@@ -353,6 +353,39 @@ Inst *SkipSingleUserCheckInstruction(Inst *inst)
     return inst;
 }
 
+const Inst *SkipSingleUserCheckInstruction(const Inst *inst)
+{
+    if (inst->IsCheck() && inst->HasSingleUser()) {
+        inst = inst->GetUsers().Front().GetInst();
+    }
+    return inst;
+}
+
+bool IsStringLengthAccessor(const Inst *inst)
+{
+    return inst->GetOpcode() == compiler::Opcode::LenArray;
+}
+
+bool IsStringLengthAccessorChain(const Inst *inst)
+{
+    inst = SkipSingleUserCheckInstruction(inst);
+    return IsStringLengthAccessor(inst);
+}
+
+Inst *GetStringLengthCompressedShr(Inst *lenArrayCall)
+{
+    // Note: ark::coretypes::String::GetLength at
+    // static_core/runtime/include/coretypes/string.h
+    // Getting string length is followed by Shr caused by optional string compression
+
+    if (!lenArrayCall->HasSingleUser()) {
+        return nullptr;
+    }
+
+    auto *maybeShift = lenArrayCall->GetUsers().Front().GetInst();
+    return (maybeShift->GetOpcode() == Opcode::Shr) ? maybeShift : nullptr;
+}
+
 bool IsIntrinsicStringBuilderAppendString(Inst *inst)
 {
     if (!inst->IsIntrinsic()) {

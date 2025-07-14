@@ -94,7 +94,7 @@ std::string PassManager::GetFileName([[maybe_unused]] const char *passName, [[ma
         ssFilename << "_OSR";
     }
     if (passName != nullptr) {
-        ssFilename << "_" << passName;
+        ssFilename << std::string(stats_->GetCurrentPassCallDepth() + 1, '_') << passName;
     }
     ssFullpath << folderName.c_str() << "/" << ClearFileName(ssFilename.str(), suffix) << suffix;
     return ssFullpath.str();
