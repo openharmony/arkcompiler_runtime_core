@@ -646,7 +646,7 @@ export namespace uri {
         this.data = this.data.substring(2); // 2:Intercept the string from the second subscript
         this.analysisHostAndPath();
         this.checkErrAndThrow();
-      } else if (this.data.length != 0 && this.data[0] == c'/') {
+      } else if (this.data.length != 0 && this.data.charAt(0) == c'/') {
         this.path = this.data;
         this.assignSchemeSpecificPart();
         this.data = "";
@@ -738,8 +738,8 @@ export namespace uri {
 
     private analysisHost(isLawfulPort: boolean) {
       // find ipv4 or ipv6 or host
-      if (this.data.length > 0 && this.data[0] == c'[') {
-        if (this.data[this.data.length - 1] == c']') {
+      if (this.data.length > 0 && this.data.charAt(0) == c'[') {
+        if (this.data.charAt(this.data.length.toInt() - 1) == c']') {
           // IPV6
           if (!isLawfulPort) {
             this.errStr = "Port does not conform to the rule.";
@@ -905,7 +905,7 @@ export namespace uri {
       if (this.inputUri.length == index + 1) {
         return false;
       }
-      return this.inputUri[index + 1] == c'/';
+      return this.inputUri.charAt(index.toInt() + 1) == c'/';
     }
 
     addQueryValue(key: string, value: string) {
@@ -928,7 +928,7 @@ export namespace uri {
         result += this.path;
       }
       if (str == "segment") {
-        let lastChar = result[result.length - 1];
+        let lastChar = result.charAt(result.length.toInt() - 1);
         if (lastChar == c'/') {
           result += param;
         } else {
@@ -1165,7 +1165,7 @@ export namespace uri {
         this.assignSchemeSpecificPart();
         this.data = this.data.substring(2); // Skip the '//'
         this.analysisHostAndPath();
-      } else if (this.data[0] === c'/') {
+      } else if (this.data.charAt(0) === c'/') {
         this.path = this.data;
         this.assignSchemeSpecificPart();
         this.data = "";

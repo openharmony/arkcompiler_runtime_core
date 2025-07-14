@@ -1635,6 +1635,26 @@ bool InstBuilder::TryBuildStringCharAtIntrinsic(const BytecodeInstruction *bcIns
     return true;
 }
 
+void InstBuilder::BuildStringGetIntrinsic(const BytecodeInstruction *bcInst, bool accRead,
+                                          RuntimeInterface::IntrinsicId intrinsicId)
+{
+    auto bcAddr = GetPc(bcInst->GetAddress());
+    auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
+
+    auto stringGet = graph_->CreateInstIntrinsic(DataType::REFERENCE, bcAddr, intrinsicId);
+    stringGet->AllocateInputTypes(GetGraph()->GetAllocator(), 3);  // 3: number of inputs
+
+    stringGet->AppendInput(GetArgDefinition(bcInst, 0, accRead));
+    stringGet->AddInputType(DataType::REFERENCE);
+    stringGet->AppendInput(GetArgDefinition(bcInst, 1, accRead));
+    stringGet->AddInputType(DataType::INT32);
+    stringGet->AppendInput(saveState);
+    stringGet->AddInputType(DataType::NO_TYPE);
+
+    AddInstruction(saveState, stringGet);
+    UpdateDefinitionAcc(stringGet);
+}
+
 // NOLINTNEXTLINE(misc-definitions-in-headers)
 template <bool IS_ACC_WRITE>
 void InstBuilder::BuildLoadFromAnyByName([[maybe_unused]] const BytecodeInstruction *bcInst,

@@ -93,7 +93,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @returns a primitive at index
      */
-    public $_get(index: number): char {
+    public $_get(index: number): String {
         return this.$_get(index.toInt());
     }
 
@@ -102,11 +102,11 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @param index index to look at
      *
-     * @returns char value at index
+     * @returns String value at index
      *
      * @throws StringIndexOutOfBoundsError if index is negative or >= length
      */
-    public native $_get(index: int): char;
+    public native $_get(index: int): String;
 
     /**
      * Checks equality of this string and another Object as String

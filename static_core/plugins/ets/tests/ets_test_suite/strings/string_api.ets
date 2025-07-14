@@ -136,9 +136,9 @@ function main(): void {
     arktest.assertEQ(arr.length, 3, "Length must be 3");
 
     let str4: String = "Example string";
-    arktest.assertEQ(str4[0], c'E', "First character must be `E`");
-    arktest.assertEQ(str4[8], c's', "Eighth character must be `s`");
-    arktest.assertEQ(str4[str4.length - 1], c'g', "Last character must be `g`");
+    arktest.assertEQ(str4[0], "E", "First character must be `E`");
+    arktest.assertEQ(str4[8], "s", "Eighth character must be `s`");
+    arktest.assertEQ(str4[str4.length - 1], "g", "Last character must be `g`");
 
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof StringIndexOutOfBoundsError);
@@ -155,5 +155,5 @@ function main(): void {
     }, exceptionCheck);
 
     let str5: String = "函数式编程";
-    arktest.assertEQ(str5[0], c'函', "First character must be `函`");
+    arktest.assertEQ(str5[0], "函", "First character must be `函`");
 }
