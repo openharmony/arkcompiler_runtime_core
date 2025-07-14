@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,6 +57,18 @@ static constexpr auto SOURCE = R"(
 }
 )";
 
+static constexpr int16_t SAVER_COUNTER_INIT = 4096;
+
+void CheckSaverCounter(ark::Method *method)
+{
+    while (method->GetSaverTryCounter() > 0) {
+        method->TryCreateSaverTask();
+    }
+    ASSERT_EQ(0, method->GetSaverTryCounter());
+    method->TryCreateSaverTask();
+    ASSERT_EQ(SAVER_COUNTER_INIT, method->GetSaverTryCounter());
+}
+
 TEST_F(ProfilingRunnerTest, BranchStatisticsCpp)
 {
     PandaRunner runner;
@@ -69,6 +81,7 @@ TEST_F(ProfilingRunnerTest, BranchStatisticsCpp)
     ASSERT_EQ(132U, profilingData->GetBranchTakenCounter(0x10U));
     ASSERT_EQ(199U, profilingData->GetBranchNotTakenCounter(0x09U));
     ASSERT_EQ(67U, profilingData->GetBranchNotTakenCounter(0x10U));
+    CheckSaverCounter(method);
     Runtime::Destroy();
 }
 
@@ -84,6 +97,7 @@ TEST_F(ProfilingRunnerTest, BranchStatistics)
     ASSERT_EQ(132U, profilingData->GetBranchTakenCounter(0x10U));
     ASSERT_EQ(199U, profilingData->GetBranchNotTakenCounter(0x09U));
     ASSERT_EQ(67U, profilingData->GetBranchNotTakenCounter(0x10U));
+    CheckSaverCounter(method);
     Runtime::Destroy();
 }
 #endif

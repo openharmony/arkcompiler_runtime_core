@@ -1566,12 +1566,12 @@ bool Runtime::IncrementalSaveProfileInfo() const
 bool Runtime::TryCreateSaverTask()
 {
     if (!IncrementalSaveProfileInfo()) {
-        LOG(INFO, RUNTIME) << "[profile_saver] Incremental profile save disabled.";
+        LOG(DEBUG, RUNTIME) << "[profile_saver] Incremental profile save disabled.";
         return false;
     }
     auto saverWorker = GetPandaVM()->GetProfileSaverWorker();
     if (saverWorker == nullptr) {
-        LOG(INFO, RUNTIME) << "[profile_saver] Profile saver worker doesn't exists.";
+        LOG(DEBUG, RUNTIME) << "[profile_saver] Profile saver worker doesn't exists.";
         return false;
     }
     return saverWorker->TryAddTask();

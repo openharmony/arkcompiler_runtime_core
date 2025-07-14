@@ -206,7 +206,7 @@ Method::Method(Class *klass, const panda_file::File *pf, panda_file::File::Entit
       shorty_(shorty)
 {
     ResetHotnessCounter();
-
+    ResetSaverTryCounter();
     // Atomic with relaxed order reason: data race with native_pointer_ with no synchronization or ordering constraints
     // imposed on other reads or writes NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
     pointer_.nativePointer.store(nullptr, std::memory_order_relaxed);
@@ -611,6 +611,15 @@ int16_t Method::GetInitialHotnessCounter()
 void Method::ResetHotnessCounter()
 {
     stor16Pair_.hotnessCounter = GetInitialHotnessCounter();
+}
+
+void Method::TryCreateSaverTask()
+{
+    DecrementSaverTryCounter();
+    if (GetSaverTryCounter() < 0) {
+        ResetSaverTryCounter();
+        Runtime::GetCurrent()->TryCreateSaverTask();
+    }
 }
 
 }  // namespace ark

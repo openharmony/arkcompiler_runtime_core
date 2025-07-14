@@ -462,7 +462,7 @@ inline bool Method::DecrementHotnessCounter(ManagedThread *thread, uintptr_t bcO
     // The compilation process will start performing
     // once the counter value decreases to a value that is or less than 0
 
-    Runtime::GetCurrent()->TryCreateSaverTask();
+    TryCreateSaverTask();
 
     if (GetHotnessCounter() > 0) {
         if (TryVerify<IS_CALL>()) {
