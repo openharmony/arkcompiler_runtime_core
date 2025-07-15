@@ -76,11 +76,11 @@ export namespace StdProcess {
         /**
          * Wait for child process to terminate
          *
-         * @returns { Promise<number> } Promise containing child process's exit code value
+         * @returns { Promise<int> } Promise containing child process's exit code value
          */
-        wait(): Promise<number> {
+        wait(): Promise<int> {
             this.waitImpl();
-            return Promise.resolve < number > (this.exitCode);
+            return Promise.resolve <int> (this.exitCode);
         }
 
         /**
@@ -111,10 +111,10 @@ export namespace StdProcess {
         /**
          * Send a signal to the child process
          *
-         * @param { number | string } signal number or string indicating a kill signal
+         * @param { int | string } signal int or string indicating a kill signal
          *
          */
-        kill(signal: number | string): void {
+        kill(signal: int | string): void {
             let killSignal: int;
             if (signal instanceof string) {
                 if (SIGNAL_MAP.has(signal as string)) {
@@ -123,10 +123,10 @@ export namespace StdProcess {
                     killSignal = SIGNAL_MAP.get("SIGTERM")! as int;
                 }
             } else {
-                if (!isInteger(signal as number) || (signal as number) < 1 || (signal as number) > 31) {
+                if ((signal as int) < 1 || (signal as int) > 31) {
                     throw new RangeError("Invalid signal value");
                 }
-                killSignal = signal.toInt();
+                killSignal = signal;
             }
             this.killImpl(killSignal);
         }
@@ -151,17 +151,17 @@ export namespace StdProcess {
         /**
          * Child process's pid as double value
          */
-        readonly pid: number;
+        readonly pid: int;
 
         /**
          * Child process's ppid as double value
          */
-        readonly ppid: number;
+        readonly ppid: int;
 
         /**
          * Child process's exit code as double value
          */
-        readonly exitCode: number;
+        readonly exitCode: int;
 
         private outBytesRead: int;
 
@@ -185,17 +185,17 @@ export namespace StdProcess {
         /**
         * Time after which a kill signal will be send to child process
         */
-        timeout?: number;
+        timeout?: int;
 
         /**
         * Kill signal that is sent to child process after timeout
         */
-        killSignal?: number | string;
+        killSignal?: int | string;
 
         /**
         * Maximum buffer size for both sdout and stderr of child process
         */
-        maxBuffer?: number;
+        maxBuffer?: int;
     }
 
     /**
@@ -205,38 +205,38 @@ export namespace StdProcess {
         /**
          * Determine if a given uid belongs to an app
          *
-         * @param { number } uid
+         * @param { int } uid
          *
          * @returns { boolean } resulting boolean
          */
-        native isAppUid(uid: number): boolean;
+        native isAppUid(uid: int): boolean;
 
         /**
          * Determine the uid corresponding to a user name string
          *
          * @param { string } v user name string
          *
-         * @returns { number } user id as number
+         * @returns { int } user id as int
          */
-        native getUidForName(v: string): number;
+        native getUidForName(v: string): int;
 
         /**
          * Determine the priority for a given pid or tid
          *
-         * @param { number } v pid or tid
+         * @param { int } v pid or tid
          *
-         * @returns { number } priority value as number
+         * @returns { int } priority value as int
          */
-        native getThreadPriority(v: number): number;
+        native getThreadPriority(v: int): int;
 
         /**
         * Get configuration information
         *
-        * @param { number } name constant corresponding to a configuration parameter
+        * @param { int } name constant corresponding to a configuration parameter
         *
-        * @returns { number } value of the configuration parameter
+        * @returns { long } value of the configuration parameter
         */
-        native getSystemConfig(name: number): number;
+        native getSystemConfig(name: int): long;
 
         /**
          * Get value of an environment variable
@@ -250,22 +250,22 @@ export namespace StdProcess {
         /**
          * Exit the program
          *
-         * @param { number } code exit code
+         * @param { int } code exit code
          *
          */
-        native exit(code: number): void;
+        native exit(code: int): void;
 
         /**
          * Send a kill singnal to a process with a given pid
          *
-         * @param { number } signal signal to send
+         * @param { int } signal signal to send
          *
-         * @param { number } pid pid of receiving process
+         * @param { int } pid pid of receiving process
          *
          * @returns { boolean } value indicating if the signal was sent succesfully
          *
          */
-        native kill(signal: number, pid: number): boolean;
+        native kill(signal: int, pid: int): boolean;
     }
 
     export type RejectedObjectListener = (reason: Error, obj: Object) => void;
@@ -276,58 +276,58 @@ export namespace StdProcess {
     /**
     * Get effective group id of the current process
     *
-    * @returns { number } egid as number
+    * @returns { int } egid as int
     */
-    export native function egid(): number;
+    export native function egid(): int;
 
     /**
     * Get effective user id of the current process
     *
-    * @returns { number } euid as number
+    * @returns { int } euid as int
     */
-    export native function euid(): number;
+    export native function euid(): int;
 
     /**
     * Get group id of the current process
     *
-    * @returns { number } gid as number
+    * @returns { int } gid as int
     */
-    export native function gid(): number;
+    export native function gid(): int;
 
     /**
     * Get user id of the current process
     *
-    * @returns { number } uid as number
+    * @returns { int } uid as int
     */
-    export native function uid(): number;
+    export native function uid(): int;
 
     /**
     * Get groups to which the current process belongs
     *
-    * @returns { number[] } groups as number array
+    * @returns { int[] } groups as int array
     */
-    export native function groups(): number[];
+    export native function groups(): int[];
 
     /**
     * Get process id of the current process
     *
-    * @returns { number } pid as number
+    * @returns { int } pid as int
     */
-    export native function pid(): number;
+    export native function pid(): int;
 
     /**
     * Get parent process id of the current process
     *
-    * @returns { number } ppid as number
+    * @returns { int } ppid as int
     */
-    export native function ppid(): number;
+    export native function ppid(): int;
 
     /**
     * Get thread id of the current process
     *
-    * @returns { number } tid as number
+    * @returns { int } tid as int
     */
-    export native function tid(): number;
+    export native function tid(): int;
 
     /**
     * Determine if the current process is isolated
@@ -346,16 +346,16 @@ export namespace StdProcess {
     /**
     * Get start time of the current process
     *
-    * @returns { number } current process's start time milliseconds as number
+    * @returns { long } current process's start time milliseconds as int
     */
-    export native function getStartRealtime(): number;
+    export native function getStartRealtime(): long;
 
     /**
     * Get past cpu time of the current process
     *
-    * @returns { number } current process's past cpu time in milliseconds as number
+    * @returns { long } current process's past cpu time in milliseconds as long
     */
-    export native function getPastCpuTime(): number;
+    export native function getPastCpuTime(): long;
 
 
     /**
@@ -442,10 +442,10 @@ export namespace StdProcess {
     /**
     * Get the system uptime
     *
-    * @returns { number } uptime in milliseconds as number
+    * @returns { long } uptime in milliseconds as long
     *
     */
-    export native function uptime(): number;
+    export native function uptime(): long;
 
     function getCmdOptions(options?: ConditionType): int[] {
         let timeout: int = 0;
@@ -453,11 +453,11 @@ export namespace StdProcess {
         let maxBuffer: int = MAX_BUFFER_SIZE;
 
             if (options == undefined) {
-                return [timeout, killSignal, maxBuffer] as int[];
+                return [timeout, killSignal, maxBuffer];
             }
 
-        if (options.timeout != undefined && options.timeout as number > 0) {
-            timeout = (options.timeout as number).toInt();
+        if (options.timeout != undefined && options.timeout as int > 0) {
+            timeout = options.timeout as int;
         }
 
         if (options.killSignal != undefined) {
@@ -467,18 +467,18 @@ export namespace StdProcess {
                     killSignal = SIGNAL_MAP.get(options.killSignal as string)! as int;
                 }
             } else {
-                if (!isInteger(options.killSignal as number) || (options.killSignal as number) < 1 || (options.killSignal as number) > 31) {
+                if ((options.killSignal as int) < 1 || (options.killSignal as int) > 31) {
                     throw new RangeError("Invalid signal value");
                 }
-                killSignal = (options.killSignal as number).toInt();
+                killSignal = options.killSignal as int;
             }
         }
 
         if (options.maxBuffer != undefined) {
-            if ((options.maxBuffer as number).toInt() < 0) {
+            if ((options.maxBuffer as int) < 0) {
                 throw new RangeError("Invalid buffer size value");
             }
-            maxBuffer = min((options.maxBuffer as number).toInt(), MAX_BUFFER_SIZE);
+            maxBuffer = min(options.maxBuffer as int, MAX_BUFFER_SIZE);
         }
 
         let ret: Array<int> = new Array<int>(3);

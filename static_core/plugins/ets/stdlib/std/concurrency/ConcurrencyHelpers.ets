@@ -61,7 +61,7 @@ class NativeAsyncWorkHelper {
         if (timeout > 0) {
             setTimeout(() => {
                 launch<void, (nativeCb: long, data: long, needNativeScope: boolean) => void>(NativeAsyncWorkHelper.eventNativeInvokeInternal, launchParams, executeCb, data, true);
-            }, timeout);
+            }, timeout.toInt());
         } else {
             launch<void, (nativeCb: long, data: long, needNativeScope: boolean) => void>(NativeAsyncWorkHelper.eventNativeInvokeInternal, launchParams, executeCb, data, true);
         }

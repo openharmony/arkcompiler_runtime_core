@@ -32,7 +32,7 @@ class Waiter {
         if(!(timeout instanceof undefined) && (timeout as number) > 0) {
             setTimeout((waiter: Waiter) => {
                 waiter.notify(Waiter.timeOutStatus);
-            }, timeout as number, this);
+            }, (timeout as number).toInt(), this);
         }
         let job = new CompletableJob<string>();
         this.promiseQueue.push(job);

@@ -49,7 +49,7 @@ function foo() {
     let repetitions: int = 2;
     let delay: int = 1;
 	let checkpoint = 0;
-	let id2 = -1.0
+	let id2 = -1;
 	id2 = setInterval(() => {
         if (checkpoint == 10000) {
             clearInterval(id2);

@@ -119,7 +119,7 @@ function taskExecuteDelayedTest(): void {
         arktest.assertEQ(res1, 'Concurrent function failed');
         let task2 = new taskpool.Task(longFunc, 50);
         arktest.expectError(() => {
-            await taskpool.executeDelayed(-100.0, task2);
+            await taskpool.executeDelayed(-100, task2);
         }, new Error('taskpool:: The delayTime is less than zero'));
     } catch(e: Error) {
         // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
@@ -254,12 +254,12 @@ function taskSendDataInAsyncFunction():void {
 function taskExecutePeriodicallyTest(): void {
     let task1 = new taskpool.Task(returnAbc);
     arktest.expectError(() => {
-        taskpool.executePeriodically(-100.0, task1);
+        taskpool.executePeriodically(-100, task1);
     }, new Error('taskpool:: The period value is less than zero'));
     let res = await taskpool.execute(task1);
     arktest.assertEQ(res, 'abc');
     arktest.expectError(() => {
-        taskpool.executePeriodically(100.0, task1);
+        taskpool.executePeriodically(100, task1);
     }, new Error('taskpool:: The concurrent task has been executed and cannot be executed periodically'));
 }
 
@@ -268,10 +268,10 @@ function taskWithDependencyExecutePeriodicallyTest(): void {
     let task2 = new taskpool.Task(max, 36, 12);
     task1.addDependency(task2);
     arktest.expectError(() => {
-        taskpool.executePeriodically(10.0, task1);
+        taskpool.executePeriodically(10, task1);
     }, new Error('taskpool:: the task with dependency cannot executePeriodically'));
     arktest.expectError(() => {
-        taskpool.executePeriodically(100.0, task2);
+        taskpool.executePeriodically(100, task2);
     }, new Error('taskpool:: the task with dependency cannot executePeriodically'));
 }
 

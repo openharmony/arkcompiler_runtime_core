@@ -20,22 +20,22 @@
 
 namespace ark::ets::intrinsics::taskpool {
 
-static std::atomic<EtsLong> g_taskId = 1;
-static std::atomic<EtsLong> g_taskGroupId = 1;
-static std::atomic<EtsLong> g_seqRunnerId = 1;
+static std::atomic<EtsInt> g_taskId = 1;
+static std::atomic<EtsInt> g_taskGroupId = 1;
+static std::atomic<EtsInt> g_seqRunnerId = 1;
 static constexpr const char *LAUNCH = "launch";
 
-extern "C" EtsLong GenerateTaskId()
+extern "C" EtsInt GenerateTaskId()
 {
     return g_taskId++;
 }
 
-extern "C" EtsLong GenerateGroupId()
+extern "C" EtsInt GenerateGroupId()
 {
     return g_taskGroupId++;
 }
 
-extern "C" EtsLong GenerateSeqRunnerId()
+extern "C" EtsInt GenerateSeqRunnerId()
 {
     return g_seqRunnerId++;
 }

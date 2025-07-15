@@ -48,7 +48,7 @@ function launchImpl(func: () => NullishType): Promise<NullishType> {
 
 function testDelayFunc(): NullishType {
     let task = new taskpool.LongTask(sumFunc);
-    let res = await taskpool.executeDelayed(10.0, task);
+    let res = await taskpool.executeDelayed(10, task);
     arktest.expectError(() => {
         taskpool.execute(task);
     }, new Error('taskpool:: The long task can only be executed once'));
@@ -67,7 +67,7 @@ function executeDelayedTest(): void {
     let task = new taskpool.LongTask(sum, 10, 80);
     await taskpool.execute(task);
     arktest.expectError(() => {
-        taskpool.executeDelayed(10.0, task);
+        taskpool.executeDelayed(10, task);
     }, new Error('taskpool:: Multiple executions of LongTask are not supported in the executeDelayed'));
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }
@@ -76,7 +76,7 @@ function executePeriodicallyTest(): void {
     let task1 = new taskpool.LongTask(sumFunc);
     await taskpool.execute(task1);
     arktest.expectError(() => {
-        taskpool.executePeriodically(100.0, task1);
+        taskpool.executePeriodically(100, task1);
     }, new Error('taskpool:: The concurrent task has been executed and cannot be executed periodically'));
 }
 
