@@ -45,7 +45,7 @@ The syntax of *enumeration declaration* is presented below:
    named constant
 
 Type ``const enum`` is supported for source-level compatibility with |TS|.
-Type ``const`` is skipped as it has no impact on ``enum`` semantics in
+Modifier ``const`` is skipped as it has no impact on ``enum`` semantics in
 |LANG|.
 
 Enumerations with explicitly specified type values are described in
@@ -106,7 +106,8 @@ constants are combined in a single enumeration.
    enumeration
 
 A type to which all enumeration constant values belong is called *enumeration
-base type*. This type is ``int``, ``long``, or ``string``.
+base type*. This type is ``int``, ``long``, ``string`` or an explicitly
+specified type, see :ref:`Enumeration with Explicit Type`.
 
 .. index::
    enumeration base type

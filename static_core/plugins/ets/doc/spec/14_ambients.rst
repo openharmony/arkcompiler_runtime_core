@@ -287,12 +287,8 @@ The syntax of *ambient indexer declaration* is presented below:
 .. code-block:: abnf
 
     ambientIndexerDeclaration:
-        'readonly'? '[' identifier ':' indexType ']' returnType
+        'readonly'? '[' identifier ':' type ']' returnType
         ;
-
-The following restriction applies: Only one *ambient indexer declaration* is
-allowed in an ambient class declaration.
-
 .. index::
    ambient indexer declaration
    indexing
@@ -302,16 +298,28 @@ allowed in an ambient class declaration.
    restriction
    ambient class declaration
 
+The use of *ambient indexer declarations* is represented by the example below:
+
 .. code-block:: typescript
    :linenos:
 
     declare class C {
         [index: number]: number
     }
+    declare class D {
+        [index: int]: C
+    }
+    declare class E {
+        [index: string]: string
+    }
 
-**Note**. *Ambient indexer declaration* is supported in ambient contexts only.
-If written in |LANG|, ambient class implementation must conform to
-:ref:`Indexable Types`.
+The following restrictions applies: 
+
+- Only one *ambient indexer declaration* is allowed in an ambient class declaration.
+
+- *Ambient indexer declaration* is supported in ambient contexts only.
+  If written in |LANG|, ambient class implementation must conform to
+  :ref:`Indexable Types`.
 
 .. index::
    ambient indexer declaration

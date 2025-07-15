@@ -306,31 +306,31 @@ cannot be used as identifiers:
 +--------------------+-------------------+------------------+------------------+
 |                    |                   |                  |                  |
 +====================+===================+==================+==================+
-|   ``abstract``     |   ``else``        |   ``instanceof`` |   ``public``     |
+|   ``abstract``     |   ``else``        |   ``instanceof`` |   ``switch``     |
 +--------------------+-------------------+------------------+------------------+
-|   ``as``           |   ``enum``        |   ``interface``  |   ``return``     |
+|   ``as``           |   ``enum``        |   ``interface``  |   ``super``      |
 +--------------------+-------------------+------------------+------------------+
-|   ``async``        |   ``export``      |   ``internal``   |   ``static``     |
+|   ``async``        |   ``export``      |   ``let``        |   ``this``       |
 +--------------------+-------------------+------------------+------------------+
-|   ``await``        |   ``extends``     |   ``let``        |   ``switch``     |
+|   ``await``        |   ``extends``     |   ``native``     |   ``throw``      |
 +--------------------+-------------------+------------------+------------------+
-|   ``break``        |   ``false``       |   ``native``     |   ``super``      |
+|   ``break``        |   ``false``       |   ``new``        |   ``true``       |
 +--------------------+-------------------+------------------+------------------+
-|   ``case``         |   ``final``       |   ``new``        |   ``this``       |
+|   ``case``         |   ``final``       |   ``null``       |   ``try``        |
 +--------------------+-------------------+------------------+------------------+
-|   ``catch``        |   ``finally``     |   ``null``       |   ``throw``      |
+|   ``catch``        |   ``finally``     |   ``overload``   |   ``typeof``     |
 +--------------------+-------------------+------------------+------------------+
-|   ``class``        |   ``for``         |   ``overload``   |   ``true``       |
+|   ``class``        |   ``for``         |   ``override``   |   ``undefined``  |
 +--------------------+----+--------------+------------------+------------------+
-|   ``const``        |   ``function``    |   ``override``   |   ``try``        |
+|   ``const``        |   ``function``    |   ``private``    |   ``while``      |
 +--------------------+-------------------+------------------+------------------+
-|   ``constructor``  |   ``if``          |   ``package``    |   ``typeof``     |
+|   ``constructor``  |   ``if``          |   ``protected``  |                  |
 +--------------------+-------------------+------------------+------------------+
-|   ``continue``     |   ``implements``  |   ``private``    |   ``undefined``  |
+|   ``continue``     |   ``implements``  |   ``public``     |                  |
 +--------------------+-------------------+------------------+------------------+
-|   ``default``      |   ``import``      |   ``protected``  |   ``while``      |
+|   ``default``      |   ``import``      |   ``return``     |                  |
 +--------------------+-------------------+------------------+------------------+
-|   ``do``           |   ``in``          |                  |                  |
+|   ``do``           |   ``in``          |   ``static``     |                  |
 +--------------------+-------------------+------------------+------------------+
 
 
@@ -604,22 +604,13 @@ last symbol of an integer literal.
    integer
    underscore character
 
-Integer literals are of integer types that match literals as follows:
+Integer literals are of ``int`` or ``long`` types as follows:
 
-- For *decimal* integer literals
+- ``int`` if the literal value can be represented
+  by a non-negative 32-bit number, i.e., the value is in the
+  range 0..max(int); or
 
-  + ``int`` if the literal value can be represented
-    by a non-negative 32-bit number, i.e., the value is in the
-    range 0..max(int); or
-
-  + ``long`` otherwise.
-
-- For *hex*, *octal*, and *binary* integer literals
-
-  + ``int`` if bit representation of the value fits in 32-bits, i.e., the value 
-    is in the range 0..max(unsigned 32-bit integer); or
-
-  + ``long`` otherwise.
+- ``long`` otherwise.
 
 A :index:`compile-time error` occurs if an integer literal value is too
 large for the values of type ``long``. The concept is represented by the
@@ -629,12 +620,13 @@ examples below:
    :linenos:
 
     // literals of type int:
+    0
     1
     0x7F
-    0x7FFFFFFF // max(int)
-    0x80000000 // min(int)
+    0x7FFF_FFFF // max(int)
 
     // literals of type long:
+    0x8000_0000
     0x7FFF_FFFF_1
     9223372036854775807 // max(long)
 
@@ -646,7 +638,6 @@ examples below:
    integer literal
    int
    long
-   char
 
 |
 

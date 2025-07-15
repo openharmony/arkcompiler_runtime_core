@@ -113,39 +113,6 @@ the standard library.
    launch function
    asynchronous launch
 
-Section :ref:`Packages` discusses a well-known and proven language feature
-intended to organize large pieces of software that typically consist of many
-components. *Packages* allow developers to construct a software product
-as a composition of subsystems, and organize the development process in a way
-that is appropriate for independent teams to work in parallel.
-
-*Package* is the language construct that combines a number of declarations,
-and makes them parts of an independent compilation unit.
-
-The *export* and *import* features are used to organize communication between
-*packages*. An entity exported from one package becomes known to and
-accessible (see :ref:`Accessible`) in another package which imports that
-feature. Various options are provided to simplify export/import, e.g., by
-defining non-exported, i.e., ``internal`` declarations that are not accessible
-(see :ref:`Accessible`) from the outside of the package.
-
-In addition, |LANG| supports the *package* initialization semantics that
-makes a *package* even more independent from its environment.
-
-.. index::
-   package
-   construct
-   declaration
-   compilation unit
-   export
-   import
-   internal declaration
-   non-exported declaration
-   access
-   accessibility
-   initialization
-   semantics
-
 |
 
 .. _Type char:
@@ -417,11 +384,11 @@ The syntax of *array creation expression* is presented below:
 *Array creation expression* creates an object that is a new array with the
 elements of the type specified by ``arrayElelementType``.
 
-The type of each *dimensionExpression* must be assignable (see
+The type of each *dimension expression* must be assignable (see
 :ref:`Assignability`) to an ``int`` type. Otherwise,
 a :index:`compile-time error` occurs.
 
-A :index:`compile-time error` occurs if any *dimensionExpression* is a
+A :index:`compile-time error` occurs if any *dimension expression* is a
 constant expression that is evaluated to a negative integer value at compile
 time.
 
@@ -441,7 +408,7 @@ time.
    negative integer
    compile time
 
-If the type of any *dimensionExpression* is ``number`` or other floating-point
+If the type of any *dimension expression* is ``number`` or other floating-point
 type, and its fractional part is different from '0', then errors occur as
 follows:
 
@@ -597,8 +564,8 @@ as follows:
    the expressions to the right of it are not evaluated.
 
 #. The values of dimension expressions are checked. If the value of any
-   ``dimExpr`` expression is less than zero, then ``NegativeArraySizeError`` is
-   thrown.
+   dimension expression is less than zero, then ``NegativeArraySizeError``
+   is thrown.
 
 #. Space for the new array is allocated. If the available space is not
    sufficient to allocate the array, then ``OutOfMemoryError`` is thrown,
@@ -646,7 +613,6 @@ Enumerations Experimental
 
 Several experimental features  described below are available for enumerations
 
-
 |
 
 .. _Enumeration with Explicit Type:
@@ -665,7 +631,15 @@ Enumeration with Explicit Type
         'const'? 'enum' identifier ':' type '{' enumConstantList? '}'
         ;
 
-If *Explicit type* is an integer type then omitted values for constants allowed, 
+All enumeration constants of declared enumeration are of the *explicit type*
+specified in the declaration. It also means that
+*explicit type* is the *enumeration base type* (see :ref:`Enumerations`).
+
+.. index::
+   enumeration base type
+   enumeration with explicit type
+
+If *explicit type* is an integer type then omitted values for constants allowed,
 the same rules applied as for enum with non-explicit type (see :ref:`Enumeration Integer Values`).
 
 A :index:`compile-time error` occurs in the following situations:
@@ -681,10 +655,8 @@ A :index:`compile-time error` occurs in the following situations:
    numeric type
    string type
    value
-   subtype
    type
    syntax
-
 
 .. code-block:: typescript
    :linenos:
@@ -705,12 +677,17 @@ Enumeration Methods
 .. meta:
     frontend_status: Done
 
-Several static methods are available to handle each enumeration type as follows:
+Several static methods are available to handle each enumeration type
+as follows:
 
--  Method ``values()`` returns an array of enumeration constants in the order of
-   declaration.
--  Method ``getValueOf(name: string)`` returns an enumeration constant with the
-   given name, or throws an error if no constant with such name exists.
+-  Method ``static values()`` returns an array of enumeration constants
+   in the order of declaration.
+-  Method ``static getValueOf(name: string)`` returns an enumeration constant
+   with the given name, or throws an error if no constant with such name
+   exists.
+-  Method ``static fromValue(value: T)``, where ``T`` is the base type
+   of the enumeration returns an enumeration constant with the
+   given value, or throws an error if no constant with such value exists.
 
 .. index::
    enumeration method
@@ -723,10 +700,14 @@ Several static methods are available to handle each enumeration type as follows:
 .. code-block:: typescript
    :linenos:
 
-      enum Color { Red, Green, Blue }
+      enum Color { Red, Green, Blue = 5 }
       let colors = Color.values()
       //colors[0] is the same as Color.Red
+
       let red = Color.getValueOf("Red")
+
+      Color.fromValue(5) // ok, retuns Color.Blue
+      Color.fromValue(6) // throws runtime error
 
 Additional methods for instances of an enumeration type are as follows:
 
@@ -1636,7 +1617,7 @@ methods is to be defined, otherwise a :index:`compile-time error` occurs.
         // f3 and f4 are declared in I2
     }
     class C implements I1, I2 {
-       // compile-time error as no new overload is defined 
+       // compile-time error as no new overload is defined
     }
     class D implements I1, I2 {
         overload foo { f2, f3, f1, f4 } // OK, as new overload is defined
@@ -1647,7 +1628,7 @@ methods is to be defined, otherwise a :index:`compile-time error` occurs.
 
     const i1: I1 = new D
     i1.foo(<arguments>) // call is valid if arguments fit first signature of {f1, f2} set
-    
+
     const i2: I2 = new D
     i2.foo(<arguments>) // call is valid if arguments fit first signature of {f3, f4} set
 
@@ -1750,7 +1731,7 @@ inherited into the interface, otherwise a :index:`compile-time error` occurs.
         // f3 and f4 are declared in I2
     }
     interface I3 extends I1, I2 {
-       // compile-time error as no new overload for 'foo' is defined 
+       // compile-time error as no new overload for 'foo' is defined
     }
     interface I4 extends I1, I2 {
         overload foo { f4, f1, f3, f2 } // OK, as new overload is defined
@@ -1778,7 +1759,7 @@ The syntax is presented below:
         'overload' 'constructor' '{' identifier (',' identifier)* ','? '}'
         ;
 
-This feature can be used if there are more then one constructors declared 
+This feature can be used if there are more then one constructors declared
 in the class, and maximum one of them is anonymous (see
 :ref:`Constructor Names`).
 
@@ -1824,7 +1805,7 @@ position in a list of overloaded constructors:
 
 A :index:`compile-time error` occurs if both *overload constructor declaration* and
 constructor *overload signature* (see
-:ref:`Declarations with Overload Signatures`) are used: 
+:ref:`Declarations with Overload Signatures`) are used:
 
 .. code-block:: typescript
    :linenos:
@@ -1835,10 +1816,10 @@ constructor *overload signature* (see
         constructor (b: boolean)
         constructor (...x: Any[]) {/*body1*/}
 
-        constructor fromString(s: string) {/*body2*/} 
+        constructor fromString(s: string) {/*body2*/}
 
         // overload declaration
-        overload constructor { fromString } 
+        overload constructor { fromString }
         // compile-time error: mix of both overload schemes
     }
 
@@ -2155,8 +2136,8 @@ explicitly specify constructor to call in :ref:`New Expressions`:
     new Temperature.Celsius(0)
     new Temperature.Fahrenheit(32)
 
-If a constructor has a name then the direct application of this constructor in 
-the new expression implies explicit usage of the constructor name: 
+If a constructor has a name then the direct application of this constructor in
+the new expression implies explicit usage of the constructor name:
 
 .. code-block:: typescript
    :linenos:
@@ -2345,10 +2326,7 @@ called the *receiver type* (see :ref:`Receiver Type`).
 
 If the *receiver type* is a class or interface type, then ``private`` or
 ``protected`` members are not accessible (see :ref:`Accessible`) within the
-body of a *function with receiver*. Only ``public`` and  ``internal`` members
-can be accessed. The ``internal`` members can be accessed only when *function
-with receiver* and its class or interface type are declared in the same
-compilation unit:
+body of a *function with receiver*. Only ``public`` members can be accessed:
 
 .. index::
    keyword this
@@ -2356,7 +2334,6 @@ compilation unit:
    receiver type
    public member
    private member
-   internal member
    protected member
    access
    parameter
@@ -2717,7 +2694,7 @@ The syntax of *lambda expression with receiver* is presented below:
 .. code-block:: abnf
 
     lambdaExpressionWithReceiver:
-        annotationUsage? typeParameters?
+        annotationUsage?
         '(' receiverParameter (',' lambdaParameterList)? ')'
         returnType? '=>' lambdaBody
         ;
@@ -3041,242 +3018,13 @@ The syntax of a *library description* is presented below:
         ;
 
 
-*Libraries* are constructed from separate modules, packages or, other libraries.
-They can control what is exported from a library by using the
-import-and-then-export scheme.
+*Libraries* are constructed from modules or other libraries. They can control
+what is exported from a library by using the import-and-then-export scheme.
 
 *Libraries* are stored in a file system or a database (see
 :ref:`Compilation Units in Host System`).
 
 
-|
-
-.. _Packages:
-
-Packages
-********
-
-.. meta:
-    frontend_status: Partly
-    todo: Implement compiling a package module as a single compilation unit - #16267
-
-One or more *package modules* form a package.
-
-The syntax of *package* is presented below:
-
-.. code-block:: abnf
-
-      packageDeclaration:
-          packageModule+
-          ;
-
-*Packages* are stored in a file system or a database (see
-:ref:`Compilation Units in Host System`).
-
-A *package* can consist of several package modules if all such modules
-have the same *package header*.
-
-.. index::
-   package module
-   package
-   file system
-   database
-   package header
-   module
-
-The syntax of *package module* is presented below:
-
-
-.. code-block:: abnf
-
-    packageModule:
-        packageHeader packageModuleDeclaration
-        ;
-
-    packageHeader:
-        'package' qualifiedName
-        ;
-
-    packageModuleDeclaration:
-        importDirective* packageModuleDeclaration*
-        ;
-
-    packageModuleDeclaration:
-        packageTopDeclaration | staticBlock
-        ;
-
-    packageTopDeclaration:
-        ('export' 'default'?)?
-        annotationUsage?
-        ( typeDeclaration
-        | variableDeclarations
-        | packageConstantDeclarations
-        | functionDeclaration
-        | functionWithReceiverDeclaration
-        | accessorWithReceiverDeclaration
-        | namespaceDeclaration
-        | ambientDeclaration
-        )
-        ;
-
-
-A :index:`compile-time error` occurs if:
-
--  *Package module* contains no package header; or
--  Package headers of two package modules in the same package have
-   different identifiers.
-
-Every *package module* can directly use all exported entities from the core
-packages of the standard library (see :ref:`Standard Library Usage`).
-
-A *package module* can directly access all top-level entities declared in all
-modules that constitute the package.
-
-If a top-level declaration in any package module contains an initializer for a
-variable or a constant, then the form of the initializer must be
-*constantExpression*. Otherwise, a :index:`compile-time error` occurs.
-
-Initializer block is to be used for initialization to ensure an explicit order
-of initialization.
-
-.. code-block:: typescript
-   :linenos:
-
-   package P
-     let v1 = foo() // Compile-time error as call to foo() is not a constant expression
-     function foo() { return 1 }
-
-     let v2 = 2 + 3 * 4 // OK
-
-     let v2: number
-     static {
-        v2 = foo() // OK
-     }
-
-A :index:`compile-time error` occurs if a package contains *initializer blocks*
-in more than one source file:
-
-.. code-block:: typescript
-   :linenos:
-
-      // Source file 1
-      package P
-         static { // P initializer part one
-         }
-         function foo() {}
-         static { // P initializer part two
-         }
-
-
-      // Source file 2
-      package P
-         static {} // compile-time error as initializer in a different source file
-
-
-.. index::
-   package module
-   package header
-   package
-   header
-   module
-   core package
-   top-level entity
-   initializer
-   top-level declaration
-   variable
-   constant
-   block
-   initialization
-
-|
-
-.. _Constants in Packages:
-
-Constants in Packages
-=====================
-
-.. meta:
-    frontend_status: Done
-
-Constant declarations in packages can be defined without the mandatory
-initializer, and must be initialized in the body of the initializer block
-(see :ref:`Static Initialization`) before the first use of the constant as
-represented in the example below.
-
-.. code-block:: typescript
-   :linenos:
-
-   package P
-     function foo() { return 1 }
-
-     const c1: number
-     static {
-        c1 = foo() // OK
-     }
-
-The syntax of *package constant declaration* is presented below:
-
-.. code-block:: abnf
-
-    packageConstantDeclaration:
-        identifier ':' type initializer?
-        | identifier initializer
-        ;
-
-.. index::
-   package
-   constant declaration
-   constant
-   initializer
-   block
-
-|
-
-.. _Internal Access Modifier Experimental:
-
-Internal Access Modifier
-========================
-
-.. meta:
-    frontend_status: Partly
-    todo: Implement in libpandafile, implement semantic, now it is parsed and ignored - #16088
-
-The modifier ``internal`` indicates that a class member, a constructor, or
-an interface member is accessible (see :ref:`Accessible`) within its
-compilation unit only. If the compilation unit is a package (see
-:ref:`Packages`), then ``internal`` members can be used in any
-*package module*. If the compilation unit is a separate module (see
-:ref:`Separate Modules`), then ``internal`` members can be used within this
-module.
-
-.. index::
-   internal access modifier
-   access modifier
-   modifier
-   access modifier
-   modifier internal
-   access
-   accessibility
-   compilation unit
-   package
-   separate module
-   internal member
-   class member
-   module
-
-.. code-block:: typescript
-   :linenos:
-
-      class C {
-        internal count: int
-        getCount(): int {
-          return this.count // ok
-        }
-      }
-
-      function increment(c: C) {
-        c.count++ // ok
-      }
 
 .. raw:: pdf
 

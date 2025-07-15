@@ -21,8 +21,6 @@ Grammar Summary
 
     identifier: Identifier;
 
-    indexType: 'number';
-
     type:
         annotationUsage?
         ( typeReference
@@ -432,7 +430,7 @@ Grammar Summary
         ;
 
     lambdaExpression:
-        annotationUsage? ('async'|typeParameters)? lambdaSignature '=>' lambdaBody
+        annotationUsage? 'async'? lambdaSignature '=>' lambdaBody
         ;
 
     lambdaBody:
@@ -581,19 +579,11 @@ Grammar Summary
         ;
 
     tryStatement:
-          'try' block catchClauses finallyClause?
-          ;
-
-    catchClauses:
-          typedCatchClause* catchClause?
+          'try' block catchClause? finallyClause?
           ;
 
     catchClause:
           'catch' '(' identifier ')' block
-          ;
-
-    typedCatchClause:
-          'catch' '(' identifier ':' typeReference ')' block
           ;
 
     finallyClause:
@@ -647,7 +637,6 @@ Grammar Summary
 
     accessModifier:
         'private'
-        | 'internal'
         | 'protected'
         | 'public'
         ;
@@ -758,17 +747,17 @@ Grammar Summary
         ;
 
     compilationUnit:
-        separateModuleDeclaration
-        | packageDeclaration
+        moduleDeclaration
         | declarationModule
+        | libraryDescription
         ;
 
-    packageDeclaration:
-        packageModule+
-        ;
-
-    separateModuleDeclaration:
+    moduleDeclaration:
         importDirective* (topDeclaration | topLevelStatements | exportDirective)*
+        ;
+
+    libraryDescription:
+        (importDirective|reExportDirective)*
         ;
 
     importDirective:
@@ -831,7 +820,12 @@ Grammar Summary
         ;
 
     namespaceDeclaration:
-        'namespace' qualifiedName '{' topDeclaration* '}'
+        'namespace' qualifiedName
+        '{' namespaceMember* staticBlock? namespaceMember* '}'
+        ;
+
+    namespaceMember:
+        topDeclaration | exportDirective
         ;
 
     exportDirective:
@@ -949,7 +943,7 @@ Grammar Summary
         ;
 
     ambientIndexerDeclaration:
-        'readonly'? '[' identifier ':' indexType ']' returnType
+        'readonly'? '[' identifier ':' type ']' returnType
         ;
 
     ambientCallSignatureDeclaration:
@@ -1042,7 +1036,8 @@ Grammar Summary
         ;
 
     lambdaExpressionWithReceiver:
-        annotationUsage? typeParameters? '(' receiverParameter (',' lambdaParameterList)? ')'
+        annotationUsage?
+        '(' receiverParameter (',' lambdaParameterList)? ')'
         returnType? '=>' lambdaBody
         ;
 
@@ -1058,42 +1053,6 @@ Grammar Summary
 
       awaitExpression:
         'await' expression
-        ;
-
-      packageModule:
-          packageHeader packageModuleDeclaration
-          ;
-
-      packageHeader:
-          'package' qualifiedName
-          ;
-
-
-    packageModuleDeclaration:
-        importDirective* packageModuleDeclaration*
-        ;
-
-    packageModuleDeclaration:
-        packageTopDeclaration | staticBlock
-        ;
-
-    packageTopDeclaration:
-        ('export' 'default'?)?
-        annotationUsage?
-        ( typeDeclaration
-        | variableDeclarations
-        | packageConstantDeclarations
-        | functionDeclaration
-        | functionWithReceiverDeclaration
-        | accessorWithReceiverDeclaration
-        | namespaceDeclaration
-        | ambientDeclaration
-        )
-        ;
-
-    packageConstantDeclaration:
-        identifier ':' type initializer?
-        | identifier initializer
         ;
 
     annotationDeclaration:

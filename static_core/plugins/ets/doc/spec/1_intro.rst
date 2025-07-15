@@ -106,19 +106,12 @@ The |LANG| language as a whole is characterized by the following:
    The |LANG| language supports the *component programming* approach. It
    presumes that software is designed and implemented as a composition
    of *compilation units*. A compilation unit is typically represented as
-   a *module* or a *package*.
+   a *module* or a *library*.
 
    A *module* in |LANG| is a standalone, independently compiled unit that
    combines various programming resources (types, classes, functions, and so
    on). A module can communicate with other modules by exporting all or some
    of its resources to, or importing from other modules.
-
-   A *package* in |LANG| is a set of (usually related) modules that are stored
-   in a file system or a database, and have the same *packageHeader*.
-
-   This feature provides a high level of software development process and
-   software maintainability, supports flexible module reuse and efficient
-   version control.
 
 .. index::
    modularity
@@ -126,7 +119,6 @@ The |LANG| language as a whole is characterized by the following:
    component programming
    maintainability
    module
-   package
 
 -  **Genericity**
 
@@ -536,16 +528,10 @@ as used in other languages, application areas, or industries.
      functions (in the general sense, i.e., including methods and constructors)
      with different signatures and different bodies.
 
-
-   package level scope
-      -- a name in the package level scope that is declared on the package
-      level, and is accessible throughout the entire package and in other
-      packages if exported.
-
    module level scope
-     -- a name in the module level scope that is applicable to separate modules
-     only, and is accessible throughout the entire module and in other packages
-     if exported.
+     -- a name in the module level scope that is applicable to modules only,
+     and is accessible throughout the entire module and in other modules if
+     exported.
 
    class level scope
      -- a name that is declared inside a class, and is accessible inside the

@@ -49,7 +49,7 @@ Type of Standalone Expression
     frontend_status: Done
 
 *Standalone expression* (see :ref:`Type of Expression`) is an expression for
-which no target type is expected in its context.
+which there is no target type in the context where expression is used.
 
 The type of a *standalone expression* is determined as follows:
 
@@ -142,7 +142,7 @@ as follows:
    :linenos:
 
     function foo(x: int) {
-        let x = y // type of 'x' is 'int'
+        let y = x // type of 'y' is 'int'
     }
 
 -  Otherwise, the type of ``expr`` is evaluated as type of a standalone
@@ -357,6 +357,19 @@ with *n*>0) are **all** of the following:
 The direct supertype of a type parameter is the type specified as the
 constraint of that type parameter.
 
+When some generic class or interface has type parameters with variance specifed
+(see :ref:`Type Parameter Variance`) then the subtyping for instantiations of
+such class or interface is determined according to the variance of appropriate
+type parameter:
+                       
+.. code-block:: typescript
+   :linenos:
+
+    class G<in T1, out T2> { }
+
+    // G<S, T> <: G <U, V> iff S >: U and T <: V
+
+
 .. index::
    direct supertype
    generic type
@@ -521,7 +534,7 @@ following conditions are met:
    -  ``FP``:sub:`i` is an optional parameter if ``SP``:sub:`i` is an optional
       parameter.
 
--  type ``FR`` is a subtype of ``SR`` (covariance).
+-  Otherwise type ``FR`` is a subtype of ``SR`` (covariance).
 
 .. index::
    function type
@@ -562,7 +575,7 @@ following conditions are met:
     let foo: (x?: number, y?: string) => void = (): void => {} // OK: ``m <= n``
     foo = (p?: number): void => {}                             // OK:  ``m <= n``
     foo = (p1?: number, p2?: string): void => {}               // OK: Identical types
-    foo = (p: number): void => {}                              
+    foo = (p: number): void => {}
           // Compile-time error: 1st parameter in type is optional but in lambda mandatory
     foo = (p1: number, p2?: string): void => {}
           // Compile-time error:  1st parameter in type is optional but in lambda mandatory
@@ -653,6 +666,22 @@ Identity relation for types ``A`` and ``B`` is defined as follows:
 
 **Note.** :ref:`Type Alias Declaration` creates no new type but only a new
 name for the existing type. An alias is indistinguishable from its base type.
+
+**Note.** If a generic class or interface has a type parameter ``T``, and its
+method has its own type parameter ``T``, then the two types are different and
+unrelated.
+
+.. code-block:: typescript
+   :linenos:
+
+   class A<T> {
+      data: T
+      constructor (p: T) { this.data = p } // OK, as here 'T' is a class type parameter
+      method <T>(p: T) {
+          this.data = p // compile-time error as 'T' of the class is different from 'T' of the method
+      }
+   }
+
 
 .. index::
    type identity
@@ -1021,7 +1050,7 @@ from the context on condition that:
 #. The evaluated result type is an integer type, the *target type* is a smaller
    integer type with the value of the expression fiting into its range; or
 
-#. The *target type* is ``float``, the evaluated result type is ``double`` and  
+#. The *target type* is ``float``, the evaluated result type is ``double`` and
    the value of the expression fits into the range of type ``float``.
 
 A :index:`compile-time error` occurs if the context is a union type,
@@ -1283,7 +1312,6 @@ A :index:`compile-time error` occurs if an attempt is made to do the following:
    class Base {
       public public_member() {}
       protected protected_member() {}
-      internal internal_member() {}
       private private_member() {}
    }
 
@@ -1297,8 +1325,6 @@ A :index:`compile-time error` occurs if an attempt is made to do the following:
          // Public member can be overridden and/or implemented by the public one
       public override protected_member() {}
          // Protected member can be overridden by the protected or public one
-      internal internal_member() {}
-         // Internal member can be overridden by the internal one only
       override private_member() {}
          // A compile-time error occurs if an attempt is made to override private member
          // or implement the private methods with default implementation
@@ -2064,8 +2090,8 @@ Static Initialization
     frontend_status: Done
 
 *Static initialization* is a routine performed once for each class (see
-:ref:`Classes`), namespace (see :ref:`Namespace Declarations`), separate module
-(see :ref:`Separate Modules`), or package module (see :ref:`Packages`).
+:ref:`Classes`), namespace (see :ref:`Namespace Declarations`), or
+module (see :ref:`Modules`).
 
 *Static initialization* execution involves the execution of the following:
 
@@ -2116,8 +2142,8 @@ Static Initialization Safety
 A compile-time error occurs if a *named reference* refers to a not yet
 initialized *entity*, including one of the following:
 
-- Variable (see :ref:`Variable and Constant Declarations`) of a separate module
-  package (see :ref:`Packages`), or namespace (see :ref:`Namespace Declarations`);
+- Variable (see :ref:`Variable and Constant Declarations`) of a module or
+  namespace (see :ref:`Namespace Declarations`);
 
 - Static field of a class (see :ref:`Static and Instance Fields`).
 

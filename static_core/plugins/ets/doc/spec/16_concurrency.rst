@@ -200,9 +200,8 @@ semantics of ``Promise`` is similar to the semantics of ``Promise`` in |JS|/|TS|
 if it is used in the context of a single coroutine.
 
 ``Promise object`` represents the values returned by the call of an ``async``
-function. ``Promise object`` belongs to core packages of the
-:ref:`Standard Library`. Thus it is imported by default, and can be used
-without any qualification.
+function. ``Promise object`` is defined in the :ref:`Standard Library` and thus
+it can be used without any qualification.
 
 The ``Promise`` lifetime is not limited to the lifetime of the root coroutine
 as it is created.
@@ -239,7 +238,6 @@ The methods are used as follows:
    launch
    argument
    callback
-   package
    standard library
    method
 

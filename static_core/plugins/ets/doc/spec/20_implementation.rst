@@ -33,13 +33,11 @@ If an import path ``<some path>/name`` is resolved to a path in the folder
 '*name*', then  the compiler executes the following lookup sequence:
 
 -   If the folder contains the file ``index.ets``, then this file is imported
-    as a separate module written in |LANG|;
+    as a module written in |LANG|;
 
 -   If the folder contains the file ``index.ts``, then this file is imported
-    as a separate module written in |TS|;
+    as a module written in |TS|.
 
--   Otherwise, the compiler imports the package constituted by files
-    ``name/*.ets``.
 
 .. index::
    implementation
@@ -50,8 +48,6 @@ If an import path ``<some path>/name`` is resolved to a path in the folder
    compiler
    lookup sequence
    module
-   separate module
-   package
 
 |
 
@@ -63,22 +59,16 @@ Compilation Units in Host System
 .. meta:
     frontend_status: Done
 
-Modules, packages, and libraries are created and stored in a manner that is
-determined by the host system. The exact manner modules and packages are stored
+Modules and libraries are created and stored in a manner that is
+determined by the host system. The exact manner modules and libraries are stored
 in a file system is determined by a particular implementation of the compiler
 and other tools.
 
 A simple implementation is summarized as follows:
 
--  Module (package module) is stored in a single file.
+-  Module is stored in a single file.
 
--  All package modules are stored in files of the same folder.
-
--  Folder that can store several separate modules (one source file to contain a
-   separate module or a package module).
-
--  Folder that stores a single package must not contain separate module
-   files or package modules from other packages.
+-  Folder that can store several modules (one source file to contain a module).
 
 -  Library description files are named "lib.ets". Source files are stored in
    folders with a predefined structure.
@@ -89,11 +79,8 @@ A simple implementation is summarized as follows:
    storage
    storage management
    module
-   package
-   separate module
    file system
    implementation
-   package module
    file
    folder
    source file

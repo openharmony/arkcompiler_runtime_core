@@ -18,7 +18,7 @@ Generics
 .. meta:
     frontend_status: Partly
 
-Class, interface, type alias, method, function, and lambda are program entities
+Class, interface, type alias, method, and function are program entities
 that can be parameterized in |LANG| by one or several types. An entity so
 parameterized introduces a *generic declaration* (called *a generic* for
 brevity).
@@ -28,7 +28,7 @@ Types used as generic parameters in a generic are called *type parameters*
 
 A *generic* must be instantiated in order to be used. *Generic instantiation*
 is the action that transforms a *generic* into a real program entity
-(non-generic class, interface, union, array, method, function, or lambda), or
+(non-generic class, interface, union, array, method, or function), or
 into another *generic instantiation*. Instantiation (see
 :ref:`Generic Instantiations`) can be performed either explicitly or
 implicitly.
@@ -43,7 +43,6 @@ creating new types during compilation (see :ref:`Utility Types`).
    type alias
    method
    function
-   lambda
    entity
    parameterization
    generic
@@ -117,9 +116,9 @@ The syntax of *type parameter* is presented below:
         '=' typeReference ('[]')?
         ;
 
-A generic class, interface, type alias, method, function, or lambda defines a
-set of parameterized classes, interfaces, unions, arrays, methods, functions, or
-lambdas respectively (see :ref:`Generic Instantiations`). A single type argument
+A generic class, interface, type alias, method, or function defines a
+set of parameterized classes, interfaces, unions, arrays, methods, or functions
+respectively (see :ref:`Generic Instantiations`). A single type argument
 can define only one set for each possible parameterization of the type parameter
 section.
 
@@ -128,7 +127,6 @@ section.
    generic class
    generic interface
    generic function
-   lambda
    generic instantiation
    class
    interface
@@ -446,8 +444,8 @@ Generic Instantiations
 .. meta:
     frontend_status: Done
 
-As mentioned before, a generic class, interface, type alias, method, function,
-or lambda declaration defines a set of corresponding non-generic entities. The
+As mentioned before, a generic declaration defines a set
+of corresponding non-generic entities. The
 process of instantiation is designed to do the following:
 
 - Allow producing new generic or non-generic entities;
@@ -455,7 +453,7 @@ process of instantiation is designed to do the following:
   of type, including the type argument itself.
 
 As a result of the instantiation process, a new class, interface, union, array,
-method, function, or lambda is created.
+method, or function is created.
 
 .. code-block:: typescript
    :linenos:
@@ -472,8 +470,6 @@ method, function, or lambda is created.
    type alias
    method
    function
-   lambda
-   lambda declaration
    instantiation
    non-generic entity
    type parameter
@@ -557,9 +553,6 @@ type parameters to substitute corresponding type parameters of a generic:
        f2: X<T, string> // X instantiated with T and string
     }
 
-    let lambda = <T> (p: T) => { console.log (p) } // Generic lambda defined
-    lambda<string> ("string argument") // Generic lambda instantiated and called
-
 .. index::
    instantiation
    generic
@@ -567,7 +560,7 @@ type parameters to substitute corresponding type parameters of a generic:
    type parameter
 
 A :index:`compile-time error` occurs if type arguments are provided for
-non-generic class, interface, type alias, method, function, or lambda.
+non-generic class, interface, type alias, method, or function.
 
 In the explicit generic instantiation *G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`>,
 *G* is the generic declaration, and  <``T``:sub:`1`, ``...``, ``T``:sub:`n`> is
@@ -591,7 +584,6 @@ parameterized declaration ranging over them.
    type alias
    method
    function
-   lambda
    generic
    instantiation
    generic declaration
@@ -658,13 +650,9 @@ in which a generic is referred. It is represented in the example below:
 
     function foo <G> (x: G, y: G) {} // Generic function declaration
     foo (new Object, new Object)     // Implicit generic function instantiation
-      // based on argument types the type argument is inferred
+      // based on argument types: the type argument is inferred
 
-    let lambda = <T>(p: T): void => {console.log (p)}  // Generic lambda declaration
-    lambda(6) // Implicit generic lambda instantiation
-
-Implicit instantiation is only possible for generic functions, methods, and
-lambdas.
+Implicit instantiation is only possible for generic functions and methods.
 
 .. index::
    instantiation
@@ -674,7 +662,6 @@ lambdas.
    context
    method
    function
-   lambda
 
 |
 
@@ -689,8 +676,11 @@ Utility Types
 |LANG| supports several embedded types, called *utility* types. Utility types
 allow constructing new types by adjusting properties of initial types. If the
 initial types are class or interface, then the resultant utility types are also
-handled as class or interface types. An alphabetically sorted list of utility
-types is provided below.
+handled as class or interface types. All utility type names are accessible as
+simple names (see :ref:`Accessible`) in any compilation unit across all its
+scopes. Using these names as programmer-defined entities causes to a
+:index:`compile-time error` in accordance to :ref:`Declarations`. 
+An alphabetically sorted list of utility types is provided below.
 
 .. index::
    embedded type
@@ -719,8 +709,7 @@ Type ``Awaited<T>`` is represented by the example below:
     
     type B = Awaited<Promise<Promise<number>>> // type B is number
     
-    type C = Awaited<boolean | Promise<number>> // type C is boolean | number
-    
+    type C = Awaited<boolean | Promise<number>> // type C is boolean | number   
 
 |
 
