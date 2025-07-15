@@ -298,9 +298,18 @@ InterpreterToCompiledCodeBridge:
     // store method (the first arg)
     movq %r13, (%rdx)
     addq $8, %rdx
+
+    // the dispatch routine expects opcode in ecx
     movzbl (%rbx), %ecx
+    cmpl $MIN_PREFIX_OPCODE_INDEX, %ecx
+    jl .Lnonprefixed
+    movzwl (%rbx), %ecx
+    addq $2, %rbx
+    jmp .Ldispatch
+.Lnonprefixed:
     addq $1, %rbx // read opcode and advance insn_ptr
 
+.Ldispatch:
     // The file contains code which checks opcode and jumps
     // to the corresponding handler.
     // At the end each handler jumps to .Lload_reg_args label.

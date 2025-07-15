@@ -249,8 +249,16 @@ InterpreterToCompiledCodeBridge:
 
     // store method (the first arg)
     str lr, [x10], #8
-    ldrb w5, [x6], #1 // read opcode and advance insn_ptr
 
+    ldrb w5, [x6] // read opcode
+    cmp w5, #MIN_PREFIX_OPCODE_INDEX
+    blt .Lnonprefixed
+    ldrh w5, [x6], #2 // read opcode and advance insn_ptr
+    b .Ldispatch
+.Lnonprefixed:
+    add x6, x6, #1 // advance insn_ptr
+
+.Ldispatch:
     // The file contains code which checks opcode and jumps
     // to the corresponding handler.
     // At the end each handler jumps to .Lload_reg_args label.

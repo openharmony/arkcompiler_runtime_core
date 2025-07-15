@@ -194,8 +194,16 @@ InterpreterToCompiledCodeBridge:
     // setup r5 as follow
     // r5 - iframe.vregs
     add r5, r5, #FRAME_VREGS_OFFSET
-    ldrb r6, [r4], #1 // read opcode and advance insn_ptr
 
+    ldrb r6, [r4] // read opcode
+    cmp r6, #MIN_PREFIX_OPCODE_INDEX
+    blt .Lnonprefixed
+    ldrh r6, [r4], #2 // read opcode and advance insn_ptr
+    b .Ldispatch
+.Lnonprefixed:
+    add r4, r4, #1 // advance insn_ptr
+
+.Ldispatch:
     // The file contains code which checks opcode and jumps
     // to the corresponding handler.
     // At the end each handler jumps to .Linvoke_from_bridge label.
