@@ -16,7 +16,7 @@ cases:
   - desc: Force return of non-empty generic instance, using object as generic type.
     decl: |-
       class A<T> {
-        foo(p: T): T! {
+        foo(p: T): NonNullable<T> {
           return p!;
         }
       }
@@ -35,7 +35,7 @@ cases:
       }
 
       class B<T extends A | null> {
-          foo(p: T): T! {
+          foo(p: T): NonNullable<T> {
               return p!;
           }
       }
@@ -54,7 +54,7 @@ cases:
       }
 
       class B<T extends A | undefined> {
-          foo(p: T): T! {
+          foo(p: T): NonNullable<T> {
               return p!;
           }
       }
@@ -73,7 +73,7 @@ cases:
       }
 
       class B<T extends A | null> {
-          foo(p: T): T! {
+          foo(p: T): NonNullable<T> {
               return p!;
           }
       }
@@ -93,7 +93,7 @@ cases:
       }
 
       class B<T extends A | null> {
-          foo(p: T): T! {
+          foo(p: T): NonNullable<T> {
               return p!;
           }
       }
@@ -113,7 +113,7 @@ cases:
       }
 
       class B<T extends A | undefined> {
-          foo(p: T): T! {
+          foo(p: T): NonNullable<T> {
               return p!;
           }
       }

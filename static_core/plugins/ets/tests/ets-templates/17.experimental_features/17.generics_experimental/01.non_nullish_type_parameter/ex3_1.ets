@@ -24,7 +24,7 @@ type TMyBase = MyBase
 type TMyBaseUndefineable = MyBase | undefined
 
 class A<T extends MyBase | undefined> {
-    foo(p:T): T! {
+    foo(p:T): NonNullable<T> {
         return p!
     }
 }
