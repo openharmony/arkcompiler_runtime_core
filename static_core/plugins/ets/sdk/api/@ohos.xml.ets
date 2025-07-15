@@ -102,7 +102,15 @@ export namespace xml {
             else {
                 b = buffer.from(bufferIn)
             }
-            strIn = (encoding != undefined) ? b.toString(encoding! as buffer.BufferEncoding) : b.toString()
+            if (encoding != undefined) {
+                encoding = encoding.toLowerCase()
+                if (encoding !== "utf-8") {
+                    throw new BusinessError(TypeErrorCodeId, new Error('Parameter error.Just support utf-8'))
+                }
+                strIn = b.toString(encoding! as buffer.BufferEncoding)
+            } else {
+                strIn = b.toString()
+            }
             this.helper = new XmlParseHelper(strIn)
         }
 
