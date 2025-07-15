@@ -614,9 +614,6 @@
 13.compilation_units/07.export_directives/04.re-export_directive/pkg02_re-export_all_with_rename.ets
 13.compilation_units/07.export_directives/04.re-export_directive/pkg03_re-export_all.ets
 
-#25195 Subtyping for funtions doesn't work with return type void
-15.semantic_rules/02.subtyping/04.subtyping_for_function_types/positive_3.ets
-
 #23537
 15.semantic_rules/09.overloading/overloading_for_functions/function_argument_equivalent_neg_n2_0.ets
 15.semantic_rules/08.overriding/01.overriding_in_classes/access_modifier_over_25.ets

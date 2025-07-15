@@ -236,5 +236,8 @@
 # c'\u0000' + '0000' != "00000"
 07.expressions/31.string_interpolation_expressions/siexp_6.ets
 
+#25195 Subtyping for funtions shouldn't work with return type void and any ref type
+15.semantic_rules/02.subtyping/04.subtyping_for_function_types/positive_3.ets
+
 # there is no correct return value
 17.experimental_features/09.overload_declarations/01.function_overload_declarations/fn_overloading_35.ets
