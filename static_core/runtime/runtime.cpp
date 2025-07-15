@@ -976,6 +976,12 @@ bool Runtime::Initialize()
         StartMemAllocDumper(ConvertToString(options_.GetMemAllocDumpFile()));
     }
 
+    // NOTE(compiler team): #27075 Remove this after full support of LineString, TreeString and SliceString
+    // Disable String Concat optimizations for new types of string, due to expected performance degradation
+    if (!compiler::g_options.WasSetCompilerOptimizeStringConcat()) {
+        compiler::g_options.SetCompilerOptimizeStringConcat(!Runtime::GetOptions().IsUseAllStrings());
+    }
+
 #ifdef PANDA_TARGET_MOBILE
     mem::GcHung::InitPreFork(true);
 #else
