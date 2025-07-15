@@ -92,6 +92,16 @@ public:
      * Usage scenario: Attribute value is a number
      */
     static bool IsNumber(const std::string &str);
+
+    /**
+     * Split str by '^'
+     * @param str split str
+     * @return (left, right) if not contain '^', return tuple is (str, "")
+     * e.g.
+     *  SplitAnonymousName("foo^1) => ["foo", "^1"]
+     *  SplitAnonymousName("foo) => ["foo", ""]
+     */
+    static std::tuple<std::string, std::string> SplitAnonymousName(const std::string &str);
 };
 
 }  // namespace panda::guard

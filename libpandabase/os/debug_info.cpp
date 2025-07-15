@@ -194,8 +194,11 @@ void DebugInfo::Destroy()
     cu_list_.clear();
     ranges_.clear();
     dwarf_finish(dbg_, nullptr);
-    close(fd_);
-    fd_ = INVALID_FD;
+    {
+        os::memory::LockHolder lock(fd_mutex_);
+        close(fd_);
+        fd_ = INVALID_FD;
+    }
     dbg_ = nullptr;
 }
 
@@ -211,8 +214,11 @@ DebugInfo::ErrorCode DebugInfo::ReadFromFile(const char *filename)
         // But since dbg is NULL, dwarf_dealloc just returns in case of dbg == nullptr and doesn't free this memory
         // A possible solution is to use 20201201 version and call dwarf_dealloc.
         free(err);  // NOLINT(cppcoreguidelines-no-malloc)
-        close(fd_);
-        fd_ = INVALID_FD;
+        {
+            os::memory::LockHolder lock(fd_mutex_);
+            close(fd_);
+            fd_ = INVALID_FD;
+        }
         dbg_ = nullptr;
     }
     if (res == DW_DLV_ERROR) {

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,26 +13,30 @@
  * limitations under the License.
  */
 
-/*---
-desc: Local classes and interfaces are prohibited in ArkTS
-tags: [compile-only, negative]
----*/
+#ifndef PANDA_GUARD_OBFUSCATE_ARRAY_H
+#define PANDA_GUARD_OBFUSCATE_ARRAY_H
 
-function foo(): int {
+#include "entity.h"
 
-    interface LocalInterface {
-        fld: int
-    }
+namespace panda::guard {
 
-    class LocalClass implements LocalInterface {
-        fld: int
-    }
+class Node;
 
-    let v: LocalClass = new LocalClass
-    v.fld = 42
-    return v.fld
-}
+class Array final : public Entity {
+public:
+    explicit Array(Program *program) : Entity(program) {}
 
-function main() {
-    assertEQ(foo(), 42)
-}
+protected:
+    void RefreshNeedUpdate() override;
+
+    void Update() override;
+
+public:
+    std::optional<Node *> node_ = std::nullopt;
+
+    InstructionInfo nameInfo_ {};
+};
+
+}  // namespace panda::guard
+
+#endif  // PANDA_GUARD_OBFUSCATE_ARRAY_H

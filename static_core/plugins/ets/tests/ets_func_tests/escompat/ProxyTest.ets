@@ -116,10 +116,11 @@ function testObjectProxyOps(): void {
     verifyObjectProxyOps(new ObjWithProps(), new ObjProxyHandler())
 }
 
+
+class Handler extends DefaultProxyHandler<Map<string, string>> {}
 function testStdLibClassesProxying(): void {
     const map = new Map<string, string>()
 
-    class Handler extends DefaultProxyHandler<Map<string, string>> {}
     const mapProxy = Proxy.create(map, new Handler())
 
     assertTrue(map === mapProxy)

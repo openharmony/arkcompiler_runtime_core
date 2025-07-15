@@ -21,6 +21,7 @@
 #include <string>
 #include <libdwarf/libdwarf.h>
 #include "macros.h"
+#include "mutex.h"
 #include "utils/span.h"
 
 namespace panda {
@@ -177,6 +178,7 @@ private:
     Dwarf_Signed arange_count_ {0};
     std::list<CompUnit> cu_list_;
     std::set<Range> ranges_;
+    os::memory::Mutex fd_mutex_;  // Protect file descriptor operations
 };
 
 }  // namespace panda

@@ -104,7 +104,7 @@ static_core/plugins/ets/runtime/ets_libbase_runtime.yaml @Prof1983
 static_core/plugins/ets/runtime/ets_runtime_interface*   @Prof1983
 static_core/plugins/ets/runtime/job_queue.h              @dmitriitr
 static_core/plugins/ets/sdk/                             ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker @yuan-yao14
-static_core/plugins/ets/stdlib/                          ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker ^liyiming13 ^jokerxd-liu
+static_core/plugins/ets/stdlib/                          ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker @liyiming13 ^jokerxd-liu ^lijin1039
 static_core/plugins/ets/tests/ani                        @liwentao_uiw @v-cherkashin ^slynkodenis
 static_core/plugins/ets/verification/                    @igelhaus
 static_core/runtime/include/mem/                         ^dmitriitr @udav
@@ -134,7 +134,7 @@ static_core/plugins/ets/tests/benchmarks/ani                                  @i
 static_core/plugins/ets/tests/benchmarks/interop_js                           @nazarovkonstantin @ignatenkooleg @Prof1983
 static_core/plugins/ets/tests/checked/                                        @Prof1983 @dingding5
 static_core/plugins/ets/tests/ets-templates/                                  ^Prof1983 @igelhaus ^ragnvald @fotograf @zsw_zhushiwei ^amate ^sergeyandreev ^lindvladimir_f9b8
-static_core/plugins/ets/tests/ets_es_checked/                                 ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker ^liyiming13 ^jokerxd-liu
+static_core/plugins/ets/tests/ets_es_checked/                                 ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker @liyiming13 ^jokerxd-liu ^lijin1039
 static_core/plugins/ets/tests/ets_sdk/                                        ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker @yuan-yao14
 static_core/plugins/ets/tests/interop_js/                                     ^igelhaus @nazarovkonstantin ^rokashevichsvetlana ^kurnevichstanislav
 static_core/plugins/ets/tests/stdlib-templates/                               ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker
@@ -148,21 +148,21 @@ static_core/plugins/ets/runtime/interop_js/xgc/                               ^d
 static_core/plugins/ets/stdlib/std/concurrency/                               @konstanting ^dmitriitr ^udav ^wang_zhaoyong ^ychen3
 static_core/plugins/ets/stdlib/std/containers/BlockingQueue.sts               @konstanting
 static_core/plugins/ets/stdlib/std/core/Coroutine.sts                         ^dmitriitr @konstanting ^ychen3
-static_core/plugins/ets/stdlib/std/core/EnumConstant.sts                      @aleksander-sotov ^anton-sysoev @dreamdoomwalker ^liyiming13
-static_core/plugins/ets/stdlib/std/core/Field.sts                             @aleksander-sotov ^anton-sysoev @dreamdoomwalker ^liyiming13
-static_core/plugins/ets/stdlib/std/core/FinalizationRegistry.sts              ^dmitriitr @udav ^shemetovphilip ^liyiming13
+static_core/plugins/ets/stdlib/std/core/EnumConstant.sts                      @aleksander-sotov ^anton-sysoev @dreamdoomwalker @liyiming13 ^lijin1039
+static_core/plugins/ets/stdlib/std/core/Field.sts                             @aleksander-sotov ^anton-sysoev @dreamdoomwalker @liyiming13 ^lijin1039
+static_core/plugins/ets/stdlib/std/core/FinalizationRegistry.sts              ^dmitriitr @udav ^shemetovphilip @liyiming13 ^lijin1039
 static_core/plugins/ets/stdlib/std/core/GC.sts                                ^dmitriitr @udav
-static_core/plugins/ets/stdlib/std/core/Method.sts                            @aleksander-sotov ^anton-sysoev @dreamdoomwalker ^liyiming13
-static_core/plugins/ets/stdlib/std/core/Object.sts                            @aleksander-sotov ^anton-sysoev @dreamdoomwalker ^liyiming13
+static_core/plugins/ets/stdlib/std/core/Method.sts                            @aleksander-sotov ^anton-sysoev @dreamdoomwalker @liyiming13 ^lijin1039
+static_core/plugins/ets/stdlib/std/core/Object.sts                            @aleksander-sotov ^anton-sysoev @dreamdoomwalker @liyiming13 ^lijin1039
 static_core/plugins/ets/stdlib/std/core/Promise.sts                           ^dmitriitr @udav
-static_core/plugins/ets/stdlib/std/core/Type*                                 @aleksander-sotov ^anton-sysoev @dreamdoomwalker ^liyiming13
-static_core/plugins/ets/stdlib/std/core/UnionCase.sts                         @aleksander-sotov ^anton-sysoev @dreamdoomwalker ^liyiming13
-static_core/plugins/ets/stdlib/std/core/Value.sts                             @aleksander-sotov ^anton-sysoev @dreamdoomwalker ^liyiming13
+static_core/plugins/ets/stdlib/std/core/Type*                                 @aleksander-sotov ^anton-sysoev @dreamdoomwalker @liyiming13 ^lijin1039
+static_core/plugins/ets/stdlib/std/core/UnionCase.sts                         @aleksander-sotov ^anton-sysoev @dreamdoomwalker @liyiming13 ^lijin1039
+static_core/plugins/ets/stdlib/std/core/Value.sts                             @aleksander-sotov ^anton-sysoev @dreamdoomwalker @liyiming13 ^lijin1039
 static_core/plugins/ets/tests/ets-templates/17.experimental_features/         @dmitriitr @Prof1983 @igelhaus @ragnvald @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
 static_core/plugins/ets/tests/ets-templates/7.expressions/                    @dmitriitr @Prof1983 @igelhaus @ragnvald @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
 static_core/plugins/ets/tests/ets-templates/9.classes/                        @dmitriitr @Prof1983 @igelhaus @ragnvald @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
-static_core/plugins/ets/tests/ets_func_tests/escompat/                        ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker ^liyiming13 ^jokerxd-liu
-static_core/plugins/ets/tests/ets_func_tests/std/                             ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker ^liyiming13 ^jokerxd-liu
+static_core/plugins/ets/tests/ets_func_tests/escompat/                        ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker @liyiming13 ^lijin1039 ^jokerxd-liu
+static_core/plugins/ets/tests/ets_func_tests/std/                             ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker @liyiming13 ^lijin1039 ^jokerxd-liu
 static_core/plugins/ets/tests/ets_test_suite/atomics/                         @konstanting
 static_core/plugins/ets/tests/ets_test_suite/containers/blocking_queue.sts    @konstanting
 static_core/plugins/ets/tests/ets_test_suite/coroutines/                      @konstanting

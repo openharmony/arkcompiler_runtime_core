@@ -17,12 +17,12 @@ import * as ts from 'typescript';
 
 import { FaultID } from '../utils/lib/FaultId';
 import { visitVisitResult } from './utils/ASTHelpers';
-import { 
+import {
   ETSKeyword,
   FINAL_CLASS,
-  JSValue, 
-  KitPrefix, 
-  UtilityTypes, 
+  JSValue,
+  KitPrefix,
+  UtilityTypes,
   SpecificTypes,
   BuiltInType
 } from '../utils/lib/TypeUtils';
@@ -44,7 +44,7 @@ export class Autofixer {
     [
       ts.SyntaxKind.PropertyDeclaration,
       [
-        this[FaultID.PrivateIdentifier].bind(this), 
+        this[FaultID.PrivateIdentifier].bind(this),
         this[FaultID.NoInitializer].bind(this),
         this[FaultID.NoETSKeyword].bind(this),
         this[FaultID.PropertyAccessExpression].bind(this)
@@ -86,7 +86,7 @@ export class Autofixer {
     [ts.SyntaxKind.AnyKeyword, [this[FaultID.AnyToJSValue].bind(this)]],
     [ts.SyntaxKind.UnknownKeyword, [this[FaultID.UnknownToJSValue].bind(this)]],
     [
-      ts.SyntaxKind.InterfaceDeclaration, 
+      ts.SyntaxKind.InterfaceDeclaration,
       [
         this[FaultID.NoETSKeyword].bind(this),
         this[FaultID.DefaultExport].bind(this),
@@ -97,7 +97,7 @@ export class Autofixer {
     [ts.SyntaxKind.SymbolKeyword, [this[FaultID.SymbolToJSValue].bind(this)]],
     [ts.SyntaxKind.IntersectionType, [this[FaultID.IntersectionTypeJSValue].bind(this)]],
     [
-      ts.SyntaxKind.TypeReference, 
+      ts.SyntaxKind.TypeReference,
       [
         this[FaultID.ObjectParametersToJSValue].bind(this),
         this[FaultID.InstanceType].bind(this),
@@ -108,7 +108,7 @@ export class Autofixer {
     [
       ts.SyntaxKind.FunctionDeclaration,
       [
-        this[FaultID.GeneratorFunction].bind(this), 
+        this[FaultID.GeneratorFunction].bind(this),
         this[FaultID.ObjectBindingParams].bind(this),
         this[FaultID.DefaultExport].bind(this)
       ]
@@ -116,9 +116,9 @@ export class Autofixer {
     [ts.SyntaxKind.TypeQuery, [this[FaultID.TypeQuery].bind(this)]],
     [ts.SyntaxKind.TypeParameter, [this[FaultID.LiteralType].bind(this)]],
     [
-      ts.SyntaxKind.ClassDeclaration, 
+      ts.SyntaxKind.ClassDeclaration,
       [
-        this[FaultID.NoPrivateMember].bind(this), 
+        this[FaultID.NoPrivateMember].bind(this),
         this[FaultID.DefaultExport].bind(this),
         this[FaultID.NoETSKeyword].bind(this)
       ]
@@ -853,7 +853,7 @@ export class Autofixer {
     /**
      * For duplicated enums, convert them to one enum
      */
-    
+
     const statements: ts.Statement[] = [];
     const interfaceDeclarations: ts.InterfaceDeclaration[] = [];
     const classDeclarations: ts.ClassDeclaration[] = [];
@@ -964,7 +964,7 @@ export class Autofixer {
     if (ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node) || ts.isInterfaceDeclaration(node)) {
       return exportDefaultAssignment(node,this.context);
     }
-  
+
     return node;
   }
 
@@ -992,7 +992,7 @@ export class Autofixer {
         }
       }
     }
-    
+
     return node;
   }
 
@@ -1052,7 +1052,7 @@ export class Autofixer {
         }
       }
     }
-    
+
     return node;
   }
 
@@ -1061,7 +1061,7 @@ export class Autofixer {
    */
   private [FaultID.LimitExtends](node: ts.Node): ts.VisitResult<ts.Node> {
     /**
-     * If some classes inherit from special classes or interfaces, 
+     * If some classes inherit from special classes or interfaces,
      * these classes will be directly removed from the declaration file.
      */
 
@@ -1123,7 +1123,7 @@ export class Autofixer {
   private [FaultID.PropertyAccessExpression](node: ts.Node): ts.VisitResult<ts.Node> {
 
     /**
-     * Property access expression convert to specific type 
+     * Property access expression convert to specific type
      */
 
     if (ts.isPropertyDeclaration(node)) {
@@ -1131,7 +1131,7 @@ export class Autofixer {
       if (!initializer || initializer.kind !== ts.SyntaxKind.PropertyAccessExpression) {
         return node;
       }
-  
+
       const updatedInitializer = updatePropertyAccessExpression(initializer as ts.PropertyAccessExpression, this.context);
       if (updatedInitializer) {
         return this.context.factory.updatePropertyDeclaration(
@@ -1144,7 +1144,7 @@ export class Autofixer {
         );
       }
     }
-  
+
     return node;
   }
 
@@ -1971,12 +1971,12 @@ function restrictIdentifierName(
   const restrictedNames: ReadonlySet<string>= new Set(ETSKeyword);
 
   if (
-    ts.isPropertyDeclaration(node) 
-    || ts.isMethodDeclaration(node) 
-    || ts.isClassDeclaration(node) 
-    || ts.isInterfaceDeclaration(node)
-    || ts.isImportSpecifier(node) 
-    || ts.isExportSpecifier(node)
+    ts.isPropertyDeclaration(node) ||
+    ts.isMethodDeclaration(node) ||
+    ts.isClassDeclaration(node) ||
+    ts.isInterfaceDeclaration(node) ||
+    ts.isImportSpecifier(node) ||
+    ts.isExportSpecifier(node)
   ) {
     return restrictDeclarationName(node, restrictedNames);
   }

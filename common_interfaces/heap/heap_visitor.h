@@ -31,12 +31,17 @@ using WeakRefFieldVisitor = std::function<bool(RefField<> &)>;
 
 void VisitRoots(const RefFieldVisitor &visitor);
 void VisitWeakRoots(const WeakRefFieldVisitor &visitorFunc);
+void VisitSTWRoots(const RefFieldVisitor &visitor);
+void VisitConcurrentRoots(const RefFieldVisitor &visitor);
 
 // GlobalRoots are subsets of roots which are shared in all mutator threads.
 void VisitGlobalRoots(const RefFieldVisitor &visitor);
 void VisitWeakGlobalRoots(const WeakRefFieldVisitor &visitorFunc);
+void VisitPreforwardRoots(const RefFieldVisitor &visitor);
+
 void VisitMutatorRoot(const RefFieldVisitor &visitor, Mutator &mutator);
 void VisitWeakMutatorRoot(const WeakRefFieldVisitor &visitor, Mutator &mutator);
+void VisitMutatorPreforwardRoot(const RefFieldVisitor &visitor, Mutator &mutator);
 // Static VM Roots scanning
 void VisitStaticRoots(const RefFieldVisitor &visitor);
 }  // namespace common

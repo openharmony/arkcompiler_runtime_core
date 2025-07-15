@@ -19,18 +19,23 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <shared_mutex>
+#include <mutex>
+#include <map>
 
 namespace common {
 class HeapProfilerListener {
 public:
     static HeapProfilerListener &GetInstance();
 
-    void RegisterMoveEventCb(const std::function<void(uintptr_t, uintptr_t, size_t)> &cb);
-    void UnRegisterMoveEventCb();
+    uint32_t RegisterMoveEventCb(const std::function<void(uintptr_t, uintptr_t, size_t)> &cb);
+    void UnRegisterMoveEventCb(uint32_t index);
     void OnMoveEvent(uintptr_t fromObj, uintptr_t toObj, size_t size);
 
 private:
-    std::function<void(uintptr_t, uintptr_t, size_t)> moveEventCb_;
+    std::map<uint32_t, std::function<void(uintptr_t, uintptr_t, size_t)>> moveEventCbs_;
+    uint32_t moveEventCbId_ {1};
+    std::shared_mutex mutex_;
 };
 }  // namespace common
 #endif  // COMMON_INTERFACES_HEAP_PROFILER_LISTENER_H

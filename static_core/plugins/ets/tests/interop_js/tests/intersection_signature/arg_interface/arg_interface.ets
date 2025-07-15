@@ -27,12 +27,11 @@ import {
     instanceChildAgeNameInterfaceClass,
 } from 'main_js';
 
+class AgeNameClass {
+    age = tsNumber;
+    name = tsString;
+}
 function checkArgFuFromSts(): boolean {
-    class AgeNameClass {
-        age = tsNumber;
-        name = tsString;
-    }
-
     return checkIntersectionInterface(new AgeNameClass()) as boolean;
 }
 

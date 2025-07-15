@@ -19,13 +19,16 @@ if (ark_standalone_build) {
 }
 
 config("asmdefines_public_config") {
-  include_dirs = [
-    "$target_gen_dir/generated/",
-    "$ark_third_party_root/icu/icu4c/source/common",
-    "$ark_third_party_root/icu/icu4c/source/i18n",
-    "$ark_third_party_root/icu/icu4c/source",
-    "$ark_third_party_root/icu",
-  ]
+  include_dirs = [ "$target_gen_dir/generated/" ]
+
+  if (ark_standalone_build || ark_static_standalone_build) {
+    include_dirs += [ 
+      "//third_party/icu/icu4c/source/common",
+      "//third_party/icu/icu4c/source/i18n",
+      "//third_party/icu/icu4c/source",
+      "$ark_third_party_root/icu",
+    ]
+  }
 }
 
 ohos_static_library("asm_defines") {

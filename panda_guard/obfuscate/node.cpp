@@ -185,6 +185,7 @@ void panda::guard::Node::EnumerateIns(const InstructionInfo &info, Scope scope)
         CreateObjectDecoratorProperty(info);
     }
     UpdateExportForNamespaceMember(info);
+    CreateArray(info);
 }
 
 void panda::guard::Node::CreateFunction(const InstructionInfo &info, Scope scope)
@@ -527,6 +528,21 @@ void panda::guard::Node::UpdateExportForNamespaceMember(const InstructionInfo &i
     }
 }
 
+void panda::guard::Node::CreateArray(const InstructionInfo &info)
+{
+    if (info.notEqualToOpcode(pandasm::Opcode::CREATEARRAYWITHBUFFER)) {
+        return;
+    }
+
+    LOG(INFO, PANDAGUARD) << TAG << "found array:" << info.ins_->GetId(0);
+    auto array = std::make_shared<Array>(this->program_);
+    array->node_ = this;
+    array->nameInfo_ = info;
+    array->Create();
+
+    this->arrays_.emplace_back(array);
+}
+
 void panda::guard::Node::FindStLexVarName(const InstructionInfo &info)
 {
     if (info.notEqualToOpcode(pandasm::Opcode::STLEXVAR)) {
@@ -737,6 +753,10 @@ void panda::guard::Node::Update()
             decorator->Obfuscate();
             decorator->WriteNameCache(this->sourceName_);
         }
+    }
+
+    for (const auto &array : this->arrays_) {
+        array->Obfuscate();
     }
 
     if (this->contentNeedUpdate_) {

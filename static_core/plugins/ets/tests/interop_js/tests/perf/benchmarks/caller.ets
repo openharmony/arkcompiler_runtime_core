@@ -39,33 +39,34 @@ class $jsnew {
     static Init = JSRuntime.__initJSNewClass();
 };
 
+
+class Benchmarks {
+    voidPasser = voidPasser
+    numPasser = numPasser
+    strPasser = strPasser
+    arrPasser = arrPasser
+    arrGetter = arrGetter
+    strGetter = strGetter
+    objGetter = objGetter
+    numGetter = numGetter
+}
+
+class InteropBenchmarks {
+    voidPasser = interop_voidPasser
+    numPasser = interop_numPasser
+    strPasser = interop_strPasser
+    arrPasser = interop_arrPasser
+    arrGetter = interop_arrGetter
+    strGetter = interop_strGetter
+    objGetter = interop_objGetter
+    numGetter = interop_numGetter
+    arrAnyGetter = interop_arrAnyGetter
+    strAnyGetter = interop_strAnyGetter
+    numAnyGetter = interop_numAnyGetter
+}
+
 export function initBenchmarks(isInterop : boolean): Object
 {
-    class Benchmarks {
-        voidPasser = voidPasser
-        numPasser = numPasser
-        strPasser = strPasser
-        arrPasser = arrPasser
-        arrGetter = arrGetter
-        strGetter = strGetter
-        objGetter = objGetter
-        numGetter = numGetter
-    }
-
-    class InteropBenchmarks {
-        voidPasser = interop_voidPasser
-        numPasser = interop_numPasser
-        strPasser = interop_strPasser
-        arrPasser = interop_arrPasser
-        arrGetter = interop_arrGetter
-        strGetter = interop_strGetter
-        objGetter = interop_objGetter
-        numGetter = interop_numGetter
-        arrAnyGetter = interop_arrAnyGetter
-        strAnyGetter = interop_strAnyGetter
-        numAnyGetter = interop_numAnyGetter
-    }
-
     if (isInterop) {
         return new InteropBenchmarks;
     }

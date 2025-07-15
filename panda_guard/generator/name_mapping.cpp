@@ -44,31 +44,32 @@ std::string panda::guard::NameMapping::GetName(const std::string &origin, bool g
         LOG(WARNING, PANDAGUARD) << TAG << "origin name is empty";
         return obfName;
     }
+    const auto &[prefix, suffix] = StringUtil::SplitAnonymousName(origin);
     do {
-        auto item = nameMapping_.find(origin);
+        auto item = nameMapping_.find(prefix);
         if (item != nameMapping_.end()) {
             obfName = item->second;
             break;
         }
 
         if (!generateNew) {
-            obfName = origin;
+            obfName = prefix;
             break;
         }
 
-        if (StringUtil::IsNumber(origin)) {
-            obfName = origin;
+        if (StringUtil::IsNumber(prefix)) {
+            obfName = prefix;
             break;
         }
 
-        if (StringUtil::IsAnonymousNameSpaceName(origin)) {
-            obfName = origin;
+        if (StringUtil::IsAnonymousNameSpaceName(prefix)) {
+            obfName = prefix;
             break;
         }
 
-        if (options_ && (options_->IsReservedNames(origin) || options_->IsReservedProperties(origin) ||
-                         options_->IsReservedToplevelNames(origin))) {
-            obfName = origin;
+        if (options_ && (options_->IsReservedNames(prefix) || options_->IsReservedProperties(prefix) ||
+                         options_->IsReservedToplevelNames(prefix))) {
+            obfName = prefix;
             break;
         }
 
@@ -77,6 +78,7 @@ std::string panda::guard::NameMapping::GetName(const std::string &origin, bool g
     PANDA_GUARD_ASSERT_PRINT(obfName.empty(), TAG, ErrorCode::GENERIC_ERROR,
                              "GetName name generator failed, name is empty");
     nameMapping_.emplace(origin, obfName);
+    obfName.append(suffix);
     LOG(INFO, PANDAGUARD) << TAG << "NameMapping:" << origin << " --> " << obfName;
     return obfName;
 }
