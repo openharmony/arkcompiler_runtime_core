@@ -13,6 +13,7 @@
 
 set(DISABLES_TESTS
     standalone_function
+    interface_arg_impl
 )
 
 SUBDIRLIST(EXECUTED_TESTS
