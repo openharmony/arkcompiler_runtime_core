@@ -13,7 +13,9 @@
     "component": {
         "name": "runtime_core",
         "subsystem": "arkcompiler",
-        "syscap": [],
+        "syscap": [
+            "SystemCapability.ArkCompiler.ANI"
+        ],
         "features": [
             "runtime_core_enable_codegen"
         ],
@@ -280,6 +282,7 @@
             ],
             "test": [
                 "//arkcompiler/runtime_core/tests/fuzztest:fuzztest",
+                "//arkcompiler/runtime_core/static_core/plugins/ets/tests/ani/fuzztest:fuzztest",
                 "//arkcompiler/runtime_core/static_core/plugins/ets/tests/ets_sdk/fuzztest:fuzztest",
                 "//arkcompiler/runtime_core:runtime_core_unittest"
             ]

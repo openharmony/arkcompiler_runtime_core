@@ -145,6 +145,7 @@ std::optional<Monitor::State> Monitor::HandleLightLockedState(MarkWord &mark, MT
         if (newCount < MarkWord::LIGHT_LOCK_LOCK_MAX_COUNT) {
             auto newMark = mark.DecodeFromLightLock(thread->GetInternalId(), newCount);
             // Strong CAS as the loop iteration is large
+            ASSERT(objHandle.GetPtr() != nullptr);
             bool ret = objHandle.GetPtr()->AtomicSetMark(mark, newMark);
             if (ret) {
                 LOG(DEBUG, RUNTIME) << "The lightweight monitor was successfully recursively acquired";
@@ -212,6 +213,7 @@ std::optional<Monitor::State> Monitor::HandleUnlockedState(MarkWord &mark, MTMan
     ASSERT(thread->GetInternalId() <= MarkWord::LIGHT_LOCK_THREADID_MAX_COUNT);
     auto newMark = mark.DecodeFromLightLock(thread->GetInternalId(), 1);
     // Strong CAS as the loop iteration is large
+    ASSERT(objHandle.GetPtr() != nullptr);
     auto ret = objHandle.GetPtr()->AtomicSetMark(mark, newMark);
     if (ret) {
         LOG(DEBUG, RUNTIME) << "The lightweight monitor was successfully acquired for the first time";
@@ -311,6 +313,7 @@ Monitor::State Monitor::MonitorEnter(ObjectHeader *obj, bool trylock)
 
 Monitor::State Monitor::MonitorExit(ObjectHeader *obj)
 {
+    ASSERT(obj != nullptr);
     auto thread = MTManagedThread::GetCurrent();
     bool ret = false;
 
@@ -340,8 +343,7 @@ Monitor::State Monitor::MonitorExit(ObjectHeader *obj)
                     newMark = mark.DecodeFromUnlocked();
                 }
                 // Strong CAS as the loop iteration is large
-                ret = obj->AtomicSetMark(mark, newMark);
-                if (ret) {
+                if (obj->AtomicSetMark(mark, newMark)) {
                     LOG(DEBUG, RUNTIME) << "Exited lightweight lock";
                     TraceMonitorUnLock();
                     thread->PopLocalObjectLocked(obj);
@@ -383,6 +385,7 @@ Monitor::State Monitor::WaitWithHeavyLockedState(MTManagedThread *thread, VMHand
 {
     State resultState = State::OK;
     auto monitor = thread->GetMonitorPool()->LookupMonitor(mark.GetMonitorId());
+    ASSERT(monitor != nullptr);
     if (monitor->GetOwner() != thread) {
         // The monitor is acquired by other thread
         // throw an internal exception?
@@ -505,6 +508,7 @@ Monitor::State Monitor::Notify(ObjectHeader *obj)
     switch (state) {
         case MarkWord::STATE_HEAVY_LOCKED: {
             auto monitor = thread->GetMonitorPool()->LookupMonitor(mark.GetMonitorId());
+            ASSERT(monitor != nullptr);
             if (monitor->GetOwner() != thread) {
                 // The monitor is acquired by other thread
                 // throw an internal exception?
@@ -836,8 +840,9 @@ bool Monitor::Deflate(ObjectHeader *obj)
         LOG(DEBUG, RUNTIME) << "Trying to deflate non-heavy locked object";
         return false;
     }
-
-    auto *monitorPool = MTManagedThread::GetCurrent()->GetMonitorPool();
+    auto *thread = MTManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    auto *monitorPool = thread->GetMonitorPool();
     monitor = monitorPool->LookupMonitor(oldMark.GetMonitorId());
     if (monitor == nullptr) {
         LOG(DEBUG, RUNTIME) << "Monitor was already destroyed by someone else.";
@@ -898,6 +903,7 @@ uint8_t Monitor::HoldsLock(ObjectHeader *obj)
     switch (state) {
         case MarkWord::STATE_HEAVY_LOCKED: {
             Monitor *monitor = thread->GetMonitorPool()->LookupMonitor(mark.GetMonitorId());
+            ASSERT(monitor != nullptr);
             // asm has no boolean type
             return (monitor->GetOwner() == thread) ? 1 : 0;
         }
@@ -923,7 +929,10 @@ uint32_t Monitor::GetLockOwnerOsThreadID(ObjectHeader *obj)
 
     switch (state) {
         case MarkWord::STATE_HEAVY_LOCKED: {
-            Monitor *monitor = MTManagedThread::GetCurrent()->GetMonitorPool()->LookupMonitor(mark.GetMonitorId());
+            auto *thread = MTManagedThread::GetCurrent();
+            ASSERT(thread != nullptr);
+            Monitor *monitor = thread->GetMonitorPool()->LookupMonitor(mark.GetMonitorId());
+            ASSERT(monitor != nullptr);
             MTManagedThread *owner = monitor->GetOwner();
             if (owner == nullptr) {
                 return MTManagedThread::NON_INITIALIZED_THREAD_ID;
@@ -948,9 +957,11 @@ Monitor *Monitor::GetMonitorFromObject(ObjectHeader *obj)
     if (obj != nullptr) {
         MarkWord mark = obj->AtomicGetMark();
         MarkWord::ObjectState state = mark.GetState();
+        auto *thread = MTManagedThread::GetCurrent();
+        ASSERT(thread != nullptr);
         switch (state) {
             case MarkWord::STATE_HEAVY_LOCKED:
-                return MTManagedThread::GetCurrent()->GetMonitorPool()->LookupMonitor(mark.GetMonitorId());
+                return thread->GetMonitorPool()->LookupMonitor(mark.GetMonitorId());
             case MarkWord::STATE_LIGHT_LOCKED:
                 return nullptr;
             default:

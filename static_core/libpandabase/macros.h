@@ -135,6 +135,20 @@
 #define LIKELY(exp) (__builtin_expect((exp) != 0, true))     // NOLINT(cppcoreguidelines-macro-usage)
 #define UNLIKELY(exp) (__builtin_expect((exp) != 0, false))  // NOLINT(cppcoreguidelines-macro-usage)
 
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CHECK_EXPR(expr)                                                                                      \
+    do {                                                                                                      \
+        if (UNLIKELY(!(expr))) {                                                                              \
+            std::cerr << "CHECK FAILED: " << #expr;                                                           \
+            std::cerr << "          IN: " << __FILE__ << ":" << __LINE__ << ":" << __FUNCTION__ << std::endl; \
+            ark::PrintStack(std::cerr);                                                                       \
+            std::abort();                                                                                     \
+        }                                                                                                     \
+    } while (0)
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CHECK_NOT_NULL(ptr) CHECK_EXPR((ptr) != nullptr)
+
 #if !defined(NDEBUG)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)

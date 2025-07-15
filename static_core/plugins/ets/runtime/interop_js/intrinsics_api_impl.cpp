@@ -24,6 +24,7 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "runtime/include/class_linker-inl.h"
 #include "runtime/coroutines/stackful_coroutine.h"
+#include "types/ets_object.h"
 
 // NOLINTBEGIN(readability-identifier-naming)
 // CC-OFFNXT(G.FMT.10-CPP) project code style
@@ -643,8 +644,25 @@ EtsString *JSRuntimeTypeOf(JSValue *object)
             return EtsString::CreateFromMUtf8("string");
         case napi_symbol:
             return EtsString::CreateFromMUtf8("object");
-        case napi_object:
+        case napi_object: {
+            auto coro = EtsCoroutine::GetCurrent();
+            auto ctx = InteropCtx::Current(coro);
+            INTEROP_CODE_SCOPE_ETS(coro);
+            auto env = ctx->GetJSEnv();
+            NapiScope jsHandleScope(env);
+            napi_value jsValue = JSConvertJSValue::Wrap(env, object);
+            // (note: need to use JS_TYPE, #ICIFWJ)
+            if (IsConstructor(env, jsValue, "Number")) {
+                return EtsString::CreateFromMUtf8("number");
+            }
+            if (IsConstructor(env, jsValue, "Boolean")) {
+                return EtsString::CreateFromMUtf8("boolean");
+            }
+            if (IsConstructor(env, jsValue, "String")) {
+                return EtsString::CreateFromMUtf8("string");
+            }
             return EtsString::CreateFromMUtf8("object");
+        }
         case napi_function:
             return EtsString::CreateFromMUtf8("function");
         case napi_external:
@@ -767,18 +785,16 @@ uint8_t JSRuntimeInstanceOfStaticType(JSValue *object, EtsTypeAPIType *paramType
         return static_cast<uint8_t>(false);
     }
     auto cls = reinterpret_cast<EtsClass *>(clsObj);
-
-    // Check if object has SharedReference
-    ets_proxy::SharedReference *sharedRef = [=] {
-        napi_value jsValue = JSConvertJSValue::Wrap(env, object);
-        return ctx->GetSharedRefStorage()->GetReference(env, jsValue);
-    }();
-    auto result = false;
-    if (sharedRef != nullptr) {
-        EtsObject *etsObject = sharedRef->GetEtsObject();
-        result = cls->IsAssignableFrom(etsObject->GetClass());
+    napi_value jsValue = JSConvertJSValue::Wrap(env, object);
+    if (jsValue == nullptr) {
+        return static_cast<uint8_t>(false);
     }
-
+    auto etsObjectRes = JSConvertEtsObject::UnwrapImpl(ctx, env, jsValue);
+    if (!etsObjectRes.has_value()) {
+        return static_cast<uint8_t>(false);
+    }
+    EtsObject *etsObject = etsObjectRes.value();
+    bool result = cls->IsAssignableFrom(etsObject->GetClass());
     return static_cast<uint8_t>(result);
 }
 

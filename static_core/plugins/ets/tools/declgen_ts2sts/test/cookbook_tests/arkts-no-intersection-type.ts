@@ -15,12 +15,12 @@
 
 export type A = string & number;
 
-interface Person {
+export interface Person {
     name: string;
     age: number;
 }
 
-interface Employee {
+export interface Employee {
     employeeId: string;
     department: string;
 }

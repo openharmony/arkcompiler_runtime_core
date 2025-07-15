@@ -13,22 +13,24 @@
  * limitations under the License.
  */
 
+#include "plugins/ets/runtime/interop_js/js_job_queue.h"
 #include <node_api.h>
+#include "plugins/ets/runtime/ets_handle.h"
+#include "plugins/ets/runtime/ets_handle_scope.h"
+#include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/ets_utils.h"
+#include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "plugins/ets/runtime/interop_js/interop_common.h"
+#include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "plugins/ets/runtime/interop_js/js_convert.h"
+#include "plugins/ets/runtime/interop_js/js_value.h"
+#include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/types/ets_promise.h"
+#include "runtime/coroutines/stackful_coroutine.h"
 #include "runtime/handle_scope-inl.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/mem/refstorage/reference.h"
-#include "plugins/ets/runtime/ets_vm.h"
-#include "plugins/ets/runtime/ets_utils.h"
-#include "plugins/ets/runtime/types/ets_method.h"
-#include "plugins/ets/runtime/interop_js/js_job_queue.h"
-#include "plugins/ets/runtime/interop_js/interop_common.h"
-#include "plugins/ets/runtime/interop_js/interop_context.h"
-#include "plugins/ets/runtime/interop_js/js_value.h"
-#include "plugins/ets/runtime/types/ets_promise.h"
-#include "plugins/ets/runtime/ets_handle_scope.h"
-#include "plugins/ets/runtime/ets_handle.h"
-#include "plugins/ets/runtime/interop_js/code_scopes.h"
-#include "runtime/coroutines/stackful_coroutine.h"
 #include "intrinsics.h"
 
 namespace ark::ets::interop::js {
@@ -122,19 +124,28 @@ static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callb
         vm->GetGlobalObjectStorage()->Remove(promiseRef);
 
         if (isResolved) {
-            auto jsval = JSValue::Create(coro, ctx, value);
+            auto *jsval = JSValue::Create(coro, ctx, value);
+            ASSERT(jsval != nullptr);
             ark::ets::intrinsics::EtsPromiseResolve(promiseHandle.GetPtr(), jsval->AsObject(),
                                                     ark::ets::ToEtsBoolean(false));
         } else {
             auto refconv = JSRefConvertResolve<true>(ctx, ctx->GetErrorClass());
             ASSERT(refconv != nullptr);
-            auto error = refconv->Unwrap(ctx, value);
+            bool isInstanceof = false;
+            EtsObject *error = nullptr;
+            NAPI_CHECK_FATAL(napi_is_error(env, value, &isInstanceof));
+            if (!isInstanceof) {
+                auto res = JSConvertESError::UnwrapImpl(ctx, env, value);
+                if (LIKELY(res.has_value())) {
+                    error = AsEtsObject(res.value());
+                }
+            } else {
+                error = refconv->Unwrap(ctx, value);
+            }
             ASSERT(error != nullptr);
             ark::ets::intrinsics::EtsPromiseReject(promiseHandle.GetPtr(), error, ark::ets::ToEtsBoolean(false));
         }
     }
-
-    vm->GetCoroutineManager()->Schedule();
 
     napi_value undefined;
     napi_get_undefined(env, &undefined);
@@ -154,6 +165,7 @@ static napi_value OnJsPromiseRejected(napi_env env, [[maybe_unused]] napi_callba
 void JsJobQueue::CreatePromiseLink(EtsObject *jsObject, EtsPromise *etsPromise)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     PandaEtsVM *vm = coro->GetPandaVM();
     InteropCtx *ctx = InteropCtx::Current(coro);
     if (ctx == nullptr) {
@@ -211,6 +223,7 @@ JsJobQueue::JsCallback *JsJobQueue::JsCallback::Create(EtsCoroutine *coro, const
 void JsJobQueue::JsCallback::Run()
 {
     auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     auto *refStorage = coro->GetPandaVM()->GetGlobalObjectStorage();
     auto *callback = EtsObject::FromCoreType(refStorage->Get(jsCallbackRef_));
     LambdaUtils::InvokeVoid(coro, callback);
@@ -218,7 +231,9 @@ void JsJobQueue::JsCallback::Run()
 
 JsJobQueue::JsCallback::~JsCallback()
 {
-    auto *refStorage = EtsCoroutine::GetCurrent()->GetPandaVM()->GetGlobalObjectStorage();
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    auto *refStorage = coro->GetPandaVM()->GetGlobalObjectStorage();
     refStorage->Remove(jsCallbackRef_);
 }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -104,6 +104,7 @@ void GCMarker<Marker, LANG_TYPE_STATIC>::HandleArrayClass(GCMarkingStackType *ob
                 gc, useGcWorkers ? gc->GetSettings()->GCRootMarkingStackMaxSize() : 0,
                 useGcWorkers ? gc->GetSettings()->GCWorkersMarkingStackMaxSize() : 0,
                 GCWorkersTaskTypes::TASK_HUGE_ARRAY_MARKING_REMARK);
+            ASSERT(newStack != nullptr);
             static_cast<GCAdaptiveStack<ObjectHeader *> *>(newStack)->PushToStack(
                 const_cast<coretypes::Array *>(arrayObject));
             size_t taskStartIndex = currentPartition * partitionSize;
@@ -159,6 +160,7 @@ void GCMarker<Marker, LANG_TYPE_STATIC>::MarkInstance(GCMarkingStackType *object
     } else if (cls->IsClassClass()) {
         // Handle Class handles static fields only, so we need to Handle regular fields explicitly too
         auto objectCls = ark::Class::FromClassObject(object);
+        ASSERT(objectCls != nullptr);
         if (objectCls->IsInitializing() || objectCls->IsInitialized()) {
             HandleClass(objectsStack, objectCls);
         }

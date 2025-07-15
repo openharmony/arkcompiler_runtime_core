@@ -114,7 +114,7 @@ class DeepCloner {
 			const fieldName = objEntry![DeepCloner.OBJ_ENTRY_NAME]
 			const field = objType.getFieldByName(fieldName as String)
 
-			const objFieldValueCopy = this.clone<Object>(objEntry![DeepCloner.OBJ_ENTRY_VALUE])
+			const objFieldValueCopy = this.clone<Object>(__narrowAny(objEntry![DeepCloner.OBJ_ENTRY_VALUE]))
 			if (field.getType().assignableFrom(Type.of(objFieldValueCopy))) {
 				objCopyValue.setFieldByName(fieldName as string, Value.of(objFieldValueCopy) as Value)
 			}
@@ -141,8 +141,8 @@ class DeepCloner {
 		for (let i = 0; i < arrayLength; i++) {
 			const arrayElementValue = arrayValue.getElement(i)
 
-			const arrayElementCopy = this.clone<Object>(arrayElementValue.getData())
-			arrayCopyValue.setElement(i, Value.of(arrayElementCopy))
+			const arrayElementCopy = this.clone<Object>(__narrowAny(arrayElementValue.getData()))
+			arrayCopyValue.setElement(i, Value.of(__narrowAny(arrayElementCopy)))
 		}
 
 		this.currentDepth--

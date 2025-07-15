@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,7 @@ public:
         // Fill clusters_ in order of presence in JSON-obj:
         size_t nClusters = clustersJson->GetSize();
         for (size_t idx = 0; idx < nClusters; idx++) {
+            ASSERT(clustersJson->GetValue<JsonObjPointer>(idx) != nullptr);
             const auto clusterJson = clustersJson->GetValue<JsonObjPointer>(idx)->get();
             if (clusterJson == nullptr) {
                 LOG_PAOC_CLUSTERS(FATAL) << "Can't find a cluster (idx = " << idx << ")";
@@ -93,6 +94,7 @@ public:
                 if (option == nullptr) {
                     LOG_PAOC_CLUSTERS(FATAL) << "Unknown option: `" << optionName << "`";
                 }
+                ASSERT(optionValue != nullptr);
                 auto value = OptionsCluster::ParseOptionValue(*optionValue, option, paParser);
                 clusters_.back().GetVector().emplace_back(option, std::move(value));
             }
@@ -116,6 +118,7 @@ public:
                 LOG_PAOC_CLUSTERS(FATAL) << "Can't get clusters array for method `" << methodName << "`";
             }
             auto &curClusters = specialOptions_.try_emplace(methodName).first->second;
+            ASSERT(curClustersJson != nullptr);
             for (const auto &idx : *curClustersJson) {
                 // Cluster may be referenced by integer number (cluster's order) or string (cluster's name):
                 const auto *numIdx = idx.Get<NumT>();
@@ -168,6 +171,7 @@ public:
         static ValueVariant ParseOptionValue(const std::string_view &valueString, PandArgBase *option,
                                              PandArgParser *paParser)
         {
+            ASSERT(option != nullptr);
             switch (option->GetType()) {
                 case PandArgType::STRING:
                     return ParseOptionValue<std::string>(valueString, option, paParser);

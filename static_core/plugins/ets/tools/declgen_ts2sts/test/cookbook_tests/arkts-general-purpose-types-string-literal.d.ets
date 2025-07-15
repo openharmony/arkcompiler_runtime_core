@@ -13,5 +13,5 @@
  * limitations under the License.
  */
 export type Greeting = string;
-export declare let a: string;
+export declare let a: "Hello";
 export declare let b: Greeting;

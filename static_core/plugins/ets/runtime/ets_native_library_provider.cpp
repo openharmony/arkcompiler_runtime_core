@@ -22,6 +22,8 @@
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/napi/ets_napi_invoke_interface.h"
+#include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/ets_namespace_manager_impl.h"
 
 namespace ark::ets {
 
@@ -44,6 +46,30 @@ Expected<EtsNativeLibrary, os::Error> LoadFromPath(const PandaVector<PandaString
     return EtsNativeLibrary::Load(name);
 }
 
+Expected<EtsNativeLibrary, os::Error> LoadNativeLibraryFromNamespace(const char *name)
+{
+    auto coroutine = EtsCoroutine::GetCurrent();
+    std::string abcPath;
+    for (auto stack = StackWalker::Create(coroutine); stack.HasFrame(); stack.NextFrame()) {
+        auto *method = stack.GetMethod();
+        if (LIKELY(method != nullptr)) {
+            if (method->GetPandaFile() == nullptr) {
+                continue;
+            }
+            auto *ctx = method->GetClass()->GetLoadContext();
+            ASSERT(ctx != nullptr);
+            LOG(INFO, RUNTIME) << "NativeLibraryProvider::LoadNativeLibraryFromNamespace: ctx:"
+                               << reinterpret_cast<uint64_t>(ctx)
+                               << ", isBootContext:" << ((ctx->IsBootContext()) ? "true" : "false");
+            if (!ctx->IsBootContext()) {
+                abcPath = method->GetPandaFile()->GetFullFileName();
+                break;
+            }
+        }
+    }
+    EtsNamespaceManagerImpl &instance = EtsNamespaceManagerImpl::GetInstance();
+    return instance.LoadNativeLibraryFromNs(abcPath, name);
+}
 }  // namespace
 
 std::optional<std::string> NativeLibraryProvider::LoadLibrary(EtsEnv *env, const PandaString &name)
@@ -57,12 +83,13 @@ std::optional<std::string> NativeLibraryProvider::LoadLibrary(EtsEnv *env, const
             return {};
         }
     }
-
     auto loadRes = LoadFromPath(GetLibraryPath(), name);
+    if (!loadRes) {
+        loadRes = LoadNativeLibraryFromNamespace(name.c_str());
+    }
     if (!loadRes) {
         return loadRes.Error().ToString();
     }
-
     const EtsNativeLibrary *lib = nullptr;
     {
         os::memory::WriteLockHolder lock(lock_);

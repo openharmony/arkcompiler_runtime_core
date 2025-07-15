@@ -24,13 +24,13 @@ export declare class test extends C1 {
     penWidth: number;
 }
 export type testPromise = ESObject;
-export interface Shape {
+export declare interface Shape {
     color: string;
 }
-export interface PenStroke {
+export declare interface PenStroke {
     penWidth: number;
 }
-export interface Square extends Shape, PenStroke {
+export declare interface Square extends Shape, PenStroke {
     sideLength: number;
 }
 export type SquareTest = ESObject;

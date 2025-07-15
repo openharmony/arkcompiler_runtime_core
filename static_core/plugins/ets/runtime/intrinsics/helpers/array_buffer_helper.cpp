@@ -85,7 +85,7 @@ constexpr auto K_DECODING_TABLE = BuildDecodingTable();
     const auto paddingStart = std::find(input.begin(), input.end(), K_PADDING_CHAR);
     const bool hasPadding = paddingStart != input.end();
     // Count padding characters at the end
-    const size_t paddingCount = std::count(paddingStart, input.end(), K_PADDING_CHAR);
+    const auto paddingCount = static_cast<size_t>(std::count(paddingStart, input.end(), K_PADDING_CHAR));
     const bool validChars =
         std::all_of(input.begin(), paddingStart, [](unsigned char c) { return IsBase64Character(c); });
     const bool validPadding =
@@ -412,7 +412,11 @@ Result<int32_t> CalculateStringBytesLength(std::string_view input, std::string_v
             ++pad;
         }
         size_t threeLength = len * 3;
-        size_t size = threeLength / 4 - pad;
+        size_t s = threeLength / base64::K_BASE64_BLOCK_SIZE;
+        if (s < pad) {
+            return Err<PandaString>(PandaString("Invalid base64 string: ") + PandaString(input));
+        }
+        size_t size = s - pad;
         return static_cast<int32_t>(size);
     }
     if (encoding == "hex") {

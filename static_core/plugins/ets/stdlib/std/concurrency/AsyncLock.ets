@@ -90,7 +90,7 @@ export final class AsyncLock {
 
         let wrapped = (l: AsyncLock) => { return l.wrapper<T, U>(callback, callerCID, mode, options); }
         if (this.canAcquireLock(mode, callerCID, asyncLockInfo)) {
-            wrapped = (l: AsyncLock) => { return l.syncwrapper<T, U>(callback, asyncLockInfo); }
+            wrapped = (l: AsyncLock) => { return l.syncwrapper<T, U>(callback, asyncLockInfo, options); }
         } else {
             ConcurrencyHelpers.mutexLock(this.mutex);
             this.pending.add(asyncLockInfo);
@@ -123,7 +123,10 @@ export final class AsyncLock {
         }
     }
 
-    private syncwrapper<T,U>(callback: AsyncLockCallback<T>, asyncLockInfo: AsyncLockInfo) : Promise<T> {
+    private syncwrapper<T,U>(callback: AsyncLockCallback<T>, asyncLockInfo: AsyncLockInfo, options: AsyncLockOptions<U>) : Promise<T> {
+        if (options.signal != null && options.signal!.aborted == true) {
+            throw new Error("Aborted");
+        }
         return Promise.resolve<T>(callback()).finally(() => {this.unlock(asyncLockInfo); });
     }
 

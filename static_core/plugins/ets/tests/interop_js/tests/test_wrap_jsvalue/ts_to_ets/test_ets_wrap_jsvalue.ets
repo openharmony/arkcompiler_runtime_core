@@ -15,9 +15,6 @@
 
 package unit.test;
 
-// NOTE(zhaoziming_hw): #IC8LO3 remove local declaration after Any type is supported
-type Any = object | null | undefined;
-
 class B {}
 
 function foo(val: Any): boolean {

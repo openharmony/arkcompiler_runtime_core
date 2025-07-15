@@ -22,11 +22,9 @@ class ProxyHandler1 extends DefaultReadonlyArrayProxyHandler<string> {
     }
 }
 
+ 
 function testReadonlyArrayProxyOps(): void {
     const array: ReadonlyArray<string> = Array.of<string>("I", "II", "III")
-
-
-
     const handler = new ProxyHandler1()
     const arrayProxy = Proxy.create(array, handler)
 

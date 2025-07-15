@@ -17,6 +17,6 @@ export declare class C {
     static foo(n?: number): void;
     bar(n?: number): void;
 }
-export interface Iface {
+export declare interface Iface {
     foo(n?: number): void;
 }

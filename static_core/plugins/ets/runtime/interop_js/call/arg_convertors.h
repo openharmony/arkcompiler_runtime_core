@@ -45,6 +45,10 @@ template <typename FStore>
     auto env = ctx->GetJSEnv();
 
     // start fastpath
+    if (IsUndefined(env, jsVal)) {
+        storeRes(nullptr);
+        return true;
+    }
     if (IsNull(env, jsVal)) {
         if (LIKELY(klass->IsAssignableFrom(ctx->GetNullValueClass()))) {
             storeRes(ctx->GetNullValue()->GetCoreType());
@@ -113,12 +117,7 @@ template <typename FStore, typename GetClass>
                                                                const GetClass &getClass, napi_value jsVal)
 {
     auto id = type.GetId();
-    auto env = ctx->GetJSEnv();
     if (id == panda_file::Type::TypeId::REFERENCE) {
-        if (IsUndefined(env, jsVal)) {
-            storeRes(nullptr);
-            return true;
-        }
         return ConvertRefArgToEts(ctx, getClass(), storeRes, jsVal);
     }
     return ConvertPrimArgToEts(ctx, id, storeRes, jsVal);
@@ -237,6 +236,7 @@ static ObjectHeader **DoPackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, 
 template <typename FRead>
 [[nodiscard]] static ALWAYS_INLINE inline bool ConvertRefArgToJS(InteropCtx *ctx, napi_value *resSlot, FRead &readVal)
 {
+    ASSERT(ctx != nullptr);
     auto env = ctx->GetJSEnv();
     auto setResult = [resSlot](napi_value res) {
         *resSlot = res;

@@ -83,6 +83,7 @@ public:
 
     void SetMutex(EtsCoroutine *coro, EtsMutex *mutex)
     {
+        ASSERT(mutex != nullptr);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsJob, mutex_), mutex->GetCoreType());
     }
 
@@ -94,6 +95,7 @@ public:
 
     void SetEvent(EtsCoroutine *coro, EtsEvent *event)
     {
+        ASSERT(event != nullptr);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsJob, event_), event->GetCoreType());
     }
 
@@ -160,7 +162,9 @@ public:
 
     void Fail(EtsCoroutine *coro, EtsObject *error)
     {
+        ASSERT(error != nullptr);
         ASSERT(state_ == STATE_RUNNING);
+        ASSERT(error != nullptr);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsJob, value_), error->GetCoreType());
         state_ = STATE_FAILED;
 

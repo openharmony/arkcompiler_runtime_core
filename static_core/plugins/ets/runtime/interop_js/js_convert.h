@@ -219,7 +219,8 @@ JSCONVERT_UNWRAP(BigInt)
     auto [words, signBit] = GetBigInt(env, jsVal);
     std::vector<EtsInt> array = ConvertBigIntArrayFromJsToEts(words);
 
-    auto etsIntArray = EtsIntArray::Create(array.size());
+    auto *etsIntArray = EtsIntArray::Create(array.size());
+    ASSERT(etsIntArray != nullptr);
     for (uint32_t i = 0; i < array.size(); ++i) {
         etsIntArray->Set(i, array[i]);
     }
@@ -240,6 +241,19 @@ JSCONVERT_WRAP(JSValue)
 JSCONVERT_UNWRAP(JSValue)
 {
     return JSValue::Create(EtsCoroutine::GetCurrent(), ctx, jsVal);
+}
+
+JSCONVERT_DEFINE_TYPE(EtsObject, EtsObject *);
+JSCONVERT_WRAP(EtsObject)
+{
+    InteropFatal("Wrap of EtsObject should be done with relevant converter");
+    UNREACHABLE();
+}
+
+JSCONVERT_UNWRAP(EtsObject)
+{
+    auto objectConverter = ctx->GetEtsClassWrappersCache()->Lookup(PlatformTypes()->coreObject);
+    return objectConverter->Unwrap(ctx, jsVal);
 }
 
 // ESError convertors are supposed to box JSValue objects, do not treat them in any other way
@@ -302,6 +316,7 @@ JSCONVERT_WRAP(Promise)
 
     [[maybe_unused]] EtsHandleScope s(coro);
     EtsHandle<EtsPromise> hpromise(coro, etsVal);
+    ASSERT(hpromise.GetPtr() != nullptr);
     napi_deferred deferred;
     napi_value jsPromise;
     NAPI_CHECK_FATAL(napi_create_promise(env, &deferred, &jsPromise));
@@ -359,6 +374,7 @@ JSCONVERT_UNWRAP(Promise)
     [[maybe_unused]] EtsHandleScope s(coro);
     auto *promise = EtsPromise::Create(coro);
     EtsHandle<EtsPromise> hpromise(coro, promise);
+    ASSERT(hpromise.GetPtr() != nullptr);
     EtsHandle<EtsPromiseRef> href(coro, EtsPromiseRef::Create(coro));
     href->SetTarget(coro, hpromise->AsObject());
     hpromise->SetInteropObject(coro, href.GetPtr());

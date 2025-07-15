@@ -25,7 +25,6 @@ function main(): int {
 }
 
 class Handler<T> extends DefaultArrayProxyHandler<T> {}
-
 function newProxy<T>(a: Array<T>): Array<T> {
 
     return Proxy.create<T>(a, new Handler<T>())

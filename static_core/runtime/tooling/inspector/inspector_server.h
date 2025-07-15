@@ -116,7 +116,7 @@ public:
         std::function<Expected<EvaluationResult, std::string>(PtThread, const std::string &)> &&handler);
     void OnCallProfilerEnable();
     void OnCallProfilerDisable();
-    void OnCallProfilerSetSamplingInterval(std::function<void(int32_t)> &&handler);
+    void OnCallProfilerSetSamplingInterval(std::function<void(uint32_t)> &&handler);
     void OnCallProfilerStart(std::function<Expected<bool, std::string>()> &&handler);
     void OnCallProfilerStop(std::function<Expected<Profile, std::string>()> &&handler);
 

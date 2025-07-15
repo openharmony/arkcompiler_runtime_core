@@ -880,6 +880,7 @@ void Runtime::SetPandaPath()
 void Runtime::SetThreadClassPointers()
 {
     ManagedThread *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
     classLinker_->InitializeRoots(thread);
     auto ext = GetClassLinker()->GetExtension(GetLanguageContext(GetRuntimeType()));
     if (ext != nullptr) {
@@ -1144,6 +1145,7 @@ std::optional<Runtime::Error> Runtime::CreateApplicationClassLinkerContext(std::
     PandaString aotCtx;
     {
         ScopedManagedCodeThread smct(ManagedThread::GetCurrent());
+        ASSERT(appContext_.ctx != nullptr);
         appContext_.ctx->EnumeratePandaFiles(
             compiler::AotClassContextCollector(&aotCtx, options_.IsAotVerifyAbsPath()));
     }

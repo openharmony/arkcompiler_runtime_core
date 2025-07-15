@@ -41,7 +41,7 @@ function sumFunc(...items: number[]) : number {
 }
 
 class Sum implements Function {
-    unsafeCall(...items: FixedArray<(Object | null | undefined)>): Object | null | undefined {
+    unsafeCall(...items: FixedArray<Any>): Any {
         let sum: number = 0;
         for (let i: int = 0; i < items.length; i++) {
             sum += (items[i] as number);

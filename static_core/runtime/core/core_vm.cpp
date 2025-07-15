@@ -296,6 +296,7 @@ ObjectHeader *PandaCoreVM::GetOOMErrorObject()
 [[noreturn]] void PandaCoreVM::HandleUncaughtException()
 {
     ManagedThread *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
     LOG(ERROR, RUNTIME) << "Unhandled exception: " << thread->GetException()->ClassAddr<Class>()->GetName();
     // _exit guarantees a safe completion in case of multi-threading as static destructors aren't called
     _exit(1);

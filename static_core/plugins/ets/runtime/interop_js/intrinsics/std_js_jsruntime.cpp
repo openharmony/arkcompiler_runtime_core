@@ -255,6 +255,7 @@ EtsLong JSRuntimeXgcStartIntrinsic()
     auto *gc = coro->GetPandaVM()->GetGC();
     auto &gcTaskTracker = ets::intrinsics::GCTaskTracker::InitIfNeededAndGet(gc);
     auto task = MakePandaUnique<GCTask>(GCTaskCause::CROSSREF_CAUSE, time::GetCurrentTimeInNanos());
+    ASSERT(task != nullptr);
     auto id = task->GetId();
     gcTaskTracker.AddTaskId(id);
     if (!XGC::GetInstance()->Trigger(gc, std::move(task))) {

@@ -53,6 +53,7 @@ void LoopAnalyzer::ResetLoopInfo()
 Loop *LoopAnalyzer::CreateNewLoop(BasicBlock *loopHeader)
 {
     auto loop = GetGraph()->GetAllocator()->New<Loop>(GetGraph()->GetAllocator(), loopHeader, loopCounter_++);
+    ASSERT(loop != nullptr);
     loop->AppendBlock(loopHeader);
     return loop;
 }
@@ -61,6 +62,7 @@ void LoopAnalyzer::CreateRootLoop()
 {
     ASSERT(GetGraph()->GetRootLoop() == nullptr);
     auto rootLoop = GetGraph()->GetAllocator()->New<Loop>(GetGraph()->GetAllocator(), nullptr, loopCounter_++);
+    ASSERT(rootLoop != nullptr);
     rootLoop->SetAsRoot();
     GetGraph()->SetRootLoop(rootLoop);
 }
@@ -183,6 +185,7 @@ BasicBlock *LoopAnalyzer::CreatePreHeader(BasicBlock *header)
 {
     auto fwEdgesIndexes = GetForwardEdgesIndexes(header);
     auto preHeader = header->CreateImmediateDominator();
+    ASSERT(preHeader != nullptr);
     preHeader->SetGuestPc(header->GetGuestPc());
     if (fwEdgesIndexes.size() >= 2U) {
         MovePhiInputsToPreHeader(header, preHeader, fwEdgesIndexes);

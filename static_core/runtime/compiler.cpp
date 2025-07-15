@@ -57,6 +57,7 @@ bool PandaRuntimeInterface::IsGcValidForFastPath(SourceLanguage lang) const
 {
     auto runtime = Runtime::GetCurrent();
     if (lang == SourceLanguage::INVALID) {
+        ASSERT(ManagedThread::GetCurrent() != nullptr);
         lang = ManagedThread::GetCurrent()->GetThreadLang();
     }
     auto gcType = runtime->GetGCType(runtime->GetOptions(), lang);
@@ -165,6 +166,7 @@ compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetNumberClass(Metho
     const uint8_t *classDescriptor = utf::CStringAsMutf8(name);
     auto classLinker = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx);
     auto *classPtr = classLinker->GetClass(classDescriptor, false, classLinker->GetBootContext(), nullptr);
+    ASSERT(classPtr != nullptr);
     *typeId = classPtr->GetFileId().GetOffset();
     return classPtr;
 }
@@ -268,6 +270,7 @@ bool PandaRuntimeInterface::IsInterfaceMethod(MethodPtr parentMethod, MethodId i
 {
     ErrorHandler handler;
     auto *method = GetMethod(parentMethod, id);
+    ASSERT(method != nullptr);
     return (method->GetClass()->IsInterface() && !method->IsDefaultInterfaceMethod());
 }
 
@@ -920,6 +923,7 @@ bool Compiler::CompileMethod(Method *method, uintptr_t bytecodeOffset, bool osr,
     }
     bool ctxOsr = method->HasCompiledCode() ? osr : false;
     if (method->AtomicSetCompilationStatus(ctxOsr ? Method::COMPILED : Method::NOT_COMPILED, Method::WAITING)) {
+        ASSERT(ManagedThread::GetCurrent() != nullptr);
         CompilerTask ctx {method, ctxOsr, ManagedThread::GetCurrent()->GetVM()};
         AddTask(std::move(ctx), func);
     }

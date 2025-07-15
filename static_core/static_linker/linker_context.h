@@ -236,7 +236,8 @@ private:
 
     void MakeChangeWithId(CodePatcher &p, CodeData *data);
 
-    void HandleStringId(CodePatcher &p, const BytecodeInstruction &inst, const panda_file::File *filePtr);
+    void HandleStringId(CodePatcher &p, const BytecodeInstruction &inst, const panda_file::File *filePtr,
+                        CodeData *data);
 
     void HandleLiteralArrayId(CodePatcher &p, const BytecodeInstruction &inst, const panda_file::File *filePtr,
                               const std::map<panda_file::File::EntityId, panda_file::BaseItem *> *items);

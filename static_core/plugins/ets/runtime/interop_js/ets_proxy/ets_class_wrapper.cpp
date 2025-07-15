@@ -244,9 +244,10 @@ public:
             return etsObject;
         }
         if (IsStdClass(klass_)) {
-            auto objectConverter =
+            auto *objectConverter =
                 ctx->GetEtsClassWrappersCache()->Lookup(EtsClass::FromRuntimeClass(ctx->GetObjectClass()));
-            auto ret = objectConverter->Unwrap(ctx, jsValue);
+            auto *ret = objectConverter->Unwrap(ctx, jsValue);
+            ASSERT(ret != nullptr);
             if (!ret->IsInstanceOf(EtsClass::FromRuntimeClass(klass_))) {
                 ctx->ThrowJSTypeError(ctx->GetJSEnv(), "object of type " +
                                                            ret->GetClass()->GetRuntimeClass()->GetName() +
@@ -297,6 +298,7 @@ protected:
         std::istringstream iss {interfaces};
         std::string descriptor;
         auto *coro = EtsCoroutine::GetCurrent();
+        ASSERT(coro != nullptr);
         while (std::getline(iss, descriptor, ',')) {
             auto interfaceCls =
                 coro->GetPandaVM()->GetClassLinker()->GetClass(descriptor.data(), true, ctx->LinkerCtx());
@@ -326,6 +328,7 @@ public:
     {
         auto objectConverter =
             ctx->GetEtsClassWrappersCache()->Lookup(EtsClass::FromRuntimeClass(ctx->GetObjectClass()));
+        ASSERT(objectConverter != nullptr);
         auto ret = objectConverter->Unwrap(ctx, jsValue);
 
         std::array args = {Value {ret->GetCoreType()}};

@@ -77,32 +77,32 @@ cases:
           assertEQ( res, "1234" )
 
     - use: |-
-          const ch: char = c'X'
+          const ch: string = 'X'
           for (let ch of "A" + "B" + "CD") {
               res += ch
-              ch = c' '
+              ch = ' '
               res += ch
           }
           assertEQ( res, "A B C D " )
 
     - use: |-
-          let ch: char
+          let ch: string
           for (ch of "ABCD") res += ch
           assertEQ( res, "ABCD" )
 
     - use: |-
-          let ch: char
+          let ch: string
           for (ch of "ABCD") {
               res += ch
-              ch = c' '
+              ch = ' '
               res += ch
           }
           assertEQ( res, "A B C D " )
 
     - use: |-
         let foo: () => String = ():String => { return "ABCD" }
-        for (let ch of foo()) res += ++ch
-        assertEQ( res, "BCDE" )
+        for (let ch of foo()) res += ch
+        arktest.assertEQ( res, "ABCD" )
 
     - use: |-
           let arr: Long[] = new Long[3]

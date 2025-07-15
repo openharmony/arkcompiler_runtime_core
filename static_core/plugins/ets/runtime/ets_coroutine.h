@@ -50,6 +50,7 @@ public:
         mem::InternalAllocatorPtr allocator = runtime->GetInternalAllocator();
         auto co = allocator->New<EtsCoroutine>(os::thread::GetCurrentThreadId(), allocator, vm, std::move(name),
                                                context, std::move(epInfo), type, priority);
+        ASSERT(co != nullptr);
         co->Initialize();
         return co;
     }

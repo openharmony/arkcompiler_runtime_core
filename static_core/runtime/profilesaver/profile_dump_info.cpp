@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include <sys/file.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/uio.h>
 
 #include <cerrno>
@@ -84,7 +85,7 @@ static int testEOF(int fd)
     return read(fd, buffer, 1);
 }
 
-int64_t GetFileSizeBytes(const PandaString &filename)
+ssize_t GetFileSizeBytes(const PandaString &filename)
 {
     struct stat statBuf {};
     int rc = stat(filename.c_str(), &statBuf);
@@ -510,13 +511,14 @@ bool ProfileDumpInfo::ProcessLine(SerializerBuffer &lineBuffer, uint32_t methodS
     return true;
 }
 
-bool ProfileDumpInfo::Save(const PandaString &filename, uint64_t *bytesWritten, int fd)
+bool ProfileDumpInfo::Save(const PandaString &filename, ssize_t *bytesWritten, int fd)
 {
     bool result = Save(fd);
     if (result) {
         if (bytesWritten != nullptr) {
             LOG(INFO, RUNTIME) << "      Profile Saver Bingo! and bytes written = " << bytesWritten;
-            *bytesWritten = GetFileSizeBytes(filename);
+            int64_t writedBytes = GetFileSizeBytes(filename);
+            *bytesWritten = writedBytes < 0 ? 0 : static_cast<int64_t>(writedBytes);
         }
     } else {
         LOG(ERROR, RUNTIME) << "Failed to save profile info to " << filename;
@@ -524,7 +526,7 @@ bool ProfileDumpInfo::Save(const PandaString &filename, uint64_t *bytesWritten, 
     return result;
 }
 
-bool ProfileDumpInfo::MergeAndSave(const PandaString &filename, uint64_t *bytesWritten, bool force)
+bool ProfileDumpInfo::MergeAndSave(const PandaString &filename, ssize_t *bytesWritten, bool force)
 {
     // NB! we using READWRITE mode to leave the creation job to framework layer.
     ark::os::unix::file::File myfile = ark::os::file::Open(filename, ark::os::file::Mode::READWRITE);

@@ -13,12 +13,12 @@
 
 cases:
     - code: |-
-          let v: char|null
-          let res: char
+          let v: string|null
+          let res: string = ""
           for (v of 'a') {
               res = v
           }
-          return res == c'a' ? 0 : 1
+          return res == 'a' ? 0 : 1
 
     - code: |-
           let v: number|undefined

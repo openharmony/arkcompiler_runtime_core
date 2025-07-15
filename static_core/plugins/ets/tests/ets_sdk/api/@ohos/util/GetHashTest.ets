@@ -55,16 +55,17 @@ function testUtilGetHash002() {
     assertEQ(result1, result2, "The same object should have the same hash code");
 }
 
-function testUtilGetHash003() {
-    class Car {
-        make: string;
-        model: string;
+class Car {
+    make: string;
+    model: string;
 
-        constructor(make: string, model: string) {
-          this.make = make;
-          this.model = model;
-        }
+    constructor(make: string, model: string) {
+        this.make = make;
+        this.model = model;
     }
+}
+function testUtilGetHash003() {
+
     let myCar = new Car("Toyota", "Corolla");
     let result1 = util.getHash(myCar);
     let result2 = util.getHash(myCar);
@@ -123,15 +124,7 @@ function testUtilGetHash009() {
 }
 
 function testUtilGetHash010() {
-    class Car {
-        make: string;
-        model: string;
 
-        constructor(make: string, model: string) {
-          this.make = make;
-          this.model = model;
-        }
-    }
     let myCar1 = new Car("Toyota", "Corolla");
     let myCar2 = new Car("Toyota", "Corolla");
     let result1 = util.getHash(myCar1);

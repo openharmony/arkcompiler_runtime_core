@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@ namespace ark {
 
 StackWalker StackWalker::Create(const ManagedThread *thread, UnwindPolicy policy)
 {
+    ASSERT(thread != nullptr);
 #ifndef NDEBUG
     ASSERT(thread->IsRuntimeCallEnabled());
     if (Runtime::GetOptions().IsVerifyCallStack()) {
@@ -49,6 +50,7 @@ StackWalker::StackWalker(void *fp, bool isFrameCompiled, uintptr_t npc, UnwindPo
 
 void StackWalker::Reset(const ManagedThread *thread)
 {
+    ASSERT(thread != nullptr);
     frame_ = GetTopFrameFromFp(thread->GetCurrentFrame(), thread->IsCurrentFrameCompiled(), thread->GetNativePc());
 }
 
@@ -535,6 +537,7 @@ Frame *StackWalker::GetFrameFromPrevFrame(Frame *prevFrame)
         size_t frameNumVregs = method->GetNumVregs() + numActualArgs;
         frame = interpreter::RuntimeInterface::CreateFrameWithActualArgs<true>(frameNumVregs, numActualArgs, method,
                                                                                prevFrame);
+        ASSERT(frame != nullptr);
         frame->SetDynamic();
         DynamicFrameHandler frameHandler(frame);
         static constexpr uint8_t ACC_OFFSET = VRegInfo::ENV_COUNT + 1;
@@ -797,6 +800,7 @@ void StackWalker::Dump(std::ostream &os, bool printVregs /* = false */) &&
 
 void StackWalker::DumpFrame(std::ostream &os)
 {
+    ASSERT(GetMethod() != nullptr);
     os << GetMethod()->GetFullName();
     if (IsCFrame()) {
         if (GetCFrame().IsNative()) {

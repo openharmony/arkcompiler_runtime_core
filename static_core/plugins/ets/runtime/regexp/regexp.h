@@ -36,15 +36,6 @@ public:
     }
 
 private:
-    // NOTE(kparshukov): add "string could be broken after" as nodiscard description when C++20
-    [[nodiscard]] static bool PreparePattern(PandaVector<uint8_t> &pattern, const bool utf16);
-    [[nodiscard]] static bool ReplaceUnicode(PandaVector<uint8_t> &pattern);
-    static uint8_t HexCharToUint(const char &chr);
-    static bool IsHex(const char &chr);
-    static PandaVector<uint8_t> ReadLongUnicode(const PandaVector<uint8_t> &pattern, size_t &readingCurrent);
-    static PandaVector<uint8_t> ReadShortUnicode(const PandaVector<uint8_t> &pattern, size_t &readingCurrent);
-    static PandaVector<uint8_t> ReadUnicodeChars(const PandaVector<uint8_t> &pattern, size_t &readingCurrent);
-    static uint64_t GetCodeFromHex(const PandaVector<uint8_t> &bytes);
     void SetFlag(const char &chr);
     void SetUnicodeFlag(const char &chr);
     void SetIfNotSet(bool &flag);

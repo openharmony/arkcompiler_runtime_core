@@ -56,7 +56,6 @@ const d: Array<Number> = [10, -1, 237, -5, 148, 65, 3, 34, 0, 12];
 const dd: FixedArray<Number> = [1, 0, 3, 4, 0, 6];
 
 class Handler<T> extends DefaultArrayProxyHandler<T> {}
-
 function newProxy<T>(a: Array<T>): Array<T> {
 
     return Proxy.create<T>(a, new Handler<T>())

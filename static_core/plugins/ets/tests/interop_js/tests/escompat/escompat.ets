@@ -341,9 +341,6 @@ function Error_CreateEtsSampleWithCause(): Error {
     return new Error("message", new ErrorOptions("cause"));
 }
 
-// NOTE(zhaoziming_hw): #IC8LO3 remove local declaration after Any type is supported
-type Any = object | null | undefined;
-
 function ArrayBuffer_TestJSLength(dynArr: Any): void {
     let arr = InteropTransferHelper.transferArrayBufferToStatic(dynArr) as ArrayBuffer;
     assertTrue( (arr as Object) instanceof ArrayBuffer);

@@ -336,6 +336,7 @@ MTManagedThread *MTThreadManager::SuspendAndWaitThreadByInternalThreadId(uint32_
     // NB! Expected to be called in registered thread, change implementation if this function used elsewhere
     MTManagedThread *current = MTManagedThread::GetCurrent();
     MTManagedThread *suspended = nullptr;
+    ASSERT(current != nullptr);
     ASSERT(current->GetStatus() != ThreadStatus::RUNNING);
 
     // Extract target thread

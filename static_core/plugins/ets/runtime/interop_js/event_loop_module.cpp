@@ -47,6 +47,7 @@ uv_loop_t *EventLoop::GetEventLoop()
 
 void EventLoop::RunEventLoop(EventLoopRunMode mode)
 {
+    ark::ets::interop::js::InteropCtx::Current(EtsCoroutine::GetCurrent())->UpdateInteropStackInfoIfNeeded();
     auto *loop = GetEventLoop();
     switch (mode) {
         case EventLoopRunMode::RUN_DEFAULT:
@@ -168,7 +169,9 @@ bool EventLoopCallbackPoster::ThreadSafeCallbackQueue::IsEmpty()
 
 PandaUniquePtr<CallbackPoster> EventLoopCallbackPosterFactoryImpl::CreatePoster()
 {
-    [[maybe_unused]] auto *w = Coroutine::GetCurrent()->GetContext<StackfulCoroutineContext>()->GetWorker();
+    auto *coro = Coroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    [[maybe_unused]] auto *w = coro->GetContext<StackfulCoroutineContext>()->GetWorker();
     ASSERT(w->IsMainWorker() || w->InExclusiveMode());
     auto poster = MakePandaUnique<EventLoopCallbackPoster>();
     ASSERT(poster != nullptr);

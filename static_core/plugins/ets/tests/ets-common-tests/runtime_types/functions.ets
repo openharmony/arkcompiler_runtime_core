@@ -13,26 +13,25 @@
  * limitations under the License.
  */
 
-type __T = object | null | undefined
-function xassert(a: __T, b: __T) { return assertEQ(a, b) }
+function xassert(a: Any, b: Any) { return assertEQ(a, b) }
 
 function fakeLambdaInvoke(a: string, b: string | undefined): string {
     return a + (b === undefined ? "u" : b);
 }
 
-class FakeLambdaObject extends Lambda2 implements Function1<__T, __T> {
+class FakeLambdaObject extends Lambda2 implements Function1<Any, Any> {
     public constructor() { }
 
-    public invoke1(a: __T): __T {
+    public invoke1(a: Any): Any {
         return fakeLambdaInvoke(a as string, undefined)
     }
 
-    public invokeR1(a: __T, ...r: FixedArray<__T>): __T {
+    public invokeR1(a: Any, ...r: FixedArray<Any>): Any {
         r = Runtime.restArgumentsUnderapplicationStub(r, 1)
         return fakeLambdaInvoke(a as string, r[0] as string | undefined)
     }
 
-    public invoke2(a: __T, b: __T): __T {
+    public invoke2(a: Any, b: Any): Any {
         return fakeLambdaInvoke(a as string, b as string | undefined)
     }
 
@@ -41,7 +40,7 @@ class FakeLambdaObject extends Lambda2 implements Function1<__T, __T> {
     }
 }
 
-function testF1(f: Function1<__T, __T>) {
+function testF1(f: Function1<Any, Any>) {
     xassert(f.invoke1("a"), "au")
     xassert(f.invoke2("a", "b"), "ab")
     xassert(f.invoke3("a", "b", "c"), "ab")

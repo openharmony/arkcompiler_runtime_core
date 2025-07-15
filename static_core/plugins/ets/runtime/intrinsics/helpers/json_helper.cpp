@@ -16,6 +16,7 @@
 #include "ets_exceptions.h"
 #include "ets_handle.h"
 #include "include/thread_scopes.h"
+#include "macros.h"
 #include "types/ets_escompat_array.h"
 #include "types/ets_object.h"
 #include "json_helper.h"
@@ -74,6 +75,7 @@ void JSONStringifier::AppendJSONPointPrimitive(const PandaString &value, bool ha
 
 bool JSONStringifier::SerializeFields(EtsHandle<EtsObject> &value)
 {
+    ASSERT(value.GetPtr() != nullptr);
     bool hasContent = false;
     auto keys = PandaUnorderedSet<PandaString>();
     bool isSuccessful = false;
@@ -118,6 +120,7 @@ bool JSONStringifier::SerializeJSONObjectArray(EtsHandle<EtsObject> &value)
 
     auto array = EtsHandle<EtsArrayObject<EtsObject>>(coro, EtsArrayObject<EtsObject>::FromEtsObject(value.GetPtr()));
     auto realArray = EtsHandle<EtsObjectArray>(coro, array->GetData());
+    ASSERT(realArray.GetPtr() != nullptr);
     auto length = array->GetActualLength();
 
     for (size_t i = 0; i < length; ++i) {
@@ -251,6 +254,7 @@ bool JSONStringifier::SerializeJSONString(EtsHandle<EtsObject> &value)
 {
     EtsHandleScope scope(EtsCoroutine::GetCurrent());
     auto stringHandle = EtsHandle<EtsString>(EtsCoroutine::GetCurrent(), EtsString::FromEtsObject(value.GetPtr()));
+    ASSERT(stringHandle.GetPtr() != nullptr);
     if (stringHandle->IsEmpty()) {
         buffer_ += "\"\"";
     } else if (stringHandle->IsUtf16()) {
@@ -265,7 +269,7 @@ bool JSONStringifier::SerializeJSONString(EtsHandle<EtsObject> &value)
 
 bool JSONStringifier::SerializeJSONBoxedBoolean(EtsHandle<EtsObject> &value)
 {
-    auto val = EtsBoxPrimitive<EtsBoolean>::FromCoreType(value.GetPtr())->GetValue();
+    auto val = EtsBoxPrimitive<EtsBoolean>::Unbox(value.GetPtr());
     if (val == 0) {
         buffer_ += "false";
     } else {
@@ -276,7 +280,7 @@ bool JSONStringifier::SerializeJSONBoxedBoolean(EtsHandle<EtsObject> &value)
 
 bool JSONStringifier::SerializeJSONBoxedDouble(EtsHandle<EtsObject> &value)
 {
-    auto val = EtsBoxPrimitive<EtsDouble>::FromCoreType(value.GetPtr())->GetValue();
+    auto val = EtsBoxPrimitive<EtsDouble>::Unbox(value.GetPtr());
     auto cache = PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
     auto coro = EtsCoroutine::GetCurrent();
     PandaString v = cache->GetOrCache(coro, val)->GetMutf8();
@@ -290,7 +294,7 @@ bool JSONStringifier::SerializeJSONBoxedDouble(EtsHandle<EtsObject> &value)
 
 bool JSONStringifier::SerializeJSONBoxedFloat(EtsHandle<EtsObject> &value)
 {
-    auto val = EtsBoxPrimitive<EtsFloat>::FromCoreType(value.GetPtr())->GetValue();
+    auto val = EtsBoxPrimitive<EtsFloat>::Unbox(value.GetPtr());
     auto cache = PandaEtsVM::GetCurrent()->GetFloatToStringCache();
     auto coro = EtsCoroutine::GetCurrent();
     PandaString v = cache->GetOrCache(coro, val)->GetMutf8();
@@ -304,7 +308,7 @@ bool JSONStringifier::SerializeJSONBoxedFloat(EtsHandle<EtsObject> &value)
 
 bool JSONStringifier::SerializeJSONBoxedLong(EtsHandle<EtsObject> &value)
 {
-    auto val = EtsBoxPrimitive<EtsLong>::FromCoreType(value.GetPtr())->GetValue();
+    auto val = EtsBoxPrimitive<EtsLong>::Unbox(value.GetPtr());
     auto cache = PandaEtsVM::GetCurrent()->GetLongToStringCache();
     auto coro = EtsCoroutine::GetCurrent();
     PandaString v = cache->GetOrCache(coro, val)->GetMutf8();
@@ -319,7 +323,7 @@ bool JSONStringifier::SerializeJSONBoxedLong(EtsHandle<EtsObject> &value)
 template <typename T>
 bool JSONStringifier::SerializeJSONBoxedPrimitiveNoCache(EtsHandle<EtsObject> &value)
 {
-    T val = EtsBoxPrimitive<T>::FromCoreType(value.GetPtr())->GetValue();
+    T val = EtsBoxPrimitive<T>::Unbox(value.GetPtr());
     if constexpr (std::is_same_v<T, EtsChar>) {
         buffer_ += "\"";
         buffer_ += static_cast<char>(val);
@@ -348,7 +352,7 @@ PandaString JSONStringifier::HandleNumeric(EtsHandle<EtsObject> &value)
     PandaString result;
     auto coro = EtsCoroutine::GetCurrent();
     if constexpr (std::is_same_v<T, EtsDouble>) {
-        auto val = EtsBoxPrimitive<EtsDouble>::FromCoreType(value.GetPtr())->GetValue();
+        auto val = EtsBoxPrimitive<EtsDouble>::Unbox(value.GetPtr());
         auto cache = PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
         auto v = cache->GetOrCache(coro, val)->GetMutf8();
         if ((v == "NaN") || (v == "Infinity") || (v == "-Infinity")) {
@@ -357,7 +361,7 @@ PandaString JSONStringifier::HandleNumeric(EtsHandle<EtsObject> &value)
             result = v;
         }
     } else if constexpr (std::is_same_v<T, EtsFloat>) {
-        auto val = EtsBoxPrimitive<EtsFloat>::FromCoreType(value.GetPtr())->GetValue();
+        auto val = EtsBoxPrimitive<EtsFloat>::Unbox(value.GetPtr());
         auto cache = PandaEtsVM::GetCurrent()->GetFloatToStringCache();
         auto v = cache->GetOrCache(coro, val)->GetMutf8();
         if ((v == "NaN") || (v == "Infinity") || (v == "-Infinity")) {
@@ -366,7 +370,7 @@ PandaString JSONStringifier::HandleNumeric(EtsHandle<EtsObject> &value)
             result = v;
         }
     } else if constexpr (std::is_same_v<T, EtsLong>) {
-        auto val = EtsBoxPrimitive<EtsLong>::FromCoreType(value.GetPtr())->GetValue();
+        auto val = EtsBoxPrimitive<EtsLong>::Unbox(value.GetPtr());
         auto cache = PandaEtsVM::GetCurrent()->GetLongToStringCache();
         auto v = cache->GetOrCache(coro, val)->GetMutf8();
         if ((v == "NaN") || (v == "Infinity") || (v == "-Infinity")) {
@@ -375,13 +379,13 @@ PandaString JSONStringifier::HandleNumeric(EtsHandle<EtsObject> &value)
             result = v;
         }
     } else if constexpr (std::is_same<T, EtsBoolean>()) {
-        auto val = EtsBoxPrimitive<EtsBoolean>::FromCoreType(value.GetPtr())->GetValue();
+        auto val = EtsBoxPrimitive<EtsBoolean>::Unbox(value.GetPtr());
         result = val == 0 ? "false" : "true";
     } else if constexpr (std::is_same<T, EtsChar>()) {
-        auto val = EtsBoxPrimitive<EtsChar>::FromCoreType(value.GetPtr())->GetValue();
+        auto val = EtsBoxPrimitive<EtsChar>::Unbox(value.GetPtr());
         result = static_cast<char>(val);
     } else {
-        T val = EtsBoxPrimitive<T>::FromCoreType(value.GetPtr())->GetValue();
+        T val = EtsBoxPrimitive<T>::Unbox(value.GetPtr());
         result = std::to_string(val);
     }
     return result;
@@ -389,6 +393,7 @@ PandaString JSONStringifier::HandleNumeric(EtsHandle<EtsObject> &value)
 
 bool JSONStringifier::HandleRecordKey(EtsHandle<EtsObject> &key)
 {
+    ASSERT(key.GetPtr() != nullptr);
     if (key->IsStringClass()) {
         key_ = EtsString::FromEtsObject(key.GetPtr())->GetMutf8();
     } else {
@@ -423,6 +428,7 @@ bool JSONStringifier::SerializeJSONRecord(EtsHandle<EtsObject> &value)
         return false;
     }
     buffer_ += "{";
+    ASSERT(value.GetPtr() != nullptr);
     auto cls = value->GetClass();
     auto headEntry = cls->GetFieldByIndex(RECORD_HEAD_ENTRY_INDEX);
     auto coro = EtsCoroutine::GetCurrent();
@@ -453,6 +459,7 @@ bool JSONStringifier::SerializeJSONRecord(EtsHandle<EtsObject> &value)
 
 bool JSONStringifier::PushValue(EtsHandle<EtsObject> &value)
 {
+    ASSERT(value.GetPtr() != nullptr);
     if (path_.find(value->GetHashCode()) != path_.end()) {
         return true;
     }
@@ -647,6 +654,7 @@ bool JSONStringifier::HandleField(EtsHandle<EtsObject> &obj, EtsField *etsField,
             break;
         }
         case EtsType::LONG: {
+            ASSERT(obj.GetPtr() != nullptr);
             auto val = obj->GetFieldPrimitive<EtsLong>(etsField);
             auto cache = PandaEtsVM::GetCurrent()->GetLongToStringCache();
             PandaString v = cache->GetOrCache(coro, val)->GetMutf8();
@@ -685,6 +693,7 @@ EtsString *JSONStringifier::Stringify(EtsHandle<EtsObject> &value)
 {
     bool result = false;
     auto coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     result = SerializeObject(value);
     if (!result || coro->HasPendingException()) {
         return nullptr;

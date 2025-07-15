@@ -336,9 +336,11 @@ bool ClassLinker::SetupClassInfo(ClassLinker::ClassInfo &info, panda_file::Class
     info.itableBuilder = ctx.CreateITableBuilder(errorHandler);
     info.imtableBuilder = ctx.CreateIMTableBuilder();
 
+    ASSERT(info.itableBuilder != nullptr);
     if (!info.itableBuilder->Build(this, base, interfaces, dataAccessor->IsInterface())) {
         return false;
     }
+    ASSERT(info.vtableBuilder != nullptr);
     if (!info.vtableBuilder->Build(dataAccessor, base, info.itableBuilder->GetITable(), context)) {
         FreeITableAndInterfaces(info.itableBuilder->GetITable(), interfaces);
         return false;
@@ -385,9 +387,11 @@ bool ClassLinker::SetupClassInfo(ClassLinker::ClassInfo &info, Span<Method> meth
     info.itableBuilder = ctx.CreateITableBuilder(errorHandler);
     info.imtableBuilder = ctx.CreateIMTableBuilder();
 
+    ASSERT(info.itableBuilder != nullptr);
     if (!info.itableBuilder->Build(this, base, interfaces, isInterface)) {
         return false;
     }
+    ASSERT(info.vtableBuilder != nullptr);
     if (!info.vtableBuilder->Build(methods, base, info.itableBuilder->GetITable(), isInterface)) {
         FreeITableAndInterfaces(info.itableBuilder->GetITable(), interfaces);
         return false;
@@ -774,6 +778,7 @@ bool ClassLinker::LinkMethods(Class *klass, ClassInfo *classInfo,
                               [[maybe_unused]] ClassLinkerErrorHandler *errorHandler)
 {
     classInfo->vtableBuilder->UpdateClass(klass);
+    ASSERT(classInfo->itableBuilder != nullptr);
     if (!classInfo->itableBuilder->Resolve(klass)) {
         return false;
     }
@@ -892,6 +897,7 @@ Class *ClassLinker::LoadClass(panda_file::ClassDataAccessor *classDataAccessor, 
         return nullptr;
     }
 
+    ASSERT(classInfo.vtableBuilder != nullptr);
     auto *klass = ext->CreateClass(descriptor, classInfo.vtableBuilder->GetVTableSize(),
                                    classInfo.imtableBuilder->GetIMTSize(), classInfo.size);
 
@@ -1125,6 +1131,7 @@ Class *ClassLinker::BuildClass(const uint8_t *descriptor, bool needCopyDescripto
     }
 
     // Need to protect ArenaAllocator and loaded_classes_
+    ASSERT(classInfo.vtableBuilder != nullptr);
     auto *klass = ext->CreateClass(descriptor, classInfo.vtableBuilder->GetVTableSize(),
                                    classInfo.imtableBuilder->GetIMTSize(), classInfo.size);
 

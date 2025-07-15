@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-// NOTE(zhaoziming_hw): #IC8LO3 remove local declaration after Any type is supported
-type Any = Object | null | undefined;
-
 function testTransferArrayBufferDynamicToStatic(dynamicArrayBuffer: Any): void {
     let staticArrayBuffer: ArrayBuffer =
         InteropTransferHelper.transferArrayBufferToStatic(dynamicArrayBuffer) as ArrayBuffer;

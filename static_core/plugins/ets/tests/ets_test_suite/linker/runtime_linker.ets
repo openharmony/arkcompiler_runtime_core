@@ -73,7 +73,8 @@ class Test {
 
     static testCaller() {
         let caller = Class.ofCaller();
-        assertEQ(caller.getName(), cname("Test"));
+        assertNE(caller, undefined);
+        assertEQ(caller!.getName(), cname("Test"));
         assertNE(Other.getCallerOfItself(), caller);
     }
 
@@ -90,7 +91,7 @@ class Test {
     }
 
     static testLoadClass() {
-        let linker = Class.ofCaller().getLinker();
+        let linker = Class.ofCaller()!.getLinker();
         let clsName = cname("LoadTarget");
 
         assertFalse(LoadTarget_init, "LoadTarget class must be lazily initialized");
@@ -108,7 +109,7 @@ class Test {
     }
 
     static testInitialize() {
-        let linker = Class.ofCaller().getLinker();
+        let linker = Class.ofCaller()!.getLinker();
         let clsName = cname("InitializeTarget");
 
         assertFalse(InitializeTarget_init, "InitializeTarget class must be lazily initialized");
@@ -119,7 +120,7 @@ class Test {
     }
 
     static testCreateInstance() {
-        let linker = Class.ofCaller().getLinker();
+        let linker = Class.ofCaller()!.getLinker();
 
         let acls = Class.of(new A());
         assertEQ(Class.of(acls.createInstance()), acls);

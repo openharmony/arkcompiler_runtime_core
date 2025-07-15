@@ -99,7 +99,6 @@ void StackfulCoroutineManager::FinalizeWorkers(size_t howMany, Runtime *runtime,
     }
     entrypointParam.workerFinalizationEvent.Lock();
 
-    ScopedNativeCodeThread nativeCode(Coroutine::GetCurrent());
     Await(&entrypointParam.workerFinalizationEvent);
 
     os::memory::LockHolder lh(workersLock_);
@@ -122,6 +121,11 @@ StackfulCoroutineWorker *StackfulCoroutineManager::ChooseWorkerForFinalization()
 
 void StackfulCoroutineManager::CreateWorkersImpl(size_t howMany, Runtime *runtime, PandaVM *vm)
 {
+    if (howMany == 0) {
+        LOG(DEBUG, COROUTINES)
+            << "StackfulCoroutineManager::CreateWorkersImpl():creation of zero workers requested,skipping...";
+        return;
+    }
     auto wCountBeforeCreation = activeWorkersCount_;
     for (uint32_t i = 0; i < howMany; ++i) {
         CreateWorker(runtime, vm, StackfulCoroutineWorker::ScheduleLoopType::THREAD, "worker ");
@@ -141,6 +145,7 @@ StackfulCoroutineWorker *StackfulCoroutineManager::CreateWorker(Runtime *runtime
     auto workerId = AllocateWorkerId();
     workerName += ToPandaString(workerId);
     auto *worker = allocator->New<StackfulCoroutineWorker>(runtime, vm, this, wType, std::move(workerName), workerId);
+    ASSERT(worker != nullptr);
     if (stats_.IsEnabled()) {
         worker->GetPerfStats().Enable();
     }
@@ -642,6 +647,7 @@ bool StackfulCoroutineManager::LaunchImpl(EntrypointInfo &&epInfo, PandaString &
     {
         os::memory::LockHolder lkWorkers(workersLock_);
         auto *w = ChooseWorkerForCoroutine(co);
+        ASSERT(w != nullptr);
         w->AddRunnableCoroutine(co);
     }
 #ifndef NDEBUG
@@ -669,6 +675,7 @@ bool StackfulCoroutineManager::LaunchImmediatelyImpl(EntrypointInfo &&epInfo, Pa
         os::memory::LockHolder lkWorkers(workersLock_);
         w = ChooseWorkerForCoroutine(co);
     }
+    ASSERT(w != nullptr);
     // since we are going to switch the context, we have to close the interval
     GetCurrentWorker()->GetPerfStats().FinishInterval(CoroutineTimeStats::LAUNCH);
     co->SetImmediateLauncher(Coroutine::GetCurrent());
@@ -690,6 +697,7 @@ bool StackfulCoroutineManager::LaunchWithMode(Coroutine::EntrypointInfo &&epInfo
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchWithMode started";
 
     auto *co = Coroutine::GetCurrent();
+    ASSERT(co != nullptr);
     auto *w = co->GetContext<StackfulCoroutineContext>()->GetWorker();
     mode = (mode == CoroutineLaunchMode::DEFAULT && w->InExclusiveMode()) ? CoroutineLaunchMode::SAME_WORKER : mode;
     bool result = false;
@@ -813,6 +821,7 @@ void StackfulCoroutineManager::MainCoroutineCompleted()
 StackfulCoroutineContext *StackfulCoroutineManager::GetCurrentContext()
 {
     auto *co = Coroutine::GetCurrent();
+    ASSERT(co != nullptr);
     return co->GetContext<StackfulCoroutineContext>();
 }
 
@@ -952,6 +961,7 @@ Coroutine *StackfulCoroutineManager::CreateExclusiveWorkerForThread(Runtime *run
     }
 
     auto *eWorker = CreateWorker(runtime, vm, StackfulCoroutineWorker::ScheduleLoopType::FIBER, "[e-worker] ");
+    ASSERT(eWorker != nullptr);
     eWorker->SetExclusiveMode(true);
     eWorker->DisableForCrossWorkersLaunch();
     auto *eCoro = CreateEntrypointlessCoroutine(runtime, vm, true, "[ea_coro] " + eWorker->GetName(),
@@ -1137,6 +1147,7 @@ void StackfulCoroutineManager::MigrateAwakenedCoro(Coroutine *co)
 {
     os::memory::LockHolder lkWorkers(workersLock_);
     auto *w = ChooseWorkerForCoroutine(co);
+    ASSERT(w != nullptr);
     w->AddRunnableCoroutine(co);
 }
 
@@ -1170,18 +1181,7 @@ void StackfulCoroutineManager::PreZygoteFork()
         StopManagerThread();
     }
 
-    // Will be refactored by using modified 'FinalizeWorkers' to avoid copy-paste. #26674
-    os::memory::LockHolder lock(workersLock_);
-    for (auto *worker : workers_) {
-        if (worker->IsMainWorker()) {
-            continue;
-        }
-        worker->SetActive(false);
-    }
-    // 1 is for MAIN
-    while (activeWorkersCount_ > 1) {
-        workersCv_.Wait(&workersLock_);
-    }
+    FinalizeWorkers(commonWorkersCount_ - 1, Runtime::GetCurrent(), Runtime::GetCurrent()->GetPandaVM());
 }
 
 void StackfulCoroutineManager::PostZygoteFork()

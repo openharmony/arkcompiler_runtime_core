@@ -13,14 +13,12 @@
  * limitations under the License.
  */
 
-type SomeRef = Object | null | undefined;
-
 // Prevents comparison elimination by frontend type inferrence
 function getfalse(): boolean { return false }
-function getnull(): SomeRef { return null }
-function getundef(): SomeRef { return undefined }
-function id(x: SomeRef) { return x }
-function getobj(): SomeRef { return new Object(); }
+function getnull(): Any { return null }
+function getundef(): Any { return undefined }
+function id(x: Any) { return x }
+function getobj(): Any { return new Object(); }
 
 //! CHECKER      AOT ets.equals peepholes
 //! SKIP_IF      @architecture == "arm32"
@@ -74,19 +72,19 @@ function getobj(): SomeRef { return new Object(); }
 //!
 //! RUN          entry: "ets_equals.ETSGLOBAL::main"
 
-function equals_dce(x: SomeRef, y: SomeRef) {
+function equals_dce(x: Any, y: Any) {
     return getfalse() && x == y;
 }
-function equals_cse(x: SomeRef, y: SomeRef) {
+function equals_cse(x: Any, y: Any) {
     return id(x) == id(y) && id(y) == id(x); // commutative
 }
-function equals_same_inputs(x: SomeRef) {
+function equals_same_inputs(x: Any) {
     return id(x) == id(x);
 }
-function equals_null(x: SomeRef) {
+function equals_null(x: Any) {
     return getnull() == x;
 }
-function equals_undefined(x: SomeRef) {
+function equals_undefined(x: Any) {
     return x == getundef();
 }
 function equals_null_undefined() {

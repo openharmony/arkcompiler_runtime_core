@@ -243,13 +243,14 @@ void CodePatcher::AddStringDependency()
     }
 }
 
-void Context::HandleStringId(CodePatcher &p, const BytecodeInstruction &inst, const panda_file::File *filePtr)
+void Context::HandleStringId(CodePatcher &p, const BytecodeInstruction &inst, const panda_file::File *filePtr,
+                             CodeData *data)
 {
     BytecodeId bId = inst.GetId();
     auto oldId = bId.AsFileId();
     auto sData = filePtr->GetStringData(oldId);
     auto itemStr = std::string(utf::Mutf8AsCString(sData.data));
-    p.Add(CodePatcher::StringChange {inst, std::move(itemStr)});
+    p.Add(CodePatcher::StringChange {inst, std::move(itemStr), data->nmi});
 }
 
 void Context::HandleLiteralArrayId(CodePatcher &p, const BytecodeInstruction &inst, const panda_file::File *filePtr,
@@ -306,7 +307,7 @@ void Context::MakeChangeWithId(CodePatcher &p, CodeData *data)
         } else if (inst.HasFlag(Flags::FIELD_ID) || inst.HasFlag(Flags::STATIC_FIELD_ID)) {
             makeWithId(&panda_file::File::ResolveFieldIndex);
         } else if (inst.HasFlag(Flags::STRING_ID)) {
-            HandleStringId(p, inst, filePtr);
+            HandleStringId(p, inst, filePtr, data);
         } else if (inst.HasFlag(Flags::LITERALARRAY_ID)) {
             HandleLiteralArrayId(p, inst, filePtr, items);
         }

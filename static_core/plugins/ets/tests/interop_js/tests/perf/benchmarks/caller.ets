@@ -39,7 +39,6 @@ class $jsnew {
     static Init = JSRuntime.__initJSNewClass();
 };
 
-
 class Benchmarks {
     voidPasser = voidPasser
     numPasser = numPasser

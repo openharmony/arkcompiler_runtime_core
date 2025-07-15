@@ -15,4 +15,5 @@ panda_ets_interop_js_gtest(ets_interop_js_test_esvalue_def_test
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esvalue_def_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esvalue_def_test.ets
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esvalue_def_test.js
+    TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esvalue_def_test2.ts
 )

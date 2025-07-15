@@ -362,10 +362,10 @@ function testStringifyFunction(): int {
 
 type Option<T> = T | undefined
 
-
 class WithOption {
     opt: Option<string> = "hello"
 }
+
 function testStringifyUnion(): int {
     const option: Option<string> = "hello"
 
@@ -377,20 +377,21 @@ function testStringifyUnion(): int {
     return testResult
 }
 
-class WithFn {
-    fn: Fn<number, number> = new IdentityFn<number>()
-}
-
 interface Fn<A, R> {
     apply(a: A): R 
 }
+
 class IdentityFn<A> implements Fn<A, A> {
     apply(a: A): A {
         return a
     }
 }
-function testStringifyInterface(): int {
 
+class WithFn {
+    fn: Fn<number, number> = new IdentityFn<number>()
+}
+
+function testStringifyInterface(): int {
     const identityNumber: Fn<number, number> = new IdentityFn<number>()
     let testResult = test("{}" == JSON.stringify(identityNumber), "standalone interface")
 

@@ -25,6 +25,7 @@ void EtsWeakReference::ClearReferent()
 
 void EtsWeakReference::SetReferent(EtsObject *addr)
 {
+    ASSERT(addr != nullptr);
     ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsWeakReference, referent_), addr->GetCoreType());
 }
 

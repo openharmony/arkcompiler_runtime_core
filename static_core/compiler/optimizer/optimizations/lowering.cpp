@@ -392,7 +392,9 @@ bool Lowering::TryReplaceDivModNonPowerOfTwo([[maybe_unused]] GraphVisitor *v, I
 
     auto input0 = inst->GetInput(0).GetInst();
     bool isSigned = DataType::IsTypeSigned(input0->GetType());
-    if (!graph->GetEncoder()->CanOptimizeImmDivMod(uValue, isSigned)) {
+    auto encoder = graph->GetEncoder();
+    ASSERT(encoder != nullptr);
+    if (!encoder->CanOptimizeImmDivMod(uValue, isSigned)) {
         return false;
     }
 
@@ -457,7 +459,9 @@ void Lowering::ReplaceSignedModPowerOfTwo([[maybe_unused]] GraphVisitor *v, Inst
         addInst = graph->CreateInstAdd(inst, input0, valueMinus1Cnst);
     }
     Inst *selectInst;
-    if (graph->GetEncoder()->CanEncodeImmAddSubCmp(0, size, true)) {
+    auto encoder = graph->GetEncoder();
+    ASSERT(encoder != nullptr);
+    if (encoder->CanEncodeImmAddSubCmp(0, size, true)) {
         selectInst = graph->CreateInstSelectImm(inst, std::array<Inst *, 3U> {addInst, input0, input0}, 0,
                                                 inst->GetType(), ConditionCode::CC_LT);
     } else {
@@ -467,7 +471,8 @@ void Lowering::ReplaceSignedModPowerOfTwo([[maybe_unused]] GraphVisitor *v, Inst
     }
     auto maskValue = ~static_cast<uint64_t>(valueMinus1);
     Inst *andInst;
-    if (graph->GetEncoder()->CanEncodeImmLogical(maskValue, size)) {
+    ASSERT(encoder != nullptr);
+    if (encoder->CanEncodeImmLogical(maskValue, size)) {
         andInst = graph->CreateInstAndI(inst, selectInst, maskValue);
     } else {
         auto mask = graph->FindOrCreateConstant(maskValue);
@@ -487,7 +492,9 @@ void Lowering::ReplaceUnsignedModPowerOfTwo([[maybe_unused]] GraphVisitor *v, In
     auto valueMinus1 = absValue - 1;
     uint32_t size = (inst->GetType() == DataType::UINT64 || inst->GetType() == DataType::INT64) ? WORD_SIZE : HALF_SIZE;
     Inst *andInst;
-    if (graph->GetEncoder()->CanEncodeImmLogical(valueMinus1, size)) {
+    auto encoder = graph->GetEncoder();
+    ASSERT(encoder != nullptr);
+    if (encoder->CanEncodeImmLogical(valueMinus1, size)) {
         andInst = graph->CreateInstAndI(inst, inst->GetInput(0).GetInst(), valueMinus1);
     } else {
         auto valueMinus1Cnst = graph->FindOrCreateConstant(valueMinus1);
@@ -609,7 +616,9 @@ void Lowering::LowerShift(Inst *inst)
     }
 
     auto graph = inst->GetBasicBlock()->GetGraph();
-    if (!graph->GetEncoder()->CanEncodeShift(size)) {
+    auto encoder = graph->GetEncoder();
+    ASSERT(encoder != nullptr);
+    if (!encoder->CanEncodeShift(size)) {
         return;
     }
 
@@ -744,6 +753,7 @@ bool Lowering::ConstantFitsCompareImm(Inst *cst, uint32_t size, ConditionCode cc
         return (size == HALF_SIZE) && (val == 0);
     }
     if (cc == ConditionCode::CC_TST_EQ || cc == ConditionCode::CC_TST_NE) {
+        ASSERT(encoder != nullptr);
         return encoder->CanEncodeImmLogical(val, size);
     }
     return encoder->CanEncodeImmAddSubCmp(val, size, IsSignedConditionCode(cc));
@@ -763,7 +773,9 @@ Inst *Lowering::LowerAddSub(Inst *inst)
     auto val = static_cast<int64_t>(pred->CastToConstant()->GetIntValue());
     DataType::Type type = inst->GetType();
     uint32_t size = (type == DataType::UINT64 || type == DataType::INT64) ? WORD_SIZE : HALF_SIZE;
-    if (!graph->GetEncoder()->CanEncodeImmAddSubCmp(val, size, false)) {
+    auto encoder = graph->GetEncoder();
+    ASSERT(encoder != nullptr);
+    if (!encoder->CanEncodeImmAddSubCmp(val, size, false)) {
         return nullptr;
     }
 
@@ -800,7 +812,9 @@ void Lowering::LowerMulDivMod(Inst *inst)
     auto val = static_cast<int64_t>(pred->CastToConstant()->GetIntValue());
     DataType::Type type = inst->GetType();
     uint32_t size = (type == DataType::UINT64 || type == DataType::INT64) ? WORD_SIZE : HALF_SIZE;
-    if (!graph->GetEncoder()->CanEncodeImmMulDivMod(val, size)) {
+    auto encoder = graph->GetEncoder();
+    ASSERT(encoder != nullptr);
+    if (!encoder->CanEncodeImmMulDivMod(val, size)) {
         return;
     }
 
@@ -874,6 +888,7 @@ Inst *Lowering::LowerMultiplyAddSub(Inst *inst)
 
     auto graph = inst->GetBasicBlock()->GetGraph();
     auto encoder = graph->GetEncoder();
+    ASSERT(encoder != nullptr);
     if ((isSub && !encoder->CanEncodeMSub()) || (!isSub && !encoder->CanEncodeMAdd())) {
         return nullptr;
     }
@@ -893,7 +908,9 @@ Inst *Lowering::LowerNegateMultiply(Inst *inst)
     }
 
     auto graph = inst->GetBasicBlock()->GetGraph();
-    if (!graph->GetEncoder()->CanEncodeMNeg()) {
+    auto encoder = graph->GetEncoder();
+    ASSERT(encoder != nullptr);
+    if (!encoder->CanEncodeMNeg()) {
         return nullptr;
     }
 
@@ -937,6 +954,7 @@ void Lowering::LowerLogicWithInvertedOperand(Inst *inst)
     auto opcode = inst->GetOpcode();
     Inst *newInst;
     if (opcode == Opcode::Or) {
+        ASSERT(encoder != nullptr);
         if (!encoder->CanEncodeOrNot()) {
             return;
         }
@@ -1060,7 +1078,9 @@ Inst *Lowering::LowerLogic(Inst *inst)
     DataType::Type type = inst->GetType();
     uint32_t size = (type == DataType::UINT64 || type == DataType::INT64) ? WORD_SIZE : HALF_SIZE;
     auto graph = inst->GetBasicBlock()->GetGraph();
-    if (!graph->GetEncoder()->CanEncodeImmLogical(val, size)) {
+    auto encoder = graph->GetEncoder();
+    ASSERT(encoder != nullptr);
+    if (!encoder->CanEncodeImmLogical(val, size)) {
         return nullptr;
     }
     Inst *newInst;

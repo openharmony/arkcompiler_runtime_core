@@ -208,6 +208,7 @@ public:
     {
         auto graph = GetAllocator()->New<Graph>(
             GraphArgs {GetAllocator(), GetLocalAllocator(), GetArch(), method, GetRuntime()}, this, mode_);
+        ASSERT(graph != nullptr);
         graph->SetAotData(GetAotData());
         return graph;
     }
@@ -596,6 +597,7 @@ public:
         } else {
             UNREACHABLE();
         }
+        ASSERT(graphRegs != nullptr);
         graphRegs->resize(usedRegs->size());
         std::copy(usedRegs->begin(), usedRegs->end(), graphRegs->begin());
     }
@@ -1031,7 +1033,9 @@ public:
             return encoder_->BufferSize();
         }
         auto maxIrInstsCount = GetCurrentInstructionId();
-        auto maxArchInstsPerIrInsts = GetEncoder()->MaxArchInstPerEncoded();
+        auto encoder = GetEncoder();
+        ASSERT(encoder != nullptr);
+        auto maxArchInstsPerIrInsts = encoder->MaxArchInstPerEncoded();
         auto maxBytesInArchInst = GetInstructionSizeBits(GetArch());
         return maxIrInstsCount * maxArchInstsPerIrInsts * maxBytesInArchInst;
     }

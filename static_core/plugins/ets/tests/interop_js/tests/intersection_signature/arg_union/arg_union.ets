@@ -27,7 +27,6 @@ import {
     instanceChildAgeNameUnionClass,
 } from 'main_js';
 
-
 class Intersection1 {
     age = tsNumber;
     name = tsString;

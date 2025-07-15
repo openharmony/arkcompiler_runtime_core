@@ -57,7 +57,11 @@ uint32_t ToUint32(double x)
 extern "C" double StdMathRandom()
 {
     std::uniform_real_distribution<double> urd(0.0, 1.0);
-    return urd(EtsCoroutine::GetCurrent()->GetPandaVM()->GetRandomEngine());
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    auto *pandaVM = coro->GetPandaVM();
+    ASSERT(pandaVM != nullptr);
+    return urd(pandaVM->GetRandomEngine());
 }
 
 extern "C" double StdMathAcos(double val)

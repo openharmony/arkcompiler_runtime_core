@@ -77,6 +77,9 @@ class Es2PandaOptions:
     def is_fullastverifier(self) -> bool:
         return '--ast-verifier:phases=each' in self.es2panda_args
 
+    def is_simultaneous(self) -> bool:
+        return "--simultaneous=true" in self.es2panda_args
+
     def get_command_line(self) -> str:
         options = [
             f'--es2panda-timeout={self.timeout}' if self.timeout != Es2PandaOptions.__DEFAULT_TIMEOUT else '',

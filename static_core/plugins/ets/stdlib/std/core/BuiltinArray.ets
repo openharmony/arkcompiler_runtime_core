@@ -21,7 +21,7 @@ function asIntOrDefault(n: Number | undefined, def: int): int {
     if (n === undefined) {
         return def
     }
-    return (n! as Object as Number) as number as int;
+    return (n!).toInt();
 }
 
 function normalizeIndex(idx: int, len: int): int {
@@ -619,7 +619,7 @@ export function toLocaleString(self: FixedArray<boolean>): string {
         }
         let x = self[i] as NullishType;
         if ((null !== x) && (undefined !== x)) {
-            sb.append(x!.toLocaleString())
+            sb.append((x! as object).toLocaleString()) // #26217
         }
     }
     return sb.toString()
@@ -1579,7 +1579,7 @@ export function toLocaleString(self: FixedArray<byte>): string {
         }
         let x = self[i] as NullishType;
         if ((null !== x) && (undefined !== x)) {
-            sb.append(x!.toLocaleString())
+            sb.append((x! as object).toLocaleString()) // #26217
         }
     }
     return sb.toString()
@@ -2539,7 +2539,7 @@ export function toLocaleString(self: FixedArray<short>): string {
         }
         let x = self[i] as NullishType;
         if ((null !== x) && (undefined !== x)) {
-            sb.append(x!.toLocaleString())
+            sb.append((x! as object).toLocaleString()) // #26217
         }
     }
     return sb.toString()
@@ -3499,7 +3499,7 @@ export function toLocaleString(self: FixedArray<int>): string {
         }
         let x = self[i] as NullishType;
         if ((null !== x) && (undefined !== x)) {
-            sb.append(x!.toLocaleString())
+            sb.append((x! as object).toLocaleString()) // #26217
         }
     }
     return sb.toString()
@@ -4459,7 +4459,7 @@ export function toLocaleString(self: FixedArray<long>): string {
         }
         let x = self[i] as NullishType;
         if ((null !== x) && (undefined !== x)) {
-            sb.append(x!.toLocaleString())
+            sb.append((x! as object).toLocaleString()) // #26217
         }
     }
     return sb.toString()
@@ -5419,7 +5419,7 @@ export function toLocaleString(self: FixedArray<float>): string {
         }
         let x = self[i] as NullishType;
         if ((null !== x) && (undefined !== x)) {
-            sb.append(x!.toLocaleString())
+            sb.append((x! as object).toLocaleString()) // #26217
         }
     }
     return sb.toString()
@@ -6387,7 +6387,7 @@ export function toLocaleString(self: FixedArray<double>): string {
         }
         let x = self[i] as NullishType;
         if ((null !== x) && (undefined !== x)) {
-            sb.append(x!.toLocaleString())
+            sb.append((x! as object).toLocaleString()) // #26217
         }
     }
     return sb.toString()
@@ -7355,7 +7355,7 @@ export function toLocaleString(self: FixedArray<char>): string {
         }
         let x = self[i] as NullishType;
         if ((null !== x) && (undefined !== x)) {
-            sb.append(x!.toLocaleString())
+            sb.append((x! as object).toLocaleString()) // #26217
         }
     }
     return sb.toString()

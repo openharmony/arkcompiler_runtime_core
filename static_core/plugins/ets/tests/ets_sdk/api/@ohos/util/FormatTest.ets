@@ -289,7 +289,6 @@ function testFunctionsArrayObject() : int {
     return success
 }
 
-
 class Person {
     name: string = 'John'
     age: int  = 20

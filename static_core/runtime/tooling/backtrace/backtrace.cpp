@@ -69,6 +69,7 @@ int Backtrace::Symbolize(uintptr_t pc, uintptr_t mapBase, uint32_t bcOffset, uin
     }
     uintptr_t realOffset = pc - mapBase;
     std::unique_ptr<const panda_file::File> file = panda_file::OpenPandaFileFromMemory(abcData, abcSize);
+    ASSERT(file != nullptr);
     uintptr_t realPc = realOffset + reinterpret_cast<uintptr_t>(file->GetBase());
 
     auto methodInfos = ReadAllMethodInfos(file.get());
@@ -88,7 +89,7 @@ int Backtrace::Symbolize(uintptr_t pc, uintptr_t mapBase, uint32_t bcOffset, uin
             if (size < 0) {
                 LOG(ERROR, RUNTIME) << "copy funtionname failed!";
             }
-            function->line = panda_file::debug_helpers::GetLineNumber(mda, bcOffset, file.get());
+            function->line = static_cast<int32_t>(panda_file::debug_helpers::GetLineNumber(mda, bcOffset, file.get()));
             function->column = 0;
             function->codeBegin = methodInfos[mid].codeBegin;
             function->codeSize = methodInfos[mid].codeSize;

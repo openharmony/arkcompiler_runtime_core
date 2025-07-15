@@ -59,7 +59,7 @@ StringDecoder::StringDecoder(const std::string &encoding)
     conv_ = UtilHelper::CreateConverter(encoding, codeflag);
 }
 
-ani_string StringDecoder::Write(ani_env *env, const char *source, int32_t byteOffset, int32_t length, UBool flush)
+ani_string StringDecoder::Write(ani_env *env, const char *source, int32_t byteOffset, uint32_t length, UBool flush)
 {
     size_t limit = static_cast<size_t>(ucnv_getMinCharSize(conv_)) * length;
     size_t len = limit * sizeof(UChar);

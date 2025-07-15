@@ -14,10 +14,14 @@
 */
 
 let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_esvalue/esvalue_def_test');
+let module2 = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_esvalue/esvalue_def_test2');
 
 let jsBoolean = module.getProperty('b');
 let jsNumber = module.getProperty('n');
 let jsString = module.getProperty('s');
+let jsBoxNum = module2.getProperty('boxNum');
+let jsBoxBool = module2.getProperty('boxBool');
+let jsBoxStr = module2.getProperty('boxStr');
 let jsUndefined = module.getProperty('jsUndefined');
 let jsBigInt = module.getProperty('bi');
 let jsNull = module.getProperty('jsNull');
@@ -172,10 +176,10 @@ function checkGetPropertyByName(): boolean {
     return val.toNumber() === 2;
 }
 
+class staticObjectA {
+    aaa: string = ''
+}
 function checkGetPropertyStaticObj(): boolean {
-    class staticObjectA {
-        aaa: string = ''
-    }
     let sObj = new staticObjectA();
     sObj.aaa = 'bbb';
     let obj = ESValue.wrap(sObj);
@@ -250,7 +254,13 @@ function checkHasPropertyByName(): boolean {
 
 function checkTypeOf(): boolean {
     let jsType = jsString.typeOf();
-    return jsType === 'string'
+    let jsNumType = jsBoxNum.typeOf();
+    let jsBoolType = jsBoxBool.typeOf();
+    let jsStrType = jsBoxStr.typeOf();
+    return jsType === 'string' &&
+        jsNumType === 'number' &&
+        jsBoolType === 'boolean' &&
+        jsStrType === 'string';
 }
 
 function checkInvokeNoParam(): boolean {
@@ -262,7 +272,7 @@ function checkInvokeNoParam(): boolean {
 }
 
 function checkInvokeHasParam(): boolean {
-    let args: FixedArray<(Object|null|undefined)> = [ESValue.wrapDouble(2), ESValue.wrapDouble(3)];
+    let args: FixedArray<(Object | null | undefined)> = [ESValue.wrapDouble(2), ESValue.wrapDouble(3)];
     let result: ESValue = jsFuncWithParam.invoke(...args);
     if (!result.isNumber()) {
         return false;
@@ -299,12 +309,12 @@ function checkKeys(): boolean {
     let keys = ['a', 'b', 'c'];
     let index = 0;
     for (const key of jsIterableObject.keys()) {
-        if (key.toString() != keys[index]) {
+        if (key.toString() !== keys[index]) {
             return false;
         }
         index++;
     }
-    if (index != 3) {
+    if (index !== 3) {
         return false;
     }
     return true;
@@ -314,12 +324,12 @@ function checkValues(): boolean {
     let values = [1, 2, 3];
     let index = 0;
     for (const value of jsIterableObject.values()) {
-        if (value.toNumber() != values[index]) {
+        if (value.toNumber() !== values[index]) {
             return false;
         }
         index++;
     }
-    if (index != 3) {
+    if (index !== 3) {
         return false;
     }
     return true;
@@ -330,22 +340,22 @@ function checkEntries(): boolean {
     let values = [1, 2, 3];
     let index = 0;
     for (const entry of jsIterableObject.entries()) {
-        if (entry[0].toString() != keys[index]) {
+        if (entry[0].toString() !== keys[index]) {
             return false;
         }
-        if (entry[1].toNumber() != values[index]) {
+        if (entry[1].toNumber() !== values[index]) {
             return false;
         }
         index++;
     }
-    if (index != 3) {
+    if (index !== 3) {
         return false;
     }
     return true;
 }
 
+class testObj {}
 function checkInstanceOfStaticObj(): boolean {
-    class testObj {};
     let staticObj = new testObj();
     let obj = ESValue.wrap(staticObj);
     return obj.instanceOf(Type.of(staticObj));
@@ -364,13 +374,13 @@ function checkInstanceOfStaticPrimitive(): boolean {
 }
 
 function checkInstanceOfDynamic(): boolean {
-	let num = ESValue.wrapInt(123);
-	let user = jsUser.instantiate(num);
+    let num = ESValue.wrapInt(123);
+    let user = jsUser.instantiate(num);
     return user.instanceOf(jsUser);
 }
 
 function checkInstaniate(): boolean {
-	let num = ESValue.wrapInt(123);
-	let user = jsUser.instantiate(num);
+    let num = ESValue.wrapInt(123);
+    let user = jsUser.instantiate(num);
     return user.getProperty('ID').toNumber() === 123;
 }

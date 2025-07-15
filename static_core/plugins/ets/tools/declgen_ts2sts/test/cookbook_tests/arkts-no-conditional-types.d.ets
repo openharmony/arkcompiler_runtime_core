@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-type Example1 = ESObject;
-interface Animal {
+export type Example1 = ESObject;
+export declare interface Animal {
     live(): void;
 }
-interface Dog extends Animal {
+export declare interface Dog extends Animal {
     woof(): void;
 }

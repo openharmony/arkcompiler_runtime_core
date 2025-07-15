@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,7 @@ Graph *GraphCloner::CloneGraph()
     auto newGraph = allocator_->New<Graph>(Graph::GraphArgs {allocator_, localAllocator_, GetGraph()->GetArch(),
                                                              GetGraph()->GetMethod(), GetGraph()->GetRuntime()},
                                            GetGraph()->GetParentGraph(), GetGraph()->GetMode());
+    ASSERT(newGraph != nullptr);
     newGraph->SetCurrentInstructionId(GetGraph()->GetCurrentInstructionId());
     newGraph->SetAotData(GetGraph()->GetAotData());
     CloneBlocksAndInstructions<InstCloneType::CLONE_ALL, false>(GetGraph()->GetVectorBlocks(), newGraph);
@@ -116,6 +117,7 @@ void GraphCloner::CopyLoop(Loop *loop, Loop *clonedLoop)
         auto clonedHeader = GetClone(innerLoop->GetHeader());
         auto &clonedLa = clonedHeader->GetGraph()->GetAnalysis<LoopAnalyzer>();
         auto clonedInnerLoop = clonedLa.CreateNewLoop(clonedHeader);
+        ASSERT(clonedInnerLoop != nullptr);
         clonedInnerLoop->SetOuterLoop(clonedLoop);
         clonedLoop->AppendInnerLoop(clonedInnerLoop);
         CopyLoop(innerLoop, clonedInnerLoop);
@@ -182,7 +184,7 @@ void GraphCloner::BuildTryCatchLogic(Graph *newGraph)
 
     auto fixThrowables = [this](const CatchPhiInst *originalInst, CatchPhiInst *clonedInst) {
         if (originalInst->GetThrowableInsts() != nullptr) {
-            for (int i = 0, j = originalInst->GetThrowableInsts()->size(); i < j; ++i) {
+            for (size_t i = 0, j = originalInst->GetThrowableInsts()->size(); i < j; ++i) {
                 auto *clonedThrowable = cloneInstMap_[originalInst->GetThrowableInst(i)];
                 clonedInst->AppendThrowableInst(clonedThrowable);
             }
@@ -287,6 +289,7 @@ void PopulateResolverBlock(Loop *loop, BasicBlock *resolver, Inst *inst)
 BasicBlock *GraphCloner::CreateResolverBlock(Loop *loop, BasicBlock *backEdge)
 {
     auto outsideSucc = GetLoopOutsideSuccessor(loop);
+    ASSERT(backEdge != nullptr);
     auto resolver = backEdge->InsertNewBlockToSuccEdge(outsideSucc);
     backEdge->GetLoop()->GetOuterLoop()->AppendBlock(resolver);
     // Populate resolver-block with phis for each instruction which has outside-loop user
@@ -353,6 +356,7 @@ GraphCloner::LoopUnrollData *GraphCloner::PrepareLoopToUnroll(Loop *loop, bool c
     // Populate `LoopUnrollData`
     auto allocator = loop->GetHeader()->GetGraph()->GetLocalAllocator();
     auto unrollData = allocator->New<LoopUnrollData>();
+    ASSERT(unrollData != nullptr);
     unrollData->blocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
     unrollData->blocks->resize(loop->GetBlocks().size());
     std::copy(loop->GetBlocks().begin(), loop->GetBlocks().end(), unrollData->blocks->begin());
@@ -384,6 +388,7 @@ GraphCloner::LoopUnrollData *GraphCloner::PrepareLoopToUnroll(Loop *loop, bool c
 
     unrollData->phiUpdateInputs = allocator->New<InstVector>(allocator->Adapter());
     for (auto phi : headerBlock->PhiInsts()) {
+        ASSERT(unrollData->phiUpdateInputs != nullptr);
         unrollData->phiUpdateInputs->push_back(phi->CastToPhi()->GetPhiInput(backEdge));
     }
     unrollData->header = headerBlock;
@@ -581,6 +586,7 @@ void GraphCloner::BuildLoopUnrollDataFlow(LoopUnrollData *unrollData)
             } else {
                 // phi should be visited and its input should be added to the map
                 ASSERT(unrollData->phiReplacedInputs->count(input) == 1);
+                ASSERT(unrollData->phiReplacedInputs != nullptr);
                 input = unrollData->phiReplacedInputs->at(input);
             }
         }
@@ -856,6 +862,7 @@ Loop *GraphCloner::CloneLoop(Loop *loop)
     SplitPreHeader(loop);
     auto unrollData = PrepareLoopToClone(loop);
 
+    ASSERT(unrollData != nullptr);
     CloneBlocksAndInstructions<InstCloneType::CLONE_ALL, true>(*unrollData->blocks, GetGraph());
     BuildLoopCloneControlFlow(unrollData);
     BuildLoopCloneDataFlow(unrollData);
@@ -903,7 +910,9 @@ GraphCloner::LoopClonerData *GraphCloner::PopulateLoopClonerData(Loop *loop, Bas
 {
     auto allocator = GetGraph()->GetLocalAllocator();
     auto clonerData = allocator->New<LoopClonerData>();
+    ASSERT(clonerData != nullptr);
     clonerData->blocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
+    ASSERT(clonerData->blocks != nullptr);
     clonerData->blocks->resize(loop->GetBlocks().size() + 1);
     clonerData->blocks->at(0) = preHeader;
     std::copy(loop->GetBlocks().begin(), loop->GetBlocks().end(), clonerData->blocks->begin() + 1);
@@ -949,6 +958,7 @@ GraphCloner::LoopClonerData *GraphCloner::PrepareLoopToClone(Loop *loop)
     }
     // Split outside succ after last phi
     // create empty block before outside succ if outside succ don't contain phi insts
+    ASSERT(outsideSucc != nullptr);
     if (outsideSucc->HasPhi() && outsideSucc->GetFirstInst() != nullptr) {
         auto lastPhi = outsideSucc->GetFirstInst()->GetPrev();
         auto block = outsideSucc->SplitBlockAfterInstruction(lastPhi, true);
@@ -1005,6 +1015,7 @@ void GraphCloner::MakeLoopCloneInfo(LoopClonerData *unrollData)
     auto cloneLoop = GetGraph()->GetAnalysis<LoopAnalyzer>().CreateNewLoop(headerClone);
     auto outerLoop = loop->GetOuterLoop();
     outerLoop->AppendInnerLoop(cloneLoop);
+    ASSERT(cloneLoop != nullptr);
     cloneLoop->SetOuterLoop(outerLoop);
 
     // Populate cloned loop

@@ -194,10 +194,10 @@ function testReplaceNonExistNumKey() {
     arktest.assertFalse(hashMap.replace(1, 2), "Replacing non-existent numeric key in populated map should fail");
 }
 
+class Tmp {
+    name: number = 0
+}
 function testReplaceExistNumKeyObjValue() {
-    class Tmp {
-        name: number = 0
-    }
     const hashMap = new HashMap<number, Tmp>();
     let paramOne: Tmp = {
         name: 1
@@ -209,10 +209,10 @@ function testReplaceExistNumKeyObjValue() {
     arktest.assertTrue(hashMap.replace(1, paramTwo), "Replacing existing key with a different value should succeed");
 }
 
+class Name {
+    name: string = ""
+}
 function testReplaceExistObjKeyDiffObjValue() {
-    class Name {
-        name: string = ""
-    }
     const hashMap = new HashMap<Name, Name>();
     let paramOne: Name = {
         name: "Lily"
@@ -228,10 +228,10 @@ function testReplaceExistObjKeyDiffObjValue() {
         "Replacing existing key with a different value should succeed");
 }
 
+class Age {
+    age: number = 0
+}
 function testReplaceNonExistObjKey() {
-    class Age {
-        age: number = 0
-    }
     const hashMap = new HashMap<Age, number>();
     let paramOne: Age = {
         age: 18

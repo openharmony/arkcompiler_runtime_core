@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,10 +19,11 @@
 #include "runtime/handle_scope-inl.h"
 
 namespace ark::tooling::inspector {
-ObjectRepository::ObjectRepository()
-    : extension_(ManagedThread::GetCurrent()->GetLanguageContext().CreatePtLangExt()),
-      scope_(ManagedThread::GetCurrent())
+ObjectRepository::ObjectRepository() : extension_(nullptr), scope_(ManagedThread::GetCurrent())
 {
+    auto *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    extension_ = thread->GetLanguageContext().CreatePtLangExt();
 }
 
 RemoteObject ObjectRepository::CreateGlobalObject()

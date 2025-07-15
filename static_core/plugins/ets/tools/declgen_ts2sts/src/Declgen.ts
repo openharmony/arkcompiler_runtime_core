@@ -38,6 +38,7 @@ export class Declgen {
   private readonly hookedHost: ts.CompilerHost;
   private readonly rootFiles: readonly string[];
   private readonly compilerOptions: ts.CompilerOptions;
+  private readonly declgenOptions: DeclgenCLIOptions;
 
   constructor(
     declgenOptions: DeclgenCLIOptions,
@@ -47,6 +48,7 @@ export class Declgen {
     const { rootNames, options } = Declgen.parseDeclgenOptions(declgenOptions);
 
     this.rootFiles = rootNames;
+    this.declgenOptions = declgenOptions;
 
     this.sourceFileMap = new Map<string, ts.SourceFile>();
     this.compilerOptions = Object.assign({}, options, {
@@ -100,29 +102,30 @@ export class Declgen {
     return compile(this.rootFiles, this.compilerOptions, this.hookedHost);
   }
 
-  private checkProgram(program: ts.Program): CheckerResult {
-    const checker = new Checker(program.getTypeChecker());
-
-    void checker;
-    void this;
-
-    return [];
-  }
-  
   private processDeclarationFiles(program: ts.Program): void {
     const typeChecker = program.getTypeChecker();
 
     this.rootFiles.forEach((fileName) => {
       const sourceFile = program.getSourceFile(fileName);
       if (sourceFile && sourceFile.isDeclarationFile) {
-        const outDir = program.getCompilerOptions().outDir || path.dirname(fileName);
-        const regex = new RegExp(`\\${Extension.DTS}|\\${Extension.DETS}$`);
-        const dEtsFilePath = path.join(outDir, `${path.basename(fileName).replace(regex, '')}${Extension.DETS}`);
+
+        const compilerOptions = program.getCompilerOptions();
+        const outDir = compilerOptions.outDir || path.dirname(fileName);
+        const rootDir = compilerOptions.rootDir || path.dirname(fileName);
+        const relativePath = path.relative(rootDir, fileName);
+        const fileNameWithoutExt = relativePath.replace(/\.d\.(ts|ets)$/, '');
+        const dEtsFilePath = path.join(outDir, `${fileNameWithoutExt}${Extension.DETS}`);
 
         const result = this.transformDeclarationFiles(program, sourceFile, typeChecker);
         const printer = ts.createPrinter();
         const transformedCode = printer.printFile(result.transformed[0] as ts.SourceFile);
-        fs.writeFileSync(dEtsFilePath, transformedCode, { encoding: 'utf8' });
+
+        if (Declgen.isFileInAllowedPath(this.declgenOptions, [sourceFile])) {
+          if (!fs.existsSync(outDir)) {
+            fs.mkdirSync(outDir, { recursive: true });
+          }
+          fs.writeFileSync(dEtsFilePath, transformedCode, { encoding: 'utf8' });
+        }
       }
     });
   }
@@ -131,21 +134,21 @@ export class Declgen {
     const result = ts.transform(
       sourceFile,
       [
-        (context: ts.TransformationContext) => {
+        (context: ts.TransformationContext): ts.Transformer<ts.SourceFile> => {
           const autofixer = new Autofixer(typeChecker, context);
           const visit = (node: ts.Node): ts.Node | undefined => {
             const fixedNode = autofixer.fixNode(node);
 
             if (fixedNode === undefined) {
-              return undefined;
+              return node;
             } else if (Array.isArray(fixedNode)) {
               return context.factory.createBlock(fixedNode as readonly ts.Statement[]);
             } else {
               return ts.visitEachChild(fixedNode, visit, context);
             }
           };
-          return (node: ts.Node) => {
-            return visit(node) ?? node;
+          return (sourceFile: ts.SourceFile): ts.SourceFile => {
+            return visit(sourceFile) as ts.SourceFile;
           };
         }
       ],
@@ -154,7 +157,7 @@ export class Declgen {
 
     return result;
   }
-  
+
   private static createHookedCompilerHost(
     sourceFileMap: Map<string, ts.SourceFile>,
     compilerOptions: ts.CompilerOptions,

@@ -17,12 +17,12 @@ function SumInt(value1: int, value2: int): int {
     return value1 + value2;
 }
 
-function TaskpoolFuncTestSumInt() {
+function taskpoolFuncTestSumInt() {
     let result = await taskpool.execute(SumInt, 10, 20);
     assertEQ(result, 30);
 }
 
-function TaskpoolFuncTestAnd() {
+function taskpoolFuncTestAnd() {
     let And = (value1: boolean, value2: boolean): boolean => {
         if (value1 & value2) {
             return true;
@@ -33,7 +33,7 @@ function TaskpoolFuncTestAnd() {
     assertEQ(result, true);
 }
 
-function TaskpoolFuncTestStrCat() {
+function taskpoolFuncTestStrCat() {
     let StrCat = (value1: string, value2: string): string => {
         return value1 + value2;
     }
@@ -41,7 +41,7 @@ function TaskpoolFuncTestStrCat() {
     assertEQ(result, "abcdef");
 }
 
-function TaskpoolFuncTestStrCat2() {
+function taskpoolFuncTestStrCat2() {
     let StrCat = (value1: string, value2: string): string => {
         return value1 + value2;
     }
@@ -50,7 +50,7 @@ function TaskpoolFuncTestStrCat2() {
     assertEQ(result, "abcdef");
 }
 
-function TaskpoolFuncTestStrCat3() {
+function taskpoolFuncTestStrCat3() {
     let StrCat = (value1: string, value2: string): string => {
         return value1 + value2;
     }
@@ -61,7 +61,7 @@ function TaskpoolFuncTestStrCat3() {
     assertEQ(result, "abcdefhello");
 }
 
-function TaskpoolFuncTestArraySum() {
+function taskpoolFuncTestArraySum() {
     let Sum = (value1: int[], value2: int[]): int[] => {
         let result: int[] = [0, 0];
         result[0] = value1[0] + value2[0];
@@ -80,7 +80,7 @@ class A {
     b: int;
 }
 
-function TaskpoolFuncTestClassFieldsSum() {
+function taskpoolFuncTestClassFieldsSum() {
     let Sum = (value1: A, value2: A): A => {
         let result = new A();
         result.a = value1.a + value2.a;
@@ -92,21 +92,21 @@ function TaskpoolFuncTestClassFieldsSum() {
     assertEQ(result.b, 6);
 }
 
-function TaskpoolFuncTestSumInt2() {
+function taskpoolFuncTestSumInt2() {
     let result1 = await taskpool.execute(SumInt, 10, 20);
     let result2 = await taskpool.execute(SumInt, 30, 40);
     assertEQ(result1, 30);
     assertEQ(result2, 70);
 }
 
-function TaskpoolFuncTestSumInt2SameArguments() {
+function taskpoolFuncTestSumInt2SameArguments() {
     let result1 = await taskpool.execute(SumInt, 10, 20);
     let result2 = await taskpool.execute(SumInt, 10, 20);
     assertEQ(result1, 30);
     assertEQ(result2, 30);
 }
 
-function TaskpoolFuncTestSumAndMulti() {
+function taskpoolFuncTestSumAndMulti() {
     let MultiInt = (value1: int, value2: int): int => {
         return value1 * value2;
     }
@@ -121,16 +121,18 @@ function TaskpoolFuncTestSumAndMulti() {
 }
 
 function main(): int {
-    TaskpoolFuncTestSumInt();
-    TaskpoolFuncTestAnd();
-    TaskpoolFuncTestStrCat();
-    TaskpoolFuncTestStrCat2();
-    TaskpoolFuncTestStrCat3();
-    TaskpoolFuncTestArraySum();
-    TaskpoolFuncTestClassFieldsSum();
-    TaskpoolFuncTestSumInt2();
-    TaskpoolFuncTestSumInt2SameArguments();
-    TaskpoolFuncTestSumAndMulti();
+    let funcTaskSuite = new arktest.ArkTestsuite("taskpool.FuncTask");
+    funcTaskSuite.addTest("TaskpoolFuncTestSumInt", taskpoolFuncTestSumInt);
+    funcTaskSuite.addTest("TaskpoolFuncTestAnd", taskpoolFuncTestAnd);
+    funcTaskSuite.addTest("TaskpoolFuncTestStrCat", taskpoolFuncTestStrCat);
+    funcTaskSuite.addTest("TaskpoolFuncTestStrCat2", taskpoolFuncTestStrCat2);
+    funcTaskSuite.addTest("TaskpoolFuncTestStrCat3", taskpoolFuncTestStrCat3);
+    funcTaskSuite.addTest("TaskpoolFuncTestArraySum", taskpoolFuncTestArraySum);
+    funcTaskSuite.addTest("TaskpoolFuncTestClassFieldsSum", taskpoolFuncTestClassFieldsSum);
+    funcTaskSuite.addTest("TaskpoolFuncTestSumInt2", taskpoolFuncTestSumInt2);
+    funcTaskSuite.addTest("TaskpoolFuncTestSumInt2SameArguments", taskpoolFuncTestSumInt2SameArguments);
+    funcTaskSuite.addTest("TaskpoolFuncTestSumAndMulti", taskpoolFuncTestSumAndMulti);
+    let res = funcTaskSuite.run();
     CoroutineExtras.stopTaskpool();
-    return 0;
+    return res;
 }

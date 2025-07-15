@@ -18,27 +18,26 @@ import { ILogger } from './Logger';
 export const logMessages: string[] = [];
 
 export class SilentLogger implements ILogger {
-  constructor(){
-    logMessages.length=0;
+  constructor() {
+    logMessages.length = 0;
   }
-  private log(level: string,message: string): void{
+  private log(level: string, message: string): void {
     void this;
     logMessages.push(`[${level}] ${message}`);
   }
   doTrace(message: string): void {
-    this.log('TRACE',message);
+    this.log('TRACE', message);
   }
   doDebug(message: string): void {
-    this.log('DEBUG',message);
+    this.log('DEBUG', message);
   }
   doInfo(message: string): void {
-    this.log('INFO',message);
+    this.log('INFO', message);
   }
   doWarn(message: string): void {
-    this.log('WARN',message);
+    this.log('WARN', message);
   }
   doError(message: string): void {
-    this.log('ERROR',message);
+    this.log('ERROR', message);
   }
-
 }
