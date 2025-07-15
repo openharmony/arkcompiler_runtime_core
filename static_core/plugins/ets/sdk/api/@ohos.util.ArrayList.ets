@@ -348,7 +348,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
             throw new BusinessError(CapacityErrorCodeId, new Error(`The current capacity has reached the maximum limit.`));
         }
 
-        if (newCapacity > this.capacity) {
+        if (newCapacity > this.length) {
             this.increaseCap(newCapacity.toInt());
         }
     }

@@ -20,6 +20,7 @@ function main() {
 
     suite.addTest("ArrayList increaseCapacityTo with bigger value", testIncreaseCapacityToBiggerValue);
     suite.addTest("ArrayList increaseCapacityTo with smaller value", testIncreaseCapacityToSmallerValue);
+    suite.addTest("ArrayList increaseCapacityTo", testIncreaseCapacityTo);
     suite.addTest("ArrayList trimToCurrentLength", testTrimToCurrentLength);
     suite.addTest("ArrayList iterator with empty container", testIteratorEmptyContainer);
     suite.addTest("ArrayList iterator", testIterator);
@@ -92,6 +93,18 @@ function testIncreaseCapacityToSmallerValue() {
     arktest.assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
     arktest.assertEQ(arrayList.getCapacity(), TestData.testNumber10,
         "ArrayList capacity should remain unchanged when increasing to a smaller value");
+}
+
+function testIncreaseCapacityTo() {
+    let arrayList = new ArrayList<number>();
+    for (let i: number = 0; i < 5; i++) {
+        arrayList.add(i);
+    }
+    arktest.assertEQ(arrayList.getCapacity(), 10);
+    arrayList.increaseCapacityTo(-1);
+    arktest.assertEQ(arrayList.getCapacity(), 10);
+    arrayList.increaseCapacityTo(8);
+    arktest.assertEQ(arrayList.getCapacity(), 8);
 }
 
 function testTrimToCurrentLength() {
