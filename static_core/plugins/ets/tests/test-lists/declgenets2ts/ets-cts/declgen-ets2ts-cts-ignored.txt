@@ -37,6 +37,9 @@
 13.compilation_units/04.declaration_modules/struct_declaration_n _1.ets
 17.experimental_features/10.native_functions_and_methods/01.native_functions/nat4.ets
 17.experimental_features/11.classes_experimental/02.final_methods/final_declaration_with_modifiers_negative_1.ets
+07.expressions/32.lambda_expression/01.lambda_signature/positive_2.ets
+07.expressions/32.lambda_expression/01.lambda_signature/positive_3.ets
+07.expressions/32.lambda_expression/01.lambda_signature/positive_4.ets
 #FailKind.ABORT_FAIL - 38 tests:
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_14.ets
 13.compilation_units/06.namespace_declarations/namespace_declarations_neg15.ets
@@ -78,6 +81,9 @@
 17.experimental_features/11.classes_experimental/02.final_methods/final_declaration_with_modifiers_negative_3.ets
 17.experimental_features/11.classes_experimental/02.final_methods/fm_10.ets
 17.experimental_features/11.classes_experimental/02.final_methods/fm_7.ets
+07.expressions/32.lambda_expression/01.lambda_signature/positive_0.ets
+07.expressions/32.lambda_expression/01.lambda_signature/positive_1.ets
+07.expressions/32.lambda_expression/01.lambda_signature/positive_5.ets
 #FailKind.DECLGEN_ETS2TS_FAIL - 3 tests:
 03.types/19.function_types/incorrect_function_name_43.ets
 13.compilation_units/04.declaration_modules/struct_declaration_n_1.ets
@@ -1072,3 +1078,34 @@
 17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/functions_with_receiver_16.ets
 17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_a2_20.ets
 17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_a2_3.ets
+03.types/19.function_types/function_type_spec4_n.ets
+04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_import_13.ets
+05.generics/03.utility_types/03.partial_utility_type/module_abstract.ets
+05.generics/03.utility_types/03.partial_utility_type/module_class_1.ets
+05.generics/03.utility_types/03.partial_utility_type/module_class_2.ets
+05.generics/03.utility_types/03.partial_utility_type/module_extends_0.ets
+05.generics/03.utility_types/03.partial_utility_type/module_extends_3.ets
+05.generics/03.utility_types/03.partial_utility_type/module_implements_0.ets
+05.generics/03.utility_types/03.partial_utility_type/module_implements_2.ets
+05.generics/03.utility_types/04.required_utility_type/required_module_class_0.ets
+05.generics/03.utility_types/04.required_utility_type/required_module_class_2.ets
+05.generics/03.utility_types/04.required_utility_type/required_module_interface_0.ets
+05.generics/03.utility_types/04.required_utility_type/required_module_interface_2.ets
+05.generics/03.utility_types/04.required_utility_type/required_module_interface_3.ets
+06.contexts_and_conversions/02.assignment-like_contexts/call2_13.ets
+06.contexts_and_conversions/02.assignment-like_contexts/call2_2.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_1.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_2.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_8.ets
+06.contexts_and_conversions/01.type_of_expression/standalone_expression_n_0.ets
+06.contexts_and_conversions/01.type_of_expression/standalone_expression_n_2.ets
+06.contexts_and_conversions/01.type_of_expression/standalone_expression_n_3.ets
+06.contexts_and_conversions/02.assignment-like_contexts/call2_11.ets
+06.contexts_and_conversions/02.assignment-like_contexts/call2_5.ets
+06.contexts_and_conversions/02.assignment-like_contexts/call2_7.ets
+06.contexts_and_conversions/02.assignment-like_contexts/call2_9.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_3.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_4.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_5.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_6.ets
+07.expressions/32.lambda_expression/01.lambda_signature/negative_2.ets
