@@ -702,18 +702,16 @@ void EtsClassLinkerExtension::InitializeBuiltinSpecialClasses()
         c->SetNullValue();
         c->SetValueTyped();
     });
-    auto const setupBoxedFlags = [](EtsClass *c) {
-        c->SetBoxed();
-        c->SetValueTyped();
-    };
-    CacheClass(BOX_BOOLEAN, setupBoxedFlags);
-    CacheClass(BOX_BYTE, setupBoxedFlags);
-    CacheClass(BOX_CHAR, setupBoxedFlags);
-    CacheClass(BOX_SHORT, setupBoxedFlags);
-    CacheClass(BOX_INT, setupBoxedFlags);
-    CacheClass(BOX_LONG, setupBoxedFlags);
-    CacheClass(BOX_FLOAT, setupBoxedFlags);
-    CacheClass(BOX_DOUBLE, setupBoxedFlags);
+
+    CacheClass(BOX_BOOLEAN, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::BOOLEAN); });
+    CacheClass(BOX_BYTE, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::BYTE); });
+    CacheClass(BOX_CHAR, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::CHAR); });
+    CacheClass(BOX_SHORT, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::SHORT); });
+    CacheClass(BOX_INT, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::INT); });
+    CacheClass(BOX_LONG, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::LONG); });
+    CacheClass(BOX_FLOAT, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::FLOAT); });
+    CacheClass(BOX_DOUBLE, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::DOUBLE); });
+
     CacheClass(BIG_INT, [](auto *c) {
         c->SetBigInt();
         c->SetValueTyped();

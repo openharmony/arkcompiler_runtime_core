@@ -35,15 +35,14 @@ public:
         ASSERT(coro->HasPendingException() == false);
 
         [[maybe_unused]] EtsHandleScope scope(coro);
-        EtsHandle<EtsObject> keyHandle(EtsCoroutine::GetCurrent(), key);
-        EtsHandle<EtsObject> valHandle(EtsCoroutine::GetCurrent(), val);
+        EtsHandle<EtsObject> keyHandle(coro, key);
+        EtsHandle<EtsObject> valHandle(coro, val);
 
         const EtsPlatformTypes *platformTypes = PlatformTypes(coro->GetPandaVM());
-        EtsHandle<EtsClass> klass(EtsCoroutine::GetCurrent(), platformTypes->escompatMapEntry);
-        EtsHandle<EtsEscompatMapEntry> entryHandle(EtsCoroutine::GetCurrent(),
-                                                   FromEtsObject(EtsObject::Create(klass.GetPtr())));
-        entryHandle->SetKey(keyHandle.GetPtr());
-        entryHandle->SetVal(valHandle.GetPtr());
+        EtsHandle<EtsClass> klass(coro, platformTypes->escompatMapEntry);
+        EtsHandle<EtsEscompatMapEntry> entryHandle(coro, FromEtsObject(EtsObject::Create(klass.GetPtr())));
+        entryHandle->SetKey(coro, keyHandle.GetPtr());
+        entryHandle->SetVal(coro, valHandle.GetPtr());
 
         if (UNLIKELY(coro->HasPendingException())) {
             if (coro->GetPandaVM()->GetOOMErrorObject() == nullptr ||
@@ -66,9 +65,8 @@ public:
 
         EtsHandleScope scope(coro);
         const EtsPlatformTypes *platformTypes = PlatformTypes(coro->GetPandaVM());
-        EtsHandle<EtsClass> klass(EtsCoroutine::GetCurrent(), platformTypes->escompatMapEntry);
-        EtsHandle<EtsEscompatMapEntry> entryHandle(EtsCoroutine::GetCurrent(),
-                                                   FromEtsObject(EtsObject::Create(klass.GetPtr())));
+        EtsHandle<EtsClass> klass(coro, platformTypes->escompatMapEntry);
+        EtsHandle<EtsEscompatMapEntry> entryHandle(coro, FromEtsObject(EtsObject::Create(klass.GetPtr())));
 
         if (UNLIKELY(coro->HasPendingException())) {
             if (coro->GetPandaVM()->GetOOMErrorObject() == nullptr ||
@@ -119,48 +117,48 @@ public:
         return MEMBER_OFFSET(EtsEscompatMapEntry, val_);
     }
 
-    EtsEscompatMapEntry *GetPrev()
+    EtsEscompatMapEntry *GetPrev(EtsCoroutine *coro)
     {
-        auto *obj = ObjectAccessor::GetObject(EtsCoroutine::GetCurrent(), this, GetPrevOffset());
+        auto *obj = ObjectAccessor::GetObject(coro, this, GetPrevOffset());
         return EtsEscompatMapEntry::FromCoreType(obj);
     }
 
-    EtsEscompatMapEntry *GetNext()
+    EtsEscompatMapEntry *GetNext(EtsCoroutine *coro)
     {
-        auto *obj = ObjectAccessor::GetObject(EtsCoroutine::GetCurrent(), this, GetNextOffset());
+        auto *obj = ObjectAccessor::GetObject(coro, this, GetNextOffset());
         return EtsEscompatMapEntry::FromCoreType(obj);
     }
 
-    EtsObject *GetKey()
+    EtsObject *GetKey(EtsCoroutine *coro)
     {
-        auto *obj = ObjectAccessor::GetObject(EtsCoroutine::GetCurrent(), this, GetKeyOffset());
+        auto *obj = ObjectAccessor::GetObject(coro, this, GetKeyOffset());
         return EtsEscompatMapEntry::FromCoreType(obj);
     }
 
-    EtsObject *GetVal()
+    EtsObject *GetVal(EtsCoroutine *coro)
     {
-        auto *obj = ObjectAccessor::GetObject(EtsCoroutine::GetCurrent(), this, GetValOffset());
+        auto *obj = ObjectAccessor::GetObject(coro, this, GetValOffset());
         return EtsEscompatMapEntry::FromCoreType(obj);
     }
 
-    void SetVal(EtsObject *val)
+    void SetVal(EtsCoroutine *coro, EtsObject *val)
     {
-        ObjectAccessor::SetObject(EtsCoroutine::GetCurrent(), this, GetValOffset(), val->GetCoreType());
+        ObjectAccessor::SetObject(coro, this, GetValOffset(), val->GetCoreType());
     }
 
-    void SetKey(EtsObject *key)
+    void SetKey(EtsCoroutine *coro, EtsObject *key)
     {
-        ObjectAccessor::SetObject(EtsCoroutine::GetCurrent(), this, GetKeyOffset(), key->GetCoreType());
+        ObjectAccessor::SetObject(coro, this, GetKeyOffset(), key->GetCoreType());
     }
 
-    void SetPrev(EtsEscompatMapEntry *prev)
+    void SetPrev(EtsCoroutine *coro, EtsEscompatMapEntry *prev)
     {
-        ObjectAccessor::SetObject(EtsCoroutine::GetCurrent(), this, GetPrevOffset(), prev->GetCoreType());
+        ObjectAccessor::SetObject(coro, this, GetPrevOffset(), prev->GetCoreType());
     }
 
-    void SetNext(EtsEscompatMapEntry *next)
+    void SetNext(EtsCoroutine *coro, EtsEscompatMapEntry *next)
     {
-        ObjectAccessor::SetObject(EtsCoroutine::GetCurrent(), this, GetNextOffset(), next->GetCoreType());
+        ObjectAccessor::SetObject(coro, this, GetNextOffset(), next->GetCoreType());
     }
 
 private:
@@ -198,15 +196,15 @@ public:
         return MEMBER_OFFSET(EtsEscompatMap, sizeVal_);
     }
 
-    EtsEscompatMapEntry *GetHead()
+    EtsEscompatMapEntry *GetHead(EtsCoroutine *coro)
     {
-        auto *obj = ObjectAccessor::GetObject(EtsCoroutine::GetCurrent(), this, GetHeadOffset());
+        auto *obj = ObjectAccessor::GetObject(coro, this, GetHeadOffset());
         return EtsEscompatMapEntry::FromCoreType(obj);
     }
 
-    EtsEscompatArray *GetBuckets()
+    EtsEscompatArray *GetBuckets(EtsCoroutine *coro)
     {
-        auto *obj = ObjectAccessor::GetObject(EtsCoroutine::GetCurrent(), this, GetBucketsOffset());
+        auto *obj = ObjectAccessor::GetObject(coro, this, GetBucketsOffset());
         return reinterpret_cast<EtsEscompatArray *>(obj);
     }
 
@@ -220,15 +218,15 @@ public:
         ObjectAccessor::SetPrimitive(this, GetSizeOffset(), size);
     }
 
-    void SetHead(ObjectHeader *head)
+    void SetHead(EtsCoroutine *coro, ObjectHeader *head)
     {
-        ObjectAccessor::SetObject(EtsCoroutine::GetCurrent(), this, GetHeadOffset(), head);
+        ObjectAccessor::SetObject(coro, this, GetHeadOffset(), head);
     }
 
-    void SetBuckets(EtsEscompatArray *buckets)
+    void SetBuckets(EtsCoroutine *coro, EtsEscompatArray *buckets)
     {
         ASSERT(buckets != nullptr);
-        ObjectAccessor::SetObject(EtsCoroutine::GetCurrent(), this, GetBucketsOffset(), buckets->GetCoreType());
+        ObjectAccessor::SetObject(coro, this, GetBucketsOffset(), buckets->GetCoreType());
     }
 
     static EtsBoolean Has(EtsEscompatMap *map, EtsObject *key);

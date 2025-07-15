@@ -44,47 +44,40 @@ static inline bool Compare(EtsObject *a, EtsObject *b)
     return aVal == bVal;
 }
 
-static bool CompareBoxed(EtsObject *a, EtsObject *b, const EtsPlatformTypes *ptypes)
+static bool CompareBoxed(EtsObject *a, EtsObject *b)
 {
     EtsClass *aKlass = a->GetClass();
     EtsClass *bKlass = b->GetClass();
 
-    if (aKlass == ptypes->coreBoolean) {
-        return Compare<EtsBoolean>(a, b);
-    }
-
-    if (aKlass == ptypes->coreDouble) {
-        EtsDouble aVal = EtsBoxPrimitive<EtsDouble>::Unbox(a);
-        EtsDouble bVal = bKlass == ptypes->coreInt ? static_cast<EtsDouble>(EtsBoxPrimitive<EtsInt>::Unbox(b))
-                                                   : EtsBoxPrimitive<EtsDouble>::Unbox(b);
-        return CompareFloats(aVal, bVal);
-    }
-
-    if (aKlass == ptypes->coreInt) {
-        EtsInt aVal = EtsBoxPrimitive<EtsInt>::Unbox(a);
-        EtsInt bVal = bKlass == ptypes->coreDouble ? static_cast<EtsInt>(EtsBoxPrimitive<EtsDouble>::Unbox(b))
-                                                   : EtsBoxPrimitive<EtsInt>::Unbox(b);
-        return aVal == bVal;
-    }
-
-    if (aKlass == ptypes->coreLong) {
-        return Compare<EtsLong>(a, b);
-    }
-
-    if (aKlass == ptypes->coreShort) {
-        return Compare<EtsShort>(a, b);
-    }
-
-    if (aKlass == ptypes->coreByte) {
-        return Compare<EtsByte>(a, b);
-    }
-
-    if (aKlass == ptypes->coreFloat) {
-        return CompareFloats(EtsBoxPrimitive<EtsFloat>::Unbox(a), EtsBoxPrimitive<EtsFloat>::Unbox(b));
-    }
-
-    if (aKlass == ptypes->coreChar) {
-        return Compare<EtsChar>(a, b);
+    auto type = aKlass->GetBoxedType();
+    switch (type) {
+        case EtsClass::BoxedType::INT: {
+            EtsInt aVal = EtsBoxPrimitive<EtsInt>::Unbox(a);
+            EtsInt bVal = bKlass->IsBoxedDouble() ? static_cast<EtsInt>(EtsBoxPrimitive<EtsDouble>::Unbox(b))
+                                                  : EtsBoxPrimitive<EtsInt>::Unbox(b);
+            return aVal == bVal;
+        }
+        case EtsClass::BoxedType::DOUBLE: {
+            EtsDouble aVal = EtsBoxPrimitive<EtsDouble>::Unbox(a);
+            EtsDouble bVal = bKlass->IsBoxedInt() ? static_cast<EtsDouble>(EtsBoxPrimitive<EtsInt>::Unbox(b))
+                                                  : EtsBoxPrimitive<EtsDouble>::Unbox(b);
+            return CompareFloats(aVal, bVal);
+        }
+        case EtsClass::BoxedType::FLOAT:
+            return CompareFloats(EtsBoxPrimitive<EtsFloat>::Unbox(a), EtsBoxPrimitive<EtsFloat>::Unbox(b));
+        case EtsClass::BoxedType::LONG:
+            return Compare<EtsLong>(a, b);
+        case EtsClass::BoxedType::SHORT:
+            return Compare<EtsShort>(a, b);
+        case EtsClass::BoxedType::BYTE:
+            return Compare<EtsByte>(a, b);
+        case EtsClass::BoxedType::CHAR:
+            return Compare<EtsChar>(a, b);
+        case EtsClass::BoxedType::BOOLEAN:
+            return Compare<EtsBoolean>(a, b);
+        default:
+            LOG(FATAL, RUNTIME) << "Unknown boxed type";
+            UNREACHABLE();
     }
 
     return false;
@@ -102,17 +95,16 @@ static bool Compare(EtsObject *a, EtsObject *b)
 
     EtsClass *aKlass = a->GetClass();
     EtsClass *bKlass = b->GetClass();
-    auto *ptypes = PlatformTypes(EtsCoroutine::GetCurrent());
     if (aKlass != bKlass) {
-        bool isNumericPair = (aKlass == ptypes->coreInt && bKlass == ptypes->coreDouble) ||
-                             (aKlass == ptypes->coreDouble && bKlass == ptypes->coreInt);
+        bool isNumericPair =
+            (aKlass->IsBoxedInt() && bKlass->IsBoxedDouble()) || (aKlass->IsBoxedDouble() && bKlass->IsBoxedInt());
         if (!isNumericPair) {
             return false;
         }
     }
 
     if (aKlass->IsBoxed()) {
-        return CompareBoxed(a, b, ptypes);
+        return CompareBoxed(a, b);
     }
 
     if (aKlass->IsStringClass() && bKlass->IsStringClass()) {
@@ -145,9 +137,9 @@ static inline uint32_t GetHashFloats(EtsObject *obj)
     return static_cast<uint32_t>(static_cast<int32_t>(val));
 }
 
-static inline uint32_t CallCustomHashCodeMethod(EtsEscompatMap *&map, EtsObject *&key, Method *instanceMethod)
+static inline uint32_t CallCustomHashCodeMethod(EtsCoroutine *&coro, EtsEscompatMap *&map, EtsObject *&key,
+                                                Method *instanceMethod)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro->HasPendingException() == false);
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle<EtsEscompatMap> mapHandle(coro, map);
@@ -156,49 +148,39 @@ static inline uint32_t CallCustomHashCodeMethod(EtsEscompatMap *&map, EtsObject 
     auto result = instanceMethod->Invoke(coro, args.data());
     map = mapHandle.GetPtr();
     key = keyHandle.GetPtr();
+    coro = EtsCoroutine::GetCurrent();
     return result.GetAs<uint32_t>();
 }
 
-static uint32_t GetHashCode(EtsEscompatMap *&map, EtsObject *&key)
+static uint32_t GetHashCode(EtsCoroutine *&coro, EtsEscompatMap *&map, EtsObject *&key)
 {
-    auto *ptypes = PlatformTypes(EtsCoroutine::GetCurrent());
-
     auto *klass = key->GetClass();
     if (klass->IsNullValue()) {
         return 0;
     }
 
     if (klass->IsBoxed()) {
-        if (klass == ptypes->coreBoolean) {
-            return EtsBoxPrimitive<EtsBoolean>::Unbox(key);
-        }
-
-        if (klass == ptypes->coreLong) {
-            return EtsBoxPrimitive<EtsLong>::Unbox(key);
-        }
-
-        if (klass == ptypes->coreInt) {
-            return EtsBoxPrimitive<EtsInt>::Unbox(key);
-        }
-
-        if (klass == ptypes->coreShort) {
-            return EtsBoxPrimitive<EtsShort>::Unbox(key);
-        }
-
-        if (klass == ptypes->coreByte) {
-            return EtsBoxPrimitive<EtsByte>::Unbox(key);
-        }
-
-        if (klass == ptypes->coreChar) {
-            return EtsBoxPrimitive<EtsChar>::Unbox(key);
-        }
-
-        if (klass == ptypes->coreFloat) {
-            return GetHashFloats<EtsFloat>(key);
-        }
-
-        if (klass == ptypes->coreDouble) {
-            return GetHashFloats<EtsDouble>(key);
+        auto type = klass->GetBoxedType();
+        switch (type) {
+            case EtsClass::BoxedType::INT:
+                return EtsBoxPrimitive<EtsInt>::Unbox(key);
+            case EtsClass::BoxedType::DOUBLE:
+                return GetHashFloats<EtsDouble>(key);
+            case EtsClass::BoxedType::FLOAT:
+                return GetHashFloats<EtsFloat>(key);
+            case EtsClass::BoxedType::LONG:
+                return EtsBoxPrimitive<EtsLong>::Unbox(key);
+            case EtsClass::BoxedType::SHORT:
+                return EtsBoxPrimitive<EtsShort>::Unbox(key);
+            case EtsClass::BoxedType::BYTE:
+                return EtsBoxPrimitive<EtsByte>::Unbox(key);
+            case EtsClass::BoxedType::CHAR:
+                return EtsBoxPrimitive<EtsChar>::Unbox(key);
+            case EtsClass::BoxedType::BOOLEAN:
+                return EtsBoxPrimitive<EtsBoolean>::Unbox(key);
+            default:
+                LOG(FATAL, RUNTIME) << "Unknown boxed type";
+                UNREACHABLE();
         }
     }
 
@@ -219,37 +201,38 @@ static uint32_t GetHashCode(EtsEscompatMap *&map, EtsObject *&key)
 
     // We need to call the `$_hashCode` method from ETS for compatibility because some classes can override this method
     // with their own implementation.
-    return CallCustomHashCodeMethod(map, key, instanceMethod);
+    return CallCustomHashCodeMethod(coro, map, key, instanceMethod);
 }
 
-static inline uint32_t GetBucketIdx(EtsEscompatMap *&map, EtsObject *&key)
+static inline uint32_t GetBucketIdx(EtsCoroutine *&coro, EtsEscompatMap *&map, EtsObject *&key)
 {
     if (key == nullptr) {
         return 1;  // like ETS.
     }
 
     // Using int for keyHash to maintain ETS compatibility.
-    int32_t keyHash = GetHashCode(map, key);
+    int32_t keyHash = GetHashCode(coro, map, key);
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
     uint32_t tmp = keyHash >> HASH_SIGN_SHIFT;
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
-    return ((keyHash ^ tmp) - tmp) & (map->GetBuckets()->GetActualLength() - 1);
+    return ((keyHash ^ tmp) - tmp) & (map->GetBuckets(coro)->GetActualLength() - 1);
 }
 
-static inline EtsEscompatArray *GetBucket(EtsEscompatMap *&map, EtsObject *&key)
+static inline EtsEscompatArray *GetBucket(EtsCoroutine *&coro, EtsEscompatMap *&map, EtsObject *&key)
 {
-    const uint32_t index = GetBucketIdx(map, key);
-    return reinterpret_cast<EtsEscompatArray *>(map->GetBuckets()->GetData()->Get(index));
+    const uint32_t index = GetBucketIdx(coro, map, key);
+    return reinterpret_cast<EtsEscompatArray *>(map->GetBuckets(coro)->GetData()->Get(index));
 }
 
 EtsBoolean EtsEscompatMap::Has(EtsEscompatMap *map, EtsObject *key)
 {
-    auto *bucket = GetBucket(map, key);
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *bucket = GetBucket(coro, map, key);
     if (bucket != nullptr) {
         uint32_t bucketSize = bucket->GetActualLength();
         for (uint32_t i = 0; i < bucketSize; ++i) {
             auto *entry = reinterpret_cast<EtsEscompatMapEntry *>(bucket->GetData()->Get(i));
-            if (Compare(entry->GetKey(), key)) {
+            if (Compare(entry->GetKey(coro), key)) {
                 return ToEtsBoolean(true);
             }
         }
@@ -260,13 +243,14 @@ EtsBoolean EtsEscompatMap::Has(EtsEscompatMap *map, EtsObject *key)
 
 EtsObject *EtsEscompatMap::Get(EtsEscompatMap *map, EtsObject *key)
 {
-    auto *bucket = GetBucket(map, key);
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *bucket = GetBucket(coro, map, key);
     if (bucket != nullptr) {
         uint32_t bucketSize = bucket->GetActualLength();
         for (uint32_t i = 0; i < bucketSize; ++i) {
             auto *entry = reinterpret_cast<EtsEscompatMapEntry *>(bucket->GetData()->Get(i));
-            if (Compare(entry->GetKey(), key)) {
-                return entry->GetVal();
+            if (Compare(entry->GetKey(coro), key)) {
+                return entry->GetVal(coro);
             }
         }
     }
@@ -276,7 +260,8 @@ EtsObject *EtsEscompatMap::Get(EtsEscompatMap *map, EtsObject *key)
 
 EtsBoolean EtsEscompatMap::Delete(EtsEscompatMap *map, EtsObject *key)
 {
-    auto *bucket = GetBucket(map, key);
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *bucket = GetBucket(coro, map, key);
     if (bucket == nullptr) {
         return ToEtsBoolean(false);
     }
@@ -284,12 +269,12 @@ EtsBoolean EtsEscompatMap::Delete(EtsEscompatMap *map, EtsObject *key)
     uint32_t bucketSize = bucket->GetActualLength();
     for (uint32_t i = 0; i < bucketSize; ++i) {
         auto *entry = reinterpret_cast<EtsEscompatMapEntry *>(bucket->GetData()->Get(i));
-        if (!Compare(entry->GetKey(), key)) {
+        if (!Compare(entry->GetKey(coro), key)) {
             continue;
         }
 
-        entry->GetPrev()->SetNext(entry->GetNext());
-        entry->GetNext()->SetPrev(entry->GetPrev());
+        entry->GetPrev(coro)->SetNext(coro, entry->GetNext(coro));
+        entry->GetNext(coro)->SetPrev(coro, entry->GetPrev(coro));
 
         [[maybe_unused]] auto lastEntry = bucket->Pop();
         if (i != (bucketSize--)) {
@@ -298,7 +283,7 @@ EtsBoolean EtsEscompatMap::Delete(EtsEscompatMap *map, EtsObject *key)
 
         map->SetSize(map->GetSize() - 1);
         if (map->GetSize() == 0) {
-            map->SetHead(nullptr);
+            map->SetHead(coro, nullptr);
         }
         return ToEtsBoolean(true);
     }

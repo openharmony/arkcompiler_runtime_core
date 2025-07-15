@@ -519,11 +519,13 @@ public:
         return GetObjectHeader()->GetFieldPrimitive<uint32_t>(GetFlagsOffset());
     }
 
+    enum class BoxedType { BOOLEAN, BYTE, CHAR, SHORT, INT, LONG, FLOAT, DOUBLE };
+
     void SetWeakReference();
     void SetFinalizeReference();
     void SetValueTyped();
     void SetNullValue();
-    void SetBoxed();
+    void SetBoxedKind(BoxedType boxedKind);
     void SetFunction();
     void SetEtsEnum();
     void SetBigInt();
@@ -557,6 +559,21 @@ public:
     [[nodiscard]] bool IsBoxed() const
     {
         return (GetFlags() & IS_BOXED) != 0;
+    }
+
+    [[nodiscard]] BoxedType GetBoxedType() const
+    {
+        return static_cast<BoxedType>(BoxedTypeField::Get(GetFlags()));
+    }
+
+    [[nodiscard]] bool IsBoxedDouble()
+    {
+        return GetBoxedType() == BoxedType::DOUBLE;
+    }
+
+    [[nodiscard]] bool IsBoxedInt()
+    {
+        return GetBoxedType() == BoxedType::INT;
     }
 
     [[nodiscard]] bool IsFunction() const
@@ -768,6 +785,10 @@ private:
     constexpr static uint32_t IS_ETS_ENUM = 1U << 25U;
     // Class is Function Reference
     constexpr static uint32_t IS_FUNCTION_REFERENCE = 1U << 26U;
+    // To get information about boxed type.
+    constexpr static uint32_t BOXED_TYPE_FIELD_START = 27;
+    constexpr static uint32_t BOXED_TYPE_FIELD_SIZE = 3;
+    using BoxedTypeField = BitField<uint32_t, BOXED_TYPE_FIELD_START, BOXED_TYPE_FIELD_SIZE>;
 
     ark::ObjectHeader header_;  // EtsObject
 
