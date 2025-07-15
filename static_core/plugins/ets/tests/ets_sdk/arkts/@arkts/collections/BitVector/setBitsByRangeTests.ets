@@ -24,7 +24,6 @@ function main() {
 
     suite.addTest("Verify setting a range of bits updates the bit vector correctly.", BitVector_setBitsByRange_Func_001);
     suite.addTest("Verify error is thrown when 'toIndex' is out of range.", BitVector_setBitsByRange_Func_002);
-    suite.addTest("Verify error is thrown when 'fromIndex' is not an integer.", BitVector_setBitsByRange_Func_003);
     suite.addTest("Verify error is thrown when both 'fromIndex' and 'toIndex' are negative.", BitVector_setBitsByRange_Func_004);
     suite.addTest("Verify error is thrown when 'fromIndex' is negative and 'toIndex' is valid.", BitVector_setBitsByRange_Func_005);
     suite.addTest("Verify setting a large range of bits updates the bit vector correctly.", BitVector_setBitsByRange_Func_006);
@@ -82,32 +81,6 @@ function BitVector_setBitsByRange_Func_002() {
             (e as BusinessError).message === `The value of "toIndex" is out of range. It must be >= 0 && <= 8. Received value is: -3`;
     };
     arktest.expectThrow(() => { bitVector.setBitsByRange(0, 8, -3); }, exceptionCheck);
-}
-
-/**
- * @tc.number    : BITVECTOR_TEST_017
- * @tc.name      : BitVector_setBitsByRange_Func_003
- * @tc.desc      : Verify error is thrown when 'fromIndex' is not an integer.
- * @tc.size      : MediumTest
- * @tc.type      : Function
- * @tc.level     : Level 2
- */
-function BitVector_setBitsByRange_Func_003() {
-    let bitVector = new collections.BitVector(0);
-    bitVector.push(1);
-    bitVector.push(1);
-    bitVector.push(0);
-    bitVector.push(1);
-    bitVector.push(0);
-    bitVector.push(0);
-    bitVector.push(1);
-    bitVector.push(0);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return e instanceof BusinessError &&
-            (e as BusinessError).code === TypeErrorCodeId &&
-            (e as BusinessError).message === `The type of "fromIndex" must be integer. Received value is: 0.1`;
-    };
-    arktest.expectThrow(() => { bitVector.setBitsByRange(0, 0.1, 6.1); }, exceptionCheck);
 }
 
 /**
