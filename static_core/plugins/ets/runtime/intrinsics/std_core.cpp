@@ -114,7 +114,7 @@ static PandaString ResolveLibraryName(const PandaString &name)
 #endif  // PANDA_TARGET_UNIX
 }
 
-extern "C" void LoadLibrary(ark::ets::EtsString *name)
+void LoadNativeLibraryHandler(ark::ets::EtsString *name, bool shouldVerifyPermission)
 {
     ASSERT(name->AsObject()->IsStringClass());
 
@@ -130,11 +130,11 @@ extern "C" void LoadLibrary(ark::ets::EtsString *name)
                           "The native library path is empty");
         return;
     }
-
+    LOG(INFO, RUNTIME) << "load library name is " << nameStr.c_str()
+                       << "; shouldVerifyPermission: " << shouldVerifyPermission;
     ScopedNativeCodeThread snct(coroutine);
-
     auto env = coroutine->GetEtsNapiEnv();
-    if (!coroutine->GetPandaVM()->LoadNativeLibrary(env, ResolveLibraryName(nameStr))) {
+    if (!coroutine->GetPandaVM()->LoadNativeLibrary(env, ResolveLibraryName(nameStr), shouldVerifyPermission)) {
         ScopedManagedCodeThread smct(coroutine);
 
         PandaStringStream ss;
@@ -142,6 +142,16 @@ extern "C" void LoadLibrary(ark::ets::EtsString *name)
 
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::EXCEPTION_IN_INITIALIZER_ERROR, ss.str());
     }
+}
+
+extern "C" void LoadLibrary(ark::ets::EtsString *name)
+{
+    LoadNativeLibraryHandler(name, false);
+}
+
+extern "C" void LoadLibraryWithPermissionCheck(ark::ets::EtsString *name)
+{
+    LoadNativeLibraryHandler(name, true);
 }
 
 extern "C" void StdSystemScheduleCoroutine()
