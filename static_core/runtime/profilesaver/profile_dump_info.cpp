@@ -518,7 +518,7 @@ bool ProfileDumpInfo::Save(const PandaString &filename, ssize_t *bytesWritten, i
         if (bytesWritten != nullptr) {
             LOG(INFO, RUNTIME) << "      Profile Saver Bingo! and bytes written = " << bytesWritten;
             int64_t writedBytes = GetFileSizeBytes(filename);
-            *bytesWritten = writedBytes < 0 ? 0 : static_cast<uint64_t>(writedBytes);
+            *bytesWritten = writedBytes < 0 ? 0 : static_cast<int64_t>(writedBytes);
         }
     } else {
         LOG(ERROR, RUNTIME) << "Failed to save profile info to " << filename;
