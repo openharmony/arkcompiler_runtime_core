@@ -168,6 +168,21 @@ inline ani_class ani_find_class(ani_env *env)
     return static_cast<ani_class>(guard.get_ref());
 }
 
+template <nullable_fixed_string descriptor_t>
+inline ani_enum ani_find_enum(ani_env *env)
+{
+    static sref_guard guard(env, [env]() -> ani_enum {
+        char const *descriptor = descriptor_t.c_str();
+        ani_enum enm;
+        if (ANI_OK != env->FindEnum(descriptor, &enm)) {
+            std::cerr << "Enum not found: " << descriptor << std::endl;
+            return nullptr;
+        }
+        return enm;
+    }());
+    return static_cast<ani_enum>(guard.get_ref());
+}
+
 template <nullable_fixed_string descriptor_t, nullable_fixed_string name_t, nullable_fixed_string signature_t>
 inline ani_function ani_find_module_function(ani_env *env)
 {
@@ -340,6 +355,7 @@ inline ani_static_field ani_find_class_static_field(ani_env *env)
 #define TH_ANI_FIND_MODULE(env, descriptor) ::taihe::ani_find_module<descriptor>(env)
 #define TH_ANI_FIND_NAMESPACE(env, descriptor) ::taihe::ani_find_namespace<descriptor>(env)
 #define TH_ANI_FIND_CLASS(env, descriptor) ::taihe::ani_find_class<descriptor>(env)
+#define TH_ANI_FIND_ENUM(env, descriptor) ::taihe::ani_find_enum<descriptor>(env)
 
 #define TH_ANI_FIND_MODULE_FUNCTION(env, descriptor, name, signature) \
     ::taihe::ani_find_module_function<descriptor, name, signature>(env)
@@ -394,6 +410,19 @@ inline ani_static_field ani_find_class_static_field(ani_env *env)
             return __cls;                                                    \
         }());                                                                \
         return static_cast<ani_class>(__guard.get_ref());                    \
+    }())
+
+#define TH_ANI_FIND_ENUM(env, descriptor)                                   \
+    ([env] {                                                                \
+        static ::taihe::sref_guard __guard(env, [env]() -> ani_enum {       \
+            ani_enum __enm;                                                 \
+            if (ANI_OK != env->FindEnum(descriptor, &__enm)) {              \
+                std::cerr << "Enum not found: " << descriptor << std::endl; \
+                return nullptr;                                             \
+            }                                                               \
+            return __enm;                                                   \
+        }());                                                               \
+        return static_cast<ani_enum>(__guard.get_ref());                    \
     }())
 
 #define TH_ANI_FIND_MODULE_FUNCTION(env, descriptor, name, signature)                                                 \

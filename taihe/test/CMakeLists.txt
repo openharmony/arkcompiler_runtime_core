@@ -48,6 +48,7 @@ add_subdirectory(ani_polymorphism)
 add_subdirectory(ani_fixedarray)
 add_subdirectory(ani_tp_cookies)
 add_subdirectory(ani_tp_ui)
-
+add_subdirectory(ani_compare)
+add_subdirectory(ani_export_default)
 # add_subdirectory(ani_huks)
 # add_subdirectory(ani_image)

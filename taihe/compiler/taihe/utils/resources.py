@@ -379,7 +379,7 @@ class _LegacyPandaVm(PathResource):
 class PandaVm(CachedResource):
     CLI_NAME = "panda-vm"
     PATH_CACHE = "panda-vm"
-    VERSION: Final = "sdk-1.5.0-dev.35451"
+    VERSION: Final = "sdk-1.5.0-dev.35667"
     CREDENTIAL = "koala-pub:y3t!n0therP"
     URL: Final = (
         "https://nexus.cn.bz-openlab.ru:10443/repository/koala-npm/@panda/sdk/-"

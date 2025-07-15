@@ -12,14 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-function ShowOptionalInt(x: Optional<i32>): void;
+function ShowOptionalInt(@optional x: Optional<i32>): void;
 
 function MakeOptionalInt(b: bool): Optional<i32>;
 
 function MakeOptionalArray(b: bool, val: i32, num: i32): Optional<Array<i32>>;
 
 struct ReturnResult {
-    results: Optional<Array<String>>;
+    @optional results: Optional<Array<String>>;
 }
 function SendReturnResult(result: ReturnResult): Optional<String>;
 
@@ -41,3 +41,5 @@ interface Test {
 }
 
 function GetTest(): Test;
+
+function CallCallback(second: bool, cb: (a: String, @optional b: Optional<String>) => void): void;

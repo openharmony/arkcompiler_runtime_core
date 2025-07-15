@@ -12,12 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-interface Noo {
-    Bar(): void;
-    @get GetName(): String;
-    @get GetAge(): Optional<i32>;
-    @set SetAge(a: Optional<i32>): void;
-}
+use export_enum;
+use export_iface;
+use export_namespace;
+use export_struct;
+use export_union;
 
-function GetNooIface(): Noo;
-function PrintNooName(noo: Noo): String;
+function ImportEnumFunc(): export_enum.ExportEnum;
+function ImportIfaceFunc(): export_iface.IfaceA;
+function ImportNsFunc(): export_namespace.NsStructA;
+function ImportStructFunc(): export_struct.StructA;
+function ImportUnionFunc(): export_union.ExportUnion;

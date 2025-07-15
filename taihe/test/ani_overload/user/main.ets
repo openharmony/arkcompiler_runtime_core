@@ -108,7 +108,7 @@ function testByte_Float() {
     let res = instance.overloadFunc((5).toByte(), 3.14f);
     arktest.assertEQ(res, 5);
 }
-// 测试i8 与String
+// 测试 i8 与 String
 function testByte_String() {
     let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
@@ -116,7 +116,7 @@ function testByte_String() {
     arktest.assertEQ(res, 5);
 }
 
-// 测试传入enum类型
+// 测试传入 enum 类型
 function test_enum() {
     let color = test_overload.Color.red;
     let instance: test_overload.OverloadInterface =
@@ -125,7 +125,7 @@ function test_enum() {
     arktest.assertEQ(res, (1).toInt());
 }
 
-// 测试自定义的struct类型
+// 测试自定义的 struct 类型
 function test_struct() {
     let mystruct: test_overload.Mystruct = {
         testNum: 2147483647,
@@ -137,9 +137,9 @@ function test_struct() {
     arktest.assertEQ(res, "path/to/source")
 }
 
-////多参数组合
+// 多参数组合
 
-// 测试5param
+// 测试 5 param
 function test_5param() {
     let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
@@ -202,7 +202,7 @@ function test_5param10() {
 }
 
 
-// 测试10param
+// 测试 10 param
 function test_10param() {
     let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
@@ -214,7 +214,7 @@ function test_10param() {
         true, "123", arri8, arri16, arri32);
 }
 
-// 测试10param1
+// 测试 10 param1
 function test_10param1() {
     let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
@@ -229,7 +229,7 @@ function test_10param1() {
         true, "123", arri8, mystruct, color);
 }
 
-// 测试10param2
+// 测试 10 param2
 function test_10param2() {
     let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
@@ -251,7 +251,7 @@ function test_10param2() {
         arri8, arri16, arri32);
 }
 
-// 测试10param3
+// 测试 10 param3
 function test_10param3() {
     let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
@@ -272,7 +272,7 @@ function test_10param3() {
         (1).toByte(), (1).toShort(), (1).toInt(), 1.1f, (1.123).toDouble(),
         true, "123", arrbuf1, mystruct, color);
 }
-// 测试10param4
+// 测试 10 param4
 function test_10param4() {
     let instance: test_overload.OverloadInterface =
         test_overload.get_interface();

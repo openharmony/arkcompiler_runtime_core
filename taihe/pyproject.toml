@@ -12,7 +12,7 @@
 # limitations under the License.
 
 [project]
-version = "0.37.0"
+version = "0.38.0"
 name = "taihe"
 description = "Language-neutral API tooling"
 requires-python = ">=3.10"

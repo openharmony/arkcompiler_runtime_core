@@ -12,12 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-interface Noo {
-    Bar(): void;
-    @get GetName(): String;
-    @get GetAge(): Optional<i32>;
-    @set SetAge(a: Optional<i32>): void;
-}
+#include "export_namespace.impl.hpp"
+#include <iostream>
+#include "export_namespace.proj.hpp"
+#include "stdexcept"
+#include "taihe/runtime.hpp"
 
-function GetNooIface(): Noo;
-function PrintNooName(noo: Noo): String;
+namespace {
+// To be implemented.
+
+void Bar()
+{
+    std::cout << "Export Namespace Bar()" << std::endl;
+}
+}  // namespace
+
+// Since these macros are auto-generate, lint will cause false positive.
+// NOLINTBEGIN
+TH_EXPORT_CPP_API_Bar(Bar);
+// NOLINTEND

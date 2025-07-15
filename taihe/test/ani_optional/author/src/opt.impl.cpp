@@ -138,11 +138,23 @@ optional<string> SendReturnResult(::opt::ReturnResult const &result)
     return taihe::make_holder<TestImpl, ::opt::Test>();
 }
 
+void CallCallback(bool second,
+                  ::taihe::callback_view<void(::taihe::string_view a, ::taihe::optional_view<::taihe::string> b)> cb)
+{
+    if (second) {
+        cb("Hello", optional<string> {std::in_place, "World"});
+    } else {
+        cb("Hello", optional<string> {std::nullopt});
+    }
+}
 }  // namespace
 
+// Since these macros are auto-generate, lint will cause false positive.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_ShowOptionalInt(ShowOptionalInt);
 TH_EXPORT_CPP_API_MakeOptionalInt(MakeOptionalInt);
 TH_EXPORT_CPP_API_MakeOptionalArray(MakeOptionalArray);
 TH_EXPORT_CPP_API_SendReturnResult(SendReturnResult);
 TH_EXPORT_CPP_API_GetTest(GetTest);
+TH_EXPORT_CPP_API_CallCallback(CallCallback);
 // NOLINTEND

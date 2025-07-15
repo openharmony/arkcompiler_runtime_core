@@ -402,7 +402,7 @@ string PrintUnion(::test_union::union_primitive const &data)
         return ::test_union::union_primitive::make_bValue(boolValue);
     }
 
-    // 处理未知的kind值
+    // 处理未知的 kind 值
     // ...
 }
 

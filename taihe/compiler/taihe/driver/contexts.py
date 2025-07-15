@@ -43,19 +43,16 @@ from taihe.utils.outputs import OutputConfig
 from taihe.utils.sources import SourceFile, SourceLocation, SourceManager
 
 
-def validate_source_file(source: SourceFile) -> IgnoredFileWarn | None:
+def validate_source_file(path: Path) -> IgnoredFileReason | None:
+    # not exist
+    if not path.exists():
+        return IgnoredFileReason.NOT_EXIST
     # subdirectories are ignored
-    if not source.path.is_file():
-        return IgnoredFileWarn(
-            IgnoredFileReason.IS_DIRECTORY,
-            loc=SourceLocation(source),
-        )
+    if not path.is_file():
+        return IgnoredFileReason.IS_DIRECTORY
     # unexpected file extension
-    if source.path.suffix != ".taihe":
-        return IgnoredFileWarn(
-            IgnoredFileReason.EXTENSION_MISMATCH,
-            loc=SourceLocation(source),
-        )
+    if path.suffix != ".taihe":
+        return IgnoredFileReason.EXTENSION_MISMATCH
     return None
 
 
@@ -126,13 +123,17 @@ class CompilerInstance:
 
     def collect(self):
         """Adds all `.taihe` files inside a directory. Subdirectories are ignored."""
-        scanned = chain.from_iterable(p.iterdir() for p in self.invocation.src_dirs)
         direct = self.invocation.src_files
+        scanned = chain.from_iterable(p.iterdir() for p in self.invocation.src_dirs)
 
         for file in chain(direct, scanned):
             source = SourceFile(file)
-            if warning := validate_source_file(source):
-                self.diagnostics_manager.emit(warning)
+            if warning := validate_source_file(file):
+                warn = IgnoredFileWarn(
+                    reason=warning,
+                    loc=SourceLocation(source),
+                )
+                self.diagnostics_manager.emit(warn)
             else:
                 self.source_manager.add_source(source)
 
@@ -140,8 +141,8 @@ class CompilerInstance:
         from taihe.parse.convert import AstConverter
 
         for src in self.source_manager.sources:
+            conv = AstConverter(src, self.diagnostics_manager)
             with self.diagnostics_manager.capture_error():
-                conv = AstConverter(src, self.diagnostics_manager)
                 pkg = conv.convert()
                 self.package_group.add(pkg)
 

@@ -115,13 +115,13 @@ public:
     taihe::optional<int32_t> Geti32()
     {
         int32_t const geti32Value = 1024;
-        return taihe::optional<int32_t>::make(geti32Value);  // 默认返回0
+        return taihe::optional<int32_t>::make(geti32Value);  // 默认返回 0
     }
 
     taihe::optional<int64_t> Geti64()
     {
         int64_t const geti64Value = 999999;
-        return taihe::optional<int64_t>::make(geti64Value);  // 默认返回0
+        return taihe::optional<int64_t>::make(geti64Value);  // 默认返回 0
     }
 
     taihe::optional<float> Getf32()

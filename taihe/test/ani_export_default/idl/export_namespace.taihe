@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-interface Noo {
-    Bar(): void;
-    @get GetName(): String;
-    @get GetAge(): Optional<i32>;
-    @set SetAge(a: Optional<i32>): void;
+@!namespace("export_ns", "foo")
+@!sts_export_default
+
+struct NsStructA {
+    foo: i64;
+    bar: i64;
 }
 
-function GetNooIface(): Noo;
-function PrintNooName(noo: Noo): String;
+function Bar(): void;

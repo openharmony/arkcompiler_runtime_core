@@ -58,7 +58,7 @@ def create_tar(in_dir: Path, out_tgz: Path, rename_root: str):
         # Ensure consistent user name.
         tar_cmd += ["--owner=0", "--group=0", "--numeric-owner"]
         # Ensure consistent ordering and timestamp (2024-01-01)
-        tar_cmd += ["--sort=name", f"--mtime=@1704067200"]
+        tar_cmd += ["--sort=name", "--mtime=@1704067200"]
         # Rename the root directory.
         tar_cmd += [f"--transform=s#^{in_dir.name}#{rename_root}#"]
         # Pass the root dir now.
