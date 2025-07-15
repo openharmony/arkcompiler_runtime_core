@@ -27,6 +27,8 @@
 #include "plugins/ets/runtime/types/ets_bigint.h"
 #include "plugins/ets/runtime/types/ets_typed_arrays.h"
 #include "plugins/ets/runtime/types/ets_typed_unsigned_arrays.h"
+#include "plugins/ets/runtime/types/ets_map.h"
+#include "plugins/ets/runtime/types/ets_set.h"
 #include "plugins/ets/runtime/interop_js/intrinsics_declaration.h"
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_DECLARATION_H_

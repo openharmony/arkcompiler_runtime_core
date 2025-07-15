@@ -45,6 +45,8 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/escompat_RegExp.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_taskpool.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Reflect.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/escompat_Map.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/escompat_Set.cpp
     ${ETS_EXT_SOURCES}/intrinsics/compiler_intrinsics.cpp
     ${ETS_EXT_SOURCES}/intrinsics/debugger_api.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_AniHelpers.cpp
@@ -115,6 +117,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_weak_reference.cpp
     ${ETS_EXT_SOURCES}/types/ets_finalizable_weak_ref.cpp
     ${ETS_EXT_SOURCES}/types/ets_job.cpp
+    ${ETS_EXT_SOURCES}/types/ets_map.cpp
     ${ETS_EXT_SOURCES}/ets_vm_api.cpp
     ${ETS_EXT_SOURCES}/ets_utils.cpp
     ${ETS_EXT_SOURCES}/ets_object_state_info.cpp

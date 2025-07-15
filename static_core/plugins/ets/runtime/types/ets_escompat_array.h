@@ -70,7 +70,7 @@ public:
 
     uint32_t GetActualLength()
     {
-        return actualLength_;
+        return ObjectAccessor::GetFieldPrimitive<uint32_t>(this, GetActualLengthOffset(), std::memory_order_relaxed);
     }
 
     static constexpr size_t GetBufferOffset()
@@ -146,17 +146,13 @@ public:
 
     EtsObject *Pop()
     {
-        auto *coro = EtsCoroutine::GetCurrent();
-        ASSERT(coro->HasPendingException() == false);
-
-        EtsHandleScope scope(coro);
-
-        auto *popMethod = PlatformTypes()->escompatArrayPop;
-        ASSERT(popMethod != nullptr);
-
-        std::array args {Value(GetCoreType())};
-        auto res = popMethod->GetPandaMethod()->Invoke(coro, args.data());
-        return FromCoreType(res.GetAs<ObjectHeader *>());
+        if (actualLength_ == 0) {
+            return nullptr;
+        }
+        auto ref = GetData()->Get(actualLength_ - 1);
+        GetData()->Set(actualLength_ - 1, nullptr);
+        actualLength_--;
+        return ref;
     }
 
 private:

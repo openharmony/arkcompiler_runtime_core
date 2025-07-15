@@ -1754,7 +1754,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1764,7 +1764,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1784,7 +1784,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1794,7 +1794,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1814,7 +1814,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1824,7 +1824,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1844,7 +1844,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1854,7 +1854,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1874,7 +1874,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1884,7 +1884,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1904,7 +1904,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1914,7 +1914,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1936,7 +1936,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1946,7 +1946,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1966,7 +1966,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1976,7 +1976,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -1996,7 +1996,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -2006,7 +2006,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -2026,7 +2026,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -2036,7 +2036,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -2056,7 +2056,7 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
 
@@ -2066,6 +2066,98 @@
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*       # resulting array
-    - ark::ObjectHeader*       # src array  
+    - ark::ObjectHeader*       # src array
     - int32_t                  # begin idx
     - int32_t                  # end idx
+
+# Map
+- name: MapGetFastPath
+  entrypoint: MapGetIrToc
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # object pointer
+    - ark::ObjectHeader*  # src map
+    - ark::ObjectHeader*  # key
+
+- name: MapGetUsual
+  entrypoint: EtsEscompatMapGet
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*  # object pointer
+    - ark::ObjectHeader*  # src map
+    - ark::ObjectHeader*  # key
+
+- name: MapHasFastPath
+  entrypoint: MapHasIrToc
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint8_t             # boolean
+    - ark::ObjectHeader*  # src map
+    - ark::ObjectHeader*  # key
+
+- name: MapHasUsual
+  entrypoint: EtsEscompatMapHas
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - uint8_t             # boolean
+    - ark::ObjectHeader*  # src map
+    - ark::ObjectHeader*  # key
+
+- name: MapDelete
+  entrypoint: MapDeleteIrToc
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint8_t             # boolean
+    - ark::ObjectHeader*  # src map
+    - ark::ObjectHeader*  # key
+
+- name: MapDeleteUsual
+  entrypoint: EtsEscompatMapDelete
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - uint8_t             # boolean
+    - ark::ObjectHeader*  # src map
+    - ark::ObjectHeader*  # key
+
+# Set
+- name: SetHas
+  entrypoint: SetHasIrToc
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint8_t             # boolean
+    - ark::ObjectHeader*  # src set
+    - ark::ObjectHeader*  # key
+
+- name: SetHasUsual
+  entrypoint: EtsEscompatSetHas
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - uint8_t             # boolean
+    - ark::ObjectHeader*  # src set
+    - ark::ObjectHeader*  # key
+
+- name: SetDelete
+  entrypoint: SetDeleteIrToc
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint8_t             # boolean
+    - ark::ObjectHeader*  # src set
+    - ark::ObjectHeader*  # key
+
+- name: SetDeleteUsual
+  entrypoint: EtsEscompatSetDelete
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - uint8_t             # boolean
+    - ark::ObjectHeader*  # src set
+    - ark::ObjectHeader*  # key

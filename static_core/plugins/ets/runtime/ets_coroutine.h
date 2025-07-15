@@ -115,6 +115,11 @@ public:
         return MEMBER_OFFSET(EtsCoroutine, etsNapiEnv_);
     }
 
+    static constexpr uint32_t GetLocalStorageOffset()
+    {
+        return MEMBER_OFFSET(EtsCoroutine, localStorage_);
+    }
+
     PANDA_PUBLIC_API PandaEtsVM *GetPandaVM() const;
     PANDA_PUBLIC_API CoroutineManager *GetCoroutineManager() const;
 
