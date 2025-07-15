@@ -25,11 +25,14 @@
 
 namespace ark::ets {
 
-void EtsPlatformTypes::InitializeCaches()
+void EtsPlatformTypes::CreateAndInitializeCaches()
 {
     auto *charClass = this->coreString;
     asciiCharCache_ = EtsTypedObjectArray<EtsString>::Create(charClass, EtsPlatformTypes::ASCII_CHAR_TABLE_SIZE,
                                                              ark::SpaceType::SPACE_TYPE_OBJECT);
+    if (UNLIKELY(asciiCharCache_ == nullptr)) {
+        LOG(FATAL, RUNTIME) << "Failed to create asciiCharCache";
+    }
 
     for (uint32_t i = 0; i < EtsPlatformTypes::ASCII_CHAR_TABLE_SIZE; ++i) {
         auto *str = EtsString::CreateNewStringFromCharCode(i);
@@ -175,7 +178,7 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     escompatRegExpExecArray = findType(REG_EXP_EXEC_ARRAY);
     escompatJsonReplacer = findType(JSON_REPLACER);
     if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
-        InitializeCaches();
+        CreateAndInitializeCaches();
     }
 }
 

@@ -899,6 +899,7 @@ uint8_t Monitor::HoldsLock(ObjectHeader *obj)
     MarkWord mark = obj->AtomicGetMark();
     MarkWord::ObjectState state = mark.GetState();
     MTManagedThread *thread = MTManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
 
     switch (state) {
         case MarkWord::STATE_HEAVY_LOCKED: {
