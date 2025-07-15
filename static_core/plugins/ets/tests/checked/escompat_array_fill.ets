@@ -32,6 +32,12 @@ function check_array(arr: Array<int>, start: int, end: int, expected: int) {
     }
 }
 
+function fill_big_array() {
+    // if have memory leak, will cause oom, then test failed
+    let array2: Array<number> = new Array<number>(1024 * 1024 * 120);
+    array2.fill(1);
+}
+
 //! CHECKER       escompat Array fill intrinsic
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true, entry: "escompat_array_fill.ETSGLOBAL::test_array_fill"
@@ -87,6 +93,10 @@ function test_array_fill() {
     arrObj.fill(new TestClass(3), 0, 50000);
     for (let i = 0; i < 50000; i++) {
         arktest.assertEQ(arrObj[i].get(), 3);
+    }
+
+    for (let i = 0; i < 20; i++) {
+        fill_big_array();
     }
 }
 
