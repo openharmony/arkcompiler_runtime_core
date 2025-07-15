@@ -929,6 +929,51 @@ function taskDurationTest() {
     arktest.assertNE(task2.totalDuration, 0);
 }
 
+function dependencyThenCallbackExecuteSequenceTest() {
+    let checkPoints = new Array<number>();
+    checkPoints.push(1);
+    let task1 = new taskpool.Task('task1', () => {
+        checkPoints.push(2);
+    })
+    let task2 = new taskpool.Task('task2', () => {
+        checkPoints.push(4);
+    })
+    task2.addDependency(task1);
+    let p2 = taskpool.execute(task2).then((res: Any) => {
+        checkPoints.push(5);
+    })
+    let p1 = taskpool.execute(task1).then((res: Any) => {
+        checkPoints.push(3);
+        taskpool.cancel(task2);
+    });
+    await p1;
+    let infos = taskpool.getTaskPoolInfo().taskInfos;
+    arktest.assertEQ(infos.length, 1);
+    arktest.assertEQ(infos[0].state, taskpool.State.CANCELED);
+    arktest.assertEQ(checkPoints.length, 3);
+}
+
+function dependencyErrorTaskTest() {
+    let checkPoints = new Array<number>();
+    checkPoints.push(1);
+    let task1 = new taskpool.Task('task1', () => {
+        checkPoints.push(2);
+        throw new Error('error');
+    })
+    let task2 = new taskpool.Task('task2', () => {
+        checkPoints.push(3);
+    })
+    task2.addDependency(task1);
+    let p2 = taskpool.execute(task2).then((res: Any):void => {
+        checkPoints.push(4);
+    })
+    arktest.expectError(() => {
+        await taskpool.execute(task1);
+    }, new Error('error'));
+    await p2;
+    arktest.assertEQ(checkPoints.length, 4);
+}
+
 function main(): int {
     let commonTaskSuite = new ArkTestsuite("taskpool.CommonTask");
     let commonTaskSuiteDisabled = new ArkTestsuite("taskpool.CommonTask.DISABLED");
@@ -943,24 +988,26 @@ function main(): int {
     commonTaskSuite.addTest("CheckIsDoneAndCancelTaskTest", checkIsDoneAndCancelTaskTest);
     commonTaskSuite.addTest("DependentTasksTest", dependentTasksTest);
     // #24758: Test is incorrect and flaky fails
-    commonTaskSuiteDisabled.addTest("DependentTasksWithParamsTest", dependentTasksWithParamsTest);
-    commonTaskSuite.addTest("CircularDependencyTest", circularDependencyTest);
-    commonTaskSuite.addTest("DependencyExecutedTaskTest", dependencyExecutedTaskTest);
-    commonTaskSuite.addTest("SendReceiveDataTest", sendReceiveDataTest);
-    commonTaskSuite.addTest("SendDataAndCancelTest", sendDataAndCancelTest);
-    commonTaskSuite.addTest("TasksWithDifferentParamsTest", tasksWithDifferentParamsTest);
-    commonTaskSuite.addTest("TaskPoolInTaskPoolTest", taskPoolInTaskPoolTest);
-    commonTaskSuite.addTest("TasksExecutionTest", tasksExecutionTest);
-    commonTaskSuite.addTest("TaskDurationTest", taskDurationTest);
-    commonTaskSuite.addTest("TaskExecuteDelayedTest", taskExecuteDelayedTest);
-    commonTaskSuite.addTest("getDelayedTaskInfoTest", getDelayedTaskInfoTest);
-    commonTaskSuite.addTest("getDelayedTaskInfoWithCancelTest", getDelayedTaskInfoWithCancelTest);
-    commonTaskSuite.addTest("TaskExecutePeriodicallyTest", taskExecutePeriodicallyTest);
-    commonTaskSuite.addTest("TaskWithDependencyExecutePeriodicallyTest", taskWithDependencyExecutePeriodicallyTest);
-    commonTaskSuite.addTest("TaskOnReceiveDataTest", taskOnReceiveData);
-    commonTaskSuite.addTest("TaskSendDataTest", taskSendData);
-    commonTaskSuite.addTest("TaskSendDataInAsyncFunction", taskSendDataInAsyncFunction);
-    commonTaskSuite.addTest("testOnReceiveDataRestParameter", testOnReceiveDataRestParameter);
+    commonTaskSuiteDisabled.addTest('DependentTasksWithParamsTest', dependentTasksWithParamsTest);
+    commonTaskSuite.addTest('CircularDependencyTest', circularDependencyTest);
+    commonTaskSuite.addTest('DependencyExecutedTaskTest', dependencyExecutedTaskTest);
+    commonTaskSuite.addTest('SendReceiveDataTest', sendReceiveDataTest);
+    commonTaskSuite.addTest('SendDataAndCancelTest', sendDataAndCancelTest);
+    commonTaskSuite.addTest('TasksWithDifferentParamsTest', tasksWithDifferentParamsTest);
+    commonTaskSuite.addTest('TaskPoolInTaskPoolTest', taskPoolInTaskPoolTest);
+    commonTaskSuite.addTest('TasksExecutionTest', tasksExecutionTest);
+    commonTaskSuite.addTest('TaskDurationTest', taskDurationTest);
+    commonTaskSuite.addTest('TaskExecuteDelayedTest', taskExecuteDelayedTest);
+    commonTaskSuite.addTest('getDelayedTaskInfoTest', getDelayedTaskInfoTest);
+    commonTaskSuite.addTest('getDelayedTaskInfoWithCancelTest', getDelayedTaskInfoWithCancelTest);
+    commonTaskSuite.addTest('TaskExecutePeriodicallyTest', taskExecutePeriodicallyTest);
+    commonTaskSuite.addTest('TaskWithDependencyExecutePeriodicallyTest', taskWithDependencyExecutePeriodicallyTest);
+    commonTaskSuite.addTest('TaskOnReceiveDataTest', taskOnReceiveData);
+    commonTaskSuite.addTest('TaskSendDataTest', taskSendData);
+    commonTaskSuite.addTest('TaskSendDataInAsyncFunction', taskSendDataInAsyncFunction);
+    commonTaskSuite.addTest('testOnReceiveDataRestParameter', testOnReceiveDataRestParameter);
+    commonTaskSuite.addTest('DependencyThenCallbackExecuteSequenceTest', dependencyThenCallbackExecuteSequenceTest);
+    commonTaskSuite.addTest('dependencyErrorTaskTest', dependencyErrorTaskTest);
     let res = commonTaskSuite.run();
     CoroutineExtras.stopTaskpool();
     return res;
