@@ -1422,7 +1422,11 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns an Uint8ClampedArray with replaced value on index
      */
-    public final native with(index: int, value: int): Uint8ClampedArray
+    public with(index: int, value: int): Uint8ClampedArray {
+        let res = new Uint8ClampedArray(this)
+        res.setUnsafeClamp(index, value)
+        return res
+    }
 
     /// === with element lambda functions ===
 
@@ -3167,7 +3171,11 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns an Uint8Array with replaced value on index
      */
-    public final native with(index: int, value: int): Uint8Array
+    public with(index: int, value: int): Uint8Array {
+        let res = new Uint8Array(this)
+        res.setUnsafeClamp(index, value)
+        return res
+    }
 
     /// === with element lambda functions ===
 
@@ -4898,7 +4906,11 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns an Uint16Array with replaced value on index
      */
-    public final native with(index: int, value: int): Uint16Array
+    public with(index: int, value: int): Uint16Array {
+        let res = new Uint16Array(this)
+        res.setUnsafeClamp(index, value)
+        return res
+    }
 
     /// === with element lambda functions ===
 
@@ -6675,7 +6687,11 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns an Uint32Array with replaced value on index
      */
-    public final native with(index: int, value: long): Uint32Array
+    public with(index: int, value: long): Uint32Array {
+        let res = new Uint32Array(this)
+        res.setUnsafeClamp(index, value)
+        return res
+    }
 
     /// === with element lambda functions ===
 
@@ -8457,7 +8473,11 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns an BigUint64Array with replaced value on index
      */
-    public final native with(index: int, value: long): BigUint64Array
+    public with(index: int, value: long): BigUint64Array {
+        let res = new BigUint64Array(this)
+        res.setUnsafeClamp(index, value)
+        return res
+    }
 
     /// === with element lambda functions ===
 

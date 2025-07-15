@@ -1402,7 +1402,11 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns an Int8Array with replaced value on index
      */
-    public final native with(index: int, value: byte): Int8Array
+    public with(index: int, value: byte): Int8Array {
+        let res = new Int8Array(this)
+        res.set(index, value)
+        return res
+    }
 
     /// === with element lambda functions ===
 
@@ -3161,7 +3165,11 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns an Int16Array with replaced value on index
      */
-    public final native with(index: int, value: short): Int16Array
+    public with(index: int, value: short): Int16Array {
+        let res = new Int16Array(this)
+        res.set(index, value)
+        return res
+    }
 
     /// === with element lambda functions ===
 
@@ -4898,7 +4906,11 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns an Int32Array with replaced value on index
      */
-    public final native with(index: int, value: int): Int32Array
+    public with(index: int, value: int): Int32Array {
+        let res = new Int32Array(this)
+        res.set(index, value)
+        return res
+    }
 
     /// === with element lambda functions ===
 
@@ -6645,7 +6657,11 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns an BigInt64Array with replaced value on index
      */
-    public final native with(index: int, value: long): BigInt64Array
+    public with(index: int, value: long): BigInt64Array {
+        let res = new BigInt64Array(this)
+        res.set(index, value)
+        return res
+    }
 
     /// === with element lambda functions ===
 
@@ -8369,7 +8385,11 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns an Float32Array with replaced value on index
      */
-    public final native with(index: int, value: float): Float32Array
+    public with(index: int, value: float): Float32Array {
+        let res = new Float32Array(this)
+        res.set(index, value)
+        return res
+    }
 
     /// === with element lambda functions ===
 
@@ -9986,7 +10006,11 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns an Float64Array with replaced value on index
      */
-    public final native with(index: int, value: double): Float64Array
+    public with(index: int, value: double): Float64Array {
+        let res = new Float64Array(this)
+        res.set(index, value)
+        return res
+    }
 
     /// === with element lambda functions ===
 

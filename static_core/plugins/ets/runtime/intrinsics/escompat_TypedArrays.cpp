@@ -52,20 +52,6 @@ static void *GetNativeData(T *array)
     return arrayBuffer->GetData();
 }
 
-static EtsHandle<EtsEscompatArrayBuffer> CreateArrayBuffer(EtsCoroutine *coro, EtsInt byteLength,
-                                                           const uint8_t *data = nullptr)
-{
-    void *buffer = nullptr;
-    EtsHandle<EtsEscompatArrayBuffer> newBuffer(coro, EtsEscompatArrayBuffer::Create(coro, byteLength, &buffer));
-    if (UNLIKELY(newBuffer.GetPtr() == nullptr)) {
-        return newBuffer;
-    }
-    if (data != nullptr && byteLength > 0) {
-        std::copy_n(data, byteLength, reinterpret_cast<uint8_t *>(buffer));
-    }
-    return newBuffer;
-}
-
 template <typename T>
 static void EtsEscompatTypedArraySet(T *thisArray, EtsInt pos, typename T::ElementType val)
 {
@@ -684,13 +670,11 @@ static T *EtsEscompatTypedArrayToReversedImpl(T *thisArray)
     ASSERT(srcArray.GetPtr() != nullptr);
 
     auto *srcData = GetNativeData(static_cast<T *>(srcArray.GetPtr()));
-    EtsHandle<EtsEscompatArrayBuffer> newBuffer = CreateArrayBuffer(coro, byteLength);
-    if (UNLIKELY(newBuffer.GetPtr() == nullptr)) {
-        return nullptr;
-    }
-    auto dstData = newBuffer->GetData();
+    void *dstData = nullptr;
+    EtsHandle<EtsEscompatArrayBuffer> newBuffer(coro, EtsEscompatArrayBuffer::Create(coro, byteLength, &dstData));
     auto dstArray = static_cast<T *>(srcArray->Clone());
 
+    ASSERT(newBuffer.GetPtr() != nullptr);
     ASSERT(dstArray != nullptr);
     dstArray->SetBuffer(newBuffer.GetPtr());
     dstArray->SetByteOffset(0);
@@ -1463,86 +1447,6 @@ extern "C" ark::ets::EtsString *EtsEscompatFloat64ArrayJoin(ark::ets::EtsEscompa
 {
     return TypedArrayJoin(thisArray, separator);
 }
-
-/*
- * With Implementation
- */
-
-template <typename T>
-static T *EtsEscompatTypedArrayWithImpl(T *thisArray, EtsInt pos, typename T::ElementType val)
-{
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope s(coro);
-
-    auto srcLength = static_cast<EtsInt>(thisArray->GetLengthInt());
-    auto elementSize = static_cast<size_t>(thisArray->GetBytesPerElement());
-    auto byteOffset = static_cast<size_t>(thisArray->GetByteOffset());
-    auto byteLength = static_cast<size_t>(thisArray->GetByteLength());
-
-    auto *srcData = GetNativeData(thisArray);
-    if (UNLIKELY(srcData == nullptr)) {
-        return nullptr;
-    }
-
-    if (UNLIKELY(pos < 0 || pos >= srcLength)) {
-        ThrowEtsException(coro, panda_file_items::class_descriptors::RANGE_ERROR, "Invalid typed array index");
-        return nullptr;
-    }
-
-    EtsHandle<EtsObject> srcArray(coro, thisArray);
-    if (UNLIKELY(srcArray.GetPtr() == nullptr)) {
-        return nullptr;
-    }
-
-    auto *src = ToVoidPtr(ToUintPtr(srcData) + byteOffset);
-    EtsHandle<EtsEscompatArrayBuffer> newBuffer = CreateArrayBuffer(coro, byteLength, reinterpret_cast<uint8_t *>(src));
-    if (UNLIKELY(newBuffer.GetPtr() == nullptr) || UNLIKELY(newBuffer->GetData() == nullptr)) {
-        return nullptr;
-    }
-
-    auto dstArray = static_cast<T *>(srcArray->Clone());
-    if (UNLIKELY(dstArray == nullptr)) {
-        return nullptr;
-    }
-
-    dstArray->SetBuffer(newBuffer.GetPtr());
-    dstArray->SetByteOffset(0);
-
-    ObjectAccessor::SetPrimitive(newBuffer->GetData(), pos * elementSize, val);
-    return dstArray;
-}
-
-extern "C" ark::ets::EtsEscompatUInt8ClampedArray *EtsEscompatUInt8ClampedArrayWith(
-    ark::ets::EtsEscompatUInt8ClampedArray *thisArray, EtsInt pos, EtsInt val)
-{
-    if (val > ark::ets::EtsEscompatUInt8ClampedArray::MAX) {
-        val = ark::ets::EtsEscompatUInt8ClampedArray::MAX;
-    } else if (val < ark::ets::EtsEscompatUInt8ClampedArray::MIN) {
-        val = ark::ets::EtsEscompatUInt8ClampedArray::MIN;
-    }
-    return EtsEscompatTypedArrayWithImpl(thisArray, pos, val);
-}
-
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define TYPED_ARRAY_WITH_CALL_DECL(AType, EType)                                   \
-    /* CC-OFFNXT(G.PRE.02) name part */                                            \
-    extern "C" ark::ets::EtsEscompat##AType##Array *EtsEscompat##AType##ArrayWith( \
-        ark::ets::EtsEscompat##AType##Array *thisArray, EtsInt pos, EType val)     \
-    {                                                                              \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                     \
-        return EtsEscompatTypedArrayWithImpl(thisArray, pos, val);                 \
-    }
-
-TYPED_ARRAY_WITH_CALL_DECL(Int8, EtsByte)
-TYPED_ARRAY_WITH_CALL_DECL(Int16, EtsShort)
-TYPED_ARRAY_WITH_CALL_DECL(Int32, EtsInt)
-TYPED_ARRAY_WITH_CALL_DECL(BigInt64, EtsLong)
-TYPED_ARRAY_WITH_CALL_DECL(Float32, EtsFloat)
-TYPED_ARRAY_WITH_CALL_DECL(Float64, EtsDouble)
-TYPED_ARRAY_WITH_CALL_DECL(UInt8, EtsInt)
-TYPED_ARRAY_WITH_CALL_DECL(UInt16, EtsInt)
-TYPED_ARRAY_WITH_CALL_DECL(UInt32, EtsLong)
-TYPED_ARRAY_WITH_CALL_DECL(BigUInt64, EtsLong)
 
 static EtsEscompatArrayBuffer *CreateEtsEscompatArrayBuffer(EtsCoroutine *coro, PandaEtsVM *vm, size_t length,
                                                             void **resultData)
