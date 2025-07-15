@@ -111,7 +111,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     internal readonly byteOffsetInt: int
     internal readonly byteLengthInt: int
     internal readonly lengthInt: int
-    private readonly arrayBufferBacked: boolean
 
     /**
      * Creates an empty {{element['name']}}Array.
@@ -147,7 +146,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             this.buffer = x.buffer
             this.byteOffsetInt = x.byteOffsetInt
         }
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -272,7 +270,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             }
             this.lengthInt = this.byteLengthInt / {{element['name']}}Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
@@ -281,7 +278,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             this.byteLengthInt = arr.length as int * {{element['name']}}Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLengthInt)
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 {%- if element.get('clamped', False) %}
@@ -317,7 +313,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         this.byteLengthInt = this.lengthInt * {{element['name']}}Array.BYTES_PER_ELEMENT as int
         this.byteOffsetInt = 0
         this.buffer = new ArrayBuffer(this.byteLengthInt)
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -389,7 +384,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         }
         return {{asElementCompat % 'val'}}
     }
-{%- if element.get('name') != 'Uint8Clamped' %}{#- comment: Uint8Array and others, except Uint8Clamped #}
 
     internal zeroIfInfinity(val: {{element['primitiveType']}}): {{element['primitiveType']}} {
         if ((val == Infinity) || (val == -Infinity)) {

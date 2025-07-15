@@ -95,7 +95,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     internal readonly byteOffsetInt: int
     internal readonly byteLengthInt: int
     internal readonly lengthInt: int
-    private readonly arrayBufferBacked: boolean
 
     /**
      * Creates an empty Uint8ClampedArray.
@@ -125,7 +124,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
             this.buffer = x.buffer
             this.byteOffsetInt = x.byteOffsetInt
         }
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -243,7 +241,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
             }
             this.lengthInt = this.byteLengthInt / Uint8ClampedArray.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
@@ -252,7 +249,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
             this.byteLengthInt = arr.length as int * Uint8ClampedArray.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLengthInt)
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, Uint8ClampedArray.clamp(arr.$_get(i).toInt()))
@@ -284,7 +280,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
         this.byteLengthInt = this.lengthInt * Uint8ClampedArray.BYTES_PER_ELEMENT as int
         this.byteOffsetInt = 0
         this.buffer = new ArrayBuffer(this.byteLengthInt)
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -317,13 +312,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafeClamp(i, numbers[i] as int)
         }
-    }
-
-    internal zeroIfInfinity(val: number): number {
-        if ((val == Infinity) || (val == -Infinity)) {
-            return 0 as number
-        }
-        return val as number
     }
 
     /**
@@ -1895,7 +1883,6 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     internal readonly byteOffsetInt: int
     internal readonly byteLengthInt: int
     internal readonly lengthInt: int
-    private readonly arrayBufferBacked: boolean
 
     /**
      * Creates an empty Uint8Array.
@@ -1925,7 +1912,6 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = x.buffer
             this.byteOffsetInt = x.byteOffsetInt
         }
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -2043,7 +2029,6 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             }
             this.lengthInt = this.byteLengthInt / Uint8Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
@@ -2052,7 +2037,6 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             this.byteLengthInt = arr.length as int * Uint8Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLengthInt)
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).toInt())
@@ -2084,7 +2068,6 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
         this.byteLengthInt = this.lengthInt * Uint8Array.BYTES_PER_ELEMENT as int
         this.byteOffsetInt = 0
         this.buffer = new ArrayBuffer(this.byteLengthInt)
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -3703,7 +3686,6 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     internal readonly byteOffsetInt: int
     internal readonly byteLengthInt: int
     internal readonly lengthInt: int
-    private readonly arrayBufferBacked: boolean
 
     /**
      * Creates an empty Uint16Array.
@@ -3733,7 +3715,6 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = x.buffer
             this.byteOffsetInt = x.byteOffsetInt
         }
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -3858,7 +3839,6 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             }
             this.lengthInt = this.byteLengthInt / Uint16Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
@@ -3867,7 +3847,6 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             this.byteLengthInt = arr.length as int * Uint16Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLengthInt)
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).toInt())
@@ -3899,7 +3878,6 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
         this.byteLengthInt = this.lengthInt * Uint16Array.BYTES_PER_ELEMENT as int
         this.byteOffsetInt = 0
         this.buffer = new ArrayBuffer(this.byteLengthInt)
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -5503,7 +5481,6 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     internal readonly byteOffsetInt: int
     internal readonly byteLengthInt: int
     internal readonly lengthInt: int
-    private readonly arrayBufferBacked: boolean
 
     /**
      * Creates an empty Uint32Array.
@@ -5533,7 +5510,6 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = x.buffer
             this.byteOffsetInt = x.byteOffsetInt
         }
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -5658,7 +5634,6 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             }
             this.lengthInt = this.byteLengthInt / Uint32Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
@@ -5667,7 +5642,6 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             this.byteLengthInt = arr.length as int * Uint32Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLengthInt)
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).toLong())
@@ -5699,7 +5673,6 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         this.byteLengthInt = this.lengthInt * Uint32Array.BYTES_PER_ELEMENT as int
         this.byteOffsetInt = 0
         this.buffer = new ArrayBuffer(this.byteLengthInt)
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -7338,7 +7311,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     internal readonly byteOffsetInt: int
     internal readonly byteLengthInt: int
     internal readonly lengthInt: int
-    private readonly arrayBufferBacked: boolean
 
     /**
      * Creates an empty BigUint64Array.
@@ -7368,7 +7340,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
             this.buffer = x.buffer
             this.byteOffsetInt = x.byteOffsetInt
         }
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -7493,7 +7464,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
             }
             this.lengthInt = this.byteLengthInt / BigUint64Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
@@ -7502,7 +7472,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
             this.byteLengthInt = arr.length as int * BigUint64Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLengthInt)
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).toLong())
@@ -7534,7 +7503,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
         this.byteLengthInt = this.lengthInt * BigUint64Array.BYTES_PER_ELEMENT as int
         this.byteOffsetInt = 0
         this.buffer = new ArrayBuffer(this.byteLengthInt)
-        this.arrayBufferBacked = true
     }
 
     /**

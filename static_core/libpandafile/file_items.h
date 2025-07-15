@@ -265,14 +265,6 @@ public:
     bool GetDependencyMark() const
     {
         return dependencyMarked_;
-    ItemTypes GetBaseItemType() const
-    {
-        return type_;
-    }
-
-    void SetBaseItemType(ItemTypes type)
-    {
-        type_ = type;
     }
 
     ItemTypes GetBaseItemType() const
