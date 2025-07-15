@@ -99,7 +99,7 @@ public:
     EtsClass *escompatJsonReplacer;
 
     /* Internal Caches */
-    void InitializeCaches();
+    void CreateAndInitializeCaches();
     void VisitRoots(const GCRootVisitor &visitor) const;
     void UpdateCachesVmRefs(const GCRootUpdater &updater) const;
     EtsTypedObjectArray<EtsString> *GetAsciiCacheTable() const
