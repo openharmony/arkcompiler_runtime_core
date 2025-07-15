@@ -97,15 +97,6 @@ class CoverageOptions:
     def lcov_exclude(self) -> Optional[str]:
         return None
 
-    @cached_property
-    @value(
-        yaml_path="general.coverage.llvm-cov-report-by-components",
-        cli_name="llvm_cov_report_by_components",
-        cast_to_type=_to_bool
-    )
-    def llvm_cov_report_by_components(self) -> bool:
-        return False
-
     def get_command_line(self) -> str:
         options = [
             '--use-llvm-cov' if self.use_llvm_cov else '',

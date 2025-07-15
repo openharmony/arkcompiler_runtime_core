@@ -28,11 +28,6 @@ export class PromiseStatus{
     static readonly rejected = "rejected";
 }
 
-export class PromiseStatus{
-    static readonly fulfilled = "fulfilled";
-    static readonly rejected = "rejected";
-}
-
 /**
  * Base class for Promise.allSettled return type.
  */

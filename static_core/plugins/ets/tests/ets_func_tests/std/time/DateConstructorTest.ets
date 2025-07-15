@@ -272,18 +272,6 @@ function testStringConstructorExpandedYear(): void {
     assertEQ(date.toUTCString(), "Thu, 01 Jul -0001 00:00:00 GMT")
 }
 
-function testNaNConstructor(): int {
-    try {
-        let d1 = new Date(Number.NaN);
-        let val = d1.valueOf();
-        assertTrue(isNaN(val));
-    } catch (e) {
-        return 1;
-    }
-
-    return 0;
-}
-
 //*************************************************************************************************************************************************************
 
 function checkDateWithLongYMD(date: Date, year: long, month: long, day: long): void {
