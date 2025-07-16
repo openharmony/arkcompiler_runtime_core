@@ -26,7 +26,7 @@ export class Values {
    public static etsShort: short = 123;
    public static etsInt: int = 123;
    public static etsLong: long = 123;
-   public static etsFloat: float = 12.34;
+   public static etsFloat: float = 12.34f;
    public static etsDouble: double = 12.34;
    public static etsBoolean: boolean = true;
    public static etsNull: null = null;
