@@ -904,7 +904,7 @@ options:
 
 - name: use-coroutine-pool
   type: bool
-  default: false
+  default: true
   description: caches coroutine and coroutine context instances in a pool to speedup creation/destruction
 
 - name: workers-type
