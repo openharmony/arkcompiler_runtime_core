@@ -52,7 +52,7 @@ set(RUNTIME_ARGUMENTS
     --sampling-profiler-interval=200
 )
 
-set(COMPILER_ARGUMENTS_LIST1
+set(COMPILER_ARGUMENTS_LIST
     "false"
     "true"
 )

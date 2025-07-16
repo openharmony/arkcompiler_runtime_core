@@ -80,7 +80,6 @@ macro(get_ets_int_targets_list RESULT ETS_INT_TARGET)
     set(${RESULT} ${TARGETS_LIST})
 endmacro()
 
-# NOTE(enikeytsev) issues #23850, #23852
 add_subdirectory(ani)
 add_subdirectory(backtrace)
 add_subdirectory(coroutines)
