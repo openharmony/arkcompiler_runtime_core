@@ -17,7 +17,7 @@
 #define COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_INL_H
 
 #include "common_components/base/globals.h"
-#include "common_components/base_runtime/hooks.h"
+#include "common_components/common_runtime/hooks.h"
 #include "common_interfaces/objects/string/base_string_declare.h"
 #include "common_interfaces/objects/string/line_string.h"
 
