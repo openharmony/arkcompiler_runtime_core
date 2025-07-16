@@ -1005,16 +1005,16 @@
 08.statements/15.try_statements/01.catch_clauses/catch_2.ets
 
 #23050
-09.classes/04.field_declarations/06.overriding_fields/overriding_fields_1.ets
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_1.ets
 
 #23238 Method returning 'this' returns wrong instance
-09.classes/05.method_declarations/08.methods_returning_this/met_ret_this_8.ets
+09.classes/07.method_declarations/08.methods_returning_this/met_ret_this_8.ets
 
 # 26983
-09.classes/04.field_declarations/06.overriding_fields/sample.ets
+09.classes/06.field_declarations/06.overriding_fields/sample.ets
 
 # 26983
-09.classes/04.field_declarations/06.overriding_fields/sample.ets
+09.classes/06.field_declarations/06.overriding_fields/sample.ets
 
 #16840
 10.interfaces/03.interface_members/methods_overriding.ets
