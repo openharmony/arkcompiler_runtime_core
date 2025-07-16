@@ -76,12 +76,13 @@ export interface Function {
 }
 
 export interface FunctionN<R> extends Function {
-    invokeN(...r: FixedArray<Any>): R;
 }
 
-export interface __FunctionN extends FunctionN<Any> {}
-
-export abstract class LambdaN implements __FunctionN {}
+export abstract class LambdaN implements FunctionN<Any> {
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object);
+    }
+}
 
 {%- macro defineChainingHelper(name, narg, erasedArgs) -%}
 export interface __{{name}}{{narg}} extends {{name}}{{narg}}{{erasedTypeArgsList(erasedArgs)}}
@@ -93,7 +94,7 @@ export abstract class {{lambda}}{{narg}} implements __{{name}}{{narg}}
 
 {% for narg in range(maxarity + 1) %}
 export interface FunctionR{{ narg }}{{ typeParamsDeclList(narg, True) }}
-    extends Function{% if not loop.last %}, __FunctionR{{narg + 1}}{% endif %}
+    extends Function{% if not loop.last %}, __FunctionR{{narg + 1}}{% endif %}{% if loop.last %}, FunctionN<Any>{% endif %}
 {
     {{invokeName(narg, "R")}}{{ signature(narg, True) }};
 }
