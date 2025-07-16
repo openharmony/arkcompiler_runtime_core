@@ -15,7 +15,7 @@
 
 import { Decimal } from "@arkts.math.Decimal";
 
-function checkDecimalProperties(digits: number[], exponent: number, sign: number, n: number | string) {
+function checkDecimalProperties(digits: double[], exponent: double, sign: double, n: double | string) {
     let v = new Decimal(n);
     arktest.assertEQ(v.d!.length, digits.length);
     for (let i = 0; i < digits.length; i++) {

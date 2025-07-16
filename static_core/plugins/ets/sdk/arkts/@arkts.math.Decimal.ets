@@ -15,17 +15,17 @@
 
 import { BusinessError } from "@ohos.base";
 
-export type Rounding = number
-export type Modulo = number
-export type Value = Decimal | number | string;
+export type Rounding = int
+export type Modulo = int
+export type Value = Decimal | double | string;
 
 const RANGE_ERROR_CODE = 10200001;
 const TYPE_ERROR_CODE = 401;
 const PRECISION_LIMIT_EXCEEDED_ERROR_CODE = 10200060;
 const CRYPTO_UNAVAILABLE_ERROR_CODE = 10200061;
 
-const EXP_LIMIT: number = 9e15;
-const MAX_DIGITS: number = 1e9;
+const EXP_LIMIT: double = 9e15;
+const MAX_DIGITS: double = 1e9;
 const NUMERALS: string = '0123456789abcdef';
 
 const LN10 = ('2.302585092994045684017991454684364207601101488628772976033327900967572609677352480235997205089598298341'
@@ -65,75 +65,75 @@ const isHex: RegExp = new RegExp("^0x([0-9a-f]+(\\.[0-9a-f]*)?|\\.[0-9a-f]+)(p[+
 const isOctal: RegExp = new RegExp("^0o([0-7]+(\\.[0-7]*)?|\\.[0-7]+)(p[+-]?\\d+)?$", "i");
 const isDecimal: RegExp = new RegExp("^(\\d+(\\.\\d*)?|\\.\\d+)(e[+-]?\\d+)?$", "i");
 
-const BASE: number = 1e7;
-const LOG_BASE: number = 7;
-const MAX_SAFE_INTEGER: number = 9007199254740991;
+const BASE: double = 1e7;
+const LOG_BASE: int = 7;
+const MAX_SAFE_INTEGER: double = 9007199254740991;
 
 const LN10_PRECISION = LN10.length - 1;
 const PI_PRECISION = PI.length - 1;
 
 export interface DecimalConfig {
-    precision?: number;
-    rounding?: number;
-    toExpNeg?: number;
-    toExpPos?: number;
-    minE?: number;
-    maxE?: number;
+    precision?: double;
+    rounding?: Rounding;
+    toExpNeg?: double;
+    toExpPos?: double;
+    minE?: double;
+    maxE?: double;
     crypto?: boolean;
-    modulo?: number;
+    modulo?: Modulo;
     defaults?: boolean;
 }
 
 export class Decimal {
-    internal digits: Array<number> | null = new Array<number>();
-    internal exponent: number;
-    internal sign: number;
+    internal digits: Array<double> | null = new Array<double>();
+    internal exponent: double;
+    internal sign: double;
     internal toStringTag: string = '[object Decimal]';
-    private static quadrant: number = 0;
+    private static quadrant: int = 0;
 
-    public static maxE: number = EXP_LIMIT;
-    public static minE: number = -EXP_LIMIT;
-    public static precision: number = DEFAULTS_PRECISION;
-    public static rounding: number = DEFAULTS_ROUNDING;
-    public static toExpNeg: number = DEFAULTS_TOEXPNEG;
-    public static toExpPos: number = DEFAULTS_TOEXPPOS;
-    public static modulo: number = DEFAULTS_MODULO;
+    public static maxE: double = EXP_LIMIT;
+    public static minE: double = -EXP_LIMIT;
+    public static precision: double = DEFAULTS_PRECISION;
+    public static rounding: Rounding = DEFAULTS_ROUNDING;
+    public static toExpNeg: double = DEFAULTS_TOEXPNEG;
+    public static toExpPos: double = DEFAULTS_TOEXPPOS;
+    public static modulo: Modulo = DEFAULTS_MODULO;
     public static crypto: boolean = false;
 
     // defined in d.ets, See "@arkts.math.Decimal.d.ets" for details.
-    public static readonly ROUND_UP: number = 0;
-    public static readonly ROUND_DOWN: number = 1;
-    public static readonly ROUND_CEILING: number = 2;
-    public static readonly ROUND_FLOOR: number = 3;
-    public static readonly ROUND_HALF_UP: number = 4;
-    public static readonly ROUND_HALF_DOWN: number = 5;
-    public static readonly ROUND_HALF_EVEN: number = 6;
-    public static readonly ROUND_HALF_CEILING: number = 7;
-    public static readonly ROUND_HALF_FLOOR: number = 8;
-    public static readonly EUCLIDEAN: number = 9;
+    public static readonly ROUND_UP: int = 0;
+    public static readonly ROUND_DOWN: int = 1;
+    public static readonly ROUND_CEILING: int = 2;
+    public static readonly ROUND_FLOOR: int = 3;
+    public static readonly ROUND_HALF_UP: int = 4;
+    public static readonly ROUND_HALF_DOWN: int = 5;
+    public static readonly ROUND_HALF_EVEN: int = 6;
+    public static readonly ROUND_HALF_CEILING: int = 7;
+    public static readonly ROUND_HALF_FLOOR: int = 8;
+    public static readonly EUCLIDEAN: int = 9;
 
-    get d(): Array<number> | null {
+    get d(): Array<double> | null {
         return this.digits;
     }
 
-    get e(): number {
+    get e(): double {
         return this.exponent;
     }
 
-    get s(): number {
+    get s(): double {
         return this.sign;
     }
 
     /**
      * Return a new Decimal whose value is the absolute value of this Decimal.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      */
     constructor(n: Value) {
         if (Utils.isDecimalInstance(n)) {
             this.initializeByDecimal(n as Decimal);
         } else if (typeof n === 'number') {
-            this.initializeByNumber(n as number);
+            this.initializeByNumber(n as double);
         } else if (typeof n === 'string') {
             this.initializeByString(n as string);
         } else {
@@ -188,8 +188,8 @@ export class Decimal {
      * Return a new Decimal whose value is the value of this Decimal clamped to the range
      * delineated by `min` and `max`.
      *
-     * @param { Value } min {number | string | Decimal}
-     * @param { Value } max {number | string | Decimal}
+     * @param { Value } min {double | string | Decimal}
+     * @param { Value } max {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200001 - The value of `min` is out of range.
      */
@@ -265,7 +265,7 @@ export class Decimal {
      * Return a new Decimal whose value is the integer part of dividing the value of this Decimal
      * by the value of `n`, rounded to `precision` significant digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     public dividedToIntegerBy(n: Value): Decimal {
@@ -296,11 +296,11 @@ export class Decimal {
      * Return a string representing the value of this Decimal in base 2, round to `significantDigits`
      * significant digits.
      *
-     * @param { number } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
+     * @param { double } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `significantDigits` is out of range.
      */
-    public toBinary(significantDigits: number): string {
+    public toBinary(significantDigits: double): string {
         return this.toStringBinary(2, significantDigits);
     }
 
@@ -308,12 +308,12 @@ export class Decimal {
      * Return a string representing the value of this Decimal in base 2, round to `significantDigits`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { number } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
+     * @param { double } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
      * @param { Rounding } rounding Rounding mode. Integer, 0 to 8 inclusive.
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `significantDigits | rounding` is out of range.
      */
-    public toBinary(significantDigits: number, rounding: Rounding): string {
+    public toBinary(significantDigits: double, rounding: Rounding): string {
         return this.toStringBinary(2, significantDigits, rounding);
     }
 
@@ -329,11 +329,11 @@ export class Decimal {
     /**
      * Return a string representing the value of this Decimal in base 8, round to `significantDigits` significant.
      *
-     * @param { number } significantDigits {number | string | Decimal}
+     * @param { double } significantDigits {double | string | Decimal}
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `significantDigits` is out of range.
      */
-    public toOctal(significantDigits: number): string {
+    public toOctal(significantDigits: double): string {
         return this.toStringBinary(8, significantDigits);
     }
 
@@ -341,12 +341,12 @@ export class Decimal {
      * Return a string representing the value of this Decimal in base 8, round to `significantDigits` significant
      * digits using rounding mode `rounding`.
      *
-     * @param { number } significantDigits {number | string | Decimal}
+     * @param { double } significantDigits {double | string | Decimal}
      * @param { Rounding } rounding Rounding mode. Integer, 0 to 8 inclusive.
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `significantDigits | rounding` is out of range.
      */
-    public toOctal(significantDigits: number, rounding: Rounding): string {
+    public toOctal(significantDigits: double, rounding: Rounding): string {
         return this.toStringBinary(8, significantDigits, rounding);
     }
 
@@ -362,11 +362,11 @@ export class Decimal {
     /**
      * Return a string representing the value of this Decimal in base 16, round to `significantDigits` significant.
      *
-     * @param { number } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
+     * @param { double } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `significantDigits` is out of range.
      */
-    public toHexadecimal(significantDigits: number): string {
+    public toHexadecimal(significantDigits: double): string {
         return this.toStringBinary(16, significantDigits);
     }
 
@@ -374,12 +374,12 @@ export class Decimal {
      * Return a string representing the value of this Decimal in base 16, round to `significantDigits` significant
      * digits using rounding mode `rounding`.
      *
-     * @param { number } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
+     * @param { double } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
      * @param { Rounding } rounding Rounding mode. Integer, 0 to 8 inclusive.
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `significantDigits | rounding` is out of range.
      */
-    public toHexadecimal(significantDigits: number, rounding: Rounding): string {
+    public toHexadecimal(significantDigits: double, rounding: Rounding): string {
         return this.toStringBinary(16, significantDigits, rounding);
     }
 
@@ -398,7 +398,7 @@ export class Decimal {
      * numerator and an integer denominator. The denominator will be a positive non-zero value
      * less than or equal to `max_denominator`.
      *
-     * @param { Value } maxDenominator {number | string | Decimal}
+     * @param { Value } maxDenominator {double | string | Decimal}
      * @returns { Decimal[] } the Decimal[] type
      */
     public toFraction(maxDenominator: Value): Decimal[] {
@@ -418,10 +418,10 @@ export class Decimal {
      * Return a new Decimal whose value is the value of this Decimal rounded to a maximum of `decimalPlaces`
      * decimal places.
      *
-     * @param { number } decimalPlaces Significant digits. Integer, 1 to MAX_DIGITS inclusive.
+     * @param { double } decimalPlaces Significant digits. Integer, 1 to MAX_DIGITS inclusive.
      * @returns { Decimal } the Decimal type
      */
-    public toDecimalPlaces(decimalPlaces: number): Decimal {
+    public toDecimalPlaces(decimalPlaces: double): Decimal {
         return this.toDecimalPlaces(decimalPlaces, Decimal.rounding);
     }
 
@@ -429,11 +429,11 @@ export class Decimal {
      * Return a new Decimal whose value is the value of this Decimal rounded to a maximum of `decimalPlaces`
      * decimal places using rounding mode `rounding`.
      *
-     * @param { number } decimalPlaces Significant digits. Integer, 1 to MAX_DIGITS inclusive.
+     * @param { double } decimalPlaces Significant digits. Integer, 1 to MAX_DIGITS inclusive.
      * @param { Rounding } rounding Rounding mode. Integer, 0 to 8 inclusive.
      * @returns { Decimal } the Decimal type
      */
-    public toDecimalPlaces(decimalPlaces: number, rounding: Rounding): Decimal {
+    public toDecimalPlaces(decimalPlaces: double, rounding: Rounding): Decimal {
         let decimal = this.toDecimalPlaces();
         Utils.checkInt32(decimalPlaces, 0, MAX_DIGITS);
         Utils.checkInt32(rounding, 0, 8);
@@ -454,11 +454,11 @@ export class Decimal {
      * Return a string representing the value of this Decimal in exponential notation rounded to
      * `decimalPlaces` fixed decimal places.
      *
-     * @param { number } decimalPlaces Decimal places. Integer, 0 to MAX_DIGITS inclusive.
+     * @param { double } decimalPlaces Decimal places. Integer, 0 to MAX_DIGITS inclusive.
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `decimalPlaces` is out of range.
      */
-    public toExponential(decimalPlaces: number): string {
+    public toExponential(decimalPlaces: double): string {
         return this.toExponential(decimalPlaces, Decimal.rounding);
     }
 
@@ -466,12 +466,12 @@ export class Decimal {
      * Return a string representing the value of this Decimal in exponential notation rounded to
      * `decimalPlaces` fixed decimal places using rounding mode `rounding`.
      *
-     * @param { number } decimalPlaces Decimal places. Integer, 0 to MAX_DIGITS inclusive.
+     * @param { double } decimalPlaces Decimal places. Integer, 0 to MAX_DIGITS inclusive.
      * @param { Rounding } rounding Rounding mode. Integer, 0 to 8 inclusive.
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `decimalPlaces | rounding` is out of range.
      */
-    public toExponential(decimalPlaces: number, rounding: Rounding): string {
+    public toExponential(decimalPlaces: double, rounding: Rounding): string {
         Utils.checkInt32(decimalPlaces, 0, MAX_DIGITS);
         Utils.checkInt32(rounding, 0, 8);
         let x = Utils.finalise(new Decimal(this), decimalPlaces + 1, rounding);
@@ -493,11 +493,11 @@ export class Decimal {
      * Return a string representing the value of this Decimal in normal (fixed-point) notation to
      * `decimalPlaces` fixed decimal places.
      *
-     * @param { number } decimalPlaces Decimal places. Integer, 0 to MAX_DIGITS inclusive.
+     * @param { double } decimalPlaces Decimal places. Integer, 0 to MAX_DIGITS inclusive.
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `decimalPlaces` is out of range.
      */
-    public toFixed(decimalPlaces: number): string {
+    public toFixed(decimalPlaces: double): string {
         return this.toFixed(decimalPlaces, Decimal.rounding);
     }
 
@@ -505,12 +505,12 @@ export class Decimal {
      * Return a string representing the value of this Decimal in normal (fixed-point) notation to
      * `decimalPlaces` fixed decimal places and rounded using rounding mode `rounding`.
      *
-     * @param { number } decimalPlaces Decimal places. Integer, 0 to MAX_DIGITS inclusive.
+     * @param { double } decimalPlaces Decimal places. Integer, 0 to MAX_DIGITS inclusive.
      * @param { Rounding } rounding Rounding mode. Integer, 0 to 8 inclusive.
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `decimalPlaces | rounding` is out of range.
      */
-    public toFixed(decimalPlaces: number, rounding: Rounding): string {
+    public toFixed(decimalPlaces: double, rounding: Rounding): string {
         Utils.checkInt32(decimalPlaces, 0, MAX_DIGITS);
         Utils.checkInt32(rounding, 0, 8);
         let y = Utils.finalise(new Decimal(this), decimalPlaces + this.e + 1, rounding);
@@ -521,7 +521,7 @@ export class Decimal {
     /**
      * Returns a new Decimal whose value is the nearest multiple of `n`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     public toNearest(n: Value): Decimal {
@@ -532,7 +532,7 @@ export class Decimal {
      * Returns a new Decimal whose value is the nearest multiple of `n` in the direction of rounding
      * mode `rounding`, to the value of this Decimal.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @param { Rounding } rounding Rounding mode. Integer, 0 to 8 inclusive.
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200001 - The value of `rounding` is out of range.
@@ -583,11 +583,11 @@ export class Decimal {
     /**
      * Return a string representing the value of this Decimal rounded to `significantDigits` significant digits.
      *
-     * @param { number } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
+     * @param { double } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `significantDigits` is out of range.
      */
-    public toPrecision(significantDigits: number): string {
+    public toPrecision(significantDigits: double): string {
         return this.toPrecision(significantDigits, Decimal.rounding);
     }
 
@@ -595,12 +595,12 @@ export class Decimal {
      * Return a string representing the value of this Decimal rounded to `significantDigits` significant digits
      * using rounding mode `rounding`.
      *
-     * @param { number } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
+     * @param { double } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
      * @param { Rounding } rounding Rounding mode. Integer, 0 to 8 inclusive.
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `significantDigits | rounding` is out of range.
      */
-    public toPrecision(significantDigits: number, rounding: Rounding): string {
+    public toPrecision(significantDigits: double, rounding: Rounding): string {
         Utils.checkInt32(significantDigits, 1, MAX_DIGITS);
         Utils.checkInt32(rounding, 0, 8);
         let x = Utils.finalise(new Decimal(this), significantDigits, rounding);
@@ -621,11 +621,11 @@ export class Decimal {
      * Return a new Decimal whose value is the value of this Decimal rounded to a maximum of `significantDigits`
      * significant digits.
      *
-     * @param { number } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
+     * @param { double } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200001 - The value of `significantDigits` is out of range.
      */
-    public toSignificantDigits(significantDigits: number): Decimal {
+    public toSignificantDigits(significantDigits: double): Decimal {
         return this.toSignificantDigits(significantDigits, Decimal.rounding);
     }
 
@@ -633,12 +633,12 @@ export class Decimal {
      * Return a new Decimal whose value is the value of this Decimal rounded to a maximum of `significantDigits`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { number } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
+     * @param { double } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
      * @param { Rounding } rounding Rounding mode. Integer, 0 to 8 inclusive.
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200001 - The value of `significantDigits | rounding` is out of range.
      */
-    public toSignificantDigits(significantDigits: number, rounding: Rounding): Decimal {
+    public toSignificantDigits(significantDigits: double, rounding: Rounding): Decimal {
         Utils.checkInt32(significantDigits, 1, MAX_DIGITS);
         Utils.checkInt32(rounding, 0, 8);
         return Utils.finalise(new Decimal(this), significantDigits, rounding);
@@ -647,9 +647,9 @@ export class Decimal {
     /**
      * Return the value of this Decimal converted to a number primitive. Zero keeps its sign.
      *
-     * @returns { number } the number type
+     * @returns { double } the number type
      */
-    public toNumber(): number {
+    public toNumber(): double {
         return Utils.toNumber(this.valueOf());
     }
 
@@ -668,11 +668,11 @@ export class Decimal {
     /**
      * Return the number of decimal places of the value of this Decimal.
      *
-     * @returns { number } the number type
+     * @returns { double } the number type
      */
-    public decimalPlaces(): number {
+    public decimalPlaces(): double {
         let digits = this.digits;
-        let result: number = NaN;
+        let result: double = NaN;
         if (digits) {
             let len = digits!.length - 1;
             result = (len - Math.floor(this.exponent / LOG_BASE)) * LOG_BASE;
@@ -703,10 +703,10 @@ export class Decimal {
     /**
      * Return the number of significant digits of the value of this Decimal.
      *
-     * @returns { number } the number type
+     * @returns { double } the number type
      */
-    public precision(): number {
-        let result: number;
+    public precision(): double {
+        let result: double;
         if (this.digits) {
             result = Utils.getPrecision(this.digits!);
         } else {
@@ -719,13 +719,13 @@ export class Decimal {
      * Return the number of significant digits of the value of this Decimal, whether to count
      * integer-part trailing zeros.
      *
-     * @param { boolean | number } includeZeros Whether to count integer-part trailing zeros: true, false,
+     * @param { boolean | int } includeZeros Whether to count integer-part trailing zeros: true, false,
      * 1 or 0.
-     * @returns { number } the number type
+     * @returns { double } the number type
      * @throws { BusinessError } 10200001 - The value of `includeZeros` is out of range.
      */
-    public precision(includeZeros: boolean | number): number {
-        let result: number;
+    public precision(includeZeros: boolean | int): double {
+        let result: double;
         if (includeZeros != undefined && includeZeros !== !!includeZeros && includeZeros !== 1 && includeZeros !== 0) {
             throw Utils.createBusinessError(RANGE_ERROR_CODE,
                 `The value of includeZeros is out of range. It must be 0 or 1. Received value is: ${includeZeros}`);
@@ -745,7 +745,7 @@ export class Decimal {
     /**
      * Return a new Decimal whose value is the absolute value of `n`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     static abs(n: Value): Decimal {
@@ -755,7 +755,7 @@ export class Decimal {
     /**
      * Return a new Decimal whose value is `n` round to an integer using `ROUND_FLOOR`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     static floor(n: Value): Decimal {
@@ -765,7 +765,7 @@ export class Decimal {
     /**
      * Return a new Decimal whose value is `n` rounded to an integer using `ROUND_CEIL`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     static ceil(n: Value): Decimal {
@@ -775,7 +775,7 @@ export class Decimal {
     /**
      * Return a new Decimal whose value is `n` truncated to an integer.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     static trunc(n: Value): Decimal {
@@ -785,9 +785,9 @@ export class Decimal {
     /**
      * Return a new Decimal whose value is `n` clamped to the range delineated by `min` and `max`.
      *
-     * @param { Value } n {number | string | Decimal}
-     * @param { Value } min {number | string | Decimal}
-     * @param { Value } max {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
+     * @param { Value } min {double | string | Decimal}
+     * @param { Value } max {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     static clamp(n: Value, min: Value, max: Value): Decimal {
@@ -798,8 +798,8 @@ export class Decimal {
      * Return a new Decimal whose value is the sum of `x` and `y`, rounded to `precision` significant
      * digits using rounding mode `rounding`.
      *
-     * @param { Value } x {number | string | Decimal}
-     * @param { Value } y {number | string | Decimal}
+     * @param { Value } x {double | string | Decimal}
+     * @param { Value } y {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     static add(x: Value, y: Value): Decimal {
@@ -812,7 +812,7 @@ export class Decimal {
      *
      * Only the result is rounded, not the intermediate calculations.
      *
-     * @param { Value[] } n {number | string | Decimal}
+     * @param { Value[] } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     static sum(...values: Value[]): Decimal {
@@ -832,8 +832,8 @@ export class Decimal {
      * Return a new Decimal whose value is `x` minus `y`, rounded to `precision` significant digits
      * using rounding mode `rounding`.
      *
-     * @param { Value } x {number | string | Decimal}
-     * @param { Value } y {number | string | Decimal}
+     * @param { Value } x {double | string | Decimal}
+     * @param { Value } y {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     static sub(x: Value, y: Value): Decimal {
@@ -844,8 +844,8 @@ export class Decimal {
      * Return a new Decimal whose value is `x` multiplied by `y`, rounded to `precision` significant
      * digits using rounding mode `rounding`.
      *
-     * @param { Value } x {number | string | Decimal}
-     * @param { Value } y {number | string | Decimal}
+     * @param { Value } x {double | string | Decimal}
+     * @param { Value } y {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     static mul(x: Value, y: Value): Decimal {
@@ -856,8 +856,8 @@ export class Decimal {
      * Return a new Decimal whose value is `x` divided by `y`, rounded to `precision` significant
      * digits using rounding mode `rounding`.
      *
-     * @param { Value } x {number | string | Decimal}
-     * @param { Value } y {number | string | Decimal}
+     * @param { Value } x {double | string | Decimal}
+     * @param { Value } y {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     static div(x: Value, y: Value): Decimal {
@@ -868,8 +868,8 @@ export class Decimal {
      * Return a new Decimal whose value is `x` modulo `y`, rounded to `precision` significant digits
      * using rounding mode `rounding`.
      *
-     * @param { Value } x {number | string | Decimal}
-     * @param { Value } y {number | string | Decimal}
+     * @param { Value } x {double | string | Decimal}
+     * @param { Value } y {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     static mod(x: Value, y: Value): Decimal {
@@ -880,7 +880,7 @@ export class Decimal {
      * Return a new Decimal whose value is the square root of `n`, rounded to `precision` significant
      * digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     static sqrt(n: Value): Decimal {
@@ -891,7 +891,7 @@ export class Decimal {
      * Return a new Decimal whose value is the cube root of `n`, rounded to `precision` significant
      * digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     static cbrt(n: Value): Decimal {
@@ -902,8 +902,8 @@ export class Decimal {
      * Return a new Decimal whose value is `base` raised to the power `exponent`, rounded to precision
      * significant digits using rounding mode `rounding`.
      *
-     * @param { Value } base {number | string | Decimal} The base.
-     * @param { Value } exponent {number | string | Decimal} The exponent.
+     * @param { Value } base {double | string | Decimal} The base.
+     * @param { Value } exponent {double | string | Decimal} The exponent.
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
@@ -915,7 +915,7 @@ export class Decimal {
      * Return a new Decimal whose value is the natural exponential of `n`, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
@@ -927,8 +927,8 @@ export class Decimal {
      * Return a new Decimal whose value is the log of `n` to the base `base`, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal}
-     * @param { Value } base {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
+     * @param { Value } base {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
@@ -940,7 +940,7 @@ export class Decimal {
      * Return a new Decimal whose value is the natural logarithm of `n`, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
@@ -952,7 +952,7 @@ export class Decimal {
      * Return a new Decimal whose value is the base 2 logarithm of `n`, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
@@ -964,7 +964,7 @@ export class Decimal {
      * Return a new Decimal whose value is the base 10 logarithm of `n`, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
@@ -976,7 +976,7 @@ export class Decimal {
      * Return a new Decimal whose value is the cosine of `n`, rounded to `precision` significant
      * digits using rounding mode `rounding`
      *
-     * @param { Value } n {number | string | Decimal} A value in radians.
+     * @param { Value } n {double | string | Decimal} A value in radians.
      * @returns { Decimal } the Decimal type
      */
     static cos(n: Value): Decimal {
@@ -987,7 +987,7 @@ export class Decimal {
      * Return a new Decimal whose value is the sine of `n`, rounded to `precision` significant digits
      * using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal} A value in radians.
+     * @param { Value } n {double | string | Decimal} A value in radians.
      * @returns { Decimal } the Decimal type
      */
     static sin(n: Value): Decimal {
@@ -998,7 +998,7 @@ export class Decimal {
      * Return a new Decimal whose value is the tangent of `n`, rounded to `precision` significant
      * digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal} A value in radians.
+     * @param { Value } n {double | string | Decimal} A value in radians.
      * @returns { Decimal } the Decimal type
      */
     static tan(n: Value): Decimal {
@@ -1009,7 +1009,7 @@ export class Decimal {
      * Return a new Decimal whose value is the hyperbolic cosine of `n`, rounded to precision
      * significant digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal} A value in radians.
+     * @param { Value } n {double | string | Decimal} A value in radians.
      * @returns { Decimal } the Decimal type
      */
     static cosh(n: Value): Decimal {
@@ -1020,7 +1020,7 @@ export class Decimal {
      * Return a new Decimal whose value is the hyperbolic sine of `n`, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     static sinh(n: Value): Decimal {
@@ -1031,7 +1031,7 @@ export class Decimal {
      * Return a new Decimal whose value is the hyperbolic tangent of `n`, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal} A value in radians.
+     * @param { Value } n {double | string | Decimal} A value in radians.
      * @returns { Decimal } the Decimal type
      */
     static tanh(n: Value): Decimal {
@@ -1041,7 +1041,7 @@ export class Decimal {
     /**
      * Return a new Decimal whose value is the arccosine in radians of `n`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
@@ -1053,7 +1053,7 @@ export class Decimal {
      * Return a new Decimal whose value is the arcsine in radians of `n`, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
@@ -1065,7 +1065,7 @@ export class Decimal {
      * Return a new Decimal whose value is the arctangent in radians of `n`, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
@@ -1077,7 +1077,7 @@ export class Decimal {
      * Return a new Decimal whose value is the inverse of the hyperbolic cosine of `n`, rounded to
      * `precision` significant digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
@@ -1089,7 +1089,7 @@ export class Decimal {
      * Return a new Decimal whose value is the inverse of the hyperbolic sine of `n`, rounded to
      * `precision` significant digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal} A value in radians.
+     * @param { Value } n {double | string | Decimal} A value in radians.
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
 
@@ -1102,7 +1102,7 @@ export class Decimal {
      * Return a new Decimal whose value is the inverse of the hyperbolic tangent of `n`, rounded to
      * `precision` significant digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal} A value in radians.
+     * @param { Value } n {double | string | Decimal} A value in radians.
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
@@ -1114,8 +1114,8 @@ export class Decimal {
      * Return a new Decimal whose value is the arctangent in radians of `y/x` in the range -pi to pi
      * (inclusive), rounded to `precision` significant digits using rounding mode `rounding`.
      *
-     * @param { Value } y {number | string | Decimal} The y-coordinate.
-     * @param { Value } x {number | string | Decimal} The x-coordinate.
+     * @param { Value } y {double | string | Decimal} The y-coordinate.
+     * @param { Value } x {double | string | Decimal} The x-coordinate.
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
@@ -1157,7 +1157,7 @@ export class Decimal {
      * Return a new Decimal whose value is the square root of the sum of the squares of the arguments,
      * rounded to `precision` significant digits using rounding mode `rounding`.
      *
-     * @param { Value[] } n {number | string | Decimal} Decimal
+     * @param { Value[] } n {double | string | Decimal} Decimal
      * @returns { Decimal } the Decimal type
      */
     static hypot(...n: Value[]): Decimal {
@@ -1182,7 +1182,7 @@ export class Decimal {
     /**
      * Return a new Decimal whose value is the maximum of the arguments.
      *
-     * @param { Value[] } n {number | string | Decimal}
+     * @param { Value[] } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     static max(...values: Value[]): Decimal {
@@ -1202,7 +1202,7 @@ export class Decimal {
     /**
      * Return a new Decimal whose value is the minimum of the arguments.
      *
-     * @param { Value[] } n {number | string | Decimal}
+     * @param { Value[] } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     static min(...values: Value[]): Decimal {
@@ -1233,11 +1233,11 @@ export class Decimal {
      * Returns a new Decimal with a random value equal to or greater than 0 and less than 1, and with
      * `significantDigits` significant digits (or less if trailing zeros are produced).
      *
-     * @param { number } significantDigits Significant digits. Integer, 0 to MAX_DIGITS inclusive.
+     * @param { double } significantDigits Significant digits. Integer, 0 to MAX_DIGITS inclusive.
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200061 - Crypto unavailable
      */
-    static random(significantDigits: number): Decimal {
+    static random(significantDigits: double): Decimal {
         return Utils.random(significantDigits);
     }
 
@@ -1249,10 +1249,10 @@ export class Decimal {
      *  -0    if x is -0,
      *   NaN  otherwise
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    static sign(n: Value): number {
+    static sign(n: Value): double {
         let x = new Decimal(n);
         return x.d ? (x.d![0] ? x.s : 0 * x.s) : x.s || NaN;
     }
@@ -1260,7 +1260,7 @@ export class Decimal {
     /**
      * Return a new Decimal whose value is `n` rounded to an integer using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     static round(n: Value): Decimal {
@@ -1272,14 +1272,14 @@ export class Decimal {
      * Configures the 'global' settings for this particular Decimal constructor.
      *
      * @param { DecimalConfig } config object with one or more of the following properties,
-     *   precision  {number}
-     *   rounding   {number}
-     *   toExpNeg   {number}
-     *   toExpPos   {number}
-     *   maxE       {number}
-     *   minE       {number}
-     *   modulo     {number}
-     *   crypto     {boolean|number}
+     *   precision  {double}
+     *   rounding   {Rounding}
+     *   toExpNeg   {double}
+     *   toExpPos   {double}
+     *   maxE       {double}
+     *   minE       {double}
+     *   modulo     {Modulo}
+     *   crypto     {boolean}
      *   defaults   {true}
      * @returns { void }
      * @throws { BusinessError } 10200001 - The value of `DecimalConfig.properties` is out of range.
@@ -1319,7 +1319,7 @@ export class Decimal {
     public sqrt(): Decimal {
         let x = this;
         let d = x.d;
-        let s: number = x.s;
+        let s: double = x.s;
 
         if (s !== 1 || !d || !d![0]) {
             return new Decimal(!s || s < 0 && (!d || d![0]) ? NaN : d ? x : Infinity);
@@ -1328,7 +1328,7 @@ export class Decimal {
         external = false;
         s = Math.sqrt(+(x.toNumber()));
         let n: string = '';
-        let e: number = x.e;
+        let e: double = x.e;
         let r: Decimal;
         if (s == 0 || s == Infinity) {
             n = Utils.digitsToString(d);
@@ -1349,7 +1349,7 @@ export class Decimal {
         }
 
         let sd = (e = Decimal.precision) + 3;
-        let rep: number = 0;
+        let rep: int = 0;
         let m: boolean = false;
         while (true) {
             let t = r;
@@ -1393,12 +1393,12 @@ export class Decimal {
         external = false;
 
         // Initial estimate.
-        let s: number = x.s * Math.pow(x.s * x.toNumber(), 1 / 3);
+        let s: double = x.s * Math.pow(x.s * x.toNumber(), 1 / 3);
 
         // Math.cbrt underflow/overflow?
         // Pass x to Math.pow as integer, then adjust the exponent of the result.
         let n: string = '';
-        let e: number = 0;
+        let e: double = 0;
         let r: Decimal;
         if (!s || Math.abs(s) == Infinity) {
             n = Utils.digitsToString(x.d!);
@@ -1429,7 +1429,7 @@ export class Decimal {
         let sd = (e = Decimal.precision) + 3;
 
         // Halley's method. Compare Newton's method.
-        let rep: number = 0;
+        let rep: int = 0;
         let m: boolean = false;
         while (true) {
             let t = r;
@@ -1473,7 +1473,7 @@ export class Decimal {
     /**
      * Return true if the value of this Decimal is equal to the value of `n`, otherwise return false.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { boolean } the boolean type
      */
     public equals(n: Value): boolean {
@@ -1487,10 +1487,10 @@ export class Decimal {
      *   0    if they have the same value,
      *   NaN  if the value of either Decimal is NaN.
      *
-     * @param { Value } n {number | string | Decimal}
-     * @returns { number } the number type
+     * @param { Value } n {double | string | Decimal}
+     * @returns { double } the number type
      */
-    public comparedTo(n: Value): number {
+    public comparedTo(n: Value): double {
         let y = new Decimal(n);
         let xd = this.d;
         let yd = y.d;
@@ -1528,7 +1528,7 @@ export class Decimal {
      * Return a new Decimal whose value is the value of this Decimal divided by `n`, rounded to
      * `precision` significant digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     public div(n: Value): Decimal {
@@ -1539,7 +1539,7 @@ export class Decimal {
      * Return a new Decimal whose value is the value of this Decimal modulo `n`, rounded to
      * `precision` significant digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal }the Decimal type
      */
     public mod(n: Value): Decimal {
@@ -1570,7 +1570,7 @@ export class Decimal {
      * Return a new Decimal whose value is the value of this Decimal raised to the power `n`, rounded
      * to `precision` significant digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     public pow(n: Value): Decimal {
@@ -1591,13 +1591,13 @@ export class Decimal {
             return Utils.finalise(x, pr, rm);
         }
         let e = Math.floor(y.e / LOG_BASE);
-        let k: number;
+        let k: double;
         if (e >= y.d!.length - 1 && (k = yn < 0 ? -yn : yn) <= MAX_SAFE_INTEGER) {
             let r = this.intPow(x, k, pr);
             return y.s < 0 ? new Decimal(1).div(r) : Utils.finalise(r, pr, rm);
         }
 
-        let s: number = x.s;
+        let s: double = x.s;
         if (s < 0) {
             if (e < y.d!.length - 1) {
                 return new Decimal(NaN);
@@ -1621,7 +1621,8 @@ export class Decimal {
         }
 
         external = false;
-        Decimal.rounding = x.sign = 1;
+        x.sign = 1;
+        Decimal.rounding = 1;
         // Estimate the extra guard digits needed to ensure five correct rounding digits from
         // naturalLogarithm(x). Example of failure without these extra digits (precision: 10):
         // new Decimal(2.32456).pow('2087987436534566.46411')
@@ -1659,7 +1660,7 @@ export class Decimal {
      * Return the logarithm of the value of this Decimal to the specified base, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200060 - Precision limit exceeded.
      */
@@ -1682,7 +1683,7 @@ export class Decimal {
         // The result will have a non-terminating decimal expansion if base is 10 and arg is not an
         // integer power of 10.
         let inf: boolean = false;
-        let k: number;
+        let k: double;
         if (isBase10) {
             if (d.length > 1) {
                 inf = true;
@@ -1860,7 +1861,7 @@ export class Decimal {
         // i.e. cos(x) = 1 - cos^2(x/4)(8 - 8cos^2(x/4))
 
         // Estimate the optimum number of times to use the argument reduction.
-        let k: number = 0;
+        let k: double = 0;
         let n: string = '';
         if (len < 32) {
             k = Math.ceil(len / 3);
@@ -1956,7 +1957,7 @@ export class Decimal {
     /**
      * Return true if the value of this Decimal is greater than the value of `n`, otherwise return false.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { boolean } the boolean type
      */
     public greaterThan(n: Value): boolean {
@@ -1967,7 +1968,7 @@ export class Decimal {
      * Return true if the value of this Decimal is greater than or equal to the value of `n`,
      * otherwise return false.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { boolean } the boolean type
      */
     public greaterThanOrEqualTo(n: Value): boolean {
@@ -1978,7 +1979,7 @@ export class Decimal {
     /**
      * Return true if the value of this Decimal is less than `n`, otherwise return false.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { boolean } the boolean type
      */
     public lessThan(n: Value): boolean {
@@ -1988,7 +1989,7 @@ export class Decimal {
     /**
      * Return true if the value of this Decimal is less than or equal to `n`, otherwise return false.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { boolean } the boolean type
      */
     public lessThanOrEqualTo(n: Value): boolean {
@@ -2096,7 +2097,7 @@ export class Decimal {
             return r;
         }
 
-        let wpr: number = pr + 10;
+        let wpr: double = pr + 10;
         Decimal.precision = wpr;
         Decimal.rounding = 1;
 
@@ -2104,7 +2105,7 @@ export class Decimal {
         // Ensure |x| < 0.42
         // atan(x) = 2 * atan(x / (1 + sqrt(1 + x^2)))
         let k = Math.min(28, wpr / LOG_BASE + 2 | 0);
-        let i: number = 0;
+        let i: double = 0;
         for (i = k; i; --i) {
             x = x.div(x.mul(x).add(1).sqrt().add(1));
         }
@@ -2239,7 +2240,7 @@ export class Decimal {
      * Return a new Decimal whose value is the value of this Decimal plus `n`, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     public add(n: Value): Decimal {
@@ -2272,8 +2273,8 @@ export class Decimal {
         let e = Math.floor(y.e / LOG_BASE);
         xd = xd!.slice();
         let i = k - e;
-        let len: number;
-        let d: Array<number>;
+        let len: double;
+        let d: Array<double>;
         if (i) {
             if (i < 0) {
                 d = xd;
@@ -2304,7 +2305,7 @@ export class Decimal {
             yd = xd;
             xd = d;
         }
-        let carry: number = 0;
+        let carry: Long = 0;
         for (carry = 0; i;) {
             --i;
             xd[i] = xd[i] + yd[i] + carry;
@@ -2329,7 +2330,7 @@ export class Decimal {
      * Return a new Decimal whose value is the value of this Decimal minus `n`, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     public sub(n: Value): Decimal {
@@ -2371,12 +2372,12 @@ export class Decimal {
         let xExp = Math.floor(x.e / LOG_BASE);
         xd = xd.slice();
         let expDiff = xExp - yExp;
-        let len: number;
-        let i: number;
+        let len: double;
+        let i: double;
         let xLessThanY: boolean = false;
         if (expDiff) {
             xLessThanY = expDiff < 0;
-            let d: Array<number>;
+            let d: Array<double>;
             if (xLessThanY) {
                 d = xd;
                 expDiff = -expDiff;
@@ -2423,7 +2424,7 @@ export class Decimal {
             xd.push(0);
             len++
         }
-        let j: number;
+        let j: double;
         for (i = yd.length; i > expDiff && i > 0;) {
             if (xd[--i] < yd[i]) {
                 for (j = i; j && xd[--j] === 0;) {
@@ -2455,7 +2456,7 @@ export class Decimal {
      * Return a new Decimal whose value is this Decimal times `n`, rounded to `precision` significant
      * digits using rounding mode `rounding`.
      *
-     * @param { Value } n {number | string | Decimal}
+     * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
     public mul(n: Value): Decimal {
@@ -2471,8 +2472,8 @@ export class Decimal {
         let e = Math.floor(this.exponent / LOG_BASE) + Math.floor(y.e / LOG_BASE);
         let xdL = xd!.length;
         let ydL = yd!.length;
-        let r: Array<number> | null;
-        let rL: number;
+        let r: Array<double> | null;
+        let rL: double;
         if (xdL < ydL) {
           r = xd;
           xd = yd;
@@ -2481,16 +2482,16 @@ export class Decimal {
           xdL = ydL;
           ydL = rL;
         }
-        r = new Array<number>();
+        r = new Array<double>();
         rL = xdL + ydL;
-        let i: number;
+        let i: double;
         for (i = rL; i--;) {
             r.push(0);
         }
 
-        let carry: number = 0;
-        let k: number;
-        let t: number;
+        let carry: Long = 0;
+        let k: double;
+        let t: double;
         for (i = ydL; --i >= 0;) {
           carry = 0;
           for (k = xdL + i; k > i;) {
@@ -2533,7 +2534,7 @@ export class Decimal {
         }
     }
 
-    private initializeByNumber(v: number) {
+    private initializeByNumber(v: double) {
         if (v == 0) {
             this.sign = 1;
             this.exponent = 0;
@@ -2549,8 +2550,8 @@ export class Decimal {
         }
 
         if (tv === ~~tv && tv < 1e7) {
-            let e: number;
-            let i: number;
+            let e: double;
+            let i: double;
             for (e = 0, i = tv; i >= 10; i /= 10) {
                 e++;
             }
@@ -2582,7 +2583,7 @@ export class Decimal {
     }
 
     private initializeByString(v: string) {
-        let i: number;
+        let i: int;
         let str: string = v;
         if ((i = v.charCodeAt(0)) === 45) {
             str = v.slice(1);
@@ -2601,9 +2602,9 @@ export class Decimal {
     }
 
     private parseDecimal(str: String): void {
-        let e: number;
-        let i: number;
-        let len: number;
+        let e: double;
+        let i: double;
+        let len: double;
         if ((e = str.indexOf('.')) > -1) {
             str = str.replace('.', '');
         }
@@ -2625,7 +2626,7 @@ export class Decimal {
         if (str) {
             len -= i;
             this.exponent = e = e - i - 1;
-            this.digits = new Array<number>();
+            this.digits = new Array<double>();
             i = (e + 1) % LOG_BASE;
             if (e < 0) {
                 i += LOG_BASE;
@@ -2679,7 +2680,7 @@ export class Decimal {
             return;
         }
 
-        let base: number;
+        let base: int;
         if (isHex.test(str))  {
             base = 16;
             str = str.toLowerCase();
@@ -2693,7 +2694,7 @@ export class Decimal {
         }
 
         let i = str.search(new RegExp("p", "i"));
-        let p: number = 0;
+        let p: double = 0;
         if (i > 0) {
             p = Utils.toNumber(str.slice(i + 1));
             str = str.substring(2, i);
@@ -2703,7 +2704,7 @@ export class Decimal {
 
         i = str.indexOf('.');
         let isFloat: boolean = i >= 0;
-        let len: number = 0;
+        let len: double = 0;
         let divisor: Decimal = new Decimal(0);
         if (isFloat) {
             str = str.replace('.', '');
@@ -2738,7 +2739,7 @@ export class Decimal {
         return;
     }
 
-    private intPow(x: Decimal, n: number, pr: number): Decimal {
+    private intPow(x: Decimal, n: double, pr: double): Decimal {
         let r = new Decimal(1);
         let k = Math.ceil(pr / LOG_BASE + 4);
         external = false;
@@ -2766,7 +2767,7 @@ export class Decimal {
         return r;
     }
 
-    private getBase10Exponent(digits: Array<number>, e: number): number {
+    private getBase10Exponent(digits: Array<double>, e: double): double {
         let w = digits[0];
         for (e *= LOG_BASE; w >= 10; w /= 10) {
             e++;
@@ -2774,7 +2775,7 @@ export class Decimal {
         return e;
     }
 
-    private truncate(arr: Array<number>, len: number): boolean {
+    private truncate(arr: Array<double>, len: double): boolean {
         if (arr.length > len) {
             arr.length = len;
             return true;
@@ -2782,9 +2783,9 @@ export class Decimal {
         return false;
     }
 
-    private convertBase(str: string, baseIn: number, baseOut: number): Array<number> {
-        let arrL: number;
-        let arr: Array<number> = Utils.updateDigits(0);
+    private convertBase(str: string, baseIn: int, baseOut: double): Array<double> {
+        let arrL: double;
+        let arr: Array<double> = Utils.updateDigits(0);
         for (let i = 0; i < str.length;) {
             for (arrL = arr.length; arrL--;) {
                arr[arrL] = arr[arrL] * baseIn;
@@ -2803,14 +2804,14 @@ export class Decimal {
         return arr.reverse();
     }
 
-    internal finiteToString(isExp: boolean, sd?: number): string {
+    internal finiteToString(isExp: boolean, sd?: double): string {
         if (!this.isFinite()) {
             return this.nonFiniteToString();
         }
-        let k: number;
+        let k: double;
         let e = this.exponent;
         let str: string = Utils.digitsToString(this.d!);
-        let len: number = str.length;
+        let len: double = str.length;
         if (isExp) {
           if (sd && (k = sd - len) > 0) {
             str = str.charAt(0) + '.' + str.slice(1) + Utils.getZeroString(k);
@@ -2838,16 +2839,16 @@ export class Decimal {
         return String(Number.isNaN(this.sign) ? NaN : this.sign * this.sign * Infinity);
     }
 
-    private naturalExponential(x: Decimal, sd?: number): Decimal {
+    private naturalExponential(x: Decimal, sd?: double): Decimal {
         let rm = Decimal.rounding;
         let pr = Decimal.precision;
         if (!x.d || !x.d![0] || x.e > 17) {
             return new Decimal(x.d
-                ? !x.d![0] ? 1 as number : x.s < 0 ? 0 as number : Infinity
-                : x.s ? x.s < 0 ? 0 as number : x : NaN);
+                ? !x.d![0] ? 1 as double : x.s < 0 ? 0 as double : Infinity
+                : x.s ? x.s < 0 ? 0 as double : x : NaN);
         }
 
-        let wpr: number;
+        let wpr: double;
         if (sd == undefined) {
             external = false;
             wpr = pr;
@@ -2855,7 +2856,7 @@ export class Decimal {
             wpr = sd;
         }
         let t = new Decimal(0.03125);
-        let k: number = 0;
+        let k: double = 0;
         while (x.e > -2) {
             x = x.mul(t);
             k += 5;
@@ -2870,7 +2871,7 @@ export class Decimal {
         let sum = new Decimal(1);
         Decimal.precision = wpr;
         let i = 0;
-        let rep: number = 0;
+        let rep: int = 0;
         while (true) {
             pow = Utils.finalise(pow.mul(x), wpr, 1);
             denominator = denominator.mul(++i);
@@ -2899,14 +2900,14 @@ export class Decimal {
         }
     }
 
-    private naturalLogarithm(y: Decimal, sd?: number): Decimal {
+    private naturalLogarithm(y: Decimal, sd?: double): Decimal {
         let x = y;
         let xd = x.d;
         let rm = Decimal.rounding;
         if (x.s < 0 || !xd || !xd![0] || !x.e && xd![0] == 1 && xd!.length == 1) {
-            return new Decimal(xd && !xd![0] ? -Infinity : x.s != 1 ? NaN : xd ? 0 as number : x);
+            return new Decimal(xd && !xd![0] ? -Infinity : x.s != 1 ? NaN : xd ? 0 as double : x);
         }
-        let wpr: number;
+        let wpr: double;
         let pr = Decimal.precision;
         if (sd == undefined) {
             external = false;
@@ -2914,13 +2915,13 @@ export class Decimal {
         } else {
             wpr = sd;
         }
-        let guard: number = 10;
+        let guard: int = 10;
         Decimal.precision = wpr += guard;
         let c = Utils.digitsToString(xd!);
         let ch = new Char(c.charAt(0));
         let c0 = Utils.toNumber(ch.toString());
-        let e: number = 0;
-        let n: number = 1;
+        let e: double = 0;
+        let n: double = 1;
         if (Math.abs(e = x.e) < 1.5e15) {
             while (c0 < 7 && c0 != 1 ||
                 c0 == 1 && (c.length > 1 ? Utils.toNumber((new Char(c.charAt(1))).toString()) : NaN) > 3) {
@@ -2946,8 +2947,8 @@ export class Decimal {
         let numerator: Decimal;
         let sum = numerator = x = Utils.divide(x.sub(1), x.add(1), wpr, 1);
         let x2 = Utils.finalise(x.mul(x), wpr, 1);
-        let denominator: number = 3;
-        let rep: number = 0;
+        let denominator: double = 3;
+        let rep: int = 0;
         while (true) {
             numerator = Utils.finalise(numerator.mul(x2), wpr, 1);
             let t = sum.add(Utils.divide(numerator, new Decimal(denominator), wpr, 1));
@@ -2976,7 +2977,7 @@ export class Decimal {
         }
     }
 
-    private getLn10(sd: number, pr?: number): Decimal {
+    private getLn10(sd: double, pr?: double): Decimal {
         if (sd > LN10_PRECISION) {
             external = true;
             if (pr != undefined) {
@@ -3021,7 +3022,7 @@ export class Decimal {
         // i.e. cos(x) = 8*(cos^4(x/4) - cos^2(x/4)) + 1
         // Estimate the optimum number of times to use the argument reduction.
         let len = x.d!.length;
-        let k: number = 0;
+        let k: double = 0;
         let y: string = '';
         if (len < 32) {
             k = Math.ceil(len / 3);
@@ -3072,16 +3073,16 @@ export class Decimal {
         return x;
     }
 
-    private taylorSeries(n: number, x: Decimal, y: Decimal, isHyperbolic?: boolean): Decimal {
+    private taylorSeries(n: int, x: Decimal, y: Decimal, isHyperbolic?: boolean): Decimal {
         let pr = Decimal.precision;
         let k = Math.ceil(pr / LOG_BASE);
 
         external = false;
         let x2 = x.mul(x);
         let u = new Decimal(y);
-        let i: number = 1;
+        let i: int = 1;
         let t: Decimal = new Decimal(0);
-        let j: number = 0;
+        let j: double = 0;
         while(true) {
             t = Utils.divide(u.mul(x2), new Decimal(n++ * n++), pr, 1);
             u = isHyperbolic ? y.add(t) : y.sub(t);
@@ -3170,14 +3171,14 @@ export class Decimal {
         return r;
     }
 
-    private getDigitsValidIndex(digits: Array<number>): number {
-        let len: number = 0;
+    private getDigitsValidIndex(digits: Array<double>): double {
+        let len: double = 0;
         for (len = digits.length; !digits[len - 1]; --len);
         return len;
     }
 
-    private digitsToString(digits: Array<number>, start: number, orgStr: string, length?: number): string {
-        let len: number;
+    private digitsToString(digits: Array<double>, start: int, orgStr: string, length?: double): string {
+        let len: double;
         let str: string = orgStr;
         if (length != undefined) {
             len = length;
@@ -3191,8 +3192,8 @@ export class Decimal {
         return str;
     }
 
-    private completeStringWithZero(isExp: boolean, len: number, baseOut: number,
-        orgStr: string, base: number, exp: number): string {
+    private completeStringWithZero(isExp: boolean, len: double, baseOut: int,
+        orgStr: string, base: int, exp: double): string {
         let str = orgStr;
         if (isExp) {
             if (len > 1) {
@@ -3225,7 +3226,7 @@ export class Decimal {
         return str;
     }
 
-    private toStringBinary(baseOut: number, sd?: number, rm?: number) {
+    private toStringBinary(baseOut: int, sd?: double, rm?: int) {
         let isExp = (sd != undefined);
         if (isExp) {
             Utils.checkInt32(sd!, 1, MAX_DIGITS);
@@ -3245,7 +3246,7 @@ export class Decimal {
         } else {
             let str = this.finiteToString(false);
             let i = str.indexOf('.');
-            let base: number = baseOut;
+            let base: int = baseOut;
             if (isExp) {
                 base = 2;
                 if (baseOut == 16) {
@@ -3333,7 +3334,7 @@ class Utils {
             || (obj.hasOwnProperty('toStringTag') && (obj as Decimal).toStringTag === tag) || false;
     }
 
-    public static getZeroString(k: number): string {
+    public static getZeroString(k: double): string {
         let zs: string = '';
         for (; k--;) {
             zs += '0';
@@ -3341,14 +3342,14 @@ class Utils {
         return zs;
     }
 
-    public static digitsToString(d: Array<number>): string {
-        let indexOfLastWord: number = d.length - 1;
+    public static digitsToString(d: Array<double>): string {
+        let indexOfLastWord: double = d.length - 1;
         let str: string = '';
-        let w: number = d[0];
+        let w: double = d[0];
         if (indexOfLastWord > 0) {
             str += w;
-            let i: number;
-            let k: number;
+            let i: int;
+            let k: double;
             let ws: string;
             for (i = 1; i < indexOfLastWord; i++) {
                 ws = d[i] + '';
@@ -3373,17 +3374,17 @@ class Utils {
         return str + w;
     }
 
-    public static checkInt32(i: number, min: number, max: number): void {
+    public static checkInt32(i: double, min: int, max: double): void {
         if (i !== ~~i || i < min || i > max) {
             throw Utils.createBusinessError(RANGE_ERROR_CODE,
                 `The value of "${i}" is out of range. It must be >= ${min} && <= ${max} . Received value is: ${i}`);
         }
     }
 
-    public static multiplyInteger(x: Array<number>, k: number, base: number): Array<number> {
-        let temp: number = 0;
-        let carry: number = 0;
-        let i: number = x.length;
+    public static multiplyInteger(x: Array<double>, k: double, base: double): Array<double> {
+        let temp: double = 0;
+        let carry: Long = 0;
+        let i: double = x.length;
         for (x = x.slice(); i--;) {
             temp = x[i] * k + carry;
             x[i] = temp % base | 0;
@@ -3395,8 +3396,8 @@ class Utils {
         return x;
     }
 
-    public static compare(a: Array<number>, b: Array<number>, aL: number, bL: number): number {
-        let r: number = 0;
+    public static compare(a: Array<double>, b: Array<double>, aL: double, bL: double): double {
+        let r: double = 0;
         if (aL != bL) {
             r = aL > bL ? 1 : -1;
         } else {
@@ -3410,8 +3411,8 @@ class Utils {
         return r;
     }
 
-    public static subtract(a: Array<number>, b: Array<number>, aL: number, base: number): void {
-        let i: number = 0;
+    public static subtract(a: Array<double>, b: Array<double>, aL: double, base: double): void {
+        let i: int = 0;
         for (; aL--;) {
             a[aL] = a[aL] - i;
             i = a[aL] < b[aL] ? 1 : 0;
@@ -3422,7 +3423,7 @@ class Utils {
         }
     }
 
-    public static pow(x: number, y: number): Decimal {
+    public static pow(x: double, y: double): Decimal {
         return new Decimal(x).pow(y);
     }
 
@@ -3431,13 +3432,13 @@ class Utils {
      * `repeating == undefined` if caller is `log` or `pow`,
      * `repeating != undefined` if caller is `naturalLogarithm` or `naturalExponential`.
      */
-    public static checkRoundingDigits(d: Array<number>, i: number, rm: number, repeating?: number): boolean {
-        let k: number;
+    public static checkRoundingDigits(d: Array<double>, i: double, rm: int, repeating?: int): boolean {
+        let k: double;
         // Get the length of the first word of the array d.
         for (k = d[0]; k >= 10; k /= 10) {
             --i;
         }
-        let di: number;
+        let di: double;
         // Is the rounding digit in the first word of d?
         if (--i < 0) {
             i += LOG_BASE;
@@ -3485,23 +3486,23 @@ class Utils {
         return r;
     }
 
-    public static updateDigits(v?: number): Array<number> {
-        let res = new Array<number>();
+    public static updateDigits(v?: double): Array<double> {
+        let res = new Array<double>();
         if (v != undefined) {
             res.push(v!);
         }
         return res;
     }
 
-    public static toNumber(s: string): number {
+    public static toNumber(s: string): double {
         return +Number.parseFloat(s);
     }
 
-    public static toExponential(n: number): String {
+    public static toExponential(n: double): String {
         return new Double(n).toExponential();
     }
 
-    public static toString(n: number): String {
+    public static toString(n: double): String {
         return new String(n);
     }
 
@@ -3538,7 +3539,7 @@ class Utils {
         return def[1];
     }
 
-    public static getPrecision(digits: Array<number>) {
+    public static getPrecision(digits: Array<double>) {
         let w = digits.length - 1;
         let len = w * LOG_BASE + 1;
 
@@ -3559,7 +3560,7 @@ class Utils {
         return (n.d![n.d!.length - 1] & 1) > 0;
     }
 
-    public static tinyPow(b: number, e: number): number {
+    public static tinyPow(b: int, e: double): double {
         let n = b;
         while (--e) {
             n *= b;
@@ -3567,7 +3568,7 @@ class Utils {
         return n;
     }
 
-    public static getPi(sd: number, rm: number): Decimal {
+    public static getPi(sd: double, rm: int): Decimal {
         if (sd > PI_PRECISION) {
             throw Utils.createBusinessError(PRECISION_LIMIT_EXCEEDED_ERROR_CODE,
                 `Precision limit exceeded, "sd" must be <= PI_PRECISION`);
@@ -3579,7 +3580,7 @@ class Utils {
      * Round `x` to `sd` significant digits using rounding mode `rm`.
      * Check for over/under-flow.
      */
-    public static finalise(x: Decimal, sd: number | undefined, rm: number | undefined,
+    public static finalise(x: Decimal, sd: double | undefined, rm: int | undefined,
         isTruncated: boolean = false): Decimal {
         // Don't round if sd is undefined.
         if (sd != undefined) {
@@ -3590,23 +3591,23 @@ class Utils {
             }
 
             // digits: the number of digits of w.
-            let digits: number;
-            let k: number;
+            let digits: double;
+            let k: double;
             for (digits = 1, k = xd![0]; k >= 10; k /= 10) {
                 digits++;
             }
-            let signDigits: number = sd!;
+            let signDigits: double = sd!;
             // i: what would be the index of rd within w if all the numbers were 7 digits long (i.e. if
             // they had leading zeros)
             let i = sd - digits;
             // j: if > 0, the actual index of rd within w (if < 0, rd is a leading zero).
-            let j: number;
+            let j: double;
             // w: the word of xd containing rd, a base 1e7 number.
-            let w: number;
+            let w: double;
             // xdi: the index of w within xd.
-            let xdi: number = 0;
+            let xdi: double = 0;
             // rd: the rounding digit, i.e. the digit after the digit that may be rounded up.
-            let rd: number;
+            let rd: double;
             if (i < 0) {
                 i += LOG_BASE;
                 j = signDigits;
@@ -3727,13 +3728,13 @@ class Utils {
      *
      * @param { Decimal } x dividend
      * @param { Decimal } y divisor
-     * @param { number } pr rounding precision
-     * @param { number } rm rounding mode
+     * @param { double } pr rounding precision
+     * @param { int } rm rounding mode
      * @param { boolean } dp the flag of decimal places
-     * @param { number } base division in the specified base, {2 | 8 | 10 | 16}
+     * @param { double } base division in the specified base, {2 | 8 | 10 | 16}
      * @returns { Decimal } the Decimal type
      */
-    public static divide(x: Decimal, y: Decimal, pr?: number, rm?: number, dp?: boolean, base?: number): Decimal {
+    public static divide(x: Decimal, y: Decimal, pr?: double, rm?: int, dp?: boolean, base?: double): Decimal {
         let sign = x.s == y.s ? 1 : -1;
         let xd = x.d;
         let yd = y.d;
@@ -3744,8 +3745,8 @@ class Utils {
         }
         xd = x.d!;
         yd = y.d!;
-        let logBase: number;
-        let e: number;
+        let logBase: double;
+        let e: double;
         if (base) {
             logBase = 1;
             e = x.e - y.e;
@@ -3757,15 +3758,15 @@ class Utils {
         let yL = yd.length;
         let xL = xd.length;
         let q = new Decimal(sign);
-        let qd = new Array<number>();
+        let qd = new Array<double>();
         q.digits = qd;
-        let i: number;
+        let i: double;
         for (i = 0; i < yL && yd[i] == (i < xL ? xd[i] || 0 : 0); i++);
 
         if (i < yL && yd[i] > (i < xL ? xd[i] || 0 : 0)) {
             e--;
         }
-        let sd: number;
+        let sd: double;
         if (pr == undefined) {
             sd = pr = Decimal.precision;
             rm = Decimal.rounding;
@@ -3775,7 +3776,7 @@ class Utils {
             sd = pr;
         }
         let more: boolean;
-        let k: number;
+        let k: double;
         if (sd < 0) {
             qd.push(1);
             more = true;
@@ -3786,7 +3787,7 @@ class Utils {
                 k = 0;
                 let ydv = yd[0];
                 sd++;
-                let t: number;
+                let t: double;
                 for (; (i < xL || k) && sd--; i++) {
                     t = k * base + (i < xd.length ? (xd[i] || 0) : 0);
                     qd.push(t / ydv | 0);
@@ -3802,7 +3803,7 @@ class Utils {
                     xL = xd.length;
                 }
                 let xi = yL;
-                let rem: Array<number> | undefined = xd.slice(0, yL);
+                let rem: Array<double> | undefined = xd.slice(0, yL);
                 let remL = rem.length;
                 for (; remL < yL;) {
                     if (remL == rem.length) {
@@ -3827,7 +3828,7 @@ class Utils {
                             rem0 = rem0 * base + (rem![1] || 0);
                         }
                         k = rem0 / yd0 | 0;
-                        let prod: Array<number>;
+                        let prod: Array<double>;
                         if (k > 1) {
                             if (k >= base) {
                                 k = base - 1;
@@ -3888,13 +3889,13 @@ class Utils {
                 i++;
             }
             q.exponent = i + e * logBase - 1;
-            let sd: number = dp ? pr + q.e + 1 : pr;
+            let sd: double = dp ? pr + q.e + 1 : pr;
             Utils.finalise(q, sd, rm, more);
         }
         return q;
     }
 
-    public static random(significantDigits?: number): Decimal {
+    public static random(significantDigits?: double): Decimal {
         let result = new Decimal(1);
         if (significantDigits == undefined) {
             significantDigits = Decimal.precision;
@@ -3904,8 +3905,8 @@ class Utils {
 
         // calculate the exponent based on 1e7.
         let exp = Math.ceil(significantDigits / LOG_BASE);
-        let i: number = 0;
-        let resultDigits: Array<number> = new Array<number>();
+        let i: int = 0;
+        let resultDigits: Array<double> = new Array<double>();
         if (!Decimal.crypto) {
             for (; i < exp;) {
                 resultDigits.push(Math.random() * 1e7 | 0);
@@ -3934,10 +3935,10 @@ class Utils {
         }
 
         // Zero?
-        let resultExponent: number = 0;
+        let resultExponent: double = 0;
         if (i < 0) {
             resultExponent = 0;
-            resultDigits = new Array<number>();
+            resultDigits = new Array<double>();
             resultDigits.push(0);
         } else {
             resultExponent = -1;
@@ -3947,8 +3948,8 @@ class Utils {
             }
 
             // Count the digits of the first word of result digits to determine leading zeros.
-            let exponent: number = 0;
-            let firstVal: number = 0;
+            let exponent: double = 0;
+            let firstVal: double = 0;
             for (exponent = 1, firstVal = resultDigits[0]; firstVal >= 10; firstVal /= 10) {
                 exponent++;
             }
@@ -3964,7 +3965,7 @@ class Utils {
         return result;
     }
 
-    public static createBusinessError(code: number, message: string) {
+    public static createBusinessError(code: int, message: string) {
         return new BusinessError(code, new Error(message));
     }
 }

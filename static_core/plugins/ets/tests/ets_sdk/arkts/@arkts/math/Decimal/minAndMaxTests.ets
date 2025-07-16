@@ -28,7 +28,7 @@ function checkResultIsNaN(...n: Value[]) {
     arktest.assertTrue(Number.isNaN(Decimal.min(...n).toNumber()));
 }
 
-function checkResultValues(min: number | string, max: number | string, ...n: Value[]) {
+function checkResultValues(min: double | string, max: double | string, ...n: Value[]) {
     arktest.assertEQ(new Decimal(min).valueOf(), Decimal.min(...n).valueOf());
     arktest.assertEQ(new Decimal(max).valueOf(), Decimal.max(...n).valueOf());
 }

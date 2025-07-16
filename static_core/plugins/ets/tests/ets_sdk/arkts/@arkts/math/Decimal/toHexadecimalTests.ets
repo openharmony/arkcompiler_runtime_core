@@ -32,7 +32,7 @@ function main(): int {
     return suite.run();
 }
 
-function checkToHexadecimalResult(expected: string, n: string | number, sd: number, rm: number) {
+function checkToHexadecimalResult(expected: string, n: string | double, sd: double, rm: int) {
     Decimal.precision = sd;
     Decimal.rounding = rm;
     arktest.assertEQ(new Decimal(n).toHexadecimal(), expected);

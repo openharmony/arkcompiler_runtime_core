@@ -56,7 +56,7 @@ function testDivForNaN() {
     arktest.assertEQ(Decimal.div(-Infinity, -Infinity).valueOf(), 'NaN');
 }
 
-function checkDivResult(dividend: string, divisor: number | string, expected: string, sd: number, rm: number) {
+function checkDivResult(dividend: string, divisor: double | string, expected: string, sd: double, rm: int) {
     Decimal.precision = sd;
     Decimal.rounding = rm;
     arktest.assertEQ(Decimal.div(dividend, divisor).valueOf(), expected);

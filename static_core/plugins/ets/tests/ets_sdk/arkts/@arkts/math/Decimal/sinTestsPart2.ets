@@ -24,7 +24,7 @@ function main(): int {
     return suite.run();
 }
 
-function checkSinResult(n: string, pr: number, rm: number, expected: string) {
+function checkSinResult(n: string, pr: double, rm: int, expected: string) {
     Decimal.precision = pr;
     Decimal.rounding = rm;
     arktest.assertEQ(new Decimal(n).sin().valueOf(), expected);

@@ -35,7 +35,7 @@ function main(): int {
     return suite.run();
 }
 
-function checkRoundResult(expected: string, n: string, rm: number) {
+function checkRoundResult(expected: string, n: string, rm: int) {
     Decimal.rounding = rm;
     arktest.assertEQ(expected, Decimal.round(n).valueOf());
 }

@@ -29,18 +29,18 @@ function main(): int {
     return suite.run();
 }
 
-function checkResultIsNotZero(expected: boolean, dividend: number, divisor: number) {
+function checkResultIsNotZero(expected: boolean, dividend: int, divisor: double) {
     let quotient = new Decimal(dividend).div(divisor);
     let result = quotient.isZero() && quotient.isNegative();
     arktest.assertEQ(result, expected);
 }
 
-function checkDivResult(dividend: string, divisor: number | string, expected: string, sd: number, rm: number) {
+function checkDivResult(dividend: string, divisor: double | string, expected: string, sd: int, rm: int) {
     Decimal.set({ precision: sd, rounding: rm, toExpNeg: -7, toExpPos: 21, minE: -9e15, maxE: 9e15 });
     arktest.assertEQ(new Decimal(dividend).div(divisor).valueOf(), expected);
 }
 
-function checkDivResultForExpIsZero(dividend: string, divisor: string, expected: string, sd: number, rm: number) {
+function checkDivResultForExpIsZero(dividend: string, divisor: string, expected: string, sd: int, rm: int) {
     Decimal.set({ precision: sd, rounding: rm, toExpNeg: 0, toExpPos: 0, minE: -9e15, maxE: 9e15 });
     arktest.assertEQ(new Decimal(dividend).div(divisor).valueOf(), expected);
 }

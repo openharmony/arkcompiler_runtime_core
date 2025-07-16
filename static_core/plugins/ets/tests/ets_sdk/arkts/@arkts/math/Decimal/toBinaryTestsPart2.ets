@@ -22,7 +22,7 @@ function main(): int {
     return suite.run();
 }
 
-function checkToBinaryResult(expected: string, n: string | number, sd: number, rm: number) {
+function checkToBinaryResult(expected: string, n: string | double, sd: double, rm: int) {
     Decimal.precision = sd;
     Decimal.rounding = rm;
     arktest.assertEQ(new Decimal(n).toBinary(), expected);

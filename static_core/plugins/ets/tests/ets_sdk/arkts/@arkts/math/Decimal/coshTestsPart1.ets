@@ -23,7 +23,7 @@ function main(): int {
     return suite.run();
 }
 
-function checkCoshResult(n: string, pr: number, rm: number, expected: string) {
+function checkCoshResult(n: string, pr: double, rm: int, expected: string) {
     Decimal.precision = pr;
     Decimal.rounding = rm;
     arktest.assertEQ(new Decimal(n).cosh().valueOf(), expected);

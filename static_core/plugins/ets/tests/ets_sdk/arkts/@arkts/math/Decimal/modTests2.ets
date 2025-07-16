@@ -25,7 +25,7 @@ function main(): int {
     return suite.run();
 }
 
-function checkModResult(a: string, b: string, expected: string, sd: number, rm: number) {
+function checkModResult(a: string, b: string, expected: string, sd: double, rm: int) {
     Decimal.precision = sd;
     Decimal.rounding = rm;
     arktest.assertEQ(new Decimal(a).mod(b).valueOf(), expected);

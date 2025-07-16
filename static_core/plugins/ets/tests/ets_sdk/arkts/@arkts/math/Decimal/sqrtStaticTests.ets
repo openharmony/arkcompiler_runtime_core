@@ -26,7 +26,7 @@ function main(): int {
     return suite.run();
 }
 
-function checkSqrtResult(expected: string, n: string | number, sd: number, rm: number) {
+function checkSqrtResult(expected: string, n: string | double, sd: double, rm: int) {
     Decimal.precision = sd;
     Decimal.rounding = rm;
     arktest.assertEQ(Decimal.sqrt(n).valueOf(), expected);

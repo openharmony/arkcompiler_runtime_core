@@ -24,7 +24,7 @@ function main(): int {
     return suite.run();
 }
 
-function checkCosResult(n: string, pr: number, rm: number, expected: string) {
+function checkCosResult(n: string, pr: double, rm: int, expected: string) {
     Decimal.precision = pr;
     Decimal.rounding = rm;
     arktest.assertEQ(new Decimal(n).cos().valueOf(), expected);

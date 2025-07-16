@@ -22,7 +22,7 @@ function main(): int {
     return suite.run();
 }
 
-function checkAtanhResult(n: string, pr: number, rm: number, expected: string) {
+function checkAtanhResult(n: string, pr: double, rm: int, expected: string) {
     Decimal.precision = pr;
     Decimal.rounding = rm;
     arktest.assertEQ(new Decimal(n).atanh().valueOf(), expected);
