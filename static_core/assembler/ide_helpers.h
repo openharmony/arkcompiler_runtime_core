@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,14 +16,15 @@
 #ifndef PANDA_ASSEMBLER_IDE_HELPERS_H
 #define PANDA_ASSEMBLER_IDE_HELPERS_H
 
+#include <cstdint>
 #include <sstream>
 
 namespace ark::pandasm {
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 struct SourcePosition {
-    size_t line = 0;
-    size_t column = 0;
+    std::uint32_t line = 0U;
+    std::uint32_t column = 0U;
 
     std::string JsonSerialize() const
     {
@@ -58,7 +59,7 @@ std::string JsonSerializeItemBody(const T &item)
     std::string quotedName = "\"" + item.name + "\"";
     ss << "{ "
        << "\"name\": " << quotedName;
-    if (item.fileLocation && item.fileLocation->isDefined) {
+    if (item.fileLocation.isDefined) {
         ss << ", "
            << "\"bodyLocation\": " << item.bodyLocation.JsonSerialize() << " }";
     } else {

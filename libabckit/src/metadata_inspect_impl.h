@@ -31,7 +31,7 @@ struct Record;
 struct LiteralArray;
 }  // namespace panda::pandasm
 namespace ark::pandasm {
-struct Function;
+class Function;
 struct Program;
 struct Record;
 struct LiteralArray;

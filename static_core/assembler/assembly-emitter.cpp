@@ -805,9 +805,10 @@ static void AddBytecodeIndexDependencies(MethodItem *method, const Ins &insn,
                                          const std::unordered_map<std::string, T *> &items,
                                          const AsmEmitter::AsmEntityCollections &entities, bool lookupInStatic = true)
 {
-    ASSERT(!insn.ids.empty());
+    ASSERT(!insn.IDEmpty());
 
-    for (const auto &id : insn.ids) {
+    for (std::size_t i = 0U; i < insn.IDSize(); ++i) {
+        const auto &id = insn.GetID(i);
         auto it = items.find(id);
         if (it == items.cend()) {
             if (lookupInStatic && insn.HasFlag(InstFlags::STATIC_METHOD_ID)) {
@@ -1527,7 +1528,7 @@ bool AsmEmitter::AddMethodAndParamsAnnotations(ItemContainer *items, const Progr
         size_t paramIdx = method->IsStatic() ? protoIdx : protoIdx + 1;
         auto &param = func.params[paramIdx];
         auto &paramItem = paramItems[protoIdx];
-        if (!AddAnnotations(&paramItem, items, param.GetOrCreateMetadata(), program, entities)) {
+        if (!AddAnnotations(&paramItem, items, *param.GetOrCreateMetadata(), program, entities)) {
             SetLastError("Cannot emit annotations for parameter a" + std::to_string(paramIdx) + " of function " +
                          func.name + ": " + GetLastError());
             return false;
@@ -1711,8 +1712,8 @@ bool AsmEmitter::EmitFunctions(ItemContainer *items, const Program &program,
         code->SetNumVregs(func.regsNum);
         code->SetNumArgs(func.GetParamsNum());
 
-        auto numIns = static_cast<uint32_t>(
-            std::count_if(func.ins.begin(), func.ins.end(), [](auto it) { return it.opcode != Opcode::INVALID; }));
+        auto numIns = static_cast<uint32_t>(std::count_if(func.ins.cbegin(), func.ins.cend(),
+                                                          [](auto const &it) { return it.opcode != Opcode::INVALID; }));
         code->SetNumInstructions(numIns);
 
         auto *bytes = code->GetInstructions();
@@ -1924,14 +1925,14 @@ bool Function::Emit(BytecodeEmitter &emitter, panda_file::MethodItem *method,
     auto labels = std::unordered_map<std::string_view, ark::Label> {};
 
     for (const auto &insn : ins) {
-        if (insn.setLabel) {
-            labels.insert_or_assign(insn.label, emitter.CreateLabel());
+        if (insn.HasLabel()) {
+            labels.insert_or_assign(insn.Label(), emitter.CreateLabel());
         }
     }
 
     for (const auto &insn : ins) {
-        if (insn.setLabel) {
-            auto search = labels.find(insn.label);
+        if (insn.HasLabel()) {
+            auto search = labels.find(insn.Label());
             ASSERT(search != labels.end());
             emitter.Bind(search->second);
         }
@@ -1980,12 +1981,12 @@ void Function::EmitLocalVariable(panda_file::LineNumberProgramItem *program, Ite
 
 size_t Function::GetLineNumber(size_t i) const
 {
-    return static_cast<int32_t>(ins[i].insDebug.lineNumber);
+    return static_cast<size_t>(ins[i].insDebug.LineNumber());
 }
 
 uint32_t Function::GetColumnNumber(size_t i) const
 {
-    return static_cast<int32_t>(ins[i].insDebug.columnNumber);
+    return ins[i].insDebug.ColumnNumber();
 }
 
 void Function::EmitNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constantPool,
@@ -2069,9 +2070,9 @@ void Function::BuildLineNumberProgram(panda_file::DebugInfoItem *debugItem, cons
 
 Function::TryCatchInfo Function::MakeOrderAndOffsets(const std::vector<uint8_t> &bytecode) const
 {
-    std::unordered_map<std::string_view, size_t> tryCatchLabels;
-    std::unordered_map<std::string, std::vector<const CatchBlock *>> tryCatchMap;
-    std::vector<std::string> tryCatchOrder;
+    std::unordered_map<std::string_view, size_t> tryCatchLabels {};
+    std::unordered_map<std::string, std::vector<const CatchBlock *>> tryCatchMap {};
+    std::vector<std::string> tryCatchOrder {};
 
     for (auto &catchBlock : catchBlocks) {
         tryCatchLabels.insert_or_assign(catchBlock.tryBeginLabel, 0);
@@ -2092,10 +2093,10 @@ Function::TryCatchInfo Function::MakeOrderAndOffsets(const std::vector<uint8_t> 
     size_t pcOffset = 0;
 
     for (const auto &i : ins) {
-        if (i.setLabel) {
-            auto it = tryCatchLabels.find(i.label);
+        if (i.HasLabel()) {
+            auto it = tryCatchLabels.find(i.Label());
             if (it != tryCatchLabels.cend()) {
-                tryCatchLabels[i.label] = pcOffset;
+                tryCatchLabels[i.Label()] = pcOffset;
             }
         }
         if (i.opcode == Opcode::INVALID) {
@@ -2106,7 +2107,7 @@ Function::TryCatchInfo Function::MakeOrderAndOffsets(const std::vector<uint8_t> 
         bi = bi.GetNext();
     }
 
-    return Function::TryCatchInfo {tryCatchLabels, tryCatchMap, tryCatchOrder};
+    return Function::TryCatchInfo {std::move(tryCatchLabels), std::move(tryCatchMap), std::move(tryCatchOrder)};
 }
 
 std::vector<CodeItem::TryBlock> Function::BuildTryBlocks(
@@ -2128,7 +2129,7 @@ std::vector<CodeItem::TryBlock> Function::BuildTryBlocks(
 
         ASSERT(!tryCatchBlocks.empty());
 
-        std::vector<CodeItem::CatchBlock> catchBlockItems;
+        std::vector<CodeItem::CatchBlock> catchBlockItems {};
 
         for (auto *catchBlock : tryCatchBlocks) {
             auto className = catchBlock->exceptionRecord;

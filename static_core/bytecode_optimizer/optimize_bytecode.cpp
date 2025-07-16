@@ -155,7 +155,7 @@ static void ColumnNumberPropagate(pandasm::Function *function)
     // handle the instructions that are at the beginning of code but do not have column number
     size_t k = 0;
     while (k < insVec.size() && cn == compiler::INVALID_COLUMN_NUM) {
-        cn = insVec[k++].insDebug.columnNumber;
+        cn = insVec[k++].insDebug.ColumnNumber();
     }
     if (cn == compiler::INVALID_COLUMN_NUM) {
         LOG(DEBUG, BYTECODE_OPTIMIZER) << "Failed ColumnNumberPropagate: All insts have invalid column number";
@@ -167,8 +167,8 @@ static void ColumnNumberPropagate(pandasm::Function *function)
 
     // handle other instructions that do not have column number
     for (; k < insVec.size(); k++) {
-        if (insVec[k].insDebug.columnNumber != compiler::INVALID_COLUMN_NUM) {
-            cn = insVec[k].insDebug.columnNumber;
+        if (insVec[k].insDebug.ColumnNumber() != compiler::INVALID_COLUMN_NUM) {
+            cn = insVec[k].insDebug.ColumnNumber();
         } else {
             insVec[k].insDebug.SetColumnNumber(cn);
         }
@@ -180,13 +180,13 @@ static void LineNumberPropagate(pandasm::Function *function)
     if (function == nullptr || function->ins.empty()) {
         return;
     }
-    size_t ln = 0;
+    std::uint32_t ln = 0;
     auto &insVec = function->ins;
 
     // handle the instructions that are at the beginning of code but do not have line number
     size_t i = 0;
     while (i < insVec.size() && ln == 0U) {
-        ln = insVec[i++].insDebug.lineNumber;
+        ln = insVec[i++].insDebug.LineNumber();
     }
     if (ln == 0U) {
         LOG(DEBUG, BYTECODE_OPTIMIZER) << "Failed LineNumberPropagate: All insts have invalid line number";
@@ -198,8 +198,8 @@ static void LineNumberPropagate(pandasm::Function *function)
 
     // handle other instructions that do not have line number
     for (; i < insVec.size(); i++) {
-        if (insVec[i].insDebug.lineNumber != 0U) {
-            ln = insVec[i].insDebug.lineNumber;
+        if (insVec[i].insDebug.LineNumber() != 0U) {
+            ln = insVec[i].insDebug.LineNumber();
         } else {
             insVec[i].insDebug.SetLineNumber(ln);
         }
@@ -231,7 +231,7 @@ static bool SkipFunction(const pandasm::Function &function, const std::string &f
         return true;
     }
 
-    if ((function.regsNum + function.GetParamsNum()) > compiler::VIRTUAL_FRAME_SIZE) {
+    if ((function.GetTotalRegs() + function.GetParamsNum()) > compiler::VIRTUAL_FRAME_SIZE) {
         LOG(ERROR, BYTECODE_OPTIMIZER) << "Unable to optimize " << funcName
                                        << ": Function frame size is larger than allowed one";
         return true;
@@ -313,9 +313,9 @@ bool OptimizeFunction(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFi
     DebugInfoPropagate(function, graph, irInterface);
 
     function.valueOfFirstParam = static_cast<int64_t>(graph->GetStackSlotsCount()) - 1L;  // Work-around promotion rules
-    function.regsNum = static_cast<size_t>(function.valueOfFirstParam + 1U);
+    function.regsNum = static_cast<std::uint32_t>(function.valueOfFirstParam + 1);
 
-    if (auto frameSize = function.regsNum + function.GetParamsNum(); frameSize >= NUM_COMPACTLY_ENCODED_REGS) {
+    if (auto frameSize = function.GetTotalRegs() + function.GetParamsNum(); frameSize >= NUM_COMPACTLY_ENCODED_REGS) {
         LOG(INFO, BYTECODE_OPTIMIZER) << "Function " << funcName << " has frame size " << frameSize;
     }
 

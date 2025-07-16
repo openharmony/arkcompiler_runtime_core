@@ -16,6 +16,7 @@
 #ifndef ASSEMBLER_ASSEMBLY_DEBUG_H
 #define ASSEMBLER_ASSEMBLY_DEBUG_H
 
+#include <cstdint>
 #include <string>
 #include <cstdint>
 

@@ -155,7 +155,7 @@ pandasm::Record &TypeCreatorCtx::GetTypeAPICtxDataRecord()
     ctxDataRecordCctor_.name += panda_file::GetCctorName(SourceLanguage::ETS);
     ctxDataRecordCctor_.metadata->SetAttribute(typeapi_create_consts::ATTR_CCTOR);
     ctxDataRecordCctor_.metadata->SetAttribute(typeapi_create_consts::ATTR_STATIC);
-    ctxDataRecordCctor_.regsNum = 1;
+    ctxDataRecordCctor_.regsNum = 1U;
     ctxDataRecordCctor_.AddInstruction(pandasm::Create_MOVI_64(0, reinterpret_cast<EtsLong>(this)));
     ctxDataRecordCctor_.AddInstruction(
         pandasm::Create_CALL_SHORT(0, 0, std::string {typeapi_create_consts::FUNCTION_GET_OBJECTS_FOR_CCTOR}));

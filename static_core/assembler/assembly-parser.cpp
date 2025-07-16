@@ -13,11 +13,6 @@
  * limitations under the License.
  */
 
-#include <cctype>
-#include <cerrno>
-
-#include <iterator>
-
 #include "assembly-type.h"
 #include "libpandafile/type_helper.h"
 #include "ins_emit.h"
@@ -697,19 +692,21 @@ void Parser::ParseResetFunctionParams(bool isHomonym)
             continue;
         }
         currFunc_ = &(it->second);
-        currFunc_->regsNum = static_cast<size_t>(currFunc_->valueOfFirstParam + 1);
+        currFunc_->regsNum = static_cast<std::uint32_t>(currFunc_->valueOfFirstParam + 1);
 
         for (const auto &v : t.second) {
-            if (currFunc_->ins.empty() && currFunc_->ins.size() < v.first && currFunc_->ins[v.first - 1].regs.empty()) {
+            if (currFunc_->ins.empty() && currFunc_->ins.size() < v.first && currFunc_->ins[v.first - 1].RegEmpty()) {
                 continue;
             }
-            currFunc_->ins[v.first - 1].regs[v.second] += static_cast<uint16_t>(currFunc_->valueOfFirstParam + 1);
+            auto value = currFunc_->ins[v.first - 1].GetReg(v.second);
+            value += static_cast<uint16_t>(currFunc_->valueOfFirstParam + 1);
+            currFunc_->ins[v.first - 1].SetReg(v.second, value);
             // NOLINTNEXTLINE(hicpp-signed-bitwise)
             size_t maxRegNumber = (1 << currFunc_->ins[v.first - 1].MaxRegEncodingWidth());
-            if (currFunc_->ins[v.first - 1].regs[v.second] >= maxRegNumber) {
+            if (currFunc_->ins[v.first - 1].GetReg(v.second) >= maxRegNumber) {
                 const auto &debug = currFunc_->ins[v.first - 1].insDebug;
-                context_.err = Error("Register width mismatch.", debug.lineNumber, Error::ErrorType::ERR_BAD_NAME_REG,
-                                     "", debug.boundLeft, debug.boundRight, debug.wholeLine);
+                context_.err = Error("Register width mismatch.", debug.LineNumber(), Error::ErrorType::ERR_BAD_NAME_REG,
+                                     "", debug.BoundLeft(), debug.BoundRight(), debug.WholeLine());
                 SetError();
                 break;
             }
@@ -724,10 +721,10 @@ void Parser::ParseResetFunctionLabelsAndParams()
     }
     for (const auto &f : ambiguousFunctionTable_) {
         for (const auto &k : f.second.labelTable) {
-            if (!k.second.fileLocation->isDefined) {
+            if (!k.second.fileLocation.isDefined) {
                 context_.err = Error("This label does not exist.", lineStric_, Error::ErrorType::ERR_BAD_LABEL_EXT, "",
-                                     k.second.fileLocation->boundLeft, k.second.fileLocation->boundRight,
-                                     k.second.fileLocation->wholeLine);
+                                     k.second.fileLocation.boundLeft, k.second.fileLocation.boundRight,
+                                     k.second.fileLocation.WholeLine());
                 SetError();
             }
         }
@@ -748,7 +745,7 @@ void Parser::ParseInsFromFuncTable(ark::pandasm::Function &func)
         bool isInitobj = insn.opcode == Opcode::INITOBJ || insn.opcode == Opcode::INITOBJ_SHORT ||
                          insn.opcode == Opcode::INITOBJ_RANGE;
         size_t diff = isInitobj ? 0 : 1;
-        auto funcName = insn.ids[0];
+        auto const &funcName = insn.GetID(0U);
 
         if (!IsSignatureOrMangled(funcName)) {
             const auto itSynonym = program_.functionSynonyms.find(funcName);
@@ -758,27 +755,27 @@ void Parser::ParseInsFromFuncTable(ark::pandasm::Function &func)
 
             if (itSynonym->second.size() > 1) {
                 const auto &debug = insn.insDebug;
-                context_.err = Error("Unable to resolve ambiguous function call", debug.lineNumber,
-                                     Error::ErrorType::ERR_FUNCTION_MULTIPLE_ALTERNATIVES, "", debug.boundLeft,
-                                     debug.boundRight, debug.wholeLine);
+                context_.err = Error("Unable to resolve ambiguous function call", debug.LineNumber(),
+                                     Error::ErrorType::ERR_FUNCTION_MULTIPLE_ALTERNATIVES, "", debug.BoundLeft(),
+                                     debug.BoundRight(), debug.WholeLine());
                 SetError();
                 break;
             }
 
-            insn.ids[0] = program_.functionSynonyms.at(funcName)[0];
+            insn.SetID(0U, program_.functionSynonyms.at(funcName)[0U]);
         }
 
-        auto foundFunc = ambiguousFunctionTable_.find({insn.ids[0], false});
+        auto foundFunc = ambiguousFunctionTable_.find({insn.GetID(0U), false});
         ASSERT(foundFunc != ambiguousFunctionTable_.end());
         if (insn.OperandListLength() - diff < foundFunc->second.GetParamsNum()) {
-            if (insn.IsCallRange() && (static_cast<int>(insn.regs.size()) - static_cast<int>(diff) >= 0)) {
+            if (insn.IsCallRange() && (static_cast<int>(insn.RegSize()) - static_cast<int>(diff) >= 0)) {
                 continue;
             }
 
             const auto &debug = insn.insDebug;
-            context_.err =
-                Error("Function argument mismatch.", debug.lineNumber, Error::ErrorType::ERR_FUNCTION_ARGUMENT_MISMATCH,
-                      "", debug.boundLeft, debug.boundRight, debug.wholeLine);
+            context_.err = Error("Function argument mismatch.", debug.LineNumber(),
+                                 Error::ErrorType::ERR_FUNCTION_ARGUMENT_MISMATCH, "", debug.BoundLeft(),
+                                 debug.BoundRight(), debug.WholeLine());
             SetError();
         }
     }
@@ -792,11 +789,11 @@ bool Parser::CheckVirtualCallInsn(const ark::pandasm::Ins &insn)
         case Opcode::CALL_VIRT_RANGE:
         case Opcode::CALL_VIRT_ACC:
         case Opcode::CALL_VIRT_ACC_SHORT: {
-            if (program_.functionStaticTable.find(insn.ids[0]) != program_.functionStaticTable.cend()) {
+            if (program_.functionStaticTable.find(insn.GetID(0U)) != program_.functionStaticTable.cend()) {
                 const auto &debug = insn.insDebug;
-                context_.err =
-                    Error("Virtual instruction calls static method.", debug.lineNumber,
-                          Error::ErrorType::ERR_BAD_OPERAND, "", debug.boundLeft, debug.boundRight, debug.wholeLine);
+                context_.err = Error("Virtual instruction calls static method.", debug.LineNumber(),
+                                     Error::ErrorType::ERR_BAD_OPERAND, "", debug.BoundLeft(), debug.BoundRight(),
+                                     debug.WholeLine());
                 SetError();
                 return false;
             }
@@ -822,16 +819,16 @@ void Parser::ParseResetFunctionTable()
 {
     for (auto &[unusedKey, func] : ambiguousFunctionTable_) {
         (void)unusedKey;
-        if (!func.fileLocation->isDefined) {
-            context_.err = Error("This function does not exist.", func.fileLocation->lineNumber,
-                                 Error::ErrorType::ERR_BAD_ID_FUNCTION, "", func.fileLocation->boundLeft,
-                                 func.fileLocation->boundRight, func.fileLocation->wholeLine);
+        if (!func.fileLocation.isDefined) {
+            context_.err = Error("This function does not exist.", func.fileLocation.lineNumber,
+                                 Error::ErrorType::ERR_BAD_ID_FUNCTION, "", func.fileLocation.boundLeft,
+                                 func.fileLocation.boundRight, func.fileLocation.WholeLine());
             SetError();
         } else if (func.HasImplementation() != func.bodyPresence) {
             context_.err =
-                Error("Inconsistency of the definition of the function and its metadata.",
-                      func.fileLocation->lineNumber, Error::ErrorType::ERR_BAD_DEFINITION_FUNCTION, "",
-                      func.fileLocation->boundLeft, func.fileLocation->boundRight, func.fileLocation->wholeLine);
+                Error("Inconsistency of the definition of the function and its metadata.", func.fileLocation.lineNumber,
+                      Error::ErrorType::ERR_BAD_DEFINITION_FUNCTION, "", func.fileLocation.boundLeft,
+                      func.fileLocation.boundRight, func.fileLocation.WholeLine());
             SetError();
         } else {
             ParseInsFromFuncTable(func);
@@ -860,10 +857,10 @@ void Parser::ParseResetRecordTable()
 {
     for (const auto &[unusedKey, record] : program_.recordTable) {
         (void)unusedKey;
-        if (!record.fileLocation->isDefined) {
-            context_.err = Error("This record does not exist.", record.fileLocation->lineNumber,
-                                 Error::ErrorType::ERR_BAD_ID_RECORD, "", record.fileLocation->boundLeft,
-                                 record.fileLocation->boundRight, record.fileLocation->wholeLine);
+        if (!record.fileLocation.isDefined) {
+            context_.err = Error("This record does not exist.", record.fileLocation.lineNumber,
+                                 Error::ErrorType::ERR_BAD_ID_RECORD, "", record.fileLocation.boundLeft,
+                                 record.fileLocation.boundRight, record.fileLocation.WholeLine());
             SetError();
         } else {
             ParseResetRecords(record);
@@ -1004,7 +1001,7 @@ void Parser::ParseAsCatchDirective()
     Function::CatchBlock catchBlock =
         PrepareCatchBlock(isCatchall, size, CATCHALL_FULL_DIRECTIVE_TOKENS_NUM, CATCH_FULL_DIRECTIVE_TOKENS_NUM);
 
-    currFunc_->catchBlocks.push_back(catchBlock);
+    currFunc_->catchBlocks.emplace_back(std::move(catchBlock));
 }
 
 void Parser::ParseAsCatchall(const std::vector<Token> &tokens)
@@ -1070,7 +1067,7 @@ Expected<Program, Error> Parser::ParseAfterMainLoop(const std::string &fileName)
     ParseResetFunctionLabelsAndParams();
 
     if (open_ && err_.err == Error::ErrorType::ERR_NONE) {
-        context_.err = Error("Code area is not closed.", currFunc_->fileLocation->lineNumber,
+        context_.err = Error("Code area is not closed.", currFunc_->fileLocation.lineNumber,
                              Error::ErrorType::ERR_BAD_CLOSE, "", 0, currFunc_->name.size(), currFunc_->name);
         SetError();
     }
@@ -1349,8 +1346,7 @@ bool Parser::ParseLabel()
         context_--;
         if (LabelValidName()) {
             if (AddObjectInTable(true, *labelTable_)) {
-                currIns_->setLabel = true;
-                currIns_->label = context_.GiveToken();
+                currIns_->SetLabel(context_.GiveToken());
 
                 LOG(DEBUG, ASSEMBLER) << "label detected (line " << lineStric_ << "): " << context_.GiveToken();
 
@@ -1445,11 +1441,11 @@ bool Parser::ParseOperandVreg()
             *(context_.maxValueOfReg) = number;
         }
 
-        currIns_->regs.push_back(static_cast<uint16_t>(number));
+        currIns_->EmplaceReg(static_cast<uint16_t>(number));
     } else if (p[0] == 'a') {
         p.remove_prefix(1);
-        currIns_->regs.push_back(static_cast<uint16_t>(ToNumber(p)));
-        context_.functionArgumentsList->emplace_back(context_.insNumber, currIns_->regs.size() - 1);
+        currIns_->EmplaceReg(static_cast<uint16_t>(ToNumber(p)));
+        context_.functionArgumentsList->emplace_back(context_.insNumber, currIns_->RegSize() - 1);
     }
 
     ++context_;
@@ -1467,8 +1463,7 @@ bool Parser::ParseOperandCall()
         return false;
     }
 
-    const auto p = std::string(context_.GiveToken().data(), context_.GiveToken().length());
-    currIns_->ids.emplace_back(p);
+    currIns_->EmplaceID(context_.GiveToken().data(), context_.GiveToken().length());
 
     ++context_;
 
@@ -1479,11 +1474,11 @@ bool Parser::ParseOperandCall()
     }
 
     if (funcSignature.empty()) {
-        const auto itSynonym = program_.functionSynonyms.find(currIns_->ids.back());
+        const auto itSynonym = program_.functionSynonyms.find(currIns_->BackID());
         if (itSynonym == program_.functionSynonyms.end()) {
-            [[maybe_unused]] auto it = ambiguousFunctionTable_.find({currIns_->ids.back(), false});
-            ASSERT(it == ambiguousFunctionTable_.end() || !it->second.fileLocation->isDefined);
-            AddObjectInTable(false, ambiguousFunctionTable_, currIns_->ids.back());
+            [[maybe_unused]] auto it = ambiguousFunctionTable_.find({currIns_->BackID(), false});
+            ASSERT(it == ambiguousFunctionTable_.end() || !it->second.fileLocation.isDefined);
+            AddObjectInTable(false, ambiguousFunctionTable_, currIns_->BackID());
             return true;
         }
 
@@ -1493,8 +1488,8 @@ bool Parser::ParseOperandCall()
             return false;
         }
     } else {
-        currIns_->ids.back() += funcSignature;
-        AddObjectInTable(false, ambiguousFunctionTable_, currIns_->ids.back());
+        currIns_->BackID() += funcSignature;
+        AddObjectInTable(false, ambiguousFunctionTable_, currIns_->BackID());
     }
 
     return true;
@@ -1740,7 +1735,7 @@ bool Parser::ParseOperandString()
         return false;
     }
 
-    currIns_->ids.push_back(res.value());
+    currIns_->EmplaceID(std::move(*res));
 
     ++context_;
 
@@ -1832,7 +1827,7 @@ bool Parser::ParseOperandInteger()
         return false;
     }
 
-    currIns_->imms.emplace_back(n);
+    currIns_->EmplaceImm(n);
     ++context_;
     return true;
 }
@@ -1844,7 +1839,7 @@ bool Parser::ParseOperandFloat(bool is64bit)
         return false;
     }
 
-    currIns_->imms.emplace_back(n);
+    currIns_->EmplaceImm(n);
     ++context_;
     return true;
 }
@@ -1861,7 +1856,7 @@ bool Parser::ParseOperandLabel()
     }
 
     std::string_view p = context_.GiveToken();
-    currIns_->ids.emplace_back(p.data(), p.length());
+    currIns_->EmplaceID(p.data(), p.length());
     AddObjectInTable(false, *labelTable_);
 
     ++context_;
@@ -1885,7 +1880,7 @@ bool Parser::ParseOperandId()
     }
 
     std::string_view p = context_.GiveToken();
-    currIns_->ids.emplace_back(p.data(), p.length());
+    currIns_->EmplaceID(p.data(), p.length());
     AddObjectInTable(false, *labelTable_);
 
     ++context_;
@@ -1935,7 +1930,7 @@ bool Parser::ParseOperandType(Type::VerificationType verType)
         }
     }
 
-    currIns_->ids.push_back(type.GetName());
+    currIns_->EmplaceID(type.GetName());
 
     return true;
 }
@@ -1961,7 +1956,7 @@ bool Parser::ParseOperandLiteralArray()
         return false;
     }
 
-    currIns_->ids.emplace_back(p.data(), p.length());
+    currIns_->EmplaceID(p.data(), p.length());
 
     ++context_;
 
@@ -1985,6 +1980,7 @@ bool Parser::ParseOperandField()
 
     std::string_view p = context_.GiveToken();
     std::string recordFullName = std::string(p);
+
     // Some names of records in pandastdlib starts with 'panda.', therefore,
     // the record name is before the second dot, and the field name is after the second dot
     auto posPoint = recordFullName.find_last_of('.');
@@ -2016,8 +2012,7 @@ bool Parser::ParseOperandField()
         }
     }
 
-    currIns_->ids.emplace_back(p.data(), p.length());
-
+    currIns_->EmplaceID(p.data(), p.length());
     ++context_;
 
     return true;
@@ -2083,7 +2078,7 @@ bool Parser::UpdateFunctionName()
         auto nodeHandle = ambiguousFunctionTable_.extract({currFunc_->name, false});
         nodeHandle.key() = {signature, false};
         ambiguousFunctionTable_.insert(std::move(nodeHandle));
-    } else if (!iter->second.fileLocation->isDefined) {
+    } else if (!iter->second.fileLocation.isDefined) {
         program_.functionSynonyms[currFunc_->name].push_back(signature);
 
         ambiguousFunctionTable_.erase({signature, false});
@@ -2097,7 +2092,7 @@ bool Parser::UpdateFunctionName()
             nodeHandle.key() = {signature, true};
             ambiguousFunctionTable_.insert(std::move(nodeHandle));
         } else {
-            ASSERT(iter->second.fileLocation->isDefined);
+            ASSERT(iter->second.fileLocation.isDefined);
             context_.err = GetError("This function already exists.", Error::ErrorType::ERR_BAD_ID_FUNCTION);
             return false;
         }
@@ -2210,7 +2205,7 @@ bool Parser::ParseRecordName()
 
     auto recordType = Type::FromName(recordName);
     auto iter = program_.recordTable.find(recordType.GetName());
-    if (iter == program_.recordTable.end() || !iter->second.fileLocation->isDefined) {
+    if (iter == program_.recordTable.end() || !iter->second.fileLocation.isDefined) {
         SetRecordInformation(recordType.GetName());
     } else {
         context_.err = GetError("This record already exists.", Error::ErrorType::ERR_BAD_ID_RECORD);
@@ -2323,10 +2318,10 @@ void Parser::SetOperationInformation()
 {
     context_.insNumber = currFunc_->ins.size();
     auto &currDebug = currFunc_->ins.back().insDebug;
-    currDebug.lineNumber = lineStric_;
-    currDebug.wholeLine = context_.tokens[context_.number - 1].wholeLine;
-    currDebug.boundLeft = context_.tokens[context_.number - 1].boundLeft;
-    currDebug.boundRight = context_.tokens[context_.number - 1].boundRight;
+    currDebug.SetLineNumber(lineStric_);
+    currDebug.SetWholeLine(context_.tokens[context_.number - 1].wholeLine);
+    currDebug.SetBoundLeft(context_.tokens[context_.number - 1].boundLeft);
+    currDebug.SetBoundRight(context_.tokens[context_.number - 1].boundRight);
 }
 
 bool Parser::ParseFunctionReturn()
@@ -2396,7 +2391,7 @@ bool Parser::ParseFunctionArg()
     ++context_;
 
     Function::Parameter parameter(type, program_.lang);
-    metadata_ = &parameter.GetOrCreateMetadata();
+    metadata_ = parameter.GetOrCreateMetadata();
 
     if (*context_ == Token::Type::DEL_LT && !ParseMetaDef()) {
         return false;
@@ -2738,7 +2733,7 @@ bool Parser::ParseOperandInitobj()
 
     if (context_.GiveToken() == ".ctor") {
         cid += ".ctor";
-        currIns_->ids.emplace_back(cid);
+        currIns_->EmplaceID(cid);
         bool findFuncInTable = false;
         for (const auto &[key, func] : ambiguousFunctionTable_) {
             if (GetFuncNameWithoutArgs(key.first) == cid) {

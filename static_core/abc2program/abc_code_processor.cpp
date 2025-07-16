@@ -14,7 +14,6 @@
  */
 
 #include "abc_code_processor.h"
-#include <iostream>
 #include "abc_field_processor.h"
 #include "abc_method_processor.h"
 #include "assembly-record.h"
@@ -31,14 +30,14 @@ AbcCodeProcessor::AbcCodeProcessor(panda_file::File::EntityId entityId, Abc2Prog
     FillProgramData();
 }
 
-std::vector<pandasm::Ins> AbcCodeProcessor::GetIns() const
+std::vector<pandasm::Ins> &&AbcCodeProcessor::GetIns()
 {
-    return ins_;
+    return std::move(ins_);
 }
 
-std::vector<pandasm::Function::CatchBlock> AbcCodeProcessor::GetCatchBlocks() const
+std::vector<pandasm::Function::CatchBlock> &&AbcCodeProcessor::GetCatchBlocks()
 {
-    return catchBlocks_;
+    return std::move(catchBlocks_);
 }
 
 uint32_t AbcCodeProcessor::GetNumVregs() const
@@ -72,7 +71,7 @@ struct TranslateImmToLabelStruct {
 
 static void TranslateImmToLabel(TranslateImmToLabelStruct &immToLabel)
 {
-    const int32_t jmpOffset = std::get<int64_t>(immToLabel.paIns->imms.at(0));
+    const int32_t jmpOffset = immToLabel.paIns->GetImm<int64_t>(0U);
     const auto bcInsDest = immToLabel.bcIns.JumpTo(jmpOffset);
     if (immToLabel.bcInsLast.GetAddress() <= bcInsDest.GetAddress()) {
         LOG(ERROR, ABC2PROGRAM) << "> error encountered at " << immToLabel.codeId << " (0x" << std::hex
@@ -89,8 +88,8 @@ static void TranslateImmToLabel(TranslateImmToLabelStruct &immToLabel)
             (*immToLabel.labelTable)[idx] = ss.str();
         }
 
-        immToLabel.paIns->imms.clear();
-        immToLabel.paIns->ids.push_back(immToLabel.labelTable->at(idx));
+        immToLabel.paIns->ClearImm();
+        immToLabel.paIns->EmplaceID(immToLabel.labelTable->at(idx));
     } else {
         LOG(ERROR, ABC2PROGRAM) << "> error encountered at " << immToLabel.codeId << " (0x" << std::hex
                                 << immToLabel.codeId << "). incorrect instruction at offset: 0x"
@@ -135,13 +134,12 @@ void AbcCodeProcessor::FillProgramData()
             stringTable_->AddStringId(offset);
         }
 
-        ins_.emplace_back(paIns);
+        ins_.emplace_back(std::move(paIns));
         bcIns = bcIns.GetNext();
     }
 
     for (const auto &pair : labelTable) {
-        ins_[pair.first].label = pair.second;
-        ins_[pair.first].setLabel = true;
+        ins_[pair.first].SetLabel(pair.second);
     }
 }
 
@@ -296,9 +294,9 @@ LabelTable AbcCodeProcessor::GetExceptions(panda_file::File::EntityId methodId, 
                 return false;
             }
 
-            catchBlocks_.push_back(catchBlockPa);
-            catchBlockPa.catchBeginLabel = "";
-            catchBlockPa.catchEndLabel = "";
+            catchBlocks_.emplace_back(catchBlockPa);
+            catchBlockPa.catchBeginLabel.clear();
+            catchBlockPa.catchEndLabel.clear();
             catchIdx++;
 
             return true;

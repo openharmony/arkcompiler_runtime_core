@@ -36,18 +36,18 @@ pandasm::Ins Disassembler::BytecodeInstructionToPandasmInstruction(BytecodeInstr
 %   i.operands.each do |operand|
 %      if (operand.name == :imm)
 %         if (operand.type != "i64")
-        ins.imms.emplace_back(static_cast<int64_t>(bcIns.GetImm<BytecodeInstruction::Format::<%=i.format.pretty.upcase%>, <%=imm_count%>>()));
+        ins.EmplaceImm(static_cast<int64_t>(bcIns.GetImm<BytecodeInstruction::Format::<%=i.format.pretty.upcase%>, <%=imm_count%>>()));
 %         else
-        ins.imms.emplace_back(bcIns.GetImm<BytecodeInstruction::Format::<%=i.format.pretty.upcase%>, <%=imm_count%>>());
+        ins.EmplaceImm(bcIns.GetImm<BytecodeInstruction::Format::<%=i.format.pretty.upcase%>, <%=imm_count%>>());
 %         end
 %         imm_count += 1
 %
 %      elsif (operand.name == :v)
-        ins.regs.emplace_back(bcIns.GetVReg(<%=reg_count%>));
+        ins.EmplaceReg(bcIns.GetVReg(<%=reg_count%>));
 %         reg_count += 1
 %      elsif (i.operands.count(&:id?) != 0)
-        ins.ids.emplace_back(IDToString(bcIns, methodId));
-%      end   
+        ins.EmplaceID(IDToString(bcIns, methodId));
+%      end
 %   end
 %   if i.profiled?
         ins.profileId = bcIns.GetProfileId();
@@ -69,7 +69,7 @@ pandasm::Ins Disassembler::BytecodeInstructionToPandasmInstruction(BytecodeInstr
         } else {
             id = methodId;
         }
-        
+
         panda_file::MethodDataAccessor mda(*file_, id);
         panda_file::ProtoDataAccessor pda(*file_, mda.GetProtoId());
 
@@ -83,15 +83,15 @@ pandasm::Ins Disassembler::BytecodeInstructionToPandasmInstruction(BytecodeInstr
                             ins.opcode == pandasm::Opcode::CALL_VIRT_ACC;
 
         if (mda.IsStatic() || isInitobj) {
-            overhead = ins.regs.size() - pda.GetNumArgs();
+            overhead = ins.RegSize() - pda.GetNumArgs();
         } else {
-            overhead = ins.regs.size() - pda.GetNumArgs() - 1;
+            overhead = ins.RegSize() - pda.GetNumArgs() - 1;
         }
         // call.acc recieves fixed amount of registers
         if (isAcc) {
             return ins;
         }
-        if (overhead < 0 || overhead > static_cast<int>(ins.regs.size())) {
+        if (overhead < 0 || overhead > static_cast<int>(ins.RegSize())) {
             LOG(ERROR, DISASSEMBLER)
                 << "> error encountered in code of " << std::dec << methodId.GetOffset() << " ("
                 << "0x" << std::hex << methodId.GetOffset() << ") while disassembling call <" << ins.ToString("")
@@ -102,7 +102,7 @@ pandasm::Ins Disassembler::BytecodeInstructionToPandasmInstruction(BytecodeInstr
         }
 
         for (int i = 0; i < overhead; i++) {
-            ins.regs.pop_back();
+            ins.PopRegBack();
         }
     }
 

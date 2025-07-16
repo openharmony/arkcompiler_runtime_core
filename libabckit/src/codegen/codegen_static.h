@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,7 +71,7 @@ public:
     {
         return "CodeGenStatic";
     }
-    std::vector<pandasm::Ins> GetEncodedInstructions() const
+    std::vector<pandasm::Ins> const &GetEncodedInstructions() const noexcept
     {
         return res_;
     }
@@ -110,10 +110,9 @@ public:
 
     void EmitLabel(const std::string &label)
     {
-        pandasm::Ins l;
-        l.label = label;
-        l.setLabel = true;
-        result_.emplace_back(l);
+        pandasm::Ins l {};
+        l.SetLabel(label);
+        result_.emplace_back(std::move(l));
     }
 
     void EmitJump(const BasicBlock *bb);

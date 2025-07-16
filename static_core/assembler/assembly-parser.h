@@ -16,14 +16,10 @@
 #ifndef PANDA_ASSEMBLER_ASSEMBLY_PARSER_H
 #define PANDA_ASSEMBLER_ASSEMBLY_PARSER_H
 
-#include <iostream>
-#include <memory>
-#include <string>
-#include <string_view>
-
 #include "assembly-context.h"
 #include "assembly-emitter.h"
 #include "assembly-field.h"
+#include "assembly-file-location.h"
 #include "assembly-function.h"
 #include "assembly-ins.h"
 #include "assembly-label.h"
@@ -111,7 +107,7 @@ private:
     std::map<std::pair<std::string, bool>, ark::pandasm::Function> ambiguousFunctionTable_;
     ark::pandasm::Ins *currIns_ = nullptr;
     ark::pandasm::Field *currFld_ = nullptr;
-    size_t lineStric_ = 0;
+    std::uint32_t lineStric_ = 0;
     ark::pandasm::Error err_;
     ark::pandasm::ErrorList war_;
     bool open_ = false; /* flag of being in a code section */
@@ -285,7 +281,7 @@ private:
         if (!fileLocation->isDefined) {
             fileLocation->boundLeft = context_.tokens[context_.number - 1].boundLeft;
             fileLocation->boundRight = context_.tokens[context_.number - 1].boundRight;
-            fileLocation->wholeLine = context_.tokens[context_.number - 1].wholeLine;
+            fileLocation->SetLine(context_.tokens[context_.number - 1].wholeLine);
             fileLocation->lineNumber = lineStric_;
         }
 
@@ -295,9 +291,11 @@ private:
     template <class T, class E>
     auto TryEmplaceInTable(bool isDefinition, T &item, const E &elem, const std::string &name)
     {
-        return item.try_emplace(elem, name, program_.lang, context_.tokens[context_.number - 1].boundLeft,
-                                context_.tokens[context_.number - 1].boundRight,
-                                context_.tokens[context_.number - 1].wholeLine, isDefinition, lineStric_);
+        return item.try_emplace(elem, name, program_.lang,
+                                FileLocation {context_.tokens[context_.number - 1].wholeLine,
+                                              context_.tokens[context_.number - 1].boundLeft,
+                                              context_.tokens[context_.number - 1].boundRight, lineStric_,
+                                              isDefinition});
     }
 
     template <class T>
@@ -309,11 +307,11 @@ private:
         if constexpr (std::is_same_v<T, std::map<std::pair<std::string, bool>, ark::pandasm::Function>>) {
             auto res = TryEmplaceInTable(isDefinition, item, std::make_pair(name, false), name);
             isInserted = res.second;
-            fileLocation = &(res.first->second.fileLocation.value());
+            fileLocation = &(res.first->second.fileLocation);
         } else {
             auto res = TryEmplaceInTable(isDefinition, item, name, name);
             isInserted = res.second;
-            fileLocation = &(res.first->second.fileLocation.value());
+            fileLocation = &(res.first->second.fileLocation);
         }
         return AnalyzeEmplacement(isDefinition, isInserted, fileLocation);
     }
@@ -326,9 +324,9 @@ inline auto Parser::TryEmplaceInTable(bool isDefinition, std::unordered_map<std:
 {
     return item.try_emplace(std::string(context_.GiveToken().data(), context_.GiveToken().length()),
                             std::string(context_.GiveToken().data(), context_.GiveToken().length()),
-                            context_.tokens[context_.number - 1].boundLeft,
-                            context_.tokens[context_.number - 1].boundRight,
-                            context_.tokens[context_.number - 1].wholeLine, isDefinition, lineStric_);
+                            FileLocation {context_.tokens[context_.number - 1].wholeLine,
+                                          context_.tokens[context_.number - 1].boundLeft,
+                                          context_.tokens[context_.number - 1].boundRight, lineStric_, isDefinition});
 }
 
 }  // namespace ark::pandasm
