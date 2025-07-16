@@ -43,7 +43,7 @@ AnyAttribute = UncheckedAttribute | AbstractCheckedAttribute
    - `AbstractCheckedAttribute.try_construct()` validates arguments and constructs instances
 """
 
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from dataclasses import MISSING, dataclass, fields
 from difflib import get_close_matches
@@ -103,7 +103,7 @@ class Argument:
 
 
 @dataclass
-class AnyAttribute(metaclass=ABCMeta):
+class AnyAttribute(ABC):
     """Base class for all attributes, both checked and unchecked.
 
     This serves as a common interface for both raw attributes (UncheckedAttribute)
@@ -189,7 +189,7 @@ class UncheckedAttribute(AnyAttribute):
         pass
 
 
-class AbstractCheckedAttribute(AnyAttribute, metaclass=ABCMeta):
+class AbstractCheckedAttribute(AnyAttribute, ABC):
     """Base class for validated attributes with pluggable checking logic.
 
     This provides the low-level framework for implementing custom attributes.
@@ -273,7 +273,7 @@ class AutoCheckedAttribute(AbstractCheckedAttribute, Generic[T]):
     Use `(Decl,)` to indicate the attribute can be attached to any declaration.
     """
 
-    MUTUALLY_EXCLUSIVE_GROUP_TAGS: ClassVar[frozenset[AttributeGroupTag]] = frozenset()
+    ATTRIBUTE_GROUP_TAGS: ClassVar[frozenset[AttributeGroupTag]] = frozenset()
     """Set of tags indicating mutually exclusive attribute groups.
 
     If this is non-empty, the attribute cannot coexist with any other
@@ -399,13 +399,13 @@ class AutoCheckedAttribute(AbstractCheckedAttribute, Generic[T]):
         Returns:
             True if the attribute can be attached, False otherwise
         """
-        for attr in chain(*parent.attributes.values()):
-            if type(attr) is type(self):
+        for prev in chain(*parent.attributes.values()):
+            if type(prev) is type(self):
                 continue
-            if not isinstance(attr, AutoCheckedAttribute):
+            if not isinstance(prev, AutoCheckedAttribute):
                 continue
-            if self.MUTUALLY_EXCLUSIVE_GROUP_TAGS & attr.MUTUALLY_EXCLUSIVE_GROUP_TAGS:
-                dm.emit(AttrConflictError(self, attr))  # type: ignore
+            if self.ATTRIBUTE_GROUP_TAGS & prev.ATTRIBUTE_GROUP_TAGS:
+                dm.emit(AttrConflictError(prev, self))  # type: ignore
 
     @override
     def get_name(self) -> str:
@@ -446,7 +446,7 @@ class TypedAttribute(AutoCheckedAttribute[T]):
     def check_typed_context(self, parent: T, dm: DiagnosticsManager) -> None:
         prev = self.get(parent)
         if prev is not None and prev is not self:
-            dm.emit(AttrConflictError(self, prev))
+            dm.emit(AttrConflictError(prev, self))
 
         super().check_typed_context(parent, dm)
 

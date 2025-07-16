@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from types import UnionType
 from typing import TYPE_CHECKING
@@ -21,7 +21,6 @@ from typing import TYPE_CHECKING
 from typing_extensions import override
 
 from taihe.utils.diagnostics import DiagError, DiagFatalError, DiagNote, DiagWarn
-from taihe.utils.sources import SourceLocation
 
 if TYPE_CHECKING:
     from taihe.semantics.attributes import (
@@ -33,6 +32,7 @@ if TYPE_CHECKING:
         EnumDecl,
         EnumItemDecl,
         IfaceDecl,
+        IfaceParentDecl,
         NamedDecl,
         PackageDecl,
         PackageLevelDecl,
@@ -179,17 +179,13 @@ class AttrConflictNote(DiagNote):
 
 @dataclass
 class AttrConflictError(DiagError):
-    current: "AnyAttribute"
     prev: "AnyAttribute"
+    current: "AnyAttribute"
 
-    def __init__(
-        self,
-        current: "AnyAttribute",
-        prev: "AnyAttribute",
-    ):
+    def __init__(self, prev: "AnyAttribute", current: "AnyAttribute"):
         super().__init__(loc=current.loc)
-        self.current = current
         self.prev = prev
+        self.current = current
 
     @override
     def describe(self) -> str:
@@ -393,6 +389,12 @@ class EnumValueError(DiagError):
 
 @dataclass
 class DuplicateExtendsNote(DiagNote):
+    prev: "IfaceParentDecl"
+
+    def __init__(self, prev: "IfaceParentDecl"):
+        super().__init__(loc=prev.loc)
+        self.prev = prev
+
     @override
     def describe(self) -> str:
         return "previously extended here"
@@ -400,9 +402,23 @@ class DuplicateExtendsNote(DiagNote):
 
 @dataclass
 class DuplicateExtendsWarn(DiagWarn):
+    prev: "IfaceParentDecl"
+    current: "IfaceParentDecl"
     iface: "IfaceDecl"
     parent_iface: "IfaceDecl"
-    prev_loc: SourceLocation | None = field(kw_only=True)
+
+    def __init__(
+        self,
+        prev: "IfaceParentDecl",
+        current: "IfaceParentDecl",
+        iface: "IfaceDecl",
+        parent_iface: "IfaceDecl",
+    ):
+        super().__init__(loc=current.loc)
+        self.prev = prev
+        self.current = current
+        self.iface = iface
+        self.parent_iface = parent_iface
 
     @override
     def describe(self) -> str:
@@ -410,8 +426,7 @@ class DuplicateExtendsWarn(DiagWarn):
 
     @override
     def notes(self):
-        if self.prev_loc:
-            yield DuplicateExtendsNote(loc=self.prev_loc)
+        yield DuplicateExtendsNote(self.prev)
 
 
 @dataclass
@@ -455,8 +470,9 @@ class RecursiveReferenceError(DiagError):
 
 
 class IgnoredFileReason(Enum):
-    IS_DIRECTORY = "subdirectories are ignored"
-    EXTENSION_MISMATCH = "unexpected file extension"
+    NOT_EXIST = "file does not exist"
+    IS_DIRECTORY = "is a directory, not a file"
+    EXTENSION_MISMATCH = "unexpected file extension, should be .taihe"
 
 
 @dataclass

@@ -27,7 +27,7 @@ struct C {
     @readonly param3: i32;
 }
 
-//struct命名按字母排序后面加数据类型
+//struct 命名按字母排序后面加数据类型
 struct DBase5 {
     param1: i8;
     param2: i16;

@@ -68,11 +68,17 @@ class SemanticTestCompilerInstance(CompilerInstance):
     def collect(self):
         pass
 
-    def assert_has_error(self, ty: type[DiagBase]):
+    def assert_has_error(self, ty: type[DiagBase] = DiagBase):
         pass
-        if all(not isinstance(err, ty) for err in self.diagnostics_manager.errors):
+        if not any(isinstance(err, ty) for err in self.diagnostics_manager.errors):
             print(f"Known: {self.diagnostics_manager.errors}")
             pytest.fail(f"Assertion mismatch: expect {ty}")
+
+    def assert_no_error(self, ty: type[DiagBase] = DiagBase):
+        pass
+        if any(isinstance(err, ty) for err in self.diagnostics_manager.errors):
+            print(f"Known: {self.diagnostics_manager.errors}")
+            pytest.fail(f"Assertion mismatch: unexpected {ty}")
 
 
 backend_registry = BackendRegistry()
@@ -512,9 +518,9 @@ def test_attr_conflict_error_2():
     test_instance = SemanticTestCompilerInstance(ani_invocation)
     test_instance.add_source(
         "package",
+        "@class\n"
+        "@class\n"
         "interface IFoo {\n"
-        '    @get("a")\n'
-        '    @get("b")\n'
         "    getX(): String;\n"
         "}\n"
     )

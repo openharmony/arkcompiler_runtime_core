@@ -62,9 +62,25 @@ function printFooName() {
     arktest.assertEQ(name, "bob")
 }
 
+class Noo1 implements IfaceReadonlyTest.Noo {
+    name: string = "hello";
+    age?: int;
+    bar(): void {
+        console.log("Noo1");
+    }
+    constructor(name: string, age?: int) {
+        this.name = name;
+        this.age = age;
+    }
+}
+
 function printNooName() {
     let noo = IfaceReadonlyTest.getNooIface();
-    let name = IfaceReadonlyTest.printNooName(noo)
+    let name = IfaceReadonlyTest.printNooName(noo);
+    let a1 = new Noo1("test1", 100);
+    console.log(a1);
+    let a2 = new Noo1("test2");
+    console.log(a2);
     console.log("noo.name is " + name)
     arktest.assertEQ(name, "noo")
 }

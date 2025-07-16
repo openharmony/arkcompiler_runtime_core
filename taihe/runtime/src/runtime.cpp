@@ -32,14 +32,14 @@ ani_vm *get_vm()
 static ani_error create_ani_error(ani_env *env, taihe::string_view msg)
 {
     ani_class errCls;
-    char const *className = "Lescompat/Error;";
+    char const *className = "escompat.Error";
     if (ANI_OK != env->FindClass(className, &errCls)) {
         std::cerr << "Not found '" << className << std::endl;
         return nullptr;
     }
 
     ani_method errCtor;
-    if (ANI_OK != env->Class_FindMethod(errCls, "<ctor>", "Lstd/core/String;Lescompat/ErrorOptions;:V", &errCtor)) {
+    if (ANI_OK != env->Class_FindMethod(errCls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &errCtor)) {
         std::cerr << "get errCtor Failed'" << className << "'" << std::endl;
         return nullptr;
     }
@@ -63,14 +63,14 @@ static ani_error create_ani_business_error(ani_env *env, int32_t err_code, taihe
     ani_error errObj = create_ani_error(env, msg);
 
     ani_class errCls;
-    char const *className = "L@ohos/base/BusinessError;";
+    char const *className = "@ohos.base.BusinessError";
     if (ANI_OK != env->FindClass(className, &errCls)) {
         std::cerr << "Not found '" << className << std::endl;
         return nullptr;
     }
 
     ani_method errCtor;
-    if (ANI_OK != env->Class_FindMethod(errCls, "<ctor>", "DLescompat/Error;:V", &errCtor)) {
+    if (ANI_OK != env->Class_FindMethod(errCls, "<ctor>", "dC{escompat.Error}:", &errCtor)) {
         std::cerr << "get errCtor Failed'" << className << "'" << std::endl;
         return nullptr;
     }

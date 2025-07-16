@@ -164,8 +164,11 @@ def generate_visitor(file: TextIO, parser: Any):
         )
 
 
-def has_generated(grammer_input: Path, parser_output: Path) -> bool:
-    return parser_output.exists() and grammer_input.stat().st_mtime < parser_output.stat().st_mtime
+def has_generated(grammar_input: Path, parser_output: Path) -> bool:
+    return (
+        parser_output.exists()
+        and grammar_input.stat().st_mtime < parser_output.stat().st_mtime
+    )
 
 
 class TaiheBuildHook(BuildHookInterface):
