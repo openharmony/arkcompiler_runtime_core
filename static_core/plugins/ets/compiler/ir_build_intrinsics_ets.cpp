@@ -276,17 +276,18 @@ void InstBuilder::BuildBigUint64ArrayGetIntrinsic(const BytecodeInstruction *bcI
     1. typedArray
     2. pos
     3. NullCheck v1
-    5. LoadNative v3, TYPED_ARRAY_BUFFER_OFFSET
-    6. LoadNative v5, ARRAY_BUFFER_DATA_OFFSET
-    7. DeoptimizeIf v6 == 0
-    9. LoadNative v3, TYPED_ARRAY_BUFFER_BYTE_OFFSET_OFFSET
+    5. LoadObject v3, TYPED_ARRAY_BUFFER_OFFSET
+    6. LoadObject v5, ARRAY_BUFFER_DATA_OFFSET
+    7. ZeroCheck D v6
+    4. Bitcast INT64->POINTER v7
+    9. LoadObject v3, TYPED_ARRAY_BUFFER_BYTE_OFFSET_OFFSET
     10. Cast FLOAT64->INT32 v9
-    11. LoadNative v3, TYPED_ARRAY_LENGTH_OFFSET
-    12. DeoptimizeIf v2 CC_AE v11
-    13. Add v2, ARRAY_DATA_OFFSET
-    14. Add v13, v10
-    Returns (v6, v14)
+    11. LoadObject v3, TYPED_ARRAY_LENGTH_OFFSET
+    12. BoundsCheck v11, v2
+    14. Add v2, v10
+    Returns (v4, v14)
  */
+// CC-OFFNXT(huge_depth[C++]) solid logic
 std::tuple<Inst *, Inst *> InstBuilder::BuildTypedArrayLoadDataAndOffset(const BytecodeInstruction *bcInst,
                                                                          DataType::Type type, bool accRead,
                                                                          bool needBoundCheck)
@@ -298,88 +299,96 @@ std::tuple<Inst *, Inst *> InstBuilder::BuildTypedArrayLoadDataAndOffset(const B
     auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
     AddInstruction(saveState);
     auto *graph = GetGraph();
-    auto arch = graph->GetArch();
     auto *nullCheck = graph->CreateInstNullCheck(DataType::REFERENCE, bcAddr, obj, saveState);
     AddInstruction(nullCheck);
 
-    auto *loadBufferInst =
-        graph->CreateInstLoadNative(DataType::REFERENCE, bcAddr, nullCheck,
-                                    graph->FindOrCreateConstant(ark::cross_values::GetTypedArrayBufferOffset(arch)));
+    auto *runtime = graph->GetRuntime();
+    auto calleeMethodId = runtime->ResolveMethodIndex(GetMethod(), bcInst->GetId(0).AsIndex());
+    auto *calleeMethod = runtime->GetMethodById(GetMethod(), calleeMethodId);
+
+    auto *typedArrayClass = runtime->GetClass(calleeMethod);
+    auto *bufferField = runtime->GetEscompatTypedArrayBuffer(typedArrayClass);
+    auto *byteOffsetField = runtime->GetEscompatTypedArrayByteOffset(typedArrayClass);
+    auto *lengthIntField = runtime->GetEscompatTypedArrayLengthInt(typedArrayClass);
+
+    auto *arrayBufferClass = runtime->GetEscompatArrayBufferClass();
+    auto *dataAddressField = runtime->GetEscompatArrayBufferDataAddress(arrayBufferClass);
+
+    auto *loadBufferInst = graph->CreateInstLoadObject(DataType::REFERENCE, bcAddr, nullCheck,
+                                                       TypeIdMixin {runtime->GetFieldId(bufferField), calleeMethod},
+                                                       bufferField, runtime->IsFieldVolatile(bufferField));
     AddInstruction(loadBufferInst);
 
-    auto *loadDataInst =
-        graph->CreateInstLoadNative(DataType::REFERENCE, bcAddr, loadBufferInst,
-                                    graph->FindOrCreateConstant(ark::cross_values::GetArrayBufferDataOffset(arch)));
+    Inst *loadDataInst = graph->CreateInstLoadObject(DataType::INT64, bcAddr, loadBufferInst,
+                                                     TypeIdMixin {runtime->GetFieldId(dataAddressField), calleeMethod},
+                                                     dataAddressField, runtime->IsFieldVolatile(dataAddressField));
     AddInstruction(loadDataInst);
 
-    BuildTypedArrayDeoptimizeIfExternalData(loadDataInst, bcAddr, saveState);
+    BuildTypedArrayDetachedDataCheck(&loadDataInst, bcAddr, saveState);
+    if (!Is64BitsArch(graph->GetArch())) {
+        loadDataInst = graph->CreateInstCast(DataType::INT32, bcAddr, loadDataInst, loadDataInst->GetType());
+        AddInstruction(loadDataInst);
+    }
+    loadDataInst = graph->CreateInstBitcast(DataType::POINTER, bcAddr, loadDataInst, loadDataInst->GetType());
+    AddInstruction(loadDataInst);
 
-    auto *loadDataOffsetFloat64Inst = graph->CreateInstLoadNative(
-        DataType::FLOAT64, bcAddr, nullCheck,
-        graph->FindOrCreateConstant(ark::cross_values::GetTypedArrayByteOffsetOffset(arch)));
+    auto *loadDataOffsetFloat64Inst = graph->CreateInstLoadObject(
+        DataType::FLOAT64, bcAddr, nullCheck, TypeIdMixin {runtime->GetFieldId(byteOffsetField), calleeMethod},
+        byteOffsetField, runtime->IsFieldVolatile(byteOffsetField));
     AddInstruction(loadDataOffsetFloat64Inst);
     auto *loadDataOffsetInst =
         graph->CreateInstCast(DataType::INT32, bcAddr, loadDataOffsetFloat64Inst, loadDataOffsetFloat64Inst->GetType());
     AddInstruction(loadDataOffsetInst);
 
     if (needBoundCheck) {
-        auto *loadLengthInst = graph->CreateInstLoadNative(
-            DataType::INT32, bcAddr, nullCheck,
-            graph->FindOrCreateConstant(ark::cross_values::GetTypedArrayLengthOffset(arch)));
+        auto *loadLengthInst = graph->CreateInstLoadObject(
+            DataType::INT32, bcAddr, nullCheck, TypeIdMixin {runtime->GetFieldId(lengthIntField), calleeMethod},
+            lengthIntField, runtime->IsFieldVolatile(lengthIntField));
         AddInstruction(loadLengthInst);
-        BuildTypedArrayDeoptimizeIfOutOfRange(pos, loadLengthInst, bcAddr, saveState);
+        BuildTypedArrayBoundsCheck(pos, loadLengthInst, bcAddr, saveState);
     }
 
-    auto *arrayDataOffset = graph->FindOrCreateConstant(ark::cross_values::GetCoretypesArrayDataOffset(arch));
     auto scale = DataType::ShiftByType(type, graph->GetArch());
     auto *scaledPos = graph->CreateInstShl(DataType::INT32, bcAddr, pos, graph->FindOrCreateConstant(scale));
     AddInstruction(scaledPos);
-    auto *dataOffsetInst = graph->CreateInstAdd(DataType::INT32, bcAddr, scaledPos, arrayDataOffset);
-    AddInstruction(dataOffsetInst);
-    dataOffsetInst = graph->CreateInstAdd(DataType::INT32, bcAddr, dataOffsetInst, loadDataOffsetInst);
+    auto *dataOffsetInst = graph->CreateInstAdd(DataType::INT32, bcAddr, scaledPos, loadDataOffsetInst);
     AddInstruction(dataOffsetInst);
 
     return std::make_tuple(loadDataInst, dataOffsetInst);
 }
 
-void InstBuilder::BuildTypedArrayDeoptimizeIfExternalData(Inst *dataInst, size_t bcAddr, SaveStateInst *saveState)
+void InstBuilder::BuildTypedArrayDetachedDataCheck(Inst **dataInst, size_t bcAddr, SaveStateInst *saveState)
 {
     auto *graph = GetGraph();
-    auto *nullPtrInst = graph->GetOrCreateNullPtr();
-    auto *isExternalInst = graph->CreateInstCompare(DataType::BOOL, bcAddr, dataInst, nullPtrInst, DataType::REFERENCE,
-                                                    ConditionCode::CC_EQ);
-    AddInstruction(isExternalInst);
-    auto *deoptIsExternalInst =
-        graph->CreateInstDeoptimizeIf(bcAddr, isExternalInst, saveState, DeoptimizeType::ZERO_CHECK);
-    AddInstruction(deoptIsExternalInst);
+    auto *zeroCheck = graph->CreateInstZeroCheck(DataType::INT64, bcAddr, *dataInst, saveState);
+    zeroCheck->SetFlag(inst_flags::CAN_DEOPTIMIZE);
+    AddInstruction(zeroCheck);
+    *dataInst = zeroCheck;
 }
 
-void InstBuilder::BuildTypedArrayDeoptimizeIfOutOfRange(Inst *posInst, Inst *lengthInst, size_t bcAddr,
-                                                        SaveStateInst *saveState)
+void InstBuilder::BuildTypedArrayBoundsCheck(Inst *posInst, Inst *lengthInst, size_t bcAddr, SaveStateInst *saveState)
 {
     auto *graph = GetGraph();
-    auto *boundsCheck =
-        graph->CreateInstCompare(DataType::BOOL, bcAddr, posInst, lengthInst, DataType::INT32, ConditionCode::CC_AE);
+    auto *boundsCheck = graph->CreateInstBoundsCheck(DataType::INT32, bcAddr, lengthInst, posInst, saveState);
+    boundsCheck->SetFlag(inst_flags::CAN_DEOPTIMIZE);
     AddInstruction(boundsCheck);
-
-    auto *deoptRangeError = graph->CreateInstDeoptimizeIf(bcAddr, boundsCheck, saveState, DeoptimizeType::BOUNDS_CHECK);
-    AddInstruction(deoptRangeError);
 }
 
 /*
     1. typedUArray
     2. pos
     3. NullCheck v1
-    5. LoadNative v3, TYPED_U_ARRAY_BUFFER_OFFSET
-    6. LoadNative v5, ARRAY_BUFFER_DATA_OFFSET
-    7. DeoptimizeIf v6 == 0
-    9. LoadNative v3, TYPED_U_ARRAY_BUFFER_BYTE_OFFSET_OFFSET
-    11. LoadNative v3, TYPED_U_ARRAY_LENGTH_OFFSET
-    12. DeoptimizeIf v2 CC_AE v11
-    13. Add v2, ARRAY_DATA_OFFSET
-    14. Add v13, v9
-    Returns (v6, v14)
+    5. LoadObject v3, TYPED_U_ARRAY_BUFFER_OFFSET
+    6. LoadObject v5, ARRAY_BUFFER_DATA_OFFSET
+    7. ZeroCheck D v6
+    4. Bitcast INT64->POINTER v7
+    9. LoadObject v3, TYPED_U_ARRAY_BUFFER_BYTE_OFFSET_OFFSET
+    11. LoadObject v3, TYPED_U_ARRAY_LENGTH_OFFSET
+    12. BoundsCheck v11, v2
+    14. Add v2, v9
+    Returns (v4, v14)
  */
+// CC-OFFNXT(huge_depth[C++]) solid logic
 std::tuple<Inst *, Inst *> InstBuilder::BuildTypedUnsignedArrayLoadDataAndOffset(const BytecodeInstruction *bcInst,
                                                                                  DataType::Type type, bool accRead,
                                                                                  bool needBoundCheck)
@@ -390,42 +399,56 @@ std::tuple<Inst *, Inst *> InstBuilder::BuildTypedUnsignedArrayLoadDataAndOffset
     auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
     AddInstruction(saveState);
     auto *graph = GetGraph();
-    auto arch = graph->GetArch();
     auto *nullCheck = graph->CreateInstNullCheck(DataType::REFERENCE, bcAddr, obj, saveState);
     AddInstruction(nullCheck);
 
-    auto *loadBufferInst = graph->CreateInstLoadNative(
-        DataType::REFERENCE, bcAddr, nullCheck,
-        graph->FindOrCreateConstant(ark::cross_values::GetTypedUnsignedArrayBufferOffset(arch)));
+    auto *runtime = graph->GetRuntime();
+    auto calleeMethodId = runtime->ResolveMethodIndex(GetMethod(), bcInst->GetId(0).AsIndex());
+    auto *calleeMethod = runtime->GetMethodById(GetMethod(), calleeMethodId);
+
+    auto *typedArrayClass = runtime->GetClass(calleeMethod);
+    auto *bufferField = runtime->GetEscompatTypedArrayBuffer(typedArrayClass);
+    auto *byteOffsetIntField = runtime->GetEscompatUnsignedTypedArrayByteOffsetInt(typedArrayClass);
+    auto *lengthIntField = runtime->GetEscompatTypedArrayLengthInt(typedArrayClass);
+
+    auto *arrayBufferClass = runtime->GetEscompatArrayBufferClass();
+    auto *dataAddressField = runtime->GetEscompatArrayBufferDataAddress(arrayBufferClass);
+
+    auto *loadBufferInst = graph->CreateInstLoadObject(DataType::REFERENCE, bcAddr, nullCheck,
+                                                       TypeIdMixin {runtime->GetFieldId(bufferField), calleeMethod},
+                                                       bufferField, runtime->IsFieldVolatile(bufferField));
     AddInstruction(loadBufferInst);
 
-    auto *loadDataInst =
-        graph->CreateInstLoadNative(DataType::REFERENCE, bcAddr, loadBufferInst,
-                                    graph->FindOrCreateConstant(ark::cross_values::GetArrayBufferDataOffset(arch)));
+    Inst *loadDataInst = graph->CreateInstLoadObject(DataType::INT64, bcAddr, loadBufferInst,
+                                                     TypeIdMixin {runtime->GetFieldId(dataAddressField), calleeMethod},
+                                                     dataAddressField, runtime->IsFieldVolatile(dataAddressField));
     AddInstruction(loadDataInst);
 
-    BuildTypedArrayDeoptimizeIfExternalData(loadDataInst, bcAddr, saveState);
+    BuildTypedArrayDetachedDataCheck(&loadDataInst, bcAddr, saveState);
+    if (!Is64BitsArch(graph->GetArch())) {
+        loadDataInst = graph->CreateInstCast(DataType::INT32, bcAddr, loadDataInst, loadDataInst->GetType());
+        AddInstruction(loadDataInst);
+    }
+    loadDataInst = graph->CreateInstBitcast(DataType::POINTER, bcAddr, loadDataInst, loadDataInst->GetType());
+    AddInstruction(loadDataInst);
 
-    auto *loadDataOffsetInst = graph->CreateInstLoadNative(
-        DataType::INT32, bcAddr, nullCheck,
-        graph->FindOrCreateConstant(ark::cross_values::GetTypedUnsignedArrayByteOffsetOffset(arch)));
+    auto *loadDataOffsetInst = graph->CreateInstLoadObject(
+        DataType::INT32, bcAddr, nullCheck, TypeIdMixin {runtime->GetFieldId(byteOffsetIntField), calleeMethod},
+        byteOffsetIntField, runtime->IsFieldVolatile(byteOffsetIntField));
     AddInstruction(loadDataOffsetInst);
 
     if (needBoundCheck) {
-        auto *loadLengthInst = graph->CreateInstLoadNative(
-            DataType::INT32, bcAddr, nullCheck,
-            graph->FindOrCreateConstant(ark::cross_values::GetTypedUnsignedArrayLengthOffset(arch)));
+        auto *loadLengthInst = graph->CreateInstLoadObject(
+            DataType::INT32, bcAddr, nullCheck, TypeIdMixin {runtime->GetFieldId(lengthIntField), calleeMethod},
+            lengthIntField, runtime->IsFieldVolatile(lengthIntField));
         AddInstruction(loadLengthInst);
-        BuildTypedArrayDeoptimizeIfOutOfRange(pos, loadLengthInst, bcAddr, saveState);
+        BuildTypedArrayBoundsCheck(pos, loadLengthInst, bcAddr, saveState);
     }
 
-    auto *arrayDataOffset = graph->FindOrCreateConstant(ark::cross_values::GetCoretypesArrayDataOffset(arch));
     auto scale = DataType::ShiftByType(type, graph->GetArch());
     auto *scaledPos = graph->CreateInstShl(DataType::INT32, bcAddr, pos, graph->FindOrCreateConstant(scale));
     AddInstruction(scaledPos);
-    auto *dataOffsetInst = graph->CreateInstAdd(DataType::INT32, bcAddr, scaledPos, arrayDataOffset);
-    AddInstruction(dataOffsetInst);
-    dataOffsetInst = graph->CreateInstAdd(DataType::INT32, bcAddr, dataOffsetInst, loadDataOffsetInst);
+    auto *dataOffsetInst = graph->CreateInstAdd(DataType::INT32, bcAddr, scaledPos, loadDataOffsetInst);
     AddInstruction(dataOffsetInst);
 
     return std::make_tuple(loadDataInst, dataOffsetInst);

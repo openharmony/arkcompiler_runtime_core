@@ -35,4 +35,34 @@ virtual FieldPtr GetEscompatArrayActualLength([[maybe_unused]] ClassPtr klass) c
     return nullptr;
 }
 
+virtual FieldPtr GetEscompatTypedArrayBuffer([[maybe_unused]] ClassPtr klass) const
+{
+    return nullptr;
+}
+
+virtual FieldPtr GetEscompatTypedArrayByteOffset([[maybe_unused]] ClassPtr klass) const
+{
+    return nullptr;
+}
+
+virtual FieldPtr GetEscompatUnsignedTypedArrayByteOffsetInt([[maybe_unused]] ClassPtr klass) const
+{
+    return nullptr;
+}
+
+virtual FieldPtr GetEscompatTypedArrayLengthInt([[maybe_unused]] ClassPtr klass) const
+{
+    return nullptr;
+}
+
+virtual ClassPtr GetEscompatArrayBufferClass() const
+{
+    return nullptr;
+}
+
+virtual FieldPtr GetEscompatArrayBufferDataAddress([[maybe_unused]] ClassPtr klass) const
+{
+    return nullptr;
+}
+
 #endif  // PANDA_PLUGINS_ETS_COMPILER_ETS_COMPILER_INTERFACE_H

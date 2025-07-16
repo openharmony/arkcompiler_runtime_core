@@ -63,6 +63,12 @@ public:
     FieldPtr GetFieldStringBuilderCompress(ClassPtr klass) const override;
     FieldPtr GetEscompatArrayBuffer(ClassPtr klass) const override;
     FieldPtr GetEscompatArrayActualLength(ClassPtr klass) const override;
+    FieldPtr GetEscompatTypedArrayBuffer(ClassPtr klass) const override;
+    FieldPtr GetEscompatTypedArrayByteOffset(ClassPtr klass) const override;
+    FieldPtr GetEscompatUnsignedTypedArrayByteOffsetInt(ClassPtr klass) const override;
+    FieldPtr GetEscompatTypedArrayLengthInt(ClassPtr klass) const override;
+    ClassPtr GetEscompatArrayBufferClass() const override;
+    FieldPtr GetEscompatArrayBufferDataAddress(ClassPtr klass) const override;
     bool IsIntrinsicStringBuilderToString(IntrinsicId id) const override;
     bool IsIntrinsicStringBuilderAppendString(IntrinsicId id) const override;
     bool IsIntrinsicStringBuilderAppend(IntrinsicId id) const override;

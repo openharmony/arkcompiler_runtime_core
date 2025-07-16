@@ -56,9 +56,9 @@ std::tuple<ark::compiler::Inst *, ark::compiler::Inst *> BuildTypedArrayLoadData
 // CC-OFFNXT(G.NAM.01,G.NAM.03) false positive
 std::tuple<ark::compiler::Inst *, ark::compiler::Inst *> BuildTypedUnsignedArrayLoadDataAndOffset(
     const BytecodeInstruction *bcInst, ark::compiler::DataType::Type type, bool accRead, bool needBoundCheck);
-void BuildTypedArrayDeoptimizeIfExternalData(ark::compiler::Inst *dataInst, size_t bcAddr,
-                                             ark::compiler::SaveStateInst *saveState);
-void BuildTypedArrayDeoptimizeIfOutOfRange(ark::compiler::Inst *posInst, ark::compiler::Inst *lengthInst, size_t bcAddr,
-                                           ark::compiler::SaveStateInst *saveState);
+void BuildTypedArrayDetachedDataCheck(ark::compiler::Inst **dataInst, size_t bcAddr,
+                                      ark::compiler::SaveStateInst *saveState);
+void BuildTypedArrayBoundsCheck(ark::compiler::Inst *posInst, ark::compiler::Inst *lengthInst, size_t bcAddr,
+                                ark::compiler::SaveStateInst *saveState);
 
 #endif  // PANDA_PLUGINS_ETS_COMPILER_INTRINSICS_IR_BUILD_ETS_INL_H

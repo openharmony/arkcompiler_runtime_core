@@ -35,21 +35,13 @@
 //! INST_COUNT   "SaveState", 5
 //! INST_COUNT   "NullCheck", 1
 //!
-//! METHOD       "escape_analysis_decompose.Int8ArrayIteratorEntries1::next"
-//! PASS_BEFORE  "EscapeAnalysis"
-//! INST_COUNT   "DeoptimizeIf", 2
-//! INST_COUNT   "Deoptimize ", 0
-//! PASS_AFTER   "EscapeAnalysis"
-//! INST_COUNT   "DeoptimizeIf", 0
-//! INST_COUNT   "Deoptimize ", 2
-//!
 //! METHOD       "escape_analysis_decompose.ETSGLOBAL::next4"
 //! PASS_BEFORE  "EscapeAnalysis"
-//! INST_COUNT   "DeoptimizeIf", 3
+//! INST_COUNT   "DeoptimizeIf", 1
 //! INST_COUNT   "Deoptimize ", 1
 //! PASS_AFTER   "EscapeAnalysis"
 //! INST_COUNT   "DeoptimizeIf", 1
-//! INST_COUNT   "Deoptimize ", 3
+//! INST_COUNT   "Deoptimize ", 1
 
 function __noinline__next1(str: string): string {
   return str;

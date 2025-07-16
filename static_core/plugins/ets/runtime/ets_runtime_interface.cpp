@@ -232,6 +232,36 @@ EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetEscompatArrayClass() const
     return PlatformTypes(PandaEtsVM::GetCurrent())->escompatArray->GetRuntimeClass();
 }
 
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatTypedArrayBuffer(ClassPtr klass) const
+{
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8("buffer"));
+}
+
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatTypedArrayByteOffset(ClassPtr klass) const
+{
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8("byteOffset"));
+}
+
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatUnsignedTypedArrayByteOffsetInt(ClassPtr klass) const
+{
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8("byteOffsetInt"));
+}
+
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatTypedArrayLengthInt(ClassPtr klass) const
+{
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8("lengthInt"));
+}
+
+EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetEscompatArrayBufferClass() const
+{
+    return PlatformTypes(PandaEtsVM::GetCurrent())->escompatArrayBuffer->GetRuntimeClass();
+}
+
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatArrayBufferDataAddress(ClassPtr klass) const
+{
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8("dataAddress"));
+}
+
 EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetStringBuilderDefaultConstructor() const
 {
     for (auto ctor : PlatformTypes()->coreStringBuilder->GetConstructors()) {

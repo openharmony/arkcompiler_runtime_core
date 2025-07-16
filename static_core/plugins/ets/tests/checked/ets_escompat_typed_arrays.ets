@@ -979,6 +979,10 @@ function test_int8array_set_byte_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int8ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function test_int8array_set_byte_ir(): void {
     let ar = new Int8Array(10)
@@ -1018,6 +1022,10 @@ function test_int8array_set_int_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int8ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function test_int8array_set_int_ir(): void {
     let ar = new Int8Array(10)
@@ -1044,6 +1052,10 @@ function test_int8array_set_int_ir(): void {
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.Int8ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function testInt8ArrayGetUnsafe(): void {
     let ar = new Int8Array(10)
@@ -1111,6 +1123,10 @@ function test_int16array_set_short_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int16ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function test_int16array_set_short_ir(): void {
     let ar = new Int16Array(10)
@@ -1150,6 +1166,10 @@ function test_int16array_set_int_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int16ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function test_int16array_set_int_ir(): void {
     let ar = new Int16Array(10)
@@ -1176,6 +1196,10 @@ function test_int16array_set_int_ir(): void {
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.Int16ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function testInt16ArrayGetUnsafe(): void {
     let ar = new Int16Array(10)
@@ -1245,6 +1269,10 @@ function test_int32array_set_int_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int32ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function test_int32array_set_int_ir(): void {
     let ar = new Int32Array(10)
@@ -1267,6 +1295,10 @@ function test_int32array_set_int_ir(): void {
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.Int32ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.Int[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function testInt32ArrayGetUnsafe(): void {
     let ar = new Int32Array(10)
@@ -1350,10 +1382,18 @@ function test_bigint64array_set_long_cpp(): void {
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.BigInt64ArraySetLong "
 //! INST_NOT      /Call.*Array::\$_set/
+//! INST          /LoadObject.*escompat\.BigInt[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.BigInt[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.BigInt[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! METHOD        "escompat_BigInt64Array::__get"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.BigInt64ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! INST          /LoadObject.*escompat\.BigInt[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.BigInt[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.BigInt[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function test_bigint64array_set_long_ir(): void {
     let ar = new BigInt64Array(10)
@@ -1373,6 +1413,10 @@ function test_bigint64array_set_long_ir(): void {
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.BigInt64ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
+//! INST          /LoadObject.*escompat\.BigInt[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.BigInt[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.BigInt[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function testBigInt64ArrayGetUnsafe(): void {
     let ar = new BigInt64Array(10)
@@ -1425,6 +1469,10 @@ function test_float32array_set_float_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Float32ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! INST          /LoadObject.*escompat\.Float[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.Float[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.Float[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function test_float32array_set_float_ir(): void {
     let ar = new Float32Array(10)
@@ -1447,6 +1495,10 @@ function test_float32array_set_float_ir(): void {
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.Float32ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
+//! INST          /LoadObject.*escompat\.Float[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.Float[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.Float[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function testFloat32ArrayGetUnsafe(): void {
     let ar = new Float32Array(10)
@@ -1495,6 +1547,10 @@ function test_float64array_set_double_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Float64ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! INST          /LoadObject.*escompat\.Float[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.Float[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.Float[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function test_float64array_set_double_ir(): void {
     let ar = new Float64Array(10)
@@ -1517,6 +1573,10 @@ function test_float64array_set_double_ir(): void {
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.Float64ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
+//! INST          /LoadObject.*escompat\.Float[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.Float[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.Float[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function testFloat64ArrayGetUnsafe(): void {
     let ar = new Float64Array(10)
@@ -1592,6 +1652,10 @@ function test_uint8array_set_rangeerror_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.UInt8ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! RUN           entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8array_set_int_ir"
 
 //! CHECKER       Uint8Array $_set int/$_get IR intrinsic
@@ -1602,6 +1666,10 @@ function test_uint8array_set_rangeerror_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.UInt8ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function test_uint8array_set_int_ir(): void {
     let ar = new Uint8Array(10)
@@ -1626,6 +1694,10 @@ function test_uint8array_set_int_ir(): void {
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.UInt8ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function testUint8ArrayGetUnsafe(): void {
     let ar = new Uint8Array(10)
@@ -1679,6 +1751,10 @@ function test_uint8clampedarray_set_rangeerror_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.UInt8ClampedArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! INST          /LoadObject.*escompat\.Uint[\d]+ClampedArray\.buffer/
+//! INST          /LoadObject.*escompat\.Uint[\d]+ClampedArray\.lengthInt/
+//! INST          /LoadObject.*escompat\.Uint[\d]+ClampedArray\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function test_uint8clampedarray_set_int_ir(): void {
     let ar = new Uint8ClampedArray(10)
@@ -1704,6 +1780,10 @@ function test_uint8clampedarray_set_int_ir(): void {
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.UInt8ClampedArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
+//! INST          /LoadObject.*escompat\.Uint[\d]+ClampedArray\.buffer/
+//! INST          /LoadObject.*escompat\.Uint[\d]+ClampedArray\.lengthInt/
+//! INST          /LoadObject.*escompat\.Uint[\d]+ClampedArray\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function testUint8ClampedArrayGetUnsafe(): void {
     let ar = new Uint8ClampedArray(10)
@@ -1757,6 +1837,10 @@ function test_uint16array_set_rangeerror_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.UInt16ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function test_uint16array_set_int_ir(): void {
     let ar = new Uint16Array(10)
@@ -1781,6 +1865,10 @@ function test_uint16array_set_int_ir(): void {
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.UInt16ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function testUint16ArrayGetUnsafe(): void {
     let ar = new Uint16Array(10)
@@ -1834,6 +1922,10 @@ function test_uint32array_set_rangeerror_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.UInt32ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function test_uint32array_set_int_ir(): void {
     let ar = new Uint32Array(10)
@@ -1871,6 +1963,10 @@ function test_uint32array_set_long_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.UInt32ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function test_uint32array_set_long_ir(): void {
     let ar = new Uint32Array(10)
@@ -1895,6 +1991,10 @@ function test_uint32array_set_long_ir(): void {
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.UInt32ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function testUint32ArrayGetUnsafe(): void {
     let ar = new Uint32Array(10)
@@ -1930,6 +2030,10 @@ function test_biguint64array_set_int_cpp(): void {
 //! INST_NOT      "Intrinsic.BigUInt64ArraySetLong "
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.BigUInt64ArrayGet "
+//! INST          /LoadObject.*escompat\.BigUint[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.BigUint[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.BigUint[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function test_biguint64array_set_int_ir(): void {
     let ar = new BigUint64Array(10)
@@ -1985,10 +2089,18 @@ function test_biguint64array_set_rangeerror_cpp(): void {
 //! INST_NOT      "Intrinsic.BigUInt64ArraySetLong "
 //! INST_NOT      "Intrinsic.BigUInt64ArraySetInt "
 //! INST_NOT      /Call.*Array::\$_set/
+//! INST          /LoadObject.*escompat\.BigUint[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.BigUint[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.BigUint[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! METHOD        "escompat_BigUint64Array::__get"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.BigUInt64ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! INST          /LoadObject.*escompat\.BigUint[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.BigUint[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.BigUint[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function test_biguint64array_set_long_ir(): void {
     let ar = new BigUint64Array(10)
@@ -2008,6 +2120,10 @@ function test_biguint64array_set_long_ir(): void {
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.BigUInt64ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
+//! INST          /LoadObject.*escompat\.BigUint[\d]+Array\.buffer/
+//! INST          /LoadObject.*escompat\.BigUint[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*escompat\.BigUint[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*escompat\.ArrayBuffer\.dataAddress/
 //! EVENT_NOT     /Deoptimization/
 function testBigUint64ArrayGetUnsafe(): void {
     let ar = new BigUint64Array(10)
