@@ -947,6 +947,13 @@ export class Autofixer {
     if (ts.isInterfaceDeclaration(node)) {
       for (const member of node.members) {
         if (ts.isCallSignatureDeclaration(member) || (ts.isMethodSignature(member) && member.questionToken)) {
+          /**
+           * If the header comment of an interface declaration contains `@noninterop` field, 
+           * the interface node will not be converted.
+           */
+          if (isNonInterop(node)) {
+            return undefined;
+          }
           const typeAliasDeclaration = ts.factory.createTypeAliasDeclaration(
           node.modifiers,
           node.name,
@@ -2254,3 +2261,11 @@ function updatePropertyAccessExpression(node: ts.PropertyAccessExpression, conte
   return undefined;
 }
 
+// Check whether the header comment contains the @noninterop field.
+function isNonInterop(node: ts.Node): boolean {
+  const fullText = ts.getOriginalNode(node).getFullText();
+  const codeText = ts.getOriginalNode(node).getText();
+  const commentText = fullText.replace(codeText, '');
+
+  return /\/\*\*.*?@noninterop\b.*?\*\//s.test(commentText);
+}
