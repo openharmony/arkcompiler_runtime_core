@@ -24,4 +24,5 @@ let foo: FuncTypeWithOptionalParameters = (): void => {} // OK: as arguments are
 foo = (p: number):void => {} // CTE as call with zero arguments is invalid
 foo = (p1: number, p2?: string): void => {} // Compile-time error: as call with zero arguments is invalid
 
-type IncorrectFuncTypeWithOptionalParameters = (x?: number, y: string) => void // compile-time error: no mandatory parameter can follow an optional parameter
+// compile-time error: no mandatory parameter can follow an optional parameter
+type IncorrectFuncTypeWithOptionalParameters = (x?: number, y: string) => void
