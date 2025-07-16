@@ -35,6 +35,8 @@ const msPerSecond: long = 1000;
 /** msPerMinute == 60000 */
 const msPerMinute: long = msPerSecond * secondsPerMinute;
 
+const secPerHour: long = secondsPerMinute * minutesPerHour;
+
 /** msPerHour == 3600000 */
 const msPerHour: long = msPerMinute * minutesPerHour;
 
@@ -429,6 +431,8 @@ export class Date {
         second: "2-digit"
     }
 
+    private static isoDateRegExp: RegExp = new RegExp("^(-?(?:[0-9]{1,}))-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])(?:T([01][0-9]|2[0-3])(?::[0-5][0-9])?(?::[0-5][0-9](?:\\.[0-9]+)?)?)?(Z|(?:[+-])(?:[01][0-9]|2[0-3]):[0-5][0-9])?$");
+
     private static readonly DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
         year: "numeric",
         month: "numeric",
@@ -441,8 +445,19 @@ export class Date {
         second: "2-digit"
     }
 
+    /**
+     * Regular Expression to Check if a String is an ISO Date Format
+     *
+     * @param dateStr Date in string format
+     * @returns If the string is in ISO date format, return true; otherwise, return false.
+     */
+    private static isIsoDate(dateStr:String): boolean {
+        return Date.isoDateRegExp.test(dateStr);
+    }
+
     /** Stored value of Date, milliseconds */
     private ms: long;
+    private isValid: boolean = true;
     private get TZOffset(): long {
         return Date.getLocalTimezoneOffset(this.ms as long);
     }
@@ -464,6 +479,14 @@ export class Date {
      * and the date obtained by parsing the given string representation of a date.
      */
     private static parseDateFromString(dateStr: String): number {
+        if (!Date.isIsoDate(dateStr)) {
+            let parser = new LegacyDateParser(dateStr);
+            let parseDate = parser.parseDate()
+            if (parseDate === INVALID_DATE) {
+                return NaN;
+            }
+            return parseDate.toDouble();
+        }
         let parseResult = new ISODateParseResult()
         try {
             parseResult = new ISODateParser(dateStr).parse()
@@ -541,7 +564,11 @@ export class Date {
             this.ms = (trunc((value as Date).valueOf() as number)).toLong()
         }
         else if (typeof value == "string") {
-            this.ms = (Date.parseDateFromString(value as string)).toLong();
+            let result = Date.parseDateFromString(value as string);
+            if (Double.isNaN(result)) {
+                this.isValid = false;
+            }
+            this.ms = result.toLong();
         }
         else {
             if (isNaN(value as number)) {
@@ -607,7 +634,7 @@ export class Date {
      * by the standard `Date` object (equivalent to ±8,640,000,000,000,000 milliseconds).
      */
     private isDateValid(ms: long): boolean {
-        return ms >= -maxDateOffset && ms <= maxDateOffset;
+        return this.isValid && ms >= -maxDateOffset && ms <= maxDateOffset;
     }
 
     /**
@@ -1289,9 +1316,6 @@ export class Date {
      * @param value new seconds
      */
     public setSeconds(value: byte): void {
-        if (value < 0 || value >= 60) {
-            throw new AssertionError("Invalid value " + value + " for \"value\", has to be in range 0..60");
-        }
         let sec = ecmaSecFromTime(this.ms - this.TZOffset * 60 * msPerSecond);
         this.ms -= sec * msPerSecond;
         this.ms += value * msPerSecond;
@@ -1565,6 +1589,9 @@ export class Date {
      * evaluated in the UTC time zone, and the same date as evaluated in the local time zone.
      */
     public getTimezoneOffset(): number {
+        if (!this.isValid) {
+            return NaN;
+        }
         return this.TZOffset.toDouble();
     }
 
@@ -1810,7 +1837,7 @@ export class Date {
      * ```
      */
     public override toString(): string {
-        let res: String = "Invalid date";
+        let res: String = "Invalid Date";
         try {
             res = this.toDateString() + " " + this.toTimeString();
         }
@@ -2072,5 +2099,781 @@ class ISODateParser {
         }
 
         return false
+    }
+}
+
+class ReadDataResult {
+    value: int;
+    strValue: string = '';
+    length: int;
+
+    constructor(value: int, length: int) {
+        this.value = value;
+        this.length = length;
+    }
+
+    constructor(value: string, length: int) {
+        this.strValue = value;
+        this.length = length;
+    }
+}
+
+class DateStringReader {
+    private static maxDecimal = (Int.MAX_VALUE - 9) / 10;
+    private data: string;
+    private index: int = 0;
+    private length: int = 0;
+    private value: string = '\0';
+
+    constructor(str: string) {
+        this.data = str;
+        this.length = str.length.toInt();
+        this.nextChar();
+    }
+
+    public nextChar(): void {
+        this.value = this.index < this.length ? this.data[this.index] : '\x7F';
+        this.index++;
+    }
+
+    public getIndex(): int {
+        return this.index;
+    }
+
+    public readNumber(): ReadDataResult {
+        let length:int = 0;
+        let num:int = 0;
+        while (Char.isDecDigit(this.value.charAt(0))) {
+            num = parseInt(this.value).toInt() + (num * 10);
+            length++;
+            if (num > DateStringReader.maxDecimal) {
+                break;
+            }
+            this.nextChar();
+        }
+        while (Char.isDecDigit(this.value.charAt(0))) {
+            this.nextChar();
+        }
+        return new ReadDataResult(num, length);
+    }
+
+    public readAlphabet(size: int): ReadDataResult {
+        let sb =  new StringBuilder();
+        let length = 0;
+        while (Char.isLetter(this.value.charAt(0))) {
+            if (length < size) {
+                sb.append(this.value.toLowerCase());
+            }
+            length++;
+            this.nextChar();
+        }
+        return new ReadDataResult(sb.toString(), length);
+    }
+
+    public getValue(): string {
+        return this.value;
+    }
+}
+
+enum DateValueType {
+    DATE_INVALID,
+    DATE_UNKNOWN,
+    DATE_NUMBER,
+    DATE_SYMBOL,
+    DATE_SPACE,
+    DATE_STRING_END,
+    DATE_TIME_ZONE,
+    DATE_TIME_FALG,
+    DATE_MONTH,
+    DATE_INVALID_WORD,
+    DATE_WORD_START = DATE_TIME_ZONE,
+}
+
+class DateUnit {
+    private type: DateValueType;
+    private value: int;
+    private length: int;
+
+    constructor(type: DateValueType, value: int, length: int) {
+        this.type = type;
+        this.value = value;
+        this.length = length;
+    }
+
+    static numericValue(value: int, length: int): DateUnit {
+        return new DateUnit(DateValueType.DATE_NUMBER, value, length);
+    }
+
+    static symbolValue(ch: string): DateUnit {
+        return new DateUnit(DateValueType.DATE_SYMBOL, ch.charCodeAt(0), 1);
+    }
+
+    static word(type: DateValueType, value: int, length: int): DateUnit {
+        return new DateUnit(type, value, length);
+    }
+
+    static space(): DateUnit {
+        return new DateUnit(DateValueType.DATE_SPACE, 0, 1);
+    }
+
+    static stringEnd(): DateUnit {
+        return new DateUnit(DateValueType.DATE_STRING_END, 0, 0);
+    }
+
+    static invalid(): DateUnit {
+        return new DateUnit(DateValueType.DATE_INVALID, 0, 0);
+    }
+
+    static unknown(): DateUnit {
+        return new DateUnit(DateValueType.DATE_UNKNOWN, 0, 1);
+    }
+
+    isInvalid(): boolean {
+        return this.type === DateValueType.DATE_INVALID;
+    }
+
+    isUnknown(): boolean {
+        return this.type === DateValueType.DATE_UNKNOWN;
+    }
+
+    isNumberType(): boolean {
+        return this.type === DateValueType.DATE_NUMBER;
+    }
+
+    isSymbolType(): boolean {
+        return this.type === DateValueType.DATE_SYMBOL;
+    }
+
+    isSymbolChar(ch: string): boolean {
+        return this.type === DateValueType.DATE_SYMBOL && this.value === ch.charCodeAt(0);
+    }
+
+    isStringEnd(): boolean {
+        return this.type === DateValueType.DATE_STRING_END;
+    }
+
+    isTimeZoneType(): boolean {
+        return this.type === DateValueType.DATE_TIME_ZONE;
+    }
+
+    isTimeFlag(): boolean {
+        return this.type === DateValueType.DATE_TIME_FALG;
+    }
+
+    isInvalidWord(): boolean {
+        return this.type === DateValueType.DATE_INVALID_WORD;
+    }
+
+    isMonth(): boolean {
+        return this.type === DateValueType.DATE_MONTH;
+    }
+
+    isWord(): boolean {
+        return this.type >= DateValueType.DATE_TIME_ZONE;
+    }
+
+    isSign(): boolean {
+        return this.isSymbolType() && (this.value === '-'.charCodeAt(0) || this.value === '+'.charCodeAt(0));
+    }
+
+    isSixDecimalDigit(): boolean {
+        return this.type === DateValueType.DATE_NUMBER && this.length === 6;
+    }
+
+    isFourDecimalDigit(): boolean {
+        return this.type === DateValueType.DATE_NUMBER && this.length === 4;
+    }
+
+    isTwoDecimalDigit(): boolean {
+        return this.type === DateValueType.DATE_NUMBER && this.length === 2;
+    }
+
+    isWordZ(): boolean {
+        return this.type === DateValueType.DATE_TIME_ZONE && this.value === 0;
+    }
+
+    isSpaceOrTab(): boolean {
+        return this.type === DateValueType.DATE_SPACE;
+    }
+
+    isValidFinallyTime(): boolean {
+        return this.isStringEnd() || this.isSign() || this.isWordZ() || this.isSpaceOrTab();
+    }
+
+    getValue(): int {
+        return this.value;
+    }
+
+    getType(): DateValueType {
+        return this.type;
+    }
+
+    getLength(): int {
+        return this.length;
+    }
+}
+
+class DateLexer {
+    private str: DateStringReader;
+    private date: DateUnit;
+
+    constructor(str: DateStringReader) {
+      this.str = str;
+      this.date = this.read();
+    }
+
+    getDate(): DateUnit {
+      return this.date;
+    }
+
+    nextDate(): DateUnit {
+      const current = this.date;
+      this.date = this.read();
+      return current;
+    }
+
+    ignoreSymbol(ch: string): boolean {
+      if (!this.date.isSymbolChar(ch)) {
+        return false;
+      }
+      this.date = this.read();
+      return true;
+    }
+
+    private read(): DateUnit {
+      if (Char.isDecDigit(this.str.getValue().charAt(0))) {
+        const res  = this.str.readNumber();
+        return DateUnit.numericValue(res.value, res.length);
+      }
+      if (this.str.getValue() == '\x7F') {
+        return DateUnit.stringEnd();
+      }
+      if (this.str.getValue() == ':') {
+        this.str.nextChar();
+        return DateUnit.symbolValue(':');
+      }
+      if (this.str.getValue() == '+') {
+        this.str.nextChar();
+        return DateUnit.symbolValue('+');
+      }
+      if (this.str.getValue() == '-') {
+        this.str.nextChar();
+        return DateUnit.symbolValue('-');
+      }
+      if (this.str.getValue() == '.') {
+        this.str.nextChar();
+        return DateUnit.symbolValue('.');
+      }
+      if (Char.isLetter(this.str.getValue().charAt(0))) {
+        const alphabet = this.str.readAlphabet(3);
+        const minLen: int = Math.min(alphabet.length, 3).toInt();
+        const str = alphabet.strValue.substring(0, minLen);
+        let res = 0;
+        let type = DateValueType.DATE_INVALID_WORD;
+        if (str === 't') {
+            type = DateValueType.DATE_TIME_FALG;
+        }
+        if (str === 'z') {
+            type =  DateValueType.DATE_TIME_ZONE;
+        }
+        if (str === 'utc' || str === 'gmt') {
+            res = 1;
+            type = DateValueType.DATE_TIME_ZONE;
+        }
+        const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+        const index = monthNames.indexOf(str.toLowerCase());
+        if (index !== -1) {
+            res = index.toInt() + 1;
+            type = DateValueType.DATE_MONTH;
+        }
+        return DateUnit.word(type, res, alphabet.length);
+      }
+      if (Char.isWhiteSpace(this.str.getValue().charAt(0))) {
+        this.str.nextChar();
+        return DateUnit.space();
+      }
+      this.str.nextChar();
+      return DateUnit.unknown();
+    }
+}
+
+class DayValue {
+    data: int[] = [0, 0, 0];
+    index: int = 0;
+    month: int = Int.MAX_VALUE;
+
+    setData(data: int): boolean {
+        if (this.index < 3) {
+            this.data[this.index++] = data;
+            return true;
+        }
+        return false;
+    }
+
+    setMonth(month: int): void {
+        this.month = month;
+    }
+
+    static monthIsValid(n: int): boolean {
+        return n >= 1 && n <= monthCountPerYear;
+    }
+
+    static dayIsValid(n: int): boolean {
+        return n >= 1 && n <= maxDaysInMonth;
+    }
+
+    isFull(): boolean {
+        return this.index === 3;
+    }
+
+    getIndex(): int {
+        return this.index;
+    }
+}
+
+class TimeValue {
+  hour_: int = 0
+  minute_: int = 0
+  second_: int = 0
+  ms_: int = 0;
+  index: int = 0;
+
+  setData(data: int): boolean {
+    if (this.index < 4) {
+        switch (this.index) {
+            case 0:
+                this.hour_ = data;
+                break;
+            case 1:
+                this.minute_ = data;
+                break;
+            case 2:
+                this.second_ = data;
+                break;
+            case 3:
+                this.ms_ = data;
+                break;
+            default:
+                return false;
+            }
+        this.index++;
+        return true;
+    }
+    return false;
+  }
+
+  static minuteIsValid(n: int): boolean {
+    return n >= 0 && n <= 59;
+  }
+
+  static secondIsValid(n: int): boolean {
+    return n >= 0 && n <= 59;
+  }
+
+  static hourIsValid(n: int): boolean {
+    return n >= 0 && n <= 24;
+  }
+
+  static milliSecondIsValid(n: int): boolean {
+    return n >= 0 && n <= 999;
+  }
+
+  static normMilliSecond(sec: DateUnit): int {
+    const len = sec.getLength();
+    const value = sec.getValue();
+    if (len === 3) {
+      return value;
+    }
+    if (len === 2) {
+      return value * 10;
+    }
+    if (len === 1) {
+      return value * 100;
+    }
+    let divisor = 1;
+    let remainingLen = len;
+    while (remainingLen > 3) {
+      divisor *= 10;
+      remainingLen--;
+    }
+    return Math.floor(value / divisor).toInt();
+  }
+
+  getIndex(): int {
+    return this.index;
+  }
+
+  isValid(n: int): boolean {
+    return (this.index === 1 && TimeValue.minuteIsValid(n)) || (this.index === 2 && TimeValue.secondIsValid(n));
+  }
+
+  isValidSecond(n: int): boolean {
+    return this.index === 2 && TimeValue.secondIsValid(n);
+  }
+}
+class TimeZone {
+  sign: int = Int.MAX_VALUE;
+  hour: int = Int.MAX_VALUE;
+  minute: int = Int.MAX_VALUE;
+
+  setSign(sign: int): void {
+    this.sign = sign;
+  }
+
+  setHour(hour: int): void {
+    this.hour = hour;
+  }
+
+  setMin(minute: int): void {
+    this.minute = minute;
+  }
+
+  setUTC(): void {
+    this.sign = 1;
+    this.hour = 0;
+    this.minute = 0;
+  }
+
+  isUTC(): boolean {
+    return this.hour === 0 && this.minute === 0;
+  }
+
+  IsLocal(): boolean {
+    return this.hour === Int.MAX_VALUE;
+  }
+
+  hasSign(): boolean {
+    return this.sign !== Int.MAX_VALUE;
+  }
+
+  hasHour(): boolean {
+    return this.hour !== Int.MAX_VALUE;
+  }
+
+  hasMinute(): boolean {
+    return this.minute !== Int.MAX_VALUE;
+  }
+
+  isValid(): boolean {
+    if (!this.hasSign() && !this.hasHour() && !this.hasMinute()) {
+      return true;
+    }
+    if (this.hasSign()) {
+      if (!this.hasHour()) {
+        return false;
+      }
+      
+      if (this.hour < 0 || this.hour > 23) {
+        return false;
+      }
+      if (this.hasMinute() && (this.minute < 0 || this.minute > 59)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+}
+
+enum TimeField {
+    YEAR = 0,
+    MONTH = 1,
+    DAYS = 2,
+    HOUR = 3,
+    MIN = 4,
+    SEC = 5,
+    MS = 6,
+    TIMEZONE = 8,
+    DATE_LENGTH = 9,
+}
+
+class LegacyDateResult { 
+    private dayValue: DayValue;
+    private timeValue: TimeValue;
+    private timeZone: TimeZone;
+    year_: int = 0;
+    month_: int = 0;
+    day_: int = 0;
+    hour_: int = 0;
+    minute_: int = 0;
+    second_: int = 0;
+    ms_: int = 0;
+    tz_: int = 0;
+
+    set hour(value: int) {
+        if (value < 0 || value > 23) {
+            throw new RangeError("Invalid hour");
+        }
+        this.hour_ = value;
+    }
+
+    set minute(value: int) {
+        if (value < 0 || value > 59) {
+            throw new RangeError("Invalid minute");
+        }
+        this.minute_ = value;
+    }
+
+    set second(value: int) {
+        if (value < 0 || value > 59) {
+            throw new RangeError("Invalid second");
+        }
+        this.second_ = value;
+    }
+
+    set ms(value: int) {
+        if (value < 0 || value > 999) {
+            throw new RangeError("Invalid ms");
+        }
+        this.ms_ = value;
+    }
+
+    constructor(dayValue: DayValue, timeValue: TimeValue, timeZone:TimeZone) {
+        this.dayValue = dayValue;
+        this.timeValue = timeValue;
+        this.timeZone = timeZone;
+    }
+
+    setTimeZone() {
+        if (!this.timeZone.IsLocal()) {
+            if (!this.timeZone.isValid()) {
+                throw new RangeError("Invalid time zone");
+            }
+            this.tz_ = (this.timeZone.sign * (this.timeZone.hour * secPerHour + this.timeZone.minute * secondsPerMinute)).toInt();
+        } else {
+            this.tz_ = Int.MAX_VALUE;
+        }
+    }
+
+    setTimeValue() {
+        this.hour = this.timeValue.hour_;
+        this.minute = this.timeValue.minute_;
+        this.second = this.timeValue.second_;
+        this.ms = this.timeValue.ms_;
+        if (this.hour_ === 24) {
+            let rs = this.minute_ === 0 && this.second_ === 0 && this.ms_ === 0
+            if (!rs) {
+                throw new RangeError("Invalid TimeValue");   
+            }
+        }
+    }
+
+    setDayValue() {
+        if (this.dayValue.index === 0) {
+            throw new RangeError("Invalid DateValue");
+        }
+        let year:int = 1;
+        let month:int = 1;
+        let day:int = 1;
+        for (let i = this.dayValue.index; i < 3; i++) {
+            this.dayValue.data[i] = 1;
+        }
+        if (this.dayValue.month === Int.MAX_VALUE) {
+            if ((this.dayValue.isFull() && DayValue.dayIsValid(this.dayValue.data[2]) && !DayValue.monthIsValid(this.dayValue.data[0]))) {
+                year = this.dayValue.data[TimeField.YEAR];
+                month = this.dayValue.data[TimeField.MONTH];
+                day = this.dayValue.data[TimeField.DAYS];
+            } else if (this.dayValue.isFull()) {
+                year = this.dayValue.data[2];
+                month = this.dayValue.data[0];
+                day = this.dayValue.data[1];
+            } else {
+                year = this.dayValue.data[0];
+                month = this.dayValue.data[1];
+                day = this.dayValue.data[2];
+            }
+        } else {
+            month = this.dayValue.month;
+            if (this.dayValue.isFull()) {
+                throw new RangeError("Invalid DateValue");
+            }
+            if (this.dayValue.index === 2) {
+                if (!DayValue.dayIsValid(this.dayValue.data[0])) {
+                    year = this.dayValue.data[0];
+                    day = this.dayValue.data[1];
+                } else {
+                    day = this.dayValue.data[0];
+                    year = this.dayValue.data[1];
+                }
+            } else {
+                day = this.dayValue.data[0];
+            }
+        }
+        if (year >= 0 && year <= 49) {
+            year += 2000;
+        } else if (year >= 50 && year <= 99) {
+            year += 1900;
+        }
+        if (!DayValue.monthIsValid(month) || !DayValue.dayIsValid(day)) {
+            throw new RangeError("Invalid DateValue");
+        }
+        this.year_ = year;
+        this.month_ = month - 1; 
+        this.day_ = day;
+    }
+}
+
+class LegacyDateParser {
+    private readonly dateStr: string
+
+    constructor(dateStr: string) {
+        this.dateStr = dateStr
+    }
+
+    private parseLegacyDateString(dateStr: string): LegacyDateResult | null {
+        const reader = new DateStringReader(dateStr);
+        const dateLexer = new DateLexer(reader);
+        const dayValue = new DayValue();
+        const timeValue = new TimeValue();
+        const timeZone = new TimeZone();
+        const result = this.parseLegacyDates(dateLexer, dayValue, timeValue, timeZone);
+        if (!result) {
+            return null;
+        }
+        let legacyDateResult = new LegacyDateResult(dayValue, timeValue, timeZone)
+        try { 
+            legacyDateResult.setTimeZone();
+            legacyDateResult.setTimeValue();
+            legacyDateResult.setDayValue();
+        } catch (e) {
+            return null
+        }
+        return legacyDateResult;
+    }
+
+    private parseLegacyDates(dateLexer: DateLexer, dayValue: DayValue, timeValue: TimeValue, timeZone: TimeZone) : boolean {
+        let date = dateLexer.nextDate();
+        let hasNumber = (dayValue.getIndex() > 0);
+        while (!date.isStringEnd()) {
+            if (date.isNumberType()) {
+                hasNumber = true;
+                if (!this.parseLegacyDateIsNumber(date, dateLexer, dayValue, timeValue)) {
+                    return false;
+                }
+            } else if (date.isMonth()) {
+                dayValue.setMonth(date.getValue());
+            } else if (date.isTimeZoneType() && hasNumber) {
+                timeZone.setUTC();
+            } else if (date.isTimeFlag() || date.isInvalidWord()) {
+                if (hasNumber) {
+                    return false;
+                }
+                if (dateLexer.getDate().isNumberType()) {
+                    return false;
+                }
+            } else if (date.isSign() && ((timeValue.getIndex() > 0) || timeZone.isUTC())) {
+                if (!this.parseLegacyDateIsSign(date, dateLexer, timeZone)) {
+                    return false;
+                }
+            }
+            date = dateLexer.nextDate();
+        }
+        return true;
+    }
+
+    private parseLegacyDateIsNumber(date: DateUnit, dateLexer: DateLexer, dayValue: DayValue, timeValue: TimeValue): boolean {
+        const num = date.getValue();
+        // first parse as time "hh:" or "mm:"
+        if (dateLexer.getDate().isSymbolChar(':')) {
+            // skip ':'
+            dateLexer.nextDate();
+            if (!dateLexer.getDate().isNumberType()) {
+                return false;
+            }
+            if (!timeValue.setData(num)) {
+                return false;
+            }
+        } else if (dateLexer.getDate().isSymbolChar('.') && timeValue.isValidSecond(num)) {
+            // skip '.'
+            dateLexer.nextDate();
+            timeValue.setData(num);
+            const milliSec = dateLexer.getDate();
+            if (!milliSec.isNumberType()) {
+                return false;
+            }
+            timeValue.setData(TimeValue.normMilliSecond(milliSec).toInt());
+            // ship "sss"
+            dateLexer.nextDate();
+            if (!dateLexer.getDate().isValidFinallyTime()) {
+                return false;
+            }
+        } else if (timeValue.isValid(num)) {
+            timeValue.setData(num);
+            if (!dateLexer.getDate().isValidFinallyTime()) {
+                return false;
+            }
+        } else if (!dayValue.setData(num)) {
+            return false;
+        }
+        return true;
+    }
+
+    private parseLegacyDateIsSign(date: DateUnit, dateLexer: DateLexer, timeZone: TimeZone): boolean {
+        if (date.isSymbolChar('-')) {
+          timeZone.setSign(-1);
+        } else {
+          timeZone.setSign(1);
+        }
+        const timeNumUnit = dateLexer.getDate();
+        if (!timeNumUnit.isNumberType()) {
+          return false;
+        }
+        const timeNum = timeNumUnit.getValue();
+        const numLength = timeNumUnit.getLength();
+        dateLexer.nextDate();
+        // parse +hh:mm
+        if (dateLexer.getDate().isSymbolChar(':')) {
+            // skip ':'
+            dateLexer.nextDate();
+            if (!dateLexer.getDate().isNumberType()) {
+                return false;
+            }
+            timeZone.setHour(timeNum);
+            timeZone.setMin(dateLexer.getDate().getValue());
+            dateLexer.nextDate();
+            // 2: hour length
+        } else if (numLength === 1 || numLength === 2) {
+            // parse GMT+hh
+            timeZone.setHour(timeNum);
+            timeZone.setMin(0);
+            // 3,4:"GMT+hhmm" hhmm length
+        } else if (numLength === 3 || numLength === 4) {
+            // parse GMT+hhmm
+            timeZone.setHour(Math.floor(timeNum / 100).toInt());
+            timeZone.setMin(timeNum % 100);
+        } else {
+            return false;
+        }
+        return true;
+    }
+
+    private getLocalOffsetFromOS(timeMs: long, isLocal: boolean): double  {
+        if (!isLocal) {
+            return 0;
+        }
+        const date = new Date(timeMs);
+        const localOffsetMinutes = date.getTimezoneOffset();
+        return -localOffsetMinutes;
+    }
+
+    public parseDate(): long {
+        const time = this.parseLegacyDateString(this.dateStr);
+        if (time != null) {
+            let day = ecmaMakeDay(time.year_, time.month_, time.day_)
+            let dateTime = ecmaMakeTime(time.hour_, time.minute_, time.second_, time.ms_)
+            let timeValue = ecmaTimeClip(ecmaMakeDate(day, dateTime));
+            if (isNaN(timeValue)) {
+                return timeValue;
+            }
+            let localMs:Double = 0;
+            if (time.tz_ == Int.MAX_VALUE) {
+                localMs = this.getLocalOffsetFromOS(timeValue, true) * msPerMinute;
+            } else {
+                localMs = time.tz_ * msPerSecond;
+            }
+            timeValue -= localMs;
+            return timeValue;
+        }
+        return INVALID_DATE;
     }
 }
