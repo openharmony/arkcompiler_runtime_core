@@ -156,3 +156,16 @@ export class CustomError extends Error {
 export function CustomErrorFunc(message: string, code: number): void {
   throw new CustomError(message, code);
 }
+
+export class SerializeTest {
+  value1: string;
+  value2: number;
+  constructor(v1: string, v2: number) {
+    this.value1 = v1;
+    this.value2 = v2;
+  }
+}
+
+export let serializeTestObj = new SerializeTest('SerializeTest', 1);
+export let serializeUndefined = undefined;
+export let serializeNull = null;

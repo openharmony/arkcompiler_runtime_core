@@ -1099,3 +1099,39 @@ intrinsics:
       args: [std.core.RuntimeLinker]
     impl: ark::ets::interop::js::intrinsics::InteropContextSetInteropRuntimeLinkerImplIntrinsic
     clear_flags: []
+
+####################
+# std.interop.InteropSerializeHelper #
+####################
+  - name: InteropSerializeHelperIsJSInteropRefImpl
+    space: ets
+    class_name: std.interop.InteropSerializeHelper
+    method_name: isJSInteropRef
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.Object ]
+    impl: ark::ets::interop::js::intrinsics::InteropSerializeHelperIsJSInteropRefImplIntrinsic
+    clear_flags: []
+
+  - name: InteropSerializeHelperSerializeHandleImpl
+    space: ets
+    class_name: std.interop.InteropSerializeHelper
+    method_name: serializeHandle
+    static: true
+    signature:
+      ret: i64
+      args: [ std.interop.js.JSValue ]
+    impl: ark::ets::interop::js::intrinsics::InteropSerializeHelperSerializeHandleImplIntrinsic
+    clear_flags: []
+
+  - name: InteropSerializeHelperDeserializeHandleImpl
+    space: ets
+    class_name: std.interop.InteropSerializeHelper
+    method_name: deserializeHandle
+    static: true
+    signature:
+      ret: std.interop.js.JSValue
+      args: [ i64 ]
+    impl: ark::ets::interop::js::intrinsics::InteropSerializeHelperDeserializeHandleImplIntrinsic
+    clear_flags: []

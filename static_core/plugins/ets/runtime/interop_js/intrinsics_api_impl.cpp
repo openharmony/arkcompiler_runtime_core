@@ -30,6 +30,14 @@
 // CC-OFFNXT(G.FMT.10-CPP) project code style
 napi_status __attribute__((weak))
 napi_load_module_with_module_request(napi_env env, const char *request_name, napi_value *result);
+
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_serialize_hybrid([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value object,
+                      [[maybe_unused]] napi_value transfer_list, [[maybe_unused]] napi_value clone_list,
+                      [[maybe_unused]] void **result);
+
+napi_status __attribute__((weak)) napi_deserialize_hybrid([[maybe_unused]] napi_env env, [[maybe_unused]] void *buffer,
+                                                          [[maybe_unused]] napi_value *object);
 // NOLINTEND(readability-identifier-naming)
 
 static bool StringStartWith(std::string_view str, std::string_view startStr)
@@ -1537,6 +1545,46 @@ void SetInteropRuntimeLinker(EtsRuntimeLinker *linker)
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
 
     ctx->SetDefaultLinkerContext(linker);
+}
+
+EtsBoolean IsJSInteropRef(EtsObject *value)
+{
+    bool res = false;
+    if (value->GetClass()->GetRuntimeClass()->IsXRefClass()) {
+        res = true;
+    }
+    return ark::ets::ToEtsBoolean(res);
+}
+
+EtsLong SerializeHandle(JSValue *value)
+{
+    auto ctx = InteropCtx::Current();
+    auto env = ctx->GetJSEnv();
+
+    napi_value nv = value->GetRefValue(env);
+
+    napi_value undefined = nullptr;
+    napi_get_undefined(env, &undefined);
+    void *serializedData;
+    napi_status status = napi_serialize_hybrid(env, nv, undefined, undefined, &serializedData);
+    INTEROP_FATAL_IF(status != napi_ok);
+
+    return reinterpret_cast<EtsLong>(serializedData);
+}
+
+JSValue *DeserializeHandle(EtsLong value)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current();
+    auto env = ctx->GetJSEnv();
+
+    void *serializedData = reinterpret_cast<void *>(value);
+
+    napi_value retVal;
+    napi_status status = napi_deserialize_hybrid(env, serializedData, &retVal);
+    INTEROP_FATAL_IF(status != napi_ok);
+
+    return JSValue::Create(coro, ctx, retVal);
 }
 
 }  // namespace ark::ets::interop::js

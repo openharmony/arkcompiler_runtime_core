@@ -92,6 +92,9 @@ EtsObject *CreateDynamicTypedArray(EtsEscompatArrayBuffer *staticArrayBuffer, in
                                    double byteOffset);
 EtsObject *CreateDynamicDataView(EtsEscompatArrayBuffer *staticArrayBuffer, double byteLength, double byteOffset);
 void SetInteropRuntimeLinker(EtsRuntimeLinker *linker);
+EtsBoolean IsJSInteropRef(EtsObject *value);
+EtsLong SerializeHandle(JSValue *value);
+JSValue *DeserializeHandle(EtsLong value);
 
 template <typename T>
 typename T::cpptype JSValueNamedGetter(JSValue *etsJsValue, EtsString *etsPropName)

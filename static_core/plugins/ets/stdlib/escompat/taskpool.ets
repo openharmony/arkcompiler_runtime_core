@@ -16,6 +16,7 @@
 package escompat;
 
 import {launch, CoroutineId, WorkerId} from "std/concurrency"
+import { InteropSerializeHelper } from "std/interop";
 
 export namespace taskpool {
     const TASKPOOL_ERROR_NOT_IN_TASKPOOL: number = 10200022;
@@ -166,9 +167,17 @@ export namespace taskpool {
         constructor(name: string, func: Function, ...args: FixedArray<NullishType>) {
             this.name = name;
             this.arguments = Array.from(args);
-            this.taskFunction = (): NullishType => {
-                return func.unsafeCall(...args);
-            };
+            if (isSupportingInterop()) {
+                let serializeHelper = new InteropSerializeHelper(args);
+                this.taskFunction = (): NullishType => {
+                    let deserializedArgs = serializeHelper.deserialize();
+                    return func.unsafeCall(...deserializedArgs);
+                };
+            } else {
+                this.taskFunction = (): NullishType => {
+                    return func.unsafeCall(...args);
+                };
+            }
             this.totalDuration = 0;
             this.ioDuration = 0;
             this.cpuDuration = 0;

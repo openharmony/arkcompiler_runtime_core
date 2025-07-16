@@ -294,6 +294,41 @@ function testEAWorkerInteropLoop() {
     arktest.assertEQ(res, true);
 }
 
+function testFunc(serializeTestObj: ESValue) {
+    let value1 = serializeTestObj.getProperty('value1').toString();
+    let value2 = serializeTestObj.getProperty('value2').toNumber();
+    arktest.assertEQ(value1, 'SerializeTest');
+    arktest.assertEQ(value2, 1);
+    return true;
+}
+
+function testEAWorkerSerialize() {
+    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+    let serializeTestObj = module.getProperty('serializeTestObj');
+    let res = eaw.run<boolean>(testFunc, serializeTestObj).Await() as boolean;
+    arktest.assertEQ(res, true);
+}
+
+function testEAWorkerSerializeUndefined() {
+    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+    let serializeObj = module.getProperty('serializeUndefined');
+    let callback = (value: ESValue) => {
+        return value.isUndefined();
+    }
+    let res = eaw.run<boolean>(callback, serializeObj).Await() as boolean;
+    arktest.assertEQ(res, true);
+}
+
+function testEAWorkerSerializeNull() {
+    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+    let serializeObj = module.getProperty('serializeNull');
+    let callback = (value: ESValue) => {
+        return value.isNull();
+    }
+    let res = eaw.run<boolean>(callback, serializeObj).Await() as boolean;
+    arktest.assertEQ(res, true);
+}
+
 function eworkerInteropTest() {
     let eworkerInteropSuite = new arktest.ArkTestsuite('eworker.InteropTest');
     eworkerInteropSuite.addTest('testProcessInput', testProcessInput);
@@ -315,6 +350,9 @@ function eworkerInteropTest() {
     eworkerInteropSuite.addTest('testCustomThrowError', testCustomThrowError);
     eworkerInteropSuite.addTest('testEAWorkerNestedExecute', testEAWorkerNestedExecute);
     eworkerInteropSuite.addTest('testEAWorkerInteropLoop', testEAWorkerInteropLoop);
+    eworkerInteropSuite.addTest('testEAWorkerSerialize', testEAWorkerSerialize);
+    eworkerInteropSuite.addTest('testEAWorkerSerializeUndefined', testEAWorkerSerializeUndefined);
+    eworkerInteropSuite.addTest('testEAWorkerSerializeNull', testEAWorkerSerializeNull);
     eworkerInteropSuite.run();
     eaw.join();
     return true;

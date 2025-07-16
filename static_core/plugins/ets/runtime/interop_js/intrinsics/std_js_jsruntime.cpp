@@ -417,4 +417,19 @@ void InteropContextSetInteropRuntimeLinkerImplIntrinsic(EtsRuntimeLinker *linker
     SetInteropRuntimeLinker(linker);
 }
 
+EtsBoolean InteropSerializeHelperIsJSInteropRefImplIntrinsic(EtsObject *value)
+{
+    return IsJSInteropRef(value);
+}
+
+EtsLong InteropSerializeHelperSerializeHandleImplIntrinsic(JSValue *value)
+{
+    return SerializeHandle(value);
+}
+
+JSValue *InteropSerializeHelperDeserializeHandleImplIntrinsic(EtsLong value)
+{
+    return DeserializeHandle(value);
+}
+
 }  // namespace ark::ets::interop::js::intrinsics
