@@ -1354,7 +1354,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: number, end?: number): {{N}}Array {
-        return this.sliceImpl(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
+        return this.slice(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -1369,7 +1369,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: number, end: int): {{N}}Array {
-        return this.sliceImpl(begin.toInt(), end.toInt())
+        return this.slice(begin.toInt(), end.toInt())
     }
 
     /**
@@ -1384,7 +1384,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: number): {{N}}Array {
-        return this.sliceImpl(begin.toInt(), end.toInt())
+        return this.slice(begin.toInt(), end.toInt())
     }
 
     /**
@@ -1399,21 +1399,16 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): {{N}}Array {
-        return this.sliceImpl(begin, end)
+        const len: int = this.lengthInt
+        const relStart = normalizeIndex(begin, len)
+        const relEnd = normalizeIndex(end, len)
+        let count = relEnd - relStart
+        if (count < 0) {
+            count = 0
+        }
+        let buf = this.buffer.slice(relStart * {{N}}Array.BYTES_PER_ELEMENT.toInt(), relEnd * {{N}}Array.BYTES_PER_ELEMENT.toInt()) as ArrayBuffer
+        return new {{N}}Array(buf)
     }
-
-    /**
-     * Creates a slice of current {{N}}Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new {{N}}Array with elements of current {{N}}Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    private final native sliceImpl(begin: int, end: int): {{N}}Array
 
     /**
      * Creates a slice of current {{N}}Array using range [begin, this.length).
@@ -1423,7 +1418,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @returns a new {{N}}Array with elements of current {{N}}Array[begin, this.length)
      */
     public slice(begin: int): {{N}}Array {
-        return this.sliceImpl(begin, this.lengthInt)
+        return this.slice(begin, this.lengthInt)
     }
 
     /**

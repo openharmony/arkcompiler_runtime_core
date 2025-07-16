@@ -726,30 +726,6 @@ void Codegen::CreateReadString(IntrinsicInst *inst, Reg dst, SRCREGS src)
     }
 }
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CODEGEN_TYPED_ARRAY_SLICE(defName, defType)                                                    \
-    /* CC-OFFNXT(G.PRE.02) name part */                                                                \
-    void Codegen::Create##defName##ArraySlice(IntrinsicInst *inst, Reg dst, SRCREGS src)               \
-    {                                                                                                  \
-        auto eid = RuntimeInterface::EntrypointId::defType##_ARRAY_SLICE;                              \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                         \
-        CallFastPath(inst, eid, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND]); \
-    }
-
-CODEGEN_TYPED_ARRAY_SLICE(Int8, INT8)
-CODEGEN_TYPED_ARRAY_SLICE(Int16, INT16)
-CODEGEN_TYPED_ARRAY_SLICE(Int32, INT32)
-CODEGEN_TYPED_ARRAY_SLICE(BigInt64, BIG_INT64)
-CODEGEN_TYPED_ARRAY_SLICE(Float32, FLOAT32)
-CODEGEN_TYPED_ARRAY_SLICE(Float64, FLOAT64)
-CODEGEN_TYPED_ARRAY_SLICE(Uint8, UINT8)
-CODEGEN_TYPED_ARRAY_SLICE(Uint16, UINT16)
-CODEGEN_TYPED_ARRAY_SLICE(Uint32, UINT32)
-CODEGEN_TYPED_ARRAY_SLICE(BigUint64, BIG_UINT64)
-CODEGEN_TYPED_ARRAY_SLICE(Uint8Clamped, UINT8_CLAMPED)
-
-#undef CODEGEN_TYPED_ARRAY_SLICE
-
 void Codegen::CreateMapGet([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(GetArch() != Arch::AARCH32);

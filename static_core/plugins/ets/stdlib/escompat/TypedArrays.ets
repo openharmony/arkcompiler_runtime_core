@@ -1164,7 +1164,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: number, end?: number): Int8Array {
-        return this.sliceImpl(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
+        return this.slice(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -1179,7 +1179,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: number, end: int): Int8Array {
-        return this.sliceImpl(begin.toInt(), end.toInt())
+        return this.slice(begin.toInt(), end.toInt())
     }
 
     /**
@@ -1194,7 +1194,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: number): Int8Array {
-        return this.sliceImpl(begin.toInt(), end.toInt())
+        return this.slice(begin.toInt(), end.toInt())
     }
 
     /**
@@ -1209,21 +1209,16 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): Int8Array {
-        return this.sliceImpl(begin, end)
+        const len: int = this.lengthInt
+        const relStart = normalizeIndex(begin, len)
+        const relEnd = normalizeIndex(end, len)
+        let count = relEnd - relStart
+        if (count < 0) {
+            count = 0
+        }
+        let buf = this.buffer.slice(relStart * Int8Array.BYTES_PER_ELEMENT.toInt(), relEnd * Int8Array.BYTES_PER_ELEMENT.toInt()) as ArrayBuffer
+        return new Int8Array(buf)
     }
-
-    /**
-     * Creates a slice of current Int8Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new Int8Array with elements of current Int8Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    private final native sliceImpl(begin: int, end: int): Int8Array
 
     /**
      * Creates a slice of current Int8Array using range [begin, this.length).
@@ -1233,7 +1228,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a new Int8Array with elements of current Int8Array[begin, this.length)
      */
     public slice(begin: int): Int8Array {
-        return this.sliceImpl(begin, this.lengthInt)
+        return this.slice(begin, this.lengthInt)
     }
 
     /**
@@ -2927,7 +2922,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: number, end?: number): Int16Array {
-        return this.sliceImpl(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
+        return this.slice(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -2942,7 +2937,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: number, end: int): Int16Array {
-        return this.sliceImpl(begin.toInt(), end.toInt())
+        return this.slice(begin.toInt(), end.toInt())
     }
 
     /**
@@ -2957,7 +2952,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: number): Int16Array {
-        return this.sliceImpl(begin.toInt(), end.toInt())
+        return this.slice(begin.toInt(), end.toInt())
     }
 
     /**
@@ -2972,21 +2967,16 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): Int16Array {
-        return this.sliceImpl(begin, end)
+        const len: int = this.lengthInt
+        const relStart = normalizeIndex(begin, len)
+        const relEnd = normalizeIndex(end, len)
+        let count = relEnd - relStart
+        if (count < 0) {
+            count = 0
+        }
+        let buf = this.buffer.slice(relStart * Int16Array.BYTES_PER_ELEMENT.toInt(), relEnd * Int16Array.BYTES_PER_ELEMENT.toInt()) as ArrayBuffer
+        return new Int16Array(buf)
     }
-
-    /**
-     * Creates a slice of current Int16Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new Int16Array with elements of current Int16Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    private final native sliceImpl(begin: int, end: int): Int16Array
 
     /**
      * Creates a slice of current Int16Array using range [begin, this.length).
@@ -2996,7 +2986,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a new Int16Array with elements of current Int16Array[begin, this.length)
      */
     public slice(begin: int): Int16Array {
-        return this.sliceImpl(begin, this.lengthInt)
+        return this.slice(begin, this.lengthInt)
     }
 
     /**
@@ -4668,7 +4658,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: number, end?: number): Int32Array {
-        return this.sliceImpl(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
+        return this.slice(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -4683,7 +4673,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: number, end: int): Int32Array {
-        return this.sliceImpl(begin.toInt(), end.toInt())
+        return this.slice(begin.toInt(), end.toInt())
     }
 
     /**
@@ -4698,7 +4688,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: number): Int32Array {
-        return this.sliceImpl(begin.toInt(), end.toInt())
+        return this.slice(begin.toInt(), end.toInt())
     }
 
     /**
@@ -4713,21 +4703,16 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): Int32Array {
-        return this.sliceImpl(begin, end)
+        const len: int = this.lengthInt
+        const relStart = normalizeIndex(begin, len)
+        const relEnd = normalizeIndex(end, len)
+        let count = relEnd - relStart
+        if (count < 0) {
+            count = 0
+        }
+        let buf = this.buffer.slice(relStart * Int32Array.BYTES_PER_ELEMENT.toInt(), relEnd * Int32Array.BYTES_PER_ELEMENT.toInt()) as ArrayBuffer
+        return new Int32Array(buf)
     }
-
-    /**
-     * Creates a slice of current Int32Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new Int32Array with elements of current Int32Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    private final native sliceImpl(begin: int, end: int): Int32Array
 
     /**
      * Creates a slice of current Int32Array using range [begin, this.length).
@@ -4737,7 +4722,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a new Int32Array with elements of current Int32Array[begin, this.length)
      */
     public slice(begin: int): Int32Array {
-        return this.sliceImpl(begin, this.lengthInt)
+        return this.slice(begin, this.lengthInt)
     }
 
     /**
@@ -6419,7 +6404,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: number, end?: number): BigInt64Array {
-        return this.sliceImpl(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
+        return this.slice(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -6434,7 +6419,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: number, end: int): BigInt64Array {
-        return this.sliceImpl(begin.toInt(), end.toInt())
+        return this.slice(begin.toInt(), end.toInt())
     }
 
     /**
@@ -6449,7 +6434,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: number): BigInt64Array {
-        return this.sliceImpl(begin.toInt(), end.toInt())
+        return this.slice(begin.toInt(), end.toInt())
     }
 
     /**
@@ -6464,21 +6449,16 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): BigInt64Array {
-        return this.sliceImpl(begin, end)
+        const len: int = this.lengthInt
+        const relStart = normalizeIndex(begin, len)
+        const relEnd = normalizeIndex(end, len)
+        let count = relEnd - relStart
+        if (count < 0) {
+            count = 0
+        }
+        let buf = this.buffer.slice(relStart * BigInt64Array.BYTES_PER_ELEMENT.toInt(), relEnd * BigInt64Array.BYTES_PER_ELEMENT.toInt()) as ArrayBuffer
+        return new BigInt64Array(buf)
     }
-
-    /**
-     * Creates a slice of current BigInt64Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new BigInt64Array with elements of current BigInt64Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    private final native sliceImpl(begin: int, end: int): BigInt64Array
 
     /**
      * Creates a slice of current BigInt64Array using range [begin, this.length).
@@ -6488,7 +6468,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns a new BigInt64Array with elements of current BigInt64Array[begin, this.length)
      */
     public slice(begin: int): BigInt64Array {
-        return this.sliceImpl(begin, this.lengthInt)
+        return this.slice(begin, this.lengthInt)
     }
 
     /**
@@ -8147,7 +8127,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: number, end?: number): Float32Array {
-        return this.sliceImpl(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
+        return this.slice(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -8162,7 +8142,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: number, end: int): Float32Array {
-        return this.sliceImpl(begin.toInt(), end.toInt())
+        return this.slice(begin.toInt(), end.toInt())
     }
 
     /**
@@ -8177,7 +8157,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: number): Float32Array {
-        return this.sliceImpl(begin.toInt(), end.toInt())
+        return this.slice(begin.toInt(), end.toInt())
     }
 
     /**
@@ -8192,21 +8172,16 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): Float32Array {
-        return this.sliceImpl(begin, end)
+        const len: int = this.lengthInt
+        const relStart = normalizeIndex(begin, len)
+        const relEnd = normalizeIndex(end, len)
+        let count = relEnd - relStart
+        if (count < 0) {
+            count = 0
+        }
+        let buf = this.buffer.slice(relStart * Float32Array.BYTES_PER_ELEMENT.toInt(), relEnd * Float32Array.BYTES_PER_ELEMENT.toInt()) as ArrayBuffer
+        return new Float32Array(buf)
     }
-
-    /**
-     * Creates a slice of current Float32Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new Float32Array with elements of current Float32Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    private final native sliceImpl(begin: int, end: int): Float32Array
 
     /**
      * Creates a slice of current Float32Array using range [begin, this.length).
@@ -8216,7 +8191,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a new Float32Array with elements of current Float32Array[begin, this.length)
      */
     public slice(begin: int): Float32Array {
-        return this.sliceImpl(begin, this.lengthInt)
+        return this.slice(begin, this.lengthInt)
     }
 
     /**
@@ -9768,7 +9743,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: number, end?: number): Float64Array {
-        return this.sliceImpl(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
+        return this.slice(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -9783,7 +9758,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: number, end: int): Float64Array {
-        return this.sliceImpl(begin.toInt(), end.toInt())
+        return this.slice(begin.toInt(), end.toInt())
     }
 
     /**
@@ -9798,7 +9773,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: number): Float64Array {
-        return this.sliceImpl(begin.toInt(), end.toInt())
+        return this.slice(begin.toInt(), end.toInt())
     }
 
     /**
@@ -9813,21 +9788,16 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): Float64Array {
-        return this.sliceImpl(begin, end)
+        const len: int = this.lengthInt
+        const relStart = normalizeIndex(begin, len)
+        const relEnd = normalizeIndex(end, len)
+        let count = relEnd - relStart
+        if (count < 0) {
+            count = 0
+        }
+        let buf = this.buffer.slice(relStart * Float64Array.BYTES_PER_ELEMENT.toInt(), relEnd * Float64Array.BYTES_PER_ELEMENT.toInt()) as ArrayBuffer
+        return new Float64Array(buf)
     }
-
-    /**
-     * Creates a slice of current Float64Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new Float64Array with elements of current Float64Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    private final native sliceImpl(begin: int, end: int): Float64Array
 
     /**
      * Creates a slice of current Float64Array using range [begin, this.length).
@@ -9837,7 +9807,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a new Float64Array with elements of current Float64Array[begin, this.length)
      */
     public slice(begin: int): Float64Array {
-        return this.sliceImpl(begin, this.lengthInt)
+        return this.slice(begin, this.lengthInt)
     }
 
     /**
