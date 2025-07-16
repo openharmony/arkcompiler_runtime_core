@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,10 @@
 {% for fd in function_decls %}
 /*---
 desc: >-
-    ArkTS does not support overload signatures in TypeScript-style where
-    several function headers are followed by a single body.
-tags: [compile-only, negative]
+    Call arguments are checked at the call site against such multiple signatures
+    in their declaration order: the call is considered valid as soon as the first
+    signature is found appropriate for the arguments given.
+tags: [{{fd.tags}}]
 ---*/
 
 {{fd.decl}}

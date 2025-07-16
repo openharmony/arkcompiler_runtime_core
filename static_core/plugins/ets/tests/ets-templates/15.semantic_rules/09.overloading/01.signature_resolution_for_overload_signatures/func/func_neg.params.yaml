@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-function_decls:
+cases:
     - decl: |-
           // CTE: implementation is missing
           function foo(): string;
@@ -28,28 +28,18 @@ function_decls:
           function bar(): string {
               return "";
           }
-          function foo(a?: string, b?:string): string {
-              return ">>>" + a + b;
+          function foo(...p: Any[]): Any {
+              return 42.0;
           }
       call: |-
           foo()
 
     - decl: |-
-          // CTE: implementation is not compatible with the declarations
+          // CTE: implementation has a wrong name
           function foo(): string;
           function foo(a: string, b: string): string;
-          function foo(a?: string, b:string): string {
-              return ">>>" + a + b;
-          }
-      call: |-
-          foo()
-
-    - decl: |-
-          // CTE: implementation is not compatible with the declarations
-          function foo(): string;
-          function foo(a: string, b: string): string;
-          function foo(a?: string, b?:number): string {
-              return ">>>" + a + b;
+          function bar(...p: Any[]): Any {
+              return 42.0;
           }
       call: |-
           foo()

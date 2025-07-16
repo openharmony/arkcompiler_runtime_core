@@ -1,0 +1,73 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - call: |-
+          // Object
+          arktest.assertEQ(new X(o).res, "Object")     // Array<Object> <: Object
+          arktest.assertEQ(new X(a).res, "AObject")    // Array<A> <: Object
+          arktest.assertEQ(new X(b).res, "BObject")    // Array<B> <: Object
+
+          // Array<A>
+          arktest.assertEQ(new X(a, 0).res, "AObject")
+
+          // Array<B>
+          arktest.assertEQ(new X(b, 0, 0).res, "BObject")
+
+          // Array<A>|Array<B>
+          arktest.assertEQ(new X(a, 0, 0, 0, 0).res, "AObject")  // Array<A> <: Array<A>|Array<B>
+          arktest.assertEQ(new X(b, 0, 0, 0, 0).res, "BObject")  // Array<B> <: Array<A>|Array<B>
+
+          // Array<Object>
+          arktest.assertEQ(new X(o, 0, 0, 0, 0, 0).res, "Object")
+
+    - tags: 'compile-only, negative'
+      call: |-
+          new X(o, 0) // CTE: No such signature
+
+    - tags: 'compile-only, negative'
+      call: |-
+          new X(b, 0) // CTE: No such signature
+
+    - tags: 'compile-only, negative'
+      call: |-
+          new X(o, 0, 0) // CTE: No such signature
+
+    - tags: 'compile-only, negative'
+      call: |-
+          new X(a, 0, 0) // CTE: No such signature
+
+    - tags: 'compile-only, negative'
+      call: |-
+          new X(o, 0, 0, 0) // CTE: No such signature
+
+    - tags: 'compile-only, negative'
+      call: |-
+          new X(a, 0, 0, 0) // CTE: No such signature
+
+    - tags: 'compile-only, negative'
+      call: |-
+          new X(b, 0, 0, 0) // CTE: No such signature
+
+    - tags: 'compile-only, negative'
+      call: |-
+          new X(o, 0, 0, 0, 0) // CTE: No such signature
+
+    - tags: 'compile-only, negative'
+      call: |-
+          new X(a, 0, 0, 0, 0, 0) // CTE: No such signature
+
+    - tags: 'compile-only, negative'
+      call: |-
+          new X(b, 0, 0, 0, 0, 0) // CTE: No such signature
