@@ -42,7 +42,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
 
-    static const char *moduleName = "Lunsafe_memory;";
+    static const char *moduleName = "unsafe_memory";
     ani_module md;
     if (ANI_OK != env->FindModule(moduleName, &md)) {
         std::cerr << "Cannot find \"" << moduleName << "\" module!\n";
@@ -50,8 +50,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
 
     std::array methods = {
-        ani_native_function {"allocMem", "I:J", reinterpret_cast<void *>(AllocMemImpl)},
-        ani_native_function {"freeMem", "J:V", reinterpret_cast<void *>(FreeMemImpl)},
+        ani_native_function {"allocMem", "i:l", reinterpret_cast<void *>(AllocMemImpl)},
+        ani_native_function {"freeMem", "l:", reinterpret_cast<void *>(FreeMemImpl)},
     };
 
     if (ANI_OK != env->Module_BindNativeFunctions(md, methods.data(), methods.size())) {

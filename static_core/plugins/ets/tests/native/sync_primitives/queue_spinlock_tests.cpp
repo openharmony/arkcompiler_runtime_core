@@ -59,7 +59,7 @@ private:
     static ani_function ResolveFunction(ani_env *env, std::string_view methodName, std::string_view signature)
     {
         ani_module md;
-        [[maybe_unused]] auto status = env->FindModule("Lqueue_spinlock_tests;", &md);
+        [[maybe_unused]] auto status = env->FindModule("queue_spinlock_tests", &md);
         ASSERT(status == ANI_OK);
         ani_function func;
         status = env->Module_FindFunction(md, methodName.data(), signature.data(), &func);
@@ -70,13 +70,13 @@ private:
     void BindSpinlockNativeFunctions()
     {
         ani_module module {};
-        [[maybe_unused]] auto status = env_->FindModule("Lqueue_spinlock_tests;", &module);
+        [[maybe_unused]] auto status = env_->FindModule("queue_spinlock_tests", &module);
         ASSERT(status == ANI_OK);
         std::array methods = {
-            ani_native_function {"spinlockCreate", ":Lstd/core/Object;", reinterpret_cast<void *>(SpinlockCreate)},
-            ani_native_function {"spinlockGuard", "Lstd/core/Object;Lstd/core/Object;:V",
-                                 reinterpret_cast<void *>(SpinlockGuard)},
-            ani_native_function {"spinlockIsHeld", "Lstd/core/Object;:Z", reinterpret_cast<void *>(SpinlockIsHeld)},
+            ani_native_function {"spinlockCreate", ":C{std.core.Object}", reinterpret_cast<void *>(SpinlockCreate)},
+            ani_native_function {"spinlockGuard",
+                                 "C{std.core.Object}C{std.core.Object}:", reinterpret_cast<void *>(SpinlockGuard)},
+            ani_native_function {"spinlockIsHeld", "C{std.core.Object}:z", reinterpret_cast<void *>(SpinlockIsHeld)},
         };
         status = env_->Module_BindNativeFunctions(module, methods.data(), methods.size());
         ASSERT(status == ANI_OK);
@@ -114,19 +114,19 @@ private:
 // Checks that the coroutine has exclusive access to the critical section
 TEST_F(EtsNativeQueueSpinlockTest, ExclusiveAccess)
 {
-    CallStaticVoidMethod(env_, "exclusiveAccess", ":V");
+    CallStaticVoidMethod(env_, "exclusiveAccess", ":");
 }
 
 // Checks that the deadlock did not occur due to GC
 TEST_F(EtsNativeQueueSpinlockTest, ObjectAllocationsUnderLock)
 {
-    CallStaticVoidMethod(env_, "objectAllocationsUnderLock", ":V");
+    CallStaticVoidMethod(env_, "objectAllocationsUnderLock", ":");
 }
 
 // Checks that the spinlock has been released in case of raised exception in callback
 TEST_F(EtsNativeQueueSpinlockTest, ThrowingExceptionUnderLock)
 {
-    CallStaticVoidMethod(env_, "throwingExceptionUnderLock", ":V");
+    CallStaticVoidMethod(env_, "throwingExceptionUnderLock", ":");
 }
 
 }  // namespace ark::ets::test

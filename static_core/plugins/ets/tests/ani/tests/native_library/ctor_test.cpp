@@ -38,7 +38,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
 
     std::array methods = {
-        ani_native_function {"sum", "II:I", reinterpret_cast<void *>(Sum)},
+        ani_native_function {"sum", "ii:i", reinterpret_cast<void *>(Sum)},
     };
 
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {

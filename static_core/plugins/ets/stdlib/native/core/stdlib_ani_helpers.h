@@ -22,8 +22,8 @@
 // This functions must be moved from stdlib. #23681
 namespace ark::ets::stdlib {
 
-constexpr const char *ERR_CLS_RUNTIME_EXCEPTION = "Lstd/core/RuntimeException;";
-constexpr const char *CTOR_SIGNATURE_STR = "Lstd/core/String;:V";
+constexpr const char *ERR_CLS_RUNTIME_EXCEPTION = "std.core.RuntimeException";
+constexpr const char *CTOR_SIGNATURE_STR = "C{std.core.String}:";
 
 void StdlibLogFatal(const char *msg);
 void StdlibLogFatal(const char *msg, ani_status status);

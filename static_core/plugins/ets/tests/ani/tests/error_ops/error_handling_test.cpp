@@ -264,7 +264,7 @@ TEST_F(ErrorHandlingTest, describe_error_thrown_through_native)
     ani_function func = nullptr;
     GetThrowErrorThroughNative(&ns, &func);
 
-    ani_native_function fn {"callThroughNative", "I:I", reinterpret_cast<void *>(callThroughNative)};
+    ani_native_function fn {"callThroughNative", "i:i", reinterpret_cast<void *>(callThroughNative)};
     ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, &fn, 1), ANI_OK);
 
     std::string output;

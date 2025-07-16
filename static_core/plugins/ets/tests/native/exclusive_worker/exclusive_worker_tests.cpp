@@ -140,7 +140,7 @@ public:
             ASSERT(status == ANI_ERROR);
 
             ani_int eWorkerId = Coroutine::GetCurrent()->GetWorker()->GetId();
-            CallStaticVoidMethod(workerEnv, "setWorkerId", "I:V", eWorkerId);
+            CallStaticVoidMethod(workerEnv, "setWorkerId", "i:", eWorkerId);
 
             ani_boolean res {};
             res = CallStaticBooleanMethod(workerEnv, routineName, routineSignature, std::forward<Args>(args)...);
@@ -183,7 +183,7 @@ private:
         event.Fire();
 
         ani_int eWorkerId = Coroutine::GetCurrent()->GetWorker()->GetId();
-        CallStaticVoidMethod(workerEnv, "setWorkerId", "I:V", eWorkerId);
+        CallStaticVoidMethod(workerEnv, "setWorkerId", "i:", eWorkerId);
 
         ani_boolean res {};
         res = CallStaticBooleanMethod(workerEnv, routineName, routineSignature, std::forward<Args>(args)...);
@@ -196,7 +196,7 @@ private:
     static ani_function ResolveFunction(ani_env *env, std::string_view methodName, std::string_view signature)
     {
         ani_module md;
-        [[maybe_unused]] auto status = env->FindModule("Lexclusive_worker_tests;", &md);
+        [[maybe_unused]] auto status = env->FindModule("exclusive_worker_tests", &md);
         ASSERT(status == ANI_OK);
         ani_function func;
         status = env->Module_FindFunction(md, methodName.data(), signature.data(), &func);
@@ -207,28 +207,28 @@ private:
 
 TEST_F(EtsNativeExclusiveWorkerTest, CallMethod)
 {
-    RunRoutineInExclusiveWorker("call", ":Z");
+    RunRoutineInExclusiveWorker("call", ":z");
 }
 
 TEST_F(EtsNativeExclusiveWorkerTest, AsyncCallMethod)
 {
-    RunRoutineInExclusiveWorker("asyncCall", ":Z");
+    RunRoutineInExclusiveWorker("asyncCall", ":z");
 }
 
 TEST_F(EtsNativeExclusiveWorkerTest, LaunchCallMethod)
 {
-    RunRoutineInExclusiveWorker("launchCall", ":Z");
+    RunRoutineInExclusiveWorker("launchCall", ":z");
 }
 
 TEST_F(EtsNativeExclusiveWorkerTest, ConcurrentWorkerAndRuntimeDestroy)
 {
-    RunRoutineInExclusiveWorker("eWorkerRoutine", ":Z");
-    CallStaticVoidMethod(env_, "mainRoutine", ":V");
+    RunRoutineInExclusiveWorker("eWorkerRoutine", ":z");
+    CallStaticVoidMethod(env_, "mainRoutine", ":");
 }
 
 TEST_F(EtsNativeExclusiveWorkerTest, AttachSameThread)
 {
-    AttachSameThread("call", ":Z");
+    AttachSameThread("call", ":z");
 }
 
 TEST_F(EtsNativeExclusiveWorkerTest, CreateLimitExclusiveWorkers)
@@ -244,53 +244,53 @@ TEST_F(EtsNativeExclusiveWorkerTest, DetachWithoutAttach)
 
 TEST_F(EtsNativeExclusiveWorkerTest, UseAfterDetach)
 {
-    UseAfterDetach("call", ":Z");
+    UseAfterDetach("call", ":z");
 }
 
 TEST_F(EtsNativeExclusiveWorkerTest, ScheduleACoroutine)
 {
-    RunRoutineInExclusiveWorker("scheduleACoroutine", ":Z");
+    RunRoutineInExclusiveWorker("scheduleACoroutine", ":z");
 }
 
 TEST_F(EtsNativeExclusiveWorkerTest, RecursiveLaunch)
 {
-    RunRoutineInExclusiveWorker("recursiveLaunch", ":Z");
+    RunRoutineInExclusiveWorker("recursiveLaunch", ":z");
 }
 
 TEST_F(EtsNativeExclusiveWorkerTest, TestOOMinEACoroutine)
 {
-    RunRoutineInExclusiveWorker("testOOM", ":Z");
+    RunRoutineInExclusiveWorker("testOOM", ":z");
 }
 
 TEST_F(EtsNativeExclusiveWorkerTest, TestExceptionsInEACoroutine)
 {
-    RunRoutineInExclusiveWorker("throwExceptions", ":Z");
+    RunRoutineInExclusiveWorker("throwExceptions", ":z");
 }
 
 TEST_F(EtsNativeExclusiveWorkerTest, ScheduleAJCoroutine)
 {
-    RunRoutineInExclusiveWorker("scheduleAJCoroutine", ":Z");
+    RunRoutineInExclusiveWorker("scheduleAJCoroutine", ":z");
 }
 
 TEST_F(EtsNativeExclusiveWorkerTest, RecursiveAsync)
 {
-    RunRoutineInExclusiveWorker("recursiveAsync", ":Z");
+    RunRoutineInExclusiveWorker("recursiveAsync", ":z");
 }
 
 TEST_F(EtsNativeExclusiveWorkerTest, ACoroutineCallAsyncFunctions)
 {
-    RunRoutineInExclusiveWorker("ACoroutineCallAsyncFunctions", ":Z");
+    RunRoutineInExclusiveWorker("ACoroutineCallAsyncFunctions", ":z");
 }
 
 TEST_F(EtsNativeExclusiveWorkerTest, AsyncFunctionLaunchACoroutine)
 {
-    RunRoutineInExclusiveWorker("asyncFunctionLaunchACoroutine", ":Z");
+    RunRoutineInExclusiveWorker("asyncFunctionLaunchACoroutine", ":z");
 }
 
 TEST_F(EtsNativeExclusiveWorkerTest, CommunicateBetweenEACoroutines)
 {
-    RunRoutineInExclusiveWorker("EACoroutineSendToMain", ":Z");
-    CallStaticVoidMethod(env_, "mainSendToEACoroutine", ":V");
+    RunRoutineInExclusiveWorker("EACoroutineSendToMain", ":z");
+    CallStaticVoidMethod(env_, "mainSendToEACoroutine", ":");
 }
 
 }  // namespace ark::ets::test

@@ -83,7 +83,7 @@ TEST_F(FixedArraySetGetRegionFloatTest, SetRegionFloatTest)
 TEST_F(FixedArraySetGetRegionFloatTest, CheckChangeFromManagedRegionFloatTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lfixedarray_region_float_test/ArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("fixedarray_region_float_test.ArrayClass", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;
@@ -113,7 +113,7 @@ TEST_F(FixedArraySetGetRegionFloatTest, CheckChangeFromManagedRegionFloatTest)
 TEST_F(FixedArraySetGetRegionFloatTest, CheckChangeFromApiRegionFloatTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lfixedarray_region_float_test/ArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("fixedarray_region_float_test.ArrayClass", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;

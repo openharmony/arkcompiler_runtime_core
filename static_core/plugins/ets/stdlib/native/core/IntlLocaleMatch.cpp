@@ -40,7 +40,7 @@ static void ThrowRangeError(ani_env *env, Args &&...args)
 {
     std::stringstream message;
     (message << ... << args);
-    ThrowNewError(env, "Lstd/core/RangeError;", message.str().c_str(), "Lstd/core/String;:V");
+    ThrowNewError(env, "std.core.RangeError", message.str().c_str(), "C{std.core.String}:");
 }
 
 std::vector<std::string> GetAvailableLocales()
@@ -128,7 +128,7 @@ static std::vector<std::string> ToStringList(ani_env *env, ani_array_ref aniList
 static ani_array_ref ToAniStrArray(ani_env *env, std::vector<std::string> strings)
 {
     ani_class stringClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/String;", &stringClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std.core.String", &stringClass));
 
     ani_array_ref array;
     if (strings.empty()) {
@@ -212,7 +212,7 @@ icu::Locale GetLocale(ani_env *env, std::string &locTag)
     icu::Locale locale = icu::Locale::forLanguageTag(icu::StringPiece(locTag.c_str()), status);
     if (UNLIKELY(U_FAILURE(status))) {
         const auto errorMessage = std::string("Language tag '").append(locTag).append("' is invalid or not supported");
-        ThrowNewError(env, "Lstd/core/RuntimeException;", errorMessage.c_str(), "Lstd/core/String;:V");
+        ThrowNewError(env, "std.core.RuntimeException", errorMessage.c_str(), "C{std.core.String}:");
         return nullptr;
     }
     return locale;
@@ -229,24 +229,24 @@ ani_string StdCoreIntlBestFitLocale(ani_env *env, [[maybe_unused]] ani_class kla
     auto success = UErrorCode::U_ZERO_ERROR;
     auto matcher = BuildLocaleMatcher(success);
     if (UNLIKELY(U_FAILURE(success))) {
-        ThrowNewError(env, "Lstd/core/RuntimeException;", "Unable to build locale matcher", "Lstd/core/String;:V");
+        ThrowNewError(env, "std.core.RuntimeException", "Unable to build locale matcher", "C{std.core.String}:");
         return nullptr;
     }
     auto it = intl::LanguageTagListIterator(tags);
     auto bestfit = matcher.getBestMatchResult(it, success);
     if (UNLIKELY(U_FAILURE(success))) {
-        ThrowNewError(env, "Lstd/core/RuntimeException;", "Unable to get best match result", "Lstd/core/String;:V");
+        ThrowNewError(env, "std.core.RuntimeException", "Unable to get best match result", "C{std.core.String}:");
         return nullptr;
     }
     auto locale = bestfit.makeResolvedLocale(success);
     if (UNLIKELY(U_FAILURE(success))) {
-        ThrowNewError(env, "Lstd/core/RuntimeException;", "Unable to make resolved locale", "Lstd/core/String;:V");
+        ThrowNewError(env, "std.core.RuntimeException", "Unable to make resolved locale", "C{std.core.String}:");
         return nullptr;
     }
     auto tag = locale.toLanguageTag<std::string>(success);
     if (UNLIKELY(U_FAILURE(success))) {
-        ThrowNewError(env, "Lstd/core/RuntimeException;", "Unable to convert locale into language tag",
-                      "Lstd/core/String;:V");
+        ThrowNewError(env, "std.core.RuntimeException", "Unable to convert locale into language tag",
+                      "C{std.core.String}:");
         return nullptr;
     }
     if (tag == "en_US_POSIX" || tag == "c") {
@@ -296,7 +296,7 @@ ani_array_ref StdCoreIntlBestFitLocales(ani_env *env, [[maybe_unused]] ani_class
     auto success = UErrorCode::U_ZERO_ERROR;
     auto matcher = BuildLocaleMatcher(success);
     if (UNLIKELY(U_FAILURE(success))) {
-        ThrowNewError(env, "Lstd/core/RuntimeException;", "Unable to build locale matcher", "Lstd/core/String;:V");
+        ThrowNewError(env, "std.core.RuntimeException", "Unable to build locale matcher", "C{std.core.String}:");
         return nullptr;
     }
 
@@ -386,17 +386,17 @@ ani_array_ref StdCoreIntlLookupLocales(ani_env *env, [[maybe_unused]] ani_class 
 
 ani_status RegisterIntlLocaleMatch(ani_env *env)
 {
-    const auto methods = std::array {ani_native_function {"bestFitLocale", "Lescompat/Array;:Lstd/core/String;",
+    const auto methods = std::array {ani_native_function {"bestFitLocale", "C{escompat.Array}:C{std.core.String}",
                                                           reinterpret_cast<void *>(StdCoreIntlBestFitLocale)},
-                                     ani_native_function {"lookupLocale", "Lescompat/Array;:Lstd/core/String;",
+                                     ani_native_function {"lookupLocale", "C{escompat.Array}:C{std.core.String}",
                                                           reinterpret_cast<void *>(StdCoreIntlLookupLocale)},
-                                     ani_native_function {"bestFitLocales", "Lescompat/Array;:Lescompat/Array;",
+                                     ani_native_function {"bestFitLocales", "C{escompat.Array}:C{escompat.Array}",
                                                           reinterpret_cast<void *>(StdCoreIntlBestFitLocales)},
-                                     ani_native_function {"lookupLocales", "Lescompat/Array;:Lescompat/Array;",
+                                     ani_native_function {"lookupLocales", "C{escompat.Array}:C{escompat.Array}",
                                                           reinterpret_cast<void *>(StdCoreIntlLookupLocales)}};
 
     ani_class localeMatchClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/LocaleMatch;", &localeMatchClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std.core.LocaleMatch", &localeMatchClass));
 
     return env->Class_BindNativeMethods(localeMatchClass, methods.data(), methods.size());
 }

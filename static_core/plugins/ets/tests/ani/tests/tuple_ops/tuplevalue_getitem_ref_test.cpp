@@ -54,10 +54,10 @@ protected:
     void CheckDoubleValue(ani_tuple_value tupleValue, const ani_size index, const std::array<double, 5U> &array)
     {
         ani_class doubleClass;
-        ASSERT_EQ(env_->FindClass("Lstd/core/Double;", &doubleClass), ANI_OK);
+        ASSERT_EQ(env_->FindClass("std.core.Double", &doubleClass), ANI_OK);
         ASSERT(doubleClass != nullptr);
         ani_method doubleUnbox;
-        env_->Class_FindMethod(doubleClass, "unboxed", ":D", &doubleUnbox);
+        env_->Class_FindMethod(doubleClass, "unboxed", ":d", &doubleUnbox);
         ASSERT(doubleClass != nullptr);
 
         ani_ref result {};
@@ -146,10 +146,10 @@ TEST_F(TupleValueGetItemRefTest, tupleValueGetItemIntCompositeScene)
     CompareStringWithRef("Hello", result);
 
     ani_class doubleClass;
-    ASSERT_EQ(env_->FindClass("Lstd/core/Double;", &doubleClass), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.Double", &doubleClass), ANI_OK);
     ASSERT(doubleClass != nullptr);
     ani_method doubleUnbox;
-    env_->Class_FindMethod(doubleClass, "unboxed", ":D", &doubleUnbox);
+    env_->Class_FindMethod(doubleClass, "unboxed", ":d", &doubleUnbox);
     ASSERT(doubleClass != nullptr);
 
     ASSERT_EQ(env_->TupleValue_GetItem_Ref(tuple, 1U, &result), ANI_OK);

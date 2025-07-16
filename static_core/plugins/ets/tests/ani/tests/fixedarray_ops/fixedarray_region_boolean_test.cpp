@@ -67,7 +67,7 @@ TEST_F(FixedArraySetGetRegionBooleanTest, SetRegionBooleanTest)
 TEST_F(FixedArraySetGetRegionBooleanTest, CheckChangeFromManagedRegionBooleanTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lfixedarray_region_boolean_test/ArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("fixedarray_region_boolean_test.ArrayClass", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;
@@ -96,7 +96,7 @@ TEST_F(FixedArraySetGetRegionBooleanTest, CheckChangeFromManagedRegionBooleanTes
 TEST_F(FixedArraySetGetRegionBooleanTest, CheckChangeFromApiRegionBooleanTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lfixedarray_region_boolean_test/ArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("fixedarray_region_boolean_test.ArrayClass", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;

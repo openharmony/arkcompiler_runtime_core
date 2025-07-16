@@ -83,7 +83,7 @@ TEST_F(FixedArraySetGetRegionIntTest, SetRegionIntTest)
 TEST_F(FixedArraySetGetRegionIntTest, CheckChangeFromManagedRegionIntTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lfixedarray_region_int_test/ArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("fixedarray_region_int_test.ArrayClass", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;
@@ -112,7 +112,7 @@ TEST_F(FixedArraySetGetRegionIntTest, CheckChangeFromManagedRegionIntTest)
 TEST_F(FixedArraySetGetRegionIntTest, CheckChangeFromApiRegionIntTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lfixedarray_region_int_test/ArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("fixedarray_region_int_test.ArrayClass", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;

@@ -44,8 +44,8 @@ std::string RemoveAccents(ani_env *env, const std::string &str)
     accentsConverter->transliterate(source);
     delete accentsConverter;
     if (UNLIKELY(U_FAILURE(status))) {
-        ThrowNewError(env, "Lstd/core/RuntimeException;", "Removing accents failed, transliterate failed",
-                      "Lstd/core/String;:V");
+        ThrowNewError(env, "std.core.RuntimeException", "Removing accents failed, transliterate failed",
+                      "C{std.core.String}:");
         return std::string();
     }
 
@@ -97,7 +97,7 @@ ani_double StdCoreIntlCollatorLocaleCmp(ani_env *env, [[maybe_unused]] ani_class
     locale.setUnicodeKeywordValue(collationName, collationValue, status);
     if (UNLIKELY(U_FAILURE(status))) {
         const auto errorMessage = std::string("Collation '").append(collation).append("' is invalid or not supported");
-        ThrowNewError(env, "Lstd/core/RuntimeException;", errorMessage.c_str(), "Lstd/core/String;:V");
+        ThrowNewError(env, "std.core.RuntimeException", errorMessage.c_str(), "C{std.core.String}:");
         return 0;
     }
 
@@ -109,7 +109,7 @@ ani_double StdCoreIntlCollatorLocaleCmp(ani_env *env, [[maybe_unused]] ani_class
         std::string localeName;
         dispName.toUTF8String(localeName);
         const auto errorMessage = std::string("Failed to create the collator for ").append(localeName);
-        ThrowNewError(env, "Lstd/core/RuntimeException;", errorMessage.c_str(), "Lstd/core/String;:V");
+        ThrowNewError(env, "std.core.RuntimeException", errorMessage.c_str(), "C{std.core.String}:");
     }
 
     auto strPiece1 = icu::StringPiece(str1.c_str());
@@ -117,7 +117,7 @@ ani_double StdCoreIntlCollatorLocaleCmp(ani_env *env, [[maybe_unused]] ani_class
     if ((strPiece1.empty() != 0) && (strPiece2.empty() != 0)) {
         auto res = collator->compareUTF8(strPiece1, strPiece2, status);
         if (UNLIKELY(U_FAILURE(status))) {
-            ThrowNewError(env, "Lstd/core/RuntimeException;", "Comparison failed", "Lstd/core/String;:V");
+            ThrowNewError(env, "std.core.RuntimeException", "Comparison failed", "C{std.core.String}:");
         }
         return res;
     }
@@ -126,7 +126,7 @@ ani_double StdCoreIntlCollatorLocaleCmp(ani_env *env, [[maybe_unused]] ani_class
     icu::UnicodeString target = StdStrToUnicode(str2);
     auto res = collator->compare(source, target, status);
     if (UNLIKELY(U_FAILURE(status))) {
-        ThrowNewError(env, "Lstd/core/RuntimeException;", "Comparison failed", "Lstd/core/String;:V");
+        ThrowNewError(env, "std.core.RuntimeException", "Comparison failed", "C{std.core.String}:");
     }
     return res;
 }
@@ -134,16 +134,16 @@ ani_double StdCoreIntlCollatorLocaleCmp(ani_env *env, [[maybe_unused]] ani_class
 ani_status RegisterIntlCollator(ani_env *env)
 {
     const auto methods =
-        std::array {ani_native_function {"removePunctuation", "Lstd/core/String;:Lstd/core/String;",
+        std::array {ani_native_function {"removePunctuation", "C{std.core.String}:C{std.core.String}",
                                          reinterpret_cast<void *>(StdCoreIntlCollatorRemovePunctuation)},
-                    ani_native_function {"removeAccents", "Lstd/core/String;:Lstd/core/String;",
+                    ani_native_function {"removeAccents", "C{std.core.String}:C{std.core.String}",
                                          reinterpret_cast<void *>(StdCoreIntlCollatorRemoveAccents)},
                     ani_native_function {"compareByCollation",
-                                         "Lstd/core/String;Lstd/core/String;Lstd/core/String;Lstd/core/String;:D",
+                                         "C{std.core.String}C{std.core.String}C{std.core.String}C{std.core.String}:d",
                                          reinterpret_cast<void *>(StdCoreIntlCollatorLocaleCmp)}};
 
     ani_class collatorClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Intl/Collator;", &collatorClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.Collator", &collatorClass));
     return env->Class_BindNativeMethods(collatorClass, methods.data(), methods.size());
 }
 

@@ -83,7 +83,7 @@ TEST_F(FixedArraySetGetRegionLongTest, SetRegionLongTest)
 TEST_F(FixedArraySetGetRegionLongTest, CheckChangeFromManagedRegionLongTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lfixedarray_region_long_test/ArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("fixedarray_region_long_test.ArrayClass", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;
@@ -111,7 +111,7 @@ TEST_F(FixedArraySetGetRegionLongTest, CheckChangeFromManagedRegionLongTest)
 TEST_F(FixedArraySetGetRegionLongTest, CheckChangeFromApiRegionLongTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lfixedarray_region_long_test/ArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("fixedarray_region_long_test.ArrayClass", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;

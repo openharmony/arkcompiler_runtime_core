@@ -28,15 +28,15 @@ extern "C" ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
 
-    static const char *moduleName = "Lstring_tlab_allocations;";
+    static const char *moduleName = "string_tlab_allocations";
     ani_module md;
     if (ANI_OK != env->FindModule(moduleName, &md)) {
         auto msg = std::string("Cannot find \"") + moduleName + std::string("\" module!");
-        ark::ets::stdlib::ThrowNewError(env, "Lstd/core/RuntimeException;", msg.data(), "Lstd/core/String;:V");
+        ark::ets::stdlib::ThrowNewError(env, "std.core.RuntimeException", msg.data(), "C{std.core.String}:");
         return ANI_ERROR;
     }
 
-    const auto functions = std::array {ani_native_function {"compileMethod", "Lstd/core/String;:I",
+    const auto functions = std::array {ani_native_function {"compileMethod", "C{std.core.String}:i",
                                                             reinterpret_cast<void *>(ark::ets::ani::CompileMethod)}};
 
     if (ANI_OK != env->Module_BindNativeFunctions(md, functions.data(), functions.size())) {

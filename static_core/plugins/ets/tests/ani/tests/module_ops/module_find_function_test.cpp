@@ -233,7 +233,7 @@ TEST_F(ModuleFindFunctionTest, check_initialization)
 
     ASSERT_FALSE(IsRuntimeClassInitialized("@abcModule.module_find_function_test", false));
     ani_function fn {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "getIntValue", "I:I", &fn), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "getIntValue", "i:i", &fn), ANI_OK);
     ASSERT_FALSE(IsRuntimeClassInitialized("@abcModule.module_find_function_test", false));
 }
 

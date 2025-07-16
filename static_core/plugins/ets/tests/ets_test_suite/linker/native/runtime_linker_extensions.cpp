@@ -73,7 +73,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
 
-    static constexpr const char *CLASS_DESCRIPTOR = "Lruntime_linker_extensions/Test;";
+    static constexpr const char *CLASS_DESCRIPTOR = "runtime_linker_extensions.Test";
     ani_class cls;
     if (ANI_OK != env->FindClass(CLASS_DESCRIPTOR, &cls)) {
         std::cerr << "Not found '" << CLASS_DESCRIPTOR << "'" << std::endl;
@@ -81,7 +81,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
 
     std::array methods = {
-        ani_native_function {"loadFile", "Lstd/core/String;:[B", reinterpret_cast<void *>(LoadFile)},
+        ani_native_function {"loadFile", "C{std.core.String}:A{b}", reinterpret_cast<void *>(LoadFile)},
     };
 
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {

@@ -45,20 +45,20 @@ static Type Static(ani_env *env, ani_class cls, ani_object i0, ani_byte i1, ani_
     ani_int errorCount = 0L;
 
     ani_class nativeModule;
-    CHECK_EQUAL(env->FindClass("Lquick_native/NativeModule;", &nativeModule), ANI_OK);
+    CHECK_EQUAL(env->FindClass("quick_native.NativeModule", &nativeModule), ANI_OK);
 
     ani_class byteWrapper;
-    CHECK_EQUAL(env->FindClass("Lquick_native/ByteWrapper;", &byteWrapper), ANI_OK);
+    CHECK_EQUAL(env->FindClass("quick_native.ByteWrapper", &byteWrapper), ANI_OK);
     ani_class shortWrapper;
-    CHECK_EQUAL(env->FindClass("Lquick_native/ShortWrapper;", &shortWrapper), ANI_OK);
+    CHECK_EQUAL(env->FindClass("quick_native.ShortWrapper", &shortWrapper), ANI_OK);
     ani_class intWrapper;
-    CHECK_EQUAL(env->FindClass("Lquick_native/IntWrapper;", &intWrapper), ANI_OK);
+    CHECK_EQUAL(env->FindClass("quick_native.IntWrapper", &intWrapper), ANI_OK);
     ani_class longWrapper;
-    CHECK_EQUAL(env->FindClass("Lquick_native/LongWrapper;", &longWrapper), ANI_OK);
+    CHECK_EQUAL(env->FindClass("quick_native.LongWrapper", &longWrapper), ANI_OK);
     ani_class floatWrapper;
-    CHECK_EQUAL(env->FindClass("Lquick_native/FloatWrapper;", &floatWrapper), ANI_OK);
+    CHECK_EQUAL(env->FindClass("quick_native.FloatWrapper", &floatWrapper), ANI_OK);
     ani_class doubleWrapper;
-    CHECK_EQUAL(env->FindClass("Lquick_native/DoubleWrapper;", &doubleWrapper), ANI_OK);
+    CHECK_EQUAL(env->FindClass("quick_native.DoubleWrapper", &doubleWrapper), ANI_OK);
 
     ani_boolean equals;
     CHECK_EQUAL(env->Reference_StrictEquals(cls, nativeModule, &equals), ANI_OK);
@@ -157,7 +157,7 @@ static Type Static(ani_env *env, ani_class cls, ani_object i0, ani_byte i1, ani_
     } else {
         static_assert(std::is_same_v<Type, ani_object>);
         ani_method ctor;
-        CHECK_EQUAL(env->Class_FindMethod(intWrapper, "<ctor>", "I:V", &ctor), ANI_OK);
+        CHECK_EQUAL(env->Class_FindMethod(intWrapper, "<ctor>", "i:", &ctor), ANI_OK);
         ani_object newObj;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         CHECK_EQUAL(env->Object_New(intWrapper, ctor, &newObj, errorCount), ANI_OK);
@@ -177,20 +177,20 @@ static Type Virtual(ani_env *env, ani_object that, ani_object i0, ani_byte i1, a
     ani_int errorCount = 0L;
 
     ani_class nativeModule;
-    CHECK_EQUAL(env->FindClass("Lquick_native/NativeModule;", &nativeModule), ANI_OK);
+    CHECK_EQUAL(env->FindClass("quick_native.NativeModule", &nativeModule), ANI_OK);
 
     ani_class byteWrapper;
-    CHECK_EQUAL(env->FindClass("Lquick_native/ByteWrapper;", &byteWrapper), ANI_OK);
+    CHECK_EQUAL(env->FindClass("quick_native.ByteWrapper", &byteWrapper), ANI_OK);
     ani_class shortWrapper;
-    CHECK_EQUAL(env->FindClass("Lquick_native/ShortWrapper;", &shortWrapper), ANI_OK);
+    CHECK_EQUAL(env->FindClass("quick_native.ShortWrapper", &shortWrapper), ANI_OK);
     ani_class intWrapper;
-    CHECK_EQUAL(env->FindClass("Lquick_native/IntWrapper;", &intWrapper), ANI_OK);
+    CHECK_EQUAL(env->FindClass("quick_native.IntWrapper", &intWrapper), ANI_OK);
     ani_class longWrapper;
-    CHECK_EQUAL(env->FindClass("Lquick_native/LongWrapper;", &longWrapper), ANI_OK);
+    CHECK_EQUAL(env->FindClass("quick_native.LongWrapper", &longWrapper), ANI_OK);
     ani_class floatWrapper;
-    CHECK_EQUAL(env->FindClass("Lquick_native/FloatWrapper;", &floatWrapper), ANI_OK);
+    CHECK_EQUAL(env->FindClass("quick_native.FloatWrapper", &floatWrapper), ANI_OK);
     ani_class doubleWrapper;
-    CHECK_EQUAL(env->FindClass("Lquick_native/DoubleWrapper;", &doubleWrapper), ANI_OK);
+    CHECK_EQUAL(env->FindClass("quick_native.DoubleWrapper", &doubleWrapper), ANI_OK);
 
     auto checkClass = [&errorCount, env](ani_class correctClass, ani_object object) -> bool {
         ani_type objectClass;
@@ -308,7 +308,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
 
-    static const char *className = "Lquick_native/NativeModule;";
+    static const char *className = "quick_native.NativeModule";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         std::cerr << "Not found '" << className << "'" << std::endl;
@@ -331,7 +331,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     };
 
-    static const char *moduleName = "Lquick_native;";
+    static const char *moduleName = "quick_native";
     ani_module module;
     if (ANI_OK != env->FindModule(moduleName, &module)) {
         std::cerr << "Module '" << moduleName << "' not found\n";

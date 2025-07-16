@@ -83,7 +83,7 @@ TEST_F(ExampleTest, CallNativeQuickFunction)
     // CC-OFFNXT(G.FMT.10-CPP) project code style
     static constexpr const char *METHOD_NAME = "quickMethod";
     // CC-OFFNXT(G.FMT.10-CPP) project code style
-    static constexpr const char *SIGNATURE = "Lstd/core/String;J:Lstd/core/String;";
+    static constexpr const char *SIGNATURE = "C{std.core.String}l:C{std.core.String}";
     // CC-OFFNXT(G.FMT.10-CPP) project code style
     static constexpr std::string_view SAMPLE_STRING = "abcd";
 
@@ -132,7 +132,7 @@ TEST_F(ExampleTest, CallNativeDirectFunction)
     // CC-OFFNXT(G.FMT.10-CPP) project code style
     static constexpr const char *METHOD_NAME = "directMethod";
     // CC-OFFNXT(G.FMT.10-CPP) project code style
-    static constexpr const char *SIGNATURE = "ZBCSIJFD:I";
+    static constexpr const char *SIGNATURE = "zbcsilfd:i";
 
     ani_class cls {};
     ASSERT_EQ(env_->FindClass(TEST_CLASS_DESCRIPTOR, &cls), ANI_OK);

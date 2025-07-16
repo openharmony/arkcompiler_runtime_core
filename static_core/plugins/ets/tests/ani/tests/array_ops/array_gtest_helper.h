@@ -24,16 +24,16 @@ class ArrayHelperTest : public AniTest {
 public:
     void InitTest()
     {
-        env_->FindClass("Lstd/core/Boolean;", &booleanClass);
-        env_->FindClass("Lstd/core/Int;", &intClass);
+        env_->FindClass("std.core.Boolean", &booleanClass);
+        env_->FindClass("std.core.Int", &intClass);
         ASSERT(booleanClass != nullptr);
         ASSERT(intClass != nullptr);
-        env_->Class_FindMethod(booleanClass, "<ctor>", "Z:V", &booleanCtor);
-        env_->Class_FindMethod(intClass, "<ctor>", "I:V", &intCtor);
+        env_->Class_FindMethod(booleanClass, "<ctor>", "z:", &booleanCtor);
+        env_->Class_FindMethod(intClass, "<ctor>", "i:", &intCtor);
         ASSERT(booleanCtor != nullptr);
         ASSERT(intCtor != nullptr);
-        env_->Class_FindMethod(booleanClass, "unboxed", ":Z", &booleanUnbox);
-        env_->Class_FindMethod(intClass, "unboxed", ":I", &intUnbox);
+        env_->Class_FindMethod(booleanClass, "unboxed", ":z", &booleanUnbox);
+        env_->Class_FindMethod(intClass, "unboxed", ":i", &intUnbox);
         ASSERT(booleanUnbox != nullptr);
         ASSERT(intUnbox != nullptr);
     }
