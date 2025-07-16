@@ -1377,3 +1377,21 @@ entrypoints:
     - int32_t                  # compare result
     - ark::coretypes::String*  # first string
     - ark::coretypes::String*  # second string
+
+- name: StringEqualsUsual
+  entrypoint: CoreStringEquals
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - uint8_t
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringEqualsSlowPath
+  entrypoint: CoreStringEquals
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - uint8_t
+    - ark::coretypes::String*
+    - ark::coretypes::String*

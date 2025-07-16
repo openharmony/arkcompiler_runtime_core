@@ -20,6 +20,7 @@
 #include "objects/string/base_string-inl.h"
 #include "objects/string/line_string-inl.h"
 #include "libpandabase/utils/utf.h"
+#include "objects/base_class.h"
 #include "runtime/include/language_context.h"
 #include "runtime/include/exceptions.h"
 #include "runtime/include/object_accessor.h"
@@ -728,6 +729,9 @@ static_assert(STRING_HASHCODE_OFFSET == ark::coretypes::String::GetHashcodeOffse
 
 constexpr uint32_t STRING_DATA_OFFSET = STRING_HASHCODE_OFFSET + sizeof(uint32_t);
 static_assert(STRING_DATA_OFFSET == ark::coretypes::String::GetDataOffset());
+constexpr uint32_t STRING_TYPE_LINE = static_cast<uint32_t>(common::ObjectType::LINE_STRING);
+constexpr uint32_t STRING_TYPE_SLICE = static_cast<uint32_t>(common::ObjectType::SLICED_STRING);
+constexpr uint32_t STRING_TYPE_TREE = static_cast<uint32_t>(common::ObjectType::TREE_STRING);
 
 }  // namespace ark::coretypes
 

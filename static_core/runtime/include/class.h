@@ -100,6 +100,41 @@ public:
         lang_ = lang;
     }
 
+    void SetLineStringClass()
+    {
+        SetBitField(StringType::LINE_STRING_CLASS);
+    }
+
+    bool IsLineStringClass() const
+    {
+        return GetStringType() == StringType::LINE_STRING_CLASS;
+    }
+
+    void SetSlicedStringClass()
+    {
+        SetBitField(StringType::SLICED_STRING_CLASS);
+    }
+
+    bool IsSlicedStringClass() const
+    {
+        return GetStringType() == StringType::SLICED_STRING_CLASS;
+    }
+
+    void SetTreeStringClass()
+    {
+        SetBitField(StringType::TREE_STRING_CLASS);
+    }
+
+    bool IsTreeStringClass() const
+    {
+        return GetStringType() == StringType::TREE_STRING_CLASS;
+    }
+
+    inline StringType GetStringType() const
+    {
+        return GetBitField();
+    }
+
     static constexpr uint32_t GetFlagsOffset()
     {
         return MEMBER_OFFSET(BaseClass, flags_);
@@ -111,6 +146,10 @@ public:
     static constexpr size_t GetObjectSizeOffset()
     {
         return MEMBER_OFFSET(BaseClass, objectSize_);
+    }
+    static constexpr uint64_t GetStringTypeOffset()
+    {
+        return MEMBER_OFFSET(BaseClass, bitField_);
     }
 
 protected:
@@ -439,41 +478,6 @@ public:
     void SetXRefClass()
     {
         SetFlags(GetFlags() | XREF_CLASS);
-    }
-
-    void SetLineStringClass()
-    {
-        SetBitField(StringType::LINE_STRING_CLASS);
-    }
-
-    bool IsLineStringClass() const
-    {
-        return GetStringType() == StringType::LINE_STRING_CLASS;
-    }
-
-    void SetSlicedStringClass()
-    {
-        SetBitField(StringType::SLICED_STRING_CLASS);
-    }
-
-    bool IsSlicedStringClass() const
-    {
-        return GetStringType() == StringType::SLICED_STRING_CLASS;
-    }
-
-    void SetTreeStringClass()
-    {
-        SetBitField(StringType::TREE_STRING_CLASS);
-    }
-
-    bool IsTreeStringClass() const
-    {
-        return GetStringType() == StringType::TREE_STRING_CLASS;
-    }
-
-    inline StringType GetStringType() const
-    {
-        return GetBitField();
     }
 
     bool IsVariableSize() const

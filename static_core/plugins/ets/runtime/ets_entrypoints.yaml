@@ -1380,6 +1380,24 @@
       - int64_t             # serialization buffer
       - ark::ObjectHeader*  # string to serialize
 
+- name: WriteStringToMemSlowPath
+  entrypoint: UnsafeMemoryWriteString
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - int32_t             # bytes written
+    - int64_t             # serialization buffer
+    - ark::ObjectHeader*  # string to serialize
+
+- name: WriteStringToMemUsual
+  entrypoint: UnsafeMemoryWriteString
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - int32_t             # bytes written
+    - int64_t             # serialization buffer
+    - ark::ObjectHeader*  # string to serialize
+
 - name: CreateStringFromMem
   entrypoint: CreateStringFromMem
   bridge: none
@@ -1831,3 +1849,141 @@
     - uint8_t             # boolean
     - ark::ObjectHeader*  # src set
     - ark::ObjectHeader*  # key
+
+- name: StringTrimSlowPath
+  entrypoint: StdCoreStringTrim
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string (result)
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringTrim3Arg
+  entrypoint: StdCoreStringTrim
+  bridge: odd_saved3
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string (result)
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringTrimLeftSlowPath
+  entrypoint: StdCoreStringTrimLeft
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string (result)
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringTrimLeft3Arg
+  entrypoint: StdCoreStringTrimLeft
+  bridge: odd_saved3
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string (result)
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringTrimRightSlowPath
+  entrypoint: StdCoreStringTrimRight
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string (result)
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringTrimRight3Arg
+  entrypoint: StdCoreStringTrimRight
+  bridge: odd_saved3
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string (result)
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringStartsWithSlowPath
+  entrypoint: StdCoreStringStartsWith
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - uint8_t             # boolean (result)
+    - ark::ObjectHeader*  # string to check
+    - ark::ObjectHeader*  # prefix to check
+    - int32_t             # index to start from
+
+- name: StringStartsWithOddSaved
+  entrypoint: StdCoreStringStartsWith
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - uint8_t             # boolean (result)
+    - ark::ObjectHeader*  # string to check
+    - ark::ObjectHeader*  # prefix to check
+    - int32_t             # index to start from
+
+- name: StringEndsWithSlowPath
+  entrypoint: StdCoreStringEndsWith
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - uint8_t             # boolean (result)
+    - ark::ObjectHeader*  # string to check
+    - ark::ObjectHeader*  # prefix to check
+    - int32_t             # index to start from
+
+- name: StringEndsWithOddSaved
+  entrypoint: StdCoreStringEndsWith
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - uint8_t             # boolean (result)
+    - ark::ObjectHeader*  # string to check
+    - ark::ObjectHeader*  # prefix to check
+    - int32_t             # index to start from
+
+- name: StringIndexOfSlowPath
+  entrypoint: StdCoreStringIndexOf
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - ark::ObjectHeader*  # string
+    - uint16_t            # char to look up
+
+- name: StringIndexOf3Arg
+  entrypoint: StdCoreStringIndexOf
+  bridge: odd_saved3
+  properties: [intrinsic]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - ark::ObjectHeader*  # string
+    - uint16_t            # char to look up
+
+- name: StringIndexOfAfterSlowPath
+  entrypoint: StdCoreStringIndexOfAfter
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - ark::ObjectHeader*  # string
+    - uint16_t            # char to look up
+    - int32_t             # unused (always zero)
+
+- name: StringIndexOfAfterOddSaved
+  entrypoint: StdCoreStringIndexOfAfter
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - ark::ObjectHeader*  # string
+    - uint16_t            # char to look up
+    - int32_t             # unused (always zero)

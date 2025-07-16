@@ -28,6 +28,17 @@ scoped_macro(:unpack_length) do |length, compression, length_shift|
     end
 end
 
+macro(:check_string_type) do |str|
+  baseClass := LoadI(str).ref
+  stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
+  If(stringType, Constants::STRING_TYPE_SLICE).EQ {
+    Goto(:SlowPathEntrypoint)
+  }
+  If(stringType, Constants::STRING_TYPE_TREE).EQ {
+    Goto(:SlowPathEntrypoint)
+  }
+end
+
 def GenerateStringEquals(lang, dynamic, compression)
     suffix = (compression ? "Compressed" : "")
     length_shift = Constants::STRING_LENGTH_SHIFT
@@ -119,6 +130,8 @@ def GenerateStringEquals(lang, dynamic, compression)
         If(str1, str2).EQ.Unlikely.b {
             Return(1).b
         }
+        check_string_type(str1)
+        check_string_type(str2)
         if dynamic
             length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
             length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -190,6 +203,10 @@ def GenerateStringEquals(lang, dynamic, compression)
         Goto(:Loop)
     Label(:NotEqual)
         Return(0).b
+    Label(:SlowPathEntrypoint)
+      entrypoint = get_entrypoint_offset("STRING_EQUALS_SLOW_PATH")
+      Intrinsic(:SLOW_PATH_ENTRY, str1, str2).AddImm(entrypoint).MethodAsImm("StringEqualsUsualBridge").Terminator.b
+      Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
     }
 end
 
@@ -865,6 +882,8 @@ def GenerateSubstringFromStringTlab(string_compression_enabled)
       next
     end
 
+    check_string_type(str)
+
     # Note, 'str' is checked against nullptr in the InstBuilder (see AddArgNullcheckIfNeeded)
     length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
     if string_compression_enabled
@@ -986,6 +1005,8 @@ def GenerateStringGetCharsTlab(string_compression_enabled)
       next
     end
 
+    check_string_type(str)
+
     If(begin_index, end_index).GT.Unlikely.b {
       Goto(:SlowPathEntrypoint)  # Out of range
     }
@@ -1093,6 +1114,8 @@ end
       ReturnVoid().void
       next
     end
+
+    check_string_type(str)
 
     # 1. There is no check of the argument against NullPointer as
     #    it's done in the InstBuilder (see AddArgNullcheckIfNeeded)
