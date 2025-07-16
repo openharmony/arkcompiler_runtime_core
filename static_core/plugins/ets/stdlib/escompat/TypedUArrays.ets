@@ -785,7 +785,38 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      * @returns new Uint8ClampedArray
      */
     public static from(arr: ArrayLike<number>): Uint8ClampedArray {
-        return Uint8ClampedArray.from<number>(arr, (x: number, k: number): number => x)
+        const len = arr.length;
+        const result = new Uint8ClampedArray(len);
+        for (let i: int = 0; i < len; ++i) {
+            const raw = (arr as ArrayLike<number>)[i];
+            let m: number;
+
+            if (isNaN(raw)) {
+                m = 0;
+            } else if (raw === Infinity) {
+                m = 255;
+            } else if (raw === -Infinity) {
+                m = 0;
+            } else {
+                const floor = Math.floor(raw);
+                const frac = raw - floor;
+                if (frac > 0.5) {
+                    m = floor + 1;
+                } else if (frac === 0.5) {
+                    m = (floor % 2 === 0) ? floor : floor + 1;
+                } else {
+                    m = floor;
+                }
+                if (m < 0) {
+                    m = 0;
+                } else if (m > 255) {
+                    m = 255;
+                }
+            }
+
+            result.setUnsafeClamp(i, m.toInt());
+        }
+        return result;
     }
 
     /**
@@ -2529,7 +2560,10 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Uint8Array
      */
     public static from(arr: ArrayLike<number>): Uint8Array {
-        return Uint8Array.from<number>(arr, (x: number, k: number): number => x)
+        return Uint8Array.from<number>(
+            arr,
+            (x: number, _k: number): number => x
+        );
     }
 
     /**
@@ -4259,7 +4293,10 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Uint16Array
      */
     public static from(arr: ArrayLike<number>): Uint16Array {
-        return Uint16Array.from<number>(arr, (x: number, k: number): number => x)
+        return Uint16Array.from<number>(
+            arr,
+            (x: number, _k: number): number => x
+        );
     }
 
     /**
@@ -6035,7 +6072,10 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Uint32Array
      */
     public static from(arr: ArrayLike<number>): Uint32Array {
-        return Uint32Array.from<number>(arr, (x: number, k: number): number => x)
+        return Uint32Array.from<number>(
+            arr,
+            (x: number, _k: number): number => x
+        );
     }
 
     /**
@@ -7812,7 +7852,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      * @returns new BigUint64Array
      */
     public static from(arr: ArrayLike<BigInt>): BigUint64Array {
-        throw new Error("BigUint64Array.from: not implemented")
+        throw new Error("BigUint64Array.from: not implemented");
     }
 
     /**
