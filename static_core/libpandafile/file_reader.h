@@ -95,6 +95,7 @@ private:
     void SetFieldValue(FieldItem *fieldItem, Type fieldType, FieldDataAccessor &fieldAcc);
     FieldItem *CreateFieldItem(ClassItem *cls, File::EntityId fieldId);
     ForeignFieldItem *CreateForeignFieldItem(BaseClassItem *fcls, File::EntityId fieldId);
+    BaseItem *CheckAndGetExistingFileItem(File::EntityId id, ItemTypes itemType);
     ClassItem *CreateClassItem(File::EntityId classId);
     ForeignClassItem *CreateForeignClassItem(File::EntityId classId);
     MethodHandleItem *CreateMethodHandleItem(File::EntityId mhId);
