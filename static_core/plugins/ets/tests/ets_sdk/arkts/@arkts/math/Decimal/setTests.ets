@@ -31,6 +31,8 @@ function main(): int {
     suite.addTest("Decimal set with crypto", testSetWithCrypto);
     suite.addTest("Decimal set with modulo", testSetWithModulo);
     suite.addTest("Decimal set with defaults", testSetWithDefaults);
+    suite.addTest("Decimal set with partial update and reset", testSetPartialUpdateAndReset);
+    suite.addTest("Decimal set retains unspecified properties", testSetRetainsUnspecifiedProperties);
 
     return suite.run();
 }
@@ -191,4 +193,57 @@ function testSetWithDefaults() {
     Decimal.set({ precision: 50, defaults: true });
     arktest.assertEQ(Decimal.precision, 50);
     arktest.assertEQ(Decimal.rounding, 4);
+}
+
+function testSetPartialUpdateAndReset() {
+    Decimal.set({ precision: 70, rounding: 6, toExpNeg: -10, toExpPos: 20,
+        minE: -1e9, maxE: 1e9, modulo: 3 });
+    arktest.assertEQ(Decimal.precision, 70);
+    arktest.assertEQ(Decimal.rounding, 6);
+    arktest.assertEQ(Decimal.toExpNeg, -10);
+    arktest.assertEQ(Decimal.toExpPos, 20);
+    arktest.assertEQ(Decimal.minE, -1e9);
+    arktest.assertEQ(Decimal.maxE, 1e9);
+    arktest.assertEQ(Decimal.modulo, 3);
+
+    Decimal.set({ precision: 50, rounding: 7, toExpNeg: -20 });
+    arktest.assertEQ(Decimal.precision, 50);
+    arktest.assertEQ(Decimal.rounding, 7);
+    arktest.assertEQ(Decimal.toExpNeg, -20);
+    arktest.assertEQ(Decimal.toExpPos, 20);
+    arktest.assertEQ(Decimal.minE, -1e9);
+    arktest.assertEQ(Decimal.maxE, 1e9);
+    arktest.assertEQ(Decimal.modulo, 3);
+    arktest.assertFalse(Decimal.crypto);
+
+    Decimal.set({ toExpPos: 21 });
+    arktest.assertEQ(Decimal.precision, 50);
+    arktest.assertEQ(Decimal.rounding, 7);
+    arktest.assertEQ(Decimal.toExpNeg, -20);
+
+    Decimal.set({ rounding: 3, defaults: true });
+    arktest.assertEQ(Decimal.rounding, 3);
+    arktest.assertEQ(Decimal.precision, 20);
+    arktest.assertEQ(Decimal.toExpNeg, -7);
+}
+
+function testSetRetainsUnspecifiedProperties() {
+    Decimal.set({ precision: 55, rounding: 5, toExpNeg: -10, modulo: 6 });
+
+    arktest.assertEQ(Decimal.precision, 55);
+    arktest.assertEQ(Decimal.rounding, 5);
+    arktest.assertEQ(Decimal.toExpNeg, -10);
+    arktest.assertEQ(Decimal.modulo, 6);
+
+    Decimal.set({ rounding: 6, toExpNeg: -16, modulo: 8 });
+    arktest.assertEQ(Decimal.precision, 55);
+    arktest.assertEQ(Decimal.rounding, 6);
+    arktest.assertEQ(Decimal.toExpNeg, -16);
+    arktest.assertEQ(Decimal.modulo, 8);
+
+    Decimal.set({ precision: 17 });
+    arktest.assertEQ(Decimal.precision, 17);
+    arktest.assertEQ(Decimal.rounding, 6);
+    arktest.assertEQ(Decimal.toExpNeg, -16);
+    arktest.assertEQ(Decimal.modulo, 8);
 }

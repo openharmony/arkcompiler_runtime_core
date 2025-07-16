@@ -1287,13 +1287,16 @@ export class Decimal {
      */
     static set(config: DecimalConfig): void {
         let useDefaults = (config.defaults != undefined && config.defaults === true);
-        Decimal.precision = Utils.checkRange(config.precision, 1, MAX_DIGITS, useDefaults, DEFAULTS_PRECISION);
-        Decimal.rounding = Utils.checkRange(config.rounding, 0, 8, useDefaults, DEFAULTS_ROUNDING);
-        Decimal.toExpNeg = Utils.checkRange(config.toExpNeg, -EXP_LIMIT, 0, useDefaults, DEFAULTS_TOEXPNEG);
-        Decimal.toExpPos = Utils.checkRange(config.toExpPos, 0, EXP_LIMIT, useDefaults, DEFAULTS_TOEXPPOS);
-        Decimal.maxE = Utils.checkRange(config.maxE, 0, EXP_LIMIT, useDefaults, EXP_LIMIT);
-        Decimal.minE = Utils.checkRange(config.minE, -EXP_LIMIT, 0, useDefaults, -EXP_LIMIT);
-        Decimal.modulo = Utils.checkRange(config.modulo, 0, 9, useDefaults, DEFAULTS_MODULO);
+        Decimal.precision =
+            Utils.checkRange(config.precision, 1, MAX_DIGITS, useDefaults, [DEFAULTS_PRECISION, Decimal.precision]);
+        Decimal.rounding = Utils.checkRange(config.rounding, 0, 8, useDefaults, [DEFAULTS_ROUNDING, Decimal.rounding]);
+        Decimal.toExpNeg =
+            Utils.checkRange(config.toExpNeg, -EXP_LIMIT, 0, useDefaults, [DEFAULTS_TOEXPNEG, Decimal.toExpNeg]);
+        Decimal.toExpPos =
+            Utils.checkRange(config.toExpPos, 0, EXP_LIMIT, useDefaults, [DEFAULTS_TOEXPPOS, Decimal.toExpPos]);
+        Decimal.maxE = Utils.checkRange(config.maxE, 0, EXP_LIMIT, useDefaults, [EXP_LIMIT, Decimal.maxE]);
+        Decimal.minE = Utils.checkRange(config.minE, -EXP_LIMIT, 0, useDefaults, [-EXP_LIMIT, Decimal.minE]);
+        Decimal.modulo = Utils.checkRange(config.modulo, 0, 9, useDefaults, [DEFAULTS_MODULO, Decimal.modulo]);
 
         if (useDefaults) {
             Decimal.crypto = false;
@@ -3502,9 +3505,10 @@ class Utils {
         return new String(n);
     }
 
-    public static checkRange(v: number | undefined, min: number, max: number, useDef: boolean, def: number): number {
+    public static checkRange(v: double | undefined, min: double, max: double,
+        useDef: boolean, def: FixedArray<double>): double {
         if (v == undefined && useDef) {
-            return def;
+            return def[0];
         }
         if (v != undefined) {
             if (Math.floor(v) === v && v >= min && v <= max) {
@@ -3515,7 +3519,23 @@ class Utils {
                 );
             }
         }
-        return def;
+        return def[1];
+    }
+
+    public static checkRange(v: int | undefined, min: double, max: double, useDef: boolean, def: FixedArray<int>): int {
+        if (v == undefined && useDef) {
+            return def[0];
+        }
+        if (v != undefined) {
+            if (Math.floor(v) === v && v >= min && v <= max) {
+                return v!;
+            } else {
+                throw Utils.createBusinessError(RANGE_ERROR_CODE,
+                    `The value of "${v!}" is out of range. It must be >= ${min} && <= ${max}. Received value is: ${v!}`
+                );
+            }
+        }
+        return def[1];
     }
 
     public static getPrecision(digits: Array<number>) {
