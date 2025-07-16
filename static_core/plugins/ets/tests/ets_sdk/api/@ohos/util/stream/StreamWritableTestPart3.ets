@@ -19,7 +19,7 @@ import { stream } from "@ohos.util.stream";
 const mustChecks: Array<Function> = new Array<Function>();
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Stream API tests")
+    const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addTest("Writev finish event", testWritableWritevFinish);
     suite.addTest("Writev error", testWritableWritevError);
@@ -39,9 +39,10 @@ async function mustCallCheckAll() {
                 mustChecks.length = 0;
                 resolve(undefined);
             } catch (e: Error) {
-                reject(e)
+                mustChecks.length = 0;
+                reject(e);
             }
-        }, 2000)
+        }, 2000);
     })
 }
 
@@ -59,7 +60,7 @@ function mustCall(fn?: Function, times: number = 1) {
 
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
@@ -69,6 +70,7 @@ class MyWritable1 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         callback.unsafeCall(new Error('write test error'));
     }
@@ -89,6 +91,7 @@ class MyWritable2 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         setTimeout(() => {
             callback.unsafeCall(new Error('write error'));
@@ -111,13 +114,14 @@ class MyWritable3 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         callback.unsafeCall(new Error('write error'));
     }
+
     doWritev(chunks: string[] | Uint8Array[], callback: Function): void {
         callback.unsafeCall(new Error('writev error'));
     }
-
 }
 // Test cases ported from ArkTS 1.0:testStreamWritableWritevFinish003
 function testWritableWritevErrorScenarioOne() {
@@ -139,17 +143,18 @@ class MyWritable4 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         setTimeout(() => {
             callback.unsafeCall(new Error('write error'));
         });
     }
+
     doWritev(chunks: string[] | Uint8Array[], callback: Function): void {
         setTimeout(() => {
             callback.unsafeCall(new Error('writev error'));
         });
     }
-
 }
 // Test cases ported from ArkTS 1.0:testStreamWritableWritevFinish004
 function testWritableWritevErrorScenarioTwo() {
@@ -169,10 +174,12 @@ function testWritableWritevErrorScenarioTwo() {
 
 class TestWritable extends stream.Writable {
     private fn: (chunk: string | Uint8Array, type: string, enc: string) => void;
+
     constructor(fn: (chunk: string | Uint8Array, type: string, enc: string) => void) {
         super();
         this.fn = fn;
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         this.fn(chunk, typeof chunk, encoding);
         callback.unsafeCall();
@@ -183,11 +190,13 @@ class CustomWritable extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
         setTimeout(() => {
             callback.unsafeCall();
         }, 0);
     }
+
     async waitForFinish(): Promise<void> {
         return new Promise<void>((resolve) => {
             this.on('finish', (): void => {
@@ -195,6 +204,7 @@ class CustomWritable extends stream.Writable {
             });
         });
     }
+
     async waitForDrain(): Promise<void> {
         return new Promise<void>((resolve) => {
             this.on('drain', (): void => {

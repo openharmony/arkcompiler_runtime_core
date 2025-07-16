@@ -18,10 +18,11 @@ import { stream } from "@ohos.util.stream";
 
 const mustChecks: Array<Function> = new Array<Function>();
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Stream API tests")
+    const suite = new arktest.ArkTestsuite("Stream API tests");
 
-    suite.addTest("Pipe with readable and writable streams.", testPipeReadableAndWritableStreams)
-    suite.addTest("Pipe large data transfer validation.", testPipeLargeDataTransferValidation)
+    suite.addTest("Pipe data transfer validation.", testPipeDataTransferValidation);
+    suite.addTest("Pipe with readable and writable streams.", testPipeReadableAndWritableStreams);
+    suite.addTest("Pipe large data transfer validation.", testPipeLargeDataTransferValidation);
 
     return suite.run();
 }
@@ -36,9 +37,10 @@ async function mustCallCheckAll() {
                 mustChecks.length = 0;
                 resolve(undefined);
             } catch (e: Error) {
-                reject(e)
+                mustChecks.length = 0;
+                reject(e);
             }
-        }, 2000)
+        }, 2000);
     })
 }
 
@@ -50,79 +52,113 @@ function mustCallFn(fn?: Function, times: number = 1) {
     }
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
 }
 
-function mustCallFnWrite(fn?: Function, times: number = 1) {
+function mustCallNoArgs(fn?: Function, times: number = 1) {
     let callCount = 0;
-    let wrappedFn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
+    let wrappedFn: Function = (): void => {
         callCount++;
-        fn?.unsafeCall(chunk, encoding, callback);
-    }
-    mustChecks.push((): void => {
-        if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
-        }
-    });
-    return wrappedFn;
-}
-
-function mustCall(fn?: Function, times: number = 1) {
-    let callCount = 0;
-    let wrappedFn: Function = (err: Error | undefined | null) => {
-        callCount++;
-        fn?.unsafeCall(err);
+        fn?.unsafeCall();
     }
 
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
 }
 
+let callCount_MyWrite1 = 0;
 class MyRead1 extends TestReadable {
     constructor() {
         super();
     }
-    doRead(size: number) {
-        this.push('Some data');
+
+    doRead(size: int) {
+        this.push('test data');
         this.push(null);
     }
 }
 class MyWrite1 extends CustomWritable {
-    str = "{\"0\":83,\"1\":111,\"2\":109,\"3\":101,\"4\":32,\"5\":100,\"6\":97,\"7\":116,\"8\":97}";
+    str = "{\"0\":116,\"1\":101,\"2\":115,\"3\":116,\"4\":32,\"5\":100,\"6\":97,\"7\":116,\"8\":97}";
+
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-        let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
-            arktest.assertEQ(JSON.stringify(chunk as Uint8Array), this.str);
-            callback.unsafeCall();
-        }
-        let wrappedFn = mustCallFnWrite(fn);
-        wrappedFn(chunk, encoding, callback);
+        callCount_MyWrite1++;
+        arktest.assertEQ(JSON.stringify(chunk as Uint8Array), this.str);
+        callback.unsafeCall();
     }
 }
+// Test cases ported from ArkTS 1.0:testStreamPipe003
+function testPipeDataTransferValidation() {
+    mustChecks.push(() => {
+        if (callCount_MyWrite1 !== 1) {
+            throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyWrite1} times.`);
+        }
+    });
 
-// Test cases ported from ArkTS 1.0:testStreamPipe004
-function testPipeReadableAndWritableStreams() {
     let readable = new MyRead1();
     let writable = new MyWrite1();
+    writable.on('finish', mustCallNoArgs());
     readable.pipe(writable);
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
-class MyRead2 extends stream.Readable {
-    sumData = 0;
+let callCount_MyWrite2 = 0;
+class MyRead2 extends TestReadable {
     constructor() {
         super();
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
+        this.push('Some data');
+        this.push(null);
+    }
+}
+class MyWrite2 extends CustomWritable {
+    str = "{\"0\":83,\"1\":111,\"2\":109,\"3\":101,\"4\":32,\"5\":100,\"6\":97,\"7\":116,\"8\":97}";
+
+    constructor() {
+        super();
+    }
+
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+        callCount_MyWrite2++;
+        arktest.assertEQ(JSON.stringify(chunk as Uint8Array), this.str);
+        callback.unsafeCall();
+    }
+}
+// Test cases ported from ArkTS 1.0:testStreamPipe004
+function testPipeReadableAndWritableStreams() {
+    mustChecks.push(() => {
+        if (callCount_MyWrite2 !== 1) {
+            throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyWrite2} times.`);
+        }
+    });
+
+    let readable = new MyRead2();
+    let writable = new MyWrite2();
+    readable.pipe(writable);
+    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+}
+
+let callCount_MyWrite3 = 0;
+class MyRead3 extends stream.Readable {
+    sumData = 0;
+
+    constructor() {
+        super();
+    }
+
+    doRead(size: int) {
         const onceData = 8 * 1024;
         if ((this.sumData + onceData) < 41000) {
             this.sumData += onceData;
@@ -135,32 +171,34 @@ class MyRead2 extends stream.Readable {
         }
     }
 }
-class MyWrite2 extends stream.Writable {
+class MyWrite3 extends stream.Writable {
     sum = 0;
-    callCount = 0;
+
     constructor() {
         super();
     }
-    doWrite(chunk: string, encoding: string, callback: Function): void {
-        let fn = (chunk: string, encoding: string, callback: Function) => {
-            this.sum += chunk.length;
-            this.callCount++;
-            if (this.callCount === 6) {
-                arktest.assertEQ(this.sum, 41000);
-            }
-            setTimeout(() => {
-                callback.unsafeCall()
-            }, 100)
+
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+        callCount_MyWrite3++;
+        this.sum += chunk.length;
+        if (callCount_MyWrite3 === 6) {
+            arktest.assertEQ(this.sum, 41000);
         }
-        let wrappedFn = mustCallFn(fn, 6);
-        wrappedFn(chunk, encoding, callback);
+        setTimeout(() => {
+            callback.unsafeCall();
+        }, 100);
     }
 }
-
 // Test cases ported from ArkTS 1.0:testStreamPipe005
 function testPipeLargeDataTransferValidation() {
-    let readable = new MyRead2();
-    let writable = new MyWrite2();
+    mustChecks.push(() => {
+        if (callCount_MyWrite3 !== 6) {
+            throw new Error(`Function was expected to be called 6 times, but was called ${callCount_MyWrite3} times.`);
+        }
+    });
+
+    let readable = new MyRead3();
+    let writable = new MyWrite3();
     readable.pipe(writable);
     readable.unpipe(writable);
     readable.pipe(writable);
@@ -172,9 +210,8 @@ class TestReadable extends stream.Readable {
         super();
     }
 
-    doRead(size: number) {
+    doRead(size: int) {
     }
-
 }
 
 class CustomWritable extends stream.Writable {

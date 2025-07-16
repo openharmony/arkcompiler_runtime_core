@@ -18,7 +18,7 @@ import { stream } from "@ohos.util.stream";
 
 const mustChecks: Array<Function> = new Array<Function>();
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Stream API tests")
+    const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addTest("Duplex finish event should not be triggered", testDuplexFinishEventNotTriggered);
     suite.addTest("Duplex writableFinished state validation", testDuplexWritableFinishedState);
@@ -40,9 +40,10 @@ async function mustCallCheckAll() {
                 mustChecks.length = 0;
                 resolve(undefined);
             } catch (e: Error) {
-                reject(e)
+                mustChecks.length = 0;
+                reject(e);
             }
-        }, 2000)
+        }, 2000);
     })
 }
 
@@ -63,7 +64,7 @@ function mustCallObjectArray(fn?: Function, times: number = 1) {
 
 function mustCallArgSize(fn?: Function, times: number = 1) {
     let callCount = 0;
-    let wrappedFn = (size: number) => {
+    let wrappedFn = (size: int) => {
         callCount++;
         fn?.unsafeCall(size);
     }
@@ -84,7 +85,7 @@ function mustCall(fn?: Function, times: number = 1) {
 
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
@@ -99,7 +100,7 @@ function mustCallNoArgs(fn?: Function, times: number = 1) {
 
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
@@ -109,7 +110,8 @@ class MyDuplex1 extends stream.Duplex {
     constructor() {
         super();
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamDuplexEnd001
@@ -128,6 +130,7 @@ class MyDuplex2 extends stream.Duplex {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         arktest.assertFalse(this.writableFinished, "writableFinished should be false");
         callback.unsafeCall();
@@ -148,11 +151,14 @@ function testDuplexWritableFinishedState() {
 
 class MyDuplex3 extends stream.Duplex {
     written: string | Uint8Array = "";
+
     constructor() {
         super();
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
         this.written = chunk;
         callback.unsafeCall();
@@ -176,25 +182,31 @@ function testDuplexBasicReadWrite() {
     }, 0);
 }
 
+let callCount_MyDuplex4 = 0;
 class MyDuplex4 extends stream.Duplex {
     constructor() {
         super();
     }
-    doRead(size: number) {
-        let fn = (size: number) => {
-            arktest.assertEQ(size, 16384);
-            this.push('duplex test');
-            this.push(null);
-        }
-        let wrappedFn = mustCallArgSize(fn);
-        wrappedFn(size);
+
+    doRead(size: int) {
+        callCount_MyDuplex4++;
+        arktest.assertEQ(size, 16384);
+        this.push('duplex test');
+        this.push(null);
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
         callback.unsafeCall();
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamDuplex002
 function testDuplexReadWithValidSize() {
+    mustChecks.push(() => {
+        if (callCount_MyDuplex4 !== 1) {
+            throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyDuplex4} times.`);
+        }
+    });
+
     let duplex = new MyDuplex4();
     duplex.write('duplex test', 'utf8', mustCallObjectArray((...param: Object[]): void => {
         if (param.length > 0 && param[0] instanceof Error) {
@@ -215,6 +227,7 @@ class MyDuplex5 extends stream.Duplex {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
         callback.unsafeCall(new Error('Write error'));
     }
@@ -225,7 +238,6 @@ function testDuplexErrorHandlingOnWrite() {
     let func: Function = (err: Error) => {
         arktest.assertEQ(err.message, "Write error", "err.message is valid");
         arktest.assertFalse(duplex.writable, "writable should be false");
-
     }
     duplex.on('error', mustCall(func));
     duplex.write('test');
@@ -236,12 +248,14 @@ class MyDuplex6 extends stream.Duplex {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
         setTimeout(() => {
             callback.unsafeCall();
         }, 20);
     }
-    doRead(size: number) {
+
+    doRead(size: int) {
         this.push('Sync data');
         this.push(null);
     }

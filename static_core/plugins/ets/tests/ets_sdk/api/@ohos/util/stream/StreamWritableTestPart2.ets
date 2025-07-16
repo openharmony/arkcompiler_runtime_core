@@ -19,7 +19,7 @@ import { stream } from "@ohos.util.stream";
 const mustChecks: Array<Function> = new Array<Function>();
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Stream API tests")
+    const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addTest("Multiple callbacks", testWritableMultipleCallbacks);
     suite.addTest("Callback repeatedly", testWritableCallbackRepeatedly);
@@ -40,9 +40,10 @@ async function mustCallCheckAll() {
                 mustChecks.length = 0;
                 resolve(undefined);
             } catch (e: Error) {
-                reject(e)
+                mustChecks.length = 0;
+                reject(e);
             }
-        }, 2000)
+        }, 2000);
     })
 }
 
@@ -69,33 +70,39 @@ function mustCall(fn?: Function, times: number = 1) {
 
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
 }
 
+let callCount_MyWritable1 = 0;
 class MyWritable1 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-        let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
-            callback.unsafeCall();
-            callback.unsafeCall();
-        }
-        let wrappedFn = mustCallUint8Array(fn);
-        wrappedFn(chunk, encoding, callback);
+        callCount_MyWritable1++;
+        callback.unsafeCall();
+        callback.unsafeCall();
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamWritableCbTwice001
 function testWritableMultipleCallbacks() {
+    mustChecks.push(() => {
+        if (callCount_MyWritable1 !== 1) {
+            throw new Error(`Function was expected to be called 1 times, `
+                            + `but was called ${callCount_MyWritable1} times.`);
+        }
+    });
+
     let writableStream = new MyWritable1();
-    writableStream.write('test');
     writableStream.on('error', mustCall((error: Error): void => {
-        arktest.assertEQ(error.message, 'Callback called multiple times');
+        arktest.assertEQ(error.message, 'Callback called multiple times.');
         arktest.assertEQ(error.name, 'BusinessError');
     }));
+    writableStream.write('test');
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
@@ -103,6 +110,7 @@ class MyWritable2 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         callback.unsafeCall();
         setTimeout(() => {
@@ -115,7 +123,7 @@ function testWritableCallbackRepeatedly() {
     let writableStream = new MyWritable2();
     writableStream.write('test');
     writableStream.on('error', mustCall((error: Error): void => {
-        arktest.assertEQ(error.message, 'Callback called multiple times');
+        arktest.assertEQ(error.message, 'Callback called multiple times.');
         arktest.assertEQ(error.name, 'BusinessError');
     }));
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
@@ -125,6 +133,7 @@ class MyWritable3 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         setTimeout(() => {
             callback.unsafeCall();
@@ -149,6 +158,7 @@ class MyWritable4 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
     }
 }
@@ -159,11 +169,11 @@ function testWritableWriteError() {
     writableStream.end();
     writableStream.write('test', 'utf8', mustCall((error: Error): void => {
         arktest.assertTrue(ticked);
-        arktest.assertEQ(error.message, 'write after end');
+        arktest.assertEQ(error.message, 'Write after end.');
     }));
     ticked = true;
     writableStream.on('error', mustCall((error: Error): void => {
-        arktest.assertEQ(error.message, 'write after end');
+        arktest.assertEQ(error.message, 'Write after end.');
     }));
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
@@ -172,6 +182,7 @@ class MyWritable5 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         callback.unsafeCall();
     }

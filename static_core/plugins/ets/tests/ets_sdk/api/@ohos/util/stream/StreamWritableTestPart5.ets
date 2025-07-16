@@ -19,7 +19,7 @@ import { stream } from "@ohos.util.stream";
 const mustChecks: Array<Function> = new Array<Function>();
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Stream API tests")
+    const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addTest("Writable properties", testWritableProperties);
     suite.addTest("Writable object mode", testWritableObjectMode);
@@ -31,6 +31,7 @@ function main(): int {
     suite.addTest("Custom writable length after multiple writes", testCustomWritableLengthAfterMultipleWrites);
     suite.addTest("Writable length after finish", testWritableLengthAfterFinish);
     suite.addTest("Writable write large data", testWritableWriteLargeData);
+    suite.addTest("Writable drain after large data", testWritableDrainAfterLargeData);
     suite.addTest("Writable drain event", testWritableDrainEvent);
     suite.addTest("Writable state after end", testWritableStateAfterEnd);
     suite.addTest("Writable cork uncork state", testWritableCorkUncorkState);
@@ -51,9 +52,10 @@ async function mustCallCheckAll() {
                 mustChecks.length = 0;
                 resolve(undefined);
             } catch (e: Error) {
-                reject(e)
+                mustChecks.length = 0;
+                reject(e);
             }
-        }, 2000)
+        }, 2000);
     })
 }
 
@@ -66,7 +68,22 @@ function mustCall(fn?: Function, times: number = 1) {
 
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
+        }
+    });
+    return wrappedFn;
+}
+
+function mustCallNoArgs(fn?: Function, times: number = 1) {
+    let callCount = 0;
+    let wrappedFn: Function = (): void => {
+        callCount++;
+        fn?.unsafeCall();
+    }
+
+    mustChecks.push((): void => {
+        if (callCount !== times) {
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
@@ -115,6 +132,7 @@ class MyWritable1 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         setTimeout(() => {
             callback.unsafeCall();
@@ -163,6 +181,7 @@ class MyWritable2 extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
         setTimeout(() => {
             callback.unsafeCall();
@@ -175,6 +194,21 @@ function testWritableWriteLargeData() {
     let writableStream = new MyWritable2();
     let writeResult = writableStream.write(largeData);
     arktest.assertFalse(writeResult);
+}
+
+// Test cases ported from ArkTS 1.0:testStreamWritableProperties011
+function testWritableDrainAfterLargeData() {
+    const largeData = 'ab'.repeat(Math.floor(16384 / 2));
+    let writableStream = new CustomWritable();
+    writableStream.write(largeData);
+    await new Promise<void>((resolve) => {
+        writableStream.on('drain', (): void => {
+            resolve(undefined);
+        });
+    });
+    writableStream.write(largeData, 'utf8', mustCallNoArgs((): void => {}));
+    arktest.assertEQ(writableStream.writable, true);
+    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
 // Test cases ported from ArkTS 1.0:testStreamWritableProperties012
@@ -213,20 +247,20 @@ function testWritableCorkUncorkState() {
 function testWritableErrorEvent() {
     let errorEvent = new ErrorEventWritable();
     let chunks = 'C';
-    errorEvent.write(chunks);
     errorEvent.on('error', (error: Error): void => {
         arktest.assertEQ(error.message, 'error');
     });
+    errorEvent.write(chunks);
 }
 
 // Test cases ported from ArkTS 1.0:testStreamWritableProperties016
 function testWritableErrorHandling() {
     let errorEvent = new ErrorEventWritable();
     let chunks = 'C';
-    errorEvent.write(chunks);
     errorEvent.on('error', (error: Error): void => {
         arktest.assertEQ(error.message, 'error');
     });
+    errorEvent.write(chunks);
 }
 
 // Test cases ported from ArkTS 1.0:testStreamWritableProperties017
@@ -243,11 +277,13 @@ class CustomWritable extends stream.Writable {
     constructor() {
         super();
     }
+
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
         setTimeout(() => {
             callback.unsafeCall();
         }, 0);
     }
+
     async waitForFinish(): Promise<void> {
         return new Promise<void>((resolve) => {
             this.on('finish', (): void => {
@@ -255,6 +291,7 @@ class CustomWritable extends stream.Writable {
             });
         });
     }
+
     async waitForDrain(): Promise<void> {
         return new Promise<void>((resolve) => {
             this.on('drain', (): void => {

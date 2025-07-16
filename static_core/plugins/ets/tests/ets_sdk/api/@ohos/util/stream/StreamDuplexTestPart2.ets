@@ -18,7 +18,7 @@ import { stream } from "@ohos.util.stream";
 
 const mustChecks: Array<Function> = new Array<Function>();
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Stream API tests")
+    const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addTest("Duplex writableObjectMode property validation", testDuplexWritableObjectModeProperty);
     suite.addTest("Duplex writableHighWatermark property validation", testDuplexWritableHighWatermarkProperty);
@@ -40,9 +40,10 @@ async function mustCallCheckAll() {
                 mustChecks.length = 0;
                 resolve(undefined);
             } catch (e: Error) {
-                reject(e)
+                mustChecks.length = 0;
+                reject(e);
             }
-        }, 2000)
+        }, 2000);
     })
 }
 
@@ -69,7 +70,7 @@ function mustCall(fn?: Function, times: number = 1) {
 
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
@@ -84,7 +85,7 @@ function mustCallNoArgs(fn?: Function, times: number = 1) {
 
     mustChecks.push((): void => {
         if (callCount !== times) {
-            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
         }
     });
     return wrappedFn;
@@ -110,10 +111,12 @@ function testDuplexReadableHighWatermarkProperty() {
 
 class CustomDuplex1 extends stream.Duplex {
     data: string;
+
     constructor() {
         super();
         this.data = '';
     }
+
     doWritev(chunks: string[] | Uint8Array[], callback: Function) {
         for (const chunk of chunks) {
             this.data += chunk
@@ -136,6 +139,7 @@ class CustomDuplex2 extends stream.Duplex {
     constructor() {
         super();
     }
+
     doWritev(chunks: string[] | Uint8Array[], callback: Function) {
         callback.unsafeCall(new Error('dowritev error'));
     }
@@ -143,34 +147,39 @@ class CustomDuplex2 extends stream.Duplex {
 // Test cases ported from ArkTS 1.0:testStreamDuplexDoWritev002
 function testDuplexDoWritevErrorHandling() {
     let duplex = new CustomDuplex2();
-    duplex.write('Hello ');
     duplex.on('error', mustCall((err: Error): void => {
         arktest.assertEQ(err.message, 'dowritev error');
     }));
+    duplex.write('Hello ');
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+let callCount_CustomDuplex3 = 0;
 class CustomDuplex3 extends stream.Duplex {
     constructor() {
         super();
     }
+
     doWritev(chunks: string[] | Uint8Array[], callback: Function) {
-        let fn = (chunks: string[] | Uint8Array[], callback: Function) => {
-            callback.unsafeCall();
-            callback.unsafeCall();
-        }
-        let wrappedFn = mustCallTwoArgs(fn);
-        wrappedFn(chunks, callback);
+        callCount_CustomDuplex3++;
+        callback.unsafeCall();
+        callback.unsafeCall();
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamDuplexDoWritev003
 function testDuplexDoWritevCallbackMultipleCalls() {
+    mustChecks.push(() => {
+        if (callCount_CustomDuplex3 !== 1) {
+            throw new Error(`Function was expected to be called 1 times, `
+                            + `but was called ${callCount_CustomDuplex3} times.`);
+        }
+    });
 
     let duplex = new CustomDuplex3();
-    duplex.write('test', 'utf8', mustCallNoArgs());
     duplex.on('error', mustCall((error: Error): void => {
         arktest.assertEQ(error.name, 'BusinessError');
         arktest.assertEQ(error.message, 'Callback called multiple times');
     }));
+    duplex.write('test', 'utf8', mustCallNoArgs());
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
