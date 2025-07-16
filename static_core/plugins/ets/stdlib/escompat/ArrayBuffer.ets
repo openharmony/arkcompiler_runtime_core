@@ -36,12 +36,12 @@ export interface ArrayBufferView {
     /**
      * The length in bytes of the array.
      */
-    readonly byteLength: number
+    readonly byteLength: int
 
     /**
      * The offset in bytes of the array.
      */
-    readonly byteOffset: number
+    readonly byteOffset: int
 }
 
 /**
@@ -204,7 +204,7 @@ export class ArrayBuffer extends Buffer
         return this._byteLength
     }
 
-    get byteLength(): number {
+    get byteLength(): int {
         return this._byteLength
     }
 
@@ -347,7 +347,7 @@ export class ArrayBuffer extends Buffer
     */
     public static from(buffer: ArrayBuffer, byteOffset?: number, length?: number): ArrayBuffer {
         const resolvedByteOffset = byteOffset ?? 0;
-        const resolvedLength = length ?? buffer.byteLength;
+        const resolvedLength = length ?? buffer.byteLength.toDouble();
         return ArrayBuffer.from(buffer, resolvedByteOffset.toInt(), resolvedLength.toInt());
     }
 

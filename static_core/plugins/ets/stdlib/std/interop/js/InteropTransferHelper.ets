@@ -422,8 +422,8 @@ export final class InteropTransferHelper {
 
         let dynamicESValue = ESValue.wrap(__narrowAny<object>(dynamicObject));
         let dynamicBuffer = dynamicESValue.getProperty("buffer");
-        let byteOffset = dynamicESValue.getProperty("byteOffset").toNumber();
-        let byteLength = dynamicESValue.getProperty("byteLength").toNumber();
+        let byteOffset = dynamicESValue.getProperty("byteOffset").toNumber().toInt();
+        let byteLength = dynamicESValue.getProperty("byteLength").toNumber().toInt();
 
         let staticBuffer = InteropTransferHelper.transferArrayBufferToStaticImpl(dynamicBuffer);
         return new DataView(staticBuffer, byteOffset, byteLength) as Object;

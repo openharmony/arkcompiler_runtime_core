@@ -753,8 +753,8 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         {
             const resolvedSource: ArrayBuffer = this.buffer;
             const resolvedTarget: ArrayBuffer = getArrayBufferFrom(target);
-            const targetSlice = resolvedTarget.slice(targetStart ?? 0, targetEnd ?? resolvedTarget.byteLength);
-            const sourceSlice = resolvedSource.slice(sourceStart ?? 0, sourceEnd ?? resolvedSource.byteLength);
+            const targetSlice = resolvedTarget.slice(targetStart ?? 0, targetEnd ?? resolvedTarget.byteLength.toDouble());
+            const sourceSlice = resolvedSource.slice(sourceStart ?? 0, sourceEnd ?? resolvedSource.byteLength.toDouble());
             return compare(new Buffer(sourceSlice), new Buffer(targetSlice));
         }
 
@@ -1087,7 +1087,7 @@ Received value is: ${value}`)
         * @private
         */
         private getDataView(): DataView {
-            return new DataView(this.buffer, 0, this.length);
+            return new DataView(this.buffer, 0, this.length.toInt());
         }
 
         /**
@@ -1104,7 +1104,7 @@ Received value is: ${value}`)
             const view = this.getDataView();
             let remaining = value;
             for (let i = byteLength - 1; i >= 0; i--) {
-                view.setUint8(offset + i, remaining & 0xff);
+                view.setUint8((offset + i).toInt(), remaining & 0xff);
                 remaining >>= 8;
             }
             return offset + byteLength;
@@ -1171,7 +1171,7 @@ Received value is: ${value}`)
             const view = this.getDataView();
             let remaining = value;
             for (let i = 0; i < byteLength; i++) {
-                view.setUint8(offset + i, remaining & 0xff);
+                view.setUint8((offset + i).toInt(), remaining & 0xff);
                 remaining >>= 8;
             }
             return offset + byteLength;
@@ -1205,7 +1205,7 @@ Received value is: ${value}`)
             const view = this.getDataView();
             let remaining = value;
             for (let i = byteLength - 1; i >= 0; i--) {
-                view.setUint8(offset + i, remaining & 0xFF);
+                view.setUint8((offset + i).toInt(), remaining & 0xFF);
                 remaining >>= 8;
             }
             return offset + byteLength;
@@ -1238,7 +1238,7 @@ Received value is: ${value}`)
             const view = this.getDataView();
             let remaining = value;
             for (let i = 0; i < byteLength; i++) {
-                view.setUint8(offset + i, remaining & 0xFF);
+                view.setUint8((offset + i).toInt(), remaining & 0xFF);
                 remaining >>= 8;
             }
             return offset + byteLength;
@@ -1300,7 +1300,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {bigint} The read value
         */
         public readBigInt64BE(offset: number = 0): bigint {
-            return this.getDataView().getBigInt64(offset, false);
+            return this.getDataView().getBigInt64(offset.toInt(), false);
         }
 
         /**
@@ -1310,7 +1310,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {bigint} The read value
         */
         public readBigInt64LE(offset: number = 0): bigint {
-            return this.getDataView().getBigInt64(offset, true);
+            return this.getDataView().getBigInt64(offset.toInt(), true);
         }
 
         /**
@@ -1320,7 +1320,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {bigint} The read value
         */
         public readBigUInt64BE(offset: number = 0): bigint {
-            return this.getDataView().getBigUint64(offset, false);
+            return this.getDataView().getBigUint64(offset.toInt(), false);
         }
 
         /**
@@ -1330,7 +1330,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {bigint} The read value
         */
         public readBigUInt64LE(offset: number = 0): bigint {
-            return this.getDataView().getBigUint64(offset, true);
+            return this.getDataView().getBigUint64(offset.toInt(), true);
         }
 
         /**
@@ -1340,7 +1340,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} The read value
         */
         public readDoubleBE(offset: number = 0): number {
-            return this.getDataView().getFloat64(offset, false);
+            return this.getDataView().getFloat64(offset.toInt(), false);
         }
 
         /**
@@ -1350,7 +1350,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} The read value
         */
         public readDoubleLE(offset: number = 0): number {
-            return this.getDataView().getFloat64(offset, true);
+            return this.getDataView().getFloat64(offset.toInt(), true);
         }
 
         /**
@@ -1360,7 +1360,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} The read value
         */
         public readFloatBE(offset: number = 0): number {
-            return this.getDataView().getFloat32(offset, false);
+            return this.getDataView().getFloat32(offset.toInt(), false);
         }
 
         /**
@@ -1370,7 +1370,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} The read value
         */
         public readFloatLE(offset: number = 0): number {
-            return this.getDataView().getFloat32(offset, true);
+            return this.getDataView().getFloat32(offset.toInt(), true);
         }
 
         /**
@@ -1380,7 +1380,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} The read value
         */
         public readInt8(offset: number = 0): number {
-            return this.getDataView().getInt8(offset);
+            return this.getDataView().getInt8(offset.toInt());
         }
 
         /**
@@ -1390,7 +1390,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} The read value
         */
         public readInt16BE(offset: number = 0): number {
-            return this.getDataView().getInt16(offset, false);
+            return this.getDataView().getInt16(offset.toInt(), false);
         }
 
         /**
@@ -1400,7 +1400,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} The read value
         */
         public readInt16LE(offset: number = 0): number {
-            return this.getDataView().getInt16(offset, true);
+            return this.getDataView().getInt16(offset.toInt(), true);
         }
 
         /**
@@ -1410,7 +1410,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} The read value
         */
         public readInt32BE(offset: number = 0): number {
-            return this.getDataView().getInt32(offset, false);
+            return this.getDataView().getInt32(offset.toInt(), false);
         }
 
         /**
@@ -1420,7 +1420,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} The read value
         */
         public readInt32LE(offset: number = 0): number {
-            return this.getDataView().getInt32(offset, true);
+            return this.getDataView().getInt32(offset.toInt(), true);
         }
 
         /**
@@ -1430,7 +1430,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} The read value
         */
         public readUInt8(offset: number = 0): number {
-            return this.getDataView().getUint8(offset);
+            return this.getDataView().getUint8(offset.toInt());
         }
 
         /**
@@ -1440,7 +1440,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} The read value
         */
         public readUInt16BE(offset: number = 0): number {
-            return this.getDataView().getUint16(offset, false);
+            return this.getDataView().getUint16(offset.toInt(), false);
         }
 
         /**
@@ -1450,7 +1450,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} The read value
         */
         public readUInt16LE(offset: number = 0): number {
-            return this.getDataView().getUint16(offset, true);
+            return this.getDataView().getUint16(offset.toInt(), true);
         }
 
         /**
@@ -1460,7 +1460,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} The read value
         */
         public readUInt32BE(offset: number = 0): number {
-            return this.getDataView().getUint32(offset, false);
+            return this.getDataView().getUint32(offset.toInt(), false);
         }
 
         /**
@@ -1470,7 +1470,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} The read value
         */
         public readUInt32LE(offset: number = 0): number {
-            return this.getDataView().getUint32(offset, true);
+            return this.getDataView().getUint32(offset.toInt(), true);
         }
 
         /**
@@ -1481,7 +1481,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} Offset plus the number of bytes written
         */
         public writeBigInt64BE(value: bigint, offset: number = 0): number {
-            this.getDataView().setBigInt64(offset, value, false);
+            this.getDataView().setBigInt64(offset.toInt(), value, false);
             return offset + 8;
         }
 
@@ -1493,7 +1493,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} Offset plus the number of bytes written
         */
         public writeBigInt64LE(value: bigint, offset: number = 0): number {
-            this.getDataView().setBigInt64(offset, value, true);
+            this.getDataView().setBigInt64(offset.toInt(), value, true);
             return offset + 8;
         }
 
@@ -1505,7 +1505,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} Offset plus the number of bytes written
         */
         public writeBigUInt64BE(value: bigint, offset: number = 0): number {
-            this.getDataView().setBigUint64(offset, value, false);
+            this.getDataView().setBigUint64(offset.toInt(), value, false);
             return offset + 8;
         }
 
@@ -1517,7 +1517,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} Offset plus the number of bytes written
         */
         public writeBigUInt64LE(value: bigint, offset: number = 0): number {
-            this.getDataView().setBigUint64(offset, value, true);
+            this.getDataView().setBigUint64(offset.toInt(), value, true);
             return offset + 8;
         }
 
@@ -1529,7 +1529,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} Offset plus the number of bytes written
         */
         public writeDoubleBE(value: number, offset: number = 0): number {
-            this.getDataView().setFloat64(offset, value, false);
+            this.getDataView().setFloat64(offset.toInt(), value, false);
             return offset + 8;
         }
 
@@ -1541,7 +1541,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} Offset plus the number of bytes written
         */
         public writeDoubleLE(value: number, offset: number = 0): number {
-            this.getDataView().setFloat64(offset, value, true);
+            this.getDataView().setFloat64(offset.toInt(), value, true);
             return offset + 8;
         }
 
@@ -1553,7 +1553,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} Offset plus the number of bytes written
         */
         public writeFloatBE(value: number, offset: number = 0): number {
-            this.getDataView().setFloat32(offset, value, false);
+            this.getDataView().setFloat32(offset.toInt(), value, false);
             return offset + 4;
         }
 
@@ -1565,7 +1565,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} Offset plus the number of bytes written
         */
         public writeFloatLE(value: number, offset: number = 0): number {
-            this.getDataView().setFloat32(offset, value, true);
+            this.getDataView().setFloat32(offset.toInt(), value, true);
             return offset + 4;
         }
 
@@ -1577,7 +1577,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} Offset plus the number of bytes written
         */
         public writeInt8(value: number, offset: number = 0): number {
-            this.getDataView().setInt8(offset, value);
+            this.getDataView().setInt8(offset.toInt(), value);
             return offset + 1;
         }
 
@@ -1589,7 +1589,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} Offset plus the number of bytes written
         */
         public writeInt16BE(value: number, offset: number = 0): number {
-            this.getDataView().setInt16(offset, value, false);
+            this.getDataView().setInt16(offset.toInt(), value, false);
             return offset + 2;
         }
 
@@ -1601,7 +1601,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} Offset plus the number of bytes written
         */
         public writeInt16LE(value: number, offset: number = 0): number {
-            this.getDataView().setInt16(offset, value, true);
+            this.getDataView().setInt16(offset.toInt(), value, true);
             return offset + 2;
         }
 
@@ -1613,7 +1613,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} Offset plus the number of bytes written
         */
         public writeInt32BE(value: number, offset: number = 0): number {
-            this.getDataView().setInt32(offset, value, false);
+            this.getDataView().setInt32(offset.toInt(), value, false);
             return offset + 4;
         }
 
@@ -1625,7 +1625,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} Offset plus the number of bytes written
         */
         public writeInt32LE(value: number, offset: number = 0): number {
-            this.getDataView().setInt32(offset, value, true);
+            this.getDataView().setInt32(offset.toInt(), value, true);
             return offset + 4;
         }
 
@@ -1637,7 +1637,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} Offset plus the number of bytes written
         */
         public writeUInt8(value: number, offset: number = 0): number {
-            this.getDataView().setUint8(offset, value);
+            this.getDataView().setUint8(offset.toInt(), value);
             return offset + 1;
         }
 
@@ -1649,7 +1649,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} Offset plus the number of bytes written
         */
         public writeUInt16BE(value: number, offset: number = 0): number {
-            this.getDataView().setUint16(offset, value, false);
+            this.getDataView().setUint16(offset.toInt(), value, false);
             return offset + 2;
         }
 
@@ -1661,7 +1661,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} Offset plus the number of bytes written
         */
         public writeUInt16LE(value: number, offset: number = 0): number {
-            this.getDataView().setUint16(offset, value, true);
+            this.getDataView().setUint16(offset.toInt(), value, true);
             return offset + 2;
         }
 
@@ -1673,7 +1673,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} Offset plus the number of bytes written
         */
         public writeUInt32BE(value: number, offset: number = 0): number {
-            this.getDataView().setUint32(offset, value, false);
+            this.getDataView().setUint32(offset.toInt(), value, false);
             return offset + 4;
         }
 
@@ -1685,7 +1685,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {number} Offset plus the number of bytes written
         */
         public writeUInt32LE(value: number, offset: number = 0): number {
-            this.getDataView().setUint32(offset, value, true);
+            this.getDataView().setUint32(offset.toInt(), value, true);
             return offset + 4;
         }
 
@@ -1702,7 +1702,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "length" is out of range. \
 It must be >= 0 and <= ${this.length}. Received value is: ${index}`)
             }
-            return this.getDataView().getUint8(index);
+            return this.getDataView().getUint8(index.toInt());
         }
 
         /**
@@ -1715,7 +1715,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${index}`)
             if (index < 0 || index >= this.length) {
                 return;
             }
-            this.getDataView().setUint8(index, value);
+            this.getDataView().setUint8(index.toInt(), value);
         }
 
         /**

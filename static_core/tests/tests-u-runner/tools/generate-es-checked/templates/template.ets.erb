@@ -128,7 +128,7 @@ function __value_is_same(a: NullishType, b: NullishType): boolean {
   if (a instanceof DataView) {
       const x = a as DataView
       const arr = new Array<number>()
-      for (let i = 0.0; i < x.byteLength; i++) {
+      for (let i: int = 0; i < x.byteLength; i++) {
         arr.push(x.getUint8(i))
       }
       __fail_description += '\ndvw ' + arr + ' <- converted data view'
