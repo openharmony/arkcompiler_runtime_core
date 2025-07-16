@@ -523,7 +523,8 @@ Frame *StackWalker::GetFrameFromPrevFrame(Frame *prevFrame)
 {
     auto vregList =
         codeInfo_.GetVRegList(stackmap_, inlineDepth_, mem::InternalAllocator<>::GetInternalAllocatorFromRuntime());
-    auto method = GetMethod();
+    auto *method = GetMethod();
+    ASSERT(method != nullptr);
     Frame *frame;
     if (IsDynamicMethod()) {
         /* If there is a usage of rest arguments in dynamic function, then a managed object to contain actual arguments
