@@ -28,9 +28,9 @@ cases:
           - { from_type: 'Int', ref_type: 'Int', expr: '0xCAFE', eq: '==' }
           - { from_type: 'Long', ref_type: 'Long', expr: '0o777', eq: '==' }
 
-    - to_type: float|double|number # normalized to double
+    - to_type: float|double|number # normalized to Float|Double
       values:
-          - { from_type: 'float', ref_type: 'Double', expr: '3.5f', eq: '==' }
+          - { from_type: 'float', ref_type: 'Float', expr: '3.5f', eq: '==' }
           - { from_type: 'double', ref_type: 'Double', expr: '-1.1E-20', eq: '==' }
           - { from_type: 'number', ref_type: 'Double', expr: '1234567e8', eq: '==' }
 
@@ -41,13 +41,13 @@ cases:
           - { from_type: 'Double', ref_type: 'Double', expr: '-1.1E-20', eq: '==' }
           - { from_type: 'Number', ref_type: 'Number', expr: '1234567e8', eq: '==' }
 
-    - to_type: byte|short|int|long|float|double # normalized to Double
+    - to_type: byte|short|int|long|float|double # normalized to Byte|Short|Int|Long|Float|Double
       values:
-          - { from_type: 'byte', ref_type: 'Double', expr: '127', eq: '==' }
-          - { from_type: 'short', ref_type: 'Double', expr: '-7', eq: '==' }
-          - { from_type: 'int', ref_type: 'Double', expr: '0xCAFE', eq: '==' }
-          - { from_type: 'long', ref_type: 'Double', expr: '0o777', eq: '==' }
-          - { from_type: 'float', ref_type: 'Double', expr: '3.5f', eq: '==' }
+          - { from_type: 'byte', ref_type: 'Byte', expr: '127', eq: '==' }
+          - { from_type: 'short', ref_type: 'Short', expr: '-7', eq: '==' }
+          - { from_type: 'int', ref_type: 'Int', expr: '0xCAFE', eq: '==' }
+          - { from_type: 'long', ref_type: 'Long', expr: '0o777', eq: '==' }
+          - { from_type: 'float', ref_type: 'Float', expr: '3.5f', eq: '==' }
           - { from_type: 'double', ref_type: 'Double', expr: '-1.1E-20', eq: '==' }
           - { from_type: 'number', ref_type: 'Double', expr: '1234567e8', eq: '==' }
 
