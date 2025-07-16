@@ -302,6 +302,7 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/inlining_nested_lambdas.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/isinstance_elim_load_static.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/lse_parameter_aliasing.ets)
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/lse_loop_non_dominating_store.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/type_propagation.ets)
     # 26982 64-bit pointer support
     if (NOT PANDA_USE_64_BIT_POINTER OR NOT PANDA_TARGET_ARM64)

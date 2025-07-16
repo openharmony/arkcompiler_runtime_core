@@ -59,6 +59,12 @@ static Lse::EquivClass GetEquivClass(Inst *inst)
     }
 }
 
+static bool PhiHasInput(Inst *phi, Inst *inst)
+{
+    const auto &inputs = phi->GetInputs();
+    return std::any_of(inputs.begin(), inputs.end(), [inst](const Input &x) { return x.GetInst() == inst; });
+}
+
 class LseVisitor {
 public:
     explicit LseVisitor(Graph *graph, Lse::HeapEqClasses *heaps)
@@ -330,7 +336,37 @@ public:
             }
             phi->AppendInput(blockHeap[alive].val);
         }
+
+        if (ExistReadsOfModifiedValues(phi, loop, insts)) {
+            COMPILER_LOG(DEBUG, LSE_OPT) << "Skipping phi candidate " << LogInst(cand)
+                                         << ": load inst of a modified value found";
+            return false;
+        }
+
         return true;
+    }
+
+    bool ExistReadsOfModifiedValues(PhiInst *phi, [[maybe_unused]] Loop *loop, InstVector *insts)
+    {
+        // Check if any loads may read a modified value
+        bool hasLaterRPOLoad = false;
+        for (auto instIt = insts->rbegin(); instIt != insts->rend(); ++instIt) {
+            auto *inst = *instIt;
+            auto isBackedgeDominated = [loop, inst](BasicBlock *bb) {
+                return bb == loop->GetPreHeader() || inst->GetBasicBlock()->IsDominate(bb);
+            };
+            if (inst->IsStore()) {
+                const auto &preds = loop->GetHeader()->GetPredsBlocks();
+                if (hasLaterRPOLoad && !std::all_of(preds.begin(), preds.end(), isBackedgeDominated)) {
+                    // RPO later load may (not precise) see this conditional store
+                    return true;
+                }
+            } else if (inst->IsLoad() && !PhiHasInput(phi, inst)) {
+                // Don't track phi inputs - they won't be eliminated anyway
+                hasLaterRPOLoad = true;
+            }
+        }
+        return false;
     }
 
     void LoopDoElimination(Inst *cand, Loop *loop, PhiInst *phi, InstVector *insts)
@@ -345,9 +381,7 @@ public:
             }
 
             // Don't replace loads that are also phi inputs
-            if (phi != nullptr &&
-                std::find_if(phi->GetInputs().begin(), phi->GetInputs().end(),
-                             [&inst](const Input &x) { return x.GetInst() == inst; }) != phi->GetInputs().end()) {
+            if (phi != nullptr && PhiHasInput(phi, inst)) {
                 continue;
             }
             if (inst->IsLoad()) {
