@@ -1018,3 +1018,19 @@
 05.generics/03.utility_types/01.awaited_utility_type/awaited_simple_6.ets
 05.generics/03.utility_types/incorrect_utility_type_usage_3.ets
 05.generics/03.utility_types/incorrect_utility_type_usage_4.ets
+
+# 15690
+05.generics/03.utility_types/02.nonnullable_utility_type/spec_sample.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_utility_2_never_0.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_utility_2_never_1.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_utility_2_never_2.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_utility_2_never_3.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_utility_2_never_4.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_utility_2_never_5.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_utility_2_never_6.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_utility_type_0.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_utility_type_1.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_utility_type_2.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_utility_type_3.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_utility_type_4.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_utility_type_5.ets
