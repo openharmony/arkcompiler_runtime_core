@@ -84,6 +84,9 @@
 04.names_declarations_and_scopes/04.accessible/type_name_const_enum.ets
 04.names_declarations_and_scopes/04.accessible/type_name_variable_enum.ets
 
+#27255
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_neg_15.ets
+
 #23643
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/04.type_inference_from_initializer/infer_12.ets
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/04.type_inference_from_initializer/infer_13.ets
