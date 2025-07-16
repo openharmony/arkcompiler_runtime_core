@@ -96,7 +96,7 @@ bool ArkDebugNativeAPI::NotifyDebugMode([[maybe_unused]] int tid, [[maybe_unused
         LOG(ERROR, DEBUGGER) << "[NotifyDebugMode] InitializeDebuggerForSocketpair symbol fail: " << dlerror();
         return false;
     }
-    if (sym(vm, true)) {
+    if (!sym(vm, true)) {
         LOG(ERROR, DEBUGGER) << "[NotifyDebugMode] InitializeDebuggerForSocketpair fail";
         return false;
     }
@@ -133,7 +133,10 @@ bool ArkDebugNativeAPI::StopDebugger([[maybe_unused]] void *vm)
 bool ArkDebugNativeAPI::StartDebuggerForSocketPair([[maybe_unused]] int tid, [[maybe_unused]] int socketfd)
 {
     LOG(INFO, DEBUGGER) << "ArkDebugNativeAPI::StartDebugForSocketPair, tid = " << tid << " socketfd is " << socketfd;
-
+    if (!Runtime::GetOptions().IsDebuggerEnable()) {
+        LOG(ERROR, DEBUGGER) << "Runtime::GetOptions().IsDebuggerEnable() " << Runtime::GetOptions().IsDebuggerEnable();
+        return false;
+    }
     using StartDebuggerForSocketpair = bool (*)(int, int, bool);
     auto sym =
         reinterpret_cast<StartDebuggerForSocketpair>(ResolveSymbol(gHybridDebuggerHandle_, "StartDebugForSocketpair"));
