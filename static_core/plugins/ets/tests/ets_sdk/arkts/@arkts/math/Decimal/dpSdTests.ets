@@ -22,7 +22,7 @@ function main(): int {
     return suite.run();
 }
 
-function checkDpAndSdResult(n: number | string, dp: number, sd: number, zs?: number | boolean) {
+function checkDpAndSdResult(n: double | string, dp: double, sd: double, zs?: int | boolean) {
     if (Number.isNaN(dp)) {
         arktest.assertTrue(Number.isNaN(new Decimal(n).decimalPlaces()));
         arktest.assertTrue(Number.isNaN(new Decimal(n).precision()));

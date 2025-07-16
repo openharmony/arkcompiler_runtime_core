@@ -25,7 +25,7 @@ function main(): int {
     return suite.run();
 }
 
-function checkExpResult(n: string, expected: string, pr: number, rm: number) {
+function checkExpResult(n: string, expected: string, pr: double, rm: int) {
     Decimal.precision = pr;
     Decimal.rounding = rm;
     arktest.assertEQ(new Decimal(n).exp().valueOf(), expected);

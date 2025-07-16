@@ -22,7 +22,7 @@ function main(): int {
     return suite.run();
 }
 
-function checkLog2Result(n: string, expected: string, sd: number, rm: number) {
+function checkLog2Result(n: string, expected: string, sd: double, rm: int) {
     Decimal.precision = sd;
     Decimal.rounding = rm;
     arktest.assertEQ(new Decimal(n).log(2).valueOf(), expected);

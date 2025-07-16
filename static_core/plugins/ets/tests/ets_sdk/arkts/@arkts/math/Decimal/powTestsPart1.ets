@@ -21,7 +21,7 @@ function main(): int {
     return suite.run();
 }
 
-function checkPowResult(base: string, exp: string, expected: string, sd: number, rm: number) {
+function checkPowResult(base: string, exp: string, expected: string, sd: double, rm: int) {
     Decimal.set({ precision: sd, rounding: rm, toExpNeg: -9e15, toExpPos: 9e15, minE: -9e15, maxE: 9e15 });
     arktest.assertEQ(new Decimal(base).pow(exp).valueOf(), expected);
 }

@@ -28,7 +28,7 @@ function main(): int {
     return suite.run();
 }
 
-function checkMulResult(multiplicand: string, multiplier: string, expected: string, sd: number, rm: number) {
+function checkMulResult(multiplicand: string, multiplier: string, expected: string, sd: double, rm: int) {
     Decimal.precision = sd;
     Decimal.rounding = rm; 
     Decimal.toExpNeg = Decimal.toExpPos = 0;

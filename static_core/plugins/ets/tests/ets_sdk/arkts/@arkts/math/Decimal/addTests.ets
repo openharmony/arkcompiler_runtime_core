@@ -33,7 +33,7 @@ function main(): int {
     return suite.run();
 }
 
-function checkAddResult(addendA: string, addendB: string, expected: string, sd: number, rm: number) {
+function checkAddResult(addendA: string, addendB: string, expected: string, sd: double, rm: int) {
     Decimal.precision = sd;
     Decimal.rounding = rm;
     arktest.assertEQ(new Decimal(addendA).add(addendB).valueOf(), expected);

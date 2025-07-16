@@ -31,7 +31,7 @@ function main(): int {
     return suite.run();
 }
 
-function checkModResult(a: string, b: string, expected: string, sd: number, rm: number) {
+function checkModResult(a: string, b: string, expected: string, sd: double, rm: int) {
     Decimal.set({ precision: sd, rounding: rm, toExpNeg: 0, toExpPos: 0, minE: -9e15, maxE: 9e15, modulo: 1 });
     arktest.assertEQ(new Decimal(a).mod(b).valueOf(), expected);
 }

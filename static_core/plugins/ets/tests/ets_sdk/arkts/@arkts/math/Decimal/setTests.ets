@@ -37,32 +37,32 @@ function main(): int {
     return suite.run();
 }
 
-function tPrecision(expected: number, obj: DecimalConfig) {
+function tPrecision(expected: double, obj: DecimalConfig) {
     Decimal.set(obj);
     arktest.assertEQ(Decimal.precision, expected);
 }
 
-function tRounding(expected: number, obj: DecimalConfig) {
+function tRounding(expected: int, obj: DecimalConfig) {
     Decimal.set(obj);
     arktest.assertEQ(Decimal.rounding, expected);
 }
 
-function tToExpNeg(expected: number, obj: DecimalConfig) {
+function tToExpNeg(expected: double, obj: DecimalConfig) {
     Decimal.set(obj);
     arktest.assertEQ(Decimal.toExpNeg, expected);
 }
 
-function tToExpPos(expected: number, obj: DecimalConfig) {
+function tToExpPos(expected: double, obj: DecimalConfig) {
     Decimal.set(obj);
     arktest.assertEQ(Decimal.toExpPos, expected);
 }
 
-function tMaxE(expected: number, obj: DecimalConfig) {
+function tMaxE(expected: double, obj: DecimalConfig) {
     Decimal.set(obj);
     arktest.assertEQ(Decimal.maxE, expected);
 }
 
-function tMinE(expected: number, obj: DecimalConfig) {
+function tMinE(expected: double, obj: DecimalConfig) {
     Decimal.set(obj);
     arktest.assertEQ(Decimal.minE, expected);
 }
@@ -72,7 +72,7 @@ function tCrypto(expected: boolean, obj: DecimalConfig) {
     arktest.assertEQ(Decimal.crypto, expected);
 }
 
-function tModulo(expected: number, obj: DecimalConfig) {
+function tModulo(expected: int, obj: DecimalConfig) {
     Decimal.set(obj);
     arktest.assertEQ(Decimal.modulo, expected);
 }

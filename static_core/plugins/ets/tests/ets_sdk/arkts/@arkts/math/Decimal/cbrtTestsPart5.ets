@@ -22,7 +22,7 @@ function main(): int {
     return suite.run();
 }
 
-function checkCbrtResult(n: string, pr: number, rm: number, expected: string) {
+function checkCbrtResult(n: string, pr: double, rm: int, expected: string) {
     Decimal.precision = pr;
     Decimal.rounding = rm;
     arktest.assertEQ(new Decimal(n).cbrt().valueOf(), expected);

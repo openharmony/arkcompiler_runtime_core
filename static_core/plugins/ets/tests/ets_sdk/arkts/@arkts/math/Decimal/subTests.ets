@@ -34,7 +34,7 @@ function main(): int {
     return suite.run();
 }
 
-function checkSubResult(minuend: string, subtrahend: string, expected: string, sd: number, rm: number) {
+function checkSubResult(minuend: string, subtrahend: string, expected: string, sd: double, rm: int) {
     Decimal.precision = sd;
     Decimal.rounding = rm;
     arktest.assertEQ(new Decimal(minuend).sub(subtrahend).valueOf(), expected);
