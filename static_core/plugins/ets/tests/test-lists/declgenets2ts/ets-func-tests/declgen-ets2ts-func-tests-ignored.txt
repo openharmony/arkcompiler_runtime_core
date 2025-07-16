@@ -133,6 +133,12 @@ std/containers/linked_blocking_queue/LinkedBlockingQueue_PushTest_Stress.ets
 std/core/IntlListFormatTest.ets
 std/core/IntlNumberFormatToParts.ets
 std/core/IntlPluralRulesTest.ets
+#28370
+std/core/FieldAllTests.ets
+std/core/MethodAllTests.ets
+std/core/MirrorClassAllTests.ets
+std/core/ParameterAllTests.ets
+std/core/ValueAllTests.ets
 std/core/TypeClassTypeTest.ets
 std/core/TypeCreateClassTest.ets
 std/core/TypeCreateInterfaceTest.ets
