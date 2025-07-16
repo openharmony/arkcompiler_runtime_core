@@ -15,15 +15,18 @@ limitations under the License.
 
 /*---
 desc: check division by zero for long integer operand
-tags: [negative, compile-only]
 ---*/
 
-function main(): void {
+function main(): int {
     try {
-        const a: long = 1
-	    const b: long = 0
-	    const result: long = a / b
-	    arktest.assertTrue(false)
-    } catch (e: ArithmeticError) {
+        const a: long = (() : long => 1)()
+        const b: long = (() : long => 0)()
+        arktest.assertTrue(a instanceof Long)
+        arktest.assertTrue(b instanceof Long)
+        a / b
+    } catch (e) {
+        return e instanceof ArithmeticError ? 0 : 1
     }
+    arktest.assertTrue(false)
+    return -1
 }

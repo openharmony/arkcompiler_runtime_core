@@ -19,9 +19,9 @@ desc: check greater than operation for two floats
 ---*/
 
 function main(): void {
-  const a: float = {{v.left}} as float
-  const b: float = {{v.right}} as float
-  arktest.assertEQ( (a > b), {{v.result}} )
+  const a: float = {{v.left}}
+  const b: float = {{v.right}}
+  arktest.assertEQ(a > b, {{v.result}})
 }
 
 {% endfor %}

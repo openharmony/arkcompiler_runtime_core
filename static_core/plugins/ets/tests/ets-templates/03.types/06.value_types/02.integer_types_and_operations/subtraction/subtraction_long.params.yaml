@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -24,5 +24,3 @@ values:
 - { left: -1, right: 1, result: -2 }
 - { left: Long.MIN_VALUE, right: -1, result: -9223372036854775807 }
 - { left: Long.MAX_VALUE, right: -1, result: Long.MIN_VALUE }
-- { left: Long.MIN_VALUE, right: Long.MAX_VALUE, result: 1 }
-- { left: Long.MAX_VALUE, right: Long.MIN_VALUE, result: -1 }

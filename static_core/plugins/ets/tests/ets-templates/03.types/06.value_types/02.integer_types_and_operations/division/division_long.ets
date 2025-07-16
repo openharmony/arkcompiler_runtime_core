@@ -21,7 +21,7 @@ desc: check division for long integer operands
 function main(): void {
     const a: long = {{v.left}}
     const b: long = {{v.right}}
-    arktest.assertEQ( (a / b), {{v.result}} )
+    arktest.assertEQ(a / b, {{v.result}})
 }
 
 {% endfor %}

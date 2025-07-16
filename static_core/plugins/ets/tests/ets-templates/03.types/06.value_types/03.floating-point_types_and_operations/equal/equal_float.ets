@@ -19,9 +19,13 @@ desc: check equality of two floats
 ---*/
 
 function main(): void {
-  const a: float = {{v.left}} as float
-  const b: float = {{v.right}} as float
-  arktest.assertTrue( (a == b) == {{v.result}} )
+  const a: float = {{v.left}}
+  const b: float = {{v.right}}
+  {% if v.result == "true" %}
+  arktest.assertEQ(a, b)
+  {% else %}
+  arktest.assertNE(a, b)
+  {% endif %}
 }
 
 {% endfor %}

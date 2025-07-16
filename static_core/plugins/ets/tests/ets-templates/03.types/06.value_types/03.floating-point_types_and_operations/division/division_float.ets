@@ -26,7 +26,7 @@ function main(): void {
     if (Float.isNaN(v)) {
         arktest.assertTrue(Float.isNaN(r))
     } else {
-        arktest.assertTrue( r == v )
+        arktest.assertEQ(r, v)
     }
 }
 

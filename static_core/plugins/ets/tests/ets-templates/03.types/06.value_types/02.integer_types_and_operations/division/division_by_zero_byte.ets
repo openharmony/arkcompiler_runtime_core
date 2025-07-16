@@ -15,15 +15,18 @@ limitations under the License.
 
 /*---
 desc: check division by zero for byte operand
-tags: [negative, compile-only]
 ---*/
 
-function main(): void {
+function main(): int {
     try {
-        const a: byte = 1
-	    const b: byte = 0
-	    const result: byte = a / b
-	    arktest.assertTrue(false)
-    } catch (e: ArithmeticError) {
+        const a: byte = (() : byte => 1)()
+        const b: byte = (() : byte => 0)()
+        arktest.assertTrue(a instanceof Byte)
+        arktest.assertTrue(b instanceof Byte)
+        a / b
+    } catch (e) {
+        return e instanceof ArithmeticError ? 0 : 1
     }
+    arktest.assertTrue(false)
+    return -1
 }

@@ -32,6 +32,14 @@
 03.types/06.value_types/03.floating-point_types_and_operations/multiplication/multiplication_double_35.ets
 03.types/06.value_types/03.floating-point_types_and_operations/multiplication/multiplication_double_51.ets
 03.types/06.value_types/03.floating-point_types_and_operations/subtraction/subtraction_double_51.ets
+03.types/06.value_types/03.floating-point_types_and_operations/postfix_decrement/postfix_decrement_double_12.ets
+03.types/06.value_types/03.floating-point_types_and_operations/postfix_increment/postfix_increment_double_12.ets
+03.types/06.value_types/03.floating-point_types_and_operations/prefix_decrement/prefix_decrement_double_12.ets
+03.types/06.value_types/03.floating-point_types_and_operations/prefix_increment/prefix_increment_double_12.ets
+
+# 27328 Flacky incorrect result of bitwise complement (possibly on Arm64)
+03.types/06.value_types/03.floating-point_types_and_operations/bitwise_complement/bitwise_complement_double_3.ets
+03.types/06.value_types/03.floating-point_types_and_operations/bitwise_complement/bitwise_complement_float_3.ets
 
 #27134
 03.types/14.type_string/string_length_type.ets

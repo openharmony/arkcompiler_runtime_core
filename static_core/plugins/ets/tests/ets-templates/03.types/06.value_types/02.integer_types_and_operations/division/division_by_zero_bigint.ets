@@ -15,15 +15,17 @@ limitations under the License.
 
 /*---
 desc: check division by zero for bigint operand
-tags: [negative, compile-only]
 ---*/
 
-function main(): void {
+function main(): int {
     try {
-        const a: bigint = 1
-	    const b: bigint = 0
+        const a: bigint = 1n
+	    const b: bigint = 0n
 	    const result: bigint = a / b
-	    arktest.assertTrue(false)
-    } catch (e: ArithmeticError) {
+    } catch (e) {
+        arktest.assertEQ((e as Error).message, 'BigInt: division by zero')
+        return 0
     }
+    arktest.assertTrue(false)
+    return -1
 }
