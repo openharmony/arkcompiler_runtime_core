@@ -40,15 +40,6 @@ Coroutine *TryCreateEACoroutine(PandaEtsVM *etsVM, bool needInterop, bool &limit
     auto *runtime = Runtime::GetCurrent();
     auto *coroMan = etsVM->GetCoroutineManager();
     auto *ifaceTable = EtsCoroutine::CastFromThread(coroMan->GetMainThread())->GetExternalIfaceTable();
-    auto *jsEnv = ifaceTable->CreateJSRuntime();
-
-    // current we cannot create JSVM instance without jsEnv
-    // so we cannot create eaworker support interop withoutJSEnv
-    if (jsEnv == nullptr && needInterop) {
-        jsEnvEmpty = true;
-        event.Fire();
-        return nullptr;
-    }
 
     auto *exclusiveCoro = coroMan->CreateExclusiveWorkerForThread(runtime, etsVM);
     // exclusiveCoro == nullptr means that we reached the limit of eaworkers count or memory resources
@@ -57,6 +48,22 @@ Coroutine *TryCreateEACoroutine(PandaEtsVM *etsVM, bool needInterop, bool &limit
         event.Fire();
         return nullptr;
     }
+
+    // early return to avoid waste time on creating jsEnv
+    if (!needInterop) {
+        event.Fire();
+        return exclusiveCoro;
+    }
+
+    auto *jsEnv = ifaceTable->CreateJSRuntime();
+    // current we cannot create JSVM instance without jsEnv
+    // so we cannot create eaworker support interop withoutJSEnv
+    if (jsEnv == nullptr) {
+        jsEnvEmpty = true;
+        event.Fire();
+        return nullptr;
+    }
+
     ifaceTable->CreateInteropCtx(exclusiveCoro, jsEnv);
     event.Fire();
     return exclusiveCoro;
