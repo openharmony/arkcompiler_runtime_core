@@ -503,6 +503,9 @@ export final class ClassValue extends Value {
     }
 
     public override toPrint(depth: int): string {
+        if (this.typ.getName() == "escompat.Date") {
+            return new StringBuilder("Date: ").append("\"").append((this.data as Date).toISOString()).append("\"").toString()
+        }
         if (depth == 0) {
             return this.typ.getName() + " {...}"
         }
