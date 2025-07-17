@@ -331,6 +331,54 @@ EtsMethod *EtsClass::GetDirectMethod(const char *name, const Method::Proto &prot
     return EtsMethod::FromRuntimeMethod(method);
 }
 
+EtsMethod *EtsClass::GetDirectStaticMethod(const char *name, const char *signature) const
+{
+    Span<Method> methods = GetRuntimeClass()->GetStaticMethods();
+    const uint8_t *mutf8Name = utf::CStringAsMutf8(name);
+    const MethodNameComp comp;
+    panda_file::File::StringData key = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
+    auto it = std::lower_bound(methods.begin(), methods.end(), key, comp);
+
+    EtsMethodSignature methodSignature(signature, true);
+    if (!methodSignature.IsValid()) {
+        LOG(ERROR, ANI) << "Wrong method signature: " << signature;
+        return nullptr;
+    }
+    Method::Proto &proto = methodSignature.GetProto();
+    while (it != methods.end()) {
+        auto &m = *it;
+        if (!comp.equal(m, key)) {
+            break;
+        }
+        if (m.GetProto() == proto) {
+            return EtsMethod::FromRuntimeMethod(it);
+        }
+        ++it;
+    }
+    return nullptr;
+}
+
+EtsMethod *EtsClass::GetDirectStaticMethod(const char *name, bool *outIsUnique) const
+{
+    ASSERT(outIsUnique != nullptr);
+    *outIsUnique = true;
+
+    Span<Method> methods = GetRuntimeClass()->GetStaticMethods();
+    const uint8_t *mutf8Name = utf::CStringAsMutf8(name);
+    const MethodNameComp comp;
+    panda_file::File::StringData key = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
+    auto it = std::lower_bound(methods.begin(), methods.end(), key, comp);
+    if (it == methods.cend() || !comp.equal(*it, key)) {
+        return nullptr;
+    }
+    auto next = std::next(it);
+    // Check that class has more than one method with that name.
+    if (next != methods.cend() && comp.equal(*next, key)) {
+        *outIsUnique = false;
+    }
+    return EtsMethod::FromRuntimeMethod(it);
+}
+
 uint32_t EtsClass::GetMethodsNum()
 {
     return GetMethods().size();

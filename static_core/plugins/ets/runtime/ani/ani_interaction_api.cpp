@@ -2097,9 +2097,19 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Byte(ani_env *env, ani_fix
     return SetPrimitiveTypeArrayRegion(env, array, offset, length, nativeBuffer);
 }
 
-// NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_BindNativeMethods(ani_env *env, ani_class cls,
-                                                         const ani_native_function *methods, ani_size nrMethods)
+static ani_status GetDirectMethodOverload(EtsClass *klass, const char *name, const char *signature, EtsMethod **result)
+{
+    PandaVector<EtsMethod *> methodVec = klass->GetDirectMethodOverload(name, signature, true);
+    if (!methodVec.empty()) {
+        ANI_CHECK_RETURN_IF_GT(methodVec.size(), 1U, ANI_AMBIGUOUS);
+        ASSERT(methodVec.size() == 1U);
+        *result = methodVec[0];
+    }
+    return ANI_OK;
+}
+
+static ani_status BindNativeMethods(ani_env *env, ani_class cls, const ani_native_function *methods, ani_size nrMethods,
+                                    bool isStatic)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -2107,44 +2117,68 @@ NO_UB_SANITIZE static ani_status Class_BindNativeMethods(ani_env *env, ani_class
     CHECK_PTR_ARG(methods);
 
     ANI_CHECK_RETURN_IF_EQ(nrMethods, 0, ANI_OK);
-    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    ScopedManagedCodeFix s(env);
     EtsClass *klass = s.ToInternalType(cls);
 
     PandaVector<EtsMethod *> etsMethods;
     etsMethods.reserve(nrMethods);
-    for (ani_size i = 0; i < nrMethods; ++i) {
-        ani_native_function m = methods[i];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    for (const ani_native_function &m : Span(methods, nrMethods)) {
+        const char *name = m.name;
         const char *signature = m.signature;
         std::optional<std::string> replacedSignature;
         if (signature != nullptr) {
             replacedSignature = ReplaceArrayInSignature(signature);
             signature = replacedSignature.has_value() ? replacedSignature->c_str() : signature;
         }
-        const char *name = m.name;
         EtsMethod *method = nullptr;
-
-        if (signature == nullptr) {
-            method = klass->GetDirectMethod(name);
+        if (isStatic) {
+            if (signature == nullptr) {
+                bool isUnique = false;
+                method = klass->GetDirectStaticMethod(name, &isUnique);
+                ANI_CHECK_RETURN_IF_EQ(isUnique, false, ANI_AMBIGUOUS);
+            } else {
+                method = klass->GetDirectStaticMethod(name, signature);
+            }
         } else {
-            method = klass->GetDirectMethod(name, signature, true);
+            if (signature == nullptr) {
+                method = klass->GetDirectMethod(name);
+            } else {
+                method = klass->GetDirectMethod(name, signature, true);
+            }
+            if (method == nullptr) {
+                ani_status status = GetDirectMethodOverload(klass, name, signature, &method);
+                ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+            }
         }
-        if (method != nullptr) {
-            etsMethods.push_back(method);
-            continue;
+        ANI_CHECK_RETURN_IF_EQ(method, nullptr, ANI_NOT_FOUND);
+        ANI_CHECK_RETURN_IF_EQ(method->IsNative(), false, ANI_NOT_FOUND);
+
+        // NOTE:
+        //  Replace condition by 'ANI_CHECK_RETURN_IF_NE(isStatic, method->IsStatic(), ANI_INVALID_ARGS)'
+        //  when all parts that uses Class_BindNativeMethods for static method will be fixed, #23863
+        ANI_CHECK_RETURN_IF_EQ(isStatic && !method->IsStatic(), true, ANI_INVALID_ARGS);
+
+        if (!isStatic && method->IsStatic()) {
+            LOG(ERROR, ANI) << "Use 'Class_BindStaticNativeMethods()' to bind static methods, method="
+                            << method->GetFullName(true);
         }
-        PandaVector<EtsMethod *> methodVec = klass->GetDirectMethodOverload(name, signature, true);
-        if (methodVec.size() == 1U) {
-            etsMethods.push_back(methodVec[0]);
-            continue;
-        }
-        if (methodVec.empty()) {
-            return ANI_NOT_FOUND;
-        }
-        if (methodVec.size() > 1U) {
-            return ANI_AMBIGUOUS;
-        }
+        etsMethods.push_back(method);
     }
     return DoBindNative(s, etsMethods, methods, nrMethods);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_BindNativeMethods(ani_env *env, ani_class cls,
+                                                         const ani_native_function *methods, ani_size nrMethods)
+{
+    return BindNativeMethods(env, cls, methods, nrMethods, false);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_BindStaticNativeMethods(ani_env *env, ani_class cls,
+                                                               const ani_native_function *methods, ani_size nrMethods)
+{
+    return BindNativeMethods(env, cls, methods, nrMethods, true);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -7020,6 +7054,7 @@ const __ani_interaction_api INTERACTION_API = {
     Module_BindNativeFunctions,
     Namespace_BindNativeFunctions,
     Class_BindNativeMethods,
+    Class_BindStaticNativeMethods,
     Reference_Delete,
     EnsureEnoughReferences,
     CreateLocalScope,

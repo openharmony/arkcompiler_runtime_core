@@ -426,7 +426,7 @@ ani_status RegisterIntlDisplayNames(ani_env *env)
     ani_class displayNamesClass;
     ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.DisplayNames", &displayNamesClass));
 
-    return env->Class_BindNativeMethods(displayNamesClass, methods.data(), methods.size());
+    return env->Class_BindStaticNativeMethods(displayNamesClass, methods.data(), methods.size());
 }
 
 }  // namespace ark::ets::stdlib::intl

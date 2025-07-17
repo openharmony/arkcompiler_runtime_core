@@ -249,7 +249,7 @@ ani_status RegisterIntlSegmenter(ani_env *env)
     ani_class segmenterClass;
     ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.Segmenter", &segmenterClass));
 
-    return env->Class_BindNativeMethods(segmenterClass, methods.data(), methods.size());
+    return env->Class_BindStaticNativeMethods(segmenterClass, methods.data(), methods.size());
 }
 
 }  // namespace ark::ets::stdlib::intl

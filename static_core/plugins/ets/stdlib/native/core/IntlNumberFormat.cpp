@@ -696,8 +696,6 @@ ani_status RegisterIntlNumberFormatNativeMethods(ani_env *env)
     ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.NumberFormat", &numberFormatClass));
 
     const auto methods = std::array {
-        ani_native_function {"getNumberingSystem", "C{std.core.String}:C{std.core.String}",
-                             reinterpret_cast<void *>(IcuNumberingSystem)},
         ani_native_function {"formatDouble", "d:C{std.core.String}", reinterpret_cast<void *>(IcuFormatDouble)},
         ani_native_function {"formatDecStr", "C{std.core.String}:C{std.core.String}",
                              reinterpret_cast<void *>(IcuFormatDecStr)},
@@ -721,9 +719,19 @@ ani_status RegisterIntlNumberFormatNativeMethods(ani_env *env)
                              reinterpret_cast<void *>(IcuFormatToRangePartsDecStrDouble)},
         ani_native_function {"formatToRangePartsDecStrDecStr", "C{std.core.String}C{std.core.String}:C{escompat.Array}",
                              reinterpret_cast<void *>(IcuFormatToRangePartsDecStrDecStr)},
-        ani_native_function {"isUnitCorrect", "C{std.core.String}:z", reinterpret_cast<void *>(IsIcuUnitCorrect)},
-        ani_native_function {"currencyDigits", "C{std.core.String}:d", reinterpret_cast<void *>(IcuCurrencyDigits)}};
+        ani_native_function {"currencyDigits", "C{std.core.String}:d", reinterpret_cast<void *>(IcuCurrencyDigits)},
+    };
     ani_status status = env->Class_BindNativeMethods(numberFormatClass, methods.data(), methods.size());
+    if (!(status == ANI_OK || status == ANI_ALREADY_BINDED)) {
+        return status;
+    }
+
+    const auto staticMethods = std::array {
+        ani_native_function {"getNumberingSystem", "C{std.core.String}:C{std.core.String}",
+                             reinterpret_cast<void *>(IcuNumberingSystem)},
+        ani_native_function {"isUnitCorrect", "C{std.core.String}:z", reinterpret_cast<void *>(IsIcuUnitCorrect)},
+    };
+    status = env->Class_BindStaticNativeMethods(numberFormatClass, staticMethods.data(), staticMethods.size());
     if (!(status == ANI_OK || status == ANI_ALREADY_BINDED)) {
         return status;
     }
