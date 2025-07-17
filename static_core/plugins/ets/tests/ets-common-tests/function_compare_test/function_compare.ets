@@ -56,11 +56,30 @@ function testArrowFunction() {
     }
 }
 
+declare function foo() : void;
+class C {
+    static test() {
+        return foo;
+    }
+
+}
+function testErrorLambdaClass(): void {
+    let res = false;
+    try {
+        C.test();
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes("Found invalid lambda class ");
+    }
+    assertEQ(res, true);
+}
+
 function main() {
     const suite = new ArkTestsuite('Function Compare tests')
     suite.addTest('Function Compare', testFunction)
     suite.addTest('Instance Method Compare', testInstanceMethod)
     suite.addTest('Static Method Compare', testStaticMethod)
     suite.addTest('Arrow Function Compare', testArrowFunction)
+    suite.addTest('Invalid Lambda Class', testErrorLambdaClass)
     return suite.run()
 }

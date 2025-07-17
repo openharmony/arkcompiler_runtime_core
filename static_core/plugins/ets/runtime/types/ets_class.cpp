@@ -35,8 +35,9 @@ namespace ark::ets {
 
 static bool VerifyLambdaClass(EtsClass *etsClass, Method *method, ClassLinkerErrorHandler *errorHandler)
 {
-    ASSERT(etsClass != nullptr);
-    ASSERT(method != nullptr);
+    if (etsClass == nullptr || method == nullptr) {
+        return false;
+    }
     auto fields = etsClass->GetFields();
     if (method->IsStatic()) {
         return fields.empty();
