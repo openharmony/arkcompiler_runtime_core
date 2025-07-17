@@ -14,6 +14,7 @@
  */
 import {xml} from "@ohos.xml"
 import { BusinessError } from "@ohos.base";
+import { util } from "@ohos.util";
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("XmlPullParser API tests, part10");
@@ -28,6 +29,7 @@ function main(): int {
     suite.addTest("Testing the XML PullParser with a malformed CDATA section. Verifies that it throws a meaningful error for invalid CDATA.", testXmlPullParserConstructor0013)
     suite.addTest("Testing the XML PullParser with names containing special characters.", testXmlPullParserConstructor0008)
     suite.addTest("Testing the XML PullParser with tag names that contain spaces.", testXmlPullParserConstructor0007)
+    suite.addTest("Testing the XML PullParser with UTF-8", testXmlPullParserConstructor0021)
 
     return suite.run()
 }
@@ -41,6 +43,12 @@ function rawStringToBuffer( str: string ) : ArrayBuffer {
     }
 
     return arr.buffer as ArrayBuffer
+}
+
+let testString0021 = "";
+function func21(name: string, value: string): boolean {
+    testString0021 += name + ':' + value;
+    return true;
 }
 
 function testXmlPullParserConstructor0007() {
@@ -329,5 +337,40 @@ function testXmlPullParserConstructor0020() {
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
     }
+}
+
+function testXmlPullParserConstructor0021() {
+    let strXml =
+        '<?xml version="1.0" encoding="utf-8"?>' +
+          '<!DOCTYPE note [\n<!ENTITY foo "baa">]>' +
+          '<note importance="high" logged="true">' +
+          '     <![CDATA[\r\nfunccrion matchwo(a,6)\r\n{\r\nreturn 1;\r\n}\r\n]]>' +
+          '     <!--Hello, World!-->' +
+          '     <company>John &amp; Hans</company>' +
+          '     <title>Happy</title>' +
+          '     <title>Happy</title>' +
+          '     <lens>Work</lens>' +
+          '     <lens>Play</lens>' +
+          '     <?go there?>' +
+          '     <a><b/></a>' +
+          '     <h:table xmlns:h="http://www.w3.org/TR/html4/">' +
+          '         <h:tr>' +
+          '             <h:td>Apples</h:td>' +
+          '             <h:td>Bananas</h:td>' +
+          '         </h:tr>' +
+          '     </h:table>' +
+          '</note>'
+    let textEncoder = new util.TextEncoder();
+    let arrbuffer = textEncoder.encodeInto(strXml);
+    let that = new xml.XmlPullParser(arrbuffer.buffer as object as ArrayBuffer, 'UTF-8');
+    testString0021 = '';
+    let options: xml.ParseOptions = {
+        supportDoctype: true,
+        ignoreNameSpace: true,
+        attributeValueCallbackFunction: func21
+    }
+    that.parseXml(options);
+    let str1 = 'importance:highlogged:truexmlns:h:http://www.w3.org/TR/html4/';
+    arktest.assertEQ(testString0021, str1);
 }
 
