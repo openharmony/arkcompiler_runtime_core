@@ -113,6 +113,9 @@ function linux_tools() {
         if [[ "${PANDA_SDK_BUILD_TYPE}" == "${BUILD_TYPE_DEBUG}" ]]; then
             llvm_target="${LLVM_BIN_X86_64_DEBUG}"
         fi
+        if [[ "${PANDA_SDK_BUILD_TYPE}" == "FastVerify" ]]; then
+            llvm_target="${LLVM_BIN_X86_64_DEBUG}"
+        fi
         extra_llvm_opts="\
             -DLLVM_TARGET_PATH=${llvm_target} \
             -DLLVM_HOST_PATH=${llvm_target}\
@@ -121,16 +124,20 @@ function linux_tools() {
 
     local linux_build_dir="$SDK_BUILD_ROOT/linux_host_tools"
     local linux_cmake_args=" \
+        -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/host_clang_14.cmake \
         -DPANDA_CROSS_AARCH64_TOOLCHAIN_FILE=cmake/toolchain/cross-ohos-musl-aarch64.cmake \
         -DTOOLCHAIN_SYSROOT=$OHOS_SDK_NATIVE/sysroot \
         -DTOOLCHAIN_CLANG_ROOT=$OHOS_SDK_NATIVE/llvm \
+        -DPANDA_ETS_INTEROP_JS=ON \
         -DPANDA_LLVM_BACKEND=${PANDA_LLVM_BACKEND} \
         ${extra_llvm_opts} \
         -DPANDA_BUILD_LLVM_BINARIES=${PANDA_BUILD_LLVM_BINARIES} \
         -DPANDA_BUILD_LLVM_BINARIES_PATH_ROOT=${SDK_BUILD_ROOT}/llvm_binaries"
-    local linux_build_targets="ark ark_aot ark_disasm ark_link es2panda etssdk e2p_test_plugin etsnative verifier ani_helpers aspt_converter dependency_analyzer"
+    local linux_build_targets="ark ark_aot ets_interop_js_napi ark_disasm ark_link es2panda etssdk e2p_test_plugin etsnative verifier ani_helpers aspt_converter dependency_analyzer"
     build_panda "$linux_build_dir" "$linux_cmake_args" "$linux_build_targets"
     copy_into_sdk "$linux_build_dir" "$PANDA_SDK_PATH/linux_host_tools" "$SCRIPT_DIR"/linux_host_tools.txt
+    mv "$PANDA_SDK_PATH/linux_host_tools/lib/module/ets_interop_js_napi.so" "$PANDA_SDK_PATH/linux_host_tools/lib/libets_interop_js_napi.so"
+    rm -r "$PANDA_SDK_PATH/linux_host_tools/lib/module"
     copy_abc_files "$linux_build_dir"
 }
 
