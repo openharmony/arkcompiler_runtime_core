@@ -17,18 +17,13 @@ limitations under the License.
 
 /*---
 desc: >-
-    A method is defined in a subinterface with the same name as the method in the superinterface.
-    If signatures are override-compatible (see Override-Compatible Signatures), then overriding is used.
-    Otherwise, overloading is used.
-tags: [{{c.tags}}]
+    Interface method overload declaration allows declaring an overload
+    alias as an interface member for a set of interface methods.
 ---*/
-
-let res: number = 0;
 
 {{c.decl}}
 
 function main(): void {
-    {{c.call}}
+    {{c.call|indent}}
 }
-
 {% endfor %}

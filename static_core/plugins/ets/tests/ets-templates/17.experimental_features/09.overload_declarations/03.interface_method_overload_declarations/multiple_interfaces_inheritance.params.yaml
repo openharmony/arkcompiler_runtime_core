@@ -15,30 +15,31 @@
 cases:
   - decl: |-
       interface I {
-          foo(i: number) {
+          foo1(i: number) {
               return 1;
           }
       }
       interface J extends I {
-          foo(j: string) {
+          foo2(j: string) {
               return 2;
           }
       }
-      class A implements I, J {}
+      class A implements I, J {
+          overload foo { foo1, foo2 }
+      }
     call: |-
       let a = new A();
       arktest.assertTrue(a.foo(1.1 as number) == 1);
       arktest.assertTrue(a.foo("some string") == 2);
 
-  - tags: 'negative, compile-only'
-    decl: |-
+  - decl: |-
       interface I {
           foo(i: number) {
               return 1;
           }
       }
       interface J extends I {
-          foo(j: number) {
+          foo(j: number) {  // Override-compatible signature, overriding is used
               return 2;
           }
       }
@@ -49,16 +50,18 @@ cases:
 
   - decl: |-
       interface I {
-          foo(i: number) {
+          foo1(i: number) {
               return 1;
           }
       }
       interface J {
-          foo(j: string) {
+          foo2(j: string) {
               return 2;
           }
       }
-      class A implements I, J {}
+      class A implements I, J {
+          overload foo { foo1, foo2 }
+      }
     call: |-
       let a = new A();
       arktest.assertTrue(a.foo(1.1 as number) == 1);
@@ -76,24 +79,6 @@ cases:
               return 2;
           }
       }
-      class A implements I, J {}
+      class A implements I, J {} // CTE: ambiguous foo
     call: |-
       let a = new A();
-      arktest.assertTrue(a.foo(1.1 as number) == 2);
-
-  - tags: 'negative, compile-only'
-    decl: |-
-      interface I {
-          foo(i: number) {
-              return 1;
-          }
-      }
-      interface J {
-          foo(j: number) {
-              return 2;
-          }
-      }
-      class A implements J, I {}
-    call: |-
-      let a = new A();
-      arktest.assertTrue(a.foo(1.1 as number) == 1);

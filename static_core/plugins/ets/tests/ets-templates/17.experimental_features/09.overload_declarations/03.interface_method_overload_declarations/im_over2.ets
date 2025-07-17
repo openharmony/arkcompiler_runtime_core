@@ -16,10 +16,8 @@
 {%- for c in cases %}
 /*---
 desc: >-
-    Two methods with the same name are defined in the same interface.
-    If signatures are override-compatible (see Override-Compatible Signatures), A compile-time error occurs.
-    Otherwise, overloading is used.
-tags: [{{c.tags}}]
+    Interface method overload declaration allows declaring an overload alias
+    as an interface member for a set of interface methods.
 ---*/
 {{c.decl}}
 

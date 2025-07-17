@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,19 @@
 {%- for c in cases %}
 /*---
 desc: >-
-    Two methods with the same name are defined in the same interface.
-    If signatures are override-compatible (see Override-Compatible Signatures), A compile-time error occurs.
-    Otherwise, overloading is used.
+    Two or more methods with the same name are defined in the same interface.
+    Interface Method Overload Signatures is used.
+tags: [{{c.tags}}]
 ---*/
+
+class A {}
+class B extends A {}
+
+interface I {
+    meth(p: B, q: A, w: string): A
+    meth(p: Array<B>, q: Array<A>, w: Array<string>): Array<A>
+}
+
 {{c.decl}}
 
 function main() {

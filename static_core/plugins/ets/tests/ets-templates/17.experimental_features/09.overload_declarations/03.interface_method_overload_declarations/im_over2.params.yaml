@@ -16,14 +16,15 @@ cases:
     - decl: |-
           // method overloaded with multiple parameters with different types
           interface J {
-              m(): int { return 0 }
-              m(i: int): int { return 1 }
-              m(i: int, j: int): int { return i + j }
-              m(i: int, j: int, k: int): int { return 3 }
-              m(i: int, j: double): double { return j + i }
-              m(i: int, j: int, k: double): int { return 21 }
-              m(i: double, j: double, k: int): int { return 31 }
-              m(i: string, j: double): string { return i + j }
+              m1(): int { return 0 }
+              m2(i: int): int { return 1 }
+              m3(i: int, j: int): int { return i + j }
+              m4(i: int, j: int, k: int): int { return 3 }
+              m5(i: int, j: double): double { return j + i }
+              m6(i: int, j: int, k: double): int { return 21 }
+              m7(i: double, j: double, k: int): int { return 31 }
+              m8(i: string, j: double): string { return i + j }
+              overload m { m1, m2, m3, m4, m5, m6, m7, m8}
           }
           class A implements J {}
       use: |-
@@ -40,10 +41,11 @@ cases:
     - decl: |-
           // method overloaded with optional parameters
           interface J {
-              m(a: Object): int { return 1 }
-              m(p: int, a: Object): int { return 2 }
-              m(p: int, a: Object, b?: Object): int { return 3 }
-              m(p: int, a?: Object, b?: Object, c: Object = new Error()): int { return 4 }
+              m1(a: Object): int { return 1 }
+              m2(p: int, a: Object): int { return 2 }
+              m3(p: int, a: Object, b?: Object): int { return 3 }
+              m4(p: int, a?: Object, b?: Object, c: Object = new Error()): int { return 4 }
+              overload m { m1, m2, m3, m4 }
           }
           class A implements J {}
       use: |-
@@ -57,8 +59,9 @@ cases:
     - decl: |-
           // method overloaded with boxing/unboxing parameters
           interface J {
-            m(a: boolean): number { return 1.0 }
-            m(a: boolean, b: number): number { return 3.0 }
+            m1(a: boolean): number { return 1.0 }
+            m2(a: boolean, b: number): number { return 3.0 }
+            overload m { m1, m2 }
           }
           class A implements J {}
       use: |-
@@ -72,10 +75,11 @@ cases:
     - decl: |-
           // method overloaded with rest parameters
           interface J {
-              m(a: Error, b: Object[]): int { return 1 }
-              m(a: Error, ...b: Object[]): int { return 2 }
-              m(a: Error, b: Error, ...c: Object[]): int { return 3 }
-              m(a: Error, b: Object, c: Object, d: Object): int { return 4 }
+              m1(a: Error, b: Object[]): int { return 1 }
+              m2(a: Error, ...b: Object[]): int { return 2 }
+              m3(a: Error, b: Error, ...c: Object[]): int { return 3 }
+              m4(a: Error, b: Object, c: Object, d: Object): int { return 4 }
+              overload m { m1, m2, m3, m4 }
           }
           class A implements J {}
       use: |-
@@ -90,9 +94,10 @@ cases:
           class X {}
           class Y {}
           interface J<T, U> {
-              m(a: T): int { return 1 }
-              m(a: T, b: U): int { return 2 }
-              m(a: U, b: T, c: U): int { return 3 }
+              m1(a: T): int { return 1 }
+              m2(a: T, b: U): int { return 2 }
+              m3(a: U, b: T, c: U): int { return 3 }
+              overload m { m1, m2, m3 }
           }
           class A<T, U> implements J<T, U> {}
       use: |-
@@ -107,9 +112,10 @@ cases:
           class Y extends X {}
           class Z extends Y {}
           interface J {
-              m(a: X, b: Y, c: Z): int { return 1 }
-              m(a: X, b: Y): int { return 2 }
-              m(a: X): int { return 3 }
+              m1(a: X, b: Y, c: Z): int { return 1 }
+              m2(a: X, b: Y): int { return 2 }
+              m3(a: X): int { return 3 }
+              overload m { m1, m2, m3 }
           }
           class A implements J {}
       use: |-

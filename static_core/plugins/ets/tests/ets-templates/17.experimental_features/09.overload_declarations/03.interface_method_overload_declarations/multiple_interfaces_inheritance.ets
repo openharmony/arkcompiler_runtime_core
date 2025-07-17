@@ -17,16 +17,18 @@ limitations under the License.
 
 /*---
 desc: >-
-    Two methods with the same name are defined in the same interface.
-    If signatures are override-compatible (see Override-Compatible Signatures), A compile-time error occurs.
-    Otherwise, overloading is used.
-tags: [negative, compile-only]
+    A method is defined in a subinterface with the same name as the method in
+    the superinterface. If signatures are override-compatible, then overriding
+    is used. Otherwise, a compile-time error occurs.
+tags: [{{c.tags}}]
 ---*/
+
+let res: number = 0;
 
 {{c.decl}}
 
 function main(): void {
-  {{c.call}}
+    {{c.call}}
 }
 
 {% endfor %}
