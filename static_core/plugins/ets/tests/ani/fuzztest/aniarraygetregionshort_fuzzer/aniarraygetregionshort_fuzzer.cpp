@@ -37,7 +37,7 @@ void AniArrayGetRegionShortFuzzTest(const char *data, size_t size)
     ani_array_short array {};
     engine->AniGetArray(&array);
     uint8_t offset = static_cast<uint8_t>(data[0]) % 20;
-    uint8_t length = static_cast<uint8_t>(data[1]) % 20;
+    uint8_t length = static_cast<uint8_t>(data[0]) % 20;
 
     ani_short nativeBuffer[20U] = {0};
 
