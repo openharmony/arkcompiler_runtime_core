@@ -76,7 +76,7 @@ inline void BaseString::ClearInternStringFlag()
 
 inline bool BaseString::TryGetHashCode(uint32_t *hash) const
 {
-    uint32_t hashcode = GetRawHashcode();
+    uint32_t hashcode = GetMixHashcode();
     if (hashcode == 0 && GetLength() != 0) {
         return false;
     }
@@ -89,11 +89,11 @@ inline bool BaseString::TryGetHashCode(uint32_t *hash) const
 template <typename ReadBarrier>
 uint32_t PUBLIC_API BaseString::GetHashcode(ReadBarrier &&readBarrier)
 {
-    uint32_t hashcode = GetRawHashcode();
+    uint32_t hashcode = GetMixHashcode();
     // GetLength() == 0 means it's an empty array.No need to computeHashCode again when hashseed is 0.
     if (hashcode == 0 && GetLength() != 0) {
-        hashcode = ComputeRawHashcode(std::forward<ReadBarrier>(readBarrier));
-        SetRawHashcode(hashcode);
+        hashcode = ComputeHashcode(std::forward<ReadBarrier>(readBarrier));
+        SetMixHashcode(hashcode);
     }
     return hashcode;
 }
@@ -117,6 +117,11 @@ bool BaseString::StringsAreEquals(Span<const T> &str1, Span<const T1> &str2)
         }
         return true;
     }
+}
+
+inline uint32_t BaseString::MixHashcode(uint32_t hashcode, bool isInteger)
+{
+    return isInteger ? (hashcode | IS_INTEGER_MASK) : (hashcode & (~IS_INTEGER_MASK));
 }
 } // namespace common
 

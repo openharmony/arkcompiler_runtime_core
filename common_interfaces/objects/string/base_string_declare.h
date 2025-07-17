@@ -56,6 +56,10 @@ public:
     BASE_CAST_CHECK(BaseString, IsString);
     NO_MOVE_SEMANTIC_CC(BaseString);
     NO_COPY_SEMANTIC_CC(BaseString);
+    static constexpr uint32_t RAW_HASH_LENGTH = 31;
+    static constexpr uint32_t IS_INTEGER_MASK = 1U << RAW_HASH_LENGTH;
+    static constexpr uint32_t MAX_INTEGER_HASH_NUMBER = 0x3B9AC9FF;
+    static constexpr uint32_t MAX_CACHED_INTEGER_SIZE = 9;
     static constexpr size_t MAX_STRING_LENGTH = 0x40000000U; // 30 bits for string length, 2 bits for special meaning
     static constexpr uint32_t MAX_ELEMENT_INDEX_LEN = 10;
     static constexpr size_t HASH_SHIFT = 5;
@@ -73,6 +77,11 @@ public:
         TRIM_END,
     };
 
+    enum IsIntegerStatus {
+        NOT_INTEGER = 0,
+        IS_INTEGER,
+    };
+
     enum ConcatOptStatus {
         BEGIN_STRING_ADD = 1,
         IN_STRING_ADD,
@@ -87,9 +96,21 @@ public:
     static_assert(LengthBits::START_BIT + LengthBits::SIZE == sizeof(uint32_t) * BITS_PER_BYTE,
                   "LengthBits does not match the field size");
 
-    PRIMITIVE_FIELD(LengthAndFlags, uint32_t, LENGTH_AND_FLAGS_OFFSET, RAW_HASHCODE_OFFSET)
+    PRIMITIVE_FIELD(LengthAndFlags, uint32_t, LENGTH_AND_FLAGS_OFFSET, MIX_HASHCODE_OFFSET)
+
+    using RawHashcode = BitField<uint32_t, 0, RAW_HASH_LENGTH>;                   // 31
+    using IsIntegerBit = RawHashcode::NextField<IsIntegerStatus, 1>;              // 1
     // In last bit of mix_hash we store if this string is small-integer number or not.
-    PRIMITIVE_FIELD(RawHashcode, uint32_t, RAW_HASHCODE_OFFSET, SIZE)
+    PRIMITIVE_FIELD(MixHashcode, uint32_t, MIX_HASHCODE_OFFSET, SIZE)
+
+    static inline uint32_t MixHashcode(uint32_t hashcode, bool isInteger);
+
+    template <typename ReadBarrier>
+    inline bool IsInteger(ReadBarrier &&readBarrier)
+    {
+        uint32_t hashcode = GetHashcode(std::forward<ReadBarrier>(readBarrier));
+        return IsIntegerBit::Decode(hashcode) == IS_INTEGER;
+    }
 
     bool IsString() const
     {
@@ -144,8 +165,11 @@ public:
     template <typename ReadBarrier>
     uint32_t PUBLIC_API GetHashcode(ReadBarrier &&readBarrier);
 
+    template<class ReadBarrier>
+    uint32_t ComputeHashcode(ReadBarrier &&readBarrier) const;
+
     template <typename ReadBarrier>
-    uint32_t PUBLIC_API ComputeRawHashcode(ReadBarrier &&readBarrier) const;
+    std::pair<uint32_t, bool>  PUBLIC_API ComputeRawHashcode(ReadBarrier &&readBarrier) const;
 
     template <bool verify = true, typename ReadBarrier>
     uint16_t At(ReadBarrier &&readBarrier, int32_t index) const;
@@ -276,8 +300,9 @@ public:
 
     // To change the hash algorithm of BaseString, please modify BaseString::CalculateConcatHashCode
     // and BaseStringHashHelper::ComputeHashForDataPlatform simultaneously!!
-    template <typename T>
-    static uint32_t ComputeHashForData(const T *data, size_t size, uint32_t hashSeed);
+    static PUBLIC_API uint32_t ComputeHashForData(const uint8_t *data, size_t size, uint32_t hashSeed);
+
+    static PUBLIC_API uint32_t ComputeHashForData(const uint16_t *data, size_t size, uint32_t hashSeed);
 
     static bool IsASCIICharacter(uint16_t data);
 
@@ -308,6 +333,9 @@ public:
 
     template <typename ReadBarrier>
     static const uint16_t *PUBLIC_API GetNonTreeUtf16Data(ReadBarrier &&readBarrier, const BaseString *src);
+
+    template <typename T>
+    static bool HashIntegerString(const T *data, size_t size, uint32_t *hash, uint32_t hashSeed);
 };
 } // namespace common
 #endif // COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_DECLARE_H
