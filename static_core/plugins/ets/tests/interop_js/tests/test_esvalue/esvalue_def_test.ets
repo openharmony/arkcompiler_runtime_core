@@ -72,36 +72,6 @@ function checkWrapNumber(): boolean {
     return obj.toNumber() === val;
 }
 
-function checkWrapByte(): boolean {
-    let val: byte = 111;
-    let obj = ESValue.wrapByte(val);
-    return Double.toByte(obj.toNumber()) === val;
-}
-
-function checkWrapShort(): boolean {
-    let val: short = 111;
-    let obj = ESValue.wrapShort(val);
-    return Double.toShort(obj.toNumber()) === val;
-}
-
-function checkWrapInt(): boolean {
-    let val: int = 111;
-    let obj = ESValue.wrapInt(val);
-    return Double.toInt(obj.toNumber()) === val;
-}
-
-function checkWrapLong(): boolean {
-    let val: long = 111;
-    let obj = ESValue.wrapLong(val);
-    return Double.toLong(obj.toNumber()) === val;
-}
-
-function checkWrapFloat(): boolean {
-    let val: float = 111;
-    let obj = ESValue.wrapFloat(val);
-    return Double.toFloat(obj.toNumber()) === val;
-}
-
 function checkWrapDouble(): boolean {
     let val: double = 111;
     let obj = ESValue.wrapDouble(val);

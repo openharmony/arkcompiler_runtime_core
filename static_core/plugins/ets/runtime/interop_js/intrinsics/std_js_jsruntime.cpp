@@ -74,9 +74,9 @@ EtsString *JSRuntimeGetValueStringIntrinsic(JSValue *etsJsValue)
     return JSRuntimeGetValueString(etsJsValue);
 }
 
-EtsObject *JSRuntimeGetValueObjectIntrinsic(JSValue *etsJsValue, EtsClass *cls)
+EtsObject *JSRuntimeGetValueObjectIntrinsic(EtsObject *etsValue, EtsClass *cls)
 {
-    return JSRuntimeGetValueObject(etsJsValue, cls);
+    return JSRuntimeGetValueObject(etsValue, cls);
 }
 
 JSValue *JSRuntimeGetPropertyJSValueIntrinsic(JSValue *etsJsValue, EtsString *etsPropName)
@@ -109,6 +109,11 @@ void JSRuntimeSetPropertyJSValueIntrinsic(JSValue *etsJsValue, EtsString *etsPro
     JSValueNamedSetter<JSConvertJSValue>(etsJsValue, etsPropName, value);
 }
 
+void JSRuntimeSetPropertyObjectIntrinsic(EtsObject *etsValue, EtsString *etsPropName, EtsObject *value)
+{
+    ESValueAnyNamedSetter(etsValue, etsPropName, value);
+}
+
 void JSRuntimeSetPropertyDoubleIntrinsic(JSValue *etsJsValue, EtsString *etsPropName, double value)
 {
     JSValueNamedSetter<JSConvertF64>(etsJsValue, etsPropName, value);
@@ -127,6 +132,21 @@ void JSRuntimeSetPropertyBooleanIntrinsic(JSValue *etsJsValue, EtsString *etsPro
 void JSRuntimeSetElementJSValueIntrinsic(JSValue *etsJsValue, int32_t index, JSValue *value)
 {
     JSValueIndexedSetter<JSConvertJSValue>(etsJsValue, index, value);
+}
+
+void JSRuntimeSetElementObjectIntrinsic(EtsObject *etsObject, int32_t index, EtsObject *value)
+{
+    ESValueAnyIndexedSetter(etsObject, index, value);
+}
+
+void JSRuntimeSetPropertyIntrinsic(EtsObject *etsObject, EtsObject *key, EtsObject *value)
+{
+    ESValueAnyStoreByValue(etsObject, key, value);
+}
+
+uint8_t JSRuntimeIsStaticValueIntrinsic(EtsObject *etsObject)
+{
+    return ESValueAnyIsStaticValue(etsObject);
 }
 
 JSValue *JSRuntimeGetElementJSValueIntrinsic(JSValue *etsJsValue, int32_t index)
@@ -159,14 +179,14 @@ JSValue *JSRuntimeCreateObjectIntrinsic()
     return JSRuntimeCreateObject();
 }
 
-JSValue *JSRuntimeCreateArrayIntrinsic()
+EtsObject *JSRuntimeCreateArrayIntrinsic()
 {
     return JSRuntimeCreateArray();
 }
 
-uint8_t JSRuntimeInstanceOfDynamicIntrinsic(JSValue *object, JSValue *ctor)
+uint8_t JSRuntimeInstanceOfDynamicIntrinsic(EtsObject *object, EtsObject *ctor)
 {
-    return JSRuntimeInstanceOfDynamic(object, ctor);
+    return ESValueAnyInstanceOf(object, ctor);
 }
 
 uint8_t JSRuntimeInstanceOfStaticIntrinsic(JSValue *object, EtsClass *clsObj)
@@ -194,34 +214,44 @@ uint8_t JSRuntimeStrictEqualIntrinsic(JSValue *lhs, JSValue *rhs)
     return JSRuntimeStrictEqual(lhs, rhs);
 }
 
-uint8_t JSRuntimeHasPropertyIntrinsic(JSValue *object, EtsString *name)
+uint8_t JSRuntimeHasPropertyIntrinsic(EtsObject *object, EtsString *name)
 {
-    return JSRuntimeHasProperty(object, name);
+    return ESValueAnyHasProperty(object, name);
 }
 
-JSValue *JSRuntimeGetPropertyIntrinsic(JSValue *object, JSValue *property)
+EtsObject *JSRuntimeGetPropertyIntrinsic(EtsObject *object, EtsObject *property)
 {
-    return JSRuntimeGetProperty(object, property);
+    return ESValueAnyLoadByValue(object, property);
 }
 
-uint8_t JSRuntimeHasPropertyJSValueIntrinsic(JSValue *object, JSValue *property)
+EtsObject *JSRuntimeGetElementObjectIntrinsic(EtsObject *etsValue, int32_t index)
 {
-    return JSRuntimeHasPropertyJSValue(object, property);
+    return ESValueAnyIndexedGetter(etsValue, index);
 }
 
-uint8_t JSRuntimeHasElementIntrinsic(JSValue *object, int index)
+EtsObject *JSRuntimeGetPropertyObjectIntrinsic(EtsObject *etsValue, EtsString *etsPropName)
 {
-    return JSRuntimeHasElement(object, index);
+    return ESValueAnyNamedGetter(etsValue, etsPropName);
 }
 
-uint8_t JSRuntimeHasOwnPropertyIntrinsic(JSValue *object, EtsString *name)
+uint8_t JSRuntimeHasPropertyObjectIntrinsic(EtsObject *object, EtsObject *property)
 {
-    return JSRuntimeHasOwnProperty(object, name);
+    return ESValueAnyHasPropertyObject(object, property);
 }
 
-uint8_t JSRuntimeHasOwnPropertyJSValueIntrinsic(JSValue *object, JSValue *property)
+uint8_t JSRuntimeHasElementIntrinsic(EtsObject *object, int index)
 {
-    return JSRuntimeHasOwnPropertyJSValue(object, property);
+    return ESValueAnyHasElement(object, index);
+}
+
+uint8_t JSRuntimeHasOwnPropertyIntrinsic(EtsObject *object, EtsString *name)
+{
+    return ESValueAnyHasOwnProperty(object, name);
+}
+
+uint8_t JSRuntimeHasOwnPropertyObjectIntrinsic(EtsObject *object, EtsObject *property)
+{
+    return ESValueAnyHasOwnPropertyObject(object, property);
 }
 
 EtsString *JSRuntimeTypeOfIntrinsic(JSValue *object)
@@ -239,11 +269,12 @@ uint8_t JSRuntimeInstanceOfStaticTypeIntrinsic(JSValue *object, EtsTypeAPIType *
     return JSRuntimeInstanceOfStaticType(object, paramType);
 }
 
-JSValue *JSRuntimeInvokeIntrinsic(JSValue *recv, JSValue *func, ObjectHeader *args)
+EtsObject *JSRuntimeInvokeIntrinsic(EtsObject *recv, EtsObject *func, ObjectHeader *args)
 {
     return JSRuntimeInvoke(recv, func, reinterpret_cast<EtsArray *>(args));
 }
-JSValue *JSRuntimeInstantiateIntrinsic(JSValue *callable, ObjectHeader *args)
+
+EtsObject *JSRuntimeInstantiateIntrinsic(EtsObject *callable, ObjectHeader *args)
 {
     return JSRuntimeInstantiate(callable, reinterpret_cast<EtsArray *>(args));
 }

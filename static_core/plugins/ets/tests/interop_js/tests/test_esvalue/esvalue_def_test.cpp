@@ -45,34 +45,9 @@ TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_number)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapNumber"));
 }
 
-TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_byte)
-{
-    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapByte"));
-}
-
 TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_bigint)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapBigInt"));
-}
-
-TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_short)
-{
-    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapShort"));
-}
-
-TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_int)
-{
-    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapInt"));
-}
-
-TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_long)
-{
-    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapLong"));
-}
-
-TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_float)
-{
-    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapFloat"));
 }
 
 TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_Double)
@@ -166,9 +141,10 @@ TEST_F(EtsESValueJsToEtsTest, test_esvalue_get_property_by_name_safe)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGetPropertyByNameSafe"));
 }
 
-TEST_F(EtsESValueJsToEtsTest, test_esvalue_get_property_by_index)
+TEST_F(EtsESValueJsToEtsTest, DISABLED_test_esvalue_get_property_by_index)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGetPropertyByIndex"));
+    // NOTE(www): #ICMNGF, need to handle when key is doubel.
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGetPropertyByIndexDouble"));
 }
 

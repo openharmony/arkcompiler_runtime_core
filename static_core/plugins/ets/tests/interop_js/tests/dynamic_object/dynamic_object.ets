@@ -17,18 +17,18 @@ function double2jsvalue(v: double): Any {
     return v;
 }
 
-function jsvalue2double(v: JSValue): double {
+function jsvalue2double(v: Any): double {
     return ESValue.wrap(v).toNumber();
 }
 
-function getPropertyFromJsvalue(obj: JSValue): double {
+function getPropertyFromJsvalue(obj: Any): double {
     return ESValue.wrap(obj).getProperty('prop').toNumber();
 }
 
-function getPropertyFromJsvalue2(obj: JSValue): double {
+function getPropertyFromJsvalue2(obj: Any): double {
     return ESValue.wrap(obj).getProperty('prop_1').getProperty('prop_2').toNumber();
 }
 
-function setPropertyToJsvalue(obj: JSValue, v: double): void {
+function setPropertyToJsvalue(obj: Any, v: double): void {
     ESValue.wrap(obj).setProperty('prop', v);
 }

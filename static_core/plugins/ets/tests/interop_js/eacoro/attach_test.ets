@@ -28,10 +28,10 @@ class TestClass {
             let f1: JSValue = JSRuntime.newJSValueObject(f1Lambda);
             let f2: JSValue = JSRuntime.newJSValueObject(f2Lambda);
             
-            let promiseProp = JSRuntime.getPropertyJSValue(JSRuntime.getGlobal(), 'Promise')
-            let methodResolve = JSRuntime.getPropertyJSValue(promiseProp, 'resolve');
+            let promiseProp = JSRuntime.getPropertyObject(JSRuntime.getGlobal(), 'Promise')
+            let methodResolve = JSRuntime.getPropertyObject(promiseProp, 'resolve');
             let resolveRes = JSRuntime.invoke(promiseProp, methodResolve);
-            let methodThen = JSRuntime.getPropertyJSValue(resolveRes, 'then');
+            let methodThen = JSRuntime.getPropertyObject(resolveRes, 'then');
             JSRuntime.invoke(resolveRes, methodThen, f1);
             JSRuntime.invoke(resolveRes, methodThen, f2);
         }
@@ -68,7 +68,7 @@ class TestClass {
         let method = JSRuntime.getPropertyJSValue(module, 'returnTwo');
         let val = JSRuntime.invoke(module, method);
         try {
-            arktest.assertEQ(JSRuntime.getValueDouble(val) as int, 2);
+            arktest.assertEQ(val, 2);
         }
         catch(e) {
             console.log("callJsFunctionTest failed");

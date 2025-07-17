@@ -462,10 +462,10 @@ void InteropCtx::InitJsValueFinalizationRegistry(EtsCoroutine *coro)
     ASSERT(jsvalueFregistryRegister_ != nullptr);
 }
 
-EtsObject *InteropCtx::CreateETSCoreESError(EtsCoroutine *coro, JSValue *jsvalue)
+EtsObject *InteropCtx::CreateETSCoreESError(EtsCoroutine *coro, EtsObject *etsObject)
 {
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coro);
-    VMHandle<ObjectHeader> jsvalueHandle(coro, jsvalue->GetCoreType());
+    VMHandle<ObjectHeader> etsObjectHandle(coro, etsObject->GetCoreType());
 
     Method::Proto proto(Method::Proto::ShortyVector {panda_file::Type(panda_file::Type::TypeId::VOID),
                                                      panda_file::Type(panda_file::Type::TypeId::REFERENCE)},
@@ -480,7 +480,7 @@ EtsObject *InteropCtx::CreateETSCoreESError(EtsCoroutine *coro, JSValue *jsvalue
     }
     VMHandle<ObjectHeader> excHandle(coro, excObj);
 
-    std::array<Value, 2U> args {Value(excHandle.GetPtr()), Value(jsvalueHandle.GetPtr())};
+    std::array<Value, 2U> args {Value(excHandle.GetPtr()), Value(etsObjectHandle.GetPtr())};
     ctor->InvokeVoid(coro, args.data());
     auto res = EtsObject::FromCoreType(excHandle.GetPtr());
     if (UNLIKELY(coro->HasPendingException())) {

@@ -40,7 +40,7 @@ function RunTasksWithJsCallTest(): void {
         let method = JSRuntime.getPropertyJSValue(module, 'returnTwo');
         let val = JSRuntime.invoke(module, method);
         try {
-            arktest.assertEQ(JSRuntime.getValueDouble(val) as int, 2);
+            arktest.assertEQ(val, 2);
         }
         catch(e: Error) {
             console.log("RunTasksWithJsCallTest failed");

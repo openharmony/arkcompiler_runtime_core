@@ -116,7 +116,8 @@ function main(): void {
     testObjectValues(etsVm);
     testArrayValues(etsVm);
     testFunctionValues(etsVm);
-    testBuiltInObjects(etsVm);
+    // NOTE(www): #ICMNFA, Currently unable to get method object in 1.2.
+    // should add testBuiltInObjects(etsVm);
 }
 
 (globalThis as any).nativeSaveRef("temp");

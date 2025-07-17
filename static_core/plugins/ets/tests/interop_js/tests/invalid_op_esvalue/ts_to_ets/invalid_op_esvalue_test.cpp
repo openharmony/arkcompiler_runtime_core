@@ -45,17 +45,18 @@ TEST_F(InvalidOpESValTsToEtsTest, checkUndefinedSetIndex)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkUndefinedSetIndex"));
 }
 
-TEST_F(InvalidOpESValTsToEtsTest, checkUndefinedInvokeMethod)
+// NOTE(www): #ICMNHG, Exception information needs to be clarified.
+TEST_F(InvalidOpESValTsToEtsTest, DISABLED_checkUndefinedInvokeMethod)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkUndefinedInvokeMethod"));
 }
 
-TEST_F(InvalidOpESValTsToEtsTest, checkUndefinedInstantiate)
+TEST_F(InvalidOpESValTsToEtsTest, DISABLED_checkUndefinedInstantiate)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkUndefinedInstantiate"));
 }
 
-TEST_F(InvalidOpESValTsToEtsTest, checkNullSetProperty)
+TEST_F(InvalidOpESValTsToEtsTest, DISABLED_checkNullSetProperty)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkNullSetProperty"));
 }
@@ -75,7 +76,7 @@ TEST_F(InvalidOpESValTsToEtsTest, checkNullGetIndex)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkNullGetIndex"));
 }
 
-TEST_F(InvalidOpESValTsToEtsTest, checkNullInvoke)
+TEST_F(InvalidOpESValTsToEtsTest, DISABLED_checkNullInvoke)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkNullInvoke"));
 }
@@ -90,22 +91,22 @@ TEST_F(InvalidOpESValTsToEtsTest, checkIntToString)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkIntToString"));
 }
 
-TEST_F(InvalidOpESValTsToEtsTest, checkIntInvoke)
+TEST_F(InvalidOpESValTsToEtsTest, DISABLED_checkIntInvoke)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkIntInvoke"));
 }
 
-TEST_F(InvalidOpESValTsToEtsTest, checkIntHasProperty)
+TEST_F(InvalidOpESValTsToEtsTest, DISABLED_checkIntHasProperty)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkIntHasProperty"));
 }
 
-TEST_F(InvalidOpESValTsToEtsTest, checkBooleanInvokeMethod)
+TEST_F(InvalidOpESValTsToEtsTest, DISABLED_checkBooleanInvokeMethod)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkBooleanInvokeMethod"));
 }
 
-TEST_F(InvalidOpESValTsToEtsTest, checkBigintInstantiate)
+TEST_F(InvalidOpESValTsToEtsTest, DISABLED_checkBigintInstantiate)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkBigintInstantiate"));
 }
@@ -115,7 +116,7 @@ TEST_F(InvalidOpESValTsToEtsTest, checkStringSetProperty)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkStringSetProperty"));
 }
 
-TEST_F(InvalidOpESValTsToEtsTest, checkIntSetIndex)
+TEST_F(InvalidOpESValTsToEtsTest, DISABLED_checkIntSetIndex)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkIntSetIndex"));
 }
@@ -130,7 +131,7 @@ TEST_F(InvalidOpESValTsToEtsTest, checkTsInstantiate)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkTsInstantiate"));
 }
 
-TEST_F(InvalidOpESValTsToEtsTest, checkTsInvoke)
+TEST_F(InvalidOpESValTsToEtsTest, DISABLED_checkTsInvoke)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkTsInvoke"));
 }

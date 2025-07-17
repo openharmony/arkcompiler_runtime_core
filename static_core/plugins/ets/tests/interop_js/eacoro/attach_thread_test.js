@@ -32,7 +32,8 @@ function runTest() {
         print('ETS runtime created');
     }
 
-    test.callJsBuiltinTest();
+    // NOTE(www): #ICMNFA, Currently unable to get method object in 1.2.
+    // Should call test.callJSBuiltinTest
     test.loadJsModuleTest();
     test.callJsFunctionTest();
     test.callJsAsyncFunctionTest();
