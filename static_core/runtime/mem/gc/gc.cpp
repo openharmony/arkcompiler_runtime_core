@@ -608,13 +608,16 @@ void GC::PostZygoteFork()
 
 class GC::PostForkGCTask : public GCTask {
 public:
-    PostForkGCTask(GCTaskCause gcReason, uint64_t gcTargetTime) : GCTask(gcReason, gcTargetTime) {}
+    PostForkGCTask(GCTaskCause gcReason, uint64_t gcTargetTime, size_t restoreLimit)
+        : GCTask(gcReason, gcTargetTime), restoreLimit_(restoreLimit)
+    {
+    }
 
     void Run(mem::GC &gc) override
     {
         LOG(DEBUG, GC) << "Runing PostForkGCTask";
         gc.GetPandaVm()->GetGCTrigger()->RestoreMinTargetFootprint();
-        gc.PostForkCallback();
+        gc.PostForkCallback(restoreLimit_);
         GCTask::Run(gc);
     }
 
@@ -622,6 +625,10 @@ public:
 
     NO_COPY_SEMANTIC(PostForkGCTask);
     NO_MOVE_SEMANTIC(PostForkGCTask);
+
+private:
+    // For g1gc, it saves young space original size.
+    size_t restoreLimit_ {0};
 };
 
 void GC::PreStartup()
@@ -629,11 +636,13 @@ void GC::PreStartup()
     // Add a delay GCTask.
     if ((!Runtime::GetCurrent()->IsZygote()) && (!gcSettings_.RunGCInPlace())) {
         // divide 2 to temporarily set target footprint to a high value to disable GC during App startup.
-        GetPandaVm()->GetGCTrigger()->SetMinTargetFootprint(Runtime::GetOptions().GetHeapSizeLimit() / 2);
+        size_t startupLimit = Runtime::GetOptions().GetHeapSizeLimit() / 2;
+        GetPandaVm()->GetGCTrigger()->SetMinTargetFootprint(startupLimit);
         PreStartupImp();
-        constexpr uint64_t DISABLE_GC_DURATION_NS = 2000 * 1000 * 1000;
+        size_t originSize = AdujustStartupLimit(startupLimit);
+        constexpr uint64_t DISABLE_GC_DURATION_NS = 3000ULL * 1000 * 1000;
         auto task = MakePandaUnique<PostForkGCTask>(GCTaskCause::STARTUP_COMPLETE_CAUSE,
-                                                    time::GetCurrentTimeInNanos() + DISABLE_GC_DURATION_NS);
+                                                    time::GetCurrentTimeInNanos() + DISABLE_GC_DURATION_NS, originSize);
         AddGCTask(true, std::move(task));
         LOG(DEBUG, GC) << "Add PostForkGCTask";
     }

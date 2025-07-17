@@ -152,6 +152,8 @@ public:
     void EvacuateStartingWith(void *ref) override;
     void SetExtensionData(GCExtensionData *data) override;
 
+    void PostForkCallback(size_t restoreLimit) override;
+
 protected:
     ALWAYS_INLINE ObjectAllocatorG1<LanguageConfig::MT_MODE> *GetG1ObjectAllocator() const
     {
@@ -229,6 +231,8 @@ private:
     void RunPhasesForRegions([[maybe_unused]] ark::GCTask &task, const CollectionSet &collectibleRegions);
 
     void PreStartupImp() override;
+
+    size_t AdujustStartupLimit(size_t startupLimit) override;
 
     void VisitCard(CardTable::CardPtr card, const ObjectVisitor &objectVisitor, const CardVisitor &cardVisitor);
 

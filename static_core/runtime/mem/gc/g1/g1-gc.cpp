@@ -128,6 +128,19 @@ void G1GC<LanguageConfig>::PreStartupImp()
 }
 
 template <class LanguageConfig>
+size_t G1GC<LanguageConfig>::AdujustStartupLimit(size_t startupLimit)
+{
+    return GetG1ObjectAllocator()->GetHeapSpace()->UpdateYoungSpaceMaxSize(startupLimit);
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::PostForkCallback(size_t restoreLimit)
+{
+    GenerationalGC<LanguageConfig>::RestoreTenuredGC();
+    GetG1ObjectAllocator()->GetHeapSpace()->UpdateYoungSpaceMaxSize(restoreLimit);
+}
+
+template <class LanguageConfig>
 template <RegionFlag REGION_TYPE, bool FULL_GC>
 void G1GC<LanguageConfig>::DoRegionCompacting(Region *region, bool useGcWorkers,
                                               PandaVector<PandaVector<ObjectHeader *> *> *movedObjectsVector)
