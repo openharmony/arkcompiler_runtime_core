@@ -243,10 +243,11 @@ static bool IsIntegerClass(EtsClass *objClass, const EtsPlatformTypes *ptypes)
             objClass == ptypes->coreInt);
 }
 
-static bool IsNullOrUndefined(EtsObject *obj)
+static bool IsNullOrUndefined(EtsHandle<EtsObject> elementHandle)
 {
     EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    return (obj == nullptr || obj == EtsObject::FromCoreType(coroutine->GetNullValue()));
+    return (elementHandle.GetPtr() == nullptr ||
+            elementHandle.GetPtr() == EtsObject::FromCoreType(coroutine->GetNullValue()));
 }
 
 static bool IsNumericClass(EtsClass *objClass, const EtsPlatformTypes *ptypes)
@@ -483,13 +484,13 @@ struct ElementComputeResult {
     EtsInt utf16Size = 0;
 };
 
-ark::ets::EtsString *GetObjStr(EtsObject *element)
+ark::ets::EtsString *GetObjStr(EtsHandle<EtsObject> elementHandle)
 {
-    auto cls = element->GetClass();
+    auto cls = elementHandle->GetClass();
     auto coro = EtsCoroutine::GetCurrent();
-    auto const performCall = [coro, &element](EtsMethod *method) {
+    auto const performCall = [coro, &elementHandle](EtsMethod *method) {
         ASSERT(method != nullptr);
-        std::array<Value, 1> args = {Value(element->GetCoreType())};
+        std::array<Value, 1> args = {Value(elementHandle->GetCoreType())};
         EtsObject *callRes = EtsObject::FromCoreType(
             EtsMethod::ToRuntimeMethod(method)->Invoke(coro, args.data()).GetAs<ObjectHeader *>());
         if (coro->HasPendingException() || callRes == EtsObject::FromCoreType(coro->GetNullValue())) {
@@ -505,16 +506,16 @@ ark::ets::EtsString *GetObjStr(EtsObject *element)
 
     auto etsStr = performCall(toStrMethod);
     if (etsStr == nullptr) {
-        return EtsString::CreateNewEmptyString();
+        return nullptr;
     }
 
     auto objStr = EtsString::FromEtsObject(etsStr);
     return objStr;
 }
 
-void ComputeObjStrSize(EtsObject *elem, ElementComputeResult &res)
+void ComputeObjStrSize(EtsHandle<EtsObject> elementHandle, ElementComputeResult &res)
 {
-    auto objStr = GetObjStr(elem);
+    auto objStr = GetObjStr(elementHandle);
     if (objStr->IsUtf16()) {
         auto utf16StrSize = objStr->GetUtf16Length();
         res.utf16Size += utf16StrSize;
@@ -548,14 +549,16 @@ constexpr size_t MaxChars()
 
 void ComputeElementCharSize(ElementComputeResult &res, EtsObject *element, const EtsPlatformTypes *ptypes)
 {
+    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
+    EtsHandle<EtsObject> elementHandle(coroutine, element);
     const int booleanUtf8Size = 5;
-    if (IsNullOrUndefined(element)) {
+    if (IsNullOrUndefined(elementHandle)) {
         return;
     }
 
-    auto elementCls = element->GetClass();
+    auto elementCls = elementHandle->GetClass();
     if (elementCls->IsStringClass()) {
-        auto strElement = coretypes::String::Cast(element->GetCoreType());
+        auto strElement = coretypes::String::Cast(elementHandle->GetCoreType());
         if (strElement->IsUtf16()) {
             auto utf16StrSize = strElement->GetUtf16Length();
             res.utf16Size += utf16StrSize;
@@ -573,7 +576,7 @@ void ComputeElementCharSize(ElementComputeResult &res, EtsObject *element, const
     } else if (elementCls == ptypes->coreBoolean) {
         res.utf8Size += booleanUtf8Size;
     } else {
-        ComputeObjStrSize(element, res);
+        ComputeObjStrSize(elementHandle, res);
     }
 }
 
@@ -625,14 +628,14 @@ size_t NumberToChars(PandaVector<char> &buf, size_t pos, T number)
 }
 
 template <typename T, typename BufferType>
-void HandleNumericType(EtsObject *element, BufferType &buf, size_t &pos)
+void HandleNumericType(EtsHandle<EtsObject> elementHandle, BufferType &buf, size_t &pos)
 {
-    auto value = GetNumericValue<T>(element);
+    auto value = GetNumericValue<T>(elementHandle.GetPtr());
     pos += NumberToChars<T>(buf, pos, value);
 }
 
 template <typename BufferType>
-using NumericHandler = void (*)(EtsObject *, BufferType &, size_t &);
+using NumericHandler = void (*)(EtsHandle<EtsObject>, BufferType &, size_t &);
 
 template <typename BufferType>
 static constexpr auto GetNumericHandlerTable(const EtsPlatformTypes *ptypes)
@@ -697,21 +700,23 @@ ark::ets::EtsString *EtsEscompatArrayJoinUtf8String(EtsObjectArray *buffer, EtsI
 void ProcessUtf8Element(EtsObject *element, PandaVector<char> &buf, const EtsPlatformTypes *ptypes, size_t &pos,
                         EtsInt &utf8Size)
 {
-    if (IsNullOrUndefined(element)) {
+    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
+    EtsHandle<EtsObject> elementHandle(coroutine, element);
+    if (IsNullOrUndefined(elementHandle)) {
         return;
     }
 
-    auto elementCls = element->GetClass();
+    auto elementCls = elementHandle->GetClass();
     const auto &numericHandlerTable = GetNumericHandlerTable<PandaVector<char>>(ptypes);
     for (const auto &entry : numericHandlerTable) {
         if (entry.first == elementCls) {
-            entry.second(element, buf, pos);
+            entry.second(elementHandle, buf, pos);
             return;
         }
     }
 
     if (elementCls->IsStringClass()) {
-        auto strElement = coretypes::String::Cast(element->GetCoreType());
+        auto strElement = coretypes::String::Cast(elementHandle->GetCoreType());
         auto str = strElement->GetDataUtf8();
         auto elementSize = strElement->GetUtf8Length();
         if (elementSize > 0) {
@@ -719,13 +724,13 @@ void ProcessUtf8Element(EtsObject *element, PandaVector<char> &buf, const EtsPla
             pos += elementSize;
         }
     } else if (elementCls == ptypes->coreBoolean) {
-        auto value = GetNumericValue<EtsBoolean>(element);
+        auto value = GetNumericValue<EtsBoolean>(elementHandle.GetPtr());
         const char *text = (value == 1) ? "true" : "false";
         const size_t len = (value == 1) ? 4 : 5;
         memcpy_s(&buf[pos], utf8Size, text, len);
         pos += len;
     } else {
-        auto objStr = GetObjStr(element);
+        auto objStr = GetObjStr(elementHandle);
         auto objStrData = objStr->GetDataUtf8();
         auto objStrSize = objStr->GetUtf8Length();
         if (objStrSize > 0) {
@@ -765,29 +770,35 @@ ark::ets::EtsString *EtsEscompatArrayJoinUtf8(EtsObjectArray *buffer, EtsInt &ac
     return EtsString::CreateFromUtf8(buf.data(), pos);
 }
 
-void ProcessUtf16Element(EtsObject *element, PandaVector<EtsChar> &buf, const EtsPlatformTypes *ptypes, size_t &pos)
+bool ProcessUtf16Element(EtsObject *element, PandaVector<EtsChar> &buf, const EtsPlatformTypes *ptypes, size_t &pos)
 {
-    if (IsNullOrUndefined(element)) {
-        return;
+    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
+    EtsHandle<EtsObject> elementHandle(coroutine, element);
+    if (IsNullOrUndefined(elementHandle)) {
+        return true;
     }
 
-    auto elementCls = element->GetClass();
+    auto elementCls = elementHandle->GetClass();
     const auto &numericHandlerTable = GetNumericHandlerTable<PandaVector<EtsChar>>(ptypes);
     for (const auto &entry : numericHandlerTable) {
         if (entry.first == elementCls) {
-            entry.second(element, buf, pos);
-            return;
+            entry.second(elementHandle, buf, pos);
+            return true;
         }
     }
 
     if (elementCls->IsStringClass()) {
-        auto strElement = coretypes::String::Cast(element->GetCoreType());
+        auto strElement = coretypes::String::Cast(elementHandle->GetCoreType());
         auto strSize = strElement->IsUtf16() ? strElement->GetUtf16Length() : strElement->GetUtf8Length();
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         strElement->CopyDataUtf16(buf.data() + pos, strSize);
         pos += strSize;
+    } else if (elementCls == ptypes->coreChar) {
+        auto value = GetNumericValue<EtsChar>(elementHandle.GetPtr());
+        buf[pos] = value;
+        pos++;
     } else if (elementCls == ptypes->coreBoolean) {
-        auto value = GetNumericValue<EtsBoolean>(element);
+        auto value = GetNumericValue<EtsBoolean>(elementHandle.GetPtr());
         const char *text = (value == 1) ? "true" : "false";
         const size_t len = (value == 1) ? 4 : 5;
         for (uint32_t i = 0; i < len; ++i) {
@@ -796,17 +807,23 @@ void ProcessUtf16Element(EtsObject *element, PandaVector<EtsChar> &buf, const Et
         }
         pos += len;
     } else {
-        auto objStr = GetObjStr(element);
+        auto objStr = GetObjStr(elementHandle);
+        if (objStr == nullptr) {
+            return false;
+        }
         auto objStrSize = objStr->IsUtf16() ? objStr->GetUtf16Length() : objStr->GetUtf8Length();
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         objStr->CopyDataUtf16(buf.data() + pos, objStrSize);
         pos += objStrSize;
     }
+    return true;
 }
 
 ark::ets::EtsString *EtsEscompatArrayJoinUtf16(EtsObjectArray *buffer, EtsInt &actualLength, ElementComputeResult &res,
                                                const EtsPlatformTypes *ptypes, EtsHandle<EtsString> separatorHandle)
 {
+    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
+    EtsHandle<EtsObjectArray> bufferHandle(coroutine, buffer);
     res.utf16Size =
         res.utf16Size + res.utf8Size + res.intCount * MaxChars<EtsLong>() + res.doubleCount * MaxChars<EtsDouble>();
     PandaVector<EtsChar> buf(res.utf16Size);
@@ -814,8 +831,10 @@ ark::ets::EtsString *EtsEscompatArrayJoinUtf16(EtsObjectArray *buffer, EtsInt &a
     auto sepSize = separator->IsUtf16() ? separator->GetUtf16Length() : separator->GetUtf8Length();
     size_t pos = 0;
     for (ets_int index = 0; index < actualLength - 1; index++) {
-        auto element = buffer->Get(index);
-        ProcessUtf16Element(element, buf, ptypes, pos);
+        auto element = bufferHandle->Get(index);
+        if (!ProcessUtf16Element(element, buf, ptypes, pos)) {
+            return nullptr;
+        }
 
         if (sepSize > 0) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -824,8 +843,10 @@ ark::ets::EtsString *EtsEscompatArrayJoinUtf16(EtsObjectArray *buffer, EtsInt &a
         }
     }
 
-    auto lastElement = buffer->Get(actualLength - 1);
-    ProcessUtf16Element(lastElement, buf, ptypes, pos);
+    auto lastElement = bufferHandle->Get(actualLength - 1);
+    if (!ProcessUtf16Element(lastElement, buf, ptypes, pos)) {
+        return nullptr;
+    }
 
     return EtsString::CreateFromUtf16(reinterpret_cast<EtsChar *>(buf.data()), pos);
 }

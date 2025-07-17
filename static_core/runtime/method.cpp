@@ -222,7 +222,9 @@ Value Method::Invoke(ManagedThread *thread, Value *args, bool proxyCall)
         StackWalker::Create(ManagedThread::GetCurrent()).Dump(std::cerr);
     }
 #endif
-    ASSERT(!thread->HasPendingException());
+    if (thread->HasPendingException()) {
+        return Value();
+    }
     return InvokeImpl<InvokeHelperStatic>(thread, GetNumArgs(), args, proxyCall);
 }
 
