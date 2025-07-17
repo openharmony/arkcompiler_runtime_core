@@ -250,6 +250,27 @@ function jsonStringifyRecordWithNullWithSpace(): void {
     arktest.assertEQ(JSON.stringify(record, undefined, ' '), '{\n "nullable": null\n}')
 }
 
+function jsonStringifyEmptyRecord(): void {
+    const record: Record<string, Any> = {}
+    arktest.assertEQ(JSON.stringify(record), '{}')
+}
+
+function jsonStringifyRecordWithNumericKey(): void {
+    let recordSimpleNumeric: Record<string | number, number | string | boolean> = { "1": 1, 2: "2", 3: true }
+    arktest.assertEQ(JSON.stringify(recordSimpleNumeric), '{"1":1,"2":"2","3":true}')
+
+    let recordWithCollisions: Record<string | number, number | string | boolean> = { "1": 1, 1: "1", 2: "2", 3: true }
+    arktest.assertEQ(JSON.stringify(recordWithCollisions), '{"1":1,"1":"1","2":"2","3":true}')
+}
+
+function jsonStringifyRecordWithSameValue(): void {
+    let record: Record<string, Any> = {};
+    let obj = new TestClass('Test');
+    record['a'] = obj;
+    record['b'] = obj;
+    arktest.assertEQ(JSON.stringify(record), '{"a":{"value":"Test"},"b":{"value":"Test"}}');
+}
+
 function jsonStringifyNestedMap(): void {
     const map = new Map<string, Object>();
     let record: Record<string, NullishType> = new Record<string, NullishType>();
@@ -315,6 +336,9 @@ function main(): int {
     suite.addTest('JSON.stringify for Record with array with space', jsonStringifyRecordWithArrayWithSpace);
     suite.addTest('JSON.stringify for Record with null', jsonStringifyRecordWithNull);
     suite.addTest('JSON.stringify for Record with null with space', jsonStringifyRecordWithNullWithSpace);
+    suite.addTest('JSON.stringify for empty Record', jsonStringifyEmptyRecord);
+    suite.addTest('JSON.stringify for Record with numeric key', jsonStringifyRecordWithNumericKey);
+    suite.addTest('JSON.stringify for Record with same object as value', jsonStringifyRecordWithSameValue);
     suite.addTest('JSON.stringify for nested Map', jsonStringifyNestedMap);
     suite.addTest('JSON.stringify for cyclic Record', jsonStringifyCyclicRecord);
     suite.addTest('JSON.stringify for control character', jsonStringifyControlCharacter);

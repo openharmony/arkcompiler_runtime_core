@@ -76,12 +76,16 @@ private:
     bool SerializeJSONRecord(EtsHandle<EtsObject> &value);
 
     bool PushValue(EtsHandle<EtsObject> &value);
+    void PopValue(EtsHandle<EtsObject> &value);
 
     PandaString ResolveDisplayName(const EtsField *field);
 
     bool SerializeObject(EtsHandle<EtsObject> &value);
     bool HandleField(EtsHandle<EtsObject> &obj, EtsField *field, bool &hasContent,
                      PandaUnorderedSet<PandaString> &keys);
+    bool HandleRecordKey(EtsHandle<EtsObject> &key);
+    template <typename T>
+    PandaString HandleNumeric(EtsHandle<EtsObject> &value);
 
     bool CheckUnsupportedAnnotation(EtsField *field);
 

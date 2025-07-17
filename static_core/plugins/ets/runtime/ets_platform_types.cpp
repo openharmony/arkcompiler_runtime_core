@@ -177,6 +177,7 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
         updateOffset(&coreFunctionRs[i]);
     }
 
+    findType(&EtsPlatformTypes::coreTuple, TUPLE);
     findType(&EtsPlatformTypes::coreTupleN, TUPLEN);
 
     findType(&EtsPlatformTypes::coreRuntimeLinker, RUNTIME_LINKER);
@@ -230,7 +231,6 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     findMethod(&EtsPlatformTypes::escompatProcessListUnhandledPromises, escompatProcess, "listUnhandledPromises",
                "Lescompat/Array;:V", true);
 
-    findType(&EtsPlatformTypes::coreTuple, TUPLE);
     findType(&EtsPlatformTypes::escompatRegExpExecArray, REG_EXP_EXEC_ARRAY);
     findType(&EtsPlatformTypes::escompatJsonReplacer, JSON_REPLACER);
     if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
