@@ -37,10 +37,8 @@ void AniModuleFindFunctionFuzzTest(const char *data, size_t size)
     ani_module md {};
     env->FindModule("std.core", &md);
     ani_function fn {};
-    size_t mid = size / 2;
-    std::string funcName(data, mid);
-    std::string funcSig(data + mid, size - mid);
-    env->Module_FindFunction(md, funcName.c_str(), funcSig.c_str(), &fn);
+    std::string funcName(data, size);
+    env->Module_FindFunction(md, funcName.c_str(), nullptr, &fn);
 }
 }  // namespace OHOS
 

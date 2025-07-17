@@ -15,7 +15,7 @@
 import("//build/config/features.gni")
 import("//build/test.gni")
 import("//arkcompiler/runtime_core/static_core/ark_root.gni")
-module_output_path = "runtime_core/static_core/plugins/ets/ani"
+module_output_path = "arkcompiler/runtime_core/static_core/plugins/ets/ani"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("AniObjGetPropertyByNameByteFuzzTest") {

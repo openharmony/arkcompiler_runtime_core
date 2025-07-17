@@ -35,7 +35,8 @@ void AniFindNamespaceFuzzTest(const char *data, size_t size)
     ani_env *env {};
     engine->GetAniEnv(&env);
     ani_namespace ns {};
-    env->FindNamespace(data, &ns);
+    std::string input(data, size);
+    env->FindNamespace(input.c_str(), &ns);
 }
 }  // namespace OHOS
 
