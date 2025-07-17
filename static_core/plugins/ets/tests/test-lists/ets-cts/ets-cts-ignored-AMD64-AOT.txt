@@ -5,17 +5,3 @@
 
 #14338
 15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_array_9.ets
-
-#17965 ERRNO: 12 (Cannot allocate memory)
-16.concurrency/03.asynchronous_api/01.async_functions/afunc_45.ets
-16.concurrency/03.asynchronous_api/01.async_functions/afunc_46.ets
-16.concurrency/03.asynchronous_api/01.async_functions/afunc_47.ets
-16.concurrency/03.asynchronous_api/01.async_functions/afunc_48.ets
-16.concurrency/03.asynchronous_api/03.async_methods/ameth_45.ets
-16.concurrency/03.asynchronous_api/03.async_methods/ameth_46.ets
-16.concurrency/03.asynchronous_api/03.async_methods/ameth_47.ets
-16.concurrency/03.asynchronous_api/03.async_methods/ameth_48.ets
-
-#26235
-07.expressions/06.spread_expression/spex_meth_13.ets
-07.expressions/06.spread_expression/spex_meth_15.ets

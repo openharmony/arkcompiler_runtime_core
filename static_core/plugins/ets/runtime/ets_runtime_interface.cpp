@@ -25,7 +25,7 @@ namespace ark::ets {
 compiler::RuntimeInterface::ClassPtr EtsRuntimeInterface::GetClass(MethodPtr method, IdType id) const
 {
     if (id == RuntimeInterface::MEM_PROMISE_CLASS_ID) {
-        return PlatformTypes(PandaEtsVM::GetCurrent())->corePromise->GetRuntimeClass();
+        return PlatformTypes()->corePromise->GetRuntimeClass();
     }
     return PandaRuntimeInterface::GetClass(method, id);
 }
@@ -224,7 +224,7 @@ uint32_t EtsRuntimeInterface::GetClassOffsetObject(MethodPtr method) const
 
 EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetStringBuilderClass() const
 {
-    return PlatformTypes(PandaEtsVM::GetCurrent())->coreStringBuilder->GetRuntimeClass();
+    return PlatformTypes()->coreStringBuilder->GetRuntimeClass();
 }
 
 EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetEscompatArrayClass() const

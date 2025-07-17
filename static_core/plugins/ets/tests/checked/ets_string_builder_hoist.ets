@@ -32,7 +32,7 @@
 //! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_hoist1"
 //! PASS_AFTER  "SimplifyStringBuilder"
 //! IN_BLOCK    "prehead"
-//! INST        /Load.*std\.core\.StringBuilder/
+//! INST        /LoadImmediate/
 //! INST_NEXT   /NewObject/
 //! INST_NEXT   /CallStatic \d+ std\.core\.StringBuilder::<ctor>/
 //! INST_NEXT   /Intrinsic\.StdCoreSbAppendString/

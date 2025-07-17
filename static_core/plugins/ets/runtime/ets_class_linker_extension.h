@@ -120,6 +120,8 @@ public:
         return langCtx_;
     }
 
+    void InitializeFinish();
+
     static EtsRuntimeLinker *GetOrCreateEtsRuntimeLinker(ClassLinkerContext *ctx);
 
     ClassLinkerContext *GetCommonContext(Span<Class *> classes) const override;
