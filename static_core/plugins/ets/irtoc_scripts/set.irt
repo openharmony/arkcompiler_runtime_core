@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include_relative '../../irtoc/scripts/common.irt'
-include_relative '../../plugins/ets/irtoc_scripts/common.irt'
-include_relative '../../plugins/ets/irtoc_scripts/map_set_common.irt'
+include_relative 'map_set_common.irt'
 
 function(:SetHasIrToc,
         params: {set: 'ref', key: 'ref'},

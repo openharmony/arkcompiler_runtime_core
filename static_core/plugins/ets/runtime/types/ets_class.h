@@ -614,16 +614,6 @@ public:
         return (GetFlagsOffset() - GCRefFieldsOffset()) / sizeof(ObjectPointerType);
     }
 
-    static constexpr uint32_t GetIsNullvalueFlag()
-    {
-        return IS_NULLVALUE;
-    }
-
-    static constexpr uint32_t GetIsBoxedFlag()
-    {
-        return IS_BOXED;
-    }
-
 private:
     enum class FindFilter { STATIC, INSTANCE, ALL };
 
@@ -754,10 +744,14 @@ private:
 
     // Class is a value-semantic type
     constexpr static uint32_t IS_VALUE_TYPED = 1U << 19U;
+
+public:
     // Class is an internal "nullvalue" class
     constexpr static uint32_t IS_NULLVALUE = 1U << 20U;
     // Class is a boxed type
     constexpr static uint32_t IS_BOXED = 1U << 21U;
+
+private:
     // Class is Function
     constexpr static uint32_t IS_FUNCTION = 1U << 22U;
     // Class is BigInt

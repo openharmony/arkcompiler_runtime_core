@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+include_relative '../../../irtoc/scripts/common.irt'
+include_relative '../../../irtoc/scripts/string_helpers.irt'
+include_relative 'common.irt'
+
 module MapConstants
   OBJ_PTR_SIZE = "ark::OBJECT_POINTER_SIZE"
 
@@ -244,12 +248,10 @@ end
 ################################################################
 
 scoped_macro(:findKeyByStr) do |buck_data, buck_len, key|
-  ofs_0 := 0
-  marg := Mul(buck_len, MapConstants::OBJ_PTR_SIZE).u32
+  ofs_0 := Mul(SubI(buck_len).Imm(1).i32, MapConstants::OBJ_PTR_SIZE).i32
 Label(:Loop)
-  ofs := Phi(ofs_0, ofs_1).u32
-  If(ofs, marg).EQ.Unlikely.b {
-    no_ofs := -1
+  ofs := Phi(ofs_0, ofs_1).i32
+  If(ofs, 0).LT.b {
     Goto(:Done)
   }
 
@@ -266,20 +268,18 @@ Label(:Loop)
   }
 
 Label(:Continue)
-  ofs_1 := AddI(ofs).Imm(MapConstants::OBJ_PTR_SIZE).u32
+  ofs_1 := SubI(ofs).Imm(MapConstants::OBJ_PTR_SIZE).i32
   Goto(:Loop)
 
 Label(:Done)
-  found := Phi(no_ofs, ofs).u32
+  found := ofs
 end
 
 scoped_macro(:findKeyByRef) do |buck_data, buck_len, key|
-  ofs_0 := 0
-  marg := Mul(buck_len, MapConstants::OBJ_PTR_SIZE).u32
+  ofs_0 := Mul(SubI(buck_len).Imm(1).i32, MapConstants::OBJ_PTR_SIZE).i32
 Label(:Loop)
-  ofs := Phi(ofs_0, ofs_1).u32
-  If(ofs, marg).EQ.Unlikely.b {
-    no_ofs := -1
+  ofs := Phi(ofs_0, ofs_1).i32
+  If(ofs, 0).LT.b {
     Goto(:Done)
   }
 
@@ -290,11 +290,11 @@ Label(:Loop)
     Goto(:Done)
   }
 
-  ofs_1 := AddI(ofs).Imm(MapConstants::OBJ_PTR_SIZE).u32
+  ofs_1 := SubI(ofs).Imm(MapConstants::OBJ_PTR_SIZE).i32
   Goto(:Loop)
 
 Label(:Done)
-  found := Phi(no_ofs, ofs).u32
+  found := ofs
 end
 
 macro(:findKeyByVal) do |buck_data, buck_len, key, type|
@@ -305,12 +305,10 @@ macro(:findKeyByVal) do |buck_data, buck_len, key, type|
 
   key_val := getCompareVal(key, type, long_type, float_type, double_type)
 
-  ofs_0 := 0
-  marg := Mul(buck_len, MapConstants::OBJ_PTR_SIZE).u32
+  ofs_0 := Mul(SubI(buck_len).Imm(1).i32, MapConstants::OBJ_PTR_SIZE).i32
 Label(:findKeyByValLoop)
-  ofs := Phi(ofs_0, ofs_1).u32
-  If(ofs, marg).EQ.Unlikely.b {
-    no_ofs := -1
+  ofs := Phi(ofs_0, ofs_1).i32
+  If(ofs, 0).LT.b {
     Goto(:findKeyByValDone)
   }
 
@@ -328,11 +326,11 @@ Label(:findKeyByValLoop)
     Goto(:findKeyByValDone)
   }
 
-  ofs_1 := AddI(ofs).Imm(MapConstants::OBJ_PTR_SIZE).u32
+  ofs_1 := SubI(ofs).Imm(MapConstants::OBJ_PTR_SIZE).i32
   Goto(:findKeyByValLoop)
 
 Label(:findKeyByValDone)
-  Phi(no_ofs, ofs).u32
+  found := ofs
 end
 
 ################################################################
@@ -367,57 +365,68 @@ macro(:findKey) do |buck_data, buck_len, key, type, flags, is_string|
   }
 
 Label(:findKeyDone)
-  Phi(find_by_str, find_by_ref, find_by_val).u32
+  Phi(find_by_str, find_by_ref, find_by_val).i32
 end
 
 ################################################################
 
-macro(:findBucket) do |map, key|
+macro(:findOffset) do |map, key, ret_none_expr|
   buck_arr_hdr := LoadI(map).Imm(MapConstants::BUCKETS_OFFSET).ref
   buck_arr_len := LoadI(buck_arr_hdr).Imm(EtsConstants::ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET).u32
 
   If(key, 0).EQ.Unlikely.b {
-    type_undef := map  # does not matter, but 0 is better - how to get it? !!!
-    flags_undef := 0
-    is_string_undef := 0
-    buck_idx_undef := 1  # like ETS
+    buck_array := LoadI(buck_arr_hdr).Imm(EtsConstants::ESCOMPAT_ARRAY_DATA_OFFSET).ref
+    buck_array_data := AddI(buck_array).Imm(Constants::ARRAY_DATA_OFFSET).ptr
+    buck_hdr_undef := LoadI(buck_array_data).Imm(MapConstants::OBJ_PTR_SIZE).ref # buckect number 1, like ETS
+    If(buck_hdr_undef, 0).EQ.b {
+      eval(ret_none_expr) # return
+    }
+
+    buck_len_undef := LoadI(buck_hdr_undef).Imm(EtsConstants::ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET).u32
+    bucket_undef := get_object_pointer_imm(buck_hdr_undef, EtsConstants::ESCOMPAT_ARRAY_DATA_OFFSET)
+    buck_data_undef := AddI(bucket_undef).Imm(Constants::ARRAY_DATA_OFFSET).ptr
+
+    offset_undef := findKeyByRef(buck_data_undef, buck_len_undef, key)
   } Else {
     klass := LoadI(key).Imm(Constants::OBJECT_CLASS_OFFSET).ref
-    type_norm := LoadI(klass).Imm(Constants::BASE_CLASS_MANAGED_OBJECT_OFFSET).ref
-    flags_norm := LoadI(klass).Imm(MapConstants::ETS_CLASS_FLAGS_FROM_RUNTIME_CLASS_OFFSET).u32
-    is_string_norm := isString(klass)
-    buck_idx_norm := getBucketIdx(key, is_string_norm, type_norm, flags_norm, buck_arr_len)
+    type := LoadI(klass).Imm(Constants::BASE_CLASS_MANAGED_OBJECT_OFFSET).ref
+    flags := LoadI(klass).Imm(MapConstants::ETS_CLASS_FLAGS_FROM_RUNTIME_CLASS_OFFSET).u32
+    is_string := isString(klass)
+    buck_idx := getBucketIdx(key, is_string, type, flags, buck_arr_len)
+    If(buck_idx, -1).EQ.b {
+      Goto(:SlowPathEntrypoint)
+    }
+
+    buck_array := LoadI(buck_arr_hdr).Imm(EtsConstants::ESCOMPAT_ARRAY_DATA_OFFSET).ref
+    buck_array_data := AddI(buck_array).Imm(Constants::ARRAY_DATA_OFFSET).ptr
+    buck_hdr_norm := Load(buck_array_data, Mul(buck_idx, MapConstants::OBJ_PTR_SIZE).u32).ref
+    If(buck_hdr_norm, 0).EQ.b {
+      eval(ret_none_expr) # return
+    }
+
+    buck_len_norm := LoadI(buck_hdr_norm).Imm(EtsConstants::ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET).u32
+    bucket_norm := get_object_pointer_imm(buck_hdr_norm, EtsConstants::ESCOMPAT_ARRAY_DATA_OFFSET)
+    buck_data_norm := AddI(bucket_norm).Imm(Constants::ARRAY_DATA_OFFSET).ptr
+
+    offset_norm := findKey(buck_data_norm, buck_len_norm, key, type, flags, is_string)
   }
-  type := Phi(type_undef, type_norm).ref
-  flags := Phi(flags_undef, flags_norm).u32
-  buck_idx := Phi(buck_idx_undef, buck_idx_norm).u32
-  is_string := Phi(is_string_undef, is_string_norm).i32
+  buck_hdr := Phi(buck_hdr_undef, buck_hdr_norm).ref
+  buck_data := Phi(buck_data_undef, buck_data_norm).ptr
+  buck_len := Phi(buck_len_undef, buck_len_norm).u32
 
-  If(buck_idx, -1).EQ.b {
-    Goto(:SlowPathEntrypoint)
+  offset_found := Phi(offset_undef, offset_norm).i32
+  If(offset_found, 0).LT.b {
+    eval(ret_none_expr) # return
   }
 
-  buck_array := LoadI(buck_arr_hdr).Imm(EtsConstants::ESCOMPAT_ARRAY_DATA_OFFSET).ref
-  buck_array_data := AddI(buck_array).Imm(Constants::ARRAY_DATA_OFFSET).ptr
-
-  buck_hdr := Load(buck_array_data, Mul(buck_idx, MapConstants::OBJ_PTR_SIZE).u32).ref
+  offset := offset_found
 end
 
-macro(:findEntry) do |map, key, type, flags, is_string|
-    buck_len := LoadI(buck_hdr).Imm(EtsConstants::ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET).u32
-    bucket := LoadI(buck_hdr).Imm(EtsConstants::ESCOMPAT_ARRAY_DATA_OFFSET).ref
-    buck_data := AddI(bucket).Imm(Constants::ARRAY_DATA_OFFSET).ptr
-    findKey(buck_data, buck_len, key, type, flags, is_string)
-end
 ################################################################
 
 scoped_macro(:processMapHas) do |map, key|
-  buck_hdr := findBucket(map, key)
-  If(buck_hdr, 0).EQ.b {
-    Return(0).b
-  }
-  offset := findEntry(map, key, type, flags, is_string)
-  Return(Compare(offset, -1).NE.b).b
+  findOffset(map, key, "Return(0).b")
+  Return(1).b
 
 Label(:SlowPathEntrypoint)
   entrypoint = get_entrypoint_offset("MAP_HAS_USUAL")
@@ -425,16 +434,22 @@ Label(:SlowPathEntrypoint)
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 end
 
-scoped_macro(:processMapDelete) do |map, key|
-  buck_hdr := findBucket(map, key)
-  If(buck_hdr, 0).EQ.b {
-    Return(0).b
-  }
+scoped_macro(:processMapGet) do |map, key|
+  offset := findOffset(map, key, "Return(nullptr).ptr")
 
-  offset := findEntry(map, key, type, flags, is_string)
-  If(offset, -1).EQ.b {
-    Return(0).b
-  }
+  entry := Load(buck_data, offset).ref
+  object := get_object_pointer_imm(entry, MapConstants::ENTRY_VAL_OFFSET)
+  Return(object).ptr
+
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("MAP_GET_USUAL")
+  Intrinsic(:SLOW_PATH_ENTRY, map, key).AddImm(entrypoint).MethodAsImm("MapGetUsualBridge").Terminator.ptr
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+end
+
+
+scoped_macro(:processMapDelete) do |map, key|
+  offset := findOffset(map, key, "Return(0).b")
 
   entry := Load(buck_data, offset).ref
   entry_next := LoadI(entry).Imm(MapConstants::ENTRY_NEXT_OFFSET).ref
@@ -445,7 +460,7 @@ scoped_macro(:processMapDelete) do |map, key|
   new_len := SubI(buck_len).Imm(1).u32
   StoreI(buck_hdr, new_len).Imm(EtsConstants::ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET).u32
 
-  last_item_ofs := Mul(new_len, MapConstants::OBJ_PTR_SIZE).u32
+  last_item_ofs := Mul(new_len, MapConstants::OBJ_PTR_SIZE).i32
   If(offset, last_item_ofs).NE.b {
     popped_entry := Load(buck_data, last_item_ofs).ref
     Store(buck_data, offset, popped_entry).ref
