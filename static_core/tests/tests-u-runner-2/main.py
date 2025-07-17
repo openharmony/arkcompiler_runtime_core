@@ -17,7 +17,6 @@
 
 import os
 import sys
-import traceback
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, cast
@@ -61,8 +60,8 @@ def main() -> None:
     failed_tests = 0
     try:
         failed_tests = main_cycle(config, logger)
-    except RunnerException:
-        logger.logger.critical(traceback.format_exc())
+    except RunnerException as exc:
+        logger.logger.critical(exc.message)
     finally:
         sys.exit(0 if failed_tests == 0 else 1)
 

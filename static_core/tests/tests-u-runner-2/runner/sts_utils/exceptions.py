@@ -40,5 +40,5 @@ class UnknownTemplateException(RunnerException):
 
 class InvalidMetaException(RunnerException):
     def __init__(self, msg: str) -> None:
-        super().__init__()
+        super().__init__(msg)
         self.message = msg
