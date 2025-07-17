@@ -319,7 +319,10 @@ export namespace util {
          * @param options The encoding options (Base64 type).
          * @returns A Uint8Array containing the Base64 encoded string.
          */
-        encodeSync(src: Uint8Array, options: Type = Type.BASIC): Uint8Array {
+        encodeSync(src: Uint8Array, options?: Type): Uint8Array {
+            if (options === undefined) {
+                options = Type.BASIC;
+            }
             let encoded: string = Base64Helper.encodeBase64(src, options === Type.BASIC_URL_SAFE || options === Type.MIME_URL_SAFE, options === Type.MIME || options === Type.MIME_URL_SAFE);
             let result: Uint8Array = new Uint8Array(encoded.length);
             for (let i: int = 0; i < encoded.length; i++) {
@@ -334,17 +337,31 @@ export namespace util {
          * @param options The encoding options (Base64 type).
          * @returns A string containing the Base64 encoded result.
          */
-        encodeToStringSync(src: Uint8Array, options: Type = Type.BASIC): string {
+        encodeToStringSync(src: Uint8Array, options?: Type): string {
+            if (options === undefined) {
+                options = Type.BASIC;
+            }
             return Base64Helper.encodeBase64(src, options === Type.BASIC_URL_SAFE || options === Type.MIME_URL_SAFE, options === Type.MIME || options === Type.MIME_URL_SAFE);
         }
 
         /**
          * Synchronously decodes a Base64 encoded Uint8Array into a byte array.
-         * @param src A Uint8Array containing the Base64 encoded string.
+         * @param src A Uint8Array containing the Base64 encoded string or the Base64 encoded string.
          * @param options The decoding options (Base64 type).
          * @returns A Uint8Array with the decoded bytes.
          */
-        decodeSync(src: Uint8Array, options: Type = Type.BASIC): Uint8Array {
+        decodeSync(src: Uint8Array | string, options?: Type): Uint8Array {
+            if (options === undefined) {
+                options = Type.BASIC;
+            }
+            if (src instanceof Uint8Array) {
+                return this.decodeSyncUint8Array(src, options);
+            } else {
+                return this.decodeSyncString(src, options);
+            }
+        }
+
+        private decodeSyncUint8Array(src: Uint8Array, options: Type): Uint8Array {
             let base64String: string;
             let charArray: Array<string> = new Array<string>();
             for (let i: int = 0; i < src.length; i++) {
@@ -357,13 +374,7 @@ export namespace util {
             return Base64Helper.decodeBase64(base64String, options === Type.BASIC_URL_SAFE || options === Type.MIME_URL_SAFE);
         }
 
-        /**
-        * Synchronously decodes a Base64 encoded string into a byte array.
-        * @param src The Base64 encoded string.
-        * @param options The decoding options (Base64 type).
-        * @returns A Uint8Array with the decoded bytes.
-        */
-        decodeSync(src: string, options: Type = Type.BASIC): Uint8Array {
+        private decodeSyncString(src: string, options: Type): Uint8Array {
             let newString: string = src;
             if (options === Type.MIME || options === Type.MIME_URL_SAFE) {
                 newString = src.replace(new RegExp("[\\r\\n]", "g"), "");
@@ -377,27 +388,35 @@ export namespace util {
          * @param options The encoding options (Base64 type).
          * @returns A Promise that resolves to a Uint8Array containing the Base64 encoded string.
          */
-        encode(src: Uint8Array, options: Type = Type.BASIC): Promise<Uint8Array> {
+        encode(src: Uint8Array, options?: Type): Promise<Uint8Array> {
+            if (options === undefined) {
+                options = Type.BASIC;
+            }
             return Promise.resolve(this.encodeSync(src, options));
         }
 
         /**
          * Asynchronously decodes a Base64 encoded string into a byte array.
-         * @param src The Base64 encoded string.
+         * @param src The Base64 encoded string or a Uint8Array containing the Base64 encoded string.
          * @param options The decoding options (Base64 type).
          * @returns A Promise that resolves to a Uint8Array with the decoded bytes.
          */
-        decode(src: string, options: Type = Type.BASIC): Promise<Uint8Array> {
+        decode(src: Uint8Array | string, options?: Type): Promise<Uint8Array> {
+            if (options === undefined) {
+                options = Type.BASIC;
+            }
+            if (src instanceof Uint8Array) {
+                return this.decodeUint8Array(src, options);
+            } else {
+                return this.decodeString(src, options);
+            }
+        }
+
+        private decodeString(src: string, options: Type): Promise<Uint8Array> {
             return Promise.resolve(this.decodeSync(src, options));
         }
 
-        /**
-         * Asynchronously decodes a Base64 encoded Uint8Array into a byte array.
-         * @param src A Uint8Array containing the Base64 encoded string.
-         * @param options The decoding options (Base64 type).
-         * @returns A Promise that resolves to a Uint8Array with the decoded bytes.
-         */
-        decode(src: Uint8Array, options: Type = Type.BASIC): Promise<Uint8Array> {
+        private decodeUint8Array(src: Uint8Array, options: Type): Promise<Uint8Array> {
             return Promise.resolve(this.decodeSync(src, options));
         }
 
@@ -407,7 +426,10 @@ export namespace util {
          * @param options The encoding options (Base64 type).
          * @returns A Promise that resolves to a string containing the Base64 encoded result.
          */
-        encodeToString(src: Uint8Array, options: Type = Type.BASIC): Promise<string> {
+        encodeToString(src: Uint8Array, options?: Type): Promise<string> {
+            if (options === undefined) {
+                options = Type.BASIC;
+            }
             return Promise.resolve(this.encodeToStringSync(src, options));
         }
     }
