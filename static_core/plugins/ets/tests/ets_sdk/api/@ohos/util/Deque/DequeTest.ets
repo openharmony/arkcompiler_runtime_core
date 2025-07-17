@@ -16,14 +16,13 @@
 import Deque from "@ohos.util.Deque";
 import { BusinessError } from "@ohos.base";
 
-const TypeErrorCodeId: number = 401;
+const TypeErrorCodeId: int = 401;
 
 // Test cases ported from ArkTS 1.0: container_deque.js
 function main() {
     const suite = new arktest.ArkTestsuite("Deque API tests");
 
     suite.addTest("Testing basic operations of Deque", testBasicOperations);
-    suite.addTest("Testing exception handling for invalid index in Deque", testExceptionHandlingInvalidIndex);
     suite.addTest("Testing popFirst and iteration in Deque", testPopFirstAndIteration);
     suite.addTest("Testing key iteration in Deque", testKeyIteration);
 
@@ -31,25 +30,25 @@ function main() {
 }
 
 function testBasicOperations() {
-    let deque = new Deque<number>();
-    let testArray = new Array<number>();
-    for (let i = 0; i < 10; i++) {
+    let deque = new Deque<double>();
+    let testArray = new Array<double>();
+    for (let i: int = 0; i < 10; i++) {
         testArray.push(i);
     }
-    for (let i = 9; i >= 0; --i) {
+    for (let i: int = 9; i >= 0; --i) {
         deque.insertFront(i);
     }
 
-    for (let i = 0; i < testArray.length; i++) {
+    for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(deque[i], testArray[i]);
     }
 
-    for (let i = 10; i < 20; i++) {
+    for (let i: int = 10; i < 20; i++) {
         deque.insertEnd(i);
         testArray.push(i);
     }
 
-    for (let i = 0; i < testArray.length; i++) {
+    for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(deque[i], testArray[i]);
     }
 
@@ -65,7 +64,7 @@ function testBasicOperations() {
 
     let itr = deque.$_iterator();
     let tmp = itr.next().value;
-    let testArray1 = new Array<number>();
+    let testArray1 = new Array<double>();
     do {
         testArray1.push(tmp!);
         tmp = itr.next().value;
@@ -82,26 +81,16 @@ function testBasicOperations() {
     arktest.assertEQ(deque.popLast(), 19);
 }
 
-function testExceptionHandlingInvalidIndex() {
-    let myDeque = new Deque<number>();
-    myDeque.insertEnd(1);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message ==
-            `The type of \"index\" must be small integer.`) && ((e as BusinessError).code == TypeErrorCodeId);
-    }
-    arktest.expectThrow(() => {myDeque[2147483648]}, exceptionCheck);
-}
-
 function testPopFirstAndIteration() {
-    let arr1 = new Array<number>();
-    let myTest = new Deque<number>();
-    for (let i = 0; i < 10; i++) {
+    let arr1 = new Array<double>();
+    let myTest = new Deque<double>();
+    for (let i: int = 0; i < 10; i++) {
         myTest.insertEnd(i);
     }
-    for (let i = 0; i < 5; i++) {
+    for (let i: int = 0; i < 5; i++) {
         myTest.popFirst();
     }
-    myTest.forEach((item: number, index: number, arr: Deque<number>) => {
+    myTest.forEach((item: double, index: int, arr: Deque<double>) => {
         arr1.push(item);
     });
     arktest.assertEQ(myTest.length, 5);
@@ -111,12 +100,12 @@ function testPopFirstAndIteration() {
 }
 
 function testKeyIteration() {
-    let test1 = new Deque<number>();
+    let test1 = new Deque<double>();
     for (let k = 0; k < 10; k++) {
         test1.insertEnd(k);
     }
     let keyName = "";
-    let key: number = 0;
+    let key: double = 0;
     for (key in test1) {
         keyName += key;
     }

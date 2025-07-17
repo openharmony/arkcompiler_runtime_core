@@ -30,7 +30,6 @@ function main(): int {
     suite.addTest("Testing LightWeightMap capacity", testIncreaseCapacityToPositive)
     suite.addTest("Testing LightWeightMap capacity to 0", testIncreaseCapacityToZero)
     suite.addTest("Testing LightWeightMap capacity to negative number", testIncreaseCapacityToNegative)
-    suite.addTest("Testing LightWeightMap capacity to large number", testIncreaseCapacityToLargeNumber)
 
     return suite.run()
 }
@@ -143,10 +142,4 @@ function testIncreaseCapacityToNegative() {
     let lightWeightMap = new LightWeightMap<string, number>();
     lightWeightMap.increaseCapacityTo(-1);
     arktest.assertEQ(lightWeightMap.length, 0);
-}
-
-//Test cases ported from ArkTS 1.0:LIGHTWEIGHTMAP_INCREASECAPACITYTO_0400
-function testIncreaseCapacityToLargeNumber() {
-    let lightWeightMap = new LightWeightMap<string, number>();
-    arktest.expectNoThrow(() => { lightWeightMap.increaseCapacityTo(1e33) });
 }

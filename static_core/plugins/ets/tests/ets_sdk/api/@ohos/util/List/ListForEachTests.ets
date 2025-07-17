@@ -16,7 +16,7 @@
 import {List} from '@ohos.util.List';
 
 class Temp {
-    age: number = 0
+    age: double = 0
     name: string = ""
 }
 
@@ -35,7 +35,7 @@ function main() {
 
 // Test cases ported from ArkTS 1.0: LIST_SYMBOL_ITERATOR_0100
 function testListSymbolIteratorForOf() {
-    let list = new List<number>();
+    let list = new List<double>();
     list.add(1);
     list.add(2);
     list.add(3);
@@ -48,7 +48,7 @@ function testListSymbolIteratorForOf() {
 
 // Test cases ported from ArkTS 1.0: LIST_SYMBOL_ITERATOR_0200
 function testListSymbolIteratorNext() {
-    let list = new List<number>();
+    let list = new List<double>();
     list.add(1);
     list.add(2);
     list.add(3);
@@ -65,7 +65,7 @@ function testListSymbolIteratorNext() {
 
 // Test cases ported from ArkTS 1.0: LIST_FOREACH_0100
 function testListForEachValueAndIndex() {
-    let list = new List<number | string | boolean | undefined | null | Object>();
+    let list = new List<double | string | boolean | undefined | null | Object>();
     list.add("zhang san");
     list.add(1);
     let temp: Temp = {
@@ -88,7 +88,7 @@ function testListForEachValueAndIndex() {
 
 // Test cases ported from ArkTS 1.0: LIST_FOREACH_0200
 function testListForEachValueOnly() {
-    let list = new List<number | string | boolean | undefined | null | Object>();
+    let list = new List<double | string | boolean | undefined | null | Object>();
     list.add("zhang san");
     list.add(1);
     let temp: Temp = {
@@ -114,7 +114,7 @@ function testListForEachValueOnly() {
 
 // Test cases ported from ArkTS 1.0: LIST_FOREACH_0300
 function testListForEachValueIndexValidation() {
-    let list = new List<number | string | boolean | undefined | null | Object>();
+    let list = new List<double | string | boolean | undefined | null | Object>();
     list.add("zhang san");
     list.add(1);
     let temp: Temp = {
@@ -139,7 +139,7 @@ function testListForEachValueIndexValidation() {
 
 // Test cases ported from ArkTS 1.0: LIST_FOREACH_0400
 function testListForEachFullValidation() {
-    let list = new List<number | string | boolean | undefined | null | Object>();
+    let list = new List<double | string | boolean | undefined | null | Object>();
     list.add("zhang san");
     list.add(1);
     let temp: Temp = {
@@ -155,7 +155,7 @@ function testListForEachFullValidation() {
     list.add("`");
     list.add("%");
     list.add(`"`);
-    list.forEach((value, index, list: List<number | string | boolean | undefined | null | Object>) => {
+    list.forEach((value, index, list: List<double | string | boolean | undefined | null | Object>) => {
         arktest.assertEQ(list.get(index), value);
     });
 }

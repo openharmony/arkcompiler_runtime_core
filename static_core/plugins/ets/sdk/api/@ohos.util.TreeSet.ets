@@ -16,7 +16,7 @@
 import TreeMap from '@ohos.util.TreeMap';
 
 export type TreeSetForEachCb<T> = (value: T, key: T, set: TreeSet<T>) => void;
-export type TreeSetComparator<T> = (firstValue: T, secondValue: T) => number;
+export type TreeSetComparator<T> = (firstValue: T, secondValue: T) => double;
 
 export interface ReadonlyTreeSet<T> extends Iterable<T> {
     /**
@@ -24,7 +24,7 @@ export interface ReadonlyTreeSet<T> extends Iterable<T> {
      *
      * @returns the number of elements in the TreeSet
      */
-    get length(): number;
+    get length(): int;
 
     /**
      * Check whether the given value is in the TreeSet
@@ -74,8 +74,8 @@ export class TreeSet<T> implements ReadonlyTreeSet<T> {
      *
      * @returns the number of elements in the TreeSet
      */
-    override get length(): number {
-        return this.treeMap.length;
+    override get length(): int {
+        return this.treeMap.length.toInt();
     }
 
     /**

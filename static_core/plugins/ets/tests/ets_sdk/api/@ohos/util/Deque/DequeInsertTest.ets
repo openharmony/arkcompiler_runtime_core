@@ -52,7 +52,7 @@ function testInsertStringAtFront() {
 
 // Test cases ported from ArkTS 1.0: DEQUE_0200
 function testInsertNumberAtFront() {
-    let deque = new Deque<number>();
+    let deque = new Deque<double>();
     deque.insertFront(1);
     deque.insertFront(2);
     deque.insertFront(3);
@@ -81,7 +81,7 @@ function testInsertObjectAtFront() {
 
 // Test cases ported from ArkTS 1.0: DEQUE_0400
 function testInsertMixedTypesAtFront() {
-    let deque = new Deque<number | string | object>();
+    let deque = new Deque<double | string | object>();
     let a: C1 = {
         name: "Dylon", age: "13"
     };
@@ -106,7 +106,7 @@ function testInsertStringAtEnd() {
 
 // Test cases ported from ArkTS 1.0: DEQUE_0600
 function testInsertNumberAtEnd() {
-    let deque = new Deque<number>();
+    let deque = new Deque<double>();
     deque.insertEnd(1);
     deque.insertEnd(2);
     deque.insertEnd(3);
@@ -135,7 +135,7 @@ function testInsertObjectAtEnd() {
 
 // Test cases ported from ArkTS 1.0: DEQUE_0800
 function testInsertMixedTypesAtEnd() {
-    let deque = new Deque<number | string | object>();
+    let deque = new Deque<double | string | object>();
     let a: C1 = {
         name: "Dylon", age: "13"
     };

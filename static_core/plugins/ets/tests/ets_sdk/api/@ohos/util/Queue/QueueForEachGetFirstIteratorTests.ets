@@ -33,17 +33,17 @@ function main() {
 }
 
 class TestData {
-    static readonly testNumber1: number = 1;
-    static readonly testNumber3: number = 3;
-    static readonly testNumber6: number = 6;
+    static readonly testNumber1: double | int = 1;
+    static readonly testNumber3: double | int = 3;
+    static readonly testNumber6: double | int = 6;
     static readonly forNumber: Number[] = [17, 3, 22, 8, 29, 11, 5, 19, 2, 26, 14, 7, 28, 10, 1, 24, 16, 13,
         21, 6, 27, 18, 4, 25, 12, 23, 9, 15, 20, 30];
 }
 
 function testQueueForEachNoParam() {
-    let queue = new Queue<number>();
+    let queue = new Queue<double>();
     initializeQueue(queue, TestData.forNumber);
-    let forEachCount: number = 0;
+    let forEachCount: int = 0;
     queue.forEach(() => {
         forEachCount++;
     });
@@ -51,11 +51,11 @@ function testQueueForEachNoParam() {
 }
 
 function testQueueForEachWithValue() {
-    let queue = new Queue<number>();
+    let queue = new Queue<double>();
     initializeQueue(queue, TestData.forNumber);
-    let forEachCount: number = 0;
-    let forEachFlag: number = 0;
-    queue.forEach((value: number) => {
+    let forEachCount: int = 0;
+    let forEachFlag: double = 0;
+    queue.forEach((value: double) => {
         if (value != queue.pop()) {
             forEachFlag = TestData.testNumber1;
         }
@@ -66,11 +66,11 @@ function testQueueForEachWithValue() {
 }
 
 function testQueueForEachWithValueAndIndex() {
-    let queue = new Queue<number>();
+    let queue = new Queue<double>();
     initializeQueue(queue, TestData.forNumber);
-    let forEachCount: number = 0;
-    let forEachFlag: number = 0;
-    queue.forEach((value: number, index: number) => {
+    let forEachCount: int = 0;
+    let forEachFlag: double = 0;
+    queue.forEach((value: double, index: int) => {
         if (value != queue.pop() || index != forEachCount) {
             forEachFlag = TestData.testNumber1;
         }
@@ -81,11 +81,11 @@ function testQueueForEachWithValueAndIndex() {
 }
 
 function testQueueForEachWithAllParams() {
-    let queue = new Queue<number>();
+    let queue = new Queue<double>();
     initializeQueue(queue, TestData.forNumber);
-    let forEachCount: number = 0;
-    let forEachFlag: number = 0;
-    queue.forEach((value: number, index: number, tempQueue: Queue<number>) => {
+    let forEachCount: int = 0;
+    let forEachFlag: double = 0;
+    queue.forEach((value: double, index: int, tempQueue: Queue<double>) => {
         arktest.assertEQ(queue, tempQueue, "TempQueue should be this");
         let elem1 = tempQueue.getFirst();
         let elem2 = queue.pop();
@@ -99,10 +99,10 @@ function testQueueForEachWithAllParams() {
 }
 
 function testQueueForEachChangeElements() {
-    let queue = new Queue<number>();
+    let queue = new Queue<double>();
     initializeQueue(queue, TestData.forNumber);
 
-    queue.forEach((value: number) => {
+    queue.forEach((value: double) => {
         value = 0;
     });
     for (let i: int = 0; i < TestData.forNumber.length; i++) {
@@ -111,15 +111,15 @@ function testQueueForEachChangeElements() {
 }
 
 function testQueueGetFirstEmpty() {
-    let queue = new Queue<number>();
+    let queue = new Queue<double>();
     arktest.assertEQ(queue.length, 0, "Initial queue length should be 0");
     arktest.assertEQ(queue.getFirst(), undefined, "Get first from empty queue should return undefined");
 }
 
 function testQueueGetFirst() {
-    let queue = new Queue<number>();
+    let queue = new Queue<double>();
     queue.add(TestData.testNumber1);
-    for (let i: number = TestData.testNumber1; i < TestData.testNumber6; i++) {
+    for (let i: int = TestData.testNumber1; i < TestData.testNumber6; i++) {
         queue.add(TestData.testNumber3);
     }
     arktest.assertEQ(queue.length, TestData.testNumber6, "Queue length should be 6 after inserting six elements");
@@ -127,13 +127,13 @@ function testQueueGetFirst() {
 }
 
 function testQueueIteratorEmpty() {
-    let queue = new Queue<number>();
-    let elem: number = 0;
+    let queue = new Queue<double>();
+    let elem: double = 0;
     for (let item of queue) {
         elem = TestData.testNumber1;
     }
     let iter = queue.$_iterator();
-    let temp: IteratorResult<number> = iter.next();
+    let temp: IteratorResult<double> = iter.next();
     while (!temp.done) {
         elem = TestData.testNumber1;
     }
@@ -141,18 +141,18 @@ function testQueueIteratorEmpty() {
 }
 
 function testQueueIterator() {
-    let queue = new Queue<number>();
-    for (let i: number = TestData.testNumber1; i < TestData.testNumber6; i++) {
+    let queue = new Queue<double>();
+    for (let i: int = TestData.testNumber1; i < TestData.testNumber6; i++) {
         queue.add(i);
     }
-    let elem1: number = TestData.testNumber1;
+    let elem1: int = TestData.testNumber1;
     for (let item of queue) {
         arktest.assertEQ(item, elem1++, "Iterator should iterate elements in correct order");
     }
     arktest.assertEQ(elem1, TestData.testNumber6, "Iterator should iterate all elements correctly");
     let iter = queue.$_iterator();
-    let temp: IteratorResult<number> = iter.next();
-    let elem2: number = TestData.testNumber1;
+    let temp: IteratorResult<double> = iter.next();
+    let elem2: int = TestData.testNumber1;
     while (!temp.done) {
         arktest.assertEQ(temp.value, elem2++, "Iterator should iterate elements in correct order");
         temp = iter.next();
@@ -161,7 +161,7 @@ function testQueueIterator() {
 }
 
 function testQueueInterfaceComposition() {
-    let queue = new Queue<number>();
+    let queue = new Queue<double>();
     queue.add(TestData.testNumber3);
     arktest.assertEQ(queue.length, TestData.testNumber1, "Queue length should be 1 after inserting one element");
 
@@ -169,7 +169,7 @@ function testQueueInterfaceComposition() {
 
     arktest.assertEQ(queue.getFirst(), queue.pop(), "Pop from Queue should return first element");
 
-    let forEachCount: number = 0;
+    let forEachCount: int = 0;
     queue.forEach(() => {
         forEachCount++;
     });
@@ -177,7 +177,7 @@ function testQueueInterfaceComposition() {
 }
 
 function initializeQueue<T>(queue: Queue<T>, sourceArray: T[]) {
-    for (let i = 0; i < sourceArray.length; i++) {
+    for (let i: int = 0; i < sourceArray.length; i++) {
         queue.add(sourceArray[i]);
     }
 }

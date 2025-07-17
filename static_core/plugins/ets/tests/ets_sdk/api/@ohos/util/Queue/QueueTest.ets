@@ -26,9 +26,9 @@ function main() {
 }
 
 function testQueueBasicOperations() {
-    let queue = new Queue<number>();
-    let testArray = new Array<number>();
-    for (let i = 0; i < 10; i++) {
+    let queue = new Queue<double>();
+    let testArray = new Array<double>();
+    for (let i: int = 0; i < 10; i++) {
         arktest.assertTrue(queue.add(i), `Adding element ${i} to the queue should return true`);
         testArray.push(i);
     }
@@ -49,27 +49,27 @@ function testQueueBasicOperations() {
 }
 
 function testQueuePopAndIteration() {
-    let myTest = new Queue<number>();
-    let arr1 = new Array<number>();
-    for (let i = 0; i < 10; i++) {
+    let myTest = new Queue<double>();
+    let arr1 = new Array<double>();
+    for (let i: int = 0; i < 10; i++) {
         myTest.add(i);
     }
-    for (let i = 0; i < 5; i++) {
+    for (let i: int = 0; i < 5; i++) {
         myTest.pop();
     }
-    myTest.forEach((item: number, index: number, arr: Queue<number>) => {
+    myTest.forEach((item: double, index: int, arr: Queue<double>) => {
         arr1.push(item);
     });
     for (let j = 5; j < 10; j++) {
         arktest.assertEQ(arr1[j - 5], j);
     }
 
-    let test1 = new Queue<number>();
+    let test1 = new Queue<double>();
     for (let k = 0; k < 10; k++) {
         test1.add(k);
     }
     let keyName = "";
-    let key: number = 0;
+    let key: double = 0;
     for (key in test1) {
         keyName += key;
     }

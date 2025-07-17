@@ -23,10 +23,10 @@ class C1 {
 function main() {
     const suite = new arktest.ArkTestsuite("Stack API tests");
 
-    suite.addTest("Testing Stack push operation with number", testStackPushWithNumber);
+    suite.addTest("Testing Stack push operation with double", testStackPushWithNumber);
     suite.addTest("Testing Stack push operation with string", testStackPushWithString);
     suite.addTest("Testing Stack push operation with object", testStackPushWithObject);
-    suite.addTest("Testing Stack push operation with types (object, string, number)", testStackPushWithMixedTypes);
+    suite.addTest("Testing Stack push operation with types (object, string, double)", testStackPushWithMixedTypes);
     suite.addTest("Testing Stack pop operation with multiple elements", testStackPopWithMultipleElements);
     suite.addTest("Testing Stack pop operation without elements", testStackPopWithoutElements);
     suite.addTest("Testing Stack peek operation with elements", testStackPeekWithElements);
@@ -37,7 +37,7 @@ function main() {
 
 // Test cases ported from ArkTS 1.0: STACK_PUSH_0100
 function testStackPushWithNumber() {
-    let stack = new Stack<number>();
+    let stack = new Stack<double>();
     let result = stack.push(1);
     arktest.assertEQ(result, 1);
 }
@@ -61,7 +61,7 @@ function testStackPushWithObject() {
 
 // Test cases ported from ArkTS 1.0: STACK_PUSH_0400
 function testStackPushWithMixedTypes() {
-    let stack = new Stack<number | string | object>();
+    let stack = new Stack<double | string | object>();
     let a: C1 = {
         name: "Dylon", age: "13"
     };
@@ -77,7 +77,7 @@ function testStackPushWithMixedTypes() {
 
 // Test cases ported from ArkTS 1.0: STACK_POP_0600
 function testStackPopWithMultipleElements() {
-    let stack = new Stack<number | string | object>();
+    let stack = new Stack<double | string | object>();
     let a: C1 = {
         name: "Dylon", age: "13"
     };
@@ -94,14 +94,14 @@ function testStackPopWithMultipleElements() {
 
 // Test cases ported from ArkTS 1.0: STACK_POP_0700
 function testStackPopWithoutElements() {
-    let stack = new Stack<number | string | object>();
+    let stack = new Stack<double | string | object>();
     let result = stack.pop();
     arktest.assertEQ(result, undefined);
 }
 
 // Test cases ported from ArkTS 1.0: STACK_PEEK_0900
 function testStackPeekWithElements() {
-    let stack = new Stack<number | string | object>();
+    let stack = new Stack<double | string | object>();
     let a: C1 = {
         name: "Dylon", age: "13"
     };
@@ -117,7 +117,7 @@ function testStackPeekWithElements() {
 
 // Test cases ported from ArkTS 1.0: STACK_PEEK_0100
 function testStackPeekWithoutElements() {
-    let stack = new Stack<number | string | object>();
+    let stack = new Stack<double | string | object>();
     let result = stack.peek();
     arktest.assertEQ(result, undefined);
 }

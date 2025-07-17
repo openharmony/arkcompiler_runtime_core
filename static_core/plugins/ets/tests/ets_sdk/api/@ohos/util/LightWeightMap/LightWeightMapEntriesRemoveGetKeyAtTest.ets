@@ -16,7 +16,7 @@
 import LightWeightMap from "@ohos.util.LightWeightMap";
 import { BusinessError } from "@ohos.base";
 
-const OutOfBoundsErrorCodeId: number = 10200001;
+const OutOfBoundsErrorCodeId: int = 10200001;
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("LightWeightMap Remove GetKeyAt Entries API tests")

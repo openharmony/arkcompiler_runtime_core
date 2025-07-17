@@ -31,72 +31,72 @@ function main() {
     return suite.run();
 }
 
-function initializeList(list: List<number>, sourceArray: Array<number>) {
-    for (let i = 0; i < sourceArray.length; i++) {
+function initializeList(list: List<double>, sourceArray: Array<double>) {
+    for (let i: int = 0; i < sourceArray.length; i++) {
         list.add(sourceArray[i]);
     }
 }
 
 class TestData {
-    static readonly testNumber1: number = 1;
-    static readonly testNumber3: number = 3;
-    static readonly testNumber20: number = 20;
+    static readonly testNumber1: double | int = 1;
+    static readonly testNumber3: double | int = 3;
+    static readonly testNumber20: double | int = 20;
     static readonly forNumber1: Number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-    static readonly arrayForNumber1 = Array.from<number>(TestData.forNumber1);
+    static readonly arrayForNumber1 = Array.from<double>(TestData.forNumber1);
 }
 
 function testGetFirstNonEmptyContainer() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.arrayForNumber1);
     arktest.assertEQ(list.getFirst(), 0, "First element should be 0");
 }
 
 function testGetFirstEmptyContainer() {
-    let list = new List<number>();
+    let list = new List<double>();
     arktest.assertEQ(list.getFirst(), undefined, "First element should be undefined when container is empty");
 }
 
 function testGetFirstUndefined() {
-    let list = new List<number | undefined>();
+    let list = new List<double | undefined>();
     list.add(undefined);
     list.add(TestData.testNumber1);
     arktest.assertEQ(list.getFirst(), undefined, "First element should be undefined");
 }
 
 function testGetLastNonEmptyContainer() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.arrayForNumber1);
     arktest.assertEQ(list.getLast(), TestData.testNumber20, "Last element should be 20");
 }
 
 function testGetLastEmptyContainer() {
-    let list = new List<number>();
+    let list = new List<double>();
     arktest.assertEQ(list.getLast(), undefined, "Last element should be undefined when container is empty");
 }
 
 function testGetLastUndefined() {
-    let list = new List<number | undefined>();
+    let list = new List<double | undefined>();
     list.add(TestData.testNumber1);
     list.add(undefined);
     arktest.assertEQ(list.getLast(), undefined, "Last element should be undefined");
 }
 
 function testIsEmptyAfterAddingElement() {
-    let list = new List<number>();
+    let list = new List<double>();
     list.add(TestData.testNumber3);
     let result: boolean = list.isEmpty();
     arktest.assertFalse(result, "List should not be empty after adding an element");
 }
 
 function testIsEmptyInitially() {
-    let list = new List<number>();
+    let list = new List<double>();
     let result: boolean = list.isEmpty();
     arktest.assertTrue(result, "List should be empty initially");
 }
 
 function testIteratorEmptyContainer() {
-    let list = new List<number>();
-    let count: number = 0;
+    let list = new List<double>();
+    let count: int = 0;
     for (let item of list) {
         count++;
     }
@@ -104,11 +104,11 @@ function testIteratorEmptyContainer() {
 }
 
 function testIteratorNonEmptyContainer() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.arrayForNumber1);
-    let count: number = 0;
+    let count: int = 0;
     let iter = list.$_iterator();
-    let temp: IteratorResult<number> = iter.next();
+    let temp: IteratorResult<double> = iter.next();
     while (!temp.done) {
         arktest.assertEQ(list.get(count++), temp.value, `Element should be equal`);
         temp = iter.next();

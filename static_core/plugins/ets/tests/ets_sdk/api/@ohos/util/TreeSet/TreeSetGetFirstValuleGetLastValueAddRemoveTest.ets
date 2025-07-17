@@ -37,7 +37,7 @@ function main(): int {
     suite.addTest("Test remove() for an empty string on an empty TreeSet.", testRemoveEmptyStringOnEmptySet)
     suite.addTest("Test remove() for an empty string on a TreeSet that does not contain it.",
         testRemoveEmptyStringNotPresent)
-    suite.addTest("Test remove() for a number on an empty TreeSet.", testRemoveNumberOnEmptySet)
+    suite.addTest("Test remove() for a double on an empty TreeSet.", testRemoveNumberOnEmptySet)
     suite.addTest("Test remove() for an existing element in a TreeSet.", testRemoveExistingElement)
     suite.addTest("Test remove() for a non-existing element in a TreeSet that contains other elements.",
         testRemoveNonExistingElementWhenSetNotEmpty)
@@ -71,7 +71,7 @@ function testGetFirstValueWithMultipleElementsNaturalOrder() {
 
 //Test cases ported from ArkTS 1.0:TREESET_2100
 function testGetFirstValueWithCustomReverseComparator() {
-    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string, secondValue: string): number => {
+    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string, secondValue: string): double => {
         return firstValue.compareTo(secondValue)
     });
     treeSet.add("b");
@@ -108,7 +108,7 @@ function testGetLastValueWithMultipleElementsNaturalOrder() {
 
 //Test cases ported from ArkTS 1.0:TREESET_2500
 function testGetLastValueWithCustomReverseComparator() {
-    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string, secondValue: string): number => {
+    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string, secondValue: string): double => {
         return firstValue.compareTo(secondValue)
     });
     treeSet.add("b");
@@ -140,7 +140,7 @@ function testAddNonEmptyString() {
 //Test cases ported from ArkTS 1.0:TREESET_3100
 function testAddMultipleElementsInLoop() {
     let treeSet = new TreeSet<string>();
-    for (let i = 0; i < 1000; i++) {
+    for (let i: int = 0; i < 1000; i++) {
         treeSet.add("sparrow" + i);
         arktest.assertTrue(treeSet.has("sparrow" + i), "The result should be true");
     }
@@ -164,7 +164,7 @@ function testRemoveEmptyStringNotPresent() {
 
 //Test cases ported from ArkTS 1.0:TREESET_3900
 function testRemoveNumberOnEmptySet() {
-    let treeSet = new TreeSet<number>();
+    let treeSet = new TreeSet<double>();
     let result = treeSet.remove(123);
     arktest.assertFalse(result, "Expected remove(123) on an empty TreeSet to return false");
 }

@@ -62,7 +62,7 @@ function testForEachNoReference() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     hashSet.add("squirrel");
     hashSet.add("sparrow");
-    let count: number = 0;
+    let count: int = 0;
     hashSet.forEach(() => {
         count++;
     });

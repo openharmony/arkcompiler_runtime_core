@@ -39,7 +39,7 @@ function main(): int {
 }
 
 function testIteratorReturnsIterator() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 357);
     lightWeightMap.set("test", 111);
@@ -57,14 +57,14 @@ function testIteratorReturnsIterator() {
 }
 
 function testIteratorWithEmptyMap() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     let iteratorSetValues = lightWeightMap.$_iterator();
     arktest.assertTrue(iteratorSetValues.next().done,
         "The lightWeightMap iterator.done should true for an empty map");
 }
 
 function testGetIndexOfKeyAndValue() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 357);
     let result1 = lightWeightMap.getIndexOfKey("sparrow");
@@ -74,7 +74,7 @@ function testGetIndexOfKeyAndValue() {
 }
 
 function testGetIndexOfKeyAndValueNonExisting() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 357);
     let result1 = lightWeightMap.getIndexOfKey("test");
@@ -84,7 +84,7 @@ function testGetIndexOfKeyAndValueNonExisting() {
 }
 
 function testGetIndexOfKeyAndValueEmptyMap() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     let result1 = lightWeightMap.getIndexOfKey("test");
     let result2 = lightWeightMap.getIndexOfValue(111);
     arktest.assertEQ(result1, -1, "The lightWeightMap should return -1 for a key in an empty map");
@@ -92,7 +92,7 @@ function testGetIndexOfKeyAndValueEmptyMap() {
 }
 
 function testGetIndexOfKeyAndValueRepeated() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 123);
     let result1 = lightWeightMap.getIndexOfKey("sparrow");
@@ -102,7 +102,7 @@ function testGetIndexOfKeyAndValueRepeated() {
 }
 
 function testGetIndexOfKeyAndValueDifferentLength() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("a", 123);
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 357);
@@ -118,7 +118,7 @@ function testGetIndexOfKeyAndValueComplex() {
     interface Complex {
         name: string;
         gender: string;
-        age: number;
+        age: double;
     }
 
     const key: Complex = {

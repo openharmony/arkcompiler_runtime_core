@@ -16,9 +16,9 @@
 import { PlainArray } from "@ohos.util.PlainArray";
 
 class Tmp {
-    age: number = 0;
+    age: double = 0;
 
-    constructor(age: number) {
+    constructor(age: double) {
         this.age = age;
     }
 }

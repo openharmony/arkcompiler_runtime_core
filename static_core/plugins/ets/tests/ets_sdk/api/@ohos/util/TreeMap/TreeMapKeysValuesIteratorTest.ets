@@ -36,7 +36,7 @@ function main(): int {
 
 function testKeysReturnIteratorByKey() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
@@ -49,7 +49,7 @@ function testKeysReturnIteratorByKey() {
 
 function testKeysReturnIteratorByKeyWithEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return secondValue.compareTo(firstValue)
         });
     let it = treeMap.keys();
@@ -58,7 +58,7 @@ function testKeysReturnIteratorByKeyWithEmptyTreeMap() {
 
 function testValuesReturnIteratorByValue() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
@@ -71,7 +71,7 @@ function testValuesReturnIteratorByValue() {
 
 function testValuesReturnIteratorByValueWithEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return secondValue.compareTo(firstValue)
         });
     let it = treeMap.values();
@@ -79,8 +79,8 @@ function testValuesReturnIteratorByValueWithEmptyTreeMap() {
 }
 
 function testIteratorReturnIterator() {
-    let treeMap: TreeMap<string, number | undefined> =
-        new TreeMap<string, number | undefined>((firstValue: string, secondValue: string): number => {
+    let treeMap: TreeMap<string, double | undefined> =
+        new TreeMap<string, double | undefined>((firstValue: string, secondValue: string): double => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", 123);
@@ -101,7 +101,7 @@ function testIteratorReturnIterator() {
 
 function testIteratorReturnIteratorWithEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return secondValue.compareTo(firstValue)
         });
     let it = treeMap.$_iterator();

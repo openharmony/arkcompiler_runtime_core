@@ -22,7 +22,7 @@ function main(): int {
     suite.addTest("Deque create an instance that stores multiple types of data", testCreateMultiTypeInstance);
     suite.addTest("Deque length", testDequeLength);
     suite.addTest("Deque length with mixed types", testDequeLengthMixedTypes);
-    suite.addTest("Deque length with large number of elements", testDequeLengthLargeNumber);
+    suite.addTest("Deque length with large double of elements", testDequeLengthLargeNumber);
     suite.addTest("Deque insert elements at the front of the deque", testInsertElementsFront);
     suite.addTest("Deque insert object at the front of the deque", testInsertObjectFront);
     suite.addTest("Deque insert every type elements at the front of the deque", testInsertAllTypesFront);
@@ -34,15 +34,15 @@ function main(): int {
 
 class Temp {
     name: string = "";
-    age: number = 0;
+    age: double = 0;
 }
 
 class TestData {
-    static readonly testNumber1: number = 1;
-    static readonly testNumber2: number = 2;
-    static readonly testNumber3: number = 3;
+    static readonly testNumber1: double | int = 1;
+    static readonly testNumber2: double | int = 2;
+    static readonly testNumber3: double | int = 3;
     static readonly testInt29: int = 29;
-    static readonly testNumber1w: number = 10000;
+    static readonly testNumber1w: double | int = 10000;
     static readonly testObject1: Temp = { name: "Dylon", age: 13 };
     static readonly testObject2: Temp = { name: "Joe", age: 14 };
     static readonly testObject3: Temp = { name: "Lucy", age: 15 };
@@ -52,17 +52,17 @@ class TestData {
 }
 
 function testCreateSingleTypeInstance() {
-    let deque: Deque<number>;
-    arktest.expectNoThrow(() => {deque = new Deque<number>()});
+    let deque: Deque<double>;
+    arktest.expectNoThrow(() => {deque = new Deque<double>()});
 }
 
 function testCreateMultiTypeInstance() {
-    let deque: Deque<number | string>;
-    arktest.expectNoThrow(() => {deque = new Deque<number | string>()});
+    let deque: Deque<double | string>;
+    arktest.expectNoThrow(() => {deque = new Deque<double | string>()});
 }
 
 function testDequeLength() {
-    let deque = new Deque<number>();
+    let deque = new Deque<double>();
     arktest.assertEQ(deque.length, 0, "Initial deque length should be 0");
     deque.insertEnd(TestData.testNumber3);
     deque.insertEnd(TestData.testNumber1);
@@ -74,7 +74,7 @@ function testDequeLength() {
 }
 
 function testDequeLengthMixedTypes() {
-    let deque = new Deque<number | string | boolean>();
+    let deque = new Deque<double | string | boolean>();
     arktest.assertEQ(deque.length, 0, "Initial deque length should be 0");
     deque.insertEnd(TestData.testNumber3);
     deque.insertEnd(TestData.testString1);
@@ -87,20 +87,20 @@ function testDequeLengthMixedTypes() {
 }
 
 function testDequeLengthLargeNumber() {
-    let deque = new Deque<number>();
-    for (let i: number = 0; i < TestData.testNumber1w; i++) {
+    let deque = new Deque<double>();
+    for (let i: int = 0; i < TestData.testNumber1w; i++) {
         deque.insertEnd(TestData.testNumber1);
     }
     arktest.assertEQ(deque.length, TestData.testNumber1w, "Deque length should be 10000 after adding elements");
 }
 
 function testInsertElementsFront() {
-    let deque = new Deque<number>();
+    let deque = new Deque<double>();
     for (let i: int = 0; i < TestData.forNumber.length; i++) {
         deque.insertFront(TestData.forNumber[i]);
     }
     let countForEach = 0;
-    deque.forEach((value: number) => {
+    deque.forEach((value: double) => {
         arktest.assertEQ(value, TestData.forNumber[TestData.testInt29 - countForEach++], "Element should match");
     });
     arktest.assertEQ(countForEach, deque.length, "Deque length same as foreach");
@@ -120,7 +120,7 @@ function testInsertObjectFront() {
 }
 
 function testInsertAllTypesFront() {
-    let deque = new Deque<number | string | object>();
+    let deque = new Deque<double | string | object>();
     deque.insertFront(TestData.testObject1);
     arktest.assertEQ(deque.getFirst(), TestData.testObject1, "Get first from non-empty deque should return first element")
 
@@ -132,10 +132,10 @@ function testInsertAllTypesFront() {
 }
 
 function testInsertElementsEnd() {
-    let deque = new Deque<number>();
+    let deque = new Deque<double>();
     initializeDeque(deque, TestData.forNumber);
     let countForEach = 0;
-    deque.forEach((value: number) => {
+    deque.forEach((value: double) => {
         arktest.assertEQ(value, TestData.forNumber[countForEach++], "Element should match");
     });
     arktest.assertEQ(countForEach, deque.length, "Deque length same as foreach");
@@ -155,7 +155,7 @@ function testInsertObjectEnd() {
 }
 
 function initializeDeque<T>(deque: Deque<T>, sourceArray: T[]) {
-    for (let i = 0; i < sourceArray.length; i++) {
+    for (let i: int = 0; i < sourceArray.length; i++) {
         deque.insertEnd(sourceArray[i]);
     }
 }

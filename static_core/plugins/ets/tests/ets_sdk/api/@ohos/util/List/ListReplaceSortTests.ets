@@ -16,10 +16,10 @@
 import {List} from '@ohos.util.List';
 import {BusinessError} from "@ohos.base";
 
-const OutOfBoundsErrorCodeId: number = 10200001;
+const OutOfBoundsErrorCodeId: int = 10200001;
 
 class Temp {
-    age: number = 0
+    age: double = 0
     name: string = ""
 }
 
@@ -38,7 +38,7 @@ function main() {
 
 // Test cases ported from ArkTS 1.0: LIST_REPLACEALLELEMENT_0100
 function testReplaceAllElementsWithNewString() {
-    let list = new List<number | string | boolean | undefined | null | Object>();
+    let list = new List<double | string | boolean | undefined | null | Object>();
     list.add("zhang san");
     list.add(1);
     let temp: Temp = {
@@ -68,7 +68,7 @@ function testReplaceAllElementsWithNewString() {
 
 // Test cases ported from ArkTS 1.0: LIST_SORT_0100
 function testSortAscendingOrder() {
-    let list = new List<number>();
+    let list = new List<double>();
     list.add(1);
     arktest.assertFalse(list.isEmpty(), "The list should not be empty after adding elements");
     list.clear();
@@ -90,7 +90,7 @@ function testSortAscendingOrder() {
 
 // Test cases ported from ArkTS 1.0: LIST_SORT_0200
 function testSortDescendingOrder() {
-    let list = new List<number>();
+    let list = new List<double>();
     list.add(1);
     arktest.assertFalse(list.isEmpty(), "The list should not be empty after adding elements");
     list.clear();
@@ -112,7 +112,7 @@ function testSortDescendingOrder() {
 
 // Test cases ported from ArkTS 1.0: LIST_SORT_0300
 function testSortAndGetSubList() {
-    let list = new List<number>();
+    let list = new List<double>();
     list.add(1);
     arktest.assertFalse(list.isEmpty(), "The list should not be empty after adding elements");
     list.clear();
@@ -133,7 +133,7 @@ function testSortAndGetSubList() {
 
 // Test cases ported from ArkTS 1.0: LIST_SORT_0400
 function testSortGetSubListAndAdd() {
-    let list = new List<number>();
+    let list = new List<double>();
     list.add(1);
     arktest.assertFalse(list.isEmpty(), "The list should not be empty after adding elements");
     list.clear();

@@ -36,7 +36,7 @@ function testForEachWithStringValues() {
     let plainArray = new PlainArray<string>();
     plainArray.add(1, "squirrel");
     plainArray.add(2, "sparrow");
-    plainArray.forEach((value: string, index?: number) => {
+    plainArray.forEach((value: string, index?: int) => {
         arktest.assertEQ(plainArray.get(index!), value);
     });
 }
@@ -47,7 +47,7 @@ function testForEachWithDuplicateStringValues() {
     plainArray.add(1, "squirrel");
     plainArray.add(2, "sparrow");
     plainArray.add(3, "sparrow");
-    plainArray.forEach((value: string, index?: number) => {
+    plainArray.forEach((value: string, index?: int) => {
         arktest.assertEQ(plainArray.get(index!), value);
     });
 }
@@ -55,7 +55,7 @@ function testForEachWithDuplicateStringValues() {
 // Test cases ported from ArkTS 1.0: PLAINARRAY_FOREACH_0300
 function testForEachWithEmptyArray() {
     let plainArray = new PlainArray<string>();
-    plainArray.forEach((value: string, index?: number) => {
+    plainArray.forEach((value: string, index?: int) => {
         arktest.assertEQ(plainArray.get(index!), value);
     });
 }
@@ -84,11 +84,11 @@ function testSymbolIteratorWithStringValues() {
     plainArray.add(1, "squirrel");
     plainArray.add(2, "sparrow");
     let iter = plainArray.$_iterator();
-    let temp: IteratorResult<[Number, string]> = iter.next();
+    let temp: IteratorResult<[Int, string]> = iter.next();
     while (!temp.done) {
-        let key = temp.value![0] as number;
+        let key = temp.value![0] as double;
         let value = temp.value![1] as string;
-        arktest.assertEQ(plainArray.get(key), value);
+        arktest.assertEQ(plainArray.get(key.toInt()), value);
         temp = iter.next();
     }
 }
@@ -100,11 +100,11 @@ function testSymbolIteratorWithDuplicateStringValues() {
     plainArray.add(2, "sparrow");
     plainArray.add(3, "sparrow");
     let iter = plainArray.$_iterator();
-    let temp: IteratorResult<[Number, string]> = iter.next();
+    let temp: IteratorResult<[Int, string]> = iter.next();
     while (!temp.done) {
-        let key = temp.value![0] as number;
+        let key = temp.value![0] as double;
         let value = temp.value![1] as string;
-        arktest.assertEQ(plainArray.get(key), value);
+        arktest.assertEQ(plainArray.get(key.toInt()), value);
         temp = iter.next();
     }
 }
@@ -113,11 +113,11 @@ function testSymbolIteratorWithDuplicateStringValues() {
 function testSymbolIteratorWithEmptyArray() {
     let plainArray = new PlainArray<string>();
     let iter = plainArray.$_iterator();
-    let temp: IteratorResult<[Number, string]> = iter.next();
+    let temp: IteratorResult<[Int, string]> = iter.next();
     while (!temp.done) {
-        let key = temp.value![0] as number;
+        let key = temp.value![0] as double;
         let value = temp.value![1] as string;
-        arktest.assertEQ(plainArray.get(key), value);
+        arktest.assertEQ(plainArray.get(key.toInt()), value);
         temp = iter.next();
     }
 }

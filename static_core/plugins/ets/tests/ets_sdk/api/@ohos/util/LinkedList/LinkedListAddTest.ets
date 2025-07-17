@@ -16,7 +16,7 @@
 import { LinkedList } from "@ohos.util.LinkedList";
 
 class Temp {
-    age: number = 0;
+    age: double = 0;
     name: string = "";
 }
 
@@ -39,7 +39,7 @@ function main() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_ADD_0100
 function testLinkedListAddVariousDataTypes() {
-    let linkList = new LinkedList<number | string | boolean | undefined | null | Object>();
+    let linkList = new LinkedList<double | string | boolean | undefined | null | Object>();
     linkList.add("zhang san");
     linkList.add(1);
     let temp: Temp = {
@@ -56,7 +56,7 @@ function testLinkedListAddVariousDataTypes() {
     arktest.assertEQ(linkList.get(3), undefined);
     arktest.assertEQ(linkList.get(4), null);
     arktest.assertEQ(linkList.get(5), true);
-    for (let i = 0; i < 4; i++) {
+    for (let i: int = 0; i < 4; i++) {
         arktest.assertEQ((linkList.get(6)! as Array<int>)[i], [0, 1, 2, 4][i]);
     }
 }
@@ -71,7 +71,7 @@ function testLinkedListAddSpecialString() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_ADD_FIRST_0100
 function testLinkedListAddFirstVariousDataTypes() {
-    let linkList = new LinkedList<number | string | boolean | undefined | null | Object>();
+    let linkList = new LinkedList<double | string | boolean | undefined | null | Object>();
     linkList.addFirst("zhang san");
     linkList.addFirst(1);
     let temp: Temp = {
@@ -82,7 +82,7 @@ function testLinkedListAddFirstVariousDataTypes() {
     linkList.addFirst(null);
     linkList.addFirst(true);
     linkList.addFirst([0, 1, 2, 4]);
-    for (let i = 0; i < 4; i++) {
+    for (let i: int = 0; i < 4; i++) {
         arktest.assertEQ((linkList.get(0)! as Array<int>)[i], [0, 1, 2, 4][i]);
     }
     arktest.assertEQ(linkList.get(1), true);
@@ -103,7 +103,7 @@ function testLinkedListAddFirstSpecialString() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_ADD_FIRST_0200
 function testLinkedListInsertAndOperations() {
-    let linkList = new LinkedList<number | string>();
+    let linkList = new LinkedList<double | string>();
     let param = "!\"#$%'()+,-./:;<=>?@[\\]^_`{|}~";
     linkList.insert(0, 1);
     linkList.insert(1, 2);
@@ -116,7 +116,7 @@ function testLinkedListInsertAndOperations() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_INSERT_0100
 function testLinkedListInsertAddAndOperations() {
-    let linkList = new LinkedList<number | string>();
+    let linkList = new LinkedList<double | string>();
     let param = "!\"#$%'()+,-./:;<=>?@[\\]^_`{|}~";
     linkList.insert(0, 1);
     linkList.insert(1, 2);
@@ -129,7 +129,7 @@ function testLinkedListInsertAddAndOperations() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_HAS_0100
 function testLinkedListHasVariousDataTypes() {
-    let linkList = new LinkedList<number | string | boolean | undefined | null | Object>();
+    let linkList = new LinkedList<double | string | boolean | undefined | null | Object>();
     linkList.add("zhang san");
     linkList.add(1);
     let temp: Temp = {
@@ -144,7 +144,7 @@ function testLinkedListHasVariousDataTypes() {
     let param = "!\"#$%'()+,-./:;<=>?@[\\]^_`{|}~";
     linkList.add(param);
     arktest.assertTrue(linkList.has("zhang san"), "The LinkedList should contain the string 'zhang san'");
-    arktest.assertTrue(linkList.has(1), "The LinkedList should contain the number 1");
+    arktest.assertTrue(linkList.has(1), "The LinkedList should contain the double 1");
     arktest.assertTrue(linkList.has(temp), "The LinkedList should contain the Temp object");
     arktest.assertTrue(linkList.has(undefined), "The LinkedList should contain 'undefined'");
     arktest.assertTrue(linkList.has(null), "The LinkedList should contain 'null'");
@@ -155,7 +155,7 @@ function testLinkedListHasVariousDataTypes() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_GET_0100
 function testLinkedListGetVariousDataTypes() {
-    let linkList = new LinkedList<number | string | boolean | undefined | null | Object>();
+    let linkList = new LinkedList<double | string | boolean | undefined | null | Object>();
     linkList.add("zhang san");
     linkList.add(1);
     let temp: Temp = {

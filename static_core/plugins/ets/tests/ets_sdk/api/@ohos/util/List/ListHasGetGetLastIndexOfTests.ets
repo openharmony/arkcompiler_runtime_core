@@ -32,39 +32,39 @@ function main() {
 }
 
 class TestData {
-    static readonly testNumber1: number = 1;
-    static readonly testNumber2: number = 2;
-    static readonly testNumber3: number = 3;
-    static readonly testNumber4: number = 4;
-    static readonly testNumber20: number = 20;
-    static readonly testNumber1w: number = 10000;
+    static readonly testNumber1: double | int = 1;
+    static readonly testNumber2: double | int = 2;
+    static readonly testNumber3: double | int = 3;
+    static readonly testNumber4: double | int = 4;
+    static readonly testNumber20: double | int = 20;
+    static readonly testNumber1w: double | int = 10000;
     static readonly testString1: string = "string";
     static readonly testString2: string = "!\"#$%'()+,-./:;<=>?@[\\]^_`{|}~";
     static readonly testObject2 = [0, 1, null];
     static readonly forNumber1: Number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-    static readonly arrayForNumber1 = Array.from<number>(TestData.forNumber1);
+    static readonly arrayForNumber1 = Array.from<double>(TestData.forNumber1);
     static readonly forNumber4: Number[] = [1, 2, 2, 3, 3];
-    static readonly arrayForNumber4 = Array.from<number>(TestData.forNumber4);
+    static readonly arrayForNumber4 = Array.from<double>(TestData.forNumber4);
 }
 
 function testHasElementInContainer() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.arrayForNumber1);
     arktest.assertTrue(list.has(TestData.testNumber1), "List should contain value 1");
 }
 
 function testHasElementNotInContainer() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.arrayForNumber1);
-    let i = 0;
-    list.forEach((value: number) => {
+    let i: int = 0;
+    list.forEach((value: double) => {
         arktest.assertEQ(value, TestData.arrayForNumber1[i++], "The element should be present");
     });
     arktest.assertFalse(list.has(TestData.testNumber1w), "List should not contain value 10000");
 }
 
 function testHasEveryType() {
-    let list = new List<number | string | boolean | null | object | undefined>();
+    let list = new List<double | string | boolean | null | object | undefined>();
     list.add(TestData.testString2);
     arktest.assertEQ(list.getLast(), TestData.testString2, "The element should be present");
     list.add(TestData.testString1);
@@ -87,22 +87,22 @@ function testHasEveryType() {
 }
 
 function testGetWithinRange() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.arrayForNumber1);
     arktest.assertEQ(list.get(0), 0, "Element at index 0 should be 0");
     arktest.assertEQ(list.get(TestData.testNumber1), TestData.testNumber1, "Element at index 1 should be 1");
-    arktest.assertEQ(list.get(TestData.arrayForNumber1.length - TestData.testNumber1), TestData.testNumber20,
+    arktest.assertEQ(list.get(TestData.arrayForNumber1.length.toInt() - TestData.testNumber1), TestData.testNumber20,
         "Element at index 20 should be 20");
 }
 
 function testGetOutsideRange() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.arrayForNumber1);
     arktest.assertEQ(list.get(TestData.testNumber1w), undefined, "Element at index 10000 should be undefined");
 }
 
 function testGetLastIndexOfUniqueElement() {
-    let list = new List<number>();
+    let list = new List<double>();
     list.add(TestData.testNumber1);
     list.add(TestData.testNumber2);
     list.add(TestData.testNumber2);
@@ -112,7 +112,7 @@ function testGetLastIndexOfUniqueElement() {
 }
 
 function testGetLastIndexOfInexistentElement() {
-    let list = new List<number>();
+    let list = new List<double>();
     list.add(TestData.testNumber1);
     list.add(TestData.testNumber2);
     list.add(TestData.testNumber2);
@@ -121,7 +121,7 @@ function testGetLastIndexOfInexistentElement() {
 }
 
 function testGetLastIndexOfAddRemoveByIndex() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.arrayForNumber4);
     let result1 = list.removeByIndex(list.getLastIndexOf(TestData.testNumber2));
     let result2 = list.removeByIndex(list.getLastIndexOf(TestData.testNumber2));
@@ -132,7 +132,7 @@ function testGetLastIndexOfAddRemoveByIndex() {
 }
 
 function testGetLastIndexOfRepeatedElement() {
-    let list = new List<number>();
+    let list = new List<double>();
     list.add(TestData.testNumber1);
     list.add(TestData.testNumber2);
     list.add(TestData.testNumber2);
@@ -140,8 +140,8 @@ function testGetLastIndexOfRepeatedElement() {
     arktest.assertEQ(list.getLastIndexOf(TestData.testNumber2), TestData.testNumber2, "Last index of 2 should be 2");
 }
 
-function initializeList(list: List<number>, sourceArray: Array<number>) {
-    for (let i = 0; i < sourceArray.length; i++) {
+function initializeList(list: List<double>, sourceArray: Array<double>) {
+    for (let i: int = 0; i < sourceArray.length; i++) {
         list.add(sourceArray[i]);
     }
 }

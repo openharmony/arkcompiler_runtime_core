@@ -25,7 +25,7 @@ function main(): int {
     suite.addTest("Test TreeMap hasKey() with an existing key.", testHasKeyWithExistingKey)
     suite.addTest("Test TreeMap hasKey() with a non-existing key on a non-empty map.",
         testHasKeyWithNonExistingKeyOnNonEmptyMap)
-    suite.addTest("Test TreeMap hasKey() with a key that is a string representation of a number.",
+    suite.addTest("Test TreeMap hasKey() with a key that is a string representation of a double.",
         testHasKeyWithKeyAsStringRepresentationOfNumber)
     suite.addTest("Test TreeMap hasValue() with an existing value.", testHasValueWithExistingValue)
     suite.addTest("Test TreeMap hasValue() with a non-existing value.", testHasValueWithNonExistingValue)
@@ -45,21 +45,21 @@ function main(): int {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_0500
 function testHasKeyWithEmptyStringKeyOnEmptyMap() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     let result = treeMap.hasKey("");
     arktest.assertFalse(result, "Expected hasKey('') on an empty map to return false");
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_0800
 function testHasKeyWithNonExistingKeyOnEmptyMap() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     let result = treeMap.hasKey("squirrel");
     arktest.assertFalse(result, "Expected hasKey('squirrel') for a non-existing key on an empty map to return false");
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_0900
 function testHasKeyWithExistingKey() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set("squirrel", 123);
     let result = treeMap.hasKey("squirrel");
     arktest.assertTrue(result, "Expected hasKey('squirrel') to return true for an existing key");
@@ -67,7 +67,7 @@ function testHasKeyWithExistingKey() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_1000
 function testHasKeyWithNonExistingKeyOnNonEmptyMap() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set("squirrel", 123);
     let result = treeMap.hasKey('goose');
     arktest.assertFalse(result, "Expected hasKey('goose') to return false for a non-existing key on a non-empty map");
@@ -75,7 +75,7 @@ function testHasKeyWithNonExistingKeyOnNonEmptyMap() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_1100
 function testHasKeyWithKeyAsStringRepresentationOfNumber() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set("squirrel", 123);
     let result = treeMap.hasKey('123');
     arktest.assertFalse(result, "Expected hasKey('123') to return false when '123' is not a key");
@@ -83,7 +83,7 @@ function testHasKeyWithKeyAsStringRepresentationOfNumber() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_1500
 function testHasValueWithExistingValue() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set("squirrel", 123);
     let result = treeMap.hasValue(123);
     arktest.assertTrue(result, "Expected hasValue(123) to return true for an existing value");
@@ -91,7 +91,7 @@ function testHasValueWithExistingValue() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_1600
 function testHasValueWithNonExistingValue() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set("squirrel", 123);
     let result = treeMap.hasValue(333);
     arktest.assertFalse(result, "Expected hasValue(333) to return false for a non-existing value");
@@ -99,7 +99,7 @@ function testHasValueWithNonExistingValue() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_1700
 function testHasValueWithExistingValueMultipleEntries() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set("squirrel", 123);
     treeMap.set("sparrow", 356);
     let result = treeMap.hasValue(356);
@@ -108,7 +108,7 @@ function testHasValueWithExistingValueMultipleEntries() {
 
 //Test cases ported from ArkTS 1.0:REEMAP_4000
 function testSetWithEmptyStringKey() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set("", 123);
     arktest.assertEQ(treeMap.length, 1);
     let result = treeMap.get("");
@@ -117,7 +117,7 @@ function testSetWithEmptyStringKey() {
 
 //Test cases ported from ArkTS 1.0:REEMAP_4100
 function testSetWithSimpleStringKey() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set("a", 123);
     arktest.assertEQ(treeMap.length, 1);
     let result = treeMap.get("a");
@@ -126,7 +126,7 @@ function testSetWithSimpleStringKey() {
 
 //Test cases ported from ArkTS 1.0:REEMAP_4500
 function testSetWithSimpleStringKeyDifferentValue() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set("a", 1);
     arktest.assertEQ(treeMap.length, 1);
     let result = treeMap.get("a");
@@ -136,8 +136,8 @@ function testSetWithSimpleStringKeyDifferentValue() {
 //Test cases ported from ArkTS 1.0:REEMAP_4700
 function testSetMultipleDistinctKeysInLoop() {
     let arr = 'abc';
-    let treeMap = new TreeMap<string, number>();
-    for (let i = 0; i < 1000; i++) {
+    let treeMap = new TreeMap<string, double>();
+    for (let i: int = 0; i < 1000; i++) {
         treeMap.set(arr + i, 123);
     }
     arktest.assertEQ(treeMap.length, 1000);

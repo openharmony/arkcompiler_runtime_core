@@ -16,7 +16,7 @@
 import LightWeightMap from '@ohos.util.LightWeightMap';
 import { BusinessError } from "@ohos.base";
 
-const TypeErrorCodeId: number = 401;
+const TypeErrorCodeId: int = 401;
 
 export type LightWeightSetForEachCb<T> = (value: T, key: T, set: LightWeightSet<T>) => void;
 
@@ -35,7 +35,7 @@ interface ReadonlyLightWeightSet<T> extends Iterable<T> {
      *
      * @returns number of unique elements in the LightWeightSet
      */
-    get length(): number;
+    get length(): int;
 
     /**
      * Executes a provided function once per each value in the LightWeightSet object, in insertion order
@@ -81,8 +81,8 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
      *
      * @returns number of unique elements in the LightWeightSet
      */
-    get length(): number {
-        return this.buckets.length;
+    get length(): int {
+        return this.buckets.length.toInt();
     }
 
     /**
@@ -187,8 +187,8 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
      *
      * @returns the index of the value, or a negative position if the value is not found
      */
-    getIndexOf(key: T): number {
-        const index = this.buckets.getIndexOfKey(key);
+    getIndexOf(key: T): int {
+        const index = this.buckets.getIndexOfKey(key).toInt();
         if (index >= 0) {
             return index;
         } else {
@@ -217,7 +217,7 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
      * 
      * @throws BusinessError if the index exceeds Int.MAX_VALUE.
      */
-    getValueAt(index: number): T | undefined {
+    getValueAt(index: int): T | undefined {
         this.checkIndex(index);
 
         if (index < 0 || this.buckets.length <= index) {
@@ -237,7 +237,7 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
         if (set.length > this.buckets.length) {
             return false;
         }
-        for (let index: number = 0; index < set.length; index++) {
+        for (let index: int = 0; index < set.length; index++) {
             const value = set.getValueAt(index)!;
             if (!this.has(value)) {
                 return false;
@@ -251,7 +251,7 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
      *
      * @param minimumCapacity the minimum capacity to increase to
      */
-    increaseCapacityTo(minimumCapacity: number): void {
+    increaseCapacityTo(minimumCapacity: int): void {
         this.buckets.increaseCapacityTo(minimumCapacity);
     }
 
@@ -273,7 +273,7 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
      * 
      * @throws BusinessError if the index exceeds Int.MAX_VALUE.
      */
-    removeAt(index: number): boolean {
+    removeAt(index: int): boolean {
         this.checkIndex(index);
 
         return this.buckets.removeAt(index);
@@ -317,7 +317,7 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
         }
     }
 
-    private checkIndex(index: number): void {
+    private checkIndex(index: int): void {
         if (index > Int.MAX_VALUE) {
             throw new BusinessError(TypeErrorCodeId,
                 new Error(`The type of "index" must be small integer. Received value is: ${index}`))

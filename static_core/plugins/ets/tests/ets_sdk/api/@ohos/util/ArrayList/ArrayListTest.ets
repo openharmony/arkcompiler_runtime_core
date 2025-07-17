@@ -16,8 +16,8 @@
 import { ArrayList } from "@ohos.util.ArrayList";
 import { BusinessError } from "@ohos.base";
 
-const TypeErrorCodeId: number = 401;
-const OutOfBoundsErrorCodeId: number = 10200001;
+const TypeErrorCodeId: int = 401;
+const OutOfBoundsErrorCodeId: int = 10200001;
 
 function main() {
     const suite = new arktest.ArkTestsuite("ArrayList API tests");
@@ -26,17 +26,16 @@ function main() {
     suite.addTest("Testing ArrayList basic operations", testArrayList0002);
     suite.addTest("Testing ArrayList sort", testArrayList0003);
     suite.addTest("Testing ArrayList exception handling for empty container", testArrayList0004);
-    suite.addTest("Testing ArrayList exception handling for invalid index", testArrayList0005);
     suite.addTest("Testing ArrayList key iteration", testArrayList0006);
     suite.addTest("Testing ArrayList insert and remove with floor index", testArrayList0007);
 
     return suite.run();
 }
 
-function testedIterator(arrayList: ArrayList<number>, testArray: Array<number>): boolean {
+function testedIterator(arrayList: ArrayList<double>, testArray: Array<double>): boolean {
     let itr = arrayList.$_iterator();
     let tmp = itr.next().value;
-    let testArray1 = new Array<number>();
+    let testArray1 = new Array<double>();
     do {
         testArray1.push(tmp!);
         tmp = itr.next().value;
@@ -51,24 +50,24 @@ function testedIterator(arrayList: ArrayList<number>, testArray: Array<number>):
 }
 
 function testArrayList0001() {
-    let arr = new ArrayList<number>();
+    let arr = new ArrayList<double>();
     arr.add(1);
     arr.add(2);
 
-    for (let i = 0; i < arr.length; i++) {
+    for (let i: int = 0; i < arr.length; i++) {
         arktest.assertEQ(arr[i], i + 1, `The element at index ${i} should be ${i + 1}`);
     }
 }
 
 function testArrayList0002() {
-    let arr1 = new ArrayList<number>();
-    let testArray = new Array<number>();
+    let arr1 = new ArrayList<double>();
+    let testArray = new Array<double>();
 
-    for (let i = 0; i < 10; i++) {
+    for (let i: int = 0; i < 10; i++) {
         arr1.add(i);
         testArray.push(i);
     }
-    for (let i = 0; i < testArray.length; i++) {
+    for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(arr1[i], testArray[i], `The element at index ${i} should be ${testArray[i]}`);
     }
 
@@ -78,38 +77,38 @@ function testArrayList0002() {
     arktest.assertEQ(arr1.getIndexOf(5), 5, "The index of value 5 should be 5");
 
     let array = arr1.convertToArray();
-    for (let i = 0; i < testArray.length; i++) {
+    for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(array[i], testArray[i], `The element at index ${i} should be ${testArray[i]} in the converted array`);
     }
 
     let newArrayList = arr1.clone();
-    for (let i = 0; i < testArray.length; i++) {
+    for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(newArrayList[i], testArray[i],
             `The element at index ${i} should be ${testArray[i]} in the cloned ArrayList`);
     }
 
     arr1.insert(999, 3);
     testArray.splice(3 as int, 0 as int, 999);
-    for (let i = 0; i < testArray.length; i++) {
+    for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(arr1[i], testArray[i], `The element at index ${i} should be ${testArray[i]} after insertion`);
     }
 
     arr1.removeByIndex(9);
     testArray.splice(9 as int, 1);
-    for (let i = 0; i < testArray.length; i++) {
+    for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(arr1[i], testArray[i], `The element at index ${i} should be ${testArray[i]} after removal by index`);
     }
 
     const removeRes = arr1.remove(7);
     testArray.splice(8 as int, 1);
-    for (let i = 0; i < testArray.length; i++) {
+    for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(arr1[i], testArray[i], `The element at index ${i} should be ${testArray[i]} after removal by value`);
     }
     arktest.assertTrue(removeRes, "The remove operation should return true");
 
     arr1.removeByRange(1, 3);
     testArray.splice(1 as int, 2);
-    for (let i = 0; i < testArray.length; i++) {
+    for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(arr1[i], testArray[i], `The element at index ${i} should be ${testArray[i]} after removal by range`);
     }
 
@@ -119,7 +118,7 @@ function testArrayList0002() {
 
     let subArrayList = arr1.subArrayList(1, 3);
     const newTestArray = testArray.slice(1, 3);
-    for (let i = 0; i < subArrayList.length; i++) {
+    for (let i: int = 0; i < subArrayList.length; i++) {
         arktest.assertEQ(newTestArray[i], subArrayList[i],
             `The element at index ${i} should be ${newTestArray[i]} in the subArrayList`);
     }
@@ -136,21 +135,21 @@ function testArrayList0002() {
         return item * 2;
     });
 
-    for (let i = 0; i < testArray.length; i++) {
+    for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(arr1[i], testArray[i] * 2,
             `The element at index ${i} should be ${testArray[i] * 2} after replaceAllElements`);
     }
 }
 
 function testArrayList0003() {
-    let arr2 = new ArrayList<number>();
+    let arr2 = new ArrayList<double>();
     arr2.add(4);
     arr2.add(3);
     arr2.add(1);
     arr2.add(2);
     arr2.add(0);
     arr2.sort((a,b) => a - b);
-    for (let i = 0; i < 5; i++) {
+    for (let i: int = 0; i < 5; i++) {
         arktest.assertEQ(arr2[i], i, `The element at index ${i} should be ${i} after sorting in ascending order`);
     }
 
@@ -163,7 +162,7 @@ function testArrayList0003() {
     arr2.add(2);
     arr2.add(0);
     arr2.sort((a,b) => a - b);
-    for (let i = 0; i < 5; i++) {
+    for (let i: int = 0; i < 5; i++) {
         arktest.assertEQ(arr2[i], i, `The element at index ${i} should be ${i} after re-sorting in ascending order`);
     }
 
@@ -177,7 +176,7 @@ function testArrayList0003() {
 }
 
 function testArrayList0004() {
-    let testList = new ArrayList<number>();
+    let testList = new ArrayList<double>();
     arktest.expectThrow(() => {testList.removeByIndex(0)}, exceptionCheckEmptyContainer);
     arktest.expectThrow(() => {testList.removeByRange(0, 1)}, exceptionCheckEmptyContainer);
     arktest.expectThrow(() => {testList.subArrayList(0, 1)}, exceptionCheckEmptyContainer);
@@ -186,19 +185,13 @@ function testArrayList0004() {
     arktest.assertEQ(testList[1], 9, "The element at index 1 should be 9 after adding 7 and 9");
 }
 
-function testArrayList0005() {
-    let myArrayList = new ArrayList<number>();
-    myArrayList.add(1);
-    arktest.expectThrow(() => {myArrayList[2147483648]}, exceptionCheckType);
-}
-
 function testArrayList0006() {
-    let test1 = new ArrayList<number>();
+    let test1 = new ArrayList<double>();
     for (let k = 0; k < 10; k++) {
         test1.add(k);
     }
     let keyName = "";
-    let key: number = 0;
+    let key: double = 0;
     for (key in test1) {
         keyName += key;
     }
@@ -206,13 +199,13 @@ function testArrayList0006() {
 }
 
 function testArrayList0007() {
-    let myAl = new ArrayList<number>();
+    let myAl = new ArrayList<double>();
     myAl.add(1);
     myAl.add(2);
     myAl.add(3);
-    myAl.insert(30, Math.floor(1.3));
+    myAl.insert(30, Math.floor(1.3).toInt());
     arktest.assertEQ(myAl[1], 30, "The element at index 1 should be 30 after insertion");
-    myAl.removeByIndex(Math.floor(1.3));
+    myAl.removeByIndex(Math.floor(1.3).toInt());
     arktest.assertEQ(myAl[1], 2, "The element at index 1 should be 2 after removal");
 }
 

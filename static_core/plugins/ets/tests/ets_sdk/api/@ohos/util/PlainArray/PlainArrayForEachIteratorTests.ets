@@ -32,21 +32,21 @@ function main(): int {
 }
 
 class TestData {
-    static readonly testNumber1: number = 1;
+    static readonly testNumber1: double | int = 1;
     static readonly testInt1: int = 1;
-    static readonly testNumber6: number = 6;
+    static readonly testNumber6: double | int = 6;
     static readonly testString1: string = "0:0,2:2,4:4,5:5,8:8";
-    static readonly forNumber1: Number[] = [0, 2, 4, 5, 8];
-    static readonly forNumber2: Number[] = [0, 8, 2, 5, 4];
+    static readonly forNumber1: Int[] = [0, 2, 4, 5, 8];
+    static readonly forNumber2: Int[] = [0, 8, 2, 5, 4];
     static readonly forString1: String[] = ["0", "s", "88", ",", "4"];
 }
 
 function testForEachNoParameterFunction() {
-    let plainArray = new PlainArray<number>();
-    for (let i = 0; i < TestData.forNumber2.length; i++) {
+    let plainArray = new PlainArray<double>();
+    for (let i: int = 0; i < TestData.forNumber2.length; i++) {
         plainArray.add(TestData.forNumber2[i], TestData.forNumber2[i]);
     }
-    let forEachCount: number = 0;
+    let forEachCount: int = 0;
     plainArray.forEach(() => {
         forEachCount++;
     });
@@ -54,24 +54,24 @@ function testForEachNoParameterFunction() {
 }
 
 function testForEachWithOneParameter() {
-    let plainArray = new PlainArray<number>();
-    for (let i = 0; i < TestData.forNumber2.length; i++) {
+    let plainArray = new PlainArray<double>();
+    for (let i: int = 0; i < TestData.forNumber2.length; i++) {
         plainArray.add(TestData.forNumber2[i], TestData.forNumber2[i]);
     }
-    let forEachCount: number = 0;
-    plainArray.forEach((value: number) => {
+    let forEachCount: int = 0;
+    plainArray.forEach((value: double) => {
         arktest.assertEQ(value, plainArray.getValueAt(forEachCount++), "ForEach should iterate and modify elements correctly");
     });
     arktest.assertEQ(forEachCount, plainArray.length, "ForEach count should match plainArray length");
 }
 
 function testForEachWithTwoParameters() {
-    let plainArray = new PlainArray<number>();
-    for (let i = 0; i < TestData.forNumber2.length; i++) {
+    let plainArray = new PlainArray<double>();
+    for (let i: int = 0; i < TestData.forNumber2.length; i++) {
         plainArray.add(TestData.forNumber2[i] as int, TestData.forNumber2[i]);
     }
-    let forEachCount: number = 0;
-    plainArray.forEach((value: number, index: number) => {
+    let forEachCount: int = 0;
+    plainArray.forEach((value: double, index: int) => {
         arktest.assertEQ(index, plainArray.getKeyAt(forEachCount), "ForEach should iterate and modify elements correctly");
         arktest.assertEQ(value, plainArray.getValueAt(forEachCount++), "ForEach should iterate and modify elements correctly");
     });
@@ -79,12 +79,12 @@ function testForEachWithTwoParameters() {
 }
 
 function testForEachWithThreeParameters() {
-    let plainArray = new PlainArray<number>();
-    for (let i = 0; i < TestData.forNumber2.length; i++) {
+    let plainArray = new PlainArray<double>();
+    for (let i: int = 0; i < TestData.forNumber2.length; i++) {
         plainArray.add(TestData.forNumber2[i], TestData.forNumber2[i]);
     }
-    let forEachCount: number = 0;
-    plainArray.forEach((value: number, index: number, tempPlainArray: PlainArray<number>) => {
+    let forEachCount: int = 0;
+    plainArray.forEach((value: double, index: int, tempPlainArray: PlainArray<double>) => {
         arktest.assertEQ(plainArray, tempPlainArray, "TempPlainArray should be this");
         arktest.assertEQ(index, plainArray.getKeyAt(forEachCount), "ForEach should iterate and modify elements correctly");
         arktest.assertEQ(value, plainArray.getValueAt(forEachCount), "ForEach should iterate and modify elements correctly");
@@ -97,8 +97,8 @@ function testForEachWithThreeParameters() {
 }
 
 function testForEachWithEmpty() {
-    let plainArray = new PlainArray<number>();
-    let forEachCount: number = TestData.testNumber1;
+    let plainArray = new PlainArray<double>();
+    let forEachCount: int = TestData.testNumber1;
     plainArray.forEach(() => {
         forEachCount++;
     });
@@ -106,11 +106,11 @@ function testForEachWithEmpty() {
 }
 
 function testForEachChangeValue() {
-    let plainArray = new PlainArray<number>();
-    for (let i = 0; i < TestData.forNumber2.length; i++) {
+    let plainArray = new PlainArray<double>();
+    for (let i: int = 0; i < TestData.forNumber2.length; i++) {
         plainArray.add(TestData.forNumber2[i], TestData.forNumber2[i]);
     }
-    plainArray.forEach((value: number) => {
+    plainArray.forEach((value: double) => {
         value = TestData.testNumber6;
     });
     arktest.assertEQ(plainArray.toString(), TestData.testString1, "The elements should not change");
@@ -118,12 +118,12 @@ function testForEachChangeValue() {
 
 function testIteratorWithEmpty() {
     let plainArray = new PlainArray<string>();
-    let elem: number = 0;
+    let elem: double = 0;
     for (let item of plainArray) {
         elem = TestData.testNumber1;
     }
     let iter = plainArray.$_iterator();
-    let temp: IteratorResult<[Number, string]> = iter.next();
+    let temp: IteratorResult<[Int, string]> = iter.next();
     while (!temp.done) {
         elem = TestData.testNumber1;
     }
@@ -132,17 +132,17 @@ function testIteratorWithEmpty() {
 
 function testIteratorWithNonEmpty() {
     let plainArray = new PlainArray<string>();
-    for (let i = 0; i < TestData.forNumber2.length; i++) {
+    for (let i: int = 0; i < TestData.forNumber2.length; i++) {
         plainArray.add(TestData.forNumber2[i], TestData.forString1[i]);
     }
-    let elem1: number = 0;
+    let elem1: int = 0;
     for (let item of plainArray) {
         arktest.assertEQ(item[TestData.testInt1], plainArray.getValueAt(elem1), "The value should be same");
         arktest.assertEQ(item[0], plainArray.getKeyAt(elem1++), "The key should be same");
     }
     let iter = plainArray.$_iterator();
-    let temp: IteratorResult<[Number, string]> = iter.next();
-    let elem2: number = 0;
+    let temp: IteratorResult<[Int, string]> = iter.next();
+    let elem2: int = 0;
     while (!temp.done) {
         arktest.assertEQ(temp.value![TestData.testInt1], plainArray.getValueAt(elem2), "The value should be same");
         arktest.assertEQ(temp.value![0], plainArray.getKeyAt(elem2++), "The key should be same");

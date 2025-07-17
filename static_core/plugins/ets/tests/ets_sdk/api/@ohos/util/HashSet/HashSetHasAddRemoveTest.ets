@@ -51,21 +51,21 @@ function testHasValueOnEmptySet() {
 
 //Test cases ported from ArkTS 1.0:HASHSET_HAS_0500
 function testHasExistingElement() {
-    const hashSet = new HashSet<number>();
+    const hashSet = new HashSet<double>();
     hashSet.add(1);
     arktest.assertTrue(hashSet.has(1), "Expected HashSet.has(1) to return true after adding 1 to the HashSet");
 }
 
 //Test cases ported from ArkTS 1.0:HASHSET_HAS_0600
 function testHasNonExistingElement() {
-    const hashSet = new HashSet<number>();
+    const hashSet = new HashSet<double>();
     hashSet.add(1);
     arktest.assertFalse(hashSet.has(2), "Expected HashSet.has(2) to return false when 2 was not added to the HashSet");
 }
 
 //Test cases ported from ArkTS 1.0:HASHSET_HAS_0700
 function testHasAfterRACSequence() {
-    const hashSet = new HashSet<number>();
+    const hashSet = new HashSet<double>();
     hashSet.remove(1);
     arktest.assertFalse(hashSet.has(1),
         "Expected HashSet.has(1) to return false as 1 was not added or removed from an empty set");
@@ -104,11 +104,11 @@ function testAddLongString() {
 
 //Test cases ported from ArkTS 1.0:HASHSET_ADD_0600
 function testAddMultipleElements() {
-    const hashSet = new HashSet<number>();
-    for (let i = 0; i < 1000; i++) {
+    const hashSet = new HashSet<double>();
+    for (let i: int = 0; i < 1000; i++) {
         hashSet.add(i);
     }
-    for (let i = 0; i < hashSet.length; i++) {
+    for (let i: int = 0; i < hashSet.length; i++) {
         arktest.assertTrue(hashSet.has(i), "Expected HashSet to contain element after adding 1000 elements");
     }
     arktest.assertEQ(hashSet.length, 1000);
@@ -116,7 +116,7 @@ function testAddMultipleElements() {
 
 //Test cases ported from ArkTS 1.0:HASHSET_ADD_0700
 function testAddInRACSequence() {
-    const hashSet = new HashSet<number>();
+    const hashSet = new HashSet<double>();
     hashSet.remove(1);
     arktest.assertFalse(hashSet.has(1),
         "Expected HashSet.has(1) to return false as 1 was not added or removed from an empty set");
@@ -141,21 +141,21 @@ function testRemoveValueFromEmptySet() {
 
 //Test cases ported from ArkTS 1.0:HASHSET_REMOVE_0500
 function testRemoveExistingElement() {
-    const hashSet = new HashSet<number>();
+    const hashSet = new HashSet<double>();
     hashSet.add(1);
     arktest.assertTrue(hashSet.remove(1), "Expected HashSet.remove(1) to return true after adding 1 to the HashSet");
 }
 
 //Test cases ported from ArkTS 1.0:HASHSET_REMOVE_0600
 function testRemoveNonExistingElement() {
-    const hashSet = new HashSet<number>();
+    const hashSet = new HashSet<double>();
     hashSet.add(1);
     arktest.assertFalse(hashSet.remove(2), "Expected HashSet.remove(2) to return false when not added to the HashSet");
 }
 
 //Test cases ported from ArkTS 1.0:HASHSET_REMOVE_0700
 function testRemoveAfterRACSequence() {
-    const hashSet = new HashSet<number>();
+    const hashSet = new HashSet<double>();
     hashSet.remove(1);
     arktest.assertFalse(hashSet.has(1),
         "Expected HashSet.has(1) to return false as 1 was not added or removed from an empty set");

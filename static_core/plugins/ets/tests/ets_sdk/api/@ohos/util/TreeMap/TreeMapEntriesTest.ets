@@ -28,7 +28,7 @@ function main(): int {
 
 function testEntriesReturnIteratorByKeyValue() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
@@ -49,7 +49,7 @@ function testEntriesReturnIteratorByKeyValue() {
 
 function testEntriesReturnIteratorByKeyValueWithEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return secondValue.compareTo(firstValue)
         });
     let it = treeMap.entries();

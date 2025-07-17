@@ -22,7 +22,7 @@ function main() {
     suite.addTest("Stack create an instance that stores multiple types of data", testCreateMultiTypeInstance);
     suite.addTest("Stack length", testStackLength);
     suite.addTest("Stack length with mixed types", testStackLengthMixedTypes);
-    suite.addTest("Stack length with large number of elements", testStackLengthLargeNumber);
+    suite.addTest("Stack length with large double of elements", testStackLengthLargeNumber);
     suite.addTest("Stack push", testStackPush);
     suite.addTest("Stack pop first element from an empty stack", testPopFromEmptyStack);
     suite.addTest("Stack pop first element", testPopFromNonEmptyStack);
@@ -34,17 +34,17 @@ function main() {
 
 class Temp {
     name: string = "";
-    age: number = 0;
+    age: double = 0;
 }
 
 class TestData {
-    static readonly testNumber1: number = 1;
-    static readonly testNumber2: number = 2;
-    static readonly testNumber3: number = 3;
-    static readonly testNumber4: number = 4;
-    static readonly testNumber5: number = 5;
-    static readonly testNumber6: number = 6;
-    static readonly testNumber1w: number = 10000;
+    static readonly testNumber1: double | int = 1;
+    static readonly testNumber2: double | int = 2;
+    static readonly testNumber3: double | int = 3;
+    static readonly testNumber4: double | int = 4;
+    static readonly testNumber5: double | int = 5;
+    static readonly testNumber6: double | int = 6;
+    static readonly testNumber1w: double | int = 10000;
     static readonly testObject1: Temp = { name: "Dylon", age: 13 };
     static readonly testString1: string = "string";
     static readonly forNumber: Number[] = [17, 3, 22, 8, 29, 11, 5, 19, 2, 26, 14, 7, 28, 10, 1, 24, 16, 13,
@@ -52,17 +52,17 @@ class TestData {
 }
 
 function testCreateSingleTypeInstance() {
-    let stack: Stack<number>;
-    arktest.expectNoThrow(() => {stack = new Stack<number>()});
+    let stack: Stack<double>;
+    arktest.expectNoThrow(() => {stack = new Stack<double>()});
 }
 
 function testCreateMultiTypeInstance() {
-    let stack: Stack<number | string | object>;
-    arktest.expectNoThrow(() => {stack = new Stack<number | string | object | boolean>()});
+    let stack: Stack<double | string | object>;
+    arktest.expectNoThrow(() => {stack = new Stack<double | string | object | boolean>()});
 }
 
 function testStackLength() {
-    let stack = new Stack<number>();
+    let stack = new Stack<double>();
     arktest.assertEQ(stack.length, 0, "Initial stack length should be 0");
     stack.push(TestData.testNumber3);
     stack.push(TestData.testNumber1);
@@ -74,7 +74,7 @@ function testStackLength() {
 }
 
 function testStackLengthMixedTypes() {
-    let stack = new Stack<number | string | boolean | undefined>();
+    let stack = new Stack<double | string | boolean | undefined>();
     arktest.assertEQ(stack.length, 0, "Initial stack length should be 0");
     stack.push(TestData.testNumber3);
     stack.push(TestData.testString1);
@@ -87,18 +87,18 @@ function testStackLengthMixedTypes() {
 }
 
 function testStackLengthLargeNumber() {
-    let stack = new Stack<number>();
-    for (let i: number = 0; i < TestData.testNumber1w; i++) {
+    let stack = new Stack<double>();
+    for (let i: int = 0; i < TestData.testNumber1w; i++) {
         stack.push(TestData.testNumber1);
     }
     arktest.assertEQ(stack.length, TestData.testNumber1w, "Stack length should be 10000 after adding elements");
 }
 
 function testStackPush() {
-    let stack = new Stack<number>();
+    let stack = new Stack<double>();
     initializeStack(stack, TestData.forNumber);
     let countForEach = 0;
-    stack.forEach((value: number) => {
+    stack.forEach((value: double) => {
         arktest.assertEQ(value, TestData.forNumber[countForEach++], "Element should match");
     });
     arktest.assertEQ(countForEach, stack.length, "Stack length same as foreach");
@@ -106,14 +106,14 @@ function testStackPush() {
 }
 
 function testPopFromEmptyStack() {
-    let stack = new Stack<number>();
+    let stack = new Stack<double>();
     arktest.assertEQ(stack.length, 0, "Initial stack length should be 0");
     arktest.assertEQ(stack.pop(), undefined, "Pop from empty stack should return undefined");
 }
 
 function testPopFromNonEmptyStack() {
-    let stack = new Stack<number>();
-    for (let i: number = TestData.testNumber1; i < TestData.testNumber6; i++) {
+    let stack = new Stack<double>();
+    for (let i: int = TestData.testNumber1; i < TestData.testNumber6; i++) {
         stack.push(TestData.testNumber3);
     }
     stack.push(TestData.testNumber1);
@@ -121,7 +121,7 @@ function testPopFromNonEmptyStack() {
     arktest.assertEQ(stack.pop(), TestData.testNumber1, "Pop from non-empty stack should return last element");
     arktest.assertEQ(stack.length, TestData.testNumber5, "Pop from non-empty stack should update length");
     let countForEach = 0;
-    stack.forEach((value: number) => {
+    stack.forEach((value: double) => {
         arktest.assertEQ(value, TestData.testNumber3, "Element should match");
         countForEach++;
     });
@@ -129,13 +129,13 @@ function testPopFromNonEmptyStack() {
 }
 
 function testPeekEmptyStack() {
-    let stack = new Stack<number>();
+    let stack = new Stack<double>();
     arktest.assertEQ(stack.length, 0, "Initial stack length should be 0");
     arktest.assertEQ(stack.peek(), undefined, "Peek from empty stack should return undefined");
 }
 
 function testPeekNonEmptyStack() {
-    let stack = new Stack<number>();
+    let stack = new Stack<double>();
     stack.push(TestData.testNumber1);
     stack.push(TestData.testNumber2);
     arktest.assertEQ(stack.peek(), TestData.testNumber2, "Peek should return the new top element");
@@ -143,7 +143,7 @@ function testPeekNonEmptyStack() {
 }
 
 function initializeStack<T>(stack: Stack<T>, sourceArray: T[]) {
-    for (let i = 0; i < sourceArray.length; i++) {
+    for (let i: int = 0; i < sourceArray.length; i++) {
         arktest.assertEQ(stack.push(sourceArray[i]), sourceArray[i], "The result should be the added element");
     }
 }

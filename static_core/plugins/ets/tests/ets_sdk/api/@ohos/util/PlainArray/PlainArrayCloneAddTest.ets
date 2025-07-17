@@ -16,9 +16,9 @@
 import { PlainArray } from "@ohos.util.PlainArray";
 
 class Tmp {
-    age: number = 0;
+    age: double = 0;
 
-    constructor(age: number) {
+    constructor(age: double) {
         this.age = age;
     }
 }
@@ -27,7 +27,7 @@ function main() {
     const suite = new arktest.ArkTestsuite("PlainArray API tests");
 
     suite.addTest("Testing PlainArray clone with string values", testCloneWithStringValues);
-    suite.addTest("Testing PlainArray clone with number values", testCloneWithNumberValues);
+    suite.addTest("Testing PlainArray clone with double values", testCloneWithNumberValues);
     suite.addTest("Testing PlainArray clone with object values", testCloneWithObjectValues);
     suite.addTest("Testing PlainArray clone and add operation", testCloneAndAddOperation);
     suite.addTest("Testing PlainArray clone with large string values", testCloneWithLargeStringValues);
@@ -51,7 +51,7 @@ function testCloneWithStringValues() {
 
 // Test cases ported from ArkTS 1.0: PLAINARRAY_CLONE_0200
 function testCloneWithNumberValues() {
-    let plainArray = new PlainArray<number>();
+    let plainArray = new PlainArray<double>();
     plainArray.add(1, 1);
     plainArray.add(2, 2);
     let newPlainArray = plainArray.clone();
@@ -124,10 +124,10 @@ function testRemoveOperationWithBoundaryKeys() {
     let plainArray = new PlainArray<string>();
     plainArray.add(1, "zhang san");
     plainArray.add(2, "zhang san1");
-    let num: number = 2147483647;
+    let num: int = 2147483647;
     plainArray.add(num, "li si");
     arktest.assertEQ(plainArray.remove(num), "li si");
-    let num1: number = -2147483648;
+    let num1: int = -2147483648;
     plainArray.add(num1, "li si");
     arktest.assertEQ(plainArray.remove(num1), "li si");
 }

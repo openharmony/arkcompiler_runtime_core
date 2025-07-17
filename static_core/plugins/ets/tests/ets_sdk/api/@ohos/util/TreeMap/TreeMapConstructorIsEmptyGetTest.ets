@@ -18,7 +18,7 @@ import TreeMap from "@ohos.util.TreeMap";
 function main(): int {
     const suite = new arktest.ArkTestsuite("TreeMap API Constructor IsEmpty Get tests")
 
-    suite.addTest("Test TreeMap constructor (no comparator) and set() with number keys and check length.",
+    suite.addTest("Test TreeMap constructor (no comparator) and set() with double keys and check length.",
         testConstructorNoComparatorSetNumberKeys)
     suite.addTest("Test TreeMap constructor with custom string comparator and set() with string keys and check length.",
         testConstructorCustomStringComparatorSetStringKeys)
@@ -41,7 +41,7 @@ function main(): int {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_0100
 function testConstructorNoComparatorSetNumberKeys() {
-    let treeMap = new TreeMap<number, number>();
+    let treeMap = new TreeMap<double, double>();
     treeMap.set(111, 999)
     treeMap.set(222, 888)
     treeMap.set(333, 777)
@@ -51,7 +51,7 @@ function testConstructorNoComparatorSetNumberKeys() {
 //Test cases ported from ArkTS 1.0:TREEMAP_0200
 function testConstructorCustomStringComparatorSetStringKeys() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return firstValue.compareTo(secondValue);
         });
     treeMap.set("AAA", "111")
@@ -68,7 +68,7 @@ class TestEntry {
 //Test cases ported from ArkTS 1.0:TREEMAP_0300
 function testConstructorCustomObjectComparatorSetCustomObjectKeys() {
     let ts1: TreeMap<TestEntry, string> =
-        new TreeMap<TestEntry, string>((t1: TestEntry, t2: TestEntry): number => {
+        new TreeMap<TestEntry, string>((t1: TestEntry, t2: TestEntry): double => {
             return t2.id - t1.id;
         });
     let entry1: TestEntry = {
@@ -102,14 +102,14 @@ function testConstructorNoComparatorSetCustomObjectKeys() {
 
 //Test cases ported from ArkTS 1.0:testIsEmpty0001
 function testIsEmptyOnNewlyCreatedMap() {
-    let treeMap = new TreeMap<number, number>();
+    let treeMap = new TreeMap<double, double>();
     let result = treeMap.isEmpty();
     arktest.assertTrue(result, "Expected isEmpty() to be true for a newly created TreeMap");
 }
 
 //Test cases ported from ArkTS 1.0:testIsEmpty0002
 function testIsEmptyAfterAddingElement() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set("squirrel", 123);
     let result = treeMap.isEmpty();
     arktest.assertFalse(result, "Expected isEmpty() to be false after adding an element");
@@ -117,7 +117,7 @@ function testIsEmptyAfterAddingElement() {
 
 //Test cases ported from ArkTS 1.0:testIsEmpty0003
 function testIsEmptyAfterAddingAndRemovingElement() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set("squirrel", 123);
     let result = treeMap.isEmpty();
     arktest.assertFalse(result, "Expected isEmpty() to be false after adding an element");
@@ -128,21 +128,21 @@ function testIsEmptyAfterAddingAndRemovingElement() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_1800
 function testGetWithEmptyStringKeyOnEmptyMap() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     let result = treeMap.get('');
     arktest.assertEQ(result, undefined);
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_2100
 function testGetWithNonExistingKeyOnEmptyMap() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     let result = treeMap.get("key");
     arktest.assertEQ(result, undefined);
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_2200
 function testGetWithExistingKey() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set("squirrel", 123);
     let result = treeMap.get("squirrel");
     arktest.assertEQ(result, 123);
@@ -150,7 +150,7 @@ function testGetWithExistingKey() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_2300
 function testGetWithNonExistingKeyOnNonEmptyMap() {
-    let treeMap = new TreeMap<string, number>();
+    let treeMap = new TreeMap<string, double>();
     treeMap.set("squirrel", 123);
     let result = treeMap.get("sparrow");
     arktest.assertEQ(result, undefined);

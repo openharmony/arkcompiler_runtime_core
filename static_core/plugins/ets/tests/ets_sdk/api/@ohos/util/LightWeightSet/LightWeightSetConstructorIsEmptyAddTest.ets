@@ -31,7 +31,7 @@ function main(): int {
 }
 
 function testConstructorCreatesEmptySet() {
-    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
     lightWeightSet.add("aa");
     arktest.assertTrue(lightWeightSet instanceof LightWeightSet,
         "The lightWeightSet should be of the same type as the LightWeightSet");
@@ -39,14 +39,14 @@ function testConstructorCreatesEmptySet() {
 }
 
 function testIsEmptyTrue() {
-    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
     let result = lightWeightSet.isEmpty();
     arktest.assertEQ(result, true, "The lightWeightSet should be empty");
     arktest.assertEQ(lightWeightSet.length, 0, "The lightWeightSet length should be 0");
 }
 
 function testIsEmptyFalse() {
-    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
     lightWeightSet.add("aa");
     let result = lightWeightSet.isEmpty();
     arktest.assertEQ(result, false, "The lightWeightSet should not be empty");
@@ -54,7 +54,7 @@ function testIsEmptyFalse() {
 }
 
 function testIsEmptyTrueAfterRemove() {
-    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
     lightWeightSet.add(3);
     lightWeightSet.remove(3)
     let result = lightWeightSet.isEmpty();
@@ -63,7 +63,7 @@ function testIsEmptyTrueAfterRemove() {
 }
 
 function testIsEmptyTrueAfterClear() {
-    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
     lightWeightSet.add("aa")
     lightWeightSet.add("bb")
     lightWeightSet.add("cc")
@@ -74,7 +74,7 @@ function testIsEmptyTrueAfterClear() {
 }
 
 function testAddData() {
-    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
     lightWeightSet.add("aa");
     let result = lightWeightSet.has("aa");
     arktest.assertEQ(result, true, "The lightWeightSet should contain the added value");
@@ -82,7 +82,7 @@ function testAddData() {
 }
 
 function testAddMaxData() {
-    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
     const MY_MAX = 10240;
     let result = lightWeightSet.add(MY_MAX);
     arktest.assertEQ(result, true, "The lightWeightSet should contain the added value");
@@ -90,7 +90,7 @@ function testAddMaxData() {
 }
 
 function testAddExistData() {
-    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
     lightWeightSet.add("aa");
 
     let result = lightWeightSet.has("aa");
