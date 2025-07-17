@@ -570,11 +570,11 @@ bool FunctionAddParameter(AbckitArktsFunction *func, AbckitArktsFunctionParam *p
     return DEFAULT_BOOL;
 }
 
-bool FunctionRemoveParameter(AbckitArktsFunction *func, AbckitArktsFunctionParam *param)
+bool FunctionRemoveParameter(AbckitArktsFunction *func, size_t index)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(func == DEFAULT_ARKTS_FUNCTION);
-    EXPECT_TRUE(param == DEFAULT_ARKTS_FUNCTION_PARAM);
+    EXPECT_TRUE(index == DEFAULT_SIZE_T);
     return DEFAULT_BOOL;
 }
 

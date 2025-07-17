@@ -45,6 +45,13 @@ AbckitLiteralArray *CreateLiteralArrayStatic(AbckitFile *file, AbckitLiteral **v
 AbckitValue *FindOrCreateValueU1Static(AbckitFile *file, bool value);
 AbckitValue *FindOrCreateValueDoubleStatic(AbckitFile *file, double value);
 AbckitValue *FindOrCreateValueStringStatic(AbckitFile *file, const char *value, size_t len);
+// ========================================
+// Function
+// ========================================
+bool FunctionSetNameStatic(AbckitArktsFunction *function, const char *name);
+bool FunctionAddParameterStatic(AbckitArktsFunction *func, AbckitArktsFunctionParam *param);
+bool FunctionSetReturnTypeStatic(AbckitArktsFunction *func, AbckitType *type);
+bool FunctionRemoveParameterStatic(AbckitArktsFunction *func, size_t index);
 }  // namespace libabckit
 
 #endif

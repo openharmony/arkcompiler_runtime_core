@@ -1419,7 +1419,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `param` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `param` is not a parameter of function `func`.
      */
-    bool (*functionRemoveParameter)(AbckitArktsFunction *func, AbckitArktsFunctionParam *param);
+    bool (*functionRemoveParameter)(AbckitArktsFunction *func, size_t index);
 
     /**
      * @brief Sets return type for function `func`.

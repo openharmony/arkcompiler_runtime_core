@@ -853,34 +853,56 @@ extern "C" bool FunctionSetParentFunction(AbckitArktsFunction *function, AbckitA
 
 extern "C" bool FunctionSetName(AbckitArktsFunction *function, const char *name)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)function;
-    (void)name;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(function, false);
+    LIBABCKIT_BAD_ARGUMENT(name, false);
+
+    LIBABCKIT_INTERNAL_ERROR(function->core, false);
+
+    return FunctionSetNameStatic(function, name);
 }
 
 extern "C" bool FunctionAddParameter(AbckitArktsFunction *func, AbckitArktsFunctionParam *param)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)func;
-    (void)param;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(func, false);
+    LIBABCKIT_BAD_ARGUMENT(param, false);
+
+    LIBABCKIT_INTERNAL_ERROR(func->core, false);
+    LIBABCKIT_INTERNAL_ERROR(param->core, false);
+    return FunctionAddParameterStatic(func, param);
 }
 
-extern "C" bool FunctionRemoveParameter(AbckitArktsFunction *func, AbckitArktsFunctionParam *param)
+extern "C" bool FunctionRemoveParameter(AbckitArktsFunction *func, size_t index)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)func;
-    (void)param;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(func, false);
+
+    LIBABCKIT_INTERNAL_ERROR(func->core, false);
+    return FunctionRemoveParameterStatic(func, index);
 }
 
 extern "C" bool FunctionSetReturnType(AbckitArktsFunction *func, AbckitType *type)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)func;
-    (void)type;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(func, false);
+    LIBABCKIT_BAD_ARGUMENT(type, false);
+
+    LIBABCKIT_INTERNAL_ERROR(func->core, false);
+
+    return FunctionSetReturnTypeStatic(func, type);
 }
 
 extern "C" AbckitArktsFunction *CreateFunction(const char *name, AbckitType *returnType)
