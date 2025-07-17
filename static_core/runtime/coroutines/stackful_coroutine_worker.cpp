@@ -465,8 +465,9 @@ void StackfulCoroutineWorker::SwitchCoroutineContext(StackfulCoroutineContext *f
     LOG(DEBUG, COROUTINES) << "Ctx switch: " << from->GetCoroutine()->GetName() << " --> "
                            << to->GetCoroutine()->GetName();
     stats_.FinishInterval(CoroutineTimeStats::SCH_ALL);
-    OnContextSwitch();
+    OnBeforeContextSwitch(from, to);
     stats_.StartInterval(CoroutineTimeStats::CTX_SWITCH);
+    // performs the fiber switch!
     from->SwitchTo(to);
     if (IsCrossWorkerCall()) {
         ASSERT(Coroutine::GetCurrent()->GetType() == Coroutine::Type::MUTATOR);
@@ -476,6 +477,7 @@ void StackfulCoroutineWorker::SwitchCoroutineContext(StackfulCoroutineContext *f
     }
     stats_.FinishInterval(CoroutineTimeStats::CTX_SWITCH);
     stats_.StartInterval(CoroutineTimeStats::SCH_ALL);
+    OnAfterContextSwitch(from);
 }
 
 void StackfulCoroutineWorker::FinalizeTerminatedCoros()
@@ -582,9 +584,26 @@ bool StackfulCoroutineWorker::IsPotentiallyBlocked()
     return false;
 }
 
-void StackfulCoroutineWorker::OnContextSwitch()
+void StackfulCoroutineWorker::OnBeforeContextSwitch([[maybe_unused]] StackfulCoroutineContext *from,
+                                                    [[maybe_unused]] StackfulCoroutineContext *to)
 {
+    /**
+     * "from" is aready suspended or blocked, "to" is already resumed.
+     * The context is NOT switched yet, so we are on the ctx of the "from" coroutine,
+     * so it is STRICTLY NOT RECOMMENDED to run managed code from this event handler and
+     * its callees.
+     */
     lastCtxSwitchTimeMillis_ = ark::os::time::GetClockTimeInMilli();
+}
+
+void StackfulCoroutineWorker::OnAfterContextSwitch(StackfulCoroutineContext *to)
+{
+    /**
+     * "to" is already resumed. There is no reliable way to determine the ctx switch source yet.
+     * The context is JUST SWITCHED, so we are on the ctx of the "to" coroutine.
+     */
+    Coroutine *coroTo = to->GetCoroutine();
+    coroTo->OnContextSwitchedTo();
 }
 
 void StackfulCoroutineWorker::GetFullWorkerStateInfo(StackfulCoroutineWorkerStateInfo *info) const

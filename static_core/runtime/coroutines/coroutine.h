@@ -318,6 +318,7 @@ public:
     /* event handlers */
     virtual void OnHostWorkerChanged() {};
     virtual void OnStatusChanged(Status oldStatus, Status newStatus);
+    virtual void OnContextSwitchedTo();
 
 #ifdef ARK_HYBRID
     void Visit(CommonRootVisitor visitor)

@@ -44,16 +44,19 @@ public:
     void ListFailedJobs(EtsCoroutine *coro);
 
     /// @brief Adds rejected promise to an internal storage
-    void AddRejectedPromise(EtsPromise *promise);
+    void AddRejectedPromise(EtsPromise *promise, EtsCoroutine *adderCoro);
 
     /// @brief Removes rejected promise from internal storage
-    void RemoveRejectedPromise(EtsPromise *promise);
+    void RemoveRejectedPromise(EtsPromise *promise, EtsCoroutine *removerCoro);
 
-    /// @brief Invokes managed method to apply custom handler on stored rejected promises
+    /// @brief Invokes managed method to apply custom handler on stored rejected promises for a specific worker
     void ListRejectedPromises(EtsCoroutine *coro);
 
-    /// @brief Checks if manager has unhandled objects captured
-    bool HasObjects() const;
+    /// @brief Checks if manager has unhandled failed job objects captured
+    bool HasFailedJobObjects() const;
+
+    /// @brief Checks if manager has unhandled rejected promise objects captured for a specific worker
+    bool HasRejectedPromiseObjects(EtsCoroutine *coro) const;
 
     /// @brief Updates references to objects moved by GC
     void UpdateObjects(const GCRootUpdater &gcRootUpdater);
@@ -66,7 +69,9 @@ public:
 
 private:
     PandaUnorderedSet<EtsObject *> failedJobs_ GUARDED_BY(mutex_);
-    PandaUnorderedSet<EtsObject *> rejectedPromises_ GUARDED_BY(mutex_);
+    PandaUnorderedMap<CoroutineWorker::Id, PandaUnorderedSet<EtsObject *>> rejectedPromises_ GUARDED_BY(mutex_);
+    // NOTE: The current implementation doesn't handle the case where a promise is
+    // rejected in one worker and handled in another. This is considered undefined behavior.
 
     mutable os::memory::Mutex mutex_;
     PandaEtsVM *vm_;
