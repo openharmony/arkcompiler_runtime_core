@@ -284,6 +284,15 @@ export final class Char extends Object implements Comparable<Char> {
     public static native toDouble(value: char): double;
 
     /**
+     * Returns the primitive as string value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toString(value: char): string;
+
+    /**
      * Returns the primitive as char value
      *
      * @param value value to cast

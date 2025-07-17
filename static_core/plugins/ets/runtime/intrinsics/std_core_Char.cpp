@@ -72,4 +72,9 @@ EtsDouble StdCoreCharToDouble(EtsChar val)
     return static_cast<double>(val);
 }
 
+EtsString *StdCoreCharToString(EtsChar val)
+{
+    return EtsString::CreateNewStringFromCharCode(StdCoreCharToDouble(val));
+}
+
 }  // namespace ark::ets::intrinsics
