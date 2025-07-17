@@ -1542,7 +1542,9 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns a reversed copy
      */
-    public final native toReversed(): {{N}}Array
+    public toReversed(): {{N}}Array {
+        return new {{N}}Array(this).reverse()
+    }
 
     /**
      * Creates a sorted copy
