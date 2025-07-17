@@ -532,6 +532,9 @@ export abstract class Type extends Object {
         if (this instanceof BooleanType && other instanceof BooleanType) {
             return true
         }
+        if (this instanceof CharType && other instanceof CharType) {
+            return true
+        }
         return false
     }
 

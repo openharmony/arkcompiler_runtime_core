@@ -239,11 +239,90 @@ export final class Proxy {
 
         const propertyName = getter.getName().substring(Proxy.GETTER_METHOD_PREFIX_LENGTH)
         const getterType = getter.getType()
-
+        const resultType = getterType.getResultType()
         const getterCreator = new MethodCreator(getter.getName())
                 .addAccessModifier(getter.getAccessModifier())
-                .addResult(getterType.getResultType())
-                .addBody(new CallableBodyFunction((proxy: Object): NullishType => {
+                .addResult(resultType)
+        if (resultType.isPrimitive()) {
+            if (resultType instanceof IntType) {
+                getterCreator.addBody(new CallableBodyFunction((proxy: Object): Int => {
+                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    if (handler instanceof ProxyHandler) {
+                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        // using "wrapper" method to "capture" <T> after smartcast
+                        return (this.handlerGet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName) as Numeric).toInt()
+                    }
+
+                    throw new TypeError("unexpected proxy handler type: " + Type.of(handler).getName())
+                }))
+            } else if (resultType instanceof DoubleType) {
+                getterCreator.addBody(new CallableBodyFunction((proxy: Object): Double => {
+                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    if (handler instanceof ProxyHandler) {
+                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        // using "wrapper" method to "capture" <T> after smartcast
+                        return (this.handlerGet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName) as Numeric).toDouble()
+                    }
+
+                    throw new TypeError("unexpected proxy handler type: " + Type.of(handler).getName())
+                }))
+            } else if (resultType instanceof ShortType) {
+                getterCreator.addBody(new CallableBodyFunction((proxy: Object): Short => {
+                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    if (handler instanceof ProxyHandler) {
+                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        // using "wrapper" method to "capture" <T> after smartcast
+                        return (this.handlerGet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName) as Numeric).toShort()
+                    }
+
+                    throw new TypeError("unexpected proxy handler type: " + Type.of(handler).getName())
+                }))
+            } else if (resultType instanceof FloatType) {
+                getterCreator.addBody(new CallableBodyFunction((proxy: Object): Float => {
+                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    if (handler instanceof ProxyHandler) {
+                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        // using "wrapper" method to "capture" <T> after smartcast
+                        return (this.handlerGet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName) as Numeric).toFloat()
+                    }
+
+                    throw new TypeError("unexpected proxy handler type: " + Type.of(handler).getName())
+                }))
+            } else if (resultType instanceof ByteType) {
+                getterCreator.addBody(new CallableBodyFunction((proxy: Object): Byte => {
+                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    if (handler instanceof ProxyHandler) {
+                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        // using "wrapper" method to "capture" <T> after smartcast
+                        return (this.handlerGet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName) as Numeric).toByte()
+                    }
+
+                    throw new TypeError("unexpected proxy handler type: " + Type.of(handler).getName())
+                }))
+            } else if (resultType instanceof CharType) {
+                getterCreator.addBody(new CallableBodyFunction((proxy: Object): Char => {
+                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    if (handler instanceof ProxyHandler) {
+                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        // using "wrapper" method to "capture" <T> after smartcast
+                        return this.handlerGet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName) as Char
+                    }
+
+                    throw new TypeError("unexpected proxy handler type: " + Type.of(handler).getName())
+                }))
+            } else if (resultType instanceof LongType) {
+                getterCreator.addBody(new CallableBodyFunction((proxy: Object): Long => {
+                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    if (handler instanceof ProxyHandler) {
+                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        // using "wrapper" method to "capture" <T> after smartcast
+                        return (this.handlerGet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName) as Numeric).toLong()
+                    }
+
+                    throw new TypeError("unexpected proxy handler type: " + Type.of(handler).getName())
+                }))
+            } else {
+                getterCreator.addBody(new CallableBodyFunction((proxy: Object): NullishType => {
                     const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
                     if (handler instanceof ProxyHandler) {
                         const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
@@ -253,7 +332,19 @@ export final class Proxy {
 
                     throw new TypeError("unexpected proxy handler type: " + Type.of(handler).getName())
                 }))
+            }
+        } else {
+            getterCreator.addBody(new CallableBodyFunction((proxy: Object): NullishType => {
+                const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                if (handler instanceof ProxyHandler) {
+                    const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                    // using "wrapper" method to "capture" <T> after smartcast
+                    return this.handlerGet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName)
+                }
 
+                throw new TypeError("unexpected proxy handler type: " + Type.of(handler).getName())
+            }))
+        }
         proxyTypeCreator.addMethod(getterCreator)
     }
 
@@ -272,7 +363,123 @@ export final class Proxy {
             .addAccessModifier(setter.getAccessModifier())
             .addResult(setterType.getResultType())
             .addParameter(new ParameterCreator(setterType.getParameter(0).getType()))
-            .addBody(new CallableBodyFunction((proxy: Object, value: NullishType): void => {
+        const setterParamType = setterType.getParameter(0).getType()
+        if (setterParamType.isPrimitive()) {
+            if (setterParamType instanceof IntType) {
+                setterCreator.addBody(new CallableBodyFunction((proxy: Object, value: Int): void => {
+                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    if (handler instanceof ProxyHandler) {
+                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        // using "wrapper" method to "capture" <T> after smartcast
+                        const success = this.handlerSet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName, value as object)
+                        if (!success) {
+                            throw new TypeError(`proxy set handler returned false for propety '"${propertyName}"'`)
+                        }
+                    } else {
+                        throw new TypeError("unexpected proxy handler type: " + Type.of(handler).getName())
+                    }
+                }))
+            } else if (setterParamType instanceof DoubleType) {
+                setterCreator.addBody(new CallableBodyFunction((proxy: Object, value: Double): void => {
+                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    if (handler instanceof ProxyHandler) {
+                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        // using "wrapper" method to "capture" <T> after smartcast
+                        const success = this.handlerSet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName, value as object)
+                        if (!success) {
+                            throw new TypeError(`proxy set handler returned false for propety '"${propertyName}"'`)
+                        }
+                    } else {
+                        throw new TypeError("unexpected proxy handler type: " + Type.of(handler).getName())
+                    }
+                }))
+            } else if (setterParamType instanceof ShortType) {
+                setterCreator.addBody(new CallableBodyFunction((proxy: Object, value: Short): void => {
+                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    if (handler instanceof ProxyHandler) {
+                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        // using "wrapper" method to "capture" <T> after smartcast
+                        const success = this.handlerSet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName, value as object)
+                        if (!success) {
+                            throw new TypeError(`proxy set handler returned false for propety '"${propertyName}"'`)
+                        }
+                    } else {
+                        throw new TypeError("unexpected proxy handler type: " + Type.of(handler).getName())
+                    }
+                }))
+            } else if (setterParamType instanceof FloatType) {
+                setterCreator.addBody(new CallableBodyFunction((proxy: Object, value: Float): void => {
+                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    if (handler instanceof ProxyHandler) {
+                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        // using "wrapper" method to "capture" <T> after smartcast
+                        const success = this.handlerSet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName, value as object)
+                        if (!success) {
+                            throw new TypeError(`proxy set handler returned false for propety '"${propertyName}"'`)
+                        }
+                    } else {
+                        throw new TypeError("unexpected proxy handler type: " + Type.of(handler).getName())
+                    }
+                }))
+            } else if (setterParamType instanceof ByteType) {
+                setterCreator.addBody(new CallableBodyFunction((proxy: Object, value: Byte): void => {
+                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    if (handler instanceof ProxyHandler) {
+                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        // using "wrapper" method to "capture" <T> after smartcast
+                        const success = this.handlerSet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName, value as object)
+                        if (!success) {
+                            throw new TypeError(`proxy set handler returned false for propety '"${propertyName}"'`)
+                        }
+                    } else {
+                        throw new TypeError("unexpected proxy handler type: " + Type.of(handler).getName())
+                    }
+                }))
+            } else if (setterParamType instanceof CharType) {
+                setterCreator.addBody(new CallableBodyFunction((proxy: Object, value: Char): void => {
+                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    if (handler instanceof ProxyHandler) {
+                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        // using "wrapper" method to "capture" <T> after smartcast
+                        const success = this.handlerSet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName, value as object)
+                        if (!success) {
+                            throw new TypeError(`proxy set handler returned false for propety '"${propertyName}"'`)
+                        }
+                    } else {
+                        throw new TypeError("unexpected proxy handler type: " + Type.of(handler).getName())
+                    }
+                }))
+            } else if (setterParamType instanceof LongType) {
+                setterCreator.addBody(new CallableBodyFunction((proxy: Object, value: Long): void => {
+                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    if (handler instanceof ProxyHandler) {
+                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        // using "wrapper" method to "capture" <T> after smartcast
+                        const success = this.handlerSet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName, value as object)
+                        if (!success) {
+                            throw new TypeError(`proxy set handler returned false for propety '"${propertyName}"'`)
+                        }
+                    } else {
+                        throw new TypeError("unexpected proxy handler type: " + Type.of(handler).getName())
+                    }
+                }))
+            } else {
+                setterCreator.addBody(new CallableBodyFunction((proxy: Object, value: NullishType): void => {
+                    const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+                    if (handler instanceof ProxyHandler) {
+                        const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+                        // using "wrapper" method to "capture" <T> after smartcast
+                        const success = this.handlerSet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName, value as object)
+                        if (!success) {
+                            throw new TypeError(`proxy set handler returned false for propety '"${propertyName}"'`)
+                        }
+                    } else {
+                        throw new TypeError("unexpected proxy handler type: " + Type.of(handler).getName())
+                    }
+                }))
+            }
+        } else {
+            setterCreator.addBody(new CallableBodyFunction((proxy: Object, value: NullishType): void => {
                 const handler = Reflect.get(proxy, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
                 if (handler instanceof ProxyHandler) {
                     const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
@@ -285,6 +492,7 @@ export final class Proxy {
                     throw new TypeError("unexpected proxy handler type: " + Type.of(handler).getName())
                 }
             }))
+        }
 
         proxyTypeCreator.addMethod(setterCreator)
     }
