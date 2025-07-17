@@ -175,7 +175,23 @@ function testUriConstruction034() {
   }
 }
 
+function testPort0002() {
+  const Uri = "https://username:password@host:@8080/directory/file?foo=1&bar=2#fragment";
+  const uriInstance = new uri.URI(Uri);
+  arktest.assertEQ(uriInstance.port, "-1");
+}
 
+function testPort0003() {
+  const Uri = "https://username:password@host:80@80/directory/file?foo=1&bar=2#fragment";
+  const uriInstance = new uri.URI(Uri);
+  arktest.assertEQ(uriInstance.port, "-1");
+}
+
+function testPort0004() {
+  const Uri = "https://username:password@host:8080@/directory/file?foo=1&bar=2#fragment";
+  const uriInstance = new uri.URI(Uri);
+  arktest.assertEQ(uriInstance.port, "-1");
+}
 
 
 function main(): int {
@@ -208,7 +224,10 @@ function main(): int {
   suite.addTest("testUriConstruction033", testUriConstruction033);
   suite.addTest("testUriConstruction034", testUriConstruction034);
 
- 
+  suite.addTest("testPort0002", testPort0002);
+  suite.addTest("testPort0003", testPort0003);
+  suite.addTest("testPort0004", testPort0004);
+
   //passed
   return suite.run();
 }

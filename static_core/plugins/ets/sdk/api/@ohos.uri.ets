@@ -548,8 +548,6 @@ export namespace uri {
       .replaceAll("%25", '%');
   }
 
-
-
   /**
   * Handling specific URI logic
   */
@@ -573,9 +571,8 @@ export namespace uri {
     private REG_URLC = new RegExp("[\\da-zA-Z+\\-.| _~!$&=,;'(){}*/?:@\\[\\]%\"]", 'g');
     private REG_PATH = new RegExp("[\\da-zA-Z+\\-.| _~!$&=,;'(){}*/:@%]", 'g');
     private REG_USER_INFO = new RegExp("[\\da-zA-Z+\\-.| _~!$&=,;'(){}*:%]", 'g');
-    private REG_PORT = new RegExp("[\\da-zA-Z\\-.]", 'g');
+    private REG_PORT = new RegExp("[\\da-zA-Z.:@\\-;&=+$,_!~*'()]", 'g');
     private REG_NONASC = new RegExp("[^\\x00-\\x7F]", 'g');
-    private REG_DIGIT = new RegExp("[\\d]", 'g');
 
     constructor(input: string) {
       if (input == "") {
