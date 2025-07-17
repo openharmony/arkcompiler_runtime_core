@@ -60,6 +60,7 @@ template("ohos_shared_library") {
                "subsystem_name",
                "relative_install_dir",
                "install_enable",
+               "stack_protector_ret",
              ])
 
   shared_library("${target_name}") {
@@ -94,6 +95,7 @@ template("ohos_static_library") {
                "part_name",
                "external_deps",
                "branch_protector_ret",
+               "stack_protector_ret",
              ])
 
   static_library("${target_name}") {
