@@ -76,6 +76,8 @@ public:
 
     uint32_t GetNumMandatoryArgs();
 
+    std::optional<uint32_t> TryGetMinArgCount();
+
     EtsType GetArgType(size_t idx) const
     {
         EtsType etsType = ConvertPandaTypeToEtsType(GetPandaMethod()->GetArgType(idx));
@@ -178,6 +180,16 @@ public:
     bool IsNative() const
     {
         return GetPandaMethod()->IsNative();
+    }
+
+    bool HasRestParam() const
+    {
+        return (this->GetAccessFlags() & ACC_VARARGS) != 0;
+    }
+
+    bool IsFinal() const
+    {
+        return GetPandaMethod()->IsFinal();
     }
 
     bool IsFastNative() const
@@ -365,9 +377,6 @@ public:
 
     NO_COPY_SEMANTIC(EtsMethod);
     NO_MOVE_SEMANTIC(EtsMethod);
-
-private:
-    std::optional<uint32_t> TryGetMinArgCount();
 };
 
 }  // namespace ark::ets

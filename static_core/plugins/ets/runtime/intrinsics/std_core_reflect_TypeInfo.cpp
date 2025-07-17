@@ -45,10 +45,9 @@ extern "C" ReflectTypeInfo *TypeInfoOfImpl(EtsClass *cls)
     return nullptr;
 }
 
-static EtsTypeAPIMethod *CreateTypeAPIMethod(EtsCoroutine *coro, EtsClass *cls, EtsMethod *method)
+static EtsTypeAPIMethod *CreateTypeAPIMethod(EtsCoroutine *coro, EtsMethod *method)
 {
     ASSERT(coro != nullptr);
-    ASSERT(cls != nullptr);
     ASSERT(method != nullptr);
 
     [[maybe_unused]] EtsHandleScope scope(coro);
@@ -81,7 +80,6 @@ static EtsTypeAPIMethod *CreateTypeAPIMethod(EtsCoroutine *coro, EtsClass *cls, 
     attr |= (method->IsStatic()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::STATIC) : 0U;
     attr |= (method->IsConstructor()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::CONSTRUCTOR) : 0U;
     attr |= (method->IsAbstract()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::ABSTRACT) : 0U;
-    attr |= (!method->IsDeclaredIn(cls)) ? static_cast<uint32_t>(EtsTypeAPIAttributes::INHERITED) : 0U;
     attr |= (method->IsGetter()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::GETTER) : 0U;
     attr |= (method->IsSetter()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::SETTER) : 0U;
 
@@ -126,7 +124,8 @@ extern "C" ObjectHeader *ClassTypeInfoNativeIfaceGetInstanceMethods(EtsClass *cl
     ASSERT(arrayH.GetPtr() != nullptr);
 
     for (size_t idx = 0; idx < instanceMethods.size(); ++idx) {
-        arrayH->Set(idx, CreateTypeAPIMethod(coro, cls, instanceMethods[idx])->AsObject());
+        auto *typeApiMethod = CreateTypeAPIMethod(coro, instanceMethods[idx]);
+        arrayH->Set(idx, typeApiMethod->AsObject());
     }
 
     return arrayH->AsObject()->GetCoreType();
@@ -150,7 +149,7 @@ extern "C" EtsTypeAPIMethod *ClassTypeInfoNativeIfaceGetInstanceMethodByName(Ets
         return nullptr;
     }
 
-    return CreateTypeAPIMethod(coro, cls, method);
+    return CreateTypeAPIMethod(coro, method);
 }
 
 extern "C" EtsClass *ClassTypeInfoNativeIfaceGetBase(EtsClass *cls)

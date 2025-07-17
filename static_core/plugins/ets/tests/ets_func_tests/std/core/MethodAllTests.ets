@@ -50,6 +50,10 @@ function findMethod(ct: ClassType, name: string): Method | null {
 	return null
 }
 
+function isInherited(f: Method, cls: ClassType): boolean {
+	return !f.getOwnerType().equals(cls)
+}
+
 function testMethodBasics(): void {
 	const ct = Type.of(new StaticClass()) as ClassType
 
@@ -57,7 +61,7 @@ function testMethodBasics(): void {
 	arktest.assertEQ('foo', mFoo.getName())
 	arktest.assertTrue(mFoo.getType() instanceof MethodType)
 	arktest.assertTrue(mFoo.isStatic())
-	arktest.assertFalse(mFoo.isInherited())
+	arktest.assertFalse(isInherited(mFoo, ct))
 	arktest.assertFalse(mFoo.isAbstract())
 	arktest.assertFalse(mFoo.isGetter())
 	arktest.assertFalse(mFoo.isSetter())

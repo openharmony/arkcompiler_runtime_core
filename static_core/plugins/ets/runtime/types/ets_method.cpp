@@ -17,8 +17,10 @@
 
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/utf.h"
+#include "libarkfile/param_annotations_data_accessor.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
+#include "plugins/ets/runtime/ets_annotation.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/napi/ets_scoped_objects_fix.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
@@ -154,24 +156,14 @@ inline std::optional<uint32_t> TryGetMinArgCountFromAnnotation(const panda_file:
 
 std::optional<uint32_t> EtsMethod::TryGetMinArgCount()
 {
-    std::optional<uint32_t> resOpt = std::nullopt;
-
     panda_file::MethodDataAccessor mda(*(GetPandaMethod()->GetPandaFile()), GetPandaMethod()->GetFileId());
-    mda.EnumerateAnnotations([&](panda_file::File::EntityId annotationId) {
-        panda_file::AnnotationDataAccessor accessor(mda.GetPandaFile(), annotationId);
-        auto annotationName = mda.GetPandaFile().GetStringData(accessor.GetClassId()).data;
-        auto expectedAnnotationName =
-            utf::CStringAsMutf8(panda_file_items::class_descriptors::OPTIONAL_PARAMETERS_ANNOTATION.data());
-        // check if annotation is optional parameters
-        if (utf::IsEqual(annotationName, expectedAnnotationName)) {
-            std::optional<uint32_t> minArgCountOpt = TryGetMinArgCountFromAnnotation(accessor, mda.GetPandaFile());
-
-            if (minArgCountOpt.has_value()) {
-                resOpt = minArgCountOpt;
-            }
-        }
-    });
-    return resOpt;
+    auto annotationId = EtsAnnotation::OptionalParameters(GetPandaMethod());
+    if (!annotationId.IsValid()) {
+        return std::nullopt;
+    }
+    panda_file::AnnotationDataAccessor accessor(mda.GetPandaFile(), annotationId);
+    std::optional<uint32_t> minArgCountOpt = TryGetMinArgCountFromAnnotation(accessor, mda.GetPandaFile());
+    return minArgCountOpt.has_value() ? minArgCountOpt : std::nullopt;
 }
 
 uint32_t EtsMethod::GetNumMandatoryArgs()
@@ -179,8 +171,7 @@ uint32_t EtsMethod::GetNumMandatoryArgs()
     // NOTE(MockMockBlack, #IC787J): support default parameters and optional parameters for lambda functon
     size_t numMandatoryArgs = 0;
 
-    bool hasRestParam = ((this->GetAccessFlags() & ACC_VARARGS) != 0);
-    if (hasRestParam) {
+    if (this->HasRestParam()) {
         // rest param is not mandatory
         numMandatoryArgs = this->GetParametersNum() - 1;
     } else {

@@ -98,6 +98,10 @@ function testParameterGetType(): void {
 	arktest.assertTrue(p1.getType().equals(Type.of(new String(''))))
 }
 
+function isInherited(f: Method, cls: ClassType): boolean {
+	return !f.getOwnerType().equals(cls)
+}
+
 function testMethodBasics(): void {
 	const ct = Type.of(new MethodHolder()) as ClassType
 	const got = new Set<string>()
@@ -111,7 +115,7 @@ function testMethodBasics(): void {
 	arktest.assertEQ(0 as long, mSm.getType().getParametersNum())
 	arktest.assertEQ(AccessModifier.PUBLIC, mSm.getAccessModifier())
 	arktest.assertTrue(mSm.isStatic())
-	arktest.assertFalse(mSm.isInherited())
+	arktest.assertFalse(isInherited(mSm, ct))
 	arktest.assertFalse(mSm.isGetter())
 	arktest.assertFalse(mSm.isSetter())
 

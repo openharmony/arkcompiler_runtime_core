@@ -73,16 +73,11 @@ export final class Field extends Object {
         TypeAPISetStaticFieldValue(this.ownerType!, this.name, this.getType().convertObject(v))
     }
 
-    public isInherited(): boolean {
-        return (this.attributes & Attributes.INHERITED) != 0
-    }
-
     public isStatic(): boolean {
         return (this.attributes & Attributes.STATIC) != 0
     }
 
     public isReadonly(): boolean {
-        // TODO(shumilov-petr): allways false due to extra type info dumping required
         return (this.attributes & Attributes.READONLY) != 0
     }
 

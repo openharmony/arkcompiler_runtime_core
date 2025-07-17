@@ -27,6 +27,10 @@ class SubFld extends BaseFld {
     public d: int = 9
 }
 
+function isInherited(f: Field, cls: ClassType): boolean {
+	return !f.getOwnerType().equals(cls)
+}
+
 function testStaticFieldBasics(): void {
     const ct = Type.of(new SF()) as ClassType
     const f = ct.getFieldByName(new String('foo')) as Field
@@ -38,7 +42,7 @@ function testStaticFieldBasics(): void {
     arktest.assertEQ(AccessModifier.PUBLIC, f.getAccessModifier())
     const val = f.getStaticValue() as Int
     arktest.assertEQ(5 as int, val as int)
-    arktest.assertFalse(f.isInherited())
+    arktest.assertFalse(isInherited(f, ct))
     arktest.assertFalse(f.isReadonly())
 }
 
@@ -48,8 +52,8 @@ function testBarStaticField(): void {
 
     arktest.assertTrue((f.getAttributes() & Attributes.STATIC) != 0)
     arktest.assertEQ(AccessModifier.PUBLIC, f.getAccessModifier())
-    arktest.assertFalse((f.getAttributes() & Attributes.READONLY) != 0)
-    arktest.assertFalse(f.isReadonly())
+    arktest.assertTrue((f.getAttributes() & Attributes.READONLY) != 0)
+    arktest.assertTrue(f.isReadonly())
 }
 
 function testInheritedFields(): void {
@@ -58,17 +62,17 @@ function testInheritedFields(): void {
 
     const fa = ctSub.getFieldByName(new String('a')) as Field
     arktest.assertTrue(fa.getOwnerType().equals(baseCt))
-    arktest.assertTrue(fa.isInherited())
+    arktest.assertTrue(isInherited(fa, ctSub))
     arktest.assertEQ(AccessModifier.PUBLIC, fa.getAccessModifier())
 
     const fc = ctSub.getFieldByName(new String('c')) as Field
     arktest.assertTrue(fc.getOwnerType().equals(baseCt))
-    arktest.assertTrue(fc.isInherited())
+    arktest.assertTrue(isInherited(fc, ctSub))
     arktest.assertEQ(AccessModifier.PROTECTED, fc.getAccessModifier())
 
     const fd = ctSub.getFieldByName(new String('d')) as Field
     arktest.assertTrue(fd.getOwnerType().equals(ctSub))
-    arktest.assertFalse(fd.isInherited())
+    arktest.assertFalse(isInherited(fd, ctSub))
     arktest.assertEQ(AccessModifier.PUBLIC, fd.getAccessModifier())
 }
 

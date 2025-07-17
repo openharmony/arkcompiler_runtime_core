@@ -181,7 +181,7 @@ export final class Proxy {
 
             const isGetter = method.isGetter()
             const isSetter = method.isSetter()
-            const isInherited = method.isInherited()
+            const isInherited = !method.getOwnerType().equals(ArrayProxy.ARRAY_TYPE)
             const isStatic = method.isStatic()
             const isFinal = method.isFinal()
 
@@ -213,7 +213,7 @@ export final class Proxy {
                     this.generateSetterProxy(proxyTypeCreator, method)
                 }
 
-                const isInherited = method.isInherited()
+                const isInherited = method.getOwnerType().getName() != targetType.getName()
                 const isStatic = method.isStatic()
                 const isFinal = method.isFinal()
                 const isAbstract = method.isAbstract()
