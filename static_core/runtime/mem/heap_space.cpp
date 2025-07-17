@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -297,6 +297,15 @@ void GenerationalSpaces::UpdateSize(size_t desiredYoungSize)
     UpdateYoungSize(desiredYoungSize);
     ComputeNewTenured();
     SetIsWorkGC(false);
+}
+
+size_t GenerationalSpaces::UpdateYoungSpaceMaxSize(size_t size)
+{
+    os::memory::WriteLockHolder lock(heapLock_);
+    size_t oldSize = youngSpace_.GetMaxSize();
+    youngSpace_.SetMaxSize(size);
+    youngSpace_.UseFullSpace();
+    return oldSize;
 }
 
 void GenerationalSpaces::UpdateYoungSize(size_t desiredYoungSize)
