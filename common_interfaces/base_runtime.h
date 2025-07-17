@@ -70,6 +70,7 @@ inline const char* GCREASON_STRING[] = {
     "appspawn",
     "backgound",
     "hint",
+    "idle",
 };
 
 inline const char* GCReasonToString(GCReason reason)
