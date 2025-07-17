@@ -112,7 +112,7 @@ class DeepCloner {
 		for (let methodIdx = 0; methodIdx < methodNum; methodIdx++) {
 			const method = type.getMethod(methodIdx)
 			const methodName = method.getName()
-			if (methodName.equals("clone") && !method.isInherited()) {
+			if (methodName.equals("clone") && (method.getOwnerType().equals(type))) {
 				return true
 			}
 		}

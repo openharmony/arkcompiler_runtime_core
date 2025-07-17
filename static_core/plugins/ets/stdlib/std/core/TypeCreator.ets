@@ -709,15 +709,6 @@ export final class LambdaTypeCreator extends TypeCreator {
      * Adds attribute with same name
      * @returns this
      */
-    public addThrowing(): LambdaTypeCreator {
-        this.attrs.add(Attributes.THROWING, true)
-        return this;
-    }
-
-    /**
-     * Adds attribute with same name
-     * @returns this
-     */
     public addAsync(): LambdaTypeCreator {
         this.attrs.add(Attributes.ASYNC, true)
         return this;

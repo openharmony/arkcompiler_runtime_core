@@ -36,6 +36,7 @@
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/runtime/ets_annotation.h"
 #include "types/ets_array.h"
 #include "types/ets_box_primitive-inl.h"
 #include "types/ets_class.h"
@@ -217,10 +218,8 @@ EtsLong TypeAPIGetOwnFieldsNum(EtsClass *cls)
     return cls->GetOwnFieldsNumber();
 }
 
-static EtsTypeAPIField *CreateField(const EtsClass *sourceClass, EtsField *field, EtsTypeAPIType *fieldType,
-                                    EtsTypeAPIType *ownerType)
+static EtsTypeAPIField *CreateField(EtsField *field, EtsTypeAPIType *fieldType, EtsTypeAPIType *ownerType)
 {
-    ASSERT(sourceClass != nullptr);
     ASSERT(field != nullptr);
     ASSERT(fieldType != nullptr);
     ASSERT(ownerType != nullptr);
@@ -257,7 +256,6 @@ static EtsTypeAPIField *CreateField(const EtsClass *sourceClass, EtsField *field
     // Set specific attributes
     uint32_t attr = 0;
     attr |= (field->IsStatic()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::STATIC) : 0U;
-    attr |= (!field->IsDeclaredIn(sourceClass)) ? static_cast<uint32_t>(EtsTypeAPIAttributes::INHERITED) : 0U;
     attr |= (field->IsReadonly()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::READONLY) : 0U;
 
     typeapiField->SetAttributes(attr);
@@ -322,11 +320,11 @@ EtsClass *TypeAPIGetFieldOwner(EtsLong fieldPtr)
     return field->GetDeclaringClass();
 }
 
-EtsTypeAPIField *TypeAPIGetField(EtsClass *cls, EtsLong fieldPtr, EtsTypeAPIType *fieldType, EtsTypeAPIType *ownerType)
+EtsTypeAPIField *TypeAPIGetField(EtsLong fieldPtr, EtsTypeAPIType *fieldType, EtsTypeAPIType *ownerType)
 {
     auto *field = reinterpret_cast<EtsField *>(fieldPtr);
     ASSERT(field != nullptr);
-    return CreateField(cls, field, fieldType, ownerType);
+    return CreateField(field, fieldType, ownerType);
 }
 
 EtsObject *TypeAPIGetStaticFieldValue(EtsTypeAPIType *ownerType, EtsString *name)
@@ -407,11 +405,11 @@ EtsString *TypeAPIGetConstructorDescriptor(EtsClass *cls, EtsLong i)
 }
 
 static EtsTypeAPIMethod *CreateMethodUnderHandleScope(EtsHandle<EtsTypeAPIType> &methodTypeHandle, EtsMethod *method,
-                                                      const EtsClass *sourceClass)
+                                                      EtsHandle<EtsTypeAPIType> &ownerTypeHandle)
 {
     ASSERT(methodTypeHandle.GetPtr() != nullptr);
+    ASSERT(ownerTypeHandle.GetPtr() != nullptr);
     ASSERT(method != nullptr);
-    ASSERT(sourceClass != nullptr);
 
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
@@ -422,6 +420,7 @@ static EtsTypeAPIMethod *CreateMethodUnderHandleScope(EtsHandle<EtsTypeAPIType> 
 
     // Set Type
     typeapiMethod->SetMethodType(methodTypeHandle.GetPtr());
+    typeapiMethod->SetOwnerType(ownerTypeHandle.GetPtr());
     EtsString *name;
     if (method->IsInstanceConstructor()) {
         name = EtsString::CreateFromMUtf8(CONSTRUCTOR_NAME);
@@ -446,9 +445,12 @@ static EtsTypeAPIMethod *CreateMethodUnderHandleScope(EtsHandle<EtsTypeAPIType> 
     attr |= (method->IsStatic()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::STATIC) : 0U;
     attr |= (method->IsConstructor()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::CONSTRUCTOR) : 0U;
     attr |= (method->IsAbstract()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::ABSTRACT) : 0U;
-    attr |= (!method->IsDeclaredIn(sourceClass)) ? static_cast<uint32_t>(EtsTypeAPIAttributes::INHERITED) : 0U;
     attr |= (method->IsGetter()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::GETTER) : 0U;
     attr |= (method->IsSetter()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::SETTER) : 0U;
+    attr |= (method->IsFinal()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::FINAL) : 0U;
+    panda_file::File::EntityId asyncAnnId = EtsAnnotation::FindAsyncAnnotation(method->GetPandaMethod());
+    attr |= (method->IsNative() && !asyncAnnId.IsValid()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::NATIVE) : 0U;
+    attr |= (asyncAnnId.IsValid()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::ASYNC) : 0U;
 
     typeapiMethod.GetPtr()->SetAttributes(attr);
     return typeapiMethod.GetPtr();
@@ -461,15 +463,18 @@ static EtsMethod *GetEtsMethod(EtsTypeAPIType *methodType)
     return EtsMethod::FromTypeDescriptor(desc, methodType->GetContextLinker());
 }
 
-EtsTypeAPIMethod *TypeAPIGetMethod(EtsClass *cls, ObjectHeader *methodTypeObj)
+EtsTypeAPIMethod *TypeAPIGetMethod(ObjectHeader *methodTypeObj, EtsTypeAPIType *ownerType)
 {
     auto *coro = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle<EtsTypeAPIType> methodTypeHandle(coro, EtsTypeAPIType::FromCoreType(methodTypeObj));
+    EtsHandle ownerTypeHandle(coro, ownerType);
 
     auto *method = GetEtsMethod(methodTypeHandle.GetPtr());
     ASSERT(method != nullptr);
-    return CreateMethodUnderHandleScope(methodTypeHandle, method, cls);
+    ASSERT(ownerTypeHandle.GetPtr() != nullptr);
+    ASSERT(ownerTypeHandle.GetPtr()->GetRuntimeTypeDescriptor()->GetMutf8() == method->GetClass()->GetDescriptor());
+    return CreateMethodUnderHandleScope(methodTypeHandle, method, ownerTypeHandle);
 }
 
 EtsLong TypeAPIGetInterfacesNum(EtsClass *cls)
@@ -580,7 +585,7 @@ EtsString *TypeAPIGetParameterDescriptor(ObjectHeader *functionType, EtsLong i)
 }
 
 static EtsTypeAPIParameter *CreateParameterUnderHandleScope(EtsHandle<EtsTypeAPIType> &paramTypeHandle,
-                                                            std::string_view name)
+                                                            EtsMethod *function, EtsLong i)
 {
     ASSERT(paramTypeHandle.GetPtr() != nullptr);
 
@@ -592,12 +597,23 @@ static EtsTypeAPIParameter *CreateParameterUnderHandleScope(EtsHandle<EtsTypeAPI
     typeapiParameter->SetParameterType(paramTypeHandle.GetPtr());
 
     // NOTE(shumilov-petr): It's a temporary solution, extra type info dumping required
+    auto name = std::to_string(i);
     EtsHandle<EtsString> pnameHandle(coroutine, EtsString::CreateFromUtf8(name.data(), name.size()));
     typeapiParameter.GetPtr()->SetName(pnameHandle.GetPtr());
 
     // Set specific attributes
     uint32_t attr = 0U;
-    // NOTE(kirill-mitkin): Need to dump attributes of parameters from frontend to runtime
+    auto hasRestParam = function->HasRestParam();
+    auto isRestParam = (i == (function->GetNumArgs() - 1));
+    if (hasRestParam && isRestParam) {
+        attr |= static_cast<uint32_t>(EtsTypeAPIAttributes::REST);
+    } else {
+        // rest param can not be optional
+        auto minArgCountOpt = function->TryGetMinArgCount();
+        attr |= minArgCountOpt.has_value() && (i > minArgCountOpt.value())
+                    ? static_cast<uint32_t>(EtsTypeAPIAttributes::OPTIONAL)
+                    : 0U;
+    }
     typeapiParameter.GetPtr()->SetAttributes(attr);
     return typeapiParameter.GetPtr();
 }
@@ -614,7 +630,7 @@ EtsTypeAPIParameter *TypeAPIGetParameter(ObjectHeader *functionType, EtsLong i, 
     ASSERT(i >= 0 && i < function->GetNumArgs());
     // 0 is recevier type
     i = function->IsStatic() ? i : i + 1;
-    return CreateParameterUnderHandleScope(paramTypeHandle, std::to_string(i));
+    return CreateParameterUnderHandleScope(paramTypeHandle, function, i);
 }
 
 EtsString *TypeAPIGetResultTypeDescriptor(ObjectHeader *functionType)
@@ -637,10 +653,10 @@ EtsString *TypeAPIGetReceiverTypeDescriptor(ObjectHeader *functionType)
     return EtsString::CreateFromMUtf8(type->GetDescriptor());
 }
 
-EtsClass *TypeAPIGetDeclaringClass(ObjectHeader *functionType)
+EtsClass *TypeAPIGetDeclaringClassImpl(EtsTypeAPIType *type)
 {
-    auto *function = GetEtsMethod(EtsTypeAPIType::FromCoreType(functionType));
-    return (function != nullptr) ? function->GetClass() : nullptr;
+    auto *method = GetEtsMethod(type);
+    return (method != nullptr) ? method->GetClass() : nullptr;
 }
 
 EtsString *TypeAPIGetFunctionObjectNameFromAnnotation(EtsObject *functionObj)
