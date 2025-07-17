@@ -55,7 +55,7 @@ function testObjectValues(etsVm: any): void {
 
     const sym = Symbol("secret");
     nativeSaveRef({
-        [sym]: "hidden",
+        sym: "hidden",
         visible: "shown"
     });
     ASSERT_TRUE(etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsCheckSymbolFieldIgnored")());
