@@ -28,7 +28,6 @@
 // CC-OFFNXT(huge_method[C++]) solid logic
 extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version, ani_vm **result)
 {
-    ANI_DEBUG_TRACE(env);
     ANI_CHECK_RETURN_IF_EQ(result, nullptr, ANI_INVALID_ARGS);
     ANI_CHECK_RETURN_IF_EQ(options, nullptr, ANI_INVALID_ARGS);
     if (!ark::ets::ani::IsVersionSupported(version)) {
@@ -103,7 +102,6 @@ extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version,
 // CC-OFFNXT(G.FUN.02-CPP) project code stytle
 extern "C" ani_status ANI_GetCreatedVMs(ani_vm **vmsBuffer, ani_size vmsBufferLength, ani_size *result)
 {
-    ANI_DEBUG_TRACE(env);
     ANI_CHECK_RETURN_IF_EQ(vmsBuffer, nullptr, ANI_INVALID_ARGS);
     ANI_CHECK_RETURN_IF_EQ(result, nullptr, ANI_INVALID_ARGS);
 
@@ -112,7 +110,8 @@ extern "C" ani_status ANI_GetCreatedVMs(ani_vm **vmsBuffer, ani_size vmsBufferLe
         *result = 0;
         return ANI_OK;
     }
-    auto *coroutine = ark::ets::EtsCoroutine::CastFromThread(thread);
+    // After verifying that the current thread is attached to VM, it is valid to get current EtsCoroutine
+    auto *coroutine = ark::ets::EtsCoroutine::GetCurrent();
     if (coroutine != nullptr) {
         if (vmsBufferLength < 1) {
             return ANI_INVALID_ARGS;
@@ -130,7 +129,7 @@ namespace ark::ets::ani {
 
 static ani_status DestroyVM(ani_vm *vm)
 {
-    ANI_DEBUG_TRACE(env);
+    ANI_DEBUG_TRACE(vm);
     ANI_CHECK_RETURN_IF_EQ(vm, nullptr, ANI_INVALID_ARGS);
 
     auto runtime = Runtime::GetCurrent();
@@ -152,7 +151,7 @@ static ani_status DestroyVM(ani_vm *vm)
 
 NO_UB_SANITIZE static ani_status GetEnv(ani_vm *vm, uint32_t version, ani_env **result)
 {
-    ANI_DEBUG_TRACE(env);
+    ANI_DEBUG_TRACE(vm);
     ANI_CHECK_RETURN_IF_EQ(vm, nullptr, ANI_INVALID_ARGS);
     ANI_CHECK_RETURN_IF_EQ(result, nullptr, ANI_INVALID_ARGS);
 
@@ -165,11 +164,16 @@ NO_UB_SANITIZE static ani_status GetEnv(ani_vm *vm, uint32_t version, ani_env **
         LOG(ERROR, ANI) << "Cannot get environment, thread is not attached to VM";
         return ANI_ERROR;
     }
-    if (!EtsCoroutine::ThreadIsCoroutine(thread)) {
+    // After verifying that the current thread is attached to VM, it is valid to get current EtsCoroutine
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    if (UNLIKELY(coro == nullptr)) {
         LOG(ERROR, ANI) << "Cannot get environment, no current coroutine exists";
         return ANI_ERROR;
     }
-    *result = EtsCoroutine::CastFromThread(thread)->GetEtsNapiEnv();
+    ani_env *env = coro->GetEtsNapiEnv();
+    // Each EtsCoroutine must have a valid ani_env
+    ASSERT(env != nullptr);
+    *result = env;
     return ANI_OK;
 }
 
