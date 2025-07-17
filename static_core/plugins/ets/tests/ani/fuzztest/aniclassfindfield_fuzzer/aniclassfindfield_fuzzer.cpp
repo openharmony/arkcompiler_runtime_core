@@ -38,7 +38,8 @@ void AniClassFindFieldFuzzTest(const char *data, size_t size)
     env->FindClass("std.core.Int", &intCls);
 
     ani_field res {};
-    env->Class_FindField(intCls, data, &res);
+    std::string input(data, size);
+    env->Class_FindField(intCls, input.c_str(), &res);
 }
 }  // namespace OHOS
 

@@ -38,7 +38,8 @@ void AniClassFindSetterFuzzTest(const char *data, size_t size)
     env->FindClass("std.core.Int", &intCls);
 
     ani_method res {};
-    env->Class_FindSetter(intCls, data, &res);
+    std::string input(data, size);
+    env->Class_FindSetter(intCls, input.c_str(), &res);
 }
 }  // namespace OHOS
 

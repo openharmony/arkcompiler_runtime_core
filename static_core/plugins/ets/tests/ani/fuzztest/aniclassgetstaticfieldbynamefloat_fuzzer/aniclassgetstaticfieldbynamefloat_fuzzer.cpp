@@ -36,7 +36,8 @@ void AniClassGetStaticFieldByNameFloatFuzzTest(const char *data, size_t size)
     ani_class cls {};
     env->FindClass("std.core.String", &cls);
     ani_float res {};
-    env->Class_GetStaticFieldByName_Float(cls, data, &res);
+    std::string input(data, size);
+    env->Class_GetStaticFieldByName_Float(cls, input.c_str(), &res);
 }
 }  // namespace OHOS
 

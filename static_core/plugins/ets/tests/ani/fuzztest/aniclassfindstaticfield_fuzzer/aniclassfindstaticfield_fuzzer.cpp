@@ -38,7 +38,8 @@ void AniClassFindStaticFieldFuzzTest(const char *data, size_t size)
     ani_class cls {};
     env->FindClass("std.core.String", &cls);
     ani_static_field field {};
-    env->Class_FindStaticField(cls, data, &field);
+    std::string input(data, size);
+    env->Class_FindStaticField(cls, input.c_str(), &field);
 }
 }  // namespace OHOS
 

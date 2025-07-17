@@ -40,7 +40,8 @@ void AniClassCallStaticMethodByNameVoidAFuzzTest(const char *data, size_t size)
     ani_value args[2U];
     args[0U].z = ANI_TRUE;
     args[1U].z = ANI_FALSE;
-    env->Class_CallStaticMethodByName_Void_A(intCls, data, nullptr, args);
+    std::string input(data, size);
+    env->Class_CallStaticMethodByName_Void_A(intCls, input.c_str(), nullptr, args);
 }
 }  // namespace OHOS
 

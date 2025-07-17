@@ -41,7 +41,8 @@ void AniClassCallStaticMethodByNameBooleanAFuzzTest(const char *data, size_t siz
     args[0U].z = ANI_TRUE;
     args[1U].z = ANI_FALSE;
     ani_boolean res {};
-    env->Class_CallStaticMethodByName_Boolean_A(intCls, data, nullptr, &res, args);
+    std::string input(data, size);
+    env->Class_CallStaticMethodByName_Boolean_A(intCls, input.c_str(), nullptr, &res, args);
 }
 }  // namespace OHOS
 

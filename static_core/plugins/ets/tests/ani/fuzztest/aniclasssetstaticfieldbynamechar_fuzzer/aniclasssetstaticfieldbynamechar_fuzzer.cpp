@@ -36,7 +36,8 @@ void AniClassSetStaticFieldByNameCharFuzzTest(const char *data, size_t size)
     ani_class cls {};
     env->FindClass("std.core.String", &cls);
     ani_char value {};
-    env->Class_SetStaticFieldByName_Char(cls, data, value);
+    std::string input(data, size);
+    env->Class_SetStaticFieldByName_Char(cls, input.c_str(), value);
 }
 }  // namespace OHOS
 

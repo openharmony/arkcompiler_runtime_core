@@ -34,7 +34,8 @@ void AniFindModuleFuzzTest(const char *data, size_t size)
     ani_env *env {};
     engine->GetAniEnv(&env);
     ani_module md {};
-    env->FindModule(data, &md);
+    std::string input(data, size);
+    env->FindModule(input.c_str(), &md);
 }
 }  // namespace OHOS
 
