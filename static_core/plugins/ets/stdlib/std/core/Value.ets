@@ -381,7 +381,13 @@ export final class ClassValue extends reflect.Value {
         if (f.isStatic()) {
             throw new Error("Field must be not static")
         }
-        let ft = f.getType()
+        let ft:Type
+        let fvalue = this.getFieldByName(name)
+        if (fvalue.getType() instanceof UndefinedType) {
+            ft = f.getType()
+        } else {
+            ft = fvalue.getType()
+        }
         let vt = val.getType()
         if (!ft.assignableFrom(vt)) {
             throw new Error("Cannot assign field of type " + ft + " with value of type " + vt)
