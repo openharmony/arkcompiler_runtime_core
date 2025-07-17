@@ -57,8 +57,8 @@ void AniTextDecoderFuzzTest(const char *data, size_t size)
     TextDecoderEngine *engine = TextDecoderEngine::GetInstance();
     engine->AniTextDecoder(data, 0, size, true);
     engine->AniTextDecoder(data, 0, size, false);
-    engine->AniTextDecoder(data, 1, size, true);
-    engine->AniTextDecoder(data, 1, size, false);
+    engine->AniTextDecoder(data, 1, size - 1, true);
+    engine->AniTextDecoder(data, 1, size - 1, false);
 }
 }  // namespace OHOS
 
