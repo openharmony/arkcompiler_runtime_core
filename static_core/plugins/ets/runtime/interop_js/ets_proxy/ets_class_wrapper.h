@@ -49,8 +49,13 @@ public:
     static constexpr auto STATIC_METHOD_ATTR = napi_static;
     // clang-format on
 
-    using OverloadsMap =
-        std::unordered_multimap<uint8_t const *, std::pair<char const *, uint32_t>, utf::Mutf8Hash, utf::Mutf8Equal>;
+    struct OverloadEntry {
+        const char *signature;
+        uint32_t argCount;
+        const char *implMethodName;
+    };
+
+    using OverloadsMap = std::unordered_multimap<uint8_t const *, OverloadEntry, utf::Mutf8Hash, utf::Mutf8Equal>;
 
     static std::unique_ptr<EtsClassWrapper> Create(InteropCtx *ctx, EtsClass *etsClass,
                                                    const char *jsBuiltinName = nullptr,
@@ -61,6 +66,11 @@ public:
     static std::unique_ptr<JSRefConvert> CreateJSRefConvertEtsProxy(InteropCtx *ctx, Class *klass);
     static std::unique_ptr<JSRefConvert> CreateJSRefConvertJSProxy(InteropCtx *ctx, Class *klass);
     static std::unique_ptr<JSRefConvert> CreateJSRefConvertEtsInterface(InteropCtx *ctx, Class *klass);
+
+    PandaUnorderedMap<std::string, std::string> &GetOverloadNameMapping()
+    {
+        return overloadNameMapping_;
+    }
 
     bool IsEtsGlobalClass() const
     {
@@ -115,6 +125,8 @@ private:
     using GetterSetterPropsMap = std::unordered_map<std::string, napi_property_descriptor>;
     using FieldsVec = std::vector<Field *>;
     using MethodsVec = std::vector<EtsMethodSet *>;
+    // Mapping between 1.2 proxy method names and their corresponding 1.1 real method names.
+    PandaUnorderedMap<std::string, std::string> overloadNameMapping_;
 
     std::pair<FieldsVec, MethodsVec> CalculateProperties(const OverloadsMap *overloads);
     void SetBaseWrapperMethods(napi_env env, const EtsClassWrapper::MethodsVec &methods);
@@ -173,6 +185,18 @@ private:
     napi_ref jsProxyHandlerRef_ {};
 
     static constexpr const char *INTERFACE_ITERABLE_NAME = "escompat.IterableIterator";
+};
+
+class JSRefConvertJSProxy : public JSRefConvert {
+public:
+    explicit JSRefConvertJSProxy(EtsClassWrapper *wrapper);
+    napi_value WrapImpl(InteropCtx *ctx, EtsObject *etsObject);
+    EtsObject *UnwrapImpl(InteropCtx *ctx, napi_value jsValue);
+
+    std::string GetJSMethodName(Method *method);
+
+private:
+    const PandaUnorderedMap<std::string, std::string> *overloadNameMapping_ {nullptr};
 };
 
 void DoSetPrototype(napi_env env, napi_value obj, napi_value proto);

@@ -460,7 +460,10 @@ extern "C" uint64_t CallJSProxy(Method *method, uint8_t *args, uint8_t *inStackA
             ASSERT(refconv != nullptr);
             napi_value jsThis = refconv->Wrap(ctx, EtsObject::FromCoreType(etsThis));
             ASSERT(GetValueType(env, jsThis) == napi_object);
-            const char *methodName = utf::Mutf8AsCString(st->GetMethod()->GetName().data);
+            auto *refconvProxy = static_cast<ets_proxy::JSRefConvertJSProxy *>(refconv);
+            ASSERT(refconvProxy != nullptr);
+            std::string methodNameStr = refconvProxy->GetJSMethodName(st->GetMethod());
+            const char *methodName = methodNameStr.c_str();
             napi_value jsFn;
             if (!NapiGetNamedProperty(env, jsThis, methodName, &jsFn)) {
                 ASSERT(NapiIsExceptionPending(env));

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,15 +24,18 @@ namespace ark::ets::interop::js::ets_proxy {
 EtsMethodSet EtsMethodSet::Create(EtsMethod *singleMethod)
 {
     ASSERT(nullptr != singleMethod);
-    EtsClass *const enclosingClass = singleMethod->GetClass();
+    return EtsMethodSet(singleMethod, singleMethod->GetClass());
+}
 
-    return EtsMethodSet(singleMethod, enclosingClass);
+EtsMethodSet EtsMethodSet::Create(EtsMethod *singleMethod, const std::string &jsName)
+{
+    ASSERT(singleMethod != nullptr);
+    return EtsMethodSet(singleMethod, singleMethod->GetClass(), jsName);
 }
 
 const char *EtsMethodSet::GetName() const
 {
-    ASSERT(anyMethod_ != nullptr);
-    return anyMethod_->GetName();
+    return jsPublicName_.c_str();
 }
 
 void EtsMethodSet::MergeWith(const EtsMethodSet &other)

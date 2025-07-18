@@ -140,9 +140,14 @@ TEST_F(ArrayTsToEtsTest, testPop)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testPop"));
 }
 
-TEST_F(ArrayTsToEtsTest, testPush)
+TEST_F(ArrayTsToEtsTest, testPushOne)
 {
-    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testPush"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testPushOne"));
+}
+
+TEST_F(ArrayTsToEtsTest, testPushArray)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testPushArray"));
 }
 
 TEST_F(ArrayTsToEtsTest, testReduce)

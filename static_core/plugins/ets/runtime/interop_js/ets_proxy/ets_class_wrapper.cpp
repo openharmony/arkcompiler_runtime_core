@@ -200,30 +200,47 @@ std::unique_ptr<JSRefConvert> EtsClassWrapper::CreateJSRefConvertEtsProxy(Intero
     return std::make_unique<JSRefConvertEtsProxy>(wrapper);
 }
 
-class JSRefConvertJSProxy : public JSRefConvert {
-public:
-    explicit JSRefConvertJSProxy() : JSRefConvert(this) {}
-
-    napi_value WrapImpl(InteropCtx *ctx, EtsObject *etsObject)
-    {
-        SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
-        INTEROP_FATAL_IF(!storage->HasReference(etsObject, ctx->GetJSEnv()));
-        return storage->GetJsObject(etsObject, ctx->GetJSEnv());
-    }
-
-    EtsObject *UnwrapImpl(InteropCtx *ctx, [[maybe_unused]] napi_value jsValue)
-    {
-        ctx->Fatal("Unwrap called on JSProxy class");
-        return nullptr;
-    }
-};
-
 /*static*/
 std::unique_ptr<JSRefConvert> EtsClassWrapper::CreateJSRefConvertJSProxy([[maybe_unused]] InteropCtx *ctx,
                                                                          [[maybe_unused]] Class *klass)
 {
     ASSERT(js_proxy::JSProxy::IsProxyClass(klass));
-    return std::make_unique<JSRefConvertJSProxy>();
+    Class *base = klass->GetBase();
+    auto *etsClass = EtsClass::FromRuntimeClass(base);
+    auto *wrapper = ctx->GetEtsClassWrappersCache()->Lookup(etsClass);
+    if (wrapper == nullptr) {
+        return nullptr;
+    }
+    return std::make_unique<JSRefConvertJSProxy>(wrapper);
+}
+
+JSRefConvertJSProxy::JSRefConvertJSProxy(EtsClassWrapper *wrapper)
+    : JSRefConvert(this), overloadNameMapping_(&wrapper->GetOverloadNameMapping())
+{
+}
+
+napi_value JSRefConvertJSProxy::WrapImpl(InteropCtx *ctx, EtsObject *etsObject)
+{
+    SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
+    INTEROP_FATAL_IF(!storage->HasReference(etsObject, ctx->GetJSEnv()));
+    return storage->GetJsObject(etsObject, ctx->GetJSEnv());
+}
+
+EtsObject *JSRefConvertJSProxy::UnwrapImpl(InteropCtx *ctx, [[maybe_unused]] napi_value jsValue)
+{
+    ctx->Fatal("Unwrap called on JSProxy class");
+    return nullptr;
+}
+
+std::string JSRefConvertJSProxy::GetJSMethodName(Method *method)
+{
+    ASSERT(overloadNameMapping_ != nullptr);
+    std::string implName = utf::Mutf8AsCString(method->GetName().data);
+    auto iter = overloadNameMapping_->find(implName);
+    if (iter != overloadNameMapping_->end()) {
+        return iter->second;
+    }
+    return implName;
 }
 
 class JSRefConvertInterface : public JSRefConvert {
@@ -441,9 +458,8 @@ void EtsClassWrapper::SetBaseWrapperMethods(napi_env env, const EtsClassWrapper:
 std::pair<EtsClassWrapper::FieldsVec, EtsClassWrapper::MethodsVec> EtsClassWrapper::CalculateProperties(
     const OverloadsMap *overloads)
 {
-    auto fatalNoMethod = [](Class *klass, const uint8_t *name, const char *signature) {
-        InteropCtx::Fatal(std::string("No method ") + utf::Mutf8AsCString(name) + " " + signature + " in " +
-                          klass->GetName());
+    auto fatalNoMethod = [](Class *klass, const char *methodName, const char *signature) {
+        InteropCtx::Fatal(std::string("No method ") + methodName + " " + signature + " in " + klass->GetName());
     };
 
     auto klass = etsClass_->GetRuntimeClass();
@@ -457,12 +473,17 @@ std::pair<EtsClassWrapper::FieldsVec, EtsClassWrapper::MethodsVec> EtsClassWrapp
     }
     // Select preferred overloads
     if (overloads != nullptr) {
-        for (auto &[name, signaturePair] : *overloads) {
-            Method *method = etsClass_->GetDirectMethod(name, signaturePair.first)->GetPandaMethod();
+        for (const auto &[jsMethodName, entry] : *overloads) {
+            const char *implName = entry.implMethodName;
+            const char *signature = entry.signature;
+
+            Method *method = etsClass_->GetDirectMethod(utf::CStringAsMutf8(implName), signature)->GetPandaMethod();
             if (UNLIKELY(method == nullptr)) {
-                fatalNoMethod(klass, name, signaturePair.first);
+                fatalNoMethod(klass, implName, signature);
             }
-            auto etsMethodSet = std::make_unique<EtsMethodSet>(EtsMethodSet::Create(method));
+            auto jsNameStr = utf::Mutf8AsCString(jsMethodName);
+            auto etsMethodSet =
+                std::make_unique<EtsMethodSet>(EtsMethodSet::Create(EtsMethod::FromRuntimeMethod(method), jsNameStr));
             auto it = props.insert({method->GetName().data, etsMethodSet.get()});
             if (!it.second && std::holds_alternative<EtsMethodSet *>(it.first->second)) {
                 // Possible correct method overloading: merge to existing entry
@@ -533,12 +554,12 @@ void EtsClassWrapper::CollectClassMethods(EtsClassWrapper::PropsMap *props, cons
 
 bool EtsClassWrapper::HasOverloadsMethod(const OverloadsMap *overloads, Method *m)
 {
-    auto name = m->GetName().data;
-    auto range = overloads->equal_range(name);
     EtsMethod *etsMethod = EtsMethod::FromRuntimeMethod(m);
-    for (auto iter = range.first; iter != range.second; ++iter) {
-        if (iter->second.second ==
-            etsMethod->GetNumArgs() - static_cast<unsigned int>(etsMethod->GetPandaMethod()->HasVarArgs())) {
+    const char *methodName = utf::Mutf8AsCString(m->GetName().data);
+    uint32_t argCount = etsMethod->GetNumArgs() - static_cast<unsigned int>(etsMethod->GetPandaMethod()->HasVarArgs());
+
+    for (const auto &[jsMethodName, entry] : *overloads) {
+        if (strcmp(entry.implMethodName, methodName) == 0 && entry.argCount == argCount) {
             return true;
         }
     }
