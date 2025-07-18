@@ -30,13 +30,18 @@ class AsyncLockManager {
     * @returns { AsyncLock } Returns an instance of AsyncLock.
     */
     public request(name: string): AsyncLock {
+        let lock: AsyncLock | undefined;
         ConcurrencyHelpers.mutexLock(this.mutex);
-        let lock = this.locks.get(name);
+        let lck = this.locks.get(name);
+        if (lck != undefined) {
+            lock = lck!.deref();
+        }
         if (lock == undefined) {
             lock = new AsyncLock(name);
         }
         ConcurrencyHelpers.mutexUnlock(this.mutex);
-        return lock;
+        return lock!;
+
     }
 
     /**
@@ -50,14 +55,17 @@ class AsyncLockManager {
             ConcurrencyHelpers.mutexLock(this.mutex);
             let lock = this.locks.get(name);
             if (lock == undefined) {
-                throw new Error("AsyncLock " + name + " not found");
+                throw new Error('AsyncLock ' + name + ' not found');
             }
-            if (name.includes("__AnonymousLockName__")) {
-                throw new Error("Lock cannot be found");
+            if (name.includes('__AnonymousLockName__')) {
+                throw new Error('Lock cannot be found');
             }
-            let state = lock.query();
-            return state;
-        } finally {
+            if (lock!.deref() == undefined) {
+                throw new Error('Lock is in undefined state');
+            }
+            return lock!.deref()!.query();
+        }
+        finally {
             ConcurrencyHelpers.mutexUnlock(this.mutex);
         }
     }
@@ -71,15 +79,31 @@ class AsyncLockManager {
         ConcurrencyHelpers.mutexLock(this.mutex);
         let result = new AsyncLockState[Double.toInt(this.locks.size)];  // Statement "as int" to be removed after fixing issue 19773.
         let idx = 0;
-        this.locks.forEach((val: AsyncLock, key: string): void => {
-            result[idx++] = val.query();
+        this.locks.forEach((val: WeakRef<AsyncLock>, key: String): void => {
+            let l = val.deref();
+            if (l != undefined) {
+                result[idx++] = l.query();
+            } 
         });
         ConcurrencyHelpers.mutexUnlock(this.mutex);
         return result;
     }
 
-    internal locks: Map<string, AsyncLock> = new Map<string, AsyncLock>();
+    /**
+    * Set element and create a WeakRef  in locks.and register WeakRef in FinalizationRegistry
+    * @param { AsyncLock } asyncLock - name of the lock.
+    */
+    public setElem(asyncLock: AsyncLock) {
+        let w = new WeakRef<AsyncLock>(asyncLock)
+        this.locks.set(asyncLock.name, w)
+        this.finreg.register(asyncLock, asyncLock.name, asyncLock);
+    }
+
+    internal locks: Map<string, WeakRef<AsyncLock>> = new Map<string, WeakRef<AsyncLock>>();
     private mutex: Object = ConcurrencyHelpers.mutexCreate();
+    private finreg: FinalizationRegistry<String> = new FinalizationRegistry<String>((s: String) => {
+            this.locks.delete(s)
+        }); 
 }
 
 const asyncLockManager: AsyncLockManager;
