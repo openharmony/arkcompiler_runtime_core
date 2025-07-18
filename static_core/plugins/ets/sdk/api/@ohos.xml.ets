@@ -15,14 +15,14 @@
 import buffer from '@ohos.buffer';
 import { BusinessError } from "@ohos.base";
 
-const TypeErrorCodeId: number = 401;
-const BufferOverFlowErrorCodeId: number = 10200062;
-const IllegalPositionErrorCodeId: number = 10200063;
-const EmptyErrorCodeId: number = 10200064;
-const NoElementMatchErrorCodeId: number = 10200065;
-const EncodingErrorCodeId: number = 10200066;
+const TypeErrorCodeId: int = 401;
+const BufferOverFlowErrorCodeId: int = 10200062;
+const IllegalPositionErrorCodeId: int = 10200063;
+const EmptyErrorCodeId: int = 10200064;
+const NoElementMatchErrorCodeId: int = 10200065;
+const EncodingErrorCodeId: int = 10200066;
 
-function createBusinessError(code: number, message: string) {
+function createBusinessError(code: int, message: string) {
     let err = new BusinessError();
     err.code = code;
     err.name = 'BusinessError';

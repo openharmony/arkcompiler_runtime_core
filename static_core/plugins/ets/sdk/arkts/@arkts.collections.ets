@@ -16,8 +16,8 @@
 
 import { BusinessError } from "@ohos.base"
 
-const OutOfBoundsErrorCodeId: number = 10200001;
-const TypeErrorCodeId: number = 401;
+const OutOfBoundsErrorCodeId: int = 10200001;
+const TypeErrorCodeId: int = 401;
 
 export namespace collections {
     final class BitVectorIterator implements IterableIterator<int> {

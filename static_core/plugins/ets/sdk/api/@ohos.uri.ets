@@ -965,7 +965,7 @@ export namespace uri {
 
     private checkErrAndThrow() {
       if (this.errStr != "") {
-        const SyntaxErrorCodeId: number = 10200002;
+        const SyntaxErrorCodeId: int = 10200002;
         throw new BusinessError(SyntaxErrorCodeId, new Error('BusinessError', `Syntax Error. Invalid Uri string: The ${this.errStr}`, undefined));
       }
     }

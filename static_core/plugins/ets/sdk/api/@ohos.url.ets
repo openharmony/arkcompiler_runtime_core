@@ -15,9 +15,9 @@
 
 import { BusinessError } from "@ohos.base";
 
-const SyntaxErrorCodeId: number = 10200002;
+const SyntaxErrorCodeId: int = 10200002;
 
-function createBusinessError(code: number, message: string) {
+function createBusinessError(code: int, message: string) {
     let err = new BusinessError();
     err.code = code;
     err.name = 'BusinessError';
