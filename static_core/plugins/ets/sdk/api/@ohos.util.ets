@@ -1536,7 +1536,7 @@ export namespace util {
          * Check whether the entered value is the iterator type of set.
          * @param { Object } value - A Set iterator value
          * @returns { boolean } Returns true if the value is an iterator returned for a built-in Set instance.
-         * 
+         *
          * Since the current interface cannot be correctly determined, it returns false by default
          */
         isSetIterator(value: Object): boolean {
@@ -1620,7 +1620,7 @@ export namespace util {
          * Check whether the entered value is of type asyncfunction.
          * @param { Object } value - A AsyncFunction value
          * @returns { boolean } Returns true if the value is a built-in AsyncFunction instance.
-         * 
+         *
          * Since the current interface cannot be correctly determined, it returns false by default
          */
         isAsyncFunction(value: Object): boolean {

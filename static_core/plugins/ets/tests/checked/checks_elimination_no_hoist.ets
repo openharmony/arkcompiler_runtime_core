@@ -165,7 +165,7 @@ function NullCheck(): int {
 //! RUN_PAOC     options: "--compiler-cross-arch=arm64 --compiler-regex=.*BoundsCheck --compiler-enable-events --compiler-events-path=./events.csv"
 //! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::BoundsCheck"
 //! PASS_AFTER   "IrBuilder"
-//! INST         "LoadCompressedStringChar"; lcscId = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
+//! INST         "LenArray"; lcscId = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
 //! EVENT        /checks_elimination_no_hoist.ETSGLOBAL::BoundsCheck,licm,inst_id:#{lcscId}/
 function __noinline__getstr(): string {
     return "x";
