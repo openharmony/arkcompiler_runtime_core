@@ -61,13 +61,16 @@ bool EtsRegExp::Compile(const std::vector<uint8_t> &pattern, const bool isUtf16,
     return re_ != nullptr;
 }
 
-RegExpExecResult EtsRegExp::Execute(const std::vector<uint8_t> &str, const int len, const int startOffset)
+RegExpExecResult EtsRegExp::Execute(const std::vector<uint8_t> &pattern, const std::vector<uint8_t> &str, const int len,
+                                    const int startOffset)
 {
     RegExpExecResult result;
     if (utf16_) {
         result = RegExp16::Execute(re_, reinterpret_cast<const uint16_t *>(str.data()), len, startOffset);
+        RegExp16::EraseExtraGroups(reinterpret_cast<const uint16_t *>(pattern.data()), pattern.size(), result);
     } else {
         result = RegExp8::Execute(re_, str.data(), len, startOffset);
+        RegExp8::EraseExtraGroups(pattern.data(), pattern.size(), result);
     }
 
     return result;

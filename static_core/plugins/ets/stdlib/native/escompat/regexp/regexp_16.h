@@ -30,6 +30,10 @@ public:
     static RegExpExecResult Execute(Pcre2Obj re, const uint16_t *str, int len, const int startOffset);
     static void ExtractGroups(Pcre2Obj expression, int count, RegExpExecResult &result, void *data);
     static void FreePcre2Object(Pcre2Obj re);
+    static void EraseExtraGroups(const uint16_t *pattern, const size_t len, RegExpExecResult &result);
+    static bool IsUncountable(const uint16_t *pattern, const size_t len, size_t index);
+    static void SanitizeGroupCaptureResults(const std::vector<bool> &countableGroups,
+                                            const std::map<size_t, size_t> &parentGroups, RegExpExecResult &result);
 };
 
 }  // namespace ark::ets::stdlib

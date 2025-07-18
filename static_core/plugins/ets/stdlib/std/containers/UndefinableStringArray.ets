@@ -81,6 +81,9 @@ export namespace containers {
         public toArray(): String[] {
             let newData = new String[this.curSize]
             for (let i = 0; i < this.curSize; ++i) {
+                if (this.data[i] == null) {
+                    continue;
+                }
                 newData[i] = this.data[i]!
             }
             return newData

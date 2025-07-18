@@ -42,6 +42,8 @@ class RegExpResultArray /*extends Array<String>*/ {
     /** named groups names and indeces */
     public groups: RegExpGroupsContainer | undefined = undefined
 
+    protected isUndefined: Array<boolean> = []
+
     constructor(index: int, input: String, result: Array<String>, indices: Array<Array<number>>) {
         this.isCorrect = true
         this.index_ = index
@@ -50,8 +52,53 @@ class RegExpResultArray /*extends Array<String>*/ {
         this.indices_ = indices
     }
 
+    constructor(index : int, input : String, result : Array<String>, indices : Array<Array<number>>,
+                isUndefined : Array<boolean>) {
+        this.isCorrect = true
+        this.index_ = index
+        this.input_ = input
+        this.result_ = result
+        this.indices_ = indices
+        this.isUndefined = isUndefined
+    }
+
     internal constructor() {
 
+    }
+
+    private setNumberedField(index: number, value: String): void {
+        if (index > 9 || index <= 0) {
+            return
+        }
+        if (index == 1) RegExp.$1_ = value
+        else if (index == 2) RegExp.$2_ = value
+        else if (index == 3) RegExp.$3_ = value
+        else if (index == 4) RegExp.$4_ = value
+        else if (index == 5) RegExp.$5_ = value
+        else if (index == 6) RegExp.$6_ = value
+        else if (index == 7) RegExp.$7_ = value
+        else if (index == 8) RegExp.$8_ = value
+        else if (index == 9) RegExp.$9_ = value
+    }
+
+    internal postExecProcessing(res: RegExpResultArray, input: String, index: number, hasIndices: boolean): void {
+        if (!res.isCorrect) {
+            return
+        }
+        RegExp.$1_ = ""
+        RegExp.$2_ = ""
+        RegExp.$3_ = ""
+        RegExp.$4_ = ""
+        RegExp.$5_ = ""
+        RegExp.$6_ = ""
+        RegExp.$7_ = ""
+        RegExp.$8_ = ""
+        RegExp.$9_ = ""
+        this.updateGroups()
+        this.updateIndicesAndResult(hasIndices)
+        RegExp.input_ = input
+        RegExp.leftContext_ = input.substring(0, index)
+        RegExp.rightContext_ = input.substring(index + res.result[0].length)
     }
 
     /**
@@ -78,8 +125,11 @@ class RegExpResultArray /*extends Array<String>*/ {
      *
      * @returns resulting string
      */
-    public $_get(index: int): String {
-        return this.result_[index]
+    public $_get(index: int): String | undefined {
+        if (index < this.isUndefined.length && this.isUndefined[index]) {
+            return undefined
+        }
+        return this.result_[index];
     }
 
     /**
@@ -89,7 +139,7 @@ class RegExpResultArray /*extends Array<String>*/ {
      *
      * @returns resulting string
      */
-    public $_get(index: number): String {
+    public $_get(index: number): String | undefined {
         return this.$_get(index.toInt());
     }
 
@@ -128,29 +178,65 @@ class RegExpResultArray /*extends Array<String>*/ {
     }
 
     /**
+     * Returns a string representing the match result
+     *
+     * @returns a string representing the match result
+     */
+    public toString(): String {
+        if (this.result_.length > 0) {
+            return this.result_.toString();
+        }
+        throw new Error("result is empty")
+    }
+
+    /**
      * Parses groupsRaw_ to groups
      */
     internal updateGroups(): void {
         throw new Error("not overridden")
     }
 
+    private processStaticFields(index: number, str: String): void {
+        if (index == 0) {
+            RegExp.lastMatch_ = str
+        }
+        if (index == this.result_.length - 1) {
+            RegExp.lastParen_ = str
+        }
+        this.setNumberedField(index, str)
+    }
+
     internal updateIndicesAndResult(hasIndices: boolean): void {
         let data = this.resultRaw_.split(',')
         this.result_ = new Array<String>(data.length / 2)
+        this.isUndefined = new Array<boolean>(data.length / 2)
         if (hasIndices) {
             this.indices_ = new Array<Array<number>>(data.length / 2)
             for (let i = 0; i < data.length; i+= 2) {
                 const index = Number.parseInt(data[i])
                 const endIndex = Number.parseInt(data[i + 1])
-                this.indices_[i / 2] = [index, endIndex]
-                this.result_[i / 2] = this.input_.substring(index, endIndex)
+                if (index == -1 || endIndex == -1) {
+                    this.indices_[i / 2] = [0, 0]
+                    this.isUndefined[i / 2] = true
+                } else {
+                    this.indices_[i / 2] = [index, endIndex]
+                    this.result_[i / 2] = this.input_.substring(index, endIndex)
+                    this.processStaticFields(i / 2, this.result_[i / 2])
+                    this.isUndefined[i / 2] = false
+                }
             }
         } else {
             this.indices_ = []
             for (let i = 0; i < data.length; i+= 2) {
                 const index = Number.parseInt(data[i])
                 const endIndex = Number.parseInt(data[i + 1])
-                this.result_[i / 2] = this.input_.substring(index, endIndex)
+                if (index != -1 && endIndex != -1) {
+                    this.result_[i / 2] = this.input_.substring(index, endIndex)
+                    this.processStaticFields(i / 2, this.result_[i / 2])
+                    this.isUndefined[i / 2] = false
+                } else {
+                    this.isUndefined[i / 2] = true
+                }
             }
         }
     }
@@ -178,6 +264,11 @@ class RegExpResultArray /*extends Array<String>*/ {
 export class RegExpMatchArray extends RegExpResultArray {
     private hasIndex_: boolean = true
     private hasInput_: boolean = true
+
+    constructor(index : int, input : String, result : Array<String>, indices : Array<Array<number>>,
+                isUndefined : Array<boolean>) {
+        super(Double.toInt(index), input, result, indices, isUndefined)
+    };
 
     constructor(index: int, input: String, result: Array<String>, indices: Array<Array<number>>) {
         super(Double.toInt(index), input, result, indices)
@@ -666,55 +757,14 @@ export class RegExp extends Object {
 
     private native matchImpl(pattern: String, flags: String, str: String, patternLength: number, strLength: number, lastIndex: number, hasSlashU: boolean): RegExpMatchArray;
 
-    private setNumberedField(index: number, value: String): void {
-        if (index > 9 || index <= 0) {
-            return
-        }
-        if (index == 1) RegExp.$1_ = value
-        else if (index == 2) RegExp.$2_ = value
-        else if (index == 3) RegExp.$3_ = value
-        else if (index == 4) RegExp.$4_ = value
-        else if (index == 5) RegExp.$5_ = value
-        else if (index == 6) RegExp.$6_ = value
-        else if (index == 7) RegExp.$7_ = value
-        else if (index == 8) RegExp.$8_ = value
-        else if (index == 9) RegExp.$9_ = value
-    }
-
-    private postExecProcessing(res: RegExpResultArray, input: String, index: number): void {
-        if (!res.isCorrect) {
-            return
-        }
-        res.updateGroups()
-        res.updateIndicesAndResult(this.hasIndices)
-        RegExp.input_ = input
-        RegExp.leftContext_ = input.substring(0, index)
-        RegExp.rightContext_ = input.substring(index + res.result[0].length)
-        RegExp.$1_ = ""
-        RegExp.$2_ = ""
-        RegExp.$3_ = ""
-        RegExp.$4_ = ""
-        RegExp.$5_ = ""
-        RegExp.$6_ = ""
-        RegExp.$7_ = ""
-        RegExp.$8_ = ""
-        RegExp.$9_ = ""
-        let matches = res.result
-        RegExp.lastMatch_ = matches[0]
-        for (let i = 1; i < matches.length; i++) {
-            if (i == matches.length - 1) {
-                RegExp.lastParen_ = matches[i]
-            }
-            this.setNumberedField(i, matches[i])
-        }
-    }
-
     internal exec(str: String, index: number): RegExpExecArray | null {
         const hasSlashU = str.contains("\\u", 0) || this.pattern_.contains("\\u", 0)
         const res = this.execImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, index, hasSlashU)
         if (res.isCorrect) {
             res.input = str
-            this.postExecProcessing(res, str, res.index)
+            RegExp.lastMatch_ = ""
+            RegExp.lastParen_ = ""
+            res.postExecProcessing(res, str, res.index, this.hasIndices)
             return res
         } else {
             return null
@@ -739,7 +789,7 @@ export class RegExp extends Object {
         const res = this.matchImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, index, hasSlashU)
         if (res.isCorrect) {
             res.input = str
-            this.postExecProcessing(res, str, res.index!)
+            res.postExecProcessing(res, str, res.index!, this.hasIndices)
             return res
         } else {
             return null
@@ -790,7 +840,7 @@ export class RegExp extends Object {
         for (let i = 0; i < results.length; ++i) {
             let result = results.at(i)!;
             let nCaptures = result.length;
-            let matched = result.$_get(0);
+            let matched = result.$_get(0)!;
             let matchLength = matched.getLength();
             let position = max(min(result.index, lengthS), 0).toInt();
             let captures = new containers.UndefinableStringArray(nCaptures);
@@ -838,7 +888,7 @@ export class RegExp extends Object {
         for (let i = 0; i < results.length; ++i) {
             let result = results.at(i)!;
             let nCaptures = result.length;
-            let matched = result.$_get(0);
+            let matched = result.$_get(0)!;
             let matchLength = matched.getLength();
             let position = (max(min(result.index, lengthS), 0)).toInt();
             let args = new containers.UndefinableObjectArray(nCaptures);
@@ -926,6 +976,8 @@ export class RegExp extends Object {
         }
         this.lastIndex = 0;
         let matches = new containers.UndefinableStringArray();
+        let indices = new Array<Array<number>>();
+        let isUndefined = new Array<boolean>();
         let n = 0
         while (true) {
             let result = this.matchInternal(str)
@@ -933,11 +985,13 @@ export class RegExp extends Object {
                 if (n == 0) {
                     return null
                 }
-                return new RegExpMatchArray(-1, "", matches.toArray())
+                return new RegExpMatchArray(-1, "", matches.toArray(), indices, isUndefined)
             }
             else {
                 let matchStr = result.$_get(0)
                 matches.pushBack(matchStr)
+                indices = indices.concat(result.indices)
+                isUndefined = isUndefined.concat(result.isUndefined)
                 if (matchStr == "") {
                     this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex, this.unicode)
                 }
@@ -964,8 +1018,11 @@ export class RegExp extends Object {
      * @returns true if match was found
      */
     public test(str: String): boolean {
-        const hasSlashU = str.contains("\\u", 0) || this.pattern_.contains("\\u", 0)
-        return this.execImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, this.lastIndex, hasSlashU).isCorrect
+        let res = this.exec(str)
+        if (!res) {
+            return false
+        }
+        return res.isCorrect
     }
 
     /**

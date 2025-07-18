@@ -239,7 +239,7 @@ static RegExpExecResult Execute(ani_env *env, const ExecData &data)
         return badResult;
     }
 
-    auto result = re.Execute(inputStr, data.inputSize, data.lastIndex);
+    auto result = re.Execute(patternStr, inputStr, data.inputSize, data.lastIndex);
     re.Destroy();
     return result;
 }

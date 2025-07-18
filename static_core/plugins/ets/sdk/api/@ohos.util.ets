@@ -794,9 +794,9 @@ export namespace util {
                 throw createBusinessError(TypeErrorCodeId,
                     `Parameter error. The type of ${str} must be effective string`);
             }
-            const str1 = match[1];
+            const str1 = match[1]!;
             const separator = match[2];
-            const str2 = match[3];
+            const str2 = match[3]!;
             if (RationalNumber.isNumeric(str1) && RationalNumber.isNumeric(str2)) {
                 const num1 = Number(str1);
                  const num2 = Number(str2);
