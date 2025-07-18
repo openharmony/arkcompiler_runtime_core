@@ -59,6 +59,7 @@ public:
             MIRROR_FIELD_INFO(Error, stackLines_, "stackLines"),
             MIRROR_FIELD_INFO(Error, stack_, "stack_"),
             MIRROR_FIELD_INFO(Error, cause_, "cause_"),
+            MIRROR_FIELD_INFO(Error, code_, "code_"),
         };
     }
 

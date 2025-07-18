@@ -96,7 +96,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"direct", nullptr, reinterpret_cast<void *>(Direct)},
     };
 
-    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, methods.data(), methods.size())) {
         std::cerr << "Cannot bind native methods to '" << className << "'" << std::endl;
         return ANI_ERROR;
     };

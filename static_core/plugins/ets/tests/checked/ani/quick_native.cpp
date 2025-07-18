@@ -316,10 +316,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
 
     std::array methods = {
-        ani_native_function {"generalStaticPrim", nullptr, reinterpret_cast<void *>(Static<ani_int>)},
-        ani_native_function {"quickStaticPrim", nullptr, reinterpret_cast<void *>(Static<ani_int>)},
-        ani_native_function {"generalStaticObj", nullptr, reinterpret_cast<void *>(Static<ani_object>)},
-        ani_native_function {"quickStaticObj", nullptr, reinterpret_cast<void *>(Static<ani_object>)},
         ani_native_function {"generalVirtualFinalPrim", nullptr, reinterpret_cast<void *>(Virtual<ani_int>)},
         ani_native_function {"quickVirtualFinalPrim", nullptr, reinterpret_cast<void *>(Virtual<ani_int>)},
         ani_native_function {"generalVirtualFinalObj", nullptr, reinterpret_cast<void *>(Virtual<ani_object>)},
@@ -328,6 +324,18 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
         std::cerr << "Cannot bind native methods to '" << className << "'" << std::endl;
+        return ANI_ERROR;
+    };
+
+    std::array staticMethods = {
+        ani_native_function {"generalStaticPrim", nullptr, reinterpret_cast<void *>(Static<ani_int>)},
+        ani_native_function {"quickStaticPrim", nullptr, reinterpret_cast<void *>(Static<ani_int>)},
+        ani_native_function {"generalStaticObj", nullptr, reinterpret_cast<void *>(Static<ani_object>)},
+        ani_native_function {"quickStaticObj", nullptr, reinterpret_cast<void *>(Static<ani_object>)},
+    };
+
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size())) {
+        std::cerr << "Cannot bind static native methods to '" << className << "'" << std::endl;
         return ANI_ERROR;
     };
 

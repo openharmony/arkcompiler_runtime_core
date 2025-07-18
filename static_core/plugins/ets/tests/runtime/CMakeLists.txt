@@ -22,7 +22,6 @@ panda_ets_add_gtest(
     SANITIZERS ${PANDA_SANITIZERS_LIST}
     PANDA_STD_LIB $<TARGET_PROPERTY:mock_stdlib,FILE>
     DEPS_TARGETS mock_stdlib
-    TEST_GROUP ets_tests_runtime_gtests
 )
 
 panda_ets_add_gtest(
@@ -33,8 +32,7 @@ panda_ets_add_gtest(
     INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
     SANITIZERS ${PANDA_SANITIZERS_LIST}
     PANDA_STD_LIB "${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc" 
-    DEPS_TARGETS mock_stdlib
-    TEST_GROUP ets_tests_runtime_gtests
+    DEPS_TARGETS etsstdlib
 )
 
 panda_add_gtest_with_ani(ets_vm_init_prealloc_test
@@ -63,9 +61,13 @@ panda_ets_add_gtest(
     INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
     SANITIZERS ${PANDA_SANITIZERS_LIST}
     PANDA_STD_LIB "${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc" 
-    DEPS_TARGETS mock_stdlib
-    TEST_GROUP ets_tests_runtime_gtests
+    DEPS_TARGETS etsstdlib
 )
+
+add_dependencies(ets_tests_runtime_gtests
+    ets_vm_test_gtests
+    static_object_accessor_test_gtests
+    static_type_converter_test_gtests)
 
 add_subdirectory(types)
 add_subdirectory(tooling)

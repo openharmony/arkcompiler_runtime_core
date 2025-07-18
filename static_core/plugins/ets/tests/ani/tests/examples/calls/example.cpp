@@ -90,7 +90,7 @@ TEST_F(ExampleTest, CallNativeQuickFunction)
     ani_class klass {};
     ASSERT_EQ(env_->FindClass(TEST_CLASS_DESCRIPTOR, &klass), ANI_OK);
     ani_native_function fn {METHOD_NAME, SIGNATURE, reinterpret_cast<void *>(QuickFunction)};
-    ASSERT_EQ(env_->Class_BindNativeMethods(klass, &fn, 1), ANI_OK);
+    ASSERT_EQ(env_->Class_BindStaticNativeMethods(klass, &fn, 1), ANI_OK);
 
     ani_string sample {};
     ASSERT_EQ(env_->String_NewUTF8(SAMPLE_STRING.data(), SAMPLE_STRING.size(), &sample), ANI_OK);
@@ -137,7 +137,7 @@ TEST_F(ExampleTest, CallNativeDirectFunction)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass(TEST_CLASS_DESCRIPTOR, &cls), ANI_OK);
     ani_native_function fn {METHOD_NAME, SIGNATURE, reinterpret_cast<void *>(DirectFunction)};
-    ASSERT_EQ(env_->Class_BindNativeMethods(cls, &fn, 1), ANI_OK);
+    ASSERT_EQ(env_->Class_BindStaticNativeMethods(cls, &fn, 1), ANI_OK);
 
     ani_int result = 0;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)

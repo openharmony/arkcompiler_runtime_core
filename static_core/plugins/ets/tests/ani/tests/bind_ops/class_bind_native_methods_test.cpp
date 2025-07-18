@@ -45,57 +45,6 @@ static ani_long NativeMethodsLongFooNative(ani_env *, ani_class)
     return static_cast<ani_long>(84L);
 }
 
-// ninja ani_test_bind_ops_class_bind_native_methods_gtests
-TEST_F(ClassBindNativeMethodsTest, RegisterNativesTest)
-{
-    ani_class cls;
-    ani_module module;
-    ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
-    ASSERT_EQ(env_->Module_FindClass(module, "RegisteringNativeMethodsTest", &cls), ANI_OK);
-    ASSERT_NE(cls, nullptr);
-
-    std::array methods = {
-        ani_native_function {"foo", ":i", reinterpret_cast<void *>(NativeMethodsFooNative)},
-        ani_native_function {"long_foo", ":l", reinterpret_cast<void *>(NativeMethodsLongFooNative)},
-    };
-    ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
-}
-
-TEST_F(ClassBindNativeMethodsTest, already_binded_method)
-{
-    ani_class cls;
-    ani_module module;
-    ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
-    ASSERT_EQ(env_->Module_FindClass(module, "RegisteringNativeMethodsTest", &cls), ANI_OK);
-    ASSERT_NE(cls, nullptr);
-
-    std::array methods = {
-        ani_native_function {"foo", ":i", reinterpret_cast<void *>(NativeMethodsFooNative)},
-        ani_native_function {"long_foo", ":l", reinterpret_cast<void *>(NativeMethodsLongFooNative)},
-    };
-    ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
-    ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_ALREADY_BINDED);
-}
-
-TEST_F(ClassBindNativeMethodsTest, RegisterNativesErrorTest)
-{
-    ani_class cls;
-    ani_module module;
-    ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
-    ASSERT_EQ(env_->Module_FindClass(module, "RegisteringNativeMethodsTest", &cls), ANI_OK);
-    ASSERT_NE(cls, nullptr);
-
-    std::array methods = {
-        ani_native_function {"foo", ":i", reinterpret_cast<void *>(NativeMethodsFooNative)},
-        ani_native_function {"long_foo11", ":l", reinterpret_cast<void *>(NativeMethodsLongFooNative)},
-    };
-    ani_size nrMethods = 2;
-    ASSERT_EQ(env_->Class_BindNativeMethods(cls, nullptr, nrMethods), ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), nrMethods), ANI_NOT_FOUND);
-    ASSERT_EQ(env_->c_api->Class_BindNativeMethods(nullptr, cls, methods.data(), nrMethods), ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->Class_BindNativeMethods(nullptr, methods.data(), nrMethods), ANI_INVALID_ARGS);
-}
-
 TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_002)
 {
     ani_namespace ns {};
@@ -315,8 +264,6 @@ TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_007)
     std::array methods = {
         ani_native_function {"foo", "ii:i", reinterpret_cast<void *>(NativeMethodsFooNative)},
         ani_native_function {"foo", "iii:i", reinterpret_cast<void *>(NativeMethodsFooNativeOverride)},
-        ani_native_function {"sum", "ii:i", reinterpret_cast<void *>(NativeMethodsFooNative)},
-        ani_native_function {"sum", "iii:i", reinterpret_cast<void *>(NativeMethodsFooNativeOverride)},
     };
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
 
@@ -356,8 +303,6 @@ TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_008)
     std::array methods = {
         ani_native_function {"foo1", "ii:i", reinterpret_cast<void *>(NativeMethodsFooNative)},
         ani_native_function {"foo2", "iii:i", reinterpret_cast<void *>(NativeMethodsFooNativeOverride)},
-        ani_native_function {"sum1", "ii:i", reinterpret_cast<void *>(NativeMethodsFooNative)},
-        ani_native_function {"sum2", "iii:i", reinterpret_cast<void *>(NativeMethodsFooNativeOverride)},
     };
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
 

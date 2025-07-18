@@ -35,7 +35,6 @@ panda_ets_add_gtest(
         $<TARGET_PROPERTY:mock_stdlib,FILE>
     DEPS_TARGETS
         mock_stdlib
-    TEST_GROUP ets_tests_runtime_gtests
 )
 
 panda_ets_add_gtest(
@@ -75,5 +74,8 @@ panda_ets_add_gtest(
         $<TARGET_PROPERTY:etsstdlib,FILE>
     DEPS_TARGETS
         etsstdlib
-    TEST_GROUP ets_tests_runtime_gtests
 )
+
+add_dependencies(ets_tests_runtime_gtests
+    ets_internal_objects_tests_gtests
+    ets_internal_objects_mock_tests_gtests)
