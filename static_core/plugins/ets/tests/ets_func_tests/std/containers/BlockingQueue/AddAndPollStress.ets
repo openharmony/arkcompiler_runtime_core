@@ -25,32 +25,39 @@ function main(): int {
 function addAndPoll() {
     let queueTestIntA = new containers.ArrayBlockingQueue<number>(10000)
     let queueTestIntL = new containers.LinkedBlockingQueue<number>(10000)
+
+    // Add elements
+    let addSome = (testBQ: containers.BlockingQueue<number>, start: int) => {
+        for (let i = start; i < start + 1000; i++) {
+            arktest.assertTrue(testBQ.add(i))
+        }
+    }
+
+    // Remove elements
+    let pollSome = (testBQ: containers.BlockingQueue<number>, start: int) => {
+        for (let i = start; i < start + 1000; i++) {
+            testBQ.poll()
+        }
+    }
+
+    // Test body
+    let addAndPollStressTest = (testBQ: containers.BlockingQueue<number>) => {
+        let arrPromise = new Array<Promise<NullishType>>(20)
+        for (let i = 0; i < 10; i++) {
+            arrPromise[i] = taskpool.execute(addSome, testBQ, i * 1000)
+        }
+        for (let i = 10; i < 20; i++) {
+            arrPromise[i] = taskpool.execute(pollSome, testBQ, i * 1000)
+        }
+        for (let i = 0; i < 20; i++) {
+            await arrPromise[i]
+        }
+        arktest.assertEQ(testBQ.capacity, 10000)
+    }
+
+    // Run test with ArrayBlockingQueue
     addAndPollStressTest(queueTestIntA)
+
+    // Run test with LinkedBlockingQueue
     addAndPollStressTest(queueTestIntL)
-}
-
-function addAndPollStressTest(testBQ: containers.BlockingQueue<number>) {
-    let arrPromise = new Array<Promise<NullishType>>(20)
-    for (let i = 0; i < 10; i++) {
-        arrPromise[i] = taskpool.execute(addSome, testBQ, i * 1000)
-    }
-    for (let i = 10; i < 20; i++) {
-        arrPromise[i] = taskpool.execute(pollSome, testBQ, i * 1000)
-    }
-    for (let i = 0; i < 20; i++) {
-        await arrPromise[i]
-    }
-    arktest.assertEQ(testBQ.capacity, 10000)
-}
-
-function addSome(testBQ: containers.BlockingQueue<number>, start: int) {
-    for (let i = start; i < start + 1000; i++) {
-        arktest.assertTrue(testBQ.add(i))
-    }
-}
-
-function pollSome(testBQ: containers.BlockingQueue<number>, start: int) {
-    for (let i = start; i < start + 1000; i++) {
-        testBQ.poll()
-    }
 }

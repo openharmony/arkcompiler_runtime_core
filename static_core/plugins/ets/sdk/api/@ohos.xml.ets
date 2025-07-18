@@ -124,7 +124,7 @@ export namespace xml {
             this.helper.parseXml()
         }
     }
-    
+
     type Attributes = Map<string, string>
 
     interface XmlNode {
@@ -536,7 +536,7 @@ export namespace xml {
         public tokenFunc_?: (eventType: EventType, value: ParseInfo) => boolean
 
         private strXml_ : string = " "
-        private nodeMap = new Map<int, XmlNode>(); 
+        private nodeMap = new Map<int, XmlNode>();
 
         constructor(str: string) {
             this.strXml_ = str
@@ -670,7 +670,7 @@ export namespace xml {
                     if (type == EventType.INSTRUCTION && item.substr(0, XmlParseHelper.XML.length) == XmlParseHelper.XML) {
                         resType = EventType.START_DOCUMENT
                         pos = 1
-                    } else if (type == EventType.INSTRUCTION) { 
+                    } else if (type == EventType.INSTRUCTION) {
                         pos += item.length
                     }
                     if (this.supportDoctype && (type == EventType.ENTITY_REFERENCE)) {
@@ -753,7 +753,7 @@ export namespace xml {
                         name: name,
                         isSelfClose: false
                     } as XmlNode
-                    node!.type = EventType.END_TAG 
+                    node!.type = EventType.END_TAG
                     this.processNameSpace(node)
                     this.calcPosition(this.strXml_.substr(0, pos), node!)
                     this.nodeMap.set(node!.pos!, node!)
@@ -780,7 +780,7 @@ export namespace xml {
                         isSelfClose: true
                     } as XmlNode
                     node.attributes = this.getAttributes(item, node)
-                    this.processNameSpace(node) 
+                    this.processNameSpace(node)
                     this.calcPosition(this.strXml_.substr(0, pos), node!)
                     this.nodeMap.set(pos - 1, node)
                     let endNode = {
@@ -810,7 +810,7 @@ export namespace xml {
                         pos: pos,
                         content: this.removeSpecTags(content)
                     } as XmlNode
-                    node!.type = (node!.content!.replaceAll(" ", "") == "") ? EventType.WHITESPACE : EventType.TEXT 
+                    node!.type = (node!.content!.replaceAll(" ", "") == "") ? EventType.WHITESPACE : EventType.TEXT
                     this.calcPosition(this.strXml_.substr(0, pos - 1), node!)
                     this.nodeMap.set(node!.pos!, node!)
                 }
@@ -885,7 +885,7 @@ export namespace xml {
 
         private nsMap = new Map<string,string>()
         private processNameSpace(node: XmlNode): void {
-            if (this.ignoreNameSpace) { 
+            if (this.ignoreNameSpace) {
                 return
             }
 
@@ -893,7 +893,7 @@ export namespace xml {
                 node.attributes!.forEach ((value: string, key: string) => {
                     if (key! === XmlParseHelper.XMLNS) {
                         this.nsMap.set(XmlParseHelper.UNDESCORE, value)
-                    } 
+                    }
                     if (key.indexOf(XmlParseHelper.XMLNS_PREFIX) === 0) {
                         let prefix = key!.replace(XmlParseHelper.XMLNS_PREFIX,'')
                         this.nsMap.set(prefix, value)
@@ -941,7 +941,7 @@ export namespace xml {
             if (!this.isNullish(this.attrFunc_) && (!this.isNullish(node.attributes)) && (node.attributes!.size > 0)
             && this.onlyStartTag(node) && !this.isStartOrEndDocument(node)) {
                 let res = true
-                node.attributes!.forEach((value: string, key: string) => { 
+                node.attributes!.forEach((value: string, key: string) => {
                     if (res && !this.attrFunc_!(key, value)) {
                         res = false
                         return
