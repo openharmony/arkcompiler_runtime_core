@@ -994,9 +994,6 @@
 #23051 Reference comparison
 07.expressions/25.equality_expressions/reference_equality/type_conversion_of_one_operand_to_another_type.ets
 
-#24401 Generic lambda is not supported by compiler
-07.expressions/32.lambda_expression/generic.ets
-
 #25042 Ast verifier failure for for-of with labelled statement
 08.statements/11.continue_statements/continue_for_of3l.ets
 08.statements/11.continue_statements/continue_for_of5l.ets
