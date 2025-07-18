@@ -13,28 +13,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for i in default_value %}
-
 /*---
 desc: Predefined type declaration.
 ---*/
 
-class A {
-  a: int
-}
+let b1: (string | null)[]
+b1 = ["aa", null]
+arktest.assertEQ(b1[0], "aa")
+arktest.assertEQ(b1[1], null)
 
-{% if ":" in i %}
-let x = {{i}};
-function main(): void {
-  let y = {{i}};
-  arktest.assertTrue(x instanceof Function)
-  arktest.assertTrue(y instanceof Function)
-}
-{% else %}
-let x: {{i}};
-function main(): void {
-  let y: {{i}};
-}
-{% endif %}
+let b2: string | null[]
+b2 = [null, null]
+arktest.assertEQ(b2[0], null)
+arktest.assertEQ(b2[1], null)
 
-{% endfor %}
+let c: () => string | null
+c = (): string | null => { return null }
+arktest.assertEQ(c(), null)
+
+let d: (() => string) | null
+d = null
+d = (): string => { return "hi" }
+arktest.assertEQ(d(), "hi")
