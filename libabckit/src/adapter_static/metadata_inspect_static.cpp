@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -321,7 +321,7 @@ bool FunctionIsAnonymousStatic(AbckitCoreFunction *function)
     size_t pos = func->name.rfind('.');
     ASSERT(pos != std::string::npos);
     std::string name = func->name.substr(pos + 1);
-    return name.find("lambda$invoke$") == 0;
+    return name.find("lambda_invoke-") == 0;
 }
 
 bool FunctionIsNativeStatic(AbckitCoreFunction *function)

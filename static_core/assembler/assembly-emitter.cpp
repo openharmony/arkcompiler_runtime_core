@@ -991,8 +991,8 @@ static std::vector<std::pair<std::string, ark::pandasm::LiteralArray>> SortByLas
                                                                           literalarrayTable.end());
 
     std::sort(items.begin(), items.end(), [](const auto &a, const auto &b) {
-        size_t posA = a.first.rfind('$');
-        size_t posB = b.first.rfind('$');
+        size_t posA = a.first.rfind('-');
+        size_t posB = b.first.rfind('-');
 
         std::string lastNumberA = (posA != std::string::npos) ? a.first.substr(posA + 1) : "";
         std::string lastNumberB = (posB != std::string::npos) ? b.first.substr(posB + 1) : "";

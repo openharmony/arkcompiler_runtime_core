@@ -27,7 +27,7 @@
     return
 }
 
-.record $NamedAccessMeta-i32 {
+.record %%union_prop-i32 {
     i32 bar
     i32 baz
 }
@@ -38,14 +38,14 @@
     movi v2, 15
     lda v2
     ldai 2
-    ets.ldobj.name v0, $NamedAccessMeta-i32.bar
+    ets.ldobj.name v0, %%union_prop-i32.bar
     movi v3, 5
     add2 v3
     movi v4, 20
     jne v4, error1
     stobj v1, B.baz
     ldai 3
-    ets.ldobj.name v1, $NamedAccessMeta-i32.baz
+    ets.ldobj.name v1, %%union_prop-i32.baz
     jne v4, error2
     ldai 0
     return

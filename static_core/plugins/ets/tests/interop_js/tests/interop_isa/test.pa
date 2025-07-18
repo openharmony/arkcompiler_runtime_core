@@ -62,7 +62,7 @@
 
 .record std.core.Function0 <external>
 
-.record test-static.LambdaObject-ETSGLOBAL$lambda$invoke$0 <final, ets.implements=std.core.Function0, ets.extends=std.core.Lambda0, access.record=public> {
+.record test-static.%%lambda-lambda_invoke-0 <final, ets.implements=std.core.Function0, ets.extends=std.core.Lambda0, access.record=public> {
 }
 
 .record test-static.ETSGLOBAL <ets.abstract, ets.extends=std.core.Object, access.record=public> {
@@ -377,18 +377,18 @@ jump_label_1:
 
 .function void std.core.Lambda0._ctor_(std.core.Lambda0 a0) <ctor, external, access.function=public>
 
-.function i32 test-static.LambdaObject-ETSGLOBAL$lambda$invoke$0.$_invoke(test-static.LambdaObject-ETSGLOBAL$lambda$invoke$0 a0) <access.function=public> {
+.function i32 test-static.%%lambda-lambda_invoke-0.$_invoke(test-static.%%lambda-lambda_invoke-0 a0) <access.function=public> {
 	call.short test-static.ETSGLOBAL.bar:()
 	return
 }
 
-.function void test-static.LambdaObject-ETSGLOBAL$lambda$invoke$0._ctor_(test-static.LambdaObject-ETSGLOBAL$lambda$invoke$0 a0) <ctor, access.function=public> {
+.function void test-static.%%lambda-lambda_invoke-0._ctor_(test-static.%%lambda-lambda_invoke-0 a0) <ctor, access.function=public> {
 	mov.obj v0, a0
 	call.short std.core.Lambda0._ctor_:(std.core.Lambda0), v0
 	return.void
 }
 
-.function std.core.Object test-static.LambdaObject-ETSGLOBAL$lambda$invoke$0.invoke0(test-static.LambdaObject-ETSGLOBAL$lambda$invoke$0 a0) <access.function=public> {
+.function std.core.Object test-static.%%lambda-lambda_invoke-0.invoke0(test-static.%%lambda-lambda_invoke-0 a0) <access.function=public> {
 	call.short test-static.ETSGLOBAL.bar:()
 	sta v0
 	initobj.short std.core.Int._ctor_:(std.core.Int,i32), v0
@@ -401,7 +401,7 @@ jump_label_1:
 }
 
 .function std.core.Object test-static.ETSGLOBAL.doTestCallStatic() <static, access.function=public> {
-    initobj.short test-static.LambdaObject-ETSGLOBAL$lambda$invoke$0._ctor_:(test-static.LambdaObject-ETSGLOBAL$lambda$invoke$0)
+    initobj.short test-static.%%lambda-lambda_invoke-0._ctor_:(test-static.%%lambda-lambda_invoke-0)
     sta.obj v0
     any.call.0 v0
     return.obj

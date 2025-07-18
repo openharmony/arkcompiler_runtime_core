@@ -24,7 +24,7 @@
     std.core.String baz
 }
 
-.record $NamedAccessMeta-std-core-String {
+.record %%union_prop-std-core-String {
     std.core.String bar
     std.core.String baz
 }
@@ -41,7 +41,7 @@
     lda.str "42"
     stobj.obj v1, B.baz
 
-    ets.ldobj.name.obj v1, $NamedAccessMeta-std-core-String.baz
+    ets.ldobj.name.obj v1, %%union_prop-std-core-String.baz
     sta.obj v2
     lda.str "42"
     sta.obj v3
@@ -49,7 +49,7 @@
     movi v4, 1
     jne v4, error1
 
-    ets.ldobj.name.obj v0, $NamedAccessMeta-std-core-String.bar
+    ets.ldobj.name.obj v0, %%union_prop-std-core-String.bar
     sta.obj v2
     lda.str "64"
     sta.obj v3

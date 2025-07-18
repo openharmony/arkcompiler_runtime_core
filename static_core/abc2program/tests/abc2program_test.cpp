@@ -224,8 +224,8 @@ TEST_F(Abc2ProgramFunctionsTest, RecordTable)
     const std::array expectedRecordNames = {
         "Functions.ETSGLOBAL"s,
         "Functions.Cls"s,
-        "Functions.LambdaObject-ETSGLOBAL$lambda$invoke$0"s,
-        "Functions.LambdaObject-ETSGLOBAL$lambda$invoke$1"s,
+        "Functions.%%lambda-lambda_invoke-0"s,
+        "Functions.%%lambda-lambda_invoke-1"s,
     };
     panda_file::SourceLang expectedLang = panda_file::SourceLang::ETS;
     std::vector<std::string> recordNames;
@@ -239,7 +239,7 @@ TEST_F(Abc2ProgramFunctionsTest, RecordTable)
 
 TEST_F(Abc2ProgramFunctionsTest, Functions)
 {
-    const std::string prefix = "Functions.LambdaObject-ETSGLOBAL$lambda$invoke";
+    const std::string prefix = "Functions.%%lambda-lambda_invoke";
     const std::set<std::string> expectedFunctions = {
         "Functions.Cls._ctor_:Functions.Cls;void;",
         "Functions.Cls.func_f:Functions.Cls;i32;i32;",
@@ -249,15 +249,15 @@ TEST_F(Abc2ProgramFunctionsTest, Functions)
         "Functions.ETSGLOBAL._cctor_:void;",
         "Functions.ETSGLOBAL.bar:f64;std.core.String;",
         "Functions.ETSGLOBAL.foo:std.core.String;std.core.String;",
-        "Functions.ETSGLOBAL.lambda$invoke$0:std.core.String;std.core.String;",
-        "Functions.ETSGLOBAL.lambda$invoke$1:std.core.String;std.core.String;",
+        "Functions.ETSGLOBAL.lambda_invoke-0:std.core.String;std.core.String;",
+        "Functions.ETSGLOBAL.lambda_invoke-1:std.core.String;std.core.String;",
         "Functions.ETSGLOBAL.main:void;",
-        prefix + "$0.$_invoke:Functions.LambdaObject-ETSGLOBAL$lambda$invoke$0;std.core.String;std.core.String;",
-        prefix + "$0._ctor_:Functions.LambdaObject-ETSGLOBAL$lambda$invoke$0;void;",
-        prefix + "$0.invoke1:Functions.LambdaObject-ETSGLOBAL$lambda$invoke$0;std.core.Object;std.core.Object;",
-        prefix + "$1.$_invoke:Functions.LambdaObject-ETSGLOBAL$lambda$invoke$1;std.core.String;std.core.String;",
-        prefix + "$1._ctor_:Functions.LambdaObject-ETSGLOBAL$lambda$invoke$1;void;",
-        prefix + "$1.invoke1:Functions.LambdaObject-ETSGLOBAL$lambda$invoke$1;std.core.Object;std.core.Object;",
+        prefix + "-0.$_invoke:Functions.%%lambda-lambda_invoke-0;std.core.String;std.core.String;",
+        prefix + "-0._ctor_:Functions.%%lambda-lambda_invoke-0;void;",
+        prefix + "-0.invoke1:Functions.%%lambda-lambda_invoke-0;std.core.Object;std.core.Object;",
+        prefix + "-1.$_invoke:Functions.%%lambda-lambda_invoke-1;std.core.String;std.core.String;",
+        prefix + "-1._ctor_:Functions.%%lambda-lambda_invoke-1;void;",
+        prefix + "-1.invoke1:Functions.%%lambda-lambda_invoke-1;std.core.Object;std.core.Object;",
         "std.core.Lambda1._ctor_:std.core.Lambda1;void;",
         "std.core.Object._ctor_:std.core.Object;void;",
         "std.core.Runtime.failedTypeCastException:std.core.Object;std.core.String;u1;std.core.ClassCastError;",
@@ -278,7 +278,7 @@ TEST_F(Abc2ProgramFunctionsTest, Functions)
 
 TEST_F(Abc2ProgramFunctionsConcatTest, Functions)
 {
-    const std::string prefix = "Functions.LambdaObject-ETSGLOBAL$lambda$invoke";
+    const std::string prefix = "Functions.%%lambda-lambda_invoke";
     const std::set<std::string> expectedFunctions = {
         "Functions.Cls._ctor_:Functions.Cls;void;",
         "Functions.Cls.func_f:Functions.Cls;i32;i32;",
@@ -288,15 +288,15 @@ TEST_F(Abc2ProgramFunctionsConcatTest, Functions)
         "Functions.ETSGLOBAL._cctor_:void;",
         "Functions.ETSGLOBAL.bar:f64;std.core.String;",
         "Functions.ETSGLOBAL.foo:std.core.String;std.core.String;",
-        "Functions.ETSGLOBAL.lambda$invoke$0:std.core.String;std.core.String;",
-        "Functions.ETSGLOBAL.lambda$invoke$1:std.core.String;std.core.String;",
+        "Functions.ETSGLOBAL.lambda_invoke-0:std.core.String;std.core.String;",
+        "Functions.ETSGLOBAL.lambda_invoke-1:std.core.String;std.core.String;",
         "Functions.ETSGLOBAL.main:void;",
-        prefix + "$0.$_invoke:Functions.LambdaObject-ETSGLOBAL$lambda$invoke$0;std.core.String;std.core.String;",
-        prefix + "$0._ctor_:Functions.LambdaObject-ETSGLOBAL$lambda$invoke$0;void;",
-        prefix + "$0.invoke1:Functions.LambdaObject-ETSGLOBAL$lambda$invoke$0;std.core.Object;std.core.Object;",
-        prefix + "$1.$_invoke:Functions.LambdaObject-ETSGLOBAL$lambda$invoke$1;std.core.String;std.core.String;",
-        prefix + "$1._ctor_:Functions.LambdaObject-ETSGLOBAL$lambda$invoke$1;void;",
-        prefix + "$1.invoke1:Functions.LambdaObject-ETSGLOBAL$lambda$invoke$1;std.core.Object;std.core.Object;",
+        prefix + "-0.$_invoke:Functions.%%lambda-lambda_invoke-0;std.core.String;std.core.String;",
+        prefix + "-0._ctor_:Functions.%%lambda-lambda_invoke-0;void;",
+        prefix + "-0.invoke1:Functions.%%lambda-lambda_invoke-0;std.core.Object;std.core.Object;",
+        prefix + "-1.$_invoke:Functions.%%lambda-lambda_invoke-1;std.core.String;std.core.String;",
+        prefix + "-1._ctor_:Functions.%%lambda-lambda_invoke-1;void;",
+        prefix + "-1.invoke1:Functions.%%lambda-lambda_invoke-1;std.core.Object;std.core.Object;",
         "std.core.Lambda1._ctor_:std.core.Lambda1;void;",
         "std.core.Object._ctor_:std.core.Object;void;",
         "std.core.Runtime.failedTypeCastException:std.core.Object;std.core.String;u1;std.core.ClassCastError;",

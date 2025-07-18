@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -173,10 +173,13 @@ class EtsBenchmarksRunner:
         subprocess.run(["mkdir", "-p", current_output_dir])
         fd_read = os.open(self.wrapper_asm_filepath, os.O_RDONLY, 0o755)
         fd_read_two = os.open(base_asm_file_path, os.O_RDONLY, 0o755)
-        file_to_read = os.fdopen(fd_read, "r")
-        file_to_read_two = os.fdopen(fd_read_two, "r")
-        os.fdopen(os.open(tmp_asm_file_path, os.O_WRONLY | os.O_CREAT, 0o755), "w").write(file_to_read.read() +
-                                                                             file_to_read_two.read())
+
+        with os.fdopen(fd_read, "r") as file_to_read, \
+                os.fdopen(fd_read_two, "r") as file_to_read_two, \
+                os.fdopen(os.open(tmp_asm_file_path, os.O_WRONLY |
+                                  os.O_CREAT, 0o755), "w") as file_to_write:
+            file_to_write.write(file_to_read.read() +
+                                file_to_read_two.read())
 
         if self.is_device:
             device_current_output_dir = os.path.join(

@@ -15,7 +15,7 @@
 
 //! CHECKER      Check that loads after a non-dominating store are not replaced by a phi
 //! RUN          force_jit: true, options: "--compiler-regex='.*lambda.*'", entry: "lse_loop_non_dominating_store.ETSGLOBAL::main"
-//! METHOD       "lse_loop_non_dominating_store.LambdaObject-ETSGLOBAL_lambda_invoke_0::invoke1"
+//! METHOD       "lse_loop_non_dominating_store.__lambda-lambda_invoke_0::invoke1"
 //! PASS_BEFORE  "LSE"
 //! INST_COUNT   /LoadObject.*std\.core\.IntBox\.value/, 4
 //! PASS_AFTER   "LSE"

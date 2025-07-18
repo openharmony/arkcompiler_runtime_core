@@ -79,14 +79,14 @@ public:
     {
         return war_;
     }
-    inline bool IsUnderscoreOrDollarOrHyphen(char c)
+    inline bool IsAllowedSpecialCharacter(char c)
     {
-        return c == '_' || c == '$' || c == '-';
+        return c == '_' || c == '$' || c == '-' || c == '%';
     }
 
-    inline bool IsAlphaNumeric(char c)
+    inline bool IsValidNameCharacter(char c)
     {
-        return std::isalnum(c) != 0 || IsUnderscoreOrDollarOrHyphen(c);
+        return std::isalnum(c) != 0 || IsAllowedSpecialCharacter(c);
     }
 
     inline bool IsNonDigit(char c)
