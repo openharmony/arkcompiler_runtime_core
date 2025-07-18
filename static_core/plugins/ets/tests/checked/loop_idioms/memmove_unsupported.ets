@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-function check(arr1: Object, arr2: Object): boolean {
+function check(arr1: Object, arr2: Object): int {
     if (arr1.toString() != arr2.toString()) {
         console.print("Expected " + arr2.toString() + " but got " + arr1.toString());
-        return true;
+        return 1;
     }
-    return false;
+    return 0;
 }
 
 let GLOBAL_OFFS: int = 1;
@@ -29,7 +29,7 @@ class TestUnsupported {
     //! METHOD        "memmove_unsupported.TestUnsupported::noAlias_underIf"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
-    static noAlias_underIf(): boolean {
+    static noAlias_underIf(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
         return check(TestUnsupported.__noinline__noAlias_underIf(src, dst), [6, 7, 8, 4, 5]);
@@ -49,7 +49,7 @@ class TestUnsupported {
     //! METHOD        "memmove_unsupported.TestUnsupported::patternMissmatch_boundscheck"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
-    static patternMissmatch_boundscheck(): boolean {
+    static patternMissmatch_boundscheck(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;
@@ -65,7 +65,7 @@ class TestUnsupported {
     //! METHOD        "memmove_unsupported.TestUnsupported::subIdx"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
-    static subIdx(): boolean {
+    static subIdx(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;

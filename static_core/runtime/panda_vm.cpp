@@ -54,7 +54,7 @@ void PandaVM::UpdateVmRefs(const GCRootUpdater &gcRootUpdater)
 Expected<int, Runtime::Error> PandaVM::InvokeEntrypoint(Method *entrypoint, const std::vector<std::string> &args)
 {
     if (!CheckEntrypointSignature(entrypoint)) {
-        LOG(ERROR, RUNTIME) << "Method '" << entrypoint << "' has invalid signature";
+        LOG(ERROR, RUNTIME) << "Method '" << entrypoint->GetFullName(true) << "' has invalid signature";
         return Unexpected(Runtime::Error::INVALID_ENTRY_POINT);
     }
     Expected<int, Runtime::Error> ret = InvokeEntrypointImpl(entrypoint, args);
