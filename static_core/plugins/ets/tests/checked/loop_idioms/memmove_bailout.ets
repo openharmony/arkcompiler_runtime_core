@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-function check(arr1: Object, arr2: Object): boolean {
+function check(arr1: Object, arr2: Object): int {
     if (arr1.toString() != arr2.toString()) {
         console.print("Expected " + arr2.toString() + " but got " + arr1.toString());
-        return true;
+        return 1;
     }
-    return false;
+    return 0;
 }
 
 class TestBailout {
@@ -27,7 +27,7 @@ class TestBailout {
     //! METHOD        "memmove_bailout.TestBailout::mayAlias"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
-    static mayAlias(): boolean {
+    static mayAlias(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
         return check(TestBailout.__noinline__mayAlias(src, dst), [6, 7, 8, 4, 5]);
@@ -45,7 +45,7 @@ class TestBailout {
     //! METHOD        "memmove_bailout.TestBailout::patternMissmatch_offsets1"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
-    static patternMissmatch_offsets1(): boolean {
+    static patternMissmatch_offsets1(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;
@@ -60,7 +60,7 @@ class TestBailout {
     //! METHOD        "memmove_bailout.TestBailout::patternMissmatch_offsets2"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
-    static patternMissmatch_offsets2(): boolean {
+    static patternMissmatch_offsets2(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;
@@ -75,7 +75,7 @@ class TestBailout {
     //! METHOD        "memmove_bailout.TestBailout::refArray"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
-    static refArray(): boolean {
+    static refArray(): int {
         let src = new Array<int>(6, 7, 8);
         let dst = new Array<int>(1, 2, 3, 4, 5);
         let offs = dst.length - src.length;
@@ -90,7 +90,7 @@ class TestBailout {
     //! METHOD        "memmove_bailout.TestBailout::differentTypes"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
-    static differentTypes(): boolean {
+    static differentTypes(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<long> = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;
