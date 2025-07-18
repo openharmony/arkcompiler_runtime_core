@@ -12,12 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import ExportEnum from "export_enum"
-import IfaceA from "export_iface"
-import ns_foo from "export_ns"
-import StructA from "export_struct"
-import Export_func from "export_toplevel_func"
-import ExportUnion from "export_union"
-import * as import_example from "import_example"
+#include "export_toplevel_func.impl.hpp"
+#include <iostream>
+#include "export_toplevel_func.proj.hpp"
+#include "stdexcept"
+#include "taihe/runtime.hpp"
 
-function main() {}
+namespace {
+// To be implemented.
+
+void ToplevelFunc()
+{
+    std::cout << "Export default toplevel func" << std::endl;
+}
+}  // namespace
+
+// Since these macros are auto-generate, lint will cause false positive.
+// NOLINTBEGIN
+TH_EXPORT_CPP_API_ToplevelFunc(ToplevelFunc);
+// NOLINTEND

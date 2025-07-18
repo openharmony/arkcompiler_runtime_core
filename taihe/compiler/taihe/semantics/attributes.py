@@ -292,16 +292,52 @@ class AutoCheckedAttribute(AbstractCheckedAttribute, Generic[T]):
         raw: UncheckedAttribute,
         dm: DiagnosticsManager,
     ) -> Self | None:
-        args, kwargs, ok = cls.split_and_validate_args(raw, dm)
-        if not ok:
-            return None
+        args: list[Argument] = []
+        kwargs: dict[str, Argument] = {}
 
+        for arg in raw.args:
+            if arg.key is None:
+                if kwargs:
+                    dm.emit(AttrArgOrderError(arg))
+                    return None
+                args.append(arg)
+            else:
+                if (prev := kwargs.get(arg.key)) is not None:
+                    dm.emit(AttrArgRedefError(prev, arg))
+                    return None
+                kwargs[arg.key] = arg
+
+        return cls.try_construct_from_parsed_args(raw.loc, args, kwargs, dm)
+
+    @classmethod
+    def try_construct_from_parsed_args(
+        cls,
+        loc: SourceLocation | None,
+        args: list[Argument],
+        kwargs: dict[str, Argument],
+        dm: DiagnosticsManager,
+    ) -> Self | None:
+        """Constructs the attribute instance from parsed arguments.
+
+        This method processes the positional and keyword arguments, validates
+        them against the dataclass fields, and constructs the attribute instance.
+
+        Args:
+            loc: Source location of the attribute for error reporting
+            name: The name of the attribute (without @ prefix)
+            args: Positional arguments passed to the attribute
+            kwargs: Keyword arguments passed to the attribute
+            dm: Diagnostics manager for error reporting
+
+        Returns:
+            An instance of the attribute on success, None on failure
+        """
         dataclass_arguments: dict[str, Any] = {}
 
         for field in fields(cls):
             if field.name == "loc":
                 # Special handling for the 'loc' field
-                dataclass_arguments["loc"] = raw.loc
+                dataclass_arguments["loc"] = loc
                 continue
             if field.init is False:
                 # Skip fields that are not intended for initialization
@@ -313,7 +349,7 @@ class AutoCheckedAttribute(AbstractCheckedAttribute, Generic[T]):
                 # If no value is provided and no default, emit an error
                 if field.default is not MISSING or field.default_factory is not MISSING:
                     continue
-                dm.emit(AttrArgMissingError(cls.NAME, field.name, False, loc=raw.loc))
+                dm.emit(AttrArgMissingError(cls.NAME, field.name, False, loc=loc))
                 return None
             elif args:
                 # If the field is positional, pop the first positional argument
@@ -322,7 +358,7 @@ class AutoCheckedAttribute(AbstractCheckedAttribute, Generic[T]):
                 # If no value is provided and no default, emit an error
                 if field.default is not MISSING or field.default_factory is not MISSING:
                     continue
-                dm.emit(AttrArgMissingError(cls.NAME, field.name, False, loc=raw.loc))
+                dm.emit(AttrArgMissingError(cls.NAME, field.name, False, loc=loc))
                 return None
 
             # Validate the type of the provided value
@@ -340,44 +376,6 @@ class AutoCheckedAttribute(AbstractCheckedAttribute, Generic[T]):
             return None
 
         return cls(**dataclass_arguments)
-
-    @classmethod
-    def split_and_validate_args(
-        cls,
-        raw: UncheckedAttribute,
-        dm: DiagnosticsManager,
-    ) -> tuple[list[Argument], dict[str, Argument], bool]:
-        """Split raw arguments into positional and keyword, and validate ordering.
-
-        Positional arguments must appear before any keyword arguments.
-        Mixing positional and keyword arguments with incorrect order results in diagnostics.
-
-        Args:
-            raw: The raw unchecked attribute containing argument list.
-            dm: Diagnostics manager for reporting invalid order.
-
-        Returns:
-            A tuple of:
-            - List of positional arguments
-            - Dictionary of keyword arguments
-            - A boolean indicating if any ordering errors were found
-        """
-        args: list[Argument] = []
-        kwargs: dict[str, Argument] = {}
-
-        for arg in raw.args:
-            if arg.key is None:
-                if kwargs:
-                    dm.emit(AttrArgOrderError(arg))
-                    return [], {}, False
-                args.append(arg)
-            else:
-                if (prev := kwargs.get(arg.key)) is not None:
-                    dm.emit(AttrArgRedefError(prev, arg))
-                    return [], {}, False
-                kwargs[arg.key] = arg
-
-        return args, kwargs, True
 
     @override
     def check_context(self, parent: Decl, dm: DiagnosticsManager) -> None:

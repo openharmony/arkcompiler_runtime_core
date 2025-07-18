@@ -23,59 +23,63 @@ spec
       EOF
     ;
 
+/////////
+// Use //
+/////////
+
 use
-    : KW_USE PkgName_pkg_name = pkgName (KW_AS TOKENOpt_pkg_alias = ID)? SEMICOLON # usePackage
+    : KW_USE PkgName_pkg_name = pkgName (KW_AS IdNameOpt_pkg_alias = idName)? SEMICOLON # usePackage
     | KW_FROM PkgName_pkg_name = pkgName KW_USE DeclAliasPairLst_decl_alias_pairs += declAliasPair (COMMA DeclAliasPairLst_decl_alias_pairs += declAliasPair)* SEMICOLON # useSymbol
     ;
 
-pkgName
-    : (TOKENLst_parts += ID DOT)* TOKENLst_parts += ID
+declAliasPair
+    : IdName_decl_name = idName (KW_AS IdNameOpt_decl_alias = idName)?
     ;
 
-declAliasPair
-    : TOKEN_decl_name = ID (KW_AS TOKENOpt_decl_alias = ID)?
-    ;
+/////////////////
+// Declaration //
+/////////////////
 
 specField
     : (DeclAttrLst_forward_attrs += declAttr)*
-      KW_ENUM TOKEN_name = ID COLON Type_enum_ty = type
+      KW_ENUM IdName_name = idName COLON Type_enum_ty = type
       LEFT_BRACE (EnumItemLst_fields += enumItem (COMMA EnumItemLst_fields += enumItem)* COMMA?)? RIGHT_BRACE # enum
     | (DeclAttrLst_forward_attrs += declAttr)*
-      KW_STRUCT TOKEN_name = ID
+      KW_STRUCT IdName_name = idName
       LEFT_BRACE (StructFieldLst_fields += structField | ScopeAttrLst_inner_attrs += scopeAttr)* RIGHT_BRACE # struct
     | (DeclAttrLst_forward_attrs += declAttr)*
-      KW_UNION TOKEN_name = ID
+      KW_UNION IdName_name = idName
       LEFT_BRACE (UnionFieldLst_fields += unionField | ScopeAttrLst_inner_attrs += scopeAttr)* RIGHT_BRACE # union
     | (DeclAttrLst_forward_attrs += declAttr)*
-      KW_INTERFACE TOKEN_name = ID
+      KW_INTERFACE IdName_name = idName
       (COLON InterfaceParentLst_extends += interfaceParent (COMMA InterfaceParentLst_extends += interfaceParent)* COMMA?)?
       LEFT_BRACE (InterfaceFieldLst_fields += interfaceField | ScopeAttrLst_inner_attrs += scopeAttr)* RIGHT_BRACE # interface
     | (DeclAttrLst_forward_attrs += declAttr)*
-      KW_FUNCTION TOKEN_name = ID
-      LEFT_PARENTHESIS (ParameterLst_parameters += parameter (COMMA ParameterLst_parameters += parameter)* COMMA?)? RIGHT_PARENTHESIS (COLON (TypeOpt_return_ty = type | KW_VOID))? SEMICOLON # globalFunction
+      KW_FUNCTION IdName_name = idName
+      LEFT_PARENTHESIS (ParameterLst_parameters += parameter (COMMA ParameterLst_parameters += parameter)* COMMA?)? RIGHT_PARENTHESIS (COLON (KW_VOID | TypeOpt_return_ty = type))? SEMICOLON # globalFunction
     ;
 
 enumItem
     : (DeclAttrLst_forward_attrs += declAttr)*
-      TOKEN_name = ID (ASSIGN_TO AnyExprOpt_val = anyExpr)? # enumProperty
+      IdName_name = idName (ASSIGN_TO AnyExprOpt_val = anyExpr)? # enumProperty
     ;
 
 structField
     : (DeclAttrLst_forward_attrs += declAttr)*
-      TOKEN_name = ID
+      IdName_name = idName
       COLON Type_ty = type SEMICOLON # structProperty
     ;
 
 unionField
     : (DeclAttrLst_forward_attrs += declAttr)*
-      TOKEN_name = ID
+      IdName_name = idName
       (COLON TypeOpt_ty = type)? SEMICOLON # unionProperty
     ;
 
 interfaceField
     : (DeclAttrLst_forward_attrs += declAttr)*
-      TOKEN_name = ID
-      LEFT_PARENTHESIS (ParameterLst_parameters += parameter (COMMA ParameterLst_parameters += parameter)* COMMA?)? RIGHT_PARENTHESIS (COLON (TypeOpt_return_ty = type | KW_VOID))? SEMICOLON # interfaceFunction
+      IdName_name = idName
+      LEFT_PARENTHESIS (ParameterLst_parameters += parameter (COMMA ParameterLst_parameters += parameter)* COMMA?)? RIGHT_PARENTHESIS (COLON (KW_VOID | TypeOpt_return_ty = type))? SEMICOLON # interfaceFunction
     ;
 
 interfaceParent
@@ -85,7 +89,7 @@ interfaceParent
 
 parameter
     : (DeclAttrLst_forward_attrs += declAttr)*
-      TOKEN_name = ID COLON Type_ty = type
+      IdName_name = idName COLON Type_ty = type
     ;
 
 ///////////////
@@ -93,16 +97,16 @@ parameter
 ///////////////
 
 scopeAttr
-    : AT EXCLAMATION TOKEN_name = ID (LEFT_PARENTHESIS (AttrArgLst_args += attrArg (COMMA AttrArgLst_args += attrArg)* COMMA?)? RIGHT_PARENTHESIS)?
+    : AT EXCLAMATION IdName_name = idName (LEFT_PARENTHESIS (AttrArgLst_args += attrArg (COMMA AttrArgLst_args += attrArg)* COMMA?)? RIGHT_PARENTHESIS)?
     ;
 
 declAttr
-    : AT TOKEN_name = ID (LEFT_PARENTHESIS (AttrArgLst_args += attrArg (COMMA AttrArgLst_args += attrArg)* COMMA?)? RIGHT_PARENTHESIS)?
+    : AT IdName_name = idName (LEFT_PARENTHESIS (AttrArgLst_args += attrArg (COMMA AttrArgLst_args += attrArg)* COMMA?)? RIGHT_PARENTHESIS)?
     ;
 
 attrArg
     : AnyExpr_val = anyExpr # unnamedAttrArg
-    | TOKEN_name = ID ASSIGN_TO AnyExpr_val = anyExpr # namedAttrArg
+    | IdName_name = idName ASSIGN_TO AnyExpr_val = anyExpr # namedAttrArg
     ;
 
 //////////
@@ -111,14 +115,14 @@ attrArg
 
 type
     : (DeclAttrLst_forward_attrs += declAttr)*
-      PkgName_pkg_name = pkgName DOT TOKEN_decl_name = ID # longType
+      PkgName_pkg_name = pkgName DOT IdName_decl_name = idName # longType
     | (DeclAttrLst_forward_attrs += declAttr)*
-      TOKEN_decl_name = ID # shortType
+      IdName_decl_name = idName # shortType
     | (DeclAttrLst_forward_attrs += declAttr)*
-      TOKEN_decl_name = ID LESS_THAN (TypeLst_args += type (COMMA TypeLst_args += type)* COMMA?)? GREATER_THAN # genericType
+      IdName_decl_name = idName LESS_THAN (TypeLst_args += type (COMMA TypeLst_args += type)* COMMA?)? GREATER_THAN # genericType
     | <assoc = right>
       (DeclAttrLst_forward_attrs += declAttr)*
-      LEFT_PARENTHESIS (ParameterLst_parameters += parameter (COMMA ParameterLst_parameters += parameter)* COMMA?)? RIGHT_PARENTHESIS ARROW (TypeOpt_return_ty = type | KW_VOID) # callbackType
+      LEFT_PARENTHESIS (ParameterLst_parameters += parameter (COMMA ParameterLst_parameters += parameter)* COMMA?)? RIGHT_PARENTHESIS ARROW (KW_VOID | TypeOpt_return_ty = type) # callbackType
     ;
 
 ////////////////
@@ -168,6 +172,18 @@ stringExpr
     : TOKEN_val = STRING_LITERAL # literalStringExpr
     | TOKEN_val = DOCSTRING_LITERAL # literalDocStringExpr
     | StringExpr_left = stringExpr StringExpr_right = stringExpr # binaryStringExpr
+    ;
+
+////////////////
+// Identifier //
+////////////////
+
+pkgName
+    : (IdNameLst_parts += idName DOT)* IdNameLst_parts += idName
+    ;
+
+idName
+    : TOKEN_val = ID
     ;
 
 ///////////

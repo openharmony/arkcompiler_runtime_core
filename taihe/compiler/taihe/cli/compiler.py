@@ -64,6 +64,7 @@ def main():
         "-G",
         dest="backends",
         nargs="*",
+        action="extend",
         default=[],
         choices=registry.get_backend_names(),
         help="backends to generate sources, default: abi-header, abi-source, c-author",
@@ -72,7 +73,8 @@ def main():
         "--codegen",
         "-C",
         dest="config",
-        action="append",
+        nargs="*",
+        action="extend",
         default=[],
         help="additional code generation configuration",
     )

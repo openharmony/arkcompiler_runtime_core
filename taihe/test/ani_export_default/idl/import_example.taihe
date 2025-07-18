@@ -17,6 +17,7 @@ use export_iface;
 use export_namespace;
 use export_struct;
 use export_union;
+use export_toplevel_func;
 
 function ImportEnumFunc(): export_enum.ExportEnum;
 function ImportIfaceFunc(): export_iface.IfaceA;

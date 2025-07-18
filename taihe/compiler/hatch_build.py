@@ -87,9 +87,6 @@ def generate_ast(file: TextIO, parser: Any):
         "    class TOKEN(any):\n"
         "        text: str\n"
         "\n"
-        "        def __str__(self):\n"
-        "            return self.text\n"
-        "\n"
         "        def _accept(self, visitor) -> Any:\n"
         "            return visitor.visit_token(self)\n"
         "\n"
@@ -244,12 +241,11 @@ class TaiheBuildHook(BuildHookInterface):
         build_date = now.strftime("%Y%m%d")
 
         self.version_path.write_text(
-            f"""version = {self.metadata.version!r}
-git_commit = {git_commit!r}
-git_message = {git_message!r}
-build_date = {build_date!r}
-build_time_utc = {build_timestamp!r}
-"""
+            f"version = {self.metadata.version!r}\n"
+            f"git_commit = {git_commit!r}\n"
+            f"git_message = {git_message!r}\n"
+            f"build_date = {build_date!r}\n"
+            f"build_time_utc = {build_timestamp!r}\n"
         )
 
     def _generate_grammar(self):

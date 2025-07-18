@@ -48,4 +48,4 @@ set(AUTHOR_INCLUDE
     "${CMAKE_CURRENT_LIST_DIR}/author/include"
 )
 
-add_ani_demo(ani_bundlemanager "${IDL_FILES}" "" "${GEN_ETS_FILES}" "${USER_ETS_FILES}" "${AUTHOR_INCLUDE}" "${AUTHOR_CPP_FILES}" "test")
+add_ani_demo(ani_bundlemanager "${IDL_FILES}" "" "${GEN_ETS_FILES}" "${USER_ETS_FILES}" "${AUTHOR_INCLUDE}" "${AUTHOR_CPP_FILES}")
