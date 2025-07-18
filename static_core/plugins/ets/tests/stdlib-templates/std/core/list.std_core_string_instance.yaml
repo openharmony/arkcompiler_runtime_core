@@ -1234,9 +1234,9 @@
     param_init_data_types: {inputs: "FixedArray<int>"},
     param_list: {inputs: '[0, 0]'},
 
-    method_return_type: int,
-    expected_test_data_item_type: int,
-    expected_data_type: "FixedArray<int>",
+    method_return_type: number,
+    expected_test_data_item_type: number,
+    expected_data_type: "FixedArray<number>",
     expected_test_data: '[67, 1050]',
     verify_test_result_function: comparePrimitiveValue
   }
