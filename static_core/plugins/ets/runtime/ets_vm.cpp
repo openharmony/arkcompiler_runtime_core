@@ -420,6 +420,11 @@ bool PandaEtsVM::CheckEntrypointSignature(Method *entrypoint)
 {
     ASSERT(entrypoint != nullptr);
 
+    if (entrypoint->GetReturnType().GetId() != panda_file::Type::TypeId::I32 &&
+        entrypoint->GetReturnType().GetId() != panda_file::Type::TypeId::VOID) {
+        return false;
+    }
+
     if (entrypoint->GetNumArgs() == 0) {
         return true;
     }
