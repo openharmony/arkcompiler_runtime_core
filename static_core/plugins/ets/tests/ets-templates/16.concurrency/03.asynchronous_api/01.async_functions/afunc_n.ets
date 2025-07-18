@@ -22,6 +22,10 @@ tags: [compile-only, negative]
 {{c.decl}}
 
 function main() {
-{{c.use}}
+    {% if c.use is defined %}
+        {{c.use|indent}}
+    {% else %}
+
+    {% endif %}
 }
 {% endfor %}
