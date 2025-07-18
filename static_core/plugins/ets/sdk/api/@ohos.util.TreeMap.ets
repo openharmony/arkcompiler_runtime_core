@@ -14,7 +14,7 @@
  */
 
  export type TreeMapForEachCb<K, V> = (value: V, key: K, map: TreeMap<K, V>) => void;
- export type TreeMapComparator<K> = (firstValue: K, secondValue: K) => double;
+ export type TreeMapComparator<K> = (firstValue: K, secondValue: K) => number;
 
 export interface ReadonlyTreeMap<K, V> extends Iterable<[K, V]> {
     /**
@@ -22,7 +22,7 @@ export interface ReadonlyTreeMap<K, V> extends Iterable<[K, V]> {
      *
      * @returns the number of elements in the TreeMap
      */
-    get length(): int;
+    get length(): number;
 
     /**
      * Returns a value associated with key if present
@@ -124,7 +124,7 @@ final class EmptyTreeMapIterator<R> implements IterableIterator<R> {
     }
 }
 
-type comparator<K> = (firstValue: K, secondValue: K) => double;
+type comparator<K> = (firstValue: K, secondValue: K) => number;
 
 export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
     private rootEntry: TreeMapEntry<K, V> | undefined = undefined;
@@ -263,7 +263,7 @@ export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
         }
     }
 
-    private static defaultComparator(firstValue: K, secondValue: K): int {
+    private static defaultComparator(firstValue: K, secondValue: K): number {
         if (firstValue instanceof Number && secondValue instanceof Number) {
             const firstValueN = (firstValue as Number).valueOf();
             const secondValueN = (secondValue as Number).valueOf();
@@ -289,8 +289,8 @@ export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
      */
     constructor(comparator?: TreeMapComparator<K>) {
         if (comparator === undefined) {
-            const defaultComparator: (firstValue: K, secondValue: K) => double =
-                (firstValue: K, secondValue: K): double => {
+            const defaultComparator: (firstValue: K, secondValue: K) => number =
+                (firstValue: K, secondValue: K): number => {
                 return TreeMap.defaultComparator(firstValue, secondValue);
             }
             this.comparator = defaultComparator;
@@ -304,7 +304,7 @@ export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
      *
      * @returns the number of elements in the TreeMap
      */
-    override get length(): int {
+    override get length(): number {
         return this.elementNum;
     }
 

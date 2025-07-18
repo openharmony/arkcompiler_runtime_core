@@ -15,7 +15,7 @@
 
 import { BusinessError } from "@ohos.base";
 
-const TypeErrorCodeId: int = 401;
+const TypeErrorCodeId: number = 401;
 
 export type HashMapCbFn<K, V> = (value: V, key: K, map: HashMap<K, V>) => void;
 
@@ -25,7 +25,7 @@ interface ReadonlyHashMap<K, V> extends Iterable<[K, V]> {
      *
      * @returns number of Entries with unique keys in the HashMap
      */
-    get length(): int;
+    get length(): number;
 
     /**
      * Returns a value associated with key if present
@@ -77,8 +77,8 @@ export default class HashMap<K, V> implements ReadonlyHashMap<K, V> {
      *
      * @returns number of Entries with unique keys in the HashMap
      */
-    get length(): int {
-        return this.buckets.size.toInt();
+    get length(): number {
+        return this.buckets.size;
     }
 
     /**

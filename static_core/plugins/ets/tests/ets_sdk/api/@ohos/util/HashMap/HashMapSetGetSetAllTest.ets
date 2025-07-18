@@ -37,7 +37,7 @@ function main(): int {
 }
 
 function testSetValidData() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("squirrel", 123);
     let result = hashMap.get("squirrel");
     arktest.assertEQ(result, 123, "The hashMap should return the correct value for the key");
@@ -45,7 +45,7 @@ function testSetValidData() {
 }
 
 function testSetEmptyString() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("", 356);
     let result = hashMap.get("")
     arktest.assertEQ(result, 356, "The hashMap should return the correct value for the key");
@@ -53,7 +53,7 @@ function testSetEmptyString() {
 }
 
 function testSetUndefined() {
-    let hashMap: HashMap<string|undefined, double|undefined> = new HashMap<string|undefined, double|undefined>();
+    let hashMap: HashMap<string|undefined, number|undefined> = new HashMap<string|undefined, number|undefined>();
     try {
         hashMap.set(undefined, 356);
     } catch (e: BusinessError) {
@@ -64,7 +64,7 @@ function testSetUndefined() {
 }
 
 function testSetKeyLength1024() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     let param = 'a'.repeat(2048);
     hashMap.set(param, 356);
     let result = hashMap.get(param)
@@ -73,11 +73,11 @@ function testSetKeyLength1024() {
 }
 
 function testSetDataLoop1000() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
-    for (let i: int = 0; i < 1000; i++) {
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
+    for (let i = 0; i < 1000; i++) {
         hashMap.set("ji" + i, i);
     }
-    for (let i: int = 0; i < 1000; i++) {
+    for (let i = 0; i < 1000; i++) {
         let result = hashMap.get("ji" + i)
         arktest.assertEQ(result, i, "The hashMap should return the correct value for the key");
     }
@@ -85,7 +85,7 @@ function testSetDataLoop1000() {
 }
 
 function testGetValidKey() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("sparrow", 356);
     let result = hashMap.get("sparrow");
     arktest.assertEQ(result, 356, "The hashMap should return the correct value for the key");
@@ -93,7 +93,7 @@ function testGetValidKey() {
 }
 
 function testGetNotSetKey() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("sparrow", 356);
     let result = hashMap.get("squirrel");
     arktest.assertEQ(result, undefined, "The hashMap should return undefined for the key that is not set");
@@ -101,7 +101,7 @@ function testGetNotSetKey() {
 }
 
 function testGetKeyFromEmptyHashMap() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     let result = hashMap.get("sparrow");
     arktest.assertEQ(result, undefined, "The hashMap should return undefined for the key when the hashMap is empty");
     arktest.assertEQ(hashMap.length, 0, "The hashMap length should be 0");
@@ -127,10 +127,10 @@ function testGetDataAfterClearing() {
 }
 
 function testSetAllDataFromHashMap2ToHashMap1() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("squirrel", 123);
     hashMap.set("sparrow", 356);
-    let newHashMap: HashMap<string, double> = new HashMap<string, double>();
+    let newHashMap: HashMap<string, number> = new HashMap<string, number>();
     newHashMap.setAll(hashMap);
     arktest.assertEQ(newHashMap.length, hashMap.length, "The hashMap should set all elements to another HashMap");
     arktest.assertEQ(hashMap.length, 2, "The hashMap length should be 2");
@@ -138,10 +138,10 @@ function testSetAllDataFromHashMap2ToHashMap1() {
 }
 
 function testSetAllSameKeyDiffValue() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("squirrel", 123);
     hashMap.set("sparrow", 356);
-    let newHashMap: HashMap<string, double> = new HashMap<string, double>();
+    let newHashMap: HashMap<string, number> = new HashMap<string, number>();
     newHashMap.set("sparrow", 100);
     hashMap.setAll(newHashMap);
     let result = hashMap.get("sparrow");
@@ -151,9 +151,9 @@ function testSetAllSameKeyDiffValue() {
 }
 
 function testSetAllSameData() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("sparrow", 356);
-    let newHashMap: HashMap<string, double> = new HashMap<string, double>();
+    let newHashMap: HashMap<string, number> = new HashMap<string, number>();
     newHashMap.set("sparrow", 356);
     hashMap.setAll(newHashMap);
     let result = hashMap.get("sparrow");

@@ -16,7 +16,7 @@
 import { PlainArray } from "@ohos.util.PlainArray";
 import { BusinessError } from "@ohos.base";
 
-const OutOfBoundsErrorCodeId: int = 10200001;
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("PlainArray API tests");
@@ -34,15 +34,15 @@ function main(): int {
 }
 
 function initializePlainArray<T>(plainArray: PlainArray<T>, sourceArray: T[]) {
-    for (let i: int = 0; i < sourceArray.length; i++) {
+    for (let i = 0; i < sourceArray.length; i++) {
         plainArray.add(i, sourceArray[i]);
     }
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber2: double | int = 2;
-    static readonly testNumber6: double | int = 6;
+    static readonly testNumber1: number = 1;
+    static readonly testNumber2: number = 2;
+    static readonly testNumber6: number = 6;
     static readonly testString1: string = "0:0,1:2,2:2,3:3,4:4";
     static readonly testString2: string = "0:0,1:1,2:2,3:3,4:4";
     static readonly testString3: string = "0:6,1:2,2:2,3:3,4:6";
@@ -50,22 +50,22 @@ class TestData {
 }
 
 function testSetValueAtValidIndex() {
-    let plainArray = new PlainArray<double>();
+    let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
     plainArray.setValueAt(TestData.testNumber1, TestData.testNumber1);
     arktest.assertEQ(plainArray.toString(), TestData.testString2, "Set successful and other elements should not change");
 }
 
 function testSetValueAtBoundaryIndex() {
-    let plainArray = new PlainArray<double>();
+    let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
     plainArray.setValueAt(0, TestData.testNumber6);
-    plainArray.setValueAt(TestData.forNumber2.length.toInt() - TestData.testNumber1, TestData.testNumber6);
+    plainArray.setValueAt(TestData.forNumber2.length - TestData.testNumber1, TestData.testNumber6);
     arktest.assertEQ(plainArray.toString(), TestData.testString3, "Set successful and other elements should not change");
 }
 
 function testSetValueAtExceededIndex() {
-    let plainArray = new PlainArray<double>();
+    let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
@@ -83,7 +83,7 @@ function testSetValueAtExceededIndex() {
 }
 
 function testSetValueAtWithEmpty() {
-    let plainArray = new PlainArray<double>();
+    let plainArray = new PlainArray<number>();
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message == `Container is empty`) &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
@@ -93,18 +93,18 @@ function testSetValueAtWithEmpty() {
 }
 
 function testToStringWithNonEmpty() {
-    let plainArray = new PlainArray<double>();
+    let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
     arktest.assertEQ(plainArray.toString(), TestData.testString1, "The result should be correct string representation");
 }
 
 function testToStringWithEmpty() {
-    let plainArray = new PlainArray<double>();
+    let plainArray = new PlainArray<number>();
     arktest.assertEQ(plainArray.toString(), "", "The result should be correct string representation");
 }
 
 function testClearWithNonEmpty() {
-    let plainArray = new PlainArray<double>();
+    let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
     arktest.assertEQ(plainArray.length, TestData.forNumber2.length,
         "The plainArray length should be same as TestData.forNumber2 length");
@@ -114,7 +114,7 @@ function testClearWithNonEmpty() {
 }
 
 function testClearWithEmpty() {
-    let plainArray = new PlainArray<double>();
+    let plainArray = new PlainArray<number>();
     arktest.assertEQ(plainArray.length, 0, "The plainArray length should be 0");
     plainArray.clear();
     arktest.assertEQ(plainArray.length, 0, "The plainArray length should be 0 after clear");

@@ -33,7 +33,7 @@ function main(): int {
 }
 
 function testConstructorCreatesEmptyLightWeightMap() {
-    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
+    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     lightWeightMap.set("squirrel", 123);
     arktest.assertTrue(lightWeightMap instanceof LightWeightMap,
         "The lightWeightMap should be of the same type as the LightWeightMap");
@@ -41,14 +41,14 @@ function testConstructorCreatesEmptyLightWeightMap() {
 }
 
 function testIsEmptyTrue() {
-    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
+    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     let result = lightWeightMap.isEmpty();
     arktest.assertEQ(result, true, "The lightWeightMap should be empty");
     arktest.assertEQ(lightWeightMap.length, 0, "The lightWeightMap length should be 0");
 }
 
 function testIsEmptyFalse() {
-    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
+    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     lightWeightMap.set("squirrel", 123);
     let result = lightWeightMap.isEmpty();
     arktest.assertEQ(result, false, "The lightWeightMap should not be empty");
@@ -56,7 +56,7 @@ function testIsEmptyFalse() {
 }
 
 function testIsEmptyTrueAfterRemove() {
-    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
+    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     lightWeightMap.set("squirrel", 123);
     lightWeightMap.remove("squirrel");
     let result = lightWeightMap.isEmpty();
@@ -65,7 +65,7 @@ function testIsEmptyTrueAfterRemove() {
 }
 
 function testIsEmptyTrueAfterClear() {
-    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
+    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     lightWeightMap.set("squirrel", 123);
     lightWeightMap.clear();
     let result = lightWeightMap.isEmpty();

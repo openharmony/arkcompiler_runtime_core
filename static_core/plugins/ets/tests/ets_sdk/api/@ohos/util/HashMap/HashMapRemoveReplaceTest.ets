@@ -33,7 +33,7 @@ function main(): int {
 }
 
 function testRemoveExistingKey() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("squirrel", 123);
     let result = hashMap.remove("squirrel");
     arktest.assertEQ(result, 123, "The hashMap should remove the key and return its value");
@@ -41,7 +41,7 @@ function testRemoveExistingKey() {
 }
 
 function testRemoveNonExistingKey() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("squirrel", 123);
     let result = hashMap.remove("test");
     arktest.assertEQ(result, undefined, "The hashMap should return undefined when key is not set");
@@ -49,14 +49,14 @@ function testRemoveNonExistingKey() {
 }
 
 function testRemoveKeyFromEmptyHashMap() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     let result = hashMap.remove("squirrel");
     arktest.assertEQ(result, undefined, "The hashMap should return undefined when the map is empty");
     arktest.assertEQ(hashMap.length, 0, "The hashMap length should be 0");
 }
 
 function testRemoveEmptyStringKey() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set('', 11);
     let result = hashMap.remove('');
     arktest.assertEQ(result, 11, "The hashMap should remove the key and return its value");
@@ -75,7 +75,7 @@ function testRemoveKeyAfterClearingHashMap() {
 }
 
 function testReplaceExistingKeyWithNewValue() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("squirrel", 123);
     let result1 = hashMap.replace("squirrel", 789);
     let result2 = hashMap.get("squirrel");
@@ -85,7 +85,7 @@ function testReplaceExistingKeyWithNewValue() {
 }
 
 function testReplaceNonExistingKey() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("squirrel", 123);
     let result = hashMap.replace("test", 789);
     arktest.assertEQ(result, false, "The hashMap should return false by the key that is not set");
@@ -93,14 +93,14 @@ function testReplaceNonExistingKey() {
 }
 
 function testReplaceKeyInEmptyHashMap() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     let result = hashMap.replace("test", 789);
     arktest.assertEQ(result, false, "The hashMap should return false by key when the map is empty");
     arktest.assertEQ(hashMap.length, 0, "The hashMap length should be 0");
 }
 
 function testReplaceEmptyStringKey() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set('', 123)
     let result = hashMap.replace('', 789);
     arktest.assertEQ(result, true, "The hashMap should replace the value by the key");
@@ -108,7 +108,7 @@ function testReplaceEmptyStringKey() {
 }
 
 function testReplaceKeyWithSameValue() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("squirrel", 123);
     let result1 = hashMap.replace("squirrel", 123);
     let result2 = hashMap.get("squirrel");

@@ -30,23 +30,23 @@ function main(): int {
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber3: double | int = 3;
-    static readonly testNumber6: double | int = 6;
+    static readonly testNumber1: number = 1;
+    static readonly testNumber3: number = 3;
+    static readonly testNumber6: number = 6;
     static readonly forNumber: Number[] = [17, 3, 22, 8, 29, 11, 5, 19, 2, 26, 14, 7, 28, 10, 1, 24, 16, 13,
         21, 6, 27, 18, 4, 25, 12, 23, 9, 15, 20, 30];
 }
 
 function testGetFirstFromEmptyDeque() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     arktest.assertEQ(deque.length, 0, "Initial deque length should be 0");
     arktest.assertEQ(deque.getFirst(), undefined, "Get first from empty deque should return undefined");
 }
 
 function testGetFirstFromNonEmptyDeque() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     deque.insertEnd(TestData.testNumber1);
-    for (let i: int = TestData.testNumber1; i < TestData.testNumber6; i++) {
+    for (let i: number = TestData.testNumber1; i < TestData.testNumber6; i++) {
         deque.insertEnd(TestData.testNumber3);
     }
     arktest.assertEQ(deque.length, TestData.testNumber6, "Deque length should be 6 after inserting six elements");
@@ -54,14 +54,14 @@ function testGetFirstFromNonEmptyDeque() {
 }
 
 function testGetLastFromEmptyDeque() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     arktest.assertEQ(deque.length, 0, "Initial deque length should be 0");
     arktest.assertEQ(deque.getLast(), undefined, "Get last from empty deque should return undefined");
 }
 
 function testGetLastFromNonEmptyDeque() {
-    let deque = new Deque<double>();
-    for (let i: int = TestData.testNumber1; i < TestData.testNumber6; i++) {
+    let deque = new Deque<number>();
+    for (let i: number = TestData.testNumber1; i < TestData.testNumber6; i++) {
         deque.insertEnd(TestData.testNumber3);
     }
     deque.insertEnd(TestData.testNumber1);
@@ -70,13 +70,13 @@ function testGetLastFromNonEmptyDeque() {
 }
 
 function testIteratorWithEmptyDeque() {
-    let deque = new Deque<double>();
-    let elem: double = 0;
+    let deque = new Deque<number>();
+    let elem: number = 0;
     for (let item of deque) {
         elem = TestData.testNumber1;
     }
     let iter = deque.$_iterator();
-    let temp: IteratorResult<double> = iter.next();
+    let temp: IteratorResult<number> = iter.next();
     while (!temp.done) {
         elem = TestData.testNumber1;
     }
@@ -84,18 +84,18 @@ function testIteratorWithEmptyDeque() {
 }
 
 function testIteratorWithNonEmptyDeque() {
-    let deque = new Deque<double>();
-    for (let i: int = TestData.testNumber1; i < TestData.testNumber6; i++) {
+    let deque = new Deque<number>();
+    for (let i: number = TestData.testNumber1; i < TestData.testNumber6; i++) {
         deque.insertEnd(i);
     }
-    let elem1: int = TestData.testNumber1;
+    let elem1: number = TestData.testNumber1;
     for (let item of deque) {
         arktest.assertEQ(item, elem1++, "Iterator should iterate elements in correct order");
     }
     arktest.assertEQ(elem1, TestData.testNumber6, "Iterator should iterate all elements correctly");
     let iter = deque.$_iterator();
-    let temp: IteratorResult<double> = iter.next();
-    let elem2: int = TestData.testNumber1;
+    let temp: IteratorResult<number> = iter.next();
+    let elem2: number = TestData.testNumber1;
     while (!temp.done) {
         arktest.assertEQ(temp.value, elem2++, "Iterator should iterate elements in correct order");
         temp = iter.next();
@@ -104,7 +104,7 @@ function testIteratorWithNonEmptyDeque() {
 }
 
 function testDequeInterfaceComposition() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     deque.insertFront(TestData.testNumber3);
     arktest.assertEQ(deque.length, TestData.testNumber1, "Deque length should be 1 after inserting one element at the front");
 
@@ -115,7 +115,7 @@ function testDequeInterfaceComposition() {
     arktest.assertEQ(deque.getFirst(), deque.popFirst(), "Pop first from deque should return first element");
     arktest.assertEQ(deque.getLast(), deque.popLast(), "Pop last from deque should return last element");
 
-    let forEachCount: int = 0;
+    let forEachCount: number = 0;
     deque.forEach(() => {
         forEachCount++;
     });
@@ -123,7 +123,7 @@ function testDequeInterfaceComposition() {
 }
 
 function initializeDeque<T>(deque: Deque<T>, sourceArray: T[]) {
-    for (let i: int = 0; i < sourceArray.length; i++) {
+    for (let i = 0; i < sourceArray.length; i++) {
         deque.insertEnd(sourceArray[i]);
     }
 }

@@ -31,7 +31,7 @@ function main(): int {
 }
 
 function testGetValueAtValidIndex() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     lightWeightSet.add("cc");
@@ -41,7 +41,7 @@ function testGetValueAtValidIndex() {
 }
 
 function testGetValueAtBoundaryIndex() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     lightWeightSet.add("cc");
@@ -51,7 +51,7 @@ function testGetValueAtBoundaryIndex() {
 }
 
 function testGetValueAtLeftExceededIndex() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     let result = lightWeightSet.getValueAt(-2);
@@ -59,7 +59,7 @@ function testGetValueAtLeftExceededIndex() {
 }
 
 function testGetValueAtRightExceededIndex() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     let result = lightWeightSet.getValueAt(2);
@@ -67,31 +67,31 @@ function testGetValueAtRightExceededIndex() {
 }
 
 function testGetValueAtIndexOfEmptySet() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     let result = lightWeightSet.getValueAt(4);
     arktest.assertEQ(result, undefined);
 }
 
 function testGetValueAtLeftFloatIndex() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
-    let result = lightWeightSet.getValueAt(Math.floor(1.2).toInt());
+    let result = lightWeightSet.getValueAt(Math.floor(1.2));
     arktest.assertEQ(result, "bb", "The lightWeightSet should return the value at the floored index");
     arktest.assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
 }
 
 function testGetValueAtRightFloatIndex() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
-    let result = lightWeightSet.getValueAt(Math.floor(1.8).toInt());
+    let result = lightWeightSet.getValueAt(Math.floor(1.8));
     arktest.assertEQ(result, "bb", "The lightWeightSet should return the value at the floored index");
     arktest.assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
 }
 
 function testGetValueAtLongString() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     let str1 = "sparrow"
     let str2 = "squirrel"
     let str3 = "s"

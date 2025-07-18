@@ -25,7 +25,7 @@ function main(): int {
         testIsEmptyAfterAddingAndThenRemovingAnElement)
     suite.addTest("Test LightWeightSet isEmpty() after adding elements and then calling clear().",
         testIsEmptyAfterAddingElementsAndThenCallingClear)
-    suite.addTest("Test LightWeightSet add() with a double.", testAddWithANumber)
+    suite.addTest("Test LightWeightSet add() with a number.", testAddWithANumber)
     suite.addTest("Test LightWeightSet add() with a string.", testAddWithAString)
     suite.addTest("Test LightWeightSet addAll() with an empty set to an empty set.",
         testAddAllWithAnEmptySetToAnEmptySet)
@@ -37,14 +37,14 @@ function main(): int {
 
 //Test cases ported from ArkTS 1.0:LIGHTWEIGHTSET_0100
 function testIsEmptyOnANewlyCreatedSet() {
-    let lightWeightSet = new LightWeightSet<double | string>();
+    let lightWeightSet = new LightWeightSet<number | string>();
     let result = lightWeightSet.isEmpty();
     arktest.assertTrue(result, "Expected isEmpty() on a new set to be true");
 }
 
 //Test cases ported from ArkTS 1.0:LIGHTWEIGHTSET_0200
 function testIsEmptyAfterAddingMultipleElements() {
-    let lightWeightSet = new LightWeightSet<double | string>();
+    let lightWeightSet = new LightWeightSet<number | string>();
     lightWeightSet.add(1)
     lightWeightSet.add(2)
     lightWeightSet.add(3)
@@ -54,7 +54,7 @@ function testIsEmptyAfterAddingMultipleElements() {
 
 //Test cases ported from ArkTS 1.0:LIGHTWEIGHTSET_0300
 function testIsEmptyAfterAddingAndThenRemovingAnElement() {
-    let lightWeightSet = new LightWeightSet<double | string>();
+    let lightWeightSet = new LightWeightSet<number | string>();
     lightWeightSet.add(3)
     lightWeightSet.remove(3)
     let result = lightWeightSet.isEmpty();
@@ -63,7 +63,7 @@ function testIsEmptyAfterAddingAndThenRemovingAnElement() {
 
 //Test cases ported from ArkTS 1.0:LIGHTWEIGHTSET_0400
 function testIsEmptyAfterAddingElementsAndThenCallingClear() {
-    let lightWeightSet = new LightWeightSet<double | string>();
+    let lightWeightSet = new LightWeightSet<number | string>();
     lightWeightSet.add("a")
     lightWeightSet.add("b")
     lightWeightSet.add("c")
@@ -74,10 +74,10 @@ function testIsEmptyAfterAddingElementsAndThenCallingClear() {
 
 //Test cases ported from ArkTS 1.0:LIGHTWEIGHTSET_0500
 function testAddWithANumber() {
-    let lightWeightSet = new LightWeightSet<double | string>();
+    let lightWeightSet = new LightWeightSet<number | string>();
     const MY_MAX = 10240;
     let result = lightWeightSet.add(MY_MAX);
-    arktest.assertTrue(result, "Expected add(double) to return true when adding a new element");
+    arktest.assertTrue(result, "Expected add(number) to return true when adding a new element");
 }
 
 //Test cases ported from ArkTS 1.0:LIGHTWEIGHTSET_0600
@@ -89,10 +89,10 @@ function testAddWithAString() {
 
 //Test cases ported from ArkTS 1.0:LIGHTWEIGHTSET_0700
 function testAddAllWithAnEmptySetToAnEmptySet() {
-    let lightWeightSet = new LightWeightSet<double>();
-    let value: double = 10240;
+    let lightWeightSet = new LightWeightSet<number>();
+    let value: number = 10240;
     lightWeightSet.add(value);
-    let set = new LightWeightSet<double>();
+    let set = new LightWeightSet<number>();
     let result = set.addAll(set);
     arktest.assertFalse(result, "The result should be false as no elements were added");
 }

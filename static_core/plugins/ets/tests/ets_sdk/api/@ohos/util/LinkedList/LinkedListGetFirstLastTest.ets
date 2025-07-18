@@ -29,49 +29,49 @@ function main() {
 }
 
 function initializeLinkedList<T>(linkedList: LinkedList<T>, sourceArray: Array<T>) {
-    for (let i: int = 0; i < sourceArray.length; i++) {
+    for (let i = 0; i < sourceArray.length; i++) {
         linkedList.add(sourceArray[i]);
     }
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber20: double | int = 20;
+    static readonly testNumber1: number = 1;
+    static readonly testNumber20: number = 20;
     static readonly forNumber1: Number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-    static readonly arrayForNumber1 = Array.from<double>(TestData.forNumber1);
+    static readonly arrayForNumber1 = Array.from<number>(TestData.forNumber1);
 }
 
 function testGetFirstNonEmptyContainer() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
     arktest.assertEQ(linkedList.getFirst(), 0, "First element should be 0");
 }
 
 function testGetFirstEmptyContainer() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     arktest.assertEQ(linkedList.getFirst(), undefined);
 }
 
 function testGetFirstUndefined() {
-    let linkedList = new LinkedList<double | undefined>();
+    let linkedList = new LinkedList<number | undefined>();
     linkedList.add(undefined);
     linkedList.add(TestData.testNumber1);
     arktest.assertEQ(linkedList.getFirst(), undefined, "First element should be undefined");
 }
 
 function testGetLastNonEmptyContainer() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
     arktest.assertEQ(linkedList.getLast(), TestData.testNumber20, "Last element should be 20");
 }
 
 function testGetLastEmptyContainer() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     arktest.assertEQ(linkedList.getLast(), undefined);
 }
 
 function testGetLastUndefined() {
-    let linkedList = new LinkedList<double | undefined>();
+    let linkedList = new LinkedList<number | undefined>();
     linkedList.add(TestData.testNumber1);
     linkedList.add(undefined);
     arktest.assertEQ(linkedList.getLast(), undefined, "Last element should be undefined");

@@ -16,31 +16,31 @@
 import LightWeightMap from '@ohos.util.LightWeightMap';
 import { BusinessError } from "@ohos.base";
 
-const TypeErrorCodeId: int = 401;
-const OutOfBoundsErrorCodeId: int = 10200001;
+const TypeErrorCodeId: number = 401;
+const OutOfBoundsErrorCodeId: number = 10200001;
 
-export type PlainArrayForEachCb<T> = (value: T, key: int, PlainArray: PlainArray<T>) => void;
+export type PlainArrayForEachCb<T> = (value: T, key: number, PlainArray: PlainArray<T>) => void;
 
 /**
  * The PlainArray class is a collection of key-value pairs.
  */
-export class PlainArray<T> implements Iterable<[Int, T]> {
-    private buckets: LightWeightMap<int, T>;
+export class PlainArray<T> implements Iterable<[Number, T]> {
+    private buckets: LightWeightMap<number, T>;
 
     /**
      * Returns number of Entries with unique keys in the PlainArray
      *
      * @returns number of Entries with unique keys in the PlainArray
      */
-    public get length(): int {
-        return this.buckets.length.toInt();
+    public get length(): number {
+        return this.buckets.length;
     }
 
     /**
      * Add a set of data to PlainArray.
      * @param key the key of the element to add
      */
-    public add(key: int, value: T): void {
+    public add(key: number, value: T): void {
         this.checkKey(key);
         this.buckets.set(key, value);
     }
@@ -58,7 +58,7 @@ export class PlainArray<T> implements Iterable<[Int, T]> {
      */
     public clone(): PlainArray<T> {
         const clone: PlainArray<T> = new PlainArray<T>()
-        this.buckets.forEach((value: T, key: int) => {
+        this.buckets.forEach((value: T, key: number) => {
             clone.add(key, value);
         })
 
@@ -69,7 +69,7 @@ export class PlainArray<T> implements Iterable<[Int, T]> {
      * Creates a new instance of PlainArray
      */
     public constructor() {
-        this.buckets = new LightWeightMap<int, T>();
+        this.buckets = new LightWeightMap<number, T>();
     }
 
     /**
@@ -80,7 +80,7 @@ export class PlainArray<T> implements Iterable<[Int, T]> {
      * @param callbackFn.PlainArray the instance of this object
      */
     public forEach(callbackFn: PlainArrayForEachCb<T>): void {
-        this.buckets.forEach((value: T, key: int) => {
+        this.buckets.forEach((value: T, key: number) => {
             callbackFn(value, key, this);
         });
     }
@@ -90,7 +90,8 @@ export class PlainArray<T> implements Iterable<[Int, T]> {
      * @param key the key of the element to get
      * @returns the value of the key
      */
-    public get(key: int): T | undefined {
+    public get(key: number): T | undefined {
+        this.checkKey(key);
         return this.buckets.get(key);
     }
 
@@ -100,8 +101,10 @@ export class PlainArray<T> implements Iterable<[Int, T]> {
      *
      * @returns the index of the key, or -1 if the key is not found
      */
-    public getIndexOfKey(key: int): int {
-        return this.buckets.getIndexOfKey(key).toInt();
+    public getIndexOfKey(key: number): number {
+        this.checkKey(key);
+
+        return this.buckets.getIndexOfKey(key);
     }
 
     /**
@@ -110,8 +113,8 @@ export class PlainArray<T> implements Iterable<[Int, T]> {
      *
      * @returns the index of the value, or -1 if the value is not found
      */
-    public getIndexOfValue(value: T): int {
-        return this.buckets.getIndexOfValue(value).toInt();
+    public getIndexOfValue(value: T): number {
+        return this.buckets.getIndexOfValue(value);
     }
 
     /**
@@ -122,7 +125,7 @@ export class PlainArray<T> implements Iterable<[Int, T]> {
      * 
      * @throws BusinessError if the index is out of range.
      */
-    public getKeyAt(index: int): int | undefined {
+    public getKeyAt(index: number): number | undefined {
         this.checkIndexType(index);
         if (index < 0 || index >= this.length) {
             return undefined;
@@ -137,7 +140,7 @@ export class PlainArray<T> implements Iterable<[Int, T]> {
      *
      * @returns the value of the index, or -1 if the index is not found
      */
-    public getValueAt(index: int): T {
+    public getValueAt(index: number): T {
         this.checkIndexType(index);
         this.checkEmptyContainer();
         this.checkIndex(index, this.length - 1);
@@ -151,7 +154,8 @@ export class PlainArray<T> implements Iterable<[Int, T]> {
      *
      * @returns true if the key is in the PlainArray, false otherwise
      */
-    public has(key: int): boolean {
+    public has(key: number): boolean {
+        this.checkKey(key);
         return this.buckets.hasKey(key);
     }
 
@@ -170,7 +174,8 @@ export class PlainArray<T> implements Iterable<[Int, T]> {
      *
      * @returns the value of the key, or undefined if the key is not found
      */
-    public remove(key: int): T | undefined {
+    public remove(key: number): T | undefined {
+        this.checkKey(key);
         return this.buckets.remove(key);
     }
 
@@ -180,7 +185,7 @@ export class PlainArray<T> implements Iterable<[Int, T]> {
      *
      * @returns the value of the index, or undefined if the index is not found
      */
-    public removeAt(index: int): T | undefined {
+    public removeAt(index: number): T | undefined {
         this.checkIndexType(index);
         if (index < 0 || index >= this.length) {
             return undefined;
@@ -200,7 +205,7 @@ export class PlainArray<T> implements Iterable<[Int, T]> {
      *
      * @returns the number of elements removed
      */
-    public removeRangeFrom(index: int, size: int): int {
+    public removeRangeFrom(index: number, size: number): number {
         this.checkIndexType(index);
         this.checkEmptyContainer();
         if (size > Int.MAX_VALUE) {
@@ -213,7 +218,7 @@ export class PlainArray<T> implements Iterable<[Int, T]> {
         }
 
         const elemNum = this.length - index;
-        let removedSize: int = 0;
+        let removedSize: number = 0;
         while(removedSize < min(size, elemNum)) {
             this.buckets.removeAt(index);
             removedSize++;
@@ -228,7 +233,7 @@ export class PlainArray<T> implements Iterable<[Int, T]> {
      * 
      * @throws BusinessError if the index is out of range or the container is empty.
      */
-    public setValueAt(index: int, value: T): void {
+    public setValueAt(index: number, value: T): void {
         this.checkIndexType(index);
         this.checkEmptyContainer();
         this.checkIndex(index, this.length - 1);
@@ -248,11 +253,11 @@ export class PlainArray<T> implements Iterable<[Int, T]> {
     /*
      * Returns an iterator object containing a key-value pair
      */
-    override $_iterator(): IterableIterator<[Int, T]> {
+    override $_iterator(): IterableIterator<[Number, T]> {
         return this.buckets.$_iterator();
     }
 
-    private checkIndexType(index: int): void {
+    private checkIndexType(index: number): void {
         if (index > Int.MAX_VALUE) {
             throw new BusinessError(TypeErrorCodeId, new Error(`The type of \"index\" must be small integer. Received value is: ${index}`));
         }
@@ -264,13 +269,13 @@ export class PlainArray<T> implements Iterable<[Int, T]> {
         }
     }
 
-    private checkIndex(index: int, length: int): void {
+    private checkIndex(index: number, length: number): void {
         if (index < 0 || index > length) {
             throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"index\" is out of range. It must be >= 0 && <= ${length}. Received value is: ${index}`));
         }
     }
 
-    private checkKey(key: int): void {
+    private checkKey(key: number): void {
         if (key > Int.MAX_VALUE) {
             throw new BusinessError(TypeErrorCodeId, new Error(`The type of \"key\" must be small integer. Received value is: ${key}`));
         }

@@ -31,8 +31,8 @@ function main(): int {
 }
 
 class MyObject extends Object {
-    size: double;
-    constructor(size: double) {
+    size: number;
+    constructor(size: number) {
         super();
         this.size = size;
     }
@@ -40,7 +40,7 @@ class MyObject extends Object {
 
 function testAddData() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): double => { return secondValue.compareTo(firstValue) });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     let result = treeSet.has("aa");
     arktest.assertEQ(result, true, "The treeSet should contain the added value");
@@ -49,7 +49,7 @@ function testAddData() {
 
 function testAddDataWithSameKeyDifferentValues() {
     let treeSet: TreeSet<MyObject> = new TreeSet<MyObject>((firstValue: MyObject,
-        secondValue: MyObject): double => { return secondValue.size - firstValue.size });
+        secondValue: MyObject): number => { return secondValue.size - firstValue.size });
     let obj: MyObject = new MyObject(1);
     let obj2: MyObject = new MyObject(1);
     treeSet.add(obj);
@@ -61,7 +61,7 @@ function testAddDataWithSameKeyDifferentValues() {
 
 function testAddEmptyStringData() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): double => { return firstValue.compareTo(secondValue) });
+        secondValue: string): number => { return firstValue.compareTo(secondValue) });
     treeSet.add("");
     let result = treeSet.has("");
     arktest.assertEQ(result, true, "The treeSet should contain the added value");
@@ -70,7 +70,7 @@ function testAddEmptyStringData() {
 
 function testHasValue() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): double => { return secondValue.compareTo(firstValue) });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     let result = treeSet.has("aa");
     arktest.assertEQ(result, true, "The treeSet should has the value");
@@ -79,7 +79,7 @@ function testHasValue() {
 
 function testHasNonExistingValue() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): double => { return secondValue.compareTo(firstValue) });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     let result = treeSet.has("bb");
     arktest.assertEQ(result, false, "The treeSet should not has the value that is not set");
@@ -88,7 +88,7 @@ function testHasNonExistingValue() {
 
 function testHasValueInEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): double => { return secondValue.compareTo(firstValue) });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let result = treeSet.has("aa");
     arktest.assertEQ(result, false, "The treeSet should not has the value when the treeSet is empty");
     arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0");
@@ -96,7 +96,7 @@ function testHasValueInEmptyTreeSet() {
 
 function testHasEmptyStringValueInEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): double => { return secondValue.compareTo(firstValue) });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let result = treeSet.has("");
     arktest.assertEQ(result, false, "The treeSet should not has the value that is not set");
     arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0");
@@ -104,7 +104,7 @@ function testHasEmptyStringValueInEmptyTreeSet() {
 
 function testHasValueAfterMixedOperations() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): double => { return secondValue.compareTo(firstValue) });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("squirrel");
     let resultOne = treeSet.has("squirrel");
     arktest.assertEQ(resultOne, true, "The treeSet should has the value");

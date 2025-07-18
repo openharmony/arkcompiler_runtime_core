@@ -47,7 +47,7 @@ function testBasicOperations() {
 
     let itemArr = ["aa", "bb", "cc"]
     let item: string;
-    let i: int = 0;
+    let i = 0;
     for (item in hashSet) {
         arktest.assertEQ(item, itemArr[i]);
         i++;
@@ -66,9 +66,9 @@ function testBasicOperations() {
     arktest.assertTrue(hashSet.isEmpty(), "Expected HashSet to be empty after clear");
 }
 
-// Tests `forEach` by adding doubles to a `HashSet` and summing them, verifying callback values and the total sum.
+// Tests `forEach` by adding numbers to a `HashSet` and summing them, verifying callback values and the total sum.
 function testForEachSumNumericValues() {
-    let collisionSet = new HashSet<double>();
+    let collisionSet = new HashSet<number>();
     let count = 0;
 
     collisionSet.add(1224);
@@ -102,7 +102,7 @@ function testEntriesIteratorAndForOf() {
     arktest.assertTrue(iteratorSetEntries.next().done, "Expected iterator to be done after iterating all elements");
 
     let arr = ["aa", "bb", "cc"];
-    let i: int = 0;
+    let i = 0;
     for (const item of hashSet) {
         arktest.assertEQ(item, arr[i]);
         i++;
@@ -110,9 +110,9 @@ function testEntriesIteratorAndForOf() {
     arktest.assertEQ(i, hashSet.length);
 }
 
-// Tests `entries()` iterator for doubles, iterator's `done` status, and final set length.
+// Tests `entries()` iterator for numbers, iterator's `done` status, and final set length.
 function testEntriesIteratorKeyEqualsValue() {
-    let seten = new HashSet<double>();
+    let seten = new HashSet<number>();
     seten.add(1);
     seten.add(2);
     seten.add(3);

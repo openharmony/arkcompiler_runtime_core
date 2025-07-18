@@ -35,8 +35,8 @@ function main(): int {
 }
 
 function testAddAllData() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
-    let lightWeightSett: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let lightWeightSett: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSett.add("aa");
     lightWeightSett.add("bb");
     let result = lightWeightSet.addAll(lightWeightSett);
@@ -46,14 +46,14 @@ function testAddAllData() {
 }
 
 function testAddAllEmptyData() {
-    let set: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let set: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     let result = set.addAll(set);
     arktest.assertEQ(result, false, "The lightWeightSet should add all elements from another lightWeightSet");
 }
 
 function testAddAllWithNonEmptySet() {
-    let setA: LightWeightSet<double | string> = new LightWeightSet<double | string>();
-    let setB: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let setA: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let setB: LightWeightSet<number | string> = new LightWeightSet<number | string>();
 
     setA.add("aa");
     setB.add("bb");
@@ -81,8 +81,8 @@ function testAddAllWithMultipleSets() {
 }
 
 function testHasAllData() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
-    let lightWeightSett: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let lightWeightSett: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     lightWeightSett.add("aa");
@@ -93,8 +93,8 @@ function testHasAllData() {
 }
 
 function testHasAllNotSetData() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
-    let lightWeightSett: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let lightWeightSett: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     lightWeightSett.add("cc");
@@ -106,8 +106,8 @@ function testHasAllNotSetData() {
 }
 
 function testHasAllOutOfRangeData() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
-    let lightWeightSett: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let lightWeightSett: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     lightWeightSett.add("aa");
@@ -121,8 +121,8 @@ function testHasAllOutOfRangeData() {
 }
 
 function testHasAllEmptyData() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
-    let lightWeightSett: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let lightWeightSett: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSett.add("aa");
     lightWeightSett.add("bb");
     let result = lightWeightSett.hasAll(lightWeightSet);
@@ -132,7 +132,7 @@ function testHasAllEmptyData() {
 }
 
 function testHasValue() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add(123);
     let result = lightWeightSet.has(123);
     arktest.assertEQ(result, true, "The lightWeightSet should contain the value");
@@ -140,7 +140,7 @@ function testHasValue() {
 }
 
 function testHasNotSetValue() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add(123);
     let result = lightWeightSet.has(456);
     arktest.assertEQ(result, false, "The lightWeightSet should not contain the value that is not set");
@@ -148,14 +148,14 @@ function testHasNotSetValue() {
 }
 
 function testHasValueOfEmptySet() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     let result = lightWeightSet.has(456);
     arktest.assertEQ(result, false, "The lightWeightSet should not contain any value when the lightWeightSet is empty");
     arktest.assertEQ(lightWeightSet.length, 0, "The lightWeightSet length should be 0");
 }
 
 function testHasStringValue() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     let str: string = ''
     for (let index = 0; index < 10000; index++) {
         str.concat(index + '')

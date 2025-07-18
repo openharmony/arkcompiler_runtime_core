@@ -16,8 +16,8 @@
 import {ArrayList} from "@ohos.util.ArrayList";
 import {BusinessError} from "@ohos.base";
 
-const TypeErrorCodeId: int = 401;
-const OutOfBoundsErrorCodeId: int = 10200001;
+const TypeErrorCodeId: number = 401;
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
     const suite = new arktest.ArkTestsuite("ArrayList API tests");
@@ -33,37 +33,39 @@ function main() {
     suite.addTest("ArrayList index getter", testIndexGetter);
     suite.addTest("ArrayList index setter", testIndexSetter);
     suite.addTest("ArrayList index out of range", testIndexOutOfRange);
+    suite.addTest("ArrayList index with double index", testIndexWithDoubleIndex);
+    suite.addTest("ArrayList index with double index 2", testIndexWithDoubleIndex2);
     suite.addTest("ArrayList index about for...of", testIndexForOfLoop);
 
     return suite.run();
 }
 
 class Dog {
-    age: double = 0;
+    age: number = 0;
     name: string = "";
 
-    constructor(age: double, name: string) {
+    constructor(age: number, name: string) {
         this.age = age;
         this.name = name;
     }
 }
 
 class Cat {
-    age1: double = 0;
+    age1: number = 0;
     name1: string = "";
 
-    constructor(age: double, name: string) {
+    constructor(age: number, name: string) {
         this.age1 = age;
         this.name1 = name;
     }
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber2: double | int = 2;
-    static readonly testNumber3: double | int = 3;
-    static readonly testNumber6: double | int = 6;
-    static readonly testNumber8: double | int = 8;
+    static readonly testNumber1: number = 1;
+    static readonly testNumber2: number = 2;
+    static readonly testNumber3: number = 3;
+    static readonly testNumber6: number = 6;
+    static readonly testNumber8: number = 8;
     static readonly testString1: string = "string";
     static readonly testString4: string = "%";
     static readonly testDouble1 = 0.4;
@@ -74,24 +76,24 @@ class TestData {
 }
 
 function testConvertToArrayWithEmptyContainer() {
-    let arrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
     let array = arrayList.convertToArray();
     arktest.assertEQ(array.length, arrayList.length, "Converted array should have the same length as ArrayList");
     arktest.assertEQ(array.length, 0, "Converted array should have length 0");
 }
 
 function testConvertToArray() {
-    let arrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
     let array = arrayList.convertToArray();
-    for (let i: int = 0; i < arrayList.length; i++) {
+    for (let i: number = 0; i < arrayList.length; i++) {
         arktest.assertEQ(array[i], arrayList[i], `Element at index ${i} should match`);
     }
     arktest.assertEQ(array.length, arrayList.length, "Converted array should have the same length as ArrayList");
 }
 
 function testConvertToArrayWithChange() {
-    let arrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.result4);
     let array = arrayList.convertToArray();
     arktest.assertTrue(array instanceof Array, "The result of convertToArray should be Array");
@@ -130,44 +132,44 @@ function testConvertToArrayAndCheckArrayWithCat() {
 }
 
 function testIsEmptyAfterAddingElement() {
-    let arrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
     arrayList.add(TestData.testNumber3);
     let result: boolean = arrayList.isEmpty();
     arktest.assertFalse(result, "ArrayList should not be empty after adding an element");
 }
 
 function testIsEmptyInitially() {
-    let arrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
     let result: boolean = arrayList.isEmpty();
     arktest.assertTrue(result, "ArrayList should be empty initially");
 }
 
 function testIndexGetter() {
-    let arrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
-    for (let i: int = 0; i < arrayList.length; i++) {
+    for (let i: number = 0; i < arrayList.length; i++) {
         arktest.assertEQ(arrayList[i], i + TestData.testNumber1, `Element at index ${i} should match`);
     }
 }
 
 function testIndexSetter() {
-    let arrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
-    for (let i: int = 0; i < arrayList.length; i++) {
+    for (let i: number = 0; i < arrayList.length; i++) {
         arrayList[i] = TestData.testNumber3;
     }
-    let arrayForEach = new Array<double>();
-    arrayList.forEach((value: double) => {
+    let arrayForEach = new Array<number>();
+    arrayList.forEach((value: number) => {
         arrayForEach.push(value);
     });
-    for (let i: int = 0; i < arrayList.length; i++) {
+    for (let i: number = 0; i < arrayList.length; i++) {
         arktest.assertEQ(arrayForEach[i], TestData.testNumber3, `Element at index ${i} should match`);
     }
     arktest.assertEQ(arrayList.length, arrayForEach.length, "ArrayList length should match arrayForEach length");
 }
 
 function testIndexOutOfRange() {
-    let arrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
@@ -177,18 +179,39 @@ function testIndexOutOfRange() {
     arktest.expectThrow(() => {arrayList[TestData.testNumber8]}, exceptionCheck);
 }
 
+function testIndexWithDoubleIndex() {
+    let arrayList = new ArrayList<number>();
+    initializeArrayList(arrayList, TestData.forNumber);
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            `Index must be an integer. Received value is: ${TestData.testDouble1}`) &&
+            ((e as BusinessError).code == TypeErrorCodeId);
+    }
+    arktest.expectThrow(() => {arrayList[TestData.testDouble1]}, exceptionCheck);
+}
+
+function testIndexWithDoubleIndex2() {
+    let arrayList = new ArrayList<number>();
+    initializeArrayList(arrayList, TestData.forNumber);
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            `Index must be an integer. Received value is: ${TestData.testDouble2}`) &&
+            ((e as BusinessError).code == TypeErrorCodeId);
+    }
+    arktest.expectThrow(() => {arrayList[TestData.testDouble2]}, exceptionCheck);
+}
 
 function testIndexForOfLoop() {
-    let arrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
-    let elem: double = TestData.testNumber1;
+    let elem: number = TestData.testNumber1;
     for (let item of arrayList) {
         arktest.assertEQ(item, elem++, "Element mismatch during iteration");
     }
 }
 
 function initializeArrayList<T>(arrayList: ArrayList<T>, sourceArray: T[]) {
-    for (let i: int = 0; i < sourceArray.length; i++) {
+    for (let i = 0; i < sourceArray.length; i++) {
         arrayList.add(sourceArray[i]);
     }
 }

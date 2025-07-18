@@ -43,7 +43,7 @@ function main(): int {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_ENTRIES_0100
 function testEntriesEmptyMap() {
-    const hashMap = new HashMap<double, double>();
+    const hashMap = new HashMap<number, number>();
     let entries = hashMap.entries();
     let temp = entries.next();
     arktest.assertTrue(temp.done, "Expected iterator to be done for an empty set");
@@ -55,7 +55,7 @@ function testEntriesEmptyMap() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_ENTRIES_0200
 function testEntriesPopulatedMapIterate() {
-    const hashMap = new HashMap<double, double>();
+    const hashMap = new HashMap<number, number>();
     hashMap.set(0, 0);
     hashMap.set(1, 1);
     hashMap.set(2, 2);
@@ -72,7 +72,7 @@ function testEntriesPopulatedMapIterate() {
 }
 //Test cases ported from ArkTS 1.0:HASHMAP_ENTRIES_0300
 function testEntriesPopulatedMapRemoveIter() {
-    const hashMap = new HashMap<double, double>();
+    const hashMap = new HashMap<number, number>();
     hashMap.set(0, 0);
     hashMap.set(1, 1);
     hashMap.set(2, 2);
@@ -86,7 +86,7 @@ function testEntriesPopulatedMapRemoveIter() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_ENTRIES_0400
 function testEntriesPopulatedMapReplaceIter() {
-    const hashMap = new HashMap<double, double>();
+    const hashMap = new HashMap<number, number>();
     hashMap.set(0, 0);
     hashMap.set(1, 1);
     hashMap.set(2, 2);
@@ -103,7 +103,7 @@ function testEntriesPopulatedMapReplaceIter() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_ENTRIES_0500
 function testEntriesPopulatedMapClearIter() {
-    const hashMap = new HashMap<double, double>();
+    const hashMap = new HashMap<number, number>();
     hashMap.set(0, 0);
     hashMap.set(1, 1);
     hashMap.set(2, 2);
@@ -117,7 +117,7 @@ function testEntriesPopulatedMapClearIter() {
 }
 
 function testEntriesPopulatedMapAddIter() {
-    const hashMap = new HashMap<double, double>();
+    const hashMap = new HashMap<number, number>();
     hashMap.set(0, 0);
     hashMap.set(1, 1);
     hashMap.set(2, 2);
@@ -140,7 +140,7 @@ function testEntriesPopulatedMapAddIter() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_SYMBOL_ITERATOR_0100
 function testSymbolIteratorEmpty() {
-    const hashMap = new HashMap<double, double>();
+    const hashMap = new HashMap<number, number>();
     let iter = hashMap.$_iterator();
     let temp = iter.next();
     arktest.assertTrue(temp.done, "Expected iterator to be done for an empty set");
@@ -152,7 +152,7 @@ function testSymbolIteratorEmpty() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_SYMBOL_ITERATOR_0200
 function testSymbolIteratorPopulated() {
-    const hashMap = new HashMap<double, double>();
+    const hashMap = new HashMap<number, number>();
     hashMap.set(0, 0);
     hashMap.set(1, 1);
     hashMap.set(2, 2);
@@ -170,20 +170,20 @@ function testSymbolIteratorPopulated() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_FOREACH_0100
 function testForeachEmptyMap() {
-    const hashMap = new HashMap<double, double>();
-    hashMap.forEach((value?: double, key?: double) => {
+    const hashMap = new HashMap<number, number>();
+    hashMap.forEach((value?: number, key?: number) => {
         arktest.assertEQ(hashMap.length, 0);
     });
 }
 
 //Test cases ported from ArkTS 1.0:HASHMAP_FOREACH_0200
 function testForeachPopulatedMap() {
-    const hashMap = new HashMap<double, double>();
+    const hashMap = new HashMap<number, number>();
     hashMap.set(0, 0);
     hashMap.set(1, 1);
     hashMap.set(2, 2);
     let index = 0;
-    hashMap.forEach((value?: double, key?: double) => {
+    hashMap.forEach((value?: number, key?: number) => {
         arktest.assertEQ(key, index);
         arktest.assertEQ(value, index);
         index++;
@@ -193,22 +193,22 @@ function testForeachPopulatedMap() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_FOREACH_0300
 function testForeachPopulatedMapRemoveCb() {
-    const hashMap = new HashMap<double, double>();
+    const hashMap = new HashMap<number, number>();
     hashMap.set(0, 0);
     hashMap.set(1, 1);
     hashMap.set(2, 2);
-    hashMap.forEach((value: double, key: double) => {
+    hashMap.forEach((value: number, key: number) => {
         arktest.assertEQ(hashMap.remove(key), value);
     });
 }
 
 //Test cases ported from ArkTS 1.0:HASHMAP_FOREACH_0400
 function testForeachPopulatedMapReplaceCb() {
-    const hashMap = new HashMap<double, double>();
+    const hashMap = new HashMap<number, number>();
     hashMap.set(0, 0);
     hashMap.set(1, 1);
     hashMap.set(2, 2);
-    hashMap.forEach((value: double, key: double) => {
+    hashMap.forEach((value: number, key: number) => {
         arktest.assertTrue(hashMap.replace(key, value ? value + 1 : 0),
             "Expected replace(key, value ? value + 1 : 0) to return true during forEach");
     });
@@ -216,11 +216,11 @@ function testForeachPopulatedMapReplaceCb() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_FOREACH_0500
 function testForeachPopulatedMapClearCb() {
-    const hashMap = new HashMap<double, double>();
+    const hashMap = new HashMap<number, number>();
     hashMap.set(0, 0);
     hashMap.set(1, 1);
     hashMap.set(2, 2);
-    hashMap.forEach((value?: double, key?: double) => {
+    hashMap.forEach((value?: number, key?: number) => {
         hashMap.clear();
         arktest.assertEQ(hashMap.length, 0);
     });
@@ -228,7 +228,7 @@ function testForeachPopulatedMapClearCb() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_FOREACH_0600
 function testForeachCbNoParams() {
-    const hashMap = new HashMap<double, double>();
+    const hashMap = new HashMap<number, number>();
     hashMap.set(0, 0);
     hashMap.set(1, 1);
     hashMap.set(2, 2);
@@ -239,7 +239,7 @@ function testForeachCbNoParams() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_FOREACH_0700
 function testForeachCbOneParam() {
-    const hashMap = new HashMap<double, double>();
+    const hashMap = new HashMap<number, number>();
     hashMap.set(0, 0);
     hashMap.forEach((value) => {
         arktest.assertEQ(hashMap.length, 1);
@@ -249,8 +249,8 @@ function testForeachCbOneParam() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_FOREACH_0800
 function testForeachWithThis() {
-    const hashMap = new HashMap<double, double>();
-    const hashMapNew = new HashMap<double, double>();
+    const hashMap = new HashMap<number, number>();
+    const hashMapNew = new HashMap<number, number>();
     hashMap.set(0, 0);
     hashMapNew.set(0, 0);
     hashMap.forEach((value) => {
@@ -263,9 +263,9 @@ function testForeachWithThis() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_FOREACH_0900
 function testForeachCbThreeParams() {
-    const hashMap = new HashMap<double, double>();
+    const hashMap = new HashMap<number, number>();
     hashMap.set(0, 0);
-    hashMap.forEach((value, index, hashMap: HashMap<double, double>) => {
+    hashMap.forEach((value, index, hashMap: HashMap<number, number>) => {
         arktest.assertEQ(hashMap.length, 1);
         arktest.assertEQ(value, 0);
     });
@@ -277,7 +277,7 @@ class Temp {
 }
 //Test cases ported from ArkTS 1.0:HASHMAP_CUSTOM_0100
 function testCustomTypeOps() {
-    const hashMap = new HashMap<double, Temp>();
+    const hashMap = new HashMap<number, Temp>();
     let temp: Temp = {
         age: 18, name: "zhang san"
     };
@@ -290,7 +290,7 @@ function testCustomTypeOps() {
         age: 31, name: "wang wu"
     };
     hashMap.set(2, temp2);
-    const newHashMap = new HashMap<double, Temp>();
+    const newHashMap = new HashMap<number, Temp>();
     let temp3: Temp = {
         age: 32, name: "zhao liu"
     };
@@ -310,7 +310,7 @@ function testCustomTypeOps() {
 }
 
 function testCustomLengthChanges() {
-    const hashMap = new HashMap<double, double>();
+    const hashMap = new HashMap<number, number>();
     arktest.assertEQ(hashMap.length, 0);
     hashMap.set(0, 0);
     hashMap.set(1, 1);
@@ -320,7 +320,7 @@ function testCustomLengthChanges() {
     hashMap.set(2, 3);
     arktest.assertEQ(hashMap.length, 3);
 
-    const newHashMap = new HashMap<double, double>();
+    const newHashMap = new HashMap<number, number>();
     arktest.assertEQ(newHashMap.length, 0);
 
     newHashMap.setAll(hashMap);

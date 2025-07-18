@@ -51,20 +51,20 @@ function main(): int {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_3400
 function testInitialEmptyMapLength() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     arktest.assertEQ(treeMap.length, 0);
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_3500
 function testSetSingleElement() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     treeMap.set("HIG", 123);
     arktest.assertEQ(treeMap.length, 1);
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_3600
 function testSetMultipleElements() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     treeMap.set("ABC", 123);
     treeMap.set("DEF", 456);
     treeMap.set("GHI", 789);
@@ -76,7 +76,7 @@ function testSetMultipleElements() {
 //Test cases ported from ArkTS 1.0:TREEMAP_3700
 function testSetWithCustomComparator() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("HIG", "456");
@@ -94,14 +94,14 @@ function testSetWithCustomComparator() {
 //Test cases ported from ArkTS 1.0:TREEMAP_3800
 function testSetAllFromMapWithCustomComparators() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("HIG", "456");
     treeMap.set("DEF", "123");
     treeMap.set("XYZ", "789");
     let newMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     newMap.clear();
@@ -112,14 +112,14 @@ function testSetAllFromMapWithCustomComparators() {
 //Test cases ported from ArkTS 1.0:TREEMAP_3900
 function testSetAllToNonEmptyMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("HIG", "456");
     treeMap.set("DEF", "123");
     treeMap.set("XYZ", "789");
     let newMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     newMap.clear();
@@ -130,21 +130,21 @@ function testSetAllToNonEmptyMap() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_5400
 function testGetLowerKeyEmptyStringOnEmptyMap() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     let result = treeMap.getLowerKey("");
     arktest.assertEQ(result, undefined);
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_5700
 function testGetLowerKeyNonExistingKeyOnEmptyMap() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     let result = treeMap.getLowerKey("key");
     arktest.assertEQ(result, undefined);
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_5800
 function testGetLowerKeyWithOnlyKeyInMap() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     treeMap.set("squirrel", 123);
     let result = treeMap.getLowerKey("squirrel");
     arktest.assertEQ(result, undefined);
@@ -152,7 +152,7 @@ function testGetLowerKeyWithOnlyKeyInMap() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_5900
 function testGetLowerKeyExistingKeyWithLower() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     treeMap.set("BBB", 123);
     treeMap.set("AAA", 456);
     treeMap.set("CCC", 789);
@@ -163,7 +163,7 @@ function testGetLowerKeyExistingKeyWithLower() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_6000
 function testGetLowerKeyNonExistingKeyWithLower() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     treeMap.set("BBB", 123);
     treeMap.set("AAA", 456);
     treeMap.set("CCC", 789);
@@ -174,21 +174,21 @@ function testGetLowerKeyNonExistingKeyWithLower() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_6100
 function testGetHigherKeyEmptyStringOnEmptyMap() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     let result = treeMap.getHigherKey("");
     arktest.assertEQ(result, undefined);
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_6400
 function testGetHigherKeyNonExistingKeyOnEmptyMap() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     let result = treeMap.getHigherKey('key');
     arktest.assertEQ(result, undefined);
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_6500
 function testGetHigherKeyWithOnlyKeyInMap() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     treeMap.set("AAA", 123);
     let result = treeMap.getHigherKey('AAA');
     arktest.assertEQ(result, undefined);
@@ -196,7 +196,7 @@ function testGetHigherKeyWithOnlyKeyInMap() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_6600
 function testGetHigherKeyExistingKeyWithHigher() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     treeMap.set("BBB", 123);
     treeMap.set("AAA", 456);
     treeMap.set("CCC", 789);
@@ -207,7 +207,7 @@ function testGetHigherKeyExistingKeyWithHigher() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_6700
 function testGetHigherKeyNonExistingKeyWithHigher() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     treeMap.set("BBB", 123);
     treeMap.set("AAA", 456);
     treeMap.set("CCC", 789);

@@ -16,7 +16,7 @@
 import { LinkedList } from "@ohos.util.LinkedList";
 import { BusinessError } from "@ohos.base";
 
-const OutOfBoundsErrorCodeId: int = 10200001;
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 // Test cases ported from ArkTS 1.0: container_linked_list.js
 function main() {
@@ -33,27 +33,27 @@ function main() {
 }
 
 function testLinkedListBasicCRUD() {
-    let list = new LinkedList<double>();
-    let testArray = new Array<double>();
-    for (let i: int = 0; i < 10; i++) {
+    let list = new LinkedList<number>();
+    let testArray = new Array<number>();
+    for (let i = 0; i < 10; i++) {
         list.add(i);
         testArray.push(i);
     }
-    arktest.assertTrue(list.has(8), "The LinkedList should contain the double 8");
-    arktest.assertTrue(list.has(2), "The LinkedList should contain the double 2");
+    arktest.assertTrue(list.has(8), "The LinkedList should contain the number 8");
+    arktest.assertTrue(list.has(2), "The LinkedList should contain the number 2");
     arktest.assertEQ(list.getLastIndexOf(1), 1);
     arktest.assertEQ(list.getIndexOf(5), 5);
 
     list.removeByIndex(9);
 
     testArray.splice(9.0, 1.0);
-    for (let i: int = 0; i < testArray.length; i++) {
+    for (let i = 0; i < testArray.length; i++) {
         arktest.assertEQ(list.get(i), testArray[i]);
     }
 
     const removeRes = list.remove(8);
     testArray.splice(8.0, 1.0);
-    for (let i: int = 0; i < testArray.length; i++) {
+    for (let i = 0; i < testArray.length; i++) {
         arktest.assertEQ(list.get(i), testArray[i]);
     }
     arktest.assertTrue(removeRes, "The remove method should return true for a successfully removed element");
@@ -62,20 +62,20 @@ function testLinkedListBasicCRUD() {
 
     list.insert(3, 999);
     testArray.splice(3.0, 0.0, 999);
-    for (let i: int = 0; i < testArray.length; i++) {
+    for (let i = 0; i < testArray.length; i++) {
         arktest.assertEQ(list.get(i), testArray[i]);
     }
 
     list.set(5, 888);
     testArray[5] = 888;
-    for (let i: int = 0; i < testArray.length; i++) {
+    for (let i = 0; i < testArray.length; i++) {
         arktest.assertEQ(list.get(i), testArray[i]);
     }
 
     let cloneList = list.clone();
     arktest.assertEQ(list.length, cloneList.length);
 
-    for (let i: int = 0; i < cloneList.length; i++) {
+    for (let i = 0; i < cloneList.length; i++) {
         arktest.assertEQ(list.get(i), cloneList.get(i));
     }
 
@@ -85,15 +85,15 @@ function testLinkedListBasicCRUD() {
     const removeFirstRes = list.removeFirst();
     arktest.assertEQ(removeFirstRes, 1111);
 
-    let i: int = 0;
+    let i = 0;
     for (const data of list) {
         arktest.assertEQ(data, testArray[i]);
         i++;
     }
 
-    let list1 = new LinkedList<double>();
-    let testArray1 = new Array<double>();
-    for (let i: int = 0; i < 10; i++) {
+    let list1 = new LinkedList<number>();
+    let testArray1 = new Array<number>();
+    for (let i = 0; i < 10; i++) {
         list1.add(i);
         testArray1.push(i);
     }
@@ -104,7 +104,7 @@ function testLinkedListBasicCRUD() {
 
     list1.clear();
     arktest.assertEQ(list1.length, 0);
-    for (let i: int = 0; i < 10; i++) {
+    for (let i = 0; i < 10; i++) {
         list1.add(i);
     }
 
@@ -122,17 +122,17 @@ function testLinkedListBasicCRUD() {
     arktest.expectThrow(() => { list1.removeByIndex(99) }, exceptionCheck);
 
     const arr = list.convertToArray();
-    for (let i: int = 1; i < arr.length; i++) {
+    for (let i = 1; i < arr.length; i++) {
         arktest.assertEQ(arr[i], testArray[i]);
     }
 }
 
 function testLinkedListRemoveOperations() {
-    let removeList = new LinkedList<double>();
-    for (let i: int = 0; i < 10; i++) {
+    let removeList = new LinkedList<number>();
+    for (let i = 0; i < 10; i++) {
         removeList.add(i);
     }
-    for (let i: int = 9; i >= 0; i--) {
+    for (let i = 9; i >= 0; i--) {
         removeList.add(i);
     }
     let removeResult = removeList.removeFirstFound(2);
@@ -151,9 +151,9 @@ function testLinkedListRemoveOperations() {
 }
 
 function testLinkedListIteration() {
-    let list2 = new LinkedList<double>();
-    let testArray2 = new Array<double>();
-    for (let i: int = 0; i < 10; i++) {
+    let list2 = new LinkedList<number>();
+    let testArray2 = new Array<number>();
+    for (let i = 0; i < 10; i++) {
         list2.add(i);
         testArray2.push(i);
     }
@@ -165,7 +165,7 @@ function testLinkedListIteration() {
 
     let itr = list2.$_iterator();
     let tmp = itr.next().value;
-    let arr3 = new Array<double>();
+    let arr3 = new Array<number>();
     do {
         arr3.push(tmp!);
         tmp = itr.next().value;
@@ -177,7 +177,7 @@ function testLinkedListIteration() {
 }
 
 function testLinkedListExceptionHandling() {
-    let empty_ll = new LinkedList<double>();
+    let empty_ll = new LinkedList<number>();
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
@@ -191,13 +191,13 @@ function testLinkedListExceptionHandling() {
 }
 
 function testLinkedListMathFloorIndices() {
-    let myList1 = new LinkedList<double>();
+    let myList1 = new LinkedList<number>();
     myList1.add(1);
     myList1.add(2);
     myList1.add(3);
-    myList1.insert(Math.floor(1.5).toInt(), 999);
-    arktest.assertEQ(myList1.get(Math.floor(1.5).toInt()), 999);
-    myList1.set(Math.floor(1.5).toInt(), 888);
-    myList1.removeByIndex(Math.floor(1.5).toInt());
+    myList1.insert(Math.floor(1.5), 999);
+    arktest.assertEQ(myList1.get(Math.floor(1.5)), 999);
+    myList1.set(Math.floor(1.5), 888);
+    myList1.removeByIndex(Math.floor(1.5));
     arktest.assertEQ(myList1.length, 3);
 }

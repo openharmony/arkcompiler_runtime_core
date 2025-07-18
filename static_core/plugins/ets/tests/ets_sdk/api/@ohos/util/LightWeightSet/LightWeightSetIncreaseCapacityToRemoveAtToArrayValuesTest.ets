@@ -28,7 +28,7 @@ function main(): int {
     suite.addTest("Test LightWeightSet toArray() after adding duplicate string elements",
         testToArrayAfterAddingDuplicateStringElements)
     suite.addTest("Test LightWeightSet toArray() with an object element", testToArrayWithAnObjectElement)
-    suite.addTest("Test LightWeightSet toArray() with a large double element", testToArrayWithALargeNumberElement)
+    suite.addTest("Test LightWeightSet toArray() with a large number element", testToArrayWithALargeNumberElement)
     suite.addTest("Test LightWeightSet iteration using toArray() and for...of",
         testToArrayIterationUsingToArrayAndForOf)
     suite.addTest("Test LightWeightSet values() iterator with multiple string elements",
@@ -36,7 +36,7 @@ function main(): int {
     suite.addTest("Test LightWeightSet values() iterator on an empty set", testValuesIteratorOnAnEmptySet)
     suite.addTest("Test LightWeightSet values() iterator with many concatenated string elements",
         testValuesIteratorWithManyConcatenatedStringElements)
-    suite.addTest("Test LightWeightSet values() iterator with many double elements",
+    suite.addTest("Test LightWeightSet values() iterator with many number elements",
         testValuesIteratorWithManyNumberElements)
 
     return suite.run()
@@ -49,7 +49,7 @@ class C1 {
 
 //Test cases ported from ArkTS 1.0:LIGHTWEIGHTSET_2000
 function testIncreaseCapacityToInterface() {
-    let lightWeightSet = new LightWeightSet<double>();
+    let lightWeightSet = new LightWeightSet<number>();
     arktest.expectNoThrow(() => { lightWeightSet.increaseCapacityTo(10) });
 }
 
@@ -123,7 +123,7 @@ function testToArrayWithAnObjectElement() {
 //Test cases ported from ArkTS 1.0:LIGHTWEIGHTSET_5300
 function testToArrayWithALargeNumberElement() {
     let element = 0;
-    let lightWeightSet = new LightWeightSet<double>();
+    let lightWeightSet = new LightWeightSet<number>();
     for (let index = 0; index < 1024; index++) {
         element = element += index;
     }
@@ -187,7 +187,7 @@ function testValuesIteratorWithManyConcatenatedStringElements() {
 
 //Test cases ported from ArkTS 1.0:LIGHTWEIGHTSET_5700
 function testValuesIteratorWithManyNumberElements() {
-    let lightWeightSet = new LightWeightSet<double>();
+    let lightWeightSet = new LightWeightSet<number>();
     for (let index = 0; index < 1024; index++) {
         lightWeightSet.add(index++)
     }

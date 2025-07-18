@@ -16,23 +16,23 @@
 import {ArrayList} from "@ohos.util.ArrayList";
 
 class Temp {
-    age: double = 0;
+    age: number = 0;
     name: string = "";
 }
 
 class Dog {
-    age: double = 0;
+    age: number = 0;
     name: string = "";
-    constructor(age: double, name: string) {
+    constructor(age: number, name: string) {
         this.age = age;
         this.name = name;
     }
 }
 
 class Cat {
-    age1: double = 0;
+    age1: number = 0;
     name1: string = "";
-    constructor(age: double, name: string) {
+    constructor(age: number, name: string) {
         this.age1 = age;
         this.name1 = name;
     }
@@ -56,7 +56,7 @@ function main() {
 }
 
 function testArrayListGetCapacity0001() {
-    let arrayList = new ArrayList<double | string>();
+    let arrayList = new ArrayList<number | string>();
     arrayList.insert(2, 0);
     arrayList.add(1);
     arrayList.add(22);
@@ -69,7 +69,7 @@ function testArrayListGetCapacity0001() {
 }
 
 function testArrayListGetCapacity0002() {
-    let arrayList = new ArrayList<double | string>();
+    let arrayList = new ArrayList<number | string>();
     arrayList.insert(2, 0);
     arrayList.add(1);
     arrayList.add(22);
@@ -104,19 +104,19 @@ function testArrayListConvertToArray0002() {
 }
 
 function testArrayListIsEmpty0001() {
-    let arrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
     arktest.assertTrue(arrayList.isEmpty(), "The ArrayList should be empty initially");
 }
 
 function testArrayListIsEmpty0002() {
-    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
     Object>();
     addTestElements(arrayList);
     arktest.assertFalse(arrayList.isEmpty(), "The ArrayList should not be empty after adding elements");
 }
 
 function testArrayListIsEmpty0003() {
-    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
     Object>();
     addTestElements(arrayList);
     arrayList.clear();
@@ -124,7 +124,7 @@ function testArrayListIsEmpty0003() {
 }
 
 function testArrayListSymbolIterator0001() {
-    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
     Object>();
     addTestElements(arrayList);
     let iter = arrayList.$_iterator();
@@ -136,7 +136,7 @@ function testArrayListSymbolIterator0001() {
 }
 
 function testArrayListSymbolIterator0002() {
-    let arrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
     arrayList.add(2);
     arrayList.add(4);
     arrayList.add(5);
@@ -150,7 +150,7 @@ function testArrayListSymbolIterator0002() {
     }
 }
 
-function addTestElements(arrayList: ArrayList<double | string | Array<double | string | boolean> | boolean | undefined |
+function addTestElements(arrayList: ArrayList<number | string | Array<number | string | boolean> | boolean | undefined |
     null | Object>) {
     arrayList.add("zhang san");
     arrayList.add(1);

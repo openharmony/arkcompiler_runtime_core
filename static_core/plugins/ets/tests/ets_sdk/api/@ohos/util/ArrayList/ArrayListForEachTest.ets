@@ -16,7 +16,7 @@
 import {ArrayList} from "@ohos.util.ArrayList";
 
 class Temp {
-    age: double = 0;
+    age: number = 0;
     name: string = "";
 }
 
@@ -44,7 +44,7 @@ function testArrayListReplaceAllElement0001() {
     arrayList.add("`");
     arrayList.add("%");
     arrayList.add(`"`);
-    arrayList.replaceAllElements((value: string, index: int) => {
+    arrayList.replaceAllElements((value: string, index: number) => {
         let tmp = value;
         value = tmp + value;
         let result = arrayList[index];
@@ -54,7 +54,7 @@ function testArrayListReplaceAllElement0001() {
 }
 
 function testArrayListReplaceAllElement0002() {
-    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
     Object>();
     arrayList.add("zhang san");
     arrayList.add(1);
@@ -84,7 +84,7 @@ function testArrayListReplaceAllElement0002() {
 }
 
 function testArrayListForEach0001() {
-    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
     Object>();
     arrayList.add("zhang san");
     arrayList.add(1);
@@ -107,25 +107,25 @@ function testArrayListForEach0001() {
 }
 
 function testArrayListForEach0002() {
-    let arrayList = new ArrayList<double>();
-    let newArrayList = new ArrayList<double>();
-    let result = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
+    let newArrayList = new ArrayList<number>();
+    let result = new ArrayList<number>();
     arrayList.add(2);
     arrayList.add(4);
     arrayList.add(5);
     arrayList.add(4);
-    arrayList.forEach((value: double, index: int) => {
+    arrayList.forEach((value: number, index: number) => {
         result.add(value);
         result.add(index);
     });
 
     let expectedValuesForArrayList = [2, 4, 5, 4];
     let expectedValuesForResult = [2, 0, 4, 1, 5, 2, 4, 3];
-    for (let i: int = 0; i < arrayList.length; i++) {
+    for (let i = 0; i < arrayList.length; i++) {
         arktest.assertEQ(arrayList[i], expectedValuesForArrayList[i],
             `The element at index ${i} should be ${expectedValuesForArrayList[i]}`);
     }
-    for (let i: int = 0; i < result.length; i++) {
+    for (let i = 0; i < result.length; i++) {
         arktest.assertEQ(result[i], expectedValuesForResult[i],
             `The element at index ${i} should be ${expectedValuesForResult[i]}`);
     }
@@ -133,26 +133,26 @@ function testArrayListForEach0002() {
 }
 
 function testArrayListForEach0003() {
-    let arrayList = new ArrayList<double>();
-    let newArrayList = new ArrayList<double>();
-    let result = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
+    let newArrayList = new ArrayList<number>();
+    let result = new ArrayList<number>();
     arrayList.add(2);
     arrayList.add(4);
     arrayList.add(5);
     arrayList.add(4);
     newArrayList.add(4);
-    arrayList.forEach((value: double, index: int) => {
+    arrayList.forEach((value: number, index: number) => {
         result.add(value);
         result.add(index);
     });
 
     let expectedValuesForArrayList = [2, 4, 5, 4];
     let expectedValuesForResult = [2, 0, 4, 1, 5, 2, 4, 3];
-    for (let i: int = 0; i < arrayList.length; i++) {
+    for (let i = 0; i < arrayList.length; i++) {
         arktest.assertEQ(arrayList[i], expectedValuesForArrayList[i],
             `The element at index ${i} should be ${expectedValuesForArrayList[i]}`);
     }
-    for (let i: int = 0; i < result.length; i++) {
+    for (let i = 0; i < result.length; i++) {
         arktest.assertEQ(result[i], expectedValuesForResult[i],
             `The element at index ${i} should be ${expectedValuesForResult[i]}`);
     }
@@ -161,52 +161,52 @@ function testArrayListForEach0003() {
 }
 
 function testArrayListReplaceAllElements0001() {
-    let arrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
     arrayList.add(2);
     arrayList.add(4);
     arrayList.add(5);
     arrayList.add(4);
-    arrayList.replaceAllElements((value: double): double => {
+    arrayList.replaceAllElements((value: number): number => {
         return value + 1;
     });
 
     let expectedValues = [3, 5, 6, 5];
-    for (let i: int = 0; i < arrayList.length; i++) {
+    for (let i = 0; i < arrayList.length; i++) {
         arktest.assertEQ(arrayList[i], expectedValues[i],
             `The element at index ${i} should be ${expectedValues[i]}`);
     }
 }
 
 function testArrayListReplaceAllElements0002() {
-    let arrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
     arrayList.add(2);
     arrayList.add(4);
     arrayList.add(5);
     arrayList.add(4);
-    arrayList.replaceAllElements((value: double): double => {
+    arrayList.replaceAllElements((value: number): number => {
         return value - 1;
     });
 
     let expectedValues = [1, 3, 4, 3];
-    for (let i: int = 0; i < arrayList.length; i++) {
+    for (let i = 0; i < arrayList.length; i++) {
         arktest.assertEQ(arrayList[i], expectedValues[i],
             `The element at index ${i} should be ${expectedValues[i]}`);
     }
 }
 
 function testArrayListReplaceAllElements0003() {
-    let arrayList = new ArrayList<double>();
-    let newArrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
+    let newArrayList = new ArrayList<number>();
     arrayList.add(2);
     arrayList.add(4);
     arrayList.add(5);
     arrayList.add(4);
-    arrayList.replaceAllElements((value: double): double => {
+    arrayList.replaceAllElements((value: number): number => {
         return value - 1;
     });
 
     let expectedValues = [1, 3, 4, 3];
-    for (let i: int = 0; i < arrayList.length; i++) {
+    for (let i = 0; i < arrayList.length; i++) {
         arktest.assertEQ(arrayList[i], expectedValues[i],
             `The element at index ${i} should be ${expectedValues[i]}`);
     }
@@ -214,8 +214,8 @@ function testArrayListReplaceAllElements0003() {
 }
 
 function testArrayListReplaceAllElements0004() {
-    let arrayList = new ArrayList<double>();
-    let newArrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
+    let newArrayList = new ArrayList<number>();
     arrayList.add(2);
     arrayList.add(4);
     arrayList.add(5);
@@ -223,17 +223,17 @@ function testArrayListReplaceAllElements0004() {
     newArrayList.add(3);
     newArrayList.add(5);
     newArrayList.add(7);
-    arrayList.replaceAllElements((value: double): double => {
+    arrayList.replaceAllElements((value: number): number => {
         return value - 1;
     });
 
     let expectedValuesForArrayList = [1, 3, 4, 3];
     let expectedValuesForNew = [3, 5, 7];
-    for (let i: int = 0; i < arrayList.length; i++) {
+    for (let i = 0; i < arrayList.length; i++) {
         arktest.assertEQ(arrayList[i], expectedValuesForArrayList[i],
             `The element at index ${i} should be ${expectedValuesForArrayList[i]}`);
     }
-    for (let i: int = 0; i < newArrayList.length; i++) {
+    for (let i = 0; i < newArrayList.length; i++) {
         arktest.assertEQ(newArrayList[i], expectedValuesForNew[i],
             `The element at index ${i} should be ${expectedValuesForNew[i]}`);
     }

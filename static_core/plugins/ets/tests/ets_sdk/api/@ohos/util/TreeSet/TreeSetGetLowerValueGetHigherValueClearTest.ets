@@ -20,15 +20,15 @@ function main(): int {
 
     suite.addTest("Test getLowerValue() for an empty string on an empty TreeSet.",
         testGetLowerValueEmptyStringOnEmptySet)
-    suite.addTest("Test getLowerValue() for a double on an empty TreeSet.", testGetLowerValueNumberOnEmptySet1)
-    suite.addTest("Test getLowerValue() for a double on an empty TreeSet.", testGetLowerValueNumberOnEmptySet2)
+    suite.addTest("Test getLowerValue() for a number on an empty TreeSet.", testGetLowerValueNumberOnEmptySet1)
+    suite.addTest("Test getLowerValue() for a number on an empty TreeSet.", testGetLowerValueNumberOnEmptySet2)
     suite.addTest("Test getLowerValue() on a TreeSet with multiple elements.", testGetLowerValueWithMultipleElements)
     suite.addTest("Test getLowerValue() on a TreeSet with a custom reverse string comparator.",
         testGetLowerValueWithCustomReverseComparator)
     suite.addTest("Test getHigherValue() for an empty string on an empty TreeSet.",
         testGetHigherValueEmptyStringOnEmptySet)
-    suite.addTest("Test getHigherValue() for a double on an empty TreeSet.", testGetHigherValueNumberOnEmptySet1)
-    suite.addTest("Test getHigherValue() for a double on an empty TreeSet.", testGetHigherValueNumberOnEmptySet2)
+    suite.addTest("Test getHigherValue() for a number on an empty TreeSet.", testGetHigherValueNumberOnEmptySet1)
+    suite.addTest("Test getHigherValue() for a number on an empty TreeSet.", testGetHigherValueNumberOnEmptySet2)
     suite.addTest("Test getHigherValue() on a TreeSet with multiple elements.", testGetHigherValueWithMultipleElements)
     suite.addTest("Test getHigherValue() on a TreeSet with a custom reverse string comparator.",
         testGetHigherValueWithCustomReverseComparator)
@@ -50,14 +50,14 @@ function testGetLowerValueEmptyStringOnEmptySet() {
 
 //Test cases ported from ArkTS 1.0:TREESET_4500
 function testGetLowerValueNumberOnEmptySet1() {
-    let treeSet = new TreeSet<double>();
+    let treeSet = new TreeSet<number>();
     let result = treeSet.getLowerValue(123);
     arktest.assertEQ(result, undefined);
 }
 
 //Test cases ported from ArkTS 1.0:TREESET_4600
 function testGetLowerValueNumberOnEmptySet2() {
-    let treeSet = new TreeSet<double>();
+    let treeSet = new TreeSet<number>();
     let result = treeSet.getLowerValue(123);
     arktest.assertEQ(result, undefined);
 }
@@ -73,7 +73,7 @@ function testGetLowerValueWithMultipleElements() {
 
 //Test cases ported from ArkTS 1.0:TREESET_4800
 function testGetLowerValueWithCustomReverseComparator() {
-    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string, secondValue: string): double => {
+    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string, secondValue: string): number => {
         return firstValue.compareTo(secondValue)
     });
     treeSet.add("b");
@@ -93,14 +93,14 @@ function testGetHigherValueEmptyStringOnEmptySet() {
 
 //Test cases ported from ArkTS 1.0:TREESET_5200
 function testGetHigherValueNumberOnEmptySet1() {
-    let treeSet = new TreeSet<double>();
+    let treeSet = new TreeSet<number>();
     let result = treeSet.getHigherValue(123);
     arktest.assertEQ(result, undefined);
 }
 
 //Test cases ported from ArkTS 1.0:TREESET_5300
 function testGetHigherValueNumberOnEmptySet2() {
-    let treeSet = new TreeSet<double>();
+    let treeSet = new TreeSet<number>();
     let result = treeSet.getHigherValue(123);
     arktest.assertEQ(result, undefined);
 }
@@ -116,7 +116,7 @@ function testGetHigherValueWithMultipleElements() {
 
 //Test cases ported from ArkTS 1.0:TREESET_5500
 function testGetHigherValueWithCustomReverseComparator() {
-    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string, secondValue: string): double => {
+    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string, secondValue: string): number => {
         return firstValue.compareTo(secondValue)
     });
     treeSet.add("b");
@@ -151,7 +151,7 @@ function testClearOnPopulatedSet() {
 
 //Test cases ported from ArkTS 1.0:TREESET_7000
 function testClearOnPopulatedSetWithCustomComparator() {
-    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string, secondValue: string): double => {
+    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string, secondValue: string): number => {
         return firstValue.compareTo(secondValue)
     });
     treeSet.add("b");

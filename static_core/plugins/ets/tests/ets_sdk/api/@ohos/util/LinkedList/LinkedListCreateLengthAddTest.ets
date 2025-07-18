@@ -33,47 +33,47 @@ function main() {
 }
 
 class Temp {
-    age: double = 0;
+    age: number = 0;
     name: string = "";
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber2: double | int = 2;
-    static readonly testNumber3: double | int = 3;
-    static readonly testNumber4: double | int = 4;
-    static readonly testNumber5: double | int = 5;
-    static readonly testNumber6: double | int = 6;
-    static readonly testNumber1w: double | int = 10000;
+    static readonly testNumber1: number = 1;
+    static readonly testNumber2: number = 2;
+    static readonly testNumber3: number = 3;
+    static readonly testNumber4: number = 4;
+    static readonly testNumber5: number = 5;
+    static readonly testNumber6: number = 6;
+    static readonly testNumber1w: number = 10000;
     static readonly testString1: string = "string";
     static readonly testString2: string = "!\"#$%'()+,-./:;<=>?@[\\]^_`{|}~";
     static readonly testObject1: Temp = { age: 10, name: "zhang" };
     static readonly forNumber1: Number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-    static readonly arrayForNumber1 = Array.from<double>(TestData.forNumber1);
+    static readonly arrayForNumber1 = Array.from<number>(TestData.forNumber1);
 }
 
 function testCreateSingleTypeContainer() {
-    let linkedList: LinkedList<double>;
-    arktest.expectNoThrow(() => {linkedList = new LinkedList<double>()});
+    let linkedList: LinkedList<number>;
+    arktest.expectNoThrow(() => {linkedList = new LinkedList<number>()});
 }
 
 function testCreateCompositeTypeContainer() {
-    let linkedList: LinkedList<double | string | boolean | null | object | undefined>;
-    arktest.expectNoThrow(() => {linkedList = new LinkedList<double | string | boolean | null | object | undefined>()});
+    let linkedList: LinkedList<number | string | boolean | null | object | undefined>;
+    arktest.expectNoThrow(() => {linkedList = new LinkedList<number | string | boolean | null | object | undefined>()});
 }
 
 function testLengthSyncSingleType() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     arktest.assertEQ(linkedList.length, 0, "LinkedList length should be 0");
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
-    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt(),
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length,
         "LinkedList length should be TestData.arrayForNumber1 length");
     linkedList.remove(TestData.testNumber1);
-    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt() - TestData.testNumber1, "LinkedList length should - 1");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length - TestData.testNumber1, "LinkedList length should - 1");
 }
 
 function testLengthSyncMultiType() {
-    let linkedList = new LinkedList<double | string | boolean | null | object | undefined>();
+    let linkedList = new LinkedList<number | string | boolean | null | object | undefined>();
     arktest.assertEQ(linkedList.length, 0, "LinkedList length should be 0");
     linkedList.add(TestData.testNumber1);
     linkedList.add(TestData.testString1);
@@ -87,15 +87,15 @@ function testLengthSyncMultiType() {
 }
 
 function testLengthWithLargeValue() {
-    let linkedList = new LinkedList<double>();
-    for (let i: int = 0; i < TestData.testNumber1w; i++) {
+    let linkedList = new LinkedList<number>();
+    for (let i: number = 0; i < TestData.testNumber1w; i++) {
         linkedList.add(TestData.testNumber1);
     }
     arktest.assertEQ(linkedList.length, TestData.testNumber1w, "LinkedList length should be 10000 after adding elements");
 }
 
 function testAddMultipleTypes() {
-    let linkedList = new LinkedList<double | string | boolean | null | object | undefined>();
+    let linkedList = new LinkedList<number | string | boolean | null | object | undefined>();
     linkedList.add(TestData.testNumber1);
     linkedList.add(TestData.testString1);
     linkedList.add(true);
@@ -120,27 +120,27 @@ function testAddSpecialCharacters() {
 }
 
 function testAddFirstDeclaredType() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
     linkedList.addFirst(TestData.testNumber4);
     arktest.assertEQ(linkedList.get(0), TestData.testNumber4, "First element should be 4");
-    for (let i: int = 0; i < TestData.arrayForNumber1.length.toInt(); i++) {
+    for (let i: number = 0; i < TestData.arrayForNumber1.length; i++) {
         arktest.assertEQ(linkedList.get(i + TestData.testNumber1), TestData.arrayForNumber1[i], "Element should match");
     }
-    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt() + TestData.testNumber1, "LinkedList length should + 1");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length + TestData.testNumber1, "LinkedList length should + 1");
 }
 
 function testAddFirstNull() {
-    let linkedList = new LinkedList<double | null>();
-    for (let i: int = 0; i < TestData.arrayForNumber1.length.toInt(); i++) {
+    let linkedList = new LinkedList<number | null>();
+    for (let i = 0; i < TestData.arrayForNumber1.length; i++) {
         linkedList.add(TestData.arrayForNumber1[i]);
     }
     linkedList.addFirst(null);
     arktest.assertEQ(linkedList.get(0), null, "First element should be null");
-    for (let i: int = 0; i < TestData.arrayForNumber1.length.toInt(); i++) {
+    for (let i: number = 0; i < TestData.arrayForNumber1.length; i++) {
         arktest.assertEQ(linkedList.get(i + TestData.testNumber1), TestData.arrayForNumber1[i], "Element should match");
     }
-    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt() + TestData.testNumber1,
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length + TestData.testNumber1,
         "LinkedList length should be + 1");
 }
 
@@ -152,7 +152,7 @@ function testAddFirstSpecialCharacters() {
 }
 
 function initializeLinkedList<T>(linkedList: LinkedList<T>, sourceArray: Array<T>) {
-    for (let i: int = 0; i < sourceArray.length; i++) {
+    for (let i = 0; i < sourceArray.length; i++) {
         linkedList.add(sourceArray[i]);
     }
 }

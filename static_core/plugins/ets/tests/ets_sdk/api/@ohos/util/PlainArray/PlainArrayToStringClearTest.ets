@@ -18,10 +18,10 @@ import { PlainArray } from "@ohos.util.PlainArray";
 function main() {
     const suite = new arktest.ArkTestsuite("PlainArray API tests");
 
-    suite.addTest("Testing PlainArray toString with string and double values", testToStringWithStringAndNumberValues);
+    suite.addTest("Testing PlainArray toString with string and number values", testToStringWithStringAndNumberValues);
     suite.addTest("Testing PlainArray toString with empty array", testToStringWithEmptyArray);
     suite.addTest("Testing PlainArray toString with duplicate string values", testToStringWithDuplicateStringValues);
-    suite.addTest("Testing PlainArray toString with mixed types (string, double, boolean)", testToStringWithMixedTypes);
+    suite.addTest("Testing PlainArray toString with mixed types (string, number, boolean)", testToStringWithMixedTypes);
     suite.addTest("Testing PlainArray toString with large array", testToStringWithLargeArray);
     suite.addTest("Testing PlainArray clear with multiple elements", testClearWithMultipleElements);
     suite.addTest("Testing PlainArray clear and re-add elements", testClearAndReAddElements);
@@ -33,7 +33,7 @@ function main() {
 
 // Test cases ported from ArkTS 1.0: PLAINARRAY_TOSTRING_0100
 function testToStringWithStringAndNumberValues() {
-    let plainArray = new PlainArray<string | double>();
+    let plainArray = new PlainArray<string | number>();
     plainArray.add(1, "squirrel");
     plainArray.add(2, "sparrow");
     let result = plainArray.toString();
@@ -42,14 +42,14 @@ function testToStringWithStringAndNumberValues() {
 
 // Test cases ported from ArkTS 1.0: PLAINARRAY_TOSTRING_0300
 function testToStringWithEmptyArray() {
-    let plainArray = new PlainArray<string | double>();
+    let plainArray = new PlainArray<string | number>();
     let result = plainArray.toString();
     arktest.assertEQ(result, '');
 }
 
 // Test cases ported from ArkTS 1.0: PLAINARRAY_TOSTRING_0400
 function testToStringWithDuplicateStringValues() {
-    let plainArray = new PlainArray<string | double>();
+    let plainArray = new PlainArray<string | number>();
     plainArray.add(1, "squirrel");
     plainArray.add(2, "sparrow");
     plainArray.add(3, "sparrow");
@@ -59,7 +59,7 @@ function testToStringWithDuplicateStringValues() {
 
 // Test cases ported from ArkTS 1.0: PLAINARRAY_TOSTRING_0500
 function testToStringWithMixedTypes() {
-    let plainArray = new PlainArray<string | double | boolean>();
+    let plainArray = new PlainArray<string | number | boolean>();
     plainArray.add(1, "squirrel");
     plainArray.add(2, 10);
     plainArray.add(3, true);
@@ -69,8 +69,8 @@ function testToStringWithMixedTypes() {
 
 // Test cases ported from ArkTS 1.0: PLAINARRAY_TOSTRING_0600
 function testToStringWithLargeArray() {
-    let plainArray = new PlainArray<string | double | boolean>();
-    for (let i: int = 0; i < 1024; i++) {
+    let plainArray = new PlainArray<string | number | boolean>();
+    for (let i = 0; i < 1024; i++) {
         plainArray.add(i, i);
     }
     plainArray.toString();
@@ -79,7 +79,7 @@ function testToStringWithLargeArray() {
 
 // Test cases ported from ArkTS 1.0: PLAINARRAY_CLEAR_0100
 function testClearWithMultipleElements() {
-    let plainArray = new PlainArray<string | double | boolean>();
+    let plainArray = new PlainArray<string | number | boolean>();
     plainArray.add(1, "squirrel");
     plainArray.add(2, "sparrow");
     plainArray.clear();
@@ -88,7 +88,7 @@ function testClearWithMultipleElements() {
 
 // Test cases ported from ArkTS 1.0: PLAINARRAY_CLEAR_0200
 function testClearAndReAddElements() {
-    let plainArray = new PlainArray<string | double | boolean>();
+    let plainArray = new PlainArray<string | number | boolean>();
     plainArray.add(1, "squirrel");
     plainArray.clear();
     plainArray.add(2, "sparrow");
@@ -98,7 +98,7 @@ function testClearAndReAddElements() {
 
 // Test cases ported from ArkTS 1.0: PLAINARRAY_CLEAR_0300
 function testClearWithEmptyArray() {
-    let plainArray = new PlainArray<string | double | boolean>();
+    let plainArray = new PlainArray<string | number | boolean>();
     plainArray.clear();
     arktest.assertEQ(plainArray.length, 0);
 }

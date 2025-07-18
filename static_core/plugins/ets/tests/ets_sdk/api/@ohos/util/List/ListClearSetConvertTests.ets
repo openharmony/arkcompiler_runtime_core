@@ -16,7 +16,7 @@
 import {List} from '@ohos.util.List';
 import {BusinessError} from "@ohos.base";
 
-const OutOfBoundsErrorCodeId: int = 10200001;
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
     const suite = new arktest.ArkTestsuite("List API tests");
@@ -36,50 +36,50 @@ function main() {
     return suite.run();
 }
 
-function initializeList(list: List<double>, sourceArray: Array<double>) {
-    for (let i: int = 0; i < sourceArray.length; i++) {
+function initializeList(list: List<number>, sourceArray: Array<number>) {
+    for (let i = 0; i < sourceArray.length; i++) {
         list.add(sourceArray[i]);
     }
 }
 
 class Temp {
-    age: double = 0;
+    age: number = 0;
     name: string = "";
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber2: double | int = 2;
-    static readonly testNumber3: double | int = 3;
-    static readonly testNumber4: double | int = 4;
-    static readonly testNumber5: double | int = 5;
-    static readonly testNumber6: double | int = 6;
+    static readonly testNumber1: number = 1;
+    static readonly testNumber2: number = 2;
+    static readonly testNumber3: number = 3;
+    static readonly testNumber4: number = 4;
+    static readonly testNumber5: number = 5;
+    static readonly testNumber6: number = 6;
     static readonly testString1: string = "string";
     static readonly testString2: string = "!\"#$%'()+,-./:;<=>?@[\\]^_`{|}~";
     static readonly testObject1: Temp = { age: 10, name: "zhang" };
     static readonly testObject2 = [0, 1, null];
     static readonly forNumber1: Number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-    static readonly arrayForNumber1 = Array.from<double>(TestData.forNumber1);
+    static readonly arrayForNumber1 = Array.from<number>(TestData.forNumber1);
 }
 
 function testClearNonEmptyContainer() {
-    let list = new List<double>();
+    let list = new List<number>();
     initializeList(list, TestData.arrayForNumber1);
-    arktest.assertEQ(list.length, TestData.arrayForNumber1.length.toInt(), "List length should be same as TestData.arrayForNumber1");
+    arktest.assertEQ(list.length, TestData.arrayForNumber1.length, "List length should be same as TestData.arrayForNumber1");
     list.clear();
     arktest.assertEQ(list.length, 0, "List length should be 0 after clear");
 }
 
 function testClearEmptyContainer() {
-    let list = new List<double>();
+    let list = new List<number>();
     arktest.assertEQ(list.length, 0, "List length should be 0");
     list.clear();
     arktest.assertEQ(list.length, 0, "List length should be 0 after clear");
 }
 
 function testSetMultipleTypes() {
-    let list = new List<double | string | boolean | null | object | undefined>();
-    for (let i: int = 0; i < TestData.testNumber6; i++) {
+    let list = new List<number | string | boolean | null | object | undefined>();
+    for (let i = 0; i < TestData.testNumber6; i++) {
         list.add(i);
     }
 
@@ -92,7 +92,7 @@ function testSetMultipleTypes() {
 }
 
 function testSetElementsInEmptyContainer() {
-    let list = new List<double>();
+    let list = new List<number>();
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
             "Container is empty") &&
@@ -103,7 +103,7 @@ function testSetElementsInEmptyContainer() {
 }
 
 function testSetGetIndexOfRemoveByIndex() {
-    let list = new List<double | string | boolean | null | object | undefined>();
+    let list = new List<number | string | boolean | null | object | undefined>();
     list.add(TestData.testString1);
     list.add(TestData.testNumber1);
     list.add(TestData.testObject1);
@@ -112,13 +112,13 @@ function testSetGetIndexOfRemoveByIndex() {
     list.add(true);
 
     let index = list.getIndexOf(TestData.testObject1);
-    let elem1 = list.set(Math.floor(index).toInt(), TestData.testString2);
-    let elem2 = list.removeByIndex(Math.floor(index).toInt());
+    let elem1 = list.set(Math.floor(index), TestData.testString2);
+    let elem2 = list.removeByIndex(Math.floor(index));
     arktest.assertEQ(elem1, elem2, "The result should be the same for both operations");
 }
 
 function testSetGetIndexOfHas() {
-    let list = new List<double | string | boolean | null | object | undefined>();
+    let list = new List<number | string | boolean | null | object | undefined>();
     list.add(TestData.testString1);
     list.add(TestData.testNumber1);
     list.add(TestData.testObject1);
@@ -127,12 +127,12 @@ function testSetGetIndexOfHas() {
     list.add(true);
 
     let index = list.getIndexOf(TestData.testObject1);
-    let elem = list.set(Math.floor(index).toInt(), TestData.testString2);
+    let elem = list.set(Math.floor(index), TestData.testString2);
     arktest.assertTrue(list.has(elem), "The element set successful");
 }
 
 function testSetGetLast() {
-    let list = new List<double | string | boolean | null | object | undefined>();
+    let list = new List<number | string | boolean | null | object | undefined>();
     list.add(TestData.testString1);
     list.add(TestData.testNumber1);
     list.add(TestData.testObject1);
@@ -146,7 +146,7 @@ function testSetGetLast() {
 }
 
 function testSetGetFirst() {
-    let list = new List<double | string | boolean | null | object | undefined>();
+    let list = new List<number | string | boolean | null | object | undefined>();
     list.add(TestData.testString1);
     list.add(TestData.testNumber1);
     list.add(TestData.testObject1);
@@ -160,30 +160,30 @@ function testSetGetFirst() {
 }
 
 function testConvertToArrayNonEmptyContainer() {
-    let list = new List<double>();
+    let list = new List<number>();
     initializeList(list, TestData.arrayForNumber1);
     let array = list.convertToArray();
     arktest.assertTrue(Array.isArray(array), "The result should be an Array");
     arktest.assertEQ(array.length, list.length, "Array length should be same as List length");
-    for (let i: int = 0; i < TestData.arrayForNumber1.length.toInt(); i++) {
+    for (let i = 0; i < TestData.arrayForNumber1.length; i++) {
         arktest.assertEQ(array[i], list.get(i), `Element at index ${i} should be equal`);
     }
 }
 
 function testConvertToArrayEmptyContainer() {
-    let list = new List<double>();
+    let list = new List<number>();
     let array = list.convertToArray();
     arktest.assertEQ(array.length, 0, "Array length should be 0");
 }
 
 function testConvertToArrayChangeArray() {
-    let list = new List<double>();
+    let list = new List<number>();
     initializeList(list, TestData.arrayForNumber1);
     let array = list.convertToArray();
     array.push(TestData.testNumber1);
     arktest.assertEQ(array.length, list.length + TestData.testNumber1, "Array length should be List length + 1");
-    arktest.assertEQ(list.length, TestData.arrayForNumber1.length.toInt(), "List length should not change");
-    for (let i: int = 0; i < TestData.arrayForNumber1.length.toInt(); i++) {
+    arktest.assertEQ(list.length, TestData.arrayForNumber1.length, "List length should not change");
+    for (let i = 0; i < TestData.arrayForNumber1.length; i++) {
         arktest.assertEQ(list.get(i), TestData.arrayForNumber1[i], `Element at index ${i} should be equal`);
     }
 }

@@ -32,7 +32,7 @@ function main(): int {
 }
 
 function testConstructorCreatesEmptyHashMap() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("squirrel", 123);
     arktest.assertTrue(hashMap instanceof HashMap, "The hashMap should be of the same type as the HashMap");
     arktest.assertEQ(hashMap.length, 1, "The hashMap length should be 1");
@@ -53,14 +53,14 @@ function testConstructorWithCustomTypeData() {
 }
 
 function testIsEmptyTrue() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     let result = hashMap.isEmpty();
     arktest.assertEQ(result, true, "The hashMap should be empty");
     arktest.assertEQ(hashMap.length, 0, "The hashMap length should be 0");
 }
 
 function testIsEmptyFalse() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("squirrel", 123);
     let result = hashMap.isEmpty();
     arktest.assertEQ(result, false, "The hashMap should not be empty");
@@ -68,7 +68,7 @@ function testIsEmptyFalse() {
 }
 
 function testIsEmptyAfterRemovingData() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("squirrel", 123);
     let result1 = hashMap.isEmpty();
     hashMap.remove("squirrel")
@@ -79,7 +79,7 @@ function testIsEmptyAfterRemovingData() {
 }
 
 function testIsEmptyAfterClearingData() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("squirrel", 123);
     let result1 = hashMap.isEmpty();
     hashMap.clear()
@@ -90,7 +90,7 @@ function testIsEmptyAfterClearingData() {
 }
 
 function testClearData() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("squirrel", 123);
     hashMap.clear();
     let result = hashMap.get("squirrel");
@@ -99,13 +99,13 @@ function testClearData() {
 }
 
 function testClearEmptyHashMap() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.clear();
     arktest.assertEQ(hashMap.length, 0, "Empty HashMap should remain empty after clear");
 }
 
 function testClearAndSetDataAgain() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("ji", 12);
     hashMap.clear();
     hashMap.set("ji", 13);

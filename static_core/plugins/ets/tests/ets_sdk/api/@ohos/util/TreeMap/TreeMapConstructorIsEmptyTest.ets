@@ -19,7 +19,7 @@ function main(): int {
     const suite = new arktest.ArkTestsuite("TreeMap Constructor IsEmpty API tests")
 
     suite.addTest("TreeMap construct default empty string treeMap", testConstructDefaultEmptyStringTreeMap)
-    suite.addTest("TreeMap construct default empty double treeMap", testConstructDefaultEmptyNumberTreeMap)
+    suite.addTest("TreeMap construct default empty number treeMap", testConstructDefaultEmptyNumberTreeMap)
     suite.addTest("TreeMap construct default empty object treeMap", testConstructDefaultEmptyObjectTreeMap)
     suite.addTest("TreeMap construct no comparator treeMap", testConstructNoComparatorTreeMap)
     suite.addTest("TreeMap isEmpty is true", testIsEmptyReturnsTrue)
@@ -30,8 +30,8 @@ function main(): int {
 }
 
 class MyObject extends Object {
-    size: double;
-    constructor(size: double) {
+    size: number;
+    constructor(size: number) {
         super();
         this.size = size;
     }
@@ -39,7 +39,7 @@ class MyObject extends Object {
 
 function testConstructDefaultEmptyStringTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
@@ -48,8 +48,8 @@ function testConstructDefaultEmptyStringTreeMap() {
 }
 
 function testConstructDefaultEmptyNumberTreeMap() {
-    let treeMap: TreeMap<double, double> =
-        new TreeMap<double, double>((firstValue: double, secondValue: double): double => {
+    let treeMap: TreeMap<number, number> =
+        new TreeMap<number, number>((firstValue: number, secondValue: number): number => {
             return secondValue - firstValue
         });
     treeMap.set(111, 999)
@@ -61,7 +61,7 @@ function testConstructDefaultEmptyNumberTreeMap() {
 
 function testConstructDefaultEmptyObjectTreeMap() {
     let treeMapo: TreeMap<MyObject, MyObject> =
-        new TreeMap<MyObject, MyObject>((firstValue: MyObject, secondValue: MyObject): double => {
+        new TreeMap<MyObject, MyObject>((firstValue: MyObject, secondValue: MyObject): number => {
             return secondValue.size - firstValue.size
         });
     let obj: MyObject = new MyObject(1);
@@ -72,7 +72,7 @@ function testConstructDefaultEmptyObjectTreeMap() {
 }
 
 function testConstructNoComparatorTreeMap() {
-    let treeMap: TreeMap<double, double> = new TreeMap<double, double>();
+    let treeMap: TreeMap<number, number> = new TreeMap<number, number>();
     treeMap.set(111, 999)
     treeMap.set(222, 888)
     treeMap.set(333, 777)
@@ -82,7 +82,7 @@ function testConstructNoComparatorTreeMap() {
 
 function testIsEmptyReturnsTrue() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     let result = treeMap.isEmpty();
@@ -92,7 +92,7 @@ function testIsEmptyReturnsTrue() {
 
 function testIsEmptyReturnsFalse() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
@@ -103,7 +103,7 @@ function testIsEmptyReturnsFalse() {
 
 function testIsEmptyReturnsTrueAfterRemove() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");

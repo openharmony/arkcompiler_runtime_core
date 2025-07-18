@@ -29,48 +29,48 @@ function main() {
 }
 
 class Temp {
-    age: double = 0;
+    age: number = 0;
     name: string = "";
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber5: double | int = 5;
-    static readonly testNumber6: double | int = 6;
-    static readonly testNumberLarge: double = 10000;
+    static readonly testNumber1: number = 1;
+    static readonly testNumber5: number = 5;
+    static readonly testNumber6: number = 6;
+    static readonly testNumberLarge: number = 10000;
     static readonly testString1: string = "string";
     static readonly testObject1: Temp = { age: 10, name: "zhang" };
     static readonly forNumber1: Number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-    static readonly arrayForNumber1 = Array.from<double>(TestData.forNumber1);
+    static readonly arrayForNumber1 = Array.from<number>(TestData.forNumber1);
 }
 
-function initializeList(list: List<double>, sourceArray: Array<double>) {
-    for (let i: int = 0; i < sourceArray.length; i++) {
+function initializeList(list: List<number>, sourceArray: Array<number>) {
+    for (let i = 0; i < sourceArray.length; i++) {
         list.add(sourceArray[i]);
     }
 }
 
 function testCreateSingleTypeContainer() {
-    let list: List<double>;
-    arktest.expectNoThrow(() => {list = new List<double>()});
+    let list: List<number>;
+    arktest.expectNoThrow(() => {list = new List<number>()});
 }
 
 function testCreateCompositeTypeContainer() {
-    let list: List<double | string | boolean | null | object | undefined>;
-    arktest.expectNoThrow(() => {list = new List<double | string | boolean | null | object | undefined>()});
+    let list: List<number | string | boolean | null | object | undefined>;
+    arktest.expectNoThrow(() => {list = new List<number | string | boolean | null | object | undefined>()});
 }
 
 function testLengthSyncSingleType() {
-    let list = new List<double>();
+    let list = new List<number>();
     arktest.assertEQ(list.length, 0, "List length should be 0");
     initializeList(list, TestData.arrayForNumber1);
-    arktest.assertEQ(list.length, TestData.arrayForNumber1.length.toInt(), "List length should be TestData.arrayForNumber1 length");
+    arktest.assertEQ(list.length, TestData.arrayForNumber1.length, "List length should be TestData.arrayForNumber1 length");
     list.remove(TestData.testNumber1);
-    arktest.assertEQ(list.length, TestData.arrayForNumber1.length.toInt() - TestData.testNumber1, "List length should - 1");
+    arktest.assertEQ(list.length, TestData.arrayForNumber1.length - TestData.testNumber1, "List length should - 1");
 }
 
 function testLengthSyncMultiType() {
-    let list = new List<double | string | boolean | null | object | undefined>();
+    let list = new List<number | string | boolean | null | object | undefined>();
     arktest.assertEQ(list.length, 0, "List length should be 0");
     list.add(TestData.testNumber1);
     list.add(TestData.testString1);
@@ -84,15 +84,15 @@ function testLengthSyncMultiType() {
 }
 
 function testLengthWithLargeValue() {
-    let list = new List<double>();
-    for (let i: int = 0; i < TestData.testNumberLarge; i++) {
+    let list = new List<number>();
+    for (let i: number = 0; i < TestData.testNumberLarge; i++) {
         list.add(TestData.testNumber1);
     }
     arktest.assertEQ(list.length, TestData.testNumberLarge, "List length should be 10000 after adding elements");
 }
 
 function testListConstructor0001() {
-    let list = new List<double | string | Array<double | string | boolean> | boolean | bigint |
+    let list = new List<number | string | Array<number | string | boolean> | boolean | bigint |
     Int32Array | undefined | null | object>();
     arktest.assertEQ(list.length, 0);
 }

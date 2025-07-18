@@ -23,7 +23,7 @@ interface ReadonlyHashSet<T> extends Iterable<T> {
      *
      * @returns number of unique elements in the HashSet
      */
-    get length(): int;
+    get length(): number;
 
     /**
      * Checks if a value is in the HashSet
@@ -68,8 +68,8 @@ export class HashSet<T> implements ReadonlyHashSet<T> {
      *
      * @returns number of unique elements in the HashSet
      */
-    get length(): int {
-        return this.buckets.length.toInt();
+    get length(): number {
+        return this.buckets.length;
     }
 
     /**

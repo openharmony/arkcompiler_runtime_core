@@ -27,7 +27,7 @@ function main(): int {
 }
 
 function testEntriesReturnIteratorByKeyValue() {
-    let newHashSet: HashSet<double | undefined> = new HashSet<double | undefined>();
+    let newHashSet: HashSet<number | undefined> = new HashSet<number | undefined>();
     newHashSet.add(1);
     newHashSet.add(2);
     newHashSet.add(3);

@@ -39,10 +39,10 @@ function main(): int {
 }
 
 function testForEachNoReference() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
-    let count: int = 0;
+    let count: number = 0;
     lightWeightSet.forEach(() => {
         count++;
     });
@@ -50,41 +50,41 @@ function testForEachNoReference() {
 }
 
 function testForEachValueReference() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     let flag = false;
-    lightWeightSet.forEach((value: double | string) => {
+    lightWeightSet.forEach((value: number | string) => {
         flag = lightWeightSet.getIndexOf("aa") == 0 && lightWeightSet.getIndexOf("bb") == 1;
         arktest.assertEQ(flag, true, "The lightWeightSet forEach should iterate over all values");
     });
 }
 
 function testForEachValueKeyReference() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     let flag = false;
-    lightWeightSet.forEach((value: double | string, key: double | string) => {
+    lightWeightSet.forEach((value: number | string, key: number | string) => {
         flag = lightWeightSet.getIndexOf("aa") == 0 && lightWeightSet.getIndexOf("bb") == 1;
         arktest.assertEQ(flag, true, "The lightWeightSet forEach should iterate over all values and keys");
     });
 }
 
 function testForEachThreeReferences() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     let flag = false;
-    lightWeightSet.forEach((value: double | string, key: double | string,
-        lightWeightSet: LightWeightSet<double | string>) => {
+    lightWeightSet.forEach((value: number | string, key: number | string,
+        lightWeightSet: LightWeightSet<number | string>) => {
         flag = lightWeightSet.getIndexOf("aa") == 0 && lightWeightSet.getIndexOf("bb") == 1;
         arktest.assertEQ(flag, true, "The lightWeightSet forEach should iterate over all values, keys, and the set itself");
     });
 }
 
 function testValuesIterator() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     let it = lightWeightSet.values();
@@ -94,13 +94,13 @@ function testValuesIterator() {
 }
 
 function testValuesIteratorEmptySet() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     let it = lightWeightSet.values();
     arktest.assertTrue(it.next().done, "The lightWeightSet values iterator.done should true for an empty set");
 }
 
 function testIterator() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     let it = lightWeightSet.$_iterator();
@@ -110,7 +110,7 @@ function testIterator() {
 }
 
 function testIteratorEmptySet() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     let it = lightWeightSet.$_iterator();
     arktest.assertTrue(it.next().done, "The lightWeightSet iterator.done should true for an empty set");
 }

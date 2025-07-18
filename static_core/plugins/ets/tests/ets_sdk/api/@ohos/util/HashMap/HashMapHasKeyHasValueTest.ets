@@ -29,7 +29,7 @@ function main(): int {
 }
 
 function testHasKeyHasValueWithExistingKeyAndValue() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("squirrel", 123);
     let result1 = hashMap.hasKey("squirrel");
     let result2 = hashMap.hasValue(123);
@@ -39,7 +39,7 @@ function testHasKeyHasValueWithExistingKeyAndValue() {
 }
 
 function testHasKeyHasValueWithNonExistingKeyAndValue() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("squirrel", 123);
     let result1 = hashMap.hasKey("sparrow");
     let result2 = hashMap.hasValue(456);
@@ -49,7 +49,7 @@ function testHasKeyHasValueWithNonExistingKeyAndValue() {
 }
 
 function testHasKeyHasValueWithEmptyHashMap() {
-    let hashMap: HashMap<string, double> = new HashMap<string, double>();
+    let hashMap: HashMap<string, number> = new HashMap<string, number>();
     let result1 = hashMap.hasKey("squirrel");
     let result2 = hashMap.hasValue(123);
     arktest.assertEQ(result1, false, "The hashMap not contains the specified key when the hashMap is empty");

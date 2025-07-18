@@ -27,7 +27,7 @@ function main(): int {
 }
 
 function testEntriesReturnIteratorByKeyValue() {
-    let lightWeightSet: LightWeightSet<double | undefined> = new LightWeightSet<double | undefined>();
+    let lightWeightSet: LightWeightSet<number | undefined> = new LightWeightSet<number | undefined>();
     lightWeightSet.add(123);
     lightWeightSet.add(456);
     lightWeightSet.add(333);
@@ -45,7 +45,7 @@ function testEntriesReturnIteratorByKeyValue() {
 }
 
 function testEntriesReturnIteratorByKeyValueWithEmptySet() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     let it = lightWeightSet.entries();
     arktest.assertTrue(it.next().done, "The lightWeightSet entries iterator.done should true for an empty set");
 }

@@ -35,22 +35,22 @@ function main() {
 }
 
 function initializeLinkedList<T>(linkedList: LinkedList<T>, sourceArray: Array<T>) {
-    for (let i: int = 0; i < sourceArray.length; i++) {
+    for (let i = 0; i < sourceArray.length; i++) {
         linkedList.add(sourceArray[i]);
     }
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber2: double | int = 2;
-    static readonly testNumber3: double | int = 3;
-    static readonly testNumber4: double | int = 4;
+    static readonly testNumber1: number = 1;
+    static readonly testNumber2: number = 2;
+    static readonly testNumber3: number = 3;
+    static readonly testNumber4: number = 4;
     static readonly forNumber1: Number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-    static readonly arrayForNumber1 = Array.from<double>(TestData.forNumber1);
+    static readonly arrayForNumber1 = Array.from<number>(TestData.forNumber1);
     static readonly forNumber2: Number[] = [1, 2, 3, 4, 5];
-    static readonly arrayForNumber2 = Array.from<double>(TestData.forNumber2);
+    static readonly arrayForNumber2 = Array.from<number>(TestData.forNumber2);
     static readonly forNumber4: Number[] = [1, 2, 2, 3, 3];
-    static readonly arrayForNumber4 = Array.from<double>(TestData.forNumber4);
+    static readonly arrayForNumber4 = Array.from<number>(TestData.forNumber4);
 }
 
 function testGetLastIndexOfUniqueElement() {
@@ -67,7 +67,7 @@ function testGetLastIndexOfInexistentElement() {
 }
 
 function testGetLastIndexOfAddRemoveByIndex() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber4);
     let result1 = linkedList.removeByIndex(linkedList.getLastIndexOf(TestData.testNumber2));
     let result2 = linkedList.removeByIndex(linkedList.getLastIndexOf(TestData.testNumber2));
@@ -78,7 +78,7 @@ function testGetLastIndexOfAddRemoveByIndex() {
 }
 
 function testGetLastIndexOfAddRemoveFirstAdd() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber2);
     let elem = linkedList.removeFirst();
     linkedList.add(elem!);
@@ -87,7 +87,7 @@ function testGetLastIndexOfAddRemoveFirstAdd() {
 }
 
 function testGetLastIndexOfAddRemoveLastAdd() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber2);
     let elem = linkedList.removeLast();
     linkedList.add(elem!);
@@ -109,13 +109,13 @@ function testGetIndexOfUniqueElement() {
 }
 
 function testGetIndexOfInexistentElement() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber4);
     arktest.assertEQ(linkedList.getIndexOf(TestData.testNumber4), -TestData.testNumber1, "First index of 4 should be -1");
 }
 
 function testGetIndexOfAddRemoveByIndex() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber4);
     let result1 = linkedList.removeByIndex(linkedList.getIndexOf(TestData.testNumber2));
     let result2 = linkedList.removeByIndex(linkedList.getIndexOf(TestData.testNumber2));
@@ -126,7 +126,7 @@ function testGetIndexOfAddRemoveByIndex() {
 }
 
 function testGetIndexOfAddRemoveFirstAdd() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber2);
     let elem = linkedList.removeFirst();
     linkedList.add(elem!);
@@ -140,7 +140,7 @@ function testGetIndexOfRepeatedElement() {
 }
 
 function initializeNumberLinkedList() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     linkedList.add(TestData.testNumber1);
     linkedList.add(TestData.testNumber2);
     linkedList.add(TestData.testNumber2);

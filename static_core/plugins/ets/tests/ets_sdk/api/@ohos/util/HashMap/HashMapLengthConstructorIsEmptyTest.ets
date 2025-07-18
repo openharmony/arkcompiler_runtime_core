@@ -33,20 +33,20 @@ function main(): int {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_LENGTH_0100
 function testLengthNewMap() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     arktest.assertEQ(hashMap.length, 0);
 }
 
 //Test cases ported from ArkTS 1.0:HASHMAP_LENGTH_0200
 function testLengthAfterSet() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     hashMap.set("li", 1);
     arktest.assertEQ(hashMap.length, 1);
 }
 
 //Test cases ported from ArkTS 1.0:HASHMAP_LENGTH_0300
 function testLengthAfterRemoveSetClear() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     hashMap.remove("zhang")
     hashMap.set("li", 1);
     hashMap.clear();
@@ -55,7 +55,7 @@ function testLengthAfterRemoveSetClear() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_CONSTRUCTOR_0100
 function testConstructorWithSimpleData() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     hashMap.set("li", 1);
     arktest.assertEQ(hashMap.length, 1);
     arktest.assertTrue(hashMap.hasKey('li'), "hasKey('li') should return true when the key exists");
@@ -79,20 +79,20 @@ function testConstructorWithCustomData() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_IS_EMPTY_0100
 function testIsEmptyNewMap() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     arktest.assertTrue(hashMap.isEmpty(), "A newly created HashMap should be empty");
 }
 
 //Test cases ported from ArkTS 1.0:HASHMAP_IS_EMPTY_0200
 function testIsEmptyAfterSet() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     hashMap.set("ji", 1)
     arktest.assertFalse(hashMap.isEmpty(), "HashMap should not be empty after adding an element");
 }
 
 //Test cases ported from ArkTS 1.0:HASHMAP_IS_EMPTY_0300
 function testIsEmptyAfterSetRemove() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     hashMap.set("ji", 1)
     hashMap.remove("ji")
     arktest.assertTrue(hashMap.isEmpty(), "HashMap should be empty after removing the only element");
@@ -100,7 +100,7 @@ function testIsEmptyAfterSetRemove() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_IS_EMPTY_0400
 function testIsEmptyAfterSetClear() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     hashMap.set("ji", 1)
     hashMap.clear();
     arktest.assertTrue(hashMap.isEmpty(), "HashMap should be empty after calling clear");

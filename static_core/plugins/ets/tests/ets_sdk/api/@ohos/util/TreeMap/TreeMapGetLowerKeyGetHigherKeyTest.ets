@@ -36,8 +36,8 @@ function main(): int {
 
 
 class MyObject extends Object {
-    size: double;
-    constructor(size: double) {
+    size: number;
+    constructor(size: number) {
         super();
         this.size = size;
     }
@@ -52,7 +52,7 @@ function equalObjects(first: MyObject, second: MyObject): boolean {
 
 function testGetLowerKeyAndHigherKeyValidKeys() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
@@ -71,7 +71,7 @@ function testGetLowerKeyAndHigherKeyValidKeys() {
 
 function testGetLowerKeyAndHigherKeyEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     let lower = treeMap.getLowerKey("bb");
@@ -83,7 +83,7 @@ function testGetLowerKeyAndHigherKeyEmptyTreeMap() {
 
 function testGetLowerKeyAndHigherKeyBoundaryData() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
@@ -98,7 +98,7 @@ function testGetLowerKeyAndHigherKeyBoundaryData() {
 
 function testGetLowerKeyAndHigherKeyNonExistingKey() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("bb", "456");
@@ -122,7 +122,7 @@ function testGetLowerKeyAndHigherKeyNonExistingKey() {
 
 function testGetLowerKeyAndHigherKeyEmptyStringKey() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     let lower = treeMap.getLowerKey("");
@@ -134,7 +134,7 @@ function testGetLowerKeyAndHigherKeyEmptyStringKey() {
 
 function testGetLowerKeyAndHigherKeyObjectKeys() {
     let treeMapo: TreeMap<MyObject, MyObject> =
-        new TreeMap<MyObject, MyObject>((firstValue: MyObject, secondValue: MyObject): double => {
+        new TreeMap<MyObject, MyObject>((firstValue: MyObject, secondValue: MyObject): number => {
             return secondValue.size - firstValue.size;
         });
     let obj: MyObject = new MyObject(1);
@@ -160,7 +160,7 @@ function testGetLowerKeyAndHigherKeyObjectKeys() {
 
 function testGetLowerKeyAndHigherKeyObjectKeysBoundaryData() {
     let treeMapo: TreeMap<MyObject, MyObject> =
-        new TreeMap<MyObject, MyObject>((firstValue: MyObject, secondValue: MyObject): double => {
+        new TreeMap<MyObject, MyObject>((firstValue: MyObject, secondValue: MyObject): number => {
             return secondValue.size - firstValue.size;
         });
     let obj: MyObject = new MyObject(1);

@@ -46,14 +46,14 @@ function main(): int {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_2400
 function testGetFirstKeyOnEmptyMap() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     let result = treeMap.getFirstKey();
     arktest.assertEQ(result, undefined);
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_2500
 function testGetFirstKeyOnMapWithSingleElement() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     treeMap.set("sparrow", 356);
     let result = treeMap.getFirstKey();
     arktest.assertEQ(result, 'sparrow');
@@ -62,7 +62,7 @@ function testGetFirstKeyOnMapWithSingleElement() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_2600
 function testGetFirstKeyOnMapWithMultipleElementsNaturalOrder() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     treeMap.set("DEF", 123);
     treeMap.set("ABC", 356);
     let result = treeMap.getFirstKey();
@@ -73,7 +73,7 @@ function testGetFirstKeyOnMapWithMultipleElementsNaturalOrder() {
 //Test cases ported from ArkTS 1.0:TREEMAP_2700
 function testGetFirstKeyWithCustomReverseComparator() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return firstValue.compareTo(secondValue);
         });
     treeMap.set("aa", "3");
@@ -88,7 +88,7 @@ function testGetFirstKeyWithCustomReverseComparator() {
 //Test cases ported from ArkTS 1.0:TREEMAP_2800
 function testGetFirstKeyWithCustomNaturalOrderComparator() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue);
         });
     treeMap.set("aa", "3");
@@ -102,14 +102,14 @@ function testGetFirstKeyWithCustomNaturalOrderComparator() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_2900
 function testGetLastKeyOnEmptyMap() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     let result = treeMap.getLastKey();
     arktest.assertEQ(result, undefined);
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_3000
 function testGetLastKeyOnMapWithSingleElement() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     treeMap.set("DEF", 123);
     let result = treeMap.getLastKey();
     arktest.assertEQ(result, 'DEF');
@@ -118,7 +118,7 @@ function testGetLastKeyOnMapWithSingleElement() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_3100
 function testGetLastKeyOnMapWithMultipleElementsNaturalOrder() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     treeMap.set("HIG", 456);
     treeMap.set("DEF", 123);
     let result = treeMap.getLastKey();
@@ -129,7 +129,7 @@ function testGetLastKeyOnMapWithMultipleElementsNaturalOrder() {
 //Test cases ported from ArkTS 1.0:TREEMAP_3200
 function testGetLastKeyWithCustomNaturalOrderComparator() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue);
         });
     treeMap.set("HIG", "456");
@@ -144,7 +144,7 @@ function testGetLastKeyWithCustomNaturalOrderComparator() {
 //Test cases ported from ArkTS 1.0:TREEMAP_3300
 function testGetLastKeyWithCustomComparatorClearRepopulate() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue);
         });
     treeMap.set("HIG", "456");
@@ -165,7 +165,7 @@ function testGetLastKeyWithCustomComparatorClearRepopulate() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_4800
 function testRemoveNonExistingEmptyStringKeyOnNonEmptyMap() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     treeMap.set("squirrel", 123);
     treeMap.set("sparrow", 456);
     let result = treeMap.remove("");
@@ -174,14 +174,14 @@ function testRemoveNonExistingEmptyStringKeyOnNonEmptyMap() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_5100
 function testRemoveNonExistingKeyOnEmptyMap() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     let result = treeMap.remove('key');
     arktest.assertEQ(result, undefined);
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_5200
 function testRemoveExistingKey() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     treeMap.set("squirrel", 123);
     treeMap.set("sparrow", 456);
     let result = treeMap.remove("sparrow");
@@ -190,7 +190,7 @@ function testRemoveExistingKey() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_5300
 function testRemoveNonExistingKeyOnNonEmptyMap() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     treeMap.set("squirrel", 123);
     treeMap.set("sparrow", 456);
     let result = treeMap.remove("tiger");

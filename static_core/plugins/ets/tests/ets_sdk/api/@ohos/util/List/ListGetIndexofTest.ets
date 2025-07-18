@@ -32,7 +32,7 @@ function main() {
 
 // Test cases ported from ArkTS 1.0: LIST_GETLASTINDEXOF_0100
 function testGetLastIndexOfWithDuplicates() {
-    let list = new List<double>();
+    let list = new List<number>();
     list.add(1);
     list.add(2);
     let index1 = list.getLastIndexOf(2);
@@ -46,7 +46,7 @@ function testGetLastIndexOfWithDuplicates() {
 
 // Test cases ported from ArkTS 1.0: LIST_GETLASTINDEXOF_0200
 function testGetLastIndexOfWithAddRemove() {
-    let list = new List<double>();
+    let list = new List<number>();
     list.add(1);
     list.add(2);
     list.add(2);
@@ -62,7 +62,7 @@ function testGetLastIndexOfWithAddRemove() {
 
 // Test cases ported from ArkTS 1.0: LIST_GETLASTINDEXOF_0300
 function testGetLastIndexOfWithReAdd() {
-    let list = new List<double>();
+    let list = new List<number>();
     list.add(1);
     list.add(2);
     list.add(3);
@@ -76,13 +76,13 @@ function testGetLastIndexOfWithReAdd() {
 
 // Test cases ported from ArkTS 1.0: LIST_GETLASTINDEXOF_0400
 function testGetLastIndexOfWithRemoveReAdd() {
-    let list = new List<double>();
+    let list = new List<number>();
     list.add(1);
     list.add(2);
     list.add(3);
     list.add(4);
     list.add(5);
-    let param: double = 5;
+    let param: number = 5;
     list.remove(param);
     list.add(param);
     arktest.assertEQ(list.getLastIndexOf(param), list.length - 1);
@@ -90,7 +90,7 @@ function testGetLastIndexOfWithRemoveReAdd() {
 
 // Test cases ported from ArkTS 1.0: LIST_GETINDEXOF_0100
 function testGetIndexOfWithDuplicates() {
-    let list = new List<double>();
+    let list = new List<number>();
     list.add(1);
     list.add(2);
     let index1 = list.getIndexOf(2);
@@ -104,7 +104,7 @@ function testGetIndexOfWithDuplicates() {
 
 // Test cases ported from ArkTS 1.0: LIST_GETINDEXOF_0200
 function testGetIndexOfWithAddRemove() {
-    let list = new List<double>();
+    let list = new List<number>();
     list.add(1);
     list.add(2);
     list.add(2);
@@ -120,13 +120,13 @@ function testGetIndexOfWithAddRemove() {
 
 // Test cases ported from ArkTS 1.0: LIST_GETINDEXOF_0300
 function testGetIndexOfWithRemoveReAdd() {
-    let list = new List<double>();
+    let list = new List<number>();
     list.add(1);
     list.add(2);
     list.add(3);
     list.add(4);
     list.add(5);
-    let param: double = 5;
+    let param: number = 5;
     list.remove(param);
     list.add(param);
     arktest.assertEQ(list.getIndexOf(param), list.length - 1);
@@ -134,7 +134,7 @@ function testGetIndexOfWithRemoveReAdd() {
 
 // Test cases ported from ArkTS 1.0: LIST_GETINDEXOF_0400
 function testGetIndexOfWithReAdd() {
-    let list = new List<double>();
+    let list = new List<number>();
     list.add(1);
     list.add(2);
     list.add(3);

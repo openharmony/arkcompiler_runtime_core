@@ -60,15 +60,15 @@ function testBasicFuncAndStateCheck() {
         arktest.assertEQ(newMap.get(keyHashMap), valueHashMap);
     });
 
-    let doublemap = new HashMap<double, double>();
-    for (let i: int = 0; i < 10; i++) {
+    let doublemap = new HashMap<number, number>();
+    for (let i = 0; i < 10; i++) {
         doublemap.set(i, i);
     }
     let ss = Math.floor(Math.random() * 10);
     arktest.assertTrue(doublemap.hasKey(ss), "Expected map to have key ss");
 
-    let myTest = new HashMap<double, double>();
-    myTest.set(Math.floor(1.4).toInt(), 2);
+    let myTest = new HashMap<number, number>();
+    myTest.set(Math.floor(1.4), 2);
     arktest.assertTrue(myTest.hasKey(1), "Expected the HashMap to contain the key 1 after setting it");
 
     let dmap = new HashMap<string, string>();
@@ -84,7 +84,7 @@ function testBasicFuncAndStateCheck() {
 }
 
 function testCollisionAndForeachSummation() {
-    let collisionMap = new HashMap<double, double>();
+    let collisionMap = new HashMap<number, number>();
     let count = 0;
 
     collisionMap.set(1224, 1);
@@ -118,7 +118,7 @@ function testEntriesAndSymbolIterator() {
     arktest.assertEQ(iteratorEntries.next().value, undefined);
 
     let arr = ["aa", "bb", "cc"];
-    let i: int = 0;
+    let i = 0;
     for (const item of map) {
         arktest.assertEQ(item[1], arr[i]);
         i++;

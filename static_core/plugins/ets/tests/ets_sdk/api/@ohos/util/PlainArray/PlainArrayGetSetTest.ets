@@ -16,7 +16,7 @@
 import { PlainArray } from "@ohos.util.PlainArray";
 import { BusinessError } from "@ohos.base";
 
-const OutOfBoundsErrorCodeId: int = 10200001;
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
     const suite = new arktest.ArkTestsuite("PlainArray API tests");
@@ -97,7 +97,7 @@ function testGetValueAtAndIndexOfValueConsistency() {
 
 // Test cases ported from ArkTS 1.0: PLAINARRAY_SETVALUEAT_0100
 function testSetValueAtValidIndexMixedTypes() {
-    let plainArray = new PlainArray<string | double>();
+    let plainArray = new PlainArray<string | number>();
     plainArray.add(1, "squirrel");
     plainArray.add(2, "sparrow");
     plainArray.setValueAt(1, 3546);
@@ -106,7 +106,7 @@ function testSetValueAtValidIndexMixedTypes() {
 
 // Test cases ported from ArkTS 1.0: PLAINARRAY_SETVALUEAT_0200
 function testSetValueAtOutOfRangeIndex() {
-    let plainArray = new PlainArray<string | double>();
+    let plainArray = new PlainArray<string | number>();
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message == `Container is empty`) &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
@@ -116,7 +116,7 @@ function testSetValueAtOutOfRangeIndex() {
 
 // Test cases ported from ArkTS 1.0: PLAINARRAY_SETVALUEAT_0300
 function testSetValueAtBoundaryValues() {
-    let plainArray = new PlainArray<string | double>();
+    let plainArray = new PlainArray<string | number>();
     plainArray.add(1, "squirrel");
     plainArray.add(2, "sparrow");
     plainArray.add(3, "sparrow");

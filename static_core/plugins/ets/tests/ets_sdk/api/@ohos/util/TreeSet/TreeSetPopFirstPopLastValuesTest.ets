@@ -62,7 +62,7 @@ function testPopFirstWithMultipleElementsNaturalOrder() {
 
 //Test cases ported from ArkTS 1.0:TREESET_5800
 function testPopFirstWithCustomReverseComparator() {
-    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string, secondValue: string): double => {
+    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string, secondValue: string): number => {
         return firstValue.compareTo(secondValue)
     });
     treeSet.add("b");
@@ -127,7 +127,7 @@ function testPopLastWithMultipleElements() {
 
 //Test cases ported from ArkTS 1.0:TREESET_6400
 function testPopLastWithCustomReverseComparator() {
-    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string, secondValue: string): double => {
+    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string, secondValue: string): number => {
         return firstValue.compareTo(secondValue)
     });
     treeSet.add("b");
@@ -198,7 +198,7 @@ function testValuesWithMultipleElements() {
 
 //Test cases ported from ArkTS 1.0:TREESET_7300
 function testValuesWithCustomReverseComparator() {
-    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string, secondValue: string): double => {
+    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string, secondValue: string): number => {
         return firstValue.compareTo(secondValue)
     });
     treeSet.add('AAA');

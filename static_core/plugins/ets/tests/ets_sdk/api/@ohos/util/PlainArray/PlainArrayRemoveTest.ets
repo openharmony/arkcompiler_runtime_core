@@ -16,7 +16,7 @@
 import { PlainArray } from "@ohos.util.PlainArray";
 import { BusinessError } from "@ohos.base";
 
-const OutOfBoundsErrorCodeId: int = 10200001;
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
     const suite = new arktest.ArkTestsuite("PlainArray API tests");
@@ -94,7 +94,7 @@ function testRemoveRangeFromWithMathFloorSize() {
     let plainArray = new PlainArray<string>();
     plainArray.add(1, "squirrel");
     plainArray.add(2, "sparrow");
-    let result = plainArray.removeRangeFrom(1, Math.floor(7.5).toInt());
+    let result = plainArray.removeRangeFrom(1, Math.floor(7.5));
     arktest.assertEQ(result, 1);
 }
 

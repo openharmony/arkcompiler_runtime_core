@@ -39,15 +39,15 @@ function main(): int {
 
 class Temp {
     name: string = "";
-    age: double = 0;
+    age: number = 0;
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber3: double | int = 3;
-    static readonly testNumber5: double | int = 5;
-    static readonly testNumber6: double | int = 6;
-    static readonly testNumber31: double = 31;
+    static readonly testNumber1: number = 1;
+    static readonly testNumber3: number = 3;
+    static readonly testNumber5: number = 5;
+    static readonly testNumber6: number = 6;
+    static readonly testNumber31: number = 31;
     static readonly testObject1: Temp = { name: "Dylon", age: 13 };
     static readonly testString1: string = "string";
     static readonly testString2: string = "a";
@@ -57,14 +57,14 @@ class TestData {
 }
 
 function testDequeHasElement() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     initializeDeque(deque, TestData.forNumber);
     let result: boolean = deque.has(TestData.testNumber3);
     arktest.assertTrue(result, "Deque should contain the element");
 }
 
 function testDequeHasInexistentElement() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     initializeDeque(deque, TestData.forNumber);
     let result: boolean = deque.has(TestData.testNumber31);
     arktest.assertFalse(result, "Deque should not contain the element");
@@ -83,22 +83,22 @@ function testDequeHasObjectElement() {
 }
 
 function testDequePopFirstFromEmpty() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     arktest.assertEQ(deque.length, 0, "Initial deque length should be 0");
     arktest.assertEQ(deque.popFirst(), undefined, "Pop first from empty deque should return undefined");
 }
 
 function testDequePopFirstElement() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     deque.insertEnd(TestData.testNumber1);
-    for (let i: int = TestData.testNumber1; i < TestData.testNumber6; i++) {
+    for (let i: number = TestData.testNumber1; i < TestData.testNumber6; i++) {
         deque.insertEnd(TestData.testNumber3);
     }
     arktest.assertEQ(deque.length, TestData.testNumber6, "Deque length should be 6 after inserting six elements");
     arktest.assertEQ(deque.popFirst(), TestData.testNumber1, "Pop first from non-empty deque should return first element");
     arktest.assertEQ(deque.length, TestData.testNumber5, "Pop first from non-empty deque should update length");
     let countForEach = 0;
-    deque.forEach((value: double) => {
+    deque.forEach((value: number) => {
         arktest.assertEQ(value, TestData.testNumber3, "Element should match");
         countForEach++;
     });
@@ -106,14 +106,14 @@ function testDequePopFirstElement() {
 }
 
 function testDequePopLastFromEmpty() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     arktest.assertEQ(deque.length, 0, "Initial deque length should be 0");
     arktest.assertEQ(deque.popLast(), undefined, "Pop last from empty deque should return undefined");
 }
 
 function testDequePopLastElement() {
-    let deque = new Deque<double>();
-    for (let i: int = TestData.testNumber1; i < TestData.testNumber6; i++) {
+    let deque = new Deque<number>();
+    for (let i: number = TestData.testNumber1; i < TestData.testNumber6; i++) {
         deque.insertEnd(TestData.testNumber3);
     }
     deque.insertEnd(TestData.testNumber1);
@@ -121,7 +121,7 @@ function testDequePopLastElement() {
     arktest.assertEQ(deque.popLast(), TestData.testNumber1, "Pop last from non-empty deque should return last element");
     arktest.assertEQ(deque.length, TestData.testNumber5, "Pop last from non-empty deque should update length");
     let countForEach = 0;
-    deque.forEach((value: double) => {
+    deque.forEach((value: number) => {
         arktest.assertEQ(value, TestData.testNumber3, "Element should match");
         countForEach++;
     });
@@ -129,9 +129,9 @@ function testDequePopLastElement() {
 }
 
 function testDequeForEachNoParam() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     initializeDeque(deque, TestData.forNumber);
-    let forEachCount: int = 0;
+    let forEachCount: number = 0;
     deque.forEach(() => {
         forEachCount++;
     });
@@ -139,11 +139,11 @@ function testDequeForEachNoParam() {
 }
 
 function testDequeForEachWithValue() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     initializeDeque(deque, TestData.forNumber);
-    let forEachCount: int = 0;
-    let forEachFlag: double = 0;
-    deque.forEach((value: double) => {
+    let forEachCount: number = 0;
+    let forEachFlag: number = 0;
+    deque.forEach((value: number) => {
         if (value != deque.popFirst()) {
             forEachFlag = TestData.testNumber1;
         }
@@ -154,11 +154,11 @@ function testDequeForEachWithValue() {
 }
 
 function testDequeForEachWithValueAndIndex() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     initializeDeque(deque, TestData.forNumber);
-    let forEachCount: int = 0;
-    let forEachFlag: double = 0;
-    deque.forEach((value: double, index: int) => {
+    let forEachCount: number = 0;
+    let forEachFlag: number = 0;
+    deque.forEach((value: number, index: number) => {
         if (value != deque.popFirst() || index != forEachCount) {
             forEachFlag = TestData.testNumber1;
         }
@@ -169,11 +169,11 @@ function testDequeForEachWithValueAndIndex() {
 }
 
 function testDequeForEachWithValueIndexAndTempArrayList() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     initializeDeque(deque, TestData.forNumber);
-    let forEachCount: int = 0;
-    let forEachFlag: double = 0;
-    deque.forEach((value: double, index: int, tempDeque: Deque<double>) => {
+    let forEachCount: number = 0;
+    let forEachFlag: number = 0;
+    deque.forEach((value: number, index: number, tempDeque: Deque<number>) => {
         arktest.assertEQ(deque, tempDeque, "TempDeque should be this");
         let elem1 = tempDeque.getFirst();
         let elem2 = deque.popFirst();
@@ -187,10 +187,10 @@ function testDequeForEachWithValueIndexAndTempArrayList() {
 }
 
 function testDequeForEachChangeElements() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     initializeDeque(deque, TestData.forNumber);
 
-    deque.forEach((value: double) => {
+    deque.forEach((value: number) => {
         value = 0;
     });
     for (let i: int = 0; i < TestData.forNumber.length; i++) {
@@ -199,7 +199,7 @@ function testDequeForEachChangeElements() {
 }
 
 function testDequeJSONStringify() {
-    let deque: Deque<double | string | object> = new Deque<double | string | object>();
+    let deque: Deque<number | string | object> = new Deque<number | string | object>();
     deque.insertEnd(TestData.testObject1);
     deque.insertEnd(TestData.testString2);
     deque.insertEnd(TestData.testNumber1);
@@ -208,7 +208,7 @@ function testDequeJSONStringify() {
 }
 
 function initializeDeque<T>(deque: Deque<T>, sourceArray: T[]) {
-    for (let i: int = 0; i < sourceArray.length; i++) {
+    for (let i = 0; i < sourceArray.length; i++) {
         deque.insertEnd(sourceArray[i]);
     }
 }

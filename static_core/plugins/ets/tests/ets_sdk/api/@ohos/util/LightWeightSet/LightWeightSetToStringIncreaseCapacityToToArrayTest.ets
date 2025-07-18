@@ -39,7 +39,7 @@ function main(): int {
 }
 
 function testToStringOutputData() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     let result = lightWeightSet.toString();
@@ -48,14 +48,14 @@ function testToStringOutputData() {
 }
 
 function testToStringEmptySet() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     let result = lightWeightSet.toString();
     arktest.assertEQ(result, "", "The lightWeightSet should return a string representation of the set");
     arktest.assertEQ(lightWeightSet.length, 0, "The lightWeightSet length should be 0");
 }
 
 function testToStringLargeData() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     const MY_MAX = 1024000;
     lightWeightSet.add(MY_MAX);
     let result = lightWeightSet.toString();
@@ -64,7 +64,7 @@ function testToStringLargeData() {
 }
 
 function testIncreaseCapacityTo() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     arktest.expectNoThrow(() => { lightWeightSet.increaseCapacityTo(16); });
@@ -72,28 +72,28 @@ function testIncreaseCapacityTo() {
 }
 
 function testIncreaseCapacityToLessThanLength() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     arktest.expectNoThrow(() => { lightWeightSet.increaseCapacityTo(1); });
 }
 
 function testIncreaseCapacityToLeftFloat() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
-    arktest.expectNoThrow(() => { lightWeightSet.increaseCapacityTo(Math.floor(1.2).toInt()); });
+    arktest.expectNoThrow(() => { lightWeightSet.increaseCapacityTo(Math.floor(1.2)); });
 }
 
 function testIncreaseCapacityToRightFloat() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
-    arktest.expectNoThrow(() => { lightWeightSet.increaseCapacityTo(Math.floor(3.8).toInt()); });
+    arktest.expectNoThrow(() => { lightWeightSet.increaseCapacityTo(Math.floor(3.8)); });
 }
 
 function testToArray() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     let test1 = lightWeightSet.toArray()

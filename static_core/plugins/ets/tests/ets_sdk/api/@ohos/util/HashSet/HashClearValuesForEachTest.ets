@@ -37,14 +37,14 @@ function main(): int {
 
 //Test cases ported from ArkTS 1.0:HASHSET_CLEAR_0100
 function testClearEmptySet() {
-    const hashSet = new HashSet<double>();
+    const hashSet = new HashSet<number>();
     hashSet.clear();
     arktest.assertEQ(hashSet.length, 0);
 }
 
 //Test cases ported from ArkTS 1.0:HASHSET_CLEAR_0200
 function testClearNonEmptySet() {
-    const hashSet = new HashSet<double>();
+    const hashSet = new HashSet<number>();
     hashSet.add(1);
     hashSet.clear();
     arktest.assertEQ(hashSet.length, 0);
@@ -52,7 +52,7 @@ function testClearNonEmptySet() {
 
 //Test cases ported from ArkTS 1.0:HASHSET_CLEAR_0300
 function testClearThenAdd() {
-    const hashSet = new HashSet<double>();
+    const hashSet = new HashSet<number>();
     hashSet.add(1);
     hashSet.clear();
     hashSet.add(1);
@@ -61,7 +61,7 @@ function testClearThenAdd() {
 
 //Test cases ported from ArkTS 1.0:HASHSET_VALUES_0100
 function testValuesEmptySet() {
-    const hashSet = new HashSet<double>();
+    const hashSet = new HashSet<number>();
     let values = hashSet.values();
     let temp = values.next();
     arktest.assertTrue(temp.done, "Expected iterator to be done for an empty HashSet");
@@ -69,7 +69,7 @@ function testValuesEmptySet() {
 
 //Test cases ported from ArkTS 1.0:HASHSET_VALUES_0200
 function testValuesNonEmptySet() {
-    const hashSet = new HashSet<double>();
+    const hashSet = new HashSet<number>();
     hashSet.add(1);
     hashSet.add(2);
     hashSet.add(3);
@@ -86,20 +86,20 @@ function testValuesNonEmptySet() {
 
 //Test cases ported from ArkTS 1.0:HASHSET_FOREACH_0100
 function testForEachEmptySet() {
-    const hashSet = new HashSet<double>();
-    hashSet.forEach((value?: double, key?: double) => {
+    const hashSet = new HashSet<number>();
+    hashSet.forEach((value?: number, key?: number) => {
         arktest.assertEQ(hashSet.length, 0);
     });
 }
 
 //Test cases ported from ArkTS 1.0:HASHSET_FOREACH_0200
 function testForEachNonEmptySet() {
-    const hashSet = new HashSet<double>();
+    const hashSet = new HashSet<number>();
     hashSet.add(1);
     hashSet.add(2);
     hashSet.add(3);
     let index = 1;
-    hashSet.forEach((value?: double) => {
+    hashSet.forEach((value?: number) => {
         arktest.assertEQ(value, index);
         index++;
     });
@@ -108,9 +108,9 @@ function testForEachNonEmptySet() {
 
 //Test cases ported from ArkTS 1.0:HASHSET_FOREACH_0300
 function testForEachAddInsideCallback() {
-    const hashSet = new HashSet<double>();
+    const hashSet = new HashSet<number>();
     hashSet.add(1);
-    hashSet.forEach((value?: double) => {
+    hashSet.forEach((value?: number) => {
         hashSet.add(2);
         arktest.assertEQ(hashSet.length, 2);
     });
@@ -118,9 +118,9 @@ function testForEachAddInsideCallback() {
 
 //Test cases ported from ArkTS 1.0:HASHSET_FOREACH_0400
 function testForEachClearInsideCallback() {
-    const hashSet = new HashSet<double>();
+    const hashSet = new HashSet<number>();
     hashSet.add(1);
-    hashSet.forEach((value?: double) => {
+    hashSet.forEach((value?: number) => {
         hashSet.clear();
         arktest.assertEQ(hashSet.length, 0);
     });
@@ -128,11 +128,11 @@ function testForEachClearInsideCallback() {
 
 //Test cases ported from ArkTS 1.0:HASHSET_FOREACH_0500
 function testForEachClearSetInsideCallbackAnotherSetUnchanged() {
-    const hashSet = new HashSet<double>();
-    const hashSetNew = new HashSet<double>();
+    const hashSet = new HashSet<number>();
+    const hashSetNew = new HashSet<number>();
     hashSetNew.add(1);
     hashSet.add(1);
-    hashSet.forEach((value?: double) => {
+    hashSet.forEach((value?: number) => {
         hashSet.clear();
         arktest.assertEQ(hashSet.length, 0);
     });
@@ -142,9 +142,9 @@ function testForEachClearSetInsideCallbackAnotherSetUnchanged() {
 
 //Test cases ported from ArkTS 1.0:HASHSET_FOREACH_0600
 function testForEachAllParamsClearInside() {
-    const hashSet = new HashSet<double>();
+    const hashSet = new HashSet<number>();
     hashSet.add(1);
-    hashSet.forEach((value: double, index, hashSet: HashSet<double>) => {
+    hashSet.forEach((value: number, index, hashSet: HashSet<number>) => {
         hashSet.clear();
         arktest.assertEQ(hashSet.length, 0);
     })

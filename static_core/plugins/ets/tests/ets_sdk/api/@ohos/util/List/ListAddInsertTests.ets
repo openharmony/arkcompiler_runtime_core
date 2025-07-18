@@ -16,12 +16,12 @@
 import {List} from '@ohos.util.List';
 import {BusinessError} from "@ohos.base";
 
-const OutOfBoundsErrorCodeId: int = 10200001;
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 class Temp1 {
-    age: double = 0
+    age: number = 0
     name: string = ""
-    constructor(age: double, name: string) {
+    constructor(age: number, name: string) {
         this.age = age;
         this.name = name;
     }
@@ -45,28 +45,28 @@ function main() {
 }
 
 class Temp {
-    age: double = 0;
+    age: number = 0;
     name: string = "";
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber2: double | int = 2;
-    static readonly testNumber3: double | int = 3;
-    static readonly testNumber4: double | int = 4;
-    static readonly testNumber5: double | int = 5;
-    static readonly testNumber6: double | int = 6;
-    static readonly testNumber7: double | int = 7;
-    static readonly testNumber8: double | int = 8;
+    static readonly testNumber1: number = 1;
+    static readonly testNumber2: number = 2;
+    static readonly testNumber3: number = 3;
+    static readonly testNumber4: number = 4;
+    static readonly testNumber5: number = 5;
+    static readonly testNumber6: number = 6;
+    static readonly testNumber7: number = 7;
+    static readonly testNumber8: number = 8;
     static readonly testString1: string = "string";
     static readonly testString2: string = "!\"#$%'()+,-./:;<=>?@[\\]^_`{|}~";
     static readonly testObject1: Temp = { age: 10, name: "zhang" };
     static readonly forNumber1: Number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-    static readonly arrayForNumber1 = Array.from<double>(TestData.forNumber1);
+    static readonly arrayForNumber1 = Array.from<number>(TestData.forNumber1);
 }
 
 function testAddMultipleTypes() {
-    let list = new List<double | string | boolean | null | object | undefined>();
+    let list = new List<number | string | boolean | null | object | undefined>();
     list.add(TestData.testNumber1);
     list.add(TestData.testString1);
     list.add(true);
@@ -91,7 +91,7 @@ function testAddSpecialCharacters() {
 }
 
 function testInsertWithinRange() {
-    let list = new List<double | string | boolean | null | object | undefined>();
+    let list = new List<number | string | boolean | null | object | undefined>();
     list.add(TestData.testNumber1);
     list.add(TestData.testNumber2);
     list.insert(TestData.testNumber1, TestData.testNumber1);
@@ -113,21 +113,21 @@ function testInsertWithinRange() {
 }
 
 function testInsertAtBoundary() {
-    let list = new List<double>();
+    let list = new List<number>();
     initializeList(list, TestData.arrayForNumber1);
-    list.insert(0, TestData.arrayForNumber1.length.toInt());
+    list.insert(0, TestData.arrayForNumber1.length);
     list.insert(0, 0);
 
-    for (let i: int = 0; i < TestData.arrayForNumber1.length.toInt(); i++) {
+    for (let i: number = 0; i < TestData.arrayForNumber1.length; i++) {
         arktest.assertEQ(list.get(i + TestData.testNumber1), TestData.arrayForNumber1[i], "Element should match");
     }
     arktest.assertEQ(list.get(0), 0, "Element should be 0");
     arktest.assertEQ(list.get(list.length - TestData.testNumber1), 0, "Element should be 0");
-    arktest.assertEQ(list.length, TestData.arrayForNumber1.length.toInt() + TestData.testNumber2, "List length should + 2");
+    arktest.assertEQ(list.length, TestData.arrayForNumber1.length + TestData.testNumber2, "List length should + 2");
 }
 
 function testInsertGetIndexOfRemoveByIndexHas() {
-    let list = new List<double | string>();
+    let list = new List<number | string>();
     list.insert(TestData.testString2, 0);
     let index = list.getIndexOf(TestData.testString2);
     arktest.assertEQ(index, 0, "The index of the first element should be 0");
@@ -136,7 +136,7 @@ function testInsertGetIndexOfRemoveByIndexHas() {
 }
 
 function testInsertIndexGreaterThanLength() {
-    let list = new List<double>();
+    let list = new List<number>();
     initializeList(list, TestData.arrayForNumber1);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
@@ -148,7 +148,7 @@ function testInsertIndexGreaterThanLength() {
 }
 
 function testInsertIndexLessThanZero() {
-    let list = new List<double>();
+    let list = new List<number>();
     initializeList(list, TestData.arrayForNumber1);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
@@ -159,15 +159,15 @@ function testInsertIndexLessThanZero() {
     arktest.expectThrow(() => {list.insert(TestData.testNumber6, -TestData.testNumber1)}, exceptionCheck);
 }
 
-function initializeList(list: List<double>, sourceArray: Array<double>) {
-    for (let i: int = 0; i < sourceArray.length; i++) {
+function initializeList(list: List<number>, sourceArray: Array<number>) {
+    for (let i = 0; i < sourceArray.length; i++) {
         list.add(sourceArray[i]);
     }
 }
 
 // Test cases ported from ArkTS 1.0: LIST_ADD_0100
 function testListAddVariousDataTypes() {
-    let list = new List<double | string | boolean | undefined | null | Object>();
+    let list = new List<number | string | boolean | undefined | null | Object>();
     list.add("zhang san");
     list.add(1);
     let param: Temp1 = new Temp1(10, "zhang");
@@ -178,7 +178,7 @@ function testListAddVariousDataTypes() {
     list.insert("insert", 0);
     list.add([0, 1, 2, 4]);
     list.removeByIndex(0);
-    for (let i: int = 0; i < 4; i++) {
+    for (let i = 0; i < 4; i++) {
         arktest.assertEQ((list.get(6)! as Array<int>)[i], [0, 1, 2, 4][i]);
     }
     arktest.assertEQ(list.get(5), true);

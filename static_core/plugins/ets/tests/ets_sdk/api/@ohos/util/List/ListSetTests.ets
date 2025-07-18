@@ -16,14 +16,14 @@
 import {List} from '@ohos.util.List';
 
 class Temp {
-    age: double = 0
+    age: number = 0
     name: string = ""
 }
 
 class Temp1 {
-    age: double = 0
+    age: number = 0
     name: string = ""
-    constructor(age: double, name: string) {
+    constructor(age: number, name: string) {
         this.age = age;
         this.name = name;
     }
@@ -44,7 +44,7 @@ function main() {
 
 // Test cases ported from ArkTS 1.0: LIST_SET_0100
 function testSetAndUpdateData() {
-    let list = new List<double | string | boolean | undefined | null | Object>();
+    let list = new List<number | string | boolean | undefined | null | Object>();
     list.add("zhang san");
     list.add(1);
     let param: Temp = {
@@ -55,14 +55,14 @@ function testSetAndUpdateData() {
     list.add(null);
     list.add(true);
     list.add([0, 1, 2, 4]);
-    list.forEach((value, index: int) => {
+    list.forEach((value, index: number) => {
         arktest.assertNE(list.set(index, "li si"), undefined);
     })
 }
 
 // Test cases ported from ArkTS 1.0: LIST_SET_0200
 function testSetWithGetIndexOfAndRemoveByIndex() {
-    let list = new List<double | string | boolean | undefined | null | Object>();
+    let list = new List<number | string | boolean | undefined | null | Object>();
     list.add("zhang san");
     list.add(1);
     let param: Temp = {
@@ -81,7 +81,7 @@ function testSetWithGetIndexOfAndRemoveByIndex() {
 
 // Test cases ported from ArkTS 1.0: LIST_SET_0300
 function testSetWithGetIndexOfAndHas() {
-    let list = new List<double | string | boolean | undefined | null | Object>();
+    let list = new List<number | string | boolean | undefined | null | Object>();
     list.add("zhang san");
     list.add(1);
     let param: Temp = {
@@ -99,7 +99,7 @@ function testSetWithGetIndexOfAndHas() {
 
 // Test cases ported from ArkTS 1.0: LIST_SET_0400
 function testSetAndConvertToArray() {
-    let list = new List<double | string | boolean | undefined | null | Object>();
+    let list = new List<number | string | boolean | undefined | null | Object>();
     list.add("zhang san");
     list.add(1);
     let param: Temp1 = new Temp1(10, "zhang");
@@ -119,7 +119,7 @@ function testSetAndConvertToArray() {
 
 // Test cases ported from ArkTS 1.0: LIST_SET_0500
 function testSetAndGetFirst() {
-    let list = new List<double | string | boolean | undefined | null | Object>();
+    let list = new List<number | string | boolean | undefined | null | Object>();
     list.add("zhang san");
     list.add(1);
     let param: Temp1 = new Temp1(10, "zhang");
@@ -135,7 +135,7 @@ function testSetAndGetFirst() {
 
 // Test cases ported from ArkTS 1.0: LIST_SET_0600
 function testSetAndGetLast() {
-    let list = new List<double | string | boolean | undefined | null | Object>();
+    let list = new List<number | string | boolean | undefined | null | Object>();
     list.add("zhang san");
     list.add(1);
     let param: Temp1 = new Temp1(10, "zhang");

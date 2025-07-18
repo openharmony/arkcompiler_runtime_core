@@ -30,7 +30,7 @@ function main(): int {
 }
 
 function testRemoveAtValidIndex() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     lightWeightSet.add("cc");
@@ -40,7 +40,7 @@ function testRemoveAtValidIndex() {
 }
 
 function testRemoveAtBoundaryIndex() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     lightWeightSet.add("cc");
@@ -50,7 +50,7 @@ function testRemoveAtBoundaryIndex() {
 }
 
 function testRemoveAtLeftExceededIndex() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     let result = lightWeightSet.removeAt(-2);
@@ -59,7 +59,7 @@ function testRemoveAtLeftExceededIndex() {
 }
 
 function testRemoveAtRightExceededIndex() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     let result = lightWeightSet.removeAt(2);
@@ -68,26 +68,26 @@ function testRemoveAtRightExceededIndex() {
 }
 
 function testRemoveAtIndexOfEmptySet() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     let result = lightWeightSet.removeAt(2);
     arktest.assertFalse(result, "The lightWeightSet should not remove with empty lightWeightSet");
     arktest.assertEQ(lightWeightSet.length, 0);
 }
 
 function testRemoveAtLeftFloatIndex() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
-    let result = lightWeightSet.removeAt(Math.floor(1.2).toInt());
+    let result = lightWeightSet.removeAt(Math.floor(1.2));
     arktest.assertEQ(result, true, "The lightWeightSet should remove the value at the floored index");
     arktest.assertEQ(lightWeightSet.length, 1, "The lightWeightSet length should be 1");
 }
 
 function testRemoveAtRightFloatIndex() {
-    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
-    let result = lightWeightSet.removeAt(Math.floor(1.8).toInt());
+    let result = lightWeightSet.removeAt(Math.floor(1.8));
     arktest.assertEQ(result, true, "The lightWeightSet should remove the value at the floored index");
     arktest.assertEQ(lightWeightSet.length, 1, "The lightWeightSet length should be 1");
 }

@@ -15,11 +15,11 @@
 
 import {BusinessError} from "@ohos.base";
 
-const TypeErrorCodeId: int = 401;
-const OutOfBoundsErrorCodeId: int = 10200001;
-const EmptyContainerErrorCodeId: int = 10200010;
+const TypeErrorCodeId: number = 401;
+const OutOfBoundsErrorCodeId: number = 10200001;
+const EmptyContainerErrorCodeId: number = 10200010;
 
-export type LinkedListForEachCb<T> = (value: T, index: int, linkedList: LinkedList<T>) => void;
+export type LinkedListForEachCb<T> = (value: T, index: number, linkedList: LinkedList<T>) => void;
 
 /**
  * Represents a node in the linked list.
@@ -62,7 +62,7 @@ final class LinkedListIterator_T<T> implements IterableIterator<T> {
  * A doubly linked list implementation.
  */
 export class LinkedList<T> implements Iterable<T> {
-    private elementNum: int;
+    private elementNum: number;
     head?: ListNode<T>;
     private tail?: ListNode<T>;
 
@@ -75,7 +75,7 @@ export class LinkedList<T> implements Iterable<T> {
     /**
      * Gets the number of elements in the list.
      */
-    public get length(): int {
+    public get length(): number {
         return this.elementNum;
     }
 
@@ -145,7 +145,7 @@ export class LinkedList<T> implements Iterable<T> {
     * @param callbackfn.linkedList - The linked list that forEach is being applied to.
     */
     public forEach(callbackfn: LinkedListForEachCb<T>): void {
-        let index: int = 0;
+        let index: number = 0;
         let currentNode: ListNode<T> | undefined = this.head;
         while (currentNode !== undefined) {
             callbackfn(currentNode!.element, index++, this);
@@ -158,7 +158,7 @@ export class LinkedList<T> implements Iterable<T> {
      * @param index The index of the element to get.
      * @returns The element at the specified index, or undefined if the index is out of range.
      */
-    public get(index: int): T | undefined {
+    public get(index: number): T | undefined {
         this.checkIndexType(index);
 
         if (index >= 0 && index < this.elementNum) {
@@ -185,8 +185,8 @@ export class LinkedList<T> implements Iterable<T> {
      * @param element The element to locate.
      * @returns The index of the first occurrence of the element, or -1 if not found.
      */
-    public getIndexOf(element: T): int {
-        let index: int = 0;
+    public getIndexOf(element: T): number {
+        let index: number = 0;
         let currentNode: ListNode<T> | undefined = this.head;
         while (currentNode !== undefined) {
             if (currentNode!.element == element) {
@@ -215,8 +215,8 @@ export class LinkedList<T> implements Iterable<T> {
      * @param element The element to locate.
      * @returns The index of the last occurrence of the element, or -1 if not found.
      */
-    public getLastIndexOf(element: T): int {
-        let index: int = this.elementNum - 1;
+    public getLastIndexOf(element: T): number {
+        let index: number = this.elementNum - 1;
         let currentNode: ListNode<T> | undefined = this.tail;
         while (currentNode !== undefined) {
             if (currentNode!.element == element) {
@@ -250,7 +250,7 @@ export class LinkedList<T> implements Iterable<T> {
      * @param element The element to insert.
      * @throws BusinessError if the index is out of range.
      */
-    public insert(index: int, element: T): void {
+    public insert(index: number, element: T): void {
         this.checkIndexType(index);
         this.checkIndex(index, this.length);
 
@@ -320,7 +320,7 @@ export class LinkedList<T> implements Iterable<T> {
      * @returns The removed element, or undefined if the index is out of range.
      * @throws BusinessError if the index is out of range.
      */
-    public removeByIndex(index: int): T | undefined {
+    public removeByIndex(index: number): T | undefined {
         this.checkIndexType(index);
         this.checkEmptyContainer(OutOfBoundsErrorCodeId);
         this.checkIndex(index, this.length - 1);
@@ -405,7 +405,7 @@ export class LinkedList<T> implements Iterable<T> {
      * @param element The new element.
      * @returns The replaced element, or undefined if the index is out of range.
      */
-    public set(index: int, element: T): T | undefined {
+    public set(index: number, element: T): T | undefined {
         this.checkIndexType(index);
         this.checkEmptyContainer(OutOfBoundsErrorCodeId);
         this.checkIndex(index, this.length - 1);
@@ -423,7 +423,7 @@ export class LinkedList<T> implements Iterable<T> {
      * @param index The index of the node to get.
      * @returns The node at the specified index, or undefined if the index is out of range.
      */
-    private getNode(index: int): ListNode<T> | undefined {
+    private getNode(index: number): ListNode<T> | undefined {
         if (index >= 0 && index < this.elementNum) {
             let currentNode: ListNode<T>;
             if (index < this.elementNum / 2) {
@@ -450,19 +450,19 @@ export class LinkedList<T> implements Iterable<T> {
         return new LinkedListIterator_T<T>(this.head);
     }
 
-    private checkIndexType(index: int): void {
+    private checkIndexType(index: number): void {
         if (index > Int.MAX_VALUE) {
             throw new BusinessError(TypeErrorCodeId, new Error(`The type of "index" must be small integer. Received value is: ${index}`));
         }
     }
 
-    private checkIndex(index: int, length: int): void {
+    private checkIndex(index: number, length: number): void {
         if (index > length || index < 0) {
             throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"index\" is out of range. It must be >= 0 && <= ${length}. Received value is: ${index}`));
         }
     }
 
-    private checkEmptyContainer(id: int): void {
+    private checkEmptyContainer(id: number): void {
         if (this.elementNum == 0) {
             throw new BusinessError(id, new Error(`Container is empty`));
         }

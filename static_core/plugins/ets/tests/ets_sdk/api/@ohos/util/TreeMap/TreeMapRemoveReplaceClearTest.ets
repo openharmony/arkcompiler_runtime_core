@@ -35,7 +35,7 @@ function main(): int {
 
 function testRemoveExistingKey() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
@@ -46,7 +46,7 @@ function testRemoveExistingKey() {
 
 function testRemoveRootEntry() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "a123");
@@ -60,7 +60,7 @@ function testRemoveRootEntry() {
 
 function testRemoveNonExistingKey() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
@@ -71,7 +71,7 @@ function testRemoveNonExistingKey() {
 
 function testRemoveKeyFromEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     let result = treeMap.remove("aa");
@@ -81,7 +81,7 @@ function testRemoveKeyFromEmptyTreeMap() {
 
 function testReplaceExistingValue() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
@@ -94,7 +94,7 @@ function testReplaceExistingValue() {
 
 function testReplaceNonExistingKey() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
@@ -107,7 +107,7 @@ function testReplaceNonExistingKey() {
 
 function testReplaceValueInEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     let result = treeMap.replace("aa", "789");
@@ -117,7 +117,7 @@ function testReplaceValueInEmptyTreeMap() {
 
 function testReplaceEmptyStringInEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     let result = treeMap.replace("", "789");
@@ -127,7 +127,7 @@ function testReplaceEmptyStringInEmptyTreeMap() {
 
 function testClearData() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
@@ -139,7 +139,7 @@ function testClearData() {
 
 function testClearEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return secondValue.compareTo(firstValue)
         });
     treeMap.clear();
@@ -147,8 +147,8 @@ function testClearEmptyTreeMap() {
 }
 
 function testSetDataAfterClearTreeMap() {
-    let treeMap: TreeMap<string, double> =
-        new TreeMap<string, double>((firstValue: string, secondValue: string): double => {
+    let treeMap: TreeMap<string, number> =
+        new TreeMap<string, number>((firstValue: string, secondValue: string): number => {
             return firstValue.compareTo(secondValue)
         });
     treeMap.set("aa", 123);

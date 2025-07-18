@@ -84,10 +84,10 @@ function testHasWithBoundaryKeys() {
     arktest.assertTrue(plainArray.has(0), "plainArray.has(0) should return true");
     plainArray.add(-1, "zhang san");
     arktest.assertTrue(plainArray.has(-1), "plainArray.has(-1) should return true");
-    let num: int = 2147483647;
+    let num: number = 2147483647;
     plainArray.add(num, "li si");
     arktest.assertTrue(plainArray.has(num), "plainArray.has(num) should return true");
-    let num1: int = -2147483648;
+    let num1: number = -2147483648;
     plainArray.add(num1, "li si");
     arktest.assertTrue(plainArray.has(num1), "plainArray.has(num1) should return true");
 }
@@ -117,10 +117,10 @@ function testGetWithBoundaryKeys() {
     arktest.assertEQ(plainArray.get(0), "zhang san");
     plainArray.add(-1, "zhang san");
     arktest.assertEQ(plainArray.get(-1), "zhang san");
-    let num: int = 2147483647;
+    let num: number = 2147483647;
     plainArray.add(num, "li si");
     arktest.assertEQ(plainArray.get(num), "li si");
-    let num1: int = -2147483648;
+    let num1: number = -2147483648;
     plainArray.add(num1, "li si");
     arktest.assertEQ(plainArray.get(num1), "li si");
 }

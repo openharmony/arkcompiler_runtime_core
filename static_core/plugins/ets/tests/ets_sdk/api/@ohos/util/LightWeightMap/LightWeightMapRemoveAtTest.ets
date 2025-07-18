@@ -30,7 +30,7 @@ function main(): int {
 }
 
 function testRemoveAtValidIndex() {
-    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
+    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
@@ -40,7 +40,7 @@ function testRemoveAtValidIndex() {
 }
 
 function testRemoveAtBoundaryIndex() {
-    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
+    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
@@ -50,7 +50,7 @@ function testRemoveAtBoundaryIndex() {
 }
 
 function testRemoveAtLeftExceededIndex() {
-    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
+    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
@@ -60,7 +60,7 @@ function testRemoveAtLeftExceededIndex() {
 }
 
 function testRemoveAtRightExceededIndex() {
-    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
+    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
@@ -70,28 +70,28 @@ function testRemoveAtRightExceededIndex() {
 }
 
 function testRemoveAtIndexOfEmptyMap() {
-    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
+    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     let result = lightWeightMap.removeAt(5);
     arktest.assertFalse(result, "The lightWeightMap should not remove the element with empty lightWeightMap");
     arktest.assertEQ(lightWeightMap.length, 0);
 }
 
 function testRemoveAtLeftFloatIndex() {
-    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
+    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
-    let result = lightWeightMap.removeAt(Math.floor(1.2).toInt());
+    let result = lightWeightMap.removeAt(Math.floor(1.2));
     arktest.assertEQ(result, true, "The lightWeightMap should remove the element at the floored left float index");
     arktest.assertEQ(lightWeightMap.length, 2, "The lightWeightMap length should be 2");
 }
 
 function testRemoveAtRightFloatIndex() {
-    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
+    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
-    let result = lightWeightMap.removeAt(Math.floor(1.8).toInt());
+    let result = lightWeightMap.removeAt(Math.floor(1.8));
     arktest.assertEQ(result, true, "The lightWeightMap should remove the element at the floored right float index");
     arktest.assertEQ(lightWeightMap.length, 2, "The lightWeightMap length should be 2");
 }

@@ -49,7 +49,7 @@ function main(): int {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_7500
 function testInitialEmptyMapProperties() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     let result = treeMap.length;
     arktest.assertEQ(result, 0);
     let result2 = treeMap.get('');
@@ -60,7 +60,7 @@ function testInitialEmptyMapProperties() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_7600
 function testClearOnNonEmptyMap() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     treeMap.set("squirrel", 123);
     treeMap.set("sparrow", 356);
     treeMap.clear();
@@ -79,7 +79,7 @@ function testClearOnNonEmptyMap() {
 //Test cases ported from ArkTS 1.0:TREEMAP_7700
 function testClearWithCustomComparator() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return firstValue.compareTo(secondValue);
         });
     treeMap.set("aa", "3");
@@ -101,7 +101,7 @@ function testClearWithCustomComparator() {
 //Test cases ported from ArkTS 1.0:TREEMAP_7800
 function testClearAndRepopulateWithCustomComparator() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return firstValue.compareTo(secondValue);
         });
     treeMap.set("aa", "3");
@@ -146,7 +146,7 @@ function testKeysWithMultipleElementsNaturalOrder() {
 //Test cases ported from ArkTS 1.0:TREEMAP_8100
 function testKeysWithCustomReverseComparator() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return firstValue.compareTo(secondValue);
         });
     treeMap.set('AAA', "123");
@@ -186,7 +186,7 @@ function testValuesWithMultipleElementsNaturalOrder() {
 //Test cases ported from ArkTS 1.0:TREEMAP_8400
 function testValuesWithCustomReverseComparator() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return firstValue.compareTo(secondValue);
         });
     treeMap.set('AAA', "123");
@@ -210,7 +210,7 @@ function testEntriesOnEmptyMap() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_9200
 function testEntriesNaturalOrder() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     treeMap.set('AAA', 123);
     treeMap.set('BBB', 456);
     treeMap.set('CCC', 789);
@@ -228,7 +228,7 @@ function testEntriesNaturalOrder() {
 //Test cases ported from ArkTS 1.0:TREEMAP_9300
 function testEntriesCustomReverseComparator() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
             return firstValue.compareTo(secondValue);
         });
     treeMap.set('AAA', '123');
@@ -247,7 +247,7 @@ function testEntriesCustomReverseComparator() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_9400
 function testEntriesAfterRemove() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     treeMap.set('AAA', 123);
     treeMap.set('BBB', 456);
     treeMap.set('CCC', 789);
@@ -264,7 +264,7 @@ function testEntriesAfterRemove() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_9500
 function testEntriesAfterReplace() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     treeMap.set('AAA', 123);
     treeMap.set('BBB', 456);
     treeMap.set('CCC', 789);
@@ -282,7 +282,7 @@ function testEntriesAfterReplace() {
 
 //Test cases ported from ArkTS 1.0:TREEMAP_9600
 function testEntriesAfterClear() {
-    let treeMap = new TreeMap<string, double>();
+    let treeMap = new TreeMap<string, number>();
     treeMap.set('AAA', 123);
     treeMap.set('BBB', 456);
     treeMap.set('CCC', 789);

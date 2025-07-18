@@ -16,8 +16,8 @@
 import {LinkedList} from "@ohos.util.LinkedList";
 import {BusinessError} from "@ohos.base";
 
-const OutOfBoundsErrorCodeId: int = 10200001;
-const EmptyContainerErrorCodeId: int = 10200010;
+const OutOfBoundsErrorCodeId: number = 10200001;
+const EmptyContainerErrorCodeId: number = 10200010;
 
 function main() {
     const suite = new arktest.ArkTestsuite("LinkedList API tests");
@@ -42,39 +42,39 @@ function main() {
 }
 
 class Temp {
-    age: double = 0;
+    age: number = 0;
     name: string = "";
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber2: double | int = 2;
-    static readonly testNumber5: double | int = 5;
-    static readonly testNumber6: double | int = 6;
-    static readonly testNumber20: double | int = 20;
-    static readonly testNumber1w: double | int = 10000;
+    static readonly testNumber1: number = 1;
+    static readonly testNumber2: number = 2;
+    static readonly testNumber5: number = 5;
+    static readonly testNumber6: number = 6;
+    static readonly testNumber20: number = 20;
+    static readonly testNumber1w: number = 10000;
     static readonly forNumber1: Number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-    static readonly arrayForNumber1 = Array.from<double>(TestData.forNumber1);
+    static readonly arrayForNumber1 = Array.from<number>(TestData.forNumber1);
     static readonly forNumber2: Number[] = [1, 2, 3, 4, 5];
-    static readonly arrayForNumber2 = Array.from<double>(TestData.forNumber2);
+    static readonly arrayForNumber2 = Array.from<number>(TestData.forNumber2);
     static readonly forNumber3: Number[] = [1, 2, 4, 2, 3];
-    static readonly arrayForNumber3 = Array.from<double>(TestData.forNumber3);
+    static readonly arrayForNumber3 = Array.from<number>(TestData.forNumber3);
 }
 
 function testRemoveByIndexWithinRange() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
     arktest.assertEQ(linkedList.removeByIndex(TestData.testNumber1), TestData.testNumber1, "Removed element should be 1");
     arktest.assertEQ(linkedList.get(0), 0, "Element at index 0 should be 0");
-    for (let i: int = TestData.testNumber1; i < linkedList.length; i++) {
+    for (let i: number = TestData.testNumber1; i < linkedList.length; i++) {
         arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber1[i + TestData.testNumber1], "Element should match");
     }
-    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt() - TestData.testNumber1,
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length - TestData.testNumber1,
         "LinkedList length should be - 1");
 }
 
 function testRemoveByIndexOutsideRange() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
@@ -86,42 +86,42 @@ function testRemoveByIndexOutsideRange() {
             "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: -6") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    arktest.expectThrow(() => {linkedList.removeByIndex(TestData.testNumber1w.toInt())}, exceptionCheck);
-    arktest.expectThrow(() => {linkedList.removeByIndex(-TestData.testNumber6.toInt())}, exceptionCheck1);
+    arktest.expectThrow(() => {linkedList.removeByIndex(TestData.testNumber1w)}, exceptionCheck);
+    arktest.expectThrow(() => {linkedList.removeByIndex(-TestData.testNumber6)}, exceptionCheck1);
 }
 
 function testRemoveByIndexUndefined() {
-    let linkedList = new LinkedList<double | string | boolean | null | object | undefined>();
+    let linkedList = new LinkedList<number | string | boolean | null | object | undefined>();
     linkedList.add(undefined);
     linkedList.add(TestData.arrayForNumber1);
     arktest.assertEQ(linkedList.removeByIndex(0), undefined, "The result should be undefined");
 }
 
 function testRemoveByIndexAtBoundary() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
-    arktest.assertEQ(linkedList.removeByIndex(TestData.arrayForNumber1.length.toInt() - TestData.testNumber1), TestData.testNumber20,
+    arktest.assertEQ(linkedList.removeByIndex(TestData.arrayForNumber1.length - TestData.testNumber1), TestData.testNumber20,
         "Removed element should - 1");
     arktest.assertEQ(linkedList.removeByIndex(0), 0, "Removed element should be 0");
-    for (let i: int = 0; i < linkedList.length; i++) {
+    for (let i: number = 0; i < linkedList.length; i++) {
         arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber1[i + TestData.testNumber1], "Element should match");
     }
-    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt() - TestData.testNumber2,
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length - TestData.testNumber2,
         "LinkedList length should be - 2");
 }
 
 function testRemoveFirstFromEmptyContainer() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
     arktest.assertEQ(linkedList.removeFirst(), 0, "Removed first element should be 0");
-    for (let i: int = 0; i < linkedList.length; i++) {
+    for (let i: number = 0; i < linkedList.length; i++) {
         arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber1[i + TestData.testNumber1], "Element should match");
     }
-    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt() - TestData.testNumber1, "LinkedList length should - 1");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length - TestData.testNumber1, "LinkedList length should - 1");
 }
 
 function testRemoveFirstFromNonEmptyContainer() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
             ((e as BusinessError).code == EmptyContainerErrorCodeId);
@@ -130,17 +130,17 @@ function testRemoveFirstFromNonEmptyContainer() {
 }
 
 function testRemoveLastFromEmptyContainer() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
     arktest.assertEQ(linkedList.removeLast(), TestData.testNumber20, "Removed first element should be 20");
-    for (let i: int = 0; i < linkedList.length; i++) {
+    for (let i: number = 0; i < linkedList.length; i++) {
         arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber1[i], "Element should match");
     }
-    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt() - TestData.testNumber1, "LinkedList length should - 1");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length - TestData.testNumber1, "LinkedList length should - 1");
 }
 
 function testRemoveLastFromNonEmptyContainer() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
             ((e as BusinessError).code == EmptyContainerErrorCodeId);
@@ -149,39 +149,39 @@ function testRemoveLastFromNonEmptyContainer() {
 }
 
 function testRemoveUniqueElement() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber2);
     arktest.assertTrue(linkedList.remove(TestData.testNumber1), "Element 1 should be removed");
     arktest.assertTrue(linkedList.remove(TestData.testNumber5), "Element 5 should be removed");
-    for (let i: int = 0; i < linkedList.length; i++) {
+    for (let i: number = 0; i < linkedList.length; i++) {
         arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber2[i + TestData.testNumber1], "Element should match");
     }
     arktest.assertEQ(linkedList.length, TestData.arrayForNumber2.length - TestData.testNumber2, "LinkedList length should - 2");
 }
 
 function testRemoveInexistentElement() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber2);
     arktest.assertFalse(linkedList.remove(TestData.testNumber6), "Element 6 is inexistent");
-    for (let i: int = 0; i < linkedList.length; i++) {
+    for (let i: number = 0; i < linkedList.length; i++) {
         arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber2[i], "Element should match");
     }
     arktest.assertEQ(linkedList.length, TestData.arrayForNumber2.length, "LinkedList length should should not change");
 }
 
 function testRemoveRepeatedElement() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber3);
     arktest.assertTrue(linkedList.remove(TestData.testNumber2), "Element 2 should be removed");
     arktest.assertEQ(linkedList.get(0), TestData.testNumber1, "First element should be 1");
-    for (let i: int = TestData.testNumber1; i < linkedList.length - TestData.testNumber1; i++) {
+    for (let i: number = TestData.testNumber1; i < linkedList.length - TestData.testNumber1; i++) {
         arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber3[i + TestData.testNumber1], "Element should match");
     }
     arktest.assertEQ(linkedList.length, TestData.arrayForNumber3.length - TestData.testNumber1, "LinkedList length should - 1");
 }
 
 function initializeLinkedList<T>(linkedList: LinkedList<T>, sourceArray: Array<T>) {
-    for (let i: int = 0; i < sourceArray.length; i++) {
+    for (let i = 0; i < sourceArray.length; i++) {
         linkedList.add(sourceArray[i]);
     }
 }

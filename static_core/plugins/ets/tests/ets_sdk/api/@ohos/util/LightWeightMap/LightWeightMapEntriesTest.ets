@@ -47,7 +47,7 @@ function testEntriesReturnIteratorByKeyValue() {
 }
 
 function testEntriesReturnIteratorByKeyValueWithEmptyMap() {
-    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
+    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     let iteratorSetValues = lightWeightMap.entries();
     arktest.assertTrue(iteratorSetValues.next().done,
         "The lightWeightMap entries iterator.done should true for an empty map");

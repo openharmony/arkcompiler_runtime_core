@@ -16,8 +16,8 @@
 import LightWeightMap from "@ohos.util.LightWeightMap";
 import { BusinessError } from "@ohos.base";
 
-const TypeErrorCodeId: int = 401;
-const OutOfBoundsErrorCodeId: int = 10200001;
+const TypeErrorCodeId: number = 401;
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("LightWeightMap SetValueAt GetValueAt API tests")
@@ -43,7 +43,7 @@ function main(): int {
 }
 
 function testSetValueAtValidIndex() {
-    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
+    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
@@ -54,7 +54,7 @@ function testSetValueAtValidIndex() {
 }
 
 function testSetValueAtBoundaryIndex() {
-    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
+    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
@@ -65,7 +65,7 @@ function testSetValueAtBoundaryIndex() {
 }
 
 function testSetValueAtLeftExceededIndex() {
-    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
+    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
@@ -79,7 +79,7 @@ function testSetValueAtLeftExceededIndex() {
 }
 
 function testSetValueAtRightExceededIndex() {
-    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
+    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
@@ -93,7 +93,7 @@ function testSetValueAtRightExceededIndex() {
 }
 
 function testSetValueAtIndexOfEmptyMap() {
-    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
+    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
@@ -103,29 +103,29 @@ function testSetValueAtIndexOfEmptyMap() {
 }
 
 function testSetValueAtLeftFloatIndex() {
-    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
+    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
-    let result1 = lightWeightMap.setValueAt(Math.floor(1.2).toInt(), 777);
-    let result2 = lightWeightMap.getValueAt(Math.floor(1.2).toInt());
+    let result1 = lightWeightMap.setValueAt(Math.floor(1.2), 777);
+    let result2 = lightWeightMap.getValueAt(Math.floor(1.2));
     arktest.assertEQ(result1, true, "The lightWeightMap should set the value at the floored left float index");
     arktest.assertEQ(result2, 777, "The lightWeightMap should return the correct value at the floored left float index");
 }
 
 function testSetValueAtRightFloatIndex() {
-    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
+    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
-    let result1 = lightWeightMap.setValueAt(Math.floor(1.8).toInt(), 777);
-    let result2 = lightWeightMap.getValueAt(Math.floor(1.8).toInt());
+    let result1 = lightWeightMap.setValueAt(Math.floor(1.8), 777);
+    let result2 = lightWeightMap.getValueAt(Math.floor(1.8));
     arktest.assertEQ(result1, true, "The lightWeightMap should set the value at the floored right float index");
     arktest.assertEQ(result2, 777, "The lightWeightMap should return the correct value at the floored right float index");
 }
 
 function testSetValueAtLargeValueAndIndex() {
-    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
+    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
@@ -133,4 +133,10 @@ function testSetValueAtLargeValueAndIndex() {
     let result2 = lightWeightMap.getValueAt(0);
     arktest.assertEQ(result1, true, "The lightWeightMap should set the value at the floored right float index");
     arktest.assertEQ(result2, Number.MAX_VALUE, "The lightWeightMap should get the value at the key index");
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The type of \"index\" must be small integer. Received value is: 1.7976931348623157e+308") &&
+            ((e as BusinessError).code == TypeErrorCodeId);
+    }
+    arktest.expectThrow(() => {lightWeightMap.getValueAt(Number.MAX_VALUE)}, exceptionCheck);
 }

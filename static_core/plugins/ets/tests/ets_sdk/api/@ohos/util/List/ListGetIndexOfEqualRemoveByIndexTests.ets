@@ -16,7 +16,7 @@
 import {List} from '@ohos.util.List';
 import {BusinessError} from "@ohos.base";
 
-const OutOfBoundsErrorCodeId: int = 10200001;
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
     const suite = new arktest.ArkTestsuite("List API tests");
@@ -37,30 +37,30 @@ function main() {
     return suite.run();
 }
 
-function initializeList(list: List<double>, sourceArray: Array<double>) {
-    for (let i: int = 0; i < sourceArray.length; i++) {
+function initializeList(list: List<number>, sourceArray: Array<number>) {
+    for (let i = 0; i < sourceArray.length; i++) {
         list.add(sourceArray[i]);
     }
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber2: double | int = 2;
-    static readonly testNumber3: double | int = 3;
-    static readonly testNumber4: double | int = 4;
-    static readonly testNumber6: double | int = 6;
-    static readonly testNumber20: double | int = 20;
-    static readonly testNumber1w: double | int = 10000;
+    static readonly testNumber1: number = 1;
+    static readonly testNumber2: number = 2;
+    static readonly testNumber3: number = 3;
+    static readonly testNumber4: number = 4;
+    static readonly testNumber6: number = 6;
+    static readonly testNumber20: number = 20;
+    static readonly testNumber1w: number = 10000;
     static readonly forNumber1: Number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-    static readonly arrayForNumber1 = Array.from<double>(TestData.forNumber1);
+    static readonly arrayForNumber1 = Array.from<number>(TestData.forNumber1);
     static readonly forNumber2: Number[] = [1, 2, 3, 4, 5];
-    static readonly arrayForNumber2 = Array.from<double>(TestData.forNumber2);
+    static readonly arrayForNumber2 = Array.from<number>(TestData.forNumber2);
     static readonly forNumber4: Number[] = [1, 2, 2, 3, 3];
-    static readonly arrayForNumber4 = Array.from<double>(TestData.forNumber4);
+    static readonly arrayForNumber4 = Array.from<number>(TestData.forNumber4);
 }
 
 function testGetIndexOfUniqueElement() {
-    let list = new List<double>();
+    let list = new List<number>();
     list.add(TestData.testNumber1);
     list.add(TestData.testNumber2);
     list.add(TestData.testNumber2);
@@ -70,13 +70,13 @@ function testGetIndexOfUniqueElement() {
 }
 
 function testGetIndexOfInexistentElement() {
-    let list = new List<double>();
+    let list = new List<number>();
     initializeList(list, TestData.arrayForNumber4);
     arktest.assertEQ(list.getIndexOf(TestData.testNumber4), -TestData.testNumber1, "First index of 4 should be -1");
 }
 
 function testGetIndexOfAddRemoveByIndex() {
-    let list = new List<double>();
+    let list = new List<number>();
     initializeList(list, TestData.arrayForNumber4);
     let result1 = list.removeByIndex(list.getIndexOf(TestData.testNumber2));
     let result2 = list.removeByIndex(list.getIndexOf(TestData.testNumber2));
@@ -87,7 +87,7 @@ function testGetIndexOfAddRemoveByIndex() {
 }
 
 function testGetIndexOfRepeatedElement() {
-    let list = new List<double>();
+    let list = new List<number>();
     list.add(TestData.testNumber1);
     list.add(TestData.testNumber2);
     list.add(TestData.testNumber2);
@@ -96,40 +96,40 @@ function testGetIndexOfRepeatedElement() {
 }
 
 function testEqualSameElement(){
-    let list = new List<double>();
+    let list = new List<number>();
     initializeList(list, TestData.arrayForNumber2);
-    let list1= new List<double>();
+    let list1= new List<number>();
     initializeList(list1, TestData.arrayForNumber2);
     arktest.assertTrue(list.equal(list1), "Lists should be equal");
 }
 
 function testEqualDifferentElement(){
-    let list = new List<double>();
+    let list = new List<number>();
     initializeList(list, TestData.arrayForNumber2);
-    let list1 = new List<double>();
+    let list1 = new List<number>();
     initializeList(list1, TestData.arrayForNumber4);
     arktest.assertFalse(list.equal(list1), "Lists should not be equal");
 }
 
 function testEqualSameContainer(){
-    let list = new List<double>();
+    let list = new List<number>();
     initializeList(list, TestData.arrayForNumber2);
     arktest.assertTrue(list.equal(list), "List should be equal to itself");
 }
 
 function testRemoveByIndexWithinRange() {
-    let list = new List<double>();
+    let list = new List<number>();
     initializeList(list, TestData.arrayForNumber1);
     arktest.assertEQ(list.removeByIndex(TestData.testNumber1), TestData.testNumber1, "Removed element should be 1");
     arktest.assertEQ(list.get(0), 0, "Element at index 0 should be 0");
-    for (let i: int = TestData.testNumber1; i < list.length; i++) {
+    for (let i: number = TestData.testNumber1; i < list.length; i++) {
         arktest.assertEQ(list.get(i), TestData.arrayForNumber1[i + TestData.testNumber1], "Element should match");
     }
-    arktest.assertEQ(list.length, TestData.arrayForNumber1.length.toInt() - TestData.testNumber1, "List length should be - 1");
+    arktest.assertEQ(list.length, TestData.arrayForNumber1.length - TestData.testNumber1, "List length should be - 1");
 }
 
 function testRemoveByIndexOutsideRange() {
-    let list = new List<double>();
+    let list = new List<number>();
     initializeList(list, TestData.arrayForNumber1);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
@@ -147,20 +147,20 @@ function testRemoveByIndexOutsideRange() {
 }
 
 function testRemoveByIndexUndefined() {
-    let list = new List<double | string | boolean | null | object | undefined>();
+    let list = new List<number | string | boolean | null | object | undefined>();
     list.add(undefined);
     list.add(TestData.arrayForNumber1);
     arktest.assertEQ(list.removeByIndex(0), undefined, "The result should be undefined");
 }
 
 function testRemoveByIndexAtBoundary() {
-    let list = new List<double>();
+    let list = new List<number>();
     initializeList(list, TestData.arrayForNumber1);
-    arktest.assertEQ(list.removeByIndex(TestData.arrayForNumber1.length.toInt() - TestData.testNumber1), TestData.testNumber20,
+    arktest.assertEQ(list.removeByIndex(TestData.arrayForNumber1.length - TestData.testNumber1), TestData.testNumber20,
         "Removed element should - 1");
     arktest.assertEQ(list.removeByIndex(0), 0, "Removed element should be 0");
-    for (let i: int = 0; i < list.length; i++) {
+    for (let i: number = 0; i < list.length; i++) {
         arktest.assertEQ(list.get(i), TestData.arrayForNumber1[i + TestData.testNumber1], "Element should match");
     }
-    arktest.assertEQ(list.length, TestData.arrayForNumber1.length.toInt() - TestData.testNumber2, "List length should be - 2");
+    arktest.assertEQ(list.length, TestData.arrayForNumber1.length - TestData.testNumber2, "List length should be - 2");
 }

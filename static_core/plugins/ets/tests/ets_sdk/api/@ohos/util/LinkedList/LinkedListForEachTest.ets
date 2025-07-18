@@ -16,15 +16,15 @@
 import { LinkedList } from "@ohos.util.LinkedList";
 
 class Temp {
-    age: double = 0;
+    age: number = 0;
     name: string = "";
 }
 
 class Temp1 {
-    age: double = 0;
+    age: number = 0;
     name: string = "";
 
-    constructor(age: double, name: string) {
+    constructor(age: number, name: string) {
         this.age = age;
         this.name = name;
     }
@@ -54,7 +54,7 @@ function main() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_SET_0100
 function testLinkedListSetAndUpdate() {
-    let linkList = new LinkedList<double | string | boolean | undefined | null | Object>();
+    let linkList = new LinkedList<number | string | boolean | undefined | null | Object>();
     linkList.add("zhang san");
     linkList.add(1);
     let param: Temp = {
@@ -65,14 +65,14 @@ function testLinkedListSetAndUpdate() {
     linkList.add(null);
     linkList.add(true);
     linkList.add([0, 1, 2, 4]);
-    linkList.forEach((value, index: int) => {
+    linkList.forEach((value, index: number) => {
         arktest.assertNE(linkList.set(index, "li si"), undefined);
     });
 }
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_SET_0200
 function testLinkedListSetWithIndexAndRemove() {
-    let linkList = new LinkedList<double | string | boolean | undefined | null | Object>();
+    let linkList = new LinkedList<number | string | boolean | undefined | null | Object>();
     linkList.add("zhang san");
     linkList.add(1);
     let param: Temp = {
@@ -91,7 +91,7 @@ function testLinkedListSetWithIndexAndRemove() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_SET_0300
 function testLinkedListSetWithGetAndHas() {
-    let linkList = new LinkedList<double | string | boolean | undefined | null | Object>();
+    let linkList = new LinkedList<number | string | boolean | undefined | null | Object>();
     linkList.add("zhang san");
     linkList.add(1);
     let param: Temp = {
@@ -109,7 +109,7 @@ function testLinkedListSetWithGetAndHas() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_SET_0400
 function testLinkedListSetWithConvertToArray() {
-    let linkList = new LinkedList<double | string | boolean | undefined | null | Object>();
+    let linkList = new LinkedList<number | string | boolean | undefined | null | Object>();
     linkList.add("zhang san");
     linkList.add(1);
     let param: Temp1 = new Temp1(10, "zhang");
@@ -130,7 +130,7 @@ function testLinkedListSetWithConvertToArray() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_SET_0500
 function testLinkedListSetAndGetFirst() {
-    let linkList = new LinkedList<double | string | boolean | undefined | null | Object>();
+    let linkList = new LinkedList<number | string | boolean | undefined | null | Object>();
 
     linkList.add("zhang san");
     linkList.add(1);
@@ -147,7 +147,7 @@ function testLinkedListSetAndGetFirst() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_SET_0600
 function testLinkedListSetAndGetLast() {
-    let linkList = new LinkedList<double | string | boolean | undefined | null | Object>();
+    let linkList = new LinkedList<number | string | boolean | undefined | null | Object>();
     linkList.add("zhang san");
     linkList.add(1);
     let param: Temp1 = new Temp1(10, "zhang");
@@ -163,7 +163,7 @@ function testLinkedListSetAndGetLast() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_SYMBOL_ITERATOR_0100
 function testLinkedListSymbolIteratorForOf() {
-    let linkList = new LinkedList<double>();
+    let linkList = new LinkedList<number>();
     linkList.add(1);
     linkList.add(2);
     linkList.add(3);
@@ -176,7 +176,7 @@ function testLinkedListSymbolIteratorForOf() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_SYMBOL_ITERATOR_0200
 function testLinkedListSymbolIteratorNext() {
-    let linkList = new LinkedList<double>();
+    let linkList = new LinkedList<number>();
     linkList.add(1);
     linkList.add(2);
     linkList.add(3);
@@ -193,26 +193,26 @@ function testLinkedListSymbolIteratorNext() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_FOREACH_0100
 function testLinkedListForEachValueAndIndex() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     linkedList.add(2);
     linkedList.add(4);
     linkedList.add(5);
     linkedList.add(4);
-    linkedList.forEach((value: double, index?: int) => {
+    linkedList.forEach((value: number, index?: number) => {
         arktest.assertEQ(linkedList.get(index!), value);
     });
 }
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_FOREACH_0200
 function testLinkedListForEachAdditionalValidation() {
-    let linkedList = new LinkedList<double>();
-    let linkedListNew = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
+    let linkedListNew = new LinkedList<number>();
     linkedList.add(2);
     linkedList.add(4);
     linkedList.add(5);
     linkedList.add(4);
     linkedListNew.add(0);
-    linkedList.forEach((value: double, index?: int) => {
+    linkedList.forEach((value: number, index?: number) => {
         arktest.assertEQ(linkedList.get(index!), value);
     });
     arktest.assertEQ(linkedListNew.length, 1);
@@ -220,13 +220,13 @@ function testLinkedListForEachAdditionalValidation() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_FOREACH_0300
 function testLinkedListForEachValueOnly() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     linkedList.add(2);
     linkedList.add(4);
     linkedList.add(5);
     linkedList.add(4);
     let index = 0;
-    linkedList.forEach((value: double) => {
+    linkedList.forEach((value: number) => {
         arktest.assertEQ(linkedList.get(index), value);
         index++;
     });
@@ -235,12 +235,12 @@ function testLinkedListForEachValueOnly() {
 
 // Test cases ported from ArkTS 1.0: LINKED_LIST_FOREACH_0400
 function testLinkedListForEachFullValidation() {
-    let linkedList = new LinkedList<double>();
+    let linkedList = new LinkedList<number>();
     linkedList.add(2);
     linkedList.add(4);
     linkedList.add(5);
     linkedList.add(4);
-    linkedList.forEach((value: double, index: int, linkedList) => {
+    linkedList.forEach((value: number, index: number, linkedList) => {
         arktest.assertEQ(linkedList.get(index), value);
     });
 }

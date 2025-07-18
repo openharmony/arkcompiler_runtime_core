@@ -16,7 +16,7 @@
 import Deque from "@ohos.util.Deque";
 import { BusinessError } from "@ohos.base";
 
-const OutOfBoundsErrorCodeId: int = 10200001;
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("Deque API tests");
@@ -32,7 +32,7 @@ const testNumbers: Number[] = [17, 3, 22, 8, 29, 11, 5, 19, 2, 26, 14, 7, 28, 10
         21, 6, 27, 18, 4, 25, 12, 23, 9, 15, 20, 30];
 
 function testIndexGetter() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     initializeDeque(deque, testNumbers);
     for (let i: int = 0; i < deque.length; i++) {
         arktest.assertEQ(deque[i], testNumbers[i], `Element at index ${i} should match`);
@@ -40,13 +40,13 @@ function testIndexGetter() {
 }
 
 function testIndexSetter() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     initializeDeque(deque, testNumbers);
-    for (let i: int = 0; i < deque.length; i++) {
+    for (let i: number = 0; i < deque.length; i++) {
         deque[i] = 3;
     }
     let forEachCount = 0;
-    deque.forEach((value: double) => {
+    deque.forEach((value: number) => {
         arktest.assertEQ(value, 3, `Element should match`);
         forEachCount++;
     });
@@ -54,19 +54,19 @@ function testIndexSetter() {
 }
 
 function testIndexOutOfRange() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     initializeDeque(deque, testNumbers);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
             `The value of \"index\" is out of range. It must be >= 0 && <= 29. Received value is: -30`) &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    arktest.expectThrow(() => {deque[-testNumbers.length.toInt()]}, exceptionCheck);
-    arktest.expectThrow(() => {deque[-testNumbers.length.toInt()] = 0}, exceptionCheck);
+    arktest.expectThrow(() => {deque[-testNumbers.length]}, exceptionCheck);
+    arktest.expectThrow(() => {deque[-testNumbers.length] = 0}, exceptionCheck);
 }
 
 function initializeDeque<T>(deque: Deque<T>, sourceArray: T[]) {
-    for (let i: int = 0; i < sourceArray.length; i++) {
+    for (let i = 0; i < sourceArray.length; i++) {
         deque.insertEnd(sourceArray[i]);
     }
 }

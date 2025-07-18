@@ -32,22 +32,22 @@ function main() {
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber3: double | int = 3;
-    static readonly testNumber6: double | int = 6;
-    static readonly testNumber10: double | int = 10;
-    static readonly testNumber15: double = 15;
+    static readonly testNumber1: number = 1;
+    static readonly testNumber3: number = 3;
+    static readonly testNumber6: number = 6;
+    static readonly testNumber10: number = 10;
+    static readonly testNumber15: number = 15;
     static readonly forNumber: Number[] = [1, 2, 3, 4, 5];
     static readonly result3: Number[] = [3, 1, 2, 3, 4, 5, 3];
     static readonly result4: Number[] = [3, 1, 2, 3, 4, 5];
 }
 
 function testArrayListClear() {
-    let arrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
     arrayList.insert(TestData.testNumber1, 0);
     initializeArrayList(arrayList, TestData.forNumber);
     arrayList.subArrayList(TestData.testNumber1, TestData.testNumber3);
-    let length: double = arrayList.length;
+    let length: number = arrayList.length;
     arrayList.clear();
     arktest.assertEQ(length, TestData.testNumber6, "ArrayList length should be 6 before clear");
     arktest.assertEQ(arrayList.length, 0, "ArrayList length should be 0 after clear");
@@ -56,36 +56,36 @@ function testArrayListClear() {
 }
 
 function testArrayListClearEmpty() {
-    let arrayList = new ArrayList<double>();
-    let length: double = arrayList.length;
+    let arrayList = new ArrayList<number>();
+    let length: number = arrayList.length;
     arrayList.clear();
     arktest.assertEQ(length, 0, "Initial ArrayList length should be 0");
     arktest.assertEQ(arrayList.length, 0, "ArrayList length should be 0 after clear");
 }
 
 function testArrayListCloneEmpty() {
-    let arrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
     let cloneArrayList = arrayList.clone();
     arktest.assertEQ(cloneArrayList.length, 0, "Cloned ArrayList should have length 0");
 }
 
 function testArrayListClone() {
-    let arrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
     arrayList.insert(TestData.testNumber1, 0);
     initializeArrayList(arrayList, TestData.forNumber);
     arrayList.subArrayList(TestData.testNumber1, TestData.testNumber3);
     let cloneArrayList = arrayList.clone();
-    for (let i: int = 0; i < arrayList.length; i++) {
+    for (let i: number = 0; i < arrayList.length; i++) {
         arktest.assertEQ(cloneArrayList[i], arrayList[i], `Element at index ${i} should match`);
     }
     arktest.assertEQ(cloneArrayList.length, arrayList.length, "Cloned ArrayList should have the same length");
 }
 
 function testArrayListCloneModify() {
-    let arrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.result4);
     let cloneArrayList = arrayList.clone();
-    for (let i: int = 0; i < arrayList.length; i++) {
+    for (let i: number = 0; i < arrayList.length; i++) {
         arktest.assertEQ(cloneArrayList[i], arrayList[i], `Element at index ${i} should match`);
     }
     cloneArrayList.add(TestData.testNumber3);
@@ -102,7 +102,7 @@ function testArrayListCloneModify() {
 }
 
 function testArrayListCloneAfterClear() {
-    let arrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
     arrayList.insert(TestData.testNumber1, 0);
     initializeArrayList(arrayList, TestData.forNumber);
     arrayList.subArrayList(TestData.testNumber1, TestData.testNumber3);
@@ -113,40 +113,40 @@ function testArrayListCloneAfterClear() {
 }
 
 function testArrayListGetCapacity() {
-    let arrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
     arrayList.insert(TestData.testNumber1, 0);
-    for (let i: int = 0; i < TestData.testNumber6; i++) {
+    for (let i: number = 0; i < TestData.testNumber6; i++) {
         arrayList.add(i);
     }
     arrayList.remove(TestData.testNumber1);
     arrayList.subArrayList(TestData.testNumber1, TestData.testNumber3);
-    let cap: double = arrayList.getCapacity();
+    let cap: number = arrayList.getCapacity();
     initializeArrayList(arrayList, TestData.forNumber);
     arktest.assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
     arktest.assertEQ(arrayList.getCapacity(), TestData.testNumber15, "ArrayList capacity should be updated correctly");
 }
 
 function testArrayListGetCapacityEmpty() {
-    let arrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
     arktest.assertEQ(arrayList.getCapacity(), TestData.testNumber10, "Initial ArrayList capacity should be 10");
 }
 
 function testArrayListGetCapacityAfterClear() {
-    let arrayList = new ArrayList<double>();
+    let arrayList = new ArrayList<number>();
     arrayList.insert(TestData.testNumber1, 0);
-    for (let i: int = 0; i < TestData.testNumber6; i++) {
+    for (let i: number = 0; i < TestData.testNumber6; i++) {
         arrayList.add(i);
     }
     arrayList.remove(TestData.testNumber1);
     arrayList.subArrayList(TestData.testNumber1, TestData.testNumber3);
-    let cap: double = arrayList.getCapacity();
+    let cap: number = arrayList.getCapacity();
     arrayList.clear();
     arktest.assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
     arktest.assertEQ(arrayList.getCapacity(), TestData.testNumber10, "ArrayList capacity should be updated correctly");
 }
 
 function initializeArrayList<T>(arrayList: ArrayList<T>, sourceArray: T[]) {
-    for (let i: int = 0; i < sourceArray.length; i++) {
+    for (let i = 0; i < sourceArray.length; i++) {
         arrayList.add(sourceArray[i]);
     }
 }

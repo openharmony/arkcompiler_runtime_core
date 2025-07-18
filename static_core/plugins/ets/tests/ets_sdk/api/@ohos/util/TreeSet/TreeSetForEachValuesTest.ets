@@ -36,10 +36,10 @@ function main(): int {
 
 function testForEachNoReference() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): double => { return secondValue.compareTo(firstValue) });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     treeSet.add("bb");
-    let count: int = 0;
+    let count: number = 0;
     treeSet.forEach(() => {
         count++;
     });
@@ -48,7 +48,7 @@ function testForEachNoReference() {
 
 function testForEachValueReference() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): double => { return secondValue.compareTo(firstValue) });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     treeSet.add("bb");
     let flag = false;
@@ -60,7 +60,7 @@ function testForEachValueReference() {
 
 function testForEachValueKeyReference() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): double => { return secondValue.compareTo(firstValue) });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     treeSet.add("bb");
     let flag = false;
@@ -72,7 +72,7 @@ function testForEachValueKeyReference() {
 
 function testForEachThreeReferences() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): double => { return secondValue.compareTo(firstValue) });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     treeSet.add("bb");
     let flag = false;
@@ -84,7 +84,7 @@ function testForEachThreeReferences() {
 
 function testValuesReturnIteratorByValue() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): double => { return secondValue.compareTo(firstValue) });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     treeSet.add("bb");
     let it = treeSet.values();
@@ -95,7 +95,7 @@ function testValuesReturnIteratorByValue() {
 
 function testValuesReturnIteratorByValueWithEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): double => { return secondValue.compareTo(firstValue) });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let it = treeSet.values();
     arktest.assertTrue(it.next().done, "The treeSet values iterator.done should true when treeSet is empty");
 }

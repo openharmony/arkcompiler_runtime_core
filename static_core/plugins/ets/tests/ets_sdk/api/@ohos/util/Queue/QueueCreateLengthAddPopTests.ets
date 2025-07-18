@@ -22,7 +22,7 @@ function main() {
     suite.addTest("Queue create an instance that stores multiple types of data", testQueueCreateMultipleTypes);
     suite.addTest("Queue length", testQueueLengthBasic);
     suite.addTest("Queue length with mixed types", testQueueLengthMixedTypes);
-    suite.addTest("Queue length with large double of elements", testQueueLengthLargeNumber);
+    suite.addTest("Queue length with large number of elements", testQueueLengthLargeNumber);
     suite.addTest("Queue add", testQueueAddElements);
     suite.addTest("Queue pop first element from an empty queue", testQueuePopEmpty);
     suite.addTest("Queue pop first element", testQueuePopFirstElement);
@@ -32,16 +32,16 @@ function main() {
 
 class Temp {
     name: string = "";
-    age: double = 0;
+    age: number = 0;
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber2: double | int = 2;
-    static readonly testNumber3: double | int = 3;
-    static readonly testNumber5: double | int = 5;
-    static readonly testNumber6: double | int = 6;
-    static readonly testNumber1w: double | int = 10000;
+    static readonly testNumber1: number = 1;
+    static readonly testNumber2: number = 2;
+    static readonly testNumber3: number = 3;
+    static readonly testNumber5: number = 5;
+    static readonly testNumber6: number = 6;
+    static readonly testNumber1w: number = 10000;
     static readonly testObject1: Temp = { name: "Dylon", age: 13 };
     static readonly testString1: string = "string";
     static readonly forNumber: Number[] = [17, 3, 22, 8, 29, 11, 5, 19, 2, 26, 14, 7, 28, 10, 1, 24, 16, 13,
@@ -49,17 +49,17 @@ class TestData {
 }
 
 function testQueueCreateSingleType() {
-    let queue: Queue<double>;
-    arktest.expectNoThrow(() => {queue = new Queue<double>()});
+    let queue: Queue<number>;
+    arktest.expectNoThrow(() => {queue = new Queue<number>()});
 }
 
 function testQueueCreateMultipleTypes() {
-    let queue: Queue<double | string | object>;
-    arktest.expectNoThrow(() => {queue = new Queue<double | string | object>()});
+    let queue: Queue<number | string | object>;
+    arktest.expectNoThrow(() => {queue = new Queue<number | string | object>()});
 }
 
 function testQueueLengthBasic() {
-    let queue = new Queue<double>();
+    let queue = new Queue<number>();
     arktest.assertEQ(queue.length, 0, "Initial queue length should be 0");
     queue.add(TestData.testNumber3);
     queue.add(TestData.testNumber1);
@@ -71,7 +71,7 @@ function testQueueLengthBasic() {
 }
 
 function testQueueLengthMixedTypes() {
-    let queue = new Queue<double | string | boolean>();
+    let queue = new Queue<number | string | boolean>();
     arktest.assertEQ(queue.length, 0, "Initial queue length should be 0");
     queue.add(TestData.testNumber3);
     queue.add(TestData.testString1);
@@ -83,18 +83,18 @@ function testQueueLengthMixedTypes() {
 }
 
 function testQueueLengthLargeNumber() {
-    let queue = new Queue<double>();
-    for (let i: int = 0; i < TestData.testNumber1w; i++) {
+    let queue = new Queue<number>();
+    for (let i: number = 0; i < TestData.testNumber1w; i++) {
         queue.add(TestData.testNumber1);
     }
     arktest.assertEQ(queue.length, TestData.testNumber1w, "Queue length should be 10000 after adding elements");
 }
 
 function testQueueAddElements() {
-    let queue = new Queue<double>();
+    let queue = new Queue<number>();
     initializeQueue(queue, TestData.forNumber);
     let countForEach = 0;
-    queue.forEach((value: double) => {
+    queue.forEach((value: number) => {
         arktest.assertEQ(value, TestData.forNumber[countForEach++], "Element should match");
     });
     arktest.assertEQ(countForEach, queue.length, "Queue length same as foreach");
@@ -102,22 +102,22 @@ function testQueueAddElements() {
 }
 
 function testQueuePopEmpty() {
-    let queue = new Queue<double>();
+    let queue = new Queue<number>();
     arktest.assertEQ(queue.length, 0, "Initial queue length should be 0");
     arktest.assertEQ(queue.pop(), undefined, "Pop from empty queue should return undefined");
 }
 
 function testQueuePopFirstElement() {
-    let queue = new Queue<double>();
+    let queue = new Queue<number>();
     queue.add(TestData.testNumber1);
-    for (let i: int = TestData.testNumber1; i < TestData.testNumber6; i++) {
+    for (let i: number = TestData.testNumber1; i < TestData.testNumber6; i++) {
         queue.add(TestData.testNumber3);
     }
     arktest.assertEQ(queue.length, TestData.testNumber6, "Queue length should be 6 after inserting six elements");
     arktest.assertEQ(queue.pop(), TestData.testNumber1, "Pop from non-empty queue should return first element");
     arktest.assertEQ(queue.length, TestData.testNumber5, "Pop from non-empty queue should update length");
     let countForEach = 0;
-    queue.forEach((value: double) => {
+    queue.forEach((value: number) => {
         arktest.assertEQ(value, TestData.testNumber3, "Element should match");
         countForEach++;
     });
@@ -125,7 +125,7 @@ function testQueuePopFirstElement() {
 }
 
 function initializeQueue<T>(queue: Queue<T>, sourceArray: T[]) {
-    for (let i: int = 0; i < sourceArray.length; i++) {
+    for (let i = 0; i < sourceArray.length; i++) {
         arktest.assertTrue(queue.add(sourceArray[i]), `Failed to add element at index ${i}`);
     }
 }

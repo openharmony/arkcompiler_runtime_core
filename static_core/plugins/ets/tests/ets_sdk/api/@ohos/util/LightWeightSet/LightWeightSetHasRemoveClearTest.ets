@@ -18,11 +18,11 @@ import {LightWeightSet} from "@ohos.util.LightWeightSet";
 function main(): int {
     const suite = new arktest.ArkTestsuite("LightWeightSet Has Remove Clear API tests")
 
-    suite.addTest("Test LightWeightSet has interface with an existing double", testHasWithAnExistingNumber)
+    suite.addTest("Test LightWeightSet has interface with an existing number", testHasWithAnExistingNumber)
     suite.addTest("Test LightWeightSet has interface with a large string", testHasWithALargeString)
     suite.addTest("Test LightWeightSet remove interface with an existing string", testRemoveWithAnExistingString)
     suite.addTest("Test LightWeightSet remove interface with a non-existing string", testRemoveWithANonExistingString)
-    suite.addTest("Test LightWeightSet remove interface with a large double", testRemoveWithALargeNumber)
+    suite.addTest("Test LightWeightSet remove interface with a large number", testRemoveWithALargeNumber)
     suite.addTest("Test LightWeightSet clear interface and check length", testClearAndCheckLength)
     suite.addTest("Test LightWeightSet add after clear", testClearAddAfterClear)
     suite.addTest("Test LightWeightSet length after clear on an empty set", testClearLengthAfterClearOnAnEmptySet)
@@ -32,7 +32,7 @@ function main(): int {
 
 //Test cases ported from ArkTS 1.0:LIGHTWEIGHTSET_0900
 function testHasWithAnExistingNumber() {
-    let lightWeightSet = new LightWeightSet<double>();
+    let lightWeightSet = new LightWeightSet<number>();
     lightWeightSet.add(123);
     let result = lightWeightSet.has(123);
     arktest.assertTrue(result, "Expected has(123) to return true for an existing element");
@@ -68,8 +68,8 @@ function testRemoveWithANonExistingString() {
 
 //Test cases ported from ArkTS 1.0:LIGHTWEIGHTSET_3200
 function testRemoveWithALargeNumber() {
-    let lightWeightSet = new LightWeightSet<double>();
-    let value: double = 1024000;
+    let lightWeightSet = new LightWeightSet<number>();
+    let value: number = 1024000;
     lightWeightSet.add(value);
     let result = lightWeightSet.remove(value);
     arktest.assertEQ(result, value);

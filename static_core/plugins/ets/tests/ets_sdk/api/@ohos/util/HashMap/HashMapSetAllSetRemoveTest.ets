@@ -47,10 +47,10 @@ function testLengthNewMap() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_SET_ALL_0200
 function testSetAllWithNewDataCheckLength() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     hashMap.set("squirrel", 123);
     hashMap.set("sparrow", 356);
-    const newHashMap = new HashMap<string, double>();
+    const newHashMap = new HashMap<string, number>();
     newHashMap.set("newMap", 99);
     hashMap.setAll(newHashMap);
     arktest.assertEQ(hashMap.length, 3);
@@ -58,10 +58,10 @@ function testSetAllWithNewDataCheckLength() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_SET_ALL_0300
 function testSetAllPreservesOriginalValue() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     hashMap.set("squirrel", 123);
     hashMap.set("sparrow", 356);
-    const newHashMap = new HashMap<string, double>();
+    const newHashMap = new HashMap<string, number>();
     newHashMap.set("newMap", 100);
     hashMap.setAll(newHashMap);
     arktest.assertEQ(hashMap.get("sparrow"), 356);
@@ -69,10 +69,10 @@ function testSetAllPreservesOriginalValue() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_SET_ALL_0400
 function testSetAllUpdatesExistingKey() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     hashMap.set("squirrel", 123);
     hashMap.set("sparrow", 356);
-    const newHashMap = new HashMap<string, double>();
+    const newHashMap = new HashMap<string, number>();
     newHashMap.set("sparrow", 100);
     hashMap.setAll(newHashMap);
     arktest.assertEQ(hashMap.get("sparrow"), 100);
@@ -80,7 +80,7 @@ function testSetAllUpdatesExistingKey() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_SET_ALL_0500
 function testGetUndefinedAfterRemoveSetClearReplace() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     hashMap.remove("sparrow");
     hashMap.set("sparrow", 356);
     hashMap.clear();
@@ -90,9 +90,9 @@ function testGetUndefinedAfterRemoveSetClearReplace() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_SET_ALL_0600
 function testSetAllWithSameDataCheckLength() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     hashMap.set("sparrow", 356);
-    const newHashMap = new HashMap<string, double>();
+    const newHashMap = new HashMap<string, number>();
     newHashMap.set("sparrow", 356);
     hashMap.setAll(newHashMap);
     arktest.assertEQ(hashMap.length, 1);
@@ -100,7 +100,7 @@ function testSetAllWithSameDataCheckLength() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_SET_0100
 function testSetEmptyStringKeyCheckState() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     hashMap.set("", 356);
     arktest.assertEQ(hashMap.length, 1);
     arktest.assertEQ(hashMap.get(""), 356);
@@ -108,7 +108,7 @@ function testSetEmptyStringKeyCheckState() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_SET_0200
 function testSetSingleCharKeyCheckState() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     hashMap.set("a", 356);
     arktest.assertEQ(hashMap.length, 1);
     arktest.assertEQ(hashMap.get("a"), 356);
@@ -116,7 +116,7 @@ function testSetSingleCharKeyCheckState() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_SET_0500
 function testSetLongKeyCheckState() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     let param = 'a'.repeat(2048);
     hashMap.set(param, 356);
     arktest.assertEQ(hashMap.length, 1);
@@ -125,7 +125,7 @@ function testSetLongKeyCheckState() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_SET_0700
 function testSetSimpleKeyValueCheckState() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     hashMap.set("ji", 1);
     arktest.assertEQ(hashMap.length, 1);
     arktest.assertEQ(hashMap.get("ji"), 1);
@@ -133,11 +133,11 @@ function testSetSimpleKeyValueCheckState() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_SET_0900
 function testSetMultipleItemsCheckState() {
-    const hashMap = new HashMap<string, double>();
-    for (let i: int = 0; i < 1000; i++) {
+    const hashMap = new HashMap<string, number>();
+    for (let i = 0; i < 1000; i++) {
         hashMap.set("ji" + i, i);
     }
-    for (let i: int = 0; i < 1000; i++) {
+    for (let i = 0; i < 1000; i++) {
         arktest.assertEQ(hashMap.get("ji" + i), i);
     }
     arktest.assertEQ(hashMap.length, 1000);
@@ -145,7 +145,7 @@ function testSetMultipleItemsCheckState() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_SET_1000
 function testGetUndefinedAfterRemoveSetClearReplaceAgain() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     hashMap.remove("sparrow");
     hashMap.set("sparrow", 356);
     hashMap.clear();

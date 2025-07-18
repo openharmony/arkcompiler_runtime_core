@@ -27,8 +27,8 @@ function main(): int {
 }
 
 function testEntriesReturnIteratorByKeyValue() {
-    let treeSet: TreeSet<double | undefined> = new TreeSet<double | undefined>(
-        (firstValue: double | undefined, secondValue: double | undefined): double => {
+    let treeSet: TreeSet<number | undefined> = new TreeSet<number | undefined>(
+        (firstValue: number | undefined, secondValue: number | undefined): number => {
             return secondValue! - firstValue!
         });
     treeSet.add(123);
@@ -49,7 +49,7 @@ function testEntriesReturnIteratorByKeyValue() {
 
 function testEntriesReturnIteratorByKeyValueWithEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): double => { return secondValue.compareTo(firstValue) });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let it = treeSet.entries();
     arktest.assertTrue(it.next().done, "The treeSet entries iterator.done should true when treeSet is empty");
 }

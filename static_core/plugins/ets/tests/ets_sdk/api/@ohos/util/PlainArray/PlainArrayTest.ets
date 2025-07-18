@@ -16,7 +16,7 @@
 import { PlainArray } from "@ohos.util.PlainArray";
 import { BusinessError } from "@ohos.base";
 
-const OutOfBoundsErrorCodeId: int = 10200001;
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 // Test cases ported from ArkTS 1.0: container_plainarray.js
 function main() {
@@ -42,7 +42,7 @@ function testPlainArrayBasicOperations() {
     plainArray.add(4, "4");
     plainArray.add(5, "5");
 
-    for (let i: int = 0; i < testArray.length; i++) {
+    for (let i = 0; i < testArray.length; i++) {
         arktest.assertEQ(plainArray.getValueAt(i), testArray[i]);
     }
 
@@ -54,7 +54,7 @@ function testPlainArrayBasicOperations() {
     arktest.assertEQ(plainArray.getValueAt(2), "2");
     
     let newPlainArray = plainArray.clone();
-    for (let i: int = 0; i < testArray.length; i++) {
+    for (let i = 0; i < testArray.length; i++) {
         arktest.assertEQ(newPlainArray.getValueAt(i), testArray[i]);
     }
 
@@ -65,7 +65,7 @@ function testPlainArrayBasicOperations() {
     plainArray.removeAt(2);
     testArray.splice(2.0, 1.0);
 
-    for (let i: int = 0; i < testArray.length; i++) {
+    for (let i = 0; i < testArray.length; i++) {
         arktest.assertEQ(plainArray.getValueAt(i), testArray[i]);
     }
 
@@ -83,8 +83,8 @@ function testPlainArrayBasicOperations() {
     for (const data of plainArray) {}
 
     let itr = plainArray.$_iterator();
-    let tmp: IteratorResult<[Int, string]> = itr.next();
-    let i: int = 0;
+    let tmp: IteratorResult<[Number, string]> = itr.next();
+    let i = 0;
     while (!tmp.done) {
         arktest.assertEQ(tmp.value![1], plainArray.getValueAt(i));
         tmp = itr.next();
@@ -115,7 +115,7 @@ function testSetValueAtAndClearOperations() {
 }
 
 function testExceptionHandlingForEmptyContainer() {
-    let empty_pa = new PlainArray<double>();
+    let empty_pa = new PlainArray<number>();
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
@@ -136,13 +136,13 @@ function testExceptionHandlingForEmptyContainer() {
 function testOperationsWithMathFloorKeys() {
     let myPa = new PlainArray<string>();
     myPa.add(0, "a");
-    myPa.add(Math.floor(1.5).toInt(), "b");
-    arktest.assertTrue(myPa.has(Math.floor(1.5).toInt()), "The PlainArray should contain the key Math.floor(1.5).toInt()");
-    arktest.assertEQ(myPa.get(Math.floor(1.5).toInt()), "b");
-    arktest.assertEQ(myPa.getValueAt(Math.floor(1.5).toInt()), "b");
-    myPa.setValueAt(Math.floor(1.5).toInt(), "c");
-    arktest.assertEQ(myPa.getKeyAt(Math.floor(1.5).toInt()), 1);
-    arktest.assertEQ(myPa.getIndexOfKey(Math.floor(1.5).toInt()), 1);
-    myPa.removeAt(Math.floor(1.5).toInt());
+    myPa.add(Math.floor(1.5), "b");
+    arktest.assertTrue(myPa.has(Math.floor(1.5)), "The PlainArray should contain the key Math.floor(1.5)");
+    arktest.assertEQ(myPa.get(Math.floor(1.5)), "b");
+    arktest.assertEQ(myPa.getValueAt(Math.floor(1.5)), "b");
+    myPa.setValueAt(Math.floor(1.5), "c");
+    arktest.assertEQ(myPa.getKeyAt(Math.floor(1.5)), 1);
+    arktest.assertEQ(myPa.getIndexOfKey(Math.floor(1.5)), 1);
+    myPa.removeAt(Math.floor(1.5));
     arktest.assertEQ(myPa.length, 1);
 }

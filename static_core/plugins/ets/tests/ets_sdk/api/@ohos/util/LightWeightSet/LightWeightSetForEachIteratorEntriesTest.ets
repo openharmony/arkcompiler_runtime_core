@@ -79,8 +79,8 @@ function testForEachOnAnEmptySet() {
 
 //Test cases ported from ArkTS 1.0:LIGHTWEIGHTSET_6800
 function testForEachChecksLength() {
-    let lightWeightSet = new LightWeightSet<double>();
-    for (let i: int = 0; i < 10; i++) {
+    let lightWeightSet = new LightWeightSet<number>();
+    for (let i = 0; i < 10; i++) {
         lightWeightSet.add(i);
     }
     lightWeightSet.forEach(() => {
@@ -90,8 +90,8 @@ function testForEachChecksLength() {
 
 //Test cases ported from ArkTS 1.0:LIGHTWEIGHTSET_6900
 function testForEachChecksHasValue() {
-    let lightWeightSet = new LightWeightSet<double>();
-    for (let i: int = 0; i < 10; i++) {
+    let lightWeightSet = new LightWeightSet<number>();
+    for (let i = 0; i < 10; i++) {
         lightWeightSet.add(i);
     }
     lightWeightSet.forEach((value) => {
@@ -101,33 +101,33 @@ function testForEachChecksHasValue() {
 
 //Test cases ported from ArkTS 1.0:LIGHTWEIGHTSET_7000
 function testForEachChecksGetIndexOfValueAgainstIndex() {
-    let lightWeightSet = new LightWeightSet<double>();
-    for (let i: int = 0; i < 10; i++) {
+    let lightWeightSet = new LightWeightSet<number>();
+    for (let i = 0; i < 10; i++) {
         lightWeightSet.add(i);
     }
-    lightWeightSet.forEach((value, index) => {
+    lightWeightSet.forEach((value, index: number) => {
         arktest.assertEQ(lightWeightSet.getIndexOf(value), index);
     });
 }
 
 //Test cases ported from ArkTS 1.0:LIGHTWEIGHTSET_7100
 function testForEachWithAllArgumentsChecksGetIndexOf() {
-    let lightWeightSet = new LightWeightSet<double>();
-    for (let i: int = 0; i < 10; i++) {
+    let lightWeightSet = new LightWeightSet<number>();
+    for (let i = 0; i < 10; i++) {
         lightWeightSet.add(i);
     }
-    lightWeightSet.forEach((value, index, lightWeightSet: LightWeightSet<double>) => {
+    lightWeightSet.forEach((value, index: number, lightWeightSet: LightWeightSet<number>) => {
         arktest.assertEQ(lightWeightSet.getIndexOf(value), index);
     });
 }
 
 //Test cases ported from ArkTS 1.0:LIGHTWEIGHTSET_7200
 function testForEachSimilarToPreviousChecksGetIndexOf() {
-    let lightWeightSet = new LightWeightSet<double>();
-    for (let i: int = 0; i < 10; i++) {
+    let lightWeightSet = new LightWeightSet<number>();
+    for (let i = 0; i < 10; i++) {
         lightWeightSet.add(i);
     }
-    lightWeightSet.forEach((value, index: double, lightWeightSet: LightWeightSet<double>) => {
+    lightWeightSet.forEach((value, index: number, lightWeightSet: LightWeightSet<number>) => {
         arktest.assertEQ(lightWeightSet.getIndexOf(value), index);
     });
 }
@@ -140,7 +140,7 @@ function test$_iteratorWithMultipleStringElements() {
     let iter = lightWeightSet.$_iterator();
     let temp: IteratorResult<string> = iter.next();
     let itemArr = ["sparrow", "squirrel"]
-    let i: int = 0;
+    let i = 0;
     while (!temp.done) {
         arktest.assertEQ(temp.value, itemArr[i]);
         i++;

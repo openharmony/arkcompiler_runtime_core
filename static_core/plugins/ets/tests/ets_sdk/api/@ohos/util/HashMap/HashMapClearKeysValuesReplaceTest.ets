@@ -45,7 +45,7 @@ function main(): int {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_CLEAR_0100
 function testClearEmptyMap() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     hashMap.clear();
     arktest.assertEQ(hashMap.length, 0);
     arktest.assertEQ(hashMap.get('ji'), undefined);
@@ -54,7 +54,7 @@ function testClearEmptyMap() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_CLEAR_0200
 function testClearPopulatedMap() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     hashMap.set("ji", 12);
     hashMap.clear();
     arktest.assertEQ(hashMap.length, 0);
@@ -64,7 +64,7 @@ function testClearPopulatedMap() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_CLEAR_0300
 function testClearSetSameKey() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     hashMap.set("ji", 12);
     hashMap.clear();
     hashMap.set("ji", 13);
@@ -72,7 +72,7 @@ function testClearSetSameKey() {
 }
 
 function testClearSetNewKey() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     hashMap.set("ji", 12);
     hashMap.clear();
     hashMap.set("sparrow", 13);
@@ -81,14 +81,14 @@ function testClearSetNewKey() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_KEYS_0100
 function testKeysEmpty() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     let keys = hashMap.keys();
     arktest.assertTrue(keys.next().done, "Empty HashMap: keys iterator .next().done is true");
 }
 
 //Test cases ported from ArkTS 1.0:HASHMAP_KEYS_0200
 function testKeysPopulated() {
-    const hashMap = new HashMap<double, double>();
+    const hashMap = new HashMap<number, number>();
     hashMap.set(0, 1);
     hashMap.set(1, 2);
     hashMap.set(2, 3);
@@ -103,7 +103,7 @@ function testKeysPopulated() {
 }
 
 function testKeysEmptyThenPopulated() {
-    const hashMap = new HashMap<double, double>();
+    const hashMap = new HashMap<number, number>();
     let result = hashMap.keys();
     arktest.assertTrue(result.next().done, "Empty HashMap: keys iterator .next().done is true");
 
@@ -122,14 +122,14 @@ function testKeysEmptyThenPopulated() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_VALUES_0100
 function testValuesEmpty() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     let keys = hashMap.values();
     arktest.assertTrue(keys.next().done, "values().next().done should be true for an empty HashMap");
 }
 
 //Test cases ported from ArkTS 1.0:HASHMAP_VALUES_0200
 function testValuesPopulated() {
-    const hashMap = new HashMap<double, double>();
+    const hashMap = new HashMap<number, number>();
     hashMap.set(0, 1);
     hashMap.set(1, 2);
     hashMap.set(2, 3);
@@ -144,7 +144,7 @@ function testValuesPopulated() {
 }
 
 function testValuesEmptyThenPopulated() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     let result = hashMap.values();
     arktest.assertTrue(result.next().done, "values().next().done should be true for an empty HashMap");
 
@@ -163,33 +163,33 @@ function testValuesEmptyThenPopulated() {
 
 //Test cases ported from ArkTS 1.0:HASHMAP_REPLACE_0100
 function testReplaceEmptyMapEmptyKey() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     arktest.assertFalse(hashMap.replace('', 1), "Replacing non-existent empty string key in empty map should fail");
 }
 
 //Test cases ported from ArkTS 1.0:HASHMAP_REPLACE_0400
 function testReplaceEmptyMapNonExistKey() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     arktest.assertFalse(hashMap.replace('key', 1), "Replacing non-existent 'key' in empty map should fail");
 }
 
 //Test cases ported from ArkTS 1.0:HASHMAP_REPLACE_0500
 function testReplaceExistKeySameValue() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     hashMap.set("ji", 1);
     arktest.assertTrue(hashMap.replace('ji', 1), "Replacing existing key with the same value should succeed");
 }
 
 //Test cases ported from ArkTS 1.0:HASHMAP_REPLACE_0600
 function testReplaceExistKeyDiffValue() {
-    const hashMap = new HashMap<string, double>();
+    const hashMap = new HashMap<string, number>();
     hashMap.set("ji", 1);
     arktest.assertTrue(hashMap.replace('ji', 2), "Replacing existing key with a different value should succeed");
 }
 
 //Test cases ported from ArkTS 1.0:HASHMAP_REPLACE_0700
 function testReplaceNonExistNumKey() {
-    const hashMap = new HashMap<double, double>();
+    const hashMap = new HashMap<number, number>();
     hashMap.set(2, 1);
     arktest.assertFalse(hashMap.replace(1, 2), "Replacing non-existent numeric key in populated map should fail");
 }
@@ -198,7 +198,7 @@ class Tmp {
     name: number = 0
 }
 function testReplaceExistNumKeyObjValue() {
-    const hashMap = new HashMap<double, Tmp>();
+    const hashMap = new HashMap<number, Tmp>();
     let paramOne: Tmp = {
         name: 1
     };
@@ -232,7 +232,7 @@ class Age {
     age: number = 0
 }
 function testReplaceNonExistObjKey() {
-    const hashMap = new HashMap<Age, double>();
+    const hashMap = new HashMap<Age, number>();
     let paramOne: Age = {
         age: 18
     };

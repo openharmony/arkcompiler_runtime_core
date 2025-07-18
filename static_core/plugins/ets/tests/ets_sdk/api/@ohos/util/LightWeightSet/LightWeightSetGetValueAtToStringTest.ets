@@ -31,7 +31,7 @@ function main(): int {
         testToStringAfterAddingDuplicateStringElements)
     suite.addTest("Test LightWeightSet toString() with a string representing object properties",
         testToStringWithAStringRepresentingObjectProperties)
-    suite.addTest("Test LightWeightSet toString() with a double element", testToStringWithANumberElement)
+    suite.addTest("Test LightWeightSet toString() with a number element", testToStringWithANumberElement)
 
     return suite.run()
 }
@@ -123,8 +123,8 @@ function testToStringWithAStringRepresentingObjectProperties() {
 
 //Test cases ported from ArkTS 1.0:LIGHTWEIGHTSET_4800
 function testToStringWithANumberElement() {
-    let value: double = 1024000;
-    let lightWeightSet = new LightWeightSet<double>();
+    let value: number = 1024000;
+    let lightWeightSet = new LightWeightSet<number>();
     lightWeightSet.add(value);
     let result = lightWeightSet.toString();
     arktest.assertEQ(result, value + '');

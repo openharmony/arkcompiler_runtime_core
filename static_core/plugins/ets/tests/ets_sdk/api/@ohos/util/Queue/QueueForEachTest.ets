@@ -37,7 +37,7 @@ function main() {
 
 // Test cases ported from ArkTS 1.0: QUEUE_1000
 function testQueueForEachWithArray() {
-    let queue = new Queue<double | string | object>();
+    let queue = new Queue<number | string | object>();
     let a: C1 = {
         name: "Dylon", age: "13"
     };
@@ -58,7 +58,7 @@ function testQueueForEachWithArray() {
 
 // Test cases ported from ArkTS 1.0: QUEUE_[SYMBOL.ITERATOR]_1100
 function testQueueSymbolIteratorUsage() {
-    let queue = new Queue<double | string | object>();
+    let queue = new Queue<number | string | object>();
     let a: C1 = {
         name: "Dylon", age: "13"
     };
@@ -70,7 +70,7 @@ function testQueueSymbolIteratorUsage() {
     let expectedValues = [a, b, c];
     let iter = queue.$_iterator();
     let temp = iter.next();
-    for (let i: int = 0; i < 3; i++) {
+    for (let i = 0; i < 3; i++) {
         arktest.assertFalse(temp.done, `Iteration ${i + 1}: done should be false`);
         arktest.assertEQ(temp.value, expectedValues[i]);
         temp = iter.next();
@@ -81,7 +81,7 @@ function testQueueSymbolIteratorUsage() {
 
 // Test cases ported from ArkTS 1.0: QUEUE_[SYMBOL.ITERATOR]_1200
 function testQueueLengthWithPop() {
-    let queue = new Queue<double | string | object>();
+    let queue = new Queue<number | string | object>();
     let a: C1 = {
         name: "Dylon", age: "13"
     };
@@ -102,7 +102,7 @@ function testQueueLengthWithPop() {
 
 // Test cases ported from ArkTS 1.0: QUEUE_1300
 function testQueueForEachLengthValidation() {
-    let queue = new Queue<double | string | object>();
+    let queue = new Queue<number | string | object>();
     let a: C1 = {
         name: "Dylon", age: "13"
     };
@@ -121,7 +121,7 @@ function testQueueForEachLengthValidation() {
 
 // Test cases ported from ArkTS 1.0: QUEUE_1400
 function testQueueForEachValueValidation() {
-    let queue = new Queue<double | string | object>();
+    let queue = new Queue<number | string | object>();
     let a: C1 = {
         name: "Dylon", age: "13"
     };
@@ -136,7 +136,7 @@ function testQueueForEachValueValidation() {
 
 // Test cases ported from ArkTS 1.0: QUEUE_1500
 function testQueueForEachValueAndIndexValidation() {
-    let queue = new Queue<double | string | object>();
+    let queue = new Queue<number | string | object>();
     let a: C1 = {
         name: "Dylon", age: "13"
     };
@@ -152,7 +152,7 @@ function testQueueForEachValueAndIndexValidation() {
 
 // Test cases ported from ArkTS 1.0: QUEUE_1600
 function testQueueForEachSingleElement() {
-    let queue = new Queue<double | string | object>();
+    let queue = new Queue<number | string | object>();
     queue.add(1);
     let count = 0;
     queue.forEach((value, index, queue): void => {

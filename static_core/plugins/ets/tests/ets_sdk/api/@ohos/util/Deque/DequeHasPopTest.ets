@@ -50,10 +50,10 @@ function testHasStringElement() {
 
 // Test cases ported from ArkTS 1.0: DEQUE_1000
 function testHasNumericElement() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     deque.insertFront(1);
     let result = deque.has(1);
-    arktest.assertTrue(result, "Deque should contain the double 1");
+    arktest.assertTrue(result, "Deque should contain the number 1");
 }
 
 // Test cases ported from ArkTS 1.0: DEQUE_1100
@@ -69,7 +69,7 @@ function testHasObjectElement() {
 
 // Test cases ported from ArkTS 1.0: DEQUE_1200
 function testPopFirstAndRetrieveNewFirst() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     deque.insertFront(1);
     deque.insertFront(2);
     deque.insertEnd(3);
@@ -81,7 +81,7 @@ function testPopFirstAndRetrieveNewFirst() {
 
 // Test cases ported from ArkTS 1.0: DEQUE_1300
 function testPopFirstFromEmptyDeque() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     deque.popFirst();
     let result = deque.getFirst();
     arktest.assertEQ(result, undefined);
@@ -89,7 +89,7 @@ function testPopFirstFromEmptyDeque() {
 
 // Test cases ported from ArkTS 1.0: DEQUE_1500
 function testGetFirstFromEmptyDeque() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     deque.popLast();
     let result = deque.getFirst();
     arktest.assertEQ(result, undefined);
@@ -97,7 +97,7 @@ function testGetFirstFromEmptyDeque() {
 
 // Test cases ported from ArkTS 1.0: DEQUE_1600
 function testGetLastAfterMultipleInserts() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     deque.insertFront(1);
     deque.insertFront(2);
     deque.insertEnd(4);
@@ -108,14 +108,14 @@ function testGetLastAfterMultipleInserts() {
 
 // Test cases ported from ArkTS 1.0: DEQUE_1700
 function testGetLastFromEmptyDeque() {
-    let deque = new Deque<double>();
+    let deque = new Deque<number>();
     let result = deque.getLast();
     arktest.assertEQ(result, undefined);
 }
 
 // Test cases ported from ArkTS 1.0: DEQUE_1800
 function testForEachIteration() {
-    let deque = new Deque<double | string | object>();
+    let deque = new Deque<number | string | object>();
     let a: C1 = {
         name: "Dylon", age: "13"
     };
@@ -134,8 +134,8 @@ function testForEachIteration() {
 
 // Test cases ported from ArkTS 1.0: DEQUE_1800 tesForeach0019
 function testForEachAndVerifyStructure() {
-    let deque = new Deque<double | string | object>();
-    let res = new Deque<double | string | object>();
+    let deque = new Deque<number | string | object>();
+    let res = new Deque<number | string | object>();
     let a: C1 = {
         name: "Dylon", age: "13"
     };

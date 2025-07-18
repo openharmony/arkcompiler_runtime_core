@@ -15,7 +15,7 @@
 
 import Deque from "@ohos.util.Deque";
 
-export type QueueForEachCb<T> = (value: T, index: int, queue: Queue<T>) => void;
+export type QueueForEachCb<T> = (value: T, index: number, queue: Queue<T>) => void;
 
 export class Queue<T> implements Iterable<T> {
     private buffer: Deque<T>;
@@ -23,8 +23,8 @@ export class Queue<T> implements Iterable<T> {
     /**
      * Gets the number of elements in the Queue.
      */
-    get length(): int {
-        return this.buffer.length.toInt();
+    get length(): number {
+        return this.buffer.length;
     }
 
     /**
@@ -56,7 +56,7 @@ export class Queue<T> implements Iterable<T> {
      * @param callbackfn - The function to execute on each element, taking the value, index, and Queue as arguments.
      */
     public forEach(callbackfn: QueueForEachCb<T>): void {
-        this.buffer.forEach(((val: T, idx) => callbackfn(val, idx.toInt(), this)));
+        this.buffer.forEach(((val: T, idx: number) => callbackfn(val, idx, this)));
     }
 
     /**
