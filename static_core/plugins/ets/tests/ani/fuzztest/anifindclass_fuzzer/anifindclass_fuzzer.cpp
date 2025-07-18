@@ -35,7 +35,8 @@ void AniFindClassFuzzTest(const char *data, size_t size)
     ani_env *env {};
     engine->GetAniEnv(&env);
     ani_class cls {};
-    env->FindClass(data, &cls);
+    std::string input(data, size);
+    env->FindClass(input.c_str(), &cls);
 }
 }  // namespace OHOS
 

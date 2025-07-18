@@ -38,7 +38,8 @@ void AniClassCallStaticMethodByNameLongFuzzTest(const char *data, size_t size)
     env->FindClass("std.core.Int", &intCls);
 
     ani_long res {};
-    env->Class_CallStaticMethodByName_Long(intCls, data, nullptr, &res);
+    std::string input(data, size);
+    env->Class_CallStaticMethodByName_Long(intCls, input.c_str(), nullptr, &res);
 }
 }  // namespace OHOS
 

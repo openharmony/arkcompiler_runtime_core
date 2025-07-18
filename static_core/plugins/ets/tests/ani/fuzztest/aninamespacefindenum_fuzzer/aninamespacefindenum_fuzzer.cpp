@@ -37,7 +37,8 @@ void AniNamespaceFindEnumFuzzTest(const char *data, size_t size)
     ani_namespace ns {};
     env->FindNamespace("escompat.taskpool", &ns);
     ani_enum e {};
-    env->Namespace_FindEnum(ns, data, &e);
+    std::string input(data, size);
+    env->Namespace_FindEnum(ns, input.c_str(), &e);
 }
 }  // namespace OHOS
 

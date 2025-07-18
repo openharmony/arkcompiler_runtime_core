@@ -38,7 +38,8 @@ void AniClassFindStaticMethodFuzzTest(const char *data, size_t size)
     ani_class cls {};
     env->FindClass("std.core.String", &cls);
     ani_static_method staticMethod {};
-    env->Class_FindStaticMethod(cls, data, nullptr, &staticMethod);
+    std::string input(data, size);
+    env->Class_FindStaticMethod(cls, input.c_str(), nullptr, &staticMethod);
 }
 }  // namespace OHOS
 
