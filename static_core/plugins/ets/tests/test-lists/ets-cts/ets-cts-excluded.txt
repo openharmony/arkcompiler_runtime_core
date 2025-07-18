@@ -29,34 +29,6 @@
 03.types/06.value_types/02.integer_types_and_operations/multiplication/multiplication_char_4.ets
 03.types/06.value_types/02.integer_types_and_operations/multiplication/multiplication_char_6.ets
 
-#not clear behaviour for union types, some tests pass, some fail
-# to discuss with spec writers
-# union types can contain several numerics
-03.types/20.union_types/ut_n2_1.ets
-03.types/20.union_types/ut_n2_10.ets
-03.types/20.union_types/ut_n2_11.ets
-03.types/20.union_types/ut_n2_13.ets
-03.types/20.union_types/ut_n2_14.ets
-03.types/20.union_types/ut_n2_15.ets
-03.types/20.union_types/ut_n2_16.ets
-03.types/20.union_types/ut_n2_17.ets
-03.types/20.union_types/ut_n2_2.ets
-03.types/20.union_types/ut_n2_20.ets
-03.types/20.union_types/ut_n2_21.ets
-03.types/20.union_types/ut_n2_24.ets
-03.types/20.union_types/ut_n2_25.ets
-03.types/20.union_types/ut_n2_28.ets
-03.types/20.union_types/ut_n2_29.ets
-03.types/20.union_types/ut_n2_3.ets
-03.types/20.union_types/ut_n2_32.ets
-03.types/20.union_types/ut_n2_33.ets
-03.types/20.union_types/ut_n2_36.ets
-03.types/20.union_types/ut_n2_37.ets
-03.types/20.union_types/ut_n2_5.ets
-03.types/20.union_types/ut_n2_6.ets
-03.types/20.union_types/ut_n2_7.ets
-03.types/20.union_types/ut_n2_9.ets
-
 # primitives
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/assn_var/assn-var_0.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_arr/comp-arr_0.ets

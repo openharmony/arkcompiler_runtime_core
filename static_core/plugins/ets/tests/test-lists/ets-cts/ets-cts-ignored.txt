@@ -50,6 +50,10 @@
 03.types/20.union_types/united_switch_ext_9.ets
 03.types/20.union_types/united_switch_ext_10.ets
 
+#26229 Implement overload
+03.types/20.union_types/02.access_to_common_union_members/cm_meth1_0.ets
+03.types/20.union_types/02.access_to_common_union_members/cm_meth1_16.ets
+
 #24420
 03.types/20.union_types/ut_34.ets
 

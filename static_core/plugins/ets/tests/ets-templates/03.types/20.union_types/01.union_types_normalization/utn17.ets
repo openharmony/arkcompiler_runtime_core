@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,13 @@
  * limitations under the License.
  */
 
-{%- for t1 in types %}
-{%- for t2 in types1 %}
-{%- if t1.upper() != t2.upper() %}
-
 /*---
-desc: When a union type contains multiple numeric types, it will not cause a compile-time error..
+desc: Test union type normalization(Any | string).
 ---*/
-type UT1 = {{t1}} | {{t2}}
-let v:UT1 = 0 as {{t1}}
-function main() {}
 
-{%- endif %}
-{%- endfor %}
-{%- endfor %}
+function main(): void {
+    type A = Any | string;
+
+    let a: A = ((): int => { return 5 })();
+    arktest.assertTrue(a instanceof Int);
+}
