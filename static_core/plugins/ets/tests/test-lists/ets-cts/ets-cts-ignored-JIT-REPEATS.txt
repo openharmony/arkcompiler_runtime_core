@@ -32,6 +32,9 @@
 #27290
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/oome1.ets
 
+#27987 
+09.classes/02.class_extension_clause/class_superclass_non_private/class_no_pri29.ets
+
 #26038
 10.interfaces/06.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_15.ets
 

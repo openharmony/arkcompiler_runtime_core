@@ -1,5 +1,0 @@
-#22377
-17.experimental_features/15.coroutines/create_and_launch_coroutine/c_func_14.ets
-
-#22379
-17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_14.ets

@@ -871,7 +871,7 @@
 07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_cte_n_5.ets
 07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_cte_n_6.ets
 
-#26256 Uninitialized value access
+#28003
 07.expressions/17.typeof_expression/tof_const_11.ets
 
 #19951
