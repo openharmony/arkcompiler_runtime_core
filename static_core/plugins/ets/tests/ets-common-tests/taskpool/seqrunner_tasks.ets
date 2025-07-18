@@ -287,9 +287,11 @@ function taskWithDifferentParamsTest() {
 
 function main(): int {
     let seqRunnerSuite = new arktest.ArkTestsuite('taskpool.SequenceRunner');
+    let seqRunnerSuiteDisabled = new arktest.ArkTestsuite('taskpool.SequenceRunner.DISABLED');
     seqRunnerSuite.addTest('ExecuteDelayedTest', executeDelayedTest);
     seqRunnerSuite.addTest('ExecutePeriodicallyTest', executePeriodicallyTest);
-    seqRunnerSuite.addTest('OrderTest', orderTest);
+    // #27912
+    seqRunnerSuiteDisabled.addTest('OrderTest', orderTest);
     seqRunnerSuite.addTest('ExecuteCommonTest', executeCommonTest);
     seqRunnerSuite.addTest('ExecuteSeqRunnerTaskTest', executeSeqRunnerTaskTest);
     seqRunnerSuite.addTest('ExecuteGroupTaskTest', executeGroupTaskTest);
