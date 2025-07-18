@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,10 @@
 
 /*---
 desc: >-
-    The choice of the method of o.m(...)call depends on the methods
-    comprising the class or interface of the o type.
+    After the type to use is known, the method to call must be determined.
+    If a method name in the call refers an overload declaration (see Overload Declarations),
+    then Overload Resolution for Overload Declarations is used to select the method to call.
+    A compile-time error occurs if no method is available to call.
 ---*/
 
 interface I {
@@ -40,13 +42,13 @@ function main(): int {
     if (!a.meth("X").equals("XA")) return 1;
 
     a = new B();
-    if (!a.meth("Y").equals("YAB")) return 1;
+    if (!a.meth("Y").equals("YAB")) return 2;
 
     let i: I = new A();
-    if (!i.meth("Z").equals("ZA")) return 1;
+    if (!i.meth("Z").equals("ZA")) return 3;
 
     i = new B();
-    if (!i.meth("W").equals("WAB")) return 1;
+    if (!i.meth("W").equals("WAB")) return 4;
 
     return 0;
 }

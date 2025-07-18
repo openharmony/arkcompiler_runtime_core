@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,30 +13,28 @@
  * limitations under the License.
  */
 
+{% for t in cases %}
 /*---
 desc: >-
-    The value of a type T expression is always suitable for
-    assignment to a type T variable; it means that unless heap
-    pollution occurs
-tags: [compile-only, negative]
+    The result of an as expression is the result of the evaluated expr
+    if the actual type of expr is a subtype of target (see Subtyping).
+    Otherwise, ClassCastError is thrown.
 ---*/
 
-class BBox<T> {
-    private v: T;
-
-    public set(v: T): void {
-      this.v = v;
-    }
-
-    public get(): T {
-      return this.v;
-    }
-}
+interface I {}
+interface J {}
+interface K {}
+class A implements I {}
+class B extends A implements J {}
 
 function main(): int {
-    let intBBox: BBox<Int> = new BBox<Int>();
-    intBBox.set(42);
-
-    let obj: Object = intBBox;
-    let stringBBox: BBox<String> = obj as BBox<String>;  // CTE TypeError: Type BBox<Int> cannot cast to type BBox<String>
+    {{t.init}};
+    try {
+        {{t.expr}};
+        return {{t.fail}};
+    } catch (e) {
+      if (! e instanceof ClassCastError) return 1;
+      return 1 - {{t.fail}};
+    }
 }
+{% endfor %}
