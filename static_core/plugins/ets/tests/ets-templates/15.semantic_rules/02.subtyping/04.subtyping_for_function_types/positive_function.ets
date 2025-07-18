@@ -26,23 +26,25 @@ desc: >-
         – FPi is a rest parameter if SPi is a rest parameter.
         – FPi is an optional parameter if SPi is an optional parameter.
     • FR can be any type if SR is type void. Otherwise, the resultant type FR is a subtype of SR (covariance).
-tags: [{{c.compileonly}}]
 ---*/
 
 class Base {}
 class Derived extends Base {}
 
-let bb: (p: Base) => Base = (p: Base) => { return new Base }
-let bd: (p: Base) => Derived = (p: Base) => { return new Derived }
-let db: (p: Derived) => Base = (p: Derived) => { return new Base }
-let dd: (p: Derived) => Derived = (p: Derived) => { return new Derived }
+//function references
+function fooBB(p: Base): Base { return p};
+function fooBD(p: Base): Derived { return new Derived()};
+function fooDB(p: Derived): Base { return new Base()};
+function fooDD(p: Derived): Derived { return p};
+
+let foobb = fooBB
+let foobd = fooBD
+let foodb = fooDB
+let foodd = fooDD
 
 {{c.decl}}
 
 function main() {
-    let exceptionCheck = (e: Error|Exception): boolean|String => {
-        return e instanceof ClassCastError
-    }
     {{c.check}}
 }
 

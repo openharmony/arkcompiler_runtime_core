@@ -13,15 +13,51 @@
 
 ---
 cases:
-    - |-
-          let f: () => Base = bb // Compile-time error: too less parameters
-    - |-
+    - decl: |-
+          let f: () => Base = bb // Compile-time error: too few parameters
+      compileonly: |-
+          negative, compile-only
+    - decl: |-
           bb = dd // Compile-time error: parameter type are not contravariant
-    - |-
+      compileonly: |-
+          negative, compile-only
+    - decl: |-
           bd = db // Compile-time error: return types are not covariant
-    - |-
+      compileonly: |-
+          negative, compile-only
+    - decl: |-
           function foo(p: Base): void {}
           let f: (p?: Base) => void = foo // Compile-time error: subtype parameter isn't optional
-    - |-
+      compileonly: |-
+          negative, compile-only
+    - decl: |-
           function foo(p: Base[]): void {}
           let f: (...p: Base[]) => void = foo // Compile-time error: subtype parameter isn't rest
+      compileonly: |-
+          negative, compile-only
+    - decl: |-  
+          let fn = (n: number) : number => { return n }
+          let f = fn as ((n: Object) => number)
+      check: |-
+          arktest.expectThrow(() => { f(new Object()); }, exceptionCheck);
+    - decl: |-
+          let fn = (n: number) : number => { return n }
+          let f = fn as ((...n: number[]) => number)
+      compileonly: |-
+          negative, compile-only
+    - decl: |-
+          let fn = (d: Derived) : Base => { return d }
+      check: |-
+          fn(new Base())
+      compileonly: |-
+          negative, compile-only
+    - decl: |-
+          let fn = (d: Derived) : Base => { return d }
+          let f = fn as ((b : Base) => Base)
+      check: |-
+          arktest.expectThrow(() => { f(new Base()); }, exceptionCheck);
+    - decl: |-
+          let fn = (d: Derived) : Base => { return d }
+          let f = fn as ((b: Base) => Derived) 
+      check: |-
+          arktest.expectThrow(() => { f(new Base()); }, exceptionCheck);

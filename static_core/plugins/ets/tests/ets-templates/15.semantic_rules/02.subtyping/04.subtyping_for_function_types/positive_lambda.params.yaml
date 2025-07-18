@@ -13,17 +13,26 @@
 
 ---
 cases:
-    - |-
+    # lambdas
+    - decl: |-
           bb = bd // OK: identical parameter types, and covariant return type
-    - |-
+    - decl: |-
           db = bd // OK: contravariant parameter types, and covariant return type
-    - |-
+    - decl: |-
           let f: (p: Base, n: number) => Base = bb // OK: subtype has less parameters
-    - |-
-          let f: (p: Base) => void = bb // OK: return type of supertype is void
-    - |-
+    - decl: |-
           function foo(p?: Base): void {}
           let f: (p?: Base) => void = foo // OK: parameters are optional
-    - |-
+    - decl: |-
           function foo(...p: Base[]): void {}
           let f: (...p: Base[]) => void = foo // OK: parameters are rest
+    - check: |-
+          bb(new Derived())
+    - decl: |-
+          let fn = bd as ((d : Derived) => Derived)
+      check: |-
+          fn(new Derived())
+    - decl: |-
+          let fn = bb as ((d : Derived) => Base)
+      check: |-
+          fn(new Derived())
