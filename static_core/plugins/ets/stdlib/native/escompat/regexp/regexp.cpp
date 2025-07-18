@@ -17,15 +17,16 @@
 
 #include "regexp_8.h"
 #include "regexp_16.h"
-#include "plugins/ets/runtime/ets_exceptions.h"
+
+#include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include "pcre2.h"
 
-namespace ark::ets {
+namespace ark::ets::stdlib {
 
-bool EtsRegExp::Compile(const PandaVector<uint8_t> &pattern, const bool isUtf16, const int len)
+bool EtsRegExp::Compile(const std::vector<uint8_t> &pattern, const bool isUtf16, const int len)
 {
     utf16_ |= isUtf16;
     uint32_t flags = 0U;
@@ -60,7 +61,7 @@ bool EtsRegExp::Compile(const PandaVector<uint8_t> &pattern, const bool isUtf16,
     return re_ != nullptr;
 }
 
-RegExpExecResult EtsRegExp::Execute(const PandaVector<uint8_t> &str, const int len, const int startOffset)
+RegExpExecResult EtsRegExp::Execute(const std::vector<uint8_t> &str, const int len, const int startOffset)
 {
     RegExpExecResult result;
     if (utf16_) {
@@ -85,28 +86,26 @@ void EtsRegExp::SetUnicodeFlag(const char &chr)
 {
     if (chr == 'u') {
         if (flagUnicode_ || flagVnicode_) {
-            ThrowBadFlagsException();
+            ThrowBadFlagsException(env_);
         }
         flagUnicode_ = true;
     } else if (chr == 'v') {
         if (flagVnicode_ || flagUnicode_) {
-            ThrowBadFlagsException();
+            ThrowBadFlagsException(env_);
         }
         flagVnicode_ = true;
     }
 }
 
-void EtsRegExp::ThrowBadFlagsException()
+void EtsRegExp::ThrowBadFlagsException(ani_env *env)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    ThrowEtsException(coroutine, panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_EXCEPTION,
-                      "invalid regular expression flags");
+    ThrowNewError(env, "Lstd/core/RuntimeException;", "invalid regular expression flags");
 }
 
 void EtsRegExp::SetIfNotSet(bool &flag)
 {
     if (flag) {
-        ThrowBadFlagsException();
+        ThrowBadFlagsException(env_);
     }
     flag = true;
 }
@@ -138,16 +137,12 @@ void EtsRegExp::SetFlag(const char &chr)
     }
 }
 
-void EtsRegExp::SetFlags(EtsString *flagsStr)
+void EtsRegExp::SetFlags(const std::string &flagsStr)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-    VMHandle<EtsString> flagsHandle(coroutine, flagsStr->GetCoreType());
-    ASSERT(flagsHandle.GetPtr() != nullptr);
-    for (int i = 0; i < flagsHandle.GetPtr()->GetLength(); i++) {
-        SetFlag(flagsHandle.GetPtr()->At(i));
+    for (const auto &c : flagsStr) {
+        SetFlag(c);
     }
     utf16_ |= flagUnicode_;
 }
 
-}  // namespace ark::ets
+}  // namespace ark::ets::stdlib

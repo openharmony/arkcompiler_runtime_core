@@ -71,7 +71,7 @@ function checkTestResult(actual: int, expected: int) : int {
 
 
 
-function checkTestResult(actual : RegExpExecArray | null, expected : RegExpExecArray | null) : int {
+function checkTestResult(actual : RegExpMatchArray | null, expected : RegExpMatchArray | null) : int {
     if (actual == null && expected == null) {
         return 0;
     }
@@ -121,8 +121,8 @@ function checkTestResult(actual : RegExpExecArray | null, expected : RegExpExecA
     }
 
     for (let i = 0; i < actual.indices.length; i++) {
-        let actInd = (reflect.Value.of(actual.indices) as ArrayValue).getElement(i).getData() as FixedArray<number>
-        let expInd = (reflect.Value.of(expected.indices) as ArrayValue).getElement(i).getData() as FixedArray<number>
+        let actInd = actual.indices[i]
+        let expInd = expected.indices[i]
         for (let j = 0; j < actInd.length; j++) {
             if (actInd[j] != expInd[j]) {
             console.println("check index: " + i);

@@ -13,13 +13,20 @@
  * limitations under the License.
  */
 
-function checkTestResult(actual : RegExpExecArray | null, expected : RegExpExecArray | null) : int {
+ function checkTestResult(actual: RegExpExecArray | RegExpMatchArray | null, expected: RegExpExecArray | RegExpMatchArray | null) : int {
   if (actual == null && expected == null) {
-     return 0;
+    return 0;
   }
   if (actual == null || expected == null) {
-     return 1;
+    return 1;
   }
+  if (actual instanceof RegExpExecArray) {
+    return checkTestResultExecArray(actual as RegExpExecArray, expected as RegExpExecArray)
+  }
+  return checkTestResultMatchArray(actual as RegExpMatchArray, expected as RegExpMatchArray)
+ }
+
+function checkTestResultMatchArray(actual : RegExpMatchArray, expected : RegExpMatchArray) : int {
 
   if (actual.isCorrect != expected.isCorrect) {
      console.println("isCorrect field of actual is not equals to expected")
@@ -53,8 +60,55 @@ function checkTestResult(actual : RegExpExecArray | null, expected : RegExpExecA
   }
 
   for (let i = 0; i < actual.indices.length; i++) {
-    let actInd = (reflect.Value.of(actual.indices) as ArrayValue).getElement(i).getData() as FixedArray<number>
-    let expInd = (reflect.Value.of(expected.indices) as ArrayValue).getElement(i).getData() as FixedArray<number>
+    let actInd = actual.indices[i]
+    let expInd = expected.indices[i]
+    for (let j = 0; j < actInd.length; j++) {
+      if (actInd[j] != expInd[j]) {
+        console.println("check index: " + i);
+        console.println("content of result array from actual is not equals to expected");
+        console.println("actual  : " + actInd[j]);
+        console.println("expected : " + expInd[j]);
+      }
+    }
+  }
+  return 0;
+}
+
+function checkTestResultExecArray(actual : RegExpExecArray, expected : RegExpExecArray) : int {
+  if (actual.isCorrect != expected.isCorrect) {
+     console.println("isCorrect field of actual is not equals to expected")
+     console.println("actual.isCorrect : " + actual.isCorrect)
+     console.println("expected.isCorrect : " + expected.isCorrect)
+     return 1;
+  }
+
+  if (actual.index != expected.index) {
+     console.println("index field of actual is not equals to expected")
+     console.println("actual.index : " + actual.index)
+     console.println("expected.index : " + expected.index)
+     return 1;
+  }
+
+  if (actual.result.length != expected.result.length) {
+    console.println("size of result array of actual is not equals to expected")
+    console.println("actual size : " + actual.result.length);
+    console.println("expected size : " + expected.result.length);
+    return 1;
+  }
+
+  for (let i = 0; i < actual.result.length; i++ ) {
+     if (!actual.result[i].equals(expected.result[i])) {
+        console.println ("check index : " + i);
+        console.println("content of result array from actual is not equals to expected");
+        console.println("actual  : " + actual.result[i]);
+        console.println("expected : " + expected.result[i]);
+        return 1;
+     }
+  }
+
+  for (let i = 0; i < actual.indices.length; i++) {
+    let actInd = actual.indices[i]
+    let expInd = expected.indices[i]
     for (let j = 0; j < actInd.length; j++) {
       if (actInd[j] != expInd[j]) {
         console.println("check index: " + i);
