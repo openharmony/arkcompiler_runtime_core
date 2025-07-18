@@ -293,9 +293,9 @@ export function isSafeInteger(v: long): boolean {
  * Execute function on the next cycle.
  *
  * @param { Function } func - the function to be executed on the next cycle.
- * @returns { number } timer id
+ * @returns { int } timer id
  */
-export function setTimeout(func: Function): number {
+export function setTimeout(func: Function): int {
     return setTimeout(func, 0);
 }
 
@@ -303,11 +303,11 @@ export function setTimeout(func: Function): number {
  * Execute function with parameters after the timer expires.
  *
  * @param { Function } func - the function to be executed after the timer expires.
- * @param { number } delayMs - timeout in milliseconds, decimals will be rounded down.
+ * @param { int } delayMs - timeout in milliseconds.
  * @param { ...NullishType } args - parameters passed to func.
- * @returns { number } timer id
+ * @returns { int } timer id
  */
-export function setTimeout(func: Function, delayMs: number, ...args: FixedArray<NullishType>): number {
+export function setTimeout(func: Function, delayMs: int, ...args: FixedArray<NullishType>): int {
     return startTimer((): void => { func.unsafeCall(...args) }, delayMs, false);
 }
 
@@ -315,9 +315,9 @@ export function setTimeout(func: Function, delayMs: number, ...args: FixedArray<
  * Print error message on the next cycle.
  *
  * @param { string } msg - the message to be printed on the next cycle.
- * @returns { number } timer id
+ * @returns { int } timer id
  */
-export function setTimeout(msg: string): number {
+export function setTimeout(msg: string): int {
     return setTimeout(():void => {
         console.error(msg)
     }, 0);
@@ -327,10 +327,10 @@ export function setTimeout(msg: string): number {
  * Print error message after the timer expires.
  *
  * @param { string } msg - the message to be printed after the timer expires.
- * @param { number } delayMs - timeout in milliseconds, decimals will be rounded down.
- * @returns { number } timer id
+ * @param { int } delayMs - timeout in milliseconds.
+ * @returns { int } timer id
  */
-export function setTimeout(msg: string, delayMs: number): number {
+export function setTimeout(msg: string, delayMs: int): int {
     return setTimeout(():void => {
         console.error(msg)
     }, delayMs);
@@ -339,9 +339,9 @@ export function setTimeout(msg: string, delayMs: number): number {
 /**
  * Cancel the specified timer.
  *
- * @param { number } timerId - the id of the timer returned from setTimeout.
+ * @param { int } timerId - the id of the timer returned from setTimeout.
  */
-export function clearTimeout(timerId: number): void {
+export function clearTimeout(timerId: int): void {
     stopTimer(timerId);
 }
 
@@ -349,9 +349,9 @@ export function clearTimeout(timerId: number): void {
  * Repeatedly do asynchronous call of the function.
  *
  * @param { Function } func - the function to be executed.
- * @returns { number } timer id
+ * @returns { int } timer id
  */
-export function setInterval(func: Function): number {
+export function setInterval(func: Function): int {
     return setInterval(func, 0);
 }
 
@@ -359,11 +359,11 @@ export function setInterval(func: Function): number {
  * Repeatedly call the function with delayMs interval between calls. The first call will be after delayMs.
  *
  * @param { Function } func - the function to be executed.
- * @param { number } delayMs - timeout in milliseconds.
+ * @param { int } delayMs - timeout in milliseconds.
  * @param { ...NullishType } args - parameters passed to func.
- * @returns { number } - timer id
+ * @returns { int } - timer id
  */
-export function setInterval(func: Function, delayMs: number, ...args: FixedArray<NullishType>): number {
+export function setInterval(func: Function, delayMs: int, ...args: FixedArray<NullishType>): int {
     return startTimer((): void => { func.unsafeCall(...args) }, delayMs, true);
 }
 
@@ -371,9 +371,9 @@ export function setInterval(func: Function, delayMs: number, ...args: FixedArray
  * Repeatedly print the error message asynchronously.
  *
  * @param { string } msg - the message to be printed.
- * @returns { number } - timer id
+ * @returns { int } - timer id
  */
-export function setInterval(msg: string): number {
+export function setInterval(msg: string): int {
     return setInterval(():void => {
         console.error(msg)
     }, 0);
@@ -383,10 +383,10 @@ export function setInterval(msg: string): number {
  * Repeatedly print the error message with delayMs interval between calls. The first print will be after delayMs.
  *
  * @param { string } msg - the message to be printed.
- * @param { number } delayMs - timeout in milliseconds.
- * @returns { number } timer id
+ * @param { int } delayMs - timeout in milliseconds.
+ * @returns { int } timer id
  */
-export function setInterval(msg: string, delayMs: number): number {
+export function setInterval(msg: string, delayMs: int): int {
     return setInterval(():void => {
         console.error(msg)
     }, delayMs)
@@ -395,28 +395,28 @@ export function setInterval(msg: string, delayMs: number): number {
 /**
  * Cancel the specified timer.
  *
- * @param { number } timerId - the id of the timer returned from setInterval.
+ * @param { int } timerId - the id of the timer returned from setInterval.
  */
-export function clearInterval(timerId: number): void {
+export function clearInterval(timerId: int): void {
     stopTimer(timerId);
 }
 
-function startTimer(func: () => void, delayMs: number, repeat: boolean): number
+function startTimer(func: () => void, delayMs: int, repeat: boolean): int
 {
-    const realDelayMs = delayMs.toInt();
+    const realDelayMs = delayMs;
     if (CoroutineExtras.workerHasExternalScheduler()) {
-        return startTimerImpl(func as Object, realDelayMs < 0 ? 0 : realDelayMs, repeat).toDouble();
+        return startTimerImpl(func as Object, realDelayMs < 0 ? 0 : realDelayMs, repeat);
     }
-    return registerTimer(func, realDelayMs < 0 ? 0 : realDelayMs, repeat).toDouble();
+    return registerTimer(func, realDelayMs < 0 ? 0 : realDelayMs, repeat);
 }
 
-function stopTimer(timerId: number): void
+function stopTimer(timerId: int): void
 {
     if (CoroutineExtras.workerHasExternalScheduler()) {
-        stopTimerImpl(timerId.toInt());
+        stopTimerImpl(timerId);
         return;
     }
-    clearTimer(timerId.toInt());
+    clearTimer(timerId);
 }
 
 native function startTimerImpl(func: Object, delayMs: int, repeat: boolean): int;

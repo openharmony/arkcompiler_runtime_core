@@ -47,7 +47,7 @@ function launchImpl(func: () => NullishType): Promise<NullishType> {
 
 function testDelayFunc(): NullishType {
     let task = new taskpool.Task(max, 80, 90);
-    let res = await taskpool.executeDelayed(50.0, task);
+    let res = await taskpool.executeDelayed(50, task);
     let runner = new taskpool.SequenceRunner();
     arktest.expectError(() => {
         runner.execute(task);
@@ -68,7 +68,7 @@ function executeDelayedTest(): void {
     let task = new taskpool.Task(sum, 25, 35);
     await runner.execute(task);
     arktest.expectError(() => {
-        taskpool.executeDelayed(100.0, task);
+        taskpool.executeDelayed(100, task);
     }, new Error('taskpool:: seqRunnerTask cannot executeDelayed outside'));
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }
@@ -79,7 +79,7 @@ function executePeriodicallyTest(): void {
     let task1 = new taskpool.Task(returnAbc);
     await runner.execute(task1);
     arktest.expectError(() => {
-        taskpool.executePeriodically(100.0, task1);
+        taskpool.executePeriodically(100, task1);
     }, new Error('taskpool:: The concurrent task has been executed and cannot be executed periodically'));
     try {
         let res2 = await launchImpl(testPeriodFunc);
@@ -93,7 +93,7 @@ function executePeriodicallyTest(): void {
 
 function testPeriodFunc(): NullishType {
     let task = new taskpool.Task(sum, 80, 90);
-    taskpool.executePeriodically(200.0, task);
+    taskpool.executePeriodically(200, task);
     let isTaskCanceled: AtomicFlag = new AtomicFlag(false);
     setTimeout(() => {
         taskpool.cancel(task);

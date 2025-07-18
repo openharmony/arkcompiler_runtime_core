@@ -130,7 +130,7 @@ export class AsyncLockInfo {
         this.contextId = -1;
     }
 
-    constructor(name: string, mode: AsyncLockMode, contextId: number) {
+    constructor(name: string, mode: AsyncLockMode, contextId: int) {
         this.name = name;
         this.mode = mode;
         this.contextId = contextId;
@@ -149,7 +149,7 @@ export class AsyncLockInfo {
     /**
     * lockAsync caller's execution context identifier.
     */
-    contextId: number;
+    contextId: int;
 }
 
 /**
@@ -162,7 +162,7 @@ export class AsyncLockOptions<T = undefined> {
         this.timeout = 0;
     }
 
-    constructor(isAvailable: boolean, signal: AbortSignal<T> | null, timeout: number) {
+    constructor(isAvailable: boolean, signal: AbortSignal<T> | null, timeout: int) {
         this.isAvailable = isAvailable;
         this.signal = signal;
         this.timeout = timeout;
@@ -182,7 +182,7 @@ export class AsyncLockOptions<T = undefined> {
      * Lock operation timeout in milliseconds. If it is greater than zero, lockAsync will reject the resulting promise
      * when the timeout is exceeded.
      */
-    timeout: number;
+    timeout: int;
 }
 
 /**

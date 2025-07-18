@@ -3332,7 +3332,7 @@ intrinsics:
     method_name: generateId
     static: true
     signature:
-      ret: i64
+      ret: i32
       args: []
     impl: ark::ets::intrinsics::taskpool::GenerateTaskId
 
@@ -3342,7 +3342,7 @@ intrinsics:
     method_name: generateGroupId
     static: true
     signature:
-      ret: i64
+      ret: i32
       args: []
     impl: ark::ets::intrinsics::taskpool::GenerateGroupId
 
@@ -3372,7 +3372,7 @@ intrinsics:
     method_name: generateSeqRunnerId
     static: true
     signature:
-      ret: i64
+      ret: i32
       args: []
     impl: ark::ets::intrinsics::taskpool::GenerateSeqRunnerId
 

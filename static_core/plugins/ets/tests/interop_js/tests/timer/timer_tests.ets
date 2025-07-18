@@ -101,7 +101,7 @@ function testSetInterval(): void {
     let checkpoint = 2;
     globalTest!.checkpoint(0);
     let start = Date.now();
-    let timerId: number;
+    let timerId: int;
     timerId = setInterval((): void => {
         // To get time Date.now and libuv uses clock_gettime under the hood, but with different parameters. Date.now() uses CLOCK_REALTIME, but libuv uses CLOCK_MONOTONIC.
         // When we calculate time interval there may be an error. For example time interval measured by Date.now may be 5.9ms round to 5
@@ -207,7 +207,7 @@ function testSetIntervalInvokeCallbacWithSpecifiedParameter(): void {
     globalTest!.checkpoint(0);
     let para : string = "para"
     let start = Date.now();
-    let timerId: number;
+    let timerId: int;
     timerId = setInterval((p: string): void => {
         // To get time Date.now and libuv uses clock_gettime under the hood, but with different parameters. Date.now() uses CLOCK_REALTIME, but libuv uses CLOCK_MONOTONIC.
         // When we calculate time interval there may be an error. For example time interval measured by Date.now may be 5.9ms round to 5
@@ -240,7 +240,7 @@ function testSetIntervalInvokeCallbacWith4SpecifiedParameters(): void {
     let para3: number = 3.0;
     let para4: string = "Parameter4";
     let start = Date.now();
-    let timerId: number;
+    let timerId: int;
     timerId = setInterval((p1 :string, p2: int, p3: number, p4: string): void => {
         // To get time Date.now and libuv uses clock_gettime under the hood, but with different parameters. Date.now() uses CLOCK_REALTIME, but libuv uses CLOCK_MONOTONIC.
         // When we calculate time interval there may be an error. For example time interval measured by Date.now may be 5.9ms round to 5
@@ -298,7 +298,7 @@ function testSetIntervalWithNegitiveDelay(): void {
     let checkpoint = 2;
     globalTest!.checkpoint(0);
     let start = Date.now();
-    let timerId: number;
+    let timerId: int;
     timerId = setInterval((): void => {
         // To get time Date.now and libuv uses clock_gettime under the hood, but with different parameters. Date.now() uses CLOCK_REALTIME, but libuv uses CLOCK_MONOTONIC.
         // When we calculate time interval there may be an error. For example time interval measured by Date.now may be 5.9ms round to 5
@@ -331,7 +331,7 @@ function testSetIntervalWithString(): void {
     globalTest!.checkpoint(0);
     let checkpoint = 2;
     let id1 = setInterval("test", delay);
-    let id2: number;
+    let id2: int;
     id2 = setInterval(() => {
         if (checkpoint == 5) {
             clearInterval(id1);
@@ -355,7 +355,7 @@ function testClearTimerCrossWorker()
             setTimeout(() => { while (!isCleared.get()) {} }, 0);
             return setTimeout(() => { arktest.assertTrue(false); }, delay);
         };
-        let id = launch<number, () => number>(workerTimerCb).Await();
+        let id = launch<int, () => int>(workerTimerCb).Await();
         clearTimeout(id);
         isCleared.set(true);
     }
@@ -365,7 +365,7 @@ function testClearTimerCrossWorker()
         let triedToClear = false;
         let id = setTimeout(() => { arktest.assertTrue(triedToClear); }, delay);
         try {
-            launch<void, (id: number) => void>(clearTimeout, id).Await();
+            launch<void, (id: int) => void>(clearTimeout, id).Await();
         } catch (e) {
             arktest.assertEQ(e.toString(), "Error: Failed to clear timer. Unable to clear interop timer from non-interop worker");
             triedToClear = true;

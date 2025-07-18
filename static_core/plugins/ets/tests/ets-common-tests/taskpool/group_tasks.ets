@@ -51,7 +51,7 @@ function launchImpl(func: () => NullishType): Promise<NullishType> {
 
 function testDelayFunc(): NullishType {
     let task = new taskpool.Task(sum, 100, 300);
-    let value = await taskpool.executeDelayed(100.0, task);
+    let value = await taskpool.executeDelayed(100, task);
     let g = new taskpool.TaskGroup();
     arktest.expectError(() => {
         g.addTask(task);
@@ -71,13 +71,13 @@ function executeDelayedTest(): void {
     let g = new taskpool.TaskGroup();
     g.addTask(task);
     arktest.expectError(() => {
-        taskpool.executeDelayed(100.0, task);
+        taskpool.executeDelayed(100, task);
     }, new Error('taskpool:: groupTask cannot executeDelayed outside'));
 }
 
 function testPeriodFunc(): NullishType {
     let task = new taskpool.Task(sum, 100, 300);
-    taskpool.executePeriodically(200.0, task);
+    taskpool.executePeriodically(200, task);
     let isTaskCanceled: AtomicFlag = new AtomicFlag(false);
     setTimeout(() => {
         taskpool.cancel(task);
@@ -110,7 +110,7 @@ function grouptaskExecutePeriodicallyTest(): void {
     let g = new taskpool.TaskGroup();
     g.addTask(task);
     arktest.expectError(() => {
-        taskpool.executePeriodically(10.0, task);
+        taskpool.executePeriodically(10, task);
     }, new Error('taskpool:: The concurrent task has been executed and cannot be executed periodically'));
 }
 
