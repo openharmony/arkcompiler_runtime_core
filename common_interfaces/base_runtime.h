@@ -70,6 +70,7 @@ inline const char* GCREASON_STRING[] = {
     "appspawn",
     "backgound",
     "hint",
+    "idle",
 };
 
 inline const char* GCReasonToString(GCReason reason)
@@ -141,6 +142,7 @@ public:
     static size_t GetNotifiedNativeSize();
     static void ChangeGCParams(bool isBackground);
     static bool CheckAndTriggerHintGC(MemoryReduceDegree degree);
+    static void NotifyHighSensitive(bool isStart);
 
     HeapParam &GetHeapParam()
     {
