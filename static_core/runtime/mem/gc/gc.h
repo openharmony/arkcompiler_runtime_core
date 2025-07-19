@@ -377,7 +377,7 @@ public:
         extensionData_ = data;
     }
 
-    virtual void PostForkCallback() {}
+    virtual void PostForkCallback([[maybe_unused]] size_t restoreLimit) {}
 
     /// Check if the object addr is in the GC sweep range
     virtual bool InGCSweepRange([[maybe_unused]] const ObjectHeader *obj) const
@@ -510,6 +510,10 @@ protected:
     virtual void PreRunPhasesImpl() = 0;
     virtual void RunPhasesImpl(GCTask &task) = 0;
     virtual void PreStartupImp() {}
+    virtual size_t AdujustStartupLimit(size_t startupLimit)
+    {
+        return startupLimit;
+    }
 
     inline bool IsTracingEnabled() const
     {
