@@ -22,7 +22,7 @@ class InterfaceArgEtsToTsTest : public EtsInteropTest {};
 
 TEST_F(InterfaceArgEtsToTsTest, test_arg_interface)
 {
-    // ASSERT_TRUE(RunJsTestSuite("test_arg_interface.ts"));
+    ASSERT_TRUE(RunJsTestSuite("test_arg_interface.ts"));
 }
 
 }  // namespace ark::ets::interop::js::testing
