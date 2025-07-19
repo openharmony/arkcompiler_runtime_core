@@ -1,4 +1,4 @@
-# 21888
+# 28002
 ets-common-tests/imported_modules_TL_exec_2/a.ets
 ets-common-tests/imported_modules_TL_exec_1/a.ets
 
@@ -21,9 +21,6 @@ ets-common-tests/intrinsics/string_from_char_code_escape.ets
 ets-common-tests/generics/generics_methods.ets
 ets-common-tests/intrinsics/bigint64array_sort.ets
 ets-common-tests/intrinsics/uint32array_sort.ets
-
-# 26975
-ets-common-tests/intrinsics/string_compare_to.ets
 
 # 25111 fail in aot after primitive types removal
 ets-common-tests/intrinsics/typed_arrays_reverse.ets

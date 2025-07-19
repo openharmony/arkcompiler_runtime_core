@@ -319,7 +319,7 @@ std/containers/linked_blocking_queue/LinkedBlockingQueue_AddTest.ets
 ### Type Erasure
 std/containers/BuiltinArrayMapTest.ets
 
-#25851
+#27586
 std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
 
 #25264
