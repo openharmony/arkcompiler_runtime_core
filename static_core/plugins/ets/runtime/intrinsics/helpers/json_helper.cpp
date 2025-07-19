@@ -432,15 +432,23 @@ bool JSONStringifier::SerializeJSONRecord(EtsHandle<EtsObject> &value)
     }
 
     EtsHandle<EtsEscompatMapEntry> head(coro, recordObj->GetHead());
+    if (head.GetPtr() == nullptr) {
+        buffer_ += "{}";
+        return true;
+    }
 
     auto hasContent = false;
     EtsHandle<EtsEscompatMapEntry> next(coro, head->GetNext());
+    if (next.GetPtr() == nullptr) {
+        buffer_ += "{}";
+        return true;
+    }
     buffer_ += "{";
     do {
         EtsHandle<EtsObject> key(coro, next->GetKey());
         EtsHandle<EtsObject> val(coro, next->GetVal());
         next = EtsHandle<EtsEscompatMapEntry>(coro, next->GetNext());
-        if (val.GetPtr() == nullptr) {
+        if (key.GetPtr() == nullptr || val.GetPtr() == nullptr) {
             continue;
         }
         if (val->GetClass()->IsFunction()) {
