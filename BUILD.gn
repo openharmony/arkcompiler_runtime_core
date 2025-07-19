@@ -424,6 +424,15 @@ if (!ark_standalone_build) {
   }
 }
 
+ohos_prebuilt_etc("app_static_runtime_enable_list"){
+  relative_install_dir = "ark"
+  source = "$ark_root/static_core/ohos/app_static_runtime_enable_list.conf"
+
+  # Set the subsystem name
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
+}
+
 group("ark_guard_packages_linux") {
   deps = []
   if (host_os != "mac") {
