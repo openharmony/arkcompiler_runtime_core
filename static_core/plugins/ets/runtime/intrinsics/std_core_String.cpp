@@ -632,9 +632,17 @@ EtsString *StdCoreStringRepeat(EtsString *str, EtsInt count)
     return result;
 }
 
-uint16_t StdCoreStringGet(EtsString *str, EtsInt index)
+EtsString *StdCoreStringGet(EtsString *str, EtsInt index)
 {
-    return StdCoreStringCharAt(str, index);
+    auto strData = static_cast<uint16_t>(StdCoreStringCharAt(str, index));
+    auto *coro = EtsCoroutine::GetCurrent();
+    if (coro->HasPendingException()) {
+        return nullptr;
+    }
+    if (strData < EtsPlatformTypes::ASCII_CHAR_TABLE_SIZE && coretypes::String::IsASCIICharacter(strData)) {
+        auto *cache = PlatformTypes()->GetAsciiCacheTable();
+        return static_cast<EtsString *>(cache->Get(strData));
+    }
+    return EtsString::CreateFromUtf16(&strData, 1);
 }
-
 }  // namespace ark::ets::intrinsics

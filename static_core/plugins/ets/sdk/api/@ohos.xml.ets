@@ -442,7 +442,7 @@ export namespace xml {
             let iLenTemp = tempString.length;
             if (this.iPos + iLenTemp <= MaxXmlLength) {
                 for (let i = 0; i < iLenTemp; i++) {
-                    this.buffer.set((i + this.iPos) as int, tempString[i].toByte());
+                    this.buffer.set((i + this.iPos) as int, tempString.charAt(i).toByte());
                 }
                 this.iPos += iLenTemp;
             } else {
@@ -1242,10 +1242,10 @@ export namespace xml {
             if (this.buffer.byteLength > this.iPos + iLenTemp - BufferIndexOffset) {
                 for (let i = 0; i < iLenTemp; i++) {
                     if (this.buffer instanceof ArrayBuffer) {
-                        (this.buffer as ArrayBuffer).set((i + this.iPos) as int, tempString[i].toByte());
+                        (this.buffer as ArrayBuffer).set((i + this.iPos) as int, tempString.charAt(i).toByte());
                     } else {
                         ((this.buffer as DataView).buffer as ArrayBuffer).set((i + this.iPos) as int,
-                            tempString[i].toByte());
+                            tempString.charAt(i).toByte());
                     }
                 }
                 this.iPos += iLenTemp;

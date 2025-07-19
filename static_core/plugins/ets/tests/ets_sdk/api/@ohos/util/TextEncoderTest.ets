@@ -15,9 +15,9 @@
 
 import {util} from "@ohos.util";
 
-function NumberEqual(resStr:number, expect:number)
+function CharCodeEqual(resStr: String, expect: number)
 {
-    return resStr === expect;
+    return resStr.charCodeAt(0) === expect;
 }
 
 function main() {
@@ -51,7 +51,8 @@ function test_encoder_utf8()
     let str = 'Hello world';
     const bytes = enc.encodeInto(str);
     for (let i = 0; i < str.length; i++) {
-        arktest.assertTrue(NumberEqual(bytes[i], str[i]), "expected equality failed: " + bytes[i] + "===" + str[i]);
+        arktest.assertTrue(CharCodeEqual(str[i], bytes[i]), "expected equality failed: " +
+                                       str[i].charCodeAt(0) + "===" + bytes[i]);
     }
 }
 

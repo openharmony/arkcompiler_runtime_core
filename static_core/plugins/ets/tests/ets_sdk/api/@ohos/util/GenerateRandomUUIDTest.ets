@@ -42,17 +42,17 @@ function testGenerateRandomUUID(): int {
     const hexDigits = "0123456789abcdef"
     for (let i = 0; i < 36; ++i) {
        if (delimiterIdx.includes(i)) {
-           arktest.assertEQ(id[i], c'-')
+           arktest.assertEQ(id.charAt(i), c'-')
        } else {
-           arktest.assertTrue(hexDigits.includes(new Char(id[i]).toString()))
+           arktest.assertTrue(hexDigits.includes(new Char(id.charAt(i)).toString()))
        }
     }
 
     const versionByte = 14
-    arktest.assertEQ(id[versionByte], c'4', "Version byte has to be 0x4")
+    arktest.assertEQ(id.charAt(versionByte), c'4', "Version byte has to be 0x4")
     const withReservedBits = 19
-    arktest.assertTrue(id[withReservedBits] >= c'8' && id[withReservedBits] <= c'b',
-        id[withReservedBits] + " are not valid reserved bits from range 0x8..0xb!")
+    arktest.assertTrue(id.charAt(withReservedBits) >= c'8' && id.charAt(withReservedBits) <= c'b',
+        id.charAt(withReservedBits) + " are not valid reserved bits from range 0x8..0xb!")
     return success
 }
 

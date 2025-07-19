@@ -17,24 +17,18 @@
 //! RUN         force_jit: true, options: "", entry: "ets_string_get.ETSGLOBAL::main"
 //! METHOD      "ets_string_get.ETSGLOBAL::main"
 //! PASS_AFTER  "IrBuilder"
-//! INST_NOT    "Intrinsic.StdCoreStringGet"
-//! INST        /NullCheck/
-//! INST        /BoundsCheck/
-//! INST        /LoadCompressedStringChar/
+//! INST        "Intrinsic.StdCoreStringGet"
 
 //! CHECKER AOT IR Builder StringGet get inlining.
 //! RUN_PAOC    options: "--compiler-regex='.*main.*'"
 //! METHOD      "ets_string_get.ETSGLOBAL::main"
 //! PASS_AFTER  "IrBuilder"
-//! INST_NOT    /Intrinsic.StdCoreStringGet/
-//! INST        /NullCheck/
-//! INST        /BoundsCheck/
-//! INST        /LoadCompressedStringChar/
+//! INST        /Intrinsic.StdCoreStringGet/
 
 function main(): void {
     let str = "abcdefg";
-    arktest.assertEQ(str[0], c'a', "Wrong str.get(0)");
-    arktest.assertEQ(str[6], c'g', "Wrong str.get(6)");
+    arktest.assertEQ(str[0], "a", "Wrong str.get(0)");
+    arktest.assertEQ(str[6], "g", "Wrong str.get(6)");
 
     let exceptionFlag = 0;
     try {

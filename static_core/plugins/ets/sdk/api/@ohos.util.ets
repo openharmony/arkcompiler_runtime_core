@@ -296,7 +296,7 @@ export namespace util {
             let bytes: Array<number> = new Array<number>();
 
             for (let i = 0; i < cleaned.length; i++) {
-                let ch = cleaned[i];
+                let ch = cleaned.charAt(i);
                 if (ch == c'=') {
                     break;
                 }

@@ -379,6 +379,8 @@ private:
         anyCheck->SetIsTypeWasProfiled(typeWasProfiled);
     }
 
+    void BuildStringGetIntrinsic(const BytecodeInstruction *bcInst, bool accRead,
+                                 RuntimeInterface::IntrinsicId intrinsicId);
     bool TryBuildStringCharAtIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 
     template <bool IS_ACC_WRITE>

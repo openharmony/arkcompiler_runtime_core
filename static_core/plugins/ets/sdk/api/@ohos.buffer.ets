@@ -478,8 +478,8 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
             const sourceStr = ArrayBuffer.stringify(resolvedSource, fromEnc, 0, sourceBytesLength);
             let asciiSource = new StringBuilder("")
             for (let i = 0; i < sourceStr.length; ++i) {
-                if (sourceStr[i].toInt() <= 128) {
-                    asciiSource.append(sourceStr[i])
+                if (sourceStr.charAt(i).toInt() <= 128) {
+                    asciiSource.append(sourceStr.charAt(i))
                 } else {
                     asciiSource.append('?')
                 }

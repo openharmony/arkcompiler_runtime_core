@@ -1137,7 +1137,7 @@ intrinsics:
     method_name: $_get
     static: false
     signature:
-      ret: u16
+      ret: std.core.String
       args: [ i32 ]
     impl: ark::ets::intrinsics::StdCoreStringGet
 ##########################
