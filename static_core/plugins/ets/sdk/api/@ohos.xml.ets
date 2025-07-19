@@ -15,14 +15,14 @@
 import buffer from '@ohos.buffer';
 import { BusinessError } from "@ohos.base";
 
-const TypeErrorCodeId: number = 401;
-const BufferOverFlowErrorCodeId: number = 10200062;
-const IllegalPositionErrorCodeId: number = 10200063;
-const EmptyErrorCodeId: number = 10200064;
-const NoElementMatchErrorCodeId: number = 10200065;
-const EncodingErrorCodeId: number = 10200066;
+const TypeErrorCodeId: int = 401;
+const BufferOverFlowErrorCodeId: int = 10200062;
+const IllegalPositionErrorCodeId: int = 10200063;
+const EmptyErrorCodeId: int = 10200064;
+const NoElementMatchErrorCodeId: int = 10200065;
+const EncodingErrorCodeId: int = 10200066;
 
-function createBusinessError(code: number, message: string) {
+function createBusinessError(code: int, message: string) {
     let err = new BusinessError();
     err.code = code;
     err.name = 'BusinessError';
@@ -47,10 +47,10 @@ export namespace xml {
     }
 
     export class ParseInfoImpl implements ParseInfo {
-        depth: number
-        columnNumber: number
-        lineNumber: number
-        attributeCount: number
+        depth: int
+        columnNumber: int
+        lineNumber: int
+        attributeCount: int
         name: string
         namespace_: string
         prefix: string
@@ -58,10 +58,10 @@ export namespace xml {
         emptyElementTag: boolean
         whitespace: boolean
 
-        override getAttributeCount(): number { return this.attributeCount; }
-        override getColumnNumber(): number { return this.columnNumber; }
-        override getDepth(): number { return this.depth; }
-        override getLineNumber(): number { return this.lineNumber; }
+        override getAttributeCount(): int { return this.attributeCount; }
+        override getColumnNumber(): int { return this.columnNumber; }
+        override getDepth(): int { return this.depth; }
+        override getLineNumber(): int { return this.lineNumber; }
         override getName(): string { return this.name; }
         override getNamespace(): string { return this.namespace_; }
         override getPrefix(): string { return this.prefix; }
@@ -71,10 +71,10 @@ export namespace xml {
     }
 
     export interface ParseInfo {
-        getAttributeCount(): number
-        getColumnNumber(): number
-        getDepth(): number
-        getLineNumber(): number
+        getAttributeCount(): int
+        getColumnNumber(): int
+        getDepth(): int
+        getLineNumber(): int
         getName(): string
         getNamespace(): string
         getPrefix(): string
@@ -131,10 +131,10 @@ export namespace xml {
         name?: string
         attributes?: Attributes
         content?: string
-        lineNumber?: number
-        columnNumber?: number
-        pos?: number
-        depth?: number
+        lineNumber?: int
+        columnNumber?: int
+        pos?: int
+        depth?: int
         prefix?: string
         namespace_?: string
         type?: EventType
@@ -536,7 +536,7 @@ export namespace xml {
         public tokenFunc_?: (eventType: EventType, value: ParseInfo) => boolean
 
         private strXml_ : string = " "
-        private nodeMap = new Map<number, XmlNode>(); 
+        private nodeMap = new Map<int, XmlNode>(); 
 
         constructor(str: string) {
             this.strXml_ = str
@@ -623,8 +623,8 @@ export namespace xml {
 
         public calcPosition(str: string, node: XmlNode) {
             let lineEndMatch: NullishType
-            let pos: number = 1
-            let end = str.length > 1 ? str.length + 1 : 1
+            let pos: int = 1
+            let end: int = str.length > 1 ? str.length.toInt() + 1 : 1
             let lineChanged: boolean = false
             node.lineNumber = 1
             node.columnNumber = 1
@@ -636,7 +636,7 @@ export namespace xml {
             }
 
             if (lineChanged) {
-                node.columnNumber = (abs(end - pos) + 1)
+                node.columnNumber = (abs(end - pos) + 1).toInt()
             } else {
                 node.columnNumber = end
             }
@@ -648,7 +648,7 @@ export namespace xml {
             info.depth = (node.depth != undefined) ? node.depth! : 0
             info.columnNumber = (node.columnNumber != undefined) ? node.columnNumber! : 0
             info.lineNumber = (node.lineNumber != undefined) ? node.lineNumber! : 0
-            info.attributeCount = (node.attributes != undefined) ? node.attributes!.size : 0
+            info.attributeCount = (node.attributes != undefined) ? node.attributes!.size.toInt() : 0
             info.emptyElementTag = (node.isSelfClose != undefined) ? (node.isSelfClose!) : false
             info.whitespace = (node.content != undefined) ? (node.content! == " " || node.content! == "") : true
             info.namespace_ = (node.namespace_ != undefined) ? node.namespace_! : ""
@@ -662,9 +662,9 @@ export namespace xml {
         private documentEntities = new Map<string,string>()
         private processServiceTag(regexp: RegExp, type: EventType) {
             let m : NullishType
-            let pos: number = 0
+            let pos: int = 0
             while (m = regexp.exec(this.strXml_.substr(pos))) {
-                pos = m!.index + 1
+                pos = m!.index.toInt() + 1
                 for (let item of m!.result) {
                     let resType = type
                     if (type == EventType.INSTRUCTION && item.substr(0, XmlParseHelper.XML.length) == XmlParseHelper.XML) {
@@ -703,7 +703,7 @@ export namespace xml {
         }
 
         private processAllStartTags() {
-            let pos: number = 0
+            let pos: int = 0
             let m : NullishType
             while (m = XmlParseHelper.startTagRegExp.exec(this.strXml_.substr(pos))) {
                 pos += m!.index
@@ -737,7 +737,7 @@ export namespace xml {
         }
 
         private processAllEndTags() {
-            let pos: number = 0
+            let pos: int = 0
             let m : NullishType
             while (m = XmlParseHelper.closeTagRegExp.exec(this.strXml_.substr(pos))) {
                 pos += m!.index
@@ -763,7 +763,7 @@ export namespace xml {
 
         private processAllSelfCloseTags() {
             let m : NullishType
-            let pos: number = 0
+            let pos: int = 0
             while (m = XmlParseHelper.selfCloseTagRegExp.exec(this.strXml_.substr(pos))) {
                 pos += m!.index
                 let item = m!.result[0]
@@ -800,7 +800,7 @@ export namespace xml {
 
         private processAllTextTags() {
             let m : NullishType
-            let pos:number = 0
+            let pos:int = 0
             while (m = XmlParseHelper.textTagRegExp.exec(this.strXml_.substr(pos))) {
                 pos += m!.index
                 for (let item of m!.result) {
@@ -836,7 +836,7 @@ export namespace xml {
             let name = ""
             let depth = 0
             let res = true
-            keys.forEach((key: number) => {
+            keys.forEach((key: int) => {
                 let node = this.nodeMap.get(key)!
                 if (node.type == EventType.START_TAG) {
                     name = node!.name!

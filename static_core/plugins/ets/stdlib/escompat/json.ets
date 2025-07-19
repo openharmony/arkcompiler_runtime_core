@@ -277,13 +277,13 @@ export class JSON {
     public static stringify(
                 obj: NullishType,
                 replacer: ((key: string, value: NullishType) => NullishType) | undefined | null,
-                space?: string | number): string {
+                space?: string | int): string {
         const replacerOpt: ((key: string, value: NullishType) => NullishType) | undefined = (replacer === null) ? undefined : replacer
 
         if (space instanceof String || space === undefined) {
             return new JSONWriter(replacerOpt, space).write(obj)
         } else {
-            return new JSONWriter(replacerOpt, JSON.spaceFromNumber(space as number)).write(obj)
+            return new JSONWriter(replacerOpt, JSON.spaceFromNumber(space as int)).write(obj)
         }
     }
 
@@ -300,7 +300,7 @@ export class JSON {
      *
      * @returns String - JSON representation of Object
      */
-    public static stringify(obj: NullishType, replacer: FixedArray<string | number>, space?: string | number): string {
+    public static stringify(obj: NullishType, replacer: FixedArray<double | string>, space?: int | string): string {
         const filter : FixedArray<string> = new string[replacer.length]
         for (let i = 0; i < replacer.length; i++) {
             filter[i] = `${replacer[i]}`
@@ -309,11 +309,11 @@ export class JSON {
         if (space instanceof String || space === undefined) {
             return new JSONWriter(filter, space).write(obj)
         } else {
-            return new JSONWriter(filter, JSON.spaceFromNumber(space as number)).write(obj)
+            return new JSONWriter(filter, JSON.spaceFromNumber(space! as int)).write(obj)
         }
     }
 
-    public static stringify(obj: NullishType, replacer: Array<string | number>, space?: string | number): string {
+    public static stringify(obj: NullishType, replacer: Array<double | string>, space?: int | string): string {
         const filter : FixedArray<string> = new string[replacer.length]
         for (let i = 0; i < replacer.length; i++) {
             filter[i] = `${replacer[i]}`
@@ -322,18 +322,14 @@ export class JSON {
         if (space instanceof String || space === undefined) {
             return new JSONWriter(filter, space).write(obj)
         } else {
-            return new JSONWriter(filter, JSON.spaceFromNumber(space as number)).write(obj)
+            return new JSONWriter(filter, JSON.spaceFromNumber(space! as int)).write(obj)
         }
     }
 
-    private static spaceFromNumber(space: number): String {
+    private static spaceFromNumber(space: int): String {
         let spacesCount = 0
-        if (space > 0) {
-            if (space > JSON.JSON_SPACE_INDENT_LIMIT) {
-                spacesCount = JSON.JSON_SPACE_INDENT_LIMIT
-            } else {
-                spacesCount = space.toInt()
-            }
+        if (space > 0)  {
+            spacesCount = (space > JSON.JSON_SPACE_INDENT_LIMIT) ? JSON.JSON_SPACE_INDENT_LIMIT : space
         }
 
         return " ".repeat(spacesCount)
@@ -564,7 +560,7 @@ export class JSON {
      * @param space - String or number of spaces for indentation
      * @returns The JSON string representation
      */
-    public static stringifyJsonElement(elem: jsonx.JsonElement, replacer?: (number | string)[], space?: string | number): string {
+    public static stringifyJsonElement(elem: jsonx.JsonElement, replacer?: (double | string)[], space?: int | string): string {
         return stringifyElementRecursively(elem, replacer, space, 0)
     }
 
@@ -1259,13 +1255,13 @@ class JSONWriter {
 /**
 * Internal method to stringify a JsonElement recursively.
 * @param {JsonElement} elem - The JsonElement to stringify
-* @param {(number | string)[] | undefined} replacer - Array of keys to include (currently not implemented)
-* @param {string | number | undefined} space - String or number of spaces for indentation
+* @param {(double | string)[] | undefined} replacer - Array of keys to include (currently not implemented)
+* @param {int | string | undefined} space - String or number of spaces for indentation
 * @param {number} depth - Current nesting depth for indentation
 * @returns {string} The JSON string representation
 * @private
 */
-function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (number | string)[], space?: string | number, depth: number = 0): string {
+function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double | string)[], space?: int | string, depth: int = 0): string {
     const indentStr = getIndentation(space, depth)
     const nextIndentStr = getIndentation(space, depth + 1)
     const hasIndentation = space != undefined && nextIndentStr.length > 0
@@ -1405,19 +1401,17 @@ function escapeString(str: string): string {
 }
 
 
-function getIndentation(space: string | number | undefined, depth: number): string {
+function getIndentation(space?: int | string, depth: int = 0): string {
     if (space == undefined) {
         return ""
     }
-    if (space instanceof string)
+    if (space! instanceof string)
     {
-        let unit = space.substring(0, 10)
+        let unit = (space! as string).substring(0, 10)
         return unit.repeat(depth)
     }
-    let as_number = space as number
-    let as_int = as_number.toInt()
-    let lower = as_int > 0
-        ? as_int
+    let lower = (space! as int) > 0
+        ? (space! as int)
         : 0
     let aligned = lower > 10
         ? 10
@@ -1846,7 +1840,7 @@ export class JsonToken
 // Grammar:
 // =============================================================
 // start  ::= value
-// value  ::= object | array | string | number | true | false | null
+// value  ::= object | array | double | string | true | false | null
 // object ::= "{" [pair ("," pair)*] "}"
 // array  ::= "[" [value ("," value)*] "]"
 // pair   ::= string ":" value
