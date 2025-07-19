@@ -15,7 +15,7 @@ limitations under the License.
 
 {% for kwd in keywords %}
 /*---
-desc: The following keywords are reserved in any context (hard keywords), and cannot be used as identifiers
+desc: The following hard keywords are reserved in any context, and cannot be used as identifiers
 tags: [negative, compile-only]
 params: '{{kwd}}'
 ---*/
