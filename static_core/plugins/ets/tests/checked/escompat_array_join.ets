@@ -201,3 +201,37 @@ function test_array_string_join() {
     arktest.assertEQ(arrayStr3, arrayStrRes3);
     arktest.assertEQ(arrayStr4, arrayStrRes4);
 }
+
+
+//! CHECKER      OOM exception for Array.join
+//! SKIP_IF       @architecture == "arm32"
+//! RUN          force_jit: true, options: "--compiler-enable-osr=false --compiler-regex='ETSGLOBAL::test_oom'", entry: "escompat_array_join.ETSGLOBAL::test_oom"
+//! EVENT        /Exception,escompat.Array::join.*NATIVE/
+function foo(n: int): int { return (n * 17 + 7) % 141;}
+function test_array_join_oom(): string {
+    let c: char[] = new char[10000];
+    let sb: StringBuilder = new StringBuilder();
+    for (let i = 0; i < 10000000; ++i) {
+        let n: int = foo(i);
+        try {
+            sb.append(new String(c));
+            n += 100;
+        } catch (e) {
+            if (e instanceof OutOfMemoryError) {
+                // Expected exception caught
+                return "Catch OOM excepiton right";
+            } else {
+                // Unexpected exception caught
+                return "Catch Other excepiton";
+            }
+        }
+    }
+
+    return "No excepiton";
+}
+
+function test_oom() {
+    const CatchOOMRes = "Catch OOM excepiton right";
+    let result = test_array_join_oom();
+    arktest.assertEQ(result, CatchOOMRes);
+}
