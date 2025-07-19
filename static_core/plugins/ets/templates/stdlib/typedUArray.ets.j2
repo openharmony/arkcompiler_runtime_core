@@ -331,7 +331,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             {%- elif element.get('name') != 'Uint8Clamped' %}
             this.setUnsafeClamp(i, {{ asElementCompatOrBigInt % ( 'this.zeroIfInfinity(' + (valueOrBigIntGetULong % 'numbers[i]') + ')' ) }})
             {%- else %}
-            this.setUnsafeClamp(i, numbers[i].to{{element['primitiveType'].capitalize()}}())
+            this.setUnsafeClamp(i, Uint8ClampedArray.toUint8Clamped(numbers[i]))
             {%- endif %}
         }
     }
@@ -1806,7 +1806,12 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         let res = new {{element['name']}}Array(resBuf)
         for (let i = 0; i < this.lengthInt; i++) {
             const fnRes = fn({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)
+			
+            {%- if element.get('name') == 'Uint8Clamped' %}
+            res.setUnsafeClamp(i, round(fnRes).toInt())
+            {%- else %}
             res.setUnsafeClamp(i, {{castFromEl % 'fnRes'}})
+            {%- endif %}
         }
         return res
     }

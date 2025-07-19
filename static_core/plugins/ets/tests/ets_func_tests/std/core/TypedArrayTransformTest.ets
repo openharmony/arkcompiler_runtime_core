@@ -348,6 +348,15 @@ function testTypedArrayBound2() {
     arktest.assertEQ(String(array[0]), '0');
 }
 
+function testUint8ClampedArray() {
+    let array: Uint8ClampedArray = new Uint8ClampedArray([25, -81, 360]);
+    const mapped = array.map(Math.sqrt);
+    arktest.assertEQ(mapped.toString(), '5,0,16');
+
+    let array2: Uint8ClampedArray = new Uint8ClampedArray([0.5, 0.6, 1.5, 1.6]);
+    arktest.assertEQ(array2.toString(), '0,1,2,2');
+}
+
 function main() {
     let myTestsuite = new arktest.ArkTestsuite("TypedArray Trasnform Datas Suite");
     myTestsuite.addTest("testJoin", testJoin);
@@ -358,5 +367,6 @@ function main() {
     myTestsuite.addTest("testTypedArrayInternalTransform2", testTypedArrayInternalTransform2);
     myTestsuite.addTest("testTypedArrayBound", testTypedArrayBound);
     myTestsuite.addTest("testTypedArrayBound2", testTypedArrayBound2);
+    myTestsuite.addTest("testUint8ClampedArray", testUint8ClampedArray);
     myTestsuite.run();
 }

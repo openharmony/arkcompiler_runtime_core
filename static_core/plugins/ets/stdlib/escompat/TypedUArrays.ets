@@ -278,7 +278,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafeClamp(i, numbers[i].toInt())
+            this.setUnsafeClamp(i, Uint8ClampedArray.toUint8Clamped(numbers[i]))
         }
     }
 
@@ -1583,7 +1583,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
         let res = new Uint8ClampedArray(resBuf)
         for (let i = 0; i < this.lengthInt; i++) {
             const fnRes = fn(this.getUnsafe(i).toDouble(), i, this)
-            res.setUnsafeClamp(i, fnRes.toInt())
+            res.setUnsafeClamp(i, round(fnRes).toInt())
         }
         return res
     }
