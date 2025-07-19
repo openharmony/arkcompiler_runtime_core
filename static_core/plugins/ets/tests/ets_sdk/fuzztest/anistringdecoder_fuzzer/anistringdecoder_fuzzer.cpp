@@ -66,9 +66,9 @@ void AniStringDecoderFuzzTest(const char *data, size_t size)
 
     StringDecoderEngine *engine = StringDecoderEngine::GetInstance();
     engine->AniStringDecoder(data, 0, size);
-    engine->AniStringDecoder(data, 1, size);
+    engine->AniStringDecoder(data, 1, size - 1);
     engine->AniStringDecoderEnd(data, 0, size);
-    engine->AniStringDecoderEnd(data, 1, size);
+    engine->AniStringDecoderEnd(data, 1, size - 1);
 }
 }  // namespace OHOS
 
