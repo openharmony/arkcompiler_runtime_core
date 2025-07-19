@@ -59,7 +59,7 @@ function testIndexerOutOfBounds() {
     arktest.assertEQ(buf.toString(), "\u0001\u0002\u0003")
 }
 
-function checkOutsideRangeError(buf: buffer.Buffer, index: number) {
+function checkOutsideRangeError(buf: buffer.Buffer, index: int) {
     let errMsg = `The value of "length" is out of range. \
 It must be >= 0 and <= ${buf.length}. Received value is: ${index}`;
     const OutOfBoundsErrorCodeId: number = 10200001;

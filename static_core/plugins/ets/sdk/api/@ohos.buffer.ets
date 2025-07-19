@@ -157,25 +157,29 @@ export default namespace buffer {
      * Allocates a new Buffer using an array of bytes in the range 0 – 255.
      * Array entries outside that range will be truncated to fit into it.
      *
-     * @param {number[]} array - An array of bytes in the range 0 – 255
+     * @param {double[]} array - An array of bytes in the range 0 – 255
      * @returns {Buffer} A new allocated Buffer containing the array data
      */
-    export function from(array: number[]): Buffer {
-        return new Buffer(ArrayBuffer.from(array))
+    export function from(array: double[]): Buffer {
+        let arr: FixedArray<byte> = new Byte[array.length]
+        for (let i = 0; i < array.length; ++i) {
+            arr[i] = array[i].toByte()
+        }
+        return new Buffer(ArrayBuffer.from(arr))
     }
 
     /**
      * Creates a view of the ArrayBuffer without copying the underlying memory.
      *
      * @param {ArrayBuffer} arrayBuffer - The source ArrayBuffer to create a view from
-     * @param {number} [byteOffset=0] - Index of first byte to expose
-     * @param {number} [length=arrayBuffer.byteLength - byteOffset] - Number of bytes to expose
+     * @param {int} [byteOffset=0] - Index of first byte to expose
+     * @param {int} [length=arrayBuffer.byteLength - byteOffset] - Number of bytes to expose
      * @returns {Buffer} A view of the ArrayBuffer
      * @throws {Error} If byteOffset or length are out of valid range
      */
-    export function from(arrayBuffer: ArrayBuffer, byteOffset?: number, length?: number): Buffer {
-        const resolvedByteOffset: number = byteOffset ?? 0;
-        const resolvedLength: number = length ?? arrayBuffer.byteLength - resolvedByteOffset;
+    export function from(arrayBuffer: ArrayBuffer, byteOffset?: int, length?: int): Buffer {
+        const resolvedByteOffset: int = byteOffset ?? 0;
+        const resolvedLength: int = length ?? arrayBuffer.byteLength.toInt() - resolvedByteOffset;
         if ((byteOffset != undefined) || (length != undefined)) {
             return new Buffer(ArrayBuffer.from(arrayBuffer, resolvedByteOffset, resolvedLength), resolvedByteOffset);
         }
@@ -188,12 +192,12 @@ export default namespace buffer {
     * or supports symbol To primitive object, a new buffer instance is created.
     *
     * @param { Object } object - object object An object supporting Symbol.toPrimitive or valueOf()
-    * @param { number | string } offsetOrEncoding - offsetOrEncoding offsetOrEncoding A byte-offset or encoding
-    * @param { number } length - length length A length
+    * @param { int | string } offsetOrEncoding - offsetOrEncoding offsetOrEncoding A byte-offset or encoding
+    * @param { int } length - length length A length
     * @returns { Buffer } Return a new allocated Buffer
     */
-    export function from(object: Object, offsetOrEncoding: number | string, length: number): Buffer {
-        const resolvedByteOffset: number = (offsetOrEncoding instanceof string) ? 0 : offsetOrEncoding;
+    export function from(object: Object, offsetOrEncoding: int | string, length: int): Buffer {
+        const resolvedByteOffset: int = (offsetOrEncoding instanceof string) ? 0 : offsetOrEncoding;
         return new Buffer(ArrayBuffer.fromObject(object, offsetOrEncoding, length), resolvedByteOffset);
     }
 
@@ -246,14 +250,14 @@ export default namespace buffer {
      *
      * @param {string | Buffer | TypedArray | DataView | ArrayBuffer} string - A value to calculate the length of
      * @param {BufferEncoding} [encoding='utf8'] - If `string` is a string, this is its encoding
-     * @returns {number} The number of bytes contained within `string`
+     * @returns {int} The number of bytes contained within `string`
      * @throws {BusinessError} 401 - Parameter error. Possible causes:
      * 1. Mandatory parameters are left unspecified;
      */
     export function byteLength(
         doc: string | Buffer | TypedArray | DataView | ArrayBuffer,
         encoding?: BufferEncoding
-    ): number {
+    ): int {
         if (doc instanceof string) {
             let resolvedEncoding: string = encoding ?? "utf8";
             return ArrayBuffer.bytesLength(doc, resolvedEncoding);
@@ -267,29 +271,29 @@ export default namespace buffer {
             case "Buffer":
                 return (doc as Buffer).length;
             case "Int8Array":
-                return (doc as Int8Array).byteLength;
+                return (doc as Int8Array).byteLength.toInt();
             case "Uint8Array":
-                return (doc as Uint8Array).byteLength;
+                return (doc as Uint8Array).byteLength.toInt();
             case "Uint8ClampedArray":
-                return (doc as Uint8ClampedArray).byteLength;
+                return (doc as Uint8ClampedArray).byteLength.toInt();
             case "Int16Array":
-                return (doc as Int16Array).byteLength;
+                return (doc as Int16Array).byteLength.toInt();
             case "Uint16Array":
-                return (doc as Uint16Array).byteLength;
+                return (doc as Uint16Array).byteLength.toInt();
             case "Int32Array":
-                return (doc as Int32Array).byteLength;
+                return (doc as Int32Array).byteLength.toInt();
             case "Uint32Array":
-                return (doc as Uint32Array).byteLength;
+                return (doc as Uint32Array).byteLength.toInt();
             case "Float32Array":
-                return (doc as Float32Array).byteLength;
+                return (doc as Float32Array).byteLength.toInt();
             case "Float64Array":
-                return (doc as Float64Array).byteLength;
+                return (doc as Float64Array).byteLength.toInt();
             case "BigInt64Array":
-                return (doc as BigInt64Array).byteLength;
+                return (doc as BigInt64Array).byteLength.toInt();
             case "BigUint64Array":
-                return (doc as BigUint64Array).byteLength;
+                return (doc as BigUint64Array).byteLength.toInt();
             case "DataView":
-                return (doc as DataView).byteLength;
+                return (doc as DataView).byteLength.toInt();
             case "ArrayBuffer":
                 return (doc as ArrayBuffer).getByteLength();
         }
@@ -299,8 +303,8 @@ export default namespace buffer {
     /**
      * Allocates a new Buffer for a fixed size bytes. If fill is undefined, the Buffer will be zero-filled.
      *
-     * @param { number } size - The desired length of the new Buffer
-     * @param { string | Buffer | number } [fill] - A value to pre-fill the new Buffer with
+     * @param { int } size - The desired length of the new Buffer
+     * @param { string | Buffer | Uint8Array | double | long } [fill] - A value to pre-fill the new Buffer with
      * @param { BufferEncoding } [encoding] - If `fill` is a string, this is its encoding
      * @returns { Buffer } Return a new allocated Buffer
      * @throws { BusinessError } 401 - Parameter error. Possible causes:
@@ -308,8 +312,8 @@ export default namespace buffer {
      * 2. Parameter verification failed.
      */
     export function alloc(
-        size: number,
-        fill?: string | Buffer | number,
+        size: int,
+        fill?: string | Buffer | Uint8Array | double | long,
         encoding?: BufferEncoding
     ): Buffer
     {
@@ -319,9 +323,9 @@ export default namespace buffer {
         const buffer = new Buffer(new ArrayBuffer(size));
         const resolvedEncoding = encoding ?? "utf-8";
         if (fill != undefined) {
-            buffer.fill(fill, 0, size, resolvedEncoding);
+            buffer.fill(fill!, 0, size, resolvedEncoding);
         } else {
-            buffer.fill(0, 0);
+            buffer.fill(0 as long, 0);
         }
         return buffer;
     }
@@ -329,13 +333,13 @@ export default namespace buffer {
     /**
      * Allocates a new Buffer for a fixed size bytes. The Buffer will not be initially filled.
      *
-     * @param { number } size - The desired length of the new Buffer
+     * @param { int } size - The desired length of the new Buffer
      * @returns { Buffer } Return a new allocated Buffer
      * @throws { BusinessError } 401 - Parameter error. Possible causes:
      * 1. Mandatory parameters are left unspecified;
      * 2. Parameter verification failed.
      */
-    export function allocUninitializedFromPool(size: number): Buffer {
+    export function allocUninitializedFromPool(size: int): Buffer {
         if (size < 0) {
             throw createBusinessError(TypeErrorCodeId, 'Parameter error: size must be a non-negative number.')
         }
@@ -345,13 +349,13 @@ export default namespace buffer {
     /**
      * Allocates a new un-pooled Buffer for a fixed size bytes. The Buffer will not be initially filled.
      *
-     * @param { number } size - The desired length of the new Buffer
+     * @param { int } size - The desired length of the new Buffer
      * @returns { Buffer } Return a new allocated Buffer
      * @throws { BusinessError } 401 - Parameter error. Possible causes:
      * 1. Mandatory parameters are left unspecified;
      * 2. Parameter verification failed.
      */
-    export function allocUninitialized(size: number): Buffer {
+    export function allocUninitialized(size: int): Buffer {
         if (size < 0) {
             throw createBusinessError(TypeErrorCodeId, 'Parameter error: size must be a non-negative number.')
         }
@@ -363,21 +367,21 @@ export default namespace buffer {
      *
      * @param { Buffer | Uint8Array } buf1 - A Buffer or Uint8Array instance.
      * @param { Buffer | Uint8Array } buf2 - A Buffer or Uint8Array instance.
-     * @returns { number } 0 is returned if target is the same as buf
+     * @returns { int } 0 is returned if target is the same as buf
      *         1 is returned if target should come before buf when sorted.
      *        -1 is returned if target should come after buf when sorted.
      * @throws { BusinessError } 401 - Parameter error. Possible causes:
      * 1. Mandatory parameters are left unspecified;
      * 2. Parameter verification failed.
      */
-    export function compare(buf1: Buffer | Uint8Array, buf2: Buffer | Uint8Array): number {
+    export function compare(buf1: Buffer | Uint8Array, buf2: Buffer | Uint8Array): int {
         const resolvedBuf1 = getArrayBufferFrom(buf1);
         const resolvedBuf2 = getArrayBufferFrom(buf2);
         const len1 = getLength(buf1);
         const len2 = getLength(buf2);
         const minLength = Math.min(len1, len2);
-        let i1 = buf1.byteOffset.toInt();
-        let i2 = buf2.byteOffset.toInt();
+        let i1 = (buf1 instanceof Buffer) ? (buf1 as Buffer).byteOffset : (buf1 as Uint8Array).byteOffset.toInt()
+        let i2 = (buf2 instanceof Buffer) ? (buf2 as Buffer).byteOffset : (buf2 as Uint8Array).byteOffset.toInt()
         for (let i = 0; i < minLength; i++) {
             if (resolvedBuf1.at(i1) != resolvedBuf2.at(i2)) {
                 return resolvedBuf1.at(i1) < resolvedBuf2.at(i2) ? -1 : 1;
@@ -392,20 +396,20 @@ export default namespace buffer {
      * Returns a new `Buffer` which is the result of concatenating all the `Buffer`instances in the `list` together.
      *
      * @param { Buffer[] | Uint8Array[] } list - List of `Buffer` or Uint8Array instances to concatenate
-     * @param { number } [totalLength] - Total length of the `Buffer` instances in `list` when concatenated
+     * @param { int } [totalLength] - Total length of the `Buffer` instances in `list` when concatenated
      * @returns { Buffer } Return a new allocated Buffer
      * @throws { BusinessError } 401 - Parameter error. Possible causes:
      * 1. Mandatory parameters are left unspecified;
      * 2. Parameter verification failed.
      * @throws { BusinessError } 10200001 - The value of "length" is out of range. It must be >= 0 and <= uint32 max. Received value is: [length]
      */
-    export function concat(list: Buffer[] | Uint8Array[], totalLength?: number): Buffer {
+    export function concat(list: Buffer[] | Uint8Array[], totalLength?: int): Buffer {
         const resolvedList = new Array<ArrayBuffer>();
         for (const item of list) {
             resolvedList.push(getArrayBufferFrom(item));
         }
-        const length = totalLength ?? resolvedList.reduce(
-            (acc: number, item: ArrayBuffer): number => acc + item.byteLength, 0);
+        const length: int = totalLength ?? resolvedList.reduce(
+            (acc: number, item: ArrayBuffer): number => acc + item.byteLength.toInt(), 0).toInt()
         if (length < 0 || length > U32_MAX) {
             throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "length" is out of range.
 It must be >= 0 and <= uint32 max. Received value is: ${length}`)
@@ -492,24 +496,24 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         return new Buffer(newBytes);
     }
 
-    class BufferIteratorKeys implements IterableIterator<number> {
+    class BufferIteratorKeys implements IterableIterator<int> {
         private length: int
         private idx: int = 0
         constructor(parent: Buffer) {
             this.length = parent.length.toInt()
         }
-        public override $_iterator(): IterableIterator<number> {
+        public override $_iterator(): IterableIterator<int> {
             return this
         }
-        override next(): IteratorResult<number> {
+        override next(): IteratorResult<int> {
             if (this.idx < 0 || this.idx >= this.length) {
-                return new IteratorResult<number>()
+                return new IteratorResult<int>()
             }
-            return new IteratorResult<number>(false, (this.idx++).toDouble())
+            return new IteratorResult<int>(false, (this.idx++))
         }
     }
 
-    class BufferIteratorValues implements IterableIterator<number> {
+    class BufferIteratorValues implements IterableIterator<long> {
         private length: int
         private parent: Buffer
         private idx: int = 0
@@ -517,18 +521,18 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
             this.length = parent.length.toInt()
             this.parent = parent
         }
-        public override $_iterator(): IterableIterator<number> {
+        public override $_iterator(): IterableIterator<long> {
             return this
         }
-        override next(): IteratorResult<number> {
+        override next(): IteratorResult<long> {
             if (this.idx < 0 || this.idx >= this.length) {
-                return new IteratorResult<number>()
+                return new IteratorResult<long>()
             }
-            return new IteratorResult<number>(false, this.parent.at(this.idx++))
+            return new IteratorResult<long>(false, this.parent.at(this.idx++))
         }
     }
 
-    class BufferEntriesIterator implements IterableIterator<[number, number]> {
+    class BufferEntriesIterator implements IterableIterator<[int, long]> {
         private length: int
         private parent: Buffer
         private idx: int = 0
@@ -536,14 +540,14 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
             this.length = parent.length.toInt()
             this.parent = parent
         }
-        public override $_iterator(): IterableIterator<[number, number]> {
+        public override $_iterator(): IterableIterator<[int, long]> {
             return this
         }
-        override next(): IteratorResult<[number, number]> {
+        override next(): IteratorResult<[int, long]> {
             if (this.idx < 0 || this.idx >= this.length) {
-                return new IteratorResult<[number, number]>()
+                return new IteratorResult<[int, long]>()
             }
-            return new IteratorResult<[number, number]>(false, [this.idx, this.parent.at(this.idx++)])
+            return new IteratorResult<[int, long]>(false, [this.idx, this.parent.at(this.idx++)])
         }
     }
 
@@ -555,22 +559,22 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         /** The underlying ArrayBuffer storing the binary data */
         public buffer: ArrayBuffer;
         /** The offset into the buffer where this Buffer instance starts */
-        internal readonly byteOffsetNumber: number;
+        internal readonly byteOffsetNumber: int;
 
         /**
          * Gets the length of the buffer in bytes
-         * @returns {number} The number of bytes in the buffer
+         * @returns {int} The number of bytes in the buffer
          */
-        get length(): number { return this.buffer.getByteLength() }
+        get length(): int { return this.buffer.getByteLength() }
 
-        get byteOffset(): number { return this.byteOffsetNumber }
+        get byteOffset(): int { return this.byteOffsetNumber }
 
         /**
          * Creates a new Buffer instance
          * @param {ArrayBuffer} buffer - The underlying ArrayBuffer to use
-         * @param {number} [byteOffset=0] - The starting offset into the ArrayBuffer
+         * @param {int} [byteOffset=0] - The starting offset into the ArrayBuffer
          */
-        public constructor(buffer: ArrayBuffer, byteOffset: number = 0)
+        public constructor(buffer: ArrayBuffer, byteOffset: int = 0)
         {
             this.buffer = buffer;
             this.byteOffsetNumber = byteOffset;
@@ -598,11 +602,11 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
          * Returns a string decoded from the buffer's contents.
          *
          * @param {BufferEncoding} [encoding='utf8'] - Character encoding to use for decoding
-         * @param {number} [start=0] - Where to start decoding
-         * @param {number} [end=buffer.length] - Where to stop decoding
+         * @param {int} [start=0] - Where to start decoding
+         * @param {int} [end=buffer.length] - Where to stop decoding
          * @returns {string} The decoded string
          */
-        public toString(encoding?: BufferEncoding, start?: number, end?: number): string {
+        public toString(encoding?: BufferEncoding, start?: int, end?: int): string {
             let resolvedEncoding: string = encoding ?? "utf8";
             let resolvedStart: int = 0;
             let resolvedEnd: int = (this.length).toInt();
@@ -624,42 +628,42 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
          * Returns the byte at the specified index
          *
          * @param {int} index - Index of the byte to return
-         * @returns {byte} The byte at the specified position
+         * @returns {long} The byte at the specified position
          */
-        public at(index: int): byte {
+        public at(index: int): long {
             return this.buffer.at(index);
         }
 
         /**
          * Checks if the buffer includes the given value.
          *
-         * @param {string | number | Buffer | Uint8Array} value - The value to search for
-         * @param {number} [byteOffset=0] - The byte position to start searching from
+         * @param {string | double | long | Buffer | Uint8Array} value - The value to search for
+         * @param {int} [byteOffset=0] - The byte position to start searching from
          * @param {BufferEncoding} [encoding='utf8'] - Encoding to use if `value` is a string
          * @returns {boolean} `true` if the value is found, otherwise `false`
          */
-        public includes(value: string | number | Buffer | Uint8Array, byteOffset?: number, encoding?: BufferEncoding): boolean {
+        public includes(value: string | double | long | Buffer | Uint8Array, byteOffset?: int, encoding?: BufferEncoding): boolean {
             return this.indexOf(value, byteOffset ?? 0, encoding ?? "utf8") != -1;
         }
 
         /**
          * Returns the first index where `value` is found in the buffer.
          *
-         * @param {string | number | Buffer | Uint8Array} value - The value to search for
-         * @param {number} [byteOffset=0] - The byte position to start searching from.
+         * @param {string | double | long | Buffer | Uint8Array} value - The value to search for
+         * @param {int} [byteOffset=0] - The byte position to start searching from.
          *   - If negative, it is counted from the end of the buffer (`len + byteOffset`).
          *   - If out of bounds (`>= buffer length`), returns `-1`.
          * @param {BufferEncoding} [encoding='utf8'] - Encoding to use if `value` is a string
-         * @returns {number} The index of the first occurrence of `value`, or -1 if not found
+         * @returns {int} The index of the first occurrence of `value`, or -1 if not found
          */
-        public indexOf(value: string | number | Buffer | Uint8Array, byteOffset?: number, encoding?: BufferEncoding): number {
+        public indexOf(value: string | double | long | Buffer | Uint8Array, byteOffset?: int, encoding?: BufferEncoding): int {
             const searchBuffer = this.normalizeValueToBuffer(value, encoding ?? "utf8");
-            const len = this.length;
+            const len: int = this.length;
             const searchLen = searchBuffer.length;
-            let startIndex = byteOffset ?? 0;
+            let startIndex: int = byteOffset ?? 0;
 
             if (startIndex < 0) {
-                startIndex = Math.max(0, len + startIndex);
+                startIndex = Math.max(0, len + startIndex).toInt()
             } else if (startIndex >= len) {
                 return -1;
             }
@@ -672,14 +676,14 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         /**
          * Returns the last index where `value` is found in the buffer.
          *
-         * @param {string | number | Buffer | Uint8Array} value - The value to search for
-         * @param {number} [byteOffset=buffer length] - The byte position to start searching from (backwards).
+         * @param {string | double | long | Buffer | Uint8Array} value - The value to search for
+         * @param {int} [byteOffset=buffer length] - The byte position to start searching from (backwards).
          *   - If negative, it is counted from the end of the buffer (`len + byteOffset`).
          *   - If out of bounds (`>= buffer length`), it is clamped to `buffer length - searchLen`.
          * @param {BufferEncoding} [encoding='utf8'] - Encoding to use if `value` is a string
-         * @returns {number} The index of the last occurrence of `value`, or -1 if not found
+         * @returns {int} The index of the last occurrence of `value`, or -1 if not found
          */
-        public lastIndexOf(value: string | number | Buffer | Uint8Array, byteOffset?: number , encoding?: BufferEncoding): number {
+        public lastIndexOf(value: string | double | long | Buffer | Uint8Array, byteOffset?: int , encoding?: BufferEncoding): int {
             const searchBuffer = this.normalizeValueToBuffer(value, encoding ?? "utf8");
             const searchLen = searchBuffer.length;
             const len = this.length;
@@ -687,9 +691,9 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
             if (searchLen == 0 || len < searchLen) {
                 return -1;
             }
-            let endIndex = byteOffset ?? len;
+            let endIndex: int = byteOffset ?? len;
             if (endIndex < 0) {
-                endIndex = Math.max(0, len + endIndex);
+                endIndex = Math.max(0, len + endIndex).toInt()
             } else if (endIndex >= len) {
                 endIndex = len - searchLen;
             }
@@ -701,11 +705,14 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
             return -1;
         }
 
-        private normalizeValueToBuffer(value: string | number | Buffer | Uint8Array, encoding: BufferEncoding): Buffer {
+        private normalizeValueToBuffer(value: string | double | long | Buffer | Uint8Array, encoding: BufferEncoding): Buffer {
             if (value instanceof string) {
                 return buffer.from(value, encoding ?? "utf8");
-            } else if (value instanceof Number) {
-                const arr: number[] = [value];
+            } else if (value instanceof Double) {
+                const arr: double[] = [value];
+                return buffer.from(arr);
+            } else if (value instanceof Long) {
+                const arr: double[] = [value.toDouble()];
                 return buffer.from(arr);
             } else if (value instanceof Buffer) {
                 return value;
@@ -714,7 +721,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
             }
         }
 
-        private compareSubarray(startIndex: number, searchBuffer: Buffer): boolean {
+        private compareSubarray(startIndex: int, searchBuffer: Buffer): boolean {
             if (startIndex + searchBuffer.length > this.length){
                 return false;
             }
@@ -731,11 +738,11 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
          * or is the same as target in sort order. Comparison is based on the actual sequence of bytes in each Buffer.
          *
          * @param { Buffer | Uint8Array } target - A Buffer or Uint8Array with which to compare buf
-         * @param { number } [targetStart] - The offset within target at which to begin comparison
-         * @param { number } [targetEnd] - The offset within target at which to end comparison (not inclusive)
-         * @param { number } [sourceStart] - The offset within buf at which to begin comparison
-         * @param { number } [sourceEnd] - The offset within buf at which to end comparison (not inclusive)
-         * @returns { number } 0 is returned if target is the same as buf
+         * @param { int } [targetStart] - The offset within target at which to begin comparison
+         * @param { int } [targetEnd] - The offset within target at which to end comparison (not inclusive)
+         * @param { int } [sourceStart] - The offset within buf at which to begin comparison
+         * @param { int } [sourceEnd] - The offset within buf at which to end comparison (not inclusive)
+         * @returns { int } 0 is returned if target is the same as buf
          *         1 is returned if target should come before buf when sorted.
          *        -1 is returned if target should come after buf when sorted.
          * @throws { BusinessError } 401 - Parameter error. Possible causes:
@@ -746,15 +753,15 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
          */
         public compare(
             target: Buffer | Uint8Array,
-            targetStart?: number,
-            targetEnd?: number,
-            sourceStart?: number,
-            sourceEnd?: number): number
+            targetStart?: int,
+            targetEnd?: int,
+            sourceStart?: int,
+            sourceEnd?: int): int
         {
             const resolvedSource: ArrayBuffer = this.buffer;
             const resolvedTarget: ArrayBuffer = getArrayBufferFrom(target);
-            const targetSlice = resolvedTarget.slice(targetStart ?? 0, targetEnd ?? resolvedTarget.byteLength.toDouble());
-            const sourceSlice = resolvedSource.slice(sourceStart ?? 0, sourceEnd ?? resolvedSource.byteLength.toDouble());
+            const targetSlice = resolvedTarget.slice(targetStart ?? 0, targetEnd ?? resolvedTarget.byteLength.toInt());
+            const sourceSlice = resolvedSource.slice(sourceStart ?? 0, sourceEnd ?? resolvedSource.byteLength.toInt());
             return compare(new Buffer(sourceSlice), new Buffer(targetSlice));
         }
 
@@ -763,10 +770,10 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
          * If sourceEnd is greater than the length of the target, the length of the target shall prevail, and the extra part will not be overwritten.
          *
          * @param { Buffer | Uint8Array } target - A Buffer or Uint8Array to copy into
-         * @param { number } [targetStart] - The offset within target at which to begin writing
-         * @param { number } [sourceStart] - The offset within buf from which to begin copying
-         * @param { number } [sourceEnd] - The offset within buf at which to stop copying (not inclusive)
-         * @returns { number } The number of bytes copied
+         * @param { int } [targetStart] - The offset within target at which to begin writing
+         * @param { int } [sourceStart] - The offset within buf from which to begin copying
+         * @param { int } [sourceEnd] - The offset within buf at which to stop copying (not inclusive)
+         * @returns { int } The number of bytes copied
          * @throws { BusinessError } 401 - Parameter error. Possible causes:
          * 1. Mandatory parameters are left unspecified;
          * 2. Parameter verification failed.
@@ -775,9 +782,9 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
          */
         public copy(
             target: Buffer | Uint8Array,
-            targetStart?: number,
-            sourceStart?: number,
-            sourceEnd?: number): number
+            targetStart?: int,
+            sourceStart?: int,
+            sourceEnd?: int): int
         {
             const resolvedTarget = getArrayBufferFrom(target);
             const resolvedSource = this.buffer;
@@ -803,15 +810,15 @@ Received value is: ${resolvedSourceEnd}`)
             for (let i = 0; i < sourceSlice.byteLength; i++) {
                 resolvedTarget.set(resolvedTargetStart + i, sourceSlice.at(i));
             }
-            return sourceSlice.byteLength;
+            return sourceSlice.byteLength.toInt();
         }
 
         /**
          * Creates and returns an iterator of [index, byte] pairs from the contents of buf.
          *
-         * @returns { IterableIterator<[number, number]> }
+         * @returns { IterableIterator<[int, long]> }
          */
-        public entries(): IterableIterator<[number, number]> {
+        public entries(): IterableIterator<[int, long]> {
             return new BufferEntriesIterator(this);
         }
 
@@ -831,9 +838,9 @@ Received value is: ${resolvedSourceEnd}`)
         /**
          * Fills buf with the specified value. If the offset and end are not given, the entire buf will be filled.
          *
-         * @param { string | Buffer | Uint8Array | number } value - The value with which to fill buf
-         * @param { number } [offset] - Number of bytes to skip before starting to fill buf
-         * @param { number } [end] - Where to stop filling buf (not inclusive)
+         * @param { string | Buffer | Uint8Array | double | long } value - The value with which to fill buf
+         * @param { int } [offset] - Number of bytes to skip before starting to fill buf
+         * @param { int } [end] - Where to stop filling buf (not inclusive)
          * @param { BufferEncoding } [encoding] - The encoding for value if value is a string
          * @returns { Buffer } A reference to buf
          * @throws { BusinessError } 10200001 - The value of "[offset/end]" is out of range. It must be >= 0 and <= [right range]. Received value is: [offset/end]
@@ -842,9 +849,9 @@ Received value is: ${resolvedSourceEnd}`)
          * 2. Parameter verification failed.
          */
         public fill(
-            value: string | Buffer | Uint8Array | number,
-            offset: number = 0,
-            end?: number,
+            value: string | Buffer | Uint8Array | double | long,
+            offset: int = 0,
+            end?: int,
             encoding?: BufferEncoding
         ): Buffer {
             const resolvedEnd = end ?? this.length;
@@ -861,8 +868,10 @@ Received value is: ${resolvedEnd}`)
             let klass: string = "string";
             if (value instanceof string) {
                 klass = "string";
-            } else if (value instanceof Number) {
-                klass = "number";
+            } else if (value instanceof long) {
+                klass = "long";
+            } else if (value instanceof double) {
+                klass = "double";
             } else {
                 // NOTE (templin.konstantin): Can't completely use smart casts due internal issue #21021
                 //  now is used temporarily solution with reflection
@@ -915,16 +924,22 @@ Received value is: ${resolvedEnd}`)
                         this.buffer.set(pos, buff[j].toByte());
                     }
                     return this;
-                case "number":
-                    let asNum = value as number;
+                case "long":
+                    let asLong: long = value as long;
                     for (let i: int = offsetInt; i < resolvedEndInt; i++) {
-                        this.buffer.set(i, asNum.toByte());
+                        this.buffer.set(i, asLong.toByte());
+                    }
+                    return this;
+                case "double":
+                    let asDouble: double = value as double;
+                    for (let i: int = offsetInt; i < resolvedEndInt; i++) {
+                        this.buffer.set(i, asDouble.toByte());
                     }
                     return this;
                 case "Buffer":
                     let asBuf = value as Buffer;
                     for (let i: int = offsetInt; i < resolvedEndInt; i++) {
-                        this.buffer.set(i, asBuf.at((i % asBuf.length).toInt()));
+                        this.buffer.set(i, asBuf.at((i % asBuf.length)).toByte());
                     }
                     return this;
                 case "Uint8Array":
@@ -934,7 +949,7 @@ Received value is: ${resolvedEnd}`)
                     }
                     return this;
                 default:
-                    throw createBusinessError(TypeErrorCodeId, `Parameter error: value must be a string, Buffer, Uint8Array, or number.
+                    throw createBusinessError(TypeErrorCodeId, `Parameter error: value must be a string, Buffer, Uint8Array, or int.
 Received value is: ${value}`)
             }
         }
@@ -943,14 +958,14 @@ Received value is: ${value}`)
         * Throws an error when a parameter value is outside allowed range bounds
         *
         * @param {string} param_name - Name of the parameter that caused the error
-        * @param {number} param_value - The value that is out of range
+        * @param {double} param_value - The value that is out of range
         * @param {int} left_bound - Minimum allowed value (inclusive)
         * @param {int} right_bound - Maximum allowed value (inclusive)
         * @returns {void}
         * @throws {Error} With a message indicating the parameter name, its value, and valid range
         * @private
         */
-        private static throwOutOfRangeError(param_name: string, param_value: number, left_bound: int, right_bound: int) {
+        private static throwOutOfRangeError(param_name: string, param_value: double, left_bound: int, right_bound: int) {
             let message = `The value of "${param_name}" is out of range.`;
             message += `It must be >= ${left_bound} and <= ${right_bound}. Received value is: ${param_value}`;
             // NOTE (templin.konstantin): must be changed to BusinessError later
@@ -960,12 +975,12 @@ Received value is: ${value}`)
         /**
         * Checks if the byteLength parameter is within valid range
         *
-        * @param {number} byteLength - Number of bytes to read or write
+        * @param {int} byteLength - Number of bytes to read or write
         * @returns {void}
         * @throws {Error} If byteLength is less than 1 or greater than 6
         * @private
         */
-        private static checkByteLengthConstraint(byteLength: number) {
+        private static checkByteLengthConstraint(byteLength: int) {
             if (byteLength < 1 || byteLength > 6) {
                 Buffer.throwOutOfRangeError("byteLength", byteLength, 1, 6);
             }
@@ -974,29 +989,29 @@ Received value is: ${value}`)
         /**
          * Creates and returns an iterator of buf keys (indices).
          *
-         * @returns { IterableIterator<number> }
+         * @returns { IterableIterator<int> }
          */
-        public keys(): IterableIterator<number> {
+        public keys(): IterableIterator<int> {
             return new BufferIteratorKeys(this);
         }
 
         /**
          * Creates and returns an iterator for buf values (bytes).
          *
-         * @returns { IterableIterator<number> }
+         * @returns { IterableIterator<long> }
          */
-        public values(): IterableIterator<number> {
+        public values(): IterableIterator<long> {
             return new BufferIteratorValues(this);
         }
 
         /**
          * Returns a new Buffer that references the same memory as the original, but offset and cropped by the start and end indices.
          *
-         * @param { number } [start] - Where the new Buffer will start
-         * @param { number } [end] - Where the new Buffer will end (not inclusive)
+         * @param { int } [start] - Where the new Buffer will start
+         * @param { int } [end] - Where the new Buffer will end (not inclusive)
          * @returns { Buffer } Returns a new Buffer that references the same memory as the original
          */
-        public subarray(start?: number, end?: number): Buffer {
+        public subarray(start?: int, end?: int): Buffer {
             if (start == undefined || isNaN(start!)) {
                 start = 0
             }
@@ -1093,13 +1108,13 @@ Received value is: ${value}`)
         /**
         * Writes a signed integer to the buffer at the specified offset using big-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} offset - Number of bytes to skip before writing
-        * @param {number} byteLength - Number of bytes to write (maximum 6)
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} offset - Number of bytes to skip before writing
+        * @param {int} byteLength - Number of bytes to write (maximum 6)
+        * @returns {int} Offset plus the number of bytes written
         * @throws {Error} If byteLength is greater than 6
         */
-        public writeIntBE(value: number, offset: number, byteLength: number): number {
+        public writeIntBE(value: long, offset: int, byteLength: int): int {
             Buffer.checkByteLengthConstraint(byteLength);
             const view = this.getDataView();
             let remaining = value;
@@ -1110,8 +1125,8 @@ Received value is: ${value}`)
             return offset + byteLength;
         }
 
-        internal getMultiplier(i : number): number {
-            return Math.pow(2, i * 8)
+        internal getMultiplier(i: int): long {
+            return Math.pow(2, i * 8).toLong()
         }
 
         internal toUByte(b: byte): int {
@@ -1121,8 +1136,8 @@ Received value is: ${value}`)
             return b;
         }
 
-        internal readBytes(view: DataView, offset: number, byteLength: number, LE: boolean = false): number {
-            let val: number = 0;
+        internal readBytes(view: DataView, offset: int, byteLength: int, LE: boolean = false): long {
+            let val: long = 0;
             for (let i = 0; i < byteLength; i++) {
                 let idx = LE ? i : byteLength - i - 1
                 const byt: int = this.toUByte(this.$_get(offset + idx)!.toByte())
@@ -1131,7 +1146,7 @@ Received value is: ${value}`)
             return val
         }
 
-        internal toSigned(val: number, byteLength: number)
+        internal toSigned(val: long, byteLength: int)
         {
             const unsignedMax = this.getMultiplier(byteLength)
             const half = unsignedMax / 2
@@ -1146,12 +1161,12 @@ Received value is: ${value}`)
         /**
         * Reads a signed integer from the buffer at the specified offset using big-endian format
         *
-        * @param {number} offset - Number of bytes to skip before reading
-        * @param {number} byteLength - Number of bytes to read (maximum 6)
-        * @returns {number} The read value
+        * @param {int} offset - Number of bytes to skip before reading
+        * @param {int} byteLength - Number of bytes to read (maximum 6)
+        * @returns {int} The read value
         * @throws {Error} If byteLength is greater than 6
         */
-        public readIntBE(offset: number, byteLength: number): number {
+        public readIntBE(offset: int, byteLength: int): long {
             Buffer.checkByteLengthConstraint(byteLength);
             let val = this.readBytes(this.getDataView(), offset, byteLength)
             return this.toSigned(val, byteLength)
@@ -1160,13 +1175,13 @@ Received value is: ${value}`)
         /**
         * Writes a signed integer to the buffer at the specified offset using little-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} offset - Number of bytes to skip before writing
-        * @param {number} byteLength - Number of bytes to write (maximum 6)
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} offset - Number of bytes to skip before writing
+        * @param {int} byteLength - Number of bytes to write (maximum 6)
+        * @returns {int} Offset plus the number of bytes written
         * @throws {Error} If byteLength is greater than 6
         */
-        public writeIntLE(value: number, offset: number, byteLength: number): number {
+        public writeIntLE(value: long, offset: int, byteLength: int): int {
             Buffer.checkByteLengthConstraint(byteLength);
             const view = this.getDataView();
             let remaining = value;
@@ -1180,12 +1195,12 @@ Received value is: ${value}`)
         /**
         * Reads a signed integer from the buffer at the specified offset using little-endian format
         *
-        * @param {number} offset - Number of bytes to skip before reading
-        * @param {number} byteLength - Number of bytes to read (maximum 6)
-        * @returns {number} The read value
+        * @param {int} offset - Number of bytes to skip before reading
+        * @param {int} byteLength - Number of bytes to read (maximum 6)
+        * @returns {long} The read value
         * @throws {Error} If byteLength is greater than 6
         */
-        public readIntLE(offset: number, byteLength: number): number {
+        public readIntLE(offset: int, byteLength: int): long {
             Buffer.checkByteLengthConstraint(byteLength);
             let val = this.readBytes(this.getDataView(), offset, byteLength, true)
             return this.toSigned(val, byteLength)
@@ -1194,13 +1209,13 @@ Received value is: ${value}`)
         /**
         * Writes an unsigned integer to the buffer at the specified offset using big-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} offset - Number of bytes to skip before writing
-        * @param {number} byteLength - Number of bytes to write (maximum 6)
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} offset - Number of bytes to skip before writing
+        * @param {int} byteLength - Number of bytes to write (maximum 6)
+        * @returns {int} Offset plus the number of bytes written
         * @throws {Error} If byteLength is greater than 6
         */
-        public writeUIntBE(value: number, offset: number, byteLength: number): number {
+        public writeUIntBE(value: long, offset: int, byteLength: int): int {
             Buffer.checkByteLengthConstraint(byteLength);
             const view = this.getDataView();
             let remaining = value;
@@ -1214,12 +1229,12 @@ Received value is: ${value}`)
         /**
         * Reads an unsigned integer from the buffer at the specified offset using big-endian format
         *
-        * @param {number} offset - Number of bytes to skip before reading
-        * @param {number} byteLength - Number of bytes to read (maximum 6)
-        * @returns {number} The read value
+        * @param {int} offset - Number of bytes to skip before reading
+        * @param {int} byteLength - Number of bytes to read (maximum 6)
+        * @returns {long} The read value
         * @throws {Error} If byteLength is greater than 6
         */
-        public readUIntBE(offset: number, byteLength: number): number {
+        public readUIntBE(offset: int, byteLength: int): long {
             Buffer.checkByteLengthConstraint(byteLength);
             return this.readBytes(this.getDataView(), offset, byteLength)
         }
@@ -1227,13 +1242,13 @@ Received value is: ${value}`)
         /**
         * Writes an unsigned integer to the buffer at the specified offset using little-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} offset - Number of bytes to skip before writing
-        * @param {number} byteLength - Number of bytes to write (maximum 6)
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} offset - Number of bytes to skip before writing
+        * @param {int} byteLength - Number of bytes to write (maximum 6)
+        * @returns {int} Offset plus the number of bytes written
         * @throws {Error} If byteLength is greater than 6
         */
-        public writeUIntLE(value: number, offset: number, byteLength: number): number {
+        public writeUIntLE(value: long, offset: int, byteLength: int): int {
             Buffer.checkByteLengthConstraint(byteLength);
             const view = this.getDataView();
             let remaining = value;
@@ -1247,12 +1262,12 @@ Received value is: ${value}`)
         /**
         * Reads an unsigned integer from the buffer at the specified offset using little-endian format
         *
-        * @param {number} offset - Number of bytes to skip before reading
-        * @param {number} byteLength - Number of bytes to read (maximum 6)
-        * @returns {number} The read value
+        * @param {int} offset - Number of bytes to skip before reading
+        * @param {int} byteLength - Number of bytes to read (maximum 6)
+        * @returns {long} The read value
         * @throws {Error} If byteLength is greater than 6
         */
-        public readUIntLE(offset: number, byteLength: number): number {
+        public readUIntLE(offset: int, byteLength: int): long {
             Buffer.checkByteLengthConstraint(byteLength);
             return this.readBytes(this.getDataView(), offset, byteLength, true)
         }
@@ -1261,14 +1276,14 @@ Received value is: ${value}`)
         * Writes a string to the buffer at the specified offset
         *
         * @param {string} str - String to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @param {number} [length] - Maximum number of bytes to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @param {int} [length] - Maximum number of bytes to write
         * @param {string} [encoding='utf8'] - Character encoding of the string
-        * @returns {number} Number of bytes written
+        * @returns {int} Number of bytes written
         * @throws { BusinessError } 10200001 - The value of "[offset/length]" is out of range. It mast be >= 0 and
             <= buf.length. Received value is: [offset/length]
         */
-        public write(str: string, offset: number = 0, length?: number, encoding: string = 'utf8'): number {
+        public write(str: string, offset: int = 0, length?: int, encoding: string = 'utf8'): int {
             if (offset < 0 || offset > this.length - 1) {
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. \
 It must be >= 0 and <= ${this.length}. Received value is: ${offset}`)
@@ -1288,28 +1303,28 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
             const byteLen = buffer.byteLength(resolvedString, resolvedEncoding);
             const strBuffer = buffer.from(resolvedString, resolvedEncoding);
             for (let i = 0; i < resolvedLength && i < byteLen; i++) {
-                this.buffer.set((offset + i).toInt(), strBuffer.at(i));
+                this.buffer.set((offset + i).toInt(), strBuffer.at(i).toByte());
             }
-            return Math.min(resolvedLength, byteLen);
+            return Math.min(resolvedLength, byteLen).toInt();
         }
 
         /**
         * Reads a signed 64-bit integer from the buffer at the specified offset using big-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @param {int} [offset=0] - Number of bytes to skip before reading
         * @returns {bigint} The read value
         */
-        public readBigInt64BE(offset: number = 0): bigint {
+        public readBigInt64BE(offset: int = 0): bigint {
             return this.getDataView().getBigInt64(offset.toInt(), false);
         }
 
         /**
         * Reads a signed 64-bit integer from the buffer at the specified offset using little-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @param {int} [offset=0] - Number of bytes to skip before reading
         * @returns {bigint} The read value
         */
-        public readBigInt64LE(offset: number = 0): bigint {
+        public readBigInt64LE(offset: int = 0): bigint {
             return this.getDataView().getBigInt64(offset.toInt(), true);
         }
 
@@ -1319,168 +1334,168 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @param {number} [offset=0] - Number of bytes to skip before reading
         * @returns {bigint} The read value
         */
-        public readBigUInt64BE(offset: number = 0): bigint {
+        public readBigUInt64BE(offset: int = 0): bigint {
             return this.getDataView().getBigUint64(offset.toInt(), false);
         }
 
         /**
         * Reads an unsigned 64-bit integer from the buffer at the specified offset using little-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @param {int} [offset=0] - Number of bytes to skip before reading
         * @returns {bigint} The read value
         */
-        public readBigUInt64LE(offset: number = 0): bigint {
+        public readBigUInt64LE(offset: int = 0): bigint {
             return this.getDataView().getBigUint64(offset.toInt(), true);
         }
 
         /**
         * Reads a 64-bit double from the buffer at the specified offset using big-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {double} The read value
         */
-        public readDoubleBE(offset: number = 0): number {
+        public readDoubleBE(offset: int = 0): double {
             return this.getDataView().getFloat64(offset.toInt(), false);
         }
 
         /**
         * Reads a 64-bit double from the buffer at the specified offset using little-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {double} The read value
         */
-        public readDoubleLE(offset: number = 0): number {
+        public readDoubleLE(offset: int = 0): double {
             return this.getDataView().getFloat64(offset.toInt(), true);
         }
 
         /**
         * Reads a 32-bit float from the buffer at the specified offset using big-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {double} The read value
         */
-        public readFloatBE(offset: number = 0): number {
-            return this.getDataView().getFloat32(offset.toInt(), false);
+        public readFloatBE(offset: int = 0): double {
+            return this.getDataView().getFloat32(offset.toInt(), false)
         }
 
         /**
         * Reads a 32-bit float from the buffer at the specified offset using little-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {double} The read value
         */
-        public readFloatLE(offset: number = 0): number {
+        public readFloatLE(offset: int = 0): double {
             return this.getDataView().getFloat32(offset.toInt(), true);
         }
 
         /**
         * Reads a signed 8-bit integer from the buffer at the specified offset
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {long} [offset=0] - Number of bytes to skip before reading
+        * @returns {long} The read value
         */
-        public readInt8(offset: number = 0): number {
-            return this.getDataView().getInt8(offset.toInt());
+        public readInt8(offset: int = 0): long {
+            return this.getDataView().getInt8(offset.toInt()).toLong()
         }
 
         /**
         * Reads a signed 16-bit integer from the buffer at the specified offset using big-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {long} The read value
         */
-        public readInt16BE(offset: number = 0): number {
-            return this.getDataView().getInt16(offset.toInt(), false);
+        public readInt16BE(offset: int = 0): long {
+            return this.getDataView().getInt16(offset.toInt(), false).toLong()
         }
 
         /**
         * Reads a signed 16-bit integer from the buffer at the specified offset using little-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {long} The read value
         */
-        public readInt16LE(offset: number = 0): number {
-            return this.getDataView().getInt16(offset.toInt(), true);
+        public readInt16LE(offset: int = 0): long {
+            return this.getDataView().getInt16(offset.toInt(), true).toLong()
         }
 
         /**
         * Reads a signed 32-bit integer from the buffer at the specified offset using big-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {long} The read value
         */
-        public readInt32BE(offset: number = 0): number {
-            return this.getDataView().getInt32(offset.toInt(), false);
+        public readInt32BE(offset: int = 0): long {
+            return this.getDataView().getInt32(offset.toInt(), false).toLong()
         }
 
         /**
         * Reads a signed 32-bit integer from the buffer at the specified offset using little-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {long} The read value
         */
-        public readInt32LE(offset: number = 0): number {
-            return this.getDataView().getInt32(offset.toInt(), true);
+        public readInt32LE(offset: int = 0): long {
+            return this.getDataView().getInt32(offset.toInt(), true).toLong()
         }
 
         /**
         * Reads an unsigned 8-bit integer from the buffer at the specified offset
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {long} The read value
         */
-        public readUInt8(offset: number = 0): number {
-            return this.getDataView().getUint8(offset.toInt());
+        public readUInt8(offset: int = 0): long {
+            return this.getDataView().getUint8(offset.toInt()).toLong()
         }
 
         /**
         * Reads an unsigned 16-bit integer from the buffer at the specified offset using big-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {long} The read value
         */
-        public readUInt16BE(offset: number = 0): number {
-            return this.getDataView().getUint16(offset.toInt(), false);
+        public readUInt16BE(offset: int = 0): long {
+            return this.getDataView().getUint16(offset.toInt(), false).toLong()
         }
 
         /**
         * Reads an unsigned 16-bit integer from the buffer at the specified offset using little-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {long} The read value
         */
-        public readUInt16LE(offset: number = 0): number {
-            return this.getDataView().getUint16(offset.toInt(), true);
+        public readUInt16LE(offset: int = 0): long {
+            return this.getDataView().getUint16(offset.toInt(), true).toLong()
         }
 
         /**
         * Reads an unsigned 32-bit integer from the buffer at the specified offset using big-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {long} The read value
         */
-        public readUInt32BE(offset: number = 0): number {
-            return this.getDataView().getUint32(offset.toInt(), false);
+        public readUInt32BE(offset: int = 0): long {
+            return this.getDataView().getUint32(offset.toInt(), false).toLong()
         }
 
         /**
         * Reads an unsigned 32-bit integer from the buffer at the specified offset using little-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {long} The read value
         */
-        public readUInt32LE(offset: number = 0): number {
-            return this.getDataView().getUint32(offset.toInt(), true);
+        public readUInt32LE(offset: int = 0): long {
+            return this.getDataView().getUint32(offset.toInt(), true).toLong()
         }
 
         /**
         * Writes a signed 64-bit integer to the buffer at the specified offset using big-endian format
         *
         * @param {bigint} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeBigInt64BE(value: bigint, offset: number = 0): number {
+        public writeBigInt64BE(value: bigint, offset: int = 0): int {
             this.getDataView().setBigInt64(offset.toInt(), value, false);
             return offset + 8;
         }
@@ -1489,10 +1504,10 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * Writes a signed 64-bit integer to the buffer at the specified offset using little-endian format
         *
         * @param {bigint} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeBigInt64LE(value: bigint, offset: number = 0): number {
+        public writeBigInt64LE(value: bigint, offset: int = 0): int {
             this.getDataView().setBigInt64(offset.toInt(), value, true);
             return offset + 8;
         }
@@ -1501,10 +1516,10 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * Writes an unsigned 64-bit integer to the buffer at the specified offset using big-endian format
         *
         * @param {bigint} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeBigUInt64BE(value: bigint, offset: number = 0): number {
+        public writeBigUInt64BE(value: bigint, offset: int = 0): int {
             this.getDataView().setBigUint64(offset.toInt(), value, false);
             return offset + 8;
         }
@@ -1513,10 +1528,10 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * Writes an unsigned 64-bit integer to the buffer at the specified offset using little-endian format
         *
         * @param {bigint} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeBigUInt64LE(value: bigint, offset: number = 0): number {
+        public writeBigUInt64LE(value: bigint, offset: int = 0): int {
             this.getDataView().setBigUint64(offset.toInt(), value, true);
             return offset + 8;
         }
@@ -1524,11 +1539,11 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         /**
         * Writes a 64-bit double to the buffer at the specified offset using big-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {double} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeDoubleBE(value: number, offset: number = 0): number {
+        public writeDoubleBE(value: double, offset: int = 0): int {
             this.getDataView().setFloat64(offset.toInt(), value, false);
             return offset + 8;
         }
@@ -1536,11 +1551,11 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         /**
         * Writes a 64-bit double to the buffer at the specified offset using little-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {double} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeDoubleLE(value: number, offset: number = 0): number {
+        public writeDoubleLE(value: double, offset: int = 0): int {
             this.getDataView().setFloat64(offset.toInt(), value, true);
             return offset + 8;
         }
@@ -1548,11 +1563,11 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         /**
         * Writes a 32-bit float to the buffer at the specified offset using big-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {double} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeFloatBE(value: number, offset: number = 0): number {
+        public writeFloatBE(value: double, offset: int = 0): int {
             this.getDataView().setFloat32(offset.toInt(), value, false);
             return offset + 4;
         }
@@ -1560,11 +1575,11 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         /**
         * Writes a 32-bit float to the buffer at the specified offset using little-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {double} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeFloatLE(value: number, offset: number = 0): number {
+        public writeFloatLE(value: double, offset: int = 0): int {
             this.getDataView().setFloat32(offset.toInt(), value, true);
             return offset + 4;
         }
@@ -1572,11 +1587,11 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         /**
         * Writes a signed 8-bit integer to the buffer at the specified offset
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeInt8(value: number, offset: number = 0): number {
+        public writeInt8(value: long, offset: int = 0): int {
             this.getDataView().setInt8(offset.toInt(), value);
             return offset + 1;
         }
@@ -1584,11 +1599,11 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         /**
         * Writes a signed 16-bit integer to the buffer at the specified offset using big-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeInt16BE(value: number, offset: number = 0): number {
+        public writeInt16BE(value: long, offset: int = 0): int {
             this.getDataView().setInt16(offset.toInt(), value, false);
             return offset + 2;
         }
@@ -1596,11 +1611,11 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         /**
         * Writes a signed 16-bit integer to the buffer at the specified offset using little-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeInt16LE(value: number, offset: number = 0): number {
+        public writeInt16LE(value: long, offset: int = 0): int {
             this.getDataView().setInt16(offset.toInt(), value, true);
             return offset + 2;
         }
@@ -1608,11 +1623,11 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         /**
         * Writes a signed 32-bit integer to the buffer at the specified offset using big-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeInt32BE(value: number, offset: number = 0): number {
+        public writeInt32BE(value: long, offset: int = 0): int {
             this.getDataView().setInt32(offset.toInt(), value, false);
             return offset + 4;
         }
@@ -1620,11 +1635,11 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         /**
         * Writes a signed 32-bit integer to the buffer at the specified offset using little-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeInt32LE(value: number, offset: number = 0): number {
+        public writeInt32LE(value: long, offset: int = 0): int {
             this.getDataView().setInt32(offset.toInt(), value, true);
             return offset + 4;
         }
@@ -1632,11 +1647,11 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         /**
         * Writes an unsigned 8-bit integer to the buffer at the specified offset
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeUInt8(value: number, offset: number = 0): number {
+        public writeUInt8(value: long, offset: int = 0): int {
             this.getDataView().setUint8(offset.toInt(), value);
             return offset + 1;
         }
@@ -1644,11 +1659,11 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         /**
         * Writes an unsigned 16-bit integer to the buffer at the specified offset using big-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeUInt16BE(value: number, offset: number = 0): number {
+        public writeUInt16BE(value: long, offset: int = 0): int {
             this.getDataView().setUint16(offset.toInt(), value, false);
             return offset + 2;
         }
@@ -1656,11 +1671,11 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         /**
         * Writes an unsigned 16-bit integer to the buffer at the specified offset using little-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeUInt16LE(value: number, offset: number = 0): number {
+        public writeUInt16LE(value: long, offset: int = 0): int {
             this.getDataView().setUint16(offset.toInt(), value, true);
             return offset + 2;
         }
@@ -1668,11 +1683,11 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         /**
         * Writes an unsigned 32-bit integer to the buffer at the specified offset using big-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeUInt32BE(value: number, offset: number = 0): number {
+        public writeUInt32BE(value: long, offset: int = 0): int {
             this.getDataView().setUint32(offset.toInt(), value, false);
             return offset + 4;
         }
@@ -1680,11 +1695,11 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         /**
         * Writes an unsigned 32-bit integer to the buffer at the specified offset using little-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeUInt32LE(value: number, offset: number = 0): number {
+        public writeUInt32LE(value: long, offset: int = 0): int {
             this.getDataView().setUint32(offset.toInt(), value, true);
             return offset + 4;
         }
@@ -1692,26 +1707,26 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         /**
         * Returns the item at that index.
         *
-        * @param { number } index - The zero-based index of the desired code unit.
+        * @param { int } index - The zero-based index of the desired code unit.
         *     Throws error if index < 0 or index >= buffer.length.
-        * @returns { number } The element in the buffer matching the given index. 
+        * @returns { int } The element in the buffer matching the given index. 
         * @throws { BusinessError } 10200001 - The value of index is out of range.
         */
-        $_get(index: number): number {
+        $_get(index: int): long {
             if (index < 0 || index >= this.length) {
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "length" is out of range. \
 It must be >= 0 and <= ${this.length}. Received value is: ${index}`)
             }
-            return this.getDataView().getUint8(index.toInt());
+            return this.getDataView().getUint8(index.toInt()).toLong()
         }
 
         /**
          * Sets the byte at the specified index.
          *
-         * @param {number} index – byte index to write
-         * @param {number} value – byte value (0–255)
+         * @param {int} index – byte index to write
+         * @param {long} value – byte value (0–255)
          */
-        $_set(index: number, value: number): void {
+        $_set(index: int, value: long): void {
             if (index < 0 || index >= this.length) {
                 return;
             }
@@ -1943,12 +1958,12 @@ It must be >= 0 and <= ${this.length}. Received value is: ${index}`)
         /**
          * Creates and returns a new Blob containing a subset of this Blob objects data. The original Blob is not altered.
          *
-         * @param {number} [start=0] - The starting index.
-         * @param {number} [end=buffer.length] -  The ending index.
+         * @param {int} [start=0] - The starting index.
+         * @param {int} [end=buffer.length] -  The ending index.
          * @param {string} [type] - The content-type for the new Blob
          * @returns {Blob}
          */
-        slice(start?: number, end?: number, type?: string): Blob {
+        slice(start?: int, end?: int, type?: string): Blob {
             if (start == undefined) {
                 start = 0;
             }

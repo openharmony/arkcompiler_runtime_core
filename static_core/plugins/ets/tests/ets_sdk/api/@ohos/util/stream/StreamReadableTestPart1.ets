@@ -181,7 +181,7 @@ class MyRead1 extends stream.Readable {
     constructor() {
         super();
     }
-
+    
     doRead(size: int) {
         throw new Error('Simulated error');
     }
@@ -269,13 +269,14 @@ function testReadableLengthPartialRead() {
     let readable = new MyRead5();
     let testData = 'Hello world!';
     readable.push(testData);
-    let chunk = readable.read((testData.length / 2).toInt());
+    let readLength: int = testData.length.toInt() / 2
+    let chunk = readable.read(readLength) as buffer.Buffer
     arktest.assertTrue(chunk !== null);
-    arktest.assertEQ(chunk!.length, testData.length / 2);
-    arktest.assertEQ(readable.readableLength, testData.length / 2);
-    let remainingChunk = readable.read((testData.length / 2).toInt());
+    arktest.assertEQ(chunk!.length.toInt(), readLength);
+    arktest.assertEQ(readable.readableLength, readLength);
+    let remainingChunk = readable.read(readLength) as buffer.Buffer
     arktest.assertTrue(remainingChunk !== null);
-    arktest.assertEQ(remainingChunk!.length, testData.length / 2);
+    arktest.assertEQ(remainingChunk!.length, readLength);
     arktest.assertEQ(readable.readableLength, 0);
 }
 

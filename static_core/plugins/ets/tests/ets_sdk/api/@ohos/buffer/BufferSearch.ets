@@ -37,8 +37,8 @@ function main(): int {
 
 function testIncludesNumbers() {
     const buf = buffer.from([10, 20, 30, 40, 50])
-    arktest.assertEQ(buf.includes(30), true)
-    arktest.assertEQ(buf.includes(60), false)
+    arktest.assertEQ(buf.includes(30 as double), true)
+    arktest.assertEQ(buf.includes(60 as double), false)
 }
 
 function testIncludesStrings() {
@@ -56,9 +56,9 @@ function testIncludesBuffers() {
 
 function testIndexOfNumbers() {
     const buf = buffer.from([1, 2, 3, 4, 5, 3, 7])
-    arktest.assertEQ(buf.indexOf(3), 2)
-    arktest.assertEQ(buf.indexOf(3, 3), 5)
-    arktest.assertEQ(buf.indexOf(8), -1)
+    arktest.assertEQ(buf.indexOf(3 as double), 2)
+    arktest.assertEQ(buf.indexOf(3 as double, 3), 5)
+    arktest.assertEQ(buf.indexOf(8 as double), -1)
 }
 
 function testIndexOfStrings() {
@@ -70,9 +70,9 @@ function testIndexOfStrings() {
 
 function testLastIndexOfNumbers() {
     const buf = buffer.from([1, 2, 3, 4, 3, 5])
-    arktest.assertEQ(buf.lastIndexOf(3), 4)
-    arktest.assertEQ(buf.lastIndexOf(3, 3), 2)
-    arktest.assertEQ(buf.lastIndexOf(6), -1)
+    arktest.assertEQ(buf.lastIndexOf(3 as double), 4)
+    arktest.assertEQ(buf.lastIndexOf(3 as double, 3), 2)
+    arktest.assertEQ(buf.lastIndexOf(6 as double), -1)
 }
 
 function testLastIndexOfStrings() {
@@ -91,14 +91,14 @@ function testIndexOfLastIndexOfBuffers() {
 
 function testIndexOfOutOfBounds() {
     const buf = buffer.from([10, 20, 30, 40, 50])
-    arktest.assertEQ(buf.indexOf(30, 10), -1)
-    arktest.assertEQ(buf.indexOf(30, -100), 2)
+    arktest.assertEQ(buf.indexOf(30 as double, 10), -1)
+    arktest.assertEQ(buf.indexOf(30 as double, -100), 2)
 }
 
 function testLastIndexOfOutOfBounds() {
     const buf = buffer.from([10, 20, 30, 40, 50])
-    arktest.assertEQ(buf.lastIndexOf(30, 100), 2)
-    arktest.assertEQ(buf.lastIndexOf(30, -100), -1)
+    arktest.assertEQ(buf.lastIndexOf(30 as double, 100), 2)
+    arktest.assertEQ(buf.lastIndexOf(30 as double, -100), -1)
 }
 
 function testIndexOfPartialMatch() {

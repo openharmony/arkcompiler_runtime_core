@@ -278,10 +278,10 @@ export class ArrayBuffer extends Buffer
     * The numbers in the provided array are converted to bytes, and then a new ArrayBuffer is constructed
     * using these bytes.
     *
-    * @param {number[]} array - An array of numbers representing byte values.
+    * @param {double[]} array - An array of numbers representing byte values.
     * @returns {ArrayBuffer} A new ArrayBuffer containing the data from the array.
     */
-    public static from(array: number[]): ArrayBuffer {
+    public static from(array: double[]): ArrayBuffer {
         const buf = new ArrayBuffer(array.length)
         for (let i = 0; i < array.length; ++i) {
             buf.set(i, array[i].toByte())
@@ -359,20 +359,20 @@ export class ArrayBuffer extends Buffer
     * it copies a segment starting from the provided byte offset for the specified length.
     *
     * @param {Object} obj - The source object, which should be either a string or an ArrayBuffer.
-    * @param {number | string} byteOffsetOrEncoding - If `obj` is an ArrayBuffer, this is the starting byte offset;
+    * @param {int | string} byteOffsetOrEncoding - If `obj` is an ArrayBuffer, this is the starting byte offset;
     *                                                 if `obj` is a string, this is the encoding to use.
-    * @param {number} length - The number of bytes to copy or the desired length of the encoded string data.
+    * @param {int} length - The number of bytes to copy or the desired length of the encoded string data.
     * @returns {ArrayBuffer} A new ArrayBuffer created from the provided object.
     * @throws {Error} If the input object type is unsupported or the arguments are incorrect.
     */
-    public static fromObject(obj: Object, byteOffsetOrEncoding: number | string, length: number): ArrayBuffer {
+    public static fromObject(obj: Object, byteOffsetOrEncoding: int | string, length: int): ArrayBuffer {
         if (obj instanceof string && byteOffsetOrEncoding instanceof string) {
             return ArrayBuffer.from(obj, byteOffsetOrEncoding as string);
         }
         if (!(obj instanceof ArrayBuffer)) {
             throw Error("Incorrect args");
         }
-        return ArrayBuffer.from(obj, (byteOffsetOrEncoding as number).toInt(), length.toInt());
+        return ArrayBuffer.from(obj, byteOffsetOrEncoding as int, length);
     }
 
 

@@ -53,7 +53,7 @@ function testToString() {
         for (let i = 0; i < 26; i++) {
             buf.writeInt8(i + 97, i);
         }
-        const str = buf.toString('utf8', Infinity); // ''
+        const str = buf.toString('utf8', Infinity.toInt()); // ''
         arktest.assertEQ(str, '');
     }
     {
@@ -61,7 +61,7 @@ function testToString() {
         for (let i = 0; i < 26; i++) {
             buf.writeInt8(i + 97, i);
         }
-        const str = buf.toString('utf8', -Infinity); // abcdefghijklmnopqrstuvwxyz
+        const str = buf.toString('utf8', -Infinity.toInt()); // abcdefghijklmnopqrstuvwxyz
         arktest.assertEQ(str, 'abcdefghijklmnopqrstuvwxyz')
     }
     {
@@ -69,7 +69,7 @@ function testToString() {
         for (let i = 0; i < 26; i++) {
             buf.writeInt8(i + 97, i);
         }
-        const str = buf.toString('utf8', undefined, Infinity) // abcdefghijklmnopqrstuvwxyz
+        const str = buf.toString('utf8', undefined, Infinity.toInt()) // abcdefghijklmnopqrstuvwxyz
         arktest.assertEQ(str, 'abcdefghijklmnopqrstuvwxyz')
     }
     {
@@ -77,7 +77,7 @@ function testToString() {
         for (let i = 0; i < 26; i++) {
             buf.writeInt8(i + 97, i);
         }
-        const str = buf.toString('utf8', 0, -Infinity); // ''
+        const str = buf.toString('utf8', 0, -Infinity.toInt()); // ''
         arktest.assertEQ(str, '')
     }
     {
@@ -95,12 +95,12 @@ function testToString() {
     }
     {
         const buf = buffer.from('hello');
-        const res = buf.toString('base64', 0, Infinity); // aGVsbG8=
+        const res = buf.toString('base64', 0, Infinity.toInt()); // aGVsbG8=
         arktest.assertEQ(res, 'aGVsbG8=')
     }
     {
         const buf = buffer.from('hello');
-        const res = buf.toString('base64', 0, -Infinity); // ''
+        const res = buf.toString('base64', 0, -Infinity.toInt()); // ''
         arktest.assertEQ(res, '')
     }
     {
