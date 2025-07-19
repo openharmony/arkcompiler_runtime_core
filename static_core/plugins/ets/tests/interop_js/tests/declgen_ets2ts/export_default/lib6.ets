@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,29 +13,11 @@
  * limitations under the License.
  */
 
-export type IntAlias = int;
-
-export class Lib2Class {
-    val: double = 323;
-}
-
-export class Lib2Class2 {
-    val: double = 324;
-}
-
-export class EC1 {}
-
-export class B {}
-export class C {}
-export class D {}
-export class E {}
-export class F {}
-export class G {}
-export class H {}
-export class O {}
-export class P {}
-export type I = string
-export type J = string
-export type K = string
-export type L = string
-export type M = string
+import E from "./lib1";
+import I from "./lib2";
+import T from "./lib3";
+import a from "./lib4";
+import N from "./lib5";
+export { I, T, N };
+export default E;
+export type { a };
