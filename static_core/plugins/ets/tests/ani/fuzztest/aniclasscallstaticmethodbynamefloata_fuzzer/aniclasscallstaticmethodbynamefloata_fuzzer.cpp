@@ -41,7 +41,8 @@ void AniClassCallStaticMethodByNameFloatAFuzzTest(const char *data, size_t size)
     args[0U].z = ANI_TRUE;
     args[1U].z = ANI_FALSE;
     ani_float res {};
-    env->Class_CallStaticMethodByName_Float_A(intCls, data, nullptr, &res, args);
+    std::string input(data, size);
+    env->Class_CallStaticMethodByName_Float_A(intCls, input.c_str(), nullptr, &res, args);
 }
 }  // namespace OHOS
 

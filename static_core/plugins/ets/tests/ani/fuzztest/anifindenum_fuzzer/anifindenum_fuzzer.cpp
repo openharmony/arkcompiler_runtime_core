@@ -34,7 +34,8 @@ void AniFindEnumFuzzTest(const char *data, size_t size)
     ani_env *env {};
     engine->GetAniEnv(&env);
     ani_enum e {};
-    env->FindEnum(data, &e);
+    std::string input(data, size);
+    env->FindEnum(input.c_str(), &e);
 }
 }  // namespace OHOS
 

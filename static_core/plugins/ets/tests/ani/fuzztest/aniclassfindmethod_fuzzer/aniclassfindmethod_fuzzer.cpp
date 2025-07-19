@@ -38,7 +38,8 @@ void AniClassFindMethodFuzzTest(const char *data, size_t size)
     ani_class cls {};
     env->FindClass("std.core.String", &cls);
     ani_method strMethod {};
-    env->Class_FindMethod(cls, data, nullptr, &strMethod);
+    std::string input(data, size);
+    env->Class_FindMethod(cls, input.c_str(), nullptr, &strMethod);
 }
 }  // namespace OHOS
 

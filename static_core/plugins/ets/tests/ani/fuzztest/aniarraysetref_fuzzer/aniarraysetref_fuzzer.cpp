@@ -39,7 +39,8 @@ void AniArraySetRegionRefFuzzTest(const char *data, size_t size)
 
     ani_ref ref {};
 
-    env->Array_Set_Ref(array, size, ref);
+    auto index = static_cast<ani_size>(size);
+    env->Array_Set_Ref(array, index, ref);
 }
 }  // namespace OHOS
 
