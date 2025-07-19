@@ -1737,14 +1737,6 @@ It must be >= 0 and <= ${this.length}. Received value is: ${index}`)
         }
     }
 
-    enum TypeParameters {
-        StringType = "string",
-        ArrayBufferType = "ArrayBuffer",
-        DataViewType = "DataView",
-        TypedArrayType = "TypedArray",
-        BlobType = "Blob"
-    }
-
     export interface BlobOptions {
         /** The Blob content-type. The intent is for type to convey the MIME media type of the data, however no validation of the type format is performed. */
         type: string
@@ -1752,58 +1744,115 @@ It must be >= 0 and <= ${this.length}. Received value is: ${index}`)
         endings: 'transparent'|'native'
     };
 
-    type SrcType = FixedArray<string> | FixedArray<ArrayBuffer> | FixedArray<TypedArray> | FixedArray<DataView> | FixedArray<Blob>;
-    type SrcItemType = string | ArrayBuffer | TypedArray | DataView | Blob;
-    type ArrSrcType =  Array<TypedArray> | Array<string> | Array<ArrayBuffer> | Array<DataView> | Array<Blob>;
-    function toString(src: SrcItemType): string {
-        if (src instanceof string) {
-            return src
-        } else if (src instanceof ArrayBuffer) {
-            return buffer.from(src as ArrayBuffer).toString()
-        } else if (src instanceof TypedArray) {
-            return buffer.from(src.buffer as ArrayBuffer).toString()
-        } else if (src instanceof DataView) {
-            return buffer.from((src as DataView).buffer as ArrayBuffer).toString()
-        }
-        return ""
-    }
+    type FixedArrayUnionType = FixedArray<string>
+        | FixedArray<ArrayBuffer>
+        | FixedArray<Int8Array>
+        | FixedArray<Uint8Array>
+        | FixedArray<Uint8ClampedArray>
+        | FixedArray<Int16Array>
+        | FixedArray<Uint16Array>
+        | FixedArray<Int32Array>
+        | FixedArray<Uint32Array>
+        | FixedArray<Float32Array>
+        | FixedArray<Float64Array>
+        | FixedArray<BigInt64Array>
+        | FixedArray<BigUint64Array>
+        | FixedArray<DataView>
+        | FixedArray<Blob>;
+
+    type ArrayItemType = string
+        | ArrayBuffer
+        | Int8Array
+        | Uint8Array
+        | Uint8ClampedArray
+        | Int16Array
+        | Uint16Array
+        | Int32Array
+        | Uint32Array
+        | Float32Array
+        | Float64Array
+        | BigInt64Array
+        | BigUint64Array
+        | DataView
+        | Blob;
+
+    type ArrayUnionType =  Array<Int8Array>
+         | Array<Uint8Array>
+         | Array<Uint8ClampedArray>
+         | Array<Int16Array>
+         | Array<Uint16Array>
+         | Array<Int32Array>
+         | Array<Uint32Array>
+         | Array<Float32Array>
+         | Array<Float64Array>
+         | Array<BigInt64Array>
+         | Array<BigUint64Array>
+         | Array<string>
+         | Array<ArrayBuffer>
+         | Array<DataView>
+         | Array<Blob>;
+
     /**
     * A Blob encapsulates immutable, raw data that can be safely shared across multiple worker threads.
     */
     export class Blob {
         /**
+         * The content-size of the Blob.
+         */
+        size: number
+
+        /**
+         * The content-type of the Blob.
+         */
+        type: string
+
+        /**
+         * The buffer of the Blob.
+         */
+        private arrBuffer: ArrayBuffer
+
+        /**
+         * Get the array of buffer.
+         */
+        private arr: ArrayUnionType
+        /**
          * Creates a new Blob object containing a concatenation of the given sources.
          * <ArrayBuffer>, <TypedArray>, <DataView>, and <Buffer> sources are copied into the 'Blob' and can therefore be safely modified after the 'Blob' is created.
          * String sources are encoded as UTF-8 byte sequences and copied into the Blob. Unmatched surrogate pairs within each string part will be replaced by Unicode U+FFFD replacement characters.
-         * @param {FixedArray<string> | FixedArray<ArrayBuffer> | FixedArray<TypedArray> | FixedArray<DataView> | FixedArray<Blob>} [sources] - An array of string, <ArrayBuffer>, <TypedArray>, <DataView>, or <Blob> objects, or any mix of such objects, that will be stored within the Blob.
-         * @param {BlobOptions} [options] - options
+         * @param { FixedArray<string> | FixedArray<ArrayBuffer> | FixedArray<TypedArray> | FixedArray<DataView> | FixedArray<Blob> } [sources] - An array of string, <ArrayBuffer>, <TypedArray>, <DataView>, or <Blob> objects, or any mix of such objects, that will be stored within the Blob.
+         * @param { BlobOptions } [options] - options
          */
-        constructor(sources: SrcType, options?: BlobOptions) {
-            this.checkParameters(sources)
-            this.createArray(sources)
+        constructor(sources: FixedArrayUnionType, options?: BlobOptions) {
+            this.handleParameters(sources)
+            this.arrBuffer = this.flattenData(this.arr)
+            this.size = this.arrBuffer.byteLength;
             if (options != undefined) {
                 this.type = options!.type ? options!.type! : ''
             } else {
                 this.type = ''
             }
-            this.calcSize()
         }
 
-        constructor(sources: ArrSrcType, options?: BlobOptions) {
-            this.checkParameters(sources)
-            this.arr = sources
+        /**
+         * Creates a new Blob object containing a concatenation of the given sources.
+         * <ArrayBuffer>, <TypedArray>, <DataView>, and <Buffer> sources are copied into the 'Blob' and can therefore be safely modified after the 'Blob' is created.
+         * String sources are encoded as UTF-8 byte sequences and copied into the Blob. Unmatched surrogate pairs within each string part will be replaced by Unicode U+FFFD replacement characters.
+         * @param { Array<TypedArray> | Array<string> | Array<ArrayBuffer> | Array<DataView> | Array<Blob> } [sources] - An array of string, <ArrayBuffer>, <TypedArray>, <DataView>, or <Blob> objects, or any mix of such objects, that will be stored within the Blob.
+         * @param { BlobOptions } [options] - options
+         */
+        constructor(sources: ArrayUnionType, options?: BlobOptions) {
+            this.arrBuffer = this.flattenData(sources);
+            this.size = this.arrBuffer.byteLength;
             if (options != undefined) {
                 this.type = options!.type ? options!.type! : ''
             } else {
                 this.type = ''
             }
-            this.calcSize()
         }
 
-        private constructor(sources: ArrSrcType, typeKey: string, type?: string) {
-            this.arr = sources
-            this.typeKey = typeKey
-            this.calcSize()
+        private constructor(sources: Array<ArrayBuffer>, typeKey: string, type?: string) {
+            this.arrBuffer = this.flattenData(sources)
+            this.size = this.arrBuffer.byteLength;
             if (type != undefined) {
                 this.type = type
             } else {
@@ -1811,84 +1860,84 @@ It must be >= 0 and <= ${this.length}. Received value is: ${index}`)
             }
         }
 
-        private constructor(blob: Blob) {
-            this.arr = blob.arr
-            this.size = blob.size
-            this.type = blob.type
-            this.typeKey = blob.typeKey
+        /**
+         * handle Parameters, and retrun ArrSrcType.
+         */
+        private handleParameters(sources: FixedArrayUnionType) {
+            if (sources instanceof FixedArray<string>) {
+                this.arr = Array.from(sources as FixedArray<string>)
+            } else if (sources instanceof FixedArray<ArrayBuffer>) {
+                this.arr = Array.from(sources as FixedArray<ArrayBuffer>);
+            } else if (sources instanceof FixedArray<DataView>) {
+                this.arr = Array.from(sources as FixedArray<DataView>);
+            } else if (sources instanceof FixedArray<Int8Array>) {
+                this.arr = Array.from(sources as FixedArray<Int8Array>);
+            } else if (sources instanceof FixedArray<Uint8Array>) {
+                this.arr = Array.from(sources as FixedArray<Uint8Array>);
+            } else if (sources instanceof FixedArray<Uint8ClampedArray>) {
+                this.arr = Array.from(sources as FixedArray<Uint8ClampedArray>);
+            } else if (sources instanceof FixedArray<Int16Array>) {
+                this.arr = Array.from(sources as FixedArray<Int16Array>);
+            } else if (sources instanceof FixedArray<Uint16Array>) {
+                this.arr = Array.from(sources as FixedArray<Uint16Array>);
+            } else if (sources instanceof FixedArray<Int32Array>) {
+                this.arr = Array.from(sources as FixedArray<Int32Array>);
+            } else if (sources instanceof FixedArray<Uint32Array>) {
+                this.arr = Array.from(sources as FixedArray<Uint32Array>);
+            } else if (sources instanceof FixedArray<Float32Array>) {
+                this.arr = Array.from(sources as FixedArray<Float32Array>);
+            } else if (sources instanceof FixedArray<Float64Array>) {
+                this.arr = Array.from(sources as FixedArray<Float64Array>);
+            } else if (sources instanceof FixedArray<BigInt64Array>) {
+                this.arr = Array.from(sources as FixedArray<BigInt64Array>);
+            } else if (sources instanceof FixedArray<BigUint64Array>) {
+                this.arr = Array.from(sources as FixedArray<BigUint64Array>);
+            } else {
+                this.arr = Array.from(sources as FixedArray<Blob>);
+            }
         }
 
-        private checkParameters(sources: ArrSrcType | SrcType) {
-            for (const element of sources) {
-                if (element instanceof string) {
-                    this.typeKey = TypeParameters.StringType
-                   break;
-                } else if (element instanceof ArrayBuffer) {
-                    this.typeKey = TypeParameters.ArrayBufferType
-                    break;
-                } else if (element instanceof DataView) {
-                    this.typeKey = TypeParameters.DataViewType
-                    break;
-                } else if (element instanceof TypedArray) {
-                    this.typeKey = TypeParameters.TypedArrayType
-                    break;
-                } else if (element instanceof Blob) {
-                    this.typeKey = TypeParameters.BlobType
-                    break;
+        private transformToArrayBuffer(value: ArrayItemType): ArrayBuffer {
+            if (value instanceof String) {
+                return ArrayBuffer.from(value, "utf-8");
+            } else if (value instanceof ArrayBuffer) {
+                return value;
+            } else if (value instanceof DataView) {
+                return value.buffer;
+            }  else if (value instanceof Blob) {
+                return value.getArrayBuffer() as ArrayBuffer;
+            } else {
+                return value.buffer as ArrayBuffer;
+            }
+        }
+
+        private flattenData(value: ArrayUnionType): ArrayBuffer {
+            const resolvedList = new Array<ArrayBuffer>();
+            for (const item of value) {
+                resolvedList.push(this.transformToArrayBuffer(item));
+            }
+            const bufferLength = resolvedList.reduce(
+                (acc: number, item: ArrayBuffer): number => acc + item.byteLength, 0);
+            const listOfBytes = new Array<byte>();
+            for (const item of resolvedList) {
+                for (let i = 0; i < item.byteLength; i++) {
+                    listOfBytes.push(item.at(i));
                 }
             }
+            const buffer = new ArrayBuffer(bufferLength);
+            let offset = 0;
+            for (let i = 0; i < listOfBytes.length; i++) {
+                buffer.set(offset, listOfBytes[i]);
+                offset += 1;
+            }
+            return buffer;
         }
 
-        private calcSize(): number {
-            this.size = 0
-            switch (this.typeKey) {
-                case "string": {
-                    for (const item of this.arr as Array<string>) {
-                        this.size += ArrayBuffer.bytesLength(item, "utf8")
-                    }
-                } break
-                case "ArrayBuffer": {
-                    for (const item of this.arr as Array<ArrayBuffer>) {
-                        this.size += item.getByteLength()
-                    }
-                } break
-                case "TypedArray": {
-                    for (const item of this.arr as Array<TypedArray>) {
-                        this.size += item.byteLength
-                    }
-                } break
-                case "DataView": {
-                    for (const item of this.arr as Array<DataView>) {
-                        this.size += item.byteLength
-                    }
-                } break
-                case "Blob": {
-                    for (const item of this.arr as Array<Blob>) {
-                        this.size += item.calcSize()
-                    }
-                } break
-            }
-            return this.size
-        }
-
-        private createArray(sources: SrcType) {
-            switch (this.typeKey) {
-                case "string": {
-                    this.arr = Array.from(sources as FixedArray<string>)
-                } break
-                case "ArrayBuffer": {
-                    this.arr = Array.from(sources as FixedArray<ArrayBuffer>)
-                } break
-                case "TypedArray": {
-                    this.arr = Array.from(sources as FixedArray<TypedArray>)
-                } break
-                case "DataView": {
-                    this.arr = Array.from(sources as FixedArray<DataView>)
-                } break
-                case "Blob": {
-                    this.arr = Array.from(sources as FixedArray<Blob>)
-                } break
-            }
+        /**
+         * Get flattened ArrayBuffer through sync interface.
+         */
+        getArrayBuffer(): ArrayBuffer {
+            return ArrayBuffer.from(this.arrBuffer as ArrayBuffer);
         }
 
         /**
@@ -1900,29 +1949,11 @@ It must be >= 0 and <= ${this.length}. Received value is: ${index}`)
          * @returns {Blob}
          */
         slice(start?: number, end?: number, type?: string): Blob {
-            switch (this.typeKey) {
-                case "string": {
-                    let arr: Array<string> = (this.arr as Array<string>).slice(start, end)
-                    return new Blob(arr, this.typeKey, type)
-                }
-                case "ArrayBuffer": {
-                    let arr: Array<ArrayBuffer> = (this.arr as Array<ArrayBuffer>).slice(start, end)
-                    return new Blob(arr, this.typeKey, type)
-                }
-                case "TypedArray": {
-                    let arr: Array<TypedArray> = (this.arr as Array<TypedArray>).slice(start, end)
-                    return new Blob(arr, this.typeKey, type)
-                }
-                case "DataView": {
-                    let arr: Array<DataView> = (this.arr as Array<DataView>).slice(start, end)
-                    return new Blob(arr, this.typeKey, type)
-                }
-                case "Blob": {
-                    let arr: Array<Blob> = (this.arr as Array<Blob>).slice(start, end)
-                    return new Blob(arr, this.typeKey, type)
-                }
+            if (start == undefined) {
+                start = 0;
             }
-            return new Blob(this)
+            const slicedArrayBuffer = this.arrBuffer.slice(start, end) as ArrayBuffer;
+            return new Blob([slicedArrayBuffer], "ArrayBuffer", type)
         }
 
         /**
@@ -1931,7 +1962,11 @@ It must be >= 0 and <= ${this.length}. Received value is: ${index}`)
          * @returns {Promise}
          */
         text(): Promise<string> {
-            return Promise.resolve(this.getString())
+            let Encoding: string = "utf8";
+            let resolvedStart: int = 0;
+            let resolvedEnd: int = this.arrBuffer.byteLength as int;
+            let decodeData: string = ArrayBuffer.stringify(this.arrBuffer, Encoding, resolvedStart, resolvedEnd);
+            return Promise.resolve(decodeData);
         }
 
         /**
@@ -1940,45 +1975,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${index}`)
          * @returns {Promise}
          */
         arrayBuffer(): Promise<ArrayBuffer> {
-            return Promise.resolve(this.toArrayBuffer())
-        }
-
-        size: number
-
-        /**
-         * The content-type of the Blob.
-         */
-        type: string
-
-        private arr: ArrSrcType
-        private typeKey: string = 'string'
-
-        private toArrayBuffer(): ArrayBuffer {
-            const str = this.getString()
-            return ArrayBuffer.from(str, "utf-8");
-        }
-
-        private getString(): string {
-            let str = ''
-            let b = new StringBuilder()
-            switch (this.typeKey) {
-                case "string": {
-                    (this.arr as Array<string>).forEach((value: string) => { b.append(toString(value as SrcItemType)) })
-                } break
-                case "ArrayBuffer": {
-                    (this.arr as Array<ArrayBuffer>).forEach((value: ArrayBuffer) => { b.append(toString(value)) })
-                } break
-                case "TypedArray": {
-                    (this.arr as Array<TypedArray>).forEach((value: TypedArray) => { b.append(toString(value)) })
-                } break
-                case "DataView": {
-                    (this.arr as Array<DataView>).forEach((value: DataView) => { b.append(toString(value)) })
-                } break
-                case "Blob": {
-                    (this.arr as Array<Blob>).forEach((value: Blob) => { b.append(value.getString()) })
-                } break
-            }
-            return b.toString()
+            return Promise.resolve(ArrayBuffer.from(this.arrBuffer as ArrayBuffer))
         }
     }
 }
