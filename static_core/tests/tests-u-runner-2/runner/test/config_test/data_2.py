@@ -106,5 +106,6 @@ args = {
     'runner.coverage-html-report-dir': Path.cwd().resolve(),
     'runner.llvm-cov-exclude': ['/tmp', '*.h'],
     'runner.lcov-exclude': ['/tmp', '*.h'],
-    'runner.clean-gcda-before-run': True
+    'runner.clean-gcda-before-run': True,
+    'runner.gn-build': True
 }
