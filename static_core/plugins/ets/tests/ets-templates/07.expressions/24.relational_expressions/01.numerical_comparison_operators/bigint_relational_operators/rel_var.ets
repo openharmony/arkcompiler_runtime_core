@@ -23,12 +23,8 @@ tags: []
 let b: bigint = {{c.b}};
 let x_var: number = {{c.operand_val}};
 
-function main(): int {
-    let actual_outcome: boolean = (b {{c.op}} x_var);
-
-    if (actual_outcome == {{c.expected_bool}}) {
-        return 0; // Test PASSES if actual outcome matches expected
-    }
-    return 1; // Test FAILS
+function main() {
+    let actual_outcome: boolean = (b {{c.op}} x_var)
+    arktest.assertTrue(actual_outcome == {{c.expected_bool}}) // Test PASSES if actual outcome matches expected
 }
 {%- endfor %} 

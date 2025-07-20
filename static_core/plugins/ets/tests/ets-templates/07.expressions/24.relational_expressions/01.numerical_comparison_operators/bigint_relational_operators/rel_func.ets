@@ -26,12 +26,8 @@ function getOperand(): number {
     return {{c.operand_val}};
 }
 
-function main(): int {
-    let actual_outcome: boolean = (b {{c.op}} getOperand());
-
-    if (actual_outcome == {{c.expected_bool}}) {
-        return 0; // Test PASSES if actual outcome matches expected
-    }
-    return 1; // Test FAILS
+function main() {
+    let actual_outcome: boolean = (b {{c.op}} getOperand())
+    arktest.assertEQ(actual_outcome, {{c.expected_bool}}) // Test PASSES if actual outcome matches expected
 }
 {%- endfor %} 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,17 +16,14 @@
 {% for ic in integer_comparison %}
 
 /*---
-desc: Integer comparison {{ic.xvalue}} {{ic.op}} {{ic.yvalue}}
+desc: Non numeric comparison {{ic.xvalue}} {{ic.op}} {{ic.yvalue}}. CTE expected
+tags: [compile-only, negative]
 ---*/
 
 function main(): void {
-  let x: {{ic.xtype}} = {{ic.xvalue}};
-  let bx: {{ic.xalias}} = new {{ic.xalias}}({{ic.xvalue}});
-  let y: {{ic.ytype}} = {{ic.yvalue}};
-  let by: {{ic.yalias}} = new {{ic.yalias}}({{ic.yvalue}});
+  let x: {{ic.xtype}} {{ic.xvalue}};
+  let y: {{ic.ytype}} {{ic.yvalue}};
   arktest.assertEQ( (x {{ic.op}} y), {{ic.result}} )
-  arktest.assertEQ( (bx {{ic.op}} by), {{ic.result}} )
-  arktest.assertEQ( (x {{ic.op}} by), {{ic.result}} )
 }
 
 {% endfor %}
