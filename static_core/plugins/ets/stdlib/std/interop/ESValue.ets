@@ -32,7 +32,7 @@ export declare class ESValuePropertyDescriptor {
 
 export final class ESValue {
     // #IC51G4: this.ev should be able to storage anything
-    private ev: JSValue
+    private ev: Any
     private isStatic: boolean
 
     private static OBJECT_CLASS: Class = Class.of(new Object());
@@ -41,83 +41,79 @@ export final class ESValue {
     private static STRING_CLASS: Class = Class.of(new String());
     private static BIGINT_CLASS: Class = Class.of(new BigInt());
 
-    constructor(ev: JSValue) {
+    constructor(ev: Any) {
         this.ev = ev
         this.isStatic = false;
     }
 
-    constructor(ev: JSValue, isStatic: boolean) {
+    constructor(ev: Any, isStatic: boolean) {
         this.ev = ev
         this.isStatic = isStatic;
     }
 
     public static get Undefined(): ESValue {
-        return new ESValue(JSRuntime.getUndefined());
+        return new ESValue(undefined, true);
     }
 
     public static get Null(): ESValue {
-        return new ESValue(JSRuntime.getNull());
+        return new ESValue(null, true);
     }
 
     public static wrapBoolean(b: boolean): ESValue {
-        return new ESValue(JSRuntime.newJSValueBoolean(b));
+        return new ESValue(b, true);
     }
 
     public static wrapString(s: string): ESValue {
-        return new ESValue(JSRuntime.newJSValueString(s));
+        return new ESValue(s, true);
     }
 
     public static wrapNumber(n: number): ESValue {
-        return new ESValue(JSRuntime.newJSValueDouble(n));
+        return new ESValue(n, true);
     }
 
     public static wrapBigInt(bi: bigint): ESValue {
-        return new ESValue(JSRuntime.newJSValueBigInt(bi));
+        return new ESValue(bi, true);
     }
 
     public static wrapByte(b: byte): ESValue {
-        return new ESValue(JSRuntime.newJSValueByte(b));
+        return new ESValue(b, true);
     }
 
     public static wrapShort(s: short): ESValue {
-        return new ESValue(JSRuntime.newJSValueShort(s));
+        return new ESValue(s, true);
     }
 
     public static wrapInt(i: int): ESValue {
-        return new ESValue(JSRuntime.newJSValueInt(i));
+        return new ESValue(i, true);
     }
 
     public static wrapLong(l: long): ESValue {
-        return new ESValue(JSRuntime.newJSValueLong(l));
+        return new ESValue(l, true);
     }
 
     public static wrapLongLossy(l: long): ESValue {
-        return new ESValue(JSRuntime.newJSValueLong(l));
+        return new ESValue(l, true);
     }
 
     public static wrapFloat(f: float): ESValue {
-        return new ESValue(JSRuntime.newJSValueFloat(f));
+        return new ESValue(f, true);
     }
 
     public static wrapDouble(d: double): ESValue {
-        return new ESValue(JSRuntime.newJSValueDouble(d));
+        return new ESValue(d, true);
     }
 
     public static wrap(o: Any): ESValue {
-        if (o == null) {
-            return new ESValue(JSRuntime.getNull());
-        }
+        let wrappedObject = new ESValue(o);
         if (o == undefined) {
-            return new ESValue(JSRuntime.getUndefined());
+            wrappedObject.isStatic = true;
+        } else {
+            wrappedObject.isStatic = JSRuntime.isStaticValue(o);
         }
-        o = o as object
-        return new ESValue(JSRuntime.newJSValueObject(o), !JSRuntime.isJSValue(o));
+        return wrappedObject;
     }
 
     public unwrap(): Any {
-        if (this.isStaticObject()) {
-            return this.toStaticObject();
-        }
         return this.ev;
     }
 
@@ -142,7 +138,7 @@ export final class ESValue {
     }
 
     public isNull(): boolean {
-        return this.isStrictlyEqualTo(new ESValue(JSRuntime.getNull()));
+        return this.isStrictlyEqualTo(new ESValue(null));
     }
 
     public isStaticObject(): boolean {
@@ -172,31 +168,28 @@ export final class ESValue {
         if (!this.isBoolean()) {
             throw new TypeError("Boolean expected");
         }
-        return JSRuntime.getValueObject(this.ev, ESValue.BOOLEAN_CLASS) as boolean;
+        return this.ev as boolean;
     }
 
     public toString(): string {
-        if(this.isObject()) {
-            return JSRuntime.getValueObject(this.ev, ESValue.STRING_CLASS) as string;
-        }
         if (!this.isString()) {
             throw new TypeError("String expected");
         }
-        return JSRuntime.getValueString(this.ev);
+        return this.ev as string;
     }
 
     public toNumber(): number {
         if (!this.isNumber()) {
             throw new TypeError("Number expected");
         }
-        return JSRuntime.getValueObject(this.ev, ESValue.NUMBER_CLASS) as number;
+        return this.ev as number;
     }
 
     public toBigInt(): bigint {
         if (!this.isBigInt()) {
             throw new TypeError("bigint expected");
         }
-        return JSRuntime.getValueObject(this.ev, ESValue.BIGINT_CLASS) as bigint;
+        return this.ev as bigint;
     }
 
     public toUndefined(): undefined {
@@ -215,17 +208,17 @@ export final class ESValue {
 
     public toStaticObject(): object {
         if (this.isStatic) {
-            return JSRuntime.getValueObject(this.ev, ESValue.OBJECT_CLASS);
+            return this.ev as Object;
         }
         throw Error("Can not cast to a static object")
     }
 
     public static areEqual(ev1: ESValue, ev2: ESValue): boolean {
-        return JSRuntime.strictEqual(ev1.ev, ev2.ev);
+        return ev1.ev == ev2.ev;
     }
 
     public static areStrictlyEqual(ev1: ESValue, ev2: ESValue): boolean {
-        return JSRuntime.strictEqual(ev1.ev, ev2.ev);
+        return ev1.ev === ev2.ev;
     }
 
     public static areEqualSafe(ev1: ESValue, ev2: ESValue): boolean {
@@ -249,16 +242,17 @@ export final class ESValue {
     }
 
     public instantiate(...args: FixedArray<StaticOrESValue>): ESValue {
-        let argJSVal: FixedArray<JSValue> = new JSValue[args.length];
+        let argsAny: FixedArray<Any> = new Any[args.length];
+        // NOTE(www): ICMTI1, it should be handled in JSRuntime.
         for (let i = 0; i < args.length; i++) {
             if (args[i] instanceof ESValue) {
                 let arg = args[i] as ESValue;
-                argJSVal[i] = arg.ev;
+                argsAny[i] = arg.ev;
             } else {
-                argJSVal[i] = ESValue.wrap(args[i]).ev;
+                argsAny[i] = ESValue.wrap(args[i]).ev;
             }
         }
-        return new ESValue(JSRuntime.instantiate(this.ev, ...argJSVal))
+        return new ESValue(JSRuntime.instantiate(this.ev, ...argsAny))
     }
 
     public static instantiateEmptyObject(): ESValue {
@@ -270,12 +264,12 @@ export final class ESValue {
     }
 
     public getProperty(name: string): ESValue {
-        return new ESValue(JSRuntime.getPropertyJSValue(this.ev, name));
+        return new ESValue(JSRuntime.getPropertyObject(this.ev, name));
     }
 
     public getProperty(index: number): ESValue {
         if (Number.isInteger(index) && index >= 0) {
-            return new ESValue(JSRuntime.getElementJSValue(this.ev, index.toInt()));
+            return new ESValue(JSRuntime.getElementObject(this.ev, index.toInt()));
         }
         let numObj = ESValue.wrapNumber(index);
         return this.getProperty(numObj);
@@ -308,36 +302,30 @@ export final class ESValue {
 
     public setProperty(name: string, value: StaticOrESValue): void {
         if (value instanceof ESValue) {
-            JSRuntime.setPropertyJSValue(this.ev, name, (value as ESValue).ev);
+            JSRuntime.setPropertyObject(this.ev, name, (value as ESValue).ev);
             return;
         }
-        JSRuntime.setPropertyJSValue(this.ev, name, ESValue.wrap(value).ev);
+        JSRuntime.setPropertyObject(this.ev, name, ESValue.wrap(value).ev);
     }
 
     public setProperty(index: number, value: StaticOrESValue): void {
         if (value instanceof ESValue) {
-            JSRuntime.setElementJSValue(this.ev, index.toInt(), (value as ESValue).ev);
+            JSRuntime.setElementObject(this.ev, index.toInt(), (value as ESValue).ev);
             return;
         }
-        JSRuntime.setElementJSValue(this.ev, index.toInt(), ESValue.wrap(value).ev);
+        JSRuntime.setElementObject(this.ev, index.toInt(), ESValue.wrap(value).ev);
     }
 
     public setProperty(property: ESValue, value: StaticOrESValue): void {
-        let type = property.typeOf();
-        switch (type) {
-            case "string":
-                this.setProperty(JSRuntime.getValueString(property.ev), value);
-                break;
-            case "number":
-                this.setProperty(JSRuntime.getValueDouble(property.ev), value);
-                break;
-            default:
-                throw Error("type can't be set as key of property");
+        if (value instanceof ESValue) {
+            JSRuntime.setProperty(this.ev, property.ev, (value as ESValue).ev);
+        } else {
+            JSRuntime.setProperty(this.ev, property.ev, value);
         }
     }
 
     public hasProperty(property: ESValue): boolean {
-        return JSRuntime.hasPropertyJSValue(this.ev, property.ev);
+        return JSRuntime.hasPropertyObject(this.ev, property.ev);
     }
 
     public hasProperty(name: string): boolean {
@@ -353,29 +341,29 @@ export final class ESValue {
     }
 
     public invoke(...args: FixedArray<StaticOrESValue>): ESValue {
-        let argJSVal: FixedArray<JSValue> = new JSValue[args.length];
+        let argsAny: FixedArray<Any> = new Any[args.length];
         for (let i = 0; i < args.length; i++) {
             if (args[i] instanceof ESValue) {
                 let arg = args[i] as ESValue;
-                argJSVal[i] = arg.ev;
+                argsAny[i] = arg.ev;
             } else {
-                argJSVal[i] = ESValue.wrap(args[i]).ev;
+                argsAny[i] = ESValue.wrap(args[i]).ev;
             }
         }
-        return new ESValue(JSRuntime.invoke(ESValue.Undefined.ev, this.ev, ...argJSVal));
+        return new ESValue(JSRuntime.invoke(ESValue.Undefined.ev, this.ev, ...argsAny));
     }
 
     internal invokeWithRecv(recv: ESValue, ...args: FixedArray<StaticOrESValue>): ESValue {
-        let argJSVal: FixedArray<JSValue> = new JSValue[args.length];
+        let argsAny: FixedArray<Any> = new Any[args.length];
         for (let i = 0; i < args.length; i++) {
             if (args[i] instanceof ESValue) {
                 let arg = args[i] as ESValue;
-                argJSVal[i] = arg.ev;
+                argsAny[i] = arg.ev;
             } else {
-                argJSVal[i] = ESValue.wrap(args[i]).ev;
+                argsAny[i] = ESValue.wrap(args[i]).ev;
             }
         }
-        return new ESValue(JSRuntime.invoke(recv.ev, this.ev, ...argJSVal));
+        return new ESValue(JSRuntime.invoke(recv.ev, this.ev, ...argsAny));
     }
 
     public invokeMethod(method: string, ...args: FixedArray<StaticOrESValue>): ESValue {
@@ -383,16 +371,16 @@ export final class ESValue {
         if (callable.isUndefined()) {
             throw Error("failed to get property");
         }
-        let argJSVal: FixedArray<JSValue> = new JSValue[args.length];
+        let argsAny: FixedArray<Any> = new Any[args.length];
         for (let i = 0; i < args.length; i++) {
             if (args[i] instanceof ESValue) {
                 let arg = args[i] as ESValue;
-                argJSVal[i] = arg.ev;
+                argsAny[i] = arg.ev;
             } else {
-                argJSVal[i] = ESValue.wrap(args[i]).ev;
+                argsAny[i] = ESValue.wrap(args[i]).ev;
             }
         }
-        return new ESValue(JSRuntime.invoke(this.ev, callable.ev, ...argJSVal));
+        return new ESValue(JSRuntime.invoke(this.ev, callable.ev, ...argsAny));
     }
 
     public keys(): IterableIterator<ESValue> {
@@ -437,16 +425,13 @@ export final class ESValue {
         } else if (type.isPrimitive()) {
             return this.typeOf() == type.getLiteral().toLowerCase();
         } else if (type instanceof ClassType) {
-            return JSRuntime.instanceOfStaticType(this.ev, type);
+            return type.assignableFrom(Type.of(this.ev));
         }
         return false;
     }
 
     public typeOf(): String {
-        if (this.ev === undefined) {
-            return "undefined";
-        }
-        return JSRuntime.typeOf(this.ev);
+        return typeof this.ev;
     }
 
     public static load(module: string): ESValue {
@@ -458,7 +443,7 @@ export final class ESValue {
     }
 
     public isPromise(): boolean {
-        return JSRuntime.isPromise(this.ev);
+        return this.ev instanceof Promise;
     }
 
     public toPromise(): Promise<ESValue> {
@@ -469,8 +454,7 @@ export final class ESValue {
         const linker = callerClass == undefined ? getBootRuntimeLinker() : callerClass.getLinker();
         let clsName = 'std.core.Promise';
         return new Promise<ESValue>((resolve, reject) => {
-            let jsPromise = 
-                JSRuntime.getValueObject(this.ev, linker.loadClass(clsName, false)) as Promise<Any>;
+            let jsPromise = this.ev as Promise<Any>;
             jsPromise.then((value: Any) => {
                 resolve(ESValue.wrap(value));
             }).catch((error) => {

@@ -419,7 +419,7 @@ public:
         sharedEtsVmState_->SetInterfaceProxyInstance(interfaceName, proxy);
     }
 
-    EtsObject *CreateETSCoreESError(EtsCoroutine *coro, JSValue *jsvalue);
+    EtsObject *CreateETSCoreESError(EtsCoroutine *coro, EtsObject *etsObject);
 
     static void ThrowETSError(EtsCoroutine *coro, napi_value val);
     static void ThrowETSError(EtsCoroutine *coro, const char *msg);

@@ -100,6 +100,7 @@ function checkNullHasOwnProperty(): boolean {
     try {
         ESValue.Null.hasOwnProperty('name');
     } catch (e: Error) {
+        console.log("checkNullHasOwnProperty", e.message)
         res = e.message === 'Need object';
     }
     return res;
@@ -120,6 +121,7 @@ function checkNullGetIndex(): boolean {
     try {
         ESValue.Null.getProperty(1);
     } catch (e: Error) {
+        console.log("checkNullGetIndex", e.message)
         res = e.message === 'Need object';
     }
     return res;
@@ -140,7 +142,9 @@ function checkIntGetProperty(): boolean {
     try {
 	    ESValue.wrapInt(123).getProperty('123');
     } catch (e: Error) {
-        res = e.message === 'Need object';
+        res = true;
+        res = res && e.message.includes("Field ");
+        res = res && e.message.includes(" not found in ");
     }
     return res;
 }
@@ -167,11 +171,7 @@ function checkIntInvoke(): boolean {
 
 function checkIntHasProperty(): boolean {
     let res: boolean = false;
-    try {
-        ESValue.wrapInt(123).hasProperty('123');
-    } catch (e: Error) {
-        res = e.message === 'Need object';
-    }
+    res = ESValue.wrapInt(123).hasProperty('123') == false;
     return res;
 }
 
@@ -200,7 +200,9 @@ function checkStringSetProperty(): boolean {
     try {
         ESValue.wrapString('123').setProperty('ID', ESValue.wrapInt(456));
     } catch (e: Error) {
-        res = e.message === 'Need object';
+        res = true;
+        res = res && e.message.includes("Field ");
+        res = res && e.message.includes(" not found in ");
     }
     return res;
 }

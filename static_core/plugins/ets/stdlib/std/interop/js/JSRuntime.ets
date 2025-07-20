@@ -19,25 +19,25 @@ package std.interop.js;
 // TODO(ivagin): This is a workaround and should be removed if the future
 class Shareable { private internal_ : long; };
 
-class MimicJSValueIteratableIterator implements IterableIterator<Object> {
-    private iterator: JSValue;
-    private nextMethod: JSValue;
+class MimicJSValueIteratableIterator implements IterableIterator<Any> {
+    private iterator: Any;
+    private nextMethod: Any;
 
-    constructor(jsIterator: JSValue) {
+    constructor(jsIterator: Object) {
         this.iterator = jsIterator;
-        this.nextMethod = JSRuntime.getPropertyJSValue(jsIterator, 'next');
+        this.nextMethod = JSRuntime.getPropertyObject(jsIterator, 'next');
         if (this.nextMethod === undefined) {
             throw new Error('Can not retrieve [Symbol.iterator] from given object, object is not iterable.');
         }
     }
 
-    override next(): IteratorResult<Object> {
+    override next(): IteratorResult<Any> {
         const nextObj = JSRuntime.invoke(this.iterator, this.nextMethod);
-        const done = JSRuntime.getPropertyJSValue(nextObj, 'done');
-        if (JSRuntime.getValueBoolean(done)) {
-            return new IteratorResult<Object>();
+        const done = JSRuntime.getPropertyObject(nextObj, 'done');
+        if (done as boolean) {
+            return new IteratorResult<Any>();
         }
-        const iterValue = JSRuntime.getPropertyJSValue(nextObj, 'value');
+        const iterValue = JSRuntime.getPropertyObject(nextObj, 'value');
         if (iterValue == undefined) {
             throw new Error('`value` field is expected in IteratorResult.');
         }
@@ -45,9 +45,9 @@ class MimicJSValueIteratableIterator implements IterableIterator<Object> {
         // convert to Tuple2 for array&map&set
         // NOTE(#IC68BA) Need to create special iterable iterator object at function level 
         if (valueObject instanceof Array && valueObject.length == 2) {
-            return new IteratorResult<Object>(new Tuple2<Object, Object>(valueObject[0] as Object,valueObject[1] as Object));
+            return new IteratorResult<Any>(new Tuple2<Any, Any>(valueObject[0] as Any,valueObject[1] as Any));
         } else {
-            return new IteratorResult<Object>(valueObject);
+            return new IteratorResult<Any>(valueObject);
         }
     }
 }
@@ -120,7 +120,7 @@ export final class JSRuntime {
     }
 
     // 2nd argument is ClassClass
-    public static getValueObject(value: JSValue, t: Class): Object {
+    public static getValueObject(value: Any, t: Class): Any {
         JSRuntime.checkIntrinsicMethod();
     }
 
@@ -171,6 +171,10 @@ export final class JSRuntime {
         JSRuntime.checkIntrinsicMethod();
     }
 
+    public static getPropertyObject(object: Any, name: String): Any {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
     // ===================
     // setProperty<TYPE>()
     // ===================
@@ -214,25 +218,29 @@ export final class JSRuntime {
         JSRuntime.checkIntrinsicMethod();
     }
 
+    public static setPropertyObject(object: Any, name: String, value: Any): void {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
     // ===================
     //
     // ===================
-    public static hasProperty(object: JSValue, name: String): boolean {
+    public static hasProperty(object: Any, name: String): boolean {
         JSRuntime.checkIntrinsicMethod();
     }
-    public static hasPropertyJSValue(object: JSValue, property: JSValue): boolean {
+    public static hasPropertyObject(object: Any, property: Any): boolean {
         JSRuntime.checkIntrinsicMethod();
     }
-    public static hasElement(object: JSValue, index: int): boolean {
+    public static hasElement(object: Any, index: int): boolean {
         JSRuntime.checkIntrinsicMethod();
     }
-    public static hasOwnProperty(object: JSValue, name: String): boolean {
+    public static hasOwnProperty(object: Any, name: String): boolean {
         JSRuntime.checkIntrinsicMethod();
     }
-    public static hasOwnPropertyJSValue(object: JSValue, property: JSValue): boolean {
+    public static hasOwnPropertyJSValue(object: Any, property: Any): boolean {
         JSRuntime.checkIntrinsicMethod();
     }
-    public static getProperty(object: JSValue, property: JSValue): JSValue {
+    public static getProperty(object: Any, property: Any): Any {
         JSRuntime.checkIntrinsicMethod();
     }
     public static typeOf(object: JSValue): string {
@@ -241,7 +249,7 @@ export final class JSRuntime {
     public static isPromise(object: JSValue): boolean {
         JSRuntime.checkIntrinsicMethod();
     }
-    public static invoke(recv: JSValue, func: JSValue, ...args: FixedArray<JSValue>): JSValue {
+    public static invoke(recv: Any, func: Any, ...args: FixedArray<Any>): Any {
         JSRuntime.checkIntrinsicMethod();
     }
     public static instanceOfStaticType(recv: JSValue, type: Type): boolean {
@@ -267,11 +275,11 @@ export final class JSRuntime {
         JSRuntime.checkIntrinsicMethod();
     }
 
-    public static createArray(): JSValue {
+    public static createArray(): Any {
         JSRuntime.checkIntrinsicMethod();
     }
 
-    public static instanceOfDynamic(object: JSValue, ctor: JSValue): boolean {
+    public static instanceOfDynamic(object: Any, ctor: Any): boolean {
         JSRuntime.checkIntrinsicMethod();
     }
 
@@ -280,6 +288,14 @@ export final class JSRuntime {
     }
 
     public static strictEqual(lhs: JSValue, rhs: JSValue): boolean {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
+    public static setProperty(object: Any, key: Any, value: Any): void {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
+    public static isStaticValue(object: Any): boolean {
         JSRuntime.checkIntrinsicMethod();
     }
 
@@ -322,7 +338,11 @@ export final class JSRuntime {
         JSRuntime.checkIntrinsicMethod();
     }
 
-    public static instantiate(callable: JSValue, ...args: FixedArray<JSValue>): JSValue {
+    public static getElementObject(object: Any, index: int): Any {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
+    public static instantiate(callable: Any, ...args: FixedArray<Any>): Any {
         JSRuntime.checkIntrinsicMethod();
     }
 
@@ -365,6 +385,10 @@ export final class JSRuntime {
         JSRuntime.checkIntrinsicMethod();
     }
 
+    public static setElementObject(object: Any, index: int, value: Any): void {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
     public static loadModule(m: String): JSValue {
         JSRuntime.checkIntrinsicMethod();
     }
@@ -373,42 +397,42 @@ export final class JSRuntime {
     // Public API
     // ===================
 
-    public static iterate(object: JSValue, callback: (arrElem: JSValue) => void): void
+    public static iterate(object: Any, callback: (arrElem: Any) => void): void
     {
         const global = JSRuntime.getGlobal();
-        const symbol = JSRuntime.getPropertyJSValue(global, "Symbol");
-        const symbolIterator = JSRuntime.getPropertyJSValue(symbol, "iterator");
+        const symbol = JSRuntime.getPropertyObject(global, "Symbol");
+        const symbolIterator = JSRuntime.getPropertyObject(symbol, "iterator");
 
-        const symbolIteratorMethod = JSRuntime.getPropertyJSValue(object, symbolIterator);
+        const symbolIteratorMethod = JSRuntime.getProperty(object, symbolIterator);
         if (symbolIteratorMethod === undefined) {
             throw new Error('Can not retrieve [Symbol.iterator] from given object, object is not iterable.');
         }
 
         const iterator = JSRuntime.invoke(object, symbolIteratorMethod);
 
-        let next: JSValue;
-        let done: JSValue;
-        let value: JSValue;
+        let next: Any;
+        let done: Any;
+        let value: Any;
 
-        const symbolNext = JSRuntime.getPropertyJSValue(iterator, "next");
+        const symbolNext = JSRuntime.getPropertyObject(iterator, "next");
         while (true) {
-            const symbolNextMethod = JSRuntime.getPropertyJSValue(iterator, symbolNext);
+            const symbolNextMethod = JSRuntime.getProperty(iterator, symbolNext);
 
             next = JSRuntime.invoke(iterator, symbolNextMethod);
             if (next === undefined) {
                 throw new Error('`next() return undefined, but IterationResult was expected.`')
             }
 
-            done = JSRuntime.getPropertyJSValue(next, "done");
+            done = JSRuntime.getPropertyObject(next, "done");
             if (done === undefined) {
                 throw new Error('`done` field is expected in IteratorResult.');
             }
 
-            if (JSRuntime.strictEqual(done, JSRuntime.newJSValueBoolean(true))) {
+            if (done as boolean === true) {
                 return;
             }
 
-            value = JSRuntime.getPropertyJSValue(next, "value");
+            value = JSRuntime.getPropertyObject(next, "value");
             if (value === undefined) {
                 throw new Error('`value` field is expected in IteratorResult when `done` = false.');
             }

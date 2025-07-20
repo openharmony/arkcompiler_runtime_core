@@ -169,7 +169,7 @@ intrinsics:
     static: true
     signature:
       ret: std.core.Object
-      args: [ std.interop.js.JSValue, std.core.Class ]
+      args: [ std.core.Object, std.core.Class ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetValueObjectIntrinsic
     clear_flags: [can_throw, heap_inv, no_cse]
 
@@ -193,6 +193,17 @@ intrinsics:
       ret: std.interop.js.JSValue
       args: [ std.interop.js.JSValue, std.interop.js.JSValue ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetPropertyJSValueyByKeyIntrinsic
+    clear_flags: [can_throw, heap_inv]
+
+  - name: JSRuntimeGetPropertyObject
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: getPropertyObject
+    static: true
+    signature:
+      ret: std.core.Object
+      args: [ std.core.Object, std.core.String ]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeGetPropertyObjectIntrinsic
     clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeGetPropertyDouble
@@ -239,6 +250,17 @@ intrinsics:
     impl: ark::ets::interop::js::intrinsics::JSRuntimeSetPropertyJSValueIntrinsic
     clear_flags: [can_throw, heap_inv]
 
+  - name: JSRuntimesetPropertyObject
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: setPropertyObject
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object, std.core.String, std.core.Object ]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeSetPropertyObjectIntrinsic
+    clear_flags: [can_throw, heap_inv]
+
   - name: JSRuntimeSetElementJSValue
     space: ets
     class_name: std.interop.js.JSRuntime
@@ -248,6 +270,17 @@ intrinsics:
       ret: void
       args: [ std.interop.js.JSValue, i32, std.interop.js.JSValue ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeSetElementJSValueIntrinsic
+    clear_flags: [can_throw, heap_inv]
+
+  - name: JSRuntimeSetElementObject
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: setElementObject
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object, i32, std.core.Object ]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeSetElementObjectIntrinsic
     clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeSetPropertyDouble
@@ -292,6 +325,17 @@ intrinsics:
       ret: std.interop.js.JSValue
       args: [ std.interop.js.JSValue, i32 ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetElementJSValueIntrinsic
+    clear_flags: [can_throw, heap_inv]
+
+  - name: JSRuntimeGetElementObject
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: getElementObject
+    static: true
+    signature:
+      ret: std.core.Object
+      args: [ std.core.Object, i32 ]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeGetElementObjectIntrinsic
     clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeGetElementDouble
@@ -355,7 +399,7 @@ intrinsics:
     method_name: createArray
     static: true
     signature:
-      ret: std.interop.js.JSValue
+      ret: std.core.Object
       args: [ ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeCreateArrayIntrinsic
     clear_flags: [can_throw, heap_inv]
@@ -366,10 +410,10 @@ intrinsics:
     method_name: instantiate
     static: true
     signature:
-      ret: std.interop.js.JSValue
+      ret: std.core.Object
       args:
-        - std.interop.js.JSValue
-        - std.interop.js.JSValue[]
+        - std.core.Object
+        - std.core.Object[]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeInstantiateIntrinsic
     clear_flags: []
 
@@ -393,7 +437,7 @@ intrinsics:
     static: true
     signature:
       ret: u1
-      args: [ std.interop.js.JSValue, std.interop.js.JSValue ]
+      args: [ std.core.Object, std.core.Object ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeInstanceOfDynamicIntrinsic
     clear_flags: [can_throw, heap_inv]
 
@@ -452,6 +496,28 @@ intrinsics:
     impl: ark::ets::interop::js::intrinsics::JSRuntimeStrictEqualIntrinsic
     clear_flags: [can_throw, heap_inv]
 
+  - name: JSRuntimeSetProperty
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: setProperty
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object, std.core.Object, std.core.Object ]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeSetPropertyIntrinsic
+    clear_flags: [can_throw, heap_inv]
+
+  - name: JSRuntimeIsStaticValue
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: isStaticValue
+    static: true
+    signature:
+      args: [ std.core.Object ]
+      ret: u1
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeIsStaticValueIntrinsic
+    clear_flags: [can_throw, heap_inv]
+
   - name: JSRuntimeHasProperty
     space: ets
     class_name: std.interop.js.JSRuntime
@@ -459,7 +525,7 @@ intrinsics:
     static: true
     signature:
       ret: u1
-      args: [ std.interop.js.JSValue, std.core.String]
+      args: [ std.core.Object, std.core.String]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeHasPropertyIntrinsic
     clear_flags: []
 
@@ -469,20 +535,20 @@ intrinsics:
     method_name: getProperty
     static: true
     signature:
-      ret: std.interop.js.JSValue
-      args: [ std.interop.js.JSValue, std.interop.js.JSValue]
+      ret: std.core.Object
+      args: [ std.core.Object, std.core.Object]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetPropertyIntrinsic
     clear_flags: []
 
-  - name: JSRuntimeHasPropertyJSValue
+  - name: JSRuntimeHasPropertyObject
     space: ets
     class_name: std.interop.js.JSRuntime
-    method_name: hasPropertyJSValue
+    method_name: hasPropertyObject
     static: true
     signature:
       ret: u1
-      args: [ std.interop.js.JSValue, std.interop.js.JSValue]
-    impl: ark::ets::interop::js::intrinsics::JSRuntimeHasPropertyJSValueIntrinsic
+      args: [ std.core.Object, std.core.Object]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeHasPropertyObjectIntrinsic
     clear_flags: []
 
   - name: JSRuntimeHasElement
@@ -492,7 +558,7 @@ intrinsics:
     static: true
     signature:
       ret: u1
-      args: [ std.interop.js.JSValue, i32]
+      args: [ std.core.Object, i32]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeHasElementIntrinsic
     clear_flags: []
 
@@ -503,19 +569,19 @@ intrinsics:
     static: true
     signature:
       ret: u1
-      args: [ std.interop.js.JSValue, std.core.String]
+      args: [ std.core.Object, std.core.String]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeHasOwnPropertyIntrinsic
     clear_flags: []
 
-  - name: JSRuntimeHasOwnPropertyJSValue
+  - name: JSRuntimeHasOwnPropertyObject
     space: ets
     class_name: std.interop.js.JSRuntime
     method_name: hasOwnPropertyJSValue
     static: true
     signature:
       ret: u1
-      args: [ std.interop.js.JSValue, std.interop.js.JSValue]
-    impl: ark::ets::interop::js::intrinsics::JSRuntimeHasOwnPropertyJSValueIntrinsic
+      args: [ std.core.Object, std.core.Object]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeHasOwnPropertyObjectIntrinsic
     clear_flags: []
 
   - name: JSRuntimeTypeOf
@@ -546,11 +612,11 @@ intrinsics:
     method_name: invoke
     static: true
     signature:
-      ret: std.interop.js.JSValue
+      ret: std.core.Object
       args:
-        - std.interop.js.JSValue
-        - std.interop.js.JSValue
-        - std.interop.js.JSValue[]
+        - std.core.Object
+        - std.core.Object
+        - std.core.Object[]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeInvokeIntrinsic
     clear_flags: []
 

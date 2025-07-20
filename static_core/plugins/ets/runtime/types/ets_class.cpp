@@ -798,10 +798,10 @@ EtsField *EtsClass::GetFieldIDByName(const char *name, const char *sig)
 uint32_t EtsClass::GetFieldIndexByName(const char *name)
 {
     auto u8name = reinterpret_cast<const uint8_t *>(name);
-    auto fields = GetRuntimeClass()->GetFields();
+    auto fields = GetFields();
     panda_file::File::StringData sd = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(u8name)), u8name};
     for (uint32_t i = 0; i < GetFieldsNumber(); i++) {
-        if (fields[i].GetName() == sd) {
+        if (fields[i]->GetCoreType()->GetName() == sd) {
             return i;
         }
     }

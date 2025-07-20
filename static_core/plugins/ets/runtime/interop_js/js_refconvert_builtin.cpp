@@ -424,13 +424,13 @@ private:
                 return MObjectObject(ctx_, jsValue);
             case napi_null:
                 return ctx_->GetNullValue();
+            case napi_bigint:
+                return BuiltinConvert<JSConvertBigInt>(ctxx, env, jsValue);
             case napi_symbol:
                 [[fallthrough]];
             case napi_function:
                 [[fallthrough]];
             case napi_external:
-                [[fallthrough]];
-            case napi_bigint:
                 return BuiltinConvert<JSConvertJSValue>(ctxx, env, jsValue);
             default:
                 ASSERT(!IsNullOrUndefined(env, jsValue));

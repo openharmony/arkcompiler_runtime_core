@@ -779,6 +779,20 @@ static void SetAttachCallbackForClass(napi_env env, napi_value jsCtor, std::vect
     NAPI_CHECK_FATAL(napi_mark_attach_with_xref(env, jsCtor, static_cast<void *>(etsClass), AttachCBForClass));
 }
 
+static void SortMethodByName(std::vector<EtsMethodSet *> &methods)
+{
+    std::sort(methods.begin(), methods.end(), [](const EtsMethodSet *lhs, const EtsMethodSet *rhs) {
+        panda_file::File::StringData lhsName = {
+            static_cast<uint32_t>(utf::MUtf8ToUtf16Size(utf::CStringAsMutf8(lhs->GetName()))),
+            utf::CStringAsMutf8(lhs->GetName())};
+        panda_file::File::StringData rhsName = {
+            static_cast<uint32_t>(utf::MUtf8ToUtf16Size(utf::CStringAsMutf8(rhs->GetName()))),
+            utf::CStringAsMutf8(rhs->GetName())};
+
+        return lhsName < rhsName;
+    });
+}
+
 /*static*/
 std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsClass *etsClass, const char *jsBuiltinName,
                                                          const OverloadsMap *overloads)
@@ -793,6 +807,9 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
     }
 
     auto [fields, methods] = _this->CalculateProperties(overloads);
+    // NOTE(www): ICMTHV, Methods should be sorted at creation time
+    SortMethodByName(methods);
+
     _this->SetBaseWrapperMethods(env, methods);
 
     auto jsProps = _this->BuildJSProperties(env, {fields.data(), fields.size()}, {methods.data(), methods.size()});

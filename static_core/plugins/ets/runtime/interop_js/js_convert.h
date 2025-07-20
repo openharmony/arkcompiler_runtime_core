@@ -250,8 +250,18 @@ JSCONVERT_UNWRAP(JSValue)
 JSCONVERT_DEFINE_TYPE(EtsObject, EtsObject *);
 JSCONVERT_WRAP(EtsObject)
 {
-    InteropFatal("Wrap of EtsObject should be done with relevant converter");
-    UNREACHABLE();
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return {};
+    }
+    auto objConv = JSRefConvertResolve(ctx, etsVal->GetClass()->GetRuntimeClass());
+    if (objConv == nullptr) {
+        ctx->ForwardEtsException(coro);
+        return nullptr;
+    }
+    return objConv->Wrap(ctx, etsVal);
 }
 JSCONVERT_UNWRAP(EtsObject)
 {
@@ -273,22 +283,36 @@ JSCONVERT_WRAP(ESError)
     auto klass = etsVal->GetClass();
     INTEROP_FATAL_IF(klass->GetRuntimeClass() != ctx->GetESErrorClass());
 
-    auto method = klass->GetInstanceMethod("getJsError", nullptr);
-    ASSERT(method != nullptr);
-    std::array args = {Value(etsVal->GetCoreType())};
-    auto val = JSValue::FromCoreType(method->GetPandaMethod()->Invoke(coro, args.data()).GetAs<ObjectHeader *>());
-    INTEROP_FATAL_IF(val == nullptr);
-    return val->GetNapiValue(env);
+    auto fieldIdx = etsVal->GetClass()->GetFieldIndexByName("jserr_");
+    auto field = etsVal->GetClass()->GetFieldByIndex(fieldIdx);
+    auto etsObject = etsVal->GetFieldObject(field);
+
+    interop::js::ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
+    if (LIKELY(storage->HasReference(etsObject, env))) {
+        auto jsThis = storage->GetJsObject(etsObject, env);
+        return jsThis;
+    }
+    return JSConvertEtsObject::WrapWithNullCheck(env, etsObject);
+
+    UNREACHABLE();
 }
 JSCONVERT_UNWRAP(ESError)
 {
     auto coro = EtsCoroutine::GetCurrent();
-    JSValue *value = nullptr;
-    value = JSValue::Create(coro, ctx, jsVal);
-    if (UNLIKELY(value == nullptr)) {
+    EtsObject *etsObject = nullptr;
+    bool isError = false;
+    NAPI_CHECK_FATAL(napi_is_error(env, jsVal, &isError));
+    if (isError) {
+        auto jsValueObj = JSValue::Create(coro, ctx, jsVal);
+        etsObject = jsValueObj->AsObject();
+    } else {
+        etsObject = JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, jsVal).value();
+    }
+
+    if (UNLIKELY(etsObject == nullptr)) {
         return {};
     }
-    auto res = ctx->CreateETSCoreESError(coro, value);
+    auto res = ctx->CreateETSCoreESError(coro, etsObject);
     if (UNLIKELY(res == nullptr)) {
         return {};
     }
