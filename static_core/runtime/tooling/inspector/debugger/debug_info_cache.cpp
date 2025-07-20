@@ -22,10 +22,10 @@
 #include "os/mutex.h"
 
 namespace ark::tooling::inspector {
-void DebugInfoCache::AddPandaFile(const panda_file::File &file)
+void DebugInfoCache::AddPandaFile(const panda_file::File &file, bool isUserPandafile)
 {
     os::memory::LockHolder lock(debugInfosMutex_);
-    const auto &debugInfo =
+    auto &debugInfo =
         debugInfos_
             .emplace(std::piecewise_construct, std::forward_as_tuple(&file),
                      std::forward_as_tuple(file,
@@ -36,6 +36,7 @@ void DebugInfoCache::AddPandaFile(const panda_file::File &file)
                                                                       std::forward_as_tuple(file, methodId));
                                            }))
             .first->second;
+    debugInfo.SetUserFile(isUserPandafile);
 
     // For all methods add non-empty source code read from debug-info
     for (auto methodId : debugInfo.GetMethodIdList()) {
@@ -57,7 +58,7 @@ void DebugInfoCache::GetSourceLocation(const PtFrame &frame, std::string_view &s
     auto method = frame.GetMethod();
     auto pandaFile = method->GetPandaFile();
     auto debugInfo = GetDebugInfo(pandaFile);
-    if (debugInfo == nullptr) {
+    if (debugInfo == nullptr || !debugInfo->IsUserFile()) {
         lineNumber = 1;
         return;
     }
@@ -428,6 +429,16 @@ const char *DebugInfoCache::GetSourceFile(Method *method)
     auto pandaFile = method->GetPandaFile();
     auto debugInfo = GetDebugInfo(pandaFile);
     if (debugInfo == nullptr) {
+        return nullptr;
+    }
+    return debugInfo->GetSourceFile(method->GetFileId());
+}
+
+const char *DebugInfoCache::GetUserSourceFile(Method *method)
+{
+    auto pandaFile = method->GetPandaFile();
+    auto debugInfo = GetDebugInfo(pandaFile);
+    if ((debugInfo == nullptr) || !debugInfo->IsUserFile()) {
         return nullptr;
     }
     return debugInfo->GetSourceFile(method->GetFileId());
