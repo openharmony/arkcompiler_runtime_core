@@ -1485,3 +1485,12 @@
 05.generics/03.utility_types/incorrect_utility_type_usage_3.ets
 05.generics/03.utility_types/incorrect_utility_type_usage_4.ets
 
+# 27383
+15.semantic_rules/01.semantic_essentials/01.type_of_standalone_expression/consecutive_arrays.ets
+
+# 27390
+15.semantic_rules/01.semantic_essentials/01.type_of_standalone_expression/union_types.ets
+15.semantic_rules/01.semantic_essentials/03.specifics_of_variable_initialization_context/expression_type_evaluation_2.ets
+
+# 27628
+15.semantic_rules/01.semantic_essentials/04.specifics_of_numeric_operator_contexts/negative_unary_operator.ets
