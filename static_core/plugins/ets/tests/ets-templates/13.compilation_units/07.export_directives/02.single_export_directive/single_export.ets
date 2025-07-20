@@ -24,7 +24,7 @@ export {{target}};
 
 const constInt: int = 42;
 const constString: string = 'test string';
-const constChar: char = 176;
+const constChar: char = c'Z';
 
 let varNumber: number = 1.42;
 let varString: string = 'Test String 1';

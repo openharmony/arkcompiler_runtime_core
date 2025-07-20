@@ -55,13 +55,6 @@ cases:
           - { val: Byte.MAX_VALUE, result: 127.0 as number }
 
     
-    - arg: char
-      values:
-          - { val: 0b0 as byte, result: "c'\\u0000'" }
-          - { val: Byte.MIN_VALUE, result: "c'\\uFF80'" }
-          - { val: Byte.MAX_VALUE, result: "c'\\u007F'" }
-
-    
     - arg: int
       values:
           - { val: 0b0 as short, result: 0 }
@@ -155,35 +148,7 @@ cases:
           - { val: -3.4028234663852886e38 as float, result: -3.4028234663852886e38 as double }
           - { val: -1.401298464324817e-45 as float, result: -1.401298464324817e-45 as double }
 
-    
-    - arg: int
-      values:
-          - { val: "c'\\u0000'", result: 0 }
-          - { val: "c'\\u0FFF'", result: 4095 }
-          - { val: "c'\\uFFFF'", result: 65535 }
 
-    
-    - arg: long
-      values:
-          - { val: "c'\\u0000'", result: 0 as long }
-          - { val: "c'\\u0FFF'", result: 4095 as long }
-          - { val: "c'\\uFFFF'", result: 65535 as long }
-
-    
-    - arg: float
-      values:
-          - { val: "c'\\u0000'", result: 0.0 as float }
-          - { val: "c'\\u0FFF'", result: 4095.0 as float }
-          - { val: "c'\\uFFFF'", result: 65535.0 as float }
-
-    
-    - arg: double
-      values:
-          - { val: "c'\\u0000'", result: 0.0 as double }
-          - { val: "c'\\u0FFF'", result: 4095.0 as double }
-          - { val: "c'\\uFFFF'", result: 65535.0 as double }
-
-    
     - arg: int
       defs: |-
           enum Color { Red, Green, Blue }

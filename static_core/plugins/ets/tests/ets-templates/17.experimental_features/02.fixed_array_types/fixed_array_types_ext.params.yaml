@@ -120,7 +120,7 @@ cases:
       arktest.assertEQ(fixedArr[2], 3);
   - desc: Create a one-dimensional fixed array with the data type char.
     logic: |-
-      let fixedArr: FixedArray<char> = [1, 2, 3];
-      arktest.assertEQ(fixedArr[0], 1);
-      arktest.assertEQ(fixedArr[1], 2);
-      arktest.assertEQ(fixedArr[2], 3);
+      let fixedArr: FixedArray<char> = [c'1', c'2', c'3'];
+      arktest.assertEQ(fixedArr[0], c'1');
+      arktest.assertEQ(fixedArr[1], c'2');
+      arktest.assertEQ(fixedArr[2], c'3');

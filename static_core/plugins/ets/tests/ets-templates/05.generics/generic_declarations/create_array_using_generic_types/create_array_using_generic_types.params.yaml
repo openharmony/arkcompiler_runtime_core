@@ -74,11 +74,6 @@ cases_two:
     values: "1.00001, 2.0111, 3.000001"
     expected_values: [1.00001, 2.0111, 3.000001]
 
-  - type: char
-    desc: Instantiated array T[] with char type.
-    values: "1, 2, 3"
-    expected_values: [1, 2, 3]
-
   - type: boolean
     desc: Instantiated array T[] with boolean type.
     values: "false, true, true"

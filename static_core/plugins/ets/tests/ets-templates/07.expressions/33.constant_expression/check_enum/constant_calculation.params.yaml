@@ -30,12 +30,6 @@ cases:
   - { type: char, value: c'p', sign: '+', expected: 122  }
   - { type: char, value: c'p', sign: '-', expected: 102  }
 
-  - { type: int, value: 308,  sign: '*', expected: 3080 }
-  - { type: int, value: 3008, sign: '/', expected: 300 }
-  - { type: int, value: 3008, sign: '%', expected: 8 }
-  - { type: int, value: 3008, sign: '+', expected: 3018 }
-  - { type: int, value: 3008, sign: '-', expected: 2998 }
-
   - { type: long, value: 5006,  sign: '*', expected: 50060 }
   - { type: long, value: 50006, sign: '/', expected: 5000 }
   - { type: long, value: 50006, sign: '%', expected: 6 }

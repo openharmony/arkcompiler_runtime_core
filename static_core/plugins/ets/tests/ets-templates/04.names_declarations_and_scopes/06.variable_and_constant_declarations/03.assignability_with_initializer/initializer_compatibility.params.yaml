@@ -34,11 +34,6 @@ type_and_initializer:
 
   - {type: double, value: "1.7976931348623157e308"}
 
-  # Char type
-
-  - {type: char, value: 0}
-  - {type: char, value: 65535}
-
   # Class type
 
   - {type: "A", typedecl: "class A {}", value: "new A"}
