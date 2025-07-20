@@ -87,6 +87,8 @@ static std::string_view GetClassLinkerErrorDescriptor(ClassLinker::Error error)
         case ClassLinker::Error::MULTIPLE_OVERRIDE:
         case ClassLinker::Error::MULTIPLE_IMPLEMENT:
             return panda_file_items::class_descriptors::LINKER_METHOD_CONFLICT_ERROR;
+        case ClassLinker::Error::INVALID_LAMBDA_CLASS:
+            return panda_file_items::class_descriptors::EXCEPTION_IN_INITIALIZER_ERROR;
         default:
             LOG(FATAL, CLASS_LINKER) << "Unhandled class linker error (" << helpers::ToUnderlying(error) << "): ";
             UNREACHABLE();
