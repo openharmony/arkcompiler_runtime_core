@@ -139,14 +139,14 @@ class TaiheASTConverter:
         loc = self.locator.get_loc(ctx)
         if node_kind == "TOKEN":
             return TaiheAST.TOKEN(loc=loc, text=ctx.text)
-        kwargs = {"loc": loc}
+        kwargs = {}
         for attr_full_name, attr_ctx in ctx.__dict__.items():
             if attr_full_name[0].isupper():
                 attr_kind_name, attr_name = attr_full_name.split("_", 1)
                 kwargs[attr_name] = self.visit(attr_kind_name, attr_ctx)
         real_kind = ctx.__class__.__name__[:-7]  # Remove the trailing "Context"
         pass
-        return getattr(TaiheAST, real_kind)(**kwargs)
+        return getattr(TaiheAST, real_kind)(loc=loc, **kwargs)
 
 
 def generate_ast(source: SourceBase, dm: DiagnosticsManager) -> TaiheAST.Spec:

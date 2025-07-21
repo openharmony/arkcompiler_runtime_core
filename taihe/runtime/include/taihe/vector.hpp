@@ -22,6 +22,7 @@
 #include <utility>
 
 #define VEC_GROWTH_FACTOR 2
+#define VEC_DEFAULT_CAPACITY 0
 
 namespace taihe {
 template <typename T>
@@ -155,7 +156,7 @@ struct vector : vector_view<T> {
     using typename vector_view<T>::data_t;
     using vector_view<T>::m_handle;
 
-    explicit vector(std::size_t cap = 0) : vector(reinterpret_cast<data_t *>(malloc(sizeof(data_t))))
+    explicit vector(std::size_t cap = VEC_DEFAULT_CAPACITY) : vector(new data_t)
     {
         tref_set(&m_handle->count, 1);
         m_handle->cap = cap;
@@ -193,7 +194,7 @@ struct vector : vector_view<T> {
         if (m_handle && tref_dec(&m_handle->count)) {
             this->clear();
             free(m_handle->buffer);
-            free(m_handle);
+            delete m_handle;
         }
     }
 
@@ -225,8 +226,7 @@ struct std::hash<taihe::vector<T>> {
     }
 };
 
-#ifdef VEC_GROWTH_FACTOR
 #undef VEC_GROWTH_FACTOR
-#endif
+#undef VEC_DEFAULT_CAPACITY
 // NOLINTEND
 #endif  // RUNTIME_INCLUDE_TAIHE_VECTOR_HPP_

@@ -93,6 +93,8 @@ class ResourceContext:
       each resource is located and processed only once.
     """
 
+    _singleton: ClassVar[Self | None] = None
+
     deployment_mode: DeploymentMode
     base_dir: Path = field(default_factory=Path)
     cache_dir: Path = field(default_factory=Path)
@@ -147,26 +149,27 @@ class ResourceContext:
 
         raise RuntimeError(f"cannot determine deployment layout ({repo_dir=})")
 
-    @staticmethod
+    @classmethod
     def initialize(
-        cli_args: Namespace | None = None, resources: Sequence[ResourceT] | None = None
-    ) -> "ResourceContext":
-        global _singleton
-        if _singleton is not None:
+        cls,
+        cli_args: Namespace | None = None,
+        resources: Sequence[ResourceT] | None = None,
+    ) -> Self:
+        if cls._singleton is not None:
             raise ValueError("already constructed")
-        _singleton = ResourceContext.from_path(__file__)
+        cls._singleton = cls.from_path(__file__)
         if cli_args:
-            _singleton.apply_cli_args(
-                ALL_RESOURCES if resources is None else resources, cli_args
+            cls._singleton.apply_cli_args(
+                ALL_RESOURCES if resources is None else resources,
+                cli_args,
             )
-        return _singleton
+        return cls._singleton
 
-    @staticmethod
-    def instance() -> "ResourceContext":
-        global _singleton
-        if _singleton is None:
-            raise ValueError("must be constructed before")
-        return _singleton
+    @classmethod
+    def instance(cls) -> Self:
+        if cls._singleton is None:
+            raise ValueError("must be initialized before")
+        return cls._singleton
 
     @staticmethod
     def register_cli_options(
@@ -177,6 +180,7 @@ class ResourceContext:
     ) -> None:
         """Register --print and --override CLI arguments to the parser."""
         resources = ALL_RESOURCES if resources is None else resources
+
         if use_print:
             # Add --print-paths argument
             parser.add_argument(
@@ -204,7 +208,10 @@ class ResourceContext:
                 )
 
     def apply_cli_args(
-        self, resources: Sequence[ResourceT], args: Namespace, auto_exit: bool = True
+        self,
+        resources: Sequence[ResourceT],
+        args: Namespace,
+        auto_exit: bool = True,
     ) -> bool:
         """Process CLI arguments. Returns True if program should exit."""
 
@@ -241,9 +248,6 @@ class ResourceContext:
             exit(0)
 
         return should_exit
-
-
-_singleton: ResourceContext | None = None
 
 
 @dataclass
@@ -379,7 +383,7 @@ class _LegacyPandaVm(PathResource):
 class PandaVm(CachedResource):
     CLI_NAME = "panda-vm"
     PATH_CACHE = "panda-vm"
-    VERSION: Final = "sdk-1.5.0-dev.35667"
+    VERSION: Final = "sdk-1.5.0-dev.38115"
     CREDENTIAL = "koala-pub:y3t!n0therP"
     URL: Final = (
         "https://nexus.cn.bz-openlab.ru:10443/repository/koala-npm/@panda/sdk/-"
@@ -508,4 +512,9 @@ BUILTIN_RESOURCES: Sequence[ResourceT] = [
     StandardLibrary,
     Documentation,
 ]
-ALL_RESOURCES: Sequence[ResourceT] = [*BUILTIN_RESOURCES, PandaVm, PythonBuild, Antlr]
+ALL_RESOURCES: Sequence[ResourceT] = [
+    *BUILTIN_RESOURCES,
+    PandaVm,
+    PythonBuild,
+    Antlr,
+]

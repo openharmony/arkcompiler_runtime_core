@@ -17,8 +17,7 @@ import argparse
 import os
 import subprocess
 import sys
-from enum import Enum
-from collections.abc import Callable
+from collections.abc import Sequence
 from pathlib import Path
 
 
@@ -42,40 +41,51 @@ class Color:
 
 
 def log_error(msg: str):
-    print(f"{Color.INV}{Color.RED}[!]{Color.RST} {msg}", file=sys.stderr)
+    print(f"{Color.INV}{Color.RED}[!]{Color.RST}", msg, file=sys.stderr)
 
 
 def log_stage(msg: str):
-    print(f"{Color.INV}{Color.GREEN}[*]{Color.RST} {msg}", file=sys.stderr)
+    print(f"{Color.INV}{Color.GREEN}[*]{Color.RST}", msg, file=sys.stderr)
 
 
 def log_action(msg: str):
-    print(f"{Color.INV}{Color.BLUE}[-]{Color.RST} {msg}", file=sys.stderr)
+    print(f"{Color.INV}{Color.BLUE}[-]{Color.RST}", msg, file=sys.stderr)
 
 
 def log_verbose(msg: str):
     print(
-        f"{Color.INV}{Color.GREY}[.]{Color.RST}{Color.GREY} {msg}{Color.RST}",
+        f"{Color.INV}{Color.GREY}[.]{Color.RST}",
+        f"{Color.GREY}{msg}{Color.RST}",
         file=sys.stderr,
     )
 
 
-def _log_command(command: list[str], cwd: Path | str):
+def _log_command(command: Sequence[Path | str], cwd: Path | str):
     log_action(" ".join(str(c) for c in command))
     log_verbose(f"working directory: {cwd}")
 
 
-def run_command(command: list[str], cwd: Path | str, check: bool = True):
+def run_command(
+    command: Sequence[Path | str],
+    cwd: Path | str,
+    check: bool = True,
+):
     _log_command(command, cwd)
     subprocess.run(command, cwd=cwd, check=check)
 
 
 def run_command_with_output(
-    command: list[str], cwd: Path | str, check: bool = True
+    command: Sequence[Path | str],
+    cwd: Path | str,
+    check: bool = True,
 ) -> str:
     _log_command(command, cwd)
     result = subprocess.run(
-        command, cwd=cwd, check=check, capture_output=True, text=True
+        command,
+        cwd=cwd,
+        check=check,
+        capture_output=True,
+        text=True,
     )
     return result.stdout.strip()
 
@@ -86,7 +96,7 @@ def get_project_root() -> Path:
 
 def init_py_env(project_root: Path):
     compiler_path = project_root / "compiler"
-    venv_bin = project_root / ".venv" / "bin"
+    venv_bin = project_root / ".venv/bin"
 
     if not venv_bin.exists():
         log_error(f"virtual environment directory not found: {venv_bin}")
@@ -97,8 +107,8 @@ def init_py_env(project_root: Path):
     os.environ["PATH"] = str(venv_bin) + os.pathsep + os.environ["PATH"]
 
 
-def run_module(module_name: str, args: list[str], project_root: Path):
-    base_command = [
+def run_module(module_name: str, args: Sequence[Path | str], project_root: Path):
+    coverage_run = [
         "coverage",
         "run",
         "--parallel-mode",
@@ -106,63 +116,65 @@ def run_module(module_name: str, args: list[str], project_root: Path):
         module_name,
         *args,
     ]
-    run_command(base_command, cwd=project_root)
+    run_command(coverage_run, cwd=project_root)
 
 
-def run_taihe_tryit(args: list[str], project_root: Path):
+def run_taihe_tryit(args: Sequence[Path | str], project_root: Path):
     run_module("taihe.cli.tryit", args, project_root)
 
 
-def run_pytest(project_root: Path):
+def run_pytest(project_root: Path, **config: Path | str):
     log_stage("Run PyTest...")
-    run_module("pytest", [], project_root)
+    run_module("pytest", [project_root / "compiler/tests"], project_root)
 
 
-def run_core_tests(project_root: Path):
+def run_core_tests(project_root: Path, **config: Path | str):
     log_stage("Run core tests...")
-    for test_dir in ["test/rgb", "test/object"]:
+    for test_dir in [project_root / "test/rgb", project_root / "test/object"]:
         log_stage(f"Testing: {test_dir}")
         run_taihe_tryit(["test", "-u", "cpp", test_dir], project_root)
 
 
-def run_ani_tests(project_root: Path, panda_home: str | None):
+def run_ani_tests(project_root: Path, **config: Path | str):
     log_stage("Run ANI tests...")
     build_dir = project_root / "build"
 
     if not build_dir.exists():
         log_verbose("Build directory not found. Running CMake configuration.")
-        cmake_cmd = ["cmake", "-B", "build", "-GNinja", "-DENABLE_COVERAGE=ON"]
-        if panda_home:
-            cmake_cmd.append(f"-DPANDA_HOME={panda_home}")
-        run_command(cmake_cmd, cwd=project_root)
+        ninja_cmd = ["cmake", "-B", "build", "-GNinja", "-DENABLE_COVERAGE=ON"]
+        if panda_home := config.get("panda_home"):
+            ninja_cmd.append(f"-DPANDA_HOME={str(panda_home)}")
+        run_command(ninja_cmd, cwd=project_root)
     else:
         log_verbose("Build directory exists. Skipping configuration.")
 
-    run_command(["cmake", "--build", "build", "--verbose"], cwd=project_root)
+    build_cmd = ["cmake", "--build", "build", "--verbose"]
+    run_command(build_cmd, cwd=project_root)
 
 
-def run_cmake_test(project_root: Path):
+def run_cmake_test(project_root: Path, **config: Path | str):
     log_stage("Run CMake test...")
 
-    test_dir = project_root / "test" / "cmake_test"
-    run_taihe_tryit(["generate", "-u", "sts", str(test_dir), "--cmake"], project_root)
+    test_dir = project_root / "test/cmake_test"
+    run_taihe_tryit(["generate", "-u", "sts", test_dir, "--cmake"], project_root)
 
     try:
-        panda_vm_path = run_command_with_output(
-            ["taihec", "--print-panda-vm-path"], cwd=project_root
-        )
-        external_include = (
-            Path(panda_vm_path) / "ohos_arm64/include/plugins/ets/runtime/ani"
-        )
+        taihec_cmd = ["taihec", "--print-panda-vm-path"]
+        panda_vm_path = run_command_with_output(taihec_cmd, cwd=project_root)
+        ani_path = Path(panda_vm_path) / "ohos_arm64/include/plugins/ets/runtime/ani"
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
         log_error(f"Unable to get panda-vm-path: {e}")
         return
 
-    run_command(
-        ["cmake", "-B", "build/generated", f"-DEXTERNAL_INCLUDE={external_include}"],
-        cwd=test_dir,
-    )
-    run_command(["cmake", "--build", "build/generated"], cwd=test_dir)
+    ninja_cmd = [
+        "cmake",
+        "-B",
+        "build/generated",
+        f"-DEXTERNAL_INCLUDE={ani_path}",
+    ]
+    run_command(ninja_cmd, cwd=test_dir)
+    build_cmd = ["cmake", "--build", "build/generated"]
+    run_command(build_cmd, cwd=test_dir)
 
 
 def generate_coverage_report(project_root: Path):
@@ -173,20 +185,22 @@ def generate_coverage_report(project_root: Path):
     except subprocess.CalledProcessError as e:
         log_error(f"Failed to generate coverage report: {e}")
 
+
+TESTS = {
+    "pytest": run_pytest,
+    "core": run_core_tests,
+    "ani": run_ani_tests,
+    "cmake": run_cmake_test,
+}
+
+MODE_TO_TESTS = {
+    "github-push-ci": list(TESTS.keys()),
+    "github-pr-ci": list(TESTS.keys()),
+    "ggw-ci": ["pytest", "ani"],
+}
+
+
 def main():
-    TESTS: dict[str, Callable[[], None]] = {
-        "pytest": lambda: run_pytest(project_root),
-        "core": lambda: run_core_tests(project_root),
-        "ani": lambda: run_ani_tests(project_root, args.panda_home),
-        "cmake": lambda: run_cmake_test(project_root),
-    }
-
-    MODE_TO_TESTS: dict[str, list[str]] = {
-        "github-push-ci": list(TESTS.keys()),
-        "github-pr-ci": list(TESTS.keys()),
-        "ggw-ci": ["pytest", "ani"],
-    }
-
     parser = argparse.ArgumentParser(
         description="Taihe integration test",
         formatter_class=argparse.RawTextHelpFormatter,
@@ -207,9 +221,6 @@ def main():
         help=f"Run tests under mode ({modes})",
     )
     args = parser.parse_args()
-    if args.run and args.mode:
-        log_error("You cannot use --run and --mode at the same time.")
-        sys.exit(1)
 
     project_root = get_project_root()
     init_py_env(project_root)
@@ -224,7 +235,7 @@ def main():
     try:
         for name in selected_tests:
             log_stage(f"=== Running test: {name} ===")
-            TESTS[name]()
+            TESTS[name](project_root, panda_home=args.panda_home)
     finally:
         generate_coverage_report(project_root)
 

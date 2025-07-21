@@ -282,6 +282,44 @@ class BuildSystem(BuildUtils):
                 f"}}\n"
             )
 
+    def taihec(
+        self,
+        dst_dir: Path,
+        src_files: list[Path],
+        backend_names: list[str],
+        cmake: bool = False,
+        sts_keep_name: bool = False,
+        arkts_module_prefix: str | None = None,
+        arkts_path_prefix: str | None = None,
+    ) -> None:
+        registry = BackendRegistry()
+        registry.register_all()
+        backends = registry.collect_required_backends(backend_names)
+        resolved_backends = [b() for b in backends]
+
+        if cmake:
+            output_config = CMakeOutputConfig(
+                dst_dir=dst_dir,
+                runtime_include_dir=RuntimeHeader.resolve_path(),
+                runtime_src_dir=RuntimeSource.resolve_path(),
+            )
+        else:
+            output_config = OutputConfig(
+                dst_dir=dst_dir,
+            )
+
+        invocation = CompilerInvocation(
+            src_files=src_files,
+            output_config=output_config,
+            backends=resolved_backends,
+            sts_keep_name=sts_keep_name,
+            arkts_module_prefix=arkts_module_prefix,
+            arkts_path_prefix=arkts_path_prefix,
+        )
+        instance = CompilerInstance(invocation)
+        if not instance.run():
+            raise RuntimeError("Taihe compiler (taihec) failed to run")
+
     def generate(self, sts_keep_name: bool, cmake: bool) -> None:
         """Generate code from IDL files."""
         if not self.idl_dir.is_dir():
@@ -291,42 +329,34 @@ class BuildSystem(BuildUtils):
 
         self.logger.info("Generating author and ani codes...")
 
-        idls = list(self.idl_dir.glob("*.taihe"))
+        lib_files: list[Path] = []
 
-        registry = BackendRegistry()
-        registry.register_all()
         backend_names = ["cpp-author"]
         if self.user == UserType.STS:
             backend_names.append("ani-bridge")
-            idls.append(StandardLibrary.resolve_path() / "taihe.platform.ani.taihe")
+            lib_files.append(
+                StandardLibrary.resolve_path() / "taihe.platform.ani.taihe"
+            )
         if self.user == UserType.CPP:
             backend_names.append("cpp-user")
         if self.should_run_pretty_print:
             backend_names.append("pretty-print")
-        backends = registry.collect_required_backends(backend_names)
-        resolved_backends = [b() for b in backends]
 
-        if cmake:
-            output_config = CMakeOutputConfig(
-                dst_dir=Path(self.generated_dir),
-                runtime_include_dir=RuntimeHeader.resolve_path(),
-                runtime_src_dir=RuntimeSource.resolve_path(),
-            )
-        else:
-            output_config = OutputConfig(
-                dst_dir=Path(self.generated_dir),
-            )
-
-        invocation = CompilerInvocation(
-            src_files=idls,
-            output_config=output_config,
-            backends=resolved_backends,
-            sts_keep_name=sts_keep_name,
+        # Generate taihe stdlib codes
+        self.taihec(
+            dst_dir=self.generated_dir,
+            src_files=lib_files,
+            backend_names=["abi-source", "cpp-common"],
         )
 
-        instance = CompilerInstance(invocation)
-        if not instance.run():
-            raise RuntimeError(f"Code generation failed")
+        # Generate author codes
+        self.taihec(
+            dst_dir=self.generated_dir,
+            src_files=list(self.idl_dir.glob("*.taihe")),
+            backend_names=backend_names,
+            cmake=cmake,
+            sts_keep_name=sts_keep_name,
+        )
 
     def build(self, opt_level: str) -> None:
         """Run the complete build process."""
@@ -736,6 +766,8 @@ class TaiheTryitParser(argparse.ArgumentParser):
         self.add_argument(
             "target_directory",
             type=str,
+            nargs="?",
+            default=".",
             help="The target directory containing source files for the project",
         )
         self.add_argument(

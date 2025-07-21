@@ -438,10 +438,10 @@ class ANICodeGenerator:
             f"}}",
         ):
             pkg_ani_source_target.writelns(
-                f"ani_long ani_data_ptr;",
-                f'env->Object_GetField_Long(object, TH_ANI_FIND_CLASS_FIELD(env, "{iface_ani_info.impl_desc}", "_taihe_dataPtr"), reinterpret_cast<ani_long*>(&ani_data_ptr));',
-                f"ani_long ani_vtbl_ptr;",
-                f'env->Object_GetField_Long(object, TH_ANI_FIND_CLASS_FIELD(env, "{iface_ani_info.impl_desc}", "_taihe_vtblPtr"), reinterpret_cast<ani_long*>(&ani_vtbl_ptr));',
+                f"ani_long ani_data_ptr = {{}};",
+                f'env->Object_GetField_Long(object, TH_ANI_FIND_CLASS_FIELD(env, "{iface_ani_info.impl_desc}", "_taihe_dataPtr"), &ani_data_ptr);',
+                f"ani_long ani_vtbl_ptr = {{}};",
+                f'env->Object_GetField_Long(object, TH_ANI_FIND_CLASS_FIELD(env, "{iface_ani_info.impl_desc}", "_taihe_vtblPtr"), &ani_vtbl_ptr);',
                 f"DataBlockHead* cpp_data_ptr = reinterpret_cast<DataBlockHead*>(ani_data_ptr);",
                 f"{iface_abi_info.vtable}* cpp_vtbl_ptr = reinterpret_cast<{iface_abi_info.vtable}*>(ani_vtbl_ptr);",
                 f"{iface_cpp_info.full_weak_name} cpp_iface = {iface_cpp_info.full_weak_name}({{cpp_vtbl_ptr, cpp_data_ptr}});",
@@ -689,7 +689,7 @@ class ANICodeGenerator:
                 inner_cpp_res = "cpp_result"
                 type_ani_info = TypeANIInfo.get(self.am, return_ty_ref.resolved_ty)
                 iface_ani_impl_target.writelns(
-                    f"{type_ani_info.ani_type} {inner_ani_res};",
+                    f"{type_ani_info.ani_type} {inner_ani_res} = {{}};",
                     f'env->Object_CallMethod_{type_ani_info.ani_type.suffix}(static_cast<ani_object>(this->ref), TH_ANI_FIND_CLASS_METHOD(env, "{iface_ani_info.type_desc}", "{method_ani_info.revert_name}", nullptr), reinterpret_cast<{type_ani_info.ani_type.base}*>(&{inner_ani_res}){inner_ani_args_trailing});',
                 )
                 type_ani_info.from_ani(
@@ -816,7 +816,7 @@ class ANICodeGenerator:
                 ani_field_value = f"ani_field_{final.name}"
                 cpp_field_result = f"cpp_field_{final.name}"
                 struct_ani_impl_target.writelns(
-                    f"{type_ani_info.ani_type} {ani_field_value};",
+                    f"{type_ani_info.ani_type} {ani_field_value} = {{}};",
                 )
                 if struct_ani_info.is_class():
                     struct_ani_impl_target.writelns(
@@ -868,7 +868,7 @@ class ANICodeGenerator:
                 ", " + ani_field_result for ani_field_result in ani_field_results
             )
             struct_ani_impl_target.writelns(
-                f"ani_object ani_obj;",
+                f"ani_object ani_obj = {{}};",
                 f'env->Object_New(TH_ANI_FIND_CLASS(env, "{struct_ani_info.impl_desc}"), TH_ANI_FIND_CLASS_METHOD(env, "{struct_ani_info.impl_desc}", "<ctor>", nullptr), &ani_obj{ani_field_results_trailing});',
                 f"return ani_obj;",
             )
@@ -971,7 +971,7 @@ class ANICodeGenerator:
                     if type_ani_info.type_desc is None:
                         continue
                     union_ani_impl_target.writelns(
-                        f"ani_boolean {is_field};",
+                        f"ani_boolean {is_field} = {{}};",
                         f'env->Object_InstanceOf(static_cast<ani_object>(ani_value), TH_ANI_FIND_CLASS(env, "{type_ani_info.type_desc}"), &{is_field});',
                     )
                     with union_ani_impl_target.indented(
@@ -990,7 +990,7 @@ class ANICodeGenerator:
                         )
                 elif NullAttr.get(final):
                     union_ani_impl_target.writelns(
-                        f"ani_boolean {is_field};",
+                        f"ani_boolean {is_field} = {{}};",
                         f"env->Reference_IsNull(ani_value, &{is_field});",
                     )
                     with union_ani_impl_target.indented(
@@ -1002,7 +1002,7 @@ class ANICodeGenerator:
                         )
                 elif UndefinedAttr.get(final):
                     union_ani_impl_target.writelns(
-                        f"ani_boolean {is_field};",
+                        f"ani_boolean {is_field} = {{}};",
                         f"env->Reference_IsUndefined(ani_value, &{is_field});",
                     )
                     with union_ani_impl_target.indented(
@@ -1028,7 +1028,7 @@ class ANICodeGenerator:
             f"}}",
         ):
             union_ani_impl_target.writelns(
-                f"ani_ref ani_value;",
+                f"ani_ref ani_value = {{}};",
             )
             with union_ani_impl_target.indented(
                 f"switch (cpp_value.get_tag()) {{",

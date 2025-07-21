@@ -48,10 +48,6 @@ parse_args() {
 
     case "$MODE" in
         ggw-ci|taihe-dev) ;; # valid
-        "")
-            log_error "--mode is required (ggw-ci or taihe-dev)"
-            exit 1
-            ;;
         *)
             log_error "Invalid mode: $MODE"
             echo "Allowed values: ggw-ci, taihe-dev"
@@ -67,7 +63,6 @@ command_not_found_handle() {
         ninja|uv)        install_pip_pkgs "$1";;
         java)            install_apt_pkgs default-jre-headless;;
         python|python3)  install_apt_pkgs python-is-python3;;
-
         pip|cmake|clang|curl) install_apt_pkgs "$1";;
         *) log_error "Unknown command $1" && exit 2;;
     esac
@@ -108,12 +103,12 @@ main() {
     elif [[ "$MODE" == "taihe-dev" ]]; then
         log_stage "Running in taihe-dev mode"
     fi
-    # "uv bulid" runs ANTLR using java. Ensure java exists here.
+    # `uv bulid` runs ANTLR using java. Ensure java exists here.
     # Since we cannot intercept a missing command in Python.
     log_stage "Checking uv deps" && ensure_command java uv
     log_stage "Syncing compiler deps" && _uv sync
-    log_stage "Checking build deps" && ensure_command python curl cmake clang ninja
     log_stage "Generate grammar" && _uv build
+    log_stage "Checking build deps" && ensure_command python curl cmake clang ninja
     log_stage "Done!"
 }
 
