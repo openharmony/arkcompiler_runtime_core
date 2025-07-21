@@ -24,23 +24,23 @@ using namespace arkts::ani_signature;
 
 TEST(BuilderTest, PrimitiveTypes)
 {
-    ASSERT_EQ(Builder::BuildUndefined().Descriptor(), "Lstd/core/Object;");
-    ASSERT_EQ(Builder::BuildNull().Descriptor(), "Lstd/core/Object;");
-    ASSERT_EQ(Builder::BuildBoolean().Descriptor(), "Z");
-    ASSERT_EQ(Builder::BuildChar().Descriptor(), "C");
-    ASSERT_EQ(Builder::BuildByte().Descriptor(), "B");
-    ASSERT_EQ(Builder::BuildShort().Descriptor(), "S");
-    ASSERT_EQ(Builder::BuildInt().Descriptor(), "I");
-    ASSERT_EQ(Builder::BuildLong().Descriptor(), "J");
-    ASSERT_EQ(Builder::BuildFloat().Descriptor(), "F");
-    ASSERT_EQ(Builder::BuildDouble().Descriptor(), "D");
+    ASSERT_EQ(Builder::BuildUndefined().Descriptor(), "std.core.Object");
+    ASSERT_EQ(Builder::BuildNull().Descriptor(), "std.core.Object");
+    ASSERT_EQ(Builder::BuildBoolean().Descriptor(), "z");
+    ASSERT_EQ(Builder::BuildChar().Descriptor(), "c");
+    ASSERT_EQ(Builder::BuildByte().Descriptor(), "b");
+    ASSERT_EQ(Builder::BuildShort().Descriptor(), "s");
+    ASSERT_EQ(Builder::BuildInt().Descriptor(), "i");
+    ASSERT_EQ(Builder::BuildLong().Descriptor(), "l");
+    ASSERT_EQ(Builder::BuildFloat().Descriptor(), "f");
+    ASSERT_EQ(Builder::BuildDouble().Descriptor(), "d");
 }
 
 TEST(BuilderTest, StdlibClass)
 {
     SignatureBuilder sb {};
     sb.AddClass({"std.core", "String"});
-    ASSERT_EQ(sb.BuildSignatureDescriptor(), "Lstd/core/String;:V");
+    ASSERT_EQ(sb.BuildSignatureDescriptor(), "C{std.core.String}:");
 }
 
 TEST(BuilderTest, ArrayTest)
@@ -48,60 +48,60 @@ TEST(BuilderTest, ArrayTest)
     SignatureBuilder sb {};
     sb.Add(Builder::BuildArray(Builder::BuildInt()));
     sb.SetReturn(Builder::BuildArray(Builder::BuildInt()));
-    ASSERT_EQ(sb.BuildSignatureDescriptor(), "[I:[I");
+    ASSERT_EQ(sb.BuildSignatureDescriptor(), "A{i}:A{i}");
 
     SignatureBuilder sb2 {};
     sb2.Add(Builder::BuildArray(Builder::BuildArray(Builder::BuildClass("com.example.MyClass"))));
     sb2.SetReturn(Builder::BuildArray(Builder::BuildInt()));
-    ASSERT_EQ(sb2.BuildSignatureDescriptor(), "[[Lcom/example/MyClass;:[I");
+    ASSERT_EQ(sb2.BuildSignatureDescriptor(), "A{A{C{com.example.MyClass}}}:A{i}");
 }
 
 TEST(BuilderTest, ModuleAndNamespace)
 {
     Module mod = Builder::BuildModule("com.example.Module");
     ASSERT_EQ(mod.Name(), "com.example.Module");
-    ASSERT_EQ(mod.Descriptor(), "Lcom/example/Module;");
+    ASSERT_EQ(mod.Descriptor(), "com.example.Module");
 
     Namespace ns1 = Builder::BuildNamespace("com.example.Namespace");
     ASSERT_EQ(ns1.Name(), "com.example.Namespace");
-    ASSERT_EQ(ns1.Descriptor(), "Lcom/example/Namespace;");
+    ASSERT_EQ(ns1.Descriptor(), "com.example.Namespace");
 
     Namespace ns2 = Builder::BuildNamespace({"com", "example", "SubNamespace"});
     ASSERT_EQ(ns2.Name(), "com.example.SubNamespace");
-    ASSERT_EQ(ns2.Descriptor(), "Lcom/example/SubNamespace;");
+    ASSERT_EQ(ns2.Descriptor(), "com.example.SubNamespace");
 }
 
 TEST(BuilderTest, ClassEnumPartialRequired)
 {
     Type cls = Builder::BuildClass("com.example.MyClass");
-    ASSERT_EQ(cls.Descriptor(), "Lcom/example/MyClass;");
+    ASSERT_EQ(cls.Descriptor(), "com.example.MyClass");
 
     Type enumType = Builder::BuildEnum({"com", "example", "MyEnum"});
-    ASSERT_EQ(enumType.Descriptor(), "Lcom/example/MyEnum;");
+    ASSERT_EQ(enumType.Descriptor(), "com.example.MyEnum");
 
     Type partialType = Builder::BuildPartial("com.example.MyClass");
-    ASSERT_EQ(partialType.Descriptor(), "Lcom/example/MyClass$partial;");
+    ASSERT_EQ(partialType.Descriptor(), "com.example.MyClass");
 
     Type requiredType = Builder::BuildRequired({"com", "example", "RequiredClass"});
-    ASSERT_EQ(requiredType.Descriptor(), "Lcom/example/RequiredClass;");
+    ASSERT_EQ(requiredType.Descriptor(), "com.example.RequiredClass");
 }
 
 TEST(BuilderTest, FunctionalObject)
 {
     Type funcType = Builder::BuildFunctionalObject(2, false);
-    ASSERT_EQ(funcType.Descriptor(), "Lstd/core/Function2;");
+    ASSERT_EQ(funcType.Descriptor(), "std.core.Function2");
 
     Type funcTypeReset = Builder::BuildFunctionalObject(3, true);
-    ASSERT_EQ(funcTypeReset.Descriptor(), "Lstd/core/FunctionR3;");
+    ASSERT_EQ(funcTypeReset.Descriptor(), "std.core.FunctionR3");
 }
 
 TEST(BuilderTest, SignatureDescriptorDirect)
 {
     std::string sig1 = Builder::BuildSignatureDescriptor({Builder::BuildInt(), Builder::BuildFloat()});
-    ASSERT_EQ(sig1, "IF:V");
+    ASSERT_EQ(sig1, "if:");
     std::string sig2 =
         Builder::BuildSignatureDescriptor({Builder::BuildInt(), Builder::BuildFloat()}, Builder::BuildBoolean());
-    ASSERT_EQ(sig2, "IF:Z");
+    ASSERT_EQ(sig2, "if:z");
 }
 
 TEST(SignatureBuilderTest, BasicSignatureBuilder)
@@ -110,7 +110,7 @@ TEST(SignatureBuilderTest, BasicSignatureBuilder)
     sb.Add(Builder::BuildInt()).Add(Builder::BuildFloat()).AddClass("com.example.MyClass");
     sb.SetReturnDouble();
     std::string sig = sb.BuildSignatureDescriptor();
-    ASSERT_EQ(sig, "IFLcom/example/MyClass;:D");
+    ASSERT_EQ(sig, "ifC{com.example.MyClass}:d");
 }
 
 TEST(BuilderTest, SpecialNames)
@@ -135,11 +135,11 @@ TEST(SignatureBuilderTest, ComplexSignatureBuilder)
 
     std::string sig = sb.BuildSignatureDescriptor();
     std::string expectedSig =
-        "IFZLcom/example/ComplexClass;"
-        "Lcom/example/MyEnum;Lcom/example/PartialClass$partial;"
-        "Lcom/example/RequiredClass;"
-        "Lstd/core/FunctionR4;"
-        ":Lcom/example/ReturnClass;";
+        "ifzC{com.example.ComplexClass}"
+        "E{com.example.MyEnum}P{com.example.PartialClass}"
+        "C{com.example.RequiredClass}"
+        "C{std.core.FunctionR4}"
+        ":C{com.example.ReturnClass}";
     ASSERT_EQ(sig, expectedSig);
 }
 
@@ -150,14 +150,14 @@ TEST(SignatureBuilderTest, MultipleBuilders)
     sb1.Add(Builder::BuildInt()).Add(Builder::BuildFloat()).SetReturnBoolean();
     sb2.Add(Builder::BuildLong()).Add(Builder::BuildDouble()).SetReturnChar();
 
-    ASSERT_EQ(sb1.BuildSignatureDescriptor(), "IF:Z");
-    ASSERT_EQ(sb2.BuildSignatureDescriptor(), "JD:C");
+    ASSERT_EQ(sb1.BuildSignatureDescriptor(), "if:z");
+    ASSERT_EQ(sb2.BuildSignatureDescriptor(), "ld:c");
 }
 
 TEST(BuilderTest, SignatureDescriptorVoidReturn)
 {
     std::string sig = Builder::BuildSignatureDescriptor({Builder::BuildInt(), Builder::BuildClass("com.example.Demo")});
-    ASSERT_EQ(sig, "ILcom/example/Demo;:V");
+    ASSERT_EQ(sig, "iC{com.example.Demo}:");
 }
 
 TEST(SignatureBuilderTest, OverrideReturnType)
@@ -167,7 +167,7 @@ TEST(SignatureBuilderTest, OverrideReturnType)
     sb.SetReturnInt();
     sb.SetReturnChar();
     std::string sig = sb.BuildSignatureDescriptor();
-    ASSERT_EQ(sig, "IZ:C");
+    ASSERT_EQ(sig, "iz:c");
 }
 
 TEST(SignatureBuilderTest, DefaultReturnTypeVoid)
@@ -175,7 +175,7 @@ TEST(SignatureBuilderTest, DefaultReturnTypeVoid)
     SignatureBuilder sb {};
     sb.Add(Builder::BuildInt());
     std::string sig = sb.BuildSignatureDescriptor();
-    ASSERT_EQ(sig, "I:V");
+    ASSERT_EQ(sig, "i:");
 }
 
 TEST(SignatureBuilderExtraTest, UndefinedAndNullReturn)
@@ -183,12 +183,12 @@ TEST(SignatureBuilderExtraTest, UndefinedAndNullReturn)
     SignatureBuilder sb1;
     sb1.Add(Builder::BuildInt()).Add(Builder::BuildFloat());
     sb1.SetReturnUndefined();
-    ASSERT_EQ(sb1.BuildSignatureDescriptor(), "IF:Lstd/core/Object;");
+    ASSERT_EQ(sb1.BuildSignatureDescriptor(), "if:C{std.core.Object}");
 
     SignatureBuilder sb2;
     sb2.Add(Builder::BuildInt()).Add(Builder::BuildFloat());
     sb2.SetReturnNull();
-    ASSERT_EQ(sb2.BuildSignatureDescriptor(), "IF:Lstd/core/Object;");
+    ASSERT_EQ(sb2.BuildSignatureDescriptor(), "if:C{std.core.Object}");
 }
 
 TEST(SignatureBuilderExtraTest, AddTypeDirectly)
@@ -198,7 +198,7 @@ TEST(SignatureBuilderExtraTest, AddTypeDirectly)
     Type floatType = Builder::BuildFloat();
     sb.Add(intType).Add(floatType);
     sb.SetReturnBoolean();
-    ASSERT_EQ(sb.BuildSignatureDescriptor(), "IF:Z");
+    ASSERT_EQ(sb.BuildSignatureDescriptor(), "if:z");
 }
 
 TEST(SignatureBuilderExtraTest, ClassAndEnumMixed)
@@ -210,11 +210,11 @@ TEST(SignatureBuilderExtraTest, ClassAndEnumMixed)
         .AddRequired({"com", "example", "RequiredD"});
     sb.SetReturnClass("com.example.ReturnE");
     std::string expectedSig =
-        "Lcom/example/ClassA;"
-        "Lcom/example/EnumB;"
-        "Lcom/example/PartialC$partial;"
-        "Lcom/example/RequiredD;"
-        ":Lcom/example/ReturnE;";
+        "C{com.example.ClassA}"
+        "E{com.example.EnumB}"
+        "P{com.example.PartialC}"
+        "C{com.example.RequiredD}"
+        ":C{com.example.ReturnE}";
     ASSERT_EQ(sb.BuildSignatureDescriptor(), expectedSig);
 }
 
@@ -223,7 +223,7 @@ TEST(SignatureBuilderExtraTest, SetReturnFunctionalObject)
     SignatureBuilder sb {};
     sb.Add(Builder::BuildInt()).Add(Builder::BuildFloat());
     sb.SetReturnFunctionalObject(3, true);
-    ASSERT_EQ(sb.BuildSignatureDescriptor(), "IF:Lstd/core/FunctionR3;");
+    ASSERT_EQ(sb.BuildSignatureDescriptor(), "if:C{std.core.FunctionR3}");
 }
 
 TEST(SignatureBuilderExtraTest, MultipleSetReturnCalls)
@@ -232,25 +232,25 @@ TEST(SignatureBuilderExtraTest, MultipleSetReturnCalls)
     sb.Add(Builder::BuildBoolean()).Add(Builder::BuildByte());
     sb.SetReturnInt();
     sb.SetReturnLong();
-    ASSERT_EQ(sb.BuildSignatureDescriptor(), "ZB:J");
+    ASSERT_EQ(sb.BuildSignatureDescriptor(), "zb:l");
 }
 
 TEST(SignatureBuilderExtraTest, EmptySignature)
 {
     SignatureBuilder sb {};
-    ASSERT_EQ(sb.BuildSignatureDescriptor(), ":V");
+    ASSERT_EQ(sb.BuildSignatureDescriptor(), ":");
 }
 
 TEST(SignatureBuilderExtraTest, SingleArgumentSignatureDescriptor)
 {
     std::string sig = Builder::BuildSignatureDescriptor({Builder::BuildInt()}, Builder::BuildLong());
-    ASSERT_EQ(sig, "I:J");
+    ASSERT_EQ(sig, "i:l");
 }
 
 TEST(SignatureBuilderExtraTest, EmptyArgsSignatureDescriptor)
 {
     std::string sig = Builder::BuildSignatureDescriptor({}, Builder::BuildNull());
-    ASSERT_EQ(sig, ":Lstd/core/Object;");
+    ASSERT_EQ(sig, ":C{std.core.Object}");
 }
 
 TEST(SignatureBuilderExtraTest, OverloadConsistency)
@@ -328,17 +328,17 @@ TEST(SignatureBuilderExtraTest, AllPrimitiveTypes)
     sb.AddUndefined().AddNull().AddBoolean().AddChar().AddByte().AddShort().AddInt().AddLong().AddFloat().AddDouble();
     sb.SetReturnDouble();
     std::string expectedSig =
-        "Lstd/core/Object;"
-        "Lstd/core/Object;"
-        "Z"
-        "C"
-        "B"
-        "S"
-        "I"
-        "J"
-        "F"
-        "D"
-        ":D";
+        "C{std.core.Object}"
+        "C{std.core.Object}"
+        "z"
+        "c"
+        "b"
+        "s"
+        "i"
+        "l"
+        "f"
+        "d"
+        ":d";
     ASSERT_EQ(sb.BuildSignatureDescriptor(), expectedSig);
 }
 

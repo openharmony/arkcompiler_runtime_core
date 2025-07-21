@@ -21,13 +21,6 @@
 
 namespace {
 
-std::string ConvertFullname(const std::string &fullname)
-{
-    std::string result = fullname;
-    std::replace(result.begin(), result.end(), '.', '/');
-    return result;
-}
-
 std::string JoinParts(std::initializer_list<std::string_view> parts)
 {
     std::ostringstream oss;
@@ -49,6 +42,7 @@ namespace arkts::ani_signature {
 class Type::Impl {
 public:
     std::string descriptor;
+    std::string aniDescriptor;
 };
 
 Type::Type(std::unique_ptr<Type::Impl> impl) : impl_(std::move(impl)) {}
@@ -82,10 +76,25 @@ std::string Type::Descriptor() const
     return (impl_ != nullptr) ? impl_->descriptor : "";
 }
 
-Type CreateType(const std::string &desc)
+std::string Type::AniDescriptor() const
+{
+    return (impl_ != nullptr) ? impl_->aniDescriptor : "";
+}
+
+static Type CreateType(const std::string &desc, const std::string &prefix = "")
 {
     auto tImpl = std::make_unique<Type::Impl>();
     tImpl->descriptor = desc;
+    tImpl->aniDescriptor = prefix.empty() ? desc : prefix + "{" + desc + "}";
+    Type t(std::move(tImpl));
+    return t;
+}
+
+static Type CreateArrayType(const std::string &anidesc)
+{
+    auto tImpl = std::make_unique<Type::Impl>();
+    tImpl->aniDescriptor = "A{" + anidesc + "}";
+    tImpl->descriptor = tImpl->aniDescriptor;
     Type t(std::move(tImpl));
     return t;
 }
@@ -178,59 +187,59 @@ std::string Namespace::Name() const
 
 Type Builder::BuildUndefined()
 {
-    return CreateType("Lstd/core/Object;");
+    return CreateType("std.core.Object", "C");
 }
 
 Type Builder::BuildNull()
 {
-    return CreateType("Lstd/core/Object;");
+    return CreateType("std.core.Object", "C");
 }
 
 Type Builder::BuildBoolean()
 {
-    return CreateType("Z");
+    return CreateType("z");
 }
 
 Type Builder::BuildChar()
 {
-    return CreateType("C");
+    return CreateType("c");
 }
 
 Type Builder::BuildByte()
 {
-    return CreateType("B");
+    return CreateType("b");
 }
 
 Type Builder::BuildShort()
 {
-    return CreateType("S");
+    return CreateType("s");
 }
 
 Type Builder::BuildInt()
 {
-    return CreateType("I");
+    return CreateType("i");
 }
 
 Type Builder::BuildLong()
 {
-    return CreateType("J");
+    return CreateType("l");
 }
 
 Type Builder::BuildFloat()
 {
-    return CreateType("F");
+    return CreateType("f");
 }
 
 Type Builder::BuildDouble()
 {
-    return CreateType("D");
+    return CreateType("d");
 }
 
 Module Builder::BuildModule(std::string_view fullName)
 {
     auto mImpl = std::make_unique<Module::Impl>();
     mImpl->name = std::string(fullName);
-    mImpl->descriptor = "L" + ConvertFullname(std::string(fullName)) + ";";
+    mImpl->descriptor = std::string(fullName);
     Module m(std::move(mImpl));
     return m;
 }
@@ -240,7 +249,7 @@ Namespace Builder::BuildNamespace(std::initializer_list<std::string_view> fullNa
     auto nsImpl = std::make_unique<Namespace::Impl>();
     std::string origName = JoinParts(fullName);
     nsImpl->name = origName;
-    nsImpl->descriptor = "L" + ConvertFullname(origName) + ";";
+    nsImpl->descriptor = origName;
     Namespace ns(std::move(nsImpl));
     return ns;
 }
@@ -250,7 +259,7 @@ Namespace Builder::BuildNamespace(std::string_view fullName)
     auto nsImpl = std::make_unique<Namespace::Impl>();
     std::string origName = std::string(fullName);
     nsImpl->name = origName;
-    nsImpl->descriptor = "L" + ConvertFullname(origName) + ";";
+    nsImpl->descriptor = origName;
     Namespace ns(std::move(nsImpl));
     return ns;
 }
@@ -258,49 +267,49 @@ Namespace Builder::BuildNamespace(std::string_view fullName)
 Type Builder::BuildClass(std::initializer_list<std::string_view> fullName)
 {
     std::string origName = JoinParts(fullName);
-    return CreateType("L" + ConvertFullname(origName) + ";");
+    return CreateType(origName, "C");
 }
 
 Type Builder::BuildClass(std::string_view fullName)
 {
     std::string origName = std::string(fullName);
-    return CreateType("L" + ConvertFullname(origName) + ";");
+    return CreateType(origName, "C");
 }
 
 Type Builder::BuildEnum(std::initializer_list<std::string_view> fullName)
 {
     std::string origName = JoinParts(fullName);
-    return CreateType("L" + ConvertFullname(origName) + ";");
+    return CreateType(origName, "E");
 }
 
 Type Builder::BuildEnum(std::string_view fullName)
 {
     std::string origName = std::string(fullName);
-    return CreateType("L" + ConvertFullname(origName) + ";");
+    return CreateType(origName, "E");
 }
 
 Type Builder::BuildPartial(std::initializer_list<std::string_view> fullName)
 {
     std::string origName = JoinParts(fullName);
-    return CreateType("L" + ConvertFullname(origName) + "$partial;");
+    return CreateType(origName, "P");
 }
 
 Type Builder::BuildPartial(std::string_view fullName)
 {
     std::string origName = std::string(fullName);
-    return CreateType("L" + ConvertFullname(origName) + "$partial;");
+    return CreateType(origName, "P");
 }
 
 Type Builder::BuildRequired(std::initializer_list<std::string_view> fullName)
 {
     std::string origName = JoinParts(fullName);
-    return CreateType("L" + ConvertFullname(origName) + ";");
+    return CreateType(origName, "C");
 }
 
 Type Builder::BuildRequired(std::string_view fullName)
 {
     std::string origName = std::string(fullName);
-    return CreateType("L" + ConvertFullname(origName) + ";");
+    return CreateType(origName, "C");
 }
 
 Type Builder::BuildFunctionalObject(std::size_t nrRequiredArgs, bool hasResetArgs)
@@ -309,27 +318,27 @@ Type Builder::BuildFunctionalObject(std::size_t nrRequiredArgs, bool hasResetArg
     const int reserveLength = 30U;
     descriptor.reserve(reserveLength);
 
-    descriptor += "Lstd/core/Function";
+    descriptor += "std.core.Function";
     if (hasResetArgs) {
         descriptor += "R";
     }
-    descriptor += std::to_string(nrRequiredArgs) + ";";
+    descriptor += std::to_string(nrRequiredArgs);
 
-    return CreateType(descriptor);
+    return CreateType(descriptor, "C");
 }
 
 Type Builder::BuildArray(Type const &type)
 {
-    return CreateType("[" + type.Descriptor());
+    return CreateArrayType(type.AniDescriptor());
 }
 
 std::string Builder::BuildSignatureDescriptor(std::initializer_list<Type> args)
 {
     std::string result;
     for (const auto &arg : args) {
-        result += arg.Descriptor();
+        result += arg.AniDescriptor();
     }
-    result += ":V";
+    result += ":";
     return result;
 }
 
@@ -337,9 +346,9 @@ std::string Builder::BuildSignatureDescriptor(std::initializer_list<Type> args, 
 {
     std::string result;
     for (const auto &arg : args) {
-        result += arg.Descriptor();
+        result += arg.AniDescriptor();
     }
-    result += ":" + ret.Descriptor();
+    result += ":" + ret.AniDescriptor();
     return result;
 }
 
@@ -378,9 +387,9 @@ public:
     {
         std::string result;
         for (const auto &param : params_) {
-            result += param.Descriptor();
+            result += param.AniDescriptor();
         }
-        result += ":" + (retSet_ ? ret_.Descriptor() : "V");
+        result += ":" + (retSet_ ? ret_.AniDescriptor() : "");
         return result;
     }
 
