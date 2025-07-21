@@ -15,8 +15,8 @@
 
 import { BusinessError } from "@ohos.base";
 
-const TypeErrorCodeId: number = 401;
-const OutOfBoundsErrorCodeId: number = 10200001;
+const TypeErrorCodeId: int = 401;
+const OutOfBoundsErrorCodeId: int = 10200001;
 
 function createBusinessError(code: int, message: string) {
     let err = new BusinessError();
