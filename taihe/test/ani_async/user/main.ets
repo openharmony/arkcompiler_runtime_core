@@ -12,115 +12,158 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as async_test from "@generated/async_test";
-import * as System from "std/core/System";
+import {BusinessError} from "@ohos.base";
+import * as async_test from "async_test";
+
 loadLibrary("ani_async");
 
 function testSyncAdd() {
-    assertEQ(async_test.addSync(1, 2), 3, "addSync should correctly add 1 + 2");
-    expectError(
-        () => {async_test.addSync(0, 2)}, "some error happen in add impl");
+    {
+        let res: int;
+        let err: BusinessError = new BusinessError();
+        try {
+            res = async_test.addSync(1, 2);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        assertEQ(res, 3, "addSync should correctly add 1 + 2");
+    }
+    {
+        let res: int;
+        let err: BusinessError = new BusinessError();
+        try {
+            res = async_test.addSync(0, 2);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        assertEQ(err.code, 1, "addSync should throw an error");
+        assertEQ(
+            err.message, "some error happen in add impl",
+            "addSync should throw an error when first parameter is 0");
+    }
+    console.log("testSyncAdd end");
 }
 
 function testAsyncAdd() {
-    // Test async add with callback
-    async_test.add(10, 20, (error: Error, data?: int) => {
-        assertEQ(error.message, "", "Callback should not receive an error");
-        assertEQ(data, 30, "add callback should receive 10 + 20 = 30");
-    });
+    {
+        let promise = new Promise<int>((resolve, reject) => {
+            async_test.add(10, 20, (err: BusinessError, data: int) => {
+                if (err.code !== 0) {
+                    reject(err);
+                } else {
+                    resolve(data);
+                }
+            });
+        });
+        let res: int;
+        let err: BusinessError = new BusinessError();
+        try {
+            res = await promise;
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        assertEQ(res, 30, "add callback should receive 10 + 20 = 30");
+    }
+    {
+        let promise = new Promise<int>((resolve, reject) => {
+            async_test.add(0, 2, (err: BusinessError, data: int) => {
+                if (err.code !== 0) {
+                    reject(err);
+                } else {
+                    resolve(data);
+                }
+            });
+        });
+        let res: int;
+        let err: BusinessError = new BusinessError();
+        try {
+            res = await promise;
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        assertEQ(err.code, 1, "add callback should receive an err");
+        assertEQ(
+            err.message, "some error happen in add impl",
+            "add callback should receive an err when first parameter is 0");
+    }
+    console.log("testAsyncAdd end");
+}
 
-    // Test promise rejection when first parameter is 0
-    expectError(
-        () => {await async_test.add(0, 2)}, "some error happen in add impl");
+function testPromiseAdd() {
+    {
+        let res: int;
+        let err: BusinessError = new BusinessError();
+        try {
+            res = await async_test.add(1, 2);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        assertEQ(res, 3, "add promise should correctly add 1 + 2");
+    }
+    {
+        let res: int;
+        let err: BusinessError = new BusinessError();
+        try {
+            res = await async_test.add(0, 2);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        assertEQ(err.code, 1, "add promise should throw an error");
+        assertEQ(
+            err.message, "some error happen in add impl",
+            "add promise should throw an error when first parameter is 0");
+    }
+    console.log("testPromiseAdd end");
 }
 
 function testIBase() {
     const ibase = async_test.getIBase();
     assertEQ(ibase.get(), "My IBase", "IBase.get() should return 'My IBase'");
 
-    // Test async interface method
-    ibase.setAsync("interface async set", (error: Error) => {
-        assertEQ(
-            error.message, "", "setAsync callback should not receive an error");
-
-        let p_ibase = ibase.getPromise();
-        assertEQ(
-            await p_ibase, "interface async set",
-            "getPromise should resolve with the value set in setAsync");
-    });
+    await ibase.setPromise("interface async set");
+    assertEQ(
+        await ibase.getPromise(), "interface async set",
+        "getPromise should resolve with the value set in setAsync");
 }
 
 function testStaticAsyncMethods() {
-    // Test static async method with callback
-    async_test.IBase.printAsync((error: Error) => {
-        assertEQ(
-            error.message, "",
-            "printAsync callback should not receive an error");
-    });
-
-    // Test getIBaseAsync callback
-    async_test.getIBaseAsync((error: Error, data?: async_test.IBase) => {
-        assertEQ(
-            error.message, "",
-            "getIBaseAsync callback should not receive an error");
-        assertNE(data, undefined, "data should not be undefined");
-        if (data) {
-            assertEQ(
-                data.get(), "My IBase",
-                "IBase from getIBaseAsync should return 'My IBase'");
-        }
-    });
-
-    // Test promise-based IBase getter
-    let r = await async_test.getIBasePromise();
-    assertNE(
-        r, undefined, "getIBasePromise should resolve with an IBase instance");
-    if (r) {
-        assertEQ(
-            r.get(), "My IBase",
-            "IBase from getIBasePromise should return 'My IBase'");
-    }
+    await async_test.IBase.printPromise();
 }
 
 function testStructMethods() {
-    const testData: async_test.Data = {a: "abc", b: "efg", c: 3};
+    await async_test.fromStruct(
+        {a: "abc", b: "efg", c: 3});  // should not throw an error
 
-    // Test fromStruct with callback
-    async_test.fromStruct(testData, (error: Error) => {
+    {
+        let err: BusinessError = new BusinessError();
+        try {
+            await async_test.fromStruct({a: "abc", b: "efg", c: 0});
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        assertEQ(err.code, 1, "fromStruct should throw an error");
         assertEQ(
-            error.message, "",
-            "fromStruct callback should not receive an error");
-    });
+            err.message, "some error happen in fromStructSync_impl",
+            "fromStruct should throw an error when c is 0");
+    }
 
-    async_test.fromStruct(testData).catch((error: NullishType) => {
+    let data: async_test.Data = await async_test.toStruct("aaa", "bbb", 1);
+    assertEQ(data.a, "aaa", "Data.a should be 'aaa'");
+    assertEQ(data.b, "bbb", "Data.b should be 'bbb'");
+    assertEQ(data.c, 1, "Data.c should be 1");
+
+    {
+        let err: BusinessError = new BusinessError();
+        try {
+            data = await async_test.toStruct("aaa", "bbb", 0);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        assertEQ(err.code, 1, "toStruct should throw an error");
         assertEQ(
-            (error as Error).message, "",
-            "fromStruct callback should not receive an error");
-    });
-
-    // Test toStruct with callback
-    async_test.toStruct(
-        "aaa", "bbb", 1, (error: Error, data?: async_test.Data) => {
-            assertEQ(
-                error.message, "",
-                "toStruct callback should not receive an error");
-            assertNE(data, undefined, "data should not be undefined");
-            if (data) {
-                assertEQ(data.a, "aaa", "Data.a should be 'aaa'");
-                assertEQ(data.b, "bbb", "Data.b should be 'bbb'");
-                assertEQ(data.c, 1, "Data.c should be 1");
-            }
-        });
-
-    // Test toStruct exception when c is 0
-    expectError(
-        () => {await async_test.toStruct("aaa", "bbb", 0)},
-        "some error happen in toStructSync_impl");
-
-    let result = await async_test.toStruct("aaa", "bbb", 1);
-    assertEQ(result.a, "aaa", "Data.a should be 'aaa'");
-    assertEQ(result.b, "bbb", "Data.b should be 'bbb'");
-    assertEQ(result.c, 1, "Data.c should be 1");
+            err.message, "some error happen in toStructSync_impl",
+            "toStruct should throw an error when c is 0");
+    }
 }
 
 function main() {
@@ -128,9 +171,10 @@ function main() {
 
     suite.addTest("Sync Add Tests", testSyncAdd);
     suite.addTest("Async Add Tests", testAsyncAdd);
+    suite.addTest("Promise Add Tests", testPromiseAdd);
     suite.addTest("IBase Tests", testIBase);
     suite.addTest("Static Async Methods Tests", testStaticAsyncMethods);
     suite.addTest("Struct Methods Tests", testStructMethods);
 
-    System.exit(suite.run());
+    exit(suite.run());
 }

@@ -14,17 +14,17 @@
  */
 
 
-// TODO: these int[] algorithms could be re-done using Generics
+// TODO: these FixedArray<int> algorithms could be re-done using Generics
 //       for better coverage after F<T implements Comparable<T>>
 //       will be implemented in stdlib
 
 // TODO: lambda doesn't work currently
-// type inplaceSortFunc = (x: int[]) => void;
+// type inplaceSortFunc = (x: FixedArray<int>) => void;
 
 const maxInt: int = 2147483647;
 const minInt: int = -2147483648;
 
-const tests: int[][][] = [
+const tests: FixedArray<FixedArray<FixedArray<int>>> = [
     [[8, 3, 1, 2, 3, 1, 0], [0, 1, 1, 2, 3, 3, 8]],
     [[], []],
     [[1], [1]],
@@ -45,13 +45,13 @@ function test(result: boolean, name: String): int {
     return 1;
 }
 
-function swap(arr: int[], i: int, k: int): void {
+function swap(arr: FixedArray<int>, i: int, k: int): void {
     let tmp = arr[i];
     arr[i] = arr[k];
     arr[k] = tmp;
 }
 
-function bubble_sort(arr: int[]): void {
+function bubble_sort(arr: FixedArray<int>): void {
         for (let i = 0; i + 1 < arr.length; ++i) {
         for (let j = 0; j + 1 < arr.length - i; ++j) {
             if (arr[j + 1] < arr[j]) {
@@ -61,7 +61,7 @@ function bubble_sort(arr: int[]): void {
     }
 }
 
-function shaker_sort(arr: int[]): void {
+function shaker_sort(arr: FixedArray<int>): void {
     if (arr.length == 0) {
         return;
     }
@@ -83,7 +83,7 @@ function shaker_sort(arr: int[]): void {
     }
 }
 
-function comb_sort(arr: int[]): void {
+function comb_sort(arr: FixedArray<int>): void {
     const factor: float = 1.2473309;
     let step: int = arr.length - 1;
     while (step >= 1) {
@@ -103,7 +103,7 @@ function comb_sort(arr: int[]): void {
     }
 }
 
-function insertion_sort(arr: int[]): void {
+function insertion_sort(arr: FixedArray<int>): void {
     for (let i: int = 1; i < arr.length; ++i) {
         let x = arr[i];
         let j = i;
@@ -115,7 +115,7 @@ function insertion_sort(arr: int[]): void {
     }
 }
 
-function cmp(x: int[], y: int[]): boolean {
+function cmp(x: FixedArray<int>, y: FixedArray<int>): boolean {
     if (x.length != y.length) {
         return false;
     }
@@ -127,13 +127,13 @@ function cmp(x: int[], y: int[]): boolean {
     return true;
 }
 
-function quick_sort(arr: int[]): int[] {
+function quick_sort(arr: FixedArray<int>): FixedArray<int> {
     if (arr.length <= 1) {
         return arr;
     }
     let pivot = arr[0];
-    let leftArr: int[] = [];
-    let rightArr: int[] = [];
+    let leftArr: FixedArray<int> = [];
+    let rightArr: FixedArray<int> = [];
     for (let i: int = 1; i < arr.length; i++) {
         if (arr[i] < pivot) {
             leftArr = concat(leftArr, [arr[i]]);
@@ -146,38 +146,38 @@ function quick_sort(arr: int[]): int[] {
     return concat(tmp, quick_sort(rightArr));
 }
 
-function test_quick_sort(data: int[][]): boolean {
-    const unsorted: int[] = copyOf(data[0]);
-    let result: int[] = quick_sort(unsorted);
+function test_quick_sort(data: FixedArray<FixedArray<int>>): boolean {
+    const unsorted: FixedArray<int> = copyOf(data[0]);
+    let result: FixedArray<int> = quick_sort(unsorted);
     return cmp(result, data[1]);
 }
 
-function test_bubble_sort(data: int[][]): boolean {
-    let unsorted: int[] = copyOf(data[0]);
+function test_bubble_sort(data: FixedArray<FixedArray<int>>): boolean {
+    let unsorted: FixedArray<int> = copyOf(data[0]);
     bubble_sort(unsorted);
     return cmp(unsorted, data[1]);
 }
 
-function test_shaker_sort(data: int[][]): boolean {
-    let unsorted: int[] = copyOf(data[0]);
+function test_shaker_sort(data: FixedArray<FixedArray<int>>): boolean {
+    let unsorted: FixedArray<int> = copyOf(data[0]);
     shaker_sort(unsorted);
     return cmp(unsorted, data[1]);
 }
 
-function test_comb_sort(data: int[][]): boolean {
-    let unsorted: int[] = copyOf(data[0]);
+function test_comb_sort(data: FixedArray<FixedArray<int>>): boolean {
+    let unsorted: FixedArray<int> = copyOf(data[0]);
     comb_sort(unsorted);
     return cmp(unsorted, data[1]);
 }
 
-function test_insertion_sort(data: int[][]): boolean {
-    let unsorted: int[] = copyOf(data[0]);
+function test_insertion_sort(data: FixedArray<FixedArray<int>>): boolean {
+    let unsorted: FixedArray<int> = copyOf(data[0]);
     insertion_sort(unsorted);
     return cmp(unsorted, data[1]);
 }
 
-function test_stdlib_sort(data: int[][]): boolean {
-    let unsorted: int[] = copyOf(data[0]);
+function test_stdlib_sort(data: FixedArray<FixedArray<int>>): boolean {
+    let unsorted: FixedArray<int> = copyOf(data[0]);
     sort(unsorted);
     return cmp(unsorted, data[1]);
 }

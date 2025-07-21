@@ -19,12 +19,14 @@
 
 #include "api/ani_textdecoder.h"
 #include "api/ani_textencoder.h"
+#include "api/ani_stringdecoder.h"
 #include "api/Util.h"
 #include "ohos/init_data.h"
 #include "tools/format_logger.h"
 #include "stdlib/native/core/stdlib_ani_helpers.h"
 
 using TextDecoder = ark::ets::sdk::util::TextDecoder;
+using StringDecoder = ark::ets::sdk::util::StringDecoder;
 
 struct ArrayBufferInfo {
     void *data;
@@ -182,6 +184,92 @@ static ani_status BindUtilHelper(ani_env *env)
     return ANI_OK;
 }
 
+static ani_boolean AniUtilsIsUndefined(ani_env *env, ani_object aniObj)
+{
+    ani_boolean isUndefined = ANI_TRUE;
+    env->Reference_IsUndefined(aniObj, &isUndefined);
+    return isUndefined;
+}
+
+static ani_boolean AniUtilsIsTypeArray(ani_env *env, ani_object aniObj)
+{
+    ani_class cls {};
+    env->FindClass("Lescompat/Uint8Array;", &cls);
+    ani_boolean isTypeArray = ANI_FALSE;
+    env->Object_InstanceOf(aniObj, cls, &isTypeArray);
+    return isTypeArray;
+}
+
+static void BindNativeStringDecoder(ani_env *env, ani_object object, ani_string aniEncoding)
+{
+    std::string stringEncoding = ark::ets::stdlib::ConvertFromAniString(env, aniEncoding);
+    auto nativeStringDecoder = new StringDecoder(stringEncoding);
+    env->Object_SetFieldByName_Long(object, "nativeDecoder_", reinterpret_cast<ani_long>(nativeStringDecoder));
+}
+
+static ani_string DoWrite(ani_env *env, ani_object object, ani_object typedArray)
+{
+    int32_t byteLength;
+    int32_t byteOffset;
+    const char *data = GetUint8ArrayInfo(env, typedArray, byteLength, byteOffset);
+    auto stringDecoder = StringDecoder::Unwrapp(env, object);
+    if (stringDecoder != nullptr) {
+        // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
+        return stringDecoder->Write(env, data, byteOffset, byteLength);
+    }
+    return nullptr;
+}
+
+static ani_string DoEnd(ani_env *env, ani_object object, ani_object typedArray)
+{
+    ani_boolean isUndefined = AniUtilsIsUndefined(env, typedArray);
+    if (isUndefined == ANI_TRUE) {
+        auto stringDecoder = StringDecoder::Unwrapp(env, object);
+        if (stringDecoder != nullptr) {
+            // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
+            return stringDecoder->End(env);
+        }
+        return nullptr;
+    }
+
+    ani_boolean isTypeArray = AniUtilsIsTypeArray(env, typedArray);
+    if (isTypeArray == ANI_FALSE) {
+        return nullptr;
+    }
+    int32_t byteLength;
+    int32_t byteOffset;
+    const char *data = GetUint8ArrayInfo(env, typedArray, byteLength, byteOffset);
+    auto stringDecoder = StringDecoder::Unwrapp(env, object);
+    if (stringDecoder != nullptr) {
+        // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
+        return stringDecoder->End(env, data, byteOffset, byteLength);
+    }
+    return nullptr;
+}
+
+static ani_status BindStringDecoder(ani_env *env)
+{
+    ani_class cls;
+    const char *className = "L@ohos/util/util/StringDecoder;";
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        LOG_ERROR_SDK("StringDecoder:: Not found %{public}s", className);
+        return ANI_ERROR;
+    }
+    std::array methods = {
+        ani_native_function {"bindNativeStringDecoder", "Lstd/core/String;:V",
+                             reinterpret_cast<void *>(BindNativeStringDecoder)},
+        ani_native_function {"doWrite", "Lescompat/Uint8Array;:Lstd/core/String;", reinterpret_cast<void *>(DoWrite)},
+        ani_native_function {"doEnd", "Lescompat/Uint8Array;:Lstd/core/String;", reinterpret_cast<void *>(DoEnd)},
+    };
+    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        LOG_ERROR_SDK("StringDecoder:: Cannot bind native methods to %{public}s", className);
+        return ANI_ERROR;
+    }
+    return ANI_OK;
+}
+
 extern "C" ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     ani_env *env;
@@ -190,7 +278,8 @@ extern "C" ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
     // NOLINTNEXTLINE(hicpp-signed-bitwise,-warnings-as-errors)
-    auto status = static_cast<ani_status>(BindUtilHelper(env) | BindTextDecoder(env) | BindTextEncoder(env));
+    auto status = static_cast<ani_status>(BindUtilHelper(env) | BindTextDecoder(env) | BindTextEncoder(env) |
+                                          BindStringDecoder(env));
     if (status != ANI_OK) {
         return ANI_ERROR;
     }

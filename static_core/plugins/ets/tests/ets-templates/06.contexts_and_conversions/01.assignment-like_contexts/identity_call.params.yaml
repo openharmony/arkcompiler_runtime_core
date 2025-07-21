@@ -23,7 +23,7 @@ cases:
       - { type: double, expr: 1.7976931348623157e308, op: '!=' }
       - { type: char, expr: "c'A'", op: '!=' }
       - { type: 'Boolean|null', expr: new Boolean(false), op: '!==' }
-      - { type: 'Byte|null', expr: new Byte(new Int(1).byteValue()), op: '!==' }
+      - { type: 'Byte|null', expr: new Byte(new Int(1).toByte()), op: '!==' }
       - { type: 'Char|null', expr: new Char(c'A'), op: '!==' }
       - { type: 'Error|null', expr: new Error("msg"), op: '!==' }
       - { type: 'Barfunc|null', expr: bar, op: '!==' }

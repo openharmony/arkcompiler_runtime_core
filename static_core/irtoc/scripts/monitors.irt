@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -45,7 +45,8 @@ Label(:CasLoop)
     if Options.arch == :x86_64
         mark_word := LoadI(monitor).Imm(Constants::MARK_WORD_OFFSET).mw
     else
-        mark_word := Intrinsic(:LOAD_ACQUIRE_MARK_WORD_EXCLUSIVE, monitor).mw
+        addr := Add(monitor, Constants::MARK_WORD_OFFSET).ptr
+        mark_word := Intrinsic(:LOAD_ACQUIRE_MARK_WORD_EXCLUSIVE, addr).mw
     end
 
     # Go to slow path if mark word's state is neither Unlock, nor Lightweight lock
@@ -66,11 +67,13 @@ Label(:CasLoop)
     }
     # Try to update mark word, retry on failure
     if Options.arch == :x86_64
-        If(Intrinsic(:COMPARE_AND_SET_MARK_WORD, monitor, mark_word, final_mark_word).b, 0).EQ.b {
+        addr := Add(monitor, Constants::MARK_WORD_OFFSET).ptr
+        If(Intrinsic(:COMPARE_AND_SET_MARK_WORD, addr, mark_word, final_mark_word).b, 0).EQ.b {
             Goto(:CasLoop)
         }
     else
-        If(Intrinsic(:STORE_RELEASE_MARK_WORD_EXCLUSIVE, monitor, final_mark_word).b, 0).NE.b {
+        addr := Add(monitor, Constants::MARK_WORD_OFFSET).ptr
+        If(Intrinsic(:STORE_RELEASE_MARK_WORD_EXCLUSIVE, addr, final_mark_word).b, 0).NE.b {
             Goto(:CasLoop)
         }
     end
@@ -119,7 +122,8 @@ Label(:CasLoop)
     if Options.arch == :x86_64
         mark_word := LoadI(monitor).Imm(Constants::MARK_WORD_OFFSET).mw
     else
-        mark_word := Intrinsic(:LOAD_ACQUIRE_MARK_WORD_EXCLUSIVE, monitor).mw
+        addr := Add(monitor, Constants::MARK_WORD_OFFSET).ptr
+        mark_word := Intrinsic(:LOAD_ACQUIRE_MARK_WORD_EXCLUSIVE, addr).mw
     end
 
     # Xor current thread id and mark word's thread id and then check that:
@@ -141,11 +145,13 @@ Label(:CasLoop)
 
     # Try to update mark word, retry on failure
     if Options.arch == :x86_64
-        If(Intrinsic(:COMPARE_AND_SET_MARK_WORD, monitor, mark_word, final_mark_word).b, 0).EQ.b {
+        addr := Add(monitor, Constants::MARK_WORD_OFFSET).ptr
+        If(Intrinsic(:COMPARE_AND_SET_MARK_WORD, addr, mark_word, final_mark_word).b, 0).EQ.b {
             Goto(:CasLoop)
         }
     else
-        If(Intrinsic(:STORE_RELEASE_MARK_WORD_EXCLUSIVE, monitor, final_mark_word).b, 0).NE.b {
+        addr := Add(monitor, Constants::MARK_WORD_OFFSET).ptr
+        If(Intrinsic(:STORE_RELEASE_MARK_WORD_EXCLUSIVE, addr, final_mark_word).b, 0).NE.b {
             Goto(:CasLoop)
         }
     end

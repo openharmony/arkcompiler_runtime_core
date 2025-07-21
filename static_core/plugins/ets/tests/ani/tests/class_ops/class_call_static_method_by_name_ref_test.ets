@@ -71,3 +71,77 @@ class B extends A{
     }
 };
 }
+
+class A {
+    static funcA(a0: int, a1: int): string {
+        if (a0 == 5 && a1 == 6) {
+            return "INT5"
+        }
+        return "NO1";
+    }
+
+    static funcA(a0: double, a1: double): double {
+        return a1 - a0 as double;
+    }
+
+    static funcB(a0: int, a1: int): string {
+        return A.funcA(a0, a1);
+    }
+};
+class B extends A{
+    static funcB(a0: int, a1: int): string {
+        if (a0 == 5 && a1 == 6) {
+            return "up"
+        }
+        return "NO1";
+    }
+};
+class C extends A{
+};
+class D extends A{
+    static funcA(a0: int, a1: int): string {
+        if (a0 == 5 && a1 == 6) {
+            return "up"
+        }
+        return "NO1";
+    }
+};
+class E extends A{
+    static funcA(a0: int, a1: int): string {
+        return A.funcA(a0, a1);
+    }
+};
+class F {
+    static increment(a0: int, a1: int): void {
+        if (a0 == 5 && a1 == 6) {
+            F.count = "INT5"
+        } else {
+            F.count = "NO1";
+        }
+    }
+
+    static getCount(): string {
+        return F.count;
+    }
+
+    static count: string = "";
+}
+class G {
+    public static publicMethod(a0: int, a1: int): string {
+        if (a0 == 5 && a1 == 6) {
+            return "INT5"
+        }
+        return "NO1";
+    }
+
+    private static privateMethod(a0: int, a1: int): string {
+        if (a0 == 5 && a1 == 6) {
+            return "up"
+        }
+        return "NO1";
+    }
+
+    static callPrivateMethod(a0: int, a1: int): string {
+        return G.privateMethod(a0, a1);
+    }
+}

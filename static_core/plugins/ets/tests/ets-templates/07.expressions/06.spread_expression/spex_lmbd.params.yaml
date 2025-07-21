@@ -233,7 +233,7 @@ cases:
           let ar = [-10.0, ...a1, ...a1, ...a2, ...a2, ...a3, 10.0, ...a3]
           assertTrue(((...p: (Double|Short|Byte)[]): double => {
               let res = 0.0
-              for (let el of p) res += (el as Numeric).doubleValue()
+              for (let el of p) res += (el as Numeric).toDouble()
               return res
           })(...ar) == 42.0)
 
@@ -377,14 +377,15 @@ cases:
               constructor(p: int, q: char) {
                   super([p, q])
               }
-              meth(): int {
-                  return 10 + ((...p: [int, char]): int => 100 + p[0])(...super.meth())
+              meth(): [int, char] {
+                  this.fld[0] = 10 + ((...p: [int, char]): int => 100 + p[0])(...super.meth())
+                  return this.fld 
               }
           }
       use: |-
           // use super expression
           let b: B = new B(1, c'Z')
-          assertTrue(b.meth() == 111)
+          assertEQ(b.meth()[0], 111)
 
     - decl: |-
           class A<T> {}

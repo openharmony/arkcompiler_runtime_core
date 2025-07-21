@@ -119,7 +119,7 @@ TEST_F(VariableSetValueShortTest, composite_case_2)
     ASSERT_EQ(env_->Namespace_FindVariable(ns_, "shortValue", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);
 
-    const ani_short values[] = {3U, 6U, 9U};
+    const ani_short values[] = {3U, 0, -9};
     ani_short result = 0U;
     for (ani_short value : values) {
         ASSERT_EQ(env_->Variable_SetValue_Short(variable, value), ANI_OK);

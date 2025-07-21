@@ -13,7 +13,7 @@
 
 [project]
 name = "vmb"
-version = "0.0.5"
+version = "0.1.1"
 description = "Virtual Machine Benchmarks"
 readme = "readme.md"
 requires-python = ">=3.7"
@@ -33,7 +33,7 @@ classifiers = [
 vmb = "vmb:main"
 
 [tool.setuptools]
-package-data = {"vmb" = ["templates/*"]}
+package-data = {"vmb" = ["templates/*", "resources/**"]}
 
 [build-system]
 requires = ["setuptools>=43.0.0", "wheel"]

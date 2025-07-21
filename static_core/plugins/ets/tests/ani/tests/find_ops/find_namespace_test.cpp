@@ -37,15 +37,14 @@ TEST_F(FindNamespaceTest, namespace_not_found)
     ASSERT_EQ(env_->FindNamespace("Lfind_namespace_test/bla-bla-bla", &ns), ANI_NOT_FOUND);
 }
 
-TEST_F(FindNamespaceTest, invalid_argument_1)
+TEST_F(FindNamespaceTest, invalid_arguments)
 {
-    ani_namespace ns;
+    ani_namespace ns {};
     ASSERT_EQ(env_->FindNamespace(nullptr, &ns), ANI_INVALID_ARGS);
-}
-
-TEST_F(FindNamespaceTest, invalid_argument_2)
-{
     ASSERT_EQ(env_->FindNamespace("Lfind_namespace_test/geometry;", nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->FindNamespace(nullptr, "Lgeometry;", &ns), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->FindNamespace("", &ns), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindNamespace("\t", &ns), ANI_NOT_FOUND);
 }
 
 TEST_F(FindNamespaceTest, namespace_is_not_class)

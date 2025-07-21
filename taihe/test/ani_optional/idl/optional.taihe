@@ -19,40 +19,39 @@ union Union {
 
 interface ExampleInterface {
 
-    func_primitive_i8(param1: Optional<i8>): void;
-    func_primitive_i16(param1: Optional<i16>): void;
-    func_primitive_i32(param1: Optional<i32>): void;
-    func_primitive_i64(param1: Optional<i64>): void;
-    func_primitive_f32(param1: Optional<f32>): void;
-    func_primitive_f64(param1: Optional<f64>): void;
-    func_primitive_bool(param1: Optional<bool>): void;
-    func_primitive_String(param1: Optional<String>): void;
+    FuncPrimitiveI8(param1: Optional<i8>): void;
+    FuncPrimitiveI16(param1: Optional<i16>): void;
+    FuncPrimitiveI32(param1: Optional<i32>): void;
+    FuncPrimitiveI64(param1: Optional<i64>): void;
+    FuncPrimitiveF32(param1: Optional<f32>): void;
+    FuncPrimitiveF64(param1: Optional<f64>): void;
+    FuncPrimitiveBool(param1: Optional<bool>): void;
+    FuncPrimitiveString(param1: Optional<String>): void;
     
+    FuncArray(param1: Optional<Array<i32>>):void;
+    FuncBuffer(param1: Optional<@arraybuffer Array<u8>>):void;
+    FuncUnion(param1: Optional<Union>):void;
+    FuncMap(param1: Optional<@record Map<String,i32>>):void;
 
-    func_Array(param1: Optional<Array<i32>>):void;
-    func_Buffer(param1: Optional<Array<u8>>):void;
-    func_Union(param1: Optional<Union>):void;
-    func_Map(param1: Optional<Map<String,i32>>):void;
-
-    @get getName(): Optional<String>;
-    @get geti8(): Optional<i8>;
-    @get geti16(): Optional<i16>;
-    @get geti32(): Optional<i32>;
-    @get geti64(): Optional<i64>;  // 注意：这里应该是i64，你可能需要修正类型
-    @get getf32(): Optional<f32>;
-    @get getf64(): Optional<f64>;
-    @get getbool(): Optional<bool>;
-    @get getArraybuffer(): Optional<Array<u8>>;
+    @get GetName(): Optional<String>;
+    @get Geti8(): Optional<i8>;
+    @get Geti16(): Optional<i16>;
+    @get Geti32(): Optional<i32>;
+    @get Geti64(): Optional<i64>;  // 注意：这里应该是i64，你可能需要修正类型
+    @get Getf32(): Optional<f32>;
+    @get Getf64(): Optional<f64>;
+    @get Getbool(): Optional<bool>;
+    @get GetArraybuffer(): Optional<@arraybuffer Array<u8>>;
 
 }
 
-function get_interface(): ExampleInterface;
-function printTestInterfaceName(testiface: ExampleInterface): void;
-function printTestInterfaceNumberi8(testiface: ExampleInterface): void;
-function printTestInterfaceNumberi16(testiface: ExampleInterface): void;
-function printTestInterfaceNumberi32(testiface: ExampleInterface): void;
-function printTestInterfaceNumberi64(testiface: ExampleInterface): void;
-function printTestInterfaceNumberf32(testiface: ExampleInterface): void;
-function printTestInterfaceNumberf64(testiface: ExampleInterface): void;
-function printTestInterfacebool(testiface: ExampleInterface): void;
-function printTestInterfaceArraybuffer(testiface: ExampleInterface): void;
+function GetInterface(): ExampleInterface;
+function PrintTestInterfaceName(testiface: ExampleInterface): void;
+function PrintTestInterfaceNumberi8(testiface: ExampleInterface): void;
+function PrintTestInterfaceNumberi16(testiface: ExampleInterface): void;
+function PrintTestInterfaceNumberi32(testiface: ExampleInterface): void;
+function PrintTestInterfaceNumberi64(testiface: ExampleInterface): void;
+function PrintTestInterfaceNumberf32(testiface: ExampleInterface): void;
+function PrintTestInterfaceNumberf64(testiface: ExampleInterface): void;
+function PrintTestInterfacebool(testiface: ExampleInterface): void;
+function PrintTestInterfaceArraybuffer(testiface: ExampleInterface): void;

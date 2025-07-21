@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+include(cmake/tooling_tests.cmake)
+
 if (NOT TARGET es2panda OR PANDA_TARGET_ARM32)
     return()
 endif()

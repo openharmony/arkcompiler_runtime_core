@@ -134,6 +134,7 @@ static ArgVector<Value> GetArgValues(ScopedManagedCodeFix *s, EtsMethod *method,
                                      ets_object object)
 {
     ArgVector<Value> parsedArgs;
+    ASSERT(method != nullptr);
     parsedArgs.reserve(method->GetNumArgs());
     if (object != nullptr) {
         parsedArgs.emplace_back(s->ToInternalType(object)->GetCoreType());
@@ -214,6 +215,7 @@ static EtsMethod *ResolveVirtualMethod(ScopedManagedCodeFix *s, ets_object objec
     }
 
     EtsObject *obj = s->ToInternalType(object);
+    ASSERT(obj != nullptr);
     return obj->GetClass()->ResolveVirtualMethod(method);
 }
 
@@ -323,6 +325,7 @@ static EtsClass *GetInternalClass(EtsEnv *env, ets_class cls, ScopedManagedCodeF
 {
     EtsClass *klass = s->ToInternalType(cls);
 
+    ASSERT(klass != nullptr);
     if (klass->IsInitialized()) {
         return klass;
     }
@@ -2740,9 +2743,10 @@ NO_UB_SANITIZE static ets_status DeferredResolve(EtsEnv *env, ets_deferred defer
     CHECK_ARG(env, resolution);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
+
     EtsPromise *promise = s.ToInternalType(deferred);
     EtsObject *value = s.ToInternalType(resolution);
-    EtsCoroutine *coro = PandaEtsNapiEnv::ToPandaEtsEnv(env)->GetEtsCoroutine();
+    EtsCoroutine *coro = s.Coroutine();
 
     promise->Resolve(coro, value);
     DeleteGlobalRef(env, reinterpret_cast<ets_object>(deferred));
@@ -2757,9 +2761,10 @@ NO_UB_SANITIZE static ets_status DeferredReject(EtsEnv *env, ets_deferred deferr
     CHECK_ARG(env, rejection);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
+
     EtsPromise *promise = s.ToInternalType(deferred);
     EtsObject *error = s.ToInternalType(rejection);
-    EtsCoroutine *coro = PandaEtsNapiEnv::ToPandaEtsEnv(env)->GetEtsCoroutine();
+    EtsCoroutine *coro = s.Coroutine();
 
     promise->Reject(coro, error);
     DeleteGlobalRef(env, reinterpret_cast<ets_object>(deferred));

@@ -13,7 +13,7 @@
 
 ---
 cases:
-  # not an exception class in throw
+  # not an error class in throw
   - defs: |-
       class A {}
     use: |-

@@ -23,6 +23,7 @@ function testStringlocaleCompare1Param() {
 function testStringlocaleCompare2Param() {
     let str:string = "5";
     assertEQ(str.localeCompare('3', "zh-CN"), 1);
+    assertEQ(str.localeCompare('3', undefined), 1);
     assertEQ(str.localeCompare('7', "zh-CN"), -1);
     assertEQ(str.localeCompare('5', "zh-CN"), 0);
 }

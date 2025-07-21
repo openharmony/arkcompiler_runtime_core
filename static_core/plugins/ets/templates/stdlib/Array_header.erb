@@ -15,7 +15,7 @@ function asIntOrDefault(n: Number | undefined, def: int): int {
     if (n === undefined) {
         return def
     }
-    return (n! as Object as Number) as number as int;
+    return (n!).toInt();
 }
 
 function normalizeIndex(idx: int, len: int): int {

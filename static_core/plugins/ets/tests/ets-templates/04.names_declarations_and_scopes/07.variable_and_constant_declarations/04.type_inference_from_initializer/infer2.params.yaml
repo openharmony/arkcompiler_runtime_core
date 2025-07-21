@@ -110,10 +110,11 @@ cases:
       use: |-
           let a = { name: "John" }  // CTE expected
 
-    - decl: |- 
+    - tags: 'negative'
+      decl: |- 
           let arr = new (Object|undefined)[1];  // inferred array of Error|undefined
       use: |-
-          assertEQ(arr[0], Object[])
+          assertEQ(arr[0], new Object[1])
 
     - decl: let myV = null
       use: |-

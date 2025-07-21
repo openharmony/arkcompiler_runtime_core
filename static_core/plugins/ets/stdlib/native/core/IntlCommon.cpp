@@ -19,6 +19,11 @@
 
 namespace ark::ets::stdlib::intl {
 
+icu::UnicodeString StdStrToUnicode(const std::string &str)
+{
+    return icu::UnicodeString::fromUTF8(icu::StringPiece(str));
+}
+
 ani_string StdStrToAni(ani_env *env, const std::string &str)
 {
     return CreateUtf8String(env, str.data(), str.size());
@@ -31,8 +36,15 @@ ani_string UnicodeToAniStr(ani_env *env, icu::UnicodeString &ustr)
 
 icu::UnicodeString AniToUnicodeStr(ani_env *env, ani_string aniStr)
 {
-    auto str = icu::StringPiece(ConvertFromAniString(env, aniStr));
-    return icu::UnicodeString::fromUTF8(str);
+    ani_size aniStrSize = 0;
+    ANI_FATAL_IF_ERROR(env->String_GetUTF16Size(aniStr, &aniStrSize));
+
+    ani_size copiedCharsCount = 0;
+    std::vector<uint16_t> buf(aniStrSize + 1);
+    ANI_FATAL_IF_ERROR(env->String_GetUTF16(aniStr, buf.data(), buf.size(), &copiedCharsCount));
+    ANI_FATAL_IF(copiedCharsCount != aniStrSize);
+
+    return icu::UnicodeString(buf.data(), aniStrSize);
 }
 
 }  // namespace ark::ets::stdlib::intl

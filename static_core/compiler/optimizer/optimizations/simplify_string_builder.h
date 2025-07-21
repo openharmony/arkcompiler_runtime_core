@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -196,7 +196,7 @@ private:
     void NormalizeStringBuilderAppendInstructionUsers(Inst *instance, SaveStateInst *saveState);
     ArenaVector<Inst *> FindStringBuilderAppendInstructions(Inst *instance);
 
-    void RemoveFromSaveStateInputs(Inst *inst);
+    void RemoveFromSaveStateInputs(Inst *inst, bool doMark = false);
     void RemoveFromAllExceptPhiInputs(Inst *inst);
     void ReconnectStringBuilderCascade(Inst *instance, Inst *inputInst, Inst *appendInstruction,
                                        SaveStateInst *saveState);

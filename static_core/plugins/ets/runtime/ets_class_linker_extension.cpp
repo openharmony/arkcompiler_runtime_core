@@ -140,6 +140,7 @@ bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
 
     auto *coroutine = ets::EtsCoroutine::GetCurrent();
     langCtx_ = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+    ASSERT(coroutine != nullptr);
     heapManager_ = coroutine->GetVM()->GetHeapManager();
 
     auto *objectClass = GetClassLinker()->GetClass(langCtx_.GetObjectClassDescriptor(), false, GetBootContext());
@@ -205,6 +206,11 @@ bool EtsClassLinkerExtension::InitializeArrayClass(Class *arrayClass, Class *com
 
 bool EtsClassLinkerExtension::InitializeClass(Class *klass)
 {
+    return InitializeClass(klass, GetErrorHandler());
+}
+
+bool EtsClassLinkerExtension::InitializeClass(Class *klass, [[maybe_unused]] ClassLinkerErrorHandler *handler)
+{
     ASSERT(IsInitialized());
     ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
 
@@ -212,7 +218,7 @@ bool EtsClassLinkerExtension::InitializeClass(Class *klass)
 
     EtsClass::FromRuntimeClass(klass)->Initialize(
         klass->GetBase() != nullptr ? EtsClass::FromRuntimeClass(klass->GetBase()) : nullptr,
-        klass->GetAccessFlags() & ETS_ACCESS_FLAGS_MASK, klass->IsPrimitive());
+        klass->GetAccessFlags() & ETS_ACCESS_FLAGS_MASK, klass->IsPrimitive(), handler);
 
     return true;
 }
@@ -395,6 +401,7 @@ Class *EtsClassLinkerExtension::InitializeClass(ObjectHeader *objectHeader, cons
                                                 size_t vtableSize, size_t imtSize, size_t size)
 {
     auto managedClass = reinterpret_cast<EtsClass *>(objectHeader);
+    ASSERT(managedClass != nullptr);
     managedClass->InitClass(descriptor, vtableSize, imtSize, size);
     auto klass = managedClass->GetRuntimeClass();
     klass->SetManagedObject(objectHeader);
@@ -623,6 +630,7 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
     // NOTE (electronick, #15938): Refactor the managed class-related pseudo TLS fields
     // initialization in MT ManagedThread ctor and EtsCoroutine::Initialize
     auto coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     coro->SetPromiseClass(GetPlatformTypes()->corePromise->GetRuntimeClass());
     coro->SetJobClass(GetPlatformTypes()->coreJob->GetRuntimeClass());
     coro->SetStringClassPtr(GetClassRoot(ClassRoot::STRING));
@@ -649,6 +657,7 @@ static EtsRuntimeLinker *CreateBootRuntimeLinker(ClassLinkerContext *ctx)
         LOG(FATAL, CLASS_LINKER) << "Could not allocate BootRuntimeLinker";
     }
     auto *runtimeLinker = EtsRuntimeLinker::FromEtsObject(etsObject);
+    ASSERT(runtimeLinker != nullptr);
     runtimeLinker->SetClassLinkerContext(ctx);
     return runtimeLinker;
 }

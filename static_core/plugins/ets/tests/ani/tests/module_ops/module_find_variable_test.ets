@@ -26,6 +26,15 @@ export let moduleG: int = 3;
 export let moduleH: int = 3;
 export let moduleI: int = 3;
 export let moduleJ: int = 3;
+
+export let moduleK: boolean = false;
+export let moduleL: char = c'G';
+export let moduleM: byte = 2;
+export let moduleN: short = 10;
+export let moduleO: long = 100;
+export let moduleP: float = 3.14;
+export let moduleQ: double = 6.28;
+
 namespace ops {
     let moduleT: int = 3;
 }

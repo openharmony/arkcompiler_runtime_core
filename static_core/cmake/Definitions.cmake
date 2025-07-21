@@ -27,6 +27,7 @@ function(panda_promote_to_definitions)
 endfunction()
 
 set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
+add_compile_definitions(PANDA_CMAKE_SDK)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     panda_set_flag(PANDA_TARGET_LINUX)
@@ -511,6 +512,7 @@ message(STATUS "PANDA_TARGET_ARM32_ABI_HARD            = ${PANDA_TARGET_ARM32_AB
 endif()
 message(STATUS "PANDA_TARGET_64                        = ${PANDA_TARGET_64}")
 message(STATUS "PANDA_TARGET_32                        = ${PANDA_TARGET_32}")
+message(STATUS "PANDA_TARGET_CPU_FEATURES              = ${PANDA_TARGET_CPU_FEATURES}")
 message(STATUS "PANDA_ENABLE_GLOBAL_REGISTER_VARIABLES = ${PANDA_ENABLE_GLOBAL_REGISTER_VARIABLES}")
 message(STATUS "PANDA_ENABLE_LTO                       = ${PANDA_ENABLE_LTO}")
 if(PANDA_TARGET_MOBILE)

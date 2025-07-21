@@ -16,6 +16,7 @@
 #ifndef PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_BOX_CLASSES_H_
 #define PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_BOX_CLASSES_H_
 
+#include "macros.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 
 namespace ark::ets {
@@ -29,6 +30,15 @@ public:
     static EtsBoxPrimitive *Create(EtsCoroutine *coro, T value);
 
     static Class *GetBoxClass(EtsCoroutine *coro);
+
+    static EtsClass *GetEtsBoxClass(EtsCoroutine *coro);
+
+    static T Unbox(EtsObject *obj)
+    {
+        auto val = EtsBoxPrimitive<T>::FromCoreType(obj);
+        ASSERT(val != nullptr);
+        return val->GetValue();
+    }
 
     static constexpr EtsBoxPrimitive *FromCoreType(EtsObject *obj)
     {
@@ -48,6 +58,11 @@ public:
 
     NO_COPY_SEMANTIC(EtsBoxPrimitive);
     NO_MOVE_SEMANTIC(EtsBoxPrimitive);
+
+    static constexpr size_t GetValueOffset()
+    {
+        return MEMBER_OFFSET(EtsBoxPrimitive, value_);
+    }
 
 private:
     T value_;

@@ -15,7 +15,7 @@ version: 0.0.0.1
 type: test-suite
 suite-name: test262
 test-root: ${WORK_DIR}/${suite-name}
-list-root: ${PANDA_SOURCE_PATH}/runtime_core/static_core/tests/tests-u-runner/test-lists/test262
+list-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/tests/tests-u-runner/test-lists/test262
 generator-class: runner.extensions.generators.test262.test262_generator.Test262Generator
 
 parameters:

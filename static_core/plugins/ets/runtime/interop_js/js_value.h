@@ -29,6 +29,7 @@ namespace ark::ets::interop::js {
 
 namespace testing {
 class JSValueOffsets;
+class ESValueOffsets;
 }  // namespace testing
 
 struct JSValueMemberOffsets;
@@ -286,7 +287,32 @@ private:
     friend class testing::JSValueOffsets;
 };
 
+class ESValue : private EtsObject {
+public:
+    JSValue *GetEo()
+    {
+        return JSValue::FromCoreType(ObjectAccessor::GetObject(this, GetEoOffset()));
+    }
+
+    static constexpr uint32_t GetEoOffset()
+    {
+        return MEMBER_OFFSET(ESValue, eo_);
+    }
+
+    ESValue() = delete;
+    ~ESValue() = delete;
+
+    NO_COPY_SEMANTIC(ESValue);
+    NO_MOVE_SEMANTIC(ESValue);
+
+private:
+    FIELD_UNUSED ObjectPointer<JSValue> eo_;
+    FIELD_UNUSED EtsBoolean isStatic_;
+    friend class testing::ESValueOffsets;
+};
+
 static_assert(JSValue::GetTypeOffset() == sizeof(ObjectHeader));
+static_assert(ESValue::GetEoOffset() == sizeof(ObjectHeader));
 
 }  // namespace ark::ets::interop::js
 

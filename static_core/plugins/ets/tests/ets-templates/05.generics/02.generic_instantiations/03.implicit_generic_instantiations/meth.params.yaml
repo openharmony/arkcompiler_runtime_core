@@ -52,7 +52,7 @@ cases:
           class Cls {
               // no constraints, union
               foo<T, U>(p: T, q: U): T|U {
-                  return p!.toString() > q!.toString() ? p : q
+                  return (p! as object).toString() > (q! as object).toString() ? p : q
               }
           }
       use: |-
@@ -113,8 +113,42 @@ cases:
               }
           }
       use: |-
-          let cls = new Cls
+          let cls = new Cls()
           assertTrue(cls.foo(new C(), true))
           assertTrue(cls.foo(new B(), new B()))
           assertTrue(cls.foo(new C(), 42.0))
           assertTrue(cls.foo(new B(), null))
+
+    - decl: |-
+          class Cls {
+              foo <T> (p: T, q: T): T {
+                  return p ?? q
+              }
+          }
+      use: |-
+          let cls = new Cls()
+          let a = new Object()
+          let b = "abc"
+          assertFalse(cls.foo(a, b) instanceof String)
+
+    - decl: |-
+          class Cls {
+              foo <T> (p: T, q: T): T {
+                  return p ?? q
+              }
+          }
+      use: |-
+          let cls = new Cls()
+          let a = "a"
+          let b = "b"
+          assertEQ(cls.foo(a, b), "a")
+
+    - decl: |-
+          class Cls {
+              foo <T> (p: T, q: T): T {
+                  return p ?? q
+              }
+          }
+      use: |-
+          let cls = new Cls()
+          assertEQ(cls.foo("a", "b"), "a")      

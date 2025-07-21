@@ -116,7 +116,7 @@ class C implements I {
         return 4
     }
 
-    public method_rest(...numbers: int[]): int
+    public method_rest(...numbers: FixedArray<int>): int
     {
         let res = 0
         for (let n of numbers) {
@@ -444,7 +444,7 @@ final class Operations {
     static sum(a0: int, a1: int): int {
         return a0 + a1;
     }
-};
+}
 
 class ClassA {
     static calculateSquareArea(length: int, wide: int, height: int): int {
@@ -464,18 +464,18 @@ class ClassA {
     static sumB(a0: int, a1: int, a2: int): int {
         return a2 + ClassA.sumA(a0, a1);
     }
-};
+}
 
 class ClassB extends ClassA {
     static or(a0: boolean, a1: boolean): boolean {
         return a0 || a1;
     }
-};
+}
 
 interface ICalculator {
     add(x: int, y: int): int;
     subtract(x: int, y: int): int;
-};
+}
  
 class BasicCalculator implements ICalculator {
     add(x: int, y: int): int {
@@ -487,7 +487,7 @@ class BasicCalculator implements ICalculator {
     static multiply(x: int, y: int): int {
         return x * y;
     }
-};
+}
 
 class SubCalculator extends BasicCalculator {
     constructor(a: int, b: int) {
@@ -502,9 +502,13 @@ class SubCalculator extends BasicCalculator {
     static divide(x: int, y: int): int {
         return x / y;
     }
+
+    static multiply(x: int, y: int): int {
+        return x + y;
+    }
     private width: int;
     private height: int;
-};
+}
 
 class AllFunctions {
     static foo (): int {
@@ -537,3 +541,7 @@ class NotOverloaded {
         return 1
     }
 };
+
+class FindNativeMethods {
+    native foo(): int;
+}

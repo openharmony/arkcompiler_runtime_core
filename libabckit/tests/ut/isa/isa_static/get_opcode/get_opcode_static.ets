@@ -18,7 +18,7 @@ class A {
 
 function foo (): double {
     let aInit = new A();
-    let arrA : A[] = [aInit];
+    let arrA : FixedArray<A> = [aInit];
     let a = new A();
     a.b = 4;
     arrA[0] = a;

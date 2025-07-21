@@ -137,6 +137,8 @@ export enum FaultID {
   LimitExtends,
   PropertyAccessExpression,
   NoBuiltInType,
+  AddDeclareToTopLevelInterfaces,
+  RemoveLimitDecorator,
   // this should always be last enum
   LAST_ID
 }

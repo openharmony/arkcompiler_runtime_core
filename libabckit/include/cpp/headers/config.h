@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 #include "../../c/metadata_core.h"
 #include "../../c/ir_core.h"
 #include "../../c/isa/isa_dynamic.h"
-#include "../../../src/include_v2/c/isa/isa_static.h"
+#include "../../c/isa/isa_static.h"
 #include "../../c/extensions/arkts/metadata_arkts.h"
 #include "../../c/extensions/js/metadata_js.h"
 

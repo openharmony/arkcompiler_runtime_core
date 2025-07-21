@@ -22,6 +22,7 @@ import {
   FINAL_CLASS,
   JSValue,
   KitPrefix,
+  LIMIT_DECORATOR,
   UtilityTypes,
   SpecificTypes,
   BuiltInType
@@ -58,7 +59,8 @@ export class Autofixer {
         this[FaultID.DuplicatedDeclaration].bind(this),
         this[FaultID.DuplicatedEnum].bind(this),
         this[FaultID.EnumWithMixedType].bind(this),
-        this[FaultID.LimitExtends].bind(this)
+        this[FaultID.LimitExtends].bind(this),
+        this[FaultID.AddDeclareToTopLevelInterfaces].bind(this)
       ]
     ],
     [ts.SyntaxKind.LiteralType, [this[FaultID.NumbericLiteral].bind(this)]],
@@ -89,8 +91,7 @@ export class Autofixer {
       ts.SyntaxKind.InterfaceDeclaration,
       [
         this[FaultID.NoETSKeyword].bind(this),
-        this[FaultID.DefaultExport].bind(this),
-        this[FaultID.CallorOptionFuncs].bind(this),
+        this[FaultID.CallorOptionFuncs].bind(this)
       ]
     ],
     [ts.SyntaxKind.Identifier, [this[FaultID.WrapperToPrimitive].bind(this)]],
@@ -104,13 +105,13 @@ export class Autofixer {
         this[FaultID.NoBuiltInType].bind(this)
       ]
     ],
-    [ts.SyntaxKind.VariableStatement, [this[FaultID.StringLiteralType].bind(this)]],
     [
       ts.SyntaxKind.FunctionDeclaration,
       [
         this[FaultID.GeneratorFunction].bind(this),
         this[FaultID.ObjectBindingParams].bind(this),
-        this[FaultID.DefaultExport].bind(this)
+        this[FaultID.DefaultExport].bind(this),
+        this[FaultID.RemoveLimitDecorator].bind(this)
       ]
     ],
     [ts.SyntaxKind.TypeQuery, [this[FaultID.TypeQuery].bind(this)]],
@@ -120,7 +121,8 @@ export class Autofixer {
       [
         this[FaultID.NoPrivateMember].bind(this),
         this[FaultID.DefaultExport].bind(this),
-        this[FaultID.NoETSKeyword].bind(this)
+        this[FaultID.NoETSKeyword].bind(this),
+        this[FaultID.RemoveLimitDecorator].bind(this)
       ]
     ],
     [ts.SyntaxKind.MethodDeclaration, [this[FaultID.NoETSKeyword].bind(this)]],
@@ -560,43 +562,6 @@ export class Autofixer {
   }
 
   /**
-   * Rule: `arkts-no-string-literal-type`
-   */
-  private [FaultID.StringLiteralType](node: ts.Node): ts.VisitResult<ts.Node> {
-    void this;
-
-    /**
-     * StringLiteralType mapped to string in arkts1.2
-     */
-
-    if (ts.isVariableStatement(node)) {
-      const newDeclarations = node.declarationList.declarations.map((declaration) => {
-        if (declaration.type && ts.isLiteralTypeNode(declaration.type)) {
-          let isStringLiteral = false;
-          declaration.type.forEachChild((child: ts.Node) => {
-            if (child.kind === ts.SyntaxKind.StringLiteral) {
-              isStringLiteral = true;
-              return;
-            }
-          });
-          if (isStringLiteral) {
-            return ts.factory.createVariableDeclaration(
-              declaration.name,
-              declaration.exclamationToken,
-              ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
-              declaration.initializer
-            );
-          }
-        }
-        return declaration;
-      });
-      const newDeclarationList = ts.factory.createVariableDeclarationList(newDeclarations, node.declarationList.flags);
-      return ts.factory.createVariableStatement(node.modifiers, newDeclarationList);
-    }
-    return node;
-  }
-
-  /**
    * Rule: `arkts-no-string-type-alias`
    */
   private [FaultID.StringTypeAlias](node: ts.Node): ts.VisitResult<ts.Node> {
@@ -961,8 +926,8 @@ export class Autofixer {
    * Rule: `arkts-ESObject-to-object-type`
    */
   private [FaultID.DefaultExport](node: ts.Node): ts.VisitResult<ts.Node> {
-    if (ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node) || ts.isInterfaceDeclaration(node)) {
-      return exportDefaultAssignment(node,this.context);
+    if (ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node)) {
+      return exportDefaultAssignment(node, this.context);
     }
 
     return node;
@@ -1169,6 +1134,64 @@ export class Autofixer {
         );
       }
     }
+
+    return node;
+  }
+
+  /**
+   * Rule: `arkts:add-declare-to-top-level-interfaces`
+   */
+  private [FaultID.AddDeclareToTopLevelInterfaces](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (!ts.isSourceFile(node)) {
+      return node;
+    }
+
+    const statements = node.statements.map(stmt => {
+      if (ts.isInterfaceDeclaration(stmt) && stmt.modifiers?.some(m => m.kind === ts.SyntaxKind.ExportKeyword)) {
+        // If 'declare' already exists, do not add it again
+        if (stmt.modifiers.some(m => m.kind === ts.SyntaxKind.DeclareKeyword)) {
+          return stmt;
+        }
+
+        // Transform interface nodes by adding the declare keyword
+        const newModifiers = [
+          ...stmt.modifiers.filter(m => ts.isModifier(m)),
+          this.context.factory.createModifier(ts.SyntaxKind.DeclareKeyword)
+        ] as ts.Modifier[];
+
+        return this.context.factory.updateInterfaceDeclaration(
+          stmt,
+          newModifiers,
+          stmt.name,
+          stmt.typeParameters,
+          stmt.heritageClauses,
+          stmt.members
+        );
+      }
+      return stmt;
+    });
+
+    return this.context.factory.updateSourceFile(node, statements);
+  }
+
+  /**
+   * Rule: `remove-limit-decorator`
+   */
+  private [FaultID.RemoveLimitDecorator](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (!ts.isFunctionDeclaration(node) && !ts.isClassDeclaration(node)) {
+      return node;
+    }
+
+    let decorators: ts.Decorator[] = [];
+    
+    const illegalDecorators = ts.getAllDecorators(node)
+    decorators = illegalDecorators?.filter(ts.isDecorator) as ts.Decorator[];
+    // Filter out restricted decorators
+    const filteredDecorators = decorators?.filter((decorator) => {
+      const expression = decorator.expression;
+      return !(ts.isIdentifier(expression) && LIMIT_DECORATOR.includes(expression.text));
+    });
+    (node as any).illegalDecorators = filteredDecorators;
 
     return node;
   }
@@ -1622,7 +1645,8 @@ function getUpdatedType(
   const isBigint = isBigintType(v);
   const isBoolean = isBooleanType(v);
 
-  if (isBigint && nodeFlag === ts.NodeFlags.Const) {
+  const allowedFlags = [ts.NodeFlags.Const, ts.NodeFlags.Let];
+  if (isBigint && allowedFlags.includes(nodeFlag)) {
     return context.factory.createKeywordTypeNode(ts.SyntaxKind.BigIntKeyword);
   } else if (isBoolean) {
     return context.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
@@ -1968,7 +1992,7 @@ function findSameInterfaceOrClassOrEnumList(
 function restrictIdentifierName(
   node: ts.PropertyDeclaration | ts.MethodDeclaration | ts.ClassDeclaration | ts.InterfaceDeclaration | ts.ImportSpecifier | ts.ExportSpecifier
 ): ts.VisitResult<ts.Node> {
-  const restrictedNames: ReadonlySet<string>= new Set(ETSKeyword);
+  const restrictedNames: ReadonlySet<string> = new Set(ETSKeyword);
 
   if (
     ts.isPropertyDeclaration(node) ||
@@ -1998,7 +2022,7 @@ function restrictDeclarationName(
 }
 
 function exportDefaultAssignment(
-  node: ts.FunctionDeclaration | ts.ClassDeclaration | ts.InterfaceDeclaration,
+  node: ts.FunctionDeclaration | ts.ClassDeclaration,
   context: ts.TransformationContext
 ): ts.VisitResult<ts.Node> {
   const modifiers = node.modifiers;
@@ -2029,8 +2053,6 @@ function updateNodeWithModifiers(
     return updateFunctionDeclarationWithModifiers(node, modifiers, context);
   } else if (ts.isClassDeclaration(node)) {
     return updateClassDeclarationWithModifiers(node, modifiers, context);
-  } else if (ts.isInterfaceDeclaration(node)) {
-    return updateInterfaceDeclarationWithModifiers(node, modifiers, context);
   }
 
   return node;
@@ -2216,3 +2238,4 @@ function updatePropertyAccessExpression(node: ts.PropertyAccessExpression, conte
 
   return undefined;
 }
+

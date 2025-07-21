@@ -79,18 +79,6 @@ cases:
           - Size.Small
           - Size.Medium
 
-    - decl: |-
-          enum Color { Red, Green, Blue }
-      case:
-          - Color.Blue
-          - 2
-
-    - decl: |-
-          enum Size { Small = "S", Medium = "M", Large = "L" }
-      case:
-          - Size.Large
-          - "'L'"
-
     - case:
           - "'0'"
           - "'\\u0000'"

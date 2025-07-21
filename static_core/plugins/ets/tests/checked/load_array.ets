@@ -32,11 +32,11 @@
 //! ASM             arm64: /ldr w.., \[x.., w.., sxtw #2\]/, amd64: /movsxd .*movsxdl (.*)/
 
 function main(): void {
-    const byteArr: byte[] = [0, 1, 2, 3, 4, 5, 6, -7]
+    const byteArr: FixedArray<byte> = [0, 1, 2, 3, 4, 5, 6, -7]
     func(byteArr, 0, byteArr.length)
 }
 
-function func(arr: byte[], startIndex: int, endIndex: int): void {
-    const cnts = new int[256]
+function func(arr: FixedArray<byte>, startIndex: int, endIndex: int): void {
+    const cnts: FixedArray<int> = new int[256]
     cnts[arr[7] + 128]++
 }

@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+import { Job } from "std/core"
+
 let ConcurrentSetTestOne: ConcurrentSet<number> = new ConcurrentSet<number>();
 
 function main(): int {
@@ -26,12 +29,12 @@ function main(): int {
             addMore(i);
         }
         assertEQ(ConcurrentSetTestOne.size, 100);
-        let promises = new Array<Promise<void>>(100);
+        let jobs = new Array<Job<void>>(100);
         for (let i: int = 0; i < 100; i++) {
-            promises[i] = launch deleteMore(i);
+            jobs[i] = launch<void, (i: int) => void>(deleteMore, i);
         }
         for (let i: int = 0; i < 100; i++) {
-            await promises[i];
+            jobs[i].Await();
         }
         assertEQ(ConcurrentSetTestOne.size, 0);
     });

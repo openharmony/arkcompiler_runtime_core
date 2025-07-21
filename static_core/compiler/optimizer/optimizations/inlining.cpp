@@ -18,6 +18,7 @@
 #include "compiler_logger.h"
 #include "compiler_options.h"
 #include "events_gen.h"
+#include "optimizer/ir/analysis.h"
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/ir_builder/ir_builder.h"
@@ -31,6 +32,7 @@
 #include "optimizer/optimizations/optimize_string_concat.h"
 #include "optimizer/optimizations/peepholes.h"
 #include "optimizer/optimizations/simplify_string_builder.h"
+#include "runtime/include/class.h"
 #include "events/events.h"
 
 namespace ark::compiler {
@@ -206,7 +208,7 @@ bool Inlining::IsInstSuitableForInline(Inst *inst) const
     }
     auto callInst = static_cast<CallInst *>(inst);
     ASSERT(!callInst->IsDynamicCall());
-    if (callInst->IsInlined() || callInst->IsLaunchCall()) {
+    if (callInst->IsInlined()) {
         return false;
     }
     if (callInst->IsUnresolved() || callInst->GetCallMethod() == nullptr) {
@@ -298,10 +300,6 @@ bool Inlining::TryInline(CallInst *callInst)
 
 bool Inlining::TryInlineWithInlineCaches(CallInst *callInst)
 {
-    if (GetGraph()->IsAotMode()) {
-        // We don't support offline inline caches yet.
-        return false;
-    }
     auto runtime = GetGraph()->GetRuntime();
     auto pic = runtime->GetInlineCaches();
     if (pic == nullptr) {
@@ -310,6 +308,19 @@ bool Inlining::TryInlineWithInlineCaches(CallInst *callInst)
 
     ArenaVector<RuntimeInterface::ClassPtr> receivers(GetGraph()->GetLocalAllocator()->Adapter());
     auto callKind = pic->GetClasses(GetGraph()->GetMethod(), callInst->GetPc(), &receivers);
+
+    if (GetGraph()->IsAotMode()) {
+        for (auto receiver : receivers) {
+            if (runtime->IsClassExternal(GetGraph()->GetMethod(), receiver)) {
+                LOG_INLINING(INFO) << "AOT inline caches external inlining is not supported";
+                EVENT_INLINE(runtime->GetMethodFullName(GetGraph()->GetMethod()), runtime->GetClassName(receiver),
+                             callInst->GetId(), events::InlineKind::VIRTUAL, events::InlineResult::SKIP_EXTERNAL);
+                return false;
+                // We don't support offline external inline caches yet
+            }
+        }
+    }
+
     switch (callKind) {
         case InlineCachesInterface::CallKind::MEGAMORPHIC:
             EVENT_INLINE(runtime->GetMethodFullName(GetGraph()->GetMethod()), "-", callInst->GetId(),
@@ -331,6 +342,9 @@ bool Inlining::TryInlineWithInlineCaches(CallInst *callInst)
 bool Inlining::DoInlineMonomorphic(CallInst *callInst, RuntimeInterface::ClassPtr receiver)
 {
     auto runtime = GetGraph()->GetRuntime();
+    auto currMethod = GetGraph()->GetMethod();
+    ASSERT(!GetGraph()->IsAotMode() || !runtime->IsClassExternal(currMethod, receiver));
+
     InlineContext ctx;
     ctx.method = runtime->ResolveVirtualMethod(receiver, callInst->GetCallMethod());
 
@@ -347,7 +361,16 @@ bool Inlining::DoInlineMonomorphic(CallInst *callInst, RuntimeInterface::ClassPt
 
     // Add type guard
     auto getClsInst = GetGraph()->CreateInstGetInstanceClass(DataType::REFERENCE, callInst->GetPc(), objInst);
-    auto loadClsInst = GetGraph()->CreateInstLoadImmediate(DataType::REFERENCE, callInst->GetPc(), receiver);
+
+    Inst *loadClsInst = nullptr;
+    if (GetGraph()->IsAotMode()) {
+        loadClsInst = GetGraph()->CreateInstLoadClass(
+            DataType::REFERENCE, callInst->GetPc(), saveState,
+            TypeIdMixin {runtime->GetClassIdWithinFile(currMethod, receiver), currMethod}, receiver);
+    } else {
+        loadClsInst = GetGraph()->CreateInstLoadImmediate(DataType::REFERENCE, callInst->GetPc(), receiver);
+    }
+
     auto cmpInst = GetGraph()->CreateInstCompare(DataType::BOOL, callInst->GetPc(), getClsInst, loadClsInst,
                                                  DataType::REFERENCE, ConditionCode::CC_NE);
     auto deoptInst =
@@ -365,15 +388,43 @@ bool Inlining::DoInlineMonomorphic(CallInst *callInst, RuntimeInterface::ClassPt
         callBb->AppendInst(deoptInst);
     }
 
-    EVENT_INLINE(runtime->GetMethodFullName(GetGraph()->GetMethod()), runtime->GetMethodFullName(ctx.method),
-                 callInst->GetId(), events::InlineKind::VIRTUAL_MONOMORPHIC, events::InlineResult::SUCCESS);
+    EVENT_INLINE(runtime->GetMethodFullName(currMethod), runtime->GetMethodFullName(ctx.method), callInst->GetId(),
+                 events::InlineKind::VIRTUAL_MONOMORPHIC, events::InlineResult::SUCCESS);
     return true;
+}
+
+SaveStateInst *Inlining::GetOrCloneSaveState(CallInst *callInst, BasicBlock *callBb)
+{
+    auto saveState = callInst->GetSaveState();
+    ASSERT(saveState != nullptr);
+
+    if (callBb == callInst->GetBasicBlock()) {
+        return saveState;
+    }
+
+    auto clonedSS = CopySaveState(GetGraph(), saveState);
+    callBb->AppendInst(clonedSS);
+
+    return clonedSS;
 }
 
 void Inlining::CreateCompareClass(CallInst *callInst, Inst *getClsInst, RuntimeInterface::ClassPtr receiver,
                                   BasicBlock *callBb)
 {
-    auto loadClsInst = GetGraph()->CreateInstLoadImmediate(DataType::REFERENCE, callInst->GetPc(), receiver);
+    auto runtime = GetGraph()->GetRuntime();
+    auto currMethod = GetGraph()->GetMethod();
+    ASSERT(!GetGraph()->IsAotMode() || !runtime->IsClassExternal(currMethod, receiver));
+
+    Inst *loadClsInst = nullptr;
+    if (GetGraph()->IsAotMode()) {
+        auto saveState = GetOrCloneSaveState(callInst, callBb);
+        loadClsInst = GetGraph()->CreateInstLoadClass(
+            DataType::REFERENCE, callInst->GetPc(), saveState,
+            TypeIdMixin {runtime->GetClassIdWithinFile(currMethod, receiver), currMethod}, receiver);
+    } else {
+        loadClsInst = GetGraph()->CreateInstLoadImmediate(DataType::REFERENCE, callInst->GetPc(), receiver);
+    }
+
     auto cmpInst = GetGraph()->CreateInstCompare(DataType::BOOL, callInst->GetPc(), loadClsInst, getClsInst,
                                                  DataType::REFERENCE, ConditionCode::CC_EQ);
     auto ifInst = GetGraph()->CreateInstIfImm(DataType::BOOL, callInst->GetPc(), cmpInst, 0, DataType::BOOL,
@@ -395,8 +446,17 @@ void Inlining::InsertDeoptimizeInst(CallInst *callInst, BasicBlock *callBb, Deop
     ASSERT(compareInst != nullptr && compareInst->GetCc() == ConditionCode::CC_EQ);
     compareInst->SetCc(ConditionCode::CC_NE);
 
-    auto deoptInst =
-        GetGraph()->CreateInstDeoptimizeIf(callInst->GetPc(), compareInst, callInst->GetSaveState(), deoptType);
+    SaveStateInst *saveState = nullptr;
+    if (GetGraph()->IsAotMode()) {
+        auto loadClsInst = compareInst->GetInput(0).GetInst();
+        ASSERT(loadClsInst != nullptr && loadClsInst->GetOpcode() == Opcode::LoadClass);
+        saveState = loadClsInst->GetSaveState();
+    } else {
+        saveState = GetOrCloneSaveState(callInst, callBb);
+    }
+    ASSERT(saveState != nullptr);
+
+    auto deoptInst = GetGraph()->CreateInstDeoptimizeIf(callInst->GetPc(), compareInst, saveState, deoptType);
 
     callBb->RemoveInst(ifInst);
     callBb->AppendInst(deoptInst);
@@ -413,11 +473,7 @@ void Inlining::InsertCallInst(CallInst *callInst, BasicBlock *callBb, BasicBlock
 
     // Copy SaveState inst
     auto ss = callInst->GetSaveState();
-    auto cloneSs = static_cast<SaveStateInst *>(ss->Clone(GetGraph()));
-    for (size_t inputIdx = 0; inputIdx < ss->GetInputsCount(); inputIdx++) {
-        cloneSs->AppendInput(ss->GetInput(inputIdx));
-        cloneSs->SetVirtualRegister(inputIdx, ss->GetVirtualRegister(inputIdx));
-    }
+    auto cloneSs = CopySaveState(GetGraph(), ss);
     newCallBb->AppendInst(cloneSs);
 
     // Copy Call inst
@@ -889,11 +945,22 @@ bool Inlining::TryInlineExternalAot(CallInst *callInst, InlineContext *ctx)
     return true;
 }
 
-bool Inlining::DoInlineIntrinsic(CallInst *callInst, InlineContext *ctx)
+bool Inlining::DoInlineIntrinsicByExpansion([[maybe_unused]] CallInst *callInst, InlineContext *ctx)
+{
+    // CC-OFFNXT(C_RULE_SWITCH_BRANCH_CHECKER) autogenerated code
+    switch (ctx->intrinsicId) {
+#include "intrinsics_inlining_expansion_switch_case.inl"
+        default:
+            return false;
+    }
+    LOG_INLINING(DEBUG) << "The method '" << GetMethodFullName(GetGraph(), ctx->method)
+                        << "' is inlined by expanding intrinsic '" << GetIntrinsicName(ctx->intrinsicId) << "'";
+    return true;
+}
+
+bool Inlining::DoInlineIntrinsicByEncoding(CallInst *callInst, InlineContext *ctx)
 {
     auto intrinsicId = ctx->intrinsicId;
-    ASSERT(intrinsicId != RuntimeInterface::IntrinsicId::INVALID);
-    ASSERT(callInst != nullptr);
     if (!EncodesBuiltin(GetGraph()->GetRuntime(), intrinsicId, GetGraph()->GetArch())) {
         return false;
     }
@@ -910,18 +977,23 @@ bool Inlining::DoInlineIntrinsic(CallInst *callInst, InlineContext *ctx)
         inst->AppendInput(inputs[i].GetInst(), callInst->GetInputType(i));
     }
 
-    auto method = ctx->method;
-    if (ctx->chaDevirtualize) {
-        InsertChaGuard(callInst);
-        GetCha()->AddDependency(method, GetGraph()->GetOutermostParentGraph()->GetMethod());
-        GetGraph()->GetOutermostParentGraph()->AddSingleImplementationMethod(method);
-    }
-
     callInst->InsertAfter(inst);
     callInst->ReplaceUsers(inst);
-    LOG_INLINING(DEBUG) << "The method: " << GetMethodFullName(GetGraph(), method) << "replaced to the intrinsic"
+    LOG_INLINING(DEBUG) << "The method: " << GetMethodFullName(GetGraph(), ctx->method) << "replaced to the intrinsic"
                         << GetIntrinsicName(intrinsicId);
+    return true;
+}
 
+bool Inlining::DoInlineIntrinsic(CallInst *callInst, InlineContext *ctx)
+{
+    ASSERT(ctx->intrinsicId != RuntimeInterface::IntrinsicId::INVALID);
+    ASSERT(callInst != nullptr);
+    if (!DoInlineIntrinsicByExpansion(callInst, ctx) && !DoInlineIntrinsicByEncoding(callInst, ctx)) {
+        return false;
+    }
+    if (ctx->chaDevirtualize) {
+        InsertChaGuard(callInst, ctx);
+    }
     return true;
 }
 
@@ -977,9 +1049,7 @@ bool Inlining::DoInlineMethod(CallInst *callInst, InlineContext *ctx)
     }
 
     if (ctx->chaDevirtualize) {
-        InsertChaGuard(callInst);
-        GetCha()->AddDependency(method, GetGraph()->GetOutermostParentGraph()->GetMethod());
-        GetGraph()->GetOutermostParentGraph()->AddSingleImplementationMethod(method);
+        InsertChaGuard(callInst, ctx);
     }
 
     bool needBarriers = runtime->IsMemoryBarrierRequired(method);
@@ -1067,6 +1137,7 @@ void Inlining::ProcessCallReturnInstructions(CallInst *callInst, BasicBlock *cal
         // Otherwise we remove call instruction
         auto saveState = callInst->GetSaveState();
         // Remove SaveState if it has only Call instruction in the users
+        ASSERT(saveState != nullptr);
         if (saveState->GetUsers().Front().GetNext() == nullptr) {
             saveState->GetBasicBlock()->RemoveInst(saveState);
         }
@@ -1199,6 +1270,7 @@ InlinedGraph Inlining::BuildGraph(InlineContext *ctx, CallInst *callInst, CallIn
     auto graphInl = GetGraph()->CreateChildGraph(ctx->method);
 
     // Propagate instruction id counter to inlined graph, thereby avoid instructions id duplication
+    ASSERT(graphInl != nullptr);
     graphInl->SetCurrentInstructionId(GetGraph()->GetCurrentInstructionId());
 
     auto stats = GetGraph()->GetPassManager()->GetStatistics();
@@ -1336,8 +1408,7 @@ bool Inlining::CheckMethodCanBeInlined(const CallInst *callInst, InlineContext *
     }
 
     if constexpr (CHECK_EXTERNAL) {
-        ASSERT(!GetGraph()->IsAotMode());
-        if (!g_options.IsCompilerInlineExternalMethods() &&
+        if ((!g_options.IsCompilerInlineExternalMethods() || GetGraph()->IsAotMode()) &&
             GetGraph()->GetRuntime()->IsMethodExternal(GetGraph()->GetMethod(), ctx->method)) {
             // Skip external methods
             EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::SKIP_EXTERNAL);
@@ -1598,14 +1669,19 @@ bool Inlining::CanUseTypeInfo(ObjectTypeInfo typeInfo, RuntimeInterface::MethodP
     return runtime->IsAssignableFrom(runtime->GetClass(method), typeInfo.GetClass());
 }
 
-void Inlining::InsertChaGuard(CallInst *callInst)
+void Inlining::InsertChaGuard(CallInst *callInst, InlineContext *ctx)
 {
+    ASSERT(ctx->chaDevirtualize);
+
     auto saveState = callInst->GetSaveState();
     auto checkDeopt = GetGraph()->CreateInstIsMustDeoptimize(DataType::BOOL, callInst->GetPc());
     auto deopt =
         GetGraph()->CreateInstDeoptimizeIf(callInst->GetPc(), checkDeopt, saveState, DeoptimizeType::INLINE_CHA);
     callInst->InsertBefore(deopt);
     deopt->InsertBefore(checkDeopt);
+
+    GetCha()->AddDependency(ctx->method, GetGraph()->GetOutermostParentGraph()->GetMethod());
+    GetGraph()->GetOutermostParentGraph()->AddSingleImplementationMethod(ctx->method);
 }
 
 bool Inlining::SkipBlock(const BasicBlock *block) const

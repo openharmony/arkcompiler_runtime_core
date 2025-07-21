@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,7 +73,7 @@ class RefBlock {
         }
     };
 
-    static constexpr unsigned int REFS_IN_BLOCK = 60;
+    static constexpr unsigned int REFS_IN_BLOCK = 240U / sizeof(ObjectPointerType);
     static constexpr SlotBitMap START_VALUE = std::numeric_limits<SlotBitMap>::max();
     static constexpr SlotBitMap FINAL_VALUE =
         std::numeric_limits<SlotBitMap>::max() & (~((static_cast<SlotBitMap>(1U) << REFS_IN_BLOCK) - 1U));
@@ -119,7 +119,7 @@ public:
 
     void VisitObjects(const GCRootVisitor &gcRootVisitor, mem::RootType rootType);
 
-    void UpdateMovedRefs();
+    void UpdateMovedRefs(const GCRootUpdater &gcRootUpdater);
 
     // used only for dumping and tests
     PandaVector<Reference *> GetAllReferencesInFrame();

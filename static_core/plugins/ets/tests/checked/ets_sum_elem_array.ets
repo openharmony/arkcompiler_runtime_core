@@ -37,12 +37,12 @@
 //! INST_COUNT    /StoreObject/, 2
 //! INST_COUNT    /Cast i64/, 2
 
-function sum2(a: int[]): int {
+function sum2(a: FixedArray<int>): int {
     return a[0] + a[1];
 }
 
 function main1(): int {
-    let a = new int[2];
+    let a: FixedArray<int> = new int[2];
     a[0] = 2;
     a[1] = 3;
     return sum2(a);

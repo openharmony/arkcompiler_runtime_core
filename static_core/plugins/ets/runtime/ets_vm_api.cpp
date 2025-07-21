@@ -156,7 +156,9 @@ bool BindNative(const char *classDescriptor, const char *methodName, void *impl)
     auto *klass = ext->GetClass(ark::utf::CStringAsMutf8(classDescriptor));
 
     if (klass == nullptr) {
-        ark::ManagedThread::GetCurrent()->ClearException();
+        auto *thread = ark::ManagedThread::GetCurrent();
+        ASSERT(thread != nullptr);
+        thread->ClearException();
         LOG(DEBUG, RUNTIME) << "BindNative: Cannot find class '" << classDescriptor << "'";
         return false;
     }

@@ -43,6 +43,14 @@ config("arkruntime_public_config") {
 
   include_dirs += platform_include_dirs
 
+  if (ark_hybrid) {
+    include_dirs += [ "$ark_root/../common_interfaces" ]
+    cflags_cc = [
+      "-Wno-gnu-anonymous-struct",
+      "-Wno-nested-anon-types",
+    ]
+  }
+
   configs = [
     "$ark_root/libpandabase:arkbase_public_config",
     "$ark_root/libpandafile:arkfile_public_config",
@@ -164,6 +172,7 @@ ohos_source_set("libarkruntime_set_static") {
     "coroutines/coroutine_manager.cpp",
     "coroutines/coroutine_stats.cpp",
     "coroutines/coroutine_worker.cpp",
+    "coroutines/priority_queue.cpp",
     "coroutines/stackful_coroutine.cpp",
     "coroutines/stackful_coroutine_manager.cpp",
     "coroutines/stackful_coroutine_worker.cpp",
@@ -209,6 +218,8 @@ ohos_source_set("libarkruntime_set_static") {
     "mem/gc/g1/update_remset_task_queue.cpp",
     "mem/gc/g1/update_remset_thread.cpp",
     "mem/gc/g1/update_remset_worker.cpp",
+    "mem/gc/cmc-gc-adapter/cmc-allocator-adapter.cpp",
+    "mem/gc/cmc-gc-adapter/cmc-gc-adapter.cpp",
     "mem/gc/gc-hung/gc_hung.cpp",
     "mem/gc/gc.cpp",
     "mem/gc/gc_adaptive_marking_stack.cpp",
@@ -271,16 +282,19 @@ ohos_source_set("libarkruntime_set_static") {
     "stack_walker.cpp",
     "string_table.cpp",
     "thread.cpp",
+    "thread_proxy.cpp",
     "time_utils.cpp",
     "timing.cpp",
     "tooling/backtrace/backtrace.cpp",
     "tooling/debug_inf.cpp",
     "tooling/debugger.cpp",
     "tooling/evaluation/expression_loader.cpp",
+    "tooling/inspector/debugger_arkapi.cpp",
     "tooling/pt_default_lang_extension.cpp",
     "tooling/pt_thread.cpp",
     "tooling/sampler/lock_free_queue.cpp",
     "tooling/sampler/sample_writer.cpp",
+    "tooling/sampler/samples_record.cpp",
     "tooling/sampler/sampling_profiler.cpp",
     "tooling/sampler/stack_walker_base.cpp",
     "tooling/sampler/thread_communicator.cpp",

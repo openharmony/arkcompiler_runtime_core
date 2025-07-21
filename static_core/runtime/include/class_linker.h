@@ -57,6 +57,7 @@ public:
         OVERRIDES_FINAL,
         MULTIPLE_OVERRIDE,
         MULTIPLE_IMPLEMENT,
+        INVALID_LAMBDA_CLASS,
     };
 
     ClassLinker(mem::InternalAllocatorPtr allocator, std::vector<std::unique_ptr<ClassLinkerExtension>> &&extensions);
@@ -246,6 +247,8 @@ public:
 
     Class *ObjectToClass(const ObjectHeader *object)
     {
+        ASSERT(object);
+        ASSERT(object->ClassAddr<Class>());
         ASSERT(object->ClassAddr<Class>()->IsClassClass());
         return extensions_[ark::panda_file::GetLangArrIndex(object->ClassAddr<BaseClass>()->GetSourceLang())]
             ->FromClassObject(const_cast<ObjectHeader *>(object));

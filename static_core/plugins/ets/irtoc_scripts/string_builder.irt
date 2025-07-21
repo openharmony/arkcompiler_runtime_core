@@ -517,7 +517,7 @@ Label(:ForEachBufferSlot)
   dst_data := Phi(dst_data1, dst_data2).ptr
   slot := AddI(ShlI(i).Imm(Constants::REFERENCE_TYPE_SHIFT).i32).Imm(Constants::ARRAY_DATA_OFFSET).i32
   obj := Load(buffer, slot).ref
-  klass := LoadI(obj).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  klass := load_class(obj)
   klass_flags := LoadI(klass).Imm(Constants::BASE_CLASS_FLAGS_OFFSET).u32
   If(AndI(klass_flags).Imm("ark::Class::STRING_CLASS").u32, 0).EQ.b {
     Goto(:ArrayObject)

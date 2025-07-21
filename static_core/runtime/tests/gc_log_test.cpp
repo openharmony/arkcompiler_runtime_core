@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -161,39 +161,6 @@ private:
 TEST_P(GCTestLog, FullLogTest)
 {
     FullLogTest();
-}
-
-TEST_F(GCTestLog, GenGCYoungCauseFullCollectionLogTest)
-{
-    SetupRuntime("gen-gc", true);
-
-    Runtime *runtime = Runtime::GetCurrent();
-    GC *gc = runtime->GetPandaVM()->GetGC();
-    MTManagedThread *thread = MTManagedThread::GetCurrent();
-    {
-        ScopedManagedCodeThread s(thread);
-        [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-        ObjectAllocator objectAllocator;
-
-        uint32_t garbageRate = Runtime::GetOptions().GetG1RegionGarbageRateThreshold();
-        // NOLINTNEXTLINE(readability-magic-numbers)
-        size_t stringLen = garbageRate * DEFAULT_REGION_SIZE / 100U + sizeof(coretypes::String);
-
-        // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-        VMHandle<coretypes::Array> arrays[3U];
-        {
-            arrays[0] =
-                VMHandle<coretypes::Array>(thread, objectAllocator.AllocArray(2U, ClassRoot::ARRAY_STRING, false));
-            arrays[0]->Set(0, objectAllocator.AllocString(stringLen));
-        }
-    }
-
-    GCTask task(GCTaskCause::YOUNG_GC_CAUSE);
-    testing::internal::CaptureStderr();
-    task.Run(*gc);
-    expectedLog_ = "[FULL (Young)]";
-    log_ = testing::internal::GetCapturedStderr();
-    ASSERT_NE(log_.find(expectedLog_), std::string::npos) << "Expected:\n" << expectedLog_ << "\nLog:\n" << log_;
 }
 
 TEST_F(GCTestLog, G1GCMixedCollectionLogTest)

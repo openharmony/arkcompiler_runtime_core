@@ -17,7 +17,7 @@
 desc: OutOfMemoryError is thrown by an assignment to an array component of
     reference type, a method call expression, or a prefix / postfix
     increment / decrement operator as a result of boxing conversion.
-ark_options: ['--heap-size-limit=33554432', '--init-heap-size-limit=33554432']
+ark_options: ['--heap-size-limit=8388608', '--init-heap-size-limit=8388608', '--gc-type=stw']
 timeout: 60
 ---*/
 
@@ -25,7 +25,7 @@ const ARRAY_SIZE = 1_000_000;
 
 function main(): int {
   try {
-    let v: Object[] = new Object[ARRAY_SIZE];
+    let v: FixedArray<Object> = new Object[ARRAY_SIZE];
 
     for (let i: int = 0; i < ARRAY_SIZE; i++) {
         let w = new Double[ARRAY_SIZE];

@@ -58,6 +58,10 @@ public:
                                                    bool pinned = false);
 
     PANDA_PUBLIC_API static String *CreateFromUtf16(const uint16_t *utf16Data, uint32_t utf16Length,
+                                                    bool canBeCompressed, const LanguageContext &ctx, PandaVM *vm,
+                                                    bool movable = true, bool pinned = false);
+
+    PANDA_PUBLIC_API static String *CreateFromUtf16(const uint16_t *utf16Data, uint32_t utf16Length,
                                                     const LanguageContext &ctx, PandaVM *vm, bool movable = true,
                                                     bool pinned = false);
 
@@ -412,11 +416,11 @@ private:
     __extension__ uint16_t dataUtf16_[0];  // NOLINT(modernize-avoid-c-arrays)
 };
 
-constexpr uint32_t STRING_LENGTH_OFFSET = 8U;
+constexpr uint32_t STRING_LENGTH_OFFSET = sizeof(ObjectHeader);
 static_assert(STRING_LENGTH_OFFSET == ark::coretypes::String::GetLengthOffset());
-constexpr uint32_t STRING_HASHCODE_OFFSET = 12U;
+constexpr uint32_t STRING_HASHCODE_OFFSET = STRING_LENGTH_OFFSET + sizeof(uint32_t);
 static_assert(STRING_HASHCODE_OFFSET == ark::coretypes::String::GetHashcodeOffset());
-constexpr uint32_t STRING_DATA_OFFSET = 16U;
+constexpr uint32_t STRING_DATA_OFFSET = STRING_HASHCODE_OFFSET + sizeof(uint32_t);
 static_assert(STRING_DATA_OFFSET == ark::coretypes::String::GetDataOffset());
 
 }  // namespace ark::coretypes

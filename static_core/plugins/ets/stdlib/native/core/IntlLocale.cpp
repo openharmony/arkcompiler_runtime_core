@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "plugins/ets/stdlib/native/core/IntlLocale.h"
+#include "plugins/ets/stdlib/native/core/IntlLanguageTag.h"
 #include "plugins/ets/stdlib/native/core/IntlCommon.h"
 #include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
 #include <unicode/locid.h>
@@ -21,6 +22,7 @@
 #include "libpandabase/macros.h"
 
 #include <cassert>
+#include <cstring>
 #include <set>
 #include <array>
 #include <sstream>
@@ -48,6 +50,57 @@ static std::vector<std::string> &GetLocaleInfo()
     static std::vector<std::string> gLocaleInfo(LocaleInfo::COUNT, "");
     std::fill(gLocaleInfo.begin(), gLocaleInfo.end(), "");
     return gLocaleInfo;
+}
+
+ParsedLocale HandleLocale(const std::string &localeString)
+{
+    size_t len = localeString.size();
+    ParsedLocale parsedResult;
+
+    // a. The single-character subtag ’x’ as the primary subtag indicates
+    //    that the language tag consists solely of subtags whose meaning is
+    //    defined by private agreement.
+    // b. Extensions cannot be used in tags that are entirely private use.
+    if (intl::IsPrivateSubTag(localeString, len)) {
+        parsedResult.base = localeString;
+        return parsedResult;
+    }
+    // If cannot find "-u-", return the whole string as base.
+    size_t foundExtension = localeString.find("-u-");
+    if (foundExtension == std::string::npos) {
+        parsedResult.base = localeString;
+        return parsedResult;
+    }
+    // Let privateIndex be Call(%StringProto_indexOf%, foundLocale, « "-x-" »).
+    size_t privateIndex = localeString.find("-x-");
+    if (privateIndex != std::string::npos && privateIndex < foundExtension) {
+        parsedResult.base = localeString;
+        return parsedResult;
+    }
+    const std::string basis = localeString.substr(0, foundExtension);
+    size_t extensionEnd = len;
+    ASSERT(len > INTL_INDEX_TWO);
+    size_t start = foundExtension + 1;
+    HandleLocaleExtension(start, extensionEnd, localeString, len);
+    const std::string end = localeString.substr(extensionEnd);
+    parsedResult.base = basis + end;
+    parsedResult.extension = localeString.substr(foundExtension, extensionEnd - foundExtension);
+    return parsedResult;
+}
+
+void HandleLocaleExtension(size_t &start, size_t &extensionEnd, const std::string &result, size_t len)
+{
+    while (start < len - INTL_INDEX_TWO) {
+        if (result[start] != '-') {
+            start++;
+            continue;
+        }
+        if (result[start + INTL_INDEX_TWO] == '-') {
+            extensionEnd = start;
+            break;
+        }
+        start += INTL_INDEX_THREE;
+    }
 }
 
 void StdCoreIntlLocaleFillCheckInfo()
@@ -230,6 +283,24 @@ ani_ref StdCoreIntlLocaleParseTag(ani_env *env, [[maybe_unused]] ani_class klass
     return StdStrToAni(env, res);
 }
 
+ani_string StdCoreIntlLocaleDefaultTag(ani_env *env)
+{
+    auto defaultLocale = icu::Locale::getDefault();
+    auto defaultLocaleName = defaultLocale.getName();
+    if (strcmp(defaultLocaleName, "en_US_POSIX") == 0 || strcmp(defaultLocaleName, "c") == 0) {
+        return StdStrToAni(env, "en-US");
+    }
+    auto status = UErrorCode::U_ZERO_ERROR;
+    auto tag = defaultLocale.toLanguageTag<std::string>(status);
+    if (UNLIKELY(U_FAILURE(status))) {
+        std::string message = "Error receiving default locale language tag: ";
+        message += u_errorName(status);
+        ThrowNewError(env, "Lstd/core/RuntimeException;", message.c_str(), "Lstd/core/String;:V");
+        return nullptr;
+    }
+    return StdStrToAni(env, tag);
+}
+
 ani_status RegisterIntlLocaleNativeMethods(ani_env *env)
 {
     const auto methods = std::array {
@@ -246,7 +317,9 @@ ani_status RegisterIntlLocaleNativeMethods(ani_env *env)
         ani_native_function {"isTagValid", "Lstd/core/String;:I",
                              reinterpret_cast<void *>(StdCoreIntlLocaleIsTagValid)},
         ani_native_function {"parseTagImpl", "Lstd/core/String;:Lstd/core/String;",
-                             reinterpret_cast<void *>(StdCoreIntlLocaleParseTag)}};
+                             reinterpret_cast<void *>(StdCoreIntlLocaleParseTag)},
+        ani_native_function {"defaultTag", ":Lstd/core/String;",
+                             reinterpret_cast<void *>(StdCoreIntlLocaleDefaultTag)}};
 
     ani_class localeClass;
     ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Intl/Locale;", &localeClass));

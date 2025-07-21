@@ -123,18 +123,6 @@ static SelectOptions ExtractOptions(ani_env *env, ani_object options)
             maximumSignificantDigits};
 }
 
-ani_string IcuGetDefaultLocaleTag(ani_env *env, [[maybe_unused]] ani_class klass)
-{
-    auto defaultLocale = icu::Locale::getDefault();
-    auto status = UErrorCode::U_ZERO_ERROR;
-    auto tag = defaultLocale.toLanguageTag<std::string>(status);
-    if (UNLIKELY(U_FAILURE(status))) {
-        ThrowRangeError(env, "Error receiving default locale language tag: ", u_errorName(status));
-        return nullptr;
-    }
-    return StdStrToAni(env, tag);
-}
-
 ani_string IcuPluralSelect(ani_env *env, [[maybe_unused]] ani_class klass, ani_double value, ani_object options)
 {
     const auto [localeStr, typeStr, minimumIntegerDigits, minimumFractionDigits, maximumFractionDigits,
@@ -220,7 +208,7 @@ ani_object IcuGetPluralCategories(ani_env *env, [[maybe_unused]] ani_class klass
     ani_class stringClass;
     ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/String;", &stringClass));
     ani_array_ref array;
-    ANI_FATAL_IF_ERROR(env->Array_New_Ref(stringClass, categories.size(), first, &array));
+    ANI_FATAL_IF_ERROR(env->FixedArray_New_Ref(stringClass, categories.size(), first, &array));
     for (size_t i = 1; i < categories.size(); ++i) {
         auto item = StdStrToAni(env, categories[i]);
         ANI_FATAL_IF_ERROR(env->Array_Set_Ref(array, i, item));
@@ -232,8 +220,6 @@ ani_status RegisterIntlPluralRules(ani_env *env)
 {
     std::array methods = {ani_native_function {"selectDouble", "DLstd/core/Object;:Lstd/core/String;",
                                                reinterpret_cast<void *>(IcuPluralSelect)},
-                          ani_native_function {"getDefaultLocaleTag", ":Lstd/core/String;",
-                                               reinterpret_cast<void *>(IcuGetDefaultLocaleTag)},
                           ani_native_function {"getPluralCategories",
                                                "Lstd/core/String;Lstd/core/String;:Lstd/core/Object;",
                                                reinterpret_cast<void *>(IcuGetPluralCategories)}};

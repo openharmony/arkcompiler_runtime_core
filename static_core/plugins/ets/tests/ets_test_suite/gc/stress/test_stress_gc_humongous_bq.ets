@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+import { Job } from "std/core"
+
  // This test tries to load gc with a large number of memory allocations 
  // close to the OOM situation
 
@@ -42,7 +45,7 @@ class TestHumongousStress {
         catch(e: OutOfMemoryError) {
             TestHumongousStress.GARBAGE = new LinkedBlockingQueue<Object>();
             try {
-                GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE));
+                GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
             }
             catch (e) {
                 assertTrue( false, "Unexpected exception during GC");
@@ -54,7 +57,7 @@ class TestHumongousStress {
         return maxNumberOfObjects;
     }
 
-    private cor(numObjToCreate: int, humongousSize: int): Object|null {
+    private static cor(numObjToCreate: int, humongousSize: int): Object|null {
         try {
             for (let i = 0; i < numObjToCreate; i++) {
                 TestHumongousStress.GARBAGE.push(new byte[humongousSize] as Object);
@@ -80,9 +83,9 @@ class TestHumongousStress {
 
         let corArrayTmp = new Array<Promise<Object|null>>();
         for(let i = 0; i < this.threadsCount - 1; i++) {
-            corArrayTmp.push(launch this.cor(objPerCoroutine, this.humongousSize));
+            corArrayTmp.push(launch<Object|null, (numObjToCreate: int, humongousSize: int) => Object|null>(TestHumongousStress.cor, objPerCoroutine, this.humongousSize));
         }
-        let corArrayLast = launch this.cor(lastCoroutuneNumObjects, this.humongousSize);
+        let corArrayLast = launch<Object|null, (numObjToCreate: int, humongousSize: int) => Object|null>(TestHumongousStress.cor, lastCoroutuneNumObjects, this.humongousSize);
 
         Coroutine.Schedule();
 
@@ -103,7 +106,7 @@ class TestHumongousStress {
     public clear(): void {
         TestHumongousStress.GARBAGE = new LinkedBlockingQueue<Object>();
         try {
-            GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE));
+            GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
         }
         catch (e) {
             assertTrue( false, "Unexpected exception during GC");

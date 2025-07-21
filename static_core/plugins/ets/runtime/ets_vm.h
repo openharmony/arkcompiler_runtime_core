@@ -64,6 +64,7 @@
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/mem/root_provider.h"
 #include "plugins/ets/runtime/ets_object_state_table.h"
+#include "plugins/ets/runtime/finalreg/finalization_registry_manager.h"
 
 namespace ark::ets {
 class DoubleToStringCache;
@@ -71,6 +72,10 @@ class FloatToStringCache;
 class LongToStringCache;
 class EtsAbcRuntimeLinker;
 class EtsFinalizableWeakRef;
+
+using WalkEventLoopCallback = std::function<void(void *, void *)>;
+
+enum class EventLoopRunMode : int { RUN_DEFAULT = 0, RUN_ONCE, RUN_NOWAIT };
 
 class PandaEtsVM final : public PandaVM, public EtsVM, public ani_vm {  // NOLINT(fuchsia-multiple-inheritance)
 public:
@@ -100,9 +105,8 @@ public:
     void InitializeGC() override;
     void StartGC() override;
     void StopGC() override;
-    void SweepVmRefs(const GCObjectVisitor &gcObjectVisitor) override;
     void VisitVmRoots(const GCRootVisitor &visitor) override;
-    void UpdateVmRefs() override;
+    void UpdateVmRefs(const GCRootUpdater &gcRootUpdater) override;
     void UninitializeThreads() override;
 
     void HandleReferences(const GCTask &task, const mem::GC::ReferenceClearPredicateT &pred) override;
@@ -217,6 +221,11 @@ public:
         return coroutineManager_;
     }
 
+    FinalizationRegistryManager *GetFinalizationRegistryManager() const
+    {
+        return finalizationRegistryManager_;
+    }
+
     CoroutineManager *GetCoroutineManager() const
     {
         return static_cast<CoroutineManager *>(GetThreadManager());
@@ -234,7 +243,7 @@ public:
 
     PANDA_PUBLIC_API ObjectHeader *GetOOMErrorObject() override;
 
-    PANDA_PUBLIC_API ObjectHeader *GetNullValue();
+    PANDA_PUBLIC_API ObjectHeader *GetNullValue() const;
 
     compiler::RuntimeInterface *GetCompilerRuntimeInterface() const override
     {
@@ -255,8 +264,6 @@ public:
         return static_cast<PandaEtsVM *>(vm);
     }
 
-    void RegisterFinalizationRegistryInstance(EtsObject *instance);
-
     [[noreturn]] static void Abort(const char *message = nullptr);
 
     std::mt19937 &GetRandomEngine()
@@ -268,13 +275,6 @@ public:
     bool IsStaticProfileEnabled() const override
     {
         return true;
-    }
-
-    void FinalizationRegistryCoroutineExecuted()
-    {
-        // // Atomic with acq_rel order reason: other threads should see correct value
-        [[maybe_unused]] uint32_t oldCnt = finRegCleanupCoroCount_.fetch_sub(1, std::memory_order_acq_rel);
-        ASSERT(oldCnt > 0);
     }
 
     void CleanupCompiledFrameResources(Frame *frame) override
@@ -350,7 +350,7 @@ public:
         return callbackPosterFactory_->CreatePoster();
     }
 
-    using RunEventLoopFunction = std::function<void()>;
+    using RunEventLoopFunction = std::function<void(EventLoopRunMode)>;
 
     void SetRunEventLoopFunction(RunEventLoopFunction &&cb)
     {
@@ -358,10 +358,24 @@ public:
         runEventLoop_ = std::move(cb);
     }
 
-    void RunEventLoop()
+    void RunEventLoop(EventLoopRunMode mode)
     {
         if (runEventLoop_) {
-            runEventLoop_();
+            runEventLoop_(mode);
+        }
+    }
+
+    using WalkEventLoopFunction = std::function<void(WalkEventLoopCallback &, void *)>;
+    void SetWalkEventLoopFunction(WalkEventLoopFunction &&cb)
+    {
+        ASSERT(!walkEventLoop_);
+        walkEventLoop_ = std::move(cb);
+    }
+
+    void WalkEventLoop(WalkEventLoopCallback &callback, void *args)
+    {
+        if (walkEventLoop_) {
+            walkEventLoop_(callback, args);
         }
     }
 
@@ -375,17 +389,37 @@ public:
         objStateTable_->DeflateInfo();
     }
 
+    /// @brief Adds failed job to an internal storage
+    void AddUnhandledFailedJob(EtsJob *job);
+
+    /// @brief Removes failed job from internal storage
+    void RemoveUnhandledFailedJob(EtsJob *job);
+
+    /// @brief Invokes managed method to apply custom handler on stored failed jobs
+    void ListUnhandledFailedJobs();
+
+    /// @brief Adds rejected promise to an internal storage
+    void AddUnhandledRejectedPromise(EtsPromise *promise);
+
+    /// @brief Removes rejected promise from internal storage
+    void RemoveUnhandledRejectedPromise(EtsPromise *promise);
+
+    /// @brief Invokes managed method to apply custom handler on stored rejected promises
+    void ListUnhandledRejectedPromises();
+
     PANDA_PUBLIC_API void AddRootProvider(mem::RootProvider *provider);
     PANDA_PUBLIC_API void RemoveRootProvider(mem::RootProvider *provider);
 
     /// @brief Create application `AbcRuntimeLinker` in managed scope.
     ClassLinkerContext *CreateApplicationRuntimeLinker(const PandaVector<PandaString> &abcFiles);
 
+    /// @brief print stack and exit the program
+    [[noreturn]] void HandleUncaughtException() override;
+
 protected:
     bool CheckEntrypointSignature(Method *entrypoint) override;
     Expected<int, Runtime::Error> InvokeEntrypointImpl(Method *entrypoint,
                                                        const std::vector<std::string> &args) override;
-    void HandleUncaughtException() override;
 
 private:
     /**
@@ -394,26 +428,9 @@ private:
      * @tparam REF_CAN_BE_NULL true iff it is legal for @param ref to hold a null pointer
      */
     template <bool REF_CAN_BE_NULL>
-    static void UpdateMovedVmRef(Value &ref);
+    static void UpdateMovedVmRef(Value &ref, const GCRootUpdater &gcRootUpdater);
 
-    static void UpdateManagedEntrypointArgRefs(EtsCoroutine *coroutine);
-
-    /// @brief Increase number of cleanup coroutines and check if not exceeds limit
-    bool UpdateFinRegCoroCountAndCheckIfCleanupNeeded()
-    {
-        // Limit of cleanup coroutines count
-        constexpr uint32_t MAX_FINREG_CLEANUP_COROS = 3;
-        // Atomic with acquire order reason: getting correct value
-        uint32_t cnt = finRegCleanupCoroCount_.load(std::memory_order_acquire);
-        uint32_t oldCnt = cnt;
-        // Atomic with acq_rel order reason: sync for counter
-        while (cnt < MAX_FINREG_CLEANUP_COROS &&
-               !finRegCleanupCoroCount_.compare_exchange_weak(cnt, cnt + 1U, std::memory_order_acq_rel,
-                                                              std::memory_order_acquire)) {
-            oldCnt = cnt;
-        }
-        return oldCnt < MAX_FINREG_CLEANUP_COROS;
-    }
+    static void UpdateManagedEntrypointArgRefs(EtsCoroutine *coroutine, const GCRootUpdater &gcRootUpdater);
 
     void InitializeRandomEngine()
     {
@@ -424,6 +441,9 @@ private:
 
     explicit PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm);
 
+    void AddUnhandledObjectImpl(PandaUnorderedSet<EtsObject *> &unhandledObjects, EtsObject *object);
+    void RemoveUnhandledObjectImpl(PandaUnorderedSet<EtsObject *> &unhandledObjects, EtsObject *object);
+
     Runtime *runtime_ {nullptr};
     mem::MemoryManager *mm_ {nullptr};
     PandaUniquePtr<EtsClassLinker> classLinker_;
@@ -433,6 +453,7 @@ private:
     CompilerInterface *compiler_ {nullptr};
     StringTable *stringTable_ {nullptr};
     MonitorPool *monitorPool_ {nullptr};
+    FinalizationRegistryManager *finalizationRegistryManager_ {nullptr};
     CoroutineManager *coroutineManager_ {nullptr};
     mem::Reference *oomObjRef_ {nullptr};
     compiler::RuntimeInterface *runtimeIface_ {nullptr};
@@ -440,9 +461,6 @@ private:
     mem::Reference *finalizableWeakRefList_ {nullptr};
     os::memory::Mutex finalizableWeakRefListLock_;
     NativeLibraryProvider nativeLibraryProvider_;
-    size_t finRegLastIndex_ {0};
-    std::atomic<uint32_t> finRegCleanupCoroCount_ {0};
-    mem::Reference *registeredFinalizationRegistryInstancesRef_ {nullptr};
     PandaUniquePtr<CallbackPosterFactoryIface> callbackPosterFactory_;
     os::memory::Mutex rootProviderlock_;
     PandaUnorderedSet<mem::RootProvider *> rootProviders_ GUARDED_BY(rootProviderlock_);
@@ -454,9 +472,15 @@ private:
     DoubleToStringCache *doubleToStringCache_ {nullptr};
     FloatToStringCache *floatToStringCache_ {nullptr};
     LongToStringCache *longToStringCache_ {nullptr};
+    os::memory::Mutex unhandledMutex_;
+    PandaUnorderedSet<EtsObject *> unhandledFailedJobs_;
+    PandaUnorderedSet<EtsObject *> unhandledRejectedPromises_;
 
     PandaUniquePtr<EtsObjectStateTable> objStateTable_ {nullptr};
     RunEventLoopFunction runEventLoop_ = nullptr;
+    WalkEventLoopFunction walkEventLoop_ = nullptr;
+
+    size_t preForkWorkerCount_ = 0;
 
     NO_MOVE_SEMANTIC(PandaEtsVM);
     NO_COPY_SEMANTIC(PandaEtsVM);

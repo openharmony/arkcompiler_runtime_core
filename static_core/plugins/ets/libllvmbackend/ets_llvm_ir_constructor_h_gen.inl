@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,73 @@ bool EmitStringEndsWith(Inst *inst);
 bool EmitStringGetBytesTlab(Inst *inst);
 bool EmitStringIndexOf(Inst *inst);
 bool EmitStringIndexOfAfter(Inst *inst);
+bool EmitStringFromCharCode(Inst *inst);
 bool EmitStringRepeat(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_REPEAT, 2U);
 }
+bool EmitInt8ArrayFillInternal(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT8_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+}
+bool EmitInt16ArrayFillInternal(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT16_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+}
+bool EmitInt32ArrayFillInternal(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT32_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+}
+bool EmitBigInt64ArrayFillInternal(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::BIG_INT64_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+}
+bool EmitFloat32ArrayFillInternal(Inst *inst);
+bool EmitFloat64ArrayFillInternal(Inst *inst);
+bool EmitFloatArrayFillInternal(Inst *inst, RuntimeInterface::EntrypointId eid, llvm::IntegerType *bitcastType);
+bool EmitUInt8ClampedArrayFillInternal(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::U_INT8_CLAMPED_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+}
+bool EmitUInt8ArrayFillInternal(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::U_INT8_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+}
+bool EmitUInt16ArrayFillInternal(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::U_INT16_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+}
+bool EmitUInt32ArrayFillInternal(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::U_INT32_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+}
+bool EmitBigUInt64ArrayFillInternal(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::BIG_U_INT64_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+}
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define EMIT_TYPED_ARRAY_TO_REVERSED(Name, MacroType)                             \
+    /* CC-OFFNXT(G.PRE.02) name part */                                           \
+    bool Emit##Name##ArrayToReversed(Inst *inst)                                  \
+    {                                                                             \
+        auto eid = RuntimeInterface::EntrypointId::MacroType##_ARRAY_TO_REVERSED; \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                    \
+        return EmitFastPath(inst, eid, 1U);                                       \
+    }
+
+EMIT_TYPED_ARRAY_TO_REVERSED(Int8, INT8)
+EMIT_TYPED_ARRAY_TO_REVERSED(Int16, INT16)
+EMIT_TYPED_ARRAY_TO_REVERSED(Int32, INT32)
+EMIT_TYPED_ARRAY_TO_REVERSED(BigInt64, BIG_INT64)
+EMIT_TYPED_ARRAY_TO_REVERSED(Float32, FLOAT32)
+EMIT_TYPED_ARRAY_TO_REVERSED(Float64, FLOAT64)
+EMIT_TYPED_ARRAY_TO_REVERSED(Uint8, UINT8)
+EMIT_TYPED_ARRAY_TO_REVERSED(Uint16, UINT16)
+EMIT_TYPED_ARRAY_TO_REVERSED(Uint32, UINT32)
+EMIT_TYPED_ARRAY_TO_REVERSED(BigUint64, BIG_UINT64)
+
+#undef EMIT_TYPED_ARRAY_TO_REVERSED
+
+bool EmitReadString(Inst *inst);
+bool EmitWriteString(Inst *inst);

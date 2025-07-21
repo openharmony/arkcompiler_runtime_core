@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +16,11 @@
 import os
 import re
 from glob import glob
-from os import path, makedirs
+from os import makedirs, path
 from pathlib import Path
-from typing import Optional, Tuple, Dict, Any, List
+from typing import Any
 
+from runner.common_exceptions import InvalidConfiguration
 from runner.descriptor import Descriptor
 from runner.extensions.generators.igenerator import IGenerator
 from runner.logger import Log
@@ -40,16 +41,16 @@ class Test262Generator(IGenerator):
         self.async_ok = re.compile(r"Test262:AsyncTestComplete")
         self.show_progress: bool = self._config.general.show_progress
         self.force_download: bool = bool(self._config.test_suite.get_parameter(self.__FORCE_DOWNLOAD, False))
-        url: Optional[str] = self._config.test_suite.get_parameter(self.__URL)
+        url: str | None = self._config.test_suite.get_parameter(self.__URL)
         if url is None:
-            raise EnvironmentError(f"No {self.__URL} parameter set in "
-                                   "`test262.yaml` config file")
+            raise InvalidConfiguration(f"No {self.__URL} parameter set in "
+                                       "`test262.yaml` config file")
         self.url: str = url
 
-        revision: Optional[str] = self._config.test_suite.get_parameter(self.__REVISION)
+        revision: str | None = self._config.test_suite.get_parameter(self.__REVISION)
         if revision is None:
-            raise EnvironmentError(f"No {self.__REVISION} parameter set in "
-                                   "`test262.yaml` config file")
+            raise InvalidConfiguration(f"No {self.__REVISION} parameter set in "
+                                       "`test262.yaml` config file")
         self.revision: str = revision
 
     @staticmethod
@@ -77,7 +78,7 @@ class Test262Generator(IGenerator):
             output.write(out_str)
 
     @staticmethod
-    def process_descriptor(descriptor: Descriptor) -> Dict[str, Any]:
+    def process_descriptor(descriptor: Descriptor) -> dict[str, str | list]:
         desc = descriptor.parse_descriptor()
 
         includes = []
@@ -101,7 +102,8 @@ class Test262Generator(IGenerator):
         }
 
     @staticmethod
-    def validate_parse_result(return_code: int, _: str, desc: Dict[str, Any], out: str) -> Tuple[bool, bool]:
+    def validate_parse_result(return_code: int, _: str, desc: dict[str, Any],   # type: ignore[explicit-any]
+                              out: str) -> tuple[bool, bool]:
         is_negative = desc['negative_phase'] == 'parse'
 
         if return_code == 0:  # passed
@@ -115,7 +117,7 @@ class Test262Generator(IGenerator):
 
         return False, False  # abnormal
 
-    def generate(self) -> List[str]:
+    def generate(self) -> list[str]:
         harness_path = Path(__file__).parent / "test262harness.js"
         stamp_name = f"test262-{self.revision}"
         test_root = download_and_generate(
@@ -138,7 +140,7 @@ class Test262Generator(IGenerator):
         files = glob(str(glob_expression), recursive=True)
         files = [file for file in files if not file.endswith("FIXTURE.js")]
 
-        with open(harness_path, 'r', encoding="utf-8") as file_handler:
+        with open(harness_path, encoding="utf-8") as file_handler:
             harness = file_handler.read()
 
         harness = harness.replace('$SOURCE', f'`{harness}`')
@@ -148,7 +150,8 @@ class Test262Generator(IGenerator):
             makedirs(path.dirname(dest_file), exist_ok=True)
             self.create_file(src_file, dest_file, harness, test262_path)
 
-    def validate_runtime_result(self, return_code: int, std_err: str, desc: Dict[str, Any], out: str) -> bool:
+    def validate_runtime_result(self, return_code: int, std_err: str,   # type: ignore[explicit-any]
+                                desc: dict[str, Any], out: str) -> bool:
         is_negative = (desc['negative_phase'] == 'runtime') or \
                       (desc['negative_phase'] == 'resolution')
 

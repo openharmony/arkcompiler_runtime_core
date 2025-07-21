@@ -86,8 +86,7 @@
         COUNT
     }
 
-    // NOTE(ekaterinazaytseva) replace class with interface after fix issue #22050
-    export class LocaleOptions {
+    export interface LocaleOptions {
         baseName?: string
         language?: string
         calendar?: string
@@ -100,8 +99,98 @@
         script?: string
     }
 
-    // NOTE(ekaterinazaytseva) replace extends with implements after fix issue #22050
-    export class Locale extends LocaleOptions {
+    export class Locale implements LocaleOptions {
+        private _baseName?: string;
+        private _language?: string;
+        private _calendar?: string;
+        private _caseFirst?: string;
+        private _numeric?: boolean;
+        private _collation?: string;
+        private _hourCycle?: string;
+        private _numberingSystem?: string;
+        private _region?: string;
+        private _script?: string;
+
+        set baseName(value: string | undefined) {
+            this._baseName = value
+        }
+
+        get baseName(): string | undefined {
+            return this._baseName
+        }
+
+        set language(value: string | undefined) {
+            this._language = value
+        }
+
+        get language(): string | undefined {
+            return this._language
+        }
+
+        set calendar(value: string | undefined) {
+            this._calendar = value
+        }
+
+        get calendar(): string | undefined {
+            return this._calendar
+        }
+
+        set caseFirst(value: string | undefined) {
+            this._caseFirst = value
+        }
+
+        get caseFirst(): string | undefined {
+            return this._caseFirst
+        }
+
+        set numeric(value: boolean | undefined) {
+            this._numeric = value
+        }
+
+        get numeric(): boolean | undefined {
+            return this._numeric
+        }
+
+        set collation(value: string | undefined) {
+            this._collation = value
+        }
+
+        get collation(): string | undefined {
+            return this._collation
+        }
+
+        set hourCycle(value: string | undefined) {
+            this._hourCycle = value
+        }
+
+        get hourCycle(): string | undefined {
+            return this._hourCycle
+        }
+
+        set numberingSystem(value: string | undefined) {
+            this._numberingSystem = value
+        }
+
+        get numberingSystem(): string | undefined {
+            return this._numberingSystem
+        }
+
+        set region(value: string | undefined) {
+            this._region = value
+        }
+
+        get region(): string | undefined {
+            return this._region
+        }
+
+        set script(value: string | undefined) {
+            this._script = value
+        }
+
+        get script(): string | undefined {
+            return this._script
+        }
+
         /**
         * The Intl.Locale() constructor creates Intl.Locale objects.
         *
@@ -162,6 +251,8 @@
         native isTagValid(tag: string) : int
         native parseTagImpl(tag:string) : string
         private native defaultLang() : string
+
+        static native defaultTag(): string
 
         private fillBaseName() {
             let sb = new StringBuilder()

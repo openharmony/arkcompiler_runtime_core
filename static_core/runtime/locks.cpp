@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,23 +56,27 @@ MutatorLock *Locks::NewMutatorLock()
 
 void MutatorLock::ReadLock()
 {
+#ifndef ARK_HYBRID
     ASSERT(!HasLock());
-    os::memory::RWLock::ReadLock();
+#endif
+    LockT::ReadLock();
     LOG(DEBUG, RUNTIME) << "MutatorLock::ReadLock";
     Thread::GetCurrent()->SetLockState(RDLOCK);
 }
 
 void MutatorLock::WriteLock()
 {
+#ifndef ARK_HYBRID
     ASSERT(!HasLock());
-    os::memory::RWLock::WriteLock();
+#endif
+    LockT::WriteLock();
     LOG(DEBUG, RUNTIME) << "MutatorLock::WriteLock";
     Thread::GetCurrent()->SetLockState(WRLOCK);
 }
 
 bool MutatorLock::TryReadLock()
 {
-    bool ret = os::memory::RWLock::TryReadLock();
+    bool ret = LockT::TryReadLock();
     LOG(DEBUG, RUNTIME) << "MutatorLock::TryReadLock";
     if (ret) {
         Thread::GetCurrent()->SetLockState(RDLOCK);
@@ -82,7 +86,7 @@ bool MutatorLock::TryReadLock()
 
 bool MutatorLock::TryWriteLock()
 {
-    bool ret = os::memory::RWLock::TryWriteLock();
+    bool ret = LockT::TryWriteLock();
     LOG(DEBUG, RUNTIME) << "MutatorLock::TryWriteLock";
     if (ret) {
         Thread::GetCurrent()->SetLockState(WRLOCK);
@@ -92,8 +96,10 @@ bool MutatorLock::TryWriteLock()
 
 void MutatorLock::Unlock()
 {
+#ifndef ARK_HYBRID
     ASSERT(HasLock());
-    os::memory::RWLock::Unlock();
+#endif
+    LockT::Unlock();
     LOG(DEBUG, RUNTIME) << "MutatorLock::Unlock";
     Thread::GetCurrent()->SetLockState(UNLOCKED);
 }

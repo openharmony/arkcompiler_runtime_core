@@ -25,7 +25,6 @@ core_types:
   - ': Date'
   - ': Double'
   - ': Error'
-  - ': Exception'
   - ': EvalError'
   - ': FinalizationRegistry<char>'
   - ': Float'

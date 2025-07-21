@@ -274,6 +274,8 @@ public:
 
     bool IsMethodExternal(MethodPtr parentMethod, MethodPtr calleeMethod) const override;
 
+    bool IsClassExternal(MethodPtr method, ClassPtr calleeClass) const override;
+
     bool IsMethodIntrinsic(MethodPtr method) const override
     {
         return MethodCast(method)->IsIntrinsic();
@@ -297,7 +299,9 @@ public:
     bool IsMethodCanBeInlined(MethodPtr method) const override
     {
         auto methodPtr = MethodCast(method);
-        if (Runtime::GetCurrent()->GetOptions().GetVerificationMode() == VerificationMode::ON_THE_FLY &&
+        const auto &options = Runtime::GetCurrent()->GetOptions();
+        if (verifier::VerificationModeFromString(options.GetVerificationMode()) ==
+                verifier::VerificationMode::ON_THE_FLY &&
             methodPtr->GetVerificationStage() != Method::VerificationStage::VERIFIED_OK) {
             return false;
         }
@@ -532,7 +536,8 @@ public:
     bool IsFieldFinal(FieldPtr field) const override;
     bool IsFieldReadonly(FieldPtr field) const override;
     bool HasFieldMetadata(FieldPtr field) const override;
-    uint64_t GetStaticFieldValue(FieldPtr fieldPtr) const override;
+    uint64_t GetStaticFieldIntegerValue(FieldPtr fieldPtr) const override;
+    double GetStaticFieldFloatValue(FieldPtr fieldPtr) const override;
 
     std::string GetFieldName(FieldPtr field) const override
     {
@@ -681,7 +686,7 @@ public:
             return;
         }
 
-        if ((Runtime::GetTaskScheduler() == nullptr) || noAsyncJit_) {
+        if (!Runtime::IsTaskManagerUsed() || noAsyncJit_) {
             compilerWorker_ =
                 internalAllocator_->New<CompilerThreadPoolWorker>(internalAllocator_, this, noAsyncJit_, options);
         } else {
@@ -742,6 +747,7 @@ public:
     void ScaleThreadPool(size_t numberOfThreads)
     {
         // Required for testing
+        ASSERT(GetThreadPool() != nullptr);
         GetThreadPool()->Scale(numberOfThreads);
     }
 
@@ -783,7 +789,7 @@ protected:
 
     ThreadPool<CompilerTask, CompilerProcessor, Compiler *> *GetThreadPool()
     {
-        ASSERT(Runtime::GetTaskScheduler() == nullptr || noAsyncJit_);
+        ASSERT(!Runtime::IsTaskManagerUsed() || noAsyncJit_);
         if (compilerWorker_ != nullptr) {
             return static_cast<CompilerThreadPoolWorker *>(compilerWorker_)->GetThreadPool();
         }

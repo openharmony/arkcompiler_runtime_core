@@ -29,11 +29,13 @@ static constexpr const char *SETTER_PREFIX = "<set>";
 
 ALWAYS_INLINE inline bool EtsReferenceNullish(EtsCoroutine *coro, EtsObject *ref)
 {
+    ASSERT(coro != nullptr);
     return ref == nullptr || ref == EtsObject::FromCoreType(coro->GetNullValue());
 }
 
 ALWAYS_INLINE inline bool IsReferenceNullish(EtsCoroutine *coro, EtsObject *ref)
 {
+    ASSERT(coro != nullptr);
     return ref == nullptr || ref == EtsObject::FromCoreType(coro->GetNullValue());
 }
 
@@ -52,6 +54,8 @@ ALWAYS_INLINE inline bool EtsReferenceEquals(EtsCoroutine *coro, EtsObject *ref1
         }
     }
 
+    ASSERT(ref1 != nullptr);
+    ASSERT(ref2 != nullptr);
     if (LIKELY(!(ref1->GetClass()->IsValueTyped() && ref2->GetClass()->IsValueTyped()))) {
         return false;
     }
@@ -150,6 +154,7 @@ ALWAYS_INLINE Field *GetFieldByName(InterpreterCache::Entry *entry, ark::Method 
         if (cacheExists && (fieldPtr->GetClass() == current)) {
             return fieldPtr;
         }
+        ASSERT(rawField != nullptr);
         field = LookupFieldByName(rawField->GetName(), current);
         if (field == nullptr) {
             current = current->GetBase();

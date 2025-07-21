@@ -106,7 +106,9 @@ public:
      * thing
      */
     using CoroutineFactory = Coroutine *(*)(Runtime *runtime, PandaVM *vm, PandaString name, CoroutineContext *ctx,
-                                            std::optional<Coroutine::EntrypointInfo> &&epInfo, Coroutine::Type type);
+                                            std::optional<Coroutine::EntrypointInfo> &&epInfo, Coroutine::Type type,
+                                            CoroutinePriority priority);
+    using NativeEntrypointFunc = Coroutine::NativeEntrypointInfo::NativeEntrypointFunc;
 
     NO_COPY_SEMANTIC(CoroutineManager);
     NO_MOVE_SEMANTIC(CoroutineManager);
@@ -139,9 +141,10 @@ public:
      * value to the language-level entities)
      * @param entrypoint the coroutine entrypoint method
      * @param arguments array of coroutine's entrypoint arguments
+     * @param abortFlag if true, finishing with an exception will abort the program
      */
     virtual bool Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                        CoroutineLaunchMode mode) = 0;
+                        CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag) = 0;
     /**
      * @brief The public coroutine creation and execution interface. Switching to the newly created coroutine occurs
      * immediately. Coroutine launch mode should correspond to the use of parent's worker.
@@ -152,7 +155,18 @@ public:
      * @param arguments array of coroutine's entrypoint arguments
      */
     virtual bool LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                                   CoroutineLaunchMode mode) = 0;
+                                   CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag) = 0;
+
+    /**
+     * @brief The public coroutine creation and execution interface with native entrypoint.
+     *
+     * @param epFunc the native function of coroutine entrypoint
+     * @param param the argument of coroutine entrypoint
+     * @param coroName the name of launching coroutine
+     * NOTE: native function can have Managed scopes
+     */
+    virtual bool LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName, CoroutineLaunchMode mode,
+                              CoroutinePriority priority, bool abortFlag) = 0;
     /// Suspend the current coroutine and schedule the next ready one for execution
     virtual void Schedule() = 0;
     /**
@@ -186,7 +200,7 @@ public:
      * @return nullptr if resource limit reached or something went wrong; ptr to the coroutine otherwise
      */
     Coroutine *CreateEntrypointlessCoroutine(Runtime *runtime, PandaVM *vm, bool makeCurrent, PandaString name,
-                                             Coroutine::Type type);
+                                             Coroutine::Type type, CoroutinePriority priority);
     void DestroyEntrypointlessCoroutine(Coroutine *co);
 
     /// Destroy a coroutine with an entrypoint
@@ -265,7 +279,14 @@ public:
     /// @return true if coroutine switch for the current worker is disabled
     virtual bool IsCoroutineSwitchDisabled() = 0;
 
+    /* ZygoteFork operations */
+    /// Called before Zygote fork to clean up and stop all worker threads.
+    virtual void PreZygoteFork() = 0;
+    /// Called after Zygote fork to reinitialize and restart worker threads.
+    virtual void PostZygoteFork() = 0;
+
 protected:
+    using EntrypointInfo = Coroutine::EntrypointInfo;
     /// Create native coroutine context instance (implementation dependent)
     virtual CoroutineContext *CreateCoroutineContext(bool coroHasEntrypoint) = 0;
     /// Delete native coroutine context instance (implementation dependent)
@@ -277,8 +298,8 @@ protected:
      *
      * @return nullptr if resource limit reached or something went wrong; ptr to the coroutine otherwise
      */
-    Coroutine *CreateCoroutineInstance(CompletionEvent *completionEvent, Method *entrypoint,
-                                       PandaVector<Value> &&arguments, PandaString name, Coroutine::Type type);
+    Coroutine *CreateCoroutineInstance(EntrypointInfo &&epInfo, PandaString name, Coroutine::Type type,
+                                       CoroutinePriority priority);
     /// Returns number of existing coroutines
     virtual size_t GetCoroutineCount() = 0;
     /**

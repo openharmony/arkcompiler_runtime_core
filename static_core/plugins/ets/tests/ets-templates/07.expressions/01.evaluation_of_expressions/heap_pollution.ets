@@ -18,9 +18,10 @@ desc: >-
     The value of a type T expression is always suitable for
     assignment to a type T variable; it means that unless heap
     pollution occurs
+tags: [compile-only, negative]
 ---*/
 
-class Box<T> {
+class BBox<T> {
     private v: T;
 
     public set(v: T): void {
@@ -33,16 +34,9 @@ class Box<T> {
 }
 
 function main(): int {
-    let intBox: Box<Int> = new Box<Int>();
-    intBox.set(42);
+    let intBBox: BBox<Int> = new BBox<Int>();
+    intBBox.set(42);
 
-    let obj: Object = intBox;
-    let stringBox: Box<String> = obj as Box<String>;
-
-    try {
-        let s: String = stringBox.get();
-    } catch (e: ClassCastError) {
-        return 0;
-    }
-    return 1;
+    let obj: Object = intBBox;
+    let stringBBox: BBox<String> = obj as BBox<String>;  // CTE TypeError: Type BBox<Int> cannot cast to type BBox<String>
 }

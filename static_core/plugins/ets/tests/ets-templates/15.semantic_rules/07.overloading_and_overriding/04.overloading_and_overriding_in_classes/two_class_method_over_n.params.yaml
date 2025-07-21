@@ -37,5 +37,4 @@ cases:
   - { arg: "i: Number|undefined|null", call: "undefined", res: 22}
   - { arg: "i: number, j: Number", call: "1, new Number()", res: 23}
   - { arg: "i: FUN", call: "() => { return true; }", res: 24}
-  - { arg: "i: TPL", call: "c", res: 25}
-  - { arg: "i: Char[]", call: "[ new Char(), new Char() ]", res: 26}
+  - { arg: "i: Char[]", call: "[ new Char(), new Char(), new Char() ]", res: 26}

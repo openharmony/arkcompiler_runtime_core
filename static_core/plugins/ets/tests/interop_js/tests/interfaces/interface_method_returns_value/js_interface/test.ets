@@ -40,7 +40,7 @@ type NullishHelperType = null | string | number
 function cleanup(): void {
     try {
         // trigger FinalizationRegistry cleanup
-        let full_gc_id = GC.startGC(GC.FULL_CAUSE);
+        let full_gc_id = GC.startGC(GC.Cause.FULL);
         GC.waitForFinishGC(full_gc_id);
     } catch (e) {
         assertTrue(false, "Unexpected exception during GC");
@@ -64,7 +64,7 @@ function type_imported__returnBoolean(){
 
 function type_imported__returnInteger(){
     const getterFn: TFunctionReturnsNumber = genericInterfaceImplementation.getInt as TFunctionReturnsNumber;
-    return typeof getterFn() == "object" && (getterFn() as int) > 0 && (getterFn() as int) / 2 == (getterFn() as int) * 0.5;
+    return typeof getterFn() == "object" && (getterFn() as int) > 0 && (getterFn() as int) / 2 == Double.toInt((getterFn() as int) * 0.5);
 }
 
 function type_imported__returnNegativeInteger(){
@@ -139,4 +139,3 @@ function type_imported__returnFunction(){
             && (returnNumericValue() as float)> 3
             && (returnNumericValue() as float) < 4;
 }
-

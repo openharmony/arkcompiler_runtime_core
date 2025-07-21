@@ -25,6 +25,7 @@
 #include "runtime/entrypoints/string_index_of.h"
 #include "runtime/arch/memory_helpers.h"
 #include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/runtime/types/ets_escompat_array.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_language_context.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
@@ -43,15 +44,11 @@ constexpr const uint32_t CHAR0X1FFC00 = 0x1ffc00;
 constexpr const uint16_t CHAR0XD800 = 0xd800;
 constexpr const uint16_t CHAR0XDC00 = 0xdc00;
 
-static ObjectHeader *StdCoreStringGetDataAsArray(EtsString *s, ets_int begin, ets_int end, bool isUtf16)
+static ObjectHeader *StdCoreStringDataAsArray(EtsString *s, ets_int begin, ets_int end, bool isUtf16)
 {
     ASSERT(s != nullptr);
     ets_int length = s->GetLength();
-    if (UNLIKELY(begin > end)) {
-        ark::ThrowStringIndexOutOfBoundsException(begin, length);
-        return nullptr;
-    }
-    if (UNLIKELY(begin > length || begin < 0)) {
+    if (UNLIKELY(begin > end || begin > length || begin < 0)) {
         ark::ThrowStringIndexOutOfBoundsException(begin, length);
         return nullptr;
     }
@@ -63,6 +60,7 @@ static ObjectHeader *StdCoreStringGetDataAsArray(EtsString *s, ets_int begin, et
     auto thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<coretypes::String> sHandle(thread, s->GetCoreType());
+    ASSERT(sHandle.GetPtr() != nullptr);
     ets_int n = end - begin;
     void *array = nullptr;
     if (isUtf16) {
@@ -101,12 +99,12 @@ static ObjectHeader *StdCoreStringGetDataAsArray(EtsString *s, ets_int begin, et
 
 ObjectHeader *StdCoreStringGetChars(EtsString *s, ets_int begin, ets_int end)
 {
-    return StdCoreStringGetDataAsArray(s, begin, end, true);
+    return StdCoreStringDataAsArray(s, begin, end, true);
 }
 
 ObjectHeader *StdCoreStringGetBytes(EtsString *s, ets_int begin, ets_int end)
 {
-    return StdCoreStringGetDataAsArray(s, begin, end, false);
+    return StdCoreStringDataAsArray(s, begin, end, false);
 }
 
 EtsString *StdCoreStringSubstring(EtsString *str, ets_int begin, ets_int end)
@@ -355,44 +353,6 @@ EtsString *StdCoreStringToLocaleLowerCase(EtsString *thisStr, EtsString *langTag
     return ToLowerCase(thisStr, locale);
 }
 
-ets_double StdCoreStringLocaleCmp(EtsString *thisStr, EtsString *cmpStr, EtsString *langTag)
-{
-    ASSERT(thisStr != nullptr && cmpStr != nullptr);
-
-    icu::Locale locale;
-    auto status = ParseSingleBCP47LanguageTag(langTag, locale);
-    if (UNLIKELY(U_FAILURE(status))) {
-        auto message = "Language tag '" + ConvertToString(langTag->GetCoreType()) + "' is invalid or not supported";
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
-        return 0;
-    }
-
-    icu::UnicodeString source;
-    if (thisStr->IsUtf16()) {
-        source = icu::UnicodeString {thisStr->GetDataUtf16(), static_cast<int32_t>(thisStr->GetUtf16Length())};
-    } else {
-        source = icu::UnicodeString {utf::Mutf8AsCString(thisStr->GetDataMUtf8()),
-                                     static_cast<int32_t>(thisStr->GetLength())};
-    }
-    icu::UnicodeString target;
-    if (cmpStr->IsUtf16()) {
-        target = icu::UnicodeString {cmpStr->GetDataUtf16(), static_cast<int32_t>(cmpStr->GetUtf16Length())};
-    } else {
-        target =
-            icu::UnicodeString {utf::Mutf8AsCString(cmpStr->GetDataMUtf8()), static_cast<int32_t>(cmpStr->GetLength())};
-    }
-    status = U_ZERO_ERROR;
-    std::unique_ptr<icu::Collator> myCollator(icu::Collator::createInstance(locale, status));
-    if (UNLIKELY(U_FAILURE(status))) {
-        icu::UnicodeString dispName;
-        locale.getDisplayName(dispName);
-        std::string localeName;
-        dispName.toUTF8String(localeName);
-        LOG(FATAL, ETS) << "Failed to create the collator for " << localeName;
-    }
-    return myCollator->compare(source, target);
-}
-
 ets_int StdCoreStringIndexOfAfter(EtsString *s, uint16_t ch, ets_int fromIndex)
 {
     return ark::intrinsics::StringIndexOfU16(s, ch, fromIndex);
@@ -504,6 +464,27 @@ EtsBoolean StdCoreStringEndsWith(EtsString *thisStr, EtsString *suffix, EtsInt e
 {
     ASSERT(thisStr != nullptr);
     return thisStr->EndsWith(suffix, endIndex);
+}
+
+EtsString *StdCoreStringFromCharCode(ObjectHeader *array)
+{
+    ASSERT(array != nullptr);
+    auto *charCodes = EtsBoxedDoubleArray::FromEtsObject(EtsObject::FromCoreType(array));
+    ASSERT(charCodes->GetData() != nullptr);
+    return EtsString::CreateNewStringFromCharCode(charCodes->GetData());
+}
+
+EtsString *StdCoreStringFromCharCodeSingle(EtsDouble charCode)
+{
+    if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
+        constexpr double UTF16_CHAR_DIVIDER = 0x10000;
+        auto character = static_cast<uint16_t>(static_cast<int64_t>(std::fmod(charCode, UTF16_CHAR_DIVIDER)));
+        if (character < EtsPlatformTypes::ASCII_CHAR_TABLE_SIZE && coretypes::String::IsASCIICharacter(character)) {
+            auto *cache = PlatformTypes()->GetAsciiCacheTable();
+            return static_cast<EtsString *>(cache->Get(character));
+        }
+    }
+    return EtsString::CreateNewStringFromCharCode(charCode);
 }
 
 /* the allocation routine to create an unitialized string of the given size */

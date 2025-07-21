@@ -33,6 +33,7 @@
 #include "plugins/ets/runtime/napi/ets_napi_invoke_interface.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
+#include "plugins/ets/runtime/types/ets_job.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "runtime/compiler.h"
@@ -46,10 +47,12 @@
 #include "plugins/ets/runtime/types/ets_error.h"
 #include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_finalizable_weak_ref_list.h"
-
+#include "plugins/ets/runtime/types/ets_escompat_array.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
+#include "plugins/ets/runtime/hybrid/mem/static_object_operator.h"
 
 #include "plugins/ets/runtime/ets_object_state_table.h"
+#include "libpandabase/taskmanager/task_manager.h"
 
 namespace ark::ets {
 // Create MemoryManager by RuntimeOptions
@@ -74,19 +77,18 @@ static mem::MemoryManager *CreateMM(Runtime *runtime, const RuntimeOptions &opti
 
     auto gcType = Runtime::GetGCType(options, panda_file::SourceLang::ETS);
 
+    mem::StaticObjectOperator::Initialize();
+
     return mem::MemoryManager::Create(ctx, allocator, gcType, gcSettings, gcTriggerConfig, heapOptions);
 }
 
 /* static */
 bool PandaEtsVM::CreateTaskManagerIfNeeded(const RuntimeOptions &options)
 {
-    if (options.GetWorkersType() == "taskmanager" && Runtime::GetTaskScheduler() == nullptr) {
-        auto *taskScheduler = taskmanager::TaskScheduler::Create(
-            options.GetTaskmanagerWorkersCount(), taskmanager::StringToTaskTimeStats(options.GetTaskStatsType()));
-        if (taskScheduler == nullptr) {
-            return false;
-        }
-        Runtime::SetTaskScheduler(taskScheduler);
+    if (options.GetWorkersType() == "taskmanager" && !Runtime::IsTaskManagerUsed()) {
+        taskmanager::TaskManager::Start(options.GetTaskmanagerWorkersCount(),
+                                        taskmanager::StringToTaskTimeStats(options.GetTaskStatsType()));
+        Runtime::SetTaskManagerUsed(true);
     }
     return true;
 }
@@ -176,6 +178,7 @@ PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::Mem
                                          heapManager->GetMemStats(), runtimeIface_);
     stringTable_ = allocator->New<StringTable>();
     monitorPool_ = allocator->New<MonitorPool>(allocator);
+    finalizationRegistryManager_ = allocator->New<FinalizationRegistryManager>(this);
     referenceProcessor_ = allocator->New<mem::ets::EtsReferenceProcessor>(mm_->GetGC());
 
     auto langStr = plugins::LangToRuntimeType(panda_file::SourceLang::ETS);
@@ -200,6 +203,7 @@ PandaEtsVM::~PandaEtsVM()
     allocator->Delete(coroutineManager_);
     allocator->Delete(referenceProcessor_);
     allocator->Delete(monitorPool_);
+    allocator->Delete(finalizationRegistryManager_);
     allocator->Delete(stringTable_);
     allocator->Delete(compiler_);
 
@@ -273,9 +277,11 @@ bool PandaEtsVM::Initialize()
 
         coro->SetupNullValue(GetNullValue());
 
-        doubleToStringCache_ = DoubleToStringCache::Create(coro);
-        floatToStringCache_ = FloatToStringCache::Create(coro);
-        longToStringCache_ = LongToStringCache::Create(coro);
+        if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
+            doubleToStringCache_ = DoubleToStringCache::Create(coro);
+            floatToStringCache_ = FloatToStringCache::Create(coro);
+            longToStringCache_ = LongToStringCache::Create(coro);
+        }
 
         referenceProcessor_->Initialize();
     }
@@ -333,16 +339,27 @@ void PandaEtsVM::PreZygoteFork()
 {
     ASSERT(mm_ != nullptr);
     ASSERT(compiler_ != nullptr);
+    ASSERT(coroutineManager_ != nullptr);
 
     mm_->PreZygoteFork();
     compiler_->PreZygoteFork();
+    coroutineManager_->PreZygoteFork();
+    if (taskmanager::TaskManager::IsUsed()) {
+        preForkWorkerCount_ = taskmanager::TaskManager::GetWorkersCount();
+        taskmanager::TaskManager::SetWorkersCount(0U);
+    }
 }
 
 void PandaEtsVM::PostZygoteFork()
 {
     ASSERT(compiler_ != nullptr);
     ASSERT(mm_ != nullptr);
+    ASSERT(coroutineManager_ != nullptr);
 
+    if (taskmanager::TaskManager::IsUsed()) {
+        taskmanager::TaskManager::SetWorkersCount(preForkWorkerCount_);
+    }
+    coroutineManager_->PostZygoteFork();
     compiler_->PostZygoteFork();
     mm_->PostZygoteFork();
     // Postpone GC on application start-up
@@ -393,19 +410,7 @@ void PandaEtsVM::HandleGCRoutineInMutator()
     ASSERT(Coroutine::GetCurrent() != nullptr);
     ASSERT(GetMutatorLock()->HasLock());
     auto coroutine = EtsCoroutine::GetCurrent();
-    auto *coroManager = coroutine->GetCoroutineManager();
-
-    if (finRegLastIndex_ != 0 && UpdateFinRegCoroCountAndCheckIfCleanupNeeded()) {
-        auto *objArray =
-            EtsObjectArray::FromCoreType(GetGlobalObjectStorage()->Get(registeredFinalizationRegistryInstancesRef_));
-        auto *event = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroManager);
-        Method *cleanup = PlatformTypes(this)->coreFinalizationRegistryExecCleanup->GetPandaMethod();
-        auto launchMode =
-            coroManager->IsMainWorker(coroutine) ? CoroutineLaunchMode::MAIN_WORKER : CoroutineLaunchMode::DEFAULT;
-        auto args = PandaVector<Value> {Value(objArray->GetCoreType()), Value(static_cast<uint32_t>(launchMode))};
-        [[maybe_unused]] bool launchResult = coroManager->Launch(event, cleanup, std::move(args), launchMode);
-        ASSERT(launchResult);
-    }
+    GetFinalizationRegistryManager()->StartCleanupCoroIfNeeded(coroutine);
     coroutine->GetPandaVM()->CleanFinalizableReferenceList();
 }
 
@@ -526,7 +531,7 @@ ObjectHeader *PandaEtsVM::GetOOMErrorObject()
     return obj;
 }
 
-ObjectHeader *PandaEtsVM::GetNullValue()
+ObjectHeader *PandaEtsVM::GetNullValue() const
 {
     auto obj = GetGlobalObjectStorage()->Get(nullValueRef_);
     ASSERT(obj != nullptr);
@@ -594,7 +599,7 @@ static void PrintExceptionInfo(EtsCoroutine *coro, EtsHandle<EtsObject> exceptio
     }
 }
 
-void PandaEtsVM::HandleUncaughtException()
+[[noreturn]] void PandaEtsVM::HandleUncaughtException()
 {
     auto coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
@@ -615,11 +620,6 @@ void PandaEtsVM::HandleUncaughtException()
     LOG(ERROR, RUNTIME) << logStream.str();
     // _exit guarantees a safe completion in case of multi-threading as static destructors aren't called
     _exit(1);
-}
-
-void PandaEtsVM::SweepVmRefs(const GCObjectVisitor &gcObjectVisitor)
-{
-    PandaVM::SweepVmRefs(gcObjectVisitor);
 }
 
 void HandleEmptyArguments(const PandaVector<Value> &arguments, const GCRootVisitor &visitor,
@@ -668,6 +668,13 @@ void PandaEtsVM::RemoveRootProvider(mem::RootProvider *provider)
     rootProviders_.erase(provider);
 }
 
+static void VisitUnhandledObjects(const GCRootVisitor &visitor, PandaUnorderedSet<EtsObject *> &unhandledObjects)
+{
+    for (auto *obj : unhandledObjects) {
+        visitor(mem::GCRoot(mem::RootType::ROOT_VM, obj->GetCoreType()));
+    }
+}
+
 void PandaEtsVM::VisitVmRoots(const GCRootVisitor &visitor)
 {
     GetThreadManager()->EnumerateThreads([visitor](ManagedThread *thread) {
@@ -685,19 +692,27 @@ void PandaEtsVM::VisitVmRoots(const GCRootVisitor &visitor)
         }
         return true;
     });
-    visitor(mem::GCRoot(mem::RootType::ROOT_VM, doubleToStringCache_->GetCoreType()));
-    visitor(mem::GCRoot(mem::RootType::ROOT_VM, floatToStringCache_->GetCoreType()));
-    visitor(mem::GCRoot(mem::RootType::ROOT_VM, longToStringCache_->GetCoreType()));
+    if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
+        visitor(mem::GCRoot(mem::RootType::ROOT_VM, doubleToStringCache_->GetCoreType()));
+        visitor(mem::GCRoot(mem::RootType::ROOT_VM, floatToStringCache_->GetCoreType()));
+        visitor(mem::GCRoot(mem::RootType::ROOT_VM, longToStringCache_->GetCoreType()));
+        PlatformTypes(this)->VisitRoots(visitor);
+    }
     {
         os::memory::LockHolder lock(rootProviderlock_);
         for (auto *rootProvider : rootProviders_) {
             rootProvider->VisitRoots(visitor);
         }
     }
+    {
+        os::memory::LockHolder lh(unhandledMutex_);
+        VisitUnhandledObjects(visitor, unhandledFailedJobs_);
+        VisitUnhandledObjects(visitor, unhandledRejectedPromises_);
+    }
 }
 
 template <bool REF_CAN_BE_NULL>
-void PandaEtsVM::UpdateMovedVmRef(Value &ref)
+void PandaEtsVM::UpdateMovedVmRef(Value &ref, const GCRootUpdater &gcRootUpdater)
 {
     ASSERT(ref.IsReference());
     ObjectHeader *arg = ref.GetAs<ObjectHeader *>();
@@ -708,14 +723,14 @@ void PandaEtsVM::UpdateMovedVmRef(Value &ref)
     } else {
         ASSERT(arg != nullptr);
     }
-    if (arg->IsForwarded()) {
-        ObjectHeader *forwardAddress = mem::GetForwardAddress(arg);
-        ref = Value(forwardAddress);
-        LOG(DEBUG, GC) << "Forward root object: " << arg << " -> " << forwardAddress;
+
+    if (gcRootUpdater(&arg)) {
+        ref = Value(arg);
+        LOG(DEBUG, GC) << "Forwarded root object: " << arg;
     }
 }
 
-void PandaEtsVM::UpdateManagedEntrypointArgRefs(EtsCoroutine *coroutine)
+void PandaEtsVM::UpdateManagedEntrypointArgRefs(EtsCoroutine *coroutine, const GCRootUpdater &gcRootUpdater)
 {
     PandaVector<Value> &arguments = coroutine->GetManagedEntrypointArguments();
     if (!arguments.empty()) {
@@ -729,12 +744,12 @@ void PandaEtsVM::UpdateManagedEntrypointArgRefs(EtsCoroutine *coroutine)
         ++it;  // skip return type
         if (!entrypoint->IsStatic()) {
             // handle 'this' argument
-            UpdateMovedVmRef<false>(arguments[argIdx]);
+            UpdateMovedVmRef<false>(arguments[argIdx], gcRootUpdater);
             ++argIdx;
         }
         while (it != panda_file::ShortyIterator()) {
             if ((*it).GetId() == panda_file::Type::TypeId::REFERENCE) {
-                UpdateMovedVmRef<true>(arguments[argIdx]);
+                UpdateMovedVmRef<true>(arguments[argIdx], gcRootUpdater);
             }
             ++it;
             ++argIdx;
@@ -742,32 +757,64 @@ void PandaEtsVM::UpdateManagedEntrypointArgRefs(EtsCoroutine *coroutine)
     }
 }
 
-void PandaEtsVM::UpdateVmRefs()
+static void UpdateUnhandledObjects(PandaUnorderedSet<EtsObject *> &unhandledObjects, const GCRootUpdater &gcRootUpdater)
 {
-    GetThreadManager()->EnumerateThreads([](ManagedThread *thread) {
+    PandaVector<PandaUnorderedSet<EtsObject *>::node_type> movedObjects {};
+    for (auto iter = unhandledObjects.begin(); iter != unhandledObjects.end();) {
+        auto *obj = (*iter)->GetCoreType();
+        // assuming that `gcRootUpdater(&obj) == false` means that `obj` was not modified
+        if (gcRootUpdater(&obj)) {
+            auto oldIter = iter;
+            ++iter;
+            auto node = unhandledObjects.extract(oldIter);
+            node.value() = EtsObject::FromCoreType(obj);
+            movedObjects.push_back(std::move(node));
+        } else {
+            ++iter;
+        }
+    }
+    for (auto &node : movedObjects) {
+        unhandledObjects.insert(std::move(node));
+    }
+}
+
+void PandaEtsVM::UpdateVmRefs(const GCRootUpdater &gcRootUpdater)
+{
+    GetThreadManager()->EnumerateThreads([&gcRootUpdater](ManagedThread *thread) {
         auto coroutine = EtsCoroutine::CastFromThread(thread);
         if (auto etsNapiEnv = coroutine->GetEtsNapiEnv()) {
             auto etsStorage = etsNapiEnv->GetEtsReferenceStorage();
-            etsStorage->GetAsReferenceStorage()->UpdateMovedRefs();
+            etsStorage->GetAsReferenceStorage()->UpdateMovedRefs(gcRootUpdater);
         }
         if (!coroutine->HasManagedEntrypoint()) {
             return true;
         }
-        UpdateManagedEntrypointArgRefs(coroutine);
+        UpdateManagedEntrypointArgRefs(coroutine, gcRootUpdater);
         return true;
     });
 
-    objStateTable_->EnumerateObjectStates([](EtsObjectStateInfo *info) {
+    objStateTable_->EnumerateObjectStates([&gcRootUpdater](EtsObjectStateInfo *info) {
         auto *obj = info->GetEtsObject()->GetCoreType();
-        if (obj->IsForwarded()) {
-            info->SetEtsObject(EtsObject::FromCoreType(ark::mem::GetForwardAddress(obj)));
+        if (gcRootUpdater(&obj)) {
+            info->SetEtsObject(EtsObject::FromCoreType(obj));
         }
     });
 
     {
         os::memory::LockHolder lock(rootProviderlock_);
         for (auto *rootProvider : rootProviders_) {
-            rootProvider->UpdateRefs();
+            rootProvider->UpdateRefs(gcRootUpdater);
+        }
+    }
+    {
+        os::memory::LockHolder lh(unhandledMutex_);
+        UpdateUnhandledObjects(unhandledFailedJobs_, gcRootUpdater);
+        UpdateUnhandledObjects(unhandledRejectedPromises_, gcRootUpdater);
+    }
+    if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
+        auto *asciiCache = PlatformTypes(this)->GetAsciiCacheTable();
+        if (asciiCache != nullptr) {
+            PlatformTypes(this)->UpdateCachesVmRefs(gcRootUpdater);
         }
     }
 }
@@ -804,70 +851,6 @@ void PandaEtsVM::DeleteWeakGlobalRef(ets_weak weakRef)
         return;
     }
     GetGlobalObjectStorage()->Remove(ref);
-}
-
-static void SortFinalizationRegistryArray(EtsHandle<EtsObjectArray> &objArrayHandle, size_t &finRegLastIndex)
-{
-    size_t head = 0;
-    size_t tail = objArrayHandle->GetLength() - 1;
-    while (head < tail) {
-        while (head < tail && objArrayHandle->Get(head) != nullptr) {
-            head++;
-        }
-        while (head < tail && objArrayHandle->Get(tail) == nullptr) {
-            tail--;
-        }
-        if (head < tail) {
-            objArrayHandle->Set(head, objArrayHandle->Get(tail));
-            objArrayHandle->Set(tail, nullptr);
-        }
-    }
-    finRegLastIndex = tail;
-}
-
-static void EnsureFinalizationRegistryInstancesCapacity(EtsCoroutine *coro, size_t &finRegLastIndex,
-                                                        mem::Reference *&ref)
-{
-    auto *vm = coro->GetPandaVM();
-    EtsClass *objectClass = vm->GetClassLinker()->GetClassRoot(EtsClassRoot::OBJECT);
-    if (ref == nullptr) {
-        constexpr uint32_t SIZE = 10;
-        auto *objArray = EtsObjectArray::Create(objectClass, SIZE, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
-        ref = vm->GetGlobalObjectStorage()->Add(objArray->GetCoreType(), ark::mem::Reference::ObjectType::GLOBAL);
-        finRegLastIndex = 0;
-        return;
-    }
-    auto *objArray = EtsObjectArray::FromCoreType(vm->GetGlobalObjectStorage()->Get(ref));
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsObjectArray> objArrayHandle(coro, objArray);
-    ASSERT(objArrayHandle.GetPtr() != nullptr);
-    size_t finRegCapacity = objArrayHandle->GetLength();
-    if (finRegLastIndex >= finRegCapacity) {
-        SortFinalizationRegistryArray(objArrayHandle, finRegLastIndex);
-        if (finRegLastIndex >= finRegCapacity) {
-            auto *newFinalizationRegistryInstances = EtsObjectArray::Create(objectClass, (finRegCapacity * 2U) + 1U,
-                                                                            SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
-            objArrayHandle->CopyDataTo(newFinalizationRegistryInstances);
-            vm->GetGlobalObjectStorage()->Remove(ref);
-            ref = vm->GetGlobalObjectStorage()->Add(newFinalizationRegistryInstances->GetCoreType(),
-                                                    ark::mem::Reference::ObjectType::GLOBAL);
-        }
-    }
-}
-
-void PandaEtsVM::RegisterFinalizationRegistryInstance(EtsObject *instance)
-{
-    ASSERT_MANAGED_CODE();
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    EtsHandle<EtsObject> instanceHandle(coroutine, instance);
-    EnsureFinalizationRegistryInstancesCapacity(coroutine, finRegLastIndex_,
-                                                registeredFinalizationRegistryInstancesRef_);
-    auto *objArray =
-        EtsObjectArray::FromCoreType(GetGlobalObjectStorage()->Get(registeredFinalizationRegistryInstancesRef_));
-    ASSERT(objArray->GetLength() != 0);
-    objArray->Set(finRegLastIndex_, instanceHandle.GetPtr());
-    finRegLastIndex_++;
 }
 
 void PandaEtsVM::RegisterFinalizerForObject(EtsCoroutine *coro, const EtsHandle<EtsObject> &object,
@@ -917,20 +900,19 @@ ClassLinkerContext *PandaEtsVM::CreateApplicationRuntimeLinker(const PandaVector
     auto *klass = PlatformTypes(this)->coreAbcRuntimeLinker;
     EtsHandle<EtsAbcRuntimeLinker> linkerHandle(coro, EtsAbcRuntimeLinker::FromEtsObject(EtsObject::Create(klass)));
 
-    EtsHandle<EtsObjectArray> pathsHandle(
-        coro, EtsObjectArray::Create(classLinker_->GetClassRoot(EtsClassRoot::STRING), abcFiles.size()));
+    EtsHandle<EtsArrayObject<EtsObject>> pathsHandle(coro, EtsArrayObject<EtsObject>::Create(abcFiles.size()));
     for (size_t idx = 0; idx < abcFiles.size(); ++idx) {
         auto *str = EtsString::CreateFromMUtf8(abcFiles[idx].data(), abcFiles[idx].length());
         if (UNLIKELY(str == nullptr)) {
             // Handle possible OOM
             exceptionHandler();
         }
-        pathsHandle->Set(idx, str->AsObject());
+        pathsHandle->SetRef(idx, str->AsObject());
     }
     std::array args {Value(linkerHandle->GetCoreType()), Value(nullptr), Value(pathsHandle->GetCoreType())};
 
     auto *ctor =
-        klass->GetDirectMethod(GetLanguageContext().GetCtorName(), "Lstd/core/RuntimeLinker;[Lstd/core/String;:V");
+        klass->GetDirectMethod(GetLanguageContext().GetCtorName(), "Lstd/core/RuntimeLinker;Lescompat/Array;:V");
     ASSERT(ctor != nullptr);
     ctor->GetPandaMethod()->InvokeVoid(coro, args.data());
     if (coro->HasPendingException()) {
@@ -942,6 +924,123 @@ ClassLinkerContext *PandaEtsVM::CreateApplicationRuntimeLinker(const PandaVector
     GetGlobalObjectStorage()->Add(linkerHandle->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
     // Safe to return a non-managed object
     return linkerHandle->GetClassLinkerContext();
+}
+
+void PandaEtsVM::AddUnhandledObjectImpl(PandaUnorderedSet<EtsObject *> &unhandledObjects, EtsObject *object)
+{
+    os::memory::LockHolder lh(unhandledMutex_);
+    unhandledObjects.insert(object);
+}
+
+void PandaEtsVM::RemoveUnhandledObjectImpl(PandaUnorderedSet<EtsObject *> &unhandledObjects, EtsObject *object)
+{
+    os::memory::LockHolder lh(unhandledMutex_);
+    unhandledObjects.erase(object);
+}
+
+template <typename T>
+static EtsArrayObject<EtsObject> *CreateEtsObjectArrayFromNativeSet(
+    EtsCoroutine *coro, const PandaUnorderedSet<EtsObject *> &unhandledObjects)
+{
+    static_assert(std::is_same_v<T, EtsJob> || std::is_same_v<T, EtsPromise>);
+    const auto objCount = unhandledObjects.size();
+    auto *array = EtsArrayObject<EtsObject>::Create(objCount);
+    ASSERT(array != nullptr);
+    size_t i = 0;
+    for (auto *obj : unhandledObjects) {
+        ASSERT(obj != nullptr);
+        ASSERT(!obj->GetCoreType()->IsForwarded());
+        array->SetRef(i, T::FromEtsObject(obj)->GetValue(coro));
+        ++i;
+    }
+    return array;
+}
+
+template <typename T>
+static void ListUnhandledImpl(EtsClassLinker *etsClassLinker, EtsCoroutine *coro, EtsArrayObject<EtsObject> *errors)
+{
+    static_assert(std::is_same_v<T, EtsJob> || std::is_same_v<T, EtsPromise>);
+    EtsHandle<EtsArrayObject<EtsObject>> herrors(coro, errors);
+    auto *platformTypes = etsClassLinker->GetEtsClassLinkerExtension()->GetPlatformTypes();
+    ark::Method *method {};
+    if constexpr (std::is_same_v<T, EtsJob>) {
+        method = platformTypes->escompatProcessListUnhandledJobs->GetPandaMethod();
+        LOG(DEBUG, COROUTINES) << "List unhandled failed jobs";
+    } else if (std::is_same_v<T, EtsPromise>) {
+        method = platformTypes->escompatProcessListUnhandledPromises->GetPandaMethod();
+        LOG(DEBUG, COROUTINES) << "List unhandled rejected promises";
+    }
+    ASSERT(method != nullptr);
+    ASSERT(herrors.GetPtr() != nullptr);
+    std::array args = {Value(herrors->GetCoreType())};
+    method->InvokeVoid(coro, args.data());
+    LOG(DEBUG, COROUTINES) << "List unhandled rejections end";
+}
+
+void PandaEtsVM::AddUnhandledFailedJob(EtsJob *job)
+{
+    AddUnhandledObjectImpl(unhandledFailedJobs_, job->AsObject());
+}
+
+void PandaEtsVM::RemoveUnhandledFailedJob(EtsJob *job)
+{
+    ASSERT(job != nullptr);
+    RemoveUnhandledObjectImpl(unhandledFailedJobs_, job->AsObject());
+}
+
+void PandaEtsVM::ListUnhandledFailedJobs()
+{
+    os::memory::LockHolder lh(unhandledMutex_);
+    if (unhandledFailedJobs_.empty()) {
+        return;
+    }
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    {
+        [[maybe_unused]] ScopedManagedCodeThread sj(coro);
+        [[maybe_unused]] EtsHandleScope scope(coro);
+
+        auto *errors = CreateEtsObjectArrayFromNativeSet<EtsJob>(coro, unhandledFailedJobs_);
+        ListUnhandledImpl<EtsJob>(GetClassLinker(), coro, errors);
+        unhandledFailedJobs_.clear();
+    }
+    if (coro->HasPendingException()) {
+        HandleUncaughtException();
+        UNREACHABLE();
+    }
+}
+
+void PandaEtsVM::AddUnhandledRejectedPromise(EtsPromise *promise)
+{
+    AddUnhandledObjectImpl(unhandledRejectedPromises_, promise->AsObject());
+}
+
+void PandaEtsVM::RemoveUnhandledRejectedPromise(EtsPromise *promise)
+{
+    ASSERT(promise != nullptr);
+    RemoveUnhandledObjectImpl(unhandledRejectedPromises_, promise->AsObject());
+}
+
+void PandaEtsVM::ListUnhandledRejectedPromises()
+{
+    os::memory::LockHolder lh(unhandledMutex_);
+    if (unhandledRejectedPromises_.empty()) {
+        return;
+    }
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    {
+        [[maybe_unused]] ScopedManagedCodeThread sj(coro);
+        [[maybe_unused]] EtsHandleScope scope(coro);
+
+        auto *errors = CreateEtsObjectArrayFromNativeSet<EtsPromise>(coro, unhandledRejectedPromises_);
+        ListUnhandledImpl<EtsPromise>(GetClassLinker(), coro, errors);
+        unhandledRejectedPromises_.clear();
+    }
+    if (coro->HasPendingException()) {
+        HandleUncaughtException();
+        UNREACHABLE();
+    }
 }
 
 /* static */

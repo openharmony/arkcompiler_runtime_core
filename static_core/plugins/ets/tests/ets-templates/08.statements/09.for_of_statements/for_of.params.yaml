@@ -53,8 +53,8 @@ cases:
           assertEQ( res, "1234" )
 
     - use: |-
-          let v: float;
-          for (v of [1.1,2.2,3.3,4.4] as float[]) res += v
+          let v: Float;
+          for (v of [1.1f,2.2f,3.3f,4.4f] as Float[]) res += v
           assertEQ( res, "1.12.23.34.4" )
 
     - use: |-
@@ -77,32 +77,32 @@ cases:
           assertEQ( res, "1234" )
 
     - use: |-
-          const ch: char = c'X'
+          const ch: string = 'X'
           for (let ch of "A" + "B" + "CD") {
               res += ch
-              ch = c' '
+              ch = ' '
               res += ch
           }
           assertEQ( res, "A B C D " )
 
     - use: |-
-          let ch: char
+          let ch: string
           for (ch of "ABCD") res += ch
           assertEQ( res, "ABCD" )
 
     - use: |-
-          let ch: char
+          let ch: string
           for (ch of "ABCD") {
               res += ch
-              ch = c' '
+              ch = ' '
               res += ch
           }
           assertEQ( res, "A B C D " )
 
     - use: |-
         let foo: () => String = ():String => { return "ABCD" }
-        for (let ch of foo()) res += ++ch
-        assertEQ( res, "BCDE" )
+        for (let ch of foo()) res += ch
+        arktest.assertEQ( res, "ABCD" )
 
     - use: |-
           let arr: Long[] = new Long[3]

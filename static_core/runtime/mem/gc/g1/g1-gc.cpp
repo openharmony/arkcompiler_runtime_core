@@ -82,6 +82,7 @@ G1GC<LanguageConfig>::G1GC(ObjectAllocatorBase *objectAllocator, const GCSetting
     updatedRefsQueue_ = allocator->New<GCG1BarrierSet::ThreadLocalCardQueues>();
     updatedRefsQueueTemp_ = allocator->New<GCG1BarrierSet::ThreadLocalCardQueues>();
     auto *firstRefVector = allocator->New<RefVector>();
+    ASSERT(firstRefVector != nullptr);
     firstRefVector->reserve(MAX_REFS);
     uniqueRefsFromRemsets_.push_back(firstRefVector);
     GetG1ObjectAllocator()->ReserveRegionIfNeeded();
@@ -137,6 +138,7 @@ void G1GC<LanguageConfig>::DoRegionCompacting(Region *region, bool useGcWorkers,
         PandaVector<ObjectHeader *> *movedObjects;
         if (useGcWorkers) {
             movedObjects = internalAllocator->template New<PandaVector<ObjectHeader *>>();
+            ASSERT(movedObjects != nullptr);
             movedObjectsVector->push_back(movedObjects);
             size_t moveSize = region->GetAllocatedBytes();
             movedObjects->reserve(moveSize / GetMinimalObjectSize());
@@ -435,7 +437,7 @@ template <class LanguageConfig>
 bool G1GC<LanguageConfig>::NeedToPromote(const Region *region) const
 {
     ASSERT(region->HasFlag(RegionFlag::IS_EDEN));
-    if (region->HasPinnedObjects()) {
+    if (fullCollectionSetPromotion_ || region->HasPinnedObjects()) {
         return true;
     }
     if ((g1PromotionRegionAliveRate_ < PERCENT_100_D) && !this->IsFullGC()) {
@@ -581,6 +583,17 @@ void G1GC<LanguageConfig>::WorkerTaskProcessing(GCWorkersTask *task, [[maybe_unu
         }
         case GCWorkersTaskTypes::TASK_EVACUATE_REGIONS: {
             ExecuteEvacuateTask(task->Cast<G1EvacuateRegionsTask<Ref>>()->GetMarkingStack());
+            break;
+        }
+        case GCWorkersTaskTypes::TASK_MARK_WHOLE_REGION: {
+            auto [region, markedObjDeque] = task->Cast<GCMarkWholeRegionTask>()->GetInfo();
+            auto processor = [region = region, markedObjDeque = markedObjDeque](ObjectHeader *obj) {
+                auto *objClass = obj->template ClassAddr<BaseClass>();
+                CalcLiveBytesMarkPreprocess<false>(obj, objClass);
+                region->GetMarkBitmap()->Set(obj);
+                markedObjDeque->emplace_back(obj);
+            };
+            region->IterateOverObjects(processor);
             break;
         }
         default:
@@ -735,6 +748,33 @@ void G1GC<LanguageConfig>::SetExtensionData(GCExtensionData *data)
 }
 
 template <class LanguageConfig>
+void G1GC<LanguageConfig>::StartGCCollection(ark::GCTask &task)
+{
+    GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats());
+    this->memStats_.Reset();
+    if (NeedToRunGC(task)) {
+        // Check there is no concurrent mark running by another thread.
+        EnsurePreWrbDisabledInThreads();
+
+        if (this->GetSettings()->LogDetailedGCInfoEnabled()) {
+            PrintFragmentationMetrics("Fragmentation before GC: ");
+        }
+
+        if (NeedFullGC(task)) {
+            task.collectionType = GCCollectionType::FULL;
+            RunFullGC(task);
+        } else {
+            fullCollectionSetPromotion_ = this->GetFastGCFlag();
+            TryRunMixedGC(task);
+        }
+
+        if (this->GetSettings()->LogDetailedGCInfoEnabled()) {
+            PrintFragmentationMetrics("Fragmentation after GC: ");
+        }
+    }
+}
+
+template <class LanguageConfig>
 void G1GC<LanguageConfig>::RunPhasesImpl(ark::GCTask &task)
 {
     SuspendUpdateRemsetWorkerScope stopUpdateRemsetWorkerScope(updateRemsetWorker_);
@@ -750,29 +790,8 @@ void G1GC<LanguageConfig>::RunPhasesImpl(ark::GCTask &task)
         ScopedTiming t("G1 GC", *this->GetTiming());
         auto startCollectionTime = ark::time::GetCurrentTimeInNanos();
         analytics_.ReportCollectionStart(startCollectionTime);
-        {
-            GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats());
-            this->memStats_.Reset();
-            if (NeedToRunGC(task)) {
-                // Check there is no concurrent mark running by another thread.
-                EnsurePreWrbDisabledInThreads();
 
-                if (this->GetSettings()->LogDetailedGCInfoEnabled()) {
-                    PrintFragmentationMetrics("Fragmentation before GC: ");
-                }
-
-                if (NeedFullGC(task)) {
-                    task.collectionType = GCCollectionType::FULL;
-                    RunFullGC(task);
-                } else {
-                    TryRunMixedGC(task);
-                }
-
-                if (this->GetSettings()->LogDetailedGCInfoEnabled()) {
-                    PrintFragmentationMetrics("Fragmentation after GC: ");
-                }
-            }
-        }
+        StartGCCollection(task);
 
         if (this->GetSettings()->G1EnablePauseTimeGoal()) {
             auto endCollectionTime = ark::time::GetCurrentTimeInNanos();
@@ -782,7 +801,9 @@ void G1GC<LanguageConfig>::RunPhasesImpl(ark::GCTask &task)
         }
         collectionSet_.clear();
         singlePassCompactionEnabled_ = false;
-
+        if (fullCollectionSetPromotion_) {
+            isMixedGcRequired_ = true;
+        }
         if (task.reason == GCTaskCause::CROSSREF_CAUSE) {
             RunConcurrentGC(task, onPauseXMarker_, concXMarker_);
         } else if (ScheduleMixedGCAndConcurrentMark(task)) {
@@ -1294,7 +1315,15 @@ void G1GC<LanguageConfig>::CollectInSinglePass(const GCTask &task)
     updatedRefsQueue_->insert(updatedRefsQueue_->end(), updatedRefsQueueTemp_->begin(), updatedRefsQueueTemp_->end());
     updatedRefsQueueTemp_->clear();
 
-    this->GetPandaVm()->UpdateMovedStrings();
+    auto gcRootUpdaterCallback = [](ObjectHeader **object) {
+        if ((*object)->IsForwarded()) {
+            *object = GetForwardAddress(*object);
+            return true;
+        }
+        return false;
+    };
+
+    this->GetPandaVm()->UpdateMovedStrings(gcRootUpdaterCallback);
     SweepRegularVmRefs();
 
     ResetRegionAfterMixedGC();
@@ -1405,7 +1434,11 @@ void G1GC<LanguageConfig>::RunGC(GCTask &task, const CollectionSet &collectibleR
         if (singlePassCompactionEnabled_) {
             CollectInSinglePass(task);
         } else {
-            MixedMarkAndCacheRefs(task, collectibleRegions);
+            if (fullCollectionSetPromotion_) {
+                FastYoungMark(collectibleRegions);
+            } else {
+                MixedMarkAndCacheRefs(task, collectibleRegions);
+            }
             ClearYoungCards(collectibleRegions);
             ClearTenuredCards(collectibleRegions);
             CollectAndMove<false>(collectibleRegions);
@@ -1432,6 +1465,10 @@ bool G1GC<LanguageConfig>::SinglePassCompactionAvailable()
     }
 
     if (g1PromotionRegionAliveRate_ <= 0) {
+        return false;
+    }
+
+    if (fullCollectionSetPromotion_) {
         return false;
     }
 
@@ -1506,6 +1543,43 @@ void G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const Colle
 
     // HandleReferences could write a new barriers - so we need to handle them before moving
     ProcessDirtyCards();
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::FastYoungMark(const CollectionSet &collectibleRegions)
+{
+    // There should be only young regions in the collection set
+    ASSERT(collectibleRegions.Tenured().empty());
+    auto allocator = this->GetInternalAllocator();
+    PandaVector<Region *> youngRegions(collectibleRegions.Young().begin(), collectibleRegions.Young().end());
+    GCMarkingStackType::MarkedObjects markedObjects(youngRegions.size(), nullptr);
+    for (size_t idx = 0; idx < youngRegions.size(); ++idx) {
+        auto *region = youngRegions[idx];
+        region->SetLiveBytes(0U);
+        markedObjects[idx] = allocator->template New<PandaDeque<ObjectHeader *>>(allocator->Adapter());
+        auto *markedObjDeque = markedObjects[idx];
+        ASSERT(markedObjDeque != nullptr);
+        GCMarkWholeRegionTask gcWorkerTask(region, markedObjDeque);
+        bool useGcWorkers = this->GetSettings()->ParallelMarkingEnabled();
+        if (useGcWorkers && this->GetWorkersTaskPool()->AddTask(GCMarkWholeRegionTask(gcWorkerTask))) {
+            continue;
+        }
+        // Couldn't add new task, so do task processing immediately
+        this->WorkerTaskProcessing(&gcWorkerTask, nullptr);
+    }
+
+    RefCacheBuilder<LanguageConfig, true> builder(this, &uniqueRefsFromRemsets_, regionSizeBits_, nullptr);
+    auto refsChecker = [this, &builder](Region *region, const MemRange &memRange) {
+        IterateOverRefsInMemRange(memRange, region, builder);
+        return false;
+    };
+    CacheRefsFromRemsets(refsChecker);
+
+    if (mixedMarkedObjects_.empty()) {
+        mixedMarkedObjects_ = std::move(markedObjects);
+    } else {
+        mixedMarkedObjects_.insert(mixedMarkedObjects_.end(), markedObjects.begin(), markedObjects.end());
+    }
 }
 
 template <class LanguageConfig>
@@ -1731,6 +1805,7 @@ void G1GC<LanguageConfig>::UpdateMovedObjectsReferences(MovedObjectsContainer<FU
                                                         const Visitor &refUpdater)
 {
     ScopedTiming t("UpdateMovedObjectsReferences", *this->GetTiming());
+    ASSERT(movedObjectsContainer != nullptr);
     for (auto *movedObjects : *movedObjectsContainer) {
         if constexpr (ENABLE_WORKERS) {
             ProcessMovedObjects(movedObjects);
@@ -2040,7 +2115,7 @@ CollectionSet G1GC<LanguageConfig>::GetCollectibleRegions(ark::GCTask const &tas
     auto g1Allocator = this->GetG1ObjectAllocator();
     LOG_DEBUG_GC << "Start GetCollectibleRegions isMixed: " << isMixed << " reason: " << task.reason;
     CollectionSet collectionSet(g1Allocator->GetYoungRegions());
-    if (isMixed) {
+    if (isMixed && !fullCollectionSetPromotion_) {
         if (!this->GetSettings()->G1EnablePauseTimeGoal()) {
             AddOldRegionsMaxAllowed(collectionSet);
         } else {
@@ -2226,6 +2301,7 @@ void G1GC<LanguageConfig>::OnThreadTerminate(ManagedThread *thread, mem::Buffers
     PandaVector<ObjectHeader *> *preBuff = nullptr;
     if (keepBuffers == mem::BuffersKeepingFlag::KEEP) {
         preBuff = allocator->New<PandaVector<ObjectHeader *>>(*thread->GetPreBuff());
+        ASSERT(preBuff != nullptr);
         thread->GetPreBuff()->clear();
     } else {  // keep_buffers == mem::BuffersKeepingFlag::DELETE
         preBuff = thread->MovePreBuff();

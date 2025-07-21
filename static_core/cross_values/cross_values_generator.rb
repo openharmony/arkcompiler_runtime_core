@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -29,12 +29,12 @@ namespace ark::cross_values::#{ARGV[2]} \{
 
 def generate(input_file, output_file)
   data = File.read(input_file)
-  defines = data.scan /"\^\^(\w+) [#\$]?([-+]?\d+)\^\^"/
+  defines = data.scan /"\^\^(\w+) [#\$]?([-+]?\d+)\s*([\w\s]*)\^\^"/
   output = ""
   output += HEADER
 
   defines.sort_by(&:first).each do |define|
-    output += "static constexpr ptrdiff_t #{define[0]}_VAL = #{define[1]};\n"
+    output += "static constexpr #{define[2].empty? ? "ptrdiff_t" : define[2]} #{define[0]}_VAL = #{define[1]};\n"
   end
   output +=  "}  // namespace ark::cross_values::#{ARGV[2]}\n\n"
   output +=  "#endif  // CROSS_VALUES_GENERATED_VALUES_#{ARGV[2]}_VALUES_GEN_H\n"

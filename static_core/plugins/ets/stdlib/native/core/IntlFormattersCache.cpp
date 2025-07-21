@@ -25,59 +25,97 @@ IntlFormattersCache::IntlFormattersCache()
     ASSERT(ERASE_AMOUNT > 0);
 }
 
-icu::number::LocalizedNumberFormatter &IntlFormattersCache::NumFmtsCacheInvalidation(const std::string &locTag,
-                                                                                     const icu::Locale &loc)
+LocNumFmt &IntlFormattersCache::NumFmtsCacheInvalidation(ani_env *env, const ParsedOptions &options, ani_status &status)
 {
+    static LocNumFmt defaultLocNumFmt;
+    auto tag = options.TagString();
+    status = ANI_OK;
     CacheUMapIterator it;
     {
         os::memory::LockHolder lh(mtx_);
-        it = cache_.find(locTag);
+        it = cache_.find(tag);
         if (it == cache_.end()) {
             EraseRandFmtsGroupByEraseRatio();
             // Create new number formatter, number range formatter is empty
-            // Number range formatter will be created via call RangeIntlFormattersCacheInvalidation
-            auto *ptr = new icu::number::LocalizedNumberFormatter(icu::number::NumberFormatter::withLocale(loc));
+            // Number range formatter will be created via call NumRangeFmtsCacheInvalidation
+            auto *ptr = new icu::number::LocalizedNumberFormatter();
+            if (UNLIKELY(ptr == nullptr)) {
+                return defaultLocNumFmt;
+            }
+
+            // Set options
+            status = InitNumFormatter(env, options, *ptr);
+            if (status != ANI_OK) {
+                return defaultLocNumFmt;
+            }
+
+            // Save into cache
             NumberFormatters f;
             f.numFmt.reset(ptr);
-            auto [iter, isNumFmtInserted] = cache_.insert_or_assign(locTag, std::move(f));
+            auto [iter, isNumFmtInserted] = cache_.insert_or_assign(tag, std::move(f));
             ASSERT(isNumFmtInserted);
             it = iter;
         } else if (it->second.numFmt == nullptr) {
-            // Create new number formatter, range formatter is not changed
-            auto *ptr = new icu::number::LocalizedNumberFormatter(icu::number::NumberFormatter::withLocale(loc));
+            // Still not created, now create new number formatter, range formatter is not changed
+            auto *ptr = new icu::number::LocalizedNumberFormatter();
+            if (UNLIKELY(ptr == nullptr)) {
+                return defaultLocNumFmt;
+            }
+            status = InitNumFormatter(env, options, *ptr);
+            if (status != ANI_OK) {
+                return defaultLocNumFmt;
+            }
             it->second.numFmt.reset(ptr);
         }
     }
-    ASSERT(it->second.numFmt != nullptr);
     return *(it->second.numFmt);
 }
 
-icu::number::LocalizedNumberRangeFormatter &IntlFormattersCache::NumRangeFmtsCacheInvalidation(
-    const std::string &locTag, const icu::Locale &loc)
+LocNumRangeFmt &IntlFormattersCache::NumRangeFmtsCacheInvalidation(ani_env *env, const ParsedOptions &options,
+                                                                   ani_status &status)
 {
+    static LocNumRangeFmt defaultLocNumRangeFmt;
+    auto tag = options.TagString();
+    status = ANI_OK;
     CacheUMapIterator it;
     {
         os::memory::LockHolder lh(mtx_);
-        it = cache_.find(locTag);
+        it = cache_.find(tag);
         if (it == cache_.end()) {
             EraseRandFmtsGroupByEraseRatio();
             // Create new number range formatter, number formatter is empty
             // Number formatter will be created via call IntlFormattersCacheInvalidation
-            auto *ptr =
-                new icu::number::LocalizedNumberRangeFormatter(icu::number::NumberRangeFormatter::withLocale(loc));
+            auto *ptr = new icu::number::LocalizedNumberRangeFormatter();
+            if (UNLIKELY(ptr == nullptr)) {
+                return defaultLocNumRangeFmt;
+            }
+
+            // Set options
+            status = InitNumRangeFormatter(env, options, *ptr);
+            if (status != ANI_OK) {
+                return defaultLocNumRangeFmt;
+            }
+
+            // Save into cache
             NumberFormatters f;
             f.numRangeFmt.reset(ptr);
-            auto [iter, isNumRangeFmtInserted] = cache_.insert_or_assign(locTag, std::move(f));
+            auto [iter, isNumRangeFmtInserted] = cache_.insert_or_assign(tag, std::move(f));
             ASSERT(isNumRangeFmtInserted);
             it = iter;
         } else if (it->second.numRangeFmt == nullptr) {
-            // Create new number range formatter, number formatter is not changed
-            auto *ptr =
-                new icu::number::LocalizedNumberRangeFormatter(icu::number::NumberRangeFormatter::withLocale(loc));
+            // Still not created, now create new number range formatter, number formatter is not changed
+            auto *ptr = new icu::number::LocalizedNumberRangeFormatter();
+            if (UNLIKELY(ptr == nullptr)) {
+                return defaultLocNumRangeFmt;
+            }
+
+            status = InitNumRangeFormatter(env, options, *ptr);
+            if (status != ANI_OK) {
+                return defaultLocNumRangeFmt;
+            }
             it->second.numRangeFmt.reset(ptr);
         }
     }
-    ASSERT(it->second.numRangeFmt != nullptr);
     return *(it->second.numRangeFmt);
 }
 

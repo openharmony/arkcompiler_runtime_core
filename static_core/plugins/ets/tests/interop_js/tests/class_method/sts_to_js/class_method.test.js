@@ -16,7 +16,6 @@ const stsVm = globalThis.gtest.etsVm;
 print(stsVm);
 
 const UserClass = stsVm.getClass('Lclass_method/test/UserClass;');
-print(UserClass);
 
 const createUserClassFromSts = stsVm.getFunction('Lclass_method/test/ETSGLOBAL;', 'createUserClassFromSts');
 print(createUserClassFromSts);

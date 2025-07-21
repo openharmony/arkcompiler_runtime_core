@@ -20,7 +20,7 @@ package std.core;
  */
 export class AbcRuntimeLinker extends RuntimeLinker {
     private parentLinker: RuntimeLinker;
-    private abcFiles: (AbcFile | undefined)[] = [];
+    private abcFiles: FixedArray<AbcFile | undefined> = [];
 
     public constructor(parentLinker: RuntimeLinker | undefined, paths: string[]) {
         super();
@@ -39,7 +39,7 @@ export class AbcRuntimeLinker extends RuntimeLinker {
      * @throws errors happened on loading ABC file.
      */
     public addAbcFiles(paths: string[]): void {
-        const newFiles = new (AbcFile | undefined)[paths.length];
+        const newFiles : FixedArray<AbcFile | undefined> = new (AbcFile | undefined)[paths.length];
         for (let i = 0; i < paths.length; i++) {
             newFiles[i] = AbcFile.loadAbcFile(this, paths[i]);
         }
@@ -71,7 +71,7 @@ export class AbcRuntimeLinker extends RuntimeLinker {
      *
      * @param newFiles ABC files loaded into current context.
      */
-    protected final native addAbcFiles(newFiles: (AbcFile | undefined)[]): void
+    protected final native addAbcFiles(newFiles: FixedArray<AbcFile | undefined>): void
 
     private native loadClassFromAbcFiles(clsName: string, init: boolean): Class | undefined
 }

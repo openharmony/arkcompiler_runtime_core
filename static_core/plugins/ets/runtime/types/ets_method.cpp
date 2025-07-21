@@ -16,8 +16,10 @@
 #include "plugins/ets/runtime/types/ets_method.h"
 
 #include "libpandabase/macros.h"
+#include "libpandabase/utils/utf.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
+#include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/napi/ets_scoped_objects_fix.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_type.h"
@@ -68,6 +70,7 @@ EtsMethod *EtsMethod::FromTypeDescriptor(const PandaString &td, EtsRuntimeLinker
     }
     ASSERT(td[0] == CLASS_TYPE_PREFIX);
     auto type = classLinker->GetClass(td.c_str(), true, ctx);
+    ASSERT(type != nullptr);
     EtsMethod *method = type->GetInstanceMethod(ark::ets::INVOKE_METHOD_NAME, nullptr);
     method = method == nullptr ? type->GetStaticMethod(ark::ets::INVOKE_METHOD_NAME, nullptr) : method;
     if (method != nullptr) {
@@ -132,6 +135,64 @@ uint32_t EtsMethod::GetNumArgSlots() const
         ++numOfSlots;
     }
     return numOfSlots;
+}
+
+inline std::optional<uint32_t> TryGetMinArgCountFromAnnotation(const panda_file::AnnotationDataAccessor &accessor,
+                                                               const panda_file::File &pandaFile)
+{
+    for (uint32_t i = 0; i < accessor.GetCount(); i++) {
+        panda_file::AnnotationDataAccessor::Elem accessorElem = accessor.GetElement(i);
+        if (utf::IsEqual(pandaFile.GetStringData(accessorElem.GetNameId()).data, utf::CStringAsMutf8("minArgCount"))) {
+            // annotation value is int in ets code which must be positive, so it is be casted to uint32_t safely
+            auto minArgCount = accessorElem.GetScalarValue().Get<int32_t>();
+            ASSERT(minArgCount >= 0);
+            return static_cast<uint32_t>(minArgCount);
+        }
+    }
+    return std::nullopt;
+}
+
+std::optional<uint32_t> EtsMethod::TryGetMinArgCount()
+{
+    std::optional<uint32_t> resOpt = std::nullopt;
+
+    panda_file::MethodDataAccessor mda(*(GetPandaMethod()->GetPandaFile()), GetPandaMethod()->GetFileId());
+    mda.EnumerateAnnotations([&](panda_file::File::EntityId annotationId) {
+        panda_file::AnnotationDataAccessor accessor(mda.GetPandaFile(), annotationId);
+        auto annotationName = mda.GetPandaFile().GetStringData(accessor.GetClassId()).data;
+        auto expectedAnnotationName =
+            utf::CStringAsMutf8(panda_file_items::class_descriptors::OPTIONAL_PARAMETERS_ANNOTATION.data());
+        // check if annotation is optional parameters
+        if (utf::IsEqual(annotationName, expectedAnnotationName)) {
+            std::optional<uint32_t> minArgCountOpt = TryGetMinArgCountFromAnnotation(accessor, mda.GetPandaFile());
+
+            if (minArgCountOpt.has_value()) {
+                resOpt = minArgCountOpt;
+            }
+        }
+    });
+    return resOpt;
+}
+
+uint32_t EtsMethod::GetNumMandatoryArgs()
+{
+    // NOTE(MockMockBlack, #IC787J): support default parameters and optional parameters for lambda functon
+    size_t numMandatoryArgs = 0;
+
+    bool hasRestParam = ((this->GetAccessFlags() & ACC_VARARGS) != 0);
+    if (hasRestParam) {
+        // rest param is not mandatory
+        numMandatoryArgs = this->GetParametersNum() - 1;
+    } else {
+        numMandatoryArgs = this->GetParametersNum();
+    }
+
+    auto minArgCountOpt = this->TryGetMinArgCount();
+    if (minArgCountOpt.has_value()) {
+        numMandatoryArgs = minArgCountOpt.value();
+    }
+
+    return numMandatoryArgs;
 }
 
 EtsClass *EtsMethod::ResolveArgType(uint32_t idx)

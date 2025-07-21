@@ -36,6 +36,25 @@ public:
         *clsResult = cls;
         *methodResult = method;
     }
+
+    void TestCombineScene(const char *className, ani_byte val1, ani_byte val2, ani_byte expectedValue)
+    {
+        ani_class cls {};
+        ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
+        ani_static_method method {};
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcA", "BB:B", &method), ANI_OK);
+
+        ani_byte value = 0;
+        ASSERT_EQ(env_->Class_CallStaticMethod_Byte(cls, method, &value, val1, val2), ANI_OK);
+        ASSERT_EQ(value, expectedValue);
+
+        ani_value args[2U];
+        args[0U].b = val1;
+        args[1U].b = val2;
+        ani_byte valueA = 0;
+        ASSERT_EQ(env_->Class_CallStaticMethod_Byte_A(cls, method, &valueA, args), ANI_OK);
+        ASSERT_EQ(valueA, expectedValue);
+    }
 };
 
 TEST_F(CallStaticMethodTest, call_static_method_byte)
@@ -229,6 +248,80 @@ TEST_F(CallStaticMethodTest, call_static_method_byte_combine_scenes_3)
     ani_byte valueA = 0;
     ASSERT_EQ(env_->Class_CallStaticMethod_Byte_A(cls, method, &valueA, args), ANI_OK);
     ASSERT_EQ(valueA, VAL1 + VAL2);
+}
+
+TEST_F(CallStaticMethodTest, call_static_method_byte_null_env)
+{
+    ani_class cls {};
+    ani_static_method method {};
+    GetMethodData(&cls, &method);
+
+    ani_byte value = 0;
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Byte(nullptr, cls, method, &value, VAL1, VAL2), ANI_INVALID_ARGS);
+    ani_value args[ARG_COUNT];
+    args[0U].b = VAL1;
+    args[1U].b = VAL2;
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Byte_A(nullptr, cls, method, &value, args), ANI_INVALID_ARGS);
+}
+
+TEST_F(CallStaticMethodTest, call_static_method_byte_combine_scenes_4)
+{
+    TestCombineScene("Lcall_static_method_byte_test/C;", VAL1, VAL2, VAL1 + VAL2);
+}
+
+TEST_F(CallStaticMethodTest, call_static_method_byte_combine_scenes_5)
+{
+    TestCombineScene("Lcall_static_method_byte_test/D;", VAL1, VAL2, VAL2 - VAL1);
+}
+
+TEST_F(CallStaticMethodTest, call_static_method_byte_combine_scenes_6)
+{
+    TestCombineScene("Lcall_static_method_byte_test/E;", VAL1, VAL2, VAL1 + VAL2);
+}
+
+TEST_F(CallStaticMethodTest, call_static_method_byte_combine_scenes_7)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lcall_static_method_byte_test/F;", &cls), ANI_OK);
+    ani_static_method method1 {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "increment", nullptr, &method1), ANI_OK);
+    ani_static_method method2 {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "getCount", nullptr, &method2), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethod_Void(cls, method1, VAL1, VAL2), ANI_OK);
+    ani_byte value = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Byte(cls, method2, &value), ANI_OK);
+    ASSERT_EQ(value, VAL1 + VAL2);
+
+    ani_value args[ARG_COUNT];
+    args[0U].b = VAL1;
+    args[1U].b = VAL2;
+    ani_byte valueA = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Byte_A(cls, method2, &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, VAL1 + VAL2);
+}
+
+TEST_F(CallStaticMethodTest, call_static_method_byte_combine_scenes_8)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lcall_static_method_byte_test/G;", &cls), ANI_OK);
+    ani_static_method method1 {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "publicMethod", "BB:B", &method1), ANI_OK);
+    ani_static_method method2 {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "callPrivateMethod", "BB:B", &method2), ANI_OK);
+    ani_byte value = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Byte(cls, method1, &value, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(value, VAL1 + VAL2);
+    ASSERT_EQ(env_->Class_CallStaticMethod_Byte(cls, method2, &value, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(value, VAL2 - VAL1);
+
+    ani_value args[ARG_COUNT];
+    args[0U].b = VAL1;
+    args[1U].b = VAL2;
+    ani_byte valueA = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Byte_A(cls, method1, &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, VAL1 + VAL2);
+    ASSERT_EQ(env_->Class_CallStaticMethod_Byte_A(cls, method2, &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, VAL2 - VAL1);
 }
 }  // namespace ark::ets::ani::testing
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

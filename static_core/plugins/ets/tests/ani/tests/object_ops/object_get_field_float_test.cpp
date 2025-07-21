@@ -46,9 +46,20 @@ TEST_F(ObjectGetFieldFloatTest, get_field_float)
     ani_field fieldAge {};
     GetTestData(&sarah, &field, &fieldAge);
 
-    ani_float age {};
+    ani_float age = 0.0F;
     ASSERT_EQ(env_->Object_GetField_Float(sarah, fieldAge, &age), ANI_OK);
     ASSERT_EQ(age, 24.0F);
+}
+
+TEST_F(ObjectGetFieldFloatTest, get_field_float_invalid_env)
+{
+    ani_object sarah {};
+    ani_field field {};
+    ani_field fieldAge {};
+    GetTestData(&sarah, &field, &fieldAge);
+
+    ani_float age = 0.0F;
+    ASSERT_EQ(env_->c_api->Object_GetField_Float(nullptr, sarah, fieldAge, &age), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectGetFieldFloatTest, get_field_float_invalid_field_type)
@@ -58,7 +69,7 @@ TEST_F(ObjectGetFieldFloatTest, get_field_float_invalid_field_type)
     ani_field fieldAge {};
     GetTestData(&sarah, &field, &fieldAge);
 
-    ani_float age {};
+    ani_float age = 0.0F;
     ASSERT_EQ(env_->Object_GetField_Float(sarah, field, &age), ANI_INVALID_TYPE);
 }
 
@@ -69,7 +80,7 @@ TEST_F(ObjectGetFieldFloatTest, invalid_argument1)
     ani_field fieldAge {};
     GetTestData(&sarah, &field, &fieldAge);
 
-    ani_float age {};
+    ani_float age = 0.0F;
     ASSERT_EQ(env_->Object_GetField_Float(nullptr, field, &age), ANI_INVALID_ARGS);
 }
 
@@ -80,7 +91,7 @@ TEST_F(ObjectGetFieldFloatTest, invalid_argument2)
     ani_field fieldAge {};
     GetTestData(&sarah, &field, &fieldAge);
 
-    ani_float age {};
+    ani_float age = 0.0F;
     ASSERT_EQ(env_->Object_GetField_Float(sarah, nullptr, &age), ANI_INVALID_ARGS);
 }
 

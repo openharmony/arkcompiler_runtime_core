@@ -46,9 +46,20 @@ TEST_F(ObjectGetFieldDoubleTest, get_field_double)
     ani_field fieldAge {};
     GetTestData(&sarah, &field, &fieldAge);
 
-    ani_double age {};
+    ani_double age = 0.0F;
     ASSERT_EQ(env_->Object_GetField_Double(sarah, fieldAge, &age), ANI_OK);
     ASSERT_EQ(age, 24.0F);
+}
+
+TEST_F(ObjectGetFieldDoubleTest, get_field_double_invalid_env)
+{
+    ani_object sarah {};
+    ani_field field {};
+    ani_field fieldAge {};
+    GetTestData(&sarah, &field, &fieldAge);
+
+    ani_double age = 0.0F;
+    ASSERT_EQ(env_->c_api->Object_GetField_Double(nullptr, sarah, fieldAge, &age), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectGetFieldDoubleTest, get_field_double_invalid_field_type)
@@ -58,7 +69,7 @@ TEST_F(ObjectGetFieldDoubleTest, get_field_double_invalid_field_type)
     ani_field fieldAge {};
     GetTestData(&sarah, &field, &fieldAge);
 
-    ani_double age {};
+    ani_double age = 0.0F;
     ASSERT_EQ(env_->Object_GetField_Double(sarah, field, &age), ANI_INVALID_TYPE);
 }
 
@@ -69,7 +80,7 @@ TEST_F(ObjectGetFieldDoubleTest, invalid_argument1)
     ani_field fieldAge {};
     GetTestData(&sarah, &field, &fieldAge);
 
-    ani_double age {};
+    ani_double age = 0.0F;
     ASSERT_EQ(env_->Object_GetField_Double(nullptr, field, &age), ANI_INVALID_ARGS);
 }
 
@@ -80,7 +91,7 @@ TEST_F(ObjectGetFieldDoubleTest, invalid_argument2)
     ani_field fieldAge {};
     GetTestData(&sarah, &field, &fieldAge);
 
-    ani_double age {};
+    ani_double age = 0.0F;
     ASSERT_EQ(env_->Object_GetField_Double(sarah, nullptr, &age), ANI_INVALID_ARGS);
 }
 

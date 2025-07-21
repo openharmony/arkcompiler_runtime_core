@@ -33,15 +33,15 @@ function main(): int {
     return check(failures, "All tests run")
 }
 
-const source: Object[] = {{.item.copySource}}
-const source2: Object[] = {{.item.concatSource}}
+const source: FixedArray<Object> = {{.item.copySource}}
+const source2: FixedArray<Object> = {{.item.concatSource}}
 
 const SUCCESS = 0
 const FAILURE = 1
 
 function testToSorted(): int {
 
-    let unsorted: Object[] = new Object[source.length]
+    let unsorted: FixedArray<Object> = new Object[source.length]
     let l:int = unsorted.length
 
     for (let i: int = 0; i < l; i++) {

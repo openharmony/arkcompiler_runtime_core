@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as test from "@generated/inject_test";
-import * as System from "std/core/System";
+import {BusinessError} from "@ohos.base";
+import * as test from "inject_test";
 
 loadLibrary("ani_inject");
 

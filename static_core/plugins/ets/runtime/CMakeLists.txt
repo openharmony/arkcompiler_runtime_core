@@ -26,6 +26,8 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_napi_env.cpp
     ${ETS_EXT_SOURCES}/ets_native_library.cpp
     ${ETS_EXT_SOURCES}/ets_native_library_provider.cpp
+    ${ETS_EXT_SOURCES}/ets_namespace_manager.cpp
+    ${ETS_EXT_SOURCES}/ets_namespace_manager_impl.cpp
     ${ETS_EXT_SOURCES}/ets_platform_types.cpp
     ${ETS_EXT_SOURCES}/ets_runtime_interface.cpp
     ${ETS_EXT_SOURCES}/ets_vm.cpp
@@ -38,8 +40,10 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/escompat_ArrayBuffer.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_TypedArrays.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Date.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/escompat_JSON.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_RegExp.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_taskpool.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/escompat_Reflect.cpp
     ${ETS_EXT_SOURCES}/intrinsics/compiler_intrinsics.cpp
     ${ETS_EXT_SOURCES}/intrinsics/debugger_api.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_AniHelpers.cpp
@@ -49,6 +53,10 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_AbcRuntimeLinker.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Char.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Console.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_Byte.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_Short.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_Int.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_Long.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Double.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Float.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_SyncPrimitives.cpp
@@ -69,10 +77,13 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_concurrency_Launch.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Atomics.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_math.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/unsafe_memory.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/dtoa_helper.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/array_buffer_helper.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/ets_intrinsics_helpers.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/ets_to_string_cache.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/helpers/json_helper.cpp
+    ${ETS_EXT_SOURCES}/finalreg/finalization_registry_manager.cpp
     ${ETS_EXT_SOURCES}/mem/ets_reference_processor.cpp
     ${ETS_EXT_SOURCES}/napi/ets_napi_helpers.cpp
     ${ETS_EXT_SOURCES}/napi/ets_napi_invoke_interface.cpp
@@ -96,7 +107,6 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_typeapi_field.cpp
     ${ETS_EXT_SOURCES}/types/ets_typeapi_method.cpp
     ${ETS_EXT_SOURCES}/types/ets_typeapi_parameter.cpp
-    ${ETS_EXT_SOURCES}/types/ets_shared_memory.cpp
     ${ETS_EXT_SOURCES}/types/ets_waiters_list.cpp
     ${ETS_EXT_SOURCES}/types/ets_weak_reference.cpp
     ${ETS_EXT_SOURCES}/types/ets_finalizable_weak_ref.cpp
@@ -112,6 +122,7 @@ set(ETS_RUNTIME_SOURCES
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlCommon.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlState.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlNumberFormat.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlNumberFormatters.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlFormattersCache.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlLocaleMatch.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlCollator.cpp
@@ -120,6 +131,10 @@ set(ETS_RUNTIME_SOURCES
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlSegmenter.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/stdlib_ani_helpers.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlDateTimeFormat.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlListFormat.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlDisplayNames.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlRelativeTimeFormat.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlLanguageTag.cpp
 )
 
 get_directory_property(CURRENT_DEFS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMPILE_DEFINITIONS)
@@ -181,6 +196,7 @@ set(IRTOC_ETS_SCRIPTS ${IRTOC_ETS_SCRIPTS} PARENT_SCOPE)
 if(NOT (CMAKE_CROSSCOMPILING OR PANDA_TARGET_OHOS))
     irtoc_compile(TARGET_NAME irtoc_ets_fastpath
                   INPUT_FILES ${IRTOC_ETS_SCRIPTS}/to_string_cache.irt
+                              ${IRTOC_ETS_SCRIPTS}/typed_arrays.irt
                   TARGET_VARIABLE IRTOC_ETS_FASTPATH_OBJ
                   TARGET_VARIABLE_LLVM IRTOC_ETS_FASTPATH_LLVM_OBJ)
 

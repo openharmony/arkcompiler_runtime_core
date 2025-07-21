@@ -19,7 +19,10 @@ type Union = string | int;
 const etsString = 'string';
 const etsInt = 1;
 const privateEtsInt = 2;
-const add = (a: int, b: int): int => a + b;
+const add:(a: int, b: int) => int;
+static {
+    add = (a: int, b: int): int => a + b;
+}
 
 function applyFunctionGenericUnion<T extends Union>(value1: T, value2: T, func: (a: T, b: T) => T): T {
     return func(value1, value2);
@@ -64,7 +67,7 @@ function genericExtendsClassCallFromSts(arg: Vector): Vector {
 }
 
 
-function applyFunctionGenericArray<T>(values: T[], func: (accumulator: T, currentValue: T) => T): T {
+function applyFunctionGenericArray<T>(values: FixedArray<T>, func: (accumulator: T, currentValue: T) => T): T {
     let result = values[0];
     for (let i = 1; i < values.length; i++) {
         result = func(result, values[i]);
@@ -72,7 +75,7 @@ function applyFunctionGenericArray<T>(values: T[], func: (accumulator: T, curren
     return result;
 }
 
-function applyFunctionGenericArrayCallFromSts(array: Int[]): int {
+function applyFunctionGenericArrayCallFromSts(array: FixedArray<Int>): int {
 
     return applyFunctionGenericArray(array, add);
 }

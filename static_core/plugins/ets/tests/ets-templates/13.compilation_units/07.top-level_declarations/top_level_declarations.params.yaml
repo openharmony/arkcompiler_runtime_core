@@ -29,3 +29,4 @@ topLevelTypes:
   - "function Dist(x: int, y: int): void {}"
   # Function with receiver
   - "function daysUntilTheNewYear(this: Date): int { return 0; }"
+  - () => { return }

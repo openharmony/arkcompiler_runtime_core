@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-runner-api-level: 0.0.0.1
 type: workflow
 workflow-name: ark-aot
 parameters:
@@ -36,6 +35,8 @@ steps:
             - "--heap-verifier=${parameters.heap-verifier}"
             - "--load-runtimes=${parameters.load-runtimes}"
             - "--full-gc-bombing-frequency=${parameters.full-gc-bombing-frequency}"
+            - "--compiler-check-final=true"
+            - "--compiler-ignore-failures=false"
             - "${parameters.aot-args}"
             - "--boot-panda-files=${parameters.stdlib}"
             - "--paoc-output=${parameters.paoc-output-file}"

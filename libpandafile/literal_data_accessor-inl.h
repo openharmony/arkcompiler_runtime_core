@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,6 +74,7 @@ inline void LiteralDataAccessor::EnumerateLiteralVals(File::EntityId id, const C
             case LiteralTag::SETTER:
             case LiteralTag::GENERATORMETHOD:
             case LiteralTag::LITERALARRAY:
+            case LiteralTag::ETS_IMPLEMENTS:
             case LiteralTag::ASYNCGENERATORMETHOD: {
                 value = static_cast<uint32_t>(helpers::Read<sizeof(uint32_t)>(&sp));
                 break;

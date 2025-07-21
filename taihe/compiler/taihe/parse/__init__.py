@@ -12,10 +12,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-__all__ = ["ast", "Visitor", "AstConverter", "SourceManager"]
-
-from taihe.parse.antlr.TaiheAST import TaiheAST as ast
-from taihe.parse.antlr.TaiheVisitor import TaiheVisitor as Visitor
-from taihe.parse.convert import AstConverter
-from taihe.utils.sources import SourceManager

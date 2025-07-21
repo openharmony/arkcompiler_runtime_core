@@ -149,10 +149,10 @@ export class ConcurrentHashMap<K, V> implements ReadonlyMap<K, V> {
             return 1;
         }
 
-        const keyHash: int = k!.$_hashCode();
+        const keyHash: int = (k! as object).$_hashCode(); // #26217
         const t = keyHash >> 31;
 
-        return ((keyHash ^ t) - t) & (this.buckets.length - 1);
+        return ((keyHash ^ t) - t) & (this.buckets.actualLength - 1);
     }
 
     private getInitialBucketsCount(entriesCount: int): int {

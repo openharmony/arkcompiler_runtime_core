@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -129,8 +129,10 @@ Inst *BalanceExpressions::OptimizeExpression(Inst *instAfterExpr)
 template <bool IS_FIRST_CALL>
 Inst *BalanceExpressions::AllocateSourcesRec(size_t firstIdx, size_t lastIdx)
 {
+    ASSERT(lastIdx > firstIdx);
     COMPILER_LOG(DEBUG, BALANCE_EXPR) << "Allocating operators for sources_[" << firstIdx << " to " << lastIdx << "]";
-    size_t splitIdx = firstIdx + GetBitFloor(lastIdx - firstIdx + 1) - 1;
+    size_t memSize = firstIdx + GetBitFloor(lastIdx - firstIdx + 1);
+    size_t splitIdx = memSize > 0 ? memSize - 1 : 0;
 
     Inst *lhs = GetOperand(firstIdx, splitIdx);
     Inst *rhs = LIKELY((splitIdx + 1) != lastIdx) ? GetOperand(splitIdx + 1, lastIdx) : sources_[splitIdx + 1];

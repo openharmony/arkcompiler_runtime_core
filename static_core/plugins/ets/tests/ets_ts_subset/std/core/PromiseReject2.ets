@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-let p = Promise.reject<number>(new Error("5"));
+let p = Promise.reject<number>(new Error('5'));
 
 p.then<void, void>((value: number): void => {
     console.log('Test failed. The promise should not be fulfilled.');
-}, (err: Object): void => {
-    if (!(err instanceof Error) || (err as Error).message != "5") {
+}, (err: Error): void => {
+    if (!(err instanceof Error) || (err as Error).message != '5') {
         console.log('Test failed. The promise should be rejected with the provided value.');
         return;
     }
-    console.log("Test passed.");
+    console.log('Test passed.');
 });

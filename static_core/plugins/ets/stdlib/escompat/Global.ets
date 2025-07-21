@@ -18,12 +18,14 @@ package escompat;
 /**
  * Represents the NaN value according to IEEE-754 specification
  */
-export const NaN = Double.NaN;
+// initialized in _initializerBlock_.ets
+export const NaN: number;
 
 /**
  * Represents the +Infinity value according to IEEE-754 specification
  */
-export const Infinity = Double.POSITIVE_INFINITY;
+// initialized in _initializerBlock_.ets
+export const Infinity: number;
 
 /**
  * Parses integer number from `String` with specified radix
@@ -67,17 +69,6 @@ export function parseInt(s: String): number {
  */
 export function parseFloat(s: String): number {
     return Double.parseFloat(s);
-}
-
-/**
- * Checks if Double is `NaN` (not a number)
- *
- * @param d the Double to test
- *
- * @returns `true` if the argument is `NaN`, `false` otherwise.
- */
-export function isNaN(d: Number): boolean {
-    return d.isNaN();
 }
 
 /**
@@ -491,18 +482,7 @@ export function isSafeInteger(v: Int): boolean {
  * @returns boolean - true if the argument is less than Double.MAX_SAFE_INTEGER
  */
 export function isSafeInteger(v: long): boolean {
-    return v <= Double.MAX_SAFE_INTEGER as long;
-}
-
-/**
- * Checks if Long can be represented in double without lossing precision
- *
- * @param v: Long - the Long to test
- *
- * @returns boolean - true if the argument is less than Double.MAX_SAFE_INTEGER
- */
-export function isSafeInteger(v: Long): boolean {
-    return v.unboxed() <= Double.MAX_SAFE_INTEGER as long;
+    return v <= Double.MAX_SAFE_INTEGER.toLong();
 }
 
 /**
@@ -523,10 +503,8 @@ export function setTimeout(func: Function): number {
  * @param ...args: NullishType[] - parameters passed to func.
  * @returns number - timer id
  */
-export function setTimeout(func: Function, delayMs: number, ...args: NullishType[]): number {
-    return startTimer(():void => {
-        func.unsafeCall(...args)
-    }, delayMs, true);
+export function setTimeout(func: Function, delayMs: number, ...args: FixedArray<NullishType>): number {
+    return startTimer((): void => { func.unsafeCall(...args) }, delayMs, false);
 }
 
 /**
@@ -581,10 +559,8 @@ export function setInterval(func: Function): number {
  * @param ...args: NullishType[] - parameters passed to func.
  * @returns number - timer id
  */
-export function setInterval(func: Function, delayMs: number, ...args: NullishType[]): number {
-    return startTimer(():void => {
-        func.unsafeCall(...args)
-    }, delayMs, false);
+export function setInterval(func: Function, delayMs: number, ...args: FixedArray<NullishType>): number {
+    return startTimer((): void => { func.unsafeCall(...args) }, delayMs, true);
 }
 
 /**
@@ -621,23 +597,23 @@ export function clearInterval(timerId: number): void {
     stopTimer(timerId);
 }
 
-function startTimer(func: () => void, delayMs: number, oneShotTimer: boolean): number
+function startTimer(func: () => void, delayMs: number, repeat: boolean): number
 {
-    const realDelayMs = delayMs as int; 
-    if (CoroutineExtras.isMainWorker()) {
-        return startTimerImpl(func as Object, realDelayMs < 0 ? 0 : realDelayMs, oneShotTimer) as number;
+    const realDelayMs = delayMs.toInt();
+    if (CoroutineExtras.workerHasExternalScheduler()) {
+        return startTimerImpl(func as Object, realDelayMs < 0 ? 0 : realDelayMs, repeat).toDouble();
     }
-    return registerTimer(func, realDelayMs < 0 ? 0 : realDelayMs, !oneShotTimer) as number;
+    return registerTimer(func, realDelayMs < 0 ? 0 : realDelayMs, repeat).toDouble();
 }
 
 function stopTimer(timerId: number): void
 {
-    if (CoroutineExtras.isMainWorker()) {
-        stopTimerImpl(timerId as int);
+    if (CoroutineExtras.workerHasExternalScheduler()) {
+        stopTimerImpl(timerId.toInt());
         return;
     }
-    clearTimer(timerId as int);
+    clearTimer(timerId.toInt());
 }
 
-native function startTimerImpl(func: Object, delayMs: int, oneShotTimer: boolean): int;
+native function startTimerImpl(func: Object, delayMs: int, repeat: boolean): int;
 native function stopTimerImpl(timerId: int): void;

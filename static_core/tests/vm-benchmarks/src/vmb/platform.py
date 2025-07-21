@@ -71,8 +71,7 @@ class PlatformBase(CrossShell, ABC):
         for n, t in tool_plugins.items():
             tool: ToolBase = t.Tool(self.target,
                                     self.flags,
-                                    args.get_custom_opts(n))
-            tool.set_custom_opts(args.custom_opts)
+                                    args.custom_opts.get(n, []))
             self.tools[n] = tool
             log.info('%s %s', tool.name, tool.version)
 

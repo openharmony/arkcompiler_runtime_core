@@ -83,7 +83,7 @@ Runtime *Runtime::instance_ = nullptr;
 RuntimeOptions Runtime::options_;   // NOLINT(fuchsia-statically-constructed-objects)
 std::string Runtime::runtimeType_;  // NOLINT(fuchsia-statically-constructed-objects)
 os::memory::Mutex Runtime::mutex_;  // NOLINT(fuchsia-statically-constructed-objects)
-taskmanager::TaskScheduler *Runtime::taskScheduler_ = nullptr;
+bool Runtime::isTaskManagerUsed_ = false;
 
 const LanguageContextBase *g_ctxsJsRuntime = nullptr;  // Deprecated. Only for capability with js_runtime.
 
@@ -365,10 +365,13 @@ bool Runtime::Create(const RuntimeOptions &options)
     instance_->GetNotificationManager()->VmInitializationEvent(thread);
     instance_->GetNotificationManager()->ThreadStartEvent(thread);
 
-    if (options.IsSamplingProfilerEnable()) {
+    if (options_.IsSamplingProfilerCreate()) {
         instance_->GetTools().CreateSamplingProfiler();
-        instance_->GetTools().StartSamplingProfiler(options.GetSamplingProfilerOutputFile(),
-                                                    options.GetSamplingProfilerInterval());
+        if (options_.IsSamplingProfilerStartupRun()) {
+            instance_->GetTools().StartSamplingProfiler(
+                std::make_unique<tooling::sampler::FileStreamWriter>(options_.GetSamplingProfilerOutputFile().c_str()),
+                options_.GetSamplingProfilerInterval());
+        }
     }
 
     return true;
@@ -406,6 +409,7 @@ bool Runtime::DestroyUnderLockHolder()
     ark::Logger::Sync();
     delete instance_;
     instance_ = nullptr;
+
     ark::mem::MemConfig::Finalize();
 
     return true;
@@ -419,15 +423,15 @@ bool Runtime::Destroy()
     }
 
     trace::ScopedTrace scopedTrace("Runtime shutdown");
-
-    if (instance_->SaveProfileInfo()) {
+    if (instance_->SaveProfileInfo() && instance_->GetClassLinker()->GetAotManager()->HasProfiledMethods()) {
         ProfilingSaver profileSaver;
         auto isAotVerifyAbsPath = instance_->GetOptions().IsAotVerifyAbsPath();
         auto classCtxStr = instance_->GetClassLinker()->GetClassContextForAot(isAotVerifyAbsPath);
         auto &profiledMethods = instance_->GetClassLinker()->GetAotManager()->GetProfiledMethods();
+        auto profiledMethodsFinal = instance_->GetClassLinker()->GetAotManager()->GetProfiledMethodsFinal();
         auto savingPath = PandaString(instance_->GetOptions().GetProfileOutput());
         auto profiledPandaFiles = instance_->GetClassLinker()->GetAotManager()->GetProfiledPandaFiles();
-        profileSaver.SaveProfile(savingPath, classCtxStr, profiledMethods, profiledPandaFiles);
+        profileSaver.SaveProfile(savingPath, classCtxStr, profiledMethods, profiledMethodsFinal, profiledPandaFiles);
     }
 
     if (GetOptions().ShouldLoadBootPandaFiles()) {
@@ -437,8 +441,9 @@ bool Runtime::Destroy()
         instance_->GetPandaVM()->BeforeShutdown();
     }
 
-    if (instance_->GetOptions().IsSamplingProfilerEnable()) {
+    if (instance_->GetOptions().IsSamplingProfilerCreate()) {
         instance_->GetTools().StopSamplingProfiler();
+        instance_->GetTools().DestroySamplingProfiler();
     }
 
     // when signal start, but no signal stop tracing, should stop it
@@ -476,11 +481,7 @@ bool Runtime::Destroy()
     // uses barriers
     instance_->GetPandaVM()->StopGC();
 
-    if (taskScheduler_ != nullptr) {
-        taskScheduler_->Finalize();
-    }
-
-    if (IsEnabled(options_.GetVerificationMode())) {
+    if (verifier::IsEnabled(verifier::VerificationModeFromString(options_.GetVerificationMode()))) {
         verifier::DestroyService(instance_->verifierService_, options_.IsVerificationUpdateCache());
     }
 
@@ -488,18 +489,14 @@ bool Runtime::Destroy()
     RuntimeInternalAllocator::Destroy();
 
     os::CpuAffinityManager::Finalize();
-    if (taskScheduler_ != nullptr) {
-        taskmanager::TaskScheduler::Destroy();
-        taskScheduler_ = nullptr;
-    }
 
     return true;
 }
 
 void Runtime::InitializeVerifierRuntime()
 {
-    auto mode = options_.GetVerificationMode();
-    if (IsEnabled(mode)) {
+    auto mode = verifier::VerificationModeFromString(options_.GetVerificationMode());
+    if (verifier::IsEnabled(mode)) {
         std::string const &cacheFile = options_.GetVerificationCacheFile();
         verifierService_ = ark::verifier::CreateService(verifierConfig_, internalAllocator_, classLinker_, cacheFile);
     }
@@ -563,15 +560,14 @@ Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr intern
         ark::os::mem_hooks::PandaHooks::Enable();
     }
 
-    saveProfilingInfo_ = options_.IsCompilerEnableJit() && options_.IsProfilesaverEnabled();
-
 #ifdef PANDA_COMPILER_ENABLE
     // NOTE(maksenov): Enable JIT for debug mode
     isJitEnabled_ = !this->IsDebugMode() && Runtime::GetOptions().IsCompilerEnableJit();
 #else
     isJitEnabled_ = false;
 #endif
-
+    isProfilerEnabled_ = Runtime::GetOptions().IsProfilerEnabled();
+    saveProfilingInfo_ = Runtime::GetOptions().IsProfilesaverEnabled();
     verifierConfig_ = ark::verifier::NewConfig();
     InitializeVerifierRuntime();
 
@@ -614,6 +610,11 @@ Runtime::~Runtime()
 
     // crossing map is shared by different VMs.
     mem::CrossingMapSingleton::Destroy();
+
+    if (Runtime::IsTaskManagerUsed()) {
+        taskmanager::TaskManager::Finish();
+        Runtime::SetTaskManagerUsed(false);
+    }
 
     RuntimeInternalAllocator::Finalize();
     PoolManager::Finalize();
@@ -706,7 +707,7 @@ mem::GCType Runtime::GetGCType(const RuntimeOptions &options, panda_file::Source
 
 bool Runtime::LoadVerificationConfig()
 {
-    return !IsEnabled(options_.GetVerificationMode()) ||
+    return !verifier::IsEnabled(verifier::VerificationModeFromString(options_.GetVerificationMode())) ||
            verifier::LoadConfigFile(verifierConfig_, options_.GetVerificationConfigFile());
 }
 
@@ -718,10 +719,6 @@ bool Runtime::CreatePandaVM(std::string_view runtimeType)
     if (pandaVm_ == nullptr) {
         LOG(ERROR, RUNTIME) << "Failed to create panda vm";
         return false;
-    }
-
-    if (taskScheduler_ != nullptr) {
-        taskScheduler_->Initialize();
     }
 
     panda_file::File::OpenMode openMode = GetLanguageContext(GetRuntimeType()).GetBootPandaFilesOpenMode();
@@ -883,6 +880,7 @@ void Runtime::SetPandaPath()
 void Runtime::SetThreadClassPointers()
 {
     ManagedThread *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
     classLinker_->InitializeRoots(thread);
     auto ext = GetClassLinker()->GetExtension(GetLanguageContext(GetRuntimeType()));
     if (ext != nullptr) {
@@ -1147,6 +1145,7 @@ std::optional<Runtime::Error> Runtime::CreateApplicationClassLinkerContext(std::
     PandaString aotCtx;
     {
         ScopedManagedCodeThread smct(ManagedThread::GetCurrent());
+        ASSERT(appContext_.ctx != nullptr);
         appContext_.ctx->EnumeratePandaFiles(
             compiler::AotClassContextCollector(&aotCtx, options_.IsAotVerifyAbsPath()));
     }
@@ -1524,7 +1523,7 @@ void Runtime::PostZygoteFork()
 // Returns true if profile saving is enabled. GetJit() will be not null in this case.
 bool Runtime::SaveProfileInfo() const
 {
-    return saveProfilingInfo_;
+    return IsProfilerEnabled() && saveProfilingInfo_;
 }
 
 void Runtime::CheckOptionsFromOs() const

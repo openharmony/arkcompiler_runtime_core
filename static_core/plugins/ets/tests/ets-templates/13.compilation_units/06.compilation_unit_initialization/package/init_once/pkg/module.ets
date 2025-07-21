@@ -23,7 +23,7 @@ package pkg;
 import {i} from "../global"
 
 // init statement
-static { i++; };
+static { i++; }
 
 // export
 export function foo() {

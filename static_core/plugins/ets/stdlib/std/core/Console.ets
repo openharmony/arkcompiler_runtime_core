@@ -21,6 +21,15 @@ package std.core;
  */
 const MAX_CONSOLE_PRINT_DEPTH: int = 10
 
+enum LogLevel {
+    DEBUG = 0,
+    INFO = 1,
+    LOG = 2,
+    WARN = 3,
+    ERROR = 4,
+    PRINTLN = 5,
+}
+
 /**
  * A Console class that provides access to standard output and error streams.
  * Supports printing various data types, timing operations, and indentation management.
@@ -32,13 +41,13 @@ export final class Console {
     /**
      * @section Internal fields
      */
-
+    private lvl2Buf: Map<LogLevel, StringBuilder>
 
     /**
      * Map to store named timers for performance measurements
      * @private
      */
-    private timers: Map<string, long> = new Map<string, long>();
+    private timers: Map<string, long>
 
     /**
      * Current indentation level for formatted output
@@ -55,7 +64,7 @@ export final class Console {
     private static readonly INDENT_SIZE: int = 2;
 
     /**
-     * Represents the space creating the margin for indentation 
+     * Represents the space creating the margin for indentation
      * @private
      * @static
      * @readonly
@@ -66,448 +75,287 @@ export final class Console {
      * Map to store named counters for counting operations
      * @private
      */
-    private counters: Map<string, int> = new Map<string, int>();
+    private counters: Map<string, int>
 
     /**
      * Internal constructor for Console class
      * @internal
      */
-    internal constructor() {}
+    internal constructor() {
+        this.timers = new Map<string, long>
+        this.counters = new Map<string, int>
+        this.lvl2Buf = new Map<LogLevel, StringBuilder>
+        this.lvl2Buf.set(LogLevel.DEBUG, new StringBuilder)
+        this.lvl2Buf.set(LogLevel.INFO, new StringBuilder)
+        this.lvl2Buf.set(LogLevel.LOG, new StringBuilder)
+        this.lvl2Buf.set(LogLevel.WARN, new StringBuilder)
+        this.lvl2Buf.set(LogLevel.ERROR, new StringBuilder)
+        this.lvl2Buf.set(LogLevel.PRINTLN, new StringBuilder)
+    }
 
+    private native printString(s: String, lvl: int): void;
+
+    private addToBuffer(s: String, level: LogLevel): void {
+        if (s.length == 0) {
+            return
+        }
+        let buf = this.lvl2Buf.get(level)!
+        buf.append(s)
+        // buffering strategies can be applied here based on buf size
+        this.printString(buf.toString(), level.valueOf())
+        this.lvl2Buf.set(level, new StringBuilder)
+    }
+
+    private get indent(): String {
+        return Console.INDENT_MARGIN.repeat(this.indentationLevel)
+    }
+
+    private static NullishTypeToPrint(o: NullishType): String {
+        return Value.of(o).toPrint(MAX_CONSOLE_PRINT_DEPTH)
+    }
 
     /**
-     * @section Native functions 
-     */
-
-
-    /**
-     * Prints a nullable value to standard output
-     * Converts the value to a string representation with depth limitation
-     * @param {NullishType} o - The value to print
+     * Implementations for printing primitive types
+     * @param {string | boolean | byte | short | char | int | long | float | double | NullishType} i - The value to print
      * @returns {void}
      * @public
+     * @deprecated Will be removed in future. Please use log instead
      */
+    public print(i: String): void {
+        this.addToBuffer(i, LogLevel.PRINTLN)
+    };
+    public print(i: boolean): void {
+        this.addToBuffer(new Boolean(i).toString(), LogLevel.PRINTLN)
+    };
+    public print(i: byte): void {
+        this.addToBuffer(new Byte(i).toString(), LogLevel.PRINTLN)
+    };
+    public print(i: short): void {
+        this.addToBuffer(new Short(i).toString(), LogLevel.PRINTLN)
+    };
+    public print(i: char): void {
+        this.addToBuffer(new Char(i).toString(), LogLevel.PRINTLN)
+    };
+    public print(i: int): void {
+        this.addToBuffer(new Int(i).toString(), LogLevel.PRINTLN)
+    };
+    public print(i: long): void {
+        this.addToBuffer(new Long(i).toString(), LogLevel.PRINTLN)
+    };
+    public print(i: float): void {
+        this.addToBuffer(new Float(i).toString(), LogLevel.PRINTLN)
+    }
+    public print(i: double): void {
+        this.addToBuffer(new Double(i).toString(), LogLevel.PRINTLN)
+    }
     public print(o: NullishType): void {
-        this.print(Value.of(o).toPrint(MAX_CONSOLE_PRINT_DEPTH))
+        this.print(Console.NullishTypeToPrint(o))
     }
 
     /**
-     * Prints a nullable value to standard error
-     * Converts the value to a string representation with depth limitation
-     * @param {NullishType} o - The value to print to stderr
+     * @section Println definitions
+     */
+
+    /**
+     * Prints a newline
      * @returns {void}
      * @public
+     * @deprecated Will be removed in future. Please use log instead
      */
-    public printError(o: NullishType): void {
-        this.printError(Value.of(o).toPrint(MAX_CONSOLE_PRINT_DEPTH))
+    public println(): void {
+        this.print(c'\n')
     }
-
-    /**
-     * Native implementations for printing primitive types to stdout
-     * @param {string | boolean | byte | short | char | int | long} i - The value to print
-     * @returns {void}
-     * @public
-     * @native
-     */
-    public native print(i: String): void;
-    public native print(i: boolean): void;
-    public native print(i: byte): void;
-    public native print(i: short): void;
-    public native print(i: char): void;
-    public native print(i: int): void;
-    public native print(i: long): void;
-
-    /**
-     * Native implementations for printing primitive types to stderr
-     * @param {string | boolean | byte | short | char | int | long} i - The value to print to stderr
-     * @returns {void}
-     * @public
-     * @native
-     */
-    public native printError(i: String): void;
-    public native printError(i: boolean): void;
-    public native printError(i: byte): void;
-    public native printError(i: short): void;
-    public native printError(i: char): void;
-    public native printError(i: int): void;
-    public native printError(i: long): void;
-
-
-    /**
-     * @section Float/Double handling 
-     */
-
-
-    /**
-     * Prints a float value to stdout
-     * Converts the float to a string before printing
-     * @param {float} f - The float value to print
-     * @returns {void}
-     * @public
-     */
-    public print(f: float): void {
-        this.print(Float.toString(f));
-    }
-
-    /**
-     * Prints a double value to stdout
-     * Converts the double to a string before printing
-     * @param {double} d - The double value to print
-     * @returns {void}
-     * @public
-     */
-    public print(d: double): void {
-        this.print(Double.toString(d));
-    }
-
-    /**
-     * Prints a float value to stderr
-     * Converts the float to a string before printing
-     * @param {float} f - The float value to print to stderr
-     * @returns {void}
-     * @public
-     */
-    public printError(f: float): void {
-        this.printError(Float.toString(f));
-    }
-
-    /**
-     * Prints a double value to stderr
-     * Converts the double to a string before printing
-     * @param {double} d - The double value to print to stderr
-     * @returns {void}
-     * @public
-     */
-    public printError(d: double): void {
-        this.printError(Double.toString(d));
-    }
-
-
-    /**
-     * @section Println definitions (to stdout)
-     */
-
-
-    /**
-     * Prints a newline to stdout
-     * @returns {void}
-     * @public
-     * @native
-     */
-    public native println(): void;
-
-    /**
-     * Prints a newline to stderr
-     * @returns {void}
-     * @public
-     * @native
-     */
-    public native printlnError(): void;
 
     /**
      * Prints an object followed by a newline to stdout
-     * @param {Object | string | boolean | byte | short | char | int | long | float | double} i - The value to print
+     * @param {NullishType | string | boolean | byte | short | char | int | long | float | double} i - The value to print
      * @returns {void}
      * @public
+     * @deprecated Will be removed in future. Please use log instead
      */
-    public println(i: Object): void {
-        this.print(i);
-        this.println();
+    public println(i: NullishType): void {
+        this.print(i)
+        this.println()
     }
     public println(i: String): void {
-        this.print(i);
-        this.println();
+        this.print(i)
+        this.println()
     }
     public println(i: boolean): void {
-        this.print(i);
-        this.println();
+        this.print(i)
+        this.println()
     }
     public println(i: byte): void {
-        this.print(i);
-        this.println();
+        this.print(i)
+        this.println()
     }
     public println(i: short): void {
-        this.print(i);
-        this.println();
+        this.print(i)
+        this.println()
     }
     public println(i: char): void {
-        this.print(i);
-        this.println();
+        this.print(i)
+        this.println()
     }
     public println(i: int): void {
-        this.print(i);
-        this.println();
+        this.print(i)
+        this.println()
     }
     public println(i: long): void {
-        this.print(i);
-        this.println();
+        this.print(i)
+        this.println()
     }
     public println(i: float): void {
-        this.print(i);
-        this.println();
+        this.print(i)
+        this.println()
     }
     public println(i: double): void {
-        this.print(i);
-        this.println();
+        this.print(i)
+        this.println()
     }
-
 
     /**
-     * @section Println definitions (to stderr)
+     * @section Console logging API
      */
-
-
-    /**
-     * Prints an object followed by a newline to stderr
-     * @param {Object | string | boolean | byte | short | char | int | long | float | double}  i - The value to print
-     * @returns {void}
-     * @public
-     */
-    public printlnError(i: Object): void {
-        this.printError(i);
-        this.printlnError();
-    }
-    public printlnError(i: String): void {
-        this.printError(i);
-        this.printlnError();
-    }
-    public printlnError(i: boolean): void {
-        this.printError(i);
-        this.printlnError();
-    }
-    public printlnError(i: byte): void {
-        this.printError(i);
-        this.printlnError();
-    }
-    public printlnError(i: short): void {
-        this.printError(i);
-        this.printlnError();
-    }
-    public printlnError(i: char): void {
-        this.printError(i);
-        this.printlnError();
-    }
-    public printlnError(i: int): void {
-        this.printError(i);
-        this.printlnError();
-    }
-    public printlnError(i: long): void {
-        this.printError(i);
-        this.printlnError();
-    }
-    public printlnError(i: float): void {
-        this.printError(i);
-        this.printlnError();
-    }
-    public printlnError(i: double): void {
-        this.printError(i);
-        this.printlnError();
-    }
-
-
-    /**
-     * @section Console.log API
-     */
-
 
     /**
      * Implementations for log primitive types to stdout
-     * @param {string | boolean | byte | short | char | int | long} i - The value to print to stdout
+     * @param {string | boolean | byte | short | char | int | long | NullishType} i - The value to print to stdout
      * @returns {void}
      * @public
-     * @native
      */
+    // NOTE(ivan-tyulyandin): overload are added for performance reasons
+    // To optimize `debug`, `warn`, `info` and `error` the same technique can be applied
     public log(i: String): void {
-        this.printIndentation()
-        this.print(i);
-        this.println();
+        this.addToBuffer(this.indent + i + c'\n', LogLevel.LOG)
     }
     public log(i: boolean): void {
-        this.printIndentation()
-        this.print(i);
-        this.println();
+        this.addToBuffer(this.indent + i + c'\n', LogLevel.LOG)
     }
     public log(i: byte): void {
-        this.printIndentation()
-        this.print(i);
-        this.println();
+        this.addToBuffer(this.indent + i + c'\n', LogLevel.LOG)
     }
     public log(i: short): void {
-        this.printIndentation()
-        this.print(i);
-        this.println();
+        this.addToBuffer(this.indent + i + c'\n', LogLevel.LOG)
     }
     public log(i: char): void {
-        this.printIndentation()
-        this.print(i);
-        this.println();
+        this.addToBuffer(this.indent + i + c'\n', LogLevel.LOG)
     }
     public log(i: int): void {
-        this.printIndentation()
-        this.print(i);
-        this.println();
+        this.addToBuffer(this.indent + i + c'\n', LogLevel.LOG)
     }
     public log(i: long): void {
-        this.printIndentation()
-        this.print(i);
-        this.println();
+        this.addToBuffer(this.indent + i + c'\n', LogLevel.LOG)
     }
     public log(i: float): void {
-        this.printIndentation()
-        this.print(i);
-        this.println();
+        this.addToBuffer(this.indent + i + c'\n', LogLevel.LOG)
     }
     public log(i: double): void {
-        this.printIndentation()
-        this.print(i);
-        this.println();
+        this.addToBuffer(this.indent + i + c'\n', LogLevel.LOG)
     }
-
-    /**
-     * @section Console.warn API
-     */
-
-    /**
-     * Implementations for warn primitive types to stderr
-     * @param {string | boolean | byte | short | char | int | long} i - The value to print to stderr
-     * @returns {void}
-     * @public
-     * @native
-     */
-    public warn(i: String): void {
-        this.printIndentationError()
-        this.printError(i);
-        this.printlnError();
-    }
-    public warn(i: boolean): void {
-        this.printIndentationError()
-        this.printError(i);
-        this.printlnError();
-    }
-    public warn(i: byte): void {
-        this.printIndentationError()
-        this.printError(i);
-        this.printlnError();
-    }
-    public warn(i: short): void {
-        this.printIndentationError()
-        this.printError(i);
-        this.printlnError();
-    }
-    public warn(i: char): void {
-        this.printIndentationError()
-        this.printError(i);
-        this.printlnError();
-    }
-    public warn(i: int): void {
-        this.printIndentationError()
-        this.printError(i);
-        this.printlnError();
-    }
-    public warn(i: long): void {
-        this.printIndentationError()
-        this.printError(i);
-        this.printlnError();
-    }
-    public warn(i: float): void {
-        this.printIndentationError()
-        this.printError(i);
-        this.printlnError();
-    }
-    public warn(i: double): void {
-        this.printIndentationError()
-        this.printError(i);
-        this.printlnError();
+    public log(): void {
+        this.addToBuffer("\n", LogLevel.LOG)
     }
 
     /**
      * @section Variadics
      */
 
+    private printRest(level: LogLevel, ...vals: NullishType[]) {
+        let sb = new StringBuilder()
+
+        if (vals.length != 0) {
+            sb.append(this.indent)
+            const dFst = vals[0]
+            const hasFmt = (dFst instanceof String) && (dFst as String).indexOf(c'%') != -1
+            if (hasFmt) {
+                vals.shift()
+                sb.append((new Formatter).format(dFst as String, vals))
+            } else {
+                sb.append(Console.NullishTypeToPrint(dFst))
+                for (let i = 1; i < vals.length; ++i) {
+                    sb.append(" " + Console.NullishTypeToPrint(vals[i]))
+                }
+            }
+        }
+
+        sb.append(c'\n')
+        this.addToBuffer(sb.toString(), level)
+    }
+
     /**
-     * Prints multiple values to stdout with space separation and a trailing newline
-     * Values are printed with proper indentation
+     * Prints log-level messages
+     * If first argument is a string it is treated as a format string
      * @param {...NullishType[]} vals - Variable number of values to be logged
      * @returns {void}
      * @public
      */
     public log(...vals: NullishType[]): void {
-        const len = vals.length
-        const lastIndex = len - 1
-        this.printIndentation()
-        for (let i = 0; i < lastIndex; i++) {
-            this.print(vals[i])
-            this.print(" ")
-        }
-        if (len != 0) {
-            this.print(vals[lastIndex])
-        }
-        this.println()
+        this.printRest(LogLevel.LOG, ...vals)
     }
 
     /**
-     * Alias for log() method
-     * Prints debug-level messages to stdout
+     * Prints debug-level messages
+     * If first argument is a string it is treated as a format string
      * @param {...NullishType[]} vals - Variable number of values to be logged
      * @returns {void}
      * @public
      */
     public debug(...vals: NullishType[]): void {
-        this.log(...vals)
+        this.printRest(LogLevel.DEBUG, ...vals)
     }
 
     /**
-     * Alias for log() method
-     * Prints info-level messages to stdout
+     * Prints info-level messages
+     * If first argument is a string it is treated as a format string
      * @param {...NullishType[]} vals - Variable number of values to be logged
      * @returns {void}
      * @public
      */
     public info(...vals: NullishType[]): void {
-        this.log(...vals)
+        this.printRest(LogLevel.INFO, ...vals)
     }
 
     /**
-     * Prints multiple values to stderr with space separation and a trailing newline
-     * Values are printed with proper indentation
-     * @param {...NullishType[]} vals - Variable number of values to be logged as warnings
+     * Prints warn-level messages
+     * If first argument is a string it is treated as a format string
+     * @param {...NullishType[]} vals - Variable number of values to be logged
      * @returns {void}
      * @public
      */
     public warn(...vals: NullishType[]): void {
-        const len = vals.length
-        const lastIndex = len - 1
-        this.printIndentationError()
-        for (let i = 0; i < lastIndex; i++) {
-            this.printError(vals[i])
-            this.printError(" ")
-        }
-        if (len != 0) {
-            this.printError(vals[lastIndex])
-        }
-        this.printlnError()
+        this.printRest(LogLevel.WARN, ...vals)
     }
 
     /**
-     * Alias for warn() method
-     * Prints error-level messages to stderr
-     * @param {...NullishType[]} vals - Variable number of values to be logged as errors
+     * Prints error-level messages
+     * If first argument is a string it is treated as a format string
+     * @param {...NullishType[]} vals - Variable number of values to be logged
      * @returns {void}
      * @public
      */
     public error(...vals: NullishType[]): void {
-        this.warn(...vals)
+        this.printRest(LogLevel.ERROR, ...vals)
     }
 
     /**
      * Conditionally prints an error message if the assertion condition is false
-     * @param {boolean} condition - The condition to evaluate
-     * @param {...NullishType[]} vals - Values to be logged if condition is false
+     * @param {...NullishType[]} vals - Values to be logged if condition is false.
+     * Condition is the first value in vals (if exist)
      * @returns {void}
      * @public
      */
-    public assert_(condition: boolean, ...vals: NullishType[]): void {
-        if (!condition) {
+    public assert(...vals: NullishType[]): void {
+        if (vals.length == 0) {
+            return
+        }
+        if (!vals[0]) {
+            // replace false evaluated condition with no `vals` length changes
+            let sb = new StringBuilder("Assertion failed")
+            if (vals.length > 1) {
+                sb.append(c':')
+            }
+            vals[0] = sb
             this.error(...vals)
         }
     }
@@ -516,7 +364,6 @@ export final class Console {
     /**
      * @section Console.count* API
      */
-    
 
     /**
     * Counts the number of times this method has been called with a specific label
@@ -553,24 +400,22 @@ export final class Console {
     * @param {NullishType} obj - The object to inspect
     * @returns {void}
     */
-    public dir(obj: NullishType): void {
-        if (obj == null) {
-            this.log('null')
+    public dir(obj?: NullishType): void {
+        if (obj == null || obj == undefined) {
             return
         }
 
-        
         // NOTE (templin.konstantin): Internal Fields Filtering
-        // 
+        //
         //  In the current language implementation, objects have an internal representation
         //  where some fields are duplicated with a "field#" prefix. These fields are part
         //  of the internal implementation and should not be displayed when outputting objects.
-        // 
+        //
         //  Example of internal representation:
         //  {
-        //     "name": "test",         
+        //     "name": "test",
         //     "field#n": "test",    // Internal field
-        //     "age": 25,               
+        //     "age": 25,
         //     "field#m": 25         // Internal field
         //  }
         const filterer = (key: String, value: NullishType): NullishType => {
@@ -590,7 +435,7 @@ export final class Console {
     * @returns {void}
     */
     public dirxml(obj: NullishType): void {
-        console.log(obj);
+        this.log(obj)
     }
 
 
@@ -602,13 +447,12 @@ export final class Console {
     /**
     * Starts a new logging group with optional label
     * Increases indentation level for subsequent log messages
-    * @param {string} [label] - Optional label for the group
+    * @param {string} [objs] - Data to be printed without additional indent
     * @returns {void}
     */
-    public group(label?: string): void {
-        if (label) {
-            this.printIndentation()
-            this.log(label)
+    public group(...objs: NullishType[]): void {
+        if (objs.length != 0) {
+            this.log(objs)
         }
         this.indentationLevel++
     }
@@ -627,40 +471,13 @@ export final class Console {
     /**
     * Alias for group() method
     * Creates a collapsed group in environments that support it
-    * @param {string} [label] - Optional label for the group
+    * @param {string} [objs] - Data to be printed without additional indent
     * @returns {void}
     * @see group
     */
-    public groupCollapsed(label?: string): void {
-        this.group(label);
+    public groupCollapsed(...objs: NullishType[]): void {
+        this.group(...objs);
     }
-
-
-    /**
-     * @section Helpers for print with indentations
-     */
-
-
-    /**
-    * Prints the current indentation to stdout
-    * Used internally for formatting grouped log messages
-    * @private
-    * @returns {void}
-    */
-    private printIndentation(): void {
-        this.print(Console.INDENT_MARGIN.repeat(this.indentationLevel));
-    }
-
-    /**
-    * Prints the current indentation to stderr
-    * Used internally for formatting grouped error messages
-    * @private
-    * @returns {void}
-    */
-    private printIndentationError(): void {
-        this.printError(Console.INDENT_MARGIN.repeat(this.indentationLevel));
-    }
-
 
     /**
     * @section Console methods for tabular data display.
@@ -672,9 +489,34 @@ export final class Console {
     * @param {NullishType[]} data - Array of objects to display as a table
     * @returns {void}
     */
-    public table(data: NullishType[]): void {
-        const df = DataFrame.fromObjects(data);
-        df.display();
+    public table(...data: NullishType[]): void {
+        if (data.length == 0) {
+            return
+        }
+
+        // Note(ivan-tyulyandin): unwrap from Array, workaround for 25264
+        // unwrap from Array
+        let dat = data[0]!
+
+        const isSimple = (dat == undefined) || (dat == null)
+                || (dat instanceof String) || (Object.keys(__narrowAny(dat)!).length == 0)
+        if (isSimple) {
+            this.log(dat)
+            return
+        }
+
+        let df: DataFrame | undefined = undefined
+        if (dat instanceof ArrayLike) {
+            dat = dat as ArrayLike<NullishType>
+            let d = new Array<NullishType>(dat.length)
+            for (let i = 0; i < d.length; ++i) {
+                d[i] = dat[i]
+            }
+            df = DataFrame.fromObjects(...d)
+        } else {
+            df = DataFrame.fromObjects(dat)
+        }
+        df!.display();
     }
 
     /**
@@ -692,12 +534,11 @@ export final class Console {
     */
     public time(label?: string): void {
         const key = label ?? 'default'
-        if (this.timers.has(key))
-        {
+        if (this.timers.has(key)) {
             this.warn("⚠️ Warning: Label 'default' already exists for console.time()")
             return
         }
-        const start = Date.now() as long
+        const start = Date.now().toLong()
         this.timers.set(key, start)
     }
 
@@ -715,7 +556,7 @@ export final class Console {
             this.warn(`Timer '${key}' does not exist`)
             return
         }
-        const end = Date.now() as long
+        const end = Date.now().toLong()
         const duration = end - startTime
         this.log("Start: ", startTime, " end:", end, " diff: ", duration)
         this.log(`${key}: ${duration}ms`)
@@ -740,19 +581,17 @@ export final class Console {
     * @returns {void}
     */
     public trace(...data: NullishType[]): void {
+        this.log("Trace:", data)
         const stackT = StackTrace.provisionStackTrace();
-        this.log(...data)
-        for (let i = 1; i < stackT.length; ++i)
-        {
+        for (let i = 1; i < stackT.length; ++i) {
             this.log(stackT[i]);
         }
     }
 
-
 }
 
-export const console = new Console();
-
+// initialized in _initializerBlock_.ets
+export const console: Console;
 
 /**
  * @section Dataframe helpers class for console.table API
@@ -788,7 +627,7 @@ class DataFrame {
     private static readonly headerIndexRow: string = '| (index) |'
 
     /** Width of the index column based on header */
-    private readonly _indexColumnWidth: int = DataFrame.headerIndexRow.length as int;
+    private readonly _indexColumnWidth: int = Double.toInt(DataFrame.headerIndexRow.length);
 
     /**
      * Creates a new DataFrame with specified columns
@@ -801,7 +640,7 @@ class DataFrame {
         this.columnWidths = new Map<ColumnName, ColumnWidth>();
         for (let column of columns) {
             this.tableModel.set(column, new Array<string>());
-            this.columnWidths.set(column, column.length as int);
+            this.columnWidths.set(column, column.length.toInt());
         }
         this.rowsCount = 0;
     }
@@ -817,8 +656,8 @@ class DataFrame {
             const value = row.get(key) ?? "-";
             this.tableModel.get(key)!.push(value);
             const currentWidth = this.columnWidths.get(key)!;
-            const valueLength = value.length as int;
-            this.columnWidths.set(key, 
+            const valueLength = value.length.toInt();
+            this.columnWidths.set(key,
                                 currentWidth < valueLength
                                 ? valueLength
                                 : currentWidth);
@@ -841,10 +680,10 @@ class DataFrame {
         connectorLeft: string,
         connectorRight: string,
     ): string {
-        const connLength: int = 
-            this._indexColumnWidth - 
-            (connectorLeft.length as int) -
-            (connectorRight.length as int);
+        const connLength: int =
+            this._indexColumnWidth -
+            connectorLeft.length.toInt() -
+            connectorRight.length.toInt();
         const conn: string = ch.repeat(connLength);
         let border: string = `${connectorLeft}${conn}`;
         for (const col of this.tableModel.keys()) {
@@ -893,7 +732,7 @@ class DataFrame {
         if (this.tableModel.size == 0) {
             return new Array<string>();
         }
-        
+
         // row1
         const topBorder = this.buildBorderRow('─', '─', '┌', '┐');
         // row2
@@ -911,7 +750,7 @@ class DataFrame {
         // |output| = 2
         output[2] = separator
         // |output| = 3
-        
+
         for (let i = 0; i < this.rowsCount; i++) {
             output[3 + i] = this.buildDataRow(i);
         }
@@ -935,7 +774,7 @@ class DataFrame {
     /**
     * Converts an object into a map of string key-value pairs for table representation.
     * Handles various types including primitives, collections, arrays, classes, and functions.
-    * 
+    *
     * @param obj - The object to be converted into table info
     * @returns A Map containing string representations of object properties
     */
@@ -980,7 +819,7 @@ class DataFrame {
                     let fieldName = objType.getField(i).getName() as string;
                     // NOTE (templin.konstantin): replace internal-representation
                     //  fields like gensym%% with more human-readable field name
-                    //  used in interfacesq
+                    //  used in interfaces
                     if (fieldName.startsWith("gensym%%")) {
                         fieldName = `Field${i}`;
                     }
@@ -1010,7 +849,7 @@ class DataFrame {
      * @returns {DataFrame} New DataFrame instance
      * @static
      */
-    public static fromObjects(data: NullishType[]): DataFrame {
+    public static fromObjects(...data: NullishType[]): DataFrame {
         if (data.length == 0) {
             return new DataFrame(new Array<ColumnName>());
         }

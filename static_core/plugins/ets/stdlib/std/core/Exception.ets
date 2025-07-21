@@ -20,7 +20,7 @@ package std.core;
  * Serves as a base class for all exception classes.
  */
 export class Exception {
-  private stackLines: String[] = [];
+  private stackLines: FixedArray<String> = [];
   message: String;
   private cause: Object;
   private provisionStackTrace(): void {

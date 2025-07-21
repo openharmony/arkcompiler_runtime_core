@@ -19,6 +19,6 @@ tags: [compile-only, negative]
 ---*/
 
 function main(): void {
-  let arr: number[] = [1, 2, 3];
+  let arr: FixedArray<number> = [1, 2, 3];
   arr.length = 3;
 }

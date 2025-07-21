@@ -22,5 +22,5 @@ function sampleFunc(): void {}
 function main(): void {
   const ref1 = sampleFunc;
   const ref2 = sampleFunc;
-  assertNE(ref1, ref2)
+  assertEQ(ref1, ref2)
 }

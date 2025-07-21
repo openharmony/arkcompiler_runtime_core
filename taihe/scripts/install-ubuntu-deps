@@ -210,10 +210,9 @@ setup_compiler_env() {
     virtualenv "${script_dir}/../compiler/.venv"
     source "${script_dir}/../compiler/.venv/bin/activate"
 
-    log "INFO" "Setting up poetry"
-    pip install poetry
-    poetry config virtualenvs.in-project true
-    (cd "${script_dir}/../compiler" && poetry install)
+    log "INFO" "Setting up uv"
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    (cd "${script_dir}/../compiler" && uv sync)
 
     log "INFO" "Generating antlr4 grammar"
     (cd "${script_dir}/../compiler" && ./generate-grammar)
@@ -246,7 +245,6 @@ main() {
             sudo "$0" install_pkg
             "$0" update_pip_mirror
             "$0" setup_compiler_env "$script_dir"
-            exit 1
             ;;
     esac
 }

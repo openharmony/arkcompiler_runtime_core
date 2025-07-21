@@ -1,14 +1,27 @@
 # 21888
-common/imported_modules_TL_exec_2/a.ets
-common/imported_modules_TL_exec_1/a.ets
+ets-common-tests/imported_modules_TL_exec_2/a.ets
+ets-common-tests/imported_modules_TL_exec_1/a.ets
 
-# URunner: support custom arktsconfig
-common/testing_varying_arktsconfigs/package_names/test_01/dir/foo.ets
-common/testing_arktsconfig/dirA/a.ets
-common/testing_arktsconfig_field_dependencies_and_entry/A/src/main/ets/a1.ets
-common/testing_arktsconfig_paths_single_file/dirA/a.ets
+# 24932
+# TypeError: Cannot use type 'void' as value.  [cast_type_lambda.ets:41:16]
+ets-common-tests/lambda/cast_type_lambda.ets
 
-# Failed tests
-common/bouncing_peas/bouncing_peas_unit_native.ets
-ets_test_suite/atomics/skipped_rendezvous_channel.ets
-ets_test_suite/atomics/skipped_cyclic_barrier.ets  # ark timeout
+# 249333
+# E/verifier: Cannot link class: Cannot find field 'int_1' in class 'ambient_const_vars.ETSGLOBAL'
+ets-common-tests/exporting-ambient-decl/main.ets
+
+# 25057
+ets-common-tests/annotation_import_export_test/AmbientImportAl.ets
+
+# 26776
+ets-common-tests/atomics/base_operator_add.ets
+ets-common-tests/atomics/base_operator_and.ets
+ets-common-tests/atomics/base_operator_bigint.ets
+ets-common-tests/atomics/base_operator_biguint.ets
+ets-common-tests/atomics/base_operator_compare_exchange.ets
+ets-common-tests/atomics/base_operator_exchange.ets
+ets-common-tests/atomics/base_operator_load.ets
+ets-common-tests/atomics/base_operator_or.ets
+ets-common-tests/atomics/base_operator_store.ets
+ets-common-tests/atomics/base_operator_sub.ets
+ets-common-tests/atomics/base_operator_xor.ets

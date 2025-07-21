@@ -30,6 +30,7 @@ Field *TryGetField(ark::Method *method, Field *rawField, uint32_t pc, ark::Class
     bool useIc = pc != ark::compiler::INVALID_PC;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     auto address = method->GetInstructions() + (useIc ? pc : 0);
+    ASSERT(EtsCoroutine::GetCurrent() != nullptr);
     InterpreterCache *cache = EtsCoroutine::GetCurrent()->GetInterpreterCache();
     return GetFieldByName<IS_GETTER>(cache->GetEntry(address), method, rawField, address, klass);
 }
@@ -40,6 +41,7 @@ ark::Method *TryGetCallee(ark::Method *method, Field *rawField, uint32_t pc, ark
     bool useIc = pc != ark::compiler::INVALID_PC;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     auto address = method->GetInstructions() + (useIc ? pc : 0);
+    ASSERT(EtsCoroutine::GetCurrent() != nullptr);
     InterpreterCache *cache = EtsCoroutine::GetCurrent()->GetInterpreterCache();
     return GetAccessorByName<FIELD_TYPE, IS_GETTER>(cache->GetEntry(address), method, rawField, address, klass);
 }
@@ -47,6 +49,7 @@ ark::Method *TryGetCallee(ark::Method *method, Field *rawField, uint32_t pc, ark
 template <panda_file::Type::TypeId FIELD_TYPE, class T>
 static T GetFieldPrimitiveType(Field *field, const VMHandle<ObjectHeader> &handleObj)
 {
+    ASSERT(handleObj.GetPtr() != nullptr);
     switch (field->GetTypeId()) {
         case panda_file::Type::TypeId::U1:
         case panda_file::Type::TypeId::U8: {
@@ -106,6 +109,7 @@ T CompilerEtsLdObjByName(ark::Method *method, int32_t id, uint32_t pc, ark::Obje
         [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
         VMHandle<ObjectHeader> handleObj(thread, obj);
         auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+        ASSERT(handleObj.GetPtr() != nullptr);
         klass = static_cast<ark::Class *>(handleObj.GetPtr()->ClassAddr<ark::BaseClass>());
         rawField = classLinker->GetField(*method, panda_file::File::EntityId(id), false);
 
@@ -134,6 +138,7 @@ template <panda_file::Type::TypeId FIELD_TYPE, class T>
 /* CC-OFFNXT(G.FUN.01-CPP, huge_method) big switch-case */
 static void SetTypedFieldPrimitive(Field *field, const VMHandle<ObjectHeader> &handleObj, T storeValue)
 {
+    ASSERT(handleObj.GetPtr() != nullptr);
     switch (field->GetTypeId()) {
         case panda_file::Type::TypeId::U1:
         case panda_file::Type::TypeId::U8: {
@@ -245,6 +250,7 @@ void CompilerEtsStObjByNameRef(ark::Method *method, int32_t id, uint32_t pc, ark
 
         Field *field = TryGetField<panda_file::Type::TypeId::REFERENCE, false>(method, rawField, pc, klass);
         if (field != nullptr) {
+            ASSERT(handleObj.GetPtr() != nullptr);
             return handleObj.GetPtr()->SetFieldObject(*field, handleStore.GetPtr());
         }
 
@@ -358,7 +364,9 @@ extern "C" uint8_t CompilerEtsIstrue(ObjectHeader *obj)
 extern "C" EtsString *CompilerDoubleToStringDecimal(ObjectHeader *cache, uint64_t number,
                                                     [[maybe_unused]] uint64_t unused)
 {
-    ASSERT(cache != nullptr);
+    if (UNLIKELY(cache == nullptr)) {
+        return DoubleToStringCache::GetNoCache(bit_cast<double>(number));
+    }
     return DoubleToStringCache::FromCoreType(cache)->GetOrCache(EtsCoroutine::GetCurrent(), bit_cast<double>(number));
 }
 

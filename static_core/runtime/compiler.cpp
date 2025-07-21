@@ -18,6 +18,7 @@
 #include "intrinsics.h"
 #include "libpandafile/bytecode_instruction.h"
 #include "libpandafile/type_helper.h"
+#include "optimizer/ir/datatype.h"
 #include "optimizer/ir/runtime_interface.h"
 #include "runtime/cha.h"
 #include "runtime/jit/profiling_data.h"
@@ -56,6 +57,7 @@ bool PandaRuntimeInterface::IsGcValidForFastPath(SourceLanguage lang) const
 {
     auto runtime = Runtime::GetCurrent();
     if (lang == SourceLanguage::INVALID) {
+        ASSERT(ManagedThread::GetCurrent() != nullptr);
         lang = ManagedThread::GetCurrent()->GetThreadLang();
     }
     auto gcType = runtime->GetGCType(runtime->GetOptions(), lang);
@@ -164,6 +166,7 @@ compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetNumberClass(Metho
     const uint8_t *classDescriptor = utf::CStringAsMutf8(name);
     auto classLinker = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx);
     auto *classPtr = classLinker->GetClass(classDescriptor, false, classLinker->GetBootContext(), nullptr);
+    ASSERT(classPtr != nullptr);
     *typeId = classPtr->GetFileId().GetOffset();
     return classPtr;
 }
@@ -267,6 +270,7 @@ bool PandaRuntimeInterface::IsInterfaceMethod(MethodPtr parentMethod, MethodId i
 {
     ErrorHandler handler;
     auto *method = GetMethod(parentMethod, id);
+    ASSERT(method != nullptr);
     return (method->GetClass()->IsInterface() && !method->IsDefaultInterfaceMethod());
 }
 
@@ -328,6 +332,14 @@ bool PandaRuntimeInterface::IsMethodExternal(MethodPtr parentMethod, MethodPtr c
         return true;
     }
     return MethodCast(parentMethod)->GetPandaFile() != MethodCast(calleeMethod)->GetPandaFile();
+}
+
+bool PandaRuntimeInterface::IsClassExternal(MethodPtr method, ClassPtr calleeClass) const
+{
+    if (calleeClass == nullptr) {
+        return true;
+    }
+    return MethodCast(method)->GetPandaFile() != ClassCast(calleeClass)->GetPandaFile();
 }
 
 compiler::DataType::Type PandaRuntimeInterface::GetMethodReturnType(MethodPtr parentMethod, MethodId id) const
@@ -741,7 +753,23 @@ bool PandaRuntimeInterface::HasFieldMetadata(FieldPtr field) const
     return (reinterpret_cast<uintptr_t>(field) & 1U) == 0;
 }
 
-uint64_t PandaRuntimeInterface::GetStaticFieldValue(FieldPtr fieldPtr) const
+double PandaRuntimeInterface::GetStaticFieldFloatValue(FieldPtr fieldPtr) const
+{
+    auto *field = FieldCast(fieldPtr);
+    auto type = GetFieldType(fieldPtr);
+    auto klass = field->GetClass();
+    ASSERT(compiler::DataType::IsFloatType(type));
+    switch (compiler::DataType::ShiftByType(type, Arch::NONE)) {
+        case 2U:
+            return klass->GetFieldPrimitive<float>(*field);
+        case 3U:
+            return klass->GetFieldPrimitive<double>(*field);
+        default:
+            UNREACHABLE();
+    }
+}
+
+uint64_t PandaRuntimeInterface::GetStaticFieldIntegerValue(FieldPtr fieldPtr) const
 {
     auto *field = FieldCast(fieldPtr);
     auto type = GetFieldType(fieldPtr);
@@ -895,6 +923,7 @@ bool Compiler::CompileMethod(Method *method, uintptr_t bytecodeOffset, bool osr,
     }
     bool ctxOsr = method->HasCompiledCode() ? osr : false;
     if (method->AtomicSetCompilationStatus(ctxOsr ? Method::COMPILED : Method::NOT_COMPILED, Method::WAITING)) {
+        ASSERT(ManagedThread::GetCurrent() != nullptr);
         CompilerTask ctx {method, ctxOsr, ManagedThread::GetCurrent()->GetVM()};
         AddTask(std::move(ctx), func);
     }

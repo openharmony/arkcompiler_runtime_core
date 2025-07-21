@@ -141,6 +141,25 @@ bool IsDataFlowInput(Inst *inst, Inst *input)
     return false;
 }
 
+static bool CanRemoveFromSaveStates(Inst *inst)
+{
+    auto mayRequireRegMap = [instance = inst](const Inst *ssUser) {
+        // For now, assume no throws or deoptimizations occur in our methods
+        return SaveStateInst::InstMayRequireRegMap(ssUser) && !IsStringBuilderMethod(ssUser, instance) &&
+               // CC-OFFNXT(G.FMT.02-CPP) project code style
+               !IsIntrinsicStringConcat(ssUser) && !IsNullCheck(ssUser, instance) &&
+               // CC-OFFNXT(G.FMT.02-CPP) project code style
+               ssUser->GetOpcode() != Opcode::LoadString;
+    };
+    for (auto &user : inst->GetUsers()) {
+        auto userInst = user.GetInst();
+        if (userInst->IsSaveState() && !static_cast<SaveStateInst *>(userInst)->CanRemoveInputs(mayRequireRegMap)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void SimplifyStringBuilder::OptimizeStringBuilderToString(BasicBlock *block)
 {
     // Removes unnecessary String Builder instances
@@ -199,7 +218,8 @@ void SimplifyStringBuilder::OptimizeStringBuilderToString(BasicBlock *block)
         }
 
         // Remove StringBuilder instance unless it has usages
-        if (removeInstance && !IsUsedOutsideBasicBlock(instance, instance->GetBasicBlock())) {
+        if (removeInstance && CanRemoveFromSaveStates(instance) &&
+            !IsUsedOutsideBasicBlock(instance, instance->GetBasicBlock())) {
             RemoveStringBuilderInstance(instance);
             isApplied_ = true;
         }
@@ -242,6 +262,10 @@ IntrinsicInst *SimplifyStringBuilder::CreateConcatIntrinsic(
 
 bool CheckUnsupportedCases(Inst *instance)
 {
+    if (!CanRemoveFromSaveStates(instance)) {
+        return false;  // Unsupported case: this instance may be needed for deoptimization
+    }
+
     if (IsUsedOutsideBasicBlock(instance, instance->GetBasicBlock())) {
         return false;  // Unsupported case: doesn't look like concatenation pattern
     }
@@ -550,13 +574,13 @@ SaveStateInst *FindPreHeaderSaveState(Loop *loop)
 size_t CountOuterLoopSuccs(BasicBlock *block)
 {
     return std::count_if(block->GetSuccsBlocks().begin(), block->GetSuccsBlocks().end(),
-                         [block](auto succ) { return succ->GetLoop() == block->GetLoop()->GetOuterLoop(); });
+                         [block](auto succ) { return block->GetLoop()->IsInside(succ->GetLoop()); });
 }
 
 BasicBlock *GetOuterLoopSucc(BasicBlock *block)
 {
     auto found = std::find_if(block->GetSuccsBlocks().begin(), block->GetSuccsBlocks().end(),
-                              [block](auto succ) { return succ->GetLoop() == block->GetLoop()->GetOuterLoop(); });
+                              [block](auto succ) { return block->GetLoop()->IsInside(succ->GetLoop()); });
     return found != block->GetSuccsBlocks().end() ? *found : nullptr;
 }
 
@@ -649,7 +673,7 @@ ArenaVector<Inst *> SimplifyStringBuilder::FindStringBuilderAppendInstructions(I
     return appendInstructions;
 }
 
-void SimplifyStringBuilder::RemoveFromSaveStateInputs(Inst *inst)
+void SimplifyStringBuilder::RemoveFromSaveStateInputs(Inst *inst, bool doMark)
 {
     inputDescriptors_.clear();
 
@@ -660,7 +684,7 @@ void SimplifyStringBuilder::RemoveFromSaveStateInputs(Inst *inst)
         inputDescriptors_.emplace_back(user.GetInst(), user.GetIndex());
     }
 
-    RemoveFromInstructionInputs(inputDescriptors_);
+    RemoveFromInstructionInputs(inputDescriptors_, doMark);
 }
 
 void SimplifyStringBuilder::RemoveFromAllExceptPhiInputs(Inst *inst)
@@ -690,8 +714,9 @@ void SimplifyStringBuilder::RemoveStringBuilderInstance(Inst *instance)
         auto isToStringCall = IsStringBuilderToString(userInst);
         return !(isSaveState || isCtorCall || ((isAppendInstruction || isToStringCall) && !hasUsers));
     }));
+    ASSERT(CanRemoveFromSaveStates(instance));
 
-    RemoveFromSaveStateInputs(instance);
+    RemoveFromSaveStateInputs(instance, true);
 
     for (auto &user : instance->GetUsers()) {
         auto userInst = user.GetInst();
@@ -1049,6 +1074,7 @@ void SimplifyStringBuilder::HoistInstructionsToPostExit(const ConcatenationLoopM
     auto loopBlock = match.exit.toStringCall->GetBasicBlock();
     loopBlock->EraseInst(match.exit.toStringCall, true);
 
+    ASSERT(saveState != nullptr);
     if (!saveState->HasUsers()) {
         // First use of save state, insert toString-call after it
         match.exit.toStringCall->SetSaveState(saveState);
@@ -1292,6 +1318,18 @@ bool SimplifyStringBuilder::HasToStringCallInput(PhiInst *phi) const
     return hasToStringCallInput && !toStringCallInputUsedAnywhereExceptPhi;
 }
 
+static bool UsedByPhiInstInSameBB(const PhiInst *phi)
+{
+    auto header = phi->GetBasicBlock();
+    for (auto &user : phi->GetUsers()) {
+        auto inst = user.GetInst();
+        if (inst->IsPhi() && inst->GetBasicBlock() == header) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool SimplifyStringBuilder::HasInputInst(Inst *inputInst, Inst *inst) const
 {
     MarkerHolder visited {GetGraph()};
@@ -1346,7 +1384,8 @@ bool SimplifyStringBuilder::IsPhiAccumulatedValue(PhiInst *phi) const
     //      20 CallStatic std.core.StringBuilder::toString sb, ss
     //      ...
 
-    return HasInputFromPreHeader(phi) && HasToStringCallInput(phi) && HasAppendInstructionUser(phi);
+    return HasInputFromPreHeader(phi) && HasToStringCallInput(phi) && !UsedByPhiInstInSameBB(phi) &&
+           HasAppendInstructionUser(phi);
 }
 
 ArenaVector<Inst *> SimplifyStringBuilder::GetPhiAccumulatedValues(Loop *loop)
@@ -1783,6 +1822,7 @@ void SimplifyStringBuilder::ReplaceWithAppendIntrinsic(const ConcatenationMatch 
     COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "for instance id=" << match.instance->GetId() << " ("
                                      << GetOpcodeString(match.instance->GetOpcode()) << "), applying";
 
+    ASSERT(match.appendCount > 0);
     auto lastAppendIntrinsic = match.appendIntrinsics[match.appendCount - 1U];
     auto appendNIntrinsic = CreateIntrinsicStringBuilderAppendStrings(
         match, CopySaveState(GetGraph(), lastAppendIntrinsic->GetSaveState()));
@@ -1836,7 +1876,7 @@ const SimplifyStringBuilder::StringBuilderCallsMap &SimplifyStringBuilder::Colle
                 continue;
             }
 
-            if (current->first != instance) {
+            if (current != calls.end() && current->first != instance) {
                 current = calls.find(instance);
             }
             if (current == calls.end()) {
@@ -1918,7 +1958,8 @@ void SimplifyStringBuilder::CollectStringBuilderFirstCalls(BasicBlock *block)
             }
         }
 
-        if (IsStringBuilderAppend(inst) && inst->GetDataFlowInput(0) == instance) {
+        if (calls != stringBuilderFirstLastCalls_.end() && IsStringBuilderAppend(inst) &&
+            inst->GetDataFlowInput(0) == instance) {
             auto &firstCall = calls->second.first;
             if (firstCall == nullptr) {
                 firstCall = inst;

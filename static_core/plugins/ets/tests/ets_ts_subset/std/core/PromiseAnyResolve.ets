@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-Promise.any(["a", "b", "c"]).then<void, void>((value: string): void => {
-    if (value != "a") {
-        console.log("Test failed. Expected value 'a' but got '" + value + "'.");
+Promise.any(['a', 'b', 'c']).then<void, void>((value: string): void => {
+    if (value != 'a') {
+        console.log('Test failed. Expected value \'a\' but got \'' + value + '\'.');
         return;
     }
-    console.log("Test passed.");
+    console.log('Test passed.');
 }, (err: AggregateError): void => {
-    console.log("Test failed. The promise should not be rejected.");
+    console.log('Test failed. The promise should not be rejected.');
 });

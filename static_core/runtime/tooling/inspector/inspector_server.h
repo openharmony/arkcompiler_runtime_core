@@ -29,9 +29,11 @@
 
 #include "session_manager.h"
 #include "source_manager.h"
+#include "thread_state.h"
 #include "types/evaluation_result.h"
 #include "types/numeric_id.h"
 #include "types/pause_on_exceptions_state.h"
+#include "types/profile_result.h"
 #include "types/property_descriptor.h"
 #include "types/remote_object.h"
 #include "types/scope.h"
@@ -64,7 +66,7 @@ public:
     void OnFail(std::function<void()> &&handler);
 
     void CallDebuggerPaused(PtThread thread, const std::vector<BreakpointId> &hitBreakpoints,
-                            const std::optional<RemoteObject> &exception,
+                            const std::optional<RemoteObject> &exception, PauseReason pauseReason,
                             const std::function<void(const FrameInfoHandler &)> &enumerateFrames);
     void CallDebuggerResumed(PtThread thread);
     void CallDebuggerScriptParsed(PtThread thread, ScriptId scriptId, std::string_view sourceFile);
@@ -112,6 +114,11 @@ public:
     void OnCallRuntimeRunIfWaitingForDebugger(std::function<void(PtThread)> &&handler);
     void OnCallRuntimeEvaluate(
         std::function<Expected<EvaluationResult, std::string>(PtThread, const std::string &)> &&handler);
+    void OnCallProfilerEnable();
+    void OnCallProfilerDisable();
+    void OnCallProfilerSetSamplingInterval(std::function<void(uint32_t)> &&handler);
+    void OnCallProfilerStart(std::function<Expected<bool, std::string>()> &&handler);
+    void OnCallProfilerStop(std::function<Expected<Profile, std::string>()> &&handler);
 
 private:
     struct CallFrameInfo {

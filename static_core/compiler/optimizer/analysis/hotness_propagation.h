@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -214,7 +214,7 @@ private:
                 return std::nullopt;
             }
             case 2U: {
-                if (pred->GetGraph()->IsThrowApplied() && pli->GetOpcode() == Opcode::Throw) {
+                if (pred->GetGraph()->IsThrowApplied() && pli != nullptr && pli->GetOpcode() == Opcode::Throw) {
                     return 0;
                 }
                 ASSERT(pli != nullptr && (pli->GetOpcode() == Opcode::If || pli->GetOpcode() == Opcode::IfImm));

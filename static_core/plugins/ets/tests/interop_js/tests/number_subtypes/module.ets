@@ -23,7 +23,7 @@ export declare function emptyFunction(): void;
 
 export declare function evaluateObject(obj: ExampleClass): ExampleClass;
 
-export declare function evaluateArray(arr: int[], size: int): int[];
+export declare function evaluateArray(arr: FixedArray<int>, size: int): FixedArray<int>;
 
 export declare class ExampleClass {
     v0: JSValue;
@@ -35,15 +35,15 @@ export declare class ExampleClass {
 
     static evaluateNumber(v2: string, v3: string): string;
 
-    static evaluateArray(arr: int[], size: int): int[];
+    static evaluateArray(arr: FixedArray<int>, size: int): FixedArray<int>;
 
     instanceEvaluateNumber(): JSValue;
 
     evaluateObject(obj: ExampleClass): ExampleClass;
 
-    getV0(): int[];
+    getV0(): FixedArray<int>;
 
-    getV1(): int[];
+    getV1(): FixedArray<int>;
 
     static emptyMethod(): void;
 };
@@ -56,9 +56,9 @@ export declare class ClassWithEmptyConstructor {
 
     verifyProperties(v0Expected: JSValue, v1Expected: JSValue): JSValue;
 
-    getV0(): int[];
+    getV0(): FixedArray<int>;
 
-    getV1(): int[];
+    getV1(): FixedArray<int>;
 }
 
 /**

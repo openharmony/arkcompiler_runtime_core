@@ -246,3 +246,8 @@ events:
     type: std::string
   - name: field_name
     type: std::string
+
+- name: ets_cache
+  fields:
+  - name: message
+    type: std::string

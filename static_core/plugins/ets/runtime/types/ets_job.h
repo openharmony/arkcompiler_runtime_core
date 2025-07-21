@@ -18,6 +18,7 @@
 
 #include "runtime/include/object_header.h"
 #include "libpandabase/macros.h"
+#include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_sync_primitives.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
@@ -82,6 +83,7 @@ public:
 
     void SetMutex(EtsCoroutine *coro, EtsMutex *mutex)
     {
+        ASSERT(mutex != nullptr);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsJob, mutex_), mutex->GetCoreType());
     }
 
@@ -93,6 +95,7 @@ public:
 
     void SetEvent(EtsCoroutine *coro, EtsEvent *event)
     {
+        ASSERT(event != nullptr);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsJob, event_), event->GetCoreType());
     }
 
@@ -159,9 +162,16 @@ public:
 
     void Fail(EtsCoroutine *coro, EtsObject *error)
     {
+        ASSERT(error != nullptr);
         ASSERT(state_ == STATE_RUNNING);
+        ASSERT(error != nullptr);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsJob, value_), error->GetCoreType());
         state_ = STATE_FAILED;
+
+        if (Runtime::GetOptions().IsListUnhandledOnExitJobs(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
+            coro->GetPandaVM()->AddUnhandledFailedJob(this);
+        }
+
         // Unblock awaitee coros
         GetEvent(coro)->Fire();
     }

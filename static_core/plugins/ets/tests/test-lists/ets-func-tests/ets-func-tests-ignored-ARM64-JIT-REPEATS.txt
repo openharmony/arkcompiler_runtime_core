@@ -1,5 +1,5 @@
 #20821
 escompat/JsonReplacerTest.ets
 
-#22500
-std/containers/ArrayTestChecked.ets
+#24951
+std/core/SortNotFromBeginningTest.ets

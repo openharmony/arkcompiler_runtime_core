@@ -55,8 +55,3 @@ cases:
     check: |-
       type t = keyof ( A | I )
 
-  - decl: |-
-      class A {}
-      interface I {}
-    check: |-
-      type t = keyof ( A | I )[]

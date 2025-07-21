@@ -408,6 +408,27 @@ TEST_F(FunctionCallVoidTest, function_call_void_009)
     ASSERT_EQ(env_->Function_Call_Int(fGetInt, &sum), ANI_OK);
     ASSERT_EQ(sum, value3 + value4);
 }
+
+TEST_F(FunctionCallVoidTest, function_call_void_010)
+{
+    ani_namespace ns {};
+    ani_function fn1 {};
+    ani_function fn2 {};
+    GetMethod(&ns, &fn1, &fn2);
+
+    ani_value args[2U];
+    args[0U].i = INT_VAL1;
+    args[1U].i = INT_VAL2;
+
+    ASSERT_EQ(env_->c_api->Function_Call_Void(nullptr, fn1, INT_VAL1, INT_VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Function_Call_Void_A(nullptr, fn1, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Void(nullptr, INT_VAL1, INT_VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Function_Call_Void_A(nullptr, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Void(fn1, nullptr), ANI_OK);
+    ASSERT_EQ(env_->Function_Call_Void_A(fn1, nullptr), ANI_INVALID_ARGS);
+}
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

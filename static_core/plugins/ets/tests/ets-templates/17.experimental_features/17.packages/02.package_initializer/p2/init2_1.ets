@@ -23,14 +23,16 @@ tags: []
 
 package p2
 
+let var1:int;
 static {
-    var1: int = 5
+    var1 = 5
 }
 
 function foo() {}
 
+let pi:number;
 static {
-    const pi = 3.14159
+    pi = 3.14159
 }
 
 function main() {

@@ -16,9 +16,16 @@ Simple string message
 true
 undefined
 null
+
 User: John Age: 30
 ConsoleLogTest.A {name: John, age: 30}
-[1, 2, 3, 4, 5]
 Hello, Alice!
 color: blue; Styled text
 Error: Test error
+null undefined 11 123 std.core.Object {}
+,,
+%d
+1
+1 2
+37 37
+19.5 19.5

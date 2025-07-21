@@ -27,6 +27,7 @@ namespace ark::ets {
 EtsObject *EtsObject::Create(EtsCoroutine *etsCoroutine, EtsClass *klass)
 {
     ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
+    ASSERT(klass != nullptr);
     return static_cast<EtsObject *>(ObjectHeader::Create(etsCoroutine, klass->GetRuntimeClass()));
 }
 
@@ -39,6 +40,7 @@ EtsObject *EtsObject::Create(EtsClass *klass)
 /* static */
 EtsObject *EtsObject::CreateNonMovable(EtsClass *klass)
 {
+    ASSERT(klass != nullptr);
     return static_cast<EtsObject *>(ObjectHeader::CreateNonMovable(klass->GetRuntimeClass()));
 }
 

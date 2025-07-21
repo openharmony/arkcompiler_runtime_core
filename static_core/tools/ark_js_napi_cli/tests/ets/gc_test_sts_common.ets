@@ -18,9 +18,15 @@
 
 package PandaGC
 
-let storage = new Object();
-let gwr: WeakRef<Object> = new WeakRef<Object>(new Object());
-let gpwr: WeakRef<Promise<Object>>;
+let storage:Object;
+let gwr: WeakRef<Object>;
+static {
+    storage = new Object();
+    gwr = new WeakRef<Object>(new Object());
+}
+
+
+let gpwr: WeakRef<Promise<Object>> | undefined;
 
 function GetSTSObject(): Object {
     return new Object();
@@ -56,7 +62,7 @@ function isSTSObjectCollected(): boolean {
 }
 
 function isSTSPromiseCollected(): boolean {
-    return gpwr.deref() === undefined;
+    return gpwr!.deref() === undefined;
 }
 
 function SetJSObject(obj: JSValue): void {
@@ -84,7 +90,7 @@ function AddPandaArray(arr: Array<Object>): void {
 function RunPandaGC(): void {
     try {
         console.log("--- Start ETS GC Full ---");
-        GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE));
+        GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
         console.log("--- Finish ETS GC Full ---");
     } catch(e) {
         throw new Error("Unexpected exception during ETS full GC");

@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as StringIo from "@generated/string_io";
-import * as StringOp from "@generated/string_op";
-import * as System from "std/core/System";
+import {BusinessError} from "@ohos.base";
+import * as StringIo from "string_io";
+import * as StringOp from "string_op";
 
 loadLibrary("ani_string");
 
@@ -115,5 +115,5 @@ function main() {
     suite.addTest("println", println)
     suite.addTest("print", print)
     suite.addTest("testPlayString", testPlayString)
-    System.exit(suite.run())
+    exit(suite.run())
 }

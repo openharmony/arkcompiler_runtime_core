@@ -16,6 +16,7 @@
 panda_add_library(ets_interop_js_gtest STATIC ets_interop_js_gtest.cpp)
 panda_target_link_libraries(ets_interop_js_gtest gtest)
 panda_target_link_libraries(ets_interop_js_gtest arkruntime)
+panda_target_link_libraries(ets_interop_js_gtest ani_helpers)
 set_target_properties(ets_interop_js_gtest PROPERTIES POSITION_INDEPENDENT_CODE ON)
 panda_target_include_directories(ets_interop_js_gtest
     PUBLIC ${PANDA_ETS_PLUGIN_SOURCE}/tests/interop_js/gtest_plugin

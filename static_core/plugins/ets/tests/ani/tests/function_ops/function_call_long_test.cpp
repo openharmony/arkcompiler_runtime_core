@@ -374,6 +374,30 @@ TEST_F(FunctionCallTest, function_call_long_009)
     ASSERT_EQ(env_->Function_Call_Long(fA, &value, value3, value4), ANI_OK);
     ASSERT_EQ(value, value3 + value4);
 }
+
+TEST_F(FunctionCallTest, function_call_long_010)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ani_value args[2U];
+    args[0U].l = LONG_VAL1;
+    args[1U].l = LONG_VAL2;
+
+    ani_long result = 0;
+    ASSERT_EQ(env_->c_api->Function_Call_Long(nullptr, fn, &result, LONG_VAL1, LONG_VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Function_Call_Long_A(nullptr, fn, &result, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Long(nullptr, &result, LONG_VAL1, LONG_VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Function_Call_Long_A(nullptr, &result, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Long(fn, nullptr, LONG_VAL1, LONG_VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Function_Call_Long_A(fn, nullptr, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Long(fn, &result, nullptr), ANI_OK);
+    ASSERT_EQ(env_->Function_Call_Long_A(fn, &result, nullptr), ANI_INVALID_ARGS);
+}
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

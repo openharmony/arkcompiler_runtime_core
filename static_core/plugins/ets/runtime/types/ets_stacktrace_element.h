@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_STACKTRACE_ELEMENT_H
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_STACKTRACE_ELEMENT_H
 
+#include "macros.h"
 #include "mem/object_pointer.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
@@ -43,18 +44,21 @@ public:
 
     inline void SetClassName(EtsString *className)
     {
+        ASSERT(className != nullptr);
         ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsStackTraceElement, className_),
                                   className->AsObject()->GetCoreType());
     }
 
     inline void SetMethodName(EtsString *methodName)
     {
+        ASSERT(methodName != nullptr);
         ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsStackTraceElement, methodName_),
                                   methodName->AsObject()->GetCoreType());
     }
 
     inline void SetSourceFileName(EtsString *sourceFileName)
     {
+        ASSERT(sourceFileName != nullptr);
         ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsStackTraceElement, sourceFileName_),
                                   sourceFileName->AsObject()->GetCoreType());
     }

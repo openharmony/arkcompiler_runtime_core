@@ -375,6 +375,30 @@ TEST_F(FunctionCallDoubleTest, function_call_double_009)
     ASSERT_EQ(env_->Function_Call_Double(fA, &value, value3, value4), ANI_OK);
     ASSERT_EQ(value, value3 + value4);
 }
+
+TEST_F(FunctionCallDoubleTest, function_call_double_010)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ani_value args[2U];
+    args[0U].d = VAL1;
+    args[1U].d = VAL2;
+
+    ani_double result = 0.0;
+    ASSERT_EQ(env_->c_api->Function_Call_Double(nullptr, fn, &result, VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Function_Call_Double_A(nullptr, fn, &result, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Double(nullptr, &result, VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Function_Call_Double_A(nullptr, &result, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Double(fn, nullptr, VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Function_Call_Double_A(fn, nullptr, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Double(fn, &result, nullptr), ANI_OK);
+    ASSERT_EQ(env_->Function_Call_Double_A(fn, &result, nullptr), ANI_INVALID_ARGS);
+}
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

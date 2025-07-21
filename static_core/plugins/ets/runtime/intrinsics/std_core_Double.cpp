@@ -51,51 +51,16 @@ double ParseFloat(EtsString *s, const uint32_t flags)
 
 EtsString *StdCoreDoubleToString(double number, int radix)
 {
-    if (UNLIKELY(radix != helpers::DECIMAL)) {
+    auto *cache = PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
+    if (UNLIKELY(radix != helpers::DECIMAL || cache == nullptr)) {
         return helpers::FpToString(number, radix);
     }
-    auto *cache = PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
-    ASSERT(cache != nullptr);
     return cache->GetOrCache(EtsCoroutine::GetCurrent(), number);
 }
 
 bool IsNegativeNan(double x)
 {
     return std::isnan(x) && std::signbit(x);
-}
-
-EtsString *StdCoreDoubleToLocaleString(ObjectHeader *obj, EtsString *locale)
-{
-    ASSERT(obj != nullptr && locale != nullptr);
-    icu::Locale loc;
-    UErrorCode status = U_ZERO_ERROR;
-    PandaVector<uint8_t> buf;
-    std::string_view locTag = locale->ConvertToStringView(&buf);
-    icu::StringPiece sp {locTag.data(), static_cast<int32_t>(locTag.size())};
-    loc = icu::Locale::forLanguageTag(sp, status);
-
-    if (UNLIKELY(U_FAILURE(status))) {
-        std::string message = "Language tag '" + std::string(locTag) + "' is invalid or not supported";
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
-        return nullptr;
-    }
-
-    double objValue = helpers::GetStdDoubleArgument(obj);
-    if (IsNegativeNan(objValue)) {
-        objValue = std::numeric_limits<double>::quiet_NaN();
-    }
-
-    icu::number::LocalizedNumberFormatter locNumFmt = icu::number::NumberFormatter::withLocale(loc);
-    icu::number::FormattedNumber fmtNum = locNumFmt.formatDouble(objValue, status);
-
-    if (UNLIKELY(U_FAILURE(status))) {
-        std::string message = "Unable to convert " + std::to_string(objValue) + " to locale " + std::string(locTag);
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RUNTIME_EXCEPTION, message);
-        return nullptr;
-    }
-
-    icu::UnicodeString uniStr = fmtNum.toString(status);
-    return EtsString::CreateFromUtf16(reinterpret_cast<const uint16_t *>(uniStr.getBuffer()), uniStr.length());
 }
 
 double StdCoreDoubleParseFloat(EtsString *s)
@@ -151,7 +116,7 @@ double StdCoreDoubleParseInt(EtsString *s, int32_t radix)
 
 EtsString *StdCoreDoubleToExponential(ObjectHeader *obj, double d)
 {
-    double objValue = helpers::GetStdDoubleArgument(obj);
+    EtsDouble objValue = EtsBoxPrimitive<EtsDouble>::Unbox(EtsObject::FromCoreType(obj));
     // If x is NaN, return the String "NaN".
     if (std::isnan(objValue)) {
         return EtsString::CreateFromMUtf8("NaN");
@@ -184,7 +149,7 @@ EtsString *StdCoreDoubleToExponential(ObjectHeader *obj, double d)
 
 EtsString *StdCoreDoubleToExponentialWithNoDigit(ObjectHeader *obj)
 {
-    double objValue = helpers::GetStdDoubleArgument(obj);
+    EtsDouble objValue = EtsBoxPrimitive<EtsDouble>::Unbox(EtsObject::FromCoreType(obj));
     // If x is NaN, return the String "NaN".
     if (std::isnan(objValue)) {
         return EtsString::CreateFromMUtf8("NaN");
@@ -228,7 +193,7 @@ EtsString *StdCoreDoubleToExponentialWithNoDigit(ObjectHeader *obj)
 
 EtsString *StdCoreDoubleToPrecision(ObjectHeader *obj, double d)
 {
-    double objValue = helpers::GetStdDoubleArgument(obj);
+    EtsDouble objValue = EtsBoxPrimitive<EtsDouble>::Unbox(EtsObject::FromCoreType(obj));
     // If x is NaN, return the String "NaN".
     if (std::isnan(objValue)) {
         return EtsString::CreateFromMUtf8("NaN");
@@ -271,7 +236,7 @@ EtsString *StdCoreDoubleToFixed(ObjectHeader *obj, double d)
         return nullptr;
     }
 
-    double objValue = helpers::GetStdDoubleArgument(obj);
+    EtsDouble objValue = EtsBoxPrimitive<EtsDouble>::Unbox(EtsObject::FromCoreType(obj));
     // If x is NaN, return the String "NaN".
     if (std::isnan(objValue)) {
         return EtsString::CreateFromMUtf8("NaN");
@@ -342,6 +307,40 @@ double StdCoreDoubleNumberFromString(EtsString *s)
     flags |= helpers::flags::EMPTY_IS_ZERO;
     flags |= helpers::flags::ERROR_IN_EXPONENT_IS_NAN;
     return ParseFloat(s, flags);
+}
+
+EtsShort StdCoreDoubleToShort(EtsDouble val)
+{
+    // CC-OFFNXT(G.NAM.03) false positive
+    int intVal = CastFloatToInt<EtsDouble, EtsInt>(val);
+    return static_cast<int16_t>(intVal);
+}
+
+EtsByte StdCoreDoubleToByte(EtsDouble val)
+{
+    // CC-OFFNXT(G.NAM.03) false positive
+    int intVal = CastFloatToInt<EtsDouble, EtsInt>(val);
+    return static_cast<int8_t>(intVal);
+}
+
+EtsInt StdCoreDoubleToInt(EtsDouble val)
+{
+    return CastFloatToInt<EtsDouble, EtsInt>(val);
+}
+
+EtsLong StdCoreDoubleToLong(EtsDouble val)
+{
+    return CastFloatToInt<EtsDouble, EtsLong>(val);
+}
+
+EtsFloat StdCoreDoubleToFloat(EtsDouble val)
+{
+    return static_cast<float>(val);
+}
+
+EtsChar StdCoreDoubleToChar(EtsDouble val)
+{
+    return CastFloatToInt<EtsDouble, EtsChar>(val);
 }
 
 }  // namespace ark::ets::intrinsics

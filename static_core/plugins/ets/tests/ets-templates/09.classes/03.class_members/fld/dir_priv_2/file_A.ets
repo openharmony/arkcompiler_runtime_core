@@ -18,10 +18,14 @@ tags: [not-a-test, compile-only]
 ---*/
 
 class A {
-    private fld: number;
+    private _fld: number;
+
+    private get fld(): number{
+        return this._fld;
+    }
 
     constructor(p: number) {
-        this.fld = p + 1
+        this._fld = p + 1
     }
 }
 

@@ -162,6 +162,26 @@ TEST_F(ReferenceEqualsTest, check_object_and_method)
     ASSERT_EQ(env_->Reference_Equals(methodARef, methodBRef, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_FALSE);
 }
+
+TEST_F(ReferenceEqualsTest, check_nullptr)
+{
+    ani_boolean isEquals = ANI_FALSE;
+    ani_ref undefinedRef1;
+    ASSERT_EQ(env_->GetUndefined(&undefinedRef1), ANI_OK);
+
+    ani_ref undefinedRef2;
+    ASSERT_EQ(env_->GetUndefined(&undefinedRef2), ANI_OK);
+
+    ASSERT_EQ(env_->Reference_Equals(undefinedRef1, undefinedRef2, &isEquals), ANI_OK);
+    ASSERT_EQ(isEquals, ANI_TRUE);
+
+    auto ref = CallEtsFunction<ani_ref>("reference_equals_test", "GetNull");
+    ASSERT_EQ(env_->Reference_Equals(ref, undefinedRef2, &isEquals), ANI_OK);
+    ASSERT_EQ(isEquals, ANI_TRUE);
+
+    ASSERT_EQ(env_->Reference_Equals(undefinedRef1, ref, &isEquals), ANI_OK);
+    ASSERT_EQ(isEquals, ANI_TRUE);
+}
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg)

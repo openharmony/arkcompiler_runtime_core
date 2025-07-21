@@ -67,7 +67,6 @@ panda_ets_interop_js_gtest(ets_interop_js_test__scenarios
         ${CMAKE_CURRENT_SOURCE_DIR}/js_suites/test_function_arg_type_conflict_date.js
         ${CMAKE_CURRENT_SOURCE_DIR}/js_suites/test_function_arg_type_conflict_error.js
         ${CMAKE_CURRENT_SOURCE_DIR}/js_suites/test_function_arg_type_conflict_map.js
-        ${CMAKE_CURRENT_SOURCE_DIR}/js_suites/test_function_arg_type_conflict_object.js
         ${CMAKE_CURRENT_SOURCE_DIR}/js_suites/test_function_arg_type_conflict_string.js
         ${CMAKE_CURRENT_SOURCE_DIR}/js_suites/test_function_arg_type_optional_primitive_default.js
         ${CMAKE_CURRENT_SOURCE_DIR}/js_suites/test_function_arg_type_optional_primitive_explicit.js

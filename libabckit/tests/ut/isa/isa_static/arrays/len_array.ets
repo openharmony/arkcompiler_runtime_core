@@ -15,7 +15,7 @@
 // Before AOP:
 
 function get_len() {
-    let a = [1, 2, 3, 4];
+    let a : FixedArray<int> = [1, 2, 3, 4];
     let l:int = 1;
     return l;
 }

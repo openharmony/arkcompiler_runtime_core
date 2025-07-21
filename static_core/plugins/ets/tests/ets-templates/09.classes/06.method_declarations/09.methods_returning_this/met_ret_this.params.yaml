@@ -525,6 +525,8 @@ cases:
 
     - decl: |-
           // calling method returning 'this' from coroutine
+          import { launch } from "std/concurrency"
+          import { Job } from "std/concurrency"
           class A {
               fld: int
               foo(): this {
@@ -535,13 +537,13 @@ cases:
                   return this
               }
 
-              bar(): Promise<this> {
-                  return launch this.foo().foo().foo()
+              bar(): Job<this> {
+                  return launch<A, () => A>(this.foo().foo().foo)
               }
           }
       use: |-
           let a = new A
-          assertEQ((await a.bar()), a)
+          assertEQ((a.bar().Await()), a)
           assertEQ(a.fld, 3)
 
     - decl: |-
@@ -549,7 +551,7 @@ cases:
           class A {
               fld: int
               bar(): Promise<this> {
-                  return launch this.foo().foo().foo()
+                  return Promise.resolve(this.foo().foo().foo())
               }
           }
 

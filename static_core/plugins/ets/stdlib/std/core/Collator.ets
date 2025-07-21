@@ -106,8 +106,7 @@
                 yToCompare = this.removePunctuation(yToCompare)
             }
 
-            switch (this.options.sensitivity)
-            {
+            switch (this.options.sensitivity) {
                 case "base": {
                     xToCompare = xToCompare.toLowerCase()
                     yToCompare = yToCompare.toLowerCase()
@@ -155,13 +154,7 @@
                     return (this.options.caseFirst == "upper") ? -1 : 1
                 }
             }
-
-            if (!this.options.collation.includes("default")) {
-                let data : string[] = [this.options.collation, this.options.locale, xToCompare, yToCompare]
-                return this.compareByCollation(data)
-            }
-
-            return (xToCompare > yToCompare) ? 1 : -1
+            return this.compareByCollation(this.options.collation, this.options.locale, xToCompare, yToCompare)
         }
 
         /**
@@ -172,31 +165,35 @@
         */
         public constructor(locales?: string | string[], options?: CollatorOptions) {
             this.options = {caseFirst: "false", collation: "default", ignorePunctuation: false,
-            locale: intlBestFitLocale(""),
+            locale: Locale.defaultTag(),
             numeric: false,
             sensitivity: "variant",
             usage: "sort"}
 
-            if (options != undefined) {
-                checkOptions(options!)
-                this.options.caseFirst = (options.caseFirst == undefined) ? "false" : options.caseFirst as String
-                this.options.ignorePunctuation = (options.ignorePunctuation == undefined) ? false : options.ignorePunctuation as boolean
-                this.options.numeric = (options.numeric == undefined) ? false : options.numeric as boolean
-                this.options.sensitivity = (options.sensitivity == undefined) ? "variant" : options.sensitivity as String
-                this.options.usage = (options.usage == undefined) ? "sort" : options.usage as String
-            }
-
+            this.options.collation = "default"
             try {
                 let l = Collator.supportedLocalesOf((locales == undefined) ? "" : locales, options)
-                if (l.length > 1) {
+                if (l.length > 0) {
                     this.options.locale = l[0]
+                    let locale = new Intl.Locale(l[0])
+                    this.options.collation = locale.collation != undefined ? locale.collation! : this.options.collation
+                    this.options.numeric = locale.numeric != undefined ? locale.numeric! : this.options.numeric
+                    this.options.caseFirst = locale.caseFirst != undefined ? locale.caseFirst! : this.options.caseFirst
                 }
             }
             catch(e) {
                 throw new RangeError("Incorrect locales " + locales);
             }
-            // NOTE (ekaterinazaytseva) apply u-extension flags from locale to CollatorOptions issue #IBD810
-            this.options.collation = "default"
+
+            if (options != undefined) {
+                checkOptions(options!)
+                this.options.caseFirst = (options.caseFirst == undefined) ? this.options.caseFirst : options.caseFirst!
+                this.options.ignorePunctuation = (options.ignorePunctuation == undefined) ? false : options.ignorePunctuation!
+                this.options.numeric = (options.numeric == undefined) ? this.options.numeric : options.numeric!
+                this.options.sensitivity = (options.sensitivity == undefined) ? "variant" : options.sensitivity!
+                this.options.usage = (options.usage == undefined) ? "sort" : options.usage!
+                this.options.collation = (options.collation == undefined) ? this.options.collation : options.collation!
+            }
         }
 
         /**
@@ -219,7 +216,7 @@
             }
             let lookup = (options != undefined) ? options.localeMatcher == "lookup" : false
             try {
-                return [lookup ? intlLookUpLocale(locales) : intlBestFitLocale(locales)]
+                return lookup ? intlLookUpLocales(locales) : intlBestFitLocales(locales)
             }
             catch(e) {
                 if (e instanceof Error) {
@@ -233,10 +230,6 @@
 
         private readonly options : ResolvedCollatorOptions
 
-        // NOTE replace native after regexp support
-        // private removePunctuation(text : string) : string {
-        //     return text.replace(/[^\w\s]|_/g, "")
-        // }
         private native removePunctuation(text: string) : string
         private native removeAccents(text: string) : string
 
@@ -245,6 +238,6 @@
         * @param data string array contains collation, lang, x, y
         * @return icu-collator 2 strings compare result: 1 (x "more" than y), -1 (y "more" than x) or 0 (equals)
         */
-        private native compareByCollation(data : string[]) : double
+        private native compareByCollation(collation : string, lang: string, str1: string, str2: string) : double
     }
 }

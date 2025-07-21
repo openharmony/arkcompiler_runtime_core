@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,6 +60,7 @@ public:
     void EmitSaveOrRestoreRegsEpIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src) override;
     void EmitTailCallIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src) override;
     void EmitSlowPathEntryIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src) override;
+    void EmitJsCastDoubleToCharIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src) override;
 
 private:
     RegMask GetCallerRegistersToRestore() const;

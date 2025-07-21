@@ -28,8 +28,8 @@ export function main(): void {
 }
 
 function testInterface(): void {
-	const input = ["hello"];
+	const input = ['hello'];
 	const classC = new C();
 	classC.bar(input);
-	assertEq(input[0], "hello");
+	assertEq(input[0], 'hello');
 }

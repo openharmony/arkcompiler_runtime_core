@@ -87,7 +87,7 @@ function testString03(): int {
         test(JSON.parse<Object>(s1, stringType) as String == s, msg)
 }
 
-function equalObjectArrays(a: Object[], b: Object[]): boolean {
+function equalObjectArrays(a: FixedArray<Object>, b: FixedArray<Object>): boolean {
     if (a.length != b.length) {
         return false
     }
@@ -100,11 +100,11 @@ function equalObjectArrays(a: Object[], b: Object[]): boolean {
 }
 
 function testArrayBooleanParse(): int {
-    let booleanType = Type.of(new Boolean[1] as Object)
-    let emptyArray : Boolean[] = []
-    return test(equalObjectArrays(JSON.parse<Object>("[false, true]", booleanType) as Boolean[],
+    let booleanType = Type.of([true] as FixedArray<Boolean>)
+    let emptyArray : FixedArray<Boolean> = []
+    return test(equalObjectArrays(JSON.parse<FixedArray<Boolean>>("[false, true]", booleanType) as FixedArray<Boolean>,
             [Boolean.valueOf(false), Boolean.valueOf(true)]), "[false, true]") +
-        test(equalObjectArrays(JSON.parse<Object>("[]", booleanType) as Boolean[], emptyArray), "[]")
+        test(equalObjectArrays(JSON.parse<FixedArray<Boolean>>("[]", booleanType) as FixedArray<Boolean>, emptyArray), "[]")
 }
 
 function testArrayBooleanStringify(): int {
@@ -115,19 +115,19 @@ function testArrayBooleanStringify(): int {
 }
 
 function testArrayDouble(): int {
-    let doubleType = Type.of(new Double[1] as Object)
-    let emptyArray : Double[] = []
-    return test(equalObjectArrays(JSON.parse<Object>("[0, -1, 1, 2.72182, -2.72182]", doubleType) as Double[],
+    let doubleType = Type.of([1.0] as FixedArray<Double>)
+    let emptyArray : FixedArray<Double> = []
+    return test(equalObjectArrays(JSON.parse<FixedArray<Double>>("[0, -1, 1, 2.72182, -2.72182]", doubleType) as FixedArray<Double>,
             [Double.valueOf(0), Double.valueOf(-1), Double.valueOf(1), Double.valueOf(2.72182), Double.valueOf(-2.72182)]), "[0, -1, 1, 2.72182, -2.72182]") +
-        test(equalObjectArrays(JSON.parse<Object>("[]", doubleType) as Double[], emptyArray), "[]")
+        test(equalObjectArrays(JSON.parse<FixedArray<Double>>("[]", doubleType) as FixedArray<Double>, emptyArray), "[]")
 }
 
 function testArrayString(): int {
-    let stringType = Type.of(new String[1] as Object)
-    let emptyArray : String[] = []
-    return test(equalObjectArrays(JSON.parse<Object>("[\"White\", \"Rabbit\", \"was running away\", \"from Alice\"]", stringType) as String[],
+    let stringType = Type.of([""] as FixedArray<String>)
+    let emptyArray : FixedArray<String> = []
+    return test(equalObjectArrays(JSON.parse<FixedArray<String>>("[\"White\", \"Rabbit\", \"was running away\", \"from Alice\"]", stringType) as FixedArray<String>,
             ["White", "Rabbit", "was running away", "from Alice"]), "[\"White\", \"Rabbit\", \"was running away\", \"from Alice\"]") +
-        test(equalObjectArrays(JSON.parse<Object>("[]", stringType) as String[], emptyArray), "[]")
+        test(equalObjectArrays(JSON.parse<FixedArray<String>>("[]", stringType) as FixedArray<String>, emptyArray), "[]")
 }
 
 function testObject(): int {
@@ -144,7 +144,7 @@ class UserWithFields extends User {
 }
 
 class SuperUser extends UserWithFields {
-    users: UserWithFields[] = []
+    users: FixedArray<UserWithFields> = []
 }
 
 function testStringifyParse(): int {
@@ -205,8 +205,8 @@ class ManyFields {
 
     boxFloat = new Float(1.1)
 
-    // NOTE(cheezzario) without explicit type, reflection returns this field value as double[] and 1.1 becomes 1.100000023841858
-    boxFloats: Float[] = [new Float(1.1)]
+    // NOTE(cheezzario) without explicit type, reflection returns this field value as FixedArray<double> and 1.1 becomes 1.100000023841858
+    boxFloats: FixedArray<Float> = [new Float(1.1)]
 
     boxDouble = new Double(1.1)
     boxDoubles = [new Double(1.1)]
@@ -314,7 +314,7 @@ function testStringifyObjectWithReferenceCycle(): int {
 }
 
 function testStringifyArrayWithReferenceCycle(): int {
-    const selfRefArray: Object[] = [new Object()]
+    const selfRefArray: FixedArray<Object> = [new Object()]
     selfRefArray[0] = selfRefArray
 
     let testSuccess = false
@@ -362,10 +362,10 @@ function testStringifyFunction(): int {
 
 type Option<T> = T | undefined
 
-
 class WithOption {
     opt: Option<string> = "hello"
 }
+
 function testStringifyUnion(): int {
     const option: Option<string> = "hello"
 
@@ -377,20 +377,21 @@ function testStringifyUnion(): int {
     return testResult
 }
 
-class WithFn {
-    fn: Fn<number, number> = new IdentityFn<number>()
-}
-
 interface Fn<A, R> {
     apply(a: A): R 
 }
+
 class IdentityFn<A> implements Fn<A, A> {
     apply(a: A): A {
         return a
     }
 }
-function testStringifyInterface(): int {
 
+class WithFn {
+    fn: Fn<number, number> = new IdentityFn<number>()
+}
+
+function testStringifyInterface(): int {
     const identityNumber: Fn<number, number> = new IdentityFn<number>()
     let testResult = test("{}" == JSON.stringify(identityNumber), "standalone interface")
 

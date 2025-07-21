@@ -31,7 +31,7 @@ class Config {
 }
 
 class ApplicationLogger {
-    private static features: string[] = [
+    private static features: FixedArray<string> = [
         "authentication",
         "authorization",
         "caching",
@@ -67,10 +67,10 @@ class ApplicationLogger {
 function main() {
     // Basic info messages
     ApplicationLogger.logStartup();
-    
+
     // Info with multiple arguments
     ApplicationLogger.logServerStatus(3000);
-    
+
     // Info with objects
     const serverConfig = new Config(
         3000,
@@ -79,10 +79,20 @@ function main() {
         "redis"
     );
     ApplicationLogger.logConfiguration(serverConfig);
-    
+
     // Info with arrays
     ApplicationLogger.logActiveFeatures();
-    
+
     // Info with styled output
-    ApplicationLogger.logSystemInformation();   
+    ApplicationLogger.logSystemInformation();
+
+    console.info()
+
+    // Formatted strings
+    console.info("%d")
+    console.info("%d", 1)
+    console.info("%d", 1, 2)
+
+    console.info("%s %s", "37", 37)
+    console.info("%s %s", "19.5", 19.5)
 }

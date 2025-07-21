@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -293,9 +293,10 @@ ObjectHeader *PandaCoreVM::GetOOMErrorObject()
     return obj;
 }
 
-void PandaCoreVM::HandleUncaughtException()
+[[noreturn]] void PandaCoreVM::HandleUncaughtException()
 {
     ManagedThread *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
     LOG(ERROR, RUNTIME) << "Unhandled exception: " << thread->GetException()->ClassAddr<Class>()->GetName();
     // _exit guarantees a safe completion in case of multi-threading as static destructors aren't called
     _exit(1);
@@ -314,15 +315,15 @@ void PandaCoreVM::VisitVmRoots(const GCRootVisitor &visitor)
     });
 }
 
-void PandaCoreVM::UpdateVmRefs()
+void PandaCoreVM::UpdateVmRefs(const GCRootUpdater &gcRootUpdater)
 {
-    PandaVM::UpdateVmRefs();
+    PandaVM::UpdateVmRefs(gcRootUpdater);
     LOG(DEBUG, GC) << "=== PTRoots Update moved. BEGIN ===";
-    GetThreadManager()->EnumerateThreads([](ManagedThread *thread) {
+    GetThreadManager()->EnumerateThreads([&gcRootUpdater](ManagedThread *thread) {
         ASSERT(MTManagedThread::ThreadIsMTManagedThread(thread));
         auto mtThread = MTManagedThread::CastFromThread(thread);
         auto ptStorage = mtThread->GetPtReferenceStorage();
-        ptStorage->UpdateMovedRefs();
+        ptStorage->UpdateMovedRefs(gcRootUpdater);
         return true;
     });
     LOG(DEBUG, GC) << "=== PTRoots Update moved. END ===";

@@ -39,25 +39,14 @@ cases:
       function foo<Z extends Y>(q: int, r: long, v: double, w: Z): Z { return w; }
 
   - decl: |-
-      // throws mark
-      function foo(a: Int, b: Long, c: Double, d: Object): Object throws { return new Object(); }
-      function foo(q: Int, r: Long, v: Double, w: Object): Object { return new Object(); }
-
-  - decl: |-
-      // rethrows mark
-      function foo(a: Int, b: Long, c: Double, d: Object, fn: () => void throws): Object rethrows { return new Object(); }
-      function foo(q: Int, r: Long, v: Double, w: Object, fn: () => void throws): Object { return new Object(); }
-
-  - decl: |-
       type T1 = Int
       type T2 = Long
       type T3 = Double
-      type T4 = () => void throws
       type T5 = Object
 
       // using type aliases
-      function foo(a: Int, b: Long, c: Double, d: Object, fn: () => void throws): Object { return new Object(); }
-      function foo(t1: T1, t2: T2, t3: T3, t5: T5, t4: T4): T5 { return new Object(); }
+      function foo(a: Int, b: Long, c: Double, d: Object): Object { return new Object(); }
+      function foo(t1: T1, t2: T2, t3: T3, t5: T5): T5 { return new Object(); }
 
   # class methods
   - decl: |-

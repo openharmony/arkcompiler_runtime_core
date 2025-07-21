@@ -70,7 +70,7 @@ class ObjProxyHandler extends DefaultProxyHandler<ObjWithProps> {
         return super.set(target, name, value)
     }
 
-    invoke(target: ObjWithProps, method: Method, args: NullishType[]): NullishType {
+    invoke(target: ObjWithProps, method: Method, args: FixedArray<NullishType>): NullishType {
         const methodName = method.getName()
         if (methodName == "isNameSet") {
             return false
@@ -115,7 +115,6 @@ function verifyObjectProxyOps(obj: ObjWithProps, objProxyHandler: ObjProxyHandle
 function testObjectProxyOps(): void {
     verifyObjectProxyOps(new ObjWithProps(), new ObjProxyHandler())
 }
-
 
 class Handler extends DefaultProxyHandler<Map<string, string>> {}
 function testStdLibClassesProxying(): void {

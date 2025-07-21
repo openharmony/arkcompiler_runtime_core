@@ -28,12 +28,13 @@ import {
 } from 'main_js';
 
 
-class Intersection1 {
+class Intersection {
     age = tsNumber;
     name = tsString;
 }
 function checkArgFuFromSts(): boolean {
-    return checkLiteralType(new Intersection1()) as boolean;
+
+    return checkLiteralType(new Intersection()) as boolean;
 }
 
 function checkIntersectionTypeClass(): boolean {

@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+import { Job } from "std/core"
+
 let isLaunchMigrated: AtomicFlag = new AtomicFlag(false);
 
 function durationFunc(duration: int): void {
@@ -28,10 +31,10 @@ function delayWithYield(duration: int): void {
 }
 
 async function awaitee(): Promise<boolean> {
-    Coroutine.Schedule();
-    return true;
+    return new Promise<boolean>((resolve: (v: boolean) => void) => {
+        setTimeout(() => { resolve(true); }, 10);
+    });
 }
-
 
 function testLaunch(): void {
     let wId = CoroutineExtras.getWorkerId();
@@ -43,7 +46,7 @@ function testLaunch(): void {
 }
 
 function checkLaunchMigration(): void {
-    await launch testLaunch();
+    launch<void, () => void>(testLaunch).Await();
 }
 
 function main() {

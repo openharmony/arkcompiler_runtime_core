@@ -71,6 +71,7 @@ class Doclet(StringEnum):
     RETURNS = "returns"
     # Lang-agnostic
     IMPORT = "Import"
+    INCLUDE = "Include"
     TAGS = "Tags"
     BUGS = "Bugs"
     GENERATOR = "Generator"  # Legacy code generation
@@ -97,6 +98,7 @@ class BenchClass:
     benches: List[BenchFunc] = field(default_factory=list)
     bench_args: Optional[argparse.Namespace] = None
     imports: List[str] = field(default_factory=list)
+    includes: List[str] = field(default_factory=list)
     tags: List[str] = field(default_factory=list)
     bugs: List[str] = field(default_factory=list)
     generator: Optional[str] = None
@@ -118,6 +120,7 @@ class DocletParser(LineParser):
         self.__pending_tags: List[str] = []
         self.__pending_bugs: List[str] = []
         self.__pending_imports: List[str] = []
+        self.__pending_includes: List[str] = []
 
     @staticmethod
     def validate_comment(doclets: List[NameVal]) -> None:
@@ -176,11 +179,11 @@ class DocletParser(LineParser):
         class_name = self.lang.parse_state(self.current)
         if not class_name:
             raise ValueError('Bench class declaration not found!')
-        self.state = BenchClass(name=class_name, tags=self.__pending_tags,
-                                bugs=self.__pending_bugs,
-                                imports=self.__pending_imports)
+        self.state = BenchClass(name=class_name,
+                                tags=self.__pending_tags, bugs=self.__pending_bugs,
+                                imports=self.__pending_imports, includes=self.__pending_includes)
         self.__pending_tags, self.__pending_bugs = [], []
-        self.__pending_imports = []
+        self.__pending_imports, self.__pending_includes = [], []
         # check if there are overrides for whole class
         for _, value in benchmarks:
             self.state.bench_args = self.parse_bench_overrides(value)
@@ -257,6 +260,12 @@ class DocletParser(LineParser):
                 self.state.imports.append(value)
             else:
                 self.__pending_imports.append(value)
+        for _, value in filter_doclets(Doclet.INCLUDE):
+            value = str(value).strip("\'\"")
+            if self.state:
+                self.state.includes.append(value)
+            else:
+                self.__pending_includes.append(value)
         for _ in states:
             self.process_state(benchmarks, generators)
             return
@@ -327,6 +336,7 @@ class TemplateVars:  # pylint: disable=invalid-name
     tags: Any = None
     bugs: Any = None
     imports: Any = None
+    includes: Any = None
     generator: str = ''
     config: Dict[str, Any] = field(default_factory=dict)
     aot_opts: str = ''
@@ -354,10 +364,10 @@ class TemplateVars:  # pylint: disable=invalid-name
             # check tags filter:
             tags = set(parsed.tags + b.tags)  # @State::@Tags + @Bench::@Tags
             if skip_tags and set.intersection(tags, skip_tags):
-                log.debug("%s skipped by skip-tags %s", b.name, skip_tags)
+                log.trace("`%s` skipped by tags: Unwanted: %s Tagged: %s", b.name, skip_tags, tags)
                 continue
             if tags_filter and not set.intersection(tags, tags_filter):
-                log.debug("%s filtered out by tags %s", b.name, tags)
+                log.trace("`%s` skipped by tags: Wanted: %s Tagged: %s", b.name, tags_filter, tags)
                 continue
             # if no params fixtures will be [()]
             fix_id = 0
@@ -390,6 +400,7 @@ class TemplateVars:  # pylint: disable=invalid-name
                 # Defaults -> CmdLine -> Class -> Bench
                 tp.set_measure_overrides(args, parsed.bench_args, b.args)
                 tp.imports = parsed.imports
+                tp.includes = parsed.includes
                 yield tp
                 fix_id += 1
 

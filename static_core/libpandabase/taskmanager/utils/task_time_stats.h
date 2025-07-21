@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "libpandabase/macros.h"
 #include "libpandabase/taskmanager/task.h"
+#include "libpandabase/taskmanager/task_queue_interface.h"
 
 #include <atomic>
 #include <unordered_map>
@@ -55,11 +56,11 @@ public:
     virtual void RegisterWorkerThread();
     /**
      * @brief Method saves information about life time and execution time of task with specified TaskProperties.
-     * @param prop: TaskProperties of task, information about which should be saved
+     * @param queue: parent queue of task, information about which should be saved
      * @param lifeTime: time in microseconds between adding task in queue and end of its execution
      * @param executionTime: time in microseconds it took to complete the task. It should be less or equal to lifeTime.
      */
-    virtual void CollectLifeAndExecutionTimes(TaskProperties prop, uint64_t lifeTime, uint64_t executionTime) = 0;
+    virtual void CollectLifeAndExecutionTimes(QueueId id, uint64_t lifeTime, uint64_t executionTime) = 0;
     /**
      * @brief Method returns vector of strings with statistics. Each string represents element of statistics. For
      * example one string can represent statistics for one unique TaskProperties.
@@ -87,7 +88,7 @@ class LightTaskTimeTimeStats final : public TaskTimeStatsBase {
 
     struct MeanTimeStats;
 
-    static constexpr size_t STATISTICS_CONTAINER_SIZE = TaskProperties::Hash::MaxValue() + 1U;
+    static constexpr size_t STATISTICS_CONTAINER_SIZE = MAX_ID_COUNT;
 
     using StatisticsContainer = std::array<MeanTimeStats, STATISTICS_CONTAINER_SIZE>;
     using StatisticsContainerPerThread = std::vector<StatisticsContainer>;
@@ -106,14 +107,13 @@ public:
     PANDA_PUBLIC_API explicit LightTaskTimeTimeStats(size_t countOfWorkers);
     PANDA_PUBLIC_API ~LightTaskTimeTimeStats() override = default;
 
-    void CollectLifeAndExecutionTimes(TaskProperties prop, uint64_t lifeTime, uint64_t executionTime) override;
+    void CollectLifeAndExecutionTimes(QueueId id, uint64_t lifeTime, uint64_t executionTime) override;
 
     std::vector<std::string> GetTaskStatistics() override;
 
 private:
-    std::string GetStatisticsForProperties(TaskProperties prop);
-    size_t GetCountOfTasksWithProperties(TaskProperties prop);
-    std::vector<TaskProperties> GetAllTaskProperties();
+    std::string GetStatisticsForProperties(QueueId id);
+    size_t GetCountOfTasksWithProperties(QueueId id);
 
     StatisticsContainerPerThread statisticsContainerPerThread_;
 };

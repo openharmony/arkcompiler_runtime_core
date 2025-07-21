@@ -508,15 +508,25 @@ def add_coverage_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         '--use-llvm-cov', action='store_true', dest='use_llvm_cov', default=None)
     parser.add_argument(
-        '--llvm-cov-profdata-out-path', dest='llvm_profdata_out_path', default=None,
+        '--use-lcov', action='store_true', dest='use_lcov', default=None)
+
+    parser.add_argument(
+        '--llvm-cov-exclude', dest='llvm_cov_exclude', default=None,
+        help='')
+    parser.add_argument(
+        '--lcov-exclude', dest='lcov_exclude', default=None,
+        help='')
+
+    parser.add_argument(
+        '--profdata-files-dir', dest='profdata_files_dir', default=None,
         type=make_dir_if_not_exist,
         help='Directory where coverage intermediate files (*.profdata) are created.')
     parser.add_argument(
-        '--llvm-cov-html-out-path', dest='llvm_cov_html_out_path', default=None,
+        '--coverage-html-report-dir', dest='coverage_html_report_dir', default=None,
         type=make_dir_if_not_exist,
         help='Stacks files in the specified directory')
     parser.add_argument(
-        '--llvm-cov-report-by-components', action='store_true', dest='llvm_cov_report_by_components',
+        '--coverage-per-binary', action='store_true', dest='coverage_per_binary',
         default=None, help='Creates a separate coverage report for each binary running')
 
 
@@ -542,6 +552,22 @@ def add_declgen_ts2ets_args(parser: argparse.ArgumentParser) -> None:
         help="run declgen_ts2ets ts-templates tests")
 
 
+def add_declgen_ets2ets_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        '--declgen-ets2ets', action='store_true', dest='declgen_ets2ets',
+        default=None,
+        help="run declgen_ets2ets tests")
+
+
+def add_declgen_ets2ets_isolated_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--declgen-ets2ets-isolated",
+        action="store_true",
+        dest="declgen_ets2etsisolated",
+        default=None,
+        help="run declgen-ets2ets-isolated tests")
+
+
 def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Regression test runner")
 
@@ -562,5 +588,7 @@ def get_args() -> argparse.Namespace:
     add_coverage_args(parser)
     add_declgen_ets2ts_args(parser)
     add_declgen_ts2ets_args(parser)
+    add_declgen_ets2ets_args(parser)
+    add_declgen_ets2ets_isolated_args(parser)
 
     return parser.parse_args()

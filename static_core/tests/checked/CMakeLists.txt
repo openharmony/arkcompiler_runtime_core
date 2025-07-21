@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -40,9 +40,10 @@ endfunction()
 
 function(panda_add_checked_test)
     set(prefix ARG)
+    set(options BOOT)
     set(singleValues NAME FILE SUPPORT_RELEASE)
     set(multiValues AUX_FILES EXT_FILES)
-    cmake_parse_arguments(${prefix} "" "${singleValues}" "${multiValues}" ${ARGN})
+    cmake_parse_arguments(${prefix} "${options}" "${singleValues}" "${multiValues}" ${ARGN})
 
     # Events don't work in release mode
     if (NOT DEFINED ARG_SUPPORT_RELEASE AND "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
@@ -90,6 +91,11 @@ function(panda_add_checked_test)
     set(OPTIONS "--boot-panda-files"
             "${boot_stdlibs}"
             "--load-runtimes=${boot_spaces}")
+
+    # Some test cases' entrypoint panda file must be loaded from boot-panda-files
+    if (ARG_BOOT)
+        set(OPTIONS ${OPTIONS} "--load-in-boot")
+    endif ()
 
     if (NOT PANDA_CI_TESTING_MODE STREQUAL "Nightly")
         set (OPTIONS ${OPTIONS} "--compiler-check-final=true")
@@ -146,13 +152,13 @@ endif()
 if (PANDA_TARGET_AMD64 OR (PANDA_TARGET_ARM64 AND NOT PANDA_ENABLE_ADDRESS_SANITIZER AND NOT PANDA_ENABLE_THREAD_SANITIZER))
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/aot.pa)
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/const_array_test.pa)
-    panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/disable_intrinsics.pa)
+    panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/disable_intrinsics.pa BOOT)
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ldarray_obj.pa)
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/float_zero.pa)
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/force_an.pa)
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inline_external.pa)
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/irreducible_loop_test.pa)
-    panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/monitor.pa)
+    panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/monitor.pa BOOT)
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/lowering_test.pa)
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/basics_aot.pa)
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/vcalls_aux.pa)
@@ -165,7 +171,7 @@ if (PANDA_TARGET_AMD64 OR (PANDA_TARGET_ARM64 AND NOT PANDA_ENABLE_ADDRESS_SANIT
     panda_add_checked_test(NAME verify_aot_tests_file1 FILE ${CMAKE_CURRENT_SOURCE_DIR}/verify_aot_tests/file1/test.pa)
     panda_add_checked_test(NAME verify_aot_tests_file2 FILE ${CMAKE_CURRENT_SOURCE_DIR}/verify_aot_tests/file2/test.pa)
     if (NOT PANDA_PRODUCT_BUILD)
-        panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/tlab_test.pa)
+        panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/tlab_test.pa BOOT)
     endif()
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/aot_cha.pa AUX_FILES basics_aot.pa)
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/aot_cha_vcalls.pa AUX_FILES vcalls_aux.pa)
@@ -225,7 +231,7 @@ panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/compare_obj.pa)
 
 if (PANDA_TARGET_ARM64)
     panda_add_checked_test(NAME core_osr FILE ${CMAKE_CURRENT_SOURCE_DIR}/osr.pa SUPPORT_RELEASE true)
-    panda_add_checked_test(NAME core_osr_irtoc_test FILE ${CMAKE_CURRENT_SOURCE_DIR}/osr_irtoc_test.pa SUPPORT_RELEASE true)
+    panda_add_checked_test(NAME core_osr_irtoc_test FILE ${CMAKE_CURRENT_SOURCE_DIR}/osr_irtoc_test.pa SUPPORT_RELEASE true BOOT)
     panda_add_checked_test(NAME initobj_osr FILE ${CMAKE_CURRENT_SOURCE_DIR}/initobj_osr.pa SUPPORT_RELEASE true)
 endif()
 
@@ -241,9 +247,13 @@ panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/isinstance_elimination.p
 panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/combine_shifts.pa)
 panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ss_ir_builder.pa)
 panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/compiler_to_interpreter.pa)
-panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/float_intrinsic.pa SUPPORT_RELEASE true)
+panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/float_intrinsic.pa SUPPORT_RELEASE true BOOT)
 panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/move_nullcheck_out_of_loop.pa SUPPORT_RELEASE true)
 panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/check_verifier.pa)
 panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/xor_to_compare_to_xor.pa)
 panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/memory-barrier.pa)
 panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inline-external-constructor.pa EXT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/memory-barrier.pa)
+
+if (NOT PANDA_TARGET_ARM32)
+    panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/boot_an_location.pa)
+endif()

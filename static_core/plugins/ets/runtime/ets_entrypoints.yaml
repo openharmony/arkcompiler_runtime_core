@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -740,6 +740,74 @@
     - uint32_t            # string data size
     - uint16_t            # char to look up
 
+- name: CreateStringFromCharCodeTlab
+  entrypoint: CreateStringFromCharCodeTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # array of numbers (f64)
+    - ark::Class*         # string class pointer
+
+- name: CreateStringFromCharCodeTlabCompressed
+  entrypoint: CreateStringFromCharCodeTlabCompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # array of numbers (f64)
+    - ark::Class*         # string class pointer
+
+- name: CreateStringFromCharCodeSlowPath
+  entrypoint: CreateStringFromCharCodeEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - ark::ObjectHeader*       # array of numbers (f64)
+
+- name: CreateStringFromCharCode2Arg
+  entrypoint: CreateStringFromCharCodeEntrypoint
+  bridge: odd_saved2
+  properties: []
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - ark::ObjectHeader*       # array of numbers (f64)
+
+- name: CreateStringFromCharCodeSingleTlab
+  entrypoint: CreateStringFromCharCodeSingleTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - uint64_t                 # number (double after a bitcast to uin64_t), char code
+    - ark::Class*              # string class pointer
+
+- name: CreateStringFromCharCodeSingleTlabCompressed
+  entrypoint: CreateStringFromCharCodeSingleTlabCompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - uint64_t                 # number (double after a bitcast to uin64_t), char code
+    - ark::Class*              # string class pointer
+
+- name: CreateStringFromCharCodeSingleSlowPath
+  entrypoint: CreateStringFromCharCodeSingleEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - uint64_t                 # number (double after a bitcast to uin64_t), char code
+
+- name: CreateStringFromCharCodeSingle2Arg
+  entrypoint: CreateStringFromCharCodeSingleEntrypoint
+  bridge: odd_saved2
+  properties: []
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - uint64_t                 # number (double after a bitcast to uin64_t), char code
+
 - name: StringRepeat
   entrypoint: StringRepeatTlab
   bridge: none
@@ -766,6 +834,246 @@
     - ark::ObjectHeader*  # resulting array of uint8
     - ark::ObjectHeader*       # src string
     - int32_t                  # count
+
+- name: Int8ArrayToReversed
+  entrypoint: Int8ArrayToReversedTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Int8ArrayToReversedOddSaved
+  entrypoint: EtsEscompatInt8ArrayToReversed
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Int8ArrayToReversedSlowPath
+  entrypoint: EtsEscompatInt8ArrayToReversed
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Int16ArrayToReversed
+  entrypoint: Int16ArrayToReversedTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Int16ArrayToReversedOddSaved
+  entrypoint: EtsEscompatInt16ArrayToReversed
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Int16ArrayToReversedSlowPath
+  entrypoint: EtsEscompatInt16ArrayToReversed
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Int32ArrayToReversed
+  entrypoint: Int32ArrayToReversedTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Int32ArrayToReversedOddSaved
+  entrypoint: EtsEscompatInt32ArrayToReversed
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Int32ArrayToReversedSlowPath
+  entrypoint: EtsEscompatInt32ArrayToReversed
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: BigInt64ArrayToReversed
+  entrypoint: BigInt64ArrayToReversedTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: BigInt64ArrayToReversedOddSaved
+  entrypoint: EtsEscompatBigInt64ArrayToReversed
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: BigInt64ArrayToReversedSlowPath
+  entrypoint: EtsEscompatBigInt64ArrayToReversed
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Float32ArrayToReversed
+  entrypoint: Float32ArrayToReversedTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Float32ArrayToReversedOddSaved
+  entrypoint: EtsEscompatFloat32ArrayToReversed
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Float32ArrayToReversedSlowPath
+  entrypoint: EtsEscompatFloat32ArrayToReversed
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Float64ArrayToReversed
+  entrypoint: Float64ArrayToReversedTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Float64ArrayToReversedOddSaved
+  entrypoint: EtsEscompatFloat64ArrayToReversed
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Float64ArrayToReversedSlowPath
+  entrypoint: EtsEscompatFloat64ArrayToReversed
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Uint8ArrayToReversed
+  entrypoint: Uint8ArrayToReversedTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Uint8ArrayToReversedOddSaved
+  entrypoint: EtsEscompatUInt8ArrayToReversed
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Uint8ArrayToReversedSlowPath
+  entrypoint: EtsEscompatUInt8ArrayToReversed
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Uint16ArrayToReversed
+  entrypoint: Uint16ArrayToReversedTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Uint16ArrayToReversedOddSaved
+  entrypoint: EtsEscompatUInt16ArrayToReversed
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Uint16ArrayToReversedSlowPath
+  entrypoint: EtsEscompatUInt16ArrayToReversed
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Uint32ArrayToReversed
+  entrypoint: Uint32ArrayToReversedTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Uint32ArrayToReversedOddSaved
+  entrypoint: EtsEscompatUInt32ArrayToReversed
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Uint32ArrayToReversedSlowPath
+  entrypoint: EtsEscompatUInt32ArrayToReversed
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: BigUint64ArrayToReversed
+  entrypoint: BigUint64ArrayToReversedTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: BigUint64ArrayToReversedOddSaved
+  entrypoint: EtsEscompatBigUInt64ArrayToReversed
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: BigUint64ArrayToReversedSlowPath
+  entrypoint: EtsEscompatBigUInt64ArrayToReversed
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
 
 - name: BeginGeneralNativeMethod
   entrypoint: BeginGeneralNativeMethod
@@ -820,3 +1128,282 @@
   - const ark::Method*
   - ark::ObjectHeader*
   - size_t
+
+- name: Int8ArrayFillInternalFastPath
+  entrypoint: Int8ArrayFillInternalFastPath
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int8_t
+    - int32_t
+    - int32_t
+
+- name: Int8ArrayFillInternalUsual
+  entrypoint: EtsEscompatInt8ArrayFillInternal
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int8_t
+    - int32_t
+    - int32_t
+
+- name: Int16ArrayFillInternalFastPath
+  entrypoint: Int16ArrayFillInternalFastPath
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int16_t
+    - int32_t
+    - int32_t
+
+- name: Int16ArrayFillInternalUsual
+  entrypoint: EtsEscompatInt16ArrayFillInternal
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int16_t
+    - int32_t
+    - int32_t
+
+- name: Int32ArrayFillInternalFastPath
+  entrypoint: Int32ArrayFillInternalFastPath
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: Int32ArrayFillInternalUsual
+  entrypoint: EtsEscompatInt32ArrayFillInternal
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: BigInt64ArrayFillInternalFastPath
+  entrypoint: BigInt64ArrayFillInternalFastPath
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int64_t
+    - int32_t
+    - int32_t
+
+- name: BigInt64ArrayFillInternalUsual
+  entrypoint: EtsEscompatBigInt64ArrayFillInternal
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int64_t
+    - int32_t
+    - int32_t
+
+- name: Float32ArrayFillInternalFastPath
+  entrypoint: Float32ArrayFillInternalFastPath
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: Float32ArrayFillInternalUsual
+  entrypoint: EtsEscompatFloat32ArrayFillInternalInt
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: Float64ArrayFillInternalFastPath
+  entrypoint: Float64ArrayFillInternalFastPath
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int64_t
+    - int32_t
+    - int32_t
+
+- name: Float64ArrayFillInternalUsual
+  entrypoint: EtsEscompatFloat64ArrayFillInternalInt
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int64_t
+    - int32_t
+    - int32_t
+
+- name: UInt8ClampedArrayFillInternalFastPath
+  entrypoint: UInt8ClampedArrayFillInternalFastPath
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: UInt8ClampedArrayFillInternalUsual
+  entrypoint: EtsEscompatUInt8ClampedArrayFillInternal
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: UInt8ArrayFillInternalFastPath
+  entrypoint: UInt8ArrayFillInternalFastPath
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: UInt8ArrayFillInternalUsual
+  entrypoint: EtsEscompatUInt8ArrayFillInternal
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: UInt16ArrayFillInternalFastPath
+  entrypoint: UInt16ArrayFillInternalFastPath
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: UInt16ArrayFillInternalUsual
+  entrypoint: EtsEscompatUInt16ArrayFillInternal
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: UInt32ArrayFillInternalFastPath
+  entrypoint: UInt32ArrayFillInternalFastPath
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int64_t
+    - int32_t
+    - int32_t
+
+- name: UInt32ArrayFillInternalUsual
+  entrypoint: EtsEscompatUInt32ArrayFillInternal
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int64_t
+    - int32_t
+    - int32_t
+
+- name: BigUInt64ArrayFillInternalFastPath
+  entrypoint: BigUInt64ArrayFillInternalFastPath
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int64_t
+    - int32_t
+    - int32_t
+
+- name: BigUInt64ArrayFillInternalUsual
+  entrypoint: EtsEscompatBigUInt64ArrayFillInternal
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int64_t
+    - int32_t
+    - int32_t
+
+- name: WriteStringToMem
+  entrypoint: WriteStringToMem
+  bridge: none
+  properties: [irtoc]
+  signature:
+      - int32_t             # bytes written
+      - int64_t             # serialization buffer
+      - ark::ObjectHeader*  # string to serialize
+
+- name: CreateStringFromMem
+  entrypoint: CreateStringFromMem
+  bridge: none
+  properties: [irtoc]
+  signature:
+      - ark::ObjectHeader*  # deserialized string
+      - int64_t             # serialization buffer
+      - int32_t             # buffer length
+      - void*               # String class object
+
+- name: CreateStringFromMemSlowPath
+  entrypoint: UnsafeMemoryReadString
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+      - ark::ObjectHeader*  # deserialized string
+      - void*               # serialization buffer
+      - int32_t             # buffer length
+
+- name: CreateStringFromMem3Arg
+  entrypoint: UnsafeMemoryReadString
+  bridge: odd_saved3
+  properties: [intrinsic]
+  signature:
+      - ark::ObjectHeader*  # deserialized string
+      - void*               # serialization buffer
+      - int32_t             # buffer length

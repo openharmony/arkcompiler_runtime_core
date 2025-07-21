@@ -62,8 +62,8 @@ function reflectGetClass(): int {
 function reflectGetArray(): int {
     let result: int = 0
 
-    let arr: number[] = [10, 20, 30]
-    let brr: string[] = ["p", "q", "t", "w"]
+    let arr: FixedArray<number> = [10, 20, 30]
+    let brr: FixedArray<string> = ["p", "q", "t", "w"]
 
     result += (Reflect.get(arr, 0) as Number == 10) ? 0 : 1
     result += (Reflect.get(arr, 1) as Number == 20) ? 0 : 1

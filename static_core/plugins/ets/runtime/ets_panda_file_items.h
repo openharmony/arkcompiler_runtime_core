@@ -53,6 +53,7 @@ static constexpr std::string_view STRING_BUILDER                       = "Lstd/c
 static constexpr std::string_view STACK_TRACE_ELEMENT                  = "Lstd/core/StackTraceElement;";
 static constexpr std::string_view ABC_FILE                             = "Lstd/core/AbcFile;";
 static constexpr std::string_view ABC_RUNTIME_LINKER                   = "Lstd/core/AbcRuntimeLinker;";
+static constexpr std::string_view MEMORY_RUNTIME_LINKER                = "Lstd/core/MemoryRuntimeLinker;";
 static constexpr std::string_view BOOT_RUNTIME_LINKER                  = "Lstd/core/BootRuntimeLinker;";
 static constexpr std::string_view CLASS                                = "Lstd/core/Class;";
 static constexpr std::string_view RUNTIME_LINKER                       = "Lstd/core/RuntimeLinker;";
@@ -92,6 +93,25 @@ static constexpr std::string_view FUNCTION15                           = "Lstd/c
 static constexpr std::string_view FUNCTION16                           = "Lstd/core/Function16;";
 static constexpr std::string_view FUNCTIONN                            = "Lstd/core/FunctionN;";
 
+// varargs Functional interfaces
+static constexpr std::string_view FUNCTIONR0                            = "Lstd/core/FunctionR0;";
+static constexpr std::string_view FUNCTIONR1                            = "Lstd/core/FunctionR1;";
+static constexpr std::string_view FUNCTIONR2                            = "Lstd/core/FunctionR2;";
+static constexpr std::string_view FUNCTIONR3                            = "Lstd/core/FunctionR3;";
+static constexpr std::string_view FUNCTIONR4                            = "Lstd/core/FunctionR4;";
+static constexpr std::string_view FUNCTIONR5                            = "Lstd/core/FunctionR5;";
+static constexpr std::string_view FUNCTIONR6                            = "Lstd/core/FunctionR6;";
+static constexpr std::string_view FUNCTIONR7                            = "Lstd/core/FunctionR7;";
+static constexpr std::string_view FUNCTIONR8                            = "Lstd/core/FunctionR8;";
+static constexpr std::string_view FUNCTIONR9                            = "Lstd/core/FunctionR9;";
+static constexpr std::string_view FUNCTIONR10                           = "Lstd/core/FunctionR10;";
+static constexpr std::string_view FUNCTIONR11                           = "Lstd/core/FunctionR11;";
+static constexpr std::string_view FUNCTIONR12                           = "Lstd/core/FunctionR12;";
+static constexpr std::string_view FUNCTIONR13                           = "Lstd/core/FunctionR13;";
+static constexpr std::string_view FUNCTIONR14                           = "Lstd/core/FunctionR14;";
+static constexpr std::string_view FUNCTIONR15                           = "Lstd/core/FunctionR15;";
+static constexpr std::string_view FUNCTIONR16                           = "Lstd/core/FunctionR16;";
+
 // Tuple classes
 static constexpr std::string_view TUPLE                                = "Lstd/core/Tuple;";
 static constexpr std::string_view TUPLE0                               = "Lstd/core/Tuple0;";
@@ -112,7 +132,6 @@ static constexpr std::string_view TUPLE14                              = "Lstd/c
 static constexpr std::string_view TUPLE15                              = "Lstd/core/Tuple15;";
 static constexpr std::string_view TUPLE16                              = "Lstd/core/Tuple16;";
 static constexpr std::string_view TUPLEN                               = "Lstd/core/TupleN;";
-
 // Base type for all enums
 static constexpr std::string_view BASE_ENUM                            = "Lstd/core/BaseEnum;";
 
@@ -148,6 +167,9 @@ static constexpr std::string_view LINKER_VERIFICATION_ERROR            = "Lstd/c
 static constexpr std::string_view NULL_POINTER_ERROR                   = "Lstd/core/NullPointerError;";
 static constexpr std::string_view OUT_OF_MEMORY_ERROR                  = "Lstd/core/OutOfMemoryError;";
 static constexpr std::string_view RANGE_ERROR                          = "Lstd/core/RangeError;";
+static constexpr std::string_view SYNTAX_ERROR                         = "Lstd/core/SyntaxError;";
+static constexpr std::string_view REFERENCE_ERROR                      = "Lescompat/ReferenceError;";
+static constexpr std::string_view URI_ERROR                            = "Lescompat/URIError;";
 static constexpr std::string_view TYPE_ERROR                           = "Lescompat/TypeError;";
 // remove or make an Error
 static constexpr std::string_view RUNTIME_EXCEPTION                    = "Lstd/core/RuntimeException;";
@@ -179,6 +201,8 @@ static constexpr std::string_view ES_ERROR                             = "Lstd/i
 
 static constexpr std::string_view ARRAY                                = "Lescompat/Array;";
 static constexpr std::string_view ARRAY_AS_LIST_INT                    = "Lstd/containers/ArrayAsListInt;";
+static constexpr std::string_view REG_EXP_EXEC_ARRAY                   = "Lescompat/RegExpExecArray;";
+static constexpr std::string_view JSON_REPLACER                        = "Lescompat/JsonReplacer;";
 
 // ANI annotation classes
 static constexpr std::string_view ANI_UNSAFE_QUICK                     = "Lstd/annotations/ani/unsafe/Quick;";
@@ -186,14 +210,37 @@ static constexpr std::string_view ANI_UNSAFE_DIRECT                    = "Lstd/a
 
 // Module annotation class
 static constexpr std::string_view ANNOTATION_MODULE                    = "Lets/annotation/Module;";
+static constexpr std::string_view ANNOTATION_MODULE_EXPORTED           = "exported";
+
+// Interface object literal annotation class
+static constexpr std::string_view INTERFACE_OBJ_LITERAL                = "Lstd/annotations/InterfaceObjectLiteral;";
 
 // escompat
-static constexpr std::string_view SHARED_MEMORY                        = "Lescompat/SharedMemory;";
 static constexpr std::string_view DATE                                 = "Lescompat/Date;";
 static constexpr std::string_view ARRAY_ENTRIES_ITERATOR_T             = "Lescompat/ArrayEntriesIterator_T;";
 static constexpr std::string_view ITERATOR_RESULT                      = "Lescompat/IteratorResult;";
 static constexpr std::string_view ARRAY_KEYS_ITERATOR                  = "Lescompat/ArrayKeysIterator;";
 static constexpr std::string_view ARRAY_VALUES_ITERATOR_T              = "Lescompat/ArrayValuesIterator_T;";
+static constexpr std::string_view MAP                                  = "Lescompat/Map;";
+static constexpr std::string_view MAPENTRY                             = "Lescompat/MapEntry;";
+static constexpr std::string_view MAPITERATOR                          = "Lescompat/MapIterator;";
+static constexpr std::string_view EMPTYMAPITERATOR                     = "Lescompat/EmptyMapIterator;";
+static constexpr std::string_view SET                                  = "Lescompat/Set;";
+static constexpr std::string_view RECORD                               = "Lescompat/Record;";
+static constexpr std::string_view PROCESS                              = "Lescompat/StdProcess;";
+
+// Json Annotations
+static constexpr std::string_view JSON_STRINGIFY_IGNORE                = "Lescompat/JSONStringifyIgnore;";
+static constexpr std::string_view JSON_PARSE_IGNORE                    = "Lescompat/JSONParseIgnore;";
+static constexpr std::string_view JSON_RENAME                          = "Lescompat/JSONRename;";
+
+// Annotation for optional parameters
+static constexpr std::string_view OPTIONAL_PARAMETERS_ANNOTATION       =
+    "Lstd/annotations/functions/OptionalParametersAnnotation;";
+
+// Annotation for function reference
+static constexpr std::string_view ANNOTATION_FUNCTIONAL_REFERENCE      =
+    "Lets/annotation/FunctionalReference;";
 
 }  // namespace class_descriptors
 

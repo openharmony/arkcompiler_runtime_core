@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,9 +16,9 @@
 
 from pathlib import Path
 
-from runner.enum_types.configuration_kind import ArchitectureKind, SanitizerKind, OSKind, BuildTypeKind
+from runner.enum_types.configuration_kind import ArchitectureKind, BuildTypeKind, OSKind, SanitizerKind
 from runner.enum_types.qemu import QemuKind
-from runner.enum_types.verbose_format import VerboseKind, VerboseFilter
+from runner.enum_types.verbose_format import VerboseFilter, VerboseKind
 
 args = {
     'workflow': 'config-1',
@@ -68,7 +68,7 @@ args = {
     },
     'test_suite1.parameters.filter': '*',
     'test_suite1.parameters.repeats': 1,
-    'test_suite1.parameters.repeats-by-time': None,
+    'test_suite1.parameters.repeats-by-time': 0,
     'test_suite1.parameters.with-js': 'with-js',
     'test_suite1.parameters.test-list': None,
     'test_suite1.parameters.test-file': None,
@@ -92,6 +92,7 @@ args = {
     'runner.processes': 12,
     'runner.detailed_report': True,
     'runner.detailed_report_file': 'my-report',
+    'runner.report_dir': 'my-report-dir',
     'runner.show_progress': True,
     'runner.verbose': VerboseKind.SHORT,
     'runner.verbose_filter': VerboseFilter.IGNORED,
@@ -99,6 +100,6 @@ args = {
     'runner.enable_time_report': True,
     'runner.time_edges': [1, 10, 100, 500],
     'runner.use_llvm_cov': True,
-    'runner.llvm_cov_profdata_out_path': str(Path(".").resolve()),
-    'runner.llvm_cov_html_out_path': str(Path(".").resolve())
+    'runner.profdata_files_dir': Path.cwd().resolve().as_posix(),
+    'runner.coverage_html_report_dir': Path.cwd().resolve().as_posix()
 }

@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as ani_test from "@generated/ani_test";
-import * as System from "std/core/System";
+import {BusinessError} from "@ohos.base";
+import * as ani_test from "ani_test";
 
 loadLibrary("ani_test");
 
@@ -99,8 +99,10 @@ function test_interface() {
             console.log("UserFoo(" + this.name + ") is calling bar()");
         }
     }
-
-    const userFoos = [new UserFoo("X"), new UserFoo("Y"), new UserFoo("Z")];
+    const X: ani_test.Foo = new UserFoo("X")
+    const Y: ani_test.Foo = new UserFoo("Y")
+    const Z: ani_test.Foo = new UserFoo("Z")
+    const userFoos: Array<ani_test.Foo> = [X, Y, Z];
     assertEQ(userFoos.length, 3);
     ani_test.callBar(userFoos);
 }
@@ -112,5 +114,5 @@ function main() {
     suite.addTest("Test Optional", test_optional);
     suite.addTest("Test Array", test_array);
     suite.addTest("Test Interface", test_interface);
-    System.exit(suite.run());
+    exit(suite.run());
 }

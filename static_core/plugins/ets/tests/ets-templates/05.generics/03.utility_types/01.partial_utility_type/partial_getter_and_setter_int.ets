@@ -28,8 +28,8 @@ interface I {
 }
 
 class C implements I {
-  private _i:number = 0;
-  private _j:string = "";
+  _i:number = 0;
+  _j:string = "";
   set i(i: number) { z += 1; this._i = i; }
   get i() { z += 10; return this._i; }
   set j(j: string) { z += 5; this._j = j; }

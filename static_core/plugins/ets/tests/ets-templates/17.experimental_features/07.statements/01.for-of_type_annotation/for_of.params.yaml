@@ -35,21 +35,21 @@ cases:
 
     - use: |-
           // empty string
-          for (let v: char of "") res += v
+          for (let v: string of "") res += v
           if (res == "") return 0;
 
     - decl: |-
           // empty nullable string
           let s: string|null = ""
       use: |-
-          for (let v: char of s!) res += v
+          for (let v: string of s!) res += v
           if (res == "") return 0;
 
     - decl: |-
           // empty nullable string
           let s: string|undefined = ""
       use: |-
-          for (const v: char of s!) res += v
+          for (const v: string of s!) res += v
           if (res == "") return 0;
 
     - decl: |-
@@ -208,13 +208,13 @@ cases:
           let arr: string[] = ["ABC", "DEF", "GHJ"]
       use: |-
           for (let v: string of arr)
-              for (let q: char of v)
+              for (let q: string of v)
                   res += q + " "
           if (res == "A B C D E F G H J ") return 0
 
     - decl: |-
           // function, implicit widening conversion: byte -> int
-          let foo: () => byte[] = ():byte[] => { return [42 as byte, 43 as byte] }
+          let foo: () => FixedArray<byte> = ():FixedArray<byte> => { return [42 as byte, 43 as byte] }
       use: |-
           for (let v: int of foo()) res += new Int(v)
           if (res == "4243") return 0;
@@ -222,9 +222,9 @@ cases:
     - use: |-
           // expression with strings
           let ch: char = c'X'
-          for (let ch: char of "A" + "B" + "CD") {
+          for (let ch: string of "A" + "B" + "CD") {
               res += ch
-              ch = c' '
+              ch = ' '
               res += ch
           }
           if (res == "A B C D " && ch == c'X') return 0;
@@ -237,8 +237,8 @@ cases:
           // function with generics, String array
           for (let v: String of foo<String>("AZ")) {
               res += "-"
-              for (let q: Char of v) {
-                  res += q.unboxed()
+              for (let q: string of v) {
+                  res += q
               }
           }
           if (res == "-AZ-AZ-AZ") return 0;

@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as test_primitives from "@generated/primitives_test";
-import * as test_void_ns from "@generated/void_func";
-import * as System from "std/core/System";
+import {BusinessError} from "@ohos.base";
+import * as test_primitives from "primitives_test";
+import * as test_void_ns from "void_func";
 
 loadLibrary("ani_primitives");
 
@@ -452,7 +452,7 @@ function testCaseBaseFunc18() {
 }
 
 function testCaseBaseFunc19() {
-    let floatArray: float[] = [3.14159, 123.0, -45678.5454, 0.052, 0.01];
+    let floatArray: float[] = [3.14159f, 123.0f, -45678.5454f, 0.052f, 0.01f];
     let doubleArray: double[] = [
         10086.123456, -156.45678945, 3.141592345454545, 9223372036.854775807,
         -922337203.6854775808
@@ -1035,34 +1035,45 @@ function testCasetestBaseBoolFunc4_2() {
 }
 
 function testCasetestBaseBoolFunc5() {
-    primitivesBoolTest.TestBaseBoolFunc5Async(
-        true, (error: Error, data?: boolean) => {
-            if (!error.message) {
-                console.log(
-                    "main finsih test testCasetestBaseBoolFunc5 success ",
-                    data);
-                assertEQ(data, true);
-            } else {
-                console.log(
-                    "main finsih test testCasetestBaseBoolFunc5 ERROR ", error);
-            }
-        })
+    let p = new Promise<boolean>((resolve, reject) => {
+        primitivesBoolTest.TestBaseBoolFunc5Async(
+            true, (err: BusinessError, data: boolean) => {
+                if (err.code !== 0) {
+                    reject(err);
+                } else {
+                    resolve(data);
+                }
+            });
+    });
+    let res: boolean;
+    let err: BusinessError = new BusinessError();
+    try {
+        res = await p;
+    } catch (e) {
+        err = e as BusinessError;
+    }
+    assertEQ(res, true);
 }
 
 function testCasetestBaseBoolFunc5_1() {
-    primitivesBoolTest.TestBaseBoolFunc5Async(
-        false, (error: Error, data?: boolean) => {
-            if (!error.message) {
-                console.log(
-                    "main finsih test testCasetestBaseBoolFunc5_1 success ",
-                    data);
-                assertEQ(data, false);
-            } else {
-                console.log(
-                    "main finsih test testCasetestBaseBoolFunc5_1 ERROR ",
-                    error);
-            }
-        })
+    let p = new Promise<boolean>((resolve, reject) => {
+        primitivesBoolTest.TestBaseBoolFunc5Async(
+            false, (err: BusinessError, data: boolean) => {
+                if (err.code !== 0) {
+                    reject(err);
+                } else {
+                    resolve(data);
+                }
+            });
+    });
+    let res: boolean;
+    let err: BusinessError = new BusinessError();
+    try {
+        res = await p;
+    } catch (e) {
+        err = e as BusinessError;
+    }
+    assertEQ(res, false);
 }
 
 function testCasetestBaseBoolFunc5_2() {
@@ -1541,5 +1552,5 @@ function main() {
     suite.addTest("check testCaseConstant2", testCaseConstant2);
     suite.addTest("check testCaseConstant3", testCaseConstant3);
     suite.addTest("check testCaseConstant4", testCaseConstant4);
-    System.exit(suite.run())
+    exit(suite.run())
 }

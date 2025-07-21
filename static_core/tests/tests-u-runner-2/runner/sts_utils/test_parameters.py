@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,15 +19,16 @@
 # that are used in templates (yaml lists).
 
 import os.path as ospath
-from typing import Dict, List, Any
 from pathlib import Path
+from typing import Any
+
 import yaml
 
-from runner.sts_utils.constants import YAML_EXTENSIONS, LIST_PREFIX
+from runner.sts_utils.constants import LIST_PREFIX, YAML_EXTENSIONS
 from runner.sts_utils.exceptions import InvalidFileFormatException
 from runner.utils import iter_files, read_file
 
-Params = Dict
+Params = dict
 
 
 def load_params(dirpath: Path) -> Params:
@@ -41,14 +42,14 @@ def load_params(dirpath: Path) -> Params:
         if not name_without_ext.startswith(LIST_PREFIX):
             raise InvalidFileFormatException(message="Lists of parameters must start with 'list.'", filepath=filepath)
         listname = name_without_ext[len(LIST_PREFIX):]
-        params: List[Dict[str, Any]] = parse_yaml(filepath)
+        params: list[dict[str, Any]] = parse_yaml(filepath) # type: ignore[explicit-any]
         if not isinstance(params, list):
             raise InvalidFileFormatException(message="Parameters list must be YAML array", filepath=filepath)
         result[listname] = params
     return result
 
 
-def parse_yaml(path: str) -> Any:
+def parse_yaml(path: str) -> Any:       # type: ignore[explicit-any]
     """
     Parses a single YAML list of parameters
     """
@@ -57,6 +58,6 @@ def parse_yaml(path: str) -> Any:
         params = yaml.safe_load(text)
     except Exception as common_exp:
         raise InvalidFileFormatException(
-            message=f"Could not load YAML: {str(common_exp)}",
+            message=f"Could not load YAML: {common_exp!s}",
             filepath=path) from common_exp
     return params

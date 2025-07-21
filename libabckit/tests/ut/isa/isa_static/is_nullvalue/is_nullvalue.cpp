@@ -14,7 +14,7 @@
  */
 
 #include "libabckit/include/c/abckit.h"
-#include "libabckit/src/include_v2/c/isa/isa_static.h"
+#include "libabckit/include/c/isa/isa_static.h"
 #include "libabckit/include/c/metadata_core.h"
 
 #include "helpers/helpers_runtime.h"

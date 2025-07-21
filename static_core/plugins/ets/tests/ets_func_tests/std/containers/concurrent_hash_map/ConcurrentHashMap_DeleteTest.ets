@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-let buf = new SharedArrayBuffer(4);
+import { launch } from "std/concurrency"
+
+let buf = new ArrayBuffer(4);
 let flag: Int8Array = new Int8Array(buf, 0, 4);
 let reFlag = 0;
 
@@ -77,10 +79,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch deleteAll();
-        let p2 = launch deleteAllBack();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(deleteAll);
+        let p2 = launch<void, () => void>(deleteAllBack);
+        p1.Await();
+        p2.Await();
         assertEQ(concurrentHashMapOne.size, 0);
     });
     concurrentHashMapOneTestsuite.addTest("deleteAndTest_001", () =>
@@ -89,10 +91,10 @@ function main(): int {
         assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
         setAll();
-        let p1 = launch deleteAll();
-        let p2 = launch replaceAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(deleteAll);
+        let p2 = launch<void, () => void>(replaceAll);
+        p1.Await();
+        p2.Await();
         assertTrue(Atomics.load(flag, 0) >= 10);
     });
     concurrentHashMapOneTestsuite.addTest("deleteAndTest_002", () =>
@@ -101,10 +103,10 @@ function main(): int {
         assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
         setAll();
-        let p1 = launch deleteAll();
-        let p2 = launch isEmptyFun();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(deleteAll);
+        let p2 = launch<void, () => void>(isEmptyFun);
+        p1.Await();
+        p2.Await();
         assertEQ(Atomics.load(flag, 0), 10);
     });
     concurrentHashMapOneTestsuite.addTest("deleteAndTest_003", () =>
@@ -112,10 +114,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch deleteAll();
-        let p2 = launch clearAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(deleteAll);
+        let p2 = launch<void, () => void>(clearAll);
+        p1.Await();
+        p2.Await();
         assertTrue(concurrentHashMapOne.isEmpty());
     });
     concurrentHashMapOneTestsuite.addTest("deleteAndTest_004", () =>
@@ -124,10 +126,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch removeAll();
-        let p2 = launch deleteAllBack();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(removeAll);
+        let p2 = launch<void, () => void>(deleteAllBack);
+        p1.Await();
+        p2.Await();
         assertTrue(concurrentHashMapOne.isEmpty());
     });
 

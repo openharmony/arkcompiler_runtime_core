@@ -17,7 +17,8 @@ class Thenable implements PromiseLike<string> {
         this.error = error;
     }
 
-    then<U, E>(_?: (value: string) => U|PromiseLike<U>, __?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
+    then<U, E>(_?: (value: string) => U | PromiseLike<U>, __?:
+            (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
         throw this.error;
     }
 
@@ -28,20 +29,20 @@ let error = new Error();
 let thenable = new Thenable(error);
 Promise.allSettled<string>([thenable]).then<void, void>((result: PromiseSettledResult<string>[]): void => {
     if (result.length != 1) {
-        console.log("Test failed. Expected array of length 1");
+        console.log('Test failed. Expected array of length 1');
         return;
     }
     if (result[0].status != PromiseStatus.rejected) {
-        console.log("Test failed. Expected status 'rejected', but got ' + result[0].status + '.");
+        console.log('Test failed. Expected status \'rejected\', but got ' + result[0].status + '.');
         return;
     }
     if ((result[0] as PromiseRejectedResult).reason != error) {
-        console.log("Test failed. Unexpected value.");
+        console.log('Test failed. Unexpected value.');
         return;
     }
-    console.log("Test passed.");
-}, (err: Object): void => {
-    console.log("Test failed. The promise should not be rejected.");
-}).catch((e: Object): void => {
-    console.log("Test failed: " + e);
+    console.log('Test passed.');
+}, (err: Error): void => {
+    console.log('Test failed. The promise should not be rejected.');
+}).catch((e: Error): void => {
+    console.log('Test failed: ' + e);
 });

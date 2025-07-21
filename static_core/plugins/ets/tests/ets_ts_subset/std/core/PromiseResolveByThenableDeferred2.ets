@@ -13,24 +13,24 @@
  * limitations under the License.
  */
 
-let resolve: ((value: Object) => void)|null = null;
+let resolve: ((value: Object) => void) | null = null;
 let value = new Object();
-let p1 = new Promise<Object>((_resolve: (v: Object) => void, _: (error: Object) => void) => {
+let p1 = new Promise<Object>((_resolve: (v: Object) => void) => {
     resolve = _resolve;
 });
 let p2 = Promise.resolve<Object>(p1);
 if (p1 !== p2) {
-    throw new Error("Test failed. Expected the same promise.");
+    throw new Error('Test failed. Expected the same promise.');
 }
 
 p2.then<void, void>((v: Object): void => {
     if (v !== value) {
-        console.log("Test failed. The promise should be resolved by the provided value.");
+        console.log('Test failed. The promise should be resolved by the provided value.');
         return;
     }
-    console.log("Test passed.");
-}, (err: Object): void => {
-    console.log("Test failed. The promise should be rejected.");
+    console.log('Test passed.');
+}, (err: Error): void => {
+    console.log('Test failed. The promise should be rejected.');
 });
 
 resolve!(value);

@@ -135,10 +135,10 @@ export final class Proxy {
     }
 
     private makeArrayProxyInstance<T>(target: Array<T>, handler: ArrayProxyHandler<T>): Array<T> {
-        const proxies: ArrayProxy<T>[] = []
+        const proxies: FixedArray<ArrayProxy<T>> = []
         const arrayProxyBaseType = (Type.of(proxies) as ArrayType).getElementType() as ClassType
 
-        const handlers: ArrayProxyHandler<T>[] = []
+        const handlers: FixedArray<ArrayProxyHandler<T>> = []
         const handlerType = (Type.of(handlers) as ArrayType).getElementType() as InterfaceType
 
         const targetLinker = getNearestNonBootRuntimeLinker()!
@@ -246,7 +246,7 @@ export final class Proxy {
                     if (handler instanceof ProxyHandler) {
                         const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
                         // using "wrapper" method to "capture" <T> after smartcast
-                        return this.handlerGet(target, handler, propertyName)
+                        return this.handlerGet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName)
                     }
 
                     throw new TypeError("unexpected proxy handler type: " + Type.of(handler).getName())
@@ -275,7 +275,7 @@ export final class Proxy {
                 if (handler instanceof ProxyHandler) {
                     const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
                     // using "wrapper" method to "capture" <T> after smartcast
-                    const success = this.handlerSet(target, handler, propertyName, value)
+                    const success = this.handlerSet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName, value as object)
                     if (!success) {
                         throw new TypeError(`proxy set handler returned false for propety '"${propertyName}"'`)
                     }
@@ -287,7 +287,7 @@ export final class Proxy {
         proxyTypeCreator.addMethod(setterCreator)
     }
 
-    private handlerInvoke<T extends Object>(target: T, handler: ProxyHandler<T>, method: Method, args: NullishType[]): NullishType {
+    private handlerInvoke<T extends Object>(target: T, handler: ProxyHandler<T>, method: Method, args: FixedArray<NullishType>): NullishType {
         return handler.invoke(target, method, args)
     }
 
@@ -301,12 +301,12 @@ export final class Proxy {
 
         methodProxyCreator
                 .addResult(methodType.getResultType())
-                .addBody(new CallableBodyErasedFunction((proxy: NullishType, args: NullishType[]): NullishType => {
+                .addBody(new CallableBodyErasedFunction((proxy: NullishType, args: FixedArray<NullishType>): NullishType => {
                     const proxyInstance = proxy as Object
                     const handler = Reflect.get(proxyInstance, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
                     if (handler instanceof ProxyHandler) {
                         const target = Reflect.get(proxyInstance, Proxy.PROXY_INSTANCE_TARGET_FIELD)
-                        return this.handlerInvoke(target, handler, method, args)
+                        return this.handlerInvoke(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), method, args)
                     }
 
                     throw new TypeError("unexpected proxy handler type: " + Type.of(handler).getName())
@@ -352,8 +352,8 @@ export final class Proxy {
         return (p1: P1, p2: P2, p3: P3, p4: P4): R => fn.invoke4(p1, p2, p3, p4)
     }
 
-    private arrayHandlerInvoke<T>(arrayProxy: ArrayProxy<T>, method: Method, args: NullishType[]): NullishType {
-        const methodArgs = new NullishType[args.length]
+    private arrayHandlerInvoke<T>(arrayProxy: ArrayProxy<T>, method: Method, args: FixedArray<NullishType>): NullishType {
+        const methodArgs: FixedArray<NullishType> = new NullishType[args.length]
 
         for (let argIdx = 0; argIdx < args.length; argIdx++) {
             const arg = args[argIdx]
@@ -379,7 +379,7 @@ export final class Proxy {
 
         methodProxyCreator
                 .addResult(methodType.getResultType())
-                .addBody(new CallableBodyErasedFunction((arrayProxy: NullishType, args: NullishType[]): NullishType => {
+                    .addBody(new CallableBodyErasedFunction((arrayProxy: NullishType, args: FixedArray<NullishType>): NullishType => {
                     if (arrayProxy instanceof ArrayProxy) {
                         return this.arrayHandlerInvoke(arrayProxy, method, args)
                     }
@@ -396,7 +396,7 @@ export interface ProxyHandler<T extends Object> {
 
     set(target: T, name: string, value: NullishType): boolean
 
-    invoke(target: T, method: Method, args: NullishType[]): NullishType
+    invoke(target: T, method: Method, args: FixedArray<NullishType>): NullishType
 }
 
 export abstract class DefaultProxyHandler<T extends Object> implements ProxyHandler<T> {
@@ -408,7 +408,7 @@ export abstract class DefaultProxyHandler<T extends Object> implements ProxyHand
         return Reflect.set(target, name, value)
     }
 
-    override invoke(target: T, method: Method, args: NullishType[]): NullishType {
+    override invoke(target: T, method: Method, args: FixedArray<NullishType>): NullishType {
         return method.invoke(target, args)
     }
 }
@@ -439,7 +439,7 @@ export abstract class DefaultArrayProxyHandler<T> extends DefaultProxyHandler<Ar
         throw new AssertionError("unexpected property: " + name)
     }
 
-    override invoke(target: Array<T>, method: Method, args: NullishType[]): NullishType {
+    override invoke(target: Array<T>, method: Method, args: FixedArray<NullishType>): NullishType {
         return super.invoke(target, method, args)
     }
 
@@ -506,8 +506,9 @@ abstract class ArrayProxy<T> extends Array<T> {
             }
 
             const signatureMatch = signature.every((paramType: Type, index: number) => {
-                const param = methodType.getParameter(index as int)
-                return paramType.equals(param.getType())
+                const param = methodType.getParameter(index.toInt())
+                let tmp = paramType.equals(param.getType())
+                return tmp
             })
 
             if (signatureMatch) {
@@ -518,7 +519,7 @@ abstract class ArrayProxy<T> extends Array<T> {
         throw new LinkerUnresolvedMethodError("failed to find method: " + name)
     }
 
-    private static getArrayMethod(name: string, firstParam: Type, ...restParams: Type[]): Method {
+    private static getArrayMethod(name: string, firstParam: Type, ...restParams: Array<Type>): Method {
         const signature = new Array<Type>(firstParam)
         signature.push(...restParams)
 
@@ -527,14 +528,14 @@ abstract class ArrayProxy<T> extends Array<T> {
 
     private static readonly POP_METHOD: Method = ArrayProxy.getArrayMethod("pop")
     private static readonly SHIFT_METHOD: Method = ArrayProxy.getArrayMethod("shift")
-    private static readonly SPLICE_METHOD_NUM: Method = ArrayProxy.getArrayMethod("splice", Type.of(1.0))
-    private static readonly SPLICE_METHOD_INT: Method = ArrayProxy.getArrayMethod("splice", Type.of(1))
+    private static readonly SPLICE_METHOD_NUM: Method = ArrayProxy.getArrayMethod("splice", Type.of(1.0 + 0))
+    private static readonly SPLICE_METHOD_INT: Method = ArrayProxy.getArrayMethod("splice", Type.of(1 as int))
 
     private static readonly SPLICE_METHOD_INT_INT_ARR: Method =
-            ArrayProxy.getArrayMethod("splice", Type.of(1), Type.of(1), Type.of(new Object[0]))
+            ArrayProxy.getArrayMethod("splice", Type.of(1 as int), Type.of(1 as int), Type.of(new Array<Object>(0)))
 
     private static readonly SPLICE_METHOD_NUM_OBJ_ARR: Method =
-            ArrayProxy.getArrayMethod("splice", Type.of(1.0), Type.of(new Number(0)), Type.of(new Object[0]))
+            ArrayProxy.getArrayMethod("splice", Type.of(1.0 + 0), Type.of(new Number(0)), Type.of(new Array<Object>(0)))
 
     constructor(target: Array<T>, handler: ArrayProxyHandler<T>) {
         this.target = target
@@ -595,15 +596,15 @@ abstract class ArrayProxy<T> extends Array<T> {
         throw new AssertionError("Array.shift() returned null")
     }
 
-    override concat(...items: ConcatArray<T>[]): Array<T> {
+    override concat(...items: FixedArray<ConcatArray<T>>): Array<T> {
         return this.target.concat(...items)
     }
 
-    override push(...items: T[]): number {
+    override push(...items: Array<T>): number {
         return this.target.push(...items)
     }
 
-    override pushECMA(...items: T[]): number {
+    override pushECMA(...items: Array<T>): number {
         return this.target.pushECMA(...items)
     }
 
@@ -611,7 +612,7 @@ abstract class ArrayProxy<T> extends Array<T> {
         const handler = this.handler
         const result = handler.invoke(this.target, ArrayProxy.SPLICE_METHOD_NUM_OBJ_ARR, [start, deleteCount, items])
         if (result instanceof Array) {
-            return result
+            return __narrowAny<Array<T>>(result)
         }
 
         throw new AssertionError("Array.splice(int, int, T[]) unexpected result type: " + Type.of(result))
@@ -621,7 +622,7 @@ abstract class ArrayProxy<T> extends Array<T> {
         const handler = this.handler
         const result = handler.invoke(this.target, ArrayProxy.SPLICE_METHOD_INT_INT_ARR, [start, deleteCount, items])
         if (result instanceof Array) {
-            return result
+            return __narrowAny<Array<T>>(result)
         }
 
         throw new AssertionError("Array.splice(int, int, T[]) unexpected result type: " + Type.of(result))
@@ -630,7 +631,7 @@ abstract class ArrayProxy<T> extends Array<T> {
     override splice(start: number): Array<T> {
         const result = this.handler.invoke(this.target, ArrayProxy.SPLICE_METHOD_NUM, [start])
         if (result instanceof Array) {
-            return result
+            return __narrowAny<Array<T>>(result)
         }
 
         throw new AssertionError("Array.splice(number) unexpected result type: " + Type.of(result))
@@ -639,7 +640,7 @@ abstract class ArrayProxy<T> extends Array<T> {
     override splice(start: int): Array<T> {
         const result = this.handler.invoke(this.target, ArrayProxy.SPLICE_METHOD_INT, [start])
         if (result instanceof Array) {
-            return result
+            return __narrowAny<Array<T>>(result)
         }
 
         throw new AssertionError("Array.splice(int) unexpected result type: " + Type.of(result))
@@ -649,11 +650,11 @@ abstract class ArrayProxy<T> extends Array<T> {
         return this.target.toSpliced(start, deleteCount)
     }
 
-    override toSpliced(start: number, deleteCount: number, ...items: T[]): Array<T> {
+    override toSpliced(start: number, deleteCount: number, ...items: FixedArray<T>): Array<T> {
         return this.target.toSpliced(start, deleteCount, ...items)
     }
 
-    override toSpliced(start: int, deleteCount: int, ...items: T[]): Array<T> {
+    override toSpliced(start: int, deleteCount: int, ...items: FixedArray<T>): Array<T> {
         return this.target.toSpliced(start, deleteCount, ...items)
     }
 

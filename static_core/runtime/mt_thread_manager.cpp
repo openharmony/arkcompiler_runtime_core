@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -299,7 +299,7 @@ bool MTThreadManager::UnregisterExitedThread(MTManagedThread *thread)
         // This code should happen after thread has been resumed: Both WaitSuspension and ResumeImps requires locking
         // suspend_lock_, so it acts as a memory barrier; flag clean should be visible in this thread after exit from
         // WaitSuspenion
-        TSAN_ANNOTATE_HAPPENS_AFTER(&thread->fts_);
+        thread->MakeTSANHappyForThreadState();
 
         threads_.remove(thread);
         if (thread->IsDaemon()) {
@@ -336,6 +336,7 @@ MTManagedThread *MTThreadManager::SuspendAndWaitThreadByInternalThreadId(uint32_
     // NB! Expected to be called in registered thread, change implementation if this function used elsewhere
     MTManagedThread *current = MTManagedThread::GetCurrent();
     MTManagedThread *suspended = nullptr;
+    ASSERT(current != nullptr);
     ASSERT(current->GetStatus() != ThreadStatus::RUNNING);
 
     // Extract target thread

@@ -63,7 +63,7 @@ function testGetIndexOfNonExistingData() {
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     let result = lightWeightSet.getIndexOf("cc");
-    assertEQ(result, -1, "The lightWeightSet should return -1 for a value that is not set");
+    assertEQ(result, -3, "The lightWeightSet should return -3 that indicates where the key should be inserted");
     assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
 }
 

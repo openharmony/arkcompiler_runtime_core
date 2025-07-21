@@ -49,7 +49,8 @@ string printNooName(::iface_readonly_test::weak::Noo noo)
     return name;
 }
 }  // namespace
-// The macros used below are automatically generated code.
+
+// because these macros are auto-generate, lint will cause false positive.
 // NOLINTBEGIN
 TH_EXPORT_CPP_API_getNooIface(getNooIface);
 TH_EXPORT_CPP_API_printNooName(printNooName);

@@ -50,9 +50,13 @@ static_assert(std::is_same_v<EtsChar, uint16_t> &&
 // The following implementation is based on ObjectHeader::ShallowCopy
 static EtsObjectArray *ReallocateBuffer(EtsHandle<EtsObjectArray> &bufHandle, uint32_t bufLen)
 {
+    ASSERT(bufHandle.GetPtr() != nullptr);
     // Allocate the new buffer - may trigger GC
     auto *newBuf = EtsObjectArray::Create(bufHandle->GetClass(), bufLen);
-    ASSERT(newBuf != nullptr);
+    /* we need to return and report the OOM exception to ets world */
+    if (newBuf == nullptr) {
+        return nullptr;
+    }
     // Copy the old buffer data
     bufHandle->CopyDataTo(newBuf);
     EVENT_SB_BUFFER_REALLOC(ManagedThread::GetCurrent()->GetId(), newBuf, newBuf->GetLength(), newBuf->GetElementSize(),
@@ -83,13 +87,16 @@ ObjectHeader *AppendCharArrayToBuffer(VMHandle<EtsObject> &sbHandle, EtsCharArra
         EtsHandle<EtsObjectArray> bufHandle(coroutine, buf);
         // May trigger GC
         buf = ReallocateBuffer(bufHandle, GetNewBufferLength(bufHandle->GetLength(), 1U));
+        if (buf == nullptr) {
+            return nullptr;
+        }
         // Update sb and arr as corresponding objects might be moved by GC
         sb = sbHandle.GetPtr();
         arr = arrHandle.GetPtr();
         // Remember the new buffer
         sb->SetFieldObject(SB_BUFFER_OFFSET, EtsObject::FromCoreType(buf->GetCoreType()));
     }
-
+    ASSERT(arr != nullptr);
     // Append array to the buf
     buf->Set(index, EtsObject::FromCoreType(arr->GetCoreType()));
     // Increment the index
@@ -188,6 +195,7 @@ static inline EtsCharArray *NullToCharArray()
                                                                  0x6900, 0x6e00, 0x6500, 0x6400};
 
     EtsCharArray *arr = EtsCharArray::Create(UNDEFINED_UTF16.size());
+    ASSERT(arr != nullptr);
     if (memcpy_s(arr->GetData<uint16_t>(), UNDEFINED_UTF16.size(), UNDEFINED_UTF16.data(), UNDEFINED_UTF16.size()) !=
         EOK) {
         UNREACHABLE();
@@ -199,6 +207,7 @@ static inline EtsCharArray *BoolToCharArray(EtsBoolean v)
 {
     auto arrLen = v != 0U ? std::char_traits<char>::length("true") : std::char_traits<char>::length("false");
     EtsCharArray *arr = EtsCharArray::Create(arrLen);
+    ASSERT(arr != nullptr);
     auto *data = arr->GetData<uint64_t>();
     if (v != 0U) {
         *data = TRUE_CODE;
@@ -213,6 +222,7 @@ static inline EtsCharArray *BoolToCharArray(EtsBoolean v)
 static inline EtsCharArray *CharToCharArray(EtsChar v)
 {
     EtsCharArray *arr = EtsCharArray::Create(1U);
+    ASSERT(arr != nullptr);
     *arr->GetData<EtsChar>() = v;
     return arr;
 }
@@ -231,8 +241,10 @@ ObjectHeader *StringBuilderAppendNullString(ObjectHeader *sb)
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
 
     VMHandle<EtsObject> sbHandle(coroutine, sb);
+    VMHandle<EtsObject> sbAppendNullStringHandle = StringBuilderAppendNullString(sbHandle);
+    ASSERT(sbAppendNullStringHandle.GetPtr() != nullptr);
 
-    return StringBuilderAppendNullString(sbHandle)->GetCoreType();
+    return sbAppendNullStringHandle->GetCoreType();
 }
 
 /**
@@ -270,6 +282,9 @@ VMHandle<EtsObject> &StringBuilderAppendString(VMHandle<EtsObject> &sbHandle, Et
         EtsHandle<EtsObjectArray> bufHandle(coroutine, buf);
         // May trigger GC
         buf = ReallocateBuffer(bufHandle, GetNewBufferLength(bufHandle->GetLength(), 1U));
+        if (buf == nullptr) {
+            return sbHandle;
+        }
         // Update sb and s as corresponding objects might be moved by GC
         sb = sbHandle->GetCoreType();
         str = strHandle.GetPtr();
@@ -319,6 +334,9 @@ VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHa
         EtsHandle<EtsObjectArray> bufHandle(coroutine, buf);
         // May trigger GC
         buf = ReallocateBuffer(bufHandle, GetNewBufferLength(bufHandle->GetLength(), 2U));
+        if (buf == nullptr) {
+            return sbHandle;
+        }
         // Update sb and strings as corresponding objects might be moved by GC
         sb = sbHandle->GetCoreType();
         str0 = str0Handle.GetPtr();
@@ -402,6 +420,9 @@ VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHa
         EtsHandle<EtsObjectArray> bufHandle(coroutine, buf);
         // May trigger GC
         buf = ReallocateBuffer(bufHandle, GetNewBufferLength(bufHandle->GetLength(), 3U));
+        if (buf == nullptr) {
+            return sbHandle;
+        }
         // Update sb and strings as corresponding objects might be moved by GC
         sb = sbHandle->GetCoreType();
         str0 = str0Handle.GetPtr();
@@ -500,6 +521,9 @@ VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHa
         EtsHandle<EtsObjectArray> bufHandle(coroutine, buf);
         // May trigger GC
         buf = ReallocateBuffer(bufHandle, GetNewBufferLength(bufHandle->GetLength(), 4U));
+        if (buf == nullptr) {
+            return sbHandle;
+        }
         // Update sb and strings as corresponding objects might be moved by GC
         sb = sbHandle->GetCoreType();
         str0 = str0Handle.GetPtr();
@@ -631,7 +655,10 @@ ObjectHeader *StringBuilderAppendLong(ObjectHeader *sb, EtsLong v)
 
     // May trigger GC
     auto *cache = PandaEtsVM::GetCurrent()->GetLongToStringCache();
-    ASSERT(cache != nullptr);
+    if (UNLIKELY(cache == nullptr)) {
+        auto *str = LongToStringCache::GetNoCache(v);
+        return StringBuilderAppendString(sbHandle->GetCoreType(), str);
+    }
     auto *str = cache->GetOrCache(EtsCoroutine::GetCurrent(), v);
     return StringBuilderAppendString(sbHandle->GetCoreType(), str);
 }
@@ -659,7 +686,10 @@ ObjectHeader *StringBuilderAppendFloat(ObjectHeader *sb, EtsFloat v)
     VMHandle<EtsObject> sbHandle(coroutine, sb);
 
     auto *cache = PandaEtsVM::GetCurrent()->GetFloatToStringCache();
-    ASSERT(cache != nullptr);
+    if (UNLIKELY(cache == nullptr)) {
+        auto *str = FloatToStringCache::GetNoCache(v);
+        return StringBuilderAppendString(sbHandle->GetCoreType(), str);
+    }
     auto *str = cache->GetOrCache(EtsCoroutine::GetCurrent(), v);
     return StringBuilderAppendString(sbHandle->GetCoreType(), str);
 }
@@ -673,7 +703,10 @@ ObjectHeader *StringBuilderAppendDouble(ObjectHeader *sb, EtsDouble v)
     VMHandle<EtsObject> sbHandle(coroutine, sb);
 
     auto *cache = PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
-    ASSERT(cache != nullptr);
+    if (UNLIKELY(cache == nullptr)) {
+        auto *str = DoubleToStringCache::GetNoCache(v);
+        return StringBuilderAppendString(sbHandle->GetCoreType(), str);
+    }
     auto *str = cache->GetOrCache(EtsCoroutine::GetCurrent(), v);
     return StringBuilderAppendString(sbHandle->GetCoreType(), str);
 }
@@ -690,6 +723,7 @@ EtsString *StringBuilderToString(ObjectHeader *sb)
     auto *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> sbHandle(coroutine, sb);
+    ASSERT(sbHandle.GetPtr() != nullptr);
 
     auto index = sbHandle->GetFieldPrimitive<uint32_t>(SB_INDEX_OFFSET);
     auto compress = sbHandle->GetFieldPrimitive<bool>(SB_COMPRESS_OFFSET);

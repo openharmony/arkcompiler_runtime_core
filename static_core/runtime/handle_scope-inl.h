@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@ inline HandleScope<T>::HandleScope(ManagedThread *thread) : thread_(thread)
 {
     ASSERT(!MTManagedThread::ThreadIsMTManagedThread(Thread::GetCurrent()) ||
            !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
-
+    ASSERT(thread != nullptr);
     HandleScope<T> *topScope = thread->GetTopScope<T>();
     if (topScope != nullptr) {
         beginIndex_ = topScope->GetBeginIndex() + topScope->GetHandleCount();

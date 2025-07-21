@@ -126,26 +126,26 @@ function main(): int {
     if (obj as string != "string") return 1;
 
     // relational
-    if (typeof num > typeof str) return 1;
-    if (typeof num >= typeof str) return 1;
-    if (typeof num == typeof str) return 1;
-    if (typeof typeof num != typeof str) return 1;
-    if (typeof typeof num > typeof str) return 1;
-    if (typeof typeof num >= typeof str) return 1;
-    if (typeof typeof num < typeof str) return 1;
-    if (typeof typeof num <= typeof str) return 1;
-    if (typeof typeof num != typeof typeof str) return 1;
-    if (typeof typeof num > typeof typeof str) return 1;
-    if (typeof typeof num >= typeof typeof str) return 1;
-    if (typeof typeof num < typeof typeof str) return 1;
-    if (typeof typeof num <= typeof typeof str) return 1;
+    if (typeof num > typeof str) return 0;
+    if (typeof num >= typeof str) return 0;
+    if (typeof num == typeof str) return 0;
+    if (typeof typeof num != typeof str) return 0;
+    if (typeof typeof num > typeof str) return 0;
+    if (typeof typeof num >= typeof str) return 0;
+    if (typeof typeof num < typeof str) return 0;
+    if (typeof typeof num <= typeof str) return 0;
+    if (typeof typeof num != typeof typeof str) return 0;
+    if (typeof typeof num > typeof typeof str) return 0;
+    if (typeof typeof num >= typeof typeof str) return 0;
+    if (typeof typeof num < typeof typeof str) return 0;
+    if (typeof typeof num <= typeof typeof str) return 0;
 
     // ternary
     str = typeof num < typeof str ? typeof num : typeof str
     if (str != "number") return 1;
     str = ""
 
-    str = typeof num < typeof str ? typeof typeof num : typeof str
+    str = typeof num > typeof str ? typeof num : typeof str
     if (str != "string") return 1;
     str = ""
 

@@ -35,11 +35,11 @@
 #include "plugins/ets/runtime/interop_js/napi_impl/napi_impl.h"
 
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
-napi_status __attribute__((weak)) napi_create_runtime(napi_env env, napi_env *resultEnv);
-// NOLINTBEGIN(readability-identifier-naming)
+// NOLINTBEGIN(readability-identifier-naming, readability-redundant-declaration)
 // CC-OFFNXT(G.FMT.10-CPP) project code style
+napi_status __attribute__((weak)) napi_create_runtime(napi_env env, napi_env *resultEnv);
 napi_status __attribute__((weak)) napi_throw_jsvalue(napi_env env, napi_value error);
-// NOLINTEND(readability-identifier-naming)
+// NOLINTEND(readability-identifier-naming, readability-redundant-declaration)
 #endif
 
 // NOTE(konstanting, #23205): this function is not listed in the ENUMERATE_NAPI macro, but now runtime needs it.
@@ -63,15 +63,21 @@ namespace descriptors = panda_file_items::class_descriptors;
 
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
 static constexpr std::string_view const FUNCTION_INTERFACE_DESCRIPTORS[] = {
-    descriptors::FUNCTION0,  descriptors::FUNCTION1,  descriptors::FUNCTION2,  descriptors::FUNCTION3,
-    descriptors::FUNCTION4,  descriptors::FUNCTION5,  descriptors::FUNCTION6,  descriptors::FUNCTION7,
-    descriptors::FUNCTION8,  descriptors::FUNCTION9,  descriptors::FUNCTION10, descriptors::FUNCTION11,
-    descriptors::FUNCTION12, descriptors::FUNCTION13, descriptors::FUNCTION14, descriptors::FUNCTION15,
-    descriptors::FUNCTION16, descriptors::FUNCTIONN,
+    descriptors::FUNCTION0,   descriptors::FUNCTION1,   descriptors::FUNCTION2,   descriptors::FUNCTION3,
+    descriptors::FUNCTION4,   descriptors::FUNCTION5,   descriptors::FUNCTION6,   descriptors::FUNCTION7,
+    descriptors::FUNCTION8,   descriptors::FUNCTION9,   descriptors::FUNCTION10,  descriptors::FUNCTION11,
+    descriptors::FUNCTION12,  descriptors::FUNCTION13,  descriptors::FUNCTION14,  descriptors::FUNCTION15,
+    descriptors::FUNCTION16,  descriptors::FUNCTIONN,   descriptors::FUNCTIONR0,  descriptors::FUNCTIONR1,
+    descriptors::FUNCTIONR2,  descriptors::FUNCTIONR3,  descriptors::FUNCTIONR4,  descriptors::FUNCTIONR5,
+    descriptors::FUNCTIONR6,  descriptors::FUNCTIONR7,  descriptors::FUNCTIONR8,  descriptors::FUNCTIONR9,
+    descriptors::FUNCTIONR10, descriptors::FUNCTIONR11, descriptors::FUNCTIONR12, descriptors::FUNCTIONR13,
+    descriptors::FUNCTIONR14, descriptors::FUNCTIONR15, descriptors::FUNCTIONR16,
 };
 
 static Class *CacheClass(EtsClassLinker *etsClassLinker, std::string_view descriptor)
 {
+    ASSERT(etsClassLinker != nullptr);
+    ASSERT(etsClassLinker->GetClass(descriptor.data()));
     auto klass = etsClassLinker->GetClass(descriptor.data())->GetRuntimeClass();
     ASSERT(klass != nullptr);
     return klass;
@@ -81,16 +87,17 @@ static Class *CacheClass(EtsClassLinker *etsClassLinker, std::string_view descri
 static void AppStateCallback(int state, int64_t timeStamp)
 {
     auto appState = AppState(static_cast<AppState::State>(state), timeStamp);
-    auto *pandaVm = Runtime::GetCurrent()->GetPandaVM();
-    pandaVm->UpdateAppState(appState);
+    auto *etsVm = static_cast<PandaEtsVM *>(Runtime::GetCurrent()->GetPandaVM());
+    AppStateManager::GetCurrent()->UpdateAppState(appState);
+    etsVm->GetGC()->SetFastGCFlag(appState.GetState() == AppState::State::SENSITIVE_START);
     switch (static_cast<AppState::State>(state)) {
         case AppState::State::SENSITIVE_START:
-            pandaVm->GetGC()->PostponeGCStart();
+            etsVm->GetGC()->PostponeGCStart();
             break;
         case AppState::State::SENSITIVE_END:
             [[fallthrough]];
         case AppState::State::COLD_START_FINISHED:
-            pandaVm->GetGC()->PostponeGCEnd();
+            etsVm->GetGC()->PostponeGCEnd();
             break;
         default:
             break;
@@ -108,7 +115,7 @@ static bool RegisterAppStateCallback([[maybe_unused]] napi_env env)
 #endif
 }
 
-static bool RegisterTimerModule(napi_env jsEnv)
+static bool RegisterTimerModule()
 {
     ani_vm *vm = nullptr;
     ani_size count = 0;
@@ -124,14 +131,18 @@ static bool RegisterTimerModule(napi_env jsEnv)
     ani_env *aniEnv = nullptr;
     status = vm->GetEnv(ANI_VERSION_1, &aniEnv);
     ASSERT(status == ANI_OK);
-    return TimerModule::Init(aniEnv, jsEnv);
+    return TimerModule::Init(aniEnv);
 }
 
 static void RegisterEventLoopModule(EtsCoroutine *coro)
 {
+    ASSERT(coro != nullptr);
     ASSERT(coro == coro->GetPandaVM()->GetCoroutineManager()->GetMainThread());
     coro->GetPandaVM()->CreateCallbackPosterFactory<EventLoopCallbackPosterFactoryImpl>();
-    coro->GetPandaVM()->SetRunEventLoopFunction([]() { EventLoop::RunEventLoop(); });
+    coro->GetPandaVM()->SetRunEventLoopFunction(
+        [](EventLoopRunMode mode) { EventLoop::RunEventLoop(static_cast<EventLoopRunMode>(mode)); });
+    coro->GetPandaVM()->SetWalkEventLoopFunction(
+        [](WalkEventLoopCallback &cb, void *args) { EventLoop::WalkEventLoop(cb, args); });
 }
 
 std::atomic_uint32_t ConstStringStorage::qnameBufferSize_ {0U};
@@ -201,6 +212,39 @@ napi_value ConstStringStorage::InitBuffer(size_t length)
     return jsArr;
 }
 
+CommonJSObjectCache::CommonJSObjectCache(InteropCtx *ctx) : ctx_(ctx)
+{
+    InitializeCache();
+}
+
+CommonJSObjectCache::~CommonJSObjectCache()
+{
+    if (proxyRef_ != nullptr) {
+        napi_env env = ctx_->GetJSEnv();
+        napi_delete_reference(env, proxyRef_);
+    }
+}
+
+napi_value CommonJSObjectCache::GetProxy() const
+{
+    if (proxyRef_ == nullptr) {
+        const_cast<CommonJSObjectCache *>(this)->InitializeCache();
+    }
+    return GetReferenceValue(ctx_->GetJSEnv(), proxyRef_);
+}
+
+void CommonJSObjectCache::InitializeCache()
+{
+    napi_env env = ctx_->GetJSEnv();
+
+    napi_value global;
+    NAPI_CHECK_FATAL(napi_get_global(env, &global));
+
+    napi_value proxy;
+    NAPI_CHECK_FATAL(napi_get_named_property(env, global, "Proxy", &proxy));
+    NAPI_CHECK_FATAL(napi_create_reference(env, proxy, 1, &proxyRef_));
+}
+
 InteropCtx *ConstStringStorage::Ctx()
 {
     ASSERT(ctx_ != nullptr);
@@ -240,6 +284,22 @@ void InteropCtx::SharedEtsVmState::SetJsProxyInstance(EtsClass *cls, js_proxy::J
 {
     os::memory::LockHolder lock(mutex_);
     jsProxies_.insert_or_assign(cls, PandaUniquePtr<js_proxy::JSProxy>(proxy));
+}
+
+js_proxy::JSProxy *InteropCtx::SharedEtsVmState::GetInterfaceProxyInstance(std::string &interfaceName) const
+{
+    os::memory::LockHolder lock(mutex_);
+    auto item = interfaceProxies_.find(interfaceName);
+    if (item != interfaceProxies_.end()) {
+        return item->second.get();
+    }
+    return nullptr;
+}
+
+void InteropCtx::SharedEtsVmState::SetInterfaceProxyInstance(std::string &interfaceName, js_proxy::JSProxy *proxy)
+{
+    os::memory::LockHolder lock(mutex_);
+    interfaceProxies_.insert_or_assign(interfaceName, PandaUniquePtr<js_proxy::JSProxy>(proxy));
 }
 
 InteropCtx::SharedEtsVmState::SharedEtsVmState(PandaEtsVM *vm)
@@ -295,7 +355,6 @@ void InteropCtx::SharedEtsVmState::CacheClasses(EtsClassLinker *etsClassLinker)
     boxLongClass = CacheClass(etsClassLinker, descriptors::BOX_LONG);
 
     arrayClass = CacheClass(etsClassLinker, descriptors::ARRAY);
-    arraybufClass = CacheClass(etsClassLinker, descriptors::ARRAY_BUFFER);
 
     arrayAsListIntClass = CacheClass(etsClassLinker, descriptors::ARRAY_AS_LIST_INT);
 
@@ -339,6 +398,7 @@ InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
     : sharedEtsVmState_(SharedEtsVmState::GetInstance(coro->GetPandaVM())),
       jsEnv_(env),
       constStringStorage_(this),
+      commonJSObjectCache_(this),
       stackInfoManager_(this, coro)
 {
     stackInfoManager_.InitStackInfoIfNeeded();
@@ -369,6 +429,7 @@ void InteropCtx::InitJsValueFinalizationRegistry(EtsCoroutine *coro)
     }
     ASSERT(!coro->HasPendingException());
     auto queue = EtsObject::FromCoreType(res.GetAs<ObjectHeader *>());
+    ASSERT(queue != nullptr);
     jsvalueFregistryRef_ = Refstor()->Add(queue->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
     ASSERT(jsvalueFregistryRef_ != nullptr);
     jsvalueFregistryRegister_ =
@@ -426,7 +487,11 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
     //    Where js.UserError will be wrapped into compat/TypeError
     //    NOTE(vpukhov): compat: add intrinsic to obtain JSValue from compat/ instances
 
-    auto objRefconv = JSRefConvertResolve(ctx, ctx->GetESErrorClass());
+    auto env = InteropCtx::Current(coro)->GetJSEnv();
+    bool isInstanceof = false;
+    NAPI_CHECK_FATAL(napi_is_error(env, val, &isInstanceof));
+    auto objRefconv = JSRefConvertResolve(ctx, isInstanceof ? ctx->GetErrorClass() : ctx->GetESErrorClass());
+    ASSERT(objRefconv != nullptr);
     LocalObjectHandle<EtsObject> etsObj(coro, objRefconv->Unwrap(ctx, val));
     if (UNLIKELY(etsObj.GetPtr() == nullptr)) {
         INTEROP_LOG(INFO) << "Something went wrong while unwrapping pending js exception";
@@ -481,6 +546,19 @@ void InteropCtx::ThrowJSValue(napi_env env, napi_value val)
 #endif
 }
 
+napi_value InteropCtx::CreateJSTypeError(napi_env env, const std::string &code, const std::string &msg)
+{
+    INTEROP_LOG(INFO) << "CreateJSTypeError: code: " << code << ", msg: " << msg;
+    ASSERT(!NapiIsExceptionPending(env));
+    napi_value errorCode;
+    NAPI_CHECK_FATAL(napi_create_string_utf8(env, code.data(), code.size(), &errorCode));
+    napi_value errorMessage;
+    NAPI_CHECK_FATAL(napi_create_string_utf8(env, msg.data(), msg.size(), &errorMessage));
+    napi_value error;
+    NAPI_CHECK_FATAL(napi_create_type_error(env, errorCode, errorMessage, &error));
+    return error;
+}
+
 void InteropCtx::InitializeDefaultLinkerCtxIfNeeded(EtsRuntimeLinker *linker)
 {
     os::memory::LockHolder lock(InteropCtx::SharedEtsVmState::mutex_);
@@ -497,9 +575,22 @@ void InteropCtx::InitializeDefaultLinkerCtxIfNeeded(EtsRuntimeLinker *linker)
         linker->AsObject()->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
 }
 
+void InteropCtx::SetDefaultLinkerContext(EtsRuntimeLinker *linker)
+{
+    os::memory::LockHolder lock(SharedEtsVmState::mutex_);
+    if (!linker->IsInstanceOf(PlatformTypes()->coreRuntimeLinker)) {
+        return;
+    }
+    SharedEtsVmState::linkerCtx_ = linker->GetClassLinkerContext();
+    PandaVM::GetCurrent()->GetGlobalObjectStorage()->Remove(SharedEtsVmState::refToDefaultLinker_);
+    SharedEtsVmState::refToDefaultLinker_ = PandaVM::GetCurrent()->GetGlobalObjectStorage()->Add(
+        linker->AsObject()->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+}
+
 void InteropCtx::ForwardEtsException(EtsCoroutine *coro)
 {
     auto env = GetJSEnv();
+    ASSERT(coro != nullptr);
     ASSERT(coro->HasPendingException());
     LocalObjectHandle<ObjectHeader> exc(coro, coro->GetException());
     coro->ClearException();
@@ -521,6 +612,13 @@ void InteropCtx::ForwardEtsException(EtsCoroutine *coro)
 void InteropCtx::ForwardJSException(EtsCoroutine *coro)
 {
     auto env = GetJSEnv();
+    const napi_extended_error_info *info = nullptr;
+    NAPI_CHECK_FATAL(napi_get_last_error_info(env, &info));
+    if (info->error_code != napi_ok && info->error_code != napi_pending_exception) {
+        INTEROP_LOG(INFO) << "Napi last error: " << info->error_message;
+        ThrowETSError(coro, info->error_message);
+        return;
+    }
     napi_value excval;
     ASSERT(NapiIsExceptionPending(env));
     NAPI_CHECK_FATAL(napi_get_and_clear_last_exception(env, &excval));
@@ -621,6 +719,7 @@ static std::optional<std::string> NapiTryDumpStack(napi_env env)
     for (auto stack = StackWalker::Create(coro); stack.HasFrame(); stack.NextFrame()) {
         printIstkFrames(istkIt->etsFrame);
         Method *method = stack.GetMethod();
+        ASSERT(method != nullptr);
         INTEROP_LOG(ERROR) << method->GetClass()->GetName() << "." << method->GetName().data << " at "
                            << method->GetLineNumberAndSourceFile(stack.GetBytecodePc());
     }
@@ -653,19 +752,16 @@ static std::optional<std::string> NapiTryDumpStack(napi_env env)
 void InteropCtx::Init(EtsCoroutine *coro, napi_env env)
 {
     auto *ctx = Runtime::GetCurrent()->GetInternalAllocator()->New<InteropCtx>(coro, env);
+    ASSERT(ctx != nullptr);
     auto *worker = coro->GetWorker();
     worker->GetLocalStorage().Set<CoroutineWorker::DataIdx::INTEROP_CTX_PTR>(ctx, Destroy);
     worker->GetLocalStorage().Set<CoroutineWorker::DataIdx::EXTERNAL_IFACES>(&ctx->interfaceTable_);
 #ifdef PANDA_JS_ETS_HYBRID_MODE
     Handshake::VmHandshake(env, ctx);
     XGC::GetInstance()->OnAttach(ctx);
-    auto rType = plugins::LangToRuntimeType(panda_file::SourceLang::ETS);
-    if (Runtime::GetOptions().IsCoroutineEnableExternalScheduling(rType)) {
-        auto workerPoster = coro->GetPandaVM()->CreateCallbackPoster();
-        ASSERT(workerPoster != nullptr);
-        worker->SetCallbackPoster(std::move(workerPoster));
-        worker->SetExternalSchedulingEnabled();
-    }
+    auto workerPoster = coro->GetPandaVM()->CreateCallbackPoster();
+    ASSERT(workerPoster != nullptr);
+    worker->SetCallbackPoster(std::move(workerPoster));
 #endif  // PANDA_JS_ETS_HYBRID_MODE
 }
 
@@ -681,7 +777,8 @@ void InteropCtx::Destroy(void *ptr)
 
 static bool CheckRuntimeOptions([[maybe_unused]] const ark::ets::EtsCoroutine *mainCoro)
 {
-#if defined(PANDA_JS_ETS_HYBRID_MODE)
+#if defined(PANDA_JS_ETS_HYBRID_MODE) && !defined(ARK_HYBRID)
+    ASSERT(mainCoro != nullptr);
     auto gcType = mainCoro->GetVM()->GetGC()->GetType();
     if ((Runtime::GetOptions().GetXgcTriggerType() != "never") &&
         (gcType != mem::GCType::G1_GC || Runtime::GetOptions().IsNoAsyncJit())) {
@@ -743,6 +840,7 @@ bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv)
     if (!CheckRuntimeOptions(mainCoro)) {
         return false;
     }
+    AppStateManager::Create();
     {
         ScopedManagedCodeThread sm(mainCoro);
         InteropCtx::Init(mainCoro, static_cast<napi_env>(napiEnv));
@@ -750,7 +848,7 @@ bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv)
 
     // NOTE(konstanting): support instantiation in the TimerModule and move this code to the InteropCtx constructor.
     // The TimerModule should be bound to the exact JsEnv
-    if (!RegisterTimerModule(InteropCtx::Current()->GetJSEnv())) {
+    if (!RegisterTimerModule()) {
         // throw some errors
     }
     if (!RegisterAppStateCallback(InteropCtx::Current()->GetJSEnv())) {
@@ -760,7 +858,12 @@ bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv)
 
     // In the hybrid mode with JSVM=leading VM, we are binding the EtsVM lifetime to the JSVM's env lifetime
     napi_add_env_cleanup_hook(
-        InteropCtx::Current()->GetJSEnv(), [](void *) { ark::Runtime::Destroy(); }, nullptr);
+        InteropCtx::Current()->GetJSEnv(),
+        [](void *) {
+            AppStateManager::Destroy();
+            ark::Runtime::Destroy();
+        },
+        nullptr);
 #if defined(PANDA_TARGET_OHOS)
     return TryInitInteropInJsEnv(napiEnv);
 #else

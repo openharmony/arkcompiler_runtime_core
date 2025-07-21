@@ -31,7 +31,7 @@ function checkRestOfObject(f: JSValue) {
     let a = new A();
     let b: B = {name: "bbb"};
     let c = () => {};
-    let objArr: object[] = [a, b, c];
+    let objArr: FixedArray<object> = [a, b, c];
     return f(objArr, a, b, c);
 }
 
@@ -44,8 +44,8 @@ function checkRestOfTuple(f: JSValue) {
 }
 
 function checkRestofUnion(f: JSValue) {
-    let unionArr1: (int | string | boolean)[] = [1, false];
-    let unionArr2: (int | string | boolean)[] = [2, 3, true, 'a', 'b'];
+    let unionArr1: FixedArray<int | string | boolean> = [1, false];
+    let unionArr2: FixedArray<int | string | boolean> = [2, 3, true, 'a', 'b'];
     return f([unionArr1, unionArr2], unionArr1, unionArr2);
 }
 

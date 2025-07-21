@@ -130,7 +130,9 @@ bool HasOsrEntryBetween(T *dominate, T *current)
         dominateBb = dominate;
         bb = current;
     }
+    ASSERT(bb != nullptr);
     auto graph = bb->GetGraph();
+    ASSERT(graph->IsOsrMode() || dominateBb != nullptr);
     if (!graph->IsOsrMode() && dominateBb->GetLoop() != bb->GetLoop()) {
         return false;
     }
@@ -230,6 +232,7 @@ Inst *InstStoredValue(Inst *inst)
 
 SaveStateInst *CopySaveState(Graph *graph, SaveStateInst *inst)
 {
+    ASSERT(inst != nullptr);
     auto copy = static_cast<SaveStateInst *>(inst->Clone(graph));
     ASSERT(copy->GetCallerInst() == inst->GetCallerInst());
     for (size_t inputIdx = 0; inputIdx < inst->GetInputsCount(); inputIdx++) {
@@ -445,6 +448,7 @@ bool IsSuitableForImplicitNullCheck(const Inst *inst)
 
 bool IsInstNotNull(const Inst *inst)
 {
+    ASSERT(inst != nullptr);
     // Allocations cannot return null pointer
     if (inst->IsAllocation() || inst->IsNullCheck() || inst->NoNullPtr()) {
         return true;
@@ -511,6 +515,43 @@ std::optional<bool> IsIfInverted(BasicBlock *phiBlock, IfImmInst *ifImm)
     }
     // True and false branches intersect
     return std::nullopt;
+}
+
+bool CheckArrayFieldObject(RuntimeInterface::ArrayField kind, Inst *inst)
+{
+    auto loadObject = inst->CastToLoadObject();
+    auto runtime = inst->GetBasicBlock()->GetGraph()->GetRuntime();
+    auto type = loadObject->GetObjectType();
+    auto field = loadObject->GetObjField();
+    if (type != ObjectType::MEM_STATIC && type != ObjectType::MEM_OBJECT) {
+        return false;
+    }
+    return runtime->IsFieldArray(kind, field);
+}
+
+bool CheckArrayField(RuntimeInterface::ArrayField kind, Inst *inst, Inst *&arrayOriginRef)
+{
+    while (inst != nullptr) {
+        switch (inst->GetOpcode()) {
+            case Opcode::LoadObject:
+                if (!CheckArrayFieldObject(kind, inst)) {
+                    return false;
+                }
+                inst = inst->GetDataFlowInput(inst->GetInput(0).GetInst());
+                break;
+            case Opcode::LenArray:
+                inst = inst->GetDataFlowInput(inst->GetInput(0).GetInst());
+                break;
+            case Opcode::Parameter:
+                if (arrayOriginRef == nullptr) {
+                    arrayOriginRef = inst;
+                }
+                return inst == arrayOriginRef;
+            default:
+                return false;
+        }
+    }
+    return false;
 }
 
 ArenaVector<Inst *> *SaveStateBridgesBuilder::SearchMissingObjInSaveStates(Graph *graph, Inst *source, Inst *target,

@@ -56,6 +56,7 @@ Function::Result Function::Compile(Arch arch, ArenaAllocator *allocator, ArenaAl
 {
     IrtocRuntimeInterface runtime;
     graph_ = allocator->New<Graph>(Graph::GraphArgs {allocator, localAllocator, arch, this, &runtime}, false);
+    ASSERT(graph_ != nullptr);
     builder_ = std::make_unique<compiler::IrConstructor>();
 
     MakeGraphImpl();
@@ -234,7 +235,10 @@ bool Function::SkippedByLLVM()
 #ifdef PANDA_LLVM_FASTPATH
     if (GetGraph()->GetMode().IsFastPath()) {
         ASSERT(GetArch() == Arch::AARCH64);
-        return std::find(SKIPPED_FASTPATHS.begin(), SKIPPED_FASTPATHS.end(), name) != SKIPPED_FASTPATHS.end();
+        return std::find(SKIPPED_FASTPATHS.begin(), SKIPPED_FASTPATHS.end(), name) != SKIPPED_FASTPATHS.end() ||
+               (compiler::g_options.IsCpuFeatureEnabled(compiler::CpuFeature::JSCVT) &&
+                std::find(SKIPPED_FASTPATHS_JSCVT.begin(), SKIPPED_FASTPATHS_JSCVT.end(), name) !=
+                    SKIPPED_FASTPATHS_JSCVT.end());
     }
 #endif
     return true;

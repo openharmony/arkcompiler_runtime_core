@@ -315,6 +315,12 @@ function testAlloc() {
     assertEQ(buf2.at(0), 0x1);
 }
 
+function testEmptyAlloc() {
+    const escape = '\0'
+    let buf = buffer.alloc(2, escape, 'utf8')
+    assertEQ(encodeURI(buf.toString('utf8')), '%00%00')
+}
+
 function testAllocUninitialized() {
     const buf = buffer.allocUninitialized(10);
     assertEQ(buf.length, 10);
@@ -481,10 +487,47 @@ function testKeys() {
 }
 
 function testSubarray() {
-    const buf = buffer.alloc(5, 'a');
-    const subBuf = buf.subarray(0, 3);
+    let buf = buffer.alloc(5, 'a');
+    let subBuf = buf.subarray(0, 3);
     assertEQ(subBuf.length, 3);
     assertEQ(subBuf.toString('ascii'), 'aaa');
+
+    buf = buffer.from("1236")
+    subBuf = buf.subarray(0, 3)
+    assertEQ(subBuf.toString(), "123")
+
+    subBuf = buf.subarray(undefined)
+    assertEQ(subBuf.toString(), "1236")
+
+    subBuf = buf.subarray(3, 4)
+    assertEQ(subBuf.toString(), "6")
+
+    subBuf = buf.subarray(-3, 0)
+    assertEQ(subBuf.length, 0)
+
+    subBuf = buf.subarray(6, 9)
+    assertEQ(subBuf.length, 0)
+
+    let buf1 = buffer.allocUninitializedFromPool(26)
+    for (let i = 0; i < 26; ++i) {
+        buf1.writeInt8(i + 97, i)
+    }
+
+    let buf2 = buf1.subarray(-1)
+    let res = buf2.toString('ascii', 0, buf2.length)
+    assertEQ(res, '')
+
+    buf2 = buf1.subarray(10, -1)
+    res = buf2.toString('ascii', 0, buf2.length)
+    assertEQ(res, '')
+
+    buf2 = buf1.subarray(2, 1)
+    res = buf2.toString('ascii', 0, buf2.length)
+    assertEQ(res, '')
+
+    buf2 = buf1.subarray(2, 2)
+    res = buf2.toString('ascii', 0, buf2.length)
+    assertEQ(res, '')
 }
 
 function testSwap16() {

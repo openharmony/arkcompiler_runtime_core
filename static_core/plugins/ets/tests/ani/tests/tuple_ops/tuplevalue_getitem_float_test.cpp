@@ -20,6 +20,10 @@ namespace ark::ets::ani::testing {
 class TupleValueGetItemFloatTest : public AniGTestTupleOps {
 public:
     static constexpr ani_float EXPECTED_RESULT = 3.14F;
+    static constexpr ani_float EXPECTED_RESULT_2 = 2.71F;
+    static constexpr ani_float EXPECTED_RESULT_3 = 1.61F;
+    static constexpr ani_float EXPECTED_RESULT_4 = 0.59F;
+    static constexpr ani_float EXPECTED_RESULT_5 = 10.0F;
 };
 
 TEST_F(TupleValueGetItemFloatTest, tupleValueGetItemFloat)
@@ -55,6 +59,28 @@ TEST_F(TupleValueGetItemFloatTest, tupleValueGetItemFloatIndexOutOfRange2)
     auto tuple = GetTupleWithCheck("tuplevalue_getitem_float_test", "getFloatTuple");
     ani_float result = 0.0F;
     ASSERT_EQ(env_->TupleValue_GetItem_Float(tuple, -1U, &result), ANI_OUT_OF_RANGE);
+}
+
+TEST_F(TupleValueGetItemFloatTest, tupleValueGetItemFloatIndexOutOfRange3)
+{
+    const ani_size maxNum = std::numeric_limits<ani_size>::max();
+    auto tuple = GetTupleWithCheck("tuplevalue_getitem_float_test", "getFloatTuple");
+    ani_float result = 0.0F;
+    ASSERT_EQ(env_->TupleValue_GetItem_Float(tuple, maxNum, &result), ANI_OUT_OF_RANGE);
+}
+
+TEST_F(TupleValueGetItemFloatTest, tupleValueGetItemFloatCompositeScene)
+{
+    auto tuple = GetTupleWithCheck("tuplevalue_getitem_float_test", "getFloatTuple");
+
+    const std::array<ani_float, 5U> expectedValues = {EXPECTED_RESULT, EXPECTED_RESULT_2, EXPECTED_RESULT_3,
+                                                      EXPECTED_RESULT_4, EXPECTED_RESULT_5};
+
+    ani_float result = 0.0F;
+    for (size_t i = 0; i < expectedValues.size(); ++i) {
+        ASSERT_EQ(env_->TupleValue_GetItem_Float(tuple, i, &result), ANI_OK);
+        ASSERT_EQ(result, expectedValues[i]);
+    }
 }
 
 TEST_F(TupleValueGetItemFloatTest, tupleValueGetItemFloatNullResult)

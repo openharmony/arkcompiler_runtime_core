@@ -24,11 +24,11 @@ statements:
           let i: int = 1;
           do i++; while (i < 10)
             x = i;
-  - block: |- 
+  - block: |-
           let i: int = 1;
           while (i < 10) i++
             x = i;
-  - block: |- 
+  - block: |-
           for (let i: int = 0; i < 10; i++) {
             x = i;
           }

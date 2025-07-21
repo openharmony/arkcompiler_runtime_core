@@ -34,7 +34,7 @@ class UserWithFields extends User {
 }
 
 class SuperUser extends UserWithFields {
-    users: UserWithFields[] = []
+    users: FixedArray<UserWithFields> = []
 }
 
 function testStringifyParseBigInt(): void {

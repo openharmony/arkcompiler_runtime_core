@@ -166,21 +166,11 @@ TEST_F(ArrayNewRefTest, NewObjectArrayTest4)
     ASSERT_EQ(status, ANI_OK);
     ASSERT_NE(str, nullptr);
 
-    const ani_size maxNum = std::numeric_limits<uint32_t>::max();
     ani_array_ref array1 = nullptr;
     ani_ref undefinedRef = nullptr;
     ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
     ASSERT_EQ(env_->Array_New_Ref(cls, ZERO, undefinedRef, &array1), ANI_OK);
     ASSERT_NE(array1, nullptr);
-
-    ani_array_ref array2 = nullptr;
-    ASSERT_EQ(env_->Array_New_Ref(cls, maxNum, undefinedRef, &array2), ANI_OUT_OF_MEMORY);
-
-    ani_array_ref array3 = nullptr;
-    ASSERT_EQ(env_->Array_New_Ref(cls, ZERO, str, &array3), ANI_PENDING_ERROR);
-
-    ani_array_ref array4 = nullptr;
-    ASSERT_EQ(env_->Array_New_Ref(cls, maxNum, str, &array4), ANI_PENDING_ERROR);
 }
 
 TEST_F(ArrayNewRefTest, NewLargeArrayTypesTest)

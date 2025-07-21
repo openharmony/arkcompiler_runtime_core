@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,7 @@
 import argparse
 from functools import cached_property
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any
 
 from runner.options.options import IOptions
 from runner.utils import check_int, is_file
@@ -35,7 +35,7 @@ class GroupsOptions(IOptions):
     __DEFAULT_CHAPTERS_FILE = "chapters.yaml"
     __CHAPTERS_DELIMITER = ";"
 
-    def __init__(self, parameters: Dict[str, Any]):
+    def __init__(self, parameters: dict[str, Any]):  # type: ignore[explicit-any]
         super().__init__()
         self.__parameters = parameters
 
@@ -84,7 +84,7 @@ class GroupsOptions(IOptions):
         return value if isinstance(value, int) else int(value)
 
     @cached_property
-    def chapters(self) -> List[str]:
+    def chapters(self) -> list[str]:
         chapters = self.__parameters[self.__CHAPTERS]
         if chapters is None:
             return []

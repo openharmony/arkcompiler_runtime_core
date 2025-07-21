@@ -33,7 +33,7 @@ type TupleT = [string, int];
 const etsInt = 1;
 const etsUnion: Union = etsInt;
 const etsString = 'string';
-const arrForLoop: int[] = [0, 1, 2]
+const arrForLoop: FixedArray<int> = [0, 1, 2]
 const etsTuple: TupleT = [etsString, etsInt];
 class EtsUser {
     age = etsInt;
@@ -42,7 +42,7 @@ class EtsUser {
 
 const etsUser = new EtsUser();
 
-const unionFoo = (a: Union, b: Union): Union[] => [a, b];
+const unionFoo = (a: Union, b: Union): FixedArray<Union> => [a, b];
 const add = (a: int, b: int): int => a + b;
 const concat = (a: string, b: string): string => a + ' ' + b;
 const push = (a: string, b: int): TupleT => [a, b];
@@ -86,7 +86,7 @@ function checkApplyFunctionGenericArray(): boolean {
     return applyFunctionGenericArray(arrForLoop, add) as int == res as int;
 }
 
-function arrSum(arr: int[]): int {
+function arrSum(arr: FixedArray<int>): int {
     let res = 0
     for (let i = 0; i < arrForLoop.length; ++i) {
         res += arrForLoop[i];
@@ -115,7 +115,7 @@ function checkApplyFunWithConstraintsArrowFun() {
 }
 
 function checkGenericKeyof(): boolean {
-    const keys: string[] = ['age', 'data'];
+    const keys: FixedArray<string> = ['age', 'data'];
     const res = genericKeyof(etsUser, keys);
 
     const checkKeys = res.keys as Array<string> instanceof Array

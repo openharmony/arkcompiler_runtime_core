@@ -20,7 +20,7 @@ export declare function error(msg: string): never;
 export declare function foo(x: string): void;
 export declare function foo1(arg: X): void;
 export declare function foo2(a?: number): void;
-export declare function foo3(...nums: number[]): void;
+export declare function foo3(...nums: Array<number>): void;
 export declare function foo4(a: number): void;
 export declare function foo5(a: number): number;
 export declare function foo6(): Promise<void>;

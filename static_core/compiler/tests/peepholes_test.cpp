@@ -6940,6 +6940,111 @@ TEST_F(PeepholesTest, MultiArrayWithLenArrayOfString)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
+TEST_F(PeepholesTest, RemoveDoubleXor)
+{
+    GRAPH(GetGraph())
+    {
+        PARAMETER(0U, 0U).i32();  // arg 0
+        CONSTANT(1U, 1U).i64();   // Constant i64 0x1
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(2U, Opcode::Xor).i32().Inputs(0U, 1U);
+            INST(3U, Opcode::Xor).i32().Inputs(2U, 1U);
+            INST(4U, Opcode::Return).b().Inputs(3U);
+        }
+    }
+    ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
+    GetGraph()->RunPass<Cleanup>();
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).i32();  // arg 0
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(4U, Opcode::Return).b().Inputs(0U);
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+TEST_F(PeepholesTest, RemoveDoubleXorNeg1)
+{
+    GRAPH(GetGraph())
+    {
+        PARAMETER(0U, 0U).i32();  // arg 0
+        PARAMETER(1U, 1U).i32();  // arg 1 (non-const input)
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(2U, Opcode::Xor).i32().Inputs(0U, 1U);
+            INST(3U, Opcode::Xor).i32().Inputs(2U, 1U);
+            INST(4U, Opcode::Return).b().Inputs(3U);
+        }
+    }
+    auto clone = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
+    ASSERT_FALSE(GetGraph()->RunPass<Peepholes>());
+    GraphChecker(GetGraph()).Check();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone));
+}
+
+TEST_F(PeepholesTest, RemoveDoubleXorNeg2)
+{
+    GRAPH(GetGraph())
+    {
+        PARAMETER(0U, 0U).i32();  // arg 0
+        CONSTANT(1U, 1U).i64();   // Constant i64 0x1
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(2U, Opcode::Add).i32().Inputs(0U, 1U);  // Non-Xor input of the second Xor
+            INST(3U, Opcode::Xor).i32().Inputs(2U, 1U);
+            INST(4U, Opcode::Return).b().Inputs(3U);
+        }
+    }
+    auto clone = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
+    ASSERT_FALSE(GetGraph()->RunPass<Peepholes>());
+    GraphChecker(GetGraph()).Check();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone));
+}
+
+TEST_F(PeepholesTest, RemoveDoubleXorNeg3)
+{
+    GRAPH(GetGraph())
+    {
+        PARAMETER(0U, 0U).i32();  // arg 0
+        CONSTANT(1U, 1U).i64();   // Constant i64 0x1
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(2U, Opcode::Xor).i32().Inputs(0U, 1U);
+            INST(3U, Opcode::Xor).i32().Inputs(2U, 1U);
+            INST(4U, Opcode::Add).i32().Inputs(2U, 0U);  // Extra user of first Xor
+            INST(5U, Opcode::Return).b().Inputs(3U);
+        }
+    }
+    auto clone = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
+    ASSERT_FALSE(GetGraph()->RunPass<Peepholes>());
+    GraphChecker(GetGraph()).Check();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone));
+}
+
+TEST_F(PeepholesTest, RemoveDoubleXorNeg4)
+{
+    GRAPH(GetGraph())
+    {
+        PARAMETER(0U, 0U).i32();  // arg 0
+        CONSTANT(1U, 1U).i64();   // Constant i64 0x1
+        CONSTANT(2U, 2U).i64();   // Another constant i64 0x2
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(3U, Opcode::Xor).i32().Inputs(0U, 1U);
+            INST(4U, Opcode::Xor).i32().Inputs(3U, 2U);
+            INST(5U, Opcode::Return).b().Inputs(4U);
+        }
+    }
+    auto clone = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
+    ASSERT_FALSE(GetGraph()->RunPass<Peepholes>());
+    GraphChecker(GetGraph()).Check();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone));
+}
+
 // NOLINTEND(readability-magic-numbers)
 
 }  // namespace ark::compiler

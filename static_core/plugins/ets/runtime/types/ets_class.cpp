@@ -33,6 +33,52 @@
 
 namespace ark::ets {
 
+static bool VerifyLambdaClass(EtsClass *etsClass, Method *method, ClassLinkerErrorHandler *errorHandler)
+{
+    ASSERT(etsClass != nullptr);
+    ASSERT(method != nullptr);
+    auto fields = etsClass->GetFields();
+    if (method->IsStatic()) {
+        return fields.empty();
+    }
+    if (fields.size() != 1) {
+        LOG(ERROR, CLASS_LINKER) << "Invalid LambdaClass: Expected at most 1 field, but got " << fields.size();
+        return false;
+    }
+    auto klass = etsClass->GetFieldByIndex(0)->GetRuntimeField()->ResolveTypeClass(errorHandler);
+    if (klass == nullptr) {
+        return false;
+    }
+    auto baseClass = method->GetClass();
+    return baseClass->IsAssignableFrom(klass);
+}
+
+static void ReportInvalidLambdaClass(const uint8_t *descriptor, [[maybe_unused]] ClassLinkerErrorHandler *errorHandler)
+{
+    if (errorHandler != nullptr) {
+        PandaStringStream ss;
+        ss << "Found invalid lambda class " << descriptor;
+        errorHandler->OnError(ClassLinker::Error::INVALID_LAMBDA_CLASS, ss.str());
+    }
+}
+
+static void FunctionalReferenceAnnotationCallBack(EtsClass *etsClass, const panda_file::File *pfile,
+                                                  panda_file::AnnotationDataAccessor *ada,
+                                                  ClassLinkerErrorHandler *errorHandler)
+{
+    // methodOffset is passed by FE
+    auto implMethod = ada->GetElement(0).GetScalarValue().Get<panda_file::File::EntityId>();
+    auto methodOffset = implMethod.GetOffset();
+    auto *linker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    auto *method = linker->GetMethod(*pfile, panda_file::File::EntityId(methodOffset), etsClass->GetLoadContext());
+
+    etsClass->SetTypeMetaData(reinterpret_cast<EtsLong>(method));
+    if (!VerifyLambdaClass(etsClass, method, errorHandler)) {
+        auto descriptor = utf::CStringAsMutf8(etsClass->GetDescriptor());
+        ReportInvalidLambdaClass(descriptor, errorHandler);
+    }
+}
+
 uint32_t EtsClass::GetFieldsNumber()
 {
     uint32_t fnumber = 0;
@@ -421,7 +467,8 @@ static bool HasFunctionTypeInSuperClasses(EtsClass *cls)
     return false;
 }
 
-void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPrimitiveType)
+void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPrimitiveType,
+                          ClassLinkerErrorHandler *errorHandler)
 {
     ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
 
@@ -450,11 +497,19 @@ void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPri
     if (pfile != nullptr) {
         panda_file::ClassDataAccessor cda(*pfile, runtimeClass->GetFileId());
 
-        cda.EnumerateAnnotation(panda_file_items::class_descriptors::ANNOTATION_MODULE.data(),
-                                [&flags](panda_file::AnnotationDataAccessor &) {
-                                    flags |= IS_MODULE;
-                                    return true;
-                                });
+        cda.EnumerateAnnotations([this, &pfile, &flags, &errorHandler](panda_file::File::EntityId annotationId) {
+            panda_file::AnnotationDataAccessor ada(*pfile, annotationId);
+            auto *annotationName = pfile->GetStringData(ada.GetClassId()).data;
+            auto *annotationModuleName = panda_file_items::class_descriptors::ANNOTATION_MODULE.data();
+            auto *annotationFunctionalReferenceName =
+                panda_file_items::class_descriptors::ANNOTATION_FUNCTIONAL_REFERENCE.data();
+            if (utf::IsEqual(utf::CStringAsMutf8(annotationModuleName), annotationName)) {
+                flags |= IS_MODULE;
+            } else if (utf::IsEqual(utf::CStringAsMutf8(annotationFunctionalReferenceName), annotationName)) {
+                flags |= (IS_FUNCTION_REFERENCE | IS_VALUE_TYPED);
+                FunctionalReferenceAnnotationCallBack(this, pfile, &ada, errorHandler);
+            }
+        });
     }
 
     SetFlags(flags);
@@ -614,7 +669,9 @@ EtsObject *EtsClass::CreateInstance()
     }
 
     if (IsStringClass()) {
-        return EtsString::CreateNewEmptyString()->AsObject();
+        auto emptyString = EtsString::CreateNewEmptyString();
+        ASSERT(emptyString != nullptr);
+        return emptyString->AsObject();
     }
 
     EtsMethod *ctor = GetDirectMethod(panda_file_items::CTOR.data(), ":V");

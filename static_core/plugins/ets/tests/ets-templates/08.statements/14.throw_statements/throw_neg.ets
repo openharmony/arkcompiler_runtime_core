@@ -15,14 +15,13 @@ limitations under the License.
 
 {% for t in cases %}
 /*---
-desc: Throw statements cause an exception to be thrown.
+desc: Throw statements cause an error to be thrown.
 tags: [compile-only, negative]
 ---*/
 
 {{t.defs}}
 
-function main(): int {
+function main() {
     {{t.use|indent}}
-    return 0;
 }
 {% endfor %}

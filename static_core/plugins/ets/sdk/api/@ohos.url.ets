@@ -209,19 +209,6 @@ export namespace url {
         return trimHead.substring(0, i + 1);
     }
 
-    function deleteTabOrNewline(input: string): string {
-        let res = "";
-        for (let i = 0; i < input.length; i++) {
-            let ch = input[i];
-            if (ch == c'\t' || ch == c'\n' || ch == c'\r') {
-                continue;
-            } else {
-                res += ch;
-            }
-        }
-        return res;
-    }
-
     function isAlpha(ch: string): boolean {
         return ch.length == 1 && ((ch[0] >= c'a' && ch[0] <= c'z') || (ch[0] >= c'A' && ch[0] <= c'Z'));
     }
@@ -239,7 +226,8 @@ export namespace url {
     }
 
     function isFileNotHost(input: string) {
-        if (isAlpha(input.charAt(0)) && (input[1] == c':' || input[1] == c'|')) {
+        let ch = new Char(input[0]);
+        if (isAlpha(ch.toString()) && (input[1] == c':' || input[1] == c'|')) {
             return true;
         }
         return false;
@@ -544,13 +532,15 @@ export namespace url {
         private ipv4Array: Array<string> = new Array<string>();
 
         analysizeScheme(input: string): boolean {
-            if (!isAlpha(input.charAt(0))) {
+            let ch = new Char(input[0]);
+            if (!isAlpha(ch.toString())) {
                 this.flags[0] = true;
                 return false;
             }
             let sizeLen: number = input.length;
             for (let i = 1; i < sizeLen - 1; i++) {
-                if (!isAlphaNum(input.charAt(i)) && input[i] != c'+' && input[i] != c'-' && input[i] != c'.') {
+                let ch1 = new Char(input[i]);
+                if (!isAlphaNum(ch1.toString()) && input[i] != c'+' && input[i] != c'-' && input[i] != c'.') {
                     this.flags[0] = true;
                     return false;
                 }
@@ -605,7 +595,8 @@ export namespace url {
             }
 
             let it = this.cPath[0];
-            if (isAlpha(it.charAt(0)) && (it[1] == c':' || it[1] == c'|')) {
+            let ch = new Char(it[0]);
+            if (isAlpha(ch.toString()) && (it[1] == c':' || it[1] == c'|')) {
                 if (it.length == 2) {
                     this.cPath[0] = it[0] + ':';
                     this.flags[4] = false;
@@ -765,8 +756,8 @@ export namespace url {
         private analysizeOpaqueHost(input: string) {
             let inputSize: number = input.length;
             for (let i = 0; i < inputSize; i++) {
-                let ch = input[i];
-                let result = Helper.specialcharacter.indexOf(ch);
+                let ch = new Char(input[i]);
+                let result = Helper.specialcharacter.indexOf(ch.toString());
                 if ((ch != c'%') && (result != -1)) {
                     this.flags[0] = true;
                     return;
@@ -875,7 +866,8 @@ export namespace url {
                 return;
             }
             for (let i = 0; i < port.length; i++) {
-                if (!isNum(port.charAt(i))) {
+                let ch = new Char(port[i]);
+                if (!isNum(ch.toString())) {
                     this.flags[0] = true;
                     return;
                 }
@@ -1574,7 +1566,9 @@ export namespace url {
             resUrl.cPath.pop();
             return;
         }
-        if ((baseUrl.cPath.length == 1) && isFile && isAlpha(baseUrl.cPath[0].charAt(0)) && (baseUrl.cPath[0].charAt(1) == c':')) {
+
+        let ch = new Char(baseUrl.cPath[0].charAt(0));
+        if ((baseUrl.cPath.length == 1) && isFile && isAlpha(ch.toString()) && (baseUrl.cPath[0].charAt(1) == c':')) {
             return;
         }
         baseUrl.cPath.pop();
@@ -2108,7 +2102,7 @@ export namespace url {
         entries(): Array<[string,string]> {
             let result = new Array<[string, string]>();
             for (let i = 0; i < this.searchParams.length; i += 2) {
-                let arr: [string, string] = [this.searchParams[i], this.searchParams[i + 1]]; 
+                let arr: [string, string] = [this.searchParams[i], this.searchParams[i + 1]];
                 result.push(arr);
             }
             return result;

@@ -310,11 +310,11 @@ cases:
       use: |-
           v = new Byte(0x7F as byte)
           assertTrue(v instanceof Integral)
-          assertTrue((v as Integral).byteValue() == 127)
+          assertTrue((v as Integral).toByte() == 127)
 
           v = new Number(2.5)
           assertTrue(v instanceof Floating)
-          assertTrue((v as Floating).doubleValue() == 2.5)
+          assertTrue((v as Floating).toDouble() == 2.5)
 
     # Enums
     - decl: |-

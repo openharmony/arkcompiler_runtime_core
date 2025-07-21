@@ -25,7 +25,7 @@
 //! INST_COUNT   "BoundsCheck", 1
 //! INST_COUNT   "BoundsCheck D", 1
 
-function test(arr: int[], idx: int) : int {
+function test(arr: FixedArray<int>, idx: int) : int {
     let sum: int = 0;
     for (let i:int = 0; i < arr.length; ++i) {
         sum += arr[i] * arr[idx];
@@ -34,6 +34,6 @@ function test(arr: int[], idx: int) : int {
 }
 
 function main(): int {
-    let arr: int[] = [0, 1, 2, 3, 4, 5];
+    let arr: FixedArray<int> = [0, 1, 2, 3, 4, 5];
     return test(arr, 0);
 }

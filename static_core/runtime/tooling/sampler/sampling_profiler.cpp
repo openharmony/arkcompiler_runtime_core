@@ -110,6 +110,15 @@ Sampler *Sampler::Create()
     return Sampler::instance_;
 }
 
+static void LogProfilerStats()
+{
+    LOG(INFO, PROFILER) << "Total samples: " << g_sTotalSamples;
+    LOG(INFO, PROFILER) << "Lost samples: " << g_sLostSamples;
+    LOG(INFO, PROFILER) << "Lost samples(Invalid method ptr): " << g_sLostInvalidSamples;
+    LOG(INFO, PROFILER) << "Lost samples(Invalid pf ptr): " << g_sLostNotFindSamples;
+    LOG(INFO, PROFILER) << "Lost samples(SIGSEGV occured): " << g_sLostSegvSamples;
+}
+
 /* static */
 void Sampler::Destroy(Sampler *sampler)
 {
@@ -118,11 +127,6 @@ void Sampler::Destroy(Sampler *sampler)
 
     // Atomic with acquire order reason: To ensure start/stop load correctly
     ASSERT(!sampler->isActive_.load(std::memory_order_acquire));
-
-    LOG(INFO, PROFILER) << "Total samples: " << g_sTotalSamples << "\nLost samples: " << g_sLostSamples;
-    LOG(INFO, PROFILER) << "Lost samples(Invalid method ptr): " << g_sLostInvalidSamples
-                        << "\nLost samples(Invalid pf ptr): " << g_sLostNotFindSamples;
-    LOG(INFO, PROFILER) << "Lost samples(SIGSEGV occured): " << g_sLostSegvSamples;
 
     Runtime::GetCurrent()->GetNotificationManager()->RemoveListener(instance_,
                                                                     RuntimeNotificationManager::Event::THREAD_EVENTS);
@@ -134,6 +138,9 @@ void Sampler::Destroy(Sampler *sampler)
 
     delete sampler;
     instance_ = nullptr;
+
+    LOG(INFO, PROFILER) << "Sampling profiler destroyed";
+    LogProfilerStats();
 }
 
 Sampler::Sampler() : runtime_(Runtime::GetCurrent()), sampleInterval_(DEFAULT_SAMPLE_INTERVAL_US)
@@ -184,7 +191,7 @@ void Sampler::LoadModule(std::string_view name)
     runtime_->GetClassLinker()->EnumeratePandaFiles(callback, false);
 }
 
-bool Sampler::Start(const char *filename)
+bool Sampler::Start(std::unique_ptr<StreamWriter> &&writer)
 {
     // Atomic with acquire order reason: To ensure start/stop load correctly
     if (isActive_.load(std::memory_order_acquire)) {
@@ -199,23 +206,23 @@ bool Sampler::Start(const char *filename)
 
     // Atomic with release order reason: To ensure start store correctly
     isActive_.store(true, std::memory_order_release);
-    // Creating std::string instead of sending pointer to avoid UB stack-use-after-scope
-    listenerThread_ = std::make_unique<std::thread>(&Sampler::ListenerThreadEntry, this, std::string(filename));
+
+    listenerThread_ = std::make_unique<std::thread>(&Sampler::ListenerThreadEntry, this, std::move(writer));
     listenerTid_ = listenerThread_->native_handle();
 
     // All prepairing actions should be done before this thread is started
     samplerThread_ = std::make_unique<std::thread>(&Sampler::SamplerThreadEntry, this);
     samplerTid_ = samplerThread_->native_handle();
-
+    LOG(INFO, PROFILER) << "Sampling profiler started";
     return true;
 }
 
-void Sampler::Stop()
+bool Sampler::Stop()
 {
     // Atomic with acquire order reason: To ensure start/stop load correctly
     if (!isActive_.load(std::memory_order_acquire)) {
         LOG(ERROR, PROFILER) << "Attemp to stop sampling profiler, but it was not started";
-        return;
+        return false;
     }
     if (!samplerThread_->joinable()) {
         LOG(FATAL, PROFILER) << "Sampling profiler thread unexpectedly disappeared";
@@ -236,6 +243,10 @@ void Sampler::Stop()
     listenerThread_.reset();
     samplerTid_ = 0;
     listenerTid_ = 0;
+
+    LOG(INFO, PROFILER) << "Sampling profiler stopped";
+    LogProfilerStats();
+    return true;
 }
 
 void Sampler::WriteLoadedPandaFiles(StreamWriter *writerPtr)
@@ -417,7 +428,7 @@ static bool CollectFrames(SamplerFrameInfo &frameInfo, SampleInfo &sample, size_
 
         sample.stackInfo.managedStack[stackCounter].pandaFilePtr = pfId;
         sample.stackInfo.managedStack[stackCounter].fileId = method->GetFileId().GetOffset();
-
+        sample.stackInfo.managedStack[stackCounter].bcOffset = stackWalker.GetBytecodePc();
         ++stackCounter;
         stackWalker.NextFrame();
 
@@ -426,7 +437,7 @@ static bool CollectFrames(SamplerFrameInfo &frameInfo, SampleInfo &sample, size_
             break;
         }
     }
-
+    sample.timeStamp = Sampler::GetMicrosecondsTimeStamp();
     return false;
 }
 
@@ -556,11 +567,9 @@ void Sampler::SamplerThreadEntry()
     } while (g_sCurrentHandlersCounter != 0);
 }
 
-// Passing std:string copy instead of reference, 'cause another thread owns this object
 // NOLINTNEXTLINE(performance-unnecessary-value-param)
-void Sampler::ListenerThreadEntry(std::string outputFile)
+void Sampler::ListenerThreadEntry(std::unique_ptr<StreamWriter> writerPtr)
 {
-    auto writerPtr = std::make_unique<StreamWriter>(outputFile.c_str());
     // Writing panda files that were loaded before sampler was created
     WriteLoadedPandaFiles(writerPtr.get());
 
@@ -581,6 +590,15 @@ void Sampler::ListenerThreadEntry(std::string outputFile)
             writerPtr->WriteSample(bufferSample);
         }
     }
+}
+
+uint64_t Sampler::GetMicrosecondsTimeStamp()
+{
+    static constexpr int USEC_PER_SEC = 1000 * 1000;
+    static constexpr int NSEC_PER_USEC = 1000;
+    struct timespec time {};
+    clock_gettime(CLOCK_MONOTONIC, &time);
+    return time.tv_sec * USEC_PER_SEC + time.tv_nsec / NSEC_PER_USEC;
 }
 
 }  // namespace ark::tooling::sampler

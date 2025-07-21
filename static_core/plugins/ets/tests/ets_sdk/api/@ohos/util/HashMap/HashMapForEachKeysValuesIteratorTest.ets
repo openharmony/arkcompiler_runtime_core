@@ -15,9 +15,6 @@
 
 import HashMap from "@ohos.util.HashMap";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
     const suite = new ArkTestsuite("HashMap ForEach Keys Values Iterator API tests")
 
@@ -92,15 +89,15 @@ function testKeysIterator() {
     let iteratorSetValues = hashMap.keys();
     assertEQ(iteratorSetValues.next().value, "sparrow", "The hashMap keys iterator should return the first key");
     assertEQ(iteratorSetValues.next().value, "gull", "The hashMap keys iterator should return the second key");
-    assertEQ(iteratorSetValues.next().value, undefined,
-        "The hashMap keys iterator should return undefined for no more keys");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The hashMap keys iterator.done should true for no more keys");
 }
 
 function testKeysIteratorWithEmptyHashMap() {
     let hashMap: HashMap<string, number> = new HashMap<string, number>();
     let iteratorSetValues = hashMap.keys();
-    assertEQ(iteratorSetValues.next().value, undefined,
-        "The hashMap keys iterator should return undefined when the hashMap is empty");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The hashMap keys iterator.done should true when the hashMap is empty");
 }
 
 function testValuesIterator() {
@@ -110,15 +107,15 @@ function testValuesIterator() {
     let iteratorSetValues = hashMap.values();
     assertEQ(iteratorSetValues.next().value, 123, "The hashMap values iterator should return the first value");
     assertEQ(iteratorSetValues.next().value, 357, "The hashMap values iterator should return the second value");
-    assertEQ(iteratorSetValues.next().value, undefined,
-        "The hashMap values iterator should return undefined for no more values");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The hashMap values iterator.done should true for no more values");
 }
 
 function testValuesIteratorWithEmptyHashMap() {
     let hashMap: HashMap<string, number> = new HashMap<string, number>();
     let iteratorSetValues = hashMap.values();
-    assertEQ(iteratorSetValues.next().value, undefined,
-        "The hashMap values iterator should return undefined when the hashMap is empty");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The hashMap values iterator.done should true when the hashMap is empty");
 }
 
 function testIterator() {
@@ -142,6 +139,6 @@ function testIterator() {
 function testIteratorWithEmptyHashMap() {
     let hashMap: HashMap<string, number> = new HashMap<string, number>();
     let iteratorSetValues = hashMap.$_iterator();
-    assertEQ(iteratorSetValues.next().value, undefined,
-        "The hashMap $_iterator should return undefined when the hashMap is empty");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The hashMap iterator.done should true when the hashMap is empty");
 }

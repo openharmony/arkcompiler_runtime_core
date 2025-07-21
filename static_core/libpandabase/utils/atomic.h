@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,13 +22,15 @@ namespace ark {
 template <typename T>
 ALWAYS_INLINE inline void AtomicStore(T *addr, T val, std::memory_order order)
 {
+    ASSERT(addr != nullptr);
     // Atomic with parameterized order reason: memory order passed as argument
     reinterpret_cast<std::atomic<T> *>(addr)->store(val, order);
 }
 
 template <typename T>
-ALWAYS_INLINE inline T AtomicLoad(T *addr, std::memory_order order)
+ALWAYS_INLINE inline T AtomicLoad(const T *addr, std::memory_order order)
 {
+    ASSERT(addr != nullptr);
     // Atomic with parameterized order reason: memory order passed as argument
     return reinterpret_cast<const std::atomic<T> *>(addr)->load(order);
 }
@@ -36,9 +38,20 @@ ALWAYS_INLINE inline T AtomicLoad(T *addr, std::memory_order order)
 template <typename T>
 ALWAYS_INLINE inline T AtomicCmpxchgStrong(T *addr, T expected, T newValue, std::memory_order order)
 {
+    ASSERT(addr != nullptr);
     // Atomic with parameterized order reason: memory order passed as argument
     reinterpret_cast<std::atomic<T> *>(addr)->compare_exchange_strong(expected, newValue, order);
     return expected;
+}
+
+template <typename T>
+ALWAYS_INLINE inline bool AtomicCmpxchgWeak(T *addr, T &expected, T newValue, std::memory_order orderSuccess,
+                                            std::memory_order orderFailure)
+{
+    ASSERT(addr != nullptr);
+    // Atomic with parameterized order reason: memory order passed as argument
+    return reinterpret_cast<std::atomic<T> *>(addr)->compare_exchange_weak(expected, newValue, orderSuccess,
+                                                                           orderFailure);
 }
 }  // namespace ark
 

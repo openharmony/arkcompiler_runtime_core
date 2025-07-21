@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -715,6 +715,7 @@ void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
                         ScalarValue::Create<Value::Type::F64>(std::get<double>(literal.value_)));
                     break;
                 case panda_file::LiteralTag::STRING:
+                case panda_file::LiteralTag::ETS_IMPLEMENTS:
                     value = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::STRING>(
                         std::string_view(std::get<std::string>(literal.value_))));
                     break;

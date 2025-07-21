@@ -16,7 +16,7 @@
 /*---
 desc: >-
     If code of an initializer block contains unhandled throw statement (see throw Statements) then the program terminates
-tags: [negative]
+tags: [negative, compile-only]
 ---*/
 
 package p6

@@ -13,11 +13,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-
-{% for c in cases %}
-
 /*---
-desc:  No method (including any getter or setter) of T is part of the Required<T> type.
+desc:  >-
+    No method (including any getter or setter) of T is part of the Required<T> type.
+    Note. If class T has a user-defined getter, setter, or both, then none of those is called when object literal is used with
+    Partial<T> variables. Object literal has its own built-in getters and setters to modify its variables.
 ---*/
 
 interface I {
@@ -27,7 +27,6 @@ interface I {
 
 function main() {
   let a: Required<I> = {i: 1.9}
-  {{c}}
+  a.i = 1.9
+  assertEQ( a.i, 1.9 )
 }
-
-{% endfor %}

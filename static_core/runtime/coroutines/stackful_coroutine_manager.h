@@ -44,9 +44,11 @@ public:
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
     bool Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                CoroutineLaunchMode mode) override;
+                CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag) override;
     bool LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                           CoroutineLaunchMode mode) override;
+                           CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag) override;
+    bool LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName, CoroutineLaunchMode mode,
+                      CoroutinePriority priority, bool abortFlag) override;
     void Schedule() override;
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(CoroutineEvent *blocker) override;
@@ -58,6 +60,9 @@ public:
 
     void CreateWorkers(size_t howMany, Runtime *runtime, PandaVM *vm) override;
     void FinalizeWorkers(size_t howMany, Runtime *runtime, PandaVM *vm) override;
+
+    void PreZygoteFork() override;
+    void PostZygoteFork() override;
 
     /* ThreadManager interfaces, see ThreadManager class for the details */
     void WaitForDeregistration() override;
@@ -72,7 +77,7 @@ public:
      */
     Coroutine *CreateNativeCoroutine(Runtime *runtime, PandaVM *vm,
                                      Coroutine::NativeEntrypointInfo::NativeEntrypointFunc entry, void *param,
-                                     PandaString name, Coroutine::Type type);
+                                     PandaString name, Coroutine::Type type, CoroutinePriority priority);
     /// destroy the "native" coroutine created earlier
     void DestroyNativeCoroutine(Coroutine *co);
     void DestroyEntrypointfulCoroutine(Coroutine *co) override;
@@ -148,8 +153,7 @@ protected:
      * @brief reuse a cached coroutine instance in case when coroutine pool is enabled
      * see Coroutine::ReInitialize for details
      */
-    void ReuseCoroutineInstance(Coroutine *co, CompletionEvent *completionEvent, Method *entrypoint,
-                                PandaVector<Value> &&arguments, PandaString name);
+    void ReuseCoroutineInstance(Coroutine *co, EntrypointInfo &&epInfo, PandaString name, CoroutinePriority priority);
 
 private:
     using WorkerId = uint32_t;
@@ -158,15 +162,15 @@ private:
     StackfulCoroutineWorker *ChooseWorkerForCoroutine(Coroutine *co) REQUIRES(workersLock_);
     stackful_coroutines::AffinityMask CalcAffinityMaskFromLaunchMode(CoroutineLaunchMode mode);
 
-    Coroutine *GetCoroutineInstanceForLaunch(CompletionEvent *completionEvent, Method *entrypoint,
-                                             PandaVector<Value> &&arguments,
-                                             stackful_coroutines::AffinityMask affinityMask);
-    bool LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                    CoroutineLaunchMode mode);
-    bool LaunchImmediatelyImpl(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                               CoroutineLaunchMode mode);
-    bool LaunchWithMode(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                        CoroutineLaunchMode mode, bool launchImmediately);
+    Coroutine *GetCoroutineInstanceForLaunch(EntrypointInfo &&epInfo, PandaString &&coroName,
+                                             CoroutinePriority priority, stackful_coroutines::AffinityMask affinityMask,
+                                             bool abortFlag);
+    bool LaunchImpl(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutineLaunchMode mode,
+                    CoroutinePriority priority, bool abortFlag);
+    bool LaunchImmediatelyImpl(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutineLaunchMode mode,
+                               CoroutinePriority priority, bool abortFlag);
+    bool LaunchWithMode(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutineLaunchMode mode,
+                        CoroutinePriority priority, bool launchImmediately, bool abortFlag);
     /**
      * Tries to extract a coroutine instance from the pool for further reuse, returns nullptr in case when it is not
      * possible.
@@ -211,6 +215,9 @@ private:
     void IncrementActiveCoroutines();
     void DecrementActiveCoroutines();
 
+    /// list unhandled language specific events on program exit
+    void ListUnhandledEventsOnProgramExit();
+
     StackfulCoroutineWorker *ChooseWorkerForFinalization();
 
     void InitializeWorkerIdAllocator();
@@ -229,6 +236,15 @@ private:
     void CheckForBlockedWorkers();
     void MigrateCoroutinesInward(uint32_t &count);
     StackfulCoroutineWorker *ChooseWorkerImpl(WorkerSelectionPolicy policy, size_t maskValue) REQUIRES(workersLock_);
+
+    /**
+     * @brief Calculate worker limits based on configuration
+     * @param config The coroutine manager configuration
+     * @param exclusiveWorkersLimit Output parameter for exclusive workers limit
+     * @param commonWorkersLimit Output parameter for common workers limit
+     */
+    void CalculateWorkerLimits(const CoroutineManagerConfig &config, size_t &exclusiveWorkersLimit,
+                               size_t &commonWorkersLimit);
 
     // for thread safety with GC
     mutable os::memory::Mutex coroListLock_;

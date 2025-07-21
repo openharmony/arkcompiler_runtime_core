@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/*---
+  tags: [not-a-test]
+  files: [level_two.ets]
+  arktsconfig: arktsconfig.json
+---*/
+
 import { LevelTwo } from "./level_two";
 
 export class LevelOne extends LevelTwo { }

@@ -333,22 +333,40 @@ cannot be used as identifiers:
 |   ``do``           |   ``interface``   |   ``static``     |                  |
 +--------------------+-------------------+------------------+------------------+
 
-2. Names of primitive built-in types as well as their aliases
-also are *hard keywords*, and cannot be used as identifiers:
+2. Names and aliases of predefined types are *hard keywords*, and cannot be
+used as identifiers:
 
-+---------------+---------------+---------------+---------------+---------------+---------------+
-|               |               |               |               |               |               |
-+===============+===============+===============+===============+===============+===============+
-| ``boolean``   | ``double``    | ``number``    | ``Boolean``   | ``Double``    | ``Number``    |
-+---------------+---------------+---------------+---------------+---------------+---------------+
-| ``byte``      | ``float``     | ``object``    | ``Byte``      | ``Float``     | ``Object``    |
-+---------------+---------------+---------------+---------------+---------------+---------------+
-| ``bigint``    | ``int``       | ``short``     | ``Bigint``    | ``Int``       | ``Short``     |
-+---------------+---------------+---------------+---------------+---------------+---------------+
-| ``char``      | ``long``      | ``string``    | ``Char``      | ``Long``      | ``String``    |
-+---------------+---------------+---------------+---------------+---------------+---------------+
-| ``void``      |               |               |               |               |               |
-+---------------+---------------+---------------+---------------+---------------+---------------+
++---------------+---------------+
+| Primary name  | Alias         |
++===============+===============+
+| ``Any``       |               |
++---------------+---------------+
+| ``bigint``    | ``BigInt``    |
++---------------+---------------+
+| ``boolean``   | ``Boolean``   |
++---------------+---------------+
+| ``byte``      | ``Byte``      |
++---------------+---------------+
+| ``char``      | ``Char``      |
++---------------+---------------+
+| ``double``    | ``Double``    |
++---------------+---------------+
+| ``float``     | ``Float``     |
++---------------+---------------+
+| ``int``       | ``Int``       |
++---------------+---------------+
+| ``long``      | ``Long``      |
++---------------+---------------+
+| ``number``    | ``Number``    |
++---------------+---------------+
+| ``Object``    | ``object``    |
++---------------+---------------+
+| ``short``     | ``Short``     |
++---------------+---------------+
+| ``string``    | ``String``    |
++---------------+---------------+
+| ``void``      |               |
++---------------+---------------+
 
 3. The following words have special meaning in certain contexts (*soft
 keywords*) but are valid identifiers elsewhere:
@@ -358,19 +376,19 @@ keywords*) but are valid identifiers elsewhere:
    soft keyword
    identifier
 
-+-----------------+--------------------+-------------------+
-|                 |                    |                   |
-+=================+====================+===================+
-|   ``catch``     |     ``in``         |     ``readonly``  |
-+-----------------+--------------------+-------------------+
-|   ``declare``   |     ``instanceof`` |     ``set``       |
-+-----------------+--------------------+-------------------+
-|   ``finally``   |     ``namespace``  |     ``type``      |
-+-----------------+--------------------+-------------------+
-|   ``from``      |     ``of``         |     ``typeof``    |
-+-----------------+--------------------+-------------------+
-|   ``get``       |     ``out``        |                   |
-+-----------------+--------------------+-------------------+
++--------------------+--------------------+--------------------+
+|                    |                    |                    |
++====================+====================+====================+
+|      ``catch``     |     ``in``         |      ``readonly``  |
++--------------------+--------------------+--------------------+
+|      ``declare``   |     ``instanceof`` |      ``set``       |
++--------------------+--------------------+--------------------+
+|      ``finally``   |     ``namespace``  |      ``type``      |
++--------------------+--------------------+--------------------+
+|      ``from``      |     ``of``         |      ``typeof``    |
++--------------------+--------------------+--------------------+
+|      ``get``       |     ``out``        |                    |
++--------------------+--------------------+--------------------+
 
 4. The following identifiers are also treated as *soft keywords* reserved for
 the future use (or used in |TS|):
@@ -418,22 +436,24 @@ The following character sequences represent operators and punctuators:
    square bracket
    keyword
 
-+-------+--------+--------+----------+--------+---------+---------+
-+-------+--------+--------+----------+--------+---------+---------+
-| ``+`` | ``&``  | ``+=`` | ``|=``   | ``&=`` | ``<``   | ``?.``  |
-+-------+--------+--------+----------+--------+---------+---------+
-| ``-`` | ``|``  | ``-=`` | ``^=``   | ``&&`` | ``>``   | ``!``   |
-+-------+--------+--------+----------+--------+---------+---------+
-| ``*`` | ``^``  | ``*=`` | ``<<=``  | ``||`` | ``===`` | ``<=``  |
-+-------+--------+--------+----------+--------+---------+---------+
-| ``/`` | ``>>`` | ``/=`` | ``>>=``  | ``++`` | ``==``  | ``>=``  |
-+-------+--------+--------+----------+--------+---------+---------+
-| ``%`` | ``<<`` | ``%=`` | ``>>>=`` | ``--`` | ``=``   | ``...`` |
-+-------+--------+--------+----------+--------+---------+---------+
-| ``(`` | ``)``  | ``[``  | ``]``    | ``{``  | ``}``   | ``??``  |
-+-------+--------+--------+----------+--------+---------+---------+
-| ``,`` | ``;``  | ``.``  | ``:``    | ``!=`` | ``!==`` |         |
-+-------+--------+--------+----------+--------+---------+---------+
++----------+----------+----------+----------+----------+----------+----------+
++----------+----------+----------+----------+----------+----------+----------+
+|  ``+``   |  ``&``   |  ``+=``  | ``|=``   | ``&=``   |  ``<``   |  ``?.``  |
++----------+----------+----------+----------+----------+----------+----------+
+|  ``-``   |  ``|``   |  ``-=``  | ``^=``   | ``&&``   |  ``>``   |  ``!``   |
++----------+----------+----------+----------+----------+----------+----------+
+|  ``*``   |  ``^``   |  ``*=``  | ``<<=``  | ``||``   |  ``===`` |  ``<=``  |
++----------+----------+----------+----------+----------+----------+----------+
+|  ``/``   |  ``>>``  |  ``/=``  | ``>>=``  | ``++``   |  ``==``  |  ``>=``  |
++----------+----------+----------+----------+----------+----------+----------+
+|  ``%``   |  ``<<``  |  ``%=``  | ``>>>=`` | ``--``   |  ``=``   |  ``...`` |
++----------+----------+----------+----------+----------+----------+----------+
+|  ``(``   |  ``)``   |  ``[``   | ``]``    | ``{``    |  ``}``   |  ``??``  |
++----------+----------+----------+----------+----------+----------+----------+
+|  ``,``   |  ``;``   |  ``.``   | ``:``    | ``!=``   |  ``!==`` |  ``**``  |
++----------+----------+----------+----------+----------+----------+----------+
+|  ``**=`` |  ``&&=`` |  ``||=`` | ``??=``  |          |          |          |
++----------+----------+----------+----------+----------+----------+----------+
 
 |
 
@@ -457,6 +477,7 @@ Literals
       | BooleanLiteral
       | StringLiteral
       | MultilineStringLiteral
+      | RegExpLiteral
       | NullLiteral
       | UndefinedLiteral
       | CharLiteral
@@ -516,14 +537,14 @@ an exponential part. Integer literals can be written with radices 16
 
     DecimalIntegerLiteral:
       '0'
-      | DecimalDigitNotNull ('_'? DecimalDigit)*
+      | DecimalDigitNotZero ('_'? DecimalDigit)*
       ;
 
     DecimalDigit:
       [0-9]
       ;
 
-    DecimalDigitNotNull:
+    DecimalDigitNotZero:
       [1-9]
       ;
 
@@ -618,20 +639,11 @@ examples below:
     9223372036854775808 // max(long) + 1
     0xFFFF_FFFF_FFFF_FFFF_0
 
-An integer literal in variable and constant declarations can be implicitly
-converted to another numeric type  (see :ref:`Numeric Types`) or type ``char``
-(see :ref:`Primitive Types Conversions`). An casting conversion must be
-used elsewhere (see :ref:`Cast Expressions`).
-
 .. index::
    integer literal
    int
    long
-   constant declaration
-   variable declaration
    char
-   implicit conversion
-   cast expression
 
 |
 
@@ -716,21 +728,18 @@ Bigint Literals
 ===============
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
+    todo: hex, octal, binary literals
 
 *Bigint literals* represent integer numbers with unlimited number of digits.
-*Bigint literals* use decimal radix only.
 
 *Bigint literals* are always of the ``bigint`` type (see :ref:`Type bigint`).
 
-A ``bigint`` literal is a sequence of digits followed by the symbol '``n``':
+A ``bigint`` literal is an *integer literal* followed by the symbol '``n``':
 
 .. code-block:: abnf
 
-    BigIntLiteral:
-      '0n'
-      | [1-9] ('_'? [0-9])* 'n'
-      ;
+    BigIntLiteral: IntegerLiteral 'n';
 
 The concept is presented by the examples below:
 
@@ -739,6 +748,7 @@ The concept is presented by the examples below:
     153n // bigint literal
     1_153n // bigint literal
     -153n // negative bigint literal
+    0xBAD_3n // bigint literal in hexadecimal notation
 
 The underscore character '``_``' used between successive digits can be used to
 denote a ``bigint`` literal and improve readability. Underscore characters in
@@ -987,6 +997,89 @@ for ``string`` (see :ref:`Type String`).
    operator
    literal
    literal type
+
+|
+
+.. _Regex Literal:
+
+Regex Literal
+=============
+
+.. meta:
+    frontend_status: None
+
+*Regex literals* can contain mandatory regex part and optional flags:
+
+.. index::
+   regex literal
+
+.. code-block:: abnf
+
+    RegexLiteral:
+        '/' RegexCharSequence '$'? '/' RegExFlags?
+        ;
+
+    RegexCharSequence:
+        (
+            RegexCharacter
+            |RegexSpecialForms
+            |'(' RegexSpecialForms ')'
+            |'(' '?<' Identifier '>' RegexSpecialForms ')'
+            |'(' '?:' RegexSpecialForms ')'
+        )+
+        ;
+
+    RegexCharacter:
+        ~["'\\\r\n] 
+        ('*'|'+'|'?'|('{' DecimalIntegerLiteral (',' DecimalIntegerLiteral? )? '}'))?
+        ;
+
+    RegexSpecialForms:   
+        CharacterClass ('(' '?='|'?!' CharacterClasse ')')? 
+        ('(' '?<='|'?<!' CharacterClasse ')') CharacterClass
+        ;
+
+    CharacterClass: 
+        '[' '^'? '\b'? (RegexCharacter | (RegexCharacter '-' RegexCharacter) '\B'?)+ '\b'? ']'
+        | '.'
+        | '\' 
+        ('d' | 'D' | 'w' | 'W' | 's' | 'S' | 't' | 'r' | 'n' | 'v' | 'f' | '0' 
+         | 'c' ['A'-'Z'] | 'x' DecimalDigit DecimalDigit 
+         | DecimalIntegerLiteral | 'k<' Identifier '>'
+        )
+        | 'u' HexDigit HexDigit HexDigit HexDigit 
+        | 'u{' HexDigit HexDigit HexDigit HexDigit HexDigit? '}'
+        | '[\b]' 
+        | (RegexCharacter '|' RegexCharacter)
+        ;
+
+    RegExFlags:
+        'g'? 'i'? 'm'? 's'? 'u'? 'v'? 'y'? 
+        ;
+
+Regex flags may be put in any order, but duplication leads to a
+:index:`compile-time error`.
+
+An example of regex literals is provided below:
+
+.. code-block:: typescript
+   :linenos:
+
+    let regex1 = /abc/ 
+    let regex2 = /ab+c/gi
+
+
+Semantically *regex literal* is equivalant to creation of an object of *RegExp*
+type which is a part of the standard library (see :ref:`Standard Library`)
+
+.. code-block:: typescript
+   :linenos:
+
+    let regex1 = /abc/ 
+    let regex2 = new RegExp ("abc")
+
+The |LANG| supports the same semantics of *regex literals* as 
+semantics of |JS| regular expresions.
 
 |
 

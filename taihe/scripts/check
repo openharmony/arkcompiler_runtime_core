@@ -23,6 +23,6 @@ ret=0
 set -x
 black --diff --check taihe tests || ret=1
 ruff check taihe tests || ret=1
-pyre check || ret=1
+pyright || ret=1
 
 exit "$ret"

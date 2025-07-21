@@ -57,12 +57,14 @@ public:
 
     void SetFieldType(EtsTypeAPIType *fieldType)
     {
+        ASSERT(fieldType != nullptr);
         ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsTypeAPIField, fieldType_),
                                   fieldType->AsObject()->GetCoreType());
     }
 
     void SetOwnerType(EtsTypeAPIType *ownerType)
     {
+        ASSERT(ownerType != nullptr);
         ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsTypeAPIField, ownerType_),
                                   ownerType->AsObject()->GetCoreType());
     }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,17 @@ class ClassLinker;
 }  // namespace ark
 
 namespace ark::verifier {
+
+/// @brief Verification mode
+enum class VerificationMode {
+    DISABLED,       // No verification
+    ON_THE_FLY,     // Verify methods before they are executed (used by panda/ark executable)
+    AHEAD_OF_TIME,  // Verify methods at startup (used by verifier executable)
+    DEBUG           // Debug verification by enabling breakpoints (used by verifier executable)
+};
+
+PANDA_PUBLIC_API bool IsEnabled(VerificationMode mode);
+PANDA_PUBLIC_API VerificationMode VerificationModeFromString(const std::string &mode);
 
 using Config = struct Config;  // NOLINT(bugprone-forward-declaration-namespace)
 

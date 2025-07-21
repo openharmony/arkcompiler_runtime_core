@@ -53,6 +53,28 @@ TEST_F(ArraySetGetRegionByteTest, GetByteArrayRegionErrorTests)
     ani_byte nativeBuffer[LENGTH_10] = {0};
     ASSERT_EQ(env_->Array_GetRegion_Byte(array, OFFSET_0, LENGTH_1, nullptr), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Array_GetRegion_Byte(array, OFFSET_5, LENGTH_10, nativeBuffer), ANI_OUT_OF_RANGE);
+    // Should change to ANI_OK when std lib array will work according to spec
+    ASSERT_EQ(env_->Array_GetRegion_Byte(array, OFFSET_0, LENGTH_1, nativeBuffer), ANI_ERROR);
+}
+
+TEST_F(ArraySetGetRegionByteTest, SetByteFixedArrayRegionErrorTests)
+{
+    ani_array_byte array = nullptr;
+    ASSERT_EQ(env_->FixedArray_New_Byte(LENGTH_5, &array), ANI_OK);
+    ani_byte nativeBuffer[LENGTH_10] = {0};
+    const ani_size offset1 = -1;
+    ASSERT_EQ(env_->Array_SetRegion_Byte(array, offset1, LENGTH_2, nativeBuffer), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->Array_SetRegion_Byte(array, OFFSET_5, LENGTH_10, nativeBuffer), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->Array_SetRegion_Byte(array, OFFSET_0, LENGTH_5, nativeBuffer), ANI_OK);
+}
+
+TEST_F(ArraySetGetRegionByteTest, GetByteFixedArrayRegionErrorTests)
+{
+    ani_array_byte array = nullptr;
+    ASSERT_EQ(env_->FixedArray_New_Byte(LENGTH_5, &array), ANI_OK);
+    ani_byte nativeBuffer[LENGTH_10] = {0};
+    ASSERT_EQ(env_->Array_GetRegion_Byte(array, OFFSET_0, LENGTH_1, nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Array_GetRegion_Byte(array, OFFSET_5, LENGTH_10, nativeBuffer), ANI_OUT_OF_RANGE);
     ASSERT_EQ(env_->Array_GetRegion_Byte(array, OFFSET_0, LENGTH_1, nativeBuffer), ANI_OK);
 }
 
@@ -145,7 +167,7 @@ TEST_F(ArraySetGetRegionByteTest, GetSpecialValueToArrayTest)
 TEST_F(ArraySetGetRegionByteTest, SetSpecialValueToArrayTest)
 {
     ani_array_byte array = nullptr;
-    ASSERT_EQ(env_->Array_New_Byte(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Byte(LENGTH_5, &array), ANI_OK);
 
     const ani_byte minByteValue = -128;
     const ani_byte maxByteValue = 127;
@@ -165,7 +187,7 @@ TEST_F(ArraySetGetRegionByteTest, SetSpecialValueToArrayTest)
 TEST_F(ArraySetGetRegionByteTest, SetGetUnionToArrayTest)
 {
     ani_array_byte array = nullptr;
-    ASSERT_EQ(env_->Array_New_Byte(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Byte(LENGTH_5, &array), ANI_OK);
 
     std::array<ani_byte, LENGTH_5> nativeBuffer = {TEST_VALUE_1, TEST_VALUE_2, TEST_VALUE_3, TEST_VALUE_4,
                                                    TEST_VALUE_5};
@@ -201,7 +223,7 @@ TEST_F(ArraySetGetRegionByteTest, SetGetUnionToArrayTest)
 TEST_F(ArraySetGetRegionByteTest, SetGetStabilityToArrayTest)
 {
     ani_array_byte array = nullptr;
-    ASSERT_EQ(env_->Array_New_Byte(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Byte(LENGTH_5, &array), ANI_OK);
 
     std::array<ani_byte, LENGTH_5> nativeBuffer = {TEST_VALUE_1, TEST_VALUE_2, TEST_VALUE_3, TEST_VALUE_4,
                                                    TEST_VALUE_5};

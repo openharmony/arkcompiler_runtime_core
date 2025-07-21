@@ -39,6 +39,17 @@ TEST_F(FindModuleTest, find_module_001)
     ASSERT_EQ(env_->Function_Call_Int_A(fn, &value, args), ANI_OK);
     ASSERT_EQ(value, value1 + value2);
 }
+
+TEST_F(FindModuleTest, invalid_argument_env)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule(nullptr, &module), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->FindModule("", &module), ANI_INVALID_DESCRIPTOR);
+    ASSERT_EQ(env_->FindModule("\t", &module), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindModule("L@abcModule/find_module_test;", nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->FindModule(nullptr, "L@abcModule/find_module_test;", &module), ANI_INVALID_ARGS);
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(modernize-avoid-c-arrays)

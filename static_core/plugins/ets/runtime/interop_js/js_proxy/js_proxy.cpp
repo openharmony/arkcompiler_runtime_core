@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include "include/class.h"
+#include "include/mem/panda_containers.h"
+#include "include/method.h"
 #include "plugins/ets/runtime/interop_js/js_proxy/js_proxy.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 
@@ -22,6 +25,8 @@ namespace ark::ets::interop::js::js_proxy {
 
 extern "C" void CallJSProxyBridge(Method *method, ...);
 extern "C" void CallJSFunctionBridge(Method *method, ...);
+
+using MethodMap = std::unordered_map<uint8_t const *, Method *, utf::Mutf8Hash, utf::Mutf8Equal>;
 
 // Create JSProxy class descriptor that will respond to IsProxyClass
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
@@ -47,6 +52,36 @@ static std::unique_ptr<uint8_t[]> MakeProxyDescriptor(const uint8_t *descriptorP
     proxyDescriptor[proxyDescriptor.size() - 1U] = '\0';
 
     return proxyDescriptorData;
+}
+
+static void GetAllInterfaceMethod(Class *interfaceCls, PandaVector<Method *> &methodPtrs, PandaSet<Class *> &methodPSet)
+{
+    if (methodPSet.count(interfaceCls) != 0) {
+        return;
+    }
+    methodPSet.insert(interfaceCls);
+    auto methods = interfaceCls->GetMethods();
+    for (auto &method : methods) {
+        methodPtrs.push_back(&method);
+    }
+    for (auto *itf : interfaceCls->GetInterfaces()) {
+        GetAllInterfaceMethod(itf, methodPtrs, methodPSet);
+    }
+}
+
+static void GetInterfaceMethodDistinct(Class *interfaceCls, MethodMap &methodMap, PandaSet<Class *> &interfaceSet)
+{
+    if (interfaceSet.count(interfaceCls) != 0) {
+        return;
+    }
+    interfaceSet.insert(interfaceCls);
+    auto methods = interfaceCls->GetMethods();
+    for (auto &method : methods) {
+        methodMap.insert({method.GetName().data, &method});
+    }
+    for (auto *itf : interfaceCls->GetInterfaces()) {
+        GetInterfaceMethodDistinct(itf, methodMap, interfaceSet);
+    }
 }
 
 static void InitProxyMethod(Class *cls, Method *src, Method *proxy, void *entryPoint)
@@ -86,30 +121,45 @@ static Span<Method> BuildProxyMethods(Class *cls, Span<Method *> targetMethods, 
 }
 
 /*static*/
-JSProxy *JSProxy::CreateBuiltinProxy(EtsClass *etsClass, Span<Method *> targetMethods)
+JSProxy *JSProxy::CreateInterfaceProxy(const PandaSet<Class *> &interfaces, std::string &interfaceName)
 {
-    Class *cls = etsClass->GetRuntimeClass();
-    ASSERT(!IsProxyClass(cls) && !etsClass->IsFinal());
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    auto descriptor = MakeProxyDescriptor(utf::CStringAsMutf8(interfaceName.data()));
+    Class *objectClass = ctx->GetObjectClass();
     ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinkerContext *context = objectClass->GetLoadContext();
 
-    auto proxyMethods = BuildProxyMethods(cls, targetMethods, reinterpret_cast<void *>(CallJSProxyBridge));
+    Class *proxyCls = classLinker->GetClass(descriptor.get(), true, context);
+    if (proxyCls == nullptr) {
+        PandaSet<Class *> interfaceSet;
+        MethodMap methodMap;
+        for (auto cls : interfaces) {
+            GetInterfaceMethodDistinct(cls, methodMap, interfaceSet);
+        }
 
-    auto descriptor = MakeProxyDescriptor(cls->GetDescriptor());
-    uint32_t accessFlags = cls->GetAccessFlags() | ACC_PROXY | ACC_FINAL;
-    Span<Field> fields {};
-    Class *baseClass = cls;
-    Span<Class *> interfaces {};
-    ClassLinkerContext *context = cls->GetLoadContext();
-
-    Class *proxyCls = classLinker->BuildClass(descriptor.get(), true, accessFlags, proxyMethods, fields, baseClass,
-                                              interfaces, context, false);
-    proxyCls->SetState(Class::State::INITIALIZING);
-    proxyCls->SetState(Class::State::INITIALIZED);
+        PandaVector<Method *> methodPtrs;
+        for (auto &[n, p] : methodMap) {
+            methodPtrs.push_back(p);
+        }
+        PandaVector<Class *> interfacesList = {interfaces.begin(), interfaces.end()};
+        return CreateProxy(descriptor.get(), objectClass, {methodPtrs.data(), methodPtrs.size()}, interfacesList,
+                           reinterpret_cast<void *>(CallJSProxyBridge));
+    }
 
     ASSERT(IsProxyClass(proxyCls));
 
     auto jsProxy = Runtime::GetCurrent()->GetInternalAllocator()->New<JSProxy>(EtsClass::FromRuntimeClass(proxyCls));
     return jsProxy;
+}
+
+/*static*/
+JSProxy *JSProxy::CreateBuiltinProxy(EtsClass *etsClass, Span<Method *> targetMethods)
+{
+    Class *cls = etsClass->GetRuntimeClass();
+    ASSERT(!IsProxyClass(cls) && !etsClass->IsFinal());
+    auto descriptor = MakeProxyDescriptor(cls->GetDescriptor());
+    return CreateProxy(descriptor.get(), cls, targetMethods, {}, reinterpret_cast<void *>(CallJSProxyBridge));
 }
 
 /*static*/
@@ -135,35 +185,12 @@ JSProxy *JSProxy::CreateFunctionProxy(EtsClass *functionInterface)
     Class *proxyFunctionCls = classLinker->GetClass(descriptor.get(), true, context);
 
     if (proxyFunctionCls == nullptr) {
-        uint32_t accessFlags = objectClass->GetAccessFlags() | ACC_PROXY | ACC_FINAL;
-
-        auto methods = interfaceCls->GetMethods();
+        PandaSet<Class *> methodPSet;
         PandaVector<Method *> methodPtrs;
-        for (auto &method : methods) {
-            methodPtrs.push_back(&method);
-        }
+        GetAllInterfaceMethod(interfaceCls, methodPtrs, methodPSet);
 
-        // build proxy methods
-        // proxy invokeN(eg. invoke1) method to JSFunctionCallBackBridge
-        // the JSFunctionCallBackBridge will call the JS function
-        // and return the result to the caller
-        auto invokeNProxyMethod = BuildProxyMethods(interfaceCls, {methodPtrs.data(), methodPtrs.size()},
-                                                    reinterpret_cast<void *>(CallJSFunctionBridge));
-
-        // create span of interface class
-        // the proxy function is a class that implements the interface functionN (eg.function1)
-
-        Span<Class *> interfacesSpan {classLinker->GetAllocator()->AllocArray<Class *>(1), 1};
-        interfacesSpan[0] = interfaceCls;
-
-        // not proxy any fields
-        Span<Field> fields {};
-
-        proxyFunctionCls = classLinker->BuildClass(descriptor.get(), true, accessFlags, invokeNProxyMethod, fields,
-                                                   objectClass, interfacesSpan, context, false);
-
-        proxyFunctionCls->SetState(Class::State::INITIALIZING);
-        proxyFunctionCls->SetState(Class::State::INITIALIZED);
+        return CreateProxy(descriptor.get(), objectClass, {methodPtrs.data(), methodPtrs.size()}, {interfaceCls},
+                           reinterpret_cast<void *>(CallJSFunctionBridge));
     }
 
     ASSERT(IsProxyClass(proxyFunctionCls));
@@ -171,6 +198,34 @@ JSProxy *JSProxy::CreateFunctionProxy(EtsClass *functionInterface)
     auto functionProxy =
         Runtime::GetCurrent()->GetInternalAllocator()->New<JSProxy>(EtsClass::FromRuntimeClass(proxyFunctionCls));
     return functionProxy;
+}
+
+/*static*/
+JSProxy *JSProxy::CreateProxy(const uint8_t *descriptor, Class *baseClass, Span<Method *> targetMethods,
+                              const PandaVector<Class *> &interfaces, void *callBridge)
+{
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinkerContext *context = baseClass->GetLoadContext();
+    auto proxyMethods = BuildProxyMethods(baseClass, targetMethods, callBridge);
+
+    uint32_t accessFlags = baseClass->GetAccessFlags() | ACC_PROXY | ACC_FINAL;
+    Span<Field> fields {};
+    Span<Class *> interfacesSpan {classLinker->GetAllocator()->AllocArray<Class *>(interfaces.size()),
+                                  interfaces.size()};
+    for (size_t i = 0; i < interfaces.size(); i++) {
+        interfacesSpan[i] = interfaces[i];
+    }
+
+    Class *proxyCls = classLinker->BuildClass(descriptor, true, accessFlags, proxyMethods, fields, baseClass,
+                                              interfacesSpan, context, false);
+    ASSERT(proxyCls != nullptr);
+    proxyCls->SetState(Class::State::INITIALIZING);
+    proxyCls->SetState(Class::State::INITIALIZED);
+
+    ASSERT(IsProxyClass(proxyCls));
+
+    auto jsProxy = Runtime::GetCurrent()->GetInternalAllocator()->New<JSProxy>(EtsClass::FromRuntimeClass(proxyCls));
+    return jsProxy;
 }
 
 }  // namespace ark::ets::interop::js::js_proxy

@@ -23,7 +23,7 @@ function foo{{c}}
 
 function main() {
     const f = foo
-    assertNE(f, foo)
+    assertEQ(f, foo)
 }
 
 {% endfor %}

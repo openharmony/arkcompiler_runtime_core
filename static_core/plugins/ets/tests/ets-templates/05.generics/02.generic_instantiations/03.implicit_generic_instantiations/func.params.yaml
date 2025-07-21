@@ -45,7 +45,7 @@ cases:
     - decl: |-
           // no constraints, union
           function foo<T, U>(p: T, q: U): T|U {
-              return p!.toString() > q!.toString() ? p : q
+              return (p! as object).toString() > (q! as object).toString() ? p : q
           }
       use: |-
           let v = foo(1.0, 11.0)
@@ -99,3 +99,28 @@ cases:
           assertTrue(foo(new B(), new B()))
           assertTrue(foo(new C(), 42.0))
           assertTrue(foo(new B(), null))
+
+    - decl: |-
+          function foo <T> (p: T, q: T): T {
+              return p ?? q
+          }
+      use: |-
+          let a = new Object()
+          let b = "abc"
+          assertFalse(foo(a, b) instanceof String)
+
+    - decl: |-
+          function foo <T> (p: T, q: T): T {
+              return p ?? q
+          }
+      use: |-
+          let a = "a"
+          let b = "b"
+          assertEQ(foo(a, b), "a")
+
+    - decl: |-
+          function foo <T> (p: T, q: T): T {
+              return p ?? q
+          }
+      use: |-
+          assertEQ(foo("a", "b"), "a")

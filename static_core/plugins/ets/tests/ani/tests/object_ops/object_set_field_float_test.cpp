@@ -50,7 +50,7 @@ TEST_F(ObjectSetFieldFloatTest, set_field_float)
     ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_float_test", "checkFloatValue", pack, 0.0F), ANI_TRUE);
 
     const int32_t loopCount = 3;
-    for (int i = 1; i <= loopCount; i++) {
+    for (int32_t i = 1; i <= loopCount; i++) {
         ASSERT_EQ(env_->Object_SetField_Float(pack, fieldFloat, value), ANI_OK);
         ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_float_test", "checkFloatValue", pack, value),
                   ANI_TRUE);
@@ -79,6 +79,16 @@ TEST_F(ObjectSetFieldFloatTest, set_field_float_negative_value)
     ASSERT_EQ(env_->Object_SetField_Float(pack, fieldFloat, -2.71F), ANI_OK);
 
     ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_float_test", "checkFloatValue", pack, -2.71F), ANI_TRUE);
+}
+
+TEST_F(ObjectSetFieldFloatTest, set_field_float_invalid_args_env)
+{
+    ani_object pack {};
+    ani_field fieldFloat {};
+    ani_field fieldString {};
+    GetTestData(&pack, &fieldFloat, &fieldString);
+
+    ASSERT_EQ(env_->c_api->Object_SetField_Float(nullptr, pack, fieldFloat, 3.14F), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectSetFieldFloatTest, set_field_float_invalid_field_type)

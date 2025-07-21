@@ -71,7 +71,7 @@ class OperationFactory {
 }
 
 function getFileDate(): int {
-  let FileDataValues: FileDataValue[] = [{
+  let FileDataValues: FixedArray<FileDataValue> = [{
     fileName: 'OperationFactoryFile',
     filePath: 'source/url/OperationFactoryFile',
     data: {

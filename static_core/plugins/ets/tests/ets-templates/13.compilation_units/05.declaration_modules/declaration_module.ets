@@ -58,7 +58,7 @@ export type Matrix = number[][]
 export type Handler = (s: string, no: number) => string
 
 export type Predicate<T> = (x: T) => Boolean
-export type NullableNumber = Number | null
+export type NullableNumber = Number | null | undefined
 export type Dictionary = Map<string, string>
 export type MapOfString<T> = Map<T, string>
 export type AAA<T> = Array<AAA<T>> // ok, AAA<T> is used as a type argument

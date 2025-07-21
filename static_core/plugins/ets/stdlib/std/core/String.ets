@@ -49,8 +49,9 @@ export final class String extends Object implements Comparable<String>, JSONable
      *
      * @param data initializer
      */
-    public native constructor(data: char[])
-
+    public native constructor(data: FixedArray<char>)
+    // let a = new char[1]
+    // let b = new String(a)
     /**
      * Constructs String from another String
      *
@@ -93,7 +94,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @returns a primitive at index
      */
     public $_get(index: number): char {
-        return this.$_get(index as int);
+        return this.$_get(Double.toInt(index));
     }
 
     /**
@@ -135,7 +136,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @returns length of this string
      */
     public get length(): number {
-        return this.getLength() as number
+        return this.getLength().toDouble()
     }
 
     /**
@@ -154,8 +155,8 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
             return "";
         }
-        let c = new char[1];
-        c[0] = this.charAt(index as int)
+        let c : FixedArray<char> = new char[1];
+        c[0] = this.charAt(index.toInt())
         return new String(c)
     }
 
@@ -197,7 +198,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
             return undefined
         }
-        return this.codePointAtInt(index as int) as number;
+        return (this.codePointAtInt(index.toInt())).toDouble();
     }
 
     /**
@@ -215,7 +216,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
             return undefined
         }
-        return this.codePointAtInt(index) as number;
+        return (this.codePointAtInt(index)).toDouble();
     }
 
     /**
@@ -230,14 +231,13 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @returns the codepoint at the specified index
      */
     private codePointAtInt(index: int): int {
-        assertTrue(index >= 0 && index < this.getLength(), "Index " + index + " has to be in range 0.." + (this.getLength()-1))
         let highValue: char = this.charAt(index);
         if (!Char.isHighSurrogate(highValue) || ++index == this.getLength()) {
-            return highValue as int;
+            return highValue.toInt();
         }
         let lowValue: char = this.charAt(index);
         if (!Char.isLowSurrogate(lowValue)) {
-            return highValue as int;
+            return highValue.toInt();
         }
         return Char.charsToCodePoint(highValue, lowValue);
     }
@@ -257,7 +257,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @returns the amount of completed codepoints
      */
     public codePointCount(begin: number, end: number): number {
-        return this.codePointCount(begin as int, end as int)
+        return this.codePointCount(begin.toInt(), end.toInt())
     }
 
     /**
@@ -275,7 +275,9 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @returns the amount of completed codepoints
      */
     public codePointCount(begin: int, end: int): int {
-        assertLE(begin, end, "Begin idx must be less than end idx")
+        if (begin > end) {
+            throw new AssertionError("Begin idx must be less than end idx")
+        }
         let counter: int = 0;
         for (let i: int = begin; i < end; i++) {
             ++counter;
@@ -315,7 +317,17 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @remark
      * Implemented as native function,  @see `getChars()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L231).
      */
-    public native getChars(begin: int, end: int): char[];
+    public getChars(begin: int, end: int): char[] {
+        // #24515: Need to remove the following function call after primitive type refactoring
+        let ret : FixedArray<char> = this.getCharsImpl(begin, end);
+        let tmpForceBox : Array<char> = new Array<char>(ret.length);
+        for (let i = 0; i < tmpForceBox.length; i++) {
+            tmpForceBox[i] = ret[i]
+        }
+        return tmpForceBox;
+    }
+
+    private native getCharsImpl(begin: int, end: int): FixedArray<char>;
 
     /**
      * Gets the byte sequence that is representing the part of
@@ -331,7 +343,17 @@ export final class String extends Object implements Comparable<String>, JSONable
      *
      * @returns byte[] array
      */
-    public native getBytes(begin: int, end: int): byte[];
+    public getBytes(begin: int, end: int): byte[] {
+        // #24515: Need to remove the following function call after primitive type refactoring
+        let ret : FixedArray<byte> = this.getBytesImpl(begin, end);
+        let tmpForceBox: Array<byte> = new Array<byte>(ret.length);
+        for (let i = 0; i < tmpForceBox.length; i++) {
+            tmpForceBox[i] = ret[i]
+        }
+        return tmpForceBox;
+    }
+
+    private native getBytesImpl(begin: int, end: int): FixedArray<byte>;
 
     /**
      * Compares the given StringBuilder to this String. The
@@ -362,26 +384,11 @@ export final class String extends Object implements Comparable<String>, JSONable
     public native override compareTo(other: String): int;
 
     /**
-     * Comparison between this String and another one based on locale.
-     * The result is -1 if this string sorts before the another string,
-     * 0 if they are equal, and 1 otherwise.
-     *
-     * @param another String to compare with
-     * @param locale String representing the BCP47 language tag
-     *
-     * @throws RangeError if the locale tag is invalid or not found
-     * @throws NullPointerError if another or locale is undefined
-     *
-     * @returns the comparison result
-     */
-    public native localeCompare(another: String, locale: String | undefined): number;
-
-    /**
      * Comparison between this String and another one based on locale and options.
      * The result is -1 if this string sorts before the another string,
      * 0 if they are equal, and 1 otherwise.
      *
-     * @param another String to compare with
+     * @param that String to compare with
      * @param locale String representing the BCP47 language tag
      * @param options Intl.CollatorOptions contains comparison options
      *
@@ -390,24 +397,8 @@ export final class String extends Object implements Comparable<String>, JSONable
      *
      * @returns the comparison result
      */
-    public localeCompare(another: String, locale: string | string[], options: Intl.CollatorOptions): number {
-        return new Intl.Collator(locale, options).compare(this, another);
-    }
-
-    /**
-     * Comparison between this String and another one based on default
-     * host locale. The result is -1 if this string sorts before the
-     * another string, 0 if they are equal, and 1 otherwise.
-     *
-     * @param another String to compare with
-     *
-     * @throws RangeError if the locale tag is invalid or not found
-     * @throws NullPointerError if another param is null
-     *
-     * @returns the comparison result
-     */
-    public localeCompare(another: String): number {
-        return this.localeCompare(another, undefined);
+    public localeCompare(that: String, locale?: string | string[], options?: Intl.CollatorOptions): number {
+        return new Intl.Collator(locale, options).compare(this, that);
     }
 
     /**
@@ -426,7 +417,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (fromIndex == undefined) {
             return this.startsWith(prefix, 0)
         }
-        return this.startsWith(prefix, fromIndex.intValue())
+        return this.startsWith(prefix, fromIndex.toInt())
     }
 
     /**
@@ -484,7 +475,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (fromIndex == undefined) {
             return this.indexOf(str, 0)
         }
-        return this.indexOf(str, fromIndex.intValue())
+        return this.indexOf(str, fromIndex.toInt())
     }
 
     /**
@@ -545,7 +536,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (fromIndex == undefined || isNaN(fromIndex)) {
             return this.lastIndexOf(str, Int.MAX_VALUE as int)
         }
-        return this.lastIndexOf(str, fromIndex.intValue())
+        return this.lastIndexOf(str, fromIndex.toInt())
     }
 
     /**
@@ -581,7 +572,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @returns new String which is a substring of this String
      */
     public substring(begin: number, end?: Number): String {
-        return this.substring(begin as int, asIntOrDefault(end, this.getLength()))
+        return this.substring(begin.toInt(), asIntOrDefault(end, this.getLength()))
     }
 
     /**
@@ -672,7 +663,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @returns new String with replaced characters
      */
     public replaceChar(oldCh: char, newCh: char): String {
-        let newChars: char[] = this.getChars();
+        let newChars: FixedArray<char> = this.getCharsImpl(0, this.getLength());
         for (let i: int = 0; i < newChars.length; i++) {
             if (newChars[i] == oldCh) {
                 newChars[i] = newCh;
@@ -693,7 +684,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @returns true if this String contains str and false otherwise
      */
     public contains(str: String, fromIndex: number): boolean {
-        return this.contains(str, fromIndex as int);
+        return this.contains(str, fromIndex.toInt());
     }
 
     /**
@@ -766,7 +757,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         } else if (limit == 0) {
             return new String[0]
         } else {
-            lim = limit.unboxed() as long
+            lim = limit.toLong()
         }
         let s = this.getLength()
         if (s == 0) {
@@ -780,7 +771,6 @@ export final class String extends Object implements Comparable<String>, JSONable
         let lastStart = 0
         for (let lastEnd = 0; lastEnd < s;) {
             let separatorRight = String.splitMatch(this, lastEnd, separator)
-            assertLE(separatorRight, s)
             if (separatorRight != -1 && separatorRight != lastStart) {
                 let substr = this.substring(lastStart, lastEnd)
                 splittedStrings.pushBack(substr)
@@ -1029,7 +1019,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @returns this string that is repeated count times
      */
     public repeat(count: number): String {
-        return this.repeat(count as int)
+        return this.repeat(count.toInt())
     }
 
     /**
@@ -1206,14 +1196,14 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
             return NaN;
         }
-        return this.charAt(index as int);
+        return this.charAt(index.toInt());
     }
 
     /*
      * The charCodeAt() method returns an integer between 0 and 65535 representing the UTF-16 code unit at the given index.
      */
     public charCodeAt(index: int): int {
-        return this.charAt(index) as int;
+        return this.charAt(index).toInt();
     }
 
     /**
@@ -1221,16 +1211,20 @@ export final class String extends Object implements Comparable<String>, JSONable
      *
      * @param codes are numbers between 0 and 65535 (0xFFFF) representing a UTF-16 code unit or NaN
      *
-     * @returns string consisting of specified UTF-16 code units.
+     * @returns string consisting of the specified UTF-16 code units.
      *
      */
-    public static fromCharCode(...codes: number[]): String {
-        let res = new StringBuilder();
-        for (const cu of codes) {
-            res.append((cu % (0x10000)) as char)
-        }
-        return res.toString()
-    }
+    public static native fromCharCode(...codes: number[]): String;
+
+    /**
+     * The String.fromCharCode() static method returns a string created from the specified UTF-16 code unit
+     *
+     * @param code is a number between 0 and 65535 (0xFFFF) representing a UTF-16 code unit or NaN
+     *
+     * @returns string consisting of the specified UTF-16 code unit.
+     *
+     */
+    public static native fromCharCode(code: number): String;
 
     /*
      * The valueOf() method returns the primitive value of a String object.
@@ -1254,7 +1248,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (position == undefined) {
             return this.indexOf(searchString) == -1 ? false : true;
         }
-        return this.indexOf(searchString, position.intValue()) == -1 ? false : true;
+        return this.indexOf(searchString, position.toInt()) == -1 ? false : true;
     }
 
     /**
@@ -1270,7 +1264,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      */
     public padEnd(maxLength: number, fillString?: String): String {
         const str = (fillString == undefined) ? "\u0020" : fillString
-        return this.padEnd(maxLength as int, str)
+        return this.padEnd(maxLength.toInt(), str)
     }
 
     /*
@@ -1282,7 +1276,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (this.getLength() >= end) {
             return this;
         }
-        let arr = new char[end]
+        let arr : FixedArray<char> = new char[end]
         for (let i: int = 0; i < this.getLength(); i++) {
             arr[i] = this.charAt(i)
         }
@@ -1300,7 +1294,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (this.getLength() >= end || str.getLength() == 0) {
             return this;
         }
-        let arr = new char[end];
+        let arr : FixedArray<char> = new char[end];
         let length = this.getLength();
         let strLength = str.getLength()
         for (let i: int = 0; i < length; i++) {
@@ -1328,7 +1322,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      */
     public padStart(maxLength: number, fillString?: String): String {
         const str = (fillString == undefined) ? "\u0020" : fillString
-        return this.padStart(maxLength as int, str)
+        return this.padStart(maxLength.toInt(), str)
     }
 
     /*
@@ -1341,7 +1335,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (padLen <= 0) {
             return this;
         }
-        let arr: char[] = new char[end]
+        let arr: FixedArray<char> = new char[end]
         for(let i = 0; i < padLen; i++){
             arr[i] = ch
         }
@@ -1359,7 +1353,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (this.getLength() >= end || str.getLength() == 0) {
             return this;
         }
-        let arr: char[] = new char[end];
+        let arr: FixedArray<char> = new char[end];
         let padLen: int = end - this.getLength();
         for (let i: int = 0; i < this.getLength(); i++) {
             arr[padLen + i] = this.charAt(i);
@@ -1385,11 +1379,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @returns new string containing the specified part of the given string
      */
     public substr(begin: number, length?: Number): String {
-        return this.substr(begin as int, asIntOrDefault(length, this.getLength()));
-    }
-
-    public substr(begin: number, length: number): String {
-        return this.substr(begin as int, length as int);
+        return this.substr(begin.toInt(), asIntOrDefault(length, this.getLength()));
     }
 
     /*
@@ -1444,10 +1434,6 @@ export final class String extends Object implements Comparable<String>, JSONable
         return this.substring(normalizeIndex(begin, this.getLength()))
     }
 
-    //public slice(begin: number, end: number): String {
-    //    return this.slice(begin as int, end as int)
-    //}
-
     public slice(begin: int, end: int): String {
         begin = normalizeIndex(begin, this.getLength())
         end = normalizeIndex(end, this.getLength())
@@ -1461,7 +1447,9 @@ export final class String extends Object implements Comparable<String>, JSONable
     static getSubstitution(matched: String, str: String, position: int, captures: String[], namedCaptures: Object | undefined, replacement: String) {
         let matchLength = matched.getLength()
         let stringLength = str.getLength()
-        assertTrue(position >= 0 && position <= stringLength, "Position " + position + " has to be in range 0.." + stringLength)
+        if (position < 0 || position > stringLength) {
+            throw new AssertionError("Position " + position + " has to be in range 0.." + stringLength)
+        }
         let tailPos = position + matchLength
         let m = captures.length
         let result = ""
@@ -1578,7 +1566,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         }
         let preceding = this.substring(0, position)
         let following = this.substring(position + searchLength)
-        let replacement = String.getSubstitution(searchValue, this, position as int, new String[0], undefined, replaceValue)
+        let replacement = String.getSubstitution(searchValue, this, position.toInt(), new String[0], undefined, replaceValue)
         return preceding + replacement + following
     }
 
@@ -1647,7 +1635,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         let matchPositions = new ArrayAsListInt();
         let position = this.indexOf(searchValue, 0)
         while (position != -1) {
-            matchPositions.pushBack(position)
+            matchPositions.pushBack(position.toInt())
             if (position == this.getLength()) {
                 break;
             }
@@ -1702,7 +1690,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         let matchPositions = new ArrayAsListInt();
         let position = this.indexOf(searchValue, 0)
         while (position != -1) {
-            matchPositions.pushBack(position)
+            matchPositions.pushBack(position.toInt())
             position = this.indexOf(searchValue, position + advanceBy)
         }
         let endOfLastMatch = 0
@@ -1753,6 +1741,13 @@ export final class String extends Object implements Comparable<String>, JSONable
      */
     public native toLocaleLowerCase(locale: String): String;
 
+    public toLocaleLowerCase(locale: String[]): String {
+        if (locale.length != 0) {
+            return this.toLocaleLowerCase(locale[0]);
+        }
+        return this.toLocaleLowerCase("");
+    }
+
     public toLocaleLowerCase(): String {
         return this.toLocaleLowerCase("");
     }
@@ -1762,6 +1757,13 @@ export final class String extends Object implements Comparable<String>, JSONable
      * according to any locale-specific case mappings.
      */
     public native toLocaleUpperCase(locale: String): String;
+
+    public toLocaleUpperCase(locale: String[]): String {
+        if (locale.length != 0) {
+            return this.toLocaleUpperCase(locale[0]);
+        }
+        return this.toLocaleUpperCase("");
+    }
 
     public toLocaleUpperCase(): String {
         return this.toLocaleUpperCase("");
@@ -1875,7 +1877,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         for (let i = 0; i < length; i++) {
             let codeUnit = this.charCodeAt(i);
             // Currently, it is a high-level proxy item
-            if (codeUnit >= HIGH_SURROGATE_MIN && codeUnit <= HIGH_SURROGATE_MAX) { 
+            if (codeUnit >= HIGH_SURROGATE_MIN && codeUnit <= HIGH_SURROGATE_MAX) {
                 // Check if low level proxy items are paired
                 const processedChar = this.processHighSurrogatePair(i, codeUnit, length);
                 if (processedChar !== null) {
@@ -1889,7 +1891,7 @@ export final class String extends Object implements Comparable<String>, JSONable
                 res.append(REPLACEMENT_CHARACTER);
             // Regular Characters
             } else if (Char.isValidCodePoint(codeUnit)) {
-                res.append(this.charAt(i) as char);
+                res.append(this.charAt(i).toChar());
             } else {
                 res.append(REPLACEMENT_CHARACTER);
             }
@@ -1914,11 +1916,11 @@ export final class String extends Object implements Comparable<String>, JSONable
             if (cp < 0 || cp > MAX_CODE_POINT || isNaN(cp) || !Number.isInteger(cp)) {
                 throw new RangeError("Invalid code point: " + new Number(cp).toString())
             }
-            let chrs = String.codePointToChar(cp as int);
-            res.append((chrs & 0xffff) as char)
+            let chrs = String.codePointToChar(cp.toInt());
+            res.append((chrs & 0xffff).toChar())
             chrs = (chrs >> 16) & 0xffff
             if (chrs > 0) {
-                res.append(chrs as char);
+                res.append(chrs.toChar());
             }
         }
         return res.toString()
@@ -1974,13 +1976,13 @@ class StringIterator implements IterableIterator<string> {
         let highValue: char = this.s.charAt(this.idx);
         this.idx += 1
         if (!Char.isHighSurrogate(highValue) || this.idx == this.s.getLength()) {
-            return new IteratorResult<String>(String.fromCharCode(highValue as number));
+            return new IteratorResult<String>(String.fromCharCode(highValue.toDouble()));
         }
         let lowValue: char = this.s.charAt(this.idx);
         if (!Char.isLowSurrogate(lowValue)) {
-            return new IteratorResult<String>(String.fromCharCode(highValue as number));
+            return new IteratorResult<String>(String.fromCharCode(highValue.toDouble()));
         }
         this.idx += 1
-        return new IteratorResult<String>(String.fromCharCode(highValue as number, lowValue as number));
+        return new IteratorResult<String>(String.fromCharCode(highValue.toDouble(), lowValue.toDouble()));
     }
 }

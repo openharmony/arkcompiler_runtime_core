@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -112,6 +112,7 @@ public:
     static void VisitLoadClass([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitLoadConstantPool([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitLoadFromConstantPool([[maybe_unused]] GraphVisitor *v, Inst *inst);
+    static void VisitLoadObject([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitLoadStatic([[maybe_unused]] GraphVisitor *v, Inst *inst);
 
 #include "optimizer/ir/visitor.inc"
@@ -228,6 +229,8 @@ private:
     bool TrySimplifyCompareNegation(Inst *inst);
     bool IsNegationPattern(Inst *inst);
     bool TrySimplifyNegationPattern(Inst *inst);
+    static bool TryOptimizeBoxedLoadStoreObject(Inst *inst);
+    static bool TryOptimizeXorChain(Inst *inst);
 
 private:
     // Each peephole application has own unique index, it will be used in peepholes dumps

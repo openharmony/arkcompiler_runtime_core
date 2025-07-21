@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 const elementsNum: int = 10;
 const stressNum: int = 100;
 let b1: int | null = 0;
@@ -126,10 +128,10 @@ function main(): int {
             let el = queueInt.getFirst();
             assertEQ(el, queueInt.pop());
         }
-        let p1 = launch queueIntGetFirstdata();
+        let p1 = launch<void, () => void>(queueIntGetFirstdata);
         let frontNum: int = 10;
         queueInt.push(frontNum);
-        await p1;
+        p1.Await();
         assertEQ(queueInt.size, 1);
     });
     ArrayBlockingQueueTestsuite.addTest("GetFirstTestInt003", () =>
@@ -147,10 +149,10 @@ function main(): int {
             assertEQ(el, queueInt.pop());
         }
         assertEQ(queueInt.size, 0);
-        let p1 = launch queueIntGetFirstdata();
+        let p1 = launch<void, () => void>(queueIntGetFirstdata);
         let frontNum: int = 10;
         queueInt.push(frontNum);
-        await p1;
+        p1.Await();
         assertEQ(queueInt.size, 1);
     });
     ArrayBlockingQueueTestsuite.addTest("GetFirstTestInt004", () =>
@@ -159,12 +161,12 @@ function main(): int {
         while (!queueInt.isEmpty()) {
             queueInt.pop();
         }
-        let p1 = launch queueIntGetFirstF1data();
+        let p1 = launch<void, () => void>(queueIntGetFirstF1data);
         queueInt.push(10);
         queueInt.push(20);
-        await p1;
-        let p2 = launch queueIntGetEndB1data();
-        await p2;
+        p1.Await();
+        let p2 = launch<void, () => void>(queueIntGetEndB1data);
+        p2.Await();
         assertEQ(queueInt.size, 2);
     });
     ArrayBlockingQueueTestsuite.addTest("GetFirstTestInt005", () =>
@@ -175,12 +177,12 @@ function main(): int {
             queueInt.pop();
         }
         assertTrue(queueInt.isEmpty());
-        let p1 = launch queueIntAddTwodata();
-        let p2 = launch queueIntGetFirstF1data();
-        let p3 = launch queueIntGetFirstF2data();
-        await p1;
-        await p2;
-        await p3;
+        let p1 = launch<void, () => void>(queueIntAddTwodata);
+        let p2 = launch<void, () => void>(queueIntGetFirstF1data);
+        let p3 = launch<void, () => void>(queueIntGetFirstF2data);
+        p1.Await();
+        p2.Await();
+        p3.Await();
         assertTrue(f1 == 10 || f1 == null);
         assertTrue(f2 == 10 || f2 == null);
         assertFalse(queueInt.isEmpty());
@@ -192,11 +194,11 @@ function main(): int {
         }
         queueInt.push(10);
         queueInt.push(30);
-        let p1 = launch queueIntGetFirstdata();
+        let p1 = launch<void, () => void>(queueIntGetFirstdata);
         queueInt.push(20);
-        await p1;
-        let p2 = launch queueIntGetFirstdata();
-        await p2;
+        p1.Await();
+        let p2 = launch<void, () => void>(queueIntGetFirstdata);
+        p2.Await();
         assertEQ(queueInt.getFirst(), 10);
     });
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -243,7 +243,9 @@ void CheckTag(int64_t reg, int64_t expected)
 {
     constexpr int ACC_NUM = std::numeric_limits<uint16_t>::max() + 1;
     int64_t tag = 0;
-    StaticFrameHandler handler(ManagedThread::GetCurrent()->GetCurrentFrame());
+    auto *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    StaticFrameHandler handler(thread->GetCurrentFrame());
     if (reg == ACC_NUM) {
         auto vreg = handler.GetAcc();
         tag = vreg.GetTag();
@@ -324,7 +326,9 @@ void SystemExit(int32_t status)
 
 void SystemScheduleCoroutine()
 {
-    auto *cm = static_cast<CoroutineManager *>(Coroutine::GetCurrent()->GetVM()->GetThreadManager());
+    auto *coro = Coroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    auto *cm = static_cast<CoroutineManager *>(coro->GetVM()->GetThreadManager());
     cm->Schedule();
 }
 

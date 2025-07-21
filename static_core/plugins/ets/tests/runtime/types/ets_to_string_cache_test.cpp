@@ -41,7 +41,8 @@ enum GenType { COPY, SHUFFLE, INDEPENDENT };
 
 class EtsToStringCacheTest : public testing::Test {
 public:
-    explicit EtsToStringCacheTest(const char *gcType = nullptr) : engine_(std::random_device {}())
+    explicit EtsToStringCacheTest(const char *gcType = nullptr, bool cacheEnabled = true)
+        : engine_(std::random_device {}())
     {
         // Logger::InitializeStdLogging(Logger::Level::INFO, Logger::ComponentMaskFromString("runtime") |
         // Logger::ComponentMaskFromString("coroutines"));
@@ -50,6 +51,7 @@ public:
         options.SetShouldLoadBootPandaFiles(true);
         options.SetShouldInitializeIntrinsics(false);
         options.SetLoadRuntimes({"ets"});
+        options.SetUseStringCaches(cacheEnabled);
 
         auto stdlib = std::getenv("PANDA_STD_LIB");
         if (stdlib == nullptr) {
@@ -108,7 +110,8 @@ public:
     {
         auto runtime = Runtime::GetCurrent();
         auto coro = mainCoro_->GetCoroutineManager()->CreateEntrypointlessCoroutine(
-            runtime, runtime->GetPandaVM(), true, "worker", Coroutine::Type::MUTATOR);
+            runtime, runtime->GetPandaVM(), true, "worker", Coroutine::Type::MUTATOR,
+            CoroutinePriority::DEFAULT_PRIORITY);
         std::mt19937 engine(std::random_device {}());
         std::uniform_real_distribution<> dis(-VALUE_RANGE, VALUE_RANGE);
         std::bernoulli_distribution bern(1.0 / TEST_THREADS);
@@ -286,7 +289,7 @@ TEST_P(EtsToStringCacheParamTest, ConcurrentInsertionUniqueHashes)
 }
 
 INSTANTIATE_TEST_SUITE_P(EtsToStringCacheTestSuite, EtsToStringCacheParamTest,
-                         testing::Combine(testing::Values("stw", "gen-gc", "g1-gc"),
+                         testing::Combine(testing::Values("stw", "g1-gc"),
                                           testing::Values(GenType::COPY, GenType::SHUFFLE, GenType::INDEPENDENT)));
 
 TEST_F(EtsToStringCacheTest, BitcastTestCached)
@@ -421,5 +424,30 @@ TEST_F(EtsToStringCacheTest, ToStringCacheElementLayout)
     CheckCacheElementMembers<EtsFloat>();
     CheckCacheElementMembers<EtsLong>();
 }
+
+// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
+class EtsToStringCacheCLITest : public EtsToStringCacheTest, public testing::WithParamInterface<bool> {
+public:
+    EtsToStringCacheCLITest() : EtsToStringCacheTest(nullptr, GetParam()) {}
+};
+
+TEST_P(EtsToStringCacheCLITest, TestCacheUsage)
+{
+    auto etsVm = GetMainCoro()->GetPandaVM();
+    auto *doubleCache = etsVm->GetDoubleToStringCache();
+    auto *floatCache = etsVm->GetFloatToStringCache();
+    auto *longCache = etsVm->GetLongToStringCache();
+    if (!GetParam()) {  // cache disabled
+        ASSERT_EQ(doubleCache, nullptr);
+        ASSERT_EQ(floatCache, nullptr);
+        ASSERT_EQ(longCache, nullptr);
+    } else {  // cache enabled
+        ASSERT_NE(doubleCache, nullptr);
+        ASSERT_NE(floatCache, nullptr);
+        ASSERT_NE(longCache, nullptr);
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(EtsToStringCacheCLITestSuite, EtsToStringCacheCLITest, testing::Values(true, false));
 
 }  // namespace ark::ets::test

@@ -38,12 +38,12 @@ void showData(Data const &s)
 
 Union makeUnion(int32_t v)
 {
-    const int32_t case1Key = 1;
-    const int32_t case2Key = 2;
-    const int32_t case3Key = 3;
+    int32_t const case1Key = 1;
+    int32_t const case2Key = 2;
+    int32_t const case3Key = 3;
 
-    const int32_t case1Value = 100;
-    const float case2Value = 0.5;
+    int32_t const case1Value = 100;
+    float const case2Value = 0.5f;
 
     switch (v) {
         case case1Key:
@@ -127,7 +127,7 @@ array<Foo> makeFoo(array_view<string> list)
     for (string_view name : list) {
         vec.push_back(make_holder<AuthorFoo, Foo>(name));
     }
-    return array<Foo>(move_data_t {}, vec.data(), vec.size());
+    return array<Foo>(copy_data, vec.data(), vec.size());
 }
 
 void callBar(array_view<Foo> arr)

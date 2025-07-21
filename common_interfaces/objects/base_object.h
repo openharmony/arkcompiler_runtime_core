@@ -206,7 +206,7 @@ protected:
         return operator_.dynamicObjOp_;
     }
 
-    static BaseObjectOperator operator_;
+    static PUBLIC_API BaseObjectOperator operator_;
     BaseStateWord state_;
 };
 }  // namespace common

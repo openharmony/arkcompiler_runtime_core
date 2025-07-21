@@ -22,7 +22,7 @@ class EtsnapiNameTest {
 
     public native static methodOverloaded(bool: boolean,  b: byte, c: char, d: double, f: float, i: int, l: long, s: short): int;
 
-    public native static methodOverloaded(obj: Object | undefined, str: String, arr: double[]): int;
+    public native static methodOverloaded(obj: Object | undefined, str: String, arr: FixedArray<double>): int;
 
     public run(): void throws {
         if (EtsnapiNameTest.objectArg(undefined) != 0) {
@@ -37,7 +37,7 @@ class EtsnapiNameTest {
         if (EtsnapiNameTest.methodOverloaded(true, 1 as byte, c'\uD8FF', 2.2, 3.3 as float, 4, 5 as long, 6 as short) != 3 ) {
             throw new Exception("ERROR: failed to call methodOverloaded");
         }
-        let arr: double[] = new double[4];
+        let arr: FixedArray<double> = new double[4];
         if (EtsnapiNameTest.methodOverloaded(undefined, "Str", arr) != 4) {
             throw new Exception("ERROR: failed to call methodOverloaded");
         }

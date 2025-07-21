@@ -45,22 +45,41 @@ uv_loop_t *EventLoop::GetEventLoop()
     return loop;
 }
 
-void EventLoop::RunEventLoop(RunMode mode)
+void EventLoop::RunEventLoop(EventLoopRunMode mode)
 {
+    ark::ets::interop::js::InteropCtx::Current(EtsCoroutine::GetCurrent())->UpdateInteropStackInfoIfNeeded();
     auto *loop = GetEventLoop();
     switch (mode) {
-        case EventLoop::RUN_DEFAULT:
+        case EventLoopRunMode::RUN_DEFAULT:
             uv_run(loop, UV_RUN_DEFAULT);
             break;
-        case EventLoop::RUN_ONCE:
+        case EventLoopRunMode::RUN_ONCE:
             uv_run(loop, UV_RUN_ONCE);
             break;
-        case EventLoop::RUN_NOWAIT:
+        case EventLoopRunMode::RUN_NOWAIT:
             uv_run(loop, UV_RUN_NOWAIT);
             break;
         default:
             UNREACHABLE();
     };
+}
+
+void EventLoop::WalkEventLoop(WalkEventLoopCallback &callback, void *args)
+{
+    auto *loop = GetEventLoop();
+
+    struct CallbackStruct {
+        std::function<void(void *, void *)> *callback;
+        void *args;
+    };
+
+    CallbackStruct parsedArgs {&callback, args};
+
+    auto uvCalback = []([[maybe_unused]] uv_handle_t *handle, void *rawArgs) {
+        auto callbackStruct = reinterpret_cast<CallbackStruct *>(rawArgs);
+        (*(callbackStruct->callback))(reinterpret_cast<void *>(handle), callbackStruct->args);
+    };
+    uv_walk(loop, uvCalback, &parsedArgs);
 }
 
 EventLoopCallbackPoster::EventLoopCallbackPoster()
@@ -150,7 +169,9 @@ bool EventLoopCallbackPoster::ThreadSafeCallbackQueue::IsEmpty()
 
 PandaUniquePtr<CallbackPoster> EventLoopCallbackPosterFactoryImpl::CreatePoster()
 {
-    [[maybe_unused]] auto *w = Coroutine::GetCurrent()->GetContext<StackfulCoroutineContext>()->GetWorker();
+    auto *coro = Coroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    [[maybe_unused]] auto *w = coro->GetContext<StackfulCoroutineContext>()->GetWorker();
     ASSERT(w->IsMainWorker() || w->InExclusiveMode());
     auto poster = MakePandaUnique<EventLoopCallbackPoster>();
     ASSERT(poster != nullptr);

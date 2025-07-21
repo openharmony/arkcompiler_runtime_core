@@ -107,7 +107,7 @@ Grammar Summary
         ;
 
     variableDeclaration:
-        identifier ('?')? ':' type initializer?
+        identifier ':' type initializer?
         | identifier initializer
         ;
 
@@ -141,7 +141,7 @@ Grammar Summary
         ;
 
     returnType:
-        ':' type
+        ':' (type | 'this')
         ;
 
     parameterList:
@@ -267,27 +267,23 @@ Grammar Summary
         ;
 
     objectLiteral:
-       '{' valueSequence? '}'
+       '{' objectLiteralMembers? '}'
        ;
 
-    valueSequence:
-       nameValue (',' nameValue)* ','?
+    objectLiteralMembers:
+       objectLiteralMember (',' objectLiteralMember)* ','?
        ;
 
-    nameValue:
+    objectLiteralMember:
+       objectLiteralField | objectLiteralMethod
+       ;
+
+    objectLiteralField:
        identifier ':' expression
        ;
 
-    recordLiteral:
-       '{' keyValueSequence? '}'
-       ;
-
-    keyValueSequence:
-       keyValue (',' keyValue)* ','?
-       ;
-
-    keyValue:
-       expression ':' expression
+    objectLiteralMethod
+       identifier typeParameters? signature block
        ;
 
     spreadExpression:
@@ -495,7 +491,6 @@ Grammar Summary
         annotationUsage?
         ( variableDeclaration
         | constantDeclaration
-        | typeDeclaration
         )
         ;
 
@@ -646,11 +641,16 @@ Grammar Summary
         ;
 
     classFieldDeclaration:
-        fieldModifier* variableDeclaration
+        fieldModifier* 
+        identifier
+        ( '?'? ':' type initializer?
+        | '?'? initializer
+        | '!' ':' type
+        )
         ;
 
     fieldModifier:
-        'static' | 'readonly'
+        'static' | 'readonly' | 'override'
         ;
 
     classMethodDeclaration:
@@ -681,7 +681,7 @@ Grammar Summary
         ;
 
     constructorDeclaration:
-        'constructor' parameters throwMark? constructorBody
+        'constructor' parameters constructorBody
         ;
 
 
@@ -717,7 +717,7 @@ Grammar Summary
         ;
 
     enumDeclaration:
-        'const'? 'enum' identifier '{' enumConstantList? '}'
+        'const'? 'enum' identifier (':' type)? '{' enumConstantList? '}'
         ;
 
     enumConstantList:
@@ -743,33 +743,34 @@ Grammar Summary
         ;
 
     importDirective:
-        'import'
-        (allBinding|selectiveBindings|defaultBinding|typeBinding 'from')?
-        importPath
+        'import' 'type'? bindings 'from' importPath
         ;
+
+    bindings:
+        defaultBinding
+        | (defaultBinding ',')? allBinding
+        | (defaultBinding ',')? selectiveBindings
+    ;
 
     allBinding:
         '*' bindingAlias
         ;
 
-    selectiveBindings:
-        '{' (nameBinding (',' nameBinding)*)? '}'
+    bindingAlias:
+        'as' identifier
         ;
 
     defaultBinding:
-        identifier | ( '{' 'default' 'as' identifier '}' )
+        identifier
         ;
 
-    typeBinding:
-        'type' selectiveBindings
+    selectiveBindings:
+        nameBinding (',' nameBinding)*
         ;
 
     nameBinding:
         identifier bindingAlias?
-        ;
-
-    bindingAlias:
-        'as' identifier
+        | 'default' 'as' identifier
         ;
 
     importPath:
@@ -795,6 +796,7 @@ Grammar Summary
         | accessorWithReceiverDeclaration
         | namespaceDeclaration
         | ambientDeclaration
+        | annotationDeclaration
         )
         ;
 
@@ -814,9 +816,11 @@ Grammar Summary
         ;
 
     singleExportDirective:
-        'export' 
-        'default'? identifier |
-        'default' expression
+        'export'
+        ( identifier 
+        | 'default' (expression | identifier)
+        | '{' identifier 'as' 'default' '}'
+        )
         ;
 
     exportTypeDirective:
@@ -824,7 +828,12 @@ Grammar Summary
         ;
 
     reExportDirective:
-        'export' ('*' | selectiveBindings) 'from' importPath
+        'export' 
+        ('*' bindingAlias? 
+        | selectiveBindings 
+        | '{' 'default' bindingAlias? '}'
+        )
+        'from' importPath
         ;
 
     topLevelStatements:
@@ -838,7 +847,9 @@ Grammar Summary
         | ambientClassDeclaration
         | ambientInterfaceDeclaration
         | ambientNamespaceDeclaration
+        | ambientAnnotationDeclaration
         | 'const'? enumDeclaration
+        | typeAlias
         )
         ;
 
@@ -859,7 +870,8 @@ Grammar Summary
         ;
 
     ambientClassDeclaration:
-        'class' identifier typeParameters? classExtendsClause? implementsClause?
+        'class'|'struct' identifier typeParameters?
+        classExtendsClause? implementsClause?
         '{' ambientClassBodyDeclaration* '}'
         ;
 
@@ -888,7 +900,7 @@ Grammar Summary
         ;
 
     ambientConstructorDeclaration:
-        'constructor' parameters throwMark?
+        'constructor' parameters 
         ;
 
     ambientMethodDeclaration:
@@ -978,7 +990,7 @@ Grammar Summary
         ;
 
     signatureWithReceiver:
-        '(' receiverParameter (', ' parameterList)? ')' returnType? throwMark?
+        '(' receiverParameter (', ' parameterList)? ')' returnType? 
         ;
 
     receiverParameter:
@@ -996,7 +1008,7 @@ Grammar Summary
 
     lambdaExpressionWithReceiver:
         annotationUsage? typeParameters? '(' receiverParameter (',' lambdaParameterList)? ')'
-        returnType? throwMark? '=>' lambdaBody
+        returnType? '=>' lambdaBody
         ;
 
     trailingLambdaCall:
@@ -1021,13 +1033,34 @@ Grammar Summary
           'package' qualifiedName
           ;
 
-      packageModuleDeclaration:
-          importDirective* packageTopDeclaration*
-          ;
 
-      packageTopDeclaration:
-          topDeclaration | initializerBlock
-          ;
+    packageModuleDeclaration:
+        importDirective* packageModuleDeclaration*
+        ;
+
+    packageModuleDeclaration:
+        packageTopDeclaration | initializerBlock
+        ;
+
+    packageTopDeclaration:
+        ('export' 'default'?)?
+        annotationUsage?
+        ( typeDeclaration
+        | variableDeclarations
+        | packageConstantDeclarations
+        | functionDeclaration
+        | functionWithReceiverDeclaration
+        | accessorWithReceiverDeclaration
+        | namespaceDeclaration
+        | ambientDeclaration
+        )
+        ;
+
+    packageConstantDeclaration:
+        identifier ':' type initializer?
+        | identifier initializer
+        ;
+
 
       initializerBlock:
           'static' block
@@ -1112,6 +1145,7 @@ Grammar Summary
       : UNICODE_CLASS_ND
       ;
 
+
     Literal:
       IntegerLiteral
       | FloatLiteral
@@ -1119,6 +1153,7 @@ Grammar Summary
       | BooleanLiteral
       | StringLiteral
       | MultilineStringLiteral
+      | RegExpLiteral
       | NullLiteral
       | UndefinedLiteral
       | CharLiteral
@@ -1133,14 +1168,14 @@ Grammar Summary
 
     DecimalIntegerLiteral:
       '0'
-      | DecimalDigitNotNull ('_'? DecimalDigit)*
+      | DecimalDigitNotZero ('_'? DecimalDigit)*
       ;
 
     DecimalDigit:
       [0-9]
       ;
 
-    DecimalDigitNotNull:
+    DecimalDigitNotZero:
       [1-9]
       ;
 
@@ -1191,10 +1226,7 @@ Grammar Summary
         'f'
         ;
 
-    BigIntLiteral:
-      '0n'
-      | [1-9] ('_'? [0-9])* 'n'
-      ;
+    BigIntLiteral: IntegerLiteral 'n';
 
     BooleanLiteral:
         'true' | 'false'
@@ -1248,6 +1280,45 @@ Grammar Summary
     CharLiteral:
         'c\'' SingleQuoteCharacter '\''
         ;
+
+    RegexLiteral:
+        '/' RegexCharSequence '$'? '/' RegExFlags?
+        ;
+
+    RegexCharSequence:
+        (
+            RegexCharacter
+            |RegexSpecialForms
+            |'(' RegexSpecialForms ')'
+            |'(' '?<' Identifier '>' RegexSpecialForms ')'
+            |'(' '?:' RegexSpecialForms ')'
+        )+
+        ;
+
+    RegexCharacter:
+        ~["'\\\r\n] ('*'|'+'|'?'|('{' DecimalIntegerLiteral (',' DecimalIntegerLiteral? )? '}'))?
+        ;
+
+    RegexSpecialForms:   
+        CharacterClass ('(' '?='|'?!' CharacterClasse ')')? 
+        ('(' '?<='|'?<!' CharacterClasse ')') CharacterClass
+        ;
+
+    CharacterClass: 
+        '[' '^'? '\b'? (RegexCharacter | (RegexCharacter '-' RegexCharacter) '\B'?)+ '\b'? ']'
+        | '.'
+        | '\' ('d' | 'D' | 'w' | 'W' | 's' | 'S' | 't' | 'r' | 'n' | 'v' | 'f' | '0' | 'c' ['A'-'Z'] | 'x' DecimalDigit DecimalDigit | DecimalIntegerLiteral | 'k<' Identifier '>')
+        | 'u' HexDigit HexDigit HexDigit HexDigit 
+        | 'u{' HexDigit HexDigit HexDigit HexDigit HexDigit? '}'
+        | '[\b]' 
+        | (RegexCharacter '|' RegexCharacter)
+        ;
+
+    RegExFlags:
+        'g'? 'i'? 'm'? 's'? 'u'? 'v'? 'y'? 
+        ;
+
+
 
 .. raw:: pdf
 

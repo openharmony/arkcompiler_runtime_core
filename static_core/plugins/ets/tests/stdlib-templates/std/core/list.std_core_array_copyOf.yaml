@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,9 +15,9 @@
     method_name: slice,
     method_nature: function,
     result_nature: array,
-    result_type: "boolean[]",
+    result_type: "FixedArray<boolean>",
     init_value: "[]",
-    method_signature: { arr: "boolean[]", startIndex: int, endIndex: int },
+    method_signature: { arr: "FixedArray<boolean>", startIndex: int, endIndex: int },
     method_signature_desc: {first: "boolean_array", second: "boolean_array"},
     method_throws: "true",
     method_test_index_data:
@@ -73,9 +73,9 @@
     method_name: slice,
     method_nature: function,
     result_nature: array,
-    result_type: "byte[]",
+    result_type: "FixedArray<byte>",
     init_value: "[]",
-    method_signature:  { arr: "byte[]", startIndex: int, endIndex: int },
+    method_signature:  { arr: "FixedArray<byte>", startIndex: int, endIndex: int },
     method_signature_desc: {first: "byte_array", second: "byte_array"},
     method_throws: "true",
     method_test_index_data:
@@ -124,9 +124,9 @@
     method_name: slice,
     method_nature: function,
     result_nature: array,
-    result_type: "short[]",
+    result_type: "FixedArray<short>",
     init_value: "[]",
-    method_signature:  { arr: "short[]", startIndex: int, endIndex: int },
+    method_signature:  { arr: "FixedArray<short>", startIndex: int, endIndex: int },
     method_signature_desc: {first: "short_array", second: "short_array"},
     method_throws: "true",
     method_test_index_data:
@@ -175,9 +175,9 @@
     method_name: slice,
     method_nature: function,
     result_nature: array,
-    result_type: "int[]",
+    result_type: "FixedArray<int>",
     init_value: "[]",
-    method_signature: { arr: "int[]", startIndex: int, endIndex: int },
+    method_signature: { arr: "FixedArray<int>", startIndex: int, endIndex: int },
     method_signature_desc: {first: "int_array", second: "int_array"},
     method_throws: "true",
     method_test_index_data:
@@ -226,9 +226,9 @@
     method_name: slice,
     method_nature: function,
     result_nature: array,
-    result_type: "long[]",
+    result_type: "FixedArray<long>",
     init_value: "[]",
-    method_signature: { arr: "long[]", startIndex: int, endIndex: int },
+    method_signature: { arr: "FixedArray<long>", startIndex: int, endIndex: int },
     method_signature_desc: {first: "long_array", second: "long_array"},
     method_throws: "true",
     method_test_index_data:
@@ -277,9 +277,9 @@
     method_name: slice,
     method_nature: function,
     result_nature: array,
-    result_type: "float[]",
+    result_type: "FixedArray<float>",
     init_value: "[]",
-    method_signature:{ arr: "float[]", startIndex: int, endIndex: int },
+    method_signature:{ arr: "FixedArray<float>", startIndex: int, endIndex: int },
     method_signature_desc: {first: "float_array", second: "float_array"},
     method_throws: "true",
     method_test_index_data:
@@ -335,9 +335,9 @@
     method_name: slice,
     method_nature: function,
     result_nature: array,
-    result_type: "double[]",
+    result_type: "FixedArray<double>",
     init_value: "[]",
-    method_signature: { arr: "double[]", startIndex: int, endIndex: int },
+    method_signature: { arr: "FixedArray<double>", startIndex: int, endIndex: int },
     method_signature_desc: {first: "double_array", second: "double_array"},
     method_throws: "true",
     method_test_index_data:
@@ -393,9 +393,9 @@
     method_name: slice,
     method_nature: function,
     result_nature: array,
-    result_type: "char[]",
+    result_type: "FixedArray<char>",
     init_value: "[]",
-    method_signature:  { arr: "char[]", startIndex: int, endIndex: int },
+    method_signature:  { arr: "FixedArray<char>", startIndex: int, endIndex: int },
     method_signature_desc: {first: "char_array", second: "char_array"},
     method_throws: "true",
     method_test_index_data:

@@ -212,6 +212,16 @@ public:
         return {fields_, numFields_};
     }
 
+    Field *GetRawFirstFieldAddr() const
+    {
+        return fields_;
+    }
+
+    uint32_t GetNumFields() const
+    {
+        return numFields_;
+    }
+
     Span<Field> GetStaticFields() const
     {
         return {fields_, numSfields_};

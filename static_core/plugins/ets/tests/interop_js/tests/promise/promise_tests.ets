@@ -366,9 +366,9 @@ let asyncLambdaAwait: () => Promise<Object | null> = async (): Promise<Object | 
 
 async function RejPromise1(): Promise<string> {
     let s: string = await new Promise<string>(
-        (resolve: (obj: string) => void,
-         reject: (obj: string) => void): void => {
-        reject("rejected");
+        (resolve: (obj: string|PromiseLike<string>) => void,
+         reject: (obj: Error) => void): void => {
+             reject(new Error("rejected"));
     });
     return s;
 }
@@ -381,7 +381,7 @@ async function asyncFuncAwaitRejected(): Promise<Object | null> {
     let promise: Promise<string> = RejPromise2();
 
     let promise2: Promise<string> =
-    promise.then((x: Promise<string>): string => {
+    promise.then((x: string|Promise<string>): string => {
         return "smth";
     })
 
@@ -400,6 +400,8 @@ function testAwaitPromise(): int {
     let p1: Promise<Object | null> = asyncFuncAwait();
     let p2: Promise<Object | null> = asyncLambdaAwait();
     let p3: Promise<Object | null> = asyncFuncAwaitRejected();
+    // execute async func (post await part) before check
+    await Promise.all([p1, p2, p3]);
     if (unresolved1 != "resolved" || unresolved2 != "resolved") {
         globalTest!.fail();
     }
@@ -411,6 +413,10 @@ function makeResolvedPromise(v: String): Promise<Object> {
     return new Promise<Object>((resolve: (value: Object) => void): void => {
         resolve(v);
     });
+}
+
+async function testAwaitJsPromiseSimple(p: Promise<Object>): Promise<void> {
+    let res: String = (await p) as String;
 }
 
 async function testAwaitJsPromise(pendingP: Promise<Object>): Promise<Object> {
@@ -490,8 +496,8 @@ async function testAsyncVoidNothing() {}
 
 function testPromiseAllEmpty(): void {
     globalTest = new Test();
-    let promises: Promise<Object>[] = [];
-    Promise.all(promises).then<void>((values: Array<Object>): void => {
+    let promises: FixedArray<Promise<Object>> = [];
+    Promise.all<Object>(promises).then<void>((values: Array<Object>): void => {
         if (values == null || values.length != 0) {
             globalTest!.fail();
         } else {
@@ -594,13 +600,13 @@ function testPromiseAllIterable(): void {
 
 function testPromiseAllSettledEmpty(): void {
     globalTest = new Test();
-    let promises: Promise<Object>[] = [];
+    let promises: FixedArray<Promise<Object>> = [];
     Promise.allSettled<Object>(promises).then<void, void>((values: PromiseSettledResult<Object>[]): void => {
         if (values.length != 0) {
             globalTest!.fail();
         }
         globalTest!.success();
-    }, (err: NullishType): void => {
+    }, (err: Error): void => {
         globalTest!.fail();
     });
 }
@@ -610,7 +616,7 @@ function testPromiseAllSettled(): void {
     let p1: Promise<Object> = Promise.resolve<Object>("abc");
     let p2: Promise<Object> = Promise.reject<Object>(new Error("def"));
     let p3: Promise<Object> = Promise.resolve<Object>("xyz");
-    Promise.allSettled([
+    Promise.allSettled<Object>([
         p1, p2, p3
     ]).then<void, void>((result: PromiseSettledResult<Object>[]): void => {
         if (result.length != 3) {
@@ -638,14 +644,14 @@ function testPromiseAllSettled(): void {
             globalTest!.fail();
         }
         globalTest!.success();
-    }, (err: NullishType): void => {
+    }, (err: Error): void => {
         globalTest!.fail();
     });
 }
 
 function testPromiseAnyEmpty(): void {
     globalTest = new Test();
-    let promises: Promise<Object>[] = [];
+    let promises: FixedArray<Promise<Object>> = [];
     Promise.any(promises).then<void, void>((v: Object): void => {
         globalTest!.fail();
     }, (err: Error): void => {
@@ -754,8 +760,9 @@ function testPromiseThenOnRejection(): void {
         globalTest!.fail();
     }, (error: Error): string => {
         return "correct flow";
-    }).then<string, void>((value: Object): void => {
+    }).then<string, void>((value): string => {
         globalTest!.success();
+        return value as string
     }, (error: Error): void => {
         globalTest!.fail();
     });

@@ -15,9 +15,6 @@
 
 import HashMap from "@ohos.util.HashMap";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
     const suite = new ArkTestsuite("HashMap Entries API tests")
 
@@ -50,6 +47,6 @@ function testEntriesReturnIteratorByKeyValue() {
 function testEntriesReturnIteratorByKeyValueWithEmptyHashMap() {
     let hashMap: HashMap<string, number> = new HashMap<string, number>();
     let iteratorSetValues = hashMap.entries();
-    assertEQ(iteratorSetValues.next().value, undefined,
-        "The hashMap entries iterator should return undefined when the hashMap is empty");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The hashMap entries iterator.done should true when the hashMap is empty");
 }

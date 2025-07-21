@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -321,7 +321,8 @@ public:
     void EncodeRint([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src) override;
     void EncodeTrunc([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src) override;
     void EncodeRoundAway([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src) override;
-    void EncodeRoundToPInf([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src) override;
+    void EncodeRoundToPInfReturnScalar([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src) override;
+    void EncodeRoundToPInfReturnFloat([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src) override;
     void EncodeReverseBytes(Reg dst, Reg src) override;
     void EncodeReverseBits(Reg dst, Reg src) override;
     void EncodeFpToBits(Reg dst, Reg src) override;
@@ -460,6 +461,7 @@ private:
     void EncodeMinMaxFp(Reg dst, Reg src0, Reg src1);
     void EncodeVorr(Reg dst, Reg src0, Reg src1);
     void EncodeVand(Reg dst, Reg src0, Reg src1);
+
     void MakeLibCallWithFloatResult(Reg dst, Reg src0, Reg src1, void *entryPoint, bool secondValue);
     void MakeLibCallWithDoubleResult(Reg dst, Reg src0, Reg src1, void *entryPoint, bool secondValue);
     void MakeLibCallWithInt64Result(Reg dst, Reg src0, Reg src1, void *entryPoint, bool secondValue);

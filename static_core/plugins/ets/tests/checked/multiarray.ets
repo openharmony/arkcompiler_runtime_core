@@ -51,19 +51,19 @@
 //! INST_COUNT      "LenArray", 1
 
 function main1(): int {
-    let M1: int[][] = new int[4][4];
+    let M1: FixedArray<FixedArray<int>> = new int[4][4];
     M1[0][0] = 1;
     return 0;
 }
 
 function main2(): int {
-    let M1: int[][][] = new int[2][2][2];
+    let M1: FixedArray<FixedArray<FixedArray<int>>> = new int[2][2][2];
     M1[0][0][3] = 1;
     return 0;
 }
 
 function main3(): int {
-    let arr = new String[2][3];
+    let arr: FixedArray<FixedArray<String>> = new String[2][3];
     arr[0][0] = new String();
     return arr[0][0].length as int;  // Should be "0"
 }

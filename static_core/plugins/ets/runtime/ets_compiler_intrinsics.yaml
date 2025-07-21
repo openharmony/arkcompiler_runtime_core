@@ -213,3 +213,15 @@ intrinsics:
     codegen_func: CreateDoubleToStringDecimal
     llvm_codegen_func: EmitDoubleToStringDecimal
     need_param_locations: true
+
+  - name: CompilerEtsStringFromCharCodeSingle
+    space: ets
+    compiler_only: true
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ u64 ]
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateStringFromCharCode
+    llvm_codegen_func: EmitStringFromCharCode
+    need_param_locations: true

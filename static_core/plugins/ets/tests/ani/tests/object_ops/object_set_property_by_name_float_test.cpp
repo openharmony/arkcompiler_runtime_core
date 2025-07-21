@@ -38,30 +38,82 @@ public:
     }
 };
 
+TEST_F(ObjectSetPropertyByNameFloatTest, set_field)
+{
+    ani_object car = NewCar();
+
+    ani_float highPerformance = 0U;
+    ASSERT_EQ(env_->Object_GetPropertyByName_Float(car, "highPerformance", &highPerformance), ANI_OK);
+    ASSERT_EQ(highPerformance, 0U);
+
+    const ani_float value = 0.1;
+    const ani_float value1 = 0.2;
+    ASSERT_EQ(env_->Object_SetPropertyByName_Float(car, "highPerformance", value), ANI_OK);
+    ASSERT_EQ(env_->Object_GetPropertyByName_Float(car, "highPerformance", &highPerformance), ANI_OK);
+    ASSERT_EQ(highPerformance, value);
+
+    ASSERT_EQ(env_->Object_SetPropertyByName_Float(car, "ecoFriendly", value1), ANI_OK);
+    ASSERT_EQ(env_->Object_GetPropertyByName_Float(car, "ecoFriendly", &highPerformance), ANI_OK);
+    ASSERT_EQ(highPerformance, value1);
+}
+
 TEST_F(ObjectSetPropertyByNameFloatTest, set_field_property)
 {
     ani_object car = NewCar();
 
-    ani_float highPerformance;
+    ani_float highPerformance = 0U;
     ASSERT_EQ(env_->Object_GetPropertyByName_Float(car, "highPerformance", &highPerformance), ANI_OK);
     ASSERT_EQ(static_cast<int32_t>(highPerformance), 0U);
 
-    ASSERT_EQ(env_->Object_SetPropertyByName_Float(car, "highPerformance", 1U), ANI_OK);
-    ASSERT_EQ(env_->Object_GetPropertyByName_Float(car, "highPerformance", &highPerformance), ANI_OK);
-    ASSERT_EQ(static_cast<int32_t>(highPerformance), 1U);
+    const int32_t loopCount = 3;
+    const ani_float value = -3.4028235E38;
+    const ani_float value1 = 3.4028235E38;
+    for (int32_t i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetPropertyByName_Float(car, "highPerformance", value), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Float(car, "highPerformance", &highPerformance), ANI_OK);
+        ASSERT_EQ(highPerformance, value);
+
+        ASSERT_EQ(env_->Object_SetPropertyByName_Float(car, "highPerformance", value1), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Float(car, "highPerformance", &highPerformance), ANI_OK);
+        ASSERT_EQ(highPerformance, value1);
+    }
 }
 
 TEST_F(ObjectSetPropertyByNameFloatTest, set_setter_property)
 {
     ani_object car = NewCar();
 
-    ani_float ecoFriendly;
+    ani_float ecoFriendly = 0U;
     ASSERT_EQ(env_->Object_GetPropertyByName_Float(car, "ecoFriendly", &ecoFriendly), ANI_OK);
     ASSERT_EQ(static_cast<int32_t>(ecoFriendly), 0U);
 
-    ASSERT_EQ(env_->Object_SetPropertyByName_Float(car, "ecoFriendly", 1U), ANI_OK);
-    ASSERT_EQ(env_->Object_GetPropertyByName_Float(car, "ecoFriendly", &ecoFriendly), ANI_OK);
-    ASSERT_EQ(static_cast<int32_t>(ecoFriendly), 1U);
+    const int32_t loopCount = 3;
+    const ani_float value = -3.4028235E38;
+    const ani_float value1 = 3.4028235E38;
+    for (int32_t i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetPropertyByName_Float(car, "ecoFriendly", value), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Float(car, "ecoFriendly", &ecoFriendly), ANI_OK);
+        ASSERT_EQ(ecoFriendly, value);
+
+        ASSERT_EQ(env_->Object_SetPropertyByName_Float(car, "ecoFriendly", value1), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Float(car, "ecoFriendly", &ecoFriendly), ANI_OK);
+        ASSERT_EQ(ecoFriendly, value1);
+    }
+}
+
+TEST_F(ObjectSetPropertyByNameFloatTest, invalid_env)
+{
+    ani_object car = NewCar();
+
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_Float(nullptr, car, "ecoFriendly", 1U), ANI_INVALID_ARGS);
+}
+
+TEST_F(ObjectSetPropertyByNameFloatTest, invalid_parameter)
+{
+    ani_object car = NewCar();
+
+    ASSERT_EQ(env_->Object_SetPropertyByName_Float(car, "ecoFriendlyA", 1U), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_SetPropertyByName_Float(car, "", 1U), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectSetPropertyByNameFloatTest, invalid_argument)
@@ -90,7 +142,7 @@ TEST_F(ObjectSetPropertyByNameFloatTest, set_interface_field)
 {
     ani_object c1 = NewC1();
 
-    ani_float prop;
+    ani_float prop = 0U;
     ASSERT_EQ(env_->Object_GetPropertyByName_Float(c1, "prop", &prop), ANI_OK);
     ASSERT_EQ(static_cast<int32_t>(prop), 0U);
 
@@ -103,7 +155,7 @@ TEST_F(ObjectSetPropertyByNameFloatTest, set_interface_property)
 {
     ani_object c2 = NewC2();
 
-    ani_float prop;
+    ani_float prop = 0U;
     ASSERT_EQ(env_->Object_SetPropertyByName_Float(c2, "prop", 0U), ANI_OK);
     ASSERT_EQ(env_->Object_GetPropertyByName_Float(c2, "prop", &prop), ANI_OK);
     ASSERT_EQ(static_cast<int32_t>(prop), 0U);

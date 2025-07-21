@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-let buf = new SharedArrayBuffer(4);
+import { launch } from "std/concurrency"
+
+let buf = new ArrayBuffer(4);
 let flag: Int8Array = new Int8Array(buf, 0, 4);
 
 let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -70,10 +72,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch getAll();
-        let p2 = launch getAll1();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(getAll);
+        let p2 = launch<void, () => void>(getAll1);
+        p1.Await();
+        p2.Await();
         let flagCounter: int = 0;
         for (let i = 0; i < 10; i++) {
             if ((arrValuesTest[i] == concurrentHashMapOne.get(i)) &&
@@ -90,10 +92,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch getAll();
-        let p2 = launch hasAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(getAll);
+        let p2 = launch<void, () => void>(hasAll);
+        p1.Await();
+        p2.Await();
         let flagCounter: int = 0;
         for (let i = 0; i < 10; i++) {
             if (arrValues[i] == arrValuesTest[i]) {
@@ -109,10 +111,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch getAll();
-        let p2 = launch deleteAllBack();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(getAll);
+        let p2 = launch<void, () => void>(deleteAllBack);
+        p1.Await();
+        p2.Await();
         for (let i = 0; i < 10; i++) {
             if (arrValues[i] == arrValuesTest[i]) {
                 Atomics.add(flag, 0, 1);
@@ -126,10 +128,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch replaceAll();
-        let p2 = launch getAllBack();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(replaceAll);
+        let p2 = launch<void, () => void>(getAllBack);
+        p1.Await();
+        p2.Await();
         let flagCounter: int = 0;
         for (let i = 0; i < 10; i++) {
             if (arrValuesTest[i] == arrValues[i] + "-re") {
@@ -144,10 +146,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch getAll();
-        let p2 = launch isEmptyFun();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(getAll);
+        let p2 = launch<void, () => void>(isEmptyFun);
+        p1.Await();
+        p2.Await();
         let flagCounter: int = 0;
         for (let i = 0; i < 10; i++) {
             if (arrValuesTest[i] == arrValues[i]) {
@@ -162,10 +164,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch getAll();
-        let p2 = launch clearAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(getAll);
+        let p2 = launch<void, () => void>(clearAll);
+        p1.Await();
+        p2.Await();
         let flagCounter: int = 0;
         for (let i = 0; i < 10; i++) {
             if (arrValuesTest[i] == arrValues[i]) {
@@ -181,10 +183,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch getAll1();
-        let p2 = launch removeAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(getAll1);
+        let p2 = launch<void, () => void>(removeAll);
+        p1.Await();
+        p2.Await();
         let flagCounter: int = 0;
         for (let i = 0; i < 10; i++) {
             if (arrValuesTest[i] == arrValuesTest1[i]) {

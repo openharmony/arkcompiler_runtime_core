@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,12 @@ namespace ark {
     void AsmDefinition_##name()                                                           \
     {                                                                                     \
         asm volatile("\n.ascii \"^^" #name " %0^^\"" ::"i"(static_cast<int64_t>(value))); \
+    }
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define DEFINE_VALUE_WITH_TYPE(name, value, type)                                                   \
+    void AsmDefinition_##name()                                                                     \
+    {                                                                                               \
+        asm volatile("\n.ascii \"^^" #name " %0 " #type "^^\"" ::"i"(static_cast<int64_t>(value))); \
     }
 #include "asm_defines.def"
 // NOLINTEND(hicpp-no-assembler)

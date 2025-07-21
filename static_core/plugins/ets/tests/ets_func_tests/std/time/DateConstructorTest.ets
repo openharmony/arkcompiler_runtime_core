@@ -14,29 +14,32 @@
  */
 
 function main(): int {
-    let failures = 0;
+    const suite = new ArkTestsuite("Date")
 
-    failures += test(testIntMsConstructor(), "Test MS constructor with Long");
-    failures += test(testIntYearMonthConstructor(), "Test year and month constructor with Long");
-    failures += test(testIntYearMonthDayConstructor(), "Test year, month and day constructor with Long");
-    failures += test(testIntYearMonthDayHoursConstructor(), "Test YMDH constructor with Long");
-    failures += test(testIntYearMonthDayHoursMinutesConstructor(),"Test YMDH and minutes constructor with Long");
-    failures += test(testIntYearMonthDayHoursMinutesSecondsConstructor(),"Test YMDH minutes and seconds constructor with Long");
-    failures += test(testIntYearMonthDayHoursMinutesSecondsMillisConstructor(),"Test YMDH minutes seconds and millis constructor with Long");
+    suite.addTest("Test MS constructor with Long", testIntMsConstructor)
+    suite.addTest("Test year and month constructor with Long", testIntYearMonthConstructor)
+    suite.addTest("Test year, month and day constructor with Long", testIntYearMonthDayConstructor)
+    suite.addTest("Test YMDH constructor with Long", testIntYearMonthDayHoursConstructor)
+    suite.addTest("Test YMDH and minutes constructor with Long", testIntYearMonthDayHoursMinutesConstructor)
+    suite.addTest("Test YMDH minutes and seconds constructor with Long", testIntYearMonthDayHoursMinutesSecondsConstructor)
+    suite.addTest("Test YMDH minutes seconds and millis constructor with Long", testIntYearMonthDayHoursMinutesSecondsMillisConstructor)
+    suite.addTest("Test MS constructor with Double", testDoubleMsConstructor)
+    suite.addTest("Test year and month constructor with Double", testDoubleYearMonthConstructor)
+    suite.addTest("Test year, month and day constructor with Double", testDoubleYearMonthDayConstructor);
+    suite.addTest("Test YMDH constructor with Double", testDoubleYearMonthDayHoursConstructor)
+    suite.addTest("Test YMDH and minutes constructor with Double", testDoubleYearMonthDayHoursMinutesConstructor)
 
-    failures += test(testDoubleMsConstructor(), "Test MS constructor with Double");
-    failures += test(testDoubleYearMonthConstructor(), "Test year and month constructor with Double");
-    failures += test(testDoubleYearMonthDayConstructor(), "Test year, month and day constructor with Double");
-    failures += test(testDoubleYearMonthDayHoursConstructor(),"Test YMDH constructor with Double")
-    failures += test(testDoubleYearMonthDayHoursMinutesConstructor(),"Test YMDH and minutes constructor with Double");
-    failures += test(testDoubleYearMonthDayHoursMinutesSecondsConstructor(),"Test YMDH minutes and seconds constructor with Double");
-    failures += test(testDoubleYearMonthDayHoursMinutesSecondsMillisConstructor(),"Test YMDH minutes seconds and millis constructor with Double");
+    suite.addTest("Test YMDH minutes and seconds constructor with Double", testDoubleYearMonthDayHoursMinutesSecondsConstructor);
+    suite.addTest("Test YMDH minutes seconds and millis constructor with Double", testDoubleYearMonthDayHoursMinutesSecondsMillisConstructor);
 
-    failures += test(testStringConstructor(), "Test constructor with string")
-    failures += test(testDateConstructor(), "Test constructor with Date object")
-    failures += test(testNaNConstructor(), "Test constructor with NaN")
-    
-    return test(failures, "All tests run");
+    suite.addTest("Test constructor with string", testStringConstructor)
+    suite.addTest("Test constructor with Date object", testDateConstructor)
+    suite.addTest("Test constructor with NaN", testNaNConstructor)
+    suite.addTest("Test constructor with string (local TZ)", testStringConstructorLocalTZ)
+    suite.addTest("Test constructor with string (invalid arguments)", testStringConstructorInvalidArgs)
+    suite.addTest("Test constructor with string (expanded year)", testStringConstructorExpandedYear)
+
+    return suite.run()
 }
 
 function test(result: int, message: String ): int {
@@ -62,440 +65,265 @@ const valueDoubleYears: double[] = [-300, -72.0, 1901.0, 1900.0, 1999.9, 100.3, 
 
 const dateString: string[] = ["2019-11-14T00:55:31.820Z", "2024-02-29T00:55:31.950Z", "2000-01-01T00:00:00.001Z"]
 
-function testIntMsConstructor(): int {
-
-    let failures = 0;
-
+function testIntMsConstructor(): void {
     for(let i: int = 0; i < longYears.length; i++) {
-
         let cd = new Date(longYears[i]);
-        
-        try {
-            if(cd.valueOf() as long != longYears[i]) failures++;
-        } catch (e) {
-            return 1;
-        }
-        
+        assertEQ(cd.valueOf() as long, longYears[i])
     }
-
-    return failures;
 }
 
-function testIntYearMonthConstructor(): int {
-    let md: long[] = longMonths;
-    let failures = 0;
-
+function testIntYearMonthConstructor(): void {
     for(let i: int = 0; i < longYears.length; i++) {
-        let cd = new Date(longYears[i], md[i]);
-        let utc = Date.UTC(longYears[i], md[i]);
-        try {
-            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
-        } catch (e) {
-            return 1;
-        }
-        failures += checkDateWithLongYMD(cd, valueLongYears[i], md[i], 1);
-    }
+        let cd = new Date(longYears[i], longMonths[i]);
+        let utc = Date.UTC(longYears[i], longMonths[i]);
 
-    return failures;
+        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        checkDateWithLongYMD(cd, valueLongYears[i], longMonths[i], 1)
+    }
 }
 
-function testIntYearMonthDayConstructor(): int {
-
-    let md: long[] = longMonths;
-    let failures = 0;
-
+function testIntYearMonthDayConstructor(): void {
     for(let i: int = 0; i < longYears.length; i++) {
-        let day: long = md[i] + 1;
-        let cd = new Date(longYears[i], md[i], day);
-        let utc = Date.UTC(longYears[i], md[i], day);
-        try {
-            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
-        } catch (e) {
-            return 1;
-        }
-        failures += checkDateWithLongYMD(cd, valueLongYears[i], md[i], day);
-    }
+        let day: long = longMonths[i] + 1;
+        let cd = new Date(longYears[i], longMonths[i], day);
+        let utc = Date.UTC(longYears[i], longMonths[i], day);
 
-    return failures;
+        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        checkDateWithLongYMD(cd, valueLongYears[i], longMonths[i], day);
+    }
 }
 
-function testIntYearMonthDayHoursConstructor(): int {
-
-    let md: long[] = longMonths;
-    let ht: long[] = longHours;
-    let failures = 0;
-
+function testIntYearMonthDayHoursConstructor(): void {
     for(let i: int = 0; i < longYears.length; i++) {
-        let day: long = md[i] + 1;
-        let cd = new Date(longYears[i], md[i], day, ht[i]);
-        let utc = Date.UTC(longYears[i], md[i], day, ht[i]);
-        try {
-            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
-        } catch (e) {
-            return 1;
-        }
-        failures += checkDateWithLongYMDH(cd, valueLongYears[i], md[i], day, ht[i]);
-    }
+        let day: long = longMonths[i] + 1;
+        let cd = new Date(longYears[i], longMonths[i], day, longHours[i]);
+        let utc = Date.UTC(longYears[i], longMonths[i], day, longHours[i]);
 
-    return failures;
+        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        checkDateWithLongYMDH(cd, valueLongYears[i], longMonths[i], day, longHours[i]);
+    }
 }
 
-function testIntYearMonthDayHoursMinutesConstructor(): int {
-
-    let md: long[] = longMonths;
-    let ht: long[] = longHours;
-    let mh: long[] = longMinutes;
-    let failures = 0;
-
+function testIntYearMonthDayHoursMinutesConstructor(): void {
     for(let i: int = 0; i < longYears.length; i++) {
-        let day: long = md[i] + 1;
-        let cd = new Date(longYears[i], md[i], day, ht[i], mh[i]);
-        let utc = Date.UTC(longYears[i], md[i], day, ht[i], mh[i]);
-        try {
-            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
-        } catch (e) {
-            return 1;
-        }
-        failures += checkDateWithLongYMDHM(cd, valueLongYears[i], md[i], day, ht[i], mh[i]);
-    }
+        let day: long = longMonths[i] + 1;
+        let cd = new Date(longYears[i], longMonths[i], day, longHours[i], longMinutes[i]);
+        let utc = Date.UTC(longYears[i], longMonths[i], day, longHours[i], longMinutes[i]);
 
-    return failures;
+        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        checkDateWithLongYMDHM(cd, valueLongYears[i], longMonths[i], day, longHours[i], longMinutes[i]);
+    }
 }
 
-function testIntYearMonthDayHoursMinutesSecondsConstructor(): int {
-
-    let md: long[] = longMonths;
-    let ht: long[] = longHours;
-    let mh: long[] = longMinutes;
-
-    let failures = 0;
-
+function testIntYearMonthDayHoursMinutesSecondsConstructor(): void {
     for(let i: int = 0; i < longYears.length; i++) {
-        let day: long = md[i] + 1;
-        let cd = new Date(longYears[i], md[i], day, ht[i], mh[i], mh[i]);
-        let utc = Date.UTC(longYears[i], md[i], day, ht[i], mh[i], mh[i]);
-        try {
-            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
-        } catch (e) {
-            return 1;
-        }
-        failures += checkDateWithLongYMDHMS(cd, valueLongYears[i], md[i], day, ht[i], mh[i], mh[i]);
-    }
+        let day: long = longMonths[i] + 1;
+        let cd = new Date(longYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i]);
+        let utc = Date.UTC(longYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i]);
 
-    return failures;
+        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        checkDateWithLongYMDHMS(cd, valueLongYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i]);
+    }
 }
 
-function testIntYearMonthDayHoursMinutesSecondsMillisConstructor(): int {
-
-    let md: long[] = longMonths;
-    let ht: long[] = longHours;
-    let mh: long[] = longMinutes
-    let failures = 0;
-
+function testIntYearMonthDayHoursMinutesSecondsMillisConstructor(): void {
     for(let i: int = 0; i < longYears.length; i++) {
-        let day: long = md[i] + 1;
-        let millis: long = mh[i]*10;
+        let day: long = longMonths[i] + 1;
+        let millis: long = longMinutes[i] * 10;
 
-        let cd = new Date(longYears[i], md[i], day, ht[i], mh[i], mh[i], millis);
-        let utc = Date.UTC(longYears[i], md[i], day, ht[i], mh[i], mh[i], millis);
-        try {
-            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
-        } catch (e) {
-            return 1;
-        }
-        failures += checkDateWithLongYMDHMSM(cd, valueLongYears[i], md[i], day, ht[i], mh[i], mh[i], millis);
+        let cd = new Date(longYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i], millis);
+        let utc = Date.UTC(longYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i], millis);
+
+        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        checkDateWithLongYMDHMSM(cd, valueLongYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i], millis);
     }
-
-    return failures;
 }
 
-function testDoubleMsConstructor(): int {
-    let id: double[] = doubleYears;
-    let failures = 0;
-
-    for(let i: int = 0; i < id.length; i++) {
-        let cd = new Date(id[i]);
-        
-        try {
-            if(Double.valueOf(doubleYears[i]).intValue() != cd.valueOf()) failures++;
-        } catch (e) {
-            return 1;
-        }
-
+function testDoubleMsConstructor(): void {
+    for(let i: int = 0; i < doubleYears.length; i++) {
+        let cd = new Date(doubleYears[i]);
+        assertEQ(Double.valueOf(doubleYears[i]).toInt(), cd.valueOf())
     }
-
-    return failures;
 }
 
-function testDoubleYearMonthConstructor(): int {
-    let id: double[] = doubleYears;
-    let md: double[] = doubleMonths;
-    let failures = 0;
+function testDoubleYearMonthConstructor(): void {
+    for(let i: int = 0; i < doubleYears.length; i++) {
+        let cd = new Date(doubleYears[i], doubleMonths[i]);
+        let utc = Date.UTC(doubleYears[i], doubleMonths[i]);
 
-    for(let i: int = 0; i < id.length; i++) {
-        let cd = new Date(id[i], md[i]);
-        let utc = Date.UTC(id[i], md[i]);
-        try {
-            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
-        } catch (e) {
-            return 1;
-        }
-        failures += checkDateWithDoubleYMD(cd, valueDoubleYears[i], md[i], 1);
+        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        checkDateWithDoubleYMD(cd, valueDoubleYears[i], doubleMonths[i], 1);
     }
-
-    return failures;
 }
 
-function testDoubleYearMonthDayConstructor(): int {
-    let id: double[] = doubleYears;
-    let md: double[] = doubleMonths;
-    let failures = 0;
+function testDoubleYearMonthDayConstructor(): void {
+    for(let i: int = 0; i < doubleYears.length; i++) {
+        let day: double = doubleMonths[i] + 1;
+        let cd = new Date(doubleYears[i], doubleMonths[i], day);
+        let utc = Date.UTC(doubleYears[i], doubleMonths[i], new Double(day));
 
-    for(let i: int = 0; i < id.length; i++) {
-        let day: double = md[i] + 1;
-        let cd = new Date(id[i], md[i], day);
-        let utc = Date.UTC(id[i], md[i], new Double(day));
-        try {
-            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
-        } catch (e) {
-            return 1;
-        }
-        failures += checkDateWithDoubleYMD(cd, valueDoubleYears[i], md[i], day);
+        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        checkDateWithDoubleYMD(cd, valueDoubleYears[i], doubleMonths[i], day);
     }
-
-    return failures;
 }
 
-function testDoubleYearMonthDayHoursConstructor(): int {
-    let id: double[] = doubleYears;
-    let md: double[] = doubleMonths;
-    let ht: double[] = doubleHours;
-    let failures = 0;
+function testDoubleYearMonthDayHoursConstructor(): void {
+    for(let i: int = 0; i < doubleYears.length; i++) {
+        let day: double = doubleMonths[i] + 1;
+        let cd = new Date(doubleYears[i], doubleMonths[i], day, doubleHours[i]);
+        let utc = Date.UTC(doubleYears[i], doubleMonths[i], new Double(day), new Double(doubleHours[i]));
 
-    for(let i: int = 0; i < id.length; i++) {
-        let day: double = md[i] + 1;
-        let cd = new Date(id[i], md[i], day, ht[i]);
-        let utc = Date.UTC(id[i], md[i], new Double(day), new Double(ht[i]));
-        try {
-            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
-        } catch (e) {
-            return 1;
-        }
-        failures += checkDateWithDoubleYMDH(cd, valueDoubleYears[i], md[i], day, ht[i]);
+        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        checkDateWithDoubleYMDH(cd, valueDoubleYears[i], doubleMonths[i], day, doubleHours[i]);
     }
-
-    return failures;
 }
 
-function testDoubleYearMonthDayHoursMinutesConstructor(): int {
-    let id: double[] = doubleYears;
-    let md: double[] = doubleMonths;
-    let ht: double[] = doubleHours;
-    let mh: double[] = doubleMinutes;
-    let failures = 0;
+function testDoubleYearMonthDayHoursMinutesConstructor(): void {
+    for(let i: int = 0; i < doubleYears.length; i++) {
+        let day: double = doubleMonths[i] + 1;
+        let cd = new Date(doubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i]);
+        let utc = Date.UTC(doubleYears[i], doubleMonths[i], new Double(day), new Double(doubleHours[i]), new Double(doubleMinutes[i]));
 
-    for(let i: int = 0; i < id.length; i++) {
-
-        let day: double = md[i] + 1;
-        let cd = new Date(id[i], md[i], day, ht[i], mh[i]);
-        let utc = Date.UTC(id[i], md[i], new Double(day), new Double(ht[i]), new Double(mh[i]));
-        try {
-            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
-        } catch (e) {
-            return 1;
-        }
-        failures += checkDateWithDoubleYMDHM(cd, valueDoubleYears[i], md[i], day, ht[i], mh[i]);
+        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        checkDateWithDoubleYMDHM(cd, valueDoubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i]);
     }
-
-    return failures;
 }
 
-function testDoubleYearMonthDayHoursMinutesSecondsConstructor(): int {
-    let id: double[] = doubleYears;
-    let md: double[] = doubleMonths;
-    let ht: double[] = doubleHours;
-    let mh: double[] = doubleMinutes;
-    let failures = 0;
+function testDoubleYearMonthDayHoursMinutesSecondsConstructor(): void {
+    for(let i: int = 0; i < doubleYears.length; i++) {
+        let day: double = doubleMonths[i] + 1;
+        let cd = new Date(doubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i], doubleMinutes[i]);
+        let utc = Date.UTC(doubleYears[i], doubleMonths[i], new Double(day), new Double(doubleHours[i]), new Double(doubleMinutes[i]), new Double(doubleMinutes[i]));
 
-    for(let i: int = 0; i < id.length; i++) {
-
-        let day: double = md[i] + 1;
-
-        let cd = new Date(id[i], md[i], day, ht[i], mh[i], mh[i]);
-        let utc = Date.UTC(id[i], md[i], new Double(day), new Double(ht[i]), new Double(mh[i]), new Double(mh[i]));
-        try {
-            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
-        } catch (e) {
-            return 1;
-        }
-        failures += checkDateWithDoubleYMDHMS(cd, valueDoubleYears[i], md[i], day, ht[i], mh[i], mh[i]);
+        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        checkDateWithDoubleYMDHMS(cd, valueDoubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i], doubleMinutes[i]);
     }
-
-    return failures;
 }
 
-function testDoubleYearMonthDayHoursMinutesSecondsMillisConstructor(): int {
-    let id: double[] = doubleYears;
-    let md: double[] = doubleMonths;
-    let ht: double[] = doubleHours;
-    let mh: double[] = doubleMinutes;
-    let failures = 0;
+function testDoubleYearMonthDayHoursMinutesSecondsMillisConstructor(): void {
+    for(let i: int = 0; i < doubleYears.length; i++) {
+        let day: double = doubleMonths[i] + 1;
+        let millis: double = doubleMinutes[i] * 10;
 
-    for(let i: int = 0; i < id.length; i++) {
+        let cd = new Date(doubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i], doubleMinutes[i], millis);
+        let utc = Date.UTC(doubleYears[i], doubleMonths[i], new Double(day),
+                new Double(doubleHours[i]), new Double(doubleMinutes[i]), new Double(doubleMinutes[i]), new Double(millis));
 
-        let day: double = md[i] + 1;
-        let millis: double = mh[i]*10;
-
-        let cd = new Date(id[i], md[i], day, ht[i], mh[i], mh[i], millis);
-        let utc = Date.UTC(id[i], md[i], new Double(day), new Double(ht[i]), new Double(mh[i]), new Double(mh[i]), new Double(millis));
-        try {
-            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
-        } catch (e) {
-            return 1;
-        }
-        failures += checkDateWithDoubleYMDHMSM(cd, valueDoubleYears[i], md[i], day, ht[i], mh[i], mh[i], millis);
+        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        checkDateWithDoubleYMDHMSM(cd, valueDoubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i], doubleMinutes[i], millis);
     }
-
-    return failures;
 }
 
-function testStringConstructor(): int {
-    let failures = 0;
-    let sd: string[] = dateString;
-
-    for(let i: int = 0; i < sd.length; i++) {
-        let cd: Date = new Date(sd[i]);
-        try {
-            if(sd[i] != cd.toISOString()) failures++;
-        } catch (e) {
-            return 1;
-        }
+function testStringConstructor(): void {
+    for(let i: int = 0; i < dateString.length; i++) {
+        let cd: Date = new Date(dateString[i]);
+        assertEQ(dateString[i], cd.toISOString())
     }
-    return failures;
 }
 
-function testDateConstructor(): int {
-    let id: double[] = doubleYears;
-    let md: double[] = doubleMonths;
-    let ht: double[] = doubleHours;
-    let mh: double[] = doubleMinutes;
-    let failures: int = 0;
-    for(let i: int = 0; i < id.length; i++) {
-
-        let day: double = md[i] + 1;
-        let tmp = new Date(id[i], md[i], day, ht[i], mh[i], mh[i]);
+function testDateConstructor(): void {
+    for(let i: int = 0; i < doubleYears.length; i++) {
+        let day: double = doubleMonths[i] + 1;
+        let tmp = new Date(doubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i], doubleMinutes[i]);
         let cd = new Date(tmp);
-        try {
-            if(tmp.valueOf() != cd.valueOf()) failures++;
-        } catch (e) {
-            return 1;
-        }
-        failures += checkDateWithDoubleYMDHMS(tmp, valueDoubleYears[i], md[i], day, ht[i], mh[i], mh[i]);
-    }
 
-    return failures;
-    
+        assertEQ(tmp.valueOf(), cd.valueOf())
+        checkDateWithDoubleYMDHMS(tmp, valueDoubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i], doubleMinutes[i]);
+    }
 }
 
-function testNaNConstructor(): int {
-    try {
-        let d1 = new Date(Number.NaN);
-        let val = d1.valueOf();
-        assertTrue(isNaN(val));
-    } catch (e) {
-        return 1;
-    }
+function testNaNConstructor(): void {
+    let d1 = new Date(Number.NaN);
+    let val = d1.valueOf();
+    assertTrue(isNaN(val));
+}
 
-    return 0;
+function testStringConstructorLocalTZ(): void {
+    const localDateTime = new Date(2024, 1, 19, 8, 0, 0)
+    const isoLocalDateTime = new Date("2024-02-19T08:00:00")
+    assertEQ(localDateTime.getTime(), isoLocalDateTime.getTime())
+
+    const isoLocalDate = new Date("1970-01-01")
+    assertEQ(isoLocalDate.getTime(), 0)
+}
+
+function testStringConstructorInvalidArgs(): void {
+    const startingSpaceDate = new Date(" 2024-02-19T08:00:00")
+    assertTrue(isNaN(startingSpaceDate.valueOf()))
+    assertTrue(isNaN(startingSpaceDate.getTime()))
+
+    const trailingSpaceDate = new Date("2024-02-19T08:00:00 ")
+    assertTrue(isNaN(trailingSpaceDate.valueOf()))
+    assertTrue(isNaN(trailingSpaceDate.getTime()))
+
+    const ms4Date = new Date("2024-02-28T00:55:31.1234Z")
+    assertEQ(Date.UTC(2024, 1, 28, 0, 55, 31, 123), ms4Date.getTime())
+
+    const ms2Date = new Date("2024-02-28T00:55:31.12Z")
+    assertEQ(Date.UTC(2024, 1, 28, 0, 55, 31, 120), ms2Date.getTime())
+
+    const missingMsDate = new Date("2024-02-28T00:55:31.")
+    assertTrue(isNaN(missingMsDate.valueOf()))
+    assertTrue(isNaN(missingMsDate.getTime()))
+}
+
+function testStringConstructorExpandedYear(): void {
+    const date = new Date("-000001-07-01T00:00Z")
+    assertEQ(date.toUTCString(), "Thu, 01 Jul -0001 00:00:00 GMT")
 }
 
 //*************************************************************************************************************************************************************
 
-function checkDateWithLongYMD(date: Date, year: long, month: long, day: long): int {
-    return  checkDateWithLongYMDH(date, year, month, day, 0);
+function checkDateWithLongYMD(date: Date, year: long, month: long, day: long): void {
+    checkDateWithLongYMDH(date, year, month, day, 0);
 }
 
-function checkDateWithLongYMDH(date: Date, year: long, month: long, day: long, hour: long): int {
-    return checkDateWithLongYMDHM(date, year, month, day, hour, 0);
+function checkDateWithLongYMDH(date: Date, year: long, month: long, day: long, hour: long): void {
+    checkDateWithLongYMDHM(date, year, month, day, hour, 0);
 }
 
-function checkDateWithLongYMDHM(date: Date, year: long, month: long, day: long, hour: long, minutes: long): int {
-    return checkDateWithLongYMDHMS(date, year, month, day, hour, minutes, 0);
+function checkDateWithLongYMDHM(date: Date, year: long, month: long, day: long, hour: long, minutes: long): void {
+    checkDateWithLongYMDHMS(date, year, month, day, hour, minutes, 0);
 }
 
-function checkDateWithLongYMDHMS(date: Date, year: long, month: long, day: long, hour: long, minutes: long, seconds: long): int {
-    return checkDateWithLongYMDHMSM(date, year, month, day, hour, minutes, seconds, 0);
+function checkDateWithLongYMDHMS(date: Date, year: long, month: long, day: long, hour: long, minutes: long, seconds: long): void {
+    checkDateWithLongYMDHMSM(date, year, month, day, hour, minutes, seconds, 0);
 }
 
-function checkDateWithLongYMDHMSM(cd: Date, year: long, month: long, day: long, hour: long, minutes: long, seconds: long, millis: long): int {
-    let failures = 0;
-
-
-        if(cd.getFullYear() != year) {
-            failures++
-            //console.println("" + year + "<->" + cd.getFullYear())
-        }
-        if(cd.getMonth() != month) {
-            failures++
-            //console.println("" + month + "<->" + cd.getMonth())
-        }
-        if(cd.getDate() != day) {
-            failures++;
-            //console.println("Day mismatch for " + cd + " " + cd.getDate() + " vs: " + day)
-        }
-        if(cd.getHours() != hour) {
-            failures++;
-            //console.println("Hours mismatch for " + cd + " " + cd.getHours() + " vs: " + hour)
-        }
-        if(cd.getMinutes() != minutes) failures++;
-        if(cd.getSeconds() != seconds) failures++;
-        if(cd.getMilliseconds() != millis) failures++;
-
-    if(failures > 0) return 1;
-    return 0;
+function checkDateWithLongYMDHMSM(cd: Date, year: long, month: long, day: long, hour: long, minutes: long, seconds: long, millis: long): void {
+    assertEQ(cd.getFullYear(), year, "year mismatch")
+    assertEQ(cd.getMonth(), month, "month mismatch")
+    assertEQ(cd.getDate(), day, "day mismatch")
+    assertEQ(cd.getHours(), hour, "hour mismatch")
+    assertEQ(cd.getMinutes(), minutes, "minute mismatch")
+    assertEQ(cd.getSeconds(), seconds, "second mismatch")
+    assertEQ(cd.getMilliseconds(), millis, "ms mismatch")
 }
 
 //*************************************************************************************************************************************************************
 
-function checkDateWithDoubleYMD(date: Date, year: double, month: double, day: double): int {
-    return  checkDateWithDoubleYMDH(date, year, month, day, 0 as double);
+function checkDateWithDoubleYMD(date: Date, year: double, month: double, day: double): void {
+    checkDateWithDoubleYMDH(date, year, month, day, 0 as double);
 }
 
-function checkDateWithDoubleYMDH(date: Date, year: double, month: double, day: double, hour: double): int {
-    return checkDateWithDoubleYMDHM(date, year, month, day, hour, 0 as double);
+function checkDateWithDoubleYMDH(date: Date, year: double, month: double, day: double, hour: double): void {
+    checkDateWithDoubleYMDHM(date, year, month, day, hour, 0 as double);
 }
 
-function checkDateWithDoubleYMDHM(date: Date, year: double, month: double, day: double, hour: double, minutes: double): int {
-    return checkDateWithDoubleYMDHMS(date, year, month, day, hour, minutes, 0 as double);
+function checkDateWithDoubleYMDHM(date: Date, year: double, month: double, day: double, hour: double, minutes: double): void {
+    checkDateWithDoubleYMDHMS(date, year, month, day, hour, minutes, 0 as double);
 }
 
-function checkDateWithDoubleYMDHMS(date: Date, year: double, month: double, day: double, hour: double, minutes: double, seconds: double): int {
-    return checkDateWithDoubleYMDHMSM(date, year, month, day, hour, minutes, seconds, 0 as double);
+function checkDateWithDoubleYMDHMS(date: Date, year: double, month: double, day: double, hour: double, minutes: double, seconds: double): void {
+    checkDateWithDoubleYMDHMSM(date, year, month, day, hour, minutes, seconds, 0 as double);
 }
 
-function checkDateWithDoubleYMDHMSM(cd: Date, year: double, month: double, day: double, hour: double, minutes: double, seconds: double, millis: double): int {
-    let failures = 0;
-        if(cd.getFullYear() != trunc(year)) {
-            failures++
-            //console.println("" + year + "<->" + cd.getFullYear())
-        }
-        if(cd.getMonth() != trunc(month)) {
-            failures++
-            //console.println("" + month + "<->" + cd.getMonth())
-        }
-        if(cd.getDate() != trunc(day)) {
-            failures++;
-            //console.println("Day mismatch for " + cd + " " + cd.getDate() + " vs: " + day)
-        }
-        if(cd.getHours() != trunc(hour)) {
-            failures++;
-            //console.println("Hours mismatch for " + cd + " " + cd.getHours() + " vs: " + hour)
-        }
-        if(cd.getMinutes() != trunc(minutes)) failures++;
-        if(cd.getSeconds() != trunc(seconds)) failures++;
-        if(cd.getMilliseconds() != trunc(millis)) failures++;
-
-    if(failures > 0) return 1;
-    return 0;
+function checkDateWithDoubleYMDHMSM(cd: Date, year: double, month: double, day: double, hour: double, minutes: double, seconds: double, millis: double): void {
+    assertEQ(cd.getFullYear(), trunc(year), "truncated year mismatch")
+    assertEQ(cd.getMonth(), trunc(month), "truncated month mismatch")
+    assertEQ(cd.getDate(), trunc(day), "truncated day mismatch")
+    assertEQ(cd.getHours(), trunc(hour), "truncated hour mismatch")
+    assertEQ(cd.getMinutes(), trunc(minutes), "truncated minute mismatch")
+    assertEQ(cd.getSeconds(), trunc(seconds), "truncated second mismatch")
+    assertEQ(cd.getMilliseconds(), trunc(millis), "truncated ms mismatch")
 }
-

@@ -97,7 +97,7 @@ function(panda_ets_interop_js_gtest TARGET)
     # Parse arguments
     cmake_parse_arguments(
         ARG
-        "COMPILATION_JS_WITH_CJS_ON"
+        "COMPILATION_JS_WITH_CJS_ON;COMPILATION_WITH_RUNTIMELINKER"
         "ETS_CONFIG;PACKAGE_NAME"
         "CPP_SOURCES;ETS_SOURCES;JS_SOURCES;TS_SOURCES;JS_TEST_SOURCE;LIBRARIES"
         ${ARGN}
@@ -119,7 +119,7 @@ function(panda_ets_interop_js_gtest TARGET)
     )
     add_dependencies(${TARGET} ${TARGET_GTEST_PACKAGE})
 
-    set(JS_COMPILATION_OPTIONS --module --merge-abc)
+    set(JS_COMPILATION_OPTIONS --module --merge-abc --enable-ets-implements)
     if(ARG_COMPILATION_JS_WITH_CJS_ON)
         set(JS_COMPILATION_OPTIONS --commonjs)
     endif()
@@ -148,9 +148,14 @@ function(panda_ets_interop_js_gtest TARGET)
         list(GET ARG_ETS_SOURCES 0 PACKATE_FILE)
         get_filename_component(ARG_PACKAGE_NAME ${PACKATE_FILE} NAME_WE)
     elseif(NOT DEFINED ARG_PACKAGE_NAME)
-        message("Please provide PACKAGE_NAME for ${TARGET}")
+        message(FATAL_ERROR "Please provide PACKAGE_NAME for ${TARGET}")
     endif()
+
     # Add launcher <${TARGET}_gtests> target
+    set(ARK_ETS_INTEROP_JS_GTEST_ABC_PATH_PATH ${PANDA_BINARY_ROOT}/abc-gtests/${TARGET_GTEST_PACKAGE}.zip)
+    if(ARG_COMPILATION_WITH_RUNTIMELINKER)
+        set(ARK_ETS_INTEROP_JS_GTEST_ABC_PATH_PATH "")
+    endif()
     panda_ets_add_gtest(
         NAME ${TARGET}
         NO_EXECUTABLE
@@ -160,11 +165,12 @@ function(panda_ets_interop_js_gtest TARGET)
             "JS_ABC_OUTPUT_PATH=${CMAKE_CURRENT_BINARY_DIR}"
             "INTEROP_TEST_BUILD_DIR=${PANDA_BINARY_ROOT}/tests/ets_interop_js"
             "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
-            "ARK_ETS_INTEROP_JS_GTEST_ABC_PATH=${PANDA_BINARY_ROOT}/abc-gtests/${TARGET_GTEST_PACKAGE}.zip"
+            "ARK_ETS_INTEROP_JS_GTEST_ABC_PATH=${ARK_ETS_INTEROP_JS_GTEST_ABC_PATH_PATH}"
             "ARK_ETS_INTEROP_JS_GTEST_SOURCES=${CMAKE_CURRENT_SOURCE_DIR}"
             "ARK_ETS_INTEROP_JS_GTEST_DIR=${INTEROP_TESTS_DIR}"
             "FIXED_ISSUES=${FIXED_ISSUES}"
             "PACKAGE_NAME=${ARG_PACKAGE_NAME}"
+            "ARK_ETS_INTEROP_JS_TARGET_GTEST_PACKAGE=${TARGET_GTEST_PACKAGE}"
         LAUNCHER
             ${ARK_JS_NAPI_CLI}
             --stub-file=${ARK_JS_STUB_FILE}
@@ -188,7 +194,7 @@ function(panda_ets_interop_js_test TARGET)
     # Parse arguments
     cmake_parse_arguments(
         ARG
-        "COMPILATION_JS_WITH_CJS_ON"
+        "COMPILATION_JS_WITH_CJS_ON;COMPILATION_WITH_RUNTIMELINKER"
         "JS_LAUNCHER;ETS_CONFIG;DYNAMIC_ABC_OUTPUT_DIR;PACKAGE_NAME"
         "ETS_SOURCES;JS_SOURCES;ABC_FILE;LAUNCHER_ARGS;"
         ${ARGN}
@@ -206,7 +212,7 @@ function(panda_ets_interop_js_test TARGET)
         ETS_CONFIG ${ARG_ETS_CONFIG}
     )
 
-    set(JS_COMPILATION_OPTIONS --module --merge-abc)
+    set(JS_COMPILATION_OPTIONS --module --merge-abc --enable-ets-implements)
     if(ARG_COMPILATION_JS_WITH_CJS_ON)
         set(JS_COMPILATION_OPTIONS --commonjs)
     endif()
@@ -225,7 +231,7 @@ function(panda_ets_interop_js_test TARGET)
         list(GET ARG_ETS_SOURCES 0 PACKATE_FILE)
         get_filename_component(ARG_PACKAGE_NAME ${PACKATE_FILE} NAME_WE)
     elseif(NOT DEFINED ARG_PACKAGE_NAME)
-        message("Please provide PACKAGE_NAME  for ${TARGET}")
+        message(FATAL_ERROR "Please provide PACKAGE_NAME  for ${TARGET}")
     endif()
     set(COMPILED_LAUNCHER_NAME ${TARGET}_launcher_abc_name)
     set(COMPILE_OPTIONS SOURCES ${ARG_JS_LAUNCHER} OUTPUT_ABC_PATHS ${COMPILED_LAUNCHER_NAME} COMPILE_OPTION ${JS_COMPILATION_OPTIONS})
@@ -247,9 +253,14 @@ function(panda_ets_interop_js_test TARGET)
 
     set(OUTPUT_FILE "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}_interop_js_output.txt")
 
+    set(ARK_ETS_INTEROP_JS_GTEST_ABC_PATH_PATH ${PANDA_BINARY_ROOT}/abc/${TARGET_TEST_PACKAGE}.zip)
+    if(ARG_COMPILATION_WITH_RUNTIMELINKER)
+        set(ARK_ETS_INTEROP_JS_GTEST_ABC_PATH_PATH "")
+    endif()
+
     set(CUSTOM_PRERUN_ENVIRONMENT
         "LD_LIBRARY_PATH=${PANDA_BINARY_ROOT}/lib/interop_js/:${PANDA_BINARY_ROOT}/lib/"
-        "ARK_ETS_INTEROP_JS_GTEST_ABC_PATH=${PANDA_BINARY_ROOT}/abc/${TARGET_TEST_PACKAGE}.zip"
+        "ARK_ETS_INTEROP_JS_GTEST_ABC_PATH=${ARK_ETS_INTEROP_JS_GTEST_ABC_PATH_PATH}"
         "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
         "PACKAGE_NAME=${ARG_PACKAGE_NAME}"
     )

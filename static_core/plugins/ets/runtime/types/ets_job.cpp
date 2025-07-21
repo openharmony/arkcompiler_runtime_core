@@ -25,7 +25,9 @@ EtsJob *EtsJob::Create(EtsCoroutine *coro)
 {
     [[maybe_unused]] EtsHandleScope scope(coro);
     auto *klass = PlatformTypes(coro)->coreJob;
-    auto hJob = EtsHandle<EtsJob>(coro, EtsJob::FromEtsObject(EtsObject::Create(coro, klass)));
+    auto hJobObject = EtsObject::Create(coro, klass);
+    ASSERT(hJobObject != nullptr);
+    auto hJob = EtsHandle<EtsJob>(coro, EtsJob::FromEtsObject(hJobObject));
     auto *mutex = EtsMutex::Create(coro);
     hJob->SetMutex(coro, mutex);
     auto *event = EtsEvent::Create(coro);
@@ -44,13 +46,14 @@ void EtsJob::EtsJobFinish(EtsJob *job, EtsObject *value)
         return;
     }
     [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsJob> hjob(coro, job);
+    EtsHandle<EtsJob> hJob(coro, job);
+    ASSERT(hJob.GetPtr() != nullptr);
     EtsHandle<EtsObject> hvalue(coro, value);
-    EtsMutex::LockHolder lh(hjob);
-    if (!hjob->IsRunning()) {
+    EtsMutex::LockHolder lh(hJob);
+    if (!hJob->IsRunning()) {
         return;
     }
-    hjob->Finish(coro, hvalue.GetPtr());
+    hJob->Finish(coro, hvalue.GetPtr());
 }
 
 /*static*/
@@ -63,13 +66,14 @@ void EtsJob::EtsJobFail(EtsJob *job, EtsObject *error)
         return;
     }
     [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsJob> hjob(coro, job);
+    EtsHandle<EtsJob> hJob(coro, job);
+    ASSERT(hJob.GetPtr() != nullptr);
     EtsHandle<EtsObject> herror(coro, error);
-    EtsMutex::LockHolder lh(hjob);
-    if (!hjob->IsRunning()) {
+    EtsMutex::LockHolder lh(hJob);
+    if (!hJob->IsRunning()) {
         return;
     }
-    hjob->Fail(coro, herror.GetPtr());
+    hJob->Fail(coro, herror.GetPtr());
 }
 
 }  // namespace ark::ets

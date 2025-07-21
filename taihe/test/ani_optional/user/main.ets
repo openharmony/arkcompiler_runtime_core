@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as OptTest from "@generated/opt";
-import * as optionalTest from "@generated/optional";
-import * as System from "std/core/System";
+import {BusinessError} from "@ohos.base";
+import * as OptTest from "opt";
+import * as optionalTest from "optional";
 
 loadLibrary("ani_optional");
 
@@ -66,123 +66,206 @@ function sendReturnResult_1() {
 
 // 数值类型测试函数
 function func_primitive_i8() {
-    let instance: optionalTest.ExampleInterface = optionalTest.get_interface();
-    instance.func_primitive_i8(5 as byte)  // byte对应i8
+    let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
+    instance.funcPrimitiveI8(5 as byte)  // byte对应i8
 }
 
 function func_primitive_i16() {
-    let instance: optionalTest.ExampleInterface = optionalTest.get_interface();
-    instance.func_primitive_i16(42 as short)  // short对应i16
+    let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
+    instance.funcPrimitiveI16(42 as short)  // short对应i16
 }
 
 function func_primitive_i32() {
-    let instance: optionalTest.ExampleInterface = optionalTest.get_interface();
-    instance.func_primitive_i32(1000 as int)  // int对应i32
+    let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
+    instance.funcPrimitiveI32(1000 as int)  // int对应i32
 }
 
 function func_primitive_i64() {
-    let instance: optionalTest.ExampleInterface = optionalTest.get_interface();
-    instance.func_primitive_i64(1000000 as long)  // long对应i64
+    let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
+    instance.funcPrimitiveI64(1000000 as long)  // long对应i64
 }
 
 // 浮点类型测试函数
 function func_primitive_f32() {
-    let instance: optionalTest.ExampleInterface = optionalTest.get_interface();
-    instance.func_primitive_f32(3.14 as float)  // float对应f32
+    let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
+    instance.funcPrimitiveF32(3.14 as float)  // float对应f32
 }
 
 function func_primitive_f64() {
-    let instance: optionalTest.ExampleInterface = optionalTest.get_interface();
-    instance.func_primitive_f64(2.71828 as double)  // double对应f64
+    let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
+    instance.funcPrimitiveF64(2.71828 as double)  // double对应f64
 }
 
 // 布尔类型测试函数
 function func_primitive_bool() {
-    let instance: optionalTest.ExampleInterface = optionalTest.get_interface();
-    instance.func_primitive_bool(true)
+    let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
+    instance.funcPrimitiveBool(true)
 }
 
 // 字符串类型测试函数
 function func_primitive_string() {
-    let instance: optionalTest.ExampleInterface = optionalTest.get_interface();
-    instance.func_primitive_String("test_string")
+    let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
+    instance.funcPrimitiveString("test_string")
 }
 
 
 function func_Array() {
-    let instance: optionalTest.ExampleInterface = optionalTest.get_interface();
+    let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
 
     let numbers: int[] = [1, 2, 3, 4, 5];
-    instance.func_Array(numbers)
+    instance.funcArray(numbers)
 }
 
 function func_buffer() {
-    let instance: optionalTest.ExampleInterface = optionalTest.get_interface();
+    let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
 
     let numbersU8: byte[] = [1, 2, 3, 4, 5];
     let arrbuf1: ArrayBuffer = new ArrayBuffer(numbersU8.length);
     for (let i = 0; i < numbersU8.length; i++) {
         arrbuf1.set(i, numbersU8[i]);
     }
-    instance.func_Buffer(arrbuf1)
+    instance.funcBuffer(arrbuf1)
 }
 
 function func_Union() {
-    let instance: optionalTest.ExampleInterface = optionalTest.get_interface();
-    instance.func_Union("hello")
-    instance.func_Union(1024 as int)
+    let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
+    instance.funcUnion("hello")
+    instance.funcUnion(1024 as int)
 }
 
 function func_Map() {
-    let instance: optionalTest.ExampleInterface = optionalTest.get_interface();
+    let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
     let cpus: Record<string, int> = {
         "cpu0": 10,
         "cpu1": 20,
     };
-    instance.func_Map(cpus)
+    instance.funcMap(cpus)
 }
 
 function func_InterfaceName() {
-    let instance: optionalTest.ExampleInterface = optionalTest.get_interface();
+    let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
     optionalTest.printTestInterfaceName(instance)
 }
 function func_Interfacei8() {
-    let instance: optionalTest.ExampleInterface = optionalTest.get_interface();
+    let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
     optionalTest.printTestInterfaceNumberi8(instance)
 }
 function func_PrintTestInterfacei16() {
-    let instance: optionalTest.ExampleInterface = optionalTest.get_interface();
+    let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
     optionalTest.printTestInterfaceNumberi16(instance);
 }
 
 function func_PrintTestInterfacei32() {
-    let instance: optionalTest.ExampleInterface = optionalTest.get_interface();
+    let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
     optionalTest.printTestInterfaceNumberi32(instance);
 }
 
 function func_PrintTestInterfacei64() {
-    let instance: optionalTest.ExampleInterface = optionalTest.get_interface();
+    let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
     optionalTest.printTestInterfaceNumberi64(instance);
 }
 
 function func_PrintTestInterfacef32() {
-    let instance: optionalTest.ExampleInterface = optionalTest.get_interface();
+    let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
     optionalTest.printTestInterfaceNumberf32(instance);
 }
 
 function func_PrintTestInterfacef64() {
-    let instance: optionalTest.ExampleInterface = optionalTest.get_interface();
+    let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
     optionalTest.printTestInterfaceNumberf64(instance);
 }
 
 function func_PrintTestInterfacebool() {
-    let instance: optionalTest.ExampleInterface = optionalTest.get_interface();
+    let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
     optionalTest.printTestInterfacebool(instance);
 }
 
 function func_PrintTestInterfaceArraybuffer() {
-    let instance: optionalTest.ExampleInterface = optionalTest.get_interface();
+    let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
     optionalTest.printTestInterfaceArraybuffer(instance);
+}
+
+function func_showOptionalString(){
+    let instance: OptTest.Test = OptTest.getTest();
+    let str = "this is string data";
+    let result = instance.showOptionalString(str);
+    assertEQ(result, "this is string data");
+}
+
+function func_showOptionalString_1(){
+    let instance: OptTest.Test = OptTest.getTest();
+    let result = instance.showOptionalString(undefined);
+    assertTrue(result == undefined);
+}
+
+function func_getTest_setIntData(){
+    let instance: OptTest.Test = OptTest.getTest();
+    instance.setIntData("this is str");
+}
+
+function func_getTest_property(){
+    let instance: OptTest.Test = OptTest.getTest();
+    instance.string = "this is string value";
+    let res = instance.string;
+    assertEQ(res, "this is string value");
+}
+
+function func_getTest_property_1(){
+    let instance: OptTest.Test = OptTest.getTest();
+    instance.string = undefined;
+    let res = instance.string;
+    assertEQ(res, undefined);
+}
+
+function func_showOptionalInt32(){
+    let instance: OptTest.Test = OptTest.getTest();
+    let intValue = 12;
+    let res = instance.showOptionalInt32(intValue);
+    assertEQ(res, 12);
+}
+
+function func_showOptionalInt32_1(){
+    let instance: OptTest.Test = OptTest.getTest();
+    let res = instance.showOptionalInt32(undefined);
+    assertEQ(res, undefined);
+}
+
+function func_showOptionalBool(){
+    let instance: OptTest.Test = OptTest.getTest();
+    let res = instance.showOptionalBool(true);
+    assertEQ(res, true);
+}
+
+function func_showOptionalBool_1(){
+    let instance: OptTest.Test = OptTest.getTest();
+    let res = instance.showOptionalBool(undefined);
+    assertEQ(res, undefined);
+}
+
+function func_showOptionalRecord(){
+    let instance: OptTest.Test = OptTest.getTest();
+    let data: Record<string, boolean> = {"key1": false};
+    let res = instance.showOptionalRecord(data) as Record<string, boolean>;
+    assertEQ(res.toString(), data.toString());
+}
+
+function func_showOptionalRecord_1(){
+    let instance: OptTest.Test = OptTest.getTest();
+    let res = instance.showOptionalRecord(undefined);
+    assertEQ(res, undefined);
+}
+
+function func_showOptionalStruct(){
+    let instance: OptTest.Test = OptTest.getTest();
+    let data: OptTest.MyStruct = {param1: 12, param2: "string data"} ;
+    let res = instance.showOptionalStruct(data) as OptTest.MyStruct;
+    assertEQ(res.toString(), data.toString());
+}
+
+function func_showOptionalStruct_1(){
+    let instance: OptTest.Test = OptTest.getTest();
+    let res = instance.showOptionalStruct(undefined);
+    assertEQ(res, undefined);
 }
 
 function main() {
@@ -212,20 +295,26 @@ function main() {
 
     suite.addTest("func_InterfaceName test", func_InterfaceName)
     suite.addTest("func_Interfacei8 test", func_Interfacei8)
-    suite.addTest(
-        "func_PrintTestInterfacei16 test", func_PrintTestInterfacei16);
-    suite.addTest(
-        "func_PrintTestInterfacei32 test", func_PrintTestInterfacei32);
-    suite.addTest(
-        "func_PrintTestInterfacei64 test", func_PrintTestInterfacei64);
-    suite.addTest(
-        "func_PrintTestInterfacef32 test", func_PrintTestInterfacef32);
-    suite.addTest(
-        "func_PrintTestInterfacef64 test", func_PrintTestInterfacef64);
-    suite.addTest(
-        "func_PrintTestInterfacebool test", func_PrintTestInterfacebool);
-    suite.addTest(
-        "func_PrintTestInterfaceArraybuffer test",
-        func_PrintTestInterfaceArraybuffer);
-    System.exit(suite.run());
+    suite.addTest("func_PrintTestInterfacei16 test", func_PrintTestInterfacei16);
+    suite.addTest("func_PrintTestInterfacei32 test", func_PrintTestInterfacei32);
+    suite.addTest("func_PrintTestInterfacei64 test", func_PrintTestInterfacei64);
+    suite.addTest("func_PrintTestInterfacef32 test", func_PrintTestInterfacef32);
+    suite.addTest("func_PrintTestInterfacef64 test", func_PrintTestInterfacef64);
+    suite.addTest("func_PrintTestInterfacebool test", func_PrintTestInterfacebool);
+    suite.addTest("func_PrintTestInterfaceArraybuffer test",func_PrintTestInterfaceArraybuffer);
+
+    suite.addTest("func_showOptionalString", func_showOptionalString)
+    suite.addTest("func_showOptionalString_1", func_showOptionalString_1)
+    suite.addTest("func_getTest_setIntData", func_getTest_setIntData)
+    suite.addTest("func_getTest_property", func_getTest_property)
+    suite.addTest("func_getTest_property_1", func_getTest_property_1)
+    suite.addTest("func_showOptionalInt32", func_showOptionalInt32)
+    suite.addTest("func_showOptionalInt32_1", func_showOptionalInt32_1)
+    suite.addTest("func_showOptionalBool", func_showOptionalBool)
+    suite.addTest("func_showOptionalBool_1", func_showOptionalBool_1)
+    suite.addTest("func_showOptionalRecord", func_showOptionalRecord)
+    suite.addTest("func_showOptionalRecord_1", func_showOptionalRecord_1)
+    suite.addTest("func_showOptionalStruct", func_showOptionalStruct)
+    suite.addTest("func_showOptionalStruct_1", func_showOptionalStruct_1)
+    exit(suite.run());
 }

@@ -16,7 +16,6 @@
 /*---
 desc: 13.compilation_units\13.06.export_directives\13.06.03.re-export_directives\issue15371
 name: issue15371_06.ets
-tags:
 files: [./issue15371_03.ets]
 ---*/
 

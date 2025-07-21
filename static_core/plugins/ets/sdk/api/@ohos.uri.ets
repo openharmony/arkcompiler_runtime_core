@@ -90,29 +90,29 @@ export namespace uri {
       return createNewUri(uriStr);
     }
 
-      getQueryValue(key: string): string | null {
-          let query = this.uriEntry.getQuery();
-          if (query === '') {
-              return null;
-          }
-          const queryStrs = query.split('&');
-          for (const item of queryStrs) {
-              const eqPos = item.indexOf('=');
-              let currentKey = item;
-              let currentValue = '';
-              if (eqPos !== -1) {
-                  currentKey = item.substring(0, eqPos);
-                  currentValue = item.substring(eqPos + 1);
-              }
-
-              const decodedKey = this.decodeSafelyInner(currentKey);
-              if (decodedKey === key) {
-                  const decodedValue = this.decodeSafelyInner(currentValue.replaceAll('+', ' '));
-                  return decodedValue || '';
-              }
-          }
-          return null;
+    getQueryValue(key: string): string | null {
+      let query = this.uriEntry.getQuery();
+      if (query === '') {
+        return null;
       }
+      const queryStrs = query.split('&');
+      for (const item of queryStrs) {
+        const eqPos = item.indexOf('=');
+        let currentKey = item;
+        let currentValue = '';
+        if (eqPos !== -1) {
+          currentKey = item.substring(0, eqPos);
+          currentValue = item.substring(eqPos + 1);
+        }
+
+        const decodedKey = this.decodeSafelyInner(currentKey);
+        if (decodedKey === key) {
+          const decodedValue = this.decodeSafelyInner(currentValue.replaceAll('+', ' '));
+          return decodedValue || '';
+        }
+      }
+      return null;
+    }
 
     private decodeSafelyOut(input: string): string {
       let decodedString = "";

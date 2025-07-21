@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,7 +15,7 @@
     method_name: lowerBoundSearch,
     method_nature: function,
     result_type: int,
-    method_signature:  { arr: "boolean[]", key: "boolean", startIndex: int, endIndex: int },
+    method_signature:  { arr: "FixedArray<boolean>", key: "boolean", startIndex: int, endIndex: int },
     method_signature_desc: {first: "boolean_array", key: "boolean", startIndex: int, endIndex: int},
     method_throws: "true",
     method_test_index_data:
@@ -61,7 +61,7 @@
     method_name: lowerBoundSearch,
     method_nature: function,
     result_type: int,
-    method_signature:  { arr: "byte[]", key: "byte", startIndex: int, endIndex: int },
+    method_signature:  { arr: "FixedArray<byte>", key: "byte", startIndex: int, endIndex: int },
     method_signature_desc: {first: "byte_array", key: "byte", startIndex: int, endIndex: int},
     method_throws: "true",
     method_test_index_data:
@@ -139,7 +139,7 @@
     method_name: lowerBoundSearch,
     method_nature: function,
     result_type: int,
-    method_signature:  { arr: "short[]", key: "short", startIndex: int, endIndex: int },
+    method_signature:  { arr: "FixedArray<short>", key: "short", startIndex: int, endIndex: int },
     method_signature_desc: {first: "short_array", key: "short", startIndex: int, endIndex: int},
     method_throws: "true",
     method_test_index_data:
@@ -218,7 +218,7 @@
     method_name: lowerBoundSearch,
     method_nature: function,
     result_type: int,
-    method_signature:  { arr: "int[]", key: "int", startIndex: int, endIndex: int },
+    method_signature:  { arr: "FixedArray<int>", key: "int", startIndex: int, endIndex: int },
     method_signature_desc: {first: "int_array", key: "int", startIndex: int, endIndex: int},
     method_throws: "true",
     method_test_index_data:
@@ -296,7 +296,7 @@
     method_name: lowerBoundSearch,
     method_nature: function,
     result_type: int,
-    method_signature:  { arr: "long[]", key: "long", startIndex: int, endIndex: int },
+    method_signature:  { arr: "FixedArray<long>", key: "long", startIndex: int, endIndex: int },
     method_signature_desc: {first: "long_array", key: "long", startIndex: int, endIndex: int},
     method_throws: "true",
     method_test_index_data:
@@ -375,7 +375,7 @@
     method_name: lowerBoundSearch,
     method_nature: function,
     result_type: int,
-    method_signature:  { arr: "float[]", key: "float", startIndex: int, endIndex: int },
+    method_signature:  { arr: "FixedArray<float>", key: "float", startIndex: int, endIndex: int },
     method_signature_desc: {first: "float_array", key: "float", startIndex: int, endIndex: int},
     method_throws: "true",
     method_test_index_data:
@@ -454,7 +454,7 @@
     method_name: lowerBoundSearch,
     method_nature: function,
     result_type: int,
-    method_signature:  { arr: "double[]", key: "double", startIndex: int, endIndex: int },
+    method_signature:  { arr: "FixedArray<double>", key: "double", startIndex: int, endIndex: int },
     method_signature_desc: {first: "double_array", key: "double", startIndex: int, endIndex: int},
     method_throws: "true",
     method_test_index_data:
@@ -533,7 +533,7 @@
     method_name: lowerBoundSearch,
     method_nature: function,
     result_type: int,
-    method_signature:  { arr: "char[]", key: "char", startIndex: int, endIndex: int },
+    method_signature:  { arr: "FixedArray<char>", key: "char", startIndex: int, endIndex: int },
     method_signature_desc: {first: "char_array", key: "char", startIndex: int, endIndex: int},
     method_throws: "true",
     method_test_index_data:

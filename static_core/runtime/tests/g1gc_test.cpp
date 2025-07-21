@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -879,6 +879,186 @@ TEST_F(G1GCPromotionTest, TestCorrectPromotionYoungRegion)
         ASSERT_TRUE(ObjectToRegion(firstHolder->Get<ObjectHeader *>(i))->HasFlag(RegionFlag::IS_OLD));
         ASSERT_FALSE(ObjectToRegion(firstHolder->Get<ObjectHeader *>(i))->HasFlag(RegionFlag::IS_PROMOTED));
     }
+}
+
+TEST_F(G1GCPromotionTest, TestFullCollectionSetPromotionObjects)
+{
+    // The object will occupy more than half of region.
+    // So expect the allocator allocates a separate young region for each object.
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    static constexpr size_t youngLength = DEFAULT_REGION_SIZE / 2 + sizeof(coretypes::Array);
+
+    ObjectAllocatorG1<> *allocator = GetAllocator();
+    Runtime *runtime = Runtime::GetCurrent();
+    // Setting FastGC flag = true - means that G1-GC should
+    // only promote all young regions without marking
+    GC *gc = runtime->GetPandaVM()->GetGC();
+    gc->SetFastGCFlag(true);
+    ASSERT_TRUE(gc->GetFastGCFlag());
+
+    // Run Full GC to compact all existed young regions:
+    GCTask task0(GCTaskCause::OOM_CAUSE);
+    task0.Run(*gc);
+
+    MTManagedThread *thread = MTManagedThread::GetCurrent();
+    ScopedManagedCodeThread s(thread);
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+
+    CollectionSetChecker checker(allocator);
+    gc->AddListener(&checker);
+    {
+        // Allocating arrays to young regions without saving any references to them
+        coretypes::Array *young1 = ObjectAllocator::AllocArray(youngLength, ClassRoot::ARRAY_U8, false);
+        coretypes::Array *young2 = ObjectAllocator::AllocArray(youngLength, ClassRoot::ARRAY_U8, false);
+        coretypes::Array *young3 = ObjectAllocator::AllocArray(youngLength, ClassRoot::ARRAY_U8, false);
+        Region *yregion1 = ObjectToRegion(young1);
+        Region *yregion2 = ObjectToRegion(young2);
+        Region *yregion3 = ObjectToRegion(young3);
+        ASSERT_TRUE(yregion1->HasFlag(RegionFlag::IS_EDEN));
+        ASSERT_TRUE(yregion2->HasFlag(RegionFlag::IS_EDEN));
+        ASSERT_TRUE(yregion3->HasFlag(RegionFlag::IS_EDEN));
+        // Check all 3 objects are in different regions
+        ASSERT_NE(yregion1, yregion2);
+        ASSERT_NE(yregion2, yregion3);
+        ASSERT_NE(yregion1, yregion3);
+        checker.SetExpectedRegions({yregion1, yregion2, yregion3});
+    }
+    auto regions = allocator->GetAllRegions();
+    size_t aliveBytesSum = 0;
+    for (auto *region : regions) {
+        aliveBytesSum += region->GetAllocatedBytes();
+    }
+    {
+        ScopedNativeCodeThread sn(thread);
+        // Promote array's regions to tenured
+        GCTask task(GCTaskCause::MIXED);
+        task.Run(*gc);
+    }
+    // Even when there are no references to the arrays
+    // they must not be deleted
+    regions = allocator->GetAllRegions();
+    size_t aliveBytesSumToCheck = 0;
+    for (auto *region : regions) {
+        aliveBytesSumToCheck += region->GetAllocatedBytes();
+    }
+    ASSERT_EQ(aliveBytesSum, aliveBytesSumToCheck);
+}
+
+TEST_F(G1GCPromotionTest, TestFullCollectionSetPromotionBitmaps)
+{
+    // Lets check LiveBitmaps after collection
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    static constexpr size_t youngLength = DEFAULT_REGION_SIZE / 2 + sizeof(coretypes::Array);
+    ObjectAllocatorG1<> *allocator = GetAllocator();
+    Runtime *runtime = Runtime::GetCurrent();
+    GC *gc = runtime->GetPandaVM()->GetGC();
+    gc->SetFastGCFlag(true);
+    ASSERT_TRUE(gc->GetFastGCFlag());
+
+    GCTask task0(GCTaskCause::OOM_CAUSE);
+    task0.Run(*gc);
+
+    MTManagedThread *thread = MTManagedThread::GetCurrent();
+    ScopedManagedCodeThread s(thread);
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+
+    VMHandle<coretypes::Array> firstHolder =
+        VMHandle<coretypes::Array>(thread, ObjectAllocator::AllocArray(youngLength, ClassRoot::ARRAY_U8, false));
+    VMHandle<coretypes::Array> secondHolder =
+        VMHandle<coretypes::Array>(thread, ObjectAllocator::AllocArray(youngLength, ClassRoot::ARRAY_U8, false));
+    VMHandle<coretypes::Array> thirdHolder =
+        VMHandle<coretypes::Array>(thread, ObjectAllocator::AllocArray(youngLength, ClassRoot::ARRAY_U8, false));
+    CollectionSetChecker listener(allocator);
+    gc->AddListener(&listener);
+    {
+        Region *yregion1 = ObjectToRegion(firstHolder.GetPtr());
+        Region *yregion2 = ObjectToRegion(secondHolder.GetPtr());
+        Region *yregion3 = ObjectToRegion(thirdHolder.GetPtr());
+        ASSERT_TRUE(yregion1->HasFlag(RegionFlag::IS_EDEN));
+        ASSERT_TRUE(yregion2->HasFlag(RegionFlag::IS_EDEN));
+        ASSERT_TRUE(yregion3->HasFlag(RegionFlag::IS_EDEN));
+        // Check all 3 objects are in different regions
+        ASSERT_NE(yregion1, yregion2);
+        ASSERT_NE(yregion2, yregion3);
+        ASSERT_NE(yregion1, yregion3);
+        listener.SetExpectedRegions({yregion1, yregion2, yregion3});
+    }
+    {
+        ScopedNativeCodeThread sn(thread);
+        // Promote array's regions to tenured
+        GCTask task(GCTaskCause::MIXED);
+        task.Run(*gc);
+    }
+    Region *region1 = ObjectToRegion(firstHolder.GetPtr());
+    Region *region2 = ObjectToRegion(secondHolder.GetPtr());
+    Region *region3 = ObjectToRegion(thirdHolder.GetPtr());
+    ASSERT_TRUE(region1->HasFlag(RegionFlag::IS_OLD));
+    ASSERT_TRUE(region2->HasFlag(RegionFlag::IS_OLD));
+    ASSERT_TRUE(region3->HasFlag(RegionFlag::IS_OLD));
+    ASSERT_TRUE(region1->GetLiveBitmap()->Test(firstHolder.GetPtr()));
+    ASSERT_TRUE(region2->GetLiveBitmap()->Test(secondHolder.GetPtr()));
+    ASSERT_TRUE(region3->GetLiveBitmap()->Test(thirdHolder.GetPtr()));
+}
+
+TEST_F(G1GCPromotionTest, TestFullCollectionSetPromotionReferences)
+{
+    // Lets check LiveBitmaps after collection
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    static constexpr size_t youngLength = DEFAULT_REGION_SIZE / 2 + sizeof(coretypes::Array);
+    Runtime *runtime = Runtime::GetCurrent();
+    GC *gc = runtime->GetPandaVM()->GetGC();
+    gc->SetFastGCFlag(true);
+    ASSERT_TRUE(gc->GetFastGCFlag());
+
+    GCTask task0(GCTaskCause::OOM_CAUSE);
+    task0.Run(*gc);
+
+    MTManagedThread *thread = MTManagedThread::GetCurrent();
+    ScopedManagedCodeThread s(thread);
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+
+    auto *obj = ObjectAllocator::AllocObjectInYoung();
+    VMHandle<coretypes::Array> youngHolder =
+        VMHandle<coretypes::Array>(thread, ObjectAllocator::AllocArray(youngLength, ClassRoot::ARRAY_U8, false));
+    VMHandle<coretypes::Array> hugeHolder =
+        VMHandle<coretypes::Array>(thread, ObjectAllocator::AllocArray(GetHumongousArrayLength(ClassRoot::ARRAY_STRING),
+                                                                       ClassRoot::ARRAY_STRING, false));
+    youngHolder->Set(0, obj);
+    hugeHolder->Set(0, obj);
+    RemSetChecker listener(gc, hugeHolder.GetPtr(), obj);
+    gc->AddListener(&listener);
+    {
+        Region *yregion = ObjectToRegion(youngHolder.GetPtr());
+        ASSERT_TRUE(yregion->HasFlag(RegionFlag::IS_EDEN));
+
+        ASSERT_TRUE(ObjectToRegion(obj)->HasFlag(RegionFlag::IS_EDEN));
+        Region *hregion = ObjectToRegion(hugeHolder.GetPtr());
+        ASSERT_TRUE(hregion->HasFlag(RegionFlag::IS_OLD));
+        ASSERT_TRUE(hregion->HasFlag(RegionFlag::IS_LARGE_OBJECT));
+    }
+    {
+        ScopedNativeCodeThread sn(thread);
+        // Promote array's regions to tenured
+        GCTask task(GCTaskCause::MIXED);
+        task.Run(*gc);
+    }
+    Region *region1 = ObjectToRegion(youngHolder.GetPtr());
+    ASSERT_TRUE(region1->HasFlag(RegionFlag::IS_OLD));
+    ASSERT_TRUE(region1->GetLiveBitmap()->Test(youngHolder.GetPtr()));
+
+    // Check update reference from objects which were moved while garbage collection
+    obj = youngHolder->Get<ObjectHeader *>(0);
+    ASSERT_TRUE(ObjectToRegion(obj)->HasFlag(RegionFlag::IS_OLD));
+    ASSERT_FALSE(ObjectToRegion(obj)->HasFlag(RegionFlag::IS_PROMOTED));
+    // Check that the object is accessible
+    ASSERT_NE(obj->ClassAddr<Class>(), nullptr);
+
+    // Check update references from objects which are not part of collection set
+    obj = hugeHolder->Get<ObjectHeader *>(0);
+    ASSERT_TRUE(ObjectToRegion(obj)->HasFlag(RegionFlag::IS_OLD));
+    ASSERT_FALSE(ObjectToRegion(obj)->HasFlag(RegionFlag::IS_PROMOTED));
+    // Check that the object is accessible
+    ASSERT_NE(obj->ClassAddr<Class>(), nullptr);
 }
 
 class PromotionRemSetChecker : public GCListener {

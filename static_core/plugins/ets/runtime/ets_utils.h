@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,24 @@ private:
     LambdaUtils() = default;
     ~LambdaUtils() = default;
 };
+
+class ManglingUtils {
+public:
+    PANDA_PUBLIC_API static EtsString *GetDisplayNameStringFromField(EtsField *field);
+    PANDA_PUBLIC_API static EtsField *GetFieldIDByDisplayName(EtsClass *klass, const PandaString &name,
+                                                              const char *sig = nullptr);
+
+    NO_COPY_SEMANTIC(ManglingUtils);
+    NO_MOVE_SEMANTIC(ManglingUtils);
+
+private:
+    ManglingUtils() = default;
+    ~ManglingUtils() = default;
+};
+
+PANDA_PUBLIC_API bool GetExportedClassDescriptorsFromModule(EtsClass *etsGlobalClass,
+                                                            std::vector<std::string> &outDescriptors);
+
 }  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_UTILS_H

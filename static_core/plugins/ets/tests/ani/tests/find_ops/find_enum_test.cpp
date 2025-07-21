@@ -60,6 +60,14 @@ TEST_F(EnumFindTest, invalid_arg_name)
 {
     ani_enum en {};
     ASSERT_EQ(env_->FindEnum("Lfind_enum_test/NotFound;", &en), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindEnum("", &en), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindEnum("\t", &en), ANI_NOT_FOUND);
+}
+
+TEST_F(EnumFindTest, invalid_arg_env)
+{
+    ani_enum en {};
+    ASSERT_EQ(env_->c_api->FindEnum(nullptr, "L#Color;", &en), ANI_INVALID_ARGS);
 }
 
 TEST_F(EnumFindTest, find_enum_combine_scenes_001)

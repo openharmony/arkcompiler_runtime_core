@@ -33,23 +33,23 @@ cases:
   - { type: Floating, val: new Float(), res: 26 }
   - { type: String, val: '""', res: 31 }
   - { type: Object, val: '""', res: 31 }
-  - { type: 'byte[]', val: '[0 as byte]', res: 101 }
-  - { type: 'short[]', val: '[0 as short]', res: 102 }
-  - { type: 'char[]', val: '[]', res: 103 }
-  - { type: 'int[]', val: '[1, 2, 3, 4, 5, 6, 7, 8, 9, 0]', res: 104 }
-  - { type: 'long[]', val: '[1 as long, 2 as long, 3 as long]', res: 105}
-  - { type: 'float[]', val: '[1.0 as float, 2.0 as float, 3.0 as float]', res: 106 }
-  - { type: 'boolean[]', val: '[true, true, false]', res: 108 }
-  - { type: 'Byte[]', val: '[new Byte()]', res: 121 }
-  - { type: 'Char[]', val: 'new Char[1]', res: 123 }
-  - { type: 'Int[]', val: 'new Int[200]', res: 124 }
-  - { type: 'Object[][][]', val: 'new String[1][1][1]', res: 132 }
+  - { type: 'FixedArray<byte>', val: '[0 as byte]', res: 101 }
+  - { type: 'FixedArray<short>', val: '[0 as short]', res: 102 }
+  - { type: 'FixedArray<char>', val: '[]', res: 103 }
+  - { type: 'FixedArray<int>', val: '[1, 2, 3, 4, 5, 6, 7, 8, 9, 0]', res: 104 }
+  - { type: 'FixedArray<long>', val: '[1 as long, 2 as long, 3 as long]', res: 105}
+  - { type: 'FixedArray<float>', val: '[1.0 as float, 2.0 as float, 3.0 as float]', res: 106 }
+  - { type: 'FixedArray<boolean>', val: '[true, true, false]', res: 108 }
+  - { type: 'FixedArray<Byte>', val: '[new Byte()]', res: 121 }
+  - { type: 'FixedArray<Char>', val: 'new Char[1]', res: 123 }
+  - { type: 'FixedArray<Int>', val: 'new Int[200]', res: 124 }
+  - { type: 'FixedArray<FixedArray<FixedArray<Object>>>', val: 'new String[1][1][1]', res: 132 }
   - {
-      type: 'Boolean[]',
+      type: 'FixedArray<Boolean>',
       val: '[new Boolean(), new Boolean(), new Boolean()]',
       res: 128,
     }
-  - { type: 'Floating[]', val: '[]', res: 130 }
-  - { type: 'Object[]', val: '[new Int(1), new Boolean()]', res: 132 }
+  - { type: 'FixedArray<Floating>', val: '[]', res: 130 }
+  - { type: 'FixedArray<Object>', val: '[new Int(1), new Boolean()]', res: 132 }
   - { type: StringBuilder, val: new StringBuilder(), res: 32 }
-  - { type: 'Comparable<Int>[]', val: '[new Int(0)]', res: 132, tags: 'compile-only, negative' }
+  - { type: 'Comparable<Int>[]', val: '[new Int(0)]', res: 32 }

@@ -25,12 +25,12 @@ class C {
 }
 
 
-function erasedM(recv: NullishType, args: NullishType[]): NullishType {
+function erasedM(recv: NullishType, args: FixedArray<NullishType>): NullishType {
 	assertEQ( args.length, 1)
 	return (args[0] as string) + "123" + (recv as C).dat
 }
 
-function erased(recv: NullishType, args: NullishType[]): NullishType {
+function erased(recv: NullishType, args: FixedArray<NullishType>): NullishType {
 	assertEQ( args.length, 3)
 	const a1: int = args[0] as Int
 	const a2: long = args[1] as Long

@@ -18,6 +18,7 @@
 
 #include "plugins/ets/runtime/interop_js/call/proto_reader.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
+#include "plugins/ets/runtime/types/ets_escompat_array.h"
 
 namespace ark::ets::interop::js {
 
@@ -44,6 +45,10 @@ template <typename FStore>
     auto env = ctx->GetJSEnv();
 
     // start fastpath
+    if (IsUndefined(env, jsVal)) {
+        storeRes(nullptr);
+        return true;
+    }
     if (IsNull(env, jsVal)) {
         if (LIKELY(klass->IsAssignableFrom(ctx->GetNullValueClass()))) {
             storeRes(ctx->GetNullValue()->GetCoreType());
@@ -112,12 +117,7 @@ template <typename FStore, typename GetClass>
                                                                const GetClass &getClass, napi_value jsVal)
 {
     auto id = type.GetId();
-    auto env = ctx->GetJSEnv();
     if (id == panda_file::Type::TypeId::REFERENCE) {
-        if (IsUndefined(env, jsVal)) {
-            storeRes(nullptr);
-            return true;
-        }
         return ConvertRefArgToEts(ctx, getClass(), storeRes, jsVal);
     }
     return ConvertPrimArgToEts(ctx, id, storeRes, jsVal);
@@ -182,9 +182,32 @@ static ObjectHeader **DoPackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, 
     return reinterpret_cast<ObjectHeader **>(restArgsArray.GetAddress());
 }
 
+// CC-OFFNXT(G.FMT.06-CPP, huge_depth) solid logic
 [[maybe_unused]] static ObjectHeader **PackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, ProtoReader &protoReader,
                                                           Span<napi_value> jsargv)
 {
+    if (!protoReader.GetClass()->IsArrayClass()) {
+        ASSERT(protoReader.GetClass() == ctx->GetArrayClass());
+        const size_t numRestParams = jsargv.size();
+
+        EtsArrayObject<EtsObject> *objArr = EtsArrayObject<EtsObject>::Create(numRestParams);
+        VMHandle<EtsArrayObject<EtsObject>> restArgsArray(coro, objArr->GetCoreType());
+        for (uint32_t restArgIdx = 0; restArgIdx < numRestParams; ++restArgIdx) {
+            auto jsVal = jsargv[restArgIdx];
+            auto store = [restArgIdx, &restArgsArray](ObjectHeader *val) {
+                restArgsArray.GetPtr()->SetRef(restArgIdx, EtsObject::FromCoreType(val));
+            };
+            if (UNLIKELY(!ConvertRefArgToEts(ctx, ctx->GetObjectClass(), store, jsVal))) {
+                if (coro->HasPendingException()) {
+                    ctx->ForwardEtsException(coro);
+                }
+                ASSERT(ctx->SanityJSExceptionPending());
+                return nullptr;
+            }
+        }
+        return reinterpret_cast<ObjectHeader **>(restArgsArray.GetAddress());
+    }
+
     panda_file::Type restParamsItemType = protoReader.GetClass()->GetComponentType()->GetType();
     switch (restParamsItemType.GetId()) {
         case panda_file::Type::TypeId::U1:
@@ -213,6 +236,7 @@ static ObjectHeader **DoPackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, 
 template <typename FRead>
 [[nodiscard]] static ALWAYS_INLINE inline bool ConvertRefArgToJS(InteropCtx *ctx, napi_value *resSlot, FRead &readVal)
 {
+    ASSERT(ctx != nullptr);
     auto env = ctx->GetJSEnv();
     auto setResult = [resSlot](napi_value res) {
         *resSlot = res;
@@ -244,10 +268,11 @@ template <typename FRead>
         return wrapRef(helpers::TypeIdentity<JSConvertString>(), ref);
     }
     // start slowpath
-    auto coro = EtsCoroutine::GetCurrent();
-    HandleScope<ObjectHeader *> scope(coro);
-    VMHandle<ObjectHeader> handle(coro, ref);
+    VMHandle<ObjectHeader> handle(EtsCoroutine::GetCurrent(), ref);
     auto refconv = JSRefConvertResolve(ctx, klass);
+    if (refconv == nullptr) {
+        return false;
+    }
     return setResult(refconv->Wrap(ctx, EtsObject::FromCoreType(handle.GetPtr())));
 }
 

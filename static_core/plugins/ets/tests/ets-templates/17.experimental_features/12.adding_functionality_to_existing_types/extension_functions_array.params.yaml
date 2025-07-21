@@ -16,13 +16,13 @@ cases:
     # 0. Regular extension functions
     - decl: |-
           class A {}
-          function test(this: A[]) { return 1 }
-          function test(this: A[][]) { return 2 }
-          function test(this: A[][][]) { return 3 }
+          function test(this: FixedArray<A>) { return 1 }
+          function test(this: FixedArray<FixedArray<A>>) { return 2 }
+          function test(this: FixedArray<FixedArray<FixedArray<A>>>) { return 3 }
       use: |-
-          let a: A[] = []
-          let b: A[][] = [[]]
-          let c: A[][][] = [[[]]]
+          let a: FixedArray<A> = []
+          let b: FixedArray<FixedArray<A>> = [[]]
+          let c: FixedArray<FixedArray<FixedArray<A>>> = [[[]]]
           assertEQ( a.test(), 1 )
           assertEQ( b.test(), 2 )
           assertEQ( c.test(), 3 )

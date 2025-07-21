@@ -16,7 +16,7 @@
 package escompat;
 
 /**
- * Either ArrayBuffer or SharedArrayBuffer
+ * Either ArrayBuffer 
  */
 // NOTE (kprokopenko): make abstract after abstract overloads get to work
 abstract class Buffer {
@@ -31,7 +31,7 @@ export interface ArrayBufferView {
     /**
      * The ArrayBuffer instance referenced by the array.
      */
-    readonly buffer: ArrayBufferLike
+    readonly buffer: ArrayBuffer
 
     /**
      * The length in bytes of the array.
@@ -122,7 +122,7 @@ export class ArrayBuffer extends Buffer
 
         if (resultLength == 0) return result
         result.setValues(this, startIndex)
-        
+
         return result
     }
 
@@ -251,10 +251,10 @@ export class ArrayBuffer extends Buffer
     }
 
     /// @brief Allocates non-movable array of fixed length
-    private native static allocateNonMovable(length: int): byte[]
+    private native static allocateNonMovable(length: int): FixedArray<byte>
 
     /// @brief Returns native address of non-movable array
-    private native static getAddress(array: byte[]): long
+    private native static getAddress(array: FixedArray<byte>): long
 
     /**
     * Creates a new ArrayBuffer from an array of bytes.
@@ -264,7 +264,7 @@ export class ArrayBuffer extends Buffer
     * @param {byte[]} arr - An array of bytes to initialize the ArrayBuffer.
     * @returns {ArrayBuffer} A new ArrayBuffer containing the data from the byte array.
     */
-    public static from(arr: byte[]): ArrayBuffer {
+    public static from(arr: FixedArray<byte>): ArrayBuffer {
         const bf = new ArrayBuffer(arr.length)
         copyTo(arr, bf.data!, 0, 0, arr.length)
         return bf
@@ -389,7 +389,7 @@ export class ArrayBuffer extends Buffer
         return ArrayBuffer.from(obj as ArrayBuffer, byteOffsetOrEncoding as int, length as int);
     }
 
-    
+
     // Fields' order is important due to alignment
     private data: FixedArray<byte> | undefined
     // Length in bytes
@@ -426,289 +426,149 @@ export class ArrayBuffer extends Buffer
     */
     public static native stringify(buffer: ArrayBuffer, encoding: string, start: int, end: int): string;
 
+    internal native atomicAddI8(index: int, byteOffset: int, value: byte): double;
+
+    internal native atomicAndI8(index: int, byteOffset: int, value: byte): double;
+
+    internal native atomicCompareExchangeI8(index: int, byteOffset: int, expectedValue: byte, replacementValue: byte): double;
+
+    internal native atomicExchangeI8(index: int, byteOffset: int, value: byte): double;
+
+    internal native atomicLoadI8(index: int, byteOffset: int): double;
+
+    internal native atomicOrI8(index: int, byteOffset: int, value: byte): double;
+
+    internal native atomicStoreI8(index: int, byteOffset: int, value: byte): double;
+
+    internal native atomicSubI8(index: int, byteOffset: int, value: byte): double;
+
+    internal native atomicXorI8(index: int, byteOffset: int, value: byte): double;
+
+    internal native atomicAddI16(index: int, byteOffset: int, value: short): double;
+
+    internal native atomicAndI16(index: int, byteOffset: int, value: short): double;
+
+    internal native atomicCompareExchangeI16(index: int, byteOffset: int, expectedValue: short, replacementValue: short): double;
+
+    internal native atomicExchangeI16(index: int, byteOffset: int, value: short): double;
+
+    internal native atomicLoadI16(index: int, byteOffset: int): double;
+
+    internal native atomicOrI16(index: int, byteOffset: int, value: short): double;
+
+    internal native atomicStoreI16(index: int, byteOffset: int, value: short): double;
+
+    internal native atomicSubI16(index: int, byteOffset: int, value: short): double;
+
+    internal native atomicXorI16(index: int, byteOffset: int, value: short): double;
+
+    internal native atomicAddI32(index: int, byteOffset: int, value: int): double;
+
+    internal native atomicAndI32(index: int, byteOffset: int, value: int): double;
+
+    internal native atomicCompareExchangeI32(index: int, byteOffset: int, expectedValue: int, replacementValue: int): double;
+
+    internal native atomicExchangeI32(index: int, byteOffset: int, value: int): double;
+
+    internal native atomicLoadI32(index: int, byteOffset: int): double;
+
+    internal native atomicOrI32(index: int, byteOffset: int, value: int): double;
+
+    internal native atomicStoreI32(index: int, byteOffset: int, value: int): double;
+
+    internal native atomicSubI32(index: int, byteOffset: int, value: int): double;
+
+    internal native atomicXorI32(index: int, byteOffset: int, value: int): double;
+
+    internal native atomicAddI64(index: int, byteOffset: int, value: long): double;
+
+    internal native atomicAndI64(index: int, byteOffset: int, value: long): double;
+
+    internal native atomicCompareExchangeI64(index: int, byteOffset: int, expectedValue: long, replacementValue: long): double;
+
+    internal native atomicExchangeI64(index: int, byteOffset: int, value: long): double;
+
+    internal native atomicLoadI64(index: int, byteOffset: int): double;
+
+    internal native atomicOrI64(index: int, byteOffset: int, value: long): double;
+
+    internal native atomicStoreI64(index: int, byteOffset: int, value: long): double;
+
+    internal native atomicSubI64(index: int, byteOffset: int, value: long): double;
+
+    internal native atomicXorI64(index: int, byteOffset: int, value: long): double;
+
+    internal native atomicAddU8(index: int, byteOffset: int, value: byte): double;
+
+    internal native atomicAndU8(index: int, byteOffset: int, value: byte): double;
+
+    internal native atomicCompareExchangeU8(index: int, byteOffset: int, expectedValue: byte, replacementValue: byte): double;
+
+    internal native atomicExchangeU8(index: int, byteOffset: int, value: byte): double;
+
+    internal native atomicLoadU8(index: int, byteOffset: int): double;
+
+    internal native atomicOrU8(index: int, byteOffset: int, value: byte): double;
+
+    internal native atomicStoreU8(index: int, byteOffset: int, value: byte): double;
+
+    internal native atomicSubU8(index: int, byteOffset: int, value: byte): double;
+
+    internal native atomicXorU8(index: int, byteOffset: int, value: byte): double;
+
+    internal native atomicAddU16(index: int, byteOffset: int, value: short): double;
+
+    internal native atomicAndU16(index: int, byteOffset: int, value: short): double;
+
+    internal native atomicCompareExchangeU16(index: int, byteOffset: int, expectedValue: short, replacementValue: short): double;
+
+    internal native atomicExchangeU16(index: int, byteOffset: int, value: short): double;
+
+    internal native atomicLoadU16(index: int, byteOffset: int): double;
+
+    internal native atomicOrU16(index: int, byteOffset: int, value: short): double;
+
+    internal native atomicStoreU16(index: int, byteOffset: int, value: short): double;
+
+    internal native atomicSubU16(index: int, byteOffset: int, value: short): double;
+
+    internal native atomicXorU16(index: int, byteOffset: int, value: short): double;
+
+    internal native atomicAddU32(index: int, byteOffset: int, value: int): double;
+
+    internal native atomicAndU32(index: int, byteOffset: int, value: int): double;
+
+    internal native atomicCompareExchangeU32(index: int, byteOffset: int, expectedValue: int, replacementValue: int): double;
+
+    internal native atomicExchangeU32(index: int, byteOffset: int, value: int): double;
+
+    internal native atomicLoadU32(index: int, byteOffset: int): double;
+
+    internal native atomicOrU32(index: int, byteOffset: int, value: int): double;
+
+    internal native atomicStoreU32(index: int, byteOffset: int, value: int): double;
+
+    internal native atomicSubU32(index: int, byteOffset: int, value: int): double;
+
+    internal native atomicXorU32(index: int, byteOffset: int, value: int): double;
+
+    internal native atomicAddU64(index: int, byteOffset: int, value: long): double;
+
+    internal native atomicAndU64(index: int, byteOffset: int, value: long): double;
+
+    internal native atomicCompareExchangeU64(index: int, byteOffset: int, expectedValue: long, replacementValue: long): double;
+
+    internal native atomicExchangeU64(index: int, byteOffset: int, value: long): double;
+
+    internal native atomicLoadU64(index: int, byteOffset: int): double;
+
+    internal native atomicOrU64(index: int, byteOffset: int, value: long): double;
+
+    internal native atomicStoreU64(index: int, byteOffset: int, value: long): double;
+
+    internal native atomicSubU64(index: int, byteOffset: int, value: long): double;
+
+    internal native atomicXorU64(index: int, byteOffset: int, value: long): double;
 }
 
-/**
- * Internal non-movable memory of a SharedArrayBuffer
- */
-class SharedMemory {
-    private data: byte[] = []
-    private waiterPtr: long
-
-    private constructor() {}
-
-    internal native static create(byteLength: int): SharedMemory;
-
-    internal at(i: int): byte {
-        return this.data[i]
-    }
-
-    internal set(i: int, value: byte): void {
-        this.data[i] = value
-    }
-
-    internal getByteLength(): int {
-        return this.data.length
-    }
-
-    internal native atomicAddI8(index: int, value: byte): byte;
-
-    internal native atomicAndI8(index: int, value: byte): byte;
-
-    internal native atomicCompareExchangeI8(index: int, expectedValue: byte, replacementValue: byte): byte;
-
-    internal native atomicExchangeI8(index: int, value: byte): byte;
-
-    internal native atomicLoadI8(index: int): byte;
-
-    internal native atomicOrI8(index: int, value: byte): byte;
-
-    internal native atomicStoreI8(index: int, value: byte): byte;
-
-    internal native atomicSubI8(index: int, value: byte): byte;
-
-    internal native atomicXorI8(index: int, value: byte): byte;
-
-    internal native atomicAddI16(index: int, value: short): short;
-
-    internal native atomicAndI16(index: int, value: short): short;
-
-    internal native atomicCompareExchangeI16(index: int, expectedValue: short, replacementValue: short): short;
-
-    internal native atomicExchangeI16(index: int, value: short): short;
-
-    internal native atomicLoadI16(index: int): short;
-
-    internal native atomicOrI16(index: int, value: short): short;
-
-    internal native atomicStoreI16(index: int, value: short): short;
-
-    internal native atomicSubI16(index: int, value: short): short;
-
-    internal native atomicXorI16(index: int, value: short): short;
-
-    internal native atomicAddI32(index: int, value: int): int;
-
-    internal native atomicAndI32(index: int, value: int): int;
-
-    internal native atomicCompareExchangeI32(index: int, expectedValue: int, replacementValue: int): int;
-
-    internal native atomicExchangeI32(index: int, value: int): int;
-
-    internal native atomicLoadI32(index: int): int;
-
-    internal native atomicOrI32(index: int, value: int): int;
-
-    internal native atomicStoreI32(index: int, value: int): int;
-
-    internal native atomicSubI32(index: int, value: int): int;
-
-    internal native atomicXorI32(index: int, value: int): int;
-
-    internal native atomicAddI64(index: int, value: long): long;
-
-    internal native atomicAndI64(index: int, value: long): long;
-
-    internal native atomicCompareExchangeI64(index: int, expectedValue: long, replacementValue: long): long;
-
-    internal native atomicExchangeI64(index: int, value: long): long;
-
-    internal native atomicLoadI64(index: int): long;
-
-    internal native atomicOrI64(index: int, value: long): long;
-
-    internal native atomicStoreI64(index: int, value: long): long;
-
-    internal native atomicSubI64(index: int, value: long): long;
-
-    internal native atomicXorI64(index: int, value: long): long;
-
-    internal native atomicAddU8(index: int, value: byte): byte;
-
-    internal native atomicAndU8(index: int, value: byte): byte;
-
-    internal native atomicCompareExchangeU8(index: int, expectedValue: byte, replacementValue: byte): byte;
-
-    internal native atomicExchangeU8(index: int, value: byte): byte;
-
-    internal native atomicLoadU8(index: int): byte;
-
-    internal native atomicOrU8(index: int, value: byte): byte;
-
-    internal native atomicStoreU8(index: int, value: byte): byte;
-
-    internal native atomicSubU8(index: int, value: byte): byte;
-
-    internal native atomicXorU8(index: int, value: byte): byte;
-
-    internal native atomicAddU16(index: int, value: short): short;
-
-    internal native atomicAndU16(index: int, value: short): short;
-
-    internal native atomicCompareExchangeU16(index: int, expectedValue: short, replacementValue: short): short;
-
-    internal native atomicExchangeU16(index: int, value: short): short;
-
-    internal native atomicLoadU16(index: int): short;
-
-    internal native atomicOrU16(index: int, value: short): short;
-
-    internal native atomicStoreU16(index: int, value: short): short;
-
-    internal native atomicSubU16(index: int, value: short): short;
-
-    internal native atomicXorU16(index: int, value: short): short;
-
-    internal native atomicAddU32(index: int, value: int): int;
-
-    internal native atomicAndU32(index: int, value: int): int;
-
-    internal native atomicCompareExchangeU32(index: int, expectedValue: int, replacementValue: int): int;
-
-    internal native atomicExchangeU32(index: int, value: int): int;
-
-    internal native atomicLoadU32(index: int): int;
-
-    internal native atomicOrU32(index: int, value: int): int;
-
-    internal native atomicStoreU32(index: int, value: int): int;
-
-    internal native atomicSubU32(index: int, value: int): int;
-
-    internal native atomicXorU32(index: int, value: int): int;
-
-    internal native atomicAddU64(index: int, value: long): long;
-
-    internal native atomicAndU64(index: int, value: long): long;
-
-    internal native atomicCompareExchangeU64(index: int, expectedValue: long, replacementValue: long): long;
-
-    internal native atomicExchangeU64(index: int, value: long): long;
-
-    internal native atomicLoadU64(index: int): long;
-
-    internal native atomicOrU64(index: int, value: long): long;
-
-    internal native atomicStoreU64(index: int, value: long): long;
-
-    internal native atomicSubU64(index: int, value: long): long;
-
-    internal native atomicXorU64(index: int, value: long): long;
-
-    internal native atomicWaitI32(byteOffset: int, value: int): int;
-
-    internal native atomicWaitI64(byteOffset: int, value: long): int;
-
-    internal native atomicTimedWaitI32(byteOffset: int, value: int, timeout: long): int;
-
-    internal native atomicTimedWaitI64(byteOffset: int, value: long, timeout: long): int;
-
-    internal native atomicNotify(byteOffset: int): int;
-
-    internal native atomicBoundedNotify(byteOffset: int, count: int): int;
-}
-
-export class SharedArrayBuffer extends Buffer {
-    private sharedMemory: SharedMemory
-
-    public constructor(byteLength: int) {
-        super()
-        this.sharedMemory = SharedMemory.create(byteLength)
-    }
-
-    internal getSharedMemory(): SharedMemory {
-        return this.sharedMemory
-    }
-
-    override getByteLength(): int {
-        return this.sharedMemory.getByteLength()
-    }
-
-    /**
-     * Returns data at specified index.
-     * No such method in JS library, required for TypedArrays
-     *
-     * @param i index
-     *
-     * @returns byte at index
-     */
-    override at(i: int): byte {
-        return this.sharedMemory.at(i)
-    }
-
-    /**
-     * Sets data at specified index.
-     * No such method in JS library, required for TypedArrays
-     *
-     * @param b new value
-     *
-     * @param i index
-     */
-    override set(i: int, b: byte) {
-        this.sharedMemory.set(i, b)
-    }
-
-    override sliceInternal(begin: int, end: int): Buffer {
-        // TODO(egor-porsev): code duplication
-        let byteLength = this.getByteLength()
-        if (begin < -byteLength) {
-            begin = 0
-        }
-        if (begin < 0) {
-            begin = byteLength + begin
-        }
-        if (begin >= byteLength) {
-            begin = byteLength
-        }
-
-        if (end < -byteLength) {
-            end = 0
-        }
-        if (end < 0) {
-            end = byteLength + end
-        }
-        if (end >= byteLength) {
-            end = byteLength
-        }
-
-        if (end <= begin) {
-            return new SharedArrayBuffer(0)
-        }
-
-        let len = end - begin
-        if (len < 0) {
-            len = 0
-        }
-        let res = new SharedArrayBuffer(len);
-        for (let i = 0; i < len; ++i) {
-            res.set(i, this.at(begin + i))
-        }
-        return res
-    }
-
-    /**
-     * Creates a new ArrayBuffer with copy of bytes in range [begin;end)
-     *
-     * @param begin an inclusive index to start copying with
-     *
-     * @param end a last exclusive index to stop copying
-     *
-     * @returns data taken from current ArrayBuffer with respect to begin and end parameters
-     */
-    public slice(begin: int, end: int): SharedArrayBuffer {
-        return this.sliceInternal(begin, end) as SharedArrayBuffer
-    }
-
-    public grow(newLength: int) {
-        // grow() cannot shrink the array and cannot expand it beyond 'maxByteLength'.
-        // Source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer/grow
-        // This is because the underlying SharedMemory object is non-movable and cannot be reallocated.
-        //
-        // Possible implementation: when SharedArrayBuffer(curByteLength, { maxByteLength }) is constructed
-        // preallocate a SharedMemory object of size 'maxByteLength' but the user should observe the length to be 'curByteLength'.
-        // In other words, SharedMemory may be implemented as (pointer to data, current length, max capacity).
-        throw new Error("not implemented");
-    }
-}
-
-export type ArrayBufferLike = ArrayBuffer | SharedArrayBuffer
+export type ArrayBufferLike = ArrayBuffer

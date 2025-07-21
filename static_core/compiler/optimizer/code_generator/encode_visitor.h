@@ -291,12 +291,6 @@ protected:
     static void VisitResolveVirtual(GraphVisitor *visitor, Inst *inst);
     static void VisitCallResolvedVirtual(GraphVisitor *visitor, Inst *inst);
 
-    static void VisitCallLaunchStatic(GraphVisitor *visitor, Inst *inst);
-    static void VisitCallResolvedLaunchStatic(GraphVisitor *visitor, Inst *inst);
-
-    static void VisitCallLaunchVirtual(GraphVisitor *visitor, Inst *inst);
-    static void VisitCallResolvedLaunchVirtual(GraphVisitor *visitor, Inst *inst);
-
     static void VisitCallDynamic(GraphVisitor *visitor, Inst *inst);
 
     static void VisitCallNative(GraphVisitor *visitor, Inst *inst);

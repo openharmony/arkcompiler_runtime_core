@@ -76,7 +76,7 @@ cases:
   # tuple
     - decl: |-
         type TPL = [number, string]
-        function foo(i: readonly TPL) {
+        function foo(i: readonly [number, string]) {
             return 1;
         }
       check: |-
@@ -95,6 +95,5 @@ cases:
         class B {
             static foo(array: readonly int[]) {}
         }
-        function foo(i: int, array?: readonly Array<number>) { }
         function foo(i: int, array?: readonly number[]) { }
       check: |-

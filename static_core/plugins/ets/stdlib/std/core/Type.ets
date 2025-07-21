@@ -97,7 +97,7 @@ class TypeAPI {
         if (o === null) {
             return TypeAPI.NullTypeDescriptor
         }
-        return (o === undefined) ? TypeAPI.UndefinedTypeDescriptor : TypeAPI.getClassDescriptor(Class.of(o))
+        return (o === undefined) ? TypeAPI.UndefinedTypeDescriptor : TypeAPI.getClassDescriptor(Class.of(__narrowAny<object>(o)))
     }
 
     static getTypeName(cls: Class): string {
@@ -144,7 +144,7 @@ export class TypeKind {
 }
 
 // 5 lower bits stores kind's id
-const TypeKindMask: byte = (1 << 6) - 1
+const TypeKindMask: byte;
 
 // NOTE(shumilov-petr): replace to enum, enum not available now
 class ValueTypeDesc {
@@ -161,7 +161,8 @@ class ValueTypeDesc {
     private constructor() {}
 }
 
-export const ObjectType: ClassType = Type.of(new Object()) as ClassType
+// initialized in _initializerBlock_.ets
+export const ObjectType: ClassType;
 
 export class Attributes {
     public static readonly STATIC: int      = 1 << 0  // Field, Method
@@ -205,7 +206,8 @@ export abstract class Type extends Object {
      * @returns instance of appropriate type or undefined if resolving is failed
      */
     public static resolve(td: TypeDescriptor): Type | undefined {
-        const contextLinker = Class.ofCaller().getLinker()
+        const callerClass = Class.ofCaller()
+        const contextLinker = callerClass == undefined ? getBootRuntimeLinker() : callerClass.getLinker()
         const internalTd: RuntimeTypeDescriptor = TypeAPI.convertTypeDescriptor(td)
         return Type.resolve(internalTd, contextLinker)
     }
@@ -220,7 +222,7 @@ export abstract class Type extends Object {
      * @returns instance of appropriate type or undefined if resolving is failed
      */
     internal static resolve(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker): Type | undefined {
-        let kind = (TypeAPI.getTypeKind(td, contextLinker) & TypeKindMask) as byte
+        let kind = (TypeAPI.getTypeKind(td, contextLinker) & TypeKindMask).toByte()
         switch (kind) {
             case TypeKind.NONE:
                 return undefined
@@ -269,6 +271,11 @@ export abstract class Type extends Object {
             default:
                 throw new AssertionError("Unexpected TypeKind " + kind)
         }
+    }
+
+    public static from<T>(): Type {
+        //should never be executed since FE lowering this
+        throw new AssertionError("Type.from call will be casted by frontend")
     }
 
     /**
@@ -363,91 +370,9 @@ export abstract class Type extends Object {
 
     public static of(o: NullishType): Type {
         const td = TypeAPI.getTypeDescriptor(o)
-        const contextLinker = (o == null) ? Class.ofCaller().getLinker() : Class.of(o).getLinker()
+        const contextClass = o == undefined ? Class.ofCaller() : Class.of(__narrowAny<object>(o))
+        const contextLinker = contextClass == undefined ? getBootRuntimeLinker() : contextClass.getLinker()
         return Type.resolve(td, contextLinker)!
-    }
-
-    // -----
-
-    public static of(v: Boolean): Type {
-        return BooleanType.REF
-    }
-
-    /**
-     * Returns Type of value
-     *
-     * @param v value
-     *
-     * @returns Type instance of this value
-     */
-    public static of(v: Char): Type {
-        return CharType.REF
-    }
-
-    /**
-     * Returns Type of value
-     *
-     * @param v value
-     *
-     * @returns Type instance of this value
-     */
-    public static of(v: Byte): Type {
-        return ByteType.REF
-    }
-
-    /**
-     * Returns Type of value
-     *
-     * @param v value
-     *
-     * @returns Type instance of this value
-     */
-    public static of(v: Short): Type {
-        return ShortType.REF
-    }
-
-    /**
-     * Returns Type of value
-     *
-     * @param v value
-     *
-     * @returns Type instance of this value
-     */
-    public static of(v: Int): Type {
-        return IntType.REF
-    }
-
-    /**
-     * Returns Type of value
-     *
-     * @param v value
-     *
-     * @returns Type instance of this value
-     */
-    public static of(v: Long): Type {
-        return LongType.REF
-    }
-
-    /**
-     * Returns Type of value
-     *
-     * @param v value
-     *
-     * @returns Type instance of this value
-     */
-    public static of(v: Float): Type {
-        return FloatType.REF
-    }
-
-    /**
-     * Returns Type of value
-     *
-     * @param v value
-     *
-     * @returns Type instance of this value
-     */
-    public static of(v: Double): Type {
-        return DoubleType.REF
     }
 
     // -----
@@ -472,7 +397,7 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: boolean[]): Type {
+    public static of(v: FixedArray<boolean>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.BOOLEAN)
     }
 
@@ -483,7 +408,7 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: char[]): Type {
+    public static of(v: FixedArray<char>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.CHAR)
     }
 
@@ -494,7 +419,7 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: byte[]): Type {
+    public static of(v: FixedArray<byte>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.BYTE)
     }
 
@@ -505,7 +430,7 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: short[]): Type {
+    public static of(v: FixedArray<short>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.SHORT)
     }
 
@@ -516,7 +441,7 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: int[]): Type {
+    public static of(v: FixedArray<int>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.INT)
     }
 
@@ -527,7 +452,7 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: long[]): Type {
+    public static of(v: FixedArray<long>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.LONG)
     }
 
@@ -538,7 +463,7 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: float[]): Type {
+    public static of(v: FixedArray<float>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.FLOAT)
     }
 
@@ -549,7 +474,7 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: double[]): Type {
+    public static of(v: FixedArray<double>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.DOUBLE)
     }
 
@@ -562,7 +487,7 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: Object[]): Type {
+    public static of(v: FixedArray<Object>): Type {
         return ArrayType.getInstance(Class.of(v))
     }
 
@@ -602,6 +527,9 @@ export abstract class Type extends Object {
             return true
         }
         if (this.isNumericType() && other.isNumericType()) {
+            return true
+        }
+        if (this instanceof BooleanType && other instanceof BooleanType) {
             return true
         }
         return false
@@ -824,7 +752,7 @@ export final class UndefinedType extends Type {
  * Represents void type
  */
 export final class VoidType extends Type {
-    public static readonly VAL: VoidType = new VoidType(ValueTypeDesc.VOID, true) 
+    public static readonly VAL: VoidType = new VoidType(ValueTypeDesc.VOID, true)
     public static readonly REF: VoidType = new VoidType(TypeAPI.getTypeDescriptor(Void.void_instance), false)
 
     private readonly value: boolean
@@ -1150,7 +1078,7 @@ export final class ByteType extends Type {
         if (!this.assignableFrom(objType)) {
             throw new Error("invalid conversion")
         }
-        return (obj as Numeric).byteValue()
+        return (obj as Numeric).toByte()
     }
 }
 
@@ -1245,7 +1173,7 @@ export final class ShortType extends Type {
         if (!this.assignableFrom(objType)) {
             throw new Error("invalid conversion")
         }
-        return (obj as Numeric).shortValue()
+        return (obj as Numeric).toShort()
     }
 }
 
@@ -1340,7 +1268,7 @@ export final class IntType extends Type {
         if (!this.assignableFrom(objType)) {
             throw new Error("invalid conversion")
         }
-        return (obj as Numeric).intValue()
+        return (obj as Numeric).toInt()
     }
 }
 
@@ -1435,7 +1363,7 @@ export final class LongType extends Type {
         if (!this.assignableFrom(objType)) {
             throw new Error("invalid conversion")
         }
-        return (obj as Numeric).longValue()
+        return (obj as Numeric).toLong()
     }
 }
 
@@ -1530,7 +1458,7 @@ export final class FloatType extends Type {
         if (!this.assignableFrom(objType)) {
             throw new Error("invalid conversion")
         }
-        return (obj as Numeric).floatValue()
+        return (obj as Numeric).toFloat()
     }
 }
 
@@ -1625,7 +1553,7 @@ export final class DoubleType extends Type {
         if (!this.assignableFrom(objType)) {
             throw new Error("invalid conversion")
         }
-        return (obj as Numeric).doubleValue()
+        return (obj as Numeric).toDouble()
     }
 }
 
@@ -1951,7 +1879,7 @@ export final class ClassType extends Type {
     }
 
     // todo(kprokopenko): make varargs
-    public make(args: NullishType[]): Object {
+    public make(args: FixedArray<NullishType>): Object {
         const argTypes = new Array<Type>(args.length)
         for (let i = 0; i < args.length; i++) {
             argTypes[i] = Type.of(args[i])
@@ -2003,7 +1931,7 @@ export final class ClassType extends Type {
         if (ctors.length != 1) {
             throw new Error("can't select consturctor: " + ctors.length + " left")
         }
-        return ctors.at(0)!.invoke(undefined, args)!
+        return __narrowAny(ctors.at(0)!.invoke(undefined, args))!
     }
 
     // class.subTypeOf(U) means that `class extends U` or `class implements U`
@@ -2273,7 +2201,7 @@ export final class ArrayType extends Type {
     internal static getInstance(arrayClass: Class, elemTD?: RuntimeTypeDescriptor): ArrayType {
         elemTD = elemTD ?? TypeAPI.getArrayElementType(arrayClass)
         const contextLinker = arrayClass.getLinker()
-        let ek = (TypeAPI.getTypeKind(elemTD, contextLinker) & TypeKindMask) as byte
+        let ek = (TypeAPI.getTypeKind(elemTD, contextLinker) & TypeKindMask).toByte()
         switch (ek) {
             case TypeKind.BOOLEAN:
                 return TypeAPI.isValueType(elemTD, contextLinker) ? ArrayType.BOOLEAN_VAL : ArrayType.BOOLEAN_REF

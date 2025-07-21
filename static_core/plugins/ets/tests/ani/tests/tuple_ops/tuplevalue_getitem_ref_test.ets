@@ -16,3 +16,8 @@
 function getReferenceTuple(): [String, double[], String] {
     return [new String("Hello"), [1, 2, 3, 4, 5], "world"];
 }
+
+function getArray(): double[] {
+    let a : double[] = [100.1, 200.2, 300.3, 400.4, 500.5]
+    return a
+}

@@ -110,7 +110,7 @@ function cycle(p: Promise<Object>, isRootRefStsObject: boolean, isRootInRing: bo
 // Triger sts full GC
 function triggerFullGC(): void {
     try {
-        GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE));
+        GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
     } catch(e) {
         assertTrue(false, "Unexpected exception during full GC");
     }

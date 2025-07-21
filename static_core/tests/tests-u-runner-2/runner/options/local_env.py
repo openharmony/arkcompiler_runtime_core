@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,8 +15,9 @@
 # limitations under the License.
 #
 
-from typing import Optional, Dict, Any
+from typing import Optional
 
+from runner.common_exceptions import InvalidConfiguration
 from runner.logger import Log
 
 _LOGGER = Log.get_logger(__file__)
@@ -26,7 +27,7 @@ class LocalEnv:
     __instance: Optional['LocalEnv'] = None
 
     def __init__(self) -> None:
-        self.__env: Dict[str, Any] = {}
+        self.__env: dict[str, str] = {}
 
     @staticmethod
     def get() -> 'LocalEnv':
@@ -39,7 +40,7 @@ class LocalEnv:
             self.__env[key] = env_value
             return
         if key in self.__env and self.__env[key] != env_value:
-            raise EnvironmentError(
+            raise InvalidConfiguration(
                 "Attention: environment has been changed during test execution. "
                 f"For key `{key}` the env_value `{self.__env[key]}` changed to `{env_value}`"
             )

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,12 +52,12 @@ function check(result: number, message: String): number {
     return fail;
 }
 
-const source: {{.item.primitiveType}}[] = {{.item.data}};
-const abnormalSource: {{.item.primitiveType}}[] = {{.item.abnormalData}};
+const source: FixedArray<{{.item.primitiveType}}> = {{.item.data}};
+const abnormalSource: FixedArray<{{.item.primitiveType}}> = {{.item.abnormalData}};
 
 
 function testSliceWithOutParam(): int {
-    //let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60];
+    //let source: FixedArray<{{.item.primitiveType}}> = [10, 20, 30, 40, 50, 60];
     let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
     let origin: {{.item.objectType}};
@@ -115,7 +115,7 @@ function testSliceWithOutParam(): int {
 }
 
 function testSliceOneParam(): int {
-    //let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60];
+    //let source: FixedArray<{{.item.primitiveType}}> = [10, 20, 30, 40, 50, 60];
     let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
     let origin: {{.item.objectType}};
@@ -184,7 +184,7 @@ function testSliceOneParam(): int {
 }
 
 function testSliceTwoParams(): int {
-    //let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60, 70, 80];
+    //let source: FixedArray<{{.item.primitiveType}}> = [10, 20, 30, 40, 50, 60, 70, 80];
     let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
     let origin: {{.item.objectType}};
@@ -335,7 +335,7 @@ function testSliceTwoParams(): int {
 }
 
 function testSliceTwoParamsWithOtherNumber(): int {
-    //let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60, 70, 80];
+    //let source: FixedArray<{{.item.primitiveType}}> = [10, 20, 30, 40, 50, 60, 70, 80];
     let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
     let origin: {{.item.objectType}};
@@ -406,7 +406,7 @@ function testSliceTwoParamsWithOtherNumber(): int {
 }
 
 function testSliceOneLengthTwoParams(): int {
-    let source1: {{.item.type}}[] = [{{.item.create}}(10)];
+    let source1: FixedArray<{{.item.type}}> = [{{.item.create}}(10)];
     let ss = new ArrayBuffer(source1.length as int * {{.item.primitiveSizeBytes}});
 
     let origin: {{.item.objectType}};

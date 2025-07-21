@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 #
 
 import re
-from typing import Dict, Any
+from typing import Any
 
 
 class Descriptor:
@@ -37,7 +37,7 @@ class Descriptor:
         self.content = self.get_content()
 
     def get_content(self) -> str:
-        with open(self.input_file, "r", encoding="utf-8") as file_pointer:
+        with open(self.input_file, encoding="utf-8") as file_pointer:
             input_str = file_pointer.read()
         return input_str
 
@@ -45,9 +45,9 @@ class Descriptor:
         header_comment = self.header.search(self.content)
         return header_comment.group(0) if header_comment else ""
 
-    def parse_descriptor(self) -> Dict[str, Any]:
+    def parse_descriptor(self) -> dict[str, Any]:   # type: ignore[explicit-any]
         header = self.get_header()
-        result: Dict[str, Any] = {}
+        result: dict[str, Any] = {}     # type: ignore[explicit-any]
 
         if len(header) == 0:
             return result
@@ -80,5 +80,5 @@ class Descriptor:
 
         return result
 
-    def get_descriptor(self) -> Dict[str, Any]:
+    def get_descriptor(self) -> dict[str, Any]:     # type: ignore[explicit-any]
         return self.parse_descriptor()

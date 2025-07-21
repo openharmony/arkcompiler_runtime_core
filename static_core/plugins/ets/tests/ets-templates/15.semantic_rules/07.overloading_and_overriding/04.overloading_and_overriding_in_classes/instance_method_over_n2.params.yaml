@@ -60,18 +60,18 @@ cases:
 
 # Array
   # overload
-  - { base: "i: int[]", derived: "i: float[]", call: "new int[2]", res: 1 }
+  - { base: "i: FixedArray<int>", derived: "i: FixedArray<float>", call: "new int[2]", res: 1 }
   - { base: "i: int[]", derived: "i: float[]", call: "new float[1]", res: 2 }
   - { base: "i: int[]", derived: "i: double[]", call: "new double[2]", res: 2 }
-  - { base: "i: String[]", derived: "i: Number[]", call: "new String[1]", res: 1 }
+  - { base: "i: FixedArray<String>", derived: "i: FixedArray<Number>", call: "new String[1]", res: 1 }
   #override (alias)
   - { base: "i: number[]", derived: "i: double[]", call: "new number[1]", res: 2 }
   - { base: "i: number[]", derived: "i: double[]", call: "new double[2]", res: 2 }
   - { base: "i: string[]", derived: "i: String[]", call: "new string[2]", res: 2 }
   - { base: "i: string[]", derived: "i: String[]", call: "new String[1]", res: 2 }
   # overload as B is covariant of A
-  - { base: "i: A[]", derived: "i: B[]", call: "[ new A() ]", res: 1 }
-  - { base: "i: A[]", derived: "i: B[]", call: "[ new B() ]", res: 2 }
+  - { base: "i: FixedArray<A>", derived: "i: FixedArray<B>", call: "[ new A() ]", res: 1 }
+  - { base: "i: FixedArray<A>", derived: "i: FixedArray<B>", call: "[ new B() ]", res: 2 }
   # overload as A is contravariant of B
   - { base: "i: B[]", derived: "i: A[]", call: "[ new A() ]", res: 2 }
   - { base: "i: B[]", derived: "i: A[]", call: "[ new B() ]", res: 1 }

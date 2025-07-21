@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 #include "basic_block.h"
 #include "dynamic_isa.h"
 #include "instruction.h"
-#include "../../../src/include_v2/cpp/headers/static_isa.h"
+#include "./static_isa.h"
 
 #include <memory>
 #include <vector>

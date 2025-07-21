@@ -155,6 +155,7 @@ void InvalidateBlocksOrderAnalyzes(Graph *graph)
 
 void Graph::AddBlock(BasicBlock *block)
 {
+    ASSERT(block != nullptr);
     block->SetId(vectorBb_.size());
     vectorBb_.push_back(block);
     block->SetGraph(this);
@@ -217,6 +218,7 @@ BasicBlock *Graph::CreateEmptyBlock(BasicBlock *baseBlock)
 {
     ASSERT(baseBlock != nullptr);
     auto block = CreateEmptyBlock();
+    ASSERT(block != nullptr);
     block->SetGuestPc(baseBlock->GetGuestPc());
     block->SetAllFields(baseBlock->GetAllFields());
     block->SetTryId(baseBlock->GetTryId());
@@ -357,6 +359,7 @@ void Graph::DisconnectBlock(BasicBlock *block, bool removeLastInst, bool fixDomT
 
 void Graph::DisconnectBlockRec(BasicBlock *block, bool removeLastInst, bool fixDomTree)
 {
+    ASSERT(block != nullptr);
     if (block->GetGraph() == nullptr) {
         return;
     }
@@ -577,7 +580,9 @@ RegMask Graph::GetArchUsedRegs()
 void Graph::SetArchUsedRegs(RegMask mask)
 {
     archUsedRegs_ = mask;
-    GetRegisters()->SetRegMask(mask);
+    auto regs = GetRegisters();
+    ASSERT(regs != nullptr);
+    regs->SetRegMask(mask);
 }
 
 VRegMask Graph::GetArchUsedVRegs()
@@ -798,6 +803,7 @@ int64_t Graph::GetBranchCounter(const BasicBlock *block, bool trueSucc)
 {
     ASSERT(block->GetSuccsBlocks().size() == MAX_SUCCS_NUM);
     auto lastInst = block->GetLastInst();
+    ASSERT(lastInst != nullptr);
     if (lastInst->GetPc() == 0) {
         return 0;
     }

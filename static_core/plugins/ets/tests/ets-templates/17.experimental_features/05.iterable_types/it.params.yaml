@@ -105,7 +105,7 @@ cases:
     - decl: |-
           abstract class RoArray<T> {
               abstract val(i: int): T
-              abstract len(): int
+              abstract len(): number
               abstract $_iterator(): XIterator<T>
           }
 
@@ -128,7 +128,7 @@ cases:
               override val(i: int): string {
                   return this.arr[i]
               }
-              override len(): int {
+              override len(): number {
                   return this.arr.length
               }
               $_iterator() {
@@ -141,7 +141,7 @@ cases:
               override val(i: int): string {
                   return this.arr[i]
               }
-              override len(): int {
+              override len(): number {
                   return this.arr.length
               }
               $_iterator() {

@@ -57,14 +57,16 @@ public:
         return reinterpret_cast<EtsTypeAPIType *>(objectHeader);
     }
 
-    EtsRuntimeLinker *GetContextLinker()
+    EtsRuntimeLinker *GetContextLinker() const
     {
-        return contextLinker_;
+        return EtsRuntimeLinker::FromCoreType(
+            ObjectAccessor::GetObject(this, MEMBER_OFFSET(EtsTypeAPIType, contextLinker_)));
     }
 
-    EtsString *GetRuntimeTypeDescriptor()
+    EtsString *GetRuntimeTypeDescriptor() const
     {
-        return td_;
+        return EtsString::FromEtsObject(
+            EtsObject::FromCoreType(ObjectAccessor::GetObject(this, MEMBER_OFFSET(EtsTypeAPIType, td_))));
     }
 
 private:

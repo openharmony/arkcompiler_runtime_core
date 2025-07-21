@@ -1,42 +1,20 @@
-#22848
-08.statements/08.for_statements/for_loop_parameters_12.ets
-
 #17881 Skip these, because the run fails if multiple files are connected. The connection is necessary, because of the export tests.
 13.compilation_units/03.import_directives/05.type_import_binding/type_binding_class.ets
 13.compilation_units/03.import_directives/05.type_import_binding/type_binding_class_alias.ets
 13.compilation_units/03.import_directives/05.type_import_binding/type_binding_interface.ets
 
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_4.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_5.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_6.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_7.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_8.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_9.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_10.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_18.ets
-
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_0.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_1.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_2.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_3.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_4.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_5.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_6.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_7.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_8.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_9.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_10.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_11.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_12.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_13.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_14.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_15.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_16.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_17.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_18.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_20.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_22.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_23.ets
 
 #17965 ERRNO: 12 (Cannot allocate memory)
 17.experimental_features/16.async_functions_and_methods/01.async_functions/afunc_45.ets
@@ -47,3 +25,7 @@
 17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_46.ets
 17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_47.ets
 17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_48.ets
+
+#26235
+07.expressions/06.spread_expression/spex_meth_13.ets
+07.expressions/06.spread_expression/spex_meth_15.ets

@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as base_test from "@generated/base_test";
-import * as System from "std/core/System";
+import {BusinessError} from "@ohos.base";
+import * as base_test from "base_test";
 
 loadLibrary("ani_basetype");
 
@@ -23,7 +23,7 @@ function main() {
     suite.addTest("float_test", float_test);
     suite.addTest("boolean_test", boolean_test);
     suite.addTest("string_test", string_test);
-    System.exit(suite.run());
+    exit(suite.run());
 }
 
 function integer_test() {
@@ -53,28 +53,28 @@ function integer_test() {
 function float_test() {
     const eps = 1e-5;
 
-    let a: float = 2.5;
-    let b: float = 3.5;
+    let a: float = 2.5f;
+    let b: float = 3.5f;
     let c: float = base_test.AddF32(a, b);
     assertLE(Math.abs(c - 6.0), eps);
 
-    let d: float = 4.3;
-    let e: float = 3.0;
+    let d: float = 4.3f;
+    let e: float = 3.0f;
     let f: float = base_test.SubF32(d, e);
     assertLE(Math.abs(f - 1.3), eps);
 
-    let h: float = 3.7;
+    let h: float = 3.7f;
     let i: double = 5.3;
     let j: double = base_test.AddF64(h, i);
     assertLE(Math.abs(j - 9.0), eps);
 
-    let k: float = 3.5;
+    let k: float = 3.5f;
     let l: double = 1.0;
     let m: double = base_test.SubF64(k, l);
     assertLE(Math.abs(m - 2.5), eps);
 
-    let x: float = 2.5;
-    let y: float = 4.0;
+    let x: float = 2.5f;
+    let y: float = 4.0f;
     let z: double = base_test.MulF64(x, y);
     assertLE(Math.abs(z - 10.0), eps);
 }

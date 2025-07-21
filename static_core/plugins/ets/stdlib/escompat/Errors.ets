@@ -108,8 +108,3 @@ export class AggregateError extends Error {
     }
 
 }
-
-/**
- * Represents error that is thrown when Date is malformed
- */
-export final class InvalidDate extends Error {}

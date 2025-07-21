@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@ Encoder (implementation of math and mem Low-level emitters)
 #include "operands.h"
 #include "target/aarch32/target.h"
 #include "lib_helpers.inl"
+#include "type_info.h"
 
 #ifndef PANDA_TARGET_MACOS
 #include "elf.h"
@@ -1291,7 +1292,7 @@ void Aarch32Encoder::EncodeRoundAway(Reg dst, Reg src)
     GetMasm()->Vrinta(VixlVReg(dst), VixlVReg(src));
 }
 
-void Aarch32Encoder::EncodeRoundToPInf(Reg dst, Reg src)
+void Aarch32Encoder::EncodeRoundToPInfReturnScalar(Reg dst, Reg src)
 {
     ScopedTmpRegF64 temp(this);
     vixl::aarch32::SRegister temp1(temp.GetReg().GetId());
@@ -1315,6 +1316,36 @@ void Aarch32Encoder::EncodeRoundToPInf(Reg dst, Reg src)
     GetMasm()->add(vixl::aarch32::eq, VixlReg(dst), VixlReg(dst), 1);
 
     BindLabel(done);
+}
+
+void Aarch32Encoder::EncodeRoundToPInfReturnFloat(Reg dst, Reg src)
+{
+    ASSERT(src.GetType() == FLOAT64_TYPE);
+    ASSERT(dst.GetType() == FLOAT64_TYPE);
+
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr double HALF = 0.5;
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr double ONE = 1.0;
+
+    ScopedTmpRegF64 ceil(this);
+    vixl::aarch32::DRegister tmp(ceil.GetReg().GetId() + 1);
+
+    // calculate ceil(val)
+    GetMasm()->Vrintp(VixlVReg(ceil), VixlVReg(src));
+
+    // compare ceil(val) - val with 0.5
+    GetMasm()->Vsub(VixlVReg(dst), VixlVReg(ceil), VixlVReg(src));
+    GetMasm()->Vmov(tmp, HALF);
+    GetMasm()->Vcmp(VixlVReg(dst), tmp);
+    GetMasm()->Vmrs(vixl::aarch32::APSR_nzcv, vixl::aarch32::FPSCR);
+
+    // calculate ceil(val) - 1
+    GetMasm()->Vmov(tmp, ONE);
+    GetMasm()->Vsub(VixlVReg(dst), VixlVReg(ceil), tmp);
+
+    // final value is ceil(val) if le
+    GetMasm()->Vmov(Convert(Condition::LE), VixlVReg(dst), VixlVReg(ceil));  // ceil(val)
 }
 
 void Aarch32Encoder::EncodeReverseBits(Reg dst, Reg src)

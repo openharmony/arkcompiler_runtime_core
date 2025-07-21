@@ -50,7 +50,14 @@ final class AbcFile {
      *
      * @throws errors happened on loading ABC file.
      */
-    public static native loadFromMemory(runtimeLinker: RuntimeLinker, rawFile: byte[]): AbcFile;
+    public static native loadFromMemoryImpl(runtimeLinker: RuntimeLinker, rawFile: FixedArray<byte>): AbcFile;
+    public static loadFromMemory(runtimeLinker: RuntimeLinker, rawFile: byte[]): AbcFile {
+        let localFixed: FixedArray<byte> = new byte[rawFile.length]
+        for (let i = 0; i < rawFile.length; i++) {
+            localFixed[i] = rawFile[i];
+        }
+        return AbcFile.loadFromMemoryImpl(runtimeLinker, localFixed);
+    }
 
     /**
      * Loads class from ABC file.

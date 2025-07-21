@@ -16,6 +16,7 @@
 
 import {StdDebug} from "std/debug"
 import {CoroutineExtras} from "std/debug/concurrency"
+import { launch } from "std/concurrency"
 
 type L = StdDebug.Logger
 async function async_chain_element(caller_wid: int, counter: int): Promise<int> {
@@ -54,7 +55,7 @@ function compare_worker_ids(): int {
     L.log("Testing launch in a separate worker");
 
     let id_main: int = CoroutineExtras.getWorkerId();
-    let id_coro: int = (await launch return_worker_id()) as int;
+    let id_coro: int = (launch<Int, () => Int>(return_worker_id).Await()) as int;
     if (id_main != id_coro) {
         L.log("Successfully ran coro in a separate worker. Main WID: " + id_main + ", Coro WID: " + id_coro);
         return 0;
@@ -75,21 +76,21 @@ function job(n: int): NullableType {
 function run_batch_launch(batch_size: int, iters: int): int {
     L.log("Testing batch launch of " + batch_size + " coroutines");
     for (let i = 0; i < batch_size; ++i) {
-        launch job(iters);
+        launch<NullableType, (i: int) => NullableType>(job, iters);
     }
     return 0;
 }
 
 function await_chain(n: int): NullableType {
     if (n > 0) {
-        await launch await_chain(n-1);
+        launch<NullableType, (i: int) => NullableType>(await_chain, n-1).Await();
     }
     return null;
 }
 
 function run_await_chain(len: int): int {
     L.log("Testing await chain of " + len + " items");
-    await launch await_chain(len);    
+    launch<NullableType, (i: int) => NullableType>(await_chain, len);
     return 0;
 }
 
@@ -100,8 +101,8 @@ function simple(): NullableType {
 function run_batch_await(batch_size: int): int {
     L.log("Testing batch await of " + batch_size + " coroutines");
     for (let i = 0; i < batch_size; ++i) {
-        let p = launch simple();
-        await p;
+        let j = launch<NullableType, () => NullableType>(simple);
+        j.Await();
     }
     return 0;
 }

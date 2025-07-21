@@ -15,7 +15,7 @@
 
 package std.concurrency;
 
-import { mlaunch } from "std/concurrency"
+import { launch } from "std/concurrency"
 
 /// This class provides api for sync primitives (see SyncPrimitives.ets)
 final class ConcurrencyHelpers {
@@ -41,7 +41,7 @@ class NativeAsyncWorkHelper {
         NativeAsyncWorkHelper.queueInternal(executeCb, completeCb, data);
     }
     static async queueInternal(executeCb: long, completeCb: long, data: long) {
-        let p = mlaunch<void, (nativeCb: long, data: long, needNativeScope: boolean) => void>(NativeAsyncWorkHelper.asyncWorkNativeInvokeInternal, executeCb, data, true);
+        let p = launch<void, (nativeCb: long, data: long, needNativeScope: boolean) => void>(NativeAsyncWorkHelper.asyncWorkNativeInvokeInternal, executeCb, data, true);
         p.Await();
         NativeAsyncWorkHelper.asyncWorkNativeInvokeInternal(completeCb, data, false);
     }

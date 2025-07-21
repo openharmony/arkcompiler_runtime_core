@@ -595,6 +595,82 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_010)
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Equality");
 }
+
+TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_011)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+
+    ani_ref res = nullptr;
+    ASSERT_EQ(
+        env_->c_api->Object_CallMethodByName_Ref(nullptr, object, "getName", "II:Lstd/core/String;", &res, VAL1, VAL2),
+        ANI_INVALID_ARGS);
+    ASSERT_EQ(
+        env_->c_api->Object_CallMethodByName_Ref_A(nullptr, object, "getName", "II:Lstd/core/String;", &res, args),
+        ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(nullptr, "getName", "II:Lstd/core/String;", &res, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(nullptr, "getName", "II:Lstd/core/String;", &res, args),
+              ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(object, nullptr, "II:Lstd/core/String;", &res, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(object, nullptr, "II:Lstd/core/String;", &res, args),
+              ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(object, "getName", nullptr, &res, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(object, "getName", nullptr, &res, args), ANI_OK);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(object, "getName", "II:Lstd/core/String;", nullptr, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(object, "getName", "II:Lstd/core/String;", nullptr, args),
+              ANI_INVALID_ARGS);
+}
+
+TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_012)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].l = VAL1;
+    args[1U].l = VAL2;
+
+    ani_ref res = nullptr;
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(
+            env_->Object_CallMethodByName_Ref(object, methodName.data(), "II:Lstd/core/String;", &res, VAL1, VAL2),
+            ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(object, methodName.data(), "II:Lstd/core/String;", &res, args),
+                  ANI_NOT_FOUND);
+    }
+}
+
+TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_013)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].l = VAL1;
+    args[1U].l = VAL2;
+
+    ani_ref res = nullptr;
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(env_->Object_CallMethodByName_Ref(object, "getName", methodName.data(), &res, VAL1, VAL2),
+                  ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(object, "getName", methodName.data(), &res, args), ANI_NOT_FOUND);
+    }
+}
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

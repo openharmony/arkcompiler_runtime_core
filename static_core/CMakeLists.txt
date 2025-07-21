@@ -72,11 +72,25 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Werror -Wshadow")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -fno-exceptions")
 
+if(UNIT_TESTS_COVERAGE)
+    if(NOT USE_GCOV_TOOLS AND NOT USE_LLVM_COV_TOOLS)
+        message(SEND_ERROR "Please use USE_GCOV_TOOLS or USE_LLVM_COV_TOOLS with UNIT_TESTS_COVERAGE option" )
+    endif()
+    include(cmake/interceptor/AddCustomTargetInterceptor.cmake)
+endif()
+
 # CC-OFFNXT(bc-40028) FP
 include(cmake/toolchain/coverage/unit_tests_lcov.cmake)
 
 if(ENABLE_UNIT_TESTS_FULL_COVERAGE)
-    add_custom_target(coverage_full DEPENDS cts-assembly tests benchmarks)
+    add_custom_target(build_for_coverage
+        COMMAND ${CMAKE_COMMAND} --build ${PANDA_BINARY_ROOT} --target cts-assembly tests benchmarks || echo "Build failed, but coverage will still be generated."
+        WORKING_DIRECTORY ${PANDA_BINARY_ROOT}
+        COMMENT "Building targets for coverage (errors ignored)"
+    )
+    add_custom_target(coverage_full
+        DEPENDS build_for_coverage
+    )
     collect_coverage_for_target(
         TARGET_NAME coverage_full
         EXCLUDE_DIR_PATTERN \"/usr*\";\"*/third_party/*\";\"*/build/*\";

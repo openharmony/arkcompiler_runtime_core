@@ -43,7 +43,9 @@ GraphChecker::GraphChecker(Graph *graph, const char *passName)
     graph_ = graph;
     PreCloneChecks(graph);
     graph_ = GraphCloner(graph, GetAllocator(), GetLocalAllocator()).CloneGraph();
-    GetGraph()->GetPassManager()->SetCheckMode(true);
+    auto graphTmp = GetGraph();
+    ASSERT(graphTmp != nullptr);
+    graphTmp->GetPassManager()->SetCheckMode(true);
     passName_ = std::string(passName);
     ASSERT(passName != nullptr);
 }
@@ -1751,7 +1753,11 @@ void GraphChecker::VisitLoadClass([[maybe_unused]] GraphVisitor *v, Inst *inst)
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
             v,
             userInst->GetOpcode() == Opcode::CheckCast || userInst->GetOpcode() == Opcode::IsInstance ||
-                userInst->GetOpcode() == Opcode::Phi || userInst->GetOpcode() == Opcode::Intrinsic,
+                userInst->GetOpcode() == Opcode::Phi || userInst->GetOpcode() == Opcode::Intrinsic ||
+                userInst->GetOpcode() == Opcode::DeoptimizeCompare ||
+                userInst->GetOpcode() == Opcode::DeoptimizeCompareImm ||
+                userInst->GetOpcode() == Opcode::DeoptimizeIf || userInst->GetOpcode() == Opcode::Load ||
+                userInst->GetOpcode() == Opcode::If || userInst->GetOpcode() == Opcode::IfImm,
             (std::cerr << "Incorrect user of the LoadClass", inst->Dump(&std::cerr), userInst->Dump(&std::cerr)));
     }
 }
@@ -2277,7 +2283,7 @@ void GraphChecker::VisitSaveState([[maybe_unused]] GraphVisitor *v, [[maybe_unus
                                                   << *inst << std::endl);
 #ifndef NDEBUG
     auto ss = inst->CastToSaveState();
-    if (ss->GetInputsWereDeleted()) {
+    if (ss->GetInputsWereDeleted() && !ss->GetInputsWereDeletedSafely()) {
         for (auto &user : inst->GetUsers()) {
             CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
                 v, !user.GetInst()->RequireRegMap(),

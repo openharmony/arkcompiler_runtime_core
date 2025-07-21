@@ -24,7 +24,11 @@ desc: >-
 ---*/
 
 class A {
-  a: {{case.type}} = {{case.value}};
+  private _a: {{case.type}} = {{case.value}};
+
+  get a(): {{case.type}}{
+    return this._a;
+  }
 }
 
 class B extends A {

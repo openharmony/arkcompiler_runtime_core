@@ -22,17 +22,21 @@ avoiding redundant computation or memory usage.
 from abc import ABC, abstractmethod
 from collections.abc import Hashable
 from dataclasses import dataclass
-from typing import Generic, NoReturn, ParamSpec, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, NoReturn, ParamSpec, TypeVar, cast
+
+if TYPE_CHECKING:
+    from taihe.driver.contexts import CompilerInvocation
+    from taihe.utils.diagnostics import DiagnosticsManager
 
 P = ParamSpec("P")
-A = TypeVar("A", bound="AbstractAnalysis")
+A = TypeVar("A", bound="AbstractAnalysis[Any]")
 
 
 @dataclass(frozen=True)
 class CacheKey:
     """Represents a unique key for identifying cached analysis instances."""
 
-    analysis_type: type["AbstractAnalysis"]
+    analysis_type: type["AbstractAnalysis[Any]"]
     args: tuple[Hashable, ...]
     kwargs: tuple[tuple[str, Hashable], ...]
 
@@ -43,13 +47,13 @@ class AbstractAnalysis(ABC, Generic[P]):
     Enforcing the use of hashable argument for unique identification and caching.
     """
 
-    def __new__(cls, *args, **kwargs) -> NoReturn:
+    def __new__(cls: type[A], *args: Any, **kwargs: Any) -> NoReturn:
         """Avoid accidentally instantiating without using the `get` method."""
         raise TypeError(
             f"Cannot instantiate {cls.__name__}. Use `{cls.__name__}.get` instead."
         )
 
-    @abstractmethod  # pyre-ignore
+    @abstractmethod
     def __init__(
         self,
         am: "AnalysisManager",
@@ -60,7 +64,7 @@ class AbstractAnalysis(ABC, Generic[P]):
 
     @classmethod
     def get(
-        cls: type[A],  # pyre-ignore
+        cls: type[A],
         am: "AnalysisManager",
         *args: P.args,
         **kwargs: P.kwargs,
@@ -72,15 +76,27 @@ class AbstractAnalysis(ABC, Generic[P]):
 class AnalysisManager:
     """Manages caching and retrieval of analysis instances."""
 
-    def __init__(self) -> None:
-        self._cache: dict[CacheKey, AbstractAnalysis] = {}
+    # TODO: maybe remove these
+    compiler_invocation: "CompilerInvocation"
+    diagnostics_manager: "DiagnosticsManager"
 
-    def get_or_create(self, analysis_type: type[A], *args, **kwargs) -> A:
+    def __init__(
+        self,
+        compiler_invocation: "CompilerInvocation",
+        diagnostics_manager: "DiagnosticsManager",
+    ) -> None:
+        self._cache: dict[CacheKey, AbstractAnalysis[Any]] = {}
+        self.compiler_invocation = compiler_invocation
+        self.diagnostics_manager = diagnostics_manager
+
+    def get_or_create(self, analysis_type: type[A], *args: Any, **kwargs: Any) -> A:
         """Get existing analysis or create new one if not cached."""
-        key = CacheKey(analysis_type, tuple(args), tuple(sorted(kwargs.items())))
+        hashable_args = tuple(args)
+        hashable_kwargs = tuple(sorted(kwargs.items()))
+        key = CacheKey(analysis_type, hashable_args, hashable_kwargs)
 
         if cached := self._cache.get(key):
-            return cached
+            return cast(A, cached)
 
         new_instance = object.__new__(analysis_type)
         new_instance.__init__(self, *args, **kwargs)

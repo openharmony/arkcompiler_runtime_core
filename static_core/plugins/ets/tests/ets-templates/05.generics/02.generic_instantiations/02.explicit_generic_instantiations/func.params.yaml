@@ -27,7 +27,7 @@ cases:
     - decl: |-
         // no constraints, union
         function foo<T, U>(p: T, q: U): T|U {
-            return p!.toString() > q!.toString() ? p : q
+            return (p! as object).toString() > (q! as object).toString() ? p : q
         }
       use: |-
         let v = foo<double, double>(1.0, 11.0)

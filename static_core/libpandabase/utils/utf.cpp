@@ -427,8 +427,7 @@ Utf8Char ConvertUtf16ToUtf8(uint16_t d0, uint16_t d1, bool modify)
             // special case for \u0000 ==> C080 - 1100'0000 1000'0000
             return {UtfLength::TWO, {UTF8_2B_FIRST, UTF8_2B_SECOND}};
         }
-        // For print string, just skip '\u0000'
-        return {0, {0x00U}};
+        return {UtfLength::ONE, {0x00U}};
     }
     if (d0 <= UTF8_1B_MAX) {
         return {UtfLength::ONE, {static_cast<uint8_t>(d0)}};
@@ -474,6 +473,8 @@ size_t Utf16ToUtf8Size(const uint16_t *utf16, uint32_t length, bool modify)
         if (utf16[i] == 0) {  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             if (modify) {
                 res += UtfLength::TWO;  // special case for U+0000 => C0 80
+            } else {
+                res += UtfLength::ONE;
             }
         } else if (utf16[i] <= UTF8_1B_MAX) {  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             res += 1;

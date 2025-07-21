@@ -106,10 +106,11 @@ cases:
           assertEQ(a.length, 4)
 
     - decl: |-
-          function bar(i: int): char {
-              return (i + 1) as char
+          function bar(i: Int): Char {
+              let v: Int = i + 1
+              return v.toChar()
           }
-          let a: Array<char> = []
+          let a: Array<Char> = []
       use: |-
           // assignment context, array of chars
           a = [bar(42), bar(43), bar(44), ]

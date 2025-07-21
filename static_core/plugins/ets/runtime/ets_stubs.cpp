@@ -18,7 +18,6 @@
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/types/ets_base_enum.h"
-#include "plugins/ets/runtime/types/ets_bigint.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 
 namespace ark::ets {
@@ -58,7 +57,7 @@ static std::optional<T> GetBoxedNumericValue(EtsPlatformTypes const *ptypes, Ets
     return std::nullopt;
 }
 
-static bool EtsBigIntEquality(EtsBigInt *obj1, EtsBigInt *obj2)
+bool EtsBigIntEquality(EtsBigInt *obj1, EtsBigInt *obj2)
 {
     auto bytes1 = obj1->GetBytes();
     auto bytes2 = obj2->GetBytes();
@@ -85,6 +84,12 @@ static bool CompareBoxedPrimitive(EtsObject *obj1, EtsObject *obj2)
            EtsBoxPrimitive<BoxedType>::FromCoreType(obj2)->GetValue();
 }
 
+static bool EqualityResursionAllowed(EtsObject *obj)
+{
+    return !(obj->GetClass()->IsEtsEnum() || obj->GetClass()->IsFunctionReference());
+}
+
+// CC-OFFNXT(huge_cca_cyclomatic_complexity[C++], huge_cyclomatic_complexity[C++], huge_method[C++]) big case
 bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
 {
     auto cls1 = obj1->GetClass();
@@ -95,14 +100,15 @@ bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
     ASSERT(ptypes != nullptr);
 
     if (cls1->IsStringClass()) {
+        if (UNLIKELY(cls2->IsEtsEnum())) {
+            obj2 = EtsBaseEnum::FromEtsObject(obj2)->GetValue();
+            cls2 = obj2->GetClass();
+        }
         return cls2->IsStringClass() &&
                coretypes::String::Cast(obj1->GetCoreType())->Compare(coretypes::String::Cast(obj2->GetCoreType())) == 0;
     }
     if (cls1 == ptypes->coreBoolean) {
         return cls2 == ptypes->coreBoolean && CompareBoxedPrimitive<EtsBoolean>(obj1, obj2);
-    }
-    if (cls1 == ptypes->coreChar) {
-        return cls2 == ptypes->coreChar && CompareBoxedPrimitive<EtsChar>(obj1, obj2);
     }
     if (UNLIKELY(cls1->IsBigInt())) {
         return cls2->IsBigInt() && EtsBigIntEquality(EtsBigInt::FromEtsObject(obj1), EtsBigInt::FromEtsObject(obj2));
@@ -111,19 +117,43 @@ bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
         return CompareBoxedPrimitive<EtsLong>(obj1, obj2);
     }
     if (auto num1 = GetBoxedNumericValue<EtsDouble>(ptypes, obj1); num1.has_value()) {
+        if (UNLIKELY(cls2->IsEtsEnum())) {
+            obj2 = EtsBaseEnum::FromEtsObject(obj2)->GetValue();
+        }
         auto num2 = GetBoxedNumericValue<EtsDouble>(ptypes, obj2);
         return num2.has_value() && num2.value() == num1.value();
     }
     if (cls1->IsEtsEnum()) {
-        if (UNLIKELY(!cls2->IsEtsEnum())) {
-            return false;
-        }
         auto *value1 = EtsBaseEnum::FromEtsObject(obj1)->GetValue();
-        auto *value2 = EtsBaseEnum::FromEtsObject(obj2)->GetValue();
-        if (UNLIKELY(value1->GetClass()->IsEtsEnum() || value2->GetClass()->IsEtsEnum())) {
+        auto *value2 = obj2;
+        if (LIKELY(cls2->IsEtsEnum())) {
+            value2 = EtsBaseEnum::FromEtsObject(obj2)->GetValue();
+        }
+        if (!EqualityResursionAllowed(value1) || !EqualityResursionAllowed(value2)) {
             return false;
         }
         return EtsReferenceEquals(coro, value1, value2);
+    }
+
+    if (cls1->IsFunctionReference()) {
+        if (UNLIKELY(!cls2->IsFunctionReference())) {
+            return false;
+        }
+        if (cls1->GetTypeMetaData() != cls2->GetTypeMetaData()) {
+            return false;
+        }
+        // function or static method
+        if (obj1->GetClass()->GetFieldsNumber() == 0) {
+            return true;
+        }
+        // For instance method, always only have one field as guaranteed by class initialization
+        ASSERT((obj1->GetClass()->GetFieldsNumber() == 1) && (obj2->GetClass()->GetFieldsNumber() == 1));
+        auto instance1 = obj1->GetFieldObject(obj1->GetClass()->GetFieldByIndex(0));
+        auto instance2 = obj2->GetFieldObject(obj2->GetClass()->GetFieldByIndex(0));
+        if (!EqualityResursionAllowed(instance1) || !EqualityResursionAllowed(instance2)) {
+            return false;
+        }
+        return EtsReferenceEquals(coro, instance1, instance2);
     }
     UNREACHABLE();
 }
@@ -149,6 +179,10 @@ EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj)
             return EtsString::CreateFromMUtf8("function");
         }
         return EtsString::CreateFromMUtf8("object");
+    }
+
+    if (cls->IsFunctionReference()) {
+        return EtsString::CreateFromMUtf8("function");
     }
 
     if (cls->IsNullValue()) {
@@ -188,6 +222,9 @@ bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj)
     EtsClass *cls = obj->GetClass();
 
     if (!cls->IsValueTyped()) {
+        return true;
+    }
+    if (cls->IsFunctionReference()) {
         return true;
     }
     if (obj->IsStringClass()) {

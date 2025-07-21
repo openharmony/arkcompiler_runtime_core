@@ -23,8 +23,9 @@ tags: []
 
 package p1
 
+let var1:int;
 static {
-    var1: int = 5
+    var1 = 5
 }
 
 function main() {

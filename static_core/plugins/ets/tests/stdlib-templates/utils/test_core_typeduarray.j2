@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,7 +50,7 @@ function check(result: int, message: String): int {
     return fail;
 }
 
-const source: {{.item.primitiveType}}[] = {{.item.data}};
+const source: FixedArray<{{.item.primitiveType}}> = {{.item.data}};
 
 function createArraySetAndGet(): int {
     let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
@@ -234,7 +234,7 @@ function testLastIndexOfNotFound(): int {
 }
 
 function testLastIndexOf4(): int {
-    let source: {{.item.primitiveType}}[] = [10 as {{.item.primitiveType}}, 20 as {{.item.primitiveType}},
+    let source: FixedArray<{{.item.primitiveType}}> = [10 as {{.item.primitiveType}}, 20 as {{.item.primitiveType}},
                                              50 as {{.item.primitiveType}}, 50 as {{.item.primitiveType}},
                                              50 as {{.item.primitiveType}}, 60 as {{.item.primitiveType}}];
     let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
@@ -256,7 +256,7 @@ function testLastIndexOf4(): int {
 }
 
 function testLastIndexOf3(): int {
-    let source: {{.item.primitiveType}}[] = [10 as {{.item.primitiveType}}, 20 as {{.item.primitiveType}},
+    let source: FixedArray<{{.item.primitiveType}}> = [10 as {{.item.primitiveType}}, 20 as {{.item.primitiveType}},
                                              50 as {{.item.primitiveType}}, 50 as {{.item.primitiveType}},
                                              50 as {{.item.primitiveType}}, 60 as {{.item.primitiveType}}];
     let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
@@ -280,7 +280,7 @@ function testLastIndexOf3(): int {
 
 
 function testMap(): int {
-    let source: {{.item.primitiveType}}[] = [10 as {{.item.primitiveType}}, 20 as {{.item.primitiveType}},
+    let source: FixedArray<{{.item.primitiveType}}> = [10 as {{.item.primitiveType}}, 20 as {{.item.primitiveType}},
                                              50 as {{.item.primitiveType}}, 50 as {{.item.primitiveType}},
                                              50 as {{.item.primitiveType}}, 60 as {{.item.primitiveType}}];
     let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
@@ -316,7 +316,7 @@ function testMap(): int {
     return success;
 }
 
-function createFromSource(source: {{.item.primitiveType}}[]): {{.item.objectType}} throws {
+function createFromSource(source: FixedArray<{{.item.primitiveType}}>): {{.item.objectType}} throws {
     let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
     let origin: {{.item.objectType}};
@@ -332,7 +332,7 @@ function createFromSource(source: {{.item.primitiveType}}[]): {{.item.objectType
     return origin;
   }
 
-function dump(source: {{.item.type}}[], origin: {{.item.objectType}}): void {
+function dump(source: FixedArray<{{.item.type}}>, origin: {{.item.objectType}}): void {
     console.print("Expected: ");
     for (let i: int = 0; i< source.length as int; i++) console.print(source[i] + " ");
     console.println();
@@ -342,7 +342,7 @@ function dump(source: {{.item.type}}[], origin: {{.item.objectType}}): void {
 }
 
 
-function assertArrayEqualsToTypedArray(source: {{.item.primitiveType}}[], origin: {{.item.objectType}}): int {
+function assertArrayEqualsToTypedArray(source: FixedArray<{{.item.primitiveType}}>, origin: {{.item.objectType}}): int {
     if (origin.length as int != source.length as int) {
         return fail;
     }
@@ -357,7 +357,7 @@ function assertArrayEqualsToTypedArray(source: {{.item.primitiveType}}[], origin
     return success;
 }
 
-const src: {{.item.primitiveType}}[] = [1 as {{.item.primitiveType}},
+const src: FixedArray<{{.item.primitiveType}}> = [1 as {{.item.primitiveType}},
                                2 as {{.item.primitiveType}},
                                3 as {{.item.primitiveType}},
                                4 as {{.item.primitiveType}},
@@ -367,10 +367,14 @@ const src: {{.item.primitiveType}}[] = [1 as {{.item.primitiveType}},
 function {{.ci.name}}(): int {
     let origin: {{.item.objectType}};
 
-    let expected: {{.item.primitiveType}}[] = [{%+ for ea in ci.expected %}{{.ea}} as {{.item.primitiveType}}, {% endfor %}];
+    let expected: FixedArray<{{.item.primitiveType}}> = [{%+ for ea in ci.expected %}{{.ea}} as {{.item.primitiveType}}, {% endfor %}];
 
     try {
+        {%- if ci.src is defined %}
+        origin = createFromSource({{.ci.src}});
+        {%- else %}
         origin = createFromSource(src);
+        {%- endif %}
     } catch(e) {
         console.println(e);
         return fail;

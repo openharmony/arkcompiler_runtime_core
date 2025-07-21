@@ -32,46 +32,25 @@ function(ani_add_gtest TARGET)
         ARG # give prefix `ARG` to each argument
         ""
         "ETS_CONFIG"
-        "CPP_SOURCES;ETS_SOURCES;LIBRARIES"
+        "CPP_SOURCES;ETS_SOURCES;LIBRARIES;TSAN_EXTRA_OPTIONS"
         ${ARGN}
     )
-    if(NOT DEFINED ARG_CPP_SOURCES)
-        message(FATAL_ERROR "CPP_SOURCES is not defined")
-    endif()
-    if(DEFINED ARG_ETS_SOURCES)
-        set(TARGET_GTEST_PACKAGE ${TARGET}_gtest_package)
-        set(VERIFY_SOURCES true)
-        # NOTE(dslynko, #24335) Disable verifier on arm32 qemu due to flaky OOM
-        if(PANDA_TARGET_ARM32 AND PANDA_QEMU_BUILD)
-            set(VERIFY_SOURCES false)
-        endif()
 
-        panda_ets_package_gtest(${TARGET_GTEST_PACKAGE}
-            ETS_SOURCES ${ARG_ETS_SOURCES}
-            ETS_CONFIG ${ARG_ETS_CONFIG}
-            VERIFY_SOURCES ${VERIFY_SOURCES}
-        )
-        set(ANI_GTEST_ABC_PATH "ANI_GTEST_ABC_PATH=${PANDA_BINARY_ROOT}/abc-gtests/${TARGET_GTEST_PACKAGE}.zip")
+    set(VERIFY_SOURCES true)
+    # NOTE(dslynko, #24335) Disable verifier on arm32 qemu due to flaky OOM
+    if(PANDA_TARGET_ARM32 AND PANDA_QEMU_BUILD)
+        set(VERIFY_SOURCES false)
     endif()
 
-    # Add launcher <${TARGET}_gtests> target
-    set(NATIVE_TESTS_DIR "${PANDA_BINARY_ROOT}/tests/native")
-    panda_ets_add_gtest(
-        NAME ${TARGET}
-        NO_CORES
-        CUSTOM_PRERUN_ENVIRONMENT
-            "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
-            "${ANI_GTEST_ABC_PATH}"
-
-        SOURCES ${ARG_CPP_SOURCES}
-        INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani
-        LIBRARIES ${ARG_LIBRARIES} ani_gtest arkruntime
-        SANITIZERS ${PANDA_SANITIZERS_LIST}
+    ets_native_test_helper(${TARGET}
+        ETS_CONFIG ${ARG_ETS_CONFIG}
+        ETS_SOURCES ${ARG_ETS_SOURCES}
+        CPP_SOURCES ${ARG_CPP_SOURCES}
+        LIBRARIES ${ARG_LIBRARIES} ani_gtest
         TSAN_EXTRA_OPTIONS ${ARG_TSAN_EXTRA_OPTIONS}
-        DEPS_TARGETS etsstdlib ${TARGET_GTEST_PACKAGE}
-        TEST_RUN_DIR ${NATIVE_TESTS_DIR}
-        OUTPUT_DIRECTORY ${NATIVE_TESTS_DIR}
+        ETS_GTEST_ABC_PATH "ANI_GTEST_ABC_PATH"
+        INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani
+        VERIFY_SOURCES ${VERIFY_SOURCES}
+        TEST_GROUP ani_tests
     )
-
-    add_dependencies(ani_tests ${TARGET}_gtests)
 endfunction(ani_add_gtest)

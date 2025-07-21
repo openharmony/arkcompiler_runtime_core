@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 #include "opt.impl.hpp"
-
 #include <iostream>
-
 #include "opt.ReturnResult.proj.1.hpp"
 #include "taihe/array.hpp"
 #include "taihe/optional.hpp"
@@ -24,7 +22,75 @@
 using namespace taihe;
 
 namespace {
-void showOptionalInt(optional_view<int32_t> x)
+
+class TestImpl {
+public:
+    string str = "this is str";
+    optional<string> a_;
+    TestImpl() {}
+
+    void Setstring(::taihe::optional_view<::taihe::string> a)
+    {
+        this->a_ = a;
+    }
+
+    ::taihe::optional<::taihe::string> Getstring()
+    {
+        return a_;
+    }
+
+    void SetIntData(::taihe::string_view a)
+    {
+        this->str = a;
+    }
+
+    ::taihe::optional<::taihe::string> ShowOptionalString(::taihe::optional_view<::taihe::string> a)
+    {
+        if (a) {
+            return a;
+        } else {
+            return optional<string>(nullptr);
+        }
+    }
+
+    ::taihe::optional<int32_t> ShowOptionalInt32(::taihe::optional_view<int32_t> a)
+    {
+        if (a) {
+            return a;
+        } else {
+            return optional<int32_t>(nullptr);
+        }
+    }
+
+    ::taihe::optional<bool> ShowOptionalBool(::taihe::optional_view<bool> a)
+    {
+        if (a) {
+            return a;
+        } else {
+            return optional<bool>(nullptr);
+        }
+    }
+
+    ::taihe::optional<::taihe::map<::taihe::string, bool>> ShowOptionalRecord(
+        ::taihe::optional_view<::taihe::map<::taihe::string, bool>> a)
+    {
+        if (a) {
+            return a;
+        } else {
+            return optional<map<string, bool>>(nullptr);
+        }
+    }
+
+    ::taihe::optional<::opt::MyStruct> ShowOptionalStruct(::taihe::optional_view<::opt::MyStruct> a)
+    {
+        if (a) {
+            return a;
+        } else {
+            return optional<::opt::MyStruct>(nullptr);
+        }
+    }
+};
+void ShowOptionalInt(optional_view<int32_t> x)
 {
     if (x) {
         std::cout << *x << std::endl;
@@ -33,17 +99,17 @@ void showOptionalInt(optional_view<int32_t> x)
     }
 }
 
-optional<int32_t> makeOptionalInt(bool b)
+optional<int32_t> MakeOptionalInt(bool b)
 {
     if (b) {
-        const int optionalMakeValue = 10;
+        int const optionalMakeValue = 10;
         return optional<int32_t>::make(optionalMakeValue);
     } else {
         return optional<int32_t>(nullptr);
     }
 }
 
-optional<array<int32_t>> makeOptionalArray(bool b, int32_t val, int32_t num)
+optional<array<int32_t>> MakeOptionalArray(bool b, int32_t val, int32_t num)
 {
     if (b) {
         return optional<array<int32_t>>::make(array<int32_t>::make(num, val));
@@ -52,7 +118,7 @@ optional<array<int32_t>> makeOptionalArray(bool b, int32_t val, int32_t num)
     }
 }
 
-optional<string> sendReturnResult(::opt::ReturnResult const &result)
+optional<string> SendReturnResult(::opt::ReturnResult const &result)
 {
     if (result.results) {
         string ret = "";
@@ -64,12 +130,17 @@ optional<string> sendReturnResult(::opt::ReturnResult const &result)
         return optional<string>(nullptr);
     }
 }
+
+::opt::Test GetTest()
+{
+    return taihe::make_holder<TestImpl, ::opt::Test>();
+}
+
 }  // namespace
 
-// The macros used below are automatically generated code
-// NOLINTBEGIN
-TH_EXPORT_CPP_API_showOptionalInt(showOptionalInt);
-TH_EXPORT_CPP_API_makeOptionalInt(makeOptionalInt);
-TH_EXPORT_CPP_API_makeOptionalArray(makeOptionalArray);
-TH_EXPORT_CPP_API_sendReturnResult(sendReturnResult);
+TH_EXPORT_CPP_API_ShowOptionalInt(ShowOptionalInt);
+TH_EXPORT_CPP_API_MakeOptionalInt(MakeOptionalInt);
+TH_EXPORT_CPP_API_MakeOptionalArray(MakeOptionalArray);
+TH_EXPORT_CPP_API_SendReturnResult(SendReturnResult);
+TH_EXPORT_CPP_API_GetTest(GetTest);
 // NOLINTEND

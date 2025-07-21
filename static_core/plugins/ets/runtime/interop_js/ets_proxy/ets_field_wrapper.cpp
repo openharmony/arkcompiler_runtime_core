@@ -82,6 +82,11 @@ static napi_value EtsFieldGetter(napi_env env, napi_callback_info cinfo)
     }
 
     napi_value res = FieldAccessor::Getter(ctx, env, etsThis, etsFieldWrapper);
+    if (UNLIKELY(res == nullptr)) {
+        if (coro->HasPendingException()) {
+            ctx->ForwardEtsException(coro);
+        }
+    }
     ASSERT(res != nullptr || ctx->SanityJSExceptionPending());
     return res;
 }
@@ -131,7 +136,9 @@ struct EtsFieldAccessorREFERENCE {
             return GetUndefined(env);
         }
         auto refconv = JSRefConvertResolve(ctx, etsValue->GetClass()->GetRuntimeClass());
-        ASSERT(refconv != nullptr);
+        if (refconv == nullptr) {
+            return nullptr;
+        }
         return refconv->Wrap(ctx, etsValue);
     }
 
@@ -153,6 +160,7 @@ struct EtsFieldAccessorREFERENCE {
                 return false;
             }
         }
+        ASSERT(etsObject.GetPtr() != nullptr);
         etsObject->SetFieldObject(etsFieldWrapper->GetObjOffset(), etsValue);
         return true;
     }
@@ -174,6 +182,7 @@ struct EtsFieldAccessorPRIMITIVE {
     {
         std::optional<PrimitiveType> etsValue = Convertor::Unwrap(ctx, env, jsValue);
         if (LIKELY(etsValue.has_value())) {
+            ASSERT(etsObject.GetPtr() != nullptr);
             etsObject->SetFieldPrimitive<PrimitiveType>(etsFieldWrapper->GetObjOffset(), etsValue.value());
         }
         return etsValue.has_value();

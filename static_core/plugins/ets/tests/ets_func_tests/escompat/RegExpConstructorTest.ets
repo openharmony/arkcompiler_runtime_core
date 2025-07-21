@@ -75,6 +75,61 @@ function main(): int {
     printTestVerdict(testResult, "test110")
     failCounter += testResult
 
+    let regExpObj120 = RegExp("Brawn Fox");
+    testResult = checkTestResult(regExpObj120, "Brawn Fox", "", false, false, false, false, false, false, false, false)
+    printTestVerdict(testResult, "test120")
+    failCounter += testResult
+
+    let regExpObj130 = RegExp("");
+    testResult = checkTestResult(regExpObj130, "(?:)", "", false, false, false, false, false, false, false, false)
+    printTestVerdict(testResult, "test130")
+    failCounter += testResult
+
+    let regExpObj140 = RegExp("Brawn", "gsu");
+    testResult = checkTestResult(regExpObj140, "Brawn", "gsu", true, true, false, false, false, false, true, false)
+    printTestVerdict(testResult, "test140")
+    failCounter += testResult
+
+    let regExpObj150 = RegExp("Brawn", "g");
+    testResult = checkTestResult(regExpObj150, "Brawn", "g", true, false, false, false, false, false, false, false)
+    printTestVerdict(testResult, "test150")
+    failCounter += testResult
+
+    let regExpObj160 = RegExp("Brawn", "s");
+    testResult = checkTestResult(regExpObj160, "Brawn", "s", false, true, false, false, false, false, false, false)
+    printTestVerdict(testResult, "test160")
+    failCounter += testResult
+
+    let regExpObj170 = RegExp("Brawn", "u");
+    testResult = checkTestResult(regExpObj170, "Brawn", "u", false, false, false, false, false, false, true, false)
+    printTestVerdict(testResult, "test170")
+    failCounter += testResult
+
+    let regExpObj180 = RegExp("Brawn", "gu");
+    testResult = checkTestResult(regExpObj180, "Brawn", "gu", true, false, false, false, false, false, true, false)
+    printTestVerdict(testResult, "test180")
+    failCounter += testResult
+
+    let regExpObj190 = RegExp("Brawn", "gs");
+    testResult = checkTestResult(regExpObj190, "Brawn", "gs", true, true, false, false, false, false, false, false)
+    printTestVerdict(testResult, "test190")
+    failCounter += testResult
+
+    let regExpObj200 = RegExp("Brawn", "su");
+    testResult = checkTestResult(regExpObj200, "Brawn", "su", false, true, false, false, false, false, true, false)
+    printTestVerdict(testResult, "test200")
+    failCounter += testResult
+
+    let regExpObj210 = RegExp("", "dgimsuy");
+    testResult = checkTestResult(regExpObj210, "(?:)", "dgimsuy", true, true, true, true, true, true, true, false)
+    printTestVerdict(testResult, "test210")
+    failCounter += testResult
+
+    let regExpObj220 = RegExp("", "yusmigd");
+    testResult = checkTestResult(regExpObj220, "(?:)", "dgimsuy", true, true, true, true, true, true, true, false)
+    printTestVerdict(testResult, "test220")
+    failCounter += testResult
+
     let regExpObj230 = new RegExp("(?:\u{23456})");
     testResult = checkTestResult(regExpObj230, "(?:𣑖)", "", false, false, false, false, false, false, false, false)
     printTestVerdict(testResult, "test230")

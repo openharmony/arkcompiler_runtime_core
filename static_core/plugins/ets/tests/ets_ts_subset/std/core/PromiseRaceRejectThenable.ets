@@ -17,19 +17,20 @@ class Thenable implements PromiseLike<string> {
     constructor(e: Error) {
         this.error = e;
     }
-    then<U, E>(_?: (value: string) => U|PromiseLike<U>, onRejected?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
+    then<U, E>(_?: (value: string) => U | PromiseLike<U>, onRejected?:
+            (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
         return Promise.resolve<E>(onRejected!(this.error));
     }
     private error: Error;
 }
 
-let error = new Error("abc");
+let error = new Error('abc');
 Promise.race([new Thenable(error)]).then<void, void>((value: string): void => {
-    console.log("Test failed. The promise should not be resolved.");
-}, (err: Object): void => {
+    console.log('Test failed. The promise should not be resolved.');
+}, (err: Error): void => {
     if (err !== error) {
-        console.log("Test failed. The promise should be rejected by the specified value.");
+        console.log('Test failed. The promise should be rejected by the specified value.');
         return;
     }
-    console.log("Test passed.");
+    console.log('Test passed.');
 });

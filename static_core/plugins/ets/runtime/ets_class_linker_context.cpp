@@ -107,7 +107,9 @@ bool TryLoadingClassInChain(const uint8_t *descriptor, DecoratorErrorHandler &er
     // All non-boot contexts are represented by EtsClassLinkerContext.
     auto *etsLinkerContext = reinterpret_cast<EtsClassLinkerContext *>(ctx);
     auto *runtimeLinker = etsLinkerContext->GetRuntimeLinker();
-    if (runtimeLinker->GetClass() != PlatformTypes()->coreAbcRuntimeLinker) {
+    ASSERT(runtimeLinker != nullptr);
+    if (runtimeLinker->GetClass() != PlatformTypes()->coreAbcRuntimeLinker &&
+        runtimeLinker->GetClass() != PlatformTypes()->memoryRuntimeLinker) {
         // Must call managed implementation.
         return false;
     }
@@ -143,6 +145,7 @@ bool TryEnumeratePandaFilesInChain(const ClassLinkerContext *ctx,
     // All non-boot contexts are represented by EtsClassLinkerContext
     auto *etsLinkerContext = reinterpret_cast<const EtsClassLinkerContext *>(ctx);
     auto *runtimeLinker = etsLinkerContext->GetRuntimeLinker();
+    ASSERT(runtimeLinker != nullptr);
     if (!runtimeLinker->IsInstanceOf(PlatformTypes()->coreAbcRuntimeLinker)) {
         // Unexpected behavior, cannot walk through chain
         return false;
@@ -188,6 +191,8 @@ Class *EtsClassLinkerContext::LoadClass(const uint8_t *descriptor, [[maybe_unuse
     auto clsName = ClassHelper::GetName(descriptor);
     auto etsClsName = EtsString::CreateFromMUtf8(clsName.c_str());
     const auto *runtimeLinker = GetRuntimeLinker();
+    ASSERT(runtimeLinker != nullptr);
+    ASSERT(etsClsName != nullptr);
     std::array args {Value(runtimeLinker->GetCoreType()), Value(etsClsName->GetCoreType()), Value(ETS_TRUE)};
 
     auto *loadClass = runtimeLinker->GetClass()->GetInstanceMethod("loadClass", "Lstd/core/String;Z:Lstd/core/Class;");
@@ -205,6 +210,7 @@ void EtsClassLinkerContext::EnumeratePandaFilesImpl(const std::function<bool(con
 {
     ASSERT(PandaEtsVM::GetCurrent()->GetMutatorLock()->HasLock());
     auto *runtimeLinker = GetRuntimeLinker();
+    ASSERT(runtimeLinker != nullptr);
     if (!runtimeLinker->IsInstanceOf(PlatformTypes()->coreAbcRuntimeLinker)) {
         return;
     }

@@ -55,7 +55,7 @@ export declare class C1 {
     constructor();
 }
 export declare class C2 {
-    public foo2(...nums: number[]): void;
+    public foo2(...nums: Array<number>): void;
     constructor();
 }
 export declare class C3 {
@@ -75,7 +75,7 @@ export declare class C6 {
     constructor();
 }
 export declare class C7 {
-    public static foo7(...nums: number[]): void;
+    public static foo7(...nums: Array<number>): void;
     constructor();
 }
 export declare class C8 {

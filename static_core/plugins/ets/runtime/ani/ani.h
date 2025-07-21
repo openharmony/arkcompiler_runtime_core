@@ -5635,6 +5635,118 @@ struct __ani_interaction_api {
      * The `resolver` is freed upon successful completion.
      */
     ani_status (*PromiseResolver_Reject)(ani_env *env, ani_resolver resolver, ani_error rejection);
+
+    /**
+     * @brief Creates a new fixedarray of booleans.
+     *
+     * This function creates a new array of the specified length for boolean values.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] length The length of the fixedarray to be created.
+     * @param[out] result A pointer to store the created FixedArray.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_New_Boolean)(ani_env *env, ani_size length, ani_array_boolean *result);
+
+    /**
+     * @brief Creates a new FixedArray of characters.
+     *
+     * This function creates a new FixedArray of the specified length for character values.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] length The length of the FixedArray to be created.
+     * @param[out] result A pointer to store the created FixedArray.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_New_Char)(ani_env *env, ani_size length, ani_array_char *result);
+
+    /**
+     * @brief Creates a new FixedArray of bytes.
+     *
+     * This function creates a new FixedArray of the specified length for byte values.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] length The length of the FixedArray to be created.
+     * @param[out] result A pointer to store the created FixedArray.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_New_Byte)(ani_env *env, ani_size length, ani_array_byte *result);
+
+    /**
+     * @brief Creates a new FixedArray of shorts.
+     *
+     * This function creates a new FixedArray of the specified length for short integer values.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] length The length of the FixedArray to be created.
+     * @param[out] result A pointer to store the created FixedArray.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_New_Short)(ani_env *env, ani_size length, ani_array_short *result);
+
+    /**
+     * @brief Creates a new FixedArray of integers.
+     *
+     * This function creates a new FixedArray of the specified length for integer values.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] length The length of the FixedArray to be created.
+     * @param[out] result A pointer to store the created FixedArray.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_New_Int)(ani_env *env, ani_size length, ani_array_int *result);
+
+    /**
+     * @brief Creates a new FixedArray of long integers.
+     *
+     * This function creates a new FixedArray of the specified length for long integer values.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] length The length of the FixedArray to be created.
+     * @param[out] result A pointer to store the created FixedArray.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_New_Long)(ani_env *env, ani_size length, ani_array_long *result);
+
+    /**
+     * @brief Creates a new FixedArray of floats.
+     *
+     * This function creates a new FixedArray of the specified length for float values.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] length The length of the FixedArray to be created.
+     * @param[out] result A pointer to store the created FixedArray.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_New_Float)(ani_env *env, ani_size length, ani_array_float *result);
+
+    /**
+     * @brief Creates a new FixedArray of doubles.
+     *
+     * This function creates a new FixedArray of the specified length for double values.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] length The length of the FixedArray to be created.
+     * @param[out] result A pointer to store the created FixedArray.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_New_Double)(ani_env *env, ani_size length, ani_array_double *result);
+
+    /**
+     * @brief Creates a new FixedArray of references.
+     *
+     * This function creates a new FixedArray of references, optionally initializing it with an FixedArray of
+     * references.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] type The type of the elements of the FixedArray.
+     * @param[in] length The length of the FixedArray to be created.
+     * @param[in] initial_element An optional reference to initialize the FixedArray. Can be null.
+     * @param[out] result A pointer to store the created FixedArray of references.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_New_Ref)(ani_env *env, ani_type type, ani_size length, ani_ref initial_element,
+                                     ani_array_ref *result);
 };
 
 // C++ API
@@ -7497,6 +7609,42 @@ struct __ani_env {
     ani_status PromiseResolver_Reject(ani_resolver resolver, ani_error rejection)
     {
         return c_api->PromiseResolver_Reject(this, resolver, rejection);
+    }
+    ani_status FixedArray_New_Boolean(ani_size length, ani_array_boolean *result)
+    {
+        return c_api->FixedArray_New_Boolean(this, length, result);
+    }
+    ani_status FixedArray_New_Char(ani_size length, ani_array_char *result)
+    {
+        return c_api->FixedArray_New_Char(this, length, result);
+    }
+    ani_status FixedArray_New_Byte(ani_size length, ani_array_byte *result)
+    {
+        return c_api->FixedArray_New_Byte(this, length, result);
+    }
+    ani_status FixedArray_New_Short(ani_size length, ani_array_short *result)
+    {
+        return c_api->FixedArray_New_Short(this, length, result);
+    }
+    ani_status FixedArray_New_Int(ani_size length, ani_array_int *result)
+    {
+        return c_api->FixedArray_New_Int(this, length, result);
+    }
+    ani_status FixedArray_New_Long(ani_size length, ani_array_long *result)
+    {
+        return c_api->FixedArray_New_Long(this, length, result);
+    }
+    ani_status FixedArray_New_Float(ani_size length, ani_array_float *result)
+    {
+        return c_api->FixedArray_New_Float(this, length, result);
+    }
+    ani_status FixedArray_New_Double(ani_size length, ani_array_double *result)
+    {
+        return c_api->FixedArray_New_Double(this, length, result);
+    }
+    ani_status FixedArray_New_Ref(ani_type type, ani_size length, ani_ref initial_element, ani_array_ref *result)
+    {
+        return c_api->FixedArray_New_Ref(this, type, length, initial_element, result);
     }
 #endif  // __cplusplus
 };

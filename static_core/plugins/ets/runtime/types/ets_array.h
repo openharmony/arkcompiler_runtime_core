@@ -20,7 +20,6 @@
 #include "runtime/include/coretypes/array.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
-#include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/ets_class_root.h"
 #include "plugins/ets/runtime/ets_vm.h"
@@ -33,17 +32,17 @@ public:
     EtsArray() = delete;
     ~EtsArray() = delete;
 
-    PANDA_PUBLIC_API size_t GetLength()
+    PANDA_PUBLIC_API size_t GetLength() const
     {
         return GetCoreType()->GetLength();
     }
 
-    size_t GetElementSize()
+    size_t GetElementSize() const
     {
         return GetCoreType()->ClassAddr<Class>()->GetComponentSize();
     }
 
-    size_t ObjectSize()
+    size_t ObjectSize() const
     {
         return GetCoreType()->ObjectSize(GetElementSize());
     }
@@ -54,12 +53,18 @@ public:
         return reinterpret_cast<T *>(GetCoreType()->GetData());
     }
 
-    EtsClass *GetClass()
+    template <class T>
+    const T *GetData() const
+    {
+        return reinterpret_cast<const T *>(GetCoreType()->GetData());
+    }
+
+    EtsClass *GetClass() const
     {
         return EtsClass::FromRuntimeClass(GetCoreType()->ClassAddr<Class>());
     }
 
-    bool IsPrimitive()
+    bool IsPrimitive() const
     {
         auto componentType = GetCoreType()->ClassAddr<Class>()->GetComponentType();
         ASSERT(componentType != nullptr);
@@ -92,6 +97,11 @@ public:
         return reinterpret_cast<coretypes::Array *>(this);
     }
 
+    const coretypes::Array *GetCoreType() const
+    {
+        return reinterpret_cast<const coretypes::Array *>(this);
+    }
+
     NO_COPY_SEMANTIC(EtsArray);
     NO_MOVE_SEMANTIC(EtsArray);
 
@@ -107,16 +117,66 @@ protected:
             coretypes::Array::Create(arrayClass->GetRuntimeClass(), length, spaceType, pinned));
     }
 
-    template <class T>
-    void SetImpl(uint32_t idx, T elem)
+    template <class T, bool IS_VOLATILE = false>
+    void SetImpl(uint32_t idx, T elem, uint32_t byteOffset = 0)
     {
-        GetCoreType()->Set(idx, elem);
+        GetCoreType()->Set<T, true, false, IS_VOLATILE>(idx, elem, byteOffset);
+    }
+
+    template <class T, bool IS_VOLATILE = false>
+    T GetImpl(uint32_t idx, uint32_t byteOffset = 0) const
+    {
+        return GetCoreType()->Get<T, true, false, IS_VOLATILE>(idx, byteOffset);
     }
 
     template <class T>
-    T GetImpl(uint32_t idx)
+    void FillImpl(T elem, uint32_t start, uint32_t end)
     {
-        return GetCoreType()->Get<T>(idx);
+        GetCoreType()->Fill(elem, start, end);
+    }
+
+    template <class T>
+    std::pair<bool, T> CompareAndExchangeImpl(uint32_t idx, T oldElemValue, T newValue, bool strong,
+                                              uint32_t byteOffset = 0)
+    {
+        return GetCoreType()->CompareAndExchange(idx, oldElemValue, newValue, std::memory_order_seq_cst, strong,
+                                                 byteOffset);
+    }
+
+    template <class T>
+    T ExchangeImpl(uint32_t idx, T val, uint32_t byteOffset = 0)
+    {
+        return GetCoreType()->Exchange(idx, val, std::memory_order_seq_cst, byteOffset);
+    }
+
+    template <class T>
+    T GetAndAddImpl(uint32_t idx, T value, uint32_t byteOffset = 0)
+    {
+        return GetCoreType()->GetAndAdd(idx, value, std::memory_order_seq_cst, byteOffset);
+    }
+
+    template <class T>
+    T GetAndSubImpl(uint32_t idx, T value, uint32_t byteOffset = 0)
+    {
+        return GetCoreType()->GetAndSub(idx, value, std::memory_order_seq_cst, byteOffset);
+    }
+
+    template <class T>
+    T GetAndBitwiseOrImpl(uint32_t idx, T value, uint32_t byteOffset = 0)
+    {
+        return GetCoreType()->GetAndBitwiseOr(idx, value, std::memory_order_seq_cst, byteOffset);
+    }
+
+    template <class T>
+    T GetAndBitwiseAndImpl(uint32_t idx, T value, uint32_t byteOffset = 0)
+    {
+        return GetCoreType()->GetAndBitwiseAnd(idx, value, std::memory_order_seq_cst, byteOffset);
+    }
+
+    template <class T>
+    T GetAndBitwiseXorImpl(uint32_t idx, T value, uint32_t byteOffset = 0)
+    {
+        return GetCoreType()->GetAndBitwiseXor(idx, value, std::memory_order_seq_cst, byteOffset);
     }
 };
 
@@ -131,6 +191,7 @@ public:
         ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
         // Generate Array class name  "[L<object_class>;"
         EtsClassLinker *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
+        ASSERT(objectClass != nullptr);
         PandaString arrayClassName = PandaString("[") + objectClass->GetDescriptor();
         EtsClass *arrayClass = classLinker->GetClass(arrayClassName.c_str(), true, objectClass->GetLoadContext());
         if (arrayClass == nullptr) {
@@ -148,10 +209,19 @@ public:
         }
     }
 
-    PANDA_PUBLIC_API Component *Get(uint32_t index)
+    PANDA_PUBLIC_API Component *Get(uint32_t index) const
     {
         return reinterpret_cast<Component *>(
             GetImpl<std::invoke_result_t<decltype(&Component::GetCoreType), Component>>(index));
+    }
+
+    void Fill(Component *element, uint32_t start, uint32_t end)
+    {
+        if (element == nullptr) {
+            FillImpl<ObjectHeader *>(nullptr, start, end);
+        } else {
+            FillImpl(element->GetCoreType(), start, end);
+        }
     }
 
     void Set(uint32_t index, Component *element, std::memory_order memoryOrder)
@@ -160,7 +230,7 @@ public:
         GetCoreType()->SetObject(offset, element == nullptr ? nullptr : element->GetCoreType(), memoryOrder);
     }
 
-    Component *Get(uint32_t index, std::memory_order memoryOrder)
+    Component *Get(uint32_t index, std::memory_order memoryOrder) const
     {
         auto offset = index * sizeof(ObjectPointerType);
         return Component::FromCoreType(GetCoreType()->GetObject(offset, memoryOrder));
@@ -177,13 +247,13 @@ public:
         return reinterpret_cast<EtsTypedObjectArray *>(objectHeader);
     }
 
-    void CopyDataTo(EtsTypedObjectArray *dst)
+    void CopyDataTo(EtsTypedObjectArray *dst) const
     {
         ASSERT(dst != nullptr);
         ASSERT(GetLength() <= dst->GetLength());
 
         if (std::size_t count = GetLength() * OBJECT_POINTER_SIZE) {
-            Span<uint8_t> srcSpan(GetData<uint8_t>(), count);
+            Span<const uint8_t> srcSpan(GetData<uint8_t>(), count);
             Span<uint8_t> dstSpan(dst->GetData<uint8_t>(), count);
             CopyData(srcSpan, dstSpan);
             // Call barriers.
@@ -208,7 +278,7 @@ private:
 
     static constexpr const std::size_t WORD_SIZE = sizeof(WordType);
 
-    void CopyData(Span<uint8_t> &src, Span<uint8_t> &dst)
+    void CopyData(Span<const uint8_t> &src, Span<uint8_t> &dst) const
     {
         ASSERT((src.Size() % OBJECT_POINTER_SIZE) == 0);
         ASSERT(src.Size() <= dst.Size());
@@ -220,13 +290,15 @@ private:
         std::size_t stop = (src.Size() / WORD_SIZE) * WORD_SIZE;
         for (; i < stop; i += WORD_SIZE) {
             // Atomic with parameterized order reason: memory order defined as constexpr
-            reinterpret_cast<AtomicWord *>(&dst[i])->store(reinterpret_cast<AtomicWord *>(&src[i])->load(ORDER), ORDER);
+            reinterpret_cast<AtomicWord *>(&dst[i])->store(reinterpret_cast<const AtomicWord *>(&src[i])->load(ORDER),
+                                                           ORDER);
         }
         // 2. copy by references if any
         stop = src.Size();
         for (; i < stop; i += OBJECT_POINTER_SIZE) {
             // Atomic with parameterized order reason: memory order defined as constexpr
-            reinterpret_cast<AtomicRef *>(&dst[i])->store(reinterpret_cast<AtomicRef *>(&src[i])->load(ORDER), ORDER);
+            reinterpret_cast<AtomicRef *>(&dst[i])->store(reinterpret_cast<const AtomicRef *>(&src[i])->load(ORDER),
+                                                          ORDER);
         }
     }
 };
@@ -238,6 +310,16 @@ class EtsPrimitiveArray : public EtsArray {
 public:
     using ValueType = ClassType;
 
+    static constexpr const EtsPrimitiveArray<ClassType, ETS_CLASS_ROOT> *FromCoreType(const ObjectHeader *object)
+    {
+        return reinterpret_cast<const EtsPrimitiveArray<ClassType, ETS_CLASS_ROOT> *>(object);
+    }
+
+    static constexpr EtsPrimitiveArray<ClassType, ETS_CLASS_ROOT> *FromEtsObject(EtsObject *object)
+    {
+        return reinterpret_cast<EtsPrimitiveArray<ClassType, ETS_CLASS_ROOT> *>(object);
+    }
+
     static EtsPrimitiveArray *Create(uint32_t length, SpaceType spaceType = SpaceType::SPACE_TYPE_OBJECT,
                                      bool pinned = false)
     {
@@ -248,10 +330,48 @@ public:
     {
         SetImpl(index, element);
     }
-    ClassType Get(uint32_t index)
+    ClassType Get(uint32_t index) const
     {
         return GetImpl<ClassType>(index);
     }
+    void SetVolatile(uint32_t index, uint32_t byteOffset, ClassType element)
+    {
+        SetImpl<ClassType, true>(index, element, byteOffset);
+    }
+    ClassType GetVolatile(uint32_t index, uint32_t byteOffset) const
+    {
+        return GetImpl<ClassType, true>(index, byteOffset);
+    }
+    std::pair<bool, ClassType> CompareAndExchange(uint32_t index, uint32_t byteOffset, ClassType oldVal,
+                                                  ClassType newVal, bool strong)
+    {
+        return CompareAndExchangeImpl(index, oldVal, newVal, strong, byteOffset);
+    }
+    ClassType Exchange(uint32_t index, uint32_t byteOffset, ClassType val)
+    {
+        return ExchangeImpl(index, val, byteOffset);
+    }
+    ClassType GetAndAdd(uint32_t index, uint32_t byteOffset, ClassType val)
+    {
+        return GetAndAddImpl(index, val, byteOffset);
+    }
+    ClassType GetAndSub(uint32_t index, uint32_t byteOffset, ClassType val)
+    {
+        return GetAndSubImpl(index, val, byteOffset);
+    }
+    ClassType GetAndBitwiseAnd(uint32_t index, uint32_t byteOffset, ClassType val)
+    {
+        return GetAndBitwiseAndImpl(index, val, byteOffset);
+    }
+    ClassType GetAndBitwiseOr(uint32_t index, uint32_t byteOffset, ClassType val)
+    {
+        return GetAndBitwiseOrImpl(index, val, byteOffset);
+    }
+    ClassType GetAndBitwiseXor(uint32_t index, uint32_t byteOffset, ClassType val)
+    {
+        return GetAndBitwiseXorImpl(index, val, byteOffset);
+    }
+
     static EtsClass *GetComponentClass()
     {
         return PandaEtsVM::GetCurrent()->GetClassLinker()->GetClassRoot(ETS_CLASS_ROOT);

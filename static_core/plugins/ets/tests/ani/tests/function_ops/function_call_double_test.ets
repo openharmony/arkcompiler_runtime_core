@@ -43,7 +43,7 @@ namespace A {
         };
         return lambdaFunction(value1, value2);
     }
-    
+
     export function recursiveFunction(value: int): double {
         if (value <= 1) {
             return 1;
@@ -53,7 +53,7 @@ namespace A {
     }
 
     function calculateSum(value1: double, value2: double, value3: char, value4: int): double {
-        let aChar: char = 'A';
+        let aChar: char = c'A';
         if (value3 == aChar) {
             return value2 - value1 as double;
         }

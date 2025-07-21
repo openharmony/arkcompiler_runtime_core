@@ -27,7 +27,7 @@ interface IReturnBoolean{
 }
 
 interface IReturnArray{
-    getArray(): number[]
+    getArray(): FixedArray<number>
 }
 
 interface IReturnUnion {
@@ -85,8 +85,8 @@ class TestClass implements ISuperInterface {
     getBoolean(): boolean {
         return false;
     }
-    getArray(): number[] {
-        const returnedArray: number[] = [1,2,3,4,5,6,8,9,0]
+    getArray(): FixedArray<number> {
+        const returnedArray: FixedArray<number> = [1,2,3,4,5,6,8,9,0]
         return returnedArray
     }
 
@@ -135,8 +135,8 @@ class ReturnsUnion implements IReturnUnion {
 // }
 
 class ReturnsArray implements IReturnArray {
-    getArray(): number[] {
-        const returnedArray: number[] = [1,2,3,4,5,6,8,9,0]
+    getArray(): FixedArray<number> {
+        const returnedArray: FixedArray<number> = [1,2,3,4,5,6,8,9,0]
         return returnedArray
     }
 }

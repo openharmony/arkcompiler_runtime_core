@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-let reject: ((err: Error)=>void)|null = null;
+let reject: ((err: Error)=>void) | null = null;
 let error = new Error();
 let p1 = Promise.resolve<number>(3);
 let p2 = new Promise<number>((_: (value:number)=>void, _reject: (err: Error)=>void) => {
     reject = _reject;
 });
 Promise.all([p1, p2]).then<void, void>((values: Array<number>): void => {
-    console.log("Test failed. The promise should not be resolved.");
+    console.log('Test failed. The promise should not be resolved.');
 }, (err: Error): void => {
     if (err != error) {
-        console.log("Test failed. The promise should be rejected by the specified value.");
+        console.log('Test failed. The promise should be rejected by the specified value.');
         return;
     }
-    console.log("Test passed.");
+    console.log('Test passed.');
 });
 reject!(error);

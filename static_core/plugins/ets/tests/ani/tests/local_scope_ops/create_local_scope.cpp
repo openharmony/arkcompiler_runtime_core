@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -170,10 +170,8 @@ TEST_F(CreateLocalScopeTest, create_local_scope_test1)
 {
     for (ani_size i = 1; i <= LOOP_COUNT; i++) {
         ASSERT_EQ(env_->CreateLocalScope(SPECIFIED_CAPACITY), ANI_OK);
-        ani_ref objectRef {};
-        ASSERT_EQ(
-            env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRef)),
-            ANI_OK);
+        ani_string objectRef {};
+        ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &objectRef), ANI_OK);
     }
 }
 
@@ -182,10 +180,8 @@ TEST_F(CreateLocalScopeTest, create_local_scope_test2)
     for (ani_size i = 1; i <= LOOP_COUNT; i++) {
         ASSERT_EQ(env_->CreateLocalScope(MIN_CAPACITY), ANI_OK);
         for (ani_size j = 1; j <= SPECIFIED_CAPACITY; j++) {
-            ani_ref objectRef {};
-            ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(),
-                                           reinterpret_cast<ani_string *>(&objectRef)),
-                      ANI_OK);
+            ani_string objectRef {};
+            ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &objectRef), ANI_OK);
         }
     }
 }
@@ -202,10 +198,8 @@ TEST_F(CreateLocalScopeTest, create_local_scope_test4)
 {
     for (ani_size i = 1; i <= LOOP_COUNT; i++) {
         ASSERT_EQ(env_->CreateLocalScope(SPECIFIED_CAPACITY), ANI_OK);
-        ani_ref objectRef {};
-        ASSERT_EQ(
-            env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRef)),
-            ANI_OK);
+        ani_string objectRef {};
+        ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &objectRef), ANI_OK);
         ASSERT_EQ(env_->Reference_Delete(objectRef), ANI_OK);
     }
 }
@@ -237,9 +231,8 @@ TEST_F(CreateLocalScopeTest, create_escape_local_scope_test1)
 {
     ASSERT_EQ(env_->CreateEscapeLocalScope(SPECIFIED_CAPACITY), ANI_OK);
 
-    ani_ref objectRef {};
-    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRef)),
-              ANI_OK);
+    ani_string objectRef {};
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &objectRef), ANI_OK);
 }
 
 TEST_F(CreateLocalScopeTest, create_escape_local_scope_test2)
@@ -247,10 +240,8 @@ TEST_F(CreateLocalScopeTest, create_escape_local_scope_test2)
     ASSERT_EQ(env_->CreateEscapeLocalScope(MIN_CAPACITY), ANI_OK);
 
     for (ani_size i = 1; i <= SPECIFIED_CAPACITY; i++) {
-        ani_ref objectRef {};
-        ASSERT_EQ(
-            env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRef)),
-            ANI_OK);
+        ani_string objectRef {};
+        ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &objectRef), ANI_OK);
     }
 }
 
@@ -258,9 +249,8 @@ TEST_F(CreateLocalScopeTest, create_escape_local_scope_test3)
 {
     ASSERT_EQ(env_->CreateEscapeLocalScope(SPECIFIED_CAPACITY), ANI_OK);
 
-    ani_ref objectRef {};
-    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRef)),
-              ANI_OK);
+    ani_string objectRef {};
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &objectRef), ANI_OK);
     ani_ref result {};
     ASSERT_EQ(env_->DestroyEscapeLocalScope(objectRef, &result), ANI_OK);
 }
@@ -269,9 +259,8 @@ TEST_F(CreateLocalScopeTest, create_escape_local_scope_test4)
 {
     ASSERT_EQ(env_->CreateEscapeLocalScope(SPECIFIED_CAPACITY), ANI_OK);
 
-    ani_ref objectRef {};
-    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRef)),
-              ANI_OK);
+    ani_string objectRef {};
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &objectRef), ANI_OK);
     ASSERT_EQ(env_->Reference_Delete(objectRef), ANI_OK);
 }
 
@@ -288,9 +277,8 @@ TEST_F(CreateLocalScopeTest, destroy_escape_local_scope_test1)
     ASSERT_EQ(env_->CreateEscapeLocalScope(SPECIFIED_CAPACITY), ANI_OK);
     ASSERT_EQ(env_->CreateEscapeLocalScope(SPECIFIED_CAPACITY), ANI_OK);
 
-    ani_ref objectRef {};
-    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRef)),
-              ANI_OK);
+    ani_string objectRef {};
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &objectRef), ANI_OK);
 
     ani_ref result {};
     ASSERT_EQ(env_->DestroyEscapeLocalScope(objectRef, &result), ANI_OK);
@@ -300,10 +288,8 @@ TEST_F(CreateLocalScopeTest, destroy_escape_local_scope_test2)
 {
     for (ani_size i = 1; i <= LOOP_COUNT; i++) {
         ASSERT_EQ(env_->CreateEscapeLocalScope(SPECIFIED_CAPACITY), ANI_OK);
-        ani_ref objectRef {};
-        ASSERT_EQ(
-            env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRef)),
-            ANI_OK);
+        ani_string objectRef {};
+        ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &objectRef), ANI_OK);
 
         ani_ref result {};
         ASSERT_EQ(env_->DestroyEscapeLocalScope(objectRef, &result), ANI_OK);
@@ -314,9 +300,8 @@ TEST_F(CreateLocalScopeTest, destroy_escape_local_scope_test3)
 {
     ASSERT_EQ(env_->CreateEscapeLocalScope(SPECIFIED_CAPACITY), ANI_OK);
 
-    ani_ref objectRefA {};
-    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRefA)),
-              ANI_OK);
+    ani_string objectRefA {};
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &objectRefA), ANI_OK);
 
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lcreate_local_scope/Operations;", &cls), ANI_OK);
@@ -338,9 +323,8 @@ TEST_F(CreateLocalScopeTest, destroy_escape_local_scope_test3)
 TEST_F(CreateLocalScopeTest, scope_test1)
 {
     ASSERT_EQ(env_->CreateEscapeLocalScope(REF_NUM), ANI_OK);
-    ani_ref objectRef {};
-    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRef)),
-              ANI_OK);
+    ani_string objectRef {};
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &objectRef), ANI_OK);
 
     ani_ref result {};
     ASSERT_EQ(env_->DestroyEscapeLocalScope(objectRef, &result), ANI_OK);

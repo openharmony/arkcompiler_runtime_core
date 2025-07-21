@@ -38,15 +38,6 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
     }
 
     /**
-     * Constructs a new Int instance with provided initial value
-     *
-     * @param value the initial value
-     */
-    public constructor(value: Int) {
-        this.value = value.intValue();
-    }
-
-    /**
      * Returns value of this instance as a primitive
      *
      * @returns value of this instance
@@ -92,8 +83,8 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      *
      * @returns value as int
      */
-    public override byteValue(): byte {
-        return this.value as byte;
+    public override toByte(): byte {
+        return this.value.toByte();
     }
 
     /**
@@ -101,8 +92,8 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      *
      * @returns value as short
      */
-    public override shortValue(): short {
-        return this.value as short;
+    public override toShort(): short {
+        return this.value.toShort();
     }
 
     /**
@@ -110,7 +101,7 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      *
      * @returns value as int
      */
-    public override intValue(): int {
+    public override toInt(): int {
         return this.value;
     }
 
@@ -119,8 +110,8 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      *
      * @returns value as long
      */
-    public override longValue(): long {
-        return this.value as long;
+    public override toLong(): long {
+        return this.value.toLong();
     }
 
     /**
@@ -128,8 +119,8 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      *
      * @returns value as float
      */
-    public override floatValue(): float {
-        return this.value as float;
+    public override toFloat(): float {
+        return Int.toFloat(this.value);
     }
 
     /**
@@ -137,8 +128,82 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      *
      * @returns value as double
      */
-    public override doubleValue(): double {
-        return this.value as double;
+    public override toDouble(): double {
+        return this.value.toDouble();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as char
+     */
+    public toChar(): char {
+        return this.value.toChar();
+    }
+
+    /**
+     * Returns the primitive as byte value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toByte(value: int): byte;
+
+    /**
+     * Returns the primitive as short value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toShort(value: int): short;
+
+    /**
+     * Returns the primitive as long value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toLong(value: int): long;
+
+    /**
+     * Returns the primitive as float value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toFloat(value: int): float;
+
+    /**
+     * Returns the primitive as double value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toDouble(value: int): double;
+
+    /**
+     * Returns the primitive as char value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toChar(value: int): char;
+
+    /**
+     * Returns the primitive as int value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static toInt(value: int): int {
+        return value;
     }
 
     /**
@@ -202,7 +267,7 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      * @returns Result of the addition
      */
     public add(other: Int): Int {
-        return Int.valueOf((this.value + other.intValue()) as int)
+        return Int.valueOf((this.value + other.toInt()) as int)
     }
 
     /**
@@ -213,7 +278,7 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      * @returns Result of the subtraction
      */
     public sub(other: Int): Int {
-        return Int.valueOf((this.value - other.intValue()) as int)
+        return Int.valueOf((this.value - other.toInt()) as int)
     }
 
     /**
@@ -224,7 +289,7 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      * @returns Result of the multiplication
      */
     public mul(other: Int): Int {
-        return Int.valueOf((this.value * other.intValue()) as int)
+        return Int.valueOf((this.value * other.toInt()) as int)
     }
 
     /**
@@ -235,7 +300,7 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      * @returns Result of the division
      */
     public div(other: Int): Int {
-        return Int.valueOf((this.value / other.intValue()) as int)
+        return Int.valueOf((this.value / other.toInt()) as int)
     }
 
     /**
@@ -246,7 +311,7 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      * @returns true if this value is less than provided, false otherwise
      */
     public isLessThan(other: Int): boolean {
-        return this.value < other.intValue();
+        return this.value < other.toInt();
     }
 
     /**
@@ -257,7 +322,7 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      * @returns true if this value is less than or equal to provided, false otherwise
      */
     public isLessEqualThan(other: Int): boolean {
-        return this.value <= other.intValue();
+        return this.value <= other.toInt();
     }
 
     /**
@@ -268,7 +333,7 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      * @returns true if this value is greater than provided, false otherwise
      */
     public isGreaterThan(other: Int): boolean {
-        return this.value > other.intValue();
+        return this.value > other.toInt();
     }
 
     /**
@@ -279,7 +344,7 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      * @returns true if this value is greater than or equal to provided, false otherwise
      */
     public isGreaterEqualThan(other: Int): boolean {
-        return this.value >= other.intValue();
+        return this.value >= other.toInt();
     }
 
     /**
@@ -295,7 +360,7 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
         if (json instanceof JSONNumber) {
             let num = (json as JSONNumber).value
             if (Double.isInteger(num) && Int.MIN_VALUE <= num && num <= Int.MAX_VALUE) {
-                return Int.valueOf(num as int)
+                return Int.valueOf(Double.toInt(num))
             }
         }
         throw new JSONTypeError("Cannot create Int from JSON", new ErrorOptions(json as Object))

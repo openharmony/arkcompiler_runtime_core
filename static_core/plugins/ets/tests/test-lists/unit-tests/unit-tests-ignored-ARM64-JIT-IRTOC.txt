@@ -1,0 +1,4 @@
+# 24931
+# [FAILED] taskpool.SequenceRunner.TaskWithDifferentParamsTest
+# expected equality failed: '0' === '30'
+ets-common-tests/taskpool/seqrunner_tasks.ets

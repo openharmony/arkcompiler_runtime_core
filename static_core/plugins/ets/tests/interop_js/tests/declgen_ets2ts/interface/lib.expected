@@ -15,15 +15,14 @@
 export declare function foo3(a: Array<string>): void;
 export declare function foo6(iface5: Iface5): void;
 export declare interface Iface {
-    get n(): number;
-    set n(value: number);
+    n: number;
     s(): string;
 }
 export declare interface Iface2 {
     foo1(): void;
 }
 export declare interface Iface3 {
-    foo2(...nums: number[]): void;
+    foo2(...nums: Array<number>): void;
 }
 export declare class C {
     public static foo3(a: Array<string>): void;
@@ -34,9 +33,17 @@ export declare interface Iface4 {
     foo3(a: Array<string>): void;
 }
 export declare interface I {
-    get s(): string;
-    set s(value: string);
+    s: string;
 }
 export declare interface Iface5 {
     foo5(): void;
+}
+export declare interface I01 {
+    str: string;
+    readonly s_read: string;
+    s_optional?: string | undefined;
+    get num1(): number;
+    set num2(value: number);
+    clsMethod: (args: string) => string;
+    clsMethod1: (args: string) => string;
 }

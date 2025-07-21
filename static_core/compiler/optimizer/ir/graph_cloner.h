@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -140,8 +140,10 @@ public:
         cloneMarker_ = markerHolder.GetMarker();
         auto unrollData = PrepareLoopToUnroll(loop, (TYPE & UnrollType::UNROLL_WITHOUT_SIDE_EXITS) == 0);
 
+        ASSERT(factor > 0);
         auto cloneCount = factor - 1;
         for (size_t i = 0; i < cloneCount; i++) {
+            ASSERT(unrollData != nullptr);
             CloneBlocksAndInstructions<InstCloneType::CLONE_ALL, true>(*unrollData->blocks, GetGraph());
             BuildLoopUnrollControlFlow(unrollData);
             // NOLINTNEXTLINE(bugprone-suspicious-semicolon, readability-braces-around-statements)
@@ -349,6 +351,7 @@ private:
                 }
             }
 
+            ASSERT(clone != nullptr);
             auto *clonedInst = CloneInstruction(inst, instCount, clone->GetGraph());
 
             cloneInstMap_[inst] = clonedInst;

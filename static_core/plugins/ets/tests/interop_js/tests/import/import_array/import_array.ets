@@ -19,7 +19,7 @@ import {
 } from 'main_js';
 
 function checkChangeArray(): boolean {
-  const oldValue: int[] = arr.slice();
+  const oldValue: FixedArray<int> = arr.slice();
   changeArray();
 
   return oldValue.length as int<arr.length as int;

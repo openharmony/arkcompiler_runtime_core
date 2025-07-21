@@ -309,7 +309,7 @@ function testClassInPlaceFieldDeclarations(): boolean {
 function testFunctionReturnsCompositeTypeInt(): boolean {
     let isOk = true;
     for (let i = 0; i < 4; i++){
-        const expectedValue = functionReturnsCompositeType(i) as (string | number | double | string[]);
+        const expectedValue = functionReturnsCompositeType(i) as (string | number | double | FixedArray<string>);
         switch (i) {
             case 0:
                 isOk = isOk && expectedValue as string == '1';

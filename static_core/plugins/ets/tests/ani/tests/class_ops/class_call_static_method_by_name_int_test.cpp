@@ -38,6 +38,23 @@ public:
         ASSERT_EQ(env_->Class_CallStaticMethodByName_Int_V(cls, name, "II:I", value, args), ANI_OK);
         va_end(args);
     }
+
+    void TestCombineScene(const char *className, const char *methodName, ani_int expectedValue)
+    {
+        ani_class cls {};
+        ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
+
+        ani_int value = 0;
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Int(cls, methodName, "II:I", &value, VAL3, VAL4), ANI_OK);
+        ASSERT_EQ(value, expectedValue);
+
+        ani_value args[2U];
+        args[0U].i = VAL3;
+        args[1U].i = VAL4;
+        ani_int valueA = 0;
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Int_A(cls, methodName, "II:I", &valueA, args), ANI_OK);
+        ASSERT_EQ(valueA, expectedValue);
+    }
 };
 
 TEST_F(ClassCallStaticMethodByNameIntTest, call_static_method_by_name_int)
@@ -89,6 +106,8 @@ TEST_F(ClassCallStaticMethodByNameIntTest, call_static_method_by_name_int_invali
     ani_int sum = 0;
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Int(env_, cls, nullptr, nullptr, &sum, VAL3, VAL4),
               ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Int(cls, "", nullptr, &sum, VAL3, VAL4), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Int(cls, "\n", nullptr, &sum, VAL3, VAL4), ANI_NOT_FOUND);
 }
 
 TEST_F(ClassCallStaticMethodByNameIntTest, call_static_method_by_name_int_invalid_result)
@@ -144,6 +163,8 @@ TEST_F(ClassCallStaticMethodByNameIntTest, call_static_method_by_name_int_a_inva
     ani_int sum = 0;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Int_A(cls, nullptr, nullptr, &sum, args), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Int_A(cls, "sum_not_exist", nullptr, &sum, args), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Int_A(cls, "", nullptr, &sum, args), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Int_A(cls, "\n", nullptr, &sum, args), ANI_NOT_FOUND);
 }
 
 TEST_F(ClassCallStaticMethodByNameIntTest, call_static_method_by_name_int_a_invalid_result)
@@ -261,6 +282,123 @@ TEST_F(ClassCallStaticMethodByNameIntTest, call_static_method_by_name_int_combin
     ani_int valueV = 0;
     TestFuncV(cls, "funcA", &valueV, VAL3, VAL4);
     ASSERT_EQ(valueV, VAL4 - VAL3);
+}
+
+TEST_F(ClassCallStaticMethodByNameIntTest, call_static_method_by_name_int_null_env)
+{
+    ani_class cls {};
+    GetMethodData(&cls);
+
+    ani_int value = 0;
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Int(nullptr, cls, "or", nullptr, &value, VAL3, VAL4),
+              ANI_INVALID_ARGS);
+    ani_value args[2U];
+    args[0U].i = VAL3;
+    args[1U].i = VAL4;
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Int_A(nullptr, cls, "or", nullptr, &value, args),
+              ANI_INVALID_ARGS);
+}
+
+TEST_F(ClassCallStaticMethodByNameIntTest, call_static_method_by_name_int_combine_scenes_5)
+{
+    ani_class clsA {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_int_test/A;", &clsA), ANI_OK);
+    ani_class clsB {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_int_test/B;", &clsB), ANI_OK);
+
+    ani_int valueA = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Int(clsA, "funcA", "II:I", &valueA, VAL3, VAL4), ANI_OK);
+    ASSERT_EQ(valueA, VAL3 + VAL4);
+    ani_int valueB = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Int(clsB, "funcB", "II:I", &valueB, VAL3, VAL4), ANI_OK);
+    ASSERT_EQ(valueB, VAL4 - VAL3);
+
+    ani_value args[2U];
+    args[0U].i = VAL3;
+    args[1U].i = VAL4;
+    ani_int valueAA = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Int_A(clsA, "funcA", "II:I", &valueAA, args), ANI_OK);
+    ASSERT_EQ(valueAA, VAL3 + VAL4);
+    ani_int valueBA = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Int_A(clsB, "funcB", "II:I", &valueBA, args), ANI_OK);
+    ASSERT_EQ(valueBA, VAL4 - VAL3);
+}
+
+TEST_F(ClassCallStaticMethodByNameIntTest, call_static_method_by_name_int_combine_scenes_6)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_int_test/A;", &cls), ANI_OK);
+    ani_int value = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Int(cls, "funcA", "II:I", &value, VAL3, VAL4), ANI_OK);
+    ASSERT_EQ(value, VAL3 + VAL4);
+
+    ani_value args[2U];
+    args[0U].i = VAL3;
+    args[1U].i = VAL4;
+    ani_int valueA = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Int_A(cls, "funcA", "II:I", &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, VAL3 + VAL4);
+
+    ani_double value2 = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Double(cls, "funcA", "DD:D", &value2, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(value2, VAL1 + VAL2);
+}
+
+TEST_F(ClassCallStaticMethodByNameIntTest, call_static_method_by_name_int_combine_scenes_7)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_int_test/A;", "funcB", VAL3 + VAL4);
+}
+
+TEST_F(ClassCallStaticMethodByNameIntTest, call_static_method_by_name_int_combine_scenes_8)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_int_test/C;", "funcA", VAL3 + VAL4);
+}
+
+TEST_F(ClassCallStaticMethodByNameIntTest, call_static_method_by_name_int_combine_scenes_9)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_int_test/D;", "funcA", VAL4 - VAL3);
+}
+
+TEST_F(ClassCallStaticMethodByNameIntTest, call_static_method_by_name_int_combine_scenes_10)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_int_test/E;", "funcA", VAL3 + VAL4);
+}
+
+TEST_F(ClassCallStaticMethodByNameIntTest, call_static_method_by_name_int_combine_scenes_11)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_int_test/F;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "increment", nullptr, VAL3, VAL4), ANI_OK);
+    ani_int value = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Int(cls, "getCount", nullptr, &value), ANI_OK);
+    ASSERT_EQ(value, VAL3 + VAL4);
+
+    ani_value args[2U];
+    args[0U].i = VAL3;
+    args[1U].i = VAL4;
+    ani_int valueA = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Int_A(cls, "getCount", nullptr, &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, VAL3 + VAL4);
+}
+
+TEST_F(ClassCallStaticMethodByNameIntTest, call_static_method_by_name_int_combine_scenes_12)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_int_test/G;", &cls), ANI_OK);
+    ani_int value = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Int(cls, "publicMethod", "II:I", &value, VAL3, VAL4), ANI_OK);
+    ASSERT_EQ(value, VAL3 + VAL4);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Int(cls, "callPrivateMethod", "II:I", &value, VAL3, VAL4), ANI_OK);
+    ASSERT_EQ(value, VAL4 - VAL3);
+
+    ani_value args[2U];
+    args[0U].i = VAL3;
+    args[1U].i = VAL4;
+    ani_int valueA = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Int_A(cls, "publicMethod", "II:I", &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, VAL3 + VAL4);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Int_A(cls, "callPrivateMethod", "II:I", &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, VAL4 - VAL3);
 }
 }  // namespace ark::ets::ani::testing
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

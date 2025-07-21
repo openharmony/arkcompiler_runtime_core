@@ -15,35 +15,35 @@
 
 function checkSequence(actual: Array<number>, expectedLength: number): void {
     if (actual.length != expectedLength) {
-        console.log("Test failed. Expected sequence length " + expectedLength + ", but got " + actual.length);
-        throw new Error("Test failed");
+        console.log('Test failed. Expected sequence length ' + expectedLength + ', but got ' + actual.length);
+        throw new Error('Test failed');
     }
     for (let i = 0; i < expectedLength; ++i) {
         if (actual[i] != i + 1) {
-            console.log("Test failed. Expected element at " + i + " to be " + i + ", but got " + actual[i]);
-            throw new Error("Test failed");
+            console.log('Test failed. Expected element at ' + i + ' to be ' + i + ', but got ' + actual[i]);
+            throw new Error('Test failed');
         }
     }
 }
 
 let sequence = new Array<number>();
-let resolve: ((value: number) => void)|null = null;
-let reject: ((err: Object) => void)|null = null;
-new Promise<number>((_resolve: (v: number) => void, _: (error: Object) => void) => {
+let resolve: ((value: number) => void) | null = null;
+let reject: ((err: Error) => void) | null = null;
+new Promise<number>((_resolve: (v: number) => void, _: (error: Error) => void) => {
     resolve = _resolve;
 }).then<void>((): void => {
     sequence.push(3)
 }).then<void>((): void => {
     checkSequence(sequence, 3);
-    console.log("Test passed.");
+    console.log('Test passed.');
 });
-new Promise<number>((_: (v: number) => void, _reject: (error: Object) => void) => {
+new Promise<number>((_: (v: number) => void, _reject: (error: Error) => void) => {
     reject = _reject;
 }).catch<void>((): void => {
     sequence.push(2);
 });
 
-reject!(new Error("abc"));
+reject!(new Error('abc'));
 resolve!(7);
 
 sequence.push(1);

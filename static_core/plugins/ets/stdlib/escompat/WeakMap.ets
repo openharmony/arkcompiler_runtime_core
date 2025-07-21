@@ -16,10 +16,10 @@
 package escompat;
 
  /**
-  * A WeakMap is a collection of key/value pairs whose keys must be objects, 
-  * with values of any arbitrary type, and which does not create strong references to its keys. 
-  * That is, an object's presence as a key in a WeakMap does not prevent the object from being garbage collected. 
-  * Once an object used as a key has been collected, 
+  * A WeakMap is a collection of key/value pairs whose keys must be objects,
+  * with values of any arbitrary type, and which does not create strong references to its keys.
+  * That is, an object's presence as a key in a WeakMap does not prevent the object from being garbage collected.
+  * Once an object used as a key has been collected,
   * its corresponding values in any WeakMap become candidates for garbage collection as well
   */
 export final class WeakMap<K extends Object, V> {
@@ -42,7 +42,7 @@ export final class WeakMap<K extends Object, V> {
             }
 
             this.keyRefToEntry.delete(keyRef)
-            
+
             const keyRefs = this.keyHashToKeyRefs.get(entry.keyHash)
             if (keyRefs !== undefined) {
                 this.deleteKeyRef(keyRefs, keyRef, entry.keyHash)
@@ -63,7 +63,7 @@ export final class WeakMap<K extends Object, V> {
         this(null)
 
         iteratorForEach<[K, V]>(entries.$_iterator(), (entry: [K, V]) => {
-            this.set(entry[WeakMap.KEY], entry[WeakMap.VAL])
+            this.set(entry[0] as K, entry[1] as V)
         })
     }
 
@@ -72,12 +72,12 @@ export final class WeakMap<K extends Object, V> {
      * and value to a WeakMap object.
      */
     set(key: K, val: V): WeakMap<K, V> {
-        const keyHash = runtime.getHashCode(key)
+        const keyHash = Runtime.getHashCode(key)
 
         const keyRefs = this.keyHashToKeyRefs.get(keyHash)
         if (keyRefs !== undefined) {
             const keyRef = this.findKeyRef(keyRefs, key)
-            if (keyRef !== undefined) { 
+            if (keyRef !== undefined) {
                 this.keyRefToEntry.set(keyRef, new WeakMapEntry<V>(keyHash, val))
             } else {
                 const newKeyRef = this.addEntry(key, keyHash, val)
@@ -99,7 +99,7 @@ export final class WeakMap<K extends Object, V> {
      * object or not.
      */
     has(key: K): boolean {
-        const keyHash = runtime.getHashCode(key)
+        const keyHash = Runtime.getHashCode(key)
 
         const keyRefs = this.keyHashToKeyRefs.get(keyHash)
         if (keyRefs === undefined) {
@@ -119,7 +119,7 @@ export final class WeakMap<K extends Object, V> {
      * a WeakMap object.
      */
     get(key: K): V | undefined {
-        const keyHash = runtime.getHashCode(key)
+        const keyHash = Runtime.getHashCode(key)
 
         const keyRefs = this.keyHashToKeyRefs.get(keyHash)
         if (keyRefs === undefined) {
@@ -144,7 +144,7 @@ export final class WeakMap<K extends Object, V> {
      * a WeakMap object.
      */
     delete(key: K): boolean {
-        const keyHash = runtime.getHashCode(key)
+        const keyHash = Runtime.getHashCode(key)
 
         const keyRefs = this.keyHashToKeyRefs.get(keyHash)
         if (keyRefs === undefined) {

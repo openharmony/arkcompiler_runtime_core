@@ -32,6 +32,36 @@ TEST_F(MangleDescriptorTest, Format_NewToOld)
 
     desc = Mangle::ConvertDescriptor("a.b.c");
     EXPECT_STREQ(desc.c_str(), "La/b/c;");
+
+    desc = Mangle::ConvertDescriptor("A{C{a.b.c}}");
+    EXPECT_STREQ(desc.c_str(), "LA{C{a/b/c}};");
+
+    desc = Mangle::ConvertDescriptor("A{A{C{a.b.c}}}");
+    EXPECT_STREQ(desc.c_str(), "LA{A{C{a/b/c}}};");
+
+    desc = Mangle::ConvertDescriptor("A{A{E{a.b.c}}}");
+    EXPECT_STREQ(desc.c_str(), "LA{A{E{a/b/c}}};");
+
+    desc = Mangle::ConvertDescriptor("A{A{A{C{a.b.c}}}}");
+    EXPECT_STREQ(desc.c_str(), "LA{A{A{C{a/b/c}}}};");
+
+    desc = Mangle::ConvertDescriptor("A{C{a.b.c}}", true);
+    EXPECT_STREQ(desc.c_str(), "[La/b/c;");
+
+    desc = Mangle::ConvertDescriptor("A{A{C{a.b.c}}}", true);
+    EXPECT_STREQ(desc.c_str(), "[[La/b/c;");
+
+    desc = Mangle::ConvertDescriptor("A{A{E{a.b.c}}}", true);
+    EXPECT_STREQ(desc.c_str(), "[[La/b/c;");
+
+    desc = Mangle::ConvertDescriptor("A{A{A{C{a.b.c}}}}", true);
+    EXPECT_STREQ(desc.c_str(), "[[[La/b/c;");
+
+    desc = Mangle::ConvertDescriptor("C{a.b.c}");
+    EXPECT_STREQ(desc.c_str(), "LC{a/b/c};");
+
+    desc = Mangle::ConvertDescriptor("C{a.b.c}", true);
+    EXPECT_STREQ(desc.c_str(), "LC{a/b/c};");
 }
 
 TEST_F(MangleDescriptorTest, Format_OldToOld)
@@ -100,6 +130,11 @@ TEST_F(MangleDescriptorTest, FindClass)
     EXPECT_EQ(env_->FindClass("mm.mangle_descriptor_test.rls.B", &cls), ANI_OK);
     EXPECT_EQ(env_->FindClass("mm.mangle_descriptor_test.rls.ns.A", &cls), ANI_OK);
     EXPECT_EQ(env_->FindClass("mm.mangle_descriptor_test.rls.ns.B", &cls), ANI_OK);
+    EXPECT_EQ(env_->FindClass("C{mm.mangle_descriptor_test.rls.ns.A}", &cls), ANI_NOT_FOUND);
+    EXPECT_EQ(env_->FindClass("C{mm.mangle_descriptor_test.rls.ns.B}", &cls), ANI_NOT_FOUND);
+    EXPECT_EQ(env_->FindClass("A{E{mm.mangle_descriptor_test.E}}", &cls), ANI_OK);
+    EXPECT_EQ(env_->FindClass("A{C{mm.mangle_descriptor_test.rls.ns.A}}", &cls), ANI_OK);
+    EXPECT_EQ(env_->FindClass("A{C{mm.mangle_descriptor_test.rls.ns.B}}", &cls), ANI_OK);
 }
 
 TEST_F(MangleDescriptorTest, FindClass_OldFormat)
@@ -119,6 +154,7 @@ TEST_F(MangleDescriptorTest, FindEnum)
     EXPECT_EQ(env_->FindEnum("mm.mangle_descriptor_test.E", &enm), ANI_OK);
     EXPECT_EQ(env_->FindEnum("mm.mangle_descriptor_test.rls.E", &enm), ANI_OK);
     EXPECT_EQ(env_->FindEnum("mm.mangle_descriptor_test.rls.ns.E", &enm), ANI_OK);
+    EXPECT_EQ(env_->FindEnum("E{mm.mangle_descriptor_test.E}", &enm), ANI_NOT_FOUND);
 }
 
 TEST_F(MangleDescriptorTest, FindEnum_OldFormat)
@@ -161,6 +197,9 @@ TEST_F(MangleDescriptorTest, Module_FindClass)
     EXPECT_EQ(env_->Module_FindClass(mod, "rls.B", &cls), ANI_OK);
     EXPECT_EQ(env_->Module_FindClass(mod, "rls.ns.A", &cls), ANI_OK);
     EXPECT_EQ(env_->Module_FindClass(mod, "rls.ns.B", &cls), ANI_OK);
+    EXPECT_EQ(env_->Module_FindClass(mod, "A{C{A}}", &cls), ANI_NOT_FOUND);
+    EXPECT_EQ(env_->Module_FindClass(mod, "C{A}", &cls), ANI_NOT_FOUND);
+    EXPECT_EQ(env_->Module_FindClass(mod, "A{E{E}}", &cls), ANI_NOT_FOUND);
 }
 
 TEST_F(MangleDescriptorTest, Module_FindClass_OldFormat)
@@ -174,7 +213,7 @@ TEST_F(MangleDescriptorTest, Module_FindClass_OldFormat)
     EXPECT_EQ(env_->Module_FindClass(mod, "Lrls/A;", &cls), ANI_OK);
     EXPECT_EQ(env_->Module_FindClass(mod, "Lrls/B;", &cls), ANI_OK);
     EXPECT_EQ(env_->Module_FindClass(mod, "Lrls/ns/A;", &cls), ANI_OK);
-    EXPECT_EQ(env_->Module_FindClass(mod, "Lrls/ns/B;", &cls), ANI_OK);
+    EXPECT_EQ(env_->Module_FindClass(mod, "[Lrls/ns/B;", &cls), ANI_INVALID_ARGS);
 }
 
 TEST_F(MangleDescriptorTest, Module_FindEnum)
@@ -186,6 +225,7 @@ TEST_F(MangleDescriptorTest, Module_FindEnum)
     EXPECT_EQ(env_->Module_FindEnum(mod, "E", &enm), ANI_OK);
     EXPECT_EQ(env_->Module_FindEnum(mod, "rls.E", &enm), ANI_OK);
     EXPECT_EQ(env_->Module_FindEnum(mod, "rls.ns.E", &enm), ANI_OK);
+    EXPECT_EQ(env_->Module_FindEnum(mod, "E{rls.ns.E}", &enm), ANI_NOT_FOUND);
 }
 
 TEST_F(MangleDescriptorTest, Module_FindEnum_OldFormat)
@@ -227,6 +267,9 @@ TEST_F(MangleDescriptorTest, Namespace_FindClass)
     EXPECT_EQ(env_->Namespace_FindClass(ns, "B", &cls), ANI_OK);
     EXPECT_EQ(env_->Namespace_FindClass(ns, "ns.A", &cls), ANI_OK);
     EXPECT_EQ(env_->Namespace_FindClass(ns, "ns.B", &cls), ANI_OK);
+    EXPECT_EQ(env_->Namespace_FindClass(ns, "A{C{A}}", &cls), ANI_NOT_FOUND);
+    EXPECT_EQ(env_->Namespace_FindClass(ns, "A{C{A}}", &cls), ANI_NOT_FOUND);
+    EXPECT_EQ(env_->Namespace_FindClass(ns, "C{A}", &cls), ANI_NOT_FOUND);
 }
 
 TEST_F(MangleDescriptorTest, Namespace_FindClass_OldFormat)

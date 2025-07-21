@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,24 +35,24 @@ namespace ark::os::memory {
 // Dummy lock which locks nothing
 // but has the same methods as RWLock and Mutex.
 // Can be used in Locks Holders.
-class DummyLock {
+class CAPABILITY("mutex") DummyLock {
 public:
-    void Lock() const {}
-    bool TryLock() const
+    void Lock() const ACQUIRE() {}
+    bool TryLock() const TRY_ACQUIRE(true)
     {
         return true;
     }
-    bool TryReadLock() const
+    bool TryReadLock() const TRY_ACQUIRE_SHARED(true)
     {
         return true;
     }
-    bool TryWriteLock() const
+    bool TryWriteLock() const TRY_ACQUIRE(true)
     {
         return true;
     }
-    void Unlock() const {}
-    void ReadLock() const {}
-    void WriteLock() const {}
+    void Unlock() const RELEASE() {}
+    void ReadLock() const ACQUIRE_SHARED() {}
+    void WriteLock() const ACQUIRE() {}
 };
 
 #if defined(PANDA_USE_FUTEX)

@@ -17,8 +17,8 @@ class ArrayClass {
     public static array: byte[] = [1, 2, 3, 4, 5];
 
     public static ChangeStaticArray() {
-        ArrayClass.array[2] = 22;
-        ArrayClass.array[4] = 44;
+        ArrayClass.array[2] = 22 as byte;
+        ArrayClass.array[4] = 44 as byte;
     }
 
     public static CheckStaticArray(): boolean {

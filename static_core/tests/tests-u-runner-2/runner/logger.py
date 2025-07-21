@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@
 #
 
 import logging
-from os import path, makedirs
+from os import makedirs, path
 from pathlib import Path
 
 from runner.enum_types.verbose_format import VerboseKind
@@ -32,7 +32,7 @@ class Log:
         self.logger = logging.getLogger(file_name)
 
     @staticmethod
-    def setup(verbose: VerboseKind, report_root: str) -> 'Log':
+    def setup(verbose: VerboseKind, report_root: Path) -> 'Log':
         root_logger = Log("runner")
 
         log_path = report_root if report_root is not None else \

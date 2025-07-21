@@ -1,0 +1,169 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- # Interfaces with static members and type parameters inside
+cases:
+  - desc: How to get number[] via reflection.
+    logic: |-
+      let type_of_array_number: Type = Type.from<number[]>();
+      assertEQ(type_of_array_number.toString(), "escompat.Array");
+  - desc: How to get object[] via reflection.
+    logic: |-
+      let type_of_Array_Object: Type = Type.from<object[]>();
+      assertEQ(type_of_Array_Object.toString(), "escompat.Array");
+  - desc: How to get Promise<number>[] via reflection.
+    logic: |-
+      let type_of_Array_Promise: Type = Type.from<Promise<number>[]>();
+      assertEQ(type_of_Array_Promise.toString(), "escompat.Array");
+  - desc: How to get bigint via reflection.
+    logic: |-
+      let type_of_bigint: Type = Type.from<bigint>();
+      assertEQ(type_of_bigint.toString(), "escompat.BigInt");
+  - desc: How to get RegExp[] via reflection.
+    logic: |-
+      let type_of_Array_RegExp: Type = Type.from<RegExp[]>();
+      assertEQ(type_of_Array_RegExp.toString(), "escompat.Array");
+  - desc: How to get Set[] via reflection.
+    logic: |-
+      let type_of_Array_Set: Type = Type.from<Set<number>[]>();
+      assertEQ(type_of_Array_Set.toString(), "escompat.Array");
+  - desc: How to get string[] via reflection.
+    logic: |-
+      let type_of_Array_string: Type = Type.from<string[]>();
+      assertEQ(type_of_Array_string.toString(), "escompat.Array");
+  - desc: How to get Promise<string>[] via reflection.
+    logic: |-
+      let type_of_Array_promise: Type = Type.from<Promise<string>[]>();
+      assertEQ(type_of_Array_promise.toString(), "escompat.Array");
+  - desc: How to get User[] via reflection.
+    logic: |-
+      let type_of_Array_UserClass: Type = Type.from<User[]>();
+      assertEQ(type_of_Array_UserClass.toString(), "escompat.Array");
+  - desc: How to get Boolean via reflection.
+    logic: |-
+      let type_of_Bool: Type = Type.from<Boolean>();
+      assertEQ(type_of_Bool.toString(), "std.core.Boolean");
+  - desc: How to get Date via reflection.
+    logic: |-
+      let type_of_date: Type = Type.from<Date>();
+      assertEQ(type_of_date.toString(), "escompat.Date");
+  - desc: How to get Set<string> via reflection.
+    logic: |-
+      let type_of_set: Type = Type.from<Set<string>>();
+      assertEQ(type_of_set.toString(), "escompat.Set");
+  - desc: How to get Map<string, string> via reflection.
+    logic: |-
+      let type_of_map: Type = Type.from<Map<string, string>>();
+      assertEQ(type_of_map.toString(), "escompat.Map");
+  - desc: How to get Int via reflection.
+    logic: |-
+      let type_of_int: Type = Type.from<int>();
+      assertEQ(type_of_int.toString(), "int");
+  - desc: How to get SomeInterface via reflection.
+    logic: |-
+      let type_of_SomeInterface: Type = Type.from<SomeInterface>();
+      assertEQ(type_of_SomeInterface.toString(), "how_to_get_type_via_reflection_ext_14.SomeInterface");
+  - desc: How to get Map via reflection.
+    logic: |-
+      let type_of_Map: Type = Type.from<Map<number, string>>();
+      assertEQ(type_of_Map.toString(), "escompat.Map");
+  - desc: How to get null via reflection.
+    logic: |-
+      let type_of_Null: Type = Type.from<null>();
+      let typeOfNullValue: Type = Type.of(null);
+      assertEQ(typeOfNullValue.toString(), "null");
+  - desc: How to get number via reflection.
+    logic: |-
+      let type_of_number: Type = Type.from<number>();
+      assertEQ(type_of_number.toString(), "double");
+  - desc: How to get object via reflection.
+    logic: |-
+      let type_of_object: Type = Type.from<object>();
+      assertEQ(type_of_object.toString(), "std.core.Object");
+  - desc: How to get Promise<number> via reflection.
+    logic: |-
+      let type_of_Promise: Type = Type.from<Promise<number>>();
+      assertEQ(type_of_Promise.toString(), "std.core.Promise");
+  - desc: How to get RegExp via reflection.
+    logic: |-
+      let type_of_RegExp: Type = Type.from<RegExp>();
+      assertEQ(type_of_RegExp.toString(), "escompat.RegExp");
+  - desc: How to get Set via reflection.
+    logic: |-
+      let type_of_Set: Type = Type.from<Set<number>>();
+      assertEQ(type_of_Set.toString(), "escompat.Set");
+  - desc: How to get string via reflection.
+    logic: |-
+      let type_of_string: Type = Type.from<string>();
+      assertEQ(type_of_string.toString(), "string");
+  - desc: How to get Promise<string> via reflection.
+    logic: |-
+      let type_of_promise: Type = Type.from<Promise<string>>();
+      assertEQ(type_of_promise.toString(), "std.core.Promise");
+  - desc: How to get undefined via reflection.
+    logic: |-
+      let type_of_Undefined: Type = Type.from<undefined>();
+      assertEQ(type_of_Undefined.toString(), "undefined");
+  - desc: How to get User via reflection.
+    logic: |-
+      let type_of_UserClass: Type = Type.from<User>();
+      assertEQ(type_of_UserClass.toString(), "how_to_get_type_via_reflection_ext_25.User");
+  - desc: How to get void via reflection.
+    logic: |-
+      let type_of_void: Type = Type.from<void>();
+      assertEQ(type_of_void.toString(), "void");
+  - desc: How to get BigInt[] via reflection.
+    logic: |-
+      let type_of_Array_Bigint: Type = Type.from<BigInt[]>();
+      assertEQ(type_of_Array_Bigint.toString(), "escompat.Array");
+  - desc: How to get boolean[] via reflection.
+    logic: |-
+      let type_of_Array_bool: Type = Type.from<boolean[]>();
+      assertEQ(type_of_Array_bool.toString(), "escompat.Array");
+  - desc: How to get Date[] via reflection.
+    logic: |-
+      let type_of_Array_Date: Type = Type.from<Date[]>();
+      assertEQ(type_of_Array_Date.toString(), "escompat.Array");
+  - desc: How to get Set<Boolean> via reflection.
+    logic: |-
+      let type_of_Array_set: Type = Type.from<Set<Boolean>>();
+      assertEQ(type_of_Array_set.toString(), "escompat.Set");
+  - desc: How to get int[] via reflection.
+    logic: |-
+      let type_of_Array_int: Type = Type.from<int[]>();
+      assertEQ(type_of_Array_int.toString(), "escompat.Array");
+  - desc: How to get SomeInterface[] via reflection.
+    logic: |-
+      let type_of_Array_Interface: Type = Type.from<SomeInterface[]>();
+      assertEQ(type_of_Array_Interface.toString(), "escompat.Array");
+  - desc: How to get Map[] via reflection.
+    logic: |-
+      let type_of_Array_Map: Type = Type.from<Map<number, string>[]>();
+      assertEQ(type_of_Array_Map.toString(), "escompat.Array");
+  - desc: How to get short via reflection.
+    logic: |-
+      let type_of_short: Type = Type.from<short>();
+      assertEQ(type_of_short.toString(), "short");
+  - desc: How to get byte via reflection.
+    logic: |-
+      let type_of_byte: Type = Type.from<byte>();
+      assertEQ(type_of_byte.toString(), "byte");
+  - desc: How to get enum via reflection.
+    logic: |-
+      enum Color {
+        red = 0,
+        green = 1,
+        blue = 2
+      }
+      let type_of_enum: Type = Type.from<Color>();
+      assertNE(type_of_enum.toString().search("Color"), -1);

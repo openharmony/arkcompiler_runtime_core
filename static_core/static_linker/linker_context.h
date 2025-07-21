@@ -42,7 +42,7 @@ public:
     struct StringChange {
         BytecodeInstruction inst;
         std::string str;
-
+        panda_file::MethodItem *mi;
         panda_file::StringItem *it {};
     };
 
@@ -53,13 +53,16 @@ public:
         panda_file::LiteralArrayItem *it {};
     };
 
-    using Change = std::variant<IndexedChange, StringChange, LiteralArrayChange, std::string, std::function<void()>>;
+    using Change =
+        std::variant<IndexedChange, StringChange, LiteralArrayChange, std::string, std::function<bool(bool peek)>>;
 
     void Add(Change c);
 
     void ApplyDeps(Context *ctx);
 
+    void TryDeletePatch();
     void Patch(const std::pair<size_t, size_t> range);
+    void AddStringDependency();
 
     void Devour(CodePatcher &&p);
 
@@ -122,6 +125,8 @@ public:
     void ComputeLayout();
 
     void Patch();
+
+    void TryDelete();
 
     const std::unordered_map<panda_file::BaseItem *, panda_file::BaseItem *> &GetKnownItems() const
     {
@@ -231,7 +236,8 @@ private:
 
     void MakeChangeWithId(CodePatcher &p, CodeData *data);
 
-    void HandleStringId(CodePatcher &p, const BytecodeInstruction &inst, const panda_file::File *filePtr);
+    void HandleStringId(CodePatcher &p, const BytecodeInstruction &inst, const panda_file::File *filePtr,
+                        CodeData *data);
 
     void HandleLiteralArrayId(CodePatcher &p, const BytecodeInstruction &inst, const panda_file::File *filePtr,
                               const std::map<panda_file::File::EntityId, panda_file::BaseItem *> *items);
@@ -243,6 +249,13 @@ private:
 
     void HandleCandidates(const panda_file::FileReader *reader, const std::vector<panda_file::FieldItem *> &candidates,
                           panda_file::ForeignFieldItem *ff);
+
+    bool MethodFind(const std::string &className, const std::string &methodName,
+                    std::map<std::string, panda_file::BaseClassItem *> &classesMap);
+
+    bool FileFind(const std::string &fileName, std::map<std::string, panda_file::BaseClassItem *> &classesMap);
+
+    bool HandleEntryDependencies();
 
     class ErrorDetail {
     public:

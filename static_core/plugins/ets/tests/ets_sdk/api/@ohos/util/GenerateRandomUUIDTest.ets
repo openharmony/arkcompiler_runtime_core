@@ -42,9 +42,9 @@ function testGenerateRandomUUID(): int {
     const hexDigits = "0123456789abcdef"
     for (let i = 0; i < 36; ++i) {
        if (delimiterIdx.includes(i)) {
-           assertEQ(id[i] as string, "-")
+           assertEQ(id[i], c'-')
        } else {
-           assertTrue(hexDigits.includes(id[i] as string))
+           assertTrue(hexDigits.includes(new Char(id[i]).toString()))
        }
     }
 

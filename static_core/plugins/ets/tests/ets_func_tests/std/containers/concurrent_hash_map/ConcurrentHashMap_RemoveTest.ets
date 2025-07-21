@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 let arrKeysTest: number[] = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10];
@@ -66,10 +68,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch removeAll();
-        let p2 = launch removeAllBack();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(removeAll);
+        let p2 = launch<void, () => void>(removeAllBack);
+        p1.Await();
+        p2.Await();
         assertTrue(concurrentHashMapOne.isEmpty());
     });
 

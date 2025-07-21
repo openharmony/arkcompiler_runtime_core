@@ -140,6 +140,7 @@ TEST_F(ErrorHandlingTest, throw_error_test)
     ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
     ASSERT_EQ(result, ANI_TRUE);
     ASSERT_EQ(env_->ThrowError(nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->ThrowError(nullptr, error), ANI_INVALID_ARGS);
 }
 
 static size_t CountSubstr(const std::string &str, const std::string &substr)
@@ -271,6 +272,11 @@ TEST_F(ErrorHandlingTest, describe_error_thrown_through_native)
     CheckErrorDescription(output, "Error",
                           {"at escompat.Error.<ctor>", GetTraceLine("throwToNativeCaller"),
                            GetTraceLine("callThroughNative"), GetTraceLine("throwErrorThroughNative")});
+}
+
+TEST_F(ErrorHandlingTest, exist_invalid_args_test)
+{
+    ASSERT_EQ(env_->ExistUnhandledError(nullptr), ANI_INVALID_ARGS);
 }
 
 TEST_F(ErrorHandlingTest, exist_multiple_call_test_1)
@@ -443,6 +449,72 @@ TEST_F(ErrorHandlingTest, throw_multiple_call_test)
     for (int32_t i = 0; i < LOOP_COUNT; i++) {
         ASSERT_EQ(env_->ThrowError(error), ANI_OK);
     }
+}
+
+TEST_F(ErrorHandlingTest, manual_create_and_throw_error_test)
+{
+    ani_class errorClass {};
+    ASSERT_EQ(env_->FindClass("Lescompat/Error;", &errorClass), ANI_OK);
+    ASSERT_NE(errorClass, nullptr);
+
+    ani_method constructor {};
+    ASSERT_EQ(env_->Class_FindMethod(errorClass, "<ctor>", "Lstd/core/String;:V", &constructor), ANI_OK);
+    ASSERT_NE(constructor, nullptr);
+
+    ani_string errorMessage {};
+    ASSERT_EQ(env_->String_NewUTF8(MESSAGE_FROM_THROW_ERROR.data(), MESSAGE_FROM_THROW_ERROR.size(), &errorMessage),
+              ANI_OK);
+    ASSERT_NE(errorMessage, nullptr);
+
+    ani_object errorObject {};
+    ASSERT_EQ(env_->Object_New(errorClass, constructor, &errorObject, errorMessage), ANI_OK);
+    ASSERT_NE(errorObject, nullptr);
+
+    ani_boolean hasError = ANI_TRUE;
+    ASSERT_EQ(env_->ExistUnhandledError(&hasError), ANI_OK);
+    ASSERT_EQ(hasError, ANI_FALSE);
+
+    ASSERT_EQ(env_->ThrowError(static_cast<ani_error>(errorObject)), ANI_OK);
+    ASSERT_EQ(env_->ExistUnhandledError(&hasError), ANI_OK);
+    ASSERT_EQ(hasError, ANI_TRUE);
+
+    ani_error thrownError {};
+    ASSERT_EQ(env_->GetUnhandledError(&thrownError), ANI_OK);
+    ASSERT_NE(thrownError, nullptr);
+
+    std::string errorDescription {};
+    GetErrorDescription(env_, errorDescription);
+    CheckErrorDescription(errorDescription, std::string(MESSAGE_FROM_THROW_ERROR), {"at escompat.Error.<ctor>"});
+
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
+    ASSERT_EQ(env_->ExistUnhandledError(&hasError), ANI_OK);
+    ASSERT_EQ(hasError, ANI_FALSE);
+}
+
+TEST_F(ErrorHandlingTest, throw_combined_scenes_test_1)
+{
+    auto func = GetThrowErrorFunction();
+
+    ani_int errorResult = 0;
+    ani_error error {};
+    ani_boolean result = ANI_FALSE;
+    ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
+    ASSERT_EQ(env_->GetUnhandledError(&error), ANI_OK);
+    ASSERT_EQ(env_->ThrowError(error), ANI_OK);
+    ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
+    ASSERT_EQ(result, ANI_TRUE);
+
+    ASSERT_EQ(env_->DescribeError(), ANI_OK);
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
+    ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
+    ASSERT_EQ(result, ANI_FALSE);
+}
+
+TEST_F(ErrorHandlingTest, get_unhandled_invalid_args_test)
+{
+    ani_error error {};
+    ASSERT_EQ(env_->GetUnhandledError(nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->GetUnhandledError(nullptr, &error), ANI_INVALID_ARGS);
 }
 
 TEST_F(ErrorHandlingTest, get_unhandled_multiple_call_test_1)

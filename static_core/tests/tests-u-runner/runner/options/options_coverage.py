@@ -28,9 +28,12 @@ class CoverageOptions:
     def to_dict(self) -> Dict[str, object]:
         return {
             "use-llvm-cov": self.use_llvm_cov,
-            "llvm-cov-profdata-out-path": self.llvm_profdata_out_path,
-            "llvm-cov-html-out-path": self.llvm_cov_html_out_path,
-            "llvm-cov-report-by-components": self.llvm_cov_report_by_components,
+            "use-lcov": self.use_lcov,
+            "profdata-files-dir": self.profdata_files_dir,
+            "coverage-html-report-dir": self.coverage_html_report_dir,
+            "coverage-per-binary": self.coverage_per_binary,
+            "llvm-cov-exclude": self.llvm_cov_exclude,
+            "lcov-exclude": self.lcov_exclude,
         }
 
     @cached_property
@@ -44,38 +47,74 @@ class CoverageOptions:
 
     @cached_property
     @value(
-        yaml_path="general.coverage.llvm-cov-profdata-out-path",
-        cli_name="llvm_profdata_out_path",
-        cast_to_type=_to_dir
-    )
-    def llvm_profdata_out_path(self) -> Optional[str]:
-        return None
-
-    @cached_property
-    @value(
-        yaml_path="general.coverage.llvm-cov-html-out-path",
-        cli_name="llvm_cov_html_out_path",
-        cast_to_type=_to_dir
-    )
-    def llvm_cov_html_out_path(self) -> Optional[str]:
-        return None
-
-    @cached_property
-    @value(
-        yaml_path="general.coverage.llvm-cov-report-by-components",
-        cli_name="llvm_cov_report_by_components",
+        yaml_path="general.coverage.use-lcov",
+        cli_name="use_lcov",
         cast_to_type=_to_bool
     )
-    def llvm_cov_report_by_components(self) -> bool:
+    def use_lcov(self) -> bool:
         return False
+
+    @cached_property
+    @value(
+        yaml_path="general.coverage.profdata-files-dir",
+        cli_name="profdata_files_dir",
+        cast_to_type=_to_dir
+    )
+    def profdata_files_dir(self) -> Optional[str]:
+        return None
+
+    @cached_property
+    @value(
+        yaml_path="general.coverage.coverage-html-report-dir",
+        cli_name="coverage_html_report_dir",
+        cast_to_type=_to_dir
+    )
+    def coverage_html_report_dir(self) -> Optional[str]:
+        return None
+
+    @cached_property
+    @value(
+        yaml_path="general.coverage.coverage-per-binary",
+        cli_name="coverage_per_binary",
+        cast_to_type=_to_bool
+    )
+    def coverage_per_binary(self) -> bool:
+        return False
+
+    @cached_property
+    @value(
+        yaml_path="general.coverage.llvm-cov-exclude",
+        cli_name="llvm_cov_exclude",
+    )
+    def llvm_cov_exclude(self) -> Optional[str]:
+        return None
+
+    @cached_property
+    @value(
+        yaml_path="general.coverage.lcov-exclude",
+        cli_name="lcov_exclude",
+    )
+    def lcov_exclude(self) -> Optional[str]:
+        return None
 
     def get_command_line(self) -> str:
         options = [
             '--use-llvm-cov' if self.use_llvm_cov else '',
-            f'--llvm-profdata-out-path="{self.llvm_profdata_out_path}"'
-            if self.llvm_profdata_out_path is not None else '',
-            f'--llvm-cov-html-out-path="{self.llvm_cov_html_out_path}"'
-            if self.llvm_cov_html_out_path is not None else '',
-            '--llvm-cov-report-by-components' if self.llvm_cov_report_by_components else '',
+
+            '--use-lcov' if self.use_lcov else '',
+
+            '--coverage-per-binary' if self.coverage_per_binary else '',
+
+            f'--profdata-files-dir="{self.profdata_files_dir}"'
+            if self.profdata_files_dir is not None else '',
+
+            f'--coverage-html-report-dir="{self.coverage_html_report_dir}"'
+            if self.coverage_html_report_dir is not None else '',
+
+            f'--llvm-cov-exclude="{self.llvm_cov_exclude}"'
+            if self.llvm_cov_exclude is not None else '',
+
+            f'--lcov-exclude="{self.lcov_exclude}"'
+            if self.lcov_exclude is not None else '',
         ]
         return ' '.join(options)

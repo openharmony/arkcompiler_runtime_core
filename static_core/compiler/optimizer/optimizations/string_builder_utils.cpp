@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,13 +32,13 @@ bool IsStringBuilderInstance(Inst *inst)
     return runtime->IsClassStringBuilder(klass);
 }
 
-bool IsMethodStringConcat(Inst *inst)
+bool IsMethodStringConcat(const Inst *inst)
 {
     if (inst->GetOpcode() != Opcode::CallStatic && inst->GetOpcode() != Opcode::CallVirtual) {
         return false;
     }
 
-    auto call = static_cast<CallInst *>(inst);
+    auto call = static_cast<const CallInst *>(inst);
     if (call->IsInlined()) {
         return false;
     }
@@ -47,7 +47,7 @@ bool IsMethodStringConcat(Inst *inst)
     return runtime->IsMethodStringConcat(call->GetCallMethod());
 }
 
-bool IsMethodStringBuilderConstructorWithStringArg(Inst *inst)
+bool IsMethodStringBuilderConstructorWithStringArg(const Inst *inst)
 {
     if (inst->GetOpcode() != Opcode::CallStatic) {
         return false;
@@ -62,7 +62,7 @@ bool IsMethodStringBuilderConstructorWithStringArg(Inst *inst)
     return runtime->IsMethodStringBuilderConstructorWithStringArg(call->GetCallMethod());
 }
 
-bool IsMethodStringBuilderConstructorWithCharArrayArg(Inst *inst)
+bool IsMethodStringBuilderConstructorWithCharArrayArg(const Inst *inst)
 {
     if (inst->GetOpcode() != Opcode::CallStatic) {
         return false;
@@ -77,11 +77,11 @@ bool IsMethodStringBuilderConstructorWithCharArrayArg(Inst *inst)
     return runtime->IsMethodStringBuilderConstructorWithCharArrayArg(call->GetCallMethod());
 }
 
-bool IsStringBuilderToString(Inst *inst)
+bool IsStringBuilderToString(const Inst *inst)
 {
     auto runtime = inst->GetBasicBlock()->GetGraph()->GetRuntime();
     if (inst->GetOpcode() == Opcode::CallStatic || inst->GetOpcode() == Opcode::CallVirtual) {
-        auto callInst = static_cast<CallInst *>(inst);
+        auto callInst = static_cast<const CallInst *>(inst);
         return !callInst->IsInlined() && runtime->IsMethodStringBuilderToString(callInst->GetCallMethod());
     }
     if (inst->IsIntrinsic()) {
@@ -91,7 +91,7 @@ bool IsStringBuilderToString(Inst *inst)
     return false;
 }
 
-bool IsMethodStringBuilderDefaultConstructor(Inst *inst)
+bool IsMethodStringBuilderDefaultConstructor(const Inst *inst)
 {
     if (inst->GetOpcode() != Opcode::CallStatic) {
         return false;
@@ -106,8 +106,70 @@ bool IsMethodStringBuilderDefaultConstructor(Inst *inst)
     return runtime->IsMethodStringBuilderDefaultConstructor(call->GetCallMethod());
 }
 
+static bool IsMethodOrIntrinsicCall(const Inst *inst, const Inst *self)
+{
+    const Inst *actualSelf = nullptr;
+    if (inst->GetOpcode() == Opcode::CallStatic) {
+        auto *call = inst->CastToCallStatic();
+        if (call->IsInlined()) {
+            return false;
+        }
+        actualSelf = call->GetObjectInst();
+    } else if (inst->IsIntrinsic()) {
+        auto *intrinsic = inst->CastToIntrinsic();
+        actualSelf = intrinsic->GetInput(0).GetInst();
+    } else {
+        return false;
+    }
+
+    if (self == nullptr) {
+        return true;
+    }
+
+    // Skip NullChecks
+    while (actualSelf->IsNullCheck()) {
+        actualSelf = actualSelf->CastToNullCheck()->GetInput(0).GetInst();
+    }
+    return actualSelf == self;
+}
+
+bool IsStringBuilderCtorCall(const Inst *inst, const Inst *self)
+{
+    if (!IsMethodOrIntrinsicCall(inst, self)) {
+        return false;
+    }
+
+    return IsMethodStringBuilderDefaultConstructor(inst) || IsMethodStringBuilderConstructorWithStringArg(inst) ||
+           IsMethodStringBuilderConstructorWithCharArrayArg(inst);
+}
+
+bool IsStringBuilderMethod(const Inst *inst, const Inst *self)
+{
+    if (!IsMethodOrIntrinsicCall(inst, self)) {
+        return false;
+    }
+
+    return IsStringBuilderCtorCall(inst, self) || IsStringBuilderAppend(inst) || IsStringBuilderToString(inst);
+}
+
+bool IsNullCheck(const Inst *inst, const Inst *self)
+{
+    return inst->IsNullCheck() && (self == nullptr || inst->CastToNullCheck()->GetInput(0) == self);
+}
+
+bool IsIntrinsicStringConcat(const Inst *inst)
+{
+    if (!inst->IsIntrinsic()) {
+        return false;
+    }
+
+    auto runtime = inst->GetBasicBlock()->GetGraph()->GetRuntime();
+    return runtime->IsIntrinsicStringConcat(inst->CastToIntrinsic()->GetIntrinsicId());
+}
+
 void InsertBeforeWithSaveState(Inst *inst, Inst *before)
 {
+    ASSERT(before != nullptr);
     if (inst->RequireState()) {
         before->InsertBefore(inst->GetSaveState());
     }
@@ -132,6 +194,7 @@ void InsertBeforeWithInputs(Inst *inst, Inst *before)
     }
 
     if (inst->GetBasicBlock() == nullptr) {
+        ASSERT(before != nullptr);
         before->InsertBefore(inst);
     }
 }
@@ -338,7 +401,7 @@ SaveStateInst *FindFirstSaveState(BasicBlock *block)
     return nullptr;
 }
 
-void RemoveFromInstructionInputs(ArenaVector<InputDesc> &inputDescriptors)
+void RemoveFromInstructionInputs(ArenaVector<InputDesc> &inputDescriptors, bool doMarkSaveStates)
 {
     // Inputs must be walked in reverse order for removal
     std::sort(inputDescriptors.begin(), inputDescriptors.end(),
@@ -348,6 +411,15 @@ void RemoveFromInstructionInputs(ArenaVector<InputDesc> &inputDescriptors)
         auto inst = inputDesc.first;
         auto index = inputDesc.second;
         inst->RemoveInput(index);
+        if (inst->IsSaveState() && doMarkSaveStates) {
+            auto *saveState = static_cast<SaveStateInst *>(inst);
+            saveState->SetInputsWereDeleted();
+#ifndef NDEBUG
+            if (!saveState->CanRemoveInputs()) {
+                saveState->SetInputsWereDeletedSafely();  // assuming this is safe
+            }
+#endif
+        }
     }
 }
 

@@ -32,7 +32,10 @@ function runTest() {
         print('ETS runtime created');
     }
 
-    test.attachTest();
+    test.callJsBuiltinTest();
+    test.loadJsModuleTest();
+    test.callJsFunctionTest();
+    test.callJsAsyncFunctionTest();
 }
 
 runTest();

@@ -81,7 +81,7 @@ cases:
           // Returning values of types Promise<T> and T from async methods is allowed.
           class A {
               async foo(p: string): Promise<String> {
-                  return launch ((): Object => new Object())()
+                  return ((): Promise<Object> => new Object())()
               }
           }
 

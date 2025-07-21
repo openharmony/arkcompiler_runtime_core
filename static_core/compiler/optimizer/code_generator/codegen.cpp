@@ -115,7 +115,7 @@ public:
         auto lr = codegen->GetTarget().GetLinkReg();
         auto fl = codegen->GetFrameLayout();
         codegen->CreateStackMap(saveState_->CastToSaveStateOsr());
-        ssize_t slot = CFrameLayout::LOCALS_START_SLOT + CFrameLayout::GetLocalsCount() - 1U;
+        auto slot = static_cast<ssize_t>(CFrameLayout::LOCALS_START_SLOT + CFrameLayout::GetLocalsCount() - 1U);
         encoder->EncodeStp(
             codegen->FpReg(), lr,
             MemRef(codegen->FpReg(),
@@ -211,6 +211,7 @@ void Codegen::CreateFrameInfo()
     auto frame = GetGraph()->GetLocalAllocator()->New<FrameInfo>(
         FrameInfo::PositionedCallers::Encode(true) | FrameInfo::PositionedCallees::Encode(true) |
         FrameInfo::CallersRelativeFp::Encode(false) | FrameInfo::CalleesRelativeFp::Encode(true));
+    ASSERT(frame != nullptr);
     frame->SetFrameSize(fl.GetFrameSize<CFrameLayout::OffsetUnit::BYTES>());
     frame->SetSpillsCount(fl.GetSpillsCount());
 
@@ -268,6 +269,13 @@ void Codegen::EmitSimdIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_un
 
 void Codegen::EmitReverseIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
                                    [[maybe_unused]] SRCREGS src)
+{
+    ASSERT(0);
+    GetEncoder()->SetFalseResult();
+}
+
+void Codegen::EmitJsCastDoubleToCharIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
+                                              [[maybe_unused]] SRCREGS src)
 {
     ASSERT(0);
     GetEncoder()->SetFalseResult();
@@ -905,7 +913,8 @@ void Codegen::CreateStackMapRec(SaveStateInst *saveState, bool requireVregMap, I
         // 1 for acc, number of env regs for dynamic method
         vregsCount += 1U + GetGraph()->GetEnvCount();
 #ifndef NDEBUG
-        ASSERT_PRINT(!saveState->GetInputsWereDeleted(), "Some vregs were deleted from the save state");
+        ASSERT_PRINT(!saveState->GetInputsWereDeleted() || saveState->GetInputsWereDeletedSafely(),
+                     "Some vregs were deleted from the save state");
 #endif
     }
 
@@ -1101,6 +1110,7 @@ bool Codegen::EmitCallRuntimeCode(Inst *inst, std::variant<EntrypointId, Reg> en
 
 void Codegen::SaveRegistersForImplicitRuntime(Inst *inst, RegMask *paramsMask, RegMask *mask)
 {
+    ASSERT(inst->GetSaveState() != nullptr);
     auto &rootsMask = inst->GetSaveState()->GetRootsRegsMask();
     for (auto i = 0U; i < inst->GetInputsCount(); i++) {
         auto input = inst->GetDataFlowInput(i);
@@ -1699,6 +1709,7 @@ void Codegen::EmitResolveStatic(ResolveStaticInst *resolver)
     auto method = GetCallerOfUnresolvedMethod(resolver);
     ScopedTmpReg tmp(GetEncoder());
     auto utypes = GetRuntime()->GetUnresolvedTypes();
+    ASSERT(utypes != nullptr);
     auto skind = UnresolvedTypesInterface::SlotKind::METHOD;
     auto methodAddr = utypes->GetTableSlot(method, resolver->GetCallMethodId(), skind);
     GetEncoder()->EncodeMov(tmp.GetReg(), Imm(methodAddr));
@@ -1949,6 +1960,7 @@ void Codegen::CreatePostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2, RegMask 
     PostWriteBarrier pwb(this, inst);
     Inst *secondValue;
     Inst *val = InstStoredValue(inst, &secondValue);
+    ASSERT(val != nullptr);
     ASSERT(secondValue == nullptr || reg2 != INVALID_REGISTER);
     if (val->GetOpcode() == Opcode::NullPtr) {
         // We can don't encode Post barrier for nullptr
@@ -1956,7 +1968,7 @@ void Codegen::CreatePostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2, RegMask 
             return;
         }
         // CallPostWRB only for second reg
-        auto secondMemOffset = reg1.GetSize() / BITS_PER_BYTE;
+        auto secondMemOffset = static_cast<ssize_t>(reg1.GetSize() / BITS_PER_BYTE);
         if (!mem.HasIndex()) {
             MemRef secondMem(mem.GetBase(), mem.GetDisp() + secondMemOffset);
             pwb.Encode(secondMem, reg2, INVALID_REGISTER, !IsInstNotNull(secondValue), preserved);

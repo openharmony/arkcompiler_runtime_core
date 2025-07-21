@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,8 @@ namespace ark::ets::interop::js::ets_proxy {
 
 PANDA_PUBLIC_API napi_value GetETSFunction(napi_env env, std::string_view packageName, std::string_view methodName);
 PANDA_PUBLIC_API napi_value GetETSClass(napi_env env, std::string_view classDescriptor);
+PANDA_PUBLIC_API napi_value GetETSInstance(napi_env env, std::string_view classDescriptor);
+PANDA_PUBLIC_API napi_value GetETSModule(napi_env env, const std::string &moduleName);
 
 }  // namespace ark::ets::interop::js::ets_proxy
 

@@ -1,5 +1,5 @@
 # plugin ets_string
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,6 +13,7 @@
 # limitations under the License.
 
 include_relative 'string_helpers.irt'
+include_relative '../../plugins/ets/irtoc_scripts/common.irt'
 
 module Constants
   MEM_BLOCK_8_BYTES = "8"
@@ -21,11 +22,15 @@ module Constants
   MEM_BLOCK_32_ALIGN_MASK = "~31ULL"
   LOG2_BITS_PER_U8 = "3"
   LOG2_BITS_PER_U16 = "4"
+  LOG2_BYTES_PER_U16 = "1"
+  LOG2_BYTES_PER_OBJ_PTR = "2" # object pointer has a size of 4 bytes on each supported platform
   XOR_SUB_U8_MASK = "0x0101010101010101ULL"
   XOR_AND_U8_MASK = "0x8080808080808080ULL"
   MAX_U8_VALUE = "255"
   U8_SIZE = "1"
   U16_SIZE = "2"
+  OBJ_PTR_SIZE = "ark::OBJECT_POINTER_SIZE"
+  WRONG_CHAR_FLAG_MASK = "0x10000UL"
 end
 
 # It is assumed that _begin_index and _end_index are safe and does not check/normalize them.
@@ -41,7 +46,7 @@ macro(:fast_substring) do |_str, _str_len, _begin_index, _end_index, _not_compre
     _same_str := Cast(_str).SrcType(Constants::COMPILER_REFERENCE).ptr
     Goto(:_Fast_Substring_Result_No_Barrier)
   }
-  _klass := LoadI(_str).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  _klass := load_class(_str)
   If(_char_count, 0).EQ.Unlikely.b {
     # Allocate and return an empty string
     _empty_str := allocate_string_tlab(_klass, 0)
@@ -232,7 +237,7 @@ function(:StringEmpty,
     next
   end
 
-  klass := LoadI(str).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  klass := load_class(str)
   empty_str := allocate_string_tlab(klass, 0)
   # String is supposed to be a constant object, so all its data should be visible by all threads
   Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
@@ -837,6 +842,302 @@ function(:StringGetBytesTlab,
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
+###
+# Char codes in an instance of 'escompat.Array' are represented as an array of object pointers to instances of the
+# boxing class 'std.core.Double'. Runtime stores such objects as instances of the 'ark::ets::EtsBoxPrimitive' class
+# and every instance has a field of type 'double', the value.
+#
+# The macro reads the boxed value by an object pointer and applies unboxing.
+#
+scoped_macro(:load_char_code) do |char_codes, offset|
+  _boxed_ptr := get_object_pointer(char_codes, offset)
+  _char_core := LoadI(_boxed_ptr).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).f64
+end  # load_char_code
+
+###
+# Tries to convert flag_char_pair, the result of calling the JS_CAST_DOUBLE_TO_CHAR intrinsic, into a Utf16 char (u16).
+# The macro checks whether the conversion was successful: whether an overflow or underflow takes place during the
+# conversion of a denormalized number and if so goes to the slow path.
+#
+scoped_macro(:validate_flag_char_pair) do |flag_char_pair|
+  _convertible1 := Cast(1).b
+  If(AndI(flag_char_pair).Imm(Constants::WRONG_CHAR_FLAG_MASK).u32, 0).NE.Unlikely {
+    _convertible2 := Cast(0).b
+  }
+  _convertible := Phi(_convertible1, _convertible2).b
+end  # validate_flag_char_pair
+
+###
+# Tries to convert a char_code into a Utf16 char (u16).
+# The macro checks whether the conversion was successful: whether an overflow or underflow takes place during the
+# conversion of a denormalized number and if so goes to the slow path.
+#
+scoped_macro(:validate_char_code) do |char_code|
+  _flag_char_pair := Intrinsic(:JS_CAST_DOUBLE_TO_CHAR, char_code).u32
+  _convertible := validate_flag_char_pair(_flag_char_pair)
+end  # validate_char_code
+
+###
+# Checks if starting from codes_data the specified number of codes (codes_count) are convertible: whenever
+# an overflow or underflow takes place during the conversion of a denormalized number we have to go to the
+# slow path.
+#
+scoped_macro(:is_array_of_convertible_char_codes) do |codes_data, codes_count|
+  if Options.jscvt_feature_enabled?
+    _convertible := Cast(1).b
+  else
+    _offset1 := Cast(0).u64
+    _codes_len := ShlI(codes_count).Imm(Constants::LOG2_BYTES_PER_OBJ_PTR).u64
+    _convertible1 := Cast(1).b
+Label(:Loop)
+    _offset := Phi(_offset1, _offset2).u64
+    If(_offset, _codes_len).AE.Unlikely {
+      Goto(:LoopDone)
+    }
+    _convertible2 := validate_char_code(load_char_code(codes_data, _offset).f64)
+    If(_convertible2, 0).EQ.Unlikely.b {
+      Goto(:LoopDone)
+    }
+    _offset2 := AddI(_offset).Imm(Constants::OBJ_PTR_SIZE).u64
+    Goto(:Loop)
+Label(:LoopDone)
+    _convertible := Phi(_convertible1, _convertible2).b
+  end
+end # is_array_of_convertible_char_codes
+
+###
+# Converts a flag_char_pair, the result of calling the JS_CAST_DOUBLE_TO_CHAR intrinsic, into a Utf16 char (u16).
+# Note, a caller of this macro must be sure the conversion will always be successful: neither overflow nor
+# underflow will take place during the conversion of a denormalized number.
+#
+scoped_macro(:get_char_from_flag_char_pair) do |flag_char_pair|
+  if !Options.jscvt_feature_enabled? and defines.DEBUG
+    If(AndI(flag_char_pair).Imm(Constants::WRONG_CHAR_FLAG_MASK).u32, 0).NE.Unlikely {
+      Intrinsic(:UNREACHABLE).Terminator.void
+    }
+  end
+  _char := Cast(flag_char_pair).u16
+end  # get_char_from_flag_char_pair
+
+###
+# Converts a char_code (f64) into a Utf16 char (u16).
+# Note, a caller of this macro must be sure the conversion will always be successful: neither overflow nor
+# underflow will take place during the conversion of a denormalized number.
+#
+scoped_macro(:get_char_from_code) do |char_code|
+  _flag_char_pair := Intrinsic(:JS_CAST_DOUBLE_TO_CHAR, char_code).u32
+  _char := get_char_from_flag_char_pair(_flag_char_pair)
+end  # get_char_from_code
+
+###
+# Checks if starting from codes_data the specified number of codes (codes_count) represent
+# an array of compressible chars
+#
+# Utf16 char is ASCII if (utf16_char - 1U < utf::UTF8_1B_MAX)
+# See runtime/include/coretypes/string.h - IsASCIICharacter
+#
+scoped_macro(:is_array_of_compressible_char_codes) do |codes_data, codes_count|
+  _offset1 := Cast(0).u64
+  _codes_len := ShlI(codes_count).Imm(Constants::LOG2_BYTES_PER_OBJ_PTR).u64
+  _compressible1 := Cast(1).b
+Label(:Loop)
+  _offset := Phi(_offset1, _offset2).u64
+  If(_offset, _codes_len).AE.Unlikely {
+    Goto(:LoopDone)
+  }
+  _char := get_char_from_code(load_char_code(codes_data, _offset).f64)
+  If(SubI(_char).Imm(Constants::STRING_MUTF8_1B_MIN).u16, Cast(Constants::STRING_MUTF8_1B_MAX).u16).AE.Unlikely {
+    _compressible2 := Cast(0).b
+    Goto(:LoopDone)
+  }
+  _offset2 := AddI(_offset).Imm(Constants::OBJ_PTR_SIZE).u64
+  Goto(:Loop)
+
+Label(:LoopDone)
+  _compressible := Phi(_compressible1, _compressible2).b
+end  # is_array_of_compressible_char_codes
+
+###
+# Converts char codes (numbers) to chars with type equals either to "u8" or "u16". For type equals to "u8", it is
+# assumed that all char codes represent compressible chars.
+#
+["u8", "u16"].each do |type|
+  scoped_macro("convert_char_codes_to_#{type}_chars".to_sym) do |src, dst, count|
+    compressed_string = type == "u8"
+    _i1 := Cast(0).u64
+Label(:Loop)
+    _i := Phi(_i1, _i2).u64
+    If(_i, count).AE.Unlikely {
+      Goto(:LoopDone)
+    }
+    _code_offset := ShlI(_i).Imm(Constants::LOG2_BYTES_PER_OBJ_PTR).u64
+    _char := get_char_from_code(load_char_code(src, _code_offset).f64)
+    if compressed_string
+      _char_offset := Cast(_i).u64
+      Store(dst, _char_offset, _char).u8
+    else
+      _char_offset := ShlI(_i).Imm(Constants::LOG2_BYTES_PER_U16).u64
+      Store(dst, _char_offset, _char).u16
+    end
+    _i2 := AddI(_i).Imm(1).u64
+    Goto(:Loop)
+
+Label(:LoopDone)
+  end  # convert_char_codes_to_#{type}_chars
+end
+
+def GenerateCreateStringFromCharCodeTlab(string_compression_enabled)
+  suffix = (string_compression_enabled ? "Compressed" : "")
+  available_regs = $panda_mask
+  function("CreateStringFromCharCodeTlab#{suffix}".to_sym,
+            params: {char_codes: 'ref', string_klass: 'ref'},
+            regmap: $full_regmap,
+            regalloc_set: available_regs,
+            mode: [:FastPath]) {
+
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+      ReturnVoid().void
+      next
+    end
+
+    # There is no check of the arguments against NullPointer as
+    # it's done in the InstBuilder (see AddArgNullcheckIfNeeded) for non-empty arrays
+    # and we suppose that the `NewArray (size=0)` instruction never returns `null`.
+    if defines.DEBUG
+      If(char_codes, 0).EQ {
+        Intrinsic(:UNREACHABLE).Terminator.void
+      }
+    end
+
+    char_codes_array := get_object_pointer_imm(char_codes, EtsConstants::ESCOMPAT_ARRAY_DATA_OFFSET)
+    codes_data := AddI(char_codes_array).Imm(Constants::ARRAY_DATA_OFFSET).ptr
+    codes_count := LoadI(char_codes_array).Imm(Constants::ARRAY_LENGTH_OFFSET).u32
+
+    # Validate if all the char codes are convertible: whenever an overflow or underflow takes place during the
+    # conversion of a denormalized number we have to go to the slow path. The validation must take place before
+    # any attempts to allocate the memory in TLAB.
+    convertible := is_array_of_convertible_char_codes(codes_data, Cast(codes_count).u64)
+    If(convertible, 0).EQ.Unlikely {
+      Goto(:SlowPathEntrypoint)
+    }
+
+    # Allocate a new string
+    if string_compression_enabled
+      compressible := is_array_of_compressible_char_codes(codes_data, Cast(codes_count).u64)
+      If(compressible, 1).EQ.Likely {
+        data_size1 := Cast(codes_count).word
+      } Else {
+        data_size2 := Cast(ShlI(codes_count).Imm(Constants::LOG2_BYTES_PER_U16).u32).word
+      }
+      data_size := Phi(data_size1, data_size2).word
+    else
+      data_size := Cast(ShlI(codes_count).Imm(Constants::LOG2_BYTES_PER_U16).u32).word
+    end
+    new_str := allocate_string_tlab(string_klass, data_size)
+    str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
+
+    # Copy data from char_codes to the new string with the required preprocessing
+    # String length field is set according to SetLength() from runtime/include/coretypes/string.h
+    if string_compression_enabled
+      If(compressible, 1).EQ.Likely {
+        convert_char_codes_to_u8_chars(codes_data, str_data, Cast(codes_count).u64)
+        StoreI(new_str, ShlI(codes_count).Imm(Constants::LOG2_BYTES_PER_U16).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+      } Else {
+        convert_char_codes_to_u16_chars(codes_data, str_data, Cast(codes_count).u64)
+        StoreI(new_str, OrI(ShlI(codes_count).Imm(Constants::LOG2_BYTES_PER_U16).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+      }
+    else
+      convert_char_codes_to_u16_chars(codes_data, str_data, Cast(codes_count).u64)
+      StoreI(new_str, codes_count).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    end
+    # String is supposed to be a constant object, so all its data should be visible by all threads
+    Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+    Return(new_str).ptr
+
+  Label(:SlowPathEntrypoint)
+    entrypoint = get_entrypoint_offset("CREATE_STRING_FROM_CHAR_CODE_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, char_codes).AddImm(entrypoint).MethodAsImm("CreateStringFromCharCode2ArgBridge").Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  }
+end # def GenerateCreateStringFromCharCodeTlab
+
+GenerateCreateStringFromCharCodeTlab(string_compression_enabled=true)
+GenerateCreateStringFromCharCodeTlab(string_compression_enabled=false)
+
+def GenerateCreateStringFromCharCodeSingleTlab(string_compression_enabled)
+  suffix = (string_compression_enabled ? "Compressed" : "")
+  available_regs = $panda_mask
+  function("CreateStringFromCharCodeSingleTlab#{suffix}".to_sym,
+            params: {char_code: 'u64', string_klass: 'ref'},
+            regmap: $full_regmap,
+            regalloc_set: available_regs,
+            mode: [:FastPath]) {
+
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+      ReturnVoid().void
+      next
+    end
+
+    char_code_num := Bitcast(char_code).f64
+    flag_char_pair := Intrinsic(:JS_CAST_DOUBLE_TO_CHAR, char_code_num).u32
+    if !Options.jscvt_feature_enabled?
+      # Validate if the char code is convertible: whenever an overflow or underflow takes place during the
+      # conversion of a denormalized number we have to go to the slow path. The validation must take place before
+      # any attempts to allocate the memory in TLAB.
+      convertible := validate_flag_char_pair(flag_char_pair)
+      If(convertible, 0).EQ.Unlikely {
+         Goto(:SlowPathEntrypoint)
+      }
+    end
+
+    # Allocate a new string
+    char := get_char_from_flag_char_pair(flag_char_pair)
+    if string_compression_enabled
+      If(SubI(char).Imm(Constants::STRING_MUTF8_1B_MIN).u16, Cast(Constants::STRING_MUTF8_1B_MAX).u16).AE.Unlikely {
+        compressible1 := Cast(0).b
+        data_size1 := Cast(2).word
+      } Else {
+        compressible2 := Cast(1).b
+        data_size2 := Cast(1).word
+      }
+      compressible := Phi(compressible1, compressible2).b
+      data_size := Phi(data_size1, data_size2).word
+    else
+      data_size := Cast(2).word
+    end
+
+    new_str := allocate_string_tlab(string_klass, data_size)
+    str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
+
+    # Copy the char to the new string with the required preprocessing
+    # String length field is set according to SetLength() from runtime/include/coretypes/string.h
+    if string_compression_enabled
+      If(compressible, 1).EQ.Likely {
+        Store(str_data, Cast(0).u64, char).u8
+        StoreI(new_str, Cast(2).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+      } Else {
+        Store(str_data, Cast(0).u64, char).u16
+        StoreI(new_str, OrI(Cast(2).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+      }
+    else
+      Store(str_data, Cast(0).u64, char).u16  
+      StoreI(new_str, Cast(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    end
+    # String is supposed to be a constant object, so all its data should be visible by all threads
+    Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+    Return(new_str).ptr
+
+  Label(:SlowPathEntrypoint)
+    entrypoint = get_entrypoint_offset("CREATE_STRING_FROM_CHAR_CODE_SINGLE_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, char_code).AddImm(entrypoint).MethodAsImm("CreateStringFromCharCodeSingle2ArgBridge").Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  }
+end # def GenerateCreateStringFromCharCodeSingleTlab
+
+GenerateCreateStringFromCharCodeSingleTlab(string_compression_enabled=true)
+GenerateCreateStringFromCharCodeSingleTlab(string_compression_enabled=false)
 
 # String contains 8-bit chars
 # 0 < str_data_size < 8
@@ -1311,7 +1612,7 @@ function(:StringRepeatTlab,
   }
 
   IfImm(Compare(count, 0).EQ.b).Imm(0).NE {
-    klass := LoadI(str).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+    klass := load_class(str)
     new_str := allocate_string_tlab(klass, Cast(0).u64);
     Return(new_str).ptr
   }
@@ -1321,7 +1622,7 @@ function(:StringRepeatTlab,
   }
 
   length := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32;
-  klass := LoadI(str).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  klass := load_class(str)
   old_buf := AddI(str).Imm(Constants::STRING_DATA_OFFSET).ptr
   uncompressed := AndI(length).Imm(1).u32
   length := Shl(ShrI(length).Imm(1).u32, uncompressed).u32
@@ -1367,3 +1668,90 @@ Label(:SlowPathEntrypoint)
   Intrinsic(:SLOW_PATH_ENTRY, str, count).AddImm(entrypoint).MethodAsImm("StringRepeatUsualBridge").Terminator.ptr
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
+
+function(:WriteStringToMem,
+          params: {mem: 'i64', str: 'ref'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    next
+  end
+
+  buf := Bitcast(mem).ptr
+  len := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  utf16 := AndI(len).Imm(1).u32
+  len_0 := ShrI(len).Imm(1).u32
+  len := len_0
+
+  If(len, 0).EQ.Unlikely.b {
+      Goto(:End)
+  }
+
+  If(utf16, 1).EQ.Unlikely.b {
+    mark := 0xfeff
+    StoreI(buf, mark).Imm(0).u16
+    len_1 := ShlI(len).Imm(1).u32
+    buf_1 := AddI(buf).Imm(2).ptr
+  }
+  buf := Phi(buf, buf_1).ptr
+  len := Phi(len, len_1).u32
+
+  str_data := AddI(str).Imm(Constants::STRING_DATA_OFFSET).ptr
+  copy_u8_chars(str_data, buf, len);
+
+  If(utf16, 1).EQ.Unlikely.b {
+    len_1 := AddI(len).Imm(2).u32
+  }
+
+Label(:End)
+  len := Phi(len_0, len, len_1).u32
+  Return(len).u32
+}
+
+function(:CreateStringFromMem,
+          params: {buf: 'i64', len: 'i32', klass: 'ref'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    next
+  end
+
+  addr := Bitcast(buf).ptr
+  mark := LoadI(addr).Imm(0).u16
+
+  If(mark, Cast(0xFEFF).u16).EQ.Unlikely.b {  # UTF-16 string
+    size_1 := SubI(len).Imm(2).i32
+    addr_1 := AddI(addr).Imm(2).ptr                
+  }
+
+  size := Phi(len, size_1).i32
+  addr := Phi(addr, addr_1).ptr
+
+  str := allocate_string_tlab_no_debug(klass, size)
+  str_data := AddI(str).Imm(Constants::STRING_DATA_OFFSET).ptr
+  copy_u8_chars(addr, str_data, size);
+  size_0 := ShlI(size).Imm(1).u32
+
+  If(mark, Cast(0xFEFF).u16).EQ.Unlikely.b {  # UTF-16 string
+    size_1 := OrI(ShrI(size_0).Imm(1).u32).Imm(1).u32
+  }
+
+  size := Phi(size_0, size_1).u32
+  str_len := AddI(str).Imm(Constants::STRING_LENGTH_OFFSET).ptr
+  StoreI(str_len, size).Imm(0).u32
+
+  Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+  Return(str).ptr
+
+  Label(:SlowPathEntrypoint)
+  eid = get_entrypoint_offset("CREATE_STRING_FROM_MEM_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, buf, len).AddImm(eid).MethodAsImm("CreateStringFromMem3ArgBridge").Terminator.ptr
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}
+

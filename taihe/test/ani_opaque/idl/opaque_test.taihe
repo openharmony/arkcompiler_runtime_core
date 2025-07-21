@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 function is_string(s: Opaque): bool;
-function get_object():Opaque;
-function get_objects(): Array<Opaque>;
+function get_object(): @sts_type("string") Opaque;
+function get_objects(): Array<@sts_type("NullishType") Opaque>;
 union Union {
   sValue: String;
   oValue: Opaque;
 }
 struct Person{
-    name: String;
+  name: String;
 }
 function is_opaque(s: Union): bool;

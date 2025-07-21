@@ -90,6 +90,7 @@ module Constants
     CLASS_STATE_OFFSET = "cross_values::GetClassStateOffset(GetArch())"
     ARRAY_LENGTH_OFFSET = "cross_values::GetCoretypesArrayLengthOffset(GetArch())"
     ARRAY_DATA_OFFSET = "cross_values::GetCoretypesArrayDataOffset(GetArch())"
+    ARRAY_CLASS_SIZE = "sizeof(coretypes::Array)"
     ARRAY_CLASS_SIZE_WITH_ALIGNMENT = "sizeof(coretypes::Array) + TLAB_ALIGNMENT - 1"
     VREGISTERS_NUM_OFFSET = "cross_values::GetFrameNumVregsOffset(GetArch())"
     VREGISTERS_OFFSET = "cross_values::GetFrameVregsOffset(GetArch())"
@@ -201,6 +202,7 @@ module Constants
     STRING_CLASS_SIZE = "sizeof(coretypes::String)"
     STRING_CLASS_SIZE_WITH_ALIGNMENT = "sizeof(coretypes::String) + TLAB_ALIGNMENT - 1"
     STRING_MUTF8_1B_MAX = "0x7f"
+    STRING_MUTF8_1B_MIN = "0x01"
     STRING_LENGTH_OFFSET = "ark::coretypes::STRING_LENGTH_OFFSET"
     STRING_HASHCODE_OFFSET = "ark::coretypes::STRING_HASHCODE_OFFSET"
     STRING_DATA_OFFSET = "ark::coretypes::STRING_DATA_OFFSET"
@@ -303,6 +305,24 @@ end
     macro(:"#{from}to#{to}") do |arg|
       Cast(arg).SrcType("DataType::#{from_type}").send(:"#{to}")
     end
+  end
+end
+
+macro(:load_class) do |obj|
+  if defines.ARK_HYBRID && defines.PANDA_TARGET_64
+    klass_with_flags = LoadI(obj).Imm(Constants::OBJECT_CLASS_OFFSET).u64
+    # Mask for class pointer
+    Bitcast(And(klass_with_flags, 0x0000ffffffffffff).u64).ref
+  else
+    LoadI(obj).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  end
+end
+
+macro(:store_class) do |obj, klass|
+  if defines.ARK_HYBRID && defines.PANDA_TARGET_64
+    StoreI(obj, OrI(Bitcast(klass).u64).Imm("0x1000000000000000UL").u64).Imm(Constants::OBJECT_CLASS_OFFSET).u64
+  else
+    StoreI(obj, klass).Imm(Constants::OBJECT_CLASS_OFFSET).ref
   end
 end
 

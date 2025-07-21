@@ -79,6 +79,7 @@ foreach(file, abc2prog_test_release_column_number_files) {
 abc2prog_test_ts_files = [
   "HelloWorld",
   "Annotations",
+  "etsImplements",
 ]
 
 foreach(file, abc2prog_test_ts_files) {
@@ -91,6 +92,8 @@ foreach(file, abc2prog_test_ts_files) {
     extra_args = [ "--module" ]
     if (file == "Annotations") {
       extra_args += [ "--enable-annotations" ]
+    } else if (file == "etsImplements") {
+      extra_args += [ "--enable-ets-implements" ]
     }
     in_puts = [ test_ts ]
     out_puts = [ test_abc ]
@@ -146,6 +149,7 @@ script_sources = [
   "cpp_sources/hello_world_test.cpp",
   "cpp_sources/release_column_number.cpp",
   "cpp_sources/release_line_number.cpp",
+  "cpp_sources/etsImplements_test.cpp",
 ]
 
 host_unittest_action("Abc2ProgScriptTest") {

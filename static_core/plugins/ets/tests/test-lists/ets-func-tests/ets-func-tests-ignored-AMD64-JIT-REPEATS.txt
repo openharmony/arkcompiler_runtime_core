@@ -1,0 +1,2 @@
+#24958
+spec/07.expressions/7.32.Lambda_Expressions/callAsyncMethodFromAsyncLambda1.ets

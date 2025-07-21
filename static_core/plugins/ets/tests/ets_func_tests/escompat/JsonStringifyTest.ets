@@ -95,9 +95,7 @@ function jsonStringifyFloat64Array(): void {
 }
 
 function jsonStringifyPromise(): void {
-    let pro = new Promise<Object>((resolve: (value: Object) => void): void => {
-        console.log("test");
-    });
+    let pro = new Promise<Object>((resolve: (value: Object) => void): void => {});
     assertEQ("{}", JSON.stringify(pro));
 }
 
@@ -131,6 +129,12 @@ function jsonStringifyRecord(): void {
     assertEQ(fields.get("version")?.toString(), "1");
 }
 
+function jsonStringifyRecordWithSpace(): void {
+    const rec: Record<string, NullishType> = { "name": "Rec", "version": 2 }
+    const recJson = JSON.stringify(rec, undefined, " ")
+    assertEQ(recJson, `{\n "name": "Rec",\n "version": 2\n}`)
+}
+
 function jsonStringifyRecordWithUndefinedValue(): void {
     let record: Record<string, NullishType> = new Record<string, NullishType>();
     record["name"] = "arkts";
@@ -144,6 +148,12 @@ function jsonStringifyRecordWithUndefinedValue(): void {
     assertEQ(fields.get("name")?.toString(), "arkts");
     assertEQ(fields.get("version")?.toString(), "1");
     assertEQ(fields.has("ignore"), false);
+}
+
+function jsonStringifyRecordWithUndefinedValueWithSpace(): void {
+    const record: Record<string, NullishType> = { "name": "arkts", "version": 1, "ignore": undefined }
+    const recordJson = JSON.stringify(record, undefined, " ")
+    assertEQ(recordJson, `{\n "name": "arkts",\n "version": 1\n}`)
 }
 
 function jsonStringifyNestedRecord(): void {
@@ -167,6 +177,15 @@ function jsonStringifyNestedRecord(): void {
     assertEQ(fields.get("desc")?.toString(), "nested");
 }
 
+function jsonStringifyNestedRecordWithSpace(): void {
+    const record: Record<string, NullishType> = { "name": "arkts", "version": 1}
+    const nestedRecord: Record<string, NullishType> = { "desc": "nested" }
+    record["nested"] = nestedRecord
+
+    const recordJson = JSON.stringify(record, undefined, " ")
+    assertEQ(recordJson, `{\n "name": "arkts",\n "version": 1,\n "nested": {\n  "desc": "nested"\n }\n}`)
+}
+
 function jsonStringifyRecordWithClassInstance(): void {
     let record: Record<string, NullishType> = new Record<string, NullishType>();
     record["TestClass"] = new TestClass("Test");
@@ -179,6 +198,12 @@ function jsonStringifyRecordWithClassInstance(): void {
     let classFields = classObj.getFields();
 
     assertEQ(classFields.get("value")?.toString(), "Test");
+}
+
+function jsonStringifyRecordWithClassInstanceWithSpace(): void {
+    const record: Record<string, NullishType> = { "TestClass": new TestClass("Test") }
+    const recordJson = JSON.stringify(record, undefined, " ")
+    assertEQ(recordJson, `{\n "TestClass": {\n  "value": "Test"\n }\n}`)
 }
 
 function jsonStringifyRecordWithArray(): void {
@@ -198,6 +223,11 @@ function jsonStringifyRecordWithArray(): void {
     assertEQ(elements[2]?.toString(), "3");
 }
 
+function jsonStringifyRecordWithArrayWithSpace(): void {
+    const record: Record<string, NullishType> = { "list": [1, 2, 3] }
+    assertEQ(JSON.stringify(record, undefined, " "), `{\n "list": [\n  1,\n  2,\n  3\n ]\n}`)
+}
+
 function jsonStringifyRecordWithNull(): void {
     let record: Record<string, NullishType> = new Record<string, NullishType>();
     record["nullable"] = null;
@@ -208,6 +238,11 @@ function jsonStringifyRecordWithNull(): void {
 
     let nullableVal = fields.get("nullable");
     assertEQ(nullableVal instanceof JSONNull, true);
+}
+
+function jsonStringifyRecordWithNullWithSpace(): void {
+    const record: Record<string, NullishType> = { "nullable": null }
+    assertEQ(JSON.stringify(record, undefined, " "), `{\n "nullable": null\n}`)
 }
 
 function jsonStringifyNestedMap(): void {
@@ -264,11 +299,17 @@ function main(): int {
     suite.addTest("JSON.stringify for empty Map", jsonStringifyMapEmpty);
     suite.addTest("JSON.stringify for Map with entries", jsonStringifyMapWithEntries);
     suite.addTest("JSON.stringify for Record", jsonStringifyRecord);
+    suite.addTest("JSON.stringify Record with space", jsonStringifyRecordWithSpace)
     suite.addTest("JSON.stringify for Record with undefined value", jsonStringifyRecordWithUndefinedValue);
+    suite.addTest("JSON.stringify for Record with undefined value with space", jsonStringifyRecordWithUndefinedValueWithSpace);
     suite.addTest("JSON.stringify for nested Record", jsonStringifyNestedRecord);
+    suite.addTest("JSON.stringify for nested Record with space", jsonStringifyNestedRecordWithSpace)
     suite.addTest("JSON.stringify for Record with class instance", jsonStringifyRecordWithClassInstance);
+    suite.addTest("JSON.stringify for Record with class instance with space", jsonStringifyRecordWithClassInstanceWithSpace);
     suite.addTest("JSON.stringify for Record with array", jsonStringifyRecordWithArray);
+    suite.addTest("JSON.stringify for Record with array with space", jsonStringifyRecordWithArrayWithSpace);
     suite.addTest("JSON.stringify for Record with null", jsonStringifyRecordWithNull);
+    suite.addTest("JSON.stringify for Record with null with space", jsonStringifyRecordWithNullWithSpace);
     suite.addTest("JSON.stringify for nested Map", jsonStringifyNestedMap);
     suite.addTest("JSON.stringify for cyclic Record", jsonStringifyCyclicRecord);
     suite.addTest("JSON.stringify for control character", jsonStringifyControlCharacter);

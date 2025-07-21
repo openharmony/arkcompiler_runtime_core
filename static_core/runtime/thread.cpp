@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,8 +75,7 @@ void Thread::FreeAllocatedMemory()
 #endif
 }
 
-Thread::Thread(PandaVM *vm, ThreadType threadType)
-    : vm_(vm), threadType_(threadType), mutatorLock_(vm->GetMutatorLock())
+Thread::Thread(PandaVM *vm, ThreadType threadType) : ThreadProxy(vm->GetMutatorLock()), vm_(vm), threadType_(threadType)
 {
     // WORKAROUND(v.cherkashin): EcmaScript side build doesn't have GC, so we skip setting barriers for this case
     mem::GC *gc = vm->GetGC();
@@ -84,8 +83,7 @@ Thread::Thread(PandaVM *vm, ThreadType threadType)
         barrierSet_ = vm->GetGC()->GetBarrierSet();
         InitCardTableData(barrierSet_);
     }
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-    fts_.asInt = initialThreadFlag_;
+    InitializeThreadFlag();
 
 #ifdef PANDA_USE_CUSTOM_SIGNAL_STACK
     mem::InternalAllocatorPtr allocator = Runtime::GetCurrent()->GetInternalAllocator();
@@ -136,18 +134,6 @@ void Thread::InitPreBuff()
     }
 }
 
-CONSTEXPR_IN_RELEASE ThreadFlag GetInitialThreadFlag()
-{
-#ifndef NDEBUG
-    ThreadFlag initialFlag = Runtime::GetOptions().IsRunGcEverySafepoint() ? SAFEPOINT_REQUEST : NO_FLAGS;
-    return initialFlag;
-#else
-    return NO_FLAGS;
-#endif
-}
-
-ThreadFlag Thread::initialThreadFlag_ = NO_FLAGS;
-
 /* static */
 void ManagedThread::Initialize()
 {
@@ -155,7 +141,7 @@ void ManagedThread::Initialize()
     ASSERT(!zeroTlab_);
     mem::InternalAllocatorPtr allocator = Runtime::GetCurrent()->GetInternalAllocator();
     zeroTlab_ = allocator->New<mem::TLAB>(nullptr, 0U);
-    initialThreadFlag_ = GetInitialThreadFlag();
+    InitializeInitThreadFlag();
 }
 
 /* static */
@@ -420,64 +406,6 @@ void ManagedThread::EnableStackOverflowCheck()
     }
 }
 
-// NO_THREAD_SAFETY_ANALYSIS due to TSAN not being able to determine lock status
-void ManagedThread::SuspendCheck() NO_THREAD_SAFETY_ANALYSIS
-{
-    // We should use internal suspension to avoid missing call of IncSuspend
-    SuspendImpl(true);
-    GetMutatorLock()->Unlock();
-    GetMutatorLock()->ReadLock();
-    ResumeImpl(true);
-}
-
-void ManagedThread::SuspendImpl(bool internalSuspend)
-{
-    os::memory::LockHolder lock(suspendLock_);
-    LOG(DEBUG, RUNTIME) << "Suspending thread " << GetId();
-    if (!internalSuspend) {
-        if (IsUserSuspended()) {
-            LOG(DEBUG, RUNTIME) << "thread " << GetId() << " is already suspended";
-            return;
-        }
-        userCodeSuspendCount_++;
-    }
-    auto oldCount = suspendCount_++;
-    if (oldCount == 0) {
-        SetFlag(SUSPEND_REQUEST);
-    }
-}
-
-void ManagedThread::ResumeImpl(bool internalResume)
-{
-    os::memory::LockHolder lock(suspendLock_);
-    LOG(DEBUG, RUNTIME) << "Resuming thread " << GetId();
-    if (!internalResume) {
-        if (!IsUserSuspended()) {
-            LOG(DEBUG, RUNTIME) << "thread " << GetId() << " is already resumed";
-            return;
-        }
-        ASSERT(userCodeSuspendCount_ != 0);
-        userCodeSuspendCount_--;
-    }
-    if (suspendCount_ > 0) {
-        suspendCount_--;
-        if (suspendCount_ == 0) {
-            ClearFlag(SUSPEND_REQUEST);
-        }
-    }
-    // Help for UnregisterExitedThread
-    TSAN_ANNOTATE_HAPPENS_BEFORE(&fts_);
-    suspendVar_.Signal();
-}
-
-void ManagedThread::SafepointPoll()
-{
-    if (this->TestAllFlags()) {
-        trace::ScopedTrace scopedTrace("RunSafepoint");
-        ark::interpreter::RuntimeInterface::Safepoint();
-    }
-}
-
 void ManagedThread::NativeCodeBegin()
 {
     LOG_IF(!(threadFrameStates_.empty() || threadFrameStates_.top() != NATIVE_CODE), FATAL, RUNTIME)
@@ -712,24 +640,22 @@ void MTManagedThread::ProcessCreatedThread()
     NativeCodeBegin();
 }
 
-void ManagedThread::UpdateGCRoots()
+void ManagedThread::UpdateGCRoots(const GCRootUpdater &gcRootUpdater)
 {
-    if ((exception_ != nullptr) && (exception_->IsForwarded())) {
-        exception_ = ::ark::mem::GetForwardAddress(exception_);
+    if ((exception_ != nullptr)) {
+        gcRootUpdater(&exception_);
     }
-    for (auto &&it : localObjects_) {
-        if ((*it)->IsForwarded()) {
-            (*it) = ::ark::mem::GetForwardAddress(*it);
-        }
+    for (auto **localObject : localObjects_) {
+        gcRootUpdater(localObject);
     }
 
     if (!taggedHandleScopes_.empty()) {
-        taggedHandleStorage_->UpdateHeapObject();
-        taggedGlobalHandleStorage_->UpdateHeapObject();
+        taggedHandleStorage_->UpdateHeapObject(gcRootUpdater);
+        taggedGlobalHandleStorage_->UpdateHeapObject(gcRootUpdater);
     }
 
     if (!objectHeaderHandleScopes_.empty()) {
-        objectHeaderHandleStorage_->UpdateHeapObject();
+        objectHeaderHandleStorage_->UpdateHeapObject(gcRootUpdater);
     }
 }
 
@@ -737,6 +663,7 @@ void ManagedThread::UpdateGCRoots()
 bool MTManagedThread::Sleep(uint64_t ms)
 {
     auto thread = MTManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
     bool isInterrupted = thread->IsInterrupted();
     if (!isInterrupted) {
         thread->TimedWait(ThreadStatus::IS_SLEEPING, ms, 0);
@@ -762,21 +689,19 @@ uint32_t ManagedThread::GetThreadPriority()
     return os::thread::GetPriority(tid);
 }
 
-void MTManagedThread::UpdateGCRoots()
+void MTManagedThread::UpdateGCRoots(const GCRootUpdater &gcRootUpdater)
 {
-    ManagedThread::UpdateGCRoots();
+    ManagedThread::UpdateGCRoots(gcRootUpdater);
     for (auto &it : localObjectsLocked_.Data()) {
-        if (it.GetObject()->IsForwarded()) {
-            it.SetObject(ark::mem::GetForwardAddress(it.GetObject()));
-        }
+        it.UpdateObject(gcRootUpdater);
     }
 
     // Update enter_monitor_object_
-    if (enterMonitorObject_ != nullptr && enterMonitorObject_->IsForwarded()) {
-        enterMonitorObject_ = ark::mem::GetForwardAddress(enterMonitorObject_);
+    if (enterMonitorObject_ != nullptr) {
+        gcRootUpdater(&enterMonitorObject_);
     }
 
-    ptReferenceStorage_->UpdateMovedRefs();
+    ptReferenceStorage_->UpdateMovedRefs(gcRootUpdater);
 }
 
 void MTManagedThread::VisitGCRoots(const ObjectVisitor &cb)
@@ -992,9 +917,7 @@ void ManagedThread::CleanUp()
     objectHeaderHandleStorage_->FreeHandles(0);
     objectHeaderHandleScopes_.clear();
 
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-    fts_.asInt = initialThreadFlag_;
-    StoreStatus<DONT_CHECK_SAFEPOINT, NO_READLOCK>(ThreadStatus::CREATED);
+    CleanUpThreadStatus();
     // NOTE(molotkovnikhail, 13159) Add cleanup of signal_stack for windows target
 }
 

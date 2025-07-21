@@ -54,24 +54,23 @@ public:
      * @param src An array that matches the format and needs to be decoded.
      * @param iflag Decoding related option parameters.
      */
-    ani_string DecodeToString(ani_env *env, const char *source, int32_t byteOffset, int32_t length, bool iflag);
+    ani_string DecodeToString(ani_env *env, const char *source, int32_t byteOffset, uint32_t length, bool iflag);
     size_t GetMinByteSize() const;
     void Reset() const;
     UConverter *GetConverterPtr() const
     {
         return tranTool_.get();
     }
-
     bool IsUnicode() const
     {
         uint32_t temp = label_ & static_cast<uint32_t>(ConverterFlags::UNICODE_FLG);
-        return temp == static_cast<int32_t>(ConverterFlags::UNICODE_FLG);
+        return temp == static_cast<uint32_t>(ConverterFlags::UNICODE_FLG);
     }
 
     bool IsIgnoreBom() const
     {
         uint32_t temp = label_ & static_cast<uint32_t>(ConverterFlags::IGNORE_BOM_FLG);
-        return temp == static_cast<int32_t>(ConverterFlags::IGNORE_BOM_FLG);
+        return temp == static_cast<uint32_t>(ConverterFlags::IGNORE_BOM_FLG);
     }
     static void ConverterClose(UConverter *pointer)
     {

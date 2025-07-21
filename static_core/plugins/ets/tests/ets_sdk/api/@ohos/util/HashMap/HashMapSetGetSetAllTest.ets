@@ -16,9 +16,6 @@
 import HashMap from "@ohos.util.HashMap";
 import { BusinessError } from "@ohos.base";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
     const suite = new ArkTestsuite("HashMap Set Get SetAll API tests")
 

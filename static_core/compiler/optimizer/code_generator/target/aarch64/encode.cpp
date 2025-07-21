@@ -477,11 +477,11 @@ void Aarch64Encoder::LoadPcRelative(Reg reg, intptr_t offset, Reg regAddr)
     } else {
         size_t pc = GetCodeOffset() + GetCursorOffset();
         size_t addr;
-        if (intptr_t res = helpers::ToSigned(pc) + offset; res < 0) {
+        if (auto res = static_cast<intptr_t>(helpers::ToSigned(pc) + offset); res < 0) {
             // Make both, pc and addr, positive
             ssize_t extend = RoundUp(std::abs(res), vixl::aarch64::kPageSize);
-            addr = res + extend;
-            pc += extend;
+            addr = static_cast<size_t>(res + extend);
+            pc += static_cast<size_t>(extend);
         } else {
             addr = res;
         }
@@ -512,7 +512,7 @@ void Aarch64Encoder::MakeCallAot(intptr_t offset)
 bool Aarch64Encoder::CanMakeCallByOffset(intptr_t offset)
 {
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
-    auto off = (offset >> vixl::aarch64::kInstructionSizeLog2);
+    auto off = (static_cast<uintptr_t>(offset) >> vixl::aarch64::kInstructionSizeLog2);
     return vixl::aarch64::Instruction::IsValidImmPCOffset(vixl::aarch64::ImmBranchType::UncondBranchType, off);
 }
 
@@ -924,7 +924,7 @@ void Aarch64Encoder::EncodeRoundAway(Reg dst, Reg src)
     GetMasm()->Frinta(VixlVReg(dst), VixlVReg(src));
 }
 
-void Aarch64Encoder::EncodeRoundToPInf(Reg dst, Reg src)
+void Aarch64Encoder::EncodeRoundToPInfReturnScalar(Reg dst, Reg src)
 {
     auto done = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
     ScopedTmpReg tmp(this, src.GetType());
@@ -940,6 +940,33 @@ void Aarch64Encoder::EncodeRoundToPInf(Reg dst, Reg src)
     GetMasm()->Fcmp(VixlVReg(tmp), 0.5F);
     GetMasm()->Cinc(VixlReg(dst), VixlReg(dst), vixl::aarch64::Condition::eq);
     GetMasm()->Bind(done);
+}
+
+void Aarch64Encoder::EncodeRoundToPInfReturnFloat(Reg dst, Reg src)
+{
+    ASSERT(src.GetType() == FLOAT64_TYPE);
+    ASSERT(dst.GetType() == FLOAT64_TYPE);
+
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr double HALF = 0.5;
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr double ONE = 1.0;
+
+    ScopedTmpRegF64 ceil(this);
+
+    // calculate ceil(val)
+    GetMasm()->Frintp(VixlVReg(ceil), VixlVReg(src));
+
+    // compare ceil(val) - val with 0.5
+    GetMasm()->Fsub(VixlVReg(dst), VixlVReg(ceil), VixlVReg(src));
+    GetMasm()->Fcmp(VixlVReg(dst), HALF);
+
+    // calculate ceil(val) - 1
+    GetMasm()->Fmov(VixlVReg(dst), ONE);
+    GetMasm()->Fsub(VixlVReg(dst), VixlVReg(ceil), VixlVReg(dst));
+
+    // select final value based on comparison result
+    GetMasm()->Fcsel(VixlVReg(dst), VixlVReg(dst), VixlVReg(ceil), vixl::aarch64::Condition::gt);
 }
 
 void Aarch64Encoder::EncodeCrc32Update(Reg dst, Reg crcReg, Reg valReg)
@@ -1642,7 +1669,6 @@ void Aarch64Encoder::EncodeCastScalar(Reg dst, bool dstSigned, Reg src, bool src
 
 void Aarch64Encoder::EncodeFastPathDynamicCast(Reg dst, Reg src, LabelHolder::LabelId slow)
 {
-    ASSERT(IsJsNumberCast());
     ASSERT(src.IsFloat() && dst.IsScalar());
 
     CHECK_EQ(src.GetSize(), BITS_PER_UINT64);
@@ -1670,6 +1696,43 @@ void Aarch64Encoder::EncodeFastPathDynamicCast(Reg dst, Reg src, LabelHolder::La
     auto slowLabel {static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(slow)};
     // jump to slow path in case of overflow
     GetMasm()->B(slowLabel, vixl::aarch64::Condition::vs);
+}
+
+void Aarch64Encoder::EncodeJsDoubleToCharCast(Reg dst, Reg src)
+{
+    ASSERT(src.IsFloat() && dst.IsScalar());
+
+    CHECK_EQ(src.GetSize(), BITS_PER_UINT64);
+    CHECK_EQ(dst.GetSize(), BITS_PER_UINT32);
+
+    // use special JS aarch64 instruction
+#ifndef NDEBUG
+    vixl::CPUFeaturesScope scope(GetMasm(), vixl::CPUFeatures::kFP, vixl::CPUFeatures::kJSCVT);
+#endif
+    GetMasm()->Fjcvtzs(VixlReg(dst), VixlVReg(src));
+}
+
+void Aarch64Encoder::EncodeJsDoubleToCharCast(Reg dst, Reg src, Reg tmp, uint32_t failureResult)
+{
+    ASSERT(src.IsFloat() && dst.IsScalar());
+
+    CHECK_EQ(src.GetSize(), BITS_PER_UINT64);
+    CHECK_EQ(dst.GetSize(), BITS_PER_UINT32);
+
+    // infinite and big numbers will overflow here to INT64_MIN or INT64_MAX, but NaN casts to 0
+    GetMasm()->Fcvtzs(VixlReg(dst, DOUBLE_WORD_SIZE), VixlVReg(src));
+    // check INT64_MIN
+    GetMasm()->Cmp(VixlReg(dst, DOUBLE_WORD_SIZE), VixlImm(1));
+    // check INT64_MAX
+    GetMasm()->Ccmp(VixlReg(dst, DOUBLE_WORD_SIZE), VixlImm(-1), vixl::aarch64::StatusFlags::VFlag,
+                    vixl::aarch64::Condition::vc);
+    // 'And' with 0xffff
+    constexpr uint32_t UTF16_CHAR_MASK = 0xffff;
+    GetMasm()->And(VixlReg(dst), VixlReg(dst), VixlImm(UTF16_CHAR_MASK));
+    // 'And' and 'Mov' change no flags so we may conditionally move failure result in case of overflow at old checking
+    // for INT64_MAX
+    GetMasm()->mov(VixlReg(tmp), failureResult);
+    GetMasm()->csel(VixlReg(dst), VixlReg(tmp), VixlReg(dst), vixl::aarch64::Condition::vs);
 }
 
 void Aarch64Encoder::EncodeCast(Reg dst, bool dstSigned, Reg src, bool srcSigned)
@@ -2350,7 +2413,7 @@ void Aarch64Encoder::CheckAlignment(MemRef mem, size_t size)
         // We need additional tmp register for check base + offset.
         // The case when separately the base and the offset are not aligned, but in sum there are aligned very rarely.
         // Therefore, the alignment check for base and offset takes place separately
-        [[maybe_unused]] size_t offset = mem.GetDisp();
+        [[maybe_unused]] auto offset = static_cast<size_t>(mem.GetDisp());
         ASSERT((offset & alignmentMask) == 0);
     }
     auto baseReg = mem.GetBase();
@@ -3246,7 +3309,7 @@ void Aarch64Encoder::LoadStoreRegisters(RegMask registers, ssize_t slot, size_t 
     if (registers.none()) {
         return;
     }
-    int32_t lastReg = registers.size() - 1;
+    auto lastReg = static_cast<int32_t>(registers.size() - 1);
     for (; lastReg >= 0; --lastReg) {
         if (registers.test(lastReg)) {
             break;
@@ -3254,12 +3317,12 @@ void Aarch64Encoder::LoadStoreRegisters(RegMask registers, ssize_t slot, size_t 
     }
     // Construct single add for big offset
     size_t spOffset;
-    auto lastOffset = (slot + lastReg - startReg) * DOUBLE_WORD_SIZE_BYTES;
+    auto lastOffset = (slot + lastReg - static_cast<ssize_t>(startReg)) * static_cast<ssize_t>(DOUBLE_WORD_SIZE_BYTES);
 
     if (!vixl::aarch64::Assembler::IsImmLSPair(lastOffset, vixl::aarch64::kXRegSizeInBytesLog2)) {
         ScopedTmpReg lrReg(this, true);
         auto tmp = VixlReg(lrReg);
-        spOffset = slot * DOUBLE_WORD_SIZE_BYTES;
+        spOffset = static_cast<size_t>(slot * DOUBLE_WORD_SIZE_BYTES);
         slot = 0;
         if (vixl::aarch64::Assembler::IsImmAddSub(spOffset)) {
             GetMasm()->Add(tmp, vixl::aarch64::sp, VixlImm(spOffset));
@@ -3484,7 +3547,7 @@ void Aarch64Encoder::PopRegisters(RegMask registers, bool isFp)
         registers.reset(lastReg);
     }
     lastReg = INVALID_REG;
-    for (ssize_t i = registers.size() - 1; i >= 0; i--) {
+    for (auto i = static_cast<ssize_t>(registers.size() - 1); i >= 0; i--) {
         if (registers[i]) {
             if (lastReg == INVALID_REG) {
                 lastReg = i;
@@ -3553,8 +3616,8 @@ size_t Aarch64Encoder::DisasmInstr([[maybe_unused]] std::ostream &stream, size_t
         stream << GetDisasm().GetOutput();
     } else {
         stream << std::setw(0x4) << std::right << std::setfill('0') << std::hex
-               << reinterpret_cast<uintptr_t>(instr) - bufferStart + codeOffset << ": " << GetDisasm().GetOutput()
-               << std::setfill(' ') << std::dec;
+               << reinterpret_cast<uintptr_t>(instr) - bufferStart + static_cast<size_t>(codeOffset) << ": "
+               << GetDisasm().GetOutput() << std::setfill(' ') << std::dec;
     }
 
 #endif

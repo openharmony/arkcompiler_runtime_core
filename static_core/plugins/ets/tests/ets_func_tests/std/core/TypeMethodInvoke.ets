@@ -26,7 +26,7 @@ class C {
 }
 
 function testSum(sum: Method): void {
-    const args = new Object[2]
+    const args : FixedArray<NullishType> = new NullishType[2]
     args[0] = Int.MAX_VALUE
     args[1] = 30
     const res = sum.invoke(null, args) as Long
@@ -36,7 +36,7 @@ function testSum(sum: Method): void {
 function testGetIsEvenPlusX(getIsEvenPlusX: Method): void {
     const c = new C()
     c.a = 15
-    const args = new Object[1]
+    const args : FixedArray<NullishType> = new NullishType[1]
 
     args[0] = 13
     assertEQ( getIsEvenPlusX.invoke(c, args) as Boolean, true)

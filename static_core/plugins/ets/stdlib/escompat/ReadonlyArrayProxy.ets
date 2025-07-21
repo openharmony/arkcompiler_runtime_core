@@ -25,7 +25,7 @@ export abstract class DefaultReadonlyArrayProxyHandler<T> implements ReadonlyArr
 	override get(target: ReadonlyArray<T>, name: string): NullishType {
 		if (name == "length") {
 			return target.length
-		} 
+		}
 
 		throw new AssertionError("unexpected property: " + name)
 	}
@@ -44,7 +44,7 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
 		this.handler = handler
 	}
 
-    override concat(...items: ConcatArray<T>[]): Array<T> {
+    override concat(...items: FixedArray<ConcatArray<T>>): Array<T> {
     	return this.target.concat(...items)
     }
 
@@ -62,7 +62,7 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
 
     override find(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): T | undefined {
     	return this.target.find(predicate)
-    } 
+    }
 
     override findLast(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): T | undefined {
     	return this.target.findLast(predicate)
@@ -145,7 +145,7 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
     }
 
     override $_get(index: number): T {
-    	return this.handler.get(this.target, index as int)
+    	return this.handler.get(this.target, index.toInt())
     }
 
     get length(): number {

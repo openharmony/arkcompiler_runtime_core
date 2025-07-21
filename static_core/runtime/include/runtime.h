@@ -154,16 +154,14 @@ public:
         zygoteNoThreads_ = val;
     }
 
-    static void SetTaskScheduler(taskmanager::TaskScheduler *taskScheduler)
+    static bool IsTaskManagerUsed()
     {
-        ASSERT(taskScheduler_ == nullptr);
-        ASSERT(taskScheduler != nullptr);
-        taskScheduler_ = taskScheduler;
+        return isTaskManagerUsed_;
     }
 
-    static taskmanager::TaskScheduler *GetTaskScheduler()
+    static void SetTaskManagerUsed(bool value)
     {
-        return taskScheduler_;
+        isTaskManagerUsed_ = value;
     }
 
     coretypes::String *ResolveString(PandaVM *vm, const Method &caller, panda_file::File::EntityId id);
@@ -388,6 +386,11 @@ public:
         return isJitEnabled_;
     }
 
+    bool IsProfilerEnabled() const
+    {
+        return isProfilerEnabled_ || isJitEnabled_;
+    }
+
     void ForceEnableJit()
     {
         isJitEnabled_ = true;
@@ -492,7 +495,7 @@ private:
     static RuntimeOptions options_;
     static std::string runtimeType_;
     static os::memory::Mutex mutex_;
-    static taskmanager::TaskScheduler *taskScheduler_;
+    static bool isTaskManagerUsed_;
 
     // NOTE(dtrubenk): put all of it in the permanent space
     mem::InternalAllocatorPtr internalAllocator_;
@@ -537,6 +540,7 @@ private:
     bool checksNullptr_ {true};
     bool isStacktrace_ {false};
     bool isJitEnabled_ {false};
+    bool isProfilerEnabled_ {false};
 
     bool isDumpNativeCrash_ {true};
 

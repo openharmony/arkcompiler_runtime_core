@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+  arktsconfig: arktsconfig.json
+---*/
+
 import { OverrideFinal } from "@mismatched/override_final";
 import { Ability } from "@spawn/ability";
 

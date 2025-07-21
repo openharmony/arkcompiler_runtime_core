@@ -19,11 +19,11 @@ tags: []
 ---*/
 
 function main() {
-    let ch : char = c'z';
+    let ch : string = 'z';
     let index : int = 0;
     let result : int = 0;
     let testStr : String = "a string object";
-    let testArray : char[] = [c'a', c' ', c's', c't', c'r', c'i', c'n', c'g', c' ', c'o', c'b', c'j', c'e', c'c', c't'];
+    let testArray : string[] = ['a', ' ', 's', 't', 'r', 'i', 'n', 'g', ' ', 'o', 'b', 'j', 'e', 'c', 't'];
     for (ch of testStr) {
         if (ch != testArray[index]) {
             console.log("Incorrect element at index : " + index);

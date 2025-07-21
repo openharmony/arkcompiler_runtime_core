@@ -66,6 +66,7 @@ void StackInfoManagerOhos::UpdateStackInfoIfNeeded()
         void *stackAddr = nullptr;
         size_t stackSize {};
         size_t guardSize {};
+        ASSERT(coro != nullptr);
         coro->GetContext<StackfulCoroutineContext>()->RetrieveStackInfo(stackAddr, stackSize, guardSize);
         napi_stack_info currentStackinfo {reinterpret_cast<size_t>(stackAddr), stackSize};
         napi_set_stackinfo(ctx_->GetJSEnv(), &currentStackinfo);

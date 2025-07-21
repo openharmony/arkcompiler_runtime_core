@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 
@@ -79,14 +81,14 @@ function main(): int {
         ConcurrentSetTestOne.clear();
         assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
-        let p1 = launch deleteOne(0);
-        let p2 = launch deleteOne(1);
-        let p3 = launch deleteOne(2);
-        let p4 = launch getSize();
-        await p1;
-        await p2;
-        await p3;
-        await p4;
+        let p1 = launch<void, (i: int) => void>(deleteOne, 0);
+        let p2 = launch<void, (i: int) => void>(deleteOne, 1);
+        let p3 = launch<void, (i: int) => void>(deleteOne, 2);
+        let p4 = launch<void, () => void>(getSize);
+        p1.Await();
+        p2.Await();
+        p3.Await();
+        p4.Await();
         assertTrue(ConcurrentSetTestOne.size > 6 && ConcurrentSetTestOne.size < 11);
     });
     ConcurrentSetTestsuite.addTest("Detele&HasTest001", () =>
@@ -94,12 +96,12 @@ function main(): int {
         ConcurrentSetTestOne.clear();
         assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
-        let p1 = launch deleteOne(0);
-        let p2 = launch deleteOne(1);
-        let p3 = launch hasOne(3);
-        await p1;
-        await p2;
-        await p3;
+        let p1 = launch<void, (i: int) => void>(deleteOne, 0);
+        let p2 = launch<void, (i: int) => void>(deleteOne, 1);
+        let p3 = launch<void, (i: int) => void>(hasOne, 3);
+        p1.Await();
+        p2.Await();
+        p3.Await();
         assertTrue(ConcurrentSetTestOne.size > 7 && ConcurrentSetTestOne.size < 11);
     });
     ConcurrentSetTestsuite.addTest("Detele&ClearTest001", () =>
@@ -107,10 +109,10 @@ function main(): int {
         ConcurrentSetTestOne.clear();
         assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
-        let p1 = launch deleteOne(0);
-        let p2 = launch clearTest();
-        await p1;
-        await p2;
+        let p1 = launch<void, (i: int) => void>(deleteOne, 0);
+        let p2 = launch<void, () => void>(clearTest);
+        p1.Await();
+        p2.Await();
         assertEQ(ConcurrentSetTestOne.has(0), false);
     });
 

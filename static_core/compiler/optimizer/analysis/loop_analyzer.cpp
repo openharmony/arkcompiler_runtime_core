@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "optimizer/ir/basicblock.h"
 #include "loop_analyzer.h"
+#include "optimizer/ir/analysis.h"
 #include "optimizer/ir/graph.h"
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/rpo.h"
@@ -29,6 +30,7 @@ bool LoopAnalyzer::RunImpl()
     PopulateLoops();
     for (auto loop : GetGraph()->GetRootLoop()->GetInnerLoops()) {
         FindAndInsertPreHeaders(loop);
+        CheckActualLengthAsLoopInitOrBound(loop);
     }
     SetLoopProperties(GetGraph()->GetRootLoop(), 0);
     return true;
@@ -51,6 +53,7 @@ void LoopAnalyzer::ResetLoopInfo()
 Loop *LoopAnalyzer::CreateNewLoop(BasicBlock *loopHeader)
 {
     auto loop = GetGraph()->GetAllocator()->New<Loop>(GetGraph()->GetAllocator(), loopHeader, loopCounter_++);
+    ASSERT(loop != nullptr);
     loop->AppendBlock(loopHeader);
     return loop;
 }
@@ -59,6 +62,7 @@ void LoopAnalyzer::CreateRootLoop()
 {
     ASSERT(GetGraph()->GetRootLoop() == nullptr);
     auto rootLoop = GetGraph()->GetAllocator()->New<Loop>(GetGraph()->GetAllocator(), nullptr, loopCounter_++);
+    ASSERT(rootLoop != nullptr);
     rootLoop->SetAsRoot();
     GetGraph()->SetRootLoop(rootLoop);
 }
@@ -181,6 +185,7 @@ BasicBlock *LoopAnalyzer::CreatePreHeader(BasicBlock *header)
 {
     auto fwEdgesIndexes = GetForwardEdgesIndexes(header);
     auto preHeader = header->CreateImmediateDominator();
+    ASSERT(preHeader != nullptr);
     preHeader->SetGuestPc(header->GetGuestPc());
     if (fwEdgesIndexes.size() >= 2U) {
         MovePhiInputsToPreHeader(header, preHeader, fwEdgesIndexes);
@@ -338,6 +343,11 @@ void LoopAnalyzer::SetLoopProperties(Loop *loop, uint32_t depth)
     }
 }
 
+void LoopAnalyzer::CheckActualLengthAsLoopInitOrBound(Loop *loop)
+{
+    loop->CheckActualLengthAsLoopInitOrBound();
+}
+
 void Loop::AppendBlock(BasicBlock *block)
 {
     ASSERT(std::find(blocks_.begin(), blocks_.end(), block) == blocks_.end());
@@ -358,6 +368,176 @@ void Loop::RemoveBlock(BasicBlock *block)
     auto blockIt = std::find(blocks_.begin(), blocks_.end(), block);
     ASSERT(blockIt != blocks_.end());
     blocks_.erase(blockIt);
+}
+
+static bool CheckUpdateAndInit(Inst *inst, bool forActualLengthAsInit = true)
+{
+    if (!inst->IsAddSub() || !inst->GetInput(1).GetInst()->IsConst()) {
+        return false;
+    }
+    auto constInst = inst->GetInput(1).GetInst()->CastToConstant();
+    if (constInst->GetType() != DataType::INT64) {
+        return false;
+    }
+    auto constVal = static_cast<int64_t>(constInst->GetIntValue());
+    bool res = false;
+    if (forActualLengthAsInit) {
+        res = inst->IsAdd() ? constVal < 0 : constVal > 0;
+    } else {
+        res = inst->IsAdd() ? constVal > 0 : constVal < 0;
+    }
+    return res;
+}
+
+bool Loop::CheckUpdateAndInitForBound(CompareInst *cmpInst, PhiInst *phiInst)
+{
+    if (GetBackEdges().size() != 1 || phiInst->GetPhiInputBb(0) != GetPreHeader()) {
+        return false;
+    }
+    auto initInst = phiInst->GetPhiInput(GetPreHeader());
+    if (!initInst->IsConst()) {
+        return false;
+    }
+    auto initConstInst = initInst->CastToConstant();
+    // only support init val greater than zero
+    if (initConstInst->GetType() != DataType::INT64 || static_cast<int64_t>(initConstInst->GetIntValue()) < 0) {
+        return false;
+    }
+    auto updateInst = phiInst->GetPhiInput(GetBackEdges()[0]);
+    // check i < len and (i + posative num or i - negative num)
+    return ((cmpInst->GetCc() == ConditionCode::CC_GE && cmpInst->GetInput(0).GetInst() == phiInst) ||
+            (cmpInst->GetCc() == ConditionCode::CC_LE && cmpInst->GetInput(1).GetInst() == phiInst)) &&
+           CheckUpdateAndInit(updateInst, false);
+}
+
+void Loop::CheckActualLengthVariantAsLoopInit(Inst *&loadObject, CompareInst *cmpInst, PhiInst *phiInst)
+{
+    if (cmpInst->GetCc() == ConditionCode::CC_GE || cmpInst->GetCc() == ConditionCode::CC_GT) {
+        if (!cmpInst->GetInput(0).GetInst()->IsConst()) {
+            return;
+        }
+    } else if (cmpInst->GetCc() == ConditionCode::CC_LE || cmpInst->GetCc() == ConditionCode::CC_LT) {
+        if (!cmpInst->GetInput(1).GetInst()->IsConst()) {
+            return;
+        }
+    } else {
+        return;
+    }
+    bool operand0IsConst = cmpInst->GetInput(0).GetInst()->IsConst();
+    auto boundInst = operand0IsConst ? cmpInst->GetInput(0).GetInst()->CastToConstant()
+                                     : cmpInst->GetInput(1).GetInst()->CastToConstant();
+    // only support bound value is zero (phi >= 0 or phi > 0)
+    if (boundInst->GetType() == DataType::INT64 && boundInst->GetIntValue() == 0) {
+        if (GetBackEdges().size() != 1 || phiInst->GetPhiInputBb(0) != GetPreHeader()) {
+            return;
+        }
+        auto updateInst = phiInst->GetPhiInput(GetBackEdges()[0]);
+        auto initInst = phiInst->GetPhiInput(GetPreHeader());
+        // check i - positive num or i + negative num
+        if (CheckUpdateAndInit(updateInst) && CheckUpdateAndInit(initInst)) {
+            if (initInst->GetInput(0).GetInst()->GetOpcode() == Opcode::LoadObject) {
+                loadObject = initInst->GetInput(0).GetInst();
+            }
+        }
+    }
+}
+
+void Loop::CheckActualLengthVariantAsLoopBound(Inst *&loadObject, CompareInst *cmpInst, PhiInst *phiInst)
+{
+    bool operand0IsPhi = cmpInst->GetInput(0).GetInst()->IsPhi();
+    auto boundInst = operand0IsPhi ? cmpInst->GetInput(1).GetInst() : cmpInst->GetInput(0).GetInst();
+    // only support div operation
+    if (boundInst->GetOpcode() != Opcode::Div) {
+        return;
+    }
+    if (boundInst->GetInput(1).GetInst()->GetOpcode() != Opcode::ZeroCheck &&
+        !boundInst->GetInput(1).GetInst()->IsConst()) {
+        return;
+    }
+    auto cstInst = boundInst->GetInput(1).GetInst();
+    if (!cstInst->IsConst()) {
+        if (!cstInst->GetInput(0).GetInst()->IsConst()) {
+            return;
+        }
+        cstInst = cstInst->GetInput(0).GetInst();
+    }
+    auto constInst = cstInst->CastToConstant();
+    if (constInst->GetType() != DataType::INT64 || static_cast<int64_t>(constInst->GetIntValue()) < 1) {
+        return;
+    }
+    if (!CheckUpdateAndInitForBound(cmpInst, phiInst)) {
+        return;
+    }
+    if (boundInst->GetInput(0).GetInst()->GetOpcode() == Opcode::LoadObject) {
+        loadObject = boundInst->GetInput(0).GetInst();
+    }
+}
+
+void Loop::CheckActualLengthAsLoopBound(Inst *&loadObject, CompareInst *cmpInst, PhiInst *phiInst)
+{
+    if (!CheckUpdateAndInitForBound(cmpInst, phiInst)) {
+        return;
+    }
+    bool operand0IsLoadObj = cmpInst->GetInput(0).GetInst()->GetOpcode() == Opcode::LoadObject;
+    loadObject = operand0IsLoadObj ? cmpInst->GetInput(0).GetInst() : cmpInst->GetInput(1).GetInst();
+}
+
+// Check inst ifImm, compare and phi.
+bool Loop::PrecheckInst(CompareInst *&cmpInst, PhiInst *&phiInst)
+{
+    BasicBlock *header = GetHeader();
+    Inst *lastInst = header->GetLastInst();
+    if (lastInst == nullptr || lastInst->GetOpcode() != Opcode::IfImm) {
+        return false;
+    }
+    auto ifImm = lastInst->CastToIfImm();
+    if (ifImm->GetCc() != CC_NE || ifImm->GetImm() != 0 || header->GetTrueSuccessor()->GetLoop() == header->GetLoop()) {
+        return false;
+    }
+    if (ifImm->GetInput(0).GetInst()->GetOpcode() != Opcode::Compare) {
+        return false;
+    }
+    cmpInst = ifImm->GetInput(0).GetInst()->CastToCompare();
+    if (cmpInst->GetInput(0).GetInst()->IsPhi()) {
+        phiInst = cmpInst->GetInput(0).GetInst()->CastToPhi();
+    }
+    if (cmpInst->GetInput(1).GetInst()->IsPhi()) {
+        if (phiInst != nullptr) {
+            return false;
+        }
+        phiInst = cmpInst->GetInput(1).GetInst()->CastToPhi();
+    }
+    return phiInst != nullptr && phiInst->GetInputsCount() == 2;  // 2: input operands num
+}
+
+void Loop::CheckActualLengthAsLoopInitOrBound()
+{
+    if (IsRoot()) {
+        return;
+    }
+    CompareInst *cmpInst = nullptr;
+    PhiInst *phiInst = nullptr;
+    if (!PrecheckInst(cmpInst, phiInst)) {
+        return;
+    }
+    Inst *loadObject = nullptr;
+    if (cmpInst->GetInput(0).GetInst()->GetOpcode() == Opcode::LoadObject ||
+        cmpInst->GetInput(1).GetInst()->GetOpcode() == Opcode::LoadObject) {
+        // ex.1 for i in [0, actualLength)
+        CheckActualLengthAsLoopBound(loadObject, cmpInst, phiInst);
+    } else if (cmpInst->GetInput(0).GetInst()->IsConst() || cmpInst->GetInput(1).GetInst()->IsConst()) {
+        // ex.2 for i in [actualLength - 1, 0]
+        CheckActualLengthVariantAsLoopInit(loadObject, cmpInst, phiInst);
+    } else {
+        // ex.3 for i in [0, actualLength / 2)
+        CheckActualLengthVariantAsLoopBound(loadObject, cmpInst, phiInst);
+    }
+    Inst *arrayOriginRef = nullptr;
+    if (CheckArrayField(RuntimeInterface::ArrayField::ACTUAL_LENGTH, loadObject, arrayOriginRef)) {
+        SetArrayIndexVariable(phiInst);
+        ASSERT(arrayOriginRef != nullptr);
+        SetArrayOriginRef(arrayOriginRef);
+    }
 }
 
 bool Loop::IsOsrLoop() const

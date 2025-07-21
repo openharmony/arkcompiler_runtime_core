@@ -38,5 +38,5 @@ export namespace Intl {
     export type UnicodeBCP47LocaleIdentifier = string;
     export type DateTimeFormatPartTypes = "day" | "dayPeriod" | "era" | "fractionalSecond" | "hour" | "literal" | "minute" | "month" | "second" | "timeZoneName" | "unknown" | "weekday" | "year";
     export type DateTimeRangeFormatPartSource = "startRange" | "endRange" | "shared"
-
+    export type LocalesArgument = UnicodeBCP47LocaleIdentifier | Locale | readonly (UnicodeBCP47LocaleIdentifier | Locale)[] | undefined
 }

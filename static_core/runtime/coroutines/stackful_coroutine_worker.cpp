@@ -40,7 +40,8 @@ StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, 
         // will create the schedule loop coroutine in the thread proc in order to set the stack protector correctly
     } else {
         scheduleLoopCtx_ = coroManager->CreateNativeCoroutine(GetRuntime(), GetPandaVM(), ScheduleLoopProxy, this,
-                                                              "[fiber_sch] " + GetName(), Coroutine::Type::SCHEDULER);
+                                                              "[fiber_sch] " + GetName(), Coroutine::Type::SCHEDULER,
+                                                              CoroutinePriority::MEDIUM_PRIORITY);
         AddRunnableCoroutine(scheduleLoopCtx_);
     }
 }
@@ -49,7 +50,7 @@ void StackfulCoroutineWorker::AddRunnableCoroutine(Coroutine *newCoro)
 {
     ASSERT(newCoro != nullptr);
     os::memory::LockHolder lock(runnablesLock_);
-    PushToRunnableQueue(newCoro);
+    PushToRunnableQueue(newCoro, newCoro->GetPriority());
     RegisterIncomingActiveCoroutine(newCoro);
 }
 
@@ -64,8 +65,9 @@ void StackfulCoroutineWorker::AddCreatedCoroutineAndSwitchToIt(Coroutine *newCor
     // precondition: called within the current worker, no cross-worker calls allowed
     ASSERT(GetCurrentContext()->GetWorker() == this);
 
-    ScopedNativeCodeThread n(Coroutine::GetCurrent());
-    SuspendCurrentCoro();
+    auto *coro = Coroutine::GetCurrent();
+    ScopedNativeCodeThread n(coro);
+    coro->RequestSuspend(false);
 
     auto *currentCtx = GetCurrentContext();
     auto *nextCtx = newCoro->GetContext<StackfulCoroutineContext>();
@@ -92,7 +94,8 @@ void StackfulCoroutineWorker::WaitForEvent(CoroutineEvent *awaitee)
     waitersLock_.Lock();
     awaitee->Unlock();
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineWorker::AddWaitingCoroutine: " << waiter->GetName() << " AWAITS";
-    waiters_.insert({awaitee, waiter});
+    [[maybe_unused]] auto [_, inserted] = waiters_.insert({awaitee, waiter});
+    ASSERT(inserted);
 
     runnablesLock_.Lock();
     ASSERT(RunnableCoroutinesExist());
@@ -115,7 +118,7 @@ void StackfulCoroutineWorker::UnblockWaiters(CoroutineEvent *blocker)
             if (!canMigrateAwait) {
                 os::memory::LockHolder lockR(runnablesLock_);
                 unblockedCoro->RequestUnblock();
-                PushToRunnableQueue(unblockedCoro);
+                PushToRunnableQueue(unblockedCoro, unblockedCoro->GetPriority());
             } else {
                 // (wangyuzhong,#24880): in case of IsMigrateAwakenedCorosEnabled() we need to correctly issue the
                 // external scheduler request from the correct worker. Here the coroutine becomes Active on one
@@ -162,7 +165,7 @@ void StackfulCoroutineWorker::FinalizeFiberScheduleLoop()
         ASSERT(scheduleLoopCtx_->HasNativeEntrypoint());
         runnablesLock_.Lock();
         // sch loop only
-        ASSERT(runnables_.size() == 1);
+        ASSERT(runnables_.Size() == 1);
         SuspendCurrentCoroAndScheduleNext();
         ASSERT(!IsCrossWorkerCall());
     }
@@ -182,7 +185,7 @@ void StackfulCoroutineWorker::CompleteAllAffinedCoroutines()
     // CC-OFFNXT(G.CTL.03): false positive
     while (true) {
         lock(waitersLock_, runnablesLock_);
-        if (runnables_.size() > 1) {
+        if (runnables_.Size() > 1) {
             unlock(waitersLock_, runnablesLock_);
             coroManager_->Schedule();
         } else if (!waiters_.empty()) {
@@ -222,18 +225,29 @@ void StackfulCoroutineWorker::PrintRunnables(const PandaString &requester)
 {
     os::memory::LockHolder lock(runnablesLock_);
     LOG(DEBUG, COROUTINES) << "[" << requester << "] ";
-    for (auto *co : runnables_) {
-        LOG(DEBUG, COROUTINES) << co->GetName() << " <";
-    }
+    runnables_.IterateOverCoroutines([](Coroutine *co) { LOG(DEBUG, COROUTINES) << co->GetName() << " <"; });
     LOG(DEBUG, COROUTINES) << "X";
 }
 #endif
 
+size_t StackfulCoroutineWorker::GetRunnablesCount(Coroutine::Type type)
+{
+    os::memory::LockHolder lock(runnablesLock_);
+    size_t runnablesCount = 0;
+    runnables_.IterateOverCoroutines([type, &runnablesCount](Coroutine *coro) {
+        if (coro->GetType() == type) {
+            runnablesCount++;
+        }
+    });
+    return runnablesCount;
+}
+
 void StackfulCoroutineWorker::ThreadProc()
 {
     threadId_ = os::thread::GetCurrentThreadId();
-    scheduleLoopCtx_ = coroManager_->CreateEntrypointlessCoroutine(
-        GetRuntime(), GetPandaVM(), false, "[thr_sch] " + GetName(), Coroutine::Type::SCHEDULER);
+    scheduleLoopCtx_ =
+        coroManager_->CreateEntrypointlessCoroutine(GetRuntime(), GetPandaVM(), false, "[thr_sch] " + GetName(),
+                                                    Coroutine::Type::SCHEDULER, CoroutinePriority::MEDIUM_PRIORITY);
     Coroutine::SetCurrent(scheduleLoopCtx_);
     scheduleLoopCtx_->RequestResume();
     AddRunningCoroutine(scheduleLoopCtx_);
@@ -269,9 +283,9 @@ void StackfulCoroutineWorker::ScheduleLoopProxy(void *worker)
     static_cast<StackfulCoroutineWorker *>(worker)->ScheduleLoop();
 }
 
-void StackfulCoroutineWorker::PushToRunnableQueue(Coroutine *co)
+void StackfulCoroutineWorker::PushToRunnableQueue(Coroutine *co, CoroutinePriority priority)
 {
-    runnables_.push_back(co);
+    runnables_.Push(co, priority);
     UpdateLoadFactor();
     runnablesCv_.Signal();
 }
@@ -279,9 +293,8 @@ void StackfulCoroutineWorker::PushToRunnableQueue(Coroutine *co)
 Coroutine *StackfulCoroutineWorker::PopFromRunnableQueue()
 {
     os::memory::LockHolder lock(runnablesLock_);
-    ASSERT(!runnables_.empty());
-    auto *co = runnables_.front();
-    runnables_.pop_front();
+    ASSERT(!runnables_.Empty());
+    auto [co, _] = runnables_.Pop();
     UpdateLoadFactor();
     return co;
 }
@@ -289,7 +302,7 @@ Coroutine *StackfulCoroutineWorker::PopFromRunnableQueue()
 bool StackfulCoroutineWorker::RunnableCoroutinesExist() const
 {
     os::memory::LockHolder lock(runnablesLock_);
-    return !runnables_.empty();
+    return !runnables_.Empty();
 }
 
 void StackfulCoroutineWorker::WaitForRunnables()
@@ -314,6 +327,8 @@ void StackfulCoroutineWorker::RegisterIncomingActiveCoroutine(Coroutine *newCoro
 {
     ASSERT(newCoro != nullptr);
     newCoro->SetWorker(this);
+    auto canMigrate = newCoro->GetContext<StackfulCoroutineContext>()->IsMigrationAllowed();
+    newCoro->LinkToExternalHolder(IsMainWorker() && !canMigrate);
 }
 
 void StackfulCoroutineWorker::RequestScheduleImpl()
@@ -351,8 +366,9 @@ void StackfulCoroutineWorker::BlockCurrentCoroAndScheduleNext()
 
 void StackfulCoroutineWorker::SuspendCurrentCoroAndScheduleNext()
 {
-    SuspendCurrentCoro();
     // will transfer control to another coro... Can change current coroutine's host worker!
+    SuspendCurrentCoro();
+    // will transfer control to another coro...
     ScheduleNextCoroUnlockRunnables();
     // ...this coro has been scheduled again: process finalization queue
     if (!IsCrossWorkerCall()) {
@@ -366,10 +382,11 @@ template <bool SUSPEND_AS_BLOCKED>
 void StackfulCoroutineWorker::SuspendCurrentCoroGeneric()
 {
     auto *currentCoro = Coroutine::GetCurrent();
+    ASSERT(currentCoro != nullptr);
     currentCoro->RequestSuspend(SUSPEND_AS_BLOCKED);
     if constexpr (!SUSPEND_AS_BLOCKED) {
         os::memory::LockHolder lock(runnablesLock_);
-        PushToRunnableQueue(currentCoro);
+        PushToRunnableQueue(currentCoro, currentCoro->GetPriority());
     }
 }
 
@@ -417,13 +434,17 @@ void StackfulCoroutineWorker::ScheduleNextCoroUnlockNone()
 StackfulCoroutineContext *StackfulCoroutineWorker::GetCurrentContext() const
 {
     auto *co = Coroutine::GetCurrent();
+    ASSERT(co != nullptr);
     return co->GetContext<StackfulCoroutineContext>();
 }
 
 StackfulCoroutineContext *StackfulCoroutineWorker::PrepareNextRunnableContextForSwitch()
 {
     // precondition: runnable coros are present
-    auto *nextCtx = PopFromRunnableQueue()->GetContext<StackfulCoroutineContext>();
+    ASSERT(Coroutine::GetCurrent() != nullptr);
+    auto *il = Coroutine::GetCurrent()->ReleaseImmediateLauncher();
+    auto *nextCtx = il != nullptr ? il->GetContext<StackfulCoroutineContext>()
+                                  : PopFromRunnableQueue()->GetContext<StackfulCoroutineContext>();
     nextCtx->RequestResume();
     Coroutine::SetCurrent(nextCtx->GetCoroutine());
     return nextCtx;
@@ -461,7 +482,7 @@ void StackfulCoroutineWorker::FinalizeTerminatedCoros()
 
 void StackfulCoroutineWorker::UpdateLoadFactor()
 {
-    loadFactor_ = (loadFactor_ + runnables_.size()) / 2U;
+    loadFactor_ = (loadFactor_ + runnables_.Size()) / 2U;
 }
 
 void StackfulCoroutineWorker::EnsureCoroutineSwitchEnabled()
@@ -476,7 +497,7 @@ void StackfulCoroutineWorker::EnsureCoroutineSwitchEnabled()
 void StackfulCoroutineWorker::MigrateTo(StackfulCoroutineWorker *to)
 {
     os::memory::LockHolder fromLock(runnablesLock_);
-    size_t migrateCount = runnables_.size() / 2;  // migrate up to half of runnable coroutines
+    size_t migrateCount = runnables_.Size() / 2;  // migrate up to half of runnable coroutines
     if (migrateCount == 0) {
         LOG(DEBUG, COROUTINES) << "The blocked worker does not have runnable coroutines.";
         return;
@@ -495,7 +516,7 @@ bool StackfulCoroutineWorker::MigrateFrom(StackfulCoroutineWorker *from)
     }
 
     os::memory::LockHolder fromLock(from->runnablesLock_);
-    size_t migrateCount = from->runnables_.size() / 2;  // migrate up to half of runnable coroutines
+    size_t migrateCount = from->runnables_.Size() / 2;  // migrate up to half of runnable coroutines
     if (migrateCount == 0) {
         LOG(DEBUG, COROUTINES) << "The target worker does not have runnable coroutines.";
         return true;
@@ -507,25 +528,26 @@ bool StackfulCoroutineWorker::MigrateFrom(StackfulCoroutineWorker *from)
 
 void StackfulCoroutineWorker::MigrateCoroutinesImpl(StackfulCoroutineWorker *to, size_t migrateCount)
 {
-    auto iter = runnables_.rbegin();
-    while (migrateCount > 0 && iter != runnables_.rend()) {
-        // not migrate SCHEDULER coroutine and FINALIZER coroutine
-        if ((*iter)->GetType() != Coroutine::Type::MUTATOR) {
-            ++iter;
-            continue;
+    using CIterator = PriorityQueue::CIterator;
+    PandaVector<CIterator> migratedCoros;
+    runnables_.VisitCoroutines([&migratedCoros, &migrateCount, this, to](auto begin, auto end) {
+        for (; migrateCount > 0 && begin != end; ++begin) {
+            // not migrate SCHEDULER coroutine and FINALIZER coroutine
+            if ((*begin)->GetType() != Coroutine::Type::MUTATOR) {
+                continue;
+            }
+            auto maskValue = (*begin)->template GetContext<StackfulCoroutineContext>()->GetAffinityMask();
+            std::bitset<stackful_coroutines::MAX_WORKERS_COUNT> affinityBits(maskValue);
+            if (affinityBits.test(to->GetId())) {
+                LOG(DEBUG, COROUTINES) << "migrate coro " << (*begin)->GetCoroutineId() << " from " << GetId() << " to "
+                                       << to->GetId();
+                to->AddRunnableCoroutine(*(*begin));
+                migratedCoros.push_back(begin);
+                --migrateCount;
+            }
         }
-        auto maskValue = (*iter)->GetContext<StackfulCoroutineContext>()->GetAffinityMask();
-        std::bitset<stackful_coroutines::MAX_WORKERS_COUNT> affinityBits(maskValue);
-        if (affinityBits.test(to->GetId())) {
-            LOG(DEBUG, COROUTINES) << "migrate coro " << (*iter)->GetCoroutineId() << " from " << GetId() << " to "
-                                   << to->GetId();
-            to->AddRunnableCoroutine(*iter);
-            iter = std::reverse_iterator(runnables_.erase((iter + 1).base()));
-            --migrateCount;
-        } else {
-            ++iter;
-        }
-    }
+    });
+    runnables_.RemoveCoroutines(migratedCoros);
 }
 
 bool StackfulCoroutineWorker::IsIdle()
@@ -544,7 +566,7 @@ void StackfulCoroutineWorker::MigrateCorosOutwardsIfBlocked()
 bool StackfulCoroutineWorker::IsPotentiallyBlocked()
 {
     os::memory::LockHolder lock(runnablesLock_);
-    if (runnables_.empty() || lastCtxSwitchTimeMillis_ == 0) {
+    if (runnables_.Empty() || lastCtxSwitchTimeMillis_ == 0) {
         return false;
     }
     if ((ark::os::time::GetClockTimeInMilli() - lastCtxSwitchTimeMillis_) >= MAX_EXECUTION_DURATION) {

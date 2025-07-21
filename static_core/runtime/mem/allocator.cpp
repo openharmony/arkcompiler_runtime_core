@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,6 +49,7 @@ ObjectAllocatorBase::~ObjectAllocatorBase()
     // NOLINTNEXTLINE(readability-delete-null-pointer)
     if (pygoteSpaceAllocator_ != nullptr) {
         delete pygoteSpaceAllocator_;
+        pygoteSpaceAllocator_ = nullptr;
     }
 }
 
@@ -97,8 +98,11 @@ ObjectAllocatorNoGen<MT_MODE>::ObjectAllocatorNoGen(MemStatsType *memStats, bool
         pygoteSpaceAllocator_->SetHeapSpace(&heapSpace_);
     }
     objectAllocator_ = new (std::nothrow) ObjectAllocator(memStats);
+    ASSERT(objectAllocator_ != nullptr);
     largeObjectAllocator_ = new (std::nothrow) LargeObjectAllocator(memStats);
+    ASSERT(largeObjectAllocator_ != nullptr);
     humongousObjectAllocator_ = new (std::nothrow) HumongousObjectAllocator(memStats);
+    ASSERT(humongousObjectAllocator_ != nullptr);
 }
 
 template <MTModeT MT_MODE>
@@ -214,6 +218,7 @@ void ObjectAllocatorNoGen<MT_MODE>::FreeObjectsMovedToPygoteSpace()
         [](void *mem, size_t size) { PoolManager::GetMmapMemPool()->FreePool(mem, size); });
     delete objectAllocator_;
     objectAllocator_ = new (std::nothrow) ObjectAllocator(memStats_);
+    ASSERT(objectAllocator_ != nullptr);
 }
 
 template <MTModeT MT_MODE>

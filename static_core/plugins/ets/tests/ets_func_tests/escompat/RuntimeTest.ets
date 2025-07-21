@@ -15,11 +15,11 @@
 
 
 function main(): void {
-    assertTrue( runtime.sameValue(0.0, 0.0))
-    assertFalse( runtime.sameValue(0.0, -0.0))
-    assertFalse( runtime.sameValue(-0.0, 0.0))
-    assertTrue( runtime.sameValue(-0.0, -0.0))
+    assertTrue(Runtime.sameValue(0.0, 0.0))
+    assertFalse(Runtime.sameValue(0.0, -0.0))
+    assertFalse(Runtime.sameValue(-0.0, 0.0))
+    assertTrue(Runtime.sameValue(-0.0, -0.0))
 
-    assertTrue(runtime.sameValueZero(0.0, -0.0))
-    assertTrue(runtime.sameValueZero(-0.0, 0.0))
+    assertTrue(Runtime.sameValueZero(0.0, -0.0))
+    assertTrue(Runtime.sameValueZero(-0.0, 0.0))
 }

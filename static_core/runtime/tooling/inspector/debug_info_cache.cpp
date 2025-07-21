@@ -56,8 +56,12 @@ void DebugInfoCache::GetSourceLocation(const PtFrame &frame, std::string_view &s
 {
     auto method = frame.GetMethod();
     auto pandaFile = method->GetPandaFile();
-    auto &debugInfo = GetDebugInfo(pandaFile);
-    sourceFile = debugInfo.GetSourceFile(method->GetFileId());
+    auto debugInfo = GetDebugInfo(pandaFile);
+    if (debugInfo == nullptr) {
+        lineNumber = 1;
+        return;
+    }
+    sourceFile = debugInfo->GetSourceFile(method->GetFileId());
 
     methodName = utf::Mutf8AsCString(method->GetName().data);
 
@@ -65,7 +69,7 @@ void DebugInfoCache::GetSourceLocation(const PtFrame &frame, std::string_view &s
     // the last such entry for which the bytecode offset is not greater than
     // the given offset. Use `std::upper_bound` to find the first entry
     // for which the condition is not true, and then step back.
-    auto &table = debugInfo.GetLineNumberTable(method->GetFileId());
+    auto &table = debugInfo->GetLineNumberTable(method->GetFileId());
     auto lineNumberIter = std::upper_bound(table.begin(), table.end(), frame.GetBytecodeOffset(),
                                            [](auto offset, auto &entry) { return offset < entry.offset; });
     ASSERT(lineNumberIter != table.begin());
@@ -79,7 +83,9 @@ std::unordered_set<PtLocation, HashLocation> DebugInfoCache::GetCurrentLineLocat
     auto method = frame.GetMethod();
     auto pandaFile = method->GetPandaFile();
     auto methodId = method->GetFileId();
-    auto &table = GetDebugInfo(pandaFile).GetLineNumberTable(methodId);
+    auto debugInfo = GetDebugInfo(pandaFile);
+    ASSERT(debugInfo != nullptr);
+    auto &table = debugInfo->GetLineNumberTable(methodId);
     auto it = std::upper_bound(table.begin(), table.end(), frame.GetBytecodeOffset(),
                                [](auto offset, auto entry) { return offset < entry.offset; });
     if (it == table.begin()) {
@@ -316,14 +322,17 @@ std::map<std::string, TypedValue> DebugInfoCache::GetLocals(const PtFrame &frame
 
     auto method = frame.GetMethod();
     auto methodId = method->GetFileId();
-    auto &debugInfo = GetDebugInfo(method->GetPandaFile());
-    auto &parameters = debugInfo.GetParameterInfo(methodId);
+    auto debugInfo = GetDebugInfo(method->GetPandaFile());
+    if (debugInfo == nullptr) {
+        return result;
+    }
+    auto &parameters = debugInfo->GetParameterInfo(methodId);
     for (auto i = 0U; i < parameters.size(); i++) {
         auto &parameter = parameters[i];
         localHandler(parameter.name, parameter.signature, frame.GetArgument(i), frame.GetArgumentKind(i));
     }
 
-    auto &variables = debugInfo.GetLocalVariableTable(methodId);
+    auto &variables = debugInfo->GetLocalVariableTable(methodId);
     auto frameOffset = frame.GetBytecodeOffset();
     for (auto &variable : variables) {
         if (variable.IsAccessibleAt(frameOffset)) {
@@ -344,7 +353,19 @@ std::string DebugInfoCache::GetSourceCode(std::string_view sourceFile)
 
         auto it = disassemblies_.find(sourceFile);
         if (it != disassemblies_.end()) {
-            return GetDebugInfo(&it->second.first).GetSourceCode(it->second.second);
+            auto debugInfo = GetDebugInfo(&it->second.first);
+            ASSERT(debugInfo != nullptr);
+            return debugInfo->GetSourceCode(it->second.second);
+        }
+    }
+
+    // Try to get source code read from debug info
+    {
+        os::memory::LockHolder lock(debugInfosMutex_);
+
+        auto iter = fileToSourceCode_.find(sourceFile);
+        if (iter != fileToSourceCode_.end()) {
+            return std::string(iter->second);
         }
     }
 
@@ -392,11 +413,24 @@ std::vector<std::string> DebugInfoCache::GetPandaFiles(const std::function<bool(
     return pandaFiles;
 }
 
-const panda_file::DebugInfoExtractor &DebugInfoCache::GetDebugInfo(const panda_file::File *file)
+const panda_file::DebugInfoExtractor *DebugInfoCache::GetDebugInfo(const panda_file::File *file)
 {
     os::memory::LockHolder lock(debugInfosMutex_);
     auto it = debugInfos_.find(file);
-    ASSERT(it != debugInfos_.end());
-    return it->second;
+    if (it == debugInfos_.end()) {
+        return nullptr;
+    }
+    return &it->second;
 }
+
+const char *DebugInfoCache::GetSourceFile(Method *method)
+{
+    auto pandaFile = method->GetPandaFile();
+    auto debugInfo = GetDebugInfo(pandaFile);
+    if (debugInfo == nullptr) {
+        return nullptr;
+    }
+    return debugInfo->GetSourceFile(method->GetFileId());
+}
+
 }  // namespace ark::tooling::inspector

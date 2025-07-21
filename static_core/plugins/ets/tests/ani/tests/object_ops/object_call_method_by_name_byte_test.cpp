@@ -396,6 +396,76 @@ TEST_F(CallObjectMethodByteByNameTest, object_call_method_by_name_byte_010)
     ASSERT_EQ(env_->Object_CallMethodByName_Byte_A(obj, "jf", "B:B", &sum, args), ANI_OK);
     ASSERT_EQ(sum, arg + value);
 }
+
+TEST_F(CallObjectMethodByteByNameTest, object_call_method_by_name_byte_011)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].b = VAL1;
+    args[1U].b = VAL2;
+
+    ani_byte res = 0U;
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Byte(nullptr, object, "byteByNameMethod", "BB:B", &res, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Byte_A(nullptr, object, "byteByNameMethod", "BB:B", &res, args),
+              ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Byte(nullptr, "byteByNameMethod", "BB:B", &res, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Byte_A(nullptr, "byteByNameMethod", "BB:B", &res, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Byte(object, nullptr, "BB:B", &res, VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Byte_A(object, nullptr, "BB:B", &res, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Byte(object, "byteByNameMethod", nullptr, &res, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Byte_A(object, "byteByNameMethod", nullptr, &res, args), ANI_OK);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Byte(object, "byteByNameMethod", "BB:B", nullptr, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Byte_A(object, "byteByNameMethod", "BB:B", nullptr, args),
+              ANI_INVALID_ARGS);
+}
+
+TEST_F(CallObjectMethodByteByNameTest, object_call_method_by_name_byte_012)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].b = VAL1;
+    args[1U].b = VAL2;
+
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    ani_byte res = 0U;
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(env_->Object_CallMethodByName_Byte(object, methodName.data(), "BB:B", &res, VAL1, VAL2),
+                  ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Byte_A(object, methodName.data(), "BB:B", &res, args), ANI_NOT_FOUND);
+    }
+}
+
+TEST_F(CallObjectMethodByteByNameTest, object_call_method_by_name_byte_013)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].b = VAL1;
+    args[1U].b = VAL2;
+
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    ani_byte res = 0U;
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(env_->Object_CallMethodByName_Byte(object, "byteByNameMethod", methodName.data(), &res, VAL1, VAL2),
+                  ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Byte_A(object, "byteByNameMethod", methodName.data(), &res, args),
+                  ANI_NOT_FOUND);
+    }
+}
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

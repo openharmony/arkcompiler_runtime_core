@@ -27,10 +27,10 @@ class $jscall {
     native static void$(callee: JSValue, self: JSValue): void;
     native static void$10s(callee: JSValue, self: JSValue, u0: String, u1: String, u2: String, u3: String, u4: String, u5: String, u6: String, u7: String, u8: String, u9: String): void;
     native static void$10d(callee: JSValue, self: JSValue, u0: double, u1: double, u2: double, u3: double, u4: double, u5: double, u6: double, u7: double, u8: double, u9: double): void;
-    native static void$10a(callee: JSValue, self: JSValue, u0: double[], u1: double[], u2: double[], u3: double[], u4: double[], u5: double[], u6: double[], u7: double[], u8: double[], u9: double[]): void;
+    native static void$10a(callee: JSValue, self: JSValue, u0: FixedArray<double>, u1: FixedArray<double>, u2: FixedArray<double>, u3: FixedArray<double>, u4: FixedArray<double>, u5: FixedArray<double>, u6: FixedArray<double>, u7: FixedArray<double>, u8: FixedArray<double>, u9: FixedArray<double>): void;
 
     native static str$(callee: JSValue, self: JSValue): string;
-    native static arr$(callee: JSValue, self: JSValue): double[];
+    native static arr$(callee: JSValue, self: JSValue): FixedArray<double>;
     native static any$(callee: JSValue, self: JSValue): JSValue;
     native static num$(callee: JSValue, self: JSValue): double;
 };
@@ -38,7 +38,6 @@ class $jscall {
 class $jsnew {
     static Init = JSRuntime.__initJSNewClass();
 };
-
 
 class Benchmarks {
     voidPasser = voidPasser
@@ -139,34 +138,34 @@ function numPasser(iters: int): void {
 
 function arrPasser(iters: int): void {
     let PassArrays: (
-        a0: double[],
-        a1: double[],
-        a2: double[],
-        a3: double[],
-        a4: double[],
-        a5: double[],
-        a6: double[],
-        a7: double[],
-        a8: double[],
-        a9: double[]
+        a0: FixedArray<double>,
+        a1: FixedArray<double>,
+        a2: FixedArray<double>,
+        a3: FixedArray<double>,
+        a4: FixedArray<double>,
+        a5: FixedArray<double>,
+        a6: FixedArray<double>,
+        a7: FixedArray<double>,
+        a8: FixedArray<double>,
+        a9: FixedArray<double>
     )=>void = STSCallee.PassArrays;
-    let u0: double[] = [.0];
-    let u1: double[] = [.1];
-    let u2: double[] = [.2];
-    let u3: double[] = [.3];
-    let u4: double[] = [.4];
-    let u5: double[] = [.5];
-    let u6: double[] = [.6];
-    let u7: double[] = [.7];
-    let u8: double[] = [.8];
-    let u9: double[] = [.9];
+    let u0: FixedArray<double> = [.0];
+    let u1: FixedArray<double> = [.1];
+    let u2: FixedArray<double> = [.2];
+    let u3: FixedArray<double> = [.3];
+    let u4: FixedArray<double> = [.4];
+    let u5: FixedArray<double> = [.5];
+    let u6: FixedArray<double> = [.6];
+    let u7: FixedArray<double> = [.7];
+    let u8: FixedArray<double> = [.8];
+    let u9: FixedArray<double> = [.9];
     for (let i = 0; i < iters; ++i) {
         PassArrays(u0, u1, u2, u3, u4, u5, u6, u7, u8, u9);
     }
 }
 
 function arrGetter(iters: int): void {
-    let GetArray: ()=>double[] = STSCallee.GetArray;
+    let GetArray: ()=>FixedArray<double> = STSCallee.GetArray;
     for (let i = 0; i < iters; ++i) {
         let r = GetArray();
     }
@@ -238,16 +237,16 @@ function interop_numPasser(iters: int): void {
 
 function interop_arrPasser(iters: int): void {
     let PassArrays = JSRuntime.getPropertyJSValue(jsvars.jsCallee, "Pass");
-    let u0 : double[] = [.0];
-    let u1 : double[] = [.1];
-    let u2 : double[] = [.2];
-    let u3 : double[] = [.3];
-    let u4 : double[] = [.4];
-    let u5 : double[] = [.5];
-    let u6 : double[] = [.6];
-    let u7 : double[] = [.7];
-    let u8 : double[] = [.8];
-    let u9 : double[] = [.9];
+    let u0 : FixedArray<double> = [.0];
+    let u1 : FixedArray<double> = [.1];
+    let u2 : FixedArray<double> = [.2];
+    let u3 : FixedArray<double> = [.3];
+    let u4 : FixedArray<double> = [.4];
+    let u5 : FixedArray<double> = [.5];
+    let u6 : FixedArray<double> = [.6];
+    let u7 : FixedArray<double> = [.7];
+    let u8 : FixedArray<double> = [.8];
+    let u9 : FixedArray<double> = [.9];
     for (let i = 0; i < iters; ++i) {
         $jscall.void$10a(PassArrays, JSRuntime.getUndefined(), u0, u1, u2, u3, u4, u5, u6, u7, u8, u9);
     }

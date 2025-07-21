@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,13 +17,13 @@
 import copy
 import os
 import re
+from collections.abc import Sequence
 from copy import deepcopy
 from pathlib import Path
-from typing import Tuple, Optional, List, Sequence, Type, Union
 
 from runner import utils
 from runner.common_exceptions import InvalidConfiguration
-from runner.enum_types.params import TestEnv, TestReport, BinaryParams
+from runner.enum_types.params import BinaryParams, TestEnv, TestReport
 from runner.extensions.validators.base_validator import BaseValidator
 from runner.extensions.validators.ivalidator import IValidator
 from runner.logger import Log
@@ -42,7 +42,8 @@ class TestStandardFlow(Test):
     __DEFAULT_ENTRY_POINT = "ETSGLOBAL::main"
 
     def __init__(self, test_env: TestEnv, test_path: Path, *,
-                 params: IOptions, test_id: str, is_dependent: bool = False) -> None:
+                 params: IOptions, test_id: str, is_dependent: bool = False,
+                 parent_test_id: str = "") -> None:
         Test.__init__(self, test_env, test_path, params, test_id)
 
         self.main_entry_point: str = self.__DEFAULT_ENTRY_POINT
@@ -52,29 +53,35 @@ class TestStandardFlow(Test):
         else:
             self.main_entry_point = f"{test_path.stem}.{self.main_entry_point}"
 
+        # Defines if in dependent packages there is at least one file compile-only and negative
+        self.dependent_packages: dict[str, bool] = {
+            'package': self.is_negative_compile
+        }
+
+        self.parent_test_id = parent_test_id
+
         # If test fails it contains reason of first failed step
         # It's supposed if the first step is failed then no step is executed further
-        self.fail_kind: Optional[str] = None
+        self.fail_kind: str | None = None
 
         self.bytecode_path: Path = test_env.work_dir.intermediate
         self.test_abc: Path = self.bytecode_path.joinpath(f"{self.test_id}.abc")
         self.test_an: Path = self.bytecode_path.joinpath(f"{self.test_id}.an")
-        os.makedirs(str(self.test_abc.parent), exist_ok=True)
+        self.test_abc.parent.mkdir(parents=True, exist_ok=True)
 
         self.validator: IValidator = self.__init_validator()
-        self.__dependent_tests: List[TestStandardFlow] = []
-        self.__dependent_abc_files: List[str] = []
+        self.__dependent_tests: list[TestStandardFlow] = []
         self.__is_dependent = is_dependent
         self.__boot_panda_files: str = ""
 
     @property
-    def all_dependent_tests(self) -> List['TestStandardFlow']:
+    def all_dependent_tests(self) -> list['TestStandardFlow']:
         if not self.metadata.files:
             return []
         id_pos: int = str(self.path).find(self.test_id)
         test_root: str = str(self.path)[:id_pos]
 
-        dependent_tests: List[TestStandardFlow] = []
+        dependent_tests: list[TestStandardFlow] = []
 
         for file in self.metadata.files:
             new_test_file_path: Path = self.path.parent.joinpath(file).resolve()
@@ -82,7 +89,8 @@ class TestStandardFlow(Test):
             test = self.__class__(self.test_env, new_test_file_path,
                                   params=self.test_extra_params,
                                   test_id=str(new_test_id),
-                                  is_dependent=True)
+                                  is_dependent=True,
+                                  parent_test_id=self.test_id)
             dependent_tests.append(test)
             if (sub_tests := test.all_dependent_tests) is not None:
                 dependent_tests.extend(sub_tests)
@@ -121,9 +129,22 @@ class TestStandardFlow(Test):
         self.__dependent_tests.extend(self.all_dependent_tests)
         current_test_id: Path = Path(self.test_id)
         for test in self.__dependent_tests:
-            test.test_abc = test.test_abc.parent / current_test_id.stem / test.test_abc.name
-            test.test_an = test.test_abc.parent / current_test_id.stem / test.test_an.name
+            prefix = Path(self.parent_test_id).stem if self.parent_test_id else current_test_id.stem
+
+            test_abc_name = f'{prefix}_{Path(test.test_abc).name}'
+            test_an_name = f'{prefix}_{Path(test.test_an).name}'
+
+            test.test_abc = Path(test.test_abc).parent / Path(test_abc_name)
+            test.test_an = Path(test.test_abc).parent / Path(test_an_name)
+
             os.makedirs(str(test.test_abc.parent), exist_ok=True)
+
+            package = test.metadata.get_package_name()
+            self.dependent_packages[package] = self.dependent_packages.get(package, False) or test.is_negative_compile
+            if test.dependent_packages:
+                for dep_key, dep_item in test.dependent_packages.items():
+                    self.dependent_packages[dep_key] = self.dependent_packages.get(dep_key, False) or dep_item
+
         return self.__dependent_tests
 
     @staticmethod
@@ -137,14 +158,14 @@ class TestStandardFlow(Test):
         return actual_return_code
 
     @staticmethod
-    def __add_options(options: List[str]) -> List[str]:
+    def __add_options(options: list[str]) -> list[str]:
         for index, option in enumerate(options):
             if not option.startswith("--"):
                 options[index] = f"--{option}"
         return options
 
     @staticmethod
-    def __get_validator_class(clazz: str) -> Type[IValidator]:
+    def __get_validator_class(clazz: str) -> type[IValidator]:
         class_obj = get_class_by_name(clazz)
         if not issubclass(class_obj, IValidator):
             raise InvalidConfiguration(
@@ -152,17 +173,29 @@ class TestStandardFlow(Test):
                 f"Check value of 'validator' parameter")
         return class_obj
 
-    def do_run(self) -> 'TestStandardFlow':
+    def continue_after_process_dependent_files(self) -> bool:
+        """
+        Processes dependent files
+        Returns True if to continue test run
+        False - break test run
+        """
         for test in self.dependent_tests:
             dependent_result = test.do_run()
             self.reproduce += dependent_result.reproduce
             simple_failed = not dependent_result.passed
             negative_compile = dependent_result.passed and dependent_result.is_negative_compile
-            if simple_failed or negative_compile:
-                self.passed = dependent_result.passed
+            dep_package = dependent_result.metadata.get_package_name()
+            package_neg_compile = self.dependent_packages.get(dep_package, False)
+            if simple_failed or negative_compile or package_neg_compile:
+                self.passed = dependent_result.passed if not package_neg_compile else True
                 self.report = dependent_result.report
                 self.fail_kind = dependent_result.fail_kind
-                return self
+                return False
+        return True
+
+    def do_run(self) -> 'TestStandardFlow':
+        if not self.continue_after_process_dependent_files():
+            return self
 
         for step in self.test_env.config.workflow.steps:
             if step.executable_path is not None:
@@ -174,12 +207,10 @@ class TestStandardFlow(Test):
                     return self
         return self
 
-    def dependent_abc_files(self) -> List[str]:
-        if not self.__dependent_abc_files:
-            self.__dependent_abc_files.extend({str(df.test_abc) for df in self.dependent_tests})
-        return self.__dependent_abc_files
+    def dependent_abc_files(self) -> list[str]:
+        return [df.test_abc.as_posix() for df in self.dependent_tests]
 
-    def __do_run_one_step(self, step: Step) -> Tuple[bool, Optional[TestReport], Optional[str]]:
+    def __do_run_one_step(self, step: Step) -> tuple[bool, TestReport | None, str | None]:
         if not step.enabled:
             passed, report, fail_kind = True, None, None
         elif step.step_kind == StepKind.COMPILER:
@@ -198,26 +229,40 @@ class TestStandardFlow(Test):
             passed, report, fail_kind = self.__run_step(step)
         return passed, report, fail_kind
 
-    def __fix_entry_point(self, args: List[str]) -> List[str]:
-        result: List[str] = args[:]
+    def __fix_entry_point(self, args: list[str]) -> list[str]:
+        result: list[str] = args[:]
         for index, arg in enumerate(result):
             if self.__DEFAULT_ENTRY_POINT in str(arg):
                 result[index] = arg.replace(self.__DEFAULT_ENTRY_POINT, self.main_entry_point).strip()
         return [res for res in result if res]
 
-    def __run_compiler(self, step: Step) -> Tuple[bool, TestReport, Optional[str]]:
-        if self.__is_dependent:
-            new_step = copy.copy(step)
-            new_step.args = step.args[:]
-            for index, arg in enumerate(new_step.args):
-                if arg.startswith("--output="):
-                    new_step.args[index] = f"--output={self.test_abc}"
-                    new_step.args.insert(index, "--ets-module")
-                    break
-            return self.__run_step(new_step)
-        return self.__run_step(step)
+    def __change_output_arg(self, source_args: list[str], new_args: list[str]) -> list[str]:
+        for index, arg in enumerate(source_args):
+            if arg.startswith("--output="):
+                new_args[index] = f"--output={self.test_abc}"
+                break
+        return new_args
 
-    def __run_verifier(self, step: Step) -> Tuple[bool, TestReport, Optional[str]]:
+    def __change_arktsconfig_arg(self, source_args: list[str], new_args: list[str]) -> list[str]:
+        for index, arg in enumerate(source_args):
+            if arg.startswith("--arktsconfig=") and self.metadata.arktsconfig is not None:
+                stdlib_path = self.test_env.config.general.static_core_root / 'plugins' / 'ets' / 'stdlib'
+                new_args[index] = f"--arktsconfig={self.metadata.arktsconfig}"
+                new_args.insert(0, f"--stdlib={stdlib_path.as_posix()}")
+                break
+        return new_args
+
+    def __run_compiler(self, step: Step) -> tuple[bool, TestReport, str | None]:
+        new_step = copy.copy(step)
+        new_step.args = step.args[:]
+        if self.__is_dependent:
+            new_step.args = self.__change_output_arg(step.args, new_step.args)
+            new_step.args = self.__change_arktsconfig_arg(step.args, new_step.args)
+            return self.__run_step(new_step)
+        new_step.args = self.__change_arktsconfig_arg(step.args, new_step.args)
+        return self.__run_step(new_step)
+
+    def __run_verifier(self, step: Step) -> tuple[bool, TestReport, str | None]:
         if self.dependent_tests:
             new_step = copy.copy(step)
             new_step.args = step.args[:]
@@ -225,7 +270,7 @@ class TestStandardFlow(Test):
             return self.__run_step(new_step)
         return self.__run_step(step)
 
-    def __run_aot(self, step: Step) -> Tuple[bool, TestReport, Optional[str]]:
+    def __run_aot(self, step: Step) -> tuple[bool, TestReport, str | None]:
         new_step = copy.copy(step)
         new_step.args = step.args[:]
         if self.dependent_tests:
@@ -234,7 +279,7 @@ class TestStandardFlow(Test):
         new_step.args.extend([f'--paoc-panda-files={self.test_abc}'])
         return self.__run_step(new_step)
 
-    def __run_runtime(self, step: Step) -> Tuple[bool, TestReport, Optional[str]]:
+    def __run_runtime(self, step: Step) -> tuple[bool, TestReport, str | None]:
         new_step = copy.copy(step)
         new_step.args = step.args[:]
         if self.dependent_tests:
@@ -244,12 +289,12 @@ class TestStandardFlow(Test):
         new_step.args.insert(-2, self.__add_panda_files())
         return self.__run_step(new_step)
 
-    def __run_step(self, step: Step) -> Tuple[bool, TestReport, Optional[str]]:
+    def __run_step(self, step: Step) -> tuple[bool, TestReport, str | None]:
         cmd_env = self.test_env.cmd_env
         if step.env:
             cmd_env = deepcopy(self.test_env.cmd_env)
             for env_item in step.env:
-                env_value = step.env[env_item]
+                env_value: str | list[str] = step.env[env_item]
                 if isinstance(env_value, list):
                     cmd_env[env_item] = "".join(env_value)
                 else:
@@ -273,12 +318,12 @@ class TestStandardFlow(Test):
         self.reproduce += test_runner.reproduce
         return passed, report, fail_kind
 
-    def __expand_last_call_macros(self, step: Step) -> List[str]:
-        flags: List[str] = []
+    def __expand_last_call_macros(self, step: Step) -> list[str]:
+        flags: list[str] = []
         for arg in self.__fix_entry_point(step.args):
             flag = utils.replace_macro(str(arg), "test-id", self.test_id)
             if utils.has_macro(flag):
-                flag_expanded: Union[str, List[str]] = ""
+                flag_expanded: str | list[str] = ""
                 try:
                     flag_expanded = Macros.correct_macro(flag, self.test_extra_params)
                 except ParameterNotFound:
@@ -307,14 +352,15 @@ class TestStandardFlow(Test):
         validator_class = self.__get_validator_class(validator_class_name)
         return validator_class()
 
-    def __add_boot_panda_files(self, args: List[str]) -> List[str]:
-        dep_files_args: List[str] = []
+    def __add_boot_panda_files(self, args: list[str]) -> list[str]:
+        dep_files_args: list[str] = []
         for arg in args:
             name = '--boot-panda-files'
             if name in arg:
                 if not self.__boot_panda_files:
                     _, value = arg.split('=')
-                    self.__boot_panda_files = f'{name}={":".join([value] + self.dependent_abc_files())}'
+                    boot_panda_files = [value, *self.dependent_abc_files(), self.test_abc.as_posix()]
+                    self.__boot_panda_files = f'{name}={":".join(boot_panda_files)}'
                 dep_files_args.append(self.__boot_panda_files)
             else:
                 dep_files_args.append(arg)
@@ -325,7 +371,7 @@ class TestStandardFlow(Test):
         if self.dependent_abc_files():
             return f'{opt_name}={":".join(self.dependent_abc_files())}'
 
-        return f'{opt_name}={str(self.test_abc)}'
+        return f'{opt_name}={self.test_abc!s}'
 
     def _step_validator(self, step: Step, output: str, error: str, return_code: int) -> bool:
         validator = (self.validator.get_validator(step.name)

@@ -100,7 +100,9 @@ export abstract class TypeCreator {
         if (this.typ != undefined) {
             return this.typ!.getTypeDesc()
         }
-        assertNE(this.ctxItemPtr, 0, "this.ctxItemPtr is 0")
+        if (this.ctxItemPtr === 0) {
+            throw new AssertionError("this.ctxItemPtr is 0")
+        }
         return TypeCreatorCtx.getTypeDescFromPointer(this.ctxItemPtr)
     }
 }
@@ -177,10 +179,10 @@ final class TypeCreatorCtx {
      *
      * @throws errors happened on class initialization.
      */
-    private static native commit(ctxPtr: long, objects: Object[], targetLinker: RuntimeLinker): string | undefined
+    private static native commit(ctxPtr: long, objects: FixedArray<Object>, targetLinker: RuntimeLinker): string | undefined
 
     private static native getError(ctxPtr: long): string | undefined
-    internal static native getObjectsArrayForCCtor(ctxPtr: long): Object[]
+    internal static native getObjectsArrayForCCtor(ctxPtr: long): FixedArray<Object>
 
     internal static native getTypeDescFromPointer(ctxItemPtr: long): RuntimeTypeDescriptor
 
@@ -232,7 +234,9 @@ final class TypeCreatorCtx {
      * Must be called.
      */
     internal deinit(): void {
-        assertNE(this.ctxPtr, 0, "cannot call deinit when ctxPtr is null")
+        if (this.ctxPtr === 0) {
+            throw new AssertionError("cannot call deinit when ctxPtr is null")
+        }
         TypeCreatorCtx.destroyCtx(this.ctxPtr)
         this.ctxPtr = 0
     }
@@ -310,7 +314,7 @@ final class TypeCreatorCtx {
 
         this.checkError()
 
-        const objsArray = new Object[this.objects.length as int]
+        const objsArray : FixedArray<Object> = new Object[this.objects.length.toInt()]
         for (let i = 0; i < this.objects.length; i++) {
             objsArray[i] = this.objects.$_get(i) as Object
         }
@@ -331,7 +335,7 @@ final class TypeCreatorCtx {
     internal registerObject(o: Object): int {
         const r = this.objects.length
         this.objects.push(o)
-        return r as int
+        return r.toInt()
     }
 
     /**
@@ -445,7 +449,9 @@ export final class ClassTypeCreator extends TypeCreator {
     }
 
     internal override declare(ctx: TypeCreatorCtx): void {
-        assertEQ(this.ctxItemPtr, 0, "this.ctxItemPtr is not 0")
+        if (this.ctxItemPtr !== 0) {
+            throw new AssertionError("this.ctxItemPtr is not 0")
+        }
         this.ctxItemPtr = ctx.checkCtxItemPtr(TypeCreatorCtx.classCreate(ctx.ctxPtr, this.name, this.attrs.get()))
     }
 
@@ -606,7 +612,9 @@ export final class InterfaceTypeCreator extends TypeCreator {
     }
 
     internal override declare(ctx: TypeCreatorCtx): void {
-        assertEQ(this.ctxItemPtr, 0, "this.ctxItemPtr is not 0")
+        if (this.ctxItemPtr !== 0) {
+            throw new AssertionError("this.ctxItemPtr is not 0")
+        }
         this.ctxItemPtr = ctx.checkCtxItemPtr(TypeCreatorCtx.interfaceCreate(ctx.ctxPtr, this.name))
     }
 
@@ -717,7 +725,9 @@ export final class LambdaTypeCreator extends TypeCreator {
     }
 
     internal override declare(ctx: TypeCreatorCtx): void {
-        assertEQ(this.ctxItemPtr, 0, "this.ctxItemPtr is not 0")
+        if (this.ctxItemPtr !== 0) {
+            throw new AssertionError("this.ctxItemPtr is not 0")
+        }
         const ftPtr = TypeCreatorCtx.lambdaTypeCreate(ctx.ctxPtr, this.attrs.get())
         this.ctxItemPtr = ftPtr
         for (let i = 0; i < this.params.length; i++) {
@@ -1225,9 +1235,8 @@ export final class CallableBodyFunction extends CallableBody {
  * Represents call to lambda with boxing all arguments
  */
 export final class CallableBodyErasedFunction extends CallableBody {
-    internal /* readonly */ body: (recv: NullishType, args: NullishType[]) => NullishType
-
-    public constructor(m: (recv: NullishType, args: NullishType[]) => NullishType) {
+    internal /* readonly */ body: (recv: NullishType, args: FixedArray<NullishType>) => NullishType
+    public constructor(m: (recv: NullishType, args: FixedArray<NullishType>) => NullishType) {
         super()
         this.body = m
     }

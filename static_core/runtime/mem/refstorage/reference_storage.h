@@ -92,7 +92,7 @@ public:
     void VisitObjects(const GCRootVisitor &gcRootVisitor, mem::RootType rootType);
 
     /// Update pointers to moved Objects in local storage
-    void UpdateMovedRefs();
+    void UpdateMovedRefs(const GCRootUpdater &gcRootUpdater);
 
     /// Dump the last several local references info(max MAX_DUMP_LOCAL_NUMS).
     void DumpLocalRef();

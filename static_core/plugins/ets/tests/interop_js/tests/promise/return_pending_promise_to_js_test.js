@@ -29,7 +29,7 @@ function init() {
 	const etsOpts = {
 		'panda-files': gtestAbcPath,
 		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
-		'coroutine-enable-external-scheduling': 'true',
+		'xgc-trigger-type': 'never',
 	};
 	if (!etsVm.createRuntime(etsOpts)) {
 		throw Error('Cannot create ETS runtime');
@@ -122,4 +122,4 @@ let args = helper.getArgv();
 if (args.length !== 6) {
 	throw Error('Expected test name');
 }
-runTest(args[4]);
+runTest(args[5]);

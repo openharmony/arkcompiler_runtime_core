@@ -30,6 +30,7 @@ JSValue *JSRuntimeNewJSValueDouble(double v);
 JSValue *JSRuntimeNewJSValueBoolean(uint8_t v);
 JSValue *JSRuntimeNewJSValueString(EtsString *v);
 JSValue *JSRuntimeNewJSValueObject(EtsObject *v);
+uint8_t JSRuntimeIsJSValue(EtsObject *v);
 JSValue *JSRuntimeNewJSValueBigInt(EtsBigInt *v);
 double JSRuntimeGetValueDouble(JSValue *etsJsValue);
 uint8_t JSRuntimeGetValueBoolean(JSValue *etsJsValue);
@@ -76,6 +77,12 @@ EtsString *JSONStringify(JSValue *jsvalue);
 EtsString *CompilerConvertLocalToString(void *value);
 EtsObject *CompilerConvertLocalToRefType(void *klassPtr, void *value);
 JSValue *JSRuntimeGetPropertyJSValueyByKey(JSValue *objectValue, JSValue *keyValue);
+EtsEscompatArrayBuffer *TransferArrayBufferToStatic(ESValue *object);
+EtsObject *TransferArrayBufferToDynamic(EtsEscompatArrayBuffer *staticArrayBuffer);
+EtsObject *CreateDynamicTypedArray(EtsEscompatArrayBuffer *staticArrayBuffer, int32_t typedArrayType, double length,
+                                   double byteOffset);
+EtsObject *CreateDynamicDataView(EtsEscompatArrayBuffer *staticArrayBuffer, double byteLength, double byteOffset);
+void SetInteropRuntimeLinker(EtsRuntimeLinker *linker);
 
 template <typename T>
 typename T::cpptype JSValueNamedGetter(JSValue *etsJsValue, EtsString *etsPropName)
@@ -113,10 +120,7 @@ void JSValueNamedSetter(JSValue *etsJsValue, EtsString *etsPropName, typename T:
     NapiScope jsHandleScope(env);
 
     PandaString propName = etsPropName->GetMutf8();
-    bool res = JSValueSetByName<T>(ctx, etsJsValue, propName.c_str(), etsPropVal);
-    if (UNLIKELY(!res)) {
-        ctx->ForwardJSException(coro);
-    }
+    JSValueSetByName<T>(ctx, etsJsValue, propName.c_str(), etsPropVal);
 }
 
 template <typename T>
@@ -134,8 +138,13 @@ typename T::cpptype JSValueIndexedGetter(JSValue *etsJsValue, int32_t index)
 
     napi_value result;
     napi_value jsVal = etsJsValue->GetNapiValue(env);
-    auto rc = napi_get_element(env, jsVal, index, &result);
-    if (UNLIKELY(NapiThrownGeneric(rc))) {
+    napi_status jsStatus;
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        jsStatus = napi_get_element(env, jsVal, index, &result);
+    }
+
+    if (jsStatus != napi_ok) {
         ctx->ForwardJSException(coro);
         return {};
     }
@@ -157,10 +166,14 @@ void JSValueIndexedSetter(JSValue *etsJsValue, int32_t index, typename T::cpptyp
     INTEROP_CODE_SCOPE_ETS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
+    napi_status jsStatus;
+    {
+        ScopedNativeCodeThread nativeScope(coro);
 
-    auto rec = napi_set_element(env, JSConvertJSValue::WrapWithNullCheck(env, etsJsValue), index,
-                                JSConvertJSValue::WrapWithNullCheck(env, value));
-    if (rec != napi_ok) {
+        jsStatus = napi_set_element(env, JSConvertJSValue::WrapWithNullCheck(env, etsJsValue), index,
+                                    T::WrapWithNullCheck(env, value));
+    }
+    if (jsStatus != napi_ok) {
         ctx->ForwardJSException(coro);
     }
 }

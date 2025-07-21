@@ -83,6 +83,7 @@ struct JSConvertBase {
     JSConvertBase() = delete;
     using cpptype = ImplCpptype;
     static constexpr bool IS_REFTYPE = std::is_pointer_v<cpptype>;
+    static constexpr bool IS_JSVALUE = std::is_same_v<JSValue *, cpptype>;
     static constexpr size_t TYPE_SIZE = IS_REFTYPE ? ClassHelper::OBJECT_POINTER_SIZE : sizeof(cpptype);
 
     static void TypeCheckFailed()
@@ -129,6 +130,9 @@ struct JSConvertBase {
         if constexpr (IS_REFTYPE) {
             // NOTE(kprokopenko) can't assign null to EtsString *, hence fallback into UnwrapImpl
             if (UNLIKELY(IsUndefined(env, jsVal))) {
+                if constexpr (IS_JSVALUE) {
+                    return JSValue::CreateUndefined(EtsCoroutine::GetCurrent(), ctx);
+                }
                 return nullptr;
             }
         }

@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+  arktsconfig: arktsconfig.json
+---*/
+
 import { A2 } from "@multiple_implement/a2_extends_a1_i1";
 import { Ability } from "@spawn/ability";
 

@@ -19,7 +19,6 @@ desc: >-
     Where one operand is of type T1, and the other operand is of type T2,
     while T1, T2, or both are a union type, then a compile-time error occurs
     if T1 and T2 have no overlap
-tags: [compile-only, negative]
 ---*/
 {{c.decl}}
 

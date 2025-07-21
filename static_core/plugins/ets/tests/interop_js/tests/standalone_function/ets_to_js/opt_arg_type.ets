@@ -89,7 +89,7 @@ function functionOptArgTypeClassEts(arg?: ClassWithMethodEts): number {
     return arg?.methodInClass() ?? 1;
 }
 
-function functionOptArgTypeArrayEts(arg?: Array<string>): string[] | Array<string> {
+function functionOptArgTypeArrayEts(arg?: Array<string>): FixedArray<string> | Array<string> {
     return arg ?? ['one', 'two'];
 }
 

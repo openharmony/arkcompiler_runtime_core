@@ -18,46 +18,47 @@ package std.core;
 /**
  * @class GC defines methods with GC-specific behavior
  */
-export final class GC {
+export namespace GC {
     /**
      * @see getObjectSpaceType
      */
-    public static readonly UNDEFINED_SPACE = 0;
-    public static readonly OBJECT_SPACE = 1;
-    public static readonly HUMONGOUS_SPACE = 2;
-    public static readonly NON_MOVABLE_SPACE = 3;
-    public static readonly YOUNG_SPACE = 4;
-    public static readonly TENURED_SPACE = 5;
+    export enum ObjectSpaceType {
+        OBJECT = 1,
+        HUMONGOUS = 2,
+        NON_MOVABLE = 3,
+        YOUNG = 4,
+        TENURED = 5
+    }
 
     /**
      * @see startGC
      * @see scheduleGcAfterNthAlloc
      */
-    public static readonly YOUNG_CAUSE = 0;
-    public static readonly THRESHOLD_CAUSE = 1;
-    public static readonly MIXED_CAUSE = 2;
-    public static readonly FULL_CAUSE = 3;
+    export enum Cause {
+        YOUNG = 0,
+        THRESHOLD = 1,
+        MIXED = 2,
+        FULL = 3
+    }
 
-    public static readonly NOT_IN_PLACE_MODE: boolean = false;
-    public static readonly IN_PLACE_MODE: boolean = true;
+    export const NOT_IN_PLACE_MODE: boolean = false;
+    export const IN_PLACE_MODE: boolean = true;
 
-    // Use class as static
-    private constructor() {}
 
     /**
      * @returns long - free heap space in bytes available for new objects
      */
-    public static native getFreeHeapSize(): long;
+    export native function getFreeHeapSize(): long;
 
     /**
      * @returns long - currently used heap space in bytes
      */
-    public static native getUsedHeapSize(): long;
+    export native function getUsedHeapSize(): long;
 
     /**
      * @returns long - maximum heap space size in bytes
      */
-    public static native getReservedHeapSize(): long;
+    export native function getReservedHeapSize(): long;
 
     /**
      * The function triggers specific GC
@@ -66,16 +67,15 @@ export final class GC {
      * @param callback callback is called in concurrent phase
      * @param inPlaceMode run GC in place mode
      *
-     * @throws IllegalArgumentException if cause of GC is invalid or
-     *         current GC does not support requested cause
+     * @throws IllegalArgumentException if current GC does not support requested cause
      *
      * @returns id of started GC.
      * - The id can be passed to waitForFinishGC to ensure the GC is finished.
      * - 0 in case the GC is executed in-place. It means there is no need to wait such GC
      * - -1 in case the task is canceled
      */
-    public static startGC(cause: int, callback: () => void, inPlaceMode: boolean = GC.NOT_IN_PLACE_MODE): long throws {
-        return GC.startGCImpl(cause, callback as Object, inPlaceMode);
+    export function startGC(cause: Cause, callback: () => void, inPlaceMode: boolean = GC.NOT_IN_PLACE_MODE): long {
+        return startGCImpl(cause as int, callback as Object, inPlaceMode);
     }
 
     /**
@@ -84,8 +84,7 @@ export final class GC {
      * @param cause cause of requested GC
      * @param inPlaceMode run GC in place mode
      *
-     * @throws IllegalArgumentException if cause of GC is invalid or
-     *         current GC does not support requested cause
+     * @throws IllegalArgumentException if current GC does not support requested cause
      * @throws UnsupportedOperationException if current GC does not support requested cause
      * @throws IllegalStateException if try to run threshold GC collection not in place after calling postponeGCStart
      *
@@ -94,19 +93,19 @@ export final class GC {
      * - 0 in case the GC is executed in-place. It means there is no need to wait such GC
      * - -1 in case the task is canceled.
      */
-    public static startGC(cause: int, inPlaceMode: boolean = GC.NOT_IN_PLACE_MODE): long throws {
-        return GC.startGCImpl(cause, undefined, inPlaceMode);
+    export function startGC(cause: Cause, inPlaceMode: boolean = GC.NOT_IN_PLACE_MODE): long {
+        return startGCImpl(cause as int, undefined, inPlaceMode);
     }
     
-    private static native startGCImpl(cause: int, callback: Object | undefined, runInPlace: boolean): long throws;
+    native function startGCImpl(cause: int, callback: Object | undefined, runInPlace: boolean): long throws;
 
     /**
     * The function returns when the specified GC gets finished
     *
-    * @param gc_id id of the GC which is returned by startGC.
-    *                      If gc_id is 0 or -1 the function returns immediately.
+    * @param gcId id of the GC which is returned by startGC.
+    *                      If gcId is 0 or -1 the function returns immediately.
     */
-    public static native waitForFinishGC(gc_id: long): void;
+    export native function waitForFinishGC(gcId: long): void;
 
     /**
      * Method schedules GC before n-th allocation by setting counter to the specific GC trigger
@@ -115,11 +114,14 @@ export final class GC {
      * @param counter number of allocation for trigger GC
      * @param cause cause of requested GC
      *
-     * @throws IllegalArgumentException if cause of GC is invalid or
-     *         current GC does not support requested cause
+     * @throws IllegalArgumentException if current GC does not support requested cause
      * @throws UnsupportedOperationException if VM is running with incorrect GC trigger
      */
-    public static native scheduleGcAfterNthAlloc(counter: int, cause: int): void throws;
+    native function scheduleGcAfterNthAllocImpl(counter: int, cause: int): void throws;
+
+    export function scheduleGcAfterNthAlloc(counter: int, cause: Cause) {
+        scheduleGcAfterNthAllocImpl(counter, cause as int);
+    }
 
     /**
      * Checks if GC was triggered
@@ -128,7 +130,7 @@ export final class GC {
      *
      * @see scheduleGcAfterNthAlloc
      */
-    public static native isScheduledGCTriggered(): boolean;
+    export native function isScheduledGCTriggered(): boolean;
 
     /**
      * Start postponing GC collection - postpone GC for some time.
@@ -141,7 +143,7 @@ export final class GC {
      * @throws IllegalStateException if it called after calling postponeGCStart
      *         without calling postponeGCEnd
      */
-    public static native postponeGCStart(): void;
+    export native function postponeGCStart(): void;
 
     /**
      * End postponing GC collection - finish postpone GC collections.
@@ -152,7 +154,7 @@ export final class GC {
      * @throws UnsupportedOperationException if GC doesn't support postponing
      * @throws IllegalStateException if it called without calling postponeGCStart
      */
-    public static native postponeGCEnd(): void;
+    export native function postponeGCEnd(): void;
 
     /**
      * Pin object - GC will not move pinned object
@@ -163,7 +165,7 @@ export final class GC {
      *
      * @throws UnsupportedOperationException if used GC does not support pinning
      */
-    public static native pinObject(obj: Object): void throws;
+    export native function pinObject(obj: Object): void throws;
 
     /**
      * Unpin pinned object - now GC can move such object if it need
@@ -175,7 +177,7 @@ export final class GC {
      *
      * @param obj pinned object for unpinning
      */
-    public static native unpinObject(obj: Object): void;
+    export native function unpinObject(obj: Object): void;
 
     /**
      * Allocate array of boolean and pin (GC will not move pinned array)
@@ -190,7 +192,7 @@ export final class GC {
      *
      * @returns pinned array of boolean
      */
-    public static native allocatePinnedBooleanArray(length: long): boolean[] throws;
+    export native function allocatePinnedBooleanArray(length: long): FixedArray<boolean> throws;
 
     /**
      * Allocate array of byte and pin (GC will not move pinned array)
@@ -205,7 +207,7 @@ export final class GC {
      *
      * @returns pinned array of byte
      */
-    public static native allocatePinnedByteArray(length: long): byte[] throws;
+    export native function allocatePinnedByteArray(length: long): FixedArray<byte> throws;
 
     /**
      * Allocate array of char and pin (GC will not move pinned array)
@@ -220,7 +222,7 @@ export final class GC {
      *
      * @returns pinned array of char
      */
-    public static native allocatePinnedCharArray(length: long): char[] throws;
+    export native function allocatePinnedCharArray(length: long): FixedArray<char> throws;
 
     /**
      * Allocate array of short and pin (GC will not move pinned array)
@@ -235,7 +237,7 @@ export final class GC {
      *
      * @returns pinned array of short
      */
-    public static native allocatePinnedShortArray(length: long): short[] throws;
+    export native function allocatePinnedShortArray(length: long): FixedArray<short> throws;
 
     /**
      * Allocate array of int and pin (GC will not move pinned array)
@@ -250,7 +252,7 @@ export final class GC {
      *
      * @returns pinned array of int
      */
-    public static native allocatePinnedIntArray(length: long): int[] throws;
+    export native function allocatePinnedIntArray(length: long): FixedArray<int> throws;
 
     /**
      * Allocate array of long and pin (GC will not move pinned array)
@@ -265,7 +267,7 @@ export final class GC {
      *
      * @returns pinned array of long
      */
-    public static native allocatePinnedLongArray(length: long): long[] throws;
+    export native function allocatePinnedLongArray(length: long): FixedArray<long> throws;
 
     /**
      * Allocate array of float and pin (GC will not move pinned array)
@@ -280,7 +282,7 @@ export final class GC {
      *
      * @returns pinned array of float
      */
-    public static native allocatePinnedFloatArray(length: long): float[] throws;
+    export native function allocatePinnedFloatArray(length: long): FixedArray<float> throws;
 
     /**
      * Allocate array of double and pin (GC will not move pinned array)
@@ -295,7 +297,7 @@ export final class GC {
      *
      * @returns pinned array of double
      */
-    public static native allocatePinnedDoubleArray(length: long): double[] throws;
+    export native function allocatePinnedDoubleArray(length: long): FixedArray<double> throws;
 
     /**
      * Returns encoded space type
@@ -304,7 +306,12 @@ export final class GC {
      *
      * @returns type of space which contains object-argument
      */
-    public static native getObjectSpaceType(obj: Object): int;
+    native function getObjectSpaceTypeImpl(obj: Object): int;
+
+    export function getObjectSpaceType(obj: Object): ObjectSpaceType {
+        let spaceType: int = getObjectSpaceTypeImpl(obj);
+        return spaceType as ObjectSpaceType;
+    }
 
     /**
      * Returns object address
@@ -313,25 +320,25 @@ export final class GC {
      *
      * @returns address of object
      */
-    public static native getObjectAddress(obj: Object): long;
+    export native function getObjectAddress(obj: Object): long;
 
     /**
      * @param obj object for which size is requested
      * @returns size of the object in bytes
      */
-    public static native getObjectSize(obj: Object): long;
+    export native function getObjectSize(obj: Object): long;
 
     /**
      * @throws NegativeArraySizeError if size is negative
      *
      * @param size: long - number of bytes to be registered by GC as native
      */
-    public static native registerNativeAllocation(size: long): void;
+    export native function registerNativeAllocation(size: long): void;
 
     /**
      * @throws NegativeArraySizeError if size is negative
      *
      * @param size: long - number of bytes to be freed by GC
      */
-    public static native registerNativeFree(size: long): void;
+    export native function registerNativeFree(size: long): void;
 }

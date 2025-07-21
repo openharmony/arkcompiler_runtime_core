@@ -132,6 +132,7 @@ compiler::RuntimeInterface::InteropCallKind EtsRuntimeInterface::GetInteropCallK
         uint32_t const argReftypeShift = method->GetReturnType().IsReference() ? 1 : 0;
         ScopedMutatorLock lock;
         auto cls = classLinker->GetClass(*pf, pda.GetReferenceType(1 + argReftypeShift), linkerCtx);
+        ASSERT(cls != nullptr);
         if (!cls->IsStringClass()) {
             return InteropCallKind::CALL_BY_VALUE;
         }
@@ -204,6 +205,11 @@ bool EtsRuntimeInterface::IsClassStringBuilder(ClassPtr klass) const
     return ClassCast(klass)->GetName() == "std.core.StringBuilder";
 }
 
+bool EtsRuntimeInterface::IsClassEscompatArray(ClassPtr klass) const
+{
+    return ClassCast(klass)->GetName() == "escompat.Array";
+}
+
 uint32_t EtsRuntimeInterface::GetClassOffsetObjectsArray(MethodPtr method) const
 {
     auto pf = MethodCast(method)->GetPandaFile();
@@ -221,6 +227,11 @@ EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetStringBuilderClass() const
     return PlatformTypes(PandaEtsVM::GetCurrent())->coreStringBuilder->GetRuntimeClass();
 }
 
+EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetEscompatArrayClass() const
+{
+    return PlatformTypes(PandaEtsVM::GetCurrent())->escompatArray->GetRuntimeClass();
+}
+
 EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetStringBuilderDefaultConstructor() const
 {
     for (auto ctor : PlatformTypes()->coreStringBuilder->GetConstructors()) {
@@ -236,6 +247,21 @@ uint32_t EtsRuntimeInterface::GetMethodId(MethodPtr method) const
 {
     ASSERT(method != nullptr);
     return static_cast<EtsMethod *>(method)->GetMethodId();
+}
+
+bool EtsRuntimeInterface::IsFieldBooleanFalse([[maybe_unused]] FieldPtr field) const
+{
+    return IsClassBoxedBoolean((FieldCast(field)->GetClass())) && GetFieldName(field) == "FALSE";
+}
+
+bool EtsRuntimeInterface::IsFieldBooleanTrue([[maybe_unused]] FieldPtr field) const
+{
+    return IsClassBoxedBoolean((FieldCast(field)->GetClass())) && GetFieldName(field) == "TRUE";
+}
+
+bool EtsRuntimeInterface::IsFieldBooleanValue([[maybe_unused]] FieldPtr field) const
+{
+    return IsClassBoxedBoolean((FieldCast(field)->GetClass())) && GetFieldName(field) == "value";
 }
 
 EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetFieldStringBuilderBuffer(ClassPtr klass) const
@@ -262,6 +288,18 @@ EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetFieldStringBuilderCompress
     return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8("compress"));
 }
 
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatArrayActualLength(ClassPtr klass) const
+{
+    ASSERT(IsClassEscompatArray(klass));
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8("actualLength"));
+}
+
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatArrayBuffer(ClassPtr klass) const
+{
+    ASSERT(IsClassEscompatArray(klass));
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8("buffer"));
+}
+
 bool EtsRuntimeInterface::IsFieldStringBuilderBuffer(FieldPtr field) const
 {
     return IsClassStringBuilder(FieldCast(field)->GetClass()) && GetFieldName(field) == "buf";
@@ -270,6 +308,31 @@ bool EtsRuntimeInterface::IsFieldStringBuilderBuffer(FieldPtr field) const
 bool EtsRuntimeInterface::IsFieldStringBuilderIndex(FieldPtr field) const
 {
     return IsClassStringBuilder(FieldCast(field)->GetClass()) && GetFieldName(field) == "index";
+}
+
+bool EtsRuntimeInterface::IsFieldArrayActualLength(FieldPtr field) const
+{
+    return IsClassEscompatArray(FieldCast(field)->GetClass()) && GetFieldName(field) == "actualLength";
+}
+
+bool EtsRuntimeInterface::IsFieldArrayBuffer(FieldPtr field) const
+{
+    return IsClassEscompatArray(FieldCast(field)->GetClass()) && GetFieldName(field) == "buffer";
+}
+
+bool EtsRuntimeInterface::IsFieldArray(ArrayField kind, FieldPtr field) const
+{
+    if (!HasFieldMetadata(field)) {
+        return false;
+    }
+    switch (kind) {
+        case ArrayField::ACTUAL_LENGTH:
+            return IsFieldArrayActualLength(field);
+        case ArrayField::BUFFER:
+            return IsFieldArrayBuffer(field);
+        default:
+            return false;
+    }
 }
 
 bool EtsRuntimeInterface::IsIntrinsicStringBuilderToString(IntrinsicId id) const
@@ -319,6 +382,20 @@ bool EtsRuntimeInterface::IsIntrinsicStringBuilderAppend(IntrinsicId id) const
         case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING3:
             return true;
         case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING4:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool EtsRuntimeInterface::IsIntrinsicStringConcat(IntrinsicId id) const
+{
+    switch (id) {
+        case IntrinsicId::INTRINSIC_STD_CORE_STRING_CONCAT2:
+            return true;
+        case IntrinsicId::INTRINSIC_STD_CORE_STRING_CONCAT3:
+            return true;
+        case IntrinsicId::INTRINSIC_STD_CORE_STRING_CONCAT4:
             return true;
         default:
             return false;
@@ -407,6 +484,11 @@ void *EtsRuntimeInterface::GetDoubleToStringCache() const
     return ark::ets::PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
 }
 
+bool EtsRuntimeInterface::IsStringCachesUsed() const
+{
+    return Runtime::GetCurrent()->GetOptions().IsUseStringCaches();
+}
+
 bool EtsRuntimeInterface::IsNativeMethodOptimizationEnabled() const
 {
     return true;
@@ -420,6 +502,16 @@ uint64_t EtsRuntimeInterface::GetDeprecatedNativeApiMask() const
 uint32_t EtsRuntimeInterface::GetRuntimeClassOffset(Arch arch) const
 {
     return ark::cross_values::GetEtsClassRuntimeClassOffset(arch);
+}
+
+bool EtsRuntimeInterface::IsBoxedClass(ClassPtr klass) const
+{
+    return EtsClass::FromRuntimeClass(ClassCast(klass))->IsBoxed();
+}
+
+bool EtsRuntimeInterface::IsClassBoxedBoolean(ClassPtr klass) const
+{
+    return PlatformTypes(PandaEtsVM::GetCurrent())->coreBoolean->GetRuntimeClass() == klass;
 }
 
 size_t EtsRuntimeInterface::GetTlsNativeApiOffset(Arch arch) const

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 - {
   method_name: asIntN,
   object_type: BigInt,
-  param_init_data_types: {"param1":"long[]", "param2": "bigint[]"},
+  param_init_data_types: {"param1":"FixedArray<long>", "param2": "FixedArray<bigint>"},
   param_types: {
     "param1": Long,
     "param2": bigint
@@ -29,7 +29,7 @@
   },
   method_return_type: bigint,
   expected_data_item_type: bigint,
-  expected_data_type: "bigint[]",
+  expected_data_type: "FixedArray<bigint>",
   expected_test_data: "[0n, 1n, -7n, 7n]",
   verify_test_result_function: comparePrimitiveValue
 }
@@ -37,7 +37,7 @@
 - {
   method_name: asIntN,
   object_type: BigInt,
-  param_init_data_types: {"param1":"long[]", "param2": "bigint[]"},
+  param_init_data_types: {"param1":"FixedArray<long>", "param2": "FixedArray<bigint>"},
   param_types: {
     "param1": Long,
     "param2": bigint
@@ -52,7 +52,7 @@
   },
   method_return_type: bigint,
   expected_data_item_type: bigint,
-  expected_data_type: "bigint[]",
+  expected_data_type: "FixedArray<bigint>",
   expected_test_data: "[9n, 25n]",
   verify_test_result_function: comparePrimitiveValue
 }
@@ -106,7 +106,7 @@
 - {
   method_name: asUintN,
   object_type: BigInt,
-  param_init_data_types: {"param1":"long[]", "param2": "bigint[]"},
+  param_init_data_types: {"param1":"FixedArray<long>", "param2": "FixedArray<bigint>"},
   param_types: {
     "param1": Long,
     "param2": bigint
@@ -121,7 +121,7 @@
   },
   method_return_type: bigint,
   expected_data_item_type: bigint,
-  expected_data_type: "bigint[]",
+  expected_data_type: "FixedArray<bigint>",
   expected_test_data: "[0n, 1n, 9n, 7n]",
   verify_test_result_function: comparePrimitiveValue
 }
@@ -129,7 +129,7 @@
 - {
   method_name: asUintN,
   object_type: BigInt,
-  param_init_data_types: {"param1":"long[]", "param2": "bigint[]"},
+  param_init_data_types: {"param1":"FixedArray<long>", "param2": "FixedArray<bigint>"},
   param_types: {
     "param1": Long,
     "param2": bigint
@@ -144,7 +144,7 @@
   },
   method_return_type: bigint,
   expected_data_item_type: bigint,
-  expected_data_type: "bigint[]",
+  expected_data_type: "FixedArray<bigint>",
   expected_test_data: "[9n, 25n]",
   verify_test_result_function: comparePrimitiveValue
 }

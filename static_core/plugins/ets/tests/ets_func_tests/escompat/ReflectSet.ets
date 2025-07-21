@@ -51,7 +51,7 @@ class C {
     public p5:short = 0;
 }
 
-function arraysAreEqual(a: string[], b: string[]): boolean {
+function arraysAreEqual(a: FixedArray<string>, b: FixedArray<string>): boolean {
     let alen = a.length
     if (alen != b.length) {
         return false
@@ -135,8 +135,8 @@ function reflectSetTypeConvert(): int {
 function reflectSetArray(): int {
     let result: int = 0
 
-    let arr: number[] = [10, 20, 30]
-    let brr: string[] = ["p", "q", "t", "w"]
+    let arr: FixedArray<number> = [10, 20, 30]
+    let brr: FixedArray<string> = ["p", "q", "t", "w"]
 
     result += (Reflect.set(arr, 0, 40 as number) == true) ? 0 : 1
     result += (Reflect.set(arr, 1, 50 as number) == true) ? 0 : 1

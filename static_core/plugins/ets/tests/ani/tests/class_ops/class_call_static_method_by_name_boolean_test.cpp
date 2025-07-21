@@ -20,6 +20,8 @@ namespace ark::ets::ani::testing {
 
 class ClassCallStaticMethodByNameBooleanTest : public AniTest {
 public:
+    static constexpr ani_int VAL1 = 5U;
+    static constexpr ani_int VAL2 = 6U;
     void GetClassData(ani_class *clsResult)
     {
         ani_class cls {};
@@ -33,6 +35,25 @@ public:
         va_start(args, value);
         ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_V(cls, name, "ZZ:Z", value, args), ANI_OK);
         va_end(args);
+    }
+
+    void TestCombineScene(const char *className, const char *methodName, ani_boolean initValue,
+                          ani_boolean expectedValue)
+    {
+        ani_class cls {};
+        ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
+
+        ani_boolean value = initValue;
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, methodName, "ZZ:Z", &value, ANI_TRUE, ANI_FALSE),
+                  ANI_OK);
+        ASSERT_EQ(value, expectedValue);
+
+        ani_value args[2U];
+        args[0U].z = ANI_TRUE;
+        args[1U].z = ANI_FALSE;
+        ani_boolean valueA = initValue;
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, methodName, "ZZ:Z", &valueA, args), ANI_OK);
+        ASSERT_EQ(valueA, expectedValue);
     }
 };
 
@@ -96,6 +117,9 @@ TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_e
 
     ani_boolean value = ANI_FALSE;
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Boolean(env_, cls, "aa", nullptr, &value, ANI_TRUE, ANI_FALSE),
+              ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "", nullptr, &value, ANI_TRUE, ANI_FALSE), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "\n", nullptr, &value, ANI_TRUE, ANI_FALSE),
               ANI_NOT_FOUND);
 }
 
@@ -178,6 +202,8 @@ TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_A
 
     ani_boolean value = ANI_FALSE;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "aa", nullptr, &value, args), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "", nullptr, &value, args), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "\n", nullptr, &value, args), ANI_NOT_FOUND);
 }
 
 TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_A_null_result)
@@ -297,6 +323,126 @@ TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_c
     ani_boolean valueV = ANI_FALSE;
     TestFuncV(cls, "funcA", &valueV, ANI_TRUE, ANI_FALSE);
     ASSERT_EQ(valueV, ANI_FALSE);
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_null_env)
+{
+    ani_class cls {};
+    GetClassData(&cls);
+
+    ani_boolean value = ANI_FALSE;
+    ASSERT_EQ(
+        env_->c_api->Class_CallStaticMethodByName_Boolean(nullptr, cls, "or", nullptr, &value, ANI_TRUE, ANI_FALSE),
+        ANI_INVALID_ARGS);
+    ani_value args[2U];
+    args[0U].z = ANI_TRUE;
+    args[1U].z = ANI_FALSE;
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Boolean_A(nullptr, cls, "or", nullptr, &value, args),
+              ANI_INVALID_ARGS);
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_combine_scenes_5)
+{
+    ani_class clsA {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_boolean_test/A;", &clsA), ANI_OK);
+    ani_class clsB {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_boolean_test/B;", &clsB), ANI_OK);
+
+    ani_boolean valueA = ANI_FALSE;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(clsA, "funcA", "ZZ:Z", &valueA, ANI_TRUE, ANI_FALSE), ANI_OK);
+    ASSERT_EQ(valueA, ANI_TRUE);
+    ani_boolean valueB = ANI_TRUE;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(clsB, "funcB", "ZZ:Z", &valueB, ANI_TRUE, ANI_FALSE), ANI_OK);
+    ASSERT_EQ(valueB, ANI_FALSE);
+
+    ani_value args[2U];
+    args[0U].z = ANI_TRUE;
+    args[1U].z = ANI_FALSE;
+    ani_boolean valueAA = ANI_FALSE;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(clsA, "funcA", "ZZ:Z", &valueAA, args), ANI_OK);
+    ASSERT_EQ(valueAA, ANI_TRUE);
+    ani_boolean valueBA = ANI_TRUE;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(clsB, "funcB", "ZZ:Z", &valueBA, args), ANI_OK);
+    ASSERT_EQ(valueBA, ANI_FALSE);
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_combine_scenes_6)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_boolean_test/A;", &cls), ANI_OK);
+    ani_boolean value = ANI_FALSE;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "funcA", "ZZ:Z", &value, ANI_TRUE, ANI_FALSE), ANI_OK);
+    ASSERT_EQ(value, ANI_TRUE);
+
+    ani_value args[2U];
+    args[0U].z = ANI_TRUE;
+    args[1U].z = ANI_FALSE;
+    ani_boolean valueA = ANI_FALSE;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "funcA", "ZZ:Z", &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, ANI_TRUE);
+
+    ani_int value2 = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Int(cls, "funcA", "II:I", &value2, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(value2, VAL1 + VAL2);
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_combine_scenes_7)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_boolean_test/A;", "funcB", ANI_FALSE, ANI_TRUE);
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_combine_scenes_8)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_boolean_test/C;", "funcA", ANI_FALSE, ANI_TRUE);
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_combine_scenes_9)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_boolean_test/D;", "funcA", ANI_TRUE, ANI_FALSE);
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_combine_scenes_10)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_boolean_test/E;", "funcA", ANI_FALSE, ANI_TRUE);
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_combine_scenes_11)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_boolean_test/F;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "increment", nullptr, ANI_TRUE, ANI_FALSE), ANI_OK);
+    ani_boolean value = ANI_TRUE;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "getCount", nullptr, &value), ANI_OK);
+    ASSERT_EQ(value, ANI_FALSE);
+
+    ani_value args[2U];
+    args[0U].z = ANI_TRUE;
+    args[1U].z = ANI_FALSE;
+    ani_boolean valueA = ANI_TRUE;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "getCount", nullptr, &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, ANI_FALSE);
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_combine_scenes_12)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_boolean_test/G;", &cls), ANI_OK);
+    ani_boolean value = ANI_FALSE;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "publicMethod", "ZZ:Z", &value, ANI_TRUE, ANI_FALSE),
+              ANI_OK);
+    ASSERT_EQ(value, ANI_TRUE);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "callPrivateMethod", "ZZ:Z", &value, ANI_TRUE, ANI_FALSE),
+              ANI_OK);
+    ASSERT_EQ(value, ANI_FALSE);
+
+    ani_value args[2U];
+    args[0U].z = ANI_TRUE;
+    args[1U].z = ANI_FALSE;
+    ani_boolean valueA = ANI_FALSE;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "publicMethod", "ZZ:Z", &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, ANI_TRUE);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "callPrivateMethod", "ZZ:Z", &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, ANI_FALSE);
 }
 }  // namespace ark::ets::ani::testing
    // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

@@ -38,6 +38,7 @@ libarkinspector_sources = [
   "types/exception_details.cpp",
   "types/location.cpp",
   "types/object_preview.cpp",
+  "types/profile_result.cpp",
   "types/remote_object.cpp",
   "types/scope.cpp",
   "types/url_breakpoint_request.cpp",
@@ -83,6 +84,7 @@ ohos_shared_library("libarkinspector") {
   sources = libarkinspector_sources
   include_dirs = [
     "$ark_root/runtime/include",
+    "$ark_root/runtime/tooling",
     "$ark_root/runtime/tooling/inspector",
     get_label_info("$ark_root/assembler:isa_gen_libarkassembler",
                    "target_gen_dir"),

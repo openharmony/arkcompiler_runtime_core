@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,17 +17,17 @@
 
 import argparse
 from functools import cached_property
-from typing import Dict, List, Any
+from typing import Any, ClassVar
 
 from runner.options.options import IOptions
 
 
 class TimeReportOptions(IOptions):
-    __DEFAULT_EDGES = [1, 5, 10]
+    __DEFAULT_EDGES: ClassVar[list[int]] = [1, 5, 10]
     __TIME_REPORT = "enable-time-report"
     __TIME_EDGES = "time-edges"
 
-    def __init__(self, args: Dict[str, Any]):
+    def __init__(self, args: dict[str, Any]):  # type: ignore[explicit-any]
         super().__init__(args)
         self.__parameters = args
 
@@ -46,7 +46,7 @@ class TimeReportOptions(IOptions):
             help='Time edges in the format `1,5,10` where numbers are seconds')
 
     @staticmethod
-    def __process_time_edges(arg: str) -> List[int]:
+    def __process_time_edges(arg: str) -> list[int]:
         return [int(v) for v in arg.split(",")]
 
     @cached_property
@@ -54,11 +54,11 @@ class TimeReportOptions(IOptions):
         return bool(self.__parameters[self.__TIME_REPORT])
 
     @cached_property
-    def time_edges(self) -> List[int]:
+    def time_edges(self) -> list[int]:
         return list(self.__parameters[self.__TIME_EDGES])
 
     def get_command_line(self) -> str:
         _edges: str = ','.join(str(self.time_edges))
-        options: List[str] = [
+        options: list[str] = [
         ]
         return ' '.join(options)

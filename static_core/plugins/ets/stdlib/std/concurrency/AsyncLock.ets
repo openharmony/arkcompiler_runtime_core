@@ -26,7 +26,7 @@ export enum AsyncLockMode {
 export final class AsyncLock {
 
     constructor() {
-        this("default_name");
+        this(AsyncLock.generateAnonymousLockName());
     }
 
     internal constructor(name: string) {
@@ -86,34 +86,95 @@ export final class AsyncLock {
      */
     public lockAsync<T, U>(callback: AsyncLockCallback<T>, mode: AsyncLockMode, options: AsyncLockOptions<U>): Promise<T> {
         let callerCID = CoroutineExtras.getCoroutineId();
-        return launch this.wrapper<T, U>(callback, callerCID, mode, options) as Promise<T>;
+        let asyncLockInfo = new AsyncLockInfo(this.name, mode, callerCID);
+
+        let wrapped = (l: AsyncLock) => { return l.wrapper<T, U>(callback, callerCID, mode, options); }
+        if (this.canAcquireLock(mode, callerCID, asyncLockInfo)) {
+            wrapped = (l: AsyncLock) => { return l.syncwrapper<T, U>(callback, asyncLockInfo, options); }
+        } else {
+            ConcurrencyHelpers.mutexLock(this.mutex);
+            this.pending.add(asyncLockInfo);
+            ConcurrencyHelpers.mutexUnlock(this.mutex);
+        }
+
+        return AsyncLock.launchPromise(wrapped, this);
     }
 
-    private wrapper<T, U>(callback: AsyncLockCallback<T>, callerCID: int, mode: AsyncLockMode, options: AsyncLockOptions<U>) : T | Promise<T>{
-        let asyncLockInfo = new AsyncLockInfo(this.name, mode, callerCID);
+    private canAcquireLock<T>(mode: AsyncLockMode, callerCID: int, asyncLockInfo: AsyncLockInfo) : boolean {
         ConcurrencyHelpers.mutexLock(this.mutex);
-        this.pending.add(asyncLockInfo);
-        ConcurrencyHelpers.mutexUnlock(this.mutex);
-
-        this.lock<U>(callerCID, mode, asyncLockInfo, options);
         try {
-            return Promise.resolve<T>(callback());
+            if (this.holderCID == 0 && this.mode == AsyncLockMode.UNLOCKED) {
+                this.counter = 1;
+                this.held.add(asyncLockInfo);
+                this.holderCID = callerCID;
+                this.mode = mode;
+                return true;
+            }
+            if (mode == AsyncLockMode.SHARED && this.mode == AsyncLockMode.SHARED && this.holderCID == callerCID) {
+                this.counter++;
+                this.held.add(asyncLockInfo);
+                this.holderCID = callerCID;
+                this.mode = mode;
+                return true;
+            }
+            return false;
         } finally {
-            this.unlock(asyncLockInfo);
+            ConcurrencyHelpers.mutexUnlock(this.mutex);
         }
+    }
+
+    private syncwrapper<T,U>(callback: AsyncLockCallback<T>, asyncLockInfo: AsyncLockInfo, options: AsyncLockOptions<U>) : Promise<T> {
+        if (options.signal != null && options.signal!.aborted == true) {
+            throw new Error("Aborted");
+        }
+        return Promise.resolve<T>(callback()).finally(() => {this.unlock(asyncLockInfo); });
+    }
+
+    private static launchPromise<T>(f: Function, ...args: FixedArray<NullishType>): Promise<T> {
+        let resolver: (((v: T | PromiseLike<T>) => void) | undefined) = undefined;
+        let rejecter: (((error: Error) => void) | undefined) = undefined;
+        let p = new Promise<T>((res, rej) => {
+            resolver = res
+            rejecter = rej;
+        })
+        let cb = () => {
+            try {
+                let v = f.unsafeCall(...args) as T
+                resolver!(v)
+            } catch (e: Error) {
+                rejecter!(e)
+            }
+        }
+        launchSameWorker(cb)
+        return p;
+    }
+
+    private wrapper<T, U>(callback: AsyncLockCallback<T>, callerCID: int, mode: AsyncLockMode, options: AsyncLockOptions<U>) : Promise<T> {
+        let asyncLockInfo = new AsyncLockInfo(this.name, mode, callerCID);
+        this.lock<U>(callerCID, mode, asyncLockInfo, options);
+        return Promise.resolve<T>(callback()).finally(() => {this.unlock(asyncLockInfo); });
     }
 
     private lock<U>(callerCID: int, mode: AsyncLockMode, asyncLockInfo: AsyncLockInfo, options: AsyncLockOptions<U>): void {
         let isDone = false;
         let timeout = options.timeout;
-        let startTime = Chrono.milliNow();
+        let isTimeoutExec: boolean = false;
+
+        if (timeout) {
+           setTimeout(() => {
+               isTimeoutExec = true;
+           }, timeout);
+        }
 
         while (isDone == false) {
-
-            if (timeout != 0 && timeout < (Chrono.milliNow() - startTime)) {
-                throw new Error("AsyncLock timeout");
+            if (options.signal != null && options.signal!.aborted == true) {
+                throw new Error("Aborted");
             }
 
+            if(isTimeoutExec == true) {
+                throw new Error("AsyncLock timeout");
+            }
+           
             ConcurrencyHelpers.mutexLock(this.mutex);
 
             if (this.holderCID == 0) {
@@ -154,7 +215,11 @@ export final class AsyncLock {
     }
 
     public static query(name: string): AsyncLockState {
-        return asyncLockManager.query(name);
+        try {
+            return asyncLockManager.query(name);
+        } catch (e: Error) {
+            throw e;
+        }
     }
 
     public static queryAll(): AsyncLockState[] {
@@ -168,7 +233,12 @@ export final class AsyncLock {
         return state;
     }
 
+    private static generateAnonymousLockName() {
+        return "__AnonymousLockName__" + Number.toString(AsyncLock.LastAnonymousId++);
+    }
+
     public readonly name: string;
+    private static LastAnonymousId: int = 0;
     private holderCID: int = 0;
     private mode: AsyncLockMode = AsyncLockMode.UNLOCKED;
     private counter: int = 0;

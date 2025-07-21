@@ -19,6 +19,7 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "libpandabase/macros.h"
 #include <node_api.h>
 #include <unordered_map>
@@ -159,9 +160,11 @@ template <bool ALLOW_INIT = false>
 // CC-OFFNXT(G.FUD.06) perf critical
 inline bool CheckClassInitialized(Class *klass)
 {
+    ASSERT(klass != nullptr);
     if constexpr (ALLOW_INIT) {
         if (UNLIKELY(!klass->IsInitialized())) {
             auto coro = EtsCoroutine::GetCurrent();
+            ASSERT(coro != nullptr);
             auto classLinker = coro->GetPandaVM()->GetClassLinker();
             if (!classLinker->InitializeClass(coro, EtsClass::FromRuntimeClass(klass))) {
                 INTEROP_LOG(ERROR) << "Class " << klass->GetDescriptor() << " cannot be initialized";
@@ -183,6 +186,11 @@ inline bool IsStdClass(Class *klass)
 inline bool IsStdClass(EtsClass *klass)
 {
     return IsStdClass(klass->GetRuntimeClass());
+}
+
+inline bool IsSubClassOfError(EtsClass *klass)
+{
+    return klass->IsSubClass(PlatformTypes()->escompatError);
 }
 
 }  // namespace ark::ets::interop::js

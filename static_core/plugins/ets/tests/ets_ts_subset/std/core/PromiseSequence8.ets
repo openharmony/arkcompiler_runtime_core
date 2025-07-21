@@ -15,28 +15,28 @@
 
 function checkSequence(actual: Array<number>, expectedLength: number): void {
     if (actual.length != expectedLength) {
-        console.log("Test failed. Expected sequence length " + expectedLength + ", but got " + actual.length);
-        throw new Error("Test failed");
+        console.log('Test failed. Expected sequence length ' + expectedLength + ', but got ' + actual.length);
+        throw new Error('Test failed');
     }
     for (let i = 0; i < expectedLength; ++i) {
         if (actual[i] != i + 1) {
-            console.log("Test failed. Expected element at " + i + " to be " + i + ", but got " + actual[i]);
-            throw new Error("Test failed");
+            console.log('Test failed. Expected element at ' + i + ' to be ' + i + ', but got ' + actual[i]);
+            throw new Error('Test failed');
         }
     }
 }
 
 let sequence = new Array<number>();
-let p = Promise.reject<number>(new Error("start error"));
+let p = Promise.reject<number>(new Error('start error'));
 
 p.finally((): void => {
     sequence.push(1);
 }).then<void>((): void => {
-    console.log("Test failed. The promise should be rejected.");
-    throw new Error("Test failed");
-}).catch<void>((err: Object): void => {
+    console.log('Test failed. The promise should be rejected.');
+    throw new Error('Test failed');
+}).catch<void>((err: Error): void => {
     sequence.push(2);
 }).then<void>((): void => {
     checkSequence(sequence, 2);
-    console.log("Test passed.");
+    console.log('Test passed.');
 });

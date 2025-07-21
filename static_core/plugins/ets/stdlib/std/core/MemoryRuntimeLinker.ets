@@ -21,7 +21,7 @@ package std.core;
 export class MemoryRuntimeLinker extends AbcRuntimeLinker {
     public constructor(parentLinker: RuntimeLinker | undefined, rawAbcFiles: byte[][]) {
         super(parentLinker, []);
-        const abcFiles = new (AbcFile | undefined)[rawAbcFiles.length as int];
+        const abcFiles : FixedArray<AbcFile | undefined> = new (AbcFile | undefined)[Double.toInt(rawAbcFiles.length)];
         for (let i = 0; i < rawAbcFiles.length; i++) {
             abcFiles[i] = AbcFile.loadFromMemory(this, rawAbcFiles[i]);
         }

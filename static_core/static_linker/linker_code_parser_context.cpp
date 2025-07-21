@@ -145,7 +145,7 @@ void CodePatcher::ApplyDeps(Context *ctx)
         std::visit(
             [this, ctx](auto &a) {
                 using T = std::remove_cv_t<std::remove_reference_t<decltype(a)>>;
-                // IndexedChange, StringChange, LiteralArrayChange, std::string, std::function<void()>>
+                // IndexedChange, StringChange, LiteralArrayChange, std::string, std::function<bool(bool)>>
                 if constexpr (std::is_same_v<T, IndexedChange>) {
                     a.mi->AddIndexDependency(a.it);
                 } else if constexpr (std::is_same_v<T, StringChange>) {
@@ -153,14 +153,47 @@ void CodePatcher::ApplyDeps(Context *ctx)
                 } else if constexpr (std::is_same_v<T, LiteralArrayChange>) {
                     ApplyLiteralArrayChange(a, ctx);
                 } else if constexpr (std::is_same_v<T, std::string>) {
-                    ctx->GetContainer().GetOrCreateStringItem(a);
-                } else if constexpr (std::is_same_v<T, std::function<void()>>) {
+                    // unreferenced string item should be mark
+                    auto stringItem = ctx->GetContainer().GetOrCreateStringItem(a);
+                    stringItem->SetDependencyMark();
+                } else if constexpr (std::is_same_v<T, std::function<bool(bool)>>) {
                     // nothing
                 } else {
                     UNREACHABLE();
                 }
             },
             v);
+    }
+}
+
+void CodePatcher::TryDeletePatch()
+{
+    auto markDependency = [](auto &a, bool &shouldDelete) {
+        using T = std::remove_cv_t<std::remove_reference_t<decltype(a)>>;
+        if constexpr (std::is_same_v<T, IndexedChange>) {
+            if (!a.mi->GetDependencyMark()) {
+                shouldDelete = true;
+            }
+        } else if constexpr (std::is_same_v<T, StringChange>) {
+            if (!a.mi->GetDependencyMark()) {
+                shouldDelete = true;
+            }
+        } else if constexpr (std::is_same_v<T, std::function<bool(bool)>>) {
+            if (a(true)) {
+                shouldDelete = true;
+            }
+        }
+    };
+
+    for (auto it = changes_.begin(); it != changes_.end();) {
+        auto &v = *it;
+        bool shouldDelete = false;
+        std::visit([&](auto &a) { markDependency(a, shouldDelete); }, v);
+        if (shouldDelete) {
+            it = changes_.erase(it);
+        } else {
+            ++it;
+        }
     }
 }
 
@@ -182,8 +215,8 @@ void CodePatcher::Patch(const std::pair<size_t, size_t> range)
                     a.inst.UpdateId(BytecodeId(off));
                 } else if constexpr (std::is_same_v<T, std::string>) {
                     // nothing
-                } else if constexpr (std::is_same_v<T, std::function<void()>>) {
-                    a();
+                } else if constexpr (std::is_same_v<T, std::function<bool(bool)>>) {
+                    a(false);
                 } else {
                     UNREACHABLE();
                 }
@@ -192,13 +225,32 @@ void CodePatcher::Patch(const std::pair<size_t, size_t> range)
     }
 }
 
-void Context::HandleStringId(CodePatcher &p, const BytecodeInstruction &inst, const panda_file::File *filePtr)
+void CodePatcher::AddStringDependency()
+{
+    auto markStringDependency = [](auto &a) {
+        using T = std::remove_cv_t<std::remove_reference_t<decltype(a)>>;
+        if constexpr (std::is_same_v<T, StringChange>) {
+            if (a.mi->GetDependencyMark()) {
+                a.it->SetDependencyMark();
+            }
+        }
+    };
+
+    for (auto it = changes_.begin(); it != changes_.end();) {
+        auto &v = *it;
+        std::visit(markStringDependency, v);
+        ++it;
+    }
+}
+
+void Context::HandleStringId(CodePatcher &p, const BytecodeInstruction &inst, const panda_file::File *filePtr,
+                             CodeData *data)
 {
     BytecodeId bId = inst.GetId();
     auto oldId = bId.AsFileId();
     auto sData = filePtr->GetStringData(oldId);
     auto itemStr = std::string(utf::Mutf8AsCString(sData.data));
-    p.Add(CodePatcher::StringChange {inst, std::move(itemStr)});
+    p.Add(CodePatcher::StringChange {inst, std::move(itemStr), data->nmi});
 }
 
 void Context::HandleLiteralArrayId(CodePatcher &p, const BytecodeInstruction &inst, const panda_file::File *filePtr,
@@ -255,7 +307,7 @@ void Context::MakeChangeWithId(CodePatcher &p, CodeData *data)
         } else if (inst.HasFlag(Flags::FIELD_ID) || inst.HasFlag(Flags::STATIC_FIELD_ID)) {
             makeWithId(&panda_file::File::ResolveFieldIndex);
         } else if (inst.HasFlag(Flags::STRING_ID)) {
-            HandleStringId(p, inst, filePtr);
+            HandleStringId(p, inst, filePtr, data);
         } else if (inst.HasFlag(Flags::LITERALARRAY_ID)) {
             HandleLiteralArrayId(p, inst, filePtr, items);
         }
@@ -288,7 +340,11 @@ void Context::ProcessCodeData(CodePatcher &p, CodeData *data)
     scrapper.Scrap(eId);
 
     auto newDbg = data->nmi->GetDebugInfo();
-    p.Add([file, this, newDbg, eId, patchLnp = data->patchLnp]() {
+    p.Add([file, this, newDbg, eId, patchLnp = data->patchLnp, nmi = data->nmi](bool peek) -> bool {
+        if (peek) {
+            // peek won't patch lnp, only return method mark for delete judge
+            return !nmi->GetDependencyMark();
+        }
         auto updater = LinkerDebugInfoUpdater(file, &cont_);
 
         auto *constantPool = newDbg->GetConstantPool();
@@ -297,11 +353,19 @@ void Context::ProcessCodeData(CodePatcher &p, CodeData *data)
             auto *lnpItem = newDbg->GetLineNumberProgram();
             updater.Emit(lnpItem, constantPool, eId);
         } else {
-            // `LineNumberProgram` is reused and its instructions will be emitted by owner-method.
-            // Still need to emit instructions' arguments, which are unique for each method.
-            panda_file::LineNumberProgramItemBase lnpItem;
-            updater.Emit(&lnpItem, constantPool, eId);
+            auto *lnpItemold = newDbg->GetLineNumberProgram();
+            if (lnpItemold->GetData().empty()) {
+                // emit if lnp size zero after delete item
+                auto *lnpItem = newDbg->GetLineNumberProgram();
+                updater.Emit(lnpItem, constantPool, eId);
+            } else {
+                // `LineNumberProgram` is reused and its instructions will be emitted by owner-method.
+                // Still need to emit instructions' arguments, which are unique for each method.
+                panda_file::LineNumberProgramItemBase lnpItem;
+                updater.Emit(&lnpItem, constantPool, eId);
+            }
         }
+        return false;
     });
 }
 

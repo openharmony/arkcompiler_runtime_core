@@ -110,6 +110,12 @@ public:
         return *currentDefs_;
     }
 
+    bool IsInBootContext()
+    {
+        auto method = static_cast<ark::Method *>(GetGraph()->GetMethod());
+        return method->GetClass()->GetLoadContext()->IsBootContext();
+    }
+
     void AddCatchPhiInputs(const ArenaUnorderedSet<BasicBlock *> &catchHandlers, const InstVector &defs,
                            Inst *throwableInst);
 
@@ -251,6 +257,7 @@ private:
     public:
         BuildCallHelper(const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput = nullptr);
 
+        bool TryBuildIntrinsic();
         void BuildIntrinsic();
         void BuildDefaultIntrinsic(RuntimeInterface::IntrinsicId intrinsicId, bool isVirtual);
         void BuildDefaultStaticIntrinsic(RuntimeInterface::IntrinsicId intrinsicId);

@@ -73,7 +73,7 @@ public:
         return reinterpret_cast<EtsPromise *>(promise);
     }
 
-    EtsObjectArray *GetCallbackQueue(EtsCoroutine *coro)
+    EtsObjectArray *GetCallbackQueue(EtsCoroutine *coro) const
     {
         return EtsObjectArray::FromCoreType(
             ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, callbackQueue_)));
@@ -84,7 +84,7 @@ public:
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, callbackQueue_), callbackQueue->GetCoreType());
     }
 
-    EtsIntArray *GetLaunchModeQueue(EtsCoroutine *coro)
+    EtsIntArray *GetLaunchModeQueue(EtsCoroutine *coro) const
     {
         return reinterpret_cast<EtsIntArray *>(
             ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, launchModeQueue_)));
@@ -96,7 +96,7 @@ public:
                                   launchModeQueue->GetCoreType());
     }
 
-    EtsInt GetQueueSize()
+    EtsInt GetQueueSize() const
     {
         return queueSize_;
     }
@@ -121,12 +121,12 @@ public:
         return (state_ == STATE_LINKED);
     }
 
-    bool IsProxy()
+    bool IsProxy() const
     {
         return GetLinkedPromise(EtsCoroutine::GetCurrent()) != nullptr;
     }
 
-    EtsObject *GetInteropObject(EtsCoroutine *coro)
+    EtsObject *GetInteropObject(EtsCoroutine *coro) const
     {
         auto *obj = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, interopObject_));
         return EtsObject::FromCoreType(obj);
@@ -134,10 +134,11 @@ public:
 
     void SetInteropObject(EtsCoroutine *coro, EtsObject *o)
     {
+        ASSERT(o != nullptr);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, interopObject_), o->GetCoreType());
     }
 
-    EtsObject *GetLinkedPromise(EtsCoroutine *coro)
+    EtsObject *GetLinkedPromise(EtsCoroutine *coro) const
     {
         auto *obj = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, linkedPromise_));
         return EtsObject::FromCoreType(obj);
@@ -150,14 +151,16 @@ public:
 
     static void CreateLink(EtsObject *source, EtsPromise *target)
     {
+        ASSERT(target != nullptr);
         EtsCoroutine *currentCoro = EtsCoroutine::GetCurrent();
         auto *jobQueue = currentCoro->GetExternalIfaceTable()->GetJobQueue();
         if (jobQueue != nullptr) {
+            ASSERT(target != nullptr);
             jobQueue->CreateLink(source, target->AsObject());
         }
     }
 
-    EtsMutex *GetMutex(EtsCoroutine *coro)
+    EtsMutex *GetMutex(EtsCoroutine *coro) const
     {
         auto *obj = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, mutex_));
         return EtsMutex::FromCoreType(obj);
@@ -165,10 +168,11 @@ public:
 
     void SetMutex(EtsCoroutine *coro, EtsMutex *mutex)
     {
+        ASSERT(mutex != nullptr);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, mutex_), mutex->GetCoreType());
     }
 
-    EtsEvent *GetEvent(EtsCoroutine *coro)
+    EtsEvent *GetEvent(EtsCoroutine *coro) const
     {
         auto *obj = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, event_));
         return EtsEvent::FromCoreType(obj);
@@ -176,6 +180,7 @@ public:
 
     void SetEvent(EtsCoroutine *coro, EtsEvent *event)
     {
+        ASSERT(event != nullptr);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, event_), event->GetCoreType());
     }
 
@@ -191,6 +196,7 @@ public:
     void Reject(EtsCoroutine *coro, EtsObject *error)
     {
         ASSERT(IsPending() || IsLinked());
+        ASSERT(error != nullptr);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, value_), error->GetCoreType());
         state_ = STATE_REJECTED;
         OnPromiseCompletion(coro);
@@ -207,7 +213,7 @@ public:
         queueSize_++;
     }
 
-    EtsObject *GetValue(EtsCoroutine *coro)
+    EtsObject *GetValue(EtsCoroutine *coro) const
     {
         return EtsObject::FromCoreType(ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, value_)));
     }

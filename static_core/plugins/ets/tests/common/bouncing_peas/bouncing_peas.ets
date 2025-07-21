@@ -47,7 +47,7 @@ function _skoala_paragraph_Paragraph__1nPaint(ptr: long/*KNativePointer*/, canva
 function _skoala_paragraph_TextStyle__1nMake(): long/*KNativePointer*/ { return 1; }
 function _skoala_paragraph_TextStyle__1nSetColor(ptr: long/*KNativePointer*/, color: int): void { }
 function _skoala_paragraph_TextStyle__1nSetFontSize(ptr: long/*KNativePointer*/, size: float): void { }
-function _skoala_ManagedString__1nMake(textStr: byte[]/*KStringPtr*/): long/*KNativePointer*/ { return 1; }
+function _skoala_ManagedString__1nMake(textStr: FixedArray<byte>/*KStringPtr*/): long/*KNativePointer*/ { return 1; }
 function _skoala_Paint__1nGetFinalizer(): long/*KNativePointer*/ { return 1; }
 function _skoala_impl_Managed__invokeFinalizer(finalizer: long/*KNativePointer*/, obj: long/*KNativePointer*/): void { }
 function _skoala_impl_RefCnt__getFinalizer(): long/*KNativePointer*/ { return 1; }
@@ -74,12 +74,12 @@ function addToHash(val: float): void {
     }
 }
 
-function encodeFPS(input: int): byte[]/*Uint8Array*/ {
+function encodeFPS(input: int): FixedArray<byte>/*Uint8Array*/ {
     const HEADER_LEN: int = 4;
     let digitsQuantity = 0;
     for (let x = input; x > 0; x = x / 10) digitsQuantity++;
     let resultLength = digitsQuantity + HEADER_LEN + 1;
-    let result = new byte[resultLength];/*Uint8Array(resultLength);*/
+    let result : FixedArray<byte> = new byte[resultLength];/*Uint8Array(resultLength);*/
     let index: int = HEADER_LEN;
     for (let digitNumber: int = 0; digitNumber < digitsQuantity; digitNumber++) {
         let cp = input / power(10., (digitsQuantity - digitNumber - 1) as double) as int % 10 + 48;

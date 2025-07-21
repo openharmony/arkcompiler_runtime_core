@@ -4,15 +4,39 @@
 #25167
 03.types/19.union_types/02.access_to_common_union_members/cm_meth2_10.ets
 
-#20935
+#24975
 03.types/19.union_types/02.access_to_common_union_members/cm_meth2_4.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth3_8.ets
 
 #25236
 03.types/19.union_types/02.access_to_common_union_members/cm_meth3_4.ets
 
+#25250
+03.types/19.union_types/02.access_to_common_union_members/cm_meth3_7.ets
+
 #25189
 03.types/19.union_types/02.access_to_common_union_members/cm_meth3_10.ets
+
+#25614
+05.generics/03.utility_types/03.readonly_utility_type/readonly_type_of_union_2.ets
+
+#25601
+05.generics/03.utility_types/03.readonly_utility_type/readonly_type_0.ets
+05.generics/03.utility_types/03.readonly_utility_type/readonly_type_6.ets
+05.generics/03.utility_types/03.readonly_utility_type/readonly_type_of_union_0.ets
+05.generics/03.utility_types/03.readonly_utility_type/readonly_type_of_union_4.ets
+05.generics/03.utility_types/03.readonly_utility_type/readonly_type_of_union_6.ets
+05.generics/03.utility_types/03.readonly_utility_type/readonly_type_2.ets
+05.generics/03.utility_types/03.readonly_utility_type/readonly_type_4.ets
+
+#26038
+10.interfaces/07.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_15.ets
+
+#24200 test behavior need to corrected for JIT mode.
+13.compilation_units/06.compilation_unit_initialization/package/init_once/test.ets
+
+#26027
+17.experimental_features/03.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_5.ets
 
 #24004 ASSERTION FAILED: ic != nullptr
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_0.ets
@@ -21,3 +45,13 @@
 
 #25252
 17.experimental_features/16.async_functions_and_methods/01.async_functions/afunc_29.ets
+
+#25054
+17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_29.ets
+
+#27197
+05.generics/03.utility_types/03.readonly_utility_type/readonly_type_6.ets
+
+#27449
+05.generics/03.utility_types/03.readonly_utility_type/readonly_type_0.ets
+

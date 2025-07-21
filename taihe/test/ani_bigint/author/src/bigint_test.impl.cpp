@@ -13,15 +13,14 @@
  * limitations under the License.
  */
 #include "bigint_test.impl.hpp"
-
 #include <iostream>
-
 #include "stdexcept"
 #include "taihe/array.hpp"
-// Please delete <stdexcept> include when you implement
+
 using namespace taihe;
 
 namespace {
+
 bool BigInt01(double a, array_view<int64_t> b)
 {
     return true;
@@ -54,8 +53,7 @@ double BigInt06(double a, array_view<int64_t> b)
     return a;
 }
 }  // namespace
-// The macros used below are automatically generated code.
-// NOLINTBEGIN
+
 TH_EXPORT_CPP_API_BigInt01(BigInt01);
 TH_EXPORT_CPP_API_BigInt02(BigInt02);
 TH_EXPORT_CPP_API_BigInt03(BigInt03);

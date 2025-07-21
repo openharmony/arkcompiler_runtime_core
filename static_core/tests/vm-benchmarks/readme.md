@@ -101,13 +101,16 @@ Each platform defines languages it can deal with,
 and each language defines its source file extension.
 Defaults are:
 
-| platform      | langs      | sources         |
-|---------------|------------|-----------------|
-| `arkts_*`     | `ets`      | `*.ets`, `*.ts` |
-| `ark_js_vm_*` | `ts`       | `*.ts`          |
-| `swift_*`     | `swift`    | `*.swift`       |
-| `v_8_*`       | `ts`, `js` | `*.ts`, `*.js`  |
-| `node_*`      | `ts`, `js` | `*.ts`, `*.js`  |
+| platform      | langs      | sources                     |
+|---------------|------------|-----------------------------|
+| `arkts_*`     | `ets`      | `*.ets`                     |
+| `ark_js_vm_*` | `ts`       | `*.ts`                      |
+| `swift_*`     | `swift`    | `*.swift`                   |
+| `v_8_*`       | `ts`, `js` | `*.ts`, `*.js`              |
+| `node_*`      | `ts`, `js` | `*.ts`, `*.js`              |
+| `interop_s2d` | `ets`      | `*.ets` + `lib*.*`          |
+| `interop_d2s` | `ts`, `js` | `*.ts`, `*.js` + `lib*.ets` |
+| `interop_d2d` | `ts`, `js` | `*.ts`, `*.js` + `lib*.*`   |
 
 ## Selecting and filtering tests:
 - Any positional argument to `all` or `gen` command would be treated
@@ -244,36 +247,53 @@ For device platforms: required binaries should be pushed to device.
 Default place is `/data/local/tmp/vmb/v_8`.
 `/data/local/tmp/vmb` part could be configured via `--device-dir`
 
+### Hap (Ability Package) - Experimental
+This platform allows to run `arkts/ets` benchmarks as application ability
+
+##### Prerequisites:
+- `PANDA_SDK` env var should point to unpacked Panda OHOS SDK (package dir)
+- `OHOS_BASE_SDK_HOME` env var should point to unpacked OHOS SDK
+- `hvigorw` should be in PATH or `HVIGORW` env var should point to hvigor script or binary
+- `hdc` should be in PATH or `HDC` env var should point to hdc script or binary
+- For signing package `HAP_SIGNING_CONFIG` env var should point to json config 
+    as in `app/signingConfigs/material` section of `build-profile.json5`
+
+##### Run
+```sh
+vmb all -p hap -A examples/benchmarks/ets
+
+# --tests-per-batch option could be used to tune amount of benchmarks per one hap package (25 is the default)
+```
+##### Limitations
+- Total test run inside app is limited to 5 sec, so `-wi` is limited to 0..1 and `-mi` to 1..2.
+    `-wt` and `it` has no effect for `hap` platform.
+- "Macro" benchmarks (i.e. test functions which run longer than 1 sec) won't produce benchmark result.
+
+
 ## Platform Features
 
-| platform          | int-mode | aot-mode | jit-mode | gc-stats | jit-stats | aot-stats | imports |
-|-------------------|:--------:|:--------:|:--------:|:--------:|:---------:|:---------:|:-------:|
-| ark_js_vm_host    |   n/a    |    V     |    V     |   n/a    |    n/a    |    n/a    |    V    |
-| ark_js_vm_ohos    |   n/a    |    V     |    V     |   n/a    |    n/a    |    n/a    |    V    |
-| arkts_device      |    V     |    V     |    V     |    V     |     V     |     V     |    V    |
-| arkts_host        |    V     |    V     |    V     |    V     |     V     |     V     |    V    |
-| arkts_ohos        |    V     |    V     |    V     |    V     |     V     |     V     |    V    |
-| node_host         |   n/a    |   n/a    |    V     |   n/a    |    n/a    |    n/a    |    V    |
-| swift_device      |   n/a    |   n/a    |   n/a    |   n/a    |    n/a    |    n/a    |    X    |
-| swift_host        |   n/a    |   n/a    |   n/a    |   n/a    |    n/a    |    n/a    |    X    |
-| v_8_device        |    V     |   n/a    |    V     |   n/a    |    n/a    |    n/a    |    V    |
-| v_8_host          |    V     |   n/a    |    V     |   n/a    |    n/a    |    n/a    |    V    |
-| v_8_ohos          |    V     |   n/a    |    V     |   n/a    |    n/a    |    n/a    |    V    |
-
+| platform       | int-mode | aot-mode | jit-mode | gc-stats | jit-stats | aot-stats | imports |
+|----------------|:--------:|:--------:|:--------:|:--------:|:---------:|:---------:|:-------:|
+| ark_js_vm_host |   n/a    |    V     |    V     |   n/a    |    n/a    |    n/a    |    V    |
+| ark_js_vm_ohos |   n/a    |    V     |    V     |   n/a    |    n/a    |    n/a    |    V    |
+| arkts_device   |    V     |    V     |    V     |    V     |     V     |     V     |    V    |
+| arkts_host     |    V     |    V     |    V     |    V     |     V     |     V     |    V    |
+| arkts_ohos     |    V     |    V     |    V     |    V     |     V     |     V     |    V    |
+| node_host      |   n/a    |   n/a    |    V     |   n/a    |    n/a    |    n/a    |    V    |
+| swift_device   |   n/a    |   n/a    |   n/a    |   n/a    |    n/a    |    n/a    |    X    |
+| swift_host     |   n/a    |   n/a    |   n/a    |   n/a    |    n/a    |    n/a    |    X    |
+| v_8_device     |    V     |   n/a    |    V     |   n/a    |    n/a    |    n/a    |    V    |
+| v_8_host       |    V     |   n/a    |    V     |   n/a    |    n/a    |    n/a    |    V    |
+| v_8_ohos       |    V     |   n/a    |    V     |   n/a    |    n/a    |    n/a    |    V    |
+| interop_d2s    |    V     |   n/a    |   n/a    |   n/a    |    n/a    |    n/a    |    V    |
+| interop_s2d    |    V     |   n/a    |   n/a    |   n/a    |    n/a    |    n/a    |    V    |
+| interop_d2d    |    V     |   n/a    |   n/a    |   n/a    |    n/a    |    n/a    |    V    |
 
 ## Interoperability tests:
 
-#### Freestyle
-Please refer to [this manual](./interop.readme.md) for freestyle benchmark development and running guide.
+Please refer to [this manual](./examples/benchmarks/interop/readme.md) and [examples](./examples/benchmarks/interop).
 
-#### Doclet
-Allows use corpus of existing VMB tests in interop mode.
-Benchmarks are generated from ets [doclets](#doclet-format).
-
-```shell
-export PANDA_BUILD=$HOME/ark-built-with-interop/runtime_core/static_core/build
-vmb all -p arkts_node_interop_host -v debug ./examples/benchmarks/ets
-```
+See also [readme here](../../plugins/ets/tests/benchmarks/interop_js/README.md)
 
 ## Self tests and linters
 ```sh

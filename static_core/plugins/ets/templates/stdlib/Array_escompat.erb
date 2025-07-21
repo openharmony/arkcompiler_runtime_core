@@ -43,7 +43,8 @@ class ArrayKeysIterator<T> implements IterableIterator<number> {
 }
 
 class FromBuffer {}
-const FROM_BUFFER = new FromBuffer()
+// initialized in _initializerBlock_.ets
+const FROM_BUFFER: FromBuffer;
 
 /**
  * Represents JS API-compatible Array
@@ -74,7 +75,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 
     public native $_get(idx: int): T;
 
-    internal $_get_unsafe(idx: int): T {
+    internal final $_get_unsafe(idx: int): T {
         return this.buffer[idx] as T
     }
 
@@ -96,7 +97,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         this(arrayLen as int)
     }
 
-    internal constructor(_tag: FromBuffer, buf: NullishType[]) {
+    internal constructor(_tag: FromBuffer, buf: FixedArray<NullishType>) {
         this.buffer = buf
         this.actualLength = buf.length
     }
@@ -113,7 +114,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     public constructor(first: T, ...d: T[]) {
         this.buffer = new NullishType[d.length + 1]
-        this.actualLength = d.length + 1
+        this.actualLength = d.length as int + 1
 
         this.buffer[0] = first
 
@@ -187,6 +188,17 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns A new Array instance with the specified length
      */
+    static $_invoke<T>(): Array<T> {
+        return new Array<T>();
+    }
+    
+    /**
+     * Creates a new instance of an Array with the specified length
+     *
+     * @param arrayLength The length of the array to be created (optional).
+     *
+     * @returns A new Array instance with the specified length
+     */
     static $_invoke<T>(arrayLength?: number): Array<T> {
         if (arrayLength != undefined) {
             return new Array<T>(arrayLength);
@@ -196,14 +208,49 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
+     * Creates a new instance of an Array with the specified length
+     *
+     * @param items array of values.
+     *
+     * @returns A new Array instance with the specified length
+     */
+    static $_invoke<T>(...items: T[]): Array<T> {
+        if (items.length == 0) {
+            return new Array<T>(0)
+        }
+        return new Array<T>(items[0], ...items.slice(1))
+    }
+
+    /**
      * Creates a new `Array` instance from `Object[]` primitive array.
      *
-     * @param arr an iterable object to convert to an array.
+     * @param iterable an iterable object to convert to an array.
      *
      * @returns `Array` intance constructed from `Object[]` primitive array.
      */
     public static from<T>(iterable: ArrayLike<T> | Iterable<T>): Array<T> {
-        return Array.from<T, T>(iterable, (x: T, k: number): T => x)
+        const ret = new Array<T>()
+        iteratorForEach<T>(iterable.$_iterator(), (x: T): void => {
+            ret.push(x)
+        })
+        return ret
+    }
+
+    /**
+     * Creates a new `Array` instance from `Object[]` ArrayLike.
+     *
+     * @param arr an iterable object to convert to an array.
+     *
+     * @returns `Array` intance constructed from `Object[]` ArrayLike.
+     */
+    public static from<T>(arr: ArrayLike<T>): Array<T> {
+        const ret = new Array<T>(arr.length as int)
+        let i = 0
+        iteratorForEach<T>(arr.$_iterator(), (x: T): void => {
+            ret[i] = x
+            i += 1
+        })
+        return ret
     }
 
     /**
@@ -220,7 +267,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     public static from<T, U>(iterable: ArrayLike<T> | Iterable<T>, mapfn: (v: T, k: number) => U): Array<U> {
         const ret = new Array<U>()
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx = new int[1]
+        const idx : FixedArray<int> = new int[1]
         idx[0] = 0
         iteratorForEach<T>(iterable.$_iterator(), (x: T): void => {
             ret.push(mapfn(x, idx[0] as number))
@@ -229,7 +276,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return ret
     }
 
-    public static from<T, U>(values: T[], mapfn: (v: T, k: number) => U): Array<U> {
+    public static from<T, U>(values: FixedArray<T>, mapfn: (v: T, k: number) => U): Array<U> {
         const ret = new Array<U>(values.length)
         for (let i = 0; i < values.length; ++i) {
             ret[i] = mapfn(values[i], i)
@@ -244,9 +291,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     *
     * @returns `Array` intance constructed from `Object[]` primitive array.
     */
-    public static from<T>(arr: T[]): Array<T> {
+    public static from<T>(arr: FixedArray<T>): Array<T> {
         const len = arr.length
-        const ret = new NullishType[len as int]
+        const ret : FixedArray<NullishType> = new NullishType[len as int]
         for (let i: int = 0; i < len; i++) {
             ret[i] = arr[i] as NullishType
         }
@@ -628,9 +675,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns Copy of an `Array`'s primitive array data.
      */
-    private copyArray(): NullishType[] {
+    private copyArray(): FixedArray<NullishType> {
         let len: int = this.actualLength
-        let res = new NullishType[len]
+        let res : FixedArray<NullishType> = new NullishType[len]
         for (let i = 0; i < len; i++) {
             res[i] = this.$_get_unsafe(i)
         }
@@ -641,7 +688,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         let idxNonUndef = 0
         type arrType = String | undefined
         try {
-            let strArr = new arrType[this.actualLength]
+            let strArr : FixedArray<arrType> = new arrType[this.actualLength]
             for (let i = 0; i < this.actualLength; i++) {
                 const vl = this.$_get_unsafe(i)
                 if (vl !== undefined) {
@@ -650,7 +697,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
                         strArr[idxNonUndef] = "null"
                     } else {
                         this.$_set_unsafe(idxNonUndef, vl)
-                        strArr[idxNonUndef] = vl.toString()
+                        strArr[idxNonUndef] = (vl as object).toString() // #26217
                     }
                     idxNonUndef++
                 }
@@ -776,7 +823,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns new length
      */
     public push(...val: T[]): number {
-        this.ensureUnusedCapacity(val.length)
+        this.ensureUnusedCapacity(val.length as int)
         for (let i = 0; i < val.length; i++) {
             this.buffer[this.actualLength + i] = val[i]
         }
@@ -790,7 +837,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns new length
      */
     public pushECMA(...val: T[]): number {
-        this.ensureUnusedCapacity(val.length)
+        this.ensureUnusedCapacity(val.length as int)
         for (let i = 0; i < val.length; i++) {
             this.buffer[this.actualLength + i] = val[i]
         }
@@ -800,7 +847,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 
     private ensureUnusedCapacity(cap: int): void {
         if (this.actualLength + cap > this.buffer.length) {
-            const copy = new NullishType[this.buffer.length * 2 + cap]
+            const copy : FixedArray<NullishType> = new NullishType[this.buffer.length * 2 + cap]
             for (let i = 0; i < this.actualLength; i++) {
                 copy[i] = this.buffer[i]
             }
@@ -842,9 +889,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         }
         // this: [left middle right], we must replace middle with `items`
 
-        this.ensureUnusedCapacity(items.length - delete)
+        this.ensureUnusedCapacity(items.length as int - delete)
         const oldLen = this.actualLength
-        this.actualLength = this.actualLength - delete + items.length
+        this.actualLength = this.actualLength - delete + items.length as int
 
         let ret = new Array<T>(delete)
         let lastSet = start
@@ -861,7 +908,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             }
         } else {
             for (let i = 0; i < rightLen; i++) {
-                this.buffer[start + items.length + i] = this.buffer[start + delete + i]
+                this.buffer[start + items.length as int + i] = this.buffer[start + delete + i]
             }
         }
         // insert middle part
@@ -919,7 +966,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     public static of<T>(...values: T[]): Array<T> {
         const ret = new Array<T>()
-        ret.ensureUnusedCapacity(values.length)
+        ret.ensureUnusedCapacity(values.length as int)
         for (let i = 0; i < values.length; i++) {
             ret.push(values[i])
         }
@@ -940,7 +987,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             buffer = new NullishType[this.buffer.length * 2 + values.length]
         }
         for (let i = 0; i < this.actualLength; i++) {
-            buffer[this.actualLength + values.length - i - 1] = this.buffer[this.actualLength - 1 - i]
+            buffer[this.actualLength + values.length as int - i - 1] = this.buffer[this.actualLength - 1 - i]
         }
         for (let i = 0; i < values.length; i++) {
             buffer[i] = values[i]
@@ -1042,6 +1089,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 % ctx.this = 'this'
 % ctx.this_arg = ''
 % ctx.this_len_int = 'this.actualLength'
+% ctx.this_array = 'escompat_array'
 % ctx.array_len_int = Proc.new { |v| "#{v}.actualLength" }
 % ctx.access_public = 'public'
 % ctx.access_private = 'private'
@@ -1051,12 +1099,14 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 % ctx.set_unsafe = Proc.new { |t, i, v| "#{t}.$_set_unsafe(#{i}, #{v})" }
 % ctx.el_type = 'T'
 % ctx.el_type_boxed = 'T'
+% ctx.function_type = 'has_native'
 % ctx.this_type = 'Array<T>'
 % ctx.this_return_type = 'this'
 % ctx.clone_this = 'new Array<T>(FROM_BUFFER, this.copyArray())'
 % ctx.make_buffer = Proc.new { |l, elt|
 %   "new NullishType[#{l}]"
 % }
+% ctx.make_fixed_array = 'FixedArray<NullishType>'
 % ctx.from_buffer = Proc.new { |b, elt|
 %   elt ||= ctx.el_type
 %   "new Array<#{elt}>(FROM_BUFFER, #{b})"

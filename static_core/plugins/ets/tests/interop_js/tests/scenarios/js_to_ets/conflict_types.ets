@@ -27,8 +27,8 @@ function TestFunctionArgTypeConflictArray(): boolean {
 }
 
 function TestFunctionArgTypeConflictArraybuffer(): boolean {
-    const buffer = js.functionArgTypeConflictArrayBuffer() as ArrayBuffer;
-    const view = new Int32Array(buffer);
+    const buffer = InteropTransferHelper.transferArrayBufferToStatic(js.functionArgTypeConflictArrayBuffer());
+    const view = new Int32Array(buffer as ArrayBuffer);
     const EXPECTED_INT = 123;
 
     return view.at(0) == EXPECTED_INT;

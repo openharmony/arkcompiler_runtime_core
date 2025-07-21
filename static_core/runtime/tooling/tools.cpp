@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,27 @@
 #include "runtime/tooling/sampler/sampling_profiler.h"
 
 namespace ark::tooling {
+
+extern "C" PANDA_PUBLIC_API int StartSamplingProfiler(const char *asptFilename, int interva)
+{
+    auto *runtime = Runtime::GetCurrent();
+    if (runtime == nullptr) {
+        LOG(DEBUG, PROFILER) << "That runtime is not created.";
+        return 1;
+    }
+    return static_cast<int>(
+        !runtime->GetTools().StartSamplingProfiler(std::make_unique<sampler::FileStreamWriter>(asptFilename), interva));
+}
+
+extern "C" PANDA_PUBLIC_API void StopSamplingProfiler()
+{
+    auto *runtime = Runtime::GetCurrent();
+    if (runtime == nullptr) {
+        LOG(DEBUG, PROFILER) << "That runtime is not created.";
+        return;
+    }
+    runtime->GetTools().StopSamplingProfiler();
+}
 
 sampler::Sampler *Tools::GetSamplingProfiler()
 {
@@ -39,26 +60,28 @@ void Tools::CreateSamplingProfiler()
     }
 }
 
-bool Tools::StartSamplingProfiler(const std::string &asptFilename, uint32_t interval)
+bool Tools::StartSamplingProfiler(std::unique_ptr<sampler::StreamWriter> streamWriter, uint32_t interval)
 {
     ASSERT(sampler_ != nullptr);
     sampler_->SetSampleInterval(interval);
-    if (asptFilename.empty()) {
-        std::time_t currentTime = std::time(nullptr);
-        std::tm *localTime = std::localtime(&currentTime);
-        std::string asptFilenameTime = std::to_string(localTime->tm_hour) + "-" + std::to_string(localTime->tm_min) +
-                                       "-" + std::to_string(localTime->tm_sec) + ".aspt";
-        return sampler_->Start(asptFilenameTime.c_str());
-    }
-    return sampler_->Start(asptFilename.c_str());
+    return sampler_->Start(std::move(streamWriter));
 }
 
 void Tools::StopSamplingProfiler()
 {
     ASSERT(sampler_ != nullptr);
     sampler_->Stop();
+}
+void Tools::DestroySamplingProfiler()
+{
+    ASSERT(sampler_ != nullptr);
     sampler::Sampler::Destroy(sampler_);
     sampler_ = nullptr;
+}
+
+bool Tools::IsSamplingProfilerCreate()
+{
+    return sampler_ != nullptr;
 }
 
 }  // namespace ark::tooling

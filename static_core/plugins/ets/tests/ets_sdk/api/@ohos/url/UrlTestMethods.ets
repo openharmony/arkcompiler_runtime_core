@@ -503,7 +503,7 @@ function main(): int {
 	suite.addTest("testUrlToString009", testUrlToString009);
     suite.addTest("testUrlToString010", testUrlToString010);
     suite.addTest("testUrlToString011", testUrlToString011);
-	suite.addTest("testUrlToString012", testUrlToString012);
+    suite.addTest("testUrlToString012", testUrlToString012);
 
 	//passed
 	return suite.run();

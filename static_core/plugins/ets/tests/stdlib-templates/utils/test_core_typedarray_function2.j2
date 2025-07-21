@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,11 +77,11 @@ function check(result: number, message: String): number {
   return fail;
 }
 
-const source: {{.item.primitiveType}}[] = {{.item.data}};
-const abnormalSource: {{.item.primitiveType}}[] = {{.item.abnormalData}};
+const source: FixedArray<{{.item.primitiveType}}> = {{.item.data}};
+const abnormalSource: FixedArray<{{.item.primitiveType}}> = {{.item.abnormalData}};
 
 function testSubarrayWithOutParam(): int {
-  //let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60];
+  //let source: FixedArray<{{.item.primitiveType}}> = [10, 20, 30, 40, 50, 60];
   let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
@@ -138,7 +138,7 @@ function testSubarrayWithOutParam(): int {
 }
 
 function testSubarrayOneParam(): int {
-  //let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60];
+  //let source: FixedArray<{{.item.primitiveType}}> = [10, 20, 30, 40, 50, 60];
   let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
@@ -231,7 +231,7 @@ function testSubarrayOneParam(): int {
 }
 
 function testSubarrayTwoParams(): int {
-  //let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60, 70, 80];
+  //let source: FixedArray<{{.item.primitiveType}}> = [10, 20, 30, 40, 50, 60, 70, 80];
   let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
@@ -245,7 +245,7 @@ function testSubarrayTwoParams(): int {
   }
 
   let subarrayStart: int = 2;
-  let subarrayEnd: int = 4;
+  let subarrayEnd: int | undefined = 4;
 
   let target: {{.item.objectType}};
 
@@ -382,7 +382,7 @@ function testSubarrayTwoParams(): int {
 }
 
 function testSubarrayTwoParamsWithOtherNumber(): int {
-  //let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60, 70, 80];
+  //let source: FixedArray<{{.item.primitiveType}}> = [10, 20, 30, 40, 50, 60, 70, 80];
   let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
@@ -396,7 +396,7 @@ function testSubarrayTwoParamsWithOtherNumber(): int {
   }
 
   let subarrayStart: int = 4;
-  let subarrayEnd: int = 2;
+  let subarrayEnd: int | undefined = 2;
 
   let target: {{.item.objectType}};
 
@@ -453,7 +453,7 @@ function testSubarrayTwoParamsWithOtherNumber(): int {
 }
 
 function testSubarrayOneLengthTwoParams(): int {
-  let source1: {{.item.primitiveType}}[] = [10];
+  let source1: FixedArray<{{.item.primitiveType}}> = [10];
   let ss = new ArrayBuffer(source1.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
@@ -467,7 +467,7 @@ function testSubarrayOneLengthTwoParams(): int {
   }
   
   let subarrayStart: int = 4;
-  let subarrayEnd: int = 2;
+  let subarrayEnd: int | undefined = 2;
 
   let target: {{.item.objectType}};
 
@@ -542,7 +542,7 @@ function testNonEmptyTypedArraySetValue(): number {
     return fail;
   }
 
-  let expectedArray: {{.item.primitiveType}}[] = [1, 2, minValue, maxValue, -1];
+  let expectedArray: FixedArray<{{.item.primitiveType}}> = [1, 2, minValue, maxValue, -1];
 
   for (let i = 0; i < typedArray.length; i++) {
     if (typedArray[i] != {{.item.create}}(expectedArray[i])) {
@@ -613,7 +613,7 @@ function testTypedArrayIncludesOneParamWithNormalNum(): number {
     return fail;
   }
 
-  let searchElementArray: {{.item.primitiveType}}[] =  {{.item.data}};
+  let searchElementArray: FixedArray<{{.item.primitiveType}}> =  {{.item.data}};
 
   for (let i = 0; i < searchElementArray.length; i++) {
     if (!typedArray.includes(searchElementArray[i])) {
@@ -649,15 +649,15 @@ function testTypedArrayIncludesOneParamWithAbnormalNum(): number {
   }
 
   {%- if item.objectType == 'Int8Array' %}
-    let searchElementArray: {{.item.primitiveType}}[] = [Byte.MAX_VALUE - 1 as byte, Byte.MAX_VALUE as byte, Byte.MIN_VALUE as byte, Byte.MIN_VALUE + 1 as byte];
+    let searchElementArray: FixedArray<{{.item.primitiveType}}> = [Byte.MAX_VALUE - 1 as byte, Byte.MAX_VALUE as byte, Byte.MIN_VALUE as byte, Byte.MIN_VALUE + 1 as byte];
   {%- elif item.objectType == 'Int16Array' %}
-    let searchElementArray: {{.item.primitiveType}}[] = [Short.MAX_VALUE - 1 as short, Short.MAX_VALUE as short, Short.MIN_VALUE as short, Short.MIN_VALUE + 1 as short];
+    let searchElementArray: FixedArray<{{.item.primitiveType}}> = [Short.MAX_VALUE - 1 as short, Short.MAX_VALUE as short, Short.MIN_VALUE as short, Short.MIN_VALUE + 1 as short];
   {%- elif item.objectType == 'Int32Array' %}
-    let searchElementArray: {{.item.primitiveType}}[] = [Int.MAX_VALUE - 1, Int.MAX_VALUE, Int.MIN_VALUE, Int.MIN_VALUE + 1];
+    let searchElementArray: FixedArray<{{.item.primitiveType}}> = [Int.MAX_VALUE - 1, Int.MAX_VALUE, Int.MIN_VALUE, Int.MIN_VALUE + 1];
   {%- elif item.objectType == 'Float32Array' %}
-    let searchElementArray: {{.item.primitiveType}}[] = [-2, -1, Float.MAX_VALUE, Float.MAX_VALUE - 1];
+    let searchElementArray: FixedArray<{{.item.primitiveType}}> = [-2, -1, Float.MAX_VALUE, Float.MAX_VALUE - 1];
   {%- elif item.objectType == 'Float64Array' %}
-    let searchElementArray: {{.item.primitiveType}}[] = [-2, -1, Double.MAX_VALUE, Double.MAX_VALUE - 1];
+    let searchElementArray: FixedArray<{{.item.primitiveType}}> = [-2, -1, Double.MAX_VALUE, Double.MAX_VALUE - 1];
   {%- endif %}
 
   for (let i = 0; i < searchElementArray.length; i++) {
@@ -678,13 +678,13 @@ function testTypedArrayIncludesOneParamWithAbnormalNum(): number {
   }
 
   //with large Number
-  let large_number: number[] = [-0x8000000000000000, 0x7FFFFFFFFFFFFFFF];
+  let large_number: FixedArray<number> = [-0x8000000000000000, 0x7FFFFFFFFFFFFFFF];
   {%- if item.objectType == 'Float32Array' or item.objectType == 'Float64Array' %}
-    let convertedValues: number[] = [-0x8000000000000000, 0x7FFFFFFFFFFFFFFF];
+    let convertedValues: FixedArray<number> = [-0x8000000000000000, 0x7FFFFFFFFFFFFFFF];
   {%- elif item.objectType == 'Int32Array'%}
-    let convertedValues: number[] = [Int.MIN_VALUE, Int.MAX_VALUE];
+    let convertedValues: FixedArray<number> = [Int.MIN_VALUE, Int.MAX_VALUE];
   {%- else %}
-    let convertedValues: number[] = [0, -1];
+    let convertedValues: FixedArray<number> = [0, -1];
   {%- endif %}
   typedArray = new {{.item.objectType}}(large_number);
 
@@ -701,7 +701,7 @@ function testTypedArrayIncludesOneParamWithAbnormalNum(): number {
 
 // Test case for TypedArray.includes(searchElement, fromIndex)
 function testTypedArrayIncludesTwoParamWithNormalIndex(): number {
-   let source1: {{.item.type}}[] = [
+   let source1: FixedArray<{{.item.type}}> = [
       {{.item.create}}(1),
       {{.item.create}}(2),
       {{.item.create}}(3),
@@ -745,7 +745,7 @@ function testTypedArrayIncludesTwoParamWithNormalIndex(): number {
 {%- if item.objectType != 'BigInt64Array' %}
 // Test case for TypedArray.includes(searchElement, fromIndex)
 function testTypedArrayIncludesTwoParamWithAbnormalIndex(): number {
-  let source1: {{.item.type}}[] = [
+  let source1: FixedArray<{{.item.type}}> = [
    {{.item.create}}(1),
    {{.item.create}}(2),
    {{.item.create}}(3),
@@ -870,7 +870,7 @@ function testTypedArrayJoinWithEmptyArray(): number {
 }
 
 function testTypedArrayJoinWithNonEmptyArray(): number {
-  let source1: {{.item.type}}[] = [
+  let source1: FixedArray<{{.item.type}}> = [
    {{.item.create}}(1),
    {{.item.create}}(2),
    {{.item.create}}(3),
@@ -917,7 +917,7 @@ function testTypedArrayJoinWithNonEmptyArray(): number {
 }
 
 function testTypedArrayJoinWithNonEmptyArrayAndAbnormalStr(): number {
-  let source1: {{.item.type}}[] = [
+  let source1: FixedArray<{{.item.type}}> = [
    {{.item.create}}(1),
    {{.item.create}}(2),
    {{.item.create}}(3),
@@ -1050,7 +1050,7 @@ function doubleElementsInArray(element: {{.item.type}}, index: number, array: {{
 
 // Test case for forEach(callbackFn)
 function testTypedArrayForEach(): number{
-  let source1: {{.item.type}}[] = [
+  let source1: FixedArray<{{.item.type}}> = [
    {{.item.create}}(1),
    {{.item.create}}(2),
    {{.item.create}}(3),
@@ -1085,7 +1085,7 @@ function testTypedArrayForEach(): number{
 
 // Test case for forEach(callbackFn: (value: number, index: number) => void)
 function testTypedArrayForEachValueIndexCallback(): number {
-    let source1: {{.item.type}}[] = [
+    let source1: FixedArray<{{.item.type}}> = [
      {{.item.create}}(1),
      {{.item.create}}(2),
      {{.item.create}}(3),
@@ -1121,7 +1121,7 @@ function testTypedArrayForEachValueIndexCallback(): number {
 
 // Test case for forEach(callbackFn: (value: number) => void)
 function testTypedArrayForEachValueCallback(): number {
-    let source1: {{.item.type}}[] = [
+    let source1: FixedArray<{{.item.type}}> = [
      {{.item.create}}(1),
      {{.item.create}}(2),
      {{.item.create}}(3),
@@ -1159,7 +1159,7 @@ function testTypedArrayForEachValueCallback(): number {
 
 // Test case for forEach(callbackFn: () => void)
 function testTypedArrayForEachNoArgsCallback(): number {
-    let source1: {{.item.type}}[] = [
+    let source1: FixedArray<{{.item.type}}> = [
      {{.item.create}}(1),
      {{.item.create}}(2),
      {{.item.create}}(3),

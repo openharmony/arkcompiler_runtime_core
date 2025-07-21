@@ -50,10 +50,18 @@ cases:
   - desc: capture "super"
     impl: |-
         class A {
-            count: number = 0
+            private _count: number = 0
 
             test(op: () => void) {
                 op()
+            }
+
+            get count(): number{
+                return this._count;
+            }
+
+            set count(p: number){
+                this._count = p;
             }
         }
 

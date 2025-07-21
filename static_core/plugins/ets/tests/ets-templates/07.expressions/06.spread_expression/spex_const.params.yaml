@@ -17,7 +17,7 @@ cases:
     - decl: |-
           let a1: Object|null|undefined = new Object
           class A {
-              fld: int
+              fld: number
               constructor(...p: Object[]) {
                   this.fld = p.length > 0 ? p.length : -1
               }
@@ -42,7 +42,7 @@ cases:
 
     - decl: |-
           class A {
-              fld: int
+              fld: number
               constructor(...p: Object[]) {
                   this.fld = p.length
               }
@@ -54,7 +54,7 @@ cases:
 
     - decl: |-
           class A {
-              fld: int
+              fld: number
               constructor(...p: char[]) {
                   this.fld = p.length
               }
@@ -168,7 +168,7 @@ cases:
 
     - decl: |-
           class A {
-              fld: int
+              fld: number
               constructor(a: int, ...p: Object[]) {
                   this.fld = a + p.length
               }
@@ -186,7 +186,7 @@ cases:
 
     - decl: |-
           class A {
-              fld: int
+              fld: number
               constructor(a: int, ...p: Object[]) {
                   this.fld = a + p.length
               }
@@ -200,7 +200,7 @@ cases:
 
     - decl: |-
           class A {
-              fld: int
+              fld: number
               constructor(a: int, ...p: Object[]) {
                   this.fld = a + p.length
               }
@@ -216,7 +216,7 @@ cases:
           let a1: Object[]|null = null
           let a2: Object[]|null = [new Object, new Object]
           class A {
-              fld: int
+              fld: number
               constructor(a: int, ...p: Object[]) {
                   this.fld = a + p.length
               }
@@ -328,12 +328,12 @@ cases:
               constructor(p: boolean[], q: boolean[]) {
                   this.fld = [...p, ...q]
               }
-              meth(): int {
+              meth(): number {
                   return new B(42, ...this.fld).fld
               }
           }
           class B {
-              fld: int
+              fld: number
               constructor(a: int, ...p: boolean[]) {
                   this.fld = a + p.length
               }
@@ -357,12 +357,12 @@ cases:
               constructor(p: boolean[], q: boolean[]) {
                   super([...p, ...q])
               }
-              bar(): int {
+              bar(): number {
                   return new C(42, ...super.meth()).fld
               }
           }
           class C {
-              fld: int
+              fld: number
               constructor(a: int, ...p: boolean[]) {
                   this.fld = a + p.length
               }
@@ -374,7 +374,7 @@ cases:
 
     - decl: |-
           class A {
-              fld: int
+              fld: number
               constructor(...p: number[][]) {
                   let res = 0
                   for (let el of p) res += el.length
@@ -414,7 +414,7 @@ cases:
               fld: double
               constructor(...p: (Double|Short|Byte)[]) {
                   let res = 0.0
-                  for (let el of p) res += (el as Numeric).doubleValue()
+                  for (let el of p) res += (el as Numeric).toDouble()
                   this.fld = res
               }
           }
@@ -425,7 +425,7 @@ cases:
 
     - decl: |-
           class A {
-              fld: int
+              fld: number
               constructor(...p: (Int|Number|String|undefined)[]) {
                   this.fld = p.length
               }
@@ -440,7 +440,7 @@ cases:
           class B<T> {}
           class C<T> {}
           class Z<T, U, V> {
-              fld: int
+              fld: number
               constructor(...p: (A<T>|B<U>|C<V>|null)[]) {
                   this.fld = p.length
               }
@@ -672,8 +672,9 @@ cases:
               constructor(p: int, q: char) {
                   super([p, q])
               }
-              meth(): int {
-                  return 10 + new Z(...super.meth()).fld
+              meth(): [int, char] {
+                  this.fld[0] = 10 + new Z(...super.meth()).fld
+                  return this.fld
               }
           }
           class Z {
@@ -685,7 +686,7 @@ cases:
       use: |-
           // use super expression
           let b: B = new B(1, c'Z')
-          assertTrue(b.meth() == 111)
+          assertEQ(b.meth()[0], 111)
 
     - decl: |-
           class A<T> {}

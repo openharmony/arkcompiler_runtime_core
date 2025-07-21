@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -266,7 +266,8 @@ void Disassembler::FillLiteralData(pandasm::LiteralArray *lit_array,
             lit.value_ = std::get<double>(value);
             break;
         }
-        case panda_file::LiteralTag::STRING: {
+        case panda_file::LiteralTag::STRING:
+        case panda_file::LiteralTag::ETS_IMPLEMENTS: {
             auto str_data = file_->GetStringData(panda_file::File::EntityId(std::get<uint32_t>(value)));
             lit.value_ = StringDataToString(str_data);
             break;
@@ -1467,6 +1468,8 @@ std::string Disassembler::LiteralTagToString(const panda_file::LiteralTag &tag) 
             return "setter";
         case panda_file::LiteralTag::GENERATORMETHOD:
             return "generator_method";
+        case panda_file::LiteralTag::ETS_IMPLEMENTS:
+            return "ets_implements";
         case panda_file::LiteralTag::ACCESSOR:
             return "accessor";
         case panda_file::LiteralTag::METHODAFFILIATE:
@@ -1588,7 +1591,8 @@ void Disassembler::SerializeLiterals(const pandasm::LiteralArray &lit_array, T &
                 os << std::get<double>(val);
                 break;
             }
-            case panda_file::LiteralTag::STRING: {
+            case panda_file::LiteralTag::STRING:
+            case panda_file::LiteralTag::ETS_IMPLEMENTS: {
                 os << "\"" << std::get<std::string>(val) << "\"";
                 break;
             }

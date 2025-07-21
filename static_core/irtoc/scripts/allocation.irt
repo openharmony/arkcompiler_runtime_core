@@ -36,6 +36,11 @@ AllocateArrayTlabValidation = {
   # code_size_max: { arm64: 128, x86_64: 145, arm32: 9999 }
 }
 
+# Increase count of available registers for x86_64
+if Options.arch == :x86_64
+  $available_regs = $panda_mask
+end
+
 function(:AllocateObjectTlab,
          params: {klass: 'ref', size: 'word'},
          regmap: $full_regmap,
@@ -70,7 +75,7 @@ function(:AllocateObjectTlab,
       call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, start, size).void
     end
     new_start := Add(start, size).ptr
-    StoreI(start, klass).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+    store_class(start, klass)
     addr := Add(tlab_ptr, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr
     StoreI(addr, new_start).Imm(0).Volatile.ptr
     Return(start).ptr
@@ -128,7 +133,7 @@ def AllocateArrayTlab(element_size)
         call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, start, size).void
       end
       new_start := Add(start, size).ptr
-      StoreI(start, klass).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+      store_class(start, klass)
       StoreI(start, elements_num).Imm(Constants::ARRAY_LENGTH_OFFSET).word
       addr := Add(tlab_ptr, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr
       StoreI(addr, new_start).Imm(0).Volatile.ptr

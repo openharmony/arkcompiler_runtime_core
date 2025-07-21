@@ -17,7 +17,6 @@
 #define COMPILER_OPTIMIZER_IR_INST_H
 
 #include <vector>
-#include <iostream>
 #include "constants.h"
 #include "datatype.h"
 
@@ -863,22 +862,13 @@ public:
     {
         return GetFlag(inst_flags::CF);
     }
-    bool IsVirtualLaunchCall() const
-    {
-        return GetOpcode() == Opcode::CallLaunchVirtual || GetOpcode() == Opcode::CallResolvedLaunchVirtual;
-    }
     bool IsVirtualCall() const
     {
-        return GetOpcode() == Opcode::CallVirtual || GetOpcode() == Opcode::CallResolvedVirtual ||
-               IsVirtualLaunchCall();
-    }
-    bool IsStaticLaunchCall() const
-    {
-        return GetOpcode() == Opcode::CallLaunchStatic || GetOpcode() == Opcode::CallResolvedLaunchStatic;
+        return GetOpcode() == Opcode::CallVirtual || GetOpcode() == Opcode::CallResolvedVirtual;
     }
     bool IsStaticCall() const
     {
-        return GetOpcode() == Opcode::CallStatic || GetOpcode() == Opcode::CallResolvedStatic || IsStaticLaunchCall();
+        return GetOpcode() == Opcode::CallStatic || GetOpcode() == Opcode::CallResolvedStatic;
     }
     bool IsNativeApiCall() const
     {
@@ -921,10 +911,6 @@ public:
     bool IsDynamicCall() const
     {
         return GetOpcode() == Opcode::CallDynamic;
-    }
-    bool IsLaunchCall() const
-    {
-        return IsStaticLaunchCall() || IsVirtualLaunchCall();
     }
     bool IsIndirectCall() const
     {
@@ -2982,6 +2968,11 @@ public:
         return GetInput(GetObjectIndex()).GetInst();
     }
 
+    const Inst *GetObjectInst() const
+    {
+        return GetInput(GetObjectIndex()).GetInst();
+    }
+
     DataType::Type GetInputType(size_t index) const override
     {
         ASSERT(inputTypes_ != nullptr);
@@ -3966,25 +3957,60 @@ public:
     {
         ASSERT(rootsStackMask_ == nullptr);
         rootsStackMask_ = allocator->New<ArenaBitVector>(allocator);
+        ASSERT(rootsStackMask_ != nullptr);
         rootsStackMask_->Reset();
     }
 
     Inst *Clone(const Graph *targetGraph) const override;
-#ifndef NDEBUG
+
     void SetInputsWereDeleted()
     {
         SetField<FlagInputsWereDeleted>(true);
     }
 
-    bool GetInputsWereDeleted()
+    bool GetInputsWereDeleted() const
     {
         return GetField<FlagInputsWereDeleted>();
+    }
+
+    bool GetInputsWereDeletedRec() const;
+
+    static bool InstMayRequireRegMap(const Inst *inst)
+    {
+        // The call may be inlined later on and have Deoptimize or DeoptimizeIf
+        // Or the block may become try after inlining
+        return inst->RequireRegMap() || inst->IsCall() || inst->CanThrow();
+    }
+
+    template <typename PredT = bool (*)(const Inst *)>
+    bool CanRemoveInputs(PredT &&mayRequireRegMap = SaveStateInst::InstMayRequireRegMap) const
+    {
+        for (auto &user : GetUsers()) {
+            if (mayRequireRegMap(user.GetInst())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+#ifndef NDEBUG
+    bool GetInputsWereDeletedSafely() const
+    {
+        return GetField<FlagInputsWereDeletedSafely>();
+    }
+
+    void SetInputsWereDeletedSafely()
+    {
+        SetField<FlagInputsWereDeletedSafely>(true);
     }
 #endif
 
 protected:
-#ifndef NDEBUG
     using FlagInputsWereDeleted = LastField::NextFlag;
+#ifndef NDEBUG
+    using FlagInputsWereDeletedSafely = FlagInputsWereDeleted::NextFlag;
+    using LastField = FlagInputsWereDeletedSafely;
+#else
     using LastField = FlagInputsWereDeleted;
 #endif
 
@@ -4631,6 +4657,7 @@ public:
         if (imms_ == nullptr) {
             imms_ = allocator->New<ArenaVector<uint32_t>>(allocator->Adapter());
         }
+        ASSERT(imms_ != nullptr);
         imms_->push_back(imm);
     }
 

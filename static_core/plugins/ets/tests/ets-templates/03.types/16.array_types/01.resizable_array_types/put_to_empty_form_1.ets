@@ -21,6 +21,7 @@ tags: []
 
 function main() {
     let arr: String[] = [];
+    arr.push("")            // Ensure index available
     arr[0] = "Hello"
     assertEQ(1, arr.length);
     assertEQ("Hello", arr[0]);

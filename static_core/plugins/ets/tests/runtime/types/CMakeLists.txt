@@ -45,6 +45,7 @@ panda_ets_add_gtest(
         ets_promise_test.cpp
         ets_job_test.cpp
         ets_class_test.cpp
+        ets_string_from_char_code_test.cpp
         ets_sync_primitives_test.cpp
         ets_arraybuf_test.cpp
         ets_arrayobj_test.cpp

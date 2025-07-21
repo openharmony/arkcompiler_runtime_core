@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+enum Color {
+    RED,
+    GREEN,
+    BLUE
+}
+
 class A {
     public static new_A(): A {
         return new A();

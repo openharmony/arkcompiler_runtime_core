@@ -19,18 +19,17 @@ import json
 import os
 import logging
 from pathlib import Path
-from glob import glob
-from tempfile import mkstemp
 from string import Template
-from typing import List, Union
+from typing import List, Any, Union, Iterable
 
 from vmb.tool import ToolBase, VmbToolExecError
 from vmb.unit import BenchUnit
 from vmb.shell import ShellResult
 from vmb.result import BuildResult, BUStatus
 from vmb.helpers import load_file, create_file
+from vmb.target import Target
 
-log = logging.getLogger('es2panda')
+log = logging.getLogger('vmb')
 
 
 def make_arktsconfig(configpath: Union[str, Path],
@@ -43,9 +42,8 @@ def make_arktsconfig(configpath: Union[str, Path],
     parsed_template = json.loads(template)
     if len(extra_paths) < 1:
         with create_file(configpath) as f:
-            f.write(json.dumps(parsed_template))
+            f.write(json.dumps(parsed_template, indent=4))
         return
-
     paths: dict = {}
     dynamic_paths: dict = {}
     for path in extra_paths:
@@ -54,7 +52,6 @@ def make_arktsconfig(configpath: Union[str, Path],
         paths[lib_name] = [path]
         if is_compilable:
             continue
-
         key: str = path.replace("/", "_").replace(".", "_")
         dynamic_paths[key] = {'language': 'js', 'declPath': path, 'ohmUrl': path}
         parsed_template['compilerOptions']['paths'] = {
@@ -65,19 +62,61 @@ def make_arktsconfig(configpath: Union[str, Path],
             **parsed_template['compilerOptions']['dynamicPaths'],
             **dynamic_paths
             }
-
     with create_file(configpath) as f:
-        f.write(json.dumps(parsed_template))
+        f.write(json.dumps(parsed_template, indent=4))
+
+
+def fix_arktsconfig(dynamic_paths: Any = None) -> None:
+    """Update arktsconfig.json with actual paths."""
+    ark_root_env = os.environ.get('PANDA_BUILD', '')
+    if not ark_root_env:
+        raise RuntimeError('PANDA_BUILD not set!')
+    ark_root = Path(ark_root_env).resolve()
+    if not ark_root.is_dir():
+        raise RuntimeError(f'PANDA_BUILD "{ark_root}" does not exist!')
+    ark_src_env = os.environ.get('PANDA_SRC', '')
+    if not ark_src_env:
+        raise RuntimeError('PANDA_SRC not set! Please point it to static_core dir.')
+    ark_src = Path(ark_src_env).resolve()
+    if not ark_src.is_dir():
+        raise RuntimeError(f'PANDA_SRC "{ark_src}" does not exist!')
+    config = ark_root.joinpath(
+        'tools', 'es2panda', 'generated', 'arktsconfig.json')
+    if config.is_file():
+        log.info('Updating %s with %s', config, ark_src)
+        with open(config, 'r', encoding="utf-8") as f:
+            j = json.load(f)
+        old_root = j.get('compilerOptions', {}).get('baseUrl', 'failed')
+        if dynamic_paths:
+            for k, v in dynamic_paths.items():
+                j['compilerOptions']['dynamicPaths'][k] = v
+        t = json.dumps(j)
+        with create_file(config) as f:
+            f.write(t.replace(old_root, str(ark_src)))
+        return
+    log.warning('%s does not exist! Creating it "manually"!', config)
+    make_arktsconfig(config, ark_src, [])
 
 
 class Tool(ToolBase):
 
     def __init__(self, *args):
         super().__init__(*args)
-        self.panda_root = self.ensure_dir(
-            os.environ.get('PANDA_BUILD', ''),
-            err='Please set $PANDA_BUILD env var'
-        )
+        # Panda binaries could be in form of:
+        # 1) panda build artifact
+        # 2) panda ohos sdk
+        # PANDA_SDK and PANDA_BUILD could be set simultaneously
+        panda_sdk = os.environ.get('PANDA_SDK', '')
+        if panda_sdk and Target.OHOS == self.target:
+            panda_root = os.path.join(panda_sdk, 'linux_host_tools')
+            self.panda_root = self.ensure_dir(
+                panda_root, err='Please point $PANDA_SDK to sdk/package')
+            os.environ['PANDA_BUILD'] = panda_root
+        else:
+            self.panda_root = self.ensure_dir(
+                os.environ.get('PANDA_BUILD', ''),
+                err='Please set $PANDA_BUILD env var'
+            )
         self.default_arktsconfig = str(Path(self.panda_root).joinpath(
             'tools', 'es2panda', 'generated', 'arktsconfig.json'))
         panda_stdlib_src = os.environ.get('PANDA_STDLIB_SRC', None)
@@ -90,29 +129,37 @@ class Tool(ToolBase):
     def name(self) -> str:
         return 'ES to Panda compiler (ArkTS mode)'
 
-    def configure_paths(self, bu: BenchUnit) -> str:
-        js_files = glob(f'{str(bu.src().parent)}/*.js')
-        js_files_includable = [x for x in js_files if x.find('bench_') == -1]
-        sts_paths_includable = [str(x) for x in bu.libs()
-                                if str(x).find('.abc') == -1]
-        extra_paths = js_files_includable + sts_paths_includable
-        if len(extra_paths) < 1:
-            return str(self.default_arktsconfig)
-        _, arktsconfig_path = mkstemp('.json', 'arktsconfig_')
-        make_arktsconfig(arktsconfig_path,
-                         self.panda_root,
-                         extra_paths)
-        return str(arktsconfig_path)
+    def update_config(self, bu: BenchUnit) -> str:
+        static: Iterable[Path] = bu.libs('.ets')
+        dynamic: Iterable[Path] = bu.libs('.ts')  # Note: no js; no mjs
+        if not dynamic and not static:
+            return self.default_arktsconfig
+        with open(self.default_arktsconfig, 'r', encoding="utf-8") as f:
+            j = json.load(f)
+        for s in static:
+            lib = s.with_suffix('')
+            j['compilerOptions']['paths'][lib.name] = [str(lib), ]
+        for d in dynamic:
+            lib = d.with_suffix('')
+            # Note: no 'declPath'
+            j['compilerOptions']['dynamicPaths'][lib.name] = {'language': 'js', 'ohmUrl': str(lib)}
+        conf = bu.path.joinpath('arktsconfig.json')
+        with create_file(conf) as f:
+            json.dump(j, f, indent=4)
+        return str(conf)
 
     def exec(self, bu: BenchUnit) -> None:
-        for lib in bu.libs('.ts', '.ets'):
+        for lib in bu.libs('.ets'):  # compile ETS imports
             abc = lib.with_suffix('.abc')
             if abc.is_file():
                 continue
             self.run_es2panda(lib, abc, self.opts, bu)
-        src = bu.src('.ts', '.ets')
+        # check if arktsconfig should be updated
+        conf = self.update_config(bu)
+        # compile bench
+        src = bu.src('.ets')
         abc = src.with_suffix('.abc')
-        res = self.run_es2panda(src, abc, self.opts, bu)
+        res = self.run_es2panda(src, abc, self.opts, bu, conf)
         abc_size = self.sh.get_filesize(abc)
         bu.result.build.append(
             BuildResult('es2panda', abc_size, res.tm, res.rss))
@@ -122,13 +169,14 @@ class Tool(ToolBase):
                      src: Path,
                      abc: Path,
                      opts: str,
-                     bu: BenchUnit) -> ShellResult:
-        arktsconfig = self.configure_paths(bu)
+                     bu: BenchUnit,
+                     conf: str = '') -> ShellResult:
+        arktsconfig = conf if conf else self.default_arktsconfig
         res = self.sh.run(
             f'LD_LIBRARY_PATH={self.panda_root}/lib '
             f'{self.es2panda} {opts} '
             f'--arktsconfig={arktsconfig} '
-            f'--output={abc} {src if not bu.src_for_es2panda_override else str(bu.src_for_es2panda_override)}',
+            f'--output={abc} {src}',
             measure_time=True)
         if res.ret != 0 or not abc.is_file():
             bu.status = BUStatus.COMPILATION_FAILED

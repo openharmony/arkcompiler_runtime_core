@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -159,6 +159,10 @@ void DominatorsTree::Init(size_t blocksCount)
     semi_ = allocator->New<ArenaVector<int32_t>>(allocator->Adapter());
     vertices_ = allocator->New<BlocksVector>(allocator->Adapter());
 
+    auto maxSize = GetGraph()->GetVectorBlocks().size();
+    if (blocksCount > maxSize) {
+        blocksCount = maxSize;
+    }
     ancestors_->resize(blocksCount);
     idoms_->resize(blocksCount);
     labels_->resize(blocksCount);
@@ -180,7 +184,9 @@ void DominatorsTree::Init(size_t blocksCount)
 /* static */
 void DominatorsTree::SetDomPair(BasicBlock *dominator, BasicBlock *block)
 {
+    ASSERT(block != nullptr);
     block->SetDominator(dominator);
+    ASSERT(dominator != nullptr);
     dominator->AddDominatedBlock(block);
 }
 

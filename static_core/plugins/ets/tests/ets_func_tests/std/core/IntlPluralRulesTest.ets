@@ -187,7 +187,7 @@ function testSelectWithOptions() {
 }
 
 function runSupportedLocalesTest(
-    locales: string | string[],
+    locales: string | FixedArray<string>,
     options: Intl.SupportedLocalesOfOptions | undefined,
     expected: string[])
 {
@@ -202,68 +202,43 @@ function testSupportedLocalesOf() {
     runSupportedLocalesTest(
         "en",
         undefined,
-        [
-            intlBestFitLocale("en")
-        ]
+        intlBestFitLocales("en")
     )
     runSupportedLocalesTest(
         fakeLocale,
         undefined,
-        [
-            intlBestFitLocale("fakeLocale")
-        ]
+        intlBestFitLocales(fakeLocale)
     )
     runSupportedLocalesTest(
         ["fr", fakeLocale, "ru"],
         undefined,
-        [
-            intlBestFitLocale("fr"),
-            intlBestFitLocale(fakeLocale),
-            intlBestFitLocale("ru")
-        ]
+        intlBestFitLocales(["fr", fakeLocale, "ru"])
     )
     runSupportedLocalesTest(
         ["ru-RU", "zh-CN", "en-US"],
         undefined,
-        [
-            intlBestFitLocale("ru-RU"),
-            intlBestFitLocale("zh-CN"),
-            intlBestFitLocale("en-US")
-        ]
+        intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
     )
     runSupportedLocalesTest(
         ["ru-RU", "zh-CN", "en-US"],
         { localeMatcher: "best fit" } as Intl.SupportedLocalesOfOptions,
-        [
-            intlBestFitLocale("ru-RU"),
-            intlBestFitLocale("zh-CN"),
-            intlBestFitLocale("en-US")
-        ]
+        intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
     )
 
     runSupportedLocalesTest(
         "en",
         { localeMatcher: "lookup" } as Intl.SupportedLocalesOfOptions,
-        [
-            intlLookUpLocale("en")
-        ]
+        intlLookUpLocales("en")
     )
     runSupportedLocalesTest(
         fakeLocale,
         { localeMatcher: "lookup" } as Intl.SupportedLocalesOfOptions,
-        [
-            intlLookUpLocale("fakeLocale")
-        ]
+        intlLookUpLocales(fakeLocale)
     )
 
     runSupportedLocalesTest(
         ["ru-RU", "zh-CN", fakeLocale, "en-US"],
         { localeMatcher: "lookup" } as Intl.SupportedLocalesOfOptions,
-        [
-            intlLookUpLocale("ru-RU"),
-            intlLookUpLocale("zh-CN"),
-            intlLookUpLocale(fakeLocale),
-            intlLookUpLocale("en-US")
-        ]
+        intlLookUpLocales(["ru-RU", "zh-CN", fakeLocale, "en-US"])
     )
 }

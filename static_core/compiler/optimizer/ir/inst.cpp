@@ -230,6 +230,8 @@ void DynamicOperands::Reallocate([[maybe_unused]] size_t newCapacity /* =0 */)
 
     auto ownerInst {GetOwnerInst()};
     // Set pointer to owned instruction into new storage NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    ASSERT(reinterpret_cast<User *>(newStor) != nullptr);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     *reinterpret_cast<Inst **>(reinterpret_cast<User *>(newStor) + newCapacity) = ownerInst;
 
     if (users_ == nullptr) {
@@ -275,6 +277,7 @@ unsigned DynamicOperands::Append(Inst *inst)
     if (GetOwnerInst()->IsPhi()) {
         user->SetBbNum(size_);
     }
+    ASSERT(inst != nullptr);
     inst->AddUser(user);
     return size_++;
 }
@@ -683,13 +686,28 @@ void SaveStateInst::AppendImmediate(uint64_t imm, uint16_t vreg, DataType::Type 
         ASSERT(GetBasicBlock() != nullptr);
         AllocateImmediates(GetBasicBlock()->GetGraph()->GetAllocator(), 0);
     }
+    ASSERT(immediates_ != nullptr);
     immediates_->emplace_back(SaveStateImm {imm, vreg, type, vregType});
 }
 
 void SaveStateInst::AllocateImmediates(ArenaAllocator *allocator, size_t size)
 {
     immediates_ = allocator->New<ArenaVector<SaveStateImm>>(allocator->Adapter());
+    ASSERT(immediates_ != nullptr);
     immediates_->resize(size);
+}
+
+bool SaveStateInst::GetInputsWereDeletedRec() const
+{
+    if (GetInputsWereDeleted()) {
+        return true;
+    }
+    if (callerInst_ != nullptr) {
+        auto *saveState = callerInst_->GetSaveState();
+        ASSERT(saveState != nullptr);
+        return saveState->GetInputsWereDeletedRec();
+    }
+    return false;
 }
 
 void TryInst::AppendCatchTypeId(uint32_t id, uint32_t catchEdgeIndex)
@@ -702,6 +720,7 @@ void TryInst::AppendCatchTypeId(uint32_t id, uint32_t catchEdgeIndex)
         catchEdgeIndexes_ = allocator->New<ArenaVector<uint32_t>>(allocator->Adapter());
     }
     catchTypeIds_->push_back(id);
+    ASSERT(catchEdgeIndexes_ != nullptr);
     catchEdgeIndexes_->push_back(catchEdgeIndex);
 }
 
@@ -712,6 +731,7 @@ void CatchPhiInst::AppendThrowableInst(const Inst *inst)
         auto allocator = GetBasicBlock()->GetGraph()->GetAllocator();
         throwInsts_ = allocator->New<ArenaVector<const Inst *>>(allocator->Adapter());
     }
+    ASSERT(throwInsts_ != nullptr);
     throwInsts_->push_back(inst);
 }
 

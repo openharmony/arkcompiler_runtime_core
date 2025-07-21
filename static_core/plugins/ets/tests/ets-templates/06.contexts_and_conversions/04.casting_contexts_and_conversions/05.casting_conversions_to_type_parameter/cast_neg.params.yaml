@@ -22,15 +22,15 @@ cases:
     - to: 'I'
       from:
         - arg: 'new CI'
-    - to: 'byte[]'
+    - to: 'FixedArray<byte>'
       from:
         - arg: 'array'
-          decl: 'const array: byte[] = [ 0 ]'
-    - to: 'C[]'
+          decl: 'const array: FixedArray<byte> = [ 0 ]'
+    - to: 'FixedArray<C>'
       from:
         - arg: '[ new C ]'
         - arg: '[ new D ]'
-    - to: 'I[]'
+    - to: 'FixedArray<I>'
       from:
         - arg: '[ new CI ]'
     - to: '() => void'

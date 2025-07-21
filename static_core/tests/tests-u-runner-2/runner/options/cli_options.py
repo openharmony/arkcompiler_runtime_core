@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,10 +18,10 @@ import argparse
 import sys
 from glob import glob
 from pathlib import Path
-from typing import List, Optional, Dict, Union, Tuple
+from typing import cast
 
 from runner import utils
-from runner.common_exceptions import InvalidConfiguration
+from runner.common_exceptions import FileNotFoundException, IncorrectEnumValue, InvalidConfiguration
 from runner.enum_types.config_type import ConfigType
 from runner.logger import Log
 from runner.options.options_general import GeneralOptions
@@ -29,9 +29,9 @@ from runner.options.options_test_suite import TestSuiteOptions
 
 _LOGGER = Log.get_logger(__file__)
 
-CliOptionType = Union[str, int, float, bool, list]
-OptionType = Optional[Union[CliOptionType, dict, Path]]
-ArgListType = List[str]
+CliOptionType = str | int | float | bool | list
+OptionType = CliOptionType | dict | Path | None
+ArgListType = list[str]
 
 
 class CliOptions:
@@ -40,7 +40,7 @@ class CliOptions:
     __CFG_RUNNER = "runner"
 
     def __init__(self, argv: ArgListType):
-        self.data: Dict[str, OptionType] = {}
+        self.data: dict[str, OptionType] = {}
         if not argv or len(argv) < 2:
             raise InvalidConfiguration("No parameters specified. Expected at least workflow and test-suite")
         self.argv: ArgListType = argv
@@ -48,8 +48,8 @@ class CliOptions:
         self.__process_runner_options(self.argv)
 
     @staticmethod
-    def __parse_option(arg_list: ArgListType, option_name: str, default_value: Optional[CliOptionType]) \
-            -> Tuple[Optional[CliOptionType], ArgListType]:
+    def __parse_option(arg_list: ArgListType, option_name: str, default_value: CliOptionType | None) \
+            -> tuple[CliOptionType | None, ArgListType]:
         """
         Search an option with `option_name` in `arg_list`.
         :param arg_list: list of strings incoming from argv (CLI)
@@ -59,7 +59,7 @@ class CliOptions:
         The type of the returned value is the type of `default_value`.
         In other case the `default_value` is returned.
         """
-        option_values: List[Optional[CliOptionType]] = []
+        option_values: list[CliOptionType | None] = []
         while CliOptions.__has_option(option_name, arg_list):
             option_value, arg_list = CliOptions.__parse_option_with_space(arg_list, option_name)
             if option_value is None:
@@ -74,7 +74,7 @@ class CliOptions:
         return option_values[0] if len(option_values) == 1 else option_values, arg_list
 
     @staticmethod
-    def __is_option_value_int(value: Optional[CliOptionType]) -> Tuple[bool, Optional[int]]:
+    def __is_option_value_int(value: CliOptionType | None) -> tuple[bool, int | None]:
         """
         Detects whether the value is int,
         if not tries to convert to int
@@ -92,7 +92,7 @@ class CliOptions:
         return False, None
 
     @staticmethod
-    def __is_option_value_str(value: Optional[CliOptionType]) -> Tuple[bool, Optional[str]]:
+    def __is_option_value_str(value: CliOptionType | None) -> tuple[bool, str | None]:
         """
         Detects whether the value is str,
         :param value: value get from CLI
@@ -104,7 +104,7 @@ class CliOptions:
         return False, None
 
     @staticmethod
-    def __is_option_value_bool(value: Optional[CliOptionType]) -> Tuple[bool, Optional[bool]]:
+    def __is_option_value_bool(value: CliOptionType | None) -> tuple[bool, bool | None]:
         """
         Detects whether the value is bool,
         if not tries to convert to bool
@@ -122,13 +122,13 @@ class CliOptions:
         return False, None
 
     @staticmethod
-    def __get_option_value(option_name: str, value: Optional[CliOptionType]) -> CliOptionType:
+    def __get_option_value(option_name: str, value: CliOptionType | None) -> CliOptionType:
         """
         Converts the value from any/str to specific type
         """
         result_tuple = CliOptions.__is_option_value_int(value)
         result: bool = result_tuple[0]
-        res_value: Optional[CliOptionType] = result_tuple[1]
+        res_value: CliOptionType | None = result_tuple[1]
         if result and res_value is not None:
             return res_value
         result, res_value = CliOptions.__is_option_value_bool(value)
@@ -149,7 +149,7 @@ class CliOptions:
 
     @staticmethod
     def __parse_option_with_space(arg_list: ArgListType, option_name: str) \
-            -> Tuple[Optional[CliOptionType], ArgListType]:
+            -> tuple[CliOptionType | None, ArgListType]:
         """
         Search the option `option_name` in the list of arguments and
         tries to get its value supposing it's divided with a space
@@ -171,7 +171,7 @@ class CliOptions:
 
     @staticmethod
     def __parse_option_with_equal(arg_list: ArgListType, option_name: str) \
-            -> Tuple[Optional[CliOptionType], ArgListType]:
+            -> tuple[CliOptionType | None, ArgListType]:
         """
         Search the option `option_name` in the list of arguments and
         tries to get its value supposing it's divided with an equal sign `=`
@@ -197,8 +197,10 @@ class CliOptions:
         parser = argparse.ArgumentParser(description="General options parser")
 
         GeneralOptions.add_cli_args(parser)
-
-        runner_args = parser.parse_args(runner_cli)
+        try:
+            runner_args = parser.parse_args(runner_cli)
+        except BaseException as exc:
+            raise IncorrectEnumValue from exc
         return runner_args
 
     @staticmethod
@@ -224,12 +226,12 @@ class CliOptions:
             existing_files = [Path(cfg).stem for cfg in glob(str(folder.joinpath("**/*.yaml")), recursive=True)]
             message = (f"Configuration file '{cfg_name}' not found. "
                        f"Expected one of: {sorted(existing_files)}")
-            raise FileNotFoundError(message) from exc
+            raise FileNotFoundException(message) from exc
         if (cfg_type := data.get(self.__CFG_TYPE)) in self.data:
             raise InvalidConfiguration(f"{cfg_name} redefines {cfg_type} config.")
-        cli_params = data.get(self.__CFG_PARAMETERS, {})
+        cli_params = cast(dict, data.get(self.__CFG_PARAMETERS, {}))
 
-        self.data[cfg_type] = cfg_name
+        self.data[str(cfg_type)] = cfg_name
         self.data[f"{cfg_name}.path"] = cfg_path
         self.data[f"{cfg_name}.data"] = data
 
@@ -287,6 +289,6 @@ class CliOptions:
         self.__process_test_suite(test_suite_cli)
 
 
-def get_args() -> Dict[str, OptionType]:
+def get_args() -> dict[str, OptionType]:
     cli = CliOptions(sys.argv[1:])
     return cli.data

@@ -35,16 +35,18 @@ namespace ark::compiler {
         enc->GetEncoder()->Encode##opc(dst, src0, src1);                        \
     }
 
+// CC-OFFNXT(G.PRE.06) solid logic
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BINARY_SHIFTED_REGISTER_OPERATION(opc)                                                  \
-    void EncodeVisitor::Visit##opc##SR(GraphVisitor *visitor, Inst *inst)                       \
-    {                                                                                           \
-        EncodeVisitor *enc = static_cast<EncodeVisitor *>(visitor);                             \
-        auto [dst, src0, src1] = enc->GetCodegen()->ConvertRegisters<2U>(inst);                 \
-        auto imm_shift_inst = static_cast<BinaryShiftedRegisterOperation *>(inst);              \
-        auto imm_value = static_cast<uint32_t>(imm_shift_inst->GetImm()) & (dst.GetSize() - 1); \
-        auto shift = Shift(src1, imm_shift_inst->GetShiftType(), imm_value);                    \
-        enc->GetEncoder()->Encode##opc(dst, src0, shift);                                       \
+#define BINARY_SHIFTED_REGISTER_OPERATION(opc)                                        \
+    void EncodeVisitor::Visit##opc##SR(GraphVisitor *visitor, Inst *inst)             \
+    {                                                                                 \
+        EncodeVisitor *enc = static_cast<EncodeVisitor *>(visitor);                   \
+        auto [dst, src0, src1] = enc->GetCodegen()->ConvertRegisters<2U>(inst);       \
+        auto imm_shift_inst = static_cast<BinaryShiftedRegisterOperation *>(inst);    \
+        auto dstSize = dst.GetSize() > 1 ? dst.GetSize() - 1 : 0;                     \
+        auto imm_value = static_cast<uint32_t>(imm_shift_inst->GetImm()) & (dstSize); \
+        auto shift = Shift(src1, imm_shift_inst->GetShiftType(), imm_value);          \
+        enc->GetEncoder()->Encode##opc(dst, src0, shift);                             \
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -921,6 +923,7 @@ void EncodeVisitor::VisitResolveObjectField(GraphVisitor *visitor, Inst *inst)
         enc->GetCodegen()->CallRuntimeWithMethod(inst, method, EntrypointId::GET_FIELD_OFFSET, dst, TypedImm(typeId));
     } else {
         auto skind = UnresolvedTypesInterface::SlotKind::FIELD;
+        ASSERT(graph->GetRuntime()->GetUnresolvedTypes() != nullptr);
         auto fieldOffsetAddr = graph->GetRuntime()->GetUnresolvedTypes()->GetTableSlot(method, typeId, skind);
         ScopedTmpReg tmpReg(enc->GetEncoder());
         // load field offset and if it's 0 then call runtime EntrypointId::GET_FIELD_OFFSET
@@ -1162,6 +1165,7 @@ void EncodeVisitor::FillLoadClassUnresolved(GraphVisitor *visitor, Inst *inst)
     auto typeId = loadClass->GetTypeId();
     auto method = loadClass->GetMethod();
     auto utypes = graph->GetRuntime()->GetUnresolvedTypes();
+    ASSERT(utypes != nullptr);
     auto klassAddr = utypes->GetTableSlot(method, typeId, UnresolvedTypesInterface::SlotKind::CLASS);
     Reg dstPtr(dst.GetId(), enc->GetCodegen()->GetPtrRegType());
     encoder->EncodeMov(dstPtr, Imm(klassAddr));
@@ -1295,6 +1299,7 @@ void EncodeVisitor::VisitUnresolvedLoadAndInitClass(GraphVisitor *visitor, Inst 
     } else {  // JIT mode
         auto method = inst->CastToUnresolvedLoadAndInitClass()->GetMethod();
         auto utypes = graph->GetRuntime()->GetUnresolvedTypes();
+        ASSERT(utypes != nullptr);
         auto klassAddr = utypes->GetTableSlot(method, classId, UnresolvedTypesInterface::SlotKind::CLASS);
         Reg dstPtr(dst.GetId(), enc->GetCodegen()->GetPtrRegType());
         encoder->EncodeMov(dstPtr, Imm(klassAddr));
@@ -1345,6 +1350,7 @@ void EncodeVisitor::VisitResolveObjectFieldStatic(GraphVisitor *visitor, Inst *i
         enc->GetCodegen()->CallRuntimeWithMethod(inst, method, entrypoint, dst, TypedImm(typeId), TypedImm(0));
     } else {
         ScopedTmpReg tmpReg(enc->GetEncoder());
+        ASSERT(graph->GetRuntime()->GetUnresolvedTypes() != nullptr);
         auto fieldAddr = graph->GetRuntime()->GetUnresolvedTypes()->GetTableSlot(method, typeId, slotKind);
         enc->GetEncoder()->EncodeMov(tmpReg, Imm(fieldAddr));
         enc->GetEncoder()->EncodeLdr(tmpReg, false, MemRef(tmpReg));
@@ -1486,6 +1492,7 @@ void EncodeVisitor::VisitUnresolvedLoadType(GraphVisitor *visitor, Inst *inst)
         encoder->EncodeLdr(dst, false, MemRef(dst, runtime->GetManagedClassOffset(enc->GetArch())));
     } else {
         auto utypes = runtime->GetUnresolvedTypes();
+        ASSERT(utypes != nullptr);
         auto clsAddr = utypes->GetTableSlot(method, typeId, UnresolvedTypesInterface::SlotKind::MANAGED_CLASS);
         Reg dstPtr(dst.GetId(), codegen->GetPtrRegType());
         encoder->EncodeMov(dstPtr, Imm(clsAddr));
@@ -2128,30 +2135,6 @@ void EncodeVisitor::VisitInitString(GraphVisitor *visitor, Inst *inst)
         cg->CreateStringFromCharArrayTlab(initStr, dst,
                                           Codegen::SRCREGS {cg->GetRegfile()->GetZeroReg(), lengthReg, ctorArg});
     }
-}
-
-void EncodeVisitor::VisitCallLaunchStatic(GraphVisitor *visitor, Inst *inst)
-{
-    auto *enc = static_cast<EncodeVisitor *>(visitor);
-    enc->GetCodegen()->CreateLaunchCall(inst->CastToCallLaunchStatic());
-}
-
-void EncodeVisitor::VisitCallLaunchVirtual(GraphVisitor *visitor, [[maybe_unused]] Inst *inst)
-{
-    auto *enc = static_cast<EncodeVisitor *>(visitor);
-    enc->GetCodegen()->CreateLaunchCall(inst->CastToCallLaunchVirtual());
-}
-
-void EncodeVisitor::VisitCallResolvedLaunchStatic(GraphVisitor *visitor, Inst *inst)
-{
-    auto *enc = static_cast<EncodeVisitor *>(visitor);
-    enc->GetCodegen()->CreateLaunchCall(inst->CastToCallResolvedLaunchStatic());
-}
-
-void EncodeVisitor::VisitCallResolvedLaunchVirtual(GraphVisitor *visitor, Inst *inst)
-{
-    auto *enc = static_cast<EncodeVisitor *>(visitor);
-    enc->GetCodegen()->CreateLaunchCall(inst->CastToCallResolvedLaunchVirtual());
 }
 
 void EncodeVisitor::VisitResolveStatic(GraphVisitor *visitor, Inst *inst)

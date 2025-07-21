@@ -92,7 +92,6 @@ ohos_shared_library("arkts_abc2program") {
 }
 
 ohos_static_library("arkts_abc2program_frontend_static") {
-  stack_protector_ret = false
   sources = abc2program_sources
 
   include_dirs = [

@@ -13,18 +13,20 @@
  * limitations under the License.
  */
 class Fulfill implements PromiseLike<string> {
-    then<U, E>(onFulfill?: (value: string) => U|PromiseLike<U>, _?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
-        return Promise.resolve().then<U>((): U|PromiseLike<U> => {
-            return onFulfill!("abc");
+    then<U, E>(onFulfill?: (value: string) => U | PromiseLike<U>, _?:
+            (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
+        return Promise.resolve().then<U>((): U | PromiseLike<U> => {
+            return onFulfill!('abc');
         });
     }
 }
 
 class Reject implements PromiseLike<string> {
-    then<U, E>(onFulfilled?: (value: string) => U|PromiseLike<U>, onRejected?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
-        return Promise.resolve().then<E>((): E|PromiseLike<E> => {
-            onFulfilled!("def");
-            return onRejected!("xyz");
+    then<U, E>(onFulfilled?: (value: string) => U | PromiseLike<U>, onRejected?:
+            (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
+        return Promise.resolve().then<E>((): E | PromiseLike<E> => {
+            onFulfilled!('def');
+            return onRejected!(new Error('xyz'));
         });
     }
 }
@@ -32,14 +34,14 @@ class Reject implements PromiseLike<string> {
 let thenable: PromiseLike<string>[] = [new Fulfill(), new Reject()];
 Promise.all(thenable).then<void, void>((values: Array<string>): void => {
     if (values.length != 2) {
-        console.log("Test failed. Expected a string array of length 2 but got length " + values.length + ".");
+        console.log('Test failed. Expected a string array of length 2 but got length ' + values.length + '.');
         return;
     }
-    if (values[0] != "abc" || values[1] != "def") {
-        console.log("Test failed. The promise should be resolved by the specified values.");
+    if (values[0] != 'abc' || values[1] != 'def') {
+        console.log('Test failed. The promise should be resolved by the specified values.');
         return;
     }
-    console.log("Test passed.");
-}, (error: Object): void => {
-    console.log("Test failed. The promise should not be rejected.");
+    console.log('Test passed.');
+}, (error: Error): void => {
+    console.log('Test failed. The promise should not be rejected.');
 });

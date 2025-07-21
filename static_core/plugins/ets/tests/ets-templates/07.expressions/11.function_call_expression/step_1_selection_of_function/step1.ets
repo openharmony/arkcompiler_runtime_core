@@ -17,6 +17,7 @@
 /*---
 desc: >-
     One function must be selected from all potentially applicable functions as a function can be overloaded.
+tags: [{{c.tags}}]
 ---*/
 
 {{c.decl}}

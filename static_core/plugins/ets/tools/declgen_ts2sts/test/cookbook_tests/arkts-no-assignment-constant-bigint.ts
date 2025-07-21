@@ -40,3 +40,11 @@ export let threeBitLet = 0b111n;
 export const negZero: 0n = -0n;
 export const baseChange: 255n = 0xFFn;
 export const leadingZeros: 0xFFn = 0x000000FFn;
+
+export let bigint_v:123n=123n;
+export const baseChange_v: 255n = 0xFFn;
+
+export let zero_v = 0b0n;
+export let oneBit_v = 0b1n;
+export let twoBit_v = 0b11n;
+export let threeBit_v = 0b111n;

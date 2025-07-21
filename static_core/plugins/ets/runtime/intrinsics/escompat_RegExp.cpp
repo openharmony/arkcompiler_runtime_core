@@ -34,7 +34,6 @@
 namespace ark::ets::intrinsics {
 using RegExpParser = ark::RegExpParser;
 using RegExpExecutor = ark::ets::RegExpExecutor;
-using RegExpMatchResult = ark::RegExpMatchResult<PandaString>;
 using Array = ark::coretypes::Array;
 
 namespace {
@@ -56,8 +55,11 @@ constexpr const char *RESULT_CLASS_NAME = "Lescompat/RegExpExecArray;";
 constexpr const char *INDEX_FIELD_NAME = "index";
 constexpr const char *INPUT_FIELD_NAME = "input";
 constexpr const char *INDICES_FIELD_NAME = "indices";
-constexpr const char *RESULT_FIELD_NAME = "result";
+constexpr const char *RESULT_FIELD_NAME = "result_";
 constexpr const char *IS_CORRECT_FIELD_NAME = "isCorrect";
+constexpr const char *GROUPS_FIELD_NAME = "groupsRaw_";
+
+constexpr const auto REG_EXP_PARSER_EXT_FLAG_EXT_UNICODE = (1U << 7U);
 
 constexpr const uint32_t INDICES_DIMENSIONS_NUM = 2;
 
@@ -88,6 +90,9 @@ uint32_t CastToBitMask(EtsString *checkStr)
             case 'y':
                 flagsBitsTemp = RegExpParser::FLAG_STICKY;
                 break;
+            case 'v':
+                flagsBitsTemp = REG_EXP_PARSER_EXT_FLAG_EXT_UNICODE;
+                break;
             default: {
                 auto *thread = ManagedThread::GetCurrent();
                 auto ctx = PandaEtsVM::GetCurrent()->GetLanguageContext();
@@ -109,6 +114,13 @@ uint32_t CastToBitMask(EtsString *checkStr)
     }
     return flagsBits;
 }
+
+struct ExecuteOptions {
+    EtsInt lastIndex;
+    bool hasIndices;
+    bool hasSlashU;
+};
+
 }  // namespace
 
 void SetFlags(EtsObject *regexpObject, EtsString *checkStr)
@@ -264,8 +276,7 @@ PandaVector<uint8_t> ExtractString(EtsString *from, const bool asUtf16)
     return result;
 }
 
-RegExpMatchResult Execute(EtsString *pattern, EtsString *flags, EtsString *inputStrObj, EtsInt lastIndex,
-                          bool hasIndices)
+RegExpExecResult Execute(EtsString *pattern, EtsString *flags, EtsString *inputStrObj, ExecuteOptions options)
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
@@ -278,20 +289,21 @@ RegExpMatchResult Execute(EtsString *pattern, EtsString *flags, EtsString *input
     const bool isUtf16Pattern = patternHandle->IsUtf16();
     auto re = EtsRegExp();
     re.SetFlags(flagsHandle.GetPtr());
-    const bool isUtf16 = isUtf16Str || isUtf16Pattern || re.IsUtf16();
+
+    const bool isUtf16 = options.hasSlashU || isUtf16Str || isUtf16Pattern || re.IsUtf16();
 
     auto str = ExtractString(inputStr.GetPtr(), isUtf16);
     auto patternStr = ExtractString(patternHandle.GetPtr(), isUtf16);
     auto compiled = re.Compile(patternStr, isUtf16, patternHandle.GetPtr()->GetLength());
     if (!compiled) {
-        RegExpMatchResult badResult;
+        RegExpExecResult badResult;
         badResult.isSuccess = false;
         return badResult;
     }
 
-    auto result = re.Execute(str, stringLength, lastIndex);
+    auto result = re.Execute(str, stringLength, options.lastIndex);
     re.Destroy();
-    if (!hasIndices) {
+    if (!options.hasIndices) {
         result.indices.clear();
     }
     return result;
@@ -399,7 +411,24 @@ void SetLastIndexField(EtsObject *regexp, EtsField *lastIndexField, bool global,
     regexp->SetFieldPrimitive<EtsDouble>(lastIndexField, value);
 }
 
-extern "C" EtsObject *EscompatRegExpExec(EtsObject *obj, EtsString *patternStr, EtsString *flagsStr, EtsString *str)
+void SetGroupsField(EtsObject *regexpExecArrayObj, const std::map<PandaString, std::pair<int32_t, int32_t>> &groups)
+{
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+    VMHandle<EtsObject> regexpExecArray(coroutine, regexpExecArrayObj->GetCoreType());
+    EtsClass *resultClass = regexpExecArray->GetClass();
+    auto *groupsField = resultClass->GetDeclaredFieldIDByName(GROUPS_FIELD_NAME);
+    PandaString data;
+    for (const auto &[key, value] : groups) {
+        data += key + "," + ToPandaString(value.first) + "," + ToPandaString(value.second) + ";";
+    }
+
+    EtsString *groupsStr = EtsString::CreateFromMUtf8(data.c_str(), data.size());
+    regexpExecArray->SetFieldObject(groupsField, groupsStr->AsObject());
+}
+
+extern "C" EtsObject *EscompatRegExpExec(EtsObject *obj, EtsString *patternStr, EtsString *flagsStr, EtsString *str,
+                                         EtsBoolean hasSlashU)
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
@@ -410,8 +439,8 @@ extern "C" EtsObject *EscompatRegExpExec(EtsObject *obj, EtsString *patternStr, 
     VMHandle<EtsString> pattern(coroutine, patternStr->GetCoreType());
     VMHandle<EtsString> flags(coroutine, flagsStr->GetCoreType());
     VMHandle<EtsString> strHandle(coroutine, str->GetCoreType());
-    auto *regexpExecArrayClass = classLinker->GetClass(RESULT_CLASS_NAME);
-    VMHandle<EtsObject> regexpExecArrayObject(coroutine, EtsObject::Create(regexpExecArrayClass)->GetCoreType());
+    auto *regexpResultArrayClass = classLinker->GetClass(RESULT_CLASS_NAME);
+    VMHandle<EtsObject> regexpExecArrayObject(coroutine, EtsObject::Create(regexpResultArrayClass)->GetCoreType());
 
     auto *regexpClass = regexp->GetClass();
 
@@ -433,7 +462,8 @@ extern "C" EtsObject *EscompatRegExpExec(EtsObject *obj, EtsString *patternStr, 
         return regexpExecArrayObject.GetPtr();
     }
 
-    auto execResult = Execute(pattern.GetPtr(), flags.GetPtr(), strHandle.GetPtr(), lastIdx, hasIndices);
+    auto execResult = Execute(pattern.GetPtr(), flags.GetPtr(), strHandle.GetPtr(),
+                              ExecuteOptions {lastIdx, hasIndices, static_cast<bool>(hasSlashU)});
     if (!execResult.isSuccess) {
         SetLastIndexField(regexp.GetPtr(), lastIndexField, global, sticky, 0.0);
         SetUnsuccessfulMatchLegacyProperties(regexpClass);
@@ -449,6 +479,7 @@ extern "C" EtsObject *EscompatRegExpExec(EtsObject *obj, EtsString *patternStr, 
     SetSuccessfulMatchLegacyProperties(regexpClass, regexpExecArrayObject.GetPtr(), strHandle.GetPtr(),
                                        execResult.index);
     SetIndicesField(regexpExecArrayObject.GetPtr(), execResult.indices, hasIndices);
+    SetGroupsField(regexpExecArrayObject.GetPtr(), execResult.namedGroups);
     return regexpExecArrayObject.GetPtr();
 }
 }  // namespace ark::ets::intrinsics

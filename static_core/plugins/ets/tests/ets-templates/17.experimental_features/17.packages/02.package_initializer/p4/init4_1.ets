@@ -19,18 +19,14 @@ desc: >-
     initial values for variables across all package modules) as described in detail in Compilation Unit Initialization
     and in Initializer Block
 files: [init4_2.ets]
-tags: []
+tags: [compile-only]
 ---*/
 
 package p4
 
+let var1:int;
 static {
-    var1: int = 5
+    var1 = 5
 }
 
 function foo() {}
-
-function main() {
-    assertEQ(var1, 5)
-    assertEQ(pi, 3.14159)
-}

@@ -16,13 +16,13 @@
 
 // Some sanity tests on basic container algorithms
 
-const tests: int[][][] = [
+const tests: FixedArray<FixedArray<FixedArray<int>>> = [
     [[8, 3, 1, 2, 3, 1, 0], [0, 1, 2, 3, 8]],
     [[1], [1]],
     [[4+4, 3, +1, 2, +3, 1, -0, +0, -1], [-1, 0, 1, 2, 3, 8]]
 ];
 
-function cmp(x: int[], y: int[]): boolean {
+function cmp(x: FixedArray<int>, y: FixedArray<int>): boolean {
     if (x.length != y.length) {
         return false;
     }
@@ -69,23 +69,23 @@ class TreeNode {
         }
     }
 
-    public traverse(): int[] {
-        let l: int[] = [];
-        let r: int[] = [];
+    public traverse(): FixedArray<int> {
+        let l: FixedArray<int> = [];
+        let r: FixedArray<int> = [];
         if (this.left != null) {
             l = this.left!.traverse();
         }
         if (this.right != null) {
             r = this.right!.traverse();
         }
-        let items: int[] = concat(l, [this.item]);
+        let items: FixedArray<int> = concat(l, [this.item]);
         return concat(items, r);
     }
 }
 
-function testTree(data: int[][]): boolean {
-    let unsorted: int[] = copyOf(data[0]);
-    let sorted: int[] = copyOf(data[1]);
+function testTree(data: FixedArray<FixedArray<int>>): boolean {
+    let unsorted: FixedArray<int> = copyOf(data[0]);
+    let sorted: FixedArray<int> = copyOf(data[1]);
     let tree = new TreeNode(unsorted[0]);
     for (let i: int = 1; i < unsorted.length; i++) {
         tree.push(unsorted[i]);

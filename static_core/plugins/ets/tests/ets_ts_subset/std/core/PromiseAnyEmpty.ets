@@ -15,11 +15,11 @@
 
 let array: Promise<string>[] = [];
 Promise.any(array).then<void, void>((value: string): void => {
-    console.log("Test failed. The promise should not be resolved.");
+    console.log('Test failed. The promise should not be resolved.');
 }, (err: AggregateError): void => {
     if (err.errors.length != 0) {
-        console.log("Test failed. Expected errors count 0 but got " + err.errors.length + ".");
+        console.log('Test failed. Expected errors count 0 but got ' + err.errors.length + '.');
         return;
     }
-    console.log("Test passed.");
+    console.log('Test passed.');
 });

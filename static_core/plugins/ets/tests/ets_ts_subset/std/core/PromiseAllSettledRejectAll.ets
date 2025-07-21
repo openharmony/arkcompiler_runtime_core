@@ -13,33 +13,33 @@
  * limitations under the License.
  */
 
-let r1 = Promise.reject<string>(new Error("rejected 0"))
-let r2 = Promise.reject<string>(new Error("rejected 1"));
-let r3 = Promise.reject<string>(new Error("rejected 2"));
+let r1 = Promise.reject<string>(new Error('rejected 0'))
+let r2 = Promise.reject<string>(new Error('rejected 1'));
+let r3 = Promise.reject<string>(new Error('rejected 2'));
 Promise.allSettled([r1, r2, r3]).then<void, void>((values: PromiseSettledResult<string>[]): void => {
     if (values.length != 3) {
-        console.log("Test failed. Expected a string array of length 3 but got length " + values.length + ".");
+        console.log('Test failed. Expected a string array of length 3 but got length ' + values.length + '.');
         return;
     }
-    if (values[0].status != "rejected" || values[1].status != "rejected" || values[2].status != "rejected") {
-        console.log("Test failed. Expected elements 0, 2, 4 have status 'rejected'.");
+    if (values[0].status != 'rejected' || values[1].status != 'rejected' || values[2].status != 'rejected') {
+        console.log('Test failed. Expected elements 0, 2, 4 have status \'rejected\'.');
         return;
     }
-    if ((values[0] as PromiseRejectedResult).reason.message != "rejected 0") {
-        console.log("Test failed. Unexpected value of the element 0.");
+    if ((values[0] as PromiseRejectedResult).reason.message != 'rejected 0') {
+        console.log('Test failed. Unexpected value of the element 0.');
         return;
     }
-    if ((values[1] as PromiseRejectedResult).reason.message != "rejected 1") {
-        console.log("Test failed. Unexpected value of the element 1.");
+    if ((values[1] as PromiseRejectedResult).reason.message != 'rejected 1') {
+        console.log('Test failed. Unexpected value of the element 1.');
         return;
     }
-    if ((values[2] as PromiseRejectedResult).reason.message != "rejected 2") {
-        console.log("Test failed. Unexpected value of the element 2.");
+    if ((values[2] as PromiseRejectedResult).reason.message != 'rejected 2') {
+        console.log('Test failed. Unexpected value of the element 2.');
         return;
     }
-    console.log("Test passed.");
-}, (error: Object): void => {
-    console.log("Test failed. The promise should not be rejected.");
-}).catch((e: Object): void => {
-    console.log("Test failed: " + e);
+    console.log('Test passed.');
+}, (error: Error): void => {
+    console.log('Test failed. The promise should not be rejected.');
+}).catch((e: Error): void => {
+    console.log('Test failed: ' + e);
 });

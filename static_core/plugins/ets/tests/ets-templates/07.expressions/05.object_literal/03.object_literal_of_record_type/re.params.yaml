@@ -17,9 +17,9 @@ cases:
           // empty records
           let a: Record<number, string> = {}
           let b: Record<number, string> = {}
-          assertTrue(a instanceof Record)
-          assertTrue(b instanceof Record)
-          assertTrue(a != b)
+          assertEQ(a instanceof Record, true)
+          assertEQ(b instanceof Record, true)
+          assertEQ(a != b, true)
 
     - use: |-
           // number to string
@@ -28,14 +28,14 @@ cases:
               1: "One",
               3.14159: "PI",
           }
-          assertTrue(a[0] == "Zero")
-          assertTrue(a[1] == "One")
-          assertTrue(a[3.14159] == "PI")
-          assertTrue(a[42] == undefined)
+          assertEQ(a[0], "Zero")
+          assertEQ(a[1], "One")
+          assertEQ(a[3.14159], "PI")
+          assertEQ(a[42], undefined)
           a = {}
-          assertTrue(a[0] == undefined)
-          assertTrue(a[1] == undefined)
-          assertTrue(a[3.14159] == undefined)
+          assertEQ(a[0], undefined)
+          assertEQ(a[1], undefined)
+          assertEQ(a[3.14159], undefined)
 
     - decl: |-
           function foo(p: string): string {
@@ -48,14 +48,14 @@ cases:
               1: foo("One"),
               3.14159: "P" + foo("I"),
           }
-          assertTrue(a[0] == "ZeroZero")
-          assertTrue(a[1] == "OneOne")
-          assertTrue(a[3.14159] == "PII")
-          assertTrue(a[42] == undefined)
+          assertEQ(a[0], "ZeroZero")
+          assertEQ(a[1], "OneOne")
+          assertEQ(a[3.14159], "PII")
+          assertEQ(a[42], undefined)
           a = {}
-          assertTrue(a[0] == undefined)
-          assertTrue(a[1] == undefined)
-          assertTrue(a[3.14159] == undefined)
+          assertEQ(a[0], undefined)
+          assertEQ(a[1], undefined)
+          assertEQ(a[3.14159], undefined)
 
     - use: |-
           // string to number
@@ -65,16 +65,16 @@ cases:
               "Two": 2e00,
               "Minus PI": -3.14159,
           }
-          assertTrue(a["Zero"] == 0)
-          assertTrue(a["One"] == 1)
-          assertTrue(a["Two"] == 2)
-          assertTrue(a["Minus PI"] == -3.14159)
-          assertTrue(a["PI"] == undefined)
+          assertEQ(a["Zero"], 0)
+          assertEQ(a["One"], 1)
+          assertEQ(a["Two"], 2)
+          assertEQ(a["Minus PI"], -3.14159)
+          assertEQ(a["PI"], undefined)
           a = {}
-          assertTrue(a["Zero"] == undefined)
-          assertTrue(a["One"] == undefined)
-          assertTrue(a["Two"] == undefined)
-          assertTrue(a["Minus PI"] == undefined)
+          assertEQ(a["Zero"], undefined)
+          assertEQ(a["One"], undefined)
+          assertEQ(a["Two"], undefined)
+          assertEQ(a["Minus PI"], undefined)
 
     - use: |-
           // string literals to number
@@ -83,9 +83,9 @@ cases:
               "One": 1.0,
               "Two": 2e00,
           }
-          assertTrue(a["Zero"] == 0)
-          assertTrue(a["One"] == 1)
-          assertTrue(a["Two"] == 2)
+          assertEQ(a["Zero"], 0)
+          assertEQ(a["One"], 1)
+          assertEQ(a["Two"], 2)
 
     - use: |-
           // string literals and string to number
@@ -96,12 +96,12 @@ cases:
               "Two": 2e00,
               "PI constant value": 3.14159,
           }
-          assertTrue(a["Zero"] == undefined)
-          assertTrue(a["One"] == 1)
-          assertTrue(a["Two"] == 2)
-          assertTrue(a[""] == 0)
-          assertTrue(a[" "] == 1)
-          assertTrue(a["PI constant value"] == 3.14159)
+          assertEQ(a["Zero"], undefined)
+          assertEQ(a["One"], 1)
+          assertEQ(a["Two"], 2)
+          assertEQ(a[""], 0)
+          assertEQ(a[" "], 1)
+          assertEQ(a["PI constant value"], 3.14159)
 
     - use: |-
           // string literals to Record
@@ -114,11 +114,11 @@ cases:
                      42: false,
               },
           }
-          assertTrue(a["a"][1]!)
-          assertTrue(!(a["a"][42]!))
-          assertTrue(a["b"][123] == undefined)
-          assertTrue(!(a["c"][1]!))
-          assertTrue(a["c"][42]!)
+          assertEQ(a["a"][1]!, true)
+          assertEQ(!(a["a"][42]!), true)
+          assertEQ(a["b"][123], undefined)
+          assertEQ(!(a["c"][1]!), true)
+          assertEQ(a["c"][42]!, true)
 
     - use: |-
           // string to Record
@@ -129,8 +129,8 @@ cases:
               "b": {},
           }
           assertEQ(a["b"]![123], undefined)
-          assertTrue(!(a["c"]![1]!))
-          assertTrue(a["c"]![42]!)
+          assertEQ(!(a["c"]![1]!), true)
+          assertEQ(a["c"]![42]!, true)
 
     - use: |-
           // short to Error
@@ -139,9 +139,9 @@ cases:
               22: new Error,
               333: new Error,
           }
-          assertTrue(a[1] instanceof Error && a[22] instanceof Error && a[333] instanceof Error)
-          assertTrue(a[1] != a[22] && a[1] != a[333])
-          assertTrue(a[2] == undefined)
+          assertEQ(a[1] instanceof Error && a[22] instanceof Error && a[333] instanceof Error, true)
+          assertEQ(a[1] != a[22] && a[1] != a[333], true)
+          assertEQ(a[2], undefined)
 
     - use: |-
           // byte to union
@@ -151,11 +151,11 @@ cases:
               100: null,
               127: 127.0,
           }
-          assertTrue(a[0] == 3.14159)
-          assertTrue(a[50] == false)
-          assertTrue(a[100] == null)
-          assertTrue(a[127] == 127.0)
-          assertTrue(a[1] == undefined)
+          assertEQ(a[0], 3.14159)
+          assertEQ(a[50], false)
+          assertEQ(a[100], null)
+          assertEQ(a[127], 127.0)
+          assertEQ(a[1], undefined)
 
     - decl: |-
           // union to union
@@ -167,10 +167,10 @@ cases:
               "A" : Color.Blue,
               "B": "green"
             }
-          assertTrue(a["A"] == Color.Blue)
-          assertTrue(a["B"] == "green")
+          assertEQ(a["A"], Color.Blue)
+          assertEQ(a["B"], "green")
           a["A"] = Color.Red
-          assertTrue(a["A"] == Color.Red)
+          assertEQ(a["A"], Color.Red)
 
     - decl: |-
           // infer Record type from function signature
@@ -183,8 +183,8 @@ cases:
               }
           }
       use: |-
-          assertTrue(foo({ "A": "B" })["exitCode"] == "0")
-          assertTrue(foo({ "A": "C" })["exitCode"] == "1")
+          assertEQ(foo({ "A": "B" })["exitCode"], "0")
+          assertEQ(foo({ "A": "C" })["exitCode"], "1")
 
     - use: |-
           // string to array
@@ -194,14 +194,14 @@ cases:
               "\u0002": ["", "1", "2"],
               "wrong key": [] as string[]
           }
-          assertTrue(r["\u0000"]![0] == "")
-          assertTrue(r["\u0001"]![0] == "")
-          assertTrue(r["\u0001"]![1] == "1")
-          assertTrue(r["\u0002"]![0] == "")
-          assertTrue(r["\u0002"]![1] == "1")
-          assertTrue(r["\u0002"]![2] == "2")
-          assertTrue(r["wrong key"]!.length == 0)
-          assertTrue(r["bad key"] == undefined)
+          assertEQ(r["\u0000"]![0], "")
+          assertEQ(r["\u0001"]![0], "")
+          assertEQ(r["\u0001"]![1], "1")
+          assertEQ(r["\u0002"]![0], "")
+          assertEQ(r["\u0002"]![1], "1")
+          assertEQ(r["\u0002"]![2], "2")
+          assertEQ(r["wrong key"]!.length, 0)
+          assertEQ(r["bad key"], undefined)
 
     - use: |-
           // string literals to tuple
@@ -234,9 +234,9 @@ cases:
               "add": (p: number): number => p + p,
               "mul": (p: number): number => p * p
           }
-          assertTrue(r["add"]!(42) == 84)
-          assertTrue(r["mul"]!(12) == 144)
-          assertTrue(r["div"] == undefined)
+          assertEQ(r["add"]!(42), 84)
+          assertEQ(r["mul"]!(12), 144)
+          assertEQ(r["div"], undefined)
 
     - use: |-
           // number to union
@@ -246,11 +246,11 @@ cases:
               3: null,
               4: undefined,
           }
-          assertTrue(r[1] == "1")
-          assertTrue(r[2] == 2.5)
-          assertTrue(r[3] == null)
-          assertTrue(r[4] == undefined)
-          assertTrue(r[5] == undefined)
+          assertEQ(r[1], "1")
+          assertEQ(r[2], 2.5)
+          assertEQ(r[3], null)
+          assertEQ(r[4], undefined)
+          assertEQ(r[5], undefined)
 
     - use: |-
           // string literals to union
@@ -260,7 +260,133 @@ cases:
               "3": Long.MAX_VALUE,
               "4": new Error()
           }
-          assertTrue(r["1"] == c'1')
-          assertTrue(r["2"] == false)
-          assertTrue(r["3"] == Long.MAX_VALUE)
-          assertTrue(r["4"] instanceof Error)
+          assertEQ(r["1"], c'1')
+          assertEQ(r["2"], false)
+          assertEQ(r["3"], Long.MAX_VALUE)
+          assertEQ(r["4"] instanceof Error, true)
+    - decl: |-
+          class Test {
+              me: int;
+              constructor(e: int) {
+                  this.me = e;
+              }
+          }
+      use: |-
+          // string literals to union
+          let r: Record<"hw"|"HW"|"hW", Test> = {
+              "hw": new Test(100),
+              "HW": new Test(150),
+              "hW": new Test(225)
+          }
+
+          assertEQ(r["hw"].me, 100)
+          assertEQ(r["HW"].me, 150)
+          assertEQ(r["hW"].me, 225)
+    - decl: |-
+          enum Queen { Dont, Stop, Me, Now }
+      use: |-
+          let r: Record<"Dont"|"Stop"|"Me"|"Now", Queen> = {
+              "Dont": Queen.Now,
+              "Stop": Queen.Me,
+              "Me": Queen.Stop,
+              "Now": Queen.Dont
+          }
+
+          assertEQ(r["Dont"], Queen.Now)
+          assertEQ(r["Stop"], Queen.Me)
+          assertEQ(r["Me"], Queen.Stop)
+          assertEQ(r["Now"], Queen.Dont)
+    - use: |-
+          let r: Record<"concat"|"remove", (f: string, s: string) => string> = {
+              "concat": (f: string, s: string): string => f + s,
+              "remove": (f: string, s: string): string => f.replace(s, '')
+          }
+
+          assertEQ(r["concat"]("Hello, ", "world!"), "Hello, world!")
+          assertEQ(r["remove"]("What are you doing?", " doing"), "What are you?")
+    - use: |-
+          let r: Record<"Nor"|"Shall"|"Death"|"Brag", Record<"Thou"|"Wanderst"|"In"|"His"|"Shade", int>> = {
+              "Nor": {
+                  "Thou": 1,
+                  "Wanderst": 2,
+                  "In": 3,
+                  "His": 4,
+                  "Shade": 5,
+              },
+              "Shall": {
+                  "Thou": 10,
+                  "Wanderst": 20,
+                  "In": 30,
+                  "His": 40,
+                  "Shade": 50,
+              },
+              "Death": {
+                  "Thou": 100,
+                  "Wanderst": 200,
+                  "In": 300,
+                  "His": 400,
+                  "Shade": 500,
+              },
+              "Brag": {
+                  "Thou": 1000,
+                  "Wanderst": 2000,
+                  "In": 3000,
+                  "His": 4000,
+                  "Shade": 5000,
+              }
+          }
+
+          assertEQ(r["Nor"]["Thou"], 1);
+          assertEQ(r["Nor"]["Wanderst"], 2);
+          assertEQ(r["Nor"]["In"], 3);
+          assertEQ(r["Nor"]["His"], 4);
+          assertEQ(r["Nor"]["Shade"], 5);
+
+          assertEQ(r["Shall"]["Thou"], 10);
+          assertEQ(r["Shall"]["Wanderst"], 20);
+          assertEQ(r["Shall"]["In"], 30);
+          assertEQ(r["Shall"]["His"], 40);
+          assertEQ(r["Shall"]["Shade"], 50);
+
+          assertEQ(r["Death"]["Thou"], 100);
+          assertEQ(r["Death"]["Wanderst"], 200);
+          assertEQ(r["Death"]["In"], 300);
+          assertEQ(r["Death"]["His"], 400);
+          assertEQ(r["Death"]["Shade"], 500);
+
+          assertEQ(r["Brag"]["Thou"], 1000);
+          assertEQ(r["Brag"]["Wanderst"], 2000);
+          assertEQ(r["Brag"]["In"], 3000);
+          assertEQ(r["Brag"]["His"], 4000);
+          assertEQ(r["Brag"]["Shade"], 5000);
+    - decl: |-
+          let r: Record<"Please"|"Read"|"Beware"|"Of"|"Pity", string> = {
+              "Please": "Book",
+              "Read": "Written by",
+              "Beware": "Stefan",
+              "Of": "Zweig",
+              "Pity": "in 1939"
+          }
+      use: |-
+          assertEQ(r["Please"], "Book")
+          assertEQ(r["Read"], "Written by")
+          assertEQ(r["Beware"], "Stefan")
+          assertEQ(r["Of"], "Zweig")
+          assertEQ(r["Pity"], "in 1939")
+    - decl: |-
+          class VulkanAPI {
+              callMeOrDie() {
+                  let r: Record<"Chill"|"Just"|"Joking :)", boolean> = {
+                      "Chill": true,
+                      "Just": true,
+                      "Joking :)": false
+                  }
+
+                  assertEQ(r["Chill"], true)
+                  assertEQ(r["Just"], true)
+                  assertEQ(!r["Joking :)"], true)
+              }
+          }
+      use: |-
+          let api: VulkanAPI = {}
+          api.callMeOrDie()

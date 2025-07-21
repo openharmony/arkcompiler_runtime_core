@@ -17,9 +17,9 @@ limitations under the License.
 desc: values() returns an array of enumeration constants in the order of declaration.
 ---*/
 
-enum Color {Red = "r1", Blue = "b1", Green = "g1"}
+enum Color { Red = "r1", Blue = "b1", Green = "g1" }
 
-function f(a: Color[]): int {
+function f(a: FixedArray<Color>): number {
   return a.length;
 }
 
@@ -29,8 +29,8 @@ function f(a: Object): int {
 
 function main(): void {
   let colors = Color.values();
-  assertEQ( colors[0], Color.Red );
-  assertEQ( colors[1], Color.Blue );
-  assertEQ( colors[2], Color.Green );
-  assertEQ( f(colors), 3 );
+  assertEQ(colors[0], Color.Red);
+  assertEQ(colors[1], Color.Blue);
+  assertEQ(colors[2], Color.Green);
+  assertEQ(f(colors), 3);
 }

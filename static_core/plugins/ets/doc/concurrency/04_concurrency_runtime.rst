@@ -10,15 +10,15 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-********************************
-Concurrency in the ArkTS runtime
-********************************
+*********************************
+Concurrency in the |LANG| runtime
+*********************************
 
 =============================
 Worker threads and coroutines
 =============================
 
-For supporting `coroutines` in ArkTS we use pool of worker threads for running them. So we have M:N concurrency (M threads used for executing of N coroutines).
+For supporting `coroutines` in |LANG| we use pool of worker threads for running them. So we have M:N concurrency (M threads used for executing of N coroutines).
 
 .. uml:: concurrency_worker_threads_and_coroutines_components.plantuml
 

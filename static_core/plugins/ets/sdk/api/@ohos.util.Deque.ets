@@ -25,12 +25,22 @@ function createBusinessError(code: number, message: string) {
     return err;
 }
 
-export default class Deque<T> implements Iterable<T> {
+export default class Deque<T> implements Iterable<T>, JsonReplacer {
     private readonly DEFAULT_CAPACITY = 8;
     internal capacity: int = this.DEFAULT_CAPACITY;
     internal buffer: Array<T>;
     internal front: int = 0;
     internal rear: int = 0;
+
+    public jsonReplacer(): Record<String, NullishType> {
+        const buf = this.buffer;
+        const len = buf.length;
+        let arrayObj: Record<String, NullishType> = {};
+        for (let i = 0; i < len; i++) {
+            arrayObj[String(i)] = buf[i];
+        }
+        return arrayObj;
+    }
 
     /**
      * property: The number of elements in the ArrayList.
@@ -62,7 +72,7 @@ export default class Deque<T> implements Iterable<T> {
             return undefined;
         }
 
-        return this.buffer[this.rear - 1];
+        return this.buffer[(this.rear - 1 + this.capacity) % this.capacity];
     }
 
     /**
@@ -211,7 +221,7 @@ export default class Deque<T> implements Iterable<T> {
             i = (i + 1) % this.capacity;
         }
 
-        this.rear = this.length as int;
+        this.rear = this.length.toInt();
         this.front = 0;
         this.capacity = newCap;
         this.buffer = newBuffer;

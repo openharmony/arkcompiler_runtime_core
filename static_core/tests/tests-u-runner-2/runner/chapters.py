@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,9 +16,9 @@
 #
 
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Dict, Any, Union, List, Set, Sequence
 
 from runner.common_exceptions import CyclicDependencyChapterException, IncorrectFileFormatChapterException
 from runner.logger import Log
@@ -28,8 +28,8 @@ from runner.options.yaml_document import YamlDocument
 @dataclass
 class Chapter:
     name: str
-    includes: List[str]
-    excludes: List[str]
+    includes: list[str]
+    excludes: list[str]
 
 
 _LOGGER = Log.get_logger(__file__)
@@ -41,12 +41,12 @@ class Chapters:
         self.__validate_cycles()
 
     @staticmethod
-    def __parse(chapters_file: Path) -> Dict[str, Chapter]:
-        result: Dict[str, Chapter] = {}
-        yaml_header: Dict[str, Any] = YamlDocument.load(chapters_file)
+    def __parse(chapters_file: Path) -> dict[str, Chapter]:
+        result: dict[str, Chapter] = {}
+        yaml_header: dict[str, list] = YamlDocument.load(chapters_file)
         if not yaml_header or not isinstance(yaml_header, dict):
             raise IncorrectFileFormatChapterException(chapters_file)
-        yaml_chapters: Optional[List[Any]] = yaml_header.get('chapters')
+        yaml_chapters: list[dict] | None = yaml_header.get('chapters')
         if not yaml_chapters or not isinstance(yaml_chapters, list):
             raise IncorrectFileFormatChapterException(chapters_file)
         for yaml_chapter in yaml_chapters:
@@ -60,7 +60,7 @@ class Chapters:
         return result
 
     @staticmethod
-    def __parse_item(includes: List[str], excludes: List[str], yaml_item: Union[str, dict]) -> None:
+    def __parse_item(includes: list[str], excludes: list[str], yaml_item: str | dict) -> None:
         if isinstance(yaml_item, str):
             includes.append(yaml_item.strip())
         elif isinstance(yaml_item, dict):
@@ -72,19 +72,19 @@ class Chapters:
                         f"Only 'exclude' is allowed as a nested dictionary: {sub_name}")
 
     @staticmethod
-    def __parse_chapter(name: str, yaml_items: Sequence[Union[str, Dict[str, str]]], chapters_file: Path) -> Chapter:
+    def __parse_chapter(name: str, yaml_items: Sequence[str | dict[str, str]], chapters_file: Path) -> Chapter:
         if not isinstance(yaml_items, list):
             raise IncorrectFileFormatChapterException(f"Incorrect file format: {chapters_file}")
-        includes: List[str] = []
-        excludes: List[str] = []
+        includes: list[str] = []
+        excludes: list[str] = []
         for yaml_item in yaml_items:
             Chapters.__parse_item(includes, excludes, yaml_item)
 
         return Chapter(name, includes, excludes)
 
     @staticmethod
-    def __filter_by_mask(mask: str, files: List[Path]) -> List[Path]:
-        filtered: List[Path] = []
+    def __filter_by_mask(mask: str, files: list[Path]) -> list[Path]:
+        filtered: list[Path] = []
         mask = Chapters.__escape_mask(mask)
         mask_folder = f'{mask}/.*' if '*' not in mask else mask
         mask_pattern = re.compile(mask)
@@ -104,18 +104,18 @@ class Chapters:
                 .replace('.', r'\.')
                 .replace('*', '.*'))
 
-    def filter_by_chapter(self, chapter_name: str, base_folder: Path, files: List[Path]) -> Set[Path]:
+    def filter_by_chapter(self, chapter_name: str, base_folder: Path, files: list[Path]) -> set[Path]:
         if chapter_name not in self.chapters:
             return set()
         chapter = self.chapters[chapter_name]
-        filtered: Set[Path] = set()
+        filtered: set[Path] = set()
         for inc in chapter.includes:
             if inc in self.chapters:
                 filtered.update(self.filter_by_chapter(inc, base_folder, files))
             else:
                 mask = str(base_folder.joinpath(inc))
                 filtered.update(Chapters.__filter_by_mask(mask, files))
-        excluded: Set[Path] = set()
+        excluded: set[Path] = set()
         for exc in chapter.excludes:
             if exc in self.chapters:
                 excluded.update(self.filter_by_chapter(exc, base_folder, files))
@@ -129,13 +129,13 @@ class Chapters:
         :raise: CyclicDependencyChapterException if a cyclic dependency found
             Normal finish means that no cycle found
         """
-        seen_chapters: List[str] = []
+        seen_chapters: list[str] = []
         for name, chapter in self.chapters.items():
             seen_chapters.append(name)
             self.__check_cycle(chapter, seen_chapters)
             seen_chapters.pop()
 
-    def __check_cycle(self, chapter: Chapter, seen_chapters: List[str]) -> None:
+    def __check_cycle(self, chapter: Chapter, seen_chapters: list[str]) -> None:
         """
         Checks if items contains any name from seen
         :param chapter: investigated chapter

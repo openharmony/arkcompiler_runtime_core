@@ -17,20 +17,24 @@ limitations under the License.
 {% for t in types %}
 
 /*---
-desc:  No method (including any getter or setter) of T is part of the Required<T> type.
-tags: [compile-only, negative]
+desc:  >-
+    No method (including any getter or setter) of T is part of the Required<T> type.
+    If class T has a user-defined getter, setter, or both, then none of those is called when object literal is used with
+    Partial<T> variables. Object literal has its own built-in getters and setters to modify its variables.
 ---*/
+
+let c: int = 0
 
 {{t}} C {
   _i?: number
-  set i(i: number|undefined) { this._i = i; }
-  get i(): number|undefined { return this._i; }
+  set i(i: number|undefined) { c += 1; this._i = i; }
+  get i(): number|undefined { c += 2; return this._i; }
 }
 
 function main() {
   let a: Required<C> = {_i: 1.9}
-  // a call to getter/setter i should result in CTE
   {{c}}
+  assertEQ( c, 0 )
 }
 
 {% endfor %}

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -149,7 +149,7 @@ public:
      *
      * If `force` is true then the save will be forced regardless of bad data or mismatched version.
      */
-    bool MergeAndSave(const PandaString &filename, uint64_t *bytesWritten, bool force);
+    bool MergeAndSave(const PandaString &filename, ssize_t *bytesWritten, bool force);
 
     /*
      * Returns the number of methods that were profiled.
@@ -278,7 +278,7 @@ private:
     bool AddClassWrapper(const PandaString &pandaFileLocation, uint32_t checksum, const ClassWrapper &classToAdd);
     bool AddResolvedClasses(const ExtractedResolvedClasses &classes);
     ProfileLineData *GetOrAddProfileLineData(const PandaString &pandaFileLocation, uint32_t checksum);
-    bool Save(const PandaString &filename, uint64_t *bytesWritten, int fd);
+    bool Save(const PandaString &filename, ssize_t *bytesWritten, int fd);
 
     PandaMap<const PandaString, ProfileLineData> dumpInfo_;
 };

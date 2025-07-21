@@ -52,11 +52,10 @@ function main(): int {
     return res;
 }
 
-const d: Number[] = [10, -1, 237, -5, 148, 65, 3, 34, 0, 12];
-const dd: Number[] = [1, 0, 3, 4, 0, 6];
+const d: Array<Number> = [10, -1, 237, -5, 148, 65, 3, 34, 0, 12];
+const dd: FixedArray<Number> = [1, 0, 3, 4, 0, 6];
 
 class Handler<T> extends DefaultArrayProxyHandler<T> {}
-
 function newProxy<T>(a: Array<T>): Array<T> {
 
     return Proxy.create<T>(a, new Handler<T>())
@@ -79,9 +78,7 @@ function createDefault(): int {
         if (!(arr instanceof Array)) {
             throw new Error("arr is not instance of Array.");
         }
-        if (arr.length != 0) {
-            throw new Error(`Expects arr.length to be 0, but actual value is ${arr.length}.`);
-        }
+        assertEQ(arr.length, 0);
         return success;
     })
 }
@@ -100,9 +97,7 @@ function createWithNegativeInitialCapacity(): int {
 
 function createWithGivenZeroSize(): int {
     return check(() => new Array<Number>(0), (arr: Array<Number>) => {
-        if (arr.length != 0) {
-            throw new Error(`Expects arr.length to be 0, but actual value is ${arr.length}.`);
-        }
+        assertEQ(arr.length, 0);
         return success;
     })
 }
@@ -110,31 +105,27 @@ function createWithGivenZeroSize(): int {
 function createWithGivenSize(): int {
     const ARRAY_SIZE = 10;
     return check(() => new Array<Number>(ARRAY_SIZE), (arr: Array<Number>) => {
-        if (arr.length != ARRAY_SIZE) {
-            throw new Error(`Expects arr.length to be ${ARRAY_SIZE}, but actual value is ${arr.length}.`);
-        }
+        assertEQ(arr.length, ARRAY_SIZE);
         return success;
     })
 }
 
 function isArrayRawArrayNumber(): int {
-    let n: Number[] = [];
-    return Array.isArray(n) == true ? success : fail;
+    let n: FixedArray<Number> = [];
+    assertTrue(Array.isArray(n));
+    return success;
 }
 
 function isArrayArrayNumber(): int {
     return check(() => new Array<Number>, (arr: Array<Number>) => {
-        return Array.isArray(arr) == true ? success : fail;
+        assertTrue(Array.isArray(arr));
+        return success;
     })
 }
 
 function isArrayNullUndefined(): int {
-    if (Array.isArray(null) == true) {
-        throw new Error("Array.isArray(null) == true");
-    }
-    if (Array.isArray(undefined) == true) {
-        throw new Error("Array.isArray(undefined) == true");
-    }
+    assertFalse(Array.isArray(null));
+    assertFalse(Array.isArray(undefined));
     return success;
 }
 
@@ -142,15 +133,9 @@ function push(): int {
     return check(() => new Array<Number>, (arr: Array<Number>) => {
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i])
-            if (arr.at(i) != d[i]) {
-                const msg = `Expects arr.at(${i}) == d[${i}] (which is ${d[i]}), but actual value is ${arr.at(i)}`;
-                throw new Error(msg);
-            }
+            assertEQ(arr.at(i), d[i]);
         }
-        if (arr.length != d.length) {
-            const msg = `Expects arr.length == d.length (which is ${d.length}), but actual value is ${arr.length}`;
-            throw new Error(msg);
-        }
+        assertEQ(arr.length, d.length);
         return success;
     })
 }
@@ -158,15 +143,9 @@ function push(): int {
 function pushECMA(): int {
     return check(() => new Array<Number>, (arr: Array<Number>) => {
         arr.pushECMA(...d);
-        if (arr.length != d.length) {
-            const msg = `Expects arr.length == d.length (which is ${d.length}), but actual value is ${arr.length}`;
-            throw new Error(msg);
-        }
+        assertEQ(arr.length, d.length);
         for (let i: int = 0; i < d.length; ++i) {
-            if (arr.at(i) != d[i]) {
-                const msg = `Expects arr.at(${i}) == d[${i}] (which is ${d[i]}), but actual value is ${arr.at(i)}`;
-                throw new Error(msg);
-            }
+            assertEQ(arr.at(i), d[i]);
         }
         return success;
     })
@@ -176,10 +155,7 @@ function setNull(): int {
     return check(() => new Array<string | null>(3), (arr: Array<string | null>) => {
         arr[1] = "abc"
         arr[2] = null;
-        if (!(arr[2] instanceof null)) {
-            const msg = `Expects arr[2] instanceof null, but actual value is ${arr[2]}`;
-            throw new Error(msg);
-        }
+        assertEQ(arr[2], null);
         return success;
     })
 }
@@ -199,23 +175,11 @@ function toSplicedArg1(): int {
             arr.push(dd[i]);
         }
         let newArr = arr.toSpliced(1);
-        if (newArr.at(0) != 1) {
-            const msg = `Expects newArr.at(0) == 1, but actual value is ${newArr.at(0)}`;
-            throw new Error(msg);
-        }
-        if (newArr.length != 1) {
-            const msg = `Expects newArr.length == 1, but actual value is ${newArr.length}`;
-            throw new Error(msg);
-        }
-        if (arr.length != dd.length) {
-            const msg = `Expects arr.length == dd.length (which is ${dd.length}), but actual value is ${arr.length}`;
-            throw new Error(msg);
-        }
+        assertEQ(newArr.at(0), 1);
+        assertEQ(newArr.length, 1);
+        assertEQ(arr.length, dd.length);
         for (let i = 0; i < dd.length; i++) {
-            if (arr[i] != dd[i]) {
-                const msg = `Expects arr[${i}] == dd[${i}] (which is ${dd[i]}), but actual value is ${arr[i]}`;
-                throw new Error(msg);
-            }
+            assertEQ(arr[i], dd[i]);
         }
         return success;
     })
@@ -227,35 +191,14 @@ function toSplicedArg2(): int {
             arr.push(dd[i]);
         }
         let newArr = arr.toSpliced(1, 2);
-        if (newArr.length != 4) {
-            const msg = `Expects newArr.length == 4, but actual value is ${newArr.length}`;
-            throw new Error(msg);
-        }
-        if (newArr[0] != 1) {
-            const msg = `Expects newArr[0] == 1, but actual value is ${newArr[0]}`;
-            throw new Error(msg);
-        }
-        if (newArr[1] != 4) {
-            const msg = `Expects newArr[1] == 4, but actual value is ${newArr[1]}`;
-            throw new Error(msg);
-        }
-        if (newArr[2] != 0) {
-            const msg = `Expects newArr[2] == 0, but actual value is ${newArr[2]}`;
-            throw new Error(msg);
-        }
-        if (newArr[3] != 6) {
-            const msg = `Expects newArr[3] == 6, but actual value is ${newArr[3]}`;
-            throw new Error(msg);
-        }
-        if (arr.length != dd.length) {
-            const msg = `Expects arr.length == dd.length (which is ${dd.length}), but actual value is ${arr.length}`;
-            throw new Error(msg);
-        }
+        assertEQ(newArr.length, 4);
+        assertEQ(newArr[0], 1);
+        assertEQ(newArr[1], 4);
+        assertEQ(newArr[2], 0);
+        assertEQ(newArr[3], 6);
+        assertEQ(arr.length, dd.length);
         for (let i = 0; i < dd.length; i++) {
-            if (arr[i] != dd[i]) {
-                const msg = `Expects arr[${i}] == dd[${i}] (which is ${dd[i]}), but actual value is ${arr[i]}`;
-                throw new Error(msg);
-            }
+            assertEQ(arr[i], dd[i]);
         }
         return success;
     })
@@ -263,12 +206,12 @@ function toSplicedArg2(): int {
 
 function check(fn: () => int, message: String): int {
     let result: int = 0;
-    try {
+    // try {
         result = fn();
-    } catch(e) {
-        console.println("FAILED: " + message + " => Exception catched: " + e);
-        return fail;
-    }
+    // } catch(e) {
+    //     console.println("FAILED: " + message + " => Exception catched: " + e);
+    //     return fail;
+    // }
     if (result == success) {
         return success;
     }

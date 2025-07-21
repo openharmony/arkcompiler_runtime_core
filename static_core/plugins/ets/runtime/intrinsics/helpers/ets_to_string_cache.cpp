@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #include "ets_class_linker_extension.h"
 #include "ets_to_string_cache.h"
 #include "ets_intrinsics_helpers.h"
+#include "libpandabase/mem/mem.h"
 
 namespace ark::ets::detail {
 
@@ -27,7 +28,7 @@ public:
     NO_COPY_SEMANTIC(EtsToStringCacheElement);
     NO_MOVE_SEMANTIC(EtsToStringCacheElement);
 
-    using Flag = uint32_t;
+    using Flag = ObjectPointerType;
     static constexpr Flag FLAG_MASK = 1U;
 
     static EtsClass *GetClass(EtsCoroutine *coro);
@@ -52,11 +53,9 @@ public:
 
     T LoadNumber() const
     {
-        T result;
         // Atomic with acquire order reason: make `flag` writes from other threads visible
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        __atomic_load(&number_, &result, __ATOMIC_ACQUIRE);
-        return result;
+        return AtomicLoad(&number_, std::memory_order_acquire);
     }
 
     /*
@@ -71,16 +70,17 @@ public:
         ObjectPointer<EtsString> string {};
         Flag flag {};
     };
-    static_assert(sizeof(Data) == sizeof(uint64_t));
+    static_assert(sizeof(Data) == sizeof(ObjectPointerType) * 2U);
+    // NOTE(ipetrov): hack for 128 bit ObjectHeader
+#if !defined(ARK_HYBRID)
     static_assert(std::atomic<Data>::is_always_lock_free);
+#endif
 
     Data LoadData() const
     {
-        Data result;
         // Atomic with acquire order reason: make `number` and `flag` writes from other threads visible
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        __atomic_load(&data_, &result, __ATOMIC_ACQUIRE);
-        return result;
+        return AtomicLoad(&data_, std::memory_order_acquire);
     }
 
     static bool IsLocked(Flag flag)
@@ -92,7 +92,7 @@ public:
     {
         // Atomic with relaxed order reason: used only after acquire-loads
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        auto newFlag = __atomic_load_n(&data_.flag, __ATOMIC_RELAXED);
+        Flag newFlag = AtomicLoad(&data_.flag, std::memory_order_relaxed);
         return newFlag == flag;
     }
 
@@ -106,6 +106,7 @@ public:
     {
         ASSERT(!IsLocked(oldData.flag));
         Data newData {string, oldData.flag + FLAG_MASK};
+        ASSERT(coro != nullptr);
         auto *barrierSet = coro->GetBarrierSet();
 
         if (UNLIKELY(barrierSet->IsPreBarrierEnabled())) {
@@ -116,8 +117,8 @@ public:
         // Atomic with acquire order reason: sync flag
         while (
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-            !__atomic_compare_exchange(&data_, &oldData, &newData, true, __ATOMIC_ACQUIRE, __ATOMIC_RELAXED)) {  // w1
-            if (bit_cast<uint64_t>(oldCopy) == bit_cast<uint64_t>(oldData)) {
+            !AtomicCmpxchgWeak(&data_, oldData, newData, std::memory_order_acquire, std::memory_order_relaxed)) {  // w1
+            if (oldCopy.string == oldData.string && oldCopy.flag == oldData.flag) {
                 // spurious failure, try compare_exchange again
                 continue;
             }
@@ -125,12 +126,12 @@ public:
         }
         // Atomic with release order reason: make flag update visible in other threads
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        __atomic_store(&number_, &number, __ATOMIC_RELEASE);  // w2
+        AtomicStore(&number_, number, std::memory_order_release);  // w2
         oldData = newData;
         newData.flag++;
         // Atomic with release order reason: number write must be visible after flag update
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        while (!__atomic_compare_exchange(&data_, &oldData, &newData, true, __ATOMIC_RELEASE, __ATOMIC_RELAXED)) {
+        while (!AtomicCmpxchgWeak(&data_, oldData, newData, std::memory_order_release, std::memory_order_relaxed)) {
         }  // w3
         ASSERT(string != nullptr);
         if (!mem::IsEmptyBarrier(barrierSet->GetPostType())) {
@@ -191,8 +192,8 @@ template <typename T>
 EtsToStringCacheElement<T> *EtsToStringCacheElement<T>::Create(EtsCoroutine *coro, EtsHandle<EtsString> &stringHandle,
                                                                T number, EtsClass *klass)
 {
-    static_assert(STRING_OFFSET == sizeof(uint64_t));
-    static_assert(NUMBER_OFFSET == sizeof(uint64_t) * 2U);
+    static_assert(STRING_OFFSET == sizeof(ObjectPointerType) * 2U);
+    static_assert(NUMBER_OFFSET == sizeof(ObjectPointerType) * 2U + sizeof(Data));
     auto *instance = FromCoreType(EtsObject::Create(coro, klass)->GetCoreType());
     instance->SetString(coro, stringHandle.GetPtr());
     instance->SetNumber(number);
@@ -202,7 +203,8 @@ EtsToStringCacheElement<T> *EtsToStringCacheElement<T>::Create(EtsCoroutine *cor
 template <typename T>
 void EtsToStringCacheElement<T>::SetString(EtsCoroutine *coro, EtsString *string)
 {
-    static_assert(STRING_OFFSET == 8U);
+    static_assert(STRING_OFFSET == sizeof(ObjectPointerType) * 2U);
+    ASSERT(string != nullptr);
     // Atomic with relaxed order reason: used only on newly-created object before store-release into array
     ObjectAccessor::SetObject(coro, this, STRING_OFFSET, string->GetCoreType());
 }
@@ -264,6 +266,13 @@ template <typename T, typename Derived, typename Hash>
 std::pair<EtsString *, ToStringResult> EtsToStringCache<T, Derived, Hash>::FinishUpdate(
     EtsCoroutine *coro, T number, EtsToStringCacheElement<T> *elem, uint64_t cachedAsInt)
 {
+    // NOTE(ipetrov): hack for 128 bit ObjectHeader
+#if defined(PANDA_TARGET_64) && !defined(PANDA_USE_32_BIT_POINTER)
+    UNUSED_VAR(coro);
+    UNUSED_VAR(elem);
+    UNUSED_VAR(cachedAsInt);
+    return {ToString(number), ToStringResult::STORE_UPDATE};
+#else
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle<EtsToStringCacheElement<T>> elemHandle(coro, elem);
     // may trigger GC
@@ -272,6 +281,7 @@ std::pair<EtsString *, ToStringResult> EtsToStringCache<T, Derived, Hash>::Finis
     auto *cached = reinterpret_cast<typename EtsToStringCacheElement<T>::Data *>(&cachedAsInt);
     auto storeRes = elemHandle->TryStore(coro, string, number, *cached);
     return {string, storeRes};
+#endif
 }
 
 // Reasoning on correctness:
@@ -290,6 +300,12 @@ std::pair<EtsString *, ToStringResult> EtsToStringCache<T, Derived, Hash>::Finis
 template <typename T, typename Derived, typename Hash>
 std::pair<EtsString *, ToStringResult> EtsToStringCache<T, Derived, Hash>::GetOrCacheImpl(EtsCoroutine *coro, T number)
 {
+    // NOTE(ipetrov): hack for 128 bit ObjectHeader
+#if defined(PANDA_TARGET_64) && !defined(PANDA_USE_32_BIT_POINTER)
+    UNUSED_VAR(coro);
+    return {ToString(number), ToStringResult::STORE_NEW};
+#else
+    EVENT_ETS_CACHE("Fastpath: create string from number with cache");
     auto index = GetIndex(number);
     // Atomic with acquire order reason: write of `elem` to array is dependency-ordered before reads from loaded `elem`
     auto *elem = Base::Get(index, std::memory_order_acquire);
@@ -314,6 +330,7 @@ std::pair<EtsString *, ToStringResult> EtsToStringCache<T, Derived, Hash>::GetOr
         return {ToString(number), ToStringResult::LOAD_FAIL_UPDATED};
     }
     return FinishUpdate(coro, number, elem, bit_cast<uint64_t>(cached));
+#endif
 }
 
 template <typename T, typename Derived, typename Hash>
@@ -321,6 +338,7 @@ EtsString *EtsToStringCache<T, Derived, Hash>::CacheAndGetNoCheck(EtsCoroutine *
                                                                   uint64_t cached)
 {
     ASSERT(elem != nullptr);
+    EVENT_ETS_CACHE("Fastpath: create string from number with cache");
     return FinishUpdate(coro, number, EtsToStringCacheElement<T>::FromCoreType(elem), cached).first;
 }
 
@@ -328,6 +346,7 @@ EtsString *EtsToStringCache<T, Derived, Hash>::CacheAndGetNoCheck(EtsCoroutine *
 template <typename T, typename Derived, typename Hash>
 EtsString *EtsToStringCache<T, Derived, Hash>::GetNoCache(T number)
 {
+    EVENT_ETS_CACHE("Slowpath: create string from number without cache");
     return ToString(number);
 }
 

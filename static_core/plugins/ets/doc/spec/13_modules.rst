@@ -24,9 +24,9 @@ compilation units. Each compilation unit creates its own scope (see
 interfaces, or other declarations are only accessible (see :ref:`Accessible`)
 within such scope if not explicitly exported.
 
-A variable, function, class, interface, or other declarations exported from 
+A variable, function, class, interface, or other declarations exported from
 some compilation unit must be imported first by the compilation unit that
-needs to use them. 
+needs to use them.
 
 .. Only exported declarations are available for the 3rd party tools and programs written in other programming languages.
 
@@ -35,6 +35,9 @@ There are three kinds of compilation units:
 - *Separate modules* (discussed below),
 - *Declaration modules* (discussed in detail in :ref:`Declaration Modules`), and
 - *Packages* (discussed in detail in :ref:`Packages`).
+
+
+The syntax of *compilation units* is presented below:
 
 .. code-block:: abnf
 
@@ -61,9 +64,14 @@ system or a database (see :ref:`Compilation Units in Host System`).
    interface
    declaration
    access
+   accessibility
+   export
    separate module
    package
    declaration module
+   storage
+   file system
+   database
 
 |
 
@@ -85,6 +93,9 @@ can optionally consist of the following four parts:
 #. Top-level statements; and
 
 #. Re-export directives.
+
+
+The syntax of *separate module* is presented below:
 
 .. code-block:: abnf
 
@@ -115,35 +126,9 @@ the standard library (see :ref:`Standard Library Usage`).
    top-level statement
    re-export directive
    import
-
-|
-
-.. _Separate Module Initializer:
-
-Separate Module Initializer
-***************************
-
-.. meta:
-    frontend_status: Done
-
-*Separate module* used for import is initialized only once with the
-details listed in :ref:`Compilation Unit Initialization`. The initialization
-process is performed in the following steps:
-
-- If the separate module has variable or constant declarations (see
-  :ref:`Variable and Constant Declarations`), then declaration initializers are
-  executed to ensure that all declarations have valid initial values;
-- If the separate module has top-level statements (see :ref:`Top-Level Statements`),
-  then the statements are also executed.
-
-.. index::
-   initializer
-   separate module
-   initialization
-   variable declaration
-   compilation unit
-   constant declaration
-   top-level statement
+   console
+   standard library
+   core package
 
 |
 
@@ -153,21 +138,20 @@ Import Directives
 *****************
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
+    todo: syntax is updated
 
 *Import directives* make entities exported from other compilation units (see
-also :ref:`Declaration Modules`) available for use in the current compilation
-unit by using different binding forms.
+:ref:`Compilation Units`) available for use in the current compilation unit by
+using different binding forms. These directives have no effect during the
+program execution.
 
 An import declaration has the following two parts:
 
 -  Import path that determines which compilation unit to import from;
 
--  Import binding that defines what entities, and in what form---qualified
-   or unqualified---the current compilation unit can use.
-
-Alternatively, a module can be imported without binding simply in order to
-run the initialization code.
+-  Import bindings that define what entities, and in what form (either
+   qualified or unqualified) the current compilation unit can use.
 
 .. index::
    import directive
@@ -182,35 +166,39 @@ run the initialization code.
    qualified form
    unqualified form
 
+The syntax of *import directives* is presented below:
+
 .. code-block:: abnf
 
     importDirective:
-        'import' allBinding|selectiveBindings|defaultBinding|typeBinding
-        'from'   importPath
+        'import' 'type'? bindings 'from' importPath
         ;
+
+    bindings:
+        defaultBinding
+        | (defaultBinding ',')? allBinding
+        | (defaultBinding ',')? selectiveBindings
+    ;
 
     allBinding:
         '*' bindingAlias
         ;
 
-    selectiveBindings:
-        '{' nameBinding (',' nameBinding)* ','? '}'
+    bindingAlias:
+        'as' identifier
         ;
 
     defaultBinding:
-        identifier | ( '{' 'default' 'as' identifier '}' )
+        identifier
         ;
 
-    typeBinding:
-        'type' selectiveBindings
+    selectiveBindings:
+        nameBinding (',' nameBinding)*
         ;
 
     nameBinding:
         identifier bindingAlias?
-        ;
-
-    bindingAlias:
-        'as' identifier
+        | 'default' 'as' identifier
         ;
 
     importPath:
@@ -220,21 +208,45 @@ run the initialization code.
 Each binding adds a declaration or declarations to the scope of a module
 or a package (see :ref:`Scopes`). Any declaration added so must be
 distinguishable in the declaration scope (see
-:ref:`Distinguishable Declarations`). A :index:`compile-time error` occurs if:
+:ref:`Distinguishable Declarations`).
 
--  A declaration added to the scope of a module or a package by a binding is
+Import with ``type`` modifier is discussed in :ref:`Import Type Directive`.
+
+A :index:`compile-time error` occurs if:
+
+-  Declaration added to the scope of a module or a package by a binding is
    not distinguishable;
--  ``importPath`` refers to the file in which the current module is stored.
+-  Compilation unit imports itself directly: ``importPath`` refers to the
+   file in which the current module is stored;
+-  Import in a package module refers to a file which contains a package
+   module.
 
-**Note**: Import directives are handled by the compiler during compilation, and
-have no effect during program execution. Though they ensure that imported
-entities are initialized before use in the current compilation unit.
+
+.. code-block:: typescript
+   :linenos:
+
+    // File1
+    package X
+    import * as XX from "File2" /* This is in fact import of the same
+                                   compilation unit. Compile-time error! */
+    import * as YY from "File3" /* This is import of one package module but not
+                                   the entire package. Compile-time error! */
+
+    // File2
+    package X
+    import * as ZZ fromn "File2" // Import the same file. Compile-time error!
+
+    // File3
+    package Y
+
 
 .. index::
    binding
    declaration
    module
    package
+   scope
+   distinguishable declaration
    declaration scope
    import directive
 
@@ -256,7 +268,7 @@ to access any entity exported from the compilation unit as defined by the
 *import path*.
 
 +---------------------------------+--+-------------------------------+
-| **Import**                      |  | **Usage**                     |
+|   Import                        |  |   Usage                       |
 +=================================+==+===============================+
 |                                                                    |
 +---------------------------------+--+-------------------------------+
@@ -271,6 +283,7 @@ the name of the imported compilation unit.
 
 .. index::
    import binding
+   import
    qualified name
    entity
    declaration scope
@@ -284,25 +297,77 @@ the name of the imported compilation unit.
 
 |
 
-.. _Simple Name Binding:
+.. _Default Import Binding:
 
-Simple Name Binding
-===================
+Default Import Binding
+======================
 
 .. meta:
     frontend_status: Done
 
-The import binding ``identifier`` binds an exported entity with the name
-``identifier`` to the declaration scope of the current module. The name
-``identifier`` can only correspond to multiple entities with ``identifier``
-denoting several overloaded functions (see
-:ref:`Function, Method and Constructor Overloading`).
+Default import binding allows importing a declaration exported from some
+module as default export. Knowing the actual name of a declaration is not
+required as the new name is given at importing.
+A :index:`compile-time error` occurs if another form of import is used to
+import an entity initially exported as default.
 
-The import binding ``identifier as A`` binds an exported entity (entities) with
-the name *A* to the declaration scope of the current module. The bounded entity
-is no longer accessible (see :ref:`Accessible`) under the name ``identifier``.
-It is shown in the following examples:
+There are two forms of *default import binding*:
 
+- Single identifier;
+- Special form of selective import with the keyword ``default``.
+
+.. code-block:: typescript
+   :linenos:
+
+    import DefaultExportedItemBindedName from ".../someFile"
+    import {default as DefaultExportedItemNewName} from  ".../someFile"
+    function foo () {
+      let v1 = new DefaultExportedItemBindedName()
+      // instance of class 'SomeClass' to be created here
+      let v2 = new DefaultExportedItemNewName()
+      // instance of class 'SomeClass' to be created here
+    }
+
+    // SomeFile
+    export default class SomeClass {}
+
+    // Or
+    class SomeClass {}
+    export default SomeClass
+
+.. index::
+   import binding
+   entity
+   import
+   declaration
+   export
+   module
+
+|
+
+.. _Selective Binding:
+
+Selective Binding
+=================
+
+.. meta:
+    frontend_status: Done
+
+
+*Selective binding* allows to bind an entity exported as *identifier*,
+or an entity exported by default (see :ref:`Default Import Binding`).
+
+Binding with *identifier* binds an exported entity with the name
+*identifier* to the declaration scope of the current module. If no *binding
+alias* is present, then the entity is added to the declaration scope under
+the original name. Otherwise, the identifier specified in *binding alias*
+is used. In the latter case, the bounded entity is no longer accessible (see
+:ref:`Accessible`) under the original name.
+
+If the *identifier* denotes several exported overloaded functions (see
+:ref:`Function, Method and Constructor Overloading`), then all these functions
+are added to the declaration scope. This situation is represented in the
+examples below:
 
 .. index::
    import binding
@@ -327,7 +392,7 @@ It is shown in the following examples:
 The import path of the module is now irrelevant:
 
 +---------------------------------+--+--------------------------------------+
-| **Import**                      |  | **Usage**                            |
+|   Import                        |  |   Usage                              |
 +=================================+==+======================================+
 |                                                                           |
 +---------------------------------+--+--------------------------------------+
@@ -348,7 +413,7 @@ The import path of the module is now irrelevant:
 A single import statement can list several names:
 
 +-------------------------------------+--+---------------------------------+
-| **Import**                          |  | **Usage**                       |
+|   Import                            |  |   Usage                         |
 +=====================================+==+=================================+
 |                                                                          |
 +-------------------------------------+--+---------------------------------+
@@ -374,164 +439,22 @@ below in :ref:`Several Bindings for One Import Path`.
 
 |
 
-.. _Several Bindings for One Import Path:
+.. _Import Type Directive:
 
-Several Bindings for One Import Path
-====================================
-
-.. meta:
-    frontend_status: Done
-
-The same bound entities can use the following:
-
-- Several import bindings,
-- One import directive, or several import directives with the same import path:
-
-+---------------------------------+-----------------------------------+
-|                                 |                                   |
-+---------------------------------+-----------------------------------+
-|                                 | .. code-block:: typescript        |
-| In one import directive         |                                   |
-|                                 |     import {sin, cos} from "..."  |
-+---------------------------------+-----------------------------------+
-|                                 | .. code-block:: typescript        |
-| In several import directives    |                                   |
-|                                 |     import {sin} from "..."       |
-|                                 |     import {cos} from "..."       |
-+---------------------------------+-----------------------------------+
-
-No conflict occurs in the above example, because the import bindings
-define disjoint sets of names.
-
-The order of import bindings in an import declaration has no influence
-on the outcome of the import.
-
-The rules below prescribe what names must be used to add bound entities
-to the declaration scope of the current module if multiple bindings are
-applied to a single name:
-
-.. index::
-   import binding
-   bound entity
-   import directive
-   import path
-   import declaration
-   import outcome
-   declaration scope
-   entity
-   binding
-
-+-----------------------------+----------------------------+------------------------------+
-| **Case**                    | **Sample**                 | **Rule**                     |
-+=============================+============================+==============================+
-|                             | .. code-block:: typescript |                              |
-| A name is explicitly used   |                            | OK. The compile-time         |
-| without an alias in several |      import {sin, sin}     | warning is recommended.      |
-| bindings.                   |         from "..."         |                              |
-+-----------------------------+----------------------------+------------------------------+
-|                             | .. code-block:: typescript |                              |
-| A name is used explicitly   |                            | OK. No warning.              |
-| without alias in one        |     import {sin}           |                              |
-| binding.                    |        from "..."          |                              |
-+-----------------------------+----------------------------+------------------------------+
-|                             | .. code-block:: typescript |                              |
-| A name is explicitly used   |                            | OK. Both the name and        |
-| without alias, and          |     import {sin}           | qualified name can be used:  |
-| implicitly with alias.      |        from "..."          |                              |
-|                             |                            | sin and M.sin are            |
-|                             |     import * as M          | accessible.                  |
-|                             |        from "..."          |                              |
-+-----------------------------+----------------------------+------------------------------+
-|                             | .. code-block:: typescript |                              |
-| A name is explicitly used   |                            | OK. Only alias is accessible |
-| with alias.                 |                            | for the name, but not the    |
-|                             |     import {sin as Sine}   | original name:               |
-|                             |       from "..."           |                              |
-|                             |                            | - Sine is accessible;        |
-|                             |                            | - sin is not accessible.     |
-+-----------------------------+----------------------------+------------------------------+
-|                             | .. code-block:: typescript |                              |
-| A name is explicitly        |                            | OK. Both options can be      |
-| used with alias, and        |                            | used:                        |
-| implicitly with alias.      |     import {sin as Sine}   |                              |
-|                             |        from "..."          | - Sine is accessible;        |
-|                             |                            |                              |
-|                             |     import * as M          | - M.sin is accessible.       |
-|                             |        from "..."          |                              |
-+-----------------------------+----------------------------+------------------------------+
-|                             | .. code-block:: typescript |                              |
-| A name is explicitly used   |                            | OK. Both aliases are         |
-| with alias several times.   |                            | accessible. But warning can  |
-|                             |     import {sin as Sine,   | be displayed.                |
-|                             |        sin as SIN}         |                              |
-|                             |        from "..."          |                              |
-+-----------------------------+----------------------------+------------------------------+
-
-.. index::
-   compile-time error
-   name
-   import
-   alias
-   access
-   
-|
-
-.. _Default Import Binding:
-
-Default Import Binding
-======================
+Import Type Directive
+=====================
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
+    todo: no CTE for type import
 
-Default import binding allows importing a declaration exported from some
-module as default export. Knowing the actual name of a declaration is not
-required as the new name is given at importing.
-A :index:`compile-time error` occurs if another form of import is used to
-import an entity initially exported as default.
+An import directive can have ``type`` modifier exclusively to be more
+compatibile with |TS| syntactically, see also :ref:`Export Type Directive`.
+|LANG| does not support any additional semantic checks for entities
+imported using *import type* directives.
 
-.. code-block:: typescript
-   :linenos:
-
-    import DefaultExportedItemBindedName from ".../someFile"
-    import {default as DefaultExportedItemNewName} from  ".../someFile"
-    function foo () {
-      let v1 = new DefaultExportedItemBindedName()
-      // instance of class 'SomeClass' to be created here
-      let v2 = new DefaultExportedItemNewName()
-      // instance of class 'SomeClass' to be created here
-    }
-
-    // SomeFile
-    export default class SomeClass {}
-
-    // Or 
-    class SomeClass {}
-    export default SomeClass
-
-.. index::
-   import binding
-   entity
-   import
-   declaration
-   export
-   module
-
-|
-
-.. _Type Binding:
-
-Type Binding
-============
-
-.. meta:
-    frontend_status: Done
-
-*Type import binding* allows importing only the type declarations exported from
-a module or a package. These declarations can be exported normally, or by
-using the *export type* form. The difference between *import* and
-*import type* is that *import* imports all exported top-level declarations,
-while *import type* imports only exported types.
+The following code illustrates semantic checks done by |TS|
+but not by |LANG| compiler:
 
 .. code-block:: typescript
    :linenos:
@@ -542,7 +465,7 @@ while *import type* imports only exported types.
     export class Class1 {/*body*/}
 
     class Class2 {}
-    export type {Class2} 
+    export type {Class2}
 
     // MainProgram.ets
 
@@ -550,16 +473,13 @@ while *import type* imports only exported types.
     import type {Class2} from "./module.ets"
 
     let c1 = new Class1() // OK
-    let c2 = new Class2() // OK, the same
+    let c2 = new Class2() // Compile-time error in Typescript, OK in ArkTS
 
 .. index::
    import binding
-   declaration
-   module
-   package
    export type
+   import
    import type
-   top-level declaration
 
 |
 
@@ -582,31 +502,41 @@ In most file systems, an import path looks like a file path. *Relative* (see
 below) and *non-relative* import paths have different *resolutions* that map
 the import path to a file path of the host system.
 
+.. index::
+   import binding
+   import path
+   alpha-numeric character
+   import
+   compilation
+   import path
+   context
+   file system
+   relative import path
+   non-relative import path
+   resolution
+
 The compiler uses the following rule to define the kind of imported
 compilation units, and the exact placement of the source code:
 
--  If import path refers to a folder denoted by the last name in the resolved
+-  If *import path* refers to a folder denoted by the last name in the resolved
    file path, then the compiler imports the package that resides in the
    folder. The source code of the package is comprised of all the |LANG| source
    files in the folder.
 
--  Otherwise, the compiler imports the module that the import path refers to.
+   Otherwise, the compiler imports the module the *import path* refers to.
    The source code of the module is the file with the extension provided
    within the import path, or---if none is so provided---appended by the
    compiler.
 
+-  If *import path* refers to both a declaration module and a separate module or
+   package with the same name, then the reference to the separate module or
+   package prevails.
+
 .. index::
-   import binding
-   import path
-   string
-   string literal
-   slash character
-   alpha-numeric character
    compilation unit
-   file system
+   import path
    file path
-   relative import path
-   non-relative import path
+   import
    resolution
    host system
    source code
@@ -616,6 +546,7 @@ compilation units, and the exact placement of the source code:
    extension
    resolving
    filename
+   separate module
 
 A *relative import path* starts with '``./``' or '``../``' as in the following
 examples:
@@ -687,6 +618,107 @@ File name, placement, and format are implementation-specific.
 
 |
 
+.. _Several Bindings for One Import Path:
+
+Several Bindings for One Import Path
+====================================
+
+.. meta:
+    frontend_status: Done
+
+The same bound entities can use the following:
+
+- Several import bindings,
+- One import directive, or several import directives with the same import path:
+
++---------------------------------+-----------------------------------+
+|                                 |                                   |
++---------------------------------+-----------------------------------+
+|                                 | .. code-block:: typescript        |
+| In one import directive         |                                   |
+|                                 |     import {sin, cos} from "..."  |
++---------------------------------+-----------------------------------+
+|                                 | .. code-block:: typescript        |
+| In several import directives    |                                   |
+|                                 |     import {sin} from "..."       |
+|                                 |     import {cos} from "..."       |
++---------------------------------+-----------------------------------+
+
+No conflict occurs in the above example, because the import bindings
+define disjoint sets of names.
+
+The order of import bindings in an import declaration has no influence
+on the outcome of the import.
+
+The rules below prescribe what names must be used to add bound entities
+to the declaration scope of the current module if multiple bindings are
+applied to a single name:
+
+.. index::
+   import binding
+   bound entity
+   import directive
+   import path
+   import declaration
+   import outcome
+   declaration scope
+   entity
+   binding
+
++-----------------------------+----------------------------+------------------------------+
+|   Case                      |   Sample                   |   Rule                       |
++=============================+============================+==============================+
+|                             | .. code-block:: typescript |                              |
+| A name is explicitly used   |                            | OK. The compile-time         |
+| without an alias in several |      import {sin, sin}     | warning is recommended.      |
+| bindings.                   |         from "..."         |                              |
++-----------------------------+----------------------------+------------------------------+
+|                             | .. code-block:: typescript |                              |
+| A name is used explicitly   |                            | OK. No warning.              |
+| without alias in one        |     import {sin}           |                              |
+| binding.                    |        from "..."          |                              |
++-----------------------------+----------------------------+------------------------------+
+|                             | .. code-block:: typescript |                              |
+| A name is explicitly used   |                            | OK. Both the name and        |
+| without alias, and          |     import {sin}           | qualified name can be used:  |
+| implicitly with alias.      |        from "..."          |                              |
+|                             |                            | sin and M.sin are            |
+|                             |     import * as M          | accessible.                  |
+|                             |        from "..."          |                              |
++-----------------------------+----------------------------+------------------------------+
+|                             | .. code-block:: typescript |                              |
+| A name is explicitly used   |                            | OK. Only alias is accessible |
+| with alias.                 |                            | for the name, but not the    |
+|                             |     import {sin as Sine}   | original name:               |
+|                             |       from "..."           |                              |
+|                             |                            | - Sine is accessible;        |
+|                             |                            | - sin is not accessible.     |
++-----------------------------+----------------------------+------------------------------+
+|                             | .. code-block:: typescript |                              |
+| A name is explicitly        |                            | OK. Both options can be      |
+| used with alias, and        |                            | used:                        |
+| implicitly with alias.      |     import {sin as Sine}   |                              |
+|                             |        from "..."          | - Sine is accessible;        |
+|                             |                            |                              |
+|                             |     import * as M          | - M.sin is accessible.       |
+|                             |        from "..."          |                              |
++-----------------------------+----------------------------+------------------------------+
+|                             | .. code-block:: typescript |                              |
+| A name is explicitly used   |                            | OK. Both aliases are         |
+| with alias several times.   |                            | accessible. But warning can  |
+|                             |     import {sin as Sine,   | be displayed.                |
+|                             |        sin as SIN}         |                              |
+|                             |        from "..."          |                              |
++-----------------------------+----------------------------+------------------------------+
+
+.. index::
+   name
+   import
+   alias
+   access
+
+|
+
 .. _Standard Library Usage:
 
 Standard Library Usage
@@ -701,7 +733,7 @@ Standard Library Usage
 All entities exported from the core packages of the standard library (see
 :ref:`Standard Library`) are accessible as simple names (see :ref:`Accessible`)
 in any compilation unit across all its scopes. Using these names as
-programmer-defined entities causes to a :index:`compile-time error` in 
+programmer-defined entities causes to a :index:`compile-time error` in
 accordance to :ref:`Distinguishable Declarations`.
 
 .. code-block:: typescript
@@ -709,7 +741,7 @@ accordance to :ref:`Distinguishable Declarations`.
 
     console.log("Hello, world!")
         // variable 'console' is defined in the standard library
-    
+
 .. index::
    compilation unit
    entity
@@ -718,6 +750,9 @@ accordance to :ref:`Distinguishable Declarations`.
    package
    access
    simple name
+   standard library
+   access
+   distinguishable declaration
 
 |
 
@@ -734,10 +769,12 @@ imported by using :ref:`Import Directives`. A declaration module contains
 :ref:`Ambient Declarations` and :ref:`Type Alias Declaration` only. An ambient
 declaration declared in a declaration module must be fully defined elsewhere.
 
+The syntax of *declaration module* is presented below:
+
 .. code-block:: abnf
 
     declarationModule:
-        importDirective* 
+        importDirective*
         ( 'export'? ambientDeclaration
         | selectiveExportDirective
         )*
@@ -768,6 +805,7 @@ and cannot be used by modules that import this declaration module:
    export
    keyword export
    declaration module
+   ambient function
 
 .. code-block:: typescript
    :linenos:
@@ -794,68 +832,16 @@ and cannot be used by modules that import this declaration module:
 
    let a = new m.A // compile-time error as A is not exported
 
-How declaration modules are stored in the file system and if the storage scheme
-of declaration modules differs from the way other modules are stored is
-determined by the particular implementation.
+How declaration modules are stored in the file system, and whether the manner
+of storage of a declaration module differs from the manner of storage of other
+modules is determined by a particular implementation.
 
 .. index::
    declaration
    declaration module
+   file system
+   storage
    implementation
-
-|
-
-.. _Compilation Unit Initialization:
-
-Compilation Unit Initialization
-*******************************
-
-.. meta:
-    frontend_status: Done
-
-*Compilation unit* is a separate module (see :ref:`Separate Module Initializer`)
-or a package (see :ref:`Package Initializer`) that is initialized once before
-an entity (function, variable, or type), exported from the compilation unit,
-is used for the first time.
-If a *compilation unit* has an import directive (see :ref:`Import Directives`)
-but the imported entities are not actually used, then the imported compilation
-unit (separate or package) is initialized before the entry point code (see
-:ref:`Program Entry Point`) starts.
-If different compilation units are not connected by import, then the order
-of compilation unit initialization is not determined.
-If there is a cyclic dependency between top-level variable declarations, then a
-:index:`compile-time error` occurs.
-
-.. code-block-meta:
-   expect-cte:
-
-.. code-block:: typescript
-   :linenos:
-
-    // Source file 1
-    import {x} from "Source file 2"
-    let y = x // y uses x for its initialization
-
-    // Source file 2
-    import {y} from "Source file 1"
-    let x = y // x uses y for its initialization
-
-.. index::
-   compilation unit
-   initialization
-   entity
-   function
-   variable
-   type
-   import directive
-   entry point
-   binding
-   declaration
-   module
-   package
-   declaration scope
-   top-level declaration
-   variable
 
 |
 
@@ -873,6 +859,8 @@ or ``enum`` see :ref:`Type Declarations`), top-level variables (see
 functions (see :ref:`Function Declarations`), or namespaces (see
 :ref:`Namespace Declarations`). Top-level declarations can be exported.
 
+The syntax of *top-level declarations* is presented below:
+
 .. code-block:: abnf
 
     topDeclaration:
@@ -886,6 +874,7 @@ functions (see :ref:`Function Declarations`), or namespaces (see
         | accessorWithReceiverDeclaration
         | namespaceDeclaration
         | ambientDeclaration
+        | annotationDeclaration
         )
         ;
 
@@ -903,8 +892,12 @@ functions (see :ref:`Function Declarations`), or namespaces (see
    enum
    variable
    constant
-   function
+   constant declaration
+   namespace
    export
+   function
+   variable declaration
+   type declaration
 
 The usage of annotations is discussed in :ref:`Using Annotations`.
 
@@ -932,8 +925,19 @@ used only inside the compilation unit they are declared in.
       // ...
     }
 
+.. index::
+   top-level declaration
+   exported declaration
+   export modifier
+   access
+   accessible declaration
+   accessibility
+   compilation unit
+   import directive
+   declaration
+
 In addition, only one top-level declaration can be exported by using the default
-export scheme. It allows specifying no declared name when importing (see
+export directive. It allows specifying no declared name when importing (see
 :ref:`Default Import Binding` for details). A :index:`compile-time error`
 occurs if more than one top-level declaration is marked as ``default``.
 
@@ -944,10 +948,18 @@ occurs if more than one top-level declaration is marked as ``default``.
 
     export default let PI = 3.141592653589
 
+.. index::
+   top-level declaration
+   export
+   default export directive
+   import
+   import binding
 
-One more form of *export default* is supported where expression is put as the
-export default target. It can be imported only with providing a name for the 
-constant variable exported with help of this scheme. Otherwise a
+Another supported form of *export default* is using an expression as export
+default target. This export directive effectively means that an anonymous
+constant variable is created with a value equal to the value of the expression
+evaluation result. The export can be imported only by providing a name for the
+constant variable that is exported by using this export directive. Otherwise, a
 :index:`compile-time error` occurs.
 
 .. code-block:: typescript
@@ -962,24 +974,29 @@ constant variable exported with help of this scheme. Otherwise a
     // File2
     import {default as a} from "File1"
 
-    a.foo()  // Calling method foo() of class A where 'a' is the instance of type A
+    a.foo()  // Calling method foo() of class A where 'a' is an instance of type A
     a = new A // Compile-time error as 'a' is a constant variable
 
     // File3
     import * as a from "File1" /* Compile-time error: such form of import
                                   cannot be used for the default export */
- 
+
 
 .. index::
    exported declaration
    top-level declaration
-   export modifier
+   modifier export
+   constant variable
+   evaluation result
+   export
+   export default
+   export directive
    accessibility
    declaration
    export
    declared name
    compilation unit
-   default export scheme
+   default export directive
    import
 
 |
@@ -993,8 +1010,9 @@ Namespace Declarations
     frontend_status: Done
 
 *Namespace declaration* introduces the qualified name to be used as a
-qualifier for access to each exported entity of the namespace. The appropriate
-syntax is presented below:
+qualifier for access to each exported entity of the namespace.
+
+The syntax of *namespace declarations* is presented below:
 
 .. code-block:: abnf
 
@@ -1003,10 +1021,7 @@ syntax is presented below:
         '{' topDeclaration* initializerBlock? topDeclaration* '}'
         ;
 
-Namespace can have an initializer block to ensure that all namespace variables
-receive initial values. Initialization details are based on
-:ref:`Compilation Unit Initialization`, except the parts related to import which
-is not applicable to namespaces and :ref:`Initializer Block`.
+Namespace can have an initializer block (see :ref:`Static Initialization`).
 
 An usage example is presented below:
 
@@ -1021,19 +1036,26 @@ An usage example is presented below:
         static {
             someVar = new SomeType
         }
+        export bar
     }
+
+    function bar() {}
 
     if (NS1.variable == NS1.constant) {
         NS1.variable = 4321
     }
+    NS1.bar()
 
 .. index::
+   namespace
    namespace declaration
    qualifier
    access
    entity
    export
-   namespace
+   qualified name
+   initializer block
+   namespace variable
 
 **Note**. A namespace must be exported to be used in another compilation unit.
 
@@ -1059,6 +1081,10 @@ An usage example is presented below:
     Space1.foo()     // compile-time error - there is no function 'foo()'
     Space1.foo(1234) // OK
 
+.. index::
+   namespace
+   compilation unit
+
 **Note**. Embedded namespaces are allowed.
 
 .. code-block:: typescript
@@ -1076,14 +1102,25 @@ An usage example is presented below:
         ExternalSpace.variable = 4321
     }
 
-**Note**. Namespaces with identical namespace names in a single compilation
-  unit merge their exported declarations into a single namespace. A duplication
-  causes a :index:`compile-time error`. Exported and non-exported declarations
-  having the same name is also considered a :index:`compile-time error`.
-  Only one of merging namespaces can have an initializer. Otherwise, a
-  :index:`compile-time error` occurs.
+.. index::
+   embedded namespace
 
-  .. code-block:: typescript
+**Note**. Namespaces with identical namespace names in a single compilation
+unit merge their exported declarations into a single namespace. A duplication
+causes a :index:`compile-time error`. Exported and non-exported declarations
+with the same name are also considered a :index:`compile-time error`.
+Only one of the merging namespaces can have an initializer. Otherwise, a
+:index:`compile-time error` occurs.
+
+.. index::
+   namespace
+   namespace name
+   compilation unit
+   export
+   declaration
+   initializer
+
+.. code-block:: typescript
    :linenos:
 
     // One source file
@@ -1107,7 +1144,7 @@ An usage example is presented below:
         //export function foo() {  }
         // Compile-time error as foo() was already defined
 
-        // function foo() { console.log ("2nd A.foo() non-exported") }  
+        // function foo() { console.log ("2nd A.foo() non-exported") }
         // Compile-time error as foo() was already defined as exported
     }
 
@@ -1116,7 +1153,7 @@ An usage example is presented below:
             too() // too()  accessible when namespace C and too() are both exported
             A.C.too()
 
-        }  
+        }
     }
 
     A.goo()
@@ -1145,6 +1182,11 @@ An usage example is presented below:
 **Note**. A namespace name can be a qualified name. It is a shortcut notation of
 embedded namespaces as represented below:
 
+.. index::
+   namespace
+   shortcut notation
+   embedded namespace
+
 .. code-block:: typescript
    :linenos:
 
@@ -1152,7 +1194,7 @@ embedded namespaces as represented below:
         /*some declarations*/
     }
 
-The code above is the shortcut version of the following code:
+The code above is the shortcut to the following code:
 
 .. code-block:: typescript
    :linenos:
@@ -1175,7 +1217,7 @@ This code illustrates the usage of declarations in the following case:
     A.B.C.foo() // Valid function call, as 'B' and 'C' are implicitly exported
 
 If an ambient namespace (see :ref:`Ambient Namespace Declarations`) belongs to
-a separate module (see :ref:`Separate Modules`) then all ambient namespace
+a separate module (see :ref:`Separate Modules`), then all ambient namespace
 declarations are accessible across all declarations and top-level statements of
 the separate module.
 
@@ -1187,18 +1229,26 @@ the separate module.
         type X = Array<number>
     }
 
-    A.foo() // Valid function call, as 'foo' is acessible for top-level statements
+    A.foo() // Valid function call, as 'foo' is accessible for top-level statements
     function foo () {
-        A.foo() // Valid function call, as 'foo' is acessible here as well
+        A.foo() // Valid function call, as 'foo' is accessible here as well
     }
     class C {
         method () {
-            A.foo() // Valid function call, as 'foo' is acessible here too
+            A.foo() // Valid function call, as 'foo' is accessible here too
             let x: A.X = [] // Type A.X can be used
         }
     }
 
-
+.. index::
+   namespace
+   separate module
+   ambient namespace
+   declaration
+   accessible declaration
+   access
+   accessibility
+   top-level statement
 
 |
 
@@ -1218,12 +1268,14 @@ Export Directives
 -  Exporting a type; or
 -  Re-exporting declarations from other compilation units.
 
+The syntax of *export directive* is presented below:
+
 .. code-block:: abnf
 
     exportDirective:
-        selectiveExportDirective 
-        | singleExportDirective 
-        | exportTypeDirective 
+        selectiveExportDirective
+        | singleExportDirective
+        | exportTypeDirective
         | reExportDirective
         ;
 
@@ -1233,6 +1285,7 @@ Export Directives
    declaration
    renaming
    re-export
+   re-exporting declaration
    compilation unit
 
 |
@@ -1249,6 +1302,8 @@ Top-level declarations can be made *exported* by using a selective export
 directive. The selective export directive provides an explicit list of names
 of the declarations to be exported. Optional renaming allows having the
 declarations exported with new names.
+
+The syntax of *selective export directive* is presented below:
 
 .. code-block:: abnf
 
@@ -1272,6 +1327,7 @@ module.
    selective export directive
    top-level declaration
    export
+   export directive
    declaration
    directive
    renaming
@@ -1279,6 +1335,7 @@ module.
    selective binding
    module
    access
+   accessibility
 
 |
 
@@ -1288,22 +1345,32 @@ Single Export Directive
 =======================
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
+    todo: changes in export syntax
 
 *Single export directive* allows specifying the declaration to be exported from
-the current compilation unit by using the declaration's own name or anonymously. 
-Synatx for the both cases is presented below: 
+the current compilation unit by using the declaration's own name, or anonymously.
+
+The syntax of *single export directive* is presented below:
 
 .. code-block:: abnf
 
     singleExportDirective:
-        'export' 
-        'default'? identifier |
-        'default' expression
+        'export'
+        ( identifier
+        | 'default' (expression | identifier)
+        | '{' identifier 'as' 'default' '}'
+        )
         ;
 
+.. index::
+   export directive
+   declaration
+   compilation unit
+   own name
+   syntax
 
-If ``default`` is added, then only one such export directive is possible in
+If ``default`` is present, then only one such export directive is possible in
 the current compilation unit. Otherwise, a :index:`compile-time error` occurs.
 
 The directive in the example below exports variable 'v' by its name:
@@ -1314,11 +1381,23 @@ The directive in the example below exports variable 'v' by its name:
     export v
     let v = 1
 
+
+The directive in the example below exports class 'A' by its name as default
+export:
+
+.. code-block:: typescript
+   :linenos:
+
     class A {}
     export default A
+    export {A as default} // such syntax is also acceptable
 
-The directive in the example below exports constant variable of some type
-anonymously:
+.. index::
+   export directive
+   compilation unit
+   directive
+
+The directive in the example below exports a constant variable anonymously:
 
 .. code-block:: typescript
    :linenos:
@@ -1327,22 +1406,23 @@ anonymously:
     export default new A
 
 
-*Single export directive* works as re-export when declaration referred by
-*identifier* was imported.
+*Single export directive* acts as re-export when the declaration referred to by
+*identifier* is imported.
 
 .. code-block:: typescript
    :linenos:
 
     import {v} from "some location"
     export v
-   
 
 .. index::
-   export directive
-   declaration
    export
-   compilation unit
-   default export scheme
+   directive
+   constant variable
+   export directive
+   re-export
+   identifier
+   import
 
 |
 
@@ -1354,13 +1434,10 @@ Export Type Directive
 .. meta:
     frontend_status: Done
 
-In addition to export that is attached to some declaration, the *export type*
-directive can be used in order to do the following:
+An export directive can have ``type`` modifier exclusively to be more
+compatibile with |TS| syntactically, see also :ref:`Import Type Directive`.
 
--  Export *as a type* a particular class or interface already declared; or
--  Export an already declared type under a different name.
-
-The appropriate syntax is presented below:
+The syntax of *export type directive* is presented below:
 
 .. code-block:: abnf
 
@@ -1368,34 +1445,16 @@ The appropriate syntax is presented below:
         'export' 'type' selectiveBindings
         ;
 
-If a class or an interface is exported in this manner, then its usage is
-limited similarly to the limitations described for *import type* directives
-(see :ref:`Type Binding`).
 
-If a class or interface is declared exported, but *export type* is applied
-to the same class or interface name, then a :index:`compile-time error` occurs.
-This situation is represented in the following example:
-
-.. code-block:: typescript
-   :linenos:
-
-    class A {}
-
-    export type {A}  // export already declared class type
-
-    export type MyA = A // name MyA is declared and exported
-
-    export type {MyA} // compile-time error as MyA was already exported
+|LANG| does not support any additional semantic checks for entities
+exported using *export type* directive.
 
 .. index::
-   export directive
    export
    declaration
    export type
-   class
-   interface
-   name
-   import type
+   export directive
+   syntax
 
 |
 
@@ -1405,19 +1464,35 @@ Re-Export Directive
 ===================
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
+    todo: syntax was changed
 
 In addition to exporting what is declared in the module, it is possible to
-re-export declarations that are part of other modules' export. 
+re-export declarations that are part of other modules' export.
 A particular declaration or all declarations can be re-exported from a module.
 When re-exporting, new names can be given. This action is similar to importing
-but has the opposite direction. The appropriate grammar is presented below:
+but has the opposite direction.
+
+The syntax of *re-export directive* is presented below:
 
 .. code-block:: abnf
 
     reExportDirective:
-        'export' ('*' | selectiveBindings) 'from' importPath
+        'export'
+        ('*' bindingAlias?
+        | selectiveBindings
+        | '{' 'default' bindingAlias? '}'
+        )
+        'from' importPath
         ;
+
+.. index::
+   export
+   module
+   declaration
+   re-export declaration
+   re-export
+   import
 
 An ``importPath`` cannot refer to the file the current module is stored in.
 Otherwise, a :index:`compile-time error` occurs.
@@ -1428,14 +1503,22 @@ The re-exporting practice is represented in the following examples:
    :linenos:
 
     export * from "path_to_the_module" // re-export all exported declarations
+    export * as qualifier from "path_to_the_module"
+       // re-export all exported declarations with qualification
     export { d1, d2 as d3} from "path_to_the_module"
        // re-export particular declarations some under new name
+    export {default} from "path_to_the_module"
+       // re-export default declaration from the other module
+    export {default as name} from "path_to_the_module"
+       // re-export default declaration from the other module under 'name'
 
 .. index::
-   re-export
-   re-export directive
-   re-export declaration
+   import path
    module
+   storage
+   re-export
+
+|
 
 .. _Top-Level Statements:
 
@@ -1446,13 +1529,21 @@ Top-Level Statements
     frontend_status: Done
 
 A separate module can contain sequences of statements that logically
-comprise one sequence of statements:
+comprise one sequence of statements.
+
+The syntax of *top-level statements* is presented below:
 
 .. code-block:: abnf
 
     topLevelStatements:
         statement*
         ;
+
+.. index::
+   top-level statement
+   separate module
+   module
+   statement
 
 A module can contain any number of top-level statements that logically
 merge into a single sequence in the textual order:
@@ -1473,14 +1564,16 @@ The sequence above is equal to the following:
       statements_1; statements_2
 
 
-It is represented by the example below:
+This situation is represented by the example below:
 
+.. index::
+   top-level statement
 
 .. code-block:: typescript
    :linenos:
 
 
-   // The actual text mixture of the statements and declarations 
+   // The actual text combination of the statements and declarations
    console.log ("Start of top-level statements")
    type A = number | string
    let a: A = 56
@@ -1499,15 +1592,11 @@ It is represented by the example below:
    let a: A = 56
    a = "a string"
 
-
-
-
-
 .. index::
+   top-level statement
+   declaration
    separate module
    statement
-   top-level statement
-   sequence
 
 - If a separate module is imported by some other module, then the semantics of
   top-level statements is to initialize the imported module. It means that all
@@ -1518,14 +1607,18 @@ It is represented by the example below:
   as a program entry point (see :ref:`Program Entry Point`). The set of
   top-level statements being empty implies that the program entry point is also
   empty and does nothing. If a separate module has the ``main`` function, then
-  it is executed after the execution of the top-level statements. 
+  it is executed after the execution of the top-level statements.
 
 .. index::
-   module
+   separate module
    semantics
    top-level statement
    initialization
    import
+   module
+   call
+   access
+   accessibility
    entry point
    function
 
@@ -1562,13 +1655,16 @@ return statement (:ref:`Expression Statements`).
 
 The execution of top-level statements means that all statements, except type
 declarations, are executed one after another in the textual order of their
-appearance within the module until an erroneous situation is thrown (see
+appearance within the module until an error situation is thrown (see
 :ref:`Errors`), or last statement is executed.
-
 
 .. index::
    top-level statement
    return statement
+   statement
+   type declaration
+   module
+   error
 
 |
 
@@ -1587,6 +1683,14 @@ be of the following two kinds:
 - Top-level statements for separate modules (see :ref:`Top-Level Statements`); or
 - Entry point function (see below).
 
+.. index::
+   separate module
+   package
+   top-level statement
+   return statement
+   execution
+   entry point
+
 A separate module can have the following forms of entry point:
 
 - Sole entry point function (``main`` or other as described below);
@@ -1594,6 +1698,10 @@ A separate module can have the following forms of entry point:
   acts as the entry point);
 - Both top-level statement and entry point function (same as above, plus the
   function called after the top-level statement execution is completed).
+
+.. index::
+   separate module
+   entry point
 
 A package can have a sole entry point function (``main`` or other as
 described below).
@@ -1610,9 +1718,8 @@ Entry point functions have the following features:
 - Entry point function cannot have overloading;
 - Entry point function is called ``main`` by default.
 
-
 .. index::
-   module
+   package
    entry point
    function
    parameter
@@ -1666,47 +1773,10 @@ The example below represents different forms of valid and invalid entry points:
 
     // Package example - outputs "Package init" then "Package main"
     package P
-    function main () { console.log ("Package main")}   
+    function main () { console.log ("Package main")}
     static { console.log ("Package init") }
 
-
 |
-
-.. _Program Exit:
-
-Program Exit
-************
-
-.. meta:
-    frontend_status: Done
-
-Separate modules and packages can act as programs (applications) and their entry
-point is described above (see :ref:`Program Entry Point`).
-
-*Program exit* takes place when:
-
-- All top-level statements (for separate modules) and statements of the entry
-  point function body, if any, complete normally.
-- An unhandled error (see :ref:`Error Handling`) occurs during the program
-  execution.
-
-In both cases, the control is transferred to the |LANG| runtime system, which
-ensures that all coroutines (see :ref:`Coroutines`) created during the program
-execution are terminated.
-
-If an error occurs, then the appropriate diagnostics is displayed. This is the
-end of the *program exit* process.
-
-.. index::
-   exit
-   top-level statement
-   top-level function
-   function body
-   normal completion
-   control
-   module
-   runtime system
-   coroutine
 
 .. raw:: pdf
 

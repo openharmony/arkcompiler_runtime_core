@@ -22,6 +22,7 @@ export final class Class {
     private name: string | undefined
     private superClass: Class | undefined
     private flags: int
+    private typeMetaData: long
 
     private constructor() { throw new Error("Class constructor called") }
     private native getNameInternal(): string;
@@ -44,14 +45,14 @@ export final class Class {
     public static native of(obj: Object): Class
 
     /**
-     * Get class of caller method
+     * Get current class
      */
     public static native current(): Class
 
     /**
-     * Get class of caller method which is calling this method
+     * Get class of caller
      */
-    public static native ofCaller(): Class
+    public static native ofCaller(): Class | undefined
 
     public native createInstance(): Object
 

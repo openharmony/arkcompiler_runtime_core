@@ -74,7 +74,7 @@ class A {
 
 export class Test {
 
-    private static __noinline__fnSum(u: double[], v: double[]): void {
+    private static __noinline__fnSum(u: FixedArray<double>, v: FixedArray<double>): void {
         let t: A = new A();
         t.f = 0;
         t.g = 0;
@@ -88,12 +88,12 @@ export class Test {
         }
     }
 
-    private static __noinline__fnMem(u: double[], v: double[], i: int): void {
+    private static __noinline__fnMem(u: FixedArray<double>, v: FixedArray<double>, i: int): void {
         u[i] = v[i];
     }
 
     // memory coalescing can't be performed over CallStatic that is barrier
-    private static __noinline__fnSumMem(u: double[], v: double[]): void {
+    private static __noinline__fnSumMem(u: FixedArray<double>, v: FixedArray<double>): void {
         let t: A = new A();
         t.f = 0;
         t.g = 0;
@@ -110,19 +110,19 @@ export class Test {
     }
 
     // memory coalescing can't be performed over GC call that is barrier
-    private static __noinline__fnSumGC(u: double[], v: double[]): void {
+    private static __noinline__fnSumGC(u: FixedArray<double>, v: FixedArray<double>): void {
         try {
             let t: A = new A();
             t.f = 0;
             t.g = 0;
             for (let j: int = 0; j < u.length; j = j + 2) {
                 t.f += u[j];
-                GC.startGC(GC.FULL_CAUSE);
+                GC.startGC(GC.Cause.FULL);
                 t.g += u[j + 1];
             }
             for (let i: int = 0; i < v.length; i = i + 2) {
                 v[i] = t.f;
-                GC.startGC(GC.FULL_CAUSE);
+                GC.startGC(GC.Cause.FULL);
                 v[i + 1] = t.g + 1;
             }
         } catch (exception) {
@@ -130,7 +130,7 @@ export class Test {
     }
 
     // memory coalescing over NullCheck can be performed for Load and can't for Store
-    private static __noinline__fnSumCls(u: double[], v: double[], o: A, d: int): void {
+    private static __noinline__fnSumCls(u: FixedArray<double>, v: FixedArray<double>, o: A, d: int): void {
         let t: A = new A();
         t.f = 0;
         t.g = 0;
@@ -148,8 +148,8 @@ export class Test {
 
     __noinline__test(n: int): void {
         let i: int;
-        let u: double[] = new double[n];
-        let v: double[] = new double[n];
+        let u: FixedArray<double> = new double[n];
+        let v: FixedArray<double> = new double[n];
         let vv1: double = 0;
         let vv2: double = 0;
         let vv3: double = 0;

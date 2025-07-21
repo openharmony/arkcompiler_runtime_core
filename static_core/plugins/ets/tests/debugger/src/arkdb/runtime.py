@@ -255,6 +255,7 @@ class Runtime:
         entry_point: str = DEFAULT_ENTRY_POINT,
         cwd: Path | None = None,
         debug: bool = True,
+        profile: bool = False,
     ) -> AsyncIterator[RuntimeProcess]:
         module.check_exists()
         o = self.options
@@ -264,10 +265,16 @@ class Runtime:
             f"--load-runtimes={o.load_runtimes}",
             f"--interpreter-type={o.interpreter_type}",
             f"--boot-panda-files={':'.join(boot_panda_files)}",
+            "--load-in-boot",
         ]
-        if debug:
+        debugger_library_option: str = f"--debugger-library-path={str(o.debugger_library_path)}"
+        if profile:
+            command.append("--sampling-profiler-create")
+            command.append("--workers-type=threadpool")
+            command.append(debugger_library_option)
+        elif debug:
             command.append("--debugger-break-on-start")
-            command.append(f"--debugger-library-path={str(o.debugger_library_path)}")
+            command.append(debugger_library_option)
             command.extend([f"--log-debug={c}" for c in o.log_debug])
         command.append(str(module.entry_abc))
         command.append(f"{module.entry_abc.stem}.{entry_point}")

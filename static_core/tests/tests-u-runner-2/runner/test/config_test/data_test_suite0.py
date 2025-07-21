@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,9 +16,9 @@
 
 from pathlib import Path
 
-from runner.enum_types.configuration_kind import ArchitectureKind, SanitizerKind, OSKind, BuildTypeKind
+from runner.enum_types.configuration_kind import ArchitectureKind, BuildTypeKind, OSKind, SanitizerKind
 from runner.enum_types.qemu import QemuKind
-from runner.enum_types.verbose_format import VerboseKind, VerboseFilter
+from runner.enum_types.verbose_format import VerboseFilter, VerboseKind
 
 args = {
     'workflow': 'config-1',
@@ -99,6 +99,6 @@ args = {
     'runner.enable_time_report': True,
     'runner.time_edges': [1, 10, 100, 500],
     'runner.use_llvm_cov': True,
-    'runner.llvm_cov_profdata_out_path': str(Path(".").resolve()),
-    'runner.llvm_cov_html_out_path': str(Path(".").resolve())
+    'runner.llvm_cov_profdata_out_path': Path.cwd().resolve().resolve(),
+    'runner.coverage_html_report_dir': Path.cwd().resolve().resolve()
 }

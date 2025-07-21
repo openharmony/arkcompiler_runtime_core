@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+import { Job } from "std/core"
+
  // This test tries to load gc with a large number of memory allocations 
  // close to the OOM situation
 
@@ -71,13 +74,13 @@ class TestHumongousStress {
         let maxObjects = this.getHeapSizeInObjects() - NUMBER_OF_FREE_REGIONS;
         let objPerCoroutine = (maxObjects / this.threadsCount) as int;
         let lastCoroutuneNumObjects = maxObjects - objPerCoroutine * (this.threadsCount - 1);
-        assertTrue( this.threadsCount > 0 && objPerCoroutine > 0));
+        assertTrue(this.threadsCount > 0 && objPerCoroutine > 0);
 
-        let corArrayTmp = new Array<Promise<Object|null>>();
+        let corArrayTmp = new Array<Job<Object|null>>();
         for(let i = 0; i < this.threadsCount - 1; i++) {
-            corArrayTmp.push(launch cor(objPerCoroutine, this.humongousSize));
+            corArrayTmp.push(launch<Object|null, (numObjToCreate: int, humongousSize: int) => Object|null>(cor, objPerCoroutine, this.humongousSize));
         }
-        let corArrayLast = launch cor(lastCoroutuneNumObjects, this.humongousSize);
+        let corArrayLast = launch<Object|null, (numObjToCreate: int, humongousSize: int) => Object|null>(cor, lastCoroutuneNumObjects, this.humongousSize);
 
         Coroutine.Schedule();
 

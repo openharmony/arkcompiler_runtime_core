@@ -198,26 +198,26 @@ cases:
               }
               constructor() {}
               constructor(p: Object) { this.t = "should never be called" }
-              constructor(p: A[]) { this.t = "A" }
-              constructor(p: Object[]) { this.t = "Object" }
-              constructor(p: byte[]) { this.t = "byte" }
-              constructor(p: short[]) { this.t = "short" }
-              constructor(p: int[]) { this.t = "int" }
-              constructor(p: long[]) { this.t = "long" }
-              constructor(p: char[]) { this.t = "char" }
-              constructor(p: boolean[]) { this.t = "boolean" }
-              constructor(p: float[]) { this.t = "float" }
-              constructor(p: double[]) { this.t = "double" }
-              constructor(p: Byte[]) { this.t = "Byte" }
-              constructor(p: Short[]) { this.t = "Short" }
-              constructor(p: Int[]) { this.t = "Int" }
-              constructor(p: Long[]) { this.t = "Long" }
-              constructor(p: Char[]) { this.t = "Char" }
-              constructor(p: Boolean[]) { this.t = "Boolean" }
-              constructor(p: Float[]) { this.t = "Float" }
-              constructor(p: Double[]) { this.t = "Double" }
-              constructor(p: Color[]) { this.t = "Color" }
-              constructor(p: Size[]) { this.t = "Size" }
+              constructor(p: FixedArray<A>) { this.t = "A" }
+              constructor(p: FixedArray<Color>) { this.t = "Color" }
+              constructor(p: FixedArray<Size>) { this.t = "Size" }
+              constructor(p: FixedArray<Object>) { this.t = "Object" }
+              constructor(p: FixedArray<char>) { this.t = "char" }
+              constructor(p: FixedArray<byte>) { this.t = "byte" }
+              constructor(p: FixedArray<short>) { this.t = "short" }
+              constructor(p: FixedArray<int>) { this.t = "int" }
+              constructor(p: FixedArray<long>) { this.t = "long" }
+              constructor(p: FixedArray<boolean>) { this.t = "boolean" }
+              constructor(p: FixedArray<double>) { this.t = "double" }
+              constructor(p: FixedArray<float>) { this.t = "float" }
+              constructor(p: FixedArray<Int>) { this.t = "Int" }
+              constructor(p: FixedArray<Short>) { this.t = "Short" }
+              constructor(p: FixedArray<Byte>) { this.t = "Byte" }
+              constructor(p: FixedArray<Long>) { this.t = "Long" }
+              constructor(p: FixedArray<Char>) { this.t = "Char" }
+              constructor(p: FixedArray<Boolean>) { this.t = "Boolean" }
+              constructor(p: FixedArray<Float>) { this.t = "Float" }
+              constructor(p: FixedArray<Double>) { this.t = "Double" }
           }
       use: |-
           assertTrue(new A([-1 as byte]).getType() == "byte")

@@ -16,5 +16,6 @@ values:
 - { value: 0, result: -1 }
 - { value: 1, result: -2 }
 - { value: "c'\uFFFF'", result: "0xFFFF0000" }
-- { value: "Char.MIN_VALUE as char", result: "Char.MAX_VALUE as char" }
+- { value: "Char.MIN_VALUE", result: "Char.MAX_VALUE" }
 - { value: 23245, result: -23246 }
+- { value: "Char.MIN_VALUE", result: -1 }

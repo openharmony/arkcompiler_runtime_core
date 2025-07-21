@@ -49,7 +49,7 @@ function hot(i:int):int { return -i; }
 
 function test_loops(): void {
     let N = cold();
-    let arr = new int[N];
+    let arr: FixedArray<int> = new int[N];
 
     for (let i:int = 0; i < N; i++) {
         if (i % 4 != 0) {

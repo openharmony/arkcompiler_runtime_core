@@ -31,12 +31,14 @@ set(SOURCES
     tooling/backtrace/backtrace.cpp
     tooling/debugger.cpp
     tooling/evaluation/expression_loader.cpp
+    tooling/inspector/debugger_arkapi.cpp
     tooling/pt_default_lang_extension.cpp
     tooling/pt_thread.cpp
     tooling/debug_inf.cpp
     tooling/tools.cpp
     tooling/sampler/sampling_profiler.cpp
     tooling/sampler/sample_writer.cpp
+    tooling/sampler/samples_record.cpp
     tooling/sampler/thread_communicator.cpp
     tooling/sampler/stack_walker_base.cpp
     tooling/sampler/lock_free_queue.cpp
@@ -80,6 +82,8 @@ set(SOURCES
     mem/gc/stw-gc/stw-gc.cpp
     mem/gc/gc_barrier_set.cpp
     mem/gc/gen-gc/gen-gc.cpp
+    mem/gc/cmc-gc-adapter/cmc-gc-adapter.cpp
+    mem/gc/cmc-gc-adapter/cmc-allocator-adapter.cpp
     mem/refstorage/ref_block.cpp
     mem/refstorage/reference_storage.cpp
     mem/refstorage/global_object_storage.cpp
@@ -114,6 +118,7 @@ set(SOURCES
     runtime_controller.cpp
     string_table.cpp
     thread.cpp
+    thread_proxy.cpp
     mt_thread_manager.cpp
     lock_order_graph.cpp
     time_utils.cpp
@@ -161,6 +166,7 @@ set(SOURCES
     coroutines/stackful_coroutine_worker.cpp
     coroutines/coroutine_events.cpp
     coroutines/coroutine_stats.cpp
+    coroutines/priority_queue.cpp
     fibers/fiber_context.cpp
     compiler_thread_pool_worker.cpp
     compiler_task_manager_worker.cpp
@@ -830,7 +836,6 @@ add_gtests(
     tests/histogram_test.cpp
     tests/mem_stats_additional_info_test.cpp
     tests/mem_stats_gc_test.cpp
-    tests/mem_stats_gen_gc_test.cpp
     tests/mem_stats_test.cpp
 )
 
@@ -863,12 +868,6 @@ add_gtests(
 add_gtests(
     arkruntime_memory_management_malloc-proxy-allocator-test
     tests/malloc-proxy-allocator-test.cpp
-)
-
-add_gtests(
-    arkruntime_memory_management_pygote_space_allocator_gen_test
-    tests/pygote_space_allocator_test_base.cpp
-    tests/pygote_space_allocator_gen_test.cpp
 )
 
 add_gtests(

@@ -10,20 +10,18 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-######################################
-Concurrency features in ArkTS language
-######################################
+###################################
+Language level concurrency features
+###################################
 
-***********************
-Language level features
-***********************
-
-===============
+***************
 async functions
-===============
+***************
+
+.. _async functions:
 
 .. note::
-  more verbose description you can find in the ArkTS language specification
+  more verbose description you can find in the |LANG| language specification
 
 The function *async* is implicitly a coroutine that can be called as a regular function.
 
@@ -51,9 +49,9 @@ functions is only supported for the sake of backward TypeScript compatibility.
    backward compatibility
    annotation
 
-=====
+*****
 await
-=====
+*****
 
 .. _await:
 
@@ -62,3 +60,5 @@ await
 If the Promise not resolved current coroutine will be suspended till it be resolved.
 
 If the :ref:'Promise<Concurrency Promise Class>' is rejected, then the reason of rejection will be thrown. 
+
+``await`` is forbidden to use outside of :ref:`async functions<async functions>`

@@ -22,6 +22,9 @@
 // This functions must be moved from stdlib. #23681
 namespace ark::ets::stdlib {
 
+constexpr const char *ERR_CLS_RUNTIME_EXCEPTION = "Lstd/core/RuntimeException;";
+constexpr const char *CTOR_SIGNATURE_STR = "Lstd/core/String;:V";
+
 void StdlibLogFatal(const char *msg);
 void StdlibLogFatal(const char *msg, ani_status status);
 
@@ -36,6 +39,9 @@ ANI_EXPORT std::string ConvertFromAniString(ani_env *env, ani_string aniStr);
 
 ANI_EXPORT ani_string CreateUtf8String(ani_env *env, const char *data, ani_size size);
 ANI_EXPORT ani_string CreateUtf16String(ani_env *env, const uint16_t *data, ani_size size);
+
+ANI_EXPORT std::string GetFieldStrUndefined(ani_env *env, ani_object obj, const char *name);
+ANI_EXPORT std::string GetFieldStr(ani_env *env, ani_object obj, const char *name);
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 

@@ -491,6 +491,9 @@ public:
 
     bool IsClearSoftReferencesEnabled() const;
 
+    bool GetFastGCFlag() const;
+    void SetFastGCFlag(bool fastGC);
+
 protected:
     /// @brief Runs all phases
     void RunPhases(GCTask &task);
@@ -574,14 +577,6 @@ protected:
     virtual void UpdateRefsToMovedObjectsInPygoteSpace() = 0;
     /// Update all refs to moved objects
     virtual void CommonUpdateRefsToMovedObjects() = 0;
-
-    virtual void UpdateVmRefs() = 0;
-
-    virtual void UpdateGlobalObjectStorage() = 0;
-
-    virtual void UpdateClassLinkerContextRoots() = 0;
-
-    void UpdateRefsInVRegs(ManagedThread *thread);
 
     const ObjectHeader *PopObjectFromStack(GCMarkingStackType *objectsStack);
 
@@ -707,7 +702,6 @@ private:
 
     size_t GetNativeBytesFromMallinfoAndRegister() const;
     virtual void ClearLocalInternalAllocatorPools() = 0;
-    virtual void UpdateThreadLocals() = 0;
     NativeGcTriggerType GetNativeGcTriggerType();
 
     class GCListenerManager {
@@ -757,7 +751,7 @@ private:
     ReferenceProcessor *referenceProcessor_ {nullptr};
 
     // NOTE(ipetrov): choose suitable priority
-    static constexpr size_t GC_TASK_QUEUE_PRIORITY = taskmanager::TaskQueueInterface::MAX_PRIORITY;
+    static constexpr size_t GC_TASK_QUEUE_PRIORITY = taskmanager::MAX_QUEUE_PRIORITY;
     taskmanager::TaskQueueInterface *gcWorkersTaskQueue_ = nullptr;
 
     /* GC worker specific variables */
@@ -796,6 +790,7 @@ private:
     PandaVM *vm_ {nullptr};
     std::atomic<bool> isFullGc_ {false};
     std::atomic<bool> isPostponeEnabled_ {false};
+    std::atomic<bool> fastGC_ {false};
     bool clearSoftReferencesEnabled_ {false};
 };
 

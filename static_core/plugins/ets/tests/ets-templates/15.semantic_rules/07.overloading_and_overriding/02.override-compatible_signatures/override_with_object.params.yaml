@@ -394,7 +394,8 @@ cases:
     result: 2
 
   # override-compatible argument (covariance)
-  - base: |-
+  - tags: 'negative, compile-only'
+    base: |-
       foo( i: Base[] ): void {
           res = 1;
       }
@@ -407,11 +408,11 @@ cases:
 
   # override-compatible argument (covariance)
   - base: |-
-      foo( i: Base[] ): void {
+      foo( i: FixedArray<Base> ): void {
           res = 1;
       }
     derived: |-
-      override foo(i: Object[]): void {
+      override foo(i: FixedArray<Object>): void {
           res = 2;
       }
     call: new Derived().foo(new Object[2]);
@@ -448,12 +449,12 @@ cases:
 
   # override-compatible return value (covariance)
   - base: |-
-      foo(): Object[] {
+      foo(): FixedArray<Object> {
           res = 1;
           return new Object[2];
       }
     derived: |-
-      override foo(): Base[] {
+      override foo(): FixedArray<Base> {
           res = 2;
           return new Base[2];
       }
@@ -549,7 +550,8 @@ cases:
     result: 2
 
   # override-compatible argument (covariance)
-  - base: |-
+  - tags: 'negative, compile-only'
+    base: |-
       foo(i: [Object, Object]): void {
           res = 1;
       }
@@ -563,7 +565,8 @@ cases:
     result: 2
 
   # override-compatible argument (covariance)
-  - base: |-
+  - tags: 'negative, compile-only'
+    base: |-
       foo(i: [Object, Object]): void {
           res = 1;
       }

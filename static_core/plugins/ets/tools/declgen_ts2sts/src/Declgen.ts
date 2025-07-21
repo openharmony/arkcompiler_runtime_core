@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import * as fs from 'fs';
 import * as ts from 'typescript';
 import * as path from 'path';
 
@@ -37,6 +38,7 @@ export class Declgen {
   private readonly hookedHost: ts.CompilerHost;
   private readonly rootFiles: readonly string[];
   private readonly compilerOptions: ts.CompilerOptions;
+  private readonly declgenOptions: DeclgenCLIOptions;
 
   constructor(
     declgenOptions: DeclgenCLIOptions,
@@ -46,6 +48,7 @@ export class Declgen {
     const { rootNames, options } = Declgen.parseDeclgenOptions(declgenOptions);
 
     this.rootFiles = rootNames;
+    this.declgenOptions = declgenOptions;
 
     this.sourceFileMap = new Map<string, ts.SourceFile>();
     this.compilerOptions = Object.assign({}, options, {
@@ -70,6 +73,12 @@ export class Declgen {
      */
     let program = this.recompile();
 
+    /**
+     * If the rootFiles contains declaration files,
+     * process the declaration files here.
+     */
+    this.processDeclarationFiles(program);
+
     const emitResult = program.emit(undefined, undefined, undefined, true, {
       before: [],
       after: [],
@@ -93,13 +102,60 @@ export class Declgen {
     return compile(this.rootFiles, this.compilerOptions, this.hookedHost);
   }
 
-  private checkProgram(program: ts.Program): CheckerResult {
-    const checker = new Checker(program.getTypeChecker());
+  private processDeclarationFiles(program: ts.Program): void {
+    const typeChecker = program.getTypeChecker();
 
-    void checker;
-    void this;
+    this.rootFiles.forEach((fileName) => {
+      const sourceFile = program.getSourceFile(fileName);
+      if (sourceFile && sourceFile.isDeclarationFile) {
 
-    return [];
+        const compilerOptions = program.getCompilerOptions();
+        const outDir = compilerOptions.outDir || path.dirname(fileName);
+        const rootDir = compilerOptions.rootDir || path.dirname(fileName);
+        const relativePath = path.relative(rootDir, fileName);
+        const fileNameWithoutExt = relativePath.replace(/\.d\.(ts|ets)$/, '');
+        const dEtsFilePath = path.join(outDir, `${fileNameWithoutExt}${Extension.DETS}`);
+
+        const result = this.transformDeclarationFiles(program, sourceFile, typeChecker);
+        const printer = ts.createPrinter();
+        const transformedCode = printer.printFile(result.transformed[0] as ts.SourceFile);
+
+        if (Declgen.isFileInAllowedPath(this.declgenOptions, [sourceFile])) {
+          if (!fs.existsSync(outDir)) {
+            fs.mkdirSync(outDir, { recursive: true });
+          }
+          fs.writeFileSync(dEtsFilePath, transformedCode, { encoding: 'utf8' });
+        }
+      }
+    });
+  }
+
+  private transformDeclarationFiles(program:ts.Program, sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker,): ts.TransformationResult<ts.Node> { 
+    const result = ts.transform(
+      sourceFile,
+      [
+        (context: ts.TransformationContext): ts.Transformer<ts.SourceFile> => {
+          const autofixer = new Autofixer(typeChecker, context);
+          const visit = (node: ts.Node): ts.Node | undefined => {
+            const fixedNode = autofixer.fixNode(node);
+
+            if (fixedNode === undefined) {
+              return node;
+            } else if (Array.isArray(fixedNode)) {
+              return context.factory.createBlock(fixedNode as readonly ts.Statement[]);
+            } else {
+              return ts.visitEachChild(fixedNode, visit, context);
+            }
+          };
+          return (sourceFile: ts.SourceFile): ts.SourceFile => {
+            return visit(sourceFile) as ts.SourceFile;
+          };
+        }
+      ],
+      program.getCompilerOptions()
+    );
+
+    return result;
   }
 
   private static createHookedCompilerHost(

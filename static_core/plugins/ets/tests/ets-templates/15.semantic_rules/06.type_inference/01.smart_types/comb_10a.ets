@@ -23,10 +23,10 @@ desc: >-
 class A {}
 let a: A|undefined = new A()
 
-let num: Number
-let str: string
-let err: Error
-let bool: Boolean
+let num: Number = 0;
+let str: string = "";
+let err: Error = new Error();
+let bool: Boolean = false;
 
 function foo(p: number|string|undefined|Error|boolean): number {
     return p === undefined ? ((): number => { a = p; return 1 })() // assigned without cast

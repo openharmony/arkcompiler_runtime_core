@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_BOX_PRIMITIVE_INL_H
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_BOX_PRIMITIVE_INL_H
 
+#include "macros.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 
@@ -24,12 +25,13 @@ template <typename T>
 EtsBoxPrimitive<T> *EtsBoxPrimitive<T>::Create(EtsCoroutine *coro, T value)
 {
     auto *instance = reinterpret_cast<EtsBoxPrimitive<T> *>(ObjectHeader::Create(coro, GetBoxClass(coro)));
+    ASSERT(instance != nullptr);
     instance->SetValue(value);
     return instance;
 }
 
 template <typename T>
-Class *EtsBoxPrimitive<T>::GetBoxClass(EtsCoroutine *coro)
+EtsClass *EtsBoxPrimitive<T>::GetEtsBoxClass(EtsCoroutine *coro)
 {
     auto ptypes = PlatformTypes(coro);
     EtsClass *boxClass = nullptr;
@@ -51,8 +53,15 @@ Class *EtsBoxPrimitive<T>::GetBoxClass(EtsCoroutine *coro)
     } else if constexpr (std::is_same<T, EtsDouble>::value) {
         boxClass = ptypes->coreDouble;
     }
+    ASSERT(boxClass != nullptr);
     ASSERT(boxClass->IsBoxed());
-    return boxClass->GetRuntimeClass();
+    return boxClass;
+}
+
+template <typename T>
+Class *EtsBoxPrimitive<T>::GetBoxClass(EtsCoroutine *coro)
+{
+    return GetEtsBoxClass(coro)->GetRuntimeClass();
 }
 
 }  // namespace ark::ets

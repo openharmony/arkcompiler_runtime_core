@@ -54,27 +54,27 @@ class jscall {
     native static any$b(top: JSValue, qname: String, v0: boolean): JSValue;
     native static any$n(top: JSValue, qname: String, v0: double): JSValue;
     native static any$s(top: JSValue, qname: String, v0: String): JSValue;
-    native static any$Aa(top: JSValue, qname: String, v0: JSValue[]): JSValue;
-    native static any$Ab(top: JSValue, qname: String, v0: boolean[]): JSValue;
-    native static any$Ai(top: JSValue, qname: String, v0: int[]): JSValue;
-    native static any$An(top: JSValue, qname: String, v0: double[]): JSValue;
-    native static any$AAn(top: JSValue, qname: String, v0: double[][]): JSValue;
-    native static any$As(top: JSValue, qname: String, v0: String[]): JSValue;
-    native static any$Ao(top: JSValue, qname: String, v0: Object[]): JSValue;
+    native static any$Aa(top: JSValue, qname: String, v0: FixedArray<JSValue>): JSValue;
+    native static any$Ab(top: JSValue, qname: String, v0: FixedArray<boolean>): JSValue;
+    native static any$Ai(top: JSValue, qname: String, v0: FixedArray<int>): JSValue;
+    native static any$An(top: JSValue, qname: String, v0: FixedArray<double>): JSValue;
+    native static any$AAn(top: JSValue, qname: String, v0: FixedArray<FixedArray<double>>): JSValue;
+    native static any$As(top: JSValue, qname: String, v0: FixedArray<String>): JSValue;
+    native static any$Ao(top: JSValue, qname: String, v0: FixedArray<Object>): JSValue;
     native static any$aaaa(top: JSValue, qname: String, v0: JSValue, v1: JSValue, v2: JSValue, v3: JSValue): JSValue;
     native static any$bi(top: JSValue, qname: String, v0: BigInt): JSValue;
     // Remove after JSValue cast fix
     native static any$(top: JSValue, qname: String, v0: JSValue): JSValue;
 
-    native static Aa$a(top: JSValue, qname: String, v0: JSValue): JSValue[];
-    native static Ab$a(top: JSValue, qname: String, v0: JSValue): boolean[];
-    native static Ai$a(top: JSValue, qname: String, v0: JSValue): int[];
-    native static An$a(top: JSValue, qname: String, v0: JSValue): double[];
-    native static AAn$a(top: JSValue, qname: String, v0: JSValue): double[][];
-    native static As$a(top: JSValue, qname: String, v0: JSValue): String[];
-    native static Ao$a(top: JSValue, qname: String, v0: JSValue): Object[];
+    native static Aa$a(top: JSValue, qname: String, v0: JSValue): FixedArray<JSValue>;
+    native static Ab$a(top: JSValue, qname: String, v0: JSValue): FixedArray<boolean>;
+    native static Ai$a(top: JSValue, qname: String, v0: JSValue): FixedArray<int>;
+    native static An$a(top: JSValue, qname: String, v0: JSValue): FixedArray<double>;
+    native static AAn$a(top: JSValue, qname: String, v0: JSValue): FixedArray<FixedArray<double>>;
+    native static As$a(top: JSValue, qname: String, v0: JSValue): FixedArray<String>;
+    native static Ao$a(top: JSValue, qname: String, v0: JSValue): FixedArray<Object>;
 
-    native static ALBadClass$a(top: JSValue, qname: String, v0: JSValue): BadClass[];
+    native static ALBadClass$a(top: JSValue, qname: String, v0: JSValue): FixedArray<BadClass>;
 
     native static num$vn(fn: JSValue, rec: JSValue, a0: double): double;
 };
@@ -207,54 +207,54 @@ function testStringOps(): boolean {
 }
 
 function testBuiltinArrayAny(): boolean {
-    let v: JSValue[] = [JSRuntime.getUndefined(), JSRuntime.newJSValueDouble(1.23), JSRuntime.newJSValueString("foo"), JSRuntime.createObject()];
+    let v: FixedArray<JSValue> = [JSRuntime.getUndefined(), JSRuntime.newJSValueDouble(1.23), JSRuntime.newJSValueString("foo"), JSRuntime.createObject()];
     let r = "object:,1.23,foo,[object Object]";
     v = jscall.Aa$a(jsvars.m, ".identity", jscall.any$Aa(jsvars.m, ".identity", v));
     return r == vstringify(jscall.any$Aa(jsvars.m, ".identity", v));
 }
 function testBuiltinArrayBoolean(): boolean {
-    let v: boolean[] = [true, false, true];
+    let v: FixedArray<boolean> = [true, false, true];
     let r = "object:true,false,true";
     v = jscall.Ab$a(jsvars.m, ".identity", jscall.any$Ab(jsvars.m, ".identity", v));
     return r == vstringify(jscall.any$Ab(jsvars.m, ".identity", v));
 }
 function testBuiltinArrayInt(): boolean {
-    let v: int[] = [111, 222];
+    let v: FixedArray<int> = [111, 222];
     let r = "object:111,222";
     v = jscall.Ai$a(jsvars.m, ".identity", jscall.any$Ai(jsvars.m, ".identity", v));
     return r == vstringify(jscall.any$Ai(jsvars.m, ".identity", v));
 }
 function testBuiltinArrayNumber(): boolean {
-    let v: double[] = [11.1, 22.2];
+    let v: FixedArray<double> = [11.1, 22.2];
     let r = "object:11.1,22.2";
     v = jscall.An$a(jsvars.m, ".identity", jscall.any$An(jsvars.m, ".identity", v));
     return r == vstringify(jscall.any$An(jsvars.m, ".identity", v));
 }
 function testBuiltinArrayString(): boolean {
-    let v: String[] = ["foo0", "foo1"];
+    let v: FixedArray<String> = ["foo0", "foo1"];
     let r = "object:foo0,foo1";
     v = jscall.As$a(jsvars.m, ".identity", jscall.any$As(jsvars.m, ".identity", v));
     return r == vstringify(jscall.any$As(jsvars.m, ".identity", v));
 }
 function testBuiltinArrayObject(): boolean {
-    let v: Object[] = [JSRuntime.getUndefined(), JSRuntime.createObject(), "foo", 1, jsnew.$(jsvars.global, ".Number")];
+    let v: FixedArray<Object> = [JSRuntime.getUndefined(), JSRuntime.createObject(), "foo", 1, jsnew.$(jsvars.global, ".Number")];
     let r = "object:,[object Object],foo,1,0";
     v = jscall.Ao$a(jsvars.m, ".identity", jscall.any$Ao(jsvars.m, ".identity", v));
     return r == vstringify(jscall.any$Ao(jsvars.m, ".identity", v));
 }
 function testBuiltinArrayMultidim(): boolean {
-    let v: double[][] = [[11.1, 22.2], [33.3, 44.4]];
+    let v: FixedArray<FixedArray<double>> = [[11.1, 22.2], [33.3, 44.4]];
     let r = "object:11.1,22.2,33.3,44.4";
     v = jscall.AAn$a(jsvars.m, ".identity", jscall.any$AAn(jsvars.m, ".identity", v));
     return r == vstringify(jscall.any$AAn(jsvars.m, ".identity", v));
 }
 function testBuiltinArrayInstanceof(): boolean {
-    let v: int[] = [111, 222];
+    let v: FixedArray<int> = [111, 222];
     let ctor = JSRuntime.getPropertyJSValue(jsvars.global, "Array");
     return JSRuntime.instanceOfDynamic(jscall.any$Ai(jsvars.m, ".identity", v), ctor);
 }
 function testInitArrayComponent(): boolean {
-    let v: JSValue[] = [JSRuntime.getNull()];
+    let v: FixedArray<JSValue> = [JSRuntime.getNull()];
     let x = jscall.ALBadClass$a(jsvars.m, ".identity", jscall.any$Aa(jsvars.m, ".identity", v));
     return true;
 }
@@ -353,8 +353,8 @@ function testTypecheckGetProp(): boolean {
     JSRuntime.setPropertyDouble(obj, "prop", 1.23);
     try {
         JSRuntime.getPropertyString(obj, "prop");
-    } catch (e: ESError) {
-        return "object:TypeError: String expected" == vstringify(e.getJsError());
+    } catch (e: TypeError) {
+        return "object:TypeError: String expected" == vstringify(e);
     }
     throw unreachable();
 }
@@ -362,8 +362,8 @@ function testTypecheckGetProp(): boolean {
 function testTypecheckJscall(): boolean {
     try {
         jscall.str$n(jsvars.m, ".identity", 123);
-    } catch (e: ESError) {
-        return "object:TypeError: String expected" == vstringify(e.getJsError());
+    } catch (e: TypeError) {
+        return "object:TypeError: String expected" == vstringify(e);
     }
     throw unreachable();
 }
@@ -375,8 +375,8 @@ function testTypecheckCallets(): boolean {
         }
 
         jscall.num$an(jsvars.m, ".applyArgs", etsfn, 123);
-    } catch (e: ESError) {
-        return "object:TypeError: String expected" == vstringify(e.getJsError());
+    } catch (e: TypeError) {
+        return "object:TypeError: String expected" == vstringify(e);
     }
     throw unreachable();
 }
@@ -404,8 +404,8 @@ function testSetThrows(): boolean {
 function testJscallResolutionThrows1(): boolean {
     try {
         jscall.void$(jsvars.m, ".Nonexisting");
-    } catch (e: ESError) {
-        return "object:TypeError: call target is not a function" == vstringify(e.getJsError());
+    } catch (e: TypeError) {
+        return "object:TypeError: call target is not a function" == vstringify(e);
     }
     throw unreachable();
 }
@@ -413,8 +413,8 @@ function testJscallResolutionThrows1(): boolean {
 function testJscallResolutionThrows2(): boolean {
     try {
         jscall.void$(jsvars.m, ".Nonexisting.Nonexsiting");
-    } catch (e: ESError) {
-        return "object:TypeError: Cannot convert undefined or null to object" == vstringify(e.getJsError());
+    } catch (e: TypeError) {
+        return "object:TypeError: Cannot convert undefined or null to object" == vstringify(e);
     }
     throw unreachable();
 }
@@ -432,7 +432,7 @@ function testJscallResolutionThrows3(): boolean {
 function gcJsruntimeCleanup(): void {
     try {
         // trigger FinalizationRegistry cleanup
-        let fullGcId = GC.startGC(GC.FULL_CAUSE, GC.IN_PLACE_MODE);
+        let fullGcId = GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE);
         // We need to switch from main coroutine to coroutine created by FinalizationRegistry because
         // if main coro is executed first, the test will return false
         Coroutine.Schedule();

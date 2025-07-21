@@ -22,6 +22,8 @@ class ClassCallStaticMethodByNameDoubleTest : public AniTest {
 public:
     static constexpr ani_double VAL1 = 1.5;
     static constexpr ani_double VAL2 = 2.5;
+    static constexpr ani_int VAL3 = 5;
+    static constexpr ani_int VAL4 = 6;
     static constexpr size_t ARG_COUNT = 2U;
 
     void GetMethodData(ani_class *clsResult)
@@ -37,6 +39,23 @@ public:
         va_start(args, value);
         ASSERT_EQ(env_->Class_CallStaticMethodByName_Double_V(cls, name, "DD:D", value, args), ANI_OK);
         va_end(args);
+    }
+
+    void TestCombineScene(const char *className, const char *methodName, ani_double expectedValue)
+    {
+        ani_class cls {};
+        ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
+
+        ani_double value = 0.0;
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Double(cls, methodName, "DD:D", &value, VAL1, VAL2), ANI_OK);
+        ASSERT_EQ(value, expectedValue);
+
+        ani_value args[2U];
+        args[0U].d = VAL1;
+        args[1U].d = VAL2;
+        ani_double valueA = 0.0;
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Double_A(cls, methodName, "DD:D", &valueA, args), ANI_OK);
+        ASSERT_EQ(valueA, expectedValue);
     }
 };
 
@@ -89,6 +108,8 @@ TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_double_by_name_
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Double(cls, nullptr, nullptr, &sum, VAL1, VAL2), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Double(cls, "sum_not_exist", nullptr, &sum, VAL1, VAL2),
               ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Double(cls, "", nullptr, &sum, VAL1, VAL2), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Double(cls, "\n", nullptr, &sum, VAL1, VAL2), ANI_NOT_FOUND);
 }
 
 TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_by_name_double_null_result)
@@ -121,6 +142,8 @@ TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_by_name_double_
     ani_double sum = 0.0;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Double_A(cls, nullptr, nullptr, &sum, args), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Double_A(cls, "sum_not_exist", nullptr, &sum, args), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Double_A(cls, "", nullptr, &sum, args), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Double_A(cls, "\n", nullptr, &sum, args), ANI_NOT_FOUND);
 }
 
 TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_by_name_double_A_null_result)
@@ -241,6 +264,123 @@ TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_by_name_double_
     ani_double valueV = 0.0;
     TestFuncV(cls, "funcA", &valueV, VAL1, VAL2);
     ASSERT_EQ(valueV, VAL2 - VAL1);
+}
+
+TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_by_name_double_null_env)
+{
+    ani_class cls {};
+    GetMethodData(&cls);
+
+    ani_double value = 0.0;
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Double(nullptr, cls, "or", nullptr, &value, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ani_value args[2U];
+    args[0U].d = VAL1;
+    args[1U].d = VAL2;
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Double_A(nullptr, cls, "or", nullptr, &value, args),
+              ANI_INVALID_ARGS);
+}
+
+TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_by_name_double_combine_scenes_5)
+{
+    ani_class clsA {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_double_test/A;", &clsA), ANI_OK);
+    ani_class clsB {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_double_test/B;", &clsB), ANI_OK);
+
+    ani_double valueA = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Double(clsA, "funcA", "DD:D", &valueA, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(valueA, VAL1 + VAL2);
+    ani_double valueB = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Double(clsB, "funcB", "DD:D", &valueB, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(valueB, VAL2 - VAL1);
+
+    ani_value args[2U];
+    args[0U].d = VAL1;
+    args[1U].d = VAL2;
+    ani_double valueAA = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Double_A(clsA, "funcA", "DD:D", &valueAA, args), ANI_OK);
+    ASSERT_EQ(valueAA, VAL1 + VAL2);
+    ani_double valueBA = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Double_A(clsB, "funcB", "DD:D", &valueBA, args), ANI_OK);
+    ASSERT_EQ(valueBA, VAL2 - VAL1);
+}
+
+TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_by_name_double_combine_scenes_6)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_double_test/A;", &cls), ANI_OK);
+    ani_double value = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Double(cls, "funcA", "DD:D", &value, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(value, VAL1 + VAL2);
+
+    ani_value args[2U];
+    args[0U].d = VAL1;
+    args[1U].d = VAL2;
+    ani_double valueA = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Double_A(cls, "funcA", "DD:D", &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, VAL1 + VAL2);
+
+    ani_int value2 = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Int(cls, "funcA", "II:I", &value2, VAL3, VAL4), ANI_OK);
+    ASSERT_EQ(value2, VAL3 + VAL4);
+}
+
+TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_by_name_double_combine_scenes_7)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_double_test/A;", "funcB", VAL1 + VAL2);
+}
+
+TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_by_name_double_combine_scenes_8)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_double_test/C;", "funcA", VAL1 + VAL2);
+}
+
+TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_by_name_double_combine_scenes_9)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_double_test/D;", "funcA", VAL2 - VAL1);
+}
+
+TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_by_name_double_combine_scenes_10)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_double_test/E;", "funcA", VAL1 + VAL2);
+}
+
+TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_by_name_double_combine_scenes_11)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_double_test/F;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "increment", nullptr, VAL1, VAL2), ANI_OK);
+    ani_double value = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Double(cls, "getCount", nullptr, &value), ANI_OK);
+    ASSERT_EQ(value, VAL1 + VAL2);
+
+    ani_value args[2U];
+    args[0U].d = VAL1;
+    args[1U].d = VAL2;
+    ani_double valueA = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Double_A(cls, "getCount", nullptr, &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, VAL1 + VAL2);
+}
+
+TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_by_name_double_combine_scenes_12)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_double_test/G;", &cls), ANI_OK);
+    ani_double value = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Double(cls, "publicMethod", "DD:D", &value, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(value, VAL1 + VAL2);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Double(cls, "callPrivateMethod", "DD:D", &value, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(value, VAL2 - VAL1);
+
+    ani_value args[2U];
+    args[0U].d = VAL1;
+    args[1U].d = VAL2;
+    ani_double valueA = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Double_A(cls, "publicMethod", "DD:D", &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, VAL1 + VAL2);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Double_A(cls, "callPrivateMethod", "DD:D", &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, VAL2 - VAL1);
 }
 }  // namespace ark::ets::ani::testing
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

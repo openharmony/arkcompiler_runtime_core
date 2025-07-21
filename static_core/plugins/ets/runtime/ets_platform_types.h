@@ -23,11 +23,15 @@ namespace ark::ets {
 class EtsClass;
 class EtsMethod;
 class EtsCoroutine;
+template <typename T>
+class EtsTypedObjectArray;
 
 // A set of types defined and used in platform implementation, owned by the VM
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 class PANDA_PUBLIC_API EtsPlatformTypes {
 public:
+    static constexpr uint32_t ASCII_CHAR_TABLE_SIZE = 128;
+    EtsClass *coreString {};  // IsStringClass
     EtsClass *coreBoolean;
     EtsClass *coreByte;
     EtsClass *coreChar;
@@ -36,6 +40,8 @@ public:
     EtsClass *coreLong;
     EtsClass *coreFloat;
     EtsClass *coreDouble;
+
+    EtsClass *coreObject;
 
     EtsClass *escompatBigint;
     EtsClass *coreFunction;
@@ -73,18 +79,38 @@ public:
     EtsClass *coreRuntimeLinker;
     EtsClass *coreBootRuntimeLinker;
     EtsClass *coreAbcRuntimeLinker;
+    EtsClass *memoryRuntimeLinker;
     EtsClass *coreAbcFile;
 
     EtsClass *coreField;
     EtsClass *coreMethod;
     EtsClass *coreParameter;
 
-    EtsClass *escompatSharedMemory;
+    EtsClass *escompatRecord;
+    EtsMethod *escompatRecordGetter;
+    EtsMethod *escompatRecordSetter;
+
+    EtsClass *escompatProcess;
+    EtsMethod *escompatProcessListUnhandledJobs;
+    EtsMethod *escompatProcessListUnhandledPromises;
+
+    EtsClass *coreTuple;
+    EtsClass *escompatRegExpExecArray;
+    EtsClass *escompatJsonReplacer;
+
+    /* Internal Caches */
+    void InitializeCaches();
+    void VisitRoots(const GCRootVisitor &visitor) const;
+    void UpdateCachesVmRefs(const GCRootUpdater &updater) const;
+    EtsTypedObjectArray<EtsString> *GetAsciiCacheTable() const
+    {
+        return asciiCharCache_;
+    }
 
 private:
     friend class EtsClassLinkerExtension;
     friend class mem::Allocator;
-
+    mutable EtsTypedObjectArray<EtsString> *asciiCharCache_ {nullptr};
     explicit EtsPlatformTypes(EtsCoroutine *coro);
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
@@ -92,6 +118,7 @@ private:
 // Obtain EtsPlatformTypes pointer cached in the coroutine
 ALWAYS_INLINE inline EtsPlatformTypes const *PlatformTypes(EtsCoroutine *coro)
 {
+    ASSERT(coro != nullptr);
     return coro->GetLocalStorage().Get<EtsCoroutine::DataIdx::ETS_PLATFORM_TYPES_PTR, EtsPlatformTypes *>();
 }
 

@@ -30,6 +30,8 @@ execution can be interrupted by the occurrence of situations of two kinds:
    not exist on a specified path, read permissions are not available,
    or else).
 
+The term *error* in this specification denotes all kinds of error situations.
+
 .. index::
    execution
    null pointer dereferencing
@@ -41,13 +43,6 @@ execution can be interrupted by the occurrence of situations of two kinds:
    completion failure
    path
    read permission
-
-The term *error* in this specification denotes all kinds of error situations.
-
-.. index::
-   runtime error
-   failure
-   runtime
 
 |
 
@@ -109,11 +104,11 @@ Errors are handled by using ``try`` statements (see :ref:`Try Statements`).
 **Note**. Not every error can be recovered.
 
 .. index::
-   compile-time error
    runtime system
+   standard libraty
    generic class
    subclass
-   error
+   error situation
    throw statement
    error
    try statement

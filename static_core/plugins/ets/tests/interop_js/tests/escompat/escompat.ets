@@ -20,7 +20,7 @@ package escompat_test
 function GCJSRuntimeCleanup(): void {
     try {
         // trigger FinalizationRegistry cleanup
-        let full_gc_id = GC.startGC(GC.FULL_CAUSE);
+        let full_gc_id = GC.startGC(GC.Cause.FULL);
         GC.waitForFinishGC(full_gc_id);
     } catch (e) {
         assertTrue( false, "Unexpected exception during GC");
@@ -68,7 +68,7 @@ function Array_TestJSPop(arr: Array<FooClass>): void {
 
 function Array_TestJSSort(arr: Array<FooClass>): void {
     let comparator: (a: FooClass, b: FooClass) => number = (a: FooClass, b: FooClass): number => {
-        return a.toString().compareTo(b.toString()) as number;
+        return Int.toDouble(a.toString().compareTo(b.toString()));
     }
     arr.sort(comparator);
     assertEQ( arr.at(1)!.toString(), "{Foo named zero}");
@@ -76,7 +76,7 @@ function Array_TestJSSort(arr: Array<FooClass>): void {
 
 function Array_TestJSToSorted(arr: Array<FooClass>): void {
     let comparator: (a: FooClass, b: FooClass) => number = (a: FooClass, b: FooClass): number => {
-        return a.toString().compareTo(b.toString()) as number;
+        return Int.toDouble(a.toString().compareTo(b.toString()));
     }
     let toSorted = arr.toSorted(comparator);
     assertEQ( toSorted.at(1)!.toString(), "{Foo named zero}");
@@ -261,10 +261,10 @@ function Array_TestJSFindIndex(arr: Array<FooClass>): void {
     let fnTrue: (v: FooClass) => boolean = (v: FooClass): boolean => { return true; }
     let fnFalse: (v: FooClass) => boolean = (v: FooClass): boolean => { return false; }
 
-    let found: int = arr.findIndex(fnTrue) as int;
+    let found: int = Double.toInt(arr.findIndex(fnTrue));
     assertEQ( found, 0) ;
 
-    let not_found: int = arr.findIndex(fnFalse) as int;
+    let not_found: int = Double.toInt(arr.findIndex(fnFalse));
     assertEQ( not_found, -1 );
 }
 
@@ -341,28 +341,32 @@ function Error_CreateEtsSampleWithCause(): Error {
     return new Error("message", new ErrorOptions("cause"));
 }
 
-function ArrayBuffer_TestJSLength(arr: ArrayBuffer): void {
+function ArrayBuffer_TestJSLength(dynArr: Any): void {
+    let arr = InteropTransferHelper.transferArrayBufferToStatic(dynArr) as ArrayBuffer;
     assertTrue( (arr as Object) instanceof ArrayBuffer);
     assertEQ( arr.byteLength, 32 );
 }
 
-function ArrayBuffer_TestJSIsView(arr: ArrayBuffer): void {
+function ArrayBuffer_TestJSIsView(dynArr: Any): void {
+    let arr = InteropTransferHelper.transferArrayBufferToStatic(dynArr) as ArrayBuffer;
     assertTrue( !ArrayBuffer.isView(arr) );
     assertTrue( ArrayBuffer.isView(new Int8Array(arr)) );
 }
 
-function ArrayBuffer_TestJSSlice(arr: ArrayBuffer): void {
-    let sliced = arr.slice(8, 24);
+function ArrayBuffer_TestJSSlice(dynArr: Any): void {
+    let arr = InteropTransferHelper.transferArrayBufferToStatic(dynArr) as ArrayBuffer;
+    let sliced = arr.slice(8 as int, 24 as int); // workaround for #26000
     assertEQ( sliced.byteLength, 16 );
 }
 
-function ArrayBuffer_TestJSResize(arr: ArrayBuffer): void {
+function ArrayBuffer_TestJSResize(dynArr: Any): void {
+    let arr = InteropTransferHelper.transferArrayBufferToStatic(dynArr) as ArrayBuffer;
     // NOTE(dslynko, #23919): finalize semantics of resizable ArrayBuffers
     assertEQ(arr.resizable, false);
 }
 
-function ArrayBuffer_CreateEtsSample(): ArrayBuffer {
-    return new ArrayBuffer(32, 32);
+function ArrayBuffer_CreateEtsSample(): Any {
+    return InteropTransferHelper.transferArrayBufferToDynamic(new ArrayBuffer(32, 32));
 }
 
 function JSON_stringify_jsv(x: JSValue) {

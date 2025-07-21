@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@ namespace ark::mem {
  * The ref collection has limited size. If there is no room in the ref collection
  * the whole object is put to the object collection.
  */
-template <class LanguageConfig>
+template <class LanguageConfig, bool FAST_GC = false>
 class RefCacheBuilder {
     using RefVector = typename G1GC<LanguageConfig>::RefVector;
 
@@ -45,15 +45,18 @@ public:
             // There is no room to store references.
             // Create a new vector and store everithing inside it
             auto *newRefVector = gc_->GetInternalAllocator()->template New<RefVector>();
+            ASSERT(newRefVector != nullptr);
             newRefVector->reserve(refVector->capacity() * 2U);
             refs_->push_back(newRefVector);
             refVector = newRefVector;
         }
         ASSERT(refVector->size() < refVector->capacity());
-        // There is room to store references
-        ASSERT(objectsStack_ != nullptr);
-        if (gc_->mixedMarker_.MarkIfNotMarkedInCollectionSet(field)) {
-            objectsStack_->PushToStack(object, field);
+        if constexpr (!FAST_GC) {
+            // There is room to store references
+            ASSERT(objectsStack_ != nullptr);
+            if (gc_->mixedMarker_.MarkIfNotMarkedInCollectionSet(field)) {
+                objectsStack_->PushToStack(object, field);
+            }
         }
         refVector->emplace_back(object, offset);
         return true;

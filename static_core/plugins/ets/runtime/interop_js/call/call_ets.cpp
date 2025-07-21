@@ -74,6 +74,7 @@ private:
 };
 
 template <bool IS_STATIC>
+// CC-OFFNXT(huge_method) solid logic
 ALWAYS_INLINE inline bool CallETSHandler::ConvertArgs(Span<Value> etsArgs)
 {
     HandleScope<ObjectHeader *> etsHandleScope(coro_);
@@ -81,7 +82,11 @@ ALWAYS_INLINE inline bool CallETSHandler::ConvertArgs(Span<Value> etsArgs)
         return reinterpret_cast<ObjectHeader **>(VMHandle<ObjectHeader>(coro, val).GetAddress());
     };
 
-    [[maybe_unused]] ObjectHeader **thisObjRoot = IS_STATIC ? nullptr : createRoot(thisObj_->GetCoreType());
+    [[maybe_unused]] ObjectHeader **thisObjRoot = nullptr;
+    if (!IS_STATIC) {
+        ASSERT(thisObj_ != nullptr);
+        thisObjRoot = createRoot(thisObj_->GetCoreType());
+    }
 
     using ArgValueBox = std::variant<uint64_t, ObjectHeader **>;
     auto const numArgs = protoReader_.GetMethod()->GetNumArgs() - !IS_STATIC;
@@ -90,7 +95,6 @@ ALWAYS_INLINE inline bool CallETSHandler::ConvertArgs(Span<Value> etsArgs)
 
     // Convert and store in root if necessary
     for (uint32_t argIdx = 0; argIdx < numNonRest; ++argIdx, protoReader_.Advance()) {
-        auto jsVal = jsargv_[argIdx];
         auto store = [&etsBoxedArgs, &argIdx, createRoot](auto val) {
             if constexpr (std::is_pointer_v<decltype(val)> || std::is_null_pointer_v<decltype(val)>) {
                 etsBoxedArgs[argIdx] = createRoot(val);
@@ -98,8 +102,17 @@ ALWAYS_INLINE inline bool CallETSHandler::ConvertArgs(Span<Value> etsArgs)
                 etsBoxedArgs[argIdx] = static_cast<uint64_t>(val);
             }
         };
-        if (UNLIKELY(!ConvertArgToEts(ctx_, protoReader_, store, jsVal))) {
-            return false;
+
+        if (argIdx >= jsargv_.size()) {
+            // for the non-present args, set them to nullptr
+            // `nullptr` stand for undefined here
+            store(nullptr);
+        } else {
+            auto jsVal = jsargv_[argIdx];
+
+            if (UNLIKELY(!ConvertArgToEts(ctx_, protoReader_, store, jsVal))) {
+                return false;
+            }
         }
     }
 
@@ -114,6 +127,7 @@ ALWAYS_INLINE inline bool CallETSHandler::ConvertArgs(Span<Value> etsArgs)
 
     // Unbox values
     if constexpr (!IS_STATIC) {
+        ASSERT(thisObjRoot != nullptr);
         etsArgs[0] = Value(*thisObjRoot);
     }
     static constexpr size_t ETS_ARGS_DISP = IS_STATIC ? 0 : 1;
@@ -133,8 +147,6 @@ ALWAYS_INLINE inline bool CallETSHandler::ConvertArgs(Span<Value> etsArgs)
 ObjectHeader **CallETSHandler::ConvertRestParams(Span<napi_value> restArgs)
 {
     ASSERT(protoReader_.GetType().IsReference());
-    ASSERT(protoReader_.GetClass()->IsArrayClass());
-
     return PackRestParameters(coro_, ctx_, protoReader_, restArgs);
 }
 
@@ -142,11 +154,21 @@ bool CallETSHandler::CheckNumArgs(size_t numArgs) const
 {
     const auto method = protoReader_.GetMethod();
     bool const hasRestParams = method->HasVarArgs();
+    auto const numMandatoryParams = EtsMethod::FromRuntimeMethod(const_cast<Method *>(method))->GetNumMandatoryArgs();
     ASSERT((hasRestParams && numArgs > 0) || !hasRestParams);
 
-    if ((hasRestParams && (numArgs - 1) > jsargv_.size()) || (!hasRestParams && numArgs != jsargv_.size())) {
+    // handle fast path: if the js argv of args is equal to numArgs
+    // then the check is passed
+    if (jsargv_.size() >= numArgs) {
+        return true;
+    }
+
+    // handle slow path
+    if (jsargv_.size() < numMandatoryParams) {
         std::string msg = "CallEtsFunction: wrong argc, ets_argc=" + std::to_string(numArgs) +
-                          " js_argc=" + std::to_string(jsargv_.size()) + " ets_method='" +
+                          " js_argc=" + std::to_string(jsargv_.size()) +
+                          " hasRestParam=" + std::to_string(static_cast<int>(hasRestParams)) +
+                          " numMandatoryParams=" + std::to_string(numMandatoryParams) + " ets_method='" +
                           std::string(method->GetFullName(true)) + "'";
         InteropCtx::ThrowJSTypeError(ctx_->GetJSEnv(), msg);
         return false;
@@ -182,6 +204,8 @@ napi_value CallETSHandler::HandleImpl()
     protoReader_.Reset();
     napi_value jsRes;
     auto readVal = [&etsRes](auto typeTag) { return etsRes.GetAs<typename decltype(typeTag)::type>(); };
+    // scope is required to ConvertRefArgToJS
+    HandleScope<ObjectHeader *> scope(coro_);
     if (UNLIKELY(!ConvertArgToJS(ctx_, protoReader_, &jsRes, readVal))) {
         return ForwardException(ctx_, coro_);
     }

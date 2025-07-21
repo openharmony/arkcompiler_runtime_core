@@ -18,14 +18,14 @@ package indirect_call_test_type_ref
 function GCJSRuntimeCleanup(): void {
     try {
         // trigger FinalizationRegistry cleanup
-        let full_gc_id = GC.startGC(GC.FULL_CAUSE);
+        let full_gc_id = GC.startGC(GC.Cause.FULL);
         GC.waitForFinishGC(full_gc_id);
     } catch (e) {
         assertTrue(false, "Unexpected exception during GC");
     }
 }
 
-function function_type_ref_array(arg: number[]): number[] {
+function function_type_ref_array(arg: FixedArray<number>): FixedArray<number> {
     return [...arg];
 }
 

@@ -15,8 +15,45 @@
 
 package escompat
 
+// initialized in _initializerBlock_.ets
+const BigIntType: Type;
 
-const BigIntType: Type = Type.of(new BigInt())
+export interface JsonReplacer {
+    jsonReplacer(): Record<String, NullishType>
+}
+
+// NOTE (chengzhihao): $Partial is not generated for exported interfaces.issue #26111
+// now use this class to throw the error.
+export class JsonReplacerTemp implements JsonReplacer {
+    jsonReplacer(): Record<String, NullishType> {
+        throw new Error("frontend bug");
+    }
+}
+
+export @interface JSONRename {
+    newName: string
+}
+
+export @interface JSONStringifyIgnore {
+}
+
+export @interface JSONParseIgnore {
+}
+
+class JSONAPI {
+    /*
+        JSON intrinsics
+    */
+    native static getJSONStringifyIgnoreByIdx(cls: Class, idx: long): boolean
+
+    native static getJSONStringifyIgnoreByName(cls: Class, name: string): boolean
+
+    native static getJSONParseIgnoreFromAnnotation(cls: Class, idx: long): boolean
+
+    native static getJSONRenameByIdx(cls: Class, idx: long): string | undefined
+
+    native static getJSONRenameByName(cls: Class, name: string): string | undefined
+}
 
 export class JSON {
     /**
@@ -129,8 +166,8 @@ export class JSON {
         return "false"
     }
 
-    private static readonly ESCAPED_CHARS: char[] = [c'\"', c'\\', c'\b', c'\f', c'\n', c'\r', c'\t']
-    private static readonly NON_ESCAPED_CHARS: char[] = [c'"', c'\\', c'b', c'f', c'n', c'r', c't']
+    private static readonly ESCAPED_CHARS: FixedArray<char> = [c'\"', c'\\', c'\b', c'\f', c'\n', c'\r', c'\t']
+    private static readonly NON_ESCAPED_CHARS: FixedArray<char> = [c'"', c'\\', c'b', c'f', c'n', c'r', c't']
     private static readonly JSON_SPACE_INDENT_LIMIT = 10
 
     /**
@@ -206,7 +243,21 @@ export class JSON {
      * @returns String - JSON representation of Object
      */
     public static stringify(obj: NullishType): String {
+        if (obj === undefined) {
+            return "undefined"
+        }
+        let output = JSON.stringifyFast(obj)
+        if (output !== undefined) {
+            return output
+        }
         return new JSONWriter().write(obj)
+    }
+
+    private static native stringifyFast(obj: NullishType): String;
+
+    public static stringify(obj: JsonReplacer): String {
+        const record = obj.jsonReplacer();
+        return JSON.stringify(record);
     }
 
     /**
@@ -578,6 +629,7 @@ class JSONWriter {
     private static readonly STD_CORE_INTEROP_JSVALUE_TYPE = (Type.of([] as FixedArray<JSValue>) as ArrayType).getElementType()
     private static readonly ESCOMPAT_ARRAY_TYPE = Type.of(new Array<Object>(0))
     private static readonly ESCOMPAT_SET_TYPE = Type.of(new Set<Object>())
+    private static readonly ESCOMPAT_MAP_TYPE = Type.of(new Map<Object, Object>())
     private static readonly STD_CORE_PROMISE_TYPE = Type.of(new Promise<Object>((res) => {}))
 
     private readonly replacer: ((key: String, value: NullishType) => NullishType) | undefined
@@ -624,6 +676,7 @@ class JSONWriter {
     }
 
     private writeObject(obj: NullishType): void {
+        obj = __narrowAny(obj)
         if (obj === null) {
             this.buffer.append("null")
         } else if (obj === undefined) {
@@ -635,9 +688,10 @@ class JSONWriter {
         } else if(obj instanceof Tuple) {
             this.writeTupleValue(obj);
         } else if (obj instanceof Record) {
-            this.writeRecord(obj as Object as Record<string, NullishType>);
-        } else if (obj instanceof Map) {
-            this.buffer.append("{}")
+            this.writeESCompatRecord(obj)
+        } else if (obj instanceof JsonReplacer) {
+            let temp: Record<String, NullishType> = obj.jsonReplacer()
+            this.writeESCompatRecord(temp)
         } else if (this.writeValueTypeWrapper(obj)) {
             // nothing to do - write completed successfully
         } else {
@@ -650,8 +704,9 @@ class JSONWriter {
             } else if (objType.getName() == JSONWriter.ESCOMPAT_ARRAY_TYPE.getName()) {
                 this.writeEscompatArray(obj as Array<Object>)
             } else if (objType.getName() == JSONWriter.ESCOMPAT_SET_TYPE.getName() ||
-                       objType.getName() == JSONWriter.STD_CORE_PROMISE_TYPE.getName()) {
-                this.buffer.append("{}")
+                       objType.getName() == JSONWriter.STD_CORE_PROMISE_TYPE.getName() ||
+                       objType.getName() == JSONWriter.ESCOMPAT_MAP_TYPE.getName()) {
+                this.buffer.append(JSONObject.EMPTY)
             } else if (objType instanceof ClassType) {
                 this.writeClassValue(obj, objType as ClassType)
             } else if (objType instanceof LambdaType) {
@@ -728,29 +783,106 @@ class JSONWriter {
         return fieldDumped
     }
 
-    private writeRecord(rec: Record<string, NullishType>): void {
-        this.buffer.append("{");
-        this.checkReferencesCycle(rec);
-        this.path.add(rec);
-        let isFirst = true;
-        for (let key of rec.keys()) {
-            if (rec[key] !== undefined) {
-                if (!isFirst) {
-                    this.buffer.append(",");
-                } else {
-                    isFirst = false;
-                }
-                this.buffer.append(JSON.stringify(key as String));
-                this.buffer.append(":");
-                this.writeObject(rec[key]);
-            }
+    private writeESCompatRecord<K extends Numeric | string, V>(record: Record<K, V>): void {
+        const currentBuffer = this.buffer
+        this.buffer = new StringBuilder("{")
+
+        if (this.useIndent) {
+            this.buffer.append("\n")
+            this.indentLevel += 1
         }
-        this.path.delete(rec);
-        this.buffer.append("}");
+
+        this.path.add(record)
+
+        let entryDumped = false
+        if (this.useFieldsFilter) {
+            const writableEntries = this.getRecordWritableEntries(record)
+
+            const ENTRY_KEY = 0
+            const ENTRY_VAL = 1
+            for (const entry of writableEntries) {
+                const entryKey = entry[ENTRY_KEY]
+                const entryVal = entry[ENTRY_VAL]
+                entryDumped = this.writeRecordEntry(entryKey, entryVal, entryDumped)
+            }
+        } else {
+            record.forEach((entryVal: V, entryKey: K) => {
+                entryDumped = this.writeRecordEntry(entryKey, entryVal, entryDumped)
+            })
+        }
+
+        this.path.delete(record)
+
+        if (this.useIndent) {
+            this.indentLevel -= 1
+            this.buffer.append("\n")
+        }
+
+        this.writePadding()
+        this.buffer.append("}")
+
+        currentBuffer.append(entryDumped ? this.buffer.toString() : "{}")
+
+        this.buffer = currentBuffer
+    }
+
+    private getRecordWritableEntries<K extends Numeric | string, V>(record: Record<K, V>): Array<[K, V]> {
+        // 'entry name' -> output position index
+        const entryNamePos = new Map<string, int>()
+        for (let idx = 0; idx < this.fieldsFilter.length; idx++) {
+            const entryName = this.fieldsFilter[idx]
+            entryNamePos.set(entryName, idx)
+        }
+
+        // 'entry key' -> output position index
+        const entryKeyPos = new Array<[K, int]>
+        for (const entryKey of record.keys()) {
+            const entryName = (entryKey as object).toString()
+            const entryPos = entryNamePos.get(entryName)
+            if (entryPos === undefined) {
+                continue
+            }
+
+            const entryKeyPosPair: [K, int] = [entryKey, entryPos]
+            entryKeyPos.push(entryKeyPosPair)
+        }
+
+        // sorting 'filtered in' entries by position
+        const ENTRY_POS = 1
+        entryKeyPos.sort((pos1: [K, int], pos2: [K, int]) => {
+            const entry1Pos = pos1[ENTRY_POS]
+            const entry2Pos = pos2[ENTRY_POS]
+            return (entry1Pos < entry2Pos) ? -1 : ((entry1Pos > entry2Pos) ? 1 : 0)
+        })
+
+        const writableEntries = new Array<[K, V]>()
+
+        const ENTRY_KEY = 0
+        for (const entry of entryKeyPos) {
+            const entryKey = entry[ENTRY_KEY]
+            const entryVal = record.get(entryKey) as V
+
+            const writableEntry: [K, V] = [entryKey, entryVal]
+            writableEntries.push(writableEntry)
+        }
+
+        return writableEntries
+    }
+
+    private writeRecordEntry<K extends Number | string, V>(entryKey: K, entryVal: V, entryDumped: boolean): boolean {
+        const entryValType = Type.of(entryVal)
+        if (entryValType instanceof LambdaType) {
+            return entryDumped
+        }
+
+        const entryName = (entryKey as object).toString()
+        const replacedVal = this.useReplacer ? this.replacer!(entryName, entryVal) : entryVal
+        return this.writeField(entryName, replacedVal, entryDumped)
     }
 
     private writeClassValue(obj: Object, objType: ClassType): void {
         const currentBuffer = this.buffer
+        // we need this local buffer to discard empty object prolog: '{','\n',<space> and replace it with '{}'
         this.buffer = new StringBuilder("{")
 
         if (this.useIndent) {
@@ -775,13 +907,39 @@ class JSONWriter {
         this.writePadding()
         this.buffer.append("}")
 
-        if (fieldDumped) {
-            currentBuffer.append(this.buffer.toString())
-        } else {
-            currentBuffer.append("{}")
-        }
+        currentBuffer.append(fieldDumped ? this.buffer.toString() : "{}")
 
         this.buffer = currentBuffer
+    }
+
+    private writeField(fieldName: string, fieldVal: NullishType, fieldDumped: boolean): boolean {
+        if (fieldVal === undefined) {
+            return fieldDumped
+        }
+
+        if (fieldDumped) {
+            this.buffer.append(",")
+            if (this.useIndent) {
+                this.buffer.append("\n")
+            }
+        } else {
+            fieldDumped = true
+        }
+
+        this.checkReferencesCycle(fieldVal)
+        this.writePadding()
+
+        this.buffer.append('"')
+        this.buffer.append(fieldName)
+        this.buffer.append('":')
+
+        if (this.useIndent) {
+            this.buffer.append(" ")
+        }
+
+        this.writeObject(fieldVal)
+
+        return fieldDumped
     }
 
     private writeClassFields(writableFields: Array<[Field, Value]>): boolean {
@@ -796,36 +954,26 @@ class JSONWriter {
             const objFieldValue = fieldTypeValuePair[FIELD_VALUE]
 
             const objToDump = this.useReplacer ? this.replacer!(objField.getName(), objFieldValue.getData()) : objFieldValue.getData()
-            if (objToDump !== undefined) {
-                if (fieldDumped) {
-                    this.buffer.append(",")
-                    if (this.useIndent) {
-                        this.buffer.append("\n")
-                    }
-                } else {
-                    fieldDumped = true
-                }
-
-                this.checkReferencesCycle(objToDump)
-                this.writePadding()
-
-                this.buffer.append('"')
-                this.buffer.append(objField.getName())
-                this.buffer.append('":')
-
-                if (this.useIndent) {
-                    this.buffer.append(" ")
-                }
-
-                this.writeObject(objToDump)
-            }
+            fieldDumped = this.writeField(objField.getName(), objToDump, fieldDumped)
         }
 
         return fieldDumped
     }
 
+    private checkSameRename(field: Field, fields: Array<[Field, Value]>): boolean {
+        return fields.some((value: [Field, Value], index: number, array:Array<[Field, Value]>)
+            => {return value[0].getName() == field.getName()});
+    }
+
+    private findKeyIndex(field: Field, fields: Array<[Field, Value]>): number {
+        return fields.findIndex((value: [Field, Value], index: number, array:Array<[Field, Value]>)
+            => {return value[0].getName() == field.getName()});
+    }
+
     private getWritableFields(classType: ClassType, classValue: ClassValue): Array<[Field, Value]> {
         const writableFields = new Array<[Field, Value]>()
+        let hasJsonIgnore: boolean = false
+        let fieldRename : string | undefined = undefined
 
         if (this.useFieldsFilter) {
             for (let fieldIdx = 0; fieldIdx < this.fieldsFilter.length; fieldIdx++) {
@@ -835,10 +983,22 @@ class JSONWriter {
                 }
 
                 const fieldType = classType.getFieldByName(fieldName)
-                if (!this.isWritableFieldType(fieldType)) {
+                hasJsonIgnore = JSONAPI.getJSONStringifyIgnoreByName(classType.cls, fieldName);
+                if (hasJsonIgnore || !this.isWritableFieldType(fieldType)) {
                     continue
                 }
 
+                fieldRename = JSONAPI.getJSONRenameByName(classType.cls, fieldName);
+                if (fieldRename != undefined) {
+                    if (classType.hasField(fieldRename)) {
+                        throw new Error("Cannot rename " + fieldRename + " in keys of " + classType.getName())
+                    } else {
+                        fieldType.name = fieldRename
+                    }
+                    if (this.checkSameRename(fieldType, writableFields)) {
+                        throw new Error("Cannot double rename " + fieldType.getName() + " in keys of " + classType.getName())
+                    }
+                }
                 const fieldValue = classValue.getFieldByName(fieldName)
 
                 const fieldTypeValuePair: [Field, Value] = [fieldType, fieldValue]
@@ -848,14 +1008,31 @@ class JSONWriter {
             const fieldsCount = classValue.getFieldsNum()
             for (let fieldIdx = 0; fieldIdx < fieldsCount; fieldIdx++) {
                 const fieldType = classType.getField(fieldIdx)
-                if (!this.isWritableFieldType(fieldType)) {
+                hasJsonIgnore = JSONAPI.getJSONStringifyIgnoreByIdx(classType.cls, fieldIdx)
+                if (hasJsonIgnore || !this.isWritableFieldType(fieldType)) {
                     continue
                 }
 
+                const index: number = this.findKeyIndex(fieldType, writableFields)
+                fieldRename = JSONAPI.getJSONRenameByIdx(classType.cls, fieldIdx);
+                if (fieldRename != undefined) {
+                    if (classType.hasField(fieldRename)) {
+                        throw new Error("Cannot rename " + fieldRename + " in keys of " + classType.getName())
+                    } else {
+                        fieldType.name = fieldRename
+                    }
+                    if (this.checkSameRename(fieldType, writableFields)) {
+                        throw new Error("Cannot double rename " + fieldType.getName() + " in keys of " + classType.getName())
+                    }
+                }
                 const fieldValue = classValue.getField(fieldIdx)
 
                 const fieldTypeValuePair: [Field, Value] = [fieldType, fieldValue]
-                writableFields.push(fieldTypeValuePair)
+                if (fieldRename != undefined || index == -1) {
+                    writableFields.push(fieldTypeValuePair)
+                } else {
+                    writableFields[index] = fieldTypeValuePair
+                }
             }
         }
 
@@ -882,7 +1059,7 @@ class JSONWriter {
 
         const arrayLength = arrayValue.getLength() as int
         if (arrayLength > 0) {
-            const array: Object = arrayValue.getData()!
+            const array: Object = __narrowAny(arrayValue.getData())!
 
             this.path.add(array)
 
@@ -1005,7 +1182,11 @@ class JSONWriter {
             return
         }
 
-        const cycleDetected = this.path.has(obj)
+        if (Type.of(obj).isPrimitive()) {
+            return
+        }
+
+        const cycleDetected = this.path.has(__narrowAny<object>(obj))
         if (cycleDetected) {
             throw new TypeError("cyclic object value")
         }
@@ -1292,7 +1473,7 @@ class JSONValueParser {
         } else if (typ instanceof DoubleType && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
             return new Double(value.value)
         } else if (typ instanceof IntType && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
-            return new Double(value.value).intValue()
+            return new Double(value.value).toInt()
         } else if (typ instanceof LongType && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
             return new Long().createFromJSONValue(value)
         } else if (typ instanceof ShortType && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
@@ -1346,16 +1527,30 @@ class JSONValueParser {
 
         let obj = classType.make()
         let classVal = Value.of(obj) as ClassValue
+        let hasJsonParseIgnore: boolean = false
+        let hasJsonStringifyIgnore: boolean = false
         const jsonObjFields = jsonObj.getFields()
         for (let field_num = 0; field_num < classType.getFieldsNum(); field_num++) {
             let classField = classType.getField(field_num)
-            if (classField.isStatic()) {
+            hasJsonParseIgnore = JSONAPI.getJSONParseIgnoreFromAnnotation(classType.cls, field_num);
+            if (hasJsonParseIgnore || classField.isStatic()) {
                 continue
             }
 
-            const jsonFieldVal = jsonObjFields.get(classField.getName())
+            let jsonFieldVal = jsonObjFields.get(classField.getName())
             if (jsonFieldVal === undefined) {
-                throw new Error("Cannot find " + classField.getName() + " in keys of " + classType.getName())
+                hasJsonStringifyIgnore = JSONAPI.getJSONStringifyIgnoreByIdx(classType.cls, field_num);
+                if (hasJsonStringifyIgnore) {
+                    continue
+                }
+                let fieldRename = JSONAPI.getJSONRenameByIdx(classType.cls, field_num);
+                if (fieldRename == undefined) {
+                    throw new Error("Cannot find " + classField.getName() + " in keys of " + classType.getName())
+                }
+                jsonFieldVal = jsonObjFields.get(fieldRename)
+                if (jsonFieldVal === undefined) {
+                    throw new Error("Cannot find rename " + fieldRename + " in keys of " + classType.getName())
+                }
             }
 
             const classFieldVal = this.parse(jsonFieldVal, classField.getType())
@@ -1395,6 +1590,7 @@ export class JSONObject extends JSONValue {
     readonly static END_CHAR = c'}'
     readonly static SEPARATOR = c':'
     readonly static DELIMETER = c','
+    readonly static EMPTY = "{}"
 
     getFields(): Map<String, JSONValue> {
         const propsCount = this.keys_.length

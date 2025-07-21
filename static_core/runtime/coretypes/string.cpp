@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,7 @@ String *String::CreateFromString(String *str, const LanguageContext &ctx, PandaV
     auto thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<String> strHandle(thread, str);
+    ASSERT(strHandle.GetPtr() != nullptr);
     auto string = AllocStringObject(strHandle->GetLength(), !strHandle->IsUtf16(), ctx, vm);
     if (string == nullptr) {
         return nullptr;
@@ -147,10 +148,10 @@ String *String::CreateFromUtf8(const uint8_t *utf8Data, uint32_t utf8Length, con
 }
 
 /* static */
-String *String::CreateFromUtf16(const uint16_t *utf16Data, uint32_t utf16Length, const LanguageContext &ctx,
-                                PandaVM *vm, bool movable, bool pinned)
+String *String::CreateFromUtf16(const uint16_t *utf16Data, uint32_t utf16Length, bool canBeCompressed,
+                                const LanguageContext &ctx, PandaVM *vm, bool movable, bool pinned)
 {
-    bool canBeCompressed = CanBeCompressed(utf16Data, utf16Length);
+    ASSERT(canBeCompressed == CanBeCompressed(utf16Data, utf16Length));
     auto string = AllocStringObject(utf16Length, canBeCompressed, ctx, vm, movable, pinned);
     if (string == nullptr) {
         return nullptr;
@@ -168,6 +169,14 @@ String *String::CreateFromUtf16(const uint16_t *utf16Data, uint32_t utf16Length,
     // String is supposed to be a constant object, so all its data should be visible by all threads
     arch::FullMemoryBarrier();
     return string;
+}
+
+/* static */
+String *String::CreateFromUtf16(const uint16_t *utf16Data, uint32_t utf16Length, const LanguageContext &ctx,
+                                PandaVM *vm, bool movable, bool pinned)
+{
+    bool compressable = CanBeCompressed(utf16Data, utf16Length);
+    return CreateFromUtf16(utf16Data, utf16Length, compressable, ctx, vm, movable, pinned);
 }
 
 /* static */
@@ -196,6 +205,7 @@ String *String::CreateNewStringFromChars(uint32_t offset, uint32_t length, Array
     auto thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<Array> arrayHandle(thread, chararray);
+    ASSERT(arrayHandle.GetPtr() != nullptr);
 
     // There is a potential data race between read of src in CanBeCompressed and write of destination buf
     // in CopyDataRegionUtf16. The src is a cast from chararray comming from managed object.
@@ -237,6 +247,7 @@ String *String::CreateNewStringFromBytes(uint32_t offset, uint32_t length, uint3
     auto thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<Array> arrayHandle(thread, bytearray);
+    ASSERT(arrayHandle.GetPtr() != nullptr);
 
     constexpr size_t BYTE_MASK = 0xFF;
 
@@ -894,6 +905,7 @@ String *String::DoReplace(String *src, uint16_t oldC, uint16_t newC, const Langu
     auto thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<String> srcHandle(thread, src);
+    ASSERT(srcHandle.GetPtr() != nullptr);
     auto string = AllocStringObject(length, canBeCompressed, ctx, vm);
     if (string == nullptr) {
         return nullptr;
@@ -944,6 +956,7 @@ String *String::FastSubString(String *src, uint32_t start, uint32_t utf16Length,
     auto thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<String> srcHandle(thread, src);
+    ASSERT(srcHandle.GetPtr() != nullptr);
     auto string = AllocStringObject(utf16Length, canBeCompressed, ctx, vm);
     if (string == nullptr) {
         return nullptr;
@@ -984,7 +997,8 @@ String *String::Concat(String *string1, String *string2, const LanguageContext &
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<String> str1Handle(thread, string1);
     VMHandle<String> str2Handle(thread, string2);
-
+    ASSERT(str1Handle.GetPtr() != nullptr);
+    ASSERT(str2Handle.GetPtr() != nullptr);
     uint32_t length1 = string1->GetLength();
     uint32_t length2 = string2->GetLength();
     uint32_t newLength = length1 + length2;

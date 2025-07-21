@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@ static void SaveCallerRegistersInFrame(RegMask mask, Encoder *encoder, const CFr
     auto fpReg = Target(fl.GetArch()).GetFrameReg();
 
     mask &= GetCallerRegsMask(fl.GetArch(), isFp);
-    auto startSlot = fl.GetStackStartSlot() + fl.GetCallerLastSlot(isFp);
+    auto startSlot = static_cast<size_t>(fl.GetStackStartSlot()) + fl.GetCallerLastSlot(isFp);
     encoder->SaveRegisters(mask, isFp, -startSlot, fpReg, GetCallerRegsMask(fl.GetArch(), isFp));
 }
 
@@ -39,7 +39,7 @@ static void RestoreCallerRegistersFromFrame(RegMask mask, Encoder *encoder, cons
     auto fpReg = Target(fl.GetArch()).GetFrameReg();
 
     mask &= GetCallerRegsMask(fl.GetArch(), isFp);
-    auto startSlot = fl.GetStackStartSlot() + fl.GetCallerLastSlot(isFp);
+    auto startSlot = static_cast<size_t>(fl.GetStackStartSlot()) + fl.GetCallerLastSlot(isFp);
     encoder->LoadRegisters(mask, isFp, -startSlot, fpReg, GetCallerRegsMask(fl.GetArch(), isFp));
 }
 
@@ -89,6 +89,7 @@ static bool InstHasRuntimeCall(const Inst *inst)
     }
     return false;
 }
+
 /*
  * We determine runtime calls manually, not using MethodProperties::HasRuntimeCalls, because we need to ignore
  * SLOW_PATH_ENTRY intrinsic, since it doesn't require LR to be preserved.
@@ -180,6 +181,7 @@ void CodegenFastPath::CreateFrameInfo()
         FrameInfo::PositionedCallers::Encode(true) | FrameInfo::PositionedCallees::Encode(false) |
         FrameInfo::CallersRelativeFp::Encode(true) | FrameInfo::CalleesRelativeFp::Encode(false) |
         FrameInfo::PushCallers::Encode(true));
+    ASSERT(frame != nullptr);
     frame->SetSpillsCount(GetGraph()->GetStackSlotsCount());
     CFrameLayout fl(GetGraph()->GetArch(), GetGraph()->GetStackSlotsCount(), false);
 
@@ -292,13 +294,10 @@ void CodegenFastPath::EmitMarkWordIntrinsic(IntrinsicInst *inst, Reg dst, SRCREG
 {
     auto intrinsic = inst->GetIntrinsicId();
     if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_LOAD_ACQUIRE_MARK_WORD_EXCLUSIVE) {
-        ASSERT(GetRuntime()->GetObjMarkWordOffset(GetArch()) == 0);
         GetEncoder()->EncodeLdrExclusive(dst, src[0], true);
     } else if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_STORE_RELEASE_MARK_WORD_EXCLUSIVE) {
-        ASSERT(GetRuntime()->GetObjMarkWordOffset(GetArch()) == 0);
         GetEncoder()->EncodeStrExclusive(dst, src[SECOND_OPERAND], src[0], true);
     } else if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_COMPARE_AND_SET_MARK_WORD) {
-        ASSERT(GetRuntime()->GetObjMarkWordOffset(GetArch()) == 0);
         GetEncoder()->EncodeCompareAndSwap(dst, src[0], src[SECOND_OPERAND], src[THIRD_OPERAND]);
     } else {
         UNREACHABLE();
@@ -397,5 +396,25 @@ void CodegenFastPath::EmitSlowPathEntryIntrinsic(IntrinsicInst *inst, [[maybe_un
 {
     ASSERT(inst->GetIntrinsicId() == RuntimeInterface::IntrinsicId::INTRINSIC_SLOW_PATH_ENTRY);
     CreateTailCall(inst, false);
+}
+
+void CodegenFastPath::EmitJsCastDoubleToCharIntrinsic([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(inst->GetIntrinsicId() == RuntimeInterface::IntrinsicId::INTRINSIC_JS_CAST_DOUBLE_TO_CHAR);
+    auto srcReg = src[FIRST_OPERAND];
+
+    CHECK_EQ(srcReg.GetSize(), BITS_PER_UINT64);
+    CHECK_EQ(dst.GetSize(), BITS_PER_UINT32);
+    dst = dst.As(INT32_TYPE);
+
+    auto enc {GetEncoder()};
+    if (g_options.IsCpuFeatureEnabled(CpuFeature::JSCVT)) {
+        // no failure may occur
+        enc->EncodeJsDoubleToCharCast(dst, srcReg);
+    } else {
+        constexpr uint32_t FAILURE_RESULT_FLAG = (1U << 16U);
+        ScopedTmpRegU32 tmp(enc);
+        enc->EncodeJsDoubleToCharCast(dst, srcReg, tmp, FAILURE_RESULT_FLAG);
+    }
 }
 }  // namespace ark::compiler

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 class Racer {
     static x: int = Racer.f();
 
@@ -40,7 +42,7 @@ function reader(): Int {
 
 function raceInTheCCtor(): void {
     for (let i = 0; i < 20; i++) {
-        launch reader();
+        launch<Int, () => Int>(reader);
     }
 }
 

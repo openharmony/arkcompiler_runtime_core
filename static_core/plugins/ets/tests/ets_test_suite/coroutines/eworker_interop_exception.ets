@@ -17,7 +17,7 @@ function main() {
     let exceptionWasCaught = false;
     try {
         let eaw : EAWorker = new EAWorker(true);
-        eaw.stop();
+        eaw.join();
     } catch (e) {
         if (e instanceof RuntimeException) {
             exceptionWasCaught = true;

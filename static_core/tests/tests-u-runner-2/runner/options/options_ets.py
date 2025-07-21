@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,7 @@
 
 import argparse
 from functools import cached_property
-from typing import Dict, Any, List
+from typing import Any
 
 from runner.options.options import IOptions
 
@@ -29,7 +29,7 @@ class ETSOptions(IOptions):
     __COMPARE_FILES_ITERATIONS = "compare-files-iterations"
     __DEFAULT_COMPARE_FILES_ITERATIONS = 2
 
-    def __init__(self, parameters: Dict[str, Any]):
+    def __init__(self, parameters: dict[str, Any]): # type: ignore[explicit-any]
         super().__init__(parameters)
         self.__parameters = parameters
 
@@ -62,6 +62,6 @@ class ETSOptions(IOptions):
         return int(self.__parameters[self.__COMPARE_FILES_ITERATIONS])
 
     def get_command_line(self) -> str:
-        options: List[str] = [
+        options: list[str] = [
         ]
         return ' '.join(options)

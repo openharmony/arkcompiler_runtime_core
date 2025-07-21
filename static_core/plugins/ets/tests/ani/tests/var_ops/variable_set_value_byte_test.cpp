@@ -116,7 +116,7 @@ TEST_F(VariableSetValueByteTest, composite_case_2)
     ASSERT_EQ(env_->Namespace_FindVariable(ns_, "aByte", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);
 
-    const ani_byte values[] = {40U, 60U, 90U};
+    const ani_byte values[] = {40U, 0, -10};
     ani_byte result = 0;
     for (ani_byte value : values) {
         ASSERT_EQ(env_->Variable_SetValue_Byte(variable, value), ANI_OK);

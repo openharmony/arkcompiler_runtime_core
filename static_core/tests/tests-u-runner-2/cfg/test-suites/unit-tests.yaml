@@ -14,8 +14,8 @@
 version: 0.0.0.1
 type: test-suite
 suite-name: unit-tests
-test-root: ${PANDA_SOURCE_PATH}/runtime_core/static_core/plugins/ets/tests
-list-root: ${PANDA_SOURCE_PATH}/runtime_core/static_core/plugins/ets/tests/test-lists/unit-tests
+test-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests
+list-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/test-lists/unit-tests
 
 parameters:
     extension: ets
@@ -23,17 +23,14 @@ parameters:
     work-dir: ${WORK_DIR}/${suite-name}
 
 collections:
-    common:
-    ets_test_suite/arrays:
-    ets_test_suite/atomics:
+    ets-common-tests:
+    ets-common-tests/atomics:
         parameters:
             ark-extra-args:
-                - "--coroutine-impl=threaded"
-                - "--coroutine-workers-count=10"
-    ets_test_suite/generics:
-    ets_test_suite/intrinsics:
-    ets_test_suite/overload:
+                - "--coroutine-impl=stackful"
+                - "--coroutine-workers-count=0"
+    ets-common-tests/intrinsics/stringbuilder_oom.ets:
+        parameters:
+            ark-extra-args:
+                - "--compiler-enable-osr=false"
     ets_test_suite/strings:
-    ets_test_suite/stubs:
-    ets_test_suite/taskpool:
-    ets_test_suite/unions:

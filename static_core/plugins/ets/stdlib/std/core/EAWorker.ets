@@ -15,6 +15,8 @@
 
 package std.core;
 
+import { launch } from "std/concurrency";
+
 type Task = () => void;
 
 /**
@@ -23,8 +25,15 @@ type Task = () => void;
  * All child coroutines will be scheduled on the same worker.
  * A JS runtime is also created if the needInterop parameter is set to true
  */
-export class ExclusiveLauncher {
-    public static elaunch(task: Task, needInterop: boolean = false): void {
+class ExclusiveLauncher {
+    /**
+     * Run task in exclusive mode
+     * Creates a new worker
+     *
+     * @param { Task } task will be scheduled on created worker
+     * @param { boolean } [needInterop=false] true if need to create JS runtime
+     */
+    internal static elaunch(task: Task, needInterop: boolean = false): void {
         let eTask = needInterop ? () => { ExclusiveLauncher.asyncCall(task); } : task;
         ExclusiveLauncher.elaunch(eTask as Object, needInterop);
     }
@@ -36,9 +45,10 @@ export class ExclusiveLauncher {
     private static native elaunch(task: Object, needInterop: boolean): void;
 };
 
+
 /**
  * Helper class for ExclusiveLauncher that allows to use
- * the same exclusive worker for several tasks 
+ * the same exclusive worker for several tasks
  */
 export class EAWorker {
     private worker: InternalWorker;
@@ -51,24 +61,50 @@ export class EAWorker {
      * Run task in EAWorker
      * Note: it has no effect if EAWorker was stoped
      */
-    public run<T>(task: () => T): Promise<T> {
-        return this.worker.run(task);
+    public run<R> (task: Function, ...args: FixedArray<NullishType>): Job<R> {
+        return this.worker.run<R>(task, ...args);
     }
+
+    public static postToMain<R>(
+        coroFun: Function,
+        ...args: FixedArray<NullishType>
+    ) : Job<R> {
+        return EAWorker.postTaskToMain<R>(coroFun, args as FixedArray<NullishType>, false);
+    }
+
+    public static postToMain<R>(
+        coroFun: Function,
+        launchParams: LaunchParams,
+        ...args: FixedArray<NullishType>
+    ) : Job<R> {
+        return EAWorker.postTaskToMain<R>(coroFun, args as FixedArray<NullishType>, launchParams.abortFlag);
+    }
+
+    /**
+     * Post task to main worker
+     * Note: it has no effect if EAWorker was stoped
+     */
+    private native static postTaskToMain<R>(
+      coroFun: Object,
+      args: FixedArray<NullishType>,
+      abortFlag: boolean
+    ) : Job<R>;
 
     /**
      * Stop EAWorker
      * This method closes run queue and detaches worker
-     * Note: it's required to call stop for EAWorker 
+     * Note: it's required to call join for EAWorker
      */
-    public stop() {
-        this.worker.stop();
+    public join() {
+        this.worker.join();
     }
 };
 
 interface InternalWorker {
-    run<T>(task: () => T): Promise<T>;
 
-    stop();
+    run<R>(task:Function, ...args:FixedArray<NullishType>): Job<R>;
+
+    join();
 }
 
 class TaskPoster {
@@ -109,20 +145,26 @@ class InteropWorker implements InternalWorker {
         this.initEvent = new Event();
         ExclusiveLauncher.elaunch(() => this.body(), true);
     }
-    
-    public run<T>(task: () => T): Promise<T> {
-        let resolveFn: (val: T) => void;
-        let p = new Promise<T>((resolve: (val: T) => void) => {
-            resolveFn = resolve;
-        });
+
+    public run<R>(task:Function, ...args:FixedArray<NullishType>):Job<R> {
+        let job = new CompletableJob<R>();
         this.initEvent.wait();
+        let wrapperTask = ():R => {
+            return task.unsafeCall(...args) as R;
+        }
         this.poster!.post((): void => {
-            InteropWorker.asyncCall(() => { resolveFn(task()); });
+            InteropWorker.asyncCall(() => {
+                try {
+                    job.finish(wrapperTask());
+                } catch(e : Error) {
+                    job.fail(e);
+                }
+            });
         });
-        return p;
+        return job;
     }
 
-    public stop() {
+    public join() {
         this.initEvent.wait();
         this.poster!.destroy();
     }
@@ -146,26 +188,25 @@ class StaticWorker implements InternalWorker {
         ExclusiveLauncher.elaunch(() => this.body(), false);
     }
 
-    public run<T>(task: () => T): Promise<T> {
-        let resolveFn: (val: T) => void;
-        let rejectFn: (error: NullishType) => void;
-        let p = new Promise<T>((resolve: (val: T) => void, reject: (error: NullishType) => void) => {
-            resolveFn = resolve;
-            rejectFn = reject;
-        });
+    public run<T>(task: Function, ...args:FixedArray<NullishType>): Job<T> {
+        let job = new CompletableJob<T>();
+        let wrapperTask = ():T => {
+            return task.unsafeCall(...args) as T;
+        }
         this.tasks.push((): void => {
             try {
-                resolveFn(task());
-            } catch(e){
-                rejectFn(e);
+                job.finish(wrapperTask());
+            } catch(e : Error){
+                job.fail(e);
             }
         });
-        return p;
+        return job;
     }
 
-    public stop() {
+    public join() {
         this.tasks.push(StaticWorker.closingTask);
     }
+
 
     private body() {
         while (true) {
@@ -173,7 +214,7 @@ class StaticWorker implements InternalWorker {
             if (task === StaticWorker.closingTask) {
                 break;
             }
-            launch task();
+            launch<void, () => void>(task);
         }
     }
 }

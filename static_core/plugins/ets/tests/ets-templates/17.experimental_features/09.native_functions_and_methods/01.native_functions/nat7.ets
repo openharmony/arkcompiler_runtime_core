@@ -14,13 +14,13 @@
  */
 
 /*---
-desc: A compile-time error occurs if a native function has a body.
-tags: [compile-only]
+desc: A compile-time error occurs if a native function has a throws clause.
+tags: [compile-only, negative]
 ---*/
 
-native function foo(a: Object): int throws; // native with throws
+native function foo(a: Object): int throws; // CTE on throws
 
-function main(): int throws {
+function main(): int {
     let v: int = foo(new Object());
     return 0;
 }

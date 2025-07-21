@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +16,10 @@
 #
 
 import subprocess
+from collections.abc import Callable
 from copy import deepcopy
-from typing import Callable, Tuple, Optional
 
-from runner.enum_types.params import TestEnv, BinaryParams, TestReport
+from runner.enum_types.params import BinaryParams, TestEnv, TestReport
 from runner.logger import Log
 
 _LOGGER = Log.get_logger(__file__)
@@ -47,7 +47,7 @@ class OneTestRunner:
 
     def run_with_coverage(self, name: str, params: BinaryParams, result_validator: ResultValidator,
                           return_code_interpreter: ReturnCodeInterpreter = lambda _, _2, rtc: rtc) \
-            -> Tuple[bool, TestReport, Optional[str]]:
+            -> tuple[bool, TestReport, str | None]:
         profraw_file, profdata_file = "", ""
         if self.test_env.config.general.coverage.use_llvm_cov and self.test_env.coverage is not None:
             params = deepcopy(params)
@@ -63,9 +63,9 @@ class OneTestRunner:
 
     def run_one_step(self, name: str, params: BinaryParams, result_validator: ResultValidator,
                      return_code_interpreter: ReturnCodeInterpreter = lambda _, _2, rtc: rtc) \
-            -> Tuple[bool, TestReport, Optional[str]]:
+            -> tuple[bool, TestReport, str | None]:
 
-        cmd = self.test_env.cmd_prefix + [str(params.executor)]
+        cmd = [*self.test_env.cmd_prefix, str(params.executor)]
         cmd.extend(params.flags)
 
         passed = False
@@ -95,8 +95,8 @@ class OneTestRunner:
         self.reproduce += f"\n{cmd}"
 
     def __run(self, name: str, params: BinaryParams, result_validator: ResultValidator,
-              return_code_interpreter: ReturnCodeInterpreter) -> Tuple[bool, str, str, str, int]:
-        cmd = self.test_env.cmd_prefix + [str(params.executor)]
+              return_code_interpreter: ReturnCodeInterpreter) -> tuple[bool, str | None, str, str, int]:
+        cmd = [*self.test_env.cmd_prefix, str(params.executor)]
         cmd.extend(params.flags)
         passed = False
         output = ""
@@ -112,7 +112,7 @@ class OneTestRunner:
                 encoding='utf-8',
                 errors='ignore',
         ) as process:
-            fail_kind: Optional[str] = None
+            fail_kind: str | None = None
             try:
                 output, error = process.communicate(timeout=params.timeout)
                 return_code = return_code_interpreter(output, error, process.returncode)

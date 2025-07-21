@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -131,6 +131,7 @@ std::optional<size_t> PtStaticDefaultExtension::GetLengthIfArray(const ObjectHea
 
 void PtStaticDefaultExtension::EnumerateProperties(const ObjectHeader *object, const PropertyHandler &handler)
 {
+    ASSERT(object != nullptr);
     auto cls = object->ClassAddr<Class>();
     ASSERT(cls != nullptr);
     if (cls->IsArrayClass()) {
@@ -142,6 +143,7 @@ void PtStaticDefaultExtension::EnumerateProperties(const ObjectHeader *object, c
         }
     } else if (cls->IsClassClass()) {
         auto runtimeCls = ark::Class::FromClassObject(object);
+        ASSERT(runtimeCls != nullptr);
         for (auto &field : runtimeCls->GetStaticFields()) {
             handler(utf::Mutf8AsCString(field.GetName().data), GetFieldValueStatic(runtimeCls, field), field.IsFinal(),
                     false);
@@ -193,6 +195,7 @@ std::optional<size_t> PtDynamicDefaultExtension::GetLengthIfArray(const ObjectHe
 
 void PtDynamicDefaultExtension::EnumerateProperties(const ObjectHeader *object, const PropertyHandler &handler)
 {
+    ASSERT(object != nullptr);
     auto *cls = object->ClassAddr<HClass>();
     ASSERT(cls != nullptr);
     if (cls->IsNativePointer() || cls->IsString()) {

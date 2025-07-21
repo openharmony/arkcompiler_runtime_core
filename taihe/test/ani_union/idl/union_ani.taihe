@@ -20,7 +20,7 @@ struct Pair {
 union InnerUnion {
   stringValue: String;
   pairValue: Pair;
-  undefinedValue;
+  @undefined undefinedValue;
 }
 
 union MyUnion {
@@ -28,5 +28,71 @@ union MyUnion {
   floatValue: f32;
 }
 
-function printMyUnion(data: MyUnion): String;
-function makeMyUnion(kind: String): MyUnion;
+function PrintMyUnion(data: MyUnion): String;
+function MakeMyUnion(kind: String): MyUnion;
+
+union BasicUnion {
+  int8Value: i8;
+  int16Value: i16;
+  int32Value: i32;
+  int64Value: i64;
+  float32Value: f32;
+  float64Value: f64;
+  stringValue: String;
+  boolValue: bool;
+  @null empty;
+}
+
+function MakeAndShowBasicUnion(data: BasicUnion): BasicUnion;
+
+union TypedArrayUnion {
+  u8Value: @typedarray Array<u8>;
+  i8Value: @typedarray Array<i8>;
+  
+  u16Value: @typedarray Array<u16>;
+  i16Value: @typedarray Array<i16>;
+  
+  u32Value: @typedarray Array<u32>;
+  i32Value: @typedarray Array<i32>;
+  
+  u64Value: @typedarray Array<u64>;
+  i64Value: @typedarray Array<i64>;
+
+  f32Value: @typedarray Array<f32>;
+  f64Value: @typedarray Array<f64>;
+
+  @null empty;
+}
+
+function MakeAndShowTypedArrayUnion(data: TypedArrayUnion): TypedArrayUnion;
+
+struct ArrayStruct {
+  float32Array: Array<f32>;
+  float64Array: Array<f64>;
+}
+
+union ArrayUnion {
+  floatValue: ArrayStruct;
+  @null empty;
+}
+
+function MakeAndShowArrayUnion(data: ArrayUnion): ArrayUnion;
+
+
+struct StrStruct {
+  a: String;
+  b: String;
+}
+
+struct IntStruct {
+  a: i32;
+  b: i32;
+}
+
+union StructUnion {
+  strValue: StrStruct;
+  intValue: IntStruct;
+  @null empty;
+}
+
+function MakeAndShowStructUnion(data: StructUnion): StructUnion;

@@ -91,6 +91,8 @@ TEST_F(ObjectInstanceOfTest, object_instance_of)
     ASSERT_EQ(env_->Object_InstanceOf(nullptr, typeRefA, &res), ANI_INVALID_ARGS);
 
     ASSERT_EQ(env_->Object_InstanceOf(objectC, nullptr, &res), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_InstanceOf(objectC, typeRefC, nullptr), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectInstanceOfTest, invalid_parameter)
@@ -241,6 +243,53 @@ TEST_F(ObjectInstanceOfTest, object_boxed_primitive_instance_of)
     ASSERT_EQ(res, ANI_TRUE);
     ASSERT_EQ(env_->Object_InstanceOf(objectInt, classObject, &res), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
+}
+
+TEST_F(ObjectInstanceOfTest, ani_enum_instance_of)
+{
+    ani_object objectColors;
+    ani_class classF;
+    GetMethodData(&objectColors, &classF, "object_instance_of_test.F", "new_Color", nullptr);
+
+    ani_object objectItems;
+    GetMethodData(&objectItems, &classF, "object_instance_of_test.F", "new_Items", nullptr);
+
+    ani_type colorsType {};
+    ASSERT_EQ(env_->Object_GetType(objectColors, &colorsType), ANI_OK);
+    ASSERT_NE(colorsType, nullptr);
+
+    ani_type itemsType {};
+    ASSERT_EQ(env_->Object_GetType(objectItems, &itemsType), ANI_OK);
+    ASSERT_NE(itemsType, nullptr);
+
+    ani_boolean res;
+    ASSERT_EQ(env_->Object_InstanceOf(objectColors, colorsType, &res), ANI_OK);
+    ASSERT_EQ(res, ANI_TRUE);
+
+    ASSERT_EQ(env_->Object_InstanceOf(objectColors, itemsType, &res), ANI_OK);
+    ASSERT_EQ(res, ANI_FALSE);
+}
+
+TEST_F(ObjectInstanceOfTest, ani_enum_item_instance_of)
+{
+    ani_enum enmColor {};
+    ASSERT_EQ(env_->FindEnum("object_instance_of_test.Color", &enmColor), ANI_OK);
+    ASSERT_NE(enmColor, nullptr);
+
+    ani_enum enmItems {};
+    ASSERT_EQ(env_->FindEnum("object_instance_of_test.Items", &enmItems), ANI_OK);
+    ASSERT_NE(enmItems, nullptr);
+
+    ani_enum_item itemRed {};
+    ASSERT_EQ(env_->Enum_GetEnumItemByName(enmColor, "RED", &itemRed), ANI_OK);
+    ASSERT_NE(itemRed, nullptr);
+
+    ani_boolean res {};
+    ASSERT_EQ(env_->Object_InstanceOf(itemRed, enmColor, &res), ANI_OK);
+    ASSERT_EQ(res, ANI_TRUE);
+
+    ASSERT_EQ(env_->Object_InstanceOf(itemRed, enmItems, &res), ANI_OK);
+    ASSERT_EQ(res, ANI_FALSE);
 }
 
 }  // namespace ark::ets::ani::testing

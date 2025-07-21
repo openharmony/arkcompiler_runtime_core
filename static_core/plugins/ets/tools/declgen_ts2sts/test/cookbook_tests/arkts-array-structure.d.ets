@@ -23,6 +23,6 @@ export declare class C {
     static foo(a: Array<string>): void;
     bar(a: Array<string>): void;
 }
-export interface Iface {
+export declare interface Iface {
     foo(a: Array<string>): void;
 }

@@ -155,11 +155,24 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertVarargsAndC
 {
     auto *ref = readVal(helpers::TypeIdentity<ObjectHeader *>());
     auto *klass = ref->template ClassAddr<Class>();
-    ASSERT(klass->IsArrayClass());
+    if (!klass->IsArrayClass()) {
+        ASSERT(klass == ctx_->GetArrayClass());
+        VMHandle<EtsArrayObject<EtsObject>> etsArr(coro_, ref);
+        auto allJsArgs = ctx_->GetTempArgs<napi_value>(etsArr->GetActualLength() + jsargs.size());
+        for (uint32_t el = 0; el < jsargs.size(); ++el) {
+            allJsArgs[el] = jsargs[el];
+        }
+        for (uint32_t el = 0; el < etsArr->GetActualLength(); ++el) {
+            EtsObject *etsElem = nullptr;
+            etsArr->GetRef(el, &etsElem);
+            auto refConv = JSRefConvertResolve<true>(ctx_, etsElem->GetClass()->GetRuntimeClass());
+            ASSERT(refConv != nullptr);
+            allJsArgs[el + jsargs.size()] = refConv->Wrap(ctx_, etsElem);
+        }
+        return CallConverted<IS_NEWCALL>(*allJsArgs);
+    }
+
     LocalObjectHandle<coretypes::Array> etsArr(coro_, ref);
-    auto compTy = klass->GetComponentType();
-    // compTy comes from parameter type, thus maybe uninitialized
-    auto refConv = JSRefConvertResolve<true>(ctx_, compTy);
 
     auto allJsArgs = ctx_->GetTempArgs<napi_value>(etsArr->GetLength() + jsargs.size());
     for (uint32_t el = 0; el < jsargs.size(); ++el) {
@@ -167,6 +180,8 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertVarargsAndC
     }
     for (uint32_t el = 0; el < etsArr->GetLength(); ++el) {
         auto *etsElem = EtsObject::FromCoreType(etsArr->Get<ObjectHeader *>(el));
+        auto refConv = JSRefConvertResolve<true>(ctx_, etsElem->GetClass()->GetRuntimeClass());
+        ASSERT(refConv != nullptr);
         allJsArgs[el + jsargs.size()] = refConv->Wrap(ctx_, etsElem);
     }
     return CallConverted<IS_NEWCALL>(*allJsArgs);
@@ -180,6 +195,8 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertArgsAndCall
     auto const numNonRest = numArgs_ - (isVarArgs ? 1 : 0);
     auto jsargs = ctx_->GetTempArgs<napi_value>(numNonRest);
 
+    // scope is required to ConvertRefArgToJS
+    HandleScope<ObjectHeader *> scope(coro_);
     for (uint32_t argIdx = 0; argIdx < numNonRest; ++argIdx, protoReader_.Advance()) {
         if (UNLIKELY(!ConvertArgToJS(ctx_, protoReader_, &jsargs[argIdx], readVal))) {
             return std::nullopt;
@@ -208,6 +225,7 @@ napi_value CallJSHandler::HandleSpecialMethod(Span<napi_value> jsargs)
 {
     napi_value handlerResult {};
     napi_env env = ctx_->GetJSEnv();
+    ScopedNativeCodeThread nativeScope(coro_);
     const char *methodName = EtsMethod::FromRuntimeMethod(protoReader_.GetMethod())->GetName();
     if (methodName != nullptr && std::strlen(methodName) >= SETTER_GETTER_PREFIX_LENGTH) {
         std::string content = std::string(methodName).substr(SETTER_GETTER_PREFIX_LENGTH);

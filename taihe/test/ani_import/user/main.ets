@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as mate from "@generated/mate";
-import * as nova from "@generated/nova";
-import * as pura from "@generated/pura";
-import * as System from "std/core/System";
+import {BusinessError} from "@ohos.base";
+import * as mate from "mate";
+import * as nova from "nova";
+import * as pura from "pura";
 
 loadLibrary("ani_import");
 

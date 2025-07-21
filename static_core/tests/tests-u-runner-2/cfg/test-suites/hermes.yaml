@@ -15,7 +15,7 @@ version: 0.0.0.1
 type: test-suite
 suite-name: hermes
 test-root: ${WORK_DIR}/${suite-name}
-list-root: ${PANDA_SOURCE_PATH}/runtime_core/static_core/tests/tests-u-runner/test-lists/hermes
+list-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/tests/tests-u-runner/test-lists/hermes
 generator-class: runner.extensions.generators.hermes.hermes_generator.HermesGenerator
 
 parameters:

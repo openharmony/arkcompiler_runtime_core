@@ -18,11 +18,13 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include "class_data_accessor.h"
 #include "file.h"
 #include "handle_scope.h"
 #include "include/coretypes/class.h"
 #include "include/mem/panda_string.h"
 #include "include/mtmanaged_thread.h"
+#include "include/object_header.h"
 #include "intrinsics.h"
 #include "macros.h"
 #include "mem/mem.h"
@@ -31,6 +33,7 @@
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "types/ets_array.h"
@@ -133,6 +136,7 @@ EtsClass *TypeAPIGetClass(EtsString *td, EtsRuntimeLinker *contextLinker)
     auto *klass = PandaEtsVM::GetCurrent()->GetClassLinker()->GetClass(typeDesc.c_str(), true,
                                                                        contextLinker->GetClassLinkerContext());
     auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     if (coro->HasPendingException()) {
         ASSERT(klass == nullptr);
         coro->ClearException();
@@ -180,7 +184,9 @@ EtsBoolean TypeAPIIsValueType(EtsString *td, EtsRuntimeLinker *contextLinker)
 
 EtsString *TypeAPIGetNullTypeDescriptor()
 {
-    const auto *nullObject = EtsObject::FromCoreType(EtsCoroutine::GetCurrent()->GetNullValue());
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    const auto *nullObject = EtsObject::FromCoreType(coro->GetNullValue());
     return EtsString::CreateFromMUtf8(nullObject->GetClass()->GetDescriptor());
 }
 
@@ -223,12 +229,15 @@ static EtsTypeAPIField *CreateField(const EtsClass *sourceClass, EtsField *field
     EtsHandle ownerTypeHandle(coroutine, ownerType);
 
     // Make the instance of Type API Field
-    EtsHandle<EtsTypeAPIField> typeapiField(coroutine, EtsTypeAPIField::Create(coroutine));
+    auto *apiField = EtsTypeAPIField::Create(coroutine);
+    ASSERT(apiField != nullptr);
+    EtsHandle<EtsTypeAPIField> typeapiField(coroutine, apiField);
+    ASSERT(typeapiField.GetPtr() != nullptr);
 
     // Set field's type, field's owner class type and name
     typeapiField->SetFieldType(fieldTypeHandle.GetPtr());
     typeapiField->SetOwnerType(ownerTypeHandle.GetPtr());
-    auto name = field->GetNameString();
+    auto name = ManglingUtils::GetDisplayNameStringFromField(field);
     typeapiField->SetName(name);
 
     // Set Access Modifier
@@ -279,7 +288,7 @@ ObjectHeader *TypeAPIGetOwnFieldPtr(EtsClass *cls, EtsLong idx)
 static EtsField *GetField(EtsClass *cls, EtsString *name)
 {
     auto fieldName = name->GetMutf8();
-    auto instanceField = cls->GetFieldIDByName(fieldName.c_str());
+    auto instanceField = ManglingUtils::GetFieldIDByDisplayName(cls, fieldName);
     if (instanceField != nullptr) {
         return instanceField;
     }
@@ -402,7 +411,11 @@ static EtsTypeAPIMethod *CreateMethodUnderHandleScope(EtsHandle<EtsTypeAPIType> 
     ASSERT(sourceClass != nullptr);
 
     auto *coroutine = EtsCoroutine::GetCurrent();
-    EtsHandle<EtsTypeAPIMethod> typeapiMethod(coroutine, EtsTypeAPIMethod::Create(coroutine));
+    ASSERT(coroutine != nullptr);
+    auto *apiMethod = EtsTypeAPIMethod::Create(coroutine);
+    ASSERT(apiMethod != nullptr);
+    EtsHandle<EtsTypeAPIMethod> typeapiMethod(coroutine, apiMethod);
+    ASSERT(typeapiMethod.GetPtr() != nullptr);
 
     // Set Type
     typeapiMethod->SetMethodType(methodTypeHandle.GetPtr());
@@ -493,6 +506,7 @@ static EtsObject *MakeObjectsArray(EtsString *elemTd, EtsRuntimeLinker *contextL
     auto *elementClass = TypeAPIGetClass(elemTd, contextLinker);
     ASSERT(elementClass != nullptr);
     EtsHandle arrayHandle(coro, EtsObjectArray::Create(elementClass, len));
+    ASSERT(arrayHandle.GetPtr() != nullptr);
     for (EtsLong i = 0; i < len; ++i) {
         auto *element = elementClass->CreateInstance();
         if (element == nullptr) {
@@ -556,7 +570,9 @@ EtsString *TypeAPIGetParameterDescriptor(ObjectHeader *functionType, EtsLong i)
     }
     // 0 is recevier type
     i = function->IsStatic() ? i : i + 1;
-    const auto *desc = function->ResolveArgType(i)->GetDescriptor();
+    const auto *argType = function->ResolveArgType(i);
+    ASSERT(argType != nullptr);
+    const auto *desc = argType->GetDescriptor();
     return EtsString::CreateFromMUtf8(desc);
 }
 
@@ -567,6 +583,7 @@ static EtsTypeAPIParameter *CreateParameterUnderHandleScope(EtsHandle<EtsTypeAPI
 
     auto *coroutine = EtsCoroutine::GetCurrent();
     EtsHandle<EtsTypeAPIParameter> typeapiParameter(coroutine, EtsTypeAPIParameter::Create(coroutine));
+    ASSERT(typeapiParameter.GetPtr() != nullptr);
 
     // Set parameter's Type
     typeapiParameter->SetParameterType(paramTypeHandle.GetPtr());
@@ -613,6 +630,7 @@ EtsString *TypeAPIGetReceiverTypeDescriptor(ObjectHeader *functionType)
         return nullptr;
     }
     auto type = function->ResolveArgType(0);
+    ASSERT(type != nullptr);
     return EtsString::CreateFromMUtf8(type->GetDescriptor());
 }
 
@@ -620,6 +638,39 @@ EtsClass *TypeAPIGetDeclaringClass(ObjectHeader *functionType)
 {
     auto *function = GetEtsMethod(EtsTypeAPIType::FromCoreType(functionType));
     return (function != nullptr) ? function->GetClass() : nullptr;
+}
+
+EtsString *TypeAPIGetFunctionObjectNameFromAnnotation(EtsObject *functionObj)
+{
+    static constexpr std::string_view ANNO_NAME = "Lstd/core/NamedFunctionObject;";
+
+    auto *thread = ManagedThread::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+
+    auto *etsClass = functionObj->GetClass();
+    auto *runtimeClass = etsClass->GetRuntimeClass();
+    const panda_file::File &pf = *runtimeClass->GetPandaFile();
+    panda_file::ClassDataAccessor cda(pf, runtimeClass->GetFileId());
+    VMHandle<EtsString> retStrHandle;
+    cda.EnumerateAnnotations([&pf, &retStrHandle, &thread](panda_file::File::EntityId annId) {
+        panda_file::AnnotationDataAccessor ada(pf, annId);
+        const char *className = utf::Mutf8AsCString(pf.GetStringData(ada.GetClassId()).data);
+        if (className == ANNO_NAME) {
+            const auto value = ada.GetElement(0).GetScalarValue();
+            const auto id = value.Get<panda_file::File::EntityId>();
+            auto stringData = pf.GetStringData(id);
+            retStrHandle = VMHandle<EtsString>(
+                thread, EtsString::CreateFromMUtf8(reinterpret_cast<const char *>(stringData.data))->GetCoreType());
+        }
+    });
+
+    if (retStrHandle.GetPtr() == nullptr) {
+        auto *emptyString = EtsString::CreateNewEmptyString();
+        ASSERT(emptyString != nullptr);
+        retStrHandle = VMHandle<EtsString>(thread, emptyString->GetCoreType());
+    }
+
+    return retStrHandle.GetPtr();
 }
 
 }  // namespace ark::ets::intrinsics

@@ -40,6 +40,7 @@ void SubscribePromiseOnResultObject(EtsPromise *outsidePromise, EtsPromise *inte
 
 static void EnsureCapacity(EtsCoroutine *coro, EtsHandle<EtsPromise> &hpromise)
 {
+    ASSERT(hpromise.GetPtr() != nullptr);
     ASSERT(hpromise->IsLocked());
     int queueLength = hpromise->GetCallbackQueue(coro) == nullptr ? 0 : hpromise->GetCallbackQueue(coro)->GetLength();
     if (hpromise->GetQueueSize() != queueLength) {
@@ -132,6 +133,7 @@ void EtsPromiseReject(EtsPromise *promise, EtsObject *error, EtsBoolean wasLinke
 void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)
 {
     auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     auto *coroManager = coro->GetCoroutineManager();
     auto launchMode = coroManager->IsMainWorker(coro) ? CoroutineLaunchMode::MAIN_WORKER : CoroutineLaunchMode::DEFAULT;
     [[maybe_unused]] EtsHandleScope scope(coro);
@@ -142,6 +144,9 @@ void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)
         EnsureCapacity(coro, hpromise);
         hpromise->SubmitCallback(coro, hcallback.GetPtr(), launchMode);
         return;
+    }
+    if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
+        coro->GetPandaVM()->RemoveUnhandledRejectedPromise(hpromise.GetPtr());
     }
     ASSERT(hpromise->GetQueueSize() == 0);
     ASSERT(hpromise->GetCallbackQueue(coro) == nullptr);
@@ -165,7 +170,7 @@ static EtsObject *AwaitProxyPromise(EtsCoroutine *currentCoro, EtsHandle<EtsProm
      *          (the last two steps are actually the cm->await()'s job)
      *      - return promise.value() if resolved or throw() it if rejected
      */
-
+    ASSERT(promiseHandle.GetPtr() != nullptr);
     promiseHandle->Wait();
     ASSERT(!promiseHandle->IsPending() && !promiseHandle->IsLinked());
 
@@ -175,8 +180,12 @@ static EtsObject *AwaitProxyPromise(EtsCoroutine *currentCoro, EtsHandle<EtsProm
         return promiseHandle->GetValue(currentCoro);
     }
     // rejected
+    if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
+        currentCoro->GetPandaVM()->RemoveUnhandledRejectedPromise(promiseHandle.GetPtr());
+    }
     LOG(DEBUG, COROUTINES) << "Promise::await: await() finished, promise has been rejected.";
     auto *exc = promiseHandle->GetValue(currentCoro);
+    ASSERT(exc != nullptr);
     currentCoro->SetException(exc->GetCoreType());
     return nullptr;
 }
@@ -196,6 +205,11 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
     }
     [[maybe_unused]] EtsHandleScope scope(currentCoro);
     EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);
+
+    {
+        ScopedNativeCodeThread n(currentCoro);
+        currentCoro->GetManager()->Schedule();
+    }
 
     /* CASE 1. This is a converted JS promise */
     if (promiseHandle->IsProxy()) {
@@ -222,6 +236,9 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
     if (promiseHandle->IsResolved()) {
         LOG(DEBUG, COROUTINES) << "Promise::await: promise is already resolved!";
         return promiseHandle->GetValue(currentCoro);
+    }
+    if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
+        currentCoro->GetPandaVM()->RemoveUnhandledRejectedPromise(promiseHandle.GetPtr());
     }
     LOG(DEBUG, COROUTINES) << "Promise::await: promise is already rejected!";
     auto *exc = promiseHandle->GetValue(currentCoro);

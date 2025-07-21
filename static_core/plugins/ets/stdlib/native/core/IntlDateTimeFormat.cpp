@@ -125,10 +125,7 @@ static std::unique_ptr<icu::Locale> ToICULocale(ani_env *env, ani_object self)
 
     ani_boolean localeIsUndefined = ANI_FALSE;
     ANI_FATAL_IF_ERROR(env->Reference_IsUndefined(localeRef, &localeIsUndefined));
-
-    if (localeIsUndefined == ANI_TRUE) {
-        return std::make_unique<icu::Locale>(icu::Locale::getDefault());
-    }
+    ANI_FATAL_IF(localeIsUndefined == ANI_TRUE);
 
     auto locale = static_cast<ani_string>(localeRef);
     ASSERT(locale != nullptr);
@@ -211,7 +208,7 @@ static ani_status DateFormatSetTimeZone(ani_env *env, icu::DateFormat *dateForma
     return ANI_OK;
 }
 
-static ani_string StdCoreIntlDateTimeFormatGetLocaleHourCycle(ani_env *env, ani_object self)
+static ani_string GetLocaleHourCycle(ani_env *env, ani_object self)
 {
     std::unique_ptr<icu::Locale> icuLocale = ToICULocale(env, self);
     if (!icuLocale) {
@@ -324,7 +321,7 @@ static ani_status ConfigureLocaleOptions(ani_env *env, icu::Locale *locale, ani_
 
     UErrorCode icuStatus = U_ZERO_ERROR;
     if (hourCycleUndefined == ANI_TRUE) {
-        if (*locale != icu::Locale::getChinese()) {
+        if (strcmp(locale->getLanguage(), icu::Locale::getChinese().getLanguage()) != 0) {
             return ANI_OK;
         }
 
@@ -603,7 +600,7 @@ static std::unique_ptr<icu::DateFormat> CreateICUDateFormat(ani_env *env, ani_ob
     return icuDateFormat;
 }
 
-static ani_string StdCoreIntlDateTimeFormatFormatImpl(ani_env *env, ani_object self, ani_double timestamp)
+static ani_string FormatImpl(ani_env *env, ani_object self, ani_double timestamp)
 {
     std::unique_ptr<icu::DateFormat> icuDateFormat = CreateICUDateFormat(env, self);
     if (!icuDateFormat) {
@@ -617,7 +614,7 @@ static ani_string StdCoreIntlDateTimeFormatFormatImpl(ani_env *env, ani_object s
     return CreateUtf16String(env, formattedDateChars, icuFormattedDate.length());
 }
 
-static ani_array_ref StdCoreIntlDateTimeFormatFormatToPartsImpl(ani_env *env, ani_object self, ani_double timestamp)
+static ani_array_ref FormatToPartsImpl(ani_env *env, ani_object self, ani_double timestamp)
 {
     std::unique_ptr<icu::DateFormat> dateFormat = CreateICUDateFormat(env, self);
     if (!dateFormat) {
@@ -685,7 +682,7 @@ static ani_array_ref StdCoreIntlDateTimeFormatFormatToPartsImpl(ani_env *env, an
 
 using UStr = icu::UnicodeString;
 
-static ani_object StdCoreIntlDateTimeFormatFormatResolvedOptionsImpl(ani_env *env, ani_object self)
+static ani_object FormatResolvedOptionsImpl(ani_env *env, ani_object self)
 {
     std::unique_ptr<icu::DateFormat> dateFormat = CreateICUDateFormat(env, self);
     if (!dateFormat) {
@@ -841,11 +838,14 @@ static std::unique_ptr<icu::FormattedDateInterval> FormatDateInterval(ani_env *e
 
 enum DateIntervalPartSource { OUT_OF_RANGE = -1, START_RANGE = 0, END_RANGE = 1 };
 
-static ani_string StdCoreIntlDateTimeFormatFormatRangeImpl(ani_env *env, ani_object self, ani_double start,
-                                                           ani_double end)
+static ani_string FormatRangeImpl(ani_env *env, ani_object self, ani_double start, ani_double end)
 {
     auto formattedIntervalVal = FormatDateInterval(env, self, start, end);
+    if (UNLIKELY(formattedIntervalVal == nullptr)) {
+        return ThrowInternalError(env, std::string("FormattedDateInterval failed"));
+    }
 
+    ASSERT(formattedIntervalVal != nullptr);
     UErrorCode status = U_ZERO_ERROR;
     UStr formattedInterval = formattedIntervalVal->toString(status);
     if (U_FAILURE(status) == TRUE) {
@@ -856,11 +856,14 @@ static ani_string StdCoreIntlDateTimeFormatFormatRangeImpl(ani_env *env, ani_obj
     return CreateUtf16String(env, formattedIntervalChars, formattedInterval.length());
 }
 
-static ani_array_ref StdCoreIntlDateTimeFormatFormatRangeToPartsImpl(ani_env *env, ani_object self, ani_double start,
-                                                                     ani_double end)
+static ani_array_ref FormatRangeToPartsImpl(ani_env *env, ani_object self, ani_double start, ani_double end)
 {
     auto formattedIntervalVal = FormatDateInterval(env, self, start, end);
+    if (UNLIKELY(formattedIntervalVal == nullptr)) {
+        return ThrowInternalError(env, std::string("FormattedDateInterval failed"));
+    }
 
+    ASSERT(formattedIntervalVal != nullptr);
     UErrorCode status = U_ZERO_ERROR;
     UStr formattedInterval = formattedIntervalVal->toString(status);
     if (U_FAILURE(status) == TRUE) {
@@ -891,10 +894,7 @@ static ani_array_ref StdCoreIntlDateTimeFormatFormatRangeToPartsImpl(ani_env *en
             }
 
             prevSpanEndIdx = partPos.getLimit(), prevPartEndIdx = partPos.getStart();
-
-            continue;
-        }
-        if (partPos.getCategory() == UFIELD_CATEGORY_DATE) {
+        } else if (partPos.getCategory() == UFIELD_CATEGORY_DATE) {
             const char *partSourceName = DTRF_PART_SOURCES.at(partSource);
             if (partPos.getStart() > prevPartEndIdx) {
                 UStr literalValue;
@@ -926,18 +926,15 @@ ani_status RegisterIntlDateTimeFormatMethods(ani_env *env)
     ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Intl/DateTimeFormat;", &dtfClass));
 
     std::array dtfMethods {
-        ani_native_function {"formatImpl", "D:Lstd/core/String;",
-                             reinterpret_cast<void *>(StdCoreIntlDateTimeFormatFormatImpl)},
+        ani_native_function {"formatImpl", "D:Lstd/core/String;", reinterpret_cast<void *>(FormatImpl)},
         ani_native_function {"formatToPartsImpl", "D:[Lstd/core/Intl/DateTimeFormatPart;",
-                             reinterpret_cast<void *>(StdCoreIntlDateTimeFormatFormatToPartsImpl)},
-        ani_native_function {"formatRangeImpl", "DD:Lstd/core/String;",
-                             reinterpret_cast<void *>(StdCoreIntlDateTimeFormatFormatRangeImpl)},
+                             reinterpret_cast<void *>(FormatToPartsImpl)},
+        ani_native_function {"formatRangeImpl", "DD:Lstd/core/String;", reinterpret_cast<void *>(FormatRangeImpl)},
         ani_native_function {"formatRangeToPartsImpl", "DD:[Lstd/core/Intl/DateTimeRangeFormatPart;",
-                             reinterpret_cast<void *>(StdCoreIntlDateTimeFormatFormatRangeToPartsImpl)},
+                             reinterpret_cast<void *>(FormatRangeToPartsImpl)},
         ani_native_function {"resolvedOptionsImpl", ":Lstd/core/Intl/ResolvedDateTimeFormatOptions;",
-                             reinterpret_cast<void *>(StdCoreIntlDateTimeFormatFormatResolvedOptionsImpl)},
-        ani_native_function {"getLocaleHourCycle", ":Lstd/core/String;",
-                             reinterpret_cast<void *>(StdCoreIntlDateTimeFormatGetLocaleHourCycle)},
+                             reinterpret_cast<void *>(FormatResolvedOptionsImpl)},
+        ani_native_function {"getLocaleHourCycle", ":Lstd/core/String;", reinterpret_cast<void *>(GetLocaleHourCycle)},
     };
 
     ani_status status = env->Class_BindNativeMethods(dtfClass, dtfMethods.data(), dtfMethods.size());

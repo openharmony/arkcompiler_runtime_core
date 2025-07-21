@@ -64,6 +64,7 @@ public:
 
     void SetName(EtsString *name)
     {
+        ASSERT(name != nullptr);
         ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsTypeAPIMethod, name_), name->AsObject()->GetCoreType());
     }
 
