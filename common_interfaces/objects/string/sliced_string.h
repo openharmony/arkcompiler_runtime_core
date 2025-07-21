@@ -65,6 +65,8 @@ public:
     static constexpr uint32_t MIN_SLICED_STRING_LENGTH = 13;
     static constexpr size_t PARENT_OFFSET = BaseString::SIZE;
     static constexpr uint32_t START_INDEX_BITS_NUM = 30U;
+    static constexpr uint32_t REF_FIELDS_COUNT = 1;
+
     using HasBackingStoreBit = BitField<bool, 0>;                                  // 1
     using ReserveBit = HasBackingStoreBit::NextFlag;                               // 1
     using StartIndexBits = ReserveBit::NextField<uint32_t, START_INDEX_BITS_NUM>;  // 30

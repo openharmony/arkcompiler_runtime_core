@@ -33,6 +33,7 @@ set(intrinsics_tests
     string_from_chars
     string_from_string
     string_fromcodepoint
+    string_gc
     string_get
     string_getbytes
     string_getchars

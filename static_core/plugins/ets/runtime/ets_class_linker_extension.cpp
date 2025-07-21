@@ -14,7 +14,7 @@
  */
 
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
-
+#include "objects/string/base_string-inl.h"
 #include "include/method.h"
 #include "include/thread_scopes.h"
 #include "libpandabase/macros.h"
@@ -151,15 +151,29 @@ Class *EtsClassLinkerExtension::CreateStringSubClass(const uint8_t *descriptor, 
     subClass->SetState(Class::State::INITIALIZING);
     subClass->SetStringClass();
     switch (type) {
-        case ClassRoot::LINE_STRING:
+        case ClassRoot::LINE_STRING: {
             subClass->SetLineStringClass();
             break;
-        case ClassRoot::SLICED_STRING:
+        }
+
+        case ClassRoot::SLICED_STRING: {
+            // used for gc
             subClass->SetSlicedStringClass();
+            subClass->SetRefFieldsNum(common::SlicedString::REF_FIELDS_COUNT, false);
+            subClass->SetRefFieldsOffset(common::SlicedString::PARENT_OFFSET, false);
+            (static_cast<BaseClass *>(subClass))->SetObjectSize(common::SlicedString::SIZE);
             break;
-        case ClassRoot::TREE_STRING:
+        }
+
+        case ClassRoot::TREE_STRING: {
+            // used for gc
             subClass->SetTreeStringClass();
+            subClass->SetRefFieldsNum(common::TreeString::REF_FIELDS_COUNT, false);
+            subClass->SetRefFieldsOffset(common::TreeString::LEFT_OFFSET, false);
+            (static_cast<BaseClass *>(subClass))->SetObjectSize(common::TreeString::SIZE);
             break;
+        }
+
         default:
             UNREACHABLE();
     }

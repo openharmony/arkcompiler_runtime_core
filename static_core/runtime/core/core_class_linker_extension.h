@@ -48,7 +48,9 @@ public:
 
     void FreeClass(Class *klass) override;
 
-    const uint8_t *GetStringClassDescriptor(ClassRoot strCls);
+    void FillStringClass(Class *strCls, ClassRoot flag);
+
+    const uint8_t *GetStringClassDescriptor(ClassRoot flag);
 
     bool InitializeStringClass();
 

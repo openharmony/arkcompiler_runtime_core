@@ -476,7 +476,7 @@ size_t BaseString::CopyDataToUtf16(ReadBarrier &&readBarrier, uint16_t *buf, uin
     return UtfUtils::ConvertRegionUtf8ToUtf16(data, buf, length, bufLength);
 }
 
-#ifdef BASE_CLASS_32BITS
+#ifdef BASE_STRING_32BITS
 // To change the hash algorithm of BaseString, please modify BaseString::CalculateConcatHashCode
 // and BaseStringHashHelper::ComputeHashForDataPlatform simultaneously!!
 template <typename T>
