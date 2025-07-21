@@ -43,7 +43,7 @@ enum class InspectorErrorCode {
     SERVER_ERROR = -32000,
 };
 
-// Base class implementation of JSON-RPC endpoint handling the Inspector protocol.
+/// @brief Base class implementation of JSON-RPC endpoint handling the Inspector protocol.
 class EndpointBase {
 public:
     using Id = double;
@@ -93,10 +93,10 @@ protected:
     }
 
 private:
-    /// Send JSON message.
+    /// @brief Sends JSON message.
     virtual void SendMessage(const std::string &message) = 0;
 
-    /// Send JSON message created with the provided build function.
+    /// @brief Sends JSON message created with the provided build function.
     template <typename BuildFunction>
     void Send(BuildFunction &&build)
     {

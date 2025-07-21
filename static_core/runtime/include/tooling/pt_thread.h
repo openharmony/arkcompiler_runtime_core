@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include "libarkbase/macros.h"
+#include "runtime/coroutines/coroutine.h"
 #include "runtime/include/managed_thread.h"
 
 namespace ark::tooling {
@@ -45,7 +46,13 @@ public:
     uint32_t GetId() const
     {
         constexpr uint32_t PT_THREAD_NONE_ID = 0xffffffff;
-        return managedThread_ == nullptr ? PT_THREAD_NONE_ID : managedThread_->GetId();
+        if (managedThread_ == nullptr) {
+            return PT_THREAD_NONE_ID;
+        }
+        if (Coroutine::ThreadIsCoroutine(managedThread_)) {
+            return Coroutine::CastFromThread(managedThread_)->GetCoroutineId();
+        }
+        return managedThread_->GetId();
     }
 
     ManagedThread *GetManagedThread() const

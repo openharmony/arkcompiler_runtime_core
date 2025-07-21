@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,7 +17,8 @@
 
 import re
 from dataclasses import dataclass
-from typing import List, Optional, Union
+from pathlib import Path
+from typing import List, Optional
 
 from cdp import debugger, runtime
 
@@ -57,8 +58,15 @@ class SourceMeta:
         return [bp for bp in self.breakpoints if bp.breakpoint_id == breakpoint_id]
 
 
-def parse_source_meta(source: Union[List[str], str]) -> SourceMeta:
-    lines: List[str] = source if not isinstance(source, str) else source.splitlines()
+def parse_source_meta(source: str | List[str] | Path) -> SourceMeta:
+    lines: List[str] = []
+    if isinstance(source, str):
+        lines = source.splitlines()
+    elif isinstance(source, Path):
+        with source.open(mode="r") as f:
+            lines = f.readlines()
+    else:
+        lines = source
     brs = []
     for line_number, line in enumerate(lines):
         match = BREAKPOINT_PATTERN.search(line)

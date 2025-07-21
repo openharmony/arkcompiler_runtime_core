@@ -125,6 +125,9 @@ public:
     Expected<std::pair<RemoteObject, std::optional<RemoteObject>>, std::string> EvaluateExpression(
         uint32_t frameNumber, const ExpressionWrapper &bytecode);
 
+    // Checks if the thread was paused by BreakOnStart
+    bool IsPausedByBreakOnStart();
+
 private:
     using PtThreadEvaluationEngine::EvaluateExpression;
 
