@@ -278,6 +278,7 @@ add_subdirectory(depend_export)
 add_subdirectory(re_export)
 add_subdirectory(export_error)
 add_subdirectory(export_default)
+add_subdirectory(jsdoc)
 
 # interop not supported
 # eg: E/ets_interop_js: InteropCtx::Fatal: ets_proxy requested for Lescompat/WeakMap; must add or forbid
