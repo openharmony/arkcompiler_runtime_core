@@ -14,6 +14,7 @@
  */
 
 #include <atomic>
+#include <thread>
 #include "libpandabase/os/time.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "runtime/include/runtime.h"
@@ -57,4 +58,11 @@ extern "C" EtsBoolean IsSupportingInterop()
 #endif /* PANDA_ETS_INTEROP_JS */
     return ark::ets::ToEtsBoolean(res);
 }
+
+extern "C" EtsInt GetTaskPoolWorkersLimit()
+{
+    int32_t cpuCount = std::thread::hardware_concurrency();
+    return cpuCount > 1 ? cpuCount - 1 : 1;  // 1: default number
+}
+
 }  // namespace ark::ets::intrinsics::taskpool

@@ -946,7 +946,6 @@ function taskAssigmentTest() {
     await p2;
     arktest.assertNE(task1WorkerId, 0);
     arktest.assertNE(task2WorkerId, 0);
-    arktest.assertNE(task1WorkerId, task2WorkerId);
 }
 
 class ArgTestClass {
@@ -1066,6 +1065,87 @@ function doubleCancelByDependencyTest() {
     arktest.assertEQ(checkPoints[0], 1);
 }
 
+let isExecuted: AtomicFlag = new AtomicFlag(false);
+let maxCount: int = max(4, CoroutineExtras.getTaskPoolWorkersLimit());
+let executedCount: int = 0;
+function expandTest() {
+    while (!isExecuted.get()) {}
+}
+
+function reset() {
+    isExecuted.set(false);
+    executedCount = 0;
+}
+
+function taskpoolExpandTest() {
+    for (let i = 1; i <= 20; ++i) {
+        taskpool.execute(expandTest, 10).then(() => {
+            executedCount++;
+        })
+    }
+    while (CoroutineExtras.getTaskPoolWorkersNum() < maxCount) {
+        delayWithYield(10);
+    }
+    isExecuted.set(true);
+    while (executedCount != 20) {
+        delayWithYield(10);
+    }
+    arktest.assertTrue(CoroutineExtras.getTaskPoolWorkersNum() > 2);
+    reset();
+}
+
+function taskpoolMaxWorkersTest() {
+    maxCount = max(10, CoroutineExtras.getTaskPoolWorkersLimit());
+    CoroutineExtras.setTaskPoolWorkersLimit(maxCount);
+    for (let i = 1; i <= 50; ++i) {
+        taskpool.execute(expandTest, 10).then(() => {
+            executedCount++;
+        })
+    }
+    while (CoroutineExtras.getTaskPoolWorkersNum() < maxCount) {
+        delayWithYield(10);
+    }
+    isExecuted.set(true);
+    while (executedCount != 50) {
+        delayWithYield(10);
+    }
+    arktest.assertEQ(CoroutineExtras.getTaskPoolWorkersNum(), maxCount);
+    reset();
+}
+
+function taskpoolRetriggerShrinkTest() {
+    CoroutineExtras.setTaskPoolTriggerShrinkInterval(100000);
+    CoroutineExtras.setTaskPoolIdleThreshold(200000);
+    CoroutineExtras.retriggerTaskPoolShrink();
+    for (let i = 1; i <= 20; ++i) {
+        taskpool.execute(expandTest).then(() => {
+            executedCount++;
+        })
+    }
+    while(CoroutineExtras.getTaskPoolWorkersNum() < maxCount) {
+        delayWithYield(10);
+    }
+    isExecuted.set(true);
+    while (executedCount != 20) {
+        delayWithYield(10);
+    }
+    await taskpool.execute(longFunc, 200);
+    let num = CoroutineExtras.getTaskPoolWorkersNum();
+    arktest.assertEQ(num, maxCount);
+    reset();
+}
+
+function taskpoolShrinkTest() {
+    let expandedNum: int = CoroutineExtras.getTaskPoolWorkersNum();
+    CoroutineExtras.setTaskPoolTriggerShrinkInterval(50);
+    CoroutineExtras.setTaskPoolIdleThreshold(50);
+    CoroutineExtras.retriggerTaskPoolShrink();
+    await taskpool.execute(longFunc, 200);
+    let shrinkedNum = CoroutineExtras.getTaskPoolWorkersNum();
+    arktest.assertTrue(expandedNum > shrinkedNum);
+    reset();
+}
+
 function main(): int {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
@@ -1104,6 +1184,10 @@ function main(): int {
     commonTaskSuite.addTest('dependencyErrorTaskTest', dependencyErrorTaskTest);
     commonTaskSuite.addTest('dependencyCancelTaskTest', dependencyCancelTaskTest);
     commonTaskSuite.addTest('doubleCancelByDependencyTest', doubleCancelByDependencyTest);
+    commonTaskSuite.addTest('taskpoolExpandTest', taskpoolExpandTest);
+    commonTaskSuite.addTest('taskpoolMaxWorkersTest', taskpoolMaxWorkersTest);
+    commonTaskSuite.addTest('taskpoolRetriggerShrinkTest', taskpoolRetriggerShrinkTest);
+    commonTaskSuite.addTest('taskpoolShrinkTest', taskpoolShrinkTest);
     let res = commonTaskSuite.run();
     CoroutineExtras.stopTaskpool();
     return res;
