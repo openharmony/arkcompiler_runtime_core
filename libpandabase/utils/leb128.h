@@ -54,6 +54,40 @@ inline std::tuple<T, size_t, bool> DecodeUnsigned(const uint8_t *data)
     return {result, N, false};
 }
 
+#if defined(PANDA_TARGET_ARM64) && !(PANDA_TARGET_MACOS)
+
+template <>
+inline std::tuple<uint32_t, size_t, bool> DecodeUnsigned<uint32_t>(const uint8_t *data)
+{
+    if (LIKELY(!(data[0] & 0x80))) {
+        return {data[0], 1, true};
+    }
+
+    uint64_t rev = 0;
+    constexpr size_t PAGE_SIZE = 4096;
+    constexpr size_t PREFETCH_SIZE = 8;
+    constexpr size_t BITS_PER_BYTE = 8;
+    bool read_pass_end_of_page = ((uintptr_t)data & (PAGE_SIZE-1)) > PAGE_SIZE - PREFETCH_SIZE;
+    if (UNLIKELY(read_pass_end_of_page)) {
+        int i = -1;
+        do {
+            i++;
+            rev |= (uint64_t)(data[i]) << (BITS_PER_BYTE * i);
+        } while (data[i] & 0x80);
+    } else {
+        rev = ((uint64_t *)data)[0];
+    }
+    uint64_t lenbit = (~rev) & (0x8080808080);
+    uint64_t len = (__builtin_ctz(lenbit) >> 3) + 1;
+    uint64_t valid_rev = rev & (lenbit ^ (lenbit - 1));
+
+    uint32_t result = (valid_rev & 0x7f) | ((valid_rev & 0x7f00) >> 1) | ((valid_rev & 0x7f0000) >> 2) |
+        ((valid_rev & 0x7f000000) >> 3) | ((valid_rev & 0x0f00000000) >> 4);
+    return {result, len, !(valid_rev & 0xf000000000)};
+}
+
+#else
+
 template <>
 inline std::tuple<uint32_t, size_t, bool> DecodeUnsigned<uint32_t>(const uint8_t *data)
 {
@@ -90,6 +124,8 @@ inline std::tuple<uint32_t, size_t, bool> DecodeUnsigned<uint32_t>(const uint8_t
     }
     return {result, p - data, valid};
 }
+
+#endif
 
 template <class T>
 inline std::tuple<T, size_t, bool> DecodeSigned(const uint8_t *data)
