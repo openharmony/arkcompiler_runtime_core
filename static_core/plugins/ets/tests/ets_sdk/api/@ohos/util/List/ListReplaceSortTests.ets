@@ -124,7 +124,7 @@ function testSortAndGetSubList() {
     list.insert(8, 0);
     list.sort((first, second) => first - second);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
             "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 0. Received value is: 5") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }

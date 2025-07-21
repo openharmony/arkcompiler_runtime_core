@@ -134,7 +134,7 @@ function testIllegalPositionForAttributes() {
     thatSer.startElement("note");
     thatSer.endElement();
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).code == TypeErrorCodeId) &&
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).code == TypeErrorCodeId) &&
             ((e as BusinessError).message == 'Illegal position for attribute');
     }
     arktest.expectThrow(() => {thatSer.setAttributes("a","b")}, exceptionCheck);
@@ -145,7 +145,7 @@ function testEmptyAttributeName() {
     let thatSer = new xml.XmlSerializer(arrayBuffer);
     thatSer.startElement("note");
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).code == TypeErrorCodeId) &&
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).code == TypeErrorCodeId) &&
             ((e as BusinessError).message == 'Parameter error. Parameter cannot be empty');
     }
     arktest.expectThrow(() => {thatSer.setAttributes("","b")}, exceptionCheck);
@@ -159,7 +159,7 @@ function testAttributeSettingWithOverflow() {
     thatSer.endElement();
     thatSer.startElement("note1");
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).code == TypeErrorCodeId) &&
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).code == TypeErrorCodeId) &&
             ((e as BusinessError).message == 'XmlSerializer:: SetAttributes memcpy_s failed');
     }
     arktest.expectThrow(() => {thatSer.setAttributes("a", "b")}, exceptionCheck);

@@ -85,7 +85,7 @@ function testWriteDeclarationAtIllegalPositionThrowsError() {
     let thatSer = new xml.XmlSerializer(arrayBuffer);
     thatSer.setDeclaration();
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).code == TypeErrorCodeId) &&
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).code == TypeErrorCodeId) &&
             ((e as BusinessError).message == 'illegal position for declaration');
     }
     arktest.expectThrow(() => { thatSer.setDeclaration() }, exceptionCheck);

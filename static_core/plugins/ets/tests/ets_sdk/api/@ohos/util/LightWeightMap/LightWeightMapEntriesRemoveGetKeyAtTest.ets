@@ -91,7 +91,7 @@ function testGetKeyAtInvalidIndex() {
     lightWeightMap.set("squirrel", 123);
     lightWeightMap.set("sparrow", 356);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
             "The value of \"index\" is out of range. It must be >= 0 && <= 1. Received value is: 10") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }

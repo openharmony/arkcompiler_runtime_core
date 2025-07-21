@@ -25,6 +25,14 @@ export type ArrayListComparatorFn<T> = (firstValue: T, secondValue: T) => double
 export type ArrayListForEachCb<T> =  (value: T, index: int, arrlist: ArrayList<T>) => void;
 export type ArrayListReplaceCb<T> =  (value: T, index: int, arrlist: ArrayList<T>) => T;
 
+function createBusinessError(code: int, message: string) {
+    let err = new BusinessError();
+    err.code = code;
+    err.name = 'BusinessError';
+    err.message = message;
+    return err;
+}
+
 export class ArrayList<T> implements Iterable<T>, JsonReplacer {
     private readonly DEFAULT_CAPACITY = 10;
     private capacity: int = this.DEFAULT_CAPACITY;
@@ -70,7 +78,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      */
     public add(element: T): boolean {
         if (this.length >= Int.MAX_VALUE) {
-            throw new BusinessError(CapacityErrorCodeId, new Error(`The current capacity has reached the maximum limit.`));
+            throw createBusinessError(CapacityErrorCodeId, `The current capacity has reached the maximum limit.`);
         }
 
         if (this.length == this.capacity) {
@@ -346,7 +354,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      */
     public increaseCapacityTo(newCapacity: int): void {
         if (newCapacity > Int.MAX_VALUE) {
-            throw new BusinessError(CapacityErrorCodeId, new Error(`The current capacity has reached the maximum limit.`));
+            throw createBusinessError(CapacityErrorCodeId, `The current capacity has reached the maximum limit.`);
         }
 
         if (newCapacity > this.capacity) {
@@ -390,38 +398,38 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
 
     private checkEmptyContainer(): void {
         if (this.isEmpty()) {
-            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`Container is empty`));
+            throw createBusinessError(OutOfBoundsErrorCodeId, `Container is empty`);
         }
     }
 
     private checkIndex(index: int, length: int): void {
         if (index > Int.MAX_VALUE) {
-            throw new BusinessError(TypeErrorCodeId, new Error(`The type of "index" must be small integer. Received value is: ${index}`));
+            throw createBusinessError(TypeErrorCodeId, `The type of "index" must be small integer. Received value is: ${index}`);
         }
         if (index > length || index < 0) {
-            this.createBusinessError('index', length, index);
+            this.createRangeBusinessError('index', length, index);
         }
         if (!isInteger(index)) {
-            throw new BusinessError(TypeErrorCodeId, new Error(`Index must be an integer. Received value is: ${index}`));
+            throw createBusinessError(TypeErrorCodeId, `Index must be an integer. Received value is: ${index}`);
         }
     }
 
     private checkRange(fromIndex: int, toIndex: int): void {
         if (fromIndex > Int.MAX_VALUE) {
-            this.createBusinessError('fromIndex', min(this.length - 1, toIndex - 1), fromIndex - INT_MAX_VALUE_OFFSET);
+            this.createRangeBusinessError('fromIndex', min(this.length - 1, toIndex - 1), fromIndex - INT_MAX_VALUE_OFFSET);
         }
         if (fromIndex < 0 || fromIndex >= toIndex || fromIndex >= this.length) {
-            this.createBusinessError('fromIndex', min(this.length - 1, toIndex - 1), fromIndex);
+            this.createRangeBusinessError('fromIndex', min(this.length - 1, toIndex - 1), fromIndex);
         }
         if (toIndex > Int.MAX_VALUE) {
-            this.createBusinessError('toIndex', this.length, toIndex - INT_MAX_VALUE_OFFSET);
+            this.createRangeBusinessError('toIndex', this.length, toIndex - INT_MAX_VALUE_OFFSET);
         }
         if (toIndex > this.length) {
-            this.createBusinessError('toIndex', this.length, toIndex);
+            this.createRangeBusinessError('toIndex', this.length, toIndex);
         }
     }
 
-    private createBusinessError(index: string, upperLimit: int, currentValue: int): void {
-        throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"${index}\" is out of range. It must be >= 0 && <= ${upperLimit}. Received value is: ${currentValue}`));
+    private createRangeBusinessError(index: string, upperLimit: int, currentValue: int): void {
+        throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"${index}\" is out of range. It must be >= 0 && <= ${upperLimit}. Received value is: ${currentValue}`);
     }
 }

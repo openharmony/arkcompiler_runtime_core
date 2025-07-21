@@ -3966,6 +3966,6 @@ class Utils {
     }
 
     public static createBusinessError(code: int, message: string) {
-        return new BusinessError(code, new Error(message));
+        return new BusinessError(code, new Error('BusinessError', message, undefined));
     }
 }

@@ -152,7 +152,7 @@ function testWriteEmptyCDATAThrowsError() {
     let thatSer = new xml.XmlSerializer(arrayBuffer);
     thatSer.startElement('note');
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).code == TypeErrorCodeId) &&
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).code == TypeErrorCodeId) &&
             ((e as BusinessError).message == 'Parameter error. Parameter cannot be empty');
     }
     arktest.expectThrow(() => { thatSer.setCDATA('') }, exceptionCheck);

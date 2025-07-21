@@ -64,7 +64,7 @@ function checkOutsideRangeError(buf: buffer.Buffer, index: int) {
 It must be >= 0 and <= ${buf.length}. Received value is: ${index}`;
     const OutOfBoundsErrorCodeId: number = 10200001;
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) &&
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') &&
             ((e as BusinessError).message == errMsg) &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }

@@ -191,14 +191,14 @@ export default namespace buffer {
     * For the object whose value returned by valueof() function is strictly equal to object
     * or supports symbol To primitive object, a new buffer instance is created.
     *
-    * @param { Object } object - object object An object supporting Symbol.toPrimitive or valueOf()
+    * @param { Object } input - object object An object supporting Symbol.toPrimitive or valueOf()
     * @param { int | string } offsetOrEncoding - offsetOrEncoding offsetOrEncoding A byte-offset or encoding
     * @param { int } length - length length A length
     * @returns { Buffer } Return a new allocated Buffer
     */
-    export function from(object: Object, offsetOrEncoding: int | string, length: int): Buffer {
+    export function from(input: Object, offsetOrEncoding: int | string, length: int): Buffer {
         const resolvedByteOffset: int = (offsetOrEncoding instanceof string) ? 0 : offsetOrEncoding;
-        return new Buffer(ArrayBuffer.fromObject(object, offsetOrEncoding, length), resolvedByteOffset);
+        return new Buffer(ArrayBuffer.fromObject(input, offsetOrEncoding, length), resolvedByteOffset);
     }
 
     /**
@@ -248,7 +248,7 @@ export default namespace buffer {
      * This is not the same as String.prototype.length, which does not account
      * for the encoding that is used to convert the string into bytes.
      *
-     * @param {string | Buffer | TypedArray | DataView | ArrayBuffer} string - A value to calculate the length of
+     * @param {string | Buffer | TypedArray | DataView | ArrayBuffer} doc - A value to calculate the length of
      * @param {BufferEncoding} [encoding='utf8'] - If `string` is a string, this is its encoding
      * @returns {int} The number of bytes contained within `string`
      * @throws {BusinessError} 401 - Parameter error. Possible causes:

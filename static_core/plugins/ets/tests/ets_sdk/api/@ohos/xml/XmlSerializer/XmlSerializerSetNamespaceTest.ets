@@ -61,7 +61,7 @@ function testEmptyPrefixForNamespace() {
     let thatSer = new xml.XmlSerializer(arrayBuffer);
     thatSer.startElement("note");
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).code == TypeErrorCodeId) &&
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).code == TypeErrorCodeId) &&
             ((e as BusinessError).message == 'Parameter error. Parameter cannot be empty');
     }
     arktest.expectThrow(() => {thatSer.setNamespace("","http://www.w3.org/TR/html4/")}, exceptionCheck);  // CC-OFF(G.OTH.05) test logic
@@ -72,7 +72,7 @@ function testEmptyNamespaceValue() {
     let thatSer = new xml.XmlSerializer(arrayBuffer);
     thatSer.startElement("note");
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).code == TypeErrorCodeId) &&
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).code == TypeErrorCodeId) &&
             ((e as BusinessError).message == 'Parameter error. The type of  must be string');
     }
     arktest.expectThrow(() => {thatSer.setNamespace("h","")}, exceptionCheck);
@@ -86,7 +86,7 @@ function testNamespaceSettingWithOverflow() {
     thatSer.endElement();
     thatSer.startElement("note1");
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).code == TypeErrorCodeId) &&
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).code == TypeErrorCodeId) &&
             ((e as BusinessError).message == 'XmlSerializer:: SetNamespace memcpy_s failed');
     }
     arktest.expectThrow(() => {thatSer.setNamespace("b", "bbb")}, exceptionCheck);

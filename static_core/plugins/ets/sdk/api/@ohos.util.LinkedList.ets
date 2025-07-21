@@ -19,6 +19,14 @@ const TypeErrorCodeId: int = 401;
 const OutOfBoundsErrorCodeId: int = 10200001;
 const EmptyContainerErrorCodeId: int = 10200010;
 
+function createBusinessError(code: int, message: string) {
+    let err = new BusinessError();
+    err.code = code;
+    err.name = 'BusinessError';
+    err.message = message;
+    return err;
+}
+
 export type LinkedListForEachCb<T> = (value: T, index: int, linkedList: LinkedList<T>) => void;
 
 /**
@@ -452,19 +460,19 @@ export class LinkedList<T> implements Iterable<T> {
 
     private checkIndexType(index: int): void {
         if (index > Int.MAX_VALUE) {
-            throw new BusinessError(TypeErrorCodeId, new Error(`The type of "index" must be small integer. Received value is: ${index}`));
+            throw createBusinessError(TypeErrorCodeId, `The type of "index" must be small integer. Received value is: ${index}`);
         }
     }
 
     private checkIndex(index: int, length: int): void {
         if (index > length || index < 0) {
-            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"index\" is out of range. It must be >= 0 && <= ${length}. Received value is: ${index}`));
+            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"index\" is out of range. It must be >= 0 && <= ${length}. Received value is: ${index}`);
         }
     }
 
     private checkEmptyContainer(id: int): void {
         if (this.elementNum == 0) {
-            throw new BusinessError(id, new Error(`Container is empty`));
+            throw createBusinessError(id, `Container is empty`);
         }
     }
 }

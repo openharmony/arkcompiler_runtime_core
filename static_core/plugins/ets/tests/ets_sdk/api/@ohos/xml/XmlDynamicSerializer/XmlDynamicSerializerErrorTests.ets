@@ -46,7 +46,7 @@ function performXmlTest(
     setupFunction(thatSer);
 
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) &&
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') &&
                ((e as BusinessError).code == errorCodeId) &&
                ((e as BusinessError).message == errorMessage);
     }

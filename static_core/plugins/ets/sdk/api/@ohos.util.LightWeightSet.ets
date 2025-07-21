@@ -320,7 +320,8 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
     private checkIndex(index: int): void {
         if (index > Int.MAX_VALUE) {
             throw new BusinessError(TypeErrorCodeId,
-                new Error(`The type of "index" must be small integer. Received value is: ${index}`))
+                new Error('BusinessError', `The type of "index" must be small integer. Received value is: ${index}`,
+                          undefined));
         }
     }
 }

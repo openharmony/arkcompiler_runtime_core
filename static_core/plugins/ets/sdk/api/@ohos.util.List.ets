@@ -19,6 +19,14 @@ import { BusinessError } from "@ohos.base";
 const TypeErrorCodeId: int = 401;
 const OutOfBoundsErrorCodeId: int = 10200001;
 
+function createBusinessError(code: int, message: string) {
+    let err = new BusinessError();
+    err.code = code;
+    err.name = 'BusinessError';
+    err.message = message;
+    return err;
+}
+
 export type ListComparatorFn<T> = (firstValue: T, secondValue: T) => double;
 export type ListForEachCb<T> = (value: T, index: int, list: List<T>) => void;
 export type ListReplaceCb<T> = (value: T, index: int, list: List<T>) => T;
@@ -173,10 +181,10 @@ export class List<T> implements Iterable<T> {
         this.checkEmptyContainer();
 
         if (fromIndex < 0 || fromIndex >= toIndex || fromIndex >= this.length) {
-            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"fromIndex\" is out of range. It must be >= 0 && <= ${min(this.length - 1, toIndex - 1)}. Received value is: ${fromIndex}`));
+            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"fromIndex\" is out of range. It must be >= 0 && <= ${min(this.length - 1, toIndex - 1)}. Received value is: ${fromIndex}`);
         }
         if (toIndex > this.length) {
-            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"toIndex\" is out of range. It must be > 0 && <= ${this.length}. Received value is: ${toIndex}`));
+            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"toIndex\" is out of range. It must be > 0 && <= ${this.length}. Received value is: ${toIndex}`);
         }
 
         let subList: List<T> = new List<T>()
@@ -375,18 +383,18 @@ export class List<T> implements Iterable<T> {
 
     private checkIndexType(index: int): void {
         if (index > Int.MAX_VALUE) {
-            throw new BusinessError(TypeErrorCodeId, new Error(`The type of \"index\" must be small integer. Received value is: ${index}`));
+            throw createBusinessError(TypeErrorCodeId, `The type of \"index\" must be small integer. Received value is: ${index}`);
         }
     }
     private checkEmptyContainer(): void {
         if (this.isEmpty()) {
-            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`Container is empty`));
+            throw createBusinessError(OutOfBoundsErrorCodeId, `Container is empty`);
         }
     }
 
     private checkIndex(index: int, length: int): void {
         if (index > length || index < 0) {
-            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"index\" is out of range. It must be >= 0 && <= ${length}. Received value is: ${index}`));
+            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"index\" is out of range. It must be >= 0 && <= ${length}. Received value is: ${index}`);
         }
     }
 
@@ -399,7 +407,7 @@ export class List<T> implements Iterable<T> {
      */
     public $_get(index: int): T {
         if (index > Int.MAX_VALUE) {
-            throw new BusinessError(TypeErrorCodeId, new Error(`The type of \"index\" must be small integer.`));
+            throw createBusinessError(TypeErrorCodeId, `The type of \"index\" must be small integer.`);
         }
 
         this.checkIndex(index, this.length - 1);

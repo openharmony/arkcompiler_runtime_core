@@ -105,7 +105,7 @@ export namespace xml {
             if (encoding != undefined) {
                 encoding = encoding.toLowerCase()
                 if (encoding !== "utf-8") {
-                    throw new BusinessError(TypeErrorCodeId, new Error('Parameter error.Just support utf-8'))
+                    throw createBusinessError(TypeErrorCodeId, 'Parameter error.Just support utf-8')
                 }
                 strIn = b.toString(encoding! as buffer.BufferEncoding)
             } else {
@@ -172,7 +172,7 @@ export namespace xml {
          */
         constructor(encoding: string) {
             if (encoding !== 'utf-8') {
-                throw new BusinessError(EncodingErrorCodeId, new Error('Parameter error.Just support utf-8'));
+                throw createBusinessError(EncodingErrorCodeId, 'Parameter error.Just support utf-8');
             }
 
             this.buffer = new ArrayBuffer(MaxXmlLength);
@@ -257,8 +257,8 @@ export namespace xml {
          */
         public endElement(): void {
             if (this.elementNum < 1) {
-                throw new BusinessError(NoElementMatchErrorCodeId,
-                    new Error('There is no match between the startElement and the endElement'));
+                throw createBusinessError(NoElementMatchErrorCodeId,
+                    'There is no match between the startElement and the endElement');
             }
             this.elementNum--;
 
@@ -446,7 +446,7 @@ export namespace xml {
                 }
                 this.iPos += iLenTemp;
             } else {
-                throw new BusinessError(BufferOverFlowErrorCodeId, new Error('The length has exceeded the upper limit'));
+                throw createBusinessError(BufferOverFlowErrorCodeId, 'The length has exceeded the upper limit');
             }
         }
 
@@ -496,7 +496,7 @@ export namespace xml {
          */
         private checkEmptyParameter(para: string): void {
             if (para.length === 0) {
-                throw new BusinessError(EmptyErrorCodeId, new Error('Parameter error. Parameter cannot be empty'));
+                throw createBusinessError(EmptyErrorCodeId, 'Parameter error. Parameter cannot be empty');
             }
         }
 
@@ -504,7 +504,7 @@ export namespace xml {
          * Checks the position of the XML serializer and throws an error if the position is illegal.
          */
         private checkPosition(): void {
-            throw new BusinessError(IllegalPositionErrorCodeId, new Error('Illegal position for xml'));
+            throw createBusinessError(IllegalPositionErrorCodeId, 'Illegal position for xml');
         }
 
         /**
@@ -984,7 +984,7 @@ export namespace xml {
          */
         constructor(buffer: ArrayBuffer | DataView, encoding: string) {
             if (encoding !== 'utf-8') {
-                throw new BusinessError(TypeErrorCodeId, new Error('Parameter error.Just support utf-8'));
+                throw createBusinessError(TypeErrorCodeId, 'Parameter error.Just support utf-8');
             }
 
             this.buffer = buffer;
@@ -1011,7 +1011,7 @@ export namespace xml {
         public setAttributes(name: string, value: string): void {
             this.checkEmptyParameter(name);
             if (this.type !== XmlType.START_AND_ATTRIBUTES) {
-                throw new BusinessError(TypeErrorCodeId, new Error('Illegal position for attribute'));
+                throw createBusinessError(TypeErrorCodeId, 'Illegal position for attribute');
             }
 
             let stringBuilder = new StringBuilder(` ${name}=\"`);
@@ -1093,8 +1093,8 @@ export namespace xml {
         public setNamespace(prefix: string, namespace: string): void {
             this.checkEmptyParameter(prefix);
             if (namespace.length === 0) {
-                throw new BusinessError(TypeErrorCodeId,
-                    new Error(`Parameter error. The type of ${namespace} must be string`));
+                throw createBusinessError(TypeErrorCodeId,
+                    `Parameter error. The type of ${namespace} must be string`);
             }
             let stringBuilder = new StringBuilder();
             if (this.type === XmlType.START_AND_ATTRIBUTES) {
@@ -1133,7 +1133,7 @@ export namespace xml {
          */
         public setDeclaration(): void {
             if (this.isHasDecl) {
-                throw new BusinessError(TypeErrorCodeId, new Error('illegal position for declaration'));
+                throw createBusinessError(TypeErrorCodeId, 'illegal position for declaration');
             }
 
             let stringBuilder = new StringBuilder();
@@ -1250,7 +1250,7 @@ export namespace xml {
                 }
                 this.iPos += iLenTemp;
             } else {
-                throw new BusinessError(TypeErrorCodeId, new Error(`XmlSerializer:: ${name} memcpy_s failed`));
+                throw createBusinessError(TypeErrorCodeId, `XmlSerializer:: ${name} memcpy_s failed`);
             }
         }
 
@@ -1301,7 +1301,7 @@ export namespace xml {
          */
         private checkEmptyParameter(para: string): void {
             if (para.length === 0) {
-                throw new BusinessError(TypeErrorCodeId, new Error('Parameter error. Parameter cannot be empty'));
+                throw createBusinessError(TypeErrorCodeId, 'Parameter error. Parameter cannot be empty');
             }
         }
 

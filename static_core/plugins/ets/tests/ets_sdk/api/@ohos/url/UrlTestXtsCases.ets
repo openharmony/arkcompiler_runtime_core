@@ -271,13 +271,13 @@ function testUrlparseURL0032() {
 
 function testUrLParseURLEmoji0002() {
 	const errFunc = (): void => { url.URL.parseURL('/\ud83d\ude0a/path2', ''); };
-	const errCheck = (e: Error | Exception) => { return (e instanceof BusinessError) && e.message == "Parameter error. The type of  must be string" };
+	const errCheck = (e: Error | Exception) => { return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && e.message == "Parameter error. The type of  must be string" };
 	arktest.expectThrow(errFunc, errCheck);
 }
 
 function testUrLParseURLEmoji0004() {
 	const errFunc = (): void => { url.URL.parseURL('/\ud83d\udc64/path2', ''); };
-	const errCheck = (e: Error | Exception) => { return (e instanceof BusinessError) && e.message == "Parameter error. The type of  must be string" };
+	const errCheck = (e: Error | Exception) => { return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && e.message == "Parameter error. The type of  must be string" };
 	arktest.expectThrow(errFunc, errCheck);
 }
 
