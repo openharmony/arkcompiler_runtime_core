@@ -314,7 +314,7 @@ cases:
           let ok:boolean = a(10, a) == 1;
 
     - defs: |-
-        class AliasMe<T> {}          
+        class AliasMe<T> {}
         type M<T> = AliasMe<F<T>>
         type F<T> = AliasMe<M<T>>
       use: |-
@@ -327,35 +327,10 @@ cases:
         let xx: Func<String, Number> = (p: String): Number => p.length
         let ok = xx('Hello World') == 11;
 
-    - defs: |-        
-        type Alias<T extends string> = T
-
-      use: |-
-        let xx: Alias<Number> = 1
-        let ok = xx == 1;
-
     - defs: |-
-        final class FinitaLaComedia {}          
-        type Alias<T extends FinitaLaComedia> = T
-
-      use: |-
-        let xx: Alias<Number> = 1
-        let ok = xx == 1;
-
-    - defs: |-
-        final class FinitaLaComedia {}          
-        type Alias<T extends FinitaLaComedia> = T
-
-      use: |-
-        let xx: Alias<String> = "Divine"
-        let ok = xx instanceof String && xx instanceof Alias<String>;
-
-    - defs: |-
-        final class FinitaLaComedia {}          
+        final class FinitaLaComedia {}
         type Alias<T extends FinitaLaComedia = FinitaLaComedia> = T
 
       use: |-
         let xx = new Alias
         let ok = xx instanceof FinitaLaComedia && xx instanceof Alias;
-        
-        
