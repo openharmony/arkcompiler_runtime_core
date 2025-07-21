@@ -19,10 +19,10 @@ export type Rounding = int
 export type Modulo = int
 export type Value = Decimal | double | string;
 
-const RANGE_ERROR_CODE = 10200001;
-const TYPE_ERROR_CODE = 401;
-const PRECISION_LIMIT_EXCEEDED_ERROR_CODE = 10200060;
-const CRYPTO_UNAVAILABLE_ERROR_CODE = 10200061;
+const RANGE_ERROR_CODE: int = 10200001;
+const TYPE_ERROR_CODE: int = 401;
+const PRECISION_LIMIT_EXCEEDED_ERROR_CODE: int = 10200060;
+const CRYPTO_UNAVAILABLE_ERROR_CODE: int = 10200061;
 
 const EXP_LIMIT: double = 9e15;
 const MAX_DIGITS: double = 1e9;

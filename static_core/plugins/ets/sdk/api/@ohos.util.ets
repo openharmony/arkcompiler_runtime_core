@@ -15,11 +15,11 @@
 
 import { BusinessError } from "@ohos.base";
 
-const TypeErrorCodeId: number = 401;
+const TypeErrorCodeId: int = 401;
 const percentRate = 100;
-const syntaxErrorCode: number = 10200002;
+const syntaxErrorCode: int = 10200002;
 
-function createBusinessError(code: number, message: string) {
+function createBusinessError(code: int, message: string) {
     let err = new BusinessError();
     err.code = code;
     err.name = 'BusinessError';
