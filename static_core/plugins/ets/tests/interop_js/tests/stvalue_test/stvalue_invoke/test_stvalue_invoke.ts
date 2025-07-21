@@ -61,7 +61,7 @@ function testFunctionalObjectInvoke(): void {
         getSumFn.functionalObjectInvoke([numberObj3, STValue.getUndefined()]);
     } catch (e: Error) {
         res = true;
-        res = res && e.message.includes('undefined cannot be cast to Double');
+        res = res && e.message.includes('undefined cannot be cast to std.core.Double');
     }
     ASSERT_TRUE(res);
 }

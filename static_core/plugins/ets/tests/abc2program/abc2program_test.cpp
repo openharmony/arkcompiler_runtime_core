@@ -258,7 +258,7 @@ TEST_F(Abc2ProgramFunctionsTest, Functions)
         prefix + "-1.invoke1:Functions.%%lambda-lambda_invoke-1;std.core.Object;std.core.Object;",
         "std.core.Lambda1._ctor_:std.core.Lambda1;void;",
         "std.core.Object._ctor_:std.core.Object;void;",
-        "std.core.Runtime.failedTypeCastException:std.core.Object;std.core.String;u1;std.core.ClassCastError;",
+        "std.core.Runtime.failedTypeCastExclUndefinedStub:std.core.Object;std.core.Class;std.core.ClassCastError;",
         "std.core.StringBuilder._ctor_:std.core.StringBuilder;void;",
         "std.core.StringBuilder.append:std.core.StringBuilder;f64;std.core.StringBuilder;",
         "std.core.StringBuilder.append:std.core.StringBuilder;std.core.String;std.core.StringBuilder;",
@@ -296,7 +296,7 @@ TEST_F(Abc2ProgramFunctionsConcatTest, Functions)
         prefix + "-1.invoke1:Functions.%%lambda-lambda_invoke-1;std.core.Object;std.core.Object;",
         "std.core.Lambda1._ctor_:std.core.Lambda1;void;",
         "std.core.Object._ctor_:std.core.Object;void;",
-        "std.core.Runtime.failedTypeCastException:std.core.Object;std.core.String;u1;std.core.ClassCastError;",
+        "std.core.Runtime.failedTypeCastExclUndefinedStub:std.core.Object;std.core.Class;std.core.ClassCastError;",
         "std.core.StringBuilder.concatStrings:std.core.String;std.core.String;std.core.String;",
         "std.core.StringBuilder.toString:f64;std.core.String;",
     };
@@ -316,7 +316,6 @@ TEST_F(Abc2ProgramFunctionsTest, StringTable)
         "Function foo was called",
         "Function bar was called",
         "Hi,",
-        "String",
     };
     EXPECT_THAT(prog->strings, ::testing::ContainerEq(expectedStrings));
 }

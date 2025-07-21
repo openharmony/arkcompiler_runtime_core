@@ -55,43 +55,45 @@ EtsBoolean StdRuntimeSameValueZero(EtsObject *a, EtsObject *b)
     return ark::ets::intrinsics::helpers::SameValueZero(EtsCoroutine::GetCurrent(), a, b);
 }
 
-static char const *ReferenceTypeString(EtsObject *obj)
+static std::string GetClassName(EtsClass *cls)
 {
-    if (obj == nullptr) {
-        return "undefined";
-    }
-    return obj->GetClass()->GetDescriptor();
+    return cls->GetRuntimeClass()->GetName();
 }
 
-ObjectHeader *StdCoreRuntimeFailedTypeCastException(EtsObject *source, EtsString *target,
-                                                    EtsBoolean isUndefinedInTarget)
+static ObjectHeader *CreateTypeCastException(EtsObject *source, EtsClass *target, bool inclUndefined)
 {
     auto coro = EtsCoroutine::GetCurrent();
-    PandaVector<uint8_t> tree8Buf;
     ASSERT(coro != nullptr);
 
-    auto message = PandaString(ReferenceTypeString(source)) + " cannot be cast to ";
-    if (isUndefinedInTarget != 0U) {
-        if (!ClassHelper::IsUnionDescriptor(target->IsTreeString() ? target->GetTreeStringDataMUtf8(tree8Buf)
-                                                                   : target->GetDataMUtf8())) {
-            message += "{U" + target->GetMutf8();
-            message += EtsString::FastSubString(target, 0, target->GetLength() - 1)->GetMutf8();
-        } else {
-            message += EtsString::FastSubString(target, 0, target->GetLength() - 1)->GetMutf8();
+    auto message = PandaString(source == nullptr ? "undefined" : GetClassName(source->GetClass()));
+    message.append(" cannot be cast to ");
+
+    if (LIKELY(target != nullptr)) {
+        message.append(GetClassName(target));
+        if (inclUndefined) {
+            message.append(" or undefined");
         }
-        message += ",undefined}";
     } else {
-        message += target->GetMutf8();
+        message.append(inclUndefined ? "undefined" : "never");
     }
 
-    auto *exc =
+    auto exc =
         ets::SetupEtsException(coro, panda_file_items::class_descriptors::CLASS_CAST_ERROR.data(), message.data());
-
-    if (LIKELY(exc != nullptr)) {
-        return exc->GetCoreType();
+    if (UNLIKELY(exc == nullptr)) {
+        ASSERT(coro->HasPendingException());
+        return nullptr;
     }
-    ASSERT(coro->HasPendingException());
-    return nullptr;
+    return exc->GetCoreType();
+}
+
+ObjectHeader *StdCoreRuntimeFailedTypeCastExclUndefinedStub(EtsObject *source, EtsClass *target)
+{
+    return CreateTypeCastException(source, target, false);
+}
+
+ObjectHeader *StdCoreRuntimeFailedTypeCastInclUndefinedStub(EtsObject *source, EtsClass *target)
+{
+    return CreateTypeCastException(source, target, true);
 }
 
 EtsClass *StdCoreRuntimeGetTypeInfo([[maybe_unused]] EtsObject *header)

@@ -175,7 +175,7 @@ function complex_inlined_inf_loop(): int {
 //! INST             /LoadClass.*escompat.Error/
 //! INST_NEXT        "ReturnInlined"
 //! INST_NEXT        "Throw"
-//! INST_NEXT        "Intrinsic.StdCoreRuntimeFailedTypeCastException"
+//! INST_NEXT        "Intrinsic.StdCoreRuntimeFailedTypeCastExclUndefinedStub"
 //! INST_NEXT        "ReturnInlined"
 //! INST_NEXT        "Throw"
 //! INST_COUNT       "Throw", 2
