@@ -84,13 +84,13 @@ function testArrayListRemoveByIndexOf0002() {
     arrayList.add("%");
     arrayList.add(`"`);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
             "The value of \"index\" is out of range. It must be >= 0 && <= 10. Received value is: -2") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
     arktest.expectThrow(() => {arrayList.removeByIndex(-2)}, exceptionCheck);
     let exceptionCheck1 = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
             "The value of \"index\" is out of range. It must be >= 0 && <= 10. Received value is: 11") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
@@ -116,7 +116,7 @@ function testArrayListRemoveByIndexOf0003() {
     arrayList.add("%");
     arrayList.add(`"`);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
             "The value of \"index\" is out of range. It must be >= 0 && <= 10. Received value is: 11") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
@@ -220,7 +220,7 @@ function testArrayListRemoveByRange0001() {
     arrayList.add("%");
     arrayList.add(`"`);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
             "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 0. Received value is: 1") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }

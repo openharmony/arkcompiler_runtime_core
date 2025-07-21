@@ -69,7 +69,7 @@ function testGetValueAtOutOfRangeIndex() {
     plainArray.add(1, "squirrel");
     plainArray.add(2, "sparrow");
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message == 
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == 
             `The value of \"index\" is out of range. It must be >= 0 && <= 1. Received value is: 2`) &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
@@ -108,7 +108,7 @@ function testSetValueAtValidIndexMixedTypes() {
 function testSetValueAtOutOfRangeIndex() {
     let plainArray = new PlainArray<string | double>();
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message == `Container is empty`) &&
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == `Container is empty`) &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
     arktest.expectThrow(() => {plainArray.setValueAt(0, 3546)}, exceptionCheck);

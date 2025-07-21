@@ -117,17 +117,17 @@ function testSetValueAtAndClearOperations() {
 function testExceptionHandlingForEmptyContainer() {
     let empty_pa = new PlainArray<double>();
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == "Container is empty") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
     arktest.expectThrow(() => {empty_pa.getValueAt(0)}, exceptionCheck);
     let exceptionCheck1 = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == "Container is empty") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
     arktest.expectThrow(() => {empty_pa.removeRangeFrom(0, 1)}, exceptionCheck1);
     let exceptionCheck2 = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == "Container is empty") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
     arktest.expectThrow(() => {empty_pa.setValueAt(0, 1)}, exceptionCheck2);

@@ -77,7 +77,7 @@ function BitVector_flipBitByIndex_Func_002() {
     bitVector.push(0);
 
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return e instanceof BusinessError &&
+        return e instanceof BusinessError && (e as BusinessError).name == 'BusinessError' &&
             ((e as BusinessError).code === OutOfBoundsErrorCodeId &&
                 (e as BusinessError).message === `The value of "index" is out of range. It must be >= 0 && <= 7. Received value is: 20`);
     }

@@ -18,6 +18,14 @@ import { BusinessError } from "@ohos.base";
 const TypeErrorCodeId: number = 401;
 const OutOfBoundsErrorCodeId: number = 10200001;
 
+function createBusinessError(code: int, message: string) {
+    let err = new BusinessError();
+    err.code = code;
+    err.name = 'BusinessError';
+    err.message = message;
+    return err;
+}
+
 export type LightWeightMapCbFn<K, V> = (value: V, key: K, map: LightWeightMap<K, V>) => void;
 
 interface ReadonlyLightWeightMap<K, V> extends Iterable<[K, V]> {
@@ -542,20 +550,20 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
 
     private checkIndex(index: int): void {
         if (index > Int.MAX_VALUE) {
-            throw new BusinessError(TypeErrorCodeId,
-                new Error(`The type of "index" must be small integer. Received value is: ${index}`))
+            throw createBusinessError(TypeErrorCodeId,
+                `The type of "index" must be small integer. Received value is: ${index}`)
         }
     }
 
     private checkRange(index: int, length: int): void {
         if (index < 0 || index >= this.buckets.actualLength) {
-            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"index\" is out of range. It must be >= 0 && <= ${this.buckets.actualLength - 1}. Received value is: ${index}`));
+            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"index\" is out of range. It must be >= 0 && <= ${this.buckets.actualLength - 1}. Received value is: ${index}`);
         }
     }
 
     private checkEmptyContainer(): void {
         if(this.isEmpty()) {
-            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`Container is empty`));
+            throw createBusinessError(OutOfBoundsErrorCodeId, `Container is empty`);
         }
     }
 }

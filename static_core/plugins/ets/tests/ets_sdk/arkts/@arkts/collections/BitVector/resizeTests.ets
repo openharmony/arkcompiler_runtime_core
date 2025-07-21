@@ -118,7 +118,7 @@ function BitVector_resize_Func_004() {
     bitVector.push(1);
     bitVector.push(0);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return e instanceof BusinessError &&
+        return e instanceof BusinessError && (e as BusinessError).name == 'BusinessError' &&
             (e as BusinessError).message === `The value of "length" is out of range. It must be >= 0. Received value is: -4` &&
             (e as BusinessError).code === OutOfBoundsErrorCodeId;
     };

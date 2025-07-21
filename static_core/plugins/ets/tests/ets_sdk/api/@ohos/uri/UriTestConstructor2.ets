@@ -322,7 +322,7 @@ function testUriConstruction030() {
 
 function testConstructorThrow(uriText: string, errText: string) {
   let exceptionCheck = (e: Error | Exception): boolean | string => {
-    return (e instanceof BusinessError) && ((e as BusinessError).toString() == errText)
+    return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).toString() == errText)
   }
   arktest.expectThrow((): void => { let that = new uri.URI(uriText); }, exceptionCheck)
 }

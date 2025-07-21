@@ -19,6 +19,14 @@ import { BusinessError } from "@ohos.base"
 const OutOfBoundsErrorCodeId: number = 10200001;
 const TypeErrorCodeId: number = 401;
 
+function createBusinessError(code: number, message: string) {
+    let err = new BusinessError();
+    err.code = code;
+    err.name = 'BusinessError';
+    err.message = message;
+    return err;
+}
+
 export namespace collections {
     final class BitVectorIterator implements IterableIterator<int> {
         private index: int = 0;
@@ -357,7 +365,7 @@ export namespace collections {
          */
         public resize(size: int): void {
             if (size < 0) {
-                throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"length\" is out of range. It must be >= 0. Received value is: ${size}`));
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"length\" is out of range. It must be >= 0. Received value is: ${size}`);
             }
 
             let sizeInt: int = size;
@@ -526,17 +534,17 @@ export namespace collections {
 
         private checkRange(fromIndex: int, toIndex: int): void {
             if (toIndex < 0 || toIndex > this._length) {
-                throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"toIndex\" is out of range. It must be >= 0 && <= ${this._length}. Received value is: ${toIndex}`));
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"toIndex\" is out of range. It must be >= 0 && <= ${this._length}. Received value is: ${toIndex}`);
             }
 
             if (fromIndex < 0 || fromIndex >= toIndex) {
-                throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"fromIndex\" is out of range. It must be >= 0 && <= ${toIndex - 1}. Received value is: ${fromIndex}`));
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"fromIndex\" is out of range. It must be >= 0 && <= ${toIndex - 1}. Received value is: ${fromIndex}`);
             }
         }
 
         private checkIndex(index: int): void {
             if (index < 0 || index >= this._length) {
-                throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"index\" is out of range. It must be >= 0 && <= ${this._length - 1}. Received value is: ${index}`));
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"index\" is out of range. It must be >= 0 && <= ${this._length - 1}. Received value is: ${index}`);
             }
         }
 

@@ -56,7 +56,7 @@ function performXmlTest(serializerOperation: (serializer: xml.XmlSerializer) => 
 function testInvalidEncodingForXmlSerializer() {
     let arrayBuffer = new ArrayBuffer(MaxBufferLength);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).code == TypeErrorCodeId) &&
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).code == TypeErrorCodeId) &&
             ((e as BusinessError).message == 'Parameter error.Just support utf-8');
     }
     arktest.expectThrow(() => {let thatSer = new xml.XmlSerializer(arrayBuffer, 'utf-16')}, exceptionCheck);
@@ -118,7 +118,7 @@ function testEmptyNameForStartElement() {
     let arrayBuffer = new ArrayBuffer(MaxBufferLength);
     let thatSer = new xml.XmlSerializer(arrayBuffer);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).code == TypeErrorCodeId) &&
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).code == TypeErrorCodeId) &&
             ((e as BusinessError).message == 'Parameter error. Parameter cannot be empty');
     }
     arktest.expectThrow(() => {thatSer.startElement("")}, exceptionCheck);
@@ -131,7 +131,7 @@ function testStartElementWithArrayBufferOverflow() {
     thatSer.startElement("note");
     thatSer.endElement();
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).code == TypeErrorCodeId) &&
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).code == TypeErrorCodeId) &&
             ((e as BusinessError).message == 'XmlSerializer:: StartElement memcpy_s failed');
     }
     arktest.expectThrow(() => {thatSer.startElement("note1")}, exceptionCheck);

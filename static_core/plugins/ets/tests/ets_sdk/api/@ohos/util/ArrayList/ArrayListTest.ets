@@ -210,11 +210,11 @@ function testArrayList0007() {
 }
 
 function exceptionCheckEmptyContainer(e: Error | Exception): boolean | string {
-    return (e instanceof BusinessError) && ((e as BusinessError).message == `Container is empty`) &&
+    return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == `Container is empty`) &&
         ((e as BusinessError).code == OutOfBoundsErrorCodeId);
 }
 
 function exceptionCheckType(e: Error | Exception): boolean | string {
-    return (e instanceof BusinessError) && ((e as BusinessError).message.startsWith(`The type of \"index\" must be small integer.`)) &&
+    return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message.startsWith(`The type of \"index\" must be small integer.`)) &&
         ((e as BusinessError).code == TypeErrorCodeId);
 }

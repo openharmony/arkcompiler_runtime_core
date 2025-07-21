@@ -67,7 +67,7 @@ function testIndexOutOfRange() {
     initializeList(list, testNumbers);
 
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
             "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: 22") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
@@ -106,7 +106,7 @@ function checkOutsideRangeError(list: List<double>, index: int) {
         errCode = 401;
     }
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) &&
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') &&
             ((e as BusinessError).message == errMsg) &&
             ((e as BusinessError).code == errCode);
     }

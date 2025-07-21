@@ -77,7 +77,7 @@ function testSetMultipleTypes() {
 function testSetElementsInEmptyContainer() {
     let linkedList = new LinkedList<double>();
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == "Container is empty") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
     arktest.expectThrow(() => {linkedList.set(0, TestData.testNumber1)}, exceptionCheck);

@@ -18,6 +18,14 @@ import { BusinessError } from "@ohos.base";
 const TypeErrorCodeId: int = 401;
 const OutOfBoundsErrorCodeId: int = 10200001;
 
+function createBusinessError(code: int, message: string) {
+    let err = new BusinessError();
+    err.code = code;
+    err.name = 'BusinessError';
+    err.message = message;
+    return err;
+}
+
 export type DequeforEachCb<T> = (value: T, index: int, deque: Deque<T>) => void;
 
 export default class Deque<T> implements Iterable<T>, JsonReplacer {
@@ -231,7 +239,7 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
     public $_get(index: int): T {
         this.checkEmptyContainer();
         if (index > Int.MAX_VALUE) {
-            throw new BusinessError(TypeErrorCodeId, new Error(`The type of \"index\" must be small integer.`));
+            throw createBusinessError(TypeErrorCodeId, `The type of \"index\" must be small integer.`);
         }
         this.checkIndex(index);
 
@@ -259,13 +267,13 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
 
     private checkEmptyContainer(): void {
         if (this.isEmpty()) {
-            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`Container is empty`));
+            throw createBusinessError(OutOfBoundsErrorCodeId, `Container is empty`);
         }
     }
 
     private checkIndex(index: int): void {
         if (index < 0) {
-            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"index\" is out of range. It must be >= 0 && <= ${this.length - 1}. Received value is: ${index}`));
+            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"index\" is out of range. It must be >= 0 && <= ${this.length - 1}. Received value is: ${index}`);
         }
     }
 }

@@ -19,6 +19,14 @@ import { BusinessError } from "@ohos.base";
 const TypeErrorCodeId: int = 401;
 const OutOfBoundsErrorCodeId: int = 10200001;
 
+function createBusinessError(code: int, message: string) {
+    let err = new BusinessError();
+    err.code = code;
+    err.name = 'BusinessError';
+    err.message = message;
+    return err;
+}
+
 export type PlainArrayForEachCb<T> = (value: T, key: int, PlainArray: PlainArray<T>) => void;
 
 /**
@@ -204,12 +212,12 @@ export class PlainArray<T> implements Iterable<[Int, T]> {
         this.checkIndexType(index);
         this.checkEmptyContainer();
         if (size > Int.MAX_VALUE) {
-            throw new BusinessError(TypeErrorCodeId,
-                new Error(`The type of \"size\" must be small integer. Received value is: ${size}`));
+            throw createBusinessError(TypeErrorCodeId,
+                `The type of \"size\" must be small integer. Received value is: ${size}`);
         }
         this.checkIndex(index, this.length - 1);
         if (size < 1) {
-            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"size\" is out of range. It must be > 0. Received value is: ${size}`));
+            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"size\" is out of range. It must be > 0. Received value is: ${size}`);
         }
 
         const elemNum = this.length - index;
@@ -254,25 +262,25 @@ export class PlainArray<T> implements Iterable<[Int, T]> {
 
     private checkIndexType(index: int): void {
         if (index > Int.MAX_VALUE) {
-            throw new BusinessError(TypeErrorCodeId, new Error(`The type of \"index\" must be small integer. Received value is: ${index}`));
+            throw createBusinessError(TypeErrorCodeId, `The type of \"index\" must be small integer. Received value is: ${index}`);
         }
     }
 
     private checkEmptyContainer(): void {
         if (this.isEmpty()) {
-            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`Container is empty`));
+            throw createBusinessError(OutOfBoundsErrorCodeId, `Container is empty`);
         }
     }
 
     private checkIndex(index: int, length: int): void {
         if (index < 0 || index > length) {
-            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"index\" is out of range. It must be >= 0 && <= ${length}. Received value is: ${index}`));
+            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"index\" is out of range. It must be >= 0 && <= ${length}. Received value is: ${index}`);
         }
     }
 
     private checkKey(key: int): void {
         if (key > Int.MAX_VALUE) {
-            throw new BusinessError(TypeErrorCodeId, new Error(`The type of \"key\" must be small integer. Received value is: ${key}`));
+            throw createBusinessError(TypeErrorCodeId, `The type of \"key\" must be small integer. Received value is: ${key}`);
         }
     }
 }

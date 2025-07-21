@@ -77,12 +77,12 @@ function testRemoveByIndexOutsideRange() {
     let linkedList = new LinkedList<double>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
             "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: 10000") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
     let exceptionCheck1 = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
             "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: -6") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
@@ -123,7 +123,7 @@ function testRemoveFirstFromEmptyContainer() {
 function testRemoveFirstFromNonEmptyContainer() {
     let linkedList = new LinkedList<double>();
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == "Container is empty") &&
             ((e as BusinessError).code == EmptyContainerErrorCodeId);
     }
     arktest.expectThrow(() => {linkedList.removeFirst()}, exceptionCheck);
@@ -142,7 +142,7 @@ function testRemoveLastFromEmptyContainer() {
 function testRemoveLastFromNonEmptyContainer() {
     let linkedList = new LinkedList<double>();
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == "Container is empty") &&
             ((e as BusinessError).code == EmptyContainerErrorCodeId);
     }
     arktest.expectThrow(() => {linkedList.removeLast()}, exceptionCheck);

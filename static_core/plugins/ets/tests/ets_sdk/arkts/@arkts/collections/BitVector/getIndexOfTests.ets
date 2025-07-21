@@ -57,7 +57,7 @@ function BitVector_getIndexOf_Func_002() {
     bitVector.push(1);
     bitVector.push(0);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return e instanceof BusinessError &&
+        return e instanceof BusinessError && (e as BusinessError).name == 'BusinessError' &&
             ((e as BusinessError).code === OutOfBoundsErrorCodeId &&
                 (e as BusinessError).message === `The value of \"toIndex\" is out of range. It must be >= 0 && <= 8. Received value is: -3`);
     };
@@ -76,7 +76,7 @@ function BitVector_getIndexOf_Func_003() {
     bitVector.push(1);
     bitVector.push(0);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return e instanceof BusinessError &&
+        return e instanceof BusinessError && (e as BusinessError).name == 'BusinessError' &&
             ((e as BusinessError).code === OutOfBoundsErrorCodeId &&
                 (e as BusinessError).message === `The value of \"toIndex\" is out of range. It must be >= 0 && <= 8. Received value is: -3`);
     };
@@ -95,7 +95,7 @@ function BitVector_getIndexOf_Func_004() {
     bitVector.push(1);
     bitVector.push(0);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return e instanceof BusinessError &&
+        return e instanceof BusinessError && (e as BusinessError).name == 'BusinessError' &&
             ((e as BusinessError).code === OutOfBoundsErrorCodeId &&
                 (e as BusinessError).message === `The value of \"fromIndex\" is out of range. It must be >= 0 && <= 7. Received value is: -3`);
     };

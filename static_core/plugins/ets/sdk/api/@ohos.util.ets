@@ -791,8 +791,8 @@ export namespace util {
             const regex = new RegExp('^(.*)([:\\/])(.*)$');
             const match = str.match(regex);
             if (!match) {
-                throw new BusinessError(TypeErrorCodeId,
-                    new Error(`Parameter error. The type of ${str} must be effective string`));
+                throw createBusinessError(TypeErrorCodeId,
+                    `Parameter error. The type of ${str} must be effective string`);
             }
             const str1 = match[1];
             const separator = match[2];
@@ -805,8 +805,8 @@ export namespace util {
                 }
                 return RationalNumber.parseRationalNumber(num1, num2);
             } else {
-                throw new BusinessError(TypeErrorCodeId,
-                    new Error(`Parameter error. The type of ${str} must be character string`));
+                throw createBusinessError(TypeErrorCodeId,
+                    `Parameter error. The type of ${str} must be character string`);
             }
         }
 
@@ -875,8 +875,8 @@ export namespace util {
          */
         static getCommonFactor(firNum: number, SecNum: number): number {
             if (firNum === 0 || SecNum === 0) {
-                throw new BusinessError(TypeErrorCodeId,
-                    new Error(`Parameter error. The Parameter cannot be zero`));
+                throw createBusinessError(TypeErrorCodeId,
+                    `Parameter error. The Parameter cannot be zero`);
             }
             if (!Number.isInteger(firNum) || !Number.isInteger(SecNum)) {
                 console.error('getCommonFactor: The type of Parameter must be integer');
@@ -1659,7 +1659,7 @@ export namespace util {
 
     /**
      * Get the hash code of an object.
-     * @param { object } [object] - The object that need to get hash code.
+     * @param { object } [obj] - The object that need to get hash code.
      * @returns { number } Return a hash code of an object.
      */
     export function getHash(obj: object): number {
@@ -1685,7 +1685,7 @@ export namespace util {
     export function parseUUID(uuid: string): Uint8Array {
         const format = new RegExp("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
         if (!format.test(uuid)) {
-            throw new BusinessError(syntaxErrorCode, new Error(`Syntax Error.Invalid ${uuid} string`));
+            throw createBusinessError(syntaxErrorCode, `Syntax Error.Invalid ${uuid} string`);
         }
         const hex = uuid.replace(new RegExp('-', 'g'), '');
         const uuidArray = new Uint8Array(16);
