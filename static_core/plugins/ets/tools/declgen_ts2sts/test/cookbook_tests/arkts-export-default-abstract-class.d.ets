@@ -1,3 +1,4 @@
+'use static'
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export default Test;
-declare class Test {
-    name: string;
+export default declare abstract class A {
+    a: number;
+    constructor(a: number);
+    abstract log(message: string): string;
 }
-export declare class Base {
-    name: string;
-    constructor(name: string);
+export declare class B {
+    a: number;
+    constructor(a: number);
 }

@@ -2081,9 +2081,18 @@ function exportDefaultAssignment(
   }
 
   if (modifiers.some(modifier => modifier.kind === ts.SyntaxKind.DefaultKeyword)) {
-    const newModifiers = modifiers.filter(modifier =>
-      ts.isModifier(modifier)
-    ).concat(context.factory.createModifier(ts.SyntaxKind.DeclareKeyword));
+    const newModifiers = [...modifiers];
+    
+    if (!modifiers.some(modifier => modifier.kind === ts.SyntaxKind.DeclareKeyword)) {
+      const declareModifier = context.factory.createModifier(ts.SyntaxKind.DeclareKeyword);
+      
+      const defaultIndex = modifiers.findIndex(mod => mod.kind === ts.SyntaxKind.DefaultKeyword);
+      if (defaultIndex !== -1) {
+        newModifiers.splice(defaultIndex + 1, 0, declareModifier);
+      } else {
+        newModifiers.push(declareModifier);
+      }
+    }
 
     const safeModifiers = newModifiers as ts.Modifier[];
 
