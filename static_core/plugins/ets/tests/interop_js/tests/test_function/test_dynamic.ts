@@ -24,6 +24,13 @@ export function foo1(x: string): string {
 export class X {
     s: string = ""
 }
+
+export class Y {
+    static fooArgs(...nums: number[]): number {
+        return nums[0]
+    }
+}
+
 export function foo2(x: X): string {
     return x.s
 }
