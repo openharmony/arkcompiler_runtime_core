@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Variable declaration with mixed types.
+desc: Variable declaration with circular dependency.
 tags: [compile-only, negative]
 ---*/
 
