@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+#if !defined(NDEBUG) || defined(FASTVERIFY)
+#define VERBOSE_THREAD_STATE_LOG true
+#endif
+
 #include "runtime/include/thread-inl.h"
 #include "libpandabase/os/stacktrace.h"
 #include "runtime/handle_base-inl.h"
@@ -272,7 +276,9 @@ ManagedThread::~ManagedThread()
     allocator->Delete(stackFrameAllocator_);
     allocator->Delete(ptThreadInfo_.release());
 
+#if defined(VERBOSE_THREAD_STATE_LOG)
     ASSERT(threadFrameStates_.empty() && "stack should be empty");
+#endif
 }
 
 void ManagedThread::InitBuffers()
@@ -419,9 +425,11 @@ void ManagedThread::EnableStackOverflowCheck()
 
 void ManagedThread::NativeCodeBegin()
 {
+#if defined(VERBOSE_THREAD_STATE_LOG)
     LOG_IF(!(threadFrameStates_.empty() || threadFrameStates_.top() != NATIVE_CODE), FATAL, RUNTIME)
         << LogThreadStack(NATIVE_CODE) << " or stack should be empty";
     threadFrameStates_.push(NATIVE_CODE);
+#endif
     UpdateStatus(ThreadStatus::NATIVE);
     isManagedScope_ = false;
 }
@@ -433,15 +441,20 @@ void ManagedThread::NativeCodeEnd()
     // after this method
     UpdateStatus(ThreadStatus::RUNNING);
     isManagedScope_ = true;
+#if defined(VERBOSE_THREAD_STATE_LOG)
     LOG_IF(threadFrameStates_.empty(), FATAL, RUNTIME) << "stack should be not empty";
     LOG_IF(threadFrameStates_.top() != NATIVE_CODE, FATAL, RUNTIME) << LogThreadStack(NATIVE_CODE);
     threadFrameStates_.pop();
+#endif
 }
 
 bool ManagedThread::IsInNativeCode() const
 {
+#if defined(VERBOSE_THREAD_STATE_LOG)
     LOG_IF(HasClearStack(), FATAL, RUNTIME) << "stack should be not empty";
     return threadFrameStates_.top() == NATIVE_CODE;
+#endif
+    return GetStatus() == ThreadStatus::NATIVE;
 }
 
 void ManagedThread::ManagedCodeBegin()
@@ -449,16 +462,20 @@ void ManagedThread::ManagedCodeBegin()
     // thread_frame_states_ should not be accessed without MutatorLock (as runtime could have been destroyed)
     UpdateStatus(ThreadStatus::RUNNING);
     isManagedScope_ = true;
+#if defined(VERBOSE_THREAD_STATE_LOG)
     LOG_IF(HasClearStack(), FATAL, RUNTIME) << "stack should be not empty";
     LOG_IF(threadFrameStates_.top() != NATIVE_CODE, FATAL, RUNTIME) << LogThreadStack(MANAGED_CODE);
     threadFrameStates_.push(MANAGED_CODE);
+#endif
 }
 
 void ManagedThread::ManagedCodeEnd()
 {
+#if defined(VERBOSE_THREAD_STATE_LOG)
     LOG_IF(HasClearStack(), FATAL, RUNTIME) << "stack should be not empty";
     LOG_IF(threadFrameStates_.top() != MANAGED_CODE, FATAL, RUNTIME) << LogThreadStack(MANAGED_CODE);
     threadFrameStates_.pop();
+#endif
     // Should be NATIVE_CODE
     UpdateStatus(ThreadStatus::NATIVE);
     isManagedScope_ = false;
@@ -466,14 +483,18 @@ void ManagedThread::ManagedCodeEnd()
 
 bool ManagedThread::IsManagedCode() const
 {
+#if defined(VERBOSE_THREAD_STATE_LOG)
     LOG_IF(HasClearStack(), FATAL, RUNTIME) << "stack should be not empty";
     return threadFrameStates_.top() == MANAGED_CODE;
+#endif
+    return GetStatus() == ThreadStatus::RUNNING;
 }
 
 // Since we don't allow two consecutive NativeCode frames, there is no managed code on stack if
 // its size is 1 and last frame is Native
 bool ManagedThread::HasManagedCodeOnStack() const
 {
+#if defined(VERBOSE_THREAD_STATE_LOG)
     if (HasClearStack()) {
         return false;
     }
@@ -481,6 +502,10 @@ bool ManagedThread::HasManagedCodeOnStack() const
         return false;
     }
     return true;
+#else
+    LOG(FATAL, RUNTIME) << "This method only supported in debug mode";
+    return !IsInNativeCode();
+#endif
 }
 
 bool ManagedThread::HasClearStack() const
@@ -859,7 +884,9 @@ void ManagedThread::CleanupInternalResources()
 
 void ManagedThread::FreeInternalMemory()
 {
+#if defined(VERBOSE_THREAD_STATE_LOG)
     threadFrameStates_.~PandaStack<ThreadState>();
+#endif
     DestroyInternalResources();
 
     localObjects_.~PandaVector<ObjectHeader **>();
@@ -911,9 +938,11 @@ void ManagedThread::CleanUp()
     ClearException();
     ClearTLAB();
 
+#if defined(VERBOSE_THREAD_STATE_LOG)
     while (!threadFrameStates_.empty()) {
         threadFrameStates_.pop();
     }
+#endif
     localObjects_.clear();
     {
         os::memory::LockHolder lock(*Locks::customTlsLock_);
