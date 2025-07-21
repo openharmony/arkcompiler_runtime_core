@@ -1533,6 +1533,20 @@
 #24289
 17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co2_over_10.ets
 
+#28235
+17.experimental_features/11.classes_experimental/03.constructor_names/ConstructorNameOverload.ets
+17.experimental_features/11.classes_experimental/03.constructor_names/ShortFormCall_0.ets
+17.experimental_features/11.classes_experimental/03.constructor_names/ShortFormCall_1.ets
+17.experimental_features/11.classes_experimental/03.constructor_names/ShortFormCall_2.ets
+17.experimental_features/11.classes_experimental/03.constructor_names/SpecExample0.ets
+17.experimental_features/11.classes_experimental/03.constructor_names/SpecExample1_Good_0.ets
+17.experimental_features/11.classes_experimental/03.constructor_names/SpecExample1_Good_1.ets
+17.experimental_features/11.classes_experimental/03.constructor_names/use_named_via_this.ets
+17.experimental_features/11.classes_experimental/03.constructor_names/use_super_from_name.ets
+17.experimental_features/11.classes_experimental/03.constructor_names/use_this_from_name.ets
+17.experimental_features/11.classes_experimental/03.constructor_names/SpecExample1_Bad_0.ets
+17.experimental_features/11.classes_experimental/03.constructor_names/SpecExample1_Bad_1.ets
+
 #24129
 17.experimental_features/12.default_interface_method_declarations/private_interface_methods2.ets
 
@@ -1541,6 +1555,8 @@
 17.experimental_features/13.adding_functionality_to_existing_types/06.implicit_this_in_lambda/implicit_this_in_lambda_3.ets
 17.experimental_features/13.adding_functionality_to_existing_types/06.implicit_this_in_lambda/implicit_this_in_lambda_4.ets
 17.experimental_features/13.adding_functionality_to_existing_types/06.implicit_this_in_lambda/implicit_this_in_lambda_6.ets
+17.experimental_features/14.trailing_lambdas/trlambda_met_13.ets
+17.experimental_features/14.trailing_lambdas/trlambda_met_14.ets
 
 #21834 overloads for |undefined are not available
 17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_0_22.ets
