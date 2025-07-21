@@ -96,6 +96,17 @@ public:
     EtsMethod *escompatArrayPush {};
     EtsMethod *escompatArrayPop {};
     EtsClass *escompatArrayBuffer {};
+    EtsClass *escompatInt8Array {};
+    EtsClass *escompatUint8Array {};
+    EtsClass *escompatUint8ClampedArray {};
+    EtsClass *escompatInt16Array {};
+    EtsClass *escompatUint16Array {};
+    EtsClass *escompatInt32Array {};
+    EtsClass *escompatUint32Array {};
+    EtsClass *escompatFloat32Array {};
+    EtsClass *escompatFloat64Array {};
+    EtsClass *escompatBigInt64Array {};
+    EtsClass *escompatBigUint64Array {};
     EtsClass *containersArrayAsListInt {};
     EtsClass *escompatRecord {};
     EtsMethod *escompatRecordGetter {};

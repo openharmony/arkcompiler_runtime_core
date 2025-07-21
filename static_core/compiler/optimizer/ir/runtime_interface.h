@@ -451,6 +451,76 @@ public:
         return false;
     }
 
+    virtual bool IsClassEscompatInt8Array([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatUint8Array([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatUint8ClampedArray([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatInt16Array([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatUint16Array([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatInt32Array([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatUint32Array([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatFloat32Array([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatFloat64Array([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatBigInt64Array([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatBigUint64Array([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatTypedArray([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsFieldTypedArrayLengthInt([[maybe_unused]] FieldPtr field) const
+    {
+        return false;
+    }
+
+    virtual bool IsMethodTypedArrayCtor([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
     virtual uint32_t GetClassOffsetObjectsArray([[maybe_unused]] MethodPtr method) const
     {
         UNREACHABLE();

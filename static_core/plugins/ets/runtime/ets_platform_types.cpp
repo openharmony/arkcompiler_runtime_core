@@ -206,6 +206,17 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     findMethod(&EtsPlatformTypes::escompatArrayPush, escompatArray, "pushSingle", "Lstd/core/Object;:V", false);
     findMethod(&EtsPlatformTypes::escompatArrayPop, escompatArray, "pop", ":Lstd/core/Object;", false);
     findType(&EtsPlatformTypes::escompatArrayBuffer, ARRAY_BUFFER);
+    findType(&EtsPlatformTypes::escompatInt8Array, INT8_ARRAY);
+    findType(&EtsPlatformTypes::escompatUint8Array, UINT8_ARRAY);
+    findType(&EtsPlatformTypes::escompatUint8ClampedArray, UINT8_CLAMPED_ARRAY);
+    findType(&EtsPlatformTypes::escompatInt16Array, INT16_ARRAY);
+    findType(&EtsPlatformTypes::escompatUint16Array, UINT16_ARRAY);
+    findType(&EtsPlatformTypes::escompatInt32Array, INT32_ARRAY);
+    findType(&EtsPlatformTypes::escompatUint32Array, UINT32_ARRAY);
+    findType(&EtsPlatformTypes::escompatFloat32Array, FLOAT32_ARRAY);
+    findType(&EtsPlatformTypes::escompatFloat64Array, FLOAT64_ARRAY);
+    findType(&EtsPlatformTypes::escompatBigInt64Array, BIG_INT64_ARRAY);
+    findType(&EtsPlatformTypes::escompatBigUint64Array, BIG_UINT64_ARRAY);
     findType(&EtsPlatformTypes::containersArrayAsListInt, ARRAY_AS_LIST_INT);
     findType(&EtsPlatformTypes::escompatRecord, RECORD);
     findMethod(&EtsPlatformTypes::escompatRecordGetter, escompatRecord, GET_INDEX_METHOD, nullptr, false);

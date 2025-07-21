@@ -231,6 +231,17 @@ static constexpr std::string_view EMPTYMAPITERATOR                     = "Lescom
 static constexpr std::string_view SET                                  = "Lescompat/Set;";
 static constexpr std::string_view RECORD                               = "Lescompat/Record;";
 static constexpr std::string_view PROCESS                              = "Lescompat/StdProcess;";
+static constexpr std::string_view INT8_ARRAY                           = "Lescompat/Int8Array;";
+static constexpr std::string_view UINT8_ARRAY                          = "Lescompat/Uint8Array;";
+static constexpr std::string_view UINT8_CLAMPED_ARRAY                  = "Lescompat/Uint8ClampedArray;";
+static constexpr std::string_view INT16_ARRAY                          = "Lescompat/Int16Array;";
+static constexpr std::string_view UINT16_ARRAY                         = "Lescompat/Uint16Array;";
+static constexpr std::string_view INT32_ARRAY                          = "Lescompat/Int32Array;";
+static constexpr std::string_view UINT32_ARRAY                         = "Lescompat/Uint32Array;";
+static constexpr std::string_view FLOAT32_ARRAY                        = "Lescompat/Float32Array;";
+static constexpr std::string_view FLOAT64_ARRAY                        = "Lescompat/Float64Array;";
+static constexpr std::string_view BIG_INT64_ARRAY                      = "Lescompat/BigInt64Array;";
+static constexpr std::string_view BIG_UINT64_ARRAY                     = "Lescompat/BigUint64Array;";
 
 // Json Annotations
 static constexpr std::string_view JSON_STRINGIFY_IGNORE                = "Lescompat/JSONStringifyIgnore;";

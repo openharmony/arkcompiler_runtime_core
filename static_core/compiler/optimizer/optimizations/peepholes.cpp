@@ -2755,11 +2755,160 @@ void Peepholes::VisitLoadFromConstantPool(GraphVisitor *v, Inst *inst)
     PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
 }
 
+// Find TypedArray constructor Call follows by NewObject instruction.
+// 4.ref NewObject  ... -> (v5,v6,...)
+// 5.void CallStatic escompat.TypedArray::<ctor> v4, v2, ...
+// Note: Support part of constructors for now, more cases will be supported in the future.
+CallInst *Peepholes::FindTypeArrayCtorCall(Inst *newObject)
+{
+    auto *graph = newObject->GetBasicBlock()->GetGraph();
+    auto *runtime = graph->GetRuntime();
+    for (auto &user : newObject->GetUsers()) {
+        auto *inst = user.GetInst();
+        if (inst->GetOpcode() == Opcode::NullCheck) {
+            auto call = FindTypeArrayCtorCall(inst);
+            if (call != nullptr) {
+                return call;
+            }
+        }
+
+        if (inst->GetOpcode() != Opcode::CallStatic) {
+            continue;
+        }
+        auto call = inst->CastToCallStatic();
+
+        auto callFirstArg = call->GetDataFlowInput(0);
+        if (callFirstArg->GetOpcode() != Opcode::NewObject || newObject->GetOpcode() != Opcode::NewObject) {
+            continue;
+        }
+
+        auto newObjectAsArg = callFirstArg->CastToNewObject();
+        auto newObjectInput = newObject->CastToNewObject();
+        if (newObjectAsArg != newObjectInput) {
+            continue;
+        }
+
+        if (runtime->IsMethodTypedArrayCtor(call->GetCallMethod())) {
+            return call;
+        }
+    }
+
+    return nullptr;
+}
+
+Inst *Peepholes::GetTypedArraySize(Inst *newInst)
+{
+    Inst *arraySize = nullptr;
+    switch (newInst->GetOpcode()) {
+        case Opcode::Constant: {
+            auto instType = newInst->GetType();
+            if (instType == DataType::INT64 || instType == DataType::INT32) {
+                arraySize = newInst;
+            }
+            break;
+        }
+
+        case Opcode::NewArray:
+            arraySize = newInst->GetDataFlowInput(newInst->GetInput(NewArrayInst::INDEX_SIZE).GetInst());
+            break;
+
+        case Opcode::NewObject: {
+            CallInst *callCtor = FindTypeArrayCtorCall(newInst);
+            if (callCtor != nullptr) {
+                auto initInst = callCtor->GetInput(1).GetInst();
+                if (initInst->IsConst() &&
+                    (initInst->GetType() == DataType::INT64 || initInst->GetType() == DataType::INT32)) {
+                    arraySize = initInst;
+                }
+            }
+            break;
+        }
+
+        default:
+            break;
+    }
+    return arraySize;
+}
+
+bool Peepholes::CheckGetLengthLoad([[maybe_unused]] Inst *inst)
+{
+    return CheckTypedArrayLengthObject(inst);
+}
+
+// The goal is to replace TypedArray get length LoadObject with actual length
+// Case 1
+// 1.i64 Constant   0x5 -> (v3,...)
+// 2.ref NewObject  ... -> (v3,v4,...)
+// 3.void CallStatic escompat.TypedArray::<ctor> v2, v1, ...
+// 4.ref NullCheck  v2p, ... -> (v5,...)
+// 5.i32 LoadObject escompat.TypedArray.lengthInt v4 -> (v6)
+// 6.    USE      v5
+// ===>
+// 1.i64 Constant   0x5 -> (v3,...)
+// 2.ref NewObject  ... -> (v3,v4,...)
+// 3.void CallStatic escompat.TypedArray::<ctor> v2, v1, ...
+// 4.ref NullCheck  v2p, ... -> (v5,...)
+// 5.i32 LoadObject escompat.TypedArray.lengthInt v4 -> (v6)
+// 6.    USE      v1
+
+// Case 2
+// 1.i64 Constant   0x5 -> (v3,...)
+// 2.ref NewArray (size=5) ..., v1, ... -> (v4,...)
+// 3.ref NewObject  ... -> (v4,v5,...)
+// 4.void CallStatic escompat.TypedArray::<ctor> v3, v2, ...
+// 5.ref NullCheck  v3p, ... -> (v6,...)
+// 6.i32 LoadObject escompat.TypedArray.lengthInt v5 -> (v7)
+// 7.    USE      v6
+// ===>
+// 1.i64 Constant   0x5 -> (v3,...)
+// 2.ref NewArray (size=5) ..., v1, ... -> (v4,...)
+// 3.ref NewObject  ... -> (v4,v5,...)
+// 4.void CallStatic escompat.TypedArray::<ctor> v3, v2, ...
+// 5.ref NullCheck  v3p, ... -> (v6,...)
+// 6.i32 LoadObject escompat.TypedArray.lengthInt v5 -> (v7)
+// 7.    USE      v1
+bool Peepholes::TryOptimizeGetLengthLoadObject(Inst *inst)
+{
+    ASSERT(inst->GetOpcode() == Opcode::LoadObject);
+
+    if (!CheckGetLengthLoad(inst)) {
+        return false;
+    }
+
+    auto newObject = inst->GetDataFlowInput(0);
+    if (newObject->GetOpcode() != Opcode::NewObject) {
+        return false;
+    }
+
+    CallInst *callCtor = FindTypeArrayCtorCall(newObject);
+    if (callCtor == nullptr) {
+        return false;
+    }
+
+    auto newArray = callCtor->GetInput(1).GetInst();
+    auto arraySize = GetTypedArraySize(newArray);
+    if (arraySize == nullptr || !arraySize->IsConst()) {
+        return false;
+    }
+
+    // We can't restore array_size register if it was defined out of OSR loop
+    if (SkipThisPeepholeInOSR(inst, arraySize)) {
+        return false;
+    }
+    inst->ReplaceUsers(arraySize);
+    return true;
+}
+
 void Peepholes::VisitLoadObject([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     ASSERT(inst->GetOpcode() == Opcode::LoadObject);
 
     auto visitor = static_cast<Peepholes *>(v);
+
+    if (visitor->TryOptimizeGetLengthLoadObject(inst)) {
+        PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
+    }
+
     if (visitor->TryOptimizeBoxedLoadStoreObject(inst)) {
         PEEPHOLE_IS_APPLIED(visitor, inst);
         return;
