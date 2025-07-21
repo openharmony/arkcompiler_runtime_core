@@ -16,11 +16,11 @@
 import { BusinessError } from "@ohos.base";
 import { jsonx } from "std/core"
 
-const TypeErrorCodeId: int = 401;
-const OutOfBoundsErrorCodeId: int = 10200001;
-const IncorrectBufferSizeId: int = 10200009;
+const TypeErrorCodeId: number = 401;
+const OutOfBoundsErrorCodeId: number = 10200001;
+const IncorrectBufferSizeId: number = 10200009;
 
-function createBusinessError(code: int, message: string) {
+function createBusinessError(code: number, message: string) {
     let err = new BusinessError();
     err.code = code;
     err.name = 'BusinessError';
