@@ -67,7 +67,7 @@ import(path)
 
 		// SetProperty
 		try {
-			value['ClassA'] = {};
+			value.ClassA = {};
 		} catch (error) {
 			ASSERT_TRUE(error.toString() == 'TypeError: Cannot assign to read only property of Object Module');
 			let ClassA = value.ClassA;
@@ -77,7 +77,7 @@ import(path)
 
 		// SetProperty
 		try {
-			value['a'] = {};
+			value.a = {};
 		} catch (error) {
 			ASSERT_TRUE(error.toString() == 'TypeError: Cannot assign to read only property of Object Module');
 			ASSERT_TRUE(value.a === 'this is 1.2 classA ets');
@@ -85,7 +85,7 @@ import(path)
 
 		// SetProperty
 		try {
-			value['foo'] = {};
+			value.foo = {};
 		} catch (error) {
 			ASSERT_TRUE(error.toString() == 'TypeError: Cannot assign to read only property of Object Module');
 			ASSERT_TRUE(typeof value.foo === 'function' && value.foo() === 'this is 1.2 foo ets');

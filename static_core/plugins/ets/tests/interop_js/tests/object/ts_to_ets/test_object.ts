@@ -16,4 +16,4 @@
 export let numb_val = 1;
 export let numb_valBoxed = new Number(numb_val);
 export let bool_valBoxed = new Boolean(true);
-export let str_valBoxed = new String("eraycinar");
+export let str_valBoxed = new String('eraycinar');
