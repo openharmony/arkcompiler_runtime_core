@@ -245,6 +245,11 @@ function jsonStringifyRecordWithNullWithSpace(): void {
     assertEQ(JSON.stringify(record, undefined, " "), `{\n "nullable": null\n}`)
 }
 
+function jsonStringifyRecordWithEmpty(): void {
+    const record: Record<string, NullishType> = new Record<string, NullishType>()
+    assertEQ(JSON.stringify(record), '{}')
+}
+
 function jsonStringifyNestedMap(): void {
     const map = new Map<string, Object>();
     let record: Record<string, NullishType> = new Record<string, NullishType>();
@@ -310,6 +315,7 @@ function main(): int {
     suite.addTest("JSON.stringify for Record with array with space", jsonStringifyRecordWithArrayWithSpace);
     suite.addTest("JSON.stringify for Record with null", jsonStringifyRecordWithNull);
     suite.addTest("JSON.stringify for Record with null with space", jsonStringifyRecordWithNullWithSpace);
+    suite.addTest("JSON.stringify for Record with empty", jsonStringifyRecordWithEmpty);
     suite.addTest("JSON.stringify for nested Map", jsonStringifyNestedMap);
     suite.addTest("JSON.stringify for cyclic Record", jsonStringifyCyclicRecord);
     suite.addTest("JSON.stringify for control character", jsonStringifyControlCharacter);
