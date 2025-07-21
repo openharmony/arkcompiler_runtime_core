@@ -718,26 +718,6 @@ export namespace jsonx {
             throw new JsonError("UNREACHABLE: Illegal state.JsonElement is a number, but has no double or integer value")
         }
 
-        private _ensureInvariants(): void {
-            const typeMap = new Map<string, boolean>([
-                ["Null",    this.jsonType == JsonType.JsonNull],
-                ["Object",  this.jsonType == JsonType.JsonObject],
-                ["Array",   this.jsonType == JsonType.JsonArray],
-                ["Number",  this.jsonType == JsonType.JsonNumber],
-                ["String",  this.jsonType == JsonType.JsonString],
-                ["Boolean", this.jsonType == JsonType.JsonTrue || this.jsonType == JsonType.JsonFalse]
-            ])
-            const activeTypes = Array.from(typeMap.entries())
-                .filter((entry: [string, boolean]): boolean => entry[1])
-                .map((entry: [string, boolean]): string => entry[0])
-            if (activeTypes.length == 0 && this.jsonType != JsonType.JsonUndefined) {
-                throw new JsonTypeError(`Invalid JsonElement type. No valid type detected.`)
-            }
-            if (activeTypes.length > 1) {
-                throw new JsonTypeError(`Invalid JsonElement type. Multiple types detected: ${activeTypes.join(", ")}`)
-            }
-        }
-
         /**
          * Creates a deep copy of a JsonElement.
          * @param {JsonElement} source - The JsonElement to copy from
@@ -773,8 +753,6 @@ export namespace jsonx {
             } else {
                 this.maybeArrayValues = undefined
             }
-
-            this._ensureInvariants()
         }
     }
 
