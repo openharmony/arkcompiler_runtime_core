@@ -1948,34 +1948,36 @@ bool Function::Emit(BytecodeEmitter &emitter, panda_file::MethodItem *method,
     return true;
 }
 
-void Function::EmitLocalVariable(panda_file::LineNumberProgramItem *program, ItemContainer *container,
-                                 std::vector<uint8_t> *constantPool, uint32_t &pcInc, size_t instructionNumber) const
+static void TryEmitPc(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constantPool, uint32_t &pcInc)
 {
-    auto tryEmitPc = [program, constantPool, &pcInc]() -> void {
-        if (pcInc != 0) {
-            program->EmitAdvancePc(constantPool, pcInc);
-            pcInc = 0;
+    if (pcInc != 0U) {
+        program->EmitAdvancePc(constantPool, pcInc);
+        pcInc = 0;
+    }
+}
+
+void Function::EmitLocalVariable(panda_file::LineNumberProgramItem *program, ItemContainer *container,
+                                 std::vector<uint8_t> *constantPool, uint32_t &pcInc, size_t instructionNumber,
+                                 size_t variableIndex) const
+{
+    ASSERT(variableIndex < localVariableDebug.size());
+    const auto &v = localVariableDebug[variableIndex];
+    ASSERT(!IsParameter(v.reg));
+    if (instructionNumber == v.start) {
+        TryEmitPc(program, constantPool, pcInc);
+        StringItem *variableName = container->GetOrCreateStringItem(v.name);
+        StringItem *variableType = container->GetOrCreateStringItem(v.signature);
+        if (v.signatureType.empty()) {
+            program->EmitStartLocal(constantPool, v.reg, variableName, variableType);
+        } else {
+            StringItem *typeSignature = container->GetOrCreateStringItem(v.signatureType);
+            program->EmitStartLocalExtended(constantPool, v.reg, variableName, variableType, typeSignature);
         }
-    };
-    for (auto &v : localVariableDebug) {
-        if (IsParameter(v.reg)) {
-            continue;
-        }
-        if (instructionNumber == v.start) {
-            tryEmitPc();
-            StringItem *variableName = container->GetOrCreateStringItem(v.name);
-            StringItem *variableType = container->GetOrCreateStringItem(v.signature);
-            if (v.signatureType.empty()) {
-                program->EmitStartLocal(constantPool, v.reg, variableName, variableType);
-            } else {
-                StringItem *typeSignature = container->GetOrCreateStringItem(v.signatureType);
-                program->EmitStartLocalExtended(constantPool, v.reg, variableName, variableType, typeSignature);
-            }
-        }
-        if (instructionNumber == (v.start + v.length)) {
-            tryEmitPc();
-            program->EmitEndLocal(v.reg);
-        }
+    }
+
+    if (instructionNumber == (v.start + v.length)) {
+        TryEmitPc(program, constantPool, pcInc);
+        program->EmitEndLocal(v.reg);
     }
 }
 
@@ -2028,6 +2030,25 @@ void Function::EmitColumnNumber(panda_file::LineNumberProgramItem *program, std:
     }
 }
 
+void Function::CollectLocalVariable(std::vector<Function::LocalVariablePair> &localVariableInfo) const
+{
+    for (size_t i = 0; i < localVariableDebug.size(); i++) {
+        const auto &v = localVariableDebug[i];
+        if (IsParameter(v.reg)) {
+            continue;
+        }
+        localVariableInfo.emplace_back(v.start, i);
+        localVariableInfo.emplace_back(v.start + v.length, i);
+    }
+
+    // clang-format off
+    std::sort(localVariableInfo.begin(), localVariableInfo.end(),
+        [](const Function::LocalVariablePair &a, const Function::LocalVariablePair &b) {
+            return a.insnOrder < b.insnOrder;
+        });
+    // clang-format on
+}
+
 void Function::BuildLineNumberProgram(panda_file::DebugInfoItem *debugItem, const std::vector<uint8_t> &bytecode,
                                       ItemContainer *container, std::vector<uint8_t> *constantPool,
                                       bool emitDebugInfo) const
@@ -2045,25 +2066,41 @@ void Function::BuildLineNumberProgram(panda_file::DebugInfoItem *debugItem, cons
     BytecodeInstruction bi(bytecode.data());
     debugItem->SetLineNumber(prevLineNumber);
 
-    for (size_t i = 0; i < ins.size(); i++) {
-        if (emitDebugInfo) {
-            EmitLocalVariable(program, container, constantPool, pcInc, i);
-        }
-        if (ins[i].opcode == Opcode::INVALID) {
-            continue;
-        }
-
-        if (emitDebugInfo || ins[i].CanThrow()) {
-            EmitLineNumber(program, constantPool, prevLineNumber, pcInc, i);
-        }
-
-        if (ark::panda_file::IsDynamicLanguage(language) && emitDebugInfo) {
-            EmitColumnNumber(program, constantPool, prevColumnNumber, pcInc, i);
-        }
-
-        pcInc += bi.GetSize();
-        bi = bi.GetNext();
+    std::vector<Function::LocalVariablePair> localVariableInfo;
+    if (emitDebugInfo) {
+        CollectLocalVariable(localVariableInfo);
     }
+    const size_t numIns = ins.size();
+    size_t start = 0;
+    auto iter = localVariableInfo.begin();
+    do {
+        size_t end = emitDebugInfo && iter != localVariableInfo.end() ? iter->insnOrder : numIns;
+        for (size_t i = start; i < end && i < numIns; i++) {
+            /**
+             * If you change the continue condition of this loop, you need to synchronously modify the same condition
+             * of the BuildMapFromPcToIns method in the optimizer-bytecode.cpp.
+             */
+            if (ins[i].opcode == Opcode::INVALID) {
+                continue;
+            }
+            if (emitDebugInfo || ins[i].CanThrow()) {
+                EmitLineNumber(program, constantPool, prevLineNumber, pcInc, i);
+            }
+            if (ark::panda_file::IsDynamicLanguage(language) && emitDebugInfo) {
+                EmitColumnNumber(program, constantPool, prevColumnNumber, pcInc, i);
+            }
+            pcInc += bi.GetSize();
+            bi = bi.GetNext();
+        }
+        if (iter == localVariableInfo.end() || end >= numIns) {
+            break;
+        }
+        if (emitDebugInfo) {
+            EmitLocalVariable(program, container, constantPool, pcInc, end, iter->variableIndex);
+        }
+        start = end;
+        iter++;
+    } while (true);
 
     program->EmitEnd();
 }

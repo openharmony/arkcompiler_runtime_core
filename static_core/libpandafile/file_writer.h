@@ -92,6 +92,13 @@ public:
         return WriteBytes(out);
     }
 
+    virtual void ReserveBufferCapacity([[maybe_unused]] size_t size) {}
+
+    virtual bool FinishWrite()
+    {
+        return true;
+    }
+
     // default methods
     Writer() = default;
     virtual ~Writer() = default;
@@ -194,16 +201,19 @@ public:
 
     bool WriteChecksum(size_t offset) override
     {
-        if (fseek(file_, static_cast<int64_t>(offset), SEEK_SET) != 0) {
-            LOG(FATAL, RUNTIME) << "Unable to write checksum by offset: " << static_cast<int64_t>(offset);
-            UNREACHABLE();
+        static constexpr size_t MASK = 0xff;
+        static constexpr size_t WIDTH = std::numeric_limits<uint8_t>::digits;
+
+        size_t length = sizeof(uint32_t);
+        if (offset + length > buffer_.size()) {
+            return false;
         }
-        auto res = Write<uint32_t>(checksum_);
-        if (fseek(file_, static_cast<int64_t>(offset), SEEK_END) != 0) {
-            LOG(FATAL, RUNTIME) << "Unable to write checksum by offset: " << static_cast<int64_t>(offset);
-            UNREACHABLE();
+        uint32_t temp = checksum_;
+        for (size_t i = 0; i < length; i++) {
+            buffer_[offset + i] = temp & MASK;
+            temp >>= WIDTH;
         }
-        return res;
+        return true;
     }
 
     bool WriteByte(uint8_t data) override;
@@ -212,7 +222,7 @@ public:
 
     size_t GetOffset() const override
     {
-        return offset_;
+        return buffer_.size();
     }
 
     uint32_t GetChecksum() const
@@ -225,11 +235,23 @@ public:
         return file_ != nullptr;
     }
 
+    void ReserveBufferCapacity(size_t size) override
+    {
+        buffer_.reserve(size);
+    }
+
+    const std::vector<uint8_t> &GetBuffer() const
+    {
+        return buffer_;
+    }
+
+    bool FinishWrite() override;
+
 private:
     FILE *file_;
-    size_t offset_ {0};
     uint32_t checksum_;
     bool countChecksum_ {false};
+    std::vector<uint8_t> buffer_;
 };
 
 }  // namespace ark::panda_file
