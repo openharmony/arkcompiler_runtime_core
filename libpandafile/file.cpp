@@ -673,6 +673,49 @@ void CheckFileVersion(const std::array<uint8_t, File::VERSION_SIZE> &file_versio
     }
 #undef LOG_LEVEL
 }
+
+PandaFileType GetFileType(std::string_view filepath)
+{
+    File::OpenMode openMode = File::OpenMode::READ_ONLY;
+    os::file::Mode mode = GetMode(openMode);
+    os::file::File file = os::file::Open(filepath, mode);
+    if (!file.IsValid()) {
+        PLOG(ERROR, PANDAFILE) << "Failed to open panda file '" << filepath << "'";
+        return PandaFileType::FILE_FORMAT_INVALID;
+    }
+
+    os::file::FileHolder fhHolder(file);
+    auto res = file.GetFileSize();
+    if (!res) {
+        PLOG(ERROR, PANDAFILE) << "Failed to get size of panda file '" << filepath << "'";
+        return PandaFileType::FILE_FORMAT_INVALID;
+    }
+
+    size_t size = res.Value();
+    if (size < sizeof(File::Header)) {
+        LOG(ERROR, PANDAFILE) << "Invalid panda file '" << filepath << "' - has not header";
+        return PandaFileType::FILE_FORMAT_INVALID;
+    }
+
+    os::mem::ConstBytePtr ptr = os::mem::MapFile(file, GetProt(openMode), os::mem::MMAP_FLAG_PRIVATE, size).ToConst();
+    if (ptr.Get() == nullptr) {
+        PLOG(ERROR, PANDAFILE) << "Failed to map panda file '" << filepath << "'";
+        return PandaFileType::FILE_FORMAT_INVALID;
+    }
+
+    auto header = reinterpret_cast<const File::Header *>(ptr.Get());
+    if (size != 0 && size != header->file_size) {
+        LOG(ERROR, PANDAFILE) << "File [" << filepath << "]'s actual size [" << ptr.GetSize()
+                              << "] is not equal to Header's fileSize [" << header->file_size << "]";
+        return PandaFileType::FILE_FORMAT_INVALID;
+    }
+
+    if (header->version == File::STATIC_VERSION) {
+        return PandaFileType::FILE_STATIC;
+    }
+    return PandaFileType::FILE_DYNAMIC;
+}
+
 /* static */
 std::unique_ptr<const File> File::OpenFromMemory(os::mem::ConstBytePtr &&ptr)
 {
