@@ -55,8 +55,6 @@ private:
 static void NativeCall(ani_env *env, ani_int id)
 {
     auto event = AsyncEvent();
-    auto mainId = GetWorkerId(env);
-    ASSERT_NE(mainId, id);
 
     auto dataSend = std::tie(event, id);
     auto status = SendEvent(

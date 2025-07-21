@@ -13,13 +13,17 @@
  * limitations under the License.
  */
 
+let mainWorkerId: int = -1;
+
 function callback(): int {
+    NativeCall(mainWorkerId);
     return CoroutineExtras.getWorkerId();
 }
 
 native function NativeCall(id: int): void;
 
 export function TestMain(): int {
+    mainWorkerId = CoroutineExtras.getWorkerId();
     let ea = new EAWorker();
     let id = ea.run<int>(callback).Await();
     NativeCall(id);
