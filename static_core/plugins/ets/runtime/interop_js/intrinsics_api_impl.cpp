@@ -672,7 +672,7 @@ EtsObject *InvokeWithObjectReturn(EtsObject *thisObj, EtsObject *func, Span<VMHa
 
     for (auto &objHeader : args) {
         EtsObject *arg = EtsObject::FromCoreType(objHeader.GetPtr());
-        auto realArg = JSConvertEtsObject::Wrap(env, arg);
+        auto realArg = JSConvertEtsObject::WrapWithNullCheck(env, arg);
         realArgs.push_back(realArg);
     }
 
