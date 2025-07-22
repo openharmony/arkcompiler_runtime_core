@@ -431,23 +431,23 @@ bool JSONStringifier::SerializeJSONRecord(EtsHandle<EtsObject> &value)
         return false;
     }
 
-    EtsHandle<EtsEscompatMapEntry> head(coro, recordObj->GetHead());
+    EtsHandle<EtsEscompatMapEntry> head(coro, recordObj->GetHead(coro));
     if (head.GetPtr() == nullptr) {
         buffer_ += "{}";
         return true;
     }
 
     auto hasContent = false;
-    EtsHandle<EtsEscompatMapEntry> next(coro, head->GetNext());
+    EtsHandle<EtsEscompatMapEntry> next(coro, head->GetNext(coro));
     if (next.GetPtr() == nullptr) {
         buffer_ += "{}";
         return true;
     }
     buffer_ += "{";
     do {
-        EtsHandle<EtsObject> key(coro, next->GetKey());
-        EtsHandle<EtsObject> val(coro, next->GetVal());
-        next = EtsHandle<EtsEscompatMapEntry>(coro, next->GetNext());
+        EtsHandle<EtsObject> key(coro, next->GetKey(coro));
+        EtsHandle<EtsObject> val(coro, next->GetVal(coro));
+        next = EtsHandle<EtsEscompatMapEntry>(coro, next->GetNext(coro));
         if (key.GetPtr() == nullptr || val.GetPtr() == nullptr) {
             continue;
         }

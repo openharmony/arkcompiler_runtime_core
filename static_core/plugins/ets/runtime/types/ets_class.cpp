@@ -649,10 +649,13 @@ void EtsClass::SetNullValue()
     flags_ = flags_ | IS_NULLVALUE;
     ASSERT(IsNullValue());
 }
-void EtsClass::SetBoxed()
+void EtsClass::SetBoxedKind(BoxedType boxedKind)
 {
     flags_ = flags_ | IS_BOXED;
     ASSERT(IsBoxed());
+    SetValueTyped();
+    auto kind = helpers::ToUnderlying(boxedKind);
+    BoxedTypeField::Set(kind, &flags_);
 }
 void EtsClass::SetFunction()
 {
