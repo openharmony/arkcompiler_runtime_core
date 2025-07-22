@@ -30,28 +30,99 @@ int32_t CompareStringSpan(Span<T1> &lhsSp, Span<T2> &rhsSp, int32_t count);
 template <typename T1, typename T2>
 bool IsSubStringAtSpan(Span<T1> &lhsSp, Span<T2> &rhsSp, uint32_t offset);
 
-template <typename ReadBarrier>
-uint32_t BaseString::ComputeRawHashcode(ReadBarrier &&readBarrier) const
+template<typename ReadBarrier>
+uint32_t BaseString::ComputeHashcode(ReadBarrier &&readBarrier) const
 {
+    auto [hash, isInteger] = ComputeRawHashcode(readBarrier);
+    return MixHashcode(hash, isInteger);
+}
+
+template <typename ReadBarrier>
+std::pair<uint32_t, bool> BaseString::ComputeRawHashcode(ReadBarrier &&readBarrier) const
+{
+    uint32_t hash = 0;
     uint32_t length = GetLength();
     if (length == 0) {
-        return 0;
+        return {hash, false};
     }
 
     if (IsUtf8()) {
         std::vector<uint8_t> buf;
         const uint8_t *data = BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), this, buf);
+        // String using UTF8 encoding, and length smaller than 10, try to compute integer hash.
+        if (length < MAX_ELEMENT_INDEX_LEN && this->HashIntegerString(data, length, &hash, 0)) {
+            return {hash, true};
+        }
         // String can not convert to integer number, using normal hashcode computing algorithm.
-        return ComputeHashForData(data, length, 0);
+        hash = ComputeHashForData(data, length, 0);
+        return {hash, false};
     } else {
         std::vector<uint16_t> buf;
         const uint16_t *data = BaseString::GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), this, buf);
         // If rawSeed has certain value, and second string uses UTF16 encoding,
         // then merged string can not be small integer number.
-        return ComputeHashForData(data, length, 0);
+        hash = ComputeHashForData(data, length, 0);
+        return {hash, false};
     }
 }
 
+template<typename T>
+inline static bool IsDecimalDigitChar(const T c)
+{
+    return (c >= '0' && c <= '9');
+}
+
+inline bool ComputeIntegerHash(uint32_t *num, uint8_t c)
+{
+    if (!IsDecimalDigitChar(c)) {
+        return false;
+    }
+    int charDate = c - '0';
+    *num = (*num) * 10 + charDate; // 10: decimal factor
+    return true;
+}
+
+template<typename T>
+bool BaseString::HashIntegerString(const T *data, size_t size, uint32_t *hash, uint32_t hashSeed)
+{
+    ASSERT(size >= 0);
+    if (hashSeed == 0) {
+        if (IsDecimalDigitChar(data[0]) && data[0] != '0') {
+            uint32_t num = data[0] - '0';
+            uint32_t i = 1;
+            do {
+                if (i == size) {
+                    // compute mix hash
+                    if (num <= MAX_INTEGER_HASH_NUMBER) {
+                        *hash = MixHashcode(num, IS_INTEGER);
+                        return true;
+                    }
+                    return false;
+                }
+            } while (ComputeIntegerHash(&num, data[i++]));
+        }
+        if (size == 1 && (data[0] == '0')) {
+            *hash = MixHashcode(0, IS_INTEGER);
+            return true;
+        }
+    } else {
+        if (IsDecimalDigitChar(data[0])) {
+            uint32_t num = hashSeed * 10 + (data[0] - '0'); // 10: decimal factor
+            uint32_t i = 1;
+            do {
+                if (i == size) {
+                    // compute mix hash
+                    if (num <= MAX_INTEGER_HASH_NUMBER) {
+                        *hash = MixHashcode(num, IS_INTEGER);
+                        return true;
+                    }
+                    return false;
+                }
+            } while (ComputeIntegerHash(&num, data[i++]));
+        }
+    }
+    return false;
+}
 
 template <typename ReadBarrier>
 bool BaseString::EqualToSplicedString(ReadBarrier &&readBarrier, const BaseString *str1, const BaseString *str2)

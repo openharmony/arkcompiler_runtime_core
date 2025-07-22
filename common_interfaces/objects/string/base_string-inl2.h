@@ -96,7 +96,7 @@ LineString *BaseString::CreateLineString(Allocator &&allocator, size_t length, b
     BaseObject *obj = std::invoke(allocator, size, CommonType::LINE_STRING);
     LineString *string = LineString::Cast(obj);
     string->InitLengthAndFlags(length, compressed);
-    string->SetRawHashcode(0);
+    string->SetMixHashcode(0);
     return string;
 }
 
@@ -108,7 +108,7 @@ SlicedString *BaseString::CreateSlicedString(Allocator &&allocate, WriteBarrier 
 {
     SlicedString *slicedString = SlicedString::Cast(
         std::invoke(allocate, SlicedString::SIZE, CommonType::SLICED_STRING));
-    slicedString->SetRawHashcode(0);
+    slicedString->SetMixHashcode(0);
     slicedString->SetParent(std::forward<WriteBarrier>(writeBarrier), parent.GetBaseObject());
     return slicedString;
 }
@@ -124,7 +124,7 @@ TreeString *BaseString::CreateTreeString(Allocator &&allocator, WriteBarrier &&w
     auto string = TreeString::Cast(
         std::invoke(allocator, TreeString::SIZE, CommonType::TREE_STRING));
     string->InitLengthAndFlags(length, compressed);
-    string->SetRawHashcode(0);
+    string->SetMixHashcode(0);
     string->SetFirst(writeBarrier, left.GetBaseObject());
     string->SetSecond(writeBarrier, right.GetBaseObject());
     return string;
