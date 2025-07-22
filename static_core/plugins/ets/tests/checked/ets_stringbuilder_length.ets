@@ -16,29 +16,33 @@
 //! CHECKER     StringBuilder length field access AOT unoptimized
 //! SKIP_IF     @architecture == "arm32"
 //! RUN_PAOC    options: "--compiler-regex='.*StringCalculation00' --compiler-inlining=false --compiler-check-final=false --compiler-simplify-string-builder=false"
+//!
 //! METHOD      "ets_stringbuilder_length.ETSGLOBAL::StringCalculation00"
 //! PASS_AFTER  "OptimizeStringConcat"
 //! PASS_AFTER_NEXT "Cleanup"
-//! TRUE        IR_COUNT("StringBuilder::<ctor>") == 3
-//! TRUE        IR_COUNT("Intrinsic.StdCoreSbToString") == 3
-//! TRUE        IR_COUNT("LenArray") == 4
+//! INST_COUNT  /StringBuilder::<ctor>/,3
+//! INST_COUNT  /Intrinsic.StdCoreSbToString/,3
+//! INST_COUNT  /LenArray/,4
 //! INST_NOT    /LoadObject \d+ std.core.StringBuilder.length/
+//!
 //! RUN         entry: "ets_stringbuilder_length.ETSGLOBAL::StringCalculation00", result: 0
 
 //! CHECKER     StringBuilder length field access AOT optimized
 //! SKIP_IF     @architecture == "arm32"
 //! RUN_PAOC    options: "--compiler-regex='.*StringCalculation00' --compiler-inlining=false --compiler-check-final=false"
+//!
 //! METHOD      "ets_stringbuilder_length.ETSGLOBAL::StringCalculation00"
 //! PASS_AFTER  "OptimizeStringConcat"
-//! TRUE        IR_COUNT("StringBuilder::<ctor>") == 3
-//! TRUE        IR_COUNT("Intrinsic.StdCoreSbToString") == 3
-//! TRUE        IR_COUNT("LenArray") == 4
+//! INST_COUNT  /StringBuilder::<ctor>/,3
+//! INST_COUNT  /Intrinsic.StdCoreSbToString/,3
+//! INST_COUNT  /LenArray/,4
 //! INST_NOT    /LoadObject \d+ std.core.StringBuilder.length/
 //! PASS_AFTER  "SimplifyStringBuilder"
-//! TRUE        IR_COUNT("StringBuilder::<ctor>") == 1
-//! TRUE        IR_COUNT("Intrinsic.StdCoreSbToString") == 1
-//! TRUE        IR_COUNT("LenArray") == 2
+//! INST_COUNT  /StringBuilder::<ctor>/,1
+//! INST_COUNT  /Intrinsic.StdCoreSbToString/,1
+//! INST_COUNT  /LenArray/,2
 //! INST        /LoadObject \d+ std.core.StringBuilder.length/
+//!
 //! RUN         entry: "ets_stringbuilder_length.ETSGLOBAL::StringCalculation00", result: 0
 
 function GenerateFakeRandomInteger(): Int32Array {
@@ -68,13 +72,15 @@ function StringCalculation00() {
 //! CHECKER     StringBuilder without length field AOT
 //! SKIP_IF     @architecture == "arm32"
 //! RUN_PAOC    options: "--compiler-regex='.*StringCalculation01' --compiler-inlining=false --compiler-check-final=false"
+//!
 //! METHOD      "ets_stringbuilder_length.ETSGLOBAL::StringCalculation01"
 //! PASS_AFTER  "OptimizeStringConcat"
-//! TRUE        IR_COUNT("StringBuilder::<ctor>") == 3
-//! TRUE        IR_COUNT("Intrinsic.StdCoreSbToString") == 3
+//! INST_COUNT  /StringBuilder::<ctor>/,3
+//! INST_COUNT  /Intrinsic.StdCoreSbToString/,3
 //! PASS_AFTER  "SimplifyStringBuilder"
-//! TRUE        IR_COUNT("StringBuilder::<ctor>") == 1
-//! TRUE        IR_COUNT("Intrinsic.StdCoreSbToString") == 1
+//! INST_COUNT  /StringBuilder::<ctor>/,1
+//! INST_COUNT  /Intrinsic.StdCoreSbToString/,1
+//!
 //! RUN         entry: "ets_stringbuilder_length.ETSGLOBAL::StringCalculation00", result: 0
 
 function StringCalculation01() {
@@ -102,17 +108,19 @@ function StringCalculation01() {
 //! CHECKER     StringBuilder length field access at nested loop AOT
 //! SKIP_IF     @architecture == "arm32"
 //! RUN_PAOC    options: "--compiler-regex='.*StringCalculation02' --compiler-inlining=false --compiler-check-final=false"
+//!
 //! METHOD      "ets_stringbuilder_length.ETSGLOBAL::StringCalculation02"
 //! PASS_AFTER  "OptimizeStringConcat"
-//! TRUE        IR_COUNT("StringBuilder::<ctor>") == 5
-//! TRUE        IR_COUNT("Intrinsic.StdCoreSbToString") == 5
-//! TRUE        IR_COUNT("LenArray") == 4
+//! INST_COUNT  /StringBuilder::<ctor>/,5
+//! INST_COUNT  /Intrinsic.StdCoreSbToString/,5
+//! INST_COUNT  /LenArray/,4
 //! INST_NOT    /LoadObject \d+ std.core.StringBuilder.length/
 //! PASS_AFTER  "SimplifyStringBuilder"
-//! TRUE        IR_COUNT("StringBuilder::<ctor>") == 2
-//! TRUE        IR_COUNT("Intrinsic.StdCoreSbToString") == 3
-//! TRUE        IR_COUNT("LenArray") == 2
+//! INST_COUNT  /StringBuilder::<ctor>/,2
+//! INST_COUNT  /Intrinsic.StdCoreSbToString/,3
+//! INST_COUNT  /LenArray/,2
 //! INST        /LoadObject \d+ std.core.StringBuilder.length/
+//!
 //! RUN         entry: "ets_stringbuilder_length.ETSGLOBAL::StringCalculation02", result: 0
 
 function StringCalculation02() {
@@ -136,4 +144,39 @@ function StringCalculation02() {
   
     console.log(res.length)
     return res.length.toInt() - 5761
+}
+
+//! CHECKER     Concat loop with length access unoptimized loop AOT
+//! SKIP_IF     @architecture == "arm32"
+//! RUN_PAOC    options: "--compiler-regex='.*StringCalculation03|.*reuse_concat_loop1' --compiler-inlining=false --compiler-check-final=false --compiler-simplify-string-builder=false"
+//! RUN         entry: "ets_stringbuilder_length.ETSGLOBAL::StringCalculation03", result: 0
+
+//! CHECKER     Concat loop with length access loop AOT CHA inline
+//! SKIP_IF     @architecture == "arm32"
+//! RUN_PAOC    options: "--compiler-regex='.*StringCalculation03|.*reuse_concat_loop1' --compiler-inlining=true --paoc-use-cha=true --compiler-check-final=false"
+//!
+//! METHOD      "ets_stringbuilder_length.ETSGLOBAL::reuse_concat_loop1"
+//! PASS_AFTER  "OptimizeStringConcat"
+//! INST_COUNT  /StringBuilder::<ctor>/,2
+//! INST_COUNT  /Intrinsic.StdCoreSbToString/,2
+//! INST_COUNT  /LenArray/,1
+//! PASS_AFTER  "SimplifyStringBuilder"
+//! INST_COUNT  /StringBuilder::<ctor>/,1
+//! INST_COUNT  /Intrinsic.StdCoreSbToString/,1
+//! INST_NOT    /LenArray/
+//! INST_COUNT  /LoadObject \d+ std.core.StringBuilder.length/,1
+//!
+//! RUN         entry: "ets_stringbuilder_length.ETSGLOBAL::StringCalculation03", result: 0
+
+function reuse_concat_loop1(a: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        str += str.length;                      // partially applied
+        str += a;                               // two SBs merged into one
+    }
+    return str;
+}
+
+function StringCalculation03() {
+    arktest.assertEQ(reuse_concat_loop1("a", 4), "0a2a4a6a", "Wrong result at reuse_concat_loop1");
 }

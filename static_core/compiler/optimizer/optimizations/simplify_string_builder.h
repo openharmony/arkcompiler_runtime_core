@@ -148,10 +148,7 @@ private:
             Multiple independent patterns maybe in a loop.
         */
 
-        explicit ConcatenationLoopMatch(ArenaAllocator *allocator)
-            : loop {allocator}, temp {allocator->Adapter()}, exit {allocator}
-        {
-        }
+        explicit ConcatenationLoopMatch(ArenaAllocator *allocator) : loop {allocator}, temp {allocator->Adapter()} {}
 
         BasicBlock *block {nullptr};   // NOLINT(misc-non-private-member-variables-in-classes)
         PhiInst *accValue {nullptr};   // NOLINT(misc-non-private-member-variables-in-classes)
@@ -164,9 +161,14 @@ private:
         } preheader;                         // NOLINT(misc-non-private-member-variables-in-classes)
 
         struct Loop {
-            explicit Loop(ArenaAllocator *allocator) : appendInstructions {allocator->Adapter()} {}
+            explicit Loop(ArenaAllocator *allocator)
+                : appendInstructions {allocator->Adapter()}, toStringLengthChains {allocator->Adapter()}
+            {
+            }
             ArenaVector<Inst *> appendInstructions;  // NOLINT(misc-non-private-member-variables-in-classes)
-        } loop;                                      // NOLINT(misc-non-private-member-variables-in-classes)
+            ArenaVector<ToStringLengthChain>
+                toStringLengthChains;  // NOLINT(misc-non-private-member-variables-in-classes)
+        } loop;                        // NOLINT(misc-non-private-member-variables-in-classes)
 
         struct TemporaryInstructions {
             Inst *intermediateValue {nullptr};  // NOLINT(misc-non-private-member-variables-in-classes)
@@ -181,12 +183,9 @@ private:
 
         ArenaVector<TemporaryInstructions> temp;  // NOLINT(misc-non-private-member-variables-in-classes)
 
-        struct Exit {
-            explicit Exit(ArenaAllocator *allocator) : toStringLengthChains {allocator->Adapter()} {}
+        struct {
             Inst *toStringCall {nullptr};  // NOLINT(misc-non-private-member-variables-in-classes)
-            ArenaVector<ToStringLengthChain>
-                toStringLengthChains;  // NOLINT(misc-non-private-member-variables-in-classes)
-        } exit;                        // NOLINT(misc-non-private-member-variables-in-classes)
+        } exit;                            // NOLINT(misc-non-private-member-variables-in-classes)
 
         void Clear();
         bool IsInstanceHoistable() const;
