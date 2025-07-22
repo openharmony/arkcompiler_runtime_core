@@ -24,10 +24,9 @@ namespace ark {
 
 class AffinityMask final {
 public:
-    using Storage = size_t;
-
     // maximum workers count should conform to number of bits in the affinity mask
-    static constexpr size_t MAX_WORKERS_COUNT = sizeof(Storage) * BITS_PER_BYTE;
+    static constexpr size_t MAX_WORKERS_COUNT = 128;
+    using Storage = std::bitset<MAX_WORKERS_COUNT>;
 
     AffinityMask() = default;
     ~AffinityMask() = default;
@@ -37,27 +36,23 @@ public:
 
     size_t NumAllowedWorkers() const
     {
-        std::bitset<MAX_WORKERS_COUNT> affinityBits(data_);
-        return affinityBits.count();
+        return data_.count();
     }
 
     bool IsWorkerAllowed(CoroutineWorker::Id workerId) const
     {
-        std::bitset<MAX_WORKERS_COUNT> affinityBits(data_);
-        return affinityBits.test(workerId);
+        return data_.test(workerId);
     }
 
     AffinityMask &SetWorkerAllowed(CoroutineWorker::Id workerId)
     {
-        std::bitset<MAX_WORKERS_COUNT> affinityBits(data_);
-        data_ = affinityBits.set(workerId).to_ullong();
+        data_.set(workerId);
         return *this;
     }
 
     AffinityMask &SetWorkerNotAllowed(CoroutineWorker::Id workerId)
     {
-        std::bitset<MAX_WORKERS_COUNT> affinityBits(data_);
-        data_ = affinityBits.reset(workerId).to_ullong();
+        data_.reset(workerId);
         return *this;
     }
 
@@ -69,21 +64,16 @@ public:
     // NOTE: constexpr
     static AffinityMask Full()
     {
-        return AffinityMask(MASK_FULL);
+        return AffinityMask(Storage().set());
     }
 
     // NOTE: constexpr
     static AffinityMask Empty()
     {
-        return AffinityMask(MASK_NONE);
+        return AffinityMask(Storage().reset());
     }
 
 private:
-    // all ones
-    static constexpr Storage MASK_FULL = std::numeric_limits<Storage>::max();
-    // all zeros
-    static constexpr Storage MASK_NONE = 0U;
-
     // NOTE: constexpr
     explicit AffinityMask(Storage data) : data_(data) {}
 

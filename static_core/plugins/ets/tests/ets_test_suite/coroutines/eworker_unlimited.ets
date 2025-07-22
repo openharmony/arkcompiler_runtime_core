@@ -15,8 +15,8 @@
 
 let mainId = CoroutineExtras.getWorkerId();
 
-// Using one worker in runtime options allows to use 63 free worker id's
-const NUM_EWORKERS: int = 63;
+// Using one worker in runtime options allows to use 127 free worker id's
+const NUM_EWORKERS: int = 127;
 
 function CreateWorkers(): Array<EAWorker> {
     let workers = new Array<EAWorker>();
