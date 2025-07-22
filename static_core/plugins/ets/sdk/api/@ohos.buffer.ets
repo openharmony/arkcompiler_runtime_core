@@ -939,6 +939,9 @@ Received value is: ${resolvedEnd}`)
 
             let klass: string = "string";
             if (value instanceof string) {
+                if (value as string == "") {
+                    return this.fill(0 as long, offset, end, encoding);
+                }
                 klass = "string";
             } else if (value instanceof int) {
                 klass = "int";
@@ -1845,7 +1848,7 @@ It must be >= 0 and <= ${Math.pow(2, 32) - 1}. Received value is: ${value}`)
         *
         * @param { int } index - The zero-based index of the desired code unit.
         *     Throws error if index < 0 or index >= buffer.length.
-        * @returns { int } The element in the buffer matching the given index. 
+        * @returns { int } The element in the buffer matching the given index.
         * @throws { BusinessError } 10200001 - The value of index is out of range.
         */
         $_get(index: int): long {

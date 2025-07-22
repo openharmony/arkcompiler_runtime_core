@@ -66,6 +66,7 @@ function main(): int {
     suite.addTest("Test equals", testEquals)
     suite.addTest("Test fill", testFill)
     suite.addTest("Test fill hex", testFillHex);
+    suite.addTest("Test fill empty", testFillEmpty);
     suite.addTest("Test fill ascii with unicode", testFillAsciiWithUnicode)
     suite.addTest("Test fill utf8 with unicode", testFillUtf8WithUnicode)
     suite.addTest("Test fill base64 with unicode", testFillBase64WithUnicode)
@@ -1082,8 +1083,8 @@ function testByteOffset() {
     buf = new buffer.Buffer(a, 2)
     arktest.assertEQ(buf.byteOffset, 2)
     let byteOffset: int;
-    arktest.expectError((): void => { 
-                                        byteOffset = -1; 
+    arktest.expectError((): void => {
+                                        byteOffset = -1;
                                         let f = new buffer.Buffer(a, byteOffset) });
     arktest.expectError((): void => {
                                         byteOffset = a.getByteLength();
@@ -1197,6 +1198,15 @@ function testFillUtf16leWithUnicode() {
     const buf = buffer.alloc(10).fill('F1刘FG', 0, 10, 'utf16le');
     const hex = buf.toString('hex');
     arktest.assertEQ(hex, '46003100185246004700');
+}
+
+function testFillEmpty(){
+    let encodeArr: (undefined | buffer.BufferEncoding)[] = [undefined, 'utf8', 'utf-8', 'ucs2', 'ucs-2', 'ascii', 'latin1', 'binary', 'utf16le', 'base64', 'base64url', 'hex'];
+    const buf = buffer.alloc(20).fill('');
+    for (const encode of encodeArr) {
+        buf.fill('', 0, buf.length, encode);
+        arktest.assertEQ(buf.length, 20, encode);
+    }
 }
 
 function testBufferToString00001() {
