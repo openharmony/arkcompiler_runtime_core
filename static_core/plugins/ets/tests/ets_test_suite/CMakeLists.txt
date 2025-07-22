@@ -15,7 +15,7 @@ function(add_ets_test test_suite)
     set(prefix ARG)
     set(noValues SKIP_ARM32_COMPILER)
     set(singleValues FILE TEST_NAME ENTRYPOINT TEST_PATH)
-    set(multiValues OPTIONS MODE)
+    set(multiValues OPTIONS MODE COMPILER_EXTRA_OPTIONS)
     cmake_parse_arguments(${prefix} "${noValues}" "${singleValues}" "${multiValues}" ${ARGN})
 
     # Create target to run one test in different modes(e.g. ets_test_suite_coroutines_launch_n_workers)
@@ -35,7 +35,12 @@ function(add_ets_test test_suite)
 
     if ("INT" IN_LIST ARG_MODE)
         set(target ${test_suite}_${ARG_TEST_NAME}-ets-int)
-        run_int_ets_code(${target} ${test_out_dir} SOURCES "${test_in}" ENTRYPOINT ${ARG_ENTRYPOINT} RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})
+        run_int_ets_code(${target} ${test_out_dir}
+                         SOURCES "${test_in}"
+                         ENTRYPOINT ${ARG_ENTRYPOINT}
+                         RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS}
+                         COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
+        )
         add_dependencies(${all_modes_tests} ${target})
     endif()
 
@@ -48,25 +53,39 @@ function(add_ets_test test_suite)
     if ("AOT" IN_LIST ARG_MODE)
         set(target ${test_suite}_${ARG_TEST_NAME}-ets-aot)
         LIST(APPEND targets ${target})
-        run_aot_ets_code(aot ${test_in} ${test_out_dir} ${target} RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})
+        run_aot_ets_code(aot ${test_in} ${test_out_dir} ${target}
+                         RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS}
+                         COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
+        )
     endif()
 
     if ("LLVMAOT" IN_LIST ARG_MODE AND PANDA_LLVM_AOT)
         set(target ${test_suite}_${ARG_TEST_NAME}-ets-llvmaot)
         LIST(APPEND targets ${target})
-        run_aot_ets_code(llvm ${test_in} ${test_out_dir} ${target} RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})
+        run_aot_ets_code(llvm ${test_in} ${test_out_dir} ${target}
+                         RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS}
+                         COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
+        )
     endif()
 
     if ("JIT" IN_LIST ARG_MODE)
         set(target ${test_suite}_${ARG_TEST_NAME}-ets-jit)
         LIST(APPEND targets ${target})
-        run_jit_ets_code(${test_in} ${test_out_dir} ${target} ENTRYPOINT ${ARG_ENTRYPOINT} RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})
+        run_jit_ets_code(${test_in} ${test_out_dir} ${target}
+                         ENTRYPOINT ${ARG_ENTRYPOINT}
+                         RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS}
+                         COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
+        )
     endif()
 
     if ("JITOSR" IN_LIST ARG_MODE AND PANDA_TARGET_ARM64)
         set(target ${test_suite}_${ARG_TEST_NAME}-ets-jit-osr)
         LIST(APPEND targets ${target})
-        run_jit_osr_ets_code(${test_in} ${test_out_dir} ${target} ENTRYPOINT ${ARG_ENTRYPOINT} RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})
+        run_jit_osr_ets_code(${test_in} ${test_out_dir} ${target}
+                             ENTRYPOINT ${ARG_ENTRYPOINT}
+                             RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS}
+                             COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
+        )
     endif()
 
     foreach(target ${targets})

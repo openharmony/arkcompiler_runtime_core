@@ -91,7 +91,7 @@ endfunction()
 
 function(compile_ets_sources WORK_DIR ABC_TARGET ABC_FILES ETS_SOURCES)
     set(oneValueArgs ARKTS_CONFIG ETSPATH OPT_LEVEL)
-    set(multiValueArgs ARKTS_CONFIGS)
+    set(multiValueArgs ARKTS_CONFIGS COMPILER_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     add_custom_target(${ABC_TARGET})
@@ -123,7 +123,9 @@ function(compile_ets_sources WORK_DIR ABC_TARGET ABC_FILES ETS_SOURCES)
         compile_ets_code(${SOURCE_ETS} ${SOURCE_ABC} ${SOURCE_ABC_TARGET}
                          ARKTS_CONFIG ${ARKTS_CONFIG}
                          ETSPATH ${ARG_ETSPATH}
-                         OPT_LEVEL ${ARG_OPT_LEVEL})
+                         OPT_LEVEL ${ARG_OPT_LEVEL}
+                         COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
+        )
         add_dependencies(${ABC_TARGET} ${SOURCE_ABC_TARGET})
         set(RESULT ${RESULT} ${SOURCE_ABC})
     endforeach()

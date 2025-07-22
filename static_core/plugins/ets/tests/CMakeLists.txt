@@ -123,7 +123,7 @@ function(run_ets_code_impl TARGET WORK_DIR ETS_SOURCES)
     endif()
 
     set(oneValueArgs ENTRYPOINT ETSPATH OPT_LEVEL)
-    set(multiValueArgs ARKTS_CONFIGS RUNTIME_EXTRA_OPTIONS)
+    set(multiValueArgs ARKTS_CONFIGS COMPILER_EXTRA_OPTIONS RUNTIME_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     set(ABC_TARGET ${TARGET}-abc)
@@ -131,6 +131,7 @@ function(run_ets_code_impl TARGET WORK_DIR ETS_SOURCES)
                         ARKTS_CONFIGS ${ARG_ARKTS_CONFIGS}
                         ETSPATH ${ARG_ETSPATH}
                         OPT_LEVEL ${ARG_OPT_LEVEL}
+                        COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
     )
 
     list(GET ABC_FILES 0 ENTRY_ABC)
@@ -170,7 +171,7 @@ add_custom_target(ets_run_int_ets_code_tests)
 # NOTE(vpukhov): use a common format
 function(run_int_ets_code TARGET WORK_DIR)
     set(oneValueArgs ENTRYPOINT ETSPATH OPT_LEVEL)
-    set(multiValueArgs SOURCES ARKTS_CONFIGS RUNTIME_EXTRA_OPTIONS)
+    set(multiValueArgs SOURCES ARKTS_CONFIGS COMPILER_EXTRA_OPTIONS RUNTIME_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     add_custom_target(${TARGET})
@@ -189,6 +190,7 @@ function(run_int_ets_code TARGET WORK_DIR)
                       ENTRYPOINT ${ARG_ENTRYPOINT}
                       OPT_LEVEL ${ARG_OPT_LEVEL}
                       RUNTIME_EXTRA_OPTIONS "${arkopts_cpp}"
+                      COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
     )
     add_dependencies(${TARGET} ${TARGET}-cpp)
 
@@ -205,6 +207,7 @@ function(run_int_ets_code TARGET WORK_DIR)
                       ENTRYPOINT ${ARG_ENTRYPOINT}
                       OPT_LEVEL ${ARG_OPT_LEVEL}
                       RUNTIME_EXTRA_OPTIONS "${arkopts_irtoc}"
+                      COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
     )
     add_dependencies(${TARGET} ${TARGET}-irtoc)
 
@@ -222,6 +225,7 @@ function(run_int_ets_code TARGET WORK_DIR)
                           ENTRYPOINT ${ARG_ENTRYPOINT}
                           OPT_LEVEL ${ARG_OPT_LEVEL}
                           RUNTIME_EXTRA_OPTIONS "${arkopts_llvm}"
+                          COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
         )
         add_dependencies(${TARGET} ${TARGET}-llvmirtoc)
     endif()
@@ -232,7 +236,7 @@ add_custom_target(ets_run_jit_ets_code_tests)
 
 function(run_jit_ets_code ETS_SRC WORK_DIR TARGET)
     set(oneValueArgs ENTRYPOINT OPT_LEVEL)
-    set(multiValueArgs RUNTIME_EXTRA_OPTIONS)
+    set(multiValueArgs RUNTIME_EXTRA_OPTIONS COMPILER_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     set(arkopts
@@ -247,6 +251,7 @@ function(run_jit_ets_code ETS_SRC WORK_DIR TARGET)
                       ENTRYPOINT ${ARG_ENTRYPOINT}
                       OPT_LEVEL ${ARG_OPT_LEVEL}
                       RUNTIME_EXTRA_OPTIONS "${arkopts}"
+                      COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
     )
 endfunction()
 
@@ -255,7 +260,7 @@ add_custom_target(ets_run_jit_osr_ets_code_tests)
 
 function(run_jit_osr_ets_code ETS_SRC WORK_DIR TARGET)
     set(oneValueArgs ENTRYPOINT OPT_LEVEL)
-    set(multiValueArgs RUNTIME_EXTRA_OPTIONS)
+    set(multiValueArgs RUNTIME_EXTRA_OPTIONS COMPILER_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     set(arkopts
@@ -269,6 +274,7 @@ function(run_jit_osr_ets_code ETS_SRC WORK_DIR TARGET)
                       ENTRYPOINT ${ARG_ENTRYPOINT}
                       OPT_LEVEL ${ARG_OPT_LEVEL}
                       RUNTIME_EXTRA_OPTIONS "${arkopts}"
+                      COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
     )
 endfunction()
 
@@ -303,13 +309,16 @@ function(run_aot_ets_code PAOC_MODE ETS_SRC WORK_DIR TARGET)
     endif()
 
     set(oneValueArgs OPT_LEVEL)
-    set(multiValueArgs RUNTIME_EXTRA_OPTIONS)
+    set(multiValueArgs RUNTIME_EXTRA_OPTIONS COMPILER_EXTRA_OPTIONS )
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     get_filename_component(SRC_FNAME ${ETS_SRC} NAME)
     set(OUTPUT_ABC ${WORK_DIR}/${SRC_FNAME}-${PAOC_MODE}.abc)
     set(ABC_TARGET ${TARGET}-ets-es2panda)
-    compile_ets_code(${ETS_SRC} ${OUTPUT_ABC} ${ABC_TARGET} OPT_LEVEL ${ARG_OPT_LEVEL})
+    compile_ets_code(${ETS_SRC} ${OUTPUT_ABC} ${ABC_TARGET}
+                     OPT_LEVEL ${ARG_OPT_LEVEL}
+                     COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
+    )
 
     set(OUTPUT_AN ${WORK_DIR}/${SRC_FNAME}-${PAOC_MODE}.an)
     set(TARGET_AOT ${TARGET}-${PAOC_MODE}-files)
@@ -351,13 +360,18 @@ endfunction()
 function(run_int_jit_aot_ets_code ETS_SRC WORK_DIR TARGET)
     set(oneValueArgs OPT_LEVEL)
     set(noValues SKIP_ARM32_COMPILER)
-    set(multiValueArgs RUNTIME_EXTRA_OPTIONS)
+    set(multiValueArgs RUNTIME_EXTRA_OPTIONS COMPILER_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "${noValues}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     add_custom_target(${TARGET})
 
     # int
-    run_int_ets_code(${TARGET}-ets-int ${WORK_DIR} SOURCES "${ETS_SRC}" OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS})
+    run_int_ets_code(${TARGET}-ets-int ${WORK_DIR}
+                     SOURCES "${ETS_SRC}"
+                     OPT_LEVEL ${ARG_OPT_LEVEL}
+                     RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS}
+                     COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
+    )
     if(TARGET ${TARGET}-ets-int)
         add_dependencies(${TARGET} ${TARGET}-ets-int)
     endif()
@@ -366,25 +380,41 @@ function(run_int_jit_aot_ets_code ETS_SRC WORK_DIR TARGET)
         return()
     endif()
     # jit
-    run_jit_ets_code(${ETS_SRC} ${WORK_DIR} ${TARGET}-ets-jit OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS})
+    run_jit_ets_code(${ETS_SRC} ${WORK_DIR} ${TARGET}-ets-jit
+                     OPT_LEVEL ${ARG_OPT_LEVEL}
+                     RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS}
+                     COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
+    )
     if(TARGET ${TARGET}-ets-jit)
         add_dependencies(${TARGET} ${TARGET}-ets-jit)
     endif()
     # aot
-    run_aot_ets_code(aot ${ETS_SRC} ${WORK_DIR} ${TARGET}-ets-aot OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS})
+    run_aot_ets_code(aot ${ETS_SRC} ${WORK_DIR} ${TARGET}-ets-aot
+                     OPT_LEVEL ${ARG_OPT_LEVEL}
+                     RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS}
+                     COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
+    )
     if(TARGET ${TARGET}-ets-aot)
         add_dependencies(${TARGET} ${TARGET}-ets-aot)
     endif()
     # llvm-aot
     if (PANDA_LLVM_AOT)
-        run_aot_ets_code(llvm ${ETS_SRC} ${WORK_DIR} ${TARGET}-ets-llvmaot OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS})
+        run_aot_ets_code(llvm ${ETS_SRC} ${WORK_DIR} ${TARGET}-ets-llvmaot
+                         OPT_LEVEL ${ARG_OPT_LEVEL}
+                         RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS}
+                         COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
+        )
         if(TARGET ${TARGET}-ets-llvmaot)
             add_dependencies(${TARGET} ${TARGET}-ets-llvmaot)
         endif()
     endif()
     # jit-osr
     if (PANDA_TARGET_ARM64)
-        run_jit_osr_ets_code(${ETS_SRC} ${WORK_DIR} ${TARGET}-ets-jit-osr OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS})
+        run_jit_osr_ets_code(${ETS_SRC} ${WORK_DIR} ${TARGET}-ets-jit-osr
+                             OPT_LEVEL ${ARG_OPT_LEVEL}
+                             RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS}
+                             COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
+        )
         if(TARGET ${TARGET}-ets-jit-osr)
             add_dependencies(${TARGET} ${TARGET}-ets-jit-osr)
         endif()

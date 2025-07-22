@@ -26,13 +26,21 @@ set(abc2progTestFiles
 
 add_custom_target(abc2program_gen)
 
+# --ets-strings-concat options #26986
 foreach(NAME ${abc2progTestFiles})
     add_custom_target(abc2program_gen_${NAME} COMMENT "Generating ${NAME} for abc2program"
         COMMAND ${PANDA_BINARY_ROOT}/bin/es2panda ${CMAKE_CURRENT_SOURCE_DIR}/ets/${NAME}.ets
-        --opt-level=0 --output=${CMAKE_CURRENT_BINARY_DIR}/ets/${NAME}.abc
+        --opt-level=0 --ets-strings-concat=false --output=${CMAKE_CURRENT_BINARY_DIR}/ets/${NAME}.abc
         DEPENDS es2panda)
     add_dependencies(abc2program_gen abc2program_gen_${NAME})
 endforeach()
+
+add_custom_target(abc2program_gen_Functions_concat COMMENT "Generating Functions_concat for abc2program"
+    COMMAND ${PANDA_BINARY_ROOT}/bin/es2panda ${CMAKE_CURRENT_SOURCE_DIR}/ets/Functions.ets
+    --opt-level=0 --ets-strings-concat=true --output=${CMAKE_CURRENT_BINARY_DIR}/ets/Functions_concat.abc
+    DEPENDS es2panda)
+add_dependencies(abc2program_gen abc2program_gen_Functions_concat)
+
 
 panda_add_gtest(
     NAME abc2program_tests
