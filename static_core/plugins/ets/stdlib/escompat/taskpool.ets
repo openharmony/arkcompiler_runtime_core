@@ -187,7 +187,7 @@ export namespace taskpool {
             this.cpuDuration = 0;
             this.taskMutex = ConcurrencyHelpers.mutexCreate();
             this.condVar = ConcurrencyHelpers.condVarCreate();
-            this.dependentTasks = new Set<Task>();
+            this.dependentTasks = new containers.ConcurrentSet<Task>();
             // Each task has unique identifier
             this.taskId = Task.generateId();
         }
@@ -624,7 +624,7 @@ export namespace taskpool {
         /// Count of tasks which should be executed before this task
         internal taskDependenciesCount: int = 0;
         /// Set of tasks which can be executed after this task
-        internal dependentTasks: Set<Task>;
+        internal dependentTasks: containers.ConcurrentSet<Task>;
         /// identifier of worker which starts to execute the task
         internal workerId: int = -1;
         /// an instance of the task is running
@@ -1105,6 +1105,7 @@ export namespace taskpool {
                 throw new Error(TASKPOOL_ERROR_TASK_NOT_EXECUTED_TASK, "taskpool:: task is not executed or has been executed");
             }
         });
+        tryCancelDependentTasks(task);
     }
 
     /**
@@ -1376,6 +1377,16 @@ export namespace taskpool {
 
     function isCanceled(task: Task): boolean {
         return pendingDelayedCanceled.has(task) || tasksToBeCanceled.has(task) || groupsToBeCanceled.has(task.groupId);
+    }
+
+    function tryCancelDependentTasks(task: Task): void {
+        for(const dependentTask: Task of task.dependentTasks) {
+            try {
+                cancel(dependentTask);
+            } catch (e) {
+                // The error can be ignored.
+            }
+        }
     }
 
     function hasTask(task: Task): boolean {

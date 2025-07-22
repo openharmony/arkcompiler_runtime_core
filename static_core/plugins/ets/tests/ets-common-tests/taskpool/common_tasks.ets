@@ -1011,6 +1011,61 @@ function dependencyErrorTaskTest() {
     arktest.assertEQ(checkPoints.length, 4);
 }
 
+async function delay(ms: int) {
+    await new Promise<void>((res, rej) => {
+        setTimeout(() => {
+            res(undefined);
+        }, ms);
+    });
+}
+
+function dependencyCancelTaskTest() {
+    let checkPoints = new Array<number>();
+    let task1 = new taskpool.Task('task1', () => {
+        checkPoints.push(1);
+    });
+    let task2 = new taskpool.Task('task2', () => {
+        checkPoints.push(2);
+    });
+    let task3 = new taskpool.Task('task3', () => {
+        checkPoints.push(3);
+    });
+    task2.addDependency(task1);
+    task3.addDependency(task2);
+    taskpool.execute(task3);
+    taskpool.execute(task2);
+    await taskpool.execute(task1).then(() => {
+        taskpool.cancel(task2);
+    });
+    await delay(50);
+    arktest.assertEQ(checkPoints.length, 1);
+    arktest.assertEQ(checkPoints[0], 1);
+}
+
+function doubleCancelByDependencyTest() {
+    let checkPoints = new Array<number>();
+    let task1 = new taskpool.Task('task1', () => {
+        checkPoints.push(1);
+    });
+    let task2 = new taskpool.Task('task2', () => {
+        checkPoints.push(2);
+    });
+    let task3 = new taskpool.Task('task3', () => {
+        checkPoints.push(3);
+    });
+    task2.addDependency(task1);
+    task3.addDependency(task2);
+    taskpool.execute(task3);
+    taskpool.execute(task2);
+    taskpool.cancel(task3);
+    await taskpool.execute(task1).then(() => {
+        taskpool.cancel(task2);
+    });
+    await delay(50);
+    arktest.assertEQ(checkPoints.length, 1);
+    arktest.assertEQ(checkPoints[0], 1);
+}
+
 function main(): int {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
@@ -1047,6 +1102,8 @@ function main(): int {
     commonTaskSuite.addTest('taskArgumentsTest', taskArgumentsTest);
     commonTaskSuite.addTest('DependencyThenCallbackExecuteSequenceTest', dependencyThenCallbackExecuteSequenceTest);
     commonTaskSuite.addTest('dependencyErrorTaskTest', dependencyErrorTaskTest);
+    commonTaskSuite.addTest('dependencyCancelTaskTest', dependencyCancelTaskTest);
+    commonTaskSuite.addTest('doubleCancelByDependencyTest', doubleCancelByDependencyTest);
     let res = commonTaskSuite.run();
     CoroutineExtras.stopTaskpool();
     return res;
