@@ -468,12 +468,15 @@ static uint32_t NormalizeIndex(int32_t idx, int64_t len)
 extern "C" ObjectHeader *EtsEscompatArrayFill(ObjectHeader *arrayHeader, EtsObject *value, int32_t start, int32_t end)
 {
     ASSERT(arrayHeader != nullptr);
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coro);
     auto *array = EtsEscompatArray::FromEtsObject(EtsObject::FromCoreType(arrayHeader));
+    EtsHandle<EtsEscompatArray> arrayHandle(coro, array);
     auto actualLength = static_cast<int64_t>(array->GetActualLength());
     auto startInd = NormalizeIndex(start, actualLength);
     auto endInd = NormalizeIndex(end, actualLength);
-    array->GetData()->Fill(value, startInd, endInd);
-    return arrayHeader;
+    arrayHandle->GetData()->Fill(value, startInd, endInd);
+    return arrayHandle->GetCoreType();
 }
 
 struct ElementComputeResult {
