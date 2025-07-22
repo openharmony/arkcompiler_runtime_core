@@ -15,22 +15,21 @@
 
 //! CHECKER                 ets.istrue JIT
 //! RUN                     force_jit: true, options: "--compiler-regex='.*check_istrue.*'", entry: "ets_istrue.ETSGLOBAL::main"
-//! METHOD                  "ets_istrue.ETSGLOBAL::check_istrue"
-//! PASS_AFTER              "Codegen"
-//! INST_COUNT              /Intrinsic.CompilerEtsIstrue/, 1
+//! CHECK_GROUP             CheckGroup1
 
 //! CHECKER                 ets.istrue AOT
-//! SKIP_IF                 @architecture == "arm32"
 //! RUN_PAOC                options: "--compiler-regex='.*check_istrue.*'"
-//! METHOD                  "ets_istrue.ETSGLOBAL::check_istrue"
-//! PASS_AFTER              "Codegen"
-//! INST_COUNT              /Intrinsic.CompilerEtsIstrue/, 1
+//! CHECK_GROUP             CheckGroup1
 //! RUN                     entry: "ets_istrue.ETSGLOBAL::main"
 
 //! DISABLED_CHECKER        ets.istrue LLVM AOT
-//! SKIP_IF                 @architecture == "arm32"
 //! RUN_LLVM                options: "--compiler-regex='.*check_istrue.*'"
 //! RUN                     entry: "ets_istrue.ETSGLOBAL::main"
+
+//! CHECK_GROUP             CheckGroup1
+//! METHOD                  "ets_istrue.ETSGLOBAL::check_istrue"
+//! PASS_AFTER              "Codegen"
+//! INST_COUNT              /Intrinsic.CompilerEtsIstrue/, 1
 
 function check_istrue(v: Any) { return !!v }
 
