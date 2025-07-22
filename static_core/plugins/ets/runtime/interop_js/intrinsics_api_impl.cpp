@@ -1042,6 +1042,12 @@ EtsObject *CreateObject(JSValue *ctor, Span<VMHandle<ObjectHeader>> args)
 
     for (auto &objHeader : args) {
         EtsObject *arg = EtsObject::FromCoreType(objHeader.GetPtr());
+        if (arg == nullptr) {
+            napi_value jsUndefined;
+            napi_get_undefined(env, &jsUndefined);
+            realArgs.push_back(jsUndefined);
+            continue;
+        }
         auto refconv = JSRefConvertResolve(ctx, arg->GetClass()->GetRuntimeClass());
         auto realArg = refconv->Wrap(ctx, arg);
         realArgs.push_back(realArg);
