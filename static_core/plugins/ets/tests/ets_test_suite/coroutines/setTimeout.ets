@@ -40,6 +40,30 @@ function clearTimeoutTest() {
     clearTimeout(id);
 }
 
+function clearTimeoutTestWithOutId() {
+    clearTimeout();
+}
+
+function clearTimeoutTestWithNullId() {
+    clearTimeout(null);
+}
+
+function clearTimeoutTestWithUndefinedId() {
+    clearTimeout(undefined);
+}
+
+function clearIntervalTestWithOutId() {
+    clearInterval();
+}
+
+function clearIntervalTestWithNullId() {
+    clearInterval(null);
+}
+
+function clearIntervalTestWithUndefinedId() {
+    clearInterval(undefined);
+}
+
 function clearIntervalTestFromCallback() {
     let flag = true;
     let id: int = -1;
@@ -58,6 +82,152 @@ function clearIntervalFromAnotherTimer() {
         arktest.assertTrue(flag);
         clearInterval(id);
     }, mediumTimeout);
+}
+
+function setIntervalWithDifferentMsgAndDelay() {
+    let flag = true;
+
+    let id0 = setInterval("setIntervalMsg0 in setIntervalWithDifferentMsgAndDelay", shortTimeout);
+    setTimeout(() => {
+        arktest.assertTrue(flag);
+        clearInterval(id0);
+    }, shortTimeout);
+
+    let id1 = setInterval("setIntervalMsg1 in setIntervalWithDifferentMsgAndDelay", null);
+    setTimeout(() => {
+        arktest.assertTrue(flag);
+        clearInterval(id1);
+    }, shortTimeout);
+
+    let id2 = setInterval("setIntervalMsg2 in setIntervalWithDifferentMsgAndDelay", undefined);
+    setTimeout(() => {
+        arktest.assertTrue(flag);
+        clearInterval(id2);
+    }, shortTimeout);
+
+    let id3 = setInterval("setIntervalMsg3 in setIntervalWithDifferentMsgAndDelay");
+    setTimeout(() => {
+        arktest.assertTrue(flag);
+        clearInterval(id3);
+    }, shortTimeout);
+
+    let id4 = setInterval("", null);
+    setTimeout(() => {
+        arktest.assertTrue(flag);
+        clearInterval(id4);
+    }, shortTimeout);
+
+    let id5 = setInterval("", undefined);
+    setTimeout(() => {
+        arktest.assertTrue(flag);
+        clearInterval(id5);
+    }, shortTimeout);
+
+    let id6 = setInterval("");
+    setTimeout(() => {
+        arktest.assertTrue(flag);
+        clearInterval(id6);
+    }, shortTimeout);
+}
+
+function setIntervalWithFuncAndDifferentDelay() {
+    let flag = false;
+
+    let id0 = setInterval(() => { flag = true; }, shortTimeout);
+    setTimeout(() => {
+        arktest.assertTrue(flag);
+        clearInterval(id0);
+    }, shortTimeout);
+
+    flag = false;
+    let id1 = setInterval(() => { flag = true; }, null);
+    setTimeout(() => {
+        arktest.assertTrue(flag);
+        clearInterval(id1);
+    }, shortTimeout);
+
+    flag = false;
+    let id2 = setInterval(() => { flag = true; }, undefined);
+    setTimeout(() => {
+        arktest.assertTrue(flag);
+        clearInterval(id2);
+    }, shortTimeout);
+}
+
+function setTimeoutWithDifferentMsgAndDelay() {
+    let id0 = setInterval("setIntervalMsg0 in setTimeoutWithDifferentMsgAndDelay", shortTimeout);
+    setTimeout("setTimeoutMsg0 in setTimeoutWithDifferentMsgAndDelay", shortTimeout);
+    clearInterval(id0);
+
+    let id1 = setInterval("setIntervalMsg1 in setTimeoutWithDifferentMsgAndDelay", null);
+    setTimeout("setTimeoutMsg1 in setTimeoutWithDifferentMsgAndDelay", null);
+    clearInterval(id1);
+
+    let id2 = setInterval("setIntervalMsg2 in setTimeoutWithDifferentMsgAndDelay", undefined);
+    setTimeout("setTimeoutMsg2 in setTimeoutWithDifferentMsgAndDelay", undefined);
+    clearInterval(id2);
+
+    let id3 = setInterval("setIntervalMsg3 in setTimeoutWithDifferentMsgAndDelay");
+    setTimeout("setTimeoutMsg3 in setTimeoutWithDifferentMsgAndDelay", shortTimeout);
+    clearInterval(id3);
+
+    let id4 = setInterval("", null);
+    setTimeout("", null);
+    clearInterval(id4);
+
+    let id5 = setInterval("", undefined);
+    setTimeout("", undefined);
+    clearInterval(id5);
+
+    let id6 = setInterval("");
+    setTimeout("", shortTimeout);
+    clearInterval(id6);
+}
+
+function setTimeoutWithFuncAndDifferentDelay() {
+    let flag = true;
+
+    let id0 = setInterval("setIntervalMsg0 in setTimeoutWithFuncAndDifferentDelay", shortTimeout);
+    setTimeout(() => {
+        arktest.assertTrue(flag);
+        clearInterval(id0);
+    }, shortTimeout);
+
+    let id1 = setInterval("setIntervalMsg1 in setTimeoutWithFuncAndDifferentDelay", null);
+    setTimeout(() => {
+        arktest.assertTrue(flag);
+        clearInterval(id1);
+    }, null);
+
+    let id2 = setInterval("setIntervalMsg2 in setTimeoutWithFuncAndDifferentDelay", undefined);
+    setTimeout(() => {
+        arktest.assertTrue(flag);
+        clearInterval(id2);
+    }, undefined);
+
+    let id3 = setInterval("setIntervalMsg3 in setTimeoutWithFuncAndDifferentDelay");
+    setTimeout(() => {
+        arktest.assertTrue(flag);
+        clearInterval(id3);
+    }, shortTimeout);
+
+    let id4 = setInterval("", null);
+    setTimeout(() => {
+        arktest.assertTrue(flag);
+        clearInterval(id4);
+    }, null);
+
+    let id5 = setInterval("", undefined);
+    setTimeout(() => {
+        arktest.assertTrue(flag);
+        clearInterval(id5);
+    }, undefined);
+
+    let id6 = setInterval("");
+    setTimeout(() => {
+        arktest.assertTrue(flag);
+        clearInterval(id6);
+    }, shortTimeout);
 }
 
 function clearTimeoutFromAnotherWorkerTest() {
@@ -94,10 +264,6 @@ function testSameWorkerIdTestLaunch() {
     launch<void, () => void>(sameWorkerIdTest);
 }
 
-function testFirstTimerIdLaunch() {
-    launch<void, () => void>(firstTimerIdTest);
-}
-
 function main(): int {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     
@@ -109,9 +275,19 @@ function main(): int {
      */
     testSuite.addTest('firstTimerIdTest', firstTimerIdTest);
     testSuite.addTest('setTimeoutTest', setTimeoutTest);
+    testSuite.addTest('clearTimeoutTestWithOutId', clearTimeoutTestWithOutId);
+    testSuite.addTest('clearTimeoutTestWithNullId', clearTimeoutTestWithNullId);
+    testSuite.addTest('clearTimeoutTestWithUndefinedId', clearTimeoutTestWithUndefinedId);
     testSuite.addTest('clearTimeoutTest', clearTimeoutTest);
+    testSuite.addTest('clearIntervalTestWithOutId', clearIntervalTestWithOutId);
+    testSuite.addTest('clearIntervalTestWithNullId', clearIntervalTestWithNullId);
+    testSuite.addTest('clearIntervalTestWithUndefinedId', clearIntervalTestWithUndefinedId);
     testSuite.addTest('clearIntervalTestFromCallback', clearIntervalTestFromCallback);
     testSuite.addTest('clearIntervalFromAnotherTimer', clearIntervalFromAnotherTimer);
+    testSuite.addTest('setIntervalWithDifferentMsgAndDelay', setIntervalWithDifferentMsgAndDelay);
+    testSuite.addTest('setIntervalWithFuncAndDifferentDelay', setIntervalWithFuncAndDifferentDelay);
+    testSuite.addTest('setTimeoutWithDifferentMsgAndDelay', setTimeoutWithDifferentMsgAndDelay);
+    testSuite.addTest('setTimeoutWithFuncAndDifferentDelay', setTimeoutWithFuncAndDifferentDelay);
     testSuite.addTest('clearTimeoutFromAnotherWorkerTest', clearTimeoutFromAnotherWorkerTest);
     testSuite.addTest('sameWorkerIdTest', sameWorkerIdTest);
     
@@ -124,7 +300,6 @@ function main(): int {
     testSuite.addTest('testClearIntervalFromTimerLaunch', testClearIntervalFromTimerLaunch);
     testSuite.addTest('testCearTimeoutFromWorkerLaunch', testCearTimeoutFromWorkerLaunch);
     testSuite.addTest('testSameWorkerIdTestLaunch', testSameWorkerIdTestLaunch);
-    testSuite.addTest('testFirstTimerIdLaunch', testFirstTimerIdLaunch);
 
     /**
      * Note: none of these tests will actually be registered as failing by ArkTest in case if it fails. 
