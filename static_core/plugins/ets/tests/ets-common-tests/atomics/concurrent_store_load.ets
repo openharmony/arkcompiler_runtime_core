@@ -19,7 +19,7 @@ let RESULT = 10 as long
 
 let arr: BigInt64Array = new BigInt64Array;
 
-function main() {
+function testMain() {
     let buf = new ArrayBuffer(8);
     arr = new BigInt64Array(buf, 0, 1);
 
@@ -42,4 +42,10 @@ function wait(): int {
         i += j
     }
     return i
+}
+
+function main() {
+    const suite = new arktest.ArkTestsuite('Function Atomics concurrent_store_load tests')
+    suite.addTest('Function testMain', testMain)
+    return suite.run()
 }

@@ -56,7 +56,7 @@ function testLoad() {
 }
 
 function main() {
-    const suite = new arktest.ArkTestsuite('Function Atomics baseOperator tests')
+    const suite = new arktest.ArkTestsuite('Function Atomics base_operation_load tests')
     suite.addTest('Function testLoad', testLoad)
     return suite.run()
 }

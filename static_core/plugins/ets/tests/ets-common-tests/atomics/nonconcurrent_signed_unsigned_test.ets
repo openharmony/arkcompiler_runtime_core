@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function main() {
+function testMain() {
     let sab = new ArrayBuffer(1024);
     let ab = new ArrayBuffer(256);
 
@@ -35,4 +35,10 @@ function main() {
     bcontrol6[0] = -5;
 
     arktest.assertEQ(Atomics.or(bview6, 3, 0), bcontrol6[0]);
+}
+
+function main() {
+    const suite = new arktest.ArkTestsuite('Function Atomics nonconcurrent_signed_unsigned_test tests')
+    suite.addTest('Function testMain', testMain)
+    return suite.run()
 }

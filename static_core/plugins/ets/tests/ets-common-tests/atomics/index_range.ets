@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function main() {
+function testMain() {
     let arr: BigInt64Array = new BigInt64Array(2)
     Atomics.add(arr, 1, new BigInt(24))
     let res = Atomics.load(arr, 1).getLong()
@@ -29,4 +29,10 @@ function main() {
     arrUint32[1] = 56
     arktest.assertEQ(Atomics.load(arrUint32,1), 56)
 
+}
+
+function main() {
+    const suite = new arktest.ArkTestsuite('Function Atomics index_range tests')
+    suite.addTest('Function testMain', testMain)
+    return suite.run()
 }

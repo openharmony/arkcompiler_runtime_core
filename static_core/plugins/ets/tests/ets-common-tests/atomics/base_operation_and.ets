@@ -37,19 +37,19 @@ let typeArrayList = [
     uint32array
 ]
 
-function testOr() {
+function testAnd() {
     for (let i = 0; i < typeArrayList.length; i++) {
         let ta = typeArrayList[i]
         let arraySize = ta.length
 
         for (let j = 0; j < arraySize; j++) {
-            Atomics.store(ta, j, 2)
+            Atomics.store(ta, j, 3)
 
-            let old = Atomics.or(ta, j, 1)
-            arktest.assertEQ(old, 2)
+            let old = Atomics.and(ta, j, 1)
+            arktest.assertEQ(old, 3)
 
             for (let k = 0; k < arraySize; k++) {
-                let re = (k === j) ? 3 : 0
+                let re = (k === j) ? 1 : 0
                 arktest.assertEQ(Atomics.load(ta, k), re)
             }
 
@@ -59,7 +59,7 @@ function testOr() {
 }
 
 function main() {
-    const suite = new arktest.ArkTestsuite('Function Atomics baseOperator tests')
-    suite.addTest('Function testOr', testOr)
+    const suite = new arktest.ArkTestsuite('Function Atomics base_operation_and tests')
+    suite.addTest('Function testAnd', testAnd)
     return suite.run()
 }

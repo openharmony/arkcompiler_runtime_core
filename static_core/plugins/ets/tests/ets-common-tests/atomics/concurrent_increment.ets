@@ -21,7 +21,7 @@ let RESULT = N.toByte()
 let arr: Int8Array = new Int8Array;
 let arr_u32: Int32Array = new Int32Array;
 
-function main() {
+function testMain() {
     let buf = new ArrayBuffer(4);
     let buf_2 = new ArrayBuffer(4);
     arr = new Int8Array(buf, 0, 1);
@@ -61,4 +61,10 @@ function wait(): int {
         i += j
     }
     return i
+}
+
+function main() {
+    const suite = new arktest.ArkTestsuite('Function Atomics concurrent_increment tests')
+    suite.addTest('Function testMain', testMain)
+    return suite.run()
 }

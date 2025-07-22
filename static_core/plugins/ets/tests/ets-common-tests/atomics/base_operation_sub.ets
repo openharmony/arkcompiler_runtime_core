@@ -37,18 +37,20 @@ let typeArrayList = [
     uint32array
 ]
 
-function testStore() {
+function testSub() {
     for (let i = 0; i < typeArrayList.length; i++) {
         let ta = typeArrayList[i]
         let arraySize = ta.length
 
         for (let j = 0; j < arraySize; j++) {
-            let re = Atomics.store(ta, j, 12)
-            arktest.assertEQ(re, 12)
+            Atomics.store(ta, j, 48)
+
+            let old = Atomics.sub(ta, j, 12)
+            arktest.assertEQ(old, 48)
 
             for (let k = 0; k < arraySize; k++) {
-                let expected = (k === j) ? 12 : 0
-                arktest.assertEQ(Atomics.load(ta, k), expected)
+                let re = (k === j) ? 36 : 0
+                arktest.assertEQ(Atomics.load(ta, k), re)
             }
 
             Atomics.store(ta, j, 0)
@@ -57,7 +59,7 @@ function testStore() {
 }
 
 function main() {
-    const suite = new arktest.ArkTestsuite('Function Atomics baseOperator tests')
-    suite.addTest('Function testStore', testStore)
+    const suite = new arktest.ArkTestsuite('Function Atomics base_operation_sub tests')
+    suite.addTest('Function testSub', testSub)
     return suite.run()
 }

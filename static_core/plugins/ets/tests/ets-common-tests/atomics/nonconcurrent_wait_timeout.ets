@@ -13,10 +13,16 @@
  * limitations under the License.
  */
 
-function main(): void {
+function testMain(): void {
     let buf = new ArrayBuffer(1024);
     let arr: Int32Array = new Int32Array(buf, 0);
     Atomics.store(arr, 0, 0);
     let r = Atomics.wait(arr, 0, 0, 10);
     arktest.assertEQ(r, "timed-out")
+}
+
+function main() {
+    const suite = new arktest.ArkTestsuite('Function Atomics nonconcurrent_wait_timeout tests')
+    suite.addTest('Function testMain', testMain)
+    return suite.run()
 }
