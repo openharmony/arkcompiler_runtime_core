@@ -46,6 +46,7 @@ inline constexpr double MAX_VALUE = std::numeric_limits<double>::max();
 inline constexpr double MIN_VALUE = std::numeric_limits<double>::min();
 inline constexpr double POSITIVE_INFINITY = coretypes::TaggedValue::VALUE_INFINITY;
 inline constexpr double NAN_VALUE = coretypes::TaggedValue::VALUE_NAN;
+inline constexpr double SCIENTIFIC_NOTATION_THRESHOLD = 1e21;
 
 inline constexpr int DOUBLE_MAX_PRECISION = 17;
 inline constexpr int FLOAT_MAX_PRECISION = 9;
