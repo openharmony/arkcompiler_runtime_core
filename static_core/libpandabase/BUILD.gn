@@ -23,11 +23,7 @@ if (ark_standalone_build) {
 ohos_static_library("libarktsbase_package") {
   deps = []
   if (enable_static_vm) {
-    if (is_mac) {
-      deps += [ ":libarktsbase_frontend_static" ]
-    } else {
-      deps += [ ":libarktsbase" ]
-    }
+    deps += [ ":libarktsbase_frontend_static" ]
   }
 
   part_name = ark_part_name

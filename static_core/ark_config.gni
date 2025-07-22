@@ -441,13 +441,8 @@ template("es2panda_gen") {
       } else {
         external_deps = [ "ets_frontend:ets2panda(${host_toolchain})" ]
       }
-      if (defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable) {
-        es2panda_bin = rebase_path(
-                "${es2panda_root_out}/obj/binarys/arkcompiler/ets_frontend/innerapis/ets2panda/clang_x64/libs/es2panda")
-      } else {
-        es2panda_bin = rebase_path(
-                "${es2panda_root_out}/arkcompiler/ets_frontend/es2panda")
-      }
+      es2panda_bin =
+          rebase_path("${es2panda_root_out}/arkcompiler/ets_frontend/es2panda")
       script = "//arkcompiler/ets_runtime/script/run_ark_executable.py"
       if (defined(invoker.sources)) {
         sources = invoker.sources

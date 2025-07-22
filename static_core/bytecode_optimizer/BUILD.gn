@@ -24,11 +24,7 @@ if (ark_standalone_build) {
 ohos_static_library("libarktsbytecodeopt_package") {
   deps = []
   if (enable_static_vm) {
-    if (abckit_enable) {
-      deps += [ ":libarktsbytecodeopt" ]
-    } else {
-      deps += [ ":libarktsbytecodeopt_frontend_static" ]
-    }
+    deps += [ ":libarktsbytecodeopt_frontend_static" ]
   }
 
   part_name = ark_part_name
