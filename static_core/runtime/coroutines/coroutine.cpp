@@ -144,7 +144,7 @@ void Coroutine::IssueTracingEvents(Status oldStatus, Status newStatus)
 {
     bool isMutator = this->GetType() == Coroutine::Type::MUTATOR;
     if (isMutator && newStatus == Coroutine::Status::RUNNING && oldStatus != Coroutine::Status::RUNNING) {
-        Tracer::StartAsync(Tracer::COROUTINE_EXECUTION, this->GetCoroutineId());
+        Tracer::StartAsync(Tracer::COROUTINE_EXECUTION, this->GetCoroutineId(), this->GetName().c_str());
     }
     if (isMutator && newStatus != Coroutine::Status::RUNNING && oldStatus == Coroutine::Status::RUNNING) {
         Tracer::FinishAsync(Tracer::COROUTINE_EXECUTION, this->GetCoroutineId());

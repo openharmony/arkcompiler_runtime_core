@@ -23,6 +23,7 @@ constexpr uint64_t TRACER_TAG = HITRACE_TAG_ARK;
 #include <cstdint>
 #include <string>
 constexpr uint64_t TRACER_TAG = 0ULL;
+constexpr uint64_t HITRACE_LEVEL_INFO = 0ULL;
 
 extern "C" {
 inline void StartTrace([[maybe_unused]] uint64_t tag, [[maybe_unused]] const std::string &name,
@@ -35,10 +36,37 @@ inline void StartAsyncTrace([[maybe_unused]] uint64_t tag, [[maybe_unused]] cons
                             [[maybe_unused]] int32_t taskId, [[maybe_unused]] float limit = -1)
 {
 }
+
+#ifdef PANDA_USE_HITRACE
+inline void StartAsyncTraceEx([[maybe_unused]] HiTraceOutputLevel level, [[maybe_unused]] uint64_t tag,
+                              [[maybe_unused]] const char *name, [[maybe_unused]] int32_t taskId,
+                              [[maybe_unused]] const char *customCategory, [[maybe_unused]] const char *customArgs)
+{
+}
+#else
+inline void StartAsyncTraceEx([[maybe_unused]] uint64_t level, [[maybe_unused]] uint64_t tag,
+                              [[maybe_unused]] const char *name, [[maybe_unused]] int32_t taskId,
+                              [[maybe_unused]] const char *customCategory, [[maybe_unused]] const char *customArgs)
+{
+}
+#endif
+
 inline void FinishAsyncTrace([[maybe_unused]] uint64_t tag, [[maybe_unused]] const std::string &name,
                              [[maybe_unused]] int32_t taskId)
 {
 }
+
+#ifdef PANDA_USE_HITRACE
+inline void FinishAsyncTraceEx([[maybe_unused]] HiTraceOutputLevel level, [[maybe_unused]] uint64_t tag,
+                               [[maybe_unused]] const char *name, [[maybe_unused]] int32_t taskId)
+{
+}
+#else
+inline void FinishAsyncTraceEx([[maybe_unused]] uint64_t level, [[maybe_unused]] uint64_t tag,
+                               [[maybe_unused]] const char *name, [[maybe_unused]] int32_t taskId)
+{
+}
+#endif
 
 inline void CountTrace([[maybe_unused]] uint64_t tag, [[maybe_unused]] const std::string &name,
                        [[maybe_unused]] int64_t count)
@@ -68,14 +96,14 @@ public:
         FinishTrace(TRACER_TAG);
     }
 
-    static void StartAsync(const std::string &name, int32_t taskId, float limit = -1)
+    static void StartAsync(const std::string &name, int32_t taskId, const char *taskName = "")
     {
-        StartAsyncTrace(TRACER_TAG, name, taskId, limit);
+        StartAsyncTraceEx(HITRACE_LEVEL_INFO, TRACER_TAG, name.c_str(), taskId, taskName, "");
     }
 
     static void FinishAsync(const std::string &name, int32_t taskId)
     {
-        FinishAsyncTrace(TRACER_TAG, name, taskId);
+        FinishAsyncTraceEx(HITRACE_LEVEL_INFO, TRACER_TAG, name.c_str(), taskId);
     }
 
     static void Count(const std::string &name, int64_t count)
