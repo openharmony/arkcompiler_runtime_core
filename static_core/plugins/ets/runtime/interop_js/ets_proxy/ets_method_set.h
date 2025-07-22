@@ -158,10 +158,9 @@ template <class Iterator>
 PandaVector<Method *> CollectAllPandaMethods(Iterator begin, Iterator end)
 {
     PandaVector<Method *> allMethods;
+    allMethods.reserve(std::distance(begin, end));
     for (Iterator it = begin; it != end; ++it) {
-        const EtsMethodSet *methodSet = *it;
-        const auto pushAllPandaMethods = [&allMethods](EtsMethod *m) { allMethods.push_back(m->GetPandaMethod()); };
-        methodSet->EnumerateMethods(pushAllPandaMethods);
+        allMethods.push_back((*it)->GetPandaMethod());
     }
     return allMethods;
 }

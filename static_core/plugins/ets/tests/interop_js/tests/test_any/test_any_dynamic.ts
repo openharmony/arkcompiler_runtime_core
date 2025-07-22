@@ -95,6 +95,10 @@ export class Foobar {
     }
 }
 
+export let arrNum = new Array<Number>(1, 2, 3, 4);
+export let arrFill = new Array<Number>(1, 2, 3, 4);
+export let big_val = 1234567890n;
+
 function main() {
     testAll();
 }

@@ -800,16 +800,13 @@ static void SetAttachCallbackForClass(napi_env env, napi_value jsCtor, std::vect
     NAPI_CHECK_FATAL(napi_mark_attach_with_xref(env, jsCtor, static_cast<void *>(etsClass), AttachCBForClass));
 }
 
-static void SortMethodByName(std::vector<EtsMethodSet *> &methods)
+static void SortMethodByName(PandaVector<Method *> &methods)
 {
-    std::sort(methods.begin(), methods.end(), [](const EtsMethodSet *lhs, const EtsMethodSet *rhs) {
-        panda_file::File::StringData lhsName = {
-            static_cast<uint32_t>(utf::MUtf8ToUtf16Size(utf::CStringAsMutf8(lhs->GetName()))),
-            utf::CStringAsMutf8(lhs->GetName())};
-        panda_file::File::StringData rhsName = {
-            static_cast<uint32_t>(utf::MUtf8ToUtf16Size(utf::CStringAsMutf8(rhs->GetName()))),
-            utf::CStringAsMutf8(rhs->GetName())};
-
+    std::sort(methods.begin(), methods.end(), [](const Method *lhs, const Method *rhs) {
+        panda_file::File::StringData lhsName = {static_cast<uint32_t>(utf::MUtf8ToUtf16Size(lhs->GetName().data)),
+                                                lhs->GetName().data};
+        panda_file::File::StringData rhsName = {static_cast<uint32_t>(utf::MUtf8ToUtf16Size(rhs->GetName().data)),
+                                                rhs->GetName().data};
         return lhsName < rhsName;
     });
 }
@@ -828,8 +825,6 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
     }
 
     auto [fields, methods] = _this->CalculateProperties(overloads);
-    // NOTE(www): ICMTHV, Methods should be sorted at creation time
-    SortMethodByName(methods);
 
     _this->SetBaseWrapperMethods(env, methods);
 
@@ -844,7 +839,10 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
     }
     // NOTE(vpukhov): forbid "true" ets-field overriding in js-derived class, as it cannot be proxied back
     if (!etsClass->IsFinal()) {
-        auto ungroupedMethods = CollectAllPandaMethods(methods.begin(), methods.end());
+        auto allEtsMethod = etsClass->GetMethods();
+        auto ungroupedMethods = CollectAllPandaMethods(allEtsMethod.begin(), allEtsMethod.end());
+        SortMethodByName(ungroupedMethods);
+
         _this->jsproxyWrapper_ = ctx->GetJsProxyInstance(etsClass);
         if (_this->jsproxyWrapper_ == nullptr) {
             // NOTE(konstanting): we assume that the method list stays the same for every proxied class
