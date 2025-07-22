@@ -28,7 +28,7 @@
 #include <string_view>
 
 #if defined(PANDA_JS_ETS_HYBRID_MODE)
-#include "interfaces/inner_api/napi/native_node_api.h"
+#include "interfaces/inner_api/napi/native_node_hybrid_api.h"
 #else
 // NOLINTBEGIN(readability-identifier-naming, modernize-use-using)
 typedef napi_value (*proxy_object_attach_cb)(napi_env env, void *data);
