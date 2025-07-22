@@ -1743,8 +1743,8 @@
 #58: flaky, do not delete if it passed
 07.expressions/33.constant_expression/check_array/constant_bitwise_complement_4.ets
 07.expressions/33.constant_expression/check_array/constant_bitwise_complement_5.ets
-15.semantic_rules/07.type_inference/02.smart_types/un_bool_ops_8.ets
-15.semantic_rules/07.type_inference/02.smart_types/un_bool_ops_10.ets
+15.semantic_rules/08.smart_casts_and_smart_types/01.type_expression/un_bool_ops_8.ets
+15.semantic_rules/08.smart_casts_and_smart_types/01.type_expression/un_bool_ops_10.ets
 08.statements/15.try_statements/02.finally_clause/finally_0.ets
 08.statements/15.try_statements/02.finally_clause/finally_2.ets
 08.statements/15.try_statements/02.finally_clause/finally_3.ets

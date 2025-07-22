@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,31 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-{%- for c in cases %}
 
 /*---
 desc: >-
-    Other examples are explicit calls to instanceof or checks against
-    null as part of if statements
-tags: [{{c.tags}}]
+    There could be cases when the type of an entity (mostly local variables)
+    is a union type and in the particular context of the program the compiler
+    can narrow (smart cast) the static type to a more precise type (smart type)
+    and allow operations which are specific to such narrowed type.
 ---*/
 
-function foo(p: Object|null): Object {
-    return p!
+function main() {
+    let a = new Object()
+    arktest.assertEQ(a.toString(), "[object Object]")
 }
-function foo(p: Number): number {
-    return p + p
-}
-function foo(p: String): string {
-    return p + p
-}
-function foo(p: Boolean): boolean {
-    return p ^ p
-}
-
-{{c.decl}}
-
-function main(): int {
-    {{c.code|indent}}
-}
-{%- endfor %}
