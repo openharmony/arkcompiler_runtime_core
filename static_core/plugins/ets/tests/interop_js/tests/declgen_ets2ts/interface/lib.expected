@@ -47,3 +47,15 @@ export declare interface I01 {
     clsMethod: (args: string) => string;
     clsMethod1: (args: string) => string;
 }
+export declare interface I02 {
+    a: A.B;
+    foo(): A.B;
+}
+export declare interface Literal_Function_handler_Object_error {
+    handler: ESObject;
+    error: ESObject;
+    toJSON(): ESObject;
+}
+declare namespace A {
+    type B = number;
+}
