@@ -24,16 +24,25 @@ from runner.code_coverage.coverage_dir import CoverageDir
 
 
 class LcovTool:
-    def __init__(self, build_dir_path: Path, coverage_dir: CoverageDir, cmd_executor: CmdExecutor) -> None:
+    def __init__(
+        self,
+        build_dir_path: Path,
+        coverage_dir: CoverageDir,
+        cmd_executor: CmdExecutor,
+        gcov_tool: str | None
+    ) -> None:
         self.build_dir = build_dir_path
         self.bin_dir = self.build_dir / 'bin'
         self.coverage_dir = coverage_dir
         self.cmd_executor = cmd_executor
+        self.gcov_tool = gcov_tool
 
         self.dot_info_files_dir = self.coverage_dir.coverage_work_dir / "dot_info_files_dir"
 
         self.lcov_binary = self.cmd_executor.get_binary("lcov")
         self.genhtml_binary = self.cmd_executor.get_binary("genhtml")
+
+        self.lcov_ignore_errors_option = "empty,utility,range,inconsistent,source,format,category"
 
         self.components: dict[str, Path] = {}
 
@@ -85,15 +94,20 @@ class LcovTool:
         lcov_command = [
             self.lcov_binary,
             "--capture",
+            "--all",
             "--quiet",
             "--base-directory", str(base_directory_option),
             "--directory", str(directory_option),
             "--output-file", str(dot_info_file),
-            "--rc", "lcov_branch_coverage=1",
+            "--branch-coverage",
+            "--ignore-errors", self.lcov_ignore_errors_option
         ]
         if exclude_regex is not None:
             for pattern in exclude_regex:
                 lcov_command.extend(["--exclude", pattern])
+
+        if self.gcov_tool is not None:
+            lcov_command.extend(["--gcov-tool", self.gcov_tool])
 
         self.cmd_executor.run_command(lcov_command)
 
@@ -130,7 +144,9 @@ class LcovTool:
         genhtml_command = [
             str(self.genhtml_binary),
             f"--output-directory={_output_directory}",
-            str(_dot_info_file)
+            str(_dot_info_file),
+            "--ignore-errors", self.lcov_ignore_errors_option,
+            "--filter", "missing"
         ]
         self.cmd_executor.run_command(genhtml_command)
 

@@ -97,7 +97,8 @@ class TestSuiteConfigTest1(unittest.TestCase):
             "--coverage-per-binary",
             "--clean-gcda-before-run",
             "--time-edges", "1,10,100,500",
-            "--gn-build"]
+            "--gn-build",
+            "--gcov-tool", "/usr/bin/ls"]
 
         configs = ConfigsLoader(self.workflow_name, self.test_suite_name)
 

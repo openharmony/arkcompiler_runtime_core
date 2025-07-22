@@ -52,7 +52,7 @@ class RunnerStandardFlow(RunnerFileBased):
             timestamp=int(datetime.timestamp(datetime.now(pytz.UTC))),
             report_formats={self.config.general.report_format},
             work_dir=WorkDir(config, self.default_work_dir_root),
-            coverage=CoverageManager(self.config.general.build, self.work_dir.coverage_dir),
+            coverage=CoverageManager(self.config.general.build, self.work_dir.coverage_dir, config.general.coverage),
         )
 
         self.__remove_intermediate_files()

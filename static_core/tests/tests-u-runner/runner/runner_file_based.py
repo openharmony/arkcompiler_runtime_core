@@ -21,14 +21,15 @@ from abc import abstractmethod
 from datetime import datetime
 from functools import cached_property
 from glob import glob
-from os import path, environ
+from os import environ, path
 from pathlib import Path
-from typing import List, Dict, Optional, Type, Tuple
+from typing import Dict, List, Optional, Tuple, Type
 from unittest import TestCase
 
 import pytz
 from runner.code_coverage.coverage_manager import CoverageManager
-from runner.enum_types.configuration_kind import ConfigurationKind, SanitizerKind
+from runner.enum_types.configuration_kind import (ConfigurationKind,
+                                                  SanitizerKind)
 from runner.enum_types.fail_kind import FailKind
 from runner.enum_types.params import TestEnv
 from runner.enum_types.qemu import QemuKind
@@ -130,7 +131,11 @@ class RunnerFileBased(Runner):
         Runner.__init__(self, config, name)
         self.cmd_env = environ.copy()
 
-        self.coverage_manager = CoverageManager(Path(self.build_dir), self.work_dir.coverage_dir)
+        self.coverage_manager = CoverageManager(
+            Path(self.build_dir),
+            self.work_dir.coverage_dir,
+            config.general.coverage
+        )
 
         self.__set_test_list_options()
         self.binaries = panda_binaries(name, self.build_dir, self.config, self.conf_kind)
