@@ -79,7 +79,7 @@ PandaString ConvertHexEncoding(const PandaVector<uint8_t> &bytes);
 
 PandaString ConvertLatinEncoding(const PandaVector<uint8_t> &bytes);
 
-Result<PandaVector<uint8_t>> ConvertStringToBytes(const PandaString &input, std::string_view encoding);
+Result<PandaVector<uint8_t>> ConvertStringToBytes(const PandaString &input, std::string_view encoding, size_t size);
 
 /// @brief Calculates the number of bytes required to represent the string in the given encoding.
 Result<int32_t> CalculateStringBytesLength(std::string_view input, std::string_view encoding);
