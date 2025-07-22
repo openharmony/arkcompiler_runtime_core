@@ -566,3 +566,22 @@ function testJsonElementSetElementChangeType(): void {
     root.setElement("prop", prop);
     arktest.assertEQ(root.getDouble("prop"), 10, "SetElement should automatically change type");
 }
+
+function testJsonElementNumberCasts(): void {
+    let usernameInteger = '{"username": 1234}';
+    let jsonElement = JSON.parseJsonElement(usernameInteger);
+    arktest.assertEQ(jsonElement.getDouble("username"),  1234.0, "GetDouble should return correct double value");
+    arktest.assertEQ(jsonElement.getInteger("username"), 1234, "GetInteger should return correct integer value");
+
+    let usernameDouble = '{"username": 1234.5678}';
+    let jsonElementDouble = JSON.parseJsonElement(usernameDouble);
+
+    arktest.expectThrow(
+        (): void => {
+            let u = jsonElementDouble.getInteger("username");
+        },
+        (e: Error | Exception) => {
+            return (e instanceof jsonx.JsonTypeError)
+        }
+    );
+}

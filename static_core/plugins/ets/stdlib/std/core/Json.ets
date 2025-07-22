@@ -513,13 +513,11 @@ export namespace jsonx {
          * @throws {RangeError} If the key is not found
          */
         asDouble(): double {
-            if (this.jsonType != JsonType.JsonNumber) {
+            let result = this.getNumberMaybeCast()
+            if (result == undefined) {
                 throw new JsonTypeError("This value's ValueKind is not Number.")
             }
-            if (this.maybeDoubleValue == undefined) {
-                throw new JsonTypeError("This value's ValueKind is Number, but the value contains no double value.")
-            }
-            return this.maybeDoubleValue!
+            return result!
         }
 
         /**
@@ -529,9 +527,7 @@ export namespace jsonx {
          * @returns {double} The double value if found, undefined otherwise
          */
         tryAsDouble(): double | undefined {
-            return this.jsonType == JsonType.JsonNumber
-                ? this.maybeDoubleValue
-                : undefined
+            return this.getNumberMaybeCast()
         }
 
         /**
@@ -545,8 +541,8 @@ export namespace jsonx {
             if (this.jsonType != JsonType.JsonNumber) {
                 throw new JsonTypeError("This value's ValueKind is not Number.")
             }
-            if (this.maybeIntegerValue == undefined) {
-                throw new JsonTypeError("This value's ValueKind is Number, but the value contains no integer value.")
+            if (this.maybeDoubleValue != undefined) {
+                throw new JsonTypeError("Expected integer, but elementcontains a double value.")
             }
             return this.maybeIntegerValue!
         }
@@ -705,6 +701,21 @@ export namespace jsonx {
             this.maybeObjectValues = undefined
             this.maybeArrayValues  = undefined
             this.maybeNullValue    = undefined
+        }
+
+        private getNumberMaybeCast(): double | undefined {
+            if (this.jsonType != JsonType.JsonNumber) {
+                return undefined
+            }
+            let doubleValue = this.maybeDoubleValue
+            if (doubleValue != undefined) {
+                return doubleValue
+            }
+            let integerValue = this.maybeIntegerValue
+            if (integerValue != undefined) {
+                return integerValue.toDouble()
+            }
+            throw new JsonError("UNREACHABLE: Illegal state.JsonElement is a number, but has no double or integer value")
         }
 
         private _ensureInvariants(): void {
