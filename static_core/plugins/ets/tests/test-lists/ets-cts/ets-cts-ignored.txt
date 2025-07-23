@@ -1517,6 +1517,13 @@
 17.experimental_features/02.fixed_array_types/far4c.ets
 17.experimental_features/02.fixed_array_types/far4d.ets
 
+#28041
+20.implementation_details/04.ensuring_module_initialization/positive_test_4.ets
+
+#28042
+20.implementation_details/04.ensuring_module_initialization/positive_test_10.ets
+20.implementation_details/04.ensuring_module_initialization/positive_test_8.ets
+
 ############
 # temporary place for the tests related to primitive types refactoring
 ############
