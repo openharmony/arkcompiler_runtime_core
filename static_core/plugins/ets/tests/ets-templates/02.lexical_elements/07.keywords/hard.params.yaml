@@ -55,5 +55,6 @@ keywords:
     - throw
     - 'true'
     - try
+    - typeof
     - undefined
     - while
