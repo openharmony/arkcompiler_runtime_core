@@ -76,7 +76,7 @@ cases:
           let v1: RF = (p: RF): RF => { return p }
 
     - defs: |-
-        { class ClassNestedInBlock{} }        
+        { class ClassNestedInBlock{} }
         type TAlias = ClassNestedInBlock;
 
     - defs: |-
@@ -130,3 +130,26 @@ cases:
         type Alias<T = FinitaLaComedia> = T
       use: |-
         let x: Alias = 1  //CTE: TypeError: Type 'Int' cannot be assigned to type 'FinitaLaComedia'
+
+    - defs: |-
+        type Alias<T extends string> = T
+
+      use: |-
+        let xx: Alias<Number> = 1
+        let ok = xx == 1;
+
+    - defs: |-
+        final class FinitaLaComedia {}
+        type Alias<T extends FinitaLaComedia> = T
+
+      use: |-
+        let xx: Alias<Number> = 1
+        let ok = xx == 1;
+
+    - defs: |-
+        final class FinitaLaComedia {}
+        type Alias<T extends FinitaLaComedia> = T
+
+      use: |-
+        let xx: Alias<String> = "Divine"
+        let ok = xx instanceof String && xx instanceof Alias<String>;
