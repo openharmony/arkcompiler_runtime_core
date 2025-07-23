@@ -147,7 +147,8 @@ export class Autofixer {
     [ts.SyntaxKind.TupleType, [this[FaultID.TupleTypeToArray].bind(this)]],
     [ts.SyntaxKind.StructDeclaration, [this[FaultID.StructDeclaration].bind(this)]],
     [ts.SyntaxKind.IndexedAccessType, [this[FaultID.IndexAccessType].bind(this)]],
-    [ts.SyntaxKind.FunctionType, [this[FaultID.FunctionType].bind(this)]]
+    [ts.SyntaxKind.FunctionType, [this[FaultID.FunctionType].bind(this)]],
+    [ts.SyntaxKind.UnionType, [this[FaultID.NoVoidUnionType].bind(this)]]
   ]);
 
   fixNode(node: ts.Node): ts.VisitResult<ts.Node> {
@@ -1406,7 +1407,26 @@ export class Autofixer {
         );
       }
     }
-  
+    
+    return node;
+  }
+
+  /*
+   * Rule: `union type with void mapped to Any`
+   */
+  private [FaultID.NoVoidUnionType](node: ts.Node): ts.VisitResult<ts.Node> {
+    
+    /**
+     * If a union type contains the void type,
+     * convert the union type to Any.
+     */
+    if (ts.isUnionTypeNode(node)) {
+      const hasVoid = node.types.some((type) => type.kind === ts.SyntaxKind.VoidKeyword);
+      if (hasVoid) {
+        return this.context.factory.createTypeReferenceNode(JSValue);
+      }
+    }
+
     return node;
   }
 }
