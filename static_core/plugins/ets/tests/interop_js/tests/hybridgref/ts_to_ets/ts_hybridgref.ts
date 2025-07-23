@@ -75,7 +75,7 @@ function main(): void {
 
     const sym = Symbol("secret");
     const objWithSymbol = {
-        [sym]: "hidden",
+        sym: "hidden",
         visible: "shown"
     };
     nativeSaveRef(objWithSymbol);
