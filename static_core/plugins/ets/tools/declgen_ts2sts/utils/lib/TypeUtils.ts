@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-export const JSValue: string = 'ESObject';
+export const JSValue: string = 'Any';
+export const ESObject: string = 'ESObject';
 export const KitPrefix: string[] = [];
 export const BuiltInType: string[] = ['Symbol'];
 export const ETSKeyword: string[] = ['Class', 'ESObject', 'MethodType'];
@@ -140,4 +141,7 @@ export const FINAL_CLASS: string[] = [
     'WeakRef'
 ];
 export const LIMIT_DECORATOR: string[] = ['Sendable', 'Concurrent'];
+<<<<<<< HEAD
 
+=======
+>>>>>>> dbff5c192 (Fix: convert deprecated ESObject to Any)

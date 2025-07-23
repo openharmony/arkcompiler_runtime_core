@@ -96,7 +96,7 @@ export enum FaultID {
   ErrorSuppression,
   StrictDiagnostic,
   ImportAfterStatement,
-  EsObjectType,
+  ESObjectType,
   NumbericLiteral,
   ConditionalTypes,
   EnumWithMixedType,
