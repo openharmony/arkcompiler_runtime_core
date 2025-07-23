@@ -18,6 +18,11 @@ export declare function foo1(x: string): string
 export declare class X {
     s: string
 }
+
+export declare class Y {
+    static fooArgs(...nums: number[]): number
+}
+
 export declare function foo2(x: X): string
 
 export declare function foo3(...args: number[]): number[]
