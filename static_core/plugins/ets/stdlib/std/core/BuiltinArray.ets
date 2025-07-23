@@ -527,7 +527,7 @@ export function lastIndexOf(self: FixedArray<boolean>, element: boolean, fromInd
     }
 
     while (k >= 0) {
-        if (__runtimeEquals(self[k], element)) {
+        if (self[k] === element) {
             return k;
         }
         k--;
@@ -734,7 +734,7 @@ export function includes(self: FixedArray<boolean>, val: boolean, fromIndex?: Nu
 export function indexOf(self: FixedArray<boolean>, val: boolean, fromIndex: int): int {
     fromIndex = normalizeIndex(fromIndex, self.length)
     for (let i = fromIndex; i < self.length; i++) {
-        if (__runtimeEquals(val, self[i])) {
+        if (val === self[i]) {
             return i
         }
     }
@@ -1490,7 +1490,7 @@ export function lastIndexOf(self: FixedArray<byte>, element: byte, fromIndex: in
     }
 
     while (k >= 0) {
-        if (__runtimeEquals(self[k], element)) {
+        if (self[k] === element) {
             return k;
         }
         k--;
@@ -1697,7 +1697,7 @@ export function includes(self: FixedArray<byte>, val: byte, fromIndex?: Number):
 export function indexOf(self: FixedArray<byte>, val: byte, fromIndex: int): int {
     fromIndex = normalizeIndex(fromIndex, self.length)
     for (let i = fromIndex; i < self.length; i++) {
-        if (__runtimeEquals(val, self[i])) {
+        if (val === self[i]) {
             return i
         }
     }
@@ -2453,7 +2453,7 @@ export function lastIndexOf(self: FixedArray<short>, element: short, fromIndex: 
     }
 
     while (k >= 0) {
-        if (__runtimeEquals(self[k], element)) {
+        if (self[k] === element) {
             return k;
         }
         k--;
@@ -2660,7 +2660,7 @@ export function includes(self: FixedArray<short>, val: short, fromIndex?: Number
 export function indexOf(self: FixedArray<short>, val: short, fromIndex: int): int {
     fromIndex = normalizeIndex(fromIndex, self.length)
     for (let i = fromIndex; i < self.length; i++) {
-        if (__runtimeEquals(val, self[i])) {
+        if (val === self[i]) {
             return i
         }
     }
@@ -3416,7 +3416,7 @@ export function lastIndexOf(self: FixedArray<int>, element: int, fromIndex: int)
     }
 
     while (k >= 0) {
-        if (__runtimeEquals(self[k], element)) {
+        if (self[k] === element) {
             return k;
         }
         k--;
@@ -3623,7 +3623,7 @@ export function includes(self: FixedArray<int>, val: int, fromIndex?: Number): b
 export function indexOf(self: FixedArray<int>, val: int, fromIndex: int): int {
     fromIndex = normalizeIndex(fromIndex, self.length)
     for (let i = fromIndex; i < self.length; i++) {
-        if (__runtimeEquals(val, self[i])) {
+        if (val === self[i]) {
             return i
         }
     }
@@ -4379,7 +4379,7 @@ export function lastIndexOf(self: FixedArray<long>, element: long, fromIndex: in
     }
 
     while (k >= 0) {
-        if (__runtimeEquals(self[k], element)) {
+        if (self[k] === element) {
             return k;
         }
         k--;
@@ -4586,7 +4586,7 @@ export function includes(self: FixedArray<long>, val: long, fromIndex?: Number):
 export function indexOf(self: FixedArray<long>, val: long, fromIndex: int): int {
     fromIndex = normalizeIndex(fromIndex, self.length)
     for (let i = fromIndex; i < self.length; i++) {
-        if (__runtimeEquals(val, self[i])) {
+        if (val === self[i]) {
             return i
         }
     }
@@ -5342,7 +5342,7 @@ export function lastIndexOf(self: FixedArray<float>, element: float, fromIndex: 
     }
 
     while (k >= 0) {
-        if (__runtimeEquals(self[k], element)) {
+        if (self[k] === element) {
             return k;
         }
         k--;
@@ -5557,7 +5557,7 @@ export function includes(self: FixedArray<float>, val: float, fromIndex?: Number
 export function indexOf(self: FixedArray<float>, val: float, fromIndex: int): int {
     fromIndex = normalizeIndex(fromIndex, self.length)
     for (let i = fromIndex; i < self.length; i++) {
-        if (__runtimeEquals(val, self[i])) {
+        if (val === self[i]) {
             return i
         }
     }
@@ -6313,7 +6313,7 @@ export function lastIndexOf(self: FixedArray<double>, element: double, fromIndex
     }
 
     while (k >= 0) {
-        if (__runtimeEquals(self[k], element)) {
+        if (self[k] === element) {
             return k;
         }
         k--;
@@ -6528,7 +6528,7 @@ export function includes(self: FixedArray<double>, val: double, fromIndex?: Numb
 export function indexOf(self: FixedArray<double>, val: double, fromIndex: int): int {
     fromIndex = normalizeIndex(fromIndex, self.length)
     for (let i = fromIndex; i < self.length; i++) {
-        if (__runtimeEquals(val, self[i])) {
+        if (val === self[i]) {
             return i
         }
     }
@@ -7284,7 +7284,7 @@ export function lastIndexOf(self: FixedArray<char>, element: char, fromIndex: in
     }
 
     while (k >= 0) {
-        if (__runtimeEquals(self[k], element)) {
+        if (self[k] === element) {
             return k;
         }
         k--;
@@ -7491,7 +7491,7 @@ export function includes(self: FixedArray<char>, val: char, fromIndex?: Number):
 export function indexOf(self: FixedArray<char>, val: char, fromIndex: int): int {
     fromIndex = normalizeIndex(fromIndex, self.length)
     for (let i = fromIndex; i < self.length; i++) {
-        if (__runtimeEquals(val, self[i])) {
+        if (val === self[i]) {
             return i
         }
     }

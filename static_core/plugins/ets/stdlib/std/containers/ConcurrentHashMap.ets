@@ -367,7 +367,7 @@ export namespace containers {
                 if (node === null) {
                     continue;
                 }
-                if (__runtimeSameValueZero(node.key, key)) {
+                if (Runtime.sameValueZero(node.key, key)) {
                     node.val = val;
                     this.setVal.decrease();
                     ConcurrencyHelpers.mutexUnlock(this.mutex);
@@ -418,7 +418,7 @@ export namespace containers {
                     if (node === null) {
                         continue;
                     }
-                    if (__runtimeSameValueZero(node.key, key)) {
+                    if (Runtime.sameValueZero(node.key, key)) {
                         node.val = newValue;
                         ConcurrencyHelpers.mutexUnlock(this.mutex);
                         return true;
@@ -449,7 +449,7 @@ export namespace containers {
                     if (node === null) {
                         continue;
                     }
-                    if (__runtimeSameValueZero(node.key, key)) {
+                    if (Runtime.sameValueZero(node.key, key)) {
                         return true;
                     }
                 }
@@ -510,7 +510,7 @@ export namespace containers {
                 if (node === null) {
                     continue;
                 }
-                if (!__runtimeSameValueZero(node.key, key)) {
+                if (!Runtime.sameValueZero(node.key, key)) {
                     continue;
                 }
 
@@ -592,7 +592,7 @@ export namespace containers {
                     if (node === null) {
                         continue;
                     }
-                    if (__runtimeSameValueZero(node.key, key)) {
+                    if (Runtime.sameValueZero(node.key, key)) {
                         return node.val;
                     }
                 }

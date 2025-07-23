@@ -195,19 +195,3 @@ export final class Runtime {
 export function __narrowAny<T = (object | null | undefined)>(v: Any): T {
     return v as T
 }
-
-export function __runtimeEquals(o1: Any, o2: Any): boolean {
-    return Runtime.equals(o1, o2)
-}
-
-export function __runtimeSameValueZero(o1: Any, o2: Any): boolean {
-    return Runtime.sameValueZero(o1, o2)
-}
-
-export function __runtimeSameValue(o1: Any, o2: Any): boolean {
-    return Runtime.sameValue(o1, o2)
-}
-
-export function __runtimeIsSameReference(o1: Any, o2: Any): boolean {
-    return Runtime.isSameReference(o1, o2)
-}
