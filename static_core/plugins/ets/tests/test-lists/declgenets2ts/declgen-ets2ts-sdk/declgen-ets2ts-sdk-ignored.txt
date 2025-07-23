@@ -10,3 +10,4 @@ api/@ohos.util.stream.ets
 api/@ohos.util.ArrayList.ets
 api/@ohos.util.Deque.ets
 api/@ohos.xml.ets
+api/UtilHelper.ets
