@@ -21,3 +21,5 @@ var_decl:
     - 'let x = "true", y:boolean = x;  // Wrong type'
     - 'let y:boolean = new Object();  // Wrong type'
     - 'let x:Object; let y:Object = x;  // Use before initialization'
+    - 'let x; // compile-time error -- either type or initializer'
+    - 'let a = b; let b = a;  // circular dependency'

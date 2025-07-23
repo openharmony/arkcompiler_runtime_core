@@ -18,6 +18,6 @@ desc: Variable declaration with inferred type.
 ---*/
 
 function main(): void {
-    let tmp = (tmp1: number) => tmp1 * 2;
-    arktest.assertTrue(tmp(5) == 10);
+    let tmp = (tmp1: number[]) => tmp1[0] * tmp1[1];
+    arktest.assertTrue(tmp([5, 2]) == 10);
 }

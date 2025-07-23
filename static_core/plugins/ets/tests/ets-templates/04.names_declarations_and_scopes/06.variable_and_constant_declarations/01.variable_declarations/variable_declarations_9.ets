@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Variable declaration with initializer.
+desc: Variable declaration with array initializer.
 ---*/
 
 function main(): void {
