@@ -143,6 +143,41 @@ public:
     bool IsStatic() const;
 
     /**
+     * @brief Tells if method is public.
+     * @return bool
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsPublic() const;
+
+    /**
+     * @brief Tells if method is protected.
+     * @return bool
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsProtected() const;
+
+    /**
+     * @brief Tells if method is private.
+     * @return bool
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsPrivate() const;
+
+    /**
+     * @brief Tells if method is internal.
+     * @return bool
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsInternal() const;
+
+    /**
+     * @brief Tells if Function is defined in the same binary or externally in another binary.
+     * @return Returns `true` if Function is defined in another binary and `false` if defined locally.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsExternal() const;
+
+    /**
      * @brief Get the Module object
      * @return `core::Module`
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
@@ -169,6 +204,13 @@ public:
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     core::Namespace GetParentNamespace() const;
+
+    /**
+     * @brief Returns parameters for function.
+     * @return `std::vector<core::FunctionParam>`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::vector<core::FunctionParam> GetParameters() const;
 
     /**
      * @brief Enumeraterated nested functions
@@ -206,6 +248,13 @@ public:
     bool IsCtor() const;
 
     /**
+     * @brief Tells if function is static constructor.
+     * @return Returns `true` if function is static constructor and `false` otherwise.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsCctor() const;
+
+    /**
      * @brief Tells if function is anonymous.
      * @return Returns `true` if function is anonymous and `false` otherwise.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
@@ -219,6 +268,13 @@ public:
      * @note Allocates
      */
     Function SetGraph(Graph &graph) const;
+
+    /**
+     * @brief Returns return type for function.
+     * @return `core::Type`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Type GetReturnType() const;
 
 private:
     Function(AbckitCoreFunction *func, const ApiConfig *conf, const File *file) : ViewInResource(func), conf_(conf)

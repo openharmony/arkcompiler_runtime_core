@@ -174,6 +174,8 @@ extern const size_t DEFAULT_SIZE_T;
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_CORE_NAMESPACE_FIELD (reinterpret_cast<AbckitCoreNamespaceField *>(0xdead0056))
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define DEFAULT_ARKTS_NAMESPACE_FIELD (reinterpret_cast<AbckitArktsNamespaceField *>(0xdead0057))
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_CORE_CLASS_FIELD (reinterpret_cast<AbckitCoreClassField *>(0xdead0048))
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_ARKTS_CLASS_FIELD (reinterpret_cast<AbckitArktsClassField *>(0xdead0049))

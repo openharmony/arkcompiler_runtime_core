@@ -74,6 +74,14 @@ extern "C" AbckitArktsModule *FileAddExternalModuleArktsV1(AbckitFile *file,
 // Module
 // ========================================
 
+extern "C" bool ModuleSetName(AbckitArktsModule *m, const char *name)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)m;
+    (void)name;
+    return false;
+}
+
 extern "C" AbckitArktsImportDescriptor *ModuleAddImportFromArktsV1ToArktsV1(
     AbckitArktsModule *importing, AbckitArktsModule *imported,
     const AbckitArktsImportFromDynamicModuleCreateParams *params)
@@ -230,6 +238,18 @@ extern "C" AbckitArktsAnnotationInterface *ModuleAddAnnotationInterface(
         default:
             LIBABCKIT_UNREACHABLE;
     }
+}
+
+// ========================================
+// Namespace
+// ========================================
+
+extern "C" bool NamespaceSetName(AbckitArktsNamespace *ns, const char *name)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)ns;
+    (void)name;
+    return false;
 }
 
 // ========================================
@@ -465,6 +485,18 @@ extern "C" AbckitArktsInterface *CreateInterface(const char *name)
 }
 
 // ========================================
+// Enum
+// ========================================
+
+extern "C" bool EnumSetName(AbckitArktsEnum *enm, const char *name)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)enm;
+    (void)name;
+    return false;
+}
+
+// ========================================
 // Module Field
 // ========================================
 
@@ -517,6 +549,18 @@ extern "C" AbckitArktsModuleField *CreateModuleField(AbckitArktsModule *module, 
     (void)type;
     (void)value;
     return nullptr;
+}
+
+// ========================================
+// NamespaceField
+// ========================================
+
+extern "C" bool NamespaceFieldSetName(AbckitArktsNamespaceField *field, const char *name)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    (void)name;
+    return false;
 }
 
 // ========================================
@@ -663,6 +707,14 @@ extern "C" AbckitArktsEnumField *CreateEnumField(AbckitArktsEnum *enm, const cha
 // ========================================
 // AnnotationInterface
 // ========================================
+
+extern "C" bool AnnotationInterfaceSetName(AbckitArktsAnnotationInterface *ai, const char *name)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)ai;
+    (void)name;
+    return false;
+}
 
 extern "C" AbckitArktsAnnotationInterfaceField *AnnotationInterfaceAddField(
     AbckitArktsAnnotationInterface *ai, const AbckitArktsAnnotationInterfaceFieldCreateParams *params)
@@ -843,6 +895,14 @@ extern "C" AbckitArktsFunction *CreateFunction(const char *name, AbckitType *ret
 // Annotation
 // ========================================
 
+extern "C" bool AnnotationSetName(AbckitArktsAnnotation *anno, const char *name)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)anno;
+    (void)name;
+    return false;
+}
+
 extern "C" AbckitArktsAnnotationElement *AnnotationAddAnnotationElement(
     AbckitArktsAnnotation *anno, AbckitArktsAnnotationElementCreateParams *params)
 {
@@ -928,8 +988,14 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // Module
     // ========================================
 
-    ModuleAddImportFromArktsV1ToArktsV1, ModuleRemoveImport, ModuleAddExportFromArktsV1ToArktsV1, ModuleRemoveExport,
-    ModuleAddAnnotationInterface,
+    ModuleSetName, ModuleAddImportFromArktsV1ToArktsV1, ModuleRemoveImport, ModuleAddExportFromArktsV1ToArktsV1,
+    ModuleRemoveExport, ModuleAddAnnotationInterface,
+
+    // ========================================
+    // Namespace
+    // ========================================
+
+    NamespaceSetName,
 
     // ========================================
     // Class
@@ -948,11 +1014,23 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     InterfaceSetParentFunction, CreateInterface,
 
     // ========================================
+    // Enum
+    // ========================================
+
+    EnumSetName,
+
+    // ========================================
     // Module Field
     // ========================================
 
     ModuleFieldAddAnnotation, ModuleFieldRemoveAnnotation, ModuleFieldSetName, ModuleFieldSetType, ModuleFieldSetValue,
     CreateModuleField,
+
+    // ========================================
+    // Namespace Field
+    // ========================================
+
+    NamespaceFieldSetName,
 
     // ========================================
     // Class Field
@@ -978,7 +1056,7 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // AnnotationInterface
     // ========================================
 
-    AnnotationInterfaceAddField, AnnotationInterfaceRemoveField,
+    AnnotationInterfaceSetName, AnnotationInterfaceAddField, AnnotationInterfaceRemoveField,
 
     // ========================================
     // Function
@@ -992,7 +1070,7 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // Annotation
     // ========================================
 
-    AnnotationAddAnnotationElement, AnnotationRemoveAnnotationElement,
+    AnnotationSetName, AnnotationAddAnnotationElement, AnnotationRemoveAnnotationElement,
 
     // ========================================
     // Type

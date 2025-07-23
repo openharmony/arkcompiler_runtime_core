@@ -249,6 +249,17 @@ extern "C" bool ArktsModuleFieldIsReadonly(AbckitArktsModuleField *field)
 }
 
 /* ========================================
+ * Namespace Field
+ * ======================================== */
+
+extern "C" AbckitArktsNamespaceField *CoreNamespaceFieldToArktsNamespaceField(AbckitCoreNamespaceField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
+/* ========================================
  * Class Field
  * ======================================== */
 
@@ -545,6 +556,12 @@ AbckitArktsInspectApi g_arktsInspectApiImpl = {
     // ========================================
 
     ArktsModuleFieldToCoreModuleField, CoreModuleFieldToArktsModuleField, ArktsModuleFieldIsReadonly,
+
+    // ========================================
+    // Namespace Field
+    // ========================================
+
+    CoreNamespaceFieldToArktsNamespaceField,
 
     // ========================================
     // Class Field

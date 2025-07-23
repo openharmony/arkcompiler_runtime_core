@@ -74,6 +74,14 @@ public:
     ~Annotation() override = default;
 
     /**
+     * @brief Sets name for annotation
+     * @return `true` on success.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool SetName(const std::string &name) const;
+
+    /**
      * @brief Add element
      * @param val
      * @param name

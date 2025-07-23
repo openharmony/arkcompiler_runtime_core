@@ -22,6 +22,16 @@
 
 namespace abckit::core {
 
+inline std::string Annotation::GetName() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitString *cString = conf->cIapi_->annotationGetName(GetView());
+    CheckError(conf);
+    std::string str = conf->cIapi_->abckitStringToString(cString);
+    CheckError(conf);
+    return str;
+}
+
 inline bool Annotation::EnumerateElements(const std::function<bool(abckit::core::AnnotationElement)> &cb) const
 {
     Payload<const std::function<bool(core::AnnotationElement)> &> payload {cb, GetApiConfig(), GetResource()};
@@ -40,6 +50,13 @@ inline core::AnnotationInterface Annotation::GetInterface() const
     AnnotationInterface iface(GetApiConfig()->cIapi_->annotationGetInterface(GetView()), GetApiConfig(), GetResource());
     CheckError(GetApiConfig());
     return iface;
+}
+
+inline bool Annotation::IsExternal() const
+{
+    auto res = GetApiConfig()->cIapi_->annotationIsExternal(GetView());
+    CheckError(GetApiConfig());
+    return res;
 }
 
 }  // namespace abckit::core

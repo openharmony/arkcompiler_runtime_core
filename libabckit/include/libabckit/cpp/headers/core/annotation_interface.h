@@ -35,6 +35,8 @@ class AnnotationInterface : public ViewInResource<AbckitCoreAnnotationInterface 
     friend class arkts::Module;
     /// @brief core::Module
     friend class core::Module;
+    /// @brief core::Namespace
+    friend class core::Namespace;
     /// @brief core::AnnotationInterfaceField
     friend class core::AnnotationInterfaceField;
     /// @brief abckit::DefaultHash<AnnotationInterface>
@@ -105,6 +107,13 @@ public:
 
      */
     core::Module GetModule() const;
+
+    /**
+     * @brief Returns parent namespace for AnnotationInterface.
+     * @return `core::Namespace`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Namespace GetParentNamespace() const;
 
     /**
      * @brief Enumerates fields of Annotation Interface, invoking callback `cb` for each field.

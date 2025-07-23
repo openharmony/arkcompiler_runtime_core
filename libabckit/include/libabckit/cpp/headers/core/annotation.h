@@ -35,6 +35,14 @@ class Annotation : public ViewInResource<AbckitCoreAnnotation *, const File *> {
     friend class arkts::Function;
     /// @brief core::Class
     friend class core::Class;
+    /// @brief core::Interface
+    friend class core::Interface;
+    /// @brief core::ClassField
+    friend class core::ClassField;
+    /// @brief core::InterfaceField
+    friend class core::InterfaceField;
+    /// @brief core::EnumField
+    friend class core::EnumField;
     /// @brief arkts::Class
     friend class arkts::Class;
     /// @brief arkts::Function
@@ -79,11 +87,25 @@ public:
     ~Annotation() override = default;
 
     /**
+     * @brief Get Annotation name
+     * @return `std::string`
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::string GetName() const;
+
+    /**
      * @brief Get the Interface of Annotation
      * @return core::AnnotationInterface
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     core::AnnotationInterface GetInterface() const;
+
+    /**
+     * @brief Tell if annotation is External
+     * @return bool
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsExternal() const;
 
     /**
      * @brief Enumerates elements of the Annotation, invoking the callback for each element.

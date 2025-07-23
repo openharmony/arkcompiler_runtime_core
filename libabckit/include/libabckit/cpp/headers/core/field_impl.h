@@ -42,6 +42,30 @@ inline std::string ModuleField::GetName() const
     return str;
 }
 
+inline Type ModuleField::GetType() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitType *type = conf->cIapi_->moduleFieldGetType(GetView());
+    CheckError(conf);
+    return Type(type, conf, GetResource());
+}
+
+inline bool ModuleField::IsPublic() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    bool res = conf->cIapi_->moduleFieldIsPublic(GetView());
+    CheckError(conf);
+    return res;
+}
+
+inline bool ModuleField::IsPrivate() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    bool res = conf->cIapi_->moduleFieldIsPrivate(GetView());
+    CheckError(conf);
+    return res;
+}
+
 // ========================================
 // Namesapce Field
 // ========================================
@@ -64,6 +88,14 @@ inline std::string NamespaceField::GetName() const
     return str;
 }
 
+inline Type NamespaceField::GetType() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitType *type = conf->cIapi_->namespaceFieldGetType(GetView());
+    CheckError(conf);
+    return Type(type, conf, GetResource());
+}
+
 // ========================================
 // Class Field
 // ========================================
@@ -84,6 +116,14 @@ inline std::string ClassField::GetName() const
     std::string str = conf->cIapi_->abckitStringToString(cString);
     CheckError(conf);
     return str;
+}
+
+inline Type ClassField::GetType() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitType *type = conf->cIapi_->classFieldGetType(GetView());
+    CheckError(conf);
+    return Type(type, conf, GetResource());
 }
 
 inline bool ClassField::IsPublic() const
@@ -110,12 +150,50 @@ inline bool ClassField::IsPrivate() const
     return res;
 }
 
+inline bool ClassField::IsInternal() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    bool res = conf->cIapi_->classFieldIsInternal(GetView());
+    CheckError(conf);
+    return res;
+}
+
 inline bool ClassField::IsStatic() const
 {
     const ApiConfig *conf = GetApiConfig();
     bool res = conf->cIapi_->classFieldIsStatic(GetView());
     CheckError(conf);
     return res;
+}
+
+inline bool ClassField::IsReadonly() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    bool res = conf->cIapi_->classFieldIsReadonly(GetView());
+    CheckError(conf);
+    return res;
+}
+
+inline bool ClassField::IsOverride() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    bool res = conf->cIapi_->classFieldIsOverride(GetView());
+    CheckError(conf);
+    return res;
+}
+
+inline std::vector<core::Annotation> ClassField::GetAnnotations() const
+{
+    std::vector<core::Annotation> annotations;
+    Payload<std::vector<core::Annotation> *> payload {&annotations, GetApiConfig(), GetResource()};
+    GetApiConfig()->cIapi_->classFieldEnumerateAnnotations(
+        GetView(), &payload, [](AbckitCoreAnnotation *anno, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::Annotation> *> *>(data);
+            payload.data->push_back(core::Annotation(anno, payload.config, payload.resource));
+            return true;
+        });
+    CheckError(GetApiConfig());
+    return annotations;
 }
 
 // ========================================
@@ -140,12 +218,42 @@ inline std::string InterfaceField::GetName() const
     return str;
 }
 
+inline Type InterfaceField::GetType() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitType *type = conf->cIapi_->interfaceFieldGetType(GetView());
+    CheckError(conf);
+    return Type(type, conf, GetResource());
+}
+
+inline bool InterfaceField::IsPrivate() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    bool res = conf->cIapi_->interfaceFieldIsPrivate(GetView());
+    CheckError(conf);
+    return res;
+}
+
 inline bool InterfaceField::IsReadonly() const
 {
     const ApiConfig *conf = GetApiConfig();
     bool res = conf->cIapi_->interfaceFieldIsReadonly(GetView());
     CheckError(conf);
     return res;
+}
+
+inline std::vector<core::Annotation> InterfaceField::GetAnnotations() const
+{
+    std::vector<core::Annotation> annotations;
+    Payload<std::vector<core::Annotation> *> payload {&annotations, GetApiConfig(), GetResource()};
+    GetApiConfig()->cIapi_->interfaceFieldEnumerateAnnotations(
+        GetView(), &payload, [](AbckitCoreAnnotation *anno, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::Annotation> *> *>(data);
+            payload.data->push_back(core::Annotation(anno, payload.config, payload.resource));
+            return true;
+        });
+    CheckError(GetApiConfig());
+    return annotations;
 }
 
 // ========================================
@@ -168,6 +276,14 @@ inline std::string EnumField::GetName() const
     std::string str = conf->cIapi_->abckitStringToString(cString);
     CheckError(conf);
     return str;
+}
+
+inline Type EnumField::GetType() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitType *type = conf->cIapi_->enumFieldGetType(GetView());
+    CheckError(conf);
+    return Type(type, conf, GetResource());
 }
 
 }  // namespace abckit::core

@@ -18,18 +18,26 @@
 
 #include "class.h"
 #include "annotation.h"
+#include "annotation_interface.h"
 
 // NOLINTBEGIN(performance-unnecessary-value-param)
 namespace abckit::arkts {
 
 inline AbckitArktsClass *Class::TargetCast() const
 {
-    auto ret = GetApiConfig()->cArktsIapi_->coreClassToArktsClass(GetView());
+    const auto ret = GetApiConfig()->cArktsIapi_->coreClassToArktsClass(GetView());
     CheckError(GetApiConfig());
     return ret;
 }
 
 inline Class::Class(const core::Class &coreOther) : core::Class(coreOther), targetChecker_(this) {}
+
+inline bool Class::SetName(const std::string &name) const
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->classSetName(TargetCast(), name.c_str());
+    CheckError(GetApiConfig());
+    return ret;
+}
 
 inline Class Class::RemoveAnnotation(arkts::Annotation anno) const
 {

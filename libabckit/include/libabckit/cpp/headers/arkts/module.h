@@ -78,6 +78,14 @@ public:
     ~Module() override = default;
 
     /**
+     * @brief Sets name for module
+     * @return `true` on success.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool SetName(const std::string &name) const;
+
+    /**
      * @brief Adds import from one ArktsV1 module to another ArktsV1 module.
      * @return Pointer to the newly created import descriptor.
      * @param [ in ] imported - The module the `importing` module imports from.

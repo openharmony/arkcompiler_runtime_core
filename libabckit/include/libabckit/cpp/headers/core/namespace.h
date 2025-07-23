@@ -41,6 +41,8 @@ class Namespace : public ViewInResource<AbckitCoreNamespace *, const File *> {
     friend class core::NamespaceField;
     /// @brief to access private constructor
     friend class core::Function;
+    /// @brief to access private constructor
+    friend class core::AnnotationInterface;
     /// @brief abckit::DefaultHash<Namespace>
     friend class abckit::DefaultHash<Namespace>;
 
@@ -92,14 +94,7 @@ public:
      * @return `std::string`
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
-    std::string GetName() const
-    {
-        AbckitString *abcName = GetApiConfig()->cIapi_->namespaceGetName(GetView());
-        CheckError(GetApiConfig());
-        std::string name = GetApiConfig()->cIapi_->abckitStringToString(abcName);
-        CheckError(GetApiConfig());
-        return name;
-    }
+    std::string GetName() const;
 
     /**
      * @brief Tells if Namespace is defined in the same binary or externally in another binary.
@@ -113,11 +108,7 @@ public:
      * @return `core::Namespace` or NULL if namespace has no parent namespace.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
-    Namespace GetParentNamespace() const
-    {
-        AbckitCoreNamespace *parent = GetApiConfig()->cIapi_->namespaceGetParentNamespace(GetView());
-        return Namespace(parent, GetApiConfig(), GetResource());
-    }
+    Namespace GetParentNamespace() const;
 
     /**
      * @brief Return vector with namespace's classes.
@@ -139,6 +130,13 @@ public:
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::vector<core::Enum> GetEnums() const;
+
+    /**
+     * @brief Return vector with namespace's annotation interfaces.
+     * @return std::vector<core::AnnotationInterface>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::vector<core::AnnotationInterface> GetAnnotationInterfaces() const;
 
     /**
      * @brief Return vector with namespace's functions.

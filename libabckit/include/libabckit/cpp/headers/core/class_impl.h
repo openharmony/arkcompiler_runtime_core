@@ -38,6 +38,27 @@ inline std::string Class::GetName() const
     return str;
 }
 
+inline bool Class::IsExternal() const
+{
+    const auto isExternal = GetApiConfig()->cIapi_->classIsExternal(GetView());
+    CheckError(GetApiConfig());
+    return isExternal;
+}
+
+inline bool Class::IsFinal() const
+{
+    const auto isFinal = GetApiConfig()->cIapi_->classIsFinal(GetView());
+    CheckError(GetApiConfig());
+    return isFinal;
+}
+
+inline bool Class::IsAbstract() const
+{
+    const auto isAbstract = GetApiConfig()->cIapi_->classIsAbstract(GetView());
+    CheckError(GetApiConfig());
+    return isAbstract;
+}
+
 // CC-OFFNXT(G.FUD.06) perf critical
 inline std::vector<core::Function> Class::GetAllMethods() const
 {

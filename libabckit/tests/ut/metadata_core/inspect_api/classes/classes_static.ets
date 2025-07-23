@@ -28,7 +28,7 @@ interface I1 {
 class C3 {}
 
 class C2 extends C1 implements I1 {
-  F1: string = "Hello";
-  F2: number = 1;
-  I1F1: string = "World";
+  public F1: string = 'Hello';
+  public F2: number = 1;
+  public I1F1: string = 'World';
 }

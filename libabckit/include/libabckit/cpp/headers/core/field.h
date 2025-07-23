@@ -84,6 +84,13 @@ public:
     std::string GetName() const;
 
     /**
+     * @brief Returns type.
+     * @return abckit::Type
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Type GetType() const;
+
+    /**
      * @brief Tell if field is Public.
      * @return Return `true` if field is Public otherwise false
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
@@ -176,6 +183,13 @@ public:
      */
     std::string GetName() const;
 
+    /**
+     * @brief Returns type.
+     * @return abckit::Type
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Type GetType() const;
+
 private:
     NamespaceField(AbckitCoreNamespaceField *field, const ApiConfig *conf, const File *file)
         : ViewInResource(field), conf_(conf)
@@ -256,6 +270,13 @@ public:
     std::string GetName() const;
 
     /**
+     * @brief Returns type.
+     * @return abckit::Type
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Type GetType() const;
+
+    /**
      * @brief Tell if field is Public.
      * @return Return `true` if field is Public otherwise false
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
@@ -277,11 +298,39 @@ public:
     bool IsPrivate() const;
 
     /**
+     * @brief Tell if field is Internal.
+     * @return Return `true` if field is Internal otherwise false
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsInternal() const;
+
+    /**
      * @brief Tell if field is Static.
      * @return Return `true` if field is Static otherwise false
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     bool IsStatic() const;
+
+    /**
+     * @brief Tell if field is Readonly.
+     * @return Return `true` if field is Readonly otherwise false
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsReadonly() const;
+
+    /**
+     * @brief Tell if field is Override.
+     * @return Return `true` if field is Override otherwise false
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsOverride() const;
+
+    /**
+     * @brief Get vector with all Annotations
+     * @return std::vector<core::Annotation>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::vector<core::Annotation> GetAnnotations() const;
 
 private:
     ClassField(AbckitCoreClassField *field, const ApiConfig *conf, const File *file)
@@ -363,11 +412,32 @@ public:
     std::string GetName() const;
 
     /**
+     * @brief Returns type.
+     * @return abckit::Type
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Type GetType() const;
+
+    /**
+     * @brief Tell if field is Private.
+     * @return Return `true` if field is Private otherwise false
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsPrivate() const;
+
+    /**
      * @brief Tell if field is Readonly.
      * @return Return `true` if field is Readonly otherwise false
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     bool IsReadonly() const;
+
+    /**
+     * @brief Get vector with all Annotations
+     * @return std::vector<core::Annotation>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::vector<core::Annotation> GetAnnotations() const;
 
 private:
     InterfaceField(AbckitCoreInterfaceField *field, const ApiConfig *conf, const File *file)
@@ -447,6 +517,13 @@ public:
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::string GetName() const;
+
+    /**
+     * @brief Returns type.
+     * @return abckit::Type
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Type GetType() const;
 
 private:
     EnumField(AbckitCoreEnumField *field, const ApiConfig *conf, const File *file) : ViewInResource(field), conf_(conf)
