@@ -365,7 +365,7 @@ TEST_F(LibAbcKitInspectApiEnumeratorsTest, StaticClassEnumerateAnonymousFunction
 {
     TestStructType testStruct;
     testStruct.nameModuleToSearch = "enumerators_static";
-    testStruct.namesOfAnonFuncs = std::vector<std::string> {"lambda$invoke$0:void;", "lambda$invoke$1:void;"};
+    testStruct.namesOfAnonFuncs = std::vector<std::string> {"lambda_invoke-0:void;", "lambda_invoke-1:void;"};
 
     EnumerateAnonymousFunctions(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/enumerators/enumerators_static.abc",
                                 testStruct);

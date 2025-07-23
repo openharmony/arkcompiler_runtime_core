@@ -23,7 +23,7 @@
     i8 baz
 }
 
-.record $NamedAccessMeta-i8 {
+.record %%union_prop-i8 {
     i8 bar
     i8 baz
 }
@@ -35,14 +35,14 @@
     lda v2
     stobj v0, A.bar
     ldai 4
-    ets.ldobj.name v0, $NamedAccessMeta-i8.bar
+    ets.ldobj.name v0, %%union_prop-i8.bar
     movi v3, 5
     add2 v3
     movi v4, 20
     jne v4, error1
     stobj v1, B.baz
     ldai 2
-    ets.ldobj.name v1, $NamedAccessMeta-i8.baz
+    ets.ldobj.name v1, %%union_prop-i8.baz
     jne v4, error2
     ldai 0
     return

@@ -545,7 +545,7 @@ static bool IsInterfaceFunction(const std::string &instanceName,
     return false;
 }
 
-static const std::string LAMBDA_RECORD_KEY = "LambdaObject";
+static const std::string LAMBDA_RECORD_KEY = "%%lambda-";
 static const std::string INIT_FUNC_NAME = "_$init$_";
 static const std::string TRIGGER_CCTOR_FUNC_NAME = "_$trigger_cctor$_";
 

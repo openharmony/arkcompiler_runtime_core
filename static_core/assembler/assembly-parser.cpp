@@ -1227,7 +1227,7 @@ bool Parser::PrefixedValidNameToken(BracketOptions options, bool isUnion)
             }
             continue;
         }
-        if (IsAlphaNumeric(c)) {
+        if (IsValidNameCharacter(c)) {
             continue;
         }
         if (IsAllowBrackets(options) && (c == '[' || c == ']')) {
@@ -1328,7 +1328,7 @@ bool Parser::LabelValidName()
     token.remove_prefix(1);
 
     for (auto i : token) {
-        if (!IsAlphaNumeric(i)) {
+        if (!IsValidNameCharacter(i)) {
             return false;
         }
     }
