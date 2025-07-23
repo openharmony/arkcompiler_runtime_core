@@ -279,22 +279,5 @@ export function copyOf(src: FixedArray<{{T}}>): FixedArray<{{T}}> {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: FixedArray<{{T}}>, dst: FixedArray<{{T}}>, dstStart: int, srcStart: int, srcEnd: int): void {
-    if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
-    }
-    if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsError("copyTo: dst bounds verification failed")
-    }
-    if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsError("Destination array must have enough space")
-    }
-
-    let j: int = dstStart;
-    for (let i: int = srcStart; i < srcEnd; i++) {
-        dst[j] = src[i];
-        j++;
-    }
-}
-
+export native function copyTo(src: FixedArray<{{T}}>, dst: FixedArray<{{T}}>, dstStart: int, srcStart: int, srcEnd: int): void;
 {%- endfor %}
