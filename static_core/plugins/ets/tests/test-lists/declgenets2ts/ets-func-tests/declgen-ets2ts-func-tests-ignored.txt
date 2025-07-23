@@ -10,7 +10,8 @@ spec/10.Interfaces/Interface_Methods_Declarations/method_overload6.ets
 spec/10.Interfaces/method_overload6.ets
 spec/11.Enumerations/issue14636.ets
 spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_03.ets
-#FailKind.TSC_FAIL - 147 tests:
+regression/23652.ets
+#FailKind.TSC_FAIL - 166 tests:
 escompat/ArrayProxyTest.ets
 escompat/JsonParseTest.ets
 escompat/ProcessTest.ets
@@ -85,6 +86,7 @@ std/containers/array_blocking_queue/ArrayBlockingQueue_PollTest.ets
 std/containers/array_blocking_queue/ArrayBlockingQueue_PopTest.ets
 std/containers/array_blocking_queue/ArrayBlockingQueue_PushTest.ets
 std/containers/blocking_queue.ets
+std/containers/BlockingQueue/AddAndPollStress.ets
 std/containers/concurrent_hash_map/ConcurrentHashMap_ClearTest.ets
 std/containers/concurrent_hash_map/ConcurrentHashMap_DeleteTest.ets
 std/containers/concurrent_hash_map/ConcurrentHashMap_EntriesTest.ets

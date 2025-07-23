@@ -547,6 +547,10 @@ def add_declgen_ets2ts_args(parser: argparse.ArgumentParser) -> None:
         '--declgen-ets2ts-runtime', action='store_true', dest='declgen_ets2ts_runtime',
         default=None,
         help="run declgen_ets2ts ETS runtime tests")
+    parser.add_argument(
+        '--declgen-ets2ts-sdk', action='store_true', dest='declgen_ets2ts_sdk',
+        default=None,
+        help="run declgen_ets2ts ETS sdk")
 
 
 def add_declgen_ts2ets_args(parser: argparse.ArgumentParser) -> None:

@@ -1,0 +1,8 @@
+#FailKind.TSC_FAIL - 6 tests:
+api/@ohos.buffer.ets
+#Arkts_TS_Incompatible - 5 tests:
+api/@ohos.util.ets
+api/@ohos.util.stream.ets
+api/@ohos.util.ArrayList.ets
+api/@ohos.util.Deque.ets
+api/@ohos.xml.ets

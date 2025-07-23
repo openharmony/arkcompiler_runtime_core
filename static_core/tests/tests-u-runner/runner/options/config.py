@@ -75,6 +75,7 @@ class Config:
             "declgen_ets2ts_cts",
             "declgen_ets2ts_func_tests",
             "declgen_ets2ts_runtime",
+            "declgen_ets2ts_sdk",
             "ets_sdk",
             "declgen_ts2ets_cts",
             "recheck",
