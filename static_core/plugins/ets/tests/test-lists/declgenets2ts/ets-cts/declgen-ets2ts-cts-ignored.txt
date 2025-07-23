@@ -1410,3 +1410,6 @@
 15.semantic_rules/08.overriding/04.overriding_and_implement_signatures_in_interfaces/Sig_7.ets
 15.semantic_rules/08.overriding/04.overriding_and_implement_signatures_in_interfaces/Sig_8.ets
 14.ambient_declarations/03.class_declarations/class_declarations_neg_6.ets
+04.names_declarations_and_scopes/08.function_declarations/02.parameter_list/param_list_neg_2.ets
+09.classes/01.class_declaration/04.class_implementation_clause/implements_same_interface_with_diferent_parameters_2.ets
+09.classes/01.class_declaration/04.class_implementation_clause/invalid_type_reference.ets

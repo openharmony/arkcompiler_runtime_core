@@ -55,6 +55,7 @@ spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_10_01.ets
 spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_10_02.ets
 spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_10_03.ets
 spec/05.Generics/issue15380_0.ets
+spec/05.Generics/issue15089_05.ets
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_03.ets
 spec/09.classes/Accessor_Declarations/issue-15142_4.ets
 spec/09.classes/Accessor_Declarations/issue-15142_7.ets
@@ -183,3 +184,9 @@ std/core/std_core_string_String_lastIndexOf_String_int.ets
 std/core/std_core_string_String_lastIndexOf_char_int.ets
 std/core/std_core_string_String_search_String.ets
 std/containers/BlockingQueue/AddAndPollStress.ets
+escompat/ArrayTest1.ets
+escompat/ArrayTest2.ets
+escompat/ArrayTest3.ets
+escompat/ArrayTest4.ets
+escompat/ArrayTest5.ets
+escompat/ArrayTest6.ets
