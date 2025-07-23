@@ -21,6 +21,7 @@ import {
   ETSKeyword,
   FINAL_CLASS,
   JSValue,
+  ESObject,
   KitPrefix,
   LIMIT_DECORATOR,
   UtilityTypes,
@@ -102,7 +103,8 @@ export class Autofixer {
       [
         this[FaultID.ObjectParametersToJSValue].bind(this),
         this[FaultID.InstanceType].bind(this),
-        this[FaultID.NoBuiltInType].bind(this)
+        this[FaultID.NoBuiltInType].bind(this),
+        this[FaultID.ESObjectType].bind(this)
       ]
     ],
     [
@@ -196,6 +198,23 @@ export class Autofixer {
     return node;
   }
 
+  /**
+   * Rule: `arkts-ESObject-is-Any`
+   */
+  private [FaultID.ESObjectType](node: ts.Node): ts.VisitResult<ts.Node> {
+    /*
+     * Replace `ESObject` type with `Any` in declarations.
+     */
+
+    if (ts.isTypeReferenceNode(node) &&
+      ts.isIdentifier(node.typeName) &&
+      node.typeName.escapedText === ESObject) {
+      return replaceEsObjectTypeName(node, this.context.factory);
+    }
+
+    return node;
+  }
+  
   /**
    * Rule: `arkts-no-private-identifiers`
    */
@@ -2268,4 +2287,12 @@ function isNonInterop(node: ts.Node): boolean {
   const commentText = fullText.replace(codeText, '');
 
   return /\/\*\*.*?@noninterop\b.*?\*\//s.test(commentText);
+}
+
+function replaceEsObjectTypeName(node: ts.TypeReferenceNode, factory: ts.NodeFactory): ts.TypeReferenceNode {
+  return factory.updateTypeReferenceNode(
+    node,
+    factory.createIdentifier(JSValue),
+    node.typeArguments
+  );
 }
