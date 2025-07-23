@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,86 +13,81 @@
 
 ---
 cases:
-    # RESIZABLE ARRAY, PARAMETER
+    # FIXED ARRAY, PARAMETER
     - base: |-
-          foo(i: Array<Base>) {
+          foo(i: FixedArray<Base>) {
               res = 1
           }
       derived: |-
-          override foo(i: Array<Base>) {
+          override foo(i: FixedArray<Base>) {
               res = 2
           }
       call: |-
-          new Base().foo([new Base()])
-          arktest.assertEQ(res, 1)
-          new Base().foo([new Derived()])
-          arktest.assertEQ(res, 1)
           new Derived().foo([new Base()])
           arktest.assertEQ(res, 2)
           new Derived().foo([new Derived()])
           arktest.assertEQ(res, 2)
+          new Base().foo([new Base()])
+          arktest.assertEQ(res, 1)
+          new Base().foo([new Derived()])
+          arktest.assertEQ(res, 1)
       params: override-compatible with same type parameter
 
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(i: Array<Derived>) {
-              res = 1
-          }
-      derived: |-
-          override foo(i: Array<Base>) {
-              res = 2
-          }
-      params: override-incompatible parameter
-
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(i: Array<Derived>) {
-              res = 1
-          }
-      derived: |-
-          foo(i: Array<Base>) {  // override assumed
-              res = 2
-          }
-      params: override-incompatible parameter
-
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(i: Array<Base>) {
-              res = 1
-          }
-      derived: |-
-          override foo(i: Array<Derived>) {
-              res = 2
-          }
-      params: override-incompatible parameter
-
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(i: Array<Base>) {
-              res = 1
-          }
-      derived: |-
-          foo(i: Array<Derived>) {  // override assumed
-              res = 2
-          }
-      params: override-incompatible parameter
-
-    # RESIZABLE ARRAY, RETURN TYPE
     - base: |-
-          foo(): Array<Base> {
+          foo(i: FixedArray<Derived>) {
+              res = 1
+          }
+      derived: |-
+          foo(i: FixedArray<Base>) {  // overriding assumed
+              res = 2
+          }
+      call: |-
+          new Derived().foo([new Derived()])
+          arktest.assertEQ(res, 2)
+          new Derived().foo([new Base()])
+          arktest.assertEQ(res, 2)
+          new Base().foo([new Derived()])
+          arktest.assertEQ(res, 1)
+      params: override-compatible parameter (contravariance)
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(i: FixedArray<Base>) {
+              res = 1
+          }
+      derived: |-
+          foo(i: FixedArray<Derived>) { // CTE: not override-compatible
+              res = 2
+          }
+      params: override-incompatible parameter
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(i: FixedArray<Base>) {
+              res = 1
+          }
+      derived: |-
+          override foo(i: FixedArray<Derived>) { // CTE: not override-compatible
+              res = 2
+          }
+      params: override-incompatible parameter
+
+    # FIXED ARRAY, RETURN TYPE
+    - base: |-
+          foo(): FixedArray<Base> {
               res = 1
               return [new Base()]
           }
-          bar(): Array<Derived> {
+          bar(): FixedArray<Derived> {
               res = 2
               return [new Derived()]
           }
       derived: |-
-          foo(): Array<Base> {
+          foo(): FixedArray<Base> {
               res = 3
               return [new Base()]
           }
-          override bar(): Array<Derived> {
+          override bar(): FixedArray<Derived> {
               res = 4
               return [new Derived()]
           }
@@ -107,53 +102,56 @@ cases:
           arktest.assertEQ(res, 4)
       params: override-compatible with same return type
 
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(): Array<Base> {
+    - base: |-
+          foo(): FixedArray<Base> {
               res = 1
               return [new Base()]
           }
-      derived: |-
-          override foo(): Array<Derived> {
+          bar(): FixedArray<Base> {
               res = 2
+              return [new Base()]
+          }
+      derived: |-
+          foo(): FixedArray<Derived> {
+              res = 3
               return [new Derived()]
+          }
+          override bar(): FixedArray<Derived> {
+              res = 4
+              return [new Derived()]
+          }
+      call: |-
+          new Base().foo()
+          arktest.assertEQ(res, 1)
+          new Base().bar()
+          arktest.assertEQ(res, 2)
+          new Derived().foo()
+          arktest.assertEQ(res, 3)
+          new Derived().bar()
+          arktest.assertEQ(res, 4)
+      params: override-compatible return type (covariance)
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(): FixedArray<Derived> {
+              res = 1
+              return [new Derived()]
+          }
+      derived: |-
+          override foo(): FixedArray<Base> {
+              res = 2
+              return [new Base()]
           }
       params: override-incompatible return type
 
     - tags: 'negative, compile-only'
       base: |-
-          foo(): Array<Base> {
-              res = 1
-              return [new Base()]
-          }
-      derived: |-
-          foo(): Array<Derived> {
-              res = 2
-              return [new Derived()]
-          }
-      params: override-incompatible return type
-
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(): Array<Derived> {
+          foo(): FixedArray<Derived> {
               res = 1
               return [new Derived()]
           }
       derived: |-
-          override foo(): Array<Base> {
-              res = 2
-              return [new Base()]
-          }
-      params: override-incompatible return type
-
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(): Array<Derived> {
-              res = 1
-              return [new Derived()]
-          }
-      derived: |-
-          foo(): Array<Base> {
+          foo(): FixedArray<Base> {
               res = 2
               return [new Base()]
           }

@@ -1247,7 +1247,7 @@
 13.compilation_units/07.export_directives/04.re-export_directive/pkg02_re-export_all_with_rename.ets
 13.compilation_units/07.export_directives/04.re-export_directive/pkg03_re-export_all.ets
 
-#27911 Generic functions subtyping 
+#27911 Generic functions subtyping
 15.semantic_rules/02.subtyping/04.subtyping_for_function_types/positive_function_generic_0.ets
 15.semantic_rules/02.subtyping/04.subtyping_for_function_types/positive_function_generic_1.ets
 15.semantic_rules/02.subtyping/04.subtyping_for_function_types/positive_function_generic_4.ets
@@ -1277,11 +1277,6 @@
 15.semantic_rules/09.overloading/overload-equivalent_signatures/ex_6_1.ets
 
 #14338 Function, method, constructor overload signatures
-15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_tuple_1.ets
-15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_tuple_3.ets
-15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatible_signature_7.ets
-15.semantic_rules/08.overriding/03.override-compatible_signatures/override_with_object_10.ets
-15.semantic_rules/08.overriding/03.override-compatible_signatures/override_with_object_5.ets
 15.semantic_rules/08.overriding/01.overriding_in_classes/class_method_over_n3_1.ets
 15.semantic_rules/08.overriding/01.overriding_in_classes/class_method_over_n3_10.ets
 15.semantic_rules/08.overriding/01.overriding_in_classes/class_method_over_n3_11.ets
@@ -1343,6 +1338,40 @@
 
 #24129
 15.semantic_rules/08.overriding/02.overriding_and_overload_signatures_in_interfaces/im_over2_3.ets
+
+#27583
+15.semantic_rules/08.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_0.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_1.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_2.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_3.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_4.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_5.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_6.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_array_2.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_array_4.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_class_4.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_enum_1.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_fixed_array_2.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_function_11.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_function_13.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_function_16.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_function_18.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_function_2.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_function_20.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_function_5.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_intf_3.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_primitive_2.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_tuple_2.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_tuple_4.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_with_object_n_1.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_with_object_n_13.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_with_object_n_17.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_with_object_n_19.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_with_object_n_21.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_with_object_n_23.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_with_object_n_25.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_with_object_n_3.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_with_object_n_5.ets
 
 #26730
 15.semantic_rules/08.overriding/04.overriding_and_implement_signatures_in_interfaces/Sig_0.ets
@@ -1677,7 +1706,6 @@
 #58: flaky, do not delete if it passed
 07.expressions/33.constant_expression/check_array/constant_bitwise_complement_4.ets
 07.expressions/33.constant_expression/check_array/constant_bitwise_complement_5.ets
-15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_array_9.ets
 15.semantic_rules/07.type_inference/02.smart_types/un_bool_ops_8.ets
 15.semantic_rules/07.type_inference/02.smart_types/un_bool_ops_10.ets
 08.statements/15.try_statements/02.finally_clause/finally_0.ets

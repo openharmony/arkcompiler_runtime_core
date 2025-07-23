@@ -17,24 +17,22 @@ limitations under the License.
 
 /*---
 desc: >-
-          Mixed override-compatibility between types of different kinds is always false,
-          except the compatibility with class type Object as any type is a subtype of Object.
-tags: [{{c.tags}}]
+    Mixed override-compatibility between types of different kinds is always false,
+    except the compatibility with class type Object as any type is a subtype of Object.
 ---*/
 
 let res: number = 0;
 
 class Base {
-    {{c.base}}
+    {{c.base|indent}}
 }
 
 class Derived extends Base {
-    {{c.derived}}
+    {{c.derived|indent}}
 }
 
-function main(): void {
-    {{c.call}}
+function main() {
+    {{(c.call or '')|indent}}
     arktest.assertEQ(res, {{c.result}})
 }
-
 {% endfor %}

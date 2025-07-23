@@ -17,18 +17,20 @@ limitations under the License.
 
 /*---
 desc: >-
-          There are two cases of type override-compatibility, as types are used as either parameter types,
-          or return types. For each case there are six kinds of types
+    There are two cases of type override-compatibility,
+    as types are used as either parameter types,
+    or return types. For each case there are six kinds of types
 
-          - Type parameter
+    - Type parameter
 
-          Every type is override-compatible with itself (see Invariance).
+    Every type is override-compatible with itself (see Invariance).
 
-          The following rule applies in case of generics
+    The following rule applies in case of generics
 
-          - Derived class must have type parameter constraints to be type-compatible (see Type Compatibility) with the
-          respective type parameter constraint in the base type;
-          - Otherwise, a compile-time error occurs.
+    - Derived class must have type parameter constraints to be
+    type-compatible (see Type Compatibility) with the
+    respective type parameter constraint in the base type;
+    - Otherwise, a compile-time error occurs.
 tags: [{{c.tags}}]
 params: {{c.params}}
 ---*/
@@ -41,8 +43,7 @@ let res: number = 0;
 
 {{c.derived}}
 
-function main(): void {
-    {{c.call}}
+function main() {
+    {{(c.call or 'return')|indent}}
 }
-
 {% endfor %}

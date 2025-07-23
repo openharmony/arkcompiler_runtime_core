@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -17,28 +17,19 @@ limitations under the License.
 
 /*---
 desc: >-
-    There are two cases of type override-compatibility, as types
-    are used as either parameter types,
-    or return types. For each case there are six kinds of types
-
-    - Resizable Array type
-
-    Every type is override-compatible with itself (see Invariance).
-tags: [{{c.tags}}]
-params: {{c.params}}
+    The example below illustrates override-compatibility with Object.
+    If signatures are override-compatible, then overriding is used.
+    Otherwise, a compile-time error occurs.
+tags: [compile-only, negative]
 ---*/
 
-let res: number = 0;
+enum E1 {E1, E2}
 
-class Base {
-    {{c.base|indent}}
+interface Base {
+    foo<T extends Derived, U extends Base>(i: {{c.base}}): void
 }
 
-class Derived extends Base {
-    {{c.derived|indent}}
-}
-
-function main() {
-    {{(c.call or 'return')|indent}}
+interface Derived extends Base {
+    foo<T extends Derived, U extends Base>(i: {{c.derived}}): void
 }
 {% endfor %}

@@ -13,20 +13,10 @@
 
 ---
 cases:
-  # OVERRIDE
-  - { base: "Object", derived: "Derived" }
-  - { base: "Object", derived: "(q: Base)=>Derived" }
-  - { base: "Object", derived: "Number" }
-  - { base: "Object", derived: "T | U" }
-  - { base: "Object", derived: "E1" }
-  - { base: "Object", derived: "Base[]" }
-  - { base: "Object", derived: "[ Base, Base ]" }
-  # OVERLOAD
-  - { base: "number", derived: "Object" }
-  - { base: "Object", derived: "number" }
-  - { base: "Object", derived: "Derived" }
-  - { base: "Object", derived: "(q: Base)=>Derived" }
-  - { base: "Object", derived: "T | U" }
-  - { base: "Object", derived: "E1" }
-  - { base: "Object", derived: "Base[]" }
-  - { base: "Object", derived: "[ Base, Base ]" }
+    - { derived: 'Object', base: 'Derived' }
+    - { derived: 'Object', base: '(q: Base) => Derived' }
+    - { derived: 'Object', base: 'Number' }
+    - { derived: 'Object', base: 'T | U' }
+    - { derived: 'Object', base: 'E1' }
+    - { derived: 'Object', base: 'Base[]' }
+    - { derived: 'Object', base: '[Base, Base]' }

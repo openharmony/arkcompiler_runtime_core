@@ -17,8 +17,9 @@ limitations under the License.
 
 /*---
 desc: >-
-          The example below illustrates override-compatibility with Object
-tags: [compile-only]
+    The example below illustrates override-compatibility with Object.
+    If signatures are override-compatible, then overriding is used.
+    Otherwise, a compile-time error occurs.
 ---*/
 
 enum E1 {E1, E2}
@@ -28,7 +29,21 @@ interface Base {
 }
 
 interface Derived extends Base {
-    kinds_of_return_type<T extends Derived, U extends Base>(): {{c}}
+    kinds_of_return_type<T extends Derived, U extends Base>(): {{c.type}}
 }
 
+class A implements Derived {
+    res: int = 0
+
+    kinds_of_return_type<T extends Derived, U extends Base>(): {{c.type}} {
+        this.res = 2
+        return {{c.expr}}
+    }
+}
+
+function main() {
+    let a = new A
+    let v = a.kinds_of_return_type<Derived, Base>()
+    arktest.assertEQ(a.res, 2)
+}
 {% endfor %}

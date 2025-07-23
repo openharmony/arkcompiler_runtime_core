@@ -13,83 +13,76 @@
 
 ---
 cases:
-  # ENUM TYPE, PARAMETER
-  - base: |-
-      class Base {
+    # ENUM, PARAMETER
+    - base: |-
           foo(i: SHIPYARD) {
-              res = i
+              res = 1
           }
-      }
-    derived: |-
-      class Derived extends Base {
-          foo(i: HARBOUR) {
-              res = i
+      derived: |-
+          foo(i: SHIPYARD) {
+              res = 2
           }
-      }
-    call: |-
-      new Derived().foo(HARBOUR.Flippers)
-      arktest.assertEQ( res , 2 )
-      new Derived().foo(SHIPYARD.Flippers)
-      arktest.assertEQ( res , 1 )
-    params: enum is not override-compatible, overload is used
+      call: |-
+          new Base().foo(SHIPYARD.Flippers)
+          arktest.assertEQ(res, 1)
+          new Derived().foo(SHIPYARD.Flippers)
+          arktest.assertEQ(res, 2)
+      params: override-compatible, same parameter type
 
-  - tags: 'negative, compile-only'
-    base: |-
-      class Base {
+    - tags: 'negative, compile-only'
+      base: |-
           foo(i: SHIPYARD) {
+              res = 1
           }
-      }
-    derived: |-
-      class Derived extends Base {
+      derived: |-
+          foo(i: HARBOUR) {  // overriding assumed
+              res = 2
+          }
+      params: parameter is override-incompatible
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(i: SHIPYARD) {
+              res = 1
+          }
+      derived: |-
           override foo(i: HARBOUR) {
+              res = 2
           }
-      }
-    params: enum is not override-compatible
+      params: parameter is override-incompatible
 
-  # TYPE PARAMETER, RETURN VALUE
-  - base: |-
-      class Base {
+    # ENUM, RETURN TYPE
+    - base: |-
           foo(): SHIPYARD {
               return SHIPYARD.Flippers
           }
-      }
-    derived: |-
-      class Derived extends Base {
+      derived: |-
           foo(): SHIPYARD {
               return SHIPYARD.SwimRing
           }
-      }
-    call: |-
-      arktest.assertEQ( new Derived().foo(), SHIPYARD.SwimRing )
-      arktest.assertEQ( new Base().foo(), SHIPYARD.Flippers )
-    params: override-compatible with itself return value (invariance)
+      call: |-
+          arktest.assertEQ(new Base().foo(), SHIPYARD.Flippers)
+          arktest.assertEQ(new Derived().foo(), SHIPYARD.SwimRing)
+      params: override-compatible with same type
 
-  - tags: 'negative, compile-only'
-    base: |-
-      class Base {
+    - tags: 'negative, compile-only'
+      base: |-
           foo(): SHIPYARD {
               return SHIPYARD.Flippers
           }
-      }
-    derived: |-
-      class Derived extends Base {
+      derived: |-
           foo(): HARBOUR {
               return HARBOUR.Boat
           }
-      }
-    params: override-incompatible return value, not overload-equivalent
+      params: override-incompatible return type
 
-  - tags: 'negative, compile-only'
-    base: |-
-      class Base {
+    - tags: 'negative, compile-only'
+      base: |-
           foo(): SHIPYARD {
               return SHIPYARD.Flippers
           }
-      }
-    derived: |-
-      class Derived extends Base {
+      derived: |-
           override foo(): HARBOUR {
               return HARBOUR.Boat
           }
-      }
-    params: override-incompatible return value
+      params: override-incompatible return type
