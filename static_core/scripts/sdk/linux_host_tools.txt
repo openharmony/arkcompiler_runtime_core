@@ -14,6 +14,7 @@ lib/libarkbytecodeopt.so
 lib/libarkcompiler.so
 lib/libarkdisassembler.so
 lib/libarkfile.so
+lib/libarkplatform.so
 lib/libarklinker.so
 lib/libarkruntime.so
 lib/libarktarget_options.so
@@ -30,3 +31,4 @@ lib/libinit_icu.so
 lib/libirtoc.so
 lib/libllvmbackend.so
 lib/libLLVM-15.so
+lib/module/ets_interop_js_napi.so
