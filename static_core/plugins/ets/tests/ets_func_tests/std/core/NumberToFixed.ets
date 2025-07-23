@@ -80,6 +80,11 @@ class TestData {
             fractionDigits: 0,
             expected: "999900000000000000000"
         },
+        {
+            numb: 6e23,
+            fractionDigits: 50,
+            expected: "6e+23"
+        },
     ]
     static a: Number = new Number('a');
     static big_digits: Number = Number.POSITIVE_INFINITY;

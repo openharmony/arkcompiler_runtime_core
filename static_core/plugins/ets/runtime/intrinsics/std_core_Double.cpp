@@ -253,6 +253,9 @@ EtsString *StdCoreDoubleToFixed(ObjectHeader *obj, double d)
         return EtsString::CreateFromMUtf8("Infinity");
     }
 
+    if (std::fabs(objValue) >= helpers::SCIENTIFIC_NOTATION_THRESHOLD) {
+        return StdCoreDoubleToString(objValue, static_cast<int>(helpers::DECIMAL));
+    }
     return helpers::DoubleToFixed(objValue, static_cast<int>(digitAbs));
 }
 
