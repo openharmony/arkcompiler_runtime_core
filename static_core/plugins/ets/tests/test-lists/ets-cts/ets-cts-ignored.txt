@@ -1409,6 +1409,10 @@
 15.semantic_rules/09.overloading/01.signature_resolution_for_overload_signatures/meth/meth_async_1.ets
 15.semantic_rules/09.overloading/01.signature_resolution_for_overload_signatures/meth/meth_order_0.ets
 
+#28191
+17.experimental_features/02.fixed_array_types/fixed_array_types_ext_8.ets
+17.experimental_features/02.fixed_array_types/fixed_array_types_ext_9.ets
+
 #22816
 17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/cm_over2_4.ets
 
