@@ -22,10 +22,7 @@ tags: []
 
 let b: bigint = {{c.b}}
 
-function main(): int {
-    if (b {{c.op}} {{c.exp}}) { 
-        return 0
-    }
-    return 1
+function main() {
+    arktest.assertTrue(b {{c.op}} {{c.exp}})
 }
 {%- endfor %}

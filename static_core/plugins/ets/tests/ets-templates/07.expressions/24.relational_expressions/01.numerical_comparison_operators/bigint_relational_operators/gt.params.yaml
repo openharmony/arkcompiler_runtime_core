@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,19 +16,19 @@ cases:
     - values:
         - 0n
         - -0n
-        - new BigInt(0 as long)
+        - new BigInt(new Long(0))
         - new BigInt(0.0f)
         - new BigInt(-0.0)
         - new BigInt(-(new BigInt(0)))
     - values:
         - +1n
-        - new BigInt(+1 as byte)
-        - new BigInt(+1 as short)
+        - new BigInt(new Byte(+1))
+        - new BigInt(new Short(+1))
         - new BigInt(+1.0)
         - new BigInt(+1n)
     - values:
         - -1n
-        - new BigInt(-1 as short)
+        - new BigInt(new Short(-1))
         - new BigInt(-1)
         - new BigInt(-1.0f)
         - new BigInt(-1n)
@@ -89,7 +89,7 @@ cases:
     - values:
         - 9007199254740991n  # max safe integer in double
         - new BigInt(9007199254.740991e6)
-        - new BigInt(9007199254740991 as long)
+        - new BigInt(new Long(9007199254740991))
     - values:
         - 9007199254740990n  # max safe integer in double - 1
         - new BigInt(new BigInt(9007199254740990.0))
@@ -101,7 +101,7 @@ cases:
     - values:
         - -9007199254740989n  # min safe integer in double + 2
         - new BigInt(-0.9007199254740989e16)
-        - new BigInt(-9007199254740989 as long)
+        - new BigInt(new Long(-9007199254740989))
     # from bigint
     - values:
         - 94876543875610289630186594876592837465n

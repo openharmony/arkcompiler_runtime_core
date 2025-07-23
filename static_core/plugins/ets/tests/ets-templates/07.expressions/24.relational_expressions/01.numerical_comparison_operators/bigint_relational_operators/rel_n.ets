@@ -22,10 +22,7 @@ tags: [compile-only, negative]
 
 let b: bigint = {{c.b}}
 
-function main(): int {
-    if (b {{c.op}} {{c.exp}}) { // CTE expected
-        return 1
-    }
-    return 0
+function main() {
+    arktest.assertTrue(b {{c.op}} {{c.exp}}) // CTE expected
 }
 {%- endfor %}
