@@ -29,6 +29,7 @@ namespace ark::ets::interop::js::ets_proxy {
 class EtsMethodSet {
 public:
     static EtsMethodSet Create(EtsMethod *singleMethod);
+    static EtsMethodSet Create(EtsMethod *singleMethod, const std::string &jsName);
 
     static EtsMethodSet Create(Method *singleMethod)
     {
@@ -115,7 +116,21 @@ private:
           name_(singleMethod->GetFullName(false)),
 #endif
           entries_(PandaVector<EtsMethod *>(singleMethod->GetParametersNum() + 1)),
-          anyMethod_(singleMethod)
+          anyMethod_(singleMethod),
+          jsPublicName_(singleMethod->GetName())
+    {
+        entries_[singleMethod->GetParametersNum() -
+                 static_cast<unsigned int>(singleMethod->GetPandaMethod()->HasVarArgs())] = singleMethod;
+    }
+
+    EtsMethodSet(EtsMethod *singleMethod, EtsClass *enclosingClass, std::string jsName)
+        : enclosingClass_(enclosingClass),
+#ifndef NDEBUG
+          name_(singleMethod->GetFullName(false)),
+#endif
+          entries_(PandaVector<EtsMethod *>(singleMethod->GetParametersNum() + 1)),
+          anyMethod_(singleMethod),
+          jsPublicName_(std::move(jsName))
     {
         entries_[singleMethod->GetParametersNum() -
                  static_cast<unsigned int>(singleMethod->GetPandaMethod()->HasVarArgs())] = singleMethod;
@@ -132,6 +147,7 @@ private:
 
     // Abritrary item from set to get common properties
     const EtsMethod *const anyMethod_;
+    std::string jsPublicName_;
 
     bool isValid_ = true;
 

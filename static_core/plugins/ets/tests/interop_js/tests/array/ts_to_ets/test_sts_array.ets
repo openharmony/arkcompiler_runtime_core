@@ -203,10 +203,16 @@ function testPop(): boolean {
     return a == 4
 }
 
-function testPush(): boolean {
+function testPushOne(): boolean {
     arrayPush.push(5)
     let a: number = arrayPush.pop() as number
     return a === 5
+}
+
+function testPushArray(): boolean {
+    arrayPush.push(1,2,3,4)
+    let a: number = arrayPush.pop() as number
+    return a === 4
 }
 
 function testReduce(): boolean {

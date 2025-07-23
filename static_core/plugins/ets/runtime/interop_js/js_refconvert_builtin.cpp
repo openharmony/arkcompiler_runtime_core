@@ -134,10 +134,10 @@ private:
 
     void RegisterExceptions()
     {
-        static const ets_proxy::EtsClassWrapper::OverloadsMap W_ERROR_OVERLOADS {
-            {utf::CStringAsMutf8("<ctor>"), std::make_pair("Lstd/core/String;Lescompat/ErrorOptions;:V", 2)}};
-        static const ets_proxy::EtsClassWrapper::OverloadsMap W_EXCEPTION_OVERLOADS {
-            {utf::CStringAsMutf8("<ctor>"), std::make_pair("Lstd/core/String;:V", 1)}};
+        static const ets_proxy::EtsClassWrapper::OverloadsMap W_ERROR_OVERLOADS = {
+            {utf::CStringAsMutf8("<ctor>"), {"Lstd/core/String;Lescompat/ErrorOptions;:V", 2, "<ctor>"}}};
+        static const ets_proxy::EtsClassWrapper::OverloadsMap W_EXCEPTION_OVERLOADS = {
+            {utf::CStringAsMutf8("<ctor>"), {"Lstd/core/String;:V", 1, "<ctor>"}}};
         wError_ = RegisterClass(descriptors::ERROR, "Error", &W_ERROR_OVERLOADS);
         RegisterClass(descriptors::EXCEPTION, nullptr, &W_EXCEPTION_OVERLOADS);
 
@@ -206,21 +206,20 @@ private:
     void RegisterArray()
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_ARRAY_OVERLOADS = {
-            {utf::CStringAsMutf8("<ctor>"), std::make_pair(":V", 1)},
-            {utf::CStringAsMutf8("$_get"), std::make_pair("I:Lstd/core/Object;", 2)},
-            {utf::CStringAsMutf8("$_set"), std::make_pair("ILstd/core/Object;:V", 3)},
-            {utf::CStringAsMutf8("at"), std::make_pair("I:Lstd/core/Object;", 2)},
-            {utf::CStringAsMutf8("copyWithin"), std::make_pair("III:Lescompat/Array;", 4)},
+            {utf::CStringAsMutf8("<ctor>"), {":V", 1, "<ctor>"}},
+            {utf::CStringAsMutf8("$_get"), {"I:Lstd/core/Object;", 2, "$_get"}},
+            {utf::CStringAsMutf8("$_set"), {"ILstd/core/Object;:V", 3, "$_set"}},
+            {utf::CStringAsMutf8("at"), {"I:Lstd/core/Object;", 2, "at"}},
+            {utf::CStringAsMutf8("copyWithin"), {"III:Lescompat/Array;", 4, "copyWithin"}},
             {utf::CStringAsMutf8("fill"),
-             std::make_pair("Lstd/core/Object;Lstd/core/Double;Lstd/core/Double;:Lescompat/Array;", 4)},
-            {utf::CStringAsMutf8("indexOf"), std::make_pair("Lstd/core/Object;Lstd/core/Double;:D", 3)},
-            {utf::CStringAsMutf8("lastIndexOf"), std::make_pair("Lstd/core/Object;I:I", 3)},
-            {utf::CStringAsMutf8("slice"), std::make_pair("II:Lescompat/Array;", 3)},
-            {utf::CStringAsMutf8("splice"), std::make_pair("I:Lescompat/Array;", 2)},
-            {utf::CStringAsMutf8("splice"), std::make_pair("IILescompat/Array;:Lescompat/Array;", 3)},
-            {utf::CStringAsMutf8("toSpliced"), std::make_pair("II[Lstd/core/Object;:Lescompat/Array;", 3)},
-            {utf::CStringAsMutf8("with"), std::make_pair("DLstd/core/Object;:Lescompat/Array;", 3)},
-        };
+             {"Lstd/core/Object;Lstd/core/Double;Lstd/core/Double;:Lescompat/Array;", 4, "fill"}},
+            {utf::CStringAsMutf8("indexOf"), {"Lstd/core/Object;Lstd/core/Double;:D", 3, "indexOf"}},
+            {utf::CStringAsMutf8("lastIndexOf"), {"Lstd/core/Object;I:I", 3, "lastIndexOf"}},
+            {utf::CStringAsMutf8("slice"), {"II:Lescompat/Array;", 3, "slice"}},
+            {utf::CStringAsMutf8("splice"), {"I:Lescompat/Array;", 2, "splice"}},
+            {utf::CStringAsMutf8("splice"), {"IILescompat/Array;:Lescompat/Array;", 3, "splice"}},
+            {utf::CStringAsMutf8("toSpliced"), {"II[Lstd/core/Object;:Lescompat/Array;", 3, "toSpliced"}},
+            {utf::CStringAsMutf8("with"), {"DLstd/core/Object;:Lescompat/Array;", 3, "with"}}};
         wArray_ = RegisterClass(descriptors::ARRAY, "Array", &W_ARRAY_OVERLOADS);
         NAPI_CHECK_FATAL(napi_object_seal(ctx_->GetJSEnv(), jsGlobalEts_));
     }
@@ -253,8 +252,7 @@ private:
     void RegisterMap()
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_MAP_OVERLOADS = {
-            {utf::CStringAsMutf8("<ctor>"),
-             std::make_pair("{ULescompat/Array;Lescompat/Iterable;Lstd/core/Null;}:V", 2)}};
+            {utf::CStringAsMutf8("<ctor>"), {"{ULescompat/Array;Lescompat/Iterable;Lstd/core/Null;}:V", 2, "<ctor>"}}};
         wMap_ = RegisterClassWithLeafMatcher(descriptors::MAP, "Map", &W_MAP_OVERLOADS);
     }
 
@@ -262,18 +260,18 @@ private:
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_SET_OVERLOADS = {
             {utf::CStringAsMutf8("<ctor>"),
-             std::make_pair("{ULescompat/Iterable;Lstd/core/Null;[Lstd/core/Object;}:V", 2)}};
+             {"{ULescompat/Iterable;Lstd/core/Null;[Lstd/core/Object;}:V", 2, "<ctor>"}}};
         wSet_ = RegisterClassWithLeafMatcher(descriptors::SET, "Set", &W_SET_OVERLOADS);
     }
 
     void RegisterDate()
     {
-        static const ets_proxy::EtsClassWrapper::OverloadsMap W_DATE_OVERLOADS {
-            {utf::CStringAsMutf8("setDate"), std::make_pair("D:D", 2)},
-            {utf::CStringAsMutf8("setUTCDate"), std::make_pair("D:D", 2)},
-            {utf::CStringAsMutf8("setMilliseconds"), std::make_pair("D:D", 2)},
-            {utf::CStringAsMutf8("setUTCMilliseconds"), std::make_pair("D:D", 2)},
-            {utf::CStringAsMutf8("setTime"), std::make_pair("J:V", 2)},
+        static const ets_proxy::EtsClassWrapper::OverloadsMap W_DATE_OVERLOADS = {
+            {utf::CStringAsMutf8("setDate"), {"D:D", 2, "setDate"}},
+            {utf::CStringAsMutf8("setUTCDate"), {"D:D", 2, "setUTCDate"}},
+            {utf::CStringAsMutf8("setMilliseconds"), {"D:D", 2, "setMilliseconds"}},
+            {utf::CStringAsMutf8("setUTCMilliseconds"), {"D:D", 2, "setUTCMilliseconds"}},
+            {utf::CStringAsMutf8("setTime"), {"J:V", 2, "setTime"}},
         };
         wDate_ = RegisterClassWithLeafMatcher(descriptors::DATE, "Date", &W_DATE_OVERLOADS);
     }
