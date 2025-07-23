@@ -586,17 +586,17 @@ AffinityMask StackfulCoroutineManager::CalcAffinityMask(CoroutineLaunchMode mode
      *   EXCLUSIVE              ->least busy, forbid migration  ->least busy, forbid migration, disallow <main>
      */
 
+    if (CoroutineWorkerGroup::IsValidNonAnyId(groupId)) {
+        // for now, assuming that the groupId is correct
+        return AffinityMask::Empty().SetWorkerAllowed(static_cast<CoroutineWorker::Id>(groupId));
+    }
+
     if (mode == CoroutineLaunchMode::SAME_WORKER) {
         return AffinityMask::Empty().SetWorkerAllowed(GetCurrentWorker()->GetId());
     }
 
     if (mode == CoroutineLaunchMode::MAIN_WORKER) {
         return AffinityMask::Empty().SetWorkerAllowed(MAIN_WORKER_ID);
-    }
-
-    if (CoroutineWorkerGroup::IsValidNonAnyId(groupId)) {
-        // for now, assuming that the groupId is correct
-        return AffinityMask::Empty().SetWorkerAllowed(static_cast<CoroutineWorker::Id>(groupId));
     }
 
     // CoroutineLaunchMode::EXCLUSIVE is not supported yet (but will be)
