@@ -15,7 +15,7 @@
 
 import { Lib2Class, Lib2Class2 /*as Lib2Class2Alias*/, IntAlias, EC1 } from './lib2';
 import { B } from './lib2';
-import { C, D } from './lib2';
+import { C, D, H, O, P } from './lib2';
 import { E as EE, F } from './lib2';
 import * as GG from './lib2';
 import type { I } from './lib2';
@@ -60,3 +60,6 @@ export let p1: EC1;
 export function foo1(a: EC1): EC1 {
     return new EC1;
 }
+export { H };
+export default O;
+export type { P };

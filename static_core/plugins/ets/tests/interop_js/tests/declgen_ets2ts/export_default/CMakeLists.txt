@@ -28,10 +28,12 @@ create_declgen_ets2ts_test(export_default
         ${CMAKE_CURRENT_SOURCE_DIR}/lib3.ets
         ${CMAKE_CURRENT_SOURCE_DIR}/lib4.ets
         ${CMAKE_CURRENT_SOURCE_DIR}/lib5.ets
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib6.ets
     DECLS_EXPECTED
         ${CMAKE_CURRENT_SOURCE_DIR}/lib1.expected
         ${CMAKE_CURRENT_SOURCE_DIR}/lib2.expected
         ${CMAKE_CURRENT_SOURCE_DIR}/lib3.expected
         ${CMAKE_CURRENT_SOURCE_DIR}/lib4.expected
         ${CMAKE_CURRENT_SOURCE_DIR}/lib5.expected
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib6.expected
 )

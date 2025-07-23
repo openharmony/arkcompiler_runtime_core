@@ -44,6 +44,15 @@ export declare class F {
 export declare class G {
     constructor();
 }
+export declare class H {
+    constructor();
+}
+export declare class O {
+    constructor();
+}
+export declare class P {
+    constructor();
+}
 export type I = string;
 export type J = string;
 export type K = string;
