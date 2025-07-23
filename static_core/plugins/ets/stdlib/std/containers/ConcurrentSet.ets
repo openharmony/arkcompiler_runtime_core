@@ -114,7 +114,7 @@ export namespace containers {
         *
         * @returns { number } number of unique elements in the ConcurrentSet.
         */
-        public override get size(): number {
+        public override get size(): int {
             return this.elements.size;
         }
 

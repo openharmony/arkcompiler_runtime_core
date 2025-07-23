@@ -31,7 +31,7 @@ export interface ReadonlySet<T> extends Iterable<T> {
      *
      * @returns number of unique elements in the Set
      */
-    get size(): number;
+    get size(): int;
 
     /**
      * Executes a provided function once per each value in the Set object, in insertion order
@@ -149,7 +149,7 @@ export class Set<K> implements ReadonlySet<K> {
      *
      * @returns number of unique elements in the Set
      */
-    override get size(): number {
+    override get size(): int {
         return this.elements.size;
     }
 

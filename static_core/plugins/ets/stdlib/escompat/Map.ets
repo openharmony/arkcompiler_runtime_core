@@ -21,7 +21,7 @@ export interface ReadonlyMap<K, V> extends Iterable<[K, V]> {
      *
      * @returns number of Entries with unique keys in the Map
      */
-    get size(): number;
+    get size(): int;
 
     /**
      * Returns a value assosiated with key if present
@@ -335,7 +335,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      *
      * @returns number of Entries with unique keys in the Map
      */
-    override get size(): number {
+    override get size(): int {
         return this.sizeVal
     }
 

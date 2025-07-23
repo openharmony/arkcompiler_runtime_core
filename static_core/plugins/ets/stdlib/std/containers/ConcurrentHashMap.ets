@@ -463,7 +463,7 @@ export namespace containers {
         *
         * @returns { number } number of Entries with unique keys in the ConcurrentHashMap
         */
-        public override get size(): number {
+        public override get size(): int {
             return this.sizeVal.get();
         }
 
