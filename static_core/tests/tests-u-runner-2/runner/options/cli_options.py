@@ -202,7 +202,7 @@ class CliOptions:
         try:
             runner_args = parser.parse_args(runner_cli)
         except BaseException as exc:
-            raise IncorrectEnumValue from exc
+            raise IncorrectEnumValue(str(exc.args)) from exc
         return runner_args
 
     @staticmethod

@@ -76,7 +76,7 @@ class TestSuiteConfigTest2(unittest.TestCase):
                 std_err = str(handle.getvalue())
                 pos = std_err.find("error: argument --verbose/-v: expected one argument")
                 self.assertGreaterEqual(pos, 0, "Error message about `--verbose` is not found")
-                raise IncorrectEnumValue from exc
+                raise IncorrectEnumValue(str(exc.args)) from exc
 
     def test_option_with_incorrect_value(self) -> None:
         args = [self.workflow_name, self.test_suite_name, "--verbose", "abc"]
