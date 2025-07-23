@@ -27,4 +27,6 @@ export declare function foo2(x: X): string
 
 export declare function foo3(...args: number[]): number[]
 
+export declare function foo4(arg1: number = 1): number
+
 export declare function bar<T>(x: T): T

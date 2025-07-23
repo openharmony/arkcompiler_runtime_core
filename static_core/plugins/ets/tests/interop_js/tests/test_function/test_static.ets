@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-import { X, Y, foo1, foo2, foo3, bar } from "testDecl";
+import { X, Y, foo1, foo2, foo3, foo4, bar } from "testDecl";
 
 function TestFunction1() {
     arktest.assertEQ(foo1("1"), "1")
@@ -42,8 +42,14 @@ function TestFunction3() {
     arktest.assertEQ(ret, 10.0)
 }
 
+function TestFunction4() {
+    arktest.assertEQ(foo4(), 2)
+    arktest.assertEQ(foo4(2), 3)
+}
+
 function testAll() {
     TestFunction1()
     TestFunction2()
     TestFunction3()
+    TestFunction4()
 }

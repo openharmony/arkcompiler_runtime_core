@@ -39,6 +39,10 @@ export function foo3(...args: number[]): number[] {
     return args
 }
 
+export function foo4(arg1: number = 1): number {
+    return arg1 + 1
+}
+
 export function bar<T>(x: T): T {
     return x
 }
