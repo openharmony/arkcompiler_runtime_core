@@ -18,7 +18,6 @@
 #include <iostream>
 #include <node_api.h>
 #include "interop_test_helper.h"
-#include "timer.h"
 #include "native_engine/native_engine.h"
 
 namespace ark::ets::interop::js::helper {
@@ -169,30 +168,11 @@ static napi_value GetArgv(napi_env env, [[maybe_unused]] napi_callback_info info
     return argvArray;
 }
 
-static napi_value SetTimeout(napi_env env, napi_callback_info info)
-{
-    return SetTimeoutImpl(env, info, false);
-}
-
-static napi_value SetInterval(napi_env env, napi_callback_info info)
-{
-    return SetTimeoutImpl(env, info, true);
-}
-
-static napi_value ClearTimer(napi_env env, napi_callback_info info)
-{
-    return ClearTimerImpl(env, info);
-}
-
 static napi_value Init(napi_env env, napi_value exports)
 {
     const std::array desc = {
         napi_property_descriptor {"getEnvironmentVar", 0, GetEnvironmentVar, 0, 0, 0, napi_enumerable, 0},
         napi_property_descriptor {"getArgv", 0, GetArgv, 0, 0, 0, napi_enumerable, 0},
-        napi_property_descriptor {"setTimeout", 0, SetTimeout, 0, 0, 0, napi_enumerable, 0},
-        napi_property_descriptor {"setInterval", 0, SetInterval, 0, 0, 0, napi_enumerable, 0},
-        napi_property_descriptor {"clearTimeout", 0, ClearTimer, 0, 0, 0, napi_enumerable, 0},
-        napi_property_descriptor {"clearInterval", 0, ClearTimer, 0, 0, 0, napi_enumerable, 0},
     };
 
     if (napi_define_properties(env, exports, desc.size(), desc.data()) != napi_ok) {

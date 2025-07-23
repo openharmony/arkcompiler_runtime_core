@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_INTEROP_JS_GTEST_PLUGIN_TIMER_H
-#define PANDA_INTEROP_JS_GTEST_PLUGIN_TIMER_H
+#ifndef PANDA_PLUGINS_INTEROP_JS_TIMER_H
+#define PANDA_PLUGINS_INTEROP_JS_TIMER_H
 
 #include <node_api.h>
 #include <uv.h>
@@ -37,7 +37,7 @@ struct TimerInfo {
     bool repeat;
     uv_timer_t *timer;
     uint32_t timerId;
-    static constexpr uv_close_cb kTimerCloseCallback = [](uv_handle_t *handle) {
+    static constexpr uv_close_cb TIMER_CLOSE_CALLBACK = [](uv_handle_t *handle) {
         delete reinterpret_cast<uv_timer_t *>(handle);
     };
     // NOLINTEND(misc-non-private-member-variables-in-classes)
@@ -48,4 +48,4 @@ napi_value ClearTimerImpl(napi_env env, napi_callback_info info);
 
 }  // namespace ark::ets::interop::js::helper
 
-#endif  // PANDA_INTEROP_JS_GTEST_PLUGIN_TIMER_H
+#endif  // PANDA_PLUGINS_INTEROP_JS_TIMER_H
