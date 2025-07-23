@@ -272,7 +272,10 @@ export final class BigInt {
         return this.toString(10)
     }
 
-    public toString(radix: double): string {
+    public toString(radix?: double): string {
+        if (radix == undefined) {
+            return this.toString(10)
+        }
         if (radix == -Infinity || radix == +Infinity || radix == NaN) {
             throw new RangeError(BigInt.INVALID_RADIX_MESSAGE)
         }
