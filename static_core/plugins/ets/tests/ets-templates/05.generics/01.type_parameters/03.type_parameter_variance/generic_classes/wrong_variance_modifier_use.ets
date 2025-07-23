@@ -16,7 +16,7 @@
 {% for c in cases %}
 
 /*---
-desc: Test the compile-time error occures if a function, methos or constructor type parameters have a varance modifier specified.
+desc: Test the compile-time error occurs if a function, method or constructor type parameters have a variance modifier specified.
 tags: [compile-only, negative]
 ---*/
 

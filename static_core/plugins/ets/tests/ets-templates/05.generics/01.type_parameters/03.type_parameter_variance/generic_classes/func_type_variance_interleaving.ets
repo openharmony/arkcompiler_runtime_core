@@ -20,8 +20,8 @@ desc: Function types variance interleaving.
 tags: [compile-only]
 ---*/
 
-interface I<in T1, out T2> {
-  foo (p: {{c.param}}T1): T2
+class X<in T1, out T2> {
+  foo (p: {{c.param}}T1): T2 { return p as T2 }
 }
 
 {% endfor %}
