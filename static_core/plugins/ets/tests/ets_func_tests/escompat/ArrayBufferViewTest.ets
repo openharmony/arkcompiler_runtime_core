@@ -16,25 +16,6 @@
 const RESULT_SUCCESS = 0
 const RESULT_FAILURE = 1
 
-class Assertions {
-  static assertEquals(expected: number, actual: number, message: string): void {
-    if (expected != actual) throw new AssertionError(`${message} - expected: ${expected} but was ${actual}`)
-  }
-
-  static assertSame(expected: Object, actual: Object, message: string): void {
-    if (expected !== actual) throw new AssertionError(message)
-
-  } 
-
-  static assertTrue(condition: boolean, message: string): void {
-    if (!condition) throw new AssertionError(message) 
-  }
-
-  static assertFalse(condition: boolean, message: string): void {
-    if (condition) throw new AssertionError(message)
-  }
-}
-
 function main(): int {
     let testsFailed = 0
 
@@ -48,9 +29,9 @@ function testArrayBufferDataView(): int {
     
     let bufferView: ArrayBufferView = new DataView(buffer, 4, 12)
 
-    Assertions.assertSame(buffer, bufferView.buffer, "ArrayBufferView.buffer returned completely different buffer instance")
-    Assertions.assertEquals(12, bufferView.byteLength, "ArrayBufferView.byteLength")
-    Assertions.assertEquals(4, bufferView.byteOffset, "ArrayBufferView.byteOffset")
+    arktest.assertEQ(buffer, bufferView.buffer, "ArrayBufferView.buffer returned completely different buffer instance")
+    arktest.assertEQ(12, bufferView.byteLength, "ArrayBufferView.byteLength")
+    arktest.assertEQ(4, bufferView.byteOffset, "ArrayBufferView.byteOffset")
 
     return RESULT_SUCCESS
 }

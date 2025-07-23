@@ -966,8 +966,8 @@ function test_int8array_set_byte_cpp(): void {
     let ar = new Int8Array(10)
     ar[2] = (-128).toByte()
     ar[4] = (127).toByte()
-    assertEquals(-128, ar[2])
-    assertEquals(127, ar[4])
+    arktest.assertEQ(-128, ar[2])
+    arktest.assertEQ(127, ar[4])
 }
 
 //! CHECKER       Int8Array $_set byte/$_get IR intrinsic
@@ -988,8 +988,8 @@ function test_int8array_set_byte_ir(): void {
     let ar = new Int8Array(10)
     ar[2] = (-128).toByte()
     ar[4] = (127).toByte()
-    assertEquals(-128, ar[2])
-    assertEquals(127, ar[4])
+    arktest.assertEQ(-128, ar[2])
+    arktest.assertEQ(127, ar[4])
 }
 
 //! CHECKER       Int8Array $_set int/$_get cpp intrinsic
@@ -1007,10 +1007,10 @@ function test_int8array_set_int_cpp(): void {
     ar[3] = -129
     ar[4] = 127
     ar[5] = 128
-    assertEquals(-128, ar[2])
-    assertEquals(127, ar[3])
-    assertEquals(127, ar[4])
-    assertEquals(-128, ar[5])
+    arktest.assertEQ(-128, ar[2])
+    arktest.assertEQ(127, ar[3])
+    arktest.assertEQ(127, ar[4])
+    arktest.assertEQ(-128, ar[5])
 }
 
 //! CHECKER       Int8Array $_set int/$_get IR intrinsic
@@ -1033,10 +1033,10 @@ function test_int8array_set_int_ir(): void {
     ar[3] = -129
     ar[4] = 127
     ar[5] = 128
-    assertEquals(-128, ar[2])
-    assertEquals(127, ar[3])
-    assertEquals(127, ar[4])
-    assertEquals(-128, ar[5])
+    arktest.assertEQ(-128, ar[2])
+    arktest.assertEQ(127, ar[3])
+    arktest.assertEQ(127, ar[4])
+    arktest.assertEQ(-128, ar[5])
 }
 
 //! CHECKER       Int8Array getUnsafe cpp intrinsic
@@ -1092,9 +1092,9 @@ function test_int8array_set_number_cpp(): void {
     ar[2] = -Infinity
     ar[4] = Infinity
     ar[5] = NaN
-    assertEquals(0, ar[2])
-    assertEquals(0, ar[4])
-    assertEquals(0, ar[5])
+    arktest.assertEQ(0, ar[2])
+    arktest.assertEQ(0, ar[4])
+    arktest.assertEQ(0, ar[5])
 }
 
 //! CHECKER       Int16Array $_set short/$_get cpp intrinsic
@@ -1110,8 +1110,8 @@ function test_int16array_set_short_cpp(): void {
     let ar = new Int16Array(10)
     ar[2] = (-32768).toShort()
     ar[4] = (32767).toShort()
-    assertEquals(-32768, ar[2])
-    assertEquals(32767, ar[4])
+    arktest.assertEQ(-32768, ar[2])
+    arktest.assertEQ(32767, ar[4])
 }
 
 //! CHECKER       Int16Array $_set short/$_get IR intrinsic
@@ -1132,8 +1132,8 @@ function test_int16array_set_short_ir(): void {
     let ar = new Int16Array(10)
     ar[2] = (-32768).toShort()
     ar[4] = (32767).toShort()
-    assertEquals(-32768, ar[2])
-    assertEquals(32767, ar[4])
+    arktest.assertEQ(-32768, ar[2])
+    arktest.assertEQ(32767, ar[4])
 }
 
 //! CHECKER       Int16Array $_set int/$_get cpp intrinsic
@@ -1151,10 +1151,10 @@ function test_int16array_set_int_cpp(): void {
     ar[3] = -32769
     ar[4] = 32767
     ar[5] = 32768
-    assertEquals(-32768, ar[2])
-    assertEquals(32767, ar[3])
-    assertEquals(32767, ar[4])
-    assertEquals(-32768, ar[5])
+    arktest.assertEQ(-32768, ar[2])
+    arktest.assertEQ(32767, ar[3])
+    arktest.assertEQ(32767, ar[4])
+    arktest.assertEQ(-32768, ar[5])
 }
 
 //! CHECKER       Int16Array $_set int/$_get IR intrinsic
@@ -1177,10 +1177,10 @@ function test_int16array_set_int_ir(): void {
     ar[3] = -32769
     ar[4] = 32767
     ar[5] = 32768
-    assertEquals(-32768, ar[2])
-    assertEquals(32767, ar[3])
-    assertEquals(32767, ar[4])
-    assertEquals(-32768, ar[5])
+    arktest.assertEQ(-32768, ar[2])
+    arktest.assertEQ(32767, ar[3])
+    arktest.assertEQ(32767, ar[4])
+    arktest.assertEQ(-32768, ar[5])
 }
 
 //! CHECKER       Int16Array getUnsafe cpp intrinsic
@@ -1240,9 +1240,9 @@ function test_int16array_set_number_cpp(): void {
     ar[2] = -Infinity
     ar[4] = Infinity
     ar[5] = NaN
-    assertEquals(0, ar[2])
-    assertEquals(0, ar[4])
-    assertEquals(0, ar[5])
+    arktest.assertEQ(0, ar[2])
+    arktest.assertEQ(0, ar[4])
+    arktest.assertEQ(0, ar[5])
 }
 
 //! CHECKER       Int32Array $_set int/$_get cpp intrinsic
@@ -1257,8 +1257,8 @@ function test_int32array_set_int_cpp(): void {
     let ar = new Int32Array(10)
     ar[2] = -2147483648
     ar[4] = 2147483647
-    assertEquals(-2147483648, ar[2])
-    assertEquals(2147483647, ar[4])
+    arktest.assertEQ(-2147483648, ar[2])
+    arktest.assertEQ(2147483647, ar[4])
 }
 
 //! CHECKER       Int32Array $_set int/$_get IR intrinsic
@@ -1278,8 +1278,8 @@ function test_int32array_set_int_ir(): void {
     let ar = new Int32Array(10)
     ar[2] = -2147483648
     ar[4] = 2147483647
-    assertEquals(-2147483648, ar[2])
-    assertEquals(2147483647, ar[4])
+    arktest.assertEQ(-2147483648, ar[2])
+    arktest.assertEQ(2147483647, ar[4])
 }
 
 //! CHECKER       Int32Array getUnsafe cpp intrinsic
@@ -1335,9 +1335,9 @@ function test_int32array_set_number_cpp(): void {
     ar[2] = -Infinity
     ar[4] = Infinity
     ar[5] = NaN
-    assertEquals(0, ar[2])
-    assertEquals(0, ar[4])
-    assertEquals(0, ar[5])
+    arktest.assertEQ(0, ar[2])
+    arktest.assertEQ(0, ar[4])
+    arktest.assertEQ(0, ar[5])
 }
 
 //! CHECKER       BigInt64Array $_set int/$_get cpp intrinsic
@@ -1350,8 +1350,8 @@ function test_bigint64array_set_int_cpp(): void {
     let ar = new BigInt64Array(10)
     ar[2] = -2147483648
     ar[4] = 2147483647
-    assertEquals(-2147483648n, ar[2])
-    assertEquals(2147483647n, ar[4])
+    arktest.assertEQ(-2147483648n, ar[2])
+    arktest.assertEQ(2147483647n, ar[4])
 }
 
 //! CHECKER       BigInt64Array $_set long/$_get cpp intrinsic
@@ -1370,10 +1370,10 @@ function test_bigint64array_set_long_cpp(): void {
     ar[3] = 18446744073709551618n
     ar[4] = -9223372036854775808n
     ar[5] = -18446744073709551618n
-    assertEquals(9223372036854775807n, ar[2])
-    assertEquals(2n, ar[3])
-    assertEquals(-9223372036854775808n, ar[4])
-    assertEquals(-2n, ar[5])
+    arktest.assertEQ(9223372036854775807n, ar[2])
+    arktest.assertEQ(2n, ar[3])
+    arktest.assertEQ(-9223372036854775808n, ar[4])
+    arktest.assertEQ(-2n, ar[5])
 }
 
 //! CHECKER       BigInt64Array $_set long/$_get IR intrinsic
@@ -1401,10 +1401,10 @@ function test_bigint64array_set_long_ir(): void {
     ar[3] = 18446744073709551618n
     ar[4] = -9223372036854775808n
     ar[5] = -18446744073709551618n
-    assertEquals(9223372036854775807n, ar[2])
-    assertEquals(2n, ar[3])
-    assertEquals(-9223372036854775808n, ar[4])
-    assertEquals(-2n, ar[5])
+    arktest.assertEQ(9223372036854775807n, ar[2])
+    arktest.assertEQ(2n, ar[3])
+    arktest.assertEQ(-9223372036854775808n, ar[4])
+    arktest.assertEQ(-2n, ar[5])
 }
 
 //! CHECKER       BigInt64Array getUnsafe IR intrinsic
@@ -1457,8 +1457,8 @@ function test_float32array_set_float_cpp(): void {
     let ar = new Float32Array(10)
     ar[2] = -3.4028235e+38f
     ar[4] = 3.4028235e+38f
-    assertEquals(-3.4028235e+38f, ar[2])
-    assertEquals(3.4028235e+38f, ar[4])
+    arktest.assertEQ(-3.4028235e+38f, ar[2])
+    arktest.assertEQ(3.4028235e+38f, ar[4])
 }
 
 //! CHECKER       Float32Array $_set float/$_get IR intrinsic
@@ -1478,8 +1478,8 @@ function test_float32array_set_float_ir(): void {
     let ar = new Float32Array(10)
     ar[2] = -3.4028235e+38f
     ar[4] = 3.4028235e+38f
-    assertEquals(-3.4028235e+38f, ar[2])
-    assertEquals(3.4028235e+38f, ar[4])
+    arktest.assertEQ(-3.4028235e+38f, ar[2])
+    arktest.assertEQ(3.4028235e+38f, ar[4])
 }
 
 //! CHECKER       Float32Array getUnsafe cpp intrinsic
@@ -1535,8 +1535,8 @@ function test_float64array_set_double_cpp(): void {
     let ar = new Float64Array(10)
     ar[2] = -3.4028235e+38
     ar[4] = 3.4028235e+38
-    assertEquals(-3.4028235e+38, ar[2])
-    assertEquals(3.4028235e+38, ar[4])
+    arktest.assertEQ(-3.4028235e+38, ar[2])
+    arktest.assertEQ(3.4028235e+38, ar[4])
 }
 
 //! CHECKER       Float64Array $_set double/$_get IR intrinsic
@@ -1556,8 +1556,8 @@ function test_float64array_set_double_ir(): void {
     let ar = new Float64Array(10)
     ar[2] = -3.4028235e+38
     ar[4] = 3.4028235e+38
-    assertEquals(-3.4028235e+38, ar[2])
-    assertEquals(3.4028235e+38, ar[4])
+    arktest.assertEQ(-3.4028235e+38, ar[2])
+    arktest.assertEQ(3.4028235e+38, ar[4])
 }
 
 //! CHECKER       Float64Array getUnsafe cpp intrinsic
@@ -1624,9 +1624,9 @@ function test_uint8array_set_int_cpp(): void {
     ar[2] = -1
     ar[3] = 255
     ar[4] = 257
-    assertEquals(255, ar[2])
-    assertEquals(255, ar[3])
-    assertEquals(1, ar[4])
+    arktest.assertEQ(255, ar[2])
+    arktest.assertEQ(255, ar[3])
+    arktest.assertEQ(1, ar[4])
 }
 
 //! CHECKER       Uint8Array $_set cpp intrinsic rangeerror
@@ -1676,9 +1676,9 @@ function test_uint8array_set_int_ir(): void {
     ar[2] = -1
     ar[3] = 255
     ar[4] = 257
-    assertEquals(255, ar[2])
-    assertEquals(255, ar[3])
-    assertEquals(1, ar[4])
+    arktest.assertEQ(255, ar[2])
+    arktest.assertEQ(255, ar[3])
+    arktest.assertEQ(1, ar[4])
 }
 
 //! CHECKER       Uint8Array getUnsafe cpp intrinsic
@@ -1723,9 +1723,9 @@ function test_uint8clampedarray_set_int_cpp(): void {
     ar[2] = -1
     ar[3] = 255
     ar[4] = 256
-    assertEquals(0, ar[2])
-    assertEquals(255, ar[3])
-    assertEquals(255, ar[4])
+    arktest.assertEQ(0, ar[2])
+    arktest.assertEQ(255, ar[3])
+    arktest.assertEQ(255, ar[4])
 }
 
 //! CHECKER       Uint8ClampedArray $_set cpp intrinsic rangeerror
@@ -1762,9 +1762,9 @@ function test_uint8clampedarray_set_int_ir(): void {
     ar[2] = -1
     ar[3] = 255
     ar[4] = 256
-    assertEquals(0, ar[2])
-    assertEquals(255, ar[3])
-    assertEquals(255, ar[4])
+    arktest.assertEQ(0, ar[2])
+    arktest.assertEQ(255, ar[3])
+    arktest.assertEQ(255, ar[4])
 }
 
 //! CHECKER       Uint8ClampedArray getUnsafe cpp intrinsic
@@ -1809,9 +1809,9 @@ function test_uint16array_set_int_cpp(): void {
     ar[2] = -1
     ar[3] = 65535
     ar[4] = 65537
-    assertEquals(65535, ar[2])
-    assertEquals(65535, ar[3])
-    assertEquals(1, ar[4])
+    arktest.assertEQ(65535, ar[2])
+    arktest.assertEQ(65535, ar[3])
+    arktest.assertEQ(1, ar[4])
 }
 
 //! CHECKER       Uint16Array $_set cpp intrinsic rangeerror
@@ -1847,9 +1847,9 @@ function test_uint16array_set_int_ir(): void {
     ar[2] = -1
     ar[3] = 65535
     ar[4] = 65537
-    assertEquals(65535, ar[2])
-    assertEquals(65535, ar[3])
-    assertEquals(1, ar[4])
+    arktest.assertEQ(65535, ar[2])
+    arktest.assertEQ(65535, ar[3])
+    arktest.assertEQ(1, ar[4])
 }
 
 //! CHECKER       Uint16Array getUnsafe cpp intrinsic
@@ -1893,8 +1893,8 @@ function test_uint32array_set_int_cpp(): void {
     let ar = new Uint32Array(10)
     ar[2] = -1
     ar[3] = 2147483647
-    assertEquals(4294967295, ar[2])
-    assertEquals(2147483647, ar[3])
+    arktest.assertEQ(4294967295, ar[2])
+    arktest.assertEQ(2147483647, ar[3])
 }
 
 //! CHECKER       Uint32Array $_set cpp intrinsic rangeerror
@@ -1931,8 +1931,8 @@ function test_uint32array_set_int_ir(): void {
     let ar = new Uint32Array(10)
     ar[2] = -1
     ar[3] = 2147483647
-    assertEquals(4294967295, ar[2])
-    assertEquals(2147483647, ar[3])
+    arktest.assertEQ(4294967295, ar[2])
+    arktest.assertEQ(2147483647, ar[3])
 }
 
 //! CHECKER       Uint32Array $_set long/$_get cpp intrinsic
@@ -1949,9 +1949,9 @@ function test_uint32array_set_long_cpp(): void {
     ar[2] = (-1).toLong()
     ar[3] = 4294967295
     ar[4] = 4294967297
-    assertEquals(4294967295, ar[2])
-    assertEquals(4294967295, ar[3])
-    assertEquals(1, ar[4])
+    arktest.assertEQ(4294967295, ar[2])
+    arktest.assertEQ(4294967295, ar[3])
+    arktest.assertEQ(1, ar[4])
 }
 
 //! CHECKER       Uint32Array $_set long/$_get IR intrinsic
@@ -1973,9 +1973,9 @@ function test_uint32array_set_long_ir(): void {
     ar[2] = (-1).toLong()
     ar[3] = 4294967295
     ar[4] = 4294967297
-    assertEquals(4294967295, ar[2])
-    assertEquals(4294967295, ar[3])
-    assertEquals(1, ar[4])
+    arktest.assertEQ(4294967295, ar[2])
+    arktest.assertEQ(4294967295, ar[3])
+    arktest.assertEQ(1, ar[4])
 }
 
 //! CHECKER       Uint32Array getUnsafe cpp intrinsic
@@ -2018,8 +2018,8 @@ function test_biguint64array_set_int_cpp(): void {
     let ar = new BigUint64Array(10)
     ar[2] = -1
     ar[3] = 2147483647
-    assertEquals(18446744073709551615n, ar[2])
-    assertEquals(2147483647n, ar[3])
+    arktest.assertEQ(18446744073709551615n, ar[2])
+    arktest.assertEQ(2147483647n, ar[3])
 }
 
 //! CHECKER       BigUint64Array $_set int/$_get IR intrinsic
@@ -2039,8 +2039,8 @@ function test_biguint64array_set_int_ir(): void {
     let ar = new BigUint64Array(10)
     ar[2] = -1
     ar[3] = 2147483647
-    assertEquals(18446744073709551615n, ar[2])
-    assertEquals(2147483647n, ar[3])
+    arktest.assertEQ(18446744073709551615n, ar[2])
+    arktest.assertEQ(2147483647n, ar[3])
 }
 
 //! CHECKER       BigUint64Array $_set long/$_get cpp intrinsic
@@ -2060,10 +2060,10 @@ function test_biguint64array_set_long_cpp(): void {
     ar[3] = -18446744073709551618n
     ar[4] = -1n
     ar[5] = 18446744073709551615n
-    assertEquals(2n, ar[2])
-    assertEquals(18446744073709551614n, ar[3])
-    assertEquals(18446744073709551615n, ar[4])
-    assertEquals(18446744073709551615n, ar[5])
+    arktest.assertEQ(2n, ar[2])
+    arktest.assertEQ(18446744073709551614n, ar[3])
+    arktest.assertEQ(18446744073709551615n, ar[4])
+    arktest.assertEQ(18446744073709551615n, ar[5])
 }
 
 //! CHECKER       BigUint64Array $_set cpp intrinsic rangeerror
@@ -2108,10 +2108,10 @@ function test_biguint64array_set_long_ir(): void {
     ar[3] = -18446744073709551618n
     ar[4] = -1n
     ar[5] = 18446744073709551615n
-    assertEquals(2n, ar[2])
-    assertEquals(18446744073709551614n, ar[3])
-    assertEquals(18446744073709551615n, ar[4])
-    assertEquals(18446744073709551615n, ar[5])
+    arktest.assertEQ(2n, ar[2])
+    arktest.assertEQ(18446744073709551614n, ar[3])
+    arktest.assertEQ(18446744073709551615n, ar[4])
+    arktest.assertEQ(18446744073709551615n, ar[5])
 }
 
 //! CHECKER       BigUint64Array getUnsafe IR intrinsic
@@ -2135,18 +2135,6 @@ function testBigUint64ArrayGetUnsafe(): void {
     arktest.assertEQ(18446744073709551614n, ar.at(3))
     arktest.assertEQ(18446744073709551615n, ar.at(4))
     arktest.assertEQ(18446744073709551615n, ar.at(5))
-}
-
-function assertEquals(expected: number, actual: number): void {
-    if (expected != actual) throw new AssertionError(`${expected} != ${actual}`)
-}
-
-function assertEquals(expected: float, actual: float): void {
-    if (expected != actual) throw new AssertionError(`${expected} != ${actual}`)
-}
-
-function assertEquals(expected: BigInt, actual: BigInt): void {
-    if (expected != actual) throw new AssertionError(`${expected} != ${actual}`)
 }
 
 //! CHECKER       Int8Array copyWithin
