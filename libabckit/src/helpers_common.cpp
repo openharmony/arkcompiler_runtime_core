@@ -109,6 +109,88 @@ bool ModuleEnumerateAnnotationInterfacesHelper(AbckitCoreModule *m, void *data,
     return true;
 }
 
+bool NamespaceEnumerateNamespacesHelper(AbckitCoreNamespace *n, void *data,
+                                        bool (*cb)(AbckitCoreNamespace *ns, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(n, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &[_, ns] : n->nt) {
+        if (!cb(ns.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool NamespaceEnumerateClassesHelper(AbckitCoreNamespace *n, void *data, bool (*cb)(AbckitCoreClass *klass, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(n, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &[className, klass] : n->ct) {
+        if (!cb(klass.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool NamespaceEnumerateInterfacesHelper(AbckitCoreNamespace *n, void *data,
+                                        bool (*cb)(AbckitCoreInterface *iface, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(n, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &[_, iface] : n->it) {
+        if (!cb(iface.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool NamespaceEnumerateEnumsHelper(AbckitCoreNamespace *n, void *data, bool (*cb)(AbckitCoreEnum *enm, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(n, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &[_, enm] : n->et) {
+        if (!cb(enm.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool NamespaceEnumerateTopLevelFunctionsHelper(AbckitCoreNamespace *n, void *data,
+                                               bool (*cb)(AbckitCoreFunction *function, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(n, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &function : n->functions) {
+        if (!cb(function.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool NamespaceEnumerateFieldsHelper(AbckitCoreNamespace *n, void *data,
+                                    bool (*cb)(AbckitCoreNamespaceField *field, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(n, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &field : n->fields) {
+        if (!cb(field.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool ClassEnumerateMethodsHelper(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreFunction *method, void *data))
 {
     LIBABCKIT_LOG_FUNC;
@@ -127,6 +209,34 @@ bool ClassEnumerateFieldsHelper(AbckitCoreClass *klass, void *data, bool (*cb)(A
     LIBABCKIT_BAD_ARGUMENT(cb, false)
     for (auto &field : klass->fields) {
         if (!cb(field.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool ClassEnumerateSubClassesHelper(AbckitCoreClass *klass, void *data,
+                                    bool (*cb)(AbckitCoreClass *subClass, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(klass, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &subClass : klass->subClasses) {
+        if (!cb(subClass, data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool ClassEnumerateInterfacesHelper(AbckitCoreClass *klass, void *data,
+                                    bool (*cb)(AbckitCoreInterface *iface, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(klass, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &iface : klass->interfaces) {
+        if (!cb(iface, data)) {
             return false;
         }
     }
@@ -155,6 +265,48 @@ bool InterfaceEnumerateFieldsHelper(AbckitCoreInterface *iface, void *data,
     LIBABCKIT_BAD_ARGUMENT(cb, false)
     for (auto &[_, field] : iface->fields) {
         if (!cb(field.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool InterfaceEnumerateSuperInterfacesHelper(AbckitCoreInterface *iface, void *data,
+                                             bool (*cb)(AbckitCoreInterface *superInterface, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(iface, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &superInterface : iface->superInterfaces) {
+        if (!cb(superInterface, data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool InterfaceEnumerateSubInterfacesHelper(AbckitCoreInterface *iface, void *data,
+                                           bool (*cb)(AbckitCoreInterface *subInterface, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(iface, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &subInterface : iface->subInterfaces) {
+        if (!cb(subInterface, data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool InterfaceEnumerateClassesHelper(AbckitCoreInterface *iface, void *data,
+                                     bool (*cb)(AbckitCoreClass *klass, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(iface, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &klass : iface->classes) {
+        if (!cb(klass, data)) {
             return false;
         }
     }

@@ -50,11 +50,14 @@ TEST_F(LibAbcKitInspectApiClassesTest, StaticModuleEnumerateClasses)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static.abc", &file);
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         std::size_t gotNumClasses = 0;
         g_implI->moduleEnumerateClasses(m, &gotNumClasses, ClassCountrer);
         EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-        constexpr std::size_t EXPECTED_NUM_CLASSES = 1;
+        constexpr std::size_t EXPECTED_NUM_CLASSES = 3;
         EXPECT_EQ(gotNumClasses, EXPECTED_NUM_CLASSES);
 
         return true;
@@ -71,6 +74,9 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicModuleEnumerateClasses)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic.abc", &file);
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         std::size_t gotNumClasses = 0;
         g_implI->moduleEnumerateClasses(m, &gotNumClasses, ClassCountrer);
         EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -92,6 +98,9 @@ TEST_F(LibAbcKitInspectApiClassesTest, StaticModuleEnumerateClassesEmpty)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_empty_static.abc", &file);
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         std::size_t gotNumClasses = 0;
         g_implI->moduleEnumerateClasses(m, &gotNumClasses, ClassCountrer);
         EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -113,6 +122,9 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicModuleEnumerateClassesEmpty)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_empty_dynamic.abc", &file);
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         std::size_t gotNumClasses = 0;
         g_implI->moduleEnumerateClasses(m, &gotNumClasses, ClassCountrer);
         EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -134,6 +146,9 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassGetNameSmoke)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static.abc", &file);
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         AbckitString *name = nullptr;
         name = g_implI->classGetName(nullptr);
         EXPECT_EQ(name, nullptr);
@@ -170,6 +185,9 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetNameSmoke)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic.abc", &file);
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         AbckitString *name = nullptr;
         name = g_implI->classGetName(nullptr);
         EXPECT_EQ(name, nullptr);
@@ -225,12 +243,15 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassGetName)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static.abc", &file);
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         std::set<std::string> gotNames;
 
         g_implI->moduleEnumerateClasses(m, &gotNames, ClassNameCollector);
         EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-        std::set<std::string> expectedNames = {"C1"};
+        std::set<std::string> expectedNames = {"C1", "C2", "C3"};
         EXPECT_EQ(expectedNames.size(), gotNames.size());
         for (auto &expectedName : expectedNames) {
             EXPECT_NE(gotNames.find(expectedName), gotNames.end());
@@ -250,6 +271,9 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetName)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic.abc", &file);
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         std::set<std::string> gotNames;
         g_implI->moduleEnumerateClasses(m, &gotNames, ClassNameCollector);
         EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -284,6 +308,9 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassEnumerateMethodsSmoke)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static.abc", &file);
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) -> bool {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         helpers::ClassByNameContext ctxFinder = {nullptr, "C1"};
         g_implI->moduleEnumerateClasses(m, &ctxFinder, helpers::ClassByNameFinder);
         EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -321,6 +348,9 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassEnumerateMethodsSmoke)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic.abc", &file);
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) -> bool {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         helpers::ClassByNameContext ctxFinder = {nullptr, "C1"};
         g_implI->moduleEnumerateClasses(m, &ctxFinder, helpers::ClassByNameFinder);
         EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -373,6 +403,9 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassEnumerateMethodsEmpty)
     // }
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         helpers::ClassByNameContext ctxFinder = {nullptr, "C1"};
         g_implI->moduleEnumerateClasses(m, &ctxFinder, helpers::ClassByNameFinder);
         EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -405,6 +438,9 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassEnumerateMethodsEmpty)
     // }
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         helpers::ClassByNameContext ctxFinder = {nullptr, "C1"};
         g_implI->moduleEnumerateClasses(m, &ctxFinder, helpers::ClassByNameFinder);
         EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -440,6 +476,9 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassEnumerateMethodsSeveralMethods)
     // }
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         helpers::ClassByNameContext ctxFinder = {nullptr, "C1"};
         g_implI->moduleEnumerateClasses(m, &ctxFinder, helpers::ClassByNameFinder);
         EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -473,6 +512,9 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassEnumerateMethodsSeveralMethod
     // }
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) -> bool {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         helpers::ClassByNameContext ctxFinder = {nullptr, "C1"};
         g_implI->moduleEnumerateClasses(m, &ctxFinder, helpers::ClassByNameFinder);
         EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -502,6 +544,9 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassGetFile)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static.abc", &file);
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) -> bool {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         auto *ctxI1 = g_implI->moduleGetFile(m);
 
         helpers::ClassByNameContext ctxFinder = {nullptr, "C1"};
@@ -531,6 +576,9 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetFile)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic.abc", &file);
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) -> bool {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         auto *ctxI1 = g_implI->moduleGetFile(m);
 
         helpers::ClassByNameContext ctxFinder = {nullptr, "C1"};
@@ -562,6 +610,9 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetModule)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic.abc", &file);
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         helpers::ClassByNameContext ctxFinder = {nullptr, "C1"};
         g_implI->moduleEnumerateClasses(m, &ctxFinder, helpers::ClassByNameFinder);
         EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -591,6 +642,9 @@ TEST_F(LibAbcKitInspectApiClassesTest, StaticClassGetModule)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static.abc", &file);
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         helpers::ClassByNameContext ctxFinder = {nullptr, "C1"};
         g_implI->moduleEnumerateClasses(m, &ctxFinder, helpers::ClassByNameFinder);
         EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -620,6 +674,9 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetParentFunction)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic.abc", &file);
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         helpers::ClassByNameContext c0Finder = {nullptr, "C1"};
         g_implI->moduleEnumerateClasses(m, &c0Finder, helpers::ClassByNameFinder);
         EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

@@ -19,6 +19,8 @@
 
 #include "libabckit/cpp/abckit_cpp.h"
 
+#include <set>
+
 namespace libabckit::test {
 
 class LibAbcKitInspectApiModulesTest : public ::testing::Test {};
@@ -31,6 +33,9 @@ TEST_F(LibAbcKitInspectApiModulesTest, ModuleGetFieldsStatic)
     std::vector<std::string> fieldNames;
 
     for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
         for (const auto &field : module.GetFields()) {
             fieldNames.emplace_back(field.GetName());
         }
@@ -79,15 +84,18 @@ TEST_F(LibAbcKitInspectApiModulesTest, ModuleGetNamespacesStatic)
 {
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_static.abc");
 
-    std::vector<std::string> namespaceNames;
+    std::set<std::string> gotNamespaceNames;
+    std::set<std::string> expectNamespacesNames = {"ns1"};
 
     for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
         for (const auto &ns : module.GetNamespaces()) {
-            namespaceNames.emplace_back(ns.GetName());
+            gotNamespaceNames.emplace(ns.GetName());
         }
     }
 
-    ASSERT_EQ(namespaceNames[0], "ns1");
-    ASSERT_EQ(namespaceNames.size(), 1);
+    ASSERT_EQ(gotNamespaceNames, expectNamespacesNames);
 }
 }  // namespace libabckit::test

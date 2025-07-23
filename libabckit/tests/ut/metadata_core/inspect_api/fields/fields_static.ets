@@ -13,28 +13,24 @@
  * limitations under the License.
  */
 
-interface InterfaceA {
-    fieldA: string,
-    readonly fieldB: number,
-    bar(){}
+const F1: string = "Hello";
+
+class C1 {
+  C1F1: string = "public";
+  protected C1F2: string = "protected";
+  private C1F3: string = "private";
+  static C1F4: string = "static";
 }
 
-interface InterfaceB extends InterfaceA {
-    foo()
+interface I1 {
+  I1F1: number;
+  readonly I1F2: string;
 }
 
-interface InterfaceC {
-    fieldC: string
+enum E1 {
+  ONE
 }
 
-class ClassA implements InterfaceA {
-    fieldA = "Hello";
-    fieldB = 1.0;
-}
-
-class ClassB implements InterfaceB, InterfaceC {
-    fieldA = "Hello";
-    fieldB = 1.0;
-    fieldC = "World";
-    foo(){}
+namespace NS1 {
+  const NS1F1: string[] = ["namespace"];
 }

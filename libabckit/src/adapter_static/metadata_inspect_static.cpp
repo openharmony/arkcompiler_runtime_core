@@ -123,6 +123,40 @@ AbckitString *EnumGetNameStatic(AbckitCoreEnum *enm)
 }
 
 // ========================================
+// Field
+// ========================================
+
+bool ClassFieldIsPublicStatic(AbckitCoreClassField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    return (field->GetArkTSImpl()->GetStaticImpl()->metadata->GetAccessFlags() & ACC_PUBLIC) != 0x0;
+}
+
+bool ClassFieldIsProtectedStatic(AbckitCoreClassField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    return (field->GetArkTSImpl()->GetStaticImpl()->metadata->GetAccessFlags() & ACC_PROTECTED) != 0x0;
+}
+
+bool ClassFieldIsPrivateStatic(AbckitCoreClassField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    return (field->GetArkTSImpl()->GetStaticImpl()->metadata->GetAccessFlags() & ACC_PRIVATE) != 0x0;
+}
+
+bool ClassFieldIsStaticStatic(AbckitCoreClassField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    return (field->GetArkTSImpl()->GetStaticImpl()->metadata->GetAccessFlags() & ACC_STATIC) != 0x0;
+}
+
+bool InterfaceFieldIsReadonlyStatic(AbckitCoreInterfaceField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    return (field->flag & ACC_READONLY) != 0x0;
+}
+
+// ========================================
 // Function
 // ========================================
 AbckitString *FunctionGetNameStatic(AbckitCoreFunction *function)

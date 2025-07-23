@@ -20,6 +20,18 @@
 
 namespace abckit::core {
 
+// ========================================
+// Module Field
+// ========================================
+
+inline Module ModuleField::GetModule() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitCoreModule *module = conf->cIapi_->moduleFieldGetModule(GetView());
+    CheckError(conf);
+    return Module(module, conf, GetResource());
+}
+
 inline std::string ModuleField::GetName() const
 {
     const ApiConfig *conf = GetApiConfig();
@@ -28,6 +40,40 @@ inline std::string ModuleField::GetName() const
     std::string str = conf->cIapi_->abckitStringToString(cString);
     CheckError(conf);
     return str;
+}
+
+// ========================================
+// Namesapce Field
+// ========================================
+
+inline Namespace NamespaceField::GetNamespace() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitCoreNamespace *ns = conf->cIapi_->namespaceFieldGetNamespace(GetView());
+    CheckError(conf);
+    return Namespace(ns, conf, GetResource());
+}
+
+inline std::string NamespaceField::GetName() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitString *cString = conf->cIapi_->namespaceFieldGetName(GetView());
+    CheckError(conf);
+    std::string str = conf->cIapi_->abckitStringToString(cString);
+    CheckError(conf);
+    return str;
+}
+
+// ========================================
+// Class Field
+// ========================================
+
+inline Class ClassField::GetClass() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitCoreClass *klass = conf->cIapi_->classFieldGetClass(GetView());
+    CheckError(conf);
+    return Class(klass, conf, GetResource());
 }
 
 inline std::string ClassField::GetName() const
@@ -40,6 +86,50 @@ inline std::string ClassField::GetName() const
     return str;
 }
 
+inline bool ClassField::IsPublic() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    bool res = conf->cIapi_->classFieldIsPublic(GetView());
+    CheckError(conf);
+    return res;
+}
+
+inline bool ClassField::IsProtected() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    bool res = conf->cIapi_->classFieldIsProtected(GetView());
+    CheckError(conf);
+    return res;
+}
+
+inline bool ClassField::IsPrivate() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    bool res = conf->cIapi_->classFieldIsPrivate(GetView());
+    CheckError(conf);
+    return res;
+}
+
+inline bool ClassField::IsStatic() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    bool res = conf->cIapi_->classFieldIsStatic(GetView());
+    CheckError(conf);
+    return res;
+}
+
+// ========================================
+// Interface Field
+// ========================================
+
+inline Interface InterfaceField::GetInterface() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitCoreInterface *iface = conf->cIapi_->interfaceFieldGetInterface(GetView());
+    CheckError(conf);
+    return Interface(iface, conf, GetResource());
+}
+
 inline std::string InterfaceField::GetName() const
 {
     const ApiConfig *conf = GetApiConfig();
@@ -48,6 +138,26 @@ inline std::string InterfaceField::GetName() const
     std::string str = conf->cIapi_->abckitStringToString(cString);
     CheckError(conf);
     return str;
+}
+
+inline bool InterfaceField::IsReadonly() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    bool res = conf->cIapi_->interfaceFieldIsReadonly(GetView());
+    CheckError(conf);
+    return res;
+}
+
+// ========================================
+// Enum Field
+// ========================================
+
+inline Enum EnumField::GetEnum() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitCoreEnum *enm = conf->cIapi_->enumFieldGetEnum(GetView());
+    CheckError(conf);
+    return Enum(enm, conf, GetResource());
 }
 
 inline std::string EnumField::GetName() const

@@ -58,8 +58,13 @@ inline std::string Module::GetName() const
 inline std::vector<core::Class> Module::GetClasses() const
 {
     std::vector<core::Class> classes;
+    Payload<std::vector<core::Class> *> payload {&classes, GetApiConfig(), GetResource()};
 
-    GetClassesInner(classes);
+    GetApiConfig()->cIapi_->moduleEnumerateClasses(GetView(), &payload, [](AbckitCoreClass *klass, void *data) {
+        const auto &payload = *static_cast<Payload<std::vector<core::Class> *> *>(data);
+        payload.data->push_back(core::Class(klass, payload.config, payload.resource));
+        return true;
+    });
 
     CheckError(GetApiConfig());
 
@@ -69,8 +74,13 @@ inline std::vector<core::Class> Module::GetClasses() const
 inline std::vector<core::Interface> Module::GetInterfaces() const
 {
     std::vector<core::Interface> interfaces;
+    Payload<std::vector<core::Interface> *> payload {&interfaces, GetApiConfig(), GetResource()};
 
-    GetInterfacesInner(interfaces);
+    GetApiConfig()->cIapi_->moduleEnumerateInterfaces(GetView(), &payload, [](AbckitCoreInterface *iface, void *data) {
+        const auto &payload = *static_cast<Payload<std::vector<core::Interface> *> *>(data);
+        payload.data->push_back(core::Interface(iface, payload.config, payload.resource));
+        return true;
+    });
 
     CheckError(GetApiConfig());
 
@@ -80,8 +90,13 @@ inline std::vector<core::Interface> Module::GetInterfaces() const
 inline std::vector<core::Enum> Module::GetEnums() const
 {
     std::vector<core::Enum> enums;
+    Payload<std::vector<core::Enum> *> payload {&enums, GetApiConfig(), GetResource()};
 
-    GetEnumsInner(enums);
+    GetApiConfig()->cIapi_->moduleEnumerateEnums(GetView(), &payload, [](AbckitCoreEnum *enm, void *data) {
+        const auto &payload = *static_cast<Payload<std::vector<core::Enum> *> *>(data);
+        payload.data->push_back(core::Enum(enm, payload.config, payload.resource));
+        return true;
+    });
 
     CheckError(GetApiConfig());
 
@@ -91,8 +106,14 @@ inline std::vector<core::Enum> Module::GetEnums() const
 inline std::vector<core::Function> Module::GetTopLevelFunctions() const
 {
     std::vector<core::Function> functions;
+    Payload<std::vector<core::Function> *> payload {&functions, GetApiConfig(), GetResource()};
 
-    GetTopLevelFunctionsInner(functions);
+    GetApiConfig()->cIapi_->moduleEnumerateTopLevelFunctions(
+        GetView(), &payload, [](AbckitCoreFunction *func, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::Function> *> *>(data);
+            payload.data->push_back(core::Function(func, payload.config, payload.resource));
+            return true;
+        });
 
     CheckError(GetApiConfig());
 
@@ -102,8 +123,13 @@ inline std::vector<core::Function> Module::GetTopLevelFunctions() const
 inline std::vector<core::ModuleField> Module::GetFields() const
 {
     std::vector<core::ModuleField> fields;
+    Payload<std::vector<core::ModuleField> *> payload {&fields, GetApiConfig(), GetResource()};
 
-    GetFieldsInner(fields);
+    GetApiConfig()->cIapi_->moduleEnumerateFields(GetView(), &payload, [](AbckitCoreModuleField *field, void *data) {
+        const auto &payload = *static_cast<Payload<std::vector<core::ModuleField> *> *>(data);
+        payload.data->push_back(core::ModuleField(field, payload.config, payload.resource));
+        return true;
+    });
 
     CheckError(GetApiConfig());
 
@@ -113,8 +139,14 @@ inline std::vector<core::ModuleField> Module::GetFields() const
 inline std::vector<core::AnnotationInterface> Module::GetAnnotationInterfaces() const
 {
     std::vector<core::AnnotationInterface> ifaces;
+    Payload<std::vector<core::AnnotationInterface> *> payload {&ifaces, GetApiConfig(), GetResource()};
 
-    GetAnnotationInterfacesInner(ifaces);
+    GetApiConfig()->cIapi_->moduleEnumerateAnnotationInterfaces(
+        GetView(), &payload, [](AbckitCoreAnnotationInterface *func, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::AnnotationInterface> *> *>(data);
+            payload.data->push_back(core::AnnotationInterface(func, payload.config, payload.resource));
+            return true;
+        });
 
     CheckError(GetApiConfig());
 
@@ -124,8 +156,13 @@ inline std::vector<core::AnnotationInterface> Module::GetAnnotationInterfaces() 
 inline std::vector<core::Namespace> Module::GetNamespaces() const
 {
     std::vector<core::Namespace> namespaces;
+    Payload<std::vector<core::Namespace> *> payload {&namespaces, GetApiConfig(), GetResource()};
 
-    GetNamespacesInner(namespaces);
+    GetApiConfig()->cIapi_->moduleEnumerateNamespaces(GetView(), &payload, [](AbckitCoreNamespace *func, void *data) {
+        const auto &payload = *static_cast<Payload<std::vector<core::Namespace> *> *>(data);
+        payload.data->push_back(core::Namespace(func, payload.config, payload.resource));
+        return true;
+    });
 
     CheckError(GetApiConfig());
 
@@ -135,8 +172,14 @@ inline std::vector<core::Namespace> Module::GetNamespaces() const
 inline std::vector<core::ImportDescriptor> Module::GetImports() const
 {
     std::vector<core::ImportDescriptor> imports;
+    Payload<std::vector<core::ImportDescriptor> *> payload {&imports, GetApiConfig(), GetResource()};
 
-    GetImportsInner(imports);
+    GetApiConfig()->cIapi_->moduleEnumerateImports(
+        GetView(), &payload, [](AbckitCoreImportDescriptor *func, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::ImportDescriptor> *> *>(data);
+            payload.data->push_back(core::ImportDescriptor(func, payload.config, payload.resource));
+            return true;
+        });
 
     CheckError(GetApiConfig());
 
@@ -146,8 +189,14 @@ inline std::vector<core::ImportDescriptor> Module::GetImports() const
 inline std::vector<core::ExportDescriptor> Module::GetExports() const
 {
     std::vector<core::ExportDescriptor> exports;
+    Payload<std::vector<core::ExportDescriptor> *> payload {&exports, GetApiConfig(), GetResource()};
 
-    GetExportsInner(exports);
+    GetApiConfig()->cIapi_->moduleEnumerateExports(
+        GetView(), &payload, [](AbckitCoreExportDescriptor *func, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::ExportDescriptor> *> *>(data);
+            payload.data->push_back(core::ExportDescriptor(func, payload.config, payload.resource));
+            return true;
+        });
 
     CheckError(GetApiConfig());
 
@@ -230,123 +279,6 @@ inline bool Module::EnumerateImports(const std::function<bool(core::ImportDescri
             return payload.data(core::ImportDescriptor(func, payload.config, payload.resource));
         });
     CheckError(GetApiConfig());
-    return isNormalExit;
-}
-
-inline bool Module::GetClassesInner(std::vector<core::Class> &classes) const
-{
-    Payload<std::vector<core::Class> *> payload {&classes, GetApiConfig(), GetResource()};
-
-    auto isNormalExit =
-        GetApiConfig()->cIapi_->moduleEnumerateClasses(GetView(), &payload, [](AbckitCoreClass *klass, void *data) {
-            const auto &payload = *static_cast<Payload<std::vector<core::Class> *> *>(data);
-            payload.data->push_back(core::Class(klass, payload.config, payload.resource));
-            return true;
-        });
-    return isNormalExit;
-}
-
-inline bool Module::GetInterfacesInner(std::vector<core::Interface> &interfaces) const
-{
-    Payload<std::vector<core::Interface> *> payload {&interfaces, GetApiConfig(), GetResource()};
-
-    auto isNormalExit = GetApiConfig()->cIapi_->moduleEnumerateInterfaces(
-        GetView(), &payload, [](AbckitCoreInterface *iface, void *data) {
-            const auto &payload = *static_cast<Payload<std::vector<core::Interface> *> *>(data);
-            payload.data->push_back(core::Interface(iface, payload.config, payload.resource));
-            return true;
-        });
-    return isNormalExit;
-}
-
-inline bool Module::GetEnumsInner(std::vector<core::Enum> &enums) const
-{
-    Payload<std::vector<core::Enum> *> payload {&enums, GetApiConfig(), GetResource()};
-
-    auto isNormalExit =
-        GetApiConfig()->cIapi_->moduleEnumerateEnums(GetView(), &payload, [](AbckitCoreEnum *enm, void *data) {
-            const auto &payload = *static_cast<Payload<std::vector<core::Enum> *> *>(data);
-            payload.data->push_back(core::Enum(enm, payload.config, payload.resource));
-            return true;
-        });
-    return isNormalExit;
-}
-
-inline bool Module::GetTopLevelFunctionsInner(std::vector<core::Function> &functions) const
-{
-    Payload<std::vector<core::Function> *> payload {&functions, GetApiConfig(), GetResource()};
-
-    auto isNormalExit = GetApiConfig()->cIapi_->moduleEnumerateTopLevelFunctions(
-        GetView(), &payload, [](AbckitCoreFunction *func, void *data) {
-            const auto &payload = *static_cast<Payload<std::vector<core::Function> *> *>(data);
-            payload.data->push_back(core::Function(func, payload.config, payload.resource));
-            return true;
-        });
-    return isNormalExit;
-}
-
-inline bool Module::GetFieldsInner(std::vector<core::ModuleField> &fields) const
-{
-    Payload<std::vector<core::ModuleField> *> payload {&fields, GetApiConfig(), GetResource()};
-
-    auto isNormalExit = GetApiConfig()->cIapi_->moduleEnumerateFields(
-        GetView(), &payload, [](AbckitCoreModuleField *field, void *data) {
-            const auto &payload = *static_cast<Payload<std::vector<core::ModuleField> *> *>(data);
-            payload.data->push_back(core::ModuleField(field, payload.config));
-            return true;
-        });
-    return isNormalExit;
-}
-
-inline bool Module::GetAnnotationInterfacesInner(std::vector<core::AnnotationInterface> &ifaces) const
-{
-    Payload<std::vector<core::AnnotationInterface> *> payload {&ifaces, GetApiConfig(), GetResource()};
-
-    auto isNormalExit = GetApiConfig()->cIapi_->moduleEnumerateAnnotationInterfaces(
-        GetView(), &payload, [](AbckitCoreAnnotationInterface *func, void *data) {
-            const auto &payload = *static_cast<Payload<std::vector<core::AnnotationInterface> *> *>(data);
-            payload.data->push_back(core::AnnotationInterface(func, payload.config, payload.resource));
-            return true;
-        });
-    return isNormalExit;
-}
-
-inline bool Module::GetNamespacesInner(std::vector<core::Namespace> &namespaces) const
-{
-    Payload<std::vector<core::Namespace> *> payload {&namespaces, GetApiConfig(), GetResource()};
-
-    auto isNormalExit = GetApiConfig()->cIapi_->moduleEnumerateNamespaces(
-        GetView(), &payload, [](AbckitCoreNamespace *func, void *data) {
-            const auto &payload = *static_cast<Payload<std::vector<core::Namespace> *> *>(data);
-            payload.data->push_back(core::Namespace(func, payload.config, payload.resource));
-            return true;
-        });
-    return isNormalExit;
-}
-
-inline bool Module::GetImportsInner(std::vector<core::ImportDescriptor> &imports) const
-{
-    Payload<std::vector<core::ImportDescriptor> *> payload {&imports, GetApiConfig(), GetResource()};
-
-    auto isNormalExit = GetApiConfig()->cIapi_->moduleEnumerateImports(
-        GetView(), &payload, [](AbckitCoreImportDescriptor *func, void *data) {
-            const auto &payload = *static_cast<Payload<std::vector<core::ImportDescriptor> *> *>(data);
-            payload.data->push_back(core::ImportDescriptor(func, payload.config, payload.resource));
-            return true;
-        });
-    return isNormalExit;
-}
-
-inline bool Module::GetExportsInner(std::vector<core::ExportDescriptor> &exports) const
-{
-    Payload<std::vector<core::ExportDescriptor> *> payload {&exports, GetApiConfig(), GetResource()};
-
-    auto isNormalExit = GetApiConfig()->cIapi_->moduleEnumerateExports(
-        GetView(), &payload, [](AbckitCoreExportDescriptor *func, void *data) {
-            const auto &payload = *static_cast<Payload<std::vector<core::ExportDescriptor> *> *>(data);
-            payload.data->push_back(core::ExportDescriptor(func, payload.config, payload.resource));
-            return true;
-        });
     return isNormalExit;
 }
 

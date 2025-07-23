@@ -54,6 +54,16 @@ AbckitString *InterfaceGetNameStatic(AbckitCoreInterface *iface);
 AbckitString *EnumGetNameStatic(AbckitCoreEnum *enm);
 
 // ========================================
+// Field
+// ========================================
+
+bool ClassFieldIsPublicStatic(AbckitCoreClassField *field);
+bool ClassFieldIsProtectedStatic(AbckitCoreClassField *field);
+bool ClassFieldIsPrivateStatic(AbckitCoreClassField *field);
+bool ClassFieldIsStaticStatic(AbckitCoreClassField *field);
+bool InterfaceFieldIsReadonlyStatic(AbckitCoreInterfaceField *field);
+
+// ========================================
 // Function
 // ========================================
 

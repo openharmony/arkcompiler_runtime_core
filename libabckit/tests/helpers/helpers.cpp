@@ -796,4 +796,26 @@ std::string_view AbckitStringToString(AbckitString *str)
     return name;
 }
 
+std::optional<abckit::core::Class> GetClassByName(const abckit::core::Module &module, const std::string &name)
+{
+    for (const auto &klass : module.GetClasses()) {
+        if (klass.GetName() == name) {
+            return klass;
+        }
+    }
+    LIBABCKIT_LOG_TEST(DEBUG) << "Class Not Found: " << name << std::endl;
+    return std::nullopt;
+}
+
+std::optional<abckit::core::Interface> GetInterfaceByName(const abckit::core::Module &module, const std::string &name)
+{
+    for (const auto &iface : module.GetInterfaces()) {
+        if (iface.GetName() == name) {
+            return iface;
+        }
+    }
+    LIBABCKIT_LOG_TEST(DEBUG) << "Interface Not Found: " << name << std::endl;
+    return std::nullopt;
+}
+
 }  // namespace libabckit::test::helpers

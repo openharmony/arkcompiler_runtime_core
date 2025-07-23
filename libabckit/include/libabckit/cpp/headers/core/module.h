@@ -37,6 +37,8 @@ class Module : public ViewInResource<AbckitCoreModule *, const File *> {
     /// @brief to access private constructor
     friend class core::Class;
     /// @brief to access private constructor
+    friend class core::Namespace;
+    /// @brief to access private constructor
     friend class core::ImportDescriptor;
     /// @brief to access private constructor
     friend class core::ExportDescriptor;
@@ -275,24 +277,6 @@ public:
     bool EnumerateAnnotationInterfaces(const std::function<bool(core::AnnotationInterface)> &cb) const;
 
 private:
-    bool GetClassesInner(std::vector<core::Class> &classes) const;
-
-    bool GetInterfacesInner(std::vector<core::Interface> &interfaces) const;
-
-    bool GetEnumsInner(std::vector<core::Enum> &enums) const;
-
-    bool GetTopLevelFunctionsInner(std::vector<core::Function> &functions) const;
-
-    bool GetFieldsInner(std::vector<core::ModuleField> &fields) const;
-
-    bool GetAnnotationInterfacesInner(std::vector<core::AnnotationInterface> &ifaces) const;
-
-    bool GetNamespacesInner(std::vector<core::Namespace> &namespaces) const;
-
-    bool GetImportsInner(std::vector<core::ImportDescriptor> &imports) const;
-
-    bool GetExportsInner(std::vector<core::ExportDescriptor> &exports) const;
-
     Module(AbckitCoreModule *module, const ApiConfig *conf, const File *file) : ViewInResource(module), conf_(conf)
     {
         SetResource(file);

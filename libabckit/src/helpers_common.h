@@ -31,15 +31,37 @@ bool ModuleEnumerateFieldsHelper(AbckitCoreModule *m, void *data, bool (*cb)(Abc
 bool ModuleEnumerateAnnotationInterfacesHelper(AbckitCoreModule *m, void *data,
                                                bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data));
 
+bool NamespaceEnumerateNamespacesHelper(AbckitCoreNamespace *n, void *data,
+                                        bool (*cb)(AbckitCoreNamespace *ns, void *data));
+bool NamespaceEnumerateClassesHelper(AbckitCoreNamespace *n, void *data,
+                                     bool (*cb)(AbckitCoreClass *klass, void *data));
+bool NamespaceEnumerateInterfacesHelper(AbckitCoreNamespace *n, void *data,
+                                        bool (*cb)(AbckitCoreInterface *iface, void *data));
+bool NamespaceEnumerateEnumsHelper(AbckitCoreNamespace *n, void *data, bool (*cb)(AbckitCoreEnum *enm, void *data));
+bool NamespaceEnumerateTopLevelFunctionsHelper(AbckitCoreNamespace *n, void *data,
+                                               bool (*cb)(AbckitCoreFunction *function, void *data));
+bool NamespaceEnumerateFieldsHelper(AbckitCoreNamespace *n, void *data,
+                                    bool (*cb)(AbckitCoreNamespaceField *field, void *data));
+
 bool ClassEnumerateMethodsHelper(AbckitCoreClass *klass, void *data,
                                  bool (*cb)(AbckitCoreFunction *method, void *data));
 bool ClassEnumerateFieldsHelper(AbckitCoreClass *klass, void *data,
                                 bool (*cb)(AbckitCoreClassField *field, void *data));
+bool ClassEnumerateSubClassesHelper(AbckitCoreClass *klass, void *data,
+                                    bool (*cb)(AbckitCoreClass *subClass, void *data));
+bool ClassEnumerateInterfacesHelper(AbckitCoreClass *klass, void *data,
+                                    bool (*cb)(AbckitCoreInterface *iface, void *data));
 
 bool InterfaceEnumerateMethodsHelper(AbckitCoreInterface *iface, void *data,
                                      bool (*cb)(AbckitCoreFunction *method, void *data));
 bool InterfaceEnumerateFieldsHelper(AbckitCoreInterface *iface, void *data,
                                     bool (*cb)(AbckitCoreInterfaceField *field, void *data));
+bool InterfaceEnumerateSuperInterfacesHelper(AbckitCoreInterface *iface, void *data,
+                                             bool (*cb)(AbckitCoreInterface *superInterface, void *data));
+bool InterfaceEnumerateSubInterfacesHelper(AbckitCoreInterface *iface, void *data,
+                                           bool (*cb)(AbckitCoreInterface *subInterface, void *data));
+bool InterfaceEnumerateClassesHelper(AbckitCoreInterface *iface, void *data,
+                                     bool (*cb)(AbckitCoreClass *klass, void *data));
 
 bool EnumEnumerateMethodsHelper(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreFunction *method, void *data));
 bool EnumEnumerateFieldsHelper(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreEnumField *field, void *data));

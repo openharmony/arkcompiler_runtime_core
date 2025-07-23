@@ -16,6 +16,7 @@
 #ifndef CPP_ABCKIT_CORE_FIELD_H
 #define CPP_ABCKIT_CORE_FIELD_H
 
+#include <vector>
 #include "../base_classes.h"
 
 namespace abckit::core {
@@ -23,7 +24,7 @@ namespace abckit::core {
 /**
  * @brief ModuleField
  */
-class ModuleField : public View<AbckitCoreModuleField *> {
+class ModuleField : public ViewInResource<AbckitCoreModuleField *, const File *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class core::Module;
@@ -69,6 +70,106 @@ public:
     ~ModuleField() override = default;
 
     /**
+     * @brief Returns module for module field.
+     * @return core::Module
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Module GetModule() const;
+
+    /**
+     * @brief Returns name.
+     * @return std::string
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::string GetName() const;
+
+    /**
+     * @brief Tell if field is Public.
+     * @return Return `true` if field is Public otherwise false
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsPublic() const;
+
+    /**
+     * @brief Tell if field is Private.
+     * @return Return `true` if field is Private otherwise false
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsPrivate() const;
+
+private:
+    ModuleField(AbckitCoreModuleField *field, const ApiConfig *conf, const File *file)
+        : ViewInResource(field), conf_(conf)
+    {
+        SetResource(file);
+    };
+    const ApiConfig *conf_;
+
+protected:
+    /**
+     * @brief Get the Api Config object
+     * @return const ApiConfig*
+     */
+    const ApiConfig *GetApiConfig() const override
+    {
+        return conf_;
+    }
+};
+
+/**
+ * @brief NamespaceField
+ */
+class NamespaceField : public ViewInResource<AbckitCoreNamespaceField *, const File *> {
+    // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief to access private constructor
+    friend class core::Namespace;
+    /// @brief abckit::DefaultHash<NamespaceField>
+    friend class abckit::DefaultHash<NamespaceField>;
+
+protected:
+    /// @brief Core API View type
+    using CoreViewT = NamespaceField;
+
+public:
+    /**
+     * @brief Construct a new NamespaceField object
+     * @param other
+     */
+    NamespaceField(const NamespaceField &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return NamespaceField&
+     */
+    NamespaceField &operator=(const NamespaceField &other) = default;
+
+    /**
+     * @brief Construct a new Field object
+     * @param other
+     */
+    NamespaceField(NamespaceField &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return NamespaceField&
+     */
+    NamespaceField &operator=(NamespaceField &&other) = default;
+
+    /**
+     * @brief Destroy the NamespaceField object
+     */
+    ~NamespaceField() override = default;
+
+    /**
+     * @brief Returns namespace for namespace field.
+     * @return core::Class
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Namespace GetNamespace() const;
+
+    /**
      * @brief Returns name.
      * @return std::string
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
@@ -76,7 +177,11 @@ public:
     std::string GetName() const;
 
 private:
-    ModuleField(AbckitCoreModuleField *field, const ApiConfig *conf) : View(field), conf_(conf) {};
+    NamespaceField(AbckitCoreNamespaceField *field, const ApiConfig *conf, const File *file)
+        : ViewInResource(field), conf_(conf)
+    {
+        SetResource(file);
+    };
     const ApiConfig *conf_;
 
 protected:
@@ -93,7 +198,7 @@ protected:
 /**
  * @brief ClassField
  */
-class ClassField : public View<AbckitCoreClassField *> {
+class ClassField : public ViewInResource<AbckitCoreClassField *, const File *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class core::Class;
@@ -137,14 +242,53 @@ public:
     ~ClassField() override = default;
 
     /**
+     * @brief Returns class for class field.
+     * @return core::Class
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Class GetClass() const;
+
+    /**
      * @brief Returns name.
      * @return std::string
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::string GetName() const;
 
+    /**
+     * @brief Tell if field is Public.
+     * @return Return `true` if field is Public otherwise false
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsPublic() const;
+
+    /**
+     * @brief Tell if field is Public.
+     * @return Return `true` if field is Protected otherwise false
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsProtected() const;
+
+    /**
+     * @brief Tell if field is Private.
+     * @return Return `true` if field is Private otherwise false
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsPrivate() const;
+
+    /**
+     * @brief Tell if field is Static.
+     * @return Return `true` if field is Static otherwise false
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsStatic() const;
+
 private:
-    ClassField(AbckitCoreClassField *field, const ApiConfig *conf) : View(field), conf_(conf) {};
+    ClassField(AbckitCoreClassField *field, const ApiConfig *conf, const File *file)
+        : ViewInResource(field), conf_(conf)
+    {
+        SetResource(file);
+    };
     const ApiConfig *conf_;
 
 protected:
@@ -161,7 +305,7 @@ protected:
 /**
  * @brief InterfaceField
  */
-class InterfaceField : public View<AbckitCoreInterfaceField *> {
+class InterfaceField : public ViewInResource<AbckitCoreInterfaceField *, const File *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class core::Interface;
@@ -205,14 +349,32 @@ public:
     ~InterfaceField() override = default;
 
     /**
+     * @brief Returns Interface for interface field.
+     * @return core::Interface
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Interface GetInterface() const;
+
+    /**
      * @brief Returns name.
      * @return std::string
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::string GetName() const;
 
+    /**
+     * @brief Tell if field is Readonly.
+     * @return Return `true` if field is Readonly otherwise false
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsReadonly() const;
+
 private:
-    InterfaceField(AbckitCoreInterfaceField *field, const ApiConfig *conf) : View(field), conf_(conf) {};
+    InterfaceField(AbckitCoreInterfaceField *field, const ApiConfig *conf, const File *file)
+        : ViewInResource(field), conf_(conf)
+    {
+        SetResource(file);
+    };
     const ApiConfig *conf_;
 
 protected:
@@ -229,7 +391,7 @@ protected:
 /**
  * @brief EnumField
  */
-class EnumField : public View<AbckitCoreEnumField *> {
+class EnumField : public ViewInResource<AbckitCoreEnumField *, const File *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class core::Enum;
@@ -273,6 +435,13 @@ public:
     ~EnumField() override = default;
 
     /**
+     * @brief Returns Enum for enum field.
+     * @return core::Enum
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Enum GetEnum() const;
+
+    /**
      * @brief Returns name.
      * @return std::string
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
@@ -280,7 +449,10 @@ public:
     std::string GetName() const;
 
 private:
-    EnumField(AbckitCoreEnumField *field, const ApiConfig *conf) : View(field), conf_(conf) {};
+    EnumField(AbckitCoreEnumField *field, const ApiConfig *conf, const File *file) : ViewInResource(field), conf_(conf)
+    {
+        SetResource(file);
+    };
     const ApiConfig *conf_;
 
 protected:

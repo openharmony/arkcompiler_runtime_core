@@ -17,10 +17,121 @@
 #define CPP_ABCKIT_CORE_NAMESPACE_IMPL_H
 
 #include "namespace.h"
+#include "module.h"
 #include "function.h"
 #include "class.h"
+#include "interface.h"
+#include "enum.h"
+#include "field.h"
 
 namespace abckit::core {
+
+inline core::Module Namespace::GetModule() const
+{
+    AbckitCoreModule *mod = GetApiConfig()->cIapi_->namespaceGetModule(GetView());
+    CheckError(GetApiConfig());
+    return Module(mod, GetApiConfig(), GetResource());
+}
+
+inline std::vector<core::Class> Namespace::GetClasses() const
+{
+    std::vector<core::Class> classes;
+    Payload<std::vector<core::Class> *> payload {&classes, GetApiConfig(), GetResource()};
+
+    GetApiConfig()->cIapi_->namespaceEnumerateClasses(GetView(), &payload, [](AbckitCoreClass *klass, void *data) {
+        const auto &payload = *static_cast<Payload<std::vector<core::Class> *> *>(data);
+        payload.data->push_back(core::Class(klass, payload.config, payload.resource));
+        return true;
+    });
+
+    CheckError(GetApiConfig());
+
+    return classes;
+}
+
+inline std::vector<core::Interface> Namespace::GetInterfaces() const
+{
+    std::vector<core::Interface> interfaces;
+    Payload<std::vector<core::Interface> *> payload {&interfaces, GetApiConfig(), GetResource()};
+
+    GetApiConfig()->cIapi_->namespaceEnumerateInterfaces(
+        GetView(), &payload, [](AbckitCoreInterface *iface, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::Interface> *> *>(data);
+            payload.data->push_back(core::Interface(iface, payload.config, payload.resource));
+            return true;
+        });
+
+    CheckError(GetApiConfig());
+
+    return interfaces;
+}
+
+inline std::vector<core::Enum> Namespace::GetEnums() const
+{
+    std::vector<core::Enum> enums;
+    Payload<std::vector<core::Enum> *> payload {&enums, GetApiConfig(), GetResource()};
+
+    GetApiConfig()->cIapi_->namespaceEnumerateEnums(GetView(), &payload, [](AbckitCoreEnum *enm, void *data) {
+        const auto &payload = *static_cast<Payload<std::vector<core::Enum> *> *>(data);
+        payload.data->push_back(core::Enum(enm, payload.config, payload.resource));
+        return true;
+    });
+
+    CheckError(GetApiConfig());
+
+    return enums;
+}
+
+inline std::vector<core::Function> Namespace::GetTopLevelFunctions() const
+{
+    std::vector<core::Function> functions;
+    Payload<std::vector<core::Function> *> payload {&functions, GetApiConfig(), GetResource()};
+
+    GetApiConfig()->cIapi_->namespaceEnumerateTopLevelFunctions(
+        GetView(), &payload, [](AbckitCoreFunction *func, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::Function> *> *>(data);
+            payload.data->push_back(core::Function(func, payload.config, payload.resource));
+            return true;
+        });
+
+    CheckError(GetApiConfig());
+
+    return functions;
+}
+
+inline std::vector<core::NamespaceField> Namespace::GetFields() const
+{
+    std::vector<core::NamespaceField> fields;
+    Payload<std::vector<core::NamespaceField> *> payload {&fields, GetApiConfig(), GetResource()};
+
+    GetApiConfig()->cIapi_->namespaceEnumerateFields(
+        GetView(), &payload, [](AbckitCoreNamespaceField *field, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::NamespaceField> *> *>(data);
+            payload.data->push_back(core::NamespaceField(field, payload.config, payload.resource));
+            return true;
+        });
+
+    CheckError(GetApiConfig());
+
+    return fields;
+}
+
+inline std::vector<core::Namespace> Namespace::GetNamespaces() const
+{
+    std::vector<core::Namespace> namespaces;
+    Payload<std::vector<core::Namespace> *> payload {&namespaces, GetApiConfig(), GetResource()};
+
+    GetApiConfig()->cIapi_->namespaceEnumerateNamespaces(
+        GetView(), &payload, [](AbckitCoreNamespace *func, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::Namespace> *> *>(data);
+            payload.data->push_back(core::Namespace(func, payload.config, payload.resource));
+            return true;
+        });
+
+    CheckError(GetApiConfig());
+
+    return namespaces;
+}
 
 // CC-OFFNXT(G.FUD.06) perf critical
 inline bool Namespace::EnumerateNamespaces(const std::function<bool(core::Namespace)> &cb) const

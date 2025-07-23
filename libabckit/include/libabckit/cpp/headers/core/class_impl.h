@@ -55,6 +55,22 @@ inline std::vector<core::Function> Class::GetAllMethods() const
     return methods;
 }
 
+inline std::vector<core::ClassField> Class::GetFields() const
+{
+    std::vector<core::ClassField> fields;
+    Payload<std::vector<core::ClassField> *> payload {&fields, GetApiConfig(), GetResource()};
+
+    GetApiConfig()->cIapi_->classEnumerateFields(GetView(), &payload, [](AbckitCoreClassField *field, void *data) {
+        const auto &payload = *static_cast<Payload<std::vector<core::ClassField> *> *>(data);
+        payload.data->push_back(core::ClassField(field, payload.config, payload.resource));
+        return true;
+    });
+
+    CheckError(GetApiConfig());
+
+    return fields;
+}
+
 // CC-OFFNXT(G.FUD.06) perf critical
 inline std::vector<core::Annotation> Class::GetAnnotations() const
 {
@@ -74,6 +90,46 @@ inline std::vector<core::Annotation> Class::GetAnnotations() const
     return anns;
 }
 
+inline core::Class Class::GetSuperClass() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitCoreClass *klass = conf->cIapi_->classGetSuperClass(GetView());
+    CheckError(conf);
+    return core::Class(klass, conf_, GetResource());
+}
+
+inline std::vector<Class> Class::GetSubClasses() const
+{
+    std::vector<core::Class> classes;
+    Payload<std::vector<core::Class> *> payload {&classes, GetApiConfig(), GetResource()};
+
+    GetApiConfig()->cIapi_->classEnumerateSubClasses(GetView(), &payload, [](AbckitCoreClass *klass, void *data) {
+        const auto &payload = *static_cast<Payload<std::vector<core::Class> *> *>(data);
+        payload.data->push_back(core::Class(klass, payload.config, payload.resource));
+        return true;
+    });
+
+    CheckError(GetApiConfig());
+
+    return classes;
+}
+
+inline std::vector<Interface> Class::GetInterfaces() const
+{
+    std::vector<Interface> interfaces;
+    Payload<std::vector<core::Interface> *> payload {&interfaces, GetApiConfig(), GetResource()};
+
+    GetApiConfig()->cIapi_->classEnumerateInterfaces(GetView(), &payload, [](AbckitCoreInterface *iface, void *data) {
+        const auto &payload = *static_cast<Payload<std::vector<core::Interface> *> *>(data);
+        payload.data->push_back(core::Interface(iface, payload.config, payload.resource));
+        return true;
+    });
+
+    CheckError(GetApiConfig());
+
+    return interfaces;
+}
+
 // CC-OFFNXT(G.FUD.06) perf critical
 inline bool Class::EnumerateMethods(const std::function<bool(core::Function)> &cb) const
 {
@@ -87,38 +143,6 @@ inline bool Class::EnumerateMethods(const std::function<bool(core::Function)> &c
     CheckError(GetApiConfig());
     return isNormalExit;
 }
-
-inline bool Class::GetAllMethodsInner(std::vector<core::Function> &methods) const
-{
-    Payload<std::vector<core::Function> *> payload {&methods, GetApiConfig(), GetResource()};
-
-    auto isNormalExit =
-        GetApiConfig()->cIapi_->classEnumerateMethods(GetView(), &payload, [](AbckitCoreFunction *method, void *data) {
-            const auto &payload = *static_cast<Payload<std::vector<core::Function> *> *>(data);
-            payload.data->push_back(core::Function(method, payload.config, payload.resource));
-            return true;
-        });
-    return isNormalExit;
-}
-
-inline bool Class::GetAllAnnotationsInner(std::vector<core::Annotation> &anns) const
-{
-    Payload<std::vector<core::Annotation> *> payload {&anns, GetApiConfig(), GetResource()};
-
-    auto isNormalExit = GetApiConfig()->cIapi_->classEnumerateAnnotations(
-        GetView(), &payload, [](AbckitCoreAnnotation *method, void *data) {
-            const auto &payload = *static_cast<Payload<std::vector<core::Annotation> *> *>(data);
-            payload.data->push_back(core::Annotation(method, payload.config, payload.resource));
-            return true;
-        });
-    return isNormalExit;
-}
-
-inline Class::Class(AbckitCoreClass *klass, const ApiConfig *conf, const File *file)
-    : ViewInResource(klass), conf_(conf)
-{
-    SetResource(file);
-};
 
 inline bool Class::EnumerateAnnotations(const std::function<bool(core::Annotation)> &cb) const
 {

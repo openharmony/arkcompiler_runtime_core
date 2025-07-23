@@ -16,9 +16,21 @@
 #ifndef CPP_ABCKIT_CORE_ENUM_IMPL_H
 #define CPP_ABCKIT_CORE_ENUM_IMPL_H
 
-#include "./enum.h"
+#include "enum.h"
 
 namespace abckit::core {
+
+inline const File *Enum::GetFile() const
+{
+    return GetResource();
+}
+
+inline core::Module Enum::GetModule() const
+{
+    AbckitCoreModule *mod = GetApiConfig()->cIapi_->enumGetModule(GetView());
+    CheckError(GetApiConfig());
+    return Module(mod, GetApiConfig(), GetResource());
+}
 
 inline std::string Enum::GetName() const
 {
@@ -33,8 +45,13 @@ inline std::string Enum::GetName() const
 inline std::vector<core::Function> Enum::GetAllMethods() const
 {
     std::vector<core::Function> methods;
+    Payload<std::vector<core::Function> *> payload {&methods, GetApiConfig(), GetResource()};
 
-    GetAllMethodsInner(methods);
+    GetApiConfig()->cIapi_->enumEnumerateMethods(GetView(), &payload, [](AbckitCoreFunction *method, void *data) {
+        const auto &payload = *static_cast<Payload<std::vector<core::Function> *> *>(data);
+        payload.data->push_back(core::Function(method, payload.config, payload.resource));
+        return true;
+    });
 
     CheckError(GetApiConfig());
 
@@ -44,38 +61,17 @@ inline std::vector<core::Function> Enum::GetAllMethods() const
 inline std::vector<core::EnumField> Enum::GetFields() const
 {
     std::vector<core::EnumField> fields;
+    Payload<std::vector<core::EnumField> *> payload {&fields, GetApiConfig(), GetResource()};
 
-    GetFieldsInner(fields);
+    GetApiConfig()->cIapi_->enumEnumerateFields(GetView(), &payload, [](AbckitCoreEnumField *field, void *data) {
+        const auto &payload = *static_cast<Payload<std::vector<core::EnumField> *> *>(data);
+        payload.data->push_back(core::EnumField(field, payload.config, payload.resource));
+        return true;
+    });
 
     CheckError(GetApiConfig());
 
     return fields;
-}
-
-inline bool Enum::GetAllMethodsInner(std::vector<core::Function> &methods) const
-{
-    Payload<std::vector<core::Function> *> payload {&methods, GetApiConfig(), GetResource()};
-
-    auto isNormalExit =
-        GetApiConfig()->cIapi_->enumEnumerateMethods(GetView(), &payload, [](AbckitCoreFunction *method, void *data) {
-            const auto &payload = *static_cast<Payload<std::vector<core::Function> *> *>(data);
-            payload.data->push_back(core::Function(method, payload.config, payload.resource));
-            return true;
-        });
-    return isNormalExit;
-}
-
-inline bool Enum::GetFieldsInner(std::vector<core::EnumField> &fields) const
-{
-    Payload<std::vector<core::EnumField> *> payload {&fields, GetApiConfig(), GetResource()};
-
-    auto isNormalExit =
-        GetApiConfig()->cIapi_->enumEnumerateFields(GetView(), &payload, [](AbckitCoreEnumField *field, void *data) {
-            const auto &payload = *static_cast<Payload<std::vector<core::EnumField> *> *>(data);
-            payload.data->push_back(core::EnumField(field, payload.config));
-            return true;
-        });
-    return isNormalExit;
 }
 }  // namespace abckit::core
 

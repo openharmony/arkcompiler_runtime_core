@@ -50,6 +50,7 @@ class Interface;
 class Enum;
 class Function;
 class ModuleField;
+class NamespaceField;
 class ClassField;
 class InterfaceField;
 class EnumField;
@@ -114,6 +115,8 @@ class ApiConfig final {
     friend core::Function;
     /// \relates abckit::core::ModuleField
     friend core::ModuleField;
+    /// \relates abckit::core::NamespaceField
+    friend core::NamespaceField;
     /// \relates abckit::core::ClassField
     friend core::ClassField;
     /// \relates abckit::core::InterfaceField
