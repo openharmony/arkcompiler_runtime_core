@@ -325,9 +325,6 @@ std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
 #25264
 std/core/ConsoleArrayTest.ets
 
-#25130
-std/core/dateformat/DateTimeFormatTest.ets
-
 #11468
 std/core/std_core_array_forEach_boolean_array_func_boolean.ets
 std/core/std_core_array_forEach_byte_array_func_byte.ets
@@ -344,9 +341,6 @@ std/core/std_core_typedarrays_bignum__BigInt64Array.ets
 
 #23989
 std/core/std_core_typedarrays_bignum__BigUint64Array.ets
-
-#22948 TypeApi produces invalid bytecode
-std/core/TypeCreatePrimitiveNameTest.ets
 
 ### Negative tests (Import-export)
 spec/import_export/07.export_directives/02.export_type_directives/to_export_negative.ets
@@ -449,7 +443,6 @@ std/core/std_core_typeduarrays_methods__Uint16Array.ets
 std/core/std_core_typeduarrays_methods__Uint32Array.ets
 std/core/std_core_typeduarrays_methods__Uint8Array.ets
 std/core/std_core_typeduarrays_methods__Uint8ClampedArray.ets
-std/core/tolocalestr/NumberLocaleStringTest.ets
 
 # 5.
 # TypeError: Unresolved reference compareWrapperObjectValue
@@ -515,26 +508,6 @@ std/core/std_core_typeduarrays_methods__Uint8Array.ets
 std/core/std_core_typeduarrays_methods__Uint8ClampedArray.ets
 escompat/JsonReplacerTest.ets
 escompat/JsonStringifyRegExpExecArrayTest.ets
-std/core/ConsoleDirTest.ets
-std/core/std_core_value_class_value_all_006.ets
-std/serialization/std_serialization_json_2_stringify_Empty_User_Array.ets
-std/serialization/std_serialization_json_2_stringify_User_With_Desc_Array.ets
-std/serialization/std_serialization_json_2_stringify_User_With_Long_Array.ets
-std/serialization/std_serialization_json_2_stringify_User_array.ets
-std/serialization/std_serialization_json_2_stringify_User_array_with_null.ets
-std/serialization/std_serialization_json_stringify_Long_array.ets
-std/serialization/std_serialization_json_stringify_Object_Mix_Array.ets
-std/serialization/std_serialization_json_stringify_Object_array.ets
-std/serialization/std_serialization_json_stringify_String_array.ets
-std/serialization/std_serialization_json_stringify_String_array_white_space.ets
-std/serialization/std_serialization_json_stringify_boolean_array.ets
-std/serialization/std_serialization_json_stringify_byte_array.ets
-std/serialization/std_serialization_json_stringify_char_array.ets
-std/serialization/std_serialization_json_stringify_int_array.ets
-std/serialization/std_serialization_json_stringify_long_array.ets
-std/serialization/std_serialization_json_stringify_short_array.ets
 std/core/std_core_typeduarrays_methods__BigUint64Array.ets
 regression/15278_0.ets
 spec/07.expressions/7.32.Lambda_Expressions/callMethodFromAsyncLambda2.ets
-std/core/IntlNumberFormatResolvedOptionsTest.ets
-std/core/dateformat/IntlDateFormatRangeOptionsTest.ets
