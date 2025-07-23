@@ -148,8 +148,69 @@ function testToString() {
     }
 }
 
+function testWriteUInt8Error() {
+    let buf = buffer.allocUninitializedFromPool(4);
+    arktest.expectError(() => {buf.writeUInt8(0x0304, 1);}, 'The value of "value" is out of range. It must be >= 0 and <= 255. Received value is: 772');
+}
+
+function testWriteInt32BEError() {
+    let buf = buffer.allocUninitializedFromPool(4);
+    arktest.expectError(() => {buf.writeInt32BE(3405691582, 0);}, 'The value of "value" is out of range. It must be >= -2147483648 and <= 2147483647. Received value is: 3405691582');
+}
+
+function testWriteInt32LEError() {
+    let buf = buffer.allocUninitializedFromPool(4);
+    arktest.expectError(() => {buf.writeInt32LE(3405691582, 0);}, 'The value of "value" is out of range. It must be >= -2147483648 and <= 2147483647. Received value is: 3405691582');
+}
+
+function testWriteInt16LEError() {
+    let buf = buffer.alloc(5);
+    arktest.expectError(() => {buf.writeInt16LE(48879, 0);}, 'The value of "value" is out of range. It must be >= -32768 and <= 32767. Received value is: 48879');
+}
+
+function testWriteInt16BEError() {
+    let buf = buffer.alloc(5);
+    arktest.expectError(() => {buf.writeInt16BE(48879, 0);}, 'The value of "value" is out of range. It must be >= -32768 and <= 32767. Received value is: 48879');
+}
+
+function testWriteInt8Error() {
+    let buf = buffer.alloc(5);
+    arktest.expectError(() => {buf.writeInt8(0x0304, 0);}, 'The value of "value" is out of range. It must be >= -128 and <= 127. Received value is: 772');
+}
+
+function testWriteUInt32BEError() {
+    let buf = buffer.allocUninitializedFromPool(4);
+    arktest.expectError(() => {buf.writeUInt32BE(-2, 0);}, 'The value of "value" is out of range. It must be >= 0 and <= 4294967295. Received value is: -2');
+}
+
+function testWriteUInt32LEError() {
+    let buf = buffer.allocUninitializedFromPool(4);
+    arktest.expectError(() => {buf.writeUInt32LE(-2, 0);}, 'The value of "value" is out of range. It must be >= 0 and <= 4294967295. Received value is: -2');
+}
+
+function testWriteUInt16BEError() {
+    let buf = buffer.allocUninitializedFromPool(4);
+    arktest.expectError(() => {buf.writeUInt16BE(-2, 0);}, 'The value of "value" is out of range. It must be >= 0 and <= 65535. Received value is: -2');
+}
+
+function testWriteUInt16LEError() {
+    let buf = buffer.allocUninitializedFromPool(4);
+    arktest.expectError(() => {buf.writeUInt16LE(-2, 0);}, 'The value of "value" is out of range. It must be >= 0 and <= 65535. Received value is: -2');
+}
+
 function main(): int {
     const suite = new arktest.ArkTestsuite("Buffer API tests")
     suite.addTest("Test buffer toString", testToString)
+    suite.addTest("Test buffer WriteUInt8 throw value error", testWriteUInt8Error)
+    suite.addTest("Test buffer WriteInt32BE throw value error", testWriteInt32BEError)
+    suite.addTest("Test buffer WriteInt32LE throw value error", testWriteInt32LEError)
+    suite.addTest("Test buffer WriteInt16LE throw value error", testWriteInt16LEError)
+    suite.addTest("Test buffer WriteInt16BE throw value error", testWriteInt16BEError)
+
+    suite.addTest("Test buffer WriteInt8 throw value error", testWriteInt8Error)
+    suite.addTest("Test buffer WriteUInt32BE throw value error", testWriteUInt32BEError)
+    suite.addTest("Test buffer WriteUInt32LE throw value error", testWriteUInt32LEError)
+    suite.addTest("Test buffer WriteUInt16BE throw value error", testWriteUInt16BEError)
+    suite.addTest("Test buffer WriteUInt16LE throw value error", testWriteUInt16LEError)
     return suite.run()
 }
