@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include_relative '../../irtoc/scripts/common.irt'
-include_relative '../../plugins/ets/irtoc_scripts/common.irt'
-include_relative '../../plugins/ets/irtoc_scripts/map_set_common.irt'
+include_relative 'map_set_common.irt'
 
 function(:MapGetIrToc,
         params: {map: 'ref', key: 'ref'},
@@ -27,24 +25,7 @@ function(:MapGetIrToc,
     next
   end
 
-  buck_hdr := findBucket(map, key)
-  If(buck_hdr, 0).EQ.b {
-    Return(nullptr).ptr
-  }
-
-  offset := findEntry(map, key, type, flags, is_string)
-  If(offset, -1).EQ.b {
-    Return(nullptr).ptr
-  }
-
-  entry := Load(buck_data, offset).ref
-  object := get_object_pointer_imm(entry, MapConstants::ENTRY_VAL_OFFSET)
-  Return(object).ptr
-
-Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("MAP_GET_USUAL")
-  Intrinsic(:SLOW_PATH_ENTRY, map, key).AddImm(entrypoint).MethodAsImm("MapGetUsualBridge").Terminator.ptr
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  processMapGet(map, key)
 }
 
 function(:MapDeleteIrToc,
