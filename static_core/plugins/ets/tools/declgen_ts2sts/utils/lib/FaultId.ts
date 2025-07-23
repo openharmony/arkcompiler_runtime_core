@@ -140,6 +140,7 @@ export enum FaultID {
   AddDeclareToTopLevelInterfaces,
   RemoveLimitDecorator,
   TupleTypeToArray,
+  StructDeclaration,
   // this should always be last enum
   LAST_ID
 }

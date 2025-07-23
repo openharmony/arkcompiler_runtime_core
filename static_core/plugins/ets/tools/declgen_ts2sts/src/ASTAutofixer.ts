@@ -131,7 +131,8 @@ export class Autofixer {
     [ts.SyntaxKind.ExportDeclaration, [this[FaultID.NoEmptyExport].bind(this)]],
     [ts.SyntaxKind.ExportSpecifier, [this[FaultID.NoETSKeyword].bind(this)]],
     [ts.SyntaxKind.MappedType, [this[FaultID.MappedType].bind(this)]],
-    [ts.SyntaxKind.TupleType, [this[FaultID.TupleTypeToArray].bind(this)]]
+    [ts.SyntaxKind.TupleType, [this[FaultID.TupleTypeToArray].bind(this)]],
+    [ts.SyntaxKind.StructDeclaration, [this[FaultID.StructDeclaration].bind(this)]]
   ]);
 
   fixNode(node: ts.Node): ts.VisitResult<ts.Node> {
@@ -1213,6 +1214,32 @@ export class Autofixer {
         this.context.factory.createIdentifier('Array'),
         [this.context.factory.createTypeReferenceNode(JSValue)]
       );
+    }
+
+    return node;
+  }
+  
+  /**
+   * Rule: `keeping the struct in its original form`
+   */
+  private [FaultID.StructDeclaration](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (ts.isStructDeclaration(node)) {
+
+    const filteredMembers = node.members.filter(member => {
+      return !ts.isConstructorDeclaration(member);
+    });
+
+    // Create a new struct node, removing only the constructor
+    const newStruct = ts.factory.updateStructDeclaration(
+      node,
+      node.modifiers,
+      node.name,
+      node.typeParameters,
+      node.heritageClauses,
+      ts.factory.createNodeArray(filteredMembers)
+    );
+
+      return newStruct;
     }
 
     return node;
