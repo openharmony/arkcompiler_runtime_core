@@ -299,6 +299,18 @@ bool CheckFcmpWithConstInput(Inst *input0, Inst *input1)
     return false;
 }
 
+bool CheckTypedArrayLengthObject(Inst *inst)
+{
+    auto loadObject = inst->CastToLoadObject();
+    auto runtime = inst->GetBasicBlock()->GetGraph()->GetRuntime();
+    auto type = loadObject->GetObjectType();
+    auto field = loadObject->GetObjField();
+    if (type != ObjectType::MEM_STATIC && type != ObjectType::MEM_OBJECT) {
+        return false;
+    }
+    return runtime->IsFieldTypedArrayLengthInt(field);
+}
+
 // Get power of 2
 // if n not power of 2 return -1;
 int64_t GetPowerOfTwo(uint64_t n)
