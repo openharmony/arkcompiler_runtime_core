@@ -402,7 +402,7 @@ cases:
       }
     logic: |-
       let stringValue = new EnumValue();
-      arktest.assertEQ(stringValue.getEnumValue() as string, 'Red');
+      arktest.assertEQ(stringValue.getEnumValue().toString(), 'Red');
 
   - desc: The return type of a generic interface method is a calculate function type.
     decl: |-

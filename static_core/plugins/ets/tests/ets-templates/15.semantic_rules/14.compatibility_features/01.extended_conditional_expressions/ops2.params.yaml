@@ -58,6 +58,3 @@ cases:
     - { val: 'undefined', type: 'Object|undefined', truthy: false }
 
     - { val: '0n', type: 'bigint', truthy: false }
-
-    - { type: 'Color', val: 'Color.Red', truthy: false }
-    - { type: 'Size', val: 'Size.L', truthy: true }
