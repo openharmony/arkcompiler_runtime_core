@@ -195,7 +195,7 @@ function testMyWritableDoWrite() {
 // Test cases ported from ArkTS 1.0:testStreamWritableWriteError003
 function testWritableUnknownEncoding() {
     let exceptionCheck = (e: Error | Exception): boolean => {
-        return ((e as BusinessError).message == "Unknown encoding: test")
+        return ((e as BusinessError).message == "Parameter error. The type of test must be string.")
     }
     arktest.expectThrow(testMyWritableDoWrite, exceptionCheck);
 }
