@@ -36,14 +36,7 @@ function main(): int {
 }
 
 function rawStringToBuffer( str: string ) : ArrayBuffer {
-    let idx = 0
-    let len = str.length
-    let arr = new Uint8Array( len )
-    for ( idx = 0 ; idx < len ; ++idx ) {
-        arr[ idx ] = str.charCodeAt(idx) & 0xFF;
-    }
-
-    return arr.buffer as ArrayBuffer
+    return new util.TextEncoder().encodeInto(str).buffer;
 }
 
 let testString = "";

@@ -11,4 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-testXmlParseInfoGetName0012 failed, error: BusinessError: The node name contains invalid characters
+testXmlParseInfoGetName0012 failed, error: BusinessError: The node name contains invalid characters: 1
