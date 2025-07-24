@@ -25,3 +25,13 @@ types:
     - Long
     - Float
     - Double
+    - Any
+    - Function
+    - "(() => void)"
+    - "null"
+    - undefined
+    - never
+    - int[]
+    - Array<int>
+    - FixedArray<int>
+    - Object

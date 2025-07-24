@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -37,6 +37,7 @@ cases:
       use: |-
           arktest.assertTrue(u1.meth() === undefined)
           arktest.assertTrue(u2.meth() === null)
+      tags: "compile-only, negative"
 
     - decl: |-
           // classes, methods of number type
@@ -306,3 +307,47 @@ cases:
       tags: compile-only, negative
       use: |-
           arktest.assertEQ(u1.meth(), 1)  // CTE: different signatures
+
+    - decl: |-
+          // overload signatures
+          class A {
+              meth(p: Object): number {
+                  return 1
+              }
+              meth(p: number): number {
+                  return 1
+              }
+          }
+          class B {
+              meth(p: Object): number {
+                  return 2
+              }
+          }
+          let u1: A|B = new A
+      tags: compile-only, negative
+      use: |-
+          arktest.assertEQ(u1.meth(new Object()), 1)  // CTE: method with overload signature
+
+    - decl: |-
+          // overload alias
+          class A {
+              overload meth { meth1, meth2 }
+              meth1(p: Object): number {
+                  return 1
+              }
+              meth2(p: number): number {
+                  return 1
+              }
+          }
+          class B {
+              meth(p: Object): number {
+                  return 2
+              }
+              meth1(p: number): number {
+                  return 2
+              }
+          }
+          let u1: A|B = new A
+      tags: compile-only, negative
+      use: |-
+          arktest.assertEQ(u1.meth(), 1)  // CTE: method with overload signature

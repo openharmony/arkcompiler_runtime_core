@@ -368,3 +368,123 @@ cases:
               v = null
           - |-
               v = new Object()
+
+    - decl: |-
+          type UT = byte | short | int | long | float | double | Numeric | Any  // => Any
+          let v: UT
+      pos:
+          - |-
+              v = new Byte(0x7F as byte)
+              arktest.assertEQ(v, 127)
+              v = new Short(-32768 as short)
+              arktest.assertEQ(v, Short.MIN_VALUE)
+              v = new Int(3)
+              arktest.assertEQ(v, 3)
+              v = new Long(0xffffffffff as long)
+              arktest.assertEQ(v, 1099511627775)
+              v = new Float(3.14f)
+              arktest.assertEQ(v, 3.14f)
+              v = new Double(2.5)
+              arktest.assertEQ(v, 2.5)
+
+    - decl: |-
+          type UT = Function | Any  // => Any
+          let v: UT
+      pos:
+          - |-
+              v = (): void => {}
+              arktest.assertTrue(v instanceof Function)
+              v = 1 as byte
+              arktest.assertEQ(v, 1)
+
+    - decl: |-
+          type UT = Function | (() => int)  // => Function
+          let v: UT
+      pos:
+          - |-
+              v = (): void => {}
+              arktest.assertTrue(v instanceof Function)
+              v = (): int => { return 0 }
+              arktest.assertTrue(v instanceof Function)
+      neg:
+          - |-
+              v = null
+          - |-
+              v = new Object()
+
+    - decl: |-
+          type UT = Function | (() => int) | Any  // => Any
+          let v: UT
+      pos:
+          - |-
+              v = (): void => {}
+              arktest.assertTrue(v instanceof Function)
+              v = (): int => { return 0 }
+              arktest.assertTrue(v instanceof Function)
+
+    - decl: |-
+          class A {
+            a: int = 0
+          }
+          type keys = keyof A
+          type UT = string | keys // => string
+          let v: UT
+      pos:
+          - |-
+              v = "a"
+              arktest.assertEQ(v, "a")
+              v = "abc"
+              arktest.assertEQ(v, "abc")
+      neg:
+          - |-
+              v = null
+          - |-
+              v = new Object()
+
+    - decl: |-
+          type UT = byte | never  // => Byte
+          let v: UT
+      pos:
+          - |-
+              v = new Byte(0x7F as byte)
+              arktest.assertEQ(v, 127)
+
+    - decl: |-
+          type UT = short | never  // => Short
+          let v: UT
+      pos:
+          - |-
+              v = new Short(-32768 as short)
+              arktest.assertEQ(v, Short.MIN_VALUE)
+
+    - decl: |-
+          type UT = int | never  // => Int
+          let v: UT
+      pos:
+          - |-
+              v = new Int(3)
+              arktest.assertEQ(v, 3)
+
+    - decl: |-
+          type UT = long | never  // => Long
+          let v: UT
+      pos:
+          - |-
+              v = new Long(0xffffffffff as long)
+              arktest.assertEQ(v, 1099511627775)
+
+    - decl: |-
+          type UT = float | never  // => Float
+          let v: UT
+      pos:
+          - |-
+              v = new Float(3.14f)
+              arktest.assertEQ(v, 3.14f)
+
+    - decl: |-
+          type UT = double | never  // => Double
+          let v: UT
+      pos:
+          - |-
+              v = new Double(2.5)
+              arktest.assertEQ(v, 2.5)
