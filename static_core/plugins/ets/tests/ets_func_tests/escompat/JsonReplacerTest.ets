@@ -251,6 +251,19 @@ function jsonStringifyWithReplacer(): void {
     arktest.assertEQ(jsonResult, result, '{\n "0": "zhang san"\n}')
 }
 
+function jsonStringifyStringArrayReplacer(): void {
+    let arr = Array.of<TestClass1>(new TestClass1(), new TestClass1(), new TestClass1());
+    let b = Array.of<string>("param1","param4")
+    let ret = JSON.stringify(arr,b);
+    let objArray : Array<TestClass1> = parseJsonString(ret)
+    arktest.assertEQ(objArray[0].param1, '"test1"')
+    arktest.assertEQ(objArray[0].param4, '"test4"')
+    arktest.assertEQ(objArray[1].param1, '"test1"')
+    arktest.assertEQ(objArray[1].param4, '"test4"')
+    arktest.assertEQ(objArray[2].param1, '"test1"')
+    arktest.assertEQ(objArray[2].param4, '"test4"')
+}
+
 function main(): int {
     const suite = new arktest.ArkTestsuite('JSON.stringify')
     suite.addTest('object with function replacer', jsonStringifyObjectWithFunctionReplacer)
@@ -260,8 +273,50 @@ function main(): int {
     suite.addTest('class implements JsonReplacer nested case', jsonStringifyWithNestedReplacer)
     suite.addTest('class implements JsonReplacer with space', jsonStringifyWithSpaceReplacer)
     suite.addTest('class implements JsonReplacer with space and replacer', jsonStringifyWithReplacer)
+    suite.addTest('class implements JsonReplacer with stringArray replacer', jsonStringifyStringArrayReplacer)
     suite.addTest('with array replacer', jsonStringifyWithArrayReplacer)
     suite.addTest('with "null" replacer', jsonStringifyWithNullReplacer)
     suite.addTest('with "undefined" replacer', jsonStringifyWithUndefinedReplacer)
     return suite.run()
+}
+
+class TestClass1 {
+    param1: string = "test1";
+    param2: string = "test2";
+    param3: string = "test3";
+    param4: string = "test4";
+}
+
+function parseJsonString(jsonStr: string): Array<TestClass1>  {
+  let content: string = jsonStr.slice(1, -1)
+  let objStrs: string[] = content.split('},{')
+  let result: Array<TestClass1> = []
+  objStrs.forEach((str: string, index: number, array: string[]) => {
+    let objStr: string = str
+    if (index === 0) {
+      objStr = objStr + '}'
+    }
+    if (index === array.length - 1) {
+      objStr = '{' + objStr;  
+    }
+    if (index !== 0 && index !== array.length - 1) {
+      objStr = '{' + objStr + '}';  
+    }
+    let keyValueStr: string = objStr.slice(1, -1);
+    let keyValuePairs: Array<string> = keyValueStr.split(',')
+    let obj:TestClass1 = new TestClass1() ;
+    keyValuePairs.forEach(pair => {
+      let parts: Array<string> = pair.split(':')
+      let keyPart: string = parts[0]
+      let valuePart: string = parts[1]
+      let key : string = keyPart.slice(1,-1)
+      if (key === 'param1') {
+        obj.param1 = valuePart
+      } else if (key === 'param4') {
+        obj.param4 = valuePart
+      }
+    });
+    result.push(obj);
+  });
+  return result;
 }

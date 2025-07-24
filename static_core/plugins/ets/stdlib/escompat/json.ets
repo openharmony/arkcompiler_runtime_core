@@ -65,7 +65,7 @@ export class JSON {
      *
      * @returns String - JSON representation of byte
      */
-    public static stringify(d: byte): String {
+    public static stringifyByte(d: byte): String {
         return StringBuilder.toString(d)
     }
 
@@ -76,7 +76,7 @@ export class JSON {
      *
      * @returns String - JSON representation of short
      */
-    public static stringify(d: short): String {
+    public static stringifyShort(d: short): String {
         return StringBuilder.toString(d)
     }
 
@@ -87,7 +87,7 @@ export class JSON {
      *
      * @returns String - JSON representation of int
      */
-    public static stringify(d: int): String {
+    public static stringifyInt(d: int): String {
         return StringBuilder.toString(d)
     }
 
@@ -98,7 +98,7 @@ export class JSON {
      *
      * @returns String - JSON representation of long
      */
-    public static stringify(d: long): String {
+    public static stringifyLong(d: long): String {
         return StringBuilder.toString(d)
     }
 
@@ -109,7 +109,7 @@ export class JSON {
      *
      * @returns String - JSON representation of float
      */
-    public static stringify(d: float): String {
+    public static stringifyFloat(d: float): String {
         if (Float.isFinite(d)) {
             return StringBuilder.toString(d)
         } else {
@@ -124,7 +124,7 @@ export class JSON {
      *
      * @returns String - JSON representation of double
      */
-    public static stringify(d: double): String {
+    public static stringifyDouble(d: double): String {
         if (Double.isFinite(d)) {
             return StringBuilder.toString(d)
         } else {
@@ -139,7 +139,7 @@ export class JSON {
      *
      * @returns String - JSON representation of bigint
      */
-    public static stringify(d: bigint): String {
+    public static stringifyBigint(d: bigint): String {
         return d.toString()
     }
 
@@ -150,7 +150,7 @@ export class JSON {
      *
      * @returns String - JSON representation of char
      */
-    public static stringify(d: char): String {
+    public static stringifyChar(d: char): String {
         return "\"" + StringBuilder.toString(d) + "\""
     }
 
@@ -161,7 +161,7 @@ export class JSON {
      *
      * @returns String - JSON representation of boolean
      */
-    public static stringify(d: boolean): String {
+    public static stringifyBoolean(d: boolean): String {
         if (d) {
             return "true"
         }
@@ -179,7 +179,7 @@ export class JSON {
      *
      * @returns String - JSON representation of byte
      */
-    public static stringify(d: String): String {
+    public static stringifyString(d: String): String {
         let sb = new StringBuilder([c'\"'] as FixedArray<char>)
         let len = d.getLength()
 
@@ -244,7 +244,7 @@ export class JSON {
      *
      * @returns String - JSON representation of Object
      */
-    public static stringify(obj: NullishType): String {
+    public static stringifyNullishTypeObj(obj: NullishType): String {
         if (obj === undefined) {
             return "undefined"
         }
@@ -257,7 +257,7 @@ export class JSON {
 
     private static native stringifyFast(obj: NullishType): String;
 
-    public static stringify(obj: JsonReplacer): String {
+    public static stringifyJsonReplacer(obj: JsonReplacer): String {
         const record = obj.jsonReplacer();
         return JSON.stringify(record);
     }
@@ -274,7 +274,7 @@ export class JSON {
      *
      * @returns String - JSON representation of Object
      */
-    public static stringify(
+    public static stringifyObjValue(
                 obj: NullishType,
                 replacer: ((key: string, value: NullishType) => NullishType) | undefined | null,
                 space?: string | int): string {
@@ -300,7 +300,7 @@ export class JSON {
      *
      * @returns String - JSON representation of Object
      */
-    public static stringify(obj: NullishType, replacer: FixedArray<double | string>, space?: int | string): string {
+    public static stringifyDoubleStringFixedArray(obj: NullishType, replacer: FixedArray<double | string>, space?: int | string): string {
         const filter : FixedArray<string> = new string[replacer.length]
         for (let i = 0; i < replacer.length; i++) {
             filter[i] = `${replacer[i]}`
@@ -313,7 +313,20 @@ export class JSON {
         }
     }
 
-    public static stringify(obj: NullishType, replacer: Array<double | string>, space?: int | string): string {
+    public static stringifyDoubleStringArray(obj: NullishType, replacer: Array<double | string>, space?: int | string): string {
+        const filter : FixedArray<string> = new string[replacer.length]
+        for (let i = 0; i < replacer.length; i++) {
+            filter[i] = `${replacer[i]}`
+        }
+
+        if (space instanceof String || space === undefined) {
+            return new JSONWriter(filter, space).write(obj)
+        } else {
+            return new JSONWriter(filter, JSON.spaceFromNumber(space! as int)).write(obj)
+        }
+    }
+
+    public static stringifyStringArray(obj: NullishType, replacer: Array<string>, space?: int | string): string {
         const filter : FixedArray<string> = new string[replacer.length]
         for (let i = 0; i < replacer.length; i++) {
             filter[i] = `${replacer[i]}`
@@ -335,7 +348,7 @@ export class JSON {
         return " ".repeat(spacesCount)
     }
 
-    public static native stringify(d: JSValue): String;
+    public static native stringifyJSValue(d: JSValue): String;
 
     //--------------------------
     //          arrays
@@ -348,7 +361,7 @@ export class JSON {
      *
      * @returns String - JSON representation of bytes array
      */
-    public static stringify(d: FixedArray<byte>): String {
+    public static stringifyByteFixedArray(d: FixedArray<byte>): String {
         let s = new StringBuilder("[")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
@@ -369,7 +382,7 @@ export class JSON {
      *
      * @returns String - JSON representation of shorts array
      */
-    public static stringify(d: FixedArray<short>): String {
+    public static stringifyShortFixedArray(d: FixedArray<short>): String {
         let s = new StringBuilder("[")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
@@ -390,7 +403,7 @@ export class JSON {
      *
      * @returns String - JSON representation of ints array
      */
-    public static stringify(d: FixedArray<int>): String {
+    public static stringifyIntFixedArray(d: FixedArray<int>): String {
         let s = new StringBuilder("[")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
@@ -411,7 +424,7 @@ export class JSON {
      *
      * @returns String - JSON representation of longs array
      */
-    public static stringify(d: FixedArray<long>): String {
+    public static stringifyLongFixedArray(d: FixedArray<long>): String {
         let s = new StringBuilder("[")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
@@ -432,7 +445,7 @@ export class JSON {
      *
      * @returns String - JSON representation of array of bytes
      */
-    public static stringify(d: FixedArray<float>): String {
+    public static stringifyFloatFixedArray(d: FixedArray<float>): String {
         let s = new StringBuilder("[")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
@@ -453,7 +466,7 @@ export class JSON {
      *
      * @returns String - JSON representation of doubles array
      */
-    public static stringify(d: FixedArray<double>): String {
+    public static stringifyDoubleFixedArray(d: FixedArray<double>): String {
         let s = new StringBuilder("[")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
@@ -474,7 +487,7 @@ export class JSON {
      *
      * @returns String - JSON representation of chars array
      */
-    public static stringify(d: FixedArray<char>): String {
+    public static stringifyCharFixedArray(d: FixedArray<char>): String {
         let s = new StringBuilder("[")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
@@ -495,7 +508,7 @@ export class JSON {
      *
      * @returns String - JSON representation of booleans array
      */
-    public static stringify(d: FixedArray<boolean>): String {
+    public static stringifyBooleanFixedArray(d: FixedArray<boolean>): String {
         let s = new StringBuilder("[")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
@@ -512,7 +525,7 @@ export class JSON {
         return s.toString()
     }
 
-    public static stringify(d: Array<Number>): String {
+    public static stringifyNumberArray(d: Array<Number>): String {
         let s = new StringBuilder("[")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
@@ -526,7 +539,7 @@ export class JSON {
         return s.toString()
     }
 
-    public static stringify(d: ArrayLike<Number>): String {
+    public static stringifyNumberArrayLike(d: ArrayLike<Number>): String {
         let s = new StringBuilder("{")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
@@ -542,6 +555,16 @@ export class JSON {
         }
         s.append('}');
         return s.toString()
+    }
+
+    public static overload stringify {  
+        stringifyByte, stringifyChar, stringifyInt, stringifyShort, stringifyLong, 
+        stringifyBigint, stringifyFloat, stringifyDouble, stringifyBoolean, stringifyString, 
+        stringifyByteFixedArray, stringifyCharFixedArray, stringifyShortFixedArray, stringifyIntFixedArray, 
+        stringifyLongFixedArray,  stringifyFloatFixedArray, stringifyDoubleFixedArray, 
+        stringifyBooleanFixedArray, stringifyDoubleStringFixedArray, stringifyNumberArray,
+        stringifyNumberArrayLike, stringifyStringArray, stringifyDoubleStringArray, 
+        stringifyJSValue, stringifyNullishTypeObj, stringifyJsonReplacer, stringifyObjValue, 
     }
 
     /**
