@@ -1,0 +1,93 @@
+diff --git a/assembler/BUILD.gn b/assembler/BUILD.gn
+index a2edfb71b60ede065ce7c9457b12dfd82903115e..feea7d9f627cf7292e8e158104bb4b6dbf038d35 100644
+--- a/assembler/BUILD.gn
++++ b/assembler/BUILD.gn
+@@ -23,6 +23,20 @@ config("arkassembler_public_config") {
+   defines = [ "PANDA_WITH_ECMASCRIPT" ]
+ }
+ 
++if (!ark_standalone_build) {
++  ohos_shared_headers("arkassembler_public_headers") {
++    include_dirs = [
++      "$ark_root/assembler",
++      "$target_gen_dir",
++      "$target_gen_dir/include",
++      "$root_gen_dir/libpandabase",
++      "$ark_root/plugins/ecmascript/assembler",
++    ]
++    part_name = "runtime_core"
++    subsystem_name = "arkcompiler"
++  }
++}
++
+ libarkassembler_sources = [
+   "$target_gen_dir/function_collect_string.cpp",
+   "$target_gen_dir/ins_to_string.cpp",
+diff --git a/bundle.json b/bundle.json
+index 7bcaef9832204e649ec6506d3501efc1e9dfd1f8..1d180c6d976dc3db82665ce6b84ecc766daa6423 100644
+--- a/bundle.json
++++ b/bundle.json
+@@ -276,6 +276,15 @@
+                 },
+                 {
+                     "name": "//arkcompiler/runtime_core/static_core/verification/gen:verification_headers"
++                },
++                {
++                    "name": "//arkcompiler/runtime_core/assembler:arkassembler_public_headers"
++                },
++                {
++                    "name": "//arkcompiler/runtime_core/libpandabase:arkbase_public_headers"
++                },
++                {
++                    "name": "//arkcompiler/runtime_core/libpandafile:arkfile_public_headers"
+                 }
+             ],
+             "test": [
+diff --git a/libpandabase/BUILD.gn b/libpandabase/BUILD.gn
+index 36b3fc416ddf244deaf1f26502416573ced50a6b..828711bfbc0117a2552f6a54fd5a8f6eb61f82af 100644
+--- a/libpandabase/BUILD.gn
++++ b/libpandabase/BUILD.gn
+@@ -31,6 +31,19 @@ config("arkbase_public_config") {
+   }
+ }
+ 
++if (!ark_standalone_build) {
++  ohos_shared_headers("arkbase_public_headers") {
++    include_dirs = [
++      "$ark_root/libpandabase",
++      "$target_gen_dir/include",
++      "$target_gen_dir",
++    ]
++    include_dirs += platform_include_dirs
++    part_name = "runtime_core"
++    subsystem_name = "arkcompiler"
++  }
++}  
++
+ config("arkbase_fuzz_config") {
+   configs = [ "$build_root/config/compiler:exceptions" ]
+   defines = [ "SUPPORT_KNOWN_EXCEPTION" ]
+diff --git a/libpandafile/BUILD.gn b/libpandafile/BUILD.gn
+index 4eb004e71c799bc63300c6617df7809fc5e02fea..78f6443a8bbe83da9c8c1734c5b7c5729aeebb8f 100644
+--- a/libpandafile/BUILD.gn
++++ b/libpandafile/BUILD.gn
+@@ -27,6 +27,19 @@ config("arkfile_public_config") {
+   }
+ }
+ 
++if (!ark_standalone_build) {
++  ohos_shared_headers("arkfile_public_headers") {
++    include_dirs = [
++      "$ark_root/libpandafile",
++      "$ark_root/libziparchive",
++      "$target_gen_dir",
++      "$target_gen_dir/include",
++    ]
++    part_name = "runtime_core"
++    subsystem_name = "arkcompiler"
++  }
++}
++
+ config("arkfile_runtime_public_config") {
+   include_dirs = [
+     "$ark_root/libpandafile",
