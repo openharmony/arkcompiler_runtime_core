@@ -24,5 +24,6 @@
 	"templates": "*",
 	"tests": "*",
 	"verifier": "*",
-	"taihe": "*"
+	"taihe": "*",
+	"common_interfaces/objects/string/base_string_impl.h": "*"
 }
