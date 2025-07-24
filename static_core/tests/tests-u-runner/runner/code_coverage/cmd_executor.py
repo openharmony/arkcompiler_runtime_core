@@ -14,10 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import subprocess
-from pathlib import Path
-from typing import List, TextIO, Union, Optional
 from abc import ABC, abstractmethod
+from pathlib import Path
+from typing import List, Optional, TextIO, Union
+
+from runner.logger import Log
+
+_LOGGER = logging.getLogger('runner.code_coverage.cmd_executor')
 
 
 class CmdExecutor(ABC):
@@ -26,8 +31,8 @@ class CmdExecutor(ABC):
         self,
         command: List[str],
         stdout: Union[TextIO, int] = subprocess.PIPE,
-        stderror: Union[TextIO, int] = subprocess.DEVNULL
-    ) -> subprocess.CompletedProcess:
+        stderror: Union[TextIO, int] = subprocess.PIPE
+    ) -> Union[subprocess.CompletedProcess, None]:
         pass
 
     @abstractmethod
@@ -40,9 +45,13 @@ class LinuxCmdExecutor(CmdExecutor):
         self,
         command: List[str],
         stdout: Union[TextIO, int] = subprocess.PIPE,
-        stderror: Union[TextIO, int] = subprocess.DEVNULL
-    ) -> subprocess.CompletedProcess:
-        return subprocess.run(command, check=True, text=True, stdout=stdout, stderr=stderror, timeout=5400)
+        stderror: Union[TextIO, int] = subprocess.PIPE
+    ) -> Union[subprocess.CompletedProcess, None]:
+        try:
+            return subprocess.run(command, check=True, text=True, stdout=stdout, stderr=stderror, timeout=5400)
+        except subprocess.CalledProcessError as error:
+            Log.default(_LOGGER, f"There was a problem:\n{error.stderr}")
+            return None
 
     def get_binary(self, binary_name: str, version: Optional[str] = None) -> str:
         return f"{binary_name}-{version}" if version else binary_name
