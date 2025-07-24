@@ -13,28 +13,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for i in default_value %}
+{% for c in cases %}
 
 /*---
 desc: Predefined type declaration.
+tags: [negative, compile-only]
 ---*/
 
-class A {
-  a: int
-}
-
-{% if ":" in i %}
-let x = {{i}};
-function main(): void {
-  let y = {{i}};
-  arktest.assertTrue(x instanceof Function)
-  arktest.assertTrue(y instanceof Function)
-}
-{% else %}
-let x: {{i}};
-function main(): void {
-  let y: {{i}};
-}
-{% endif %}
+let a: {{c}}
+a = null
 
 {% endfor %}

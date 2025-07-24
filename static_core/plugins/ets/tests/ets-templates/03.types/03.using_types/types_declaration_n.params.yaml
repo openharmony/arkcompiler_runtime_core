@@ -12,21 +12,7 @@
 # limitations under the License.
 
 --- # List of predefined types
-default_value:
-  - [number, number]
-  - number|string
-  - "'xyz'"
-  - keyof (A)
-  - string[]|null
-  - (string|null)[]
-  - () => string|null
-  - "(): string|null => { return 'a' }"
-  - "(): string|null => { return null }"
-  - "(() => string) | null"
-  - "(): string => { return 'abc' }"
-  - ([number, number])
-  - (number|string)
-  - (keyof (A))
-  - (() => string|null)
-  - () => (string|null)
-  - () => (string)|null
+cases:
+  - (string | null)[]
+  - string | null[]
+  - () => string | null
