@@ -38,6 +38,10 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
     private capacity: int = this.DEFAULT_CAPACITY;
     private buffer: Array<T>;
 
+    public toString(): string {
+        return "[object ArrayList]";
+    }
+
     public jsonReplacer(): Record<String, NullishType> {
         const buf = this.buffer;
         const len = buf.length;

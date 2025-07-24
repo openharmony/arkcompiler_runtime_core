@@ -63,6 +63,10 @@ export class HashSet<T> implements ReadonlyHashSet<T> {
         this.buckets = new HashMap<T, T>();
     }
 
+    public toString(): string {
+        return "[object HashSet]";
+    }
+
     /**
      * Returns number of unique elements in the HashSet
      *
