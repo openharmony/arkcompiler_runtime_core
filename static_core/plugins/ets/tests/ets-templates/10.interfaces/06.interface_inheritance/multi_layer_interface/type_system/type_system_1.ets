@@ -30,20 +30,6 @@ interface C extends B {
     methodC(): string;
 }
 
-class D implements C {
-    methodA(): string {
-        return "A";
-    }
-
-    methodB(): string {
-        return "B";
-    }
-
-    methodC(): string {
-        return "C";
-    }
-}
-
 class E implements C {
     methodA(): string {
         return "A";

@@ -14,21 +14,39 @@
  */
 
 /*---
-desc: Verify that a child class can override a static method providing a constant-like value.
+desc: Multiple inheritance conflict detection.
+tags: [compile-only, negative]
 ---*/
 
-class Parent {
-    static getValue(): string {
-        return "ValueParent";
-    }
+let a: number = 10;
+let b: string = 'Hello, ';
+
+interface B {
+    draw(): string;
 }
 
-class Child extends Parent {
-    static getValue(): string {
-        return "ValueChild";
-    }
+interface C {
+    draw(x: number): void;
 }
 
-function main(): void {
-    arktest.assertEQ(Child.getValue(), "ValueChild");
+interface D {
+    draw(x: string): void;
+}
+
+class E implements A, B, C, D {
+    draw(): void {
+        a = a + 1;
+    }
+
+    draw(): string {
+        return 'b';
+    }
+
+    draw(x: number): void {
+        a = a + x;
+    }
+
+    draw(x: string): void {
+        b = b + x;
+    }
 }

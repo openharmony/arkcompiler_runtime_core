@@ -14,7 +14,8 @@
  */
 
 /*---
-desc: The child interface inherits the parent interface and adds new methods(parentinterface call newmethod).
+desc: >-
+    The child interface inherits the parent interface and adds new methods (parentinterface call newmethod).
 ---*/
 
 interface ParentInterface {

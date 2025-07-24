@@ -19,10 +19,5 @@ tags: [compile-only, negative]
 ---*/
 
 interface ParentInterface {
-  parentMethod(): string;
   optionalMethod ? (): string;
-}
-
-interface ChildInterface extends ParentInterface {
-  childMethod(): string;
 }

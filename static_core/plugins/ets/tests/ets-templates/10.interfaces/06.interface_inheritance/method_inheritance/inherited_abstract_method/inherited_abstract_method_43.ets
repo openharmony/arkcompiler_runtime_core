@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Nested inheritance of interfaces(parentinterface2 call parentmethod1).
+desc: Nested inheritance of interfaces (parentinterface2 call parentmethod1).
 ---*/
 
 interface ParentInterface1 {

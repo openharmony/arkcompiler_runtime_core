@@ -14,11 +14,10 @@
  */
 
 /*---
-desc: In multi-layer inheritance, the upper-layer interface method modifier is private,
+desc: >-
+      In multi-layer inheritance, the upper-layer interface method modifier is private,
       and the sub-interface inherits the upper-layer interface.
-tags:
-- positive
-- compile-only
+tags: [compile-only]
 ---*/
 
 interface GrandParentInterface {
@@ -27,14 +26,8 @@ interface GrandParentInterface {
   }
 }
 
-interface ParentInterface extends GrandParentInterface {
+interface ParentInterface extends GrandParentInterface {}
 
-}
+interface ChildInterface extends ParentInterface {}
 
-interface ChildInterface extends ParentInterface {
-
-}
-
-class ConcreteClass implements ChildInterface {
-
-}
+class ConcreteClass implements ChildInterface {}

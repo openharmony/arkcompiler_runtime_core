@@ -13,47 +13,60 @@
  * limitations under the License.
  */
 
+{% for option in [1,2] %}
+{% for c in cases %}
 /*---
-desc: In multi-layer inheritance, sub-interfaces cannot overwrite all the constants of upper-layer interfaces.
-      The data type is object.
+desc: >-
+      In multi-layer inheritance, the sub-interface inherits the constants of all upper-layer interfaces.
+      The constant data type is {{c.type}}.
 ---*/
-
+{% if c.type == "ColorSet" %}
+enum ColorSet {
+  Red = 0,
+  Green = 1,
+  Blue = 2
+}{% elif c.type == "Person" %}
 interface Person {
     name: string;
     age: number;
     hobbies: string[];
 }
-
-interface GrandParentInterface {
-  readonly GRANDPARENT_CONST: Person;
-}
-
-interface ParentInterface extends GrandParentInterface {
-  readonly PARENT_CONST: Person;
-}
-
-interface ChildInterface extends ParentInterface {
-  readonly GRANDPARENT_CONST: Person;
-
-  readonly PARENT_CONST: Person;
-}
-
-class ConcreteClass implements ChildInterface {
-  readonly GRANDPARENT_CONST: Person = {
+let j1: Person = {
     name: "John1",
     age: 30,
     hobbies: ["reading", "swimming"]
-  };
-
-  readonly PARENT_CONST: Person = {
+};
+let j2: Person = {
     name: "John2",
     age: 30,
-    hobbies: ["reading", "swimming"]
-  };
+    hobbies: ["playing"]
+};
+{% endif %}
+
+interface GrandParentInterface {
+  readonly GRANDPARENT_CONST: {{c.type}};
+}
+
+interface ParentInterface extends GrandParentInterface {
+  readonly PARENT_CONST: {{c.type}};
+}
+
+interface ChildInterface extends ParentInterface {
+{% if option == "1" %}
+  readonly GRANDPARENT_CONST: {{c.type}};
+  readonly PARENT_CONST: {{c.type}};
+{% endif %}
+}
+
+class ConcreteClass implements ChildInterface {
+  readonly GRANDPARENT_CONST: {{c.type}} = {{c.val1}};
+  readonly PARENT_CONST: {{c.type}} = {{c.val2}};
 }
 
 function main(): void {
   const obj: ChildInterface = new ConcreteClass();
-  arktest.assertEQ(obj.GRANDPARENT_CONST.name, "John1");
-  arktest.assertEQ(obj.PARENT_CONST.name, "John2");
+  arktest.assertEQ(obj.GRANDPARENT_CONST{{c.option}}, {{c.res1}});
+  arktest.assertEQ(obj.PARENT_CONST{{c.option}}, {{c.res2}});
 }
+{% endfor %}
+{% endfor %}

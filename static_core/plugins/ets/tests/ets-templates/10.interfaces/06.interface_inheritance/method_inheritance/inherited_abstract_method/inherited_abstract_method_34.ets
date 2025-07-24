@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Child interfaces inherit multiple parent interfaces, one of which has a default method(parentinterface2 call parentmethod2).
+desc: >-
+    Child interfaces inherit multiple parent interfaces, one of which has a default method
+    (parentinterface2 call parentmethod2).
 ---*/
 
 interface ParentInterface1 {

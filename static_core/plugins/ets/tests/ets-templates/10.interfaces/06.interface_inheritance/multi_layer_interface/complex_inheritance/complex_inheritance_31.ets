@@ -18,7 +18,7 @@ desc: Constant access test under complex inheritance.
 ---*/
 
 interface G {
-    readonly INTERFACR_CONST: string;
+    readonly INTERFACE_CONST: string;
     readonly OVERRIDE_CONST: string;
 }
 
@@ -29,7 +29,7 @@ interface F extends G {
 class GrandParent implements F {
     static readonly GRANDPARENT_CONST = "GrandParent Constant";
     static readonly OVERRIDE_CONST = "GrandParent Override Constant";
-    readonly INTERFACR_CONST: string = "Interface Constant";
+    readonly INTERFACE_CONST: string = "Interface Constant";
     readonly OVERRIDE_CONST: string = "Override Constant";
 }
 
@@ -46,6 +46,6 @@ function main(): void {
     arktest.assertEQ(Child.CHILD_CONST, "Child Constant");
     arktest.assertEQ(Child.OVERRIDE_CONST, "Parent Override Constant");
     const c: Child = new Child();
-    arktest.assertEQ(c.INTERFACR_CONST, "Interface Constant");
+    arktest.assertEQ(c.INTERFACE_CONST, "Interface Constant");
     arktest.assertEQ(c.OVERRIDE_CONST, "Override Constant");
 }

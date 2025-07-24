@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Subclass interfaces do not override the default methods of parent interfaces(parentinterface call defaultmethod).
+desc: >-
+    Subclass interfaces do not override the default methods
+    of parent interfaces (parentinterface call defaultmethod).
 ---*/
 
 interface ParentInterface {
@@ -30,6 +32,6 @@ class ChildClass implements ChildInterface {
 }
 
 function main(): void {
-  let instance: ParentInterface  = new ChildClass();
+  let instance: ParentInterface = new ChildClass();
   arktest.assertEQ(instance.defaultMethod(), "ParentInterface default method");
 }

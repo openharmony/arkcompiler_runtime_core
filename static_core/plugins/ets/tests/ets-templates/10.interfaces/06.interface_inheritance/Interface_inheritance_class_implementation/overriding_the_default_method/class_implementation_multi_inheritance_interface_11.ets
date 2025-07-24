@@ -14,7 +14,8 @@
  */
 
 /*---
-desc: The parent class overrides the default methods of the part inherited by
+desc: >-
+      The parent class overrides the default methods of the part inherited by
       the subinterface implemented by the subinterface of the child class.
 ---*/
 

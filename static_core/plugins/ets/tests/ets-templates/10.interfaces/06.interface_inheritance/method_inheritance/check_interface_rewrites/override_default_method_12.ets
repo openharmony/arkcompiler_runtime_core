@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Multiple inheritance interface, subclass interface overr(childinterface call defaultmethod).
+desc: Multiple inheritance interface, subclass interface overr (childinterface call defaultmethod).
 ---*/
 
 interface GrandParentInterface {
@@ -33,6 +33,6 @@ class ChildClass implements ChildInterface {
 }
 
 function main(): void {
-  let instance: ChildInterface  = new ChildClass();
+  let instance: ChildInterface = new ChildClass();
   arktest.assertEQ(instance.defaultMethod(), "GrandParentInterface default method");
 }

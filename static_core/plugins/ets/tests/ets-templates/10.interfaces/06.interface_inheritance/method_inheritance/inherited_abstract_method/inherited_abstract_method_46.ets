@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Generic methods in interfaces inherit(parentinterface call parentmethod).
+desc: Generic methods in interfaces inherit (parentinterface call parentmethod).
 ---*/
 
 interface ParentInterface {

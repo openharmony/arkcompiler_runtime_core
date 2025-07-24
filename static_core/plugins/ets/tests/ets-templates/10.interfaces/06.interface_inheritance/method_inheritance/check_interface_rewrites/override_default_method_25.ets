@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Subclass interface overrides parent interface default method and provides properties(parentinginterface call defaultmethod).
+desc: >-
+    Subclass interface overrides parent interface default method and provides
+    properties (parentinginterface call defaultmethod).
 ---*/
 
 interface ParentInterface {
@@ -33,11 +35,11 @@ interface ChildInterface extends ParentInterface {
 class ChildClass implements ChildInterface {
   property: string = "MyClass property";
   defaultMethod(): string {
-    return "ChildInterface overridden method";
+    return "Class overridden method";
   }
 }
 
 function main(): void {
-  let instance: ParentInterface  = new ChildClass();
-  arktest.assertEQ(instance.defaultMethod(), "ChildInterface overridden method");
+  let instance: ParentInterface = new ChildClass();
+  arktest.assertEQ(instance.defaultMethod(), "Class overridden method");
 }

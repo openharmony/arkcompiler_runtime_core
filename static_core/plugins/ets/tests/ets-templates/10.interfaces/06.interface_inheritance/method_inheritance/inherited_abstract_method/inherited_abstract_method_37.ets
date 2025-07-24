@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Mixed inheritance of interfaces and classes(parentclass call interfacemethod).
+desc: Mixed inheritance of interfaces and classes (parentclass call interfacemethod).
 ---*/
 
 interface ParentInterface {

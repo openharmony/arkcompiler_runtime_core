@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Default method for child interface to override parent interface(parentinterface call the rewritten result should be output).
+desc: >-
+    Default method for child interface to override parent interface
+    (parentinterface call the rewritten result should be output).
 ---*/
 
 interface ParentInterface {
@@ -40,5 +42,5 @@ class ChildClass implements ChildInterface {
 
 function main(): void {
   let instance: ParentInterface = new ChildClass();
-  arktest.assertNE(instance.parentMethod(), "Parent method implementation");
+  arktest.assertNE(instance.parentMethod(), "Overridden implementation of parentMethod in ChildInterface");
 }

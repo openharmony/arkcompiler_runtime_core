@@ -14,11 +14,10 @@
  */
 
 /*---
-desc: In multi-layer inheritance, the upper-layer interface method is private.
+desc: >-
+      In multi-layer inheritance, the upper-layer interface method is private.
       When the private method is accessed, a compilation error occurs.
-tags:
-- negative
-- compile-only
+tags: [negative, compile-only]
 ---*/
 
 interface GrandParentInterface {
@@ -27,17 +26,11 @@ interface GrandParentInterface {
   }
 }
 
-interface ParentInterface extends GrandParentInterface {
+interface ParentInterface extends GrandParentInterface {}
 
-}
+interface ChildInterface extends ParentInterface {}
 
-interface ChildInterface extends ParentInterface {
-
-}
-
-class ConcreteClass implements ChildInterface {
-
-}
+class ConcreteClass implements ChildInterface {}
 
 function main(): void {
   const instance = new ConcreteClass();

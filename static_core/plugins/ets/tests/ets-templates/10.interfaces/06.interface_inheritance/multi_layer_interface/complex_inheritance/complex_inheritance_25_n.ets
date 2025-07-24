@@ -14,10 +14,16 @@
  */
 
 /*---
-desc: Test file.
-tags:
-- compile-only
-- not-a-test
+desc: Static class method is not implementing interface non-static method
+tags: [compile-only, negative]
 ---*/
 
-export const CONSTANT_A = "ValueB";
+interface G {
+    greet(): string;
+}
+
+class Parent implements G {
+    static greet(): string {
+        return "Hello from Parent";
+    }
+}

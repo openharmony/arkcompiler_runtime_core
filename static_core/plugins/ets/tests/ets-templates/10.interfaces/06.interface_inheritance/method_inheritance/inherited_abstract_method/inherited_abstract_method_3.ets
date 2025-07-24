@@ -15,7 +15,7 @@
 
 /*---
 desc: >-
-    Singlelevel inheritance, child interface inherits abstract method of parent interface
+    Single level inheritance, child interface inherits abstract method of parent interface
     (validate subclass method invocation).
 ---*/
 
