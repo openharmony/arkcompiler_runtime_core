@@ -430,18 +430,32 @@ std::pair<std::string_view, std::string_view> ResolveModuleName(std::string_view
     constexpr std::string_view REQUIRE_NAPI = "requireNapi";
     constexpr std::string_view REQUIRE_NATIVE_MODULE = "requireNativeModule";
     constexpr std::string_view SYSTEM_PLUGIN_PREFIX = "@system.";
+    constexpr std::string_view SYSTEM_PLUGIN_PREFIX_TRANSFORMED = "@system:";
+    constexpr size_t SYSTEM_PLUGIN_PREFIX_SIZE = SYSTEM_PLUGIN_PREFIX.size();
     constexpr std::string_view OHOS_PLUGIN_PREFIX = "@ohos.";
+    constexpr std::string_view OHOS_PLUGIN_PREFIX_TRANSFORMED = "@ohos:";
+    constexpr size_t OHOS_PLUGIN_PREFIX_SIZE = OHOS_PLUGIN_PREFIX.size();
+    constexpr std::string_view HMS_PLUGIN_PREFIX = "@hms.";
+    constexpr std::string_view HMS_PLUGIN_PREFIX_TRANSFORMED = "@hms:";
+    constexpr size_t HMS_PLUGIN_PREFIX_SIZE = HMS_PLUGIN_PREFIX.size();
 
     if (NATIVE_MODULE_LIST.count(module) != 0) {
         return {module.substr(1), REQUIRE_NATIVE_MODULE};
     }
 
-    if (module.compare(0, SYSTEM_PLUGIN_PREFIX.size(), SYSTEM_PLUGIN_PREFIX) == 0) {
-        return {module.substr(SYSTEM_PLUGIN_PREFIX.size()), REQUIRE_NAPI};
+    if ((module.compare(0, SYSTEM_PLUGIN_PREFIX_SIZE, SYSTEM_PLUGIN_PREFIX) == 0) ||
+        (module.compare(0, SYSTEM_PLUGIN_PREFIX_SIZE, SYSTEM_PLUGIN_PREFIX_TRANSFORMED) == 0)) {
+        return {module.substr(SYSTEM_PLUGIN_PREFIX_SIZE), REQUIRE_NAPI};
     }
 
-    if (module.compare(0, OHOS_PLUGIN_PREFIX.size(), OHOS_PLUGIN_PREFIX) == 0) {
-        return {module.substr(OHOS_PLUGIN_PREFIX.size()), REQUIRE_NAPI};
+    if ((module.compare(0, OHOS_PLUGIN_PREFIX_SIZE, OHOS_PLUGIN_PREFIX) == 0) ||
+        (module.compare(0, OHOS_PLUGIN_PREFIX_SIZE, OHOS_PLUGIN_PREFIX_TRANSFORMED) == 0)) {
+        return {module.substr(OHOS_PLUGIN_PREFIX_SIZE), REQUIRE_NAPI};
+    }
+
+    if ((module.compare(0, HMS_PLUGIN_PREFIX_SIZE, HMS_PLUGIN_PREFIX) == 0) ||
+        (module.compare(0, HMS_PLUGIN_PREFIX_SIZE, HMS_PLUGIN_PREFIX_TRANSFORMED) == 0)) {
+        return {module.substr(HMS_PLUGIN_PREFIX_SIZE), REQUIRE_NAPI};
     }
 
     return {module, REQUIRE};
