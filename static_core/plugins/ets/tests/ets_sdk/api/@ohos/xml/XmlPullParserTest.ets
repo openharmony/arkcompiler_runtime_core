@@ -61,7 +61,7 @@ function testWithTagValueCb() {
         "<?xml version=\"1.0\" encoding=\"utf-8\"?><!DOCTYPE note [\n<!ENTITY foo \"baa\">]>",
         "<note importance=\"high\" logged=\"true\">",
         "<![CDATA[\r\nfunction matchwo(a,6)\r\n{\r\nreturn 1\r\n}\r\n]]>",
-        "<!--Hello, World!--> <company>John &amp Hans</company> <title>Happy</title>",
+        "<!--Hello, World!--> <company>John &amp; Hans</company> <title>Happy</title>",
         "<title>Happy</title> <todo>Work</todo> <todo>Play</todo> <?go there?>",
         "<a><b/></a> <h:table xmlns:h=\"http://www.w3.org/TR/html4/\"> <h:tr>",
         "<h:td>Apples</h:td> <h:td>Bananas</h:td> </h:tr>",
@@ -81,12 +81,15 @@ function testWithTagValueCb() {
 
     parser.parseXml(options)
 
-    const res = '{  :  note [ foo "baa"] }; {  :  foo "baa" }; { note :  }; {  : function matchwo(a,6){return 1} }; \
-{  : Hello, World! }; { company :  }; {  : John &amp Hans }; { company :  }; { title :  }; {  : Happy }; { title :  }; \
-{ title :  }; {  : Happy }; { title :  }; { todo :  }; {  : Work }; { todo :  }; { todo :  }; {  : Play }; \
-{ todo :  }; {  : go there }; { a :  }; { b :  }; { b :  }; { a :  }; { table :  }; { tr :  }; { td :  }; {  : Apples }; \
-{ td :  }; { td :  }; {  : Bananas }; { td :  }; { tr :  }; { table :  }; { note :  }; '
-
+    const res = '{  :  }; {  :  note [<!ENTITY foo "baa">] }; { note :  }; ' +
+        '{  : function matchwo(a,6){return 1} }; {  : Hello, World! }; {  :   }; ' +
+        '{ company :  }; {  : John & Hans }; { company :  }; {  :   }; { title :  }; ' +
+        '{  : Happy }; { title :  }; { title :  }; {  : Happy }; { title :  }; ' +
+        '{  :   }; { todo :  }; {  : Work }; { todo :  }; {  :   }; { todo :  }; ' +
+        '{  : Play }; { todo :  }; {  :   }; {  : go there }; { a :  }; { b :  }; ' +
+        '{ b :  }; { a :  }; {  :   }; { table :  }; {  :   }; { tr :  }; { td :  }; ' +
+        '{  : Apples }; { td :  }; {  :   }; { td :  }; {  : Bananas }; { td :  }; ' +
+        '{  :   }; { tr :  }; { table :  }; { note :  }; {  :  }; ';
     arktest.assertEQ(processStr(g_testStr), processStr(res))
 }
 
@@ -115,11 +118,15 @@ function testWithTagValueCbWithIgnoreNS() {
 
     parser.parseXml(options)
 
-    const res = '{  :  foo "baa" }; { note :  }; {  : function matchwo(a,6){return 1;} }; {  : Hello, World! }; \
-{ company :  }; {  : John & Hans }; { company :  }; { title :  }; {  : Happy }; { title :  }; { title :  }; \
-{  : Happy }; { title :  }; { todo :  }; {  : Work }; { todo :  }; { todo :  }; {  : Play }; { todo :  }; \
-{  : go there }; { a :  }; { b :  }; { b :  }; { a :  }; { h:table :  }; { h:tr :  }; { h:td :  }; {  : Apples }; { h:td :  }; \
-{ h:td :  }; {  : Bananas }; { h:td :  }; { h:tr :  }; { h:table :  }; { note :  }; '
+    const res = '{  :  }; { note :  }; {  : function matchwo(a,6){return 1;} }; ' +
+        '{  : Hello, World! }; {  :   }; { company :  }; {  : John & Hans }; ' +
+        '{ company :  }; {  :   }; { title :  }; {  : Happy }; { title :  }; ' +
+        '{ title :  }; {  : Happy }; { title :  }; {  :   }; { todo :  }; {  : Work }; ' +
+        '{ todo :  }; {  :   }; { todo :  }; {  : Play }; { todo :  }; {  :   }; ' +
+        '{  : go there }; { a :  }; { b :  }; { b :  }; { a :  }; {  :   }; ' +
+        '{ h:table :  }; {  :   }; { h:tr :  }; { h:td :  }; {  : Apples }; ' +
+        '{ h:td :  }; {  :   }; { h:td :  }; {  : Bananas }; { h:td :  }; {  :   }; ' +
+        '{ h:tr :  }; { h:table :  }; { note :  }; {  :  }; ';
     arktest.assertEQ(processStr(g_testStr), processStr(res))
 }
 
@@ -149,11 +156,15 @@ function testWithTagValueCbWithSupportDocTypeAndIgnoreNS() {
 
     parser.parseXml(options)
 
-    const res = '{  :  note [ foo "baa"] }; {  :  foo "baa" }; { note :  }; {  : function matchwo(a,6){return 1;} }; \
-{  : Hello, World! }; { company :  }; {  : John & Hans }; { company :  }; { title :  }; {  : Happy }; { title :  }; \
-{ title :  }; {  : Happy }; { title :  }; { todo :  }; {  : Work }; { todo :  }; { todo :  }; {  : Play }; \
-{ todo :  }; {  : go there }; { a :  }; { b :  }; { b :  }; { a :  }; { h:table :  }; { h:tr :  }; { h:td :  }; {  : Apples }; \
-{ h:td :  }; { h:td :  }; {  : Bananas }; { h:td :  }; { h:tr :  }; { h:table :  }; { note :  }; '
+    const res = '{  :  }; {  :  note [<!ENTITY foo "baa">] }; { note :  }; ' +
+        '{  : function matchwo(a,6){return 1;} }; {  : Hello, World! }; {  :   }; ' +
+        '{ company :  }; {  : John & Hans }; { company :  }; {  :   }; { title :  }; ' +
+        '{  : Happy }; { title :  }; { title :  }; {  : Happy }; { title :  }; ' +
+        '{  :   }; { todo :  }; {  : Work }; { todo :  }; {  :   }; { todo :  }; ' +
+        '{  : Play }; { todo :  }; {  :   }; {  : go there }; { a :  }; { b :  }; ' +
+        '{ b :  }; { a :  }; {  :   }; { h:table :  }; {  :   }; { h:tr :  }; ' +
+        '{ h:td :  }; {  : Apples }; { h:td :  }; {  :   }; { h:td :  }; {  : Bananas }; ' +
+        '{ h:td :  }; {  :   }; { h:tr :  }; { h:table :  }; { note :  }; {  :  }; ';
 
     arktest.assertEQ(processStr(g_testStr), processStr(res))
 }
@@ -213,29 +224,40 @@ function testWithTokenValueCb() {
 
     parser.parseXml(options)
 
-    const expected = '{ START_DOCUMENT : { depth : 0}; { columnNumber : 1}; { lineNumber : 1}; { attributeCount : 2}; \
-{ isEmptyElementTag : false}; { isWhitespace : false}; { namespace : }; { name : }; { prefix : }; \
-{ text : xml version="1.0" encoding="utf-8"} }; { START_TAG : { depth : 1}; { columnNumber : 77}; { lineNumber : 1}; \
-{ attributeCount : 2}; { isEmptyElementTag : false}; { isWhitespace : true}; { namespace : }; { name : note}; { prefix : }; \
-{ text : } }; { CDSECT : { depth : 1}; { columnNumber : 78}; { lineNumber : 1}; { attributeCount : 0}; \
-{ isEmptyElementTag : false}; { isWhitespace : false}; { namespace : }; { name : }; { prefix : }; \
-{ text : function matchwo(a,6){return 1;}} }; { COMMENT : { depth : 1}; { columnNumber : 6}; \
-{ lineNumber : 6}; { attributeCount : 0}; { isEmptyElementTag : false}; { isWhitespace : false}; { namespace : }; \
-{ name : }; { prefix : }; { text : Hello, World!} }; { START_TAG : { depth : 2}; { columnNumber : 35}; { lineNumber : 6}; \
-{ attributeCount : 0}; { isEmptyElementTag : false}; { isWhitespace : true}; { namespace : }; { name : company}; { prefix : }; \
-{ text : } }; { TEXT : { depth : 2}; { columnNumber : 50}; { lineNumber : 6}; { attributeCount : 0}; { isEmptyElementTag : false}; \
-{ isWhitespace : false}; { namespace : }; { name : }; { prefix : }; { text : John & Hans} }; { END_TAG : { depth : 1}; \
-{ columnNumber : 60}; { lineNumber : 6}; { attributeCount : 0}; { isEmptyElementTag : false}; { isWhitespace : true}; \
-{ namespace : }; { name : company}; { prefix : }; { text : } }; { START_TAG : { depth : 2}; { columnNumber : 68}; \
-{ lineNumber : 6}; { attributeCount : 0}; { isEmptyElementTag : false}; { isWhitespace : true}; { namespace : }; { name : title}; \
-{ prefix : }; { text : } }; { TEXT : { depth : 2}; { columnNumber : 73}; { lineNumber : 6}; { attributeCount : 0}; \
-{ isEmptyElementTag : false}; { isWhitespace : false}; { namespace : }; { name : }; { prefix : }; { text : Happy} }; \
-{ END_TAG : { depth : 1}; { columnNumber : 81}; { lineNumber : 6}; { attributeCount : 0}; { isEmptyElementTag : false}; \
-{ isWhitespace : true}; { namespace : }; { name : title}; { prefix : }; { text : } }; { END_TAG : { depth : 1}; \
-{ columnNumber : 88}; { lineNumber : 6}; { attributeCount : 0}; { isEmptyElementTag : false}; { isWhitespace : true}; \
-{ namespace : }; { name : note}; { prefix : }; { text : } }; { END_DOCUMENT : { depth : 0}; { columnNumber : 88}; \
-{ lineNumber : 6}; { attributeCount : 0}; { isEmptyElementTag : false}; { isWhitespace : true}; { namespace : }; { name : }; \
-{ prefix : }; { text : } }; '
+    const expected = '{ START_DOCUMENT : { depth : 0}; { columnNumber : 1};' +
+        ' { lineNumber : 1}; { attributeCount : 0}; { isEmptyElementTag : false}; ' +
+        '{ isWhitespace : true}; { namespace : }; { name : }; { prefix : }; { text : } }; ' +
+        '{ START_TAG : { depth : 1}; { columnNumber : 77}; { lineNumber : 1}; ' +
+        '{ attributeCount : 2}; { isEmptyElementTag : false}; { isWhitespace : false}; ' +
+        '{ namespace : }; { name : note}; { prefix : }; { text : } }; { CDSECT : { depth : 1}; ' +
+        '{ columnNumber : 4}; { lineNumber : 6}; { attributeCount : 0}; { isEmptyElementTag : false}; ' +
+        '{ isWhitespace : true}; { namespace : }; { name : }; { prefix : }; ' +
+        '{ text : function matchwo(a,6){return 1;}} }; { COMMENT : { depth : 1}; ' +
+        '{ columnNumber : 24}; { lineNumber : 6}; { attributeCount : 0}; { isEmptyElementTag : false}; ' +
+        '{ isWhitespace : true}; { namespace : }; { name : }; { prefix : }; { text : Hello, World!} }; ' +
+        '{ WHITESPACE : { depth : 1}; { columnNumber : 25}; { lineNumber : 6}; { attributeCount : 0}; ' +
+        '{ isEmptyElementTag : false}; { isWhitespace : true}; { namespace : }; { name : }; { prefix : }; ' +
+        '{ text :  } }; { START_TAG : { depth : 2}; { columnNumber : 34}; { lineNumber : 6}; ' +
+        '{ attributeCount : 0}; { isEmptyElementTag : false}; { isWhitespace : true}; { namespace : }; ' +
+        '{ name : company}; { prefix : }; { text : } }; { TEXT : { depth : 2}; { columnNumber : 49}; ' +
+        '{ lineNumber : 6}; { attributeCount : 0}; { isEmptyElementTag : false}; { isWhitespace : false}; ' +
+        '{ namespace : }; { name : }; { prefix : }; { text : John & Hans} }; { END_TAG : { depth : 2}; ' +
+        '{ columnNumber : 59}; { lineNumber : 6}; { attributeCount : 0}; { isEmptyElementTag : false}; ' +
+        '{ isWhitespace : true}; { namespace : }; { name : company}; { prefix : }; { text : } }; ' +
+        '{ WHITESPACE : { depth : 1}; { columnNumber : 60}; { lineNumber : 6}; { attributeCount : 0}; ' +
+        '{ isEmptyElementTag : false}; { isWhitespace : true}; { namespace : }; { name : }; { prefix : }; ' +
+        '{ text :  } }; { START_TAG : { depth : 2}; { columnNumber : 67}; { lineNumber : 6}; ' +
+        '{ attributeCount : 0}; { isEmptyElementTag : false}; { isWhitespace : true}; { namespace : }; ' +
+        '{ name : title}; { prefix : }; { text : } }; { TEXT : { depth : 2}; { columnNumber : 72}; ' +
+        '{ lineNumber : 6}; { attributeCount : 0}; { isEmptyElementTag : false}; { isWhitespace : false}; ' +
+        '{ namespace : }; { name : }; { prefix : }; { text : Happy} }; { END_TAG : { depth : 2}; ' +
+        '{ columnNumber : 80}; { lineNumber : 6}; { attributeCount : 0}; { isEmptyElementTag : false}; ' +
+        '{ isWhitespace : true}; { namespace : }; { name : title}; { prefix : }; { text : } }; ' +
+        '{ END_TAG : { depth : 1}; { columnNumber : 87}; { lineNumber : 6}; { attributeCount : 0}; ' +
+        '{ isEmptyElementTag : false}; { isWhitespace : true}; { namespace : }; { name : note}; ' +
+        '{ prefix : }; { text : } }; { END_DOCUMENT : { depth : 0}; { columnNumber : 87}; ' +
+        '{ lineNumber : 11}; { attributeCount : 0}; { isEmptyElementTag : false}; ' +
+        '{ isWhitespace : true}; { namespace : }; { name : }; { prefix : }; { text : } }; ';
 
     arktest.assertEQ(processStr(g_testStr), processStr(expected))
 }
@@ -280,7 +302,7 @@ function testReplaceXmlSpecChars() {
 function testCDATA() {
     const str : ReadonlyArray<string> = Array.of<string>(
     "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
-    "<note importance='high' logged='true'",
+    "<note importance='high' logged='true'>",
     "    <title>Hello\nWorld</title>",
     "    <todo>Work\n</todo>",
     "    <mess><![CDATA[This is a \n CDATA section]]></mess>",
@@ -468,12 +490,12 @@ function testTagValue() {
     let data = rawStringToBuffer(strXml)
     let parser = new xml.XmlPullParser(data, "utf-8")
     let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tagValueCallbackFunction": tagCb}
-    parser.parseXml(options)
+    parser.parseXml(options);
 
-    let expectedTextStr = '{ note :  }; {  :      }; {  : function \n matchwo(a,6) }; {  :      }; {  : Hello, World! }; \
-{  :      }; { company :  }; {  : John & Hans }; { company :  }; {  :      }; { title :  }; {  : Happy }; { title :  }; \
-{  :      }; { lens :  }; {  : Play }; { lens :  }; {  :      }; {  : go there }; { note :  }; '
-
+    let expectedTextStr = '{  :  }; { note :  }; {  :      }; {  : function \n matchwo(a,6) }; ' +
+        '{  :      }; {  : Hello, World! }; {  :      }; { company :  }; {  : John & Hans }; ' +
+        '{ company :  }; {  :      }; { title :  }; {  : Happy }; { title :  }; {  :      }; ' +
+        '{ lens :  }; {  : Play }; { lens :  }; {  :      }; {  : go there }; { note :  }; {  :  }; ';
     arktest.assertEQ(textStr, expectedTextStr)
 
     let oldExpectedStr = 'note    function \n matchwo(a,6)    Hello, World!    companyJohn & Hanscompany\

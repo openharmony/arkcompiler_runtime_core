@@ -152,6 +152,7 @@ if (!(ark_standalone_build ||
       "$ark_root/plugins/ets/sdk/native/api/ani_textdecoder.cpp",
       "$ark_root/plugins/ets/sdk/native/api/ani_textencoder.cpp",
       "$ark_root/plugins/ets/sdk/native/api/ani_textencoder_helper.cpp",
+      "$ark_root/plugins/ets/sdk/native/api/ani_xmlpullparser.cpp",
       "$ark_root/plugins/ets/sdk/native/main.cpp",
       "$ark_root/plugins/ets/stdlib/native/core/stdlib_ani_helpers.cpp",
     ]

@@ -17,10 +17,12 @@
 #define PANDA_PLUGINS_ETS_SDK_NATIVE_CORE_UTIL_H
 
 #include <ani.h>
+#include <string>
+#include <string_view>
 
-extern "C" {
 namespace ark::ets::sdk::util {
 
+extern "C" {
 ANI_EXPORT ani_string ETSApiUtilHelperGenerateRandomUUID(ani_env *env, [[maybe_unused]] ani_class klass,
                                                          ani_boolean entropyCache);
 
@@ -30,9 +32,34 @@ ANI_EXPORT ani_object ETSApiUtilHelperGenerateRandomBinaryUUID(ani_env *env, [[m
 ANI_EXPORT void ThrowNewError(ani_env *env, std::string_view classDescriptor, std::string_view msg,
                               const char *ctorSignature = nullptr);
 
-ANI_EXPORT ani_string CreateUtf8String(ani_env *env, const char *data, ani_size size);
 ANI_EXPORT ani_string CreateUtf16String(ani_env *env, const uint16_t *data, ani_size size);
-}  // namespace ark::ets::sdk::util
 }
+
+ani_string CreateUtf8String(ani_env *env, const char *data, ani_size size);
+inline ani_string CreateStringUtf8(ani_env *env, const std::string &str)
+{
+    return CreateUtf8String(env, str.data(), str.size());
+}
+
+ani_ref GetAniNull(ani_env *env);
+bool IsNullishValue(ani_env *env, ani_ref ref);
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define BOX_VALUE_LIST(V)        \
+    V(ani_boolean, Boolean, "z") \
+    V(ani_byte, Byte, "b")       \
+    V(ani_char, Char, "c")       \
+    V(ani_double, Double, "d")   \
+    V(ani_float, Float, "f")     \
+    V(ani_int, Int, "i")         \
+    V(ani_long, Long, "l")       \
+    V(ani_short, Short, "s")
+
+// CC-OFFNXT(G.PRE.09) function defination~, no effects.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define DEF_UNBOX_METHOD(aniType, typeName, _signature) aniType UnboxTo##typeName(ani_env *env, ani_object value);
+BOX_VALUE_LIST(DEF_UNBOX_METHOD)
+#undef DEF_UNBOX_METHOD
+}  // namespace ark::ets::sdk::util
 
 #endif  //  PANDA_PLUGINS_ETS_SDK_NATIVE_CORE_UTIL_H

@@ -11,10 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-testXmlPullParserConstructor0020 failed, error: AssertionError: expected true but was false
-testXmlPullParserConstructor0019 failed, error: AssertionError: expected true but was false
-testXmlPullParserConstructor0018 failed, error: AssertionError: expected true but was false
-testXmlPullParserConstructor0015 failed, error: AssertionError: expected true but was false
-testXmlPullParserConstructor0014 failed, error: AssertionError: expected true but was false
-testXmlPullParserConstructor0013 failed, error: AssertionError: expected true but was false
-testXmlPullParserConstructor0008 failed, error: BusinessError: The node name contains invalid characters
+testXmlPullParserConstructor0020 failed, error: BusinessError: Unexpected token: xml version="1.0" encoding="utf-8"
+testXmlPullParserConstructor0019 failed, error: BusinessError: unterminated entity ref
+testXmlPullParserConstructor0018 failed, error: BusinessError: unterminated entity ref
+testXmlPullParserConstructor0015 failed, error: BusinessError: Illegal: "]]>" outside CDATA section
+testXmlPullParserConstructor0014 failed, error: BusinessError: Illegal: "]]>" outside CDATA section
+testXmlPullParserConstructor0013 failed, error: BusinessError: Unexpected token
+testXmlPullParserConstructor0008 failed, error: BusinessError: The node name contains invalid characters: &

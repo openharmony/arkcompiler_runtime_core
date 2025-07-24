@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 import {xml} from "@ohos.xml"
+import { util } from "@ohos.util";
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("XmlPullParser API tests, part6");
@@ -55,14 +56,7 @@ const testXml =
     "</example>";
 
 function rawStringToBuffer( str: string ) : ArrayBuffer {
-    let idx = 0
-    let len = str.length
-    let arr = new Uint8Array( len )
-    for ( idx = 0 ; idx < len ; ++idx ) {
-        arr[ idx ] = str.charCodeAt(idx) & 0xFF;
-    }
-
-    return arr.buffer as ArrayBuffer
+    return new util.TextEncoder().encodeInto(str).buffer;
 }
 
 function testXmlParseInfoGetColumnNumber0001() {
@@ -196,7 +190,7 @@ function testXmlParseInfoGetColumnNumber0006() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
-        arktest.assertTrue(str.includes("key:5 value:286"));
+        arktest.assertTrue(str.includes("key:5 value:303"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
@@ -219,7 +213,7 @@ function testXmlParseInfoGetColumnNumber0007() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
-        arktest.assertTrue(str.includes("key:6 value:142"));
+        arktest.assertTrue(str.includes("key:6 value:190"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
@@ -242,7 +236,7 @@ function testXmlParseInfoGetColumnNumber0008() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
-        arktest.assertTrue(str.includes("key:7 value:40"))
+        arktest.assertTrue(str.includes("key:7 value:97"))
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
@@ -288,7 +282,7 @@ function testXmlParseInfoGetColumnNumber0010() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
-        arktest.assertTrue(str.includes("key:9 value:59"));
+        arktest.assertTrue(str.includes("key:9 value:413"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
