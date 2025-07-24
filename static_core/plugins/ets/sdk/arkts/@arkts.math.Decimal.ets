@@ -2536,7 +2536,7 @@ export class Decimal {
 
     private initializeByNumber(v: double) {
         if (v == 0) {
-            this.sign = 1;
+            this.sign = 1 / v < 0 ? -1 : 1;
             this.exponent = 0;
             this.digits = Utils.updateDigits(0);
             return;

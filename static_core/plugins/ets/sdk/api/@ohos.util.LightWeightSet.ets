@@ -17,6 +17,7 @@ import LightWeightMap from '@ohos.util.LightWeightMap';
 import { BusinessError } from "@ohos.base";
 
 const TypeErrorCodeId: int = 401;
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 export type LightWeightSetForEachCb<T> = (value: T, key: T, set: LightWeightSet<T>) => void;
 
@@ -62,6 +63,10 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
 
     private static readonly SHIFT_COUNT = 31;
 
+    private static readonly MIN_BUCKETS_COUNT = 8;
+
+    private capacity: int = LightWeightSet.MIN_BUCKETS_COUNT;
+
     private iteratorForEach<V>(x: Iterator<V>, fn: (x: V) => void): void {
         while (true) {
             const v = x.next();
@@ -96,6 +101,13 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
         if (this.buckets.hasKey(obj)) {
             return false;
         }
+        if (this.buckets.length >= this.capacity) {
+            if (this.capacity * 2 > Int.MAX_VALUE) {
+                return false;
+            } else {
+                this.increaseCapacityTo(this.capacity * 2);
+            }
+        }
         this.buckets.set(obj, obj);
         return true;
     }
@@ -127,6 +139,7 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
      */
     clear(): void {
         this.buckets.clear();
+        this.capacity = LightWeightSet.MIN_BUCKETS_COUNT;
     }
 
     /**
@@ -194,7 +207,7 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
         } else {
             const hashCode = this.hash(key);
             let low: int = 0;
-            let high: int = this.buckets.length as int - 1;
+            let high: int = this.buckets.length - 1;
             while (low <= high) {
                 const mid = (low + high) >>> 1;
                 const midHash = this.hash(this.buckets.getKeyAt(mid)!);
@@ -250,8 +263,18 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
      * Increases the capacity of the LightWeightSet to the specified minimum capacity
      *
      * @param minimumCapacity the minimum capacity to increase to
+     * 
+     * throws BusinessError if the minimumCapacity out of range.
      */
     increaseCapacityTo(minimumCapacity: int): void {
+        if (minimumCapacity > Int.MAX_VALUE) {
+            return;
+        }
+        if (minimumCapacity <= 0 || this.capacity >= minimumCapacity) {
+            throw new BusinessError(OutOfBoundsErrorCodeId,
+                new Error(`The value of "minimumCapacity" is out of range. It must be > ${this.capacity}. Received value is: ${minimumCapacity}`));
+        }
+        this.capacity = minimumCapacity;
         this.buckets.increaseCapacityTo(minimumCapacity);
     }
 

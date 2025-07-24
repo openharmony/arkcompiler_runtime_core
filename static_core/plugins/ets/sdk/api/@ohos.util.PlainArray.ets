@@ -130,10 +130,10 @@ export class PlainArray<T> implements Iterable<[Int, T]> {
      * 
      * @throws BusinessError if the index is out of range.
      */
-    public getKeyAt(index: int): int | undefined {
+    public getKeyAt(index: int): int {
         this.checkIndexType(index);
         if (index < 0 || index >= this.length) {
-            return undefined;
+            return -1;
         }
 
         return this.buckets.getKeyAt(index)!;

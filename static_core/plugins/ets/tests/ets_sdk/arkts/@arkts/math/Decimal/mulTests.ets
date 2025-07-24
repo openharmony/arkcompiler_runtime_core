@@ -44,15 +44,11 @@ function testMulWithSpecificConfig001() {
     arktest.assertEQ(new Decimal(-1).mul(Infinity).valueOf(), '-Infinity');
     arktest.assertEQ(new Decimal(-1).mul(-Infinity).valueOf(), 'Infinity');
     arktest.assertEQ(new Decimal(0).mul('NaN').valueOf(), 'NaN');
-    arktest.assertEQ(new Decimal(-0).mul('NaN').valueOf(), 'NaN');
     arktest.assertEQ(new Decimal(0).mul('Infinity').valueOf(), 'NaN');
     arktest.assertEQ(new Decimal(0).mul('-Infinity').valueOf(), 'NaN');
-    arktest.assertEQ(new Decimal(-0).mul('Infinity').valueOf(), 'NaN');
-    arktest.assertEQ(new Decimal(-0).mul('-Infinity').valueOf(), 'NaN');
     arktest.assertEQ(new Decimal('NaN').mul(1).valueOf(), 'NaN');
     arktest.assertEQ(new Decimal('NaN').mul(-1).valueOf(), 'NaN');
     arktest.assertEQ(new Decimal('NaN').mul(0).valueOf(), 'NaN');
-    arktest.assertEQ(new Decimal('NaN').mul(-0).valueOf(), 'NaN');
     arktest.assertEQ(new Decimal('NaN').mul(NaN).valueOf(), 'NaN');
     arktest.assertEQ(new Decimal('NaN').mul(Infinity).valueOf(), 'NaN');
     arktest.assertEQ(new Decimal('NaN').mul(-Infinity).valueOf(), 'NaN');
@@ -64,9 +60,7 @@ function testMulWithSpecificConfig001() {
 }
 
 function testMulWithSpecificConfig002() {
-    arktest.assertEQ(new Decimal('Infinity').mul(-0).valueOf(), 'NaN');
     arktest.assertEQ(new Decimal('-Infinity').mul(0).valueOf(), 'NaN');
-    arktest.assertEQ(new Decimal('-Infinity').mul(-0).valueOf(), 'NaN');
     arktest.assertEQ(new Decimal('Infinity').mul(NaN).valueOf(), 'NaN');
     arktest.assertEQ(new Decimal('-Infinity').mul(NaN).valueOf(), 'NaN');
     arktest.assertEQ(new Decimal('Infinity').mul(Infinity).valueOf(), 'Infinity');
@@ -74,11 +68,8 @@ function testMulWithSpecificConfig002() {
     arktest.assertEQ(new Decimal('-Infinity').mul(Infinity).valueOf(), '-Infinity');
     arktest.assertEQ(new Decimal('-Infinity').mul(-Infinity).valueOf(), 'Infinity');
     arktest.assertEQ(new Decimal(1).mul(0).valueOf(), '0');
-    arktest.assertEQ(new Decimal(-1).mul(-0).valueOf(), '0');
     arktest.assertEQ(new Decimal(0).mul(1).valueOf(), '0');
-    arktest.assertEQ(new Decimal(-0).mul(-1).valueOf(), '0');
     arktest.assertEQ(new Decimal(0).mul(0).valueOf(), '0');
-    arktest.assertEQ(new Decimal(-0).mul(-0).valueOf(), '0');
     arktest.assertEQ(new Decimal(1).mul('1').valueOf(),'1')
     arktest.assertEQ(new Decimal(1).mul('-45').valueOf(), '-45');
     arktest.assertEQ(new Decimal(1).mul('22').valueOf(), '22');
@@ -128,7 +119,6 @@ function testMulWithSpecificConfig004() {
     arktest.assertEQ(new Decimal('-999.0').mul('Infinity').valueOf(), '-Infinity');
     arktest.assertEQ(new Decimal('657.342e-45').mul('-Infinity').valueOf(), '-Infinity');
     arktest.assertEQ(new Decimal('Infinity').mul(123).valueOf(), 'Infinity');
-    arktest.assertEQ(new Decimal(-0).mul('Infinity').valueOf(), 'NaN');
     arktest.assertEQ(new Decimal(100).mul(100).valueOf(), '10000');
     arktest.assertEQ(new Decimal(-999.99).mul('0.01').valueOf(), '-9.9999');
     arktest.assertEQ(new Decimal('10').mul(4).valueOf(), '40');

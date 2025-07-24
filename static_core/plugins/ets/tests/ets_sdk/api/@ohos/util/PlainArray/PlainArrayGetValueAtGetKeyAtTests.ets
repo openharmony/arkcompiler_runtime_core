@@ -65,13 +65,13 @@ function testGetKeyAtBoundaryIndex() {
 function testGetKeyAtExceededIndex() {
     let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber2);
-    arktest.assertEQ(plainArray.getKeyAt(-TestData.testNumber1), undefined);
-    arktest.assertEQ(plainArray.getKeyAt(TestData.testNumber6), undefined);
+    arktest.assertEQ(plainArray.getKeyAt(-TestData.testNumber1), -1);
+    arktest.assertEQ(plainArray.getKeyAt(TestData.testNumber6), -1);
 }
 
 function testGetKeyAtIndexOfEmpty() {
     let plainArray = new PlainArray<double>();
-    arktest.assertEQ(plainArray.getKeyAt(0), undefined);
+    arktest.assertEQ(plainArray.getKeyAt(0), -1);
 }
 
 function testGetValueAtValidIndex() {

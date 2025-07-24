@@ -14,6 +14,9 @@
  */
 
 import {LightWeightSet} from "@ohos.util.LightWeightSet";
+import { BusinessError } from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("LightWeightSet ToString IncreaseCapacityTo ToArray API tests")
@@ -32,6 +35,7 @@ function main(): int {
         testIncreaseCapacityToLeftFloat)
     suite.addTest("LightWeightSet increaseCapacityTo the right float capacity",
         testIncreaseCapacityToRightFloat)
+    suite.addTest("LightWeightSet increaseCapacityTo the negative capacity", testIncreaseCapacityToNegativeNumber)
     suite.addTest("LightWeightSet toArray lightWeightSet",
         testToArray)
 
@@ -68,28 +72,60 @@ function testIncreaseCapacityTo() {
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     arktest.expectNoThrow(() => { lightWeightSet.increaseCapacityTo(16); });
-    arktest.expectNoThrow(() => { lightWeightSet.increaseCapacityTo(2); });
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            'The value of \"minimumCapacity\" is out of range. It must be > 16. Received value is: 2') &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    }
+    arktest.expectThrow(() => { lightWeightSet.increaseCapacityTo(2) }, exceptionCheck);
 }
 
 function testIncreaseCapacityToLessThanLength() {
     let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
-    arktest.expectNoThrow(() => { lightWeightSet.increaseCapacityTo(1); });
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            'The value of \"minimumCapacity\" is out of range. It must be > 8. Received value is: 1') &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    }
+    arktest.expectThrow(() => { lightWeightSet.increaseCapacityTo(1) }, exceptionCheck);
 }
 
 function testIncreaseCapacityToLeftFloat() {
     let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
-    arktest.expectNoThrow(() => { lightWeightSet.increaseCapacityTo(Math.floor(1.2).toInt()); });
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            'The value of \"minimumCapacity\" is out of range. It must be > 8. Received value is: 1') &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    }
+    arktest.expectThrow(() => { lightWeightSet.increaseCapacityTo(Math.floor(1.2).toInt()) }, exceptionCheck);
 }
 
 function testIncreaseCapacityToRightFloat() {
     let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
-    arktest.expectNoThrow(() => { lightWeightSet.increaseCapacityTo(Math.floor(3.8).toInt()); });
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            'The value of \"minimumCapacity\" is out of range. It must be > 8. Received value is: 3') &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    }
+    arktest.expectThrow(() => { lightWeightSet.increaseCapacityTo(Math.floor(3.8).toInt()) }, exceptionCheck);
+}
+
+function testIncreaseCapacityToNegativeNumber() {
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    lightWeightSet.add("aa");
+    lightWeightSet.add("bb");
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            'The value of \"minimumCapacity\" is out of range. It must be > 8. Received value is: -4') &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    }
+    arktest.expectThrow(() => { lightWeightSet.increaseCapacityTo(-4) }, exceptionCheck);
 }
 
 function testToArray() {
