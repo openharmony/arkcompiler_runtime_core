@@ -40,7 +40,7 @@ enum class LanguageType : uint64_t {
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
 class BaseStateWord {
 public:
-#ifdef BASE_CLASS_32BITS
+#ifdef BASE_STRING_32BITS
     static constexpr size_t BASECLASS_WIDTH = 32;
     static constexpr size_t PADDING_WIDTH = 28;
 #else

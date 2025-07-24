@@ -90,11 +90,42 @@ void CoreClassLinkerExtension::InitializeClassRoots(const LanguageContext &ctx)
                              utf::Mutf8AsCString(ctx.GetStringArrayClassDescriptor()));
 }
 
-const uint8_t *CoreClassLinkerExtension::GetStringClassDescriptor(ClassRoot strCls)
+void CoreClassLinkerExtension::FillStringClass(Class *strCls, ClassRoot flag)
 {
-    switch (strCls) {
+    strCls->SetState(Class::State::INITIALIZING);
+    switch (flag) {
+        case ClassRoot::LINE_STRING: {
+            strCls->SetLineStringClass();
+            break;
+        }
+        case ClassRoot::SLICED_STRING: {
+            strCls->SetSlicedStringClass();
+            break;
+        }
+        case ClassRoot::TREE_STRING: {
+            strCls->SetTreeStringClass();
+            break;
+        }
+        default: {
+            UNREACHABLE();
+        }
+    }
+    strCls->SetStringClass();
+    strCls->SetState(Class::State::INITIALIZED);
+    strCls->SetFinal();
+}
+
+const uint8_t *CoreClassLinkerExtension::GetStringClassDescriptor(ClassRoot flag)
+{
+    switch (flag) {
         case ClassRoot::LINE_STRING:
             return utf::CStringAsMutf8("Lpanda/LineString;");
+
+        case ClassRoot::SLICED_STRING:
+            return utf::CStringAsMutf8("Lpanda/SlicedString;");
+
+        case ClassRoot::TREE_STRING:
+            return utf::CStringAsMutf8("Lpanda/TreeString;");
 
         default:
             UNREACHABLE();
@@ -120,25 +151,25 @@ bool CoreClassLinkerExtension::InitializeStringClass()
     strCls->SetLoadContext(GetBootContext());
     GetClassLinker()->AddClassRoot(flag, strCls);
 
-    // 2. create LineStringClass
-    flag = ClassRoot::LINE_STRING;
+    // 2. create LineStringClass / SlicedStringClass / TreeStringClass
     uint32_t accessFlags = strCls->GetAccessFlags() | ACC_FINAL;
     Span<Field> fields {};
     Span<Method> methodsSpan {};
     Span<Class *> interfacesSpan {};
-    const uint8_t *descriptor = GetStringClassDescriptor(flag);
-    Class *lineStrCls = GetClassLinker()->BuildClass(descriptor, true, accessFlags, methodsSpan, fields, strCls,
-                                                     interfacesSpan, GetBootContext(), false);
-    if (lineStrCls == nullptr) {
-        LOG(ERROR, CLASS_LINKER) << "Cannot create string class '" << descriptor << "'";
-        return false;
+    auto first = static_cast<int>(ClassRoot::LINE_STRING);
+    auto last = static_cast<int>(ClassRoot::TREE_STRING);
+    for (auto i = first; i <= last; i++) {
+        flag = static_cast<ClassRoot>(i);
+        const uint8_t *descriptor = GetStringClassDescriptor(flag);
+        Class *subStrCls = GetClassLinker()->BuildClass(descriptor, true, accessFlags, methodsSpan, fields, strCls,
+                                                        interfacesSpan, GetBootContext(), false);
+        if (subStrCls == nullptr) {
+            LOG(ERROR, CLASS_LINKER) << "Cannot create string class '" << descriptor << "'";
+            return false;
+        }
+        FillStringClass(subStrCls, flag);
+        GetClassLinker()->AddClassRoot(flag, subStrCls);
     }
-    lineStrCls->SetState(Class::State::INITIALIZING);
-    lineStrCls->SetStringClass();
-    lineStrCls->SetLineStringClass();
-    lineStrCls->SetState(Class::State::INITIALIZED);
-    lineStrCls->SetFinal();
-    GetClassLinker()->AddClassRoot(flag, lineStrCls);
     return true;
 }
 

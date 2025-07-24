@@ -52,8 +52,9 @@ public:
     NO_COPY_SEMANTIC_CC(TreeString);
     // Minimum length for a tree string
     static constexpr uint32_t MIN_TREE_STRING_LENGTH = 13;
-
     static constexpr size_t LEFT_OFFSET = BaseString::SIZE;
+    static constexpr uint32_t REF_FIELDS_COUNT = 2;
+
     POINTER_FIELD(LeftSubString, LEFT_OFFSET, RIGHT_OFFSET)
     POINTER_FIELD(RightSubString, RIGHT_OFFSET, SIZE)
 
