@@ -33,30 +33,12 @@ function createEmptyArrayBuffer(): int {
   return a.byteLength ? 1 : 0;
 }
 
-class Assertions {
-  static assertEquals(expected: int, actual: int): void {
-    if (expected != actual) throw new AssertionError(`${expected} != ${actual}`)
-  }
-
-  static assertEquals(expected: number, actual: number): void {
-    if (expected != actual) throw new AssertionError(`${expected} != ${actual}`)
-  }
-
-  static assertTrue(condition: boolean): void {
-    if (!condition) throw new AssertionError("expected true but was false") 
-  }
-
-  static assertFalse(condition: boolean): void {
-    if (condition) throw new AssertionError("expected false but was true")
-  }
-}
-
 /**
  * Check created ArrayBuffer with different lengths
  */
 function createArrayBufferOfVariousLengths(): int {
   let buf = new ArrayBuffer(10);
-  Assertions.assertEquals(10, buf.byteLength)
+  arktest.assertEQ(10, buf.byteLength)
 
   try {
     new ArrayBuffer(-1)
@@ -88,10 +70,10 @@ function sliceArrayBufferInt(): int {
 function sliceArrayBufferNumberNegativeEnd(): int {
   let buffer = new ArrayBuffer(8);
   
-  Assertions.assertEquals(2, buffer.slice(2 as number, -4 as number).byteLength)
-  Assertions.assertEquals(0, buffer.slice(2 as number, -10 as number).byteLength)
-  Assertions.assertEquals(0, buffer.slice(2 as number, Number.NEGATIVE_INFINITY).byteLength)
-  Assertions.assertEquals(0, buffer.slice(0 as number, Number.NaN).byteLength)
+  arktest.assertEQ(2, buffer.slice(2 as number, -4 as number).byteLength)
+  arktest.assertEQ(0, buffer.slice(2 as number, -10 as number).byteLength)
+  arktest.assertEQ(0, buffer.slice(2 as number, Number.NEGATIVE_INFINITY).byteLength)
+  arktest.assertEQ(0, buffer.slice(0 as number, Number.NaN).byteLength)
   
   return 0;
 }
@@ -102,11 +84,11 @@ function sliceArrayBufferNumberNegativeEnd(): int {
 function sliceArrayBufferNumberNegativeStart(): int {
   let buffer = new ArrayBuffer(8);
   
-  Assertions.assertEquals(3, buffer.slice(-5 as number, 6 as number).byteLength)
-  Assertions.assertEquals(6, buffer.slice(-12 as number, 6 as number).byteLength)
-  Assertions.assertEquals(6, buffer.slice(Number.NEGATIVE_INFINITY, 6 as number).byteLength)
-  Assertions.assertEquals(0, buffer.slice(Number.NaN, 0).byteLength)
-  Assertions.assertEquals(0, buffer.slice(Number.POSITIVE_INFINITY).byteLength)
+  arktest.assertEQ(3, buffer.slice(-5 as number, 6 as number).byteLength)
+  arktest.assertEQ(6, buffer.slice(-12 as number, 6 as number).byteLength)
+  arktest.assertEQ(6, buffer.slice(Number.NEGATIVE_INFINITY, 6 as number).byteLength)
+  arktest.assertEQ(0, buffer.slice(Number.NaN, 0).byteLength)
+  arktest.assertEQ(0, buffer.slice(Number.POSITIVE_INFINITY).byteLength)
   
   return 0;
 }
@@ -158,22 +140,22 @@ function sliceArrayBufferNumberEndExceedsLength(): int {
  * Check isView() static method of ArrayBuffer
  */
 function isViewArrayBuffer(): int {
-  Assertions.assertFalse(ArrayBuffer.isView({}))
-  Assertions.assertFalse(ArrayBuffer.isView(new ArrayBuffer(0)))
-  Assertions.assertFalse(ArrayBuffer.isView(""))
+  arktest.assertFalse(ArrayBuffer.isView({}))
+  arktest.assertFalse(ArrayBuffer.isView(new ArrayBuffer(0)))
+  arktest.assertFalse(ArrayBuffer.isView(""))
 
-  Assertions.assertTrue(ArrayBuffer.isView(new Int8Array))
-  Assertions.assertTrue(ArrayBuffer.isView(new Int16Array))
-  Assertions.assertTrue(ArrayBuffer.isView(new Int32Array))
-  Assertions.assertTrue(ArrayBuffer.isView(new BigInt64Array))
-  Assertions.assertTrue(ArrayBuffer.isView(new Float32Array))
-  Assertions.assertTrue(ArrayBuffer.isView(new Float64Array))
+  arktest.assertTrue(ArrayBuffer.isView(new Int8Array))
+  arktest.assertTrue(ArrayBuffer.isView(new Int16Array))
+  arktest.assertTrue(ArrayBuffer.isView(new Int32Array))
+  arktest.assertTrue(ArrayBuffer.isView(new BigInt64Array))
+  arktest.assertTrue(ArrayBuffer.isView(new Float32Array))
+  arktest.assertTrue(ArrayBuffer.isView(new Float64Array))
 
-  Assertions.assertTrue(ArrayBuffer.isView(new Uint8Array))
-  Assertions.assertTrue(ArrayBuffer.isView(new Uint8ClampedArray))
-  Assertions.assertTrue(ArrayBuffer.isView(new Uint16Array))
-  Assertions.assertTrue(ArrayBuffer.isView(new Uint32Array))
-  Assertions.assertTrue(ArrayBuffer.isView(new BigUint64Array))
+  arktest.assertTrue(ArrayBuffer.isView(new Uint8Array))
+  arktest.assertTrue(ArrayBuffer.isView(new Uint8ClampedArray))
+  arktest.assertTrue(ArrayBuffer.isView(new Uint16Array))
+  arktest.assertTrue(ArrayBuffer.isView(new Uint32Array))
+  arktest.assertTrue(ArrayBuffer.isView(new BigUint64Array))
 
   return 0;
 }
