@@ -84,6 +84,17 @@ export class TestNew2 {
     }
 }
 
+export class Foobar {
+    receivedUndefined: boolean;
+    constructor(arg: Object | undefined, arg2: Object) {
+        if (arg === undefined) {
+            this.receivedUndefined = true;
+        } else {
+            this.receivedUndefined = false;
+        }
+    }
+}
+
 function main() {
     testAll();
 }

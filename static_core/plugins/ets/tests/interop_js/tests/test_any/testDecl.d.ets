@@ -54,3 +54,8 @@ export declare class TestNew2 {
 
     constructor(lhs: number, rhs: number);
 }
+
+export declare class Foobar {
+    receivedUndefined: boolean;
+    constructor(arg: Object | undefined, arg2: Object);
+}

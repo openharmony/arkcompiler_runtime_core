@@ -18,6 +18,7 @@ import { NumberMap, numberMapInstance } from "testDecl";
 import { functionArg0, functionArg1, functionArg2 } from "testDecl";
 import { Qux, quxInstance } from "testDecl";
 import { TestNew0, TestNew1, TestNew2 } from "testDecl";
+import { Foobar } from "testDecl";
 
 function testIsInstance() {
     let res = fooInstance instanceof Foo;
@@ -116,6 +117,11 @@ function testCallNew2() {
     arktest.assertEQ(caff, 0xcaff);
 }
 
+function testCallWithUndefined() {
+    let foobarInstance = new Foobar(undefined, `placeholder`);
+    arktest.assertEQ(foobarInstance.receivedUndefined, true);
+}
+
 function testAll() {
     testIsInstance();
     testLdByName();
@@ -133,4 +139,5 @@ function testAll() {
     testCallNew0();
     testCallNew1();
     testCallNew2();
+    testCallWithUndefined();
 }
