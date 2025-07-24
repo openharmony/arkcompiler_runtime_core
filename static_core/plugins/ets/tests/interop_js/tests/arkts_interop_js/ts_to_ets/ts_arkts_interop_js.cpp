@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 
+#include <thread>
+
 #include <ani.h>
 
 #include "ets_interop_js_gtest.h"
@@ -132,6 +134,40 @@ TEST_F(ArktsNapiScopeTest, CheckScopeOpenApi)
 
     ASSERT_TRUE(arkts_napi_scope_open(aniEnv, &jsEnv));
     ASSERT_TRUE(arkts_napi_scope_close_n(jsEnv, 0, nullptr, nullptr));
+
+    // Check that scope can be opened once again
+    ASSERT_TRUE(arkts_napi_scope_open(aniEnv, &jsEnv));
+    ASSERT_TRUE(arkts_napi_scope_close_n(jsEnv, 0, nullptr, nullptr));
+}
+
+TEST_F(ArktsNapiScopeTest, CheckScopeOpenApiFromThreads)
+{
+    ani_env *aniEnv {};
+    ASSERT_TRUE(GetAniEnv(&aniEnv));
+
+    // Check that scope cannot be opened in unattached thread
+    std::thread unattachedThread([aniEnv]() {
+        napi_env jsEnv {};
+        ASSERT_FALSE(arkts_napi_scope_open(aniEnv, &jsEnv));
+    });
+    unattachedThread.join();
+
+    // Check that scope can be opened in a newly attached thread
+    ani_vm *vm = nullptr;
+    ani_size result = 0;
+    ASSERT_EQ(ANI_GetCreatedVMs(&vm, 1, &result), ANI_OK);
+    ASSERT_EQ(result, 1);
+    std::thread attachedThread([vm]() {
+        ani_option interopEnabled {"--interop=enable", nullptr};
+        ani_options aniArgs {1, &interopEnabled};
+        ani_env *env = nullptr;
+        ASSERT_EQ(vm->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &env), ANI_OK);
+        napi_env jsEnv {};
+        ASSERT_TRUE(arkts_napi_scope_open(env, &jsEnv));
+        ASSERT_TRUE(arkts_napi_scope_close_n(jsEnv, 0, nullptr, nullptr));
+        ASSERT_EQ(vm->DetachCurrentThread(), ANI_OK);
+    });
+    attachedThread.join();
 }
 
 static void CheckAnyRef(ani_env *env, ani_ref anyRef, std::string_view testString)
