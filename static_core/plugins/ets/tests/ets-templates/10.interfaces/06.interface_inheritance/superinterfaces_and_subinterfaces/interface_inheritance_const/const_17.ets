@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Test whether the default value of constants in the subclass interface can be redefined(number).
+desc: Test whether the default value of constants in the subclass interface can be redefined (number).
 ---*/
 
 interface ParentInterface {

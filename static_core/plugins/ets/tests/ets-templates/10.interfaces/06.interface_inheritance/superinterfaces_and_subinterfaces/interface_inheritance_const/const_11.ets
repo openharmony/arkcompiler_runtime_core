@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Test whether the subclass interface inherits the customized type constant of the parent class interface(number).
+desc: Test whether the subclass interface inherits the customized type constant of the parent class interface
 ---*/
 
 interface ParentInterface {

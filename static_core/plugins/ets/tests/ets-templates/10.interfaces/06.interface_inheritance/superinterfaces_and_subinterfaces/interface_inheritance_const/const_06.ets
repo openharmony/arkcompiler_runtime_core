@@ -14,19 +14,16 @@
  */
 
 /*---
-desc: Test whether the subclass interface inherits the protection constant of the parent class interface.
+desc: ->
+      CTE expected if class uses name for a field/method already mentioned in the superinterface
+      with a private modifier
+tags: [compile-only, negative]
 ---*/
 
-class ParentClass {
-  protected static readonly CONSTANT: string = "ParentConstant";
-
-  public static getConstant(): string {
-    return ParentClass.CONSTANT;
-  }
+interface I {
+  private readonly CONSTANT: string;
 }
 
-class ChildClass extends ParentClass {}
-
-function main(): void {
-  arktest.assertEQ(ChildClass.getConstant(), "ParentConstant");
+class ParentClass {
+  readonly CONSTANT: string = "ParentConstant";
 }

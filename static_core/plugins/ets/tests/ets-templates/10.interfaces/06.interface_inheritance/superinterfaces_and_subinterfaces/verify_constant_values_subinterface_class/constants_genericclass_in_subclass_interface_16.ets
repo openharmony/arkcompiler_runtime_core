@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Verify whether the constant values genericclass<int> remain consistent in the subclass interface.
+desc: Verify whether the constant values generic class<int> remain consistent in the subclass interface.
 ---*/
 
 class GenericClass<T> {

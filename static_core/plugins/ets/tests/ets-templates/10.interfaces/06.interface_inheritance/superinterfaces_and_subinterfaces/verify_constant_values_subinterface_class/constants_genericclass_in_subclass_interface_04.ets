@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Verify whether the constant values genericclass<Date[]> remain consistent in the subclass interface.
+desc: Verify whether the constant values generic class<Date[]> remain consistent in the subclass interface.
 ---*/
 
 class GenericClass<T> {
