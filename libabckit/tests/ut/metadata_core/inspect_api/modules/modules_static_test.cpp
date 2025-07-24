@@ -85,7 +85,7 @@ TEST_F(LibAbcKitInspectApiModulesTest, ModuleGetNamespacesStatic)
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_static.abc");
 
     std::set<std::string> gotNamespaceNames;
-    std::set<std::string> expectNamespacesNames = {"ns1"};
+    std::set<std::string> expectNamespacesNames = {"Ns1"};
 
     for (const auto &module : file.GetModules()) {
         if (module.IsExternal()) {

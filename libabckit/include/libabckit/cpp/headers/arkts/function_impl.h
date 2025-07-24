@@ -31,7 +31,7 @@ inline AbckitArktsFunction *Function::TargetCast() const
     return ret;
 }
 
-inline Function::Function(const core::Function &coreOther) : core::Function(coreOther), targetChecker_(this) {};
+inline Function::Function(const core::Function &other) : core::Function(other), targetChecker_(this) {};
 
 inline bool Function::IsNative() const
 {
