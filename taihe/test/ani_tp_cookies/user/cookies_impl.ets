@@ -12,11 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-"use static"
-import{AsyncCallback} from "@ohos.base";
-import {BusinessError} from "@ohos.base";
+"use static";
 
-import * as cookies_taihe from "cookies"
+import * as cookies_taihe from "cookies";
 
 export class AntUserCookiesProviderClz implements
     cookies_taihe.AntUserCookiesProvider {

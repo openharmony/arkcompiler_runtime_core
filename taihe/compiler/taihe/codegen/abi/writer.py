@@ -23,7 +23,6 @@ from taihe.utils.outputs import DEFAULT_INDENT, FileKind, FileWriter, OutputMana
 class CSourceWriter(FileWriter):
     """Represents a C or C++ source file."""
 
-    @override
     def __init__(
         self,
         om: OutputManager,

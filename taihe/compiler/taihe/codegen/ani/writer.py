@@ -61,7 +61,6 @@ class KeepNaming(Naming):
 class StsWriter(FileWriter):
     """Represents a static type script (sts) file."""
 
-    @override
     def __init__(
         self,
         om: OutputManager,
@@ -80,7 +79,7 @@ class StsWriter(FileWriter):
 
     @override
     def write_prologue(self, f: TextIO):
-        f.write("'use static'\n")
+        f.write('"use static";\n')
         for import_name, decl_pair in self.import_dict.items():
             module_name, decl_name = decl_pair
             if decl_name is None:

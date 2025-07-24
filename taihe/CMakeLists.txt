@@ -226,6 +226,7 @@ function(write_arkts_config arktsconfig ets_files)
     "    \"paths\": {\n"
     "      \"std\": [\"${PANDA_HOME}/../ets/stdlib/std\"],\n"
     "      \"escompat\": [\"${PANDA_HOME}/../ets/stdlib/escompat\"],\n"
+    "      \"@ohos\": [\"${PANDA_HOME}/../ets/sdk/sdk/api/@ohos\"],\n"
     "${ETS_PATAIHE_ENTRIES_JOINED}\n"
     "    }\n"
     "  }\n"
@@ -290,6 +291,7 @@ function(run_abc demo_name main_abc)
     COMMAND # LD_PRELOAD=/usr/lib/llvm-14/lib/clang/14.0.0/lib/linux/libclang_rt.asan-x86_64.so
     LD_LIBRARY_PATH=${CMAKE_CURRENT_BINARY_DIR} ${ETS_RUNTIME}
     --boot-panda-files=$ENV{PANDA_HOME}/../ets/etsstdlib.abc
+    --boot-panda-files=$ENV{PANDA_HOME}/../ets/etssdk.abc
     --load-runtimes=ets ${main_abc} main.ETSGLOBAL::main
     && echo "Run successful" || (echo "Run failed" && exit 1)
     COMMENT "Running ${demo_name}"

@@ -39,7 +39,7 @@ AnyAttribute = UncheckedAttribute | AbstractCheckedAttribute
 1. **Backend Initialization**: Backends register attributes using
    `AbstractCheckedAttribute.register_to(registry)`
 2. **IR Construction**: The IR converter processes unchecked attributes:
-   - `CheckedAttributeManager.attach()` dispatches to appropriate handlers
+   - `AttributeRegistry.attach()` dispatches to appropriate handlers
    - `AbstractCheckedAttribute.try_construct()` validates arguments and constructs instances
 """
 
@@ -216,7 +216,7 @@ class AbstractCheckedAttribute(AnyAttribute, ABC):
 
     @classmethod
     @abstractmethod
-    def register_to(cls, registry: "CheckedAttributeManager") -> None:
+    def register_to(cls, registry: "AttributeRegistry") -> None:
         """Registers this attribute type with the given registry.
 
         Args:
@@ -282,7 +282,7 @@ class AutoCheckedAttribute(AbstractCheckedAttribute, Generic[T]):
 
     @override
     @classmethod
-    def register_to(cls, registry: "CheckedAttributeManager") -> None:
+    def register_to(cls, registry: "AttributeRegistry") -> None:
         registry.register_one(cls.NAME, cls)
 
     @override
@@ -469,7 +469,7 @@ class RepeatableAttribute(AutoCheckedAttribute[T]):
 CheckedAttrT = type[AbstractCheckedAttribute]
 
 
-class CheckedAttributeManager:
+class AttributeRegistry:
     """Registry for mapping attribute names to their implementation classes.
 
     This registry serves as the central dispatch mechanism during IR construction,

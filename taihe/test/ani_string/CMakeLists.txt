@@ -17,7 +17,6 @@ set(IDL_FILES
 )
 
 set(GEN_ETS_FILES
-    "@ohos.base.ets"
     "string_io.ets"
     "string_op.ets"
 )

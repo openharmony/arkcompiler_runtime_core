@@ -18,7 +18,6 @@ set(IDL_FILES
 )
 
 set(GEN_ETS_FILES
-    "@ohos.base.ets"
     "scene.ets"
     "sceneNodeParameters.ets"
 )

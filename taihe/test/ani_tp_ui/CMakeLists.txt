@@ -14,7 +14,6 @@
 file(GLOB IDL_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/idl/*.taihe")
 
 set(GEN_ETS_FILES
-    "@ohos.base.ets"
     "ui_user.ets"
     "ui.ets"
 )
