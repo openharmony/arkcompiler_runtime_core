@@ -59,3 +59,7 @@ export declare class Foobar {
     receivedUndefined: boolean;
     constructor(arg: Object | undefined, arg2: Object);
 }
+
+export declare let arrNum: number[];
+export declare let arrFill: number[];
+export declare let big_val: bigint;

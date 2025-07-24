@@ -19,99 +19,100 @@ import { functionArg0, functionArg1, functionArg2 } from "testDecl";
 import { Qux, quxInstance } from "testDecl";
 import { TestNew0, TestNew1, TestNew2 } from "testDecl";
 import { Foobar } from "testDecl";
+import {arrNum, arrFill, big_val} from 'testDecl';
 
-function testIsInstance() {
+function testIsInstance(): void {
     let res = fooInstance instanceof Foo;
     arktest.assertEQ(res, true);
 }
 
-function testLdByName() {
+function testLdByName(): void {
     let bar = fooInstance.bar;
     arktest.assertEQ(bar, 0xcafe);
 
     let baz = fooInstance.baz;
-    arktest.assertEQ(baz, "hello world");
+    arktest.assertEQ(baz, 'hello world');
 }
 
-function testLdByVal() {
-    let bar = fooInstance["bar"];
+function testLdByVal(): void {
+    let bar = fooInstance['bar'];
     arktest.assertEQ(bar, 0xcafe);
 
-    let baz = fooInstance["baz"];
-    arktest.assertEQ(baz, "hello world");
+    let baz = fooInstance['baz'];
+    arktest.assertEQ(baz, 'hello world');
 }
 
-function testLdByIdx() {
+function testLdByIdx(): void {
     let babe = numberMapInstance[1];
     arktest.assertEQ(babe, 0xbabe);
 }
 
-function testStByIdx() {
+function testStByIdx(): void {
     numberMapInstance[1] = 0xabcd;
 
     let babe = numberMapInstance[1];
     arktest.assertEQ(babe, 0xabcd);
 }
 
-function testStByName() {
-    fooInstance.baz = "updated";
+function testStByName(): void {
+    fooInstance.baz = 'updated';
     let baz = fooInstance.baz;
-    arktest.assertEQ(baz, "updated");
+    arktest.assertEQ(baz, 'updated');
 }
 
-function testStByVal() {
-    fooInstance["bar"] = 0xf00d;
-    let bar = fooInstance["bar"];
+function testStByVal(): void {
+    fooInstance['bar'] = 0xf00d;
+    let bar = fooInstance['bar'];
     arktest.assertEQ(bar, 0xf00d);
 
-    fooInstance["baz"] = "testStByVal";
-    let baz = fooInstance["baz"];
-    arktest.assertEQ(baz, "testStByVal");
+    fooInstance['baz'] = 'testStByVal';
+    let baz = fooInstance['baz'];
+    arktest.assertEQ(baz, 'testStByVal');
 }
 
-function testCall0() {
+function testCall0(): void {
     let cafe = functionArg0();
     arktest.assertEQ(cafe, 0xcafe);
 }
 
-function testCallShort() {
+function testCallShort(): void {
     let caff = functionArg1(0xcafe);
     arktest.assertEQ(caff, 0xcaff);
 }
 
-function testCallRange() {
+function testCallRange(): void {
     let caff = functionArg2(0xcafe, 1);
     arktest.assertEQ(caff, 0xcaff);
 }
 
-function testCallThis0() {
+function testCallThis0(): void {
     let cafe = quxInstance.methodArg0();
     arktest.assertEQ(cafe, 0xcafe);
 }
 
-function testCallThis1() {
+function testCallThis1(): void {
     let caff = quxInstance.methodArg1(0xcafe);
     arktest.assertEQ(caff, 0xcaff);
 }
 
-function testCallThis2() {
+function testCallThis2(): void {
     let caff = quxInstance.methodArg2(0xcafe, 1);
     arktest.assertEQ(caff, 0xcaff);
 }
 
-function testCallNew0() {
+function testCallNew0(): void {
     let testNew0Instance = new TestNew0();
     let cafe = testNew0Instance.bar;
     arktest.assertEQ(cafe, 0xcafe);
 }
 
-function testCallNew1() {
+function testCallNew1(): void {
     let testNew1Instance = new TestNew1(0xcafe);
     let cafe = testNew1Instance.bar;
     arktest.assertEQ(cafe, 0xcafe);
 }
 
-function testCallNew2() {
+function testCallNew2(): void {
     let testNew2Instance = new TestNew2(0xcafe, 1);
     let caff = testNew2Instance.bar;
     arktest.assertEQ(caff, 0xcaff);
@@ -122,7 +123,26 @@ function testCallWithUndefined() {
     arktest.assertEQ(foobarInstance.receivedUndefined, true);
 }
 
-function testAll() {
+function testArray(): void {
+    let arr1: Array<Number> = arrNum.with(1, 8);
+    let arr2: Array<Number> = arrNum.with(1.0, 8.0);
+    arktest.assertEQ(arr1.toString(), '1,8,3,4');
+    arktest.assertEQ(arr2.toString(), '1,8,3,4');
+}
+
+function testArrayFill(): void {
+    let arr1: Array<Number> = arrFill.fill(8, 1, 3);
+    let arr2: Array<Number> = arrFill.fill(8.0, 1.0, 3.0);
+    arktest.assertEQ(arr1.toString(), '1,8,8,4');
+    arktest.assertEQ(arr2.toString(), '1,8,8,4');
+}
+
+function testBigInt(): void {
+    let a: Any = big_val;
+    arktest.assertEQ(a, 1234567890n);
+}
+
+function testAll(): void {
     testIsInstance();
     testLdByName();
     testLdByVal();
@@ -140,4 +160,7 @@ function testAll() {
     testCallNew1();
     testCallNew2();
     testCallWithUndefined();
+    testArray();
+    testArrayFill();
+    testBigInt();
 }
