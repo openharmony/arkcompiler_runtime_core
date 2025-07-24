@@ -242,7 +242,7 @@ function testWritableDefaultEncodingBehavior() {
         testWritable.end();
     }
     let exceptionCheck = (e: Error | Exception): boolean => {
-        return ((e as BusinessError).message == "Unknown encoding: abc")
+        return ((e as BusinessError).message == "Parameter error. The type of abc must be string.")
     }
     arktest.expectThrow(test, exceptionCheck);
 }

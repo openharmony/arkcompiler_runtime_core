@@ -156,7 +156,7 @@ function testReadableStreamSetEncodingParameterError() {
     }
 
     let exceptionCheck = (e: Error | Exception): string | boolean => {
-        return ((e as BusinessError).message == "Unknown encoding: my valid encoding");
+        return ((e as BusinessError).message == "Parameter error. The type of my valid encoding must be string.");
     }
     arktest.expectThrow(() => {test()}, exceptionCheck);
 }

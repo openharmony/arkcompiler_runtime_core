@@ -387,7 +387,7 @@ export namespace stream {
                 }
                 return true;
             } else {
-                this.throwError(createBusinessError(401, `Unknown encoding: ${encoding}`));
+                this.throwError(createBusinessError(401, `Parameter error. The type of ${encoding} must be string.`));
                 this.errorFresh();
                 return false;
             }
@@ -1701,7 +1701,8 @@ export namespace stream {
                     this.throwError(e as Error);
                 }
             } else {
-                this.throwError(createBusinessError(401, `Unknown encoding: ${encodingLowCase}`));
+                this.throwError(createBusinessError(401,
+                    `Parameter error. The type of ${encodingLowCase} must be string.`));
                 res = false;
             }
             return res;
