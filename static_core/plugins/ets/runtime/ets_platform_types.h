@@ -125,6 +125,9 @@ public:
     EtsClass *coreParameter {};
     EtsClass *coreClassType {};
 
+    EtsClass *classTypeInfo {};
+    EtsClass *unionTypeInfo {};
+
     /* escompat.Process */
     EtsClass *escompatProcess {};
     EtsMethod *escompatProcessListUnhandledJobs {};

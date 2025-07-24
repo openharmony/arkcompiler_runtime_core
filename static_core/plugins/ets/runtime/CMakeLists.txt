@@ -74,6 +74,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Promise.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_StackTrace.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Type.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_reflect_TypeInfo.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_TypeCreator.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Method.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Value.cpp
@@ -102,6 +103,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_field.cpp
     ${ETS_EXT_SOURCES}/types/ets_method.cpp
     ${ETS_EXT_SOURCES}/types/ets_promise.cpp
+    ${ETS_EXT_SOURCES}/types/reflect_type_info.cpp
     ${ETS_EXT_SOURCES}/types/ets_promise_ref.cpp
     ${ETS_EXT_SOURCES}/types/ets_object.cpp
     ${ETS_EXT_SOURCES}/types/ets_sync_primitives.cpp

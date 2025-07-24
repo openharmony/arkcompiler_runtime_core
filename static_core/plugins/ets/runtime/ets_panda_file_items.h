@@ -54,6 +54,8 @@ static constexpr std::string_view STRING_BUILDER                       = "Lstd/c
 
 // TypeAPI classes
 static constexpr std::string_view CLASS_TYPE                           = "Lstd/core/ClassType;";
+static constexpr std::string_view CLASS_TYPE_INFO                      = "Lstd/core/reflect/ClassTypeInfo;";
+static constexpr std::string_view UNION_TYPE_INFO                      = "Lstd/core/reflect/UnionTypeInfo;";
 
 // Runtime classes
 static constexpr std::string_view STACK_TRACE_ELEMENT                  = "Lstd/core/StackTraceElement;";

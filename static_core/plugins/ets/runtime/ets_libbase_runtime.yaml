@@ -42,6 +42,9 @@ coretypes:
 - managed_class: Array
   mirror_class: ark::ets::EtsCharArray
 
+- managed_class: std.core.reflect.TypeInfo
+  mirror_class: ark::ets::ReflectTypeInfo
+
 - managed_class: std.core.Type
   mirror_class: ark::ets::EtsTypeAPIType
 
@@ -5753,6 +5756,62 @@ intrinsics:
       ret: std.core.String
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreClassGetDescriptor
+
+#####################
+# std.core.TypeInfo #
+#####################
+  - name: StdCoreReflectTypeInfoGetNameImpl
+    space: ets
+    class_name: std.core.reflect.TypeInfo
+    method_name: getNameImpl
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.core.Class ]
+    impl: ark::ets::intrinsics::TypeInfoGetNameImpl
+
+  - name: StdCoreReflectTypeInfoOfImpl
+    space: ets
+    class_name: std.core.reflect.TypeInfo
+    method_name: ofImpl
+    static: true
+    signature:
+      ret: std.core.reflect.TypeInfo
+      args: [ std.core.Class ]
+    impl: ark::ets::intrinsics::TypeInfoOfImpl
+
+#####################################
+# std.core.ClassTypeInfoNativeIface #
+#####################################
+  - name: StdCoreReflectClassTypeInfoNativeIfaceGetBase
+    space: ets
+    class_name: std.core.reflect.ClassTypeInfoNativeIface
+    method_name: getBase
+    static: true
+    signature:
+      ret: std.core.Class
+      args: [ std.core.Class ]
+    impl: ark::ets::intrinsics::ClassTypeInfoNativeIfaceGetBase
+
+  - name: StdCoreReflectClassTypeInfoNativeIfaceGetInstanceMethods
+    space: ets
+    class_name: std.core.reflect.ClassTypeInfoNativeIface
+    method_name: getInstanceMethods
+    static: true
+    signature:
+      ret: std.core.Method[]
+      args: [ std.core.Class, u1 ]
+    impl: ark::ets::intrinsics::ClassTypeInfoNativeIfaceGetInstanceMethods
+
+  - name: StdCoreReflectClassTypeInfoNativeIfaceGetInstanceMethodByName
+    space: ets
+    class_name: std.core.reflect.ClassTypeInfoNativeIface
+    method_name: getInstanceMethodByName
+    static: true
+    signature:
+      ret: std.core.Method
+      args: [ std.core.Class, std.core.String, u1 ]
+    impl: ark::ets::intrinsics::ClassTypeInfoNativeIfaceGetInstanceMethodByName
 
 ##########################
 # std.core.RuntimeLinker #

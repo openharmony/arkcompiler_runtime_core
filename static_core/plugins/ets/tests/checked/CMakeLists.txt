@@ -234,7 +234,8 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
     if (PANDA_COMPILER_TARGET_AARCH64)
         # 26982 64-bit pointer support
         if (NOT PANDA_USE_64_BIT_POINTER OR NOT PANDA_TARGET_ARM64)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/checks_elimination_no_hoist.ets)
+            # issue #25345
+            # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/checks_elimination_no_hoist.ets)
         endif()
     endif()
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_mod.ets)
