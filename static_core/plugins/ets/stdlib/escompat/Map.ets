@@ -230,6 +230,11 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         }
     }
 
+    // NOTE: This API may be removed someday due #28030 internal issue
+    constructor(bucketsCount: int) {
+        this.buckets = new MapBucket<K, V>[bucketsCount]
+    }
+
     override toString(): String {
         const strBuf = new StringBuilder()
 

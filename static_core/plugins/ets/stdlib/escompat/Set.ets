@@ -103,6 +103,11 @@ export class Set<K> implements ReadonlySet<K> {
         }
     }
 
+    // NOTE: This API may be removed someday due #28030 internal issue
+    constructor(bucketsCount: int) {
+        this.elements = new Map<K, K>(bucketsCount);
+    }
+
     private toStringVals(): String {
         const strBuf = new StringBuilder()
 
