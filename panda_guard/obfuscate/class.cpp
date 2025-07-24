@@ -123,8 +123,12 @@ void panda::guard::Class::CreateMethod(const pandasm::LiteralArray &literalArray
     PANDA_GUARD_ASSERT_PRINT(methodIdxLiteralIndex >= literalArray.literals_.size(), TAG, ErrorCode::GENERIC_ERROR,
                              "methodIdxLiteralIndex offset overflow");
     const auto &[tag_, value_] = literalArray.literals_[methodIdxLiteralIndex];
-    PANDA_GUARD_ASSERT_PRINT(tag_ != panda::panda_file::LiteralTag::METHOD, TAG, ErrorCode::GENERIC_ERROR,
-                             "bad tag for methodIdx");
+    if (tag_ != panda_file::LiteralTag::METHOD) {
+        // if is callRuntime instruction, getter and setter method defined in literals
+        if (!callRunTimeInst_ || (tag_ != panda_file::LiteralTag::GETTER && tag_ != panda_file::LiteralTag::SETTER)) {
+            PANDA_GUARD_ABORT_PRINT(TAG, ErrorCode::GENERIC_ERROR, "bad tag for methodIdx");
+        }
+    }
 
     const std::string methodIdx = std::get<std::string>(value_);
     LOG(INFO, PANDAGUARD) << TAG << "methodIdx:" << methodIdx;
