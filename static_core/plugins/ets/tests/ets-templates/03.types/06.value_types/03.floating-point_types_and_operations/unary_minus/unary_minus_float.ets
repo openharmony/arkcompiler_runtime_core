@@ -19,12 +19,12 @@ desc: check unary minus operation for float operand
 ---*/
 
 function main(): void {
-  const v: float = ( {{v.value}} ).toFloat()
-  const r: float = ( {{v.result}} ).toFloat()
+  const v: float = ({{v.value}}).toFloat()
+  const r: float = ({{v.result}}).toFloat()
     if (Float.isNaN(v)) {
       arktest.assertTrue(Float.isNaN(r))
     } else {
-      arktest.assertEQ(  -(v), r )
+      arktest.assertEQ(-(v), r)
     }
 }
 

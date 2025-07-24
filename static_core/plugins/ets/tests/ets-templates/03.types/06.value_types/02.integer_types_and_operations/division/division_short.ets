@@ -21,7 +21,7 @@ desc: check division for short integer operands
 function main(): void {
     const a: short = {{v.left}}
     const b: short = {{v.right}}
-    arktest.assertEQ( (a / b), {{v.result}} )
+    arktest.assertEQ(a / b, {{v.result}})
 }
 
 {% endfor %}

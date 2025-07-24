@@ -21,7 +21,7 @@ desc: check not equality of two doubles
 function main(): void {
   const a: double = {{v.left}}
   const b: double = {{v.right}}
-  arktest.assertEQ((a != b), {{v.result}})
+  arktest.assertEQ(a != b, {{v.result}})
 }
 
 {% endfor %}

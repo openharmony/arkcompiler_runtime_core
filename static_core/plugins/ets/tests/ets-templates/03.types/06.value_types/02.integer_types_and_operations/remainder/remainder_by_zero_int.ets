@@ -15,15 +15,18 @@ limitations under the License.
 
 /*---
 desc: check remainder of division by zero for integer operands
-tags: [compile-only, negative]
 ---*/
 
-function main(): void {
+function main(): int {
     try {
-        const a: int = 1
-        const b: int = 0
-        const result: int = a % b
-        arktest.assertTrue(false)
-    } catch (e: ArithmeticError) {
+        const a: int = (() : int => 1)()
+        const b: int = (() : int => 0)()
+        arktest.assertTrue(a instanceof Int)
+        arktest.assertTrue(b instanceof Int)
+        a % b
+    } catch (e) {
+        return e instanceof ArithmeticError ? 0 : 1
     }
+    arktest.assertTrue(false)
+    return -1
 }

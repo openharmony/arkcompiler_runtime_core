@@ -13,11 +13,16 @@
 
 --- # list of values
 values:
-- { left: long, right: byte, result: long }
-- { left: long, right: char, result: long }
-- { left: long, right: short, result: long }
-- { left: long, right: int, result: long }
-- { left: int, right: byte, result: int }
-- { left: int, right: short, result: int }
-- { left: int, right: char, result: int }
-- { left: int, right: int, result: int }
+- { value: 0.0f, result: -1.0f }
+- { value: +0.0f, result: -1.0f }
+- { value: -0.0f, result: -1.0f }
+- { value: 1.0f, result: 0.0f }
+- { value: -1.0f, result: -2.0f }
+- { value: Float.POSITIVE_INFINITY, result: Float.POSITIVE_INFINITY }
+- { value: Float.NEGATIVE_INFINITY, result: Float.NEGATIVE_INFINITY }
+- { value: 1.17549435E-38f, result: -1.0f } # min normal
+- { value: Float.MIN_VALUE, result: -1.0f }
+- { value: Float.MAX_VALUE, result: Float.MAX_VALUE }
+- { value: 3.1415927f, result: 2.1415927f }
+- { value: 0e38f, result: -1.0f }
+- { value: 1.1754942E-38f, result: -1.0f } # max subnormal
