@@ -36,6 +36,7 @@ keywords:
     - if
     - implements
     - import
+    - instanceof
     - interface
     - internal
     - let
