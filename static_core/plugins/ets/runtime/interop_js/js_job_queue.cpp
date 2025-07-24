@@ -124,10 +124,8 @@ static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callb
         vm->GetGlobalObjectStorage()->Remove(promiseRef);
 
         if (isResolved) {
-            auto *jsval = JSValue::Create(coro, ctx, value);
-            ASSERT(jsval != nullptr);
-            ark::ets::intrinsics::EtsPromiseResolve(promiseHandle.GetPtr(), jsval->AsObject(),
-                                                    ark::ets::ToEtsBoolean(false));
+            auto etsVal = JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, value).value();
+            ark::ets::intrinsics::EtsPromiseResolve(promiseHandle.GetPtr(), etsVal, ark::ets::ToEtsBoolean(false));
         } else {
             auto refconv = JSRefConvertResolve<true>(ctx, ctx->GetErrorClass());
             ASSERT(refconv != nullptr);
