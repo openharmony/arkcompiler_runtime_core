@@ -1593,6 +1593,9 @@ bool AsmEmitter::MakeFunctionDebugInfoAndAnnotations(ItemContainer *items, const
         }
 
         auto *method = FindMethod(func, name, entities);
+        if (method == nullptr) {
+            return false;
+        }
 
         if (func.metadata->HasImplementation()) {
             SetCodeAndDebugInfo(items, method, func, emitDebugInfo);
