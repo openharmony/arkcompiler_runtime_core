@@ -30,12 +30,12 @@ class AniBridgeBackendConfig(BackendConfig):
 
     def construct(self, instance: CompilerInstance) -> Backend:
         from taihe.codegen.ani.attributes import all_attr_types
-        from taihe.codegen.ani.gen_ani import ANICodeGenerator
-        from taihe.codegen.ani.gen_sts import STSCodeGenerator
+        from taihe.codegen.ani.gen_ani import AniCodeGenerator
+        from taihe.codegen.ani.gen_sts import StsCodeGenerator
 
-        instance.attribute_manager.register(*all_attr_types)
+        instance.attribute_registry.register(*all_attr_types)
 
-        # TODO: unify {ANI,STS}CodeGenerator
+        # TODO: unify {Ani,Sts}CodeGenerator
         class AniBridgeBackendImpl(Backend):
             def __init__(self, ci: "CompilerInstance"):
                 super().__init__(ci)
@@ -45,7 +45,7 @@ class AniBridgeBackendConfig(BackendConfig):
                 om = self._ci.output_manager
                 am = self._ci.analysis_manager
                 pg = self._ci.package_group
-                ANICodeGenerator(om, am).generate(pg)
-                STSCodeGenerator(om, am).generate(pg)
+                AniCodeGenerator(om, am).generate(pg)
+                StsCodeGenerator(om, am).generate(pg)
 
         return AniBridgeBackendImpl(instance)

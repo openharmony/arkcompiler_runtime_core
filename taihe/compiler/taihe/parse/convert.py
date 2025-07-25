@@ -53,7 +53,7 @@ from taihe.utils.sources import SourceBase, SourceLocation
 
 
 def id2str(id_name: ast.IdName) -> str:
-    return id_name.val.text
+    return id_name.val.text.lstrip("#")
 
 
 def pkg2str(pkg_name: ast.PkgName) -> str:
@@ -252,8 +252,22 @@ class ExprEvaluator(Visitor):
         return node.val.text[3:-3]
 
     @override
+    def visit_parenthesis_string_expr(self, node: ast.ParenthesisStringExpr) -> str:
+        return self.visit(node.expr)
+
+    @override
     def visit_binary_string_expr(self, node: ast.BinaryStringExpr) -> str:
         return self.visit(node.left) + self.visit(node.right)
+
+    @override
+    def visit_conditional_string_expr(self, node: ast.ConditionalStringExpr) -> str:
+        return (
+            self.visit(node.then_expr)
+            if self.visit(node.cond)
+            else self.visit(node.else_expr)
+        )
+
+    # Any Expr
 
     @override
     def visit_any_expr(self, node: ast.AnyExpr) -> Any:

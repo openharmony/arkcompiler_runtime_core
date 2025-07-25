@@ -383,7 +383,7 @@ class _LegacyPandaVm(PathResource):
 class PandaVm(CachedResource):
     CLI_NAME = "panda-vm"
     PATH_CACHE = "panda-vm"
-    VERSION: Final = "sdk-1.5.0-dev.38115"
+    VERSION: Final = "sdk-1.5.0-dev.38664"
     CREDENTIAL = "koala-pub:y3t!n0therP"
     URL: Final = (
         "https://nexus.cn.bz-openlab.ru:10443/repository/koala-npm/@panda/sdk/-"
@@ -392,7 +392,9 @@ class PandaVm(CachedResource):
     # Computed attributes
     ani_header_dir: Path = field(init=False)
     stdlib_sources: dict[str, Path] = field(init=False)
+    sdk_sources: dict[str, Path] = field(init=False)
     stdlib_lib: Path = field(init=False)
+    sdk_lib: Path = field(init=False)
     host_tools_dir: Path = field(init=False)
 
     def __post_init__(self):
@@ -400,9 +402,14 @@ class PandaVm(CachedResource):
             self.base_path / "ohos_arm64/include/plugins/ets/runtime/ani"
         )
         self.stdlib_sources = {
-            dir: self.base_path / "ets/stdlib" / dir for dir in ["std", "escompat"]
+            "std": self.base_path / "ets/stdlib/std",
+            "escompat": self.base_path / "ets/stdlib/escompat",
+        }
+        self.sdk_sources = {
+            "@ohos": self.base_path / "ets/sdk/sdk/api/@ohos",
         }
         self.stdlib_lib = self.base_path / "ets" / "etsstdlib.abc"
+        self.sdk_lib = self.base_path / "ets" / "etssdk.abc"
         self.host_tools_dir = self.base_path / "linux_host_tools"
 
     def tool(self, binary: str) -> Path:

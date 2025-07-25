@@ -54,15 +54,15 @@ class Platform(Enum):
 def create_tar(in_dir: Path, out_tgz: Path, rename_root: str):
     out_tgz.unlink(missing_ok=True)
     try:
-        tar_cmd = ["tar", "--create", "--gzip", "--format=gnu", "--file", str(out_tgz)]
+        tar_cmd = ["tar", "--create", "--gzip", "--format=gnu", "--file", out_tgz]
         # Ensure consistent user name.
         tar_cmd += ["--owner=0", "--group=0", "--numeric-owner"]
         # Ensure consistent ordering and timestamp (2024-01-01)
-        tar_cmd += ["--sort=name", "--mtime=@1704067200"]
+        tar_cmd += ["--sort=name"]
         # Rename the root directory.
         tar_cmd += [f"--transform=s#^{in_dir.name}#{rename_root}#"]
         # Pass the root dir now.
-        tar_cmd += ["-C", str(in_dir.parent), in_dir.name]
+        tar_cmd += ["-C", in_dir.parent, in_dir.name]
         subprocess.run(tar_cmd, check=True, capture_output=True, text=True)
     except subprocess.CalledProcessError as e:
         print(f"Error creating package: {e}")
@@ -94,7 +94,7 @@ class PythonBundle:
         PythonBuild.resolve().extract_to(self.pyrt_dir, system=self.platform.value)
 
     def install_package(self, wheel: Path):
-        # TODO rm dummy scripts / fix shebang paths
+        # TODO: rm dummy scripts / fix shebang paths
         uv_args = ["uv", "pip", "install", f"--target={self.sitepkg_dir}"]
         uv_args += ["--", str(wheel)]
         subprocess.run(uv_args, check=True)

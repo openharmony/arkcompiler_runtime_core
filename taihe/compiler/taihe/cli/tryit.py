@@ -287,17 +287,15 @@ class BuildSystem(BuildUtils):
         dst_dir: Path,
         src_files: list[Path],
         backend_names: list[str],
-        cmake: bool = False,
-        sts_keep_name: bool = False,
-        arkts_module_prefix: str | None = None,
-        arkts_path_prefix: str | None = None,
+        buildsys_name: str | None = None,
+        extra: dict[str, str | None] | None = None,
     ) -> None:
         registry = BackendRegistry()
         registry.register_all()
         backends = registry.collect_required_backends(backend_names)
         resolved_backends = [b() for b in backends]
 
-        if cmake:
+        if buildsys_name == "cmake":
             output_config = CMakeOutputConfig(
                 dst_dir=dst_dir,
                 runtime_include_dir=RuntimeHeader.resolve_path(),
@@ -310,17 +308,16 @@ class BuildSystem(BuildUtils):
 
         invocation = CompilerInvocation(
             src_files=src_files,
+            src_dirs=[],
             output_config=output_config,
             backends=resolved_backends,
-            sts_keep_name=sts_keep_name,
-            arkts_module_prefix=arkts_module_prefix,
-            arkts_path_prefix=arkts_path_prefix,
+            extra=extra or {},
         )
         instance = CompilerInstance(invocation)
         if not instance.run():
             raise RuntimeError("Taihe compiler (taihec) failed to run")
 
-    def generate(self, sts_keep_name: bool, cmake: bool) -> None:
+    def generate(self, buildsys_name: str | None, extra: dict[str, str | None]) -> None:
         """Generate code from IDL files."""
         if not self.idl_dir.is_dir():
             raise FileNotFoundError(f"IDL directory not found: '{self.idl_dir}'")
@@ -354,8 +351,8 @@ class BuildSystem(BuildUtils):
             dst_dir=self.generated_dir,
             src_files=list(self.idl_dir.glob("*.taihe")),
             backend_names=backend_names,
-            cmake=cmake,
-            sts_keep_name=sts_keep_name,
+            buildsys_name=buildsys_name,
+            extra=extra,
         )
 
     def build(self, opt_level: str) -> None:
@@ -619,7 +616,7 @@ class BuildSystem(BuildUtils):
     ) -> None:
         """Create ArkTS configuration file."""
         vm = PandaVm.resolve()
-        paths = vm.stdlib_sources | (app_paths or {})
+        paths = vm.stdlib_sources | vm.sdk_sources | (app_paths or {})
 
         config_content = {
             "compilerOptions": {
@@ -707,11 +704,11 @@ class BuildSystem(BuildUtils):
     ) -> float:
         """Run the compiled ABC file with the Ark runtime."""
         ark_path = self.config.vm.tool("ark")
-        etsstdlib_path = self.config.vm.stdlib_lib
 
         command = [
             ark_path,
-            f"--boot-panda-files={etsstdlib_path}",
+            f"--boot-panda-files={self.config.vm.sdk_lib}",
+            f"--boot-panda-files={self.config.vm.stdlib_lib}",
             f"--load-runtimes=ets",
             abc_target,
             entry,
@@ -792,14 +789,20 @@ class TaiheTryitParser(argparse.ArgumentParser):
 
     def register_generate_configs(self) -> None:
         self.add_argument(
-            "--sts-keep-name",
-            action="store_true",
-            help="Keep original function and interface method names",
+            "--build",
+            "-B",
+            dest="buildsys",
+            choices=["cmake"],
+            help="build system to use for generated sources",
         )
         self.add_argument(
-            "--cmake",
-            action="store_true",
-            help="Generate CMake files for the project",
+            "--codegen",
+            "-C",
+            dest="config",
+            nargs="*",
+            action="extend",
+            default=[],
+            help="additional code generation configuration",
         )
 
     def register_update_configs(self) -> None:
@@ -891,9 +894,16 @@ def main():
             if args.command == "create":
                 build_system.create()
             if args.command in ("generate", "test"):
+                extra: dict[str, str | None] = {}
+                for config in args.config:
+                    k, *v = config.split("=", 1)
+                    if v:
+                        extra[k] = v[0]
+                    else:
+                        extra[k] = None
                 build_system.generate(
-                    sts_keep_name=args.sts_keep_name,
-                    cmake=args.cmake,
+                    buildsys_name=args.buildsys,
+                    extra=extra,
                 )
             if args.command in ("build", "test"):
                 build_system.build(

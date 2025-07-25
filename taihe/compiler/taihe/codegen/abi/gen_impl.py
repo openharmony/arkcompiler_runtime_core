@@ -14,11 +14,11 @@
 # limitations under the License.
 
 from taihe.codegen.abi.analyses import (
-    GlobFuncABIInfo,
+    GlobFuncAbiInfo,
     GlobFuncCImplInfo,
-    PackageABIInfo,
+    PackageAbiInfo,
     PackageCImplInfo,
-    TypeABIInfo,
+    TypeAbiInfo,
 )
 from taihe.codegen.abi.writer import CHeaderWriter, CSourceWriter
 from taihe.semantics.declarations import (
@@ -41,7 +41,7 @@ class CImplHeadersGenerator:
 
     def gen_package_file(self, pkg: PackageDecl):
         pkg_c_impl_info = PackageCImplInfo.get(self.am, pkg)
-        pkg_abi_info = PackageABIInfo.get(self.am, pkg)
+        pkg_abi_info = PackageAbiInfo.get(self.am, pkg)
         with CHeaderWriter(
             self.om,
             f"include/{pkg_c_impl_info.header}",
@@ -50,10 +50,10 @@ class CImplHeadersGenerator:
             pkg_c_impl_target.add_include("taihe/common.h", pkg_abi_info.header)
             for func in pkg.functions:
                 for param in func.params:
-                    type_abi_info = TypeABIInfo.get(self.am, param.ty_ref.resolved_ty)
+                    type_abi_info = TypeAbiInfo.get(self.am, param.ty_ref.resolved_ty)
                     pkg_c_impl_target.add_include(*type_abi_info.impl_headers)
                 if return_ty_ref := func.return_ty_ref:
-                    type_abi_info = TypeABIInfo.get(self.am, return_ty_ref.resolved_ty)
+                    type_abi_info = TypeAbiInfo.get(self.am, return_ty_ref.resolved_ty)
                     pkg_c_impl_target.add_include(*type_abi_info.impl_headers)
                 self.gen_func(func, pkg_c_impl_target)
 
@@ -62,19 +62,19 @@ class CImplHeadersGenerator:
         func: GlobFuncDecl,
         pkg_c_impl_target: CHeaderWriter,
     ):
-        func_abi_info = GlobFuncABIInfo.get(self.am, func)
+        func_abi_info = GlobFuncAbiInfo.get(self.am, func)
         func_c_impl_info = GlobFuncCImplInfo.get(self.am, func)
         func_impl = "C_FUNC_IMPL"
         params = []
         args = []
         for param in func.params:
-            type_abi_info = TypeABIInfo.get(self.am, param.ty_ref.resolved_ty)
+            type_abi_info = TypeAbiInfo.get(self.am, param.ty_ref.resolved_ty)
             params.append(f"{type_abi_info.as_param} {param.name}")
             args.append(param.name)
         params_str = ", ".join(params)
         args_str = ", ".join(args)
         if return_ty_ref := func.return_ty_ref:
-            type_abi_info = TypeABIInfo.get(self.am, return_ty_ref.resolved_ty)
+            type_abi_info = TypeAbiInfo.get(self.am, return_ty_ref.resolved_ty)
             return_ty_name = type_abi_info.as_owner
         else:
             return_ty_name = "void"
@@ -115,11 +115,11 @@ class CImplSourcesGenerator:
         func_c_impl_name = f"{func.name}_impl"
         params = []
         for param in func.params:
-            type_abi_info = TypeABIInfo.get(self.am, param.ty_ref.resolved_ty)
+            type_abi_info = TypeAbiInfo.get(self.am, param.ty_ref.resolved_ty)
             params.append(f"{type_abi_info.as_param} {param.name}")
         params_str = ", ".join(params)
         if return_ty_ref := func.return_ty_ref:
-            type_abi_info = TypeABIInfo.get(self.am, return_ty_ref.resolved_ty)
+            type_abi_info = TypeAbiInfo.get(self.am, return_ty_ref.resolved_ty)
             return_ty_name = type_abi_info.as_owner
         else:
             return_ty_name = "void"

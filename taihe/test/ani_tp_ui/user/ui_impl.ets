@@ -12,11 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-"use static"
-import{AsyncCallback} from "@ohos.base";
-import {BusinessError} from "@ohos.base";
+"use static";
 
-import * as ui_taihe from "ui"
+import * as ui_taihe from "ui";
 
 export class AntUserModalControllerClz implements
     ui_taihe.AntUserModalController {

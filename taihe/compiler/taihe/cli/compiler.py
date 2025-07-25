@@ -70,6 +70,13 @@ def main():
         help="backends to generate sources, default: abi-header, abi-source, c-author",
     )
     parser.add_argument(
+        "--build",
+        "-B",
+        dest="buildsys",
+        choices=["cmake"],
+        help="build system to use for generated sources",
+    )
+    parser.add_argument(
         "--codegen",
         "-C",
         dest="config",
@@ -77,13 +84,6 @@ def main():
         action="extend",
         default=[],
         help="additional code generation configuration",
-    )
-    parser.add_argument(
-        "--build",
-        "-B",
-        dest="build_system",
-        choices=["cmake"],
-        help="build system to use for generated sources",
     )
 
     # Special options {{
@@ -96,10 +96,14 @@ def main():
     ResourceContext.initialize(args)
     # }} Special options
 
+    if not args.src_files and not args.src_dirs:
+        print("taihec: error: no input files", file=sys.stderr)
+        return -1
+
     backends = registry.collect_required_backends(args.backends)
     resolved_backends = [b() for b in backends]
 
-    if args.build_system == "cmake":
+    if args.buildsys == "cmake":
         output_config = CMakeOutputConfig(
             dst_dir=Path(args.dst_dir),
             runtime_include_dir=RuntimeHeader.resolve_path(),
@@ -110,27 +114,21 @@ def main():
             dst_dir=Path(args.dst_dir),
         )
 
-    if not args.src_files and not args.src_dirs:
-        print("taihec: error: no input files", file=sys.stderr)
-        return -1
+    extra: dict[str, str | None] = {}
+    for config in args.config:
+        k, *v = config.split("=", 1)
+        if v:
+            extra[k] = v[0]
+        else:
+            extra[k] = None
 
     invocation = CompilerInvocation(
         src_files=args.src_files,
         src_dirs=args.src_dirs,
-        output_config=output_config,
         backends=resolved_backends,
+        output_config=output_config,
+        extra=extra,
     )
-
-    for config in args.config:
-        k, *v = config.split("=", 1)
-        if k == "sts:keep-name":
-            invocation.sts_keep_name = True
-        elif k == "arkts:module-prefix":
-            invocation.arkts_module_prefix = v[0] if v else None
-        elif k == "arkts:path-prefix":
-            invocation.arkts_path_prefix = v[0] if v else None
-        else:
-            raise ValueError(f"unknown codegen config {k!r}")
 
     instance = CompilerInstance(invocation)
 

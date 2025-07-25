@@ -40,7 +40,7 @@ static ani_error create_ani_error(ani_env *env, taihe::string_view msg)
 
     ani_method errCtor;
     if (ANI_OK != env->Class_FindMethod(errCls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &errCtor)) {
-        std::cerr << "get errCtor Failed'" << className << "'" << std::endl;
+        std::cerr << "Get Ctor Failed '" << className << "'" << std::endl;
         return nullptr;
     }
 
@@ -52,16 +52,14 @@ static ani_error create_ani_error(ani_env *env, taihe::string_view msg)
 
     ani_error errObj;
     if (ANI_OK != env->Object_New(errCls, errCtor, reinterpret_cast<ani_object *>(&errObj), result_string, undefined)) {
-        std::cerr << "Create Object Failed'" << className << "'" << std::endl;
+        std::cerr << "Create Object Failed '" << className << "'" << std::endl;
         return nullptr;
     }
     return errObj;
 }
 
-static ani_error create_ani_business_error(ani_env *env, int32_t err_code, taihe::string_view msg)
+static ani_error create_ani_business_error(ani_env *env, int32_t code, taihe::string_view msg)
 {
-    ani_error errObj = create_ani_error(env, msg);
-
     ani_class errCls;
     char const *className = "@ohos.base.BusinessError";
     if (ANI_OK != env->FindClass(className, &errCls)) {
@@ -70,15 +68,17 @@ static ani_error create_ani_business_error(ani_env *env, int32_t err_code, taihe
     }
 
     ani_method errCtor;
-    if (ANI_OK != env->Class_FindMethod(errCls, "<ctor>", "dC{escompat.Error}:", &errCtor)) {
-        std::cerr << "get errCtor Failed'" << className << "'" << std::endl;
+    if (ANI_OK != env->Class_FindMethod(errCls, "<ctor>", "iC{escompat.Error}:", &errCtor)) {
+        std::cerr << "Get Ctor Failed '" << className << "'" << std::endl;
         return nullptr;
     }
 
+    ani_error errObj = create_ani_error(env, msg);
+    ani_int errCode = static_cast<ani_int>(code);
+
     ani_error businessErrObj;
-    if (ANI_OK != env->Object_New(errCls, errCtor, reinterpret_cast<ani_object *>(&businessErrObj),
-                                  static_cast<ani_double>(err_code), errObj)) {
-        std::cerr << "Create Object Failed'" << className << "'" << std::endl;
+    if (ANI_OK != env->Object_New(errCls, errCtor, reinterpret_cast<ani_object *>(&businessErrObj), errCode, errObj)) {
+        std::cerr << "Create Object Failed '" << className << "'" << std::endl;
         return nullptr;
     }
     return businessErrObj;
@@ -90,9 +90,9 @@ void ani_set_error(ani_env *env, taihe::string_view msg)
     env->ThrowError(errObj);
 }
 
-void ani_set_business_error(ani_env *env, int32_t err_code, taihe::string_view msg)
+void ani_set_business_error(ani_env *env, int32_t code, taihe::string_view msg)
 {
-    ani_error businessErrObj = create_ani_business_error(env, err_code, msg);
+    ani_error businessErrObj = create_ani_business_error(env, code, msg);
     env->ThrowError(businessErrObj);
 }
 
@@ -110,25 +110,29 @@ bool ani_has_error(ani_env *env)
 
 void set_error(taihe::string_view msg)
 {
-    ani_env *env = get_env();
+    env_guard guard;
+    ani_env *env = guard.get_env();
     ani_set_error(env, msg);
 }
 
-void set_business_error(int32_t err_code, taihe::string_view msg)
+void set_business_error(int32_t code, taihe::string_view msg)
 {
-    ani_env *env = get_env();
-    ani_set_business_error(env, err_code, msg);
+    env_guard guard;
+    ani_env *env = guard.get_env();
+    ani_set_business_error(env, code, msg);
 }
 
 void reset_error()
 {
-    ani_env *env = get_env();
+    env_guard guard;
+    ani_env *env = guard.get_env();
     ani_reset_error(env);
 }
 
 bool has_error()
 {
-    ani_env *env = get_env();
+    env_guard guard;
+    ani_env *env = guard.get_env();
     return ani_has_error(env);
 }
 }  // namespace taihe

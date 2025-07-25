@@ -17,7 +17,6 @@ set(IDL_FILES
 )
 
 set(GEN_ETS_FILES
-    "@ohos.base.ets"
     "primitives_test.ets"
     "void_func.ets"
 )

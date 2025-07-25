@@ -27,9 +27,9 @@ class AbiHeaderBackendConfig(BackendConfig):
     NAME = "abi-header"
 
     def construct(self, instance: "CompilerInstance") -> Backend:
-        from taihe.codegen.abi.gen_abi import ABIHeadersGenerator
+        from taihe.codegen.abi.gen_abi import AbiHeadersGenerator
 
-        class ABIHeaderBackendImpl(Backend):
+        class AbiHeaderBackendImpl(Backend):
             def __init__(self, ci: "CompilerInstance"):
                 super().__init__(ci)
                 self._ci = ci
@@ -38,9 +38,9 @@ class AbiHeaderBackendConfig(BackendConfig):
                 om = self._ci.output_manager
                 am = self._ci.analysis_manager
                 pg = self._ci.package_group
-                ABIHeadersGenerator(om, am).generate(pg)
+                AbiHeadersGenerator(om, am).generate(pg)
 
-        return ABIHeaderBackendImpl(instance)
+        return AbiHeaderBackendImpl(instance)
 
 
 @dataclass
@@ -49,9 +49,9 @@ class AbiSourcesBackendConfig(BackendConfig):
     DEPS: ClassVar = ["abi-header"]
 
     def construct(self, instance: "CompilerInstance") -> Backend:
-        from taihe.codegen.abi.gen_abi import ABISourcesGenerator
+        from taihe.codegen.abi.gen_abi import AbiSourcesGenerator
 
-        class ABISourcesBackendImpl(Backend):
+        class AbiSourcesBackendImpl(Backend):
             def __init__(self, ci: "CompilerInstance"):
                 super().__init__(ci)
                 self._ci = ci
@@ -60,9 +60,9 @@ class AbiSourcesBackendConfig(BackendConfig):
                 om = self._ci.output_manager
                 am = self._ci.analysis_manager
                 pg = self._ci.package_group
-                ABISourcesGenerator(om, am).generate(pg)
+                AbiSourcesGenerator(om, am).generate(pg)
 
-        return ABISourcesBackendImpl(instance)
+        return AbiSourcesBackendImpl(instance)
 
 
 @dataclass

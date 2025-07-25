@@ -32,9 +32,11 @@ from dataclasses import dataclass, field
 from itertools import chain
 from pathlib import Path
 
+from typing_extensions import Self
+
 from taihe.driver.backend import Backend, BackendConfig
 from taihe.semantics.analysis import analyze_semantics
-from taihe.semantics.attributes import CheckedAttributeManager
+from taihe.semantics.attributes import AttributeRegistry
 from taihe.semantics.declarations import PackageGroup
 from taihe.utils.analyses import AnalysisManager
 from taihe.utils.diagnostics import ConsoleDiagnosticsManager, DiagnosticsManager
@@ -74,10 +76,30 @@ class CompilerInvocation:
     output_config: OutputConfig = field(default_factory=OutputConfig)
     backends: list[BackendConfig] = field(default_factory=lambda: [])
 
-    # TODO: refactor this to a more structured way
+    extra: dict[str, str | None] = field(default_factory=lambda: {})
+
+
+# TODO: refactor this
+@dataclass
+class CompilerConfig:
     sts_keep_name: bool = False
     arkts_module_prefix: str | None = None
     arkts_path_prefix: str | None = None
+
+    @classmethod
+    def construct(cls, configure: dict[str, str | None]) -> Self:
+        res = cls()
+        for config in configure:
+            k, *v = config.split("=", 1)
+            if k == "sts:keep-name":
+                res.sts_keep_name = True
+            elif k == "arkts:module-prefix":
+                res.arkts_module_prefix = v[0] if v else None
+            elif k == "arkts:path-prefix":
+                res.arkts_path_prefix = v[0] if v else None
+            else:
+                raise ValueError(f"unknown codegen config {k!r}")
+        return res
 
 
 class CompilerInstance:
@@ -91,15 +113,12 @@ class CompilerInstance:
 
     invocation: CompilerInvocation
     backends: list[Backend]
-
-    attribute_manager: CheckedAttributeManager
-
     diagnostics_manager: DiagnosticsManager
-
     source_manager: SourceManager
     package_group: PackageGroup
-
     analysis_manager: AnalysisManager
+    attribute_registry: AttributeRegistry
+    config: CompilerConfig
 
     def __init__(
         self,
@@ -109,13 +128,13 @@ class CompilerInstance:
     ):
         self.invocation = invocation
         self.diagnostics_manager = dm()
-        self.analysis_manager = AnalysisManager(invocation)
         self.source_manager = SourceManager()
         self.package_group = PackageGroup()
         self.output_manager = invocation.output_config.construct(self)
-        self.attribute_manager = CheckedAttributeManager()
-
-        self.backends = [conf.construct(self) for conf in invocation.backends]
+        self.attribute_registry = AttributeRegistry()
+        self.backends = [backend.construct(self) for backend in invocation.backends]
+        self.config = CompilerConfig.construct(invocation.extra)
+        self.analysis_manager = AnalysisManager(self.config)
 
     ##########################
     # The compilation phases #
@@ -153,7 +172,7 @@ class CompilerInstance:
         analyze_semantics(
             self.package_group,
             self.diagnostics_manager,
-            self.attribute_manager,
+            self.attribute_registry,
         )
 
         for b in self.backends:
