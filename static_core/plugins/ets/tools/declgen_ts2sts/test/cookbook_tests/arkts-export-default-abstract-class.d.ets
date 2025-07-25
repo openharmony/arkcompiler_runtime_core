@@ -16,7 +16,7 @@
 export default declare abstract class A {
     a: number;
     constructor(a: number);
-    abstract log(message: string): string;
+    abstract logs(message: string): string;
 }
 export declare class B {
     a: number;

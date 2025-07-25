@@ -143,6 +143,7 @@ export enum FaultID {
   TupleTypeToArray,
   StructDeclaration,
   NoVoidUnionType,
+  ConstLiteralToType,
   // this should always be last enum
   LAST_ID
 }
