@@ -148,7 +148,8 @@ export class Autofixer {
     [ts.SyntaxKind.StructDeclaration, [this[FaultID.StructDeclaration].bind(this)]],
     [ts.SyntaxKind.IndexedAccessType, [this[FaultID.IndexAccessType].bind(this)]],
     [ts.SyntaxKind.FunctionType, [this[FaultID.FunctionType].bind(this)]],
-    [ts.SyntaxKind.UnionType, [this[FaultID.NoVoidUnionType].bind(this)]]
+    [ts.SyntaxKind.UnionType, [this[FaultID.NoVoidUnionType].bind(this)]],
+    [ts.SyntaxKind.VariableDeclaration, [this[FaultID.ConstLiteralToType].bind(this)]]
   ]);
 
   fixNode(node: ts.Node): ts.VisitResult<ts.Node> {
@@ -1424,6 +1425,37 @@ export class Autofixer {
       const hasVoid = node.types.some((type) => type.kind === ts.SyntaxKind.VoidKeyword);
       if (hasVoid) {
         return this.context.factory.createTypeReferenceNode(JSValue);
+      }
+    }
+    
+    return node;
+  }  
+
+  /*      
+  * Rule: `arkts-const-literal-to-type`
+  */
+  private [FaultID.ConstLiteralToType](node: ts.Node): ts.VisitResult<ts.Node> {
+    /**
+     * Convert const variable declarations with literal values to type declarations.
+     * e.g. export declare const c = 123; -> export declare const c: number;
+     */
+    
+    if (ts.isVariableDeclaration(node) && node.initializer) {
+      let typeNode: ts.TypeNode | undefined;
+
+      if (ts.isNumericLiteral(node.initializer)) {
+        typeNode = this.context.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword);
+      }
+
+      if (typeNode) {
+        const result = this.context.factory.createVariableDeclaration(
+          node.name,
+          node.exclamationToken,
+          typeNode,
+          undefined
+        );
+
+        return result;
       }
     }
 
