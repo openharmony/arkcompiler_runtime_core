@@ -26,18 +26,44 @@ import yaml
 from runner.logger import Log
 from runner.options.config import Config
 from runner.plugins.ets.ets_test_suite import (
+    EtsTestSuite,
     CtsEtsTestSuite,
     FuncEtsTestSuite,
     RuntimeEtsTestSuite
 )
+from runner.plugins.ets.ets_test_dir import EtsTestDir
 from runner.plugins.declgenets2ts.test_declgenets2ts import DeclgenEts2tsStage, TestDeclgenETS2TS
 from runner.plugins.declgenets2ts.declgenets2ts_suites import DeclgenEtsSuites
 from runner.runner_base import get_test_id
 from runner.runner_file_based import RunnerFileBased
 from runner.enum_types.test_directory import TestDirectory
+from runner.plugins.work_dir import WorkDir
+from runner.plugins.ets.preparation_step import JitStep, \
+    CopyStep
 
 _LOGGER = logging.getLogger(
     "runner.plugins.declgenets2ts.runner_declgenets2ts")
+
+
+class DeclgenSdkEtsTestSuite(EtsTestSuite):
+    def __init__(self, config: Config, work_dir: WorkDir, default_list_root: str):
+        super().__init__(config, work_dir, DeclgenEtsSuites.DECLGENSDK.value, default_list_root)
+        self._ets_test_dir = EtsTestDir(config.general.static_core_root, config.general.test_root)
+        self.set_preparation_steps()
+
+    def set_preparation_steps(self) -> None:
+        self._preparation_steps.append(CopyStep(
+            test_source_path=self._ets_test_dir.declgen_sdk,
+            test_gen_path=self.test_root,
+            config=self.config
+        ))
+        if self._is_jit:
+            self._preparation_steps.append(JitStep(
+                test_source_path=self.test_root,
+                test_gen_path=self.test_root,
+                config=self.config,
+                num_repeats=self._jit.num_repeats
+        ))
 
 
 class RunnerDeclgenETS2TS(RunnerFileBased):
@@ -74,7 +100,7 @@ class RunnerDeclgenETS2TS(RunnerFileBased):
 
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestDeclgenETS2TS:
         test = TestDeclgenETS2TS(self.test_env, test_file, flags, get_test_id(
-            test_file, self.test_root), self.build_dir)
+            test_file, self.test_root), self.build_dir, self.__declgen_ets_name)
         test.ignored = is_ignored
         return test
 
@@ -125,6 +151,8 @@ class RunnerDeclgenETS2TS(RunnerFileBased):
             name = DeclgenEtsSuites.FUNC.value
         elif "declgen_ets2ts_runtime" in test_suites:
             name = DeclgenEtsSuites.RUNTIME.value
+        elif "declgen_ets2ts_sdk" in test_suites:
+            name = DeclgenEtsSuites.DECLGENSDK.value
         else:
             Log.exception_and_raise(
                 _LOGGER, f"Unsupported test suite: {self.config.test_suites}")
@@ -135,6 +163,7 @@ class RunnerDeclgenETS2TS(RunnerFileBased):
             DeclgenEtsSuites.CTS.value: CtsEtsTestSuite,
             DeclgenEtsSuites.FUNC.value: FuncEtsTestSuite,
             DeclgenEtsSuites.RUNTIME.value: RuntimeEtsTestSuite,
+            DeclgenEtsSuites.DECLGENSDK.value: DeclgenSdkEtsTestSuite,
         }
         return name_to_class.get(ets_suite_name)
 

@@ -22,3 +22,4 @@ class DeclgenEtsSuites(Enum):
     CTS = "declgen-ets2ts-cts"
     FUNC = "declgen-ets2ts-func-tests"
     RUNTIME = "declgen-ets2ts-runtime"
+    DECLGENSDK = "declgen-ets2ts-sdk"
