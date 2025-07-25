@@ -48,4 +48,15 @@ export declare class DecoratorManager implements DecoratorContainer {
 export declare interface DecoratorContainer {
     decorator: Any;
     applyDecorator(target: Any, propertyKey: string | Any): void;
+export declare let a: Any;
+export declare let buffers: Any[];
+export declare function processData(buffer: Any): Any;
+export type BufferType = Any;
+export type ComplexType = Any | string;
+export declare class DataProcessor {
+    sharedBuffer: Any;
+}
+export declare interface BufferHolder {
+    buffer: Any;
+    getBuffer(): Any;
 }
