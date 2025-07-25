@@ -81,6 +81,9 @@ napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
             jsValue = JSValue::CreateRefValue(coro, ctx, jsFn, napi_function);
         }
     }
+    if (UNLIKELY(jsValue == nullptr)) {
+        return nullptr;
+    }
     return jsValue->GetRefValue(env);
 }
 
