@@ -40,3 +40,23 @@ export type SymbolAlias = symbol;
 export const sym6: SymbolAlias = Symbol("description");
 
 export const obj3: { [key: symbol]: string } = {};
+
+export let a: SharedArrayBuffer;
+export let buffers: SharedArrayBuffer[];
+
+export function processData(buffer: SharedArrayBuffer): SharedArrayBuffer {
+   return buffer; 
+}
+
+export class DataProcessor {
+    private buffer: SharedArrayBuffer;
+    public sharedBuffer: SharedArrayBuffer = new SharedArrayBuffer(1024);
+}
+
+export interface BufferHolder {
+    buffer: SharedArrayBuffer;
+    getBuffer(): SharedArrayBuffer;
+}
+
+export type BufferType = SharedArrayBuffer;
+export type ComplexType = SharedArrayBuffer | string;
