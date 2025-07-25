@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-function main(): int {
+export function debugMain(): int {
     let repetitions: int = 500000;
 
     return execute_test(repetitions);
 }
 
-function release_main(): int {
+export function releaseMain(): int {
     let repetitions: int = 10000000;
 
     return execute_test(repetitions);

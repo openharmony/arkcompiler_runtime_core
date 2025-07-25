@@ -72,9 +72,9 @@ add_custom_target(sampler_ani_es2panda
 )
 add_dependencies(sampler_ani_es2panda sampler_ani_lib)
 
-set(ETS_ENTRY_POINT "main")
-if (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "FastVerify")
-    set(ETS_ENTRY_POINT "release_main")
+set(ETS_ENTRY_POINT "releaseMain")
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(ETS_ENTRY_POINT "debugMain")
 endif()
 
 # NOTE(kurnevichstanislav): fix SIGSEGV in sampler tests with TaskManager (#14278)
