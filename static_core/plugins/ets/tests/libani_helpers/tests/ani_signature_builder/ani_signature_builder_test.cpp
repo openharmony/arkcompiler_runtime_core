@@ -118,6 +118,17 @@ TEST(BuilderTest, SpecialNames)
     ASSERT_EQ(Builder::BuildConstructorName(), "<ctor>");
     ASSERT_EQ(Builder::BuildSetterName("value"), "<set>value");
     ASSERT_EQ(Builder::BuildGetterName("value"), "<get>value");
+    ASSERT_EQ(Builder::BuildPropertyName("value"), "<property>value");
+    ASSERT_EQ(Builder::BuildPartialName("value"), "value$partial");
+    ASSERT_EQ(Builder::BuildAsyncName("value"), "%%async-value");
+    ASSERT_EQ(Builder::GetSetterNamePrefix(), "<set>");
+    ASSERT_EQ(Builder::GetGetterNamePrefix(), "<get>");
+    ASSERT_EQ(Builder::GetPropertyNamePrefix(), "<property>");
+    ASSERT_EQ(Builder::GetPartialNamePrefix(), "$partial");
+    ASSERT_EQ(Builder::GetAsyncNamePrefix(), "%%async-");
+    ASSERT_EQ(Builder::GetUnionPropertyNamePrefix(), "%%union_prop-");
+    ASSERT_EQ(Builder::GetLambdaPrefix(), "%%lambda-");
+    ASSERT_EQ(Builder::GetLambdaInvokePrefix(), "lambda_invoke-");
 }
 
 TEST(SignatureBuilderTest, ComplexSignatureBuilder)
