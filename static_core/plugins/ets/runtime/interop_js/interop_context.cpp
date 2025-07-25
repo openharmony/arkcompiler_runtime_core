@@ -39,6 +39,7 @@
 // CC-OFFNXT(G.FMT.10-CPP) project code style
 napi_status __attribute__((weak)) napi_create_runtime(napi_env env, napi_env *resultEnv);
 napi_status __attribute__((weak)) napi_throw_jsvalue(napi_env env, napi_value error);
+napi_status __attribute__((weak)) napi_setup_hybrid_environment(napi_env env);
 // NOLINTEND(readability-identifier-naming, readability-redundant-declaration)
 #endif
 
@@ -864,6 +865,10 @@ bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv)
             ark::Runtime::Destroy();
         },
         nullptr);
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
+    auto env = static_cast<napi_env>(napiEnv);
+    NAPI_CHECK_RETURN(napi_setup_hybrid_environment(env));
+#endif
 #if defined(PANDA_TARGET_OHOS)
     return TryInitInteropInJsEnv(napiEnv);
 #else
