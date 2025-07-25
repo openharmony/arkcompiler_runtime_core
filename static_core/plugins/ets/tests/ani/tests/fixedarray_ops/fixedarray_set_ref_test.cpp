@@ -28,12 +28,14 @@ TEST_F(FixedArraySetRefTest, SetRefErrorTests)
     ani_class cls = nullptr;
     ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
-    ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, nullptr, &array), ANI_OK);
-    ani_ref ref = nullptr;
+    std::string_view rawString {"1234"};
+    ani_string str {};
+    ASSERT_EQ(env_->String_NewUTF8(rawString.data(), rawString.length(), &str), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, str, &array), ANI_OK);
     const ani_size index = 0;
     const ani_size invalidIndex = 5;
-    ASSERT_EQ(env_->FixedArray_Set_Ref(nullptr, index, ref), ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->FixedArray_Set_Ref(array, invalidIndex, ref), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->FixedArray_Set_Ref(nullptr, index, str), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->FixedArray_Set_Ref(array, invalidIndex, str), ANI_OUT_OF_RANGE);
     auto num = static_cast<ani_ref>(CallEtsFunction<ani_ref>("fixedarray_set_ref_test", "getObject"));
     ASSERT_EQ(env_->FixedArray_Set_Ref(array, 0, num), ANI_INVALID_TYPE);
 }
@@ -61,10 +63,13 @@ TEST_F(FixedArraySetRefTest, SetRefErrorValueToArrayTest)
     ani_class cls = nullptr;
     ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
-    ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, nullptr, &array), ANI_OK);
+    std::string_view rawString {"1234"};
+    ani_string str {};
+    ASSERT_EQ(env_->String_NewUTF8(rawString.data(), rawString.length(), &str), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, str, &array), ANI_OK);
 
     const ani_size errorIndex = -1;
-    ASSERT_EQ(env_->FixedArray_Set_Ref(array, errorIndex, nullptr), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->FixedArray_Set_Ref(array, errorIndex, str), ANI_OUT_OF_RANGE);
 }
 
 TEST_F(FixedArraySetRefTest, SetGetUnionToArrayTest)
@@ -72,7 +77,10 @@ TEST_F(FixedArraySetRefTest, SetGetUnionToArrayTest)
     ani_fixedarray_ref array = nullptr;
     ani_class cls = nullptr;
     ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
-    ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, nullptr, &array), ANI_OK);
+    std::string_view rawString {"1234"};
+    ani_string str {};
+    ASSERT_EQ(env_->String_NewUTF8(rawString.data(), rawString.length(), &str), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, str, &array), ANI_OK);
 
     auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("fixedarray_set_ref_test", "getNewString1"));
     const ani_size index1 = 1;
@@ -121,7 +129,10 @@ TEST_F(FixedArraySetRefTest, SetGetStabilityToArrayTest)
     ani_fixedarray_ref array = nullptr;
     ani_class cls = nullptr;
     ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
-    ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, nullptr, &array), ANI_OK);
+    std::string_view rawString {"1234"};
+    ani_string str {};
+    ASSERT_EQ(env_->String_NewUTF8(rawString.data(), rawString.length(), &str), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, str, &array), ANI_OK);
     ani_ref ref1 = nullptr;
     auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("fixedarray_set_ref_test", "getNewString1"));
     const ani_size index1 = 1;

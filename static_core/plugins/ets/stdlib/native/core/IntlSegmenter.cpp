@@ -180,8 +180,10 @@ ani_array IntlClusters(ani_env *env, [[maybe_unused]] ani_class klass, BreakerFa
     ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.Cluster", &clusterClass));
 
     // Create array of the correct size
+    ani_ref undefined {};
+    ANI_FATAL_IF_ERROR(env->GetUndefined(&undefined));
     ani_array resultArray;
-    ANI_FATAL_IF_ERROR(env->Array_New(clusters.size(), nullptr, &resultArray));
+    ANI_FATAL_IF_ERROR(env->Array_New(clusters.size(), undefined, &resultArray));
 
     // Fill the array with cluster objects
     for (size_t i = 0; i < clusters.size(); ++i) {

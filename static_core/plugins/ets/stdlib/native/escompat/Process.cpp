@@ -468,8 +468,10 @@ static ani_array GetGroupIDs(ani_env *env)
     auto groups = ark::os::thread::GetGroups();
     auto groupIds = std::vector<ani_int>(groups.begin(), groups.end());
 
+    ani_ref undefined {};
+    ANI_FATAL_IF_ERROR(env->GetUndefined(&undefined));
     ani_array result;
-    ANI_FATAL_IF_ERROR(env->Array_New(groups.size(), nullptr, &result));
+    ANI_FATAL_IF_ERROR(env->Array_New(groups.size(), undefined, &result));
 
     if (groups.empty()) {
         ThrowNewError(env, "std.core.RuntimeException", "Failed to get process groups", "C{std.core.String}:");

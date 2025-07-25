@@ -494,6 +494,7 @@ if (PANDA_ETS_INTEROP_JS)
     panda_set_flag(PANDA_ETS_INTEROP_JS)
 endif()
 
+message(STATUS "CMAKE_BUILD_TYPE                       = ${CMAKE_BUILD_TYPE}")
 message(STATUS "PANDA_TARGET_MOBILE_WITH_MANAGED_LIBS  = ${PANDA_TARGET_MOBILE_WITH_MANAGED_LIBS}")
 message(STATUS "PANDA_TARGET_UNIX                      = ${PANDA_TARGET_UNIX}")
 message(STATUS "PANDA_TARGET_LINUX                     = ${PANDA_TARGET_LINUX}")

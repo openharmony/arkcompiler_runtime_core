@@ -94,10 +94,12 @@ static std::vector<icu::UnicodeString> ToIcuList(ani_env *env, ani_array aniList
 
 static ani_array ToAniArray(ani_env *env, std::vector<ani_string> strings)
 {
+    ani_ref undefined {};
+    ANI_FATAL_IF_ERROR(env->GetUndefined(&undefined));
     ani_class stringClass;
     ANI_FATAL_IF_ERROR(env->FindClass("std.core.String", &stringClass));
     ani_array array;
-    ANI_FATAL_IF_ERROR(env->Array_New(strings.size(), nullptr, &array));
+    ANI_FATAL_IF_ERROR(env->Array_New(strings.size(), undefined, &array));
     for (size_t i = 0; i < strings.size(); ++i) {
         auto item = strings[i];
         ANI_FATAL_IF_ERROR(env->Array_Set(array, i, item));

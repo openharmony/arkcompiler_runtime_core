@@ -67,13 +67,7 @@ TEST_F(ArrayNewRefTest, NewObjectArrayTest)
     ASSERT_EQ(zeroLengthSize, ZERO);
 
     ani_array_ref array = nullptr;
-
-    // Test creating array with null initial element
-    ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_5, nullptr, reinterpret_cast<ani_fixedarray_ref *>(&array)), ANI_OK);
-    ASSERT_NE(array, nullptr);
     ani_size size = 0;
-    ASSERT_EQ(env_->Array_GetLength(array, &size), ANI_OK);
-    ASSERT_EQ(size, LENGTH_5);
 
     // Test creating array with undefined initial element
     ani_ref undefinedRef = nullptr;

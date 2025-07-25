@@ -27,14 +27,16 @@ TEST_F(ArrayGetLengthTest, GetLengthTest)
 {
     InitTest();
 
+    ani_ref undefined {};
+    ASSERT_EQ(env_->GetUndefined(&undefined), ANI_OK);
     ani_array array {};
-    ASSERT_EQ(env_->Array_New(1U, nullptr, &array), ANI_OK);
+    ASSERT_EQ(env_->Array_New(1U, undefined, &array), ANI_OK);
     ani_size sz {};
     ASSERT_EQ(env_->Array_GetLength(array, &sz), ANI_OK);
     ASSERT_EQ(sz, 1U);
 
     ani_object boxedBoolean {};
-    env_->Object_New(booleanClass, booleanCtor, &boxedBoolean, ANI_TRUE);
+    ASSERT_EQ(env_->Object_New(booleanClass, booleanCtor, &boxedBoolean, ANI_TRUE), ANI_OK);
     ani_array arrayBoolean {};
     ASSERT_EQ(env_->Array_New(5U, boxedBoolean, &arrayBoolean), ANI_OK);
     ASSERT_EQ(env_->Array_GetLength(arrayBoolean, &sz), ANI_OK);
@@ -65,7 +67,7 @@ TEST_F(ArrayGetLengthTest, GetLengthErrorTest)
 
     ani_size sz {};
     ASSERT_EQ(env_->Array_GetLength(nullptr, &sz), ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->Array_New(5U, nullptr, &array), ANI_OK);
+    ASSERT_EQ(env_->Array_New(5U, nullptr, &array), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Array_GetLength(array, nullptr), ANI_INVALID_ARGS);
 }
 
