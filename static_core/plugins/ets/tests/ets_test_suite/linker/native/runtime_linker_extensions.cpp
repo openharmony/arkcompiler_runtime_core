@@ -80,11 +80,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
 
-    std::array methods = {
-        ani_native_function {"loadFile", "C{std.core.String}:A{b}", reinterpret_cast<void *>(LoadFile)},
-    };
-
-    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
+    ani_native_function method {"loadFile", "C{std.core.String}:A{b}", reinterpret_cast<void *>(LoadFile)};
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, &method, 1)) {
         std::cerr << "Cannot bind native methods to '" << CLASS_DESCRIPTOR << "'" << std::endl;
         return ANI_ERROR;
     };

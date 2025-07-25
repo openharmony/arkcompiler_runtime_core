@@ -88,6 +88,42 @@ static void AssertCompoundClassRoot(EtsClassLinker *classLinker, EtsClassRoot ro
     }
 }
 
+static void AssertStringClassRoot(EtsClassLinker *classLinker, EtsClassRoot root)
+{
+    EtsClass *klass = classLinker->GetClassRoot(root);
+    Class *coreClass = klass->GetRuntimeClass();
+
+    ASSERT_NE(klass, nullptr);
+    ASSERT_TRUE(klass->IsInitialized());
+    ASSERT_TRUE(coreClass->IsInstantiable());
+    ASSERT_FALSE(klass->IsArrayClass());
+    ASSERT_FALSE(klass->IsPrimitive());
+    ASSERT_TRUE(klass->IsClass());
+    ASSERT_FALSE(klass->IsInterface());
+    ASSERT_FALSE(klass->IsAbstract());
+    ASSERT_FALSE(coreClass->IsProxy());
+    ASSERT_EQ(coreClass->GetLoadContext(), classLinker->GetEtsClassLinkerExtension()->GetBootContext());
+
+    ASSERT_TRUE(klass->IsFinal());
+    ASSERT_FALSE(coreClass->IsObjectClass());
+    ASSERT_NE(klass->GetBase(), nullptr);
+    ASSERT_EQ(klass->GetBase(), classLinker->GetClassRoot(EtsClassRoot::STRING));
+
+    switch (root) {
+        case EtsClassRoot::LINE_STRING:
+            ASSERT_TRUE(coreClass->IsLineStringClass());
+            break;
+        case EtsClassRoot::SLICED_STRING:
+            ASSERT_TRUE(coreClass->IsSlicedStringClass());
+            break;
+        case EtsClassRoot::TREE_STRING:
+            ASSERT_TRUE(coreClass->IsTreeStringClass());
+            break;
+        default:
+            UNREACHABLE();
+    }
+}
+
 static void AssertCompoundContainerClassRoot(EtsClassLinker *classLinker, EtsClassRoot root)
 {
     EtsClass *klass = classLinker->GetClassRoot(root);
@@ -179,9 +215,10 @@ TEST_F(EtsVMTest, InitTest)
 
     AssertCompoundClassRoot(classLinker, EtsClassRoot::OBJECT);
     AssertCompoundClassRoot(classLinker, EtsClassRoot::CLASS);
-    AssertCompoundClassRoot(classLinker, EtsClassRoot::LINE_STRING);
-    AssertCompoundClassRoot(classLinker, EtsClassRoot::SLICED_STRING);
-    AssertCompoundClassRoot(classLinker, EtsClassRoot::TREE_STRING);
+    AssertCompoundClassRoot(classLinker, EtsClassRoot::STRING);
+    AssertStringClassRoot(classLinker, EtsClassRoot::LINE_STRING);
+    AssertStringClassRoot(classLinker, EtsClassRoot::SLICED_STRING);
+    AssertStringClassRoot(classLinker, EtsClassRoot::TREE_STRING);
 
     AssertCompoundContainerClassRoot(classLinker, EtsClassRoot::STRING_ARRAY);
 

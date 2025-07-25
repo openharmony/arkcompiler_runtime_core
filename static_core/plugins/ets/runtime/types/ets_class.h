@@ -789,9 +789,9 @@ private:
     // ets.Class fields BEGIN
     FIELD_UNUSED ObjectPointer<EtsString> name_;       // String
     FIELD_UNUSED ObjectPointer<EtsClass> superClass_;  // Class<? super T>
-    FIELD_UNUSED uint32_t flags_;
     FIELD_UNUSED EtsLong typeMetaData_;
     FIELD_UNUSED EtsLong overloadMap_;
+    FIELD_UNUSED uint32_t flags_;
     // ets.Class fields END
 
     ark::Class klass_;

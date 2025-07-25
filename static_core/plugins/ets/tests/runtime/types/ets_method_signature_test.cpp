@@ -66,6 +66,7 @@ public:
         options.SetCompilerEnableJit(false);
         options.SetGcType("epsilon");
         options.SetLoadRuntimes({"ets"});
+        options.SetUseStringCaches(false);
 
         Runtime::Create(options);
     }

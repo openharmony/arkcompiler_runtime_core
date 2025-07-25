@@ -30,8 +30,11 @@ public:
 
     static std::vector<MirrorFieldInfo> GetEtsAbcRuntimeLinkerClassMembers()
     {
-        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsAbcRuntimeLinker, parentLinker_, "parentLinker"),
-                                             MIRROR_FIELD_INFO(EtsAbcRuntimeLinker, abcFiles_, "abcFiles")};
+        return std::vector<MirrorFieldInfo> {
+            MIRROR_FIELD_INFO(EtsAbcRuntimeLinker, parentLinker_, "parentLinker"),
+            MIRROR_FIELD_INFO(EtsAbcRuntimeLinker, abcFiles_, "abcFiles"),
+            MIRROR_FIELD_INFO(EtsAbcRuntimeLinker, sharedRuntimeLinkers_, "sharedLibraryLoaders"),
+        };
     }
 };
 
