@@ -72,6 +72,7 @@ export namespace taskpool {
             if (task == undefined) {
                 return false;
             }
+            workerPendingTasksCount.set(this.workerId, workerPendingTasksCount.get(this.workerId)! + 1);
             this.currentPriority = task.priority;
             let job = this.run<NullishType>((): NullishType => {
                 let res = task?.execute();
@@ -84,12 +85,19 @@ export namespace taskpool {
             let p = Promise.resolve<NullishType>(new Object()).then<NullishType, NullishType>(taskRunner, taskRunner);
             p.then((res: NullishType) => {
 				task?.resolve(res);
-                this.notifyTaskFinished(task)
+                this.notifyTaskFinished(task);
             }).catch((e) => {
                 task?.reject(e);
-                this.notifyTaskFinished(task)
+                this.notifyTaskFinished(task);
             }).finally(() => {
                 this.currentPriority = undefined;
+                setTimeout(() => {
+                    task?.notifyDependencies();
+                    this.notifyTaskFinished(task);
+                });
+                ConcurrencyHelpers.lockGuard(workersMutex, () => {
+                    workerPendingTasksCount.set(this.workerId, workerPendingTasksCount.get(this.workerId)! - 1);
+                })
             })
             return true;
         }
@@ -160,6 +168,7 @@ export namespace taskpool {
          */
         constructor(name: string, func: Function, ...args: FixedArray<NullishType>) {
             this.name = name;
+            this.arguments = Array.from(args);
             this.taskFunction = (): NullishType => {
                 return func.unsafeCall(...args);
             };
@@ -437,7 +446,7 @@ export namespace taskpool {
             ConcurrencyHelpers.mutexUnlock(this.taskMutex);
         }
 
-        private notifyDependencies(): void {
+        internal notifyDependencies(): void {
             for (const dependentTask: Task of this.dependentTasks) {
                 ConcurrencyHelpers.lockGuard(dependentTask.taskMutex, () => {
                     dependentTask.taskDependenciesCount--;
@@ -481,7 +490,9 @@ export namespace taskpool {
                 this.ioDuration = 0;
                 // Process the task finishing
                 const notCanceled: boolean = taskFinished(this);
-                this.notifyDependencies();
+                if(isTaskPoolUseLaunch) {
+                    this.notifyDependencies();
+                }
                 if (!notCanceled) {
                     this.throwCancelTaskError();
                 }
@@ -1407,15 +1418,35 @@ export namespace taskpool {
      */
     function notifyExecuteTask(): void {
         initWorkerPool();
-        ConcurrencyHelpers.mutexLock(workersMutex);
-        for (let w : TaskPoolWorker of workers) {
+        ConcurrencyHelpers.lockGuard(workersMutex, () => {
+            let w = chooseWorkerForTask();
             if (!w.performTask() && getTaskNum() > 0) {
                 // Current getTask may get an undefined task when higher priority task hit the continueCount
                 // So here we try to performTask again to avoid task cannot be executed
                 w.performTask();
             }
+        })
+    }
+
+    /**
+     * @brief Select an optimal worker for task execution based on current pending tasks count.
+     * @see taskpool.notifyExecuteTask
+     */
+    function chooseWorkerForTask(): TaskPoolWorker {
+        let minTaskCount  = Int.MAX_VALUE;
+        let selectedWorker = Array.from(workers)[0];
+        for (let w : TaskPoolWorker of workers) {
+            let currentWorkerTaskCount = workerPendingTasksCount.get(w.workerId);
+            if(!currentWorkerTaskCount) {
+                workerPendingTasksCount.set(w.workerId, 0);
+                return w;
+            }
+            if(currentWorkerTaskCount < minTaskCount ) {
+                minTaskCount  = currentWorkerTaskCount;
+                selectedWorker = w;
+            }
         }
-        ConcurrencyHelpers.mutexUnlock(workersMutex);
+        return selectedWorker;
     }
 
     /**
@@ -1545,6 +1576,8 @@ export namespace taskpool {
     const currentExecutingTasks: Map<WorkerId, Task> = new Map<WorkerId, Task>();
     // value is set of executing tasks on this worker
     const workerToTasks: Map<WorkerId, Set<Task>> = new Map<WorkerId, Set<Task>>();
+    // Count of pending tasks per worker
+    const workerPendingTasksCount: Map<WorkerId, Int> = new Map<WorkerId, Int>();
 
     const workersMutex = ConcurrencyHelpers.mutexCreate();
     const workers: Set<TaskPoolWorker> = new Set<TaskPoolWorker>();
