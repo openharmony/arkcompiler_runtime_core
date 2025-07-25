@@ -60,9 +60,7 @@ public:
      */
     ALWAYS_INLINE static ObjectHeader *AllocateNonMovableArray(EtsInt length)
     {
-        auto byteArray = EtsByteArray::Create(length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
-        ASSERT(byteArray != nullptr);
-        return byteArray->GetCoreType();
+        return EtsByteArray::Create(length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT)->GetCoreType();
     }
 
     ALWAYS_INLINE static EtsLong GetAddress(const EtsByteArray *array)
