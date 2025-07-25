@@ -556,3 +556,13 @@ class NotOverloaded {
 class FindNativeMethods {
     native foo(): int;
 }
+
+class FindOverloadedConstructor {
+    public constructor empty() {}
+    public constructor withArg (a: int) {}
+    public overload constructor { empty, withArg }
+}
+
+class FindConstructorWithDefaultParams {
+    public constructor(a?: int, b?: int) {}
+}

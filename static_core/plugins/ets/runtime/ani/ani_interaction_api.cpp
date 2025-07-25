@@ -551,7 +551,8 @@ static bool CheckUniqueMethod(EtsClass *klass, const char *name)
     ASSERT(klass != nullptr);
     ASSERT(name != nullptr);
     size_t nameCounter = 0;
-    for (auto &method : klass->GetMethods()) {
+    auto methodsList = (panda_file_items::CTOR == name) ? klass->GetConstructors() : klass->GetMethods();
+    for (auto &method : methodsList) {
         if (method->IsStatic() == IS_STATIC && ::strcmp(method->GetName(), name) == 0) {
             if (++nameCounter == 2U) {
                 return false;
@@ -687,7 +688,7 @@ template <bool IS_STATIC_METHOD>
 static ani_status GetClassMethod(ani_env *env, ani_class cls, const char *name, const char *signature,
                                  EtsMethod **result)
 {
-    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    ScopedManagedCodeFix s(env);
     EtsClass *klass = s.ToInternalType(cls);
     return DoGetClassMethod<IS_STATIC_METHOD>(klass, name, signature, result);
 }
@@ -864,7 +865,7 @@ NO_UB_SANITIZE static ani_status Object_GetType(ani_env *env, ani_object object,
     CHECK_PTR_ARG(object);
     CHECK_PTR_ARG(result);
 
-    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    ScopedManagedCodeFix s(env);
     EtsObject *etsObject = s.ToInternalType(object);
     ASSERT(etsObject != nullptr);
     EtsClass *etsClass = etsObject->GetClass();
@@ -1113,21 +1114,22 @@ NO_UB_SANITIZE static ani_status Module_FindNamespace(ani_env *env, ani_module m
 template <typename InternalType, typename AniFixedArrayType>
 static ani_status NewPrimitiveTypeArray(ani_env *env, ani_size length, AniFixedArrayType *result)
 {
-    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    ScopedManagedCodeFix s(env);
     auto *array = InternalType::Create(length);
     ANI_CHECK_RETURN_IF_EQ(array, nullptr, ANI_OUT_OF_MEMORY);
     return s.AddLocalRef(reinterpret_cast<EtsObject *>(array), reinterpret_cast<ani_ref *>(result));
 }
 
 template <typename T>
-static ani_status GetArrayRegion(EtsEscompatArray *objectArray, size_t start, size_t offset, T *buff)
+static ani_status GetArrayRegion(EtsCoroutine *coro, EtsEscompatArray *objectArray, size_t start, size_t offset,
+                                 T *buff)
 {
     ASSERT(buff != nullptr);
     ANI_CHECK_RETURN_IF_GT(offset, std::numeric_limits<size_t>::max() - start, ANI_OUT_OF_RANGE);
     size_t end = start + offset;
     ANI_CHECK_RETURN_IF_GT(end, objectArray->GetActualLength(), ANI_OUT_OF_RANGE);
 
-    Class *boxPrimitiveClass = EtsBoxPrimitive<T>::GetBoxClass(EtsCoroutine::GetCurrent());
+    Class *boxPrimitiveClass = EtsBoxPrimitive<T>::GetBoxClass(coro);
     for (size_t posArr = start, posBuff = 0; posArr < end; ++posArr, ++posBuff) {
         EtsBoxPrimitive<T> *boxedVal = nullptr;
         [[maybe_unused]] auto getRes = objectArray->GetRef(posArr, reinterpret_cast<EtsObject **>(&boxedVal));
@@ -1150,7 +1152,7 @@ static ani_status GetPrimitiveTypeArrayRegion(ani_env *env, ArrayType array, ani
     ASSERT(array != nullptr);
     ANI_CHECK_RETURN_IF_EQ(len != 0 && buf == nullptr, true, ANI_INVALID_ARGS);
 
-    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    ScopedManagedCodeFix s(env);
     EtsObject *objArray = s.ToInternalType(static_cast<ani_object>(array));
     if (!objArray->IsArrayClass()) {
         EtsEscompatArray *escompatArray = EtsEscompatArray::FromEtsObject(objArray);
@@ -1158,7 +1160,7 @@ static ani_status GetPrimitiveTypeArrayRegion(ani_env *env, ArrayType array, ani
         if (UNLIKELY(start > length || len > (length - start))) {
             return ANI_OUT_OF_RANGE;
         }
-        return GetArrayRegion<T>(escompatArray, start, len, buf);
+        return GetArrayRegion<T>(s.GetCoroutine(), escompatArray, start, len, buf);
     }
 
     EtsArray *internalArray = EtsArray::FromEtsObject(objArray);
@@ -1179,7 +1181,6 @@ static ani_status SetArrayRegion(ScopedManagedCodeFix &s, EtsEscompatArray *obje
                                  T *buff)
 {
     ASSERT(buff != nullptr);
-    auto *coro = EtsCoroutine::GetCurrent();
 
     ANI_CHECK_RETURN_IF_GT(offset, std::numeric_limits<size_t>::max() - start, ANI_OUT_OF_RANGE);
     size_t end = start + offset;
@@ -1192,7 +1193,7 @@ static ani_status SetArrayRegion(ScopedManagedCodeFix &s, EtsEscompatArray *obje
     for (size_t posArr = start, posBuff = 0; posArr < end; ++posArr, ++posBuff) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         T value = buff[posBuff];
-        auto boxedValue = EtsBoxPrimitive<std::remove_const_t<T>>::Create(coro, value);
+        auto boxedValue = EtsBoxPrimitive<std::remove_const_t<T>>::Create(coroutine, value);
         ANI_CHECK_RETURN_IF_EQ(boxedValue, nullptr, ANI_OUT_OF_MEMORY);
         [[maybe_unused]] auto setRes = objectArrayHandle->SetRef(posArr, boxedValue);
         ASSERT(setRes);
@@ -1205,7 +1206,7 @@ static ani_status SetPrimitiveTypeArrayRegion(ani_env *env, ArrayType array, ani
 {
     ASSERT(array != nullptr);
     ANI_CHECK_RETURN_IF_EQ(len != 0 && buf == nullptr, true, ANI_INVALID_ARGS);
-    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    ScopedManagedCodeFix s(env);
     EtsObject *objArray = s.ToInternalType(static_cast<ani_object>(array));
     if (!objArray->IsArrayClass()) {
         EtsEscompatArray *escompatArray = EtsEscompatArray::FromEtsObject(objArray);
@@ -1895,7 +1896,7 @@ static ani_status DoBindNativeFunctions(ani_env *env, ani_namespace ns, const an
                                         ani_size nrFunctions)
 {
     ANI_CHECK_RETURN_IF_EQ(nrFunctions, 0, ANI_OK);
-    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    ScopedManagedCodeFix s(env);
     EtsNamespace *etsNs = s.ToInternalType(ns);
     PandaVector<EtsMethod *> etsMethods;
     etsMethods.reserve(nrFunctions);
@@ -4686,7 +4687,7 @@ NO_UB_SANITIZE static ani_status String_NewUTF8(ani_env *env, const char *utf8_s
     CHECK_PTR_ARG(utf8_string);
     CHECK_PTR_ARG(result);
 
-    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    ScopedManagedCodeFix s(env);
     auto internalString = EtsString::CreateFromUtf8(utf8_string, size);
     ANI_CHECK_RETURN_IF_EQ(internalString, nullptr, ANI_OUT_OF_MEMORY);
     return s.AddLocalRef(internalString->AsObject(), reinterpret_cast<ani_ref *>(result));
@@ -4700,7 +4701,7 @@ NO_UB_SANITIZE static ani_status String_GetUTF8Size(ani_env *env, ani_string str
     CHECK_PTR_ARG(string);
     CHECK_PTR_ARG(result);
 
-    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    ScopedManagedCodeFix s(env);
     auto internalString = s.ToInternalType(string);
     *result = internalString->GetUtf8Length();
     return ANI_OK;
@@ -4743,7 +4744,7 @@ NO_UB_SANITIZE static ani_status String_GetUTF8SubString(ani_env *env, ani_strin
         return ANI_BUFFER_TO_SMALL;
     }
 
-    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    ScopedManagedCodeFix s(env);
     EtsString *internalString = s.ToInternalType(string);
     auto utf8Length = internalString->GetUtf8Length();
     if (UNLIKELY(substr_offset > utf8Length || substrSize > (utf8Length - substr_offset))) {
@@ -4778,7 +4779,7 @@ NO_UB_SANITIZE static ani_status String_GetUTF16Size(ani_env *env, ani_string st
     CHECK_PTR_ARG(string);
     CHECK_PTR_ARG(result);
 
-    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    ScopedManagedCodeFix s(env);
     auto internalString = s.ToInternalType(string);
     *result = internalString->GetUtf16Length();
     return ANI_OK;
