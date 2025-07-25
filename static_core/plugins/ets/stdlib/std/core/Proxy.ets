@@ -737,7 +737,8 @@ abstract class ArrayProxy<T> extends Array<T> {
     }
 
     private static readonly POP_METHOD: Method = ArrayProxy.getArrayMethod("pop")
-    private static readonly PUSH_METHOD: Method = ArrayProxy.getArrayMethod("push", Type.of(new Array<object>()))
+    private static readonly PUSH_METHOD: Method = ArrayProxy.getArrayMethod("pushArray", Type.of(new Array<object>()))
+    private static readonly PUSH_SINGLE_METHOD: Method = ArrayProxy.getArrayMethod("pushOne", Type.of(new Object()))
     private static readonly CONCAT_METHOD: Method = ArrayProxy.getArrayMethod("concat", Type.of([] as FixedArray<ConcatArray<object>>))
     private static readonly UNSHIFT_METHOD: Method = ArrayProxy.getArrayMethod("unshift", Type.of(new Array<object>()))
     private static readonly SHIFT_METHOD: Method = ArrayProxy.getArrayMethod("shift")
@@ -822,13 +823,22 @@ abstract class ArrayProxy<T> extends Array<T> {
         throw new AssertionError("Array.concat() unexpected result type: " + Type.of(result))
     }
 
-    override push(...items: Array<T>): number {
+    override pushArray(...items: Array<T>): number {
         const result = this.handler.invoke(this.target, ArrayProxy.PUSH_METHOD, [items])
         if (result instanceof Number) {
             return result
         }
 
         throw new AssertionError("Array.push() unexpected result type: " + Type.of(result))
+    }
+
+    override pushOne(item: T): number {
+        const result = this.handler.invoke(this.target, ArrayProxy.PUSH_SINGLE_METHOD, [item])
+        if (result instanceof Number) {
+            return result
+        }
+
+        throw new AssertionError("Array.push() single push unexpected result type: " + Type.of(result))
     }
 
     override pushECMA(...items: Array<T>): number {

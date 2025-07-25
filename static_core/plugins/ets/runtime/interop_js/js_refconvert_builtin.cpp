@@ -219,8 +219,12 @@ private:
             {utf::CStringAsMutf8("splice"), {"I:Lescompat/Array;", 2, "splice"}},
             {utf::CStringAsMutf8("splice"), {"IILescompat/Array;:Lescompat/Array;", 3, "splice"}},
             {utf::CStringAsMutf8("toSpliced"), {"II[Lstd/core/Object;:Lescompat/Array;", 3, "toSpliced"}},
-            {utf::CStringAsMutf8("with"), {"DLstd/core/Object;:Lescompat/Array;", 3, "with"}}};
+            {utf::CStringAsMutf8("with"), {"DLstd/core/Object;:Lescompat/Array;", 3, "with"}},
+            {utf::CStringAsMutf8("push"), {"Lescompat/Array;:D", 1, "pushArray"}}};
+
         wArray_ = RegisterClass(descriptors::ARRAY, "Array", &W_ARRAY_OVERLOADS);
+        wArray_->GetOverloadNameMapping()["pushOne"] = "push";
+        wArray_->GetOverloadNameMapping()["pushArray"] = "push";
         NAPI_CHECK_FATAL(napi_object_seal(ctx_->GetJSEnv(), jsGlobalEts_));
     }
 

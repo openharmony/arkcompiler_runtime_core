@@ -1496,6 +1496,16 @@ intrinsics:
 ##################
 # escompat.Array #
 ##################
+  - name: EscompatArrayPushImpl
+    space: ets
+    class_name: escompat.Array
+    method_name: pushImpl
+    static: false
+    signature:
+      ret: f64
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEscompatArrayPushImpl
+
   - name: EscompatArrayGet
     space: ets
     class_name: escompat.Array

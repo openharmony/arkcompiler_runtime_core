@@ -465,6 +465,19 @@ static uint32_t NormalizeIndex(int32_t idx, int64_t len)
     return idx > len ? len : idx;
 }
 
+EtsDouble EtsEscompatArrayPushImpl(ObjectHeader *arrayHeader, EtsObject *value)
+{
+    // have ensured the capacity in ets.
+    ASSERT(arrayHeader != nullptr);
+    auto *array = EtsEscompatArray::FromEtsObject(EtsObject::FromCoreType(arrayHeader));
+    auto actualLength = array->GetActualLength();
+    // this.buffer[this.actualLength] = val
+    array->GetData()->Set(actualLength, value);
+    // this.actualLength += 1
+    array->SetActualLength(actualLength + 1);
+    return actualLength + 1;
+}
+
 extern "C" ObjectHeader *EtsEscompatArrayFill(ObjectHeader *arrayHeader, EtsObject *value, int32_t start, int32_t end)
 {
     ASSERT(arrayHeader != nullptr);
