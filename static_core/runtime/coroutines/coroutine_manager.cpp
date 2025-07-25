@@ -66,6 +66,8 @@ Coroutine *CoroutineManager::CreateEntrypointlessCoroutine(Runtime *runtime, Pan
         // resource limit reached
         return nullptr;
     }
+    // In current design user (not system) coroutine is EP-ful mutator
+    ASSERT(CoroutineManager::IsSystemCoroutine(type, false));
     CoroutineContext *ctx = CreateCoroutineContext(false);
     if (ctx == nullptr) {
         // do not proceed if we cannot create a context for the new coroutine
@@ -99,6 +101,10 @@ Coroutine *CoroutineManager::CreateCoroutineInstance(EntrypointInfo &&epInfo, Pa
 {
     if (GetCoroutineCount() >= GetCoroutineCountLimit()) {
         // resource limit reached
+        return nullptr;
+    }
+    if (!IsSystemCoroutine(type, true) && IsUserCoroutineLimitReached()) {
+        // user coro limit reached
         return nullptr;
     }
     CoroutineContext *ctx = CreateCoroutineContext(true);
