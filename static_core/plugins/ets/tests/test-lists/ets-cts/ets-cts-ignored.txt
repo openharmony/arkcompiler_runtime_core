@@ -1264,11 +1264,7 @@
 10.interfaces/06.interface_inheritance/multi_layer_interface/type_system/type_system_23.ets
 10.interfaces/06.interface_inheritance/superinterfaces_and_subinterfaces/interface_inheritance_const/const_06.ets
 
-#23856
-13.compilation_units/07.export_directives/01.selective_export_directive/t01/c.ets
-13.compilation_units/07.export_directives/01.selective_export_directive/t02/d.ets
-13.compilation_units/07.export_directives/01.selective_export_directive/t03/d.ets
-13.compilation_units/07.export_directives/01.selective_export_directive/t04/d.ets
+#28243
 13.compilation_units/07.export_directives/04.re-export_directive/pkg01_re-export_all_by_old_names.ets
 13.compilation_units/07.export_directives/04.re-export_directive/pkg02_re-export_all_with_rename.ets
 13.compilation_units/07.export_directives/04.re-export_directive/pkg03_re-export_all.ets
