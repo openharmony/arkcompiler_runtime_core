@@ -388,6 +388,26 @@ TEST_F(ClassFindMethodTest, binded_method)
     ASSERT_NE(method, nullptr);
 }
 
+TEST_F(ClassFindMethodTest, FindOverloadedConstructor)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("test.FindOverloadedConstructor", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_method ctor {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", nullptr, &ctor), ANI_AMBIGUOUS);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &ctor), ANI_OK);
+
+    ASSERT_EQ(env_->FindClass("test.FindConstructorWithDefaultParams", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", nullptr, &ctor), ANI_AMBIGUOUS);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std.core.Int}:", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std.core.Int}C{std.core.Int}:", &ctor), ANI_OK);
+}
+
 TEST_F(ClassFindMethodTest, find_intrinsics)
 {
     {
