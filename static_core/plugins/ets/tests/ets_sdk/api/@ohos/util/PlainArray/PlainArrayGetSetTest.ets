@@ -41,7 +41,7 @@ function testGetKeyAtOutOfRangeIndex() {
     plainArray.add(1, "squirrel");
     plainArray.add(2, "sparrow");
     let result = plainArray.getKeyAt(3);
-    arktest.assertEQ(result, undefined);
+    arktest.assertEQ(result, -1);
 }
 
 // Test cases ported from ArkTS 1.0: PLAINARRAY_GETKEYAT_0200
