@@ -462,7 +462,7 @@
 //! INST_COUNT    /StringBuilder::<ctor>/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendDouble/,1
-//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
 //!
 //! METHOD        "ets_string_concat_loop.ETSGLOBAL::reuse_concat_loop2"
 //! PASS_BEFORE   "BranchElimination"
@@ -474,7 +474,7 @@
 //! INST_COUNT    /StringBuilder::<ctor>/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
-//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
 //!
 //! METHOD        "ets_string_concat_loop.ETSGLOBAL::reuse_concat_loop3"
 //! PASS_BEFORE   "BranchElimination"
@@ -974,7 +974,7 @@
 //! INST_COUNT    /StringBuilder::<ctor>/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendDouble/,1
-//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
 //!
 //! METHOD        "ets_string_concat_loop.ETSGLOBAL::reuse_concat_loop2"
 //! PASS_BEFORE   "BranchElimination"
@@ -986,7 +986,7 @@
 //! INST_COUNT    /StringBuilder::<ctor>/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
-//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
 //!
 //! METHOD        "ets_string_concat_loop.ETSGLOBAL::reuse_concat_loop3"
 //! PASS_BEFORE   "BranchElimination"

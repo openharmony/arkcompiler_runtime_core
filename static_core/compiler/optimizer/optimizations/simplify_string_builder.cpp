@@ -483,9 +483,9 @@ void SimplifyStringBuilder::ConcatenationLoopMatch::Clear()
     preheader.appendAccValue = nullptr;
 
     loop.appendInstructions.clear();
+    loop.toStringLengthChains.clear();
     temp.clear();
     exit.toStringCall = nullptr;
-    exit.toStringLengthChains.clear();
 }
 
 bool SimplifyStringBuilder::HasAppendOrLengthUsersOnly(Inst *inst) const
@@ -511,6 +511,8 @@ bool IsCheckCastWithoutUsers(Inst *inst)
 bool SimplifyStringBuilder::HasPhiOrAppendOrLengthUsersOnly(Inst *inst, Marker appendInstructionVisited) const
 {
     MarkerHolder phiVisited {GetGraph()};
+    // Release clang-tidy-14 claims match.exit.toStringCall as nullable ignorring IsInstanceHoistable checks
+    // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
     auto fnCheckUser = [loop = inst->GetBasicBlock()->GetLoop(), appendInstructionVisited](auto &user) {
         bool sameLoop = user.GetInst()->GetBasicBlock()->GetLoop() == loop;
         bool isSaveState = user.GetInst()->IsSaveState();
@@ -564,6 +566,7 @@ bool SimplifyStringBuilder::IsInstanceHoistable(const ConcatenationLoopMatch &ma
 bool SimplifyStringBuilder::IsToStringHoistable(const ConcatenationLoopMatch &match,
                                                 Marker appendInstructionVisited) const
 {
+    ASSERT(match.exit.toStringCall != nullptr);
     return HasPhiOrAppendOrLengthUsersOnly(match.exit.toStringCall, appendInstructionVisited);
 }
 
@@ -844,7 +847,7 @@ void SimplifyStringBuilder::ReconnectStringBuilderCascades(const ConcatenationLo
 
 void SimplifyStringBuilder::ReconnectToStringLengthChains(const ConcatenationLoopMatch &match)
 {
-    if (match.exit.toStringLengthChains.empty()) {
+    if (match.loop.toStringLengthChains.empty()) {
         return;
     }
 
@@ -853,9 +856,14 @@ void SimplifyStringBuilder::ReconnectToStringLengthChains(const ConcatenationLoo
     auto lengthField = runtime->GetFieldStringBuilderLength(sbClass);
     auto loop = match.block->GetLoop();
 
-    for (auto &chain : match.exit.toStringLengthChains) {
+    MarkerHolder chainsVisited {GetGraph()};
+    for (auto &chain : match.loop.toStringLengthChains) {
         ASSERT(chain.toStringCallOrPhi == match.accValue);
         ASSERT(chain.nullCheckCall != nullptr);
+
+        if (chain.nullCheckCall->SetMarker(chainsVisited.GetMarker())) {
+            continue;
+        }
 
         auto checkLoop = chain.nullCheckCall->GetBasicBlock()->GetLoop();
         if (checkLoop != loop && !checkLoop->IsInside(loop)) {
@@ -1344,12 +1352,13 @@ void SimplifyStringBuilder::MatchStringBuilderUsage(Inst *instance, StringBuilde
             chain.lenArrayCall = SkipSingleUserCheckInstruction(userInst);
             chain.shrLengthShift = GetStringLengthCompressedShr(chain.lenArrayCall);
 
-            if (chain.lenArrayCall->IsMarked(lenArrayVisited.GetMarker())) {
+            if (chain.lenArrayCall->SetMarker(lenArrayVisited.GetMarker())) {
                 return false;
             }
-            chain.lenArrayCall->SetMarker(lenArrayVisited.GetMarker());
 
             usage.toStringLengthChains.push_back(chain);
+            COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "[.length] Chain has been added"
+                                             << " lenArrayCall=v" << chain.lenArrayCall->GetId();
             return false;
         };
 
@@ -1670,11 +1679,11 @@ bool SimplifyStringBuilder::ValidateTemporaryStringLengthPhis(const Concatenatio
 
     for (const auto &chain : usage.toStringLengthChains) {
         if (chain.toStringCallOrPhi != match.accValue) {
-            COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "[.length] Temporary instruction hoistment is not supported yet";
+            COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "[.length][reject] Hostment to non-acc is not supported";
             return false;
         }
         if (chain.nullCheckCall == nullptr) {
-            COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "[.length] LenArray w/o NullCheck is not supported yet";
+            COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "[.length][reject] LenArray w/o NullCheck is not supported";
             return false;
         }
     }
@@ -1694,6 +1703,15 @@ void SimplifyStringBuilder::MatchTemporaryInstructions(const StringBuilderUsage 
     temp.toStringCall = usage.toStringCalls[0];
     temp.instance = usage.instance;
     temp.ctorCall = usage.ctorCall;
+
+    if (!usage.toStringLengthChains.empty()) {
+        if (!ValidateTemporaryStringLengthPhis(match, usage)) {
+            match.Clear();
+            return;
+        }
+        std::copy(usage.toStringLengthChains.begin(), usage.toStringLengthChains.end(),
+                  std::back_inserter(match.loop.toStringLengthChains));
+    }
 
     for (auto appendInstruction : usage.appendInstructions) {
         bool isMatchStillValid =
@@ -1726,7 +1744,8 @@ Inst *SimplifyStringBuilder::MatchHoistableInstructions(const StringBuilderUsage
     match.preheader.ctorCall = usage.ctorCall;
     ASSERT(usage.toStringCalls.size() == 1);
     match.exit.toStringCall = usage.toStringCalls[0];
-    match.exit.toStringLengthChains = usage.toStringLengthChains;
+    ASSERT(match.loop.toStringLengthChains.empty());
+    match.loop.toStringLengthChains = usage.toStringLengthChains;
 
     for (auto &user : usage.instance->GetUsers()) {
         auto userInst = SkipSingleUserCheckInstruction(user.GetInst());
