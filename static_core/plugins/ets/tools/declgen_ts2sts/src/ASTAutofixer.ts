@@ -124,7 +124,8 @@ export class Autofixer {
         this[FaultID.NoPrivateMember].bind(this),
         this[FaultID.DefaultExport].bind(this),
         this[FaultID.NoETSKeyword].bind(this),
-        this[FaultID.RemoveLimitDecorator].bind(this)
+        this[FaultID.RemoveLimitDecorator].bind(this),
+        this[FaultID.NoOptionalMemberFunction].bind(this)
       ]
     ],
     [ts.SyntaxKind.MethodDeclaration, [this[FaultID.NoETSKeyword].bind(this)]],
@@ -1222,6 +1223,28 @@ export class Autofixer {
     });
     (node as any).illegalDecorators = filteredDecorators;
 
+    return node;
+  }
+
+  /**
+   * Rule: `arkts-no-optional-member-function`
+   */
+  private [FaultID.NoOptionalMemberFunction](node: ts.Node): ts.VisitResult<ts.Node> {
+    /**
+     * Member functions with the optional question token will no longer be supported in ArkTS 1.2.
+     * Remove such methods from class declarations.
+     */
+    if (ts.isClassDeclaration(node)) {
+      const updatedMembers = node.members.filter(isNotOptionalMemberFunction);
+      return this.context.factory.updateClassDeclaration(
+        node,
+        node.modifiers,
+        node.name,
+        node.typeParameters,
+        node.heritageClauses,
+        updatedMembers
+      );
+    }
     return node;
   }
 
@@ -2351,4 +2374,14 @@ function replaceEsObjectTypeName(node: ts.TypeReferenceNode, factory: ts.NodeFac
     factory.createIdentifier(JSValue),
     node.typeArguments
   );
+}
+  
+/**
+ * helper function to filter out optional(with question token) methods in class declaration.
+ */ 
+function isNotOptionalMemberFunction(member: ts.ClassElement): boolean {
+  if (ts.isMethodDeclaration(member) && member.questionToken) {
+    return false;
+  }
+  return true;
 }
