@@ -18,9 +18,7 @@ export default abstract class A{
     constructor(a: number) {
         this.a = a;
     }
-    abstract log(message: string): string {
-        return "log: " + message;
-    }
+    abstract logs(message: string): string;
 }
 
 export class B{

@@ -23,7 +23,7 @@ declare const b5: boolean;
 declare let b4: boolean;
 declare let b8: boolean;
 declare const b9 = "";
-declare const b10 = 0;
+declare const b10: number;
 declare let b12: string;
 declare let b13: number;
 declare let b15: string;

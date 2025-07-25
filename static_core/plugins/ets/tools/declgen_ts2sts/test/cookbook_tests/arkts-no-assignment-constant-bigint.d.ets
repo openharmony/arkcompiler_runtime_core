@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export declare const bin = 5, binBig: bigint;
-export declare const oct = 375, octBig: bigint;
-export declare const hex = 3083, hexBig: bigint;
-export declare const dec = 123, decBig: bigint;
+export declare const bin: number, binBig: bigint;
+export declare const oct: number, octBig: bigint;
+export declare const hex: number, hexBig: bigint;
+export declare const dec: number, decBig: bigint;
 export declare const largeBin: bigint;
 export declare const largeOct: bigint;
 export declare const largeDec: bigint;
