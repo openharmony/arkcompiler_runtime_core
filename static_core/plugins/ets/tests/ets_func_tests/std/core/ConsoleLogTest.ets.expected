@@ -29,3 +29,8 @@ null undefined 11 123 std.core.Object {}
 1 2
 37 37
 19.5 19.5
+escompat.ArrayBuffer {data: [1, 2, 3], byteLength: 3}
+escompat.ArrayBuffer {data: [], byteLength: 0}
+[object Object],[object Object]
+ConsoleLogTest.B {buf: escompat.ArrayBuffer {data: [1, 2, 3], byteLength: 3}} ConsoleLogTest.B {buf: escompat.ArrayBuffer {data: [4, 5], byteLength: 2}}
+escompat.ArrayBuffer {...}

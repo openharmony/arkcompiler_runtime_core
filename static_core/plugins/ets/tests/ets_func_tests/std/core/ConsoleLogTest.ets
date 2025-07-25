@@ -23,6 +23,13 @@ class A {
     }
 }
 
+class B {
+    buf: ArrayBuffer
+    constructor(b: ArrayBuffer) {
+        this.buf = b
+    }
+}
+
 function main() {
     // Basic values
     console.log("Simple string message");
@@ -62,4 +69,26 @@ function main() {
 
     console.log("%s %s", "37", 37)
     console.log("%s %s", "19.5", 19.5)
+    
+    // ArrayBuffer tests
+    const buf1 = new ArrayBuffer(3);
+    const view1 = new Uint8Array(buf1);
+    view1[0] = 1;
+    view1[1] = 2;
+    view1[2] = 3;
+
+    const buf2 = new ArrayBuffer(2);
+    const view2 = new Uint8Array(buf2);
+    view2[0] = 4;
+    view2[1] = 5;
+    
+    console.log(buf1); 
+    console.log(new ArrayBuffer(0)); 
+    console.log([new B(buf1), new B(buf2)]);
+    console.log(new B(buf1), new B(buf2));
+
+    const arrayBuffer = new ArrayBuffer(10);
+    const arrayBufferValue = reflect.Value.of(arrayBuffer);
+    const result = arrayBufferValue.toPrint(0).toString();
+    console.log(result);
 }

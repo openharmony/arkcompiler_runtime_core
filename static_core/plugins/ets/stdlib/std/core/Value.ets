@@ -513,6 +513,20 @@ export final class ClassValue extends reflect.Value {
     }
 
     public override toPrint(depth: int): string {
+        
+        if (this.typ.getName() == "escompat.ArrayBuffer") {
+            if (depth == 0) {
+                return "escompat.ArrayBuffer {...}";
+            }
+            const result = new StringBuilder("escompat.ArrayBuffer {");
+            const dataField = this.getFieldByName('data');
+            result.append("data: ").append(dataField.toPrint(depth - 1));
+            const byteLengthField = this.getFieldByName('_byteLength');
+            result.append(", byteLength: ").append(byteLengthField.toPrint(depth - 1));
+            result.append("}");
+            return result.toString();
+        }
+
         if (this.typ.getName() == "escompat.Date") {
             return new StringBuilder("Date: ").append("\"").append((this.data as Date).toISOString()).append("\"").toString()
         }

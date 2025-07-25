@@ -47,6 +47,14 @@ class TestClass {
     }
 }
 
+function jsonStringifyArrayBuffer(): void {
+    let emptyBuffer = new ArrayBuffer(0);
+    arktest.assertEQ('{}', JSON.stringify(emptyBuffer));
+
+    let largeBuffer = new ArrayBuffer(1024);
+    arktest.assertEQ('{}', JSON.stringify(largeBuffer));
+}
+
  function jsonStringifyUint8Array(): void {
     let value: Uint8Array = Uint8Array.of(UINT8_MIN - 1, UINT8_MIN, UINT8_MAX, UINT8_MAX + 1);
     arktest.assertEQ('{"0":255,"1":0,"2":255,"3":0}', JSON.stringify(value));
@@ -311,6 +319,7 @@ function jsonStringifyEscapeCharacter(): void {
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("Json stringify for ArrayLike tests ")
+    suite.addTest('JSON.stringify for ArrayBuffer', jsonStringifyArrayBuffer);
     suite.addTest('JSON.stringify for Uint8Array', jsonStringifyUint8Array)
     suite.addTest('JSON.stringify for Int8Array', jsonStringifyInt8Array)
     suite.addTest('JSON.stringify for Uint8ClampedArray', jsonStringifyUint8ClampedArray)
