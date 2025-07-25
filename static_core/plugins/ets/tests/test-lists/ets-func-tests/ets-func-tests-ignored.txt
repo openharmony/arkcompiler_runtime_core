@@ -325,6 +325,9 @@ std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
 #25264
 std/core/ConsoleArrayTest.ets
 
+#27145
+std/core/dateformat/IntlDateFormatTest.ets
+
 #11468
 std/core/std_core_array_forEach_boolean_array_func_boolean.ets
 std/core/std_core_array_forEach_byte_array_func_byte.ets
@@ -488,7 +491,6 @@ spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-5.ets
 spec/03.types/References_Types/Bigint/bigint-arithmetic-inc-1.ets
 spec/03.types/References_Types/Bigint/bigint-arithmetic-inc-2.ets
 spec/03.types/References_Types/Bigint/bigint-arithmetic-inc.ets
-std/concurrency/AsyncLockTest.ets
 std/containers/concurrent_hash_map/ConcurrentHashMap_ForEachTest.ets
 std/containers/concurrent_hash_map/ConcurrentHashMap_PressureTest_Remove.ets
 std/core/TypeCreateErasedBodyTest.ets
