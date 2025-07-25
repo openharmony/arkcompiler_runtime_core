@@ -31,7 +31,7 @@ config("arkbase_public_config") {
   }
 }
 
-if (!ark_standalone_build) {
+if (!ark_standalone_build && !is_arkui_x) {
   ohos_shared_headers("arkbase_public_headers") {
     include_dirs = [
       "$ark_root/libpandabase",
