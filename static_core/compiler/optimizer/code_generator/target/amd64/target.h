@@ -462,7 +462,7 @@ private:
     void CopyImmToXmm(Reg xmm, T imm);
 
     void EncodeCompareAndSwap(Reg dst, Reg obj, const Reg *offset, Reg val, Reg newval);
-    void EncodeCmpFracWithDelta(Reg src);
+    void EncodeCmpFracWithZero(Reg src);
 
 private:
     Amd64LabelHolder *labels_ {nullptr};

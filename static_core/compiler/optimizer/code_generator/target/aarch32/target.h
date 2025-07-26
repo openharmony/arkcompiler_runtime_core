@@ -475,7 +475,7 @@ private:
     bool ComparePosImmHelper(Reg src, int64_t value, Condition *cc);
     Condition TrySwapCc(Condition cc, bool *swap);
     void CompareZeroHelper(Reg src, Condition *cc);
-    void EncodeCmpFracWithDelta(Reg src);
+    void EncodeCmpFracWithZero(Reg src);
     static inline constexpr int32_t MEM_BIG_OFFSET = 4095;
     static inline constexpr int32_t MEM_SMALL_OFFSET = 255;
     static inline constexpr int32_t VMEM_OFFSET = 1020;
