@@ -119,7 +119,6 @@ class TestSuiteConfigTest1(unittest.TestCase):
         expected = data_2.args
         compare_dicts(self, actual, expected)
 
-
     def test_wrong_config_names(self) -> None:
         args = [("panda-int1", "ets-runtime"), ("panda-int", "ets-runtime1"),
                 ("panda-int1", "ets-runtime1")]

@@ -19,7 +19,7 @@ parameters:
     build: ${PANDA_BUILD}
     enable-es2panda: True
     enable-verifier: True
-    es2panda-extra-args: []
+    es2panda-args: []
     es2panda-full-args:
         - "--arktsconfig=${parameters.arktsconfig}"
         - "--gen-stdlib=false"
@@ -27,7 +27,7 @@ parameters:
         - "--extension=${parameters.extension}"
         - "--opt-level=${parameters.opt-level}"
         - "--output=${parameters.output-file}"
-        - "${parameters.es2panda-extra-args}"
+        - "${parameters.es2panda-args}"
     es2panda-timeout: 30
     extension: sts
     load-runtimes: ets

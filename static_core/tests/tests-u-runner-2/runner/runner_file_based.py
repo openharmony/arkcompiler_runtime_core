@@ -96,7 +96,7 @@ class RunnerFileBased(Runner):
         _LOGGER.all("Processing run statistics")
 
         results = [result for result in self.results if result.passed is not None]
-        ignored_but_passed, ignored_still_failed, excluded_but_passed, excluded_still_failed, fail_lists = (
+        ignored_but_passed, _, excluded_but_passed, excluded_still_failed, fail_lists = (
             self.__results_analysis(results))
 
         total_tests = len(results) + self.excluded
