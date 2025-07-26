@@ -16,6 +16,11 @@ module:
   namespace: ark
 
 options:
+- name: version
+  type: bool
+  default: false
+  description: Print version and exit
+
 - name: boot-panda-files
   type: arg_list_t
   default:
@@ -176,7 +181,7 @@ options:
     - events
     - scheduler
     - coroutines
-  description: '[DEPRECATED] Option was moved to libpandabase/options.yaml, use base_options::Options instead of runtime options.'
+  description: '[DEPRECATED] Option was moved to libpandabase/utils/logger_options.yaml, use logger::Options instead of runtime options.'
   delimiter: ":"
   deprecated: true
 
@@ -376,7 +381,7 @@ options:
 - name: g1-region-garbage-rate-threshold
   type: uint32_t
   default: 52
-  description: Specify garbage rate threshold of a tenured region to be included into a mixed collection. 
+  description: Specify garbage rate threshold of a tenured region to be included into a mixed collection.
 
 - name: g1-number-of-tenured-regions-at-mixed-collection
   type: uint32_t
@@ -441,7 +446,7 @@ options:
   - warning
   - error
   - fatal
-  description: '[DEPRECATED] Option was moved to libpandabase/options.yaml, use base_options::Options instead of runtime options.'
+  description: '[DEPRECATED] Option was moved to libpandabase/utils/logger_options.yaml, use logger::Options instead of runtime options.'
   deprecated: true
 
 - name: log-stream
@@ -452,13 +457,13 @@ options:
   - file
   - fast-file
   - dummy
-  description: '[DEPRECATED] Option was moved to libpandabase/options.yaml, use base_options::Options instead of runtime options.'
+  description: '[DEPRECATED] Option was moved to libpandabase/utils/logger_options.yaml, use logger::Options instead of runtime options.'
   deprecated: true
 
 - name: log-file
   type: std::string
   default: ""
-  description: '[DEPRECATED] Option was moved to libpandabase/options.yaml, use base_options::Options instead of runtime options.'
+  description: '[DEPRECATED] Option was moved to libpandabase/utils/logger_options.yaml, use logger::Options instead of runtime options.'
   deprecated: true
 
 - name: gc-enable-tracing
@@ -520,7 +525,7 @@ options:
   delimiter: ':'
 
 - name: aot-verify-abs-path
-  type: bool 
+  type: bool
   default: true
   description: Use absolute path to panda files in Aot verification
 

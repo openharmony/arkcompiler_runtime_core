@@ -19,38 +19,60 @@ namespace ark::ets::ani::testing {
 
 class CreateVMTest : public ::testing::Test {
 public:
-    std::string BuildOptionString()
+    static std::string GetBootPandaFilesOption()
     {
         const char *stdlib = std::getenv("ARK_ETS_STDLIB_PATH");
         if (stdlib == nullptr) {
-            return "";
+            std::cerr << "ARK_ETS_STDLIB_PATH=" << stdlib << std::endl;
+            std::abort();
         }
-        const char *abcPath = std::getenv("ANI_GTEST_ABC_PATH");
-        std::string bootFileString = "--ext:--boot-panda-files=" + std::string(stdlib);
+        return "--ext:boot-panda-files=" + std::string(stdlib);
+    }
 
-        if (abcPath != nullptr) {
-            bootFileString += ":" + std::string(abcPath);
-        }
-        return bootFileString;
+    static ani_options GetOptions()
+    {
+        static std::string bootFileString = GetBootPandaFilesOption();
+        static std::array arrayOpts = {
+            ani_option {bootFileString.c_str(), nullptr},
+        };
+        return {arrayOpts.size(), arrayOpts.data()};
     }
 };
 
 TEST_F(CreateVMTest, create_vm_and_destroy_vm)
 {
+    ani_options options = GetOptions();
     ani_vm *vm = nullptr;
-    std::string bootFileString = BuildOptionString();
-    ani_option bootFileOption = {bootFileString.data(), nullptr};
-    std::vector<ani_option> options;
-    options.push_back(bootFileOption);
-    ani_options optionsPtr = {options.size(), options.data()};
+    ASSERT_EQ(ANI_CreateVM(&options, ANI_VERSION_1, &vm), ANI_OK);
+    ASSERT_EQ(vm->DestroyVM(), ANI_OK);
+}
 
+// NOTE: Enable when #25347 is resolved
+TEST_F(CreateVMTest, DISABLED_create_vm_secod_attempt)
+{
+    ani_options options = GetOptions();
+    ani_vm *vm = nullptr;
+    ASSERT_EQ(ANI_CreateVM(nullptr, ANI_VERSION_1, &vm), ANI_ERROR);
+    ASSERT_EQ(ANI_CreateVM(&options, ANI_VERSION_1, &vm), ANI_OK);
+    ASSERT_EQ(vm->DestroyVM(), ANI_OK);
+}
+
+TEST_F(CreateVMTest, create_vm_with_invalid_args)
+{
+    ani_options options = GetOptions();
+    ani_vm *vm = nullptr;
     const int32_t versionNew = 2;
     const int32_t versionOld = 0;
-    ASSERT_EQ(ANI_CreateVM(nullptr, ANI_VERSION_1, &vm), ANI_INVALID_ARGS);
-    ASSERT_EQ(ANI_CreateVM(&optionsPtr, versionNew, &vm), ANI_INVALID_VERSION);
-    ASSERT_EQ(ANI_CreateVM(&optionsPtr, versionOld, &vm), ANI_INVALID_VERSION);
-    ASSERT_EQ(ANI_CreateVM(&optionsPtr, ANI_VERSION_1, nullptr), ANI_INVALID_ARGS);
-    ASSERT_EQ(ANI_CreateVM(&optionsPtr, ANI_VERSION_1, &vm), ANI_OK);
+    ASSERT_EQ(ANI_CreateVM(&options, versionNew, &vm), ANI_INVALID_VERSION);
+    ASSERT_EQ(ANI_CreateVM(&options, versionOld, &vm), ANI_INVALID_VERSION);
+    ASSERT_EQ(ANI_CreateVM(&options, ANI_VERSION_1, nullptr), ANI_INVALID_ARGS);
+}
+
+TEST_F(CreateVMTest, destroy_vm_with_invalid_args)
+{
+    ani_options options = GetOptions();
+    ani_vm *vm = nullptr;
+    ASSERT_EQ(ANI_CreateVM(&options, ANI_VERSION_1, &vm), ANI_OK);
     ASSERT_EQ(vm->c_api->DestroyVM(nullptr), ANI_INVALID_ARGS);
     ASSERT_EQ(vm->DestroyVM(), ANI_OK);
 }

@@ -16,7 +16,7 @@
 #include "logger.h"
 #include "os/thread.h"
 #include "string_helpers.h"
-#include "generated/base_options.h"
+#include "generated/logger_options.h"
 
 #include <cstdarg>
 #include <cstdio>
@@ -34,7 +34,7 @@ thread_local int Logger::nesting_ = 0;
 
 #include <logger_impl_gen.inc>
 
-void Logger::Initialize(const base_options::Options &options, Formatter formatter)
+void Logger::Initialize(const logger::Options &options, Formatter formatter)
 {
     if (formatter == nullptr) {
         formatter = DefaultFormatter;

@@ -27,7 +27,7 @@
 #include "optimizer_run.h"
 #include "optimizer/ir_builder/ir_builder.h"
 #include "os/filesystem.h"
-#include "generated/base_options.h"
+#include "generated/logger_options.h"
 
 #include "paoc.h"
 #ifdef PANDA_LLVM_AOT
@@ -86,8 +86,8 @@ public:
         paoc_->paocOptions_->AddOptions(&paParser);
         ark::compiler::g_options.AddOptions(&paParser);
 
-        base_options::Options baseOptions("");
-        baseOptions.AddOptions((&paParser));
+        logger::Options loggerOptions("");
+        loggerOptions.AddOptions((&paParser));
 
         paoc_->AddExtraOptions(&paParser);
 
@@ -95,7 +95,7 @@ public:
             std::cerr << "Error: " << paParser.GetErrorString() << "\n";
             return -1;
         }
-        Logger::Initialize(baseOptions);
+        Logger::Initialize(loggerOptions);
         if (paoc_->paocOptions_->GetPaocPandaFiles().empty()) {
             paoc_->PrintUsage(paParser);
             return 1;

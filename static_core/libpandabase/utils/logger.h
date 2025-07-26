@@ -44,9 +44,9 @@ using FuncMobileLogPrint = int (*)(int, int, const char *, const char *, const c
 inline constexpr int LOG_ID_MAIN = 0;
 PANDA_PUBLIC_API extern FuncMobileLogPrint g_mlogBufPrint;
 
-namespace base_options {
+namespace logger {
 class Options;
-}  // namespace base_options
+}  // namespace logger
 
 class Logger {
 public:
@@ -141,7 +141,7 @@ public:
         NO_MOVE_SEMANTIC(Message);
     };
 
-    PANDA_PUBLIC_API static void Initialize(const base_options::Options &options, Formatter formatter = nullptr);
+    PANDA_PUBLIC_API static void Initialize(const logger::Options &options, Formatter formatter = nullptr);
 
     PANDA_PUBLIC_API static void InitializeFileLogging(const std::string &logFile, Level level,
                                                        ComponentMask componentMask, bool isFastLogging = false,

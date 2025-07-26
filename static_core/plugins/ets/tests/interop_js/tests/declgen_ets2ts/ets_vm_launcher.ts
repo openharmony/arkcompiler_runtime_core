@@ -41,7 +41,6 @@ if (etsVm === undefined) {
 const etsOpts = {
 	'panda-files': gtestAbcPath,
 	'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
-	'load-runtimes': 'ets',
 };
 
 if (!etsVm.createRuntime(etsOpts)) {

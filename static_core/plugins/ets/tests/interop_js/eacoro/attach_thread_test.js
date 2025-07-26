@@ -19,7 +19,6 @@ function runTest() {
     let test = requireNapiPreview('attach_thread_test_module', true);
 
     const etsVmRes = etsVm.createRuntime({
-        'load-runtimes': 'ets',
         'boot-panda-files': 'etsstdlib.abc:' + 'attach_test.abc',
         'gc-trigger-type': 'heap-trigger',
         'compiler-enable-jit': 'false',

@@ -50,8 +50,8 @@ public:
     std::vector<ani_option> GetExtraAniOptions() override
     {
         return {
-            ani_option {"--gc-type=g1-gc", nullptr},
-            ani_option {"--compiler-enable-jit", nullptr},
+            ani_option {"--ext:gc-type=g1-gc", nullptr},
+            ani_option {"--ext:compiler-enable-jit", nullptr},
         };
     }
 

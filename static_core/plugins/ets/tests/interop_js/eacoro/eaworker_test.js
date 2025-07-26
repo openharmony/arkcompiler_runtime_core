@@ -17,7 +17,6 @@ function runTest() {
     let etsVm = requireNapiPreview('ets_interop_js_napi', true);
 
     const etsVmRes = etsVm.createRuntime({
-        'load-runtimes': 'ets',
         'boot-panda-files': 'etsstdlib.abc:' + 'eaworker_test.abc',
         'gc-trigger-type': 'heap-trigger',
         'compiler-enable-jit': 'false',

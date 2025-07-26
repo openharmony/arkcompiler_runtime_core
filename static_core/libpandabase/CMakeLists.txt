@@ -527,7 +527,7 @@ if(PANDA_TARGET_32)
     )
 endif()
 
-panda_gen_options(TARGET arkbase_obj YAML_FILE options.yaml GENERATED_HEADER base_options.h)
+panda_gen_options(TARGET arkbase_obj YAML_FILE utils/logger_options.yaml GENERATED_HEADER logger_options.h)
 
 panda_add_sanitizers(TARGET arkbase_obj SANITIZERS ${PANDA_SANITIZERS_LIST})
 

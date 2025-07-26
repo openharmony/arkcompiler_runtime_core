@@ -11,5 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(logger)
-add_subdirectory(options_parser)
+ani_add_gtest(ani_test_ani_options_parser
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ani_options_parser_test.cpp
+)

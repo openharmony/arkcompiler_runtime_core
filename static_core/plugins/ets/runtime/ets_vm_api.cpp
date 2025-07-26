@@ -16,7 +16,7 @@
 #include <iostream>
 #include "ets_vm_api.h"
 #include "ets_vm.h"
-#include "generated/base_options.h"
+#include "generated/logger_options.h"
 
 #ifdef PANDA_TARGET_OHOS
 #include <hilog/log.h>
@@ -79,7 +79,7 @@ static void LogPrint([[maybe_unused]] int id, [[maybe_unused]] int level, [[mayb
 
 namespace ark::ets {
 
-bool CreateRuntime(std::function<bool(base_options::Options *, RuntimeOptions *)> const &addOptions)
+bool CreateRuntime(std::function<bool(logger::Options *, RuntimeOptions *)> const &addOptions)
 {
     auto runtimeOptions = ark::RuntimeOptions("app");
     runtimeOptions.SetLoadRuntimes({"ets"});
@@ -87,13 +87,13 @@ bool CreateRuntime(std::function<bool(base_options::Options *, RuntimeOptions *)
     runtimeOptions.SetMobileLog(reinterpret_cast<void *>(LogPrint));
 #endif
 
-    ark::base_options::Options baseOptions("app");
+    ark::logger::Options loggerOptions("app");
 
-    if (!addOptions(&baseOptions, &runtimeOptions)) {
+    if (!addOptions(&loggerOptions, &runtimeOptions)) {
         return false;
     }
 
-    ark::Logger::Initialize(baseOptions);
+    ark::Logger::Initialize(loggerOptions);
 
     LOG(DEBUG, RUNTIME) << "CreateRuntime";
 
@@ -121,9 +121,9 @@ bool CreateRuntime(std::function<bool(base_options::Options *, RuntimeOptions *)
 
 bool CreateRuntime(const std::string &stdlibAbc, const std::string &pathAbc, const bool useJit, const bool useAot)
 {
-    auto addOpts = [&stdlibAbc, &pathAbc, useJit, useAot](base_options::Options *baseOptions,
+    auto addOpts = [&stdlibAbc, &pathAbc, useJit, useAot](logger::Options *loggerOptions,
                                                           ark::RuntimeOptions *runtimeOptions) {
-        baseOptions->SetLogLevel("info");
+        loggerOptions->SetLogLevel("info");
         runtimeOptions->SetBootPandaFiles({stdlibAbc, pathAbc});
         runtimeOptions->SetPandaFiles({pathAbc});
         runtimeOptions->SetGcTriggerType("heap-trigger");

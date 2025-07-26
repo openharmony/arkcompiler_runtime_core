@@ -16,7 +16,9 @@
 #include "ani.h"
 #include "ani_options_parser.h"
 #include "ani_options.h"
-#include "generated/base_options.h"
+#include "compiler/compiler_logger.h"
+#include "compiler/compiler_options.h"
+#include "generated/logger_options.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
@@ -29,49 +31,21 @@
 extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version, ani_vm **result)
 {
     ANI_CHECK_RETURN_IF_EQ(result, nullptr, ANI_INVALID_ARGS);
-    ANI_CHECK_RETURN_IF_EQ(options, nullptr, ANI_INVALID_ARGS);
     if (!ark::ets::ani::IsVersionSupported(version)) {
         return ANI_INVALID_VERSION;
     }
 
-    size_t optionsSize = options->nr_options;
-    const ani_option *optionsArr = options->options;
-
-    ark::ets::ani::ANIOptionsParser aniParser(optionsSize, optionsArr);
-
-    // NOTE(konstanting, #23205): please note that compiler options are not supported by ANI_CreateVM.
-    // Compiler logging is not supported too. Please look at e.g. ets_vm_api.cpp:CreateRuntime
-    // and ets_vm_plugin.cpp:AddOptions for reference if you would like to support the mentioned
-    // features.
-    ark::ets::ani::ANIOptions aniOptions;
-    ark::base_options::Options baseOptions("");
-    ark::PandArgParser paParser;
-
-    // NOTE(konstanting, #23205): consider adding options validation (Validate() method)
-    // Add runtime options
-    baseOptions.AddOptions(&paParser);
-    aniOptions.AddOptions(&paParser);
-
-    if (!paParser.Parse(aniParser.GetRuntimeOptions())) {
-        std::string errorMessage = paParser.GetErrorString();
-        if (!errorMessage.empty() && errorMessage.back() == '\n') {
-            // Trim new line
-            errorMessage = std::string(errorMessage.c_str(), errorMessage.length() - 1);
-        }
-        ark::Logger::Initialize(baseOptions, aniParser.GetLoggerCallback());
-        LOG(ERROR, ANI) << errorMessage;
+    ark::ets::ani::OptionsParser parser;
+    auto errMsg = parser.Parse(options);
+    auto &aniOptions = parser.GetANIOptions();
+    ark::Logger::Initialize(parser.GetLoggerOptions(), aniOptions.GetLoggerCallback());
+    if (errMsg) {
+        LOG(ERROR, ANI) << errMsg.value();
         return ANI_ERROR;
     }
-    ark::Logger::Initialize(baseOptions, aniParser.GetLoggerCallback());
+    ark::compiler::CompilerLogger::SetComponents(ark::compiler::g_options.GetCompilerLog());
 
-#ifndef PANDA_ETS_INTEROP_JS
-    if (aniParser.IsInteropMode()) {
-        // no interop options allowed in the interop-free build!
-        return ANI_INVALID_ARGS;
-    }
-#endif /* PANDA_ETS_INTEROP_JS */
-
-    if (!ark::Runtime::Create(aniOptions)) {
+    if (!ark::Runtime::Create(parser.GetRuntimeOptions())) {
         LOG(ERROR, ANI) << "Cannot create runtime";
         return ANI_ERROR;
     }
@@ -79,8 +53,8 @@ extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version,
     auto coroutine = ark::ets::EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
 #ifdef PANDA_ETS_INTEROP_JS
-    if (aniParser.IsInteropMode()) {
-        bool created = ark::ets::interop::js::CreateMainInteropContext(coroutine, aniParser.GetInteropEnv());
+    if (aniOptions.IsInteropMode()) {
+        bool created = ark::ets::interop::js::CreateMainInteropContext(coroutine, aniOptions.GetInteropEnv());
         if (!created) {
             LOG(ERROR, ANI) << "Cannot create interop context";
             ark::Runtime::Destroy();

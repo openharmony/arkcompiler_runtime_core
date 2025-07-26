@@ -36,7 +36,7 @@ class AsyncWorkTest : public ark::ets::ani::testing::AniTest {};
 class MainWorkerAsyncWorkTest : public ark::ets::ani::testing::AniTest {
     std::vector<ani_option> GetExtraAniOptions() override
     {
-        return {ani_option {"--ext:ets.coroutine-workers-count=1", nullptr}};
+        return {ani_option {"--ext:coroutine-workers-count=1", nullptr}};
     }
 };
 

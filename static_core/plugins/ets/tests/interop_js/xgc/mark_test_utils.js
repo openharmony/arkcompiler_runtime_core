@@ -20,7 +20,6 @@ function init(module, stsFile) {
     gTestModule = requireNapiPreview(module, true);
 
     const etsVmRes = gEtsVm.createRuntime({
-        'load-runtimes': 'ets',
         'log-components': 'ets_interop_js',
         'boot-panda-files': 'etsstdlib.abc:' + stsFile,
         'gc-trigger-type': 'heap-trigger',

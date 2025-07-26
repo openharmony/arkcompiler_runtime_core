@@ -22,9 +22,9 @@
 #include "libpandabase/macros.h"
 
 namespace ark {
-namespace base_options {
+namespace logger {
 class Options;
-}  // namespace base_options
+}  // namespace logger
 
 class RuntimeOptions;
 }  // namespace ark
@@ -33,7 +33,7 @@ namespace ark::ets {
 
 PANDA_PUBLIC_API bool CreateRuntime(const std::string &stdlibAbc, const std::string &pathAbc, bool useJit, bool useAot);
 
-PANDA_PUBLIC_API bool CreateRuntime(std::function<bool(base_options::Options *, RuntimeOptions *)> const &addOptions);
+PANDA_PUBLIC_API bool CreateRuntime(std::function<bool(logger::Options *, RuntimeOptions *)> const &addOptions);
 
 PANDA_PUBLIC_API bool DestroyRuntime();
 
