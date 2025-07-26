@@ -467,7 +467,7 @@ private:
     void HandleChar(int32_t ch, const vixl::aarch64::Register &tmp, vixl::aarch64::Label *labelNotFound,
                     vixl::aarch64::Label *labelUncompressedString);
 
-    void EncodeCmpFracWithDelta(Reg src);
+    void EncodeCmpFracWithZero(Reg src);
 
 private:
     Aarch64LabelHolder *labels_ {nullptr};

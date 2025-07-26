@@ -47,6 +47,37 @@ function testBigIntToString5() {
     arktest.assertEQ(result, "a")
 }
 
+function testBigIntConstructor1() {
+    let n = BigInt(0x0102030405060708)
+    arktest.assertEQ(n, BigInt("72623859790382848"))
+
+    const errorcheck = (e: Error | Exception) => { 
+        return (e instanceof RangeError) &&
+            e.message === 'the number 72623859.79038285 cannot be converted to a BigInt because it is not an integer'
+        }
+    arktest.expectThrow((): void => { n = BigInt(72623859.790382848) }, errorcheck)
+}
+
+function testBigIntConstructor2() {
+    let n = BigInt(0x010203040506)
+    arktest.assertEQ(n,  BigInt("1108152157446"))
+    n = BigInt(72623859)
+    arktest.assertEQ(n, BigInt("72623859"))
+}
+
+function testBigIntConstructor3() {
+    let n = BigInt("72623859790382856")
+    arktest.assertEQ(n.toString(), "72623859790382856")
+    n = BigInt("72623859790382848")
+    arktest.assertEQ(n.toString(), "72623859790382848")
+}
+
+function testBigIntConstructor4() {
+    let n = BigInt(0.0)
+    arktest.assertEQ(n, BigInt("0.0"))
+    arktest.assertEQ(n.toString(), "0")
+}
+
 function main(): int {
 	const suite = new arktest.ArkTestsuite("test bigint toString by undefined")
 
@@ -55,6 +86,10 @@ function main(): int {
     suite.addTest("convert 0b10 to toString(undefined)", testBigIntToString3)
     suite.addTest("convert 0x10 to toString(undefined)", testBigIntToString4)
     suite.addTest("test union number|undefined as params for toString", testBigIntToString5)
+    suite.addTest("test large numbers and decimals", testBigIntConstructor1)
+    suite.addTest("test ordinary numbers", testBigIntConstructor2)
+    suite.addTest("test strings", testBigIntConstructor3)
+    suite.addTest("test 0.0", testBigIntConstructor4)
 
 	return suite.run()
 }

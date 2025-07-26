@@ -543,7 +543,7 @@ export final class Double extends Floating implements Comparable<Double> {
      */
     public static isInteger(v: double): boolean {
         // In the language % works as C fmod that differs with IEEE-754 % definition
-        return Double.compare(v % (1.0 as double), 0.0 as double);
+        return (abs(v % (1.0 as double)) == 0.0);
     }
 
     /**
