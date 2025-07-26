@@ -868,6 +868,10 @@ bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv)
     if (!CheckRuntimeOptions(mainCoro)) {
         return false;
     }
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
+    auto env = static_cast<napi_env>(napiEnv);
+    NAPI_CHECK_RETURN(napi_setup_hybrid_environment(env));
+#endif
     AppStateManager::Create();
     {
         ScopedManagedCodeThread sm(mainCoro);
@@ -892,10 +896,6 @@ bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv)
             ark::Runtime::Destroy();
         },
         nullptr);
-#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
-    auto env = static_cast<napi_env>(napiEnv);
-    NAPI_CHECK_RETURN(napi_setup_hybrid_environment(env));
-#endif
 #if defined(PANDA_TARGET_OHOS)
     return TryInitInteropInJsEnv(napiEnv);
 #else
