@@ -300,7 +300,7 @@ public:
     void EncodeAndNot(Reg dst, Reg src0, Reg src1) override;
     void EncodeOrNot(Reg dst, Reg src0, Reg src1) override;
 
-    void EncodeExtractBits(Reg dst, Reg src0, Imm imm1, Imm imm2) override;
+    void EncodeExtractBits(Reg dst, Reg src0, Imm imm1, Imm imm2, bool signExt) override;
 
     /* builtins-related encoders */
     void EncodeIsInf(Reg dst, Reg src) override;
