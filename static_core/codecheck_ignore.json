@@ -89,6 +89,7 @@
   "plugins/ets/tests/ets-common-tests/imported_modules_TL_exec_1A": "*",
   "plugins/ets/tests/ets-common-tests/imported_modules_TL_exec_2": "*",
   "plugins/ets/tests/ets-common-tests/imported_modules_TL_exec_2A": "*",
+  "plugins/ets/tests/ets-common-tests/infer_function_return_type": "*",
   "plugins/ets/tests/ets-common-tests/internal_interface_class_test": "*",
   "plugins/ets/tests/ets-common-tests/intrinsics": "*",
   "plugins/ets/tests/ets-common-tests/lambda": "*",
