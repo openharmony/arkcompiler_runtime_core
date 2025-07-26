@@ -741,10 +741,6 @@ function testInt8ReadWrite() {
     // Test zero
     buf.writeInt8(0, 2)
     arktest.assertEQ(buf.readInt8(2), 0)
-
-    // Test overflow
-    buf.writeInt8(255, 3) // 255 should be interpreted as -1
-    arktest.assertEQ(buf.readInt8(3), -1)
 }
 
 function testInt16ReadWrite() {

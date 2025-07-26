@@ -1496,6 +1496,10 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {int} Offset plus the number of bytes written
         */
         public writeBigInt64BE(value: bigint, offset: int = 0): int {
+            if (value < Long.MIN_VALUE || value > Long.MAX_VALUE) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. \
+It must be >= -(2n ** 63n) and <= 2n ** 63n. Received value is: ${value}`)
+           }
             this.getDataView().setBigInt64(offset.toInt(), value, false);
             return offset + 8;
         }
@@ -1508,6 +1512,10 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {int} Offset plus the number of bytes written
         */
         public writeBigInt64LE(value: bigint, offset: int = 0): int {
+            if (value < Long.MIN_VALUE || value > Long.MAX_VALUE) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. \
+It must be >= -(2n ** 63n) and <= 2n ** 63n. Received value is: ${value}`)
+            }
             this.getDataView().setBigInt64(offset.toInt(), value, true);
             return offset + 8;
         }
@@ -1520,6 +1528,10 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {int} Offset plus the number of bytes written
         */
         public writeBigUInt64BE(value: bigint, offset: int = 0): int {
+            if (value < 0 || value > ((1n << 64n) - 1n)) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. \
+It must be >= 0 and <= 2n ** 64n - 1n. Received value is: ${value}`)
+            }
             this.getDataView().setBigUint64(offset.toInt(), value, false);
             return offset + 8;
         }
@@ -1532,6 +1544,10 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {int} Offset plus the number of bytes written
         */
         public writeBigUInt64LE(value: bigint, offset: int = 0): int {
+            if (value < 0 || value > ((1n << 64n) - 1n)) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. \
+It must be >= 0 and <= 2n ** 64n - 1n. Received value is: ${value}`)
+            }
             this.getDataView().setBigUint64(offset.toInt(), value, true);
             return offset + 8;
         }
@@ -1592,6 +1608,10 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {int} Offset plus the number of bytes written
         */
         public writeInt8(value: long, offset: int = 0): int {
+            if (value < (-Math.pow(2, 7)) || value > (Math.pow(2, 7) - 1)) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. \
+It must be >= ${-Math.pow(2, 7)} and <= ${Math.pow(2, 7) - 1}. Received value is: ${value}`)
+            }
             this.getDataView().setInt8(offset.toInt(), value);
             return offset + 1;
         }
@@ -1604,6 +1624,10 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {int} Offset plus the number of bytes written
         */
         public writeInt16BE(value: long, offset: int = 0): int {
+            if (value < (-Math.pow(2, 15)) || value > (Math.pow(2, 15) - 1)) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. \
+It must be >= ${-Math.pow(2, 15)} and <= ${Math.pow(2, 15) - 1}. Received value is: ${value}`)
+            }
             this.getDataView().setInt16(offset.toInt(), value, false);
             return offset + 2;
         }
@@ -1616,6 +1640,10 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {int} Offset plus the number of bytes written
         */
         public writeInt16LE(value: long, offset: int = 0): int {
+            if (value < (-Math.pow(2, 15)) || value > (Math.pow(2, 15) - 1)) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. \
+It must be >= ${-Math.pow(2, 15)} and <= ${Math.pow(2, 15) - 1}. Received value is: ${value}`)
+            }
             this.getDataView().setInt16(offset.toInt(), value, true);
             return offset + 2;
         }
@@ -1628,6 +1656,10 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {int} Offset plus the number of bytes written
         */
         public writeInt32BE(value: long, offset: int = 0): int {
+            if (value < (-Math.pow(2, 31)) || value > (Math.pow(2, 31) - 1)) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. \
+It must be >= ${-Math.pow(2, 31)} and <= ${Math.pow(2, 31) - 1}. Received value is: ${value}`)
+            }
             this.getDataView().setInt32(offset.toInt(), value, false);
             return offset + 4;
         }
@@ -1640,6 +1672,10 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {int} Offset plus the number of bytes written
         */
         public writeInt32LE(value: long, offset: int = 0): int {
+            if (value < -(Math.pow(2, 31)) || value > (Math.pow(2, 31) - 1)) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. \
+It must be >= ${-Math.pow(2, 31)} and <= ${Math.pow(2, 31) - 1}. Received value is: ${value}`)
+            }
             this.getDataView().setInt32(offset.toInt(), value, true);
             return offset + 4;
         }
@@ -1652,6 +1688,10 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {int} Offset plus the number of bytes written
         */
         public writeUInt8(value: long, offset: int = 0): int {
+            if (value < 0 || value > 255) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. \
+It must be >= 0 and <= 255. Received value is: ${value}`)
+            }
             this.getDataView().setUint8(offset.toInt(), value);
             return offset + 1;
         }
@@ -1664,6 +1704,10 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {int} Offset plus the number of bytes written
         */
         public writeUInt16BE(value: long, offset: int = 0): int {
+            if (value < 0 || value > (Math.pow(2, 16) - 1)) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. \
+It must be >= 0 and <= ${Math.pow(2, 16) - 1}. Received value is: ${value}`)
+            }
             this.getDataView().setUint16(offset.toInt(), value, false);
             return offset + 2;
         }
@@ -1676,6 +1720,10 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {int} Offset plus the number of bytes written
         */
         public writeUInt16LE(value: long, offset: int = 0): int {
+            if (value < 0 || value > (Math.pow(2, 16) - 1)) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. \
+It must be >= 0 and <= ${Math.pow(2, 16) - 1}. Received value is: ${value}`)
+            }
             this.getDataView().setUint16(offset.toInt(), value, true);
             return offset + 2;
         }
@@ -1688,6 +1736,10 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {int} Offset plus the number of bytes written
         */
         public writeUInt32BE(value: long, offset: int = 0): int {
+            if (value < 0 || value > (Math.pow(2, 32) - 1)) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. \
+It must be >= 0 and <= ${Math.pow(2, 32) - 1}. Received value is: ${value}`)
+            }
             this.getDataView().setUint32(offset.toInt(), value, false);
             return offset + 4;
         }
@@ -1700,6 +1752,10 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @returns {int} Offset plus the number of bytes written
         */
         public writeUInt32LE(value: long, offset: int = 0): int {
+            if (value < 0 || value > (Math.pow(2, 32) - 1)) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. \
+It must be >= 0 and <= ${Math.pow(2, 32) - 1}. Received value is: ${value}`)
+            }
             this.getDataView().setUint32(offset.toInt(), value, true);
             return offset + 4;
         }
