@@ -22,6 +22,5 @@ desc: The keyword keyof is applied to the class or interface type (see Classes a
 {{case.decl}}
 
 function main() {
-  {{case.check|indent}}
 }
 {% endfor %}

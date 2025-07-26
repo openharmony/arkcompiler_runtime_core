@@ -14,16 +14,22 @@
 --- # create array using generic extend types.
 case_negative:
   - desc: Instantiated array T[] with object type.
-    logic: |-
+
+    decl:
       type MyArray<T> = Array<T>;
+
+    logic: |-
       let numArray: MyArray<number> = new Array<number>(1, 2, 3);
       let expectedException= (e: Error | Exception): boolean => {return (e instanceof RangeError)}
       numArray.length = 2;
       arktest.expectThrow(() => {numArray[2] = 2;}, expectedException)
 
   - desc: Instantiate built-in generic arrays(Array<T>) with object types.
-    logic: |-
+
+    decl:
       type MyArray<T> = Array<T>;
+
+    logic: |-
       let expectedException= (e: Error | Exception): boolean => {return (e instanceof RangeError)}
       let numArray: MyArray<number> = new Array<number>(1, 2, 3);
       arktest.expectThrow(() => {numArray.length = 5;}, expectedException)

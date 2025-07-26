@@ -14,23 +14,26 @@
 cases:
   - import: |-
         import {A} from "./module.ets"
+
+        type t = keyof A
     call: |-
         let n: never
-        type t = keyof A
         let a: t = n
 
   - import: |-
         import {B} from "./module.ets"
-    call: |-
+
         type t = keyof B
+    call: |-
         let a: t = "foo"
         let b: "foo" = a
         a = b
 
   - import: |-
         import {C} from "./module.ets"
-    call: |-
+
         type t = keyof C
+    call: |-
         let a: t = "foo"
         let b: "foo"|"bar" = a
         b = "bar"
@@ -38,8 +41,9 @@ cases:
 
   - import: |-
         import {AC} from "./module.ets"
-    call: |-
+
         type t = keyof AC
+    call: |-
         let a: t = "foo"
         let b: "foo"|"bar" = a
         b = "bar"
@@ -47,8 +51,9 @@ cases:
 
   - import: |-
         import {I} from "./module.ets"
-    call: |-
+
         type t = keyof I
+    call: |-
         let a: t = "foo"
         let b: "foo"|"bar" = a
         b = "bar"

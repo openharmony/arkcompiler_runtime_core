@@ -17,8 +17,9 @@
 desc: Test the same type of cancellation(number | number = number).
 ---*/
 
+type A = number | number;
+
 function main(): void {
-    type A = number | number;
     let a: A = 10;
 
     arktest.assertTrue(typeof a === "number");

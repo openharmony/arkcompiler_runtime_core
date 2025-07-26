@@ -17,8 +17,9 @@
 desc: Test the removal of number literal type hanged when the union type contains string("2" | string).
 ---*/
 
+type A = "2" | string;
+
 function main(): void {
-    type A = "2" | string;
     let a: A = "test";
     arktest.assertTrue(typeof a === "string");
 }

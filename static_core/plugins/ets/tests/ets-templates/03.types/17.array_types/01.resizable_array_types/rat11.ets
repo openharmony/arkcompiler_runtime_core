@@ -17,8 +17,9 @@
 desc: Test the creation of a two-dimensional array(string[][]).
 ---*/
 
+type Matrix = string[][];
+
 function main(): void {
-  type Matrix = string[][];
   let matrix: Matrix = [["aa", "bb"], ["cc", "dd"]];
   let a: string = matrix[0][1];
 

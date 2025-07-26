@@ -54,14 +54,14 @@ function testGetIndexOfKeyNonExisting() {
     arktest.assertEQ(lightWeightMap.getIndexOfKey("a"), -1);
 }
 
+interface ComplexKey {
+    name: string;
+    gender: string;
+    age: number;
+}
+
 //Test cases ported from ArkTS 1.0:LIGHTWEIGHTMAP_GETINDEXOFKEY_0300
 function testGetIndexOfKeyByComplexKey() {
-    interface ComplexKey {
-        name: string;
-        gender: string;
-        age: number;
-    }
-
     const key: ComplexKey = {
         name: 'squirrel',
         gender: 'male',

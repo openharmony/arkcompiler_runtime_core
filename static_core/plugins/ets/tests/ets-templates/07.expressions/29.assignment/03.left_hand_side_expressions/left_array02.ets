@@ -17,8 +17,9 @@
 desc: Left-hand expression testing - record element access testing.
 ---*/
 
+type Keys = 'key1' | 'key2' | 'key3'
+
 function main(): void {
-  type Keys = 'key1' | 'key2' | 'key3'
   let myRecord: Record<Keys, number> = {
     'key1': 1,
     'key2': 2,

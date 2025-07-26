@@ -17,10 +17,11 @@
 desc: Test joint type(number | string).
 ---*/
 
+type A = number;
+type B = string;
+type C = A | B;
+
 function main(): void {
-    type A = number;
-    type B = string;
-    type C = A | B;
 
     let a: C = 10;
     arktest.assertEQ(typeof a, "number");

@@ -13,13 +13,14 @@
 
 cases:
   - decl: |-
+      type t = keyof A
+
       class A {
         private _foo: int
         get foo(): int { return this._foo } 
         set foo(i: int) { this._foo = i } 
       }
     check: |-
-      type t = keyof A
       let a: t = "foo"
       arktest.assertEQ(typeof a, "string")
 
@@ -35,33 +36,36 @@ cases:
     tags: compile-only,negative
 
   - decl: |-
+      type t = keyof A
+
       abstract class A {
         private _foo: int
         get foo(): int { return this._foo } 
         set foo(i: int) { this._foo = i } 
       }
     check: |-
-      type t = keyof A
       let a: t = "foo"
       arktest.assertEQ(typeof a, "string")
 
   - decl: |-
+      type t = keyof A
+      
       final class A {
         private _foo: int
         get foo(): int { return this._foo } 
         set foo(i: int) { this._foo = i } 
       }
     check: |-
-      type t = keyof A
       let a: t = "foo"
       arktest.assertEQ(typeof a, "string")
 
   - decl: |-
+      type t = keyof I
+      
       interface I {
         get foo(): int 
         set foo(i: int) 
       }
     check: |-
-      type t = keyof I
       let a: t = "foo"
       arktest.assertEQ(typeof a, "string")
