@@ -15,23 +15,16 @@ limitations under the License.
 
 /*---
 desc: >-
-    A method is defined in a subinterface with the same name as the method in the superinterface.
-    If signatures are override-compatible (see Override-Compatible Signatures), then overriding is used.
-    Otherwise, overloading is used.
+    A method is defined in a subinterface with the same name as the method
+    in the superinterface. If signatures are override-compatible, then
+    overriding is used. Otherwise, a compile-time error occurs.
 tags: [compile-only, negative]
 ---*/
 
-let res: number = 0;
-
 interface I {
-  foo(i: Byte): void {
-    res = 1;
-  }
+    foo(i: byte): void
 }
 
 interface J<T> extends I {
-  foo(j: T): string {
-      res = 2;
-      return "str";
-  }
+    foo(j: T): string // CTE: Not override-compatible signature
 }

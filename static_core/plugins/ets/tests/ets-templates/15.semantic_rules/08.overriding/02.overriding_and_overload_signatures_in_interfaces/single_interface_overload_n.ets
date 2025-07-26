@@ -16,10 +16,7 @@ limitations under the License.
 {% for case in cases %}
 
 /*---
-desc: >-
-    Two methods with the same name are defined in the same interface.
-    If signatures are override-compatible (see Override-Compatible Signatures), A compile-time error occurs.
-    Otherwise, overloading is used.
+desc: Interface method overload signature cannot have a body.
 tags: [negative, compile-only]
 ---*/
 
@@ -27,11 +24,15 @@ type TPL = [boolean, string];
 type BoolFun = () => boolean;
 
 interface I {
-  foo(i: {{case}}) {}
-  foo(j: {{case}}) {}
+    foo(i: {{case}})
+    foo(j: {{case}}) {} // CTE: Interface body is not allowed
 }
 
-class A implements I {}
+class A implements I {
+    foo(...p: Any[]): Any {
+        return
+    }
+}
 
 function main(): void {
   let a: A = new A();

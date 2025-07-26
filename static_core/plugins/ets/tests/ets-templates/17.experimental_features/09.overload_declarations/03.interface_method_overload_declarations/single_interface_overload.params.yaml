@@ -15,8 +15,9 @@
 cases:
   - decl: |-
       interface I<F, G> {
-          foo(i: F) {}
-          foo(j: G) {}
+          foo1(i: F) {}
+          foo2(j: G) {}
+          overload foo { foo1, foo2 }
       }
       class A<F,G> implements I<F,G> {}
     call: |-
@@ -24,18 +25,20 @@ cases:
 
   - decl: |-
       interface I<F> {
-          foo(i: F) {}
-          foo(j: Number) {}
+          foo1(i: F) {}
+          foo2(j: Number) {}
+          overload foo { foo1, foo2 }
       }
       class A<F> implements I<F> {}
     call: |-
       new A<Byte>();
 
   - decl: |-
-      class G<T> {}  
+      class G<T> {}
       interface I<T> {
-          foo(i: G<T>) {}
-          foo(j: G<Number>) {}
+          foo1(i: G<T>) {}
+          foo2(j: G<Number>) {}
+          overload foo { foo1, foo2 }
       }
       class A<T> implements I<T> {}
     call: |-
@@ -43,8 +46,9 @@ cases:
 
   - decl: |-
       interface I {
-        foo(j: String) {}
-        foo(i: string) {}
+          foo1(j: String) {}
+          foo2(i: string) {}
+          overload foo { foo1, foo2 }
       }
       class A implements I {}
     call: |-
@@ -52,8 +56,9 @@ cases:
 
   - decl: |-
       interface I {
-        foo(j: number) {}
-        foo(i: double) {}
+          foo1(j: number) {}
+          foo2(i: double) {}
+          overload foo { foo1, foo2 }
       }
       class A implements I {}
     call: |-
@@ -61,10 +66,10 @@ cases:
 
   - decl: |-
       interface I {
-        foo(j: Number) {}
-        foo(i: Double) {}
+          foo1(j: Number) {}
+          foo2(i: Double) {}
+          overload foo { foo1, foo2 }
       }
       class A implements I {}
     call: |-
       new A();
-

@@ -16,9 +16,8 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: >-
-    A method is defined in a subinterface with the same name as the method in the superinterface.
-    If signatures are override-compatible (see Override-Compatible Signatures), then overriding is used.
-    Otherwise, overloading is used.
+    Interface method overload declaration allows declaring an overload
+    alias as an interface member for a set of interface methods.
 ---*/
 
 let res: number = 0;
@@ -35,9 +34,10 @@ class Gen2<T,S> {
 }
 
 interface IBase<T,S> {
-    {% for d in cases %}
-        foo({{d.arg}}) { res = 100 + {{d.res}}; }
-    {% endfor %}
+    {%- for d in cases %}
+    foo{{loop.index}}({{d.arg}}) { res = 100 + {{d.res}}; }
+    {%- endfor %}
+    overload foo { {% for d in cases %}foo{{loop.index}}{{ ", " if not loop.last }}{% endfor %} }
 }
 
 interface IDerived<T,S> extends IBase<T,S> {
@@ -52,7 +52,7 @@ class Derived<T,S> implements IDerived<T,S> {}
 function main(): void {
   let a = new Derived<Number, String>();
   let b = new Base<Number, String>();
-  let c: TPL = [ false, 1.2];
+  let c: TPL = [ false, 1.2f ];
   b.foo({{c.call}}); // base instance method call
   arktest.assertTrue(res == 100 + {{c.res}});
   a.foo({{c.call}}); // derived instance method call

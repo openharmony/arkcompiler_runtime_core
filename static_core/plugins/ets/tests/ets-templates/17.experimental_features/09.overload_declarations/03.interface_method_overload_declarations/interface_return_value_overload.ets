@@ -23,23 +23,25 @@ desc: >-
 let res: number = 0;
 
 interface I {
-  foo(i: byte): void {
+  foo1(i: byte): string {
     res = 1;
+    return "str";
   }
 }
 
 interface J extends I {
-  foo(j: int): number {
-      res = 2;
-      return 2.1;
+  foo2(j: int): number {
+    res = 2;
+    return 2.1;
   }
 }
 
-class A implements J {}
+class A implements J {
+   overload foo { foo1, foo2 }
+}
 
 function main(): void {
   let a: A = new A();
-  arktest.assertTrue(a.foo(1) == 2.1);
-  a.foo(1 as byte);
-  arktest.assertTrue(res == 1);
+  arktest.assertEQ( a.foo(1), 2.1 );
+  arktest.assertEQ( a.foo(1 as byte), "str" );
 }
