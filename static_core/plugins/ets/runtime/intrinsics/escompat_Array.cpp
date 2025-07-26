@@ -27,6 +27,7 @@
 #include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
 #include "plugins/ets/runtime/types/ets_base_enum.h"
 #include "plugins/ets/runtime/types/ets_escompat_array.h"
+#include "utils/utils.h"
 
 namespace ark::ets::intrinsics {
 
@@ -762,7 +763,7 @@ ark::ets::EtsString *EtsEscompatArrayJoinUtf8(EtsObjectArray *buffer, EtsInt &ac
         ProcessUtf8Element(element, buf, ptypes, pos, res.utf8Size);
 
         if (sepSize > 0) {
-            memcpy_s(&buf[pos], res.utf8Size, separatorHandle.GetPtr()->GetDataUtf8(), sepSize);
+            MemcpyUnsafe(&buf[pos], separatorHandle.GetPtr()->GetDataUtf8(), sepSize);
             pos += sepSize;
         }
     }

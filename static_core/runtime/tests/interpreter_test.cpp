@@ -47,6 +47,7 @@
 #include "runtime/include/coretypes/native_pointer.h"
 #include "runtime/tests/test_utils.h"
 #include "libpandabase/test_utilities.h"
+#include "utils/utils.h"
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -136,7 +137,7 @@ static std::pair<PandaUniquePtr<Method>, std::unique_ptr<const panda_file::File>
 
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
     auto buf = allocator->AllocArray<uint8_t>(data.size());
-    memcpy_s(buf, data.size(), data.data(), data.size());
+    MemcpyUnsafe(buf, data.data(), data.size());
 
     os::mem::ConstBytePtr ptr(reinterpret_cast<std::byte *>(buf), data.size(), [](std::byte *buffer, size_t) noexcept {
         auto a = Runtime::GetCurrent()->GetInternalAllocator();

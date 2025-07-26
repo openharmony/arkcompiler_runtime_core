@@ -18,6 +18,7 @@
 #include "runtime/include/runtime.h"
 #include "ets_type.h"
 #include "plugins/ets/runtime/ani/ani.h"
+#include "utils/utils.h"
 
 namespace ark::ets {
 
@@ -70,7 +71,7 @@ public:
                       std::is_same_v<T, std::nullptr_t>);
         static_assert(sizeof(T) <= sizeof(holder_));
 
-        memcpy_s(&holder_, sizeof(holder_), &value, sizeof(value));
+        MemcpyUnsafe(&holder_, &value, sizeof(value));
     }
 
     template <typename T>
@@ -80,7 +81,7 @@ public:
         static_assert(sizeof(T) <= sizeof(holder_));
 
         T tmp;
-        memcpy_s(&tmp, sizeof(T), &holder_, sizeof(T));
+        MemcpyUnsafe(&tmp, &holder_, sizeof(T));
         return tmp;
     }
 

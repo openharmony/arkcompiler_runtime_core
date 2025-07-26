@@ -23,6 +23,7 @@
 #include <type_traits>
 
 #include "utils/bit_helpers.h"
+#include "utils/utils.h"
 
 #if !PANDA_TARGET_WINDOWS
 #include "securec.h"
@@ -118,9 +119,7 @@ protected:
     void Write(uint32_t value, uint32_t offset, uint32_t width)
     {
         auto *dst = const_cast<uint8_t *>(GetPointer(static_cast<int32_t>(offset)));
-        if (memcpy_s(dst, width, &value, width) != 0) {
-            LOG(FATAL, PANDAFILE) << "Cannot write value : " << value << "at the dst offset : " << offset;
-        }
+        MemcpyUnsafe(dst, &value, width);
     }
 
     uint8_t ReadByte(size_t offset) const

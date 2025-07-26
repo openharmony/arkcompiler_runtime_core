@@ -26,6 +26,7 @@
 #include "runtime/mem/freelist_allocator-inl.h"
 #include "runtime/mem/alloc_config.h"
 #include "runtime/arch/memory_helpers.h"
+#include "utils/utils.h"
 
 namespace ark::mem {
 
@@ -500,7 +501,7 @@ void RegionAllocator<AllocConfigT, LockConfigT>::CompactSpecificRegion(Region *r
         }
         // Don't initialize memory for an object here because we will use memcpy anyway
         ASSERT(dst != nullptr);
-        memcpy_s(dst, objectSize, object, objectSize);
+        MemcpyUnsafe(dst, object, objectSize);
         // need to mark as alive moved object
         ASSERT(regionTo->GetLiveBitmap() != nullptr);
         regionTo->IncreaseAllocatedObjects();

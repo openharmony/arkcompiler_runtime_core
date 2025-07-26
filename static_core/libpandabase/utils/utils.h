@@ -19,6 +19,7 @@
 #include "libpandabase/macros.h"
 
 #include <limits>
+#include <algorithm>
 
 namespace ark {
 // ----------------------------------------------------------------------------
@@ -64,6 +65,11 @@ inline uint32_t HexValue(uint32_t c)
 }
 
 PANDA_PUBLIC_API uint32_t CountDigits(uint64_t v);
+
+ALWAYS_INLINE inline void MemcpyUnsafe(void *dest, const void *src, size_t length)
+{
+    std::copy_n(static_cast<const uint8_t *>(src), length, static_cast<uint8_t *>(dest));
+}
 
 }  // namespace ark
 #endif  // PANDA_LIBPANDABASE_UTILS_UTILS_H

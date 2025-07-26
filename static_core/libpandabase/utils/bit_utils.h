@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@
 #include <bitset>
 
 #include <securec.h>
+#include "utils/utils.h"
 
 #define PANDA_BIT_UTILS_CTZ __builtin_ctz      // NOLINT(cppcoreguidelines-macro-usage)
 #define PANDA_BIT_UTILS_CTZLL __builtin_ctzll  // NOLINT(cppcoreguidelines-macro-usage)
@@ -303,8 +304,8 @@ inline To bit_cast(const From &src) noexcept  // NOLINT(readability-identifier-n
                   "source and destination types must be trivially copyable");
     static_assert(std::is_trivially_constructible_v<To>, "destination type must be default constructible");
 
-    To dst;
-    memcpy_s(&dst, sizeof(To), &src, sizeof(To));
+    To dst {};
+    MemcpyUnsafe(&dst, &src, sizeof(To));
     return dst;
 }
 
@@ -312,8 +313,8 @@ template <class To, class From>
 inline To down_cast(const From &src) noexcept  // NOLINT(readability-identifier-naming)
 {
     static_assert(sizeof(To) <= sizeof(From), "size of the types must be lesser");
-    To dst;
-    memcpy_s(&dst, sizeof(To), &src, sizeof(To));
+    To dst {};
+    MemcpyUnsafe(&dst, &src, sizeof(To));
     return dst;
 }
 

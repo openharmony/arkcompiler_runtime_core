@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "libpandafile/panda_cache.h"
 
 #include "runtime/hotreload/hotreload.h"
+#include "utils/utils.h"
 
 namespace ark::hotreload {
 
@@ -547,13 +548,11 @@ static void UpdateTables(Class *runtimeClass, Class *tmpClass)
     Span<Method *> newImt = tmpClass->GetIMT();
     runtimeClass->SetITable(tmpClass->GetITable());
     tmpClass->SetITable(oldItable);
-    if (!oldVtable.empty() && memcpy_s(oldVtable.begin(), oldVtable.size() * sizeof(void *), newVtable.begin(),
-                                       oldVtable.size() * sizeof(void *)) != EOK) {
-        LOG(FATAL, RUNTIME) << __func__ << " memcpy_s failed";
+    if (!oldVtable.empty()) {
+        MemcpyUnsafe(oldVtable.begin(), newVtable.begin(), oldVtable.size() * sizeof(void *));
     }
-    if (!oldImt.empty() && memcpy_s(oldImt.begin(), oldImt.size() * sizeof(void *), newImt.begin(),
-                                    oldImt.size() * sizeof(void *)) != EOK) {
-        LOG(FATAL, RUNTIME) << __func__ << " memcpy_s failed";
+    if (!oldImt.empty()) {
+        MemcpyUnsafe(oldImt.begin(), newImt.begin(), oldImt.size() * sizeof(void *));
     }
 }
 
