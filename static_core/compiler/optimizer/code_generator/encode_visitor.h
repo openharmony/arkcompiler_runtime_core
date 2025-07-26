@@ -140,6 +140,8 @@ protected:
 
 #undef BINARY_SHIFTED_REGISTER_OPERATION_DEF
 
+    static void VisitExtractBitfield(GraphVisitor *visitor, Inst *inst);
+
     static void VisitShrI(GraphVisitor *visitor, Inst *inst);
 
     static void VisitCast(GraphVisitor *visitor, Inst *inst);

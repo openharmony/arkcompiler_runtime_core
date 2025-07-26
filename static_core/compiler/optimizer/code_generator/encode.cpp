@@ -435,7 +435,7 @@ void Encoder::EncodeMoveBitsRaw([[maybe_unused]] Reg dst, [[maybe_unused]] Reg s
 }
 
 void Encoder::EncodeExtractBits([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src, [[maybe_unused]] Imm imm1,
-                                [[maybe_unused]] Imm imm2)
+                                [[maybe_unused]] Imm imm2, [[maybe_unused]] bool signExt)
 {
     success_ = false;
 }
