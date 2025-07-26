@@ -7079,7 +7079,6 @@ const __ani_interaction_api INTERACTION_API = {
     Module_BindNativeFunctions,
     Namespace_BindNativeFunctions,
     Class_BindNativeMethods,
-    Class_BindStaticNativeMethods,
     Reference_Delete,
     EnsureEnoughReferences,
     CreateLocalScope,
@@ -7482,6 +7481,7 @@ const __ani_interaction_api INTERACTION_API = {
     Any_Call,
     Any_CallMethod,
     Any_New,
+    Class_BindStaticNativeMethods,
 };
 // clang-format on
 
