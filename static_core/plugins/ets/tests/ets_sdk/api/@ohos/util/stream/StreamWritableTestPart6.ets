@@ -28,6 +28,8 @@ function main(): int {
     suite.addTest("Writable remove all listeners", testWritableRemoveAllListeners);
     suite.addTest("Writable default encoding", testWritableDefaultEncoding);
     suite.addTest("Writable set default encoding", testWritableSetDefaultEncoding);
+    suite.addTest("Writable set default encoding undefined", testWritableSetDefaultEncodingUndefined);
+    suite.addTest("Writable set default encoding empty string", testWritableSetDefaultEncodingEmptyString);
     suite.addTest("Writable default encoding behavior", testWritableDefaultEncodingBehavior);
     suite.addTest("Writable drain event high watermark", testWritableDrainEventHighWatermark);
     suite.addTest("Writable drain event async high watermark", testWritableDrainEventAsyncHighWatermark);
@@ -229,6 +231,16 @@ function testWritableSetDefaultEncoding() {
     testWritable.setDefaultEncoding('ascii');
     testWritable.write('car');
     testWritable.end();
+}
+
+function testWritableSetDefaultEncodingUndefined() {
+    const x = new stream.Writable;
+    arktest.assertFalse(x.setDefaultEncoding());
+}
+
+function testWritableSetDefaultEncodingEmptyString() {
+    const x = new stream.Writable;
+    arktest.assertFalse(x.setDefaultEncoding(""));
 }
 
 // Test cases ported from ArkTS 1.0:testStreamWritableChangeDefaultEncoding003

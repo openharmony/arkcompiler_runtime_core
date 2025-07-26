@@ -890,7 +890,7 @@ export namespace stream {
          */
         setDefaultEncoding(encoding?: string): boolean {
             if (!encoding) {
-                encoding = DEFAULT_ENCODING;
+                return false;
             }
 
             const ret = this.setEncoding(encoding);
