@@ -17,8 +17,9 @@
 desc: The type of test type A when assigned to a word number.
 ---*/
 
+type A = A[] | number;
+
 function main(): void {
-    type A = A[] | number;
     let a: A = 12;
 
     arktest.assertTrue(typeof a === "number");

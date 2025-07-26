@@ -17,9 +17,9 @@
 desc: Test union type normalization(Any | string).
 ---*/
 
-function main(): void {
-    type A = Any | string;
+type A = Any | string;
 
+function main(): void {
     let a: A = ((): int => { return 5 })();
     arktest.assertTrue(a instanceof Int);
 }

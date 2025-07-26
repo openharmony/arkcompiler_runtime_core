@@ -19,6 +19,7 @@ desc: All statements in the module level must be enclosed in curly braces to for
 tags: [compile-only]
 ---*/
 
+enum Enum { v1, v2 }
 let x: int = 0;
 
 function check(): boolean {

@@ -17,19 +17,20 @@
 desc: Test joint type.
 ---*/
 
-function main(): void {
-    type T1 = string;
-    type T2 = number;
-    type T3 = boolean;
-    type T4 = null;
-    type UnionType = (T1 | T2) | (T3 | T4);
+type T1 = string;
+type T2 = number;
+type T3 = boolean;
+type T4 = null;
+type Union = (T1 | T2) | (T3 | T4);
 
-    let a: UnionType = "test";
+function main(): void {
+
+    let a: Union = "test";
     arktest.assertEQ(typeof a, "string");
-    let b: UnionType = 10;
+    let b: Union = 10;
     arktest.assertEQ(typeof b, "number");
-    let c: UnionType = true;
+    let c: Union = true;
     arktest.assertEQ(typeof c, "boolean");
-    let d: UnionType = null;
+    let d: Union = null;
     arktest.assertEQ(typeof d, "object");
 }

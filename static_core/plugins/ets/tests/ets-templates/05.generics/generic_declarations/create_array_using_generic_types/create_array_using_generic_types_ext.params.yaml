@@ -14,8 +14,9 @@
 --- # create array using generic extend types.
 case:
   - desc: Using type aliases to instantiate a multi-dimensional array T[].
-    logic: |-
+    decl: |-
       type MyArray<T> = T[][][];
+    logic: |-
       let arr: MyArray<number> = [[[1, 2, 3]]];
       arktest.assertEQ(arr[0][0][0], 1);
 
@@ -26,8 +27,8 @@ case:
           age: number;
           hobbies: string[];
       }
-    logic: |-
       type MyArray<T> = T[];
+    logic: |-
       let numArray: MyArray<Person> = [
         {
           name: "John",
@@ -52,8 +53,8 @@ case:
         age: number;
         hobbies: string[];
       }
-    logic: |-
       type MyArray<T> = Array<T>;
+    logic: |-
       let numArray: MyArray<Person> = new Array<Person>(
         {
           name: "John",
@@ -64,8 +65,9 @@ case:
       arktest.assertEQ(numArray[0].name, "John");
 
   - desc: Instantiate built-in generic arrays(Array<T>) with string[] type.
-    logic: |-
+    decl: |-
       type MyArray<T> = Array<T>;
+    logic: |-
       let numArray: MyArray<string[]> = new Array<string[]>(
         ["1", "2", "3"],
         ["4", "5", "6"],
@@ -93,8 +95,9 @@ case:
       arktest.assertEQ(emptyArray.length, 0);
 
   - desc: Instantiated array T[] with string[] type.
-    logic: |-
+    decl: |-
       type MyArray<T> = T[][];
+    logic: |-
       let numArray: MyArray<string> = [
         ["0", "1", "2"],
         ["3", "4", "5"],
@@ -110,8 +113,8 @@ case:
         age: number;
         hobbies: string[];
       }
-    logic: |-
       type MyArray<T> = T[];
+    logic: |-
       let numArray: MyArray<Person> = [
         {
           name: "John",

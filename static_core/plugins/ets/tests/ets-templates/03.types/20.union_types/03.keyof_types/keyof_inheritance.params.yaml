@@ -19,11 +19,11 @@ types:
 cases:
   # combinations of empty final/abstract/common classes
   - decl: |-
+      type t1 = keyof A
+      type t2 = keyof B
       class A {}
       class B extends A {}
     check: |-
-      type t1 = keyof A
-      type t2 = keyof B
       let a: t1|number
       let b: t2|number
       arktest.assertEQ(typeof a, 'number')
@@ -31,11 +31,11 @@ cases:
 
 
   - decl: |-
+      type t1 = keyof A
+      type t2 = keyof B
       abstract class A {}
       class B extends A {}
     check: |-
-      type t1 = keyof A
-      type t2 = keyof B
       let a: t1|number
       let b: t2|number
       arktest.assertEQ(typeof a, 'number')
@@ -43,11 +43,11 @@ cases:
 
 
   - decl: |-
+      type t1 = keyof A
+      type t2 = keyof B
       abstract class A {}
       abstract class B extends A {}
     check: |-
-      type t1 = keyof A
-      type t2 = keyof B
       let a: t1|number
       let b: t2|number
       arktest.assertEQ(typeof a, 'number')
@@ -55,11 +55,11 @@ cases:
 
 
   - decl: |-
+      type t1 = keyof A
+      type t2 = keyof B
       class A {}
       final class B extends A {}
     check: |-
-      type t1 = keyof A
-      type t2 = keyof B
       let a: t1|number
       let b: t2|number
       arktest.assertEQ(typeof a, 'number')
@@ -67,11 +67,11 @@ cases:
 
 
   - decl: |-
+      type t1 = keyof A
+      type t2 = keyof B
       abstract class A {}
       final class B extends A {}
     check: |-
-      type t1 = keyof A
-      type t2 = keyof B
       let a: t1|number
       let b: t2|number
       arktest.assertEQ(typeof a, 'number')
@@ -80,11 +80,11 @@ cases:
 
   # Interfaces
   - decl: |-
+      type t1 = keyof I
+      type t2 = keyof II
       interface I {}
       interface II extends I {}
     check: |-
-      type t1 = keyof I
-      type t2 = keyof II
       let a: t1|number
       let b: t2|number
       arktest.assertEQ(typeof a, 'number')
@@ -92,6 +92,8 @@ cases:
 
 
   - decl: |-
+      type t1 = keyof I
+      type t2 = keyof II
       interface I {
         foo: int
         jay()
@@ -101,9 +103,6 @@ cases:
         jay(i: number)
       }
     check: |-
-      type t1 = keyof I
-      type t2 = keyof II
-  
       let a: t1 = "foo"
       let b: "foo" | "jay" = a
       a = b
@@ -115,11 +114,11 @@ cases:
 
   # Interfaces + class
   - decl: |-
+      type t1 = keyof I
+      type t2 = keyof A
       interface I {}
       class A implements I {}
     check: |-
-      type t1 = keyof I
-      type t2 = keyof A
       let a: t1|number
       let b: t2|number
       arktest.assertEQ(typeof a, 'number')
@@ -127,6 +126,8 @@ cases:
 
 
   - decl: |-
+      type t1 = keyof I
+      type t2 = keyof A
       interface I {
         foo: int
         bar()
@@ -139,9 +140,6 @@ cases:
         foo = 1
       }
     check: |-
-      type t1 = keyof I
-      type t2 = keyof A
-      
       let a: t1 = "foo"
       let b: "foo" | "bar" = a
       a = b
@@ -152,6 +150,8 @@ cases:
 
 
   - decl: |-
+      type t1 = keyof I
+      type t2 = keyof A
       interface I {
         foo: int
         bar()
@@ -161,9 +161,6 @@ cases:
         foo1: boolean
       }
     check: |-
-      type t1 = keyof I
-      type t2 = keyof A
-      
       let a: t1 = "foo"
       let b: "foo" | "bar" = a
       a = b
@@ -174,6 +171,8 @@ cases:
 
 
   - decl: |-
+      type t1 = keyof I
+      type t2 = keyof A
       interface I {
         foo: int
         bar()
@@ -185,9 +184,6 @@ cases:
         foo = 2
       }
     check: |-
-      type t1 = keyof I
-      type t2 = keyof A
-      
       let a: t1 = "foo"
       let b: "foo" | "bar" = a
       a = b
@@ -199,14 +195,14 @@ cases:
 
 # empty interface|non-empty class
   - decl: |-
+      type t1 = keyof I
+      type t2 = keyof A
       interface I { }
       final class A implements I {
         bar() {}
         foo = true
       }
     check: |-
-      type t1 = keyof I
-      type t2 = keyof A
       let a: t1|number
       arktest.assertEQ(typeof a, 'number')
       
@@ -217,14 +213,14 @@ cases:
 
   # empty class|non-empty interface
   - decl: |-
+      type t1 = keyof I
+      type t2 = keyof A
       interface I {
         foo: int
         bar()
       }
       abstract class A implements I { }
     check: |-
-      type t1 = keyof I
-      type t2 = keyof A
       let a: t1 = "foo"
       let b: t2 = a
       a = b

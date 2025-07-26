@@ -91,13 +91,12 @@ function testModifyDuringIteration() {
     arktest.assertEQ(arr3[2], 4)
 }
 
+interface Person {
+    name: string;
+    age: number;
+}
 
 function testObjectArray() {
-    interface Person {
-        name: string;
-        age: number;
-    }
-    
     const people: Person[] = [
         { name: 'Alice', age: 25 },
         { name: 'Bob', age: 30 },

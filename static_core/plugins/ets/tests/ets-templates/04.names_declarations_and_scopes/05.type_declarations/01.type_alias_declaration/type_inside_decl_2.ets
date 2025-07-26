@@ -19,8 +19,9 @@
 
 class MyGenericClass<X> {}
 
+type TAlias = String | MyGenericClass<Boolean>
+
 function body() {
-    type TAlias = String | MyGenericClass<Boolean>
     let m = new MyGenericClass<Boolean>
     let x: TAlias = m
     x = 'Hello Alias'

@@ -326,9 +326,8 @@ function stringified_insertion_sort<T>(arr: FixedArray<T>, arrStr: FixedArray<bu
 function stringified_perform_merge<T>(arr: FixedArray<T>, arrStr: FixedArray<buffStr>, startIndex: int, midIndex: int, endIndex: int): void {
     const len1 = midIndex - startIndex + 1;
     const len2 = endIndex - midIndex;
-    type buffType = T | undefined
-    let left : FixedArray<buffType> = new buffType[len1]
-    let right : FixedArray<buffType> = new buffType[len2]
+    let left: (T | undefined)[] = new Array<T | undefined>(len1);
+    let right: (T | undefined)[] = new Array<T | undefined>(len2);
     let leftStr : FixedArray<buffStr> = new buffStr[len1]
     let rightStr : FixedArray<buffStr> = new buffStr[len2]
     for (let i = 0; i < len1; i++) {

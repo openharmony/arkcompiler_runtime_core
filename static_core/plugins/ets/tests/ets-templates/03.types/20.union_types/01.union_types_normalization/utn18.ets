@@ -17,9 +17,9 @@
 desc: Test union type normalization(Function | string).
 ---*/
 
-function main(): void {
-    type A = Function | string;
+type A = Function | string;
 
+function main(): void {
     let a: A = (): void => {};
     arktest.assertTrue(a instanceof Function);
 }

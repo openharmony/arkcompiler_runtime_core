@@ -17,8 +17,9 @@
 desc: TTest the same type of cancellation(boolean | boolean).
 ---*/
 
+type A = boolean | boolean;
+
 function main(): void {
-    type A = boolean | boolean;
     let a: A = true;
 
     arktest.assertTrue(typeof a === "boolean");

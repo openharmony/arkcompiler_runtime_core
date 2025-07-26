@@ -17,9 +17,10 @@
  desc: Declare type inside function, etc
  ---*/
 
+type TStringAlias = String | undefined
+
 class TypeHolder {
     body() {
-        type TStringAlias = String | undefined
         let x: TStringAlias = 'Hello Alias'
         const y: TStringAlias = x
         return x

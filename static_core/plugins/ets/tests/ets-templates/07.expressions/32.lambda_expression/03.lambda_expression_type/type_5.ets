@@ -19,15 +19,10 @@ tags:
 
 ---*/
 
+type TU = String | number
 
 function main() {
-
-    type TU = String | number
-
     let FO = (flag: boolean) => () => flag ? 'Hello World' : 12.0
-
     let F1 = FO(true)
     let x: TU = F1()
-
-
 }

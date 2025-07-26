@@ -53,14 +53,14 @@ function testGetNonExistingKeyWithSpaces() {
     arktest.assertEQ(lightWeightMap.get(" squirrel "), undefined);
 }
 
+interface ComplexValue {
+    name: string;
+    gender: string;
+    age: number;
+}
+
 //Test cases ported from ArkTS 1.0:LIGHTWEIGHTMAP_GET_0500
 function testGetComplexValue() {
-    interface ComplexValue {
-        name: string;
-        gender: string;
-        age: number;
-    }
-
     const value: ComplexValue = {
         name: 'squirrel',
         gender: 'male',
@@ -71,14 +71,14 @@ function testGetComplexValue() {
     arktest.assertEQ(lightWeightMap.get("squirrel"), value);
 }
 
+interface ComplexKey {
+    name: string;
+    gender: string;
+    age: number;
+}
+
 //Test cases ported from ArkTS 1.0:LIGHTWEIGHTMAP_GET_0700
 function testGetByComplexKey() {
-    interface ComplexKey {
-        name: string;
-        gender: string;
-        age: number;
-    }
-
     const key: ComplexKey = {
         name: 'squirrel',
         gender: 'male',

@@ -18,8 +18,9 @@ desc: Issue 21490. Function type arity
 tags: []
 ---*/
 
+type ft = (value?: String) => void
+
 function main(): int {
-    type ft = (value?: String) => void
     let f: ft = () => {}
     try {
         f();

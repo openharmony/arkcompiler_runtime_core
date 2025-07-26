@@ -17,8 +17,9 @@
 desc: Test whether the elements of the 3D array can be accessed normally.
 ---*/
 
+type ThreeDArray = string[][][];
+
 function main(): void {
-  type ThreeDArray = string[][][];
 
   let arrThree: ThreeDArray = [[["aa", "bb"], ["cc", "dd"]], [["ee", "ff"], ["gg", "hh"], ["ii", "jj"]]];
   let a = arrThree[0][1][0];

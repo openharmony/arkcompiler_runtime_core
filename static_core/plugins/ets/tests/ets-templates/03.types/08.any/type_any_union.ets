@@ -17,6 +17,8 @@ desc: Type Any
 ---*/
 
 class A {}
+
+type a = A | Any
+
 function main(): void {
-    type a = A | Any
 }
