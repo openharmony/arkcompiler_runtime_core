@@ -16,7 +16,7 @@ function m0F0() {
     (()=>{console.log(1)})();
     (()=>{console.log(2)})();
 }
-// function* m0F1() {}
+
 async function m0F2() {}
 class M0C0 {
     M0C0F0(){}
@@ -24,21 +24,15 @@ class M0C0 {
     async M0C0F2(){}
     // async *M0C0F3(){}
 }
-// enum M0E0 {}
 
-// namespace M0N0 {
-    function m0N0F0() {}
-    // function* m0N0F1() {}
-    async function m0N0F2() {}
-    class M0N0C0 {
-        M0N0C0F0(){}
-        static M0N0C0F1(){}
-        async M0N0C0F2(){}
-        // async *M0N0C0F3(){}
-    }
-    // enum M0N0E0 {}
+function m0N0F0() {}
 
-    // namespace M0N0N0 {
-        function m0N0N0F0() {}
-    // }
-// }
+async function m0N0F2() {}
+
+class M0N0C0 {
+    M0N0C0F0(){}
+    static M0N0C0F1(){}
+    async M0N0C0F2(){}
+}
+
+function m0N0N0F0() {}

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const moduleField: string = "Module Field";
+const moduleField: string = 'Module Field';
 
 interface InterfaceA {}
 
@@ -21,4 +21,4 @@ enum EnumA {
     RED,
 }
 
-namespace ns1 {}
+namespace Ns1 {}

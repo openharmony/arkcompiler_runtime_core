@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-function get_element(): FixedArray<int> {
+function getElement(): FixedArray<int> {
    return [1 as int, 0 as int];
 }
 
 function main() {
-    console.log(get_element()[0]);
+    console.log(getElement()[0]);
 }
