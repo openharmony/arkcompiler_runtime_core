@@ -231,7 +231,7 @@ class Checker
   end
 
   def init_run
-    Dir.mkdir(@cwd) unless File.exists?(@cwd)
+    Dir.mkdir(@cwd) unless File.exist?(@cwd)
     if @options.interop
       # module directory need only for interop with ArkJSVM
       module_dir_path = File.join(@cwd, "module")

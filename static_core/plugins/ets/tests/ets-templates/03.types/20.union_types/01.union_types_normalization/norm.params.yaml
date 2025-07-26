@@ -195,10 +195,10 @@ cases:
               arktest.assertTrue(v[0] == 'a' && v[1] == 'b')
       neg:
           - |-
-              let v: UT|undefined = [1.0, 2.0]
+              let v = [1.0, 2.0] as UT|undefined
               v[0] = 3.0  // CTE, readonly array
           - |-
-              let v: UT|undefined = ['a', 'b']
+              let v = ['a', 'b'] as UT|undefined
               v[1] = 'c'  // CTE, readonly array
 
     - decl: |-
@@ -214,7 +214,7 @@ cases:
               arktest.assertTrue(v instanceof UT && v.length == 3)
       neg:
           - |-
-              let v: UT = [new Object(), new Object()]
+              let v = [new Object(), new Object()] as UT
               v[0] = new Object()  // CTE, readonly array
 
     - decl: |-

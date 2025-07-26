@@ -21,7 +21,7 @@ tags: [compile-only, negative]
 ---*/
 
 function main() {
-  let y: readonly {{c.type}}[] = [{{c.use}}]
+  let y = [{{c.use}}] as readonly {{c.type}}[]
   y[0] = {{c.use}}
 }
 

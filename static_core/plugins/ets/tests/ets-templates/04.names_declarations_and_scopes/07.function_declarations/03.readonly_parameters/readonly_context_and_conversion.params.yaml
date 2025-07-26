@@ -23,7 +23,7 @@ cases:
         }
       use: |-
         function main() {
-            let ro: readonly int[] = [1, 2];
+            let ro = [1, 2] as readonly int[];
             foo(ro);
         }
 
@@ -35,7 +35,7 @@ cases:
         }
       use: |-
         function main() {
-            let ro: readonly Array<int> = new Array<int>(1);
+            let ro = new Array<int>(1) as ReadonlyArray<int>;
             foo(ro);
         }
 
@@ -54,7 +54,7 @@ cases:
 
   # read-write argument could be used as readonly.
     - tags: |-
-        compile-only, negative
+        compile-only
       decl: |-
         function foo(i: readonly int[]) {
             return 1;
