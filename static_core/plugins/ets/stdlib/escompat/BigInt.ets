@@ -373,7 +373,7 @@ export final class BigInt {
         if (bits < 0 || bits > Double.MAX_SAFE_INTEGER) {
             throw new RangeError('bits < 0 or bits > Double.MAX_SAFE_INTEGER')
         }
-        if (bits >= num.length() * BigInt.shiftSys) {
+        if (bits > num.length() * BigInt.shiftSys) {
             return num
         }
         // operatorLeftShift temporary has limitations to 255 on rhs

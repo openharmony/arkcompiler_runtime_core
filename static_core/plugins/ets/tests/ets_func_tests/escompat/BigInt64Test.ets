@@ -77,6 +77,34 @@ function testBigInt64ArraySetWithVals() {
     arktest.assertEQ(typedArray[6], -2n)
 }
 
+function testBigintAsIntN() {
+    const n1 = 12392320390239294724747283477947923471101032n
+    const n2 = 4294967295n
+    const n3 = 9223372036854775808n
+    const n4 = 9223372036854775809n
+
+    /* Testing asIntN() static method */
+    arktest.assertEQ(BigInt.asIntN(0, n1), 0n)
+    arktest.assertEQ(BigInt.asIntN(8, n1), 104n)
+    arktest.assertEQ(BigInt.asIntN(16, n1), 27752n)
+    arktest.assertEQ(BigInt.asIntN(32, n1), -737317784n)
+    arktest.assertEQ(BigInt.asIntN(64, n1), -7098331616643290008n)
+    arktest.assertEQ(BigInt.asIntN(32, n2), -1n)
+    arktest.assertEQ(BigInt.asIntN(64, n3), -9223372036854775808n)
+    arktest.assertEQ(BigInt.asIntN(64, n4), -9223372036854775807n)
+}
+
+function testBigintAsUIntN() {
+    const n1 = 12392320390239294724747283477947923471101032n
+
+    /* Testing asUintN() static method */
+    arktest.assertEQ(BigInt.asUintN(0, n1), 0n)
+    arktest.assertEQ(BigInt.asUintN(8, n1), 104n)
+    arktest.assertEQ(BigInt.asUintN(16, n1), 27752n)
+    arktest.assertEQ(BigInt.asUintN(32, n1), 3557649512n)
+    arktest.assertEQ(BigInt.asUintN(64, n1), 11348412457066261608n)
+}
+
 function main(): int {
 	const suite = new arktest.ArkTestsuite("test conversion between bigint and BigInt64Array")
 
@@ -88,6 +116,7 @@ function main(): int {
 	suite.addTest("convert -9223372036854775810n to BigInt64Array element", testBigInt64ArraySet6)
 	suite.addTest("convert -18446744073709551618n to BigInt64Array element", testBigInt64ArraySet7)
     suite.addTest("setBigInt64Array with vals", testBigInt64ArraySetWithVals)
-
+    suite.addTest("test bigint asIntN", testBigintAsIntN)
+    suite.addTest("test bigint asUIntN", testBigintAsUIntN)
 	return suite.run()
 }
