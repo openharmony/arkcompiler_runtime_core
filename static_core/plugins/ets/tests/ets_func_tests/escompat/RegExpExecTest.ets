@@ -30,7 +30,7 @@ function testRegExpExec1(): void {
     let arr = new RegExp("\x00").exec("\u0000");
     arktest.assertNE(arr, null);
     if (arr != null) {
-        arktest.assertEQ(arr[0].codePointAt(0), 0, "testRegExpExec1");
+        arktest.assertEQ(arr[0]!.codePointAt(0), 0, "testRegExpExec1");
     }
 }
 
@@ -38,10 +38,10 @@ function testRegExpExec2(): void {
     let arr = new RegExp("ab\x00g").exec("ab\u0000grfd");
     arktest.assertNE(arr, null);
     if (arr != null) {
-        arktest.assertEQ(arr[0].codePointAt(0), 97, "testRegExpExec2");
-        arktest.assertEQ(arr[0].codePointAt(1), 98, "testRegExpExec2");
-        arktest.assertEQ(arr[0].codePointAt(2), 0, "testRegExpExec2");
-        arktest.assertEQ(arr[0].codePointAt(3), 103, "testRegExpExec2");
+        arktest.assertEQ(arr[0]!.codePointAt(0), 97, "testRegExpExec2");
+        arktest.assertEQ(arr[0]!.codePointAt(1), 98, "testRegExpExec2");
+        arktest.assertEQ(arr[0]!.codePointAt(2), 0, "testRegExpExec2");
+        arktest.assertEQ(arr[0]!.codePointAt(3), 103, "testRegExpExec2");
     }
 }
 
@@ -49,8 +49,8 @@ function testRegExpExec3(): void {
     let arr = new RegExp("ab").exec("ab\u0000grfd");
     arktest.assertNE(arr, null);
     if (arr != null) {
-        arktest.assertEQ(arr[0].codePointAt(0), 97, "testRegExpExec3");
-        arktest.assertEQ(arr[0].codePointAt(1), 98, "testRegExpExec3");
+        arktest.assertEQ(arr[0]!.codePointAt(0), 97, "testRegExpExec3");
+        arktest.assertEQ(arr[0]!.codePointAt(1), 98, "testRegExpExec3");
     }
 }
 
@@ -68,7 +68,7 @@ function testRegExpExec6(): void {
     let arr = new RegExp("").exec("\u0000");
     arktest.assertNE(arr, null);
     if (arr != null) {
-        arktest.assertEQ(arr[0].length, 0, "testRegExpExec6");
+        arktest.assertEQ(arr[0]!.length, 0, "testRegExpExec6");
     }
 }
 
@@ -76,6 +76,6 @@ function testRegExpExec7(): void {
     let arr = new RegExp("").exec("");
     arktest.assertNE(arr, null);
     if (arr != null) {
-        arktest.assertEQ(arr[0].length, 0, "testRegExpExec7");
+        arktest.assertEQ(arr[0]!.length, 0, "testRegExpExec7");
     }
 }

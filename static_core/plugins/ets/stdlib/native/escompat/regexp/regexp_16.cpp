@@ -46,7 +46,7 @@ RegExpExecResult RegExp16::Execute(Pcre2Obj re, const uint16_t *str, int len, co
     auto *expr = reinterpret_cast<pcre2_code *>(re);
     auto *matchData = pcre2_match_data_create_from_pattern(expr, nullptr);
     std::vector<std::pair<bool, std::string>> captures;
-    std::vector<std::pair<uint32_t, uint32_t>> indices;
+    std::vector<std::pair<int32_t, int32_t>> indices;
     auto resultCount = pcre2_match(expr, str, len, startOffset, 0, matchData, nullptr);
     auto *ovector = pcre2_get_ovector_pointer(matchData);
 
@@ -63,8 +63,7 @@ RegExpExecResult RegExp16::Execute(Pcre2Obj re, const uint16_t *str, int len, co
         const auto substringStart = ovector[i];
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         const auto substringEnd = ovector[i + 1];
-        indices.emplace_back(
-            std::make_pair(static_cast<uint32_t>(substringStart), static_cast<uint32_t>(substringEnd)));
+        indices.emplace_back(std::make_pair(substringStart, substringEnd));
     }
 
     int nameCount;
@@ -82,7 +81,7 @@ RegExpExecResult RegExp16::Execute(Pcre2Obj re, const uint16_t *str, int len, co
     result.endIndex = ovector[1];
     auto groupCount = static_cast<size_t>(pcre2_get_ovector_count(matchData));
     while (result.indices.size() < groupCount) {
-        result.indices.emplace_back(std::make_pair(0, 0));
+        result.indices.emplace_back(std::make_pair(-1, -1));
     }
     pcre2_match_data_free(matchData);
     return result;
@@ -130,6 +129,105 @@ void RegExp16::ExtractGroups(Pcre2Obj expression, int count, RegExpExecResult &r
 void RegExp16::FreePcre2Object(Pcre2Obj re)
 {
     pcre2_code_free(reinterpret_cast<pcre2_code *>(re));
+}
+
+bool RegExp16::IsUncountable(const uint16_t *pattern, const size_t len, size_t index)
+{
+    uint8_t next = '\0';
+    if (index < len - 1U) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        next = static_cast<uint8_t>(pattern[index + 1U]);
+    }
+    uint8_t next2 = '\0';
+    if (index < len - 2U) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        next2 = static_cast<uint8_t>(pattern[index + 2U]);
+    }
+    uint8_t next3 = '\0';
+    if (index < len - 3U) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        next3 = static_cast<uint8_t>(pattern[index + 3U]);
+    }
+    const bool isLookahead = next == '?' && (next2 == '=' || next2 == '!');
+    const bool isLookbehind = next == '?' && next2 == '<' && (next3 == '=' || next3 == '!');
+    const bool isAtomicOrNonCapturing = next == '?' && (next2 == ':' || next2 == '>');
+    return isLookahead || isLookbehind || isAtomicOrNonCapturing;
+}
+
+void RegExp16::SanitizeGroupCaptureResults(const std::vector<bool> &countableGroups,
+                                           const std::map<size_t, size_t> &parentGroups, RegExpExecResult &result)
+{
+    auto groupId = 0U;
+    auto countedGroupId = groupId;
+    std::map<size_t, size_t> groupToCountableGroup;
+    for (size_t i = 1U; i < countableGroups.size(); i++) {
+        groupId++;
+        if (countableGroups[i]) {
+            countedGroupId++;
+            groupToCountableGroup[groupId] = countedGroupId;
+        }
+    }
+
+    for (const auto [childIndex, parentIndex] : parentGroups) {
+        if (childIndex >= countableGroups.size() || parentIndex >= countableGroups.size()) {
+            continue;
+        }
+        if (!countableGroups[childIndex] || !countableGroups[parentIndex]) {
+            continue;
+        }
+        const auto countedChildIndex = groupToCountableGroup[childIndex];
+        const auto countedResultIndex = groupToCountableGroup[parentIndex];
+        if (countedChildIndex >= result.indices.size() || countedResultIndex >= result.indices.size()) {
+            continue;
+        }
+        const auto &child = result.indices[countedChildIndex];
+        const auto &parent = result.indices[countedResultIndex];
+        if (child.first < parent.first || child.second > parent.second) {
+            result.indices[countedChildIndex].first = -1;
+            result.indices[countedChildIndex].second = -1;
+        }
+    }
+}
+
+void RegExp16::EraseExtraGroups(const uint16_t *pattern, const size_t len, RegExpExecResult &result)
+{
+    if (result.indices.size() < 2U) {
+        return;
+    }
+
+    // define that "group" is any sequence starting with '(' and ending with ')'
+    // while "countable/counted group" is any capturing group
+    size_t groupId = 0;
+    std::vector<size_t> currentGroups;
+    std::map<size_t, size_t> parentGroups;
+    std::vector<bool> countableGroups = {false};
+    uint8_t prev = '\0';
+    uint8_t prev2 = '\0';
+    bool inClass = false;
+    for (size_t i = 0U; i < len; i++) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        const auto &cur = static_cast<uint8_t>(pattern[i]);
+        const bool notSupressed = prev != '\\' || prev2 == '\\';
+        if (cur == '(' && notSupressed && !inClass) {
+            groupId++;
+            countableGroups.push_back(!IsUncountable(pattern, len, i));
+            currentGroups.push_back(groupId);
+            if (currentGroups.size() > 1) {
+                parentGroups[groupId] = currentGroups[currentGroups.size() - 2U];
+            }
+        } else if (cur == ')' && notSupressed && !inClass) {
+            if (!currentGroups.empty()) {
+                currentGroups.pop_back();
+            }
+        } else if (cur == '[' && notSupressed) {
+            inClass = true;
+        } else if (cur == ']' && notSupressed) {
+            inClass = false;
+        }
+        prev2 = prev;
+        prev = cur;
+    }
+    SanitizeGroupCaptureResults(countableGroups, parentGroups, result);
 }
 
 }  // namespace ark::ets::stdlib

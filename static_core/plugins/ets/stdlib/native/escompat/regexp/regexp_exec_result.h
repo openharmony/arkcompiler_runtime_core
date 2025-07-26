@@ -25,9 +25,9 @@
 namespace ark::ets::stdlib {
 
 struct RegExpExecResult {
-    using IndexPair = std::pair<uint32_t, uint32_t>;
-    uint32_t index = 0;
-    uint32_t endIndex = 0;
+    using IndexPair = std::pair<int32_t, int32_t>;
+    int32_t index = 0;
+    int32_t endIndex = 0;
     std::vector<IndexPair> indices;
     std::map<std::string, std::pair<int32_t, int32_t>> namedGroups;
     bool isSuccess = false;

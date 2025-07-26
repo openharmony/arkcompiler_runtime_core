@@ -33,7 +33,8 @@ public:
     }
     void SetFlags(const std::string &flagsStr);
     bool Compile(const std::vector<uint8_t> &pattern, const bool isUtf16, const int len);
-    RegExpExecResult Execute(const std::vector<uint8_t> &str, const int len, const int startOffset);
+    RegExpExecResult Execute(const std::vector<uint8_t> &pattern, const std::vector<uint8_t> &str, const int len,
+                             const int startOffset);
     void Destroy();
 
     bool IsUtf16() const
