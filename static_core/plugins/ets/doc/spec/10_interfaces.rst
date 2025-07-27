@@ -32,6 +32,7 @@ type that:
    interface type
    reference type
    instance variable
+   field
    property
    method
    member
@@ -42,7 +43,7 @@ type that:
 Creating an instance of interface type is not possible.
 
 An interface can be declared *direct extension* of one or more other
-interfaces. In that case the interface inherits all members from the interfaces
+interfaces. If so, the interface inherits all members from the interfaces
 it extends. Inherited members can be optionally overridden or hidden.
 
 A class can be declared to *directly implement* one or more interfaces. Any
@@ -58,31 +59,41 @@ support common behaviors without sharing a superclass.
    instantiation
    direct extension
    inheritance
+   inherited member
    extension
    superinterface
    direct implementation
    superclass
    object
    overriding
+   hiding
+   overridden member
+   hidden member
    shadowing
 
 The value of a variable declared *interface type* can be a reference to any
-instance of class that implements the specified interface. However, it is not
+instance of a class that implements the specified interface. However, it is not
 enough for a class to implement all methods of an interface. A class or one of
 its superclasses must be actually declared to implement an interface.
 Otherwise, the class is not considered to implement the interface.
 
-Interfaces are assignable to the class
-``Object`` (see :ref:`Assignability`).
+The rules of subtyping are discussed in detail in
+:ref:`Subtyping for Classes and Interfaces`.
 
 .. index::
+   value
    variable
    interface type
    interface
+   class
+   superclass
+   declaration
+   instance
    reference
    method
    implementation
    assignability
+   Object
 
 |
 
@@ -102,6 +113,7 @@ The syntax of *interface declarations* is presented below:
 .. index::
    interface declaration
    reference type
+   syntax
 
 .. code-block:: abnf
 
@@ -134,6 +146,7 @@ The scope of an interface declaration is defined in :ref:`Scopes`.
    class name
    generic interface
    generic declaration
+   shadowing
    scope
 
 |
@@ -160,6 +173,7 @@ the declared interface also implements all interfaces that the interface
    implementation
    declared interface
    interface
+   inheritance
 
 A :index:`compile-time error` occurs if:
 
@@ -173,6 +187,8 @@ A :index:`compile-time error` occurs if:
 
 .. index::
    extends clause
+   alias
+   non-interface type
    interface declaration
    interface type
    access
@@ -180,12 +196,9 @@ A :index:`compile-time error` occurs if:
    scope
    type argument
    parameterized type
-   type-parameterized declaration
+   generic instantiation
+   extends graph
    well-formed parameterized type
-   enumeration type
-   union type
-   function type
-   enum type
 
 If an interface declaration (possibly generic) ``I`` <``F``:sub:`1` ``,...,
 F``:sub:`n`> (:math:`n\geq{}0`) contains an ``extends`` clause, then the
@@ -209,10 +222,12 @@ All *direct superinterfaces* of the parameterized interface type ``I``
    generic
    generic declaration
    extends clause
+   interface type
+   declaration
    direct superinterface
-   compile-time error
    parameterized interface
    substitution
+   superinterface
 
 The transitive closure of the direct superinterface relationship results in
 the *superinterface* relationship.
@@ -228,7 +243,6 @@ Interface *K* is a superinterface of *I* if:
    transitive closure
    direct superinterface
    superinterface
-   compile-time error
    direct subinterface
    interface
    subinterface
@@ -241,6 +255,14 @@ A :index:`compile-time error` occurs if an interface depends on itself.
 If superinterfaces have default implementations (see
 :ref:`Default Interface Method Declarations`) for some method ``m``, then
 the following occurs:
+
+.. index::
+   interface
+   extension
+   Object
+   class
+   superinterface
+   implementation
 
 - Method ``m`` with an override-compatible signature (see
   :ref:`Override-Compatible Signatures`) declared within the current interface
@@ -327,6 +349,7 @@ The usage of annotations is discussed in :ref:`Using Annotations`.
    interface type
    property
    method
+   syntax
    interface declaration
    method declaration
    scope
@@ -354,12 +377,10 @@ interface has the same name as the ``Object``'s ``public`` method.
    interface
    interface member
    inheritance
+   interface declaration
    direct superinterface
    Object
    public method
-   signature
-   override-compatible signature
-   implementation
 
 An interface inherits all members of the interfaces it extends
 (see :ref:`Interface Inheritance`).
@@ -375,6 +396,8 @@ methods of an interface type must not be the same (see
    method
    declaration scope
    interface type
+   interface declaration
+   scope
 
 |
 
@@ -386,7 +409,7 @@ Interface Properties
 .. meta:
     frontend_status: Done
 
-*Interface property* can be defined in the form of a field or an accessor
+*Interface property* can be defined in the form of a field or an *accessor*
 (a getter or a setter).
 
 The syntax of *interface property* is presented below:
@@ -399,14 +422,23 @@ The syntax of *interface property* is presented below:
         | 'set' identifier '(' parameter ')'
         ;
 
+.. index::
+   interface
+   property
+   field
+   accessor
+   getter
+   setter
+   interface property
+   syntax
 
-An interface property is *required property* (see :ref:`Required Interface Properties`)
-if it is defined as
+An interface property is a *required property* (see
+:ref:`Required Interface Properties`) if it is one of the following:
 
-- Explicit getter or setter; or 
-- In form of a field and does not have a '``?``'.
+- Explicit *accessor*, i.e., a getter or a setter; or
+- Form of a field that has no '``?``'.
 
-Otherwise, it is an *optional property* (see :ref:`Optional Interface Properties`)
+Otherwise, it is an *optional property* (see :ref:`Optional Interface Properties`).
 
 If '``?``' is used after the name of the property, then the property type is
 semantically equivalent to ``type | undefined``.
@@ -422,6 +454,20 @@ semantically equivalent to ``type | undefined``.
         property: Type | undefined
     }
 
+.. index::
+   interface property
+   interface
+   property
+   required property
+   optional property
+   accessor
+   getter
+   setter
+   field
+   property type
+   semantic equivalent
+
+|
 
 .. _Required Interface Properties:
 
@@ -434,23 +480,28 @@ Required Interface Properties
 A *required property* defined in the form of a field implicitly
 defines the following:
 
--  A getter, if the property is marked as ``readonly``;
+-  Getter, if the property is marked as ``readonly``;
 -  Otherwise, both a getter and a setter with the same name.
 
 A type annotation for the field defines return type for the getter
 and type of parameter for the setter.
 
-As a result, the following definitions have the same effect:
+As a result, the following declarations have the same effect:
 
 .. index::
    property
    interface
+   required property
    interface property
    field
    accessor
    readonly
    getter
    setter
+   property
+   type annotation
+   parameter
+   return type
 
 .. code-block:: typescript
    :linenos:
@@ -472,12 +523,18 @@ an accessor notation (see :ref:`Implementing Required Interface Properties`,
 :ref:`Implementing Optional Interface Properties`).
 
 .. index::
+   string
    implementation
+   required property
+   accessor
    interface
    interface property
+   optional property
    field
-   accessor notation
+   notation
    property
+   entity
+   class
 
 |
 
@@ -491,21 +548,27 @@ Optional Interface Properties
 
 An *optional property* can be defined in two forms:
 
--  short form: ``identifier '?' ':' T``
--  explicit form: ``identifier ':' T | undefined``
+-  Short form ``identifier '?' ':' T``; or
+-  Explicit form ``identifier ':' T | undefined``.
+
 
 In both cases, ``identifier`` has effective type ``T | undefined``.
 
 The *optional property* implicitly defines the following:
 
+.. index::
+   optional property
+   interface property
+   identifier
+
 -  A getter (if the property is marked as ``readonly``);
 -  Otherwise, both a getter and a setter with the same name.
 
-Accessors have implicitly defined bodies, in this aspect they are
-similar to :ref:`Default Interface Method Declarations`.
+Accessors have implicitly defined bodies, in this aspect they are similar to
+:ref:`Default Interface Method Declarations`.
 However, |LANG| does not support explicitly defined accessors with bodies.
 
-The following definition:
+The following declaration:
 
 .. code-block:: typescript
    :linenos:
@@ -514,7 +577,7 @@ The following definition:
         num?: number
     }
     
-implicitly defines accessors:
+-- implicitly declares two accessors:
     
 .. code-block:: typescript
    :linenos:
@@ -524,11 +587,22 @@ implicitly defines accessors:
         set num(x: number | undefined) { throw new InvalidStoreAccessError }
     }
 
-
-If the default setter is not redefined in a class that implements the interface,
+If the default setter is not overridden in a class that implements the interface,
 ``InvalidStoreAccessError`` is thrown at attempt to set value of an optional
 property. See also :ref:`Implementing Optional Interface Properties`.
 
+.. index::
+   getter
+   setter
+   implementation
+   value
+   optional property
+   readonly
+   accessor
+   body
+   interface property
+
+|
 
 .. _Interface Method Declarations:
 
@@ -538,7 +612,7 @@ Interface Method Declarations
 .. meta:
     frontend_status: Done
 
-An ordinary *interface method declaration* specifies the method's name and
+An ordinary *interface method declaration* specifies the method name and
 signature, and is called *abstract*. Its implicit accessibility is ``public``.
 
 An interface method can have a body (see :ref:`Default Interface Method Declarations`)
@@ -554,6 +628,7 @@ as an experimental feature.
    signature
    interface method
    method body
+   abstract declaration
 
 The syntax of *interface method declaration* is presented below:
 
@@ -566,11 +641,9 @@ The syntax of *interface method declaration* is presented below:
 
 
 .. index::
-   public method
-   abstract method
-   interface
-   property
+   interface method declaration
    declaration
+   syntax
 
 |
 
@@ -591,10 +664,14 @@ be defined in a class that implements this interface.
 .. index::
    interface
    method
+   interface method
+   overload signature
+   name
+   implementation
 
 The order of textual declarations of overloaded signatures affects the manner
 a type check is performed at the call site, starting from the signature declared
-first and then proceeding in the proper sequence.
+first, and then proceeding in the proper sequence.
 
 The use of *overload signatures* is represented by the example below:
 
@@ -619,6 +696,10 @@ The use of *overload signatures* is represented by the example below:
 .. index::
    implementation body
    overload signatures
+   declaration
+   call site
+   signature
+   string
 
 |
 
@@ -643,7 +724,11 @@ Private methods defined in superinterfaces are not accessible (see
 .. index::
    inheritance
    interface
+   interface inheritance
    direct superinterface
+   overriding
+   overload signature
+   method
    superinterface
    semantic check
    private method
@@ -661,11 +746,14 @@ superinterface of *I*.
 
 .. index::
    interface
+   declaration
+   method
    private method
    compatibility
    instance method
    override-compatible signature
    access
+   access modifier
    superinterface
    private method
    signature

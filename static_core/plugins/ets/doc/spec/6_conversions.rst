@@ -29,6 +29,17 @@ Contexts can be of the following kinds:
 
 -  :ref:`Numeric Operator Contexts` with all numeric operators ('``+``', '``-``', etc.).
 
+.. index::
+   context
+   conversion
+   expression
+   string
+   assignment-like context
+   numeric operator
+   concatenation
+
+|
+
 
 .. _Assignment-like Contexts:
 
@@ -63,9 +74,12 @@ Assignment-like Contexts
    assignment-like context
    assignment context
    call context
+   variable declaration
    constant declaration
    constant
+   field
    field declaration
+   assignment
    assignment context
    expression value
    expression
@@ -74,9 +88,14 @@ Assignment-like Contexts
    constructor call
    lambda call
    method call
+   call context
+   type
+   type inference
+   interface field
    formal parameter
    array literal
    object literal
+   initial value
    value
    variable
    constant
@@ -122,8 +141,10 @@ occurs.
 
 .. index::
    expression type
+   expression
    target type
    assignability
+   conversion
 
 |
 
@@ -146,7 +167,7 @@ String Operator Contexts
 
 -  An operand of a floating-point type (see :ref:`Floating-Point Types and Operations`)
    is converted to type ``string`` with a value that represents the operand in
-   the decimal form (without the loss of information).
+   the decimal form without the loss of information.
 
 -  An operand of type ``boolean`` is converted to type ``string`` with the
    values ``true`` or ``false``.
@@ -161,8 +182,8 @@ String Operator Contexts
      - Operand ``null`` is converted to string ``null``.
      - Operand ``undefined`` is converted to string ``undefined``.
 
--  An operand of a reference type or of ``enum`` type with non-*string* values is converted by applying the
-   method call ``toString()``.
+-  An operand of a reference type or an ``enum`` type with non-*string* values
+   is converted by applying the method call ``toString()``.
 
 If there is no applicable conversion, then a :index:`compile-time error` occurs.
 
@@ -181,12 +202,14 @@ The target type in this context is always ``string``:
    floating-point type
    loss of information
    enumeration type
-   string
+   string type
+   nullish type
    boolean
    decimal
    string conversion
    operand null
    operator undefined
+   method call
    context
 
 .. code-block:: typescript
@@ -216,7 +239,7 @@ expression can be converted to target type ``T`` while the arithmetic
 operation for the values of type ``T`` is being defined.
 
 An operand of enumeration type (see :ref:`Enumerations`) can be used in
-the numeric context if values of this enumeration are of type ``int``.
+a numeric context if values of this enumeration are of type ``int``.
 The type of this operand is assumed to be ``int``.
 
 .. index::
@@ -231,7 +254,7 @@ The type of this operand is assumed to be ``int``.
    string context
    type int
 
-Numeric contexts actually take the following forms:
+Numeric contexts take the following forms:
 
 -  :ref:`Unary Expressions`;
 -  :ref:`Multiplicative Expressions`;
@@ -271,7 +294,7 @@ Implicit Conversions
    todo: Forbidden Conversion - note: Not exhaustively tested, should work
 
 This section describes all implicit conversions that are allowed. Each
-conversion is allowed in a particular context (for example, if an expression
+conversion is allowed in a particular context (e.g., if an expression
 that initializes a local variable is subject to :ref:`Assignment-like Contexts`,
 then the rules of this context define what specific conversion is implicitly
 chosen for the expression).
@@ -338,9 +361,9 @@ Widening Numeric Conversions
 | numeric constants|                                                      |
 +------------------+------------------------------------------------------+
 
-These conversions cause no loss of information about the overall magnitude of
-a numeric value. Some least significant bits of the value can be lost only in
-conversions from an integer type to a floating-point type if the IEEE 754
+The above conversions cause no loss of information about the overall magnitude
+of a numeric value. Some least significant bits of the value can be lost only
+in conversions from an integer type to a floating-point type if the IEEE 754
 *round-to-nearest* mode is used correctly. The resultant floating-point value
 is properly rounded to the integer value.
 
@@ -370,12 +393,13 @@ Enumeration to Constants Type Conversions
 .. meta:
     frontend_status: Done
 
--  A value of *enumeration* type without explicit base type is converted to
+The following conversions never cause a runtime error:
+
+-  Value of *enumeration* type without explicit base type is converted to
    the corresponding integer type (see :ref:`Enumerations`).
--  A value of *enumeration* type with explicit numeric base type
+-  Value of *enumeration* type with explicit numeric base type
    (see :ref:`Enumeration with Explicit Type`) is converted to the base type.
 
-These conversions never cause a runtime error.
 
 .. code-block:: typescript
    :linenos:
@@ -389,7 +413,10 @@ These conversions never cause a runtime error.
 
 .. index::
    enumeration type
+   numeric base type
+   base type
    conversion
+   integer type
    constant
    runtime error
    type int
@@ -406,7 +433,7 @@ a runtime error.
 
 .. index::
    enumeration type
-   type string
+   string type
    conversion
    constant
    runtime error
@@ -424,9 +451,10 @@ is converted to the declared type. This conversion never causes a runtime error.
 .. index::
    enumeration type
    conversion
+   value
    constant
+   type declaration
    runtime error
-
 
 |
 
@@ -440,17 +468,11 @@ Numeric Casting Conversions
 
 A *numeric casting conversion* occurs if the *target type* and the expression
 type are both ``numeric``.
-There are two contexts where *numeric casting conversion* is applied:
+The context for a *numeric casting conversion* is where conversion methods
+are used as defined in the standard library (see :ref:`Standard Library`).
 
--  Using conversion methods defined in the standard library
-   (see :ref:`Standard Library`);
-
--  Or, implicitly in the following arithmetic operations:
-   :ref:`Postfix Increment`, :ref:`Postfix Decrement`,
-   :ref:`Prefix Increment`, :ref:`Prefix Decrement`.
-
-The following example illustrates explicit use of
-methods for *numeric cast conversions*:
+The explicit use of methods for *numeric cast conversions* is represented in
+the following example:
 
 .. code-block-meta:
    not-subset
@@ -463,7 +485,7 @@ methods for *numeric cast conversions*:
     let pi = 3.14
     process_int(pi.toInt())
 
-These conversions never cause runtime errors.
+A numeric casting conversion never causes a runtime error.
 
 Numeric casting conversion of an operand of type ``double`` to target type
 ``float`` is performed in compliance with the IEEE 754 rounding rules. This
@@ -490,6 +512,14 @@ Double infinity is converted to the same-signed floating-point infinity.
    float infinity
    infinity double
    floating-point infinity
+   double infinity
+   double NaN
+   Nan
+   float NaN
+   IEEE 754
+   rounding rule
+   conversion
+   infinity
 
 A numeric conversion of a floating-point type operand to target types ``long``
 or ``int`` is performed by the following rules:
@@ -513,6 +543,10 @@ A numeric casting conversion of a floating-point type operand to types
 .. index::
    target type
    floating-point operand
+   floating-point type
+   long type
+   int type
+   NaN
    numeric conversion
    byte
    short
@@ -527,6 +561,7 @@ A numeric casting conversion of a floating-point type operand to types
    floating-point type
    floating-point infinity
    rounding rules
+   round-toward-zero
 
 A numeric casting conversion from an integer type to a smaller integer
 type ``I`` discards all bits except the *N* lowest ones, where *N* is
@@ -537,8 +572,9 @@ value can differ from that of the original value.
 .. index::
    IEEE 754
    floating-point type
+   numeric casting conversion
    operand
-   NaN
+   conversion
    positive infinity
    target type
    negative infinity

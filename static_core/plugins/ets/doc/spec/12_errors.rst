@@ -30,7 +30,7 @@ execution can be interrupted by the occurrence of situations of two kinds:
    not exist on a specified path, read permissions are not available,
    or else).
 
-The term *error* in this specification denotes all kinds of error situations.
+The term *error* in this Specification denotes all kinds of error situations.
 
 .. index::
    execution
@@ -43,6 +43,7 @@ The term *error* in this specification denotes all kinds of error situations.
    completion failure
    path
    read permission
+   error
 
 |
 
@@ -65,9 +66,12 @@ handling is provided below:
 
 .. index::
    error
+   base class
    class
    error handling
    derived class
+   standard library
+
 
 |
 
@@ -112,6 +116,7 @@ Errors are handled by using ``try`` statements (see :ref:`Try Statements`).
    throw statement
    error
    try statement
+   runtime system
 
 .. code-block:: typescript
    :linenos:

@@ -928,13 +928,13 @@ used in generic classes and interfaces for better flexibility. A
        $_set (index: K, value: V)
     }
 
-    class IndexableByNumber<V> extends Indexable<number, V> {
+    class IndexableByNumber<V> implements Indexable<number, V> {
        private data: V[] = []
        $_get (index: number): V { return this.data [index] }
        $_set (index: number, value: V) { this.data[index] = value }
     }
 
-    class IndexableByString<V> extends Indexable<string, V> {
+    class IndexableByString<V> implements Indexable<string, V> {
        private data = new Map<string, V>
        $_get (index: string): V { return this.data [index] }
        $_set (index: string, value: V) { this.data[index] = value }
@@ -1742,14 +1742,16 @@ Some or all overloaded functions can be ``native`` as follows:
         overload foo { foo1, foo2 }
     }
 
-If a subclass has an *overload declaration*, then the overload declaration
-can be overridden in a subclass. If a superclass has no *overload declaration*,
-then the declaration from the superclass in used.
-If a subclass has an *overload declaration*, then the overload declaration must
-list all methods overloaded in a superclass. Otherwise, a
+If a superclass has an *overload declaration*, then this declaration can be
+overridden in subclasses. If a subclass does not override an
+*overload declaration*, then the declaration from the superclass is inherited.
+
+If a subclass overrides an *overload declaration*, then this declaration must
+list all methods of the *overload declaration* in a superclass. Otherwise, a
 :index:`compile-time error` occurs.
-*Overload declaration* in a subclass can add new methods and change the order
-of methods.
+
+In addition, overriding *overload declaration* in a subclass can add include
+new methods and change the order of all methods in the *overload declaration*.
 
 An *overload alias* is used like an ordinary class method except that it is
 replaced in a call at compile time for one of overloaded methods that use the
@@ -1951,7 +1953,7 @@ all interface methods, except those having a default body (see
     class
     implementation
 
-An interface *overload alias* can be redefined in a class. In this case, the
+An interface *overload alias* can be overridden in a class. In this case, the
 *overload declaration* in the class must contain all methods overloaded in the
 interface. Otherwise, a :index:`compile-time error` occurs.
 
@@ -1967,12 +1969,12 @@ interface. Otherwise, a :index:`compile-time error` occurs.
    let d = new D()
    d.goo() // d.bar(undefined) is used, as it is the first appropriate method
 
-An *overload alias* defined in a superinterface can be redefined in a
+An *overload alias* defined in a superinterface can be overridden in a
 subinterface. In this case, the *overload declaration* of the subinterface
 must contain all methods overloaded in superinterface. Otherwise, a
 :index:`compile-time error` occurs.
 
-The *overload alias* defined in superinterfaces must be redefined
+The *overload alias* defined in superinterfaces must be overridden
 in a subinterface if several *overload declarations* for the same alias are
 inherited into the interface, otherwise a :index:`compile-time error` occurs.
 
@@ -2126,7 +2128,7 @@ Overload Alias Name Same As Function Name
 
 .. meta:
     frontend_status: None
-    
+
 A name of a top-level *overload declaration* can be the same as the name of an
 overloaded function. This situation is represented in the following example:
 
@@ -2182,7 +2184,7 @@ Overload Alias Name Same As Method Name
 
 .. meta:
     frontend_status: None
-    
+
 A name of a class or interface *overload declaration* can be the same as the
 name of an overloaded method. As one example, a method defined in a superclass
 can be used as one of overloaded methods in a same-name subclass *overload
@@ -2220,7 +2222,7 @@ declaration*. This important case is represented by the following example:
     subclass
 
 If names of a method and of an *overload alias* are the same, then the method
-can be overriden as usual:
+can be overridden as usual:
 
 .. code-block:: typescript
    :linenos:
@@ -2229,7 +2231,7 @@ can be overriden as usual:
         foo(n: number): number {/*body*/}
     }
     class D implements C {
-        foo(n: number): number {/*body*/} // method is overriden
+        foo(n: number): number {/*body*/} // method is overridden
         fooString(s: number): string {/*body*/}
 
         overload foo { foo, fooString }
@@ -2527,8 +2529,8 @@ explicitly specify constructor to call in :ref:`New Expressions`:
     new Temperature.Celsius(0)
     new Temperature.Fahrenheit(32)
 
-If a constructor has a name, then a direct application of the constructor in
-a new expression implies using the constructor name explicitly:
+If a constructor has a name, then using the constructor directly in a new
+expression implies using the constructor name explicitly:
 
 .. index::
    constructor name
@@ -2555,7 +2557,7 @@ reference (see :ref:`Named Reference`) in any expression.
 .. code-block:: typescript
    :linenos:
 
-    class X{ 
+    class X{
         constructor foo() {}
     }
     const func = X.foo // Compile-time error
@@ -2658,8 +2660,8 @@ Functions with Receiver
 
 *Function with receiver* declaration is a top-level declaration
 (see :ref:`Top-Level Declarations`) that looks almost the same as
-:ref:`Function Declarations`, except that the first parameter is mandatory,
-and the keyword ``this`` is used as its name.
+:ref:`Function Declarations`, except that the first mandatory parameter uses
+keyword ``this`` as its name.
 
 The syntax of *function with receiver* is presented below:
 
@@ -2687,12 +2689,16 @@ The syntax of *function with receiver* is presented below:
 
 *Function with receiver* can be called in the following two ways:
 
--  Making a function call (see :ref:`Function Call Expression`), and
-   passing the first parameter in the usual way;
+-  Making an ordinary function call (see :ref:`Function Call Expression`) when
+   the first argument is the receiver object;
 
--  Making a method call (see :ref:`Method Call Expression`) with
-   no argument provided for the first parameter, and using the
-   ``objectReference`` before the function name as the first argument.
+-  Making a method call (see :ref:`Method Call Expression`) when the receiver
+   is an ``objectReference`` before the function name passed as the first
+   argument of the call.
+
+All other arguments are handled in an ordinary manner.
+
+Note: that derived classes or interfaces may be used as receivers.
 
 .. index::
    function with receiver
@@ -2729,17 +2735,31 @@ The syntax of *function with receiver* is presented below:
 
       function demo (d: D) {
          // as a function call:
-         foo(d)
-         bar(d, 1)
+         foo1(d)
+         bar1(d, 1)
 
          // as a method call:
-         d.foo()
-         d.bar(1)
+         d.foo1()
+         d.bar1(1)
       }
 
+      class E implements D {}
+      const e = new E
+
+      // derived class is used as a receiver for a method call:
+      e.foo1()
+      e.bar1(1)
+
+      // the same as a function call:
+      foo1(e)
+      bar1(e, 1)
+ 
+
 The keyword ``this`` can be used inside a *function with receiver*. It
-corresponds to the first parameter. The type of ``this`` parameter is
-called the *receiver type* (see :ref:`Receiver Type`).
+corresponds to the first parameter. Otherwise, a :index:`compile-time error`
+occurs.
+The type of parameter ``this`` is called the *receiver type* (see
+:ref:`Receiver Type`).
 
 If the *receiver type* is a class or interface type, then ``private`` or
 ``protected`` members are not accessible (see :ref:`Accessible`) within the
@@ -2777,17 +2797,26 @@ body of a *function with receiver*. Only ``public`` members can be accessed:
 
 A :index:`compile-time error` occurs if the name of a *function with receiver*
 is the same as the name of an accessible (see :ref:`Accessible`) instance
-method or field of the receiver type, i.e., a *function with receiver* cannot
-overload a method defined for the receiver type:
+method or field of the receiver type:
 
 .. code-block:: typescript
    :linenos:
 
       class A {
-          foo () { ...  }
+          foo () { ... }
       }
+      function foo(this: A) { ... } // Compile-time error to prevent ambiguity below
+      (new A).foo()
 
-      function foo(this: A) { ... } // Compile-time error
+
+A :index:`compile-time error` occurs if the *function with receiver* is
+attempted to be called from the derived class varialbe:
+
+      class B extends A {}
+      const b = new B
+      b.foo()  // Compile-time error
+      foo (b)  // OK
+
 
 *Function with receiver* cannot have the same name as a global function.
 Otherwise, a :index:`compile-time error` occurs.
@@ -2831,7 +2860,7 @@ Otherwise, a :index:`compile-time error` occurs.
 *Functions with receiver* are dispatched statically. What function is being
 called is known at compile time based on the receiver type specified in the
 declaration. A *function with receiver* can be applied to the receiver of any
-derived class until it is redefined within the derived class:
+derived class until it is overridden within the derived class:
 
 .. code-block:: typescript
    :linenos:
@@ -2840,14 +2869,11 @@ derived class until it is redefined within the derived class:
       class Derived extends Base { ... }
 
       function foo(this: Base) { console.log ("Base.foo is called") }
-      function foo(this: Derived) { console.log ("Derived.foo is called") }
 
       let b: Base = new Base()
       b.foo() // `Base.foo is called` to be printed
       b = new Derived()
       b.foo() // `Base.foo is called` to be printed
-      let d: Derived = new Derived()
-      d.foo() // `Derived.foo is called` to be printed
 
 A *function with receiver* can be defined in a compilation unit other than the
 one that defines the receiver type. This is represented in the following
@@ -2930,8 +2956,10 @@ Accessors with Receiver
     frontend_status: Done
 
 *Accessor with receiver* declaration is a top-level declaration (see
-:ref:`Top-Level Declarations`) that can be used as class or interface accessor
-(see :ref:`Accessor Declarations`) for a specified receiver type:
+:ref:`Top-Level Declarations`) that can be used as class
+(see :ref:`Class Accessor Declarations`) or interface accessor
+(see :ref:`Interface Properties`)
+for a specified receiver type:
 
 The syntax of *accessor with receiver* is presented below:
 
@@ -3080,7 +3108,7 @@ The usual rule of function type compatibility (see
       f1 = f2 // ok
 
 The sole difference is that only an entity of *function type with receiver* can
-be used in :ref:`Method Call Expression`. The definitions from the previous
+be used in :ref:`Method Call Expression`. The declarations from the previous
 example are reused in the example below:
 
 .. code-block:: typescript
@@ -3417,12 +3445,12 @@ means that the call must use the default value of the parameter.
       bar() { console.log ("trailing lambda") }
       // function 'bar' receives last argument as the trailing lambda,
       bar(); { console.log ("that is the block code") }
-      // function 'bar' is called with 'f' parameter set to 'undefined'
+      // function 'bar' is called with parameter 'f' set to 'undefined'
 
       function goo(n: number) { ... }
 
-      goo() { console.log("aa") } // compile-time error
-      goo(); { console.log("aa") } // ok
+      goo() { console.log("aa") } // compile-time error as goo() requires an argument
+      goo(); { console.log("aa") } // compile-time error as goo() requires an argument
 
 
 If there are optional parameters in front of an optional function type parameter,
@@ -3454,6 +3482,136 @@ trailing lambda only. This implies that the value of all skipped arguments is
    method call
    string
    lambda
+
+|
+
+.. _Accessor Declarations:
+
+Accessor Declarations
+*********************
+
+.. meta:
+    frontend_status: None
+
+Accessors are top-level declarations that can be used as a replacement for
+variables to add additional control in the operations of getting or setting
+a variable value. An accessor can be either a getter or a setter.
+
+The syntax of *accessor declarations* is presented below:
+
+.. code-block:: abnf
+
+    accessorDeclaration:
+        'native'?
+        ( 'get' identifier '(' ')' returnType? block?
+        | 'set' identifier '(' parameter ')' block?
+        )
+        ;
+
+The modifier ``native`` indicates that the accessor is a *native accessor*
+(similarly to :ref:`Native Functions`).
+
+A non-native accessor must have a body.
+
+A :index:`compile-time error` occurs if:
+
+- Native accessor has a body; or
+- Non-native accessor has no body.
+
+A *get-accessor* (*getter*) must have an explicit return type and no parameters,
+or no return type at all on condition the type can be inferred from the getter
+body (see :ref:`Return Type Inference`).
+A *set-accessor* (*setter*) must have a single parameter and no return type.
+
+A :index:`compile-time error` occurs if:
+
+-  Getter or setter is used in a call expression (like a function);
+-  Getter return type cannot be inferred from the getter body; or
+-  *Set-accessor* (*setter*) has an optional parameter (see
+   :ref:`Optional Parameters`):
+
+Typical use of an accessor to control value setting is represented in the
+following example:
+
+.. code-block:: typescript
+   :linenos:
+
+    let saved_age = 0
+
+    export get age(): number { return saved_age }
+    export set age(a: number) {
+        if (a < 0) { throw new Error("wrong age") }
+        saved_age = a
+    }
+
+A getter and a setter, unlike functions, can have the same name
+as they are distinguishable by the place of usage:
+
+.. code-block:: typescript
+   :linenos:
+   
+   let _name = ""
+   get name(): string { return _name }
+   set name(x: string { _name = x }
+
+However, an accessor declaration must be distinguishable from other entities,
+so a :index:`compile-time error` occurs if:
+
+- an accessor has the same name as other entity in the scope;
+- two getters or two setters in the scope have the same name.
+
+.. code-block:: typescript
+   :linenos:
+   
+   let name = "Bob"
+   get name(): string { return "Alice" } // compile-time error
+
+No additional restrictions are imposed on signatures of the getter and
+the setter with the same name.
+
+.. code-block:: typescript
+   :linenos:
+   
+   set hashCode(x: string) {/*body*/}
+   get hashCode(): long {/*body*/} // ok
+
+The use of getters and setters looks like the use of variables.
+A :index:`compile-time error` occurs if:
+
+- Getter is used in the position of the *left-hand-side expression* in an
+  :ref:`Assignment`;
+- Setter is used to get a value.
+
+.. code-block:: typescript
+   :linenos:
+
+    get magicNumber(): number { return 42 }
+    set randomSeed(a: number) {}
+
+    console.log(maginNumber) // ok, getter is used
+    magicNumber = 15 // compile-time error, setter is not defined
+
+    randomSeed(42) // ok, setter is used
+    console.log(randomSeed) // compile-time error, getter is not defined
+
+Accessors can be declared at all places where :ref:`Top-Level Declarations`
+including namespaces can be used:
+
+.. code-block:: typescript
+   :linenos:
+
+    namespace N {
+        let saved_age = 0
+
+        export get age(): number { return saved_age }
+        export set age(a: number) {
+            if (a < 0) { throw new Error("wrong age") }
+            saved_age = a
+        }
+    }
+
+    N.age = 18
+    console.log(N.age)
 
 |
 

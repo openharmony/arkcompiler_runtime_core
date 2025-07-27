@@ -18,11 +18,11 @@ Ambient Declarations
 .. meta:
     frontend_status: Done
 
-*Ambient declaration* specifies an entity that is declared somewhere else.
+*Ambient declaration* specifies an entity that is declared elsewhere.
 Ambient declarations:
 
--  Provide type information for entities included in a program from an external
-   source.
+-  Provide type information for entities included into a program from external
+   sources.
 -  Introduce no new entities like regular declarations do.
 -  Cannot include executable code, and thus have no initializers.
 
@@ -42,6 +42,10 @@ Ambient functions, methods, and constructors have no bodies.
    function
    method
    constructor
+   function body
+   method body
+   constructor body
+
 
 The syntax of *ambient declaration* is presented below:
 
@@ -56,6 +60,7 @@ The syntax of *ambient declaration* is presented below:
         | ambientInterfaceDeclaration
         | ambientNamespaceDeclaration
         | ambientAnnotationDeclaration
+        | ambientAccessorDeclaration
         | 'const'? enumDeclaration
         | typeAlias
         )
@@ -75,19 +80,21 @@ context that is already ambient:
     }
 
 .. index::
+   syntax
    ambient declaration
-   enumeration type
+   enumeration type declaration
    context
    modifier declare
    declare
+   declared type
    prefix
-   keyword const
+   const keyword
    compatibility
    ambient
 
 A :index:`compile-time error` occurs if an ambient function, constructor, or
-method is in the same compilation unit (see :ref:`Compilation Units`) with
-a non-ambient function, constructor, or method:
+method is found within the same compilation unit (see :ref:`Compilation Units`)
+as a non-ambient function, constructor, or method:
 
 .. code-block:: typescript
    :linenos:
@@ -113,6 +120,17 @@ can lead to the following situation:
     import {bar} from "Module"             // OK
     foo()
     bar()
+
+.. index::
+   ambient function
+   ambient constructor
+   ambient method
+   compilation unit
+   non-ambient function
+   non-ambient constructor
+   non-ambient method
+   import
+   import directive
 
 |
 
@@ -147,6 +165,8 @@ is available.
 
 .. index::
    ambient constant
+   constant declaration
+   syntax
    declaration
    type annotation
    initializer expression
@@ -178,10 +198,12 @@ A :index:`compile-time error` occurs if explicit return type for an ambient
 function declaration is not specified.
 
 .. index::
+   syntax
    ambient function declaration
    type annotation
    return type
    function
+   ambient function declaration
    function declaration
 
 .. code-block:: typescript
@@ -208,18 +230,18 @@ Ambient function declarations cannot specify function bodies.
    ambient function
    value
    parameter
+   optional parameter
    default value
    modifier async
-   async
+   async modifier
    function body
    ambient context
 
-
 |
 
-.. _Ambient Overlaod Function Declarations:
+.. _Ambient Overload Function Declarations:
 
-Ambient Overlaod Function Declarations
+Ambient Overload Function Declarations
 **************************************
 
 .. meta:
@@ -251,6 +273,13 @@ defined by the same rules.
    N.foo("a string")
    N.foo(5)
 
+.. index::
+   ambient overload function declaration
+   ambient overload function
+   function overload declaration
+   semantics
+   syntax
+
 |
 
 .. _Ambient Class Declarations:
@@ -277,7 +306,7 @@ The syntax of *ambient class declaration* is presented below:
         | ambientConstructorDeclaration
         | ambientMethodDeclaration
         | overloadMethodDeclaration
-        | ambientAccessorDeclaration
+        | ambientClassAccessorDeclaration
         | ambientIndexerDeclaration
         | ambientCallSignatureDeclaration
         | ambientIterableDeclaration
@@ -292,7 +321,9 @@ Ambient field declarations have no initializers.
 
 .. index::
    ambient field declaration
+   ambient class declaration
    initializer
+   syntax
 
 The syntax of *ambient field declaration* is presented below:
 
@@ -310,6 +341,16 @@ Ambient constructor, method, and accessor declarations have no bodies.
 
 Their syntax is presented below:
 
+
+.. index::
+   ambient field declaration
+   ambient class declaration
+   ambient constructor declaration
+   ambient method declaration
+   ambient accessor declaration
+   initializer declaration
+   syntax
+
 .. code-block:: abnf
 
     ambientConstructorDeclaration:
@@ -324,7 +365,7 @@ Their syntax is presented below:
         'static'
         ;
 
-    ambientAccessorDeclaration:
+    ambientClassAccessorDeclaration:
         ambientMethodModifier*
         ( 'get' identifier '(' ')' returnType
         | 'set' identifier '(' parameter ')'
@@ -351,12 +392,14 @@ same syntax and semantics (see :ref:`Class Method Overload Declarations`).
       a.foo(5)
    }
 
-
 .. index::
-   constructor
-   method
-   accessor
-   ambient accessor declaration
+   ambient method
+   overload
+   non-ambient method
+   syntax
+   semantics
+   method call
+   class method
 
 |
 
@@ -379,13 +422,13 @@ The syntax of *ambient indexer declaration* is presented below:
         'readonly'? '[' identifier ':' type ']' returnType
         ;
 .. index::
+   ambient indexer
    ambient indexer declaration
    indexing
    class instance
    ambient context
+   syntax
    compatibility
-   restriction
-   ambient class declaration
 
 The use of *ambient indexer declarations* is represented in the example below:
 
@@ -412,6 +455,8 @@ The following restrictions apply:
 
 .. index::
    ambient indexer declaration
+   restriction
+   ambient class declaration
    ambient context
    ambient class
    implementation
@@ -458,7 +503,9 @@ in an ambient class declaration.
    callable type
    ambient context
    compatibility
+   syntax
    restriction
+   ambient class declaration
 
 |
 
@@ -493,7 +540,7 @@ The following restrictions apply:
    :linenos:
 
     declare class C {
-        [Symbol.iterator]: CIterator
+        [Symbol.iterator] (): CIterator
     }
 
 **Note**. *Ambient iterable declaration* is supported in ambient contexts only.
@@ -501,14 +548,20 @@ If written in |LANG|, ambient class implementation must conform to
 :ref:`Iterable Types`.
 
 .. index::
+   ambient iterable
    ambient iterable declaration
    class instance
+   ambient context
    iterable class instance
    ambient context
    compatibility
+   syntax
    return type
+   restriction
    implementation
    interface
+   ambient class
+   implementation
 
 |
 
@@ -544,6 +597,13 @@ The syntax of *ambient interface declaration* is presented below:
 *Ambient interface* can contain additional members in the same manner as
 an ambient class (see :ref:`Ambient Indexer`, and :ref:`Ambient Iterable`).
 
+.. index::
+   syntax
+   ambient interface
+   ambient interface declaration
+   ambient class
+   ambient indexer
+   ambient iterable
 
 If an interface method declaration is marked with the keyword ``default``, then
 a non-ambient interface must contain the default implementation for the method
@@ -570,12 +630,15 @@ as follows:
     class C3 implements I2 { foo() {} } // Class C3 is valid as foo() has implemenation
 
 
-
 .. index::
-   ambient interface
+   interface method
+   default keyword
+   non-ambient interface
+   runtime error
+   method
    ambient interface declaration
    ambient class
-   default method implementation
+   default implementation
 
 |
 
@@ -610,6 +673,7 @@ The syntax of *ambient namespace declaration* is presented below:
         | ambientClassDeclaration
         | ambientInterfaceDeclaration
         | ambientNamespaceDeclaration
+        | ambientAccessorDeclaration
         | 'const'? enumDeclaration
         | typeAlias
         )
@@ -636,14 +700,16 @@ accessed by using qualified names only.
 .. index::
    namespace
    ambient namespace
+   ambient namespace declaration
    entity
    compatibility
+   syntax
    platform API
    third-party library API
    ambient iterable declaration
-   qualified name
+   declared type
    access
-   keyword const
+   const keyword
    enumeration type declaration
    prefix
    declared type
@@ -674,6 +740,18 @@ all declarations and top-level statements of the current module.
             let x: A.X = [] // Type A.X can be used
         }
     }
+
+A :index:`compile-time error` occurs if an *ambient namespace* declaration
+contains an *exportDirective* that refers to a declaration which is not a part
+of the namespace.
+
+.. code-block:: typescript
+   :linenos:
+
+    export declare namespace A {
+         export {foo} // compile-time error: no 'foo' in namespace 'A'
+    }
+    function foo() {}
 
 .. index::
    ambient namespace
@@ -710,12 +788,47 @@ declaration module is built (see :ref:`Declaration Modules`).
    entity
    implementation
    namespace declaration
+   namespace name
    declaration
    top-level declaration
    compilation unit
    ambient context
    nested namespace
+   embedded namespace
    declaration module
+
+|
+
+.. _Ambient Accessor Declarations:
+
+Ambient Accessor Declarations
+*****************************
+
+.. meta:
+    frontend_status: None
+    
+*Ambient accessor declaration* is the ambient version of :ref:`Accessor Declarations`.
+
+The syntax of *ambient accessor declarations* is presented below:
+
+.. code-block:: abnf
+
+    ambientAccessorDeclaration:
+        ( 'get' identifier '(' ')' returnType
+        | 'set' identifier '(' parameter ')' 
+        )
+        ;
+
+A compile-time error occurs if explicit return type for an ambient getter
+declaration is not specified.
+
+.. code-block:: typescript
+   :linenos:
+
+    declare get name(): string // ok
+    declare get age() // compile-time error, return type must be specified
+
+See :ref:`Accessor Declarations` for details.
 
 .. raw:: pdf
 

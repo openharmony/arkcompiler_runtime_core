@@ -26,6 +26,7 @@ Contributors:
 - Huo Qingyi
 - Kanatov Alexey
 - Nedoria Aleksei
+- Olshevsky Vladimir
 - Pavlyuk Alexander
 - Pei Jiajun
 - Polyakov Alexander

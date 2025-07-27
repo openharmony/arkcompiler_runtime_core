@@ -21,7 +21,7 @@ Annotations
 *Annotation* is a special language element that changes the semantics of
 the declaration to which it is applied by adding metadata.
 
-The example below illustrates how an annotation is declared and used:
+Declaring and using an annotation is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -48,13 +48,16 @@ allowed between the character '``@``' and the name:
 .. index::
    annotation
    semantics
+   language element
    metadata
    declaration
    class declaration
    prefix
    space
+   white space
    line separator
    argument
+   name
 
 .. code-block::
    :linenos:
@@ -63,7 +66,7 @@ allowed between the character '``@``' and the name:
     @ ClassAuthor({authorName: "Bob"}) // compile-time error, space is forbidden
 
 A :index:`compile-time error` occurs if the annotation name is not accessible
-(see :ref:`Accessible`) at the place of usage. An annotation declaration can be
+(see :ref:`Accessible`) at the place of use. An annotation declaration can be
 exported and used in other compilation units.
 
 Multiple annotations can be applied to a single declaration:
@@ -81,6 +84,7 @@ Multiple annotations can be applied to a single declaration:
    accessibility
    annotation declaration
    compilation unit
+   declaration
 
 |
 
@@ -120,14 +124,20 @@ occurs if the value of this expression cannot be evaluated at compile time.
 
 .. index::
    annotation
+   declaration
    interface
-   keyword interface
+   interface keyword
    prefix
-   keyword export
+   export keyword
+   syntax
+   annotation declaration
    annotation field
+   declared entity
    constant expression
    compile time
    initializer
+   expression
+   value
    type
 
 *Annotation* must be defined at the top level. Otherwise, a
@@ -162,6 +172,7 @@ the annotation or used as an interface:
    annotation declaration
    interface
    entity
+   type
 
 |
 
@@ -190,9 +201,7 @@ an *annotation field*.
    type for annotation field
    numeric type
    boolean type
-   type boolean
-   string
-   type string
+   string type
    enumeration type
    array
    multidimensional array
@@ -219,7 +228,7 @@ and to define the values of annotation fields:
         '(' (objectLiteral | constantExpression)? ')'
         ;
 
-An annotation declaration is presented in the example below:
+An annotation declaration is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -247,7 +256,7 @@ a :index:`compile-time error` occurs.
    value
    expression
 
-The usage of annotation is presented in the example below. The annotations in
+The use of annotation is presented in the example below. The annotations in
 this example are applied to class declarations:
 
 .. code-block:: typescript
@@ -284,11 +293,15 @@ Annotations can be applied to the following:
    class declaration
    top-level declaration
    class
+   type
    interface
    method
    parameter
+   optional parameter
    lambda expression
+   lambda expression with receiver
    function
+   local declaration
 
 Otherwise, a :index:`compile-time error` occurs:
 
@@ -297,8 +310,8 @@ Otherwise, a :index:`compile-time error` occurs:
 
     function foo () @MyAnno() {} // wrong target for annotation
 
-Repeatable annotations are not supported, i.e., an annotation cannot be applied
-to an entity more than once:
+Repeatable annotations are not supported, i.e., an annotation can be applied
+to an entity no more than once:
 
 .. code-block:: typescript
    :linenos:
@@ -327,6 +340,8 @@ Otherwise, a :index:`compile-time error` occurs:
 
 .. index::
    annotation
+   repeatable annotation
+   entity
    array literal
    array type
    value
@@ -363,8 +378,10 @@ omitted after the annotation name:
    field
    array type
    annotation
+   syntax
    array literal
    parenthesis
+   property
    annotation name
 
 |
@@ -438,19 +455,20 @@ annotation is accessed by its qualified name:
     @ns.MyAnno
     class C {/*body*/}
 
+Unqualified import is also allowed:
+
 .. index::
    export
    import
    annotation
    annotation declaration
-   keyword export
+   export keyword
    import directive
+   export directive
    imported module
    qualified name
    access
    unqualified import
-
-Unqualified import is also allowed:
 
 .. code-block:: typescript
    :linenos:
@@ -480,14 +498,19 @@ Annotations are forbidden in the following cases:
 - Rename in import.
 
 .. index::
+   annotation
    export type
    import type
+   import annotation
+   export annotation
    annotation
+   notation
    type
    notation
    import annotation
    export default
    import default
+   renaming
 
 .. code-block:: typescript
    :linenos:
@@ -521,12 +544,14 @@ An ambient annotation and the annotation that implements it must be exactly
 identical, including field initialization:
 
 .. index::
+   syntax
    ambient annotation
    declaration
    annotation
    type
    runtime error
    field initialization
+   initialization
 
 .. code-block:: typescript
    :linenos:
@@ -580,6 +605,7 @@ the declaration that implements the ambient declaration:
 
 .. index::
    annotation declaration
+   initialization
    import
    annotation
    ambient declaration
@@ -608,8 +634,10 @@ An annotation that annotates a declaration of another annotation is called
 .. index::
    standard annotation
    annotation
+   standard annotation
    compiler
    built-in annotation
+   call
    semantics
    declaration
    meta-annotation
@@ -641,12 +669,14 @@ used as follows:
     class C {}
 
 .. index::
+   meta-annotation
    retention annotation
    standard annotation
    annotation
    declaration
    declaration annotation
    field
+   string type
 
 The value of this field determines at which point an annotation is used,
 and discarded after use.
@@ -717,6 +747,15 @@ of an ``AnnotationTargets`` enumeration defined in :ref:`Standard Library`.
 The annotation ``@Target`` has a single field ``targets`` of type
 ``AnnotationTargets[]``. It is typically used as follows:
 
+.. index::
+   target annotation
+   annotation
+   meta-annotation
+   declaration
+   source code
+   context
+   value
+
 .. code-block:: typescript
    :linenos:
 
@@ -737,6 +776,16 @@ the usage of ``X`` is not restricted.
 
 An ``AnnotationTargets`` enumeration contains constants for the following
 targets:
+
+.. index::
+   annotation
+   declaration
+   compiler
+   compiler check
+   context
+   restriction
+   enumeration
+   constant
 
 -  Targets for :ref:`Top-Level Declarations`:
 
@@ -762,7 +811,7 @@ targets:
     - INTERFACE_METHOD;
     - INTERFACE_GETTER;
     - INTERFACE_SETTER.
-    
+
 -  Other targets:
     
     - LAMBDA for :ref:`Lambda Expressions` and
@@ -770,7 +819,32 @@ targets:
     - PARAMETER for function, method, and lambda parameter;
     - STRUCT (see :ref:`Keyword struct and ArkUI`);
     - TYPE (see :ref:`Using Types`).
-    
+
+.. index::
+   class
+   enumeration
+   function
+   interface
+   namespace
+   type alias
+   variable
+   class member
+   function with receiver
+   class field
+   class method
+   class getter
+   class setter
+   interface property
+   interface method
+   interface getter
+   interface setter
+   target
+   lambda
+   parameter
+   struct
+   type
+   annotation
+
 A :index:`compile-time error` occurs if an enumeration constant is used more
 then once in an ``@Target`` annotation:
 
@@ -795,6 +869,16 @@ For an annotation with *retention policy* (see :ref:`Retention Annotation`)
 is implicitly declared. All fields of this class are ``readonly``.
 If a field is of an array type, the array type is also ``readonly``.
 
+.. index::
+   runtime
+   access
+   annotation
+   retention policy
+   retention annotation
+   bytecode
+   readonly field
+   array type
+ 
 For the following annotation:
 
 .. code-block:: typescript
@@ -806,7 +890,7 @@ For the following annotation:
         attrs: number[]
     }
 
-the abstract class is declared:
+--the abstract class is declared:
 
 .. code-block:: typescript
    :linenos:
@@ -816,7 +900,7 @@ the abstract class is declared:
         readonly attrs: readonly number[]
     }
 
-The following example shows the use of such class:
+The use of such a class is represented in following example:
 
 .. code-block:: typescript
    :linenos:
@@ -826,6 +910,12 @@ The following example shows the use of such class:
 
     let my: MyAnno = // call of reflection library to get instance of annotation for type A
     console.log(my.name) // output: someName
+
+.. index::
+   annotation
+   abstract class
+   declaration
+   readonly name
 
 .. raw:: pdf
 

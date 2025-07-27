@@ -18,7 +18,7 @@ Statements
 .. meta:
     frontend_status: Done
 
-Statements are designed to control execution.
+*Statements* are designed to control execution.
 
 The syntax of *statements* is presented below:
 
@@ -60,6 +60,9 @@ execution is considered to *complete abruptly* if it causes an error thrown.
 .. index::
    statement
    execution
+   control
+   evaluation
+   error
    statement execution
    normal completion
    abrupt completion
@@ -91,6 +94,8 @@ result of such execution is discarded.
 .. index::
    statement
    expression
+   expression statement
+   syntax
    execution
 
 |
@@ -128,14 +133,17 @@ return statement at all. Such a block is equivalent to one that ends in a
 
 .. index::
    statement
-   balanced brace
+   balanced braces
    block
+   syntax
    error
    execution
    block statement
    type declaration
    return
    return type
+   declaration body
+   return statement
 
 |
 
@@ -177,15 +185,25 @@ The usage of annotations is discussed in :ref:`Using Annotations`.
 
 .. index::
    local declaration
+   enclosing context
+   context
    let declaration
    const declaration
    mutable variable
    immutable variable
    initialization
+   syntax
    execution
    function
    method
+   surrounding function
+   surrounding method
    block scope
+   if statement
+   for statement
+   for-of statement
+   annotation
+
 
 |
 
@@ -224,7 +242,11 @@ Type of expression must be ``boolean``, or a type mentioned in
 .. index::
    if statement
    statement
+   syntax
    expression
+   type
+   boolean type
+   conditional expression
 
 If an expression is successfully evaluated as ``true``, then a ``thenStatement``
 is executed. Otherwise, an ``elseStatement`` is executed (if provided).
@@ -279,6 +301,11 @@ for such a statement.
    statement
    expression
    evaluation
+   block
+   block scope
+   scope
+   else-block
+   then-block
 
 |
 
@@ -337,9 +364,12 @@ within ``loopStatement``, or is used in lambda expressions (see
 
 .. index::
    loop statement
+   loop
+   syntax
+   lambda
+   lambda expression
+   loop body
    label
-   break statement
-   continue statement
    identifier
 
 |
@@ -377,10 +407,17 @@ Otherwise, a :index:`compile-time error` occurs.
 .. index::
    while statement
    do statement
+   evaluation
    expression
    expression value
    execution
    statement
+   syntax
+   while statement
+   do statement
+   boolean type
+   type
+   extended conditional expression
 
 |
 
@@ -440,6 +477,13 @@ mentioned in :ref:`Extended Conditional Expressions`. Otherwise, a
 
 .. index::
    for statement
+   syntax
+   variable
+   declaration
+   loop index variable
+   type
+   inferred type
+   initialization
 
 A variable declared in the *forInit*-part has the loop scope. It can be used
 in a *forContinue* expression, a *forUpdate* expression, a single-body
@@ -455,6 +499,8 @@ statement, or in a body block if enclosed in parentheses:
     console.log(k)
     // i =  k  // CTE when uncommented
     let i: number = k  // OK
+
+|
 
 .. _For-Of Statements:
 
@@ -487,29 +533,33 @@ The execution of a ``for-of`` loop starts from the evaluation of ``expression``.
 If the evaluation is successful, then the resultant expression is used for
 loop iterations (execution of the ``statement``). On each iteration,
 *forVariable* is set to successive elements of the ``array``, ``string``, or
-the result of class iterator advancing.
+the result of class iterator advancement.
 
 .. index::
    for-of statement
    loop
-   array
-   string
+   instance
+   iterable class
+   iterable interface
+   itarable type
    expression
    type
    array
    string
    for-of loop
    evaluation
-   loop iterations
+   loop iteration
+   class iterator
+   iteration
    statement
 
 If *forVariable* has the modifiers ``let`` or ``const``, then a new variable
-is declared in the loop scope. The new variable is accessible only inside loop
-body. Otherwise, the variable is as declared above.
+is declared in the loop scope. The new variable is accessible only inside the
+loop body. Otherwise, the variable is as declared above.
 The modifier ``const`` prohibits assignments into *forVariable*,
 while ``let`` allows modifications.
 
-The type of *forVariable* declared inside loop is inferred to be that
+The type of *forVariable* declared inside the loop is inferred to be that
 of the *iterated* elements, namely:
 
 -  ``T``, if ``Array<T>`` or ``FixedArray<T>`` instance is iterated;
@@ -528,6 +578,15 @@ variable. Otherwise, a :index:`compile-time error` occurs.
    modifier
    modifier let
    let
+   loop
+   loop scope
+   loop body
+   instance
+   iteration
+   iterable type
+   accessibility
+   declaration
+   inferred type
    modifier const
    const
    variable
@@ -535,6 +594,7 @@ variable. Otherwise, a :index:`compile-time error` occurs.
    modification
    for-of type annotation
    annotation
+   iterator
 
 .. code-block:: typescript
    :linenos:
@@ -560,6 +620,12 @@ variable. Otherwise, a :index:`compile-time error` occurs.
 Explicit type annotation of *forVariable* is allowed as an experimental
 feature (see :ref:`For-of Explicit Type Annotation`).
 
+.. index::
+   annotation
+   inferred type
+   expression
+   assignment
+
 |
 
 .. _Break Statements:
@@ -578,10 +644,12 @@ occurs.
 
 .. index::
    break statement
+   control transfer
    compile-time error
    control transfer
    switch statement
    loop statement
+   syntax
 
 The syntax of *break statement* is presented below:
 
@@ -628,6 +696,9 @@ Examples of ``break`` statements with and without a label are presented below:
    identifier
    control transfer
    statement
+   enclosing statement
+   surrounding function
+   surrounding method
    function
    method
    label
@@ -661,19 +732,50 @@ The syntax of *continue statement* is presented below:
         'continue' identifier?
         ;
 
+.. index::
+   continue statement
+   statement
+   execution
+   loop
+   loop iteration
+   control transfer
+   iteration
+   exit condition
+   label
+   syntax
+
 A ``continue`` statement with no label transfers control to the next iteration
 of the enclosing ``loop`` statement. If there is no enclosing ``loop`` statement
 within the body of the surrounding function or method, then a
 :index:`compile-time error` occurs.
 
 A ``continue`` statement with the label *identifier* transfers control
-to the next iteration of the enclosing loop statement
-with the same label *identifier*.
+to the next iteration of the enclosing loop statement with the same label
+*identifier*.
 If there is no enclosing loop statement with the same label *identifier*
 (within the body of the surrounding function or method),
 then a :index:`compile-time error` occurs.
 
 Examples of ``continue`` statements with and without a label are presented below:
+
+.. index::
+   continue statement
+   control transfer
+   statement
+   iteration
+   surrounding function
+   surrounding method
+   enclosing statement
+   execution
+   label
+   label identifier
+   exit condition
+   loop statement
+   surrounding function
+   control transfer
+   identifier
+   function
+   method
 
 .. code-block:: typescript
    :linenos:
@@ -697,18 +799,6 @@ Examples of ``continue`` statements with and without a label are presented below
         console.log("Outer") // Never reached
       } while (false)
 
-
-.. index::
-   continue statement
-   execution
-   label
-   exit condition
-   loop statement
-   surrounding function
-   control transfer
-   identifier
-   continue statement
-   function
 
 |
 
@@ -736,11 +826,16 @@ method, or a lambda body with non-``void`` return type.
 
 .. index::
    return statement
+   statement
    expression
+   syntax
    return expression
    function
    method
+   lambda body
+   return type
    method body
+   function body
    constructor
 
 A ``return`` statement (with no *expression*) can occur inside one of the
@@ -762,15 +857,19 @@ A :index:`compile-time error` occurs if a ``return`` statement is found in:
 .. index::
    return statement
    expression
+   function body
+   lambda body
+   method body
+   return type
    statement
    top-level statement
    function
    method
+   void type
    return type
    class
    initializer
    constructor
-   constructor declaration
    initializer block
    constructor body
    return type
@@ -789,7 +888,10 @@ initializer block, or top-level statement are not executed.
    return statement
    termination
    surrounding function
+   function
    surrounding method
+   method
+   initializer
    constructor
    initializer block
    top-level statement
@@ -797,8 +899,6 @@ initializer block, or top-level statement are not executed.
    expression
    evaluation
    method body
-   top-level statement
-   return statement
 
 |
 
@@ -850,6 +950,9 @@ control out of a nested ``switch`` or ``loop`` statement (see
 :ref:`Break statements`).
 
 .. index::
+   syntax
+   switch statement
+   switch expression
    expression type
    identifier
    control transfer
@@ -864,6 +967,7 @@ statement expression.
 
 .. index::
    expression
+   expression type
    switch statement
    assignability
 
@@ -887,7 +991,7 @@ statement expression.
     let a: A| null = assignIt()
     switch (a) {
       case null:
-      case null: // One may have several case clauses with the same expression in 
+      case null: // One may have several case clauses with the same expression in
         console.log ("a is null")
         break
       case new A:
@@ -898,14 +1002,14 @@ statement expression.
     }
     function assignIt () {
         return new A
-    }    
+    }
 
 
 The execution of a ``switch`` statement starts from the evaluation of the
 ``switch`` expression.
 
 The value of the ``switch`` expression is compared repeatedly to the value
-of case expressions. The comparison starts from the top and proceeds till the
+of case expressions. The comparison starts from the top and proceeds until the
 first *match*. A *match* occurs when a particular case expression value equals
 the value of the ``switch`` expression in terms of the operator '``==``'. The
 execution is transferred to the set of statements of the *caseClause* where the
@@ -919,9 +1023,15 @@ If no *match* occurs while a *defaultClause* is present, then the execution is
 transferred to the statements of the *defaultClause*.
 
 .. index::
+   expression
+   break
+   object
+   function
    execution
    switch statement
-   expression
+   switch expression
+   expression value
+   execution trasnfer
    evaluation
    constant
    operator
@@ -962,17 +1072,24 @@ Errors can be thrown at any place in the code.
 
 .. index::
    throw statement
+   error object
    thrown value
    thrown object
    control transfer
    statement
    method
+   method call
    function
    constructor
    try block
    try statement
+   value
    assignment
    assignability
+   expression
+   assignability
+   error
+   type
 
 |
 
@@ -1019,6 +1136,7 @@ If an error is thrown in the ``try`` block directly or indirectly, then the
 control is transferred to the ``catch`` clause.
 
 .. index::
+   syntax
    catch clause
    typed catch clause
    try statement
@@ -1052,13 +1170,10 @@ The type of *catch identifier* inside the block is ``Error`` (see
    catch clause
    catch identifier
    access
+   error
    block
    catch identifier
    Object
-
-
-.. index::
-   typed catch clause
 
 .. code-block:: typescript
    :linenos:
@@ -1089,6 +1204,9 @@ the ``ZeroDivisor``, and '*0*'  for all other errors.
 .. index::
    catch clause
    runtime
+   function
+   divisor
+
 
 |
 
@@ -1127,10 +1245,10 @@ can be performed while leaving the ``try-catch``:
    try-catch
    normal completion
    abrupt completion
+   syntax
    finally block
    execution
    return
-   try-catch
 
 .. code-block:: typescript
 
@@ -1190,14 +1308,15 @@ can be performed while leaving the ``try-catch``:
    error
    catch clause
    runtime
+   statement
    catch clause
    assignability
    propagation
    surrounding scope
-   function
-   method
-   constructor
-   caller context
+   caller scope
+   scope
+   coroutine stack
+   environment
 
 .. raw:: pdf
 

@@ -104,7 +104,7 @@ value of type ``Type`` that represents type ``T`` at runtime.
    :linenos:
 
     let type_of_int: Type = Type.from<int>()
-    let type_of_string: Type = Type.from<String>()
+    let type_of_string: Type = Type.from<string>()
     let type_of_number: Type = Type.from<number>()
     let type_of_Object: Type = Type.from<Object>()
 
@@ -250,7 +250,7 @@ The situation is represented in the following example:
         foo(p: T) {}
     }
     class D extends B<string> {
-        foo(p: string> {} // original overriding method
+        foo(p: string) {} // original overriding method
     }
 
 In the example above, the compiler generates a *bridge* method with the name
@@ -281,63 +281,7 @@ is created in ``D``, in the following cases:
 - Subclass ``D`` is defined as ``class D extends B<X``:sub:`1` ``, ..., X``:sub:`n` ``>``;
 - Method ``m`` of class ``D`` overrides ``m`` from ``B`` with type parameters in signature,
   e.g., ``(T``:sub:`1` ``, ..., T``:sub:`n` ``)``;
-- Signature of the overriden method ``m`` is not ``(C``:sub:`1` ``, ..., C``:sub:`n` ``)``.
-
-
-|
-
-.. _Runtime Evaluation of Lambda Expressions Implementation:
-
-Runtime Evaluation of Lambda Expressions Implementation
-=======================================================
-
-.. meta:
-    frontend_status: Done
-
-
-In order to make lambdas behave as required (see
-:ref:`Runtime Evaluation of Lambda Expressions`), the language implementation
-can act as follows:
-
--  If a captured variable is of a non-value type (see :ref:`Value Types`), then
-   replace the captured variable type for a proxy class that contains an
-   original reference (``x: T`` for ``x: Proxy<T>; x.ref = original-ref``).
--  If the captured variable is defined as ``const``, then proxying is not
-   required.
--  If the captured formal parameter cannot be proxied, then the implementation
-   can require adding of a local variable as shown in the table below.
-
-.. index::
-   lambda
-   implementation
-   runtime evaluation
-   non-value type
-   reference
-   captured formal parameter
-   predefined value type
-   proxy class
-   captured variable
-   captured variable type
-   proxying
-   local variable
-   variable
-   source code
-   pseudo code
-
-+-----------------------------------+-----------------------------------+
-|   Source Code                     |   Pseudo Code                     |
-+===================================+===================================+
-| .. code-block:: typescript        | .. code-block:: typescript        |
-|    :linenos:                      |    :linenos:                      |
-|                                   |                                   |
-|     function foo(y: int) {        |     function foo(y: int) {        |
-|     let x = () => { return y+1 }  |     let y$: Int = y               |
-|     console.log(x())              |     let x = () => { return y$+1 } |
-|     }                             |     console.log(x())              |
-|                                   |     }                             |
-+-----------------------------------+-----------------------------------+
-
-
+- Signature of the overridden method ``m`` is not ``(C``:sub:`1` ``, ..., C``:sub:`n` ``)``.
 
 
 .. raw:: pdf
