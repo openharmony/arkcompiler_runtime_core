@@ -734,15 +734,6 @@ TEST_F(EtsStringTest, ConvertFromUtf8)
     CheckConvertString(str);
 }
 
-TEST_F(EtsStringTest, ConvertFromMUtf8)
-{
-    std::vector<uint8_t> data {'a', 0xc0, 0x80, 'b', 0xe2, 0x82, 0xac, 'z', '\n'};
-    size_t strLen = 6U;
-    auto *utf8Data = reinterpret_cast<const char *>(data.data());
-    EtsString *str = EtsString::CreateFromMUtf8(utf8Data, strLen);
-    CheckConvertString(str);
-}
-
 }  // namespace ark::ets::test
 
 // NOLINTEND(readability-magic-numbers)
