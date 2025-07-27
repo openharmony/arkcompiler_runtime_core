@@ -33,12 +33,20 @@ enable_hitrace =
     !ark_standalone_build && is_standard_system && current_os == "ohos" &&
     (current_cpu == "arm64" || current_cpu == "arm")
 
+enable_qos =
+    !ark_standalone_build && is_standard_system && current_os == "ohos" &&
+    (current_cpu == "arm64" || current_cpu == "arm")
+
 if (enable_hilog) {
   hiviewdfx_ext_deps += [ "hilog:libhilog" ]
 }
 
 if (enable_hitrace) {
   hiviewdfx_ext_deps += [ "hitrace:hitrace_meter" ]
+}
+
+if (enable_qos) {
+  hiviewdfx_ext_deps += [ "qos_manager:qos" ]
 }
 
 if (is_standard_system || ark_standalone_build) {

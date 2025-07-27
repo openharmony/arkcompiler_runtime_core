@@ -30,6 +30,7 @@
 #include "libpandabase/os/thread.h"
 #include "libpandabase/utils/arch.h"
 #include "libpandabase/utils/list.h"
+#include "libpandabase/utils/logger.h"
 #include "libpandabase/utils/tsan_interface.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
@@ -47,6 +48,16 @@
 #include "runtime/mem/refstorage/reference_storage.h"
 #include "runtime/entrypoints/entrypoints.h"
 #include "events/events.h"
+#ifdef PANDA_USE_QOS
+#include "qos.h"
+#endif
+
+enum Priority {
+    PRIORITY_IDLE = 0,
+    PRIORITY_LOW = 1,
+    PRIORITY_DEFAULT = 2,
+    PRIORITY_HIGH = 3,
+};
 
 #define ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS()
 
@@ -387,6 +398,19 @@ public:
 
 private:
     ThreadT *thread_;
+};
+
+class QosHelper {
+public:
+    static int SetCurrentWorkerPriority([[maybe_unused]] Priority priority)
+    {
+#ifdef PANDA_USE_QOS
+        return SetThreadQos(static_cast<OHOS::QOS::QosLevel>(priority));
+#else
+        LOG(INFO, RUNTIME) << "QosHelper::SetWorkerPriority is not supported";
+        return 0;
+#endif
+    }
 };
 
 }  // namespace ark

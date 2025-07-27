@@ -62,7 +62,8 @@ export namespace taskpool {
 
     class TaskPoolWorker extends EAWorker {
         constructor(supportInterop: boolean = false) {
-            super(supportInterop);
+            super("taskpool", supportInterop);
+            this.start();
             this.run<void>((): void => {
                 this.workerId = CoroutineExtras.getWorkerId();
             }).Await();

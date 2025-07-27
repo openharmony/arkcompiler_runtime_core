@@ -17,6 +17,7 @@ let mainId = CoroutineExtras.getWorkerId();
 
 function testEworkerId() {
     let w = new EAWorker();
+    w.start();
     let p1 = w.run<int>(():int => {
         let runId = CoroutineExtras.getWorkerId();
         arktest.assertNE(runId, mainId);

@@ -34,6 +34,7 @@ class TestClass {
 
 export function checkAsync(ptr: bigint) {
     let w = new EAWorker(true);
+    w.start();
     let cb = (): int => {
         let module = ESValue.load('./serialize_interop_tests_helpers_js');
         let method = module.getProperty('checkResult');

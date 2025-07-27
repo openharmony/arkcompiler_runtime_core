@@ -82,6 +82,7 @@ function primitiveParameter() : void {
 let eaw:EAWorker = new EAWorker();
 
 function main(): int {
+    eaw.start();
     const testSuite = new arktest.ArkTestsuite('EAWorkerParameterTest');
     testSuite.addTest('singleObject', singleObject);
     testSuite.addTest('returnArray', returnArray);

@@ -122,7 +122,7 @@ function testAsyncThrow(): boolean {
 
 function testACoroutineEaworker(): void {
     let ew = new EAWorker();
-
+    ew.start();
     let job0 = ew.run<number>(testFooLaunch);
     let job1 = ew.run<void>(testAddSchedule);
     let job2 = ew.run<number>(testRecursiveLaunch);
@@ -139,7 +139,7 @@ function testACoroutineEaworker(): void {
 
 function testAJCoroutineEaworker(): void {
     let ew = new EAWorker();
-
+    ew.start();
     let job0 = ew.run<number>(testFooAsync);
     let job1 = ew.run<void>(testAddAsyncSchedule);
     let job2 = ew.run<number>(testRecursiveAsync);
@@ -156,6 +156,7 @@ function testAJCoroutineEaworker(): void {
 
 function testACAJcoroutine(): void {
     let ew = new EAWorker();
+    ew.start();
     let job1 = ew.run<number>(testFooLaunch);
     let job2 = ew.run<number>(testFooAsync);
     
@@ -169,6 +170,7 @@ function testACAJcoroutine(): void {
 
 function testACoroutineCallAJCoroutine(): void {
     let ew = new EAWorker();
+    ew.start();
     let job1 = ew.run<number>(() => {
         let job2: Job<Promise<number>> = launch<Promise<number>, ()=>Promise<number>>(fooAsync)
         let p = job2.Await();
@@ -190,6 +192,7 @@ async function AsyncCallLaunch(): Promise<Job<number>> {
 
 function testAJCoroutineCallACoroutine(): void {
     let ew = new EAWorker();
+    ew.start();
     let job1 = ew.run<Promise<Job<number>>>(AsyncCallLaunch);
     let p = job1.Await();
     let job2: Job<number> = await p;
@@ -203,8 +206,10 @@ function testNestedEAWorker(): void {
     clearCounter();
 
     let e1 = new EAWorker();
+    e1.start();
     let job1 = e1.run<number>(():number => {
         let e2 = new EAWorker();
+        e2.start();
         let job2 = e2.run<number>(():number => {
             return foo();
         });
