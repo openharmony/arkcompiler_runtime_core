@@ -128,7 +128,9 @@ class TestFileBased(Test):
                 return_code = process.returncode
                 passed = result_validator(output, error, return_code)
                 if not passed:
-                    fail_kind = self.detect_segfault(return_code, params.fail_kind_fail)
+                    fail_kind = (self.detect_segfault(return_code, params.fail_kind_fail)
+                                 if self.fail_kind != FailKind.COMPARE_OUTPUT_FAIL
+                                 else self.fail_kind)
                     error = error.strip()
                     error = f"{fail_kind.name}{f': {error}' if error else ''}"
             except subprocess.TimeoutExpired:

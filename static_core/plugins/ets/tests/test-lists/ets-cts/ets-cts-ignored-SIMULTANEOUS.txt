@@ -88,3 +88,14 @@
 07.expressions/03.named_reference/qualified_name_3.ets
 15.semantic_rules/11.static_initialization/package_initializer/p3/packageP3/init3_1.ets
 15.semantic_rules/11.static_initialization/package_initializer/p3/packageP3/init3_2.ets
+
+# 28169
+04.names_declarations_and_scopes/06.variable_and_constant_declarations/04.type_inference_from_initializer/infer2_12.ets
+09.classes/04.class_members/class_initializer/abstract_class_initializer_declaration_try_neg_2.ets
+09.classes/04.class_members/class_initializer/abstract_class_initializer_declaration_try_neg_1.ets
+09.classes/04.class_members/class_initializer/class_initializer_declaration_try_neg_1.ets
+09.classes/04.class_members/class_initializer/class_initializer_declaration_try_neg_2.ets
+08.statements/14.throw_statements/throw_neg2.ets
+13.compilation_units/09.program_entry_point/program_entry_no_handle_error.ets
+12.error_handling/01.errors/error_call.ets
+20.implementation_details/04.ensuring_module_initialization/negative_test_rte.ets

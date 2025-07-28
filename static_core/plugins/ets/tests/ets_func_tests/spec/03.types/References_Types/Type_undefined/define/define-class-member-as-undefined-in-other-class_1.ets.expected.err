@@ -15,5 +15,5 @@
 E/runtime: Unhandled exception: std.core.NullPointerError
 E/runtime: NullPointerError
 E/runtime: 	at std.core.NullPointerError.<ctor> (etsstdlib.ets:42:0)
-E/runtime: 	at define-class-member-as-undefined-in-other-class_1.ETSGLOBAL.main (define-class-member-as-undefined-in-other-class_1.ets:39:0)
+E/runtime: 	at define-class-member-as-undefined-in-other-class_1.ETSGLOBAL.main (define-class-member-as-undefined-in-other-class_1.ets:38:0)
 E/runtime:
