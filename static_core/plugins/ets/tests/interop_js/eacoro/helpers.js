@@ -23,9 +23,8 @@ export async function simpleAsync() {
 };
 
 export async function asyncWithAwait() {
-    const helper = requireNapiPreview('libinterop_test_helper.so', false);
     let p = new Promise((resolve) => {
-        helper.setTimeout(() => {
+        setTimeout(() => {
           globalThis.value = 7;
           resolve(`Waited 1 millisecond`);
         }, 1);
