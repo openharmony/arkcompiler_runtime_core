@@ -24,3 +24,9 @@ function GetUndefined(): undefined {
 function getObject(): Object {
     return "Hello World!"
 }
+
+native function isUndefined(arg: Object | null | undefined): boolean
+
+export function checkUndefinedReference(): boolean {
+    return isUndefined(undefined) && !isUndefined(null) && !isUndefined("abc")
+}

@@ -356,7 +356,10 @@ static ani_string StdCoreIntlDisplayNamesOf(ani_env *env, [[maybe_unused]] ani_c
     auto codeStr = ConvertFromAniString(env, code);
     auto styleStr = ConvertFromAniString(env, style);
     auto fallbackStr = ConvertFromAniString(env, fallback);
-    auto languageDisplayStr = (languageDisplay != nullptr) ? ConvertFromAniString(env, languageDisplay) : "dialect";
+    ani_boolean isUndefined = ANI_FALSE;
+    [[maybe_unused]] auto aniStatus = env->Reference_IsUndefined(languageDisplay, &isUndefined);
+    ASSERT(aniStatus == ANI_OK);
+    auto languageDisplayStr = (isUndefined == ANI_FALSE) ? ConvertFromAniString(env, languageDisplay) : "dialect";
 
     bool isValidCodeType = true;
     auto codeType = StringToCodeType(typeStr, isValidCodeType);

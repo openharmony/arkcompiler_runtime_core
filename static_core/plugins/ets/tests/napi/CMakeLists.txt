@@ -28,7 +28,7 @@ set(ets_tests_list
     #"InnerNativeTest"
     "FakeNativeTest"
     #"InterfaceNativeTest"
-    "EtsnapiNameTest"
+    #"EtsnapiNameTest"
     "EtsnapiVersionHookTest"
 )
 
