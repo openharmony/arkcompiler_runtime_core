@@ -26,3 +26,6 @@ ets-common-tests/atomics/concurrent_wait_notify_all.ets
 
 #28060
 ets-common-tests/taskpool/common_tasks.ets
+
+#28278
+ets-common-tests/atomics/base_operation_exchange.ets
