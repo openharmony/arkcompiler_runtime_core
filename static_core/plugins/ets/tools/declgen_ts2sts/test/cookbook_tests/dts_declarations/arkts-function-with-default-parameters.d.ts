@@ -13,5 +13,4 @@
  * limitations under the License.
  */
 
-export function foo(a: number, b: number)
-export function foo(a: number){}
+export declare function foo(a?: number): void;

@@ -1,4 +1,3 @@
-'use static'
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export declare class C {
-    static foo(a: number, b: number): Any;
-}
+
+export declare let a: Number;
+export declare let b: number;
+export declare let b1: bigint;
+export declare let c: symbol;
+export declare let d: String;
+export declare let e: Boolean;
+export declare let sym: symbol;

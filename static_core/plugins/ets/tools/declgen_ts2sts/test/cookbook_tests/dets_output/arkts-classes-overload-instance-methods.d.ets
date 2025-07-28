@@ -13,4 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export declare function foo(a: number, b: number): Any;
+export declare class MathUtils2 {
+    add(num: number): number;
+    add(num1: number, num2: number): number;
+}
