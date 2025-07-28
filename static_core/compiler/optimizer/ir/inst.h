@@ -2690,6 +2690,69 @@ public:
     PANDA_PUBLIC_API Inst *Clone(const Graph *targetGraph) const override;
 };
 
+class PANDA_PUBLIC_API ExtractBitfieldInst : public FixedInputsInst<1> {
+public:
+    using FixedInputsInst::FixedInputsInst;
+
+    ExtractBitfieldInst(Initializer t, unsigned sourceBit, unsigned width, bool signExt = false)
+        : FixedInputsInst(std::move(t)), sourceBit_(sourceBit), width_(width), signExt_(signExt)
+    {
+    }
+
+    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
+    {
+        ASSERT(index < GetInputsCount());
+        return GetType();
+    }
+
+    void SetSourceBit(unsigned sourceBit)
+    {
+        sourceBit_ = sourceBit;
+    }
+
+    void SetWidth(unsigned width)
+    {
+        width_ = width;
+    }
+
+    ExtractBitfieldInst &AsSignBitExtension()
+    {
+        signExt_ = true;
+        return *this;
+    }
+
+    ExtractBitfieldInst &AsZeroExtension()
+    {
+        signExt_ = false;
+        return *this;
+    }
+
+    unsigned GetSourceBit() const
+    {
+        return sourceBit_;
+    }
+
+    unsigned GetWidth() const
+    {
+        return width_;
+    }
+
+    bool IsSignBitExtension() const
+    {
+        return signExt_;
+    }
+
+    bool IsZeroExtension() const
+    {
+        return !signExt_;
+    }
+
+private:
+    unsigned sourceBit_ {0};
+    unsigned width_ {0};
+    bool signExt_ {false};
+};
+
 class SpillFillInst;
 
 /// Mixin to hold location data

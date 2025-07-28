@@ -3024,9 +3024,13 @@ void Aarch64Encoder::EncodeOrNot(Reg dst, Reg src0, Shift src1)
     GetMasm()->Orn(VixlReg(dst), VixlReg(src0), VixlShift(src1));
 }
 
-void Aarch64Encoder::EncodeExtractBits(Reg dst, Reg src0, Imm imm1, Imm imm2)
+void Aarch64Encoder::EncodeExtractBits(Reg dst, Reg src0, Imm imm1, Imm imm2, bool signExt)
 {
-    GetMasm()->Ubfx(VixlReg(dst), VixlReg(src0), imm1.GetAsInt(), imm2.GetAsInt());
+    if (signExt) {
+        GetMasm()->Sbfx(VixlReg(dst), VixlReg(src0), imm1.GetAsInt(), imm2.GetAsInt());
+    } else {
+        GetMasm()->Ubfx(VixlReg(dst), VixlReg(src0), imm1.GetAsInt(), imm2.GetAsInt());
+    }
 }
 
 void Aarch64Encoder::EncodeAndNot(Reg dst, Reg src0, Reg src1)
