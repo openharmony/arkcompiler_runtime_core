@@ -16,6 +16,7 @@
 #include "unit_test.h"
 #include "panda_runner.h"
 #include "runtime/jit/profiling_data.h"
+#include "runtime/jit/profiling_saver.h"
 
 namespace ark::test {
 class ProfilingRunnerTest : public testing::Test {};
@@ -72,6 +73,21 @@ TEST_F(ProfilingRunnerTest, BranchStatisticsCpp)
     Runtime::Destroy();
 }
 
+TEST_F(ProfilingRunnerTest, ProfilingDataNullptTestCpp)
+{
+    PandaRunner runner;
+    runner.GetRuntimeOptions().SetInterpreterType("cpp");
+    auto runtime = runner.CreateRuntime();
+    runner.Run(runtime, SOURCE, std::vector<std::string> {});
+    auto method = runner.GetMethod("foo");
+    auto profilingData = method->GetProfilingData();
+    ASSERT_EQ(nullptr, profilingData);
+    ProfilingSaver saver;
+    pgo::AotProfilingData profData;
+    saver.AddMethod(&profData, method, 0);
+    Runtime::Destroy();
+}
+
 #ifndef PANDA_COMPILER_TARGET_AARCH32
 TEST_F(ProfilingRunnerTest, BranchStatistics)
 {
@@ -84,6 +100,20 @@ TEST_F(ProfilingRunnerTest, BranchStatistics)
     ASSERT_EQ(132U, profilingData->GetBranchTakenCounter(0x10U));
     ASSERT_EQ(199U, profilingData->GetBranchNotTakenCounter(0x09U));
     ASSERT_EQ(67U, profilingData->GetBranchNotTakenCounter(0x10U));
+    Runtime::Destroy();
+}
+
+TEST_F(ProfilingRunnerTest, ProfilingDataNullptTest)
+{
+    PandaRunner runner;
+    auto runtime = runner.CreateRuntime();
+    runner.Run(runtime, SOURCE, std::vector<std::string> {});
+    auto method = runner.GetMethod("foo");
+    auto profilingData = method->GetProfilingData();
+    ASSERT_EQ(nullptr, profilingData);
+    ProfilingSaver saver;
+    pgo::AotProfilingData profData;
+    saver.AddMethod(&profData, method, 0);
     Runtime::Destroy();
 }
 #endif
