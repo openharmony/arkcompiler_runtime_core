@@ -27,7 +27,7 @@
 #include <functional>
 
 #if defined(PANDA_JS_ETS_HYBRID_MODE)
-#include "interfaces/inner_api/napi/native_node_api.h"
+#include "interfaces/inner_api/napi/native_node_hybrid_api.h"
 #else
 // NOLINTBEGIN(readability-identifier-naming)
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style

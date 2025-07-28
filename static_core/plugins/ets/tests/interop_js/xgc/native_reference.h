@@ -17,7 +17,7 @@
 #define NATIVE_REFERENCE_H
 
 #include "native_engine/native_reference.h"
-#include "interfaces/inner_api/napi/native_node_api.h"
+#include "interfaces/inner_api/napi/native_node_hybrid_api.h"
 
 namespace ark::ets::interop::js {
 
