@@ -492,9 +492,10 @@ export namespace taskpool {
             try {
                 result = this.taskFunction();
                 this.callUserCallback(this.onSuccessCallback);
-            } catch (e: Error) {
+            } catch (e) {
                 try {
-                    this.onFailCallback?.(e);
+                    // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+                    this.onFailCallback?.(e as Error);
                 } catch (callbackError) {}
                 throw e;
             } finally {
@@ -565,7 +566,7 @@ export namespace taskpool {
                 argsArray.forEach((args: FixedArray<NullishType>) => {
                     try {
                         this.onReceiveCallback!.unsafeCall(...args);
-                    } catch(e: Error) {}
+                    } catch(e) {}
                 });
                 return value;
             });
@@ -1593,8 +1594,9 @@ export namespace taskpool {
             try {
                 let res = job.Await();
                 resolve(res);
-            } catch(e: Error) {
-                reject(e);
+            } catch(e) {
+                // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+                reject(e as Error);
             }
         });
         return task.getOnReceivePromise(promise);
@@ -1656,8 +1658,9 @@ function launchPromise(f: Function, ...args: FixedArray<NullishType>): Promise<N
         try {
             let v = f.unsafeCall(...args)
             resolver!(v)
-        } catch (e: Error) {
-            rejecter!(e)
+        } catch (e) {
+            // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+            rejecter!(e as Error)
         }
     }
     launch<void, () => void>(cb)

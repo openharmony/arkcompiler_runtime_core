@@ -144,8 +144,9 @@ export final class AsyncLock {
             try {
                 let v = f.unsafeCall(...args) as T
                 resolver!(v)
-            } catch (e: Error) {
-                rejecter!(e)
+            } catch (e) {
+                // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+                rejecter!(e as Error)
             }
         }
         launchSameWorker(cb)
@@ -239,7 +240,7 @@ export final class AsyncLock {
     public static query(name: string): AsyncLockState {
         try {
             return asyncLockManager.query(name);
-        } catch (e: Error) {
+        } catch (e) {
             throw e;
         }
     }

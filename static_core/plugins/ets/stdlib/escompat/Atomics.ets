@@ -698,8 +698,9 @@ export class Atomics {
             try {
                 let v = Atomics.waitImpl(typedArray, index, value, timeout)
                 resolver!(v)
-            } catch (e: Error) {
-                rejecter!(e)
+            } catch (e) {
+                // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+                rejecter!(e as Error)
             }
         }
         launch<void, () => void>(cb)

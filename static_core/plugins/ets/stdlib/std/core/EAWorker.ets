@@ -604,12 +604,14 @@ class InteropWorker implements InternalWorker {
                     } else {
                         job.finish(wrapperTask());
                     }
-                } catch (e : Error) {
+                } catch (e) {
                     if (this.errorHandler != undefined) {
                         let errHandler = this.errorHandler as ErrorHandler;
-                        errHandler(e);
+                        // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+                        errHandler(e as Error);
                     }
-                    job.fail(e);
+                    // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+                    job.fail(e as Error);
                 }
             });
         }
@@ -726,11 +728,13 @@ class StaticWorker implements InternalWorker {
                 } else {
                     job.finish(wrapperTask());
                 }
-            } catch(e : Error){
-                job.fail(e);
+            } catch(e){
+                // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+                job.fail(e as Error);
                 if (this.errorHandler != undefined) {
                     let errHandler = this.errorHandler as ErrorHandler;
-                    errHandler(e);
+                    // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+                    errHandler(e as Error);
                 }
             }
         }

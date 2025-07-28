@@ -637,7 +637,7 @@ export abstract class DefaultProxyHandler<T extends Object> implements ProxyHand
         try {
             const getter = targetType.getMethodByName(GETTER_PREFIX + name)
             return getter.invoke(target, [])
-        } catch(e: Error) {
+        } catch(e) {
             console.error(e)
         }
 
@@ -652,7 +652,7 @@ export abstract class DefaultProxyHandler<T extends Object> implements ProxyHand
             const setter = targetType.getMethodByName(SETTER_PREFIX + name)
             setter.invoke(target, [value])
             return true
-        } catch(e: Error) {
+        } catch(e) {
             console.error(e)
         }
 
