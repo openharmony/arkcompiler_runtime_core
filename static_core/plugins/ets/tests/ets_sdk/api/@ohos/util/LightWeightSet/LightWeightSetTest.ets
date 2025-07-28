@@ -52,7 +52,7 @@ function testLightWeightSetComprehensiveFunctionality() {
     let itemArr = [1, 2, 3]
     let item: double = 0;
     let i: int = 0;
-    for (item in lightWeightSet) {
+    for (item of lightWeightSet) {
         arktest.assertEQ(item, itemArr[i]);
         i++;
     }
