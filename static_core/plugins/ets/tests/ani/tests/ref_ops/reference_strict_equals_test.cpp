@@ -17,12 +17,16 @@
 
 namespace ark::ets::ani::testing {
 
-class ReferenceStrictEqualsTest : public AniTest {};
+class ReferenceStrictEqualsTest : public AniTest {
+public:
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    static constexpr const char *MODULE_NAME = "reference_strict_equals_test";
+};
 
 TEST_F(ReferenceStrictEqualsTest, check_null_and_null)
 {
-    auto nullRef1 = CallEtsFunction<ani_ref>("reference_strict_equals_test", "GetNull");
-    auto nullRef2 = CallEtsFunction<ani_ref>("reference_strict_equals_test", "GetNull");
+    auto nullRef1 = CallEtsFunction<ani_ref>(MODULE_NAME, "GetNull");
+    auto nullRef2 = CallEtsFunction<ani_ref>(MODULE_NAME, "GetNull");
     ani_boolean isEquals;
     ASSERT_EQ(env_->Reference_StrictEquals(nullRef1, nullRef2, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_TRUE);
@@ -30,8 +34,8 @@ TEST_F(ReferenceStrictEqualsTest, check_null_and_null)
 
 TEST_F(ReferenceStrictEqualsTest, check_null_and_undefined)
 {
-    auto nullRef = CallEtsFunction<ani_ref>("reference_strict_equals_test", "GetNull");
-    auto undefinedRef = CallEtsFunction<ani_ref>("reference_strict_equals_test", "GetUndefined");
+    auto nullRef = CallEtsFunction<ani_ref>(MODULE_NAME, "GetNull");
+    auto undefinedRef = CallEtsFunction<ani_ref>(MODULE_NAME, "GetUndefined");
     ani_boolean isEquals;
     ASSERT_EQ(env_->Reference_StrictEquals(nullRef, undefinedRef, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_FALSE);
@@ -39,8 +43,8 @@ TEST_F(ReferenceStrictEqualsTest, check_null_and_undefined)
 
 TEST_F(ReferenceStrictEqualsTest, check_null_and_object)
 {
-    auto nullRef = CallEtsFunction<ani_ref>("reference_strict_equals_test", "GetNull");
-    auto objectRef = CallEtsFunction<ani_ref>("reference_strict_equals_test", "getObject");
+    auto nullRef = CallEtsFunction<ani_ref>(MODULE_NAME, "GetNull");
+    auto objectRef = CallEtsFunction<ani_ref>(MODULE_NAME, "getObject");
     ani_boolean isEquals;
     ASSERT_EQ(env_->Reference_StrictEquals(nullRef, objectRef, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_FALSE);
@@ -48,8 +52,8 @@ TEST_F(ReferenceStrictEqualsTest, check_null_and_object)
 
 TEST_F(ReferenceStrictEqualsTest, check_undefined_and_undefined)
 {
-    auto undefinedRef1 = CallEtsFunction<ani_ref>("reference_strict_equals_test", "GetUndefined");
-    auto undefinedRef2 = CallEtsFunction<ani_ref>("reference_strict_equals_test", "GetUndefined");
+    auto undefinedRef1 = CallEtsFunction<ani_ref>(MODULE_NAME, "GetUndefined");
+    auto undefinedRef2 = CallEtsFunction<ani_ref>(MODULE_NAME, "GetUndefined");
     ani_boolean isEquals;
     ASSERT_EQ(env_->Reference_StrictEquals(undefinedRef1, undefinedRef2, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_TRUE);
@@ -57,8 +61,8 @@ TEST_F(ReferenceStrictEqualsTest, check_undefined_and_undefined)
 
 TEST_F(ReferenceStrictEqualsTest, check_undefined_and_object)
 {
-    auto undefinedRef = CallEtsFunction<ani_ref>("reference_strict_equals_test", "GetUndefined");
-    auto objectRef = CallEtsFunction<ani_ref>("reference_strict_equals_test", "getObject");
+    auto undefinedRef = CallEtsFunction<ani_ref>(MODULE_NAME, "GetUndefined");
+    auto objectRef = CallEtsFunction<ani_ref>(MODULE_NAME, "getObject");
     ani_boolean isEquals;
     ASSERT_EQ(env_->Reference_StrictEquals(undefinedRef, objectRef, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_FALSE);
@@ -66,8 +70,8 @@ TEST_F(ReferenceStrictEqualsTest, check_undefined_and_object)
 
 TEST_F(ReferenceStrictEqualsTest, check_object_and_object)
 {
-    auto objectRef1 = CallEtsFunction<ani_ref>("reference_strict_equals_test", "getObject");
-    auto objectRef2 = CallEtsFunction<ani_ref>("reference_strict_equals_test", "getObject");
+    auto objectRef1 = CallEtsFunction<ani_ref>(MODULE_NAME, "getObject");
+    auto objectRef2 = CallEtsFunction<ani_ref>(MODULE_NAME, "getObject");
     ani_boolean isEquals;
     ASSERT_EQ(env_->Reference_StrictEquals(objectRef1, objectRef2, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_TRUE);
@@ -75,7 +79,7 @@ TEST_F(ReferenceStrictEqualsTest, check_object_and_object)
 
 TEST_F(ReferenceStrictEqualsTest, invalid_argument)
 {
-    auto ref = CallEtsFunction<ani_ref>("reference_strict_equals_test", "GetNull");
+    auto ref = CallEtsFunction<ani_ref>(MODULE_NAME, "GetNull");
     ASSERT_EQ(env_->Reference_StrictEquals(ref, ref, nullptr), ANI_INVALID_ARGS);
 }
 
@@ -94,6 +98,36 @@ TEST_F(ReferenceStrictEqualsTest, invalid_result)
     ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
 
     ASSERT_EQ(env_->Reference_StrictEquals(undefinedRef, undefinedRef, nullptr), ANI_INVALID_ARGS);
+}
+
+static void AreReferencesStrictEqualHelper(ani_env *env, ani_ref lhs, ani_ref rhs, ani_boolean *result)
+{
+    ASSERT_EQ(env->Reference_StrictEquals(lhs, rhs, result), ANI_OK);
+}
+
+static ani_boolean AreReferencesStrictEqualImpl(ani_env *env, ani_ref lhs, ani_ref rhs)
+{
+    ani_boolean areEqual = ANI_FALSE;
+    AreReferencesStrictEqualHelper(env, lhs, rhs, &areEqual);
+    return areEqual;
+}
+
+TEST_F(ReferenceStrictEqualsTest, CheckStrictEqualityWithNullishValues)
+{
+    ani_module mod {};
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &mod), ANI_OK);
+    ani_native_function fn {"areReferencesStrictEqual",
+                            "X{C{std.core.Object}C{std.core.Null}}X{C{std.core.Object}C{std.core.Null}}:z",
+                            reinterpret_cast<void *>(AreReferencesStrictEqualImpl)};
+    ASSERT_EQ(env_->Module_BindNativeFunctions(mod, &fn, 1), ANI_OK);
+
+    auto isCorrect = CallEtsFunction<ani_boolean>(MODULE_NAME, "checkNullishValuesStrictEquality");
+
+    ani_boolean hasPendingError = ANI_FALSE;
+    ASSERT_EQ(env_->ExistUnhandledError(&hasPendingError), ANI_OK);
+    ASSERT_EQ(hasPendingError, ANI_FALSE);
+
+    ASSERT_EQ(isCorrect, ANI_TRUE);
 }
 
 }  // namespace ark::ets::ani::testing
