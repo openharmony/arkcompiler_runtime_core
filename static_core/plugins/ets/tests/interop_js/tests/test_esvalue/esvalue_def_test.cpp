@@ -222,4 +222,9 @@ TEST_F(EtsESValueJsToEtsTest, test_esvalue_check_instaniate)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstaniate"));
 }
 
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_test_undefined)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testUndefined"));
+}
+
 }  // namespace ark::ets::interop::js::testing
