@@ -31,7 +31,13 @@ cases:
           let a = [[]]  // CTE, type cannot be determined
 
     - use: |-
+          let a = [[1,], []]  // CTE, type cannot be resolved
+
+    - use: |-
           let a = [{}, {},]  // CTE, type cannot be determined
+
+    - use: |-
+          [(): void => {}, {}]  // CTE, type cannot be resolved
 
     - decl: |-
           class A<T> {

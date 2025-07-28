@@ -56,8 +56,8 @@ cases:
 
     - decl: |-
           function foo(a: FixedArray<Number>) {
-              arktest.assertTrue(Number.isNaN(a[0].unboxed()))
-              arktest.assertEQ(a[3].unboxed(), 1.7976931348623157e+308)
+              arktest.assertTrue(Number.isNaN(a[0]))
+              arktest.assertEQ(a[3], 1.7976931348623157e+308)
               arktest.assertEQ(a.length, 4)
           }
       use: |-
@@ -66,9 +66,9 @@ cases:
 
     - decl: |-
           function foo(a: FixedArray<Boolean>) {
-              arktest.assertEQ(a[0].unboxed(), false)
-              arktest.assertEQ(a[1].unboxed(), true)
-              arktest.assertEQ(a[2].unboxed(), true)
+              arktest.assertEQ(a[0], false)
+              arktest.assertEQ(a[1], true)
+              arktest.assertEQ(a[2], true)
               arktest.assertEQ(a.length, 3)
           }
       use: |-
@@ -77,7 +77,7 @@ cases:
 
     - decl: |-
           function foo(a: FixedArray<Long>) {
-              arktest.assertEQ(a[3].unboxed(), -9223372036854775808)
+              arktest.assertEQ(a[3], -9223372036854775808)
               arktest.assertEQ(a.length, 4)
           }
       use: |-
@@ -179,8 +179,8 @@ cases:
     - decl: |-
           function foo(a: FixedArray<FixedArray<Number>>) {
               arktest.assertEQ(a.length, 4)
-              arktest.assertEQ(a[0][0].unboxed(), 1.7976931348623157e+308)
-              arktest.assertEQ(a[2][2].unboxed(), 6.0)
+              arktest.assertEQ(a[0][0], 1.7976931348623157e+308)
+              arktest.assertEQ(a[2][2], 6.0)
           }
       use: |-
           // call context, array of array of boxed

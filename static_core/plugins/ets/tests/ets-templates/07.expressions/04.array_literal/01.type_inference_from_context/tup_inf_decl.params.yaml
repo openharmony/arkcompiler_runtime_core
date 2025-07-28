@@ -31,10 +31,10 @@ cases:
     - use: |-
           // declaration context, tuple of boxed
           let a: [Short, Int, Byte, Long] = [0b1, 2, 0x7f, -9223372036854775808,]
-          arktest.assertEQ(a[0].unboxed(), 1)
-          arktest.assertEQ(a[1].unboxed(), 2)
-          arktest.assertEQ(a[2].unboxed(), 127)
-          arktest.assertEQ(a[3].unboxed(), -9223372036854775808)
+          arktest.assertEQ(a[0], 1)
+          arktest.assertEQ(a[1], 2)
+          arktest.assertEQ(a[2], 127)
+          arktest.assertEQ(a[3], -9223372036854775808)
 
     - use: |-
           // declaration context, tuple of boxed
@@ -67,7 +67,7 @@ cases:
           let a: [[string, Object], [Double, float]] = [["a", {}, ], [Double.POSITIVE_INFINITY - 1.0 , 16777215, ], ]
           arktest.assertEQ(a[0][0],  "a")
           arktest.assertTrue(a[0][1] instanceof Object)
-          arktest.assertEQ(a[1][0].unboxed(), Number.POSITIVE_INFINITY)
+          arktest.assertEQ(a[1][0], Number.POSITIVE_INFINITY)
           arktest.assertEQ(a[1][1], 16777215f)
 
     - use: |-
@@ -82,11 +82,11 @@ cases:
     - use: |-
           // declaration context, tuple of tuple of boxed
           let a: [Long, [Double, Number], [Int, Long]] = [9223372036854775807, [9007199254740991, -9007199254740991], [ 2147483647, -9223372036854775808]]
-          arktest.assertEQ(a[0].unboxed(), 9223372036854775807)
-          arktest.assertEQ(a[1][0].unboxed(), 9007199254740991)
-          arktest.assertEQ(a[1][1].unboxed(), -9007199254740991)
-          arktest.assertEQ(a[2][0].unboxed(), 2147483647)
-          arktest.assertEQ(a[2][1].unboxed(), -9223372036854775808)
+          arktest.assertEQ(a[0], 9223372036854775807)
+          arktest.assertEQ(a[1][0], 9007199254740991)
+          arktest.assertEQ(a[1][1], -9007199254740991)
+          arktest.assertEQ(a[2][0], 2147483647)
+          arktest.assertEQ(a[2][1], -9223372036854775808)
 
     - decl: |-
           enum Color { Red, Green, Blue }
