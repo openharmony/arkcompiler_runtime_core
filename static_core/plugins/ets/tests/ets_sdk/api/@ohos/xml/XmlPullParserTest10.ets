@@ -27,6 +27,7 @@ function main(): int {
     suite.addTest("Testing the XML PullParser with content containing ']]>' within CDATA. Verifies that it handles the input correctly without error.", testXmlPullParserConstructor0015)
     suite.addTest("Testing the XML PullParser with nested CDATA sections.Verifies that it handles nested CDATA sections correctly.", testXmlPullParserConstructor0014)
     suite.addTest("Testing the XML PullParser with a malformed CDATA section. Verifies that it throws a meaningful error for invalid CDATA.", testXmlPullParserConstructor0013)
+    suite.addTest("Testing the XML PullParser with a CDATA section without end. Verifies that it throws a meaningful error for invalid CDATA.", testXmlMethod018)
     suite.addTest("Testing the XML PullParser with names containing special characters.", testXmlPullParserConstructor0008)
     suite.addTest("Testing the XML PullParser with tag names that contain spaces.", testXmlPullParserConstructor0007)
     suite.addTest("Testing the XML PullParser with UTF-8", testXmlPullParserConstructor0021)
@@ -45,9 +46,9 @@ function rawStringToBuffer( str: string ) : ArrayBuffer {
     return arr.buffer as ArrayBuffer
 }
 
-let testString0021 = "";
+let testString = "";
 function func21(name: string, value: string): boolean {
-    testString0021 += name + ':' + value;
+    testString += name + ':' + value;
     return true;
 }
 
@@ -117,8 +118,8 @@ function testXmlPullParserConstructor0013() {
             '    </student>' +
             '    <body>I was parsed!</body>' +
             '</students>'
-        
-        
+
+
         let parser = new xml.XmlPullParser(rawStringToBuffer(testXml), "utf-8");
         let options: xml.ParseOptions = {
             supportDoctype: true,
@@ -363,7 +364,7 @@ function testXmlPullParserConstructor0021() {
     let textEncoder = new util.TextEncoder();
     let arrbuffer = textEncoder.encodeInto(strXml);
     let that = new xml.XmlPullParser(arrbuffer.buffer as object as ArrayBuffer, 'UTF-8');
-    testString0021 = '';
+    testString = '';
     let options: xml.ParseOptions = {
         supportDoctype: true,
         ignoreNameSpace: true,
@@ -371,6 +372,34 @@ function testXmlPullParserConstructor0021() {
     }
     that.parseXml(options);
     let str1 = 'importance:highlogged:truexmlns:h:http://www.w3.org/TR/html4/';
-    arktest.assertEQ(testString0021, str1);
+    arktest.assertEQ(testString, str1);
 }
 
+function func18(name: string, value: string): boolean {
+    testString += name + value;
+    return true;
+}
+
+function testXmlMethod018() {
+    const TAG = 'testXmlMethod018';
+    try {
+        let strXml =
+            '<?xml version="1.0" encoding="UTF-8"?>' +
+            '<note importance="high" logged="true">' +
+            '<company><![CDATA[';
+        let textEncoder = new util.TextEncoder();
+        let uint8 = textEncoder.encodeInto(strXml);
+        let that = new xml.XmlPullParser(uint8.buffer as object as ArrayBuffer);
+        testString = '';
+        let options: xml.ParseOptions = {
+            supportDoctype: true,
+            ignoreNameSpace: true,
+            tagValueCallbackFunction: func18
+        };
+        that.parseXml(options);
+        arktest.assertTrue(false);
+    } catch (err: BusinessError) {
+        arktest.assertEQ(err.toString(), "BusinessError: Cannot find the ']]>' in xml string.");
+        arktest.assertEQ(err.code, 401);
+    }
+}
