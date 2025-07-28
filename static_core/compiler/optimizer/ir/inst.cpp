@@ -270,6 +270,7 @@ unsigned DynamicOperands::Append(Inst *inst)
     if (capacity_ == size_) {
         Reallocate();
     }
+    ASSERT(capacity_ > size_);
     SetInput(size_, Input(inst));
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     new (users_ + capacity_ - size_ - 1) User(false, size_, capacity_);
