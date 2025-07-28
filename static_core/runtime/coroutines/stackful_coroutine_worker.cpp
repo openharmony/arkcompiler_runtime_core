@@ -189,22 +189,24 @@ void StackfulCoroutineWorker::CompleteAllAffinedCoroutines()
     // CC-OFFNXT(G.FMT.04-CPP): project code style
     auto unlock = [](auto &&...locks) { ([&]() NO_THREAD_SAFETY_ANALYSIS { locks.Unlock(); }(), ...); };
 
-    // CC-OFFNXT(G.CTL.03): false positive
-    while (true) {
-        lock(waitersLock_, runnablesLock_);
-        if (runnables_.Size() > 1) {
-            unlock(waitersLock_, runnablesLock_);
-            coroManager_->Schedule();
-        } else if (!waiters_.empty()) {
-            workerCompletionEvent_.SetNotHappened();
-            workerCompletionEvent_.Lock();
-            unlock(waitersLock_, runnablesLock_);
-            coroManager_->Await(&workerCompletionEvent_);
-        } else {
-            unlock(waitersLock_, runnablesLock_);
-            break;
+    do {
+        // CC-OFFNXT(G.CTL.03): false positive
+        while (true) {
+            lock(waitersLock_, runnablesLock_);
+            if (runnables_.Size() > 1) {
+                unlock(waitersLock_, runnablesLock_);
+                coroManager_->Schedule();
+            } else if (!waiters_.empty()) {
+                workerCompletionEvent_.SetNotHappened();
+                workerCompletionEvent_.Lock();
+                unlock(waitersLock_, runnablesLock_);
+                coroManager_->Await(&workerCompletionEvent_);
+            } else {
+                unlock(waitersLock_, runnablesLock_);
+                break;
+            }
         }
-    }
+    } while (GetPandaVM()->RunEventLoop(ark::EventLoopRunMode::RUN_NOWAIT));
 }
 
 void StackfulCoroutineWorker::DisableCoroutineSwitch()

@@ -133,6 +133,12 @@ static bool RegisterTimerModule()
     ani_env *aniEnv = nullptr;
     status = vm->GetEnv(ANI_VERSION_1, &aniEnv);
     ASSERT(status == ANI_OK);
+#ifndef PANDA_TARGET_OHOS
+    auto jsEnv = InteropCtx::Current()->GetJSEnv();
+    napi_value global = nullptr;
+    napi_get_global(jsEnv, &global);
+    ark::ets::interop::js::helper::Init(jsEnv, global);
+#endif
     return TimerModule::Init(aniEnv);
 }
 
@@ -142,7 +148,7 @@ static void RegisterEventLoopModule(EtsCoroutine *coro)
     ASSERT(coro == coro->GetPandaVM()->GetCoroutineManager()->GetMainThread());
     coro->GetPandaVM()->CreateCallbackPosterFactory<EventLoopCallbackPosterFactoryImpl>();
     coro->GetPandaVM()->SetRunEventLoopFunction(
-        [](EventLoopRunMode mode) { EventLoop::RunEventLoop(static_cast<EventLoopRunMode>(mode)); });
+        [](EventLoopRunMode mode) { return EventLoop::RunEventLoop(static_cast<EventLoopRunMode>(mode)); });
     coro->GetPandaVM()->SetWalkEventLoopFunction(
         [](WalkEventLoopCallback &cb, void *args) { EventLoop::WalkEventLoop(cb, args); });
 }

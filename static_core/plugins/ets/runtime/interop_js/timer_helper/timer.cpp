@@ -19,6 +19,8 @@
 #include <unordered_map>
 #include <iostream>
 
+#include "plugins/ets/runtime/interop_js/event_loop_module.h"
+
 #if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wshadow"
@@ -43,7 +45,7 @@ static std::unordered_map<uint32_t, TimerInfo *> g_timers;
 // NOLINTEND(fuchsia-statically-constructed-objects)
 
 TimerInfo::TimerInfo(napi_env env, napi_ref cb, std::vector<napi_ref> cbArgs, bool repeat)
-    : env(env), cb(cb), cbArgs(std::move(cbArgs)), repeat(repeat), timer(new uv_timer_t())
+    : env(env), cb(cb), cbArgs(std::move(cbArgs)), repeat(repeat), timer(EventLoop::CreateTimer())
 {
     timerId = g_nextTimerId++;
     g_timers[timerId] = this;
@@ -60,8 +62,7 @@ TimerInfo::~TimerInfo()
         napi_delete_reference(env, ref);
     }
     g_timers.erase(timerId);
-    uv_timer_stop(timer);
-    uv_close(reinterpret_cast<uv_handle_t *>(timer), TIMER_CLOSE_CALLBACK);
+    EventLoop::CloseTimer(timer);
 }
 
 static napi_value RegisterTimer(napi_env env, napi_ref cb, std::vector<napi_ref> cbArgs, int32_t timeout, bool repeat)

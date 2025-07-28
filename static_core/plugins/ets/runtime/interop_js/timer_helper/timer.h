@@ -37,9 +37,6 @@ struct TimerInfo {
     bool repeat;
     uv_timer_t *timer;
     uint32_t timerId;
-    static constexpr uv_close_cb TIMER_CLOSE_CALLBACK = [](uv_handle_t *handle) {
-        delete reinterpret_cast<uv_timer_t *>(handle);
-    };
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
 

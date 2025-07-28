@@ -35,6 +35,11 @@ function runTest() {
     RunTasksWithJsCallTest();
     let CreateEAWorkerWithoutInterop = etsVm.getFunction('Leaworker_test/ETSGLOBAL;', 'CreateEAWorkerWithoutInterop');
     CreateEAWorkerWithoutInterop();
+
+    let RunSetTimeoutTest = etsVm.getFunction('Leaworker_test/ETSGLOBAL;', 'RunSetTimeoutTest');
+    RunSetTimeoutTest();
+    let RunNewCoroInSetTimeoutTest = etsVm.getFunction('Leaworker_test/ETSGLOBAL;', 'RunNewCoroInSetTimeoutTest');
+    RunNewCoroInSetTimeoutTest();
 }
 
 runTest();

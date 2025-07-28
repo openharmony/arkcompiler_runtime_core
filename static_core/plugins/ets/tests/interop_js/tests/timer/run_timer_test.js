@@ -31,7 +31,7 @@ function runTest(test, isExternalTimer) {
 		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
 	};
 	if (isExternalTimer) {
-		etsOpts['coroutine-enable-features:enable-external-timer'] = 'true'
+		etsOpts['coroutine-enable-features:enable-external-timer'] = 'true';
 	}
 	if (!etsVm.createRuntime(etsOpts)) {
 		throw Error('Cannot create ETS runtime');
