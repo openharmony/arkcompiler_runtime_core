@@ -200,6 +200,112 @@ with values that can be determined at compile time.
 
 |
 
+.. _Type of Expression:
+
+Type of Expression
+==================
+
+.. meta:
+    frontend_status: Done
+
+Every expression written in the |LANG| programming language has a type that 
+is evaluated at compile time.
+
+In most contexts, an expression must be *compatible* with the type expected in
+a context. This type is called *target type*. If no target type is available
+in a context, then the expression is called a *standalone expression*:
+
+.. code-block:: typescript
+   :linenos:
+
+    let a = expr // no target type is available 
+
+    function foo() {
+        expr // no target type is available 
+    }
+
+Otherwise, the expression is *non-standalone*:
+
+.. index::
+   inferred type
+   expression
+   type inference
+   compatible expression
+   standalone expression
+   context
+   target type
+
+.. code-block-meta:
+   skip
+
+.. code-block:: typescript
+   :linenos:
+
+    let a: number = expr // target type of 'expr' is number
+
+    function foo(s: string) {}
+    foo(expr) // target type of 'expr' is string
+
+The type of some expressions cannot be inferred (see :ref:`Type Inference`)
+from the expression itself (see :ref:`Object Literal` as an example).
+A :index:`compile-time error` occurs if such an expression
+is used as a *standalone expression*:
+
+.. code-block:: typescript
+   :linenos:
+
+    class P { x: number, y: number }
+
+    let x = { x: 10, y: 10 } // standalone object literal - compile time error
+    let y: P = { x: 10, y: 10 } // OK, type of object literal is inferred
+
+The evaluation of an expression type requires completing the following steps:
+
+#. Collect information for type inference (type annotation,
+   generic constraints, etc);
+
+#. Perform :ref:`Type Inference`;
+
+#. If the expression type is not yet inferred on a previous step, and the
+   expression is a literal in the general sense, including :ref:`Array Literal`,
+   then make an attempt to evaluate the type from the expression itself.
+
+.. index::
+   expression
+   standalone expression
+   non-standalone expression
+   context
+   inferred type
+
+A :index:`compile-time error` occurs if none of these steps produces an
+appropriate expression type.
+
+If the expression  type is ``readonly``, then the target type must
+also be ``readonly``. Otherwise, a :index:`compile-time error` occurs:
+
+.. code-block:: typescript
+   :linenos:
+
+      let readonly_array: readonly number[] = [1, 2, 3]
+
+      foo1(readonly_array) // OK
+      foo2(readonly_array) // compile-time error
+
+      function foo1 (p: readonly number[]) {}
+      function foo2 (p: number[]) {}
+
+      let writable_array: number [] = [1, 2, 3]
+      foo1 (writable_array) // OK, as always safe
+
+.. index::
+   expression
+   readonly
+   target type
+   conversion
+   type
+
+|
+
 .. _Normal and Abrupt Completion of Expression Evaluation:
 
 Normal and Abrupt Completion of Expression Evaluation
@@ -600,7 +706,10 @@ of the generic method or function. Otherwise, a :index:`compile-time error`
 occurs.
 
 A :index:`compile-time error` also occurs if a name referred by *qualifiedName*
-is undefined or inaccessible.
+is one of the following:
+
+-  Undefined or inaccessible;
+-  Named constructor (see :ref:`Constructor Names`).
 
 Type of a *named reference* is the type of an expression.
 
@@ -620,9 +729,9 @@ Type of a *function reference* is derived from the function signature:
 .. code-block:: typescript
    :linenos:
 
-   function foo(n: number): string {}
-
+   function foo(n: number): string { return n.toString() }
    let func = foo // type of func is '(n: number) => string'
+   let x = func(1)  // foo() called via reference
 
 A *function reference* can refer to a generic function but only
 if :ref:`Explicit Generic Instantiations` is present, otherwise
@@ -644,10 +753,11 @@ used in a named reference:
 
    function foo1(n: number) {}
    function foo2(s: string) {}
-   overload foo( foo1, foo2 )
+   overload foo { foo1, foo2 }
 
-   let x = foo // compile-time error, ambiguity
-   let y = foo2 // ok
+   foo(1)          // OK, overload call
+   let x = foo     // Error: ref to overload
+   let y = foo2    // ok, ref to foo2
 
 A name of a :ref:`Function with Overload Signatures` can be used
 as named reference. The type of a *function reference* is derived
@@ -659,7 +769,7 @@ from a signature of implementation body
 
    function foo(n: number)
    function foo(s: string)
-   function foo(...x: Any[]): Any {)
+   function foo(...x: Any[]): Any {}
 
    let x = foo // ok, type is (...x: Any[]) => Any
 
@@ -679,7 +789,7 @@ Type of a *method reference* is derived from the method signature:
 
     class C {
       static foo(n: number) {}
-      bar (s: string): boolean {}
+      bar (s: string): boolean { return true }
     }
 
     // Method reference to a static method
@@ -728,7 +838,7 @@ used in a named reference:
 
     class C {
         foo1(n: number) {}
-        foo2(s: string)
+        foo2(s: string) {}
         overload foo { foo1, foo2 }
     }
 
@@ -922,7 +1032,7 @@ The following example illustrates possible kinds of context:
     let array: number[] = [1, 2, 3]   // assignment context
     function foo (array: number[]) {}
     foo ([1, 2, 3])                   // call context
-    [1, 2, 3] as number[]             // casting conversion
+    let b = [1, 2, 3] as number[]             // casting conversion
 
 .. index::
    type inference
@@ -972,9 +1082,12 @@ union type. Otherwise, a :index:`compile-time error` occurs:
 .. code-block:: typescript
    :linenos:
 
-    let union_of_arrays: number[] | string[] = [1, 2] // OK, type of literal is number[]
+    let union_of_arrays_int: int[] | string[] = [1, 2] // OK, literal is int[]
+                                                       // Compatible with  union
+    let union_of_arrays: number[] | string[] = [1, 2] // Error, literal is int[]
+                                                      // incompatible with union
     let incorrect_union_of_arrays: number[] | string[] = [1, 2, "string"]
-     /* compile-time error: (number|string)[] (type of the literal) is not compatible with
+     /* Error: (number|string)[] (type of the literal) is not compatible with
         number[] | string[] (type of the variable)
      */
 
@@ -1006,6 +1119,9 @@ compatible with the array element type, then an array literal is of
    array element
    array literal
 
+If the type used in the context is a readonly array, then an array literal
+is of readonly array type.
+
 |
 
 .. _Array Type Inference from Types of Elements:
@@ -1016,10 +1132,10 @@ Array Type Inference from Types of Elements
 .. meta:
     frontend_status: Done
 
-Where no context is set and thus the type of an array literal cannot be inferred
-from the context (see :ref:`Type of Expression`), the type of array literal
-``[`` ``expr``:sub:`1`, ``...`` , ``expr``:sub:`N` ``]`` is inferred from the
-initialization expression instead by using the following algorithm:
+Where no context is set, and thus the type of an array literal cannot be
+inferred from the context (see :ref:`Type of Expression`), the type of array
+literal ``[`` ``expr``:sub:`1`, ``...`` , ``expr``:sub:`N` ``]`` is inferred
+from the initialization expression instead by using the following algorithm:
 
 
 .. #. If there is no expression (*N == 0*), then type is ``Object[]``.
@@ -1039,12 +1155,12 @@ initialization expression instead by using the following algorithm:
    then the array literal type is ``T[]``.
 
 #. Otherwise, the array literal type is constructed as the union type
-   ``T``:sub:1 ``| ... | T``:sub:N,
-   where ``T``:sub:i is the type of *expr*:sub:i, and then:
+   ``T``:sub:1 ``| ... | T``:sub:`N`,
+   where ``T``:sub:`i` is the type of *expr*:sub:`i`, and then:
 
-    - If ``T``:sub:i is a literal type, then it is replaced for its supertype;
+    - If ``T``:sub:`i` is a literal type, then it is replaced for its supertype;
 
-    - If ``T``:sub:i is a union type comprised of literal types, then each
+    - If ``T``:sub:`i` is a union type comprised of literal types, then each
       constituent literal type is replaced for its supertype.
 
     - :ref:`Union Types Normalization` is applied to the resultant union type
@@ -1066,6 +1182,7 @@ initialization expression instead by using the following algorithm:
 .. code-block:: typescript
    :linenos:
 
+    type A = number
     let u : "A" | "B" = "A"
 
     let a = []                        // compile-time error, type cannot be inferred
@@ -1768,9 +1885,10 @@ method, or constructor. A sequence of types of these values is the type of the
 
     let tuple1: [number, string, boolean] = [1, "2", true]
     let tuple2: [number, string] = [4, "5"]
-    let tuple3: [number, string, boolean, number, string] = [...tuple1, ...tuple2] // spread tuple1 and tuple2 elements
+     // spread tuple1 and tuple2 elements
+    let tuple3: [number, string, boolean, number, string] = [...tuple1, ...tuple2]
        // while building new tuple object during compile-time
-    console.log(tuple3) // prints [1, "2", true, 4, "5"]
+    console.log(tuple3) // prints [1, 2, true, 4, 5]
 
     function bar (...tuple: [number, string]) {
       console.log (tuple)
@@ -1781,7 +1899,7 @@ method, or constructor. A sequence of types of these values is the type of the
       console.log ([...a1, 42, ...a2])
         // such array literal will be built at runtime
     }
-    run_time_spread_application2 (tuple1, tuple2) // prints [1, "2", true, 42, 4, "5"]
+    run_time_spread_application2 (tuple1, tuple2) // prints [1, 2, true, 42, 4, "5"]
 
     class A<T> implements Iterable<T|undefined> { // variables of type A can be spread
         $_iterator(): Iterator<T|undefined>  {
@@ -1964,7 +2082,7 @@ below:
     }
     class AnotherClass {
         anotherMethod() {
-            const object: aClass = { // Object literal
+            const obj: aClass = { // Object literal
               method () {
                   this // type of 'this' is aClass
               },
@@ -2504,28 +2622,38 @@ Array Indexing Expression
     frontend_status: Partly
     todo: implement floating point index support - #14001
 
-*Index expression* for array indexing must be of a numeric type (see
-:ref:`Numeric Types`). Otherwise, a :index:`compile-time error` occurs.
+*Index expression* for array indexing must be one of integer types, namely
+``byte``, ``short``, or ``int``. Otherwise, a :index:`compile-time error`
+occurs.
 
-If an *index expression* is of type ``number`` or other floating-point type,
-and the fractional part differs from 0, then errors occur as follows:
-
--  A runtime error, if the situation is identified during program execution;
-   and
--  A :index:`compile-time error`, if the situation is detected during
-   compilation.
 
 .. index::
    array indexing
-   numeric type
+   integer type
    index expression
-   floating-point type
    runtime error
    compilation
 
-A numeric types conversion (see :ref:`Widening Numeric Conversions`) is
-performed on an *index expression* to ensure that the resultant type is ``int``.
-Otherwise, a :index:`compile-time error` occurs.
+The conversion of ``byte`` and  ``short`` types (see
+:ref:`Widening Numeric Conversions`) is performed on an *index expression* to
+ensure that the resultant type is ``int``. Otherwise, a
+:index:`compile-time error` occurs.
+
+Other numeric types (``long``, ``float``, and ``double``/``number``) must be
+converted explicitly by applying the methods defined in the classes of the
+:ref:`Standard Library`.
+
+.. code-block:: typescript
+   :linenos:
+
+    const a = ["Alice", "Bob", "Carol"]
+    function demo (l: long, f: float, d: double, n: number) {
+        console.log (
+           a[l.toInt()], a[f.toInt()],
+           a[d.toInt()], a[n.toInt()]
+        ) // OK to access array using index expression conversion methods
+    }
+
 
 If the chaining operator '``?.``' (see :ref:`Chaining Operator`) is present,
 and after its application the type of *object reference expression*
@@ -2565,15 +2693,15 @@ array elements can be modified by changing the resultant variable fields:
         field: number = 42
     }
     const objects: RefType[] = [new RefType(), new RefType()]
-    const object = objects [1]
-    object.field = 777            // change the field in the array element
+    const obj = objects [1]
+    obj.field = 777            // change the field in the array element
     console.log(objects[0].field) // prints 42
     console.log(objects[1].field) // prints 777
 
     let an_array = [1, 2, 3]
     let element = an_array [3.5] // compile-time error as index is not integer
     function foo (index: number) {
-       let element = an_array [index] // runtime error if index is not integer
+       let element = an_array [index] // compile-time error as index is not integer
     }
 
 An array indexing expression evaluated at runtime behaves as follows:
@@ -2591,7 +2719,7 @@ An array indexing expression evaluated at runtime behaves as follows:
 .. code-block:: typescript
    :linenos:
 
-    function setElement(names: string[], i: number, name: string) {
+    function setElement(names: string[], i: int, name: string) {
         names[i] = name // runtime error, if 'i' is out of bounds
     }
 
@@ -2618,8 +2746,8 @@ String Indexing Expression
     frontend_status: Partly
     todo: return type is string
 
-*Index expression* for array indexing must be of a numeric type (see
-:ref:`Numeric Types`). The same rules apply as those for
+*Index expression* for string indexing must be of one of integer types, namely
+``byte``, ``short``, or ``int``. The same rules apply as in
 :ref:`Array Indexing Expression`.
 
 If the index expression value of a string is less than zero, greater than
@@ -2965,7 +3093,7 @@ A :index:`compile-time error` occurs if ``typeReference`` is a type parameter.
 
 **Note**. If a *class instance creation expression* with no argument is used
 as object reference in a method call expression, then empty parentheses
-'*()*' are to be used.
+'``()``' are to be used.
 
 .. code-block:: typescript
    :linenos:
@@ -3041,14 +3169,14 @@ by :ref:`Type Erasure`.
     let c = new C<number>
     c.foo()
 
-The ``type`` of an ``instanceof`` expression is used for *smart typing*
-(see :ref:`Smart Types`) if applicable.
+The ``type`` of an ``instanceof`` expression is used for *smart cast*
+(see :ref:`Smart Casts and Smart Types`) if applicable.
 
 .. index::
    instanceof expression
    subtype
-   type erasure
-   smart typing
+   type cast
+   smart cast
    instantiated generic type
    generic type
    type name
@@ -3191,7 +3319,7 @@ example below:
    :linenos:
 
    enum NumE {A, B}
-   enums StrE {S1 = "aaa", S2 = "bbb"}
+   enum StrE {S1 = "aaa", S2 = "bbb"}
 
    let x = 1 as NumE // ok, it is E.B
    let y = 2 as NumE // compile-time error
@@ -3265,7 +3393,7 @@ This situation is represented in the following example:
 
 :ref:`Instanceof Expression` can be used to prevent runtime errors. Moreover,
 in many cases :ref:`Instanceof Expression` makes *cast conversion* unnecessary
-as *smart casting* is applied (see :ref:`Smart Types`):
+as *smart cast* is applied (see :ref:`Smart Casts and Smart Types`):
 
 .. code-block:: typescript
    :linenos:
@@ -3314,8 +3442,6 @@ The evaluation of a *typeof expression* starts with the ``expression``
 evaluation. If this evaluation causes an error, then the ``typeof`` expression
 evaluation terminates abruptly. Otherwise, the value of a ``typeof expression``
 is defined as follows:
-
-|
 
 1. **Expression type defined at compile time**
 
@@ -3830,10 +3956,10 @@ Type of the operand expression with the unary operator '``+``' must
 be convertible  (see :ref:`Implicit Conversions`) to a numeric type (see
 :ref:`Numeric Types`). Otherwise, a :index:`compile-time error` occurs.
 
-The numeric types conversion is
-performed on the operand to ensure that the resultant type is that of the
-unary plus expression. The result of a unary plus expression is always a value,
-not a variable (even if the result of the operand expression is a variable).
+A numeric types conversion is performed on the operand to ensure that the
+resultant type is that of the unary plus expression. The result of a unary plus
+expression is always a value, not a variable (even if the result of the operand
+expression is a variable).
 
 Type of the *unary plus expression* is the type of the expression provided.
 
@@ -3866,9 +3992,8 @@ Type of the operand expression with the unary operator '``-``' must
 be convertible (see :ref:`Widening Numeric Conversions`) to a numeric type (see
 :ref:`Numeric Types`). Otherwise, a :index:`compile-time error` occurs.
 
-The numeric types conversion
-is performed on the operand to ensure that the resultant type is that of the
-unary minus expression.
+A numeric types conversion is performed on the operand to ensure that the
+resultant type is that of the unary minus expression.
 The result of a unary minus expression is a value, not a variable (even if the
 result of the operand expression is a variable).
 
@@ -4041,7 +4166,7 @@ Type of each operand in a multiplicative operator must be convertible (see
 :ref:`Numeric Operator Contexts`) to a numeric type (see :ref:`Numeric Types`).
 Otherwise, a :index:`compile-time error` occurs.
 
-The numeric types conversion (see :ref:`Widening Numeric Conversions`)
+A numeric types conversion (see :ref:`Widening Numeric Conversions`)
 is performed on both operands to ensure that the resultant type is the type of
 the multiplicative expression.
 
@@ -4057,7 +4182,6 @@ variable (even if the operand expression is a variable).
    numeric type
    multiplicative operator
    multiplicative expression
-   numeric type
    value
    unary bitwise complement expression
    operand expression
@@ -4089,7 +4213,7 @@ Integer multiplication is associative when all operands are of the same type.
 
 Floating-point multiplication is not associative.
 
-Type of a *multiplication expression* is the 'heaviest' (see
+Type of a *multiplication expression* is the 'largest' (see
 :ref:`Numeric Types`) type of its operands.
 
 If overflow occurs during integer multiplication, then:
@@ -4276,7 +4400,7 @@ The evaluation of a floating-point division operator '``/``' never throws an
 error despite possible overflow, underflow, division by zero, or loss of
 information.
 
-The type of the *division expression* is the '*heaviest*' numeric type (see
+The type of the *division expression* is the '*largest*' numeric type (see
 :ref:`Numeric Types`) of its operands.
 
 
@@ -4316,7 +4440,7 @@ The remainder operator in |LANG| accepts floating-point operands (unlike in
 C and C++).
 
 The remainder operation on integer operands produces a result value, i.e.,
-:math:`(a/b)*b+(a\%b)` equals *a*. The numeric type conversion on remainder
+:math:`(a/b)*b+(a\%b)` equals *a*. Numeric type conversion on remainder
 operation is discussed in :ref:`Widening Numeric Conversions`.
 
 .. index::
@@ -4416,7 +4540,7 @@ The evaluation of the floating-point remainder operator '``%``' never throws
 an error, even if the right-hand operand is zero. Overflow, underflow, or
 loss of precision cannot occur.
 
-The type of the *remainder expression* is the '*heaviest*' numeric type (see
+The type of the *remainder expression* is the '*largest*' numeric type (see
 :ref:`Numeric Types`) of its operands.
 
 
@@ -4493,7 +4617,7 @@ Type of each operand of the binary operator '``-``' must be convertible
 :ref:`Numeric Types`) in all cases. Otherwise, a :index:`compile-time error`
 occurs.
 
-Type of *Additive expression* is ``string`` or the 'heaviest' (see
+Type of *Additive expression* is ``string`` or the 'largest' (see
 :ref:`Numeric Types`) type of its operands.
 
 
@@ -4552,7 +4676,7 @@ Additive Operators for Numeric Types
    frontend_status: Done
    todo: The sum of two infinities of opposite sign should be NaN, but it is -NaN
 
-The numeric types conversion (see :ref:`Widening Numeric Conversions`)
+A numeric types conversion (see :ref:`Widening Numeric Conversions`)
 performed on a pair of operands ensures that both operands are of a numeric
 type. If the conversion fails, then a :index:`compile-time error` occurs.
 
@@ -4732,6 +4856,8 @@ operand is converted to ``int``.
 If both operands are of type ``bigint``, then no conversion is required.
 A :index:`compile-time error` occurs if one operand is type ``bigint``, and the
 other one is a numeric type.
+Also, a :index:`compile-time error` occurs if '``>>>``' (unsigned right shift)
+is applied to operands of type ``bigint``.
 
 The result of a *shift expression* is of the type to which its first operand
 converted.
@@ -4851,7 +4977,7 @@ relational expression depends on types of operands. It is a
 types described below.
 
 .. index::
-   numerical relational operator
+   numeric relational operator
    relational operator
    relational expression
    boolean type
@@ -4861,35 +4987,51 @@ types described below.
 
 |
 
-.. _Numerical Relational Operators:
+.. _Numeric Conversions for Operands:
 
-Numerical Relational Operators
-==============================
+Numeric Conversions for Operands
+================================
 
 .. meta:
     frontend_status: Done
 
-Type of each operand in a numerical relational operator must be convertible
-to a numeric type (see :ref:`Numeric Types`) or to ``bigint`` type.
+If at least one operand is of ``bigint`` type, then the other operand is
+converted to ``bigint`` by using a ``BigInt()`` function. Otherwise, numeric
+types conversion (see :ref:`Widening Numeric Conversions`) is performed on each
+operand to ensure all operands are of the the largest numeric type of operands
+(see :ref:`Numeric Types`).
+
+
+|
+
+.. _Numeric Relational Operators:
+
+Numeric Relational Operators
+============================
+
+.. meta:
+    frontend_status: Done
+
+Type of each operand in a numeric relational operator must be convertible
+to a numeric type (see :ref:`Numeric Types`) or to a ``bigint`` type.
 Otherwise, a :index:`compile-time error` occurs.
 
-Numeric types conversions (see :ref:`Widening Numeric Conversions`) are
-performed on each operand. If at least one operand is of ``bigint`` type, then
-the other operand is converted to ``bigint`` by using a ``BigInt()`` function.
+Numeric conversions for operands (see :ref:'Numeric conversions for operands')
+are performed on all operands. 
 
-Depending on the heaviest type of operands, a comparison is performed as follows:
+Depending on the converted type of operands, a comparison is performed as follows:
 
--  Signed integer comparison, if the converted type of the operand is ``int``
+-  Signed integer comparison, if the converted operand type is ``int``
    or ``long``.
 
--  Floating-point comparison, if the converted type of the operand is ``float``
+-  Floating-point comparison, if the converted operand type is ``float``
    or ``double``.
 
--  Bigint comparison, if the converted type of the operand is ``bigint``.
+-  Bigint comparison, if the converted operand type is ``bigint``.
 
 
 .. index::
-   numerical relational operator
+   numeric relational operator
    operand
    conversion
    numeric type
@@ -5019,7 +5161,7 @@ Enumeration Relational Operators
     frontend_status: Done
 
 If both operands are of the same Enumeration type (see :ref:`Enumerations`),
-then :ref:`Numerical Relational Operators` or :ref:`String Relational Operators`
+then :ref:`numeric Relational Operators` or :ref:`String Relational Operators`
 are used depending on the kind of enumeration constant value
 ( :ref:`Enumeration Integer Values` or :ref:`Enumeration String Values`).
 Otherwise, a :index:`compile-time error` occurs.
@@ -5085,13 +5227,17 @@ A comparison that uses the operators '``==``' and '``===``' is evaluated to
 - Operands of :ref:`Type string` or string literal type
   (see :ref:`String Literal Types`) with the same contents;
 
-- Operands of :ref:`Type bigint` of the same value;
+- Operands after a numeric conversion (see
+  :ref:`Numeric Conversions for Operands`) are of :ref:`Type bigint` of the
+  same value;
 
 - Operands of :ref:`Type char` of the same value (both operands represent the
   same Unicode code point);
 
-- Operands of :ref:`Numeric Types` of the same value except ``NaN``
-  (see :ref:`Numerical Equality Operators` for details);
+- Operands after a numeric conversion (see
+  :ref:`Numeric conversions for operands`) are of :ref:`Numeric Types` of the
+  same value except ``NaN`` (see :ref:`numeric Equality Operators` for
+  details);
 
 - Operands of the same enumeration type (see :ref:`Enumerations`)
   that have the same numeric values or the same string contents,
@@ -5174,15 +5320,15 @@ An equality with values of two union types is represented in the example below:
 
 |
 
-.. _Numerical Equality Operators:
+.. _Numeric Equality Operators:
 
-Numerical Equality Operators
-============================
+Numeric Equality Operators
+==========================
 
 .. meta:
     frontend_status: Done
 
-Type of each operand in a numerical equality operator must be convertible
+Type of each operand in a numeric equality operator must be convertible
 (see :ref:`Implicit Conversions`) to a numeric type (see :ref:`Numeric Types`).
 Otherwise, a :index:`compile-time error` occurs.
 
@@ -5200,7 +5346,7 @@ The floating-point equality test must be performed in accordance with the
 following IEEE 754 standard rules:
 
 .. index::
-   numerical equality
+   numeric equality
    value equality
    operator
    numeric type
@@ -5239,7 +5385,6 @@ or floating-point operands other than ``NaN``:
    right-hand-side operand, then the operator '``!=``' or '``!==``' produces
    the value ``true``. Otherwise, the result is ``false``.
 
-The following example illustrates *numerical equality*:
 
 .. code-block:: typescript
    :linenos:
@@ -5259,7 +5404,7 @@ The following example illustrates *numerical equality*:
    value equality
    floating-point value
    floating-point operand
-   numerical equality
+   numeric equality
    positive infinity
    negative infinity
    positive zero
@@ -5422,8 +5567,8 @@ If the type of one or both operands is ``double`` or ``float``, then the operand
 or operands are truncated first to the appropriate integer type.
 If the type of any operand is ``byte`` or ``short``, then the operand is
 converted to ``int``.
-If operands are of different integer types, then the operand of the smaller type
-is converted to the larger type (see :ref:`Numeric types`) by using
+If operands are of different integer types, then the operand of a smaller type
+is converted to a larger type (see :ref:`Numeric types`) by using
 :ref:`Widening Numeric Conversions`.
 If both operands are of type ``bigint``, then no conversion is required.
 A :index:`compile-time error` occurs if one operand of type ``bigint``, and the
@@ -6606,42 +6751,9 @@ variable is implied to change:
 |     }                                         |              |
 +-----------------------------------------------+--------------+
 
-In order to make lambdas behave as required, the language implementation
-can act as follows:
+An overview of how the mechanism can be implemented is provided in
+:ref:`Runtime Evaluation of Lambda Expressions Implementation`.
 
--  Replace the captured variable’s type for a proxy class that contains an
-   original reference (x: T for x: Proxy<T>; x.ref = original-ref) if that
-   captured variable is of non-value type (see :ref:`Value Types`).
-
-If the captured variable is defined as ``const``, then proxying is not
-required.
-
-If the captured formal parameter can be neither boxed nor proxied, then
-the implementation can require addition of a local variable as follows:
-
-.. index::
-   lambda
-   implementation
-   predefined value type
-   proxy class
-   captured variable
-   captured variable type
-   proxying
-   local variable
-   variable
-
-+-----------------------------------+-----------------------------------+
-|   Source Code                     |   Pseudo Code                     |
-+===================================+===================================+
-| .. code-block:: typescript        | .. code-block:: typescript        |
-|    :linenos:                      |    :linenos:                      |
-|                                   |                                   |
-|     function foo(y: int) {        |     function foo(y: int) {        |
-|     let x = () => { return y+1 }  |     let y$: Int = y               |
-|     console.log(x())              |     let x = () => { return y$+1 } |
-|     }                             |     console.log(x())              |
-|                                   |     }                             |
-+-----------------------------------+-----------------------------------+
 
 |
 

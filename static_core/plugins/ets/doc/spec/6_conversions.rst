@@ -18,136 +18,8 @@ Contexts and Conversions
 .. meta:
     frontend_status: Done
 
-This Chapter defines evaluation of type of expressions depending
-on expression contexts and set of conversions that can be applied
-to expressions.
-
-.. _Type of Expression:
-
-Type of Expression
-******************
-
-.. meta:
-    frontend_status: Done
-
-Every expression written in the |LANG| programming language has a type that 
-is evaluated at compile time.
-
-In most contexts, an expression must be *compatible* with a type expected in
-that context. This type is called the *target type*.
-
-If no target type is available in the context, then the expression is called a
-*standalone expression*:
-
-.. code-block:: typescript
-   :linenos:
-
-    let a = expr // no target type is available 
-
-    function foo() {
-        expr // no target type is available 
-    }
-
-Otherwise, the expression is *non-standalone*:
-
-.. index::
-   inferred type
-   expression
-   type inference
-   compatible expression
-   standalone expression
-   context
-   target type
-
-.. code-block-meta:
-   skip
-
-.. code-block:: typescript
-   :linenos:
-
-    let a: number = expr // target type of 'expr' is number
-
-    function foo(s: string) {}
-    foo(expr) // target type of 'expr' is string
-
-The type of some expressions cannot be inferred (see :ref:`Type Inference`)
-from the expression itself (see :ref:`Object Literal` as an example).
-A :index:`compile-time error` occurs if such an expression
-is used as a *standalone expression*:
-
-.. code-block:: typescript
-   :linenos:
-
-    class P { x: number, y: number }
-
-    let x = { x: 10, y: 10 } // standalone object literal - compile time error
-    let y: P = { x: 10, y: 10 } // OK, type of object literal is inferred
-
-There are two ways to facilitate the compatibility of a *non-standalone
-expression* with its surrounding context:
-
-#. The type of some non-standalone expressions can be inferred from the
-   target type (a type of expression can be different in different contexts).
-
-#. In the :ref:`Assignment-like Contexts` inferred expression type
-   can be different from the target type, then
-   performing an implicit *conversion* can ensure :ref:`Assignability`.
-   The conversion from type ``S`` to type ``T`` causes a type ``S`` expression
-   to be handled as a type ``T`` expression at compile time.
-
-.. index::
-   expression
-   standalone expression
-   non-standalone expression
-   compatible type
-   compatibility
-   surrounding context
-   context
-   inferred type
-   conversion
-   assignability
-   assignable type
-   compile time
-
-A :index:`compile-time error` occurs if neither produces an appropriate
-expression type.
-
-The rules that determine whether a *target type* allows an implicit
-*conversion* vary for different kinds of contexts and types of expressions.
-The *target type* can influence not only the type of the expression but also,
-in some cases, its runtime behavior.
-
-Some cases of conversion require action at runtime to check the
-validity of conversion, or to translate the runtime expression value
-into a form that is appropriate for the new type ``T``.
-
-.. index::
-   runtime behavior
-   expression
-   expression type
-   expression value
-   target type
-   context
-   runtime behavior
-   value
-   conversion
-
-If the type of the expression is ``readonly``, then the target type must
-also be ``readonly``. Otherwise, a :index:`compile-time error` occurs:
-
-.. code-block:: typescript
-   :linenos:
-
-      let readonly_array: readonly number[] = [1, 2, 3]
-
-      foo1(readonly_array) // OK
-      foo2(readonly_array) // compile-time error
-
-      function foo1 (p: readonly number[]) {}
-      function foo2 (p: number[]) {}
-
-      let writable_array: number [] = [1, 2, 3]
-      foo1 (writable_array) // OK, as always safe
+This Chapter defines expression contexts and conversions that can be applied
+to expressions in different contexts.
 
 Contexts can be of the following kinds:
 
@@ -157,22 +29,6 @@ Contexts can be of the following kinds:
 
 -  :ref:`Numeric Operator Contexts` with all numeric operators ('``+``', '``-``', etc.).
 
-.. index::
-   expression
-   readonly
-   target type
-   assignment-like context
-   assignment
-   expression value
-   string concatenation
-   concatenation
-   context
-   operator
-   numeric operator
-   conversion
-   type
-
-|
 
 .. _Assignment-like Contexts:
 
@@ -448,7 +304,7 @@ Widening Numeric Conversions
   :ref:`Numeric Types`);
 
 - Values of *enumeration* type (if enumeration constants of this type are
-  of a numeric type) to the same or a wider numeric type.
+  of a numeric type) to the same or a larger numeric type.
 
 .. index::
    widening
@@ -602,7 +458,7 @@ methods for *numeric cast conversions*:
 .. code-block:: typescript
    :linenos:
 
-    function process_int(an_int: int) { ... }
+    function process_int(an_int: int) { /* ... */ }
 
     let pi = 3.14
     process_int(pi.toInt())

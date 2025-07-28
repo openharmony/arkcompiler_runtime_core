@@ -49,7 +49,7 @@ Type of Standalone Expression
     frontend_status: Done
 
 *Standalone expression* (see :ref:`Type of Expression`) is an expression for
-which there is no target type in the context where expression is used.
+which there is no target type in the context where the expression is used.
 
 The type of a *standalone expression* is determined as follows:
 
@@ -267,7 +267,7 @@ Subtyping
 subtype of ``T`` (recorded as ``S<:T``), means that any object of type
 ``S`` can be safely used in any context to replace an object of type ``T``.
 The opposite relation (recorded as ``T:>S``) is called *supertype* relationship.
-Each type is its own subtype and supertype (``S<:S``).
+Each type is its own subtype and supertype (``S<:S`` and ``S:>S``).
 
 By the definition of ``S<:T``, type ``T`` belongs to the set of *supertypes*
 of type ``S``. The set of *supertypes* includes all *direct supertypes*
@@ -276,10 +276,24 @@ More formally speaking, the set is obtained by reflexive and transitive
 closure over the direct supertype relation.
 
 If a relationship of two types is not described in one of the following
-sections, then the types are not related to each other. Specifically,
-two :ref:`Resizable Array Types` and two :ref:`Tuple Types`
-are not related to each other, except where they are identical
-(see :ref:`Type Identity`).
+sections, then the types are not related to each other. Specifically, two
+:ref:`Resizable Array Types` and two :ref:`Tuple Types` are not related to each
+other, except where they are identical (see :ref:`Type Identity`).
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base {}
+    class Derived extends Base {}
+
+    function not_a_subtype (
+       ab: Array<Base>, ad: Array<Derived>,
+       tb: [Base, Base], td: [Derived, Derived],
+    ) {
+       ab = ad // Compile-time error
+       tb = td // Compile-time error
+    }
+
 
 .. index::
    subtyping
@@ -357,11 +371,11 @@ with *n*>0) are **all** of the following:
 The direct supertype of a type parameter is the type specified as the
 constraint of that type parameter.
 
-When some generic class or interface has type parameters with variance specifed
-(see :ref:`Type Parameter Variance`) then the subtyping for instantiations of
-such class or interface is determined according to the variance of appropriate
-type parameter:
-                       
+If type parameters of a generic class or an interface have a variance specifed
+(see :ref:`Type Parameter Variance`), then the subtyping for instantiations of
+the class or interface is determined in accordance with the variance of the
+appropriate type parameter:
+
 .. code-block:: typescript
    :linenos:
 
@@ -534,7 +548,7 @@ following conditions are met:
    -  ``FP``:sub:`i` is an optional parameter if ``SP``:sub:`i` is an optional
       parameter.
 
--  Otherwise type ``FR`` is a subtype of ``SR`` (covariance).
+-  Otherwise, type ``FR`` is a subtype of ``SR`` (covariance).
 
 .. index::
    function type
@@ -596,7 +610,8 @@ following conditions are met:
 Subtyping for Fixed-Size Array Types
 ====================================
 
-Fixed-size array types are covariant and are formally defined as follows:
+Subtyping for fixed-size array types is based on subtyping of their element
+types. It is formally defined as follows:
 
 ``FixedSize<B> <: FixedSize<A>`` if ``B <: A``.
 
@@ -609,10 +624,12 @@ The situation is represented in the following example:
     let y: FixedArray<Object> = x // ok, as number <: Object
     x = y // compile-time error
 
-Covariant array assignment can lead to ``ArrayStoreError`` runtime error
-if a value of a wrong type is put into the array. Type safety is ensured by the
-runtime checks performed by the runtime system as represented in the example
-below:
+Such subtyping allows array assignments that can lead to ``ArrayStoreError``
+at runtime if a value of a type which is not a subtype of an element type of
+one array is put into that array by using the subtyping of another array
+element type.
+Type safety is ensured by runtime checks performed by the runtime system as
+represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -621,13 +638,41 @@ below:
     class D extends C {}
 
     function foo (ca: FixedArray<C>) {
-      ca[0] = new C()
+      ca[0] = new C() // ArrayStoreError if ca refers to FixedArray<D>
     }
 
     let da: FixedArray<D> = [new D()]
-    let ca: FixedArray<C> = da
 
-    foo(ca) // runtime error in 'foo'
+    foo(da) // leads to runtime error in 'foo'
+
+|
+
+.. _Subtyping for Intersection Types:
+
+Subtyping for Intersection Types
+================================
+
+Intersecton type ``I`` defined as (``I``:sub:`1` ``& ... | I``:sub:`n`)
+is a subtype of type ``T`` if ``I``:sub:`i` is a subtype of ``T``
+for some *i*.
+
+Type ``T`` is a subtype of intersection type
+(``I``:sub:`1` ``& ... | I``:sub:`n`) if ``T`` is a subtype of each
+``I``:sub:`i`.
+
+|
+
+.. _Subtyping for Difference Types:
+
+Subtyping for Difference Types
+==============================
+
+Difference type ``A - B`` is a subtype of ``T`` if ``A`` is
+a subtype of ``T``.
+
+Type ``T`` is a subtype of the difference type ``A - B`` if ``T`` is
+a subtype of ``A``, and no value belongs both to ``T`` and ``B``
+(i.e., ``T & B = never``).
 
 |
 
@@ -667,9 +712,9 @@ Identity relation for types ``A`` and ``B`` is defined as follows:
 **Note.** :ref:`Type Alias Declaration` creates no new type but only a new
 name for the existing type. An alias is indistinguishable from its base type.
 
-**Note.** If a generic class or interface has a type parameter ``T``, and its
-method has its own type parameter ``T``, then the two types are different and
-unrelated.
+**Note.** If a generic class or an interface has a type parameter ``T`` while
+its method has its own type parameter ``T``, then the two types are different
+and unrelated.
 
 .. code-block:: typescript
    :linenos:
@@ -987,7 +1032,7 @@ Type inference is applied by the compiler in the following contexts:
 - Array literal type inference (see :ref:`Array Literal Type Inference from Context`,
   and :ref:`Array Type Inference from Types of Elements`);
 - Object literal type inference (see :ref:`Object Literal`);
-- Smart types (see :ref:`Smart Types`).
+- Smart casts (see :ref:`Smart Casts and Smart Types`).
 
 .. index::
    strong typing
@@ -1088,59 +1133,638 @@ The examples below illustrate valid and invalid narrowing.
 
 |
 
-.. _Smart Types:
+.. _Return Type Inference:
 
-Smart Types
-===========
+Return Type Inference
+=====================
+
+.. meta:
+    frontend_status: Done
+
+A missing function, method, getter, or lambda return type can be inferred from
+the function, method, getter, or lambda body. A :index:`compile-time error`
+occurs if return type is missing from a native function (see
+:ref:`Native Functions`).
+
+The current version of |LANG| allows inferring return types at least under
+the following conditions:
+
+-  If there is no return statement, or if all return statements have no
+   expressions, then the return type is ``void`` (see :ref:`Type void`). It
+   effectively implies that a call to a function, method, or lambda returns
+   the value ``undefined``.
+-  If there are *k* return statements (where *k* is 1 or more) with
+   the same type expression *R*, then ``R`` is the return type.
+-  If there are *k* return statements (where *k* is 2 or more) with
+   expressions of types ``T``:sub:`1`, ``...``, ``T``:sub:`k`, then ``R`` is the
+   *union type* (see :ref:`Union Types`) of these types (``T``:sub:`1` | ... |
+   ``T``:sub:`k`), and its normalized version (see :ref:`Union Types Normalization`)
+   is the return type. If at least one of return statements has no expression, then
+   type ``undefined`` is added to the return type union.
+-  If a lambda body contains no return statement but at least one throw statement
+   (see :ref:`Throw Statements`), then the lambda return type is ``never`` (see
+   :ref:`Type never`).
+-  If a function, a method, or a lambda is ``async`` (see
+   :ref:`Async Functions and Methods`), a return type is inferred by applying
+   the above rules, and the return type ``T`` is not ``Promise``, then the return
+   type is assumed to be ``Promise<T>``.
+
+Return type inference is represented in the example below:
+
+.. index::
+   return type
+   function
+   method
+   lambda
+   function return type
+   method return type
+   native function
+   void type
+   type inference
+   inferred type
+   method body
+   return statement
+   normalization
+   expression type
+   expression
+   function
+   implementation
+   compiler
+   union type
+   never type
+   async type
+
+.. code-block:: typescript
+   :linenos:
+
+    // Explicit return type
+    function foo(): string { return "foo" }
+
+    // Implicit return type inferred as string
+    function goo() { return "goo" }
+
+    class Base {}
+    class Derived1 extends Base {}
+    class Derived2 extends Base {}
+
+    function bar (condition: boolean) {
+        if (condition)
+            return new Derived1()
+        else
+            return new Derived2()
+    }
+    // Return type of bar will be Derived1|Derived2 union type
+
+    function boo (condition: boolean) {
+        if (condition) return 1
+    }
+    // That is a compile-time error as there is an execution path with no return
+
+*Smart types* can appear in the process of return type inference
+(see :ref:`Smart Casts and Smart Types`). 
+A :index:`compile-time error` occurs if an inferred return type is a :ref:`Type Expression`
+that can not be expressed in |LANG|:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C{}
+    interface I {}
+    class D extends C implements I {}
+    
+    function foo(c: C) {
+        return c instanceof I ? c : new D() // compile-time error: inferred type is C & I
+    }
+
+.. index::
+   union type
+   type inference
+   inferred type
+
+|
+
+.. _Smart Casts and Smart Types:
+
+Smart Casts and Smart Types
+***************************
 
 .. meta:
     frontend_status: Partly
     todo: implement a dataflow check for loops and try-catch blocks
 
-Data entities like local variables (see :ref:`Variable and Constant Declarations`)
-and parameters (see :ref:`Parameter List`), if not captured in a lambda body and
-modified by the lambda code, are subjected to *smart typing*.
+|LANG| supports the concept of *smart casts*, meaning that
+in some cases the compiler can implicitly cast
+a value of a variable to a type which is more specific that
+the declared type of the variable.
+The more specific type is called *smart type*.
+*Smart casts* allows keeping type safety, doing less typing,
+and improving performance.
 
-Every data entity has a static type, which is specified explicitly or
-inferred at the point of declaration. This type defines the set of operations
-that can be applied to the entity (namely, what methods can be called, and what
-other entities can be accessed if the entity acts as a receiver of the
-operation):
+Smart casts are applied to local variables
+(see :ref:`Variable and Constant Declarations`) and parameters
+(see :ref:`Parameter List`), expect those that are captured and
+modified in lambdas.
+In the subsequent text term *variable* is used for both local variables
+and parameters.
+
+**Note.** Smart casts are not apppiled to global variabes and class fields,
+as it is hard to track their values.
+
+A variable has a single declared type, and can have different *smart
+types* in different contexts. A variable *smart type* is always
+a subtype of the declared type.
+
+*Smart type* is used by the compiler each time the value of a variable is read.
+It never used when a variable value is changed.
+
+The example below illustrates usage and benefits of a *smart type*:
 
 .. code-block:: typescript
    :linenos:
 
-    let a = new Object
-    a.toString() // entity 'a' has method toString()
+    class C {}
+    class D extends C {
+        foo() {}
+    }
+
+    function bar(c: C) {
+        if (c instanceof D) {
+            c.foo() // ok, here smart type of 'c' is 'D', 'foo' is safely called
+        }
+        c.foo() // compile-time error, 'c' does not have method 'foo'
+        (c as D).foo() // no compile-time error, can throw runtime error
+    }
+
+
+The compiler uses data-flow analysis based on :ref:`Control-flow Graph` to
+compute *smart types* (see :ref:`Computing Smart Types`). The following
+language features influence the computation:
+
+-  Variable declarations;
+-  Variable assignments (a variable initialization is handled as a variable
+   declaration combined with an assignment);
+-  :ref:`InstanceOf Expression` with variables;
+-  Conditional statements and conditional expressions that include:
+
+    -  :ref:`Equality Expressions` of a variable and an expression that
+       process string literals, ``null`` value, and ``undefined`` value in
+       a specific way.
+
+    -  :ref:`Equality Expressions` of ``typeof v`` and a string literal, where
+       ``v`` is a variable.
+
+    -  :ref:`Extended Conditional Expressions`.
+
+-  :ref:`Loop Statements`.
+
+A *smart type* usually takes the form of a :ref:`Type Expression` that can
+contain types not otherwise represented in |LANG|, namely:
+
+- :ref:`Intersection Types`;
+- :ref:`Difference Types`.
 
 .. index::
    smart type
-   data entity
+   data-flow analysis
    variable
-   parameter
-   class variable
-   local variable
-   smart typing
-   lambda code
-   function
-   method
-   static type
-   inferred type
-   receiver
-   access
-   declaration
+   variable declaration
+   variable assignment
+   variable initialization
+   assignment
+   conditional statement
+   conditional expression
+   equality expression
+   null
+   undefined
+   string literal
+   extended conditional expression
+   intersection type
+   difference type
 
-If an entity is class type (see :ref:`Classes`), interface type (see
-:ref:`Interfaces`), or union type (see :ref:`Union Types`), then the compiler
-can narrow (smart cast) a static type to a more precise type (smart type), and
-allow operations that are specific to the type so narrowed:
+|
+
+.. _Type Expression:
+
+Type Expression
+===============
+
+The *type* of an entity is conventionally defined as the set of values
+an entity (e.g., a variable) can take, and the set of operators
+applicable to the entity of a given type. Two types with equal sets of values
+and operators are considered equal irrespective of a syntatic form used to
+denote the types.
+
+However, in some cases it is useful to distinguish between equal types with
+different representation or syntactic form. For example, types ``Object`` and
+``Object|C`` are equal but they behave in different ways as a context of
+an :ref:`Object Literal`:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        num = 1
+    }
+    function foo(x: Object|C) {}
+    function bar(x: Object) {}
+
+    foo({num: 42}} // ok, object literal is of type 'C'
+    bar({num: 42}} // compile-time error, Object does not have field 'num'
+
+The term *type expression* is used below as notation that consists of type
+names and operators on types, namely:
+
+- ``'|'`` for union operator;
+- ``'&'`` for intersection operator (see :ref:`Intersection Types`);
+- ``'&'`` for difference operator (see :ref:`Difference Types`).
+
+Computing *smart types* is the process of creating, evaluating, and simplifying
+*type expressions*.
+
+**Note.** *Intersection types* and *difference types* are semantic (not
+syntactic notions) that cannot be represented in |LANG|.
+
+.. index::
+   type expression
+   entity
+   value
+   variable
+   operator
+   syntax
+   context
+   object literal
+   field
+   type expression
+   notation
+   type name
+   operator
+   type
+   intersection type
+   difference type
+   union operator
+   intersection operator
+   difference operator
+
+|
+
+.. _Intersection Types:
+
+Intersection Types
+==================
+
+An *intersection type* is a type created from other types by using the
+intersection operator ``'&'``.
+The values of intersection type ``A & B`` are all values that belong
+to both ``A`` and ``B``. The same applies to the set of operations.
+
+Intersection types cannot be expressed directly in |LANG|. Instead, they appear
+as *smart types* of variables in the process of :ref:`Computing Smart Types` as
+represented below:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        foo() {}
+    }
+    interface I {
+        bar(): void
+    }
+
+    function test(i: I) {
+        if (i instanceof C) {
+            // smart type of 'i' here is of some subtype of 'C' that implements 'I'
+            // type expression for this type is I & C
+            i.foo() // ok
+            i.bar() // ok
+        }
+    }
+
+See also :ref:`Subtyping for Intersection Types`.
+
+.. index::
+   intersection type
+   intersection operator
+   value
+   operation
+   variable
+
+|
+
+.. _Difference Types:
+
+Difference Types
+================
+
+A *difference type* is a type created from two other types by a subtraction
+operation, i.e., by using the operator ``'-'``.
+The values of the difference type ``A - B`` are all values that belong to type
+``A`` but not to type ``B``. The same applies to the set of operations.
+
+Difference types in |LANG| cannot be expressed directly. They appear as
+*smart types* of variables in the process of :ref:`Computing Smart Types`:
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(x: string | undefined): number {
+        if (x == undefined) {
+            return 0
+        } else {
+            // smart type of 'x' here is (string | undefined - undefined) = string,
+            // hence, string propety can be applied to 'x'
+            return x.length
+        }
+    }
+
+This is discussed in detail in :ref:`Subtyping for Difference Types`.
+
+|
+
+.. _Computing Smart Types:
+
+Computing Smart Types
+=====================
+
+Computing smart types is based on *locations*. A *location* is a set of
+variables known to have the same value in a given context.
+
+Two maps are used to specify a context *(l, s)*, where:
+
+-  *l: V* :math:`\rightarrow` *L*, map from variables *V* to locations *L*;
+
+-  *s: L* :math:`\rightarrow` *T*, map from locations to smart types *T*
+   ascribed to those locations.
+
+Contexts are computed in relation to nodes of :ref:`Control-flow Graph`.
+Control-flow graph (CFG) contains the following kinds of nodes:
+
+-  Nodes for expressions that have results assigned to variables,
+   including temporary variables;
+
+-  *Branching nodes* that have true and false branches;
+
+-  *Assuming nodes* that have an assumed condition specified;
+
+-  *Backedge nodes* that mark the transfer of control from the end
+   point of a loop to its start point.
+
+The way how maps *(l, s*) are changed when processing the
+specific nodes is described below.
+Notation :math:`x'` is used to denote a map that replaces any previous map
+during the node evaluation.
+
+At a **variable declaration** ``let v``:
+
+-  ``l(v):={v}``.
+
+At an **assignment to the variable** ``v``: ``v = e``:
+
+-  If *e* is a variable, and no implicit conversions are performed:
+   ``l'(v):=l'(e):={v}`` :math:`\cup` ``l(e)``.
+
+-  Otherwise, ``s'(l(v)):=s(N(T((e)))``, where ``T(e)`` is the smart type of *e*,
+   and *N(x)* adds to type *x* all types to which type *x* can be converted,
+   namely:
+
+    - If *x* is a numeric type, then a larger numeric type;
+    - If *x* is an enumeration type, then the *enumeration base type*.
+
+The following table summarises the contexts for map evaluation at an
+*assumption node*:
+
+.. list-table::
+   :width: 100%
+   :widths: 30 35 35
+   :header-rows: 1
+
+   * - Branching on
+     - On the positive branch
+     - On the negative branch
+   * - *v* ``instanceof`` ``A``
+     - assuming *v* ``instanceof`` ``A``:
+
+       ``s'(l(v)):=s(l(v))&A``
+
+     - assuming !(*v* ``instanceof`` ``A``):
+
+       ``s'(l(v)):=s(l(v))-A``,
+
+   * - *v* ``===`` *str* (string literal)
+     - ``s'(l(v)):=str``
+     - ``s'(l(v)):=s(l(v))-str``
+
+   * - *v* ``===`` ``undefined``
+     - ``s'(l(v)):=undefined``
+
+     - ``s'(l(v)):=s(l(v))-undefined``
+
+   * - *v* ``===`` ``null``
+     - ``s'(l(v)):=null``
+
+     - ``s'(l(v)):=s(l(v))-null``
+
+   * - *v* ``==`` ``undefined``
+     - ``s'(l(v)):=undefined``
+
+     - ``s'(l(v)):= s(l(v))-undefined-null``
+
+   * - *v* ``==`` ``null``
+     - ``s'(l(v)):=null``
+
+     - ``s'(l(v)):= s(l(v))-undefined-null``
+
+   * - *v* ``===`` *ec*, where *ec* is an ``enum`` constant
+     - ``s'(l(v)):=ec``
+     - ``s'(l(v)):=s(l(v))-ec``
+   * - ``typeof`` *v* ``===`` *str*
+
+       See **Note 2** below for evalution of type *T*.
+
+     - ``s'(l(v)):= s(l(v))&T``
+     - ``s'(l(v)) := s(l(v))-T``
+
+   * - *v* ``===`` *e*, where *e* is any expression
+     - if *e* is a variable *w*, no implicit conversion occurs,
+       and no ``null == undefined`` consideration is involved, then:
+
+       ``l'(v):=l'(w):=l(v)``:math:`\cup` ``l(w)``
+
+       otherwise:
+
+       ``s'(l'(v))=s(l(v))&N(T(e))``
+
+       The definitions of ``T`` and ``N`` are as in the assignment clause.
+
+     - No change
+
+   * - *v* (truthiness check)
+     - ``s'(l(v)):=s(l(v)) - (null|undefined|"")``
+     - ``s'(l(v)):=s(l(v))&T``,
+
+       where T is union of all types the contain at least one falsy value.
+
+**Notes**:
+
+#. In the table above the operator ``'==='`` can be replaced for ``'=='`` except
+   where ``'=='`` is used explicitly.
+
+#. For branching on ``typeof`` *v* ``===`` *str*, type *T* is
+   evaluated in accordance with the value of *str*:
+
+    -  If ``"boolean"``, then *T* is ``boolean``;
+
+    -  If ``"string"``, then *T* is ``string | char``;
+
+    -  If ``"undefined"``, then *T* is ``undefined``;
+
+    -  If a name of a numeric type, then *T* is this numeric type;
+
+    -  If ``object``, then *T* is ``Object - boolean - string - all numeric types``.
+
+
+At a node that joins two CFG brances, namely ``C``:sub:`1` :math:`\leq` :sub:`1`, ``s``:sub:`1` ``>``,
+and ``C``:sub:`2` :math:`\leq` ``l``:sub:`2`, ``s``:sub:`2` ``>``, for each variable *v*:
+
+- ``l'(v):=l``:sub:`1` ``(v)``:math:`\cap` ``l``:sub:`2` ``(v)``; and
+
+- ``s'(l'(v)):=s``:sub:`1` ``(l'``:sub:`1` ``(v))|s``:sub:`2` ``(l'``:sub:`2` ``(v))``.
+
+At each *backedge node*, smart type of each variable attached to the node is set
+to its declared type.
+
+|
+
+.. _Control-flow Graph:
+
+Control-flow Graph
+==================
+
+Computing smart types based on *control-flow graph* that describes
+the possible evaluation paths of a function body
+(graphs are intraprocedural).
+
+See :ref:`Computing Smart Types` for a list of CFG nodes that influences
+computation.
+
+TBD: Describe how each language construct is translated to a CFG fragment.
+
+|
+
+.. _Type Expression Simplification:
+
+Type Expression Simplification
+==============================
+
+The following table summarises the contexts for *type expression simplification*
+transformations to be performed at each node of the CFG:
+
+.. list-table::
+   :width: 100%
+   :widths: 40 30 30
+   :header-rows: 1
+
+   * - Transformation
+     - Initial expression
+     - Simplified expression
+   * - Associativity of '``&``'
+     - ``(A&B)&C``
+     - ``A&(B&C)``
+   * - Commutativity of '``&``'
+     - ``A&B``
+     - ``B&A``
+   * - In case of subtyping ``A<:B`` and '``&``'
+     - ``A&B``
+     - ``A``
+   * -
+     - ``A&never``
+     - ``never``
+   * -
+     - ``A&Any``
+     - ``A``
+
+   * - Associativity of '``|``'
+     - ``(A|B)C``
+     - ``A|(B|C)``
+   * - Commutativity of '``|``'
+     - ``A|B``
+     - ``B|A``
+   * - In case of subtyping ``A<:B`` and '``|``' 
+     - ``A|B``
+     - ``B``
+   * -
+     - ``A|never``
+     - ``A``
+   * -
+     - ``A|Any``
+     - ``Any``     
+   * - Difference with ``never``
+     - ``A-never``
+     - ``A``
+   * - In case of subtyping ``A<:B`` and '``-``' 
+     - ``A-B``
+     - ``never``
+   * -
+     - ``A-Any``
+     - ``never``
+   * -
+     - ``(B-A)|A``
+     - ``B``
+   * -
+     - ``(A-B)&B``
+     - ``never``
+   * - Other transformations
+     - ``(A&B)-C``
+     - ``(A-C)&(B-C)``
+   * - 
+     - ``(A|B)&C``
+     - ``(A&C)|(B&C)``
+   * -
+     - ``(A|B)-C``
+     - ``(A-C)|(B-C)``
+   * -
+     - ``(A-B)-C``
+     - ``(A-(B|C)``
+
+The following simplifications for object types are also taken into account:
+
+#. If ``A`` and ``B`` are classes and neither transitively extends the other,
+   then ``A&B = never``, ``A-B = A``.
+#. If ``A`` is a final class that does not implement the interface *I*, then
+   ``A&I = never``, ``A-I = A``.
+#. If ``A`` is a class or interface, and *U* is ``never`` or ``undefined``, then
+   ``A&U = never``, ``A-U = A``.
+#. If ``E`` is enum with cases ``E``:sub:`1` ``, ... , E``:sub:`n`, then
+   ``E = E``:sub:`1` ``| ... |E``:sub:`n`.
+
+The following normalization procedure is performed for every *smart type* at
+every node of CFG where possible:
+
+#. Push *difference types* inside *intersection types* and unions, and
+   simplify the the difference.
+#. Push *intersection types* inside unions, and simplify the intersections.
+#. Simplify the resultant union types.
+
+After a simplification, *smart types* undergo approximation with *difference
+types* ``A-B`` recursively replaced by ``A``.
+
+|
+
+.. _Smart Cast Examples:
+
+Smart Cast Examples
+===================
+
+By using variable initializers or an assignment the compiler can narrow
+(smart cast) a declared type to a more precise subtype (smart type), and
+allow operations that are specific to the subtype:
 
 .. code-block:: typescript
    :linenos:
 
     function boo() {
         let a: number | string = 42
-        a++ /* Here we know for sure that type of 'a' is number and number-specific
+        a++ /* Smart type of 'a' is number and number-specific
            operations are type-safe */
     }
 
@@ -1148,13 +1772,27 @@ allow operations that are specific to the type so narrowed:
     class Derived extends Base { method () {} }
     function goo() {
        let b: Base = new Derived
-       b.method () /* Here we know for sure that type of 'b' is Derived and Derived-specific
+       b.method () /* Smart type of 'b' is Derived and Derived-specific
            operations can be applied in type-safe way */
     }
 
+.. index::
+   class type
+   interface type
+   union type
+   compiler
+   smart cast
+   narrowing
+   smart type
+   static type
+   operation
+   type-safe operation
+   derived operation
+   derived-specific operation
+
 Other examples are explicit calls to ``instanceof``
 (see :ref:`InstanceOf Expression`) or checks against ``null``
-(see :ref:`Equality Expressions`) as part of ``if`` statements
+(see :ref:`Equality Expressions`) as parts of ``if`` statements
 (see :ref:`if Statements`) or conditional expressions
 (see :ref:`Conditional Expressions`):
 
@@ -1171,33 +1809,18 @@ Other examples are explicit calls to ``instanceof``
     }
 
 .. index::
-   type
-   entity
-   local variable
-   interface type
-   class type
-   union type
-   context
-   compiler
-   narrowing
-   smart cast
-   smart type
-   if statement
-   conditional expression
-   entity
-   class type
-   static type
-   narrowed type
+   call
    instanceof
    null
-   semantic check
+   if statement
+   conditional expression
 
-In like cases, a smart compiler can deduce the smart type of an entity without
-requiring additional checks or casts (see :ref:`Cast Expression`).
+In like cases, a smart compiler requires no additional checks or casts (see
+:ref:`Cast Expression`) to deduce a smart type of an entity.
 
 Overloading (see :ref:`Overload Declarations`) can cause tricky situations
 when a smart type results in calling an entity that suits the smart type
-rather than a static type of an argument (see
+rather than a declared type of an argument (see
 :ref:`Overload Resolution for Overload Declarations`):
 
 .. code-block:: typescript
@@ -1218,18 +1841,15 @@ rather than a static type of an argument (see
         foo (b) // as smart type of 'b' is Derived, fooDerived will be called
     }
 
-Particular cases supported by the compiler are determined by the compiler
-implementation.
-
 .. index::
    smart type
    entity
-   casting conversion
+   cast expression
+   check
    overloading
+   overload declaration
    function
-   method
-   static type
-   implementation
+   overload resolution
    compiler
 
 |
@@ -1245,7 +1865,7 @@ implementation of a method already defined in its supertype optionally
 with modified signature.
 
 The actual method to be called is determined at runtime based on object type.
-Thus, overriding is related to runtime polymorphism.
+Thus, overriding is related to *runtime polymorphism*.
 
 |LANG| uses the *override-compatibility* rule to check the correctness of
 overriding. The *overriding* is correct if method signature in a subtype
@@ -1437,11 +2057,15 @@ Overriding and Overload Signatures in Interfaces
 
    * - Context
      - Semantic Check
-   * - A method is defined in a subinterface with the same name as the method
-       in the superinterface.
+   * - A method is defined in a subinterface with the same name as the
+       method in the superinterface.
      - If signatures are *override-compatible* (see
        :ref:`Override-Compatible Signatures`), then *overriding* is used.
        Otherwise, a :index:`compile-time error` occurs.
+   * - A method is defined in a subinterface with the same name as the
+       private method in the superinterface.
+     - A :index:`compile-time error` occurs.
+
 
 .. code-block:: typescript
    :linenos:
@@ -1449,10 +2073,12 @@ Overriding and Overload Signatures in Interfaces
    interface Base {
       method_1()
       method_2(p: number)
+      private foo() {} // private method with implementation body
    }
    interface Derived extends Base {
       method_1() // overriding
-      method_2(p: string) // compile-time error
+      method_2(p: string) // compile-time error: non-compatible signature
+      foo(p: number): void // compile-time error: the same name as private method
    }
 
 
@@ -1677,11 +2303,10 @@ Override compatibility with ``Object`` is represented in the example below:
           p01: Derived,
           p02: (q: Base)=>Derived,
           p03: number,
-          p04: Number,
-          p05: T | U,
-          p06: E1,
-          p07: Base[],
-          p08: [Base, Base]
+          p04: T | U,
+          p05: E1,
+          p06: Base[],
+          p07: [Base, Base]
        ): void
        kinds_of_return_type(): Object // It can be overridden by all subtypes of Object
     }
@@ -1689,12 +2314,11 @@ Override compatibility with ``Object`` is represented in the example below:
        kinds_of_parameters( // Object is a supertype for all class types
           p1: Object,
           p2: Object,
-          p3: Object, // Compile-time error: number and Object are not override-compatible
+          p3: Object,
           p4: Object,
           p5: Object,
           p6: Object,
-          p7: Object,
-          p8: Object
+          p7: Object
        ): void
     }
 
@@ -1825,12 +2449,11 @@ another class. The situation is represented in the example below:
 Overloading
 ***********
 
-*Overloading* is the language feature that allows to use one name to
-call several functions, methods, or constructors with different signatures
-and different bodies.
+*Overloading* is the language feature that allows to use the same name to
+call several functions, or methods, or constructors with different signatures.
 
 The actual function, method, or constructor to be called is determined at
-compile time. Thus, *overloading* is related to compile-time polymorphism.
+compile time. Thus, *overloading* is compile-time *polymorphism by name*.
 
 |LANG| supports the following two *overloading*  mechanisms:
 
@@ -1949,6 +2572,33 @@ example:
     max(1) // maxN is used
     max(false, true) // compile-time error, no appropriate signature
 
+Overload resolution for an instance method overload (see
+:ref:`Class Method Overload Declarations`) always uses the type of the
+*object reference* known at compile time. It can be either the type used
+in a declaration, or a *smart type* (see :ref:`Smart Casts and Smart Types`) as illustrated
+by the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    class A {
+        foo1(x: A) { console.log("A.foo") }
+        overload foo {foo1}
+    }
+    class B extends A {
+        foo2(x: B) { console.log("B.foo") }
+        overload foo {foo2, foo1}
+    }
+
+    function test(a: A) {
+        a.foo(new B()) // 'foo1' is called as overload from 'A' is used
+    }
+
+    test(new B()) // output: A.foo
+
+    let b = new B()
+    b.foo(b) // output: B.foo, as overload from 'B' is used
+
 |
 
 .. _Type Erasure:
@@ -2050,7 +2700,7 @@ Type mapping determines the *effective types* as follows:
 -  Instantiation of an internal generic function type with respect to
    the number of parameter types *n* for :ref:`Function Types` in the form
    ``(P1, P2 ..., Pn) => R``. Parameter types ``P1, P2 ... Pn`` are
-   instantiated with ``object | null | undefined``, and the return type ``R``
+   instantiated with ``Any``, and the return type ``R``
    is instantiated with type ``never``.
 
 -  Instantiation of an internal generic tuple type with respect to
@@ -2115,6 +2765,10 @@ following operations:
 
 **Note**. None of the operations above invokes a *static initialization*
 recursively if the *static initialization* of the same entity is not complete.
+
+**Note**. For namespaces, the code in a static block is executed only when
+namespace members are used in the program (an example is provided in
+:ref:`Namespace Declarations`).
 
 If *static initialization* routine execution is terminated due to an
 exception thrown, then the initialization is not complete. A repetitive attempt

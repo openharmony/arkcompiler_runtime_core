@@ -148,11 +148,11 @@ The |LANG| standard library (see :ref:`Standard Library`) provides a top-level
 function ``initModule()`` with one parameter of ``string`` type. A call to this
 function ensures that the module referred by the argument is available and its
 initialization (see :ref:`Static Initialization`) is performed. An argument
-should be a string literal otherwise a :index:`compile-time error` occurs. The
-current module has no access to the exported declarations of the module
+should be a string literal otherwise a :index:`compile-time error` occurs.
+
+The current module has no access to the exported declarations of the module
 referred by the argument. If such module is not available or any other runtime
-issue occurs then a proper exception is thrown. All these details are part of
-the standard library documentation.
+issue occurs then a proper exception is thrown.
 
 .. code-block:: typescript
    :linenos:
@@ -282,6 +282,63 @@ is created in ``D``, in the following cases:
 - Method ``m`` of class ``D`` overrides ``m`` from ``B`` with type parameters in signature,
   e.g., ``(T``:sub:`1` ``, ..., T``:sub:`n` ``)``;
 - Signature of the overriden method ``m`` is not ``(C``:sub:`1` ``, ..., C``:sub:`n` ``)``.
+
+
+|
+
+.. _Runtime Evaluation of Lambda Expressions Implementation:
+
+Runtime Evaluation of Lambda Expressions Implementation
+=======================================================
+
+.. meta:
+    frontend_status: Done
+
+
+In order to make lambdas behave as required (see
+:ref:`Runtime Evaluation of Lambda Expressions`), the language implementation
+can act as follows:
+
+-  If a captured variable is of a non-value type (see :ref:`Value Types`), then
+   replace the captured variable type for a proxy class that contains an
+   original reference (``x: T`` for ``x: Proxy<T>; x.ref = original-ref``).
+-  If the captured variable is defined as ``const``, then proxying is not
+   required.
+-  If the captured formal parameter cannot be proxied, then the implementation
+   can require adding of a local variable as shown in the table below.
+
+.. index::
+   lambda
+   implementation
+   runtime evaluation
+   non-value type
+   reference
+   captured formal parameter
+   predefined value type
+   proxy class
+   captured variable
+   captured variable type
+   proxying
+   local variable
+   variable
+   source code
+   pseudo code
+
++-----------------------------------+-----------------------------------+
+|   Source Code                     |   Pseudo Code                     |
++===================================+===================================+
+| .. code-block:: typescript        | .. code-block:: typescript        |
+|    :linenos:                      |    :linenos:                      |
+|                                   |                                   |
+|     function foo(y: int) {        |     function foo(y: int) {        |
+|     let x = () => { return y+1 }  |     let y$: Int = y               |
+|     console.log(x())              |     let x = () => { return y$+1 } |
+|     }                             |     console.log(x())              |
+|                                   |     }                             |
++-----------------------------------+-----------------------------------+
+
+
+
 
 .. raw:: pdf
 

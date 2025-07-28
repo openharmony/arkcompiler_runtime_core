@@ -295,10 +295,7 @@ Otherwise, a :index:`compile-time error` occurs:
 .. code-block:: typescript
    :linenos:
 
-
-    function foo () {
-           @MyAnno() let local = 1 // compile-time error
-    }
+    function foo () @MyAnno() {} // wrong target for annotation
 
 Repeatable annotations are not supported, i.e., an annotation cannot be applied
 to an entity more than once:
@@ -605,8 +602,8 @@ Standard Annotations
 *Standard annotation* is usually known to the compiler. It modifies the
 semantics of the declaration it is applied to.
 
-If an annotation is aimed to annotate declaration of other annotation,
-it is called *meta-annotation*.
+An annotation that annotates a declaration of another annotation is called
+*meta-annotation*.
 
 .. index::
    standard annotation
@@ -710,16 +707,15 @@ Target Annotation
 
 
 ``@Target`` is a standard *meta-annotation* that is used to annotate
-a declaration of another annotation.
-A :index:`compile-time error` occurs if it is used in other places.
+a declaration of another annotation. A :index:`compile-time error` occurs
+if ``@Target`` is used elsewhere.
 
-``@Target`` specifies the set of contexts in the source code
-in which the declared annotation can be used
-via the set of values of ``AnnotationTargets`` enumeration defined
-in :ref:`Standard Library`.
+``@Target`` specifies the set of source code contexts in which the declared
+annotation can be used. The contexts are specified by using a set of values
+of an ``AnnotationTargets`` enumeration defined in :ref:`Standard Library`.
 
-The annotation has a single field ``targets`` of type ``AnnotationTargets[]``.
-It is typically used as follows:
+The annotation ``@Target`` has a single field ``targets`` of type
+``AnnotationTargets[]``. It is typically used as follows:
 
 .. code-block:: typescript
    :linenos:
@@ -732,47 +728,48 @@ It is typically used as follows:
     @Target({targets: [AnnotationTargets.PARAMETER]})
     @interface SpecialParameter {/*some fields*/}
     
-If the annotation is present in the declaration of annotation ``X``,
-the compiler checks that ``X`` is used only in the specified contexts.
+If the annotation is present in the declaration of annotation ``X``, then
+the compiler checks that ``X`` is used in the specified contexts only.
 Otherwise, a :index:`compile-time error` occurs.
 
-If the annotation is not present in the declaration of annotation ``X``, then
-there is no restriction on ``X`` usage.
+If no annotation is present in the declaration of annotation ``X``, then
+the usage of ``X`` is not restricted.
 
-The ``AnnotationTargets`` enumeration contains constants
-for the following targets:
+An ``AnnotationTargets`` enumeration contains constants for the following
+targets:
 
--  targets for :ref:`Top-Level Declarations`:
+-  Targets for :ref:`Top-Level Declarations`:
 
-    - CLASS
-    - ENUMERATION
-    - FUNCTION
-    - FUNCTION_WITH_RECEIVER
-    - INTERFACE
-    - NAMESPACE
-    - TYPE_ALIAS
-    - VARIABLE
+    - CLASS;
+    - ENUMERATION;
+    - FUNCTION;
+    - FUNCTION_WITH_RECEIVER;
+    - INTERFACE;
+    - NAMESPACE;
+    - TYPE_ALIAS;
+    - VARIABLE.
+
+-  Targets for :ref:`Class Members`:
+
+    - CLASS_FIELD;
+    - CLASS_METHOD;
+    - CLASS_GETTER;
+    - CLASS_SETTER.
+
+-  Targets for :ref:`Interface Members`:
+
+    - INTERFACE_PROPERTY;
+    - INTERFACE_METHOD;
+    - INTERFACE_GETTER;
+    - INTERFACE_SETTER.
     
--  targets for :ref:`Class Members`:
-
-    - CLASS_FIELD
-    - CLASS_METHOD
-    - CLASS_GETTER
-    - CLASS_SETTER
-
--  targets for :ref:`Interface Members`:
-
-    - INTERFACE_PROPERTY
-    - INTERFACE_METHOD
-    - INTERFACE_GETTER
-    - INTERFACE_SETTER
+-  Other targets:
     
--  other targets:
-    
-    - LAMBDA - for :ref:`Lambda Expressions` and
-      :ref:`Lambda Expressions with Receiver`
-    - PARAMETER -  for function, method and lambda parameter
-    - STRUCT - see :ref:`Keyword struct and ArkUI`
+    - LAMBDA for :ref:`Lambda Expressions` and
+      :ref:`Lambda Expressions with Receiver`;
+    - PARAMETER for function, method, and lambda parameter;
+    - STRUCT (see :ref:`Keyword struct and ArkUI`);
+    - TYPE (see :ref:`Using Types`).
     
 A :index:`compile-time error` occurs if an enumeration constant is used more
 then once in an ``@Target`` annotation:
