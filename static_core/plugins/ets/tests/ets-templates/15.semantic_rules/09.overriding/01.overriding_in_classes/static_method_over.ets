@@ -17,9 +17,9 @@
 
 /*---
 desc: >-
-    An instance method is defined in a subclass with the same name as the instance method in a superclass.
-    If signatures are override-compatible (see Override-Compatible Signatures), then overriding is used. Otherwise,
-    overloading is used.
+    A static method is defined in a subclass with the same name as the static method in a superclass.
+    If signatures are override-compatible (see Override-Compatible Signatures), then the static method in the
+    subclass hides the previous static method. Otherwise, a compile-time error occurs.
 tags: [{{c.tags}}]
 ---*/
 
@@ -29,12 +29,17 @@ class A {}
 class B extends A {}
 class C extends B {}
 
+type FUN_AA = (i: A) => A;
 type FUN_AB = (i: A) => B;
-type FUN_BA = (i: B) => A;
 type FUN_AC = (i: A) => C;
-type FUN_CA = (i: C) => A;
+
+type FUN_BA = (i: B) => A;
+type FUN_BB = (i: B) => B;
 type FUN_BC = (i: B) => C;
+
+type FUN_CA = (i: C) => A;
 type FUN_CB = (i: C) => B;
+type FUN_CC = (i: C) => C;
 
 function faa(i: A) { return new A(); }
 function fab(i: A) { return new B(); }
@@ -47,17 +52,20 @@ function fcb(i: C) { return new B(); }
 function fcc(i: C) { return new C(); }
 
 class Base {
-    foo({{c.base}}) { res = 1;}
+    static foo({{c.base}}) { res = 1; }
 }
 
 class Derived extends Base {
-    foo({{c.derived}}) { res = 2;}
+    static /* @@ label1 */foo({{c.derived}}) { res = 2; }
 }
 
 function main() {
-    new Derived().foo({{c.call}});
-    arktest.assertEQ( res, {{c.res}} );
+    res = 0
+    /* @@ label2 */Derived.foo(/* @@ label3 */{{c.call}});
+    arktest.assertEQ(res, {{c.res}});
 }
+
+{{c.expected_error}}
 
 {%- endfor %}
 

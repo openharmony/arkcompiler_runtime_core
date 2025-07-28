@@ -1367,32 +1367,37 @@
 #23537
 15.semantic_rules/10.overloading/overloading_for_functions/function_argument_equivalent_neg_n2_0.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_25.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_n2_20.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/single_class_over_generic_1.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_n2_19.ets
+15.semantic_rules/10.overloading/single_class_over_generic_1.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_private_5.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_private_6.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_12.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_20.ets
 
 #26554 overloads for static methods span the inheritance
-15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_n3_3.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_n3_4.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_n2_13.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_n2_18.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_n2_26.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_n2_31.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_n2_34.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_n2_37.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_n2_8.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_n2_11.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_1.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_3.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_4.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_9.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_10.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_11.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_12.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_8.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_9.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_11.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_12.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_15.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_16.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_17.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_19.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_20.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_25.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_26.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_27.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_28.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_29.ets
 
 #23477: Bad candidate function invoked
 15.semantic_rules/10.overloading/overload-equivalent_signatures/ex_6_1.ets
-
-#14338 Function, method, constructor overload signatures
-15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_n3_1.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_n3_10.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_n3_11.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_n3_12.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_n2_18.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_n2_37.ets
 
 #26730
 15.semantic_rules/09.overriding/02.overriding_and_overload_signatures_in_interfaces/im_overloading1_1.ets
@@ -1433,6 +1438,17 @@
 15.semantic_rules/09.overriding/02.overriding_and_overload_signatures_in_interfaces/interface_return_value_overload_2.ets
 
 #27583
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_8.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_9.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_15.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_16.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_17.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_25.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_26.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_27.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_28.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_29.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_32.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_0.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_1.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_2.ets
@@ -2105,6 +2121,10 @@
 
 # 27628
 15.semantic_rules/01.semantic_essentials/04.specifics_of_numeric_operator_contexts/negative_unary_operator.ets
+
+# 28436
+15.semantic_rules/08.overriding/01.overriding_in_classes/access_modifier_over_private_5.ets
+15.semantic_rules/08.overriding/01.overriding_in_classes/access_modifier_over_private_6.ets
 
 # 27886 Issues with default values
 09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_3.ets

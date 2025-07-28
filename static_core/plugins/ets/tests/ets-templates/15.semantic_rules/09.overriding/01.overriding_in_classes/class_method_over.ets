@@ -16,13 +16,9 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: >-
-    An instance method is defined in a subclass with the same name as the instance method in a superclass.
-    If signatures are override-compatible (see Override-Compatible Signatures), then overriding is used. Otherwise,
-    overloading is used.
-
     A static method is defined in a subclass with the same name as the static method in a superclass.
-    If signatures are overload-equivalent (see Overload-Equivalent Signatures), then the static method in the
-    subclass hides the previous static method. Otherwise, overloading is used.
+    If signatures are override-compatible (see Override-Compatible Signatures), then the static method in the
+    subclass hides the previous static method. Otherwise, a compile-time error occurs.
 
     {{c.doc|indent}}
 tags: [{{c.tags}}]
@@ -33,7 +29,10 @@ let res: number = 0;
 {{c.decl}}
 
 function main(): void {
-  {{c.use}}
+  res = 0
+  {{c.use|indent}}
 }
+
+{{c.expected_error}}
 
 {% endfor %}

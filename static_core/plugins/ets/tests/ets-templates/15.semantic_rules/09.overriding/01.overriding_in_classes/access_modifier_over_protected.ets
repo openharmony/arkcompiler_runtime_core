@@ -16,12 +16,14 @@
 {%- for c in cases %}
 
 /*---
-desc: >-
-    An overriding member can keep or extend the access modifier (see Access Modifiers) of the inherited or implemented
-    member. Otherwise, a compile-time error occurs.
-    Only accessible (see Accessible) methods are subject for overloading and overriding. For example, neither
-    overriding nor overloading is considered if a superclass contains a private method, and a subclass has a method
-    with the same name. In case of overriding the same rules are applied for accessors as well.
+desc: |-
+    Only accessible (see Accessible) methods are subjected to override.
+    The same rule applies to accessors in case of overriding.
+    An overriding member can keep or extend the access modifier (see Access Modifiers)
+    of a member. Otherwise, a compile-time error occurs.
+
+    A compile-time error occurs if an attempt is made to do the following:
+        • Override a private method of a superclass;
 
     {{c.doc}}
 tags: [{{c.tags}}]
@@ -30,14 +32,13 @@ tags: [{{c.tags}}]
 let res: number = 0;
 
 class Base {
-    public public_foo() { res = 1;}
-    protected protected_foo(i: Number) { res = 2;}
-    internal internal_foo() { res = 3;}
-    private private_foo() { res = 4;}
+    public public_foo() { res = 1; }
+    protected protected_foo(i: Number) { res = 2; }
+    private private_foo() { res = 4; }
 }
 
 interface Interface {
-    public_foo() { res = 5;}
+    public_foo() { res = 5; }
 }
 
 class Gen<T> {
@@ -51,7 +52,10 @@ class Gen2<T,S> {
 {{c.decl}}
 
 function main() {
-    {{c.use}}
+    res = 0
+    {{c.use|indent}}
 }
+
+{{c.expected_error}}
 
 {%- endfor %}
