@@ -78,8 +78,6 @@ class EtsFinalizableWeakRef;
 
 using WalkEventLoopCallback = std::function<void(void *, void *)>;
 
-enum class EventLoopRunMode : int { RUN_DEFAULT = 0, RUN_ONCE, RUN_NOWAIT };
-
 class PandaEtsVM final : public PandaVM, public ani_vm {  // NOLINT(fuchsia-multiple-inheritance)
 public:
     static Expected<PandaEtsVM *, PandaString> Create(Runtime *runtime, const RuntimeOptions &options);
@@ -350,15 +348,15 @@ public:
     }
 
     /// @brief Method creates CallBackPoster using factory.
-    PandaUniquePtr<CallbackPoster> CreateCallbackPoster()
+    PandaUniquePtr<CallbackPoster> CreateCallbackPoster(CallbackPoster::DestroyCallback onDestroy = nullptr)
     {
         if (callbackPosterFactory_ == nullptr) {
             return nullptr;
         }
-        return callbackPosterFactory_->CreatePoster();
+        return callbackPosterFactory_->CreatePoster(std::move(onDestroy));
     }
 
-    using RunEventLoopFunction = std::function<void(EventLoopRunMode)>;
+    using RunEventLoopFunction = std::function<bool(ark::EventLoopRunMode)>;
 
     void SetRunEventLoopFunction(RunEventLoopFunction &&cb)
     {
@@ -366,11 +364,13 @@ public:
         runEventLoop_ = std::move(cb);
     }
 
-    void RunEventLoop(EventLoopRunMode mode)
+    bool RunEventLoop(ark::EventLoopRunMode mode) override
     {
-        if (runEventLoop_) {
-            runEventLoop_(mode);
+        if (!runEventLoop_) {
+            return false;
         }
+
+        return runEventLoop_(mode);
     }
 
     using WalkEventLoopFunction = std::function<void(WalkEventLoopCallback &, void *)>;

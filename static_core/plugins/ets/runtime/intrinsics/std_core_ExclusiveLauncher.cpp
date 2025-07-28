@@ -30,6 +30,10 @@
 
 namespace ark::ets::intrinsics {
 
+enum TaskPosterState : uint64_t { NOT_DESTROYED, DESTROYED };
+
+thread_local static TaskPosterState g_posterState = NOT_DESTROYED;
+
 static thread_local EtsInt g_currentEAWorkerNum = 0;
 static std::atomic<EtsInt> g_eaworkerCount = 1;
 static constexpr EtsInt INVALID_WORKER_ID = -1;
@@ -112,22 +116,9 @@ void RunTaskOnEACoroutine(PandaEtsVM *etsVM, bool needInterop, mem::Reference *t
         auto poster = etsVM->CreateCallbackPoster();
         ASSERT(poster != nullptr);
         poster->Post(RunExclusiveTask, taskRef, refStorage);
-        // 2 NativeEngine async_t and 1 async_t for each of the two instances of CallbackPoster
-        // CC-OFFNXT(G.NAM.03-CPP) project code style
-        static constexpr uint32_t MANUALLY_HANDLED_ASYNC_COUNT = 4U;
-        WalkEventLoopCallback cntHandles = []([[maybe_unused]] void *handle, void *arg) {
-            auto *cnt = reinterpret_cast<uint32_t *>(arg);
-            (*cnt)++;
-        };
-        // CC-OFFNXT(G.CTL.03) implementation feature
-        while (true) {
-            // NOTE(ksarychev, #25367): change to handle corner cases
-            etsVM->RunEventLoop(EventLoopRunMode::RUN_ONCE);
-            uint32_t handleCount = 0;
-            etsVM->WalkEventLoop(cntHandles, &handleCount);
-            if (handleCount <= MANUALLY_HANDLED_ASYNC_COUNT) {
-                break;
-            }
+
+        while (g_posterState != TaskPosterState::DESTROYED) {
+            etsVM->RunEventLoop(ark::EventLoopRunMode::RUN_ONCE);
         }
     } else {
         RunExclusiveTask(taskRef, refStorage);
@@ -202,7 +193,10 @@ int64_t TaskPosterCreate()
 {
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
-    auto poster = coro->GetPandaVM()->CreateCallbackPoster();
+
+    std::function onDestroy = []() { g_posterState = DESTROYED; };
+
+    auto poster = coro->GetPandaVM()->CreateCallbackPoster(onDestroy);
     ASSERT(poster != nullptr);
     return reinterpret_cast<int64_t>(poster.release());
 }

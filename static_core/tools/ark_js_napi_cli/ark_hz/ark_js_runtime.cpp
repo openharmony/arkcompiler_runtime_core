@@ -71,11 +71,6 @@ bool ArkJsRuntime::ProcessOptions(int argc, const char **argv, arg_list_t *filen
     return true;
 }
 
-static napi_value JsValueFromLocalValue(panda::Local<panda::JSValueRef> local)
-{
-    return reinterpret_cast<napi_value>(*local);
-}
-
 bool ArkJsRuntime::Init()
 {
     if (vm_ != nullptr) {
@@ -93,9 +88,6 @@ bool ArkJsRuntime::Init()
     engine_->SetGetAssetFunc(utils::GetAsset);
     engine_->SetCleanEnv([this] { JSNApi::DestroyJSVM(vm_); });
 
-    auto *engine = GetNativeEngine();
-    Local<ObjectRef> global = panda::JSNApi::GetGlobalObject(vm_);
-    ark::ets::interop::js::helper::Init(reinterpret_cast<napi_env>(engine), JsValueFromLocalValue(global));
     return true;
 }
 

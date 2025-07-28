@@ -51,12 +51,14 @@ class EventLoopCallbackPoster : public CallbackPoster {
 
 public:
     static_assert(PANDA_ETS_INTEROP_JS);
-    explicit EventLoopCallbackPoster();
+    explicit EventLoopCallbackPoster(DestroyCallback onDestroy = nullptr);
     ~EventLoopCallbackPoster() override;
     NO_COPY_SEMANTIC(EventLoopCallbackPoster);
     NO_MOVE_SEMANTIC(EventLoopCallbackPoster);
 
 private:
+    void Init();
+
     void PostImpl(WrappedCallback &&callback) override;
 
     void PostToEventLoop(WrappedCallback &&callback);
@@ -64,7 +66,8 @@ private:
     static void AsyncEventToExecuteCallbacks(uv_async_t *async);
 
     uv_async_t *async_ = nullptr;
-    ThreadSafeCallbackQueue *callbackQueue_;
+    ThreadSafeCallbackQueue *callbackQueue_ = nullptr;
+    WrappedCallback onDestroy_;
 };
 
 class EventLoopCallbackPosterFactoryImpl : public CallbackPosterFactoryIface {
@@ -78,16 +81,23 @@ public:
      * @brief Creates callback poster to perform async work in EventLoop.
      * NOTE: This method can only be called from threads that have napi_env (e.g. Main, Exclusive Workers).
      */
-    PandaUniquePtr<CallbackPoster> CreatePoster() override;
+    // NOLINTNEXTLINE(google-default-arguments)
+    PandaUniquePtr<CallbackPoster> CreatePoster(CallbackPoster::DestroyCallback onDestroy = nullptr) override;
 };
 
 class EventLoop {
 public:
     static uv_loop_t *GetEventLoop();
 
-    static void RunEventLoop(EventLoopRunMode mode = EventLoopRunMode::RUN_DEFAULT);
+    static bool RunEventLoop(EventLoopRunMode mode = EventLoopRunMode::RUN_DEFAULT);
 
     static void WalkEventLoop(WalkEventLoopCallback &callback, void *args);
+
+    static uv_timer_t *CreateTimer();
+
+    static void CloseTimer(uv_timer_t *timer);
+
+    static std::atomic_uint32_t eventCount_;
 };
 
 }  // namespace ark::ets::interop::js
