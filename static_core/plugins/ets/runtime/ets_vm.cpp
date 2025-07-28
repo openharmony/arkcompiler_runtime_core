@@ -87,6 +87,7 @@ bool PandaEtsVM::CreateTaskManagerIfNeeded(const RuntimeOptions &options)
     if (options.GetWorkersType() == "taskmanager" && !Runtime::IsTaskManagerUsed()) {
         taskmanager::TaskManager::Start(options.GetTaskmanagerWorkersCount(),
                                         taskmanager::StringToTaskTimeStats(options.GetTaskStatsType()));
+        taskmanager::TaskManager::EnableTimerThread();
         Runtime::SetTaskManagerUsed(true);
     }
     return true;
@@ -376,6 +377,7 @@ void PandaEtsVM::PreZygoteFork()
 
     if (taskmanager::TaskManager::IsUsed()) {
         preForkWorkerCount_ = taskmanager::TaskManager::GetWorkersCount();
+        taskmanager::TaskManager::DisableTimerThread();
         taskmanager::TaskManager::SetWorkersCount(0U);
     }
 }
@@ -388,6 +390,7 @@ void PandaEtsVM::PostZygoteFork()
 
     if (taskmanager::TaskManager::IsUsed()) {
         taskmanager::TaskManager::SetWorkersCount(preForkWorkerCount_);
+        taskmanager::TaskManager::EnableTimerThread();
     }
     coroutineManager_->PostZygoteFork();
     compiler_->PostZygoteFork();

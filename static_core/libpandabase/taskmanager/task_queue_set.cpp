@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "libpandabase/taskmanager/task_queue_set.h"
+#include "libpandabase/taskmanager/task_manager.h"
 #include "libpandabase/utils/logger.h"
 
 namespace ark::taskmanager::internal {
@@ -33,6 +33,7 @@ TaskQueueSet::TaskQueueSet(TaskWaitList *waitList, TaskTimeStatsType taskTimeSta
         // Atomic with relaxed order reason: no order dependency with another variables
         queues_[i].store(nullptr, std::memory_order_relaxed);
     }
+    checkIfTimerThreadExists_ = [] { return TaskManager::IsTimerThreadEnabled(); };
 }
 
 TaskQueueSet::~TaskQueueSet()

@@ -633,6 +633,7 @@ Runtime::~Runtime()
     mem::CrossingMapSingleton::Destroy();
 
     if (Runtime::IsTaskManagerUsed()) {
+        taskmanager::TaskManager::DisableTimerThread();
         taskmanager::TaskManager::Finish();
         Runtime::SetTaskManagerUsed(false);
     }

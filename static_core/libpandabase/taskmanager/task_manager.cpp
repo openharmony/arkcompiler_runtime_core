@@ -59,8 +59,29 @@ size_t TaskManager::GetWorkersCount()
     return inst_->scheduler_.GetCountOfWorkers();
 }
 
+/*static*/
+void TaskManager::EnableTimerThread()
+{
+    inst_->timerThread_.Start();
+}
+
+/*static*/
+void TaskManager::DisableTimerThread()
+{
+    inst_->timerThread_.Finish();
+}
+
+/*static*/
+bool TaskManager::IsTimerThreadEnabled()
+{
+    return inst_->timerThread_.IsEnabled();
+}
+
 TaskManager::TaskManager(size_t workerCount, TaskTimeStatsType statsType)
-    : waitList_(), queueSet_(&waitList_, statsType), scheduler_(workerCount, &waitList_, &queueSet_)
+    : waitList_(),
+      timerThread_(&waitList_),
+      queueSet_(&waitList_, statsType),
+      scheduler_(workerCount, &waitList_, &queueSet_)
 {
     queueSet_.SetCallbacks([] { TaskManager::inst_->scheduler_.SignalWorkers(); });
 }

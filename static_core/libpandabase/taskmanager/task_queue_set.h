@@ -50,6 +50,9 @@ private:
     TaskWaitList *waitList_ = nullptr;
     std::function<void()> signalWorkersCallback_;
     std::function<void()> signalWaitersCallback_;
+
+    std::function<bool()> checkIfTimerThreadExists_;
+
     TaskTimeStatsBase *taskTimeStats_ = nullptr;
     std::atomic_size_t selectionIndex_ {0};
     std::array<std::atomic<TaskQueueInterface *>, MAX_COUNT_OF_QUEUE> queues_ {};
@@ -63,7 +66,7 @@ inline TaskQueueInterface *TaskQueueSet::CreateQueue(QueuePriority priority)
     size_t i = 0;
     auto *queue = internal::TaskQueue<Allocator>::Create(priority, waitList_, taskTimeStats_);
     ASSERT(signalWorkersCallback_ != nullptr);
-    queue->SetCallbacks(signalWorkersCallback_);
+    queue->SetCallbacks(signalWorkersCallback_, checkIfTimerThreadExists_);
     while (i != MAX_COUNT_OF_QUEUE) {
         for (i = 0; i < MAX_COUNT_OF_QUEUE; i++) {
             // Atomic with relaxed order reason: no order dependency with another variables

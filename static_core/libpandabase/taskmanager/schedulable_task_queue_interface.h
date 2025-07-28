@@ -35,6 +35,8 @@ public:
     using SignalWorkersCallback = std::function<void()>;
     using SignalWaitersCallback = std::function<void()>;
 
+    using CheckIfTimerThreadIsEnabledCallback = std::function<bool()>;
+
     using AddTaskToWorkerFunc = std::function<void(TaskPtr)>;
     using AddTaskToHelperFunc = std::function<void(TaskPtr)>;
 
@@ -61,7 +63,8 @@ public:
 
     virtual TaskTimeStatsBase *GetTaskTimeStats() const = 0;
 
-    void virtual SetCallbacks(SignalWorkersCallback signalWorkersCallback) = 0;
+    void virtual SetCallbacks(SignalWorkersCallback signalWorkersCallback,
+                              CheckIfTimerThreadIsEnabledCallback checkTimerThreadExistCallback) = 0;
 
     /// @brief Removes callback function.
     void virtual UnsetCallbacks() = 0;

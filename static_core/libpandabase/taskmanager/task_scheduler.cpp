@@ -73,7 +73,6 @@ bool TaskScheduler::FillWithTasks(WorkerThread *worker)
 {
     // CC-OFFNXT(G.CTL.03): false positive
     while (true) {
-        ProcessWaitList();
         auto queue = queueSet_->SelectQueue();
         if (queue != nullptr) {
             PutTasksInWorker(worker, reinterpret_cast<internal::SchedulableTaskQueueInterface *>(queue));
@@ -117,8 +116,8 @@ bool TaskScheduler::WaitUntilNewTasks(WorkerThread *worker)
     waitWorkersCount_.fetch_add(1, std::memory_order_relaxed);
     // we don't use while loop here, because WorkerThread should be fast, if it was contified waiting work correct, if
     // it was not we will retuen to the worker, where we should retry all the checks, so behiaviour is correct.
-    if (AreQueuesEmpty() || !waitList_->HaveReadyValue()) {
-        queuesWaitCondVar_.TimedWait(&taskSchedulerStateLock_, TASK_WAIT_TIMEOUT);
+    if (AreQueuesEmpty() && !worker->CheckFinish()) {
+        queuesWaitCondVar_.Wait(&taskSchedulerStateLock_);
     }
     // Atomic with relaxed order reason: no sync depends
     waitWorkersCount_.fetch_sub(1, std::memory_order_relaxed);

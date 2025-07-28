@@ -48,6 +48,7 @@ set(SOURCES
     ${PANDA_ROOT}/libpandabase/taskmanager/task_manager.cpp
     ${PANDA_ROOT}/libpandabase/taskmanager/task_queue_set.cpp
     ${PANDA_ROOT}/libpandabase/taskmanager/task_scheduler.cpp
+    ${PANDA_ROOT}/libpandabase/taskmanager/timer_thread.cpp
     ${PANDA_ROOT}/libpandabase/taskmanager/worker_thread.cpp
     ${PANDA_ROOT}/libpandabase/taskmanager/utils/task_time_stats.cpp
     ${ARKBASE_LTO_SOURCES}
