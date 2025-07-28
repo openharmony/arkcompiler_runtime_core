@@ -99,9 +99,10 @@ void SweepStaticRoots(const WeakRefFieldVisitor &visitor)
         return alive ? ark::ObjectStatus::ALIVE_OBJECT : ark::ObjectStatus::DEAD_OBJECT;
     };
     vm->SweepVmRefs(visitorWrap);
-#ifdef PANDA_JS_ETS_HYBRID_MODE
-    static_cast<ark::mem::ets::EtsReferenceProcessor *>(vm->GetReferenceProcessor())->ClearDeadReference(visitorWrap);
-#endif
+    auto *refProccessor = static_cast<ark::mem::ets::EtsReferenceProcessor *>(vm->GetReferenceProcessor());
+    refProccessor->ClearDeadReferences([&visitor](const ark::ObjectHeader *object) -> bool {
+        return !visitor(reinterpret_cast<RefField<> &>(*reinterpret_cast<const BaseObject **>(&object)));
+    });
 }
 
 #ifdef PANDA_JS_ETS_HYBRID_MODE

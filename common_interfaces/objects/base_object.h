@@ -58,12 +58,6 @@ public:
         return GetOperator()->IsValidObject(this);
     }
 
-    // Iterate object field, and skit the weak referent, ONLY used in interop.
-    void ForEachRefFieldSkipReferent(const RefFieldVisitor &visitor)
-    {
-        GetOperator()->ForEachRefFieldSkipReferent(this, visitor);
-    }
-
     void ForEachRefField(const RefFieldVisitor &visitor)
     {
         GetOperator()->ForEachRefField(this, visitor);
@@ -195,7 +189,7 @@ public:
     }
     // The interfaces above only use for common code compiler. It will be deleted later.
 
-    void SetFullBaseClassWithoutBarrier(BaseClass* cls)
+    void SetFullBaseClassWithoutBarrier(BaseClass *cls)
     {
         state_ = 0;
         state_.SetFullBaseClassAddress(reinterpret_cast<common::StateWordType>(cls));
@@ -216,6 +210,7 @@ public:
     {
         return GetBaseClass()->IsString();
     }
+
 protected:
     inline BaseObjectOperatorInterfaces *GetOperator() const
     {

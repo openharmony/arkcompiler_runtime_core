@@ -40,17 +40,18 @@ public:
     static bool IterateAndDiscoverReferences(GC *gc, ObjectHeader *obj, Handler *handler, void *begin, void *end);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool Iterate(Class *cls, ObjectHeader *obj, Handler *handler);
+    static bool Iterate(const Class *cls, ObjectHeader *obj, Handler *handler);
 
 private:
     template <bool INTERRUPTIBLE, typename Handler>
     static bool Iterate(Class *cls, ObjectHeader *obj, Handler *handler, void *begin, void *end);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool IterateObjectReferences(ObjectHeader *object, Class *objClass, Handler *handler);
+    static bool IterateObjectReferences(ObjectHeader *object, const Class *objClass, Handler *handler);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool IterateObjectReferences(ObjectHeader *object, Class *cls, Handler *handler, void *begin, void *end);
+    static bool IterateObjectReferences(ObjectHeader *object, const Class *cls, Handler *handler, void *begin,
+                                        void *end);
 
     template <bool INTERRUPTIBLE, typename Handler>
     static bool IterateClassReferences(Class *cls, Handler *handler);
