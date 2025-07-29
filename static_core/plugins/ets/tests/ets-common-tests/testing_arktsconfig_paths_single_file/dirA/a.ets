@@ -18,7 +18,7 @@
   arktsconfig: arktsconfig.json
 ---*/
 
-import { BObj } from "HarB.foo"
+import { BObj } from 'HarB.foo'
 
 function main() {
     BObj.foo();

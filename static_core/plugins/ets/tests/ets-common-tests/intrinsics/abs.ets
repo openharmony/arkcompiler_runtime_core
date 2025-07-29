@@ -14,15 +14,32 @@
  */
 
 function main(): int {
-    if (abs(Double.POSITIVE_INFINITY) != Double.POSITIVE_INFINITY) return 3;
-    if (abs(Double.NEGATIVE_INFINITY) != Double.POSITIVE_INFINITY) return 4;
-    if (abs(Double.MAX_VALUE) != Double.MAX_VALUE) return 5;
-    if (abs(-Double.MAX_VALUE) != Double.MAX_VALUE) return 6;
-    if (abs(Double.MIN_VALUE) != Double.MIN_VALUE) return 7;
-    if (abs(-Double.MIN_VALUE) != Double.MIN_VALUE) return 8;
-    if (abs(1.) != 1.) return 9;
-    if (abs(-1.) != 1.) return 10;
-    if (abs(0.) != 0.) return 11;
-
+    if (abs(Double.POSITIVE_INFINITY) != Double.POSITIVE_INFINITY) {
+        return 3;
+    }
+    if (abs(Double.NEGATIVE_INFINITY) != Double.POSITIVE_INFINITY) {
+        return 4;
+    }
+    if (abs(Double.MAX_VALUE) != Double.MAX_VALUE) {
+        return 5;
+    }
+    if (abs(-Double.MAX_VALUE) != Double.MAX_VALUE) {
+        return 6;
+    }
+    if (abs(Double.MIN_VALUE) != Double.MIN_VALUE) {
+        return 7;
+    }
+    if (abs(-Double.MIN_VALUE) != Double.MIN_VALUE) {
+        return 8;
+    }
+    if (abs(1.0) != 1.0) {
+        return 9;
+    }
+    if (abs(-1.0) != 1.0) {
+        return 10;
+    }
+    if (abs(0.0) != 0.0) {
+        return 11;
+    }
     return 0;
 }

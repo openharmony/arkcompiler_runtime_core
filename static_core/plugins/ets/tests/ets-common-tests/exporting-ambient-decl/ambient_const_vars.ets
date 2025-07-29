@@ -17,17 +17,21 @@
   tags: [not-a-test]
 ---*/
 
-export declare const int_1 = 3;
-export declare const int_2 = 0, int_3 = 9007199254740991;
-declare const int_04 = -0.0, int_5 = 9007199254740991;
-export { int_04 as int_4, int_5 };
-declare const int_6 = 0;
-export { int_6 };
+export declare const INT_1 = 3;
+export declare const INT_2 = 0;
+export declare const INT_3 = 9007199254740991;
+declare const INT_04 = -0.0;
+declare const INT_5 = 9007199254740991;
+export { INT_04 as INT_4, INT_5 };
+declare const INT_6 = 0;
+export { INT_6 };
 
 
-export declare const double_1 = 3.14E14;
-export declare const double_2 = -0.0, double_3 = 9007199254740991.0;
-declare const double_4 = -0.0, double_05 = 9007199254740991.0;
-export { double_4, double_05 as double_5 };
-declare const double_6 = -0.0;
-export { double_6 };
+export declare const DOUBLE_1 = 3.14E14;
+export declare const DOUBLE_2 = -0.0;
+export declare const DOUBLE_3 = 9007199254740991.0;
+declare const DOUBLE_4 = -0.0;
+declare const DOUBLE_05 = 9007199254740991.0;
+export { DOUBLE_4, DOUBLE_05 as DOUBLE_5 };
+declare const DOUBLE_6 = -0.0;
+export { DOUBLE_6 };

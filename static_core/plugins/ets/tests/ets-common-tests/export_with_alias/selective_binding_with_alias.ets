@@ -18,7 +18,7 @@ files:
 - ./a_module.ets
 ---*/
 
-import {AA as AAA} from "./a_module"
+import {AA as AAA} from './a_module'
 
 function main(): void {
     let aa:AAA;

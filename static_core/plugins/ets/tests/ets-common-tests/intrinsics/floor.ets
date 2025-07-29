@@ -14,18 +14,41 @@
  */
 
 function main(): int {
-    if (floor(Double.POSITIVE_INFINITY) != Double.POSITIVE_INFINITY) return 1;
-    if (floor(Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) return 2;
-    if (Double.toString(floor(Double.NaN)) != Double.toString(Double.NaN)) return 3;
-    if (floor(0.) != 0.) return 4;
-    if (floor(1.) != 1.) return 5;
-    if (floor(-1.) != -1.) return 6;
-    if (floor(1.5) != 1.) return 7;
-    if (floor(1.6) != 1.) return 8;
-    if (floor(1.4) != 1.) return 9;
-    if (floor(-1.5) != -2.) return 10;
-    if (floor(-1.6) != -2.) return 11;
-    if (floor(-1.4) != -2.) return 12;
-    
+    if (floor(Double.POSITIVE_INFINITY) != Double.POSITIVE_INFINITY) {
+        return 1;
+    }
+    if (floor(Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) {
+        return 2;
+    }
+    if (Double.toString(floor(Double.NaN)) != Double.toString(Double.NaN)) {
+        return 3;
+    }
+    if (floor(0.0) != 0.0) {
+        return 4;
+    }
+    if (floor(1.0) != 1.0) {
+        return 5;
+    }
+    if (floor(-1.0) != -1.0) {
+        return 6;
+    }
+    if (floor(1.5) != 1.0) {
+        return 7;
+    }
+    if (floor(1.6) != 1.0) {
+        return 8;
+    }
+    if (floor(1.4) != 1.0) {
+        return 9;
+    }
+    if (floor(-1.5) != -2.0) {
+        return 10;
+    }
+    if (floor(-1.6) != -2.0) {
+        return 11;
+    }
+    if (floor(-1.4) != -2.0) {
+        return 12;
+    }
     return 0;
 }

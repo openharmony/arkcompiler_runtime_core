@@ -23,6 +23,6 @@ class A {
 
 function main(): void {
     let a : A = new A()
-    assertNE(a, null, "Generics allocating error #1!")
+    arktest.assertNE(a, null, 'Generics allocating error #1!')
     a.bar()
 }

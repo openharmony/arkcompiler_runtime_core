@@ -13,28 +13,28 @@
  * limitations under the License.
  */
 
-let str: String = new String("abcΣΨΩ0123456789!");
+let str: String = 'abcΣΨΩ0123456789!';
 let bytes: byte[] = [97, 98, 99, -93, -88, -87, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 33]
 
-function equals(val: byte[], exp: byte[], offset: int): boolean
-{
-    if (val.length != (exp.length - offset))
+function equals(val: byte[], exp: byte[], offset: int): boolean {
+    if (val.length != (exp.length - offset)) {
         return false;
+	}
     for (let i: int = 0; i < val.length; ++i) {
-        if (val[i] != exp[i + offset])
+        if (val[i] != exp[i + offset]) {
             return false;
+		}
     }
     return true;
 }
 
-function printArray(a: byte[], offset: int, name: String): void
-{
-    console.println(name + " length: " + (a.length - offset))
-    console.print(name + " data:  [ ")
+function printArray(a: byte[], offset: int, name: String): void {
+    console.println(name + ' length: ' + (a.length - offset))
+    console.print(name + ' data:  [ ')
     for (let i: int = 0; i < a.length; ++i) {
-        console.print(a[i + offset] + " ");
+        console.print(a[i + offset] + ' ');
     }
-    console.println("]");
+    console.println(']');
 }
 
 function main(): int {
@@ -42,9 +42,9 @@ function main(): int {
     for (let i: int = 0; i < len; ++i) {
         let arr: byte[] = str.getBytes(i, len);
         if (!equals(arr, bytes, i)) {
-            console.println("at: " + i);
-            printArray(arr, 0,   "actual  ")
-            printArray(bytes, i, "expected")
+            console.println('at: ' + i);
+            printArray(arr, 0, 'actual  ')
+            printArray(bytes, i, 'expected')
             return 1;
         }
     }

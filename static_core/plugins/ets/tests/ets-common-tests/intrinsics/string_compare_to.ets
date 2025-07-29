@@ -13,38 +13,38 @@
  * limitations under the License.
  */
 
-let what: String = "";
+let what: String = '';
 
 function finder(s: String) {
     return s.compareTo(what) == 0;
 }
 
-function test_latin() {
-    let strs = new Array<String>;
+function testLatin() {
+    let strs: String[] = [];
     let n = 5000;
     for (let i = 0; i < n; i += 10) {
         strs.push(`${i}ww`);
         what = `${i}ww`;
         let found = strs.find(finder);
-        assertEQ(found, what, "The string should be found");
+        arktest.assertEQ(found, what, 'The string should be found');
         if (strs.length > 3) {
             strs.unshift();
         }
     }
 }
 
-function test_corner_cases() {
+function testCornerCases() {
     let tuples: [String, String, int][] = [
-        ["zя", "zz", 1],
-        ["zя", "z", 1],
-        ["zzя", "zzz", 1],
-        ["zzя", "zz", 1],
-        ["zzzя", "zzzz", 1],
-        ["zzzя", "zzz", 1],
-        ["zzzzя", "zzzzz", 1],
-        ["zzzzя", "zzzz", 1],
-        ["\uFEFFa", "aa", 1],
-        ["aaa", "aaa", 0],
+        ['zя', 'zz', 1],
+        ['zя', 'z', 1],
+        ['zzя', 'zzz', 1],
+        ['zzя', 'zz', 1],
+        ['zzzя', 'zzzz', 1],
+        ['zzzя', 'zzz', 1],
+        ['zzzzя', 'zzzzz', 1],
+        ['zzzzя', 'zzzz', 1],
+        ['\uFEFFa', 'aa', 1],
+        ['aaa', 'aaa', 0],
     ];
     for (let i = 0; i < tuples.length; i++) {
         let tuple = tuples[i];
@@ -62,7 +62,7 @@ function test_corner_cases() {
     }
 }
 
-let prefix = "";
+let prefix = '';
 
 function mixed_finder(s: String) {
     let r = s.compareTo(what);
@@ -72,7 +72,7 @@ function mixed_finder(s: String) {
     return r == 0;
 }
 
-function test_mixed() {
+function testMixed() {
     let strs = new Array<String>;
     let n = 5000;
     for (let i = 0; i < n; i += 10) {
@@ -80,23 +80,23 @@ function test_mixed() {
         strs.push(`${i}w`);
         what = `${i}я`;
         let found = strs.find(mixed_finder);
-        assertEQ(found, undefined, "The string should not be found");
+        arktest.assertEQ(found, undefined, 'The string should not be found');
         if (strs.length > 3) {
             strs.unshift();
         }
     }
 
-    test_corner_cases();
+    testCornerCases();
 }
 
-function test_utf16() {
+function testUtf16() {
     let strs = new Array<String>;
     let n = 5000;
     for (let i = 0; i < n; i += 10) {
         strs.push(`${i}я`);
         what = `${i}я`;
         let found = strs.find(finder);
-        assertEQ(found, what, "The string should be found");
+        arktest.assertEQ(found, what, 'The string should be found');
         if (strs.length > 3) {
             strs.unshift();
         }
@@ -104,8 +104,8 @@ function test_utf16() {
 }
 
 function main(): int {
-    test_latin();
-    test_mixed();
-    test_utf16();
+    testLatin();
+    testMixed();
+    testUtf16();
     return 0;
 }

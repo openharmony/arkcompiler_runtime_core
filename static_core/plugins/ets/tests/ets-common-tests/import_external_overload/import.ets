@@ -28,7 +28,7 @@ function foo(p: int): int {
 }
 
 function main(): int {
-    if (foo("XYZ") != "XYZXYZ" || foo(2) != 4 || foo(1.2) != 2.4) {
+    if (foo('XYZ') != 'XYZXYZ' || foo(2) != 4 || foo(1.2) != 2.4) {
         return 1
     }
     return 0

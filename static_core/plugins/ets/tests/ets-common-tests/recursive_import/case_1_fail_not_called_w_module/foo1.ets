@@ -19,10 +19,10 @@ files:
 tags: [not-a-test]
 ---*/
 
-import {foo} from "./foo2"
+import {foo} from './foo2'
 
 export class A {
-    a: int;
+    public a: int;
 }
 
 

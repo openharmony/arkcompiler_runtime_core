@@ -14,18 +14,41 @@
  */
 
 function main(): int {
-    if (ceil(Double.POSITIVE_INFINITY) != Double.POSITIVE_INFINITY) return 1;
-    if (ceil(Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) return 2;
-    if (Double.toString(ceil(Double.NaN)) != Double.toString(Double.NaN)) return 3;
-    if (ceil(0.) != 0.) return 4;
-    if (ceil(1.) != 1.) return 5;
-    if (ceil(-1.) != -1.) return 6;
-    if (ceil(1.5) != 2.) return 7;
-    if (ceil(1.6) != 2.) return 8;
-    if (ceil(1.4) != 2.) return 9;
-    if (ceil(-1.5) != -1.) return 10;
-    if (ceil(-1.6) != -1.) return 11;
-    if (ceil(-1.4) != -1.) return 12;
-    
+    if (ceil(Double.POSITIVE_INFINITY) != Double.POSITIVE_INFINITY) {
+        return 1;
+    }
+    if (ceil(Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) {
+        return 2;
+    }
+    if (Double.toString(ceil(Double.NaN)) != Double.toString(Double.NaN)) {
+        return 3;
+    }
+    if (ceil(0.0) != 0.0) {
+        return 4;
+    }
+    if (ceil(1.0) != 1.0) {
+        return 5;
+    }
+    if (ceil(-1.0) != -1.0) {
+        return 6;
+    }
+    if (ceil(1.5) != 2.0) {
+        return 7;
+    }
+    if (ceil(1.6) != 2.0) {
+        return 8;
+    }
+    if (ceil(1.4) != 2.0) {
+        return 9;
+    }
+    if (ceil(-1.5) != -1.0) {
+        return 10;
+    }
+    if (ceil(-1.6) != -1.0) {
+        return 11;
+    }
+    if (ceil(-1.4) != -1.0) {
+        return 12;
+    }
     return 0;
 }

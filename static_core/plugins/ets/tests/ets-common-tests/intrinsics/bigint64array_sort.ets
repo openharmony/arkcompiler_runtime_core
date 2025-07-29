@@ -14,7 +14,7 @@
  */
 
 const ARRAY_SIZE = 15;
-const UNSORTED = [5, 3, Long.MAX_VALUE, 2, 4, -1, 99, 10, 7, 0, 45, 1, 88, Long.MIN_VALUE, 37];
+const UNSORTED: Array<Double> = [5, 3, Long.MAX_VALUE, 2, 4, -1, 99, 10, 7, 0, 45, 1,88, Long.MIN_VALUE, 37];
 const SORTED = [Long.MIN_VALUE, -1, 0, 1, 2, 3, 4, 5, 7, 10, 37, 45, 88, 99, Long.MAX_VALUE];
 const SINGLE = [88];
 

@@ -25,6 +25,6 @@ function main() {
     }
 
     let reason = Atomics.wait(arr, 0, 0, 10)
-    console.println("reason is " + reason)
-    assertEQ(reason, "timed-out")
+    console.println('reason is ' + reason)
+    arktest.assertEQ(reason, 'timed-out')
 }

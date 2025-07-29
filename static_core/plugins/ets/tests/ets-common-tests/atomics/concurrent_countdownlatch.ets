@@ -13,8 +13,8 @@
 * limitations under the License.
 */
 
-import {StdDebug} from "std/debug"
-import { launch } from "std/concurrency"
+import {StdDebug} from 'std/debug'
+import { launch } from 'std/concurrency'
 
 type L = StdDebug.Logger
 
@@ -36,39 +36,39 @@ function main() {
     bytearr_i64 = new BigInt64Array(buf_2, 0, 1)
 
     for (let i = 0; i < N; i++) {
-        launch<Int, () => Int>(task_1)
+        launch<Int, () => Int>(task1)
     }
     let cur: byte = Atomics.load(bytearr_i8, 0) as byte
     while (cur != N) {
-        L.log("waiting, finished tasks: " + cur)
+        L.log('waiting, finished tasks: ' + cur)
         Atomics.wait(arr_1, 0, cur)
         cur = Atomics.load(bytearr_i8, 0) as byte
     }
 
     for (let i = 0; i < N; i++) {
-        launch<Int, () => Int>(task_2)
+        launch<Int, () => Int>(task2)
     }
     let cur_64: long = Atomics.load(bytearr_i64, 0).getLong()
     while (cur_64 != N) {
-        L.log("waiting, finished tasks: " + cur_64)
+        L.log('waiting, finished tasks: ' + cur_64)
         Atomics.wait(arr_2, 0, new BigInt(cur_64))
         cur_64 = Atomics.load(bytearr_i64, 0).getLong()
     }
-    L.log("all tasks have finished")
+    L.log('all tasks have finished')
 }
 
-function task_1(): Int {
+function task1(): Int {
     heavyComputation()
-    L.log("Task finished. Notifying")
+    L.log('Task finished. Notifying')
     Atomics.add(bytearr_i8, 0, 1 as byte)
     Atomics.notify(arr_1, 0)
     
     return 1
 }
 
-function task_2(): Int {
+function task2(): Int {
     heavyComputation()
-    L.log("Task finished. Notifying")
+    L.log('Task finished. Notifying')
     Atomics.add(bytearr_i64, 0, new BigInt(1))
     Atomics.notify(arr_2, 0)
     

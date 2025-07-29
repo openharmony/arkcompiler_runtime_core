@@ -17,7 +17,7 @@
 tags: [not-a-test]
 ---*/
 
-import {A} from "./source1"
+import {A} from './source1'
 
-export function foo(a: A){}
+export function foo(a: A) {}
 

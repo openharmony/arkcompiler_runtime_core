@@ -15,16 +15,27 @@
 
 const ARRAY_SIZE = 15;
 const AB_SIZE = ARRAY_SIZE * Float.BYTE_SIZE;
-const UNSORTED = [Float.MAX_VALUE, 0, 100.5, 3.375, 1.125, -1.125, Float.POSITIVE_INFINITY, 10.5, 7.375, 45.125, 1.375,
-                  Float.NEGATIVE_INFINITY, Float.MIN_VALUE, 36.625, 123.375];
-const SORTED = [Float.NEGATIVE_INFINITY, -1.125, 0, Float.MIN_VALUE, 1.125, 1.375, 3.375, 7.375, 10.5, 36.625, 45.125,
-                100.5, 123.375, Float.MAX_VALUE, Float.POSITIVE_INFINITY];
-const SORTED_UNALIGNED = [Float.NEGATIVE_INFINITY, -1.125, 0, Float.MIN_VALUE, 1.125, 1.375, 3.375, 7.375, 10.5,
-                          36.625, 45.125, 100.5, 123.375, Float.POSITIVE_INFINITY];
-const UNSORTED_WITH_NAN = [Float.MAX_VALUE, 0.0, 100.5, Float.NaN, 1.125, -1.125, Float.POSITIVE_INFINITY, 10.5, 7.375,
-                           45.125, 1.375, Float.NEGATIVE_INFINITY, Float.MIN_VALUE, 36.625, 123.375];
-const SORTED_WITH_NAN = [Float.NEGATIVE_INFINITY, -1.125, 0.0, 100.5, Float.MAX_VALUE, Float.NaN, Float.MIN_VALUE,
-                         1.125, 1.375, 7.375, 10.5, 36.625, 45.125, 123.375, Float.POSITIVE_INFINITY];
+const UNSORTED: Array<Double> = [
+    Float.MAX_VALUE.toDouble(), 0, 100.5, 3.375, 1.125, -1.125,
+    Float.POSITIVE_INFINITY.toDouble(), 10.5, 7.375, 45.125, 1.375, 
+    Float.NEGATIVE_INFINITY.toDouble(),
+    Float.MIN_VALUE.toDouble(), 36.625, 123.375];
+const SORTED = [
+    Float.NEGATIVE_INFINITY, -1.125, 0,
+    Float.MIN_VALUE, 1.125, 1.375, 3.375, 7.375, 10.5, 36.625, 45.125, 100.5, 123.375,
+    Float.MAX_VALUE, Float.POSITIVE_INFINITY];
+const SORTED_UNALIGNED = [
+    Float.NEGATIVE_INFINITY, -1.125, 0,
+    Float.MIN_VALUE, 1.125, 1.375, 3.375, 7.375, 10.5, 36.625, 45.125, 100.5, 123.375, Float.POSITIVE_INFINITY];
+const UNSORTED_WITH_NAN: double[] = [
+    Float.MAX_VALUE.toDouble(), 0.0, 100.5,
+    Float.NaN.toDouble(), 1.125, -1.125,
+    Float.POSITIVE_INFINITY.toDouble(), 10.5, 7.375, 45.125, 1.375,
+    Float.NEGATIVE_INFINITY.toDouble(), Float.MIN_VALUE.toDouble(), 36.625, 123.375];
+const SORTED_WITH_NAN: double[] = [
+    Float.NEGATIVE_INFINITY.toDouble(), -1.125, 0.0, 100.5,
+    Float.MAX_VALUE.toDouble(), Float.NaN.toDouble(), Float.MIN_VALUE.toDouble(),
+    1.125, 1.375, 7.375, 10.5, 36.625, 45.125, 123.375, Float.POSITIVE_INFINITY.toDouble()];
 const SINGLE = [88.0];
 
 function fillBuffer(buf: ArrayBuffer): void {

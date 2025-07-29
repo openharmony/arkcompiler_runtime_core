@@ -24,13 +24,13 @@ files:
 ---*/
 
 
-import default_class from "./default_export/default_export_class"
-import default_func from "./default_export/default_export_function"
-import default_interface from "./default_export/default_export_interface"
-import default_var from "./default_export/default_export_variable"
+import default_class from './default_export/default_export_class'
+import default_func from './default_export/default_export_function'
+import default_interface from './default_export/default_export_interface'
+import default_var from './default_export/default_export_variable'
 
 class I implements default_interface {
-    item = 1;
+    public item = 1;
 }
 
 function main() {
@@ -39,5 +39,5 @@ function main() {
     let e = new I();
     assertEQ(e.item, 1);
     let b : default_class = new default_class();
-    assertEQ(b.hello("hello"), "hello_world")  
+    arktest.assertEQ(b.hello('hello'), 'hello_world')  
 }

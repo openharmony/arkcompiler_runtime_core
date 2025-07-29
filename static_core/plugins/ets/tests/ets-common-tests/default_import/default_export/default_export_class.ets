@@ -19,8 +19,8 @@
 
 export default class TestClass {
     hello(param: String): String {
-        return param + "_world";
+        return param + '_world';
     }
 
-    test_member = "test";
+    public testMember = 'test';
 }

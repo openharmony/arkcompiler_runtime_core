@@ -18,10 +18,10 @@ files:
 - ./export.ets
 ---*/
 
-import {default as c, default as d} from "./export.ets";
+import {default as c, default as d} from './export.ets';
 
-function main(){
-    assertEQ(c, 10)
-    assertEQ(d, 10)
-    assertEQ(c, d)
+function main() {
+    arktest.assertEQ(c, 10)
+    arktest.assertEQ(d, 10)
+    arktest.assertEQ(c, d)
 }

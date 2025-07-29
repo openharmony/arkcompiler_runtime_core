@@ -18,11 +18,11 @@
 ---*/
 
 export class BothInt {
-  static a: int = 24;
-  a: int = 42;
+  public static a: int = 24;
+  public a: int = 42;
 }
 
 export class IntAndString {
-  static a: int = 23;
-  a: string = "42";
+  public static a: int = 23;
+  public a: string = '42';
 }

@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
+    }
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -14,37 +15,91 @@
  */
 
 function main() : int {
-    if (min(Int.MAX_VALUE as int, 0 as int) != 0) return 1;
-    if (min(Int.MIN_VALUE as int, 0 as int) != Int.MIN_VALUE as int) return 2;
-    if (min(0 as int, -2 as int) != -2 as int) return 3;
-    if (min(0 as int, 3 as int) != 0 as int) return 4;
-    if (min(-2 as int, -4 as int) != -4 as int) return 5;
-    if (min(1 as int, 4 as int) != 1 as int) return 6;
+    if (min(Int.MAX_VALUE as int, 0 as int) != 0) {
+        return 1;
+    }
+    if (min(Int.MIN_VALUE as int, 0 as int) != Int.MIN_VALUE as int) {
+        return 2;
+    }
+    if (min(0 as int, -2 as int) != -2 as int) {
+        return 3;
+    }
+    if (min(0 as int, 3 as int) != 0 as int) {
+        return 4;
+    }
+    if (min(-2 as int, -4 as int) != -4 as int) {
+        return 5;
+    }
+    if (min(1 as int, 4 as int) != 1 as int) {
+        return 6;
+    }
+    if (min(Long.MAX_VALUE, 0) != 0) {
+        return 11;
+    }
+    if (min(Long.MIN_VALUE, 0) != Long.MIN_VALUE) {
+        return 12;
+    }
+    if (min(0, -2) != -2) {
+        return 13;
+    }
+    if (min(0, 3) != 0) {
+        return 14;
+    }
+    if (min(-2, -4) != -4) {
+        return 15;
+    }
+    if (min(1, 4) != 1) {
+        return 16;
+    }
 
-    if (min(Long.MAX_VALUE, 0) != 0) return 11;
-    if (min(Long.MIN_VALUE, 0) != Long.MIN_VALUE) return 12;
-    if (min(0, -2) != -2) return 13;
-    if (min(0, 3) != 0) return 14;
-    if (min(-2, -4) != -4) return 15;
-    if (min(1, 4) != 1) return 16;
+    if (min(Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY) != Float.NEGATIVE_INFINITY) {
+        return 21;
+    }
+    if (min(Float.MAX_VALUE, Float.NEGATIVE_INFINITY) != Float.NEGATIVE_INFINITY) {
+        return 22;
+    }
+    if (min(0.0 as float, Float.NEGATIVE_INFINITY) != Float.NEGATIVE_INFINITY) {
+        return 23;
+    }
+    if (min(0.0 as float, Float.MIN_VALUE) != 0.0 as float) {
+        return 24;
+    }
+    if (min(Float.MAX_VALUE, Float.MIN_VALUE) != Float.MIN_VALUE) {
+        return 25;
+    }
+    if (min(0.0 as float, 2.0 as float) != 0.0 as float) {
+        return 26;
+    }
+    if (min(0.0 as float, -4.0 as float) != -4.0 as float) {
+        return 27;
+    }
+    if (min(1.e-10 as float, 2.e+12 as float) != 1.e-10 as float) {
+        return 28;
+    }
 
-    if (min(Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY) != Float.NEGATIVE_INFINITY) return 21;
-    if (min(Float.MAX_VALUE, Float.NEGATIVE_INFINITY) != Float.NEGATIVE_INFINITY) return 22;
-    if (min(0. as float, Float.NEGATIVE_INFINITY) != Float.NEGATIVE_INFINITY) return 23;
-    if (min(0. as float, Float.MIN_VALUE) != 0. as float) return 24;
-    if (min(Float.MAX_VALUE, Float.MIN_VALUE) != Float.MIN_VALUE) return 25;
-    if (min(0. as float, 2. as float) != 0. as float) return 26;
-    if (min(0. as float, -4. as float) != -4. as float) return 27;
-    if (min(1.e-10 as float, 2.e+12 as float) != 1.e-10 as float) return 28;
-
-    if (min(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) return 31;
-    if (min(Double.MAX_VALUE, Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) return 32;
-    if (min(0, Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) return 33;
-    if (min(0, Double.MIN_VALUE) != 0) return 34;
-    if (min(Double.MAX_VALUE, Double.MIN_VALUE) != Double.MIN_VALUE) return 35;
-    if (min(0, 2) != 0) return 36;
-    if (min(0, -4) != -4) return 37;
-    if (min(1.e-100, 2.e+200) != 1.e-100) return 38;
-
+    if (min(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) {
+        return 31;
+    }
+    if (min(Double.MAX_VALUE, Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) {
+        return 32;
+    }
+    if (min(0, Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) {
+        return 33;
+    }
+    if (min(0, Double.MIN_VALUE) != 0) {
+        return 34;
+    }
+    if (min(Double.MAX_VALUE, Double.MIN_VALUE) != Double.MIN_VALUE) {
+        return 35;
+    }
+    if (min(0, 2) != 0) {
+        return 36;
+    }
+    if (min(0, -4) != -4) {
+        return 37;
+    }
+    if (min(1.e-100, 2.e+200) != 1.e-100) {
+        return 38;
+    }
     return 0;
 }

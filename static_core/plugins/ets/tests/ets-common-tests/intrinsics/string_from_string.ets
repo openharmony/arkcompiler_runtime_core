@@ -15,7 +15,7 @@
 
 function main(): int {
 
-    const uncompressable_strings_table: String[] = [
+    const uncompressableStringsTable: String[] = [
         '\u00b0',
         '\u00b0\u00b1',
         '\u00b0\u00b1\u00b2',
@@ -35,39 +35,39 @@ function main(): int {
     ];
 
 
-    let compressable_strings_table: String[] = [
-        "0",
-        "01",
-        "012",
-        "0123",
-        "01234",
-        "012345",
-        "0123456",
-        "01234567",
-        "012345678",
-        "0123456789",
-        "0123456789a",
-        "0123456789ab",
-        "0123456789abc",
-        "0123456789abcd",
-        "0123456789abcde",
-        "0123456789abcdef",
-        "0123456789abcdefg",
-        "0123456789abcdefgh",
-        "0123456789abcdefghi",
-        "0123456789abcdefghij",
-        "0123456789abcdefghijk"
+    let compressableStringsTable: String[] = [
+        '0',
+        '01',
+        '012',
+        '0123',
+        '01234',
+        '012345',
+        '0123456',
+        '01234567',
+        '012345678',
+        '0123456789',
+        '0123456789a',
+        '0123456789ab',
+        '0123456789abc',
+        '0123456789abcd',
+        '0123456789abcde',
+        '0123456789abcdef',
+        '0123456789abcdefg',
+        '0123456789abcdefgh',
+        '0123456789abcdefghi',
+        '0123456789abcdefghij',
+        '0123456789abcdefghijk'
     ];
 
-    for (let i: int = 0; i < compressable_strings_table.length; i++) {
-        let tmp = new String(compressable_strings_table[i]);
-        if (tmp != compressable_strings_table[i]) {
+    for (let i: int = 0; i < compressableStringsTable.length; i++) {
+        let tmp = compressableStringsTable[i];
+        if (tmp != compressableStringsTable[i]) {
             return 1;
         }
     }
-    for (let i: int = 0; i < uncompressable_strings_table.length; i++) {
-        let tmp = new String(uncompressable_strings_table[i]);
-        if (tmp != uncompressable_strings_table[i]) {
+    for (let i: int = 0; i < uncompressableStringsTable.length; i++) {
+        let tmp = uncompressableStringsTable[i];
+        if (tmp != uncompressableStringsTable[i]) {
             return 2;
         }
     }

@@ -13,32 +13,32 @@
  * limitations under the License.
  */
 
-const Empty: String = '';
-const Hello: String = 'Hello';
-const HelloDup: String = 'HelloHelloHelloHelloHelloHelloHelloHello';
-const Nature: String = '自然界';
-const NatureDup: String = '自然界自然界自然界自然界自然界自然界自然界自然界';
+const gEmpty: String = '';
+const gHello: String = 'Hello';
+const gHelloDup: String = 'HelloHelloHelloHelloHelloHelloHelloHello';
+const gNature: String = '自然界';
+const gNatureDup: String = '自然界自然界自然界自然界自然界自然界自然界自然界';
 
 function main(): int {
-    assertEQ(Empty.repeat(0), "")
-    assertEQ(Empty.repeat(1), "")
-    assertEQ(Nature.repeat(0), "")
-    assertEQ(Hello.repeat(0), "")
-    for(let i: int = 1; i < 8; ++i) {
-        let hello: String = Hello.repeat(i);
-        let nature: String = Nature.repeat(i);
-        if(hello != HelloDup.substring(0, 5 * i)) {
-            return 10+i;
+    arktest.assertEQ(gEmpty.repeat(0), '')
+    arktest.assertEQ(gEmpty.repeat(1), '')
+    arktest.assertEQ(gNature.repeat(0), '')
+    arktest.assertEQ(gHello.repeat(0), '')
+    for (let i: int = 1; i < 8; ++i) {
+        let hello: String = gHello.repeat(i);
+        let nature: String = gNature.repeat(i);
+        if (hello != gHelloDup.substring(0, 5 * i)) {
+            return 10 + i;
         }
-        if (nature != NatureDup.substring(0, 3 * i)) {
-            return 20+i;
+        if (nature != gNatureDup.substring(0, 3 * i)) {
+            return 20 + i;
         }
     }
 
     // try repeat() with a negative index
     let errors: int = 0;
     try {
-        let z = Empty.repeat(-1);
+        let z = gEmpty.repeat(-1);
     } catch (e) {
         errors = 1;
     }

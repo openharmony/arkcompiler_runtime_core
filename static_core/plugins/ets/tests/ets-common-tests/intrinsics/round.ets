@@ -14,18 +14,41 @@
  */
 
 function main(): int {
-    if (round(Double.POSITIVE_INFINITY) != Double.POSITIVE_INFINITY) return 1;
-    if (round(Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) return 2;
-    if (Double.toString(round(Double.NaN)) != Double.toString(Double.NaN)) return 3;
-    if (round(0.) != 0.) return 4;
-    if (round(1.) != 1.) return 5;
-    if (round(-1.) != -1.) return 6;
-    if (round(1.5) != 2.) return 7;
-    if (round(1.6) != 2.) return 8;
-    if (round(1.4) != 1.) return 9;
-    if (round(-1.5) != -1.) return 10;
-    if (round(-1.6) != -2.) return 11;
-    if (round(-1.4) != -1.) return 12;
-
+    if (round(Double.POSITIVE_INFINITY) != Double.POSITIVE_INFINITY) {
+        return 1;
+    }
+    if (round(Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) {
+        return 2;
+    }
+    if (Double.toString(round(Double.NaN)) != Double.toString(Double.NaN)) {
+        return 3;
+    }
+    if (round(0.0) != 0.0) {
+        return 4;
+    }
+    if (round(1.0) != 1.0) {
+        return 5;
+    }
+    if (round(-1.0) != -1.0) {
+        return 6;
+    }
+    if (round(1.5) != 2.0) {
+        return 7;
+    }
+    if (round(1.6) != 2.0) {
+        return 8;
+    }
+    if (round(1.4) != 1.0) {
+        return 9;
+    }
+    if (round(-1.5) != -1.0) {
+        return 10;
+    }
+    if (round(-1.6) != -2.0) {
+        return 11;
+    }
+    if (round(-1.4) != -1.0) {
+        return 12;
+    }
     return 0;
 }

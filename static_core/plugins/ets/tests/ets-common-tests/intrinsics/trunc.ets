@@ -14,18 +14,18 @@
  */
 
 function main(): int {
-    if (trunc(Double.POSITIVE_INFINITY) != Double.POSITIVE_INFINITY) return 1;
-    if (trunc(Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) return 2;
-    if (Double.toString(trunc(Double.NaN)) != Double.toString(Double.NaN)) return 3;
-    if (trunc(0.) != 0.) return 4;
-    if (trunc(1.) != 1.) return 5;
-    if (trunc(-1.) != -1.) return 6;
-    if (trunc(1.5) != 1.) return 7;
-    if (trunc(1.6) != 1.) return 8;
-    if (trunc(1.4) != 1.) return 9;
-    if (trunc(-1.5) != -1.) return 10;
-    if (trunc(-1.6) != -1.) return 11;
-    if (trunc(-1.4) != -1.) return 12;
+    if (trunc(Double.POSITIVE_INFINITY) != Double.POSITIVE_INFINITY) { return 1; }
+    if (trunc(Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) { return 2; }
+    if (Double.toString(trunc(Double.NaN)) != Double.toString(Double.NaN)) { return 3; }
+    if (trunc(0.0) != 0.0) { return 4; }
+    if (trunc(1.0) != 1.0) { return 5; }
+    if (trunc(-1.0) != -1.0) { return 6; }
+    if (trunc(1.5) != 1.0) { return 7; }
+    if (trunc(1.6) != 1.0) { return 8; }
+    if (trunc(1.4) != 1.0) { return 9; }
+    if (trunc(-1.5) != -1.0) { return 10; }
+    if (trunc(-1.6) != -1.0) { return 11; }
+    if (trunc(-1.4) != -1.0) { return 12; }
     
     return 0;
 }

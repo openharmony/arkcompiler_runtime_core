@@ -17,9 +17,9 @@
   tags: [not-a-test]
 ---*/
 
-declare namespace foo {
+declare namespace Foo {
     export function foo(): int;
 }
 
-export default foo
+export default Foo
 

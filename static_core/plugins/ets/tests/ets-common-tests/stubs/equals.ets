@@ -38,8 +38,8 @@ enum Color64 {
 }
 
 enum ColorString {
-    RED = "",
-    GREEN = "GREEN"
+    RED = '',
+    GREEN = 'GREEN'
 }
 
 function testNormal() {

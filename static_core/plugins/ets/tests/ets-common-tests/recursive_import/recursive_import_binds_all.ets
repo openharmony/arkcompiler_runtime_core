@@ -18,8 +18,8 @@ files:
 - ./packages/recursive/package_module_1.ets
 ---*/
 
-import * as all from "./packages/recursive";
+import * as all from './packages/recursive';
 
 function main(): void {
-    assertEQ(all.a, "hello");
+    arktest.assertEQ(all.a, 'hello');
 }

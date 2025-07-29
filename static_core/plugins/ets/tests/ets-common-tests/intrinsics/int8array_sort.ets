@@ -14,7 +14,7 @@
  */
 
 const ARRAY_SIZE = 15;
-const UNSORTED = [5, 3, 127, 2, 4, -1, 99, 10, 7, 0, 45, 1, 88, -127, 37];
+const UNSORTED: Array<Double> = [5, 3, 127, 2, 4, -1, 99, 10, 7, 0, 45, 1, 88, -127, 37];
 const SORTED = [-127, -1, 0, 1, 2, 3, 4, 5, 7, 10, 37, 45, 88, 99, 127];
 const SORTED_UNALIGNED = [-127, -1, 0, 1, 2, 3, 4, 7, 10, 37, 45, 88, 99, 127];
 const SINGLE = [88];

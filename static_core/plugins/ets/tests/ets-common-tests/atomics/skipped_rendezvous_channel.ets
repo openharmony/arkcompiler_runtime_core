@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-import { launch } from "std/concurrency"
+import { launch } from 'std/concurrency'
 
 let s = new ArrayBuffer(4);
 let arr = new Int32Array(s, 0, 1);
@@ -31,7 +31,7 @@ function producer(): Int {
     let c = new Console() // workaround, issue: #12996
     
     for (let i = 1; i < 10; i++) {
-        c.println("sending " + i)
+        c.println('sending ' + i)
         send(i)
         c.println("sent " + i)
     }
@@ -42,10 +42,10 @@ function consumer(): Int {
     let c = new Console() // workaround, issue: #12996 
 
     for (let i = 1; i < 10; i++) {
-        c.println("receiving")
+        c.println('receiving')
         let x = read()
-        c.println("received " + x)
-        assertEQ(x, i)
+        c.println('received ' + x)
+        arktest.assertEQ(x, i)
     }
     return 1
 }
