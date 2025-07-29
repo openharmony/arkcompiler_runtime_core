@@ -435,15 +435,22 @@ bool JSONStringifier::SerializeJSONRecord(EtsHandle<EtsObject> &value)
 
     EtsHandleScope scope(coro);
     EtsHandle<EtsObject> head(coro, value->GetFieldObject(headEntry));
-
+    if (head.GetPtr() == nullptr) {
+        buffer_ += "}";
+        return true;
+    }
     auto hasContent = false;
     EtsHandle<EtsObject> next(coro, head->GetFieldObject(head->GetClass()->GetFieldByIndex(RECORD_NEXT_FIELD_INDEX)));
+    if (next.GetPtr() == nullptr) {
+        buffer_ += "}";
+        return true;
+    }
     do {
         EtsHandle<EtsObject> key(coro, next->GetFieldObject(next->GetClass()->GetFieldByIndex(RECORD_KEY_FIELD_INDEX)));
         EtsHandle<EtsObject> val(coro, next->GetFieldObject(next->GetClass()->GetFieldByIndex(RECORD_VAL_FIELD_INDEX)));
         next = EtsHandle<EtsObject>(coro,
                                     next->GetFieldObject(next->GetClass()->GetFieldByIndex(RECORD_NEXT_FIELD_INDEX)));
-        if (val.GetPtr() == nullptr) {
+        if (key.GetPtr() == nullptr || val.GetPtr() == nullptr) {
             continue;
         }
         if (val->GetClass()->IsFunction()) {
