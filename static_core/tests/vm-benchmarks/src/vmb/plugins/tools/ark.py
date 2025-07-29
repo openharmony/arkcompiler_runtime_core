@@ -80,6 +80,8 @@ class Tool(ToolBase):
         if an_files:
             enable_an = '' if Target.HOST == self.target else '--enable-an:force'
             aot_opts = f'{enable_an} --aot-files={":".join([x for x in an_files if x])}'
+        if OptFlags.AOTPGO in self.flags:
+            options += '--compiler-enable-jit=false '
         return self.cmd.format(
             name=name, abc=abc, options=options, gclog=gclog, aot_opts=aot_opts)
 
@@ -105,6 +107,7 @@ class Tool(ToolBase):
         if profile:
             options += ('--compiler-profiling-threshold=0 '
                         '--profilesaver-enabled=true '
+                        '--compiler-enable-jit=false '
                         f'--profile-output={abc}.profdata ')
         arkts_cmd = self.get_cmd(
             name=bu.name, abc=str(abc), options=options, gclog=gclog, an=an)
