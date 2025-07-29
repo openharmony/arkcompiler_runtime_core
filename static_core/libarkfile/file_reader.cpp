@@ -914,11 +914,24 @@ ForeignClassItem *FileReader::CreateForeignClassItem(File::EntityId classId)
     return classItem;
 }
 
+BaseItem *FileReader::CheckAndGetExistingFileItem(File::EntityId id, ItemTypes itemType)
+{
+    auto it = itemsDone_.find(id);
+    if (it != itemsDone_.end()) {
+        auto iType = it->second->GetItemType();
+        if (iType != itemType) {
+            LOG(FATAL, PANDAFILE) << ItemTypeToString(itemType) << " ItemType Error " << static_cast<int>(iType);
+        }
+        return it->second;
+    }
+    return nullptr;
+}
+
 ClassItem *FileReader::CreateClassItem(File::EntityId classId)
 {
-    auto it = itemsDone_.find(classId);
-    if (it != itemsDone_.end()) {
-        return static_cast<ClassItem *>(it->second);
+    BaseItem *item = CheckAndGetExistingFileItem(classId, ItemTypes::CLASS_ITEM);
+    if (item != nullptr) {
+        return static_cast<ClassItem *>(item);
     }
     ClassDataAccessor classAcc(*file_, classId);
 

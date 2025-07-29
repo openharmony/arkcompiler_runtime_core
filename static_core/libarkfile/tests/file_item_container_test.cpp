@@ -1303,4 +1303,44 @@ TEST(ItemContainer, TryBlockDeclaredSizeOverflowShouldFatal)
     EXPECT_DEATH(TriggerFatalTryBlock(), ".*");
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
+TEST(ItemContainer, TestErrorItemType)
+{
+    // Write panda file to memory
+    ItemContainer container;
+
+    ClassItem *emptyClassItem = container.GetOrCreateClassItem("Foo");
+
+    ClassItem *classItem = container.GetOrCreateClassItem("Bar");
+    classItem->SetAccessFlags(ACC_PUBLIC);
+    classItem->SetSuperClass(emptyClassItem);
+
+    // Add interface
+    ClassItem *ifaceItem = container.GetOrCreateClassItem("Iface");
+    ifaceItem->SetAccessFlags(ACC_PUBLIC);
+    classItem->AddInterface(ifaceItem);
+
+    // Add source file
+    StringItem *sourceFile = container.GetOrCreateStringItem("source_file");
+    classItem->SetSourceFile(sourceFile);
+
+    MemoryWriter memWriter;
+    ASSERT_TRUE(container.Write(&memWriter));
+
+    // Read panda file from memory
+    auto data = memWriter.GetData();
+
+    auto emptyDeleter = +[](std::byte *, size_t) noexcept {};
+    auto reader = FileReader(File::OpenFromMemory(
+        os::mem::ConstBytePtr(reinterpret_cast<std::byte *>(data.data()), data.size(), emptyDeleter)));
+
+    const auto *items = reader.GetItems();
+    File::EntityId classId(emptyClassItem->GetOffset());
+    StringItem *errorClassItem = container.GetOrCreateStringItem("errorClassItem");
+    auto *nonConstItems = const_cast<std::map<File::EntityId, BaseItem *> *>(items);
+    nonConstItems->insert({classId, static_cast<BaseItem *>(errorClassItem)});
+
+    EXPECT_DEATH({ reader.ReadContainer(); }, ".*");
+}
+
 }  // namespace ark::panda_file::test
