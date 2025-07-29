@@ -439,7 +439,6 @@ ohos_source_set("libarkruntime_set_static") {
 
   external_deps = [
     "napi:ace_napi",
-    "node:node_header_notice",
     icui18n_dep,
     icuuc_dep,
     sdk_libc_secshared_dep,
