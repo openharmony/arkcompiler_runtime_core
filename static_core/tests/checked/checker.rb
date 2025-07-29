@@ -193,6 +193,7 @@ class Checker
 
   public
   attr_reader :name
+  attr_reader :code
 
   module AotMode
     PAOC = 1
@@ -785,18 +786,40 @@ end
 
 def read_checks(options)
   checks = []
+  checks_recheck = {}
   check = nil
+  checkgroups = {}
+  checkgroup = nil
   command_token = /[ ]*#{options.command_token}(.*)/
   checker_start = /[ ]*#{options.command_token} CHECKER[ ]*(.*)/
   disabled_checker_start = /[ ]*#{options.command_token} DISABLED_CHECKER[ ]*(.*)/
+  checkgroup_start = /[ ]*#{options.command_token} CHECK_GROUP[ ]*(.*)/
   File.readlines(options.source).each_with_index do |line, line_no|
-    if check
+    if check || checkgroup
       unless line.start_with? command_token
         check = nil
+        checkgroup = nil
         next
       end
-      raise "No space between two checkers: '#{line.strip}'" if line.start_with? checker_start
-      check.append_line(command_token.match(line)[1]) unless check == :disabled_check
+      raise "No space between two checkers: '#{line.strip}'" if line.start_with? checker_start or (checkgroup and line.start_with? checkgroup_start)
+      command_text = command_token.match(line)[1]
+      if check
+        if line.start_with? checkgroup_start
+          if checkgroups.key?(command_text)
+            check.append_line(checkgroups[command_text])
+            next
+          else
+            unless checks_recheck.key?(check.name)
+              checks_recheck[check.name] = []
+            end
+            checks_recheck[check.name].append(command_text)
+          end
+        end
+        check.append_line(command_text) unless check == :disabled_check
+      elsif checkgroup
+        checkgroups[checkgroup] += command_text
+        checkgroups[checkgroup] += "\n"
+      end
     else
       next unless line.start_with? command_token
       if line.start_with? checker_start
@@ -804,11 +827,29 @@ def read_checks(options)
         raise "Checker with name '#{name}'' already exists" if checks.any? { |x| x.name == name }
 
         check = Checker.new(options, name, line_no: line_no)
+        check.append_line(" SKIP_IF      @architecture == \"arm32\"") if name.include? "AOT"
         checks << check
+
+      elsif line.start_with? checkgroup_start
+        checkgroup = command_token.match(line)[1]
+        raise "CheckGroup with name '#{checkgroup}'' already exists" if checkgroups.key?(checkgroup)
+
+        checkgroups[checkgroup] = ""
       else
         raise "Line '#{line.strip}' does not belong to any checker" unless line.start_with? disabled_checker_start
         check = :disabled_check
         next
+      end
+    end
+  end
+  checks_recheck.each do |ch_name, d_name_lst|
+    checks.each do |check|
+      if check.name == ch_name
+        d_name_lst.each do |d_name|
+          raise "CheckGroup with name '#{d_name}' not specified" unless checkgroups.key?(d_name)
+
+          check.code.source.sub! d_name, checkgroups[d_name]
+        end
       end
     end
   end
