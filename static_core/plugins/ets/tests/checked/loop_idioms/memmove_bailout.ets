@@ -23,11 +23,15 @@ function check(arr1: Object, arr2: Object): int {
 
 class TestBailout {
     //! CHECKER       TestBailout1
-    //! RUN           force_jit: true, options: "--compiler-inlining-blacklist='memmove_bailout.TestBailout::mayAlias,memmove_bailout.TestBailout::patternMissmatch_offsets1,memmove_bailout.TestBailout::patternMissmatch_offsets2,memmove_bailout.TestBailout::refArray,memmove_bailout.TestBailout::differentTypes'", entry: "memmove_bailout.TestBailout::main"
+    //! RUN           force_jit: true, options: "--compiler-inlining-blacklist='memmove_bailout.TestBailout::mayAlias.*,memmove_bailout.TestBailout::patternMissmatch_offsets1,memmove_bailout.TestBailout::patternMissmatch_offsets2,memmove_bailout.TestBailout::refArray,memmove_bailout.TestBailout::differentTypes'", entry: "memmove_bailout.TestBailout::main"
     //!
-    //! METHOD        "memmove_bailout.TestBailout::mayAlias"
+    //! METHOD        "memmove_bailout.TestBailout::__noinline__mayAlias"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
+    //!
+    //! METHOD        "memmove_bailout.TestBailout::__noinline__mayAlias_ref"
+    //! PASS_AFTER    "LoopIdioms"
+    //! INST_NOT      /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
     //!
     //! METHOD        "memmove_bailout.TestBailout::patternMissmatch_offsets1"
     //! PASS_AFTER    "LoopIdioms"
@@ -44,6 +48,14 @@ class TestBailout {
     //! METHOD        "memmove_bailout.TestBailout::differentTypes"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
+
+    //! CHECKER       AOT Test memmove bailout for references
+    //! SKIP_IF       @architecture == "arm32"
+    //! RUN_PAOC      options: "--compiler-regex='.*memmove_bailout.TestBailout::.*mayAlias.*'"
+    //! METHOD        "memmove_bailout.TestBailout::__noinline__mayAlias_ref"
+    //! PASS_AFTER    "LoopIdioms"
+    //! INST_NOT      /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+    //!
     static mayAlias(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
@@ -51,6 +63,19 @@ class TestBailout {
     }
 
     static __noinline__mayAlias(src: FixedArray<int>, dst: FixedArray<int>): FixedArray<int> {
+        for (let i: int = 0; i < src.length; i++) {
+            dst[i] = src[i];
+        }
+        return dst;
+    }
+
+    static mayAlias_ref(): int {
+        let src: FixedArray<string> = ["6", "7", "8"];
+        let dst: FixedArray<object> = new object[3];
+        return check(TestBailout.__noinline__mayAlias_ref(src, dst), ["6", "7", "8"]);
+    }
+
+    static __noinline__mayAlias_ref(src: FixedArray<string>, dst: FixedArray<object>): FixedArray<object> {
         for (let i: int = 0; i < src.length; i++) {
             dst[i] = src[i];
         }
@@ -99,6 +124,7 @@ class TestBailout {
 
     static main(): void {
         TestBailout.mayAlias();
+        TestBailout.mayAlias_ref();
         TestBailout.patternMissmatch_offsets1();
         TestBailout.patternMissmatch_offsets2();
         TestBailout.refArray();

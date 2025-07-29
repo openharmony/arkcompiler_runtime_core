@@ -1107,7 +1107,7 @@ void Codegen::CallIntrinsic(Inst *inst, RuntimeInterface::IntrinsicId id)
 {
     SCOPED_DISASM_STR(this, "CallIntrinsic");
     // Call intrinsics isn't supported for IrToc, because we don't know address of intrinsics during IRToc compilation.
-    // We store adresses of intrinsics in aot file in AOT mode.
+    // We store addresses of intrinsics in aot file in AOT mode.
     ASSERT(GetGraph()->SupportManagedCode());
     if (GetGraph()->IsAotMode()) {
         auto aotData = GetGraph()->GetAotData();

@@ -257,6 +257,8 @@ group("arktscompiler_header_deps") {
     ":intrinsics_ir_build_static_call_inl",
     ":intrinsics_ir_build_virtual_call_inl",
     ":intrinsics_lse_heap_inv_args_inl",
+    ":li_memmove_intrinsic_id_switch_case_inl",
+    ":li_customize_memmove_intrinsic_switch_case_inl",
     ":intrinsics_peephole_inl_h",
     ":ir_dyn_base_types_h",
     ":libarkcompiler_intrinsics_gen_inl_can_encode_builtin_inl",
@@ -651,6 +653,22 @@ ark_gen_file("intrinsics_extensions_inl_h") {
   data = [ ark_plugin_options_yaml ]
   api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/intrinsics_extensions.inl.h"
+}
+
+ark_gen_file("li_memmove_intrinsic_id_switch_case_inl") {
+  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+  template_file = "optimizer/templates/intrinsics/loop_idioms_memmove_intrinsic_id_switch_case.inl.erb"
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
+  output_file = "$target_gen_dir/generated/loop_idioms_memmove_intrinsic_id_switch_case.inl"
+}
+
+ark_gen_file("li_customize_memmove_intrinsic_switch_case_inl") {
+  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+  template_file = "optimizer/templates/intrinsics/loop_idioms_customize_memmove_intrinsic_switch_case.inl.erb"
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
+  output_file = "$target_gen_dir/generated/loop_idioms_customize_memmove_intrinsic_switch_case.inl"
 }
 
 generated_file("plugin_create_pipeline_inl") {

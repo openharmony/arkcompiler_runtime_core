@@ -58,6 +58,97 @@
 //! METHOD        "memmove_supported.TestSupported::test_forwardClosed"
 //! PASS_AFTER    "LoopIdioms"
 //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
+//!
+//! METHOD        "memmove_supported.TestSupported::test_forwardClosed_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//!
+//! METHOD        "memmove_supported.TestSupported::test_backwardsOpen_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//!
+//! METHOD        "memmove_supported.TestSupported::test_backwardsClosed_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//!
+//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets_negOffsets_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//!
+//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets_sameNegOffset_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//!
+//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets4_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//!
+//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets3_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//!
+//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets2_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//!
+//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets1_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//!
+//! METHOD        "memmove_supported.TestSupported::test_noAlias_locals_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//!
+//! METHOD        "memmove_supported.TestSupported::test_noAlias_updateFirstOnly_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+
+//! CHECKER       AOT Test memmove for references
+//! SKIP_IF       @architecture == "arm32"
+//! RUN_PAOC      options: "--compiler-regex='.*memmove_supported.TestSupported::.*test.*'"
+//! METHOD        "memmove_supported.TestSupported::test_forwardClosed_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//!
+//! METHOD        "memmove_supported.TestSupported::test_backwardsOpen_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//!
+//! METHOD        "memmove_supported.TestSupported::test_backwardsClosed_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//!
+//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets_negOffsets_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//!
+//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets_sameNegOffset_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//!
+//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets4_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//!
+//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets3_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//!
+//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets2_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//!
+//! METHOD        "memmove_supported.TestSupported::test_patternMatch_offsets1_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//!
+//! METHOD        "memmove_supported.TestSupported::test_noAlias_locals_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//!
+//! METHOD        "memmove_supported.TestSupported::test_noAlias_updateFirstOnly_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST          /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
 
 function check(arr1: Object, arr2: Object): int {
     if (arr1.toString() != arr2.toString()) {
@@ -77,6 +168,29 @@ class TestSupported {
             dst[i] = src[i];
         }
         return check(dst, [1, 2, 3, 4]);
+    }
+
+    static test_noAlias_locals_ref(): int {
+        let src: FixedArray<string> = ["1", "2", "3", "4"];
+        let dst: FixedArray<string> = new string[4];
+        for (let i: int = 0; i < src.length; i++) {
+            dst[i] = src[i];
+        }
+        return check(dst, ["1", "2", "3", "4"]);
+    }
+
+    static test_noAlias_updateFirstOnly_ref(): int {
+        let src: FixedArray<string> = ["1", "2", "3", "4"];
+        let dst: FixedArray<string> = new string[4];
+        TestSupported.__noinline__updateFirst(dst);
+        for (let i: int = 0; i < src.length; i++) {
+            dst[i] = src[i];
+        }
+        return check(dst, ["1", "2", "3", "4"]);
+    }
+
+    static __noinline__updateFirst(a: FixedArray<string>) {
+        a[0] = "";
     }
 
     static test_noAlias_localAndParam(): int {
@@ -102,6 +216,16 @@ class TestSupported {
         return check(dst, [1, 2, 6, 7, 8]);
     }
 
+    static test_patternMatch_offsets1_ref(): int {
+        let src: FixedArray<string> = ["6", "7", "8"];
+        let dst: FixedArray<string> = ["1", "2", "3", "4", "5"];
+        let offs = dst.length - src.length;
+        for (let i: int = 0; i < src.length; i++) {
+            dst[i + offs] = src[i];
+        }
+        return check(dst, ["1", "2", "6", "7", "8"]);
+    }
+
     static test_patternMatch_offsets2(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
@@ -110,6 +234,16 @@ class TestSupported {
             dst[i] = src[i - offs];
         }
         return check(dst, [1, 2, 6, 7, 8]);
+    }
+
+    static test_patternMatch_offsets2_ref(): int {
+        let src: FixedArray<string> = ["6", "7", "8"];
+        let dst: FixedArray<string> = ["1", "2", "3", "4", "5"];
+        let offs = dst.length - src.length;
+        for (let i: int = offs; i < dst.length; i++) {
+            dst[i] = src[i - offs];
+        }
+        return check(dst, ["1", "2", "6", "7", "8"]);
     }
 
     static test_patternMatch_offsets3(): int {
@@ -122,6 +256,16 @@ class TestSupported {
         return check(dst, [1, 2, 6, 7, 8]);
     }
 
+    static test_patternMatch_offsets3_ref(): int {
+        let src: FixedArray<string> = ["6", "7", "8"];
+        let dst: FixedArray<string> = ["1", "2", "3", "4", "5"];
+        let offs = dst.length - src.length;
+        for (let i: int = 0; i < src.length; i++) {
+            dst[i + offs] = src[i];
+        }
+        return check(dst, ["1", "2", "6", "7", "8"]);
+    }
+
     static test_patternMatch_offsets4(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
@@ -130,6 +274,16 @@ class TestSupported {
             dst[i] = src[i - offs];
         }
         return check(dst, [1, 2, 6, 7, 8]);
+    }
+
+    static test_patternMatch_offsets4_ref(): int {
+        let src: FixedArray<string> = ["6", "7", "8"];
+        let dst: FixedArray<string> = ["1", "2", "3", "4", "5"];
+        let offs = dst.length - src.length;
+        for (let i: int = offs; i < dst.length; i++) {
+            dst[i] = src[i - offs];
+        }
+        return check(dst, ["1", "2", "6", "7", "8"]);
     }
 
     static test_patternMatch_offsets_sameNegOffset(): int {
@@ -141,6 +295,15 @@ class TestSupported {
         return check(dst, [6, 7, 3, 4, 5]);
     }
 
+    static test_patternMatch_offsets_sameNegOffset_ref(): int {
+        let src: FixedArray<string> = ["6", "7", "8"];
+        let dst: FixedArray<string> = ["1", "2", "3", "4", "5"];
+        for (let i: int = 1; i < src.length; i++) {
+            dst[i - 1] = src[i - 1];
+        }
+        return check(dst, ["6", "7", "3", "4", "5"]);
+    }
+
     static test_patternMatch_offsets_negOffsets(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
@@ -148,6 +311,15 @@ class TestSupported {
             dst[i - 1] = src[i - 2];
         }
         return check(dst, [1, 6, 7, 4, 5]);
+    }
+
+    static test_patternMatch_offsets_negOffsets_ref(): int {
+        let src: FixedArray<string> = ["6", "7", "8"];
+        let dst: FixedArray<string> = ["1", "2", "3", "4", "5"];
+        for (let i: int = 2; i < src.length + 1; i++) {
+            dst[i - 1] = src[i - 2];
+        }
+        return check(dst, ["1", "6", "7", "4", "5"]);
     }
 
     static test_backwardsClosed(): int {
@@ -161,6 +333,15 @@ class TestSupported {
         return check(dst, [1, 6, 7, 8, 5]);
     }
 
+    static test_backwardsClosed_ref(): int {
+        let src: FixedArray<string> = ["6", "7", "8"];
+        let dst: FixedArray<string> = ["1", "2", "3", "4", "5"];
+        for (let i: int = src.length - 1; i >= 0; i--) {
+            dst[i + 1] = src[i];
+        }
+        return check(dst, ["1", "6", "7", "8", "5"]);
+    }
+
     static test_backwardsOpen(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
@@ -169,6 +350,15 @@ class TestSupported {
             dst[i - 1] = src[i];
         }
         return check(dst, [7, 8, 3, 4, 5]);
+    }
+
+    static test_backwardsOpen_ref(): int {
+        let src: FixedArray<string> = ["6", "7", "8"];
+        let dst: FixedArray<string> = ["1", "2", "3", "4", "5"];
+        for (let i: int = src.length - 1; i > 0; i--) {
+            dst[i - 1] = src[i];
+        }
+        return check(dst, ["7", "8", "3", "4", "5"]);
     }
 
     static test_forwardClosed(): int {
@@ -181,21 +371,41 @@ class TestSupported {
         }
         return check(dst, [1, 6, 7, 8, 5]);
     }
+
+    static test_forwardClosed_ref(): int {
+        let src: FixedArray<string> = ["6", "7", "8"];
+        let dst: FixedArray<string> = ["1", "2", "3", "4", "5"];
+        for (let i: int = 0; i <= src.length - 1; i++) {
+            dst[i + 1] = src[i];
+        }
+        return check(dst, ["1", "6", "7", "8", "5"]);
+    }
 };
 
 function main(): int {
     let res: int = 0;
     res += TestSupported.test_noAlias_locals();
+    res += TestSupported.test_noAlias_locals_ref();
     res += TestSupported.test_noAlias_localAndParam();
+    res += TestSupported.test_noAlias_updateFirstOnly_ref();
     res += TestSupported.test_patternMatch_offsets1();
+    res += TestSupported.test_patternMatch_offsets1_ref();
     res += TestSupported.test_patternMatch_offsets2();
+    res += TestSupported.test_patternMatch_offsets2_ref();
     res += TestSupported.test_patternMatch_offsets3();
+    res += TestSupported.test_patternMatch_offsets3_ref();
     res += TestSupported.test_patternMatch_offsets4();
+    res += TestSupported.test_patternMatch_offsets4_ref();
     res += TestSupported.test_patternMatch_offsets_sameNegOffset();
+    res += TestSupported.test_patternMatch_offsets_sameNegOffset_ref();
     res += TestSupported.test_patternMatch_offsets_negOffsets();
+    res += TestSupported.test_patternMatch_offsets_negOffsets_ref();
     res += TestSupported.test_backwardsClosed();
+    res += TestSupported.test_backwardsClosed_ref();
     res += TestSupported.test_backwardsOpen();
+    res += TestSupported.test_backwardsOpen_ref();
     res += TestSupported.test_forwardClosed();
+    res += TestSupported.test_forwardClosed_ref();
     arktest.assertEQ(res, 0);
     return res;
 }

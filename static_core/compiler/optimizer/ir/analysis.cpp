@@ -694,7 +694,8 @@ void SaveStateBridgesBuilder::FixSaveStatesInBB(BasicBlock *block)
 
 bool SaveStateBridgesBuilder::IsSaveStateForGc(Inst *inst)
 {
-    return inst->GetOpcode() == Opcode::SafePoint || inst->GetOpcode() == Opcode::SaveState;
+    return inst->GetOpcode() == Opcode::SafePoint || inst->GetOpcode() == Opcode::SaveState ||
+           inst->GetOpcode() == Opcode::SaveStateDeoptimize;
 }
 
 void SaveStateBridgesBuilder::CreateBridgeInSS(Inst *source)
