@@ -80,10 +80,10 @@ class VmbLauncher {
             let elapsedMs: long = 0;
         {% if gc > 0 %}
             VmbLauncher.log("Force GC");
-            let gc = GC.startGC(GC.Cause.FULL);
+            let gc = GC.startGC(GC.Cause.THRESHOLD);
             GC.waitForFinishGC(gc);
             VmbLauncher.log("Force GC");
-            gc = GC.startGC(GC.Cause.FULL);
+            gc = GC.startGC(GC.Cause.THRESHOLD);
             GC.waitForFinishGC(gc);
             // No sleep in ETS: sleep({{gc}})
         {% else %}
