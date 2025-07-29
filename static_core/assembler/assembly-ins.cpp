@@ -17,7 +17,7 @@
 
 namespace ark::pandasm {
 
-std::string ark::pandasm::Ins::RegsToString(bool &first, bool const printArgs, size_t const firstArgIdx) const
+std::string ark::pandasm::Ins::RegsToString(bool &first, bool printArgs, size_t const firstArgIdx) const
 {
     std::string translator {};
     for (std::size_t i = 0U; i < RegSize(); ++i) {
@@ -84,8 +84,8 @@ std::string ark::pandasm::Ins::OperandsToString(bool printArgs, size_t firstArgI
     return ss.str();
 }
 
-std::string ark::pandasm::Ins::RegToString(size_t const idx, bool const isFirst, bool const printArgs,
-                                           size_t const firstArgIdx) const
+std::string ark::pandasm::Ins::RegToString(size_t idx, bool const isFirst, bool const printArgs,
+                                           size_t firstArgIdx) const
 {
     if (idx >= RegSize()) {
         return std::string("");
@@ -126,7 +126,7 @@ std::string ark::pandasm::Ins::ImmToString(size_t idx, bool isFirst) const
     return translator.str();
 }
 
-std::string ark::pandasm::Ins::IdToString(size_t const idx, bool const isFirst) const
+std::string ark::pandasm::Ins::IdToString(size_t idx, bool const isFirst) const
 {
     if (idx >= IDSize()) {
         return std::string("");
