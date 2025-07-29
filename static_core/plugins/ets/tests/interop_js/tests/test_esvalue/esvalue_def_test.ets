@@ -38,6 +38,8 @@ let jsIterableObject = module.getProperty('testItetatorObject');
 let jsUser = module.getProperty('User');
 let jsDoubledObj = module.getProperty('doubledObj');
 let propObj = module.getProperty('propObj');
+let throwNull = module.getProperty('throwNull');
+let throwUndefined = module.getProperty('throwUndefined');
 
 function checkGetUndefined(): boolean {
     let obj = ESValue.Undefined;
@@ -363,4 +365,21 @@ function testUndefined(): boolean {
     return propObj.getProperty('property1').isUndefined() &&
            propObj.getProperty('property2').isUndefined() &&
            propObj.getProperty(123).isUndefined();
+}
+
+function checkThrowNullOrUndefined(): boolean {
+    let res = false;
+    try {
+        throwNull.invoke();
+        res = false;
+    } catch (e: ESError) {
+        res = e.getValue().toNull() === null;
+    }
+    try {
+        throwUndefined.invoke();
+        res = false;
+    } catch (e: ESError) {
+        res = e.getValue().toUndefined() === undefined;
+    }
+    return res;
 }
