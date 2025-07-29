@@ -32,19 +32,19 @@ function main(): void {
   id = 0{{c['add_val']}}
   arktest.assertEQ(str[id], "\x17")
 
-  id = 3{{c['add_val']}}
+  id = 4{{c['add_val']}}
   arktest.assertEQ(str[id], "\u1f48")
 
-  id = 8{{c['add_val']}}
+  id = 9{{c['add_val']}}
   arktest.assertEQ(str[id], "\n")
 
-  id = 10{{c['add_val']}}
+  id = 11{{c['add_val']}}
   arktest.assertEQ(str[id], "\u{CAFE}")
 
-  id = 13{{c['add_val']}}
+  id = 14{{c['add_val']}}
   arktest.assertEQ(str[id], "生")
 
-  id = 18{{c['add_val']}}
+  id = 19{{c['add_val']}}
   arktest.assertEQ(str[id], "С")
 
   arktest.assertEQ(str.length, vals.length)
