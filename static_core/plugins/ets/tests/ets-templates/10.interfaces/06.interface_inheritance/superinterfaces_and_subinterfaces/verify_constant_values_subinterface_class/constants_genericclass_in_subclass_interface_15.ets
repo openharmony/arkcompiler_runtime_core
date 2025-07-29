@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Verify whether the constant values genericclass<enum> remain consistent in the subclass interface.
+desc: Verify whether the constant values generic class<enum> remain consistent in the subclass interface.
 ---*/
 
 class GenericClass<T> {
