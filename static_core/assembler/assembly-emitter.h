@@ -26,9 +26,9 @@
 #include "assembly-program.h"
 #include "assembly-type.h"
 #include "assembly-function.h"
-#include "bytecode_emitter.h"
-#include "file_item_container.h"
-#include "pgo.h"
+#include "libarkfile/bytecode_emitter.h"
+#include "libarkfile/file_item_container.h"
+#include "libarkfile/pgo.h"
 
 namespace ark::pandasm {
 

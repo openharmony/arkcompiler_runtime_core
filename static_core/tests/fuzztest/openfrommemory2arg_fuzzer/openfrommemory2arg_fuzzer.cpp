@@ -15,7 +15,7 @@
 
 #include "openfrommemory2arg_fuzzer.h"
 #include <cstddef>
-#include "libpandafile/file.h"
+#include "libarkfile/file.h"
 
 namespace OHOS {
 void OpenFromMemory2ArgFuzzTest(const uint8_t *data, size_t size)

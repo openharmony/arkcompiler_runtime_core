@@ -18,11 +18,11 @@
 #include <string>
 #include <vector>
 
-#include "libpandafile/bytecode_emitter.h"
-#include "libpandafile/bytecode_instruction.h"
+#include "libarkfile/bytecode_emitter.h"
+#include "libarkfile/bytecode_instruction.h"
 #include "libpandabase/utils/utils.h"
-#include "libpandafile/file_items.h"
-#include "libpandafile/value.h"
+#include "libarkfile/file_items.h"
+#include "libarkfile/value.h"
 #include "runtime/bridge/bridge.h"
 #include "runtime/entrypoints/entrypoints.h"
 #include "runtime/include/method.h"

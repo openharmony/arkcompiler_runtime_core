@@ -38,9 +38,9 @@ static_core/extras/                   @igelhaus
 static_core/gn/                       @igelhaus
 static_core/irtoc/                    @Prof1983 @mbolshov @asidorov ^dingding5 ^chernykhsergey
 static_core/isa/                      @mbolshov ^igelhaus
+static_core/libarkfile/               @igelhaus
 static_core/libllvmbackend/           ^Prof1983 ^kosovpavel @asidorov
 static_core/libpandabase/             @dmitriitr @nazarovkonstantin ^igelhaus
-static_core/libpandafile/             @igelhaus
 static_core/libziparchive/            @nazarovkonstantin ^igelhaus
 static_core/panda/                    @nazarovkonstantin ^igelhaus
 static_core/pandastdlib/              @igelhaus

@@ -17,7 +17,7 @@
 
 #include "include/coretypes/string.h"
 #include "include/object_header.h"
-#include "libpandafile/shorty_iterator.h"
+#include "libarkfile/shorty_iterator.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_runtime_interface.h"
 #include "plugins/ets/runtime/ets_vm.h"

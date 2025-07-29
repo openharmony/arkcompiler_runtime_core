@@ -17,11 +17,11 @@
 #define PANDA_VERIFICATION_ABSINT_ABS_INT_INL_H
 
 #include "abs_int_inl_compat_checks.h"
-#include "file_items.h"
+#include "libarkfile/file_items.h"
 #include "include/mem/panda_containers.h"
 #include "include/method.h"
 #include "include/runtime.h"
-#include "libpandafile/type_helper.h"
+#include "libarkfile/type_helper.h"
 #include "macros.h"
 #include "runtime/include/class.h"
 #include "runtime/include/thread_scopes.h"

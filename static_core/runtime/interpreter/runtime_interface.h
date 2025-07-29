@@ -18,7 +18,7 @@
 #include <memory>
 
 #include "libpandabase/utils/logger.h"
-#include "libpandafile/file_items.h"
+#include "libarkfile/file_items.h"
 #include "runtime/entrypoints/entrypoints.h"
 #include "runtime/include/class_linker-inl.h"
 #include "runtime/include/coretypes/array.h"

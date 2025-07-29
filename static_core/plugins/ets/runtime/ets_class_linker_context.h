@@ -16,7 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_CLASS_LINKER_CONTEXT_H
 #define PANDA_PLUGINS_ETS_RUNTIME_ETS_CLASS_LINKER_CONTEXT_H
 
-#include <libpandafile/include/source_lang_enum.h>
+#include <libarkfile/include/source_lang_enum.h>
 
 #include "libpandabase/macros.h"
 #include "os/mutex.h"

@@ -18,7 +18,7 @@
 #include "gtest/gtest.h"
 
 #include "evaluation/evaluation_engine.h"
-#include "file.h"
+#include "libarkfile/file.h"
 #include "object_header.h"
 #include "runtime_options.h"
 #include "runtime.h"

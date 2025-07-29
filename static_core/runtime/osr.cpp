@@ -16,7 +16,7 @@
 #include "runtime/osr.h"
 
 #include "libpandabase/events/events.h"
-#include "libpandafile/shorty_iterator.h"
+#include "libarkfile/shorty_iterator.h"
 #include "runtime/include/managed_thread.h"
 #include "runtime/include/method.h"
 #include "runtime/include/stack_walker.h"

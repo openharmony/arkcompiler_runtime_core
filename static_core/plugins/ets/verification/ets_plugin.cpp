@@ -15,7 +15,7 @@
 
 #include "ets_plugin.h"
 #include "abs_int_inl_compat_checks.h"
-#include "source_lang_enum.h"
+#include <libarkfile/include/source_lang_enum.h>
 #include "verifier_messages.h"
 #include "runtime/include/runtime.h"
 #include "plugins/ets/runtime/ets_vm.h"

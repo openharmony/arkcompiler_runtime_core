@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "libpandafile/bytecode_instruction.h"
-#include "libpandafile/bytecode_instruction-inl.h"
-#include "libpandafile/file_items.h"
-#include "libpandafile/debug_info_updater-inl.h"
+#include "libarkfile/bytecode_instruction.h"
+#include "libarkfile/bytecode_instruction-inl.h"
+#include "libarkfile/file_items.h"
+#include "libarkfile/debug_info_updater-inl.h"
 
 #include "linker_context.h"
 

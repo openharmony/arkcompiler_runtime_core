@@ -17,7 +17,7 @@
 
 #include <atomic>
 #include "include/thread.h"
-#include "libpandafile/file.h"
+#include "libarkfile/file.h"
 #include "libpandabase/os/mutex.h"
 #include "libpandabase/utils/time.h"
 #include "libpandabase/utils/span.h"

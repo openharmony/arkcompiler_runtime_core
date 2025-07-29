@@ -1,7 +1,7 @@
 compiler/generated
 libpandabase/generated
 libpandabase/panda_gen_options
-libpandafile/include
+libarkfile/include
 panda_gen_options
 plugins/ets
 runtime/include

@@ -17,6 +17,8 @@
   "extras": "*",
   "isa/CMakeLists.txt": {"bc-40001": "*"},
   "ldscripts": "*",
+	"libarkfile/CMakeLists.txt": {"bc-40001": "*"},
+	"libarkfile/external/CMakeLists.txt": {"bc-40001": "*"},
   "libpandabase/tests/taskmanager": "*",
   "libpandabase/mem/mmap_mem_pool-inl.h": "*",
   "libpandabase/utils/small_vector.h": "*",

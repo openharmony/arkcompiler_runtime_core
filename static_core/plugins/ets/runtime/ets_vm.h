@@ -22,7 +22,7 @@
 #include <string>
 #include <vector>
 
-#include <libpandafile/include/source_lang_enum.h>
+#include <libarkfile/include/source_lang_enum.h>
 
 #include "include/mem/panda_smart_pointers.h"
 #include "jit/profile_saver_worker.h"

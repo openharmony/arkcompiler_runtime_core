@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +15,11 @@
 
 #include <iostream>
 
-#include "libpandafile/file.h"
-#include "libpandafile/file_reader.h"
+#include "libarkfile/file.h"
+#include "libarkfile/file_reader.h"
 #include "libpandabase/utils/logger.h"
 #include "libpandabase/utils/pandargs.h"
-#include "libpandafile/file_writer.h"
+#include "libarkfile/file_writer.h"
 #include "libpandabase/utils/utf.h"
 #include "runtime/include/mem/panda_string.h"
 #include "header_writer.h"

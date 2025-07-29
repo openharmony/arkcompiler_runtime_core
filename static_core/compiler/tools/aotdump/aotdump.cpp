@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,16 +15,16 @@
 
 #include "aot_manager.h"
 #include "aotdump_options.h"
-#include "class_data_accessor.h"
-#include "file.h"
-#include "file-inl.h"
+#include "libarkfile/class_data_accessor.h"
+#include "libarkfile/file.h"
+#include "libarkfile/file-inl.h"
 #include "mem/arena_allocator.h"
 #include "mem/gc/gc_types.h"
 #include "mem/pool_manager.h"
-#include "method_data_accessor.h"
-#include "method_data_accessor-inl.h"
-#include "proto_data_accessor.h"
-#include "proto_data_accessor-inl.h"
+#include "libarkfile/method_data_accessor.h"
+#include "libarkfile/method_data_accessor-inl.h"
+#include "libarkfile/proto_data_accessor.h"
+#include "libarkfile/proto_data_accessor-inl.h"
 #include "runtime/include/class_helper.h"
 #include "utils/arch.h"
 #include "utils/bit_memory_region-inl.h"

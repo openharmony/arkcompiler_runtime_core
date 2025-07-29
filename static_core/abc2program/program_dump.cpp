@@ -15,7 +15,7 @@
 
 #include "program_dump.h"
 #include "mangling.h"
-#include "method_data_accessor-inl.h"
+#include "libarkfile/method_data_accessor-inl.h"
 #include "abc2program_log.h"
 #include "abc_file_utils.h"
 #include "source_language.h"

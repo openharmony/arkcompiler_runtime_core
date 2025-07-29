@@ -16,8 +16,8 @@
 #ifndef PANDA_PROFILING_H
 #define PANDA_PROFILING_H
 
-#include "libpandafile/bytecode_instruction.h"
-#include "source_lang_enum.h"
+#include "libarkfile/bytecode_instruction.h"
+#include <libarkfile/include/source_lang_enum.h>
 #include "libpandabase/utils/expected.h"
 #include "runtime/include/profiling_gen.h"
 #include <string_view>

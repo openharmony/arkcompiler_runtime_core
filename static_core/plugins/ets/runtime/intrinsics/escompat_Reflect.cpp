@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "annotation_data_accessor.h"
-#include "class_data_accessor.h"
+#include "libarkfile/annotation_data_accessor.h"
+#include "libarkfile/class_data_accessor.h"
 #include "ets_panda_file_items.h"
 #include "ets_vm.h"
-#include "file.h"
+#include "libarkfile/file.h"
 #include "include/managed_thread.h"
 #include "include/object_header.h"
 #include "plugins/ets/runtime/types/ets_field.h"

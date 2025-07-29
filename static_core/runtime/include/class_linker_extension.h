@@ -16,8 +16,8 @@
 #define PANDA_RUNTIME_CLASS_LINKER_EXTENSION_H_
 
 #include "libpandabase/os/mutex.h"
-#include "libpandafile/file.h"
-#include "libpandafile/file_items.h"
+#include "libarkfile/file.h"
+#include "libarkfile/file_items.h"
 #include "runtime/class_linker_context.h"
 #include "runtime/include/class_root.h"
 #include "runtime/include/class.h"

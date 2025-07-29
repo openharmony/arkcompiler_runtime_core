@@ -17,9 +17,9 @@
 #include <gtest/gtest.h>
 
 #include "assembler/assembly-parser.h"
-#include "bytecode_instruction.h"
+#include "libarkfile/bytecode_instruction.h"
 #include "include/thread_scopes.h"
-#include "libpandafile/bytecode_instruction-inl.h"
+#include "libarkfile/bytecode_instruction-inl.h"
 #include "runtime/include/managed_thread.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_notification.h"

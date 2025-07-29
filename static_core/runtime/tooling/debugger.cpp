@@ -28,7 +28,7 @@
 #include "libpandabase/os/mem.h"
 #include "libpandabase/utils/expected.h"
 #include "libpandabase/utils/span.h"
-#include "libpandafile/bytecode_instruction.h"
+#include "libarkfile/bytecode_instruction.h"
 #include "pt_scoped_managed_code.h"
 #include "pt_thread_info.h"
 #include "runtime/handle_scope-inl.h"

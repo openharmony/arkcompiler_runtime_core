@@ -15,7 +15,7 @@
 
 #include "plugins/ets/runtime/napi/ets_napi_helpers.h"
 
-#include "libpandafile/shorty_iterator.h"
+#include "libarkfile/shorty_iterator.h"
 #include "macros.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/mem/ets_reference.h"

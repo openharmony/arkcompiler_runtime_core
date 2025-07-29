@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "macros.h"
-#include <libpandafile/include/source_lang_enum.h>
+#include <libarkfile/include/source_lang_enum.h>
 
 #include "libpandabase/utils/logger.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"

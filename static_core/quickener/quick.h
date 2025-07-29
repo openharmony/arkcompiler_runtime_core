@@ -16,8 +16,8 @@
 #ifndef PANDA_QUICKENER_QUICK_H
 #define PANDA_QUICKENER_QUICK_H
 
-#include "libpandafile/file.h"
-#include "libpandafile/file_reader.h"
+#include "libarkfile/file.h"
+#include "libarkfile/file_reader.h"
 #include "quickener.h"
 
 #endif  // PANDA_QUICKENER_QUICK_H

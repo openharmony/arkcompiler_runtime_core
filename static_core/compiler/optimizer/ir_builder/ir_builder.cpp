@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-#include "file_items.h"
+#include "libarkfile/file_items.h"
 #include "ir_builder.h"
 #include "compiler_logger.h"
 #include "macros.h"
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/runtime_interface.h"
 #include "pbc_iterator.h"
-#include "bytecode_instruction.h"
-#include "code_data_accessor-inl.h"
+#include "libarkfile/bytecode_instruction.h"
+#include "libarkfile/code_data_accessor-inl.h"
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/analysis/hotness_propagation.h"
-#include "method_data_accessor-inl.h"
+#include "libarkfile/method_data_accessor-inl.h"
 
 #ifdef ENABLE_LIBABCKIT
 #include "abckit_inst_builder.h"

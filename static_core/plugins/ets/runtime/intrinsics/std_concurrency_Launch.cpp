@@ -16,7 +16,7 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "runtime/include/runtime.h"
-#include "source_lang_enum.h"
+#include <libarkfile/include/source_lang_enum.h>
 #include "types/ets_array.h"
 #include "types/ets_class.h"
 #include "types/ets_field.h"

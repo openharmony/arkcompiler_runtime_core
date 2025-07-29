@@ -29,7 +29,7 @@ panda_isa_gen(
         "operand_types_print.h.erb"
     REQUIRES
         "${CMAKE_CURRENT_SOURCE_DIR}/asm_isapi.rb"
-        "${PANDA_ROOT}/libpandafile/pandafile_isapi.rb"
+        "${ARKFILE_ROOT}/pandafile_isapi.rb"
 )
 
 set(SOURCES
@@ -86,7 +86,6 @@ if(PANDA_WITH_BYTECODE_OPTIMIZER)
 endif()
 
 include_directories(${PANDA_ROOT}/libpandabase/)
-include_directories(${CMAKE_BINARY_DIR}/libpandafile/include/)
 
 panda_add_library(arkassembler_static STATIC $<TARGET_OBJECTS:arkassembler_obj>)
 panda_target_link_libraries(arkassembler_static arkassembler_obj)

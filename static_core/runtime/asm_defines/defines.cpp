@@ -14,7 +14,7 @@
  */
 
 #include <cstdint>
-#include "libpandafile/file.h"
+#include "libarkfile/file.h"
 #include "runtime/include/class.h"
 #include "runtime/include/coretypes/array.h"
 #include "runtime/include/coretypes/native_pointer.h"

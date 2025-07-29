@@ -173,7 +173,7 @@ action("abckit_check_clang_tidy") {
     "$ark_root_static/assembler:arktsassembler_header_deps",
     "$ark_root_static/compiler:arktscompiler_header_deps",
     "$ark_root_static/libpandabase:arktsbase_header_deps",
-    "$ark_root_static/libpandafile:arktsfile_header_deps",
+    "$ark_root_static/libarkfile:arktsfile_header_deps",
     "src:libabckit_header_deps",
     "src/adapter_dynamic:abckit_adapter_dynamic_header_deps",
     "src/adapter_static:abckit_adapter_static_header_deps",

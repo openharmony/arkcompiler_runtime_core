@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,8 +20,8 @@
 #include <cerrno>
 
 #include <vector>
-#include "libpandafile/file.h"
-#include "libpandafile/class_data_accessor-inl.h"
+#include "libarkfile/file.h"
+#include "libarkfile/class_data_accessor-inl.h"
 #include "plugins/ets/runtime/types/ets_type.h"
 
 namespace ark::ets::header_writer {

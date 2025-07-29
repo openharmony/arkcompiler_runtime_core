@@ -16,7 +16,7 @@
 #ifndef PANDA_IR_BUILDER_H
 #define PANDA_IR_BUILDER_H
 
-#include "bytecode_instruction.h"
+#include "libarkfile/bytecode_instruction.h"
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/pass.h"

@@ -20,7 +20,7 @@
 #include "compiler/code_info/code_info.h"
 #include "os/library_loader.h"
 #include "utils/span.h"
-#include "libpandafile/file.h"
+#include "libarkfile/file.h"
 
 #include <string>
 #include <array>

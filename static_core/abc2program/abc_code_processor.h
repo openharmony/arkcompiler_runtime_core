@@ -19,7 +19,7 @@
 #include "abc_file_entity_processor.h"
 #include "assembly-function.h"
 #include "common/abc_code_converter.h"
-#include "code_data_accessor-inl.h"
+#include "libarkfile/code_data_accessor-inl.h"
 
 namespace ark::abc2program {
 

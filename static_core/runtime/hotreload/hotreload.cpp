@@ -20,7 +20,7 @@
 #include "runtime/include/thread_scopes.h"
 #include "runtime/monitor_object_lock.h"
 #include "runtime/monitor.h"
-#include "libpandafile/panda_cache.h"
+#include "libarkfile/panda_cache.h"
 
 #include "runtime/hotreload/hotreload.h"
 

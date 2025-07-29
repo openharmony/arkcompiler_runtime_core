@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "file.h"
+#include "libarkfile/file.h"
 #include "include/object_header.h"
 #include "include/thread_scopes.h"
 #include "intrinsics.h"

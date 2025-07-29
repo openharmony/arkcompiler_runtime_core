@@ -18,7 +18,7 @@
 
 #include <map>
 #include "abc_file_entity_processor.h"
-#include "class_data_accessor-inl.h"
+#include "libarkfile/class_data_accessor-inl.h"
 
 namespace ark::abc2program {
 

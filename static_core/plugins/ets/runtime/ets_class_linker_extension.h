@@ -17,7 +17,7 @@
 
 #include <cstddef>
 
-#include <libpandafile/include/source_lang_enum.h>
+#include <libarkfile/include/source_lang_enum.h>
 
 #include "libpandabase/macros.h"
 #include "runtime/class_linker_context.h"

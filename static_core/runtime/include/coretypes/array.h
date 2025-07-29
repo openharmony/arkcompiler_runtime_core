@@ -23,7 +23,7 @@
 #include "libpandabase/mem/mem.h"
 #include "libpandabase/mem/space.h"
 #include "libpandabase/utils/span.h"
-#include "libpandafile/bytecode_instruction-inl.h"
+#include "libarkfile/bytecode_instruction-inl.h"
 #include "runtime/include/class-inl.h"
 #include "runtime/include/language_context.h"
 #include "runtime/include/object_header.h"

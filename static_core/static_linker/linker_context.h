@@ -19,10 +19,10 @@
 #include <forward_list>
 #include <functional>
 
-#include "libpandafile/bytecode_instruction.h"
-#include "libpandafile/file_items.h"
-#include "libpandafile/file_reader.h"
-#include "libpandafile/file_item_container.h"
+#include "libarkfile/bytecode_instruction.h"
+#include "libarkfile/file_items.h"
+#include "libarkfile/file_reader.h"
+#include "libarkfile/file_item_container.h"
 
 #include "linker.h"
 #include "macros.h"

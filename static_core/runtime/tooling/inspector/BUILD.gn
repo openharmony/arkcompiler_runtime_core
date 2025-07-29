@@ -67,7 +67,7 @@ ohos_shared_library("libarkinspector") {
     "$ark_root/compiler:arkcompiler_public_config",
     "$ark_root/disassembler:arkdisassembler_public_config",
     "$ark_root/libpandabase:arkbase_public_config",
-    "$ark_root/libpandafile:arkfile_public_config",
+    "$ark_root/libarkfile:arkfile_public_config",
     "$ark_root/runtime:arkruntime_public_config",
     ":libarkinspector_config",
   ]
@@ -80,7 +80,7 @@ ohos_shared_library("libarkinspector") {
     "$ark_root/compiler:libarktscompiler",
     "$ark_root/disassembler:arktsdisassembler",
     "$ark_root/libpandabase:libarktsbase",
-    "$ark_root/libpandafile:libarktsfile",
+    "$ark_root/libarkfile:libarktsfile",
     "$ark_root/runtime:libarkruntime",
   ]
   sources = libarkinspector_sources

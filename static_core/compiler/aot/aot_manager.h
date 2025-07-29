@@ -17,7 +17,7 @@
 #define COMPILER_AOT_AOT_MANAGER_H
 
 #include "aot_file.h"
-#include "file.h"
+#include "libarkfile/file.h"
 #include "utils/arena_containers.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"

@@ -28,7 +28,7 @@ set_cxx_compiler(afl-clang-fast++)
 set(AFL_NOOPT --afl_noopt)
 
 add_definitions(-DFUZZING_EXIT_ON_FAILED_ASSERT=1)
-add_definitions(-DFUZZING_EXIT_ON_FAILED_ASSERT_FOR="/libpandafile/,/libpandabase/")
+add_definitions(-DFUZZING_EXIT_ON_FAILED_ASSERT_FOR="/libarkfile/,/libpandabase/")
 
 set(FUZZER_LIB "/usr/lib/afl/libAFLDriver.a")
 set(PANDA_WITH_TESTS false CACHE STRING "" FORCE)

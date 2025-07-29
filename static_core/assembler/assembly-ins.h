@@ -18,8 +18,8 @@
 
 #include <unordered_map>
 #include "assembly-debug.h"
-#include "bytecode_emitter.h"
-#include "file_items.h"
+#include "libarkfile/bytecode_emitter.h"
+#include "libarkfile/file_items.h"
 #include "isa.h"
 
 namespace ark::pandasm {

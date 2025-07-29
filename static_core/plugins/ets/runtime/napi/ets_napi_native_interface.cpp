@@ -16,7 +16,7 @@
 #include "plugins/ets/runtime/napi/ets_napi_native_interface.h"
 
 #include "libpandabase/macros.h"
-#include "libpandafile/shorty_iterator.h"
+#include "libarkfile/shorty_iterator.h"
 #include "libpandabase/utils/logger.h"
 #include "libpandabase/utils/bit_utils.h"
 #include "libpandabase/utils/string_helpers.h"

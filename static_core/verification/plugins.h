@@ -17,7 +17,7 @@
 #define PANDA_VERIFICATION_PLUGINS_H
 
 #include "abs_int_inl_compat_checks.h"
-#include "source_lang_enum.h"
+#include <libarkfile/include/source_lang_enum.h>
 
 namespace ark::verifier::plugin {
 

@@ -21,10 +21,10 @@
 #include "assembly-type.h"
 #include "assembly-debug.h"
 #include "assembly-file-location.h"
-#include "bytecode_emitter.h"
+#include "libarkfile/bytecode_emitter.h"
 #include "extensions/extensions.h"
-#include "file_items.h"
-#include "file_item_container.h"
+#include "libarkfile/file_items.h"
+#include "libarkfile/file_item_container.h"
 #include "ide_helpers.h"
 #include "meta.h"
 

@@ -16,8 +16,8 @@
 #include "runtime/compiler.h"
 
 #include "intrinsics.h"
-#include "libpandafile/bytecode_instruction.h"
-#include "libpandafile/type_helper.h"
+#include "libarkfile/bytecode_instruction.h"
+#include "libarkfile/type_helper.h"
 #include "optimizer/ir/datatype.h"
 #include "optimizer/ir/runtime_interface.h"
 #include "runtime/cha.h"

@@ -15,10 +15,10 @@
 
 #include "debug_info_cache.h"
 
-#include "debug_info_extractor.h"
+#include "libarkfile/debug_info_extractor.h"
 #include "include/tooling/pt_location.h"
 #include "libpandabase/utils/bit_utils.h"
-#include "method_data_accessor.h"
+#include "libarkfile/method_data_accessor.h"
 #include "os/mutex.h"
 
 namespace ark::tooling::inspector {

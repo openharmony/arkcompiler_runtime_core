@@ -21,8 +21,8 @@
 
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/logger.h"
-#include "libpandafile/file-inl.h"
-#include "libpandafile/class_data_accessor-inl.h"
+#include "libarkfile/file-inl.h"
+#include "libarkfile/class_data_accessor-inl.h"
 
 #include "runtime/tooling/sampler/sample_info.h"
 

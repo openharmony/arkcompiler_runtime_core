@@ -19,23 +19,23 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "annotation_data_accessor.h"
+#include "libarkfile/annotation_data_accessor.h"
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
-#include "class_data_accessor-inl.h"
-#include "code_data_accessor-inl.h"
-#include "debug_data_accessor-inl.h"
-#include "field_data_accessor-inl.h"
-#include "field_data_accessor.h"
-#include "file_items.h"
+#include "libarkfile/class_data_accessor-inl.h"
+#include "libarkfile/code_data_accessor-inl.h"
+#include "libarkfile/debug_data_accessor-inl.h"
+#include "libarkfile/field_data_accessor-inl.h"
+#include "libarkfile/field_data_accessor.h"
+#include "libarkfile/file_items.h"
 #include "lexer.h"
-#include "method_data_accessor-inl.h"
-#include "param_annotations_data_accessor.h"
-#include "proto_data_accessor-inl.h"
+#include "libarkfile/method_data_accessor-inl.h"
+#include "libarkfile/param_annotations_data_accessor.h"
+#include "libarkfile/proto_data_accessor-inl.h"
 #include "utils/span.h"
 #include "utils/leb128.h"
 #include "utils/utf.h"
-#include "bytecode_instruction-inl.h"
+#include "libarkfile/bytecode_instruction-inl.h"
 
 namespace ark::test {
 

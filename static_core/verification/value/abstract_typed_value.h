@@ -21,7 +21,7 @@
 
 #include "verification/value/origin.h"
 
-#include "libpandafile/bytecode_instruction.h"
+#include "libarkfile/bytecode_instruction.h"
 
 #include "macros.h"
 

@@ -16,7 +16,7 @@
 #define PANDA_RUNTIME_HOTRELOAD_HOTRELOAD_H_
 
 #include "libpandabase/macros.h"
-#include "libpandafile/file.h"
+#include "libarkfile/file.h"
 #include "runtime/include/class.h"
 #include "runtime/include/managed_thread.h"
 #include "runtime/include/mem/panda_containers.h"

@@ -985,7 +985,7 @@ Private Access Modifier
 
 .. meta:
     frontend_status: Done
-    todo: only parsing is implemented, but checking isn't implemented yet, need libpandafile support too
+    todo: only parsing is implemented, but checking isn't implemented yet, need libarkfile support too
 
 The modifier ``private`` indicates that a class member or a constructor is
 accessible (see :ref:`Accessible`) within its declaring class, i.e., a private

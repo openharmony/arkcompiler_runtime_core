@@ -18,7 +18,7 @@
 #include <cstdint>
 
 #include "libpandabase/utils/span.h"
-#include "libpandafile/file_items.h"
+#include "libarkfile/file_items.h"
 #include "runtime/include/coretypes/tagged_value.h"
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/object_header_config.h"

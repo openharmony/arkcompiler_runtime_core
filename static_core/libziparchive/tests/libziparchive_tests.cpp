@@ -14,7 +14,7 @@
  */
 
 #include "zip_archive.h"
-#include "libpandafile/file.h"
+#include "libarkfile/file.h"
 #include "os/file.h"
 #include "os/mem.h"
 

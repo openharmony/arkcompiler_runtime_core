@@ -19,7 +19,7 @@
 
 #include "libpandabase/utils/logger.h"
 #include "libpandabase/utils/pandargs.h"
-#include "libpandafile/file_writer.h"
+#include "libarkfile/file_writer.h"
 
 static void PrintHelp(ark::PandArgParser &pa_parser)
 {

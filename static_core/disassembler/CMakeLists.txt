@@ -16,9 +16,9 @@ project(arkdisassembler CXX)
 
 panda_add_executable(ark_disasm disasm.cpp)
 
-set(GENERATOR ${PANDA_ROOT}/libpandafile/types.rb)
+set(GENERATOR ${ARKFILE_ROOT}/types.rb)
 set(TEMPLATE ${CMAKE_CURRENT_LIST_DIR}/templates/type_to_pandasm_type.cpp.erb)
-set(DATAFILE ${PANDA_ROOT}/libpandafile/types.yaml)
+set(DATAFILE ${ARKFILE_ROOT}/types.yaml)
 set(DEPENDENCIES ${GENERATOR} ${TEMPLATE} ${DATAFILE})
 set(OUTFILE "${CMAKE_CURRENT_BINARY_DIR}/type_to_pandasm_type.cpp")
 add_custom_command(OUTPUT "${OUTFILE}"
@@ -35,7 +35,7 @@ panda_isa_gen(
         "bc_ins_to_pandasm_ins.cpp.erb"
     REQUIRES
         "${PANDA_ROOT}/assembler/asm_isapi.rb"
-        "${PANDA_ROOT}/libpandafile/pandafile_isapi.rb"
+        "${ARKFILE_ROOT}/pandafile_isapi.rb"
 )
 
 panda_add_library(arkdisassembler_obj OBJECT
@@ -52,7 +52,6 @@ panda_target_include_directories(arkdisassembler_obj
     PUBLIC ${CMAKE_SOURCE_DIR}/libpandabase
     PUBLIC ${CMAKE_SOURCE_DIR}/runtime
     PUBLIC ${CMAKE_BINARY_DIR}/libpandabase
-    PUBLIC ${CMAKE_BINARY_DIR}/libpandafile/include
     ${CMAKE_BINARY_DIR}
 )
 

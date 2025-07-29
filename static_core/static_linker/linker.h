@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 #include <set>
-#include "libpandafile/file_item_container.h"
+#include "libarkfile/file_item_container.h"
 
 namespace ark::static_linker {
 

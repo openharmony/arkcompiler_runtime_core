@@ -324,9 +324,9 @@ foreach(arch ${BRIDGE_ARCHS})
 
 endforeach()
 
-set(GENERATOR ${PANDA_ROOT}/libpandafile/types.rb)
+set(GENERATOR ${ARKFILE_ROOT}/types.rb)
 set(TEMPLATE ${CMAKE_CURRENT_LIST_DIR}/templates/shorty_values.h.erb)
-set(DATAFILE ${PANDA_ROOT}/libpandafile/types.yaml)
+set(DATAFILE ${ARKFILE_ROOT}/types.yaml)
 set(DEPENDENCIES ${GENERATOR} ${TEMPLATE} ${DATAFILE})
 set(OUTFILE "${CMAKE_CURRENT_BINARY_DIR}/include/shorty_values.h")
 add_custom_command(OUTPUT "${OUTFILE}"
@@ -356,10 +356,8 @@ panda_target_include_directories(arkruntime_interpreter_impl
     PUBLIC ${GEN_INCLUDE_DIR}
     PUBLIC ${PANDA_ROOT}/compiler
     PUBLIC ${PANDA_ROOT}/libpandabase
-    PUBLIC ${PANDA_ROOT}/libpandafile
     PUBLIC ${PANDA_BINARY_ROOT}/panda_gen_options
     PUBLIC ${PANDA_BINARY_ROOT}
-    PUBLIC ${PANDA_BINARY_ROOT}/libpandafile/include
     PUBLIC ${PANDA_BINARY_ROOT}/libpandabase/generated
     PUBLIC ${VERIFIER_INCLUDE_DIR}
     PUBLIC ${PANDA_BINARY_ROOT}
@@ -623,12 +621,10 @@ panda_target_include_directories(csa_tests_arkruntime_interpreter_impl
     PUBLIC ${GEN_INCLUDE_DIR}
     PUBLIC ${PANDA_ROOT}/compiler
     PUBLIC ${PANDA_ROOT}/libpandabase
-    PUBLIC ${PANDA_ROOT}/libpandafile
     PUBLIC ${PANDA_ROOT}/../common_interfaces
     PUBLIC ${PANDA_BINARY_ROOT}/panda_gen_options
     PUBLIC ${PANDA_BINARY_ROOT}
     PUBLIC ${PANDA_BINARY_ROOT}/compiler/generated
-    PUBLIC ${PANDA_BINARY_ROOT}/libpandafile/include
     PUBLIC ${PANDA_BINARY_ROOT}/libpandabase/generated
     PUBLIC ${VERIFIER_INCLUDE_DIR}
     PUBLIC ${PANDA_BINARY_ROOT}
@@ -677,9 +673,7 @@ if(PANDA_WITH_TESTS)
     PUBLIC ${GEN_INCLUDE_DIR}
     PUBLIC ${PANDA_ROOT}/compiler
     PUBLIC ${PANDA_ROOT}/libpandabase
-    PUBLIC ${PANDA_ROOT}/libpandafile
     PUBLIC ${PANDA_BINARY_ROOT}/panda_gen_options
-    PUBLIC ${PANDA_BINARY_ROOT}/libpandafile/include
     PUBLIC ${PANDA_BINARY_ROOT}
     PUBLIC ${PANDA_BINARY_ROOT}/libpandabase/generated
     PUBLIC ${VERIFIER_INCLUDE_DIR}

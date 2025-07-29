@@ -19,7 +19,7 @@
 #include <atomic>
 
 #include "libpandabase/macros.h"
-#include "libpandafile/file.h"
+#include "libarkfile/file.h"
 #include "runtime/include/coretypes/tagged_value.h"
 #include "runtime/interpreter/frame.h"
 #include "runtime/thread_pool_queue.h"

@@ -15,7 +15,7 @@
 #ifndef PANDA_INTERPRETER_STATE_H_
 #define PANDA_INTERPRETER_STATE_H_
 
-#include "libpandafile/bytecode_instruction-inl.h"
+#include "libarkfile/bytecode_instruction-inl.h"
 #include "runtime/interpreter/acc_vregister.h"
 #include "runtime/interpreter/acc_vregister-inl.h"
 #include "runtime/interpreter/frame.h"
