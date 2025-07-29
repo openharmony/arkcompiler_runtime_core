@@ -29,3 +29,16 @@ ets-common-tests/taskpool/common_tasks.ets
 
 #28278
 ets-common-tests/atomics/base_operation_exchange.ets
+
+#28171
+ets-common-tests/atomics/base_operation_add.ets
+ets-common-tests/atomics/base_operation_and.ets
+ets-common-tests/atomics/base_operation_bigint.ets
+ets-common-tests/atomics/base_operation_biguint.ets
+ets-common-tests/atomics/base_operation_compare_exchange.ets
+ets-common-tests/atomics/base_operation_exchange.ets
+ets-common-tests/atomics/base_operation_load.ets
+ets-common-tests/atomics/base_operation_or.ets
+ets-common-tests/atomics/base_operation_store.ets
+ets-common-tests/atomics/base_operation_sub.ets
+ets-common-tests/atomics/base_operation_xor.ets
