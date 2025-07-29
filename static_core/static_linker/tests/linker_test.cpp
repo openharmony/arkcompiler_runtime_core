@@ -795,4 +795,48 @@ TEST(linkertests, TestForReprArrayValueItem)
     ASSERT_TRUE(av1Res == av1Expect);
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
+TEST(linkertests, TestLoopSuperClass)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    // Write panda file to memory
+    ark::panda_file::ItemContainer container;
+
+    // set current class's superclass to self
+    ark::panda_file::ClassItem *classItem = container.GetOrCreateClassItem("Bar");
+    classItem->SetAccessFlags(ark::ACC_PUBLIC);
+    classItem->SetSuperClass(classItem);
+
+    // Add interface
+    ark::panda_file::ClassItem *ifaceItem = container.GetOrCreateClassItem("Iface");
+    ifaceItem->SetAccessFlags(ark::ACC_PUBLIC);
+    classItem->AddInterface(ifaceItem);
+
+    // Add method
+    ark::panda_file::StringItem *methodName = container.GetOrCreateStringItem("foo");
+    ark::panda_file::PrimitiveTypeItem *retType =
+        container.GetOrCreatePrimitiveTypeItem(ark::panda_file::Type::TypeId::VOID);
+    std::vector<ark::panda_file::MethodParamItem> params;
+    ark::panda_file::ProtoItem *protoItem = container.GetOrCreateProtoItem(retType, params);
+    classItem->AddMethod(methodName, protoItem, ark::ACC_PUBLIC | ark::ACC_STATIC, params);
+
+    // Add field
+    ark::panda_file::StringItem *fieldName = container.GetOrCreateStringItem("field");
+    ark::panda_file::PrimitiveTypeItem *fieldType =
+        container.GetOrCreatePrimitiveTypeItem(ark::panda_file::Type::TypeId::I32);
+    classItem->AddField(fieldName, fieldType, ark::ACC_PUBLIC);
+
+    // Add source file
+    ark::panda_file::StringItem *sourceFile = container.GetOrCreateStringItem("source_file");
+    classItem->SetSourceFile(sourceFile);
+    auto writer = ark::panda_file::FileWriter("loop_super_class.abc");
+    ASSERT_TRUE(container.Write(&writer));
+
+    std::string cmd = GenLinkCmd(" -- loop_super_class.abc");
+    // NOLINTNEXTLINE(cert-env33-c)
+    auto linkRes = std::system(cmd.c_str());
+    ASSERT_NE(linkRes, 0);
+#endif
+}
+
 }  // namespace
