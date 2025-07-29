@@ -171,3 +171,67 @@ cases:
           A.globl = 1.0
           A.foo(10.0); { A.globl = 4.0 } // no last function parameter
           arktest.assertEQ( A.globl, 4.0 )
+
+    # optional parameters before optional trailing lambda, may be skipped
+    - decl: |-
+        type StringProvider = () => string
+        class Holder {
+          static foo(val1: String, val2?: String, lf?: StringProvider): string {
+              return `${val1} ${val2} ${lf?.()}`
+          }
+        }
+      use: |-
+
+        let result = Holder.foo('Hello', 'World', () => 'of Trailing Lambdas')
+        arktest.assertEQ('Hello World of Trailing Lambdas', result);
+        
+        result = Holder.foo('Hello') {
+        return 'of Trailing Lambdas'
+        }
+        arktest.assertEQ('Hello undefined of Trailing Lambdas', result);
+        
+        result = Holder.foo('Hello'); {
+        // This is not a trailing lambda block
+        }
+        arktest.assertEQ('Hello undefined undefined', result);
+
+    # optional parameters before optional trailing lambda, may be skipped
+    - decl: |-
+        type StringProvider = () => string
+        class Holder {
+          static boo(val1: String, val2: String = 'Missed', lf?: StringProvider): string {
+              return `${val1} ${val2} ${lf?.()}`
+          }
+        }
+      use: |-
+        let result = Holder.boo('Hello', 'World', () => 'of Trailing Lambdas')
+        arktest.assertEQ('Hello World of Trailing Lambdas', result);
+        
+        result = Holder.boo('Hello') {
+          return 'of Trailing Lambdas'
+        }
+        arktest.assertEQ('Hello Missed of Trailing Lambdas', result);
+
+        result = Holder.boo('Hello'); {
+          // This is not a trailing lambda block
+        }
+        arktest.assertEQ('Hello Missed undefined', result);
+
+    # optional parameters before optional trailing lambda, may be skipped
+    - decl: |-
+        type StringProvider = () => string
+        const stub: StringProvider = () => 'I am Stub'
+        class Holder {
+          static roo(val1: String, val2: String = 'Missed', lf: StringProvider = stub): string {
+              return `${val1} ${val2} ${lf?.()}`
+          }
+        }
+
+      use: |-
+        let result = Holder.roo('Hello', 'World', () => 'of Trailing Lambdas')
+        arktest.assertEQ('Hello World of Trailing Lambdas', result);
+        
+        result = Holder.roo('Hello'); {
+          // This is not a trailing lambda block
+        }
+        arktest.assertEQ('Hello Missed I am Stub', result);

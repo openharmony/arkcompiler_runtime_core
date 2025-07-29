@@ -266,3 +266,65 @@ cases:
           g1 = 0.0
           g2 = 0.0
           arktest.assertEQ( foo(() => { g1 = 2.0 }), 2.0 )
+
+    # optional parameters before optional trailing lambda, may be skipped
+    - decl: |-
+        type StringProvider = () => string
+        
+        function foo(val1: String, val2?: String, lf?: StringProvider): string {
+            return `${val1} ${val2} ${lf?.()}`
+        }
+
+      use: |-
+        let result = foo('Hello', 'World', () => 'of Trailing Lambdas')
+        arktest.assertEQ('Hello World of Trailing Lambdas', result);
+        
+        result = foo('Hello') {
+          return 'of Trailing Lambdas'
+        }
+        arktest.assertEQ('Hello undefined of Trailing Lambdas', result);
+        
+        result = foo('Hello'); {
+          // This is not a trailing lambda block
+        }
+        arktest.assertEQ('Hello undefined undefined', result);
+
+    # optional parameters before optional trailing lambda, may be skipped
+    - decl: |-
+        type StringProvider = () => string
+        
+        function boo(val1: String, val2: String = 'Missed', lf?: StringProvider): string {
+            return `${val1} ${val2} ${lf?.()}`
+        }
+
+      use: |-
+        let result = boo('Hello', 'World', () => 'of Trailing Lambdas')
+        arktest.assertEQ('Hello World of Trailing Lambdas', result);
+        
+        result = boo('Hello') {
+          return 'of Trailing Lambdas'
+        }
+        arktest.assertEQ('Hello Missed of Trailing Lambdas', result);
+
+        result = boo('Hello'); {
+          // This is not a trailing lambda block
+        }
+        arktest.assertEQ('Hello Missed undefined', result);
+
+    # optional parameters before optional trailing lambda, may be skipped
+    - decl: |-
+        type StringProvider = () => string
+        const stub: StringProvider = () => 'I am Stub'
+        
+        function roo(val1: String, val2: String = 'Missed', lf: StringProvider = stub): string {
+            return `${val1} ${val2} ${lf?.()}`
+        }
+
+      use: |-
+        let result = roo('Hello', 'World', () => 'of Trailing Lambdas')
+        arktest.assertEQ('Hello World of Trailing Lambdas', result);
+        
+        result = roo('Hello'); {
+          // This is not a trailing lambda block
+        }
+        arktest.assertEQ('Hello Missed I am Stub', result);

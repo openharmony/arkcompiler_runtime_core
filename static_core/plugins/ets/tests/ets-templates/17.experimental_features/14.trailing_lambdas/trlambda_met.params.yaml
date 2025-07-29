@@ -171,3 +171,140 @@ cases:
           A.globl = 1.0
           new A().foo(10.0); { A.globl = 4.0 } // no last function parameter
           arktest.assertEQ( A.globl, 4.0 )
+
+    # optional parameters before optional trailing lambda, may be skipped
+    - decl: |-
+        type StringProvider = () => string
+        class Holder {
+          foo(val1: String, val2?: String, lf?: StringProvider): string {
+              return `${val1} ${val2} ${lf?.()}`
+          }
+        }
+      use: |-
+        let test = new Holder
+        let result = test.foo('Hello', 'World', () => 'of Trailing Lambdas')
+        arktest.assertEQ('Hello World of Trailing Lambdas', result);
+        
+        result = test.foo('Hello') {
+        return 'of Trailing Lambdas'
+        }
+        arktest.assertEQ('Hello undefined of Trailing Lambdas', result);
+        
+        result = test.foo('Hello'); {
+        // This is not a trailing lambda block
+        }
+        arktest.assertEQ('Hello undefined undefined', result);
+
+    # optional parameters before optional trailing lambda, may be skipped
+    - decl: |-
+        type StringProvider = () => string
+        class Holder {
+          boo(val1: String, val2: String = 'Missed', lf?: StringProvider): string {
+              return `${val1} ${val2} ${lf?.()}`
+          }
+        }
+
+
+      use: |-
+        let test = new Holder
+        let result = test.boo('Hello', 'World', () => 'of Trailing Lambdas')
+        arktest.assertEQ('Hello World of Trailing Lambdas', result);
+        
+        result = test.boo('Hello') {
+          return 'of Trailing Lambdas'
+        }
+        arktest.assertEQ('Hello Missed of Trailing Lambdas', result);
+
+        result = test.boo('Hello'); {
+          // This is not a trailing lambda block
+        }
+        arktest.assertEQ('Hello Missed undefined', result);
+
+    # optional parameters before optional trailing lambda, may be skipped
+    - decl: |-
+        type StringProvider = () => string
+        const stub: StringProvider = () => 'I am Stub'
+        class Holder {
+          roo(val1: String, val2: String = 'Missed', lf: StringProvider = stub): string {
+              return `${val1} ${val2} ${lf?.()}`
+          }
+        }
+
+      use: |-
+        let test = new Holder
+        let result = test.roo('Hello', 'World', () => 'of Trailing Lambdas')
+        arktest.assertEQ('Hello World of Trailing Lambdas', result);
+        
+        result = test.roo('Hello'); {
+          // This is not a trailing lambda block
+        }
+        arktest.assertEQ('Hello Missed I am Stub', result);
+
+    # trailing lambda with receiver
+    - decl: |-
+        let counter = 0
+        interface ReceiverTarget {}
+        type CounterProvider = (this: ReceiverTarget) => void
+
+        class Holder implements ReceiverTarget {
+          foo(lf: CounterProvider) { lf(this) }
+          boo(lf: CounterProvider) { this.lf() }
+        }
+
+      use: |-
+        counter = 0;
+        let ld = (this: ReceiverTarget) => { counter++ }
+        
+        let holder = new Holder
+        holder.foo(ld)
+        holder.foo() { counter++ }
+        holder.boo(ld)
+        holder.boo() { counter ++ } 
+        arktest.assertEQ(4, counter)
+
+    # trailing lambda with receiver. Implicit this access
+    - decl: |-
+
+        type CounterProvider = (this: ReceiverTarget) => void
+
+        class ReceiverTarget  {
+          counter: int = 0
+          foo(lf: CounterProvider) { lf(this) }
+          boo(lf: CounterProvider) { this.lf() }
+        }
+
+      use: |-
+
+        let ld = (this: ReceiverTarget) => { counter++ }
+        
+        let holder = new ReceiverTarget
+        holder.foo(ld)
+        holder.foo() { counter++ }
+        holder.boo(ld)
+        holder.boo() { counter ++ } 
+        arktest.assertEQ(4, holder.counter)
+
+    # trailing lambda with receiver. Implicit this access
+    - decl: |-
+
+        type CounterProvider = (this: ReceiverTarget) => void
+
+        class ReceiverTarget  {
+          counter: int = 0
+          inc() {
+            this.counter++
+          }
+          foo(lf: CounterProvider) { lf(this) }
+          boo(lf: CounterProvider) { this.lf() }
+        }
+
+      use: |-
+
+        let ld = (this: ReceiverTarget) => { inc() }
+        
+        let holder = new ReceiverTarget
+        holder.foo(ld)
+        holder.foo() { inc() }
+        holder.boo(ld)
+        holder.boo() { inc() }
+        arktest.assertEQ(4, holder.counter)
