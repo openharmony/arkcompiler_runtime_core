@@ -359,6 +359,9 @@ std::variant<bool, panda_file::MethodItem *> Context::TryFindMethod(panda_file::
     }
 
     panda_file::BaseClassItem *searchIn = kls->GetSuperClass();
+    if (klass == searchIn) {
+        LOG(FATAL, STATIC_LINKER) << "TryFindMethod Error: Current class same as SuperClass";
+    }
     size_t idx = 0;
     while (true) {
         auto res = TryFindMethod(searchIn, fm, relatedItems);
@@ -470,6 +473,10 @@ std::variant<std::monostate, panda_file::FieldItem *, panda_file::ForeignClassIt
     });
     if (newFld != nullptr) {
         return newFld;
+    }
+
+    if (klass == kls->GetSuperClass()) {
+        LOG(FATAL, STATIC_LINKER) << "TryFindField Error: Current class same as SuperClass";
     }
     return TryFindField(kls->GetSuperClass(), name, expectedType, badCandidates);
 }
