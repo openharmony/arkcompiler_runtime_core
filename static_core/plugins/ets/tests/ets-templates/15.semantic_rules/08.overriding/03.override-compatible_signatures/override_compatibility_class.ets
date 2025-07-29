@@ -17,12 +17,13 @@ limitations under the License.
 
 /*---
 desc: >-
-          There are two cases of type override-compatibility, as types are used as either parameter types,
-          or return types. For each case there are six kinds of types
+    There are two cases of type override-compatibility,
+    as types are used as either parameter types,
+    or return types. For each case there are six kinds of types
 
-          - {{c.doc}}
+    - {{c.doc}}
 
-          Every type is override-compatible with itself (see Invariance).
+    Every type is override-compatible with itself (see Invariance).
 tags: [{{c.tags}}]
 params: {{c.params}}
 ---*/
@@ -32,15 +33,14 @@ let res: number = 0;
 {{c.decl}}
 
 class Base {
-    {{c.base}}
+    {{c.base|indent}}
 }
 
 class Derived extends Base {
-    {{c.derived}}
+    {{c.derived|indent}}
 }
 
-function main(): void {
-    {{c.call}}
+function main() {
+    {{(c.call or 'return')|indent}}
 }
-
 {% endfor %}

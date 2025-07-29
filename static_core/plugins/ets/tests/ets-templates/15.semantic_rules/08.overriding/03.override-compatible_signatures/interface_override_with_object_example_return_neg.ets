@@ -17,8 +17,8 @@ limitations under the License.
 
 /*---
 desc: >-
-          The example below illustrates override-compatibility with Object.
-          Return types are not override compatible, are overload-equivalent
+    The example below illustrates override-compatibility with Object.
+    Return types are not override-compatible, CTE is expected.
 tags: [compile-only, negative]
 ---*/
 
@@ -31,5 +31,4 @@ interface Base {
 interface Derived extends Base {
     kinds_of_return_type<T extends Derived, U extends Base>(): {{c.derived}}
 }
-
 {% endfor %}

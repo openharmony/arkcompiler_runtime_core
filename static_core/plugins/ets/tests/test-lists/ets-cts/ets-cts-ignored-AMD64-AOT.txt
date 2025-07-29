@@ -2,6 +2,3 @@
 13.compilation_units/02.import_directives/04.import_type_directive/type_binding_class.ets
 13.compilation_units/02.import_directives/04.import_type_directive/type_binding_class_alias.ets
 13.compilation_units/02.import_directives/04.import_type_directive/type_binding_interface.ets
-
-#14338
-15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_array_9.ets

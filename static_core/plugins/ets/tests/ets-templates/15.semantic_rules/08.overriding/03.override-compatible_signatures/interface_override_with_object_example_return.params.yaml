@@ -13,11 +13,11 @@
 
 ---
 cases:
-  - Derived
-  - "(q: Derived)=>Base"
-  - Number
-  - "T | U"
-  - E1
-  - Base[]
-  - [ Base, Base ]
-  - number
+    - { type: 'Derived', expr: 'new A' }
+    - { type: '(q: Derived) => Base', expr: '(p: Derived): Base => new A' }
+    - { type: 'Number', expr: '42.0' }
+    - { type: 'T | U', expr: 'new A as T' }
+    - { type: 'E1', expr: 'E1.E1' }
+    - { type: 'Base[]', expr: '[new A]' }
+    - { type: '[ Base, Base ]', expr: '[ new A, new A ]' }
+    - { type: 'number', expr: '42.0' }

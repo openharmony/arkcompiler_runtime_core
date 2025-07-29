@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,76 +13,58 @@
 
 ---
 cases:
-    # CLASS, METHOD PARAMETER
+    # INTERFACE, METHOD PARAMETER
     - base: |-
-          foo(i: Base): void {
+          foo(i: IBase): void {
               res = 1;
           }
-          bar(i: Derived): void {
+          bar(i: IDerived): void {
               res = 2;
           }
       derived: |-
-          foo(i: Base): void {
+          foo(i: IBase): void {
               res = 3;
           }
-          override bar(i: Derived): void {
+          bar(i: IDerived): void {
               res = 4;
           }
       call: |-
-          new Base().foo(new Base())
+          new Base().foo(new A())
           arktest.assertEQ(res, 1)
-          new Base().bar(new Derived())
+          new Base().bar(new B())
           arktest.assertEQ(res, 2)
-          new Derived().foo(new Base())
+          new Derived().foo(new A())
           arktest.assertEQ(res, 3)
-          new Derived().bar(new Derived())
+          new Derived().bar(new B())
           arktest.assertEQ(res, 4)
       doc: Class/Interface type
       params: override-compatible with same type parameter
 
     - base: |-
-          foo(i: Derived): void {
+          foo(i: IDerived): void {
               res = 1
           }
       derived: |-
-          override foo(i: Base): void {
+          override foo(i: IBase): void {
               res = 2
           }
       call: |-
-          new Base().foo(new Derived())
+          new Base().foo(new B())
           arktest.assertEQ(res, 1)
-          new Derived().foo(new Base())
+          new Derived().foo(new A())
           arktest.assertEQ(res, 2)
-          new Derived().foo(new Derived())
-          arktest.assertEQ(res, 2)
-      doc: Class/Interface type
-      params: override-compatible parameter (contravariance)
-
-    - base: |-
-          foo(i: Derived): void {
-              res = 1
-          }
-      derived: |-
-          foo(i: Base): void { // overriding assumed
-              res = 2
-          }
-      call: |-
-          new Base().foo(new Derived())
-          arktest.assertEQ(res, 1)
-          new Derived().foo(new Base())
-          arktest.assertEQ(res, 2)
-          new Derived().foo(new Derived())
+          new Derived().foo(new B())
           arktest.assertEQ(res, 2)
       doc: Class/Interface type
       params: override-compatible parameter (contravariance)
 
     - tags: 'negative, compile-only'
       base: |-
-          foo(i: Base): void {
+          foo(i: IBase): void {
               res = 1;
           }
       derived: |-
-          override foo(i: Derived): void {
+          override foo(i: IDerived): void {
               res = 2;
           }
       doc: Class/Interface type
@@ -90,34 +72,34 @@ cases:
 
     - tags: 'negative, compile-only'
       base: |-
-          foo(i: Base): void {
+          foo(i: IBase): void {
               res = 1;
           }
       derived: |-
-          foo(i: Derived): void {  // overriding assumed
+          foo(i: IDerived): void {
               res = 2;
           }
       doc: Class/Interface type
       params: override-incompatible parameter
 
-    # CLASS, METHOD RETURN TYPE
+    # INTERFACE, METHOD RETURN TYPE
     - base: |-
-          foo(): Base {
+          foo(): IBase {
               res = 1;
-              return new Base();
+              return new A();
           }
-          bar(): Derived {
+          bar(): IDerived {
               res = 2;
-              return new Derived();
+              return new B();
           }
       derived: |-
-          foo(): Base {
+          foo(): IBase {
               res = 3;
-              return new Base();
+              return new A();
           }
-          bar(): Derived {
+          bar(): IDerived {
               res = 4;
-              return new Derived();
+              return new B();
           }
       call: |-
           new Base().foo()
@@ -132,32 +114,14 @@ cases:
       params: override-compatible with same return type
 
     - base: |-
-          foo(): Base {
+          foo(): IBase {
               res = 1;
-              return this;
+              return new A();
           }
       derived: |-
-          override foo(): Derived {
+          override foo(): IDerived {
               res = 2;
-              return this;
-          }
-      call: |-
-          new Base().foo();
-          arktest.assertEQ(res, 1)
-          new Derived().foo();
-          arktest.assertEQ(res, 2)
-      doc: Class/Interface type
-      params: override-compatible return type (covariance)
-
-    - base: |-
-          foo(): Base {
-              res = 1;
-              return this;
-          }
-      derived: |-
-          foo(): Derived {
-              res = 2;
-              return this;
+              return new B();
           }
       call: |-
           new Base().foo();
@@ -169,28 +133,28 @@ cases:
 
     - tags: 'negative, compile-only'
       base: |-
-          foo(): Derived {
+          foo(): IDerived {
               res = 1;
-              return new Derived();
+              return new B();
           }
       derived: |-
-          override foo(): Base {
+          override foo(): IBase {
               res = 2;
-              return new Base();
+              return new A();
           }
       doc: Class/Interface type
       params: override-incompatible return type
 
     - tags: 'negative, compile-only'
       base: |-
-          foo(): Derived {
+          foo(): IDerived {
               res = 1;
-              return new Derived();
+              return new B();
           }
       derived: |-
-          foo(): Base {
+          foo(): IBase {
               res = 2;
-              return new Base();
+              return new A();
           }
       doc: Class/Interface type
       params: override-incompatible return type

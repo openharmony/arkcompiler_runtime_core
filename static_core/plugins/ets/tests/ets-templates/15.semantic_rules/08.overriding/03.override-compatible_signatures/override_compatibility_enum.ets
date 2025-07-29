@@ -17,12 +17,13 @@ limitations under the License.
 
 /*---
 desc: >-
-          There are two cases of type override-compatibility, as types are used as either parameter types,
-          or return types. For each case there are six kinds of types
+    There are two cases of type override-compatibility,
+    as types are used as either parameter types,
+    or return types. For each case there are six kinds of types
 
-          - Enum types
+    - Enum types
 
-          Every type is override-compatible with itself (see Invariance).
+    Every type is override-compatible with itself (see Invariance).
 
 tags: [{{c.tags}}]
 params: {{c.params}}
@@ -30,16 +31,17 @@ params: {{c.params}}
 
 enum SHIPYARD { None, Flippers, SwimRing, Boat }
 enum HARBOUR { Boat, SwimRing, Flippers, None }
-let res: number = 0;
+let res: int = 0;
 
-{{c.decl}}
-
-{{c.base}}
-
-{{c.derived}}
-
-function main(): void {
-    {{c.call}}
+class Base {
+    {{c.base|indent}}
 }
 
+class Derived extends Base {
+    {{c.derived| indent}}
+}
+
+function main() {
+    {{(c.call or 'return')|indent}}
+}
 {% endfor %}

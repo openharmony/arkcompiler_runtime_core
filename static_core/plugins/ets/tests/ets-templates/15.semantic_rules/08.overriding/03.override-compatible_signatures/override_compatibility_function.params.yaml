@@ -13,174 +13,683 @@
 
 ---
 cases:
-  # FUNCTION, PARAMETER
-  - base: |-
-      foo( i: (j: Base) => Derived ): void {
-          res = 1
-      }
-    derived: |-
-      override foo(i: (j: Base) => Derived): void {
-          res = 2
-      }
-    call: |-
-      new Derived().foo( ( i:Base ): Derived => { return new Derived() } )
-      arktest.assertEQ( res, 2)
-    params: override-compatible with itself parameter
+    # FUNCTION, PARAMETER
+    - base: |-
+          foo(i: (j: Base) => Base): void {
+              res = 1
+          }
+      derived: |-
+          override foo(i: (j: Base) => Base): void {
+              res = 2
+          }
+      call: |-
+          new Base().foo((i:Base): Base => { return new Base() })
+          arktest.assertEQ(res, 1)
+          new Base().foo((i:Base): Derived => { return new Derived() })
+          arktest.assertEQ(res, 1)
 
-  - base: |-
-      foo( i: (j: Base) => Derived ): void {
-          res = 1
-      }
-    derived: |-
-      override foo(i: (j: Derived) => Derived): void {
-          res = 2
-      }
-    call: |-
-      new Derived().foo( ( i:Base ): Derived => { return new Derived() } )
-      arktest.assertEQ( res, 2)
-      new Derived().foo( ( i:Derived ): Derived => { return new Derived() } )
-      arktest.assertEQ( res, 2)
-    params: override-compatible parameter (covariance)
+          new Derived().foo((i:Base): Base => { return new Base() })
+          arktest.assertEQ(res, 2)
+          new Derived().foo((i:Base): Derived => { return new Derived() })
+          arktest.assertEQ(res, 2)
+      params: override-compatible with same type parameter
 
-  - base: |-
-      foo( i: (j: Base) => Derived ): void {
-          res = 1
-      }
-    derived: |-
-      override foo(i: (j: Derived) => Base): void {
-          res = 2
-      }
-    call: |-
-      new Derived().foo( ( i:Base ): Derived => { return new Derived() } )
-      arktest.assertEQ( res, 2)
-      new Derived().foo( ( i:Derived ): Derived => { return new Derived() } )
-      arktest.assertEQ( res, 2)
-      new Derived().foo( ( i:Base ): Base => { return new Base() } )
-      arktest.assertEQ( res, 2)
-      new Derived().foo( ( i:Derived ): Base => { return new Base() } )
-      arktest.assertEQ( res, 2)
-    params: override-compatible parameter (covariance)
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(i: (j: Base) => Base): void {
+              res = 1
+          }
+      derived: |-
+          override foo(i: (j: Base) => Derived): void {
+              res = 2
+          }
+      params: override-incompatible parameter
 
-  - tags: 'negative, compile-only'
-    base: |-
-      foo( i: (j: Derived) => Base ): void {
-          res = 1
-      }
-    derived: |-
-      override foo(i: (j: Base) => Derived): void {
-          res = 2
-      }
-    params: override-incompatible parameter (contravariance)
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(i: (j: Base) => Base): void {
+              res = 1
+          }
+      derived: |-
+          foo(i: (j: Base) => Derived): void { // override assumed
+              res = 2
+          }
+      params: override-incompatible parameter
 
-  - tags: 'negative, compile-only'
-    base: |-
-      foo( i: (j: Derived) => Base ): void {
-          res = 1
-      }
-    derived: |-
-      override foo(i: (j: Base) => Base): void {
-          res = 2
-      }
-    params: override-incompatible parameter (contravariance)
+    - base: |-
+          foo(i: (j: Base) => Base): void {
+              res = 1
+          }
+      derived: |-
+          override foo(i: (j: Derived) => Base): void {
+              res = 2
+          }
+      call: |-
+          new Base().foo((i:Base): Base => { return new Base() })
+          arktest.assertEQ(res, 1)
+          new Base().foo((i:Base): Derived => { return new Derived() })
+          arktest.assertEQ(res, 1)
 
-  - tags: 'negative, compile-only'
-    base: |-
-      foo( i: (j: Derived) => Derived ): void {
-          res = 1
-      }
-    derived: |-
-      override foo(i: (j: Base) => Derived): void {
-          res = 2
-      }
-    params: override-incompatible parameter (contravariance)
+          new Derived().foo((i:Derived): Base => { return new Base() })
+          arktest.assertEQ(res, 2)
+          new Derived().foo((i:Derived): Derived => { return new Derived() })
+          arktest.assertEQ(res, 2)
+          new Derived().foo((i:Base): Base => { return new Base() })
+          arktest.assertEQ(res, 2)
+          new Derived().foo((i:Base): Derived => { return new Derived() })
+          arktest.assertEQ(res, 2)
+      params: override-compatible parameter
 
-  - tags: 'compile-only'
-    base: |-
-      foo( i: (j: Derived) => Derived ): void {
-          res = 1
-      }
-    derived: |-
-      foo(i: (j: Base) => Derived): void {
-          res = 2
-      }
-    call: |-
-      let func = (j: Base) : Derived => new Derived()
-      new Derived().foo(func)
-      arktest.assertEQ(res, 2)
-    params: override-incompatible parameter, overloading is also unavailable
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(i: (j: Base) => Base): void {
+              res = 1
+          }
+      derived: |-
+          override foo(i: (j: Derived) => Derived): void {
+              res = 2
+          }
+      params: override-incompatible parameter
 
-  - tags: 'negative, compile-only'
-    base: |-
-      foo( i: (j: Derived) => Derived ): void {
-          res = 1
-      }
-    derived: |-
-      foo(i: (j: Base) => Derived): void {
-          res = 2
-      }
-      foo(i: (j: Derived) => Base): void {
-          res = 2
-      }
-    params: duplicated function implementation
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(i: (j: Base) => Base): void {
+              res = 1
+          }
+      derived: |-
+          foo(i: (j: Derived) => Derived): void {  // override assumed
+              res = 2
+          }
+      params: override-incompatible parameter
 
-  # FUNCTION, RETURN VALUE
-  - decl: |-
-      function fdb(i: Derived): Base {
-          return new Base()
-      }
-    base: |-
-      foo(): (i: Derived) => Base {
-          res = 1
-          return fdb
-      }
-    derived: |-
-      override foo(): (i: Derived) => Base {
-          res = 2
-          return fdb
-      }
-    call: |-
-      new Derived().foo()
-      arktest.assertEQ( res, 2)
-    params: override-compatible with itself return value
+    - base: |-
+          foo(i: (j: Base) => Derived): void {
+              res = 1
+          }
+      derived: |-
+          override foo(i: (j: Base) => Base): void {
+              res = 2
+          }
+      call: |-
+          new Base().foo((i:Base): Derived => { return new Derived() })
+          arktest.assertEQ(res, 1)
 
-  - tags: 'negative, compile-only'
-    decl: |-
-      function fdb(i: Derived): Base {
-          return new Base()
-      }
-      function fbb(i: Base): Base {
-          return i
-      }
-    base: |-
-      foo(): (i: Base) => Base {
-          res = 1
-          return fbb
-      }
-    derived: |-
-      foo(): (i: Derived) => Base {
-          res = 2
-          return fdb
-      }
-    params: override-incompatible return value (covariance), overload incompatible
+          new Derived().foo((i:Base): Base => { return new Base() })
+          arktest.assertEQ(res, 2)
+          new Derived().foo((i:Base): Derived => { return new Derived() })
+          arktest.assertEQ(res, 2)
+      params: override-compatible parameter
 
-  - decl: |-
-      function fdb(i: Derived): Base {
-          return new Base()
-      }
-      function fbb(i: Base): Base {
-          return i
-      }
-    base: |-
-      foo(): (i: Derived) => Base {
-          res = 1
-          return fdb
-      }
-    derived: |-
-      override foo(): (i: Base) => Base {
-          res = 2
-          return fbb
-      }
-    call: |-
-      new Derived().foo()
-      arktest.assertEQ( res, 2)
-    params: override-compatible return value (contravariance)
+    - base: |-
+          foo(i: (j: Base) => Derived): void {
+              res = 1
+          }
+      derived: |-
+          override foo(i: (j: Base) => Derived): void {
+              res = 2
+          }
+      call: |-
+          new Base().foo((i:Base): Derived => { return new Derived() })
+          arktest.assertEQ(res, 1)
+
+          new Derived().foo((i:Base): Derived => { return new Derived() })
+          arktest.assertEQ(res, 2)
+      params: override-compatible parameter
+
+    - base: |-
+          foo(i: (j: Base) => Derived): void {
+              res = 1
+          }
+      derived: |-
+          override foo(i: (j: Derived) => Base): void {
+              res = 2
+          }
+      call: |-
+          new Base().foo((i:Base): Derived => { return new Derived() })
+          arktest.assertEQ(res, 1)
+
+          new Derived().foo((i:Derived): Base => { return new Base() })
+          arktest.assertEQ(res, 2)
+          new Derived().foo((i:Base): Base => { return new Base() })
+          arktest.assertEQ(res, 2)
+          new Derived().foo((i:Derived): Derived => { return new Derived() })
+          arktest.assertEQ(res, 2)
+          new Derived().foo((i:Base): Derived => { return new Derived() })
+          arktest.assertEQ(res, 2)
+      params: override-compatible parameter
+
+    - base: |-
+          foo(i: (j: Base) => Derived): void {
+              res = 1
+          }
+      derived: |-
+          override foo(i: (j: Derived) => Derived): void {
+              res = 2
+          }
+      call: |-
+          new Base().foo((i:Base): Derived => { return new Derived() })
+          arktest.assertEQ(res, 1)
+
+          new Derived().foo((i:Derived): Derived => { return new Derived() })
+          arktest.assertEQ(res, 2)
+          new Derived().foo((i:Base): Derived => { return new Derived() })
+          arktest.assertEQ(res, 2)
+      params: override-compatible parameter
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(i: (j: Derived) => Base): void {
+              res = 1
+          }
+      derived: |-
+          override foo(i: (j: Base) => Base): void {
+              res = 2
+          }
+      params: override-incompatible parameter
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(i: (j: Derived) => Base): void {
+              res = 1
+          }
+      derived: |-
+          foo(i: (j: Base) => Base): void {  // override assumed
+              res = 2
+          }
+      params: override-incompatible parameter
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(i: (j: Derived) => Base): void {
+              res = 1
+          }
+      derived: |-
+          override foo(i: (j: Base) => Derived): void {
+              res = 2
+          }
+      params: override-incompatible parameter
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(i: (j: Derived) => Base): void {
+              res = 1
+          }
+      derived: |-
+          foo(i: (j: Base) => Derived): void { // override assumed
+              res = 2
+          }
+      params: override-incompatible parameter
+
+    - base: |-
+          foo(i: (j: Derived) => Base): void {
+              res = 1
+          }
+      derived: |-
+          override foo(i: (j: Derived) => Base): void {
+              res = 2
+          }
+      call: |-
+          new Base().foo((i:Derived): Base => { return new Base() })
+          arktest.assertEQ(res, 1)
+          new Base().foo((i:Base): Base => { return new Base() })
+          arktest.assertEQ(res, 1)
+          new Base().foo((i:Derived): Derived => { return new Derived() })
+          arktest.assertEQ(res, 1)
+          new Base().foo((i:Base): Derived => { return new Derived() })
+          arktest.assertEQ(res, 1)
+
+          new Derived().foo((i:Derived): Base => { return new Base() })
+          arktest.assertEQ(res, 2)
+          new Derived().foo((i:Base): Base => { return new Base() })
+          arktest.assertEQ(res, 2)
+          new Derived().foo((i:Derived): Derived => { return new Derived() })
+          arktest.assertEQ(res, 2)
+          new Derived().foo((i:Base): Derived => { return new Derived() })
+          arktest.assertEQ(res, 2)
+      params: override-compatible parameter
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(i: (j: Derived) => Base): void {
+              res = 1
+          }
+      derived: |-
+          override foo(i: (j: Derived) => Derived): void {
+              res = 2
+          }
+      params: override-incompatible parameter
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(i: (j: Derived) => Base): void {
+              res = 1
+          }
+      derived: |-
+          foo(i: (j: Derived) => Derived): void { // override assumed
+              res = 2
+          }
+      params: override-incompatible parameter
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(i: (j: Derived) => Derived): void {
+              res = 1
+          }
+      derived: |-
+          override foo(i: (j: Base) => Base): void {
+              res = 2
+          }
+      params: override-incompatible parameter
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(i: (j: Derived) => Derived): void {
+              res = 1
+          }
+      derived: |-
+          foo(i: (j: Base) => Base): void { // override assumed
+              res = 2
+          }
+      params: override-incompatible parameter
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(i: (j: Derived) => Derived): void {
+              res = 1
+          }
+      derived: |-
+          override foo(i: (j: Base) => Derived): void {
+              res = 2
+          }
+      params: override-incompatible parameter
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(i: (j: Derived) => Derived): void {
+              res = 1
+          }
+      derived: |-
+          foo(i: (j: Base) => Derived): void { // override assumed
+              res = 2
+          }
+      params: override-incompatible parameter
+
+    - base: |-
+          foo(i: (j: Derived) => Derived): void {
+              res = 1
+          }
+      derived: |-
+          override foo(i: (j: Derived) => Base): void {
+              res = 2
+          }
+      call: |-
+          new Base().foo((i:Derived): Derived => { return new Derived() })
+          arktest.assertEQ(res, 1)
+          new Base().foo((i:Base): Derived => { return new Derived() })
+          arktest.assertEQ(res, 1)
+
+          new Derived().foo((i:Derived): Base => { return new Base() })
+          arktest.assertEQ(res, 2)
+          new Derived().foo((i:Derived): Derived => { return new Derived() })
+          arktest.assertEQ(res, 2)
+          new Derived().foo((i:Base): Base => { return new Base() })
+          arktest.assertEQ(res, 2)
+          new Derived().foo((i:Base): Derived => { return new Derived() })
+          arktest.assertEQ(res, 2)
+      params: override-compatible parameter
+
+    - base: |-
+          foo(i: (j: Derived) => Derived): void {
+              res = 1
+          }
+      derived: |-
+          override foo(i: (j: Derived) => Derived): void {
+              res = 2
+          }
+      call: |-
+          new Base().foo((i:Derived): Derived => { return new Derived() })
+          arktest.assertEQ(res, 1)
+          new Base().foo((i:Base): Derived => { return new Derived() })
+          arktest.assertEQ(res, 1)
+
+          new Derived().foo((i:Derived): Derived => { return new Derived() })
+          arktest.assertEQ(res, 2)
+          new Derived().foo((i:Base): Derived => { return new Derived() })
+          arktest.assertEQ(res, 2)
+      params: override-compatible parameter
+
+    # FUNCTION, RETURN TYPE
+    - base: |-
+          foo(): (i: Base) => Base {
+              res = 1
+              return (i: Base): Base => new Base
+          }
+      derived: |-
+          foo(): (i: Base) => Base {
+              res = 2
+              return (i: Base): Base => new Base
+          }
+      call: |-
+          new Base().foo()
+          arktest.assertEQ(res, 1)
+          new Derived().foo()
+          arktest.assertEQ(res, 2)
+      params: override-compatible with same return type
+
+    - base: |-
+          foo(): (i: Base) => Base {
+              res = 1
+              return (i: Base): Base => new Base
+          }
+      derived: |-
+          foo(): (i: Base) => Derived {
+              res = 2
+              return (i: Base): Derived => new Derived
+          }
+      call: |-
+          new Base().foo()
+          arktest.assertEQ(res, 1)
+          new Derived().foo()
+          arktest.assertEQ(res, 2)
+      params: override-compatible return type
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(): (i: Base) => Base {
+              res = 1
+              return (i: Base): Base => new Base
+          }
+      derived: |-
+          override foo(): (i: Derived) => Base {
+              res = 2
+              return (i: Derived): Base => new Base
+          }
+      params: override-incompatible return type
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(): (i: Base) => Base {
+              res = 1
+              return (i: Base): Base => new Base
+          }
+      derived: |-
+          foo(): (i: Derived) => Base { // override assumed
+              res = 2
+              return (i: Derived): Base => new Base
+          }
+      params: override-incompatible return type
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(): (i: Base) => Base {
+              res = 1
+              return (i: Base): Base => new Base
+          }
+      derived: |-
+          override foo(): (i: Derived) => Derived {
+              res = 2
+              return (i: Derived): Derived => new Derived
+          }
+      params: override-incompatible return type
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(): (i: Base) => Base {
+              res = 1
+              return (i: Base): Base => new Base
+          }
+      derived: |-
+          foo(): (i: Derived) => Derived { // override assumed
+              res = 2
+              return (i: Derived): Derived => new Derived
+          }
+      params: override-incompatible return type
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(): (i: Base) => Derived {
+              res = 1
+              return (i: Base): Derived => new Derived
+          }
+      derived: |-
+          override foo(): (i: Base) => Base {
+              res = 2
+              return (i: Base): Base => new Base
+          }
+      params: override-incompatible return type
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(): (i: Base) => Derived {
+              res = 1
+              return (i: Base): Derived => new Derived
+          }
+      derived: |-
+          foo(): (i: Base) => Base { // override assumed
+              res = 2
+              return (i: Base): Base => new Base
+          }
+      params: override-incompatible return type
+
+    - base: |-
+          foo(): (i: Base) => Derived {
+              res = 1
+              return (i: Base): Derived => new Derived
+          }
+      derived: |-
+          foo(): (i: Base) => Derived {
+              res = 2
+              return (i: Base): Derived => new Derived
+          }
+      call: |-
+          new Base().foo()
+          arktest.assertEQ(res, 1)
+          new Derived().foo()
+          arktest.assertEQ(res, 2)
+      params: override-compatible return type
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(): (i: Base) => Derived {
+              res = 1
+              return (i: Base): Derived => new Derived
+          }
+      derived: |-
+          override foo(): (i: Derived) => Base {
+              res = 2
+              return (i: Derived): Base => new Base
+          }
+      params: override-incompatible return type
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(): (i: Base) => Derived {
+              res = 1
+              return (i: Base): Derived => new Derived
+          }
+      derived: |-
+          foo(): (i: Derived) => Base { // override assumed
+              res = 2
+              return (i: Derived): Base => new Base
+          }
+      params: override-incompatible return type
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(): (i: Base) => Derived {
+              res = 1
+              return (i: Base): Derived => new Derived
+          }
+      derived: |-
+          override foo(): (i: Derived) => Derived {
+              res = 2
+              return (i: Derived): Derived => new Derived
+          }
+      params: override-incompatible return type
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(): (i: Base) => Derived {
+              res = 1
+              return (i: Base): Derived => new Derived
+          }
+      derived: |-
+          foo(): (i: Derived) => Derived { // override assumed
+              res = 2
+              return (i: Derived): Derived => new Derived
+          }
+      params: override-incompatible return type
+
+    - base: |-
+          foo(): (i: Derived) => Base {
+              res = 1
+              return (i: Derived): Base => new Base
+          }
+      derived: |-
+          foo(): (i: Base) => Base {
+              res = 2
+              return (i: Base): Base => new Base
+          }
+      call: |-
+          new Base().foo()
+          arktest.assertEQ(res, 1)
+          new Derived().foo()
+          arktest.assertEQ(res, 2)
+      params: override-compatible return type
+
+    - base: |-
+          foo(): (i: Derived) => Base {
+              res = 1
+              return (i: Derived): Base => new Base
+          }
+      derived: |-
+          foo(): (i: Base) => Derived {
+              res = 2
+              return (i: Base): Derived => new Derived
+          }
+      call: |-
+          new Base().foo()
+          arktest.assertEQ(res, 1)
+          new Derived().foo()
+          arktest.assertEQ(res, 2)
+      params: override-compatible return type
+
+    - base: |-
+          foo(): (i: Derived) => Base {
+              res = 1
+              return (i: Derived): Base => new Base
+          }
+      derived: |-
+          foo(): (i: Derived) => Base {
+              res = 2
+              return (i: Derived): Base => new Base
+          }
+      call: |-
+          new Base().foo()
+          arktest.assertEQ(res, 1)
+          new Derived().foo()
+          arktest.assertEQ(res, 2)
+      params: override-compatible return type
+
+    - base: |-
+          foo(): (i: Derived) => Base {
+              res = 1
+              return (i: Derived): Base => new Base
+          }
+      derived: |-
+          foo(): (i: Derived) => Derived {
+              res = 2
+              return (i: Derived): Derived => new Derived
+          }
+      call: |-
+          new Base().foo()
+          arktest.assertEQ(res, 1)
+          new Derived().foo()
+          arktest.assertEQ(res, 2)
+      params: override-compatible return type
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(): (i: Derived) => Derived {
+              res = 1
+              return (i: Derived): Derived => new Derived
+          }
+      derived: |-
+          override foo(): (i: Base) => Base {
+              res = 2
+              return (i: Base): Base => new Base
+          }
+      params: override-incompatible return type
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(): (i: Derived) => Derived {
+              res = 1
+              return (i: Derived): Derived => new Derived
+          }
+      derived: |-
+          foo(): (i: Base) => Base { // override assumed
+              res = 2
+              return (i: Base): Base => new Base
+          }
+      params: override-incompatible return type
+
+    - base: |-
+          foo(): (i: Derived) => Derived {
+              res = 1
+              return (i: Derived): Derived => new Derived
+          }
+      derived: |-
+          foo(): (i: Base) => Derived {
+              res = 2
+              return (i: Base): Derived => new Derived
+          }
+      call: |-
+          new Base().foo()
+          arktest.assertEQ(res, 1)
+          new Derived().foo()
+          arktest.assertEQ(res, 2)
+      params: override-compatible return type
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(): (i: Derived) => Derived {
+              res = 1
+              return (i: Derived): Derived => new Derived
+          }
+      derived: |-
+          override foo(): (i: Derived) => Base {
+              res = 2
+              return (i: Derived): Base => new Base
+          }
+      params: override-incompatible return type
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(): (i: Derived) => Derived {
+              res = 1
+              return (i: Derived): Derived => new Derived
+          }
+      derived: |-
+          foo(): (i: Derived) => Base { // override assumed
+              res = 2
+              return (i: Derived): Base => new Base
+          }
+      params: override-incompatible return type
+
+    - base: |-
+          foo(): (i: Derived) => Derived {
+              res = 1
+              return (i: Derived): Derived => new Derived
+          }
+      derived: |-
+          foo(): (i: Derived) => Derived {
+              res = 2
+              return (i: Derived): Derived => new Derived
+          }
+      call: |-
+          new Base().foo()
+          arktest.assertEQ(res, 1)
+          new Derived().foo()
+          arktest.assertEQ(res, 2)
+      params: override-compatible return type

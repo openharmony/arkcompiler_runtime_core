@@ -17,12 +17,13 @@ limitations under the License.
 
 /*---
 desc: >-
-          There are two cases of type override-compatibility, as types are used as either parameter types,
-          or return types. For each case there are six kinds of types
+    There are two cases of type override-compatibility,
+    as types are used as either parameter types,
+    or return types. For each case there are six kinds of types
 
-          - Tuple type
+    - Tuple type
 
-          Every type is override-compatible with itself (see Invariance).
+    Every type is override-compatible with itself (see Invariance).
 tags: [{{c.tags}}]
 params: {{c.params}}
 ---*/
@@ -43,11 +44,11 @@ type TPL_DDD = [Derived, [Derived, Derived]]
 type TPL_OOO = [Object, [Object, Object]]
 
 class Base {
-    {{c.base}}
+    {{c.base|indent}}
 }
 
 class Derived extends Base {
-    {{c.derived}}
+    {{c.derived|indent}}
 }
 
 let ob: TPL_OB = [new Object(), new Base()]
@@ -60,8 +61,7 @@ let bbb: TPL_BBB = [new Base(), [new Base(), new Base()]]
 let bbd: TPL_BBD = [new Base(), [new Base(), new Derived()]]
 let ddd: TPL_DDD = [new Derived(), [new Derived(), new Derived()]]
 
-function main(): void {
-    {{c.call}}
+function main() {
+    {{(c.call or 'return')|indent}}
 }
-
 {% endfor %}

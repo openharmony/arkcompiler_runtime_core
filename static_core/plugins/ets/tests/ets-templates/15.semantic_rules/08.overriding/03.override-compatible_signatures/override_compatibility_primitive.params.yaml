@@ -13,95 +13,108 @@
 
 ---
 cases:
-  # PRIMITIVES, PARAMETER
-  - base: |-
-      foo(i: number): void {
-          res = 1
-      }
-    derived: |-
-      override foo(i: number): void {
-          res = 2
-      }
-    call: |-
-      new Derived().foo(1)
-      arktest.assertEQ( res, 2 )
-    params: override-compatible with itself parameter
+    # VALUE TYPES, PARAMETER
+    - base: |-
+          foo(i: number): void {
+              res = 1
+          }
+      derived: |-
+          override foo(i: number): void {
+              res = 2
+          }
+      call: |-
+          new Base().foo(1.0)
+          arktest.assertEQ(res, 1)
+          new Derived().foo(1.0)
+          arktest.assertEQ(res, 2)
+      params: override-compatible with same type parameter
 
-  - base: |-
-      foo(i: number): void {
-          res = 1
-      }
-    derived: |-
-      foo(i: long): void {
-          res = 2
-      }
-    call: |-
-      new Derived().foo(1 as number)
-      arktest.assertEQ( res, 1 )
-      new Derived().foo(1 as long)
-      arktest.assertEQ( res, 2 )
-    params: override-incompatible parameter, overload-compatible
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(i: number): void {
+              res = 1
+          }
+      derived: |-
+          override foo(i: long): void {
+              res = 2
+          }
+      params: override-incompatible parameter
 
-  - tags: 'negative, compile-only'
-    base: |-
-      foo(i: number): void {
-          res = 1
-      }
-    derived: |-
-      override foo(i: long): void {
-          res = 2
-      }
-    params: override-incompatible parameter (no invariance)
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(i: number): void {
+              res = 1
+          }
+      derived: |-
+          foo(i: long): void { // override assumed
+              res = 2
+          }
+      params: override-incompatible parameter
 
-# PRIMITIVES, RETURN VALUE
-  - base: |-
-      foo(): number {
-          res = 1
-          return 1.0
-      }
-    derived: |-
-      foo(): number {
-          res = 2
-          return 1.0
-      }
-    call: |-
-      new Derived().foo()
-      arktest.assertEQ( res, 2 )
-    params: override-compatible return value
+    # VALUE TYPES, RETURN TYPE
+    - base: |-
+          foo(): number {
+              res = 1
+              return 1.0
+          }
+      derived: |-
+          foo(): number {
+              res = 2
+              return 1.0
+          }
+      call: |-
+          new Base().foo()
+          arktest.assertEQ(res, 1)
+          new Derived().foo()
+          arktest.assertEQ(res, 2)
+      params: override-compatible return type
 
-  - tags: 'negative, compile-only'
-    base: |-
-      foo(): number {
-          res = 1
-          return 1.0
-      }
-    derived: |-
-      override foo(): boolean {
-          res = 2
-          return true
-      }
-    params: override-incompatible return value
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(): number {
+              res = 1
+              return 1.0
+          }
+      derived: |-
+          override foo(): boolean {
+              res = 2
+              return true
+          }
+      params: override-incompatible return type
 
-  - tags: 'negative, compile-only'
-    base: |-
-      foo(): void {
-          res = 1
-      }
-    derived: |-
-      foo(): number {
-          res = 2
-          return 1.0
-      }
-    params: override-incompatible return value
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(): number {
+              res = 1
+              return 1.0
+          }
+      derived: |-
+          foo(): boolean {  // override assumed
+              res = 2
+              return true
+          }
+      params: override-incompatible return type
 
-  - tags: 'negative, compile-only'
-    base: |-
-      foo(): number {
-          res = 1
-          return 1.0
-      }
-    derived: |-
-      foo(): void {
-          res = 2
-      }
-    params: override-incompatible return value
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(): void {
+              res = 1
+          }
+      derived: |-
+          foo(): number {
+              res = 2
+              return 1.0
+          }
+      params: override-incompatible return type
+
+    - tags: 'negative, compile-only'
+      base: |-
+          foo(): number {
+              res = 1
+              return 1.0
+          }
+      derived: |-
+          foo(): void {
+              res = 2
+          }
+      params: override-incompatible return type
