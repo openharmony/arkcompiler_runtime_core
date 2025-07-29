@@ -188,25 +188,25 @@ cases:
           arktest.assertTrue(r[foo(3)] === undefined)
 
     - decl: |-
-          let arr: float[] = [0f, Float.MIN_VALUE, Float.MAX_VALUE, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, Float.NaN]
+          let arr: float[] = [0.0f, Float.MIN_VALUE, Float.MAX_VALUE, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, Float.NaN]
       use: |-
           // key is of numeric type, array access expressions
-          let r: Record<Float, Float|string> = { 1f: 1f }
-          r[arr[0]] = 0f
+          let r: Record<Float, Float|string> = { 1.0f: 1.0f }
+          r[arr[0]] = 0.0f
           r[arr[1]] = Float.MIN_VALUE
           r[arr[2]] = Float.MAX_VALUE
           r[arr[3]] = Float.NEGATIVE_INFINITY
           r[arr[4]] = Float.POSITIVE_INFINITY
           r[arr[5]] = Float.NaN
-          arktest.assertTrue(r[arr[0]] == 0f && r[arr[1]] == Float.MIN_VALUE && r[arr[2]] == Float.MAX_VALUE)
+          arktest.assertTrue(r[arr[0]] == 0.0f && r[arr[1]] == Float.MIN_VALUE && r[arr[2]] == Float.MAX_VALUE)
           arktest.assertTrue(r[arr[3]] == Float.NEGATIVE_INFINITY && r[arr[4]] == Float.POSITIVE_INFINITY)
-          arktest.assertTrue(Float.isNaN(r[arr[5]] as Float) && r[99f] === undefined)
+          arktest.assertTrue(Float.isNaN(r[arr[5]] as Float) && r[99.0f] === undefined)
           r[arr[3]] = "3"
           r[arr[4]] = "4"
           r[arr[5]] = "5"
-          arktest.assertTrue(r[arr[0]] == 0f && r[arr[1]] == Float.MIN_VALUE && r[arr[2]] == Float.MAX_VALUE)
+          arktest.assertTrue(r[arr[0]] == 0.0f && r[arr[1]] == Float.MIN_VALUE && r[arr[2]] == Float.MAX_VALUE)
           arktest.assertTrue(r[arr[3]] == "3" && r[arr[4]] == "4")
-          arktest.assertTrue(r[arr[5]] == "5" && r[99f] === undefined)
+          arktest.assertTrue(r[arr[5]] == "5" && r[99.0f] === undefined)
 
     # Record key is a union of numeric and string
     - use: |-

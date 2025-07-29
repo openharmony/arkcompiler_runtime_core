@@ -25,11 +25,11 @@ cases:
     - from_type: short
       to_type: short
       values:
-          - { expr: 0f, val: 0 }
+          - { expr: 0, val: 0 }
           - { expr: Short.MIN_VALUE, val: -32_768 }
           - { expr: Short.MAX_VALUE, val: 32_767 }
-          - { expr: -32768f, val: -32_768 }
-          - { expr: 32767f, val: 32_767 }
+          - { expr: -32768, val: -32_768 }
+          - { expr: 32767, val: 32_767 }
 
     - from_type: int
       to_type: int
@@ -43,11 +43,11 @@ cases:
     - from_type: long
       to_type: long
       values:
-          - { expr: 0f, val: 0 }
+          - { expr: 0, val: 0 }
           - { expr: Long.MIN_VALUE, val: -9223372036854775808 }
           - { expr: Long.MAX_VALUE, val: 9223372036854775807 }
-          - { expr: -9223372036854775808f, val: -9223372036854775808 }
-          - { expr: 9223372036854775807f, val: 9223372036854775807 }
+          - { expr: -9223372036854775808, val: -9223372036854775808 }
+          - { expr: 9223372036854775807, val: 9223372036854775807 }
 
     - from_type: float
       to_type: float

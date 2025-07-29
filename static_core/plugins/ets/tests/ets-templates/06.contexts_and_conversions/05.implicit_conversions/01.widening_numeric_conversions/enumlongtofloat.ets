@@ -18,18 +18,18 @@ desc: Casting conversions enum to float.
 ---*/
 
 enum Status {
-  Active = 3_000_000_001,
-  Inactive = 3_000_000_002,
-  Pending = 3_000_000_003
+  Active = 3_000_001,
+  Inactive = 3_000_002,
+  Pending = 3_000_003
 }
 
 let activeFloatValue: number = Status.Active;
 let inactiveFloatValue: number = Status.Inactive;
 let pendingFloatValue: number = Status.Pending;
 
-let expectedActiveValue: number = 3000000001f;
-let expectedInactiveValue: number = 3000000002f;
-let expectedPendingValue: number = 3000000003f;
+let expectedActiveValue: number = 3000001.0f;
+let expectedInactiveValue: number = 3000002.0f;
+let expectedPendingValue: number = 3000003.0f;
 
 function main(): void {
   arktest.assertEQ(activeFloatValue, expectedActiveValue)

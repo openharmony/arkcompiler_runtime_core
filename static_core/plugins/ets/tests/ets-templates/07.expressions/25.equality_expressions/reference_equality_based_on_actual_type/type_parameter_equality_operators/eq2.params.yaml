@@ -32,10 +32,10 @@ cases:
           - '127 as byte'
           - '127 as short'
           - '127 as long'
-          - '127f'
+          - '127.0f'
           - new Byte(127 as byte)
           - new Int(127)
-          - new Float(127f)
+          - new Float(127.0f)
 
     - type1: byte|short|Error
       type2: char|long|Error

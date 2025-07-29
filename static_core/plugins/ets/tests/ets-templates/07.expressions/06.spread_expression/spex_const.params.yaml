@@ -104,13 +104,13 @@ cases:
           class A {
               fld: float
               constructor(a: float, ...p: float[]) {
-                  this.fld = a + reduce(p, (prev: float, next: float) => prev + next, 0f)
+                  this.fld = a + reduce(p, (prev: float, next: float) => prev + next, 0.0f)
               }
           }
       use: |-
           // spread of float array
-          let a: float[] = [1f, 2f, 3f]
-          arktest.assertTrue(new A(42f, ...a).fld == 48f)
+          let a: float[] = [1.0f, 2.0f, 3.0f]
+          arktest.assertTrue(new A(42.0f, ...a).fld == 48.0f)
 
     - decl: |-
           class A {
@@ -525,7 +525,7 @@ cases:
       use: |-
           // spread tuples of all value types
           let r: [byte, short, int, long, float, double, boolean, char, string] =
-              [1 as byte, 2 as short, 3, 4 as long, 5f, 6.0, true, c'Z', "X"]
+              [1 as byte, 2 as short, 3, 4 as long, 5.0f, 6.0, true, c'Z', "X"]
           arktest.assertTrue(new A(...r).fld[9] == 42)
 
     - decl: |-

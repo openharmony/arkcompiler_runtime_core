@@ -96,7 +96,7 @@ function testF32ArrayNoNaN() {
     checkArray(dataNoInf, 1.0, true);
     checkArrayForFloat(dataNoInf, 1.0f);
     checkArray(dataNoInf, 1 + 1.19209290e-07, false);
-    checkArrayForFloat(dataNoInf, 1f + 1.19209290e-07f);
+    checkArrayForFloat(dataNoInf, 1.0f + 1.19209290e-07f);
     checkArray(dataNoInf, 1.0601e+09, true);
     checkArrayForFloat(dataNoInf, 1.0601e+09f);
     checkArray(dataNoInf, 1.060001e+09, true);
@@ -194,7 +194,7 @@ function testF32ArrayInf() {
         checkArray(arr, -2.02e+16, true);
         checkArrayForFloat(arr, -2.02e+16f);
         checkArray(arr, 0, true);
-        checkArrayForFloat(arr, 0f);
+        checkArrayForFloat(arr, 0.0f);
         checkArray(arr, 1.06e+12, true);
         checkArrayForFloat(arr, 1.06e+12f);
         checkArray(arr, 2.8e+24, true);
@@ -321,7 +321,7 @@ function testF32ArrayNaN() {
         }
         checkArray(arr, value, false, -(arr.length - positionOfVal - 1));
         checkArray(arr, value, true, arr.length - (arr.length - positionOfVal));
-        checkArrayForFloat(arr, 0f);
+        checkArrayForFloat(arr, 0.0f);
         checkArrayForFloat(arr, -100.01f);
     }
     let dataNaN0 = Float32Array.of(NaN, Infinity, -3.4e+38, -2.02e+16, 0, 1.06e+12, 2.8e+24, 3.4e+38);
@@ -371,7 +371,7 @@ function testF32ArrayNaNOnly() {
         checkArray(arr, NaN, true, -(arr.length + 1));
         checkArrayForFloat(arr, NaN.toFloat());
         checkArray(arr, 0, false);
-        checkArrayForFloat(arr, 0f);
+        checkArrayForFloat(arr, 0.0f);
     }
     checkNaNOnly(Float32Array.of(NaN));
     checkNaNOnly(Float32Array.of(NaN, NaN));

@@ -34,7 +34,7 @@ cases:
           - '127 as long'
           - new Byte(127 as byte)
           - new Short(127 as short)
-          - new Float(127f)
+          - new Float(127.0f)
 
     - type1: byte|short|Error
       type2: char|long|Error

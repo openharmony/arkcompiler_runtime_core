@@ -168,7 +168,7 @@ cases:
           arktest.assertEQ(i.meth([0, 0] as short[]), 2)
           arktest.assertEQ(i.meth([0, 0, 0]), 3)
           arktest.assertEQ(i.meth([0, 0, 0, 0] as long[]), 4)
-          arktest.assertEQ(i.meth([0f, 0f, 0f, 0f, 0f] as float[]), 5)
+          arktest.assertEQ(i.meth([0.0f, 0.0f, 0.0f, 0.0f, 0.0f] as float[]), 5)
           arktest.assertEQ(i.meth([0.0, 0.0, 0.0, 0.0, 0.0, 0.0] as double[]), 6)
 
     - decl: |-

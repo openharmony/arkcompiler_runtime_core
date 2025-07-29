@@ -21,12 +21,12 @@ cases:
       case2:
           - '-128 as byte'
           - '-128'
-          - '-128f'
+          - '-128.0f'
           - new Byte(-128 as byte)
           - new Short(-128 as short)
           - new Int(-128)
           - new Long(-128 as long)
-          - new Float(-128f)
+          - new Float(-128.0f)
 
     - type: Long
       case1:
@@ -35,9 +35,9 @@ cases:
       case2:
           - '127 as short'
           - '127 as long'
-          - '127f'
+          - '127.0f'
           - '127.0'
-          - new Float(127f)
+          - new Float(127.0f)
           - new Double(127.0)
 
     - type: Char
@@ -50,7 +50,7 @@ cases:
           - '1.0'
           - new Byte(1 as byte)
           - new Long(1 as long)
-          - new Float(1f)
+          - new Float(1.0f)
 
     # string equality
     - type: string

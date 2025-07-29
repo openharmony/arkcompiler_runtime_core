@@ -47,9 +47,9 @@ cases:
           let a: [Number, Float, Int]|undefined
       use: |-
           // assignment context, tuple of boxed
-          a = [Number.NaN, 0f, -2147483647]
+          a = [Number.NaN, 0.0f, -2147483647]
           arktest.assertTrue(Number.isNaN(a![0]))
-          arktest.assertEQ(a![1], 0f)
+          arktest.assertEQ(a![1], 0.0f)
           arktest.assertEQ(a![2], -2147483647)
 
     - decl: |-
@@ -98,8 +98,8 @@ cases:
       use: |-
           // assignment context, tuple of tuple of boxed
           a = [[-16777215, 16777215], [-9223372036854775808, 9223372036854775807], [32767]]
-          arktest.assertEQ(a![0][0], -16777215f)
-          arktest.assertEQ(a![0][1], 16777215f)
+          arktest.assertEQ(a![0][0], -16777215.0f)
+          arktest.assertEQ(a![0][1], 16777215.0f)
           arktest.assertEQ(a![1][0], -9223372036854775808)
           arktest.assertEQ(a![1][1], 9223372036854775807)
           arktest.assertEQ(a![2][0], 32767)

@@ -21,7 +21,7 @@ cases:
       case2:
           - '-128 as byte'
           - '-128'
-          - '-128f'
+          - '-128.0f'
           - new Short(-128 as short)
           - new Long(-128 as long)
 
@@ -31,7 +31,7 @@ cases:
           - new Long(127 as long)
       case2:
           - '127 as short'
-          - '127f'
+          - '127.0f'
           - '127.0'
           - c'\u007f'
           - new Byte(127 as byte)
@@ -45,7 +45,7 @@ cases:
           - '0 as byte'
           - '0'
           - '0 as long'
-          - '0f'
+          - '0.0f'
           - new Short(0 as short)
           - new Long(0 as long)
           - new Double(0.0)

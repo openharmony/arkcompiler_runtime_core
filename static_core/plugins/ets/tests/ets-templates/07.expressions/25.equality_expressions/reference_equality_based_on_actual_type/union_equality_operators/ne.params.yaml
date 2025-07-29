@@ -31,7 +31,7 @@ cases:
       case2:
           - '127 as byte'
           - '127'
-          - '127f'
+          - '127.0f'
           - new Byte(127 as byte)
           - new Short(127 as short)
           - new Long(127 as long)

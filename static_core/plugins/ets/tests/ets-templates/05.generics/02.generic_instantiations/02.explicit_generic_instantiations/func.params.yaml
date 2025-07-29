@@ -50,8 +50,8 @@ cases:
         }
       use: |-
         let err = new Error()
-        let z = foo<float, Error>(42f, err)
-        arktest.assertTrue(z[0][0] == 42f && z[0][4] == 42f && z[1][0] == err && z[1][4] == err)
+        let z = foo<float, Error>(42.0f, err)
+        arktest.assertTrue(z[0][0] == 42.0f && z[0][4] == 42.0f && z[1][0] == err && z[1][4] == err)
       # case 3
     - decl: |-
         class A {}

@@ -97,7 +97,7 @@
     method_return_type: float,
     init_object_data: "[0 as byte, 1 as byte, Double.MIN_VALUE.toFloat(), Double.MAX_VALUE.toFloat()]",
     expected_data_type: "FixedArray<float>",
-    expected_test_data: "[0f, 1f, Double.MIN_VALUE.toFloat(), Double.MAX_VALUE.toFloat()]",
+    expected_test_data: "[0.f, 1.f, Double.MIN_VALUE.toFloat(), Double.MAX_VALUE.toFloat()]",
     verify_test_result_function: compareFloatPointValue
   }
 - {
@@ -186,7 +186,7 @@
     method_return_type: float,
     init_object_data: "[0 as byte, 1 as byte, Double.MIN_VALUE.toFloat(), Double.MAX_VALUE.toFloat()]",
     expected_data_type: "FixedArray<float>",
-    expected_test_data: "[0f, 1f, Double.MIN_VALUE.toFloat(), Double.MAX_VALUE.toFloat()]",
+    expected_test_data: "[0.f, 1.f, Double.MIN_VALUE.toFloat(), Double.MAX_VALUE.toFloat()]",
     verify_test_result_function: compareFloatPointValue
   }
 - {

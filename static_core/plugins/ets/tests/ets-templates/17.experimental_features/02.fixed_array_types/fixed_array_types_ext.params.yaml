@@ -196,9 +196,9 @@ cases:
 
   - desc: Create a one-dimensional fixed array with the data type float.
     logic: |-
-      let fixedArr: FixedArray<float> = [1f, 2.5f, 3.7f];
+      let fixedArr: FixedArray<float> = [1.0f, 2.5f, 3.7f];
       arktest.assertEQ(fixedArr.length, 3);
-      arktest.assertEQ(fixedArr[0], 1f);
+      arktest.assertEQ(fixedArr[0], 1.0f);
       arktest.assertEQ(fixedArr[1], 2.5f);
       arktest.assertEQ(fixedArr[2], 3.7f);
 

@@ -55,8 +55,8 @@ cases:
 
     - use: |-
           // spread of float array
-          let a: float[] = [1f, 2f, 3f]
-          arktest.assertTrue(((a: float, ...p: float[]): float => a + reduce(p, (prev: float, next: float) => prev + next, 0f))(42f, ...a) == 48f)
+          let a: float[] = [1.0f, 2.0f, 3.0f]
+          arktest.assertTrue(((a: float, ...p: float[]): float => a + reduce(p, (prev: float, next: float) => prev + next, 0.0f))(42.0f, ...a) == 48.0f)
 
     - use: |-
           // spread of number array
@@ -289,7 +289,7 @@ cases:
     - use: |-
           // spread tuples of all value types
           let r: [byte, short, int, long, float, double, boolean, char, string] =
-              [1 as byte, 2 as short, 3, 4 as long, 5f, 6.0, true, c'Z', "X"]
+              [1 as byte, 2 as short, 3, 4 as long, 5.0f, 6.0, true, c'Z', "X"]
           arktest.assertTrue(((...p: [byte, short, int, long, float, double, boolean, char, string]):
               [byte, short, int, long, float, double, boolean, char, string, int] =>
               [...p, 42])(...r)[9] == 42)

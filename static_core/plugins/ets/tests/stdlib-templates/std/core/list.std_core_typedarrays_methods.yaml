@@ -79,7 +79,7 @@
   cast2primitive: ".toFloat()",
   create: "",
   primitiveSizeBytes: 4,
-  data: "[Float.MIN_VALUE, Float.MAX_VALUE, 0.0f, -0.0f, 1e10f, 3.141592653589793f, 30f, 0.5f]",
+  data: "[Float.MIN_VALUE, Float.MAX_VALUE, 0.0f, -0.0f, 1e10f, 3.141592653589793f, 30.0f, 0.5f]",
   abnormalData: "[Float.MIN_VALUE - 2, Float.MIN_VALUE - 1, Float.MAX_VALUE + 1,  Float.MAX_VALUE + 2]"
 }
 

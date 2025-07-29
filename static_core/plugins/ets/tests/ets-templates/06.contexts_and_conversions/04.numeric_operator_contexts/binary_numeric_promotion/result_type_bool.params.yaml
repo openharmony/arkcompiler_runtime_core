@@ -77,21 +77,21 @@ cases:
   - { type: long, val: 1, rt: Float, rv: new Float(1.0f), op: '>' }
   - { type: long, val: 1, rt: Double, rv: new Double(1.0), op: '>=' }
 
-  - { type: float, val: 1f, rt: byte, rv: 1 as byte, op: '<' }
-  - { type: float, val: 1f, rt: short, rv: 1, op: '<=' }
+  - { type: float, val: 1.0f, rt: byte, rv: 1 as byte, op: '<' }
+  - { type: float, val: 1.0f, rt: short, rv: 1, op: '<=' }
 
-  - { type: float, val: 1f, rt: int, rv: 1, op: '!=' }
-  - { type: float, val: 1f, rt: long, rv: 1, op: '>' }
-  - { type: float, val: 1f, rt: float, rv: 1.0f, op: '>=' }
-  - { type: float, val: 1f, rt: double, rv: 1.0, op: '<' }
+  - { type: float, val: 1.0f, rt: int, rv: 1, op: '!=' }
+  - { type: float, val: 1.0f, rt: long, rv: 1, op: '>' }
+  - { type: float, val: 1.0f, rt: float, rv: 1.0f, op: '>=' }
+  - { type: float, val: 1.0f, rt: double, rv: 1.0, op: '<' }
 
-  - { type: float, val: 1f, rt: Byte, rv: new Byte(1 as byte), op: '<=' }
-  - { type: float, val: 1f, rt: Short, rv: new Short(1), op: '==' }
+  - { type: float, val: 1.0f, rt: Byte, rv: new Byte(1 as byte), op: '<=' }
+  - { type: float, val: 1.0f, rt: Short, rv: new Short(1), op: '==' }
 
-  - { type: float, val: 1f, rt: Int, rv: new Int(1), op: '>' }
-  - { type: float, val: 1f, rt: Long, rv: new Long(1), op: '>=' }
-  - { type: float, val: 1f, rt: Float, rv: new Float(1.0f), op: '<' }
-  - { type: float, val: 1f, rt: Double, rv: new Double(1.0), op: '<=' }
+  - { type: float, val: 1.0f, rt: Int, rv: new Int(1), op: '>' }
+  - { type: float, val: 1.0f, rt: Long, rv: new Long(1), op: '>=' }
+  - { type: float, val: 1.0f, rt: Float, rv: new Float(1.0f), op: '<' }
+  - { type: float, val: 1.0f, rt: Double, rv: new Double(1.0), op: '<=' }
 
   - { type: double, val: 1 as double, rt: byte, rv: 1 as byte, op: '==' }
   - { type: double, val: 1 as double, rt: short, rv: 1, op: '!=' }
