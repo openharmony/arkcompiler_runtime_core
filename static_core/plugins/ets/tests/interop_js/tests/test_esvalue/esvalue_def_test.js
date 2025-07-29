@@ -59,3 +59,11 @@ export let propObj = {
     'property2': 'bbbbb',
     123: 456,
 };
+
+export function throwNull() {
+    throw null;
+}
+
+export function throwUndefined() {
+    throw undefined;
+}

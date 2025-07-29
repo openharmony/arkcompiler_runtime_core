@@ -478,7 +478,7 @@ EtsObject *InteropCtx::CreateETSCoreESError(EtsCoroutine *coro, EtsObject *etsOb
 
     Method::Proto proto(Method::Proto::ShortyVector {panda_file::Type(panda_file::Type::TypeId::VOID),
                                                      panda_file::Type(panda_file::Type::TypeId::REFERENCE)},
-                        Method::Proto::RefTypeVector {utf::Mutf8AsCString(GetJSValueClass()->GetDescriptor())});
+                        Method::Proto::RefTypeVector {utf::Mutf8AsCString(GetObjectClass()->GetDescriptor())});
     auto ctorName = utf::CStringAsMutf8(panda_file_items::CTOR.data());
     auto ctor = GetESErrorClass()->GetDirectMethod(ctorName, proto);
     ASSERT(ctor != nullptr);
@@ -509,8 +509,11 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
     }
     ASSERT(!coro->HasPendingException());
 
-    if (IsNullOrUndefined(ctx->GetJSEnv(), val)) {
-        ctx->ThrowETSError(coro, "interop/js throws undefined/null");
+    auto env = ctx->GetJSEnv();
+    if (IsUndefined(env, val)) {
+        auto etsObj = JSValue::CreateUndefined(coro, ctx)->AsObject();
+        EtsObject *esObj = ctx->CreateETSCoreESError(coro, etsObj);
+        coro->SetException(esObj->GetCoreType());
         return;
     }
 
@@ -519,7 +522,6 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
     //    Where js.UserError will be wrapped into compat/TypeError
     //    NOTE(vpukhov): compat: add intrinsic to obtain JSValue from compat/ instances
 
-    auto env = InteropCtx::Current(coro)->GetJSEnv();
     bool isInstanceof = false;
     NAPI_CHECK_FATAL(napi_is_error(env, val, &isInstanceof));
     auto objRefconv = JSRefConvertResolve(ctx, isInstanceof ? ctx->GetErrorClass() : ctx->GetESErrorClass());
