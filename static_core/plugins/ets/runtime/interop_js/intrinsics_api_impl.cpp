@@ -588,7 +588,7 @@ void SetPropertyWithObject(JSValue *object, JSValue *property, EtsObject *value)
 
     auto jsThis = JSConvertJSValue::WrapWithNullCheck(env, object);
     auto key = JSConvertJSValue::WrapWithNullCheck(env, property);
-    auto jsValue = JSRefConvertResolve(ctx, value->GetClass()->GetRuntimeClass())->Wrap(ctx, value);
+    auto jsValue = JSConvertEtsObject::WrapWithNullCheck(env, value);
 
     {
         ScopedNativeCodeThread nativeScope(coro);
@@ -605,7 +605,7 @@ void SetIndexedPropertyWithObject(JSValue *object, uint32_t index, EtsObject *va
     NapiScope jsHandleScope(env);
 
     auto jsThis = JSConvertJSValue::WrapWithNullCheck(env, object);
-    auto jsValue = JSRefConvertResolve(ctx, value->GetClass()->GetRuntimeClass())->Wrap(ctx, value);
+    auto jsValue = JSConvertEtsObject::WrapWithNullCheck(env, value);
 
     {
         ScopedNativeCodeThread nativeScope(coro);
@@ -622,7 +622,7 @@ void SetNamedPropertyWithObject(JSValue *object, const char *key, EtsObject *val
     NapiScope jsHandleScope(env);
 
     auto jsThis = JSConvertJSValue::WrapWithNullCheck(env, object);
-    auto jsValue = JSRefConvertResolve(ctx, value->GetClass()->GetRuntimeClass())->Wrap(ctx, value);
+    auto jsValue = JSConvertEtsObject::WrapWithNullCheck(env, value);
 
     {
         ScopedNativeCodeThread nativeScope(coro);

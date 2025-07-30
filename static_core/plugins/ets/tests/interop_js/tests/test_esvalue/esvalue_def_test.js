@@ -53,3 +53,9 @@ export class User {
 export let doubledObj = {
     3.2: 'aaa'
 };
+
+export let propObj = {
+    'property1': 'aaaaa',
+    'property2': 'bbbbb',
+    123: 456,
+};
