@@ -162,9 +162,10 @@ export class IndexOutOfBoundsError extends Error {
 /**
  * @class Represents exception that is thrown when provided string index is out of bounds
  */
-export final class StringIndexOutOfBoundsError extends Error {
+export final class StringIndexOutOfBoundsError extends RangeError {
     constructor(message?: String, options?: ErrorOptions) {
-        super("StringIndexOutOfBoundsError", message, options)
+        super(message, options)
+        this.name = "StringIndexOutOfBoundsError"
     }
 }
 
