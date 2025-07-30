@@ -1274,6 +1274,12 @@
 09.classes/09.constructor_declaration/constructor_declaration_with_type_parameters4.ets
 09.classes/09.constructor_declaration/constructor_declaration_with_type_parameters5.ets
 
+#28527
+09.classes/09.constructor_declaration/01.formal_parameters/cons_parameters_gen_35.ets
+
+#28533
+09.classes/09.constructor_declaration/01.formal_parameters/cons_parameters_18.ets
+
 #28160 Cannot initialize function type interface property with rest parameter
 10.interfaces/04.interface_properties/01.required_interface_properties/required_interface_properties_17.ets
 
