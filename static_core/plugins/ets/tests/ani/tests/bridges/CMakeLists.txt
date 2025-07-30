@@ -21,12 +21,17 @@ if(PANDA_TARGET_ARM32 AND PANDA_QEMU_BUILD)
     set(QEMU_ARM32 true)
 endif()
 
-set(J2_files ${CMAKE_CURRENT_SOURCE_DIR}/j2/types_lib.j2
-    ${CMAKE_CURRENT_SOURCE_DIR}/j2/types_ets.j2
-    ${CMAKE_CURRENT_SOURCE_DIR}/j2/arrays_lib.j2
-    ${CMAKE_CURRENT_SOURCE_DIR}/j2/arrays_ets.j2
-    ${CMAKE_CURRENT_SOURCE_DIR}/j2/returns_lib.j2
-    ${CMAKE_CURRENT_SOURCE_DIR}/j2/returns_ets.j2
+set(J2_files
+    ${CMAKE_CURRENT_SOURCE_DIR}/j2/types.cpp.j2
+    ${CMAKE_CURRENT_SOURCE_DIR}/j2/types.ets.j2
+    ${CMAKE_CURRENT_SOURCE_DIR}/j2/arrays.cpp.j2
+    ${CMAKE_CURRENT_SOURCE_DIR}/j2/arrays.ets.j2
+    ${CMAKE_CURRENT_SOURCE_DIR}/j2/returns.cpp.j2
+    ${CMAKE_CURRENT_SOURCE_DIR}/j2/returns.ets.j2
+    ${CMAKE_CURRENT_SOURCE_DIR}/j2/types_ref.ets.j2
+    ${CMAKE_CURRENT_SOURCE_DIR}/j2/types_ref.cpp.j2
+    ${CMAKE_CURRENT_SOURCE_DIR}/j2/returns_ref.ets.j2
+    ${CMAKE_CURRENT_SOURCE_DIR}/j2/returns_ref.cpp.j2
 )
 
 set(Scripts ${CMAKE_CURRENT_SOURCE_DIR}/scripts/gen_test_files.py
@@ -34,7 +39,7 @@ set(Scripts ${CMAKE_CURRENT_SOURCE_DIR}/scripts/gen_test_files.py
 )
 
 set(Prefixes "types" "arrays" "returns")
-set(Types "boolean" "byte" "char" "double" "float" "int" "long" "short" "string")
+set(Types "boolean" "byte" "char" "double" "float" "int" "long" "short" "string" "ref")
 
 set(FILES "")
 foreach(pref IN LISTS Prefixes)
@@ -44,7 +49,7 @@ foreach(pref IN LISTS Prefixes)
                 list(APPEND FILES ${CMAKE_CURRENT_BINARY_DIR}/tests/${pref}_${type}_${i}/${pref}_${type}_${i}.cpp)
                 list(APPEND FILES ${CMAKE_CURRENT_BINARY_DIR}/tests/${pref}_${type}_${i}/${pref}_${type}_${i}.ets)
             endforeach()
-        else()
+        elseif (NOT "${pref}_${type}" STREQUAL "arrays_ref")
             list(APPEND FILES ${CMAKE_CURRENT_BINARY_DIR}/tests/${pref}_${type}/${pref}_${type}.cpp)
             list(APPEND FILES ${CMAKE_CURRENT_BINARY_DIR}/tests/${pref}_${type}/${pref}_${type}.ets)
         endif()
@@ -57,35 +62,35 @@ add_custom_command(
     DEPENDS ${J2_files} ${Scripts}
 )
 
-add_custom_target(ani_tests_birdges_generate_test_files DEPENDS ${FILES})
+add_custom_target(ani_tests_bridges_generate_test_files DEPENDS ${FILES})
 
 set(PANDA_RUN_PREFIX
     LD_LIBRARY_PATH=${ANI_LIB_TESTS}
     ${PANDA_RUN_PREFIX}
 )
 
-add_custom_target(ani_tests_birdges_tests COMMENT "Common target to run ANI bridges tests")
+add_custom_target(ani_tests_bridges_tests COMMENT "Common target to run ANI bridges tests")
 
 function(add_tests pref suff)
     set(test_name ${pref}_${suff})
     panda_add_library(${test_name} SHARED ${CMAKE_CURRENT_BINARY_DIR}/tests/${test_name}/${test_name}.cpp)
-    add_dependencies(${test_name} ani_tests_birdges_generate_test_files)
+    add_dependencies(${test_name} ani_tests_bridges_generate_test_files)
 
-    panda_target_include_directories(${test_name} PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani)
+    panda_target_include_directories(${test_name} PRIVATE ${PLUGIN_SOURCE}/runtime/ani)
     panda_target_compile_options(${test_name} PRIVATE -Wno-attributes)
 
     set_target_properties(${test_name} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${ANI_LIB_TESTS})
     panda_target_link_libraries(${test_name} arkruntime gtest)
 
-    if(NOT TARGET ani_tests_birdges_${pref})
-        add_custom_target(ani_tests_birdges_${pref})
-        add_dependencies(ani_tests_birdges_${pref} ${test_name})
-        add_dependencies(ani_tests_birdges_tests ani_tests_birdges_${pref})
+    if(NOT TARGET ani_tests_bridges_${pref})
+        add_custom_target(ani_tests_bridges_${pref})
+        add_dependencies(ani_tests_bridges_${pref} ${test_name})
+        add_dependencies(ani_tests_bridges_tests ani_tests_bridges_${pref})
     endif()
 
-    # Create targets ani_tests_birdges_${pref}_${suff}-ets-aot, ani_tests_birdges_${pref}_${suff}-ets-jit (etc.)
-    # ani_tests_birdges_${pref} target depends on them
-    add_ets_test(ani_tests_birdges_${pref}
+    # Create targets ani_tests_bridges_${pref}_${suff}-ets-aot, ani_tests_bridges_${pref}_${suff}-ets-jit (etc.)
+    # ani_tests_bridges_${pref} target depends on them
+    add_ets_test(ani_tests_bridges_${pref}
         FILE ${test_name}.ets
         TEST_NAME ${suff}
         MODE "INT" "JIT" "AOT" "LLVMAOT" "JITOSR"
@@ -93,26 +98,26 @@ function(add_tests pref suff)
         TEST_PATH ${CMAKE_CURRENT_BINARY_DIR}/tests/${test_name}/${test_name}.ets
     )
 
-    if(TARGET ani_tests_birdges_${pref}_${suff}-ets-aot)
-        add_dependencies(ani_tests_birdges_${pref}_${suff}-ets-aot ${test_name})
+    if(TARGET ani_tests_bridges_${pref}_${suff}-ets-aot)
+        add_dependencies(ani_tests_bridges_${pref}_${suff}-ets-aot ${test_name})
     endif()
-    if(TARGET ani_tests_birdges_${pref}_${suff}-ets-int-cpp)
-        add_dependencies(ani_tests_birdges_${pref}_${suff}-ets-int-cpp ${test_name})
+    if(TARGET ani_tests_bridges_${pref}_${suff}-ets-int-cpp)
+        add_dependencies(ani_tests_bridges_${pref}_${suff}-ets-int-cpp ${test_name})
     endif()
-    if(TARGET ani_tests_birdges_${pref}_${suff}-ets-int-irtoc)
-        add_dependencies(ani_tests_birdges_${pref}_${suff}-ets-int-irtoc ${test_name})
+    if(TARGET ani_tests_bridges_${pref}_${suff}-ets-int-irtoc)
+        add_dependencies(ani_tests_bridges_${pref}_${suff}-ets-int-irtoc ${test_name})
     endif()
-    if(TARGET ani_tests_birdges_${pref}_${suff}-ets-int-llvmirtoc)
-        add_dependencies(ani_tests_birdges_${pref}_${suff}-ets-int-llvmirtoc ${test_name})
+    if(TARGET ani_tests_bridges_${pref}_${suff}-ets-int-llvmirtoc)
+        add_dependencies(ani_tests_bridges_${pref}_${suff}-ets-int-llvmirtoc ${test_name})
     endif()
-    if(TARGET ani_tests_birdges_${pref}_${suff}-ets-jit)
-        add_dependencies(ani_tests_birdges_${pref}_${suff}-ets-jit ${test_name})
+    if(TARGET ani_tests_bridges_${pref}_${suff}-ets-jit)
+        add_dependencies(ani_tests_bridges_${pref}_${suff}-ets-jit ${test_name})
     endif()
-    if(TARGET ani_tests_birdges_${pref}_${suff}-ets-llvmaot)
-        add_dependencies(ani_tests_birdges_${pref}_${suff}-ets-llvmaot ${test_name})
+    if(TARGET ani_tests_bridges_${pref}_${suff}-ets-llvmaot)
+        add_dependencies(ani_tests_bridges_${pref}_${suff}-ets-llvmaot ${test_name})
     endif()
-    if(TARGET ani_tests_birdges_${pref}_${suff}-ets-jit-osr)
-        add_dependencies(ani_tests_birdges_${pref}_${suff}-ets-jit-osr ${test_name})
+    if(TARGET ani_tests_bridges_${pref}_${suff}-ets-jit-osr)
+        add_dependencies(ani_tests_bridges_${pref}_${suff}-ets-jit-osr ${test_name})
     endif()
 endfunction(add_tests)
 
@@ -124,11 +129,11 @@ if(NOT PANDA_TARGET_ARM64 OR PANDA_32_BIT_MANAGED_POINTER)
                 foreach(i RANGE 1 11)
                     add_tests(${pref}_${type} ${i})
                 endforeach()
-            else()
+            elseif(NOT "${pref}_${type}" STREQUAL "arrays_ref")
                 add_tests(${pref} ${type})
             endif()
         endforeach()
     endforeach()
 endif()
 
-add_dependencies(ani_tests ani_tests_birdges_tests)
+add_dependencies(ani_tests ani_tests_bridges_tests)

@@ -17,21 +17,18 @@
 #include <string>
 #include <iostream>
 #include <cstring>
-#include <cassert>
 #include <vector>
 #include <algorithm>
+#include "utils/logger.h"
 
 [[maybe_unused]] static void GetStdString(ani_env *env, ani_string str, std::string &result)
 {
     ani_size sz {};
-    if (env->String_GetUTF8Size(str, &sz) != ANI_OK) {
-        exit(1);
-    }
+    LOG_IF(env->String_GetUTF8Size(str, &sz) != ANI_OK, FATAL, ANI) << "Failed to get UTF8 string size";
     result.resize(sz + 1);
 
-    if (env->String_GetUTF8SubString(str, 0, sz, result.data(), result.size(), &sz) != ANI_OK) {
-        exit(1);
-    }
+    LOG_IF(env->String_GetUTF8SubString(str, 0, sz, result.data(), result.size(), &sz) != ANI_OK, FATAL, ANI) << "Failed to get UTF8 substring";
+
     result.resize(sz);
 }
 
@@ -44,7 +41,7 @@
 
 {% for name in names -%}
 {% if (name != "Direct" or type != "string") and (name != "Direct" or arm32 == "false" or type != "float") %}
-ani_{{ type }} return{{ name }}{{ Type }}({% if name != "Direct" %}[[maybe_unused]] ani_env *env {% endif %})
+ani_{{ type }} return{{ name }}{{ Type }}({% if name != "Direct" %} [[maybe_unused]] ani_env *env {% endif %})
 {
     {% if type == "boolean" -%}
     ani_boolean ret = ANI_TRUE;
@@ -53,25 +50,25 @@ ani_{{ type }} return{{ name }}{{ Type }}({% if name != "Direct" %}[[maybe_unuse
     {% elif type == "string" -%}
     std::string str("UTF_STRING@#$");
     ani_string ret;
-    env->String_NewUTF8(str.c_str(), str.length(), &ret);
+    LOG_IF(env->String_NewUTF8(str.c_str(), str.length(), &ret) != ANI_OK, FATAL, ANI) << "Failed to create UTF8 string";
     {% else -%}
     auto ret = ani_{{ type }}(1);
     {% endif -%}
     return ret;
 }
 
-void check{{ name }}{{ Type }}({% if name != "Direct" %}[[maybe_unused]] ani_env *env, {% endif %} [[maybe_unused]] ani_{{ type }} value)
+void check{{ name }}{{ Type }}({% if name != "Direct" %}[[maybe_unused]] ani_env *env, {% endif %} ani_{{ type }} value)
 {
     {% if type == "boolean" -%}
-    assert(value == ani_{{ type }}(ANI_TRUE));
+    LOG_IF(value != ani_{{ type }}(ANI_TRUE), FATAL, ANI) << "value != ANI_TRUE";
     {% elif type == "float" or type == "double" -%}
-    assert(Equal(value, 1.1));
+    LOG_IF(!Equal(value, 1.1), FATAL, ANI) << "'" << value << "' not equal to 1.1";
     {% elif type == "string" -%}
     std::string ret {};
     GetStdString(env, value, ret);
-    assert(ret == "UTF_STRING@#$");
+    LOG_IF(ret != "UTF_STRING@#$", FATAL, ANI) << "'" << ret << "' not equal to 'UTF_STRING@#$'";
     {% else -%}
-    assert(value == ani_{{ type }}(1));
+    LOG_IF(value != ani_{{ type }}(1), FATAL, ANI) << "'" << value << "' not equal to 1";
     {% endif -%}
 }
 {% endif %}
@@ -93,23 +90,16 @@ const std::vector<ani_native_function> g_{{ type }}Methods = {
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     ani_env *env;
-    if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
-        std::cerr << "Unsupported ANI_VERSION_1" << std::endl;
-        return ANI_ERROR;
-    }
+    LOG_IF(vm->GetEnv(ANI_VERSION_1, &env) != ANI_OK, FATAL, ANI) << "Unsupported ANI_VERSION_1";
+
     static const char *moduleName = "EtsAniTests";
 
     ani_module module;
 
-    if (ANI_OK != env->FindModule(moduleName, &module)) {
-        std::cerr << "Not found '" << moduleName << "'" << std::endl;
-        return ANI_ERROR;
-    }
+    LOG_IF(env->FindModule(moduleName, &module) != ANI_OK, FATAL, ANI) << "Not found '" << moduleName << "'";
 
     for (auto &m : g_{{ type }}Methods) {
-        if (env->Module_BindNativeFunctions(module, &m, 1) != ANI_OK) {
-            return ANI_ERROR;
-        }
+        LOG_IF(env->Module_BindNativeFunctions(module, &m, 1) != ANI_OK, FATAL, ANI) << "Failed to bind function '" << m.name << "'";
     }
     *result = ANI_VERSION_1;
     return ANI_OK;
