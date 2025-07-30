@@ -158,11 +158,11 @@ export namespace uri {
     }
 
     /**
-    * Returns a set of the unique names of all query parameters.
+    * Obtains all non-repeated keys in the query component of this URI. 
     *
-    * @returns { Array<string> } Return a set of decoded names.
+    * @returns { string[] } Return a set of decoded names.
     */
-    getQueryNames(): Array<string> {
+    getQueryNames(): string[] {
       return this.uriEntry.getQueryNames();
     }
 
@@ -208,9 +208,9 @@ export namespace uri {
     /**
     * Gets the decoded path segments.
     *
-    * @returns { Array<string> } Return decoded path segments, each without a leading or trailing "/".
+    * @returns { string[] } Return decoded path segments, each without a leading or trailing "/".
     */
-    getSegment(): Array<string> {
+    getSegment(): string[] {
       return this.uriEntry.getSegments();
     }
 
@@ -240,10 +240,8 @@ export namespace uri {
     * @returns { string | null }
     */
     get scheme(): string | null {
-      if (this.uriEntry.getScheme() == '') {
-        return null;
-      }
-      return this.uriEntry.getScheme();
+      let s: string = this.uriEntry.getScheme();
+      return s == "" ? null : s;
     }
 
     /**
@@ -399,10 +397,10 @@ export namespace uri {
     /**
      * Sets the protocol part of the URI.
      *
-     * @param { string | null } input
+     * @param { string } input
      */
-    set scheme(input: string | null) {
-      if (input === null || input.length === 0) {
+    set scheme(input: string) {
+      if (input.length === 0) {
         return;
       }
       this.uriEntry.setScheme(input);
@@ -410,133 +408,97 @@ export namespace uri {
 
     /**
      * Sets the path portion of the URI.
-     * @param { string | null } input
+     * @param { string } input
      */
-    set path(input: string | null) {
-      if (input === null) {
-        return;
-      }
+    set path(input: string) {
       this.uriEntry.setPath(encodeURI(input));
     }
 
     /**
      * Sets the decoding scheme-specific part of the URI.
-     * @param { string | null } input
+     * @param { string } input
      * NOTE(zhangziye):#25267 Unable to use different getter/setter signature 
      */
-    set ssp(input: string | null) {
-      if (input === null) {
-        return;
-      }
+    set ssp(input: string) {
       this.uriEntry.setSsp(encodeURI(input))
     }
 
     /**
      * Sets the decoding permission component part of this URI.
-     * @param { string | null } input
+     * @param { string } input
      */
-    set authority(input: string | null) {
-      if (input === null) {
-        return;
-      }
+    set authority(input: string) {
       this.uriEntry.setAuthority(encodeURI(input))
     }
 
     /**
      * Sets Obtains the user information part of the URI.
-     * @param { string | null } input
+     * @param { string } input
      */
-    set userInfo(input: string | null) {
-      if (input === null) {
-        return;
-      }
+    set userInfo(input: string) {
       this.uriEntry.setUserInfo(encodeURIComponent(input));
     }
 
     /**
      * Sets the query portion of the URI
-     * @param { string | null } input
+     * @param { string } input
      */
-    set query(input: string | null) {
-      if (input === null) {
-        return;
-      }
+    set query(input: string) {
       this.uriEntry.setQuery(encodeURIComponent(input));
     }
 
     /**
      * Sets the fragment portion of the URI
-     * @param { string | null } input
+     * @param { string } input
      */
-    set fragment(input: string | null) {
-      if (input === null) {
-        return;
-      }
+    set fragment(input: string) {
       this.uriEntry.setFragment(encodeURIComponent(input));
     }
 
     /**
      * Sets Obtains the encoded user information part of the URI.
-     * @param { string | null } input
+     * @param { string } input
      */
-    set encodedUserInfo(input: string | null) {
-      if (input === null) {
-        return;
-      }
+    set encodedUserInfo(input: string) {
       this.uriEntry.setUserInfo(input);
     }
 
     /**
      * Sets the encoded path portion of the URI.
-     * @param { string | null } input
+     * @param { string } input
      */
-    set encodedPath(input: string | null) {
-      if (input === null) {
-        return;
-      }
+    set encodedPath(input: string) {
       this.uriEntry.setPath(input);
     }
 
     /**
      * Sets the encoded query component from this URI.
-     * @param { string | null } input
+     * @param { string } input
      */
-    set encodedQuery(input: string | null) {
-      if (input === null) {
-        return;
-      }
+    set encodedQuery(input: string) {
       this.uriEntry.setQuery(input);
     }
 
     /**
      * Sets the encoded fragment component from this URI.
-     * @param { string | null } input
+     * @param { string } input
      */
-    set encodedFragment(input: string | null) {
-      if (input === null) {
-        return;
-      }
+    set encodedFragment(input: string) {
       this.uriEntry.setFragment(input);
     }
 
     /**
      * Sets the encoded authority component from this URI.
-     * @param { string | null } input
+     * @param { string } input
      */
-    set encodedAuthority(input: string | null) {
-      if (input === null) {
-        return;
-      }
+    set encodedAuthority(input: string) {
       this.uriEntry.setAuthority(input);
     }
  
     /**
      * NOTE(zhangziye):#25267 Unable to use different getter/setter signature 
      */
-    set encodedSSP(input: string | null) {
-      if (input === null) {
-        return;
-      }
+    set encodedSSP(input: string) {
       this.uriEntry.setSsp(input);
     }
   }
