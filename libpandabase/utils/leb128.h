@@ -64,15 +64,15 @@ inline std::tuple<uint32_t, size_t, bool> DecodeUnsigned<uint32_t>(const uint8_t
     }
 
     uint64_t rev = 0;
-    constexpr size_t PAGE_SIZE = 4096;
-    constexpr size_t PREFETCH_SIZE = 8;
-    constexpr size_t BITS_PER_BYTE = 8;
-    bool read_pass_end_of_page = ((uintptr_t)data & (PAGE_SIZE-1)) > PAGE_SIZE - PREFETCH_SIZE;
+    constexpr size_t LEB128_PAGE_SIZE = 4096;
+    constexpr size_t LEB128_PREFETCH_SIZE = 8;
+    constexpr size_t LEB128_BITS_PER_BYTE = 8;
+    bool read_pass_end_of_page = ((uintptr_t)data & (LEB128_PAGE_SIZE-1)) > LEB128_PAGE_SIZE - LEB128_PREFETCH_SIZE;
     if (UNLIKELY(read_pass_end_of_page)) {
         int i = -1;
         do {
             i++;
-            rev |= (uint64_t)(data[i]) << (BITS_PER_BYTE * i);
+            rev |= (uint64_t)(data[i]) << (LEB128_BITS_PER_BYTE * i);
         } while (data[i] & 0x80);
     } else {
         rev = ((uint64_t *)data)[0];
