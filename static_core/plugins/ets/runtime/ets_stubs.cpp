@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
+#include "libpandabase/utils/utf.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/types/ets_base_enum.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
-#include "types/ets_object.h"
 
 #ifdef PANDA_ETS_INTEROP_JS
 #include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
+#include "plugins/ets/runtime/interop_js/xref_object_operator.h"
 #endif
 
 namespace ark::ets {
@@ -227,11 +229,10 @@ bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
             if (UNLIKELY(!cls2->GetRuntimeClass()->IsXRefClass())) {
                 return false;
             }
-            ASSERT(cls1 == PlatformTypes(coro)->interopJSValue);
-            ASSERT(cls2 == PlatformTypes(coro)->interopJSValue);
-            auto jsObj1 = interop::js::JSValue::FromEtsObject(obj1);
-            auto jsObj2 = interop::js::JSValue::FromEtsObject(obj2);
-            return jsObj1->StrictEquals(jsObj2);
+
+            auto lhsXRefObject = interop::js::XRefObjectOperator::FromEtsObject(obj1);
+            auto rhsXRefObject = interop::js::XRefObjectOperator::FromEtsObject(obj2);
+            return interop::js::XRefObjectOperator::StrictEquals(coro, lhsXRefObject, rhsXRefObject);
         });
     }
     UNREACHABLE();
@@ -282,8 +283,8 @@ EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj)
     }
     if (cls->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
-            ASSERT(cls == PlatformTypes(coro)->interopJSValue);
-            return EtsString::CreateFromMUtf8(JSValue::FromEtsObject(obj)->TypeOf().c_str());
+            auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(obj);
+            return EtsString::CreateFromMUtf8(xRefObjectOperator.TypeOf(coro).c_str());
         });
     }
 
@@ -340,8 +341,8 @@ bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj)
 
     if (cls->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
-            auto jsObj = JSValue::FromEtsObject(obj);
-            return jsObj->IsTrue();
+            auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(obj);
+            return xRefObjectOperator.IsTrue(coro);
         });
     }
     UNREACHABLE();
@@ -351,8 +352,8 @@ bool EtsHasPropertyByName([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisOb
 {
     if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
-            ASSERT(thisObj->GetClass() == PlatformTypes(coro)->interopJSValue);
-            return static_cast<bool>(interop::js::JSRuntimeHasProperty(thisObj, name));
+            auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObj);
+            return xRefObjectOperator.HasProperty(coro, utf::Mutf8AsCString(name->GetDataMUtf8()));
         })
     } else {
         auto namePtr = utf::Mutf8AsCString(name->GetDataMUtf8());
@@ -372,8 +373,8 @@ bool EtsHasPropertyByIdx([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj
 {
     if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
-            ASSERT(thisObj->GetClass() == PlatformTypes(coro)->interopJSValue);
-            return static_cast<bool>(interop::js::JSRuntimeHasElement(thisObj, idx));
+            auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObj);
+            return xRefObjectOperator.HasProperty(coro, idx);
         })
     } else {
         EtsMethod *method = FindGetMethod(coro, thisObj->GetClass());
@@ -393,7 +394,10 @@ bool EtsHasPropertyByIdx([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj
 bool EtsHasOwnPropertyByName([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj, [[maybe_unused]] EtsString *name)
 {
     if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
-        PANDA_ETS_INTEROP_JS_GUARD({ return interop::js::JSRuntimeHasOwnProperty(thisObj, name); })
+        PANDA_ETS_INTEROP_JS_GUARD({
+            auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObj);
+            return xRefObjectOperator.HasProperty(coro, utf::Mutf8AsCString(name->GetDataMUtf8()), true);
+        });
     } else {
         auto fieldName = utf::Mutf8AsCString(name->GetDataMUtf8());
         EtsField *etsFiled = thisObj->GetClass()->GetDeclaredFieldIDByName(fieldName);
@@ -408,14 +412,12 @@ bool EtsHasOwnPropertyByName([[maybe_unused]] EtsCoroutine *coro, EtsObject *thi
     }
 }
 
-bool HandleJSValueHasProperty([[maybe_unused]] EtsObject *thisObj, [[maybe_unused]] EtsObject *property,
-                              [[maybe_unused]] bool isOwn)
+bool HandleJSValueHasProperty([[maybe_unused]] EtsCoroutine *coro, [[maybe_unused]] EtsObject *thisObj,
+                              [[maybe_unused]] EtsObject *property, [[maybe_unused]] bool isOwn)
 {
     PANDA_ETS_INTEROP_JS_GUARD({
-        if (isOwn) {
-            return interop::js::JSRuntimeHasOwnPropertyObject(thisObj, property);
-        }
-        return static_cast<bool>(interop::js::JSRuntimeHasPropertyObject(thisObj, property));
+        auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObj);
+        return xRefObjectOperator.HasProperty(coro, property, isOwn);
     });
 }
 
@@ -460,20 +462,18 @@ bool EtsHasPropertyByValue([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisO
                            [[maybe_unused]] EtsObject *property, bool isOwn)
 {
     if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
-        return HandleJSValueHasProperty(thisObj, property, isOwn);
+        return HandleJSValueHasProperty(coro, thisObj, property, isOwn);
     }
     return HandleStaticHasProperty(coro, thisObj, property, isOwn);
 }
 
-EtsObject *EtsLdbyname([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj,
-                       [[maybe_unused]] panda_file::File::StringData name)
+EtsObject *EtsLdbyname(EtsCoroutine *coro, EtsObject *thisObj, panda_file::File::StringData name)
 {
     auto fieldName = utf::Mutf8AsCString(name.data);
     if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
-            ASSERT(thisObj->GetClass() == PlatformTypes(coro)->interopJSValue);
-            auto thisValue = JSValue::FromEtsObject(thisObj);
-            return interop::js::GetNamedPropertyObject(thisValue, fieldName);
+            auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObj);
+            return xRefObjectOperator.GetProperty(coro, utf::Mutf8AsCString(name.data));
         });
     } else {
         auto fieldIndex = thisObj->GetClass()->GetFieldIndexByName(fieldName);
@@ -501,34 +501,32 @@ EtsObject *EtsLdbyname([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj,
     }
 }
 
-bool EtsStbyname([[maybe_unused]] EtsCoroutine *coro, EtsObject *obj,
-                 [[maybe_unused]] panda_file::File::StringData propName, [[maybe_unused]] EtsObject *value)
+bool EtsStbyname([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj,
+                 [[maybe_unused]] panda_file::File::StringData name, [[maybe_unused]] EtsObject *value)
 {
-    auto fieldName = utf::Mutf8AsCString(propName.data);
-    if (obj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
+    auto fieldName = utf::Mutf8AsCString(name.data);
+    if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
-            ASSERT(obj->GetClass() == PlatformTypes(coro)->interopJSValue);
-            auto thisValue = JSValue::FromEtsObject(obj);
-            interop::js::SetNamedPropertyWithObject(thisValue, fieldName, value);
-            return true;
+            auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObj);
+            return xRefObjectOperator.SetProperty(coro, utf::Mutf8AsCString(name.data), value);
         });
     } else {
         // ASSERTION. LHS is not a JSValue
         // then it is must a static object
-        auto fieldIndex = obj->GetClass()->GetFieldIndexByName(fieldName);
-        EtsField *field = obj->GetClass()->GetFieldByIndex(fieldIndex);
+        auto fieldIndex = thisObj->GetClass()->GetFieldIndexByName(fieldName);
+        EtsField *field = thisObj->GetClass()->GetFieldByIndex(fieldIndex);
         if (field != nullptr) {
-            SetPropertyValue(coro, obj, field, value);
+            SetPropertyValue(coro, thisObj, field, value);
             return true;
         }
 
-        auto setMethod = FindSetterMethod(obj->GetClass(), fieldName);
+        auto setMethod = FindSetterMethod(thisObj->GetClass(), fieldName);
         if (setMethod != nullptr) {
-            std::array args {ark::Value(obj->GetCoreType()), ark::Value(value->GetCoreType())};
+            std::array args {ark::Value(thisObj->GetCoreType()), ark::Value(value->GetCoreType())};
             setMethod->GetPandaMethod()->Invoke(coro, args.data());
             return true;
         }
-        ThrowEtsFieldNotFoundException(coro, obj->GetClass()->GetDescriptor(), fieldName);
+        ThrowEtsFieldNotFoundException(coro, thisObj->GetClass()->GetDescriptor(), fieldName);
         return false;
     }
 }
@@ -537,9 +535,8 @@ EtsObject *EtsLdbyidx(EtsCoroutine *coro, EtsObject *thisObj, [[maybe_unused]] u
 {
     if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
-            ASSERT(thisObj->GetClass() == PlatformTypes(coro)->interopJSValue);
-            auto thisValue = JSValue::FromEtsObject(thisObj);
-            return interop::js::JSValueIndexedGetter<JSConvertEtsObject>(thisValue, index);
+            auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObj);
+            return xRefObjectOperator.GetProperty(coro, index);
         });
     } else {
         auto getMethod = FindGetMethod(coro, thisObj->GetClass());
@@ -552,23 +549,21 @@ EtsObject *EtsLdbyidx(EtsCoroutine *coro, EtsObject *thisObj, [[maybe_unused]] u
     }
 }
 
-bool EtsStbyidx(EtsCoroutine *coro, EtsObject *obj, uint32_t idx, EtsObject *value)
+bool EtsStbyidx(EtsCoroutine *coro, EtsObject *thisObj, uint32_t idx, EtsObject *value)
 {
-    if (obj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
+    if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
-            ASSERT(obj->GetClass() == PlatformTypes(coro)->interopJSValue);
-            auto thisValue = JSValue::FromEtsObject(obj);
-            interop::js::SetIndexedPropertyWithObject(thisValue, idx, value);
-            return true;
+            auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObj);
+            return xRefObjectOperator.SetProperty(coro, idx, value);
         });
     } else {
         // ASSERTION. LHS is not a JSValue
         // then it is must a static object
-        auto setMethod = FindSetMethod(coro, obj->GetClass());
+        auto setMethod = FindSetMethod(coro, thisObj->GetClass());
         if (setMethod == nullptr) {
             return false;
         }
-        std::array args {ark::Value(obj->GetCoreType()), ark::Value(idx), ark::Value(value->GetCoreType())};
+        std::array args {ark::Value(thisObj->GetCoreType()), ark::Value(idx), ark::Value(value->GetCoreType())};
         setMethod->GetPandaMethod()->Invoke(coro, args.data());
         return true;
     }
@@ -579,17 +574,17 @@ EtsObject *EtsLdbyval(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *valObj)
 {
     if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
-            ASSERT(thisObj->GetClass() == PlatformTypes(coro)->interopJSValue);
-            auto thisValue = JSValue::FromEtsObject(thisObj);
+            auto xRefObjectThis = interop::js::XRefObjectOperator::FromEtsObject(thisObj);
             if (valObj->IsStringClass()) {
-                return interop::js::JSValueNamedGetter<JSConvertEtsObject>(thisValue, EtsString::FromEtsObject(valObj));
+                return xRefObjectThis.GetProperty(
+                    coro, utf::Mutf8AsCString(EtsString::FromEtsObject(valObj)->GetDataMUtf8()));
             }
             if (valObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
-                return interop::js::GetPropertyObject(thisValue, JSValue::FromEtsObject(valObj));
+                return xRefObjectThis.GetProperty(coro, valObj);
             }
             auto unboxedValue = GetBoxedNumericValue<int64_t>(PlatformTypes(coro), valObj);
             if (unboxedValue.has_value()) {
-                return interop::js::JSValueIndexedGetter<JSConvertEtsObject>(thisValue, unboxedValue.value());
+                return xRefObjectThis.GetProperty(coro, unboxedValue.value());
             }
             ThrowEtsInvalidKey(coro, valObj->GetClass()->GetDescriptor());
             return nullptr;
@@ -623,25 +618,23 @@ EtsObject *EtsLdbyval(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *valObj)
     }
 }
 
-bool EtsStbyval(EtsCoroutine *coro, EtsObject *obj, EtsObject *key, EtsObject *value)
+bool EtsStbyval(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *key, EtsObject *value)
 {
-    if (obj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
+    if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
-            ASSERT(obj->GetClass() == PlatformTypes(coro)->interopJSValue);
-            auto thisValue = JSValue::FromEtsObject(obj);
+            auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObj);
+
             if (key->IsStringClass()) {
-                interop::js::SetNamedPropertyWithObject(
-                    thisValue, utf::Mutf8AsCString(EtsString::FromEtsObject(key)->GetDataMUtf8()), value);
-                return true;
+                std::string name = utf::Mutf8AsCString(EtsString::FromEtsObject(key)->GetDataMUtf8());
+                return xRefObjectOperator.SetProperty(coro, name, value);
             }
             if (key->GetClass()->GetRuntimeClass()->IsXRefClass()) {
-                interop::js::SetPropertyWithObject(thisValue, JSValue::FromEtsObject(key), value);
-                return true;
+                return xRefObjectOperator.SetProperty(coro, key, value);
             }
             auto unboxedValue = GetBoxedNumericValue<int64_t>(PlatformTypes(coro), key);
             if (unboxedValue.has_value()) {
-                interop::js::SetIndexedPropertyWithObject(thisValue, unboxedValue.value(), value);
-                return true;
+                uint32_t index = unboxedValue.value();
+                return xRefObjectOperator.SetProperty(coro, index, value);
             }
             ThrowEtsInvalidKey(coro, key->GetClass()->GetDescriptor());
             return false;
@@ -652,19 +645,19 @@ bool EtsStbyval(EtsCoroutine *coro, EtsObject *obj, EtsObject *key, EtsObject *v
         if (key->IsStringClass()) {
             auto strObj = EtsString::FromEtsObject(key)->GetDataMUtf8();
             panda_file::File::StringData propName = {static_cast<uint32_t>(utf::MUtf8ToUtf16Size(strObj)), strObj};
-            return EtsStbyname(coro, obj, propName, value);
+            return EtsStbyname(coro, thisObj, propName, value);
         }
         auto unboxedValue = GetBoxedNumericValue<int64_t>(PlatformTypes(coro), key);
         if (unboxedValue.has_value()) {
-            return EtsStbyidx(coro, obj, unboxedValue.value(), value);
+            return EtsStbyidx(coro, thisObj, unboxedValue.value(), value);
         }
         if (value->GetClass()->GetRuntimeClass()->IsXRefClass()) {
             PANDA_ETS_INTEROP_JS_GUARD({
                 auto ctx = interop::js::InteropCtx::Current(coro);
                 auto env = ctx->GetJSEnv();
                 interop::js::ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
-                if (LIKELY(storage->HasReference(obj, env))) {
-                    auto jsThis = storage->GetJsObject(obj, env);
+                if (LIKELY(storage->HasReference(thisObj, env))) {
+                    auto jsThis = storage->GetJsObject(thisObj, env);
                     return interop::js::GetPropertyObject(JSValue::Create(coro, ctx, jsThis),
                                                           JSValue::FromEtsObject(value));
                 }
@@ -679,11 +672,9 @@ bool EtsIsinstance([[maybe_unused]] EtsCoroutine *coro, EtsObject *lhsObj, EtsOb
 {
     if (lhsObj->GetClass()->GetRuntimeClass()->IsXRefClass() && rhsObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
-            ASSERT(interop::js::JSRuntimeIsJSValue(rhsObj));
-            if (interop::js::JSRuntimeIsJSValue(lhsObj) == 0) {
-                return false;
-            }
-            return interop::js::JSRuntimeInstanceOfDynamic(lhsObj, rhsObj) != 0;
+            auto lhsXrefObjOperator = interop::js::XRefObjectOperator::FromEtsObject(lhsObj);
+            auto rhsXrefObjOperator = interop::js::XRefObjectOperator::FromEtsObject(rhsObj);
+            return lhsXrefObjOperator.IsInstanceOf(coro, rhsXrefObjOperator);
         });
     }
     return false;
@@ -693,7 +684,10 @@ EtsObject *EtsCall([[maybe_unused]] EtsCoroutine *coro, EtsObject *funcObj,
                    [[maybe_unused]] Span<VMHandle<ObjectHeader>> args)
 {
     if (funcObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
-        PANDA_ETS_INTEROP_JS_GUARD({ return interop::js::InvokeWithObjectReturn(nullptr, funcObj, args); })
+        PANDA_ETS_INTEROP_JS_GUARD({
+            auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(funcObj);
+            return xRefObjectOperator.Invoke(coro, args);
+        });
     } else {
         if (!funcObj->GetClass()->IsFunction()) {
             ThrowEtsInvalidType(coro, funcObj->GetClass()->GetDescriptor());
@@ -722,19 +716,30 @@ EtsObject *EtsCall([[maybe_unused]] EtsCoroutine *coro, EtsObject *funcObj,
     }
 }
 
-EtsObject *EtsCallThis([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj,
-                       [[maybe_unused]] panda_file::File::StringData name,
+EtsObject *EtsCallThis(EtsCoroutine *coro, EtsObject *thisObj, [[maybe_unused]] panda_file::File::StringData name,
                        [[maybe_unused]] Span<VMHandle<ObjectHeader>> args)
 {
     [[maybe_unused]] auto fieldName = utf::Mutf8AsCString(name.data);
     if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
-            auto thisValue = JSValue::FromEtsObject(thisObj);
-            EtsObject *function = interop::js::GetPropertyObjectByString(thisValue, fieldName);
-            if (!function->GetClass()->GetRuntimeClass()->IsXRefClass()) {
-                return nullptr;
-            }
-            return interop::js::InvokeWithObjectReturn(thisObj, function, args);
+            auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObj);
+            std::string methodName = utf::Mutf8AsCString(name.data);
+            return xRefObjectOperator.InvokeMethod(coro, methodName, args);
+        });
+    } else {
+        // Not supported yet, need rethink for overload case
+        ThrowEtsInvalidType(coro, thisObj->GetClass()->GetDescriptor());
+        return nullptr;
+    }
+}
+
+EtsObject *EtsCallThis(EtsCoroutine *coro, EtsObject *thisObj, [[maybe_unused]] EtsObject *funcObj,
+                       [[maybe_unused]] Span<VMHandle<ObjectHeader>> args)
+{
+    if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
+        PANDA_ETS_INTEROP_JS_GUARD({
+            auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObj);
+            return xRefObjectOperator.InvokeMethod(coro, funcObj, args);
         });
     } else {
         // Not supported yet, need rethink for overload case
@@ -748,8 +753,8 @@ EtsObject *EtsCallNew([[maybe_unused]] EtsCoroutine *coro, EtsObject *ctor,
 {
     if (ctor->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
-            auto initFunction = interop::js::JSValue::FromEtsObject(ctor);
-            return interop::js::CreateObject(initFunction, args);
+            auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(ctor);
+            return xRefObjectOperator.Instantiate(coro, args);
         });
     } else {
         ThrowEtsInvalidType(coro, ctor->GetClass()->GetDescriptor());

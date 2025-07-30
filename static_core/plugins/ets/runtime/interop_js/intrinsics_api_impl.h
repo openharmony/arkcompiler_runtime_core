@@ -20,8 +20,9 @@
 #include "plugins/ets/runtime/interop_js/js_convert.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
-#include "types/ets_object.h"
-#include "types/ets_typeapi_type.h"
+#include "plugins/ets/runtime/types/ets_escompat_array.h"
+#include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/types/ets_typeapi_type.h"
 
 namespace ark::ets::interop::js {
 
@@ -108,6 +109,7 @@ void SetInteropRuntimeLinker(EtsRuntimeLinker *linker);
 EtsBoolean IsJSInteropRef(EtsObject *value);
 EtsLong SerializeHandle(JSValue *value);
 JSValue *DeserializeHandle(EtsLong value);
+EtsObject *JSRuntimeInvokeDynamicFunction(EtsObject *functionObject, EtsObjectArray *args);
 
 template <typename T>
 typename T::cpptype JSValueNamedGetter(JSValue *etsJsValue, EtsString *etsPropName)

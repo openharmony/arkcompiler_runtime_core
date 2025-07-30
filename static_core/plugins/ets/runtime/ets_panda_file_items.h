@@ -207,6 +207,9 @@ static constexpr std::string_view JS_RUNTIME                           = "Lstd/i
 static constexpr std::string_view JS_VALUE                             = "Lstd/interop/js/JSValue;";
 static constexpr std::string_view ES_ERROR                             = "Lstd/interop/js/ESError;";
 
+// Interop function class for invoking dynamic functions
+static constexpr std::string_view INTEROP_DYNAMIC_FUNCTION             = "Lstd/interop/js/DynamicFunction;";
+
 static constexpr std::string_view ARRAY                                = "Lescompat/Array;";
 static constexpr std::string_view ARRAY_AS_LIST_INT                    = "Lstd/containers/containers/ArrayAsListInt;";
 static constexpr std::string_view REG_EXP_EXEC_ARRAY                   = "Lescompat/RegExpExecArray;";

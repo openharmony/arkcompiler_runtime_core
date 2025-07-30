@@ -50,13 +50,13 @@ bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj);
 
 EtsObject *EtsLdbyname(EtsCoroutine *coro, EtsObject *thisObj, panda_file::File::StringData name);
 
-bool EtsStbyname(EtsCoroutine *coro, EtsObject *obj, panda_file::File::StringData propName, EtsObject *value);
+bool EtsStbyname(EtsCoroutine *coro, EtsObject *thisObj, panda_file::File::StringData name, EtsObject *value);
 
 EtsObject *EtsLdbyidx(EtsCoroutine *coro, EtsObject *thisObj, uint32_t index);
 
-bool EtsStbyidx(EtsCoroutine *coro, EtsObject *obj, uint32_t idx, EtsObject *value);
+bool EtsStbyidx(EtsCoroutine *coro, EtsObject *thisObj, uint32_t idx, EtsObject *value);
 
-bool EtsStbyval(EtsCoroutine *coro, EtsObject *obj, EtsObject *key, EtsObject *value);
+bool EtsStbyval(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *key, EtsObject *value);
 
 EtsObject *EtsLdbyval(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *valObj);
 
@@ -66,6 +66,7 @@ EtsObject *EtsCall(EtsCoroutine *coro, EtsObject *funcObj, Span<VMHandle<ObjectH
 
 EtsObject *EtsCallThis(EtsCoroutine *coro, EtsObject *thisObj, panda_file::File::StringData name,
                        Span<VMHandle<ObjectHeader>> args);
+EtsObject *EtsCallThis(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *funcObj, Span<VMHandle<ObjectHeader>> args);
 
 EtsObject *EtsCallObject(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *funcObj, Span<VMHandle<ObjectHeader>> args);
 

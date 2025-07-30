@@ -98,7 +98,7 @@ function(panda_ets_interop_js_gtest TARGET)
     cmake_parse_arguments(
         ARG
         "COMPILATION_JS_WITH_CJS_ON;COMPILATION_WITH_RUNTIMELINKER"
-        "ETS_CONFIG;PACKAGE_NAME"
+        "ETS_CONFIG;PACKAGE_NAME;VERIFY_SOURCES"
         "CPP_SOURCES;ETS_SOURCES;JS_SOURCES;TS_SOURCES;JS_TEST_SOURCE;ASM_SOURCE;LIBRARIES"
         ${ARGN}
     )
@@ -115,6 +115,7 @@ function(panda_ets_interop_js_gtest TARGET)
     if(DEFINED ARG_ETS_SOURCES)
         set(TARGET_GTEST_PACKAGE ${TARGET}_gtest_package)
         panda_ets_package_gtest(${TARGET_GTEST_PACKAGE}
+            VERIFY_SOURCES ${ARG_VERIFY_SOURCES}
             ETS_SOURCES ${ARG_ETS_SOURCES}
             ETS_CONFIG ${ARG_ETS_CONFIG}
         )

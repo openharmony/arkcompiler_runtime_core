@@ -276,6 +276,7 @@ if (ark_ets_interop_js) {
     "runtime/interop_js/timer_module.cpp",
     "runtime/interop_js/xgc/xgc.cpp",
     "runtime/interop_js/xgc/xgc_vm_adaptor.cpp",
+    "runtime/interop_js/xref_object_operator.cpp",
   ]
 
   if (ark_ets_hybrid) {
