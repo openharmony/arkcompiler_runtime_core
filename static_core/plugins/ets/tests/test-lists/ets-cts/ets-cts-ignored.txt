@@ -1070,6 +1070,9 @@
 #23062
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_23.ets
 
+#28526
+07.expressions/11.function_call_expression/fcall_20.ets
+
 #27157
 07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_rte_n_0.ets
 07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_rte_n_1.ets

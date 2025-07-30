@@ -177,3 +177,120 @@ cases:
           arktest.assertEQ(call(foo), 1)
           arktest.assertEQ(call(A.method), 2)
           arktest.assertEQ(call((new A).method), 3)
+
+    - decl: |-
+        let calls: int = 0;
+      use: |-
+        calls = 0;
+        ((): void => { calls++ }) ()
+        arktest.assertEQ(1, calls)
+
+    - decl: |-
+        let calls: int = 0;
+        function foo(s: Object, i: Object, b: Object): Boolean {
+          calls++
+          return s instanceof String &&  i instanceof int && b instanceof Boolean
+        }
+        type LT = (s: Object, i: Object, b: Object) => Boolean
+      use: |-
+        calls = 0;
+        let ll: LT = (s: Object, i: Object, b: Object) => foo(s, i, b)
+        let r = ll("Hello", 42, true)
+        arktest.assertTrue(r)
+        arktest.assertEQ(1, calls)
+
+    - decl: |-
+        let calls: int = 0;
+        function foo(s: Object, i: Object, b: Object): Boolean {
+          calls++
+          return s instanceof String &&  i instanceof int && b instanceof Boolean
+        }
+        type LT = null | (s: Object, i: Object, b: Object) => Boolean
+        function getLambdaOrNull(value: Boolean = false): LT {
+          return value ? (s: Object, i: Object, b: Object) => foo(s, i, b) : null
+        }
+
+      use: |-
+        calls = 0;
+        let ll: LT = getLambdaOrNull()
+        let r: Boolean | undefined = ll?.('Hello', 42, true)
+        arktest.assertEQ(undefined, r)
+        arktest.assertEQ(0, calls)
+        
+        ll = getLambdaOrNull(true)
+        r = ll?.('Hello', 42, true)
+        arktest.assertEQ(true, r)
+        arktest.assertEQ(1, calls)
+
+    - decl: |-
+        let calls: int = 0;
+        function foo(s: Object, i: Object, b: Object): Boolean {
+          calls++
+          return s instanceof String &&  i instanceof int && b instanceof Boolean
+        }
+        type LT = null | (s: Object, i: Object, b: Object) => Boolean
+        function getLambdaOrNull(value: Boolean = false): LT {
+          return value ? (s: Object, i: Object, b: Object) => foo(s, i, b) : null
+        }
+
+      use: |-
+        calls = 0;
+        let r = getLambdaOrNull()?.('Hello', 42, true)
+        arktest.assertEQ(0, calls)
+        r = getLambdaOrNull(true)?.('Hello', 42, true)
+        arktest.assertEQ(1, calls)
+
+    - decl: |-
+        let calls: int = 0;
+      use: |-
+        calls = 0;
+        let value = (() => { return 42 }) ()
+        arktest.assertEQ(42, value)
+
+    - decl: |-
+        let calls: int = 0;
+      use: |-
+        let value = ((p1: int, p2: int) => { return p1 + p2 }) (40, 2)
+        arktest.assertEQ(42, value)
+
+    - decl: |-
+        let calls: int = 0;
+      use: |-
+        let value = ((p1: int, p2: () => int) => { return p1 + p2() }) (40, () => 2)
+        arktest.assertEQ(42, value)
+
+    - decl: |-
+        let calls: int = 0;
+        interface User {
+          name: string;
+          age: number;
+        }
+      use: |-
+        let value = ((): User => { return {name: 'Alice', age: 16 } }) ()
+        arktest.assertEQ('Alice', value.name)
+        arktest.assertTrue(value instanceof User)
+
+    - decl: |-
+        let calls: int = 0;
+        interface User {
+          name: string;
+          age: number;
+        }
+        type LP = () => User
+      use: |-
+        let lp: LP = () => { return {name: 'Alice', age: 16 } }
+        let value = ((up: LP): User => { return up() }) (lp)
+        arktest.assertEQ('Alice', value.name)
+        arktest.assertTrue(value instanceof User)
+
+    - decl: |-
+        let calls: int = 0;
+        interface User {
+          name: string;
+          age: number;
+        }
+        type LP = () => User
+      use: |-
+        let value = ((up: LP): User => { return up() }) () { return {name: 'Alice', age: 16 } }
+        arktest.assertEQ('Alice', value.name)
+        arktest.assertTrue(value instanceof User)
