@@ -18,6 +18,7 @@ import {
     setCompileErrLogs,
     setCompileOutLogs, setDisasmErrLogs, setDisasmOutLogs,
     setErrLogs,
+    setHighlightErrors,
     setOutLogs,
     setRunErrLogs,
     setRunOutLogs,
@@ -75,6 +76,27 @@ export interface IApiResponse {
         verifier?: IVerifierData;
     };
 }
+
+const collectHighlights = (str?: string): { message: string; line: number; column: number }[] => {
+    if (!str) return [];
+    const re =
+      /(?<type>\w+(?:Error|Exception|Warning|Notice|Info|Debug|Fatal)?):\s+(?<msg>[\s\S]*?)\s+\[(?<file>[^\[\]]+?):(?<line>\d+):(?<col>\d+)\]/g;
+  
+    const out: { message: string; line: number; column: number, type: string }[] = [];
+    const arr = [...str.matchAll(re)]
+    for (const m of arr) {
+      const { type, msg, file, line, col } = m.groups as {
+        type: string; msg: string; file: string; line: string; col: string;
+      };
+      out.push({
+        message: `${type}: ${msg.trim()} [${file}:${line}:${col}]`,
+        line: Number(line),
+        column: Number(col),
+        type: type
+      });
+    }
+    return out;
+  };
 
 export const handleResponseLogs = createAsyncThunk(
     'logs/compileLogs',
@@ -184,6 +206,9 @@ export const handleResponseLogs = createAsyncThunk(
                     })
                 ));
             }
+            const outHighlight = collectHighlights(data.output)
+            const errHighlight = collectHighlights(data.error)
+            thunkAPI.dispatch(setHighlightErrors([...outHighlight, ...errHighlight]));
         };
 
         handleLog(

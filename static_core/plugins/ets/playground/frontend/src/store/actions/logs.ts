@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
+    setClearHighLightErrs,
     setCompileErrLogs,
     setCompileOutLogs, setDisasmErrLogs,
     setDisasmOutLogs, setErrLogs,
@@ -30,6 +31,7 @@ export const clearOutLogs = createAsyncThunk(
         thunkAPI.dispatch(setRunOutLogs([]));
         thunkAPI.dispatch(setDisasmOutLogs([]));
         thunkAPI.dispatch(setOutLogs([]));
+        thunkAPI.dispatch(setClearHighLightErrs([]));
     },
 );
 export const clearErrLogs = createAsyncThunk(
@@ -39,5 +41,6 @@ export const clearErrLogs = createAsyncThunk(
         thunkAPI.dispatch(setRunErrLogs([]));
         thunkAPI.dispatch(setDisasmErrLogs([]));
         thunkAPI.dispatch(setErrLogs([]));
+        thunkAPI.dispatch(setClearHighLightErrs([]));
     },
 );

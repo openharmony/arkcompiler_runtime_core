@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import ArkTSEditor from './ArkTSEditor';
 import { Provider } from 'react-redux';
@@ -44,7 +43,8 @@ describe('ArkTSEditor component', () => {
             appState: { theme: 'light', primaryColor: '#e32b49', disasm: false },
             code: { compileLoading: false, runLoading: false, code: '' },
             options: { isLoading: false, options: [], pickedOptions: [] },
-            syntax: { isLoading: false, syntax }
+            syntax: { isLoading: false, syntax },
+            logs: {out: [], err: [], highlightErrors: []}
         });
         store.dispatch = jest.fn();
     });

@@ -23,7 +23,9 @@ import {setCodeAction} from '../../store/actions/code';
 import {AppDispatch} from '../../store';
 import debounce from 'lodash.debounce';
 import * as monaco from 'monaco-editor';
+import { editor as monacoEditor } from 'monaco-editor';
 import { loader } from '@monaco-editor/react';
+import { selectHighlightErrors } from '../../store/selectors/logs';
 
 loader.config({ monaco });
 
@@ -33,6 +35,8 @@ const ArkTSEditor: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const {theme} = useTheme();
     const [syn, setSyn] = useState(backendSyntax);
+    const highlightErrors = useSelector(selectHighlightErrors);
+    const [editorInstance, setEditorInstance] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
 
     useEffect(() => {
         setSyn(backendSyntax);
@@ -81,8 +85,34 @@ const ArkTSEditor: React.FC = () => {
         dispatch(setCodeAction(value));
     }, 300);
 
+    useEffect(() => {
+        if (!monaco || !editorInstance) {
+            return;
+        }
+        const model = editorInstance.getModel();
+        if (!model) {
+            return;
+        }
+        const markers: monaco.editor.IMarkerData[] = highlightErrors.map(err => ({
+            startLineNumber: err.line,
+            startColumn: err.column,
+            endLineNumber: err.line,
+            endColumn: err.column + 1,
+            message: err.message,
+            severity: err.type === 'Warning'
+             ? monaco.MarkerSeverity.Warning
+             : monaco.MarkerSeverity.Error
+        })
+    );
+    
+        monacoEditor.setModelMarkers(model, 'arkts', markers);
+    }, [highlightErrors, monaco, editorInstance]);
+
     return (
         <Editor
+            onMount={(editor): void => {
+                setEditorInstance(editor);
+            }}
             defaultLanguage="arkts"
             defaultValue={'console.log("Hello, ArkTS!");'}
             theme={theme === 'dark' ? 'vs-dark' : 'light'}

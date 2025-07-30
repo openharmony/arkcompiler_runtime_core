@@ -71,3 +71,7 @@ a {
 .monaco-editor .scroll-decoration {
   box-shadow: none !important;
 }
+
+.mosaic-window, .mosaic-preview {
+  overflow: unset !important;
+}
