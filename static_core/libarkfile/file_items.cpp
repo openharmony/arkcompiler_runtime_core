@@ -599,7 +599,9 @@ void BaseMethodItem::SetDependencyMark()
     }
     auto deps = GetIndexDependencies();
     for (auto dep : deps) {
-        dep->SetDependencyMark();
+        if (!dep->GetDependencyMark()) {
+            dep->SetDependencyMark();
+        }
     }
 }
 
@@ -1145,6 +1147,14 @@ size_t ArrayValueItem::GetComponentSize() const
             return 0;
         }
     }
+}
+
+void ArrayValueItem::SetDependencyMark()
+{
+    for (auto &it : items_) {
+        it.SetDependencyMark();
+    }
+    BaseItem::SetDependencyMark();
 }
 
 size_t LiteralItem::CalculateSize() const

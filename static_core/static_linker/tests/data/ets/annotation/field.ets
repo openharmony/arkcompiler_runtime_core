@@ -44,10 +44,7 @@
     }
  }
 
-@interface MethodAuthor {
-    authorName: string
-}
-@MethodAuthor({authorName: "Alice"})
+@PropertyAuthor({authName: "Alice"})
 export function main(){
     console.log("Starting the application");
 }

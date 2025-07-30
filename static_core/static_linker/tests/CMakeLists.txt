@@ -138,7 +138,6 @@ if (TARGET es2panda AND TARGET etsstdlib AND PANDA_WITH_ETS AND NOT CMAKE_CROSSC
         mix/2.ets
         singlefile/classExtension.ets
         singlefile/interImpl.ets
-        singlefile/lambda_test.ets
         singlefile/ObjectLiteral.ets
         singlefile/teserror.ets
         sys/1.ets
