@@ -217,9 +217,9 @@ function testThrowError() {
     let callback = () => {
     let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
     let res: boolean;
-    try {
-        module.getProperty('ErrorFunc').invoke(ESValue.wrapString(ErrorMessage));
-        res = false;
+        try {
+            module.getProperty('ErrorFunc').invoke(ESValue.wrapString(ErrorMessage));
+            res = false;
         } catch (error: Error) {
             res = (error instanceof Error) && (error.message == ErrorMessage);
         }
@@ -237,11 +237,8 @@ function testCustomThrowError() {
             module.getProperty('CustomErrorFunc').invoke(ESValue.wrapString(CustomErrorMessage), ESValue.wrapNumber(CustomErrorCode));
             res = false;
         } catch (e: Error) {
-            let errObj: ESValue = (e as ESError).getValue()
-            let msg: ESValue = errObj.getProperty('message')
-            let code: ESValue = errObj.getProperty('code')
-            res = (e instanceof Error) && (msg.toString() == CustomErrorMessage) &&
-                (code.toNumber() == CustomErrorCode);
+            res = (e instanceof Error) && (e.message == CustomErrorMessage) &&
+                (e.code == CustomErrorCode);
         }
         return res;
     }

@@ -42,19 +42,17 @@ function testThrowError(): boolean {
 }
 
 function testCustomThrowError(): boolean {
-    let res: boolean;
+    let error_catched = false;
     try {
         etsCustomErrorFunc.invoke(CustomErrorMessage, CustomErrorCode);
-        res = false;
     } catch (e: Error) {
-        console.log(e instanceof Error);
-        let errObj: ESValue = (e as ESError).getValue()
-        let msg: ESValue = errObj.getProperty('message')
-        let code: ESValue = errObj.getProperty('code')
-        res = (e instanceof Error) && (msg.toString() === CustomErrorMessage) &&
-              (code.toNumber() === CustomErrorCode);
+        error_catched = true;
+
+        arktest.assertEQ(e instanceof Error, true);
+        arktest.assertEQ(e.message, CustomErrorMessage);
+        arktest.assertEQ(e.code, CustomErrorCode);
     }
-    return res;
+    return error_catched;
 }
 
 function testRangeError(): boolean {

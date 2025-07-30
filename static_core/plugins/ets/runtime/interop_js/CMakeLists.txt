@@ -82,6 +82,7 @@ panda_target_sources(arkruntime_obj PRIVATE
         ${ETS_EXT_SOURCES}/interop_js/timer_helper/interop_timer_helper.cpp
         ${ETS_EXT_SOURCES}/interop_js/xgc/xgc.cpp
         ${ETS_EXT_SOURCES}/interop_js/xgc/xgc_vm_adaptor.cpp
+        ${ETS_EXT_SOURCES}/interop_js/xref_object_operator.cpp
         ${ETS_EXT_SOURCES}/interop_js/code_scopes.cpp
         ${ETS_INTEROP_ARCH_SOURCES}
         ${ETS_INTEROP_HYBRID_SOURCES}
