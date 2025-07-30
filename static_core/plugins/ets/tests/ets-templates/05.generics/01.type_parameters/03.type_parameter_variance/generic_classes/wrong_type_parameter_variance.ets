@@ -16,7 +16,7 @@
 {% for c in cases %}
 
 /*---
-desc: Test the compile-time error occures if type parameters with a varance modifier incorrectly used.
+desc: Test the compile-time error occurs if type parameters with a variance modifier incorrectly used.
 tags: [compile-only, negative]
 ---*/
 

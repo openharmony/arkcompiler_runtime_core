@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+{% for fd in function_decls %}
 
 /*---
-desc: Test the compile-time error occurs if type parameters with a variance modifier incorrectly used.
+desc: Test the compile-time error occurs if a function type parameters have a variance modifier specified.
 tags: [compile-only, negative]
 ---*/
 
-interface I<{{c.param}}> {
-  {{c.expression}}
-}
+{{fd.decl}}
+
+function main(): void {}
 
 {% endfor %}
