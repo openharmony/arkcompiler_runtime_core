@@ -58,6 +58,21 @@ private:
 
     void ZapFreedHandles();
 
+    void FreeExtraNodes(uint32_t nid);
+
+    void ZapFreedHandlesForNode(std::array<T, NODE_BLOCK_SIZE> *node, uint32_t start = 0);
+
+    void UpdateHeapObjectForNode(std::array<coretypes::TaggedType, NODE_BLOCK_SIZE> *node, uint32_t size,
+                                 const GCRootUpdater &gcRootUpdater);
+
+    void VisitGCRootsForNode(std::array<coretypes::TaggedType, NODE_BLOCK_SIZE> *node, uint32_t size,
+                             const ObjectVisitor &cb);
+
+    void UpdateHeapObjectForNode(std::array<ObjectHeader *, NODE_BLOCK_SIZE> *node, uint32_t size,
+                                 const GCRootUpdater &gcRootUpdater);
+
+    void VisitGCRootsForNode(std::array<ObjectHeader *, NODE_BLOCK_SIZE> *node, uint32_t size, const ObjectVisitor &cb);
+
     // TaggedType has been specialized for js, Other types are empty implementation
     void UpdateHeapObject([[maybe_unused]] const GCRootUpdater &gcRootUpdater) {}
 

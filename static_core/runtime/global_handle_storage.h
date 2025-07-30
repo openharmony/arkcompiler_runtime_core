@@ -110,6 +110,10 @@ private:
     {
     }
 
+    inline void UpdateGCRootsInBlock(std::array<Node, GLOBAL_BLOCK_SIZE> *block, size_t size,
+                                     const GCRootUpdater &gcRootUpdater);
+    inline void VisitGCRootsInBlock(std::array<Node, GLOBAL_BLOCK_SIZE> *block, size_t size, const ObjectVisitor &cb);
+
     inline void FreeGlobalNodes()
     {
         for (auto block : *globalNodes_) {
