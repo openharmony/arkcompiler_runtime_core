@@ -403,6 +403,7 @@ typename P::ValueType GetElement(EtsObject *obj, EtsLong i)
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     auto typeClass = obj->GetClass();
+    ASSERT(typeClass != nullptr);
     if (!typeClass->GetComponentType()->IsBoxed()) {
         VMHandle<P> arrHandle(coroutine, obj->GetCoreType());
         ASSERT(arrHandle.GetPtr() != nullptr);
