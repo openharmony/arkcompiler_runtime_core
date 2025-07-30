@@ -29,7 +29,7 @@ type CallbackFnType = (...params: Object[]) => void;
 export namespace stream {
     const DEFAULT_ENCODING = 'utf-8';
     const DEFAULT_HIGH_WATER_MARK = 16 * 1024;
-    const ENCODING_SET: Array<string> = new Array<string>(
+    const ENCODING_SET: string[] = [
         'ascii', 'utf-8', 'UTF-8', 'gbk', 'GBK', 'GB2312', 'gb2312',
         'GB18030', 'gb18030', 'ibm866', 'iso-8859-2', 'iso-8859-3',
         'iso-8859-4', 'iso-8859-5', 'iso-8859-6', 'iso-8859-7',
@@ -38,7 +38,7 @@ export namespace stream {
         'windows-874', 'windows-1250', 'windows-1251', 'windows-1252',
         'windows-1253', 'windows-1254', 'windows-1255', 'windows-1256',
         'windows-1257', 'windows-1258', 'big5', 'euc-jp', 'iso-2022-jp',
-        'shift_jis', 'euc-kr', 'x-mac-cyrillic', 'utf-16be', 'utf-16le');
+        'shift_jis', 'euc-kr', 'x-mac-cyrillic', 'utf-16be', 'utf-16le'];
     const TYPE_ERROR_CODE_ID: number = 401;
     const DO_READ_FUNC_ERROR_CODE_ID: number = 10200038;
 
@@ -112,7 +112,7 @@ export namespace stream {
 
         on(event: string, callback: CallbackFnType): void {
             if (!this.handlers.has(event)) {
-                const funcList = new Array<CallbackFnType>();
+                const funcList: CallbackFnType[] = [];
                 this.handlers.set(event, funcList);
             }
             const funcList = this.handlers.get(event);
@@ -418,7 +418,7 @@ export namespace stream {
             this.callbacks = new Map<string, Array<CallbackFnType>>();
             this.isInitialized = false;
             this.pauseInner = false;
-            this.pipeWritableArrayInner = new Array<ReadablePipeStream>();
+            this.pipeWritableArrayInner = [];
             this.readableObjectModeInner = false;
             this.readableInner = true;
             this.readableHighWatermarkInner = DEFAULT_HIGH_WATER_MARK;
