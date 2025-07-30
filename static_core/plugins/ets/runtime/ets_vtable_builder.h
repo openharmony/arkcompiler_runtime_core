@@ -31,8 +31,6 @@ bool ETSProtoIsOverriddenBy(const ClassLinkerContext *ctx, Method::ProtoId const
                             bool isStrict = false);
 std::optional<RefTypeLink> GetClosestCommonAncestor(ClassLinker *cl, const ClassLinkerContext *ctx, RefTypeLink source,
                                                     RefTypeLink target);
-std::pair<panda_file::File const *, panda_file::File::EntityId> GetClassInfo(const ClassLinkerContext *ctx,
-                                                                             const uint8_t *desc);
 
 class EtsVTableCompatibleSignatures {
 public:

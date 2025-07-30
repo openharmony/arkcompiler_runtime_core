@@ -181,6 +181,9 @@ Class *ClassHelper::GetUnionLUBClass(const uint8_t *descriptor, ClassLinker *cla
     }
     if (ClassHelper::IsUnionDescriptor(descriptor)) {
         const auto *handledDescr = ext->ComputeLUB(classLinkerCtx, descriptor);
+        if (handledDescr == nullptr) {
+            return nullptr;
+        }
         return classLinker->GetClass(handledDescr, true, classLinkerCtx, handler);
     }
     auto dim = ClassHelper::GetDimensionality(descriptor);

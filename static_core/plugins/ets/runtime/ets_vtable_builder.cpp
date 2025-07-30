@@ -129,8 +129,14 @@ static bool UnionIsAssignableToRef(const ClassLinkerContext *ctx, RefTypeLink su
     while (descriptor[idx] != '}') {
         auto typeSp = ClassHelper::GetUnionComponent(&(descriptor[idx]));
         idx += typeSp.Size();
+
         PandaString typeDescCopy(utf::Mutf8AsCString(typeSp.Data()), typeSp.Size());
-        auto [typePf, typeClassId] = GetClassInfo(ctx, utf::CStringAsMutf8(typeDescCopy.c_str()));
+        auto cda = RefTypeLink(ctx, utf::CStringAsMutf8(typeDescCopy.c_str())).CreateCDA();
+        if (!cda.has_value()) {
+            return false;
+        }
+        auto typePf = &cda.value().GetPandaFile();
+        auto typeClassId = cda.value().GetClassId();
         auto type = RefTypeLink(ctx, typePf, typeClassId);
 
         bool isAssignableTo;
@@ -160,7 +166,13 @@ bool UnionIsAssignableToUnion(const ClassLinkerContext *ctx, RefTypeLink sub, Re
         idx += typeSp.Size();
 
         PandaString typeDescCopy(utf::Mutf8AsCString(typeSp.Data()), typeSp.Size());
-        auto [typePf, typeClassId] = GetClassInfo(ctx, utf::CStringAsMutf8(typeDescCopy.c_str()));
+        auto cda = RefTypeLink(ctx, utf::CStringAsMutf8(typeDescCopy.c_str())).CreateCDA();
+        if (!cda.has_value()) {
+            return false;
+        }
+        auto typePf = &cda.value().GetPandaFile();
+        auto typeClassId = cda.value().GetClassId();
+
         auto type = RefTypeLink(ctx, typePf, typeClassId);
         if (UnionIsAssignableToRef<true, true>(ctx, type, super, depth)) {
             return true;
@@ -265,26 +277,14 @@ bool ETSProtoIsOverriddenBy(const ClassLinkerContext *ctx, Method::ProtoId const
     return true;
 }
 
-std::pair<panda_file::File const *, panda_file::File::EntityId> GetClassInfo(const ClassLinkerContext *ctx,
-                                                                             const uint8_t *desc)
-{
-    auto cda = RefTypeLink(ctx, desc).CreateCDA();
-    ASSERT(cda.has_value());
-    return {&cda.value().GetPandaFile(), cda.value().GetClassId()};
-}
-
-panda_file::ClassDataAccessor GetClassDataAccessor(ClassLinkerContext *ctx, const uint8_t *desc)
-{
-    auto cda = RefTypeLink(ctx, desc).CreateCDA();
-    ASSERT(cda.has_value());
-    return cda.value();
-}
-
 std::optional<RefTypeLink> GetClosestCommonAncestor(ClassLinker *cl, const ClassLinkerContext *ctx, RefTypeLink source,
                                                     RefTypeLink target)
 {
-    panda_file::ClassDataAccessor const &targetCDA =
-        GetClassDataAccessor(const_cast<ClassLinkerContext *>(ctx), target.GetDescriptor());
+    auto cda = RefTypeLink(ctx, target.GetDescriptor()).CreateCDA();
+    if (!cda.has_value()) {
+        return std::nullopt;
+    }
+    panda_file::ClassDataAccessor const &targetCDA = cda.value();
 
     if (targetCDA.IsInterface() || targetCDA.GetSuperClassId().GetOffset() == 0) {
         return std::nullopt;
