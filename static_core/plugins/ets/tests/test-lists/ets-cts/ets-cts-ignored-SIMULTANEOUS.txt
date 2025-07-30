@@ -86,8 +86,8 @@
 07.expressions/03.named_reference/qualified_name_1.ets
 07.expressions/03.named_reference/qualified_name_2.ets
 07.expressions/03.named_reference/qualified_name_3.ets
-15.semantic_rules/11.static_initialization/package_initializer/p3/packageP3/init3_1.ets
-15.semantic_rules/11.static_initialization/package_initializer/p3/packageP3/init3_2.ets
+15.semantic_rules/12.static_initialization/package_initializer/p3/packageP3/init3_1.ets
+15.semantic_rules/12.static_initialization/package_initializer/p3/packageP3/init3_2.ets
 
 # 28169
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/04.type_inference_from_initializer/infer2_12.ets
