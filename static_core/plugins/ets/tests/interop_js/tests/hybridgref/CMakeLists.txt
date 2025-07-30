@@ -12,4 +12,4 @@
 # limitations under the License.
 
 add_subdirectory(ets_to_ts)
-#add_subdirectory(ts_to_ets)
+add_subdirectory(ts_to_ets)
