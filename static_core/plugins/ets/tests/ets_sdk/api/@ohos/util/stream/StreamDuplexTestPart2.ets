@@ -26,6 +26,8 @@ function main(): int {
     suite.addTest("Duplex doWritev concatenates chunks correctly", testDuplexDoWritevConcatenatesChunks);
     suite.addTest("Duplex doWritev error handling", testDuplexDoWritevErrorHandling);
     suite.addTest("Duplex doWritev callback multiple calls handling", testDuplexDoWritevCallbackMultipleCalls);
+    suite.addTest("Duplex write undefined", testDuplexWriteUndefined);
+    suite.addTest("Duplex write empty string", testDuplexWriteEmptyString);
 
     return suite.run();
 }
@@ -182,4 +184,18 @@ function testDuplexDoWritevCallbackMultipleCalls() {
     }));
     duplex.write('test', 'utf8', mustCallNoArgs());
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+}
+
+function testDuplexWriteUndefined() {
+    let err: BusinessError = new BusinessError();
+    err.message = 'Parameter error. The type of undefined must be string or UintArray';
+    let duplex = new stream.Duplex();
+    arktest.expectError(() => { duplex.write(); }, err);
+}
+
+function testDuplexWriteEmptyString() {
+    let err: BusinessError = new BusinessError();
+    err.message = 'Cannot read property byteLength of undefined';
+    let duplex = new stream.Duplex();
+    arktest.expectError(() => { duplex.write(""); }, err);
 }
