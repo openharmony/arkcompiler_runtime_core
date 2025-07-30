@@ -60,12 +60,17 @@ public:
 
     static bool IsUndefined(EtsObject *object)
     {
-        return object == nullptr;
+        return object == GetUndefinedObject();
     }
 
     static EtsObject *GetUndefinedObject()
     {
         return nullptr;
+    }
+
+    static EtsReference *GetUndefinedReference()
+    {
+        return ToNativePtr<EtsReference>(REF_UNDEFINED_VALUE);
     }
 
     static ani_status GetUndefinedWRef(ani_wref *result)

@@ -54,3 +54,18 @@ class B extends A {
         return s0 + "_" + s1
     }
 }
+
+native function areReferencesEqual(lhs: Object | null | undefined, rhs: Object | null | undefined): boolean
+
+export function checkNullishValuesEquality(): boolean {
+    return areReferencesEqual(undefined, undefined) &&
+        areReferencesEqual(null, null) &&
+        areReferencesEqual(undefined, null) &&
+        !areReferencesEqual(undefined, "") &&
+        !areReferencesEqual(null, "") &&
+        !areReferencesEqual("abc", "") &&
+        areReferencesEqual("", "") &&
+        !areReferencesEqual(1, "") &&
+        !areReferencesEqual(1, 2) &&
+        areReferencesEqual(1, 1)
+}

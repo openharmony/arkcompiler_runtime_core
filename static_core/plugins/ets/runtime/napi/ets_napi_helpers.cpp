@@ -17,6 +17,7 @@
 
 #include "libarkfile/shorty_iterator.h"
 #include "macros.h"
+#include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/mem/ets_reference.h"
 #include "plugins/ets/runtime/napi/ets_napi.h"
@@ -55,8 +56,15 @@ public:
     template <class T>
     ALWAYS_INLINE typename std::enable_if_t<std::is_same<T, ObjectHeader **>::value, void> Write(T v)
     {
-        arch::ArgWriter<RUNTIME_ARCH>::Write<EtsReference *>(
-            EtsReferenceStorage::NewEtsStackRef(reinterpret_cast<EtsObject **>(v)));
+        EtsReference *ref = nullptr;
+        auto *objPtr = reinterpret_cast<EtsObject **>(v);
+        ASSERT(objPtr != nullptr);
+        if (ani::ManagedCodeAccessor::IsUndefined(*objPtr)) {
+            ref = ani::ManagedCodeAccessor::GetUndefinedReference();
+        } else {
+            ref = EtsReferenceStorage::NewEtsStackRef(objPtr);
+        }
+        arch::ArgWriter<RUNTIME_ARCH>::Write<EtsReference *>(ref);
     }
 
     template <class T>
