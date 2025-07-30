@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-type Contravariant<T> = ESObject;
+type Contravariant<T> = Any;
 export declare let ContravariantExample: Contravariant<Base>;
 export declare let ContravariantChild: Contravariant<Child>;
 declare class Base {

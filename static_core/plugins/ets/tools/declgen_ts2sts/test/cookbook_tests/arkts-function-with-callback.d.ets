@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export type Callback = ESObject;
+export type Callback = Any;
 export declare function foo(cb: Callback): void;
-export type Callback1 = ESObject;
+export type Callback1 = Any;
 export declare let foo1: Callback1;
 export declare class X {
     data: number;

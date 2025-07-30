@@ -19,9 +19,9 @@ export type ReadonlyPerson = Any;
 export type ArrayElementMap<T extends Any[], U> = Any;
 export type NumberArray = Array<Any>;
 export type StringArray = ArrayElementMap<NumberArray, string>;
-export type Book = ESObject;
+export type Book = Any;
 export type SelectedKeys = 'title' | 'author';
-export type PartialBook = ESObject;
+export type PartialBook = Any;
 export type a = Person;
 export declare class Class2<T> {
     a: Person;

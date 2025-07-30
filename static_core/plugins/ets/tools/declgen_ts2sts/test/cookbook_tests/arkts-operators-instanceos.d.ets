@@ -12,4 +12,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export declare function foo(arg: ESObject): boolean;
+export declare function foo(arg: Any): boolean;

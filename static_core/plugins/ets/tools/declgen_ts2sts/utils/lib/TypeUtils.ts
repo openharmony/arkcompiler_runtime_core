@@ -141,7 +141,3 @@ export const FINAL_CLASS: string[] = [
     'WeakRef'
 ];
 export const LIMIT_DECORATOR: string[] = ['Sendable', 'Concurrent'];
-<<<<<<< HEAD
-
-=======
->>>>>>> dbff5c192 (Fix: convert deprecated ESObject to Any)

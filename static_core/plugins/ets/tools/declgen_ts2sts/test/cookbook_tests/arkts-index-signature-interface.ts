@@ -12,16 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export declare let x: Any;
-export declare let a: Any;
-export declare let person: Any;
-export type Point = Any;
-export declare let myPoint: Point;
-export declare function printPerson(person: Any): void;
-export declare let newPerson: Any;
-export type Config = Any;
-export declare let config: Config;
-export type Calculator = Any;
-export declare let myCalculator: Calculator;
-export type User = Any;
-export declare let user: User;
+export interface StringIndexedObject {
+    [key: string]: number;
+    length: number;
+}
+
+export interface NumberIndexedObject {
+    [index: number]: string;
+    [key: string]: string;
+}
+
+export interface MixedIndexObject {
+    [key: string]: string | number;
+    [index: number]: string;
+    version: number;
+    name: string;
+}

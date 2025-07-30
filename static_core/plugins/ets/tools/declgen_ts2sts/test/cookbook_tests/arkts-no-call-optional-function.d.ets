@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export type CallableInterface = ESObject;
-export type OptionalMethodInterface = ESObject;
-export type MixedInterface = ESObject;
-export type CallableInterface1 = ESObject;
-export type OptionalMethodInterface1 = ESObject;
+export type CallableInterface = Any;
+export type OptionalMethodInterface = Any;
+export type MixedInterface = Any;
+export type CallableInterface1 = Any;
+export type OptionalMethodInterface1 = Any;
 export declare interface NormalInterface {
     method2(): void;
 }

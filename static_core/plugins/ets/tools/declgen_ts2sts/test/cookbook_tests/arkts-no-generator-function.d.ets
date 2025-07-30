@@ -12,5 +12,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export declare function foo(): ESObject;
-export declare function bar(arg: ESObject): ESObject;
+export declare function foo(): Any;
+export declare function bar(arg: Any): Any;
