@@ -36,9 +36,9 @@ public:
     // below are interfaces used for serialize
     static Address AllocateNoGC(size_t size);
     static Address AllocateOldOrLargeNoGC(size_t size);
-    static Address AllocatePinNoGC(size_t size);
+    static Address AllocateNonmoveNoGC(size_t size);
     static Address AllocateOldRegion();
-    static Address AllocatePinnedRegion();
+    static Address AllocateNonMovableRegion();
     static Address AllocateLargeRegion(size_t size);
 };
 }  // namespace common
