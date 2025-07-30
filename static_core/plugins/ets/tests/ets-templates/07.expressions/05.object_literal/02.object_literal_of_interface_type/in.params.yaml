@@ -102,16 +102,8 @@ cases:
           arktest.assertTrue( b instanceof B && b.age == 42 && b.name == "John" )
           let a: A = b
           arktest.assertTrue( a instanceof A && a.name == "John" )
-          let c: B = {}
+          let c: B = {age: 0}
           arktest.assertTrue( c instanceof B && c.age == 0 && c.name == undefined )
-
-    - decl: |-
-          interface A {
-              age: number
-          }
-      use: |-
-          let a: A = {}
-          arktest.assertTrue( a instanceof A && a.age == 0 )
 
     - decl: |-
           interface A {}
@@ -127,7 +119,7 @@ cases:
               age: number
           }
       use: |-
-          let v: Object[] = [ {} as A, {} as B, {} ]
+          let v: Object[] = [ {age: 0} as A, {age: 0} as B, {} ]
           arktest.assertTrue( v[0] instanceof A && (v[0] as A).age == 0 )
           arktest.assertTrue( v[1] instanceof B && (v[1] as B).age == 0 )
           arktest.assertTrue( v[2] instanceof Object )

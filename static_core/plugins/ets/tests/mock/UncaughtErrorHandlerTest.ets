@@ -85,7 +85,7 @@ function SimpleConcurrentTest(): void {
         procManager.exit(2);
     });
 
-    const params: LaunchParams = {abortFlag: true};
+    const params: LaunchParams = {abortFlag: true, workerGroupId: 0};
     launch<void, () => void>((): void => {
         first_event.Wait();
         setTimeout(() => {

@@ -676,24 +676,25 @@ export namespace Intl {
         }
 
         public resolvedNumberFormatOptions(): ResolvedNumberFormatOptions {
-            let newOptions: ResolvedNumberFormatOptions = {}
-            newOptions.compactDisplay = this._compactDisplay
-            newOptions.currencySign = this._currencySign
-            newOptions.currency = this._currency
-            newOptions.currencyDisplay = this._currencyDisplay
-            newOptions.locale = this._locale
-            newOptions.maximumFractionDigits = this._maximumFractionDigits
-            newOptions.maximumSignificantDigits = this._maximumSignificantDigits
-            newOptions.minimumFractionDigits = this._minimumFractionDigits
-            newOptions.minimumIntegerDigits = this._minimumIntegerDigits
-            newOptions.minimumSignificantDigits = this._minimumSignificantDigits
-            newOptions.notation = this._notation
-            newOptions.numberingSystem = this._numberingSystem
-            newOptions.signDisplay = this._signDisplay
-            newOptions.style = this._style
-            newOptions.unit = this._unit
-            newOptions.unitDisplay = this._unitDisplay
-            newOptions.useGrouping = this._useGrouping
+            let newOptions: ResolvedNumberFormatOptions = {
+                compactDisplay : this._compactDisplay,
+                currencySign : this._currencySign,
+                currency : this._currency,
+                currencyDisplay : this._currencyDisplay,
+                locale : this._locale,
+                maximumFractionDigits : this._maximumFractionDigits,
+                maximumSignificantDigits : this._maximumSignificantDigits,
+                minimumFractionDigits : this._minimumFractionDigits,
+                minimumIntegerDigits : this._minimumIntegerDigits,
+                minimumSignificantDigits : this._minimumSignificantDigits,
+                notation : this._notation,
+                numberingSystem : this._numberingSystem,
+                signDisplay : this._signDisplay,
+                style : this._style,
+                unit : this._unit,
+                unitDisplay : this._unitDisplay,
+                useGrouping : this._useGrouping
+            }
             return newOptions;
         }
     }

@@ -49,14 +49,6 @@ function testDisplayNamesCreation(): void {
         new TypeError("Options parameter is required")
     );
 
-    // DisplayNames constructor should throw when type is not specified
-    arktest.expectError(
-        (): void => {
-            new Intl.DisplayNames("en", {});
-        },
-        new TypeError("Option 'type' is required")
-    );
-
     const displayNames = new Intl.DisplayNames("en", { type: "language" });
     arktest.assertTrue(displayNames instanceof Intl.DisplayNames);
 
