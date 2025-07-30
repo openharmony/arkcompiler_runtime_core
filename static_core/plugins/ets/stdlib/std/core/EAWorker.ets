@@ -83,6 +83,8 @@ export class EAWorker {
         let mainWorker = mainWorkerObj as EAWorker;
         mainWorker.isMain = true;
         EAWorker.mainWorker = mainWorker;
+        mainWorker.name = "MAIN";
+        EAWorker.workers.set(MAIN_WORKER_ID, mainWorker);
     }
 
     private worker: InternalWorker;
@@ -236,13 +238,12 @@ export class EAWorker {
         if (!this.isStarted.get()) {
             throw new Error("Cannot stop worker before start");
         }
-        if (!this.loopStarted.get()) {
-            return;
-        }
         this.worker.quit();
-        this.loopStarted.set(false);
-        if (EAWorker.workers.get(this.eaworkerNum) != undefined) {
-            EAWorker.workers.delete(this.eaworkerNum);
+        if (this.loopStarted.get()) {
+            this.loopStarted.set(false);
+            if (EAWorker.workers.get(this.eaworkerNum) != undefined) {
+                EAWorker.workers.delete(this.eaworkerNum);
+            }
         }
     }
 
@@ -257,12 +258,11 @@ export class EAWorker {
         if (!this.isStarted.get()) {
             throw new Error("Cannot stop worker before start");
         }
-        if (!this.loopStarted.get()) {
-            return;
-        }
         this.worker.join();
-        EAWorker.workers.delete(this.eaworkerNum);
-        this.loopStarted.set(false);
+        if (this.loopStarted.get()) {
+            EAWorker.workers.delete(this.eaworkerNum);
+            this.loopStarted.set(false);
+        }
     }
 
     /**
@@ -333,34 +333,67 @@ export class EAWorker {
         return res;
     }
 
-    internal getMessage(message: concurrency.Message): concurrency.Message | undefined {
+    internal hasMessages(handler: concurrency.MessageHandler, what: int, object: Object | undefined): boolean {
         if (this.isMain) {
-            return undefined;
+            return false;
         }
-        let res: concurrency.Message | undefined = undefined;
+        let res = false;
         this.messages.forEach((value: MessageStatus, key: concurrency.Message) => {
-            if (key.equals(message) && value != MessageStatus.CANCELLED) {
-                res = key;
+            if (key.getTarget() == handler
+                && key.getWhat() == what
+                && (object == undefined || key.getObject() == object)
+                && value != MessageStatus.CANCELLED) {
+                res = true;
             }
         });
         return res;
     }
 
-    /**
-     * Cancel a message by setting its status to CANCELLED
-     * @param { Message } message The message to cancel
-     * @returns { boolean } True if the message was cancelled, false otherwise
-     */
-    internal cancelMessage(message: concurrency.Message): boolean {
+    internal hasCallbacks(handler: concurrency.MessageHandler, callback: Task): boolean {
         if (this.isMain) {
             return false;
         }
-        let msg = this.getMessage(message);
-        if (msg != undefined) {
-            this.messages.set(msg, MessageStatus.CANCELLED);
-            return true;
+        let res = false;
+        this.messages.forEach((value: MessageStatus, key: concurrency.Message) => {
+            if (key.getTarget() == handler && key.getCallback() == callback) {
+                res = true;
+            }
+        });
+        return res;
+    }
+
+    internal removeCallbacks(handler: concurrency.MessageHandler, callback: Task): boolean {
+        if (this.isMain) {
+            return false;
         }
-        return false;
+        let res = false;
+        this.messages.forEach((value: MessageStatus, key: concurrency.Message) => {
+            if (key.getTarget() == handler
+                && key.getCallback() == callback
+                && value != MessageStatus.CANCELLED) {
+                this.messages.set(key, MessageStatus.CANCELLED);
+                res = true;
+            }
+        });
+        return res;
+    }
+
+    internal removeMessages(handler: concurrency.MessageHandler, what: int, object: Object | undefined): boolean {
+        if (this.isMain) {
+            return false;
+        }
+        let res = false;
+        this.messages.forEach((value: MessageStatus, key: concurrency.Message) => {
+            if (key.getTarget() == handler
+                && key.getWhat() == what 
+                && (object == undefined || key.getObject() == object)
+                && value != MessageStatus.CANCELLED
+                && key.getCallback() == undefined) {
+                this.messages.set(key, MessageStatus.CANCELLED);
+                res = true;
+            }
+        });
+        return res;
     }
 
     /**
@@ -433,12 +466,11 @@ export class EAWorker {
         if (this.isMain) {
             throw new Error("Main worker cannot be stopped");
         }
-        if (!this.loopStarted.get()) {
-            return;
-        }
         this.worker.join();
-        EAWorker.workers.delete(this.eaworkerNum);
-        this.loopStarted.set(false);
+        if (this.loopStarted.get()) {
+            EAWorker.workers.delete(this.eaworkerNum);
+            this.loopStarted.set(false);
+        }
     }
 
     /**
@@ -761,6 +793,7 @@ class StaticWorker implements InternalWorker {
         while (this.tasks.size > 0) {
             this.tasks.poll();
         }
+        this.messages.clear();
         this.join();
     }
 

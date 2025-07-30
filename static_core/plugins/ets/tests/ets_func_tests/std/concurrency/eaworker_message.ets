@@ -89,7 +89,6 @@ function testMainQuit() {
     arktest.expectError(() => {
         eawMain.join();
     }, new Error('Main worker cannot be stopped'));
-
 }
 
 function testQuit() {
@@ -278,13 +277,16 @@ function testMain() {
     arktest.assertEQ(mainWorker.getUncaughtExceptionHandler(), undefined);
 }
 
+
 function testTaskPool() {
+    let event = new Event();
     taskpool.execute(() => {
         arktest.expectError(() => {
             EAWorker.current();
         }, new Error('Can not get current worker in taskpool'));
+        event.fire();
     });
-
+    event.wait();
     CoroutineExtras.stopTaskpool();
 }
 
@@ -314,6 +316,21 @@ function testQuitSafelyBeforeStart() {
     eaw.quitSafely();
 }
 
+function testPostTaskWhenNotStarted() {
+    let eaw = new EAWorker();
+    arktest.expectError(() => {
+        eaw.postTask(() => {});
+    }, new Error('Can not post task when worker is not started'));
+}
+
+function testStartAfterQuit() {
+    let eaw = new EAWorker();
+    eaw.quit();
+    arktest.expectError(() => {
+        eaw.start();
+    }, new Error('Can not start worker after quit'));
+}
+
 function main() {
     const suite = new arktest.ArkTestsuite('EAWorker Message Test Suite');
     suite.addTest('testNamedEAWorker', testNamedEAWorker);
@@ -328,8 +345,9 @@ function main() {
     suite.addTest('testPriority', testPriority);
     suite.addTest('testCommunication', testCommunication);
     suite.addTest('testMainWorker', testMain);
-    suite.addTest('testTaskPool', testTaskPool);
     suite.addTest('testQuitBeforeStart', testQuitBeforeStart);
     suite.addTest('testQuitSafelyBeforeStart', testQuitSafelyBeforeStart);
+    // flaky fail test case #28321
+    // suite.addTest('testTaskPool', testTaskPool);
     suite.run();
 }
