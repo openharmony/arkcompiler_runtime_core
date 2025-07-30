@@ -185,7 +185,7 @@ export final class WeakMap<K extends Object, V> {
         if (keyRefs.length == 1) {
             keyRefs.pop()
         } else {
-            const keyRefPos = keyRefs.indexOf(keyRef)
+            const keyRefPos = keyRefs.indexOf(keyRef).toInt()
             if (keyRefPos == -1) {
                 return
             }

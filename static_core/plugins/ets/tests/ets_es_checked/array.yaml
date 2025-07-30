@@ -33,7 +33,7 @@ sub:
         - |
           (x: number, y: number, i: number): number => x - y + i
         - |
-          (x: number, y: number, i: number, array: Array<number>): number => y - x + i + array[i]
+          (x: number, y: number, i: number, array: Array<number>): number => y - x + i
       reduce_u_lamdbas:
         - |
           (): string => "1234.0"
@@ -44,7 +44,7 @@ sub:
         - |
           (x: string, y: number, i: number): string => x + y + i
         - |
-          (x: string, y: number, i: number, array: Array<number>): string => y + x + i + array[i]
+          (x: string, y: number, i: number, array: Array<number>): string => y + x + i
     sub:
       - method: "concat"
         rest:

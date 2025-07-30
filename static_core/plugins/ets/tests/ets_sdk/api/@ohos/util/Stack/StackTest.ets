@@ -41,7 +41,7 @@ function testStackBasicOperations() {
 
     let count = 0;
     stack.forEach((i, d) => {
-        arktest.assertEQ(d, testArray[i]);
+        arktest.assertEQ(d, testArray[i.toInt()]);
         count++;
     });
     arktest.assertEQ(count, stack.length);

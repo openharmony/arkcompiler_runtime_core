@@ -16,19 +16,19 @@
 //! CHECKER     Verify that array method calls remain non-inlined in a custom class extending Map.
 //! RUN         force_jit: true, options: "--compiler-regex='.*test.*'", entry: "ets_escompat_map_no_inline_array_calls.ETSGLOBAL::test"
 //! METHOD      "ets_escompat_map_no_inline_array_calls.ETSGLOBAL::test"
+//!
 //! PASS_BEFORE "Inline"
-//! INST        /CallVirtual .*MyMap::set/
-//! INST        /CallVirtual .*MyMap::get/
+//! INST        /Call.*MyMap::set/
+//! INST        /Call.*MyMap::get/
+//!
 //! PASS_AFTER  "Inline"
-//! INST        /CallVirtual.*Inlined.*MyMap::set/
-//! INST_NEXT   /CallStatic.*Map::set/
+//! INST        /Call.*MyMap::set/
 //! INST_NEXT   /LoadObject.*MyMap\.arr/
-//! INST_NEXT   /CallVirtual.*Array::\$_set/
-//! INST_NOT    /CallVirtual.*Inlined.*Array::\$_set/
-//! INST        /CallVirtual.*Inlined.*MyMap::get/
+//! INST_NOT    /Call.*Inlined.*Array::\$_set/
+//!
+//! INST        /Call.*MyMap::get/
 //! INST_NEXT   /LoadObject.*MyMap\.arr/
-//! INST_NEXT   /CallVirtual.*Array::\$_get/
-//! INST_NOT    /CallVirtual.*Inlined.*Array::\$_get/
+//! INST_NOT    /Call.*Inlined.*Array::\$_get/
 
 class MyArray<T> extends Array<T> {
     public myArrayGetCounter: number = 0
@@ -36,12 +36,12 @@ class MyArray<T> extends Array<T> {
         super(len);
     }
 
-    override $_get(index: number): T {
+    override $_get(index: int): T {
         this.myArrayGetCounter += 1;
         return super.$_get(index);
     }
 
-    override $_set(index: number, val: T): void {
+    override $_set(index: int, val: T): void {
         return super.$_set(index, val);
     }
 }
@@ -55,12 +55,11 @@ class MyMap<K, V> extends Map<K, V> {
     }
 
     public get(index: number): K {
-        return this.arr.$_get(index)
+        return this.arr.$_get(index.toInt())
     }
 
     public set(index: number, key: K, val: V) {
-        super.set(key, val)
-        this.arr.$_set(index, key);
+        this.arr.$_set(index.toInt(), key);
     }
 }
 

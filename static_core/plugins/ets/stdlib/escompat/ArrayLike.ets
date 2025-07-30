@@ -17,7 +17,7 @@ package escompat;
 
 class ArrayLikeIterator<T> implements IterableIterator<T> {
     private base: ArrayLike<T>
-    private index: number = 0
+    private index: int = 0
 
     constructor(base: ArrayLike<T>) {
         this.base = base
@@ -32,7 +32,7 @@ class ArrayLikeIterator<T> implements IterableIterator<T> {
 }
 
 export interface ArrayLike<T> extends Iterable<T> {
-    $_get(index: number): T;
+    $_get(index: int): T
 
     get length(): int
 
