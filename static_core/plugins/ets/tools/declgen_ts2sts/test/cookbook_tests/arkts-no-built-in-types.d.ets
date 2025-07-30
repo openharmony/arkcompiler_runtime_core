@@ -24,3 +24,15 @@ export declare function printSymbol(value: Any): void;
 export type SymbolAlias = Any;
 export declare const sym6: SymbolAlias;
 export declare const obj3: Any;
+export declare let a: Any;
+export declare let buffers: Any[];
+export declare function processData(buffer: Any): Any;
+export type BufferType = Any;
+export type ComplexType = Any | string;
+export declare class DataProcessor {
+    sharedBuffer: Any;
+}
+export declare interface BufferHolder {
+    buffer: Any;
+    getBuffer(): Any;
+}
