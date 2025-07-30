@@ -15,13 +15,17 @@
 
 /*---
 desc: >-
-    If the interface type I is inferred from the context, then the type of the object literal is
-    an anonymous class implicitly created for interface I.
-tags: [compile-only]
+    If the interface type I is inferred from the context,
+    then type of an object literal is an anonymous class
+    implicitly created for interface I.
 ---*/
 
 interface Person {
     name: string
     age: number
 }
-let b: Person = {name: "Bob", age: 25}
+
+function main(): void {
+    let p: Person = {name: "Bob", age: 25}
+    arktest.assertEQ(p.age, 25)
+}

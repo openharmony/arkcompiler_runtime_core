@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +15,11 @@
 
 /*---
 desc: >-
-    Interface type I must contain properties only.
-    If interface type I contains a method,
-    then a compile-time error occurs
-tags: [compile-only, negative]
+    A compile-time error occurs if an object literal introduces new methods
+tags: [negative, compile-only]
 ---*/
 
-interface I {
-    name: string
-    foo(): void
-}
-
-let i: I = {name: "Bob"} // compile-time error, interface has methods
+class Base1 {}
+interface Base2 {}
+const o1: Base1 = { m() {} } // compile-time error
+const o2: Base2 = { m() {} } // compile-time error

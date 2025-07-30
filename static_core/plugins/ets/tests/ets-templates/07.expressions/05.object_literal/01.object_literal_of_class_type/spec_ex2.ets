@@ -14,14 +14,18 @@
  */
 
 /*---
-desc: If the class type C is inferred from the context, then the type of object literal is C.
+desc: >-
+    A compile-time error occurs
+    if the identifier does not name an accessible member field (see Accessible) in type C
 tags: [compile-only, negative]
 ---*/
 
 class Friend {
     name: string = ""
     private nick: string = ""
-    age: number = 0
+    age: number
+    sex?: "male"|"female"
 }
+
 // compile-time error, nick is private:
-let f: Friend = {name: "aa", age: 55, nick: "bb"}
+let f: Friend = {name: "Alexander", age: 55, nick: "Alex"}

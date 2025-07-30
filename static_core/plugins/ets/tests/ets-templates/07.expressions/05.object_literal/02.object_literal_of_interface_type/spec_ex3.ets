@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +15,18 @@
 
 /*---
 desc: >-
-    Interface type I must contain properties only.
-    If interface type I contains a method,
-    then a compile-time error occurs
-tags: [compile-only, negative]
+    If some interface properties are of an optional type,
+    then such properties can be skipped in an object literal,
+    their values are set to undefined
 ---*/
 
-interface I {
+interface Person {
     name: string
-    foo(): void
+    age: number
+    sex?: "male"|"female"
 }
 
-let i: I = {name: "Bob"} // compile-time error, interface has methods
+function main(): void {
+    let b: Person = {name: "Bob", age: 25}
+    arktest.assertEQ(b.sex, undefined)
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +15,21 @@
 
 /*---
 desc: >-
-    Interface type I must contain properties only.
-    If interface type I contains a method,
-    then a compile-time error occurs
-tags: [compile-only, negative]
+    And object literal method is a complete declaration of a public method
 ---*/
 
-interface I {
-    name: string
-    foo(): void
+
+abstract class Person {
+    name: string = ""
+    abstract set_name(name: string): void
 }
 
-let i: I = {name: "Bob"} // compile-time error, interface has methods
+
+function main(): void {
+    let p: Person = {
+        name: "Bob",
+        set_name(name: string) { this.name = name }
+    }
+    p.set_name("Alice")
+    arktest.assertEQ(p.name, "Alice")
+}

@@ -15,28 +15,33 @@
 
 /*---
 desc: >-
-    A parameterless constructor is executed to produce an instance a of class A. The execution of the object literal
-    completes abruptly if so does the execution of the constructor.
+    A compile-time error occurs if a class has a private or a protected method,
+    and its object literal contains same-name methods with override-compatible signatures
 ---*/
 
-class A {
-    name: string|null = null
-    age: number|null = null
-    constructor() {
-        let x = 0
-        let y = 1
-        let z = y/x
-    }
+class Base {}
+
+class Derived extends Base {}
+
+class aClass {
+    private method (p: Derived): Base { return new Base }
 }
 
-function main(): int {
-  let a: A|null = null;
-  try {
-      a = { name: "Bob", age: 42 } as A
-  } catch (e) {
-      arktest.assertTrue(e instanceof ArithmeticError)
-      arktest.assertEQ(a, null);
-      return 0;
-  }
-  return 1;
+interface I {
+    method (p: Derived): Base
 }
+
+function main(): void {
+
+    const x: aClass = {
+        method () {} // OK as it is not an overriding case
+    }
+    arktest.assertTrue(x instanceof aClass)
+
+    const o: I = {
+        method (p: Base): Derived { return new Derived } // OK
+    }
+    o.method (new Derived) // OK
+
+}
+

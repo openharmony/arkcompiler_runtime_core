@@ -14,16 +14,21 @@
  */
 
 /*---
-desc: If the class type C is inferred from the context, then the type of object literal is C.
-tags: [compile-only]
+desc: If class type C is inferred from the context, then type of an object literal is C.
 ---*/
 
 class Person {
     name: string = ""
     age: number = 0
 }
-function foo(p: Person) { /*some code*/ }
-// ...
-let p: Person = {name: "Bob", age: 25} /* ok, variable type is
-used */
-foo({name: "Alice", age: 18}) // ok, parameter type is used
+
+function foo(p: Person) {
+    arktest.assertEQ(p.age, 18)
+}
+
+function main(): void {
+    let p: Person = {name: "Bob", age: 25}  // ok, variable type is used
+    arktest.assertTrue(p instanceof Person)
+    arktest.assertEQ(p.age, 25)
+    foo({name: "Alice", age: 18}) // ok, parameter type is used
+}

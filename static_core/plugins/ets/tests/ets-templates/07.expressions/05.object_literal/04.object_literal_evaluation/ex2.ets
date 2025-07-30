@@ -34,7 +34,8 @@ function main(): int {
   let a: A|null = null;
   try {
       a = { name: "Bob", age: foo(a) } as A
-  } catch (e: NullPointerError) {
+  } catch (e) {
+      arktest.assertTrue(e instanceof NullPointerError)
       arktest.assertTrue( a == null );
       return 0;
   }

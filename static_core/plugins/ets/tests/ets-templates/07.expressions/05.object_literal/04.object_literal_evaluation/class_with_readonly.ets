@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +15,17 @@
 
 /*---
 desc: >-
-    Interface type I must contain properties only.
-    If interface type I contains a method,
-    then a compile-time error occurs
-tags: [compile-only, negative]
+    Assignment of the value of expression to the corresponding field of x as its initial value.
+    This rule also applies to readonly fields.
 ---*/
 
-interface I {
-    name: string
-    foo(): void
+class X {
+    a: number
+    readonly b: number
 }
 
-let i: I = {name: "Bob"} // compile-time error, interface has methods
+function main(): void {
+    let x: X = { a: 1, b: 2 }
+    arktest.assertEQ(x.a, 1)
+    arktest.assertEQ(x.b, 2)
+}
