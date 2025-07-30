@@ -34,6 +34,8 @@ function runTest() {
     RunTasksTest();
     let RunTasksWithJsCallTest = etsVm.getFunction('Leaworker_test/ETSGLOBAL;', 'RunTasksWithJsCallTest');
     RunTasksWithJsCallTest();
+    let CreateEAWorkerWithoutInterop = etsVm.getFunction('Leaworker_test/ETSGLOBAL;', 'CreateEAWorkerWithoutInterop');
+    CreateEAWorkerWithoutInterop();
 }
 
 runTest();

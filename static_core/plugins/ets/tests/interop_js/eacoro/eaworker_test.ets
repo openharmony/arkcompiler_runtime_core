@@ -87,3 +87,19 @@ function RunTasksWithJsAsyncCallTest(): void {
     let result = p.Await();
     assertEQ(result, 0);
 }
+
+function CreateEAWorkerWithoutInterop(): void {
+    let eaw = new EAWorker();
+    let res = false;
+    try {
+        let callback = () => {
+            let module = JSRuntime.loadModule('./eaworker_test_helpers_js');
+            let val = JSRuntime.getPropertyJSValue(module, 'returnTwo');
+        };
+        eaw.run<void>(callback).Await();
+    } catch(e: Error) {
+        res = true;
+        eaw.join();
+    }
+    assertEQ(res, true);
+}
