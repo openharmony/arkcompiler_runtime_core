@@ -55,6 +55,64 @@ function getLength(value: buffer.Buffer | Uint8Array): number {
     return value.buffer.byteLength;
 }
 
+function stringify(buffer: ArrayBuffer, encoding: string, resolvedStart: int, resolvedEnd: int): string {
+    let val  = '';
+    if (encoding == "utf8" || encoding == "utf-8" || encoding == "ascii") {
+        return ArrayBuffer.stringify(buffer, encoding, resolvedStart, resolvedEnd);
+    } else if (encoding == "utf16le" || encoding == "utf-16le" || encoding == "ucs2" || encoding == "ucs-2") {
+        for (let i = resolvedStart; i + 1 < resolvedEnd; i += 2) { // 2 is array->NextIndex
+            const a: Int = (buffer.at(i) & 0xff);
+            const b: Int = (buffer.at(i + 1) & 0xff);
+            val += String.fromCharCode((b << 8) + a);
+        }
+    } else if (encoding === "binary" || encoding === "latin1") {
+        for (let i = resolvedStart; i < resolvedEnd; i++) {
+            val += String.fromCharCode(+(buffer.at(i) & 0xff));
+        }
+    } else if (encoding == "base64" || encoding == "base64url") {
+        let base64 = '';
+        let encodings = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+        if (encoding == "base64url") {
+            encodings = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
+        }
+        for (let i = resolvedStart; i < resolvedEnd; i += 3) {
+            const byte1 = buffer.at(i) & 0xff;
+            const byte2 = i + 1 < resolvedEnd ? (buffer.at(i + 1) & 0xff) : NaN;
+            const byte3 = i + 2 < resolvedEnd ? (buffer.at(i + 2) & 0xff) : NaN;
+            
+            const enc1 = byte1 >> 2;
+            const enc2 = ((byte1 & 3) << 4) | (byte2 >> 4);
+            const enc3 = ((byte2 & 15) << 2) | (byte3 >> 6);
+            const enc4 = byte3 & 63;
+            
+            if (isNaN(byte2)) {
+                base64 += encodings.charAt(enc1) + encodings.charAt(enc2) + '==';
+            } else if (isNaN(byte3)) {
+                base64 += encodings.charAt(enc1) + encodings.charAt(enc2) + encodings.charAt(enc3) + '=';
+            } else {
+                base64 += encodings.charAt(enc1) + encodings.charAt(enc2) + encodings.charAt(enc3) + encodings.charAt(enc4);
+            }
+        }
+        if (encoding == "base64url") {
+            let lastNonEqualPos = base64.length - 1;
+            while (lastNonEqualPos >= 0 && base64.charAt(lastNonEqualPos) == '=') {
+                lastNonEqualPos--;
+            }
+            if (lastNonEqualPos >= 0) {
+                base64 = base64.substring(0, lastNonEqualPos + 1);
+            }
+        }
+        return base64;
+    } else if (encoding == "hex") {
+        for (let i = resolvedStart, len = resolvedEnd; i < len; i++) {
+            let tmpstr = Number(buffer.at(i) & 0xff).toString(16); // 16 : 16 decimal
+            tmpstr = (tmpstr.length === 1) ? `0${tmpstr}` : tmpstr;
+            val += tmpstr;
+        }
+    }
+    return val;
+}
+
 function fillInPaddingBase64(str: string): string {
     const base64Divisible: int = 4;
     const normalized: String = normalizeBase64Url(str);
@@ -218,13 +276,13 @@ export default namespace buffer {
     /**
      * Creates a new Buffer containing the provided string encoded using the specified encoding.
      *
-     * @param {String} string - The string to encode into the buffer
+     * @param {string} input - The string to encode into the buffer
      * @param {BufferEncoding} [encoding='utf8'] - The character encoding to use
      * @returns {Buffer} A new Buffer containing the encoded string
      */
-    export function from(string: String, encoding?: BufferEncoding): Buffer {
+    export function from(input: string, encoding?: BufferEncoding): Buffer {
         const resolvedEncoding: string = (encoding ?? "utf8");
-        let resolvedString = string;
+        let resolvedString = input;
         if (resolvedEncoding == 'ascii') {
             resolvedString = sanitizeAscii(resolvedString);
         } else if (resolvedEncoding == 'utf8' || resolvedEncoding == 'utf-8') {
@@ -238,7 +296,7 @@ export default namespace buffer {
                 return new Buffer(new ArrayBuffer(0));
             }
         } else if (encoding == 'base64' || encoding == 'base64url') {
-            resolvedString = fillInPaddingBase64(string);
+            resolvedString = fillInPaddingBase64(input);
         }
         return new Buffer(ArrayBuffer.from(resolvedString, resolvedEncoding));
     }
@@ -304,7 +362,7 @@ export default namespace buffer {
      * Allocates a new Buffer for a fixed size bytes. If fill is undefined, the Buffer will be zero-filled.
      *
      * @param { int } size - The desired length of the new Buffer
-     * @param { string | Buffer | Uint8Array | double | long } [fill] - A value to pre-fill the new Buffer with
+     * @param { string | Buffer | Uint8Array | int | double | long } [fill] - A value to pre-fill the new Buffer with
      * @param { BufferEncoding } [encoding] - If `fill` is a string, this is its encoding
      * @returns { Buffer } Return a new allocated Buffer
      * @throws { BusinessError } 401 - Parameter error. Possible causes:
@@ -313,7 +371,7 @@ export default namespace buffer {
      */
     export function alloc(
         size: int,
-        fill?: string | Buffer | Uint8Array | double | long,
+        fill?: string | Buffer | Uint8Array | int | double | long,
         encoding?: BufferEncoding
     ): Buffer
     {
@@ -478,20 +536,25 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
     export function transcode(source: Buffer | Uint8Array, fromEnc: string, toEnc: string): Buffer {
         let resolvedSource = getArrayBufferFrom(source);
         let sourceBytesLength = resolvedSource.byteLength.toInt();
+        let str = '';
+        if (source instanceof Uint8Array) {
+            str = source.toString();
+        } else if (source instanceof Buffer) {
+            str = stringify(resolvedSource, fromEnc, 0, sourceBytesLength);
+        }
         if (toEnc == 'ascii') {
-            const sourceStr = ArrayBuffer.stringify(resolvedSource, fromEnc, 0, sourceBytesLength);
-            let asciiSource = new StringBuilder("")
-            for (let i = 0; i < sourceStr.length; ++i) {
-                if (sourceStr.charAt(i).toInt() <= 128) {
-                    asciiSource.append(sourceStr.charAt(i))
+            let newStr = "";
+            for (let i = 0; i < str.length; ++i) {
+                if (str.charAt(i).toInt() <= 128) {
+                    newStr += str.charAt(i);
                 } else {
-                    asciiSource.append('?')
+                    newStr += '?';
                 }
             }
-            resolvedSource = ArrayBuffer.from(asciiSource.toString(), fromEnc)
-            sourceBytesLength = resolvedSource.byteLength.toInt();
+            str = newStr;
+        } else if (toEnc == 'base64') {
+            str = str.replace("/[\r\n]/g", '');
         }
-        const str = ArrayBuffer.stringify(resolvedSource, toEnc, 0, sourceBytesLength);
         const newBytes = ArrayBuffer.from(str, toEnc);
         return new Buffer(newBytes);
     }
@@ -611,18 +674,18 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
             let resolvedEncoding: string = encoding ?? "utf8";
             let resolvedStart: int = 0;
             let resolvedEnd: int = (this.length).toInt();
-            if (start && !isNaN(start!) && start! > 0) {
-                resolvedStart = start.toInt();
+            if (start !== undefined && !isNaN(start!) && start! > 0) {
+                resolvedStart = start!.toInt();
             }
-            if (end && !isNaN(end!)) {
-                resolvedEnd = end.toInt();
+            if (end !== undefined && !isNaN(end!)) {
+                resolvedEnd = end!.toInt();
             }
             let bufLength = this.length;
             if (resolvedStart >= bufLength || resolvedStart > resolvedEnd) {
                  return '';
             }
-            resolvedEnd = resolvedEnd > bufLength ? bufLength.toInt() : resolvedEnd
-            return ArrayBuffer.stringify(this.buffer, resolvedEncoding, resolvedStart, resolvedEnd);
+            resolvedEnd = resolvedEnd > bufLength ? bufLength.toInt() : resolvedEnd;
+            return stringify(this.buffer, resolvedEncoding, resolvedStart, resolvedEnd);
         }
 
         /**
@@ -638,26 +701,26 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         /**
          * Checks if the buffer includes the given value.
          *
-         * @param {string | double | long | Buffer | Uint8Array} value - The value to search for
+         * @param {string | int | double | long | Buffer | Uint8Array} value - The value to search for
          * @param {int} [byteOffset=0] - The byte position to start searching from
          * @param {BufferEncoding} [encoding='utf8'] - Encoding to use if `value` is a string
          * @returns {boolean} `true` if the value is found, otherwise `false`
          */
-        public includes(value: string | double | long | Buffer | Uint8Array, byteOffset?: int, encoding?: BufferEncoding): boolean {
+        public includes(value: string | int | double | long | Buffer | Uint8Array, byteOffset?: int, encoding?: BufferEncoding): boolean {
             return this.indexOf(value, byteOffset ?? 0, encoding ?? "utf8") != -1;
         }
 
         /**
          * Returns the first index where `value` is found in the buffer.
          *
-         * @param {string | double | long | Buffer | Uint8Array} value - The value to search for
+         * @param {string | int | double | long | Buffer | Uint8Array} value - The value to search for
          * @param {int} [byteOffset=0] - The byte position to start searching from.
          *   - If negative, it is counted from the end of the buffer (`len + byteOffset`).
          *   - If out of bounds (`>= buffer length`), returns `-1`.
          * @param {BufferEncoding} [encoding='utf8'] - Encoding to use if `value` is a string
          * @returns {int} The index of the first occurrence of `value`, or -1 if not found
          */
-        public indexOf(value: string | double | long | Buffer | Uint8Array, byteOffset?: int, encoding?: BufferEncoding): int {
+        public indexOf(value: string | int | double | long | Buffer | Uint8Array, byteOffset?: int, encoding?: BufferEncoding): int {
             const searchBuffer = this.normalizeValueToBuffer(value, encoding ?? "utf8");
             const len: int = this.length;
             const searchLen = searchBuffer.length;
@@ -677,14 +740,14 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         /**
          * Returns the last index where `value` is found in the buffer.
          *
-         * @param {string | double | long | Buffer | Uint8Array} value - The value to search for
+         * @param {string | int | double | long | Buffer | Uint8Array} value - The value to search for
          * @param {int} [byteOffset=buffer length] - The byte position to start searching from (backwards).
          *   - If negative, it is counted from the end of the buffer (`len + byteOffset`).
          *   - If out of bounds (`>= buffer length`), it is clamped to `buffer length - searchLen`.
          * @param {BufferEncoding} [encoding='utf8'] - Encoding to use if `value` is a string
          * @returns {int} The index of the last occurrence of `value`, or -1 if not found
          */
-        public lastIndexOf(value: string | double | long | Buffer | Uint8Array, byteOffset?: int , encoding?: BufferEncoding): int {
+        public lastIndexOf(value: string | int | double | long | Buffer | Uint8Array, byteOffset?: int , encoding?: BufferEncoding): int {
             const searchBuffer = this.normalizeValueToBuffer(value, encoding ?? "utf8");
             const searchLen = searchBuffer.length;
             const len = this.length;
@@ -706,11 +769,14 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
             return -1;
         }
 
-        private normalizeValueToBuffer(value: string | double | long | Buffer | Uint8Array, encoding: BufferEncoding): Buffer {
+        private normalizeValueToBuffer(value: string | int | double | long | Buffer | Uint8Array, encoding: BufferEncoding): Buffer {
             if (value instanceof string) {
                 return buffer.from(value, encoding ?? "utf8");
             } else if (value instanceof Double) {
                 const arr: double[] = [value];
+                return buffer.from(arr);
+            } else if (value instanceof int) {
+                const arr: double[] = [value.toDouble()];
                 return buffer.from(arr);
             } else if (value instanceof Long) {
                 const arr: double[] = [value.toDouble()];
@@ -839,7 +905,7 @@ Received value is: ${resolvedSourceEnd}`)
         /**
          * Fills buf with the specified value. If the offset and end are not given, the entire buf will be filled.
          *
-         * @param { string | Buffer | Uint8Array | double | long } value - The value with which to fill buf
+         * @param { string | Buffer | Uint8Array | int | double | long } value - The value with which to fill buf
          * @param { int } [offset] - Number of bytes to skip before starting to fill buf
          * @param { int } [end] - Where to stop filling buf (not inclusive)
          * @param { BufferEncoding } [encoding] - The encoding for value if value is a string
@@ -850,7 +916,7 @@ Received value is: ${resolvedSourceEnd}`)
          * 2. Parameter verification failed.
          */
         public fill(
-            value: string | Buffer | Uint8Array | double | long,
+            value: string | Buffer | Uint8Array | int | double | long,
             offset: int = 0,
             end?: int,
             encoding?: BufferEncoding
@@ -872,6 +938,8 @@ Received value is: ${resolvedEnd}`)
                     return this.fill(0 as long, offset, end, encoding);
                 }
                 klass = "string";
+            } else if (value instanceof int) {
+                klass = "int";
             } else if (value instanceof long) {
                 klass = "long";
             } else if (value instanceof double) {
@@ -926,6 +994,12 @@ Received value is: ${resolvedEnd}`)
 
                     for (let j: int = 0; pos < resolvedEndInt; j++, pos++) {
                         this.buffer.set(pos, buff[j].toByte());
+                    }
+                    return this;
+                case "int":
+                    let asInt: int = value as int;
+                    for (let i: int = offsetInt; i < resolvedEndInt; i++) {
+                        this.buffer.set(i, asInt.toByte());
                     }
                     return this;
                 case "long":

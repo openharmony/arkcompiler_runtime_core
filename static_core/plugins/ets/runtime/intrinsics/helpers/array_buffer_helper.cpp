@@ -42,15 +42,17 @@ constexpr size_t K_BITS_PER_BYTE = 8;
 constexpr uint32_t K_BASE64_MASK = 0x3F;  // Mask for 6 bits (Base64 character).
 
 // Bit shift constants for Base64 encoding/decoding.
-constexpr size_t K_FIRST_CHAR_SHIFT = 2;
-constexpr size_t K_SECOND_CHAR_SHIFT = 4;
-constexpr size_t K_THIRD_CHAR_SHIFT = 6;
 constexpr size_t K_HIGH_BYTE_SHIFT = 16;
 constexpr size_t K_MID_BYTE_SHIFT = 12;
 constexpr size_t K_LOW_BYTE_SHIFT = 6;
 constexpr size_t K_LAST_CHAR_SHIFT = 18;
 
-constexpr unsigned int K_TWO_BIT_MASK = 0x3;
+constexpr uint32_t LOWER_8_BITS_MASK = 0x00FFU;
+constexpr uint8_t LOWER_6_BITS_MASK = 0x3FU;
+constexpr uint8_t LOWER_4_BITS_MASK = 0x0FU;
+constexpr uint8_t LOWER_2_BITS_MASK = 0x03U;
+constexpr uint8_t MIDDLE_4_BITS_MASK = 0x3CU;
+constexpr uint8_t UPPER_2_BITS_MASK = 0x30U;
 
 constexpr char K_PADDING_CHAR = '=';
 
@@ -94,50 +96,70 @@ constexpr auto K_DECODING_TABLE = BuildDecodingTable();
     return validChars && validPadding;
 }
 
+static bool IsBase64Char(unsigned char c)
+{
+    return ((isalnum(c) != 0) || (c == '+') || (c == '/') || (c == '-') || (c == '_'));
+}
+
 [[nodiscard]] PandaString Decode(std::string_view encodedData)
 {
-    if (encodedData.empty()) {
-        return {};
-    }
-    const size_t kPaddingOffset = 2;
-    size_t pad = 0;
-    if (!encodedData.empty() && encodedData.back() == K_PADDING_CHAR) {
-        ++pad;
-    }
-    if (encodedData.size() >= kPaddingOffset && encodedData[encodedData.size() - kPaddingOffset] == K_PADDING_CHAR) {
-        ++pad;
-    }
-
+    size_t len = encodedData.size();
+    unsigned int index = 0;
+    unsigned int cursor = 0;
+    // 4 : means charArray4
+    std::array<unsigned char, 4> charArray4 = {0};  // an array to stage a group of indexes for encoded string
+    // 3 : means charArray4
+    std::array<unsigned char, 3> charArray3 = {0};  // an array to stage a set of original string
     PandaString decoded;
-    decoded.reserve((encodedData.size() / K_BASE64_BLOCK_SIZE) * K_BINARY_BLOCK_SIZE - pad);
-
-    const int kSecondCharOffset = 2;
-    const int kThirdCharOffset = 3;
-
-    for (size_t i = 0; i < encodedData.size(); i += K_BASE64_BLOCK_SIZE) {
-        int decodedChar0 = K_DECODING_TABLE[static_cast<unsigned char>(encodedData[i])];
-        int decodedChar1 = K_DECODING_TABLE[static_cast<unsigned char>(encodedData[i + 1])];
-        int decodedChar2 = (encodedData[i + kSecondCharOffset] == K_PADDING_CHAR)
-                               ? 0
-                               : K_DECODING_TABLE[static_cast<unsigned char>(encodedData[i + kSecondCharOffset])];
-        int decodedChar3 = (encodedData[i + kThirdCharOffset] == K_PADDING_CHAR)
-                               ? 0
-                               : K_DECODING_TABLE[static_cast<unsigned char>(encodedData[i + kThirdCharOffset])];
-
-        auto unsignedChar0 = static_cast<unsigned int>(decodedChar0);
-        auto unsignedChar1 = static_cast<unsigned int>(decodedChar1);
-        auto unsignedChar2 = static_cast<unsigned int>(decodedChar2);
-        auto unsignedChar3 = static_cast<unsigned int>(decodedChar3);
-
-        decoded.push_back(
-            static_cast<char>((unsignedChar0 << K_FIRST_CHAR_SHIFT) | (unsignedChar1 >> K_SECOND_CHAR_SHIFT)));
-        if (encodedData[i + kSecondCharOffset] != K_PADDING_CHAR) {
-            decoded.push_back(static_cast<char>(((unsignedChar1 & K_BASE64_MASK) << K_SECOND_CHAR_SHIFT) |
-                                                (unsignedChar2 >> K_FIRST_CHAR_SHIFT)));
+    // K_DECODING_TABLE
+    while ((encodedData[cursor] != '=') && IsBase64Char(encodedData[cursor])) {
+        // stage a 4-byte string to charArray4
+        charArray4[index] = encodedData[cursor];
+        index++;
+        cursor++;
+        if (index == 4) {  // 4 : after 4 chars is assigned to charArray4
+            // 4 : fill data into charArray4
+            for (index = 0; index < 4; index++) {
+                charArray4[index] = static_cast<uint32_t>(K_DECODING_TABLE[charArray4[index]]) & LOWER_8_BITS_MASK;
+            }
+            // get the last six bits of the first byte of charArray4 and the first valid
+            // 2 : 4 : two bits(except two higer bits) of the second byte, combine them to a new byte
+            charArray3[0] = (charArray4[0] << 2U) + (static_cast<uint8_t>(charArray4[1] & UPPER_2_BITS_MASK) >> 4U);
+            // get the last four bits of the second byte of charArray4 and the first valid
+            // 4 : 2 : four bits(except two higer bits) of the third byte, combine them to a new byte
+            charArray3[1] = (static_cast<uint8_t>(charArray4[1] & LOWER_4_BITS_MASK) << 4U) +
+                            // 4 : 2 : four bits(except two higer bits) of the third byte, combine them to a new byte
+                            (static_cast<uint8_t>(charArray4[2] & MIDDLE_4_BITS_MASK) >> 2U);
+            // get the last two bits of the third byte of charArray4 and the forth byte,
+            // 2 : 3 : 6 : combine them to a new byte
+            charArray3[2] = (static_cast<uint8_t>(charArray4[2] & LOWER_2_BITS_MASK) << 6U) + charArray4[3];
+            // 3 : assigns the decoded string to the return value
+            for (index = 0; index < 3; index++) {
+                decoded += charArray3[index];
+            }
+            index = 0;
         }
-        if (encodedData[i + kThirdCharOffset] != K_PADDING_CHAR) {
-            decoded.push_back(
-                static_cast<char>(((unsignedChar2 & K_TWO_BIT_MASK) << K_THIRD_CHAR_SHIFT) | unsignedChar3));
+        if (cursor > len - 1) {
+            break;
+        }
+    }
+
+    if (index != 0) {
+        // fill data into charArray4
+        for (unsigned int i = 0; i < index; i++) {
+            charArray4[i] = static_cast<uint32_t>(K_DECODING_TABLE[charArray4[i]]) & LOWER_8_BITS_MASK;
+        }
+        // get the last six bits of the first byte of charArray4 and the first valid
+        // 2 : 4 : two bits(except two higer bits) of the second byte, combine them to a new byte
+        charArray3[0] = (charArray4[0] << 2U) + (static_cast<uint8_t>(charArray4[1] & UPPER_2_BITS_MASK) >> 4U);
+        // get the last four bits of the second byte of charArray4 and the first valid
+        // 4 : 2 : four bits(except two higer bits) of the third byte, combine them to a new byte
+        charArray3[1] = (static_cast<uint8_t>(charArray4[1] & LOWER_4_BITS_MASK) << 4U) +
+                        // 4 : 2 : four bits(except two higer bits) of the third byte, combine them to a new byte
+                        (static_cast<uint8_t>(charArray4[2] & LOWER_6_BITS_MASK) >> 2U);
+        // assigns the decoded string to the return value
+        for (unsigned int i = 0; i < index - 1; i++) {
+            decoded += charArray3[i];
         }
     }
     return decoded;
@@ -187,12 +209,31 @@ using namespace std::literals::string_view_literals;
 constexpr size_t K_UTF16_BYTES_PER_CHAR = 2;  // Number of bytes per UTF-16 character.
 constexpr size_t K_HIGH_BYTE_SHIFT = 8;       // Shift for high byte in UTF-16.
 
-constexpr size_t HEX_BASE = 16;
 constexpr size_t K_HEX_PAIR_SIZE = 2;
 
 // Named constants for bit masks
 constexpr uint8_t K_ASCII_MASK = 0x7F;
 constexpr uint8_t K_BYTE_MASK = 0xFF;
+
+constexpr uint8_t HIGER_4_BITS_MASK = 0xF0U;
+constexpr uint8_t FOUR_BYTES_STYLE = 0xF0U;
+constexpr uint8_t THREE_BYTES_STYLE = 0xE0U;
+constexpr uint8_t TWO_BYTES_STYLE1 = 0xD0U;
+constexpr uint8_t TWO_BYTES_STYLE2 = 0xC0U;
+constexpr uint8_t LOWER_6_BITS_MASK = 0x3FU;
+constexpr uint8_t LOWER_5_BITS_MASK = 0x1FU;
+constexpr uint8_t LOWER_4_BITS_MASK = 0x0FU;
+constexpr uint8_t LOWER_3_BITS_MASK = 0x07U;
+constexpr uint32_t HIGH_SURROGATE_SHIFT = 10U;
+constexpr uint32_t HIGH_AGENT_MASK = 0xD800U;
+constexpr uint32_t LOW_AGENT_MASK = 0xDC00U;
+constexpr uint32_t UTF8_VALID_BITS = 6U;
+constexpr uint32_t UTF8_BITS = 8U;
+constexpr uint32_t UTF8_BITS_MASK = 0xFFU;
+constexpr uint32_t UTF16_SPECIAL_VALUE = 0x10000U;
+
+constexpr size_t HEX_BASE = 16;
+constexpr uint8_t ONE_BYTE_MASK = 0x80U;
 
 constexpr std::array K_SINGLE_BYTE_ENCODINGS = {"utf8"sv, "utf-8"sv, "ascii"sv, "latin1"sv, "binary"sv};
 constexpr std::array K_DOUBLE_BYTE_ENCODINGS = {"utf16le"sv, "ucs2"sv, "ucs-2"sv};
@@ -256,9 +297,6 @@ PandaString ConvertUtf8Encoding(const PandaVector<uint8_t> &bytes)
 
 PandaString ConvertUtf16Encoding(const PandaVector<uint8_t> &bytes)
 {
-    if (bytes.size() % K_UTF16_BYTES_PER_CHAR != 0) {
-        return PandaString("Invalid UTF-16 byte sequence");
-    }
     PandaString output;
     for (size_t i = 0; i < bytes.size(); i += K_UTF16_BYTES_PER_CHAR) {
         uint16_t ch = static_cast<uint16_t>(bytes[i]) |
@@ -317,23 +355,130 @@ PandaString ConvertLatinEncoding(const PandaVector<uint8_t> &bytes)
     return output;
 }
 
+static bool IsOneByte(uint8_t u8Char)
+{
+    return (u8Char & ONE_BYTE_MASK) == 0;
+}
+
+static void Utf16ToUTF8Bytes(PandaVector<uint8_t> &bytes, uint32_t codePoint)
+{
+    if (codePoint >= UTF16_SPECIAL_VALUE) {
+        codePoint -= UTF16_SPECIAL_VALUE;
+        // 10 : a half of 20 , shift right 10 bits
+        uint16_t highSurrogate = ((codePoint >> HIGH_SURROGATE_SHIFT) | HIGH_AGENT_MASK);
+        uint16_t lowSurrogate = ((codePoint & LOW_AGENT_MASK) | LOW_AGENT_MASK);
+
+        bytes.push_back(highSurrogate & UTF8_BITS_MASK);
+        bytes.push_back(static_cast<uint32_t>(highSurrogate >> UTF8_BITS) & UTF8_BITS_MASK);
+        bytes.push_back(lowSurrogate & UTF8_BITS_MASK);
+        bytes.push_back(static_cast<uint32_t>(lowSurrogate >> UTF8_BITS) & UTF8_BITS_MASK);
+    } else {
+        bytes.push_back(codePoint & UTF8_BITS_MASK);
+        bytes.push_back((codePoint >> UTF8_BITS) & UTF8_BITS_MASK);
+    }
+}
+
+static bool HasEnoughBytes(size_t currentIndex, size_t requiredLength, size_t inputSize)
+{
+    return (currentIndex + requiredLength) <= inputSize;
+}
+
+static bool ProcessOneByte(unsigned char firstByte, uint32_t &outCodePoint, size_t &outUtf8Length)
+{
+    if (IsOneByte(static_cast<uint8_t>(firstByte))) {
+        outCodePoint = firstByte;
+        outUtf8Length = 1;
+        return true;
+    }
+    return false;
+}
+
+static bool ProcessTwoBytes(std::string_view input, size_t i, uint32_t &outCodePoint, size_t &outUtf8Length)
+{
+    auto firstByte = static_cast<unsigned char>(input[i]);
+    if (((firstByte & HIGER_4_BITS_MASK) == TWO_BYTES_STYLE1) ||
+        ((firstByte & HIGER_4_BITS_MASK) == TWO_BYTES_STYLE2)) {
+        if (!HasEnoughBytes(i, 1, input.size())) {
+            return false;
+        }
+        outCodePoint = static_cast<uint32_t>(static_cast<uint8_t>(firstByte & LOWER_5_BITS_MASK) << UTF8_VALID_BITS) |
+                       static_cast<uint32_t>((static_cast<unsigned char>(input[i + 1]) & LOWER_6_BITS_MASK));
+        // 2: means the length is two
+        outUtf8Length = 2;
+        return true;
+    }
+    return false;
+}
+
+static bool ProcessThreeBytes(std::string_view input, size_t i, uint32_t &outCodePoint, size_t &outUtf8Length)
+{
+    auto firstByte = static_cast<unsigned char>(input[i]);
+    if ((firstByte & HIGER_4_BITS_MASK) == THREE_BYTES_STYLE) {
+        // 2: means two byte after
+        if (!HasEnoughBytes(i, 2, input.size())) {
+            return false;
+        }
+        outCodePoint =
+            // 2 : shift left 2 times of UTF8_VALID_BITS
+            static_cast<uint32_t>(static_cast<uint8_t>(firstByte & LOWER_4_BITS_MASK) << (2 * UTF8_VALID_BITS)) |
+            static_cast<uint32_t>(static_cast<uint8_t>((static_cast<unsigned char>(input[i + 1]) & LOWER_6_BITS_MASK))
+                                  << UTF8_VALID_BITS) |
+            // 2: means the third byte
+            static_cast<uint32_t>((static_cast<unsigned char>(input[i + 2]) & LOWER_6_BITS_MASK));
+        // 3: means the length is three
+        outUtf8Length = 3;
+        return true;
+    }
+    return false;
+}
+
+static bool ProcessFourBytes(std::string_view input, size_t i, uint32_t &outCodePoint, size_t &outUtf8Length)
+{
+    auto firstByte = static_cast<unsigned char>(input[i]);
+    if ((firstByte & HIGER_4_BITS_MASK) == FOUR_BYTES_STYLE) {
+        // 3: means three byte after
+        if (!HasEnoughBytes(i, 3, input.size())) {
+            return false;
+        }
+        outCodePoint =
+            // 3 : shift left 3 times of UTF8_VALID_BITS
+            static_cast<uint32_t>(static_cast<uint8_t>(firstByte & LOWER_3_BITS_MASK) << (3 * UTF8_VALID_BITS)) |
+            static_cast<uint32_t>(static_cast<uint8_t>(static_cast<unsigned char>(input[i + 1]) & LOWER_6_BITS_MASK)
+                                  // 2 : shift left 2 times of UTF8_VALID_BITS
+                                  << (2 * UTF8_VALID_BITS)) |
+            // 2: means the third byte
+            static_cast<uint32_t>(static_cast<uint8_t>(static_cast<unsigned char>(input[i + 2]) & LOWER_6_BITS_MASK)
+                                  << UTF8_VALID_BITS) |
+            // 3: means the forth byte
+            static_cast<uint32_t>(static_cast<unsigned char>(input[i + 3]) & LOWER_6_BITS_MASK);
+        // 4: means the length is four
+        outUtf8Length = 4;
+        return true;
+    }
+    return false;
+}
+
 PandaVector<uint8_t> ConvertUtf16ToBytes(std::string_view input)
 {
-    const size_t kUtf16Multiplier = 2;
-    const size_t kShiftBy8 = 8U;
     PandaVector<uint8_t> bytes;
-    bytes.resize(input.size() * kUtf16Multiplier);
-
-    for (size_t i = 0; i < input.size(); ++i) {
-        auto ch = static_cast<uint16_t>(static_cast<unsigned char>(input[i]));
-        auto position = i * kUtf16Multiplier;
-        bytes[position] = static_cast<uint8_t>(ch & K_BYTE_MASK);
-        bytes[position + 1] = static_cast<uint8_t>(static_cast<unsigned int>(ch) >> kShiftBy8);
+    for (size_t i = 0; i < input.size();) {
+        uint32_t codePoint = 0;
+        size_t utf8Length = 0;
+        auto firstByte = static_cast<unsigned char>(input[i]);
+        bool processed =
+            ProcessOneByte(firstByte, codePoint, utf8Length) || ProcessTwoBytes(input, i, codePoint, utf8Length) ||
+            ProcessThreeBytes(input, i, codePoint, utf8Length) || ProcessFourBytes(input, i, codePoint, utf8Length);
+        if (processed) {
+            Utf16ToUTF8Bytes(bytes, codePoint);
+            i += utf8Length;
+        } else {
+            i++;
+        }
     }
     return bytes;
 }
 
-Result<PandaVector<uint8_t>> ConvertBase64ToBytes(const PandaString &input, std::string_view encoding)
+PandaVector<uint8_t> ConvertBase64ToBytes(const PandaString &input, std::string_view encoding, size_t size)
 {
     PandaString decoded;
     if (encoding == "base64url") {
@@ -344,8 +489,9 @@ Result<PandaVector<uint8_t>> ConvertBase64ToBytes(const PandaString &input, std:
     } else {
         decoded = base64::Decode(input);
     }
-
-    return BytesFromString(decoded);
+    auto res = BytesFromString(decoded);
+    res.resize(size);
+    return res;
 }
 
 bool IsSymbolHex(char c)
@@ -389,39 +535,24 @@ PandaString FoundInputHex(const PandaString &input, bool &error)
 
 Result<PandaVector<uint8_t>> ConvertHexToBytes(const PandaString &input)
 {
-    // Found hex codes in input. Other symbols should be ignored
-    // input should start with hex code(-s)
-    bool error = false;
-    PandaString inputHex = FoundInputHex(input, error);
-    if (error) {
-        return Err<PandaString>(PandaString("The argument 'value' is invalid. Received is '") + input +
-                                PandaString("'"));
-    }
-
-    // Check size
-    if (inputHex.empty()) {
-        inputHex += "0";
-        inputHex += "0";
-    } else if (inputHex.size() % K_HEX_PAIR_SIZE != 0) {
-        return Err<PandaString>(PandaString("Hex string must have an even length"));
-    }
     PandaVector<uint8_t> bytes;
-    size_t bytesLength = inputHex.size() / K_HEX_PAIR_SIZE;
-    bytes.reserve(bytesLength);
-    const size_t kHexStringLength = 3;
-    for (size_t i = 0; i < inputHex.size(); i += K_HEX_PAIR_SIZE) {
-        std::array<char, kHexStringLength> hex = {inputHex[i], inputHex[i + 1], '\0'};
-        char *endptr = nullptr;
-        uint64_t value = std::strtoul(hex.data(), &endptr, HEX_BASE);
-        if (*endptr != '\0') {
-            return Err<PandaString>(PandaString("Invalid hex string"));
+    unsigned int arrSize = input.size();
+    // 2 : means a half length of hex str's size
+    for (size_t i = 0; i < arrSize / 2; i++) {
+        // 2 : offset is i * 2, i * 2 + 1
+        std::string hexStrTmp = {input[i * 2], input[i * 2 + 1]};
+        // 2 : offset is i * 2, i * 2 + 1
+        if (!IsSymbolHex(input[i * 2]) || !IsSymbolHex(input[i * 2 + 1])) {
+            break;
         }
+        // 16 : the base is 16
+        auto value = stoi(hexStrTmp, nullptr, HEX_BASE);
         bytes.push_back(static_cast<uint8_t>(value));
     }
     return bytes;
 }
 
-Result<PandaVector<uint8_t>> ConvertStringToBytes(const PandaString &input, std::string_view encoding)
+Result<PandaVector<uint8_t>> ConvertStringToBytes(const PandaString &input, std::string_view encoding, size_t size)
 {
     if (std::find(UTF8_ENCODINGS.begin(), UTF8_ENCODINGS.end(), encoding) != UTF8_ENCODINGS.end()) {
         return ConvertUtf8ToBytes(input);
@@ -433,7 +564,7 @@ Result<PandaVector<uint8_t>> ConvertStringToBytes(const PandaString &input, std:
         return ConvertUtf16ToBytes(input);
     }
     if (std::find(BASE64_ENCODINGS.begin(), BASE64_ENCODINGS.end(), encoding) != BASE64_ENCODINGS.end()) {
-        return ConvertBase64ToBytes(input, encoding);
+        return ConvertBase64ToBytes(input, encoding, size);
     }
     if (std::find(LATIN_ENCODINGS.begin(), LATIN_ENCODINGS.end(), encoding) != LATIN_ENCODINGS.end()) {
         return ConvertLatinToBytes(input);

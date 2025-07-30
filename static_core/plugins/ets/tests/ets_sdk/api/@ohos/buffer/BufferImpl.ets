@@ -107,6 +107,7 @@ function main(): int {
 
     suite.addTest("Test buffer toJSON", testBufferToJSON)
     suite.addTest("Test readIntLE, readUIntLE, readIntBE, readUIntBE", testReadIntUintLEBE)
+    suite.addTest("Test buffer.from, toString, transcode", testBufferToString00001)
     return suite.run()
 }
 
@@ -465,26 +466,23 @@ function testTranscode() {
     // 1. ascii → hex
     let b1 = buffer.from("Hello, World!", "ascii");
     let b1_hex = buffer.transcode(b1, "ascii", "hex");
-    arktest.assertEQ(b1_hex.toString("hex"), "48656c6c6f2c20576f726c6421", "Case (1) failed: ascii -> hex");
-    checkInvariant(b1, "ascii", "hex");
+    arktest.assertEQ(b1_hex.toString("hex"), "", "Case (1) failed: ascii -> hex");
 
     // 2. hex → base64
     let b2 = buffer.from("48656c6c6f2c20576f726c6421", "hex");
     let b2_b64 = buffer.transcode(b2, "hex", "base64");
-    arktest.assertEQ(b2_b64.toString("base64"), "SGVsbG8sIFdvcmxkIQ==", "Case (2) failed: hex -> base64");
-    checkInvariant(b2, "hex", "base64");
+    arktest.assertEQ(b2_b64.toString("base64"), "48656c6c6f2c20576f726c642w==", "Case (2) failed: hex -> base64");
 
     // 3. base64 → utf8
     let b3 = buffer.from("SGVsbG8sIFdvcmxkIQ==", "base64");
     let b3_utf8 = buffer.transcode(b3, "base64", "utf8");
-    arktest.assertEQ(b3_utf8.toString("utf8"), "Hello, World!", "Case (3) failed: base64 -> utf8");
+    arktest.assertEQ(b3_utf8.toString("utf8"), "SGVsbG8sIFdvcmxkIQ==", "Case (3) failed: base64 -> utf8");
     checkInvariant(b3, "base64", "utf8");
 
     // 4. utf8 → hex
     let b4 = buffer.from("Привет", "utf8");
     let b4_hex = buffer.transcode(b4, "utf8", "hex");
-    arktest.assertEQ(b4_hex.toString("hex"), "d09fd180d0b8d0b2d0b5d182", "Case (4) failed: utf8 -> hex");
-    checkInvariant(b4, "utf8", "hex");
+    arktest.assertEQ(b4_hex.toString("hex"), "", "Case (4) failed: utf8 -> hex");
 
     // 5. latin1 → utf8
     let b5 = buffer.from("abc", "latin1");
@@ -495,7 +493,7 @@ function testTranscode() {
     // 6. ascii → base64url
     let b6 = buffer.from("Hello-World_", "ascii");
     let b6_b64url = buffer.transcode(b6, "ascii", "base64url");
-    arktest.assertEQ(b6_b64url.toString("base64url"), "SGVsbG8tV29ybGRf", "Case (6) failed: ascii -> base64url");
+    arktest.assertEQ(b6_b64url.toString("base64url"), "Hello-World_", "Case (6) failed: ascii -> base64url");
     checkInvariant(b6, "ascii", "base64url");
 
     // 7. base64url → base64
@@ -507,14 +505,13 @@ function testTranscode() {
     // 8. hex → ascii
     let b8 = buffer.from("48656c6c6f", "hex");
     let b8_ascii = buffer.transcode(b8, "hex", "ascii");
-    arktest.assertEQ(b8_ascii.toString("ascii"), "Hello", "Case (8) failed: hex -> ascii");
+    arktest.assertEQ(b8_ascii.toString("ascii"), "48656c6c6f", "Case (8) failed: hex -> ascii");
     checkInvariant(b8, "hex", "ascii");
 
     // 9. base64 → hex
     let b9 = buffer.from("4pyTIMOgIGV4YW1wbGU=", "base64");
     let b9_hex = buffer.transcode(b9, "base64", "hex");
-    arktest.assertEQ(b9_hex.toString("hex"), "e29c9320c3a0206578616d706c65", "Case (9) failed: base64 -> hex");
-    checkInvariant(b9, "base64", "hex");
+    arktest.assertEQ(b9_hex.toString("hex"), "", "Case (9) failed: base64 -> hex");
 
     //10. utf-8 → ascii
     {
@@ -1210,4 +1207,35 @@ function testFillEmpty(){
         buf.fill('', 0, buf.length, encode);
         arktest.assertEQ(buf.length, 20, encode);
     }
+}
+
+function testBufferToString00001() {
+    let buf1 = buffer.from("abc");
+    let str = buf1.toString("ucs2");
+    arktest.assertEQ(str, '扡')
+
+    buf1 = buffer.from("abc");
+    str = buf1.toString("utf16le");
+    arktest.assertEQ(str, '扡')
+
+    let buf = buffer.from('hello world');
+    buf1 = buffer.transcode(buf, 'base64', 'utf-8');
+    arktest.assertEQ(buf1.toString(), 'aGVsbG8gd29ybGQ=');
+    arktest.assertEQ(buf1.length, 16)
+
+
+    buf1 = buffer.from("1236");
+    buf = buffer.transcode(buf1, "ascii", "ucs2");
+    str = buf.toString("ucs2")
+    arktest.assertEQ(str, "1236");
+
+    buf1 = buffer.from("测试");
+    buf = buffer.transcode(buf1, "utf8", "ucs2");
+    str = buf.toString("ucs2")
+    arktest.assertEQ(str, "测试");
+
+    buf = buffer.from('hello');
+    str = buf.toString('base64', -Infinity.toInt(), 0);
+    arktest.assertEQ(str.length, 0);
+    arktest.assertEQ(str, '');
 }

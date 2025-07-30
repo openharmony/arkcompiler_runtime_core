@@ -27,6 +27,8 @@ constexpr std::array UTF8_ENCODINGS = {"utf8"sv, "utf-8"sv, "ascii"sv};
 constexpr std::array UTF16_ENCODINGS = {"utf16le"sv, "ucs2"sv, "ucs-2"sv};
 constexpr std::array BASE64_ENCODINGS = {"base64"sv, "base64url"sv};
 constexpr std::array LATIN_ENCODINGS = {"latin1"sv, "binary"sv};
+constexpr size_t TWO_BYTES = 2;
+constexpr size_t THREE_BYTES = 3;
 
 namespace ark::ets::intrinsics {
 
@@ -43,6 +45,25 @@ static EtsHandle<EtsEscompatArrayBuffer> CreateArrayBuffer(EtsCoroutine *coro, E
         std::copy_n(data, byteLength, reinterpret_cast<uint8_t *>(buffer));
     }
     return newBuffer;
+}
+
+static size_t ByteLength(const PandaString &string, const PandaString &encoding)
+{
+    size_t length = string.length();
+    if (length == 0) {
+        return 0;
+    }
+    size_t siz = length;
+    if (std::find(BASE64_ENCODINGS.begin(), BASE64_ENCODINGS.end(), encoding) != BASE64_ENCODINGS.end()) {
+        size_t pos = 0;
+        size_t byteLength = length;
+        while (byteLength > 1 && (pos = string.find('=', pos)) != std::string::npos) {
+            byteLength--;
+            pos++;
+        }
+        siz = (byteLength * THREE_BYTES) >> TWO_BYTES;
+    }
+    return siz;
 }
 
 /**
@@ -63,7 +84,8 @@ static PandaVector<uint8_t> ConvertEtsStringToBytes(EtsString *strObj, EtsString
     PandaString input(strObj->ConvertToStringView(&strBuf));
     PandaString encoding =
         encodingObj != nullptr ? PandaString(encodingObj->ConvertToStringView(&encodingBuf)) : "utf8";
-    auto res = helpers::encoding::ConvertStringToBytes(input, encoding);
+    size_t siz = ByteLength(input, encoding);
+    auto res = helpers::encoding::ConvertStringToBytes(input, encoding, siz);
     if (std::holds_alternative<helpers::Err<PandaString>>(res)) {
         ThrowException(ctx, coro, ctx.GetIllegalArgumentExceptionClassDescriptor(),
                        utf::CStringAsMutf8(std::get<helpers::Err<PandaString>>(res).Message().c_str()));
