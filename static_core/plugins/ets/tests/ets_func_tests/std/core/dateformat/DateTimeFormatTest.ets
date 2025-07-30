@@ -90,6 +90,14 @@ function dateFormatWithoutParameters(): void {
     assertEQ(expected, actual)
 }
 
+function testConsoleLogNegativeDate() {
+    let d = new Date(-271822)
+    const MAX_CONSOLE_PRINT_DEPTH: int = 10
+    // console.log stub
+    let res = Value.of(d as NullishType).toPrint(MAX_CONSOLE_PRINT_DEPTH)
+    arktest.assertEQ(res, "Date: \"1969-12-31T23:55:28.178Z\"")
+}
+
 function main(): int {
     initFormatResults()
 
@@ -100,6 +108,7 @@ function main(): int {
     suite.addTest("date format with custom locale and default options", dateFormatWithCustomLocaleAndDefaultOptions)
     suite.addTest("date format with custom locale and options containing invalid time zone", dateFormatWithInvalidTimeZone)
     suite.addTest("format w/o parameters", dateFormatWithoutParameters)
+    suite.addTest("Test console.log out for Date with negative constructor", testConsoleLogNegativeDate)
 
     return suite.run()
 }
