@@ -966,7 +966,9 @@ export class Autofixer {
 
     if (ts.isInterfaceDeclaration(node)) {
       for (const member of node.members) {
-        if (ts.isCallSignatureDeclaration(member) || (ts.isMethodSignature(member) && member.questionToken)) {
+        if (ts.isIndexSignatureDeclaration(member) ||
+          ts.isCallSignatureDeclaration(member) ||
+          (ts.isMethodSignature(member) && member.questionToken)) {
           /**
            * If the header comment of an interface declaration contains `@noninterop` field, 
            * the interface node will not be converted.
