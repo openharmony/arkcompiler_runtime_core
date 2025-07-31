@@ -304,7 +304,7 @@ TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestLoadConstArray)
     EXPECT_TRUE(helpers::Match(output, "1\n"));
     helpers::TransformMethod(
         ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/load_const_array.abc",
-        ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/load_const_array_modified.abc", "get_element",
+        ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/load_const_array_modified.abc", "getElement",
         [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
             auto arr = std::vector<AbckitLiteral *>({
                 g_implM->createLiteralU32(file, 4),
