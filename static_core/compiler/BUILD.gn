@@ -25,11 +25,7 @@ if (ark_standalone_build) {
 ohos_static_library("libarktscompiler_package") {
   deps = []
   if (enable_static_vm) {
-    if (is_mac) {
-      deps += [ ":libarktscompiler_frontend_static" ]
-    } else {
-      deps += [ ":libarktscompiler" ]
-    }
+    deps += [ ":libarktscompiler_frontend_static" ]
   }
 
   part_name = ark_part_name
