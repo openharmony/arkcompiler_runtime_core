@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Implement the default method for classes to override multiple inheritance interfaces(grandparentinterface call defaultmethod).
+desc: >-
+    Implement the default method for classes to override multiple inheritance
+    interfaces (grandparentinterface call defaultmethod).
 ---*/
 
 interface GrandParentInterface {
@@ -34,11 +36,11 @@ interface ChildInterface extends ParentInterface {
 
 class ChildClass implements ChildInterface {
   defaultMethod(): string {
-    return "ChildClass overridden method";
+    return "Class overridden method";
   }
 }
 
 function main(): void {
-  let instance: GrandParentInterface  = new ChildClass();
-  arktest.assertEQ(instance.defaultMethod(), "ChildClass overridden method");
+  let instance: GrandParentInterface = new ChildClass();
+  arktest.assertEQ(instance.defaultMethod(), "Class overridden method");
 }

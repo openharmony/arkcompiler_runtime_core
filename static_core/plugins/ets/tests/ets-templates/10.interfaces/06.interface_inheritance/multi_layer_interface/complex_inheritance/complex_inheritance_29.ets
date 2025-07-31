@@ -33,7 +33,7 @@ class GrandParent implements G {
     }
 
     overrideMethod(): string {
-        return "Interface override method";
+        return "Class override method";
     }
 }
 

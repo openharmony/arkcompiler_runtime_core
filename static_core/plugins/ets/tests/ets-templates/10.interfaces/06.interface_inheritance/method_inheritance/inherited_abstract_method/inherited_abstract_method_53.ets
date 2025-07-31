@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: With number argument - call parent abstract method(parentinterface call parentmethod).
+desc: With number argument - call parent abstract method (parentinterface call parentmethod).
 ---*/
 
 interface ParentInterface {

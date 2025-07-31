@@ -14,11 +14,10 @@
  */
 
 /*---
-desc: In multi-layer inheritance, the upper-layer interface method modifier is public,
+desc: >-
+      In multi-layer inheritance, the upper-layer interface method modifier is public,
       and the sub-interface method with the same name is private. A compilation error occurs.
-tags:
-- negative
-- compile-only
+tags: [negative, compile-only]
 ---*/
 
 interface GrandParentInterface {
@@ -27,9 +26,7 @@ interface GrandParentInterface {
   };
 }
 
-interface ParentInterface extends GrandParentInterface {
-
-}
+interface ParentInterface extends GrandParentInterface {}
 
 interface ChildInterface extends ParentInterface {
   private grandparentMethod(): string {

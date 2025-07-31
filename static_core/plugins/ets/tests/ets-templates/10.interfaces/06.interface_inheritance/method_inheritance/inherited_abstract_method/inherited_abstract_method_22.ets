@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Parent interface contains default method implementation(parentinterface call childmethod).
+desc: Parent interface contains default method implementation (parentinterface call childmethod).
 ---*/
 
 interface ParentInterface {

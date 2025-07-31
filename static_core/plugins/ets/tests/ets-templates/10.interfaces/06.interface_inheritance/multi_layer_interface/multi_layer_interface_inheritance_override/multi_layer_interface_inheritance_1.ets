@@ -14,30 +14,39 @@
  */
 
 /*---
-desc: In multi-layer inheritance, sub-interfaces cannot overwrite all the constants of upper-layer interfaces.
-      The data type is [].
+desc: >-
+      An upper-layer interface has multiple methods. In multi-layer inheritance,
+      the sub-interface inherits the methods of all upper-layer interfaces.
 ---*/
 
 interface GrandParentInterface {
-  readonly GRANDPARENT_CONST: [];
+  grandparentMethod(): string {
+    return "grandparentMethod";
+  }
+
+  grandparentMethod_1(): number {
+    return 1;
+  }
 }
 
 interface ParentInterface extends GrandParentInterface {
-  readonly PARENT_CONST: [];
+  parentMethod(): string {
+    return "parentMethod";
+  }
+
+  parentMethod_1(): number {
+    return 2;
+  }
 }
 
-interface ChildInterface extends ParentInterface {
-  readonly GRANDPARENT_CONST: [];
-  readonly PARENT_CONST: [];
-}
+interface ChildInterface extends ParentInterface {}
 
-class ConcreteClass implements ChildInterface {
-  readonly GRANDPARENT_CONST: [] = [];
-  readonly PARENT_CONST: [] = [];
-}
+class ConcreteClass implements ChildInterface {}
 
 function main(): void {
   const obj: ChildInterface = new ConcreteClass();
-  arktest.assertEQ(obj.GRANDPARENT_CONST.toString(), "");
-  arktest.assertEQ(obj.PARENT_CONST.toString(), "");
+  arktest.assertEQ(obj.grandparentMethod(), "grandparentMethod");
+  arktest.assertEQ(obj.parentMethod(), "parentMethod");
+  arktest.assertEQ(obj.grandparentMethod_1(), 1);
+  arktest.assertEQ(obj.parentMethod_1(), 2);
 }

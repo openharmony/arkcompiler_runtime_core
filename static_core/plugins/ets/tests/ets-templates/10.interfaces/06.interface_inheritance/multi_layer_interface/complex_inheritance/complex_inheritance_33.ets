@@ -18,7 +18,7 @@ desc: Access static constants normally in complex inheritance relationships.
 ---*/
 
 interface G {
-    readonly INTERFACR_CONST: string;
+    readonly INTERFACE_CONST: string;
 }
 
 interface F extends G {
@@ -27,7 +27,7 @@ interface F extends G {
 
 class GrandParent implements F {
     static readonly GRANDPARENT_CONST = "GrandParent Constant";
-    readonly INTERFACR_CONST: string = "GrandParent interface";
+    readonly INTERFACE_CONST: string = "GrandParent interface";
 }
 
 class Parent extends GrandParent {
@@ -40,7 +40,7 @@ class Child extends Parent {
 
 function main(): void {
     arktest.assertEQ(GrandParent.GRANDPARENT_CONST, "GrandParent Constant");
-    arktest.assertEQ(new GrandParent().INTERFACR_CONST, "GrandParent interface");
+    arktest.assertEQ(new GrandParent().INTERFACE_CONST, "GrandParent interface");
     arktest.assertEQ(Parent.PARENT_CONST, "Parent Constant");
     arktest.assertEQ(Child.CHILD_CONST, "Child Constant");
 }

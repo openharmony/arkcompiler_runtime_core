@@ -28,11 +28,11 @@ interface ChildInterface extends ParentInterface {
 
 class ChildClass implements ChildInterface {
   defaultMethod(): string {
-    return "ChildClass overridden method";
+    return "Class overridden method";
   }
 }
 
 function main(): void {
-  let instance: ChildInterface  = new ChildClass();
-  arktest.assertEQ(instance.defaultMethod(), "ChildClass overridden method");
+  let instance: ChildInterface = new ChildClass();
+  arktest.assertEQ(instance.defaultMethod(), "Class overridden method");
 }

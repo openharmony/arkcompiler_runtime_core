@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Default method for child interface to override parent interface(the rewritten result should be output).
+desc: Default method for child interface to override parent interface (the rewritten result should be output).
 ---*/
 
 interface ParentInterface {

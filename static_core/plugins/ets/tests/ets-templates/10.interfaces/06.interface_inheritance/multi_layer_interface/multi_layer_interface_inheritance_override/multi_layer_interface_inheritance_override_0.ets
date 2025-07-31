@@ -14,11 +14,10 @@
  */
 
 /*---
-desc: In multi-layer inheritance, the upper-layer interface method returns string,
+desc: >-
+      In multi-layer inheritance, the upper-layer interface method returns string,
       and the sub-interface method returns number. A compilation error occurs.
-tags:
-- negative
-- compile-only
+tags: [negative, compile-only]
 ---*/
 
 interface GrandParentInterface {
@@ -27,8 +26,7 @@ interface GrandParentInterface {
   }
 }
 
-interface ParentInterface extends GrandParentInterface {
-}
+interface ParentInterface extends GrandParentInterface {}
 
 interface ChildInterface extends ParentInterface {
   grandparentMethod(): number {

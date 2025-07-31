@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Union type methods in interfaces(childinterface call parentMethod-string).
+desc: Union type methods in interfaces (childinterface call parentMethod-string).
 ---*/
 
 interface ParentInterface {

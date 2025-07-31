@@ -14,7 +14,8 @@
  */
 
 /*---
-desc: All default methods inherited by the subinterface implemented by the parent class
+desc: >-
+      All default methods inherited by the subinterface implemented by the parent class
       overriding the subinterface of the child class.
 ---*/
 

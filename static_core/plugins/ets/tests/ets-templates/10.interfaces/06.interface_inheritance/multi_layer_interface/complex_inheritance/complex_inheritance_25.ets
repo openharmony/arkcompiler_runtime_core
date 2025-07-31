@@ -14,26 +14,23 @@
  */
 
 /*---
-desc: The subclass overrides the static method of the superclass.
-tags: [compile-only, negative]
+desc: Class with a static method called after inherited method frm the interface
 ---*/
 
 interface G {
-    greet(): string;
-}
-
-class Parent {
-    static greet(): string {
-        return "Hello from Parent";
-    }
-}
-
-class Child extends Parent implements G {
-    static override greet(): string {
-        return "Hello from Child";
-    }
-
     greet(): string {
-        return "Hello from child";
+        return "i";
     }
+}
+
+class C implements G {
+    static greet(): string {
+        return "c";
+    }
+}
+
+function main() {
+    let c: C = new C();
+    arktest.assertEQ(c.greet(), "i")
+    arktest.assertEQ(C.greet(), "c")
 }

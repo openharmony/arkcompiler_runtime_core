@@ -14,12 +14,11 @@
  */
 
 /*---
-desc: Multiple inheritance conflict detection.
-tags: [compile-only, negative]
+desc: Multiple inheritance conflict resolving.
 ---*/
 
 let a: number = 10;
-let b: string = 'Hello, ';
+let res: string = ""
 
 interface A {
     draw(): void;
@@ -38,19 +37,30 @@ interface D {
 }
 
 class E implements A, B, C, D {
-    draw(): void {
-        a = a + 1;
+    draw(...p: Any[]): Any {
+        if (p.length == 0) {
+            if (a == 10)
+                return "B"
+            res = "B"
+        else if (p[0] instanceof number)
+            res = "C"
+        else if (p[0] instanceof number)
+            res = "D"
+        }
+        return
     }
+}
 
-    draw(): string {
-        return 'b';
-    }
-
-    draw(x: number): void {
-        a = a + x;
-    }
-
-    draw(x: string): void {
-        b = b + x;
-    }
+function main() {
+    res = ""
+    a = 10
+    let c: E = new E()
+    arktest.assertEQ(c.draw(), "B")
+    a++
+    c.draw()
+    arktest.assertEQ(res, "A")
+    c.draw(1)
+    arktest.assertEQ(res, "C")
+    c.draw("str")
+    arktest.assertEQ(res, "D")
 }

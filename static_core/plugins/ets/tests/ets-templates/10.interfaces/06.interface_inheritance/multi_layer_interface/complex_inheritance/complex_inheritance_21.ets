@@ -35,9 +35,6 @@ class A {
 class B extends A implements F {
     attemptModify() {
         this.value = 2;
+        return "str"
     }
-}
-
-function main(): void {
-    const a: A = new A();
 }
