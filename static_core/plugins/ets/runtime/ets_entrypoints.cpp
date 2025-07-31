@@ -409,24 +409,21 @@ extern "C" void EndGeneralNativeMethodPrim()
     auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
 
     coroutine->NativeCodeEnd();
-    storage->PopLocalEtsFrame(nullptr);
+    storage->PopLocalEtsFrame(EtsReference::GetUndefined());
 }
 
-extern "C" ObjectHeader *EndGeneralNativeMethodObj(ark::mem::Reference *ref)
+extern "C" ObjectHeader *EndGeneralNativeMethodObj(ark::ets::EtsReference *etsRef)
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
     auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
-
     coroutine->NativeCodeEnd();
-
     ObjectHeader *ret = nullptr;
-    auto *etsRef = EtsReference::CastFromReference(ref);
-    if (etsRef != nullptr) {
+    if (LIKELY(!coroutine->HasPendingException())) {
         ret = storage->GetEtsObject(etsRef)->GetCoreType();
     }
 
-    storage->PopLocalEtsFrame(nullptr);
+    storage->PopLocalEtsFrame(EtsReference::GetUndefined());
     return ret;
 }
 
@@ -448,22 +445,20 @@ extern "C" void EndQuickNativeMethodPrim()
     ASSERT(coroutine != nullptr);
     auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
 
-    storage->PopLocalEtsFrame(nullptr);
+    storage->PopLocalEtsFrame(EtsReference::GetUndefined());
 }
 
-extern "C" ObjectHeader *EndQuickNativeMethodObj(ark::mem::Reference *ref)
+extern "C" ObjectHeader *EndQuickNativeMethodObj(ark::ets::EtsReference *etsRef)
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
     auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
-
     ObjectHeader *ret = nullptr;
-    auto *etsRef = EtsReference::CastFromReference(ref);
-    if (etsRef != nullptr) {
+    if (LIKELY(!coroutine->HasPendingException())) {
         ret = storage->GetEtsObject(etsRef)->GetCoreType();
     }
 
-    storage->PopLocalEtsFrame(nullptr);
+    storage->PopLocalEtsFrame(EtsReference::GetUndefined());
     return ret;
 }
 

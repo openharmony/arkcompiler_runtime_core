@@ -24,6 +24,9 @@
 
 namespace ark::ets {
 class EtsReference final {
+    // We use 'long' type for the magic number to support both 32-bit and 64-bit architectures at the same time.
+    static constexpr long REF_UNDEFINED_VALUE = -1UL;  // NOLINT(google-runtime-int)
+
 public:
     DEFAULT_COPY_SEMANTIC(EtsReference);
     DEFAULT_MOVE_SEMANTIC(EtsReference);
@@ -54,12 +57,30 @@ public:
 
     static mem::Reference *CastToReference(EtsReference *etsRef)
     {
+        ASSERT(etsRef != nullptr);
+        if (IsUndefined(etsRef)) {
+            return nullptr;
+        }
         return reinterpret_cast<mem::Reference *>(etsRef);
     }
 
     static EtsReference *CastFromReference(mem::Reference *ref)
     {
+        if (ref == nullptr) {
+            return GetUndefined();
+        }
         return reinterpret_cast<EtsReference *>(ref);
+    }
+
+    static EtsReference *GetUndefined()
+    {
+        return ToNativePtr<EtsReference>(REF_UNDEFINED_VALUE);
+    }
+
+    static bool IsUndefined(EtsReference *ref)
+    {
+        ASSERT(ref != nullptr);
+        return ref == GetUndefined();
     }
 
 private:
@@ -106,7 +127,17 @@ public:
 
     [[nodiscard]] bool IsValidEtsRef(EtsReference *etsRef)
     {
-        return IsValidRef(EtsReference::CastToReference(etsRef));
+        return EtsReference::IsUndefined(etsRef) || IsValidRef(EtsReference::CastToReference(etsRef));
+    }
+
+    [[nodiscard]] static bool IsUndefinedEtsObject(EtsObject *obj)
+    {
+        return obj == GetUndefinedEtsObject();
+    }
+
+    [[nodiscard]] static EtsObject *GetUndefinedEtsObject()
+    {
+        return nullptr;
     }
 
     bool PushLocalEtsFrame(uint32_t capacity)
