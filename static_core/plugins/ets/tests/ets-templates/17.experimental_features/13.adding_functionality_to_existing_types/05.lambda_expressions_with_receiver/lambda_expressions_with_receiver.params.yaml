@@ -73,3 +73,168 @@ cases:
       let a: A = new A()
       let b: B = new B()
       arktest.assertEQ(b.f(b, a), "A")
+  - decl: |
+      class A {
+        f(): string { return "A" }
+      }
+      class B {
+        f = (this: A): string => { return this.f() }
+      }
+    use: |
+      let a: A = new A()
+      let b: B = new B()
+      arktest.assertEQ(b.f(a), "A")
+      arktest.assertEQ(a.f(), "A")
+  - decl: |
+      class A {
+        f(): string { return "A" }
+      }
+      interface I {
+        f: (this: A) => string
+      }
+    use: |
+      let a: A = new A()
+      let i: I = {f: (this: A): string => { return this.f() }}
+      arktest.assertEQ(i.f(a), "A")
+  - decl: |
+      let f = (this: Number): void => {}
+    use: |
+      let n: Number = 1
+      f(n)
+  - decl: |
+      let f = (this: Number): void => {}
+    use: |
+      let n: Number = 1
+      n.f()
+  - decl: |
+      interface I {}
+      let f = (this: I): void => {}
+    use: |
+      let i: I = {}
+      f(i)
+  - decl: |
+      interface I {}
+      let f = (this: I): void => {}
+    use: |
+      let i: I = {}
+      i.f()
+  - decl: |
+      let f = (this: number): void => {}
+    use: |
+      let n: number = 1
+      f(n)
+  - decl: |
+      let f = (this: number): void => {}
+    use: |
+      let n: number = 1
+      n.f()
+  - decl: |
+      let f = (this: byte): void => {}
+    use: |
+      let n: byte = 1
+      f(n)
+  - decl: |
+      let f = (this: byte): void => {}
+    use: |
+      let n: byte = 1
+      n.f()
+  - decl: |
+      let f = (this: short): void => {}
+    use: |
+      let n: short = 1
+      f(n)
+  - decl: |
+      let f = (this: short): void => {}
+    use: |
+      let n: short = 1
+      n.f()
+  - decl: |
+      let f = (this: int): void => {}
+    use: |
+      let n: int = 1
+      f(n)
+  - decl: |
+      let f = (this: int): void => {}
+    use: |
+      let n: int = 1
+      n.f()
+  - decl: |
+      let f = (this: long): void => {}
+    use: |
+      let n: long = 1
+      f(n)
+  - decl: |
+      let f = (this: long): void => {}
+    use: |
+      let n: long = 1
+      n.f()
+  - decl: |
+      let f = (this: bigint): void => {}
+    use: |
+      let n: bigint = 1n
+      f(n)
+  - decl: |
+      let f = (this: bigint): void => {}
+    use: |
+      let n: bigint = 1n
+      n.f()
+  - decl: |
+      let f = (this: float): void => {}
+    use: |
+      let n: float = 1.0f
+      f(n)
+  - decl: |
+      let f = (this: float): void => {}
+    use: |
+      let n: float = 1.0f
+      n.f()
+  - decl: |
+      let f = (this: double): void => {}
+    use: |
+      let n: double = 1.0
+      f(n)
+  - decl: |
+      let f = (this: double): void => {}
+    use: |
+      let n: double = 1.0
+      n.f()
+  - decl: |
+      let f = (this: boolean): void => {}
+    use: |
+      let n: boolean = true
+      f(n)
+  - decl: |
+      let f = (this: boolean): void => {}
+    use: |
+      let n: boolean = true
+      n.f()
+  - decl: |
+      let f = (this: string): void => {}
+    use: |
+      let n: string = "abc"
+      f(n)
+  - decl: |
+      let f = (this: string): void => {}
+    use: |
+      let n: string = "abc"
+      n.f()
+  - decl: |
+      let f = (this: char): void => {}
+    use: |
+      let n: char = c'a'
+      f(n)
+  - decl: |
+      let f = (this: char): void => {}
+    use: |
+      let n: char = c'a'
+      n.f()
+  - decl: |
+      let f = (this: Function): void => {}
+    use: |
+      let n: Function = (): void => {}
+      f(n)
+  - decl: |
+      let f = (this: Function): void => {}
+    use: |
+      let n: Function = (): void => {}
+      n.f()

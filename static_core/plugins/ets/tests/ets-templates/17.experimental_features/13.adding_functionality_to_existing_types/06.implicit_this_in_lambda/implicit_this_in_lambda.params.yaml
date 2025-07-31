@@ -15,65 +15,65 @@
 cases:
   - decl: |
       class A {
-        foo(): void {}
+        foo(): int { return 0 }
       }
-      function f(context: (this: A) => void) {}
+      function f(context: (this: A) => void) { context(new A()) }
       f((this: A): void => {
-        this.foo()
+        arktest.assertEQ(this.foo(), 0)
       })
   - decl: |
       class A {
-        foo(): void {}
+        foo(): int { return 0 }
       }
-      function f(context: (this: A) => void) {}
+      function f(context: (this: A) => void) { context(new A()) }
       f((this: A): void => {
-        foo()
-      })
-  - decl: |
-      class A {
-        m: int = 0
-      }
-      function f(context: (this: A) => void) {}
-      f((this: A): void => {
-        this.m
+        arktest.assertEQ(foo(), 0)
       })
   - decl: |
       class A {
         m: int = 0
       }
-      function f(context: (this: A) => void) {}
+      function f(context: (this: A) => void) { context(new A()) }
       f((this: A): void => {
-        m
+        arktest.assertEQ(this.m, 0)
       })
   - decl: |
       class A {
         m: int = 0
       }
-      function f(context: (this: A) => void) {}
+      function f(context: (this: A) => void) { context(new A()) }
+      f((this: A): void => {
+        arktest.assertEQ(m, 0)
+      })
+  - decl: |
+      class A {
+        m: int = 0
+      }
+      function f(context: (this: A) => void) { context(new A()) }
       f() {
-        m
+        arktest.assertEQ(m, 0)
       }
   - decl: |
       class A {
         m: int = 0
       }
-      function f(context: (this: A) => void) {}
+      function f(context: (this: A) => void) { context(new A()) }
       f() {
-        this.m
+        arktest.assertEQ(this.m, 0)
       }
   - decl: |
       class A {
-        foo() {}
+        foo(): int { return 0 }
       }
-      function f(context: (this: A) => void) {}
+      function f(context: (this: A) => void) { context(new A()) }
       f() {
-        foo()
+        arktest.assertEQ(foo(), 0)
       }
   - decl: |
       class A {
-        foo() {}
+        foo(): int { return 0 }
       }
-      function f(context: (this: A) => void) {}
+      function f(context: (this: A) => void) { context(new A()) }
       f() {
-        this.foo()
+        arktest.assertEQ(this.foo(), 0)
       }

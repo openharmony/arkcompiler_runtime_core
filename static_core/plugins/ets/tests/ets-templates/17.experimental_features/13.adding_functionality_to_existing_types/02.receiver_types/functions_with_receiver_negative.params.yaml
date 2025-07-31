@@ -14,33 +14,8 @@
 ---
 cases:
   - decl: |
-      class A {
-        protected num: number = 1
-      }
-      function f(this: A): number {
-        return this.num
-      }
+      function f(this: null) {}
   - decl: |
-      class A {}
-      function f(this: A): void {}
-      function f(param: A): void {}
+      function f(this: undefined) {}
   - decl: |
-      class A {
-        private num: number = 1
-      }
-      function f(this: A): number {
-        return this.num
-      }
-  - decl: |
-      class A<T> {}
-      function f(this: A<T>) {}
-  - decl: |
-      class A {
-        f(): void {}
-      }
-      function f(this: A): void {}
-  - decl: |
-      class A {
-        f: number = 1
-      }
-      function f(this: A): void {}
+      function f(this: Any) {}
