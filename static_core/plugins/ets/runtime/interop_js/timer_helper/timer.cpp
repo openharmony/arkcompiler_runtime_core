@@ -14,22 +14,39 @@
  */
 
 #include "timer.h"
-#include "native_engine/native_engine.h"
 
+#include <array>
 #include <unordered_map>
 #include <iostream>
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wshadow"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
+#endif
+
+// NOLINTBEGIN(readability-identifier-naming, readability-redundant-declaration)
+// CC-OFFNXT(G.FMT.10-CPP) project code style
+napi_status __attribute__((weak)) napi_is_callable(napi_env env, napi_value value, bool *result);
+// CC-OFFNXT(G.FMT.10-CPP) project code style
+napi_status __attribute__((weak)) napi_get_uv_event_loop(napi_env env, struct uv_loop_s **loop);
+// NOLINTEND(readability-identifier-naming, readability-redundant-declaration)
+
 namespace ark::ets::interop::js::helper {
 
+// NOLINTBEGIN(fuchsia-statically-constructed-objects)
 // CC-OFFNXT(G.NAM.03-CPP) project code style
-static uint32_t nextTimerId = 0;
-static std::unordered_map<uint32_t, TimerInfo *> timers;
+static uint32_t g_nextTimerId = 0;
+static std::unordered_map<uint32_t, TimerInfo *> g_timers;
+// NOLINTEND(fuchsia-statically-constructed-objects)
 
 TimerInfo::TimerInfo(napi_env env, napi_ref cb, std::vector<napi_ref> cbArgs, bool repeat)
     : env(env), cb(cb), cbArgs(std::move(cbArgs)), repeat(repeat), timer(new uv_timer_t())
 {
-    timerId = nextTimerId++;
-    timers[timerId] = this;
+    timerId = g_nextTimerId++;
+    g_timers[timerId] = this;
     timer->data = this;
     uv_loop_t *loop = nullptr;
     napi_get_uv_event_loop(env, &loop);
@@ -42,9 +59,9 @@ TimerInfo::~TimerInfo()
     for (auto &ref : cbArgs) {
         napi_delete_reference(env, ref);
     }
-    timers.erase(timerId);
+    g_timers.erase(timerId);
     uv_timer_stop(timer);
-    uv_close(reinterpret_cast<uv_handle_t *>(timer), kTimerCloseCallback);
+    uv_close(reinterpret_cast<uv_handle_t *>(timer), TIMER_CLOSE_CALLBACK);
 }
 
 static napi_value RegisterTimer(napi_env env, napi_ref cb, std::vector<napi_ref> cbArgs, int32_t timeout, bool repeat)
@@ -73,7 +90,7 @@ static napi_value RegisterTimer(napi_env env, napi_ref cb, std::vector<napi_ref>
             std::abort();  // CC-OFF(G.STD.16-CPP) fatal error
         }
 
-        if (timers.find(timerId) == timers.end()) {
+        if (g_timers.find(timerId) == g_timers.end()) {
             // timer was cleared during callback
             return;
         }
@@ -150,8 +167,8 @@ napi_value SetTimeoutImpl(napi_env env, napi_callback_info info, bool repeat)
 napi_value ClearTimerImpl(napi_env env, napi_callback_info info)
 {
     size_t argc = 1;
-    napi_value argv[1];
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    std::array<napi_value, 1> argv {};
+    napi_get_cb_info(env, info, &argc, argv.data(), nullptr, nullptr);
     if (argc < 1) {
         napi_throw_error(env, nullptr, "The number of params must be one");
         return nullptr;
@@ -164,13 +181,13 @@ napi_value ClearTimerImpl(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto timerIt = timers.find(tId);
-    if (timerIt == timers.end()) {
+    auto timerIt = g_timers.find(tId);
+    if (timerIt == g_timers.end()) {
         // timer already cleared
         return nullptr;
     }
-    timers.erase(timerIt);
     auto *timerInfo = timerIt->second;
+    g_timers.erase(timerIt);
     delete timerInfo;
 
     napi_value undefined;
