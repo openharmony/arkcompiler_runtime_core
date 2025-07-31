@@ -254,7 +254,7 @@ function check(fn: () => int, message: String): int {
     try {
         result = fn();
     } catch(e) {
-        console.println("FAILED: " + message + " => Exception catched: " + e);
+        console.println("FAILED: " + message + " => Error catched: " + e);
         return fail;
     }
     if (result == success) {
