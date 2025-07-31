@@ -26,7 +26,7 @@ class BarInt1<T>  {
         case 0:
             return this.data1;
         default:
-            throw new Exception ("Hmm ...");
+            throw new Error("Hmm ...");
         }
     }
 
@@ -36,7 +36,7 @@ class BarInt1<T>  {
             this.data1 = value;
             break;
         default:
-            throw new Exception ("Hmm ...");
+            throw new Error("Hmm ...");
         }
     }
 
@@ -57,7 +57,7 @@ class BarInt2<T> extends BarInt1<T> {
         case 1:
             return this.data21;
         default:
-            throw new Exception ("Hmm ...");
+            throw new Error("Hmm ...");
         }
     }
 
@@ -70,7 +70,7 @@ class BarInt2<T> extends BarInt1<T> {
             this.data21 = value;
             break;
         default:
-            throw new Exception ("Hmm ...");
+            throw new Error("Hmm ...");
         }
     }
 
@@ -97,7 +97,7 @@ function test1() : int {
         arktest.assertEQ(x[0], 1)
     } catch(e) {
         result++
-        console.log("Unexpexted exception 1");
+        console.log("Unexpexted error 1");
     }
 
     try {
@@ -105,7 +105,7 @@ function test1() : int {
         arktest.assertEQ(y[1], 2)
     } catch(e) {
         result++
-        console.log("Unexpexted exception 2");
+        console.log("Unexpexted error 2");
 
     }
 
@@ -113,7 +113,7 @@ function test1() : int {
         x[0] = 10
     } catch(e) {
         result++
-        console.log("Unexpexted exception 3");
+        console.log("Unexpexted error 3");
     }
 
     try {
@@ -121,14 +121,14 @@ function test1() : int {
         y[1] = 20
     } catch(e) {
         result++
-        console.log("Unexpexted exception 4");
+        console.log("Unexpexted error 4");
     }
 
       try {
         arktest.assertEQ(x[0], 10)
     } catch(e) {
         result++
-        console.log("Unexpexted exception 5");
+        console.log("Unexpexted error 5");
     }
 
     try {
@@ -136,7 +136,7 @@ function test1() : int {
         arktest.assertEQ(y[1], 20)
     } catch(e) {
         result++
-        console.log("Unexpexted exception 6");
+        console.log("Unexpexted error 6");
 
     }
 

@@ -31,7 +31,7 @@ class BarInt1 implements IFooBar {
           case 0:
             return this.data;
           default:
-            throw new Exception ("Hmm ...");
+            throw new Error("Hmm ...");
         }
     }
 
@@ -41,7 +41,7 @@ class BarInt1 implements IFooBar {
             this.data = value;
             break;
           default:
-            throw new Exception ("Hmm ...");
+            throw new Error("Hmm ...");
         }
     }
 
@@ -62,7 +62,7 @@ class BarInt2 implements IFooBar {
           case 1:
             return this.data2;
           default:
-            throw new Exception ("Hmm ...");
+            throw new Error("Hmm ...");
         }
     }
 
@@ -75,7 +75,7 @@ class BarInt2 implements IFooBar {
             this.data2 = value;
             break;
           default:
-            throw new Exception ("Hmm ...");
+            throw new Error("Hmm ...");
         }
     }
 
@@ -101,7 +101,7 @@ function test1() : int {
         arktest.assertEQ(x[0], 1)
     } catch (e) {
         result++
-        console.log("Unexpexted exception");
+        console.log("Unexpexted error");
     }
 
     try {
@@ -109,14 +109,14 @@ function test1() : int {
         arktest.assertEQ(y[1], 2)
     } catch (e) {
         result++
-        console.log("Unexpexted exception");
+        console.log("Unexpexted error");
     }
 
     try {
         x[0] == 10
     } catch (e) {
         result++
-        console.log("Unexpexted exception");
+        console.log("Unexpexted error");
     }
 
     try {
@@ -124,14 +124,14 @@ function test1() : int {
         y[1] = 20
     } catch (e) {
         result++
-        console.log("Unexpexted exception");
+        console.log("Unexpexted error");
     }
 
       try {
         arktest.assertEQ(x[0], 10)
     } catch (e) {
         result++
-        console.log("Unexpexted exception");
+        console.log("Unexpexted error");
     }
 
     try {
@@ -139,7 +139,7 @@ function test1() : int {
         arktest.assertEQ(y[1], 20)
     } catch (e) {
         result++
-        console.log("Unexpexted exception");
+        console.log("Unexpexted error");
     }
 
 

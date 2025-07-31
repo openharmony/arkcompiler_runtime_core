@@ -47,9 +47,9 @@ function runTest(test: () => int, message: String) {
   } catch (e) {
     if (e instanceof AssertionError) {
       const error = e as AssertionError
-      console.println(`FAILED: '${message}' with exception: ${error.name}(${error.message})`)
+      console.println(`FAILED: '${message}' with error: ${error.name}(${error.message})`)
     } else {
-      console.println(`FAILED '${message}' with exception ` + e)
+      console.println(`FAILED '${message}' with error ` + e)
     }
     return RESULT_FAILURE
   }

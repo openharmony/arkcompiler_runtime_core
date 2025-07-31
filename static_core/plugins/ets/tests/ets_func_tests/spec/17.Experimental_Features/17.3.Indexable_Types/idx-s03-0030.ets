@@ -26,7 +26,7 @@ class Bar {
           case 0:
             return this.data1;
           default:
-            throw new Exception ("Hmm ...");
+            throw new Error("Hmm ...");
         }
     }
 
@@ -36,7 +36,7 @@ class Bar {
             this.data1 = value;
             break;
           default:
-            throw new Exception ("Hmm ...");
+            throw new Error("Hmm ...");
         }
     }
 
@@ -45,7 +45,7 @@ class Bar {
           case "hello":
             return this.data1;
           default:
-            throw new Exception ("Hmm ...");
+            throw new Error("Hmm ...");
         }
     }
 
@@ -55,7 +55,7 @@ class Bar {
             this.data1 = value;
             break;
           default:
-            throw new Exception ("Hmm ...");
+            throw new Error("Hmm ...");
         }
     }
 
@@ -74,42 +74,42 @@ function test1() : int {
         arktest.assertEQ(x[0], 10)
     } catch (e) {
         result++
-        console.log("Unexpexted exception 1");
+        console.log("Unexpexted error 1");
     }
 
     try {
         arktest.assertEQ(x["hello"], 10)
     } catch (e) {
         result++
-        console.log("Unexpexted exception 1");
+        console.log("Unexpexted error 1");
     }
 
     try {
         x[0] = 100
     } catch (e) {
         result++
-        console.log("Unexpexted exception 3");
+        console.log("Unexpexted error 3");
     }
 
     try {
         arktest.assertEQ(x[0], 100)
     } catch (e) {
         result++
-        console.log("Unexpexted exception 4");
+        console.log("Unexpexted error 4");
     }
 
     try {
         x["hello"] = 100
     } catch (e) {
         result++
-        console.log("Unexpexted exception 5");
+        console.log("Unexpexted error 5");
     }
 
     try {
         arktest.assertEQ(x["hello"], 100)
     } catch (e) {
         result++
-        console.log("Unexpexted exception 6");
+        console.log("Unexpexted error 6");
     }
 
     return result;
