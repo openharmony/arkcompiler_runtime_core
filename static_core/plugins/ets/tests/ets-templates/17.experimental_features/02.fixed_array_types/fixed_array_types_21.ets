@@ -22,5 +22,5 @@ tags:
 
 function main(): void {
     let x: FixedArray<number> = [1, 2, 3];
-    x.lenght = 4;
+    x.length = 4;
 }
