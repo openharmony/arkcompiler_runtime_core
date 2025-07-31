@@ -914,7 +914,8 @@ ClassLinkerContext *PandaEtsVM::CreateApplicationRuntimeLinker(const PandaVector
 
     EtsHandle<EtsEscompatArray> pathsHandle(coro, EtsEscompatArray::Create(abcFiles.size()));
     for (size_t idx = 0; idx < abcFiles.size(); ++idx) {
-        auto *str = EtsString::CreateFromMUtf8(abcFiles[idx].data(), abcFiles[idx].length());
+        auto utf8Data = reinterpret_cast<const uint8_t *>(abcFiles[idx].data());
+        auto *str = EtsString::CreateFromMUtf8(abcFiles[idx].data(), utf::MUtf8ToUtf16Size(utf8Data));
         if (UNLIKELY(str == nullptr)) {
             // Handle possible OOM
             exceptionHandler();
