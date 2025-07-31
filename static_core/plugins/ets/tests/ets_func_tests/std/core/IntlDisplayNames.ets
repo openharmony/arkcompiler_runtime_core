@@ -41,22 +41,20 @@ function main(): int {
 }
 
 function testDisplayNamesCreation(): void {
-    const typeErrorCheck = (e: Error | Exception) => { return (e instanceof TypeError) }
-
     // DisplayNames constructor should throw when type is not specified
-    arktest.expectThrow(
+    arktest.expectError(
         (): void => {
             new Intl.DisplayNames("en");
         },
-        typeErrorCheck
+        new TypeError("Options parameter is required")
     );
 
     // DisplayNames constructor should throw when type is not specified
-    arktest.expectThrow(
+    arktest.expectError(
         (): void => {
             new Intl.DisplayNames("en", {});
         },
-        typeErrorCheck
+        new TypeError("Option 'type' is required")
     );
 
     const displayNames = new Intl.DisplayNames("en", { type: "language" });
