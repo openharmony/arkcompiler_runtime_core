@@ -580,8 +580,8 @@ export final class Char extends Object implements Comparable<Char> {
     /**
      * toUpperCase() converts the underlying char to upper case if it is in lower case, otherwise the char unchanged
      */
-    public toUpperCase(): void {
-        this.value = Char.toUpperCase(this.value);
+    public toUpperCase(): Char {
+        return Char.toUpperCase(this.value);
     }
 
     /**
@@ -596,8 +596,8 @@ export final class Char extends Object implements Comparable<Char> {
     /**
      * toLowerCase() converts the underlying char to a lower case if it is in upper case, otherwise the char unchanged.
      */
-    public toLowerCase(): void {
-        this.value = Char.toLowerCase(this.value);
+    public toLowerCase(): Char {
+        return Char.toLowerCase(this.value);
     }
 
     /**
