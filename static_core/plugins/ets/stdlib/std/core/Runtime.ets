@@ -140,23 +140,16 @@ export final class Runtime {
      */
     public static native isSameReference(o1: Any, o2: Any): boolean;
 
-    /**
-     * Internal entrypoint to create exception for failed type cast
-     *
-     * @param src source value
-     *
-     * @param dstStr target type string
-     *
-     * @param isUndef true if undefined is in target type
-     *
-     * @returns exception object to throw
-     */
-    static native failedTypeCastException(src: Any, dstStr: string, isUndef: boolean): ClassCastError
-
+    // Deprecated.
     native static __getTypeInfo(o: Any): Class|undefined;
 
+    // Internal stub to create a ClassCastError object in failed cast events
+    static native failedTypeCastException(src: Any, dstStr: string, isUndef: boolean): ClassCastError
+
+    // Internal stub to create a FixedArray of the specified type and length
     native static allocSameTypeArray<T extends FixedArray<Any>>(type: Class, length: int): T;
 
+    // Internal stub to create a FixedArray with elements prepended in front of the original array
     static addFrontElementsStub(original: FixedArray<Any>, front: FixedArray<Any>): FixedArray<Any> {
         let res = Runtime.allocSameTypeArray<FixedArray<Any>>(Class.of(original), original.length + front.length)
         for (let i: int = 0; i < front.length; ++i) {
@@ -168,6 +161,7 @@ export final class Runtime {
         return res
     }
 
+    // Internal stub to create a FixedArray with several elements removed from front of the original array
     static removeFrontElementsStub(original: FixedArray<Any>, count: int): FixedArray<Any> {
         let res = Runtime.allocSameTypeArray<FixedArray<Any>>(Class.of(original), original.length - count)
         for (let i: int = count; i < original.length; ++i) {
@@ -176,6 +170,7 @@ export final class Runtime {
         return res
     }
 
+    // Internal stub to pad rest arguments array to handle possible argument underapplication
     static restArgumentsUnderapplicationStub(rest: FixedArray<Any>, required: int): FixedArray<Any> {
         if (rest.length >= required) {
             return rest
@@ -188,6 +183,11 @@ export final class Runtime {
             newRest[i] = undefined
         }
         return newRest
+    }
+
+    // Internal stub to handle a generic case of unsafeCall for std.core.Lambda... helper classes
+    static lambdaUnsafeCallStub(fn: Function, r: FixedArray<Any>): Any {
+        return __lambdaUnsafeCallStub(fn, r)
     }
 }
 
