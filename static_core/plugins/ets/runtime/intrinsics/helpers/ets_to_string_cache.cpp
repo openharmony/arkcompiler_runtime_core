@@ -279,6 +279,7 @@ std::pair<EtsString *, ToStringResult> EtsToStringCache<T, Derived, Hash>::Finis
     auto *string = ToString(number);
     ASSERT(string != nullptr);
     auto *cached = reinterpret_cast<typename EtsToStringCacheElement<T>::Data *>(&cachedAsInt);
+    ASSERT(elemHandle.GetPtr() != nullptr);
     auto storeRes = elemHandle->TryStore(coro, string, number, *cached);
     return {string, storeRes};
 #endif
