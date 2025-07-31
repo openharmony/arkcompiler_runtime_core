@@ -117,4 +117,29 @@ TEST_F(ReferenceIsUndefinedTest, CheckUndefinedReceivedFromManaged)
     ASSERT_EQ(isCorrectUndefined, ANI_TRUE);
 }
 
+static ani_ref GetUndefinedFromNativeImpl(ani_env *env)
+{
+    ani_ref undef {};
+    ani_status status = env->GetUndefined(&undef);
+    LOG_IF(status != ANI_OK, FATAL, ANI) << "Cannot get undefined ani_ref";
+    return undef;
+}
+
+TEST_F(ReferenceIsUndefinedTest, CheckUndefinedFromNative)
+{
+    ani_module mod {};
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &mod), ANI_OK);
+    ani_native_function fn {"getUndefinedFromNative", ":C{std.core.Object}",
+                            reinterpret_cast<void *>(GetUndefinedFromNativeImpl)};
+    ASSERT_EQ(env_->Module_BindNativeFunctions(mod, &fn, 1), ANI_OK);
+
+    auto isCorrectUndefined = CallEtsFunction<ani_boolean>(MODULE_NAME, "checkUndefinedFromNative");
+
+    ani_boolean hasPendingError = ANI_FALSE;
+    ASSERT_EQ(env_->ExistUnhandledError(&hasPendingError), ANI_OK);
+    ASSERT_EQ(hasPendingError, ANI_FALSE);
+
+    ASSERT_EQ(isCorrectUndefined, ANI_TRUE);
+}
+
 }  // namespace ark::ets::ani::testing

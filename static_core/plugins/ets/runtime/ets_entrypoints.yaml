@@ -855,7 +855,7 @@
   properties: []
   signature:
     - ark::ObjectHeader*
-    - ark::mem::Reference*
+    - ark::ets::EtsReference*
 
 - name: BeginQuickNativeMethod
   entrypoint: BeginQuickNativeMethod
@@ -877,7 +877,7 @@
   properties: []
   signature:
     - ark::ObjectHeader*
-    - ark::mem::Reference*
+    - ark::ets::EtsReference*
 
 - name: ResolveCallByName
   entrypoint: ResolveCallByNameEntrypoint
