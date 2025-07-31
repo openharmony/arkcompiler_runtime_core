@@ -26,6 +26,5 @@ function testToJSONWithInvalidDate(): void {
 }
 
 function testToISOStringWithInvalidDate(): void {
-    const errorCheck = (e: Error | Exception) => { return e.message == 'Invalid time value'; };
-    arktest.expectThrow((): void => { invalidDate.toISOString(); }, errorCheck);
+    arktest.expectError((): void => { invalidDate.toISOString(); }, new RangeError("Invalid time value"));
 }
