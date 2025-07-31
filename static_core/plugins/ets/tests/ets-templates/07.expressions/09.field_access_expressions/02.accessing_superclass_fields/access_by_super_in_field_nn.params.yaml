@@ -16,16 +16,16 @@ cases:
   - { type: "byte", value: "2", assert: "instance.b == 2"}
   - { type: "short", value: "2", assert: "instance.b == 2"}
   - { type: "long", value: "2", assert: "instance.b == 2"}
-  - { type: "float", value: "1.2f", assert: "instance.b == 1.2f as float"}
+  - { type: "float", value: "1.2f", assert: "instance.b == 1.2f.toFloat()"}
   - { type: "double", value: "2", assert: "instance.b == 2"}
   - { type: "char", value: "c'a'", assert: "instance.b == c'a'"}
   - { type: "boolean", value: "true", assert: "instance.b == true"}
   - { type: "string", value: "\"some string\"", assert: "instance.b == \"some string\""}
-  - { type: "Byte", value: "new Byte(2 as byte)", assert: "instance.b == 2"}
-  - { type: "Short", value: "new Short(2 as short)", assert: "instance.b == 2"}
+  - { type: "Byte", value: "new Byte(2)", assert: "instance.b == 2"}
+  - { type: "Short", value: "new Short(2)", assert: "instance.b == 2"}
   - { type: "Int", value: "new Int(2)", assert: "instance.b == 2"}
   - { type: "Long", value: "new Long(2)", assert: "instance.b == 2"}
-  - { type: "Float", value: "new Float(1.2)", assert: "instance.b == 1.2 as float"}
+  - { type: "Float", value: "new Float(1.2)", assert: "instance.b == new Float(1.2)"}
   - { type: "Double", value: "new Double(1.2)", assert: "instance.b == 1.2"}
   - { type: "Char", value: "new Char(c'a')", assert: "instance.b == c'a'"}
   - { type: "Boolean", value: "new Boolean(true)", assert: "instance.b == true"}

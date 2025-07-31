@@ -21,7 +21,7 @@ desc:
 
 const value1: {{c.type}} = {{c.value}}
 const value2: int = 10
-const size: int = value1 {{c.sign}} value2 {{c.conversion}}
+const size: int = (value1 {{c.sign}} value2){{c.conversion}}
 
 function main() {
     const data = new int[size]

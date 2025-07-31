@@ -22,9 +22,9 @@ desc: >-
 let arr: int[] = [1, 2, 3];
 
 function main(): void {
-  let x: Byte = new Byte(0 as byte)
-  let y: Short = new Short(1 as short)
-  let z: Int = new Int(2 as int)
+  let x: Byte = new Byte(0)
+  let y: Short = new Short(1)
+  let z: Int = new Int(2)
 
   arktest.assertTrue( arr[x] == 1 && arr[y] == 2 && arr[z] == 3 )
 }

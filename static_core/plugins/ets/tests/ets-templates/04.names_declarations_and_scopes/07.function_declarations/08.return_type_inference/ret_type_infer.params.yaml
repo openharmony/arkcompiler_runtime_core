@@ -15,60 +15,60 @@
 cases:
     - decl: |-
             function foo() {  // infer byte
-                return 127 as byte;
+                return new Byte(127);
             }
       call: |-
-            arktest.assertTrue(foo() == 127 as byte);
+            arktest.assertTrue(foo() == new Byte(127));
 
     - decl: |-
             function foo() {  // infer Byte
-                return new Byte(127 as byte);
+                return new Byte(127);
             }
       call: |-
             let b = foo();
             arktest.assertTrue(b instanceof Byte);
-            arktest.assertTrue(b.unboxed() == 127 as byte);
+            arktest.assertTrue(b.unboxed() == new Byte(127));
 
     - decl: |-
             function foo() {  // infer short
                 return 2 as short;
             }
       call: |-
-            arktest.assertTrue(foo() == 2 as short);
+            arktest.assertTrue(foo() == new Short(2));
 
     - decl: |-
             function foo() {  // infer Short
-                return new Short(2 as short);
+                return new Short(new Short(2));
             }
       call: |-
             let b = foo();
             arktest.assertTrue(b instanceof Short);
-            arktest.assertTrue(b.unboxed() == 2 as short);
+            arktest.assertTrue(b.unboxed() == new Short(2));
 
     - decl: |-
             function foo() {  // infer Int
-                return new Int(2 as int);
+                return new Int(2);
             }
       call: |-
             let b = foo();
             arktest.assertTrue(b instanceof Int);
-            arktest.assertTrue(b.unboxed() == 2 as int);
+            arktest.assertTrue(b.unboxed() == new Int(2));
 
     - decl: |-
             function foo() {  // infer long
-                return 3 as long;
+                return new Long(3);
             }
       call: |-
-            arktest.assertTrue(foo() == 3 as long);
+            arktest.assertTrue(foo() == new Long(3));
 
     - decl: |-
             function foo() {  // infer Long
-                return new Long(3 as long);
+                return new Long(3);
             }
       call: |-
             let b = foo();
             arktest.assertTrue(b instanceof Long);
-            arktest.assertTrue(b.unboxed() == 3 as long);
+            arktest.assertTrue(b.unboxed() == new Long(3));
 
     - decl: |-
             function foo() {  // infer float
@@ -79,28 +79,28 @@ cases:
 
     - decl: |-
             function foo() {  // infer Float
-                return new Float(4.3 as float);
+                return new Float(4.3);
             }
       call: |-
             let b = foo();
             arktest.assertTrue(b instanceof Float);
-            arktest.assertTrue(b.unboxed() == 4.3 as float);
+            arktest.assertTrue(b.unboxed() == new Float(4.3));
 
     - decl: |-
             function foo() {  // infer double
-                return 5.3 as double;
+                return new Double(5.3);
             }
       call: |-
-            arktest.assertTrue(foo() == 5.3 as double);
+            arktest.assertTrue(foo() == new Double(5.3));
 
     - decl: |-
             function foo() {  // infer Double
-                return new Double(5.4 as double);
+                return new Double(5.4);
             }
       call: |-
             let b = foo();
             arktest.assertTrue(b instanceof Double);
-            arktest.assertTrue(b.unboxed() == 5.4 as double);
+            arktest.assertTrue(b.unboxed() == new Double(5.4));
 
     - decl: |-
             function foo() {  // infer Number
@@ -286,11 +286,11 @@ cases:
           const cstr = "some string"  // infer boxing conversion + union Number|String|undefined|null
           function foo(i: int) {
               switch(i) {
-                  case 1: return 1 as byte;
-                  case 2: return 2 as short;
-                  case 3: return 3 as int;
-                  case 4: return 4 as long;
-                  case 5: return 5 as float;
+                  case 1: return new Byte(1);
+                  case 2: return new Short(2);
+                  case 3: return new Int(3);
+                  case 4: return new Long(4);
+                  case 5: return new Float(5);
                   case 6: return 6 as number;
                   case 7: return 'B';
                   default: return 0;

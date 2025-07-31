@@ -18,7 +18,7 @@ cases:
         type T = byte
     check: |-
         function main() {
-            let a: T = 0x80 as byte; // -128
+            let a: T = 0x80.toByte(); // -128
             arktest.assertEQ(foo(a), 1);
         }
 
@@ -26,7 +26,7 @@ cases:
         type T = short
     check: |-
         function main() {
-            let a: T = 0x7FFF as short; // 32767
+            let a: T = 0x7FFF.toShort(); // 32767
             arktest.assertEQ(foo(a), 2);
         }
 
@@ -34,7 +34,7 @@ cases:
         type T = int
     check: |-
         function main() {
-            let a: T = 127 as int;
+            let a: T = new Int(127);
             arktest.assertEQ(foo(a), 3);
         }
 
@@ -42,7 +42,7 @@ cases:
         type T = long
     check: |-
         function main() {
-            let a: T = 127 as long;
+            let a: T = new Long(127);
             arktest.assertEQ(foo(a), 4);
         }
 
@@ -50,7 +50,7 @@ cases:
         type T = float
     check: |-
         function main() {
-            let a: T = -0.0 as float;
+            let a: T = new Float(-0.0);
             arktest.assertEQ(foo(a), 5);
         }
 
@@ -58,7 +58,7 @@ cases:
         type T = double
     check: |-
         function main() {
-            let a: T = -0.0 as double;
+            let a: T = new Double(-0.0);
             arktest.assertEQ(foo(a), 6); // double is an alias to number
         }
 
@@ -91,7 +91,7 @@ cases:
         type T = Byte
     check: |-
         function main() {
-            let a: T = new Byte(0x7F as byte);
+            let a: T = new Byte(0x7F);
             arktest.assertEQ(foo(a), 1);
         }
 
@@ -99,7 +99,7 @@ cases:
         type T = Short
     check: |-
         function main() {
-            let a: T = new Short(2 as short);
+            let a: T = new Short(2);
             arktest.assertEQ(foo(a), 2);
         }
 
@@ -107,7 +107,7 @@ cases:
         type T = Int
     check: |-
         function main() {
-            let a: T = new Int(3 as int);
+            let a: T = new Int(3);
             arktest.assertEQ(foo(a), 3);
         }
 
@@ -115,7 +115,7 @@ cases:
         type T = Long
     check: |-
         function main() {
-            let a: T = new Long(4 as long);
+            let a: T = new Long(4);
             arktest.assertEQ(foo(a), 4);
         }
 
@@ -123,7 +123,7 @@ cases:
         type T = Float
     check: |-
         function main() {
-            let a: T = new Float(0.1 as float);
+            let a: T = new Float(0.1);
             arktest.assertEQ(foo(a), 5);
         }
 
@@ -131,7 +131,7 @@ cases:
         type T = Double
     check: |-
         function main() {
-            let a: T = new Double(0.1 as double);
+            let a: T = new Double(0.1);
             arktest.assertEQ(foo(a), 6); // Double is an alias to Number
         }
 

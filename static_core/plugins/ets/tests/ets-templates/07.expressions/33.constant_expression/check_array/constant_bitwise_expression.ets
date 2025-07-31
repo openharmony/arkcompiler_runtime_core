@@ -20,7 +20,7 @@ desc:
 ---*/
 
 const value1: {{c.type}} = {{c.value}}
-const size: int = (value1 {{c.expression}}) as int
+const size: int = (value1 {{c.expression}}).toInt()
 
 function main() {
     const data = new int[size]

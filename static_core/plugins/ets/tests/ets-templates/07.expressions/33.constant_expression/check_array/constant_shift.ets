@@ -23,7 +23,7 @@ const value1: {{c.type}} = {{c.value}}
 const size = value1 {{c.sign}} 3
 
 function main() {
-    const data = new int[size as int]
+    const data = new int[size.toInt()]
     arktest.assertEQ(data.length, {{c.expected}})
 }
 
