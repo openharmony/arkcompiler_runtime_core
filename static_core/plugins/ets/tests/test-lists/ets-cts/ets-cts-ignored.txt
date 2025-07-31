@@ -996,14 +996,17 @@
 # 27963
 07.expressions/01.evaluation_of_expressions/optional_chain_this.ets
 
-#24036
+# 24036
 07.expressions/01.evaluation_of_expressions/03.operator_precedence/typeof.ets
 
 # 28004
 07.expressions/01.evaluation_of_expressions/03.operator_precedence/exponentiation.ets
 
-#28179
+# 28179
 07.expressions/03.named_reference/01.function_reference/function_reference_neg.ets
+
+# 21362
+07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/nase3.ets
 
 #22791 FixedArray and Array<T> support is not implemented yet
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_cast_23.ets
