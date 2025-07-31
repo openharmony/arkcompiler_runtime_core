@@ -272,7 +272,7 @@ function runTest(testName: string, testBody: () => int): int {
 
         return RESULT_SUCCESS;
     } catch(e) {
-        console.println("FAILED: " + testName + " => Exception catched: " + e);
+        console.println("FAILED: " + testName + " => Error catched: " + e);
         return RESULT_FAILURE;
     }
 }
