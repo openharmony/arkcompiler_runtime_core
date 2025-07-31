@@ -22,6 +22,9 @@ LiteralDataAccessor::LiteralDataAccessor(const File &pandaFile, File::EntityId l
 {
     literalNum_ = pandaFile_.GetHeader()->numLiteralarrays;
     literalDataSp_ = pandaFile_.GetSpanFromId(literalDataId_);
+    if (literalDataSp_.size() >= pandaFile_.GetHeader()->fileSize) {
+        LOG(FATAL, PANDAFILE) << "Literal data size is greater than file size";
+    }
 }
 
 }  // namespace ark::panda_file

@@ -1252,8 +1252,13 @@ std::string Disassembler::GetMethodSignature(const panda_file::File::EntityId &m
 std::string Disassembler::GetFullRecordName(const panda_file::File::EntityId &classId) const
 {
     std::string name = StringDataToString(file_->GetStringData(classId));
-
+    if (name.empty()) {
+        LOG(FATAL, DISASSEMBLER) << "Record name is empty";
+    }
     auto type = pandasm::Type::FromDescriptor(name);
+    if (type.GetName().empty()) {
+        LOG(FATAL, DISASSEMBLER) << "Type name is empty";
+    }
     type = pandasm::Type(type.GetNameWithoutRank(), type.GetRank());
 
     return type.GetPandasmName();
