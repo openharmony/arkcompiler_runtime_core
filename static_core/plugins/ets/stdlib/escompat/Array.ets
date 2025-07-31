@@ -66,6 +66,9 @@ const FROM_BUFFER: FromBuffer;
 /**
  * Represents JS API-compatible Array
  */
+
+type arrType = String | undefined;
+
 export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     private buffer: FixedArray<NullishType>
     internal actualLength: int
@@ -705,7 +708,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 
     private wrap_default_sort(): void {
         let idxNonUndef = 0
-        type arrType = String | undefined
         try {
             let strArr : FixedArray<arrType> = new arrType[this.actualLength]
             for (let i = 0; i < this.actualLength; i++) {

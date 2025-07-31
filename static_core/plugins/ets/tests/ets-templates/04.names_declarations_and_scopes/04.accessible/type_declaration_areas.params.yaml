@@ -14,9 +14,9 @@
 ---
 cases:
   - decl: |-
+      type A = Boolean;
       let checked = false;
       {
-          type A = Boolean;
           let a: A = new Boolean(true);
           checked = a.unboxed();
       }
@@ -26,17 +26,16 @@ cases:
       }
 
   - decl: |-
+      type A = int;
       function main() {
-          type A = int;
           let a: A = -3;
           arktest.assertEQ(a, -3);
       }
 
   - decl: |-
+      type B = Int | String;
       function main() {
-          type B = Int;
           for(let i: int = 0; i<1; i++) {
-              type B = String;
               let a: B = "";
               arktest.assertTrue( a instanceof String)
           }
@@ -45,8 +44,8 @@ cases:
       }
 
   - decl: |-
+      type A = int;
       function foo(i: int): int {
-          type A = int;
           let a: A = i + 1;
           return a;
       }
@@ -55,9 +54,9 @@ cases:
       }
 
   - decl: |-
+      type B = String;
       function main() {
           try {
-              type B = String;
               let a: B = "";
               arktest.assertTrue(a instanceof String)
           } catch (e) {
@@ -66,18 +65,18 @@ cases:
       }
 
   - decl: |-
+      type B = String;
       function main() {
           for(let i: int = 0; i<1; i++) {
-              type B = String;
               let a: B = "";
               arktest.assertTrue(a instanceof String)
           }
       }
 
   - decl: |-
+      type A = int;
+      type B = string;
       function main() {
-          type A = int;
-          type B = string;
           for(let i: A = 0; i<1; i++) {
               let a: B = "";
               arktest.assertTrue(a instanceof string)
@@ -85,9 +84,9 @@ cases:
       }
 
   - decl: |-
+      type B = Float;
       function main() {
           while(1) {
-              type B = Float;
               let a: B = new Float();
               arktest.assertTrue(a instanceof Float)
               break;
@@ -95,19 +94,19 @@ cases:
       }
 
   - decl: |-
+      type B = Float;
       function main() {
           do {
-              type B = Float;
+              
               let a: B = new Float();
               arktest.assertTrue(a instanceof B)
           } while(0)
       }
 
   - decl: |-
+      type B = Int | String;
       function main() {
-          type B = Int;
           do {
-              type B = String;
               let a: B = "";
               arktest.assertTrue(a instanceof String)
           } while(0)
@@ -116,10 +115,10 @@ cases:
       }
 
   - decl: |-
+      type B = Int | String;
       function main() {
           switch (1) {
               case 1:
-                  type B = String;
                   let a: B = "";
                   arktest.assertTrue(a instanceof String);
                   break;
@@ -129,11 +128,10 @@ cases:
       }
 
   - decl: |-
+      type B = Int | String;
       function main() {
-          type B = Int;
           switch (2) {
               case 1:
-                  type B = String;
                   arktest.assertTrue(false)
                   break;
               case 2:
@@ -148,11 +146,10 @@ cases:
       }
 
   - decl: |-
+      type B = Int | String;
       function main() {
-          type B = Int;
           switch (2) {
               case 1: {
-                  type B = String;
                   arktest.assertTrue(false)
                   break;
                 }

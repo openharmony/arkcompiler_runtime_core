@@ -21,9 +21,10 @@ desc: {{c.desc}}
 
 {{c.decl}}
 
+type MyArray<T> = T[];
+type Direction = {{c.type}};
+
 function main(): void {
-  type MyArray<T> = T[];
-  type Direction = {{c.type}};
   let tmpArray: MyArray<Direction> = [{{c['values']}}];
 
   {{c.expected}}

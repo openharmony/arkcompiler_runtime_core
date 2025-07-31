@@ -20,6 +20,8 @@ desc: {{stm.desc}}
 
 ---*/
 
+{{stm.decl}}
+
 function main(): void {
     {{stm.logic}}
 }

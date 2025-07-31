@@ -18,7 +18,6 @@ statements:
   - block: |-
           if (check())
             arktest.assertTrue(true);
-  - block: 'enum Enum { v1, v2 }'
   - block: 'const b: int = 1;'
   - block: |-
           let i: int = 1;

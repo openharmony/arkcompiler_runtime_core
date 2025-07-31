@@ -19,6 +19,7 @@ cases:
       arktest.assertEQ(typeof a, 'number')
 
   - decl: |-
+      type t = keyof A<Object,Map<Object,Number>>
       class A<T,V> {
         foo(i: T) {}
         bar: V
@@ -28,13 +29,13 @@ cases:
         jay<U>() {}
       }
     check: |-
-      type t = keyof A<Object,Map<Object,Number>>
       let a: t = "bar"
       a = "foo"
       a = "jay"
       arktest.assertEQ(typeof a, "string")
 
   - decl: |-
+      type t = keyof A<Array<Byte>,Set<String>>
       final class A<T,V> {
         foo(i: T) {}
         bar: V
@@ -44,13 +45,13 @@ cases:
         jay<U>() {}
       }
     check: |-
-      type t = keyof A<Array<Byte>,Set<String>>
       let a: t = "bar"
       a = "foo"
       a = "jay"
       arktest.assertEQ(typeof a, "string")
 
   - decl: |-
+      type t = keyof A<B,int[]>
       abstract class A<T,V> {
         foo(i: T) {}
         bar: V
@@ -58,13 +59,13 @@ cases:
       }
       class B {}
     check: |-
-      type t = keyof A<B,int[]>
       let a: t = "bar"
       a = "foo"
       a = "jay"
       arktest.assertEQ(typeof a, "string")
 
   - decl: |-
+      type t = keyof I<NUM,Boolean>
       interface I<T,V> {
         foo(i: T)
         bar: V
@@ -72,7 +73,6 @@ cases:
       }
       enum NUM {A, B, C}
     check: |-
-      type t = keyof I<NUM,Boolean>
       let a: t = "bar"
       a = "foo"
       a = "jay"

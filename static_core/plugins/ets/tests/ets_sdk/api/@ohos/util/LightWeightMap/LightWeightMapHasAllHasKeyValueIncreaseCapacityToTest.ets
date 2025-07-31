@@ -92,14 +92,14 @@ function testHasValueNonExistingWithSpaces() {
         "Expected hasValue(' sparrow ') to return false as the value with surrounding spaces does not exist");
 }
 
+interface ComplexValue {
+    name: string;
+    gender: string;
+    age: number;
+}
+
 //Test cases ported from ArkTS 1.0:LIGHTWEIGHTMAP_HASVALUE_0500
 function testHasValueComplex() {
-    interface ComplexValue {
-        name: string;
-        gender: string;
-        age: number;
-    }
-
     const value: ComplexValue = {
         name: 'squirrel',
         gender: 'male',

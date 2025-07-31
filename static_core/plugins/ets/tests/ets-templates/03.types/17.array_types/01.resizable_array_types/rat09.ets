@@ -17,8 +17,9 @@
 desc: Test the creation of a two-dimensional array(number[][]).
 ---*/
 
+type Matrix = number[][];
+
 function main(): void {
-  type Matrix = number[][];
   let matrix: Matrix = [[1, 2], [3, 4]];
   let a: number = matrix[0][1];
 

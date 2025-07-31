@@ -22,8 +22,9 @@ desc:
 const const1: {{c.type1}} = 101
 const const2: {{c.type2}} = const1
 
+enum TestEnum { One = const2 }
+
 function main() {
-    enum TestEnum { One = const2 }
     arktest.assertEQ(TestEnum.One.valueOf(), 101)
 }
 

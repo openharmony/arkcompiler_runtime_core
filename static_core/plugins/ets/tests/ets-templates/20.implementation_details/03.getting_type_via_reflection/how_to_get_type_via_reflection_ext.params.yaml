@@ -161,10 +161,5 @@ cases:
       arktest.assertEQ(type_of_byte.toString(), "std.core.Byte");
   - desc: How to get enum via reflection.
     logic: |-
-      enum Color {
-        red = 0,
-        green = 1,
-        blue = 2
-      }
       let type_of_enum: Type = Type.from<Color>();
       arktest.assertNE(type_of_enum.toString().search("Color"), -1);

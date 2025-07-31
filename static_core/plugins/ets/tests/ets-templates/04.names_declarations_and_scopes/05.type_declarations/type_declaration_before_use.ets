@@ -21,12 +21,10 @@ tags: []
 const our: TOuterStringAlias = 'Outer String Alias'
 
 type TOuterStringAlias = String
-
+type TStringAlias = String
 
 function body() {
-
     let x: TStringAlias = 'Hello Alias'
-    type TStringAlias = String
 
     const y: TStringAlias = x
     return x

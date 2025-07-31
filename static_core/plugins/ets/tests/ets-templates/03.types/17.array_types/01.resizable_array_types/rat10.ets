@@ -17,8 +17,9 @@
 desc: Test whether the defined two-dimensional array can access elements normally(number[][]).
 ---*/
 
+type Matrix = number[][];
+
 function main(): void {
-  type Matrix = number[][];
   let matrix: Matrix = [[1, 2], [3, 4]];
   let a: number = matrix[1][1];
 

@@ -29,8 +29,9 @@ tags: [{{case.tags}}]
     {{case.def|indent}}
 }
 
+type t = keyof A
+
 function main() {
-    type t = keyof A
     // It is allowed to assign variable value of union_1 to another variable of union_2 if
     // union_2 contains or equal union_1.
     // Cannot assign value of union_1 to union_2 otherwise.

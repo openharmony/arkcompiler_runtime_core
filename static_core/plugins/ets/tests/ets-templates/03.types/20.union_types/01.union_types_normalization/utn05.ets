@@ -17,8 +17,9 @@
 desc: Test joint type("1" | string) .
 ---*/
 
+type A = "1" | string;
+
 function main(): void {
-    type A = "1" | string;
 
     let a: A = "test";
     arktest.assertEQ(typeof a, "string");

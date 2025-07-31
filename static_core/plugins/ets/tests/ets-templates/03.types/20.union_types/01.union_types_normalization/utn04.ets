@@ -17,8 +17,9 @@
 desc: Test joint type("1" | Object).
 ---*/
 
+type A = "1" | Object;
+
 function main(): void {
-    type A = "1" | Object;
 
     let a: A = {};
     arktest.assertEQ(typeof a, "object");
