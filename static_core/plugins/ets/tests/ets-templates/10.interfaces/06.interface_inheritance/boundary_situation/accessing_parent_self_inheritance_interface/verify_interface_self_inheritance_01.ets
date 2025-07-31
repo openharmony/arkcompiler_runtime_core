@@ -21,21 +21,3 @@ tags: [compile-only, negative]
 interface SelfInheritingInterface extends SelfInheritingInterface {
   method2(): void;
 }
-
-class MyClass implements SelfInheritingInterface {
-  method1(): void {
-    console.log("run result --> no pass: expected output --> , actual output --> ,\n" +
-                "actual error --> SEGFAULT_FAIL, actual return code --> -11");
-  }
-
-  method2(): void {
-    console.log("run result --> no pass: expected output --> , actual output --> ,\n" +
-                "actual error --> SEGFAULT_FAIL, actual return code --> -11");
-  }
-}
-
-function main(): void {
-  const classA = new MyClass();
-  classA.method1();
-  classA.method2();
-}

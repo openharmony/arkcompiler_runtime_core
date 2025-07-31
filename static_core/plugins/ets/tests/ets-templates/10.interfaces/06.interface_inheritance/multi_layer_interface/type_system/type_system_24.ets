@@ -43,17 +43,11 @@ class GermanShepherd implements Dog, Guard {
         this.breed = breed;
     }
 
-    makeSound(): void {
-        console.log("Generic animal sound");
-    }
+    makeSound(): void {}
 
-    bark(): void {
-        console.log("Woof! Woof!");
-    }
+    bark(): void {}
 
-    guard(): void {
-        console.log("Guarding the house");
-    }
+    guard(): void {}
 }
 
 function main(): void {

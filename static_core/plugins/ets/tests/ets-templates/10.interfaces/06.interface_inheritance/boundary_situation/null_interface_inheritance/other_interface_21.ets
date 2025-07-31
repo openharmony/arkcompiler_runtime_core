@@ -15,11 +15,10 @@
 
 /*---
 desc: Null interface inherits an interface containing an any type.
-tags: [compile-only, negative]
 ---*/
 
 interface ParentInterface {
-  value: any; 
+  value: Any; 
 }
 
 interface EmptyInterface extends ParentInterface {}
@@ -28,4 +27,5 @@ function main(): void {
   const obj: EmptyInterface = {
     value: 42
   };
+  arktest.assertEQ(obj.value, 42);
 }

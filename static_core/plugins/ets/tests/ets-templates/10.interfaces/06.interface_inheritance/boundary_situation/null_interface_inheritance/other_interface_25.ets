@@ -27,6 +27,6 @@ interface EmptyInterface extends ParentInterface {}
 function main(): void {
   const obj: EmptyInterface = {
     items: ["apple", "banana"]
-  };  
-  obj.items.push("cherry");
+  };
+  obj.items = ["apple", "banana", "cherry"] // CTE, cannot increase length of the readonly array
 }

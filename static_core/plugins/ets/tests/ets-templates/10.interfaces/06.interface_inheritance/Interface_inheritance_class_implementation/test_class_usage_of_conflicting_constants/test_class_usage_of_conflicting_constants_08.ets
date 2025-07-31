@@ -15,8 +15,8 @@
 
 /*---
 desc: >-
-    Verify that a class can distinguish the same - named constants between an interface constant and a class static
-    constant by class name and instance.
+    Verify that a class can distinguish the same-named constants between an interface constant
+    and a class static constant by class name and instance.
 ---*/
 
 interface InterfaceStaticConflictInterface {

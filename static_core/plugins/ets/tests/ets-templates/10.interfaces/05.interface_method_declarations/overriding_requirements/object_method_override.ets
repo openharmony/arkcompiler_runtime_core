@@ -23,7 +23,3 @@ interface A {
     return "sd";
   };
 }
-
-class B implements A {
-
-}

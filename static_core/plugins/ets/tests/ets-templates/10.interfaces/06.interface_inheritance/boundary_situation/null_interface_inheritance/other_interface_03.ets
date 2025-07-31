@@ -15,7 +15,7 @@
 
 /*---
 desc: Nan empty interface inherits an empty interface.
-tags: [compile-only, positive]
+tags: [compile-only]
 ---*/
 
 interface ParentEmptyInterface {}

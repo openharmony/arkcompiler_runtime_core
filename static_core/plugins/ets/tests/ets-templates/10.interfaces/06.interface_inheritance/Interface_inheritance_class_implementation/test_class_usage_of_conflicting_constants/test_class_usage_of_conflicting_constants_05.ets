@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Verify the conflict of the same - named constants in multi - level inheritance and interface implementation.
+desc: Verify the conflict of the same-named constants in multi-level inheritance and interface implementation.
 ---*/
 
 class GrandParentClass {

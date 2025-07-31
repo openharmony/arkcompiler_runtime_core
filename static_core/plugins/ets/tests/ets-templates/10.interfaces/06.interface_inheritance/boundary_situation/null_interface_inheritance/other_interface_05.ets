@@ -21,19 +21,11 @@ tags: [compile-only, negative]
 ---*/
 
 interface ParentInterface {
-  name: string;
   greet(): string;
 }
 
-interface EmptyInterface extends ParentInterface {}
-
 function main(): void {
-  const name = "Charlie";
-  const obj: EmptyInterface = {
-    name: name,
-    greet: () => {
-      return `Hello, ${name}`;
-    }
-  };
-  const greeting = obj.greet();
+  const obj: ParentInterface = {
+    greet: "str"
+  }
 }

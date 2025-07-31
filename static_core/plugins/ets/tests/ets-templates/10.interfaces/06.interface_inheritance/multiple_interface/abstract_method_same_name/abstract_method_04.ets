@@ -27,9 +27,3 @@ interface Parent2 {
 }
 
 interface Child extends Parent1, Parent2 {}
-
-class ChildClass implements Child {
-  getValue(): string | number {
-    return Math.random() > 0.5 ? "Hello" : 42;
-  }
-}

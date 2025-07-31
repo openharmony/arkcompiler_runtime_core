@@ -14,25 +14,23 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Overload public default method from superinterface with different signature.
+desc: Inheritance open method from superinterface with declared private method with same signature in interface.
+assert: >-
+    A compile-time error occurs if:
+        If an interface I declares a private method m, and
+        Signature of m is compatible with the public instance method 𝑚′ in a superinterface of I, and
+        𝑚′ is otherwise accessible to code in I.
+tags: [negative, compile-only]
 ---*/
 
 interface A {
-  foo(): int {
+  private foo(): int {
     return 1;
   }
 }
 
 interface B extends A {
-  foo(c: int): int {
+  private foo(): int {
     return 2;
   }
-}
-
-class C implements B {}
-
-function main(): void {
-  let c: C = new C()
-  arktest.assertEQ(c.foo(), 1)
-  arktest.assertEQ(c.foo(1), 2)
 }

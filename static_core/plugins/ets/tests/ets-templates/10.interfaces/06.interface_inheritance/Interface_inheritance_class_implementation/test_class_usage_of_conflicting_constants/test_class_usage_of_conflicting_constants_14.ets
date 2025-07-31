@@ -15,8 +15,8 @@
 
 /*---
 desc: >-
-    Verify that a class can distinguish the same - named constants between an interface constant and a protected class
-    property by subclass access.
+    Verify that a class can distinguish the same-named constants
+    between an interface constant and a protected class property by subclass access.
 ---*/
 
 interface ProtectedPropConflictInterface {
