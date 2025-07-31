@@ -62,7 +62,7 @@ cases:
           arktest.assertEQ( a.meth(new Long(-1 as long)), "long" )
           arktest.assertEQ( a.meth(new Char(c'A')), "char" )
           arktest.assertEQ( a.meth(new Boolean(false)), "boolean" )
-          arktest.assertEQ( a.meth(new Float(3.14 as float)), "float" )
+          arktest.assertEQ( a.meth(new Float(3.14.toFloat())), "float" )
           arktest.assertEQ( a.meth(new Double(3.14)), "double" )
           arktest.assertEQ( a.meth(-1 as long), "long" )
           arktest.assertEQ( a.meth(-1 as int), "int" )
@@ -71,7 +71,7 @@ cases:
           arktest.assertEQ( a.meth(c'A'), "char" )
           arktest.assertEQ( a.meth(false), "boolean" )
           arktest.assertEQ( a.meth(3.14), "double" )
-          arktest.assertEQ( a.meth(3.14 as float), "float" )
+          arktest.assertEQ( a.meth(3.14.toFloat()), "float" )
 
     - decl: |-
           // primitives and boxed, with sub/superclass
@@ -105,7 +105,7 @@ cases:
           arktest.assertEQ( a.meth(new Long(-1 as long)), "long" )
           arktest.assertEQ( a.meth(new Char(c'A')), "char" )
           arktest.assertEQ( a.meth(new Boolean(false)), "boolean" )
-          arktest.assertEQ( a.meth(new Float(3.14 as float)), "float" )
+          arktest.assertEQ( a.meth(new Float(3.14.toFloat())), "float" )
           arktest.assertEQ( a.meth(new Double(3.14)), "double" )
           arktest.assertEQ( a.meth(-1 as long), "long" )
           arktest.assertEQ( a.meth(-1 as int), "int" )
@@ -114,7 +114,7 @@ cases:
           arktest.assertEQ( a.meth(c'A'), "char" )
           arktest.assertEQ( a.meth(false), "boolean" )
           arktest.assertEQ( a.meth(3.14), "double" )
-          arktest.assertEQ( a.meth(3.14 as float), "float" )
+          arktest.assertEQ( a.meth(3.14.toFloat()), "float" )
 
     - decl: |-
           // enums
@@ -247,7 +247,7 @@ cases:
           arktest.assertEQ( a.meth([-1 as long]), "long" )
           arktest.assertEQ( a.meth([c'A']), "char" )
           arktest.assertEQ( a.meth([false]), "boolean" )
-          arktest.assertEQ( a.meth([3.14 as float]), "float" )
+          arktest.assertEQ( a.meth([3.14.toFloat()]), "float" )
           arktest.assertEQ( a.meth([3.14]), "double" )
           arktest.assertEQ( a.meth([new Byte(-1 as byte)]), "byte" )
           arktest.assertEQ( a.meth([new Short(-1 as short)]), "short" )
@@ -255,7 +255,7 @@ cases:
           arktest.assertEQ( a.meth([new Long(-1 as long)]), "long" )
           arktest.assertEQ( a.meth([new Char(c'A')]), "char" )
           arktest.assertEQ( a.meth([new Boolean(false)]), "boolean" )
-          arktest.assertEQ( a.meth([new Float(3.14 as float)]), "float" )
+          arktest.assertEQ( a.meth([new Float(3.14.toFloat())]), "float" )
           arktest.assertEQ( a.meth([new Double(3.14)]), "double" )
           arktest.assertEQ( a.meth([new Object()]), "Object" )
           arktest.assertEQ( a.meth([Color.Red]), "Color" )

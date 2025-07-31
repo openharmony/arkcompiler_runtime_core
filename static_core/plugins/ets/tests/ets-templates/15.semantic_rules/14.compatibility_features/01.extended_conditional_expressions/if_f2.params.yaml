@@ -30,7 +30,7 @@ cases:
     - { val: '-0', type: 'double' }
 
     - { val: 'new Int(0)', type: 'int' }
-    - { val: 'new Byte(0 as byte)', type: 'byte' }
+    - { val: 'new Byte(0)', type: 'byte' }
     - { val: 'new Short()', type: 'short' }
     - { val: 'new Long()', type: 'long' }
     - { val: 'new Float()', type: 'float' }

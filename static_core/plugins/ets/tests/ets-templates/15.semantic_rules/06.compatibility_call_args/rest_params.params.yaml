@@ -15,7 +15,7 @@
 cases:
     - to_type: short[]
       value: |-
-        0b0 as byte, Byte.MIN_VALUE, Byte.MAX_VALUE
+        0b0.toByte(), Byte.MIN_VALUE, Byte.MAX_VALUE
       result: 
         - 0
         - -128
@@ -23,7 +23,7 @@ cases:
 
     - to_type: int[]
       value: |-
-        0b0 as byte, Byte.MIN_VALUE, Byte.MAX_VALUE
+        0b0.toByte(), Byte.MIN_VALUE, Byte.MAX_VALUE
       result: 
         - 0
         - -128
@@ -31,23 +31,23 @@ cases:
 
     - to_type: long[]
       value: |-
-        0b0 as byte, Byte.MIN_VALUE, Byte.MAX_VALUE
+        0b0.toByte(), Byte.MIN_VALUE, Byte.MAX_VALUE
       result: 
-        - 0 as long
-        - -128 as long
-        -  127 as long
+        - new Long(0)
+        - new Long(-128)
+        - new Long(127)
 
     - to_type: float[]
       value: |-
-        0b0 as byte, Byte.MIN_VALUE, Byte.MAX_VALUE
+        0b0.toByte(), Byte.MIN_VALUE, Byte.MAX_VALUE
       result: 
-        - 0 as float
-        - -128 as float
-        -  127 as float
+        - new Float(0)
+        - new Float(-128)
+        - new Float(127)
 
     - to_type: int[]
       value: |-
-        0b0 as short, Short.MIN_VALUE, Short.MAX_VALUE
+        0b0.toShort(), Short.MIN_VALUE, Short.MAX_VALUE
       result: 
         - 0
         - -32_768
@@ -55,7 +55,7 @@ cases:
 
     - to_type: number[]
       value: |-
-        0b0 as short, Short.MIN_VALUE, Short.MAX_VALUE
+        0b0.toShort(), Short.MIN_VALUE, Short.MAX_VALUE
       result: 
         - 0.0
         - -32_768 as number

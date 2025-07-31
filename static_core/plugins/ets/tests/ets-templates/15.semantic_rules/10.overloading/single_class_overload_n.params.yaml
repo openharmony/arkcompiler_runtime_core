@@ -52,7 +52,7 @@ cases:
       new Base<String, Number>(new Long());
       arktest.assertEQ( res, 6);
 
-      new Base<String, Number>(1.1 as float);
+      new Base<String, Number>(1.1.toFloat());
       arktest.assertEQ( res, 8);
 
       new Base<String, Number>(new Float());
@@ -170,7 +170,7 @@ cases:
       a.foo(new Long());
       arktest.assertEQ( res, 6);
 
-      a.foo(1.1 as float);
+      a.foo(1.1.toFloat());
       arktest.assertEQ( res, 8);
 
       a.foo(new Float());
@@ -287,7 +287,7 @@ cases:
       Base.foo(new Long());
       arktest.assertEQ( res, 6);
   
-      Base.foo(1.1 as float);
+      Base.foo(1.1.toFloat());
       arktest.assertEQ( res, 8);
   
       Base.foo(new Float());
