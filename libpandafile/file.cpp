@@ -673,6 +673,38 @@ void CheckFileVersion(const std::array<uint8_t, File::VERSION_SIZE> &file_versio
     }
 #undef LOG_LEVEL
 }
+
+PandaFileType GetFileType(const uint8_t *data, int32_t size)
+{
+    if (data == nullptr) {
+        LOG(ERROR, PANDAFILE) << "Invalid panda file, data is null";
+        return PandaFileType::FILE_FORMAT_INVALID;
+    }
+
+    uint32_t actualSize = static_cast<uint32_t>(size);
+    if (actualSize < sizeof(File::Header)) {
+        LOG(ERROR, PANDAFILE) << "Invalid panda file, size=" << actualSize;
+        return PandaFileType::FILE_FORMAT_INVALID;
+    }
+
+    auto header = reinterpret_cast<const File::Header *>(data);
+    if (actualSize != header->file_size) {
+        LOG(ERROR, PANDAFILE) << "File actual size [" << actualSize << "] is not equal to Header's fileSize ["
+                              << header->file_size << "]";
+        return PandaFileType::FILE_FORMAT_INVALID;
+    }
+
+    if (File::MAGIC != header->magic) {
+        LOG(ERROR, PANDAFILE) << "Invalid magic number. Abc file is corrupted";
+        return PandaFileType::FILE_FORMAT_INVALID;
+    }
+
+    if (header->version == File::STATIC_VERSION) {
+        return PandaFileType::FILE_STATIC;
+    }
+    return PandaFileType::FILE_DYNAMIC;
+}
+
 /* static */
 std::unique_ptr<const File> File::OpenFromMemory(os::mem::ConstBytePtr &&ptr)
 {

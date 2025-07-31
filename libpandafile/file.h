@@ -59,6 +59,7 @@ public:
     static constexpr size_t MAGIC_SIZE = 8;
     static constexpr size_t VERSION_SIZE = 4;
     static const std::array<uint8_t, MAGIC_SIZE> MAGIC;
+    static constexpr std::array<uint8_t, VERSION_SIZE> STATIC_VERSION = {0, 0, 0, 5};
 
     struct Header {
         std::array<uint8_t, MAGIC_SIZE> magic;
@@ -523,6 +524,22 @@ std::unique_ptr<const File> OpenPandaFile(std::string_view location, std::string
  */
 bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filename = "");
 void CheckFileVersion(const std::array<uint8_t, File::VERSION_SIZE> &file_version, const std::string_view &filename);
+
+enum class PandaFileType : int8_t {
+    FILE_FORMAT_INVALID = -1,
+    FILE_DYNAMIC = 0,
+    FILE_STATIC = 1,
+};
+
+/**
+ * @brief Return the abc file type
+ * @param[in] data : begin pos of abc file
+ * @param[in] size : length of abc file
+ * @return -1 indicates the abc file format invalid
+ *         0 indicates the abc file is dynamic
+ *         1 indicates the abc file is static
+ */
+PandaFileType GetFileType(const uint8_t *data, int32_t size);
 
 // Last version which contains redundance literal array in header
 constexpr std::array<uint8_t, File::VERSION_SIZE> LAST_CONTAINS_LITERAL_IN_HEADER_VERSION {12, 0, 6, 0};
