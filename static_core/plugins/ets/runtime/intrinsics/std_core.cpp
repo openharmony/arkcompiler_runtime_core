@@ -381,4 +381,9 @@ extern "C" EtsInt EtsAtomicIntFetchAndSub(EtsObject *atomicInt, EtsInt value)
     return EtsAtomicInt::FromEtsObject(atomicInt)->FetchAndSub(value);
 }
 
+extern "C" EtsBoolean StdSystemIsExternalTimerEnabled()
+{
+    return ark::ets::ToEtsBoolean(EtsCoroutine::GetCurrent()->GetManager()->IsExternalTimerEnabled());
+}
+
 }  // namespace ark::ets::intrinsics

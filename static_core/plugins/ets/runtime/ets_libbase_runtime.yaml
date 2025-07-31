@@ -5654,6 +5654,16 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::taskpool::GetTaskPoolWorkersLimit
 
+  - name: StdCoroutineIsExternalTimerEnabled
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: isExternalTimerEnabled
+    static: true
+    signature:
+      ret: u1
+      args: []
+    impl: ark::ets::intrinsics::StdSystemIsExternalTimerEnabled
+
 ####################################
 # std.debug.concurrency.AtomicFlag #
 ####################################

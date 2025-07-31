@@ -404,7 +404,7 @@ export function clearInterval(timerId?: int | null): void {
 function startTimer(func: () => void, delayMs: int, repeat: boolean): int
 {
     const realDelayMs = delayMs;
-    if (CoroutineExtras.workerHasExternalScheduler()) {
+    if (CoroutineExtras.isExternalTimerEnabled() && CoroutineExtras.workerHasExternalScheduler()) {
         return startTimerImpl(func as Object, realDelayMs < 0 ? 0 : realDelayMs, repeat);
     }
     return registerTimer(func, realDelayMs < 0 ? 0 : realDelayMs, repeat);
@@ -412,7 +412,7 @@ function startTimer(func: () => void, delayMs: int, repeat: boolean): int
 
 function stopTimer(timerId: int): void
 {
-    if (CoroutineExtras.workerHasExternalScheduler()) {
+    if (CoroutineExtras.isExternalTimerEnabled() && CoroutineExtras.workerHasExternalScheduler()) {
         stopTimerImpl(timerId);
         return;
     }

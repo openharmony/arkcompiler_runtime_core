@@ -244,6 +244,7 @@ void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime
     enableDrainQueueIface_ = config.enableDrainQueueIface;
     enableMigration_ = config.enableMigration;
     migrateAwakenedCoros_ = config.migrateAwakenedCoros;
+    externalTimerEnabled_ = config.enableExternalTimer;
 
     // set limits
     coroStackSizeBytes_ = Runtime::GetCurrent()->GetOptions().GetCoroutineStackSizePages() * os::mem::GetPageSize();

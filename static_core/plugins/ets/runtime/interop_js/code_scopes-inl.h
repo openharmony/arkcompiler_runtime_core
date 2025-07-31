@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_CODE_SCOPES_INL_H
 
 #include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "runtime/coroutines/coroutine_worker.h"
 
 namespace ark::ets::interop::js {
 
@@ -44,6 +45,7 @@ inline bool CloseInteropCodeScope(EtsCoroutine *coro)
 
     auto *ctx = InteropCtx::Current(coro);
     if constexpr (ETS_TO_JS) {
+        coro->GetWorker()->TriggerSchedulerExternally(coro);
         ctx->UpdateInteropStackInfoIfNeeded();
     }
     ctx->CallStack().PopRecord();

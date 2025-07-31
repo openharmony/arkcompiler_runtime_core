@@ -144,7 +144,9 @@ Expected<PandaEtsVM *, PandaString> PandaEtsVM::Create(Runtime *runtime, const R
         // exclusive workers limit
         options.GetCoroutineEWorkersLimit(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
         // enable perf stats
-        options.IsCoroutineDumpStats(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))};
+        options.IsCoroutineDumpStats(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+        // enable external timer implementation
+        options.IsCoroutineEnableFeaturesEnableExternalTimer(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))};
     vm->coroutineManager_->Initialize(cfg, runtime, vm);
 
     return vm;

@@ -122,6 +122,10 @@ public:
     {
         return migrateAwakenedCoros_;
     }
+    bool IsExternalTimerEnabled() override
+    {
+        return externalTimerEnabled_;
+    }
 
     /* profiling tools */
     CoroutineStats &GetPerfStats()
@@ -307,6 +311,7 @@ private:
     // coroutine migration feature
     bool enableMigration_ = false;
     bool migrateAwakenedCoros_ = false;
+    bool externalTimerEnabled_ = false;
 
     // the number of migration triggers
     std::atomic_uint32_t migrateCount_ = 0;

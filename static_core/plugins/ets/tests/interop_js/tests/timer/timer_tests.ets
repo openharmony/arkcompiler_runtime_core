@@ -20,7 +20,7 @@ class Test {
     }
 
     check(): boolean {
-        if (this.result == Test.RESULT_FAILED) {
+        if (this.result == Test.RESULT_FAILED || this.result == Test.RESULT_UNSET) {
             return false;
         }
         if (this.sequence.length != this.numCheckpoints) {
@@ -43,6 +43,11 @@ class Test {
         console.log(message);
     }
 
+    setPassed(): void {
+        arktest.assertEQ(this.result, Test.RESULT_UNSET)
+        this.result = Test.RESULT_PASSED;
+    }
+
     checkpoint(value: int) {
         this.sequence.push(value);
     }
@@ -63,7 +68,7 @@ function check(): boolean {
 
 let globalTest: Test | null = null;
 
-function testSetTimeout(): void {
+function testSetTimeout(isExternalTimer: boolean): void {
     globalTest = new Test(3);
     let sequence = new Array<number>();
     let delay = 100;
@@ -79,11 +84,12 @@ function testSetTimeout(): void {
             globalTest!.fail("The callback is called after " + spentTime + "ms. Expected to be called after " + delay + "ms at least.");
         }
         globalTest!.checkpoint(2);
+        globalTest!.setPassed();
     }, delay);
     globalTest!.checkpoint(1);
 }
 
-function testClearTimeout(): void {
+function testClearTimeout(isExternalTimer: boolean): void {
     globalTest = new Test(2);
     let sequence = new Array<number>();
     globalTest!.checkpoint(0);
@@ -92,9 +98,10 @@ function testClearTimeout(): void {
     }, 0);
     clearTimeout(timerId);
     globalTest!.checkpoint(1);
+    globalTest!.setPassed();
 }
 
-function testSetInterval(): void {
+function testSetInterval(isExternalTimer: boolean): void {
     globalTest = new Test(6);
     let sequence = new Array<number>();
     let delay = 100;
@@ -113,6 +120,7 @@ function testSetInterval(): void {
         }
         if (checkpoint == 5) {
             clearInterval(timerId);
+            globalTest!.setPassed();
         }
         globalTest!.checkpoint(checkpoint);
         ++checkpoint;
@@ -120,7 +128,7 @@ function testSetInterval(): void {
     globalTest!.checkpoint(1);
 }
 
-function testSetTimeoutExecuteOrder() : void {
+function testSetTimeoutExecuteOrder(isExternalTimer: boolean) : void {
     globalTest = new Test(6);
     globalTest!.checkpoint(0);
     setTimeout((): void => {
@@ -136,11 +144,12 @@ function testSetTimeoutExecuteOrder() : void {
     }, 0);
     setTimeout((): void => {
         globalTest!.checkpoint(5);
+        globalTest!.setPassed();
     }, 0);
     globalTest!.checkpoint(1);
 }
 
-function testSetTimeoutInvokeCallbackWithSpecifiedParameter(): void {
+function testSetTimeoutInvokeCallbackWithSpecifiedParameter(isExternalTimer: boolean): void {
     globalTest = new Test(3);
     let delay = 100;
     globalTest!.checkpoint(0);
@@ -159,11 +168,12 @@ function testSetTimeoutInvokeCallbackWithSpecifiedParameter(): void {
             globalTest!.fail("The parameter passed to the callback is " + p + ". Expected to be " + para + ".");
         }
         globalTest!.checkpoint(2);
+        globalTest!.setPassed();
     }, delay, para);
     globalTest!.checkpoint(1);
 }
 
-function testSetTimeoutInvokeCallbackWith4SpecifiedParameters(): void {
+function testSetTimeoutInvokeCallbackWith4SpecifiedParameters(isExternalTimer: boolean): void {
     globalTest = new Test(3);
     let delay = 100;
     globalTest!.checkpoint(0);
@@ -195,11 +205,12 @@ function testSetTimeoutInvokeCallbackWith4SpecifiedParameters(): void {
             globalTest!.fail("The parameter passed to the callback is " + p4 + ". Expected to be " + para4 + ".");
         }
         globalTest!.checkpoint(2);
+        globalTest!.setPassed();
     }, delay, para1, para2, para3, para4);
     globalTest!.checkpoint(1);
 }
 
-function testSetIntervalInvokeCallbacWithSpecifiedParameter(): void {
+function testSetIntervalInvokeCallbacWithSpecifiedParameter(isExternalTimer: boolean): void {
     globalTest = new Test(6);
     let sequence = new Array<number>();
     let delay = 100;
@@ -222,6 +233,7 @@ function testSetIntervalInvokeCallbacWithSpecifiedParameter(): void {
         }
         if (checkpoint == 5) {
             clearInterval(timerId);
+            globalTest!.setPassed();
         }
         globalTest!.checkpoint(checkpoint);
         ++checkpoint;
@@ -229,7 +241,7 @@ function testSetIntervalInvokeCallbacWithSpecifiedParameter(): void {
     globalTest!.checkpoint(1);
 }
 
-function testSetIntervalInvokeCallbacWith4SpecifiedParameters(): void {
+function testSetIntervalInvokeCallbacWith4SpecifiedParameters(isExternalTimer: boolean): void {
     globalTest = new Test(6);
     let sequence = new Array<number>();
     let delay = 100;
@@ -264,6 +276,7 @@ function testSetIntervalInvokeCallbacWith4SpecifiedParameters(): void {
         }
         if (checkpoint == 5) {
             clearInterval(timerId);
+            globalTest!.setPassed();
         }
         globalTest!.checkpoint(checkpoint);
         ++checkpoint;
@@ -271,7 +284,7 @@ function testSetIntervalInvokeCallbacWith4SpecifiedParameters(): void {
     globalTest!.checkpoint(1);
 }
 
-function testSetTimeoutWithNegitiveDelay(): void {
+function testSetTimeoutWithNegitiveDelay(isExternalTimer: boolean): void {
     globalTest = new Test(3);
     let sequence = new Array<number>();
     let delay = -10;
@@ -287,11 +300,12 @@ function testSetTimeoutWithNegitiveDelay(): void {
             globalTest!.fail("The callback is called after " + spentTime + "ms. Expected to be called after 0 ms at least.");
         }
         globalTest!.checkpoint(2);
+        globalTest!.setPassed();
     }, delay);
     globalTest!.checkpoint(1);
 }
 
-function testSetIntervalWithNegitiveDelay(): void {
+function testSetIntervalWithNegitiveDelay(isExternalTimer: boolean): void {
     globalTest = new Test(6);
     let sequence = new Array<number>();
     let delay = -10;
@@ -310,6 +324,7 @@ function testSetIntervalWithNegitiveDelay(): void {
         }
         if (checkpoint == 5) {
             clearInterval(timerId);
+            globalTest!.setPassed();
         }
         globalTest!.checkpoint(checkpoint);
         ++checkpoint;
@@ -317,15 +332,16 @@ function testSetIntervalWithNegitiveDelay(): void {
     globalTest!.checkpoint(1);
 }
 
-function testSetTimeoutWithString(): void {
+function testSetTimeoutWithString(isExternalTimer: boolean): void {
     globalTest = new Test(2);
     let delay = 100;
     globalTest!.checkpoint(0);
     setTimeout("test", delay);
     globalTest!.checkpoint(1);
+    globalTest!.setPassed();
 }
 
-function testSetIntervalWithString(): void {
+function testSetIntervalWithString(isExternalTimer: boolean): void {
     globalTest = new Test(2);
     let delay = 100;
     globalTest!.checkpoint(0);
@@ -336,13 +352,14 @@ function testSetIntervalWithString(): void {
         if (checkpoint == 5) {
             clearInterval(id1);
             clearInterval(id2);
+            globalTest!.setPassed();
         } 
         checkpoint ++ ;
     }, delay)
     globalTest!.checkpoint(1);
 }
 
-function testClearTimerCrossWorker()
+function testClearTimerCrossWorker(isExternalTimer: boolean)
 {
     globalTest = new Test(0);
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
@@ -362,14 +379,20 @@ function testClearTimerCrossWorker()
 
     /// Clear main timer from worker
     {
-        let triedToClear = false;
-        let id = setTimeout(() => { arktest.assertTrue(triedToClear); }, delay);
+        let isCleared = new AtomicFlag(false);
+        let errorThrown = false;
+        let id = setTimeout(() => { arktest.assertTrue(isCleared.get()); }, delay);
         try {
-            launch<void, (id: int) => void>(clearTimeout, id).Await();
+            launch<void, () => void>((): void => {
+                isCleared.set(true);
+                clearTimeout(id);
+            }).Await();
         } catch (e) {
             arktest.assertEQ(e.toString(), "Error: Failed to clear timer. Unable to clear interop timer from non-interop worker");
-            triedToClear = true;
+            errorThrown = true;
         }
-        arktest.assertTrue(triedToClear);
+        arktest.assertEQ(isExternalTimer, errorThrown);
+        arktest.assertTrue(isCleared.get());
     }
+    globalTest!.setPassed();
 }
