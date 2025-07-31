@@ -20,8 +20,8 @@
 
 class Bar<T> {
     private data : T
-    $_get(index: int) : T {throw new Exception("Hmm ...")}
-    $_set(index: int, value: T) {throw new Exception("Hmm ...")}
+    $_get(index: int) : T {throw new Error("Hmm ...")}
+    $_set(index: int, value: T) {throw new Error("Hmm ...")}
 
     constructor(data : T) {
         this.data = data;

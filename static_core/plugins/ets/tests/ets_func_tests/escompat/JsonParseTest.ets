@@ -218,7 +218,7 @@ function test(testAction: () => int, testName: string): int {
             const errorMessage = assertionError.message
             console.println(`"${testName}" failed with error: ${errorMessage}`)
         } else {
-            console.println(`"${testName}" failed with exception ${e}`)
+            console.println(`"${testName}" failed with error ${e}`)
         }
 
         return RESULT_FAILURE
