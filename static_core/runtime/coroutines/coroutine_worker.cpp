@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 
-#include "coroutines/coroutine.h"
 #include "coroutines/coroutine_manager.h"
 #include "coroutines/coroutine_worker.h"
 
 namespace ark {
 
-void CoroutineWorker::OnCoroBecameActive(Coroutine *co)
+void CoroutineWorker::TriggerSchedulerExternally(Coroutine *requester)
 {
-    if (co->GetType() == Coroutine::Type::MUTATOR && IsExternalSchedulingEnabled()) {
-        auto *coroMan = co->GetManager();
+    if (requester->GetType() == Coroutine::Type::MUTATOR && IsExternalSchedulingEnabled()) {
+        auto *coroMan = requester->GetManager();
 // Note: Currently passing lambda to PostExternalCallback will cause a crash in Arm32
 // detail infomation can be seen at #24085
 #ifdef PANDA_TARGET_ARM32
@@ -32,6 +31,11 @@ void CoroutineWorker::OnCoroBecameActive(Coroutine *co)
         PostExternalCallback([coroMan]() { coroMan->Schedule(); });
 #endif
     }
+}
+
+void CoroutineWorker::OnCoroBecameActive(Coroutine *co)
+{
+    TriggerSchedulerExternally(co);
 }
 
 }  // namespace ark

@@ -117,6 +117,8 @@ public:
 
     void OnCoroBecameActive(Coroutine *co);
 
+    void TriggerSchedulerExternally(Coroutine *requester);
+
 private:
     Runtime *runtime_ = nullptr;
     PandaVM *vm_ = nullptr;
