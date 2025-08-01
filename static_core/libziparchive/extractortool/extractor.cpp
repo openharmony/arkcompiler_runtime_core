@@ -21,11 +21,17 @@ namespace ark::extractor {
 constexpr char EXT_NAME_ABC[] = ".abc";  // NOLINT(modernize-avoid-c-arrays)
 constexpr const char *LOCAL_CODE_PATH = "/data/storage/el1/bundle";
 constexpr const char *FILE_SEPARATOR = "/";
+constexpr const int MAX_INNER_HSP_SLASHES = 3;
 
 static bool StringEndWith(const std::string &str, const char *endStr, size_t endStrLen)
 {
     size_t len = str.length();
     return ((len >= endStrLen) && (str.compare(len - endStrLen, endStrLen, endStr) == 0));
+}
+
+static bool IsInnerHspPath(const std::string &path)
+{
+    return std::count(path.begin(), path.end(), '/') <= MAX_INNER_HSP_SLASHES;
 }
 
 static std::string GetRelativePath(const std::string &srcPath)
@@ -38,6 +44,29 @@ static std::string GetRelativePath(const std::string &srcPath)
     if (relativePath.find(FILE_SEPARATOR) == 0) {
         relativePath = relativePath.substr(1);
         relativePath = relativePath.substr(relativePath.find(std::string(FILE_SEPARATOR)) + 1);
+    }
+    return relativePath;
+}
+
+static std::string GetRelativePathForHsp(const std::string &srcPath)
+{
+    if (srcPath.empty() || srcPath[0] != '/') {
+        return srcPath;
+    }
+    std::regex srcPattern(LOCAL_CODE_PATH);
+    std::string relativePath = std::regex_replace(srcPath, srcPattern, "");
+    if (IsInnerHspPath(relativePath)) {
+        if (relativePath.find(FILE_SEPARATOR) == 0) {
+            relativePath = relativePath.substr(1);
+            relativePath = relativePath.substr(relativePath.find(std::string(FILE_SEPARATOR)) + 1);
+        }
+    } else {
+        if (relativePath.find(FILE_SEPARATOR) == 0) {
+            std::string bundleName = relativePath.substr(1);
+            std::string moduleName = bundleName.substr(bundleName.find(std::string(FILE_SEPARATOR)) + 1);
+            std::string hspName = moduleName.substr(moduleName.find(std::string(FILE_SEPARATOR)) + 1);
+            relativePath = hspName.substr(hspName.find(std::string(FILE_SEPARATOR)) + 1);
+        }
     }
     return relativePath;
 }
@@ -59,6 +88,16 @@ bool Extractor::Init()
 std::shared_ptr<FileMapper> Extractor::GetSafeData(const std::string &fileName)
 {
     std::string relativePath = GetRelativePath(fileName);
+    if (!StringEndWith(relativePath, EXT_NAME_ABC, sizeof(EXT_NAME_ABC) - 1)) {
+        return nullptr;
+    }
+
+    return zipFile_.CreateFileMapper(relativePath, FileMapperType::SAFE_ABC);
+}
+
+std::shared_ptr<FileMapper> Extractor::GetSafeDataForHsp(const std::string &fileName)
+{
+    std::string relativePath = GetRelativePathForHsp(fileName);
     if (!StringEndWith(relativePath, EXT_NAME_ABC, sizeof(EXT_NAME_ABC) - 1)) {
         return nullptr;
     }
