@@ -28,14 +28,16 @@ ets-common-tests/atomics/concurrent_wait_notify_all.ets
 ets-common-tests/taskpool/common_tasks.ets
 
 # 26776
-ets-common-tests/atomics/base_operator_add.ets
-ets-common-tests/atomics/base_operator_and.ets
-ets-common-tests/atomics/base_operator_bigint.ets
-ets-common-tests/atomics/base_operator_biguint.ets
-ets-common-tests/atomics/base_operator_compare_exchange.ets
-ets-common-tests/atomics/base_operator_exchange.ets
-ets-common-tests/atomics/base_operator_load.ets
-ets-common-tests/atomics/base_operator_or.ets
-ets-common-tests/atomics/base_operator_store.ets
-ets-common-tests/atomics/base_operator_sub.ets
-ets-common-tests/atomics/base_operator_xor.ets
+ets-common-tests/atomics/base_operation_add.ets
+ets-common-tests/atomics/base_operation_and.ets
+ets-common-tests/atomics/base_operation_bigint.ets
+ets-common-tests/atomics/base_operation_biguint.ets
+ets-common-tests/atomics/base_operation_compare_exchange.ets
+ets-common-tests/atomics/base_operation_exchange.ets
+ets-common-tests/atomics/base_operation_load.ets
+ets-common-tests/atomics/base_operation_or.ets
+ets-common-tests/atomics/base_operation_store.ets
+ets-common-tests/atomics/base_operation_sub.ets
+ets-common-tests/atomics/base_operation_xor.ets
+
+
