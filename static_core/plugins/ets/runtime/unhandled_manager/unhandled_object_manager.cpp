@@ -216,4 +216,34 @@ bool UnhandledObjectManager::HasObjects() const
     return !(rejectedPromises_.empty() && failedJobs_.empty());
 }
 
+[[noreturn]] static void InvokeErrorHandler(EtsClassLinker *etsClassLinker, EtsCoroutine *coro,
+                                            EtsHandle<EtsObject> &exception)
+{
+    ASSERT(coro != nullptr);
+    auto descr = exception->GetClass()->GetDescriptor();
+    if (descr == panda_file_items::class_descriptors::OUT_OF_MEMORY_ERROR ||
+        descr == panda_file_items::class_descriptors::STACK_OVERFLOW_ERROR) {
+        LOG(ERROR, RUNTIME) << "Unhandled exception: " << exception->GetCoreType()->ClassAddr<Class>()->GetName();
+        // _exit guarantees a safe completion in case of multi-threading as static destructors aren't called
+        _exit(1);
+    }
+    coro->ClearException();
+    auto *platformTypes = etsClassLinker->GetEtsClassLinkerExtension()->GetPlatformTypes();
+    auto *method = platformTypes->escompatProcessHandleUncaughtError->GetPandaMethod();
+    ASSERT(method != nullptr);
+    std::array args = {Value(exception->GetCoreType())};
+    LOG(DEBUG, COROUTINES) << "Invoking error handler";
+    method->InvokeVoid(coro, args.data());
+    UNREACHABLE();
+}
+
+[[noreturn]] void UnhandledObjectManager::InvokeErrorHandlerAndExit(EtsCoroutine *coro, EtsHandle<EtsObject> exception)
+{
+    ASSERT(coro != nullptr);
+    ASSERT_MANAGED_CODE();
+
+    InvokeErrorHandler(vm_->GetClassLinker(), coro, exception);
+    UNREACHABLE();
+}
+
 }  // namespace ark::ets

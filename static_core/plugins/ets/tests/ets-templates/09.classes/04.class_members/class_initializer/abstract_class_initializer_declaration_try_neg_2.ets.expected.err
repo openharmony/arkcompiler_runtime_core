@@ -11,10 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-E/runtime: Unhandled exception: escompat.Error
-E/runtime: Error
-E/runtime: 	at escompat.Error.<ctor> (etsstdlib.ets:45:0)
-E/runtime: 	at abstract_class_initializer_declaration_try_neg_2.ETSGLOBAL.foo (abstract_class_initializer_declaration_try_neg_2.ets:24:0)
-E/runtime: 	at abstract_class_initializer_declaration_try_neg_2.A.<cctor> (abstract_class_initializer_declaration_try_neg_2.ets:31:0)
-E/runtime: 	at abstract_class_initializer_declaration_try_neg_2.ETSGLOBAL.main (abstract_class_initializer_declaration_try_neg_2.ets:35:0)
-E/runtime:
+Unhandled exception: escompat.Error
+Error
+	at escompat.Error.<ctor> (etsstdlib.ets:45:0)
+	at abstract_class_initializer_declaration_try_neg_2.ETSGLOBAL.foo (abstract_class_initializer_declaration_try_neg_2.ets:24:0)
+	at abstract_class_initializer_declaration_try_neg_2.A.<cctor> (abstract_class_initializer_declaration_try_neg_2.ets:31:0)
+	at abstract_class_initializer_declaration_try_neg_2.ETSGLOBAL.main (abstract_class_initializer_declaration_try_neg_2.ets:35:0)

@@ -616,31 +616,6 @@ void PandaEtsVM::ResolveNativeMethod(Method *method)
     method->SetNativePointer(ptr);
 }
 
-static void PrintExceptionInfo(EtsCoroutine *coro, EtsHandle<EtsObject> exception, PandaStringStream &ss)
-{
-    ASSERT(exception.GetPtr() != nullptr);
-    auto cls = exception->GetClass();
-
-    PandaVector<uint8_t> strBuf;
-    auto const performCall = [coro, &exception, &strBuf](EtsMethod *method) -> std::optional<std::string_view> {
-        ASSERT(method != nullptr);
-        std::array<Value, 1> args = {Value(exception->GetCoreType())};
-        EtsObject *callRes = EtsObject::FromCoreType(
-            EtsMethod::ToRuntimeMethod(method)->Invoke(coro, args.data()).GetAs<ObjectHeader *>());
-        if (coro->HasPendingException() || callRes == EtsObject::FromCoreType(coro->GetNullValue())) {
-            return std::nullopt;
-        }
-        return EtsString::FromEtsObject(callRes)->ConvertToStringView(&strBuf);
-    };
-
-    ss << std::endl
-       << performCall(cls->GetInstanceMethod("toString", ":Lstd/core/String;")).value_or("invoke toString failed");
-    if (PlatformTypes(coro)->escompatError->IsAssignableFrom(cls)) {
-        ss << std::endl
-           << performCall(cls->GetInstanceMethod("<get>stack", ":Lstd/core/String;")).value_or("exception dump failed");
-    }
-}
-
 [[noreturn]] void PandaEtsVM::HandleUncaughtException()
 {
     auto coro = EtsCoroutine::GetCurrent();
@@ -650,18 +625,7 @@ static void PrintExceptionInfo(EtsCoroutine *coro, EtsHandle<EtsObject> exceptio
 
     EtsHandle<EtsObject> exception(coro, EtsObject::FromCoreType(coro->GetException()));
 
-    PandaStringStream logStream;
-    logStream << "Unhandled exception: " << exception->GetCoreType()->ClassAddr<Class>()->GetName();
-
-    auto descr = exception->GetClass()->GetDescriptor();
-    if (descr != panda_file_items::class_descriptors::OUT_OF_MEMORY_ERROR &&
-        descr != panda_file_items::class_descriptors::STACK_OVERFLOW_ERROR) {
-        coro->ClearException();
-        PrintExceptionInfo(coro, exception, logStream);
-    }
-    LOG(ERROR, RUNTIME) << logStream.str();
-    // _exit guarantees a safe completion in case of multi-threading as static destructors aren't called
-    _exit(1);
+    GetUnhandledObjectManager()->InvokeErrorHandlerAndExit(coro, exception);
 }
 
 void HandleEmptyArguments(const PandaVector<Value> &arguments, const GCRootVisitor &visitor,

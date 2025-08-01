@@ -132,6 +132,7 @@ public:
     EtsClass *escompatProcess {};
     EtsMethod *escompatProcessListUnhandledJobs {};
     EtsMethod *escompatProcessListUnhandledPromises {};
+    EtsMethod *escompatProcessHandleUncaughtError {};
 
     EtsClass *escompatRegExpExecArray {};
     EtsClass *escompatJsonReplacer {};
