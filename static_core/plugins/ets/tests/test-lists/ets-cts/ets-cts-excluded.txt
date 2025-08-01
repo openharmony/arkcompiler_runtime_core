@@ -172,8 +172,8 @@
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_34.ets
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_7.ets
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_8.ets
-15.semantic_rules/11.static_initialization/package_initializer/p4/init4_1.ets
-15.semantic_rules/11.static_initialization/package_initializer/p4/init4_2.ets
+15.semantic_rules/12.static_initialization/package_initializer/p4/init4_1.ets
+15.semantic_rules/12.static_initialization/package_initializer/p4/init4_2.ets
 07.expressions/33.constant_expression/check_array/constant_logical_expression_12.ets
 07.expressions/33.constant_expression/check_array/constant_logical_expression_13.ets
 07.expressions/33.constant_expression/check_array/constant_logical_expression_14.ets

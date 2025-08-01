@@ -100,8 +100,8 @@
 09.classes/04.class_members/met/sepmod_5.ets
 
 # The following tests fail on verifier due to es2panda failures on dependent files
-15.semantic_rules/09.overloading/overloading_for_functions/function_import_from_same_cu.ets
-15.semantic_rules/09.overloading/overloading_for_functions/function_import_from_same_cu_2.ets
+15.semantic_rules/10.overloading/overloading_for_functions/function_import_from_same_cu.ets
+15.semantic_rules/10.overloading/overloading_for_functions/function_import_from_same_cu_2.ets
 17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_a2_0.ets
 17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_a2_1.ets
 17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_a2_2.ets
