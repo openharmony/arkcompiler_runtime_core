@@ -48,7 +48,6 @@ set(SOURCES
     dprofiler/dprofiler.cpp
     hotreload/hotreload.cpp
     interpreter/interpreter.cpp
-    interpreter/runtime_interface.cpp
     intrinsics.cpp
     coretypes/line_string.cpp
     coretypes/string.cpp
@@ -389,7 +388,6 @@ if (HOST_TOOLS)
 elseif (PANDA_LLVM_INTERPRETER AND PANDA_LLVM_INTERPRETER_INLINING)
     set(sources
             $<TARGET_PROPERTY:arkruntime_obj,SOURCE_DIR>/entrypoints/entrypoints.cpp
-            $<TARGET_PROPERTY:arkruntime_obj,SOURCE_DIR>/interpreter/runtime_interface.cpp
             $<TARGET_PROPERTY:arkruntime_obj,SOURCE_DIR>/object_header.cpp
             $<TARGET_PROPERTY:arkruntime_obj,SOURCE_DIR>/mem/heap_manager.cpp
             $<TARGET_PROPERTY:arkruntime_obj,SOURCE_DIR>/mem/tlab.cpp

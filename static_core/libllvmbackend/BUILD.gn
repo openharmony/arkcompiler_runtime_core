@@ -299,7 +299,6 @@ if (is_llvmbackend) {
     sources = [
       "$ark_root/runtime/class_linker.cpp",
       "$ark_root/runtime/entrypoints/entrypoints.cpp",
-      "$ark_root/runtime/interpreter/runtime_interface.cpp",
       "$ark_root/runtime/mem/heap_manager.cpp",
       "$ark_root/runtime/mem/tlab.cpp",
       "$ark_root/runtime/object_header.cpp",
@@ -339,8 +338,6 @@ if (is_llvmbackend) {
       rebase_path("$target_out_dir/../runtime/bitcode/runtime.o"),
       rebase_path(
           "$target_out_dir/../runtime/entrypoints/bitcode/entrypoints.o"),
-      rebase_path(
-          "$target_out_dir/../runtime/interpreter/bitcode/runtime_interface.o"),
       rebase_path("$target_out_dir/../runtime/bitcode/object_header.o"),
       rebase_path("$target_out_dir/../runtime/mem/bitcode/heap_manager.o"),
       rebase_path("$target_out_dir/../runtime/mem/bitcode/tlab.o"),
