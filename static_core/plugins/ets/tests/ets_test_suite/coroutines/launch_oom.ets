@@ -32,11 +32,11 @@ function testLaunchOOM(): void {
             L.log('Successfully caught: ' + e);
             return;
         } else {
-            arktest.assertTrue(false, 'Wrong exception thrown: ' + e);
+            arktest.assertTrue(false, 'Wrong error thrown: ' + e);
             return;
         }
     }
-    arktest.assertTrue(false, 'No exception thrown but should be!');
+    arktest.assertTrue(false, 'No error thrown but should be!');
 }
 
 function main(): int {

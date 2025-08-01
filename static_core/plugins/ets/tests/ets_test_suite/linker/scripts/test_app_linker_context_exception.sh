@@ -54,7 +54,7 @@ if [ ${RETURN_CODE} -eq 1 ] && [[ "${STDERR}" =~ "${EXPECTED_ERROR_MESSAGE}" ]];
     exit 0
 fi
 
-echo Expected runtime unhandled exception with the following message: "${EXPECTED_ERROR_MESSAGE}"
+echo Expected runtime unhandled error with the following message: "${EXPECTED_ERROR_MESSAGE}"
 echo Captured stderr: "${STDERR}"
 echo Return code: "${RETURN_CODE}"
 exit 1

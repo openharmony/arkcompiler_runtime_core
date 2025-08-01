@@ -14,7 +14,7 @@
  */
 
 function testEworkersReachedLimit() {
-    let exceptionWasCatched = false;
+    let errorWasCatched = false;
     let eaWorkers = new Array<EAWorker>();
     try {
         while (true) {
@@ -22,12 +22,12 @@ function testEworkersReachedLimit() {
         }
     } catch (e) {
         arktest.assertEQ(e.toString(), 'CoroutinesLimitExceedError: The limit of Exclusive Workers has been reached');
-        exceptionWasCatched = true;
+        errorWasCatched = true;
     }
     eaWorkers.forEach((eaWorker: EAWorker) => {
         eaWorker.join();
     });
-    arktest.assertTrue(exceptionWasCatched);
+    arktest.assertTrue(errorWasCatched);
 }
 
 function main(): int {

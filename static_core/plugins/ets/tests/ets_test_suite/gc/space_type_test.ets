@@ -42,7 +42,7 @@ function main(): int {
         HumongousObjectTest();
     }
     catch (e) {
-        arktest.assertTrue(false, "Space allocation test must not throw exceptions");
+        arktest.assertTrue(false, "Space allocation test must not throw errors");
     }
     return 0;
 }

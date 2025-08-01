@@ -37,21 +37,21 @@ function launchCoroutines(n_cor: int): int {
     return 0;
 }
 
-function throwException(): Object {
+function throwError(): Object {
     throw new Error();
 }
 
-function launchCoroutinesWithException(n_cor: int): int { 
+function launchCoroutinesWithError(n_cor: int): int { 
     let p: (Job<Object> | undefined)[] = new (Job<Object> | undefined)[n_cor];
     for (let i = 0; i < n_cor; ++i) {
-        p[i] = launch<Object, () => Object>(throwException);
+        p[i] = launch<Object, () => Object>(throwError);
     }
     for (let i = 0; i < n_cor; ++i) {
         try {
             (p[i]!).Await();
         } catch (e) {
             if (!(e instanceof Error)) {
-              L.log('Expected Error but another exception has been thrown!: ' + e);
+              L.log('Expected Error but another error has been thrown!: ' + e);
               return 1;
             }
             continue;
@@ -88,8 +88,8 @@ function testMultipleLaunch(): void {
         return;
     }
 
-    // Reuse 5 coroutines and throw exception in them
-    if(launchCoroutinesWithException(5) != 0) {
+    // Reuse 5 coroutines and throw error in them
+    if(launchCoroutinesWithError(5) != 0) {
         arktest.assertTrue(false, 'First launch of 5 throw-error coroutines failed!!');
         return;
     }

@@ -143,7 +143,7 @@ function testRunBatchAwait(): void {
 }
 
 function main(): int {
-    let testSuite = new arktest.ArkTestsuite('coroutines.launch_exception');
+    let testSuite = new arktest.ArkTestsuite('coroutines.launch_error');
     testSuite.addTest('testCompareWorkerIdsAsync', testCompareWorkerIdsAsync);
     testSuite.addTest('testCompareWorkerIds', testCompareWorkerIds);
     testSuite.addTest('testRunBatchLaunch', testRunBatchLaunch);

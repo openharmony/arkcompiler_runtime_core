@@ -30,7 +30,7 @@ function main(): int {
         });
     }
     catch (e) {
-        arktest.assertTrue(false, "startGC must not throw exceptions in this case");
+        arktest.assertTrue(false, "startGC must not throw errors in this case");
     }
     arktest.assertEQ(gc, 0, "GC with callback must be run in place");
     arktest.assertTrue(flag, "Callback hasn't been called");
