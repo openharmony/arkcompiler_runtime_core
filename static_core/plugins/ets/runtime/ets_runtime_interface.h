@@ -43,9 +43,11 @@ public:
     bool IsMethodStringBuilderDefaultConstructor(MethodPtr method) const override;
     bool IsMethodStringBuilderToString(MethodPtr method) const override;
     bool IsMethodStringBuilderAppend(MethodPtr method) const override;
+    bool IsMethodEscompatMapCtor(MethodPtr method) const override;
     bool IsMethodInModuleScope([[maybe_unused]] MethodPtr method) const override;
     bool IsMethodTypedArrayCtor([[maybe_unused]] MethodPtr method) const override;
     bool IsClassStringBuilder(ClassPtr klass) const override;
+    bool IsClassEscompatMap(ClassPtr klass) const override;
     bool IsClassEscompatArray(ClassPtr klass) const override;
     bool IsClassEscompatInt8Array(ClassPtr klass) const override;
     bool IsClassEscompatUint8Array(ClassPtr klass) const override;
