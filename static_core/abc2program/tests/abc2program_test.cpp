@@ -179,7 +179,6 @@ TEST_F(Abc2ProgramHelloWorldTest, RecordTable)
 TEST_F(Abc2ProgramHelloWorldTest, Functions)
 {
     const std::set<std::string> expectedFunctions = {
-        "HelloWorld.ETSGLOBAL._$init$_:void;",
         "HelloWorld.ETSGLOBAL._cctor_:void;",
         "HelloWorld.ETSGLOBAL.main:void;",
         "HelloWorld.HelloWorld._ctor_:HelloWorld.HelloWorld;void;",
@@ -245,7 +244,6 @@ TEST_F(Abc2ProgramFunctionsTest, Functions)
         "Functions.Cls.func_f:Functions.Cls;i32;i32;",
         "Functions.Cls.func_i:Functions.Cls;i32;i32;",
         "Functions.Cls.func_s:i32;i32;",
-        "Functions.ETSGLOBAL._$init$_:void;",
         "Functions.ETSGLOBAL._cctor_:void;",
         "Functions.ETSGLOBAL.bar:f64;std.core.String;",
         "Functions.ETSGLOBAL.foo:std.core.String;std.core.String;",
@@ -284,7 +282,6 @@ TEST_F(Abc2ProgramFunctionsConcatTest, Functions)
         "Functions.Cls.func_f:Functions.Cls;i32;i32;",
         "Functions.Cls.func_i:Functions.Cls;i32;i32;",
         "Functions.Cls.func_s:i32;i32;",
-        "Functions.ETSGLOBAL._$init$_:void;",
         "Functions.ETSGLOBAL._cctor_:void;",
         "Functions.ETSGLOBAL.bar:f64;std.core.String;",
         "Functions.ETSGLOBAL.foo:std.core.String;std.core.String;",
@@ -348,7 +345,6 @@ TEST_F(Abc2ProgramTypeTest, Type)
         "Type.Cls$partial._ctor_ Type.Cls$partial void",
         "Type.Cls._ctor_ Type.Cls void",
         "Type.Cls.add_inner Type.Cls i32 i64 f32 f64 std.core.String",
-        "Type.ETSGLOBAL._$init$_ void",
         "Type.ETSGLOBAL._cctor_ void",
         "Type.ETSGLOBAL.add_outer i32 i64 f32 f64 std.core.String",
         "Type.ETSGLOBAL.main void",
