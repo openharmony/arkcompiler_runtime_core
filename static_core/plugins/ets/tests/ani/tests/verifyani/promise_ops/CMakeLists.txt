@@ -11,16 +11,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include(cmake/ani_verify_tests.cmake)
+ani_verify_add_gtest(ani_verify_test_promise_new
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_promise_new_test.cpp
+)
 
-add_subdirectory(array_ops)
-add_subdirectory(class_ops)
-add_subdirectory(error_ops)
-add_subdirectory(function_ops)
-add_subdirectory(local_scope_ops)
-add_subdirectory(object_ops)
-add_subdirectory(ref_ops)
-add_subdirectory(scope_ops)
-add_subdirectory(string_ops)
-add_subdirectory(vm_ops)
-add_subdirectory(promise_ops)
+ani_verify_add_gtest(ani_verify_test_promise_resolver_resolve
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_promise_resolver_resolve_test.cpp
+)
+
+ani_verify_add_gtest(ani_verify_test_promise_resolver_reject
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_promise_resolver_reject_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_promise_resolver_reject_test.ets
+)
