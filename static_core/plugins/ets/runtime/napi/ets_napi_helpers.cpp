@@ -448,15 +448,7 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
         ASSERT(classObj != nullptr);
         auto classPtr = reinterpret_cast<EtsObject **>(regArgs);
         *classPtr = classObj;
-    } else {
-        // Handle this arg
-        ASSERT(method->GetNumArgs() != 0);
-        ASSERT(!method->GetArgType(0).IsPrimitive());
-        args.push_back(Value(*const_cast<ObjectHeader **>(argReader.ReadPtr<ObjectHeader *>())));
     }
-
-    arch::ValueWriter writer(&args);
-    ARCH_COPY_METHOD_ARGS(method, argReader, writer);
 
     // Create object after arg fix ^^^.
     // Arg fix is needed for StackWalker. So if GC gets triggered in EtsPromise::Create
@@ -468,6 +460,16 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
     }
     auto promiseRef = vm->GetGlobalObjectStorage()->Add(promise, mem::Reference::ObjectType::GLOBAL);
     auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, coroManager);
+
+    // Read values from stack and keep in args values for Launch after possible GC in EtsPromise::Create
+    if (!method->IsStatic()) {
+        // Handle this arg
+        ASSERT(method->GetNumArgs() != 0);
+        ASSERT(!method->GetArgType(0).IsPrimitive());
+        args.push_back(Value(*const_cast<ObjectHeader **>(argReader.ReadPtr<ObjectHeader *>())));
+    }
+    arch::ValueWriter writer(&args);
+    ARCH_COPY_METHOD_ARGS(method, argReader, writer);
 
     [[maybe_unused]] EtsHandleScope scope(currentCoro);
     EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);
