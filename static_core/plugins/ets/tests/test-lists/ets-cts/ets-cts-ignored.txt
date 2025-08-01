@@ -1233,6 +1233,29 @@
 # 26983
 09.classes/06.field_declarations/06.overriding_fields/sample.ets
 
+#26730
+09.classes/09.constructor_declaration/constructor_declaration_overload1.ets
+09.classes/09.constructor_declaration/constructor_declaration_overload2.ets
+09.classes/09.constructor_declaration/constructor_declaration_anonymous_overloading1.ets
+09.classes/09.constructor_declaration/constructor_declaration_anonymous_overloading2.ets
+
+#28235
+09.classes/09.constructor_declaration/constructor_declaration_private3.ets
+09.classes/09.constructor_declaration/constructor_declaration_protected3.ets
+09.classes/09.constructor_declaration/constructor_declaration_singleton4.ets
+09.classes/09.constructor_declaration/constructor_declaration_singleton5.ets
+09.classes/09.constructor_declaration/constructor_declaration_with_type_parameters6.ets
+
+#28059
+09.classes/09.constructor_declaration/constructor_declaration_internal1.ets
+09.classes/09.constructor_declaration/constructor_declaration_internal2.ets
+
+#28378
+09.classes/09.constructor_declaration/constructor_declaration_with_type_parameters1.ets
+09.classes/09.constructor_declaration/constructor_declaration_with_type_parameters2.ets
+09.classes/09.constructor_declaration/constructor_declaration_with_type_parameters4.ets
+09.classes/09.constructor_declaration/constructor_declaration_with_type_parameters5.ets
+
 #28160 Cannot initialize function type interface property with rest parameter
 10.interfaces/04.interface_properties/01.required_interface_properties/required_interface_properties_17.ets
 
