@@ -180,7 +180,7 @@ function testBufferFill0007() {
 	const buf = buffer.alloc(6);
 	arktest.expectError(() => {
 		buf.fill('D', -1);
-	}, 'The value of "offset" is out of range. It must be >= 0 and <= 4294967296. Received value is: -1');
+	}, 'The value of "offset" is out of range. It must be >= 0 and <= 2147483647. Received value is: -1');
 }
 
 function testBufferFill0016() {
