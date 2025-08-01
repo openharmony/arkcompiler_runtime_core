@@ -58,7 +58,7 @@ function main(): int {
   {%- if item.method_return_type == "void" %}
         {%- if item.method_throws == true %} try { {%- endif %}
         obj{{.item.object_type}}.{{.item.method_name}}({{.item.param_list.keys()|list|join(', ')}});
-        {%- if item.method_throws == true %} } catch (e) { console.println("Unexpected exception in positive test"); } {%- endif %}
+        {%- if item.method_throws == true %} } catch (e) { console.println("Unexpected error in positive test"); } {%- endif %}
     {% if item.result_storage == "this" %}
         let actual: {{.item.result_type}};
         actual = obj{{.item.object_type}}.{{.item.result_retrieve_function}};
@@ -67,7 +67,7 @@ function main(): int {
       let actual: {{.item.method_return_type}};
       {% if item.method_throws == true %} try { {%- endif %}
       actual = obj{{.item.object_type}}.{{.item.property_name}};
-      {% if item.method_throws == true %} } catch (e) { console.println("Unexpected exception in positive test"); } {%- endif %}
+      {% if item.method_throws == true %} } catch (e) { console.println("Unexpected error in positive test"); } {%- endif %}
   {%- endif %}
   {%- for number, param in item.param_list.items() %}
 //      console.print("{{.number}} = " + {{.number}} + ";");
