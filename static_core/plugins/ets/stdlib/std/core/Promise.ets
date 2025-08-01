@@ -91,8 +91,9 @@ export final class Promise<out T> implements PromiseLike<T> {
             }, (error: Error): void => {
                 this.rejectImpl(error as Error, false);
             });
-        } catch (error: Error) {
-            this.rejectImpl(error, false);
+        } catch (error) {
+            // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+            this.rejectImpl(error as Error, false);
         }
     }
 
@@ -112,8 +113,9 @@ export final class Promise<out T> implements PromiseLike<T> {
                 } else {
                     promise.rejectImpl(this.value as Error, false);
                 }
-            } catch (error: Error) {
-                promise.rejectImpl(error, false);
+            } catch (error) {
+                // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+                promise.rejectImpl(error as Error, false);
             }
         }
         this.submitCallback(fn as Object);
@@ -142,8 +144,9 @@ export final class Promise<out T> implements PromiseLike<T> {
                         promise.rejectImpl(this.value as Error, false);
                     }
                 }
-            } catch (e: Error) {
-                promise.rejectImpl(e, false);
+            } catch (e) {
+                // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+                promise.rejectImpl(e as Error, false);
             }
         }
         this.submitCallback(fn as Object);
@@ -168,8 +171,9 @@ export final class Promise<out T> implements PromiseLike<T> {
                 } else {
                     promise.doResolve<T>(this.value as T);
                 }
-            } catch (e: Error) {
-                promise.rejectImpl(e, false);
+            } catch (e) {
+                // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+                promise.rejectImpl(e as Error, false);
             }
         }
         this.submitCallback(fn as Object);
@@ -197,8 +201,9 @@ export final class Promise<out T> implements PromiseLike<T> {
                 } else {
                     promise.doResolve<T>(this.value as T);
                 }
-            } catch (e: Error) {
-                promise.rejectImpl(e, false);
+            } catch (e) {
+                // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+                promise.rejectImpl(e as Error, false);
             }
         }
         this.submitCallback(fn as Object);
@@ -219,8 +224,9 @@ export final class Promise<out T> implements PromiseLike<T> {
                 if (onFinally) {
                     try {
                         onFinally();
-                    } catch(error: Error) {
-                        promise.rejectImpl(error, false);
+                    } catch(error) {
+                        // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+                        promise.rejectImpl(error as Error, false);
                     }
                 }
                 if (this.state == Promise.STATE_RESOLVED) {
@@ -228,8 +234,9 @@ export final class Promise<out T> implements PromiseLike<T> {
                 } else {
                     promise.rejectImpl(this.value as Error, false);
                 }
-            } catch (e: Error) {
-                promise.rejectImpl(e, false);
+            } catch (e) {
+                // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+                promise.rejectImpl(e as Error, false);
             }
         }
         this.submitCallback(fn as Object);
@@ -308,8 +315,9 @@ export final class Promise<out T> implements PromiseLike<T> {
     static all<U>(promises: Iterable<U|PromiseLike<U>>): Promise<Array<U>> {
         try {
             return Promise.all<U>(Promise.toArray(promises));
-        } catch (e: Error) {
-            return Promise.reject<Array<U>>(e);
+        } catch (e) {
+            // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+            return Promise.reject<Array<U>>(e as Error);
         }
     }
 
@@ -335,8 +343,9 @@ export final class Promise<out T> implements PromiseLike<T> {
     static allSettled<U>(promises: Iterable<U|PromiseLike<U>>): Promise<PromiseSettledResult<U>[]> {
         try {
             return Promise.allSettled<U>(Promise.toArray(promises));
-        } catch (e: Error) {
-            return Promise.reject<PromiseSettledResult<U>[]>(e);
+        } catch (e) {
+            // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+            return Promise.reject<PromiseSettledResult<U>[]>(e as Error);
         }
     }
 
@@ -364,8 +373,9 @@ export final class Promise<out T> implements PromiseLike<T> {
     static any<U>(promises: Iterable<U|PromiseLike<U>>): Promise<U> {
         try {
             return Promise.any<U>(Promise.toArray(promises));
-        } catch (e: Error) {
-            return Promise.reject<U>(e);
+        } catch (e) {
+            // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+            return Promise.reject<U>(e as Error);
         }
     }
 
@@ -391,8 +401,9 @@ export final class Promise<out T> implements PromiseLike<T> {
     static race<U>(promises: Iterable<U|PromiseLike<U>>): Promise<U> {
         try {
             return Promise.race<U>(Promise.toArray(promises));
-        } catch (e: Error) {
-            return Promise.reject<U>(e);
+        } catch (e) {
+            // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+            return Promise.reject<U>(e as Error);
         }
     }
 
@@ -454,8 +465,9 @@ export final class Promise<out T> implements PromiseLike<T> {
                 }, (error: Error): void => {
                     thisPromise.rejectImpl(error, true);
                 });
-            } catch(error: Error) {
-                thisPromise.rejectImpl(error, true);
+            } catch(error) {
+                // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+                thisPromise.rejectImpl(error as Error, true);
             }
         }
         if(internalPromise instanceof Promise) {
@@ -628,8 +640,9 @@ class AnyPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
                 }, (error: Error): void => {
                     this.rejectImpl(error as Error, idx);
                 });
-            } catch (e: Error) {
-                this.rejectImpl(e, i);
+            } catch (e) {
+                // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+                this.rejectImpl(e as Error, i);
             }
         }
     }

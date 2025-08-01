@@ -936,8 +936,12 @@ class JSONWriter {
         try {
             const json = JSON.stringify(obj.unwrap())
             this.buffer.append(json.toString())
-        } catch (e: TypeError) {
-            throw new TypeError("cyclic object value")
+        } catch (e) {
+            if (e instanceof TypeError) {
+                throw new TypeError("cyclic object value")
+            } else {
+                throw e
+            }
         }
     }
 

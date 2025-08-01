@@ -490,7 +490,7 @@ export class Date {
         let parseResult = new ISODateParseResult()
         try {
             parseResult = new ISODateParser(dateStr).parse()
-        } catch (parseError: ISODateParseError) {
+        } catch (parseError) {
             return INVALID_DATE
         }
 
