@@ -18,6 +18,7 @@ desc: Type export class type. Type is having the same name as non-exported class
 tags:
 - compile-only
 - not-a-test
+- negative
 ---*/
 
 export type A = B
