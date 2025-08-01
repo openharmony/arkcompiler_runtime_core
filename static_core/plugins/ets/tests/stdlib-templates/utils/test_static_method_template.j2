@@ -29,7 +29,7 @@ function  {{.item.method_name}}{{.test_name|capitalize}}() : {{.item.result_type
 {%- endif %}
 {%- if item.method_throws == "true" %}
   }  catch (e)  {
-     console.println("Unexpected exception in positive test")
+     console.println("Unexpected error in positive test")
   }
 {%- endif %}  
   return actual
