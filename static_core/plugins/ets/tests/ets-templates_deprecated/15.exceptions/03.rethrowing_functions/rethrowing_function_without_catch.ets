@@ -19,7 +19,7 @@ assert: A function that that accepts a throwing function as a parameter can be m
 tags: [compile-only, negative]
 ---*/
 
-class TestException extends Exception {}
+class TestError extends Error {}
 type func = (): void;
 
 function foo(bar: func throws): void rethrows {
@@ -27,7 +27,7 @@ function foo(bar: func throws): void rethrows {
 }
 
 function canThrow (): void {
-  throw new TestException();
+  throw new TestError();
 }
 
 function main(): void {
