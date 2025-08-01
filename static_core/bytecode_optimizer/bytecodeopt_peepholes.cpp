@@ -92,12 +92,9 @@ void ReplaceNewObjectUsers(Inst *newObject, Inst *nullCheck, CallInst *initObjec
 
 void BytecodeOptPeepholes::VisitNewObject(GraphVisitor *v, Inst *inst)
 {
+    ASSERT(inst != nullptr);
     CallInst *callInit = FindCtorCall(inst);
-    if (callInit == nullptr) {
-        return;
-    }
-
-    if (inst->GetBasicBlock() != callInit->GetBasicBlock()) {
+    if (callInit == nullptr || inst->GetBasicBlock() != callInit->GetBasicBlock()) {
         return;
     }
 
