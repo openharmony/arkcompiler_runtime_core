@@ -1291,6 +1291,17 @@
 #28533
 09.classes/09.constructor_declaration/01.formal_parameters/cons_parameters_18.ets
 
+#28693
+09.classes/09.constructor_declaration/02.constructor_body/spec_example1.ets
+
+#28235
+09.classes/09.constructor_declaration/02.constructor_body/invocation_another_constructor_of_same_class.ets
+09.classes/09.constructor_declaration/02.constructor_body/primary.ets
+09.classes/09.constructor_declaration/02.constructor_body/secondary.ets
+09.classes/09.constructor_declaration/02.constructor_body/spec_example2.ets
+09.classes/09.constructor_declaration/02.constructor_body/invocation_another_constructor_of_superclass1.ets
+09.classes/09.constructor_declaration/02.constructor_body/invocation_another_constructor_of_superclass2.ets
+
 #28160 Cannot initialize function type interface property with rest parameter
 10.interfaces/04.interface_properties/01.required_interface_properties/required_interface_properties_17.ets
 

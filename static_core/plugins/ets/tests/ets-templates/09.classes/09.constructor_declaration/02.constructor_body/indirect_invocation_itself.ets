@@ -22,13 +22,13 @@ tags: [compile-only, negative]
 ---*/
 
 class A {
-  public x: int;
+    public x: int;
 
-  public constructor(a: int) {
-    this(5, 5)
-  }
+    public constructor oneArg(a: int) {
+        this.twoArgs(5, 5)
+    }
 
-  public constructor(a: int, b : int) {
-    this(b);
-  }
+    public constructor twoArgs(a: int, b : int) {
+        this.oneArg(b);
+    }
 }

@@ -14,31 +14,34 @@ limitations under the License.
 ---*/
 
 /*---
-desc: >-
-    this can be passed as an argument no matter if fields are initialized.
-    If an uninitialized field is used, NullPointerError is thrown.
+desc: Invocation constructor of abstract superclass.
+assert: >-
+    The first statement of a constructor body may be an explicit invocation of another constructor of the same class
+    or of the direct superclass.
 ---*/
 
-class A {
-    public n: number;
-    public s: string;
+abstract class A {
+    x: int;
 
-    foo(a: A) {
-        return a.s.length;
+    protected constructor(a: int) {
+        this.x = a + 1;
+    }
+}
+
+class B extends A {
+    constructor() {  // primary constructor
+        super(42)
     }
 
-    public constructor() {
-        this.n = this.foo(this);
-        this.s = "abcd";
+    constructor fromInt(a: int) { // primary constructor
+        super(a + 1);
     }
 }
 
 function main() {
-    try {
-        let a = new A();
-    } catch (e) {
-        arktest.assertTrue(e instanceof NullPointerError);
-        return;
-    }
-    arktest.assertTrue(false, "NPE expected");
+    arktest.assertEQ(new B().x, 43)
+    arktest.assertEQ(new B.fromInt(5).x, 7)
+
+    let b: B = {}
+    arktest.assertEQ(b.x, 43)
 }

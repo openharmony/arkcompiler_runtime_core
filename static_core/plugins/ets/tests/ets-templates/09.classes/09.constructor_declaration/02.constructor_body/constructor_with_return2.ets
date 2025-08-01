@@ -14,11 +14,9 @@
  */
 
 /*---
-desc: Declaring constructor with return statement with expression.
-assert: >-
-    A return statement may be used in the body of a constructor if it does not include an expression.
-    Except for the possibility of explicit constructor invocations, and the prohibition on explicitly
-    returning a value, the body of a constructor is like the body of a method.
+desc: >-
+    A return statement may be used in the body of a constructor if it
+    does not include an expression.
 ---*/
 
 class A {
@@ -33,6 +31,6 @@ class A {
 }
 
 function main() {
-    arktest.assertTrue(new A(42).x == 43)
-    arktest.assertTrue(new A(0).x == 0)
+    arktest.assertEQ(new A(42).x, 43)
+    arktest.assertEQ(new A(0).x, 0)
 }
