@@ -67,6 +67,11 @@ public:
     void DeleteGlobalVerifiedRef(VRef *vgref);
     bool IsValidGlobalVerifiedRef(VRef *vgref);
 
+    // Global resolvers
+    VResolver *AddGlobalVerifiedResolver(ani_resolver resolver);
+    void DeleteGlobalVerifiedResolver(VResolver *vresolver);
+    bool IsValidGlobalVerifiedResolver(VResolver *vresolver);
+
 private:
     EnvANIVerifier *GetEnvANIVerifier();
 };

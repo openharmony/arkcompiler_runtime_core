@@ -20,10 +20,10 @@
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/ani/verify/types/vref.h"
 #include "plugins/ets/runtime/ani/verify/types/vmethod.h"
+#include "plugins/ets/runtime/ani/verify/types/vresolver.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/mem/panda_string.h"
-
 #include <optional>
 
 namespace ark::ets::ani::verify {
@@ -31,6 +31,7 @@ namespace ark::ets::ani::verify {
 class VEnv;
 class VRef;
 class ANIVerifier;
+class VResolver;
 
 class EnvANIVerifier final {
 public:
@@ -65,6 +66,10 @@ public:
 
     bool IsValidInCurrentFrame(VRef *vref);
     bool CanBeDeletedFromCurrentScope(VRef *vref);
+
+    bool IsValidGlobalVerifiedResolver(VResolver *vresolver);
+    VResolver *AddGlobalVerifiedResolver(ani_resolver resolver);
+    void DeleteGlobalVerifiedResolver(VResolver *vresolver);
 
     const __ani_interaction_api *GetInteractionAPI() const
     {

@@ -39,6 +39,7 @@ class VFixedArrayInt;
 class VFixedArrayLong;
 class VFixedArrayFloat;
 class VFixedArrayDouble;
+class VResolver;
 
 namespace internal {
 
@@ -191,6 +192,16 @@ struct TypeMapping<VFixedArrayFloat **> {
 template <>
 struct TypeMapping<VFixedArrayDouble **> {
     using Type = ani_fixedarray_double *;
+};
+
+template <>
+struct TypeMapping<VResolver *> {
+    using Type = ani_resolver;
+};
+
+template <>
+struct TypeMapping<VResolver **> {
+    using Type = ani_resolver *;
 };
 
 template <typename X>

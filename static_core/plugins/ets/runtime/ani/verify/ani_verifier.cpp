@@ -29,24 +29,27 @@ VRef *ANIVerifier::AddGlobalVerifiedRef(ani_ref gref)
     auto *igref = igrefHolder.get();
     auto vgref = InternalRef::CastToVRef(igref);
     {
-        os::memory::LockHolder<os::memory::Mutex> lockHolder(grefsMapMutex_);
-        grefsMap_[vgref] = std::move(igrefHolder);
+        auto &grefs = GetGlobalData().grefsMap;
+        os::memory::LockHolder<os::memory::Mutex> lockHolder(GetGlobalData().grefsMapMutex);
+        grefs[vgref] = std::move(igrefHolder);
     }
     return vgref;
 }
 
 void ANIVerifier::DeleteGlobalVerifiedRef(VRef *vgref)
 {
-    os::memory::LockHolder<os::memory::Mutex> lockHolder(grefsMapMutex_);
-    auto it = grefsMap_.find(vgref);
-    ASSERT(it != grefsMap_.cend());
-    grefsMap_.erase(it);
+    auto &grefs = GetGlobalData().grefsMap;
+    os::memory::LockHolder<os::memory::Mutex> lockHolder(GetGlobalData().grefsMapMutex);
+    auto it = grefs.find(vgref);
+    ASSERT(it != grefs.cend());
+    grefs.erase(it);
 }
 
 bool ANIVerifier::IsValidGlobalVerifiedRef(VRef *vgref)
 {
-    os::memory::LockHolder<os::memory::Mutex> lockHolder(grefsMapMutex_);
-    return grefsMap_.find(vgref) != grefsMap_.cend();
+    auto &grefs = GetGlobalData().grefsMap;
+    os::memory::LockHolder<os::memory::Mutex> lockHolder(GetGlobalData().grefsMapMutex);
+    return grefs.find(vgref) != grefs.cend();
 }
 
 impl::VMethod *ANIVerifier::AddMethod(EtsMethod *method)
@@ -54,27 +57,55 @@ impl::VMethod *ANIVerifier::AddMethod(EtsMethod *method)
     auto vmethodHolder = MakePandaUnique<impl::VMethod>(method);
     impl::VMethod *vmethod = vmethodHolder.get();
     {
-        os::memory::WriteLockHolder lock(methodsSetLock_);
+        os::memory::WriteLockHolder lock(GetGlobalData().methodsSetLock);
 
-        methodsSet_[vmethod] = std::move(vmethodHolder);
+        GetGlobalData().methodsSet[vmethod] = std::move(vmethodHolder);
     }
     return vmethod;
 }
 
 void ANIVerifier::DeleteMethod(impl::VMethod *vmethod)
 {
-    os::memory::WriteLockHolder lock(methodsSetLock_);
+    os::memory::WriteLockHolder lock(GetGlobalData().methodsSetLock);
 
-    auto it = methodsSet_.find(vmethod);
-    ASSERT(it != methodsSet_.cend());
-    methodsSet_.erase(it);
+    auto it = GetGlobalData().methodsSet.find(vmethod);
+    ASSERT(it != GetGlobalData().methodsSet.cend());
+    GetGlobalData().methodsSet.erase(it);
 }
 
 bool ANIVerifier::IsValidVerifiedMethod(impl::VMethod *vmethod)
 {
-    os::memory::ReadLockHolder lock(methodsSetLock_);
+    os::memory::ReadLockHolder lock(GetGlobalData().methodsSetLock);
 
-    return methodsSet_.find(vmethod) != methodsSet_.cend();
+    return GetGlobalData().methodsSet.find(vmethod) != GetGlobalData().methodsSet.cend();
+}
+
+VResolver *ANIVerifier::AddGlobalVerifiedResolver(ani_resolver resolver)
+{
+    auto vresolverHolder = MakePandaUnique<VResolver>(resolver);
+    VResolver *vresolver = vresolverHolder.get();
+    {
+        auto &grefs = GetGlobalData().resolversMap;
+        os::memory::LockHolder<os::memory::Mutex> lockHolder(GetGlobalData().resolverMapMutex);
+        grefs[vresolver] = std::move(vresolverHolder);
+    }
+    return vresolver;
+}
+
+void ANIVerifier::DeleteGlobalVerifiedResolver(VResolver *vresolver)
+{
+    auto &resolvers = GetGlobalData().resolversMap;
+    os::memory::LockHolder<os::memory::Mutex> lockHolder(GetGlobalData().resolverMapMutex);
+    auto it = resolvers.find(vresolver);
+    ASSERT(it != resolvers.cend());
+    resolvers.erase(it);
+}
+
+bool ANIVerifier::IsValidGlobalVerifiedResolver(VResolver *vresolver)
+{
+    auto &resolvers = GetGlobalData().resolversMap;
+    os::memory::LockHolder<os::memory::Mutex> lockHolder(GetGlobalData().resolverMapMutex);
+    return resolvers.find(vresolver) != resolvers.cend();
 }
 
 void ANIVerifier::Abort(const std::string_view message)
