@@ -16,7 +16,7 @@
 package escompat;
 
 /**
- * Either ArrayBuffer 
+ * Either ArrayBuffer
  */
 // NOTE (kprokopenko): make abstract after abstract overloads get to work
 abstract class Buffer {

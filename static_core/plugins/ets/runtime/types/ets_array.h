@@ -105,6 +105,11 @@ public:
     NO_COPY_SEMANTIC(EtsArray);
     NO_MOVE_SEMANTIC(EtsArray);
 
+    void UpdateLength(ArraySizeT length)
+    {
+        SetLength(length);
+    }
+
 protected:
     // Use type alias to allow using into derived classes
     using ObjectHeader = ::ark::ObjectHeader;

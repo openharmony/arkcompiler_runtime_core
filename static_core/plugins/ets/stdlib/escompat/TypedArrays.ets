@@ -1183,7 +1183,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: number, end?: number): Int8Array {
-        return this.slice(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
+        return this.sliceImpl(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -1198,7 +1198,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: number, end: int): Int8Array {
-        return this.slice(begin.toInt(), end.toInt())
+        return this.sliceImpl(begin.toInt(), end.toInt())
     }
 
     /**
@@ -1213,7 +1213,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: number): Int8Array {
-        return this.slice(begin.toInt(), end.toInt())
+        return this.sliceImpl(begin.toInt(), end.toInt())
     }
 
     /**
@@ -1228,15 +1228,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): Int8Array {
-        const len: int = this.lengthInt
-        const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
-        let count = relEnd - relStart
-        if (count < 0) {
-            count = 0
-        }
-        let buf = this.buffer.slice(relStart * Int8Array.BYTES_PER_ELEMENT.toInt(), relEnd * Int8Array.BYTES_PER_ELEMENT.toInt()) as ArrayBuffer
-        return new Int8Array(buf)
+        return this.sliceImpl(begin, end)
     }
 
     /**
@@ -1247,7 +1239,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a new Int8Array with elements of current Int8Array[begin, this.length)
      */
     public slice(begin: int): Int8Array {
-        return this.slice(begin, this.lengthInt)
+        return this.sliceImpl(begin, this.lengthInt)
     }
 
     /**
@@ -1332,7 +1324,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a reversed copy
      */
     public toReversed(): Int8Array {
-        return new Int8Array(this).reverse()
+        return this.toReversedImpl()
     }
 
     /**
@@ -1381,7 +1373,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns an Int8Array with replaced value on index
      */
     public with(index: number, value: number): Int8Array {
-        return this.with(index.toInt(), value.toByte())
+        return this.withImpl(index.toInt(), value.toByte())
     }
 
     /**
@@ -1394,9 +1386,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns an Int8Array with replaced value on index
      */
     public with(index: int, value: byte): Int8Array {
-        let res = new Int8Array(this)
-        res.set(index, value)
-        return res
+        return this.withImpl(index, value)
     }
 
     /// === with element lambda functions ===
@@ -1741,6 +1731,22 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     public valueOf(): Int8Array {
         return this
     }
+
+    private final sliceImpl(begin: int, end: int): Int8Array {
+        return new Int8Array(this.allocSlicedBuffer(begin, end))
+    }
+
+    private final toReversedImpl(): Int8Array {
+        return new Int8Array(this.allocReversedBuffer())
+    }
+
+    private final withImpl(index: int, value: byte): Int8Array {
+        return new Int8Array(this.allocBufferWith(index, value))
+    }
+
+    private final native allocSlicedBuffer(beg: int, end: int): ArrayBuffer
+    private final native allocReversedBuffer(): ArrayBuffer
+    private final native allocBufferWith(index: int, value: byte): ArrayBuffer
 
     private final native getUnsafe(index: int): byte
 
@@ -2937,7 +2943,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: number, end?: number): Int16Array {
-        return this.slice(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
+        return this.sliceImpl(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -2952,7 +2958,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: number, end: int): Int16Array {
-        return this.slice(begin.toInt(), end.toInt())
+        return this.sliceImpl(begin.toInt(), end.toInt())
     }
 
     /**
@@ -2967,7 +2973,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: number): Int16Array {
-        return this.slice(begin.toInt(), end.toInt())
+        return this.sliceImpl(begin.toInt(), end.toInt())
     }
 
     /**
@@ -2982,15 +2988,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): Int16Array {
-        const len: int = this.lengthInt
-        const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
-        let count = relEnd - relStart
-        if (count < 0) {
-            count = 0
-        }
-        let buf = this.buffer.slice(relStart * Int16Array.BYTES_PER_ELEMENT.toInt(), relEnd * Int16Array.BYTES_PER_ELEMENT.toInt()) as ArrayBuffer
-        return new Int16Array(buf)
+        return this.sliceImpl(begin, end)
     }
 
     /**
@@ -3001,7 +2999,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a new Int16Array with elements of current Int16Array[begin, this.length)
      */
     public slice(begin: int): Int16Array {
-        return this.slice(begin, this.lengthInt)
+        return this.sliceImpl(begin, this.lengthInt)
     }
 
     /**
@@ -3086,7 +3084,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a reversed copy
      */
     public toReversed(): Int16Array {
-        return new Int16Array(this).reverse()
+        return this.toReversedImpl()
     }
 
     /**
@@ -3135,7 +3133,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns an Int16Array with replaced value on index
      */
     public with(index: number, value: number): Int16Array {
-        return this.with(index.toInt(), value.toShort())
+        return this.withImpl(index.toInt(), value.toShort())
     }
 
     /**
@@ -3148,9 +3146,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns an Int16Array with replaced value on index
      */
     public with(index: int, value: short): Int16Array {
-        let res = new Int16Array(this)
-        res.set(index, value)
-        return res
+        return this.withImpl(index, value)
     }
 
     /// === with element lambda functions ===
@@ -3495,6 +3491,22 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     public valueOf(): Int16Array {
         return this
     }
+
+    private final sliceImpl(begin: int, end: int): Int16Array {
+        return new Int16Array(this.allocSlicedBuffer(begin, end))
+    }
+
+    private final toReversedImpl(): Int16Array {
+        return new Int16Array(this.allocReversedBuffer())
+    }
+
+    private final withImpl(index: int, value: short): Int16Array {
+        return new Int16Array(this.allocBufferWith(index, value))
+    }
+
+    private final native allocSlicedBuffer(beg: int, end: int): ArrayBuffer
+    private final native allocReversedBuffer(): ArrayBuffer
+    private final native allocBufferWith(index: int, value: short): ArrayBuffer
 
     private final native getUnsafe(index: int): short
 
@@ -4668,7 +4680,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: number, end?: number): Int32Array {
-        return this.slice(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
+        return this.sliceImpl(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -4683,7 +4695,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: number, end: int): Int32Array {
-        return this.slice(begin.toInt(), end.toInt())
+        return this.sliceImpl(begin.toInt(), end.toInt())
     }
 
     /**
@@ -4698,7 +4710,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: number): Int32Array {
-        return this.slice(begin.toInt(), end.toInt())
+        return this.sliceImpl(begin.toInt(), end.toInt())
     }
 
     /**
@@ -4713,15 +4725,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): Int32Array {
-        const len: int = this.lengthInt
-        const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
-        let count = relEnd - relStart
-        if (count < 0) {
-            count = 0
-        }
-        let buf = this.buffer.slice(relStart * Int32Array.BYTES_PER_ELEMENT.toInt(), relEnd * Int32Array.BYTES_PER_ELEMENT.toInt()) as ArrayBuffer
-        return new Int32Array(buf)
+        return this.sliceImpl(begin, end)
     }
 
     /**
@@ -4732,7 +4736,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a new Int32Array with elements of current Int32Array[begin, this.length)
      */
     public slice(begin: int): Int32Array {
-        return this.slice(begin, this.lengthInt)
+        return this.sliceImpl(begin, this.lengthInt)
     }
 
     /**
@@ -4817,7 +4821,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a reversed copy
      */
     public toReversed(): Int32Array {
-        return new Int32Array(this).reverse()
+        return this.toReversedImpl()
     }
 
     /**
@@ -4866,7 +4870,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns an Int32Array with replaced value on index
      */
     public with(index: number, value: number): Int32Array {
-        return this.with(index.toInt(), value.toInt())
+        return this.withImpl(index.toInt(), value.toInt())
     }
 
     /**
@@ -4879,9 +4883,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns an Int32Array with replaced value on index
      */
     public with(index: int, value: int): Int32Array {
-        let res = new Int32Array(this)
-        res.set(index, value)
-        return res
+        return this.withImpl(index, value)
     }
 
     /// === with element lambda functions ===
@@ -5226,6 +5228,22 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public valueOf(): Int32Array {
         return this
     }
+
+    private final sliceImpl(begin: int, end: int): Int32Array {
+        return new Int32Array(this.allocSlicedBuffer(begin, end))
+    }
+
+    private final toReversedImpl(): Int32Array {
+        return new Int32Array(this.allocReversedBuffer())
+    }
+
+    private final withImpl(index: int, value: int): Int32Array {
+        return new Int32Array(this.allocBufferWith(index, value))
+    }
+
+    private final native allocSlicedBuffer(beg: int, end: int): ArrayBuffer
+    private final native allocReversedBuffer(): ArrayBuffer
+    private final native allocBufferWith(index: int, value: int): ArrayBuffer
 
     private final native getUnsafe(index: int): int
 
@@ -6412,7 +6430,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: number, end?: number): BigInt64Array {
-        return this.slice(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
+        return this.sliceImpl(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -6427,7 +6445,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: number, end: int): BigInt64Array {
-        return this.slice(begin.toInt(), end.toInt())
+        return this.sliceImpl(begin.toInt(), end.toInt())
     }
 
     /**
@@ -6442,7 +6460,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: number): BigInt64Array {
-        return this.slice(begin.toInt(), end.toInt())
+        return this.sliceImpl(begin.toInt(), end.toInt())
     }
 
     /**
@@ -6457,15 +6475,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): BigInt64Array {
-        const len: int = this.lengthInt
-        const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
-        let count = relEnd - relStart
-        if (count < 0) {
-            count = 0
-        }
-        let buf = this.buffer.slice(relStart * BigInt64Array.BYTES_PER_ELEMENT.toInt(), relEnd * BigInt64Array.BYTES_PER_ELEMENT.toInt()) as ArrayBuffer
-        return new BigInt64Array(buf)
+        return this.sliceImpl(begin, end)
     }
 
     /**
@@ -6476,7 +6486,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns a new BigInt64Array with elements of current BigInt64Array[begin, this.length)
      */
     public slice(begin: int): BigInt64Array {
-        return this.slice(begin, this.lengthInt)
+        return this.sliceImpl(begin, this.lengthInt)
     }
 
     /**
@@ -6561,7 +6571,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns a reversed copy
      */
     public toReversed(): BigInt64Array {
-        return new BigInt64Array(this).reverse()
+        return this.toReversedImpl()
     }
 
     /**
@@ -6610,7 +6620,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns an BigInt64Array with replaced value on index
      */
     public with(index: number, value: BigInt): BigInt64Array {
-        return this.with(index.toInt(), value.getLong())
+        return this.withImpl(index.toInt(), value.getLong())
     }
 
     /**
@@ -6623,9 +6633,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns an BigInt64Array with replaced value on index
      */
     public with(index: int, value: long): BigInt64Array {
-        let res = new BigInt64Array(this)
-        res.set(index, value)
-        return res
+        return this.withImpl(index, value)
     }
 
     /// === with element lambda functions ===
@@ -6974,6 +6982,22 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     public valueOf(): BigInt64Array {
         return this
     }
+
+    private final sliceImpl(begin: int, end: int): BigInt64Array {
+        return new BigInt64Array(this.allocSlicedBuffer(begin, end))
+    }
+
+    private final toReversedImpl(): BigInt64Array {
+        return new BigInt64Array(this.allocReversedBuffer())
+    }
+
+    private final withImpl(index: int, value: long): BigInt64Array {
+        return new BigInt64Array(this.allocBufferWith(index, value))
+    }
+
+    private final native allocSlicedBuffer(beg: int, end: int): ArrayBuffer
+    private final native allocReversedBuffer(): ArrayBuffer
+    private final native allocBufferWith(index: int, value: long): ArrayBuffer
 
     private final native getUnsafe(index: int): long
 
@@ -8133,7 +8157,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: number, end?: number): Float32Array {
-        return this.slice(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
+        return this.sliceImpl(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -8148,7 +8172,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: number, end: int): Float32Array {
-        return this.slice(begin.toInt(), end.toInt())
+        return this.sliceImpl(begin.toInt(), end.toInt())
     }
 
     /**
@@ -8163,7 +8187,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: number): Float32Array {
-        return this.slice(begin.toInt(), end.toInt())
+        return this.sliceImpl(begin.toInt(), end.toInt())
     }
 
     /**
@@ -8178,15 +8202,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): Float32Array {
-        const len: int = this.lengthInt
-        const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
-        let count = relEnd - relStart
-        if (count < 0) {
-            count = 0
-        }
-        let buf = this.buffer.slice(relStart * Float32Array.BYTES_PER_ELEMENT.toInt(), relEnd * Float32Array.BYTES_PER_ELEMENT.toInt()) as ArrayBuffer
-        return new Float32Array(buf)
+        return this.sliceImpl(begin, end)
     }
 
     /**
@@ -8197,7 +8213,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a new Float32Array with elements of current Float32Array[begin, this.length)
      */
     public slice(begin: int): Float32Array {
-        return this.slice(begin, this.lengthInt)
+        return this.sliceImpl(begin, this.lengthInt)
     }
 
     /**
@@ -8282,7 +8298,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a reversed copy
      */
     public toReversed(): Float32Array {
-        return new Float32Array(this).reverse()
+        return this.toReversedImpl()
     }
 
     /**
@@ -8331,7 +8347,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns an Float32Array with replaced value on index
      */
     public with(index: number, value: number): Float32Array {
-        return this.with(index.toInt(), value.toFloat())
+        return this.withImpl(index.toInt(), value.toFloat())
     }
 
     /**
@@ -8344,9 +8360,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns an Float32Array with replaced value on index
      */
     public with(index: int, value: float): Float32Array {
-        let res = new Float32Array(this)
-        res.set(index, value)
-        return res
+        return this.withImpl(index, value)
     }
 
     /// === with element lambda functions ===
@@ -8708,6 +8722,22 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     public valueOf(): Float32Array {
         return this
     }
+
+    private final sliceImpl(begin: int, end: int): Float32Array {
+        return new Float32Array(this.allocSlicedBuffer(begin, end))
+    }
+
+    private final toReversedImpl(): Float32Array {
+        return new Float32Array(this.allocReversedBuffer())
+    }
+
+    private final withImpl(index: int, value: float): Float32Array {
+        return new Float32Array(this.allocBufferWith(index, value))
+    }
+
+    private final native allocSlicedBuffer(beg: int, end: int): ArrayBuffer
+    private final native allocReversedBuffer(): ArrayBuffer
+    private final native allocBufferWith(index: int, value: float): ArrayBuffer
 
     private final native getUnsafe(index: int): float
 
@@ -9759,7 +9789,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: number, end?: number): Float64Array {
-        return this.slice(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
+        return this.sliceImpl(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -9774,7 +9804,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: number, end: int): Float64Array {
-        return this.slice(begin.toInt(), end.toInt())
+        return this.sliceImpl(begin.toInt(), end.toInt())
     }
 
     /**
@@ -9789,7 +9819,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: number): Float64Array {
-        return this.slice(begin.toInt(), end.toInt())
+        return this.sliceImpl(begin.toInt(), end.toInt())
     }
 
     /**
@@ -9804,15 +9834,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): Float64Array {
-        const len: int = this.lengthInt
-        const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
-        let count = relEnd - relStart
-        if (count < 0) {
-            count = 0
-        }
-        let buf = this.buffer.slice(relStart * Float64Array.BYTES_PER_ELEMENT.toInt(), relEnd * Float64Array.BYTES_PER_ELEMENT.toInt()) as ArrayBuffer
-        return new Float64Array(buf)
+        return this.sliceImpl(begin, end)
     }
 
     /**
@@ -9823,7 +9845,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a new Float64Array with elements of current Float64Array[begin, this.length)
      */
     public slice(begin: int): Float64Array {
-        return this.slice(begin, this.lengthInt)
+        return this.sliceImpl(begin, this.lengthInt)
     }
 
     /**
@@ -9908,7 +9930,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a reversed copy
      */
     public toReversed(): Float64Array {
-        return new Float64Array(this).reverse()
+        return this.toReversedImpl()
     }
 
     /**
@@ -9957,7 +9979,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns an Float64Array with replaced value on index
      */
     public with(index: number, value: number): Float64Array {
-        return this.with(index.toInt(), value.toDouble())
+        return this.withImpl(index.toInt(), value.toDouble())
     }
 
     /**
@@ -9970,9 +9992,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns an Float64Array with replaced value on index
      */
     public with(index: int, value: double): Float64Array {
-        let res = new Float64Array(this)
-        res.set(index, value)
-        return res
+        return this.withImpl(index, value)
     }
 
     /// === with element lambda functions ===
@@ -10334,6 +10354,22 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     public valueOf(): Float64Array {
         return this
     }
+
+    private final sliceImpl(begin: int, end: int): Float64Array {
+        return new Float64Array(this.allocSlicedBuffer(begin, end))
+    }
+
+    private final toReversedImpl(): Float64Array {
+        return new Float64Array(this.allocReversedBuffer())
+    }
+
+    private final withImpl(index: int, value: double): Float64Array {
+        return new Float64Array(this.allocBufferWith(index, value))
+    }
+
+    private final native allocSlicedBuffer(beg: int, end: int): ArrayBuffer
+    private final native allocReversedBuffer(): ArrayBuffer
+    private final native allocBufferWith(index: int, value: double): ArrayBuffer
 
     private final native getUnsafe(index: int): double
 

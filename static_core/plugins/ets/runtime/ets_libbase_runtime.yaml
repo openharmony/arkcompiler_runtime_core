@@ -2897,6 +2897,10 @@ intrinsics:
       args: [std.core.String]
     impl: ark::ets::intrinsics::EtsEscompatBigUint64ArrayJoin
 
+################################
+# escompat.TypedArrays.reverse #
+################################
+
   - name: Int8ArrayReverse
     space: ets
     class_name: escompat.Int8Array
@@ -3006,6 +3010,353 @@ intrinsics:
       ret: escompat.BigUint64Array
       args: []
     impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayReverse
+
+############################################
+# escompat.TypedArrays.allocReversedBuffer #
+############################################
+
+  - name: Int8ArrayAllocReversedBuffer
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: allocReversedBuffer
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayAllocReversedBuffer
+
+  - name: Int16ArrayAllocReversedBuffer
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: allocReversedBuffer
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayAllocReversedBuffer
+
+  - name: Int32ArrayAllocReversedBuffer
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: allocReversedBuffer
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayAllocReversedBuffer
+
+  - name: BigInt64ArrayAllocReversedBuffer
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: allocReversedBuffer
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayAllocReversedBuffer
+
+  - name: Float32ArrayAllocReversedBuffer
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: allocReversedBuffer
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayAllocReversedBuffer
+
+  - name: Float64ArrayAllocReversedBuffer
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: allocReversedBuffer
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayAllocReversedBuffer
+
+  - name: UInt8ArrayAllocReversedBuffer
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: allocReversedBuffer
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayAllocReversedBuffer
+
+  - name: UInt8ClampedArrayAllocReversedBuffer
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: allocReversedBuffer
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayAllocReversedBuffer
+
+  - name: UInt16ArrayAllocReversedBuffer
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: allocReversedBuffer
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayAllocReversedBuffer
+
+  - name: UInt32ArrayAllocReversedBuffer
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: allocReversedBuffer
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayAllocReversedBuffer
+
+  - name: BigUInt64ArrayAllocReversedBuffer
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: allocReversedBuffer
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayAllocReversedBuffer
+
+##########################################
+# escompat.TypedArrays.allocSlicedBuffer #
+##########################################
+
+  - name: Int8ArrayAllocSlicedBuffer
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: allocSlicedBuffer
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayAllocSlicedBuffer
+
+  - name: Int16ArrayAllocSlicedBuffer
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: allocSlicedBuffer
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayAllocSlicedBuffer
+
+  - name: Int32ArrayAllocSlicedBuffer
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: allocSlicedBuffer
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayAllocSlicedBuffer
+
+  - name: BigInt64ArrayAllocSlicedBuffer
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: allocSlicedBuffer
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayAllocSlicedBuffer
+
+  - name: Float32ArrayAllocSlicedBuffer
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: allocSlicedBuffer
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayAllocSlicedBuffer
+
+  - name: Float64ArrayAllocSlicedBuffer
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: allocSlicedBuffer
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayAllocSlicedBuffer
+
+  - name: UInt8ArrayAllocSlicedBuffer
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: allocSlicedBuffer
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayAllocSlicedBuffer
+
+  - name: UInt8ClampedArrayAllocSlicedBuffer
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: allocSlicedBuffer
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayAllocSlicedBuffer
+
+  - name: UInt16ArrayAllocSlicedBuffer
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: allocSlicedBuffer
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayAllocSlicedBuffer
+
+  - name: UInt32ArrayAllocSlicedBuffer
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: allocSlicedBuffer
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayAllocSlicedBuffer
+
+  - name: BigUInt64ArrayAllocSlicedBuffer
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: allocSlicedBuffer
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayAllocSlicedBuffer
+
+########################################
+# escompat.TypedArrays.allocBufferWith #
+########################################
+
+  - name: Int8ArrayAllocBufferWith
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: allocBufferWith
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [i32, i8]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayAllocBufferWith
+
+  - name: Int16ArrayAllocBufferWith
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: allocBufferWith
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [i32, i16]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayAllocBufferWith
+
+  - name: Int32ArrayAllocBufferWith
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: allocBufferWith
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayAllocBufferWith
+
+  - name: BigInt64ArrayAllocBufferWith
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: allocBufferWith
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [i32, i64]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayAllocBufferWith
+
+  - name: Float32ArrayAllocBufferWith
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: allocBufferWith
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [i32, f32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayAllocBufferWith
+
+  - name: Float64ArrayAllocBufferWith
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: allocBufferWith
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [i32, f64]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayAllocBufferWith
+
+  - name: UInt8ArrayAllocBufferWith
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: allocBufferWith
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayAllocBufferWith
+
+  - name: UInt8ClampedArrayAllocBufferWith
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: allocBufferWith
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayAllocBufferWith
+
+  - name: UInt16ArrayAllocBufferWith
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: allocBufferWith
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayAllocBufferWith
+
+  - name: UInt32ArrayAllocBufferWith
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: allocBufferWith
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [i32, i64]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayAllocBufferWith
+
+  - name: BigUInt64ArrayAllocBufferWith
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: allocBufferWith
+    static: false
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [i32, i64]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayAllocBufferWith
+
+
+###################################
+# escompat.TypedArrays.copyWithin #
+###################################
 
   - name: Int8ArrayCopyWithin
     space: ets
