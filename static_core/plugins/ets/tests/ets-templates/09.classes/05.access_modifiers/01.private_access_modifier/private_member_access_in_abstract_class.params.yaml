@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,29 +15,31 @@
 tests:
   - doc: access private field
     decl: |-
-      class A {
+      abstract class A {
         private x: int = 7
         foo(): int {
           return this.x
         }
       }
+      class C extends A { }
     check: |-
-      arktest.assertEQ(new A().foo(), 7)
+      arktest.assertEQ(new C().foo(), 7)
 
   - doc: access private static field
     decl: |-
-      class A {
+      abstract class A {
         private static x: int = 7
         foo(): int {
           return A.x
         }
       }
+      class C extends A { }
     check: |-
-      arktest.assertEQ(new A().foo(), 7)
+      arktest.assertEQ(new C().foo(), 7)
 
   - doc: access private method
     decl: |-
-      class A {
+      abstract class A {
         private getValue(): int {
           return 1
         }
@@ -45,12 +47,13 @@ tests:
           return this.getValue()
         }
       }
+      class C extends A { }
     check: |-
-      arktest.assertEQ(new A().foo(), 1)
+      arktest.assertEQ(new C().foo(), 1)
 
   - doc: access private static method
     decl: |-
-      class A {
+      abstract class A {
         private static getValue(): int {
           return 1
         }
@@ -58,12 +61,13 @@ tests:
           return A.getValue()
         }
       }
+      class C extends A { }
     check: |-
-      arktest.assertEQ(new A().foo(), 1)
+      arktest.assertEQ(new C().foo(), 1)
 
   - doc: access private getter
     decl: |-
-      class A {
+      abstract class A {
         private _val: int = 0
         private get val(): int {
           return this._val
@@ -73,12 +77,13 @@ tests:
           return this.val
         }
       }
+      class C extends A { }
     check: |-
-      arktest.assertEQ(new A().foo(7), 7)
+      arktest.assertEQ(new C().foo(7), 7)
 
   - doc: access private static getter
     decl: |-
-      class A {
+      abstract class A {
         private static _val: int = 0
         private static get val(): int {
           return A._val
@@ -90,13 +95,14 @@ tests:
           return A.val
         }
       }
+      class C extends A { }
     check: |-
       A.val = 5
-      arktest.assertEQ(new A().foo(), 5)
+      arktest.assertEQ(new C().foo(), 5)
 
   - doc: access private setter
     decl: |-
-      class A {
+      abstract class A {
         private _val: int = 0
         private set val(i: int) {
           this._val = i
@@ -106,12 +112,13 @@ tests:
           return this._val
         }
       }
+      class C extends A { }
     check: |-
-      arktest.assertEQ(new A().foo(4), 4)
+      arktest.assertEQ(new C().foo(4), 4)
 
   - doc: access private static setter
     decl: |-
-      class A {
+      abstract class A {
         private static _val: int = 0
         private static set val(i: int) {
           A._val = i
@@ -121,5 +128,6 @@ tests:
           return A._val
         }
       }
+      class C extends A { }
     check: |-
-      arktest.assertEQ(new A().foo(6), 6)
+      arktest.assertEQ(new C().foo(6), 6)

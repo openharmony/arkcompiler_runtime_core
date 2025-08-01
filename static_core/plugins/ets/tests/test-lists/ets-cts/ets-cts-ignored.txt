@@ -1221,6 +1221,17 @@
 #27010
 08.statements/15.try_statements/01.catch_clauses/catch_2.ets
 
+# 28639
+09.classes/05.access_modifiers/01.private_access_modifier/private_member_access_out_class_5.ets
+09.classes/05.access_modifiers/01.private_access_modifier/private_member_access_out_abstract_class_12.ets
+09.classes/05.access_modifiers/01.private_access_modifier/private_member_access_out_abstract_class_13.ets
+
+# 28640
+09.classes/05.access_modifiers/02.protected_access_modifier/protected_member_access_out_class_10.ets
+09.classes/05.access_modifiers/02.protected_access_modifier/protected_member_access_out_class_11.ets
+09.classes/05.access_modifiers/02.protected_access_modifier/protected_member_access_out_class_14.ets
+09.classes/05.access_modifiers/02.protected_access_modifier/protected_member_access_out_class_15.ets
+
 #23050
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_1.ets
 

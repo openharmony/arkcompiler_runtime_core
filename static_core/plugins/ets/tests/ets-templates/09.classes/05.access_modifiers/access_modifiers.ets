@@ -21,11 +21,7 @@ assert: >-
     Members and constructors may have either private, internal, internal protected, protected or public modifier to
     explicitly specify the desired accessibility.
 params: "{{mod}} {{member}}"
-{%- if member.unsupported == "true" %}
-tags: [negative, compile-only]
-{%- else %}
 tags: [compile-only]
-{%- endif %}
 ---*/
 
 class A {

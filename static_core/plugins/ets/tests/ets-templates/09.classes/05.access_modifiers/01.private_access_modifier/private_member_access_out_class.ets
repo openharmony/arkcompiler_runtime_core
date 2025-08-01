@@ -26,9 +26,7 @@ class A {
 }
 
 function main(): void {
-  let instance: A = new A();
-
-  instance.{{member.call}};
+  {{member.call}};
 }
 
 {% endfor %}

@@ -13,24 +13,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for member in members %}
+{% for test in tests %}
 /*---
 desc: Check member with public access modifier out class.
 assert: Member or constructor with public modifier can be accessed everywhere.
-params: "{{member.body}}"
-{%- if member.unsupported == "true" %}
-tags: [negative, compile-only]
-{%- endif %}
 ---*/
 
-class A {
-  public {{member.body}}
-}
+{{test.class}}
 
 function main(): void {
-  let instance: A = new A();
-
-  instance.{{member.call}};
+  {{test.check}}
 }
-
 {% endfor %}

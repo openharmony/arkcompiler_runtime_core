@@ -19,6 +19,3 @@ tags: [negative, compile-only]
 ---*/
 
 public class A {}
-
-function main(): void {
-}

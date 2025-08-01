@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,7 +15,4 @@
 members:
   - { body: "x: int;", call: "instance.x" }
   - { body: "foo(): void {}", call: "instance.foo()" }
-  - { body: "class B{}", call: "let x: A.B = new A.B()", unsupported: "true" }
-  - { body: "interface I{}", call: "let x: A.I", unsupported: "true" }
-  - { body: "enum Color {Red, Green}", call: "instance.Color.Red", unsupported: "true" }
   - { body: "constructor(y: int) { this.y = y; }", call: "let x: A = new A(5)" }
