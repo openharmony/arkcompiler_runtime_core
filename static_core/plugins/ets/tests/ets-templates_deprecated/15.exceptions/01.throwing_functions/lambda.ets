@@ -19,12 +19,12 @@ assert: To indicate that a function (in general sense, meaning a function, metho
 tags: [compile-only]
 ---*/
 
-class TestException extends Exception {}
+class TestError extends Error {}
 
 type func = (x: int) => int throws;
 
 function bar(): void throws {
-  let foo: func = (x: int): int throws => { throw new TestException(); return 5; };
+  let foo: func = (x: int): int throws => { throw new TestError(); return 5; };
 
   let i: int = foo(4);
 }

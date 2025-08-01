@@ -20,5 +20,5 @@ tags: [compile-only]
 ---*/
 
 function bar(): void throws {
-  throw new Exception();
+  throw new Error();
 }

@@ -19,17 +19,19 @@ assert: To indicate that a function (in general sense, meaning a function, metho
 tags: [compile-only, negative]
 ---*/
 
-class TestException extends Exception {}
+class TestError extends Error {}
 
 class A {
   i: int = 0;
 
   public constructor() {
     try {
-      throw new TestException();
+      throw new TestError();
     }
-    catch (e: TestException) {
-      this.i = 5;
+    catch (e) {
+      if (e instanceof TestError) {
+        this.i = 5;
+      }
     }
   }
 }
