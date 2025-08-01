@@ -46,7 +46,7 @@
 //! INST_NOT   /Intrinsic.EscompatArraySet/
 //! INST       /Call((Virtual)|(Static)) .*escompat\.Array::\$_set/
 
-//! CHECKER JIT IR Builder: Case #2: escompat.Array get/set operations (with exceptions).
+//! CHECKER JIT IR Builder: Case #2: escompat.Array get/set operations (with errors).
 //! RUN        force_jit: true, entry: "escompat_array_get_set.ETSGLOBAL::test2"
 //! EVENT      /Compilation,escompat_array_get_set.ETSGLOBAL::__noinline__testRangeError,.*,COMPILED/
 //! METHOD  "escompat_array_get_set.ETSGLOBAL::__noinline__testRangeError"
@@ -63,7 +63,7 @@
 //! PASS_AFTER "Inline"
 //! INST_NOT   /Intrinsic.EscompatArrayGet/
 
-//! CHECKER AOT IR Builder: Case #2: escompat.Array get/set operations (with exceptions).
+//! CHECKER AOT IR Builder: Case #2: escompat.Array get/set operations (with errors).
 //! SKIP_IF    @architecture == "arm32"
 //! RUN_PAOC   options: ""
 //! METHOD  "escompat_array_get_set.ETSGLOBAL::__noinline__testRangeError"
@@ -90,9 +90,9 @@ function arrayGet(arr: Array<int>): int {
     return arr[1] + arr[3] + arr[8];
 }
 
-const CORRECT_EXCEPTION_THROWN = 0;
-const WRONG_EXCEPTION_THROWN = 1;
-const NO_EXCEPTION_THROWN = 2;
+const CORRECT_ERROR_THROWN = 0;
+const WRONG_ERROR_THROWN = 1;
+const NO_ERROR_THROWN = 2;
 const WRONG_EXPRESSION_RESULT = 3;
 
 function __noinline__testRangeError(arr: Array<int>, index: int): int {
@@ -100,11 +100,11 @@ function __noinline__testRangeError(arr: Array<int>, index: int): int {
         arr[index] = 21;
     } catch (e) {
         if (e instanceof RangeError) {
-            return CORRECT_EXCEPTION_THROWN;
+            return CORRECT_ERROR_THROWN;
         }
-        return WRONG_EXCEPTION_THROWN;
+        return WRONG_ERROR_THROWN;
     }
-    return NO_EXCEPTION_THROWN;
+    return NO_ERROR_THROWN;
 }
 
 function __noinline__testClassCastError(arr: Array<int>, index: int): int {
@@ -114,11 +114,11 @@ function __noinline__testClassCastError(arr: Array<int>, index: int): int {
         dest = arr[index];
     } catch (e) {
         if (e instanceof ClassCastError) {
-            return (dest == MAGIC_NUMBER) ? CORRECT_EXCEPTION_THROWN : WRONG_EXPRESSION_RESULT;
+            return (dest == MAGIC_NUMBER) ? CORRECT_ERROR_THROWN : WRONG_EXPRESSION_RESULT;
         }
-        return WRONG_EXCEPTION_THROWN;
+        return WRONG_ERROR_THROWN;
     }
-    return NO_EXCEPTION_THROWN;
+    return NO_ERROR_THROWN;
 }
 
 function test1(): void {
@@ -131,14 +131,14 @@ function test2(): void {
     const arr = new Array<int>(16);
     arraySet(arr);
 
-    // Exception case #1: index < 0
-    arktest.assertEQ(__noinline__testRangeError(arr, -1), CORRECT_EXCEPTION_THROWN);
+    // Error case #1: index < 0
+    arktest.assertEQ(__noinline__testRangeError(arr, -1), CORRECT_ERROR_THROWN);
 
-    // Exception case #2: index >= length
-    arktest.assertEQ(__noinline__testRangeError(arr, 16), CORRECT_EXCEPTION_THROWN);
+    // Error case #2: index >= length
+    arktest.assertEQ(__noinline__testRangeError(arr, 16), CORRECT_ERROR_THROWN);
 
-    // Exception case #3: undefined -> Int cast error
-    arktest.assertEQ(__noinline__testClassCastError(arr, 2), CORRECT_EXCEPTION_THROWN);
+    // Error case #3: undefined -> Int cast error
+    arktest.assertEQ(__noinline__testClassCastError(arr, 2), CORRECT_ERROR_THROWN);
 }
 
 class ExtArray<T> extends Array<T> {
