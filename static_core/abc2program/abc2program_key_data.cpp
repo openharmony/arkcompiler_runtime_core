@@ -51,6 +51,9 @@ pandasm::Program &Abc2ProgramKeyData::GetProgram() const
 std::string Abc2ProgramKeyData::GetFullRecordNameById(const panda_file::File::EntityId &classId) const
 {
     std::string name = stringTable_.GetStringById(classId);
+    if (name.empty()) {
+        LOG(FATAL, ABC2PROGRAM) << "Record name is empty";
+    }
     pandasm::Type type = pandasm::Type::FromDescriptor(name);
     return type.GetPandasmName();
 }
