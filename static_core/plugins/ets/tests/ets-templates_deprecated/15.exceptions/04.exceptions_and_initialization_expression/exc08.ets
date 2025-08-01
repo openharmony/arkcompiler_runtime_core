@@ -17,7 +17,7 @@
 desc: >-
   A variable declaration (§4.7.1) or a constant declaration (§4.7.2) expression
   used to initialize a variable or constant must not have calls to functions
-  that can throw or rethrow exceptions.
+  that can throw or rethrow errors.
 tags: [compile-only, negative]
 ---*/
 
@@ -27,7 +27,7 @@ function main(): int {
     let v: int = (
         (i: int):int throws => {
             if (i != 2) {
-                throw new Exception()
+                throw new Error()
             }
             return --i;
         }
