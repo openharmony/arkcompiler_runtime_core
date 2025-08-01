@@ -64,7 +64,7 @@ function createArraySetAndGet(): int {
         try {
             target.set(i, source[i] as {{.item.primitiveType}});
         } catch(e) {
-            console.print("Catched exception at insert via set(int, {{.item.type}})");
+            console.print("Catched error at insert via set(int, {{.item.type}})");
             return fail;
         }
     }
@@ -91,7 +91,7 @@ function createArraySetAndGet(): int {
         try {
             target2[i.toDouble()] = source[i] as {{.item.primitiveType}};
         } catch(e) {
-            console.print("Catched exception at insert via $_set(number, {{.item.type}})");
+            console.print("Catched error at insert via $_set(number, {{.item.type}})");
             return fail;
         }
         if (target[i] != target2[i]) {
@@ -326,7 +326,7 @@ function createFromSource(source: FixedArray<{{.item.primitiveType}}>): {{.item.
         origin.set(source);
     } catch(e) {
         console.println(e);
-        throw new Exception("Unable to create typed array");
+        throw new Error("Unable to create typed array");
     }
 
     return origin;
