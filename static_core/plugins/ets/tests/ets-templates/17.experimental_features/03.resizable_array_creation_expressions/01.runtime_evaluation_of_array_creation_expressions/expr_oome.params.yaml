@@ -24,10 +24,8 @@ cases:
       use: |-
           res = ""
           let v: UT = null
-          try {
-              v = new number[foo(size)][foo(size)]
-          } catch (e) {
-              arktest.assertTrue(e instanceof OutOfMemoryError && v === null)
-              return
+          let expectedError = (e: Error): boolean => {
+              return (e instanceof OutOfMemoryError)
           }
-          arktest.assertTrue(false, "OutOfMemoryError expected")
+          arktest.expectThrowError(() => {v = new number[foo(size)][foo(size)]}, expectedError)
+          arktest.assertEQ(v, null)
