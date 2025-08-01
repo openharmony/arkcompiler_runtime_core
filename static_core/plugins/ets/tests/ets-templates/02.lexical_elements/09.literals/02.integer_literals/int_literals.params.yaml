@@ -16,6 +16,8 @@ cases:
     # dec
     - { lit: '0', val: '0' }
     - { lit: '1', val: '1' }
+    - { lit: '+1', val: '1' }
+    - { lit: '-1', val: '-1' }
     - { lit: '2147483647', val: '2147483647' }
     - { lit: '2_147_483_647', val: '2147483647' }
     # hex
@@ -24,9 +26,12 @@ cases:
     - { lit: '0xffffffff', val: '-1' }
     - { lit: '0x80000000', val: '-2147483648' }
     - { lit: '0X7fffffff', val: '2147483647' }
+    - { lit: '0X7FFF_FFFF', val: '2147483647' }
     - { lit: '0xca_fe_CA_FE', val: '-889271554' }
     - { lit: '0X00_00_00_00_ca_fe_CA_FE', val: '-889271554' }
     - { lit: '0xa_Ab_Bc_Cd_D', val: '-1430532899' }
+    - { lit: '0xBAD3', val: '47827' }
+    - { lit: '0xBAD_3', val: '47827' }
     # oct
     - { lit: '0o00000000000', val: '0' }
     - { lit: '0o00000000001', val: '1' }

@@ -13,15 +13,15 @@
 
 --- # List of soft keywords
 keywords:
-    - catch
-    - declare
-    - finally
     - from
     - get
-    - in
+    - keyof
     - namespace
     - of
     - out
     - readonly
     - set
     - type
+    - internal
+    - package
+    - declare

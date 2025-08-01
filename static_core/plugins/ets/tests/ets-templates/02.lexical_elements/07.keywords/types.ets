@@ -15,7 +15,7 @@ limitations under the License.
 
 {% for kwd in keywords %}
 /*---
-desc: Names of primitive built-in types as well as their boxed versions also are hard keywords, and cannot be used as identifiers
+desc:  Names and aliases of predefined types are hard keywords, and cannot be used as identifiers
 tags: [negative, compile-only]
 params: '{{kwd}}'
 ---*/

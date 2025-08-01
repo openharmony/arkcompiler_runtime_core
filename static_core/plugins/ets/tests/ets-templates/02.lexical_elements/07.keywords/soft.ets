@@ -15,7 +15,7 @@ limitations under the License.
 
 {% for kwd in keywords %}
 /*---
-desc: The following words have special meaning in certain contexts (soft keywords) but are valid identifiers elsewhere
+desc: The following soft keywords have special meaning in certain contexts but are valid identifiers elsewhere
 params: '{{kwd}}'
 ---*/
 

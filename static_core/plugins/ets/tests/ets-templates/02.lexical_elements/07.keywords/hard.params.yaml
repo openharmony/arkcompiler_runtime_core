@@ -19,6 +19,7 @@ keywords:
     - await
     - break
     - case
+    - catch
     - class
     - const
     - constructor
@@ -31,20 +32,21 @@ keywords:
     - extends
     - 'false'
     - final
+    - finally
     - for
     - function
     - if
     - implements
     - import
+    - in
     - instanceof
     - interface
-    - internal
     - let
     - native
     - new
     - 'null'
+    - overload
     - override
-    - package
     - private
     - protected
     - public

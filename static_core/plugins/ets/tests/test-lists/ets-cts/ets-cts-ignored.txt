@@ -1,6 +1,18 @@
 #25066
 02.lexical_elements/07.keywords/types_local_18.ets
 
+#28017
+02.lexical_elements/07.keywords/hard_6.ets
+02.lexical_elements/07.keywords/hard_19.ets
+02.lexical_elements/07.keywords/hard_25.ets
+
+#28018
+02.lexical_elements/07.keywords/soft_2.ets
+
+#28019
+02.lexical_elements/07.keywords/soft_9.ets
+02.lexical_elements/07.keywords/soft_10.ets
+
 #26687
 02.lexical_elements/09.literals/03.floating_point_literals/float_literal_too_large_0.ets
 
