@@ -181,14 +181,14 @@ function reduceFunc(a: Number, b: Number, index: number, arr: ReadonlyArray<Numb
 
 function reduceFuncArg4ReadonlyArray(): int {
     let arrEmpty: ReadonlyArray<Number> = new Array<Number>;
-    let hasException: boolean = false;
+    let hasError: boolean = false;
     try {
         let res = arrEmpty.reduce(reduceFunc);
         return RESULT_FAILURE;
     } catch(e) {
-        hasException = true;
+        hasError = true;
     }
-    if (!hasException) return RESULT_FAILURE;
+    if (!hasError) return RESULT_FAILURE;
 
     const arr: ReadonlyArray<Number> = Arrays.copy(TEST_ARRAY);
     let res = arr.reduce(reduceFunc);
@@ -214,14 +214,14 @@ function reduceFuncArg4ReadonlyArrayWithInitialValue(): int {
 
 function reduceRightFuncArg4ReadonlyArray(): int {
     let arrEmpty: ReadonlyArray<Number> = new Array<Number>;
-    let hasException: boolean = false;
+    let hasError: boolean = false;
     try {
         let res = arrEmpty.reduceRight(reduceFunc);
         return RESULT_FAILURE;
     } catch(e) {
-        hasException = true;
+        hasError = true;
     }
-    if (!hasException) return RESULT_FAILURE;
+    if (!hasError) return RESULT_FAILURE;
 
     const arr: ReadonlyArray<Number> = Arrays.copy(TEST_ARRAY);
     let res = arr.reduceRight(reduceFunc);
