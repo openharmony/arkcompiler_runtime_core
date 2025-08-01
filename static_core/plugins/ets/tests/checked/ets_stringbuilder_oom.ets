@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-//! CHECKER      OOM exception for StringBuilder
+//! CHECKER      OOM error for StringBuilder
 //! RUN          force_jit: true, options: "--compiler-enable-osr=false --compiler-regex='ETSGLOBAL::main'", entry: "ets_stringbuilder_oom.ETSGLOBAL::main"
-//! EVENT        /Exception,ets_stringbuilder_oom.ETSGLOBAL::main.*NATIVE/
+//! EVENT        /Error,ets_stringbuilder_oom.ETSGLOBAL::main.*NATIVE/
 function foo(n: int): int { return (n * 17 + 7) % 141;}
 function main(): int {
     let c: char[] = new char[10000];
@@ -29,10 +29,10 @@ function main(): int {
             if (n != foo(i)) {
                 return 3;
             }
-            // Expected exception caught
+            // Expected error caught
             return 0;
         } catch (e) {
-            // Unexpected exception caught
+            // Unexpected error caught
             return 1;
         }
     }

@@ -38,7 +38,7 @@ function test_set_int8array_rangeerror() {
     let dst = new Int8Array(4)
     try {
         set_array(dst, src)
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -85,7 +85,7 @@ function test_set_int8array_with_offset_rangeerror() {
     let dst = new Int8Array(5)
     try {
         set_array(dst, src, 1)
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -119,7 +119,7 @@ function test_set_int16array_rangeerror() {
     let dst = new Int16Array(4)
     try {
         set_array(dst, src)
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -166,7 +166,7 @@ function test_set_int16array_with_offset_rangeerror() {
     let dst = new Int16Array(5)
     try {
         set_array(dst, src, 1)
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -200,7 +200,7 @@ function test_set_int32array_rangeerror() {
     let dst = new Int32Array(4)
     try {
         set_array(dst, src)
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -247,7 +247,7 @@ function test_set_int32array_with_offset_rangeerror() {
     let dst = new Int32Array(5)
     try {
         set_array(dst, src, 1)
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -281,7 +281,7 @@ function test_set_bigint64array_rangeerror() {
     let dst = new BigInt64Array(4)
     try {
         set_array(dst, src)
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -328,7 +328,7 @@ function test_set_bigint64array_with_offset_rangeerror() {
     let dst = new BigInt64Array(5)
     try {
         set_array(dst, src, 1)
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -362,7 +362,7 @@ function test_set_float32array_rangeerror() {
     let dst = new Float32Array(4)
     try {
         set_array(dst, src)
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -409,7 +409,7 @@ function test_set_float32array_with_offset_rangeerror() {
     let dst = new Float32Array(5)
     try {
         set_array(dst, src, 1)
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -443,7 +443,7 @@ function test_set_float64array_rangeerror() {
     let dst = new Float64Array(4)
     try {
         set_array(dst, src)
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -490,7 +490,7 @@ function test_set_float64array_with_offset_rangeerror() {
     let dst = new Float64Array(5)
     try {
         set_array(dst, src, 1)
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -532,7 +532,7 @@ function test_set_uint8array_rangeerror() {
     let dst = new Uint8Array(4)
     try {
         set_array(dst, src)
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -587,7 +587,7 @@ function test_set_uint8array_with_offset_rangeerror() {
     let dst = new Uint8Array(5)
     try {
         set_array(dst, src, 1)
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -621,7 +621,7 @@ function test_set_uint8clampedarray_rangeerror() {
     let dst = new Uint8ClampedArray(4)
     try {
         set_array(dst, src)
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -668,7 +668,7 @@ function test_set_uint8clampedarray_with_offset_rangeerror() {
     let dst = new Uint8ClampedArray(5)
     try {
         set_array(dst, src, 1)
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -702,7 +702,7 @@ function test_set_uint16array_rangeerror() {
     let dst = new Uint16Array(4)
     try {
         set_array(dst, src)
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -749,7 +749,7 @@ function test_set_uint16array_with_offset_rangeerror() {
     let dst = new Uint16Array(5)
     try {
         set_array(dst, src, 1)
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -783,7 +783,7 @@ function test_set_uint32array_rangeerror() {
     let dst = new Uint32Array(4)
     try {
         set_array(dst, src)
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -830,7 +830,7 @@ function test_set_uint32array_with_offset_rangeerror() {
     let dst = new Uint32Array(5)
     try {
         set_array(dst, src, 1)
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -864,7 +864,7 @@ function test_set_biguint64array_rangeerror() {
     let dst = new BigUint64Array(4)
     try {
         set_array(dst, src)
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -911,7 +911,7 @@ function test_set_biguint64array_with_offset_rangeerror() {
     let dst = new BigUint64Array(5)
     try {
         set_array(dst, src, 1)
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -922,33 +922,33 @@ function set_array(dst: BigUint64Array, src: BigUint64Array, offset: int) {
 
 function check_array(arr: ArrayLike<number>, expected: ArrayLike<number>) {
     if (arr.length != expected.length) {
-        throw new Exception("Unexpected array length")
+        throw new Error("Unexpected array length")
     }
     for (let i = 0; i < expected.length; i++) {
         if (arr[i] != expected[i]) {
-            throw new Exception("Unexpected element with index " + i)
+            throw new Error("Unexpected element with index " + i)
         }
     }
 }
 
 function check_array(arr: BigInt64Array, expected: BigInt64Array) {
     if (arr.length != expected.length) {
-        throw new Exception("Unexpected array length")
+        throw new Error("Unexpected array length")
     }
     for (let i = 0; i < expected.length; i++) {
         if (arr[i] != expected[i]) {
-            throw new Exception("Unexpected element with index " + i)
+            throw new Error("Unexpected element with index " + i)
         }
     }
 }
 
 function check_array(arr: BigUint64Array, expected: BigUint64Array) {
     if (arr.length != expected.length) {
-        throw new Exception("Unexpected array length")
+        throw new Error("Unexpected array length")
     }
     for (let i = 0; i < expected.length; i++) {
         if (arr[i] != expected[i]) {
-            throw new Exception("Unexpected element with index " + i)
+            throw new Error("Unexpected element with index " + i)
         }
     }
 }
@@ -1075,7 +1075,7 @@ function test_int8array_set_rangeerror_cpp(): void {
     let ar = new Int8Array(10)
     try {
         ar[11] = 1
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -1223,7 +1223,7 @@ function test_int16array_set_rangeerror_cpp(): void {
     let ar = new Int16Array(10)
     try {
         ar[11] = 1
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -1318,7 +1318,7 @@ function test_int32array_set_rangeerror_cpp(): void {
     let ar = new Int32Array(10)
     try {
         ar[11] = 1
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -1440,7 +1440,7 @@ function test_bigint64array_set_rangeerror_cpp(): void {
     let ar = new BigInt64Array(10)
     try {
         ar[11] = 1n
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -1518,7 +1518,7 @@ function test_float32array_set_rangeerror_cpp(): void {
     let ar = new Float32Array(10)
     try {
         ar[11] = 1.2f
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -1596,7 +1596,7 @@ function test_float64array_set_rangeerror_cpp(): void {
     let ar = new Float64Array(10)
     try {
         ar[11] = 1.2
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -1639,7 +1639,7 @@ function test_uint8array_set_rangeerror_cpp(): void {
     let ar = new Uint8Array(10)
     try {
         ar[11] = 1
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -1738,7 +1738,7 @@ function test_uint8clampedarray_set_rangeerror_cpp(): void {
     let ar = new Uint8ClampedArray(10)
     try {
         ar[11] = 1
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -1824,7 +1824,7 @@ function test_uint16array_set_rangeerror_cpp(): void {
     let ar = new Uint16Array(10)
     try {
         ar[11] = 1
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -1908,7 +1908,7 @@ function test_uint32array_set_rangeerror_cpp(): void {
     let ar = new Uint32Array(10)
     try {
         ar[11] = 1
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
@@ -2077,7 +2077,7 @@ function test_biguint64array_set_rangeerror_cpp(): void {
     let ar = new BigUint64Array(10)
     try {
         ar[11] = 1n
-        throw new Exception("Missing RangeError")
+        throw new Error("Missing RangeError")
     } catch (e: RangeError) {
     }
 }
