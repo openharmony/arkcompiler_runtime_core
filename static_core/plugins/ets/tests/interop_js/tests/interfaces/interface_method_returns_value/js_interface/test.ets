@@ -43,7 +43,7 @@ function cleanup(): void {
         let fullGcId = GC.startGC(GC.Cause.FULL);
         GC.waitForFinishGC(fullGcId);
     } catch (e) {
-        arktest.assertTrue(false, "Unexpected exception during GC");
+        arktest.assertTrue(false, "Unexpected error during GC");
     }
 }
 
