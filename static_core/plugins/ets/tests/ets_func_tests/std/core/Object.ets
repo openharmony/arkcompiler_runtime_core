@@ -80,7 +80,7 @@ function objArraysAreEqual(a: NullishType[], b: NullishType[]): boolean {
         return false
     }
     for (let i = 0; i < alen; i++) {
-        if (!__runtimeEquals(a[i], b[i])) {
+        if (a[i] !== b[i]) {
             return false
         }
     }
@@ -93,7 +93,7 @@ function tupleAreEqual(a: NullishTuple[], b: NullishTuple[]): boolean {
         return false
     }
     for (let i = 0; i < alen; i++) {
-        if (a[i]![0] != b[i]![0] || !__runtimeEquals(a[i]![1], b[i]![1])) {
+        if (a[i]![0] != b[i]![0] || a[i]![1] !== b[i]![1]) {
             return false
         }
     }
@@ -108,7 +108,7 @@ function mapAreEqual(a: Map<PropertyKey, NullishType>, b: Map<PropertyKey, Nulli
     let areEqual: boolean = true
     a.forEach((av: NullishType, k: PropertyKey) => {
         const bv = b.get(k)
-        if (bv == undefined || !__runtimeEquals(av, bv)) {
+        if (bv == undefined || av !== bv)) {
             areEqual = false
             return
         }

@@ -476,7 +476,7 @@
     }
 
     while (k >= 0) {
-        if (__runtimeEquals(<%= get_unsafe.(this, 'k') %>, element)) {
+        if (<%= get_unsafe.(this, 'k') %> === element) {
             return k;
         }
         k--;
@@ -808,7 +808,7 @@ private joinObject(sep?: String): string {
     }
 % else
     for (let i = fi; i < len; i++) {
-        if (__runtimeSameValueZero(val, <%= get_unsafe.(this, 'i') %>)) {
+        if (val === <%= get_unsafe.(this, 'i') %>) {
             return true;
         }
     }
@@ -830,7 +830,7 @@ private joinObject(sep?: String): string {
 <%= access_public %> indexOf<%= this_generic %>(<%= this_arg %>val: <%= el_type %>, fromIndex: int): int {
     fromIndex = normalizeIndex(fromIndex, <%= this_len_int %>)
     for (let i = fromIndex; i < <%= this_len_int %>; i++) {
-        if (__runtimeEquals(val, <%= get_unsafe.(this, 'i') %>)) {
+        if (val === <%= get_unsafe.(this, 'i') %>) {
             return i
         }
     }

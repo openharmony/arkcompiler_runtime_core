@@ -101,7 +101,7 @@ export final class MapIterator<K, V, R> implements IterableIterator<R> {
 
     override next(): IteratorResult<R> {
         const nextNode = this.node.next
-        if (__runtimeIsSameReference(nextNode, this.tail)) {
+        if (Runtime.isSameReference(nextNode, this.tail)) {
             return new IteratorResult<R>()
         }
         this.node = nextNode
@@ -137,10 +137,10 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     private static readonly MIN_BUCKETS_COUNT = 8
 
     private getBucketIndex(k: NullishType): int {
-        if (__runtimeIsSameReference(k, null)) {
+        if (Runtime.isSameReference(k, null)) {
             return 0;
         }
-        if (__runtimeIsSameReference(k, undefined)) {
+        if (Runtime.isSameReference(k, undefined)) {
             return 1;
         }
 
@@ -242,7 +242,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         let entriesIterRes = entriesIter.next()
         while (!entriesIterRes.done) {
             const entry = entriesIterRes.value
-            if (!__runtimeIsSameReference(entry, undefined) && !__runtimeIsSameReference(entry, null)) {
+            if (entry != null) {
                 strBuf.append(entry!)
             }
 
@@ -295,7 +295,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         const buckSize = buck.actualLength
         for (let i = 0; i < buckSize; i++) {
             const entry = buck.$_get_unsafe(i)
-            if (__runtimeSameValueZero(entry.key, key)) {
+            if (Runtime.sameValueZero(entry.key, key)) {
                 entry.val = val
                 return this
             }
