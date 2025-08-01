@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-//! CHECKER      Try Catch Resolving JIT Do not optimize when exception instances are function parameters
+//! CHECKER      Try Catch Resolving JIT Do not optimize when error instances are function parameters
 //! RUN          force_jit: true, options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false --compiler-regex=ets_try_catch5.MultipleCatch::__noinline__multipleCatch", entry: "ets_try_catch5.ETSGLOBAL::main"
 //! EVENT        /Compilation,ets_try_catch5.MultipleCatch::__noinline__multipleCatch,.*,COMPILED/
 //! METHOD       "ets_try_catch5.MultipleCatch::__noinline__multipleCatch"
@@ -22,7 +22,7 @@
 //! PASS_AFTER   "TryCatchResolving"
 //! INST_COUNT   "Throw",2
 
-//! CHECKER      Try Catch Resolving AOT with with exception instances as function parameters
+//! CHECKER      Try Catch Resolving AOT with with error instances as function parameters
 //! SKIP_IF      @architecture == "arm32"
 //! RUN_PAOC     options: "--compiler-regex=ets_try_catch5.MultipleCatch::__noinline__multipleCatch"
 //! METHOD       "ets_try_catch5.MultipleCatch::__noinline__multipleCatch"
@@ -31,7 +31,7 @@
 //! PASS_AFTER   "TryCatchResolving"
 //! INST_COUNT   "Throw",2
 
-//! CHECKER      Try Catch Resolving AOT+PGO with with exception instances as function parameters
+//! CHECKER      Try Catch Resolving AOT+PGO with with error instances as function parameters
 //! SKIP_IF      @architecture == "arm32"
 //! RUN_PGO_PROF entry: "ets_try_catch5.ETSGLOBAL::main"
 //! RUN_PGO_PAOC options: "--compiler-regex=ets_try_catch5.MultipleCatch::__noinline__multipleCatch"
@@ -41,14 +41,14 @@
 //! PASS_AFTER   "TryCatchResolving"
 //! INST_COUNT   "Throw",2
 
-class Exception0 extends Exception {}
-class Exception1 extends Exception {}
+class Error0 extends Error {}
+class Error1 extends Error {}
 
 class MultipleCatch {
   __noinline__defaultCatch() : int {
      let res : int = 0;
-     let ex0: Exception = new Exception0();
-     let ex1: Exception = new Exception1();
+     let ex0: Error = new Error0();
+     let ex1: Error = new Error1();
      try {
          res = this.__noinline__multipleCatch(ex0, ex1);
      } catch(e) {
@@ -56,7 +56,7 @@ class MultipleCatch {
      return res;
   }
 
-  __noinline__multipleCatch(ex0: Exception, ex1: Exception) : int {
+  __noinline__multipleCatch(ex0: Error, ex1: Error) : int {
     let res : int = 0;
     for (let i : int = 0; i < 16; i++) {
       let k : int = i % 2;
@@ -69,10 +69,12 @@ class MultipleCatch {
           default:
             break;
         }
-      } catch (e: Exception0) {
-        res += 1;
-      } catch (e: Exception1) {
-        res += 2;
+      } catch (e) {
+        if (e instanceof Error0) {
+          res += 1;
+        } else if (e instanceof Error1) {
+          res += 2;
+        }
       }
     }
     return res;

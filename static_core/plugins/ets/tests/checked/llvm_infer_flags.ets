@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-// InferFlags should set nsw flag to "i0 += ?" addition, and as a consequence eliminate branch with ArithmeticException
+// InferFlags should set nsw flag to "i0 += ?" addition, and as a consequence eliminate branch with ArithmeticError
 //! CHECKER        Infer nsw flag for i0 phi
 //! RUN_LLVM       options: "--llvm-options=--print-after=infer-flags --compiler-regex='.*simple'"
 //! READ_FILE      "console.out"
 //! LLVM_METHOD    /define protected.*simple/
 //! INST_NEXT      /%v19 = add nsw i32 %v\d+, %v19.v/
 
-//! CHECKER          No ArithmeticException
+//! CHECKER          No ArithmeticError
 //! RUN_LLVM         options: "--llvm-dump-after --compiler-regex='.*simple'"
 //! READ_FILE        "console.out"
 //! LLVM_METHOD      /.*simple.*/
-//! INST_NEXT_NOT    /.*ArithmeticException.*/
+//! INST_NEXT_NOT    /.*ArithmeticError.*/
 
 function condition(i: int, i0: int): boolean {
     return i % i0 == 0
@@ -46,7 +46,7 @@ function simple(): int {
 //! RUN_LLVM       options: "--llvm-options=--print-after=runtime-calls-lowering --compiler-regex='.*willThrow'"
 //! READ_FILE      "console.out"
 //! LLVM_METHOD    /.*willThrow.*/
-//! INST_NEXT      /.*ArithmeticException.*/
+//! INST_NEXT      /.*ArithmeticError.*/
 //! RUN            entry: "llvm_infer_flags.ETSGLOBAL::willThrow"
 
 function willThrow(): int {

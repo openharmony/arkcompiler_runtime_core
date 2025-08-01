@@ -208,7 +208,7 @@ function try_catch_reserve30(do_throw: boolean) : string {
     try {
         sb.append(0)
         if (do_throw)
-            throw new Exception("Exception")
+            throw new Error("Error")
     }
     catch (ex) {
         sb.append("1")
@@ -370,7 +370,7 @@ function main_events_check() : int {
 
 function main_compile_check() : int {
     arktest.assertTrue(try_catch_reserve30(false).startsWith("0"), "Wrong result at try_catch_reserve30");
-    arktest.assertTrue(try_catch_reserve30(true).startsWith("01Exception"), "Wrong result at try_catch_reserve30");
+    arktest.assertTrue(try_catch_reserve30(true).startsWith("01Error"), "Wrong result at try_catch_reserve30");
     arktest.assertEQ(arg_reserve42(), "012", "Wrong result at arg_reserve42");
     return 0
 }

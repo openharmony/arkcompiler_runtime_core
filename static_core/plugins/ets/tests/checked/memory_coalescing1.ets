@@ -125,7 +125,7 @@ export class Test {
                 GC.startGC(GC.Cause.FULL);
                 v[i + 1] = t.g + 1;
             }
-        } catch (exception) {
+        } catch (error) {
         }
     }
 
