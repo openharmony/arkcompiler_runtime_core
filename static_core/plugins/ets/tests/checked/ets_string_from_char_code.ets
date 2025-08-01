@@ -14,10 +14,12 @@
  */
 
 //! CHECKER       AOT IR Builder, check String creation from a single and numerous char code(s)
-//! RUN_PAOC      options: "--compiler-regex='.*from.*CharCode.*' --compiler-inlining=false"
+//! RUN_PAOC      options: "--compiler-regex='.*from.*CharCode.*' --compiler-inlining=true --compiler-inline-external-methods-aot=true"
 //!
 //! METHOD        "ets_string_from_char_code.ETSGLOBAL::fromCharCodes"
 //! PASS_AFTER    "Peephole"
+//! INST          /CallStatic .*std.core.String::fromCharCode/
+//! PASS_AFTER    "Inline"
 //! INST          /Intrinsic.StdCoreStringFromCharCode/
 //! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingle/
 //! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
@@ -29,10 +31,12 @@
 //! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
 
 //! CHECKER       AOT IR Builder, check String creation from a single and numerous char code(s) with no string caches
-//! RUN_PAOC      options: "--compiler-regex='.*from.*CharCode.*' --compiler-inlining=false --use-string-caches=false"
+//! RUN_PAOC      options: "--compiler-regex='.*from.*CharCode.*' --compiler-inlining=true --compiler-inline-external-methods-aot=true --use-string-caches=false"
 //!
 //! METHOD        "ets_string_from_char_code.ETSGLOBAL::fromCharCodes"
 //! PASS_AFTER    "Peephole"
+//! INST          /CallStatic .*std.core.String::fromCharCode/
+//! PASS_AFTER    "Inline"
 //! INST          /Intrinsic.StdCoreStringFromCharCode/
 //! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingle/
 //! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
@@ -43,10 +47,12 @@
 //! INST          /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
 
 //! CHECKER       JIT IR Builder, check String creation from a single and numerous char code(s)
-//! RUN           force_jit: true, options: "--compiler-regex='.*from.*CharCode.*' --compiler-inlining=false", entry: "ets_string_from_char_code.ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*from.*CharCode.*' --compiler-inlining=true", entry: "ets_string_from_char_code.ETSGLOBAL::main"
 //!
 //! METHOD        "ets_string_from_char_code.ETSGLOBAL::fromCharCodes"
 //! PASS_AFTER    "Peephole"
+//! INST          /CallStatic .*std.core.String::fromCharCode/
+//! PASS_AFTER    "Inline"
 //! INST          /Intrinsic.StdCoreStringFromCharCode/
 //! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingle/
 //! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/

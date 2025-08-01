@@ -14,14 +14,14 @@
  */
 
 #include "plugins/ets/runtime/unhandled_manager/unhandled_object_manager.h"
-#include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_class_linker_context.h"
-#include "plugins/ets/runtime/types/ets_job.h"
-#include "plugins/ets/runtime/types/ets_promise.h"
-#include "plugins/ets/runtime/types/ets_escompat_array.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
+#include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/types/ets_escompat_array.h"
+#include "plugins/ets/runtime/types/ets_job.h"
+#include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/types/ets_promise.h"
 #include "runtime/include/method.h"
-#include "runtime/include/thread_scopes.h"
 
 namespace ark::ets {
 
@@ -118,20 +118,25 @@ static EtsHandle<EtsEscompatArray> CreateEtsObjectArrayFromHandles(EtsCoroutine 
 {
     static_assert(std::is_same_v<T, EtsJob> || std::is_same_v<T, EtsPromise>);
     ASSERT(coro != nullptr);
-    auto *array = EtsEscompatArray::Create(handles.size());
-    ASSERT(array != nullptr);
-    EtsHandle<EtsEscompatArray> harray(coro, array);
+    EtsHandle<EtsEscompatArray> arrayH(coro, EtsEscompatArray::Create(coro, handles.size()));
+    if (UNLIKELY(arrayH.GetPtr() == nullptr)) {
+        ASSERT(coro->HasPendingException());
+        return EtsHandle<EtsEscompatArray>(coro, nullptr);
+    }
     size_t i = 0;
     for (auto hobj : handles) {
-        auto *objAndReason = EtsEscompatArray::Create(2U);
-        ASSERT(objAndReason != nullptr);
-        objAndReason->SetRef(0, T::FromEtsObject(hobj.GetPtr())->GetValue(coro));
-        objAndReason->SetRef(1, hobj.GetPtr());
+        auto *objAndReason = EtsEscompatArray::Create(coro, 2U);
+        if (UNLIKELY(objAndReason == nullptr)) {
+            ASSERT(coro->HasPendingException());
+            return EtsHandle<EtsEscompatArray>(coro, nullptr);
+        }
+        objAndReason->EscompatArraySetUnsafe(0, T::FromEtsObject(hobj.GetPtr())->GetValue(coro));
+        objAndReason->EscompatArraySetUnsafe(1, hobj.GetPtr());
 
-        harray->SetRef(i, objAndReason);
+        arrayH->EscompatArraySetUnsafe(i, objAndReason);
         ++i;
     }
-    return harray;
+    return arrayH;
 }
 
 template <typename T>
@@ -176,6 +181,10 @@ static void ListUnhandledObjectsImpl(EtsClassLinker *etsClassLinker, EtsCoroutin
 
     auto handles = TransformToVectorOfHandles(coro, objects);
     auto hEtsArray = CreateEtsObjectArrayFromHandles<T>(coro, handles);
+    if (UNLIKELY(hEtsArray.GetPtr() == nullptr)) {
+        ASSERT(coro->HasPendingException());
+        return;
+    }
     ListObjectsFromEtsArray<T>(etsClassLinker, coro, hEtsArray);
 }
 

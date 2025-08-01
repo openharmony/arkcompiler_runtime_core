@@ -1857,6 +1857,7 @@
   signature:
     - void
     - ark::ObjectHeader*
+    - int32_t
 
 - name: EscompatArrayReverseSync
   entrypoint: EscompatArrayReverseSync
@@ -1865,6 +1866,8 @@
   signature:
     - void
     - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
 
 - name: EscompatArrayReverseAsync
   entrypoint: EscompatArrayReverseAsync
@@ -1873,6 +1876,8 @@
   signature:
     - void
     - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
 
 - name: EscompatArrayReverseAsyncManual
   entrypoint: EscompatArrayReverseAsyncManual
@@ -1881,6 +1886,8 @@
   signature:
     - void
     - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
 
 - name: EscompatArrayReverseHybrid
   entrypoint: EscompatArrayReverseHybrid
@@ -1889,6 +1896,8 @@
   signature:
     - void
     - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
 
 - name: ArrayFastCopyToRefSync
   entrypoint: ArrayFastCopyToRefSync

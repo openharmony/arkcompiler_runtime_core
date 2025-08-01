@@ -191,13 +191,15 @@ static ObjectHeader **DoPackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, 
         ASSERT(protoReader.GetClass() == ctx->GetArrayClass());
         const size_t numRestParams = jsargv.size();
 
-        EtsEscompatArray *objArr = EtsEscompatArray::Create(numRestParams);
-        ASSERT(objArr != nullptr);
-        VMHandle<EtsEscompatArray> restArgsArray(coro, objArr->GetCoreType());
+        EtsHandle<EtsEscompatArray> restArgsArray(coro, EtsEscompatArray::Create(coro, numRestParams));
+        if (UNLIKELY(restArgsArray.GetPtr() == nullptr)) {
+            ASSERT(coro->HasPendingException());
+            return nullptr;
+        }
         for (uint32_t restArgIdx = 0; restArgIdx < numRestParams; ++restArgIdx) {
             auto jsVal = jsargv[restArgIdx];
             auto store = [restArgIdx, &restArgsArray](ObjectHeader *val) {
-                restArgsArray.GetPtr()->SetRef(restArgIdx, EtsObject::FromCoreType(val));
+                restArgsArray->EscompatArraySetUnsafe(restArgIdx, EtsObject::FromCoreType(val));
             };
             if (UNLIKELY(!ConvertRefArgToEts(ctx, ctx->GetObjectClass(), store, jsVal))) {
                 if (coro->HasPendingException()) {

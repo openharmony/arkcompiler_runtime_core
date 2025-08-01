@@ -13,15 +13,33 @@
  * limitations under the License.
  */
 
-#include <limits>
 #include "ani.h"
 #include "array_gtest_helper.h"
-#include "libarkbase/macros.h"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
-class ArrayGetSetTest : public ArrayHelperTest {};
+class ArrayGetSetTest : public ArrayHelperTest {
+public:
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    static constexpr const char *MODULE_NAME = "array_get_set_test";
+
+public:
+    void GetExtendedArray(ani_array *result)
+    {
+        auto extendedArray = CallEtsFunction<ani_ref>(MODULE_NAME, "getExtendedArray");
+        ani_boolean isCorrect = ANI_FALSE;
+        ASSERT_EQ(env_->ExistUnhandledError(&isCorrect), ANI_OK);
+        ASSERT_EQ(isCorrect, ANI_FALSE);
+        ASSERT_EQ(env_->Reference_IsNullishValue(extendedArray, &isCorrect), ANI_OK);
+        ASSERT_EQ(isCorrect, ANI_FALSE);
+        ani_class escompatArray {};
+        ASSERT_EQ(env_->FindClass("escompat.Array", &escompatArray), ANI_OK);
+        ASSERT_EQ(env_->Object_InstanceOf(static_cast<ani_object>(extendedArray), escompatArray, &isCorrect), ANI_OK);
+        ASSERT_EQ(isCorrect, ANI_TRUE);
+        *result = static_cast<ani_array>(extendedArray);
+    }
+};
 
 TEST_F(ArrayGetSetTest, GetTest)
 {
@@ -116,8 +134,93 @@ TEST_F(ArrayGetSetTest, GetSetInvalidArgsTest)
     ASSERT_EQ(env_->Array_Get(array, 0, nullptr), ANI_INVALID_ARGS);
 
     ASSERT_EQ(env_->GetUndefined(&res), ANI_OK);
-    ASSERT_EQ(env_->Array_Set(array, 0, res), ANI_OUT_OF_RANGE);
-    ASSERT_EQ(env_->Array_Get(array, 0, &res), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->Array_Set(array, 0, res), ANI_PENDING_ERROR);
+    ani_boolean hasPendingError = ANI_FALSE;
+    ASSERT_EQ(env_->ExistUnhandledError(&hasPendingError), ANI_OK);
+    ASSERT_EQ(hasPendingError, ANI_TRUE);
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
+
+    ASSERT_EQ(env_->Array_Get(array, 0, &res), ANI_PENDING_ERROR);
+    ASSERT_EQ(env_->ExistUnhandledError(&hasPendingError), ANI_OK);
+    ASSERT_EQ(hasPendingError, ANI_TRUE);
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
+}
+
+template <bool GETTER>
+static void CheckArrayCounter(ani_env *env, ani_array extendedArray, ani_int expected)
+{
+    const char *fieldName = "setCounter";
+    if constexpr (GETTER) {
+        fieldName = "getCounter";
+    }
+    ani_int value = 0;
+    ASSERT_EQ(env->Object_GetFieldByName_Int(extendedArray, fieldName, &value), ANI_OK);
+    ASSERT_EQ(value, expected);
+}
+
+TEST_F(ArrayGetSetTest, ExtendedArrayLength)
+{
+    ani_array extendedArray {};
+    GetExtendedArray(&extendedArray);
+
+    ani_size sz = 0;
+    ASSERT_EQ(env_->Array_GetLength(extendedArray, &sz), ANI_OK);
+    // Extended array always returns zero length
+    ASSERT_EQ(sz, 0);
+}
+
+TEST_F(ArrayGetSetTest, ExtendedArrayGet)
+{
+    ani_array extendedArray {};
+    GetExtendedArray(&extendedArray);
+
+    ani_ref res {};
+    ASSERT_EQ(env_->Array_Get(extendedArray, 0, &res), ANI_OK);
+    ani_boolean isCorrect = ANI_FALSE;
+    ASSERT_EQ(env_->Reference_IsNull(res, &isCorrect), ANI_OK);
+    ASSERT_EQ(isCorrect, ANI_TRUE);
+    CheckArrayCounter<true>(env_, extendedArray, 1U);
+
+    ASSERT_EQ(env_->Array_Get(extendedArray, 1U, &res), ANI_OK);
+    ASSERT_EQ(env_->Reference_IsUndefined(res, &isCorrect), ANI_OK);
+    ASSERT_EQ(isCorrect, ANI_TRUE);
+    CheckArrayCounter<true>(env_, extendedArray, 2U);
+
+    ASSERT_EQ(env_->Array_Get(extendedArray, 2U, &res), ANI_OK);
+    ASSERT_EQ(env_->Reference_IsNullishValue(res, &isCorrect), ANI_OK);
+    ASSERT_EQ(isCorrect, ANI_FALSE);
+    ani_class coreString {};
+    ASSERT_EQ(env_->FindClass("std.core.String", &coreString), ANI_OK);
+    ASSERT_EQ(env_->Object_InstanceOf(static_cast<ani_object>(res), coreString, &isCorrect), ANI_OK);
+    ASSERT_EQ(isCorrect, ANI_TRUE);
+    std::string str;
+    GetStdString(static_cast<ani_string>(res), str);
+    ASSERT_STREQ(str.c_str(), "sample");
+    CheckArrayCounter<true>(env_, extendedArray, 3U);
+}
+
+TEST_F(ArrayGetSetTest, ExtendedArraySet)
+{
+    ani_array extendedArray {};
+    GetExtendedArray(&extendedArray);
+
+    ani_class coreInt {};
+    ASSERT_EQ(env_->FindClass("std.core.Int", &coreInt), ANI_OK);
+    ani_method ctor {};
+    ASSERT_EQ(env_->Class_FindMethod(coreInt, "<ctor>", "i:", &ctor), ANI_OK);
+
+    for (size_t i = 0; i < 3U; ++i) {
+        ani_object value {};
+        ASSERT_EQ(env_->Object_New(coreInt, ctor, &value, i), ANI_OK);
+        ASSERT_EQ(env_->Array_Set(extendedArray, i, value), ANI_OK);
+        CheckArrayCounter<false>(env_, extendedArray, i + 1);
+    }
+
+    auto isCorrect = CallEtsFunction<ani_boolean>(MODULE_NAME, "checkChangedArray", extendedArray);
+    ani_boolean hasError = ANI_FALSE;
+    ASSERT_EQ(env_->ExistUnhandledError(&hasError), ANI_OK);
+    ASSERT_EQ(hasError, ANI_FALSE);
+    ASSERT_EQ(isCorrect, ANI_TRUE);
 }
 
 }  // namespace ark::ets::ani::testing

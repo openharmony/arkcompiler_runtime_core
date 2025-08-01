@@ -18,6 +18,7 @@
 #include <type_traits>
 #include <cmath>
 #include "ets_handle.h"
+#include "ets_panda_file_items.h"
 #include "libarkbase/utils/utf.h"
 #include "libarkbase/utils/utils.h"
 #include "plugins/ets/runtime/types/ets_typed_arrays.h"
@@ -401,27 +402,17 @@ private:
 }  // namespace
 
 template <typename T>
-static void EtsEscompatTypedArraySetValuesFromArrayImpl(T *thisArray, EtsEscompatArray *srcArray)
+static void EtsEscompatTypedArraySetValuesFromFixedArray(T *thisArray, void *dstData, EtsObjectArray *srcData,
+                                                         uint32_t actualLength)
 {
-    auto *dstData = GetNativeData(thisArray);
-    if (UNLIKELY(dstData == nullptr)) {
-        return;
-    }
-    /**
-     * False-positive static-analyzer report:
-     * GC can happen only on ThrowException in GetNativeData.
-     * But such case meaning data to be nullptr and retun prevents
-     * us from proceeding
-     */
-    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    auto *srcData = srcArray->GetData();
-    if (UNLIKELY(srcData == nullptr || srcData->GetLength() == 0)) {
-        return;
-    }
-
     using ElementType = typename T::ElementType;
+
+    ASSERT(thisArray != nullptr);
+    ASSERT(dstData != nullptr);
+    ASSERT(srcData != nullptr);
+
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    if (UNLIKELY(srcArray->GetActualLength() > static_cast<uint32_t>(thisArray->GetLengthInt()))) {
+    if (UNLIKELY(actualLength > static_cast<uint32_t>(thisArray->GetLengthInt()))) {
         EtsCoroutine *coro = EtsCoroutine::GetCurrent();
         ThrowEtsException(coro, panda_file_items::class_descriptors::RANGE_ERROR, "offset is out of bounds");
         return;
@@ -431,13 +422,86 @@ static void EtsEscompatTypedArraySetValuesFromArrayImpl(T *thisArray, EtsEscompa
     auto offset = static_cast<EtsInt>(thisArray->GetByteOffset());
     const auto arrayElement = unbox::ArrayElement<T>();
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    for (size_t i = 0; i < srcArray->GetActualLength(); ++i) {
+    for (size_t i = 0; i < actualLength; ++i) {
         const auto val = arrayElement.GetTyped(srcData->Get(i));
         if (!val.has_value()) {
             break;
         }
         ObjectAccessor::SetPrimitive(dstData, offset, *val);
         offset += sizeof(ElementType);
+    }
+}
+
+/// Slow path, because methods of `srcArray` might be overriden
+template <typename T>
+static void EtsEscompatTypedArraySetValuesFromArraySlowPath(T *thisArray, void *dstData, EtsEscompatArray *srcArray,
+                                                            EtsCoroutine *coro)
+{
+    using ElementType = typename T::ElementType;
+
+    ASSERT(thisArray != nullptr);
+    ASSERT(srcArray != nullptr);
+    ASSERT(coro != nullptr);
+
+    EtsInt thisArrayLengthInt = thisArray->GetLengthInt();
+    EtsInt offset = thisArray->GetByteOffset();
+
+    EtsHandleScope scope(coro);
+    EtsHandle<EtsEscompatArray> srcArrayHandle(coro, srcArray);
+
+    EtsInt actualLength = 0;
+    if (UNLIKELY(!srcArrayHandle->GetLength(coro, &actualLength))) {
+        ASSERT(coro->HasPendingException());
+        return;
+    }
+
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+    if (UNLIKELY(actualLength < 0 || actualLength > thisArrayLengthInt)) {
+        ThrowEtsException(coro, panda_file_items::class_descriptors::RANGE_ERROR, "offset is out of bounds");
+        return;
+    }
+
+    const auto arrayElement = unbox::ArrayElement<T>();
+    for (size_t i = 0; i < static_cast<size_t>(actualLength); ++i) {
+        auto optElement = srcArrayHandle->GetRef(coro, i);
+        if (UNLIKELY(!optElement)) {
+            ASSERT(coro->HasPendingException());
+            return;
+        }
+        if (UNLIKELY(*optElement == nullptr)) {
+            PandaStringStream ss;
+            ss << "element at index " << i << " is undefined";
+            ThrowEtsException(coro, panda_file_items::class_descriptors::NULL_POINTER_ERROR, ss.str());
+            return;
+        }
+        const auto val = arrayElement.GetTyped(*optElement);
+        if (!val.has_value()) {
+            ASSERT(coro->HasPendingException());
+            break;
+        }
+        ObjectAccessor::SetPrimitive(dstData, offset, *val);
+        offset += sizeof(ElementType);
+    }
+}
+
+template <typename T>
+static void EtsEscompatTypedArraySetValuesFromArrayImpl(T *thisArray, EtsEscompatArray *srcArray)
+{
+    ASSERT(thisArray != nullptr);
+    ASSERT(srcArray != nullptr);
+
+    auto *dstData = GetNativeData(thisArray);
+    if (UNLIKELY(dstData == nullptr)) {
+        return;
+    }
+
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    if (LIKELY(srcArray->IsExactlyEscompatArray(coro))) {
+        // Fast path in case of `srcArray` being exactly `escompat.Array`
+        EtsEscompatTypedArraySetValuesFromFixedArray(thisArray, dstData, srcArray->GetDataFromEscompatArray(),
+                                                     srcArray->GetActualLengthFromEscompatArray());
+    } else {
+        EtsEscompatTypedArraySetValuesFromArraySlowPath(thisArray, dstData, srcArray, coro);
     }
 }
 

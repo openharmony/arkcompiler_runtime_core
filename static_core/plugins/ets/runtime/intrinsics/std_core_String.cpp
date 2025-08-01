@@ -31,6 +31,7 @@
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_language_context.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
+#include "plugins/ets/runtime/intrinsics/helpers/ets_string_helpers.h"
 
 #include "unicode/locid.h"
 #include "unicode/coll.h"
@@ -562,8 +563,7 @@ EtsBoolean StdCoreStringEndsWith(EtsString *thisStr, EtsString *suffix, EtsInt e
 EtsString *StdCoreStringFromCharCode(EtsEscompatArray *charCodes)
 {
     ASSERT(charCodes != nullptr);
-    ASSERT(charCodes->GetData() != nullptr);
-    return EtsString::CreateNewStringFromCharCode(charCodes->GetData(), charCodes->GetActualLength());
+    return helpers::CreateNewStringFromCharCode(charCodes);
 }
 
 EtsString *StdCoreStringFromCharCodeSingle(EtsDouble charCode)

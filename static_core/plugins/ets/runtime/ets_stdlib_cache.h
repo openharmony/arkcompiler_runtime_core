@@ -25,10 +25,12 @@ struct StdlibCache {
     ani_module std_core;
     ani_class std_core_String_Builder;
     ani_class std_core_Console;
+    ani_class escompat_Array;
     ani_method std_core_Console_error;
     ani_method std_core_String_Builder_default_ctor;
     ani_method std_core_String_Builder_append;
     ani_method std_core_String_Builder_toString;
+    ani_method escompat_Array_pushOne;
     ani_variable std_core_console;
     // NOLINTEND(readability-identifier-naming)
 };

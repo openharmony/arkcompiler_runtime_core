@@ -555,10 +555,7 @@ bool LLVMIrConstructor::EmitEscompatArrayReverse(Inst *inst)
         return false;
     }
 
-    auto arrObj = GetInputValue(inst, 0);
-    uint32_t actualLenghtOffset = ark::cross_values::GetEscompatArrayActualLengthOffset(arch);
-    auto arrLengthOffset = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), arrObj, actualLenghtOffset);
-    auto arrLength = builder_.CreateLoad(builder_.getInt32Ty(), arrLengthOffset);
+    auto arrLength = GetInputValue(inst, 1);
 
     auto shortArrayThreshold = builder_.getInt32(MAGIC_NUM_FOR_SHORT_ARRAY_THRESHOLD);
 
@@ -568,7 +565,9 @@ bool LLVMIrConstructor::EmitEscompatArrayReverse(Inst *inst)
         llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "emit_go_to_slowpath"), func_);
     auto returnBb = llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "emit_return"), func_);
     builder_.CreateCondBr(builder_.CreateICmpUGT(arrLength, shortArrayThreshold), slowPathBb, fastPathBb);
-    const std::array callArgs = {arrObj};
+    // NOTE(srokashevich, #30178): remove fake arg after fix
+    auto fake = GetInputValue(inst, 0);
+    const std::array callArgs = {GetInputValue(inst, 0), fake, arrLength};
 
     SetCurrentBasicBlock(fastPathBb);
     auto fastPathEntrypointId = GetArrayFastReverseEntrypointId(GetGraph()->GetRuntime()->GetPostType());
@@ -577,7 +576,7 @@ bool LLVMIrConstructor::EmitEscompatArrayReverse(Inst *inst)
 
     SetCurrentBasicBlock(slowPathBb);
     constexpr auto slowPathEntrypointId = RuntimeInterface::EntrypointId::ESCOMPAT_ARRAY_REVERSE;
-    CreateEntrypointCall(slowPathEntrypointId, inst, callArgs);
+    CreateEntrypointCall(slowPathEntrypointId, inst, {GetInputValue(inst, 0), arrLength});
     builder_.CreateBr(returnBb);
 
     SetCurrentBasicBlock(returnBb);

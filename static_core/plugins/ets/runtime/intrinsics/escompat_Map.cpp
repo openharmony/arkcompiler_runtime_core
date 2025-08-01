@@ -15,8 +15,8 @@
 
 #include "plugins/ets/runtime/types/ets_map.h"
 #include "plugins/ets/runtime/types/ets_bigint.h"
-
-#include "types/ets_object.h"
+#include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/types/ets_string.h"
 
 namespace ark::ets::intrinsics {
 

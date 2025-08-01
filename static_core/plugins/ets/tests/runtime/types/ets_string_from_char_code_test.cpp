@@ -22,6 +22,7 @@
 #include "types/ets_box_primitive-inl.h"
 #include "types/ets_array.h"
 #include "types/ets_string.h"
+#include "plugins/ets/runtime/intrinsics/helpers/ets_string_helpers.h"
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -66,14 +67,13 @@ public:
     }
 
     template <typename DoubleIter>
-    EtsString::CharCodeArray *CreateCharCodeArray(DoubleIter first, DoubleIter last)
+    EtsObjectArray *CreateCharCodeArray(DoubleIter first, DoubleIter last)
     {
-        using CharCodeArray = EtsString::CharCodeArray;
         using CharCode = EtsBoxPrimitive<EtsDouble>;
         EtsClass *klass = CharCode::GetEtsBoxClass(coroutine_);
         ASSERT(klass != nullptr);
         auto length = std::distance(first, last);
-        CharCodeArray *charCodeArray = CharCodeArray::Create(klass, length);
+        EtsObjectArray *charCodeArray = EtsObjectArray::Create(klass, length);
         std::for_each(first, last, [&charCodeArray, this, idx = 0U](double d) mutable {
             auto *boxedValue = CharCode::Create(coroutine_, d);
             charCodeArray->Set(idx++, boxedValue);
@@ -85,22 +85,18 @@ public:
     {
         // Allocate and create the buffer
         auto *buffer = CreateCharCodeArray(codes.begin(), codes.end());
-        auto ptypes = PlatformTypes(coroutine_);
-        EtsClass *klass = ptypes->escompatArray;
         // Allocate the array object
-        auto *array = EtsEscompatArray::FromEtsObject(EtsObject::Create(klass));
+        auto *array = EtsEscompatArray::Create(coroutine_, codes.size());
         // Fill the array with the pre-created buffer
         ObjectAccessor::SetObject(coroutine_, array, EtsEscompatArray::GetBufferOffset(), buffer->GetCoreType());
-        // Set length
-        array->SetActualLength(std::distance(codes.begin(), codes.end()));
         return array;
     }
 
     template <typename DoubleIter>
     EtsString *CreateNewStringFromCharCodes(DoubleIter first, DoubleIter last)
     {
-        EtsString::CharCodeArray *charCodeArray = CreateCharCodeArray<DoubleIter>(first, last);
-        return EtsString::CreateNewStringFromCharCode(charCodeArray, std::distance(first, last));
+        EtsObjectArray *charCodeArray = CreateCharCodeArray<DoubleIter>(first, last);
+        return intrinsics::helpers::CreateNewStringFromCharCode(charCodeArray, std::distance(first, last));
     }
 
     EtsString *CreateNewStringFromCharCodes(const std::vector<double> &codes)

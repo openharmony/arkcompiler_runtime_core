@@ -13,30 +13,16 @@
  * limitations under the License.
  */
 
-function getEmptyArray(): Array<Int> {
-    let a: Array<Int> = []
-    return a
-}
+class ArrayWithThrowingPushPop<T> extends Array<T> {
+    public override pushOne(val: T): int {
+        throw new Error("pushOne was called")
+    }
 
-function getArray(): Array<Int> {
-    let a: Array<Int> = [1, 2, 3, 4, 5]
-    return a
-}
-
-function checkEmptyArray(a: Array<Int>): boolean {
-    return a.length == 0
-}
-
-function checkArray(a: Array<Int>): boolean {
-    return a[0] == 10 && a[1] == 20 && a[2] == 30 && a[3] == 40 && a[4] == 50
-}
-
-class ArrayWithThrowingLength<T> extends Array<T> {
-    public override get length(): int {
-        throw new Error("length was called")
+    public override pop(): T | undefined {
+        throw new Error("pop was called")
     }
 }
 
 export function getExtendedArray() {
-    return new ArrayWithThrowingLength<int>()
+    return new ArrayWithThrowingPushPop<int>()
 }

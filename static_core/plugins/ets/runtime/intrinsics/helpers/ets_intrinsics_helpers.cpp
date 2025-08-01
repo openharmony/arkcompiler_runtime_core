@@ -30,6 +30,7 @@
 #include "types/ets_primitives.h"
 #include "types/ets_string.h"
 #include "types/ets_type.h"
+#include "plugins/ets/runtime/types/ets_method.h"
 
 namespace ark::ets::intrinsics::helpers {
 

@@ -17,7 +17,6 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "cross_values.h"
 #include <endian.h>
 #include <optional>
 
@@ -26,38 +25,29 @@
 #include "interpreter/runtime_interface.h"
 #include "libarkbase/utils/utf.h"
 #include "libarkbase/utils/utils.h"
+#include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_stubs.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
+#include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_base_enum.h"
 #include "plugins/ets/runtime/types/ets_escompat_array.h"
-#include "libarkbase/utils/utils.h"
+#include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/types/ets_primitives.h"
 
 namespace ark::ets::intrinsics {
 
 EtsObject *EtsEscompatArrayGet(EtsEscompatArray *array, int32_t index)
 {
-    ASSERT(array != nullptr);
-    auto actualLength = array->GetActualLength();
-    if (UNLIKELY(static_cast<uint32_t>(index) >= actualLength)) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR,
-                          "Out of bounds");
-        return nullptr;
-    }
-    return array->GetData()->Get(index);
+    return array->EscompatArrayGet(index);
 }
 
 void EtsEscompatArraySet(EtsEscompatArray *array, int32_t index, EtsObject *value)
 {
-    ASSERT(array != nullptr);
-    auto actualLength = array->GetActualLength();
-    if (UNLIKELY(static_cast<uint32_t>(index) >= actualLength)) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR,
-                          "Out of bounds");
-        return;
-    }
-    array->GetData()->Set(index, value);
+    return array->EscompatArraySet(index, value);
 }
 
 template <typename Func>
@@ -247,13 +237,6 @@ static bool IsIntegerClass(EtsClass *objClass, const EtsPlatformTypes *ptypes)
             objClass == ptypes->coreInt);
 }
 
-static bool IsNullOrUndefined(EtsHandle<EtsObject> elementHandle)
-{
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    return (elementHandle.GetPtr() == nullptr ||
-            elementHandle.GetPtr() == EtsObject::FromCoreType(coroutine->GetNullValue()));
-}
-
 static bool IsNumericClass(EtsClass *objClass, const EtsPlatformTypes *ptypes)
 {
     return (objClass == ptypes->coreDouble || objClass == ptypes->coreFloat);
@@ -378,13 +361,13 @@ EtsDouble EtsEscompatArrayLastIndexOfCommon(EtsObjectArray *buffer, EtsObject *v
     return -1;
 }
 
-EtsInt EtsEscompatArrayInternalIndexOfImpl(EtsEscompatArray *array, EtsObject *value, EtsInt fromIndex)
+extern "C" EtsInt EtsEscompatArrayInternalIndexOf(ObjectHeader *bufferObject, EtsInt actualLength, EtsObject *value,
+                                                  EtsInt fromIndex)
 {
-    auto actualLength = static_cast<int32_t>(array->GetActualLength());
+    auto *buffer = EtsObjectArray::FromCoreType(bufferObject);
     fromIndex = NormalizeArrayIndex(fromIndex, actualLength);
     EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
     const EtsPlatformTypes *ptypes = PlatformTypes(coroutine);
-    EtsObjectArray *buffer = array->GetData();
 
     if (value == nullptr) {
         return EtsEscompatArrayIndexOfUndefined(buffer, fromIndex, actualLength);
@@ -417,26 +400,16 @@ EtsInt EtsEscompatArrayInternalIndexOfImpl(EtsEscompatArray *array, EtsObject *v
     return EtsEscompatArrayIndexOfCommon(buffer, value, fromIndex, actualLength);
 }
 
-extern "C" EtsInt EtsEscompatArrayInternalIndexOf(EtsEscompatArray *array, EtsObject *value, EtsInt fromIndex)
+extern "C" EtsInt EtsEscompatArrayInternalLastIndexOf(ObjectHeader *bufferObject, EtsInt actualLength, EtsObject *value,
+                                                      EtsInt fromIndex)
 {
-    return EtsEscompatArrayInternalIndexOfImpl(array, value, fromIndex);
-}
-
-extern "C" EtsInt EtsEscompatArrayIndexOf(EtsEscompatArray *array, EtsObject *value)
-{
-    return EtsEscompatArrayInternalIndexOfImpl(array, value, 0);
-}
-
-EtsInt EtsEscompatArrayInternalLastIndexOfImpl(EtsEscompatArray *array, EtsObject *value, EtsInt fromIndex)
-{
-    auto actualLength = static_cast<EtsInt>(array->GetActualLength());
     if (actualLength == 0) {
         return -1;
     }
+    auto *buffer = EtsObjectArray::FromCoreType(bufferObject);
 
     EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
     const EtsPlatformTypes *ptypes = PlatformTypes(coroutine);
-    EtsObjectArray *buffer = array->GetData();
     EtsInt startIndex = 0;
 
     if (fromIndex >= 0) {
@@ -476,17 +449,6 @@ EtsInt EtsEscompatArrayInternalLastIndexOfImpl(EtsEscompatArray *array, EtsObjec
     return EtsEscompatArrayLastIndexOfCommon(buffer, value, startIndex);
 }
 
-extern "C" EtsInt EtsEscompatArrayInternalLastIndexOf(EtsEscompatArray *array, EtsObject *value, EtsInt fromIndex)
-{
-    return EtsEscompatArrayInternalLastIndexOfImpl(array, value, fromIndex);
-}
-
-extern "C" EtsInt EtsEscompatArrayLastIndexOf(EtsEscompatArray *array, EtsObject *value)
-{
-    auto actualLength = static_cast<EtsInt>(array->GetActualLength());
-    return EtsEscompatArrayInternalLastIndexOfImpl(array, value, actualLength - 1);
-}
-
 static uint32_t NormalizeIndex(int32_t idx, int64_t len)
 {
     if (idx < 0) {
@@ -495,19 +457,19 @@ static uint32_t NormalizeIndex(int32_t idx, int64_t len)
     return idx > len ? len : idx;
 }
 
-extern "C" EtsEscompatArray *EtsEscompatArrayFillImpl(EtsEscompatArray *array, EtsObject *value, int32_t start,
-                                                      int32_t end)
+extern "C" void EtsEscompatArrayFillImpl(ObjectHeader *bufferHeader, int32_t length, EtsObject *value, int32_t start,
+                                         int32_t end)
 {
-    ASSERT(array != nullptr);
+    ASSERT(bufferHeader != nullptr);
+    auto *buffer = EtsObjectArray::FromEtsObject(EtsObject::FromCoreType(bufferHeader));
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsEscompatArray> arrayHandle(coro, array);
+    EtsHandle<EtsObjectArray> bufferHandle(coro, buffer);
     EtsHandle<EtsObject> valueHandle(coro, value);
-    auto actualLength = static_cast<int64_t>(array->GetActualLength());
-    auto startInd = NormalizeIndex(start, actualLength);
-    auto endInd = NormalizeIndex(end, actualLength);
+    auto startInd = NormalizeIndex(start, length);
+    auto endInd = NormalizeIndex(end, length);
     if (endInd <= startInd) {
-        return arrayHandle.GetPtr();
+        return;
     }
 
     auto count = endInd - startInd;
@@ -515,10 +477,10 @@ extern "C" EtsEscompatArray *EtsEscompatArrayFillImpl(EtsEscompatArray *array, E
     auto iterCount = count / chunkSize;
     auto remainder = count % chunkSize;
 
-    auto processChunk = [&arrayHandle, &valueHandle, startInd](std::size_t iter, std::size_t size) {
+    auto processChunk = [&bufferHandle, &valueHandle, startInd](std::size_t iter, std::size_t size) {
         auto startOffset = iter * chunkSize + startInd;
         auto endOffset = startOffset + size;
-        arrayHandle->GetData()->Fill(valueHandle.GetPtr(), startOffset, endOffset);
+        bufferHandle->Fill(valueHandle.GetPtr(), startOffset, endOffset);
     };
 
     for (std::uint32_t i = 0; i < iterCount; ++i) {
@@ -528,8 +490,6 @@ extern "C" EtsEscompatArray *EtsEscompatArrayFillImpl(EtsEscompatArray *array, E
     if (remainder > 0) {
         processChunk(iterCount, remainder);
     }
-
-    return arrayHandle.GetPtr();
 }
 
 template <typename T>
@@ -598,9 +558,9 @@ static auto GetSwap([[maybe_unused]] void *arrAddr, [[maybe_unused]] mem::GCBarr
 static constexpr size_t SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD = 50000UL;
 
 template <typename T>
-static void RefReverse(ManagedThread *thread, EtsHandle<EtsEscompatArray> &arrayHandle, int32_t length)
+static void RefReverse(ManagedThread *thread, EtsHandle<EtsObjectArray> &buffer, int32_t length)
 {
-    auto *arr = arrayHandle->GetData()->GetData<T>();
+    auto *arr = buffer->GetData<T>();
     auto *barrierSet = thread->GetBarrierSet();
     auto swap = GetSwap<T>(arr, barrierSet);
     bool usePreBarrier = barrierSet->IsPreBarrierEnabled();
@@ -632,7 +592,7 @@ static void RefReverse(ManagedThread *thread, EtsHandle<EtsEscompatArray> &array
         putSafepoint(groupIdx, length - 1 - groupIdx, SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD);
         // If GC suspend worker during RefReverse execution then it may move array pointed by arr to a different memory
         // location - should re-read a new array address
-        arr = arrayHandle->GetData()->GetData<T>();
+        arr = buffer->GetData<T>();
     }
     // Reverse possible remaining part with length less than SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD
     size_t finalIdx = (halfLength / SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD) * SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD;
@@ -642,75 +602,57 @@ static void RefReverse(ManagedThread *thread, EtsHandle<EtsEscompatArray> &array
     putSafepoint(finalIdx, length - 1 - finalIdx, halfLength - finalIdx);
 }
 
-extern "C" void EtsEscompatArrayReverse(EtsEscompatArray *array)
+extern "C" void EtsEscompatArrayReverse(ObjectHeader *bufferHeader, int32_t length)
 {
-    ASSERT(array != nullptr);
-    auto actualLength = static_cast<EtsInt>(array->GetActualLength());
-    /* the result will be exactly the same as it is */
-    const EtsInt minLength = 2;
-    if (actualLength < minLength) {
-        return;
-    }
+    ASSERT(bufferHeader != nullptr);
+    auto *buffer = EtsObjectArray::FromEtsObject(EtsObject::FromCoreType(bufferHeader));
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsEscompatArray> arrayHandle(coro, array);
+    EtsHandle<EtsObjectArray> bufferHandle(coro, buffer);
 
-    RefReverse<ObjectPointerType>(coro, arrayHandle, actualLength);
-
-    return;
+    RefReverse<ObjectPointerType>(coro, bufferHandle, length);
 }
 
 struct ElementComputeResult {
-    EtsInt intCount = 0;
-    EtsInt doubleCount = 0;
-    EtsInt stringCount = 0;
-    EtsInt utf8Size = 0;
-    EtsInt utf16Size = 0;
+    explicit ElementComputeResult(EtsCoroutine *c) : coro(c), ptypes(PlatformTypes(c)) {};
+    NO_COPY_SEMANTIC(ElementComputeResult);
+    DEFAULT_MOVE_SEMANTIC(ElementComputeResult);
+    ~ElementComputeResult() = default;
+
+    EtsCoroutine *coro {};
+    const EtsPlatformTypes *ptypes {};
+    size_t intCount = 0;
+    size_t doubleCount = 0;
+    size_t stringCount = 0;
+    size_t utf8Size = 0;
+    size_t utf16Size = 0;
+    size_t toStringIndex = 0;
+    PandaVector<EtsHandle<EtsString>> toStringResults;
 };
 
-ark::ets::EtsString *GetObjStr(EtsHandle<EtsObject> elementHandle)
-{
-    auto cls = elementHandle->GetClass();
-    auto coro = EtsCoroutine::GetCurrent();
-    auto const performCall = [coro, &elementHandle](EtsMethod *method) {
-        ASSERT(method != nullptr);
-        std::array<Value, 1> args = {Value(elementHandle->GetCoreType())};
-        EtsObject *callRes = EtsObject::FromCoreType(
-            EtsMethod::ToRuntimeMethod(method)->Invoke(coro, args.data()).GetAs<ObjectHeader *>());
-        if (coro->HasPendingException() || callRes == EtsObject::FromCoreType(coro->GetNullValue())) {
-            return static_cast<EtsObject *>(nullptr);
-        }
-        return callRes;
-    };
+static constexpr std::string_view TRUE_STRING = "true";
+static constexpr std::string_view FALSE_STRING = "false";
 
-    auto toStrMethod = cls->GetInstanceMethod("toString", ":Lstd/core/String;");
+// Might trigger GC
+static ark::ets::EtsString *GetObjStr(EtsCoroutine *coro, EtsClass *cls, EtsObject *element)
+{
+    auto *toStrMethod = cls->GetInstanceMethod("toString", ":Lstd/core/String;");
     if (toStrMethod == nullptr) {
         return EtsString::CreateNewEmptyString();
     }
 
-    auto etsStr = performCall(toStrMethod);
-    if (etsStr == nullptr) {
+    Value args(element->GetCoreType());
+    Value result = toStrMethod->GetPandaMethod()->Invoke(coro, &args);
+    if (UNLIKELY(coro->HasPendingException())) {
         return nullptr;
     }
-
-    auto objStr = EtsString::FromEtsObject(etsStr);
-    return objStr;
-}
-
-void ComputeObjStrSize(EtsHandle<EtsObject> elementHandle, ElementComputeResult &res)
-{
-    auto objStr = GetObjStr(elementHandle);
-    if (objStr->IsUtf16()) {
-        auto utf16StrSize = objStr->GetUtf16Length();
-        res.utf16Size += utf16StrSize;
-    } else {
-        auto utf8StrSize = objStr->GetUtf8Length();
-        res.utf8Size += utf8StrSize;
-    }
+    auto *resultObject = EtsObject::FromCoreType(result.GetAs<ObjectHeader *>());
+    ASSERT(resultObject != nullptr);
+    return EtsString::FromEtsObject(resultObject);
 }
 
 template <typename T>
-constexpr size_t MaxChars()
+static constexpr size_t MaxChars()
 {
     static_assert(std::numeric_limits<T>::radix == 2U);
     if constexpr (std::is_integral_v<T>) {
@@ -731,41 +673,51 @@ constexpr size_t MaxChars()
     }
 }
 
-void ComputeElementCharSize(ElementComputeResult &res, EtsObject *element, const EtsPlatformTypes *ptypes)
+// Might trigger GC
+static bool ComputeElementCharSize(ElementComputeResult &res, EtsObject *element)
 {
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    EtsHandle<EtsObject> elementHandle(coroutine, element);
     const int booleanUtf8Size = 5;
-    if (IsNullOrUndefined(elementHandle)) {
-        return;
+    if (ets::EtsReferenceNullish(res.coro, element)) {
+        return true;
     }
 
-    auto elementCls = elementHandle->GetClass();
-    if (elementCls->IsStringClass()) {
-        auto strElement = coretypes::String::Cast(elementHandle->GetCoreType());
-        if (strElement->IsUtf16()) {
-            auto utf16StrSize = strElement->GetUtf16Length();
+    const auto updateStringSize = [&res](EtsString *str) {
+        if (str->IsUtf16()) {
+            auto utf16StrSize = str->GetUtf16Length();
             res.utf16Size += utf16StrSize;
         } else {
-            auto utf8StrSize = strElement->GetUtf8Length();
+            auto utf8StrSize = str->GetUtf8Length();
             res.utf8Size += utf8StrSize;
         }
+    };
+
+    auto elementCls = element->GetClass();
+    if (elementCls->IsStringClass()) {
+        auto *strElement = EtsString::FromEtsObject(element);
+        updateStringSize(strElement);
         res.stringCount++;
-    } else if (IsIntegerClass(elementCls, ptypes)) {
+    } else if (IsIntegerClass(elementCls, res.ptypes)) {
         res.intCount++;
-    } else if (IsNumericClass(elementCls, ptypes)) {
+    } else if (IsNumericClass(elementCls, res.ptypes)) {
         res.doubleCount++;
-    } else if (elementCls == ptypes->coreChar) {
+    } else if (elementCls == res.ptypes->coreChar) {
         res.utf16Size++;
-    } else if (elementCls == ptypes->coreBoolean) {
+    } else if (elementCls == res.ptypes->coreBoolean) {
         res.utf8Size += booleanUtf8Size;
     } else {
-        ComputeObjStrSize(elementHandle, res);
+        auto *objStr = GetObjStr(res.coro, elementCls, element);
+        if (UNLIKELY(objStr == nullptr)) {
+            ASSERT(res.coro->HasPendingException());
+            return false;
+        }
+        updateStringSize(objStr);
+        res.toStringResults.emplace_back(res.coro, objStr);
     }
+    return true;
 }
 
 template <typename T>
-size_t NumberToChars(PandaVector<EtsChar> &buf, size_t pos, T number)
+static size_t NumberToChars(PandaVector<EtsChar> &buf, size_t pos, T number)
 {
     if constexpr (std::is_integral_v<T>) {
         auto num = number < 0 ? -static_cast<uint64_t>(number) : static_cast<uint64_t>(number);
@@ -790,7 +742,7 @@ size_t NumberToChars(PandaVector<EtsChar> &buf, size_t pos, T number)
 }
 
 template <typename T>
-size_t NumberToChars(PandaVector<char> &buf, size_t pos, T number)
+static size_t NumberToChars(PandaVector<char> &buf, size_t pos, T number)
 {
     if constexpr (std::is_integral_v<T>) {
         auto [strEnd, result] = std::to_chars(&buf[pos], &buf[pos + MaxChars<T>()], number);
@@ -802,19 +754,16 @@ size_t NumberToChars(PandaVector<char> &buf, size_t pos, T number)
         auto asDouble = static_cast<double>(number);
         return intrinsics::helpers::FpToStringDecimalRadix(asDouble, [&buf, &pos](std::string_view str) {
             ASSERT(str.length() <= MaxChars<T>());
-            auto err = memcpy_s(&buf[pos], MaxChars<T>(), str.data(), str.length());
-            if (err != EOK) {
-                UNREACHABLE();
-            }
+            MemcpyUnsafe(&buf[pos], str.data(), str.length());
             return str.length();
         });
     }
 }
 
 template <typename T, typename BufferType>
-void HandleNumericType(EtsHandle<EtsObject> elementHandle, BufferType &buf, size_t &pos)
+static void HandleNumericType(EtsObject *element, BufferType &buf, size_t &pos)
 {
-    auto value = GetNumericValue<T>(elementHandle.GetPtr());
+    auto value = GetNumericValue<T>(element);
     pos += NumberToChars<T>(buf, pos, value);
 }
 
@@ -832,101 +781,97 @@ static constexpr auto GetNumericHandlerTable(const EtsPlatformTypes *ptypes)
                        std::pair {ptypes->coreFloat, &HandleNumericType<EtsFloat, BufferType>}};
 }
 
-void ComputeCharSize(EtsObjectArray *buffer, EtsInt actualLength, ElementComputeResult &res,
-                     const EtsPlatformTypes *ptypes, EtsHandle<EtsString> separatorHandle)
+// Might trigger GC
+static bool ComputeCharSize(ElementComputeResult &res, EtsHandle<EtsObjectArray> &bufferHandle, size_t actualLength,
+                            EtsHandle<EtsString> &separatorHandle)
 {
-    res.intCount = 0;
-    res.doubleCount = 0;
-    res.stringCount = 0;
-    res.utf8Size = 0;
-    res.utf16Size = 0;
-
-    for (EtsInt index = 0; index < actualLength; index++) {
-        auto element = buffer->Get(index);
-        ComputeElementCharSize(res, element, ptypes);
-    }
-
-    res.utf8Size = res.utf8Size + res.intCount * MaxChars<EtsLong>() + res.doubleCount * MaxChars<EtsDouble>();
-    if (separatorHandle.GetPtr()->IsUtf16()) {
-        res.utf16Size += separatorHandle.GetPtr()->GetUtf16Length() * (actualLength - 1);
-    } else {
-        res.utf8Size += separatorHandle.GetPtr()->GetUtf8Length() * (actualLength - 1);
-    }
-}
-
-ark::ets::EtsString *EtsEscompatArrayJoinUtf8String(EtsObjectArray *buffer, EtsInt &actualLength, EtsInt &utf8Size,
-                                                    EtsHandle<EtsString> separatorHandle)
-{
-    EtsString *s = EtsString::AllocateNonInitializedString(utf8Size, true);
-    uint8_t *dstData = s->GetDataMUtf8();
-    const size_t sepSize = separatorHandle.GetPtr()->GetUtf8Length();
-
-    for (EtsInt i = 0; i < actualLength - 1; i++) {
-        EtsObject *str = buffer->Get(i);
-        coretypes::String *srcString = coretypes::String::Cast(str->GetCoreType());
-        uint32_t n = srcString->CopyDataRegionMUtf8(dstData, 0, srcString->GetLength(), utf8Size);
-        dstData += n;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        utf8Size -= n;
-        if (sepSize > 0) {
-            uint32_t len = separatorHandle.GetPtr()->CopyDataRegionMUtf8(
-                dstData, 0, separatorHandle.GetPtr()->GetLength(), utf8Size);
-            dstData += len;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            utf8Size -= len;
+    ASSERT(actualLength > 0);
+    for (size_t index = 0; index < actualLength; index++) {
+        auto *element = bufferHandle->Get(index);
+        if (UNLIKELY(!ComputeElementCharSize(res, element))) {
+            ASSERT(res.coro->HasPendingException());
+            return false;
         }
     }
 
-    EtsObject *lastStr = buffer->Get(actualLength - 1);
-    coretypes::String *lastString = coretypes::String::Cast(lastStr->GetCoreType());
-    lastString->CopyDataRegionMUtf8(dstData, 0, lastString->GetLength(), utf8Size);
-    return s;
+    res.utf8Size = res.utf8Size + res.intCount * MaxChars<EtsLong>() + res.doubleCount * MaxChars<EtsDouble>();
+    if (separatorHandle->IsUtf16()) {
+        res.utf16Size += separatorHandle->GetUtf16Length() * (actualLength - 1);
+    } else {
+        res.utf8Size += separatorHandle->GetUtf8Length() * (actualLength - 1);
+    }
+    return true;
 }
 
-void ProcessUtf8Element(EtsObject *element, PandaVector<char> &buf, const EtsPlatformTypes *ptypes, size_t &pos,
-                        EtsInt &utf8Size)
+static ark::ets::EtsString *EtsEscompatArrayJoinUtf8String(EtsHandle<EtsObjectArray> &bufferHandle, size_t actualLength,
+                                                           EtsInt resultUtf8Size, EtsHandle<EtsString> &separatorHandle)
 {
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    EtsHandle<EtsObject> elementHandle(coroutine, element);
-    if (IsNullOrUndefined(elementHandle)) {
+    ASSERT(actualLength > 0);
+    EtsString *outputString = EtsString::AllocateNonInitializedString(resultUtf8Size, true);
+    uint8_t *dstData = outputString->GetDataMUtf8();
+    const size_t sepSize = separatorHandle->GetUtf8Length();
+
+    for (size_t i = 0; i < actualLength - 1; i++) {
+        auto *srcString = EtsString::FromEtsObject(bufferHandle->Get(i));
+        uint32_t n = srcString->CopyDataRegionMUtf8(dstData, 0, srcString->GetLength(), resultUtf8Size);
+        dstData += n;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        resultUtf8Size -= n;
+        if (sepSize > 0) {
+            uint32_t len =
+                separatorHandle->CopyDataRegionMUtf8(dstData, 0, separatorHandle->GetLength(), resultUtf8Size);
+            dstData += len;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            resultUtf8Size -= len;
+        }
+    }
+
+    auto *lastString = EtsString::FromEtsObject(bufferHandle->Get(actualLength - 1));
+    lastString->CopyDataRegionMUtf8(dstData, 0, lastString->GetLength(), resultUtf8Size);
+    return outputString;
+}
+
+static void ProcessUtf8Element(ElementComputeResult &res, EtsObject *element, PandaVector<char> &outputBuffer,
+                               size_t &pos)
+{
+    if (ets::EtsReferenceNullish(res.coro, element)) {
         return;
     }
 
-    auto elementCls = elementHandle->GetClass();
-    const auto &numericHandlerTable = GetNumericHandlerTable<PandaVector<char>>(ptypes);
+    auto *elementCls = element->GetClass();
+    const auto &numericHandlerTable = GetNumericHandlerTable<PandaVector<char>>(res.ptypes);
     for (const auto &entry : numericHandlerTable) {
         if (entry.first == elementCls) {
-            entry.second(elementHandle, buf, pos);
+            entry.second(element, outputBuffer, pos);
             return;
         }
     }
 
-    PandaVector<uint8_t> tree8Buf;
-    if (elementCls->IsStringClass()) {
-        auto strElement = coretypes::String::Cast(elementHandle->GetCoreType());
-        auto str = strElement->IsTreeString() ? strElement->GetTreeStringDataUtf8(tree8Buf) : strElement->GetDataUtf8();
-        auto elementSize = strElement->GetUtf8Length();
+    const auto writeUtf8String = [&outputBuffer, &pos](EtsString *str) {
+        auto elementSize = str->GetUtf8Length();
         if (elementSize > 0) {
-            memcpy_s(&buf[pos], utf8Size, str, elementSize);
+            PandaVector<uint8_t> tree8Buf;
+            const auto *strData = str->IsTreeString() ? str->GetTreeStringDataUtf8(tree8Buf) : str->GetDataUtf8();
+            MemcpyUnsafe(&outputBuffer[pos], strData, elementSize);
             pos += elementSize;
         }
-    } else if (elementCls == ptypes->coreBoolean) {
-        auto value = GetNumericValue<EtsBoolean>(elementHandle.GetPtr());
-        const char *text = (value == 1) ? "true" : "false";
-        const size_t len = (value == 1) ? 4 : 5;
-        memcpy_s(&buf[pos], utf8Size, text, len);
-        pos += len;
+    };
+
+    if (elementCls->IsStringClass()) {
+        auto *strElement = EtsString::FromEtsObject(element);
+        writeUtf8String(strElement);
+    } else if (elementCls == res.ptypes->coreBoolean) {
+        auto value = GetNumericValue<EtsBoolean>(element);
+        std::string_view text = (value == 1) ? TRUE_STRING : FALSE_STRING;
+        MemcpyUnsafe(&outputBuffer[pos], text.data(), text.size());
+        pos += text.size();
     } else {
-        auto objStr = GetObjStr(elementHandle);
-        auto objStrData = objStr->IsTreeString() ? objStr->GetTreeStringDataUtf8(tree8Buf) : objStr->GetDataUtf8();
-        auto objStrSize = objStr->GetUtf8Length();
-        if (objStrSize > 0) {
-            memcpy_s(&buf[pos], utf8Size, objStrData, objStrSize);
-            pos += objStrSize;
-        }
+        ASSERT(res.toStringIndex < res.toStringResults.size());
+        writeUtf8String(res.toStringResults[res.toStringIndex].GetPtr());
+        res.toStringIndex++;
     }
 }
 
-ark::ets::EtsString *EtsEscompatArrayJoinUtf8(EtsObjectArray *buffer, EtsInt &actualLength, ElementComputeResult &res,
-                                              const EtsPlatformTypes *ptypes, EtsHandle<EtsString> separatorHandle)
+static ark::ets::EtsString *EtsEscompatArrayJoinUtf8(ElementComputeResult &res, EtsHandle<EtsObjectArray> &buffer,
+                                                     size_t actualLength, EtsHandle<EtsString> &separatorHandle)
 {
     if (res.utf8Size == 0) {
         return EtsString::CreateNewEmptyString();
@@ -938,14 +883,13 @@ ark::ets::EtsString *EtsEscompatArrayJoinUtf8(EtsObjectArray *buffer, EtsInt &ac
 
     PandaVector<char> buf(res.utf8Size + 1);
     PandaVector<uint8_t> tree8Buf;
-    const size_t sepSize = separatorHandle.GetPtr()->GetUtf8Length();
-    uint8_t *separator = separatorHandle.GetPtr()->IsTreeString()
-                             ? separatorHandle.GetPtr()->GetTreeStringDataUtf8(tree8Buf)
-                             : separatorHandle.GetPtr()->GetDataUtf8();
+    const size_t sepSize = separatorHandle->GetUtf8Length();
+    uint8_t *separator = separatorHandle->IsTreeString() ? separatorHandle->GetTreeStringDataUtf8(tree8Buf)
+                                                         : separatorHandle->GetDataUtf8();
     size_t pos = 0;
-    for (EtsInt index = 0; index < actualLength - 1; index++) {
-        auto element = buffer->Get(index);
-        ProcessUtf8Element(element, buf, ptypes, pos, res.utf8Size);
+    for (size_t index = 0; index < actualLength - 1; index++) {
+        auto *element = buffer->Get(index);
+        ProcessUtf8Element(res, element, buf, pos);
 
         if (sepSize > 0) {
             MemcpyUnsafe(&buf[pos], separator, sepSize);
@@ -953,147 +897,137 @@ ark::ets::EtsString *EtsEscompatArrayJoinUtf8(EtsObjectArray *buffer, EtsInt &ac
         }
     }
 
-    auto lastElement = buffer->Get(actualLength - 1);
-    ProcessUtf8Element(lastElement, buf, ptypes, pos, res.utf8Size);
+    auto *lastElement = buffer->Get(actualLength - 1);
+    ProcessUtf8Element(res, lastElement, buf, pos);
 
     return EtsString::CreateFromUtf8(buf.data(), pos);
 }
 
-bool ProcessUtf16Element(EtsObject *element, PandaVector<EtsChar> &buf, const EtsPlatformTypes *ptypes, size_t &pos)
+static void ProcessUtf16Element(ElementComputeResult &res, EtsObject *element, PandaVector<EtsChar> &outputBuffer,
+                                size_t &pos)
 {
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    EtsHandle<EtsObject> elementHandle(coroutine, element);
-    if (IsNullOrUndefined(elementHandle)) {
-        return true;
+    if (ets::EtsReferenceNullish(res.coro, element)) {
+        return;
     }
 
-    auto elementCls = elementHandle->GetClass();
-    const auto &numericHandlerTable = GetNumericHandlerTable<PandaVector<EtsChar>>(ptypes);
+    auto elementCls = element->GetClass();
+    const auto &numericHandlerTable = GetNumericHandlerTable<PandaVector<EtsChar>>(res.ptypes);
     for (const auto &entry : numericHandlerTable) {
         if (entry.first == elementCls) {
-            entry.second(elementHandle, buf, pos);
-            return true;
+            entry.second(element, outputBuffer, pos);
+            return;
         }
     }
+
+    const auto writeString = [&outputBuffer, &pos](EtsString *str) {
+        ASSERT(str != nullptr);
+        auto strSize = str->IsUtf16() ? str->GetUtf16Length() : str->GetUtf8Length();
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        str->CopyDataUtf16(outputBuffer.data() + pos, strSize);
+        pos += strSize;
+    };
 
     if (elementCls->IsStringClass()) {
-        auto strElement = coretypes::String::Cast(elementHandle->GetCoreType());
-        auto strSize = strElement->IsUtf16() ? strElement->GetUtf16Length() : strElement->GetUtf8Length();
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        strElement->CopyDataUtf16(buf.data() + pos, strSize);
-        pos += strSize;
-    } else if (elementCls == ptypes->coreChar) {
-        auto value = GetNumericValue<EtsChar>(elementHandle.GetPtr());
-        buf[pos] = value;
+        auto *strElement = EtsString::FromEtsObject(element);
+        writeString(strElement);
+    } else if (elementCls == res.ptypes->coreChar) {
+        auto value = GetNumericValue<EtsChar>(element);
+        outputBuffer[pos] = value;
         pos++;
-    } else if (elementCls == ptypes->coreBoolean) {
-        auto value = GetNumericValue<EtsBoolean>(elementHandle.GetPtr());
-        const char *text = (value == 1) ? "true" : "false";
-        const size_t len = (value == 1) ? 4 : 5;
-        for (uint32_t i = 0; i < len; ++i) {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            buf[i + pos] = text[i];
-        }
-        pos += len;
+    } else if (elementCls == res.ptypes->coreBoolean) {
+        auto value = GetNumericValue<EtsBoolean>(element);
+        std::string_view text = (value == 1) ? TRUE_STRING : FALSE_STRING;
+        std::copy(text.begin(), text.end(), outputBuffer.begin() + pos);
+        pos += text.size();
     } else {
-        auto objStr = GetObjStr(elementHandle);
-        if (objStr == nullptr) {
-            return false;
-        }
-        auto objStrSize = objStr->IsUtf16() ? objStr->GetUtf16Length() : objStr->GetUtf8Length();
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        objStr->CopyDataUtf16(buf.data() + pos, objStrSize);
-        pos += objStrSize;
+        ASSERT(res.toStringIndex < res.toStringResults.size());
+        writeString(res.toStringResults[res.toStringIndex].GetPtr());
+        res.toStringIndex++;
     }
-    return true;
 }
 
-ark::ets::EtsString *EtsEscompatArrayJoinUtf16(EtsObjectArray *buffer, EtsInt &actualLength, ElementComputeResult &res,
-                                               const EtsPlatformTypes *ptypes, EtsHandle<EtsString> separatorHandle)
+// Might trigger GC
+static ark::ets::EtsString *EtsEscompatArrayJoinUtf16(ElementComputeResult &res,
+                                                      EtsHandle<EtsObjectArray> &bufferHandle, EtsInt actualLength,
+                                                      EtsHandle<EtsString> &separatorHandle)
 {
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    EtsHandle<EtsObjectArray> bufferHandle(coroutine, buffer);
-    res.utf16Size =
+    size_t resultUtf16Size =
         res.utf16Size + res.utf8Size + res.intCount * MaxChars<EtsLong>() + res.doubleCount * MaxChars<EtsDouble>();
-    PandaVector<EtsChar> buf(res.utf16Size);
-    auto separator = separatorHandle.GetPtr();
-    auto sepSize = separator->IsUtf16() ? separator->GetUtf16Length() : separator->GetUtf8Length();
+    PandaVector<EtsChar> buf(resultUtf16Size);
+    auto sepSize = separatorHandle->IsUtf16() ? separatorHandle->GetUtf16Length() : separatorHandle->GetUtf8Length();
     size_t pos = 0;
     for (EtsInt index = 0; index < actualLength - 1; index++) {
-        auto element = bufferHandle->Get(index);
-        if (!ProcessUtf16Element(element, buf, ptypes, pos)) {
-            return nullptr;
-        }
+        auto *element = bufferHandle->Get(index);
+        ProcessUtf16Element(res, element, buf, pos);
 
         if (sepSize > 0) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            separatorHandle.GetPtr()->CopyDataUtf16(buf.data() + pos, sepSize);
+            separatorHandle->CopyDataUtf16(buf.data() + pos, sepSize);
             pos += sepSize;
         }
     }
 
-    auto lastElement = bufferHandle->Get(actualLength - 1);
-    if (!ProcessUtf16Element(lastElement, buf, ptypes, pos)) {
-        return nullptr;
-    }
+    auto *lastElement = bufferHandle->Get(actualLength - 1);
+    ProcessUtf16Element(res, lastElement, buf, pos);
 
-    return EtsString::CreateFromUtf16(reinterpret_cast<EtsChar *>(buf.data()), pos);
+    return EtsString::CreateFromUtf16(buf.data(), pos);
 }
 
-extern "C" ark::ets::EtsString *EtsEscompatArrayJoinInternal(EtsEscompatArray *array, ark::ets::EtsString *separator)
+extern "C" ark::ets::EtsString *EtsEscompatArrayJoinInternal(ObjectHeader *buffer, EtsInt actualLength,
+                                                             ark::ets::EtsString *separator)
 {
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    const EtsPlatformTypes *ptypes = PlatformTypes(coroutine);
-    EtsObjectArray *buffer = array->GetData();
-    auto actualLength = static_cast<EtsInt>(array->GetActualLength());
-    ElementComputeResult res;
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    EtsHandle<EtsObjectArray> bufferHandle(coroutine, buffer);
-    EtsHandle<EtsString> separatorHandle(coroutine, separator);
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coro);
 
-    ComputeCharSize(bufferHandle.GetPtr(), actualLength, res, ptypes, separatorHandle);
+    EtsHandle<EtsString> separatorHandle(coro, separator);
+    EtsHandle<EtsObjectArray> bufferHandle(coro, EtsObjectArray::FromCoreType(buffer));
+    ASSERT(actualLength > 0);
+    // Sanity check that actual length is less or equal to capacity
+    ASSERT(static_cast<size_t>(actualLength) <= bufferHandle->GetLength());
+
+    ElementComputeResult res(coro);
+
+    if (UNLIKELY(!ComputeCharSize(res, bufferHandle, actualLength, separatorHandle))) {
+        ASSERT(coro->HasPendingException());
+        return nullptr;
+    }
     ark::interpreter::RuntimeInterface::Safepoint();
 
     if (res.utf16Size > 0) {
-        return EtsEscompatArrayJoinUtf16(bufferHandle.GetPtr(), actualLength, res, ptypes, separatorHandle);
+        return EtsEscompatArrayJoinUtf16(res, bufferHandle, actualLength, separatorHandle);
     }
 
-    return EtsEscompatArrayJoinUtf8(bufferHandle.GetPtr(), actualLength, res, ptypes, separatorHandle);
+    return EtsEscompatArrayJoinUtf8(res, bufferHandle, actualLength, separatorHandle);
 }
 
 extern "C" EtsObject *EtsEscompatArrayGetUnsafe(EtsEscompatArray *array, int32_t index)
 {
-    ASSERT(array != nullptr);
-    [[maybe_unused]] auto length = array->GetData()->GetLength();
-    ASSERT(static_cast<uint32_t>(index) < length);
-    return array->GetData()->Get(index);
+    return array->EscompatArrayGetUnsafe(index);
 }
 
 extern "C" void EtsEscompatArraySetUnsafe(EtsEscompatArray *array, int32_t index, EtsObject *value)
 {
-    ASSERT(array != nullptr);
-    [[maybe_unused]] auto actualLength = array->GetActualLength();
-    ASSERT(static_cast<uint32_t>(index) < actualLength);
-    array->GetData()->Set(index, value);
+    array->EscompatArraySetUnsafe(index, value);
 }
 
-extern "C" void EtsEscompatArrayUnshiftInternal(EtsEscompatArray *array, ObjectHeader *bufferHeader,
+extern "C" void EtsEscompatArrayUnshiftInternal(ObjectHeader *arrayHeader, EtsInt arrayLen, ObjectHeader *bufferHeader,
                                                 EtsEscompatArray *values)
 {
-    ASSERT(array != nullptr);
+    ASSERT(arrayHeader != nullptr);
     ASSERT(bufferHeader != nullptr);
     ASSERT(values != nullptr);
     auto *buffer = EtsArray::FromEtsObject(EtsObject::FromCoreType(bufferHeader));
     auto dstLen = buffer->GetLength() * sizeof(ObjectPointerType);
     auto *dst = buffer->GetData<ObjectPointerType>();
-    auto *arraySrc = array->GetData()->GetData<ObjectPointerType>();
-    auto arraySrcLen = array->GetActualLength() * sizeof(ObjectPointerType);
-    auto valuesSrcLen = values->GetActualLength() * sizeof(ObjectPointerType);
+    auto *array = EtsArray::FromEtsObject(EtsObject::FromCoreType(arrayHeader));
+    auto *arraySrc = array->GetData<ObjectPointerType>();
+    auto arraySrcLen = arrayLen * sizeof(ObjectPointerType);
+    auto valuesSrcLen = values->GetActualLengthFromEscompatArray() * sizeof(ObjectPointerType);
     [[maybe_unused]] auto error0 =
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        memmove_s(dst + values->GetActualLength(), dstLen - valuesSrcLen, arraySrc, arraySrcLen);
+        memmove_s(dst + values->GetActualLengthFromEscompatArray(), dstLen - valuesSrcLen, arraySrc, arraySrcLen);
     ASSERT(error0 == 0);
-    auto *valuesSrc = values->GetData()->GetData<ObjectPointerType>();
+    auto *valuesSrc = values->GetDataFromEscompatArray()->GetData<ObjectPointerType>();
     [[maybe_unused]] auto error1 = memmove_s(dst, dstLen, valuesSrc, valuesSrcLen);
     ASSERT(error1 == 0);
 
@@ -1107,15 +1041,14 @@ extern "C" void EtsEscompatArrayUnshiftInternal(EtsEscompatArray *array, ObjectH
 
 extern "C" EtsBoolean EtsEscompatArrayIsPlatformArray(EtsObject *obj)
 {
-    auto *escompatArray = PlatformTypes(EtsCoroutine::GetCurrent())->escompatArray;
-    return obj->GetClass() == escompatArray;  // NOLINT (readability-implicit-bool-conversion)
+    return ToEtsBoolean(EtsEscompatArray::IsExactlyEscompatArray(obj, EtsCoroutine::GetCurrent()));
 }
 
 extern "C" ObjectHeader *EtsEscompatArrayGetBuffer(EtsObject *obj)
 {
-    ASSERT(obj->GetClass() == PlatformTypes(EtsCoroutine::GetCurrent())->escompatArray);
+    ASSERT(EtsEscompatArray::IsExactlyEscompatArray(obj, EtsCoroutine::GetCurrent()));
     auto *array = EtsEscompatArray::FromEtsObject(obj);
-    return array->GetData()->GetCoreType();
+    return array->GetDataFromEscompatArray()->GetCoreType();
 }
 
 }  // namespace ark::ets::intrinsics

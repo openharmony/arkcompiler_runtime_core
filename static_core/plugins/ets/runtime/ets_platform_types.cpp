@@ -204,8 +204,10 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
                "[Lstd/core/WeakRef;:V", true);
 
     findType(&EtsPlatformTypes::escompatArray, ARRAY);
-    findMethod(&EtsPlatformTypes::escompatArrayPush, escompatArray, "pushSingle", "Lstd/core/Object;:V", false);
     findMethod(&EtsPlatformTypes::escompatArrayPop, escompatArray, "pop", ":Lstd/core/Object;", false);
+    findMethod(&EtsPlatformTypes::escompatArrayGetLength, escompatArray, "<get>length", ":I", false);
+    findMethod(&EtsPlatformTypes::escompatArrayGet, escompatArray, "$_get", "I:Lstd/core/Object;", false);
+    findMethod(&EtsPlatformTypes::escompatArraySet, escompatArray, "$_set", "ILstd/core/Object;:V", false);
     findType(&EtsPlatformTypes::coreArrayBuffer, ARRAY_BUFFER);
     findType(&EtsPlatformTypes::escompatInt8Array, INT8_ARRAY);
     findType(&EtsPlatformTypes::escompatUint8Array, UINT8_ARRAY);

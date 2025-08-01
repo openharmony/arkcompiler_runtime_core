@@ -145,21 +145,18 @@ void Codegen::CreateEscompatArrayReverse(IntrinsicInst *inst, Reg dst, SRCREGS s
 {
     ASSERT(GetArch() != Arch::AARCH32);
 
-    ScopedTmpReg tmp1(enc_);
-    auto reg1 = tmp1.GetReg().As(INT32_TYPE);
-    enc_->EncodeLdr(
-        reg1, false,
-        MemRef(src[FIRST_OPERAND], cross_values::GetEscompatArrayActualLengthOffset(GetGraph()->GetArch())));
     auto labelSlowPath = enc_->CreateLabel();
+    auto len = src[SECOND_OPERAND];
+    enc_->EncodeJump(labelSlowPath, len, Imm(MAGIC_NUM_FOR_SHORT_ARRAY_THRESHOLD), Condition::GT);
     auto labelEnd = enc_->CreateLabel();
-    enc_->EncodeJump(labelSlowPath, reg1, Imm(MAGIC_NUM_FOR_SHORT_ARRAY_THRESHOLD), Condition::GT);
     auto fastPathEntrypointId = GetArrayFastReverseEntrypointId(GetGraph()->GetRuntime()->GetPostType());
-    CallFastPath(inst, fastPathEntrypointId, dst, {}, src[FIRST_OPERAND]);
+    // NOTE(srokashevich, #30178): remove fake arg(second src[FIRST_OPERAND]) after fix
+    CallFastPath(inst, fastPathEntrypointId, dst, {}, src[FIRST_OPERAND], src[FIRST_OPERAND], src[SECOND_OPERAND]);
     enc_->EncodeJump(labelEnd);
 
     enc_->BindLabel(labelSlowPath);
     static constexpr auto SLOW_PATH_ENTRYPOINT_ID = EntrypointId::ESCOMPAT_ARRAY_REVERSE;
-    CallRuntime(inst, SLOW_PATH_ENTRYPOINT_ID, dst, {}, src[FIRST_OPERAND]);
+    CallRuntime(inst, SLOW_PATH_ENTRYPOINT_ID, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);
     enc_->BindLabel(labelEnd);
 }
 

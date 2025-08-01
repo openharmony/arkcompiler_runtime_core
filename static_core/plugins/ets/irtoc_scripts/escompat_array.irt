@@ -43,7 +43,8 @@ function(:EscompatArrayIsPlatformArrayFast,
 
 def GenerateArrayFastReverse(sync_type)
   function("EscompatArrayReverse#{sync_type}".to_sym,
-          params: {obj: 'ref'},
+          # NOTE(srokashevich, #30178): remove fake arg after fix
+          params: {buf: 'ref', fake: 'ref', len: 'i32'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
           mode: [:FastPath]) {
@@ -58,13 +59,11 @@ def GenerateArrayFastReverse(sync_type)
       next
     end
 
-    len := LoadI(obj).Imm(EtsConstants::ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET).u32
     # if len <= 1 then do nothing
     If(len, 1).BE.Unlikely.b {
       Goto(:Done)
     }
 
-    buf := LoadI(obj).Imm(EtsConstants::ESCOMPAT_ARRAY_DATA_OFFSET).ref
     data := AddI(buf).Imm(Constants::ARRAY_DATA_OFFSET).ptr    
 
     # start reverting
@@ -92,7 +91,7 @@ def GenerateArrayFastReverse(sync_type)
     if sync_type == :Async
       post_inter_region_barrier(data, len_bytes)
     elsif sync_type == :AsyncManual
-      obj_ptr := Cast(obj).ptr
+      obj_ptr := Cast(buf).ptr
       post_inter_generational_barrier(obj_ptr)
     end
   Label(:Done)

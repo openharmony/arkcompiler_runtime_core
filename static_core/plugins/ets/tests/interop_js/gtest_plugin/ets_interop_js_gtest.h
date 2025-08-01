@@ -75,10 +75,12 @@ public:
     {
         static constexpr const char *className = "std.core.Boolean";
         ani_class booleanCls {};
-        env->FindClass(className, &booleanCls);
+        [[maybe_unused]] auto status = env->FindClass(className, &booleanCls);
+        ASSERT(status == ANI_OK);
         ani_method ctor {};
 
-        env->Class_FindMethod(booleanCls, "<ctor>", "z:", &ctor);
+        status = env->Class_FindMethod(booleanCls, "<ctor>", "z:", &ctor);
+        ASSERT(status == ANI_OK);
         ani_object obj {};
         if (env->Object_New(booleanCls, ctor, &obj, boo) != ANI_OK) {
             std::cerr << "Failed to cllocate Boolean!" << std::endl;
@@ -91,27 +93,8 @@ public:
         ani_ref undefinedRef {};
         env->GetUndefined(&undefinedRef);
 
-        const char *asmAbcPath = std::getenv("ARK_ETS_INTEROP_JS_GTEST_ASM_ABC_PATH");
-        int arrArgSize = std::strlen(asmAbcPath) ? 2 : 1;
-
-        ani_class stringCls {};
-        env->FindClass("std.core.String", &stringCls);
-
-        ani_ref undefined {};
-        env->GetUndefined(&undefined);
-
         ani_array refArray {};
-        env->Array_New(arrArgSize, undefined, &refArray);
-
-        ani_string aniStr {};
-        env->String_NewUTF8(modulePath.c_str(), modulePath.size(), &aniStr);
-        env->Array_Set(refArray, 0, aniStr);
-
-        if (asmAbcPath != nullptr) {
-            ani_string aniStr2 {};
-            env->String_NewUTF8(asmAbcPath, std::strlen(asmAbcPath), &aniStr2);
-            env->Array_Set(refArray, 1, aniStr2);
-        }
+        GetRuntimeLinkerOptions(env, refArray, modulePath);
 
         std::string clsDescriptor = "std.core.AbcRuntimeLinker";
         ani_class cls {};
@@ -120,11 +103,13 @@ public:
             std::cerr << "Failed to find class: std.core.AbcRuntimeLinker!" << std::endl;
             return false;
         }
-        env->Class_FindMethod(cls, "loadClass", "C{std.core.String}C{std.core.Boolean}:C{std.core.Class}",
-                              &loadMethodRef_);
+        const char *methodSignature = "C{std.core.String}C{std.core.Boolean}:C{std.core.Class}";
+        status = env->Class_FindMethod(cls, "loadClass", methodSignature, &loadMethodRef_);
+        ASSERT(status == ANI_OK);
 
         ani_method ctor {};
-        env->Class_FindMethod(cls, "<ctor>", "C{std.core.RuntimeLinker}C{escompat.Array}:", &ctor);
+        status = env->Class_FindMethod(cls, "<ctor>", "C{std.core.RuntimeLinker}C{escompat.Array}:", &ctor);
+        ASSERT(status == ANI_OK);
 
         ani_object obj {};
         // NOLINTNEXTLINE
@@ -139,7 +124,8 @@ public:
         }
 
         ani_class contextCls {};
-        env->FindClass("std.interop.InteropContext", &contextCls);
+        status = env->FindClass("std.interop.InteropContext", &contextCls);
+        ASSERT(status == ANI_OK);
 
         // NOLINTNEXTLINE
         status = env->Class_CallStaticMethodByName_Void(contextCls, "setDefaultInteropLinker",
@@ -156,10 +142,8 @@ public:
         ani_status status {};
         ani_ref clsRef = nullptr;
         ani_string moduleStr = nullptr;
-        if (status != ANI_OK) {
-            std::cerr << "Failed to find loadClass Method!" << std::endl;
-        }
-        env->String_NewUTF8(moduleName.c_str(), moduleName.size(), &moduleStr);
+        status = env->String_NewUTF8(moduleName.c_str(), moduleName.size(), &moduleStr);
+        ASSERT(status == ANI_OK);
         status = env->Object_CallMethod_Ref(static_cast<ani_object>(classObjRef_), loadMethodRef_, &clsRef, moduleStr,
                                             CreateBoolean(env, ANI_FALSE));
         if (status != ANI_OK || ark::ets::PandaEnv::FromAniEnv(env)->HasPendingException()) {
@@ -281,6 +265,38 @@ public:
     }
 
 private:
+    void GetRuntimeLinkerOptions(ani_env *env, ani_array &refArray, const std::string &modulePath)
+    {
+        const char *abcPathEnv = std::getenv("ARK_ETS_INTEROP_JS_GTEST_ASM_ABC_PATH");
+        std::string_view asmAbcPath(abcPathEnv ? abcPathEnv : "");
+        int arrArgSize = (!asmAbcPath.empty()) ? 2 : 1;
+
+        ani_class stringCls {};
+        [[maybe_unused]] auto status = env->FindClass("std.core.String", &stringCls);
+        ASSERT(status == ANI_OK);
+
+        ani_ref undefined {};
+        status = env->GetUndefined(&undefined);
+        ASSERT(status == ANI_OK);
+
+        status = env->Array_New(arrArgSize, undefined, &refArray);
+        ASSERT(status == ANI_OK);
+
+        ani_string aniStr {};
+        status = env->String_NewUTF8(modulePath.c_str(), modulePath.size(), &aniStr);
+        ASSERT(status == ANI_OK);
+        status = env->Array_Set(refArray, 0, aniStr);
+        ASSERT(status == ANI_OK);
+
+        if (!asmAbcPath.empty()) {
+            ani_string aniStr2 {};
+            status = env->String_NewUTF8(asmAbcPath.data(), asmAbcPath.size(), &aniStr2);
+            ASSERT(status == ANI_OK);
+            status = env->Array_Set(refArray, 1, aniStr2);
+            ASSERT(status == ANI_OK);
+        }
+    }
+
     bool LoadModule(const std::string &moduleName, const std::string &modulePath)
     {
         napi_value jsModule;

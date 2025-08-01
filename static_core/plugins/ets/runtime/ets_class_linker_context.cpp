@@ -80,6 +80,7 @@ Class *LoadFromBootContext(const uint8_t *descriptor, DecoratorErrorHandler &err
     ASSERT(ctx->IsBootContext());
     auto *klass = Runtime::GetCurrent()->GetClassLinker()->GetClass(descriptor, true, ctx, &errorHandler);
     if (errorHandler.HasError()) {
+        ASSERT(klass == nullptr);
         if (errorHandler.GetErrorCode() == ClassLinker::Error::CLASS_NOT_FOUND) {
             // Clear the error in order to delegate resolution.
             errorHandler.ClearError();
@@ -91,12 +92,6 @@ Class *LoadFromBootContext(const uint8_t *descriptor, DecoratorErrorHandler &err
     return klass;
 }
 
-EtsEscompatArray *GetSharedLibraryRuntimeLinkers(EtsClassLinkerContext *ctx)
-{
-    return EtsEscompatArray::FromEtsObject(
-        EtsAbcRuntimeLinker::FromEtsObject(ctx->GetRuntimeLinker())->GetSharedLibraryRuntimeLinkers());
-}
-
 bool TryLoadingClassInChain(const uint8_t *descriptor, DecoratorErrorHandler &errorHandler, ClassLinkerContext *ctx,
                             Class **klass)
 {
@@ -104,6 +99,8 @@ bool TryLoadingClassInChain(const uint8_t *descriptor, DecoratorErrorHandler &er
     ASSERT(klass != nullptr);
     ASSERT(*klass == nullptr);
 
+    // This lambda returns true if the class was found and either loaded correctly or failed to be loaded
+    const auto isClassFound = [&errorHandler](const Class *cls) { return cls != nullptr || errorHandler.HasError(); };
     if (ctx->IsBootContext()) {
         // No need to load by managed code, even if error occurred during loading.
         *klass = LoadFromBootContext(descriptor, errorHandler, ctx);
@@ -129,17 +126,21 @@ bool TryLoadingClassInChain(const uint8_t *descriptor, DecoratorErrorHandler &er
         ASSERT(*klass == nullptr);
         return false;
     }
-    if (*klass != nullptr) {
-        // Load success by parent linker, return true
+    if (isClassFound(*klass)) {
+        // No need to load by managed code, even if error occurred during loading.
         return true;
     }
-    for (size_t i = 0, end = GetSharedLibraryRuntimeLinkers(etsLinkerContext)->GetActualLength(); i < end; ++i) {
-        EtsObject *sharedLibraryRuntimeLinkerObj = nullptr;
-        if (!GetSharedLibraryRuntimeLinkers(etsLinkerContext)->GetRef(i, &sharedLibraryRuntimeLinkerObj)) {
-            continue;
-        }
-        EtsAbcRuntimeLinker *sharedLibraryRuntimeLinker =
-            EtsAbcRuntimeLinker::FromEtsObject(sharedLibraryRuntimeLinkerObj);
+    // After class is not found in parent linkers, try to search it in shared libraries linkers.
+    // This code repeats logic which is written in managed implementation of `AbcRuntimeLinker::findAndLoadClass`.
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+    auto *sharedLibraryLinkers = abcRuntimeLinker->GetSharedLibraryRuntimeLinkers();
+    for (size_t i = 0, end = sharedLibraryLinkers->GetLength(); i < end; ++i) {
+        auto *sharedLibraryRuntimeLinker = EtsAbcRuntimeLinker::FromEtsObject(sharedLibraryLinkers->Get(i));
+        // Formally need to check here that shared linker is not `undefined`,
+        // because `sharedLibraryLoaders` field is declared as `FixedArray<AbcRuntimeLinker | undefined>`.
+        // In fact, `sharedLibraryLoaders` is immutable, and constructor of `AbcRuntimeLinker`
+        // verifies that all shared linkers are not undefined
+        ASSERT(sharedLibraryRuntimeLinker != nullptr);
         if (sharedLibraryRuntimeLinker->GetClass() != PlatformTypes()->coreAbcRuntimeLinker &&
             sharedLibraryRuntimeLinker->GetClass() != PlatformTypes()->coreMemoryRuntimeLinker) {
             // Must call managed implementation.
@@ -150,14 +151,14 @@ bool TryLoadingClassInChain(const uint8_t *descriptor, DecoratorErrorHandler &er
             // Chain resolution failed, must call managed implementation.
             return false;
         }
-        if (*klass != nullptr) {
-            // Load success by shared linker, return true
+        if (isClassFound(*klass)) {
+            // No need to load by managed code, even if error occurred during loading.
             return true;
         }
     }
 
     // No need to load by managed code, even if error occurred during loading.
-    if (*klass == nullptr && !errorHandler.HasError()) {
+    if (!isClassFound(*klass)) {
         *klass = etsLinkerContext->FindAndLoadClass(descriptor, &errorHandler);
     }
     return true;

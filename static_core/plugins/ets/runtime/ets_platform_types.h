@@ -99,8 +99,10 @@ public:
     /* Containers */
 
     EtsClass *escompatArray {};
-    EtsMethod *escompatArrayPush {};
     EtsMethod *escompatArrayPop {};
+    EtsMethod *escompatArrayGetLength {};
+    EtsMethod *escompatArrayGet {};
+    EtsMethod *escompatArraySet {};
     EtsClass *coreArrayBuffer {};
     EtsClass *escompatInt8Array {};
     EtsClass *escompatUint8Array {};

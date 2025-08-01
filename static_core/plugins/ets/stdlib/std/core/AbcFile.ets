@@ -20,10 +20,10 @@ package std.core;
  * Intended to be used by AbcRuntimeLinker and other platform extensions.
  */
 final class AbcFile {
-    private fileHandlePtr: long;
+    private fileHandlePtr: long
 
     private constructor() {
-        throw new Error("Constructor called");
+        throw new Error("Constructor called")
     }
 
     /**
@@ -37,7 +37,7 @@ final class AbcFile {
      *
      * @throws errors happened on loading ABC file.
      */
-    public static native loadAbcFile(runtimeLinker: RuntimeLinker, path: string): AbcFile;
+    public static native loadAbcFile(runtimeLinker: RuntimeLinker, path: string): AbcFile
 
     /**
      * Loads ABC file from memory.
@@ -50,7 +50,7 @@ final class AbcFile {
      *
      * @throws errors happened on loading ABC file.
      */
-    public static native loadFromMemory(runtimeLinker: RuntimeLinker, rawFile: FixedArray<byte>): AbcFile;
+    public static native loadFromMemory(runtimeLinker: RuntimeLinker, rawFile: FixedArray<byte>): AbcFile
 
     /**
      * Loads class from ABC file.
@@ -63,9 +63,9 @@ final class AbcFile {
      *
      * @throws errors happened during class initialization.
      */
-    public native loadClass(runtimeLinker: RuntimeLinker, clsName: string, init: boolean): Class | undefined;
+    public native loadClass(runtimeLinker: RuntimeLinker, clsName: string, init: boolean): Class | undefined
 
-    public native getFilename(): string;
+    public native getFilename(): string
 }
 
 export class AbcFileNotFoundError extends LinkerError {

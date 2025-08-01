@@ -603,7 +603,7 @@ static ani_status AllocObject(ScopedManagedCodeFix &s, ani_class cls, ani_object
     ANI_CHECK_RETURN_IF_EQ(klass->IsStringClass(), true, ANI_INVALID_TYPE);
     ANI_CHECK_RETURN_IF_EQ(klass->IsArrayClass(), true, ANI_INVALID_TYPE);
 
-    EtsObject *obj = EtsObject::Create(klass);
+    EtsObject *obj = EtsObject::Create(s.GetCoroutine(), klass);
     ANI_CHECK_RETURN_IF_EQ(obj, nullptr, ANI_OUT_OF_MEMORY);
     return s.AddLocalRef(obj, reinterpret_cast<ani_ref *>(result));
 }
@@ -849,33 +849,7 @@ static ani_status NewPrimitiveTypeArray(ani_env *env, ani_size length, AniFixedA
     ScopedManagedCodeFix s(env);
     auto *array = InternalType::Create(length);
     ANI_CHECK_RETURN_IF_EQ(array, nullptr, ANI_OUT_OF_MEMORY);
-    return s.AddLocalRef(reinterpret_cast<EtsObject *>(array), reinterpret_cast<ani_ref *>(result));
-}
-
-template <typename T>
-static ani_status GetArrayRegion(EtsCoroutine *coro, EtsEscompatArray *objectArray, size_t start, size_t offset,
-                                 T *buff)
-{
-    ASSERT(buff != nullptr);
-    ANI_CHECK_RETURN_IF_GT(offset, std::numeric_limits<size_t>::max() - start, ANI_OUT_OF_RANGE);
-    size_t end = start + offset;
-    ANI_CHECK_RETURN_IF_GT(end, objectArray->GetActualLength(), ANI_OUT_OF_RANGE);
-
-    Class *boxPrimitiveClass = EtsBoxPrimitive<T>::GetBoxClass(coro);
-    for (size_t posArr = start, posBuff = 0; posArr < end; ++posArr, ++posBuff) {
-        EtsBoxPrimitive<T> *boxedVal = nullptr;
-        [[maybe_unused]] auto getRes = objectArray->GetRef(posArr, reinterpret_cast<EtsObject **>(&boxedVal));
-        ASSERT(getRes);
-        ANI_CHECK_RETURN_IF_EQ(boxedVal, nullptr, ANI_ERROR);
-        if (boxPrimitiveClass != boxedVal->GetClass()->GetRuntimeClass()) {
-            return ANI_INVALID_TYPE;
-        }
-
-        auto primitiveValue = boxedVal->GetValue();
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        buff[posBuff] = primitiveValue;
-    }
-    return ANI_OK;
+    return s.AddLocalRef(array->AsObject(), reinterpret_cast<ani_ref *>(result));
 }
 
 template <typename T>
@@ -930,7 +904,9 @@ NO_UB_SANITIZE static ani_status Array_GetLength(ani_env *env, ani_array array, 
     EtsObject *objArray = s.ToInternalType(static_cast<ani_object>(array));
     if (!objArray->IsArrayClass()) {
         auto escompatArray = EtsEscompatArray::FromEtsObject(objArray);
-        *result = escompatArray->GetActualLength();
+        EtsInt actualLength = 0;
+        ANI_CHECK_RETURN_IF_EQ(escompatArray->GetLength(s.GetCoroutine(), &actualLength), false, ANI_PENDING_ERROR);
+        *result = static_cast<ani_size>(actualLength);
     } else {
         auto etsArray = reinterpret_cast<EtsArray *>(objArray);
         *result = etsArray->GetLength();
@@ -951,12 +927,13 @@ NO_UB_SANITIZE static ani_status Array_New(ani_env *env, ani_size length, ani_re
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    auto *internalArray = EtsEscompatArray::Create(length);
+    auto *coroutine = s.GetCoroutine();
+    auto *internalArray = EtsEscompatArray::Create(coroutine, length);
     ANI_CHECK_RETURN_IF_EQ(internalArray, nullptr, ANI_OUT_OF_MEMORY);
     if (length != 0 && !IsUndefined(initialElement)) {
         EtsObject *obj = s.ToInternalType(initialElement);
         for (ani_size i = 0; i < length; ++i) {
-            internalArray->SetRef(i, obj);
+            internalArray->EscompatArraySetUnsafe(i, obj);
         }
     }
     return s.AddLocalRef(internalArray->AsObject(), reinterpret_cast<ani_ref *>(result));
@@ -971,15 +948,10 @@ NO_UB_SANITIZE static ani_status Array_Set(ani_env *env, ani_array array, ani_si
     CHECK_PTR_ARG(ref);
 
     ScopedManagedCodeFix s(env);
-    EtsObject *objArray = s.ToInternalType(array);
+    EtsEscompatArray *escompatArray = s.ToInternalType(array);
     EtsObject *obj = s.ToInternalType(ref);
-    EtsEscompatArray *escompatArray = EtsEscompatArray::FromEtsObject(objArray);
-    const auto length = escompatArray->GetActualLength();
-    ANI_CHECK_RETURN_IF_GE(index, length, ANI_OUT_OF_RANGE);
-    if (!escompatArray->SetRef(index, obj)) {
-        return ANI_ERROR;
-    }
-    return ANI_OK;
+    bool succeeded = escompatArray->SetRef(s.GetCoroutine(), index, obj);
+    return succeeded ? ANI_OK : ANI_PENDING_ERROR;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -991,15 +963,10 @@ NO_UB_SANITIZE static ani_status Array_Get(ani_env *env, ani_array array, ani_si
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    EtsObject *obj = nullptr;
-    EtsObject *objArray = s.ToInternalType(array);
-    EtsEscompatArray *escompatArray = EtsEscompatArray::FromEtsObject(objArray);
-    const auto length = escompatArray->GetActualLength();
-    ANI_CHECK_RETURN_IF_GE(index, length, ANI_OUT_OF_RANGE);
-    if (!escompatArray->GetRef(index, &obj)) {
-        return ANI_ERROR;
-    }
-    return s.AddLocalRef(obj, result);
+    EtsEscompatArray *escompatArray = s.ToInternalType(array);
+    auto optObject = escompatArray->GetRef(s.GetCoroutine(), index);
+    ANI_CHECK_RETURN_IF_EQ(optObject.has_value(), false, ANI_PENDING_ERROR);
+    return s.AddLocalRef(*optObject, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1010,12 +977,11 @@ NO_UB_SANITIZE static ani_status Array_Push(ani_env *env, ani_array array, ani_r
     CHECK_PTR_ARG(array);
     CHECK_PTR_ARG(ref);
 
-    ScopedManagedCodeFix s(env);
-    EtsObject *obj = s.ToInternalType(ref);
-    EtsObject *objArray = s.ToInternalType(array);
-    EtsEscompatArray *escompatArray = EtsEscompatArray::FromEtsObject(objArray);
-    escompatArray->Push(obj);
-    return ANI_OK;
+    const auto *cache = PandaEnv::FromAniEnv(env)->GetEtsVM()->GetStdlibCache();
+    ani_value arg;
+    arg.r = ref;
+    ani_int ignored = 0;
+    return env->Object_CallMethod_Int_A(array, cache->escompat_Array_pushOne, &ignored, &arg);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1027,10 +993,11 @@ NO_UB_SANITIZE static ani_status Array_Pop(ani_env *env, ani_array array, ani_re
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    EtsObject *obj = nullptr;
-    EtsObject *objArray = s.ToInternalType(array);
-    EtsEscompatArray *escompatArray = EtsEscompatArray::FromEtsObject(objArray);
-    obj = escompatArray->Pop();
+    EtsEscompatArray *escompatArray = s.ToInternalType(array);
+    EtsObject *obj = escompatArray->Pop(s.GetCoroutine());
+    if (s.HasPendingException()) {
+        return ANI_PENDING_ERROR;
+    }
     return s.AddLocalRef(obj, result);
 }
 

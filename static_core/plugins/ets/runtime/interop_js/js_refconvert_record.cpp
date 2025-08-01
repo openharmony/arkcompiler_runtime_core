@@ -76,7 +76,7 @@ napi_value JSRefConvertRecord::RecordGetHandler(napi_env env, napi_callback_info
     auto *etsThis = sharedRef->GetEtsObject();
     ASSERT(etsThis != nullptr);
 
-    Method *getMethod = PlatformTypes()->coreRecordGetter->GetPandaMethod();
+    EtsMethod *getMethod = etsThis->GetClass()->ResolveVirtualMethod(PlatformTypes(coro)->coreRecordGetter);
 
     if (argc < 2U) {
         INTEROP_LOG(ERROR) << "Invalid number of arguments for $_get";
@@ -84,7 +84,7 @@ napi_value JSRefConvertRecord::RecordGetHandler(napi_env env, napi_callback_info
     }
 
     Span sp(&jsArgs[1], 1);
-    return CallETSInstance(coro, ctx, getMethod, sp, etsThis);
+    return CallETSInstance(coro, ctx, getMethod->GetPandaMethod(), sp, etsThis);
 }
 
 napi_value JSRefConvertRecord::RecordSetHandler(napi_env env, napi_callback_info cbinfo)
@@ -107,7 +107,7 @@ napi_value JSRefConvertRecord::RecordSetHandler(napi_env env, napi_callback_info
     auto *etsThis = sharedRef->GetEtsObject();
     ASSERT(etsThis != nullptr);
 
-    Method *setMethod = PlatformTypes()->coreRecordSetter->GetPandaMethod();
+    EtsMethod *setMethod = etsThis->GetClass()->ResolveVirtualMethod(PlatformTypes(coro)->coreRecordSetter);
 
     if (argc < 3U) {
         INTEROP_LOG(ERROR) << "Invalid number of arguments for $_set";
@@ -116,7 +116,7 @@ napi_value JSRefConvertRecord::RecordSetHandler(napi_env env, napi_callback_info
 
     Span sp(&jsArgs[1], 2U);
 
-    CallETSInstance(coro, ctx, setMethod, sp, etsThis);
+    CallETSInstance(coro, ctx, setMethod->GetPandaMethod(), sp, etsThis);
 
     napi_value trueValue = GetBooleanValue(env, true);
     return trueValue;

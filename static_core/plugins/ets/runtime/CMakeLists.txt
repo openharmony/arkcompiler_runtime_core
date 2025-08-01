@@ -98,6 +98,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/helpers/array_buffer_helper.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/ets_intrinsics_helpers.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/reflection_helpers.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/helpers/ets_string_helpers.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/ets_to_string_cache.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/json_helper.cpp
     ${ETS_EXT_SOURCES}/finalreg/finalization_registry_manager.cpp
@@ -108,6 +109,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_coroutine.cpp
     ${ETS_EXT_SOURCES}/ets_entrypoints.cpp
     ${ETS_EXT_SOURCES}/types/ets_class.cpp
+    ${ETS_EXT_SOURCES}/types/ets_escompat_array.cpp
     ${ETS_EXT_SOURCES}/types/ets_field.cpp
     ${ETS_EXT_SOURCES}/types/ets_method.cpp
     ${ETS_EXT_SOURCES}/types/ets_promise.cpp
