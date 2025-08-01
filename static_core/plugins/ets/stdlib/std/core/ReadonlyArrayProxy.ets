@@ -150,9 +150,9 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
     	return this.handler.get(this.target, index.toInt())
     }
 
-    get length(): number {
+    get length(): int {
     	const length = this.handler.get(this.target, "length")
-    	if (length instanceof Number) {
+    	if (length instanceof Int) {
     		return length.unboxed()
     	}
 

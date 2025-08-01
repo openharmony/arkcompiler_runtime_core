@@ -472,7 +472,7 @@ cases:
 
       call: |-
         let classes: IMy[] = [new MyClass, new MyClass]
-        arktest.assertTrue(getArrayLength(...classes) instanceof number);
+        arktest.assertTrue(getArrayLength(...classes) instanceof int);
 
     - decl: |-
         const a: 'string literal' = 'string literal'

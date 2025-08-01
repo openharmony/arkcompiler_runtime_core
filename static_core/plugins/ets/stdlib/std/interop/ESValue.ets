@@ -182,7 +182,15 @@ export final class ESValue {
         if (!this.isNumber()) {
             throw new TypeError("Number expected");
         }
-        return this.ev as number;
+
+        const thisVal = this.ev
+        if (thisVal instanceof Number) {
+            return thisVal
+        } else if (thisVal instanceof Int) {
+            return thisVal.toDouble()
+        }
+
+        throw new TypeError("Invalid number: " + Type.of(thisVal))
     }
 
     public toBigInt(): bigint {
