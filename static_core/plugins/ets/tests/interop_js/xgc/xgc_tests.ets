@@ -156,7 +156,7 @@ function triggerFullGC(): void {
     try {
         GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
     } catch(e) {
-        arktest.assertTrue(false, "Unexpected exception during full GC");
+        arktest.assertTrue(false, "Unexpected error during full GC");
     }
 }
 
