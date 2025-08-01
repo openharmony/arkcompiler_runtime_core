@@ -13,11 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export declare function foo<T extends Any>(Class: T): void;
-export declare let v1: Any;
-export declare let v2: Any;
+export default declare abstract class MyClass {
+    A: number;
+    constructor(a: number);
+}
 export declare class UserIns {
     name: string;
     age: number;
     constructor(name: string, age: number);
+}
+export declare class user extends UserIns {
+    sex: string;
+    constructor(name: string, age: number, sex: string);
+}
+export declare class cla implements X {
+    name: string;
+    constructor(name: string);
+    print(): void;
+}
+export declare interface X {
+    name: string;
+    print(): void;
 }

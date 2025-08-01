@@ -147,6 +147,7 @@ export enum FaultID {
   FunctionType,
   NoVoidUnionType,
   ConstLiteralToType,
+  AddDeclareToClass,
   // this should always be last enum
   LAST_ID
 }

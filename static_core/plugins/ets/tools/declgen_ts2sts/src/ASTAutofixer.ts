@@ -132,7 +132,7 @@ export class Autofixer {
       ts.SyntaxKind.ClassDeclaration, 
       [
         this[FaultID.NoPrivateMember].bind(this), 
-        this[FaultID.DefaultExport].bind(this),
+        this[FaultID.AddDeclareToClass].bind(this),
         this[FaultID.NoETSKeyword].bind(this),
         this[FaultID.RemoveLimitDecorator].bind(this),
         this[FaultID.NoOptionalMemberFunction].bind(this)
@@ -969,6 +969,52 @@ export class Autofixer {
     }
   
     return node;
+  }
+
+  /**
+   * Rule: `arkts-add-declare-to-classes`
+   */
+  private [FaultID.AddDeclareToClass](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (!ts.isClassDeclaration(node)) {
+      return node;
+    }
+
+    const modifiers = node.modifiers;
+    if (!modifiers) {
+      return node;
+    }
+
+    const isExported = modifiers.some(m => m.kind === ts.SyntaxKind.ExportKeyword);
+    if (!isExported) {
+      return node;
+    }
+
+    const hasDeclare = modifiers.some(m => m.kind === ts.SyntaxKind.DeclareKeyword);
+    if (hasDeclare) {
+      return node;
+    }
+
+    const isDefaultExport = modifiers.some(m => m.kind === ts.SyntaxKind.DefaultKeyword);
+    
+    if (isDefaultExport) {
+      // For default export class, add declare after 'export default'
+      return exportDefaultAssignment(node, this.context);
+    } else {
+      //For regular export class, add declare after 'export'
+      const newModifiers = [
+        ...modifiers.filter(m => ts.isModifier(m)),
+        this.context.factory.createModifier(ts.SyntaxKind.DeclareKeyword)
+      ] as ts.Modifier[];
+
+      return this.context.factory.updateClassDeclaration(
+        node,
+        newModifiers,
+        node.name,
+        node.typeParameters,
+        node.heritageClauses,
+        node.members
+      );
+    }
   }
 
   /**
@@ -2298,9 +2344,18 @@ function exportDefaultAssignment(
   }
 
   if (modifiers.some(modifier => modifier.kind === ts.SyntaxKind.DefaultKeyword)) {
-    const newModifiers = modifiers.filter(modifier =>
-      ts.isModifier(modifier)
-    ).concat(context.factory.createModifier(ts.SyntaxKind.DeclareKeyword));
+    const newModifiers = [...modifiers];
+    
+    if (!modifiers.some(modifier => modifier.kind === ts.SyntaxKind.DeclareKeyword)) {
+      const declareModifier = context.factory.createModifier(ts.SyntaxKind.DeclareKeyword);
+      
+      const defaultIndex = modifiers.findIndex(mod => mod.kind === ts.SyntaxKind.DefaultKeyword);
+      if (defaultIndex !== -1) {
+        newModifiers.splice(defaultIndex + 1, 0, declareModifier);
+      } else {
+        newModifiers.push(declareModifier);
+      }
+    }
 
     const safeModifiers = newModifiers as ts.Modifier[];
 
