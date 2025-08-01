@@ -23,6 +23,20 @@ config("arkassembler_public_config") {
   defines = [ "PANDA_WITH_ECMASCRIPT" ]
 }
 
+if (!ark_standalone_build && !is_arkui_x) {
+  ohos_shared_headers("arkassembler_public_headers") {
+    include_dirs = [
+      "$ark_root/assembler",
+      "$target_gen_dir",
+      "$target_gen_dir/include",
+      "$root_gen_dir/libpandabase",
+      "$ark_root/plugins/ecmascript/assembler",
+    ]
+    part_name = "runtime_core"
+    subsystem_name = "arkcompiler"
+  }
+}
+
 libarkassembler_sources = [
   "$target_gen_dir/function_collect_string.cpp",
   "$target_gen_dir/ins_to_string.cpp",

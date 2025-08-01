@@ -27,6 +27,19 @@ config("arkfile_public_config") {
   }
 }
 
+if (!ark_standalone_build && !is_arkui_x) {
+  ohos_shared_headers("arkfile_public_headers") {
+    include_dirs = [
+      "$ark_root/libpandafile",
+      "$ark_root/libziparchive",
+      "$target_gen_dir",
+      "$target_gen_dir/include",
+    ]
+    part_name = "runtime_core"
+    subsystem_name = "arkcompiler"
+  }
+}
+
 config("arkfile_runtime_public_config") {
   include_dirs = [
     "$ark_root/libpandafile",

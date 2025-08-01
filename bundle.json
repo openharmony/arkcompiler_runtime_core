@@ -278,6 +278,15 @@
                 },
                 {
                     "name": "//arkcompiler/runtime_core/static_core/verification/gen:verification_headers"
+                },
+                {
+                    "name": "//arkcompiler/runtime_core/assembler:arkassembler_public_headers"
+                },
+                {
+                    "name": "//arkcompiler/runtime_core/libpandabase:arkbase_public_headers"
+                },
+                {
+                    "name": "//arkcompiler/runtime_core/libpandafile:arkfile_public_headers"
                 }
             ],
             "test": [

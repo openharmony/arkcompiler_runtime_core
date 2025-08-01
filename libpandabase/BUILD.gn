@@ -31,6 +31,19 @@ config("arkbase_public_config") {
   }
 }
 
+if (!ark_standalone_build && !is_arkui_x) {
+  ohos_shared_headers("arkbase_public_headers") {
+    include_dirs = [
+      "$ark_root/libpandabase",
+      "$target_gen_dir/include",
+      "$target_gen_dir",
+    ]
+    include_dirs += platform_include_dirs
+    part_name = "runtime_core"
+    subsystem_name = "arkcompiler"
+  }
+}  
+
 config("arkbase_fuzz_config") {
   configs = [ "$build_root/config/compiler:exceptions" ]
   defines = [ "SUPPORT_KNOWN_EXCEPTION" ]
