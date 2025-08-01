@@ -23,9 +23,9 @@ function main(): int {
 
     suite.addTest("Verify that a valid RFC 4122 version 4 UUID is correctly parsed into a 16-byte array.",
         testParseValidUUID)
-    suite.addTest("Verify that an invalid UUID string with missing characters throws the correct exception.",
+    suite.addTest("Verify that an invalid UUID string with missing characters throws the correct error.",
         testParseInvalidUUIDMissingChars)
-    suite.addTest("Verify that an invalid UUID string with non-hexadecimal characters throws the correct exception.",
+    suite.addTest("Verify that an invalid UUID string with non-hexadecimal characters throws the correct error.",
         testParseInvalidUUIDNonHexChars)
 
     return suite.run()

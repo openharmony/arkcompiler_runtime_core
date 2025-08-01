@@ -33,7 +33,7 @@ function runGC(): void {
         let fullGcId = GC.startGC(GC.Cause.YOUNG);
         GC.waitForFinishGC(fullGcId);
     } catch (e) {
-        throw new Error("Unexpected exception during GC");
+        throw new Error("Unexpected error during GC");
     }
 }
 

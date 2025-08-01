@@ -22,7 +22,7 @@ class PinningTestsuite extends arktest.ArkTestsuite {
         try {
             GC.waitForFinishGC(GC.startGC(GC.Cause.FULL)); // Clear heap
         } catch(e) {
-            arktest.assertTrue(!"Unexpected exception during FULL GC");
+            arktest.assertTrue(!"Unexpected error during FULL GC");
         }
     }
 }

@@ -37,11 +37,11 @@ function launchStackOverflow(): boolean {
 
     try {
         launch<Object | null, () => Object | null>(coroStackOverflow).Await();
-        L.log('No exceptions thrown by coroStackOverflow() but should be!')
+        L.log('No errors thrown by coroStackOverflow() but should be!')
         overflow = false;
     } catch (e) {
         if (!(e instanceof StackOverflowError)) {
-            L.log('Expected StackOverflowError but another exception has been thrown!');
+            L.log('Expected StackOverflowError but another error has been thrown!');
             overflow = false;
         } else {
             overflow = true;
@@ -56,11 +56,11 @@ function launchError(): boolean {
 
     try {
         launch<Object, () => Object>(coroError).Await();
-        L.log('No exceptions thrown by coroError() but should be!')
+        L.log('No errors thrown by coroError() but should be!')
         hasError = false;
     } catch (e) {
         if (!(e instanceof Error)) {
-            L.log('Expected Error but another exception has been thrown!');
+            L.log('Expected Error but another error has been thrown!');
             hasError = false;
         } else {
             hasError = true;
@@ -81,7 +81,7 @@ function testLaunchError() {
 }
 
 function main(): int {
-    let testSuite = new arktest.ArkTestsuite('coroutines.launch_exception');
+    let testSuite = new arktest.ArkTestsuite('coroutines.launch_error');
     testSuite.addTest('testLaunchStackOverflow', testLaunchStackOverflow);
     testSuite.addTest('testLaunchError', testLaunchError);
     let res = testSuite.run();
