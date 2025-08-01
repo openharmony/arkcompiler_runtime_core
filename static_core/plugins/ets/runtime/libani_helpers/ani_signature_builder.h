@@ -110,6 +110,17 @@ public:
     static std::string BuildConstructorName();
     static std::string BuildSetterName(std::string_view name);
     static std::string BuildGetterName(std::string_view name);
+    static std::string BuildPropertyName(std::string_view name);
+    static std::string BuildPartialName(std::string_view name);
+    static std::string BuildAsyncName(std::string_view name);
+    static std::string GetSetterNamePrefix();
+    static std::string GetGetterNamePrefix();
+    static std::string GetPropertyNamePrefix();
+    static std::string GetPartialNamePrefix();
+    static std::string GetAsyncNamePrefix();
+    static std::string GetUnionPropertyNamePrefix();
+    static std::string GetLambdaPrefix();
+    static std::string GetLambdaInvokePrefix();
 };
 
 class SignatureBuilder {

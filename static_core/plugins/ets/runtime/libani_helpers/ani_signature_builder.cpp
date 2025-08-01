@@ -358,6 +358,61 @@ std::string Builder::BuildGetterName(std::string_view name)
     return "<get>" + std::string(name);
 }
 
+std::string Builder::BuildPropertyName(std::string_view name)
+{
+    return "<property>" + std::string(name);
+}
+
+std::string Builder::Builder::BuildPartialName(std::string_view name)
+{
+    return std::string(name) + "$partial";
+}
+
+std::string Builder::BuildAsyncName(std::string_view name)
+{
+    return "%%async-" + std::string(name);
+}
+
+std::string Builder::GetSetterNamePrefix()
+{
+    return "<set>";
+}
+
+std::string Builder::GetGetterNamePrefix()
+{
+    return "<get>";
+}
+
+std::string Builder::GetPropertyNamePrefix()
+{
+    return "<property>";
+}
+
+std::string Builder::GetPartialNamePrefix()
+{
+    return "$partial";
+}
+
+std::string Builder::GetAsyncNamePrefix()
+{
+    return "%%async-";
+}
+
+std::string Builder::GetUnionPropertyNamePrefix()
+{
+    return "%%union_prop-";
+}
+
+std::string Builder::GetLambdaPrefix()
+{
+    return "%%lambda-";
+}
+
+std::string Builder::GetLambdaInvokePrefix()
+{
+    return "lambda_invoke-";
+}
+
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 class SignatureBuilder::Impl {
 public:
