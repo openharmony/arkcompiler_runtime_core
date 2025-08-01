@@ -2498,7 +2498,7 @@ NO_UB_SANITIZE static ets_int UnregisterNatives(EtsEnv *env, ets_class cls)
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
     EtsClass *klass = s.ToInternalType(cls);
-    klass->EnumerateMethods([](EtsMethod *method) {
+    klass->EnumerateDirectMethods([](EtsMethod *method) {
         if (method->IsNative()) {
             method->UnregisterNativeDeprecated();
         }

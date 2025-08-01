@@ -867,7 +867,7 @@ TEST_F(EtsClassTest, EnumerateMethods)
     methods.push_back(klass->GetInstanceMethod("foo4", nullptr));
     methods.push_back(klass->GetInstanceMethod("foo5", nullptr));
 
-    klass->EnumerateMethods([&enumerateMethods, &methodsVectorSize](EtsMethod *method) {
+    klass->EnumerateDirectMethods([&enumerateMethods, &methodsVectorSize](EtsMethod *method) {
         enumerateMethods.push_back(method);
         return enumerateMethods.size() == methodsVectorSize;
     });
