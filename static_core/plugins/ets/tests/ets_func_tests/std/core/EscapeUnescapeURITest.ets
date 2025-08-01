@@ -94,7 +94,7 @@ function testInverse1(s1: string): int {
     try {
         a = decodeURI(encodeURI(s1))
     } catch (e) {
-        console.println('failed with exception for "' + s1 + '"')
+        console.println('failed with error for "' + s1 + '"')
         console.println('encodeURI === ' + encodeURI(s1))
         a = decodeURI(encodeURI(s1))
         return 1
@@ -111,7 +111,7 @@ function testInverse2(s1: string): int {
     try {
         a = decodeURIComponent(encodeURIComponent(s1))
     } catch (e) {
-        console.println('failed with exception for "' + s1 + '"')
+        console.println('failed with error for "' + s1 + '"')
         console.println('encodeURIComponent === ' + encodeURIComponent(s1))
         a = decodeURIComponent(encodeURIComponent(s1))
         return 1

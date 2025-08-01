@@ -84,22 +84,26 @@ function stringGetTest6(): void {
 
 function stringGetTest7() {
     let str: string = 'abcd'
-    let exceptionFlag = 0;
+    let errorFlag = 0;
     try {
         console.log(str[-1]);
-    } catch (e: StringIndexOutOfBoundsError) {
-        exceptionFlag = 1;
     } catch (e) {
-        exceptionFlag = 2;
+        if (e instanceof StringIndexOutOfBoundsError) {
+            errorFlag = 1;
+        } else {
+            errorFlag = 2;
+        }
     }
-    arktest.assertEQ(1, exceptionFlag);
+    arktest.assertEQ(1, errorFlag);
 
     try {
         console.log(str[4]);
-    } catch (e: StringIndexOutOfBoundsError) {
-        exceptionFlag = 1;
     } catch (e) {
-        exceptionFlag = 2;
+        if (e instanceof StringIndexOutOfBoundsError) {
+            errorFlag = 1;
+        } else {
+            errorFlag = 2;
+        }
     }
-    arktest.assertEQ(1, exceptionFlag);
+    arktest.assertEQ(1, errorFlag);
 }
