@@ -14,9 +14,9 @@
  */
 
 /*---
-desc: Define new Exception.
-assert: Exception is the base class of all the exceptions. To define a new exception use Exception or any derived class as the base of your class.
+desc: Define new Error.
+assert: Error is the base class of all the errors. To define a new error use Error or any derived class as the base of your class.
 tags: [compile-only]
 ---*/
 
-class TestException extends Exception {}
+class TestError extends Error {}

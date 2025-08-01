@@ -406,14 +406,14 @@ function reduceFuncArg4ReadonlyArray(): int {
     //     return new Number(a.valueOf() + b.valueOf() + arr[index].valueOf());
     // }
     // let arrEmpty = new Array<Number>;
-    // let hasException: boolean = false;
+    // let hasError: boolean = false;
     // try {
     //     let res = arrEmpty.reduce(fn);
     //     return fail;
     // } catch(e) {
-    //     hasException = true;
+    //     hasError = true;
     // }
-    // if (hasException == false) { return fail; }
+    // if (hasError == false) { return fail; }
     // let arr = new Array<Number>;
     // for(let i: int = 0; i < d.length; ++i) {
     //     arr.push(d[i]);
@@ -458,14 +458,14 @@ function reduceRightFuncArg4ReadonlyArray(): int {
     //     return new Number(a.valueOf() + b.valueOf() + arr[index].valueOf());
     // }
     // let arrEmpty = new Array<Number>;
-    // let hasException: boolean = false;
+    // let hasError: boolean = false;
     // try {
     //     let res = arrEmpty.reduceRight(fn);
     //     return fail;
     // } catch(e) {
-    //     hasException = true;
+    //     hasError = true;
     // }
-    // if (hasException == false) { return fail; }
+    // if (hasError == false) { return fail; }
     // let arr = new Array<Number>;
     // for(let i: int = 0; i < d.length; ++i) {
     //     arr.push(d[i]);

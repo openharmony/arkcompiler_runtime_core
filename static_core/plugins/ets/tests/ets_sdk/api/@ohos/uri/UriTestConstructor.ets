@@ -343,31 +343,31 @@ function ConstructorTest025() {
 
 function ConstructorTest026() {
   let uriText = "";
-  let errText = "BusinessError: Syntax Error. Invalid Uri string: The Uri is empty.";
+  let errText = "Syntax Error. Invalid Uri string: The Uri is empty.";
   testConstructorThrow(uriText, errText);
 }
 
 function ConstructorTest027() {
   let uriText = "#asd;";
-  let errText = "BusinessError: Syntax Error. Invalid Uri string: The #It can't be the first.";
+  let errText = "Syntax Error. Invalid Uri string: The #It can't be the first.";
   testConstructorThrow(uriText, errText);
 }
 
 function ConstructorTest028() {
   let uriText = "?sa^d:s#asd;";
-  let errText = "BusinessError: Syntax Error. Invalid Uri string: The Query does not conform to the rule.";
+  let errText = "Syntax Error. Invalid Uri string: The Query does not conform to the rule.";
   testConstructorThrow(uriText, errText);
 }
 
 function ConstructorTest029() {
   let uriText = "?sad:s#a^sd;";
-  let errText = "BusinessError: Syntax Error. Invalid Uri string: The Fragment does not conform to the rule.";
+  let errText = "Syntax Error. Invalid Uri string: The Fragment does not conform to the rule.";
   testConstructorThrow(uriText, errText);
 }
 
 function ConstructorTest030() {
   let uriText = "4http:/username:password@www.test.com:99/path/path?query#fagment";
-  let errText = "BusinessError: Syntax Error. Invalid Uri string: The Scheme the first character must be a letter.";
+  let errText = "Syntax Error. Invalid Uri string: The Scheme the first character must be a letter.";
   testConstructorThrow(uriText, errText);
 }
 
@@ -378,16 +378,13 @@ function ConstructorTest031() {
 
 function ConstructorTest032() {
   let uriText = "/usern]ame/path/path?query#fagment";
-  let errText = "BusinessError: Syntax Error. Invalid Uri string: The SpecialPath does not conform to the rule.";
+  let errText = "Syntax Error. Invalid Uri string: The SpecialPath does not conform to the rule.";
   testConstructorThrow(uriText, errText);
 }
 
 
 function testConstructorThrow(uriText: string, errText: string) {
-  let exceptionCheck = (e: Error | Exception): boolean | string => {
-    return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).toString() == errText)
-  }
-  arktest.expectThrow((): void => { let that = new uri.URI(uriText); }, exceptionCheck)
+  arktest.expectError((): void => { let that = new uri.URI(uriText); }, new BusinessError(0, new Error(errText)))
 }
 
 function main(): int {
