@@ -20,6 +20,7 @@ import { Qux, quxInstance } from "testDecl";
 import { TestNew0, TestNew1, TestNew2 } from "testDecl";
 import { Foobar } from "testDecl";
 import {arrNum, arrFill, big_val} from 'testDecl';
+import { UserAccount } from 'testDecl'
 
 function testIsInstance(): void {
     let res = fooInstance instanceof Foo;
@@ -142,6 +143,30 @@ function testBigInt(): void {
     arktest.assertEQ(a, 1234567890n);
 }
 
+function testSetter(): void {
+    const user = new UserAccount('john', 25);
+    let res = false;
+    try {
+        user.age = -11;
+        res = false;
+    } catch (e: Error) {
+        res = e.message === 'Age cannot be negative';
+    }
+    try {
+        user.username = 'jo';
+        res = false;
+    } catch (e: Error) {
+        res = e.message === 'Username must be at least 3 characters long';
+    }
+    try {
+        user.username = 'jo';
+        res = false;
+    } catch (e: Error) {
+        res = e.message === 'Username must be at least 3 characters long';
+    }
+    arktest.assertTrue(res);
+}
+
 function testAll(): void {
     testIsInstance();
     testLdByName();
@@ -163,4 +188,5 @@ function testAll(): void {
     testArray();
     testArrayFill();
     testBigInt();
+    testSetter();
 }
