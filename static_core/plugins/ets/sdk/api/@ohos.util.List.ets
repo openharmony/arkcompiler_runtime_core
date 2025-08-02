@@ -41,6 +41,10 @@ export class List<T> implements Iterable<T> {
         this.buffer = new LinkedList<T>();
     }
 
+    public toString(): string {
+        return "[object List]";
+    }
+
     /**
      * Gets the number of elements in the list.
      *

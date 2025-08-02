@@ -124,6 +124,15 @@ class DataDisplay {
     }
 }
 
+interface A {
+    a: number[],
+    b: number,
+    c: B,
+}
+interface B {
+    e: number,
+}
+
 function main() {
     // Display simple array of objects
     DataDisplay.displayUsers();
@@ -140,4 +149,20 @@ function main() {
     console.table(42)
     console.table("str")
     console.table("count %d")
+
+    let a: A = {
+        a: [1, 2, 3, 4, 5], b: 5,
+        c: {
+        e: 5
+        }
+    }
+    console.table(a);
+        
+    let number1: number = 1;
+    let str = "str";
+    console.table(number1);
+    console.table(str);
+    console.table('count: %d');
+    console.table();
+    console.table([1, 2, 3]);
 }

@@ -35,6 +35,10 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
     internal front: int = 0;
     internal rear: int = 0;
 
+    public toString(): string {
+        return "[object Deque]";
+    }
+
     public jsonReplacer(): Record<String, NullishType> {
         const buf = this.buffer;
         const len = buf.length;
