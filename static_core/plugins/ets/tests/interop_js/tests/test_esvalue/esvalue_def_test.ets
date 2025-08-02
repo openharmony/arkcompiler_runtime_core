@@ -37,6 +37,7 @@ let jsIterable = module.getProperty('jsIterable');
 let jsIterableObject = module.getProperty('testItetatorObject');
 let jsUser = module.getProperty('User');
 let jsDoubledObj = module.getProperty('doubledObj');
+let propObj = module.getProperty('propObj');
 
 function checkGetUndefined(): boolean {
     let obj = ESValue.Undefined;
@@ -324,7 +325,7 @@ function checkEntries(): boolean {
     return true;
 }
 
-class testObj {}
+class testObj { }
 function checkInstanceOfStaticObj(): boolean {
     let staticObj = new testObj();
     let obj = ESValue.wrap(staticObj);
@@ -353,4 +354,13 @@ function checkInstaniate(): boolean {
     let num = ESValue.wrapInt(123);
     let user = jsUser.instantiate(num);
     return user.getProperty('ID').toNumber() === 123;
+}
+
+function testUndefined(): boolean {
+    propObj.setProperty('property1', undefined);
+    propObj.setProperty('property2', ESValue.wrap(undefined));
+    propObj.setProperty(123, undefined);
+    return propObj.getProperty('property1').isUndefined() &&
+           propObj.getProperty('property2').isUndefined() &&
+           propObj.getProperty(123).isUndefined();
 }
