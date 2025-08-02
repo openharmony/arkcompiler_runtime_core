@@ -14,95 +14,59 @@
 cases:
     - code: |-
           let v: I = new A()
-          if (foo(v) != 'A') {
-              return 1
-          }
+          arktest.assertEQ(foo(v), 'A')
     - code: |-
           let v: I = new A()
-          if (foo(v as I) != 'I') {
-              return 1
-          }
+          arktest.assertEQ(foo(v as I), 'I')
     - code: |-
           let v: I = new C()
-          if (foo(v) != 'C') {
-              return 1
-          }
+          arktest.assertEQ(foo(v), 'C')
     - code: |-
           let v: I = new C()
-          if (foo(v as I) != 'I') {
-              return 1
-          }
+          arktest.assertEQ(foo(v as I), 'I')
     - code: |-
           let v: I = new C()
-          if (foo(v as A) != 'A') {
-              return 1
-          }
+          arktest.assertEQ(foo(v as A), 'A')
     - code: |-
           let v: I = new D()
-          if (foo(v) != 'D') {
-              return 1
-          }
+          arktest.assertEQ(foo(v), 'D')
     - code: |-
           let v: I = new D()
-          if (foo(v as I) != 'I') {
-              return 1
-          }
+          arktest.assertEQ(foo(v as I), 'I')
     - code: |-
           let v: I = new D()
-          if (foo(v as A) != 'A') {
-              return 1
-          }
+          arktest.assertEQ(foo(v as A), 'A')
     - code: |-
           let v: I = new D()
-          if (foo(v as K) != 'K') {
-              return 1
-          }
+          arktest.assertEQ(foo(v as K), 'K')
 
     - code: |-
           let v: A = new A()
-          if (foo(v) != 'A') {
-              return 1
-          }
+          arktest.assertEQ(foo(v), 'A')
     - code: |-
           let v: A = new C()
-          if (foo(v) != 'C') {
-              return 1
-          }
+          arktest.assertEQ(foo(v), 'C')
     - code: |-
           let v: A = new C()
-          if (foo(v as A) != 'A') {
-              return 1
-          }
+          arktest.assertEQ(foo(v as A), 'A')
     - code: |-
           let v: A = new D()
-          if (foo(v) != 'D') {
-              return 1
-          }
+          arktest.assertEQ(foo(v), 'D')
     - code: |-
           let v: A = new D()
-          if (foo(v as A) != 'A') {
-              return 1
-          }
+          arktest.assertEQ(foo(v as A), 'A')
 
     - code: |-
           let v: C = new C()
-          if (foo(v) != 'C') {
-              return 1
-          }
+          arktest.assertEQ(foo(v), 'C')
 
     - code: |-
           let v: K = new D()
-          if (foo(v) != 'D') {
-              return 1
-          }
+          arktest.assertEQ(foo(v), 'D')
     - code: |-
           let v: K = new D()
-          if (foo(v as K) != 'K') {
-              return 1
-          }
+          arktest.assertEQ(foo(v as K), 'K')
 
     - code: |-
           let v: D = new D()
-          if (foo(v) != 'D') {
-              return 1
-          }
+          arktest.assertEQ(foo(v), 'D')
