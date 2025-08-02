@@ -261,6 +261,13 @@ void EtsCoroutine::OnHostWorkerChanged()
     GetLocalStorage().Set<DataIdx::INTEROP_CTX_PTR>(ptr);
 }
 
+void EtsCoroutine::OnContextSwitchedTo()
+{
+    if ((GetPriority() == CoroutinePriority::MEDIUM_PRIORITY) && (GetType() == Coroutine::Type::MUTATOR)) {
+        ProcessUnhandledPromiseRejections();
+    }
+}
+
 [[noreturn]] void EtsCoroutine::HandleUncaughtException()
 {
     ASSERT(HasPendingException());
@@ -277,14 +284,41 @@ void EtsCoroutine::ListUnhandledEventsOnProgramExit()
     ASSERT(umanager != nullptr);
     bool listJobs =
         Runtime::GetOptions().IsListUnhandledOnExitJobs(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
+    if (listJobs) {
+        ASSERT_NATIVE_CODE();
+        while (umanager->HasFailedJobObjects()) {
+            {
+                [[maybe_unused]] ScopedManagedCodeThread sc(this);
+                umanager->ListFailedJobs(this);
+            }
+            if (HasPendingException()) {
+                HandleUncaughtException();
+                UNREACHABLE();
+            }
+        }
+    }
+}
+
+void EtsCoroutine::ProcessUnhandledPromiseRejections()
+{
+    if (Runtime::GetOptions().IsArkAot()) {
+        return;
+    }
+    auto *umanager = GetPandaVM()->GetUnhandledObjectManager();
+    ASSERT(umanager != nullptr);
     bool listPromises =
         Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
-    while (umanager->HasObjects()) {
-        if (listJobs) {
-            umanager->ListFailedJobs(this);
-        }
-        if (listPromises) {
-            umanager->ListRejectedPromises(this);
+    if (listPromises) {
+        ASSERT_NATIVE_CODE();
+        while (umanager->HasRejectedPromiseObjects(this)) {
+            {
+                [[maybe_unused]] ScopedManagedCodeThread sc(this);
+                umanager->ListRejectedPromises(this);
+            }
+            if (HasPendingException()) {
+                HandleUncaughtException();
+                UNREACHABLE();
+            }
         }
     }
 }

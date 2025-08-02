@@ -27,13 +27,25 @@ TEST_F(PromiseRejectTest, ResolvePromise)
 
     ASSERT_EQ(env_->Promise_New(&resolver, &promise), ANI_OK);
 
+    ani_class errorClass {};
+    ASSERT_EQ(env_->FindClass("escompat.Error", &errorClass), ANI_OK);
+
+    ani_method constructor {};
+    ASSERT_EQ(env_->Class_FindMethod(errorClass, "<ctor>", "C{std.core.String}:", &constructor), ANI_OK);
+
     std::string rejected = "rejected";
-    ani_string rejection = nullptr;
+    ani_string rejection {};
     ASSERT_EQ(env_->String_NewUTF8(rejected.c_str(), rejected.size(), &rejection), ANI_OK);
 
-    ASSERT_EQ(env_->PromiseResolver_Reject(resolver, reinterpret_cast<ani_error>(rejection)), ANI_OK);
+    ani_object errorObject {};
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    ASSERT_EQ(env_->Object_New(errorClass, constructor, &errorObject, rejection), ANI_OK);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("promise_reject_test", "checkReject", promise, rejection), ANI_TRUE);
+    auto err = static_cast<ani_error>(errorObject);
+
+    ASSERT_EQ(env_->PromiseResolver_Reject(resolver, err), ANI_OK);
+
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("promise_reject_test", "checkReject", promise, err), ANI_TRUE);
 }
 
 TEST_F(PromiseRejectTest, InvalidArgument1)

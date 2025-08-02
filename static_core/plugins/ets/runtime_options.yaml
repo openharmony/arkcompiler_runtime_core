@@ -251,7 +251,7 @@ options:
   sub_options:
   - name: promises
     type: bool
-    default: false
+    default: true
     description: "promises"
   - name: jobs
     type: bool

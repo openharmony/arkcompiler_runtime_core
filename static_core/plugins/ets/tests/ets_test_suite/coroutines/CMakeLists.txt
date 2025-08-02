@@ -107,6 +107,23 @@ add_ets_coroutines_test(FILE unhandled_rejection.ets
                         MODE "INT" "JIT" "AOT"
 )
 
+add_ets_coroutines_test(FILE unhandled_rejection_event.ets
+                        SKIP_ARM32_COMPILER
+                        LIST_UNHANDLED
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO" "ONE"
+                        MODE "INT" "JIT" "AOT"
+)
+
+add_ets_coroutines_test(FILE unhandled_rejection_promise.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO" "ONE"
+                        MODE "INT" "JIT" "AOT"
+)
+
 add_ets_coroutines_test(FILE async_call.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"

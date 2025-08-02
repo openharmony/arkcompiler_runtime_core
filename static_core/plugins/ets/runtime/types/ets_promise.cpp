@@ -47,7 +47,7 @@ void EtsPromise::OnPromiseCompletion(EtsCoroutine *coro)
 
     if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)) &&
         state_ == STATE_REJECTED && queueSize == 0) {
-        coro->GetPandaVM()->GetUnhandledObjectManager()->AddRejectedPromise(this);
+        coro->GetPandaVM()->GetUnhandledObjectManager()->AddRejectedPromise(this, coro);
     }
 
     // Unblock awaitee coros
