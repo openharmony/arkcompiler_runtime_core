@@ -91,6 +91,12 @@ Class *LoadFromBootContext(const uint8_t *descriptor, DecoratorErrorHandler &err
     return klass;
 }
 
+EtsEscompatArray *GetSharedLibraryRuntimeLinkers(EtsClassLinkerContext *ctx)
+{
+    return EtsEscompatArray::FromEtsObject(
+        EtsAbcRuntimeLinker::FromEtsObject(ctx->GetRuntimeLinker())->GetSharedLibraryRuntimeLinkers());
+}
+
 bool TryLoadingClassInChain(const uint8_t *descriptor, DecoratorErrorHandler &errorHandler, ClassLinkerContext *ctx,
                             Class **klass)
 {
@@ -122,6 +128,32 @@ bool TryLoadingClassInChain(const uint8_t *descriptor, DecoratorErrorHandler &er
         // Chain resolution failed, must call managed implementation.
         ASSERT(*klass == nullptr);
         return false;
+    }
+    if (*klass != nullptr) {
+        // Load success by parent linker, return true
+        return true;
+    }
+    for (size_t i = 0, end = GetSharedLibraryRuntimeLinkers(etsLinkerContext)->GetActualLength(); i < end; ++i) {
+        EtsObject *sharedLibraryRuntimeLinkerObj = nullptr;
+        if (!GetSharedLibraryRuntimeLinkers(etsLinkerContext)->GetRef(i, &sharedLibraryRuntimeLinkerObj)) {
+            continue;
+        }
+        EtsAbcRuntimeLinker *sharedLibraryRuntimeLinker =
+            EtsAbcRuntimeLinker::FromEtsObject(sharedLibraryRuntimeLinkerObj);
+        if (sharedLibraryRuntimeLinker->GetClass() != PlatformTypes()->coreAbcRuntimeLinker &&
+            sharedLibraryRuntimeLinker->GetClass() != PlatformTypes()->coreMemoryRuntimeLinker) {
+            // Must call managed implementation.
+            return false;
+        }
+        auto *sharedLibraryContext = sharedLibraryRuntimeLinker->GetClassLinkerContext();
+        if (!TryLoadingClassInChain(descriptor, errorHandler, sharedLibraryContext, klass)) {
+            // Chain resolution failed, must call managed implementation.
+            return false;
+        }
+        if (*klass != nullptr) {
+            // Load success by shared linker, return true
+            return true;
+        }
     }
 
     // No need to load by managed code, even if error occurred during loading.
