@@ -15,6 +15,25 @@
 
 import buffer from "@ohos.buffer"
 
+class Foo {
+    valueOf1() {
+      return 'this is a test';
+    }
+
+    toString1() {
+      return 'this is a test';
+    }
+}
+
+class Person {
+    name: string;
+    age: number;
+    constructor(name: string, age: number) {
+      this.name = name;
+      this.age = age;
+    }
+}
+
 function testToString() {
     {
         let buf1 = buffer.allocUninitializedFromPool(26);
@@ -548,6 +567,69 @@ function testTranscode0084() {
     let buf1 = buffer.from("测试");
     arktest.expectError(() => {let buf = buffer.transcode(buf1, "utf8", '0');}, str);
 }
+
+function testfrom0783() {
+    const buf = buffer.from([10]);
+    arktest.assertEQ(buf.length, 1);
+}
+
+function testFrom30140() {
+    let str = 'Parameter error. The type of "input" must be Buffer or ArrayBuffer, Array, Array-like';
+    let obj =  new Map<string, string>()
+    arktest.expectError(() => {let buf1 = buffer.from(obj, 0, 5);}, str);
+}
+
+function testBufferFrom30009() {
+    let str = 'Parameter error. The type of "input" must be Buffer or ArrayBuffer, Array, Array-like';
+    const person = new Person("Alice", 30);
+    arktest.expectError(() => {
+        buffer.from(person, 11, 0);
+        buffer.from(person, 11, -1);
+        buffer.from(person, 11, Infinity.toInt());
+        buffer.from(person, 11, -Infinity.toInt());
+    }, str);
+}
+
+function testFrom0015() {
+    let buf = new Uint8Array([97, 98]);
+    const buf1 = buffer.from(buf, -1, -1);
+    let str = buf1.toString();
+    arktest.assertEQ(str, 'ab');
+}
+
+function testBufferFrom30005() {
+    let str = 'Parameter error. The type of "encoding" must be BufferEncoding. the encoding test is unknown';
+    arktest.expectError(() => {let buf = buffer.from(new String('hello world'), 'test', 1);}, str);
+}
+
+function testBufferBufferCompare0005() {
+    const buf1 = buffer.from([1, 2, 3]);
+    const buf2 = buffer.from([3, 2, 1]);
+    const result = buf1.compare(buf2, Infinity.toInt());
+    arktest.assertEQ(result, 1);
+
+}
+
+function testBufferBufferCompare0017() {
+    const buf1 = buffer.from([1, 2, 3]);
+    const buf2 = buffer.from([1, 2, 3]);
+    const result = buf1.compare(buf2, undefined, undefined, Infinity.toInt());
+    arktest.assertEQ(result, -1);
+}
+
+function testFrom0009() {
+    let str = 'Parameter error. The type of "input" must be Buffer or ArrayBuffer, Array, Array-like';
+    let foo = new Foo();
+    arktest.expectError(() => {const buf = buffer.from(foo, 'utf8', 0);}, str);
+}
+
+function testFrom0014() {
+    let buf = new Uint8Array([97, 98]);
+    const buf1 = buffer.from(buf);
+    let str = buf1.toString();
+    arktest.assertEQ(str, 'ab');
+}
+
 function main(): int {
     const suite = new arktest.ArkTestsuite("Buffer API tests")
     suite.addTest("Test buffer toString", testToString)
@@ -610,6 +692,16 @@ function main(): int {
     suite.addTest("Test buffer testfrom0793", testfrom0793)
     suite.addTest("Test buffer testfrom0794", testfrom0794)
     suite.addTest("Test buffer testfrom0795", testfrom0795)
+    suite.addTest("Test buffer testfrom0796", testfrom0796)
     suite.addTest("Test buffer testTranscode0084", testTranscode0084)
+    suite.addTest("Test buffer testfrom0783", testfrom0783)
+    suite.addTest("Test buffer testFrom30140", testFrom30140)
+    suite.addTest("Test buffer testFrom0015", testFrom0015)
+    suite.addTest("Test buffer testBufferFrom30005", testBufferFrom30005)
+    suite.addTest("Test buffer testBufferFrom30009", testBufferFrom30009)
+    suite.addTest("Test buffer testBufferBufferCompare0005", testBufferBufferCompare0005)
+    suite.addTest("Test buffer testBufferBufferCompare0017", testBufferBufferCompare0017)
+    suite.addTest("Test buffer testFrom0009", testFrom0009)
+    suite.addTest("Test buffer testFrom0014", testFrom0014)
     return suite.run()
 }

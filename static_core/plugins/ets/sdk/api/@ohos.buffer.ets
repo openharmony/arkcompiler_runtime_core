@@ -282,11 +282,22 @@ export default namespace buffer {
     * @returns { Buffer } Return a new allocated Buffer
     */
     export function fromWithObjectTypedInputOffsetOrEncodingLength(input: Object, offsetOrEncoding: int | string, length: int): Buffer {
+        if (offsetOrEncoding instanceof string && (!isEncoding(offsetOrEncoding))) {
+            throw createBusinessError(TypeErrorCodeId, `Parameter error. The type of "encoding" must be BufferEncoding. ` +
+                `the encoding ${offsetOrEncoding} is unknown`);
+        }
         if (input instanceof string || input instanceof ArrayBuffer) {
             const resolvedByteOffset: int = (offsetOrEncoding instanceof string) ? 0 : offsetOrEncoding;
             return new Buffer(ArrayBuffer.fromObject(input, offsetOrEncoding, length), resolvedByteOffset);
         }
-        throw createBusinessError(TypeErrorCodeId, 'Parameter error. The type of "string" must be Buffer or ArrayBuffer, Array, Array-like');
+        if (!(input instanceof Uint8Array)) {
+            throw createBusinessError(TypeErrorCodeId, 'Parameter error. The type of "input" must be Buffer or ArrayBuffer, Array, Array-like');
+        }
+        if (offsetOrEncoding instanceof string) {
+            const resolvedByteOffset: int = 0;
+            return new Buffer(ArrayBuffer.fromObject(input.buffer, offsetOrEncoding, length), resolvedByteOffset);
+        }
+        return new Buffer(ArrayBuffer.from(input as Uint8Array));
     }
 
     /**
