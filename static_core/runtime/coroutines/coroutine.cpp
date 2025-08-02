@@ -140,6 +140,8 @@ void Coroutine::OnStatusChanged(Status oldStatus, Status newStatus)
     }
 }
 
+void Coroutine::OnContextSwitchedTo() {}
+
 void Coroutine::IssueTracingEvents(Status oldStatus, Status newStatus)
 {
     bool isMutator = this->GetType() == Coroutine::Type::MUTATOR;

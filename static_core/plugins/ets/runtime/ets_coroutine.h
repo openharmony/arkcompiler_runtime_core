@@ -142,6 +142,7 @@ public:
 
     // event handlers
     void OnHostWorkerChanged() override;
+    void OnContextSwitchedTo() override;
 
     /// @brief print stack and exit the program
     [[noreturn]] void HandleUncaughtException() override;
@@ -165,8 +166,7 @@ private:
     void RequestPromiseCompletion(mem::Reference *promiseRef, Value returnValue);
     void RequestJobCompletion(mem::Reference *jobRef, Value returnValue);
 
-    void ListUnhandledJobs();
-    void ListUnhandledPromises();
+    void ProcessUnhandledPromiseRejections();
 
     PandaEtsNapiEnv *etsNapiEnv_ {nullptr};
     void *promiseClassPtr_ {nullptr};
