@@ -1303,4 +1303,55 @@ TEST(ItemContainer, TryBlockDeclaredSizeOverflowShouldFatal)
     EXPECT_DEATH(TriggerFatalTryBlock(), ".*");
 }
 
+static std::vector<uint8_t> CreateNormalPandaFile()
+{
+    ark::panda_file::ItemContainer container;
+
+    ark::panda_file::ClassItem *classItem = container.GetOrCreateClassItem("TestClass");
+    classItem->SetAccessFlags(ark::ACC_PUBLIC);
+
+    ark::panda_file::LiteralArrayItem *literalArray = container.GetOrCreateLiteralArrayItem("test_literal");
+
+    std::vector<ark::panda_file::LiteralItem> literalItems;
+
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    constexpr uint32_t LITERAL_VALUE = 42U;
+    literalItems.emplace_back(LITERAL_VALUE);
+    literalArray->AddItems(literalItems);
+    ark::panda_file::MemoryWriter writer;
+    EXPECT_TRUE(container.Write(&writer));
+    return writer.GetData();
+}
+
+static std::vector<uint8_t> CreateCorruptedPandaFile()
+{
+    auto normalData = CreateNormalPandaFile();
+
+    auto *header = reinterpret_cast<ark::panda_file::File::Header *>(normalData.data());
+    const int literalArrayOffset = 1000;
+    header->literalarrayIdxOff = header->fileSize + literalArrayOffset;
+    auto checksumSize = sizeof(ark::panda_file::File::Header::checksum);
+    auto fileContentOffset = ark::panda_file::File::MAGIC_SIZE + checksumSize;
+
+    // need to modify the checksum or can not pass the ValidateChecksum
+    uint8_t *pData = &normalData[fileContentOffset];
+    uint32_t calChecksum = adler32(1, pData, header->fileSize - fileContentOffset);
+    header->checksum = calChecksum;
+
+    return normalData;
+}
+
+TEST(ItemContainer, LiteralDataAccessorTest)
+{
+    auto data = CreateCorruptedPandaFile();
+    auto pandaFile = GetPandaFile(data);
+    ASSERT_NE(pandaFile, nullptr);
+
+    File::EntityId literalArraysId = pandaFile->GetLiteralArraysId();
+    ark::Logger::InitializeStdLogging(ark::Logger::Level::FATAL,
+                                      ark::Logger::ComponentMask().set(ark::Logger::Component::PANDAFILE));
+    EXPECT_DEATH({ std::make_unique<ark::panda_file::LiteralDataAccessor>(*pandaFile, literalArraysId); },
+                 ".*Literal data size is greater than file size.*|.*");
+}
+
 }  // namespace ark::panda_file::test
