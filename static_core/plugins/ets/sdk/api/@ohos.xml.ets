@@ -564,7 +564,7 @@ export namespace xml {
             [EventType.COMMENT, new RegExp("<!--[\\s\\S]*?-->","g")],
             [EventType.ENTITY_REFERENCE, new RegExp("<!ENTITY[\\s\\S]*?>","g")],
             [EventType.DOCDECL, new RegExp("<!DOCTYPE[\\s\\S]*?\[[\\s\\S]*?\]>","g")],
-            [EventType.CDSECT, new RegExp("<!\\[CDATA\\[[\\s\\S]*?\]\]>","gm")]
+            [EventType.CDSECT, new RegExp("<!\\[CDATA\\[[\\s\\S]*?(?:\\]\\]>|$)","g")]
         ])
 
         private static readonly xmlEscapeChars = new Map<string, string>([
@@ -696,6 +696,9 @@ export namespace xml {
                         this.startDocumentFound = true
                     }
                     if ((type != EventType.DOCDECL) || this.supportDoctype) {
+                        if ((type == EventType.CDSECT) && (item!.substring(item!.length-3) != "]]>")) {
+                            throw createBusinessError(TypeErrorCodeId, "Cannot find the ']]>' in xml string.");
+                        }
                         this.nodeMap.set(node!.pos!, node!)
                     }
                 }
