@@ -63,3 +63,11 @@ export declare class Foobar {
 export declare let arrNum: number[];
 export declare let arrFill: number[];
 export declare let big_val: bigint;
+
+export declare class UserAccount {
+    constructor(username: string, age: number);
+    get username(): string;
+    set username(newUsername: string);
+    get age(): number;
+    set age(newAge: number);
+}
