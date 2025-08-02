@@ -25,7 +25,7 @@ macro(check_required_program name alias install_help)
     endif()
 endmacro()
 
-set(INSTALL_HELP_MESSAGE "• script: static_core/scripts/install-deps-ubuntu --coverage-tools\n")
+set(INSTALL_HELP_MESSAGE "• script: static_core/scripts/install-deps-ubuntu -i=coverage-tools\n")
 
 # Find coverage tools
 check_required_program(lcov "LCOV" ${INSTALL_HELP_MESSAGE})
@@ -41,7 +41,7 @@ endif()
 # =============================================================================
 
 set(COVERAGE_FLAGS "-fprofile-arcs -ftest-coverage")
-set(LCOV_COMMON_FLAGS --quiet --branch-coverage --ignore-errors empty,utility,range,inconsistent,source,format)
+set(LCOV_COMMON_FLAGS --quiet --branch-coverage --ignore-errors empty,utility,range,inconsistent,source,format,mismatch)
 set(LCOV_ZEROCOUNTERS_FLAGS --zerocounters --directory ${PANDA_BINARY_ROOT})
 
 if(ENABLE_UNIT_TESTS_FULL_COVERAGE)

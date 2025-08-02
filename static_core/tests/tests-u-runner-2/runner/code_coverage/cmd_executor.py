@@ -18,6 +18,10 @@ import subprocess
 from abc import ABC, abstractmethod
 from typing import TextIO
 
+from runner.logger import Log
+
+_LOGGER = Log.get_logger(__file__)
+
 
 class CmdExecutor(ABC):
     @abstractmethod
@@ -25,18 +29,18 @@ class CmdExecutor(ABC):
         self,
         command: list[str],
         stdout: TextIO | int = subprocess.PIPE,
-        stderror: TextIO | int = subprocess.DEVNULL
-    ) -> subprocess.CompletedProcess:
+        stderror: TextIO | int = subprocess.PIPE
+    ) -> subprocess.CompletedProcess | None:
         """
         Execute a shell command in a subprocess.
 
         Args:
             command (list[str]): Command and its arguments as a list of strings.
             stdout (TextIO | int): Standard output stream. Defaults to subprocess.PIPE.
-            stderror (TextIO | int): Standard error stream. Defaults to subprocess.DEVNULL.
+            stderror (TextIO | int): Standard error stream. Defaults to subprocess.PIPE.
 
         Returns:
-            str | int: Output of the command as a string or exit code.
+            CompletedProcess | None: Output of the command as a string or exit code.
 
         Raises:
             NotImplementedError: If the method is not implemented in a subclass.
@@ -66,24 +70,28 @@ class LinuxCmdExecutor(CmdExecutor):
         self,
         command: list[str],
         stdout: TextIO | int = subprocess.PIPE,
-        stderror: TextIO | int = subprocess.DEVNULL
-    ) -> subprocess.CompletedProcess:
+        stderror: TextIO | int = subprocess.PIPE
+    ) -> subprocess.CompletedProcess | None:
         """
         Run a command on Linux using subprocess.run().
 
         Args:
             command (list[str]): Command and arguments to execute.
             stdout (TextIO | int): Standard output destination. Defaults to subprocess.PIPE.
-            stderror (TextIO | int): Standard error stream. Defaults to subprocess.DEVNULL.
+            stderror (TextIO | int): Standard error stream. Defaults to subprocess.PIPE.
 
         Returns:
-            str | int: Command output as a string or return code.
+            CompletedProcess | None: Command output as a string or return code.
 
         Raises:
             subprocess.CalledProcessError: If the command returns a non-zero exit status.
             subprocess.TimeoutExpired: If the command times out.
         """
-        return subprocess.run(command, check=True, text=True, stdout=stdout, stderr=stderror, timeout=5400)
+        try:
+            return subprocess.run(command, check=True, text=True, stdout=stdout, stderr=stderror, timeout=5400)
+        except subprocess.CalledProcessError as error:
+            _LOGGER.default(f"There was a problem:\n{error.stderr}")
+            return None
 
     def get_binary(self, binary_name: str, version: str | None = None) -> str:
         """
