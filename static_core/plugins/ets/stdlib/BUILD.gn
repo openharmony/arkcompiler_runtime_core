@@ -22,7 +22,7 @@ if (ark_standalone_build) {
 }
 
 action("copy_stdlib") {
-  script = "package_stdlib.sh"
+  script = "package_stdlib.py"
   args = [
     rebase_path("std"),
     rebase_path("escompat"),
