@@ -92,6 +92,13 @@ public:
     std::string GetName() const;
 
     /**
+     * @brief Tells if Interface is defined in the same binary or externally in another binary.
+     * @return Returns `true` if Interface is defined in another binary and `false` if defined locally.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsExternal() const;
+
+    /**
      * @brief Returns module for this `Interface`.
      * @return Owning `core::Module`.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `bool(*this)` results in `false`.
@@ -139,6 +146,13 @@ public:
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::vector<core::Class> GetClasses() const;
+
+    /**
+     * @brief Get vector with all Annotations
+     * @return std::vector<core::Annotation>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::vector<core::Annotation> GetAnnotations() const;
 
 private:
     Interface(AbckitCoreInterface *iface, const ApiConfig *conf, const File *file) : ViewInResource(iface), conf_(conf)

@@ -36,6 +36,13 @@ inline AnnotationInterface::AnnotationInterface(const core::AnnotationInterface 
 {
 }
 
+inline bool AnnotationInterface::SetName(const std::string &name) const
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->annotationInterfaceSetName(TargetCast(), name.c_str());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
 inline arkts::AnnotationInterfaceField AnnotationInterface::AddField(std::string_view name, Type type, Value value)
 {
     const struct AbckitArktsAnnotationInterfaceFieldCreateParams params {

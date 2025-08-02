@@ -18,7 +18,6 @@
 
 #include "../core/annotation_interface.h"
 #include "../base_concepts.h"
-#include "../type.h"
 
 namespace abckit::arkts {
 
@@ -73,6 +72,14 @@ public:
      * @brief Destroy the Annotation Interface object
      */
     ~AnnotationInterface() override = default;
+
+    /**
+     * @brief Sets name for annotation interface
+     * @return `true` on success.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool SetName(const std::string &name) const;
 
     /**
      * @brief Add new field to the annotation interface.

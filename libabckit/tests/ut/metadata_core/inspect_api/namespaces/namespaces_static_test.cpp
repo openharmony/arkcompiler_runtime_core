@@ -100,7 +100,7 @@ TEST_F(LibAbcKitInspectApiNamespacesTest, NamespaceEnumerateTopLevelFunctionsSta
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/namespaces/namespaces_static.abc");
 
     std::set<std::string> gotFunctionNames;
-    std::set<std::string> expectedFunctionNames = {"M1:void;", "_cctor_:void;"};
+    std::set<std::string> expectedFunctionNames = {"m1:void;", "_cctor_:void;"};
 
     for (const auto &module : file.GetModules()) {
         if (module.IsExternal()) {

@@ -25,7 +25,6 @@
 
 #include "utils.h"
 
-#include <cstdint>
 #include <memory>
 
 namespace abckit {
@@ -40,7 +39,6 @@ class Value;
 class Type;
 class Literal;
 class LiteralArray;
-class Type;
 
 namespace core {
 class Module;
@@ -49,6 +47,7 @@ class Class;
 class Interface;
 class Enum;
 class Function;
+class FunctionParam;
 class ModuleField;
 class NamespaceField;
 class ClassField;
@@ -66,7 +65,14 @@ namespace arkts {
 class Module;
 class Namespace;
 class Class;
+class Interface;
+class Enum;
 class Function;
+class ModuleField;
+class NamespaceField;
+class ClassField;
+class InterfaceField;
+class EnumField;
 class Annotation;
 class AnnotationInterface;
 class AnnotationElement;
@@ -99,7 +105,6 @@ class ApiConfig final {
     friend Type;
     friend Literal;
     friend LiteralArray;
-    friend Type;
 
     /// \relates abckit::core::Module
     friend core::Module;
@@ -113,6 +118,8 @@ class ApiConfig final {
     friend core::Enum;
     /// \relates abckit::core::Function
     friend core::Function;
+    /// \relates abckit::core::FunctionParam
+    friend core::FunctionParam;
     /// \relates abckit::core::ModuleField
     friend core::ModuleField;
     /// \relates abckit::core::NamespaceField
@@ -142,8 +149,22 @@ class ApiConfig final {
     friend arkts::Namespace;
     /// \relates abckit::arkts::Class
     friend arkts::Class;
+    /// \relates abckit::arkts::Interface
+    friend arkts::Interface;
+    /// \relates abckit::arkts::Enum
+    friend arkts::Enum;
     /// \relates abckit::arkts::Function
     friend arkts::Function;
+    /// \relates abckit::arkts::ModuleField
+    friend arkts::ModuleField;
+    /// \relates abckit::arkts::NamespaceField
+    friend arkts::NamespaceField;
+    /// \relates abckit::arkts::ClassField
+    friend arkts::ClassField;
+    /// \relates abckit::arkts::InterfaceField
+    friend arkts::InterfaceField;
+    /// \relates abckit::arkts::EnumField
+    friend arkts::EnumField;
     /// \relates abckit::arkts::Annotation
     friend arkts::Annotation;
     /// \relates abckit::arkts::AnnotationInterface

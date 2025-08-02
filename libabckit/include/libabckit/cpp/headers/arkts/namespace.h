@@ -76,6 +76,14 @@ public:
      */
     Function GetConstructor() const;
 
+    /**
+     * @brief Sets name for namespace
+     * @return `true` on success.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool SetName(const std::string &name) const;
+
 private:
     /**
      * @brief Converts underlying namespace from Core to Arkts target

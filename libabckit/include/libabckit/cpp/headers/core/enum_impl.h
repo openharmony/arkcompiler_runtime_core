@@ -32,6 +32,13 @@ inline core::Module Enum::GetModule() const
     return Module(mod, GetApiConfig(), GetResource());
 }
 
+inline Namespace Enum::GetParentNamespace() const
+{
+    AbckitCoreNamespace *ns = GetApiConfig()->cIapi_->enumGetParentNamespace(GetView());
+    CheckError(GetApiConfig());
+    return Namespace(ns, GetApiConfig(), GetResource());
+}
+
 inline std::string Enum::GetName() const
 {
     const ApiConfig *conf = GetApiConfig();
@@ -40,6 +47,13 @@ inline std::string Enum::GetName() const
     std::string str = conf->cIapi_->abckitStringToString(cString);
     CheckError(conf);
     return str;
+}
+
+inline bool Enum::IsExternal() const
+{
+    const auto isExternal = GetApiConfig()->cIapi_->enumIsExternal(GetView());
+    CheckError(GetApiConfig());
+    return isExternal;
 }
 
 inline std::vector<core::Function> Enum::GetAllMethods() const

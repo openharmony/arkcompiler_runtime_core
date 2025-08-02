@@ -18,7 +18,6 @@
 
 #include "../core/class.h"
 #include "../base_concepts.h"
-#include "annotation_interface.h"
 
 namespace abckit::arkts {
 
@@ -74,6 +73,14 @@ public:
      * @brief Destroy the Class object
      */
     ~Class() override = default;
+
+    /**
+     * @brief Sets name for class
+     * @return `true` on success.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool SetName(const std::string &name) const;
 
     /**
      * @brief Remove annotation from the class declaration.

@@ -33,6 +33,13 @@ inline AbckitArktsAnnotation *Annotation::TargetCast() const
 
 inline Annotation::Annotation(const core::Annotation &coreOther) : core::Annotation(coreOther), targetChecker_(this) {}
 
+inline bool Annotation::SetName(const std::string &name) const
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->annotationSetName(TargetCast(), name.c_str());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
 inline arkts::Annotation Annotation::AddElement(const abckit::Value &val, std::string_view name) const
 {
     struct AbckitArktsAnnotationElementCreateParams params {

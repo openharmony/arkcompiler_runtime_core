@@ -34,6 +34,13 @@ inline AbckitArktsModule *Module::TargetCast() const
 
 inline Module::Module(const core::Module &coreOther) : core::Module(coreOther), targetChecker_(this) {}
 
+inline bool Module::SetName(const std::string &name) const
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->moduleSetName(TargetCast(), name.c_str());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
 inline arkts::ImportDescriptor Module::AddImportFromArktsV1ToArktsV1(Module imported, std::string_view name,
                                                                      std::string_view alias) const
 {

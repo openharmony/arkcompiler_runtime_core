@@ -35,11 +35,30 @@ inline Function::Function(const core::Function &other) : core::Function(other), 
 
 inline bool Function::IsNative() const
 {
-    auto arktsFunc = GetApiConfig()->cArktsIapi_->coreFunctionToArktsFunction(GetView());
+    const auto ret = GetApiConfig()->cArktsIapi_->functionIsNative(TargetCast());
     CheckError(GetApiConfig());
-    auto arktsIsNative = GetApiConfig()->cArktsIapi_->functionIsNative(arktsFunc);
+    return ret;
+}
+
+inline bool Function::IsAbstract() const
+{
+    const auto ret = GetApiConfig()->cArktsIapi_->functionIsAbstract(TargetCast());
     CheckError(GetApiConfig());
-    return arktsIsNative;
+    return ret;
+}
+
+inline bool Function::IsFinal() const
+{
+    const auto ret = GetApiConfig()->cArktsIapi_->functionIsFinal(TargetCast());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline bool Function::IsAsync() const
+{
+    const auto ret = GetApiConfig()->cArktsIapi_->functionIsAsync(TargetCast());
+    CheckError(GetApiConfig());
+    return ret;
 }
 
 inline Annotation Function::AddAnnotation(AnnotationInterface ai) const
@@ -59,6 +78,13 @@ inline Function Function::RemoveAnnotation(Annotation anno) const
     GetApiConfig()->cArktsMapi_->functionRemoveAnnotation(TargetCast(), anno.TargetCast());
     CheckError(GetApiConfig());
     return *this;
+}
+
+inline bool Function::SetName(const std::string &name) const
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->functionSetName(TargetCast(), name.c_str());
+    CheckError(GetApiConfig());
+    return ret;
 }
 
 }  // namespace abckit::arkts

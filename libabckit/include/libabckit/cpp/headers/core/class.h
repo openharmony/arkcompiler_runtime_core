@@ -97,6 +97,27 @@ public:
     std::string GetName() const;
 
     /**
+     * @brief Tells if Class is defined in the same binary or externally in another binary.
+     * @return Returns `true` if Class is defined in another binary and `false` if defined locally.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsExternal() const;
+
+    /**
+     * @brief Tell if Class is final
+     * @return Returns `true` if Class is final class and `false` otherwise
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsFinal() const;
+
+    /**
+     * @brief Tell if Class is abstract
+     * @return Returns `true` if Class is abstract and `false`
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsAbstract() const;
+
+    /**
      * @brief Returns module for this `Class`.
      * @return Owning `core::Module`.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `bool(*this)` results in `false`.

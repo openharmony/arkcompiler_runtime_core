@@ -65,6 +65,13 @@ inline core::Module AnnotationInterface::GetModule() const
     return Module(mod, GetApiConfig(), GetResource());
 }
 
+inline Namespace AnnotationInterface::GetParentNamespace() const
+{
+    AbckitCoreNamespace *ns = GetApiConfig()->cIapi_->annotationInterfaceGetParentNamespace(GetView());
+    CheckError(GetApiConfig());
+    return Namespace(ns, GetApiConfig(), GetResource());
+}
+
 inline std::string AnnotationInterface::GetName() const
 {
     const ApiConfig *conf = GetApiConfig();

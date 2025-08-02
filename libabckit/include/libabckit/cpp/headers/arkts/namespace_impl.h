@@ -39,6 +39,13 @@ inline Function Namespace::GetConstructor() const
     return Function(core::Function(coreCon, GetApiConfig(), GetResource()));
 }
 
+inline bool Namespace::SetName(const std::string &name) const
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->namespaceSetName(TargetCast(), name.c_str());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
 }  // namespace abckit::arkts
 
 #endif  // CPP_ABCKIT_ARKTS_NAMESPACE_IMPL_H

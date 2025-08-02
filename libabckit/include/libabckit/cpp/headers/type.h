@@ -35,6 +35,20 @@ class Type : public ViewInResource<AbckitType *, const File *> {
     friend class arkts::AnnotationInterface;
     /// @brief abckit::Instruction
     friend class abckit::Instruction;
+    /// @brief core::ModuleField
+    friend class abckit::core::ModuleField;
+    /// @brief core::NamespaceField
+    friend class abckit::core::NamespaceField;
+    /// @brief core::ClassField
+    friend class abckit::core::ClassField;
+    /// @brief core::InterfaceField
+    friend class abckit::core::InterfaceField;
+    /// @brief core::EnumField
+    friend class abckit::core::EnumField;
+    /// @brief core::FunctionParam
+    friend class abckit::core::FunctionParam;
+    /// @brief core::Function
+    friend class abckit::core::Function;
 
 public:
     /**
@@ -88,6 +102,20 @@ public:
         auto *ret = GetApiConfig()->cIapi_->typeGetReferenceClass(GetView());
         CheckError(GetApiConfig());
         return core::Class(ret, GetApiConfig(), GetResource());
+    }
+
+    /**
+     * @brief Returns the Type Name of type
+     * @return std::String
+     */
+    inline std::string GetName() const
+    {
+        const ApiConfig *conf = GetApiConfig();
+        AbckitString *cString = conf->cIapi_->typeGetName(GetView());
+        CheckError(conf);
+        std::string str = conf->cIapi_->abckitStringToString(cString);
+        CheckError(conf);
+        return str;
     }
 
 protected:

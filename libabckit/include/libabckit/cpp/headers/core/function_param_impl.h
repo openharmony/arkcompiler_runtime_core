@@ -1,10 +1,9 @@
-/**
+/*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
-
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -14,28 +13,20 @@
  * limitations under the License.
  */
 
-namespace N1 {
-    function m1() {}
+#ifndef CPP_ABCKIT_CORE_FUNCTION_PARAM_IMPL_H
+#define CPP_ABCKIT_CORE_FUNCTION_PARAM_IMPL_H
 
-    const F1: string = 'Hello';
+#include "function_param.h"
 
-    class C1 {}
+namespace abckit::core {
 
-    interface I1 {}
-
-    enum E1 {
-        ONE
-    }
-
-    namespace N2 {
-        class C2 {
-            M2(){}
-        }
-
-        const F2: number = 1;
-    }
+inline Type FunctionParam::GetType() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitType *type = conf->cIapi_->functionParamGetType(GetView());
+    CheckError(conf);
+    return Type(type, conf, GetResource());
 }
+}  // namespace abckit::core
 
-const F0:string = 'World';
-
-class C0 {}
+#endif  // CPP_ABCKIT_CORE_FUNCTION_PARAM_IMPL_H

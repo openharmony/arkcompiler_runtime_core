@@ -22,7 +22,6 @@ class M0C0 {
     M0C0F0(){}
     static M0C0F1(){}
     async M0C0F2(){}
-    // async *M0C0F3(){}
 }
 
 function m0N0F0() {}

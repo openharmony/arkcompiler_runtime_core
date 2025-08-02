@@ -17,6 +17,7 @@
 #define CPP_ABCKIT_CORE_FUNCTION_IMPL_H
 
 #include "function.h"
+#include "function_param.h"
 #include "class.h"
 #include "module.h"
 #include "../config.h"
@@ -82,6 +83,46 @@ inline bool Function::IsStatic() const
     return result;
 }
 
+inline bool Function::IsPublic() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    bool result = conf->cIapi_->functionIsPublic(GetView());
+    CheckError(conf);
+    return result;
+}
+
+inline bool Function::IsProtected() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    bool result = conf->cIapi_->functionIsProtected(GetView());
+    CheckError(conf);
+    return result;
+}
+
+inline bool Function::IsPrivate() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    bool result = conf->cIapi_->functionIsPrivate(GetView());
+    CheckError(conf);
+    return result;
+}
+
+inline bool Function::IsInternal() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    bool result = conf->cIapi_->functionIsInternal(GetView());
+    CheckError(conf);
+    return result;
+}
+
+inline bool Function::IsExternal() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    bool result = conf->cIapi_->functionIsExternal(GetView());
+    CheckError(conf);
+    return result;
+}
+
 inline core::Module Function::GetModule() const
 {
     const ApiConfig *conf = GetApiConfig();
@@ -96,6 +137,22 @@ inline core::Class Function::GetParentClass() const
     AbckitCoreClass *klass = conf->cIapi_->functionGetParentClass(GetView());
     CheckError(conf);
     return core::Class(klass, conf_, GetResource());
+}
+
+inline std::vector<core::FunctionParam> Function::GetParameters() const
+{
+    std::vector<core::FunctionParam> params;
+    Payload<std::vector<core::FunctionParam> *> payload {&params, GetApiConfig(), GetResource()};
+
+    GetApiConfig()->cIapi_->functionEnumerateParameters(
+        GetView(), &payload, [](AbckitCoreFunctionParam *param, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::FunctionParam> *> *>(data);
+            payload.data->push_back(core::FunctionParam(param, payload.config, payload.resource));
+            return true;
+        });
+
+    CheckError(GetApiConfig());
+    return params;
 }
 
 // CC-OFFNXT(G.FUD.06) perf critical
@@ -160,6 +217,13 @@ inline bool Function::IsCtor() const
     return isCtor;
 }
 
+inline bool Function::IsCctor() const
+{
+    auto isCtor = GetApiConfig()->cIapi_->functionIsCctor(GetView());
+    CheckError(GetApiConfig());
+    return isCtor;
+}
+
 inline bool Function::IsAnonymous() const
 {
     auto isAnonymous = GetApiConfig()->cIapi_->functionIsAnonymous(GetView());
@@ -172,6 +236,13 @@ inline Function Function::SetGraph(Graph &graph) const
     GetApiConfig()->cMapi_->functionSetGraph(GetView(), graph.GetResource());
     CheckError(GetApiConfig());
     return *this;
+}
+
+inline Type Function::GetReturnType() const
+{
+    auto type = GetApiConfig()->cIapi_->functionGetReturnType(GetView());
+    CheckError(GetApiConfig());
+    return Type(type, GetApiConfig(), GetResource());
 }
 
 }  // namespace abckit::core
