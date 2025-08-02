@@ -47,7 +47,7 @@ ohos_executable("arkts_bin") {
   }
 
   output_name = "ark"
-  install_enable = true
+  install_enable = false
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
 }
