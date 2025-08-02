@@ -59,6 +59,7 @@ panda_ets_add_gtest(
         ets_base_enum_test.cpp
         ets_error_test.cpp
         ets_atomic_flag_test.cpp
+        ets_atomic_int_test.cpp
         ets_error_options_test.cpp
         ets_stacktrace_element_test.cpp
         ets_typed_arrays_test.cpp

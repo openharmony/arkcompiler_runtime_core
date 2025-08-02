@@ -35,17 +35,13 @@ export namespace containers {
     * BlockingQueue implementation
     */
     export class LinkedBlockingQueue<T> implements BlockingQueue<T> {
+
         /**
         * Constructs a default LinkedBlockingQueue.
         */
         constructor() {
             this.actualCapacity = Int.MAX_VALUE;
             this.tail = this.head = new ListNode<T>();
-            this.pushMutex = ConcurrencyHelpers.mutexCreate();
-            this.pushCondVar = ConcurrencyHelpers.condVarCreate();
-            this.popMutex = ConcurrencyHelpers.mutexCreate();
-            this.popCondVar = ConcurrencyHelpers.condVarCreate();
-            this.sizeMutex = ConcurrencyHelpers.spinlockCreate();
         }
 
         /**
@@ -59,11 +55,6 @@ export namespace containers {
             }
             this.actualCapacity = capacity;
             this.tail = this.head = new ListNode<T>();
-            this.pushMutex = ConcurrencyHelpers.mutexCreate();
-            this.pushCondVar = ConcurrencyHelpers.condVarCreate();
-            this.popMutex = ConcurrencyHelpers.mutexCreate();
-            this.popCondVar = ConcurrencyHelpers.condVarCreate();
-            this.sizeMutex = ConcurrencyHelpers.spinlockCreate();
         }
 
         /**
@@ -74,11 +65,6 @@ export namespace containers {
         constructor(iterable: Iterable<T>) {
             this.actualCapacity = Int.MAX_VALUE;
             this.tail = this.head = new ListNode<T>();
-            this.pushMutex = ConcurrencyHelpers.mutexCreate();
-            this.pushCondVar = ConcurrencyHelpers.condVarCreate();
-            this.popMutex = ConcurrencyHelpers.mutexCreate();
-            this.popCondVar = ConcurrencyHelpers.condVarCreate();
-            this.sizeMutex = ConcurrencyHelpers.spinlockCreate();
             if (iterable) {
                 const entriesIter = iterable.$_iterator();
                 for (let iterRes = entriesIter.next(); !iterRes.done; iterRes = entriesIter.next()) {
@@ -102,11 +88,6 @@ export namespace containers {
             }
             this.actualCapacity = capacity;
             this.tail = this.head = new ListNode<T>();
-            this.pushMutex = ConcurrencyHelpers.mutexCreate();
-            this.pushCondVar = ConcurrencyHelpers.condVarCreate();
-            this.popMutex = ConcurrencyHelpers.mutexCreate();
-            this.popCondVar = ConcurrencyHelpers.condVarCreate();
-            this.sizeMutex = ConcurrencyHelpers.spinlockCreate();
             const entriesIter = (iterable as Iterable<T>).$_iterator();
             for (let iterRes = entriesIter.next(); !iterRes.done; iterRes = entriesIter.next()) {
                 const val = iterRes.value;
@@ -232,7 +213,7 @@ export namespace containers {
         override getFirst(): T | undefined {
             ConcurrencyHelpers.mutexLock(this.popMutex);
             try {
-                return this.head.next!.element;
+                return this.head.next?.element;
             } finally {
                 ConcurrencyHelpers.mutexUnlock(this.popMutex);
             }
@@ -316,29 +297,15 @@ export namespace containers {
         }
 
         private fetchAndAddSize(): int {
-            let res = 0;
-            ConcurrencyHelpers.spinlockGuard(this.sizeMutex, () => {
-                res = this.actualSize;
-                this.actualSize++;
-            });
-            return res;
+            return this.actualSize.fetchAndAdd(1);
         }
 
         private fetchAndSubSize(): int {
-            let res = 0;
-            ConcurrencyHelpers.spinlockGuard(this.sizeMutex, () => {
-                res = this.actualSize;
-                this.actualSize--;
-            });
-            return res;
+            return this.actualSize.fetchAndSub(1);
         }
 
         private atomicsGetSize(): int {
-            let res = 0;
-            ConcurrencyHelpers.spinlockGuard(this.sizeMutex, () => {
-                res = this.actualSize;
-            });
-            return res;
+            return this.actualSize.get();
         }
 
         private pushListNode(newNode: ListNode<T>): void {
@@ -356,14 +323,16 @@ export namespace containers {
             return;
         }
 
-        private pushMutex: Object;                          // push/add mutex
-        private popMutex: Object;                           // pop/remove mutex
-        private pushCondVar: Object;                        // push/add CondVar, notify when NotFull
-        private popCondVar: Object;                         // pop/remove CondVar, notify when NotEmpty
-        private actualCapacity: int = 0;                    // the capacity of the LinkedBlockingQueue.
-        private actualSize: int = 0;                        // the size of the LinkedBlockingQueue.
-        private sizeMutex: Object;                          // size mutex
-        private head: ListNode<T>;
-        private tail: ListNode<T>;
+        // Mutexes and condition variables for synchronization
+        private pushMutex: Object = ConcurrencyHelpers.mutexCreate();      // push/add mutex
+        private popMutex: Object = ConcurrencyHelpers.mutexCreate();       // pop/remove mutex
+        private pushCondVar: Object = ConcurrencyHelpers.condVarCreate();  // push/add CondVar, notify when NotFull
+        private popCondVar: Object = ConcurrencyHelpers.condVarCreate();   // pop/remove CondVar, notify when NotEmpty
+        // The actual capacity and size of the LinkedBlockingQueue
+        private actualCapacity: int = Int.MAX_VALUE;        // the capacity of the LinkedBlockingQueue.
+        private actualSize: AtomicInt = new AtomicInt(0);   // the size of the LinkedBlockingQueue.
+        // The head and tail nodes of the linked list
+        private head: ListNode<T>;                          // the dummy head node of the linked list.
+        private tail: ListNode<T>;                          // the tail node of the linked list.
     }
 }

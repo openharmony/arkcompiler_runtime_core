@@ -313,9 +313,6 @@ spec/17.Experimental_Features/Iterable_Types/for_of_10.ets
 spec/17.Experimental_Features/Iterable_Types/for_of_11.ets
 spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-08.ets
 
-#24088
-std/containers/linked_blocking_queue/LinkedBlockingQueue_AddTest.ets
-
 ### Type Erasure
 std/containers/BuiltinArrayMapTest.ets
 

@@ -60,6 +60,9 @@ coretypes:
 - managed_class: std.debug.concurrency.AtomicFlag
   mirror_class: ark::ets::EtsAtomicFlag
 
+- managed_class: std.containers.AtomicInt
+  mirror_class: ark::ets::EtsAtomicInt
+
 - managed_class: std.core.StackTraceElement
   mirror_class: ark::ets::EtsStackTraceElement
 
@@ -7501,6 +7504,70 @@ intrinsics:
       ret: void
       args: [ std.core.Object, std.core.Object ]
     impl: ark::ets::intrinsics::EtsQueueSpinlockGuard
+
+################################
+# std.containers.AtomicInt #
+################################
+
+  - name: AtomicIntSet
+    space: ets
+    class_name: std.containers.AtomicInt
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::EtsAtomicIntSetValue
+
+  - name: AtomicIntGet
+    space: ets
+    class_name: std.containers.AtomicInt
+    method_name: get
+    static: false
+    signature:
+      ret: i32
+      args: []
+    impl: ark::ets::intrinsics::EtsAtomicIntGetValue
+
+  - name: AtomicIntExchange
+    space: ets
+    class_name: std.containers.AtomicInt
+    method_name: exchange
+    static: false
+    signature:
+      ret: i32
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::EtsAtomicIntGetAndSet
+
+  - name: AtomicIntCompareAndSwap
+    space: ets
+    class_name: std.containers.AtomicInt
+    method_name: compareAndSwap
+    static: false
+    signature:
+      ret: i32
+      args: [ i32, i32 ]
+    impl: ark::ets::intrinsics::EtsAtomicIntCompareAndSet
+
+  - name: AtomicIntFetchAndAdd
+    space: ets
+    class_name: std.containers.AtomicInt
+    method_name: fetchAndAdd
+    static: false
+    signature:
+      ret: i32
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::EtsAtomicIntFetchAndAdd
+
+  - name: AtomicIntFetchAndSub
+    space: ets
+    class_name: std.containers.AtomicInt
+    method_name: fetchAndSub
+    static: false
+    signature:
+      ret: i32
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::EtsAtomicIntFetchAndSub
 
 ###############################
 # std.core.RuntimeDebug #
