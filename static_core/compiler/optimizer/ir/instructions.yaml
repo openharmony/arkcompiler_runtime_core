@@ -192,6 +192,12 @@ instructions:
     verification:
       - $verify_binary_int
 
+  - opcode: ExtractBitfield
+    base: ExtractBitfieldInst
+    signature: [d-int, int]
+    flags: [acc_write, acc_read]
+    description: Extract bitfield of integer.
+
   - opcode: Compare
     base: CompareInst
     signature: [d-bool, real-any, real-any]

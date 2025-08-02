@@ -193,6 +193,15 @@ void EncodeVisitor::VisitMod(GraphVisitor *visitor, Inst *inst)
     enc->GetCodegen()->LoadCallerRegisters(liveRegs, liveFpRegs, true);
 }
 
+void EncodeVisitor::VisitExtractBitfield(GraphVisitor *visitor, Inst *inst)
+{
+    auto bfx = static_cast<ExtractBitfieldInst *>(inst);
+    auto enc = static_cast<EncodeVisitor *>(visitor);
+    auto [dst, src0] = enc->GetCodegen()->ConvertRegisters<1U>(inst);
+    enc->GetEncoder()->EncodeExtractBits(dst, src0, Imm(bfx->GetSourceBit()), Imm(bfx->GetWidth()),
+                                         bfx->IsSignBitExtension());
+}
+
 void EncodeVisitor::VisitShrI(GraphVisitor *visitor, Inst *inst)
 {
     auto binop = inst->CastToShrI();
