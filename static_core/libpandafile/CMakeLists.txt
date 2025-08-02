@@ -109,6 +109,7 @@ if (NOT PANDA_TARGET_ARM64)
             arkfile
             arkassembler
             arkziparchive
+            arkfileExt
         SANITIZERS
             ${PANDA_SANITIZERS_LIST}
     )
