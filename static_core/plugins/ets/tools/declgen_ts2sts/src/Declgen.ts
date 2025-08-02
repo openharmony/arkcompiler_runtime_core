@@ -227,7 +227,9 @@ export class Declgen {
 
     const filePath = path.resolve(sourceFiles[0].fileName);
     return declgenOptions.includePaths.some((allowedPath) => {
-      return filePath.startsWith(path.resolve(allowedPath));
+      const base = path.normalize(path.resolve(allowedPath) + path.sep);
+      const target = path.normalize(filePath);
+      return target.startsWith(base);
     });
   }
 
