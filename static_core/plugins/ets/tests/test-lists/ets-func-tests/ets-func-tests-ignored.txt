@@ -511,3 +511,6 @@ std/core/std_core_typeduarrays_methods__BigUint64Array.ets
 regression/15278_0.ets
 spec/07.expressions/7.32.Lambda_Expressions/callMethodFromAsyncLambda2.ets
 std/concurrency/eaworker_message.ets
+
+#28648
+std/core/TypeClassInfoTest.ets
