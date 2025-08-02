@@ -71,48 +71,155 @@ export namespace taskpool {
 
         internal performTask(): boolean {
             let task: Task | undefined = getTask();
-            if (task == undefined) {
+            if (task === undefined) {
                 return false;
             }
+            removeFromIdleWorkers(this);
             workerPendingTasksCount.set(this.workerId, workerPendingTasksCount.get(this.workerId)! + 1);
             this.currentPriority = task.priority;
             let job = this.run<NullishType>((): NullishType => {
+                ConcurrencyHelpers.lockGuard(taskCountMutex, () => {
+                    waitingTasksNum--;
+                });
                 let res = task?.execute();
                 return res;
             });
             const taskRunner = (value: NullishType): NullishType => {
                 let res = job.Await();
                 return res;
-            }
+            };
             let p = Promise.resolve<NullishType>(new Object()).then<NullishType, NullishType>(taskRunner, taskRunner);
             p.then((res: NullishType) => {
 				task?.resolve(res);
-                this.notifyTaskFinished(task);
             }).catch((e) => {
                 task?.reject(e);
-                this.notifyTaskFinished(task);
             }).finally(() => {
                 this.currentPriority = undefined;
                 ConcurrencyHelpers.lockGuard(workersMutex, () => {
                     workerPendingTasksCount.set(this.workerId, workerPendingTasksCount.get(this.workerId)! - 1);
-                })
+                });
+                this.notifyTaskFinished(task);
                 setTimeout(() => {
                     task?.notifyDependencies();
                     this.notifyTaskFinished(task);
                 })
-            })
+            });
             return true;
         }
 
         internal notifyTaskFinished(task: Task): void {
+            // When the task is a sequenceRunner task.
             task?.tryTriggerRunner();
+
             if (getTaskNum()) {
-                notifyExecuteTask();
+                triggerExecuteNextTask();
+            } else {
+                ConcurrencyHelpers.lockGuard(workersMutex, () => {
+                    if (isIdleWorker(this) && this.idleTime == 0) {
+                        idleWorkers.add(this);
+                        this.idleTime = Chrono.nanoNow();
+                    }
+                })
             }
+        }
+
+        // For managerWorker to expand.
+        internal triggerExpand(): void {
+            let expandJob = this.run<NullishType>((): NullishType => {
+                let targetNum: int = 0;
+                ConcurrencyHelpers.lockGuard(taskCountMutex, () => {
+                    if (totalExecCount) {
+                        let averageDuration: number = totalExecTime / totalExecCount;
+                        let result: number = (averageDuration * waitingTasksNum) / TASK_DURATION;
+                        targetNum = (min(result, waitingTasksNum)).toInt();
+                    } else {
+                        let waitingNum: int = waitingTasksNum;
+                        targetNum = (min(waitingNum, STEP_SIZE)).toInt();
+                    }
+                });
+                if (targetNum == 0) {
+                    return 0;
+                }
+                ConcurrencyHelpers.lockGuard(workersMutex, () => {
+                    let idleWorkersNum: int = 0;
+                    for (let w : TaskPoolWorker of workers) {
+                        let currentWorkerTaskCount = workerPendingTasksCount.get(w.workerId);
+                        if(!currentWorkerTaskCount) {
+                            idleWorkersNum++;
+                        }
+                    }
+                    if (workers.size < workersLimit && idleWorkersNum < targetNum) {
+                        let step: int = (Math.ceil(min(workersLimit - workers.size,
+                                                   min(workersLimit, targetNum) - idleWorkersNum))).toInt();
+                        for (let i = 0; i < step; ++i) {
+                            let w: TaskPoolWorker = new TaskPoolWorker(isTaskpoolSupportInterop);
+                            workers.add(w);
+                        }
+                    }
+                });
+                return 1;
+            });
+        }
+
+        // For managerWorker to shrink.
+        private triggerShrink(): void {
+            let shrinkJob = this.run<NullishType>((): NullishType => {
+                this.timerId = setInterval(() => {
+                    let runningWorkersNum: int = 0;
+                    ConcurrencyHelpers.lockGuard(workersMutex, () => {
+                        for (let w: TaskPoolWorker of workers) {
+                            let currentWorkerTaskCount = workerPendingTasksCount.get(w.workerId);
+                            if(currentWorkerTaskCount) {
+                                runningWorkersNum++;
+                            }
+                        }
+                    });
+                    let targetNum: int = runningWorkersNum;
+                    ConcurrencyHelpers.lockGuard(taskCountMutex, () => {
+                        if (totalExecCount) {
+                            let averageDuration: number = totalExecTime / totalExecCount;
+                            let result: number = (averageDuration * waitingTasksNum) / TASK_DURATION;
+                            targetNum += (min(waitingTasksNum, result)).toInt();
+                        } else {
+                            targetNum += min(2, waitingTasksNum);
+                        }
+                    });
+                    ConcurrencyHelpers.lockGuard(workersMutex, () => {
+                        if (workers.size > WORKERS_MINIMUM && workers.size > targetNum) {
+                            targetNum = max(WORKERS_MINIMUM, targetNum);
+                        } else {
+                            return;
+                        }
+                        let step = min(SHRINK_STEP, workers.size - targetNum);
+                        for (let i = 0; i < step && i < idleWorkers.size; ++i) {
+                            let idleWorker = Array.from(idleWorkers)[i];
+                            if (idleWorker.idleTime != 0 && (Chrono.nanoNow() - idleWorker.idleTime) > idleThreshold) {
+                                idleWorker.join();
+                                workers.delete(idleWorker);
+                                idleWorkers.delete(idleWorker);
+                            }
+                        }
+                    })
+                }, triggerInterval);
+            });
+        }
+
+        // For managerWorker to retrigger shrink.
+        internal retriggerShrink(): void {
+            clearInterval(this.timerId);
+            this.triggerShrink();
+        }
+
+        // For managerWorker to stop and release.
+        internal stopManagerWorker(): void {
+            clearInterval(this.timerId);
+            this.join();
         }
 
         internal workerId: int;
         internal currentPriority?: Priority;
+        internal timerId: int;
+        internal idleTime: long;
     }
 
     /**
@@ -507,6 +614,11 @@ export namespace taskpool {
                 const notCanceled: boolean = taskFinished(this);
                 if(isTaskPoolUseLaunch) {
                     this.notifyDependencies();
+                } else {
+                    ConcurrencyHelpers.lockGuard(taskCountMutex, () => {
+                        totalExecTime += this.getDuration();
+                        totalExecCount++;
+                    });
                 }
                 if (!notCanceled) {
                     this.throwCancelTaskError();
@@ -540,7 +652,7 @@ export namespace taskpool {
 
         /// The task is added to taskpool for execution
         internal enqueue(priority?: Priority): void {
-            priority = priority == undefined ? Priority.MEDIUM : priority;
+            priority = priority === undefined ? Priority.MEDIUM : priority;
             this.priority = priority;
             if (!isTaskPoolUseLaunch) {
                 ConcurrencyHelpers.mutexLock(taskQueuesMutex);
@@ -797,7 +909,7 @@ export namespace taskpool {
 
         constructor(name: string, priority?: Priority) {
             this.impl = SequenceRunner.getOrCreateSeqRunnerImpl(name);
-            this.priority = priority == undefined ? Priority.MEDIUM : priority;
+            this.priority = priority === undefined ? Priority.MEDIUM : priority;
             this.tasks = new Array<Task>();
         }
 
@@ -1206,7 +1318,7 @@ export namespace taskpool {
                     currentIndex++;
                     // priority of running tasks can be regard as the priority of current thread's priority
                     // current only when task has been executed the worker can execute other task
-                    if (runningTasks.has(task) && threadInfo.priority == undefined) {
+                    if (runningTasks.has(task) && threadInfo.priority === undefined) {
                         threadInfo.priority = task.priority;
                     }
                 });
@@ -1405,10 +1517,56 @@ export namespace taskpool {
         for (let w : TaskPoolWorker of workers) {
             w.join();
         }
+        managerWorker?.stopManagerWorker();
         ConcurrencyHelpers.lockGuard(workersMutex, () => {
-            isWorkersInitialized.set(false);
             workers.clear();
         })
+    }
+
+    /**
+     * @brief Set taskpool trigger shrink interval in taskpool test suite for debug.
+     * @param interval The trigger shrink interval value.
+     */
+    function setTaskPoolTriggerShrinkInterval(interval: int): void {
+        triggerInterval = interval;
+    }
+
+    /**
+     * @brief Set taskpool idle threshold in taskpool test suite for debug.
+     * @param threshold The idle threshold value.
+     */
+    function setTaskPoolIdleThreshold(threshold: int): void {
+        idleThreshold = threshold;
+    }
+
+    /**
+     * @brief Get current taskpool workers num for debug.
+     * @returns TaskPool workers num.
+     */
+    function getTaskPoolWorkersNum(): int {
+        let num: double = 0;
+        ConcurrencyHelpers.lockGuard(workersMutex, () => {
+            num = workers.size;
+        });
+        return num.toInt();
+    }
+
+    /**
+     * @brief Set taskpool workers limit in taskpool test suite for debug.
+     * @param limit TaskPool workers limit.
+     */
+    function setTaskPoolWorkersLimit(limit: int): void {
+        if (limit <= 0) {
+            return;
+        }
+        workersLimit = limit;
+    }
+
+    /**
+     * @brief Retrigger taskpool shrink in taskpool test suite for debug.
+     */
+    function retriggerTaskPoolShrink(): void {
+        managerWorker?.retriggerShrink();
     }
 
     /**
@@ -1442,16 +1600,33 @@ export namespace taskpool {
         if (isWorkersInitialized.get() || isTaskPoolUseLaunch) {
                 return;
         }
+
         ConcurrencyHelpers.lockGuard(workersMutex, () => {
             if (isWorkersInitialized.get() || isTaskPoolUseLaunch) {
                 return;
             }
+
+            if (managerWorker === undefined) {
+                // Create managerWorker, and start to trigger shrink.
+                managerWorker = new TaskPoolWorker();
+                managerWorker.retriggerShrink();
+            }
+
+            // Init taskpool worker pool.
             for (let i = 0; i < initialWorkersNumber; ++i) {
                 let w = new TaskPoolWorker(isTaskpoolSupportInterop);
                 workers.add(w);
             }
             isWorkersInitialized.set(true);
         })
+    }
+
+    /**
+     * @brief Try to trigger expand.
+     * @see taskpool.notifyExecuteTask
+     */
+    function tryTriggerExpand(): void {
+        managerWorker?.triggerExpand();
     }
 
     /**
@@ -1462,15 +1637,57 @@ export namespace taskpool {
      * @see taskpool.SequenceRunner.execute
      */
     function notifyExecuteTask(): void {
-        initWorkerPool();
+        ConcurrencyHelpers.lockGuard(taskCountMutex, () => {
+            waitingTasksNum++;
+        });
+        triggerExecuteNextTask();
+        tryTriggerExpand();
+    }
+
+    /**
+     * @brief Trigger execute task.
+     * @see taskpool.notifyExecuteTask
+     * @see taskpool.TaskPoolWorker.notifyTaskFinished
+     */
+    function triggerExecuteNextTask(): void {
         ConcurrencyHelpers.lockGuard(workersMutex, () => {
             let w = chooseWorkerForTask();
             if (!w.performTask() && getTaskNum() > 0) {
                 // Current getTask may get an undefined task when higher priority task hit the continueCount
                 // So here we try to performTask again to avoid task cannot be executed
                 w.performTask();
+            } else if (isIdleWorker(w) && w.idleTime == 0) {
+                idleWorkers.add(w);
+                w.idleTime = Chrono.nanoNow();
             }
         })
+    }
+
+    /**
+     * @brief Check the taskpool worker is idle or not.
+     * @see taskpool.TaskPoolWorker.notifyTaskFinished
+     * @see taskpool.triggerExecuteNextTask
+     */
+    function isIdleWorker(w: TaskPoolWorker): boolean {
+        let currentWorkerTaskCount = workerPendingTasksCount.get(w.workerId);
+        if(currentWorkerTaskCount) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @brief Update taskpool worker state.
+     * @see taskpool.TaskPoolWorker.performTask
+     */
+    function removeFromIdleWorkers(worker: TaskPoolWorker): void {
+        for (let w: TaskPoolWorker of idleWorkers) {
+            if (worker == w) {
+                idleWorkers.delete(w);
+                w.idleTime = 0;
+                return;
+            }
+        }
     }
 
     /**
@@ -1478,7 +1695,7 @@ export namespace taskpool {
      * @see taskpool.notifyExecuteTask
      */
     function chooseWorkerForTask(): TaskPoolWorker {
-        let minTaskCount  = Int.MAX_VALUE;
+        let minTaskCount = Int.MAX_VALUE;
         let selectedWorker = Array.from(workers)[0];
         for (let w : TaskPoolWorker of workers) {
             let currentWorkerTaskCount = workerPendingTasksCount.get(w.workerId);
@@ -1486,8 +1703,8 @@ export namespace taskpool {
                 workerPendingTasksCount.set(w.workerId, 0);
                 return w;
             }
-            if(currentWorkerTaskCount < minTaskCount ) {
-                minTaskCount  = currentWorkerTaskCount;
+            if(currentWorkerTaskCount < minTaskCount) {
+                minTaskCount = currentWorkerTaskCount;
                 selectedWorker = w;
             }
         }
@@ -1602,6 +1819,7 @@ export namespace taskpool {
 
     native function isUsingLaunch(): boolean;
     native function isSupportingInterop(): boolean;
+    native function getTaskPoolWorkersLimit(): int;
 
     // managed mutex for taskpool containers below
     const mutex = ConcurrencyHelpers.mutexCreate();
@@ -1625,7 +1843,8 @@ export namespace taskpool {
     const workerPendingTasksCount: Map<WorkerId, Int> = new Map<WorkerId, Int>();
 
     const workersMutex = ConcurrencyHelpers.mutexCreate();
-    const workers: Set<TaskPoolWorker> = new Set<TaskPoolWorker>();
+    let workers: Set<TaskPoolWorker> = new Set<TaskPoolWorker>();
+    let idleWorkers: Set<TaskPoolWorker> = new Set<TaskPoolWorker>();
     let isWorkersInitialized: AtomicFlag = new AtomicFlag(false);
 
     const taskQueuesMutex = ConcurrencyHelpers.mutexCreate();
@@ -1643,6 +1862,19 @@ export namespace taskpool {
 
     const initialWorkersNumber: int = 2;
     const continuousExecutionCount: int = 5;
+
+    const taskCountMutex = ConcurrencyHelpers.mutexCreate();
+    let waitingTasksNum: int = 0;
+    let totalExecCount: int = 0;
+    let totalExecTime: int = 0;
+    let managerWorker: TaskPoolWorker | undefined = undefined;
+    let triggerInterval: int = 30000; // 30s is the default shrink interval.
+    let idleThreshold: int = 60000; // If the worker is idle for more than 60s, it will be released.
+    let workersLimit: int = max(4, getTaskPoolWorkersLimit()); // 4 is the minimum of workers limit.
+    const STEP_SIZE: int = 2;
+    const SHRINK_STEP: int = 4; // 4: try to release 4 threads every time.
+    const TASK_DURATION: int = 100; // 100: 100ms.
+    const WORKERS_MINIMUM: int = 1; // 1: minimum thread num when idle.
 }
 
 function launchPromise(f: Function, ...args: FixedArray<NullishType>): Promise<NullishType> {

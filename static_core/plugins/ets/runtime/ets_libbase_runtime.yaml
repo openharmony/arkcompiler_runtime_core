@@ -3396,6 +3396,16 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::taskpool::GenerateSeqRunnerId
 
+  - name: TaskpoolGetTaskPoolWorkersLimit
+    space: ets
+    class_name: escompat.taskpool
+    method_name: getTaskPoolWorkersLimit
+    static: true
+    signature:
+      ret: i32
+      args: []
+    impl: ark::ets::intrinsics::taskpool::GetTaskPoolWorkersLimit
+
 ###################
 # std.time.Chrono #
 ###################
@@ -5577,6 +5587,66 @@ intrinsics:
       ret: void
       args: [i32]
     impl: ark::ets::intrinsics::StdSystemIncreaseTaskpoolWorkersToN
+
+  - name: StdCoroutineSetTaskPoolTriggerShrinkInterval
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: setTaskPoolTriggerShrinkInterval
+    static: true
+    signature:
+      ret: void
+      args: [i32]
+    impl: ark::ets::intrinsics::StdSystemSetTaskPoolTriggerShrinkInterval
+
+  - name: StdCoroutineSetTaskPoolIdleThreshold
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: setTaskPoolIdleThreshold
+    static: true
+    signature:
+      ret: void
+      args: [i32]
+    impl: ark::ets::intrinsics::StdSystemSetTaskPoolIdleThreshold
+
+  - name: StdCoroutineGetTaskPoolWorkersNum
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: getTaskPoolWorkersNum
+    static: true
+    signature:
+      ret: i32
+      args: []
+    impl: ark::ets::intrinsics::StdSystemGetTaskPoolWorkersNum
+
+  - name: StdCoroutineSetTaskPoolWorkersLimit
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: setTaskPoolWorkersLimit
+    static: true
+    signature:
+      ret: void
+      args: [i32]
+    impl: ark::ets::intrinsics::StdSystemSetTaskPoolWorkersLimit
+
+  - name: StdCoroutineRetriggerTaskPoolShrink
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: retriggerTaskPoolShrink
+    static: true
+    signature:
+      ret: void
+      args: []
+    impl: ark::ets::intrinsics::StdSystemRetriggerTaskPoolShrink
+
+  - name: StdCoroutineGetTaskPoolWorkersLimit
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: getTaskPoolWorkersLimit
+    static: true
+    signature:
+      ret: i32
+      args: []
+    impl: ark::ets::intrinsics::taskpool::GetTaskPoolWorkersLimit
 
 ####################################
 # std.debug.concurrency.AtomicFlag #
