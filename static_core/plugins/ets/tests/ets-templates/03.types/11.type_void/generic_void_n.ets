@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,17 +14,14 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Void type
+desc: Void type in generic
+tags: [compile-only, negative]
 ---*/
 
-function foo(): void {}
-
-class C {
-    bar(): void {}
+class A<T> {
+    f: T
+    m(): T { return this.f }
+    constructor(f: T) {this.f = f}
 }
 
-type FunctionWithNoParametersType = () => void
-
-let funcTypeVariable: FunctionWithNoParametersType = (): void => {}
-
-function main(): void {}
+let a: A<void> = new A<void>(void)
