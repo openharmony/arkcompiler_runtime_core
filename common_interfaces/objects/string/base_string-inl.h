@@ -691,6 +691,7 @@ template <typename ReadBarrier>
 bool BaseString::StringIsEqualUint8Data(ReadBarrier &&readBarrier, const BaseString *str1, const uint8_t *dataAddr,
                                         uint32_t dataLen, bool canBeCompressToUtf8)
 {
+    DCHECK_CC(str1 != nullptr);
     if (!str1->IsSlicedString() && canBeCompressToUtf8 != str1->IsUtf8()) {
         return false;
     }
