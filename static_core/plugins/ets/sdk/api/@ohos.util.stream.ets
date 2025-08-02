@@ -40,8 +40,6 @@ export namespace stream {
         'shift_jis', 'euc-kr', 'x-mac-cyrillic', 'utf-16be', 'utf-16le');
 
     // BusinessError
-    const ERR_INCORRECT_PARAMETER: BusinessError =
-        createBusinessError(401, 'Parameter error. Incorrect parameter.');
     const ERR_DOWRITE_NOT_IMPLEMENTED: BusinessError =
         createBusinessError(10200035, 'The doWrite() method is not implemented.');
     const ERR_WRITE_AFTER_END: BusinessError =
@@ -364,6 +362,8 @@ export namespace stream {
         private getChunkLength(chunk: string | Uint8Array): int {
             if (chunk instanceof Uint8Array) {
                 return (chunk as Uint8Array).byteLength.toInt();
+            } else if ((chunk as string) === '') {
+                throw createBusinessError(401, 'Cannot read property byteLength of undefined');
             } else {
                 return (chunk as string).length.toInt();
             }
@@ -799,8 +799,8 @@ export namespace stream {
             if (encoding) {
                 this.setEncoding(encoding!);
             }
-            if (chunk === null) {
-                throw ERR_INCORRECT_PARAMETER;
+            if (chunk === null || chunk === undefined) {
+                throw createBusinessError(401, `Parameter error. The type of ${chunk} must be string or UintArray`);
             }
             if (this.ending && !this.erroredInner) {
                 this.erroredInner = ERR_WRITE_AFTER_END;
