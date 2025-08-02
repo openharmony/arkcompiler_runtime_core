@@ -620,7 +620,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
      */
     export class Buffer implements JsonElementDeserializable {
         /** The underlying ArrayBuffer storing the binary data */
-        public buffer: ArrayBuffer;
+        private bufferData: ArrayBuffer;
         /** The offset into the buffer where this Buffer instance starts */
         internal readonly byteOffsetNumber: int;
 
@@ -632,6 +632,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
 
         get byteOffset(): int { return this.byteOffsetNumber }
 
+        get buffer(): ArrayBuffer { return this.bufferData }
         /**
          * Creates a new Buffer instance
          * @param {ArrayBuffer} buffer - The underlying ArrayBuffer to use
@@ -639,7 +640,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
          */
         public constructor(buffer: ArrayBuffer, byteOffset: int = 0)
         {
-            this.buffer = buffer;
+            this.bufferData = buffer;
             this.byteOffsetNumber = byteOffset;
             if (byteOffset >= this.buffer.getByteLength() && this.buffer.getByteLength() > 0) {
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "byteOffset" is out of range. Received value is: ${byteOffset}`)
@@ -1944,12 +1945,12 @@ It must be >= 0 and <= ${this.length}. Received value is: ${index}`)
         /**
          * The content-size of the Blob.
          */
-        size: number
+        get size(): int { return this.blobSize }
 
         /**
          * The content-type of the Blob.
          */
-        type: string
+        get type(): string { return this.blobType }
 
         /**
          * The buffer of the Blob.
@@ -1960,6 +1961,16 @@ It must be >= 0 and <= ${this.length}. Received value is: ${index}`)
          * Get the array of buffer.
          */
         private arr: ArrayUnionType
+
+        /**
+         * The size of the Blob.
+         */
+        private blobSize: int;
+
+        /**
+         * The type of the Blob.
+         */
+        private blobType: string;
         /**
          * Creates a new Blob object containing a concatenation of the given sources.
          * <ArrayBuffer>, <TypedArray>, <DataView>, and <Buffer> sources are copied into the 'Blob' and can therefore be safely modified after the 'Blob' is created.
@@ -1970,11 +1981,11 @@ It must be >= 0 and <= ${this.length}. Received value is: ${index}`)
         constructor(sources: FixedArrayUnionType, options?: BlobOptions) {
             this.handleParameters(sources)
             this.arrBuffer = this.flattenData(this.arr)
-            this.size = this.arrBuffer.byteLength;
+            this.blobSize = this.arrBuffer.byteLength;
             if (options != undefined) {
-                this.type = options!.type ? options!.type! : ''
+                this.blobType = options!.type ? options!.type! : ''
             } else {
-                this.type = ''
+                this.blobType = ''
             }
         }
 
@@ -1987,21 +1998,21 @@ It must be >= 0 and <= ${this.length}. Received value is: ${index}`)
          */
         constructor(sources: ArrayUnionType, options?: BlobOptions) {
             this.arrBuffer = this.flattenData(sources);
-            this.size = this.arrBuffer.byteLength;
+            this.blobSize = this.arrBuffer.byteLength;
             if (options != undefined) {
-                this.type = options!.type ? options!.type! : ''
+                this.blobType = options!.type ? options!.type! : ''
             } else {
-                this.type = ''
+                this.blobType = ''
             }
         }
 
         private constructor(sources: Array<ArrayBuffer>, typeKey: string, type?: string) {
             this.arrBuffer = this.flattenData(sources)
-            this.size = this.arrBuffer.byteLength;
+            this.blobSize = this.arrBuffer.byteLength;
             if (type != undefined) {
-                this.type = type
+                this.blobType = type
             } else {
-                this.type = ''
+                this.blobType = ''
             }
         }
 
