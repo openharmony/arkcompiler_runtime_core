@@ -30,6 +30,11 @@ enum LogLevel {
     PRINTLN = 5,
 }
 
+class ColumnMap {
+    columnValue:Map<string, Array<string>> = new Map<string, Array<string>>();
+    constructor() {}
+}
+
 /**
  * A Console class that provides access to standard output and error streams.
  * Supports printing various data types, timing operations, and indentation management.
@@ -76,6 +81,22 @@ export final class Console {
      * @private
      */
     private counters: Map<string, int>
+
+    private static tableChars: Map<string, string> = new Map<string,string>([
+        ["middleMiddle", "─"],
+        ["rowMiddle", "┼"],
+        ["topRight", "┐"],
+        ["topLeft", "┌"],
+        ["leftMiddle", "├"],
+        ["topMiddle", "┬"],
+        ["bottomRight", "┘"],
+        ["bottomLeft", "└"],
+        ["bottomMiddle", "┴"],
+        ["rightMiddle", "┤"],
+        ["left", "│ "],
+        ["right", " │"],
+        ["middle", " │ "],
+    ])
 
     /**
      * Internal constructor for Console class
@@ -512,11 +533,10 @@ export final class Console {
             for (let i = 0; i < d.length; ++i) {
                 d[i] = dat[i]
             }
-            df = DataFrame.fromObjects(...d)
+            DataFrame.fromObjects(...d)
         } else {
-            df = DataFrame.fromObjects(dat)
+            Console.parseObject(dat)
         }
-        df!.display();
     }
 
     /**
@@ -534,6 +554,7 @@ export final class Console {
     */
     public time(label?: string): void {
         const key = label ?? 'default'
+        Console.isNullCharacter(key);
         if (this.timers.has(key)) {
             this.warn("⚠️ Warning: Label 'default' already exists for console.time()")
             return
@@ -549,17 +570,23 @@ export final class Console {
     * @returns {void}
     * @see time
     */
-    public timeLog(label?: string): void {
+    public timeLog(label?: string, ...arguments: Object[]): void {
         const key = label ?? 'default'
+        Console.isNullCharacter(key);
+        const len = arguments.length;
+        let result = "";
         const startTime = this.timers.get(key)
         if (startTime === undefined) {
             this.warn(`Timer '${key}' does not exist`)
             return
         }
+        for (let i = 0; i < len; i++) {
+            result += " ";
+            result += arguments[i].toString();
+        }
         const end = Date.now().toLong()
         const duration = end - startTime
-        this.log("Start: ", startTime, " end:", end, " diff: ", duration)
-        this.log(`${key}: ${duration}ms`)
+        this.log(`${key}: ${duration}ms ${result}`)
     }
 
     /**
@@ -570,6 +597,9 @@ export final class Console {
     * @see time
     */
     public timeEnd(label?: string): void {
+        if (label != undefined) {
+            Console.isNullCharacter(label);
+        }
         this.timeLog(label)
         this.timers.delete(label ?? 'default')
     }
@@ -588,6 +618,291 @@ export final class Console {
         }
     }
 
+    private static isNullCharacter(key: string) {
+        if (key.length == 0 || (key[0] == '\0')) {
+            throw new Error("Parameter error. The input parameters are invalid, Timer or Counter name must be not null.")
+        }
+    }
+
+    private static parseObject(...data: NullishType[]): void {
+        const dat = data[0];
+        const objType = Type.of(dat);
+        const objValue = reflect.Value.of(dat);
+        if (objType instanceof ClassType) {
+            let hasPrimitive = false;
+            let columnMap = new ColumnMap();
+            const arrayValue = objValue as ClassValue;
+            const keyLength =objType.getFieldsNum();
+            let keyArray = new Array<string>();
+            let valuesKeyArray:Array<string> = new Array<string>(keyLength).fill("");
+            for (let i = 0; i < keyLength; i++) {
+                let fieldName = objType.getField(i).getName() as string;
+                keyArray.push(fieldName);
+                let value = arrayValue.getField(i);
+                let valueType = objType.getField(i).getType();
+                if (valueType.isPrimitive()) {
+                    valuesKeyArray[i] = value.toString();
+                    hasPrimitive = true;
+                } else {
+                    let value = arrayValue.getField(i).getData();
+                    Console.parseObjectInner(value, valueType, keyLength, columnMap, i);
+                }
+            }
+            let outputKeysArray = Console.getKeyArray(columnMap);
+            let outputValuesArray = Console.getValueArray(columnMap, keyLength, keyArray)
+            if (hasPrimitive) {
+                Console.setPrimitive(columnMap, keyLength, valuesKeyArray, outputKeysArray,   outputValuesArray);
+            }
+            let tableResult = Console.graphTable(outputKeysArray, outputValuesArray, keyLength);
+            Console.printTable(tableResult);
+        } else {
+            DataFrame.fromObjects(dat);
+        }
+    }
+
+    private static parseObjectInner(value: Any, valueType:Type, keyLength: number, columnMap: ColumnMap, index: number): void {
+        let initialMap = new Map<string, boolean>();
+        let keys:Array<string> = new Array<string>();
+        let innerLength: number = 0;
+        let innerValue: Array<string> = new Array<string>();
+        if (valueType.toString() == "escompat.Array") {
+            let innerValueStr = (reflect.Value.of(value)).toPrint(10);
+            Console.parseString(innerValueStr, keys, innerValue);
+            innerLength = innerValue.length;
+        } else if (valueType instanceof ClassType) {
+            Console.parseClassType(value, keys, innerValue);
+            innerLength = innerValue.length;
+        } else if (valueType instanceof InterfaceType) {
+            Console.parseClassType(value, keys, innerValue);
+            innerLength = innerValue.length;
+        }
+        Console.setColumnMap(innerLength, initialMap, columnMap, innerValue, keys, keyLength, index);
+    }
+
+    private static setColumnMap(innerLength: number, initialMap: Map<string, boolean>, columnMap: ColumnMap, innerValue: Array<string>, keys:Array<string>, keyLength:number, i: number): void {
+        for (let j = 0; j < innerLength; j++) {
+            let innerKey = keys[j];
+            if (!initialMap.has(innerKey)) {
+                let mapArrayLen = innerLength > keyLength ? innerLength : keyLength;
+                let mapArray = new Array<string>(mapArrayLen).fill("");
+                mapArray[i] = innerValue[j];
+                columnMap.columnValue.set(innerKey, mapArray);
+                initialMap.set(innerKey, true);
+            } else {
+                let mapTmp: Array<string> = columnMap.columnValue.get(innerKey)!;
+                mapTmp[i] = innerValue[j];
+                columnMap.columnValue.set(innerKey, mapTmp);
+            }
+        }
+    }
+
+    private static parseString(innerValueStr:string, keys:Array<string>, innerValue:Array<string>):void {
+        let stringLen = innerValueStr.length;
+        let index = 0;
+        for (let i = 0; i < stringLen; ++i) {
+            if (innerValueStr[i] <= '9' && innerValueStr[i] >= '0') {
+                let num = parseInt(innerValueStr[i]);
+                innerValue.push(num.toString());
+                keys.push(index.toString());
+                index++;
+            }
+        }
+    }
+
+    private static parseClassType(value:Any, keys: Array<string>, innerValue: Array<string>): void {
+        const objType = Type.of(value);
+        const objValue = reflect.Value.of(value);
+        if (objType instanceof ClassType) {
+            const arrayValue = objValue as ClassValue;
+            const keyLength = objType.getFieldsNum();
+            for (let i = 0; i < keyLength; i++) {
+                let fieldName = objType.getField(i).getName() as string;
+                keys.push(fieldName);
+                let values = Console.getValues(arrayValue, i)
+                innerValue.push(values);
+            }
+        }
+    }
+
+    private static getValues(arrayValue: ClassValue, i: int): string {
+        let str = "";
+        let type = Type.of(arrayValue) as ClassType;
+        let value = arrayValue.getField(i);
+        let valueType = type.getField(i).getType();
+        if (valueType.isPrimitive()) {
+            str = value.toString();
+        } else {
+            str = value.toPrint(10);
+        }
+        return str;
+    }
+
+    private static getKeyArray(columnMap: ColumnMap): Array<string> {
+        let mapLen = columnMap.columnValue.size;
+        let keysArray: Array<string> = new Array<string>();
+        for (const key of columnMap.columnValue.keys()) {
+            keysArray.push(key);
+        }
+        let keyLength = mapLen + 1;
+        let outputKeysArray:Array<string> = new Array<string>(keyLength);
+        outputKeysArray[0] = "(index)";
+        for (let i = 0; i < mapLen; i++) {
+            outputKeysArray[i + 1] = keysArray[i];
+        }
+        return outputKeysArray;
+    }
+
+    private static getValueArray(columnMap: ColumnMap, length: number, keyArray: Array<string>): Array<string> {
+        let mapLen = columnMap.columnValue.size;
+        let mapKeys: Array<string> = new Array<string>();
+        for (const key of columnMap.columnValue.keys()) {
+            mapKeys.push(key);
+        }
+        let keyLength = mapLen + 1;
+        let valueLength = keyLength * length;
+        let outputValuesArray:Array<string> = new Array<string>(valueLength);
+        let valueIndex = 0;
+        for (let i = 0; i < length; i++) {
+            let key = keyArray[i];
+            outputValuesArray[valueIndex++] = key;
+        }
+        for (let i = 0; i < mapLen; i++) {
+            let innerKey = mapKeys[i];
+            let valueArray:Array<string> = columnMap.columnValue.get(innerKey)!;
+            for (let j = 0; j < length; j++) {
+                if (valueArray[j] != null && valueArray[j] != undefined) {
+                    outputValuesArray[valueIndex++] = valueArray[j] as string;
+                }
+            }
+        }
+        return outputValuesArray;
+    }
+
+    private static setPrimitive(columnMap: ColumnMap, length: number, valuesKeyArray: Array<string>, outputKeysArray: Array<string>, outputValuesArray: Array<string>): void {
+        let mapLen = columnMap.columnValue.size;
+        let mapKeys: Array<string> = new Array<string>();
+        for (const key of columnMap.columnValue.keys()) {
+            mapKeys.push(key);
+        }
+        outputKeysArray.push("Values");
+        for (let i = 0; i < length; i++) {
+            outputValuesArray.push(valuesKeyArray[i]);
+        }
+    }
+
+    private static graphTable(head: Array<string>, columns: Array<string>, length: number): Array<string> {
+        let columnLen = head.length;
+        let columnWidths: Array<number> = new Array<number>(columnLen);
+        let rowDivider: Array<string> = new Array<string>(columnLen);
+        let tableResult: Array<string> = new Array<string>();
+        for (let i = 0; i < columnLen; i++) {
+            let stringLen = head[i].length;
+            columnWidths[i] = stringLen;
+        }
+        for (let i = 0; i < columnLen; i++) {
+            for (let j = 0; j < length; j++) {
+                let element = columns[i * length + j];
+                let stringLen = Console.getStringLen(element);
+                columnWidths[i] = columnWidths[i] > stringLen ? columnWidths[i] : stringLen;
+            }
+            let middle: string = Console.tableChars.get("middleMiddle")!;
+            rowDivider[i] = Console.stringRepeat(columnWidths[i] + 2, middle);
+        }
+        let indexRow1: string = Console.tableChars.get("topLeft")! + Console.arrayJoin(rowDivider, Console.tableChars.get("topMiddle")!) + Console.tableChars.get("topRight")!;
+        let indexRow2: string = Console.renderHead(head, columnWidths);
+        let indexRow3 = Console.tableChars.get("leftMiddle")! + Console.arrayJoin(rowDivider, Console.tableChars.get("rowMiddle")!) + Console.tableChars.get("rightMiddle")!;
+        tableResult.push(indexRow1);
+        tableResult.push(indexRow2);
+        tableResult.push(indexRow3);
+        let rows = Console.printRows(columns, columnWidths, length);
+        for (let i = 0; i < rows.length; i++) {
+            tableResult.push(rows[i]);
+        }
+        let endRow = Console.tableChars.get("bottomLeft")! + Console.arrayJoin(rowDivider, Console.tableChars.get("bottomMiddle")!) + Console.tableChars.get("bottomRight")!;
+        tableResult.push(endRow);
+        return tableResult;
+    }
+
+    private static getStringLen(str: string):number {
+        let length = 0;
+        for (let i =0; i < str.length; i++) {
+            if (str[i] != "" && str[i] != undefined && str[i] != null) {
+                length++;
+            }
+        }
+        return length;
+    }
+
+    private static stringRepeat(number: number, tableChars: string): string {
+        let divider: string = "";
+        let length = number;
+        for (let i = 0; i < length; i++) {
+            divider += tableChars;
+        }
+        return divider;
+    }
+
+    private static arrayJoin(rowDivider: Array<string>, tableChars: string): string {
+        let size = rowDivider.length;
+        if (size == 0) {
+            return "no rowDivider";
+        }
+        let result: string = rowDivider[0];
+        for (let i = 1; i < size; i++) {
+            result += tableChars;
+            result += rowDivider[i];
+        }
+        return result;
+    }
+
+    private static renderHead(head: Array<string>, columnWidths: Array<number>) {
+        let result = Console.tableChars.get("left")!;
+        let length = columnWidths.length;
+        for (let i = 0; i < length; i++) {
+            let elemStr = head[i];
+            let stringLen = elemStr.length;
+            let left = (columnWidths[i] - stringLen) / 2;
+            let right = columnWidths[i] - stringLen - left;
+            result += Console.stringRepeat(left, " ") + elemStr + Console.stringRepeat(right, " ");
+            if (i != length - 1) {
+                result += Console.tableChars.get("middle")!;
+            }
+        }
+        result += Console.tableChars.get("right")!;
+        return result;
+    }
+
+    private static printRows(Rows: Array<string>, columnWidths: Array<number>, indexNum: number): Array<string> {
+        let rows:Array<string> = new Array<string>();
+        let length = columnWidths.length;
+        for (let i = 0; i < indexNum; i++) {
+            let result:string = Console.tableChars.get("left")!;
+            for (let j = 0; j < length; j++) {
+                let stringVal = Rows[j * indexNum + i];
+                let stringLen = Console.getStringLen(stringVal);
+                if (stringLen > 0) {
+                    let left:int = ((columnWidths[j] - stringLen) / 2) as int;
+                    let right:int = (columnWidths[j] - stringLen - left) as int;
+                    result += Console.stringRepeat(left, " ") + stringVal + Console.stringRepeat(right, " ");
+                } else {
+                    result += Console.stringRepeat(columnWidths[j], " ");
+                }
+                if (j != length - 1) {
+                    result += Console.tableChars.get("middle")!;
+                }
+            }
+            result += Console.tableChars.get("right")!;
+            rows.push(result);
+        }
+        return rows;
+    }
+    
+    private static printTable(tableResult: Array<string>): void {
+        let len = tableResult.length;
+        for (let i = 0; i < len; i++) {
+            console.log(tableResult[i]);
+        }
+    }
 }
 
 // initialized in _initializerBlock_.ets
@@ -624,7 +939,7 @@ class DataFrame {
     private rowsCount: int
 
     /** Header text for the index column */
-    private static readonly headerIndexRow: string = '| (index) |'
+    private static readonly headerIndexRow: string = '│ (index) │'
 
     /** Width of the index column based on header */
     private readonly _indexColumnWidth: int = Double.toInt(DataFrame.headerIndexRow.length);
@@ -685,10 +1000,15 @@ class DataFrame {
             connectorLeft.length.toInt() -
             connectorRight.length.toInt();
         const conn: string = ch.repeat(connLength);
-        let border: string = `${connectorLeft}${conn}`;
-        for (const col of this.tableModel.keys()) {
-            const colWidth = this.columnWidths.get(col)!;
-            border += ch.repeat(colWidth + 2) + commonConnector;
+        let border: string = `${connectorLeft}${conn}${commonConnector}`;
+        const keys = Array.from(this.tableModel.keys());
+        for (let i = 0; i < keys.length; i++) {
+            const colWidth = this.columnWidths.get(keys[i])!;
+            if (i != keys.length - 1) {
+                border += ch.repeat(colWidth + 2) + commonConnector;
+            } else {
+                border += ch.repeat(colWidth + 2);
+            }
         }
         return `${border}${connectorRight}`;
     }
@@ -734,11 +1054,11 @@ class DataFrame {
         }
 
         // row1
-        const topBorder = this.buildBorderRow('─', '─', '┌', '┐');
+        const topBorder = this.buildBorderRow('─', '┬', '┌', '┐');
         // row2
-        const separator = this.buildBorderRow('─', '─', '├', '┤');
+        const separator = this.buildBorderRow('─', '┼', '├', '┤');
         // row3
-        const bottomBorder = this.buildBorderRow('─', '─', '└', '┘');
+        const bottomBorder = this.buildBorderRow('─', '┴', '└', '┘');
         // header has 2 rows and footer - 1
 
         const output = new Array<string>(4 + this.rowsCount);
@@ -846,13 +1166,12 @@ class DataFrame {
     /**
      * Creates a DataFrame from an array of objects
      * @param {NullishType[]} data - Array of objects to convert
-     * @returns {DataFrame} New DataFrame instance
      * @static
      */
-    public static fromObjects(...data: NullishType[]): DataFrame {
-        if (data.length == 0) {
-            return new DataFrame(new Array<ColumnName>());
-        }
+    public static fromObjects(...data: NullishType[]): void {
+        let dat = data[0];
+        const objType = Type.of(dat);
+        const objValue = reflect.Value.of(dat);
         const columns = new Set<string>();
         const preparedInfo = new Array<Map<string, string>>(data.length);
         for (let i = 0; i < data.length; ++i){
@@ -866,7 +1185,6 @@ class DataFrame {
         for (let i = 0; i < data.length; ++i) {
             df.insertRow(preparedInfo[i]);
         }
-        return df;
+        df!.display();
     }
-
 }

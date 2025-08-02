@@ -80,6 +80,10 @@ export class LinkedList<T> implements Iterable<T> {
         this.elementNum = 0;
     }
 
+    public toString(): string {
+        return "[object LinkedList]";
+    }
+
     /**
      * Gets the number of elements in the list.
      */

@@ -20,6 +20,10 @@ export type QueueForEachCb<T> = (value: T, index: int, queue: Queue<T>) => void;
 export class Queue<T> implements Iterable<T> {
     private buffer: Deque<T>;
 
+    public toString(): string {
+        return "[object Queue]";
+    }
+
     /**
      * Gets the number of elements in the Queue.
      */

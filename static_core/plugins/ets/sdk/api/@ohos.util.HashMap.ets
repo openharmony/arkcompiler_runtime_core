@@ -72,6 +72,10 @@ export default class HashMap<K, V> implements ReadonlyHashMap<K, V> {
         this.buckets = new Map<K, V>();
     }
 
+    public toString(): string {
+        return "[object HashMap]";
+    }
+
     /**
      * Returns number of Entries with unique keys in the HashMap
      *
