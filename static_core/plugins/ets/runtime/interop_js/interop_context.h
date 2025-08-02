@@ -661,6 +661,7 @@ bool ConstStringStorage::EnumerateStrings(size_t startFrom, size_t count, Callba
     return true;
 }
 
+bool TryInitInteropInJsEnv(void *napiEnv);
 }  // namespace ark::ets::interop::js
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_CONTEXT_H_

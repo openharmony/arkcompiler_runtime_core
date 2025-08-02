@@ -419,6 +419,10 @@ void InteropCtx::InitExternalInterfaces()
         // It's a hack and we should use INTEROP_CODE_SCOPE to allocate records.
         // Will be fixed in near future.
         InteropCtx::Current()->CallStack().AllocRecord(etsCoro->GetCurrentFrame(), nullptr);
+#if defined(PANDA_TARGET_OHOS) && defined(PANDA_ETS_INTEROP_JS)
+        // Here need to init interop in the given JSVM instance.
+        TryInitInteropInJsEnv(jsEnv);
+#endif
     });
 }
 
