@@ -217,16 +217,6 @@ static ani_status InitializeClass(ScopedManagedCodeFix &s, EtsClass *klass)
     return ANI_OK;
 }
 
-static Value ConstructValueFromFloatingPoint(float val)
-{
-    return Value(bit_cast<int32_t>(val));
-}
-
-static Value ConstructValueFromFloatingPoint(double val)
-{
-    return Value(bit_cast<int64_t>(val));
-}
-
 static ArgVector<Value> GetArgValues(ScopedManagedCodeFix &s, EtsMethod *method, va_list args, ani_object object)
 {
     ASSERT(method != nullptr);
@@ -240,39 +230,61 @@ static ArgVector<Value> GetArgValues(ScopedManagedCodeFix &s, EtsMethod *method,
     panda_file::ShortyIterator end;
     ++it;  // skip the return value
     for (; it != end; ++it) {
-        panda_file::Type type = *it;
         // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
-        switch (type.GetId()) {
-            case TypeId::U1:
-            case TypeId::U16:
-                parsedArgs.emplace_back(va_arg(args, uint32_t));
-                break;
-            case TypeId::I8:
-            case TypeId::I16:
-            case TypeId::I32:
-                parsedArgs.emplace_back(va_arg(args, int32_t));
-                break;
-            case TypeId::I64:
-                parsedArgs.emplace_back(va_arg(args, int64_t));
-                break;
-            case TypeId::F32:
-                parsedArgs.push_back(ConstructValueFromFloatingPoint(static_cast<float>(va_arg(args, double))));
-                break;
-            case TypeId::F64:
-                parsedArgs.push_back(ConstructValueFromFloatingPoint(va_arg(args, double)));
-                break;
-            case TypeId::REFERENCE: {
-                auto *param = s.ToInternalType(va_arg(args, ani_ref));
-                parsedArgs.emplace_back(param != nullptr ? param->GetCoreType() : nullptr);
-                break;
-            }
-            default:
-                LOG(FATAL, ANI) << "Unexpected argument type";
-                break;
+        panda_file::Type type = *it;
+        Value val;
+
+        auto id = type.GetId();
+        if (id == TypeId::REFERENCE) {
+            auto *param = s.ToInternalType(va_arg(args, ani_ref));
+            val = Value(param != nullptr ? param->GetCoreType() : nullptr);
+        } else if (id == TypeId::U1 || id == TypeId::U16) {
+            val = Value(static_cast<int32_t>(va_arg(args, uint32_t)));
+        } else if (id == TypeId::I8 || id == TypeId::I16 || id == TypeId::I32) {
+            val = Value(static_cast<int32_t>(va_arg(args, int32_t)));
+        } else if (id == TypeId::I64) {
+            val = Value(static_cast<int64_t>(va_arg(args, int64_t)));
+        } else if (id == TypeId::F32) {
+            val = Value(bit_cast<int32_t>(static_cast<float>(va_arg(args, double))));
+        } else if (id == TypeId::F64) {
+            double d = va_arg(args, double);
+            val = Value(bit_cast<int64_t>(d));
+        } else {
+            LOG(FATAL, ANI) << "Unexpected argument type";
         }
+        parsedArgs.emplace_back(val);
         // NOLINTEND(cppcoreguidelines-pro-type-vararg)
     }
     return parsedArgs;
+}
+
+static Value ConvertArgValue(ScopedManagedCodeFix &s, const ani_value *arg, panda_file::Type type)
+{
+    switch (type.GetId()) {
+        case TypeId::U1:
+            return Value(arg->z);
+        case TypeId::U16:
+            return Value(arg->c);
+        case TypeId::I8:
+            return Value(arg->b);
+        case TypeId::I16:
+            return Value(arg->s);
+        case TypeId::I32:
+            return Value(arg->i);
+        case TypeId::I64:
+            return Value(arg->l);
+        case TypeId::F32:
+            return Value(bit_cast<int32_t>(arg->f));
+        case TypeId::F64:
+            return Value(bit_cast<int64_t>(arg->d));
+        case TypeId::REFERENCE: {
+            auto *param = s.ToInternalType(arg->r);
+            return Value(param != nullptr ? param->GetCoreType() : nullptr);
+        }
+        default:
+            LOG(FATAL, ANI) << "Unexpected argument type";
+    }
+    return Value(nullptr);
 }
 
 // CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
@@ -286,47 +298,12 @@ static ArgVector<Value> GetArgValues(ScopedManagedCodeFix &s, EtsMethod *method,
     if (object != nullptr) {
         parsedArgs.emplace_back(s.ToInternalType(object)->GetCoreType());
     }
-
     panda_file::ShortyIterator it(method->GetPandaMethod()->GetShorty());
     panda_file::ShortyIterator end;
     ++it;  // skip the return value
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     for (const auto *arg = args; it != end; ++arg, ++it) {
-        panda_file::Type type = *it;
-        switch (type.GetId()) {
-            case TypeId::U1:
-                parsedArgs.emplace_back(arg->z);
-                break;
-            case TypeId::U16:
-                parsedArgs.emplace_back(arg->c);
-                break;
-            case TypeId::I8:
-                parsedArgs.emplace_back(arg->b);
-                break;
-            case TypeId::I16:
-                parsedArgs.emplace_back(arg->s);
-                break;
-            case TypeId::I32:
-                parsedArgs.emplace_back(arg->i);
-                break;
-            case TypeId::I64:
-                parsedArgs.emplace_back(arg->l);
-                break;
-            case TypeId::F32:
-                parsedArgs.push_back(ConstructValueFromFloatingPoint(arg->f));
-                break;
-            case TypeId::F64:
-                parsedArgs.push_back(ConstructValueFromFloatingPoint(arg->d));
-                break;
-            case TypeId::REFERENCE: {
-                auto *param = s.ToInternalType(arg->r);
-                parsedArgs.emplace_back(param != nullptr ? param->GetCoreType() : nullptr);
-                break;
-            }
-            default:
-                LOG(FATAL, ANI) << "Unexpected argument type";
-                break;
-        }
+        parsedArgs.emplace_back(ConvertArgValue(s, arg, *it));
     }
     return parsedArgs;
 }
