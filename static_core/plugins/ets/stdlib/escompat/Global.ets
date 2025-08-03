@@ -303,46 +303,46 @@ export function setTimeout(func: Function): int {
  * Execute function with parameters after the timer expires.
  *
  * @param { Function } func - the function to be executed after the timer expires.
- * @param { int } delayMs - timeout in milliseconds.
+ * @param { int | null | undefined}  delayMs - timeout in milliseconds, if pass null or undefined will be treated as 0 milliseconds.
  * @param { ...NullishType } args - parameters passed to func.
  * @returns { int } timer id
  */
-export function setTimeout(func: Function, delayMs: int, ...args: FixedArray<NullishType>): int {
-    return startTimer((): void => { func.unsafeCall(...args) }, delayMs, false);
-}
-
-/**
- * Print error message on the next cycle.
- *
- * @param { string } msg - the message to be printed on the next cycle.
- * @returns { int } timer id
- */
-export function setTimeout(msg: string): int {
-    return setTimeout(():void => {
-        console.error(msg)
-    }, 0);
+export function setTimeout(func: Function, delayMs: int | null | undefined, ...args: FixedArray<NullishType>): int {
+    if (delayMs) {
+        return startTimer((): void => { func.unsafeCall(...args) }, delayMs, false);
+    } else {
+        return startTimer((): void => { func.unsafeCall(...args) }, 0, false);
+    }
 }
 
 /**
  * Print error message after the timer expires.
  *
  * @param { string } msg - the message to be printed after the timer expires.
- * @param { int } delayMs - timeout in milliseconds.
+ * @param { int | null | undefined}  delayMs - timeout in milliseconds, if pass empty or null or undefined will be treated as 0 milliseconds.
  * @returns { int } timer id
  */
-export function setTimeout(msg: string, delayMs: int): int {
-    return setTimeout(():void => {
-        console.error(msg)
-    }, delayMs);
+export function setTimeout(msg: string, delayMs?: int | null): int {
+    if (delayMs) {
+        return setTimeout(():void => {
+            console.error(msg)
+        }, delayMs);
+    } else {
+        return setTimeout(():void => {
+            console.error(msg)
+        }, 0);
+    }
 }
 
 /**
  * Cancel the specified timer.
  *
- * @param { int } timerId - the id of the timer returned from setTimeout.
+ * @param { int | null | undefined} timerId - the id of the timer returned from setTimeout, if pass empty or null or undefined will do nothing.
  */
-export function clearTimeout(timerId: int): void {
-    stopTimer(timerId);
+export function clearTimeout(timerId?: int | null): void {
+    if (timerId) {
+        stopTimer(timerId);
+    }
 }
 
 /**
@@ -359,46 +359,46 @@ export function setInterval(func: Function): int {
  * Repeatedly call the function with delayMs interval between calls. The first call will be after delayMs.
  *
  * @param { Function } func - the function to be executed.
- * @param { int } delayMs - timeout in milliseconds.
+ * @param { int | null | undefined} delayMs - timeout in milliseconds, if pass null or undefined will be treated as 0 milliseconds.
  * @param { ...NullishType } args - parameters passed to func.
  * @returns { int } - timer id
  */
-export function setInterval(func: Function, delayMs: int, ...args: FixedArray<NullishType>): int {
-    return startTimer((): void => { func.unsafeCall(...args) }, delayMs, true);
-}
-
-/**
- * Repeatedly print the error message asynchronously.
- *
- * @param { string } msg - the message to be printed.
- * @returns { int } - timer id
- */
-export function setInterval(msg: string): int {
-    return setInterval(():void => {
-        console.error(msg)
-    }, 0);
+export function setInterval(func: Function, delayMs: int | null | undefined, ...args: FixedArray<NullishType>): int {
+    if (delayMs) {
+        return startTimer((): void => { func.unsafeCall(...args) }, delayMs, true);
+    } else {
+        return startTimer((): void => { func.unsafeCall(...args) }, 0, true);
+    }
 }
 
 /**
  * Repeatedly print the error message with delayMs interval between calls. The first print will be after delayMs.
  *
  * @param { string } msg - the message to be printed.
- * @param { int } delayMs - timeout in milliseconds.
+ * @param { int | null | undefined}  delayMs - timeout in milliseconds, if pass empty or null or undefined will be treated as 0 milliseconds.
  * @returns { int } timer id
  */
-export function setInterval(msg: string, delayMs: int): int {
-    return setInterval(():void => {
-        console.error(msg)
-    }, delayMs)
+export function setInterval(msg: string, delayMs?: int | null): int {
+    if (delayMs) {
+        return setInterval(():void => {
+            console.error(msg)
+        }, delayMs);
+    } else {
+        return setInterval(():void => {
+            console.error(msg)
+        }, 0);
+    }
 }
 
 /**
  * Cancel the specified timer.
  *
- * @param { int } timerId - the id of the timer returned from setInterval.
+ * @param { int | null | undefined} timerId - the id of the timer returned from setInterval, if pass empty or null or undefined will do nothing.
  */
-export function clearInterval(timerId: int): void {
-    stopTimer(timerId);
+export function clearInterval(timerId?: int | null): void {
+    if (timerId) {
+        stopTimer(timerId);
+    }
 }
 
 function startTimer(func: () => void, delayMs: int, repeat: boolean): int
