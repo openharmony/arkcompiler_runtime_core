@@ -20,6 +20,9 @@
 
 namespace panda::abc2program {
 
+static constexpr char NORMALIZED_OHMURL_DELIM = '&';
+static constexpr size_t OHMURL_DELIM_OFFSET = 1U;
+
 const panda_file::File &Abc2ProgramEntityContainer::GetAbcFile() const
 {
     return file_;
@@ -68,12 +71,57 @@ void Abc2ProgramEntityContainer::ModifyRecordName(std::string &record_name)
     if (!modify_pkg_name_.empty()) {
         ModifyPkgNameForRecordName(record_name);
     }
+    if (!origin_version_.empty() && !target_version_.empty() && IsSourceFileRecord(record_name) &&
+        GetPkgNameFromRecordName(record_name) == package_name_) {
+        ModifyVersionForRecordName(record_name);
+        return;
+    }
 
     if (bundle_name_.empty()) {
         return;
     }
     if (IsSourceFileRecord(record_name)) {
         record_name = bundle_name_ + record_name;
+    }
+}
+
+/**
+ * Modify the version segment embedded in a record name's ohmurl.
+ *
+ * This function updates the version information embedded in the record name string
+ * when it matches a given origin version. The record name format typically looks like:
+ *   - ".record &library/static-import-test&1.0.0"
+ *   - ".record &library/annotation-test&1.0.0.Anno"
+ *
+ * The string uses '&' as delimiters:
+ *   - The first '&' separates ".record" and the package path.
+ *   - The second '&' separates the package path and the version information.
+ *
+ * The function locates the version segment after the second '&', checks if it starts
+ * with the expected origin version (`origin_version_`), and if so, replaces it
+ * with the target version (`target_version_`), preserving any suffix after the version.
+ */
+void Abc2ProgramEntityContainer::ModifyVersionForRecordName(std::string &record_name)
+{
+    // Version part appears after the second '&', e.g.:
+    // ".record &library/annotation-test&1.0.0.Anno"
+    // So we must start parsing from the second '&' to locate the version segment.
+    size_t firstPos = record_name.find(NORMALIZED_OHMURL_DELIM);
+    if (firstPos == std::string::npos) {
+        return;
+    }
+
+    size_t secondPos = record_name.find(NORMALIZED_OHMURL_DELIM, firstPos + OHMURL_DELIM_OFFSET);
+    if (secondPos == std::string::npos) {
+        return;
+    }
+
+    // Replace version prefix only when it matches origin_version_,
+    // e.g. "1.0.0.Anno" → "2.0.0.Anno", keeping the suffix intact.
+    std::string currentVersionWithSuffix = record_name.substr(secondPos + OHMURL_DELIM_OFFSET);
+    if (currentVersionWithSuffix.rfind(origin_version_, 0) == 0) {
+        std::string suffix = currentVersionWithSuffix.substr(origin_version_.size());
+        record_name.replace(secondPos + OHMURL_DELIM_OFFSET, std::string::npos, target_version_ + suffix);
     }
 }
 

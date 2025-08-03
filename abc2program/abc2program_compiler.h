@@ -46,6 +46,18 @@ public:
     {
         modify_pkg_name_ = modify_pkg_name;
     }
+    void SetPackageName(const std::string &package_name)
+    {
+        package_name_ = package_name;
+    }
+    void SetOriginVersion(std::string origin_version)
+    {
+        origin_version_ = origin_version;
+    }
+    void SetTargetVersion(std::string target_version)
+    {
+        target_version_ = target_version;
+    }
 
 private:
     std::unique_ptr<const panda_file::File> file_;
@@ -55,6 +67,10 @@ private:
     // It should modify record name when the bundle_name_ is not empty
     std::string bundle_name_ {};
     std::string modify_pkg_name_ {};
+    // fix version for the abc input
+    std::string package_name_ {};
+    std::string origin_version_ {};
+    std::string target_version_ {};
 }; // class Abc2ProgramCompiler
 
 } // namespace panda::abc2program
