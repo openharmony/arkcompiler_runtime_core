@@ -45,4 +45,16 @@ export final class CoroutineExtras {
     public static native isTaskpoolUsingLaunchMode(): boolean;
     // is taskpool supporting interop
     public static native isTaskpoolSupportingInterop(): boolean;
+    // set taskpool shrink interval
+    public static native setTaskPoolTriggerShrinkInterval(interval: int): void;
+    // set taskpool idle threshold
+    public static native setTaskPoolIdleThreshold(threshold: int): void;
+    // get taskpool workers num
+    public static native getTaskPoolWorkersNum(): int;
+    // set taskpool workers limit
+    public static native setTaskPoolWorkersLimit(limit: int): void;
+    // retrigger taskpool shrink
+    public static native retriggerTaskPoolShrink(): void;
+    // get taskpool workers limit based on the device
+    public static native getTaskPoolWorkersLimit(): int;
 }

@@ -222,19 +222,24 @@ extern "C" void StdSystemScaleWorkersPool(int32_t scaler)
     coroutine->GetManager()->FinalizeWorkers(std::abs(scaler), runtime, vm);
 }
 
-extern "C" void StdSystemStopTaskpool()
+static Class *GetTaskPoolClass()
 {
     auto *runtime = Runtime::GetCurrent();
     auto *classLinker = runtime->GetClassLinker();
     ClassLinkerExtension *cle = classLinker->GetExtension(SourceLanguage::ETS);
     auto mutf8Name = reinterpret_cast<const uint8_t *>("Lescompat/taskpool;");
-    auto klass = cle->GetClass(mutf8Name);
+    return cle->GetClass(mutf8Name);
+}
+
+extern "C" void StdSystemStopTaskpool()
+{
+    auto *klass = GetTaskPoolClass();
     if (klass == nullptr) {
         return;
     }
     auto *method = EtsClass::FromRuntimeClass(klass)->GetStaticMethod("stopAllWorkers", ":V");
     ASSERT(method != nullptr);
-    auto coro = EtsCoroutine::GetCurrent();
+    auto *coro = EtsCoroutine::GetCurrent();
     method->GetPandaMethod()->Invoke(coro, nullptr);
 }
 
@@ -243,19 +248,84 @@ extern "C" void StdSystemIncreaseTaskpoolWorkersToN(int32_t workersNum)
     if (UNLIKELY(workersNum == 0)) {
         return;
     }
-    auto *runtime = Runtime::GetCurrent();
-    auto *classLinker = runtime->GetClassLinker();
-    ClassLinkerExtension *cle = classLinker->GetExtension(SourceLanguage::ETS);
-    auto mutf8Name = reinterpret_cast<const uint8_t *>("Lescompat/taskpool;");
-    auto klass = cle->GetClass(mutf8Name);
+    auto *klass = GetTaskPoolClass();
     if (klass == nullptr) {
         return;
     }
     auto *method = EtsClass::FromRuntimeClass(klass)->GetStaticMethod("increaseWorkersToN", "I:V");
     ASSERT(method != nullptr);
-    auto coro = EtsCoroutine::GetCurrent();
+    auto *coro = EtsCoroutine::GetCurrent();
     std::array args = {Value(workersNum)};
     method->GetPandaMethod()->Invoke(coro, args.data());
+}
+
+extern "C" void StdSystemSetTaskPoolTriggerShrinkInterval(int32_t interval)
+{
+    auto *klass = GetTaskPoolClass();
+    if (klass == nullptr) {
+        LOG(ERROR, RUNTIME) << "Get taskpool class failed.";
+        return;
+    }
+    auto *method = EtsClass::FromRuntimeClass(klass)->GetStaticMethod("setTaskPoolTriggerShrinkInterval", "I:V");
+    ASSERT(method != nullptr);
+    auto *coro = EtsCoroutine::GetCurrent();
+    std::array args = {Value(interval)};
+    method->GetPandaMethod()->Invoke(coro, args.data());
+}
+
+extern "C" void StdSystemSetTaskPoolIdleThreshold(int32_t threshold)
+{
+    auto *klass = GetTaskPoolClass();
+    if (klass == nullptr) {
+        LOG(ERROR, RUNTIME) << "Get taskpool class failed.";
+        return;
+    }
+    auto *method = EtsClass::FromRuntimeClass(klass)->GetStaticMethod("setTaskPoolIdleThreshold", "I:V");
+    ASSERT(method != nullptr);
+    auto *coro = EtsCoroutine::GetCurrent();
+    std::array args = {Value {threshold}};
+    method->GetPandaMethod()->Invoke(coro, args.data());
+}
+
+extern "C" EtsInt StdSystemGetTaskPoolWorkersNum()
+{
+    auto *klass = GetTaskPoolClass();
+    if (klass == nullptr) {
+        LOG(ERROR, RUNTIME) << "Get taskpool class failed.";
+        return EtsInt(-1);
+    }
+    auto *method = EtsClass::FromRuntimeClass(klass)->GetStaticMethod("getTaskPoolWorkersNum", ":I");
+    ASSERT(method != nullptr);
+    auto *coro = EtsCoroutine::GetCurrent();
+    ark::Value res = method->GetPandaMethod()->Invoke(coro, nullptr);
+    return res.GetAs<int>();
+}
+
+extern "C" void StdSystemSetTaskPoolWorkersLimit(int32_t threshold)
+{
+    auto *klass = GetTaskPoolClass();
+    if (klass == nullptr) {
+        LOG(ERROR, RUNTIME) << "Get taskpool class failed.";
+        return;
+    }
+    auto *method = EtsClass::FromRuntimeClass(klass)->GetStaticMethod("setTaskPoolWorkersLimit", "I:V");
+    ASSERT(method != nullptr);
+    auto *coro = EtsCoroutine::GetCurrent();
+    std::array args = {Value {threshold}};
+    method->GetPandaMethod()->Invoke(coro, args.data());
+}
+
+extern "C" void StdSystemRetriggerTaskPoolShrink()
+{
+    auto *klass = GetTaskPoolClass();
+    if (klass == nullptr) {
+        LOG(ERROR, RUNTIME) << "Get taskpool class failed.";
+        return;
+    }
+    auto *method = EtsClass::FromRuntimeClass(klass)->GetStaticMethod("retriggerTaskPoolShrink", ":V");
+    ASSERT(method != nullptr);
+    auto *coro = EtsCoroutine::GetCurrent();
+    method->GetPandaMethod()->Invoke(coro, nullptr);
 }
 
 extern "C" void StdSystemAtomicFlagSet(EtsAtomicFlag *instance, EtsBoolean v)
