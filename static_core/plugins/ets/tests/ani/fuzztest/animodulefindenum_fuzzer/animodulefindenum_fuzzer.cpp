@@ -37,7 +37,8 @@ void AniModuleFindEnumFuzzTest(const char *data, size_t size)
     ani_module md {};
     env->FindModule("std.core", &md);
     ani_enum e {};
-    env->Module_FindEnum(md, data, &e);
+    std::string input(data, size);
+    env->Module_FindEnum(md, input.c_str(), &e);
 }
 }  // namespace OHOS
 

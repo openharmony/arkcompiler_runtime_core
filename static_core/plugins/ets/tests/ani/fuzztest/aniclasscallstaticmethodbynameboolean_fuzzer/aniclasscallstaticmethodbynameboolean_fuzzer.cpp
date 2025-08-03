@@ -38,7 +38,8 @@ void AniClassCallStaticMethodByNameBooleanFuzzTest(const char *data, size_t size
     env->FindClass("std.core.Int", &intCls);
 
     ani_boolean res {};
-    env->Class_CallStaticMethodByName_Boolean(intCls, data, nullptr, &res);
+    std::string input(data, size);
+    env->Class_CallStaticMethodByName_Boolean(intCls, input.c_str(), nullptr, &res);
 }
 }  // namespace OHOS
 

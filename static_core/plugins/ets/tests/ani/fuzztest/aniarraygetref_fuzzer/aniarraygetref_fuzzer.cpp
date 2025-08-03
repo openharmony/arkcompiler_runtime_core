@@ -37,8 +37,8 @@ void AniArrayGetRegionRefFuzzTest(const char *data, size_t size)
     engine->AniGetArray(&array);
 
     ani_ref ref {};
-
-    env->Array_Get_Ref(array, size, &ref);
+    auto index = static_cast<ani_size>(size);
+    env->Array_Get_Ref(array, index, &ref);
 }
 }  // namespace OHOS
 
