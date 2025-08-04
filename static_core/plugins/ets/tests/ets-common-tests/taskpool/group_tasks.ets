@@ -1,24 +1,24 @@
 /*
  * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
 function returnAbc(): string {
-    return (() => "a")() + (() => "b")() + (() => "c")();
+    return (() => 'a')() + (() => 'b')() + (() => 'c')();
 }
 
 function returnDef(): string {
-    return (() => "de")() + (() => "f")();
+    return (() => 'de')() + (() => 'f')();
 }
 
 function sum(a: int, b: int): int {
@@ -55,7 +55,7 @@ function testDelayFunc(): NullishType {
     let g = new taskpool.TaskGroup();
     expectError(() => {
         g.addTask(task);
-    }, new Error("taskpool:: taskGroup cannot add seqRunnerTask or executedTask"));
+    }, new Error('taskpool:: taskGroup cannot add seqRunnerTask or executedTask'));
     return value;
 }
 
@@ -72,7 +72,7 @@ function executeDelayedTest(): void {
     g.addTask(task);
     expectError(() => {
         taskpool.executeDelayed(100.0, task);
-    }, new Error("taskpool:: groupTask cannot executeDelayed outside"));
+    }, new Error('taskpool:: groupTask cannot executeDelayed outside'));
 }
 
 function testPeriodFunc(): NullishType {
@@ -89,15 +89,15 @@ function testPeriodFunc(): NullishType {
     let g = new taskpool.TaskGroup();
     expectError(() => {
         g.addTask(task);
-    }, new Error("taskpool:: The interface does not support the periodicTask"));
-    return "success";
+    }, new Error('taskpool:: The interface does not support the periodicTask'));
+    return 'success';
 }
 
 function executePeriodicallyTest(): void {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     try {
         let res1 = await launchImpl(testPeriodFunc);
-        assertEQ(res1, "success");
+        assertEQ(res1, 'success');
     } catch(e: Error) {
         // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
         assertEQ(e instanceof NullPointerError, true);
@@ -111,7 +111,7 @@ function grouptaskExecutePeriodicallyTest(): void {
     g.addTask(task);
     expectError(() => {
         taskpool.executePeriodically(10.0, task);
-    }, new Error("taskpool:: The concurrent task has been executed and cannot be executed periodically"));
+    }, new Error('taskpool:: The concurrent task has been executed and cannot be executed periodically'));
 }
 
 function groupTaskExecuteRepeat(): void {
@@ -133,12 +133,12 @@ function taskGroupNestedTaskTest(): void {
     group.addTask(task);
     expectError(() => {
         await taskpool.execute(task);
-    }, new Error("taskpool:: groupTask cannot execute outside"));
+    }, new Error('taskpool:: groupTask cannot execute outside'));
 }
 
 function runOneGroupTest() {
-    let g2 = new taskpool.TaskGroup("g2");
-    arktest.assertEQ(g2.name, "g2");
+    let g2 = new taskpool.TaskGroup('g2');
+    arktest.assertEQ(g2.name, 'g2');
     let t1 = new taskpool.Task(returnAbc);
     let t2 = new taskpool.Task(returnDef);
     // tasks with params
@@ -149,16 +149,16 @@ function runOneGroupTest() {
     g2.addTask(t3);
     g2.addTask(t4);
     let res2 = await taskpool.execute(g2);
-    arktest.assertEQ(res2[0], "abc");
-    arktest.assertEQ(res2[1], "def");
+    arktest.assertEQ(res2[0], 'abc');
+    arktest.assertEQ(res2[1], 'def');
     arktest.assertEQ(res2[2], 30);
     arktest.assertEQ(res2[3], 80);
-    arktest.assertEQ(g2.name, "g2");
+    arktest.assertEQ(g2.name, 'g2');
     // Run group without tasks
-    let g0 = new taskpool.TaskGroup("g0");
+    let g0 = new taskpool.TaskGroup('g0');
     let res0 = await taskpool.execute(g0);
     arktest.assertEQ(res0.length, 0);
-    arktest.assertEQ(g0.name, "g0");
+    arktest.assertEQ(g0.name, 'g0');
 }
 
 function runSeveralGroupsTest() {
@@ -190,19 +190,19 @@ function runSeveralGroupsTest() {
     let res3 = await p3;
     let res2 = await p2;
     // Asserts for group 1
-    arktest.assertEQ(res1[0], "abc");
-    arktest.assertEQ(res1[1], "def");
-    arktest.assertEQ(res1[2], "abc");
+    arktest.assertEQ(res1[0], 'abc');
+    arktest.assertEQ(res1[1], 'def');
+    arktest.assertEQ(res1[2], 'abc');
     arktest.assertEQ(res1[3], 30);
     arktest.assertEQ(t1.isDone(), true);
     arktest.assertEQ(t2.isDone(), true);
     // Asserts for group 2
-    arktest.assertEQ(res2[0], "def");
-    arktest.assertEQ(res2[1], "abc");
+    arktest.assertEQ(res2[0], 'def');
+    arktest.assertEQ(res2[1], 'abc');
     arktest.assertEQ(res2[2], 80);
     // Asserts for group 3
-    arktest.assertEQ(res3[0], "abc");
-    arktest.assertEQ(res3[1], "def");
+    arktest.assertEQ(res3[0], 'abc');
+    arktest.assertEQ(res3[1], 'def');
     arktest.assertEQ(res3[2], 160);
 }
 
@@ -213,7 +213,7 @@ function cancelNonStartedGroupTest() {
     arktest.expectError(() => {
         taskpool.cancel(g);
         taskpool.execute(g);
-    }, new Error("taskpool:: taskGroup is not executed or has been executed"));
+    }, new Error('taskpool:: taskGroup is not executed or has been executed'));
 }
 
 function cancelExecutingGroupTest() {
@@ -224,10 +224,10 @@ function cancelExecutingGroupTest() {
     try {
         taskpool.cancel(g);
     } catch(e: Error) {
-        arktest.assertEQ(e.message, "taskpool:: taskGroup is not executed or has been executed");
+        arktest.assertEQ(e.message, 'taskpool:: taskGroup is not executed or has been executed');
         return;
     }
-    arktest.expectError(() => { await p }, new Error("taskpool:: taskGroup has been canceled"));
+    arktest.expectError(() => { await p }, new Error('taskpool:: taskGroup has been canceled'));
 }
 
 function cancelExecutedGroupTest1() {
@@ -238,7 +238,7 @@ function cancelExecutedGroupTest1() {
         await taskpool.execute(g);
         // Group tasks finished, so 'cancel' should produce the Error
         taskpool.cancel(g);
-    }, new Error("taskpool:: taskGroup is not executed or has been executed"));
+    }, new Error('taskpool:: taskGroup is not executed or has been executed'));
 }
 
 function cancelExecutedGroupTest2() {
@@ -252,7 +252,7 @@ function cancelExecutedGroupTest2() {
     taskpool.execute(g).then((res: object): void => {
         arktest.expectError(() => {
             taskpool.cancel(g);
-        }, new Error("taskpool:: taskGroup is not executed or has been executed"));
+        }, new Error('taskpool:: taskGroup is not executed or has been executed'));
         result = res as int[];
         arktest.assertEQ(result[0], 160);
         arktest.assertEQ(result[1], 80);
@@ -262,7 +262,7 @@ function cancelExecutedGroupTest2() {
 
 function addExecutedTaskTest() {
     let g = new taskpool.TaskGroup();
-    let expectedError = new Error("taskpool:: taskGroup cannot add seqRunnerTask or executedTask");
+    let expectedError = new Error('taskpool:: taskGroup cannot add seqRunnerTask or executedTask');
     // Executed task
     let task = new taskpool.Task(returnAbc);
     taskpool.execute(task);
@@ -278,7 +278,7 @@ function addLongTaskTest() {
     let g = new taskpool.TaskGroup();
     let t = new taskpool.LongTask(returnAbc);
     arktest.expectError(() => { g.addTask(t) },
-                new Error("taskpool:: The interface does not support the long task"));
+                new Error('taskpool:: The interface does not support the long task'));
 }
 
 function addTaskFromGroupTest() {
@@ -288,7 +288,7 @@ function addTaskFromGroupTest() {
     let g2 = new taskpool.TaskGroup();
     let t2 = new taskpool.Task(returnDef);
     g2.addTask(t2);
-    let expectedError = new Error("taskpool:: taskGroup cannot add groupTask");
+    let expectedError = new Error('taskpool:: taskGroup cannot add groupTask');
     // Add the same task
     arktest.expectError(() => { g1.addTask(t1) }, expectedError);
     // Add task from another group
@@ -300,7 +300,7 @@ function addDependentTaskTest() {
     let task2 = new taskpool.Task(returnAbc);
     task1.addDependency(task2);
     let taskGroup = new taskpool.TaskGroup();
-    arktest.expectError(() => { taskGroup.addTask(task1) }, new Error("taskpool:: dependent task not allowed."));
+    arktest.expectError(() => { taskGroup.addTask(task1) }, new Error('taskpool:: dependent task not allowed.'));
 }
 
 function addDependencyForGroupTaskTest() {
@@ -308,20 +308,20 @@ function addDependencyForGroupTaskTest() {
     let taskGroup = new taskpool.TaskGroup();
     taskGroup.addTask(task1);
     let task2 = new taskpool.Task(returnAbc);
-    arktest.expectError(() => { task1.addDependency(task2) }, new Error("taskpool:: groupTask cannot addDependency"));
-    arktest.expectError(() => { task2.addDependency(task1) }, new Error("taskpool:: groupTask cannot be relied on"));
+    arktest.expectError(() => { task1.addDependency(task2) }, new Error('taskpool:: groupTask cannot addDependency'));
+    arktest.expectError(() => { task2.addDependency(task1) }, new Error('taskpool:: groupTask cannot be relied on'));
 }
 
 function addTaskWithDifferentParamsTest() {
     let testWithZeroParam = (): string => {
-        return "testWithZeroParam";
+        return 'testWithZeroParam';
     }
     let testWithOneParam = (num: int): int => {
         return num * 2;
     }
     let testWithThreeParams = (a: number, str: string, b: number): string => {
         let sum: number = a + b;
-        return "testWithThreeParams res: " + sum;
+        return 'testWithThreeParams res: ' + sum;
     }
     let testWithFiveParams = (a: number, b: number, c: number, flag: boolean, str: string): string => {
         let res: number = 0;
@@ -330,7 +330,7 @@ function addTaskWithDifferentParamsTest() {
         } else {
             res = a * b * c;
         }
-        return str + " res: " + res;
+        return str + ' res: ' + res;
     }
     let test = (a: number, b: number): number => {
         let t = Date.now();
@@ -342,8 +342,8 @@ function addTaskWithDifferentParamsTest() {
     }
     let task1 = new taskpool.Task(testWithZeroParam);
     let task2 = new taskpool.Task(testWithOneParam, 15);
-    let task3 = new taskpool.Task(testWithThreeParams, 10.0, "task3", 20.0);
-    let task4 = new taskpool.Task(testWithFiveParams, 1.0, 2.0, 3.0, true, "TEST");
+    let task3 = new taskpool.Task(testWithThreeParams, 10.0, 'task3', 20.0);
+    let task4 = new taskpool.Task(testWithFiveParams, 1.0, 2.0, 3.0, true, 'TEST');
     let longTask = new taskpool.LongTask(test, 10.0, 20.0);
     let taskGroup = new taskpool.TaskGroup();
     taskGroup.addTask(task1);
@@ -351,12 +351,12 @@ function addTaskWithDifferentParamsTest() {
     taskGroup.addTask(task3);
     taskGroup.addTask(task4);
     arktest.expectError(() => { taskGroup.addTask(longTask) },
-                new Error("taskpool:: The interface does not support the long task"));
+                new Error('taskpool:: The interface does not support the long task'));
     let res = await taskpool.execute(taskGroup);
-    arktest.assertEQ(res[0], "testWithZeroParam");
+    arktest.assertEQ(res[0], 'testWithZeroParam');
     arktest.assertEQ(res[1], 30);
-    arktest.assertEQ(res[2], "testWithThreeParams res: 30");
-    arktest.assertEQ(res[3], "TEST res: 6");
+    arktest.assertEQ(res[2], 'testWithThreeParams res: 30');
+    arktest.assertEQ(res[3], 'TEST res: 6');
     arktest.assertEQ(task1.isDone(), true);
     arktest.assertEQ(task2.isDone(), true);
     arktest.assertEQ(task3.isDone(), true);
@@ -365,24 +365,24 @@ function addTaskWithDifferentParamsTest() {
 }
 
 function main(): int {
-    let taskGroupTestsuite = new arktest.ArkTestsuite("taskpool.TaskGroup");
-    taskGroupTestsuite.addTest("ExecuteDelayedTest", executeDelayedTest);
-    taskGroupTestsuite.addTest("ExecutePeriodicallyTest", executePeriodicallyTest);
-    taskGroupTestsuite.addTest("GrouptaskExecutePeriodicallyTest", grouptaskExecutePeriodicallyTest);
-    taskGroupTestsuite.addTest("GroupTaskExecuteRepeatTest", groupTaskExecuteRepeat);
-    taskGroupTestsuite.addTest("taskGroupNestedTaskTest", taskGroupNestedTaskTest);
-    taskGroupTestsuite.addTest("RunOneGroupTest", runOneGroupTest);
-    taskGroupTestsuite.addTest("RunSeveralGroupsTest", runSeveralGroupsTest);
-    taskGroupTestsuite.addTest("CancelNonStartedGroupTest", cancelNonStartedGroupTest);
-    taskGroupTestsuite.addTest("CancelExecutingGroupTest", cancelExecutingGroupTest);
-    taskGroupTestsuite.addTest("CancelExecutedGroupTest1", cancelExecutedGroupTest1);
-    taskGroupTestsuite.addTest("CancelExecutedGroupTest2", cancelExecutedGroupTest2);
-    taskGroupTestsuite.addTest("AddExecutedTaskTest", addExecutedTaskTest);
-    taskGroupTestsuite.addTest("AddLongTaskTest", addLongTaskTest);
-    taskGroupTestsuite.addTest("AddTaskFromGroupTest", addTaskFromGroupTest);
-    taskGroupTestsuite.addTest("AddDependentTaskTest", addDependentTaskTest);
-    taskGroupTestsuite.addTest("AddDependencyForGroupTaskTest", addDependencyForGroupTaskTest);
-    taskGroupTestsuite.addTest("AddTaskWithDifferentParamsTest", addTaskWithDifferentParamsTest);
+    let taskGroupTestsuite = new arktest.ArkTestsuite('taskpool.TaskGroup');
+    taskGroupTestsuite.addTest('ExecuteDelayedTest', executeDelayedTest);
+    taskGroupTestsuite.addTest('ExecutePeriodicallyTest', executePeriodicallyTest);
+    taskGroupTestsuite.addTest('GrouptaskExecutePeriodicallyTest', grouptaskExecutePeriodicallyTest);
+    taskGroupTestsuite.addTest('GroupTaskExecuteRepeatTest', groupTaskExecuteRepeat);
+    taskGroupTestsuite.addTest('taskGroupNestedTaskTest', taskGroupNestedTaskTest);
+    taskGroupTestsuite.addTest('RunOneGroupTest', runOneGroupTest);
+    taskGroupTestsuite.addTest('RunSeveralGroupsTest', runSeveralGroupsTest);
+    taskGroupTestsuite.addTest('CancelNonStartedGroupTest', cancelNonStartedGroupTest);
+    taskGroupTestsuite.addTest('CancelExecutingGroupTest', cancelExecutingGroupTest);
+    taskGroupTestsuite.addTest('CancelExecutedGroupTest1', cancelExecutedGroupTest1);
+    taskGroupTestsuite.addTest('CancelExecutedGroupTest2', cancelExecutedGroupTest2);
+    taskGroupTestsuite.addTest('AddExecutedTaskTest', addExecutedTaskTest);
+    taskGroupTestsuite.addTest('AddLongTaskTest', addLongTaskTest);
+    taskGroupTestsuite.addTest('AddTaskFromGroupTest', addTaskFromGroupTest);
+    taskGroupTestsuite.addTest('AddDependentTaskTest', addDependentTaskTest);
+    taskGroupTestsuite.addTest('AddDependencyForGroupTaskTest', addDependencyForGroupTaskTest);
+    taskGroupTestsuite.addTest('AddTaskWithDifferentParamsTest', addTaskWithDifferentParamsTest);
     let res = taskGroupTestsuite.run();
     CoroutineExtras.stopTaskpool();
     return res;
