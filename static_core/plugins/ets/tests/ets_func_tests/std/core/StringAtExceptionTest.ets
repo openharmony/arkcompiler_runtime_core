@@ -20,7 +20,7 @@ function main(): int {
     try {
         src.at(100);
     } catch (e) {
-        let b: boolean = e instanceof ArgumentOutOfRangeException;
+        let b: boolean = e instanceof ArgumentOutOfRangeError;
         if(!b) {
             console.println("Unexpected exception" + e);
             return 1;
@@ -30,7 +30,7 @@ function main(): int {
     try {
         src.at(-100);
     } catch (e) {
-        let b: boolean = e instanceof ArgumentOutOfRangeException;
+        let b: boolean = e instanceof ArgumentOutOfRangeError;
         if(!b) {
             console.println("Unexpected exception" + e);
             return 1;
