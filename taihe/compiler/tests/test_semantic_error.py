@@ -91,11 +91,9 @@ backend_registry.register_all()
 
 
 pre_backend_names = ["pretty-print"]
-pre_invocation = CompilerInvocation(
-    backends=[
-        b() for b in backend_registry.collect_required_backends(pre_backend_names)
-    ],
-)
+pre_backend_factories = backend_registry.collect_required_backends(pre_backend_names)
+pre_backend_configs = [b() for b in pre_backend_factories]
+pre_invocation = CompilerInvocation(backend_configs=pre_backend_configs)
 
 
 def test_invalid_package_name():
@@ -404,11 +402,9 @@ def test_not_a_type():
 
 
 ani_backend_names = ["cpp-author", "ani-bridge", "pretty-print"]
-ani_invocation = CompilerInvocation(
-    backends=[
-        b() for b in backend_registry.collect_required_backends(ani_backend_names)
-    ],
-)
+ani_backend_factories = backend_registry.collect_required_backends(ani_backend_names)
+ani_backend_configs = [b() for b in ani_backend_factories]
+ani_invocation = CompilerInvocation(backend_configs=ani_backend_configs)
 
 
 def test_attr_arg_order_error():

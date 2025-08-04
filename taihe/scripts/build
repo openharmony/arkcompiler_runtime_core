@@ -51,14 +51,14 @@ class Platform(Enum):
         return self.value.startswith("windows-")
 
 
-def create_tar(in_dir: Path, out_tgz: Path, rename_root: str):
+def create_tar(in_dir: Path, out_tgz: Path, rename_root: str, timestamp: float):
     out_tgz.unlink(missing_ok=True)
     try:
         tar_cmd = ["tar", "--create", "--gzip", "--format=gnu", "--file", out_tgz]
         # Ensure consistent user name.
         tar_cmd += ["--owner=0", "--group=0", "--numeric-owner"]
         # Ensure consistent ordering and timestamp (2024-01-01)
-        tar_cmd += ["--sort=name"]
+        tar_cmd += ["--sort=name", f"--mtime=@{timestamp}"]
         # Rename the root directory.
         tar_cmd += [f"--transform=s#^{in_dir.name}#{rename_root}#"]
         # Pass the root dir now.
@@ -102,7 +102,7 @@ class PythonBundle:
     def create_script(self, binary: str, pymod: str):
         if self.platform.is_windows():
             suffix_script = ".bat"
-            suffix_executable = ".11.exe"
+            python_executable = "python3.11.exe"
             path_separator = "\\"
             template = (
                 "@echo off\n"
@@ -111,7 +111,7 @@ class PythonBundle:
             )
         else:
             suffix_script = ""
-            suffix_executable = ""
+            python_executable = "python3"
             path_separator = "/"
             template = (
                 "#!/bin/bash -eu\n"
@@ -119,7 +119,7 @@ class PythonBundle:
                 'exec "$TAIHE_ROOT/_PYTHON_REL_" "$TAIHE_ROOT/_PYMOD_REL_" "$@"\n'
             )
 
-        python_path = self.pyrt_dir / f"bin/python3{suffix_executable}"
+        python_path = self.pyrt_dir / f"bin"/ python_executable
         python_rel = python_path.relative_to(self.root_dir)
         pymod_path = (self.sitepkg_dir / pymod.replace(".", "/")).with_suffix(".py")
         pymod_rel = pymod_path.relative_to(self.root_dir)
@@ -199,7 +199,12 @@ class Builder:
 
         ### Finalize ###
         (bundle.root_dir / "version.txt").write_text(self.release_note)
-        create_tar(bundle_root, bundle_out, rename_root=self.brand)
+        create_tar(
+            bundle_root,
+            bundle_out,
+            rename_root=self.brand,
+            timestamp=self.metadata.build_time_utc,
+        )
 
 
 def main():

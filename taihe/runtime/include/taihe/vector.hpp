@@ -70,10 +70,10 @@ public:
         if (required_cap > m_handle->cap) {
             this->reserve(std::max(required_cap, m_handle->cap * VEC_GROWTH_FACTOR));
         }
-        T *location = &m_handle->buffer[m_handle->len];
-        new (location) T {std::forward<Args>(args)...};
+        T &item = m_handle->buffer[m_handle->len];
+        new (&item) T {std::forward<Args>(args)...};
         ++m_handle->len;
-        return *location;
+        return item;
     }
 
     T &push_back(T &&value) const

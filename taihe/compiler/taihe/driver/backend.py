@@ -88,7 +88,7 @@ class BackendRegistry:
         self._factories.clear()
 
     def collect_required_backends(self, names: Iterable[str]) -> list[BackendConfigT]:
-        result: list[BackendConfigT] = []
+        factories: list[BackendConfigT] = []
         visited: set[str] = set()
 
         def add(name: str):
@@ -101,13 +101,13 @@ class BackendRegistry:
             visited.add(name)
             for dep in factory.DEPS:
                 add(dep)
-            result.append(factory)
+            factories.append(factory)
             return True
 
         for name in names:
             add(name)
 
-        return result
+        return factories
 
     def register_all(self):
         from taihe.codegen.abi import (

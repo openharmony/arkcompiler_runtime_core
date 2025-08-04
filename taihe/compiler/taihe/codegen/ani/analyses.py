@@ -15,7 +15,8 @@
 
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from dataclasses import field as datafield
 from typing import ClassVar
 
 from typing_extensions import override
@@ -393,11 +394,11 @@ class ArkTsPath:
 class ArkTsModuleOrNamespace(ABC):
     scope: ClassVar[AniScope]
 
-    is_default: bool = field(default=False, init=False)
-    injected_codes: list[str] = field(default_factory=list, init=False)
-    injected_heads: list[str] = field(default_factory=list, init=False)
-    packages: list[PackageDecl] = field(default_factory=list, init=False)
-    children: dict[str, "ArkTsNamespace"] = field(default_factory=dict, init=False)
+    is_default: bool = datafield(default=False, init=False)
+    injected_codes: list[str] = datafield(default_factory=list, init=False)
+    injected_heads: list[str] = datafield(default_factory=list, init=False)
+    packages: list[PackageDecl] = datafield(default_factory=list, init=False)
+    children: dict[str, "ArkTsNamespace"] = datafield(default_factory=dict, init=False)
 
     @property
     @abstractmethod
@@ -558,7 +559,7 @@ class GlobFuncAniInfo(AbstractAnalysis[GlobFuncDecl]):
         self.native_prefix = "native function "
         self.native_name = f"_taihe_{f.name}_native"
 
-        self.revert_name = f"_taihe_{f.name}_revert"
+        self.reverse_name = f"_taihe_{f.name}_reverse"
 
         naming = PackageAniInfo.get(am, f.parent_pkg).naming
 
@@ -651,7 +652,7 @@ class GlobFuncAniInfo(AbstractAnalysis[GlobFuncDecl]):
     def call_native(self, name: str) -> str:
         return name
 
-    def call_native_with(self, sts_args: list[str], this: str = "this") -> list[str]:
+    def as_native_args(self, sts_args: list[str], this: str = "this") -> list[str]:
         last = this
         arg = iter(sts_args)
         sts_native_args: list[str] = []
@@ -666,9 +667,9 @@ class GlobFuncAniInfo(AbstractAnalysis[GlobFuncDecl]):
                 sts_native_args.append(last := next(arg))
         return sts_native_args
 
-    def call_revert_with(self, sts_revert_args: list[str]) -> list[str]:
+    def as_normal_args(self, sts_reverse_args: list[str]) -> list[str]:
         sts_args: list[str] = []
-        for param, arg in zip(self.f.params, sts_revert_args, strict=True):
+        for param, arg in zip(self.f.params, sts_reverse_args, strict=True):
             if (
                 StsThisAttr.get(param)
                 or StsLastAttr.get(param)
@@ -687,7 +688,7 @@ class IfaceMethodAniInfo(AbstractAnalysis[IfaceMethodDecl]):
         self.native_prefix = "native "
         self.native_name = f"_taihe_{f.name}_native"
 
-        self.revert_name = f"_taihe_{f.parent_iface.name}_{f.name}_revert"
+        self.reverse_name = f"_taihe_{f.parent_iface.name}_{f.name}_reverse"
 
         naming = PackageAniInfo.get(am, f.parent_pkg).naming
 
@@ -767,7 +768,7 @@ class IfaceMethodAniInfo(AbstractAnalysis[IfaceMethodDecl]):
     def call_native(self, name: str) -> str:
         return f"this.{name}" if name else "this"
 
-    def call_native_with(self, sts_args: list[str], this: str = "this") -> list[str]:
+    def as_native_args(self, sts_args: list[str], this: str = "this") -> list[str]:
         last = this
         arg = iter(sts_args)
         sts_native_args: list[str] = []
@@ -782,9 +783,9 @@ class IfaceMethodAniInfo(AbstractAnalysis[IfaceMethodDecl]):
                 sts_native_args.append(last := next(arg))
         return sts_native_args
 
-    def call_revert_with(self, sts_revert_args: list[str]) -> list[str]:
+    def as_normal_args(self, sts_reverse_args: list[str]) -> list[str]:
         sts_args: list[str] = []
-        for param, arg in zip(self.f.params, sts_revert_args, strict=True):
+        for param, arg in zip(self.f.params, sts_reverse_args, strict=True):
             if (
                 StsThisAttr.get(param)
                 or StsLastAttr.get(param)
@@ -822,8 +823,7 @@ class UnionAniInfo(AbstractAnalysis[UnionDecl]):
 
         self.sts_all_somes: list[list[UnionFieldDecl]] = []
         self.sts_all_nones: list[list[UnionFieldDecl]] = []
-        # pylint: disable-next=all
-        for field in d.fields: # noqa: F402
+        for field in d.fields:
             if field.ty_ref and isinstance(ty := field.ty_ref.resolved_ty, UnionType):
                 inner_ani_info = UnionAniInfo.get(am, ty.ty_decl)
                 self.sts_all_somes.extend(
@@ -1953,7 +1953,7 @@ class RecordTypeAniInfo(TypeAniInfo):
             target.writelns(
                 f"ani_object {ani_next} = {{}};",
                 f"ani_boolean {ani_done} = {{}};",
-                f'{env}->Object_CallMethod_Ref({ani_iter}, TH_ANI_FIND_CLASS_METHOD({env}, "escompat.MapIterator", "next", nullptr), reinterpret_cast<ani_ref*>(&{ani_next}));',
+                f'{env}->Object_CallMethod_Ref({ani_iter}, TH_ANI_FIND_CLASS_METHOD({env}, "escompat.Iterator", "next", nullptr), reinterpret_cast<ani_ref*>(&{ani_next}));',
                 f'{env}->Object_GetField_Boolean({ani_next}, TH_ANI_FIND_CLASS_FIELD({env}, "escompat.IteratorResult", "done"), &{ani_done});',
             )
             with target.indented(

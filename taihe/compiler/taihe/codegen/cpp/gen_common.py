@@ -776,63 +776,13 @@ class CppHeadersGenerator:
                 f"new (this) {union_cpp_info.name}(::taihe::static_tag<tag>, ::std::forward<Args>(args)...);",
                 f"return *this;",
             )
-        # non-const reference getter
-        union_cpp_defn_target.writelns(
-            f"template<tag_t tag>",
-        )
+        # tag getter
         with union_cpp_defn_target.indented(
-            f"auto& get_ref() {{",
-            f"}}",
-        ):
-            for field in union.fields:
-                if field.ty_ref is None:
-                    continue
-                with union_cpp_defn_target.indented(
-                    f"if constexpr (tag == tag_t::{field.name}) {{",
-                    f"}}",
-                ):
-                    union_cpp_defn_target.writelns(
-                        f"return m_data.{field.name};",
-                    )
-        # non-const pointer getter
-        union_cpp_defn_target.writelns(
-            f"template<tag_t tag>",
-        )
-        with union_cpp_defn_target.indented(
-            f"auto* get_ptr() {{",
+            f"tag_t get_tag() const {{",
             f"}}",
         ):
             union_cpp_defn_target.writelns(
-                f"return m_tag == tag ? &get_ref<tag>() : nullptr;",
-            )
-        # const reference getter
-        union_cpp_defn_target.writelns(
-            f"template<tag_t tag>",
-        )
-        with union_cpp_defn_target.indented(
-            f"auto const& get_ref() const {{",
-            f"}}",
-        ):
-            for field in union.fields:
-                if field.ty_ref is None:
-                    continue
-                with union_cpp_defn_target.indented(
-                    f"if constexpr (tag == tag_t::{field.name}) {{",
-                    f"}}",
-                ):
-                    union_cpp_defn_target.writelns(
-                        f"return m_data.{field.name};",
-                    )
-        # const pointer getter
-        union_cpp_defn_target.writelns(
-            f"template<tag_t tag>",
-        )
-        with union_cpp_defn_target.indented(
-            f"auto const* get_ptr() const {{",
-            f"}}",
-        ):
-            union_cpp_defn_target.writelns(
-                f"return m_tag == tag ? &get_ref<tag>() : nullptr;",
+                f"return m_tag;",
             )
         # tag checker
         union_cpp_defn_target.writelns(
@@ -845,62 +795,86 @@ class CppHeadersGenerator:
             union_cpp_defn_target.writelns(
                 f"return m_tag == tag;",
             )
-        # tag getter
-        with union_cpp_defn_target.indented(
-            f"tag_t get_tag() const {{",
-            f"}}",
-        ):
+        for constness in ["", " const"]:
+            # reference getter
             union_cpp_defn_target.writelns(
-                f"return m_tag;",
+                f"template<tag_t tag>",
             )
-        # non-const visitor
-        union_cpp_defn_target.writelns(
-            f"template<typename Visitor>",
-        )
-        with union_cpp_defn_target.indented(
-            f"auto accept_template(Visitor&& visitor) {{",
-            f"}}",
-        ):
             with union_cpp_defn_target.indented(
-                f"switch (m_tag) {{",
+                f"auto{constness}& get_ref(){constness} {{",
                 f"}}",
-                indent="",
             ):
                 for field in union.fields:
+                    if field.ty_ref is None:
+                        continue
                     with union_cpp_defn_target.indented(
-                        f"case tag_t::{field.name}: {{",
+                        f"if constexpr (tag == tag_t::{field.name}) {{",
                         f"}}",
                     ):
-                        result = f"::taihe::static_tag<tag_t::{field.name}>"
-                        if field.ty_ref:
-                            result += f", m_data.{field.name}"
                         union_cpp_defn_target.writelns(
-                            f"return visitor({result});",
+                            f"return m_data.{field.name};",
                         )
-        # const visitor
-        union_cpp_defn_target.writelns(
-            f"template<typename Visitor>",
-        )
-        with union_cpp_defn_target.indented(
-            f"auto accept_template(Visitor&& visitor) const {{",
-            f"}}",
-        ):
+            # pointer getter
+            union_cpp_defn_target.writelns(
+                f"template<tag_t tag>",
+            )
             with union_cpp_defn_target.indented(
-                f"switch (m_tag) {{",
+                f"auto{constness}* get_ptr(){constness} {{",
                 f"}}",
-                indent="",
             ):
-                for field in union.fields:
-                    with union_cpp_defn_target.indented(
-                        f"case tag_t::{field.name}: {{",
-                        f"}}",
-                    ):
-                        result = f"::taihe::static_tag<tag_t::{field.name}>"
-                        if field.ty_ref:
-                            result += f", m_data.{field.name}"
-                        union_cpp_defn_target.writelns(
-                            f"return visitor({result});",
-                        )
+                union_cpp_defn_target.writelns(
+                    f"return m_tag == tag ? &get_ref<tag>() : nullptr;",
+                )
+            # implicit return type visitor
+            union_cpp_defn_target.writelns(
+                f"template<typename Visitor>",
+            )
+            with union_cpp_defn_target.indented(
+                f"decltype(auto) match_function(Visitor&& visitor){constness} {{",
+                f"}}",
+            ):
+                with union_cpp_defn_target.indented(
+                    f"switch (m_tag) {{",
+                    f"}}",
+                    indent="",
+                ):
+                    for field in union.fields:
+                        with union_cpp_defn_target.indented(
+                            f"case tag_t::{field.name}: {{",
+                            f"}}",
+                        ):
+                            result = [f"::taihe::static_tag<tag_t::{field.name}>"]
+                            if field.ty_ref:
+                                result.append(f"m_data.{field.name}")
+                            result_str = ", ".join(result)
+                            union_cpp_defn_target.writelns(
+                                f"return visitor({result_str});",
+                            )
+            # explicit return type visitor
+            union_cpp_defn_target.writelns(
+                f"template<typename ReturnType, typename Visitor>",
+            )
+            with union_cpp_defn_target.indented(
+                f"ReturnType match_function(Visitor&& visitor){constness} {{",
+                f"}}",
+            ):
+                with union_cpp_defn_target.indented(
+                    f"switch (m_tag) {{",
+                    f"}}",
+                    indent="",
+                ):
+                    for field in union.fields:
+                        with union_cpp_defn_target.indented(
+                            f"case tag_t::{field.name}: {{",
+                            f"}}",
+                        ):
+                            result = [f"::taihe::static_tag<tag_t::{field.name}>"]
+                            if field.ty_ref:
+                                result.append(f"m_data.{field.name}")
+                            result_str = ", ".join(result)
+                            union_cpp_defn_target.writelns(
+                                f"return visitor({result_str});",
+                            )
 
     def gen_union_named_utils(
         self,
@@ -909,8 +883,8 @@ class CppHeadersGenerator:
         union_cpp_info: UnionCppInfo,
         union_cpp_defn_target: CHeaderWriter,
     ):
+        # creator
         for field in union.fields:
-            # creator
             union_cpp_defn_target.writelns(
                 f"template<typename... Args>",
             )
@@ -921,7 +895,8 @@ class CppHeadersGenerator:
                 union_cpp_defn_target.writelns(
                     f"return make<tag_t::{field.name}>(::std::forward<Args>(args)...);",
                 )
-            # emplacement
+        # emplacement
+        for field in union.fields:
             union_cpp_defn_target.writelns(
                 f"template<typename... Args>",
             )
@@ -932,7 +907,8 @@ class CppHeadersGenerator:
                 union_cpp_defn_target.writelns(
                     f"return emplace<tag_t::{field.name}>(::std::forward<Args>(args)...);",
                 )
-            # tag checker
+        # tag checker
+        for field in union.fields:
             with union_cpp_defn_target.indented(
                 f"bool holds_{field.name}() const {{",
                 f"}}",
@@ -940,84 +916,79 @@ class CppHeadersGenerator:
                 union_cpp_defn_target.writelns(
                     f"return holds<tag_t::{field.name}>();",
                 )
-            if field.ty_ref is None:
-                continue
-            # non-const pointer getter
+        for constness in ["", " const"]:
+            # pointer getter
+            for field in union.fields:
+                if field.ty_ref is None:
+                    continue
+                with union_cpp_defn_target.indented(
+                    f"auto{constness}* get_{field.name}_ptr(){constness} {{",
+                    f"}}",
+                ):
+                    union_cpp_defn_target.writelns(
+                        f"return get_ptr<tag_t::{field.name}>();",
+                    )
+            # reference getter
+            for field in union.fields:
+                if field.ty_ref is None:
+                    continue
+                with union_cpp_defn_target.indented(
+                    f"auto{constness}& get_{field.name}_ref(){constness} {{",
+                    f"}}",
+                ):
+                    union_cpp_defn_target.writelns(
+                        f"return get_ref<tag_t::{field.name}>();",
+                    )
+            # implicit return type visitor
+            union_cpp_defn_target.writelns(
+                f"template<typename Visitor>",
+            )
             with union_cpp_defn_target.indented(
-                f"auto* get_{field.name}_ptr() {{",
+                f"decltype(auto) match(Visitor&& visitor){constness} {{",
                 f"}}",
             ):
-                union_cpp_defn_target.writelns(
-                    f"return get_ptr<tag_t::{field.name}>();",
-                )
-            # const pointer getter
+                with union_cpp_defn_target.indented(
+                    f"switch (m_tag) {{",
+                    f"}}",
+                    indent="",
+                ):
+                    for field in union.fields:
+                        with union_cpp_defn_target.indented(
+                            f"case tag_t::{field.name}: {{",
+                            f"}}",
+                        ):
+                            result = []
+                            if field.ty_ref:
+                                result.append(f"m_data.{field.name}")
+                            result_str = ", ".join(result)
+                            union_cpp_defn_target.writelns(
+                                f"return visitor.case_{field.name}({result_str});",
+                            )
+            # explicit return type visitor
+            union_cpp_defn_target.writelns(
+                f"template<typename ReturnType, typename Visitor>",
+            )
             with union_cpp_defn_target.indented(
-                f"auto const* get_{field.name}_ptr() const {{",
+                f"ReturnType match(Visitor&& visitor){constness} {{",
                 f"}}",
             ):
-                union_cpp_defn_target.writelns(
-                    f"return get_ptr<tag_t::{field.name}>();",
-                )
-            # non-const reference getter
-            with union_cpp_defn_target.indented(
-                f"auto& get_{field.name}_ref() {{",
-                f"}}",
-            ):
-                union_cpp_defn_target.writelns(
-                    f"return get_ref<tag_t::{field.name}>();",
-                )
-            # const reference getter
-            with union_cpp_defn_target.indented(
-                f"auto const& get_{field.name}_ref() const {{",
-                f"}}",
-            ):
-                union_cpp_defn_target.writelns(
-                    f"return get_ref<tag_t::{field.name}>();",
-                )
-        # non-const visitor
-        union_cpp_defn_target.writelns(
-            f"template<typename Visitor>",
-        )
-        with union_cpp_defn_target.indented(
-            f"auto accept(Visitor&& visitor) {{",
-            f"}}",
-        ):
-            with union_cpp_defn_target.indented(
-                f"switch (m_tag) {{",
-                f"}}",
-                indent="",
-            ):
-                for field in union.fields:
-                    with union_cpp_defn_target.indented(
-                        f"case tag_t::{field.name}: {{",
-                        f"}}",
-                    ):
-                        result = "" if field.ty_ref is None else f"m_data.{field.name}"
-                        union_cpp_defn_target.writelns(
-                            f"return visitor.{field.name}({result});",
-                        )
-        # const visitor
-        union_cpp_defn_target.writelns(
-            f"template<typename Visitor>",
-        )
-        with union_cpp_defn_target.indented(
-            f"auto accept(Visitor&& visitor) const {{",
-            f"}}",
-        ):
-            with union_cpp_defn_target.indented(
-                f"switch (m_tag) {{",
-                f"}}",
-                indent="",
-            ):
-                for field in union.fields:
-                    with union_cpp_defn_target.indented(
-                        f"case tag_t::{field.name}: {{",
-                        f"}}",
-                    ):
-                        result = "" if field.ty_ref is None else f"m_data.{field.name}"
-                        union_cpp_defn_target.writelns(
-                            f"return visitor.{field.name}({result});",
-                        )
+                with union_cpp_defn_target.indented(
+                    f"switch (m_tag) {{",
+                    f"}}",
+                    indent="",
+                ):
+                    for field in union.fields:
+                        with union_cpp_defn_target.indented(
+                            f"case tag_t::{field.name}: {{",
+                            f"}}",
+                        ):
+                            result = []
+                            if field.ty_ref:
+                                result.append(f"m_data.{field.name}")
+                            result_str = ", ".join(result)
+                            union_cpp_defn_target.writelns(
+                                f"return visitor.case_{field.name}({result_str});",
+                            )
 
     def gen_union_same(
         self,

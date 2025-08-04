@@ -16,6 +16,7 @@
 #define RUNTIME_INCLUDE_TAIHE_PLATFORM_ANI_HPP_
 // NOLINTBEGIN
 
+#include <taihe/object.hpp>
 #include <taihe/runtime.hpp>
 
 #include <taihe.platform.ani.proj.hpp>
@@ -81,7 +82,7 @@ struct same_impl_t<AniRefGuard, std::enable_if_t<std::is_base_of_v<sref_guard, A
         auto lhs_as_ani = ::taihe::platform::ani::weak::AniObject(lhs);
         auto rhs_as_ani = ::taihe::platform::ani::weak::AniObject(rhs);
         if (lhs_as_ani.is_error() || rhs_as_ani.is_error()) {
-            return false;
+            return same_impl<void>(lhs, rhs);
         }
         env_guard guard;
         ani_env *env = guard.get_env();
@@ -94,8 +95,12 @@ struct same_impl_t<AniRefGuard, std::enable_if_t<std::is_base_of_v<sref_guard, A
 
 template <typename AniRefGuard>
 struct hash_impl_t<AniRefGuard, std::enable_if_t<std::is_base_of_v<sref_guard, AniRefGuard>>> {
-    std::size_t operator()(data_view) const
+    std::size_t operator()(data_view val) const
     {
+        auto val_as_ani = ::taihe::platform::ani::weak::AniObject(val);
+        if (val_as_ani.is_error()) {
+            return hash_impl<void>(val);
+        }
         TH_THROW(std::runtime_error, "Hashing of ani_ref is not implemented yet.");
     }
 };
