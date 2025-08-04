@@ -996,7 +996,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @param count number of repetitions of this String
      *
-     * @throws ArgumentOutOfRangeException if count < 0
+     * @throws ArgumentOutOfRangeError if count < 0
      *
      * @returns this string that is repeated count times
      */
@@ -1011,7 +1011,7 @@ export final class String extends Object implements Comparable<String>, Iterable
     *
     * @param count number of repetitions of this String
     *
-    * @throws ArgumentOutOfRangeException if count < 0
+    * @throws ArgumentOutOfRangeError if count < 0
     *
     * @returns this string that is repeated count times
     */
