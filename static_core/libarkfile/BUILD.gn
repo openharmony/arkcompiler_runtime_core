@@ -148,6 +148,7 @@ ohos_source_set("libarktsfile_frontend_set_static") {
   deps = [
     ":arktsfile_header_deps",
     ":source_lang_enum_h",
+    "$ark_root/libpandabase:libarktsbase",
     "$ark_root/libziparchive:libarktsziparchive_frontend_static",
   ]
 
