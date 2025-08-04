@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@interface AI1 {}
 
 interface InterfaceA {
     fieldA: string,
@@ -23,6 +24,7 @@ interface InterfaceB extends InterfaceA {
     foo()
 }
 
+@AI1()
 interface InterfaceC {
     fieldC: string
 }

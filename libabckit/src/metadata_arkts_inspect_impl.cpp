@@ -829,6 +829,12 @@ bool ArkTSInterfaceEnumerateClasses(AbckitCoreInterface *iface, void *data,
     return InterfaceEnumerateClassesHelper(iface, data, cb);
 }
 
+bool ArkTSInterfaceEnumerateAnnotations(AbckitCoreInterface *iface, void *data,
+                                        bool (*cb)(AbckitCoreAnnotation *anno, void *data))
+{
+    return InterfaceEnumerateAnnotationsHelper(iface, data, cb);
+}
+
 // ========================================
 // Enum
 // ========================================
@@ -841,6 +847,22 @@ bool ArkTSEnumEnumerateMethods(AbckitCoreEnum *enm, void *data, bool (*cb)(Abcki
 bool ArkTSEnumEnumerateFields(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreEnumField *field, void *data))
 {
     return EnumEnumerateFieldsHelper(enm, data, cb);
+}
+
+// ========================================
+// Field
+// ========================================
+
+bool ArkTSClassFieldEnumerateAnnotations(AbckitCoreClassField *field, void *data,
+                                         bool (*cb)(AbckitCoreAnnotation *anno, void *data))
+{
+    return ClassFieldEnumerateAnnotationsHelper(field, data, cb);
+}
+
+bool ArkTSInterfaceFieldEnumerateAnnotations(AbckitCoreInterfaceField *field, void *data,
+                                             bool (*cb)(AbckitCoreAnnotation *anno, void *data))
+{
+    return InterfaceFieldEnumerateAnnotationsHelper(field, data, cb);
 }
 
 // ========================================
@@ -872,6 +894,20 @@ bool ArkTSFunctionEnumerateAnnotations(AbckitCoreFunction *function, void *data,
 
     for (auto &annotation : function->annotations) {
         if (!cb(annotation.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool ArkTSFunctionEnumerateParameters(AbckitCoreFunction *function, void *data,
+                                      bool (*cb)(AbckitCoreFunctionParam *param, void *data))
+{
+    LIBABCKIT_BAD_ARGUMENT(function, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+
+    for (auto &param : function->parameters) {
+        if (!cb(param.get(), data)) {
             return false;
         }
     }

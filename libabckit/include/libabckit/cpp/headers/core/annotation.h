@@ -31,8 +31,6 @@ class Annotation : public ViewInResource<AbckitCoreAnnotation *, const File *> {
     friend class core::Function;
     /// @brief core::AnnotationElement
     friend class core::AnnotationElement;
-    /// @brief arkts::Function
-    friend class arkts::Function;
     /// @brief core::Class
     friend class core::Class;
     /// @brief core::Interface
@@ -41,8 +39,6 @@ class Annotation : public ViewInResource<AbckitCoreAnnotation *, const File *> {
     friend class core::ClassField;
     /// @brief core::InterfaceField
     friend class core::InterfaceField;
-    /// @brief core::EnumField
-    friend class core::EnumField;
     /// @brief arkts::Class
     friend class arkts::Class;
     /// @brief arkts::Function

@@ -107,7 +107,7 @@ extern "C" AbckitType *CreateType(AbckitFile *file, AbckitTypeId id)
         statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
         return nullptr;
     }
-    return GetOrCreateType(file, id, 0, nullptr);
+    return GetOrCreateType(file, id, 0, nullptr, nullptr);
 }
 
 extern "C" AbckitType *CreateReferenceType(AbckitFile *file, AbckitCoreClass *klass)
@@ -118,7 +118,7 @@ extern "C" AbckitType *CreateReferenceType(AbckitFile *file, AbckitCoreClass *kl
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     LIBABCKIT_BAD_ARGUMENT(klass, nullptr);
-    return GetOrCreateType(file, AbckitTypeId::ABCKIT_TYPE_ID_REFERENCE, 0, klass);
+    return GetOrCreateType(file, AbckitTypeId::ABCKIT_TYPE_ID_REFERENCE, 0, klass, nullptr);
 }
 
 // ========================================

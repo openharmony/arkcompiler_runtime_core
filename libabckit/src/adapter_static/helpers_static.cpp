@@ -1131,4 +1131,41 @@ bool GraphDominatorsTreeAnalysisIsValid(ark::compiler::Graph *graph)
     return true;
 }
 
+AbckitTypeId ArkPandasmTypeToAbckitTypeId(const ark::pandasm::Type &type)
+{
+    switch (type.GetId()) {
+        case ark::panda_file::Type::TypeId::VOID:
+            return ABCKIT_TYPE_ID_VOID;
+        case ark::panda_file::Type::TypeId::U1:
+            return ABCKIT_TYPE_ID_U1;
+        case ark::panda_file::Type::TypeId::I8:
+            return ABCKIT_TYPE_ID_I8;
+        case ark::panda_file::Type::TypeId::U8:
+            return ABCKIT_TYPE_ID_U8;
+        case ark::panda_file::Type::TypeId::I16:
+            return ABCKIT_TYPE_ID_U16;
+        case ark::panda_file::Type::TypeId::U16:
+            return ABCKIT_TYPE_ID_U16;
+        case ark::panda_file::Type::TypeId::F32:
+            return ABCKIT_TYPE_ID_F32;
+        case ark::panda_file::Type::TypeId::I32:
+            return ABCKIT_TYPE_ID_I32;
+        case ark::panda_file::Type::TypeId::U32:
+            return ABCKIT_TYPE_ID_U32;
+        case ark::panda_file::Type::TypeId::F64:
+            return ABCKIT_TYPE_ID_F64;
+        case ark::panda_file::Type::TypeId::I64:
+            return ABCKIT_TYPE_ID_I64;
+        case ark::panda_file::Type::TypeId::U64:
+            return ABCKIT_TYPE_ID_U64;
+        case ark::panda_file::Type::TypeId::REFERENCE:
+            if (type.IsArray()) {
+                return ArkPandasmTypeToAbckitTypeId(type.GetComponentType());
+            }
+            return ABCKIT_TYPE_ID_REFERENCE;
+        default:
+            return ABCKIT_TYPE_ID_INVALID;
+    }
+}
+
 }  // namespace libabckit

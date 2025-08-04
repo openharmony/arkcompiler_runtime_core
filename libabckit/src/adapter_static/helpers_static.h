@@ -146,6 +146,7 @@ AbckitValue *FindOrCreateValueStatic(AbckitFile *file, const ark::pandasm::Value
 void GraphInvalidateAnalyses(ark::compiler::Graph *graph);
 bool GraphHasUnreachableBlocks(ark::compiler::Graph *graph);
 bool GraphDominatorsTreeAnalysisIsValid(ark::compiler::Graph *graph);
+AbckitTypeId ArkPandasmTypeToAbckitTypeId(const ark::pandasm::Type &type);
 
 constexpr AbckitBitImmSize GetBitLengthUnsigned(uint64_t imm)
 {

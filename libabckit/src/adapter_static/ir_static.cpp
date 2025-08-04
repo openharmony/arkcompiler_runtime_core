@@ -1408,7 +1408,7 @@ void IappendInputStatic(AbckitInst *inst, AbckitInst *input)
 
 static AbckitType *CreateGeneralType(AbckitFile *file, AbckitTypeId typeId, AbckitCoreClass *klass)
 {
-    return GetOrCreateType(file, typeId, 0, klass);
+    return GetOrCreateType(file, typeId, 0, klass, nullptr);
 }
 
 AbckitType *IgetTypeStatic(AbckitInst *inst)

@@ -62,13 +62,20 @@ bool InterfaceEnumerateSubInterfacesHelper(AbckitCoreInterface *iface, void *dat
                                            bool (*cb)(AbckitCoreInterface *subInterface, void *data));
 bool InterfaceEnumerateClassesHelper(AbckitCoreInterface *iface, void *data,
                                      bool (*cb)(AbckitCoreClass *klass, void *data));
+bool InterfaceEnumerateAnnotationsHelper(AbckitCoreInterface *iface, void *data,
+                                         bool (*cb)(AbckitCoreAnnotation *anno, void *data));
 
 bool EnumEnumerateMethodsHelper(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreFunction *method, void *data));
 bool EnumEnumerateFieldsHelper(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreEnumField *field, void *data));
 
+bool ClassFieldEnumerateAnnotationsHelper(AbckitCoreClassField *field, void *data,
+                                          bool (*cb)(AbckitCoreAnnotation *anno, void *data));
+bool InterfaceFieldEnumerateAnnotationsHelper(AbckitCoreInterfaceField *field, void *data,
+                                              bool (*cb)(AbckitCoreAnnotation *anno, void *data));
+
 bool IsDynamic(AbckitTarget target);
 
-AbckitType *GetOrCreateType(AbckitFile *file, AbckitTypeId id, size_t rank, AbckitCoreClass *klass);
+AbckitType *GetOrCreateType(AbckitFile *file, AbckitTypeId id, size_t rank, AbckitCoreClass *klass, AbckitString *name);
 
 }  // namespace libabckit
 

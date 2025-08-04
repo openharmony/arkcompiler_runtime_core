@@ -84,13 +84,13 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetFieldsStatic)
         }
     }
 
-    std::set<std::string> expectFieldNames = {"fieldA", "fieldB"};
+    std::set<std::string> expectFieldNames = {"<property>fieldA", "<property>fieldB"};
     ASSERT_EQ(gotFieldNames, expectFieldNames);
 }
 
 // Test: test-kind=api, api=InspectApiImpl::interfaceEnumerateSuperInterfaces, abc-kind=ArkTS2, category=positive,
 // extension=c
-TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceEnumerateSuperInterfacesStatic)
+TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetSuperInterfacesStatic)
 {
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/interfaces/interfaces_static.abc");
 
@@ -113,7 +113,7 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceEnumerateSuperInterfacesStati
 
 // Test: test-kind=api, api=InspectApiImpl::interfaceEnumerateSubInterfaces, abc-kind=ArkTS2, category=positive,
 // extension=c
-TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceEnumerateSubInterfacesStatic)
+TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetSubInterfacesStatic)
 {
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/interfaces/interfaces_static.abc");
 
@@ -135,9 +135,8 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceEnumerateSubInterfacesStatic)
     ASSERT_EQ(gotInterfaceNames, expectInterfaceNames);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::interfaceEnumerateClasses, abc-kind=ArkTS2, category=positive,
-// extension=c
-TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceEnumerateClassesStatic)
+// Test: test-kind=api, api=InspectApiImpl::interfaceEnumerateClasses, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetClassesStatic)
 {
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/interfaces/interfaces_static.abc");
 
@@ -157,6 +156,30 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceEnumerateClassesStatic)
     }
 
     ASSERT_EQ(gotClassNames, expectClassNames);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::interfaceEnumerateAnnotations, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetAnnotationsStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/interfaces/interfaces_static.abc");
+
+    std::set<std::string> gotAnnotationNames;
+    std::set<std::string> expectAnnotationNames = {"AI1"};
+
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        auto result = helpers::GetInterfaceByName(module, "InterfaceC");
+        ASSERT_NE(result, std::nullopt);
+        const auto &iface = result.value();
+        for (const auto &anno : iface.GetAnnotations()) {
+            gotAnnotationNames.emplace(anno.GetName());
+        }
+    }
+
+    ASSERT_EQ(gotAnnotationNames, expectAnnotationNames);
 }
 
 }  // namespace libabckit::test

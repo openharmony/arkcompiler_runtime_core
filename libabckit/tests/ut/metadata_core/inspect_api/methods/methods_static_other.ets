@@ -12,36 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@interface AI1 {
-  a1F1: string
-}
-
-@interface AI3 {
-  a3F1: string
-}
-
-const f1: string = 'Hello';
+function m0F1(p1: string, p2: int[]) {}
 
 class C1 {
-  @AI1({a1F1: 'C1F1'})
-  public c1F1: string = 'public';
-  protected c1F2: string = 'protected';
-  private c1F3: string = 'private';
-  public static c1F4: string = 'static';
-  internal c1F5: int = 1;
-  public readonly c1F6: int = 2;
+    public c1F1(){};
+    protected c1F2(){};
+    private c1F3(){};
+    internal c1F4(){};
 }
 
-interface I1 {
-  @AI3({a3F1: 'interface annotation'})
-  i1F1: number;
-  readonly i1F2: string;
+class C2 {
+    public static field1 = 1;
 }
 
-enum E1 {
-  ONE
-}
-
-namespace NS1 {
-  const nS1F1: string[] = ['namespace'];
+namespace Ns1 {
+    function n0F9(){};
 }

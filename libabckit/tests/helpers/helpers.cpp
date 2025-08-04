@@ -818,4 +818,37 @@ std::optional<abckit::core::Interface> GetInterfaceByName(const abckit::core::Mo
     return std::nullopt;
 }
 
+std::optional<abckit::core::Enum> GetEnumByName(const abckit::core::Module &module, const std::string &name)
+{
+    for (const auto &enm : module.GetEnums()) {
+        if (enm.GetName() == name) {
+            return enm;
+        }
+    }
+    LIBABCKIT_LOG_TEST(DEBUG) << "Enum Not Found: " << name << std::endl;
+    return std::nullopt;
+}
+
+std::optional<abckit::core::Namespace> GetNamespaceByName(const abckit::core::Module &module, const std::string &name)
+{
+    for (const auto &ns : module.GetNamespaces()) {
+        if (ns.GetName() == name) {
+            return ns;
+        }
+    }
+    LIBABCKIT_LOG_TEST(DEBUG) << "Namespace Not Found: " << name << std::endl;
+    return std::nullopt;
+}
+
+std::optional<abckit::core::Function> GetFunctionByName(const abckit::core::Module &module, const std::string &name)
+{
+    for (const auto &func : module.GetTopLevelFunctions()) {
+        if (func.GetName() == name) {
+            return func;
+        }
+    }
+    LIBABCKIT_LOG_TEST(DEBUG) << "Function Not Found: " << name << std::endl;
+    return std::nullopt;
+}
+
 }  // namespace libabckit::test::helpers

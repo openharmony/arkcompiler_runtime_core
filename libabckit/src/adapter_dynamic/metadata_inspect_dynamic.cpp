@@ -544,7 +544,7 @@ AbckitType *ValueGetTypeDynamic(AbckitValue *value)
             LIBABCKIT_UNIMPLEMENTED;
     }
     // NOTE implement logic for classes
-    return GetOrCreateType(value->file, id, 0, nullptr);
+    return GetOrCreateType(value->file, id, 0, nullptr, nullptr);
 }
 
 bool ValueGetU1Dynamic(AbckitValue *value)

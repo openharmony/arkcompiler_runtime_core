@@ -25,6 +25,11 @@ interface I1 {
   I1F1: string
 }
 
+@interface A1 {
+  a1F1: string
+}
+
+@A1({a1F1: 'Hello'})
 class C3 {}
 
 class C2 extends C1 implements I1 {

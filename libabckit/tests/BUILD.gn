@@ -208,6 +208,7 @@ abckit_gtests_sources = [
   "ut/isa/isa_static/objects/objects.cpp",
   "ut/isa/isa_static/return/return_static.cpp",
   "ut/isa/isa_static/throw/throw_static.cpp",
+  "ut/metadata_core/inspect_api/annotations/annotations_static_test.cpp",
   "ut/metadata_core/inspect_api/annotations/annotations_test.cpp",
   "ut/metadata_core/inspect_api/classes/classes_static_test.cpp",
   "ut/metadata_core/inspect_api/classes/classes_test.cpp",
@@ -217,6 +218,7 @@ abckit_gtests_sources = [
   "ut/metadata_core/inspect_api/files/files_test.cpp",
   "ut/metadata_core/inspect_api/interfaces/interfaces_static_test.cpp",
   "ut/metadata_core/inspect_api/literals/literals_test.cpp",
+  "ut/metadata_core/inspect_api/methods/methods_static_test.cpp",
   "ut/metadata_core/inspect_api/methods/methods_test.cpp",
   "ut/metadata_core/inspect_api/modules/modules_dynamic_test.cpp",
   "ut/metadata_core/inspect_api/modules/modules_static_test.cpp",
@@ -434,12 +436,14 @@ test_ts_files = [
 test_ts_files += clean_scenario_ts_files
 
 test_ets_files = [
+  "ut/metadata_core/inspect_api/annotations/annotations_static",
   "ut/metadata_core/inspect_api/modules/targets/ArkTS2_target",
   "ut/metadata_core/inspect_api/modules/modules_static",
   "ut/metadata_core/inspect_api/classes/classes_static",
   "ut/metadata_core/inspect_api/interfaces/interfaces_static",
   "ut/metadata_core/inspect_api/enums/enums_static",
   "ut/metadata_core/inspect_api/classes/classes_empty_static",
+  "ut/metadata_core/inspect_api/methods/methods_static_other",
   "ut/metadata_core/inspect_api/methods/methods_static",
   "ut/metadata_core/inspect_api/methods/native_method",
   "ut/metadata_core/inspect_api/namespaces/namespaces_static",

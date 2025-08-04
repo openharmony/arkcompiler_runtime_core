@@ -280,6 +280,9 @@ std::string_view AbckitStringToString(AbckitString *str);
 std::string GetCropFuncName(const std::string &fullSig);
 std::optional<abckit::core::Class> GetClassByName(const abckit::core::Module &module, const std::string &name);
 std::optional<abckit::core::Interface> GetInterfaceByName(const abckit::core::Module &module, const std::string &name);
+std::optional<abckit::core::Enum> GetEnumByName(const abckit::core::Module &module, const std::string &name);
+std::optional<abckit::core::Namespace> GetNamespaceByName(const abckit::core::Module &module, const std::string &name);
+std::optional<abckit::core::Function> GetFunctionByName(const abckit::core::Module &module, const std::string &name);
 
 }  // namespace libabckit::test::helpers
 
