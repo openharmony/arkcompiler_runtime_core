@@ -14,126 +14,149 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-import stat
-import sys
-import shutil
+import argparse
 import json
+import os
 import re
+import shutil
+import stat
 from pathlib import Path
+from typing import Set
 
 
 def load_json_file(file_path: Path) -> dict:
     """Load JSON file; return parsed data"""
     try:
-        with os.fdopen(os.open(file_path, os.O_RDONLY, stat.S_IRUSR), 'r', encoding='utf-8') as f:
+        with os.fdopen(
+            os.open(file_path, os.O_RDONLY, stat.S_IRUSR), "r", encoding="utf-8"
+        ) as f:
             return json.load(f)
     except json.JSONDecodeError as e:
         print(f"Error: Hiddable Interface file format is invalid in ({file_path}): {e}")
         return {}
 
 
-def read_hidden_interfaces(std_dir: Path) -> dict:
-    json_files = [
-        "hiddable_APIs.json"
-    ]
-    hidden_interfaces = {}
-    for json_file in json_files:
-        hidden_interfaces_file = std_dir / json_file
+def read_hiddable_apis(std_lib_dir: Path, json_file: Path) -> dict:
+    hiddable_apis = {}
+    hiddable_api_file = std_lib_dir / json_file
 
-        if not hidden_interfaces_file.exists():
-            print("Error: Hiddable Interface file not found. Will Copy All files.")
-            return hidden_interfaces
+    if not hiddable_api_file.exists():
+        print("Error: Hiddable Interface file not found. Will Copy All files.")
+        return hiddable_apis
 
-        data = load_json_file(hidden_interfaces_file)
-        for item in data:
-            file = item.get('file')
-            interfaces = item.get('interfaces', [])
-            if file:
-                hidden_interfaces[file] = set(interfaces)
+    data = load_json_file(hiddable_api_file)
+    for item in data:
+        file = item.get("file")
+        single_file_apis = item.get("interfaces", [])
+        if file:
+            hiddable_apis[file] = set(single_file_apis)
 
-    return hidden_interfaces
+    return hiddable_apis
 
 
-def process_file_with_hidden_interfaces(
+def process_file_with_hiddable_interfaces(
     source_file: Path,
     target_file: Path,
-    hidden_ifaces: set,
-    interface_pattern: re.Pattern) -> None:
+    hiddable_apis: Set[str],
+    api_pattern: re.Pattern[str],
+) -> None:
     """Replace export keyword with empty string if interface is hiddable"""
-    with os.fdopen(os.open(source_file, os.O_RDONLY, stat.S_IRUSR), 'r', encoding='utf-8') as f:
+    with os.fdopen(
+        os.open(source_file, os.O_RDONLY, stat.S_IRUSR), "r", encoding="utf-8"
+    ) as f:
         lines = f.readlines()
 
     modified_lines = []
 
     for line in lines:
-        match = interface_pattern.search(line)
+        match = api_pattern.search(line)
         if match:
-            interface_type, interface_name = match.groups()
-            if interface_name in hidden_ifaces:
-                modified_line = re.sub(r'\bexport \b', '', line)
+            _, api_name = match.groups()
+            if api_name in hiddable_apis:
+                modified_line = re.sub(r"\bexport \b", "", line)
                 modified_lines.append(modified_line)
                 continue
 
         modified_lines.append(line)
 
     with os.fdopen(
-        os.open(target_file, os.O_RDWR | os.O_CREAT | os.O_TRUNC, stat.S_IWUSR | stat.S_IRUSR), 'w') as fout:
+        os.open(
+            target_file,
+            os.O_RDWR | os.O_CREAT | os.O_TRUNC,
+            stat.S_IWUSR | stat.S_IRUSR,
+        ),
+        "w",
+    ) as fout:
         fout.writelines(modified_lines)
 
 
-def copy_files_with_filter(std_dir: Path, target_dir: Path, hidden_interfaces: dict) -> None:
+def copy_files_with_filter(
+    std_lib_dir: Path, target_dir: Path, hiddable_apis: dict[str, Set[str]]
+) -> None:
     """Copy stdlib files; filter interfaces by hiddable_APIs.json"""
-    copied_count = 0
-    skipped_count = 0
-    filtered_files = 0
 
-    interface_pattern = re.compile(
-        r'^\s*export\s+(?:final\s+|abstract\s+)?(class|interface|@interface|function)\s+(\w+)'
+    api_pattern = re.compile(
+        r"^\s*export\s+(?:final\s+|abstract\s+)?(?:native\s+)?(class|interface|@interface|function)\s+(\w+)"
     )
 
-    for root, _, files in os.walk(std_dir):
-        rel_path = Path(root).relative_to(std_dir)
-        target_subdir = target_dir / 'std' / rel_path
+    for root, _, files in os.walk(std_lib_dir):
+        relative_path = Path(root).relative_to(std_lib_dir)
+        target_sub_dir = target_dir / "std" / relative_path
 
-        target_subdir.mkdir(parents=True, exist_ok=True)
+        target_sub_dir.mkdir(parents=True, exist_ok=True)
 
         for file in files:
             source_file = Path(root) / file
-            rel_file_path = rel_path / file
-            rel_file_str = str(rel_file_path)
+            relative_file_path = relative_path / file
+            relative_file_string = str(relative_file_path)
 
-            if rel_file_str not in hidden_interfaces:
-                shutil.copy2(source_file, target_subdir)
-                copied_count += 1
+            if relative_file_string not in hiddable_apis:
+                shutil.copy2(source_file, target_sub_dir)
                 continue
 
-            hidden_ifaces = hidden_interfaces[rel_file_str]
+            hiddable_apis = hiddable_apis[relative_file_string]
 
-            if not hidden_ifaces:
-                skipped_count += 1
+            if not hiddable_apis:
                 continue
-            filtered_files += 1
-            target_file = target_subdir / file
-            process_file_with_hidden_interfaces(source_file, target_file, hidden_ifaces, interface_pattern)
-            copied_count += 1
+            target_file = target_sub_dir / file
+            process_file_with_hiddable_interfaces(
+                source_file, target_file, hiddable_apis, api_pattern
+            )
 
 
 def main():
-    if len(sys.argv) != 4:
-        print(f"Usage: {sys.argv[0]} <STD_DIR> <ESCOMPACT_DIR> <TARGET_DIR>")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description="Copy and process standard library files with hiddable interfaces filtering."
+    )
+    parser.add_argument(
+        "--std-dir", type=Path, help="Directory containing standard library files"
+    )
+    parser.add_argument(
+        "--escompat-dir", type=Path, help="Directory containing escompact files"
+    )
+    parser.add_argument(
+        "--target-dir", type=Path, help="Target directory for processed files"
+    )
+    parser.add_argument(
+        "--json-file", type=Path, help="The JSON file to read hiddable APIs from"
+    )
 
-    std_dir = Path(sys.argv[1])
-    escompact_dir = Path(sys.argv[2])
-    target_dir = Path(sys.argv[3])
+    args = parser.parse_args()
+
+    std_lib_dir = args.std_dir
+    escompat_lib_dir = args.escompat_dir
+    target_dir = args.target_dir
+    json_file = args.json_file
+
+    if not std_lib_dir or not escompat_lib_dir or not target_dir or not json_file:
+        parser.error("std-dir, escompact-dir, target-dir, and json-files are required.")
 
     target_dir.mkdir(parents=True, exist_ok=True)
-    hidden_interfaces = read_hidden_interfaces(std_dir)
-    copy_files_with_filter(std_dir, target_dir, hidden_interfaces)
+    hiddable_apis = read_hiddable_apis(std_lib_dir, json_file)
+    copy_files_with_filter(std_lib_dir, target_dir, hiddable_apis)
 
-    escompat_target = target_dir / escompact_dir.name
-    shutil.copytree(escompact_dir, escompat_target, dirs_exist_ok=True)
+    escompat_target_dir = target_dir / escompat_lib_dir.name
+    shutil.copytree(escompat_lib_dir, escompat_target_dir, dirs_exist_ok=True)
 
 
 if __name__ == "__main__":
