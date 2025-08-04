@@ -253,6 +253,29 @@ export namespace arktest {
     }
 
     /**
+    * Assert callback throws and test the thrown value
+    * @param cb callback to be executed
+    * @param test for a thrown value, acts as predicate or returns an error message
+    * @throws AssertionError if no value thrown or value doesn't match the test predicate
+    */
+    export function expectThrowError(
+        cb: () => void,
+        test?: (v: Error) => boolean | string) {
+        try {
+            cb()
+        } catch (e) {
+            e = (e instanceof Error) ? e as Error
+                : failingAssertion("An arbitrary object instance was caught!") 
+            let res = test?.(e)
+            if (res != undefined && res != true) {
+                failingAssertion((typeof res == "string") ? res as string : ("Unexpected value thrown: " + e))
+            }
+            return
+        }
+        failingAssertion("Callback expected to throw");
+    }
+
+    /**
     * Execute callback and check that Exception was occurred and it is the same as expected if it passed
     * @param fn executing callback
     * @param message optional string message or Exception to be tested upon the thrown value
