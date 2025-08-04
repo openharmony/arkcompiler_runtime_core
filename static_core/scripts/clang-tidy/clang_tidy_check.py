@@ -20,6 +20,7 @@ import multiprocessing
 import sys
 import subprocess
 import re
+from typing import List
 
 
 def get_args():
@@ -31,8 +32,11 @@ def get_args():
         'build_dir', help='panda build directory.', type=str)
     parser.add_argument(
         '--filename-filter', type=str, action='store', dest='filename_filter',
-        required=False, default="*",
+        required=False, default=None,
         help='Regexp for filename with path to it. If missed all source files will be checked.')
+    parser.add_argument(
+        '--changed-only', action="store_true", help='Check changed files only.'
+    )
     parser.add_argument(
         '--full', action="store_true", help='Check all files with all compile keys.')
     parser.add_argument(
@@ -250,6 +254,13 @@ def run_clang_tidy(src_path: str, config_file_path: str, build_dir: str, header_
     return True
 
 
+def get_changed_files(src_path: str) -> List[str]:
+    cmd = ['git', 'diff', 'HEAD^', '--name-status']
+    ret = subprocess.check_output(cmd, cwd=src_path)
+    files = [col.split('\t')[1] for col in ret.decode().split('\n') if col]
+    return files
+
+
 def get_full_path(relative_path: str, location_base: str, panda_dir: str, build_dir: str) -> str:
     full_path = panda_dir if location_base == "PANDA_DIR" else build_dir
     full_path += "/" + relative_path
@@ -316,7 +327,7 @@ def get_file_list(panda_dir: str, build_dir: str, filename_filter: str) -> list:
         return []
 
     regexp = None
-    if filename_filter != '*':
+    if filename_filter:
         regexp = re.compile(filename_filter)
 
     file_list = []
@@ -469,6 +480,12 @@ if __name__ == "__main__":
     err_msg = verify_args(arguments.panda_dir, arguments.build_dir)
     if err_msg:
         sys.exit(err_msg)
+
+    if arguments.changed_only:
+        if arguments.filename_filter:
+            raise Exception("--changed-only cannot be used with --filename-filer")
+        changed_files = get_changed_files(arguments.panda_dir)
+        arguments.filename_filter = '(' + '|'.join([re.escape(file) for file in changed_files]) + ')'
 
     files_list = get_file_list(
         arguments.panda_dir, arguments.build_dir, arguments.filename_filter)

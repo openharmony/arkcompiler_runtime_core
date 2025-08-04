@@ -18,6 +18,11 @@
 #   - believes that size of pointer is 64 instead of 32 for aarch32
 # TODO: Retry once we upgrade the checker.
 
+add_custom_target(clang-tidy-changed-check
+  COMMAND ${PANDA_ROOT}/scripts/clang-tidy/clang_tidy_check.py --changed-only ${PANDA_ROOT} ${PANDA_BINARY_ROOT}
+  USES_TERMINAL
+  DEPENDS panda_gen_files
+)
 
 add_custom_target(clang-tidy-static-core-check
   COMMAND ${PANDA_ROOT}/scripts/clang-tidy/clang_tidy_check.py --filename-filter /runtime_core/static_core/ ${PANDA_ROOT} ${PANDA_BINARY_ROOT}
