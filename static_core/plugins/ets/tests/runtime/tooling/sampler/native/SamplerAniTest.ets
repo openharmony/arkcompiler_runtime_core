@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function main(): int {
+export function debugMain(): int {
     loadLibrary("sampler_ani_lib");
 
     let res: int = 0;
@@ -44,7 +44,7 @@ function main(): int {
     return 0;
 }
 
-function release_main(): int {
+export function releaseMain(): int {
     loadLibrary("sampler_ani_lib");
 
     let res: int = 0;
