@@ -69,6 +69,10 @@ export class TreeSet<T> implements ReadonlyTreeSet<T> {
         this.treeMap = new TreeMap<T, T>(comparator);
     }
 
+    public toString(): string {
+        return "[object TreeSet]";
+    }
+
     /**
      * Return the number of elements in the TreeSet
      *

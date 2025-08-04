@@ -18,6 +18,10 @@
 export class Stack<T> implements Iterable<T> {
     private buffer: Array<T>;
 
+    public toString(): string {
+        return "[object Stack]";
+    }
+
     /**
      * Gets the number of elements in the Stack.
      */
