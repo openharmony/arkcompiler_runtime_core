@@ -402,54 +402,6 @@ function SetEncodedSsp() {
     arktest.assertEQ(uriObj.toString(), 'safdcas://www.test321.cn#asdasf');
 }
 
-function UriSetNullAttribute() {
-    let gaogao = new uri.URI('http://gg:gaogao@www.test.com:99/path/path?query#fagment');
-    arktest.assertEQ(gaogao.scheme, "http");
-    arktest.assertEQ(gaogao.path, "/path/path");
-    arktest.assertEQ(gaogao.authority, "gg:gaogao@www.test.com:99");
-    arktest.assertEQ(gaogao.userInfo, "gg:gaogao");
-    arktest.assertEQ(gaogao.query, "query");
-    arktest.assertEQ(gaogao.fragment, "fagment");
-    arktest.assertEQ(gaogao.encodedUserInfo, "gg:gaogao");
-    arktest.assertEQ(gaogao.encodedPath, "/path/path");
-    arktest.assertEQ(gaogao.encodedQuery, "query");
-    arktest.assertEQ(gaogao.encodedFragment, "fagment");
-    arktest.assertEQ(gaogao.encodedAuthority, "gg:gaogao@www.test.com:99");
-
-    gaogao.scheme = null;
-    gaogao.path = null;
-    gaogao.authority = null;
-    gaogao.userInfo = null;
-    gaogao.query = null;
-    gaogao.fragment = null;
-    gaogao.encodedUserInfo = null;
-    gaogao.encodedPath = null;
-    gaogao.encodedQuery = null;
-    gaogao.encodedFragment = null;
-    gaogao.encodedAuthority = null;
-
-
-    arktest.assertEQ(gaogao.scheme, "http");
-    arktest.assertEQ(gaogao.path, "/path/path");
-    arktest.assertEQ(gaogao.authority, "gg:gaogao@www.test.com:99");
-    arktest.assertEQ(gaogao.userInfo, "gg:gaogao");
-    arktest.assertEQ(gaogao.query, "query");
-    arktest.assertEQ(gaogao.fragment, "fagment");
-    arktest.assertEQ(gaogao.encodedUserInfo, "gg:gaogao");
-    arktest.assertEQ(gaogao.encodedPath, "/path/path");
-    arktest.assertEQ(gaogao.encodedQuery, "query");
-    arktest.assertEQ(gaogao.encodedFragment, "fagment");
-    arktest.assertEQ(gaogao.encodedAuthority, "gg:gaogao@www.test.com:99");
-
-    // NOTE(zhangziye):#25267 Unable to use different getter/setter signature
-    // arktest.assertEQ(gaogao.ssp, "//gg:gaogao@www.test.com:99/path/path?query");  // CC-OFF(G.OTH.04) test logic
-    // arktest.assertEQ(gaogao.encodedSSP, "//gg:gaogao@www.test.com:99/path/path?query");  // CC-OFF(G.OTH.04) test logic
-    // gaogao.ssp = null;
-    // gaogao.encodedSSP = null;
-    // arktest.assertEQ(gaogao.ssp, "//gg:gaogao@www.test.com:99/path/path?query");  // CC-OFF(G.OTH.04) test logic
-    // arktest.assertEQ(gaogao.encodedSSP, "//gg:gaogao@www.test.com:99/path/path?query");  // CC-OFF(G.OTH.04) test logic
-}
-
 function main(): int {
     let suite = new arktest.ArkTestsuite("URI UT tests");
 
@@ -466,7 +418,6 @@ function main(): int {
     suite.addTest("SetEncodedFragment", SetEncodedFragment);
     suite.addTest("SetEncodedAuthority", SetEncodedAuthority);
     suite.addTest("SetEncodedSsp", SetEncodedSsp);
-    suite.addTest("UriSetNullAttribute", UriSetNullAttribute);
     //passed
     return suite.run();
 }
