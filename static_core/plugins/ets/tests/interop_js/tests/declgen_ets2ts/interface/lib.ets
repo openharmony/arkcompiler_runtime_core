@@ -59,3 +59,38 @@ export interface I01 {
   clsMethod:(args: string)=> string;
   clsMethod1:(args: string)=> string;
 }
+
+namespace A {
+  export type B = number
+}
+
+export interface I02 {
+  a: A.B
+  foo(): A.B
+}
+
+export interface Literal_Function_handler_Object_error {
+  handler: Function0<void>;
+  error: Type;
+  toJSON(): jsonx.JsonElement;
+}
+
+interface I03 {
+}
+enum E01  {
+    a = 1,
+    b = 2
+}
+enum E02 {
+    a = 1,
+    b = 2
+}
+export interface I04 extends I03 {
+    e: E01;
+    f: E02;
+}
+
+export namespace N01 {
+  export interface I {}
+}
+export class C01 implements N01.I {}

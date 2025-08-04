@@ -47,3 +47,36 @@ export declare interface I01 {
     clsMethod: (args: string) => string;
     clsMethod1: (args: string) => string;
 }
+export declare interface I02 {
+    a: A.B;
+    foo(): A.B;
+}
+export declare interface Literal_Function_handler_Object_error {
+    handler: ESObject;
+    error: ESObject;
+    toJSON(): ESObject;
+}
+declare interface I03 {
+}
+declare enum E01 {
+    a = 1,
+    b = 2,
+}
+declare enum E02 {
+    a = 1,
+    b = 2,
+}
+export declare interface I04 extends I03 {
+    e: E01;
+    f: E02;
+}
+export declare class C01 implements N01.I {
+    constructor();
+}
+declare namespace A {
+    type B = number;
+}
+export declare namespace N01 {
+    interface I {
+    }
+}

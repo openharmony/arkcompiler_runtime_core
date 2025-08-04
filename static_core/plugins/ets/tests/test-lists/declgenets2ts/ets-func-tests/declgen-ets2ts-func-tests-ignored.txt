@@ -7,10 +7,13 @@ spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/02.export_ty
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_directive_04.ets
 #FailKind.ABORT_FAIL - 5 tests:
 spec/03.types/References_Types/Tuples_type/tuple_write_3.ets
+#FailKind.ABORT_FAIL - 6 tests:
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload6.ets
 spec/10.Interfaces/method_overload6.ets
 spec/11.Enumerations/issue14636.ets
 spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_03.ets
+regression/23652.ets
+regression/22981/22981.ets
 #FailKind.TSC_FAIL - 147 tests:
 escompat/ArrayProxyTest.ets
 escompat/JsonParseTest.ets
@@ -52,6 +55,7 @@ spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_10_01.ets
 spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_10_02.ets
 spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_10_03.ets
 spec/05.Generics/issue15380_0.ets
+spec/05.Generics/issue15089_05.ets
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_03.ets
 spec/09.classes/Accessor_Declarations/issue-15142_4.ets
 spec/09.classes/Accessor_Declarations/issue-15142_7.ets
@@ -159,6 +163,7 @@ std/core/std_core_typedarrays__Float64Array_001.ets
 std/core/std_core_typedarrays__Int16Array.ets
 std/core/std_core_typedarrays__Int32Array.ets
 std/core/std_core_typedarrays__Int8Array.ets
+escompat/ReadonlyArrayProxyTest.ets
 escompat/JsonReplacerTest.ets
 regression/23623.ets
 regression/23735.ets
@@ -179,3 +184,9 @@ std/core/std_core_string_String_lastIndexOf_String_int.ets
 std/core/std_core_string_String_lastIndexOf_char_int.ets
 std/core/std_core_string_String_search_String.ets
 std/containers/BlockingQueue/AddAndPollStress.ets
+escompat/ArrayTest1.ets
+escompat/ArrayTest2.ets
+escompat/ArrayTest3.ets
+escompat/ArrayTest4.ets
+escompat/ArrayTest5.ets
+escompat/ArrayTest6.ets
