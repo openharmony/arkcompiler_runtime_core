@@ -1635,6 +1635,17 @@ export namespace util {
         isWeakSet(value: Object): boolean {
             return value instanceof WeakSet;
         }
+
+        /**
+         * Check whether the entered value is of type asyncfunction.
+         * @param { Object } value - A AsyncFunction value
+         * @returns { boolean } Returns true if the value is a built-in AsyncFunction instance.
+         * 
+         * Since the current interface cannot be correctly determined, it returns false by default
+         */
+        isAsyncFunction(value: Object): boolean {
+            return false;
+        }
     }
 
     export function promisify(original: Function): (...args: FixedArray<Any>) => Promise<Any> {
@@ -1655,6 +1666,30 @@ export namespace util {
                 original.unsafeCall(...newArgs);
             });
         };
+    }
+
+    export function callbackWrapper(original: Function): Function {
+        return (...args: FixedArray<string | number | Function>): void => {
+            if (typeof args[args.length - 1] != 'function') {
+                throw new Error('maybe is not function');
+            }
+            const func: Function = args[args.length - 1] as Function;
+            const newArgs: FixedArray<Any> = new Any[args.length - 1];
+            for (let i = 0; i < args.length - 1; i++) {
+                newArgs[i] = args[i];
+            }
+            const funcReturn = original.unsafeCall(...newArgs);
+            if (funcReturn instanceof Promise) {
+                const func1 = funcReturn as Promise<Any>
+                func1.then((result: Any) => {
+                    func.unsafeCall(null, result);
+                }).catch((err: Error) => {
+                    func.unsafeCall(err, null);
+                });
+            } else {
+                throw new Error('The function passed to callbackWrapper must return a Promise.');
+            }
+        }
     }
 
     /**
