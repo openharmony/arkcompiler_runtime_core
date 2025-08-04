@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,12 +13,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for decl in declarations %}
 /*---
 desc: Ambient declarations
-tags: [compile-only, negative]
+tags: [not-a-test, compile-only]
 ---*/
 
-{{decl}}
+export function foo(message: string): number { return 1 };
 
-{% endfor %}
+export class A {
+  x: string;
+  constructor(x: string) { this.x = x };
+  foo(): string { return this.x };
+}
+
+export function bar(message: string): number { return 3 };
+
+export class B {
+  x: number;
+  constructor(x: number) { this.x = x };
+  foo(): number { return this.x };
+}

@@ -13,12 +13,46 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for decl in declarations %}
 /*---
-desc: Ambient Constant declarations
-tags: [compile-only]
+desc: Ambient Constant declarations implementations
+tags: [compile-only, not-a-test]
 ---*/
 
-declare {{decl}}
+export const x: int = 1;
 
-{% endfor %}
+export const obj: Object = '';
+
+export const a1: int = 1;
+export const b1: float = 1.0f;
+export const c1: string = '';
+export const d1: Byte[] = [0b1];
+export const e1: string[] = [''];
+
+export const a2: short = 1;
+export const b2: double = 1.0;
+export const c2: Object[] = [1.0];
+
+export enum Color1 { Red, Green, Blue }
+
+export enum Color2 { Red = 1 , Green = 2, Blue =  3 }
+
+export enum Color3 { Red = "1" , Green = "2", Blue =  "3" }
+
+export const enum Color4 { Red, Green, Blue }
+
+export const QuestionOfAll1 = 42
+
+export const QuestionOfAll2 = 0xBAD3
+
+export const BigLongLiteral = 9223372036854775807
+
+export const FloatConst1 = 3.14f
+
+export const FloatConst2 = 3.141_592
+
+export const FloatConst3 = .5    
+
+export const Hello = "Hello"
+
+export const MultilineSentence = `This is an example of multi-line string,
+      which should be enclosed in backticks (\`)`

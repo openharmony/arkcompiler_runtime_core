@@ -1474,6 +1474,25 @@
 13.compilation_units/07.export_directives/04.re-export_directive/pkg02_re-export_all_with_rename.ets
 13.compilation_units/07.export_directives/04.re-export_directive/pkg03_re-export_all.ets
 
+#28847
+14.ambient_declarations/bad_ambient_declarations_18.ets
+14.ambient_declarations/bad_ambient_declarations_19.ets
+14.ambient_declarations/bad_ambient_declarations_20.ets
+
+#2073 - issue on runner .expected.err comparison space 'public'
+14.ambient_declarations/01.constant_declarations/constant_usage_n_0.ets
+14.ambient_declarations/01.constant_declarations/constant_usage_n_1.ets
+14.ambient_declarations/01.constant_declarations/constant_usage_n_2.ets
+14.ambient_declarations/import_decl_n/import_declarations_n_0.ets
+14.ambient_declarations/import_decl_n/import_declarations_n_1.ets
+14.ambient_declarations/import_decl_n/import_declarations_n_2.ets
+
+#28850
+14.ambient_declarations/03.ambient_overload_function_declarations/overload_function_usage_0.ets
+14.ambient_declarations/03.ambient_overload_function_declarations/overload_function_usage_1.ets
+14.ambient_declarations/03.ambient_overload_function_declarations/overload_function_usage_2.ets
+14.ambient_declarations/03.ambient_overload_function_declarations/overload_function_usage_3.ets
+
 #28326
 15.semantic_rules/02.subtyping/01.subtyping_for_classes_and_interfaces/generic_cast_to_generic_superclass.ets
 15.semantic_rules/02.subtyping/01.subtyping_for_classes_and_interfaces/generic_cast_to_object_with_parameters.ets
