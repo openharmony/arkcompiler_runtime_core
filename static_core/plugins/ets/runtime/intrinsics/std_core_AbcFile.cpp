@@ -43,23 +43,10 @@ static EtsAbcFile *CreateAbcFile(EtsCoroutine *coro, ClassLinkerContext *ctx,
     return abcFile;
 }
 
-static std::shared_ptr<ark::extractor::Extractor> GetExtractor(const std::string &path)
+static bool IsHspPath(const std::string &path)
 {
-    std::shared_ptr<ark::extractor::Extractor> extractor = std::make_shared<ark::extractor::Extractor>(path);
-    if (!extractor || !extractor->Init()) {
-        return nullptr;
-    }
-    return extractor;
-}
-
-static std::unique_ptr<const panda_file::File> GetPandaFile(const std::shared_ptr<ark::extractor::Extractor> &extractor,
-                                                            const std::string &path)
-{
-    auto safeData = extractor->GetSafeData(path);
-    if (safeData == nullptr) {
-        return nullptr;
-    }
-    return panda_file::OpenPandaFileFromSecureMemory(safeData->GetDataPtr(), safeData->GetDataLen(), path);
+    std::string suffix = ".hsp";
+    return std::equal(suffix.rbegin(), suffix.rend(), path.rbegin());
 }
 
 EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *filePath)
@@ -79,17 +66,16 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
     }
 
     auto pathStr = std::string(path.begin(), path.end());
-    std::string suffix = ".hsp";
-    if (pf == nullptr && std::equal(suffix.rbegin(), suffix.rend(), pathStr.rbegin())) {
+    if (pf == nullptr && IsHspPath(pathStr)) {
         // get hsp path
-        std::shared_ptr<ark::extractor::Extractor> extractor = GetExtractor(pathStr);
-        if (extractor == nullptr) {
-            ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ABC_FILE_NOT_FOUND_ERROR,
-                                   PandaString("Open failed, file: ") + path);
+        std::string hspPath = pathStr;
+        std::shared_ptr<ark::extractor::Extractor> extractor = std::make_shared<ark::extractor::Extractor>(hspPath);
+        if (!extractor || !extractor->Init()) {
             return nullptr;
         }
-        std::string abcPath = pathStr.substr(0, pathStr.length() - 4).append("/ets/modules_static.abc");
-        pf = GetPandaFile(extractor, abcPath);
+        std::string abcPath = hspPath.substr(0, hspPath.length() - 4).append("/ets/modules_static.abc");
+        auto safeData = extractor->GetSafeDataForHsp(abcPath);
+        pf = panda_file::OpenPandaFileFromSecureMemory(safeData->GetDataPtr(), safeData->GetDataLen(), pathStr);
     }
 
     if (pf == nullptr) {
@@ -103,13 +89,17 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
         std::string hapPath = pathStr.substr(0, pos);
         hapPath += ".hap";
 
-        std::shared_ptr<ark::extractor::Extractor> extractor = GetExtractor(hapPath);
-        if (extractor == nullptr) {
+        std::shared_ptr<ark::extractor::Extractor> extractor = std::make_shared<ark::extractor::Extractor>(hapPath);
+        if (!extractor || !extractor->Init()) {
             ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ABC_FILE_NOT_FOUND_ERROR,
                                    PandaString("Open failed, file: ") + path);
             return nullptr;
         }
-        pf = GetPandaFile(extractor, pathStr);
+        auto safeData = extractor->GetSafeData(pathStr);
+        if (safeData == nullptr) {
+            return nullptr;
+        }
+        pf = panda_file::OpenPandaFileFromSecureMemory(safeData->GetDataPtr(), safeData->GetDataLen(), pathStr);
     }
 
     if (pf == nullptr) {
