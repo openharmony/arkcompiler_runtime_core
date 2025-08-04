@@ -46,6 +46,11 @@ constexpr size_t K_HIGH_BYTE_SHIFT = 16;
 constexpr size_t K_MID_BYTE_SHIFT = 12;
 constexpr size_t K_LOW_BYTE_SHIFT = 6;
 constexpr size_t K_LAST_CHAR_SHIFT = 18;
+constexpr size_t K_NUMBER_0 = 0;
+constexpr size_t K_NUMBER_1 = 1;
+constexpr size_t K_NUMBER_2 = 2;
+constexpr size_t K_NUMBER_3 = 3;
+constexpr size_t K_NUMBER_4 = 4;
 
 constexpr uint32_t LOWER_8_BITS_MASK = 0x00FFU;
 constexpr uint8_t LOWER_6_BITS_MASK = 0x3FU;
@@ -53,6 +58,9 @@ constexpr uint8_t LOWER_4_BITS_MASK = 0x0FU;
 constexpr uint8_t LOWER_2_BITS_MASK = 0x03U;
 constexpr uint8_t MIDDLE_4_BITS_MASK = 0x3CU;
 constexpr uint8_t UPPER_2_BITS_MASK = 0x30U;
+constexpr uint8_t BITSHIFT_2 = 2U;
+constexpr uint8_t BITSHIFT_4 = 4U;
+constexpr uint8_t BITSHIFT_6 = 6U;
 
 constexpr char K_PADDING_CHAR = '=';
 
@@ -96,71 +104,72 @@ constexpr auto K_DECODING_TABLE = BuildDecodingTable();
     return validChars && validPadding;
 }
 
-static bool IsBase64Char(unsigned char c)
+static bool IsBase64Char(uint8_t c)
 {
     return ((isalnum(c) != 0) || (c == '+') || (c == '/') || (c == '-') || (c == '_'));
 }
 
-[[nodiscard]] PandaString Decode(std::string_view encodedData)
+void ProcessDecodedBlock(const std::array<uint8_t, K_NUMBER_4> &charArray4, PandaString &decoded)
 {
-    size_t len = encodedData.size();
-    unsigned int index = 0;
-    unsigned int cursor = 0;
-    // 4 : means charArray4
-    std::array<unsigned char, 4> charArray4 = {0};  // an array to stage a group of indexes for encoded string
-    // 3 : means charArray4
-    std::array<unsigned char, 3> charArray3 = {0};  // an array to stage a set of original string
-    PandaString decoded;
-    // K_DECODING_TABLE
-    while ((encodedData[cursor] != '=') && IsBase64Char(encodedData[cursor])) {
-        // stage a 4-byte string to charArray4
-        charArray4[index] = encodedData[cursor];
-        index++;
-        cursor++;
-        if (index == 4) {  // 4 : after 4 chars is assigned to charArray4
-            // 4 : fill data into charArray4
-            for (index = 0; index < 4; index++) {
-                charArray4[index] = static_cast<uint32_t>(K_DECODING_TABLE[charArray4[index]]) & LOWER_8_BITS_MASK;
-            }
-            // get the last six bits of the first byte of charArray4 and the first valid
-            // 2 : 4 : two bits(except two higer bits) of the second byte, combine them to a new byte
-            charArray3[0] = (charArray4[0] << 2U) + (static_cast<uint8_t>(charArray4[1] & UPPER_2_BITS_MASK) >> 4U);
-            // get the last four bits of the second byte of charArray4 and the first valid
-            // 4 : 2 : four bits(except two higer bits) of the third byte, combine them to a new byte
-            charArray3[1] = (static_cast<uint8_t>(charArray4[1] & LOWER_4_BITS_MASK) << 4U) +
-                            // 4 : 2 : four bits(except two higer bits) of the third byte, combine them to a new byte
-                            (static_cast<uint8_t>(charArray4[2] & MIDDLE_4_BITS_MASK) >> 2U);
-            // get the last two bits of the third byte of charArray4 and the forth byte,
-            // 2 : 3 : 6 : combine them to a new byte
-            charArray3[2] = (static_cast<uint8_t>(charArray4[2] & LOWER_2_BITS_MASK) << 6U) + charArray4[3];
-            // 3 : assigns the decoded string to the return value
-            for (index = 0; index < 3; index++) {
-                decoded += charArray3[index];
-            }
-            index = 0;
-        }
-        if (cursor > len - 1) {
-            break;
-        }
+    std::array<uint8_t, K_NUMBER_3> charArray3 = {0};
+    charArray3[K_NUMBER_0] =
+        static_cast<uint8_t>((static_cast<uint32_t>(charArray4[K_NUMBER_0]) << BITSHIFT_2) +
+                             ((static_cast<uint32_t>(charArray4[K_NUMBER_1]) & UPPER_2_BITS_MASK) >> BITSHIFT_4));
+    charArray3[K_NUMBER_1] =
+        static_cast<uint8_t>(((static_cast<uint32_t>(charArray4[K_NUMBER_1]) & LOWER_4_BITS_MASK) << BITSHIFT_4) +
+                             ((static_cast<uint32_t>(charArray4[K_NUMBER_2]) & MIDDLE_4_BITS_MASK) >> BITSHIFT_2));
+    charArray3[K_NUMBER_2] = static_cast<uint8_t>(
+        ((static_cast<uint32_t>(charArray4[K_NUMBER_2]) & LOWER_2_BITS_MASK) << BITSHIFT_6) + charArray4[K_NUMBER_3]);
+    for (uint8_t byte : charArray3) {
+        decoded += byte;
+    }
+}
+
+void ProcessRemainingChars(uint32_t index, std::array<uint8_t, K_NUMBER_4> &charArray4, PandaString &decoded)
+{
+    std::array<uint8_t, K_NUMBER_3> charArray3 = {0};
+    charArray3[K_NUMBER_0] =
+        static_cast<uint8_t>((static_cast<uint32_t>(charArray4[K_NUMBER_0]) << BITSHIFT_2) +
+                             ((static_cast<uint32_t>(charArray4[K_NUMBER_1]) & UPPER_2_BITS_MASK) >> BITSHIFT_4));
+    if (index > K_NUMBER_1) {
+        charArray3[K_NUMBER_1] =
+            static_cast<uint8_t>(((static_cast<uint32_t>(charArray4[K_NUMBER_1]) & LOWER_4_BITS_MASK) << BITSHIFT_4) +
+                                 ((static_cast<uint32_t>(charArray4[K_NUMBER_2]) & LOWER_6_BITS_MASK) >> BITSHIFT_2));
     }
 
-    if (index != 0) {
-        // fill data into charArray4
-        for (unsigned int i = 0; i < index; i++) {
-            charArray4[i] = static_cast<uint32_t>(K_DECODING_TABLE[charArray4[i]]) & LOWER_8_BITS_MASK;
+    for (uint32_t i = 0; i < index - 1; i++) {
+        decoded += charArray3[i];
+    }
+}
+
+void DecodeBlock(std::array<uint8_t, K_NUMBER_4> &charArray4)
+{
+    for (uint32_t i = K_NUMBER_0; i < K_NUMBER_4; i++) {
+        charArray4[i] = static_cast<uint32_t>(K_DECODING_TABLE[charArray4[i]]) & LOWER_8_BITS_MASK;
+    }
+}
+
+[[nodiscard]] PandaString Decode(std::string_view encodedData)
+{
+    if (encodedData.empty()) {
+        return "";
+    }
+    uint32_t index = 0;
+    uint32_t cursor = 0;
+    const size_t len = encodedData.size();
+    std::array<uint8_t, K_NUMBER_4> charArray4 = {0};
+    PandaString decoded;
+    while (cursor < len && IsBase64Char(encodedData[cursor])) {
+        charArray4[index++] = encodedData[cursor++];
+        if (index == K_NUMBER_4) {
+            DecodeBlock(charArray4);
+            ProcessDecodedBlock(charArray4, decoded);
+            index = K_NUMBER_0;
         }
-        // get the last six bits of the first byte of charArray4 and the first valid
-        // 2 : 4 : two bits(except two higer bits) of the second byte, combine them to a new byte
-        charArray3[0] = (charArray4[0] << 2U) + (static_cast<uint8_t>(charArray4[1] & UPPER_2_BITS_MASK) >> 4U);
-        // get the last four bits of the second byte of charArray4 and the first valid
-        // 4 : 2 : four bits(except two higer bits) of the third byte, combine them to a new byte
-        charArray3[1] = (static_cast<uint8_t>(charArray4[1] & LOWER_4_BITS_MASK) << 4U) +
-                        // 4 : 2 : four bits(except two higer bits) of the third byte, combine them to a new byte
-                        (static_cast<uint8_t>(charArray4[2] & LOWER_6_BITS_MASK) >> 2U);
-        // assigns the decoded string to the return value
-        for (unsigned int i = 0; i < index - 1; i++) {
-            decoded += charArray3[i];
-        }
+    }
+    if (index > K_NUMBER_0) {
+        DecodeBlock(charArray4);
+        ProcessRemainingChars(index, charArray4, decoded);
     }
     return decoded;
 }

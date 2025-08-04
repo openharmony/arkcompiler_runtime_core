@@ -209,8 +209,6 @@ export default namespace buffer {
         | BigInt64Array
         | BigUint64Array;
 
-    const U32_MAX: long = 4294967295 as long;
-
     /**
      * Allocates a new Buffer using an array of bytes in the range 0 – 255.
      * Array entries outside that range will be truncated to fit into it.
@@ -459,7 +457,7 @@ export default namespace buffer {
      * @throws { BusinessError } 401 - Parameter error. Possible causes:
      * 1. Mandatory parameters are left unspecified;
      * 2. Parameter verification failed.
-     * @throws { BusinessError } 10200001 - The value of "length" is out of range. It must be >= 0 and <= uint32 max. Received value is: [length]
+     * @throws { BusinessError } 10200001 - The value of "length" is out of range. It must be >= 0 and <= 4294967296. Received value is: [length]
      */
     export function concat(list: Buffer[] | Uint8Array[], totalLength?: int): Buffer {
         const resolvedList = new Array<ArrayBuffer>();
@@ -468,9 +466,9 @@ export default namespace buffer {
         }
         const length: int = totalLength ?? resolvedList.reduce(
             (acc: number, item: ArrayBuffer): number => acc + item.byteLength.toInt(), 0).toInt()
-        if (length < 0 || length > U32_MAX) {
-            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "length" is out of range.
-It must be >= 0 and <= uint32 max. Received value is: ${length}`)
+        if (length < 0) {
+            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "totalLength" is out of range. \
+It must be >= 0 and <= 2147483647. Received value is: ${length}`)
         }
         const listOfBytes = new Array<byte>();
         for (const item of resolvedList) {
@@ -670,7 +668,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
          * @param {int} [end=buffer.length] - Where to stop decoding
          * @returns {string} The decoded string
          */
-        public toString(encoding?: BufferEncoding, start?: int, end?: int): string {
+        public toString(encoding?: BufferEncoding, start?: double, end?: double): string {
             let resolvedEncoding: string = encoding ?? "utf8";
             let resolvedStart: int = 0;
             let resolvedEnd: int = (this.length).toInt();
@@ -851,33 +849,40 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
             target: Buffer | Uint8Array,
             targetStart?: int,
             sourceStart?: int,
-            sourceEnd?: int): int
-        {
-            const resolvedTarget = getArrayBufferFrom(target);
-            const resolvedSource = this.buffer;
+            sourceEnd?: int): int {
+
+            let resolvedTarget: ArrayBuffer;
+            if (target instanceof Uint8Array) {
+                resolvedTarget = target.buffer as ArrayBuffer;
+            }else{
+                resolvedTarget = target.buffer;
+            }
+            const resolvedSource: ArrayBuffer = this.buffer;
             const resolvedTargetStart = (targetStart ?? 0).toInt();
             const resolvedSourceStart = (sourceStart ?? 0).toInt();
             const resolvedSourceEnd = (sourceEnd ?? this.length).toInt();
 
             if (resolvedTargetStart < 0) {
-                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "targetStart" is out of range. It must be >= 0.
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "targetStart" is out of range. It must be >= 0. \
 Received value is: ${resolvedTargetStart}`)
             }
             if (resolvedSourceStart < 0) {
-                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "sourceStart" is out of range. It must be >= 0.
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "sourceStart" is out of range. It must be >= 0. \
 Received value is: ${resolvedSourceStart}`)
             }
             if (resolvedSourceEnd < 0) {
-                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "sourceEnd" is out of range. It must be >= 0.
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "sourceEnd" is out of range. It must be >= 0. \
 Received value is: ${resolvedSourceEnd}`)
             }
-
-            const sourceSlice = resolvedSource.slice(resolvedSourceStart,
-                                                     resolvedSourceEnd);
-            for (let i = 0; i < sourceSlice.byteLength; i++) {
-                resolvedTarget.set(resolvedTargetStart + i, sourceSlice.at(i));
+            const sourceSlice: ArrayBuffer = resolvedSource.slice(resolvedSourceStart,
+                resolvedSourceEnd);
+            let copyLen = 0;
+            for (; copyLen < sourceSlice.byteLength
+                && resolvedTargetStart + copyLen < resolvedTarget.byteLength;
+                copyLen++) {
+                resolvedTarget.set(resolvedTargetStart + copyLen, sourceSlice.at(copyLen));
             }
-            return sourceSlice.byteLength.toInt();
+            return copyLen;
         }
 
         /**
@@ -924,11 +929,11 @@ Received value is: ${resolvedSourceEnd}`)
             const resolvedEnd = end ?? this.length;
 
             if (offset < 0) {
-                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. It must be >= 0.
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. It must be >= 0 and <= 4294967296. \
 Received value is: ${offset}`)
             }
             if (resolvedEnd < 0 || resolvedEnd > this.length) {
-                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "end" is out of range. It must be >= 0 and <= ${this.length}.
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "end" is out of range. It must be >= 0 and <= ${this.length - 1}. \
 Received value is: ${resolvedEnd}`)
             }
 
@@ -983,13 +988,13 @@ Received value is: ${resolvedEnd}`)
                     }
 
                     let pos = offsetInt;
-                    while (pos + buff.byteLength <= resolvedEndInt) {
+                    while (buff.byteLength > 0 && pos + buff.byteLength <= resolvedEndInt) {
                         for (let j: int = 0; j < buff.byteLength; j++) {
                             this.buffer.set(pos++, buff[j].toByte());
                         }
                     }
 
-                    for (let j: int = 0; pos < resolvedEndInt; j++, pos++) {
+                    for (let j: int = 0; pos < resolvedEndInt && buff.byteLength > 0; j++, pos++) {
                         this.buffer.set(pos, buff[j].toByte());
                     }
                     return this;
@@ -1024,7 +1029,7 @@ Received value is: ${resolvedEnd}`)
                     }
                     return this;
                 default:
-                    throw createBusinessError(TypeErrorCodeId, `Parameter error: value must be a string, Buffer, Uint8Array, or int.
+                    throw createBusinessError(TypeErrorCodeId, `Parameter error: value must be a string, Buffer, Uint8Array, or int. \
 Received value is: ${value}`)
             }
         }
@@ -1361,14 +1366,14 @@ Received value is: ${value}`)
         public write(str: string, offset: int = 0, length?: int, encoding: string = 'utf8'): int {
             if (offset < 0 || offset > this.length - 1) {
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. \
-It must be >= 0 and <= ${this.length}. Received value is: ${offset}`)
+It must be >= 0 and <= ${this.length - 1}. Received value is: ${offset}`)
             }
 
             const resolvedEncoding = encoding as buffer.BufferEncoding;
             const tmpLength = length ?? this.length - offset
             if (tmpLength < 0 || tmpLength > this.length) {
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "length" is out of range. \
-It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
+It must be >= 0 and <= ${this.length - 1}. Received value is: ${tmpLength}`)
             }
             const resolvedLength = Math.min(tmpLength, this.length - offset)
             let resolvedString = str
