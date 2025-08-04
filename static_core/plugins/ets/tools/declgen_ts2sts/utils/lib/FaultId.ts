@@ -63,6 +63,7 @@ export enum FaultID {
   NonDeclarationInNamespace,
   GeneratorFunction,
   FunctionContainsThis,
+  ReservedFuncParameter,
   PropertyAccessByIndex,
   JsxElement,
   EnumMemberNonConstInit,
