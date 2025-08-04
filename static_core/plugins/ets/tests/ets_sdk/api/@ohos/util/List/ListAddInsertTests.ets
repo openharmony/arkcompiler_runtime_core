@@ -40,6 +40,7 @@ function main() {
     suite.addTest("List insert elements at index < 0", testInsertIndexLessThanZero);
     suite.addTest("Testing List Add different dataType data", testListAddVariousDataTypes);
     suite.addTest("Testing List add special string", testListAddSpecialString);
+    suite.addTest("Testing List JSON stringify", testListJsonStringify);
 
     return suite.run();
 }
@@ -195,4 +196,22 @@ function testListAddSpecialString() {
     let param = "!\"#$%'()+,-./:;<=>?@[\\]^_`{|}~";
     list.add(param);
     arktest.assertEQ(list.get(0), param);
+}
+
+function testListJsonStringify() {
+    let list = new List<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    Object>();
+    list.add("zhang san");
+    list.add(1);
+    let param: Temp1 = new Temp1(10, "zhang");
+    list.add(param);
+    list.add(undefined);
+    list.add(null);
+    list.add(true);
+    list.insert("insert", 0);
+    list.add([0, 1, 2, undefined]);
+    list.removeByIndex(0);
+    let jsonResult = JSON.stringify(list);
+    let result = `{"0":"zhang san","1":1,"2":{"age":10,"name":"zhang"},"4":null,"5":true,"6":[0,1,2,null]}`;
+    arktest.assertEQ(jsonResult, result);
 }

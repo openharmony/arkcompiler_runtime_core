@@ -69,10 +69,25 @@ final class LinkedListIterator_T<T> implements IterableIterator<T> {
 /**
  * A doubly linked list implementation.
  */
-export class LinkedList<T> implements Iterable<T> {
+export class LinkedList<T> implements Iterable<T>, JsonReplacer {
     private elementNum: int;
     head?: ListNode<T>;
     private tail?: ListNode<T>;
+
+    public jsonReplacer(): Record<String, NullishType> {
+        let arrayObj: Record<String, NullishType> = {};
+        this.forEach((value, index) => {
+            if (Array.isArray(value)) {
+                for (let i = 0; i < (value as Array<NullishType>).length; i++) {
+                    if ((value as Array<NullishType>)[i] === undefined) {
+                        (value as Array<NullishType>)[i] = null;
+                    }
+                }
+            }
+            arrayObj[String(index)] = value;
+        });
+        return arrayObj;
+    }
 
     public constructor() {
         this.head = undefined;

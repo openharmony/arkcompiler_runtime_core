@@ -31,8 +31,12 @@ export type ListComparatorFn<T> = (firstValue: T, secondValue: T) => double;
 export type ListForEachCb<T> = (value: T, index: int, list: List<T>) => void;
 export type ListReplaceCb<T> = (value: T, index: int, list: List<T>) => T;
 
-export class List<T> implements Iterable<T> {
+export class List<T> implements Iterable<T>, JsonReplacer {
     private buffer: LinkedList<T>;
+
+    public jsonReplacer(): Record<String, NullishType> {
+        return this.buffer.jsonReplacer();
+    }
 
     /**
      * Constructs an empty list.
