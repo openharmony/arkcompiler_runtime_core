@@ -21,39 +21,52 @@ type RejectedObjectListener = StdProcess.RejectedObjectListener;
  * @class Stores EventListener that handles rejected promises and jobs
  */
 class RejectedHandler {
-    private constructor() {}
-
     /**
-     * Constructs handler by passing EventListener
-     *
-     * @param cb inner callback
-     *
+     * Constructs a new RejectedHandler with an empty listener set.
      */
-    public constructor(cb: RejectedObjectListener) {
-        this.callback = cb;
+    constructor() {
+        this.handlers = new containers.ConcurrentSet<RejectedObjectListener>();
     }
 
     /**
-     * Resets inner EventListener
+     * Registers a new rejection handler.
      *
      * @param cb new callback
      *
      */
-    public reset(cb: RejectedObjectListener) {
-        this.callback = cb;
+    public register(cb: RejectedObjectListener): void {
+        this.handlers.add(cb);
     }
 
     /**
-     * Applies handler to a provided object
-     * It is used to apply handler to a result of rejected promise or job
+     * Unregisters a previously registered rejection handler.
+     *
+     * @param cb The callback to be removed from the handler set.
+     */
+    public unregister(cb: RejectedObjectListener): void {
+        this.handlers.delete(cb);
+    }
+
+    /**
+     * Removes all registered rejection handlers.
+     */
+    public reset(): void {
+        this.handlers.clear();
+    }
+
+    /**
+     * Invokes all registered handlers with the provided rejection reason and object.
+     * Typically used when a promise or task is rejected and listeners should be notified.
      *
      * @param reason rejection result of an object
      * @param obj the object itself
      *
      */
     public apply(reason: Error, obj: Object): void {
-        this.callback(reason, obj);
+        for (const handler of this.handlers) {
+            handler(reason, obj);
+        }
     }
 
-    private callback: RejectedObjectListener = (reason: Error, obj: Object) => {};
-};
+    private handlers: containers.ConcurrentSet<RejectedObjectListener>;
+}

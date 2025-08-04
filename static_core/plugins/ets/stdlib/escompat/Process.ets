@@ -52,8 +52,6 @@ export namespace StdProcess {
 
     const MAX_BUFFER_SIZE: int = 1024 * 1024;
 
-    const DEFAULT_JOB_HANDLER_CALLBACK = (reason: Error, job: Object) => { console.error("Unhandled Job fail:", reason) };
-    const DEFAULT_PROMISE_HANDLER_CALLBACK = (reason: Error, promise: Object) => { console.error("Unhandled Promise rejection:", reason) };
 
     /**
      * @class Represents child process created by executing process.runCmd()
@@ -411,13 +409,21 @@ export namespace StdProcess {
     * @returns { boolean } indicating if the event has been removed successfully
     *
     */
-    export function off(type: string): boolean {
+    export function off(type: string, listener?: RejectedObjectListener): boolean {
         if (type == "unhandledJobRejection") {
-            setFailedJobHandler(DEFAULT_JOB_HANDLER_CALLBACK);
+            if (listener) {
+                failedJobHandler.unregister(listener);
+            } else {
+                failedJobHandler.reset();
+            }
             return true;
         }
         if (type == "unhandledPromiseRejection") {
-            setRejectedPromiseHandler(DEFAULT_PROMISE_HANDLER_CALLBACK);
+            if (listener) {
+                rejectedPromiseHandler.unregister(listener);
+            } else {
+                rejectedPromiseHandler.reset();
+            }
             return true;
         }
         throw new Error("not implemented");
@@ -496,7 +502,7 @@ export namespace StdProcess {
     *
     */
     function setFailedJobHandler(listener: RejectedObjectListener): void {
-        failedJobHandler.reset(listener);
+        failedJobHandler.register(listener);
     }
 
     /**
@@ -507,7 +513,7 @@ export namespace StdProcess {
     *
     */
     function setRejectedPromiseHandler(listener: RejectedObjectListener): void {
-        rejectedPromiseHandler.reset(listener);
+        rejectedPromiseHandler.register(listener);
     }
 
 
@@ -541,6 +547,6 @@ export namespace StdProcess {
         }
     }
 
-    let failedJobHandler: RejectedHandler = new RejectedHandler(DEFAULT_JOB_HANDLER_CALLBACK);
-    let rejectedPromiseHandler: RejectedHandler = new RejectedHandler(DEFAULT_PROMISE_HANDLER_CALLBACK);
+    let failedJobHandler: RejectedHandler = new RejectedHandler();
+    let rejectedPromiseHandler: RejectedHandler = new RejectedHandler();
 }

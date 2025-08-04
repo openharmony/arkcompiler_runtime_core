@@ -37,7 +37,8 @@ class Event {
 }
 
 
-const kTotal = 6;
+const kTotal = 5;
+const asynclock = new AsyncLock();
 let current = 0;
 let event = new Event();
 
@@ -49,36 +50,21 @@ function Failing(): string {
     throw Error('Failing');
 }
 
-function WaitAll(): null {
-    event.Wait();
-    return null;
-}
-
 function Handler(reason: Error, obj: Object): void {
-    if (current == 0) {
-        launch<null, () => null>(WaitAll);
-    }
-    current++;
-    if (current == kTotal) {
-        event.Fire();
-    } else {
-        arktest.assertTrue(current < kTotal, 'More rejections that expected');
-    }
+    await asynclock.lockAsync(() => {
+        current++;
+        if (current == kTotal) {
+            event.Fire();
+        } else {
+            arktest.assertTrue(current < kTotal, 'More rejections that expected');
+        }
+    },  AsyncLockMode.EXCLUSIVE);
 }
 
 function testUnhandledRejection(): void {
     StdProcess.on('unhandledJobRejection', (reason: Error, obj: Object): void => {
         arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
-        arktest.assertTrue(false, 'Job handler not switched');
-    });
-    StdProcess.on('unhandledPromiseRejection', (reason: Error, obj: Object): void => {
-        arktest.assertTrue(obj instanceof Promise, 'The object should be of type Promise');
-        arktest.assertTrue(false, 'Promise handler not switched');
-    });
-
-    StdProcess.on('unhandledJobRejection', (reason: Error, obj: Object): void => {
-        arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
-        Handler(reason, obj);
+        arktest.assertEQ(reason.message, 'Failing');
     });
     StdProcess.on('unhandledPromiseRejection',  (reason: Error, obj: Object): void => {
         arktest.assertTrue(obj instanceof Promise, 'The object should be of type Promise');
@@ -96,6 +82,7 @@ function testUnhandledRejection(): void {
     })
     Promise.reject(new Error('promise2'));
     Promise.reject();
+    event.Wait();
 }
 
 function main(): int {
