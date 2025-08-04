@@ -26,6 +26,7 @@ import {
   LIMIT_DECORATOR,
   UtilityTypes,
   SpecificTypes,
+  InvalidFuncParaNames,
   BuiltInType
 } from '../utils/lib/TypeUtils';
 
@@ -116,6 +117,7 @@ export class Autofixer {
         this[FaultID.RemoveLimitDecorator].bind(this)
       ]
     ],
+    [ts.SyntaxKind.Parameter,[this[FaultID.ReservedFuncParameter].bind(this)]],
     [ts.SyntaxKind.TypeQuery, [this[FaultID.TypeQuery].bind(this)]],
     [ts.SyntaxKind.TypeParameter, [this[FaultID.LiteralType].bind(this)]],
     [
@@ -1293,6 +1295,33 @@ export class Autofixer {
         node.heritageClauses,
         updatedMembers
       );
+    }
+    return node;
+  }
+
+  /**
+   * Rule: `arkts-reserved-function-parameter-name`
+   */
+  private [FaultID.ReservedFuncParameter](node: ts.Node): ts.VisitResult<ts.Node> {
+    /**
+     * Some of the function parameters are reserved keywords in ArkTS 1.2.
+     * decorate them with underscore prefix to avoid conflicts.
+     */
+    if (
+      ts.isParameter(node) &&
+      ts.isIdentifier(node.name) &&
+      InvalidFuncParaNames.includes(node.name.text)
+    ) {
+      const updatedNode = this.context.factory.updateParameterDeclaration(
+        node,
+        node.modifiers,
+        node.dotDotDotToken,
+        this.context.factory.createIdentifier(`_${node.name.text}`),
+        node.questionToken,
+        node.type,
+        node.initializer
+      );
+      return updatedNode;
     }
     return node;
   }
