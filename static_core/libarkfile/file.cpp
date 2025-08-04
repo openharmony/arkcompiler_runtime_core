@@ -265,12 +265,15 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
     }
     fseek(fp, 0, SEEK_SET);
     std::unique_ptr<const panda_file::File> file;
-    if (IsZipMagic(magic)) {
+    bool isZip = IsZipMagic(magic);
+    if (isZip) {
         file = OpenZipPandaFile(fp, location, archiveFilename, openMode);
     } else {
         file = panda_file::File::Open(location, openMode);
     }
-    if (file != nullptr) {
+    // OpenZipPandaFile will close fp directly and return nullptr if some exception happened.
+    // So for zip file, only need to close fp when file is not nullptr
+    if (!isZip || file != nullptr) {
         fclose(fp);
     }
     return file;
