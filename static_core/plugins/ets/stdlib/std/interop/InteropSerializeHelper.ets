@@ -15,7 +15,7 @@
 
 package std.interop;
 
-export enum InteropArgType {
+enum InteropArgType {
     DIRECT = 0,
     UNWRAP = 1,
     JSVALUE = 2
