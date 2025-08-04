@@ -46,8 +46,3 @@ export declare let a2: "Hello";
 export declare let b2: Greeting;
 export declare let a3: Record<string, string>;
 export type Greeting = "Hello";
-
-// generated for static Record
-type Record<K extends keyof any, T> = {
-    [P in K]: T;
-};
