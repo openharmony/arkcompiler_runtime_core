@@ -197,8 +197,8 @@ options:
   lang:
     - ets
   type: uint32_t
-  default: 15
-  description: Limit on the number of exclusive coroutines workers, 12 for 1.0 interop(native path), 3 for managed path create EAWorker.
+  default: 64
+  description: Limit on the number of exclusive coroutines workers
 
 - name: coroutine-enable-features
   description: Specify a list of experimental features
