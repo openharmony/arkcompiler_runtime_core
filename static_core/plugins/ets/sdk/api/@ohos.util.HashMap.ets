@@ -15,7 +15,7 @@
 
 import { BusinessError } from "@ohos.base";
 
-const TypeErrorCodeId: int = 401;
+const typeErrorCodeId: int = 401;
 
 export type HashMapCbFn<K, V> = (value: V, key: K, map: HashMap<K, V>) => void;
 
@@ -156,7 +156,7 @@ export default class HashMap<K, V> implements ReadonlyHashMap<K, V> {
      */
     set(key: K, value: V): Object {
         if (key === undefined) {
-            throw new BusinessError(TypeErrorCodeId, new Error('BusinessError',
+            throw new BusinessError(typeErrorCodeId, new Error('BusinessError',
                 `The type of \"key\" must be Key of JS. Received value is: ${key}`, undefined))
         }
         this.buckets.set(key, value);

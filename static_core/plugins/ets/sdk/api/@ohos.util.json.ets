@@ -54,7 +54,8 @@
      *
      * @returns String - JSON representation of Object
      */
-    export function stringify(value: NullishType, replacer?: Transformer | ((double | string)[]) | null, space?: string | int): string {
+    export function stringify(value: NullishType, replacer?: Transformer | ((double | string)[]) | null,
+                              space?: string | int): string {
         if ((replacer === null) || (replacer === undefined)) {
             return JSON.stringify(value, undefined, space)
         } else if (replacer! instanceof Transformer) {
