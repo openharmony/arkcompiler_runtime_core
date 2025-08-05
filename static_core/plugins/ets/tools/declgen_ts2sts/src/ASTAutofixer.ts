@@ -999,20 +999,7 @@ export class Autofixer {
       // For default export class, add declare after 'export default'
       return exportDefaultAssignment(node, this.context);
     } else {
-      //For regular export class, add declare after 'export'
-      const newModifiers = [
-        ...modifiers.filter(m => ts.isModifier(m)),
-        this.context.factory.createModifier(ts.SyntaxKind.DeclareKeyword)
-      ] as ts.Modifier[];
-
-      return this.context.factory.updateClassDeclaration(
-        node,
-        newModifiers,
-        node.name,
-        node.typeParameters,
-        node.heritageClauses,
-        node.members
-      );
+      return node;
     }
   }
 
