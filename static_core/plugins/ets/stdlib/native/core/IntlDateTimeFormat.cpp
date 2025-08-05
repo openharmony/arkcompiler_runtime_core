@@ -415,6 +415,11 @@ static std::unique_ptr<icu::DateFormat> CreateStyleBasedDateFormatAlignedWithLoc
                                                                                     icu::DateFormat::EStyle timeStyle,
                                                                                     const icu::Locale &locale)
 {
+    if (timeStyle == icu::DateFormat::NONE && dateStyle == icu::DateFormat::NONE) {
+        return std::unique_ptr<icu::DateFormat>(
+            icu::DateFormat::createDateTimeInstance(icu::DateFormat::kShort, icu::DateFormat::kMedium, locale));
+    }
+
     if (timeStyle == icu::DateFormat::NONE) {
         return std::unique_ptr<icu::DateFormat>(icu::DateFormat::createDateInstance(dateStyle, locale));
     }

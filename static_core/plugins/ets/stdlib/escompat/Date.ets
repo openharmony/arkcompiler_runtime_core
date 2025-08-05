@@ -426,9 +426,9 @@ export class Date {
         year: "numeric",
         month: "numeric",
         day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit"
+        hour: "numeric",
+        minute: "numeric",
+        second: "numeric"
     }
 
     private static isoDateRegExp: RegExp = new RegExp("^(-?(?:[0-9]{1,}))-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])(?:T([01][0-9]|2[0-3])(?::[0-5][0-9])?(?::[0-5][0-9](?:\\.[0-9]+)?)?)?(Z|(?:[+-])(?:[01][0-9]|2[0-3]):[0-5][0-9])?$");
@@ -440,9 +440,9 @@ export class Date {
     }
 
     private static readonly TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit"
+        hour: "numeric",
+        minute: "numeric",
+        second: "numeric"
     }
 
     /**
