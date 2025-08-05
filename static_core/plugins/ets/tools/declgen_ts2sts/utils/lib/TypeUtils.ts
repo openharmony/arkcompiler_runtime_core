@@ -132,7 +132,7 @@ export const FINAL_CLASS: string[] = [
     'Types',
     'UnionCase',
     'UnionType',
-    'UnsupportedOperationException',
+    'UnsupportedOperationError',
     'UndefinedType',
     'UndefinedValue',
     'Void',

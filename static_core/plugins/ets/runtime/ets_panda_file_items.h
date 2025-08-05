@@ -184,7 +184,7 @@ static constexpr std::string_view RUNTIME_ERROR                        = "Lstd/c
 static constexpr std::string_view STACK_OVERFLOW_ERROR                 = "Lstd/core/StackOverflowError;";
 static constexpr std::string_view STRING_INDEX_OUT_OF_BOUNDS_ERROR     = "Lstd/core/StringIndexOutOfBoundsError;";
 // remove or make an Error
-static constexpr std::string_view UNSUPPORTED_OPERATION_EXCEPTION      = "Lstd/core/UnsupportedOperationException;";
+static constexpr std::string_view UNSUPPORTED_OPERATION_ERROR          = "Lstd/core/UnsupportedOperationError;";
 
 // coroutines
 static constexpr std::string_view INVALID_COROUTINE_OPERATION_ERROR    = "Lstd/core/InvalidCoroutineOperationError;";
