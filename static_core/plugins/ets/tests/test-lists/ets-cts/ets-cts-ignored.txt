@@ -993,8 +993,17 @@
 06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/str2enum_4.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/str2enum_5.ets
 
+# 27963
+07.expressions/01.evaluation_of_expressions/optional_chain_this.ets
+
 #24036
 07.expressions/01.evaluation_of_expressions/03.operator_precedence/typeof.ets
+
+# 28004
+07.expressions/01.evaluation_of_expressions/03.operator_precedence/exponentiation.ets
+
+#28179
+07.expressions/03.named_reference/01.function_reference/function_reference_neg.ets
 
 #22791 FixedArray and Array<T> support is not implemented yet
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_cast_23.ets

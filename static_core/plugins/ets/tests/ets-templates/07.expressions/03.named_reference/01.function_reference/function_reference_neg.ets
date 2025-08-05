@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,21 +14,13 @@
  */
 
 /*---
-desc: If the value of an array index expression is negative,
-  or greater than, or equal to the length of the array,
-  then an array indexing expression throws RangeError.
+desc: >-
+    A function reference can refer to a generic function
+    but only if Explicit Generic Instantiations is present,
+    otherwise a compile-time error occurs
+tags: [compile-only, negative]
 ---*/
 
-function main(): int {
-  let v: byte[][][] = new byte[10][10][10];
-  let a = 1;
-  let b = 1;
+function gen<T> (x: T) {}
+let b = gen ;
 
-  try {
-    let i: int = (a = 2) + v[0].length.toInt() + (v[0][0] = new byte[10]).length.toInt() + (b = 2);
-    if (a != 2 || b != 2) return 1;
-    return 0;
-  } catch (e) {
-    return 1;
-  }
-}

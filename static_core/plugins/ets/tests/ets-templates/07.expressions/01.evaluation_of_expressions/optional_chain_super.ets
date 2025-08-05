@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,29 +13,22 @@
  * limitations under the License.
  */
 
-{% for t in cases %}
 /*---
 desc: >-
-    The cast operator may specify a type that is incompatible with
-    the class of the object referenced by the run-time value of the
-    operand expression.
+    If the form of primaryExpression is super,
+    then the pattern "super?." is handled as a compile-time error.
+tags: [compile-only, negative]
 ---*/
 
-interface I {}
-interface J {}
-interface K {}
-class A implements I {}
-class B extends A implements J {}
-
-function main(): int {
-    {{t.init}};
-    try {
-      {{t.expr}};
-      return {{t.fail}};
-    } catch (e: ClassCastError) {
-      return 1 - {{t.fail}};
-    } catch (e) {
-      return 1;
+class Parent {
+    get x(): int {
+        return 13;
     }
 }
-{% endfor %}
+
+class Sibling extends Parent {
+    f(): int | undefined {
+        return super?.x;
+    }
+}
+
