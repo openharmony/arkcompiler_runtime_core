@@ -23,7 +23,7 @@
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 1
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 2
+//! INST_COUNT    /NewObject/, 1
 //! INST_COUNT    /StoreObject.*res/, 0
 //! INST_COUNT    /LoadObject.*res/, 0
 //!
@@ -33,7 +33,7 @@
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 2
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 2
+//! INST_COUNT    /NewObject/, 1
 //! INST_COUNT    /StoreObject.*res/, 0
 //! INST_COUNT    /LoadObject.*res/, 0
 //!
@@ -43,7 +43,7 @@
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 3
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 2
+//! INST_COUNT    /NewObject/, 1
 //! INST_COUNT    /StoreObject.*res/, 0
 //! INST_COUNT    /LoadObject.*res/, 0
 //!
@@ -53,7 +53,7 @@
 //! INST_COUNT    /StoreObject.*res/, 6
 //! INST_COUNT    /LoadObject.*res/, 1
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 2
+//! INST_COUNT    /NewObject/, 1
 //! INST_COUNT    /StoreObject.*res/, 0
 //! INST_COUNT    /LoadObject.*res/, 0
 //!
@@ -63,7 +63,7 @@
 //! INST_COUNT    /StoreObject.*res/, 24
 //! INST_COUNT    /LoadObject.*res/, 1
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 9
+//! INST_COUNT    /NewObject/, 8
 //! INST_COUNT    /StoreObject.*res/, 14
 //! INST_COUNT    /LoadObject.*res/, 1
 //!
@@ -80,7 +80,7 @@
 //! INST_COUNT    /NewObject/, 4
 //! INST_COUNT    /StoreObject.*res/, 4
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 4
+//! INST_COUNT    /NewObject/, 3
 //! INST_COUNT    /StoreObject.*res/, 4
 //!
 //! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest2"
@@ -89,7 +89,7 @@
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 1
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 4
+//! INST_COUNT    /NewObject/, 3
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 1
 //!
@@ -99,7 +99,7 @@
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 1
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 4
+//! INST_COUNT    /NewObject/, 3
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 1
 //!
@@ -109,7 +109,7 @@
 //! INST_COUNT    /StoreObject.*res/, 6
 //! INST_COUNT    /LoadObject.*res/, 1
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 5
+//! INST_COUNT    /NewObject/, 4
 //! INST_COUNT    /StoreObject.*res/, 6
 //! INST_COUNT    /LoadObject.*res/, 1
 
