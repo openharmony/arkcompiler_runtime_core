@@ -466,4 +466,12 @@ add_ets_coroutines_test(FILE eworker_post_to_main.ets
                         MODE "INT"
 )
 
+add_ets_coroutines_test(FILE worker_group.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT"
+)
+
 add_subdirectory(dfx)

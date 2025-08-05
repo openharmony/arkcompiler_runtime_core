@@ -30,6 +30,7 @@
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/types/ets_string_builder.h"
 #include "runtime/arch/helpers.h"
+#include "runtime/coroutines/coroutine_worker_group.h"
 #include "runtime/interpreter/vregister_iterator.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
@@ -58,9 +59,8 @@ static inline bool Launch(EtsCoroutine *currentCoro, Method *method, const EtsHa
     auto promiseRef = etsVm->GetGlobalObjectStorage()->Add(promiseHandle.GetPtr(), mem::Reference::ObjectType::GLOBAL);
     auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, coroManager);
     // create the coro and put it to the ready queue
-    bool launchResult =
-        currentCoro->GetCoroutineManager()->Launch(evt, method, std::move(args), CoroutineLaunchMode::DEFAULT,
-                                                   EtsCoroutine::LAUNCH, false, CoroutineWorkerGroup::ANY_ID);
+    bool launchResult = currentCoro->GetCoroutineManager()->Launch(
+        evt, method, std::move(args), CoroutineWorkerGroup::AnyId(), EtsCoroutine::LAUNCH, false);
     if (UNLIKELY(!launchResult)) {
         // OOM
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);

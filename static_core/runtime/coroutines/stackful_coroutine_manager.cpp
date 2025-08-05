@@ -17,6 +17,7 @@
 #include <limits>
 #include "libpandabase/macros.h"
 #include "libpandabase/os/time.h"
+#include "runtime/coroutines/coroutine_worker_group.h"
 #include "runtime/coroutines/stackful_common.h"
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/coroutines/stackful_coroutine.h"
@@ -137,7 +138,8 @@ void StackfulCoroutineManager::CreateWorkersImpl(size_t howMany, Runtime *runtim
     }
     auto wCountBeforeCreation = activeWorkersCount_;
     for (uint32_t i = 0; i < howMany; ++i) {
-        CreateWorker(runtime, vm, StackfulCoroutineWorker::ScheduleLoopType::THREAD, "worker ");
+        auto *worker = CreateWorker(runtime, vm, StackfulCoroutineWorker::ScheduleLoopType::THREAD, "worker ");
+        generalWorkerGroup_ = CoroutineWorkerGroup::ExtendGroup(generalWorkerGroup_, worker->GetId());
     }
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::CreateWorkers(): waiting for workers startup";
     while (activeWorkersCount_ != howMany + wCountBeforeCreation) {
@@ -217,6 +219,15 @@ CoroutineWorker::Id StackfulCoroutineManager::AllocateWorkerId()
 void StackfulCoroutineManager::ReleaseWorkerId(CoroutineWorker::Id workerId)
 {
     os::memory::LockHolder lh(workerIdLock_);
+    if (workerId != MAIN_WORKER_ID) {
+        ASSERT(CoroutineWorkerGroup::HasWorker(generalWorkerGroup_, workerId) ||
+               CoroutineWorkerGroup::HasWorker(eaWorkerGroup_, workerId));
+        if (CoroutineWorkerGroup::HasWorker(generalWorkerGroup_, workerId)) {
+            generalWorkerGroup_ = CoroutineWorkerGroup::ShrinkGroup(generalWorkerGroup_, workerId);
+        } else {
+            eaWorkerGroup_ = CoroutineWorkerGroup::ShrinkGroup(eaWorkerGroup_, workerId);
+        }
+    }
     freeWorkerIds_.push_back(workerId);
     ASSERT(freeWorkerIds_.size() <= AffinityMask::MAX_WORKERS_COUNT);
 }
@@ -447,27 +458,28 @@ size_t StackfulCoroutineManager::GetCoroutineCountLimit()
 }
 
 bool StackfulCoroutineManager::Launch(CompletionEvent *completionEvent, Method *entrypoint,
-                                      PandaVector<Value> &&arguments, CoroutineLaunchMode mode,
-                                      CoroutinePriority priority, bool abortFlag, CoroutineWorkerGroup::Id groupId)
+                                      PandaVector<Value> &&arguments, const CoroutineWorkerGroup::Id &groupId,
+                                      CoroutinePriority priority, bool abortFlag)
 {
     auto epInfo = Coroutine::ManagedEntrypointInfo {completionEvent, entrypoint, std::move(arguments)};
-    return LaunchWithMode(std::move(epInfo), entrypoint->GetFullName(), mode, priority, false, abortFlag, groupId);
+    return LaunchWithGroupId(std::move(epInfo), entrypoint->GetFullName(), groupId, priority, false, abortFlag);
 }
 
 bool StackfulCoroutineManager::LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint,
-                                                 PandaVector<Value> &&arguments, CoroutineLaunchMode mode,
-                                                 CoroutinePriority priority, bool abortFlag)
+                                                 PandaVector<Value> &&arguments,
+                                                 const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
+                                                 bool abortFlag)
 {
     auto epInfo = Coroutine::ManagedEntrypointInfo {completionEvent, entrypoint, std::move(arguments)};
-    return LaunchWithMode(std::move(epInfo), entrypoint->GetFullName(), mode, priority, true, abortFlag);
+    return LaunchWithGroupId(std::move(epInfo), entrypoint->GetFullName(), groupId, priority, true, abortFlag);
 }
 
 bool StackfulCoroutineManager::LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
-                                            CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag,
-                                            CoroutineWorkerGroup::Id groupId)
+                                            const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
+                                            bool abortFlag)
 {
     auto epInfo = Coroutine::NativeEntrypointInfo {epFunc, param};
-    return LaunchWithMode(epInfo, std::move(coroName), mode, priority, false, abortFlag, groupId);
+    return LaunchWithGroupId(epInfo, std::move(coroName), groupId, priority, false, abortFlag);
 }
 
 void StackfulCoroutineManager::Await(CoroutineEvent *awaitee)
@@ -591,32 +603,10 @@ StackfulCoroutineWorker *StackfulCoroutineManager::ChooseWorkerForCoroutine(Coro
     return ChooseWorkerImpl(WorkerSelectionPolicy::LEAST_LOADED, maskValue);
 }
 
-AffinityMask StackfulCoroutineManager::CalcAffinityMask(CoroutineLaunchMode mode, CoroutineWorkerGroup::Id groupId)
+AffinityMask StackfulCoroutineManager::CalcAffinityMask(const CoroutineWorkerGroup::Id &groupId)
 {
-    /**
-     * launch mode \ policy      DEFAULT                         NON_MAIN
-     *   DEFAULT                ->least busy, allow migration   ->least busy, allow migration, disallow <main>
-     *   SAME_WORKER            ->same, forbid migration        ->same, forbid migration
-     *   MAIN_WORKER            ->main, forbid migration        ->main, forbid migration
-     *   EXCLUSIVE              ->least busy, forbid migration  ->least busy, forbid migration, disallow <main>
-     */
-
-    if (CoroutineWorkerGroup::IsValidNonAnyId(groupId)) {
-        // for now, assuming that the groupId is correct
-        return AffinityMask::Empty().SetWorkerAllowed(static_cast<CoroutineWorker::Id>(groupId));
-    }
-
-    if (mode == CoroutineLaunchMode::SAME_WORKER) {
-        return AffinityMask::Empty().SetWorkerAllowed(GetCurrentWorker()->GetId());
-    }
-
-    if (mode == CoroutineLaunchMode::MAIN_WORKER) {
-        return AffinityMask::Empty().SetWorkerAllowed(MAIN_WORKER_ID);
-    }
-
-    // CoroutineLaunchMode::EXCLUSIVE is not supported yet (but will be)
-    ASSERT(mode == CoroutineLaunchMode::DEFAULT);
-    AffinityMask mask = AffinityMask::Full();
+    ASSERT(groupId != CoroutineWorkerGroup::InvalidId());
+    AffinityMask mask = AffinityMask::FromGroupId(groupId);
     switch (GetSchedulingPolicy()) {
         case CoroutineSchedulingPolicy::NON_MAIN_WORKER: {
             mask.SetWorkerNotAllowed(MAIN_WORKER_ID);
@@ -653,14 +643,15 @@ Coroutine *StackfulCoroutineManager::GetCoroutineInstanceForLaunch(EntrypointInf
     return co;
 }
 
-bool StackfulCoroutineManager::LaunchImpl(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutineLaunchMode mode,
-                                          CoroutinePriority priority, bool abortFlag, CoroutineWorkerGroup::Id groupId)
+bool StackfulCoroutineManager::LaunchImpl(EntrypointInfo &&epInfo, PandaString &&coroName,
+                                          const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
+                                          bool abortFlag)
 {
 #ifndef NDEBUG
     GetCurrentWorker()->PrintRunnables("LaunchImpl begin");
 #endif
     Coroutine *co = nullptr;
-    auto affinityMask = CalcAffinityMask(mode, groupId);
+    auto affinityMask = CalcAffinityMask(groupId);
     co = GetCoroutineInstanceForLaunch(std::move(epInfo), std::move(coroName), priority, affinityMask, abortFlag);
     if (co == nullptr) {
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchImpl: failed to create a coroutine!";
@@ -679,14 +670,12 @@ bool StackfulCoroutineManager::LaunchImpl(EntrypointInfo &&epInfo, PandaString &
 }
 
 bool StackfulCoroutineManager::LaunchImmediatelyImpl(EntrypointInfo &&epInfo, PandaString &&coroName,
-                                                     CoroutineLaunchMode mode, CoroutinePriority priority,
-                                                     bool abortFlag)
+                                                     const CoroutineWorkerGroup::Id &groupId,
+                                                     CoroutinePriority priority, bool abortFlag)
 {
     Coroutine *co = nullptr;
-    ASSERT(mode == CoroutineLaunchMode::SAME_WORKER);
-    auto affinityMask = CalcAffinityMask(mode);
-
-    ASSERT(affinityMask == CalcAffinityMask(CoroutineLaunchMode::SAME_WORKER));
+    ASSERT(CoroutineWorkerGroup::HasOnlyWorker(groupId, Coroutine::GetCurrent()->GetWorker()->GetId()));
+    auto affinityMask = CalcAffinityMask(groupId);
 
     co = GetCoroutineInstanceForLaunch(std::move(epInfo), std::move(coroName), priority, affinityMask, abortFlag);
     if (co == nullptr) {
@@ -709,25 +698,27 @@ bool StackfulCoroutineManager::LaunchImmediatelyImpl(EntrypointInfo &&epInfo, Pa
     return true;
 }
 
-bool StackfulCoroutineManager::LaunchWithMode(Coroutine::EntrypointInfo &&epInfo, PandaString &&coroName,
-                                              CoroutineLaunchMode mode, CoroutinePriority priority,
-                                              bool launchImmediately, bool abortFlag, CoroutineWorkerGroup::Id groupId)
+bool StackfulCoroutineManager::LaunchWithGroupId(Coroutine::EntrypointInfo &&epInfo, PandaString &&coroName,
+                                                 CoroutineWorkerGroup::Id groupId, CoroutinePriority priority,
+                                                 bool launchImmediately, bool abortFlag)
 {
     // profiling: scheduler and launch time
     ScopedCoroutineStats sSch(&GetCurrentWorker()->GetPerfStats(), CoroutineTimeStats::SCH_ALL);
     ScopedCoroutineStats sLaunch(&GetCurrentWorker()->GetPerfStats(), CoroutineTimeStats::LAUNCH);
 
-    LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchWithMode started";
+    LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchWithGroupId started";
 
     auto *co = Coroutine::GetCurrent();
     ASSERT(co != nullptr);
     auto *w = co->GetContext<StackfulCoroutineContext>()->GetWorker();
-    mode = (mode == CoroutineLaunchMode::DEFAULT && w->InExclusiveMode()) ? CoroutineLaunchMode::SAME_WORKER : mode;
+    if (groupId == CoroutineWorkerGroup::AnyId() && w->InExclusiveMode()) {
+        groupId = ark::CoroutineWorkerGroup::GenerateExactWorkerId(w->GetId());
+    }
     bool result = false;
     if (launchImmediately) {
-        result = LaunchImmediatelyImpl(std::move(epInfo), std::move(coroName), mode, priority, abortFlag);
+        result = LaunchImmediatelyImpl(std::move(epInfo), std::move(coroName), groupId, priority, abortFlag);
     } else {
-        result = LaunchImpl(std::move(epInfo), std::move(coroName), mode, priority, abortFlag, groupId);
+        result = LaunchImpl(std::move(epInfo), std::move(coroName), groupId, priority, abortFlag);
     }
     if (!result) {
         // let's count all launch failures as "limit exceeded" for now.
@@ -738,7 +729,7 @@ bool StackfulCoroutineManager::LaunchWithMode(Coroutine::EntrypointInfo &&epInfo
 
     Tracer::Count(Tracer::LAUNCH, 1U);
 
-    LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchWithMode finished";
+    LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchWithGroupId finished";
     return result;
 }
 
@@ -984,6 +975,10 @@ Coroutine *StackfulCoroutineManager::CreateExclusiveWorkerForThread(Runtime *run
     }
 
     auto *eWorker = CreateWorker(runtime, vm, StackfulCoroutineWorker::ScheduleLoopType::FIBER, "[e-worker] ");
+    {
+        os::memory::LockHolder lh(workerIdLock_);
+        eaWorkerGroup_ = CoroutineWorkerGroup::ExtendGroup(eaWorkerGroup_, eWorker->GetId());
+    }
     ASSERT(eWorker != nullptr);
     eWorker->SetExclusiveMode(true);
     eWorker->DisableForCrossWorkersLaunch();
@@ -1076,7 +1071,7 @@ void StackfulCoroutineManager::CheckForBlockedWorkers()
 
 void StackfulCoroutineManager::MigrateCoroutinesInward(uint32_t &count)
 {
-    auto affinityMask = CalcAffinityMask(CoroutineLaunchMode::DEFAULT);
+    auto affinityMask = CalcAffinityMask(CoroutineWorkerGroup::AnyId());
     os::memory::LockHolder lkWorkers(workersLock_);
     StackfulCoroutineWorker *from = ChooseWorkerImpl(WorkerSelectionPolicy::MOST_LOADED, affinityMask);
     if (from == nullptr || from->IsIdle()) {
@@ -1104,7 +1099,7 @@ bool StackfulCoroutineManager::MigrateCoroutinesOutward(StackfulCoroutineWorker 
         LOG(DEBUG, COROUTINES) << "The worker is idle, stop migration outward.";
         return false;
     }
-    auto affinityMask = CalcAffinityMask(CoroutineLaunchMode::DEFAULT);
+    auto affinityMask = CalcAffinityMask(CoroutineWorkerGroup::AnyId());
     os::memory::LockHolder lkWorkers(workersLock_);
     StackfulCoroutineWorker *to = ChooseWorkerImpl(WorkerSelectionPolicy::LEAST_LOADED, affinityMask);
     if (to == nullptr || to == from) {
@@ -1210,6 +1205,35 @@ PandaUniquePtr<StackfulCoroutineStateInfoTable> StackfulCoroutineManager::GetAll
         infoTable->AddWorker(worker);
     }
     return infoTable;
+}
+
+static CoroutineWorkerGroup::Id TryApplyHint(const CoroutineWorkerGroup::Id &group,
+                                             const PandaVector<CoroutineWorker::Id> &hint)
+{
+    CoroutineWorkerGroup::Id hintGroup = CoroutineWorkerGroup::Empty();
+    for (auto h : hint) {
+        ASSERT(h != CoroutineWorker::INVALID_ID);
+        hintGroup = CoroutineWorkerGroup::ExtendGroup(hintGroup, h, false);
+    }
+    return ((group & hintGroup) != CoroutineWorkerGroup::Empty()) ? (group & hintGroup) : group;
+}
+
+CoroutineWorkerGroup::Id StackfulCoroutineManager::GenerateWorkerGroupId(CoroutineWorkerDomain domain,
+                                                                         const PandaVector<CoroutineWorker::Id> &hint)
+{
+    switch (domain) {
+        case CoroutineWorkerDomain::GENERAL:
+            return TryApplyHint(generalWorkerGroup_, hint);
+        case CoroutineWorkerDomain::EXACT_ID:
+            return TryApplyHint(CoroutineWorkerGroup::AnyId(), hint);
+        case CoroutineWorkerDomain::MAIN:
+            // Ignore hint
+            return CoroutineWorkerGroup::GenerateExactWorkerId(MAIN_WORKER_ID);
+        case CoroutineWorkerDomain::EA:
+            return TryApplyHint(eaWorkerGroup_, hint);
+    }
+    UNREACHABLE();
+    return CoroutineWorkerGroup::InvalidId();
 }
 
 void StackfulCoroutineManager::PreZygoteFork()

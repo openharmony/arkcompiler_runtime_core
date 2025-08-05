@@ -52,13 +52,13 @@ export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, ...args: Fix
  */
 export enum WorkerDomain {
     // NOTE(konstanting): we need a mirror class for this to verify that the IDs match the runtime IDs
-    MAIN = 0,
-    GENERAL,
+    GENERAL = 0,
+    EXACT_ID,
+    MAIN,
     EA,
-    EXACT_ID
 }
 
-export type WorkerGroupId = long;
+export type WorkerGroupId = FixedArray<long>;
 export type CoroutineId = int;
 export type WorkerId = int;
 
@@ -67,24 +67,26 @@ export type WorkerId = int;
  */
 export class WorkerGroup {
     // NOTE(konstanting): we need a mirror class for this to verify that the IDs match the runtime IDs
-    public static readonly INVALID_ID: WorkerGroupId = -1;
-    public static readonly ANY_ID: WorkerGroupId = -2;
+    public static readonly INVALID_ID: WorkerGroupId = [0, 0];
+    public static readonly ANY_ID: WorkerGroupId = [~0, ~0];
 
     /**
      * This function generates the worker group ID that can be further used to launch coroutines within that group.
      *
-     * @param domain the worker domain
-     * @param hint optional worker ids, the usage is domain-specific (e.g. ignored for MAIN, used as is for EXACT_ID)
-     *
+     * @param domain the worker domain.
+     * GENERAL domain includes all non-main and non-EA workers.
+     * EXACT_ID domain includes exact worker id from hint.
+     * MAIN domain includes only main worker.
+     * EXACT_ID domain includes only workers from "hint" parameter.
+     * @param hint optional worker ids, the usage is domain-specific.
+     * For GENERAL domain non-main and non-EA worker IDs are ignored, all other IDs are used as is.
+     * For MAIN domain hint is ignored.
+     * For EXACT_ID domain hint is used as is, empty hint means ANY_ID.
+     * For EA domain EA worker IDs are used as is, non-EA worker IDs are ignored
      * @returns an ID of the worker group to be used in launch()
      */
-    static generateGroupId(domain: WorkerDomain, hint: Array<WorkerId>): WorkerGroupId {
-        // right now we will have only the functionality that is necessary for send_event...
-        if ((domain != WorkerDomain.EXACT_ID) || (hint.length != 1)) {
-            return INVALID_ID;
-        }
-        // NOTE(konstanting): need to support all domains
-        return WorkerGroup.generateGroupIdImpl(domain.valueOf(), hint[0].toInt());
+    static generateGroupId(domain: WorkerDomain, hint?: Array<WorkerId>): WorkerGroupId {
+        return WorkerGroup.generateGroupIdImpl(domain.valueOf(), hint ?? Array<WorkerId>());
     }
 
      /**
@@ -95,17 +97,17 @@ export class WorkerGroup {
      *
      * @returns an ID of the worker group to be used in launch()
      */
-    private static native generateGroupIdImpl(domain: int, hint: int): long;
+    private static native generateGroupIdImpl(domain: int, hint: Array<int>): FixedArray<long>;
 }
 
 /**
- * @interface LaunchParams Interface for coroutine launch params.
+ * @class LaunchParams Class for coroutine launch params.
  */
-export interface LaunchParams {
+export class LaunchParams {
   /** @property { boolean } abortFlag if true, aborts the program if unhandled exception were thrown inside the coroutine. */
-  abortFlag: boolean;
-  /** @property { int } workerGroupId unique ID of the coroutine worker group that will host the newly created coroutine. */
-  workerGroupId: WorkerGroupId;
+  abortFlag: boolean = false;
+  /** @property { WorkerGroupId } workerGroupId unique ID of the coroutine worker group that will host the newly created coroutine. */
+  workerGroupId: WorkerGroupId = WorkerGroup.ANY_ID;
 }
 
 /**
@@ -118,7 +120,7 @@ export interface LaunchParams {
  * @returns instance of the Job class that represents newly launched coroutine.
  */
 export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, launchParams: LaunchParams, ...args: FixedArray<NullishType>): Job<R> {
-    return launchInternal<R, F>(coroFun, args as FixedArray<NullishType>, launchParams);
+  return launchInternal<R, F>(coroFun, args as FixedArray<NullishType>, launchParams);
 }
 
 function launchInternal<R, F extends CoroFunT<never, R>>(coroFun: F, args: FixedArray<NullishType>, launchParams?: LaunchParams): Job<R> {

@@ -27,6 +27,7 @@ public:
     // maximum workers count should conform to number of bits in the affinity mask
     static constexpr size_t MAX_WORKERS_COUNT = 128;
     using Storage = std::bitset<MAX_WORKERS_COUNT>;
+    using CoroutineWorkerGroupId = Storage;
 
     AffinityMask() = default;
     ~AffinityMask() = default;
@@ -71,6 +72,13 @@ public:
     static AffinityMask Empty()
     {
         return AffinityMask(Storage().reset());
+    }
+
+    static AffinityMask FromGroupId(const CoroutineWorkerGroupId &groupId)
+    {
+        auto mask = AffinityMask::Empty();
+        mask.data_ = groupId;
+        return mask;
     }
 
 private:

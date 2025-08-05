@@ -43,16 +43,16 @@ export final class FinalizationRegistry<T> {
     private freeidx: int = -1;
     private static finalizationRegistryLock = new Mutex();
     private mutex = new Mutex();
-    private launchMode: int;
+    private workerDomain: int;
 
     private static readonly FIRST_SIZE = 32;
 
-    private static execCleanup(array: FixedArray<(WeakRef<FinalizationRegistry<T>> | undefined)>, launchmode: int): void {
+    private static execCleanup(array: FixedArray<(WeakRef<FinalizationRegistry<T>> | undefined)>, workerDomain: int): void {
         FinalizationRegistry.finalizationRegistryLock.lock();
         try {
             for (let i = 0; i < array.length; i++) {
                 if (array[i]?.deref() !== undefined) {
-                    if (array[i]!.deref()!.launchMode == launchmode) {
+                    if (array[i]!.deref()!.workerDomain == workerDomain) {
                         try {
                             FinalizationRegistry.finalizationRegistryLock.unlock();
                             array[i]!.deref()!.cleanup();
@@ -138,7 +138,7 @@ export final class FinalizationRegistry<T> {
         this.init_arrays(FinalizationRegistry.FIRST_SIZE);
         this.callback = callback;
         FinalizationRegistry.finalizationRegistryLock.lockGuard(() => {
-            this.launchMode = FinalizationRegistry.registerInstance(new WeakRef<Object>(this));
+            this.workerDomain = FinalizationRegistry.registerInstance(new WeakRef<Object>(this));
         });
     }
 

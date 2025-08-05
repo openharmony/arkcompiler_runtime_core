@@ -53,15 +53,15 @@ static void EnsureCapacity(EtsCoroutine *coro, EtsHandle<EtsPromise> &hpromise)
         hpromise->GetCallbackQueue(coro)->CopyDataTo(newCallbackQueue);
     }
     hpromise->SetCallbackQueue(coro, newCallbackQueue);
-    auto *newLaunchModeQueue = EtsIntArray::Create(newQueueLength);
+    auto *newWorkerDomainQueue = EtsIntArray::Create(newQueueLength);
     if (hpromise->GetQueueSize() != 0) {
-        auto *launchModeQueueData = hpromise->GetLaunchModeQueue(coro)->GetData<EtsCoroutine *>();
+        auto *workerDomainQueueData = hpromise->GetWorkerDomainQueue(coro)->GetData<EtsCoroutine *>();
         [[maybe_unused]] auto err =
-            memcpy_s(newLaunchModeQueue->GetData<CoroutineLaunchMode>(), newQueueLength * sizeof(EtsInt),
-                     launchModeQueueData, queueLength * sizeof(CoroutineLaunchMode));
+            memcpy_s(newWorkerDomainQueue->GetData<CoroutineWorkerDomain>(), newQueueLength * sizeof(EtsInt),
+                     workerDomainQueueData, queueLength * sizeof(CoroutineWorkerDomain));
         ASSERT(err == EOK);
     }
-    hpromise->SetLaunchModeQueue(coro, newLaunchModeQueue);
+    hpromise->SetWorkerDomainQueue(coro, newWorkerDomainQueue);
 }
 
 void EtsPromiseResolve(EtsPromise *promise, EtsObject *value, EtsBoolean wasLinked)
@@ -134,15 +134,15 @@ void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)
 {
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
-    auto launchMode =
-        coro->GetWorker()->IsMainWorker() ? CoroutineLaunchMode::MAIN_WORKER : CoroutineLaunchMode::DEFAULT;
+    auto workerDomain =
+        coro->GetWorker()->IsMainWorker() ? CoroutineWorkerDomain::MAIN : CoroutineWorkerDomain::GENERAL;
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle<EtsPromise> hpromise(coro, promise);
     EtsHandle<EtsObject> hcallback(coro, callback);
     EtsMutex::LockHolder lh(hpromise);
     if (hpromise->IsPending() || hpromise->IsLinked()) {
         EnsureCapacity(coro, hpromise);
-        hpromise->SubmitCallback(coro, hcallback.GetPtr(), launchMode);
+        hpromise->SubmitCallback(coro, hcallback.GetPtr(), workerDomain);
         return;
     }
     if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
@@ -150,8 +150,11 @@ void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)
     }
     ASSERT(hpromise->GetQueueSize() == 0);
     ASSERT(hpromise->GetCallbackQueue(coro) == nullptr);
-    ASSERT(hpromise->GetLaunchModeQueue(coro) == nullptr);
-    EtsPromise::LaunchCallback(coro, hcallback.GetPtr(), launchMode);
+    ASSERT(hpromise->GetWorkerDomainQueue(coro) == nullptr);
+    auto groupId = workerDomain == CoroutineWorkerDomain::MAIN
+                       ? CoroutineWorkerGroup::FromDomain(coro->GetCoroutineManager(), CoroutineWorkerDomain::MAIN)
+                       : CoroutineWorkerGroup::AnyId();
+    EtsPromise::LaunchCallback(coro, hcallback.GetPtr(), groupId);
 }
 
 static EtsObject *AwaitProxyPromise(EtsCoroutine *currentCoro, EtsHandle<EtsPromise> &promiseHandle)

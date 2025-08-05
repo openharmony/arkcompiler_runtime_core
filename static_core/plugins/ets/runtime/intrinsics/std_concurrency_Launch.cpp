@@ -13,14 +13,17 @@
  * limitations under the License.
  */
 
+#include "coroutines/coroutine_worker_group.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/ets_utils.h"
 #include "runtime/include/runtime.h"
 #include <libarkfile/include/source_lang_enum.h>
 #include "types/ets_array.h"
 #include "types/ets_class.h"
 #include "types/ets_field.h"
 #include "types/ets_method.h"
+#include "types/ets_primitives.h"
 #include "types/ets_type.h"
 #include "types/ets_job.h"
 #include "types/ets_promise.h"
@@ -92,7 +95,7 @@ static PandaVector<Value> CreateArgsVector(VMHandle<EtsObject> func, EtsMethod *
 template <typename CoroResult>
 // CC-OFFNXT(huge_method) solid logic
 ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag,
-                     CoroutineWorkerGroup::Id groupId = CoroutineWorkerGroup::ANY_ID, bool postToMain = false)
+                     CoroutineWorkerGroup::Id groupId = CoroutineWorkerGroup::AnyId(), bool postToMain = false)
 {
     static_assert(std::is_same<CoroResult, EtsJob>::value || std::is_same<CoroResult, EtsPromise>::value);
 
@@ -111,6 +114,10 @@ ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag,
     if (arr == nullptr) {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
         ThrowNullPointerException(ctx, coro);
+        return nullptr;
+    }
+    if (groupId == CoroutineWorkerGroup::InvalidId()) {
+        ThrowRuntimeException("Cannot launch with invalid group id!");
         return nullptr;
     }
     [[maybe_unused]] EtsHandleScope scope(coro);
@@ -137,9 +144,10 @@ ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag,
     // introduces the potential risk of pointer invalidation in case GC moves the referenced objects,
     // we would like to do this transfer below all potential GC invocation points
     PandaVector<Value> realArgs = CreateArgsVector(function, method, array);
-    auto mode = postToMain ? CoroutineLaunchMode::MAIN_WORKER : CoroutineLaunchMode::DEFAULT;
-    bool launchResult = coro->GetCoroutineManager()->Launch(evt, method->GetPandaMethod(), std::move(realArgs), mode,
-                                                            EtsCoroutine::LAUNCH, abortFlag, groupId);
+    groupId = postToMain ? CoroutineWorkerGroup::FromDomain(coroManager, CoroutineWorkerDomain::MAIN) : groupId;
+
+    bool launchResult = coro->GetCoroutineManager()->Launch(evt, method->GetPandaMethod(), std::move(realArgs), groupId,
+                                                            EtsCoroutine::LAUNCH, abortFlag);
     if (UNLIKELY(!launchResult)) {
         // Launch failed. The exception in the current coro should be already set by Launch(),
         // just return null as the result and clean up the allocated resources.
@@ -154,13 +162,14 @@ ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag,
 extern "C" {
 EtsJob *PostToMainThread(EtsObject *func, EtsArray *arr, EtsBoolean abortFlag)
 {
-    return static_cast<EtsJob *>(Launch<EtsJob>(func, arr, abortFlag != 0U, CoroutineWorkerGroup::ANY_ID, true));
+    return static_cast<EtsJob *>(Launch<EtsJob>(func, arr, abortFlag != 0U, CoroutineWorkerGroup::AnyId(), true));
 }
 
-EtsJob *EtsLaunchInternalJobNative(EtsObject *func, EtsArray *arr, EtsBoolean abortFlag, EtsLong groupId)
+EtsJob *EtsLaunchInternalJobNative(EtsObject *func, EtsArray *arr, EtsBoolean abortFlag, EtsLongArray *groupId)
 {
-    return static_cast<EtsJob *>(
-        Launch<EtsJob>(func, arr, abortFlag != 0U, static_cast<CoroutineWorkerGroup::Id>(groupId)));
+    ASSERT(groupId->GetLength() == 2U);
+    return static_cast<EtsJob *>(Launch<EtsJob>(func, arr, abortFlag != 0U,
+                                                CoroutineWorkerGroup::FromTuple({groupId->Get(0), groupId->Get(1)})));
 }
 
 void EtsLaunchSameWorker(EtsObject *callback)
@@ -173,22 +182,48 @@ void EtsLaunchSameWorker(EtsObject *callback)
     auto *method = ResolveInvokeMethod(coro, hCallback);
     auto *coroMan = coro->GetCoroutineManager();
     auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroMan);
-    [[maybe_unused]] auto launched =
-        coroMan->Launch(evt, method->GetPandaMethod(), std::move(args), CoroutineLaunchMode::SAME_WORKER,
-                        EtsCoroutine::TIMER_CALLBACK, true, CoroutineWorkerGroup::ANY_ID);
+    [[maybe_unused]] auto launched = coroMan->Launch(
+        evt, method->GetPandaMethod(), std::move(args),
+        ark::CoroutineWorkerGroup::GenerateExactWorkerId(ark::ets::EtsCoroutine::GetCurrent()->GetWorker()->GetId()),
+        EtsCoroutine::TIMER_CALLBACK, true);
     ASSERT(launched);
 }
 
-EtsLong WorkerGroupGenerateGroupIdImpl(EtsInt domain, EtsInt hint)
+static PandaVector<CoroutineWorker::Id> ConvertEtsHintToNativeHint(EtsObject *compatArray)
 {
-    auto workerId = static_cast<CoroutineWorker::Id>(hint);
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coro);
+    EtsHandle<EtsObject> hCompatArray(coro, compatArray);
+
+    EtsField *actualLengthField = hCompatArray->GetClass()->GetFieldIDByName("actualLength", nullptr);
+    ASSERT(actualLengthField != nullptr);
+    auto actualLength = hCompatArray->GetFieldPrimitive<int32_t>(actualLengthField);
+
+    EtsField *bufferField = hCompatArray->GetClass()->GetFieldIDByName("buffer", nullptr);
+    ASSERT(bufferField != nullptr);
+    EtsObjectArray *etsBuffer = EtsObjectArray::FromEtsObject(hCompatArray->GetFieldObject(bufferField));
+    ASSERT(etsBuffer != nullptr);
+    EtsHandle<EtsObjectArray> hEtsBuffer(coro, etsBuffer);
+    ASSERT(static_cast<size_t>(actualLength) <= hEtsBuffer->GetLength());
+
+    PandaVector<CoroutineWorker::Id> hint;
+    hint.reserve(actualLength);
+    for (int i = 0; i < actualLength; i++) {
+        hint.emplace_back(GetUnboxedValue(coro, hEtsBuffer->Get(i)).GetAs<int32_t>());
+    }
+    return hint;
+}
+
+EtsLongArray *WorkerGroupGenerateGroupIdImpl(EtsInt domain, EtsObject *etsHint)
+{
     auto domainId = static_cast<CoroutineWorkerDomain>(domain);
-
-    ASSERT(workerId != CoroutineWorker::INVALID_ID);
-    // NOTE(konstanting): we need to support all domains!
-    ASSERT(domainId == CoroutineWorkerDomain::EXACT_ID);
-
-    return CoroutineWorkerGroup::GenerateId(domainId, workerId);
+    auto hint = ConvertEtsHintToNativeHint(etsHint);
+    auto groupId = CoroutineWorkerGroup::FromDomain(EtsCoroutine::GetCurrent()->GetCoroutineManager(), domainId, hint);
+    const auto [lower, upper] = CoroutineWorkerGroup::ToTuple(groupId);
+    auto *array = EtsPrimitiveArray<EtsLong, EtsClassRoot::LONG_ARRAY>::Create(2U);
+    array->Set(0, lower);
+    array->Set(1, upper);
+    return array;
 }
 
 }  // extern "C"
