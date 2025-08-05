@@ -74,7 +74,7 @@ class CompilerInvocation:
     src_files: list[Path] = field(default_factory=lambda: [])
     src_dirs: list[Path] = field(default_factory=lambda: [])
     output_config: OutputConfig = field(default_factory=OutputConfig)
-    backends: list[BackendConfig] = field(default_factory=lambda: [])
+    backend_configs: list[BackendConfig] = field(default_factory=lambda: [])
 
     extra: dict[str, str | None] = field(default_factory=lambda: {})
 
@@ -89,14 +89,13 @@ class CompilerConfig:
     @classmethod
     def construct(cls, configure: dict[str, str | None]) -> Self:
         res = cls()
-        for config in configure:
-            k, *v = config.split("=", 1)
+        for k, v in configure.items():
             if k == "sts:keep-name":
                 res.sts_keep_name = True
             elif k == "arkts:module-prefix":
-                res.arkts_module_prefix = v[0] if v else None
+                res.arkts_module_prefix = v
             elif k == "arkts:path-prefix":
-                res.arkts_path_prefix = v[0] if v else None
+                res.arkts_path_prefix = v
             else:
                 raise ValueError(f"unknown codegen config {k!r}")
         return res
@@ -132,7 +131,10 @@ class CompilerInstance:
         self.package_group = PackageGroup()
         self.output_manager = invocation.output_config.construct(self)
         self.attribute_registry = AttributeRegistry()
-        self.backends = [backend.construct(self) for backend in invocation.backends]
+        self.backends = [
+            backend_config.construct(self)
+            for backend_config in invocation.backend_configs
+        ]
         self.config = CompilerConfig.construct(invocation.extra)
         self.analysis_manager = AnalysisManager(self.config)
 

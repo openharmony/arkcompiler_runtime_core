@@ -156,7 +156,7 @@ class DiagnosticsManager(ABC):
         return self.has_reached_severity(Severity.ERROR)
 
     @property
-    def has_fatal_error(self):
+    def has_fatal(self):
         return self.has_reached_severity(Severity.FATAL)
 
     def reset_severity(self):
@@ -235,6 +235,11 @@ class ConsoleDiagnosticsManager(DiagnosticsManager):
     def _flush(self):
         self._out.flush()
 
+    def _render(self, d: DiagBase):
+        self._write(f"{d.format_message(self._color_filter_fn)}\n")
+        if d.loc:
+            self._render_source_location(d.loc)
+
     def _render_source_location(self, loc: SourceLocation):
         MAX_LINE_NO_SPACE = 5
         if not loc.span:
@@ -265,8 +270,3 @@ class ConsoleDiagnosticsManager(DiagnosticsManager):
                 f"{line:{MAX_LINE_NO_SPACE}} | {line_content}\n"
                 f"{'':{MAX_LINE_NO_SPACE}} | {f(AnsiStyle.GREEN + AnsiStyle.BRIGHT)}{markers}{f(AnsiStyle.RESET_ALL)}\n"
             )
-
-    def _render(self, d: DiagBase):
-        self._write(f"{d.format_message(self._color_filter_fn)}\n")
-        if d.loc:
-            self._render_source_location(d.loc)

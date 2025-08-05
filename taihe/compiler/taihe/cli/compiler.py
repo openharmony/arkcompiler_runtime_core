@@ -15,6 +15,7 @@
 
 import argparse
 import sys
+from glob import glob
 from pathlib import Path
 
 from taihe.driver.backend import BackendRegistry
@@ -38,14 +39,12 @@ def main():
     )
     parser.add_argument(
         "src_files",
-        type=Path,
         nargs="*",
         default=[],
         help="input .taihe files, if not provided, will read from stdin",
     )
     parser.add_argument(
         "-I",
-        type=Path,
         dest="src_dirs",
         nargs="*",
         default=[],
@@ -54,7 +53,6 @@ def main():
     parser.add_argument(
         "--output",
         "-O",
-        type=Path,
         dest="dst_dir",
         default="taihe-generated",
         help="directory for generated files",
@@ -96,22 +94,34 @@ def main():
     ResourceContext.initialize(args)
     # }} Special options
 
-    if not args.src_files and not args.src_dirs:
+    src_files = [
+        Path(src_file)
+        for src_file_pattern in args.src_files
+        for src_file in glob(src_file_pattern, recursive=True)
+    ]
+    src_dirs = [
+        Path(src_dir)
+        for src_dir_pattern in args.src_dirs
+        for src_dir in glob(src_dir_pattern, recursive=True)
+    ]
+    dst_dir = Path(args.dst_dir)
+
+    if not src_files and not src_dirs:
         print("taihec: error: no input files", file=sys.stderr)
         return -1
 
-    backends = registry.collect_required_backends(args.backends)
-    resolved_backends = [b() for b in backends]
+    backend_factories = registry.collect_required_backends(args.backends)
+    backend_configs = [b() for b in backend_factories]
 
     if args.buildsys == "cmake":
         output_config = CMakeOutputConfig(
-            dst_dir=Path(args.dst_dir),
+            dst_dir=dst_dir,
             runtime_include_dir=RuntimeHeader.resolve_path(),
             runtime_src_dir=RuntimeSource.resolve_path(),
         )
     else:
         output_config = OutputConfig(
-            dst_dir=Path(args.dst_dir),
+            dst_dir=dst_dir,
         )
 
     extra: dict[str, str | None] = {}
@@ -123,9 +133,9 @@ def main():
             extra[k] = None
 
     invocation = CompilerInvocation(
-        src_files=args.src_files,
-        src_dirs=args.src_dirs,
-        backends=resolved_backends,
+        src_files=src_files,
+        src_dirs=src_dirs,
+        backend_configs=backend_configs,
         output_config=output_config,
         extra=extra,
     )

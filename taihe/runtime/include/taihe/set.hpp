@@ -35,6 +35,11 @@ struct set_view {
 public:
     using item_t = K const;
 
+    struct node_t {
+        item_t item;
+        node_t *next;
+    };
+
     void reserve(std::size_t cap) const
     {
         if (cap == 0) {
@@ -82,84 +87,6 @@ public:
         }
         m_handle->size = 0;
     }
-
-    template <bool cover = false>
-    std::pair<item_t *, bool> emplace(as_param_t<K> key) const
-    {
-        std::size_t index = std::hash<K>()(key) % m_handle->cap;
-        node_t **current_ptr = &m_handle->bucket[index];
-        while (*current_ptr) {
-            if ((*current_ptr)->item == key) {
-                if (cover) {
-                    node_t *replaced = new node_t {
-                        .item = key,
-                        .next = (*current_ptr)->next,
-                    };
-                    node_t *current = *current_ptr;
-                    *current_ptr = replaced;
-                    delete current;
-                }
-                return {&(*current_ptr)->item, false};
-            }
-            current_ptr = &(*current_ptr)->next;
-        }
-        node_t *node = new node_t {
-            .item = key,
-            .next = m_handle->bucket[index],
-        };
-        m_handle->bucket[index] = node;
-        m_handle->size++;
-        std::size_t required_cap = m_handle->size;
-        if (required_cap >= m_handle->cap) {
-            reserve(required_cap * SET_GROWTH_FACTOR);
-        }
-        return {&node->item, true};
-    }
-
-    item_t *find_item(as_param_t<K> key) const
-    {
-        std::size_t index = std::hash<K>()(key) % m_handle->cap;
-        node_t *current = m_handle->bucket[index];
-        while (current) {
-            if (current->item == key) {
-                return &current->item;
-            }
-            current = current->next;
-        }
-        return nullptr;
-    }
-
-    // TODO: Change the return type to item_t *
-    bool find(as_param_t<K> key) const
-    {
-        item_t *item = find_item(key);
-        if (item) {
-            return true;
-        }
-        return false;
-    }
-
-    bool erase(as_param_t<K> key) const
-    {
-        std::size_t index = std::hash<K>()(key) % m_handle->cap;
-        node_t **current_ptr = &m_handle->bucket[index];
-        while (*current_ptr) {
-            if ((*current_ptr)->item == key) {
-                node_t *current = *current_ptr;
-                *current_ptr = (*current_ptr)->next;
-                delete current;
-                m_handle->size--;
-                return true;
-            }
-            current_ptr = &(*current_ptr)->next;
-        }
-        return false;
-    }
-
-    struct node_t {
-        item_t item;
-        node_t *next;
-    };
 
     struct iterator {
         using iterator_category = std::forward_iterator_tag;
@@ -214,12 +141,89 @@ public:
             return !(*this == other);
         }
 
+        operator pointer() const
+        {
+            return current ? &current->item : nullptr;
+        }
+
     private:
         node_t **bucket;
         node_t *current;
         std::size_t index;
         std::size_t cap;
     };
+
+    template <bool cover = false>
+    std::pair<iterator, bool> emplace(as_param_t<K> key) const
+    {
+        std::size_t index = std::hash<K>()(key) % m_handle->cap;
+        node_t **current_ptr = &m_handle->bucket[index];
+        while (*current_ptr) {
+            if ((*current_ptr)->item == key) {
+                if (cover) {
+                    node_t *replaced = new node_t {
+                        .item = key,
+                        .next = (*current_ptr)->next,
+                    };
+                    node_t *current = *current_ptr;
+                    *current_ptr = replaced;
+                    delete current;
+                }
+                return {iterator(m_handle->bucket, *current_ptr, index, m_handle->cap), false};
+            }
+            current_ptr = &(*current_ptr)->next;
+        }
+        node_t *node = new node_t {
+            .item = key,
+            .next = m_handle->bucket[index],
+        };
+        m_handle->bucket[index] = node;
+        m_handle->size++;
+        std::size_t required_cap = m_handle->size;
+        if (required_cap >= m_handle->cap) {
+            reserve(required_cap * SET_GROWTH_FACTOR);
+        }
+        return {iterator(m_handle->bucket, node, index, m_handle->cap), true};
+    }
+
+    iterator find_item(as_param_t<K> key) const
+    {
+        std::size_t index = std::hash<K>()(key) % m_handle->cap;
+        node_t *current = m_handle->bucket[index];
+        while (current) {
+            if (current->item == key) {
+                return iterator(m_handle->bucket, current, index, m_handle->cap);
+            }
+            current = current->next;
+        }
+        return end();
+    }
+
+    bool find(as_param_t<K> key) const
+    {
+        auto iter = find_item(key);
+        if (iter != end()) {
+            return true;
+        }
+        return false;
+    }
+
+    bool erase(as_param_t<K> key) const
+    {
+        std::size_t index = std::hash<K>()(key) % m_handle->cap;
+        node_t **current_ptr = &m_handle->bucket[index];
+        while (*current_ptr) {
+            if ((*current_ptr)->item == key) {
+                node_t *current = *current_ptr;
+                *current_ptr = (*current_ptr)->next;
+                delete current;
+                m_handle->size--;
+                return true;
+            }
+            current_ptr = &(*current_ptr)->next;
+        }
+        return false;
+    }
 
     iterator begin() const
     {
