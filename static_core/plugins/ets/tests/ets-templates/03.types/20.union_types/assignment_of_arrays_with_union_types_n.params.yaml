@@ -15,16 +15,16 @@
 cases:
     - type: object | string
       value: undefined
-      desc: Exception assignment of undefined to an array of object or string union type.
+      desc: Error assignment of undefined to an array of object or string union type.
 
     - type: string | null
       value: |-
           1
-      desc: Exception assignment of a number to an array of string or null union type.
+      desc: Error assignment of a number to an array of string or null union type.
 
     - type: boolean | object
       value: null,
-      desc: Exception assignment of a number to an array of boolean or object union type.
+      desc: Error assignment of a number to an array of boolean or object union type.
 
     - type: Custom | boolean
       value: '2023-10-10'
@@ -32,15 +32,15 @@ cases:
           class Custom {
             constructor(value: string) {}
           }
-      desc: Exception assignment of a date string to an array of custom class or number union type.
+      desc: Error assignment of a date string to an array of custom class or number union type.
 
     - type: string | (() => void) | number
       value: 1, [true, false]
-      desc: Exception assignment of a boolean array to an array of string or function union type.
+      desc: Error assignment of a boolean array to an array of string or function union type.
 
     - type: boolean | float
       value: '"abc"'
-      desc: Exception assignment of a string to an array of boolean or float type.
+      desc: Error assignment of a string to an array of boolean or float type.
 
     - type: CustomPromiseClass | Promise<number>
       value: new Date()
@@ -48,19 +48,19 @@ cases:
           class CustomPromiseClass {
             constructor(name: string) {}
           }
-      desc: Exception assignment of a date object to an array of custom class or Promise union type.
+      desc: Error assignment of a date object to an array of custom class or Promise union type.
 
     - type: number | number[]
       value: 1, 'a'
-      desc: Exception assignment of a string to an array of number or number[] type.
+      desc: Error assignment of a string to an array of number or number[] type.
 
     - type: boolean | bigint
       value: 1, true
-      desc: Exception assignment of a number to an array of boolean or bigint union type.
+      desc: Error assignment of a number to an array of boolean or bigint union type.
 
     - type: number | Float64Array
       value: "'123'"
-      desc: Exception assignment of a string to an array of number or Float64Array union type.
+      desc: Error assignment of a string to an array of number or Float64Array union type.
 
     - type: CustomWeakMapClass | char
       value: |-
@@ -69,22 +69,22 @@ cases:
           class CustomWeakMapClass {
             constructor(prop: string) {}
           }
-      desc: Exception assignment of a TextEncoder object to an array of custom class or WeakMap union type.
+      desc: Error assignment of a TextEncoder object to an array of custom class or WeakMap union type.
 
     - type: string | SharedArrayBuffer
       value: |-
           1
-      desc: Exception assignment of anumber to an array of string or SharedArrayBuffer union type.
+      desc: Error assignment of anumber to an array of string or SharedArrayBuffer union type.
 
     - type: boolean | Float64Array
       value: 1, true
-      desc: Exception assignment of a int  to an array of boolean or Float64Array union type.
+      desc: Error assignment of a int  to an array of boolean or Float64Array union type.
 
     - type: string | int
       value: 1, true
-      desc: Exception assignment of a boolean to an array of string or int union type.
+      desc: Error assignment of a boolean to an array of string or int union type.
 
     - type: string | Date
       value: |-
           1
-      desc: Exception assignment of a number to an array of string or Date union type.
+      desc: Error assignment of a number to an array of string or Date union type.
