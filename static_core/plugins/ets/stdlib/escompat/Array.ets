@@ -1095,7 +1095,17 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     private flatImpl<U>(depth: int, to: Array<U>) {
-        throw new Error("not implemented")
+        for (let i = 0; i < this.actualLength; i++) {
+            let element = this.buffer[i]
+            if (depth > 0 && element instanceof Array) {
+                let subArray = (element as Array<T>).flat<U>(depth - 1)
+                for (let j = 0; j < subArray.length; j++) {
+                    to.push(subArray[j] as U)
+                }
+            } else {
+                to.push(element as U)
+            }
+        }
     }
 
     /**
