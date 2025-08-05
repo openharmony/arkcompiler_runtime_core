@@ -652,7 +652,7 @@ intrinsics:
   - name: JSONStringify
     space: ets
     class_name: escompat.JSON
-    method_name: stringify
+    method_name: stringifyJSValue
     static: true
     signature:
       ret: std.core.String
