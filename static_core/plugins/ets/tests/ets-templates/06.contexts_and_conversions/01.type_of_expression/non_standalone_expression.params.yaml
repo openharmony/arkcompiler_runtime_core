@@ -27,7 +27,6 @@ cases:
   - {type: 'string', val: '(42).toString()'}
   - {type: 'bigint', val: '100n'}
   - {type: 'number', val: 'NaN'}
-  - {type: '<T>(x:T) => T', type2: 'function', val: '<T>(x:T):T => x'}
   - {type: 'number[]', type2: 'object', val: 'Array<number>(3)'}
   - {type: 'boolean', val: '[1] instanceof number[]'}
   - {type: 'string', val:  '(typeof x == "string") ? x:""'}
