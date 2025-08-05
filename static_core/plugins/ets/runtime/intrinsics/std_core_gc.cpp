@@ -75,7 +75,7 @@ extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback, EtsBoolean is
     if (!gc->CheckGCCause(reason)) {
         PandaStringStream eMsg;
         eMsg << mem::GCStringFromType(gc->GetType()) << " does not support " << reason << " cause";
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_EXCEPTION, eMsg.str());
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_ERROR, eMsg.str());
         return -1;
     }
     auto &gcTaskTracker = GCTaskTracker::InitIfNeededAndGet(gc);
@@ -311,7 +311,7 @@ extern "C" void StdGCScheduleGCAfterNthAlloc(EtsInt counter, EtsInt cause)
     ASSERT(coroutine != nullptr);
 
     if (counter < 0) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_EXCEPTION,
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_ERROR,
                           "counter for allocation is negative");
         return;
     }
@@ -322,7 +322,7 @@ extern "C" void StdGCScheduleGCAfterNthAlloc(EtsInt counter, EtsInt cause)
     if (!gc->CheckGCCause(reason)) {
         PandaStringStream eMsg;
         eMsg << mem::GCStringFromType(gc->GetType()) << " does not support " << reason << " cause";
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_EXCEPTION, eMsg.str());
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_ERROR, eMsg.str());
         return;
     }
     mem::GCTrigger *trigger = vm->GetGCTrigger();

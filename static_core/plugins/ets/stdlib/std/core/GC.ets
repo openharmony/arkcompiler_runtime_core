@@ -67,7 +67,7 @@ export namespace GC {
      * @param callback callback is called in concurrent phase
      * @param inPlaceMode run GC in place mode
      *
-     * @throws IllegalArgumentException if current GC does not support requested cause
+     * @throws IllegalArgumentError if current GC does not support requested cause
      *
      * @returns id of started GC.
      * - The id can be passed to waitForFinishGC to ensure the GC is finished.
@@ -84,7 +84,7 @@ export namespace GC {
      * @param cause cause of requested GC
      * @param inPlaceMode run GC in place mode
      *
-     * @throws IllegalArgumentException if current GC does not support requested cause
+     * @throws IllegalArgumentError if current GC does not support requested cause
      * @throws UnsupportedOperationException if current GC does not support requested cause
      * @throws IllegalStateException if try to run threshold GC collection not in place after calling postponeGCStart
      *
@@ -114,7 +114,7 @@ export namespace GC {
      * @param counter number of allocation for trigger GC
      * @param cause cause of requested GC
      *
-     * @throws IllegalArgumentException if current GC does not support requested cause
+     * @throws IllegalArgumentError if current GC does not support requested cause
      * @throws UnsupportedOperationException if VM is running with incorrect GC trigger
      */
     native function scheduleGcAfterNthAllocImpl(counter: int, cause: int): void;
