@@ -195,6 +195,7 @@ if (PANDA_TARGET_AMD64 OR (PANDA_TARGET_ARM64 AND NOT PANDA_ENABLE_ADDRESS_SANIT
         panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/llvmaot-tracking.pa)
         panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/llvmaot-inlines-from-split-module.pa)
         panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/llvmaot-gc-int-vs-ptr.pa)
+        panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/llvmaot-mem-barriers-sinking.pa)
         if (PANDA_TARGET_AMD64)
             panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/fill-const-array/fill-const-array-513.pa)
         endif()

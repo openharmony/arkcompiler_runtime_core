@@ -14,7 +14,7 @@ Reducing the number of instructions and speed up execution.
 
 RPO analysis
 
-## Algorithm
+## Algorithm 1: Merging Memory barriers (Implemented in both ArkIR and LLVM IR)
 
 There is instruction flag `MEM_BARRIER`. The flag is set to `true` for the instructions NewObject, NewArray and NewMultiArray.  
 The pass `OptimizeMemoryBarriers` try remove the flag(set false) from the instruction.  
@@ -28,7 +28,7 @@ The function `MergeBarriers` also is called at end of the basic block.
 
 Codegen checks the flag `MEM_BARRIER` for the instructions NewObject, NewArray and NewMultiArray and encode memory barrier if the flag `true`
 
-## Pseudocode
+## Pseudocode for Algorithm 1
 
 ```
 bool OptimizeMemoryBarriers::RunImpl()
@@ -62,7 +62,7 @@ void MemoryBarriersVisitor::MergeBarriers(InstVector& barriers_insts)
 }
 ```
 
-## Examples
+## Examples for Algorithm 1
 
 ```
 BB 0
@@ -94,11 +94,71 @@ Instructions `2.ref  NewArray`, `5.ref  NewObject` and `10.ref  NewObject` have 
 `7.void CallStatic` don't have the instructions  `2.ref  NewArray`, `5.ref  NewObject` as inputs. 
 So the pass `OptimizeMemoryBarriers` will remove the flag from these instructions and skip in `10.ref  NewObject`.  
 
+## Algorithm 2: Memory Barrier Sinking (Implemented only in LLVM IR)  
+Algorithm 1 calls `MergeBarriers` at the end to place memory barriers for allocations after last use of newly allocated object. This memory barrier is not always needed.  
+Consider a path `BasicBlock1 -> BasicBlock2`. We call such a path to be `Protected` when all newly allocated objects at the end of `BasicBlock1` are protected by at least one memory barrier before any use of those newly allocated objects.  
+This optimization is closely related to whether the paths from a predecessor to successors are protected or not. Currently, the optimization only covers the case where the predecessor block's terminator is a `br` instruction with 2 successors. The optimiztion is:
+- If both successors paths are protected, then we may safely delete the memory barrier at the end of predecessor.
+- If one successor path is protected, and the other successor only have one predecessor, then we may sink the memory barrier from the end of predecessor to the beginning of successor.
+
+## Examples for Algorithm 2
+
+### Protected Path
+```
+BB1:
+    NewObject o1
+
+BB2:
+    NewObject o2
+    MemoryBarrier
+    func(o1, o2)
+
+BB3:
+    func(o1)
+```
+`BB1 -> BB2` is a protected path, because there is a `MemoryBarrier` between the allocation `NewObject o1` and the call `func(o1, o2)`. In contrast, `BB1 -> BB3` is not a protected path because `o1` is not protected by a `MemoryBarrier` before `func(o1)`.
+
+### Memory Barriers Sinking
+```
+Before optimization:
+BB1:
+	NewObject o1
+    MemoryBarrier
+    go to BB2 or BB3 based on some condition
+    
+BB2:
+	NewObject o2
+    MemoryBarrier
+    store v0, o2
+    ...
+
+BB3:
+	call func(o1)
+
+After optimization:
+BB1:
+	NewObject o1
+    go to BB2 or BB3 based on some condition
+
+BB2:
+	NewObject o2
+    MemoryBarrier
+    store v0, o2
+    ...
+
+BB3:
+	MemoryBarrier
+	call func(o1)
+```
+
 ## Links
 
 Source code:   
-[memory_barriers.cpp](../optimizer/optimizations/memory_barriers.cpp)  
-[memory_barriers.h](../optimizer/optimizations/memory_barriers.h)  
+[memory_barriers.cpp (ArkIR)](../optimizer/optimizations/memory_barriers.cpp)  
+[memory_barriers.h (ArkIR)](../optimizer/optimizations/memory_barriers.h)  
+[mem_barriers.cpp (LLVM IR)](../../libllvmbackend/transforms/passes/mem_barriers.cpp)  
+[mem_barriers.h (LLVM IR)](../../libllvmbackend/transforms/passes/mem_barriers.h)  
 
 Tests:  
-[memory_barriers_test.cpp](../tests/memory_barriers_test.cpp)
+[memory_barriers_test.cpp (ArkIR)](../tests/memory_barriers_test.cpp)  
+[llvmaot-dmb-sinking.pa (LLVM IR)](../../tests/checked/llvmaot-dmb-sinking.pa)
