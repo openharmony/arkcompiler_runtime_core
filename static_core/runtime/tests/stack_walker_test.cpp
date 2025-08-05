@@ -364,7 +364,7 @@ static bool CheckVregs(int *regIndex, ObjectHeader *obj, const VRegInfo &regInfo
 {
     if (!regInfo.IsAccumulator()) {
         if (reg.HasObject()) {
-#if defined(PANDA_TARGET_64) && !defined(PANDA_USE_32_BIT_POINTER)
+#if defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER)
             HOOK_ASSERT(reg.GetReference() == obj, return false);
 #else
             HOOK_ASSERT((reg.GetReference() == reinterpret_cast<ObjectHeader *>(Low32Bits(obj))), return false);

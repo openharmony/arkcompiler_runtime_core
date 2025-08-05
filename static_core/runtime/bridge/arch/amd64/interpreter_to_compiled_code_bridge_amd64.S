@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,7 +54,7 @@
 
     // it is an integer arg
 
-#ifdef PANDA_USE_32_BIT_POINTER
+#if defined(PANDA_32_BIT_MANAGED_POINTER) && defined(PANDA_TARGET_64)
     // if arg is a reference, zero out garbage in upper 32 bits
     cmpl $(SHORTY_REFERENCE - SHORTY_FIRST_FLOAT), %r11d
     jne 4f
