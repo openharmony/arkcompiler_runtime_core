@@ -77,14 +77,14 @@ public:
     {
         // GCC does not support maybe_ununused attribute on class members
         UNUSED_VAR(flag_);
-        ObjectAccessor::SetPrimitive<EtsBoolean>(this, MEMBER_OFFSET(EtsAtomicFlag, flag_), v);
+        ObjectAccessor::SetPrimitive<EtsBoolean, true>(this, MEMBER_OFFSET(EtsAtomicFlag, flag_), v);
     }
 
     EtsBoolean GetValue() const
     {
         // GCC does not support maybe_ununused attribute on class members
         UNUSED_VAR(flag_);
-        return ObjectAccessor::GetPrimitive<EtsBoolean>(this, MEMBER_OFFSET(EtsAtomicFlag, flag_));
+        return ObjectAccessor::GetPrimitive<EtsBoolean, true>(this, MEMBER_OFFSET(EtsAtomicFlag, flag_));
     }
 
 private:
