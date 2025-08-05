@@ -2151,9 +2151,9 @@ export namespace url {
         * Returns all key-value pairs associated with a given search parameter as an array.
         *
         * @param { string } name - Specifies the name of a key value.
-        * @returns { Array<string> } Array<string> Returns all key-value pairs with the specified name.
+        * @returns { string[] } string[] Returns all key-value pairs with the specified name.
         */
-        getAll(getAllname: string): Array<string> {
+        getAll(getAllname: string): string[] {
             getAllname = fixUSVstring(getAllname);
             return this.urlClass.getAll(getAllname);
         }
