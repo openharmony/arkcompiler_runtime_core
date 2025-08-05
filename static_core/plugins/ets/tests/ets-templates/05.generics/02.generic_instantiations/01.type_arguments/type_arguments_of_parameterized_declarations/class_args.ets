@@ -36,6 +36,7 @@ class A<T{{c.bound}}> {
 {{c.decl}}
 function main(): int {
     {{c.use|indent}}
+    arktest.assertTrue(v instanceof A)
     return 0;
 }
 {% endfor %}

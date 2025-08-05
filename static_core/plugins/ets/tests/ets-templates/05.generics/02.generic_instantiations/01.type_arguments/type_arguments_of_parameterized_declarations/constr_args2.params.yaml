@@ -28,7 +28,7 @@ cases:
     bound: ' extends X|null'
 
   - use: |-
-      let v: A<Object,X|null> = new  A<Object,X|null>(new X(), null)
+      let v: A<Object,X|null> = new A<Object,X|null>(new X(), null)
     bound: ' extends Object|null'
 
   # interfaces
@@ -62,3 +62,56 @@ cases:
       let v: A<Y,B> = new A<Y,B>(new Y(), new Y[0])
     decl: type B = Y[]
 
+  # tuples
+  - use: |-
+      let v: A<[X, X], X> = new A<[X, X], X>([new X(), new X()], new X())
+
+  - use: |-
+      let v: A<Int, [X, X] | null> = new A<Int, [X, X] | null>(new Int(), [new X(), new X()])
+
+  - use: |-
+      let v: A<Int | null, [X, X] | null> = new A<Int|null, [X, X] | null>(null, null)
+
+  - use: |-
+      let v: A<[X, X], X | null> = new A<[X, X], X | null>([new X(), new X()], new X())
+
+  - use: |-
+      let v: A<Object, [X, X] | null> = new A<Object, [X, X] | null>(new X(), null)
+
+  # FixedArray
+  - use: |-
+      let v: A<FixedArray<X>, FixedArray<X>> = new A<FixedArray<X>, FixedArray<X>>([new X()], [new X()])
+
+  - use: |-
+      let v: A<Int, FixedArray<X> | null> = new A<Int, FixedArray<X> | null>(new Int(), [new X()])
+
+  - use: |-
+      let v: A<Int|null,X|null> = new A<Int|null,X|null>(null, null)
+
+  - use: |-
+      let v: A<FixedArray<X>, FixedArray<X> | null> = new A<FixedArray<X>, FixedArray<X> | null>([new X()], [new X()])
+
+  - use: |-
+      let v: A<Object, FixedArray<X> | null> = new A<Object, FixedArray<X> | null>([new X()], null)
+
+  # type argument is specific type
+  - use: |-
+      let v: A<Any, Any> = new A<Any, Any>(new X(), new X())
+
+  - use: |-
+      let v: A<undefined, undefined> = new A<undefined, undefined>(undefined, undefined)
+
+  - use: |-
+      let v: A<null, null> = new A<null, null>(null, null)
+
+  - use: |-
+      let v: A<string, string> = new A<string, string>("string", "string")
+
+  - use: |-
+      let v: A<bigint, bigint> = new A<bigint, bigint>(123n, 123n)
+
+  - use: |-
+      let v: A<B<keyof Keys>, B<keyof Keys>> = new A<B<'key'>, B<'key'>>(new B<'key'>, new B<'key'>)
+    decl: |-
+      class Keys { key: number = 0 }
+      class B<T extends keyof Keys> {}

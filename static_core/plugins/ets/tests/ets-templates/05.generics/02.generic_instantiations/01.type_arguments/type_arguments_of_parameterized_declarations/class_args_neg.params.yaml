@@ -105,3 +105,24 @@ cases:
 
   - use: |-
       let v: A<A<I[]>[]> = new A<A<I[]>[]>([new A<I[]>(new I[0])]) // Cannot use array creation expression with interfaces.
+
+  # type argument is tuple
+  - use: |-
+      let v: A<[X, X]> = new A<[X, X]|null>(null) // shouldn't assign to subclass
+
+  - use: |-
+      let v: A<null|[X, X]> = new A<[X, X]>([new X(), new X()]) // syntax error
+
+  - use: |-
+      let v: A<A<[X, X]>> = new A<A<[X, X]>>(new A<[Y, Y]]>([new Y(), new Y()]))  // A<Y> is not A<X>
+
+  # type argument is FixedArray
+  - use: |-
+      let v: A<FixedArray<X>> = new A<FixedArray<X>|null>(null) // shouldn't assign to subclass
+
+  - use: |-
+      let v: A<null|FixedArray<X>> = new A<FixedArray<X>>([new X()]) // syntax error
+
+  - use: |-
+      let v: A<A<FixedArray<X>>> = new A<A<FixedArray<X>>>([new A<FixedArray<Y>>(new Y())])
+      // A<FixedArray<Y>> is not A<FixedArray<X>>
