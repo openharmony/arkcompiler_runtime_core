@@ -459,8 +459,7 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
     // Read values from stack and keep in args values for Launch after possible GC in EtsPromise::Create
     if (!method->IsStatic()) {
         // Handle this arg
-        ASSERT(method->GetNumArgs() != 0);
-        ASSERT(!method->GetArgType(0).IsPrimitive());
+        ASSERT(method->GetNumArgs() != 0 && !method->GetArgType(0).IsPrimitive());
         args.push_back(Value(*const_cast<ObjectHeader **>(argReader.ReadPtr<ObjectHeader *>())));
     }
     arch::ValueWriter writer(&args);
@@ -468,8 +467,10 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
 
     [[maybe_unused]] EtsHandleScope scope(currentCoro);
     EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);
-    bool launchResult = coroManager->LaunchImmediately(evt, impl, std::move(args), CoroutineLaunchMode::SAME_WORKER,
-                                                       EtsCoroutine::ASYNC_CALL, false);
+    bool launchResult = coroManager->LaunchImmediately(
+        evt, impl, std::move(args),
+        ark::CoroutineWorkerGroup::GenerateExactWorkerId(ark::ets::EtsCoroutine::GetCurrent()->GetWorker()->GetId()),
+        EtsCoroutine::ASYNC_CALL, false);
     if (UNLIKELY(!launchResult)) {
         ASSERT(currentCoro->HasPendingException());
         // OOM is thrown by Launch

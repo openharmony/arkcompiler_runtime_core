@@ -8469,8 +8469,10 @@ intrinsics:
     method_name: generateGroupIdImpl
     static: true
     signature:
-      ret: i64
-      args: [i32, i32]
+      ret: i64[]
+      args:
+        - i32
+        - escompat.Array
     impl: ark::ets::intrinsics::WorkerGroupGenerateGroupIdImpl
 
 ###############################
@@ -8593,7 +8595,7 @@ intrinsics:
         - std.core.Object
         - std.core.Object[]
         - u1
-        - i64
+        - i64[]
     impl: ark::ets::intrinsics::EtsLaunchInternalJobNative
 
   - name: EtsLaunchOnTheSameWorker

@@ -46,12 +46,12 @@ public:
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
     bool Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag,
-                CoroutineWorkerGroup::Id groupId) override;
+                const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority, bool abortFlag) override;
     bool LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                           CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag) override;
-    bool LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName, CoroutineLaunchMode mode,
-                      CoroutinePriority priority, bool abortFlag, CoroutineWorkerGroup::Id groupId) override;
+                           const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
+                           bool abortFlag) override;
+    bool LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
+                      const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority, bool abortFlag) override;
     void Schedule() override;
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(CoroutineEvent *blocker) override;
@@ -146,6 +146,9 @@ public:
 
     PandaUniquePtr<StackfulCoroutineStateInfoTable> GetAllWorkerFullStatus() const;
 
+    CoroutineWorkerGroup::Id GenerateWorkerGroupId(CoroutineWorkerDomain domain,
+                                                   const PandaVector<CoroutineWorker::Id> &hint) override;
+
 protected:
     static constexpr CoroutineWorker::Id MAIN_WORKER_ID = 0U;
     // maximum worker id is bound by the number of bits in the affinity mask
@@ -173,18 +176,16 @@ protected:
 private:
     StackfulCoroutineContext *CreateCoroutineContextImpl(bool needStack);
     StackfulCoroutineWorker *ChooseWorkerForCoroutine(Coroutine *co) REQUIRES(workersLock_);
-    AffinityMask CalcAffinityMask(CoroutineLaunchMode mode,
-                                  CoroutineWorkerGroup::Id groupId = CoroutineWorkerGroup::ANY_ID);
+    AffinityMask CalcAffinityMask(const CoroutineWorkerGroup::Id &groupId = CoroutineWorkerGroup::AnyId());
 
     Coroutine *GetCoroutineInstanceForLaunch(EntrypointInfo &&epInfo, PandaString &&coroName,
                                              CoroutinePriority priority, AffinityMask affinityMask, bool abortFlag);
-    bool LaunchImpl(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutineLaunchMode mode,
-                    CoroutinePriority priority, bool abortFlag, CoroutineWorkerGroup::Id groupId);
-    bool LaunchImmediatelyImpl(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutineLaunchMode mode,
+    bool LaunchImpl(EntrypointInfo &&epInfo, PandaString &&coroName, const CoroutineWorkerGroup::Id &groupId,
+                    CoroutinePriority priority, bool abortFlag);
+    bool LaunchImmediatelyImpl(EntrypointInfo &&epInfo, PandaString &&coroName, const CoroutineWorkerGroup::Id &groupId,
                                CoroutinePriority priority, bool abortFlag);
-    bool LaunchWithMode(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutineLaunchMode mode,
-                        CoroutinePriority priority, bool launchImmediately, bool abortFlag,
-                        CoroutineWorkerGroup::Id groupId = CoroutineWorkerGroup::ANY_ID);
+    bool LaunchWithGroupId(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutineWorkerGroup::Id groupId,
+                           CoroutinePriority priority, bool launchImmediately, bool abortFlag);
     /**
      * Tries to extract a coroutine instance from the pool for further reuse, returns nullptr in case when it is not
      * possible.
@@ -329,6 +330,9 @@ private:
 
     // the time interval between detecting worker blocking
     static constexpr uint32_t DETECTION_INTERVAL_VALUE = 5000;
+
+    CoroutineWorkerGroup::Id generalWorkerGroup_ = CoroutineWorkerGroup::Empty();
+    CoroutineWorkerGroup::Id eaWorkerGroup_ = CoroutineWorkerGroup::Empty();
 };
 
 }  // namespace ark

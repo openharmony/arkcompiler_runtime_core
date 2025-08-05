@@ -502,7 +502,7 @@ export final class Promise<out T> implements PromiseLike<T> {
     private mutex = new Mutex();
     private event = new Event();
     private callbackQueue?: Object[];
-    private launchModeQueue?: int[];
+    private workerDomainQueue?: int[];
     private interopObject?: Object;
     private linkedPromise?: Object;
     private queueSize: int = 0;

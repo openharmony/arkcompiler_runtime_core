@@ -47,18 +47,6 @@ struct CoroutineManagerConfig {
     bool enableExternalTimer = false;
 };
 
-/// @brief defines the requested launch mode for a coroutine
-enum class CoroutineLaunchMode {
-    /// no specific requests
-    DEFAULT,
-    /// schedule to the parent's worker only
-    SAME_WORKER,
-    /// schedule to the main worker only
-    MAIN_WORKER,
-    /// schedule exclusively, moving other coros off the target worker
-    EXCLUSIVE
-};
-
 /// @brief defines the scheduling policy for a coroutine. Maybe in future we would like to add more types.
 enum class CoroutineSchedulingPolicy {
     /// choose the least busy worker
@@ -151,8 +139,7 @@ public:
      * @param groupId target worker group for the coroutine (see CoroutineWorkerGroup)
      */
     virtual bool Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                        CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag,
-                        CoroutineWorkerGroup::Id groupId) = 0;
+                        const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority, bool abortFlag) = 0;
     /**
      * @brief The public coroutine creation and execution interface. Switching to the newly created coroutine occurs
      * immediately. Coroutine launch mode should correspond to the use of parent's worker.
@@ -163,7 +150,8 @@ public:
      * @param arguments array of coroutine's entrypoint arguments
      */
     virtual bool LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                                   CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag) = 0;
+                                   const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
+                                   bool abortFlag) = 0;
 
     /**
      * @brief The public coroutine creation and execution interface with native entrypoint.
@@ -174,8 +162,8 @@ public:
      * @param groupId target worker group for the coroutine (see CoroutineWorkerGroup)
      * NOTE: native function can have Managed scopes
      */
-    virtual bool LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName, CoroutineLaunchMode mode,
-                              CoroutinePriority priority, bool abortFlag, CoroutineWorkerGroup::Id groupId) = 0;
+    virtual bool LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
+                              const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority, bool abortFlag) = 0;
     /// Suspend the current coroutine and schedule the next ready one for execution
     virtual void Schedule() = 0;
     /**
@@ -286,6 +274,27 @@ public:
     {
         return CoroutineManager::IsSystemCoroutine(co->GetType(),
                                                    co->HasNativeEntrypoint() || co->HasManagedEntrypoint());
+    }
+
+    /**
+     * @brief This function generates the worker group ID that can be further used to launch coroutines within that
+     * group.
+     * @param domain the worker domain.
+     * GENERAL domain includes all non-main and non-EA workers.
+     * EXACT_ID domain includes exact worker id from hint.
+     * MAIN domain includes only main worker.
+     * EXACT_ID domain includes only workers from "hint" parameter.
+     * @param hint optional worker ids, the usage is domain-specific.
+     * For GENERAL domain non-main and non-EA worker IDs are ignored, all other IDs are used as is.
+     * For MAIN domain hint is ignored.
+     * For EXACT_ID domain hint is used as is, empty hint means ANY_ID.
+     * For EA domain EA worker IDs are used as is, non-EA worker IDs are ignored
+     */
+    virtual CoroutineWorkerGroup::Id GenerateWorkerGroupId(
+        [[maybe_unused]] CoroutineWorkerDomain domain, [[maybe_unused]] const PandaVector<CoroutineWorker::Id> &hint)
+    {
+        ASSERT(false);
+        return CoroutineWorkerGroup::InvalidId();
     }
 
     /* events */
