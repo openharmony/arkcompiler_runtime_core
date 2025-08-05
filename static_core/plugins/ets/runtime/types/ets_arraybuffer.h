@@ -344,7 +344,7 @@ private:
 
 private:
     // ClassLinker reorders fileds based on them size. Object pointer size can be different for different configs
-#if defined(PANDA_TARGET_64) && !defined(PANDA_USE_32_BIT_POINTER)
+#if !defined(PANDA_32_BIT_MANAGED_POINTER)
     // Managed array used in this `ArrayBuffer`, null if buffer is external
     ObjectPointer<EtsByteArray> managedData_;
     // Contains pointer to either managed non-movable data or external data.

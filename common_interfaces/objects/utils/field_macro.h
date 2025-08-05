@@ -42,7 +42,7 @@
         return *addr;                                                    \
     }
 
-#if !defined(BASE_STRING_32BITS)
+#if !defined(PANDA_32_BIT_MANAGED_POINTER)
 // CC-OFFNXT(C_RULE_ID_DEFINE_LENGTH_LIMIT) solid logic
 // CC-OFFNXT(G.PRE.02) code readability
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)

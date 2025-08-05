@@ -80,7 +80,7 @@ TEST_F(EtsVMInitPreallocTest, ThrowPreallocatedOOMObjectTest)
 }
 
 // 26982 64-bit pointer support
-#if !defined(PANDA_TARGET_ARM64) || defined(PANDA_USE_32_BIT_POINTER)
+#if !defined(PANDA_TARGET_ARM64) || defined(PANDA_32_BIT_MANAGED_POINTER)
 TEST_F(EtsVMInitPreallocTest, ThrowPreallocatedOOMObjectTwiceTest)
 {
     ani_string oomName;

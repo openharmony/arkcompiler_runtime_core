@@ -1095,7 +1095,7 @@ add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/big_ark_option_valu
 
 # OSR needs additional design for try-catch processing. See the issue #13423 against panda
 # 26982 64-bit pointer support
-if(NOT PANDA_USE_64_BIT_POINTER)
+if(PANDA_32_BIT_MANAGED_POINTER)
     add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/oom-01.pa" COMPILER_OPTIONS --compiler-hotness-threshold=0 --compiler-inlining=false HEAP_SIZE_LIMIT "13000000" SKIP_OSR)
 endif()
 # OSR needs additional design for try-catch processing. See the issue #13423 against panda

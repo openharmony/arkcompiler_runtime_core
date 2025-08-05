@@ -117,7 +117,7 @@ function(add_tests pref suff)
 endfunction(add_tests)
 
 # 26982 64-bit pointer support
-if(NOT PANDA_TARGET_ARM64 OR NOT PANDA_USE_64_BIT_POINTER)
+if(NOT PANDA_TARGET_ARM64 OR PANDA_32_BIT_MANAGED_POINTER)
     foreach(pref IN LISTS Prefixes)
         foreach(type IN LISTS Types)
             if(pref STREQUAL "types")

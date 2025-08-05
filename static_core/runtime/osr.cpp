@@ -121,7 +121,7 @@ static int64_t GetValueFromVregAcc(const Frame *iframe, LanguageContext &ctx, VR
     } else {
         value = static_cast<int64_t>(ctx.GetOsrEnv(iframe, vreg));
     }
-#ifdef PANDA_USE_32_BIT_POINTER
+#if defined(PANDA_32_BIT_MANAGED_POINTER) && defined(PANDA_TARGET_64)
     if (vreg.IsObject()) {
         value = static_cast<uint32_t>(value);
     }

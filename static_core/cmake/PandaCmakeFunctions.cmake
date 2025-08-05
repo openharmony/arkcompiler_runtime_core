@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -38,7 +38,7 @@ function(panda_add_executable target)
         set_target_properties(${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${ARG_OUTPUT_DIRECTORY}")
     endif()
 
-    if(PANDA_USE_32_BIT_POINTER AND NOT (PANDA_TARGET_MOBILE OR PANDA_TARGET_WINDOWS OR PANDA_TARGET_MACOS OR PANDA_TARGET_OHOS))
+    if(PANDA_32_BIT_MANAGED_POINTER AND PANDA_TARGET_64 AND NOT (PANDA_TARGET_MOBILE OR PANDA_TARGET_WINDOWS OR PANDA_TARGET_MACOS OR PANDA_TARGET_OHOS))
         if(ARG_RAPIDCHECK_ON)
             set(LINKER_SCRIPT_ARG "-Wl,-T,${PANDA_ROOT}/ldscripts/panda_test_asan.ld")
         else()
@@ -71,7 +71,7 @@ endfunction()
 # This function need for non-SHARED libraries
 # It is necessary for 32-bits pointers via amd64 building with Clang compiler
 function(panda_set_lib_32bit_property target)
-    if(PANDA_USE_32_BIT_POINTER AND PANDA_TARGET_AMD64 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if(PANDA_32_BIT_MANAGED_POINTER AND PANDA_TARGET_AMD64 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         set_property(TARGET ${target} PROPERTY POSITION_INDEPENDENT_CODE ON)
     endif()
 endfunction()

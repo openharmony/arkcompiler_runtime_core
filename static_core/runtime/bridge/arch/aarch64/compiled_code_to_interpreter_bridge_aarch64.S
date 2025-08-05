@@ -227,7 +227,7 @@ CompiledCodeToInterpreterBridge:
     bne 2f
     // Result is a reference
     bl FreeFrame
-#if !defined(PANDA_TARGET_64) || defined(PANDA_USE_32_BIT_POINTER)
+#if defined(PANDA_32_BIT_MANAGED_POINTER)
     // Clear the upper 32 bits, since the compiler may
     // generate code that uses them (ex: ldr w?, [x19, #?])
     mov w19, w19
