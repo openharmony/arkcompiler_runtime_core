@@ -25,7 +25,7 @@ function grow(seed: int): int {
 
 function main() {
     let SyntaxFormTwo: Array<String> = ["Hello", "World", "Of", "ArkTS"];
-    let expectedException = (e: Error | Exception): boolean => {return (e instanceof RangeError)}
-    arktest.expectThrow(() => {SyntaxFormTwo.length = grow(0)}, expectedException) // CTE: Attempting to increase the length of the array by assignment to length => CTE
+    let expectedException = (e: Error): boolean => { return (e instanceof RangeError) }
+    arktest.expectThrow(() => { SyntaxFormTwo.length = grow(0) }, expectedException) // CTE: Attempting to increase the length of the array by assignment to length => CTE
 
 }

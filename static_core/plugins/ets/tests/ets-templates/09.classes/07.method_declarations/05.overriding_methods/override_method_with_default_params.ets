@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,25 +16,29 @@
 {% for c in cases %}
 
 /*---
-desc: Override method declaration with keyword {{mod}}.
+desc: Overriding methods with default parameters.
 assert: >-
-    It is compile-time error if a method declaration that contains the keyword override also contains any one of the
-    keywords abstract, static, open, native, or synchronized.
-params: {{c.modifier}}
+    If the signature of an overridden method contains parameters with default values (see Optional Parameters),
+    then the overriding method always uses the default parameter values of the overridden method.
+    A compile-time error occurs if a parameter in the overriding method has a default value
 tags: [{{c.tags}}]
 ---*/
 
 class A {
-  foo(): int {
-    return 1;
+  /* @ label */foo({{c.base_params}}): {{c.return_type}} {
+    return a;
   }
 }
 
 final class B extends A {
-  {{c.function|indent}}
+  override foo({{c.overridden_params}}): {{c.return_type}} {
+    return a;
+  }
 }
 
-{{c.main}}
+function main() {
+  {{c.main|indent}}
+}
 
 {{c.expected_error}}
 

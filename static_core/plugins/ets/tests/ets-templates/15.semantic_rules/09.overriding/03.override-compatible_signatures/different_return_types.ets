@@ -13,24 +13,46 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
+
 /*---
-desc: Access to hidden method by cast.
+desc: Different return type in mA and mC.
+assert: >-
+    If a method declaration d1 with return type R1 overrides or hides the declaration of another method d2
+    with return type R2, then d1 must be return-type-substitutable for d2, or a compile-time error occurs.
+tags: []
 ---*/
 
 class A {
- public m(): int {
-    return 1;
+  public m(): B {
+    return new B;
   }
+}
+
+class B {
+
+}
+
+class D extends B {
+
 }
 
 class C extends A {
-  public m(): int {
-    return 5;
+  public override m(): D {
+    return new D();
   }
 }
 
-function main(): void {
-  let instance: A = new C();
-
-  arktest.assertEQ( instance.m(), 5 );
+function getC(): C {
+    return new C
 }
+
+function getA(): A {
+    return new A
+}
+
+function main() {
+    {{c|indent}}
+}
+
+{% endfor %}

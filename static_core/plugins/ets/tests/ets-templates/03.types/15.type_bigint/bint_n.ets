@@ -23,7 +23,7 @@ let b: bigint
 
 function main() {
     let s: {{c.from_type}} = {{c.expr|safe}}
-    let checkException = (e: Error | Exception): boolean => {return (e instanceof RangeError)}
-    arktest.expectThrow(() => {b = new BigInt(s)}, checkException)
+    let checkException = (e: Error): boolean => { return (e instanceof RangeError) }
+    arktest.expectThrow(() => { b = new BigInt(s) }, checkException)
 }
 {%- endfor %}

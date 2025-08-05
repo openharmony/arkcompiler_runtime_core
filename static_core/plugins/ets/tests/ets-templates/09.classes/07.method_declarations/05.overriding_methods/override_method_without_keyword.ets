@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,31 +14,30 @@
  */
 
 /*---
-desc: Overload two methods, two inherited.
+desc: Override method declaration.
 assert: >-
-    If two methods of a class (whether both declared in the same class, or both inherited by a class,
-    or one declared and one inherited) have the same name but signatures that are not override-equivalent,
-    then the method name is said to be overloaded.
-    This fact causes no difficulty and never of itself results in a compile-time error.
+    The usage of the modifier override is optional but strongly recommended
+    as it makes the overriding explicit.
 ---*/
 
 class A {
-  public foo(): int {
+  foo(): int {
     return 1;
-  }
-
-  public foo(a: int): int {
-    return a;
   }
 }
 
-class B extends A {
+final class B extends A {
+  foo(): int {
+    return 5;
+  }
+}
 
+function getB(): B {
+  return new B
 }
 
 function main(): void {
-  let instance: B = new B();
+  let instance: A = getB();
 
-  arktest.assertEQ( instance.foo(), 1 );
-  arktest.assertEQ( instance.foo(2), 2 );
+  arktest.assertEQ(instance.foo(), 5);
 }

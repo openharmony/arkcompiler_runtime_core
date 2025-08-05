@@ -16,8 +16,8 @@
 /*---
 desc: Override method declaration.
 assert: >-
-    The override keyword is mandatory if an instance method overrides the corresponding instance method
-    from a superclass.
+    The usage of the modifier override is optional but strongly recommended
+    as it makes the overriding explicit
 ---*/
 
 class A {
@@ -32,8 +32,12 @@ final class B extends A {
   }
 }
 
-function main(): void {
-  let instance: B = new B();
+function getB(): B {
+  return new B
+}
 
-  arktest.assertEQ( instance.foo(), 5 );
+function main(): void {
+  let instance: A = getB();
+
+  arktest.assertEQ(instance.foo(), 5);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,26 +14,29 @@
  */
 
 /*---
-desc: Overload two methods with different return types.
+desc: Override method declaration.
 assert: >-
-    There is no required relationship between the return types of two methods with the same name,
-    unless their signatures are override-equivalent.
+    A compile-time error occurs if a method marked with the modifier override
+    does not override a method from a superclass
+tags: [compile-only, negative]
 ---*/
 
 class A {
-  public foo(): int {
-    return 1;
+  bar(): int {
+      return 1;
   }
- 
-  public foo(a: int): boolean {
-    return true;
+}
+
+final class B extends A {
+  override foo/* @ label*/(): int {
+    return 5;
   }
 }
 
 function main(): void {
-  let instance: A = new A();
+  let instance: B = new B();
 
-  arktest.assertEQ( instance.foo(), 1 );
-  arktest.assertEQ( instance.foo(2), true );
+  arktest.assertEQ( instance.foo(), 5 );
 }
 
+/* @@@ label Error TypeError: Method foo(): Int in B not overriding any method */
