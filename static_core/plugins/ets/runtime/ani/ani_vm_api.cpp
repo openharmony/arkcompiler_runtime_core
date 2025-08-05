@@ -164,12 +164,13 @@ static ani_status AttachCurrentThread(ani_vm *vm, const ani_options *options, ui
     }
 
     bool interopEnabled = false;
+    void *jsEnv = nullptr;
     if (options != nullptr) {
-        for (size_t i = 0; i < options->nr_options; ++i) {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            PandaString opt(options->options[i].option);
+        for (auto option : Span(options->options, options->nr_options)) {
+            PandaString opt(option.option);
             if (opt == "--interop=enable") {
                 interopEnabled = true;
+                jsEnv = option.extra;
             } else if (opt == "--interop=disable") {
                 interopEnabled = false;
             }
@@ -189,8 +190,10 @@ static ani_status AttachCurrentThread(ani_vm *vm, const ani_options *options, ui
 
     if (interopEnabled) {
         auto *ifaceTable = EtsCoroutine::CastFromThread(coroMan->GetMainThread())->GetExternalIfaceTable();
-        auto *jsEnv = ifaceTable->CreateJSRuntime();
-        ASSERT(jsEnv != nullptr);
+        if (jsEnv == nullptr) {
+            jsEnv = ifaceTable->CreateJSRuntime();
+            ASSERT(jsEnv != nullptr);
+        }
         ifaceTable->CreateInteropCtx(exclusiveCoro, jsEnv);
     }
     *result = PandaEtsNapiEnv::GetCurrent();
