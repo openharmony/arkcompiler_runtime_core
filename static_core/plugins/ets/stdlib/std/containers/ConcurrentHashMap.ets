@@ -18,14 +18,16 @@ package std.containers;
 export namespace containers {
 
     final class MapNode<K, V> {
-        prev: MapNode<K, V> = this;
-        next: MapNode<K, V> = this;
+        prev: MapNode<K, V>;
+        next: MapNode<K, V>;
 
         key: K;
         val: V;
         isDeleted: boolean = false;
 
         constructor(key: K, val: V) {
+            this.prev = this
+            this.next = this
             this.key = key;
             this.val = val;
         }

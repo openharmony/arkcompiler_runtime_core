@@ -35,7 +35,7 @@ function createBusinessError(code: int, message: string) {
 
 export class ArrayList<T> implements Iterable<T>, JsonReplacer {
     private readonly DEFAULT_CAPACITY = 10;
-    private capacity: int = this.DEFAULT_CAPACITY;
+    private capacity: int;
     private buffer: Array<T>;
 
     public toString(): string {
@@ -63,6 +63,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      * Creates a new instance of ArrayList.
      */
     public constructor() {
+        this.capacity = this.DEFAULT_CAPACITY;
         this.buffer = new Array<T>(this.capacity);
         this.buffer.length = 0;
     }

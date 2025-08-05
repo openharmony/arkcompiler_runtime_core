@@ -358,7 +358,7 @@ export final class ClassTypeCreator extends TypeCreator {
     private ifaces: Array<TypeOrCreator> = new Array<TypeOrCreator>()
     private fields: Array<FieldCreator> = new Array<FieldCreator>()
     private methods: Array<MethodCreator> = new Array<MethodCreator>()
-    private attrs: HasAttributes = new HasAttributes(new FreezableCreator(this), AllowedAttributes.CLASS)
+    private attrs: HasAttributes
     private targetLinker: RuntimeLinker
 
     /**
@@ -366,6 +366,7 @@ export final class ClassTypeCreator extends TypeCreator {
      */
     public constructor(name: string) {
         super()
+        this.attrs = new HasAttributes(new FreezableCreator(this), AllowedAttributes.CLASS)
         this.name = name
         this.targetLinker = getNearestNonBootRuntimeLinker()!
     }
@@ -629,11 +630,12 @@ export final class InterfaceTypeCreator extends TypeCreator {
 export final class LambdaTypeCreator extends TypeCreator {
     internal params: Array<ParameterCreator> = new Array<ParameterCreator>();
     internal result: TypeOrCreator = TypeOrCreator.from(VoidType.REF);
-    private attrs: HasAttributes = new HasAttributes(new FreezableCreator(this), AllowedAttributes.LAMBDA)
+    private attrs: HasAttributes
     private targetLinker: RuntimeLinker
 
     /** default constructor */
     public constructor() {
+        this.attrs = new HasAttributes(new FreezableCreator(this), AllowedAttributes.LAMBDA)
         this.targetLinker = getNearestNonBootRuntimeLinker()!
     }
 
@@ -879,16 +881,26 @@ export final class FieldCreator {
     internal name: string
     internal typ: TypeOrCreator
     internal frozen: FreezableImpl = new FreezableImpl()
-    internal attrs: HasAttributes = new HasAttributes(this.frozen, AllowedAttributes.FIELD)
-    internal accessMod: HasAccessMod = new HasAccessMod(this.frozen)
+    internal attrs: HasAttributes
+    internal accessMod: HasAccessMod
+
+    /**
+     * @param name new field name
+     * @param typ new field type
+     */
+    private constructor(name: string, typ: TypeOrCreator) {
+        this.name = name
+        this.attrs = new HasAttributes(this.frozen, AllowedAttributes.FIELD)
+        this.accessMod = new HasAccessMod(this.frozen)
+        this.typ = typ
+    }
 
     /**
      * @param name new field name
      * @param typ new field type
      */
     public constructor(name: string, typ: Type) {
-        this.name = name
-        this.typ = TypeOrCreator.from(typ)
+        this(name, TypeOrCreator.from(typ))
     }
 
     /**
@@ -896,8 +908,7 @@ export final class FieldCreator {
      * @param typ new field type
      */
     public constructor(name: string, typ: TypeCreator) {
-        this.name = name
-        this.typ = TypeOrCreator.from(typ)
+        this(name, TypeOrCreator.from(typ))
     }
 
     /**
@@ -928,7 +939,7 @@ export final class ParameterCreator {
     internal typ: TypeOrCreator
     internal name?: string
     internal frozen: FreezableImpl = new FreezableImpl()
-    internal attrs: HasAttributes = new HasAttributes(this.frozen, AllowedAttributes.PARAMETER)
+    internal attrs: HasAttributes
 
     /**
      * @param parameter type
@@ -958,6 +969,7 @@ export final class ParameterCreator {
      */
     internal constructor(typ: TypeOrCreator) {
         this.typ = typ
+        this.attrs = new HasAttributes(this.frozen, AllowedAttributes.PARAMETER)
     }
 
     /**
@@ -1007,14 +1019,16 @@ export final class MethodCreator {
     internal result: TypeOrCreator = TypeOrCreator.from(VoidType.REF);
     internal body?: CallableBody
     internal frozen: FreezableImpl = new FreezableImpl()
-    internal attrs: HasAttributes = new HasAttributes(this.frozen, AllowedAttributes.METHOD)
-    internal accessMod: HasAccessMod = new HasAccessMod(this.frozen)
+    internal attrs: HasAttributes
+    internal accessMod: HasAccessMod
 
     /**
      * @param name method name, which can contain [a-zA-Z0-9] and be a valid identifier
      */
     public constructor(name: string) {
         this.name = name
+        this.attrs = new HasAttributes(this.frozen, AllowedAttributes.METHOD)
+        this.accessMod = new HasAccessMod(this.frozen)
     }
 
     /**

@@ -30,7 +30,7 @@ export type DequeforEachCb<T> = (value: T, index: int, deque: Deque<T>) => void;
 
 export default class Deque<T> implements Iterable<T>, JsonReplacer {
     private readonly DEFAULT_CAPACITY = 8;
-    internal capacity: int = this.DEFAULT_CAPACITY;
+    internal capacity: int;
     internal buffer: Array<T>;
     internal front: int = 0;
     internal rear: int = 0;
@@ -118,6 +118,7 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
      * Creates a new instance of Deque.
      */
     public constructor() {
+        this.capacity = this.DEFAULT_CAPACITY;
         this.buffer = new Array<T>(this.capacity);
     }
 
