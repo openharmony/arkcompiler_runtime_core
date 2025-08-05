@@ -68,6 +68,19 @@ cases:
           bar((): int => { return 1 }) // CTE: No matching call signature
 
     - decl: |-
+          type LO = (() => void) | Object        
+          function foo(input: LO): Boolean { return true }
+      use: |-
+        foo(null) // CTE: No matching call signature
+
+    - decl: |-
+        type LO = (() => void) | Object        
+        function foo(input: LO): Boolean { return true }
+      use: |-
+        foo(undefined) // CTE: No matching call signature
+        
+
+    - decl: |-
           function bar(callee: () => void): void {
             callee()
           }
@@ -80,3 +93,29 @@ cases:
           }
       use: |-
           bar((a: int, b: int): void => {}) // CTE: No matching call signature
+
+    - decl: |-
+        function foo(s: Object, i: Object, b: Object): Boolean {
+          calls++
+          return s instanceof String &&  i instanceof int && b instanceof Boolean
+        }
+        type LT = null | (s: Object, i: Object, b: Object) => Boolean
+        function getLambdaOrNull(value: Boolean = false): LT {
+          return value ? (s: Object, i: Object, b: Object) => foo(s, i, b) : null
+        }
+      use: |-
+        let lc: LT = getLambdaOrNull()
+        let r = lc.('Hello', 42, true)
+
+    - decl: |-
+        function foo(s: Object, i: Object, b: Object): Boolean {
+          calls++
+          return s instanceof String &&  i instanceof int && b instanceof Boolean
+        }
+        type LT = null | (s: Object, i: Object, b: Object) => Boolean
+        function getLambdaOrNull(value: Boolean = false): LT {
+          return value ? (s: Object, i: Object, b: Object) => foo(s, i, b) : null
+        }
+      use: |-
+        let lc: LT = getLambdaOrNull()
+        let r = lc('Hello', 42, true)
