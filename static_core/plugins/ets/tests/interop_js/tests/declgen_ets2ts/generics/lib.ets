@@ -56,9 +56,10 @@ export class C2 {
     }
 }
 
-export let cb1: <T>(x: T) => T
-export let cb2: <T>(x: T) => T = <T>(p: T): T => p
-export let cb3 = <T, U> (p: T, q: U): [T, U] => [p, q]
+// NOTE(dongchao): enable when supported by frontend
+// export let cb1: <T>(x: T) => T
+// export let cb2: <T>(x: T) => T = <T>(p: T): T => p
+// export let cb3 = <T, U> (p: T, q: U): [T, U] => [p, q]
 
 // NOTE(ivagin): enable when supported by interop
 // export class DerivedGeneric<T, U, V> extends BaseGeneric<T, U> implements IGeneric0<U>, IGeneric1<IGeneric0<V>> {
