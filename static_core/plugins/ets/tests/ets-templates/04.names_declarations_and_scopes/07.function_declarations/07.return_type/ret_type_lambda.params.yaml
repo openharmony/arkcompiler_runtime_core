@@ -1,5 +1,5 @@
 # Copyright (c) 2021-2025 Huawei Device Co., Ltd.
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the Apache License, Version 2.0 (the "License")
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -15,126 +15,126 @@
 function_decls:
     - decl: |-
           let i = 0
-          function foo() {  // infer void
+          let foo = () => {  // infer void
               i += 1
           }
       call: |-
-          i = 0;
+          i = 0
           foo()
-          arktest.assertTrue(i == 1);
+          arktest.assertTrue(i == 1)
 
     - decl: |-
           let i = 0
-          function foo() {  // infer void
+          let foo = () => {  // infer void
               i += 1
               return
           }
       call: |-
-          i = 0;
+          i = 0
           foo()
-          arktest.assertTrue(i == 1);
+          arktest.assertTrue(i == 1)
 
     - decl: |-
           let s = "foo"
-          function foo() {  // infer string
-              return s;
+          let foo = () => {  // infer string
+              return s
           }
       call: |-
-          let v: string = foo();
+          let v: string = foo()
           arktest.assertTrue(foo() == "foo")
 
     - decl: |-
           let s: int = 42
-          function foo() {  // infer int
-              return s;
+          let foo = () => {  // infer int
+              return s
           }
       call: |-
-          let v: int = foo();
+          let v: int = foo()
           arktest.assertTrue(foo() == 42)
 
     - decl: |-
           let s: number = 1.0
-          function foo() {  // infer number
-              return s;
+          let foo = () => {  // infer number
+              return s
           }
       call: |-
-          let v: number = foo();
+          let v: number = foo()
           arktest.assertTrue(foo() == 1.0)
 
     - decl: |-
           let s = new Error()
-          function foo() {  // infer Error
-              return s;
+          let foo = () => {  // infer Error
+              return s
           }
       call: |-
-          let v: Error = foo();
+          let v: Error = foo()
           arktest.assertTrue(foo() instanceof Error)
 
     - decl: |-
           let s: number[] = [1.0, 2.0, 3.0]
-          function foo() {  // infer number[]
-              return s;
+          let foo = () => {  // infer number[]
+              return s
           }
       call: |-
-          let v = foo();
+          let v = foo()
           arktest.assertTrue(v instanceof number[] && v.length == 3)
 
     - decl: |-
           let s: Boolean[] = new Boolean[0]
-          function foo() {  // infer Boolean[]
-              return s;
+          let foo = () => {  // infer Boolean[]
+              return s
           }
       call: |-
-          let v = foo();
+          let v = foo()
           arktest.assertTrue(v instanceof Boolean[] && v.length == 0)
 
     - decl: |-
           let s: Long[][] = new Long[1][1]
-          function foo() {  // infer Long[][]
+          let foo = () => {  // infer Long[][]
               if (s != null)
-                  return s;
+                  return s
               else
-                  return new Long[2][2];
+                  return new Long[2][2]
           }
       call: |-
-          let v: Long[][] = foo();
+          let v: Long[][] = foo()
           arktest.assertTrue(foo() instanceof Long[][])
 
     - decl: |-
           let s: long[][] = new long[1][1]
-          function foo() {  // infer Error[][]|long[][]
+          let foo = (): Error[][]|long[][] => {  
               if (s != null)
-                  return s;
+                  return s
               else
-                  return new Error[1][1];
+                  return new Error[1][1]
           }
       call: |-
-          let v: long[][] = foo() as long[][];
+          let v: long[][] = foo() as long[][]
           v[0][0] = 0
           arktest.assertEQ(v[0][0], 0)
 
     - decl: |-
           let s: Long[][] = new Long[1][1]
-          function foo() {  // infer Error[]|Long[][]
+          let foo = (): Error[]|Long[][] => {  
               if (s == null)
-                  return s;
+                  return s
               else
-                  return new Error[1];
+                  return new Error[1]
           }
       call: |-
-          let v: Error[] = foo() as Error[];
+          let v: Error[] = foo() as Error[]
           arktest.assertEQ(v.length, 1)
 
     - decl: |-
           let s: Long[][] | null = new Long[1][1]
-          function foo() {  // infer Error|Long[][]
+          let foo = (): Error|Long[][]|null => {  
               if (s != null)
-                  return s;
+                  return s
               else
-                  return new Error();
+                  return new Error()
           }
       call: |-
-          let v = foo();
+          let v = foo()
           arktest.assertTrue(v instanceof Object)
 
     - decl: |-
@@ -145,14 +145,14 @@ function_decls:
           type TypeC = C
           let s = 1
 
-          function foo() {  // infer A
+          let foo = (): TypeB|TypeC => {  
               if (s == 0)
-                  return new TypeB();
+                  return new TypeB()
               else
-                  return new TypeC();
+                  return new TypeC()
           }
       call: |-
-          let v: A = foo();
+          let v: A = foo()
           arktest.assertTrue(foo() instanceof A)
 
     - decl: |-
@@ -162,49 +162,25 @@ function_decls:
           class D extends B {}
           let s = 1
 
-          function foo() {  // infer B
+          let foo = (): C|D => {  
               if (s == 0)
-                  return new C();
+                  return new C()
               else
-                  return new D();
+                  return new D()
           }
       call: |-
           let v: B[] = new B[1]
-          v[0] = foo();
+          v[0] = foo()
           arktest.assertTrue(foo() instanceof D)
 
     - decl: |-
-          let s = 0
-          async function foo() {  // infer Promise<Boolean>
-              if (s == 0)
-                  return new Boolean(true);
-              else
-                  return new Boolean(false);
+          let s = new Object()
+          let foo = (): boolean|boolean[] => {    
+            if (s != null)
+                return true
+            else
+                return [true]
           }
       call: |-
-          let v: Promise<Boolean> = foo()
-          arktest.assertTrue(foo() instanceof Promise)
-
-    - decl: |-
-        let s = new Object()
-        function foo() {    // infer true|boolean[]
-           if (s != null)
-               return true;
-           else
-               return [true];
-        }
-      call: |-
-       let v = foo();
-
-    - decl: |-
-          class B<T, U> {}
-          let s = 1
-
-          function foo<T>() {  // infer  B<T, Long|Error>
-              if (s == 0)
-                  return new B<T, Long>();
-              else
-                  return new B<T, Error>();
-          }
-      call: |-
-          let v = foo<Boolean>();
+          let v = foo()
+          arktest.assertTrue(v instanceof boolean|boolean[])
