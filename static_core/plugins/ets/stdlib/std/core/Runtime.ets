@@ -38,29 +38,6 @@ export final class Runtime {
      */
     public static native getHashCodeByValue(o: Object): long;
 
-     /**
-      * Checks if two items are equal.
-      *
-      * @param o1 first object to compare
-      *
-      * @param o2 second object to compare
-      *
-      * @returns true if items are equal
-      */
-    public static equals(o1: Any, o2: Any): boolean {
-        if (Runtime.isSameReference(o1, null)) {
-            return Runtime.isSameReference(o2, null)
-        }
-        if (Runtime.isSameReference(o1, undefined)) {
-            return Runtime.isSameReference(o2, undefined)
-        }
-        if (Runtime.isSameReference(o2, null) || Runtime.isSameReference(o2, undefined)) {
-            return false;
-        }
-
-        return o1 == o2
-    }
-
     /**
      * Checks if two items are equal 'by value'
      *
@@ -71,13 +48,13 @@ export final class Runtime {
      * @returns true if items are equal 'by value'
      */
     public static sameValue(o1: Any, o2: Any): boolean {
-        if (Runtime.isSameReference(o1, null)) {
-            return Runtime.isSameReference(o2, null)
+        if (o1 === null) {
+            return o2 === null
         }
-        if (Runtime.isSameReference(o1, undefined)) {
-            return Runtime.isSameReference(o2, undefined)
+        if (o1 === undefined) {
+            return o2 === undefined
         }
-        if (Runtime.isSameReference(o2, null) || Runtime.isSameReference(o2, undefined)) {
+        if (o2 === null || o2 === undefined) {
             return false;
         }
 
@@ -159,7 +136,7 @@ export final class Runtime {
     static native failedTypeCastException(src: Any, dstStr: string, isUndef: boolean): ClassCastError
 
     // Internal stub to create a FixedArray of the specified type and length
-    native static allocSameTypeArray<T extends FixedArray<Any>>(type: Class, length: int): T;
+    private native static allocSameTypeArray<T extends FixedArray<Any>>(type: Class, length: int): T;
 
     // Internal stub to create a FixedArray with elements prepended in front of the original array
     static addFrontElementsStub(original: FixedArray<Any>, front: FixedArray<Any>): FixedArray<Any> {
