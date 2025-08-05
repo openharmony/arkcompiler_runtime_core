@@ -1553,11 +1553,11 @@ export namespace taskpool {
      * @returns TaskPool workers num.
      */
     function getTaskPoolWorkersNum(): int {
-        let num: double = 0;
+        let num = 0;
         ConcurrencyHelpers.lockGuard(workersMutex, () => {
             num = workers.size;
         });
-        return num.toInt();
+        return num;
     }
 
     /**

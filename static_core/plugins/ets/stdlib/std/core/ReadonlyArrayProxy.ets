@@ -90,7 +90,7 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
     	return this.target.includes(searchElement, fromIndex)
     }
 
-    override indexOf(searchElement: T, fromIndex?: number): number {
+    override indexOf(searchElement: T, fromIndex?: int): int {
     	return this.target.indexOf(searchElement, fromIndex)
     }
 

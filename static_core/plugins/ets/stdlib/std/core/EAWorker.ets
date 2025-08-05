@@ -202,7 +202,6 @@ export class EAWorker {
     public setPriority(workerpriority: WorkerPriority) {
         if (this.isMain) {
             throw new Error("Main worker cannot set priority");
-            return;
         }
         if (!this.loopStarted.get()) {
             throw new Error("Can not set worker priority when not started");
@@ -231,7 +230,6 @@ export class EAWorker {
     public quit(): void {
         if (this.isMain) {
             throw new Error("Main worker cannot be stopped");
-            return;
         }
         if (!this.loopStarted.get()) {
             return;
@@ -250,7 +248,6 @@ export class EAWorker {
     public quitSafely(): void {
         if (this.isMain) {
             throw new Error("Main worker cannot be stopped");
-            return;
         }
         if (!this.loopStarted.get()) {
             return;
@@ -427,7 +424,6 @@ export class EAWorker {
     public join() {
         if (this.isMain) {
             throw new Error("Main worker cannot be stopped");
-            return;
         }
         if (!this.loopStarted.get()) {
             return;

@@ -383,7 +383,7 @@ extern "C" EtsInt EtsEscompatArrayInternalIndexOf(EtsEscompatArray *array, EtsOb
     return EtsEscompatArrayInternalIndexOfImpl(array, value, fromIndex);
 }
 
-extern "C" EtsDouble EtsEscompatArrayIndexOf(EtsEscompatArray *array, EtsObject *value)
+extern "C" EtsInt EtsEscompatArrayIndexOf(EtsEscompatArray *array, EtsObject *value)
 {
     return EtsEscompatArrayInternalIndexOfImpl(array, value, 0);
 }

@@ -214,7 +214,7 @@ private:
             {utf::CStringAsMutf8("copyWithin"), {"III:Lescompat/Array;", 4, "copyWithin"}},
             {utf::CStringAsMutf8("fill"),
              {"Lstd/core/Object;Lstd/core/Double;Lstd/core/Double;:Lescompat/Array;", 4, "fill"}},
-            {utf::CStringAsMutf8("indexOf"), {"Lstd/core/Object;Lstd/core/Double;:D", 3, "indexOf"}},
+            {utf::CStringAsMutf8("indexOf"), {"Lstd/core/Object;Lstd/core/Int;:I", 3, "indexOf"}},
             {utf::CStringAsMutf8("lastIndexOf"), {"Lstd/core/Object;I:I", 3, "lastIndexOf"}},
             {utf::CStringAsMutf8("slice"), {"II:Lescompat/Array;", 3, "slice"}},
             {utf::CStringAsMutf8("splice"), {"I:Lescompat/Array;", 2, "splice"}},
