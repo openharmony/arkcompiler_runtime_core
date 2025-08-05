@@ -12,28 +12,28 @@
 # limitations under the License.
 
 cases2:
-  - desc: Union type exception assignment.
+  - desc: Union type error assignment.
     dec1: |-
       type StringOrNumber = string | number;
       let value: StringOrNumber;
     check: |-
       value = true;
 
-  - desc: Union type exception assignment(array).
+  - desc: Union type error assignment(array).
     dec1: |-
       type StringOrNumber = string | number;
       let value: StringOrNumber;
     check: |-
       value = [1, 2, 3];
 
-  - desc: Union type exception assignment(Literal type out of bounds).
+  - desc: Union type error assignment(Literal type out of bounds).
     dec1: |-
       type StringOrNumber = "active" | "inactive" | "pending";
       let value: StringOrNumber;
     check: |-
       value = "deleted";
 
-  - desc: Union type exception assignment(function parameter type does not match typescript).
+  - desc: Union type error assignment(function parameter type does not match typescript).
     dec1: |-
       function formatInput(input: string | number): string {
         return input.toString();
@@ -41,7 +41,7 @@ cases2:
     check: |-
       formatInput(true);
 
-  - desc: Union type exception assignment(array element type restrictions-int).
+  - desc: Union type error assignment(array element type restrictions-int).
     dec1: |-
       type StringOrBoolArray = (string | boolean)[];
     check: |-
@@ -53,7 +53,7 @@ cases2:
         ];
       }
 
-  - desc: Union type exception assignment(The union type value of the interface property gave the wrong type).
+  - desc: Union type error assignment(The union type value of the interface property gave the wrong type).
     dec1: |-
       interface Animal {
         name: string;
@@ -65,19 +65,19 @@ cases2:
           age: true
         };
 
-  - desc: Union type exception assignment(promise return value does not match-boolean).
+  - desc: Union type error assignment(promise return value does not match-boolean).
     dec1: |-
       type ApiResult = Promise<string | number>;
     check: |-
       const result: ApiResult = Promise.resolve(true);
 
-  - desc: Union type exception assignment(literal type out of bounds-assignment exception assignment).
+  - desc: Union type error assignment(literal type out of bounds-assignment error assignment).
     dec1: |-
       type Status = "active" | "inactive" | "pending";
     check: |-
       let value: Status = 1;
 
-  - desc:  Union type exception assignment(function parameter type does not match typescript-array).
+  - desc:  Union type error assignment(function parameter type does not match typescript-array).
     dec1: |-
       function formatInput(input: string | number): string {
         return input.toString();
@@ -85,7 +85,7 @@ cases2:
     check: |-
       formatInput([]);
 
-  - desc: Union type exception assignment(array element type restrictions-array).
+  - desc: Union type error assignment(array element type restrictions-array).
     dec1: |-
       type StringOrBoolArray = (string | boolean)[];
     check: |-
@@ -97,7 +97,7 @@ cases2:
         ];
       }
 
-  - desc: Union type exception assignment(The union type value of the interface property gave the wrong type-array).
+  - desc: Union type error assignment(The union type value of the interface property gave the wrong type-array).
     dec1: |-
       interface Animal {
         name: string;
@@ -109,13 +109,13 @@ cases2:
         age: [1, 2, 3]
       };
 
-  - desc: Union type exception assignment(promise return value does not match-array).
+  - desc: Union type error assignment(promise return value does not match-array).
     dec1: |-
       type ApiResult = Promise<string | number>;
     check: |-
       const result: ApiResult = Promise.resolve([1, 2, 3]);
 
-  - desc: Union type exception assignment(class attribute assignment error).
+  - desc: Union type error assignment(class attribute assignment error).
     dec1: |-
       class Item {
         id: string | number;
@@ -125,7 +125,7 @@ cases2:
       }
     check: |-
 
-  - desc: Union type exception assignment(class attribute assignment error-array).
+  - desc: Union type error assignment(class attribute assignment error-array).
     dec1: |-
       class Item {
         id: string | number;
