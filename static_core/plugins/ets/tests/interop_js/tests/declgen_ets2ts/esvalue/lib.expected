@@ -12,5 +12,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-export declare let eo: ESValue;
+export declare let eo: ESObject;
