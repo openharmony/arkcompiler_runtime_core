@@ -757,7 +757,7 @@ ark::ets::EtsString *EtsEscompatArrayJoinUtf8(EtsObjectArray *buffer, EtsInt &ac
     PandaVector<char> buf(res.utf8Size + 1);
     const size_t sepSize = separatorHandle.GetPtr()->GetUtf8Length();
     size_t pos = 0;
-    for (ets_int index = 0; index < actualLength - 1; index++) {
+    for (EtsInt index = 0; index < actualLength - 1; index++) {
         auto element = buffer->Get(index);
         ProcessUtf8Element(element, buf, ptypes, pos, res.utf8Size);
 
@@ -833,7 +833,7 @@ ark::ets::EtsString *EtsEscompatArrayJoinUtf16(EtsObjectArray *buffer, EtsInt &a
     auto separator = separatorHandle.GetPtr();
     auto sepSize = separator->IsUtf16() ? separator->GetUtf16Length() : separator->GetUtf8Length();
     size_t pos = 0;
-    for (ets_int index = 0; index < actualLength - 1; index++) {
+    for (EtsInt index = 0; index < actualLength - 1; index++) {
         auto element = bufferHandle->Get(index);
         if (!ProcessUtf16Element(element, buf, ptypes, pos)) {
             return nullptr;

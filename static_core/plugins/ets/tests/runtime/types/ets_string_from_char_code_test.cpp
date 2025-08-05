@@ -122,7 +122,7 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewCompressedStringFromCharCode)
 TEST_F(EtsStringFromCharCodeTest, CreateNewUncompressedStringFromCharCode)
 {
     std::vector<uint16_t> data = {0x3B2};
-    EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<ets_int>(data.size()));
+    EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<EtsInt>(data.size()));
     EtsString *stringFromUncompressedCharCodes = CreateNewStringFromCharCodes({0x3B2});
     ASSERT_TRUE(stringFromUncompressedCharCodes->GetCoreType()->IsUtf16());
     ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
@@ -137,7 +137,7 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewUncompressedStringFromCharCode)
 TEST_F(EtsStringFromCharCodeTest, CreateNewUncompressedStringFromCharCodes)
 {
     std::vector<uint16_t> data = {0x3B2, 'A', 'B', 'C', 'D', 0xac, 0xff9c, 0, 0xffff, 1, 0xffff, 0, 0, 0};
-    EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<ets_int>(data.size()));
+    EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<EtsInt>(data.size()));
     std::vector<double> charCodes {0x3B2,
                                    0x41,
                                    66.3,
@@ -169,7 +169,7 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewEmptyStringFromCharCode)
 TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromNaNCharCode)
 {
     std::vector<uint16_t> data = {0};
-    EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<ets_int>(data.size()));
+    EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<EtsInt>(data.size()));
     EtsString *stringFromUncompressedCharCodes =
         CreateNewStringFromCharCodes({std::numeric_limits<double>::quiet_NaN()});
     ASSERT_TRUE(stringFromUncompressedCharCodes->GetCoreType()->IsUtf16());
@@ -185,7 +185,7 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromNaNCharCode)
 TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromInfinityCharCode)
 {
     std::vector<uint16_t> data = {0};
-    EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<ets_int>(data.size()));
+    EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<EtsInt>(data.size()));
     EtsString *stringFromUncompressedCharCodes =
         CreateNewStringFromCharCodes({std::numeric_limits<double>::infinity()});
     ASSERT_TRUE(stringFromUncompressedCharCodes->GetCoreType()->IsUtf16());
@@ -201,7 +201,7 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromInfinityCharCode)
 TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromNaNAndInfinityCharCodes)
 {
     std::vector<uint16_t> data = {0, 0, 0};
-    EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<ets_int>(data.size()));
+    EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<EtsInt>(data.size()));
     EtsString *stringFromUncompressedCharCodes =
         CreateNewStringFromCharCodes({std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::infinity(),
                                       -std::numeric_limits<double>::infinity()});
@@ -213,7 +213,7 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromNaNAndInfinityCharCodes)
 TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromMaxAvailableCharCode)
 {
     std::vector<uint16_t> data = {0xffff};
-    EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<ets_int>(data.size()));
+    EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<EtsInt>(data.size()));
     EtsString *stringFromMaxCharCodes1 = CreateNewStringFromCharCodes({9007199254740991.0});
     ASSERT_TRUE(stringFromMaxCharCodes1->GetCoreType()->IsUtf16());
     ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
@@ -242,7 +242,7 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromMinAvailableCharCode)
 TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromHugeCharCode)
 {
     std::vector<uint16_t> data = {0};
-    EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<ets_int>(data.size()));
+    EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<EtsInt>(data.size()));
     EtsString *stringFromHugeCharCodes1 = CreateNewStringFromCharCodes({18446744073709551616.0});
     ASSERT_TRUE(stringFromHugeCharCodes1->GetCoreType()->IsUtf16());
     ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
@@ -277,7 +277,7 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromHugeCharCode)
 TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromHugeNegativeCharCode)
 {
     std::vector<uint16_t> data = {0};
-    EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<ets_int>(data.size()));
+    EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<EtsInt>(data.size()));
     EtsString *stringFromHugeCharCodes1 = CreateNewStringFromCharCodes({-18446744073709551616.0});
     ASSERT_TRUE(stringFromHugeCharCodes1->GetCoreType()->IsUtf16());
     ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
@@ -312,7 +312,7 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromHugeNegativeCharCode)
 TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromHugeCharCodes)
 {
     std::vector<uint16_t> data = {0, 0, 0, 0, 0, 0, 0xffff, 0x1};
-    EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<ets_int>(data.size()));
+    EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<EtsInt>(data.size()));
     std::vector<double> charCodes {18446744073709551616.0,  18446744073709551617.0,  9007199254740992.0,
                                    -18446744073709551616.0, -18446744073709551617.0, -9007199254740992.0,
                                    9007199254740991.0,      -9007199254740991.0};

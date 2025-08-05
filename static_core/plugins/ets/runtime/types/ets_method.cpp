@@ -20,7 +20,6 @@
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
-#include "plugins/ets/runtime/napi/ets_scoped_objects_fix.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_type.h"
 
@@ -77,24 +76,6 @@ EtsMethod *EtsMethod::FromTypeDescriptor(const PandaString &td, EtsRuntimeLinker
         return method;
     }
     return FindInvokeMethodInFunctionalType(type);
-}
-
-EtsValue EtsMethod::Invoke(napi::ScopedManagedCodeFix *s, Value *args)
-{
-    Value res = GetPandaMethod()->Invoke(s->GetEtsCoroutine(), args);
-    if (GetReturnValueType() == EtsType::VOID) {
-        // Return any value, will be ignored
-        return EtsValue(0);
-    }
-    if (GetReturnValueType() == EtsType::OBJECT) {
-        auto *obj = reinterpret_cast<EtsObject *>(res.GetAs<ObjectHeader *>());
-        if (obj == nullptr) {
-            return EtsValue(nullptr);
-        }
-        return EtsValue(napi::ScopedManagedCodeFix::AddLocalRef(s->EtsNapiEnv(), obj));
-    }
-
-    return EtsValue(res.GetAs<EtsLong>());
 }
 
 ani_status EtsMethod::Invoke(ani::ScopedManagedCodeFix &s, Value *args, EtsValue *result)

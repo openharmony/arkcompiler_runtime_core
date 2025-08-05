@@ -177,10 +177,7 @@ srcs_runtime = [
   "runtime/intrinsics/helpers/json_helper.cpp",
   "runtime/mem/ets_gc_stat.cpp",
   "runtime/mem/ets_reference_processor.cpp",
-  "runtime/napi/ets_napi_helpers.cpp",
-  "runtime/napi/ets_napi_invoke_interface.cpp",
-  "runtime/napi/ets_napi_native_interface.cpp",
-  "runtime/napi/ets_mangle.cpp",
+  "runtime/ani/ani_helpers.cpp",
   "runtime/types/ets_class.cpp",
   "runtime/types/ets_field.cpp",
   "runtime/types/ets_method.cpp",
@@ -307,18 +304,18 @@ if (ark_ets_interop_js) {
 
 if (current_cpu == "amd64" || current_cpu == "x64" || current_cpu == "x86_64") {
   srcs_runtime += [
-    "runtime/napi/arch/amd64/ets_napi_entry_point_amd64.S",
-    "runtime/napi/arch/amd64/ets_async_entry_point_amd64.S",
+    "runtime/ani/arch/amd64/ets_napi_entry_point_amd64.S",
+    "runtime/ani/arch/amd64/ets_async_entry_point_amd64.S",
   ]
 } else if (current_cpu == "arm64") {
   srcs_runtime += [
-    "runtime/napi/arch/arm64/ets_napi_entry_point_aarch64.S",
-    "runtime/napi/arch/arm64/ets_async_entry_point_aarch64.S",
+    "runtime/ani/arch/arm64/ets_napi_entry_point_aarch64.S",
+    "runtime/ani/arch/arm64/ets_async_entry_point_aarch64.S",
   ]
 } else if (current_cpu == "arm") {
   srcs_runtime += [
-    "runtime/napi/arch/arm32/ets_napi_entry_point_arm32.S",
-    "runtime/napi/arch/arm32/ets_async_entry_point_arm32.S",
+    "runtime/ani/arch/arm32/ets_napi_entry_point_arm32.S",
+    "runtime/ani/arch/arm32/ets_async_entry_point_arm32.S",
   ]
 }
 # TODO(nsizov): Support 32-bit ARM

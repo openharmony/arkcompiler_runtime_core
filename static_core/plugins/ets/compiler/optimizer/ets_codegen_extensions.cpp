@@ -49,15 +49,6 @@ void Codegen::EtsGetNativeMethod(IntrinsicInst *inst, Reg dst, [[maybe_unused]] 
     encoder->EncodeLdr(tmpReg, false, MemRef(methodReg, GetRuntime()->GetNativePointerOffset(GetArch())));
     encoder->EncodeJump(failLabel, tmpReg, Condition::EQ);
 
-    // Don't support deprecated Native API and currently Function native mode in new API
-    // NOTE: add Function mode support
-    if (GetRuntime()->CanNativeMethodUseObjects(inst->GetCallMethod())) {
-        tmpReg.ChangeType(INT32_TYPE);
-        encoder->EncodeLdr(tmpReg, false, MemRef(methodReg, GetRuntime()->GetAccessFlagsOffset(GetArch())));
-        auto unsupportedMask = GetRuntime()->GetDeprecatedNativeApiMask();
-        encoder->EncodeAnd(tmpReg, tmpReg, Imm(unsupportedMask));
-        encoder->EncodeJump(failLabel, tmpReg, Condition::NE);
-    }
     encoder->EncodeMov(dst, methodReg);
     encoder->EncodeJump(successLabel);
 

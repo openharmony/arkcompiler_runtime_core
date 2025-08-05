@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -124,7 +124,7 @@ TEST_F(LibAbcKitCastStaticTest, LibAbcKitTestCheckCast)
         });
 
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/cast/checkcast_static_modified.abc",
-                                            "checkcast_static/ETSGLOBAL", "main");
+                                            "checkcast_static", "main");
     EXPECT_TRUE(helpers::Match(output, ""));
 }
 

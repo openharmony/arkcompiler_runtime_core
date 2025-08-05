@@ -60,7 +60,6 @@
 #include "runtime/coroutines/coroutine_manager.h"
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/ets_native_library_provider.h"
-#include "plugins/ets/runtime/napi/ets_napi.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
@@ -80,7 +79,7 @@ using WalkEventLoopCallback = std::function<void(void *, void *)>;
 
 enum class EventLoopRunMode : int { RUN_DEFAULT = 0, RUN_ONCE, RUN_NOWAIT };
 
-class PandaEtsVM final : public PandaVM, public EtsVM, public ani_vm {  // NOLINT(fuchsia-multiple-inheritance)
+class PandaEtsVM final : public PandaVM, public ani_vm {  // NOLINT(fuchsia-multiple-inheritance)
 public:
     static Expected<PandaEtsVM *, PandaString> Create(Runtime *runtime, const RuntimeOptions &options);
     static bool Destroy(PandaEtsVM *vm);
@@ -194,10 +193,6 @@ public:
         return mm_->GetGlobalObjectStorage();
     }
 
-    void DeleteGlobalRef(ets_object globalRef);
-
-    void DeleteWeakGlobalRef(ets_weak weakRef);
-
     mem::ReferenceProcessor *GetReferenceProcessor() const override
     {
         ASSERT(referenceProcessor_ != nullptr);
@@ -263,14 +258,7 @@ public:
         return runtimeIface_;
     }
 
-    bool LoadNativeLibrary(EtsEnv *env, const PandaString &name, bool shouldVerifyPermission);
-
-    void ResolveNativeMethod(Method *method);
-
-    static PandaEtsVM *FromEtsVM(EtsVM *vm)
-    {
-        return static_cast<PandaEtsVM *>(vm);
-    }
+    bool LoadNativeLibrary(ani_env *env, const PandaString &name, bool shouldVerifyPermission);
 
     static PandaEtsVM *FromAniVM(ani_vm *vm)
     {

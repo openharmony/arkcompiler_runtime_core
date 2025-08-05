@@ -55,7 +55,7 @@ static void StdCoreCopyTo(coretypes::Array *src, coretypes::Array *dst, int32_t 
     }
 }
 
-extern "C" ObjectHeader *StdCoreAllocGenericArray(ets_int len, EtsObject *sample)
+extern "C" ObjectHeader *StdCoreAllocGenericArray(EtsInt len, EtsObject *sample)
 {
     EtsClass *klass;
     if (sample != nullptr) {

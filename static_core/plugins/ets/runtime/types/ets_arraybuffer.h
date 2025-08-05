@@ -34,6 +34,8 @@ namespace test {
 class EtsArrayBufferTest;
 }  // namespace test
 
+using EtsFinalize = void (*)(void *, void *);
+
 class EtsEscompatArrayBuffer : public EtsObject {
 public:
     EtsEscompatArrayBuffer() = delete;

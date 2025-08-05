@@ -88,8 +88,7 @@ add_dependencies(mm_tests
                 bouncing_pandas_ets-ets-jit
                 bouncing_peas_ets-ets-int
                 bouncing_peas_ets-ets-int-cpp
-                bouncing_peas_ets-ets-jit
-                etsnapi_test_suite)
+                bouncing_peas_ets-ets-jit)
 if(NOT CMAKE_CROSSCOMPILING)
     add_dependencies(mm_tests
                     bouncing_pandas_ets-ets-aot

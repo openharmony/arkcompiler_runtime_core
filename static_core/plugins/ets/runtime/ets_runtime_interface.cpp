@@ -579,11 +579,6 @@ bool EtsRuntimeInterface::IsNativeMethodOptimizationEnabled() const
     return true;
 }
 
-uint64_t EtsRuntimeInterface::GetDeprecatedNativeApiMask() const
-{
-    return ACC_DEPRECATED_NATIVE_API;
-}
-
 uint32_t EtsRuntimeInterface::GetRuntimeClassOffset(Arch arch) const
 {
     return ark::cross_values::GetEtsClassRuntimeClassOffset(arch);

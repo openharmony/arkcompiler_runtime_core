@@ -30,8 +30,6 @@
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_runtime_interface.h"
 #include "plugins/ets/runtime/mem/ets_reference_processor.h"
-#include "plugins/ets/runtime/napi/ets_mangle.h"
-#include "plugins/ets/runtime/napi/ets_napi_invoke_interface.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/types/ets_job.h"
@@ -167,7 +165,7 @@ bool PandaEtsVM::Destroy(PandaEtsVM *vm)
 }
 
 PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm)
-    : EtsVM {napi::GetInvokeInterface()}, ani_vm {ani::GetVMAPI()}, runtime_(runtime), mm_(mm)
+    : ani_vm {ani::GetVMAPI()}, runtime_(runtime), mm_(mm)
 {
     ASSERT(runtime_ != nullptr);
     ASSERT(mm_ != nullptr);
@@ -579,7 +577,7 @@ ObjectHeader *PandaEtsVM::GetNullValue() const
     return obj;
 }
 
-bool PandaEtsVM::LoadNativeLibrary(EtsEnv *env, const PandaString &name, bool shouldVerifyPermission)
+bool PandaEtsVM::LoadNativeLibrary(ani_env *env, const PandaString &name, bool shouldVerifyPermission)
 {
     ASSERT_PRINT(Coroutine::GetCurrent()->IsInNativeCode(), "LoadNativeLibrary must be called at native");
 
@@ -589,31 +587,6 @@ bool PandaEtsVM::LoadNativeLibrary(EtsEnv *env, const PandaString &name, bool sh
     }
 
     return true;
-}
-
-void PandaEtsVM::ResolveNativeMethod(Method *method)
-{
-    ASSERT_PRINT(method->IsNative(), "Method should be native");
-    std::string className = utf::Mutf8AsCString(method->GetClassName().data);
-    std::string methodName = utf::Mutf8AsCString(method->GetName().data);
-    std::string name = MangleMethodName(className, methodName);
-    auto ptr = nativeLibraryProvider_.ResolveSymbol(PandaString(name));
-    if (ptr == nullptr) {
-        std::string signature;
-        signature.append(EtsMethod::FromRuntimeMethod(method)->GetMethodSignature(false));
-        name = MangleMethodNameWithSignature(name, signature);
-        ptr = nativeLibraryProvider_.ResolveSymbol(PandaString(name));
-        if (ptr == nullptr) {
-            PandaStringStream ss;
-            ss << "No implementation found for " << method->GetFullName() << ", tried " << name;
-
-            auto coroutine = EtsCoroutine::GetCurrent();
-            ThrowEtsException(coroutine, panda_file_items::class_descriptors::LINKER_UNRESOLVED_METHOD_ERROR, ss.str());
-            return;
-        }
-    }
-
-    method->SetNativePointer(ptr);
 }
 
 [[noreturn]] void PandaEtsVM::HandleUncaughtException()
@@ -787,40 +760,6 @@ void PandaEtsVM::UpdateVmRefs(const GCRootUpdater &gcRootUpdater)
             PlatformTypes(this)->UpdateCachesVmRefs(gcRootUpdater);
         }
     }
-}
-
-static mem::Reference *EtsNapiObjectToGlobalReference(ets_object globalRef)
-{
-    ASSERT(globalRef != nullptr);
-    auto *ref = reinterpret_cast<mem::Reference *>(globalRef);
-    return ref;
-}
-
-void PandaEtsVM::DeleteGlobalRef(ets_object globalRef)
-{
-    auto *ref = EtsNapiObjectToGlobalReference(globalRef);
-    if (!ref->IsGlobal()) {
-        LOG(FATAL, ETS_NAPI) << "Try to remote non-global ref: " << std::hex << ref;
-        return;
-    }
-    GetGlobalObjectStorage()->Remove(ref);
-}
-
-static mem::Reference *EtsNapiObjectToWeakReference(ets_weak weakRef)
-{
-    ASSERT(weakRef != nullptr);
-    auto *ref = reinterpret_cast<mem::Reference *>(weakRef);
-    return ref;
-}
-
-void PandaEtsVM::DeleteWeakGlobalRef(ets_weak weakRef)
-{
-    auto *ref = EtsNapiObjectToWeakReference(weakRef);
-    if (!ref->IsWeak()) {
-        LOG(FATAL, ETS_NAPI) << "Try to remote non-weak ref: " << std::hex << ref;
-        return;
-    }
-    GetGlobalObjectStorage()->Remove(ref);
 }
 
 void PandaEtsVM::RegisterFinalizerForObject(EtsCoroutine *coro, const EtsHandle<EtsObject> &object,

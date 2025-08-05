@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,7 +83,7 @@ class LibAbcKitCallStaticStaticTest : public ::testing::Test {};
 TEST_F(LibAbcKitCallStaticStaticTest, LibAbcKitTestCallStatic1)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/call/call_static_static.abc",
-                                            "call_static_static/ETSGLOBAL", "main");
+                                            "call_static_static", "main");
     EXPECT_TRUE(helpers::Match(output, ""));
 
     helpers::TransformMethod(
@@ -113,7 +113,7 @@ TEST_F(LibAbcKitCallStaticStaticTest, LibAbcKitTestCallStatic1)
         });
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/call/call_static_static_modified.abc",
-                                       "call_static_static/ETSGLOBAL", "main");
+                                       "call_static_static", "main");
     EXPECT_TRUE(helpers::Match(output, "A::foo\n"));
 }
 
@@ -121,7 +121,7 @@ TEST_F(LibAbcKitCallStaticStaticTest, LibAbcKitTestCallStatic1)
 TEST_F(LibAbcKitCallStaticStaticTest, LibAbcKitTestCallStatic2)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/call/call_static_static.abc",
-                                            "call_static_static/ETSGLOBAL", "main");
+                                            "call_static_static", "main");
     EXPECT_TRUE(helpers::Match(output, ""));
 
     helpers::TransformMethod(
@@ -148,7 +148,7 @@ TEST_F(LibAbcKitCallStaticStaticTest, LibAbcKitTestCallStatic2)
         });
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/call/call_static_static_modified.abc",
-                                       "call_static_static/ETSGLOBAL", "main");
+                                       "call_static_static", "main");
     EXPECT_TRUE(helpers::Match(output, "bar\n"));
 }
 
@@ -156,7 +156,7 @@ TEST_F(LibAbcKitCallStaticStaticTest, LibAbcKitTestCallStatic2)
 TEST_F(LibAbcKitCallStaticStaticTest, LibAbcKitTestCallStatic3)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/call/call_static_static.abc",
-                                            "call_static_static/ETSGLOBAL", "main");
+                                            "call_static_static", "main");
     EXPECT_TRUE(helpers::Match(output, ""));
 
     helpers::TransformMethod(
@@ -188,7 +188,7 @@ TEST_F(LibAbcKitCallStaticStaticTest, LibAbcKitTestCallStatic3)
         });
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/call/call_static_static_modified.abc",
-                                       "call_static_static/ETSGLOBAL", "main");
+                                       "call_static_static", "main");
     EXPECT_TRUE(helpers::Match(output, "B::foo\nC::foo\n"));
 }
 

@@ -70,7 +70,7 @@ private:
 
 TEST_F(EtsStringTest, CreateFromUtf16)
 {
-    std::vector<ets_char> data {0xffc3, 0x33, 0x00};
+    std::vector<EtsChar> data {0xffc3, 0x33, 0x00};
 
     EtsString *firstEtsString = EtsString::CreateFromUtf16(data.data(), data.size());
 
@@ -120,7 +120,7 @@ TEST_F(EtsStringTest, ToCharArray)
         ASSERT_EQ(data[i], newArray->GetCoreType()->Get<uint16_t>(i));
     }
 
-    std::vector<ets_char> data1 {'f', 'g', 'h', 'a', 'b', 0x8ab, 0xdc, 'z', 0};
+    std::vector<EtsChar> data1 {'f', 'g', 'h', 'a', 'b', 0x8ab, 0xdc, 'z', 0};
     EtsString *utf16String = EtsString::CreateFromUtf16(data1.data(), data1.size());
     EtsArray *newArray1 = utf16String->ToCharArray();
 
@@ -156,7 +156,7 @@ TEST_F(EtsStringTest, CreateFromUtf8)
 
 TEST_F(EtsStringTest, CreateNewStringFromChars)
 {
-    std::vector<ets_char> data {0x8ab, 0xdc, 'h', 'e', 'l', 'l', 'o', 0};
+    std::vector<EtsChar> data {0x8ab, 0xdc, 'h', 'e', 'l', 'l', 'o', 0};
 
     EtsString *utf16String = EtsString::CreateFromUtf16(data.data(), data.size());
     EtsArray *charArray = utf16String->ToCharArray();
@@ -165,7 +165,7 @@ TEST_F(EtsStringTest, CreateNewStringFromChars)
     uint32_t length = data.size() - beginOffset;
 
     // make char array from subdata
-    std::vector<ets_char> subdata {'h', 'e', 'l', 'l', 'o', 0};
+    std::vector<EtsChar> subdata {'h', 'e', 'l', 'l', 'o', 0};
 
     EtsString *expectedString = EtsString::CreateFromUtf16(subdata.data(), subdata.size());
 
@@ -177,7 +177,7 @@ TEST_F(EtsStringTest, CreateNewStringFromChars)
 
 TEST_F(EtsStringTest, CreateNewStringFromString)
 {
-    std::vector<ets_char> data {0xffc3, 0x33, 0x00};
+    std::vector<EtsChar> data {0xffc3, 0x33, 0x00};
 
     EtsString *string1 = EtsString::CreateFromUtf16(data.data(), data.size());
     EtsString *string2 = EtsString::CreateFromUtf16(data.data(), data.size() - 1);
@@ -230,7 +230,7 @@ TEST_F(EtsStringTest, CreateNewStringFromSlicedString)
 
 TEST_F(EtsStringTest, CreateNewEmptyString)
 {
-    ets_char data = 0;
+    EtsChar data = 0;
     EtsString *str1 = EtsString::CreateFromUtf16(&data, 0);
     EtsString *str2 = EtsString::CreateFromUtf16(&data, 1);
     EtsString *str3 = EtsString::CreateNewEmptyString();

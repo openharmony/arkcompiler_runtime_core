@@ -17,260 +17,253 @@
 
 #include "generated/logger_options.h"
 #include "plugins/ets/runtime/ets_vm.h"
-#include "plugins/ets/runtime/napi/ets_napi.h"
+#include "plugins/ets/runtime/ani/ani.h"
 
 namespace ark::ets::test {
 
 // NOLINTBEGIN(google-runtime-int)
-extern "C" ets_long SkoalaCreateRedrawerPeer([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                             [[maybe_unused]] ets_object object /*any*/)
+extern "C" ani_long SkoalaCreateRedrawerPeer([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object /*any*/)
 {
     return 1;
 }
-extern "C" ets_long SkoalaGetFrame([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                   [[maybe_unused]] ets_long peer /*KNativePointer*/, [[maybe_unused]] ets_int a,
-                                   [[maybe_unused]] ets_int b)
+extern "C" ani_long SkoalaGetFrame([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_long peer /*KNativePointer*/,
+                                   [[maybe_unused]] ani_int a, [[maybe_unused]] ani_int b)
 {
     return 1;
 }
-extern "C" ets_long SkoalaInitRedrawer([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                       [[maybe_unused]] ets_int width, [[maybe_unused]] ets_int height,
-                                       [[maybe_unused]] ets_float scale,
-                                       [[maybe_unused]] ets_long peer /*KNativePointer*/,
-                                       [[maybe_unused]] ets_long frame /*KNativePointer*/)
+// CC-OFFNXT(G.FUN.01) solid logic
+extern "C" ani_long SkoalaInitRedrawer([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_int width,
+                                       [[maybe_unused]] ani_int height, [[maybe_unused]] ani_float scale,
+                                       [[maybe_unused]] ani_long peer /*KNativePointer*/,
+                                       [[maybe_unused]] ani_long frame /*KNativePointer*/)
 {
     return 1;
 }
-extern "C" ets_long SkoalaPaint1nMake([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass)
+extern "C" ani_long SkoalaPaint1nMake([[maybe_unused]] ani_env *env)
 {
     return 1;
 }
-extern "C" ets_long SkoalaPictureRecorder1nBeginRecording(
-    [[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass, [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-    [[maybe_unused]] ets_float left, [[maybe_unused]] ets_float top, [[maybe_unused]] ets_float right,
-    [[maybe_unused]] ets_float bottom)
+// CC-OFFNXT(G.FUN.01) solid logic
+extern "C" ani_long SkoalaPictureRecorder1nBeginRecording(
+    // CC-OFFNXT(G.FMT.06) false positive
+    [[maybe_unused]] ani_env *env, [[maybe_unused]] ani_long ptr /*KNativePointer*/, [[maybe_unused]] ani_float left,
+    [[maybe_unused]] ani_float top, [[maybe_unused]] ani_float right, [[maybe_unused]] ani_float bottom)
 {
     return 1;
 }
-extern "C" ets_long SkoalaPictureRecorder1nFinishRecordingAsDrawable([[maybe_unused]] EtsEnv *env,
-                                                                     [[maybe_unused]] ets_class klass,
-                                                                     [[maybe_unused]] ets_long ptr /*KNativePointer*/)
+extern "C" ani_long SkoalaPictureRecorder1nFinishRecordingAsDrawable([[maybe_unused]] ani_env *env,
+                                                                     [[maybe_unused]] ani_long ptr /*KNativePointer*/)
 {
     return 1;
 }
-extern "C" ets_long SkoalaPictureRecorder1nFinishRecordingAsPictureWithCull(
-    [[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass, [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-    [[maybe_unused]] ets_float left, [[maybe_unused]] ets_float top, [[maybe_unused]] ets_float right,
-    [[maybe_unused]] ets_float bottom)
+// CC-OFFNXT(G.FUN.01) solid logic
+extern "C" ani_long SkoalaPictureRecorder1nFinishRecordingAsPictureWithCull(
+    // CC-OFFNXT(G.FMT.06) false positive
+    [[maybe_unused]] ani_env *env, [[maybe_unused]] ani_long ptr /*KNativePointer*/, [[maybe_unused]] ani_float left,
+    [[maybe_unused]] ani_float top, [[maybe_unused]] ani_float right, [[maybe_unused]] ani_float bottom)
 {
     return 1;
 }
-extern "C" ets_long SkoalaPictureRecorder1nMake([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass)
+extern "C" ani_long SkoalaPictureRecorder1nMake([[maybe_unused]] ani_env *env)
 {
     return 1;
 }
-extern "C" ets_long SkoalaParagraphParagraphBuilder1nMake(
-    [[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-    [[maybe_unused]] ets_long paragraphStylePtr /*KNativePointer*/,
-    [[maybe_unused]] ets_long fontCollectionPtr /*KNativePointer*/)
+extern "C" ani_long SkoalaParagraphParagraphBuilder1nMake(
+    // CC-OFFNXT(G.FMT.06) false positive
+    [[maybe_unused]] ani_env *env, [[maybe_unused]] ani_long paragraphStylePtr /*KNativePointer*/,
+    [[maybe_unused]] ani_long fontCollectionPtr /*KNativePointer*/)
 {
     return 1;
 }
-extern "C" ets_long SkoalaParagraphParagraphBuilder1nGetFinalizer([[maybe_unused]] EtsEnv *env,
-                                                                  [[maybe_unused]] ets_class klass)
+extern "C" ani_long SkoalaParagraphParagraphBuilder1nGetFinalizer([[maybe_unused]] ani_env *env)
 {
     return 1;
 }
-extern "C" ets_long SkoalaParagraphParagraphBuilder1nBuild([[maybe_unused]] EtsEnv *env,
-                                                           [[maybe_unused]] ets_class klass,
-                                                           [[maybe_unused]] ets_long ptr /*KNativePointer*/)
+extern "C" ani_long SkoalaParagraphParagraphBuilder1nBuild([[maybe_unused]] ani_env *env,
+                                                           [[maybe_unused]] ani_long ptr /*KNativePointer*/)
 {
     return 1;
 }
-extern "C" ets_long SkoalaParagraphFontCollection1nMake([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass)
+extern "C" ani_long SkoalaParagraphFontCollection1nMake([[maybe_unused]] ani_env *env)
 {
     return 1;
 }
-extern "C" ets_long SkoalaFontMgr1nDefault([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass)
+extern "C" ani_long SkoalaFontMgr1nDefault([[maybe_unused]] ani_env *env)
 {
     return 1;
 }
-extern "C" ets_long SkoalaParagraphParagraphStyle1nMake([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass)
+extern "C" ani_long SkoalaParagraphParagraphStyle1nMake([[maybe_unused]] ani_env *env)
 {
     return 1;
 }
-extern "C" ets_long SkoalaParagraphTextStyle1nMake([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass)
+extern "C" ani_long SkoalaParagraphTextStyle1nMake([[maybe_unused]] ani_env *env)
 {
     return 1;
 }
-extern "C" ets_long SkoalaManagedString1nMake([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                              [[maybe_unused]] ets_byteArray textStr /*KStringPtr*/)
+extern "C" ani_long SkoalaManagedString1nMake([[maybe_unused]] ani_env *env,
+                                              [[maybe_unused]] ani_fixedarray_byte textStr /*KStringPtr*/)
 {
     return 1;
 }
-extern "C" ets_long SkoalaPaint1nGetFinalizer([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass)
+extern "C" ani_long SkoalaPaint1nGetFinalizer([[maybe_unused]] ani_env *env)
 {
     return 1;
 }
-extern "C" ets_long SkoalaImplRefCntGetFinalizer([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass)
+extern "C" ani_long SkoalaImplRefCntGetFinalizer([[maybe_unused]] ani_env *env)
 {
     return 1;
 }
-extern "C" ets_long SkoalaParagraphParagraphStyle1nGetFinalizer([[maybe_unused]] EtsEnv *env,
-                                                                [[maybe_unused]] ets_class klass)
+extern "C" ani_long SkoalaParagraphParagraphStyle1nGetFinalizer([[maybe_unused]] ani_env *env)
 {
     return 1;
 }
-extern "C" ets_long SkoalaParagraphTextStyle1nGetFinalizer([[maybe_unused]] EtsEnv *env,
-                                                           [[maybe_unused]] ets_class klass)
+extern "C" ani_long SkoalaParagraphTextStyle1nGetFinalizer([[maybe_unused]] ani_env *env)
 {
     return 1;
 }
-extern "C" ets_long SkoalaParagraphParagraph1nGetFinalizer([[maybe_unused]] EtsEnv *env,
-                                                           [[maybe_unused]] ets_class klass)
+extern "C" ani_long SkoalaParagraphParagraph1nGetFinalizer([[maybe_unused]] ani_env *env)
 {
     return 1;
 }
-extern "C" ets_long SkoalaManagedString1nGetFinalizer([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass)
+extern "C" ani_long SkoalaManagedString1nGetFinalizer([[maybe_unused]] ani_env *env)
 {
     return 1;
 }
-extern "C" ets_long GetPeerFactory([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass)
+extern "C" ani_long GetPeerFactory([[maybe_unused]] ani_env *env)
 {
     return 1;
 }
-extern "C" ets_long GetEngine([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass)
+extern "C" ani_long GetEngine([[maybe_unused]] ani_env *env)
 {
     return 1;
 }
-extern "C" ets_int SkoalaGetFrameWidth([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                       [[maybe_unused]] ets_long peer /*KNativePointer*/,
-                                       [[maybe_unused]] ets_long frame /*KNativePointer*/)
+extern "C" ani_int SkoalaGetFrameWidth([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_long peer /*KNativePointer*/,
+                                       [[maybe_unused]] ani_long frame /*KNativePointer*/)
 {
     return 1;
 }
-extern "C" ets_int SkoalaGetFrameHeight([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                        [[maybe_unused]] ets_long peer /*KNativePointer*/,
-                                        [[maybe_unused]] ets_long frame /*KNativePointer*/)
+extern "C" ani_int SkoalaGetFrameHeight([[maybe_unused]] ani_env *env,
+                                        [[maybe_unused]] ani_long peer /*KNativePointer*/,
+                                        [[maybe_unused]] ani_long frame /*KNativePointer*/)
 {
     return 1;
 }
-extern "C" ets_int SkoalaCanvas1nSave([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                      [[maybe_unused]] ets_long ptr /*KNativePointer*/)
+extern "C" ani_int SkoalaCanvas1nSave([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_long ptr /*KNativePointer*/)
 {
     return 1;
 }
-extern "C" void SkoalaDrawPicture([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                  [[maybe_unused]] ets_long picture /*KNativePointer*/,
-                                  [[maybe_unused]] ets_long data /*KNativePointer*/,
-                                  [[maybe_unused]] ets_object cb /*any*/, [[maybe_unused]] ets_boolean sync)
+extern "C" void SkoalaDrawPicture([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_long picture /*KNativePointer*/,
+                                  [[maybe_unused]] ani_long data /*KNativePointer*/,
+                                  [[maybe_unused]] ani_object cb /*any*/, [[maybe_unused]] ani_boolean sync)
 {
 }
-extern "C" void SkoalaProvidePeerFactory([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                         [[maybe_unused]] ets_long func /*KNativePointer*/,
-                                         [[maybe_unused]] ets_long arg /*KNativePointer*/)
+extern "C" void SkoalaProvidePeerFactory([[maybe_unused]] ani_env *env,
+                                         [[maybe_unused]] ani_long func /*KNativePointer*/,
+                                         [[maybe_unused]] ani_long arg /*KNativePointer*/)
 {
 }
-extern "C" void SkoalaSetPlatformApi([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                     [[maybe_unused]] ets_object api /*any*/)
+extern "C" void SkoalaSetPlatformApi([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object api /*any*/) {}
+extern "C" void SkoalaCanvas1nDrawDrawable([[maybe_unused]] ani_env *env,
+                                           [[maybe_unused]] ani_long ptr /*KNativePointer*/,
+                                           [[maybe_unused]] ani_long drawablePtr /*KNativePointer*/,
+                                           [[maybe_unused]] ani_long matrixArr /*KFloatPtr*/)
 {
 }
-extern "C" void SkoalaCanvas1nDrawDrawable([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                           [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-                                           [[maybe_unused]] ets_long drawablePtr /*KNativePointer*/,
-                                           [[maybe_unused]] ets_long matrixArr /*KFloatPtr*/)
+extern "C" void SkoalaCanvas1nRestore([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_long ptr /*KNativePointer*/)
 {
 }
-extern "C" void SkoalaCanvas1nRestore([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                      [[maybe_unused]] ets_long ptr /*KNativePointer*/)
+extern "C" void SkoalaPaint1nSetColor([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_long ptr /*KNativePointer*/,
+                                      [[maybe_unused]] ani_int color)
 {
 }
-extern "C" void SkoalaPaint1nSetColor([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                      [[maybe_unused]] ets_long ptr /*KNativePointer*/, [[maybe_unused]] ets_int color)
+// CC-OFFNXT(G.FUN.01) solid logic
+extern "C" void SkoalaCanvas1nDrawOval([[maybe_unused]] ani_env *env,
+                                       [[maybe_unused]] ani_long canvasPtr /*KNativePointer*/,
+                                       [[maybe_unused]] ani_float left, [[maybe_unused]] ani_float top,
+                                       [[maybe_unused]] ani_float right, [[maybe_unused]] ani_float bottom,
+                                       [[maybe_unused]] ani_long paintPtr /*KNativePointer*/)
 {
 }
-extern "C" void SkoalaCanvas1nDrawOval([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                       [[maybe_unused]] ets_long canvasPtr /*KNativePointer*/,
-                                       [[maybe_unused]] ets_float left, [[maybe_unused]] ets_float top,
-                                       [[maybe_unused]] ets_float right, [[maybe_unused]] ets_float bottom,
-                                       [[maybe_unused]] ets_long paintPtr /*KNativePointer*/)
+extern "C" void SkoalaParagraphParagraphBuilder1nPushStyle([[maybe_unused]] ani_env *env,
+                                                           [[maybe_unused]] ani_long ptr /*KNativePointer*/,
+                                                           [[maybe_unused]] ani_long textStylePtr /*KNativePointer*/)
 {
 }
-extern "C" void SkoalaParagraphParagraphBuilder1nPushStyle([[maybe_unused]] EtsEnv *env,
-                                                           [[maybe_unused]] ets_class klass,
-                                                           [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-                                                           [[maybe_unused]] ets_long textStylePtr /*KNativePointer*/)
-{
-}
-extern "C" void SkoalaParagraphParagraphBuilder1nAddText([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                                         [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-                                                         [[maybe_unused]] ets_long textString /*KStringPtr*/)
+extern "C" void SkoalaParagraphParagraphBuilder1nAddText([[maybe_unused]] ani_env *env,
+                                                         [[maybe_unused]] ani_long ptr /*KNativePointer*/,
+                                                         [[maybe_unused]] ani_long textString /*KStringPtr*/)
 {
 }
 extern "C" void SkoalaParagraphFontCollection1nSetDefaultFontManager(
-    [[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass, [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-    [[maybe_unused]] ets_long fontManagerPtr /*KNativePointer*/,
-    [[maybe_unused]] ets_long defaultFamilyNameStr /*KStringPtr*/)
+    // CC-OFFNXT(G.FMT.06) false positive
+    [[maybe_unused]] ani_env *env, [[maybe_unused]] ani_long ptr /*KNativePointer*/,
+    [[maybe_unused]] ani_long fontManagerPtr /*KNativePointer*/,
+    [[maybe_unused]] ani_long defaultFamilyNameStr /*KStringPtr*/)
 {
 }
-extern "C" void SkoalaParagraphParagraph1nLayout([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                                 [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-                                                 [[maybe_unused]] ets_float width)
+extern "C" void SkoalaParagraphParagraph1nLayout([[maybe_unused]] ani_env *env,
+                                                 [[maybe_unused]] ani_long ptr /*KNativePointer*/,
+                                                 [[maybe_unused]] ani_float width)
 {
 }
-extern "C" void SkoalaParagraphParagraph1nPaint([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                                [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-                                                [[maybe_unused]] ets_long canvasPtr /*KNativePointer*/,
-                                                [[maybe_unused]] ets_float x, [[maybe_unused]] ets_float y)
+extern "C" void SkoalaParagraphParagraph1nPaint([[maybe_unused]] ani_env *env,
+                                                [[maybe_unused]] ani_long ptr /*KNativePointer*/,
+                                                [[maybe_unused]] ani_long canvasPtr /*KNativePointer*/,
+                                                [[maybe_unused]] ani_float x, [[maybe_unused]] ani_float y)
 {
 }
-extern "C" void SkoalaParagraphTextStyle1nSetColor([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                                   [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-                                                   [[maybe_unused]] ets_int color)
+extern "C" void SkoalaParagraphTextStyle1nSetColor([[maybe_unused]] ani_env *env,
+                                                   [[maybe_unused]] ani_long ptr /*KNativePointer*/,
+                                                   [[maybe_unused]] ani_int color)
 {
 }
-extern "C" void SkoalaParagraphTextStyle1nSetFontSize([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                                      [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-                                                      [[maybe_unused]] ets_float size)
+extern "C" void SkoalaParagraphTextStyle1nSetFontSize([[maybe_unused]] ani_env *env,
+                                                      [[maybe_unused]] ani_long ptr /*KNativePointer*/,
+                                                      [[maybe_unused]] ani_float size)
 {
 }
-extern "C" void SkoalaImplManagedInvokeFinalizer([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                                 [[maybe_unused]] ets_long finalizer /*KNativePointer*/,
-                                                 [[maybe_unused]] ets_long obj /*KNativePointer*/)
+extern "C" void SkoalaImplManagedInvokeFinalizer([[maybe_unused]] ani_env *env,
+                                                 [[maybe_unused]] ani_long finalizer /*KNativePointer*/,
+                                                 [[maybe_unused]] ani_long obj /*KNativePointer*/)
 {
 }
-extern "C" void SkoalaEnqueueRun([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                 [[maybe_unused]] ets_long redrawerPeerPtr /*KNativePointer*/)
+extern "C" void SkoalaEnqueueRun([[maybe_unused]] ani_env *env,
+                                 [[maybe_unused]] ani_long redrawerPeerPtr /*KNativePointer*/)
 {
 }
 // NOLINTEND(google-runtime-int)
 
 class EtsVMConfingNapi : public testing::Test {
 public:
-    bool CreateRuntime(const std::string &stdlibAbc, const std::string &pathAbc, bool enableJit,
+    void CreateRuntime(const std::string &stdlibAbc, const std::string &pathAbc, bool enableJit,
                        const std::string &pathAn = "")
     {
-        std::vector<EtsVMOption> options = {{EtsOptionType::ETS_LOG_LEVEL, "info"},
-                                            {EtsOptionType::ETS_BOOT_FILE, stdlibAbc.c_str()},
-                                            {EtsOptionType::ETS_BOOT_FILE, pathAbc.c_str()},
-                                            {EtsOptionType::ETS_ARK_FILE, pathAbc.c_str()},
-                                            {EtsOptionType::ETS_GC_TRIGGER_TYPE, "heap-trigger"},
-                                            {enableJit ? EtsOptionType::ETS_JIT : EtsOptionType::ETS_NO_JIT, nullptr}};
+        std::string bootPandaFilesOption = "--ext:boot-panda-files=" + stdlibAbc + ":" + pathAbc;
+        std::string compilerEnableJitOption =
+            std::string("--ext:compiler-enable-jit=") + (enableJit ? "true" : "false");
+        std::vector<ani_option> options = {
+            {"--ext:log-level=info", nullptr},
+            {bootPandaFilesOption.c_str(), nullptr},
+            {"--ext:gc-trigger-type=heap-trigger", nullptr},
+            {compilerEnableJitOption.c_str(), nullptr},
+        };
+        std::string optAotFilesOption;
         if (!pathAn.empty()) {
-            options.emplace_back(EtsVMOption {EtsOptionType::ETS_AOT, nullptr});
-            options.emplace_back(EtsVMOption {EtsOptionType::ETS_AOT_FILE, pathAn.c_str()});
+            options.push_back({"--ext:--enable-an", nullptr});
+            optAotFilesOption = "--ext:aot-files=" + pathAn;
+            options.push_back({optAotFilesOption.c_str(), nullptr});
         }
-
-        EtsVMInitArgs args = {ETS_NAPI_VERSION_1_0, static_cast<ets_int>(options.size()), options.data()};
-        return ETS_CreateVM(&vm_, &env_, &args) == ETS_OK;
+        ani_options opts {options.size(), options.data()};
+        ASSERT_EQ(ANI_CreateVM(&opts, ANI_VERSION_1, &vm_), ANI_OK) << "Cannot create ETS VM";
+        ASSERT_EQ(vm_->GetEnv(ANI_VERSION_1, &env_), ANI_OK) << "Cannot get ani env";
     }
 
     // CC-OFFNXT(G.NAM.03,G.NAM.03)-CPP) project code style
-    static constexpr char const *PEAS_MODULE_GLOBAL = "bouncing_peas_unit_native/ETSGLOBAL";
+    static constexpr char const *PEAS_MODULE_NAME = "bouncing_peas_unit_native";
 
     bool InitExports()
     {
-        const std::array<EtsNativeMethod, 43> impls = {
+        const std::array<ani_native_function, 43> impls = {
             {{"_skoala_createRedrawerPeer", nullptr, reinterpret_cast<void *>(SkoalaCreateRedrawerPeer)},
              {"_skoala_drawPicture", nullptr, reinterpret_cast<void *>(SkoalaDrawPicture)},
              {"_skoala_getFrame", nullptr, reinterpret_cast<void *>(SkoalaGetFrame)},
@@ -335,29 +328,38 @@ public:
              {"_getEngine", nullptr, reinterpret_cast<void *>(GetEngine)},
              {"_skoala_enqueue_run", nullptr, reinterpret_cast<void *>(SkoalaEnqueueRun)}}};
 
-        auto globalClass = env_->FindClass(PEAS_MODULE_GLOBAL);
-        if (globalClass == nullptr) {
+        ani_module module {};
+        auto status = env_->FindModule(PEAS_MODULE_NAME, &module);
+        if (status != ANI_OK) {
             return false;
         }
 
-        return env_->RegisterNatives(globalClass, impls.data(), impls.size()) == ETS_OK;
+        return env_->Module_BindNativeFunctions(module, impls.data(), impls.size()) == ANI_OK;
     }
 
     bool DestroyRuntime() const
     {
-        return vm_->DestroyEtsVM() == ETS_OK;
+        return vm_->DestroyVM() == ANI_OK;
     }
 
     int ExecuteMain() const
     {
-        auto klass = env_->FindClass(PEAS_MODULE_GLOBAL);
-        auto method = env_->GetStaticp_method(klass, "main", ":I");
-        return env_->CallStaticIntMethod(klass, method);  // NOLINT(cppcoreguidelines-pro-type-vararg)
+        ani_module module {};
+        [[maybe_unused]] auto status = env_->FindModule(PEAS_MODULE_NAME, &module);
+        ASSERT(status == ANI_OK);
+        ani_function fn {};
+        status = env_->Module_FindFunction(module, "main", ":i", &fn);
+        ASSERT(status == ANI_OK);
+        ani_int result = 0;
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        status = env_->Function_Call_Int(fn, &result);
+        ASSERT(status == ANI_OK);
+        return result;
     }
 
 private:
-    EtsVM *vm_ {};
-    EtsEnv *env_ {};
+    ani_vm *vm_ {};
+    ani_env *env_ {};
 };
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
@@ -378,7 +380,7 @@ TEST_F(EtsVMConfingNapi, PeasINT)
     ASSERT_FALSE(stdlibAbc.empty());
     ASSERT_FALSE(pathAbc.empty());
 
-    ASSERT_TRUE(CreateRuntime(stdlibAbc, pathAbc, false));
+    CreateRuntime(stdlibAbc, pathAbc, false);
     EXPECT_TRUE(InitExports());
     EXPECT_TRUE(ExecuteMain() == 0);
     ASSERT_TRUE(DestroyRuntime());
@@ -401,7 +403,7 @@ TEST_F(EtsVMConfingNapi, PeasJIT)
     ASSERT_FALSE(stdlibAbc.empty());
     ASSERT_FALSE(pathAbc.empty());
 
-    ASSERT_TRUE(CreateRuntime(stdlibAbc, pathAbc, true));
+    CreateRuntime(stdlibAbc, pathAbc, true);
     EXPECT_TRUE(InitExports());
     EXPECT_TRUE(ExecuteMain() == 0);
     ASSERT_TRUE(DestroyRuntime());
@@ -431,7 +433,7 @@ TEST_F(EtsVMConfingNapi, PeasAOT)
     ASSERT_FALSE(pathAbc.empty());
     ASSERT_FALSE(pathAn.empty());
 
-    ASSERT_TRUE(CreateRuntime(stdlibAbc, pathAbc, false, pathAn));
+    CreateRuntime(stdlibAbc, pathAbc, false, pathAn);
     EXPECT_TRUE(InitExports());
     EXPECT_TRUE(ExecuteMain() == 0);
     ASSERT_TRUE(DestroyRuntime());
@@ -465,7 +467,7 @@ TEST_F(EtsVMConfingNapi, PeasLLVMAOT)
     ASSERT_FALSE(pathAbc.empty());
     ASSERT_FALSE(pathAn.empty());
 
-    ASSERT_TRUE(CreateRuntime(stdlibAbc, pathAbc, false, pathAn));
+    CreateRuntime(stdlibAbc, pathAbc, false, pathAn);
     EXPECT_TRUE(InitExports());
     EXPECT_TRUE(ExecuteMain() == 0);
     ASSERT_TRUE(DestroyRuntime());

@@ -18,7 +18,6 @@
 #include "plugins/ets/runtime/ets_napi_env.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
-#include "plugins/ets/runtime/napi/ets_napi_native_interface.h"
 
 namespace ark::ets {
 Expected<PandaEtsNapiEnv *, const char *> PandaEtsNapiEnv::Create(EtsCoroutine *coroutine,
@@ -46,10 +45,7 @@ PandaEtsNapiEnv *PandaEtsNapiEnv::GetCurrent()
 }
 
 PandaEtsNapiEnv::PandaEtsNapiEnv(EtsCoroutine *coroutine, PandaUniquePtr<EtsReferenceStorage> referenceStorage)
-    : ani_env {ani::GetInteractionAPI()},
-      EtsEnv {napi::GetNativeInterface()},
-      coroutine_(coroutine),
-      referenceStorage_(std::move(referenceStorage))
+    : ani_env {ani::GetInteractionAPI()}, coroutine_(coroutine), referenceStorage_(std::move(referenceStorage))
 {
 }
 

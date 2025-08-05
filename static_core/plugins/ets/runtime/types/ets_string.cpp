@@ -79,7 +79,7 @@ EtsString *EtsString::CreateFromAscii(const char *str, uint32_t length)
 }
 
 /* static */
-EtsString *EtsString::CreateFromUtf16(const ets_char *utf16, ets_int length)
+EtsString *EtsString::CreateFromUtf16(const EtsChar *utf16, EtsInt length)
 {
     ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
@@ -170,7 +170,7 @@ EtsString *EtsString::CreateNewStringFromChars(uint32_t offset, uint32_t length,
 }
 
 /* static */
-EtsString *EtsString::CreateNewStringFromBytes(EtsArray *bytearray, ets_int high, ets_int offset, ets_int length)
+EtsString *EtsString::CreateNewStringFromBytes(EtsArray *bytearray, EtsInt high, EtsInt offset, EtsInt length)
 {
     ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
@@ -336,7 +336,7 @@ std::string_view EtsString::ConvertToStringView([[maybe_unused]] PandaVector<uin
 }
 
 /* static */
-EtsString *EtsString::DoReplace(EtsString *src, ets_char oldC, ets_char newC)
+EtsString *EtsString::DoReplace(EtsString *src, EtsChar oldC, EtsChar newC)
 {
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
     if (src->GetLength() == 0) {

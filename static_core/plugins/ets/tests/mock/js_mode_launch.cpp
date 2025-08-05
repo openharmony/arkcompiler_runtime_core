@@ -16,15 +16,16 @@
 #include <gtest/gtest.h>
 
 #include "runtime/include/runtime.h"
-#include "runtime/include/thread_scopes.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
-#include "plugins/ets/runtime/types/ets_method.h"
-#include "plugins/ets/runtime/ets_class_linker_extension.h"
+#include "plugins/ets/runtime/ets_napi_env.h"
 
 namespace ark::ets::test {
-static int64_t GetCoroId()
+
+static int64_t GetCoroId([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class cls)
 {
-    return reinterpret_cast<int64_t>(EtsCoroutine::GetCurrent());
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(PandaEtsNapiEnv::FromAniEnv(env)->GetEtsCoroutine() == coro);
+    return reinterpret_cast<ani_long>(coro);
 }
 
 class JsModeLaunchTest : public testing::Test {
@@ -47,15 +48,11 @@ protected:
 
         Runtime::Create(options);
 
-        EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-        ScopedManagedCodeThread scope(coroutine);
-        EtsClassLinker *etsClassLinker = coroutine->GetPandaVM()->GetClassLinker();
-        EtsClass *global = etsClassLinker->GetClass("Ljs_mode_launch/JSCoroutine;");
-        ASSERT_NE(nullptr, global);
-        EtsMethod *getCoroIdMethod = global->GetStaticMethod("getCoroutineId", nullptr);
-        ASSERT_NE(nullptr, getCoroIdMethod);
-        ASSERT_TRUE(getCoroIdMethod->IsNative());
-        getCoroIdMethod->RegisterNativeDeprecated(reinterpret_cast<void *>(GetCoroId));
+        ani_env *env = PandaEtsNapiEnv::GetCurrent();
+        ani_class jsCoroutineClass {};
+        ASSERT_EQ(env->FindClass("js_mode_launch.JSCoroutine", &jsCoroutineClass), ANI_OK);
+        ani_native_function fn {"getCoroutineId", ":l", reinterpret_cast<void *>(GetCoroId)};
+        ASSERT_EQ(env->Class_BindStaticNativeMethods(jsCoroutineClass, &fn, 1), ANI_OK);
     }
 
     void TearDown() override

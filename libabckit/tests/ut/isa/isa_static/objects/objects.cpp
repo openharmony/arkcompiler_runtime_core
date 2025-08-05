@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -126,8 +126,7 @@ static void TransformIrCreateInitObject(AbckitGraph *graph, size_t numArg)
 void InitObjectTest(size_t numArg, helpers::InstSchema<AbckitIsaApiStaticOpcode> initObjectInst,
                     const std::string &expectedOutput)
 {
-    auto output =
-        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/objects/objects.abc", "objects/ETSGLOBAL", "main");
+    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/objects/objects.abc", "objects", "main");
     EXPECT_TRUE(helpers::Match(output, "A\n"));
 
     std::vector<helpers::InstSchema<AbckitIsaApiStaticOpcode>> startBB = {};
@@ -159,16 +158,15 @@ void InitObjectTest(size_t numArg, helpers::InstSchema<AbckitIsaApiStaticOpcode>
             helpers::VerifyGraph(graph, bbSchema);
         });
 
-    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/objects/objects_modified.abc",
-                                       "objects/ETSGLOBAL", "main");
+    output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/objects/objects_modified.abc", "objects", "main");
     EXPECT_TRUE(helpers::Match(output, expectedOutput));
 }
 
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateNewObject, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitICreateObjectsStaticTest, LibAbcKitTestCreateIcreateNewObject)
 {
-    auto output =
-        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/objects/objects.abc", "objects/ETSGLOBAL", "main");
+    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/objects/objects.abc", "objects", "main");
     EXPECT_TRUE(helpers::Match(output, "A\n"));
 
     std::vector<helpers::BBSchema<AbckitIsaApiStaticOpcode>> bbSchema = {
@@ -195,8 +193,8 @@ TEST_F(LibAbcKitICreateObjectsStaticTest, LibAbcKitTestCreateIcreateNewObject)
         },
         [&](AbckitGraph *graph) { helpers::VerifyGraph(graph, bbSchema); });
 
-    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/objects/objects_modified.abc",
-                                       "objects/ETSGLOBAL", "main");
+    output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/objects/objects_modified.abc", "objects", "main");
     EXPECT_TRUE(helpers::Match(output, "A\nB\n"));
 
     helpers::TransformMethod(
@@ -206,8 +204,8 @@ TEST_F(LibAbcKitICreateObjectsStaticTest, LibAbcKitTestCreateIcreateNewObject)
            [[maybe_unused]] AbckitGraph *graph) {},
         [&](AbckitGraph *graph) { helpers::VerifyGraph(graph, bbSchema); });
 
-    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/objects/objects_modified.abc",
-                                       "objects/ETSGLOBAL", "main");
+    output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/objects/objects_modified.abc", "objects", "main");
     EXPECT_TRUE(helpers::Match(output, "A\nB\n"));
 }
 

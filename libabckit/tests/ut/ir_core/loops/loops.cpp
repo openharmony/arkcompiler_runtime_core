@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -134,8 +134,7 @@ class LibAbcKitLoopStaticTest : public ::testing::Test {};
 // Test: test-kind=api, api=GraphApiImpl::bbCreatePhi, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitLoopStaticTest, LibAbcKitLoopTestStatic)
 {
-    auto output =
-        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/loops/loop_static.abc", "loop_static/ETSGLOBAL", "main");
+    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/loops/loop_static.abc", "loop_static", "main");
     helpers::TransformMethod(
         ABCKIT_ABC_DIR "ut/ir_core/loops/loop_static.abc", ABCKIT_ABC_DIR "ut/ir_core/loops/loop_static_modified.abc",
         "bar",
@@ -144,8 +143,8 @@ TEST_F(LibAbcKitLoopStaticTest, LibAbcKitLoopTestStatic)
             CreateLoopStatic(graph, consoleLogInt);
         },
         []([[maybe_unused]] AbckitGraph *graph) {});
-    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/loops/loop_static_modified.abc",
-                                       "loop_static/ETSGLOBAL", "main");
+    output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/loops/loop_static_modified.abc", "loop_static", "main");
 }
 
 // Test: test-kind=api, api=GraphApiImpl::bbCreatePhi, abc-kind=ArkTS1, category=positive, extension=c
