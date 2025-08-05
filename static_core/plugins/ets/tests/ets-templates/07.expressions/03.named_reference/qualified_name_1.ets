@@ -13,34 +13,23 @@
  * limitations under the License.
  */
 
-{% for qname in qualified_name %}
-
 /*---
-desc: Qualified name {{qname}}
-params: {{qname}}
-tags: [compile-only]
+desc: QualifiedName (see Names) is an expression that consists of dot-separated names.
+files:
+- ./named_reference_export4.ets
 ---*/
 
-package test;
+import {Shapes as alias} from "./named_reference_export4.ets"
 
-class Clazz{{loop.index0}} {
-  static staticField: int;
-  static staticMethod(): void {}
-  field: int;
-  method(): void {}
+class Clazz {
+  // same name and namespace should not clash
+  alias: alias.Square = new alias.Square;
 }
 
-let instance{{loop.index0}}: Clazz{{loop.index0}};
-static {
-  instance{{loop.index0}} = new Clazz{{loop.index0}}();
-} 
+class Shapes {}
 
-
-{% if loop.last %}
-function main(): void {
-    {% for qname1 in qualified_name %}
-    {{qname1}}
-    {% endfor %}
+function main(): int {
+  let clazz = new Clazz;
+  let s = new Shapes;
+  return 0;
 }
-{% endif %}
-{% endfor %}

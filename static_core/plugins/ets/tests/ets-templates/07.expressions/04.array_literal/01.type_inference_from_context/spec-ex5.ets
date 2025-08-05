@@ -15,24 +15,40 @@
 
 /*---
 desc: >-
-  There are cases when every array or tuple element of primitive type is boxed
-  (see Boxing Conversions) according to the type of the context that creates a
-  new array or tuple.
+    If the type used in the context is a readonly array,
+    then an array literal is of readonly array type.
 ---*/
 
 function bar (tuple: [Number, Boolean]) {
-    arktest.assertEQ(tuple[0].unboxed(), 1.0)
-    arktest.assertEQ(tuple[1].unboxed(), true)
+    arktest.assertEQ(tuple[0], 1.0)
+    arktest.assertEQ(tuple[1], true)
+}
+
+function barReadonly (tuple: readonly [Number, Boolean]) {
+    arktest.assertEQ(tuple[0], 1.0)
+    arktest.assertEQ(tuple[1], true)
+}
+
+function fooReadonly (ar: readonly number[]) {
+    arktest.assertEQ(ar[0], 1.0)
 }
 
 function main() {
     let tuple: [Number, Boolean] = [1, true] // assignment context
-    arktest.assertEQ(tuple[0].unboxed(), 1.0)
-    arktest.assertEQ(tuple[1].unboxed(), true)
+    arktest.assertEQ(tuple[0], 1.0)
+    arktest.assertEQ(tuple[1], true)
 
     bar([1, true])  // call context
 
     let t: [Number, Boolean] = [1, true] as [Number, Boolean] // casting conversion
-    arktest.assertEQ(t[0].unboxed(), 1.0)
-    arktest.assertEQ(t[1].unboxed(), true)
+    arktest.assertEQ(t[0], 1.0)
+    arktest.assertEQ(t[1], true)
+
+    let readonly_tuple: readonly [number, boolean] = [1, true]
+    barReadonly(readonly_tuple)
+
+    let readonly_array: readonly number[] = [1, 2, 3]
+    fooReadonly(readonly_array)
+    fooReadonly([1.0, 2.0])
+
 }

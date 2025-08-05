@@ -37,10 +37,10 @@ cases:
 
     - decl: |-
           function foo(a: [Byte, Short, Int, Long]) {
-              arktest.assertEQ(a[0].unboxed(), 1)
-              arktest.assertEQ(a[1].unboxed(), 2)
-              arktest.assertEQ(a[2].unboxed(), 3)
-              arktest.assertEQ(a[3].unboxed(), -9223372036854775808)
+              arktest.assertEQ(a[0], 1)
+              arktest.assertEQ(a[1], 2)
+              arktest.assertEQ(a[2], 3)
+              arktest.assertEQ(a[3], -9223372036854775808)
           }
       use: |-
           // call context, tuple of boxed
@@ -48,9 +48,9 @@ cases:
 
     - decl: |-
           function foo(a: [Number, Float, Int]) {
-              arktest.assertTrue(Number.isNaN(a[0].unboxed()))
-              arktest.assertEQ(a[1].unboxed(), 0f)
-              arktest.assertEQ(a[2].unboxed(), -2147483647)
+              arktest.assertTrue(Number.isNaN(a[0]))
+              arktest.assertEQ(a[1], 0f)
+              arktest.assertEQ(a[2], -2147483647)
           }
       use: |-
           // call context, tuple of boxed
@@ -103,11 +103,11 @@ cases:
 
     - decl: |-
           function foo(a: [[Float, Float], [Long, Long], [Short]]) {
-              arktest.assertEQ(a[0][0].unboxed(), -16777215f)
-              arktest.assertEQ(a[0][1].unboxed(), 16777215f)
-              arktest.assertEQ(a[1][0].unboxed(), -9223372036854775808)
-              arktest.assertEQ(a[1][1].unboxed(), 9223372036854775807)
-              arktest.assertEQ(a[2][0].unboxed(), 32767)
+              arktest.assertEQ(a[0][0], -16777215f)
+              arktest.assertEQ(a[0][1], 16777215f)
+              arktest.assertEQ(a[1][0], -9223372036854775808)
+              arktest.assertEQ(a[1][1], 9223372036854775807)
+              arktest.assertEQ(a[2][0], 32767)
           }
       use: |-
           // call context, tuple of tuple of boxed

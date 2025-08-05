@@ -45,30 +45,30 @@ cases:
     - use: |-
           // casting context, array of boxed
           let a = [false, true, true] as Array<Boolean>
-          arktest.assertEQ(a[0].unboxed(), false)
-          arktest.assertEQ(a[1].unboxed(), true)
-          arktest.assertEQ(a[2].unboxed(), true)
+          arktest.assertEQ(a[0], false)
+          arktest.assertEQ(a[1], true)
+          arktest.assertEQ(a[2], true)
           arktest.assertEQ(a.length, 3)
 
     - use: |-
           // casting context, array of boxed
           let a = [1, 2, 3, -9223372036854775808,] as Array<Long>
-          arktest.assertEQ(a[3].unboxed(), -9223372036854775808)
+          arktest.assertEQ(a[3], -9223372036854775808)
           arktest.assertEQ(a.length, 4)
 
     - use: |-
           // casting context, array of boxed
           let a = [Number.NaN, 0, 3.14, 1.7976931348623157e+308, ] as Array<Number>
-          arktest.assertTrue(Number.isNaN(a[0].unboxed()))
-          arktest.assertEQ(a[3].unboxed(), 1.7976931348623157e+308)
+          arktest.assertTrue(Number.isNaN(a[0]))
+          arktest.assertEQ(a[3], 1.7976931348623157e+308)
           arktest.assertEQ(a.length, 4)
 
     - use: |-
           // casting context, array of array of boxed
           let a = [[1.7976931348623157e+308, 2, ], [3, ], [4, 5, 6, ], [], ] as Array<Array<Number>>
           arktest.assertEQ(a.length, 4)
-          arktest.assertEQ(a[0][0].unboxed(), 1.7976931348623157e+308)
-          arktest.assertEQ(a[2][2].unboxed(), 6.0)
+          arktest.assertEQ(a[0][0], 1.7976931348623157e+308)
+          arktest.assertEQ(a[2][2], 6.0)
 
     - use: |-
           // casting context, array of strings

@@ -1018,7 +1018,6 @@
 #24879 Cannot determine type of array expression in Union type
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_call_30.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_decl_28.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_call_30.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_cast_28.ets
 
 #23453 Cannot cast array literal to union of arrays

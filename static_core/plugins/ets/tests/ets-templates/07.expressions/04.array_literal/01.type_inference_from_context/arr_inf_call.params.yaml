@@ -15,7 +15,7 @@
 cases:
     # call context
     - decl: |-
-          function foo(a: FixedArray<boolean>) {
+          function foo(a: boolean[]) {
               arktest.assertEQ(a[0], false)
               arktest.assertEQ(a[1], true)
               arktest.assertEQ(a[2], true)
@@ -26,7 +26,7 @@ cases:
           foo([!true, true, true])
 
     - decl: |-
-          function foo(a: FixedArray<long>) {
+          function foo(a: long[]) {
               arktest.assertEQ(a[3], -9223372036854775808)
               arktest.assertEQ(a.length, 4)
           }
@@ -35,7 +35,7 @@ cases:
           foo([1, 2, 3, -9223372036854775808])
 
     - decl: |-
-          function foo(a: FixedArray<FixedArray<int>>) {
+          function foo(a: int[][]) {
               arktest.assertEQ(a.length, 4)
               arktest.assertEQ(a[0][0], -2147483647)
               arktest.assertEQ(a[2][2], 2147483647)
@@ -45,7 +45,7 @@ cases:
           foo([[-2147483647, 2, ], [3, ], [4, 5, 2147483647, ], [], ])
 
     - decl: |-
-          function foo(a: FixedArray<number>) {
+          function foo(a: number[]) {
               arktest.assertTrue(Number.isNaN(a[0]))
               arktest.assertEQ(a[3], 1.7976931348623157e+308)
               arktest.assertEQ(a.length, 4)
@@ -55,9 +55,9 @@ cases:
           foo([Number.NaN, 0, 3.14, 1.7976931348623157e+308, ])
 
     - decl: |-
-          function foo(a: FixedArray<Number>) {
-              arktest.assertTrue(Number.isNaN(a[0].unboxed()))
-              arktest.assertEQ(a[3].unboxed(), 1.7976931348623157e+308)
+          function foo(a: number[]) {
+              arktest.assertTrue(Number.isNaN(a[0]))
+              arktest.assertEQ(a[3], 1.7976931348623157e+308)
               arktest.assertEQ(a.length, 4)
           }
       use: |-
@@ -65,10 +65,10 @@ cases:
           foo([Number.NaN, 0, 3.14, 1.7976931348623157e+308, ])
 
     - decl: |-
-          function foo(a: FixedArray<Boolean>) {
-              arktest.assertEQ(a[0].unboxed(), false)
-              arktest.assertEQ(a[1].unboxed(), true)
-              arktest.assertEQ(a[2].unboxed(), true)
+          function foo(a: Boolean[]) {
+              arktest.assertEQ(a[0], false)
+              arktest.assertEQ(a[1], true)
+              arktest.assertEQ(a[2], true)
               arktest.assertEQ(a.length, 3)
           }
       use: |-
@@ -76,8 +76,8 @@ cases:
           foo([false, true, true])
 
     - decl: |-
-          function foo(a: FixedArray<Long>) {
-              arktest.assertEQ(a[3].unboxed(), -9223372036854775808)
+          function foo(a: Long[]) {
+              arktest.assertEQ(a[3], -9223372036854775808)
               arktest.assertEQ(a.length, 4)
           }
       use: |-
@@ -85,7 +85,7 @@ cases:
           foo([1, 2, 3, -9223372036854775808,])
 
     - decl: |-
-          function foo(a: FixedArray<string>) {
+          function foo(a: string[]) {
               arktest.assertEQ(a[3], '-9223372036854775808')
               arktest.assertEQ(a.length, 4)
           }
@@ -94,7 +94,7 @@ cases:
           foo(['1', '2', '', '-9223372036854775808', ])
 
     - decl: |-
-          function foo(a: FixedArray<string>) {
+          function foo(a: string[]) {
               arktest.assertEQ(a[0], 'x')
               arktest.assertEQ(a[1], 'x1')
               arktest.assertEQ(a[2], 'x2')
@@ -110,7 +110,7 @@ cases:
               let v: Int = i + 1 
               return v.toChar()
           }
-          function foo(a: FixedArray<Char>) {
+          function foo(a: char[]) {
               arktest.assertEQ(a[0], c'+')
               arktest.assertEQ(a[1], c',')
               arktest.assertEQ(a[2], c'-')
@@ -121,7 +121,7 @@ cases:
           foo([bar(42), bar(43), bar(44), ])
 
     - decl: |-
-          function foo(a: FixedArray<FixedArray<String>>) {
+          function foo(a: String[][]) {
               arktest.assertEQ(a[0][0], '1')
               arktest.assertEQ(a[0][1], '11')
               arktest.assertEQ(a[1][0], '')
@@ -134,7 +134,7 @@ cases:
           foo([[s, s + s,], ['', '-9223372036854775808',], ])
 
     - decl: |-
-          function foo(a: FixedArray<bigint>) {
+          function foo(a: bigint[]) {
               arktest.assertEQ(a[1], 2n)
               arktest.assertEQ(a[2], 33333333333333333333333333333333333333333333333333n)
               arktest.assertEQ(a.length, 3)
@@ -144,7 +144,7 @@ cases:
           foo([1n, 2n, 33333333333333333333333333333333333333333333333333n])
 
     - decl: |-
-          function foo(a: FixedArray<FixedArray<bigint>>) {
+          function foo(a: bigint[][]) {
               arktest.assertEQ(a[0][0], 11111111111111111111111111111111111111111111111n)
               arktest.assertEQ(a[2][0], 33333333333333333333333333333333333333333333333333n)
               arktest.assertEQ(a.length, 3)
@@ -155,7 +155,7 @@ cases:
 
     - decl: |-
           class A {}
-          function foo(a: FixedArray<A>) {
+          function foo(a: A[]) {
               arktest.assertTrue(a[0] instanceof A)
               arktest.assertEQ(a.length, 1)
           }
@@ -167,7 +167,7 @@ cases:
           class A<T> {}
           let v = new A<Number>
           let q = new A<Number>
-          function foo<T>(a: FixedArray<A<T>>) {
+          function foo<T>(a: A<T>[]) {
               arktest.assertEQ(a[0], v)
               arktest.assertEQ(a[1], q)
               arktest.assertEQ(a.length, 2)
@@ -177,17 +177,17 @@ cases:
           foo<Number>([v, q])
 
     - decl: |-
-          function foo(a: FixedArray<FixedArray<Number>>) {
+          function foo(a: Number[][]) {
               arktest.assertEQ(a.length, 4)
-              arktest.assertEQ(a[0][0].unboxed(), 1.7976931348623157e+308)
-              arktest.assertEQ(a[2][2].unboxed(), 6.0)
+              arktest.assertEQ(a[0][0], 1.7976931348623157e+308)
+              arktest.assertEQ(a[2][2], 6.0)
           }
       use: |-
           // call context, array of array of boxed
           foo([[1.7976931348623157e+308, 2, ], [3, ], [4, 5, 6, ], [], ])
 
     - decl: |-
-          function foo(a: FixedArray<FixedArray<Object>>) {
+          function foo(a: Object[][]) {
               arktest.assertEQ(a[0][0] as string,  "a")
               arktest.assertEQ(a[0][1] as int,  1)
               arktest.assertEQ(a[0][2] as boolean,  true)
@@ -199,7 +199,7 @@ cases:
           foo([["a", 1, true, 2n]])
 
     - decl: |-
-          function sum(p: FixedArray<Long>): long {
+          function sum(p: Long[]): long {
               let s: long = 0
               for (let v of p)
                   s += v
@@ -213,7 +213,7 @@ cases:
 
     - decl: |-
           class A {
-              foo(p: FixedArray<Object>): int {
+              foo(p: Object[]): number {
                   let s = p.length
                   for (let v of p) {
                       s += v instanceof A ? 1 : 0
@@ -229,7 +229,7 @@ cases:
 
     - decl: |-
           enum Color { Red, Green, Blue }
-          function foo(a: FixedArray<Color>) {
+          function foo(a: Color[]) {
               arktest.assertEQ(a[0], Color.Red)
               arktest.assertEQ(a[1], Color.Blue)
               arktest.assertEQ(a.length, 2)
@@ -240,7 +240,7 @@ cases:
 
     - decl: |-
           enum Color { Red, Green, Blue }
-          function foo(a: FixedArray<FixedArray<Color>>) {
+          function foo(a: Color[][]) {
               arktest.assertEQ(a[0][0], Color.Red)
               arktest.assertEQ(a[0][1], Color.Blue)
               arktest.assertEQ(a.length, 1)
@@ -252,7 +252,7 @@ cases:
     - decl: |-
           enum Color { Red, Green, Blue }
           type F = (p: Color) => int
-          function foo(a: FixedArray<F>) {
+          function foo(a: F[]) {
               arktest.assertEQ(a[0](Color.Red), 0)
               arktest.assertEQ(a[1](Color.Red), 1)
               arktest.assertEQ(a[2](Color.Blue), 4)
@@ -265,7 +265,7 @@ cases:
     - decl: |-
           enum Color { Red, Green, Blue }
           type F = (p: Color) => int
-          function foo(a: FixedArray<FixedArray<F>>) {
+          function foo(a: F[][]) {
               arktest.assertEQ(a[0][0](Color.Red), 0)
               arktest.assertEQ(a[1][0](Color.Red), 1)
               arktest.assertEQ(a[2][0](Color.Blue), 4)
@@ -279,7 +279,7 @@ cases:
           let u: undefined = undefined
           let n: null = null
           let o: Object = {}
-          function foo(a: FixedArray<null|undefined|Object>) {
+          function foo(a: (null|undefined|Object)[]) {
               arktest.assertEQ(a[0], null)
               arktest.assertEQ(a[1] as Object, o)
               arktest.assertEQ(a[2] as Object, o)
@@ -291,7 +291,7 @@ cases:
           foo([n, o, o, u])
 
     - decl: |-
-          function foo(a: FixedArray<boolean|int|string|null>) {
+          function foo(a: (boolean|int|string|null)[]) {
               arktest.assertEQ(a[0] as boolean, true)
               arktest.assertEQ(a[1] as int, 1)
               arktest.assertEQ(a[2] as string, 'a')
@@ -303,7 +303,7 @@ cases:
           foo([true, 1, 'a', null])
 
     - decl: |-
-          function foo(a: FixedArray<FixedArray<boolean|int|string|null>>) {
+          function foo(a: (boolean|int|string|null)[][]) {
               arktest.assertEQ(a[0][0] as boolean, true)
               arktest.assertEQ(a[0][1] as int, 1)
               arktest.assertEQ(a[0][2] as string, 'a')
@@ -316,7 +316,7 @@ cases:
 
     - decl: |-
           let e = new Error
-          function foo(a: FixedArray<Number|Error|((p: string)=>string)|Boolean>) {
+          function foo(a: (Number|Error|((p: string)=>string)|Boolean)[]) {
               arktest.assertEQ(a[0] as Error, e)
               arktest.assertEQ(a[1] as Boolean, false)
               arktest.assertEQ((a[2] as ((p: string) => string))('a'), 'aa')
@@ -329,7 +329,7 @@ cases:
 
     - decl: |-
           let e = new Error
-          function foo(a: FixedArray<FixedArray<Number|Error|((p: string)=>string)|Boolean>>) {
+          function foo(a: (Number|Error|((p: string)=>string)|Boolean)[][]) {
               arktest.assertEQ(a[0][0] as Error, e)
               arktest.assertEQ(a[1][0] as Boolean, false)
               arktest.assertEQ((a[2][0] as ((p: string) => string))('a'), 'aa')
@@ -341,33 +341,33 @@ cases:
           foo([[e], [false], [(p: string): string => p + p], [42]])
 
     - decl: |-
-          function foo(a: FixedArray<Number>|FixedArray<String>|FixedArray<Boolean>) {
-              arktest.assertEQ((a as FixedArray<Boolean>)[0], false)
-              arktest.assertEQ((a as FixedArray<Boolean>)[1], true)
-              arktest.assertEQ((a as FixedArray<Boolean>)[2], false)
-              arktest.assertEQ((a as FixedArray<Boolean>).length, 3)
+          function foo(a: Number[]|String[]|Boolean[]) {
+              arktest.assertEQ((a as Boolean[])[0], false)
+              arktest.assertEQ((a as Boolean[])[1], true)
+              arktest.assertEQ((a as Boolean[])[2], false)
+              arktest.assertEQ((a as Boolean[]).length, 3)
           }
       use: |-
           // call context, union of arrays
           foo([!true, true, !true])
 
     - decl: |-
-          function foo(a: FixedArray<Number>|FixedArray<String>|FixedArray<Boolean>) {
-              arktest.assertEQ((a as FixedArray<Number>)[0], 1)
-              arktest.assertEQ((a as FixedArray<Number>)[1], 2)
-              arktest.assertEQ((a as FixedArray<Number>)[2], 43)
-              arktest.assertEQ((a as FixedArray<Number>).length, 3)
+          function foo(a: Number[]|String[]|Boolean[]) {
+              arktest.assertEQ((a as Number[])[0], 1)
+              arktest.assertEQ((a as Number[])[1], 2)
+              arktest.assertEQ((a as Number[])[2], 43)
+              arktest.assertEQ((a as Number[]).length, 3)
           }
       use: |-
           // call context, union of arrays
           foo([1, 2, 40 + 3.0])
 
     - decl: |-
-          function foo(a: FixedArray<Number>|FixedArray<String>|FixedArray<Boolean>) {
-              arktest.assertEQ((a as FixedArray<String>)[0], '1')
-              arktest.assertEQ((a as FixedArray<String>)[1], '2')
-              arktest.assertEQ((a as FixedArray<String>)[2], '43')
-              arktest.assertEQ((a as FixedArray<String>).length, 3)
+          function foo(a: Number[]|String[]|Boolean[]) {
+              arktest.assertEQ((a as String[])[0], '1')
+              arktest.assertEQ((a as String[])[1], '2')
+              arktest.assertEQ((a as String[])[2], '43')
+              arktest.assertEQ((a as String[]).length, 3)
           }
       use: |-
           // call context, union of arrays
@@ -376,7 +376,7 @@ cases:
     - decl: |-
           enum Color { Red, Green, Blue }
           enum Size { S, M, L, XL }
-          function foo(a: FixedArray<Color|Size>) {
+          function foo(a: (Color|Size)[]) {
               arktest.assertEQ(a[0] as Color, Color.Red)
               arktest.assertEQ(a[1] as Color, Color.Green)
               arktest.assertEQ(a[2] as Size, Size.XL)
