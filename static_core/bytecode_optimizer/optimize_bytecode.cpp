@@ -232,8 +232,8 @@ static bool SkipFunction(const pandasm::Function &function, const std::string &f
     }
 
     if ((function.GetTotalRegs() + function.GetParamsNum()) > compiler::VIRTUAL_FRAME_SIZE) {
-        LOG(ERROR, BYTECODE_OPTIMIZER) << "Unable to optimize " << funcName
-                                       << ": Function frame size is larger than allowed one";
+        LOG(WARNING, BYTECODE_OPTIMIZER) << "Unable to optimize " << funcName
+                                         << ": Function frame size is larger than allowed one";
         return true;
     }
     return false;
@@ -291,12 +291,13 @@ bool OptimizeFunction(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFi
     BuildMapFromPcToIns(function, irInterface, graph, methodPtr);
 
     if (!graph->RunPass<ark::compiler::IrBuilder>()) {
-        LOG(ERROR, BYTECODE_OPTIMIZER) << "Optimizing " << funcName << ": IR builder failed!";
+        LOG(WARNING, BYTECODE_OPTIMIZER) << "Optimizing " << funcName << ": IR builder failed!";
         return false;
     }
 
     if (graph->HasIrreducibleLoop()) {
-        LOG(ERROR, BYTECODE_OPTIMIZER) << "Optimizing " << funcName << ": Graph has irreducible loop!";
+        // RegAlloc doesn't play well with such graphs
+        LOG(WARNING, BYTECODE_OPTIMIZER) << "Optimizing " << funcName << ": Graph has irreducible loop!";
         return false;
     }
 
