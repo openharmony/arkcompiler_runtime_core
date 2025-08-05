@@ -151,7 +151,7 @@ extern "C" void StdGCPostponeGCStart()
     ASSERT(coroutine != nullptr);
     auto *gc = coroutine->GetVM()->GetGC();
     if (!gc->IsPostponeGCSupported()) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_EXCEPTION,
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_ERROR,
                           "GC postpone is not supported for this GC type");
         return;
     }
@@ -169,7 +169,7 @@ extern "C" void StdGCPostponeGCEnd()
     ASSERT(coroutine != nullptr);
     auto *gc = coroutine->GetVM()->GetGC();
     if (!gc->IsPostponeGCSupported()) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_EXCEPTION,
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_ERROR,
                           "GC postpone is not supported for this GC type");
         return;
     }
@@ -194,7 +194,7 @@ template <class ResArrayType>
     }
     auto *vm = coroutine->GetVM();
     if (!vm->GetGC()->IsPinningSupported()) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_EXCEPTION,
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_ERROR,
                           "Object pinning does not support with current GC");
         return nullptr;
     }
@@ -277,7 +277,7 @@ extern "C" void StdGCPinObject(EtsObject *obj)
     auto *vm = coroutine->GetVM();
     auto *gc = vm->GetGC();
     if (!gc->IsPinningSupported()) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_EXCEPTION,
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_ERROR,
                           "Object pinning does not support with current gc");
         return;
     }
@@ -327,7 +327,7 @@ extern "C" void StdGCScheduleGCAfterNthAlloc(EtsInt counter, EtsInt cause)
     }
     mem::GCTrigger *trigger = vm->GetGCTrigger();
     if (trigger->GetType() != mem::GCTriggerType::ON_NTH_ALLOC) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_EXCEPTION,
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_ERROR,
                           "VM is running with unsupported GC trigger");
         return;
     }
