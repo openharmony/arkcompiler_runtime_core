@@ -12,25 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-declare let b: boolean;
-declare let b45: boolean;
-declare let b1: boolean;
-declare const b2: boolean;
-declare let b451: number;
-declare const b3: boolean;
-declare const b6: boolean;
-declare const b5: boolean;
-declare let b4: boolean;
-declare let b8: boolean;
-declare const b9 = "";
-declare const b10: number;
-declare let b12: string;
-declare let b13: number;
-declare let b15: string;
-declare let b16: number;
-declare let b18: boolean;
-declare let b19: boolean;
-declare let b20: boolean;
-declare let b21: boolean;
-declare let a: "hello";
-declare let a2: number;
+
+export type TA<T> = { data: T; obj: ESObject }
+
+export class CX { data: ESObject = 0 }
+export class CY<T> { data: T; obj: ESObject }
+
+export interface IA { foo(arg: ESObject): ESObject }
+
+export let va: ESObject = 1
+export let vb: CY<ESObject> = { data: '123', obj: '123' }
+export let vc: CY<CY<ESObject>> = { data: { data: '123', obj: '123' }, obj: '123' }
+export let vd = 1 as ESObject
+export let ve: CY<ESObject> = {} as CY<ESObject>
+
+export function foo1(): ESObject {
+    return '123'
+}
+export function foo2(arg: ESObject): ESObject {
+    return '123'
+}

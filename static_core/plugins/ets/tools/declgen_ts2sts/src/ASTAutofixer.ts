@@ -21,6 +21,7 @@ import {
   ETSKeyword,
   FINAL_CLASS,
   JSValue,
+  ESObject,
   KitPrefix,
   LIMIT_DECORATOR,
   UtilityTypes,
@@ -102,7 +103,8 @@ export class Autofixer {
       [
         this[FaultID.ObjectParametersToJSValue].bind(this),
         this[FaultID.InstanceType].bind(this),
-        this[FaultID.NoBuiltInType].bind(this)
+        this[FaultID.NoBuiltInType].bind(this),
+        this[FaultID.ESObjectType].bind(this)
       ]
     ],
     [
@@ -122,7 +124,8 @@ export class Autofixer {
         this[FaultID.NoPrivateMember].bind(this),
         this[FaultID.DefaultExport].bind(this),
         this[FaultID.NoETSKeyword].bind(this),
-        this[FaultID.RemoveLimitDecorator].bind(this)
+        this[FaultID.RemoveLimitDecorator].bind(this),
+        this[FaultID.NoOptionalMemberFunction].bind(this)
       ]
     ],
     [ts.SyntaxKind.MethodDeclaration, [this[FaultID.NoETSKeyword].bind(this)]],
@@ -130,7 +133,11 @@ export class Autofixer {
     [ts.SyntaxKind.ImportSpecifier, [this[FaultID.NoETSKeyword].bind(this)]],
     [ts.SyntaxKind.ExportDeclaration, [this[FaultID.NoEmptyExport].bind(this)]],
     [ts.SyntaxKind.ExportSpecifier, [this[FaultID.NoETSKeyword].bind(this)]],
-    [ts.SyntaxKind.MappedType, [this[FaultID.MappedType].bind(this)]]
+    [ts.SyntaxKind.MappedType, [this[FaultID.MappedType].bind(this)]],
+    [ts.SyntaxKind.TupleType, [this[FaultID.TupleTypeToArray].bind(this)]],
+    [ts.SyntaxKind.StructDeclaration, [this[FaultID.StructDeclaration].bind(this)]],
+    [ts.SyntaxKind.UnionType, [this[FaultID.NoVoidUnionType].bind(this)]],
+    [ts.SyntaxKind.VariableDeclaration, [this[FaultID.ConstLiteralToType].bind(this)]]
   ]);
 
   fixNode(node: ts.Node): ts.VisitResult<ts.Node> {
@@ -195,6 +202,23 @@ export class Autofixer {
     return node;
   }
 
+  /**
+   * Rule: `arkts-ESObject-is-Any`
+   */
+  private [FaultID.ESObjectType](node: ts.Node): ts.VisitResult<ts.Node> {
+    /*
+     * Replace `ESObject` type with `Any` in declarations.
+     */
+
+    if (ts.isTypeReferenceNode(node) &&
+      ts.isIdentifier(node.typeName) &&
+      node.typeName.escapedText === ESObject) {
+      return replaceEsObjectTypeName(node, this.context.factory);
+    }
+
+    return node;
+  }
+  
   /**
    * Rule: `arkts-no-private-identifiers`
    */
@@ -945,7 +969,16 @@ export class Autofixer {
 
     if (ts.isInterfaceDeclaration(node)) {
       for (const member of node.members) {
-        if (ts.isCallSignatureDeclaration(member) || (ts.isMethodSignature(member) && member.questionToken)) {
+        if (ts.isIndexSignatureDeclaration(member) ||
+          ts.isCallSignatureDeclaration(member) ||
+          (ts.isMethodSignature(member) && member.questionToken)) {
+          /**
+           * If the header comment of an interface declaration contains `@noninterop` field, 
+           * the interface node will not be converted.
+           */
+          if (isNonInterop(node)) {
+            return undefined;
+          }
           const typeAliasDeclaration = ts.factory.createTypeAliasDeclaration(
           node.modifiers,
           node.name,
@@ -1192,6 +1225,118 @@ export class Autofixer {
       return !(ts.isIdentifier(expression) && LIMIT_DECORATOR.includes(expression.text));
     });
     (node as any).illegalDecorators = filteredDecorators;
+
+    return node;
+  }
+
+  /**
+   * Rule: `arkts-no-optional-member-function`
+   */
+  private [FaultID.NoOptionalMemberFunction](node: ts.Node): ts.VisitResult<ts.Node> {
+    /**
+     * Member functions with the optional question token will no longer be supported in ArkTS 1.2.
+     * Remove such methods from class declarations.
+     */
+    if (ts.isClassDeclaration(node)) {
+      const updatedMembers = node.members.filter(isNotOptionalMemberFunction);
+      return this.context.factory.updateClassDeclaration(
+        node,
+        node.modifiers,
+        node.name,
+        node.typeParameters,
+        node.heritageClauses,
+        updatedMembers
+      );
+    }
+    return node;
+  }
+
+  /**
+   * Rule: `tuple map to Array in type annotation`
+   */
+  private [FaultID.TupleTypeToArray](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (ts.isTupleTypeNode(node)) {
+      return this.context.factory.createTypeReferenceNode(
+        this.context.factory.createIdentifier('Array'),
+        [this.context.factory.createTypeReferenceNode(JSValue)]
+      );
+    }
+
+    return node;
+  }
+  
+  /**
+   * Rule: `keeping the struct in its original form`
+   */
+  private [FaultID.StructDeclaration](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (ts.isStructDeclaration(node)) {
+
+    const filteredMembers = node.members.filter(member => {
+      return !ts.isConstructorDeclaration(member);
+    });
+
+    // Create a new struct node, removing only the constructor
+    const newStruct = ts.factory.updateStructDeclaration(
+      node,
+      node.modifiers,
+      node.name,
+      node.typeParameters,
+      node.heritageClauses,
+      ts.factory.createNodeArray(filteredMembers)
+    );
+
+      return newStruct;
+    }
+
+    return node;
+  }
+
+  /**
+   * Rule: `union type with void mapped to Any`
+   */
+  private [FaultID.NoVoidUnionType](node: ts.Node): ts.VisitResult<ts.Node> {
+    
+    /**
+     * If a union type contains the void type,
+     * convert the union type to Any.
+     */
+    if (ts.isUnionTypeNode(node)) {
+      const hasVoid = node.types.some((type) => type.kind === ts.SyntaxKind.VoidKeyword);
+      if (hasVoid) {
+        return this.context.factory.createTypeReferenceNode(JSValue);
+      }
+    }
+    
+    return node;
+  }  
+
+  /*      
+  * Rule: `arkts-const-literal-to-type`
+  */
+  private [FaultID.ConstLiteralToType](node: ts.Node): ts.VisitResult<ts.Node> {
+    /**
+     * Convert const variable declarations with literal values to type declarations.
+     * e.g. export declare const c = 123; -> export declare const c: number;
+     */
+    
+    if (ts.isVariableDeclaration(node) && node.initializer) {
+      let typeNode: ts.TypeNode | undefined;
+
+      if (ts.isNumericLiteral(node.initializer)) {
+        typeNode = this.context.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword);
+      }
+
+      if (typeNode) {
+        const result = this.context.factory.createVariableDeclaration(
+          node.name,
+          node.exclamationToken,
+          typeNode,
+          undefined
+        );
+
+        return result;
+      }
+    }
 
     return node;
   }
@@ -2032,9 +2177,18 @@ function exportDefaultAssignment(
   }
 
   if (modifiers.some(modifier => modifier.kind === ts.SyntaxKind.DefaultKeyword)) {
-    const newModifiers = modifiers.filter(modifier =>
-      ts.isModifier(modifier)
-    ).concat(context.factory.createModifier(ts.SyntaxKind.DeclareKeyword));
+    const newModifiers = [...modifiers];
+    
+    if (!modifiers.some(modifier => modifier.kind === ts.SyntaxKind.DeclareKeyword)) {
+      const declareModifier = context.factory.createModifier(ts.SyntaxKind.DeclareKeyword);
+      
+      const defaultIndex = modifiers.findIndex(mod => mod.kind === ts.SyntaxKind.DefaultKeyword);
+      if (defaultIndex !== -1) {
+        newModifiers.splice(defaultIndex + 1, 0, declareModifier);
+      } else {
+        newModifiers.push(declareModifier);
+      }
+    }
 
     const safeModifiers = newModifiers as ts.Modifier[];
 
@@ -2239,3 +2393,29 @@ function updatePropertyAccessExpression(node: ts.PropertyAccessExpression, conte
   return undefined;
 }
 
+// Check whether the header comment contains the @noninterop field.
+function isNonInterop(node: ts.Node): boolean {
+  const fullText = ts.getOriginalNode(node).getFullText();
+  const codeText = ts.getOriginalNode(node).getText();
+  const commentText = fullText.replace(codeText, '');
+
+  return /\/\*\*.*?@noninterop\b.*?\*\//s.test(commentText);
+}
+
+function replaceEsObjectTypeName(node: ts.TypeReferenceNode, factory: ts.NodeFactory): ts.TypeReferenceNode {
+  return factory.updateTypeReferenceNode(
+    node,
+    factory.createIdentifier(JSValue),
+    node.typeArguments
+  );
+}
+  
+/**
+ * helper function to filter out optional(with question token) methods in class declaration.
+ */ 
+function isNotOptionalMemberFunction(member: ts.ClassElement): boolean {
+  if (ts.isMethodDeclaration(member) && member.questionToken) {
+    return false;
+  }
+  return true;
+}

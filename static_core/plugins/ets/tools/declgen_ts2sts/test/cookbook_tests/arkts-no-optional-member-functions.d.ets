@@ -12,25 +12,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-declare let b: boolean;
-declare let b45: boolean;
-declare let b1: boolean;
-declare const b2: boolean;
-declare let b451: number;
-declare const b3: boolean;
-declare const b6: boolean;
-declare const b5: boolean;
-declare let b4: boolean;
-declare let b8: boolean;
-declare const b9 = "";
-declare const b10: number;
-declare let b12: string;
-declare let b13: number;
-declare let b15: string;
-declare let b16: number;
-declare let b18: boolean;
-declare let b19: boolean;
-declare let b20: boolean;
-declare let b21: boolean;
-declare let a: "hello";
-declare let a2: number;
+export declare class A {
+    bar(): void;
+    var1: number;
+    var2?: number;
+}
+export declare class B extends A {
+}
+export declare abstract class C {
+    abstract foo(): void;
+}
+export declare class D {
+    var1?: number;
+}
+export declare class E {
+    protected foo(arg: A): A;
+    var1?: A;
+    var2: B;
+}
+export declare class F extends E {
+    bar(): B;
+    foo(arg: A): A;
+}
+export declare class G extends C {
+    fun(): string;
+    foo(): void;
+}

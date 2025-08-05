@@ -13,5 +13,5 @@
  * limitations under the License.
  */
 export declare class C {
-    static foo(a: number, b: number): ESObject;
+    static foo(a: number, b: number): Any;
 }

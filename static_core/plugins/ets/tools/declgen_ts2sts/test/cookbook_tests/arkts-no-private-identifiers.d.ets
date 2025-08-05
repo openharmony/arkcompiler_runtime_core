@@ -17,13 +17,13 @@ declare class C {
     b: number;
     static c: string;
     static d: string;
-    protected e: Map<ESObject, ESObject>;
+    protected e: Map<Any, Any>;
     protected static f: Map<string, string>;
     j(): number;
     k(): number;
     static l(): string;
     static m(): string;
-    protected o(): Map<ESObject, ESObject>;
+    protected o(): Map<Any, Any>;
     protected static p(): Map<string, string>;
 }
 declare class Singleton {

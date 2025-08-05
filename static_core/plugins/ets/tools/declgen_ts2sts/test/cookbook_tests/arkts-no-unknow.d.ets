@@ -12,6 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export declare let cab: ESObject;
-export declare const doc: ESObject;
-export declare function f(d: ESObject): ESObject;
+export declare let cab: Any;
+export declare const doc: Any;
+export declare function f(d: Any): Any;

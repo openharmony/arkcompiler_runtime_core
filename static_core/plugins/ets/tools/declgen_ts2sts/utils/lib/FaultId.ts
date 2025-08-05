@@ -63,6 +63,7 @@ export enum FaultID {
   NonDeclarationInNamespace,
   GeneratorFunction,
   FunctionContainsThis,
+  NoOptionalMemberFunction,
   PropertyAccessByIndex,
   JsxElement,
   EnumMemberNonConstInit,
@@ -96,7 +97,7 @@ export enum FaultID {
   ErrorSuppression,
   StrictDiagnostic,
   ImportAfterStatement,
-  EsObjectType,
+  ESObjectType,
   NumbericLiteral,
   ConditionalTypes,
   EnumWithMixedType,
@@ -139,6 +140,10 @@ export enum FaultID {
   NoBuiltInType,
   AddDeclareToTopLevelInterfaces,
   RemoveLimitDecorator,
+  TupleTypeToArray,
+  StructDeclaration,
+  NoVoidUnionType,
+  ConstLiteralToType,
   // this should always be last enum
   LAST_ID
 }

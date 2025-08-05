@@ -12,35 +12,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export type AnyAlias<T> = ESObject;
-export type UnknownAlias<T> = ESObject;
-export type SymbolAlias<T> = ESObject;
-export type FunctionAlias<T> = ESObject;
-export type ObjectAlias<T> = ESObject;
-export type CallSignatureAlias<T, R> = ESObject;
-export type ConstructorSignatureAlias<T> = ESObject;
-export type IndexSignatureAlias<T> = ESObject;
-export type IntersectionAlias<T, U> = ESObject;
-export type TypeA = ESObject;
-export type TypeB = ESObject;
+export type AnyAlias<T> = Any;
+export type UnknownAlias<T> = Any;
+export type SymbolAlias<T> = Any;
+export type FunctionAlias<T> = Any;
+export type ObjectAlias<T> = Any;
+export type CallSignatureAlias<T, R> = Any;
+export type ConstructorSignatureAlias<T> = Any;
+export type IndexSignatureAlias<T> = Any;
+export type IntersectionAlias<T, U> = Any;
+export type TypeA = Any;
+export type TypeB = Any;
 export type Result = IntersectionAlias<TypeA, TypeB>;
-export type Person = ESObject;
-export type ConditionalAlias<T, U, V> = ESObject;
+export type Person = Any;
+export type ConditionalAlias<T, U, V> = Any;
 export type Result2 = ConditionalAlias<number, string, boolean>;
-export type MappedAlias<T> = ESObject;
-export type Person2 = ESObject;
+export type MappedAlias<T> = Any;
+export type Person2 = Any;
 export type NewPerson = MappedAlias<Person>;
-export type TemplateLiteralAlias<T extends string> = ESObject;
+export type TemplateLiteralAlias<T extends string> = Any;
 export type Result3 = TemplateLiteralAlias<'A' | 'B'>;
-export type PickAlias<T, K extends ESObject> = ESObject;
-export type Person3 = ESObject;
+export type PickAlias<T, K extends Any> = Any;
+export type Person3 = Any;
 export type NameOnly = PickAlias<Person, 'name'>;
 export type MappedArray<T, U> = Array<(item: T) => U>;
-export type ArrayFilter<T> = ESObject;
-export type FunctionTransformer<Input, Output, NewInput, NewOutput> = ESObject;
-export type FunctionComposer<Input, Middle, Output> = ESObject;
-export type ObjectPropertyMapper<T, U> = ESObject;
-export type Fox<T> = ESObject;
+export type ArrayFilter<T> = Any;
+export type FunctionTransformer<Input, Output, NewInput, NewOutput> = Any;
+export type FunctionComposer<Input, Middle, Output> = Any;
+export type ObjectPropertyMapper<T, U> = Any;
+export type Fox<T> = Any;
 declare class MyClass<T> {
     value: T;
     constructor(value: T);

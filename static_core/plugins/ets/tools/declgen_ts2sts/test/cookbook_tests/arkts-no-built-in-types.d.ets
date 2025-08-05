@@ -12,14 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export declare let sym1: ESObject;
-export declare const sym2: ESObject;
-export declare const Direction: ESObject;
-export declare const map: Map<ESObject, string>;
-export declare const sym5: ESObject;
-export declare function getSymbol(): ESObject;
-export declare const mySym: ESObject;
-export declare function printSymbol(value: ESObject): void;
-export type SymbolAlias = ESObject;
+export declare let sym1: Any;
+export declare const sym2: Any;
+export declare const Direction: Any;
+export declare const map: Map<Any, string>;
+export declare const sym5: Any;
+export declare function getSymbol(): Any;
+export declare const mySym: Any;
+export declare function printSymbol(value: Any): void;
+export type SymbolAlias = Any;
 export declare const sym6: SymbolAlias;
-export declare const obj3: ESObject;
+export declare const obj3: Any;

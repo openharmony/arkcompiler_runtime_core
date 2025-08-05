@@ -12,5 +12,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export declare let p: ESObject;
-export declare function foo(arg: ESObject): void;
+export declare let p: Any;
+export declare function foo(arg: Any): void;

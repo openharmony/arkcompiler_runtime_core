@@ -12,25 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-declare let b: boolean;
-declare let b45: boolean;
-declare let b1: boolean;
-declare const b2: boolean;
-declare let b451: number;
-declare const b3: boolean;
-declare const b6: boolean;
-declare const b5: boolean;
-declare let b4: boolean;
-declare let b8: boolean;
-declare const b9 = "";
-declare const b10: number;
-declare let b12: string;
-declare let b13: number;
-declare let b15: string;
-declare let b16: number;
-declare let b18: boolean;
-declare let b19: boolean;
-declare let b20: boolean;
-declare let b21: boolean;
-declare let a: "hello";
-declare let a2: number;
+export interface StringIndexedObject {
+    [key: string]: number;
+    length: number;
+}
+
+export interface NumberIndexedObject {
+    [index: number]: string;
+    [key: string]: string;
+}
+
+export interface MixedIndexObject {
+    [key: string]: string | number;
+    [index: number]: string;
+    version: number;
+    name: string;
+}

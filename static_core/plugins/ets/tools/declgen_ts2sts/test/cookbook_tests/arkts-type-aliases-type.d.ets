@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 export type Matrix = number[][];
-export type Handler = ESObject;
-export type Predicate<T> = ESObject;
+export type Handler = Any;
+export type Predicate<T> = Any;
 export type NullableNumber = number | null;
 export type Dictionary = Map<string, string>;

@@ -12,16 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export declare let x: ESObject;
-export declare let a: ESObject;
-export declare let person: ESObject;
-export type Point = ESObject;
+export declare let x: Any;
+export declare let a: Any;
+export declare let person: Any;
+export type Point = Any;
 export declare let myPoint: Point;
-export declare function printPerson(person: ESObject): void;
-export declare let newPerson: ESObject;
-export type Config = ESObject;
+export declare function printPerson(person: Any): void;
+export declare let newPerson: Any;
+export type Config = Any;
 export declare let config: Config;
-export type Calculator = ESObject;
+export type Calculator = Any;
 export declare let myCalculator: Calculator;
-export type User = ESObject;
+export type User = Any;
 export declare let user: User;

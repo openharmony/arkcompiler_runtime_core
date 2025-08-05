@@ -12,16 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export type A = ESObject;
-export type PersonEmployee = ESObject;
-export type LoggerValidator = ESObject;
-type User = ESObject;
-export type ActiveUser = ESObject;
+export type A = Any;
+export type PersonEmployee = Any;
+export type LoggerValidator = Any;
+type User = Any;
+export type ActiveUser = Any;
 declare class Logger {
     log(message: string): void;
 }
 declare class Validator {
-    validate(data: ESObject): boolean;
+    validate(data: Any): boolean;
 }
 export declare interface Person {
     name: string;

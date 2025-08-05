@@ -14,3 +14,11 @@
  */
 export type union = number | string
 export let u: union = 123
+export function a(x:number):string | number | void {
+  if(x>0){
+    return x;
+  }else if (x<0){
+    return "x";
+  }
+}
+export type c = void | string | number;

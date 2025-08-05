@@ -15,7 +15,7 @@
 export declare let a: number;
 export declare let b: number;
 export declare let b1: bigint;
-export declare let c: ESObject;
+export declare let c: Any;
 export declare let d: string;
 export declare let e: boolean;
-export declare let sym: ESObject;
+export declare let sym: Any;

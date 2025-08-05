@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export type Example1 = ESObject;
+export type Example1 = Any;
 export declare interface Animal {
     live(): void;
 }

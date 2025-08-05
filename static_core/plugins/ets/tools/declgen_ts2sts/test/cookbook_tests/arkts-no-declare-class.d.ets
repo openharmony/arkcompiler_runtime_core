@@ -16,3 +16,7 @@ export default Test;
 declare class Test {
     name: string;
 }
+export declare class Base {
+    name: string;
+    constructor(name: string);
+}

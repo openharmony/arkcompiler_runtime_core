@@ -18,4 +18,4 @@ declare namespace A {
         export let x: number;
     }
 }
-declare const result = 10;
+declare const result: number;
