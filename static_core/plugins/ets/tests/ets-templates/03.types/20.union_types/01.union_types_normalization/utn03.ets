@@ -17,8 +17,9 @@
 desc: Test joint type(string | never).
 ---*/
 
+type A = string | never;
+
 function main(): void {
-    type A = string | never;
     let a: A = "hello";
 
     arktest.assertEQ(typeof a, "string");

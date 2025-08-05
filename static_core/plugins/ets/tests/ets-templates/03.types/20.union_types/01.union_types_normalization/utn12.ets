@@ -17,8 +17,9 @@
 desc: Test the same type of cancellation(string | string = string).
 ---*/
 
+type A = string | string;
+
 function main(): void {
-    type A = string | string;
     let a: A = "test";
 
     arktest.assertTrue(typeof a === "string");

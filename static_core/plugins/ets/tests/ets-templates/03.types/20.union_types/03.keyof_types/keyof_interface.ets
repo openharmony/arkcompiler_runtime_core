@@ -27,8 +27,9 @@ interface I {
   {{case.def}}
 }
 
+type t = keyof I
+
 function main() {
-    type t = keyof I
     {% if "negative" in case.tags %}
       let union: t = {{case.check[0]}}
     {% else %}

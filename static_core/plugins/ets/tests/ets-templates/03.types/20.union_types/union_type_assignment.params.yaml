@@ -482,8 +482,8 @@ cases2:
         kind: "square";
         sideLength: number;
       }
-    check: |-
       type Shape = Circle | Square;
+    check: |-
       arktest.assertTrue(true);
 
   - desc: Basic string union type. The test union type is "red" | "green" | "blue" and red is passed in. The case that matches 1 is expected.

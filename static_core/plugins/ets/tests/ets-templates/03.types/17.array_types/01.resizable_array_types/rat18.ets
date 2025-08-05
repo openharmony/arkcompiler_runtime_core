@@ -17,8 +17,9 @@
 desc: Test creating a 3D array(number[][][]).
 ---*/
 
+type ThreeDArray = number[][][];
+
 function main(): void {
-  type ThreeDArray = number[][][];
 
   let arrThree: ThreeDArray = [[[1, 2], [3, 4]], [[5, 6], [7, 8]]];
   let a = arrThree[0][1][0];

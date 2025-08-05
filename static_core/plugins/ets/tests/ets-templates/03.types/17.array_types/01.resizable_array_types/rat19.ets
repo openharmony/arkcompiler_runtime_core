@@ -17,9 +17,9 @@
 desc: Test whether the elements of the 3D array can be accessed normally(number[][][]).
 ---*/
 
-function main(): void {
-  type ThreeDArray = number[][][];
+type ThreeDArray = number[][][];
 
+function main(): void {
   let arrThree: ThreeDArray = [[[1, 2], [3, 4]], [[5, 6], [7, 8]]];
   let a = arrThree[1][1][0];
   arktest.assertEQ(a, 7);

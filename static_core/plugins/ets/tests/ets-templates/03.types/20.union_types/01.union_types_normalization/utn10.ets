@@ -17,8 +17,9 @@
 desc: The type of test type A when assigned to a string.
 ---*/
 
+type A = A[] | string;
+
 function main(): void {
-    type A = A[] | string;
     let a: A = "test";
 
     arktest.assertTrue(typeof a === "string");

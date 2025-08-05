@@ -129,13 +129,13 @@ function testHasKeyAndValueWithBlank() {
     arktest.assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
 }
 
-function testHasKeyAndValueWithComplex() {
-    interface ComplexValue {
-        name: string;
-        gender: string;
-        age: double;
-    }
+interface ComplexValue {
+    name: string;
+    gender: string;
+    age: number;
+}
 
+function testHasKeyAndValueWithComplex() {
     const value: ComplexValue = {
         name: 'squirrel',
         gender: 'male',

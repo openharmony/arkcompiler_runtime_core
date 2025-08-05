@@ -22,8 +22,9 @@ class A {
   method() {}
 }
 
+type t = keyof A
+
 function main() {
-   type t = keyof A
    let a: t = "field"
    a = "method"
 }

@@ -44,9 +44,8 @@ cases:
               return('sleeping');
             }
           }
+          type Animal = Cat | Dog;
       use: |-
-            type Animal = Cat | Dog;
-
             let animal: Animal = new Dog();
 
             if (animal instanceof Dog) {
@@ -56,8 +55,9 @@ cases:
             arktest.assertEQ(animal.sleep(), 'sleeping');
 
     - desc: Accessing a specific type attribute after type narrowing(type narrowing of number).
+      class: |-
+          type Primitive = number | boolean;
       use: |-
-            type Primitive = number | boolean;
             let p: Primitive = 7
             if (p instanceof Number) {
               let i: number = p as number
