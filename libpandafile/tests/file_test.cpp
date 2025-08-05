@@ -317,6 +317,27 @@ HWTEST(File, CheckHeader, testing::ext::TestSize.Level0)
     remove(ABC_FILE);
 }
 
+HWTEST(File, GetFileType, testing::ext::TestSize.Level0)
+{
+    // Write panda file to disk
+    ItemContainer container;
+
+    auto writer = FileWriter(ABC_FILE);
+    ASSERT_TRUE(container.Write(&writer));
+
+    os::file::File file = os::file::Open(ABC_FILE, os::file::Mode::READONLY);
+    ASSERT_TRUE(file.IsValid());
+    os::file::FileHolder fhHolder(file);
+    auto res = file.GetFileSize();
+    size_t size = res.Value();
+    os::mem::ConstBytePtr ptr =
+        os::mem::MapFile(file, os::mem::MMAP_PROT_READ, os::mem::MMAP_FLAG_PRIVATE, size).ToConst();
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(ptr.Get());
+    panda::panda_file::PandaFileType fileType = panda::panda_file::GetFileType(data, static_cast<int32_t>(size));
+    EXPECT_EQ(fileType, panda::panda_file::PandaFileType::FILE_DYNAMIC);
+    remove(ABC_FILE);
+}
+
 HWTEST(File, GetMode, testing::ext::TestSize.Level0)
 {
     // Write panda file to disk
