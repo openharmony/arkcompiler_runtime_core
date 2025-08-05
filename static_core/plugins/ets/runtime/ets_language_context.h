@@ -171,7 +171,7 @@ public:
 
     const uint8_t *GetIllegalArgumentExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_EXCEPTION.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_ERROR.data());
     }
 
     const uint8_t *GetIllegalAccessExceptionClassDescriptor() const override

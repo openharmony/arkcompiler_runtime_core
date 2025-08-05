@@ -94,7 +94,7 @@ export const FINAL_CLASS: string[] = [
     'FloatType',
     'FloatValue',
     'GC',
-    'IllegalArgumentException',
+    'IllegalArgumentError',
     'InterfaceType',
     'Int',
     'IntIntValue',
