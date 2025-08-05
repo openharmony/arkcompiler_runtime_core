@@ -20,7 +20,6 @@
 #include "events_gen.h"
 #include "optimizer/ir/analysis.h"
 #include "optimizer/ir/basicblock.h"
-#include "optimizer/ir/graph_cloner.h"
 #include "optimizer/ir_builder/ir_builder.h"
 #include "optimizer/analysis/alias_analysis.h"
 #include "optimizer/analysis/rpo.h"
@@ -28,14 +27,9 @@
 #include "optimizer/analysis/object_type_propagation.h"
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/optimizations/branch_elimination.h"
-#include "optimizer/optimizations/licm.h"
-#include "optimizer/optimizations/licm_conditions.h"
-#include "optimizer/optimizations/loop_peeling.h"
-#include "optimizer/optimizations/loop_unswitch.h"
 #include "optimizer/optimizations/object_type_check_elimination.h"
 #include "optimizer/optimizations/optimize_string_concat.h"
 #include "optimizer/optimizations/peepholes.h"
-#include "optimizer/optimizations/redundant_loop_elimination.h"
 #include "optimizer/optimizations/simplify_string_builder.h"
 #include "runtime/include/class.h"
 #include "events/events.h"
@@ -1252,37 +1246,6 @@ bool Inlining::CheckLoops(bool *calleeCallRuntime, Graph *graphInl)
     return true;
 }
 
-bool Inlining::TryToApplyOptimization(Graph *graphInl, InlineContext *ctx, CallInst *callInst, uint64_t savedPbcInstNum,
-                                      PassManagerStatistics *stats)
-{
-    graphInl->RunPass<Cleanup>(false);
-    auto peepholeApplied = graphInl->RunPass<Peepholes>();
-    auto objectTypeApplied = graphInl->RunPass<ObjectTypeCheckElimination>();
-    if (peepholeApplied || objectTypeApplied) {
-        auto clone = GraphCloner(graphInl, GetAllocator(), GetLocalAllocator()).CloneGraph();
-        ASSERT(clone != nullptr);
-        clone->RunPass<Licm>(g_options.GetCompilerLicmHoistLimit());
-        clone->RunPass<LicmConditions>();
-        clone->RunPass<RedundantLoopElimination>();
-        clone->RunPass<LoopPeeling>();
-        clone->RunPass<LoopUnswitch>(g_options.GetCompilerLoopUnswitchMaxLevel(),
-                                     g_options.GetCompilerLoopUnswitchMaxInsts());
-        clone->RunPass<BranchElimination>();
-        // after BranchElimination pass, we should do InfiniteLoop check again.
-        clone->RunPass<LoopAnalyzer>();
-        if (clone->HasInfiniteLoop()) {
-            EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::INF_LOOP);
-            stats->SetPbcInstNum(savedPbcInstNum);
-            return false;
-        }
-        graphInl->RunPass<BranchElimination>();
-    }
-    graphInl->RunPass<Cleanup>(false);
-    graphInl->RunPass<OptimizeStringConcat>();
-    graphInl->RunPass<SimplifyStringBuilder>();
-    return true;
-}
-
 /* static */
 void Inlining::PropagateObjectInfo(Graph *graphInl, CallInst *callInst)
 {
@@ -1318,9 +1281,23 @@ InlinedGraph Inlining::BuildGraph(InlineContext *ctx, CallInst *callInst, CallIn
 
     PropagateObjectInfo(graphInl, callInst);
 
-    if (!TryToApplyOptimization(graphInl, ctx, callInst, savedPbcInstNum, stats)) {
-        return InlinedGraph();
+    // Run basic optimizations
+    graphInl->RunPass<Cleanup>(false);
+    auto peepholeApplied = graphInl->RunPass<Peepholes>();
+    auto objectTypeApplied = graphInl->RunPass<ObjectTypeCheckElimination>();
+    if (peepholeApplied || objectTypeApplied) {
+        graphInl->RunPass<BranchElimination>();
+        // after BranchElimination pass, we should do InfiniteLoop check again.
+        graphInl->RunPass<LoopAnalyzer>();
+        if (graphInl->HasInfiniteLoop()) {
+            EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::INF_LOOP);
+            stats->SetPbcInstNum(savedPbcInstNum);
+            return InlinedGraph();
+        }
     }
+    graphInl->RunPass<Cleanup>(false);
+    graphInl->RunPass<OptimizeStringConcat>();
+    graphInl->RunPass<SimplifyStringBuilder>();
 
     auto inlinedInstsCount = CalculateInstructionsCount(graphInl);
     LOG_INLINING(DEBUG) << "Actual insts-bc ratio: (" << inlinedInstsCount << " insts) / ("

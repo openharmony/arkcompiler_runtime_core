@@ -734,6 +734,31 @@ class Checker
     @ir_scope = SearchScope.from_file(@ir_files[@current_file_index], 'IR')
   end
 
+  def PASS_AFTER_NTH(pass, nth = 1)
+    return if @options.release
+
+    $current_pass = "Pass after #{nth}th occurrence of: #{pass}"
+    matches = @ir_files.each_with_index.select { |x, i| File.basename(x).include? pass }
+    raise_error "IR file not found for pass: #{pass}. Possible cause: you forgot to select METHOD first" if matches.empty?
+    raise_error "Not enough occurrences (#{matches.size}) of pass #{pass} (requested #{nth})" if matches.size < nth
+
+    @current_file_index = matches[nth-1][1]
+    @ir_scope = SearchScope.from_file(@ir_files[@current_file_index], 'IR')
+  end
+
+  def PASS_BEFORE_NTH(pass, nth = 1)
+    return if @options.release
+
+    $current_pass = "Pass before #{nth}th occurrence of: #{pass}"
+    matches = @ir_files.each_with_index.select { |x, i| File.basename(x).include? pass }
+    raise_error "IR file not found for pass: #{pass}. Possible cause: you forgot to select METHOD first" if matches.empty?
+    raise_error "Not enough occurrences (#{matches.size}) of pass #{pass} (requested #{nth})" if matches.size < nth
+
+    @current_file_index = matches[nth-1][1] - 1
+    raise_error "No pass before first occurrence of #{pass}" if @current_file_index < 0
+    @ir_scope = SearchScope.from_file(@ir_files[@current_file_index], 'IR')
+  end
+
   def PASS_BEFORE(pass)
     return if @options.release
 
