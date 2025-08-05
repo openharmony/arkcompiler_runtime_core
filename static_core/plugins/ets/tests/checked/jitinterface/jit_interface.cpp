@@ -32,7 +32,7 @@ extern "C" ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     ani_module md;
     if (ANI_OK != env->FindModule(moduleName, &md)) {
         auto msg = std::string("Cannot find \"") + moduleName + std::string("\" module!");
-        ark::ets::stdlib::ThrowNewError(env, "std.core.RuntimeException", msg.data(), "C{std.core.String}:");
+        ark::ets::stdlib::ThrowNewError(env, "std.core.RuntimeError", msg.data(), "C{std.core.String}:");
         return ANI_ERROR;
     }
 

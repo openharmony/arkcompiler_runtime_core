@@ -61,7 +61,7 @@ std::string GenUuid4(ani_env *env)
         GenRandUint<uint16_t>(), (GenRandUint<uint16_t>() & NULL_FOUR_HIGH_BITS_IN_16) | RFC4122_UUID_VERSION_MARKER,
         (GenRandUint<uint16_t>() & NULL_TWO_HIGH_BITS_IN_16) | RFC4122_UUID_RESERVED_BITS, GenRandUint<uint64_t>());
     if ((n < 0) || (n > static_cast<int>(UUID_LEN))) {
-        stdlib::ThrowNewError(env, "std.core.RuntimeException", "GenerateRandomUUID failed", "C{std.core.String}:");
+        stdlib::ThrowNewError(env, "std.core.RuntimeError", "GenerateRandomUUID failed", "C{std.core.String}:");
         return std::string();
     }
     std::stringstream res;
@@ -79,7 +79,7 @@ std::array<uint8_t, UUID_BINARY_LEN> GenUuid4Binary(ani_env *env)
         GenRandUint<uint16_t>(), (GenRandUint<uint16_t>() & NULL_FOUR_HIGH_BITS_IN_16) | RFC4122_UUID_VERSION_MARKER,
         (GenRandUint<uint16_t>() & NULL_TWO_HIGH_BITS_IN_16) | RFC4122_UUID_RESERVED_BITS, GenRandUint<uint64_t>());
     if ((charsWritten < 0) || (charsWritten > UUID_STR_LEN_NO_DASH)) {
-        stdlib::ThrowNewError(env, "std.core.RuntimeException", "generateRandomBinaryUUID failed",
+        stdlib::ThrowNewError(env, "std.core.RuntimeError", "generateRandomBinaryUUID failed",
                               "C{escompat.Uint8Array}:");
         return {};
     }

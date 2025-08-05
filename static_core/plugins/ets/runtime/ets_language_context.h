@@ -161,7 +161,7 @@ public:
 
     const uint8_t *GetRuntimeExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::RUNTIME_EXCEPTION.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::RUNTIME_ERROR.data());
     }
 
     const uint8_t *GetFileNotFoundExceptionClassDescriptor() const override
