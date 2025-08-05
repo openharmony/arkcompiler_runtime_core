@@ -41,7 +41,8 @@ export namespace containers {
         */
         constructor() {
             this.actualCapacity = Int.MAX_VALUE;
-            this.tail = this.head = new ListNode<T>();
+            this.head = new ListNode<T>();
+            this.tail = this.head;
         }
 
         /**
@@ -54,7 +55,8 @@ export namespace containers {
                 throw new RangeError("Invalid capacity for LinkedBlockingQueue's constructor.");
             }
             this.actualCapacity = capacity;
-            this.tail = this.head = new ListNode<T>();
+            this.head = new ListNode<T>();
+            this.tail = this.head;
         }
 
         /**
@@ -64,7 +66,8 @@ export namespace containers {
         */
         constructor(iterable: Iterable<T>) {
             this.actualCapacity = Int.MAX_VALUE;
-            this.tail = this.head = new ListNode<T>();
+            this.head = new ListNode<T>();
+            this.tail = this.head;
             if (iterable) {
                 const entriesIter = iterable.$_iterator();
                 for (let iterRes = entriesIter.next(); !iterRes.done; iterRes = entriesIter.next()) {
@@ -87,7 +90,8 @@ export namespace containers {
                 throw new RangeError("Invalid capacity for LinkedBlockingQueue's constructor.");
             }
             this.actualCapacity = capacity;
-            this.tail = this.head = new ListNode<T>();
+            this.head = new ListNode<T>();
+            this.tail = this.head;
             const entriesIter = (iterable as Iterable<T>).$_iterator();
             for (let iterRes = entriesIter.next(); !iterRes.done; iterRes = entriesIter.next()) {
                 const val = iterRes.value;
