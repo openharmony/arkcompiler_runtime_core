@@ -75,3 +75,28 @@ function testNotInfiniteLoop() : void {
     let a = new MyIterable<Int>();
     let myClass = new MyClass1(a);
 }
+
+//! CHECKER      Check inlining infiniteLoop1
+//! SKIP_IF      @architecture == "arm32"
+//! RUN_PAOC     options: ""
+//! METHOD       "inlining_infiniteLoop.ETSGLOBAL::testInfiniteLoop1"
+//! PASS_AFTER   "Inline"
+//! INST_COUNT   "ReturnInlined", 0
+//! EVENT        /Inline,inlining_infiniteLoop.ETSGLOBAL::testInfiniteLoop1,inlining_infiniteLoop.ETSGLOBAL::foo,2,STATIC,INF_LOOP/
+function foo() {
+    let x = 0
+    while (x < 5) {
+        x = x + 1
+        continue
+    }
+    // x++
+    while(x > 0) {
+        'app.string.delete_show'
+    }
+
+    return 1
+}
+
+function testInfiniteLoop1(): void {
+    foo()
+}

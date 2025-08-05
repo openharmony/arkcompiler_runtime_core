@@ -19,9 +19,9 @@
 //! EVENT        /Compilation,escape_analysis_casted.ETSGLOBAL::main_char,.*,COMPILED/
 //! METHOD       "escape_analysis_casted.ETSGLOBAL::main_char"
 //! PASS_BEFORE  "EscapeAnalysis"
-//! INST_COUNT   "Cast", 12
+//! INST_COUNT   "Cast", 13
 //! PASS_AFTER   "EscapeAnalysis"
-//! INST_COUNT   "Cast", 12
+//! INST_COUNT   "Cast", 13
 //! INST_COUNT   ".u16  Cast i8", 0
 
 //! CHECKER      Check escape analysis create cast in different sign types char (ARM32)
@@ -30,9 +30,9 @@
 //! EVENT        /Compilation,escape_analysis_casted.ETSGLOBAL::main_char,.*,COMPILED/
 //! METHOD       "escape_analysis_casted.ETSGLOBAL::main_char"
 //! PASS_BEFORE  "EscapeAnalysis"
-//! INST_COUNT   "Cast", 12
+//! INST_COUNT   "Cast", 13
 //! PASS_AFTER   "EscapeAnalysis"
-//! INST_COUNT   "Cast", 12
+//! INST_COUNT   "Cast", 13
 //! INST_COUNT   ".u16  Cast i8", 0
 
 class A {
@@ -61,7 +61,7 @@ function main_char(): int {
 //! EVENT        /Compilation,escape_analysis_casted.ETSGLOBAL::main_long,.*,COMPILED/
 //! METHOD       "escape_analysis_casted.ETSGLOBAL::main_long"
 //! PASS_BEFORE  "EscapeAnalysis"
-//! INST_COUNT   "Cast", 13
+//! INST_COUNT   "Cast", 14
 //! INST_COUNT   ".u16  Cast i8", 0
 //! PASS_AFTER   "EscapeAnalysis"
 //! INST_COUNT   "Cast", 13
@@ -73,7 +73,7 @@ function main_char(): int {
 //! EVENT        /Compilation,escape_analysis_casted.ETSGLOBAL::main_long,.*,COMPILED/
 //! METHOD       "escape_analysis_casted.ETSGLOBAL::main_long"
 //! PASS_BEFORE  "EscapeAnalysis"
-//! INST_COUNT   "Cast", 13
+//! INST_COUNT   "Cast", 14
 //! INST_COUNT   ".u16  Cast i8", 0
 //! PASS_AFTER   "EscapeAnalysis"
 //! INST_COUNT   "Cast", 13
