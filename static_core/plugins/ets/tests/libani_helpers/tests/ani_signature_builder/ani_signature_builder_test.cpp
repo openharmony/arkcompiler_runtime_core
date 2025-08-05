@@ -25,7 +25,7 @@ using namespace arkts::ani_signature;
 TEST(BuilderTest, PrimitiveTypes)
 {
     ASSERT_EQ(Builder::BuildUndefined().Descriptor(), "Lstd/core/Object;");
-    ASSERT_EQ(Builder::BuildNull().Descriptor(), "Lstd/core/Object;");
+    ASSERT_EQ(Builder::BuildNull().Descriptor(), "Lstd/core/Null;");
     ASSERT_EQ(Builder::BuildBoolean().Descriptor(), "Z");
     ASSERT_EQ(Builder::BuildChar().Descriptor(), "C");
     ASSERT_EQ(Builder::BuildByte().Descriptor(), "B");
@@ -188,7 +188,7 @@ TEST(SignatureBuilderExtraTest, UndefinedAndNullReturn)
     SignatureBuilder sb2;
     sb2.Add(Builder::BuildInt()).Add(Builder::BuildFloat());
     sb2.SetReturnNull();
-    ASSERT_EQ(sb2.BuildSignatureDescriptor(), "IF:Lstd/core/Object;");
+    ASSERT_EQ(sb2.BuildSignatureDescriptor(), "IF:Lstd/core/Null;");
 }
 
 TEST(SignatureBuilderExtraTest, AddTypeDirectly)
@@ -250,7 +250,7 @@ TEST(SignatureBuilderExtraTest, SingleArgumentSignatureDescriptor)
 TEST(SignatureBuilderExtraTest, EmptyArgsSignatureDescriptor)
 {
     std::string sig = Builder::BuildSignatureDescriptor({}, Builder::BuildNull());
-    ASSERT_EQ(sig, ":Lstd/core/Object;");
+    ASSERT_EQ(sig, ":Lstd/core/Null;");
 }
 
 TEST(SignatureBuilderExtraTest, OverloadConsistency)
@@ -329,7 +329,7 @@ TEST(SignatureBuilderExtraTest, AllPrimitiveTypes)
     sb.SetReturnDouble();
     std::string expectedSig =
         "Lstd/core/Object;"
-        "Lstd/core/Object;"
+        "Lstd/core/Null;"
         "Z"
         "C"
         "B"

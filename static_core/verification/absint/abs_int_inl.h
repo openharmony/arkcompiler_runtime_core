@@ -2740,7 +2740,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(objectType_);
+        SetAcc(GetCachedType());
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -2752,7 +2752,7 @@ public:
         DBGBRK();
         uint16_t vd = inst_.GetVReg<FORMAT>();
         Sync();
-        SetReg(vd, objectType_);
+        SetReg(vd, GetCachedType());
         MoveToNextInst<FORMAT>();
         return true;
     }
