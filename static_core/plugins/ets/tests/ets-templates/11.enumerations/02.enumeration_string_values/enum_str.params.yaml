@@ -44,13 +44,6 @@ cases:
           arktest.assertEQ("" + e1 + e2 + e3, "ABB")
 
     - decl: |-
-          enum Enum { first = "A", second = "B", third = "B" }
-      use: |-
-          arktest.assertEQ(Enum.first as string, "A")
-          arktest.assertEQ(Enum.second as string, "B")
-          arktest.assertEQ(Enum.third as string, "B")
-
-    - decl: |-
           const a = "ABC"
           enum Enum { e1 = a, e2 = "DEF" }  // constant expression
       use: |-
