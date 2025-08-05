@@ -172,6 +172,21 @@ TEST_F(ClassGetStaticFieldRefTest, combination_test4)
 {
     CheckFieldValue("Lclass_get_static_field_ref_test/TestRefFinal;", "string_value");
 }
+
+TEST_F(ClassGetStaticFieldRefTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_ref_test.TestRefA", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_ref_test.TestRefA"));
+    ani_ref refValue {};
+    ASSERT_EQ(env_->Class_GetStaticField_Ref(cls, field, &refValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_ref_test.TestRefA"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

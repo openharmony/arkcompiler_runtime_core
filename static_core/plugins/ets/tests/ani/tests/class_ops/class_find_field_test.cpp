@@ -192,4 +192,15 @@ TEST_F(ClassFindFieldTest, invalid_argument3)
     ASSERT_EQ(env_->Class_FindField(cls, "x", nullptr), ANI_INVALID_ARGS);
 }
 
+TEST_F(ClassFindFieldTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_find_field_test.Point", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_field_test.Point"));
+    ani_field field {};
+    ASSERT_EQ(env_->Class_FindField(cls, "x", &field), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_field_test.Point"));
+}
+
 }  // namespace ark::ets::ani::testing

@@ -147,5 +147,21 @@ TEST_F(ClassSetStaticFieldByNameShortTest, invalid_argument1)
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Short(cls, "\n", setTarget), ANI_NOT_FOUND);
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Short(nullptr, cls, "short_value", setTarget), ANI_INVALID_ARGS);
 }
+
+TEST_F(ClassSetStaticFieldByNameShortTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_short_test.ShortStatic", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_short_test.ShortStatic"));
+    const ani_short shortValue = 10;
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Short(cls, "short_valuex", shortValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_short_test.ShortStatic"));
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Short(cls, "short_value", shortValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_short_test.ShortStatic"));
+}
+
 }  // namespace ark::ets::ani::testing
    // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

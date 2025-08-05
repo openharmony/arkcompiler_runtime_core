@@ -144,6 +144,22 @@ TEST_F(ClassGetStaticFieldByNameIntTest, combination_test4)
 {
     CheckFieldValue("Lclass_get_static_field_by_name_int_test/PackstaticFinal;", "int_value");
 }
+
+TEST_F(ClassGetStaticFieldByNameIntTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_int_test.GetIntStatic", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_int_test.GetIntStatic"));
+    ani_int intValue {};
+
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Int(cls, "agex", &intValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_int_test.GetIntStatic"));
+
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Int(cls, "age", &intValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_int_test.GetIntStatic"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

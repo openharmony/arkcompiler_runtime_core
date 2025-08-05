@@ -152,5 +152,21 @@ TEST_F(ClassSetStaticFieldByNameFloatTest, invalid_argument1)
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Float(cls, "\n", setTarget), ANI_NOT_FOUND);
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Float(nullptr, cls, "float_value", setTarget), ANI_INVALID_ARGS);
 }
+
+TEST_F(ClassSetStaticFieldByNameFloatTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_float_test.FloatStatic", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_float_test.FloatStatic"));
+    const ani_float floatValue = 2.2;
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Float(cls, "float_valuex", floatValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_float_test.FloatStatic"));
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Float(cls, "float_value", floatValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_float_test.FloatStatic"));
+}
+
 }  // namespace ark::ets::ani::testing
    // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

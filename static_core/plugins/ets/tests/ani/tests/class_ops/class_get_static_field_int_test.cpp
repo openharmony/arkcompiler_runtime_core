@@ -174,6 +174,21 @@ TEST_F(ClassGetStaticFieldIntTest, combination_test4)
 {
     CheckFieldValue("Lclass_get_static_field_int_test/TestIntFinal;", "int_value");
 }
+
+TEST_F(ClassGetStaticFieldIntTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_int_test.TestIntA", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "int_value", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_int_test.TestIntA"));
+    ani_int intValue {};
+    ASSERT_EQ(env_->Class_GetStaticField_Int(cls, field, &intValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_int_test.TestIntA"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

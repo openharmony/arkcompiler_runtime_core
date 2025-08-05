@@ -174,6 +174,18 @@ TEST_F(VariableSetValueBooleanTest, composite_case_4)
     ASSERT_EQ(env_->Variable_GetValue_Boolean(variable2, &getValue2), ANI_OK);
     ASSERT_EQ(getValue2, val2);
 }
+
+TEST_F(VariableSetValueBooleanTest, check_initialization)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "aBool", &variable), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("variable_set_value_boolean_test.anyns"));
+    const ani_boolean x = ANI_TRUE;
+    ASSERT_EQ(env_->Variable_SetValue_Boolean(variable, x), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("variable_set_value_boolean_test.anyns"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-identifier-naming)

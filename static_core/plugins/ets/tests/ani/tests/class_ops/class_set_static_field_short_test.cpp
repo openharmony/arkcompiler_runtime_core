@@ -163,6 +163,21 @@ TEST_F(ClassSetStaticFieldShortTest, combination_test4)
 {
     CheckFieldValue("Lclass_set_static_field_short_test/TestSetShortFinal;", "short_value");
 }
+
+TEST_F(ClassSetStaticFieldShortTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_short_test.TestSetShortFinal", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "short_value", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.TestSetShortFinal"));
+    const ani_short shortValue = 127U;
+    ASSERT_EQ(env_->Class_SetStaticField_Short(cls, field, shortValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_short_test.TestSetShortFinal"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

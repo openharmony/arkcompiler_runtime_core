@@ -174,6 +174,22 @@ TEST_F(ClassSetStaticFieldByNameByteTest, invalid_argument)
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Byte(cls, "\n", setTarget), ANI_NOT_FOUND);
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Byte(nullptr, cls, "byte_value", setTarget), ANI_INVALID_ARGS);
 }
+
+TEST_F(ClassSetStaticFieldByNameByteTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_byte_test.ByteStatic", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_byte_test.ByteStatic"));
+    const ani_short byteValue = 1U;
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Byte(cls, "byte_valuex", byteValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_byte_test.ByteStatic"));
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Byte(cls, "byte_value", byteValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_byte_test.ByteStatic"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

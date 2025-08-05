@@ -147,6 +147,21 @@ TEST_F(ClassGetStaticFieldByNameFloatTest, combination_test4)
     CheckFieldValue("Lclass_get_static_field_by_name_float_test/FloatStaticFinal;", "float_value");
 }
 
+TEST_F(ClassGetStaticFieldByNameFloatTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_float_test.GetFloatStatic", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.GetFloatStatic"));
+    ani_float floatValue {};
+
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Float(cls, "agex", &floatValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.GetFloatStatic"));
+
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Float(cls, "age", &floatValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.GetFloatStatic"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

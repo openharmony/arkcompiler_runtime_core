@@ -334,5 +334,33 @@ TEST_F(CallStaticMethodTest, call_static_method_bool_combine_scenes_8)
     ASSERT_EQ(env_->Class_CallStaticMethod_Boolean_A(cls, method2, &valueA, args), ANI_OK);
     ASSERT_EQ(valueA, ANI_FALSE);
 }
+
+TEST_F(CallStaticMethodTest, check_initialization_bool)
+{
+    ani_class cls {};
+    ani_static_method method {};
+    GetMethodData(&cls, &method);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_bool_test.Operations"));
+    ani_boolean value {};
+    ASSERT_EQ(env_->Class_CallStaticMethod_Boolean(cls, method, &value, ANI_TRUE, ANI_FALSE), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_bool_test.Operations"));
+}
+
+TEST_F(CallStaticMethodTest, check_initialization_bool_a)
+{
+    ani_class cls {};
+    ani_static_method method {};
+    GetMethodData(&cls, &method);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_bool_test.Operations"));
+    ani_boolean value {};
+    ani_value args[2U];
+    args[0U].z = ANI_TRUE;
+    args[1U].z = ANI_FALSE;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Boolean_A(cls, method, &value, args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_bool_test.Operations"));
+}
+
 }  // namespace ark::ets::ani::testing
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

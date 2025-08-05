@@ -115,6 +115,22 @@ TEST_F(IsAssignableFromTest, is_assignable_from_multiple_inheritance)
     CheckIsAssignableFrom<false>("Lis_assignable_from_test/InterfaceA;", "Lis_assignable_from_test/MyClass;");
 }
 
+TEST_F(IsAssignableFromTest, check_initialization)
+{
+    ani_class fromCls;
+    ASSERT_EQ(env_->FindClass("is_assignable_from_test.InterfaceA", &fromCls), ANI_OK);
+
+    ani_class toCls;
+    ASSERT_EQ(env_->FindClass("is_assignable_from_test.InterfaceB", &toCls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("is_assignable_from_test.InterfaceA"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("is_assignable_from_test.InterfaceB"));
+    ani_boolean result;
+    ASSERT_EQ(env_->Type_IsAssignableFrom(fromCls, toCls, &result), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("is_assignable_from_test.InterfaceB"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("is_assignable_from_test.InterfaceA"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

@@ -84,5 +84,13 @@ TEST_F(ClassFindMethodInModuleTest, find_method_combine_scenes_001)
     ASSERT_EQ(sum, value1 + value2);
 }
 
+TEST_F(ClassFindMethodInModuleTest, check_initialization)
+{
+    ASSERT_FALSE(IsRuntimeClassInitialized("@abcModule.class_find_method_in_module_test.nsa.A"));
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("@abcModule.class_find_method_in_module_test.nsa.A", &cls), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("@abcModule.class_find_method_in_module_test.nsa.A"));
+}
+
 }  // namespace ark::ets::ani::testing
    // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

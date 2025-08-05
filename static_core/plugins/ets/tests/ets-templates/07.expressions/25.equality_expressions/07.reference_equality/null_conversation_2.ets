@@ -20,8 +20,8 @@ desc: The result of !== at runtime is false if both operand values are null
 class A {}
 
 function main(): void {
-  let b: A|null = null;
-  let c: A|null = null;
-  assertTrue( (b !== c) == false )
-  assertTrue( (b != c) == false )
+  let b: A | null = null;
+  let c: A | null = null;
+  arktest.assertTrue( (b !== c) == false )
+  arktest.assertTrue( (b != c) == false )
 }

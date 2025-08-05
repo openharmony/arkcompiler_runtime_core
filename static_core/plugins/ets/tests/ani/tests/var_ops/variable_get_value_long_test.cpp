@@ -75,6 +75,18 @@ TEST_F(VariableGetValueLongTest, invalid_args_value)
 
     ASSERT_EQ(env_->Variable_GetValue_Long(variable, nullptr), ANI_INVALID_ARGS);
 }
+
+TEST_F(VariableGetValueLongTest, check_initialization)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "x", &variable), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("variable_get_value_long_test.anyns"));
+    ani_long x;
+    ASSERT_EQ(env_->Variable_GetValue_Long(variable, &x), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("variable_get_value_long_test.anyns"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(readability-identifier-naming, misc-non-private-member-variables-in-classes)

@@ -352,5 +352,33 @@ TEST_F(CallStaticMethodTest, call_static_method_char_combine_scenes_8)
     ASSERT_EQ(env_->Class_CallStaticMethod_Char_A(cls, method2, &valueA, args), ANI_OK);
     ASSERT_EQ(valueA, 'C' - 'A');
 }
+
+TEST_F(CallStaticMethodTest, check_initialization_char)
+{
+    ani_class cls {};
+    ani_static_method method {};
+    GetMethodData(&cls, &method);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_char_test.Operations"));
+    ani_char value {};
+    ASSERT_EQ(env_->Class_CallStaticMethod_Char(cls, method, &value, 'A', 'C'), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_char_test.Operations"));
+}
+
+TEST_F(CallStaticMethodTest, check_initialization_char_a)
+{
+    ani_class cls {};
+    ani_static_method method {};
+    GetMethodData(&cls, &method);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_char_test.Operations"));
+    ani_char value {};
+    ani_value args[2U];
+    args[0U].c = 'A';
+    args[1U].c = 'B';
+    ASSERT_EQ(env_->Class_CallStaticMethod_Char_A(cls, method, &value, args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_char_test.Operations"));
+}
+
 }  // namespace ark::ets::ani::testing
    // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

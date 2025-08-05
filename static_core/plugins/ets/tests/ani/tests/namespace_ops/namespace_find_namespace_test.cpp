@@ -146,4 +146,18 @@ TEST_F(NamespaceFindNamespaceTest, find_namespace07)
 
     ASSERT_EQ(env_->Namespace_FindNamespace(ns, "LA/C;", nullptr), ANI_INVALID_ARGS);
 }
+
+TEST_F(NamespaceFindNamespaceTest, check_initialization)
+{
+    ani_namespace ns {};
+    ASSERT_EQ(env_->FindNamespace("namespace_find_namespace_test.test", &ns), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_namespace_test.test"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_namespace_test.test.A"));
+    ani_namespace result {};
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "A", &result), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_namespace_test.test.A"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_namespace_test.test"));
+}
+
 }  // namespace ark::ets::ani::testing

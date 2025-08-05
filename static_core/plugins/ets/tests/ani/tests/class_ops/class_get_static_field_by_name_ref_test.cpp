@@ -157,6 +157,22 @@ TEST_F(ClassGetStaticFieldByNameRefTest, combination_test4)
 {
     CheckFieldValue("Lclass_get_static_field_by_name_ref_test/BoxStaticFinal;", "string_value");
 }
+
+TEST_F(ClassGetStaticFieldByNameRefTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_ref_test.BoxStaticA", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_ref_test.BoxStaticA"));
+    ani_ref refValue {};
+
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, "string_valuex", &refValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_ref_test.BoxStaticA"));
+
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, "string_value", &refValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_ref_test.BoxStaticA"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

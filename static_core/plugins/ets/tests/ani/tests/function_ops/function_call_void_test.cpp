@@ -429,6 +429,34 @@ TEST_F(FunctionCallVoidTest, function_call_void_010)
     ASSERT_EQ(env_->Function_Call_Void(fn1, nullptr), ANI_OK);
     ASSERT_EQ(env_->Function_Call_Void_A(fn1, nullptr), ANI_INVALID_ARGS);
 }
+
+TEST_F(FunctionCallVoidTest, check_initialization_void)
+{
+    ani_namespace ns {};
+    ani_function fn1 {};
+    ani_function fn2 {};
+    GetMethod(&ns, &fn1, &fn2);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@functionModule.function_call_void_test.ops"));
+    ASSERT_EQ(env_->Function_Call_Void(fn1, INT_VAL1, INT_VAL2), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("@functionModule.function_call_void_test.ops"));
+}
+
+TEST_F(FunctionCallVoidTest, check_initialization_void_a)
+{
+    ani_namespace ns {};
+    ani_function fn1 {};
+    ani_function fn2 {};
+    GetMethod(&ns, &fn1, &fn2);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@functionModule.function_call_void_test.ops"));
+    ani_value args[2U];
+    args[0U].i = INT_VAL1;
+    args[1U].i = INT_VAL2;
+    ASSERT_EQ(env_->Function_Call_Void_A(fn1, args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("@functionModule.function_call_void_test.ops"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

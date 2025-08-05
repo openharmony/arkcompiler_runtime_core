@@ -382,5 +382,40 @@ TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_by_name_double_
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Double_A(cls, "callPrivateMethod", "DD:D", &valueA, args), ANI_OK);
     ASSERT_EQ(valueA, VAL2 - VAL1);
 }
+
+TEST_F(ClassCallStaticMethodByNameDoubleTest, check_initialization_double)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_double_test.G", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_double_test.G"));
+    ani_double value {};
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Double(cls, "publicMethodx", "dd:d", &value, VAL1, VAL2),
+              ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_double_test.G"));
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Double(cls, "publicMethod", "dd:d", &value, VAL1, VAL2), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_double_test.G"));
+}
+
+TEST_F(ClassCallStaticMethodByNameDoubleTest, check_initialization_double_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_double_test.G", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_double_test.G"));
+    ani_double value {};
+    ani_value args[2U];
+    args[0U].d = VAL1;
+    args[1U].d = VAL2;
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Double_A(cls, "publicMethodx", "dd:d", &value, args), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_double_test.G"));
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Double_A(cls, "publicMethod", "dd:d", &value, args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_double_test.G"));
+}
+
 }  // namespace ark::ets::ani::testing
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

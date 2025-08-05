@@ -249,4 +249,13 @@ TEST_F(EnumFindTest, find_enum_combine_scenes_004)
     RetrieveStringFromAni(env_, blueName, itemName);
     ASSERT_STREQ(itemName.data(), "BLUE");
 }
+
+TEST_F(EnumFindTest, check_initialization)
+{
+    ASSERT_FALSE(IsRuntimeClassInitialized("find_enum_test.EnumA001"));
+    ani_enum aniEnum {};
+    ASSERT_EQ(env_->FindEnum("find_enum_test.EnumA001", &aniEnum), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("find_enum_test.EnumA001"));
+}
+
 }  // namespace ark::ets::ani::testing
