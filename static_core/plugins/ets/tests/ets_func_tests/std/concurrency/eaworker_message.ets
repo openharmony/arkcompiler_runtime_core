@@ -92,14 +92,6 @@ function testMainQuit() {
 
 }
 
-function testDoubleQuit() {
-    let eaw = new EAWorker();
-    eaw.quit();
-    eaw.start();
-    eaw.quit();
-    eaw.quit();
-}
-
 function testQuit() {
     let eaw = new EAWorker();
     let waiter = new Event();
@@ -162,7 +154,7 @@ function testUncaughtExceptionHandler() {
     let waiter = new Event();
     eaw1.start();
     let expectError = new Error('expectError');
-    eaw1.setUnCaughtExceptionHandler((e: Error) => {
+    eaw1.setUncaughtExceptionHandler((e: Error) => {
         arktest.assertEQ(expectError, e);
         waiter.fire();
     });
@@ -276,15 +268,14 @@ function testMain() {
     }, new Error('Main worker cannot set priority'));
 
     arktest.expectError(() => {
-        mainWorker.setUnCaughtExceptionHandler((e: Error) => {});
+        mainWorker.setUncaughtExceptionHandler((e: Error) => {});
     }, new Error('Main worker cannot have uncaught exception handler'));
 
     arktest.expectError(() => {
         mainWorker.start();
     }, new Error('Main worker cannot be started'));
 
-    arktest.assertEQ(mainWorker.getUnCaughtExceptionHandler(), undefined);
-
+    arktest.assertEQ(mainWorker.getUncaughtExceptionHandler(), undefined);
 }
 
 function testTaskPool() {
@@ -297,13 +288,38 @@ function testTaskPool() {
     CoroutineExtras.stopTaskpool();
 }
 
+function testQuitBeforeStart() {
+    let eaw = new EAWorker();
+    arktest.expectError(() => {
+        eaw.quit();
+    }, new Error('Cannot stop worker before start'));
+    eaw.start();
+    eaw.quit();
+    arktest.expectError(() => {
+        eaw.start();
+    }, new Error('Worker already started or quit'));
+    eaw.quit();
+}
+
+function testQuitSafelyBeforeStart() {
+    let eaw = new EAWorker();
+    arktest.expectError(() => {
+        eaw.quitSafely();
+    }, new Error('Cannot stop worker before start'));
+    eaw.start();
+    eaw.quitSafely();
+    arktest.expectError(() => {
+        eaw.start();
+    }, new Error('Worker already started or quit'));
+    eaw.quitSafely();
+}
+
 function main() {
     const suite = new arktest.ArkTestsuite('EAWorker Message Test Suite');
     suite.addTest('testNamedEAWorker', testNamedEAWorker);
     suite.addTest('testTaskEAWorker', testTaskEAWorker);
     suite.addTest('testIsAliveAndQuit', testIsAliveAndQuit);
     suite.addTest('testMainQuit', testMainQuit);
-    suite.addTest('testDoubleQuit', testDoubleQuit);
     suite.addTest('testQuitSafely', testQuitSafely);
     suite.addTest('testQuit', testQuit);
     suite.addTest('testCurrent', testCurrent);
@@ -313,5 +329,7 @@ function main() {
     suite.addTest('testCommunication', testCommunication);
     suite.addTest('testMainWorker', testMain);
     suite.addTest('testTaskPool', testTaskPool);
+    suite.addTest('testQuitBeforeStart', testQuitBeforeStart);
+    suite.addTest('testQuitSafelyBeforeStart', testQuitSafelyBeforeStart);
     suite.run();
 }

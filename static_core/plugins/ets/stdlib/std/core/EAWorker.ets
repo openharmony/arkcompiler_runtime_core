@@ -103,7 +103,7 @@ export class EAWorker {
      * Create EAWorker instance
      * @param { boolean } [needInterop=false] true if need to create JS runtime
      */
-    constructor(needInterop: boolean = false) {
+    constructor supportInterop(needInterop: boolean = false) {
         this("EAWorker", needInterop);
     }
 
@@ -112,7 +112,7 @@ export class EAWorker {
      * @param { string } name The name of the worker
      * @param { boolean } [needInterop=false] true if need to create JS runtime
      */
-    constructor(name: string, needInterop: boolean = false) {
+    constructor withName(name: string, needInterop: boolean = false) {
         this.name = name;
         this.eaworkerNum = EAWorker.calculateEAWorkerCount();
         this.worker = needInterop ? new InteropWorker(this.name, this.eaworkerNum) : new StaticWorker(this.name, this.eaworkerNum);
@@ -124,7 +124,7 @@ export class EAWorker {
      * @param { Task } task The task function to execute
      * @param { boolean } [needInterop=false] true if need to create JS runtime
      */
-    constructor(task: Task, needInterop: boolean = false) {
+    constructor withTask(task: Task, needInterop: boolean = false) {
         this("EAWorker", task, needInterop);
     }
 
@@ -134,13 +134,15 @@ export class EAWorker {
      * @param { ()=>void } task The task function to execute
      * @param { boolean } [needInterop=false] true if need to create JS runtime
      */
-    constructor(name: string, task: ()=>void, needInterop: boolean = false) {
+    constructor withNameAndTask(name: string, task: ()=>void, needInterop: boolean = false) {
         this.name = name;
         this.eaworkerNum = EAWorker.calculateEAWorkerCount();
         this.worker = needInterop ? new InteropWorker(this.name, this.eaworkerNum) : new StaticWorker(this.name, this.eaworkerNum);
         this.messages = this.worker.getMessages();
         this.initialTask = task;
     }
+
+    overload constructor { supportInterop, withName, withTask, withNameAndTask }
 
     /**
      * Get the worker identifier
@@ -150,7 +152,7 @@ export class EAWorker {
         if (this.isMain) {
             return MAIN_WORKER_ID;
         }
-        if (!this.loopStarted.get()) {
+        if (!this.isStarted.get()) {
             return undefined;
         }
         return this.worker.getWorkerId();
@@ -176,7 +178,7 @@ export class EAWorker {
             throw new Error("Main worker cannot be started");
         }
         if (this.isStarted.get()) {
-            throw new Error("Worker already started");
+            throw new Error("Worker already started or quit");
         }
         this.worker.start(this.initialTask);
         this.loopStarted.set(true);
@@ -233,6 +235,9 @@ export class EAWorker {
             throw new Error("Main worker cannot be stopped");
             return;
         }
+        if (!this.isStarted.get()) {
+            throw new Error("Cannot stop worker before start");
+        }
         if (!this.loopStarted.get()) {
             return;
         }
@@ -252,6 +257,9 @@ export class EAWorker {
             throw new Error("Main worker cannot be stopped");
             return;
         }
+        if (!this.isStarted.get()) {
+            throw new Error("Cannot stop worker before start");
+        }
         if (!this.loopStarted.get()) {
             return;
         }
@@ -264,7 +272,7 @@ export class EAWorker {
      * Set the uncaught exception handler for the worker
      * @param { (error: Error) => void } handler The exception handler function
      */
-    public setUnCaughtExceptionHandler(handler: (error: Error) => void): void {
+    public setUncaughtExceptionHandler(handler: (error: Error) => void): void {
         if (this.isMain) {
             throw new Error("Main worker cannot have uncaught exception handler");
         }
@@ -275,7 +283,7 @@ export class EAWorker {
      * Get the current uncaught exception handler
      * @returns { (error: Error) => void } The current exception handler function
      */
-    public getUnCaughtExceptionHandler(): ErrorHandler | undefined {
+    public getUncaughtExceptionHandler(): ErrorHandler | undefined {
         if (this.isMain) {
             return undefined;
         }
@@ -334,7 +342,7 @@ export class EAWorker {
         }
         let res: concurrency.Message | undefined = undefined;
         this.messages.forEach((value: MessageStatus, key: concurrency.Message) => {
-            if (key.equals(message)) {
+            if (key.equals(message) && value != MessageStatus.CANCELLED) {
                 res = key;
             }
         });
@@ -446,9 +454,10 @@ export class EAWorker {
             EAWorker.postToMain<void>(task);
             return;
         }
-        if (this.loopStarted.get()) {
-            this.worker.run<void>(task);
+        if (!this.loopStarted.get()) {
+            throw new Error("Can not post task when worker is not started");
         }
+        this.worker.run<void>(task);
     }
 
     /**
