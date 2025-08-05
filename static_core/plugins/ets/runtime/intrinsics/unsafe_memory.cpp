@@ -29,7 +29,7 @@ static bool EnsureBootContext()
     auto *coro = EtsCoroutine::GetCurrent();
     auto ctx = StackWalker::Create(coro).GetMethod()->GetClass()->GetLoadContext();
     if (!ctx->IsBootContext()) {
-        auto e = panda_file_items::class_descriptors::ILLEGAL_STATE_EXCEPTION;
+        auto e = panda_file_items::class_descriptors::ILLEGAL_STATE_ERROR;
         auto msg = "Unsafe intrinsics cannot be called outside of the boot context";
         ThrowEtsException(coro, e, msg);
         return false;

@@ -100,7 +100,7 @@
         "interfaces": [
             "NoDataException",
             "ArgumentOutOfRangeException",
-            "IllegalStateException",
+            "IllegalStateError",
             "UnsupportedOperationException",
             "IllegalArgumentException",
             "RuntimeException"

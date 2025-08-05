@@ -86,7 +86,7 @@ export namespace GC {
      *
      * @throws IllegalArgumentException if current GC does not support requested cause
      * @throws UnsupportedOperationException if current GC does not support requested cause
-     * @throws IllegalStateException if try to run threshold GC collection not in place after calling postponeGCStart
+     * @throws IllegalStateError if try to run threshold GC collection not in place after calling postponeGCStart
      *
      * @returns id of started GC.
      * - The id can be passed to waitForFinishGC to ensure the GC is finished.
@@ -140,7 +140,7 @@ export namespace GC {
      * @see postponeGCEnd
      *
      * @throws UnsupportedOperationException if GC doesn't support postponing
-     * @throws IllegalStateException if it called after calling postponeGCStart
+     * @throws IllegalStateError if it called after calling postponeGCStart
      *         without calling postponeGCEnd
      */
     export native function postponeGCStart(): void;
@@ -152,7 +152,7 @@ export namespace GC {
      * @see postponeGCStart
      *
      * @throws UnsupportedOperationException if GC doesn't support postponing
-     * @throws IllegalStateException if it called without calling postponeGCStart
+     * @throws IllegalStateError if it called without calling postponeGCStart
      */
     export native function postponeGCEnd(): void;
 
