@@ -23,118 +23,10 @@
 namespace ark::compiler {
 class BasicBlock;
 
-inline bool IsNotCommutativeInst(Inst *inst)
-{
-    return !inst->IsCommutative() || DataType::IsFloatType(inst->GetType());
-}
-
 inline bool IsAddressArithmeticInst(Inst *inst)
 {
     return inst->GetType() == DataType::POINTER &&
            (inst->GetOpcode() == Opcode::AddI || inst->GetOpcode() == Opcode::SubI);
-}
-
-static bool AddClassInst(Inst *inst, VnObject *obj)
-{
-    if (inst->GetOpcode() != Opcode::LoadAndInitClass && inst->GetOpcode() != Opcode::InitClass &&
-        inst->GetOpcode() != Opcode::LoadClass) {
-        return false;
-    }
-
-    obj->Add(static_cast<VnObject::ObjType>(Opcode::InitClass));
-    auto classInst = static_cast<ClassInst *>(inst);
-    auto klass = classInst->GetClass();
-    if (klass == nullptr) {
-        obj->Add(classInst->GetTypeId());
-    } else {
-        obj->Add(reinterpret_cast<VnObject::DoubleObjType>(klass));
-    }
-    inst->SetVnObject(obj);
-    return true;
-}
-
-static bool AddGlobalVarInst(Inst *inst, VnObject *obj)
-{
-    if (inst->GetOpcode() != Opcode::GetGlobalVarAddress) {
-        return false;
-    }
-
-    obj->Add(static_cast<VnObject::ObjType>(Opcode::GetGlobalVarAddress));
-    obj->Add(inst->CastToGetGlobalVarAddress()->GetTypeId());
-    inst->SetVnObject(obj);
-    return true;
-}
-
-static bool AddSelectImmInst(Inst *inst, VnObject *obj)
-{
-    if (inst->GetOpcode() != Opcode::SelectImm) {
-        return false;
-    }
-
-    obj->Add(static_cast<VnObject::ObjType>(Opcode::SelectImm));
-    obj->Add(static_cast<VnObject::HalfObjType>(inst->GetType()),
-             static_cast<VnObject::HalfObjType>(inst->CastToSelectImm()->GetCc()));
-
-    for (auto input : inst->GetInputs()) {
-        auto inputInst = inst->GetDataFlowInput(input.GetInst());
-        auto vn = inputInst->GetVN();
-        ASSERT(vn != INVALID_VN);
-        obj->Add(vn);
-    }
-    obj->Add(inst->CastToSelectImm()->GetImm());
-    return true;
-}
-
-static bool AddCommutativeInst(Inst *inst, VnObject *obj)
-{
-    if (IsNotCommutativeInst(inst)) {
-        return false;
-    }
-
-    [[maybe_unused]] constexpr auto INPUTS_NUM = 2;
-    ASSERT(inst->GetInputsCount() == INPUTS_NUM);
-    auto input0 = inst->GetDataFlowInput(inst->GetInput(0).GetInst());
-    auto input1 = inst->GetDataFlowInput(inst->GetInput(1).GetInst());
-    ASSERT(input0->GetVN() != INVALID_VN);
-    ASSERT(input1->GetVN() != INVALID_VN);
-    if (input0->GetId() > input1->GetId()) {
-        obj->Add(input0->GetVN());
-        obj->Add(input1->GetVN());
-    } else {
-        obj->Add(input1->GetVN());
-        obj->Add(input0->GetVN());
-    }
-
-    inst->SetVnObject(obj);
-    return true;
-}
-
-static void AddSpecialTraits(Inst *inst, VnObject *obj)
-{
-    switch (inst->GetOpcode()) {
-        case Opcode::Intrinsic:
-            obj->Add(static_cast<VnObject::ObjType>(inst->CastToIntrinsic()->GetIntrinsicId()));
-            break;
-        case Opcode::CompareAnyType:
-            obj->Add(static_cast<VnObject::ObjType>(inst->CastToCompareAnyType()->GetAnyType()));
-            break;
-        case Opcode::CastAnyTypeValue:
-            obj->Add(static_cast<VnObject::ObjType>(inst->CastToCastAnyTypeValue()->GetAnyType()));
-            break;
-        case Opcode::CastValueToAnyType:
-            obj->Add(static_cast<VnObject::ObjType>(inst->CastToCastValueToAnyType()->GetAnyType()));
-            break;
-        case Opcode::LoadStatic:
-            ASSERT(inst->CastToLoadStatic()->GetObjField() != nullptr);
-            obj->Add(reinterpret_cast<VnObject::DoubleObjType>(inst->CastToLoadStatic()->GetObjField()));
-            break;
-        case Opcode::LoadObject:
-            ASSERT(inst->CastToLoadObject()->GetObjField() != nullptr);
-            obj->Add(reinterpret_cast<VnObject::DoubleObjType>(inst->CastToLoadObject()->GetObjField()));
-            break;
-        default:
-            break;
-    }
 }
 
 static bool IsIrreducibleClassInst(Inst *inst, Inst *equivInst)
@@ -143,75 +35,8 @@ static bool IsIrreducibleClassInst(Inst *inst, Inst *equivInst)
            (inst->GetOpcode() == Opcode::InitClass || inst->GetOpcode() == Opcode::LoadAndInitClass);
 }
 
-static bool AddResolver(Inst *inst, VnObject *obj)
+void VnObject::Set(Inst *inst)
 {
-    if (!inst->IsResolver()) {
-        return false;
-    }
-
-    for (auto input : inst->GetInputs()) {
-        auto inputInst = inst->GetDataFlowInput(input.GetInst());
-        if (!inputInst->IsSaveState()) {
-            auto vn = inputInst->GetVN();
-            ASSERT(vn != INVALID_VN);
-            obj->Add(vn);
-        }
-    }
-
-    if (inst->GetOpcode() == Opcode::ResolveVirtual) {
-        obj->Add(inst->CastToResolveVirtual()->GetCallMethodId());
-    } else if (inst->GetOpcode() == Opcode::ResolveStatic) {
-        obj->Add(inst->CastToResolveStatic()->GetCallMethodId());
-    } else if (inst->GetOpcode() == Opcode::ResolveObjectField) {
-        obj->Add(inst->CastToResolveObjectField()->GetTypeId());
-        obj->Add(reinterpret_cast<VnObject::DoubleObjType>(inst->CastToResolveObjectField()->GetMethod()));
-    } else if (inst->GetOpcode() == Opcode::ResolveObjectFieldStatic) {
-        obj->Add(inst->CastToResolveObjectFieldStatic()->GetTypeId());
-        obj->Add(reinterpret_cast<VnObject::DoubleObjType>(inst->CastToResolveObjectFieldStatic()->GetMethod()));
-    } else if (inst->GetOpcode() == Opcode::ResolveByName) {
-        obj->Add(inst->CastToResolveByName()->GetCallMethodId());
-    } else {
-        UNREACHABLE();
-    }
-
-    inst->SetVnObject(obj);
-    return true;
-}
-
-void VnObject::Add(Inst *inst)
-{
-    if (AddClassInst(inst, this)) {
-        return;
-    }
-    if (AddGlobalVarInst(inst, this)) {
-        return;
-    }
-    if (AddSelectImmInst(inst, this)) {
-        return;
-    }
-
-    Add(static_cast<ObjType>(inst->GetOpcode()));
-    Add(static_cast<ObjType>(inst->GetType()));
-
-    AddSpecialTraits(inst, this);
-
-    if (AddResolver(inst, this)) {
-        return;
-    }
-
-    if (AddCommutativeInst(inst, this)) {
-        return;
-    }
-
-    for (auto input : inst->GetInputs()) {
-        auto inputInst = inst->GetDataFlowInput(input.GetInst());
-        if (!inputInst->IsSaveState()) {
-            auto vn = inputInst->GetVN();
-            ASSERT(vn != INVALID_VN);
-            Add(vn);
-        }
-    }
-
     inst->SetVnObject(this);
 }
 
@@ -339,7 +164,7 @@ void ValNum::FindEqualVnOrCreateNew(Inst *inst)
 
     auto obj = GetGraph()->GetLocalAllocator()->New<VnObject>();
     ASSERT(obj != nullptr);
-    obj->Add(inst);
+    obj->Set(inst);
     COMPILER_LOG(DEBUG, VN_OPT) << " Equivalent instructions are searched for inst with id " << inst->GetId();
     auto it = mapInsts_.find(obj);
     if (it == mapInsts_.cend()) {
