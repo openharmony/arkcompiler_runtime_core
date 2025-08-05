@@ -222,8 +222,8 @@ function testCheckBigint(): void {
 function testNullAndUndefined(): void {
     ASSERT_TRUE(checkNull(null) === true);
     ASSERT_TRUE(checkNull(undefined) === false);
-    ASSERT_TRUE(checkNull(1) === false);
-    ASSERT_TRUE(checkUndefined(1) === false);
+    ASSERT_THROWS(TypeError, () => checkNull(1));
+    ASSERT_THROWS(TypeError, () => checkUndefined(1));
     ASSERT_TRUE(checkUndefined(null) === false );
     ASSERT_TRUE(checkUndefined(undefined) === true);
 }
