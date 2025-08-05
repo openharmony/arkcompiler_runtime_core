@@ -33,6 +33,8 @@ function main() {
         testLinkedListInsertAddAndOperations);
     suite.addTest("Testing LinkedList has method with various data types", testLinkedListHasVariousDataTypes);
     suite.addTest("Testing LinkedList get method with various data types", testLinkedListGetVariousDataTypes);
+    suite.addTest("Testing LinkedList add -> JSON stringify", testLinkedListAddJsonStringify);
+    suite.addTest("Testing LinkedList addFirst -> JSON stringify", testLinkedListAddFirstJsonStringify);
 
     return suite.run();
 }
@@ -172,4 +174,40 @@ function testLinkedListGetVariousDataTypes() {
     linkList.forEach((value, index) => {
         arktest.assertEQ(linkList.get(index), value);
     });
+}
+
+function testLinkedListAddJsonStringify() {
+    let linkList = new LinkedList<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    Object>();
+    linkList.add("zhang san");
+    linkList.add(1);
+    let temp: Temp = {
+        age: 10, name: "zhang"
+    };
+    linkList.add(temp);
+    linkList.add(undefined);
+    linkList.add(null);
+    linkList.add(true);
+    linkList.add([0, 1, 2, undefined]);
+    let jsonResult = JSON.stringify(linkList);
+    let result = `{"0":"zhang san","1":1,"2":{"age":10,"name":"zhang"},"4":null,"5":true,"6":[0,1,2,null]}`;
+    arktest.assertEQ(jsonResult, result);
+}
+
+function testLinkedListAddFirstJsonStringify() {
+    let linkList = new LinkedList<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    Object>();
+    linkList.addFirst("zhang san");
+    linkList.addFirst(1);
+    let temp: Temp = {
+        age: 10, name: "zhang"
+    };
+    linkList.addFirst(temp);
+    linkList.addFirst(undefined);
+    linkList.addFirst(null);
+    linkList.addFirst(true);
+    linkList.addFirst([0, 1, 2, undefined]);
+    let jsonResult = JSON.stringify(linkList);
+    let result = `{"0":[0,1,2,null],"1":true,"2":null,"4":{"age":10,"name":"zhang"},"5":1,"6":"zhang san"}`;
+    arktest.assertEQ(jsonResult, result);
 }

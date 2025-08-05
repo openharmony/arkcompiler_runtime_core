@@ -1,5 +1,9 @@
 #FailKind.TSC_FAIL - 6 tests:
 api/@ohos.buffer.ets
+#FailKind.TSC_FAIL - 3 tests:
+api/@ohos.util.LightWeightSet.ets
+api/@ohos.util.LinkedList.ets
+api/@ohos.util.List.ets
 #Arkts_TS_Incompatible - 5 tests:
 api/@ohos.util.ets
 api/@ohos.util.stream.ets
