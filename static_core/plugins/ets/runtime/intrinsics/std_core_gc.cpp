@@ -98,7 +98,7 @@ extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback, EtsBoolean is
     }
     // Run GC in GC-thread
     if ((reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE) && gc->IsPostponeEnabled()) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_STATE_EXCEPTION,
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_STATE_ERROR,
                           "Calling GC threshold not in place after calling postponeGCStart");
         return -1;
     }
@@ -156,7 +156,7 @@ extern "C" void StdGCPostponeGCStart()
         return;
     }
     if (gc->IsPostponeEnabled()) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_STATE_EXCEPTION,
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_STATE_ERROR,
                           "Calling postponeGCStart without calling postponeGCEnd");
         return;
     }
@@ -174,7 +174,7 @@ extern "C" void StdGCPostponeGCEnd()
         return;
     }
     if (!gc->IsPostponeEnabled()) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_STATE_EXCEPTION,
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_STATE_ERROR,
                           "Calling postponeGCEnd without calling postponeGCStart");
         return;
     }

@@ -155,7 +155,7 @@ static constexpr std::string_view ILLEGAL_ACCESS_ERROR                 = "Lstd/c
 static constexpr std::string_view ILLEGAL_ARGUMENT_EXCEPTION           = "Lstd/core/IllegalArgumentException;";
 static constexpr std::string_view ILLEGAL_MONITOR_STATE_ERROR          = "Lstd/core/IllegalMonitorStateError;";
 // remove or make an Error
-static constexpr std::string_view ILLEGAL_STATE_EXCEPTION              = "Lstd/core/IllegalStateException;";
+static constexpr std::string_view ILLEGAL_STATE_ERROR                  = "Lstd/core/IllegalStateError;";
 static constexpr std::string_view INDEX_OUT_OF_BOUNDS_ERROR            = "Lstd/core/IndexOutOfBoundsError;";
 static constexpr std::string_view INSTANTIATION_ERROR                  = "Lstd/core/InstantiationError;";
 // has no class defined

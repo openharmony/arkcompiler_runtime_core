@@ -13,40 +13,46 @@
  * limitations under the License.
  */
 
-function check_exceptions(): void {
-    let exception_catched: boolean = false;
+function check_errors(): void {
+    let error_catched: boolean = false;
     try {
         GC.postponeGCEnd();
-    } catch(error: IllegalStateException) {
-        exception_catched = true;
+    } catch(error) {
+        if (error instanceof IllegalStateError) {
+            error_catched = true;
+        }
     }
-    arktest.assertTrue(exception_catched, "Didn't catch the exception");
-    exception_catched = false;
+    arktest.assertTrue(error_catched, "Didn't catch the error");
+    error_catched = false;
     try {
         GC.postponeGCStart();
         GC.postponeGCStart();
-    } catch(error: IllegalStateException) {
-        exception_catched = true;
+    } catch(error) {
+        if (error instanceof IllegalStateError) {
+            error_catched = true;
+        }
     }
-    arktest.assertTrue(exception_catched, "Didn't catch the exception");
+    arktest.assertTrue(error_catched, "Didn't catch the error");
     GC.postponeGCEnd();
-    exception_catched = false;
+    error_catched = false;
     try {
         GC.postponeGCStart();
         let gc_id = GC.startGC(GC.Cause.THRESHOLD);
         GC.waitForFinishGC(gc_id);
-    } catch(error: IllegalStateException) {
-        exception_catched = true;
-    } catch (e) {
-        arktest.assertTrue(false, "Unexpected exception during GC");
+    } catch(error) {
+        if (error instanceof IllegalStateError) {
+            error_catched = true;
+        } else {
+            arktest.assertTrue(false, "Unexpected error during GC");
+        }
     }
-    arktest.assertTrue(exception_catched, "Didn't catch the exception");
+    arktest.assertTrue(error_catched, "Didn't catch the error");
     GC.postponeGCEnd();
 }
 
 
 function main(): void {
-    check_exceptions();
+    check_errors();
     let elements_count: int = 10000;
     let obj_holder: Object[] = new Object[elements_count];
     let obj_addr: long[] = new long[elements_count];
@@ -58,7 +64,7 @@ function main(): void {
         let full_gc_id = GC.startGC(GC.Cause.FULL);
         GC.waitForFinishGC(full_gc_id);
     } catch (e) {
-        arktest.assertTrue(false, "Unexpected exception during GC");
+        arktest.assertTrue(false, "Unexpected error during GC");
     }
     // Allocate elements
     for (let i: int = 0; i < elements_count; i++) {
@@ -70,7 +76,7 @@ function main(): void {
         let young_gc_id = GC.startGC(GC.Cause.YOUNG);
         GC.waitForFinishGC(young_gc_id);
     } catch (e) {
-        arktest.assertTrue(false, "Unexpected exception during GC");
+        arktest.assertTrue(false, "Unexpected error during GC");
     }
     // Check that we didn't move any object (i.e. didn't waste any time for that)
     for (let i: int = 0; i < elements_count; i++) {
@@ -87,6 +93,6 @@ function main(): void {
         GC.waitForFinishGC(gc_id);
         arktest.assertNE(young_object_addr, GC.getObjectAddress(young_object), "The object hasn't been moved");
     } catch (e) {
-        arktest.assertTrue(false, "Unexpected exception during GC");
+        arktest.assertTrue(false, "Unexpected error during GC");
     }
 }
