@@ -576,7 +576,8 @@ export class RegExpResultArray /*extends Array<String>*/ {
      * Returns the first index of the specified element.
      */
     public indexOf(val: String, fromIndex?: Number): number {
-        return this.result_.indexOf(val, fromIndex)
+        // NOTE(cheezzario) workaround for #23963
+        return this.result_.indexOf(val, fromIndex === undefined ? undefined : Int.valueOf(fromIndex.toInt()))
     }
 
     /**

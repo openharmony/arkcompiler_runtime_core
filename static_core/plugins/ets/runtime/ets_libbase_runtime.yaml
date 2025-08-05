@@ -1537,14 +1537,14 @@ intrinsics:
     method_name: indexOf
     static: false
     signature:
-      ret: f64
+      ret: i32
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::EtsEscompatArrayIndexOf
 
   - name: EscompatInternalArrayIndexOf
     space: ets
     class_name: escompat.Array
-    method_name: indexOf
+    method_name: indexOfImpl
     static: false
     signature:
       ret: i32

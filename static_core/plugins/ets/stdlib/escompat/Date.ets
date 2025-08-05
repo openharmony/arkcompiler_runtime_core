@@ -2342,7 +2342,7 @@ class DateLexer {
 
     private read(): DateUnit {
       if (Char.isDecDigit(this.str.getValue().charAt(0))) {
-        const res  = this.str.readNumber();
+        const res = this.str.readNumber();
         return DateUnit.numericValue(res.value, res.length);
       }
       if (this.str.getValue() == '\x7F') {
@@ -2383,7 +2383,7 @@ class DateLexer {
         const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
         const index = monthNames.indexOf(str.toLowerCase());
         if (index !== -1) {
-            res = index.toInt() + 1;
+            res = index + 1;
             type = DateValueType.DATE_MONTH;
         }
         return DateUnit.word(type, res, alphabet.length);
