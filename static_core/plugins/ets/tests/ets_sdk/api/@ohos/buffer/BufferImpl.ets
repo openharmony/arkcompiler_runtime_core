@@ -1020,7 +1020,7 @@ function testBufferWriteStringInfinity() {
     let buf = buffer.alloc(10)
     arktest.expectError(() => {
         buf.write(str, 0, Infinity.toInt());
-    }, "The value of \"length\" is out of range. It must be >= 0 and <= 9. Received value is: 2147483647");
+    }, "The value of \"length\" is out of range. It must be >= 0 and <= 10. Received value is: 2147483647");
 }
 
 function testBufferWriteStringWrongOffset() {
@@ -1042,7 +1042,7 @@ function testBufferWriteStringOutRangeLength() {
     let buf = buffer.alloc(10);
     arktest.expectError(() => {
         buf.write("abcdefg", 3, -1);
-    }, "The value of \"length\" is out of range. It must be >= 0 and <= 9. Received value is: -1");
+    }, "The value of \"length\" is out of range. It must be >= 0 and <= 10. Received value is: -1");
 }
 
 function testBufferFrom40002() {
