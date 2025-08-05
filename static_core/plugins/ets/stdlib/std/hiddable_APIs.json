@@ -94,7 +94,7 @@
             "IllegalStateError",
             "UnsupportedOperationException",
             "IllegalArgumentError",
-            "RuntimeException"
+            "RuntimeError"
         ]
     },
     {

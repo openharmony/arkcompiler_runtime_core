@@ -407,7 +407,7 @@ std::vector<NumberFormatPart> ExtractParts(ani_env *env, const icu::FormattedVal
 
     if (UNLIKELY(U_FAILURE(status) != 0)) {
         std::string message = "ExtractParts. Unable to convert formatted value to string";
-        ThrowNewError(env, "std.core.RuntimeException", message.c_str(), "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RuntimeError", message.c_str(), "C{std.core.String}:");
         return parts;
     }
 
@@ -437,7 +437,7 @@ std::vector<NumberFormatPart> ExtractParts(ani_env *env, const icu::FormattedVal
     while (formatted.nextPosition(cfpos, status) != 0) {
         if (UNLIKELY(U_FAILURE(status) != 0)) {
             std::string message = "ExtractParts. Error during field iteration";
-            ThrowNewError(env, "std.core.RuntimeException", message.c_str(), "C{std.core.String}:");
+            ThrowNewError(env, "std.core.RuntimeError", message.c_str(), "C{std.core.String}:");
             return parts;
         }
         int32_t cat = cfpos.getCategory();

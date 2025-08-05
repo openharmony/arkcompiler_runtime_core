@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,9 +25,9 @@ namespace ark::ets::test {
 
 class EtsNativeInterfaceException : public MockEtsNapiTestBaseClass {};
 
-TEST_F(EtsNativeInterfaceException, TestThrowRuntimeException)
+TEST_F(EtsNativeInterfaceException, TestThrowRuntimeError)
 {
-    ets_class aCls = env_->FindClass("std/core/RuntimeException");
+    ets_class aCls = env_->FindClass("std/core/RuntimeError");
     ASSERT_NE(aCls, nullptr);
     env_->ThrowErrorNew(aCls, "Test runtime exception");
 }

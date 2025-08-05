@@ -178,7 +178,7 @@ static ani_status BindUtilHelper(ani_env *env)
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         auto msg = std::string("Cannot find \"") + className + std::string("\" class!");
-        ark::ets::stdlib::ThrowNewError(env, "std.core.RuntimeException", msg.data(), "C{std.core.String}:");
+        ark::ets::stdlib::ThrowNewError(env, "std.core.RuntimeError", msg.data(), "C{std.core.String}:");
         return ANI_ERROR;
     }
 
