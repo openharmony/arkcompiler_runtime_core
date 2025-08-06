@@ -1,6 +1,6 @@
 Warning: Prohibit top-level statements. [warnings_suppression_begin_end_2.ets:17:5]
 Warning: Prohibit top-level statements. [warnings_suppression_begin_end_2.ets:19:1]
-Warning: Replace asynchronous function with coroutine. [warnings_suppression_begin_end_2.ets:25:5]
+Warning: Replace asynchronous function with coroutine. [warnings_suppression_begin_end_2.ets:25:11]
 Warning: Replace asynchronous function with coroutine. [warnings_suppression_begin_end_2.ets:32:1]
 Warning: Prohibit top-level statements. [warnings_suppression_begin_end_2.ets:47:5]
 Warning: Replace the lambda function with a regular function. [warnings_suppression_begin_end_2.ets:65:11]
