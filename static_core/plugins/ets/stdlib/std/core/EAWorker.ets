@@ -68,6 +68,7 @@ export class EAWorker {
     private loopJoined = new AtomicFlag(false);
     private initialTask: Task = () => {};
     private static workers = new containers.ConcurrentHashMap<int, EAWorker>();
+    private isTaskpool = false;
 
     /**
      * Create EAWorker instance
@@ -111,6 +112,20 @@ export class EAWorker {
         this.worker = worker;
         this.loopStarted.set(true);
         EAWorker.workers.set(this.worker.getWorkerId(), this);
+    }
+
+    /**
+     * Create EAWorker instance with specified name and supportInterop and whether it is a taskpool worker
+     * Internal usage only
+     * @param { string } name The name of the worker
+     * @param { Object } task The initial task to execute
+     * @param { boolean } supportInterop true if need to create JS runtime
+     * @param { boolean } isTaskpool true if the worker is a taskpool worker
+     */
+    protected constructor(task: Object, name: string, supportInterop: boolean = false, isTaskpool: boolean = false) {
+        this.isTaskpool = isTaskpool;
+        this.initialTask = task as Task;
+        this.worker = supportInterop ? new InteropWorker(name) : new StaticWorker(name);
     }
 
     /**
@@ -223,7 +238,7 @@ export class EAWorker {
      */
     public static current(): EAWorker | undefined {
         let currentWorker = EAWorker.getWorkers().get(CoroutineExtras.getWorkerId());
-        if (currentWorker != undefined && currentWorker.getName() == "taskpool") {
+        if (currentWorker !== undefined && currentWorker.isTaskpool) {
             throw new Error("Can not get current worker in taskpool");
         }
         return currentWorker;
