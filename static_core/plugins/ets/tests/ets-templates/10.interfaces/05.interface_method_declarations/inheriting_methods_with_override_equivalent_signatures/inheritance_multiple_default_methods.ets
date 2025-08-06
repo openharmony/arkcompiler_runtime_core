@@ -15,7 +15,10 @@ limitations under the License.
 
 /*---
 desc: Inheritance multiple default method from superinterfaces with same signatures.
-assert: If an interface I inherits a default method whose signature is override-equivalent with another method inherited by I, then a compile-time error occurs. (This is the case whether the other method is abstract or default.)
+assert: >-
+      If an interface I inherits a default method whose signature is override-equivalent
+      with another method inherited by I, then a compile-time error occurs.
+      (This is the case whether the other method is abstract or default.)
 tags: [compile-only, negative]
 ---*/
 

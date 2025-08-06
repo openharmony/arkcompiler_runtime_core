@@ -15,7 +15,10 @@ limitations under the License.
 
 /*---
 desc: Override public default method from superinterface.
-assert: An instance method mI declared in or inherited by interface I, overrides from I another instance method mJ declared in interface J, iff all of the following are true - I is a subinterface of J.
+assert: >-
+      An instance method mI declared in or inherited by interface I,
+      overrides from I another instance method mJ declared in interface J,
+      if all of the following are true - I is a subinterface of J.
 ---*/
 
 interface A {

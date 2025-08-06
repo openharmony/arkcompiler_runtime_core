@@ -15,8 +15,8 @@
 
 /*---
 desc: >-
-    Verify that a class can distinguish the same - named constants between an interface constant and a class c
-    onstructor parameter by scope.
+    Verify that a class can distinguish the same-named constants
+    between an interface constant and a class constructor parameter by scope.
 ---*/
 
 interface ConstructorParamConflictInterface {

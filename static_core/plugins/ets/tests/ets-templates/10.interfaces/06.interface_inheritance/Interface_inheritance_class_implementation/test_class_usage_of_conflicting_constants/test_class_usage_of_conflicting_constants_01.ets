@@ -15,8 +15,8 @@
 
 /*---
 desc: >-
-    Verify that a compilation error occurs when a class implements two interfaces with the same -
-    named constants with different types.
+    Verify that a compilation error occurs when a class implements
+    two interfaces with the same-named constants with different types.
 tags: [compile-only, negative]
 ---*/
 

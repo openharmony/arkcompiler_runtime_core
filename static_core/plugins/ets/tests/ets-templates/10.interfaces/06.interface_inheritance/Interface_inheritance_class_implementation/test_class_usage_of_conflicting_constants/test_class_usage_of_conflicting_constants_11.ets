@@ -15,8 +15,8 @@
 
 /*---
 desc: >-
-    Verify that a class can distinguish the same - named constants between an interface constant and a variable with
-    the same name in the class constructor by scope and instance property.
+    Verify that a class can distinguish the same-named constants between an interface constant
+    and a variable with the same name in the class constructor by scope and instance property.
 ---*/
 
 interface ConstructorVarConflictInterface {

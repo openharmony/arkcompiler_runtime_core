@@ -15,8 +15,8 @@
 
 /*---
 desc: >-
-    Verify that a class can distinguish the same - named constants between an interface constant and a class method
-    parameter by local variable.
+    Verify that a class can distinguish the same-named constants
+    between an interface constant and a class method parameter by local variable.
 ---*/
 
 interface MyInterface {
@@ -43,5 +43,5 @@ function assertEQ(condition: boolean) {
 function main(): void {
   const instance = new MyClass();
   const result = instance.someMethod(20);
-  assertEQ(result);
+  arktest.assertTrue(result);
 }

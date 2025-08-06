@@ -14,8 +14,7 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Override private default method from superinterface.
-assert: An instance method mI declared in or inherited by interface I, overrides from I another instance method mJ declared in interface J, iff all of the following are true - mJ is public.
+desc: Override private default method from superinterface is prohibited.
 tags: [negative, compile-only]
 ---*/
 
@@ -26,15 +25,7 @@ interface A {
 }
 
 interface B extends A {
-  override foo(): int {
+  foo(): int {
     return 2;
   }
-}
-
-class C implements B {}
-
-function main(): void {
-  let instance: C = new C();
-
-  arktest.assertEQ(instance.foo(), 2)
 }

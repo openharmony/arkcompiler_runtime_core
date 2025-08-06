@@ -15,8 +15,8 @@
 
 /*---
 desc: >-
-    Verify that a class can distinguish the same - named constants between an interface constant
-    and a class enum by enum access and property access.
+    Verify that a class can distinguish the same-named constants
+    between an interface constant and a class enum by enum access and property access.
 ---*/
 
 enum CONST {

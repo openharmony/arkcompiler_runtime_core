@@ -15,8 +15,8 @@
 
 /*---
 desc: >-
-    The method with the same name has the different parameters parameter type but same return types,
-    valid overloading.
+    The derived interface must provide a valid overriding overload signature (or signatures) for all overload
+    signatures of the base interface(s)
 ---*/
 
 let resultString: string = "";
@@ -43,5 +43,12 @@ class ChildClass implements Child {
 }
 
 function main(): void {
+  let failed: boolean = false
   const child = new ChildClass();
+  try {
+    child.greet(1)
+  } catch (e) {
+    failed = true
+  }
+  arktest.assertTrue(failed)
 }

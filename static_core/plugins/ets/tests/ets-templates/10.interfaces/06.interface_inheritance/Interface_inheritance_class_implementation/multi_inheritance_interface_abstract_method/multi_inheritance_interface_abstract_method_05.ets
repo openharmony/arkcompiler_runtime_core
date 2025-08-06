@@ -39,7 +39,7 @@ class FileManager implements Reader, Writer, Deleter {
   }
   
   delete(file: string) {
-  return true;
+    return true;
   }
 }
 

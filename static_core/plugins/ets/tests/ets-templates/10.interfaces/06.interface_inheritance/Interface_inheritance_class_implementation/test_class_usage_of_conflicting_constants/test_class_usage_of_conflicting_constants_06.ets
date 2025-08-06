@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Verify the conflict of the same - named constants in a generic class.
+desc: Verify the conflict of the same-named constants in a generic class.
 ---*/
 
 interface InterfaceA {

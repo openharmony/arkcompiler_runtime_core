@@ -14,7 +14,10 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Overload public default method from superinterface with different signature.
+desc: Inheritance default method from superinterface.
+assert: >-
+      An interface I inherits from its direct superinterfaces all abstract and default methods m
+      for which all of the following are true - m is a member of a direct superinterface, J, of I.
 ---*/
 
 interface A {
@@ -23,16 +26,12 @@ interface A {
   }
 }
 
-interface B extends A {
-  foo(c: int): int {
-    return 2;
-  }
-}
+interface B extends A {}
 
 class C implements B {}
 
 function main(): void {
-  let c: C = new C()
-  arktest.assertEQ(c.foo(), 1)
-  arktest.assertEQ(c.foo(1), 2)
+  let instance: C = new C();
+
+  arktest.assertEQ(instance.foo(), 1)
 }

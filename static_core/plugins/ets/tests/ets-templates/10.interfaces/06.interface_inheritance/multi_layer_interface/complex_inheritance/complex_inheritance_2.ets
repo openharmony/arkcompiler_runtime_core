@@ -14,8 +14,9 @@
  */
 
 /*---
-desc: Verify multi-level inheritance of interfaces, abstract classes, 
-      and concrete classes to ensure correct method overrides and invocations.
+desc: >-
+    Verify multi-level inheritance of interfaces, abstract classes, 
+    and concrete classes to ensure correct method overrides and invocations.
 ---*/
 
 interface A {

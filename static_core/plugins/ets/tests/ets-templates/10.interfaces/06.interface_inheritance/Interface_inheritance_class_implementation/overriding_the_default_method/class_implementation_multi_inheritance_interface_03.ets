@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Abstract class overrides a default method inherited by the subinterface, The default method returns the data type string.
+desc: >-
+      Abstract class overrides a default method inherited by the subinterface,
+      The default method returns the data type string.
 ---*/
 
 interface Parent{

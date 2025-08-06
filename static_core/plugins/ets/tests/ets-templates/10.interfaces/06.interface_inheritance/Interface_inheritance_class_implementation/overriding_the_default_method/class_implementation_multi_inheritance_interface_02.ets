@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Class overrides multiple default methods inherited by the subinterface, The default method returns the data type string.
+desc: >-
+      Class overrides multiple default methods inherited by the subinterface,
+      The default method returns the data type string.
 ---*/
 
 interface Parent{

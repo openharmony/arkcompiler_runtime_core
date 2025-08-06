@@ -15,8 +15,8 @@
 
 /*---
 desc: >-
-    Verify that a class can distinguish the same-named constants between an interface constant
-    and a class template - string property by content.
+    Verify that a class can distinguish the same-named constants
+    between an interface constant and a class template - string property by content.
 ---*/
 
 interface TemplateStringConflictInterface {

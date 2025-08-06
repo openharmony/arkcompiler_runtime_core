@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,25 +14,18 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Overload public default method from superinterface with different signature.
+desc: >-
+      CTE occurs if the body of an interface declares a method with a name
+      that is already used for a property in this declaration.
+tags: [compile-only, negative]
 ---*/
 
-interface A {
+interface I {
+  foo: number
+}
+
+interface J extends I {
   foo(): int {
     return 1;
   }
-}
-
-interface B extends A {
-  foo(c: int): int {
-    return 2;
-  }
-}
-
-class C implements B {}
-
-function main(): void {
-  let c: C = new C()
-  arktest.assertEQ(c.foo(), 1)
-  arktest.assertEQ(c.foo(1), 2)
 }

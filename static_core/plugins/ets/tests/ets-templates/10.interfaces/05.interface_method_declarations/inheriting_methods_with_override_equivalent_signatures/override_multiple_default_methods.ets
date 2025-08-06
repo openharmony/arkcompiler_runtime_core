@@ -15,8 +15,10 @@ limitations under the License.
 
 /*---
 desc: Inheritance multiple default method from superinterface with override-equivalent signature.
-assert: It is possible for an interface to inherit several methods with override-equivalent signatures (link to signatures).
-tags: [compile-only, negative]
+assert: >-
+      It is possible for an interface to inherit several methods
+      with override-equivalent signatures (link to signatures).
+tags: [compile-only]
 ---*/
 
 interface A {
@@ -31,14 +33,14 @@ interface B extends A {
   }
 }
 
-interface C extends C {
+interface C extends B {
   foo(): int {
     return 3;
   }
 }
 
 interface D extends A, B, C {
-  override foo(): int {
+  foo(): int {
     return 4;
   }
 }
