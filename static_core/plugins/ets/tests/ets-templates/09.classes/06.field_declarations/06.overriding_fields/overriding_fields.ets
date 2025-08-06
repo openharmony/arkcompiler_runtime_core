@@ -13,27 +13,53 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for member in members %}
+{% for c in cases %}
+
+{% if 'check_variants' in c %}
+  {% set check_variants=c.check_variants %}
+{% else %}
+  {% set check_variants=[{}] %}
+{% endif %}
+
+{% for cv in check_variants %}
+
+{% if 'sub_cases_logic' in c %}
+  {% set sub_cases_logic=c.sub_cases_logic %}
+{% else %}
+  {% set sub_cases_logic=[""] %}
+{% endif %}
+
+{% for scl in sub_cases_logic %}
+
+{% set logic_data -%}
+{% if 'logic' in c %}  {{c.logic|indent(width=2)}}{% endif -%}
+{% if scl != "" %}  {{scl|indent(width=2)}}{% endif -%}
+{% endset -%}
+
+{% set ns = namespace() %}
+
+{% set ns.logic_data = logic_data %}
+{% for k, v in cv.items() %}
+  {% set ns.logic_data = ns.logic_data|replace("[" ~ k ~ "]", v) %}
+{% endfor %}
+{% set logic_data=ns.logic_data %}
+
+{% set ns.decl = c.decl %}
+{% for k, v in cv.items() %}
+  {% set ns.decl = ns.decl|replace("[" ~ k ~ "]", v) %}
+{% endfor %}
+{% set decl=ns.decl %}
 
 /*---
-desc: >-
-    While extending a class or implementing interfaces, a field declared in a superclass or
-    a superintertafce can be overridden by field with the same name and the same static or
-    non-static status.
-params: {{member.params}}
-tags: [{{member.tags}}]
+desc: {{c.desc}}
 ---*/
 
-class Base {
-  {{member.base}}
-}
-
-class A extends Base{
-  {{member.child}}
-}
+{{decl}}
 
 function main(): void {
-  {{member.main}}
+{{logic_data}}
 }
 
+{% endfor %}
+{% endfor %}
 {% endfor %}
