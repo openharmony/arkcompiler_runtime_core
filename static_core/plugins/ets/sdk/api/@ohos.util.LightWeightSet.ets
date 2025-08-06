@@ -16,7 +16,7 @@
 import LightWeightMap from '@ohos.util.LightWeightMap';
 import { BusinessError } from "@ohos.base";
 
-const TypeErrorCodeId: int = 401;
+const typeErrorCodeId: int = 401;
 const OutOfBoundsErrorCodeId: number = 10200001;
 
 export type LightWeightSetForEachCb<T> = (value: T, key: T, set: LightWeightSet<T>) => void;
@@ -342,7 +342,7 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
 
     private checkIndex(index: int): void {
         if (index > Int.MAX_VALUE) {
-            throw new BusinessError(TypeErrorCodeId,
+            throw new BusinessError(typeErrorCodeId,
                 new Error('BusinessError', `The type of "index" must be small integer. Received value is: ${index}`,
                           undefined));
         }

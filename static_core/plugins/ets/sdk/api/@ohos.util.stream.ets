@@ -28,7 +28,7 @@ import buffer from '@ohos.buffer';
 export namespace stream {
     const DEFAULT_ENCODING = 'utf-8';
     const DEFAULT_HIGH_WATER_MARK = 16 * 1024;
-    const ENCODING_SET: Array<string> = new Array<string>(
+    const ENCODING_SET: string[] = [
         'ascii', 'utf-8', 'UTF-8', 'gbk', 'GBK', 'GB2312', 'gb2312',
         'GB18030', 'gb18030', 'ibm866', 'iso-8859-2', 'iso-8859-3',
         'iso-8859-4', 'iso-8859-5', 'iso-8859-6', 'iso-8859-7',
@@ -37,7 +37,7 @@ export namespace stream {
         'windows-874', 'windows-1250', 'windows-1251', 'windows-1252',
         'windows-1253', 'windows-1254', 'windows-1255', 'windows-1256',
         'windows-1257', 'windows-1258', 'big5', 'euc-jp', 'iso-2022-jp',
-        'shift_jis', 'euc-kr', 'x-mac-cyrillic', 'utf-16be', 'utf-16le');
+        'shift_jis', 'euc-kr', 'x-mac-cyrillic', 'utf-16be', 'utf-16le'];
 
     // BusinessError
     const ERR_DOWRITE_NOT_IMPLEMENTED: BusinessError =
@@ -330,7 +330,7 @@ export namespace stream {
             this.doWriteFunc = this.noWriteOpes;
             this.doWritevFunc = null;
             this.listener = new EventEmitter();
-            this.buffer = new Array<WritableBuffer>();
+            this.buffer = [];
             this.closedInner = false;
             this.defaultEncoding = DEFAULT_ENCODING;
             this.encoding = DEFAULT_ENCODING;
@@ -349,9 +349,9 @@ export namespace stream {
             this.writableNeedDrainInner = false;
             this.writableObjectModeInner = false;
             this.writableSync = true;
-            this.writeCallbackBuffer = new Array<Function>();
+            this.writeCallbackBuffer = [];
             this.writaCallbackMove = false;
-            this.writeCallbacks = new Array<Function>();
+            this.writeCallbacks = [];
             this.writing = false;
 
             this.doInitialize((): void => {
@@ -573,9 +573,9 @@ export namespace stream {
             });
             this.endCallback?.unsafeCall(this.erroredInner);
             this.endCallback = undefined;
-            this.buffer = new Array<WritableBuffer>();
-            this.writeCallbacks = new Array<Function>();
-            this.writeCallbackBuffer = new Array<Function>();
+            this.buffer = [];
+            this.writeCallbacks = [];
+            this.writeCallbackBuffer = [];
             this.writableBufferLength = 0;
             this.writableLengthInner = 0;
         }
@@ -585,7 +585,7 @@ export namespace stream {
                 return;
             }
             let currentLength: int = this.buffer.length.toInt();
-            let current: Array<WritableBuffer> = this.buffer.splice(0 as int, 1 as int);
+            let current: WritableBuffer[] = this.buffer.splice(0 as int, 1 as int);
             this.writeCallbackBuffer.splice(0 as int, 1 as int);
             while (currentLength > 0) {
                 this.writableBufferLength -= this.getChunkLength(current[0].chunk);
@@ -613,7 +613,7 @@ export namespace stream {
             if (this.buffer.length > 0) {
                 const bufferChunkLength = this.writableBufferLength;
                 this.writableBufferLength = 0;
-                this.writeCallbacks = new Array<Function>();
+                this.writeCallbacks = [];
                 let executed: boolean = false;
                 const funCallback = (...param: Object[]): void => {
                     if (!executed) {
@@ -635,7 +635,7 @@ export namespace stream {
                                 callback.unsafeCall();
                             }
                         });
-                        this.writeCallbacks = new Array<Function>();
+                        this.writeCallbacks = [];
 
                         if (!this.writableSync) {
                             this.freshCacheV();
@@ -662,8 +662,8 @@ export namespace stream {
                     this.writeCallbacks.push(callback);
                 });
                 this.writaCallbackMove = false;
-                let strChunks: Array<string> = new (string)[this.buffer.length];
-                let arrayChunks: Array<Uint8Array> = new (Uint8Array)[this.buffer.length];
+                let strChunks: string[] = new (string)[this.buffer.length];
+                let arrayChunks: Uint8Array[] = new (Uint8Array)[this.buffer.length];
                 let isString: boolean = false;
                 let index: int = 0;
                 this.buffer.forEach((value: WritableBuffer) => {
@@ -1478,9 +1478,9 @@ export namespace stream {
                         if (size === dataLength) {
                             buf[num++] = null;
                         } else {
-                            let RemainBuf = buffer.allocUninitializedFromPool(dataLength - size.toInt());
-                            (data as buffer.Buffer).copy(RemainBuf, nRetLen - size.toInt(), 0, size.toInt());
-                            buf[num] = RemainBuf;
+                            let remainBuf = buffer.allocUninitializedFromPool(dataLength - size.toInt());
+                            (data as buffer.Buffer).copy(remainBuf, nRetLen - size.toInt(), 0, size.toInt());
+                            buf[num] = remainBuf;
                         }
                         break;
                     }
@@ -1681,7 +1681,7 @@ export namespace stream {
                     this.readableEncodingInner = encodingLowCase;
 
                     // Iterate over current buffer to convert already stored Buffers:
-                    let currentBuffer: string = "";
+                    let currentBuffer: string = '';
                     for (let i: int = 0; i < this.buf.length.toInt(); i++) {
                         const decoder = this.stringDecoder as util.StringDecoder;
                         if (this.buf[i] instanceof string) {
@@ -1693,7 +1693,7 @@ export namespace stream {
                     this.buf.length = 0;
                     this.bufIndex = 0;
 
-                    if (currentBuffer !== "") {
+                    if (currentBuffer !== '') {
                         this.buf.push(currentBuffer);
                     }
                     this.readableLengthInner = currentBuffer.length.toInt();
