@@ -125,12 +125,12 @@ function main(): int {
 	]
 
 	for (let j = 0; j < suites.length; ++ j) {
-		let arttestsuite = suites[j][0];
+		let arktestsuite = suites[j][0];
 		let constr = suites[j][1];
 		for (let i = 0; i < tests.length; ++ i) {
 			let name = tests[i][0];
 			let testF = tests[i][1];
-			arttestsuite.addTest(name, ()=>testF(constr));
+			arktestsuite.addTest(name, ()=>testF(constr));
 		}
 	}
 
