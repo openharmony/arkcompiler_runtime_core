@@ -18,7 +18,7 @@ desc: Method with the same name in multiple interfaces,
       the child class chooses to implement one, and calls the implementation of the parent class.
 ---*/
 
-let result: string = "";
+let result: int = 0;
 
 interface Animal {
   makeSound(): void;
@@ -30,19 +30,20 @@ interface Machine {
 
 class Robot implements Animal {
   makeSound(): void {
-    result = "Beep";
+    result += 1;
   }
 }
 
 class AdvancedRobot extends Robot implements Machine {
   makeSound(): void {
     super.makeSound(); 
-    result = "Advanced Beep";
+    result += 2;
   }
 }
 
 function main(): void {
+  result = 0
   const advancedRobot = new AdvancedRobot();
   advancedRobot.makeSound();
-  arktest.assertEQ(result, "Advanced Beep");
+  arktest.assertEQ(result, 3);
 }

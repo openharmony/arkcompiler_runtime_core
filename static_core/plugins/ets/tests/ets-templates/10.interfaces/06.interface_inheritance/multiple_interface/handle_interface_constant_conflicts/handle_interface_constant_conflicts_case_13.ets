@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Verify that a class implementing two interfaces with the same constant name will cause a compiler error.
+desc: Verify that a class implementing two interfaces with the same constant name will not cause a compiler error.
 ---*/
 
 interface InterfaceA {

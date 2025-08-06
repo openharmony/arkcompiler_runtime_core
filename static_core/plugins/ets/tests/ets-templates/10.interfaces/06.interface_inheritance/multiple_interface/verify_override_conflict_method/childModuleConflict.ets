@@ -14,16 +14,14 @@
  */
 
 /*---
-desc: >-
-    Verify that a class implementing an interface with a constant of an array type and having a static property with
-    the same name but different type causes a compile-time error.
-tags: [compile-only, negative]
+desc: Test file.
+tags:
+- compile-only
+- not-a-test
 ---*/
 
-interface InterfaceA {
-    readonly CONSTANT: string[];
-}
+import { Parent } from "./parentModule.ets";
 
-class TestClass implements InterfaceA {
-    static readonly CONSTANT: string = "Value from TestClass";
+export interface Child extends Parent {
+    greet(): number;
 }

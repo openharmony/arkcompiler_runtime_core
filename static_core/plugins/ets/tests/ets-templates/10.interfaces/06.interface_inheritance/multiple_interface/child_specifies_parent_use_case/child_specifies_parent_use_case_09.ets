@@ -25,18 +25,6 @@ interface Parent2 {
     greet(): string;
 }
 
-class Parent1Impl implements Parent1 {
-    greet(): string {
-        return "Hello from Parent1";
-    }
-}
-
-class Parent2Impl implements Parent2 {
-    greet(): string {
-        return "Hello from Parent2";
-    }
-}
-
 interface Child extends Parent1, Parent2 {
     greet(): string;
 }

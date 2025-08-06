@@ -19,8 +19,7 @@ desc: >-
     signatures of the base interface(s)
 ---*/
 
-let resultString: string = "";
-let resultNumber: string = "";
+let res: int = 0;
 
 interface Parent1 {
   greet(message: string): void;
@@ -33,11 +32,11 @@ interface Parent2 {
 interface Child extends Parent1, Parent2 {}
 
 class ChildClass implements Child {
-  greet(message: string | number): void {
-    if (typeof message === "string") {
-      resultString = `String Greeting: ${message}`;
+  greet(...p: Any[]): Any {
+    if (p[0] instanceof "string") {
+      res = 1
     } else {
-      resultNumber = `Number Greeting: ${message}`;
+      res = 2
     }
   }
 }
@@ -45,10 +44,8 @@ class ChildClass implements Child {
 function main(): void {
   let failed: boolean = false
   const child = new ChildClass();
-  try {
-    child.greet(1)
-  } catch (e) {
-    failed = true
-  }
-  arktest.assertTrue(failed)
+  child.greet("str")
+  arktest.assertEQ(res, 1)
+  child.greet(1)
+  arktest.assertEQ(res, 2)
 }

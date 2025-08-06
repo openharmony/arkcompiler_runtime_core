@@ -14,10 +14,11 @@
  */
 
 /*---
-desc: Method with the same name in multiple interfaces, the child class chooses to call the parent class implementation.
+desc: >-
+    Method with the same name in multiple interfaces, the child class chooses to call the parent class implementation.
 ---*/
 
-let result: string = "";
+let result: int = 0;
 
 interface Animal {
   makeSound(): void;
@@ -29,19 +30,20 @@ interface Machine {
 
 class Robot implements Animal, Machine {
   makeSound(): void {
-    result = "Beep";
+    result += 1;
   }
 }
 
 class AdvancedRobot extends Robot {
   makeSound(): void {
     super.makeSound();
-    result = "Advanced Beep";
+    result += 2;
   }
 }
 
 function main(): void {
+  result = 0
   const advancedRobot = new AdvancedRobot();
   advancedRobot.makeSound();
-  arktest.assertEQ(result, "Advanced Beep");
+  arktest.assertEQ(result, 3);
 }

@@ -15,8 +15,8 @@
 
 /*---
 desc: >-
-    Verify that a class implementing an interface with a constant and having a mutable property with the same name
-    causes a compile-time error.
+    It is fine when a field is declared as readonly in a superclass/superinterface,
+    while an overriding field is not marked as readonly.
 ---*/
 
 interface InterfaceA {

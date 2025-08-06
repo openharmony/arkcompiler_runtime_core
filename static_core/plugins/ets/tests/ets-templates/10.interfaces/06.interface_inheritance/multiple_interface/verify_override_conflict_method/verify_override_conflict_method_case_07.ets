@@ -20,18 +20,8 @@ desc: >-
 tags: [compile-only, negative]
 files:
 - ./parentModule.ets
-- ./childModule.ets
+- ./childModuleConflict.ets
 ---*/
 
 import { Parent } from "./parentModule.ets";
-import { Child } from "./childModule.ets";
-
-class ParentImpl implements Parent {
-    greet(): string {
-        return "Hello from Parent (default)";
-    }
-}
-
-function main(): void {
-    const child = new ChildImpl();
-}
+import { Child } from "./childModuleConflict.ets";

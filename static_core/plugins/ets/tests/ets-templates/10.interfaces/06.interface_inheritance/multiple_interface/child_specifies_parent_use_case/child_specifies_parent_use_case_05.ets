@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Verify that a child interface resolves method conflicts when three parent interfaces have the same default method
+desc: Verify that a child interface resolves method conflicts when three parent interfaces have the same method
 ---*/
 
 interface Parent1 {
@@ -27,24 +27,6 @@ interface Parent2 {
 
 interface Parent3 {
     greet(): string;
-}
-
-class Parent1Impl implements Parent1 {
-    greet(): string {
-        return "Hello from Parent1";
-    }
-}
-
-class Parent2Impl implements Parent2 {
-    greet(): string {
-        return "Hello from Parent2";
-    }
-}
-
-class Parent3Impl implements Parent3 {
-    greet(): string {
-        return "Hello from Parent3";
-    }
 }
 
 interface Child extends Parent1, Parent2, Parent3 {

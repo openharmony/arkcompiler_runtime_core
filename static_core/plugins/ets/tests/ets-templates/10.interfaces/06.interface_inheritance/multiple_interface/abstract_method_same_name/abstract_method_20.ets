@@ -14,17 +14,34 @@
  */
 
 /*---
-desc: The method with the same name has the same type and number of parameters,
+desc: ->
+      The method with the same name has the same type and number of parameters,
       but a method has optional and required properties.
-tags: [compile-only, negative]
 ---*/
 
+let res: int = 0
+
 interface Parent1 {
-  save(data: { id: number; name?: string }): void;
+  save(did: number; name?: string): void;
 }
 
 interface Parent2 {
-  save(data: { id: number; name: string }): void; 
+  save(id: number; name: string): void;
 }
 
-interface Child extends Parent1, Parent2 {}
+class Child implements Parent1, Parent2 {
+  save(...p: Any[]): Any {
+    if(p.length == 1)
+      res = 1
+    else
+      res = 2
+  }
+}
+
+function main() {
+  let c: Child = new Child()
+  c.save(1)
+  arktest.assertEQ(res, 1)
+  c.save(1, "str")
+  arktest.assertEQ(res, 2)
+}

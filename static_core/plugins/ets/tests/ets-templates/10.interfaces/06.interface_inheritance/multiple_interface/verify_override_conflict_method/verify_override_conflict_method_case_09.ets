@@ -22,14 +22,7 @@ files:
 - ./childModule.ets
 ---*/
 
-import { Parent } from "./parentModule.ets";
 import { Child } from "./childModule.ets";
-
-class ParentImpl implements Parent {
-    greet(): string {
-        return "Hello from Parent (default)";
-    }
-}
 
 class ChildImpl implements Child {
     greet(): string {

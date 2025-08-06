@@ -14,7 +14,8 @@
  */
 
 /*---
-desc: A method with the same name in multiple interfaces, 
+desc: >-
+      A method with the same name in multiple interfaces,
       and a subclass chooses to call the default implementation of one of the interfaces.
 ---*/
 

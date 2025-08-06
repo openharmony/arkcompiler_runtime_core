@@ -20,30 +20,18 @@ desc: >-
 ---*/
 
 interface Parent1 {
-    greet(): string;
-}
-
-interface Parent2 {
-    greet(): string;
-}
-
-interface Parent3 {
-    greet(): string;
-}
-
-class Parent1Impl implements Parent1 {
     greet(): string {
         return "Hello from Parent1";
     }
 }
 
-class Parent2Impl implements Parent2 {
+interface Parent2 {
     greet(): string {
         return "Hello from Parent2";
     }
 }
 
-class Parent3Impl implements Parent3 {
+interface Parent3 {
     greet(): string {
         return "Hello from Parent3";
     }
@@ -54,11 +42,11 @@ interface Child extends Parent1, Parent2, Parent3 {
 
 class ChildImpl implements Child {
     greet(): string {
-        return new Parent1Impl().greet();
+        return "conflict resolved";
     }
 }
 
 function main(): void {
     const child = new ChildImpl();
-    arktest.assertEQ(child.greet(), "Hello from Parent1");
+    arktest.assertEQ(child.greet(), "conflict resolved");
 }

@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Methods with the same name have different return types.
+desc: Methods with the same name have different return types (number is not a subtype of string).
 tags: [compile-only, negative]
 ---*/
 
@@ -27,3 +27,9 @@ interface Parent2 {
 }
 
 interface Child extends Parent1, Parent2 {}
+
+class ChildClass implements Child {
+  getValue(): string | number {
+    return Math.random() > 0.5 ? "Hello" : 42;
+  }
+}

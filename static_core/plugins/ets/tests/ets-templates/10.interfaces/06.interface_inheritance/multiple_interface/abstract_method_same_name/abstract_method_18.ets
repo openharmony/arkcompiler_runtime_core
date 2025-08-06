@@ -18,20 +18,26 @@ desc: The method with the same name has the same type and number of parameters, 
 tags: [compile-only, negative]
 ---*/
 
+interface I1 {
+  readonly value: number
+}
+
+interface I2 {
+  value: number
+}
+
 interface Parent1 {
-  update(data: { readonly value: number }): void;
+  update(data: I1): void;
 }
 
 interface Parent2 {
-  update(data: { value: number }): void; 
+  update(data: I2): void;
 }
 
 interface Child extends Parent1, Parent2 {
-  update(data: { value: number }): void;
+  update(data: I2): void;
 }
 
 class ChildClass implements Child {
-  update(data: { value: number }): void {
-    console.log(`Value: ${data.value}`);
-  }
+  update(data: I2): void {}
 }

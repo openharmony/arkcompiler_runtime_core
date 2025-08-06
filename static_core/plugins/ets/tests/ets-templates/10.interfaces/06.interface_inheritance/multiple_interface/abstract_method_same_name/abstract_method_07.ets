@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The method with the same name has different parameter types and return types.
+desc: >-
+      The method with the same name has different parameter types and return types.
+      Return types: number is not a subtype of string.
 tags: [compile-only, negative]
 ---*/
 
@@ -29,11 +31,7 @@ interface Parent2 {
 interface Child extends Parent1, Parent2 {}
 
 class ChildClass implements Child {
-  process(data: string | number): string | number {
-    if (typeof data === "string") {
-      return `Processed String: ${data}`;
-    } else {
-      return data * 2;
-    }
+  process(...p: Any[]): Any {
+    return p[0]
   }
 }

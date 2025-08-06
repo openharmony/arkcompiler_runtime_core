@@ -20,48 +20,25 @@ desc: >-
 ---*/
 
 interface Parent1 {
-  calculate(value: number): number;
+  calculate(value: number): Object;
 }
 
-interface Parent2 {
-  calculate(value: number): string;
+interface Parent2 extends Parent1 {
+  calculate(value: number): number|string;
 }
 
-class ChildClass {
-  private parent1: Parent1;
-  private parent2: Parent2;
-
-  constructor(parent1: Parent1, parent2: Parent2) {
-    this.parent1 = parent1;
-    this.parent2 = parent2;
-  }
-
+class ChildClass implements Parent2 {
   calculate(value: number): number | string {
     if (value > 10) {
-      return this.parent1.calculate(value);
+      return value*2
     } else {
-      return this.parent2.calculate(value);
+      return ("result " + value);
     }
   }
 }
 
-class Parent1Impl implements Parent1 {
-  calculate(value: number): number {
-    return value * 2;
-  }
-}
-
-class Parent2Impl implements Parent2 {
-  calculate(value: number): string {
-    return `Result: ${value}`;
-  }
-}
-
 function main(): void {
-  const parent1 = new Parent1Impl();
-  const parent2 = new Parent2Impl();
-  const child = new ChildClass(parent1, parent2);
-
-  console.log(child.calculate(5));
+  const child = new ChildClass();
+  arktest.assertEQ(child.calculate(5), "result 5");
   arktest.assertEQ(child.calculate(15), 30);
 }

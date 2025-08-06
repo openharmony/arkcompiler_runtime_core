@@ -15,7 +15,6 @@
 
 /*---
 desc: Interfaces cannot constrain static members of a class.
-tags: [compile-only, negative]
 ---*/
 
 interface MyInterface {
@@ -23,5 +22,11 @@ interface MyInterface {
 }
 
 class MyClass implements MyInterface {
-  Static instanceProperty: string = "";
+  instanceProperty: string = "str1";
+  static instanceProperty: string = "str2";
+}
+
+function main() {
+  arktest.assertEQ(new MyClass().instanceProperty, "str1")
+  arktest.assertEQ(MyClass.instanceProperty, "str2")
 }
