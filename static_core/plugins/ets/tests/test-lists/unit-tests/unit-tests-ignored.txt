@@ -32,6 +32,3 @@ ets-common-tests/intrinsics/typed_arrays_reverse.ets
 
 # 29089
 ets-common-tests/stubs/typeof.ets
-
-#28060
-ets-common-tests/taskpool/common_tasks.ets

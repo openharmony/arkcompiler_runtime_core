@@ -123,7 +123,27 @@ export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, launchParams
   return launchInternal<R, F>(coroFun, args as FixedArray<Any>, launchParams);
 }
 
-function launchInternal<R, F extends CoroFunT<never, R>>(coroFun: F, args: FixedArray<Any>, launchParams?: LaunchParams): Job<R> {
+/**
+ * Wait for the completion of an asynchronous callback and returns its result.
+ *
+ * @param asyncCallback Asynchronous callback function that returns a promise.
+ *
+ * @returns The resolved value from the promise returned by the callback.
+ * 
+ * @throws The rejection error if the promise is rejected.
+ */
+export function waitForCompletion<T>(asyncCallback: () => Promise<T>): T {
+    let resultPromise = asyncCallback();
+    let job = new CompletableJob<T>();
+    resultPromise.then((res: T) => {
+        job.finish(res);
+    }).catch((e: Error) => {
+        job.fail(e);
+    })
+    return job.Await();
+}
+
+function launchInternal<R, F extends CoroFunT<never, R>>(coroFun: F, args: FixedArray<NullishType>, launchParams?: LaunchParams): Job<R> {
   const paddedArgs = padArrayToMaxArgs(args);
   if (launchParams) {
     return launchInternalJobNative<F, R>(coroFun, args as FixedArray<Any>, launchParams.abortFlag, launchParams.workerGroupId);
