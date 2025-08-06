@@ -14,19 +14,15 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Test call to private super
+desc: Test call to private superconstructor
 assert: Constructor is not visible here.
 tags: [compile-only, negative]
 ---*/
 
 class A {
-    constructor() {
+    constructor noArgs() {}
 
-    }
-
-    private constructor(v: int) {
-
-    }
+    private constructor(v: int) {}
 }
 
 class B extends A {

@@ -13,56 +13,50 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for stmt in statements %}
+{% for c in cases %}
 
 /*---
-desc: Negative tests for different set of statements before calling super()/this()
-assert: Call to 'super'/'this' must be first statement in constructor
-params: {{stmt}}
+desc: >-
+    A constructor body can have no more than one call to the current
+    class or direct superclass constructor. Otherwise, a compile-time
+    error occurs.
 tags: [compile-only, negative]
 ---*/
 
 class A {
-
-    protected parentField: int;
+    protected parentField: int
 
     protected parentMethod(): int {
-       return 1;
+        return 1
     }
 
-    public constructor() {
+    public constructor() {}
 
-    }
-
-    public constructor(value: String) {
-
-    }
-
+    public constructor fromString(value: string) {}
 }
 
 class B extends A {
     childField1: int
-    childField2: String
+    childField2: string
 
-    childMethod1() : int {
-        return this.childField1;
+    childMethod1(): int {
+        return this.childField1
     }
 
-    childMethod2() : String {
-        return this.childField2;
+    childMethod2(): string {
+        return this.childField2
     }
 
-    public constructor(value: String) {
-
+    public constructor fromInt(value: int) {
+        this.childField1 = value
     }
-    
-    public constructor(value: int) {
 
+    public constructor fromString(value: String) {
+        this.childField2 = value
     }
 
     public constructor() {
-        {{stmt}}
+        {{c.stmt|indent|indent}}
     }
 }
-
 {% endfor %}

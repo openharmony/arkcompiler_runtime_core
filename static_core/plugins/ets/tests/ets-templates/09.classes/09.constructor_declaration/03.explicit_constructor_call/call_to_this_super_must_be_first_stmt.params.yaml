@@ -11,22 +11,62 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# List of statements with super()
-statements:
-    - "this.childField1 = 1; super()"
-    - "this.childMethod1(); super()"
-    - "super.parentField = 1; super()"
-    - "super.parentMethod(); super()"
-    - "if (true) super() else super(\"\")"
-    - "super(this.childField2)"
-    - "super(this.childMethod2())"
-    - "this.childField1 = 1; this()"
-    - "this.childMethod1(); this()"
-    - "super.parentFiled = 1; this()"
-    - "super.parentMethod(); this()"
-    - "if (true) this() else this(\"\")"
-    - "this(super.parentField)"
-    - "this(super.parentMethod())"
-    - "this(this.childField2)"
-    - "this(this.childMethod2())"
+--- # List of statements with super()
+cases:
+    - stmt: |-
+        this.childField1 = 1
+        super()
 
+    - stmt: |-
+        let v = this.childMethod1()
+        super()
+
+    - stmt: |-
+        super.parentField = 1
+        super()
+
+    - stmt: |-
+        let v = super.parentMethod()
+        super()
+
+    - stmt: |-
+        if (new B() instanceof A)
+            super()
+        else
+            super.fromString("")
+
+    - stmt: |-
+        super.fromString(this.childField2)
+
+    - stmt: |-
+        super.fromString(this.childMethod2())
+
+    - stmt: |-
+        this.childField1 = 1
+        this()
+
+    - stmt: |-
+        this.childMethod1()
+        this()
+
+    - stmt: |-
+        let v = super.parentMethod()
+        this()
+
+    - stmt: |-
+        if (new B() instanceof A)
+            this()
+        else
+            this.fromString("")
+
+    - stmt: |-
+        this.fromInt(super.parentField)
+
+    - stmt: |-
+        this.fromInt(super.parentMethod())
+
+    - stmt: |-
+        this.fromString(this.childField2)
+
+    - stmt: |-
+        this.fromString(this.childMethod2())

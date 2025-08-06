@@ -21,11 +21,11 @@ tags: [compile-only, negative]
 
 class A {
 
-    constructor() {
+    constructor noArgs() {
         this(5)
     }
 
     constructor(v: int) {
-        this()
+        this.noArgs()
     }
 }
