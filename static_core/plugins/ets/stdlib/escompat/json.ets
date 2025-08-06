@@ -1335,7 +1335,11 @@ function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double
                 if (hasIndentation) {
                     arrayResult += nextIndentStr
                 }
-                arrayResult += stringifyElementRecursively(array[i], replacer, space, depth + 1)
+                if (array[i].jsonType == jsonx.JsonType.JsonUndefined) {
+                    arrayResult += "null"
+                } else {
+                    arrayResult += stringifyElementRecursively(array[i], replacer, space, depth + 1)
+                }
                 if (i < array.length - 1) {
                     arrayResult += ","
                 }
@@ -1362,6 +1366,9 @@ function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double
             for (let i = 0; i < entries.length; i++) {
                 const key = entries[i][0]
                 const value = entries[i][1]
+                if (value.jsonType == jsonx.JsonType.JsonUndefined) {
+                    continue
+                }
                 if (hasIndentation) {
                     objectResult += nextIndentStr
                 }
