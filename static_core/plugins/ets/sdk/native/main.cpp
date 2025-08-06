@@ -112,7 +112,7 @@ static void BindNativeDecoder(ani_env *env, ani_object object, ani_string aniEnc
 
 static ani_status BindTextDecoder(ani_env *env)
 {
-    const char *className = "L@ohos/util/util/TextDecoder;";
+    const char *className = "@ohos.util.util.TextDecoder";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         std::cerr << "Not found '" << className << "'" << std::endl;
@@ -120,8 +120,8 @@ static ani_status BindTextDecoder(ani_env *env)
     }
 
     std::array methods = {
-        ani_native_function {"bindNativeDecoder", "Lstd/core/String;I:V", reinterpret_cast<void *>(BindNativeDecoder)},
-        ani_native_function {"decode", "Lescompat/Uint8Array;Z:Lstd/core/String;", reinterpret_cast<void *>(Decode)},
+        ani_native_function {"bindNativeDecoder", "C{std.core.String}i:", reinterpret_cast<void *>(BindNativeDecoder)},
+        ani_native_function {"decode", "C{escompat.Uint8Array}z:C{std.core.String}", reinterpret_cast<void *>(Decode)},
     };
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -130,7 +130,7 @@ static ani_status BindTextDecoder(ani_env *env)
     }
 
     std::array staticMethods = {
-        ani_native_function {"nativeDestroy", "J:V", reinterpret_cast<void *>(NativeDestroy)},
+        ani_native_function {"nativeDestroy", "l:", reinterpret_cast<void *>(NativeDestroy)},
     };
     if (ANI_OK != env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size())) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -143,7 +143,7 @@ static ani_status BindTextDecoder(ani_env *env)
 [[maybe_unused]] static ani_status BindTextEncoder(ani_env *env)
 {
     ani_class cls;
-    const char *className = "L@ohos/util/util/TextEncoder;";
+    const char *className = "@ohos.util.util.TextEncoder";
     if (ANI_OK != env->FindClass(className, &cls)) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         LOG_ERROR_SDK("TextEncoder:: Not found %{public}s", className);
@@ -152,12 +152,12 @@ static ani_status BindTextDecoder(ani_env *env)
     std::array barMethods = {
         ani_native_function {
             "doEncodeInto",
-            "Lstd/core/String;Lstd/core/String;:Lescompat/Uint8Array;",
+            "C{std.core.String}C{std.core.String}:C{escompat.Uint8Array}",
             reinterpret_cast<void *>(ark::ets::sdk::util::DoEncodeInto),
         },
         ani_native_function {
             "doEncodeInfoUint8Array",
-            "Lstd/core/String;Lstd/core/String;Lescompat/Uint8Array;:L@ohos/util/util/EncodeIntoUint8ArrayInfo;",
+            "C{std.core.String}C{std.core.String}C{escompat.Uint8Array}:C{@ohos.util.util.EncodeIntoUint8ArrayInfo}",
             reinterpret_cast<void *>(ark::ets::sdk::util::DoEncodeIntoUint8Array),
         },
     };
@@ -172,18 +172,18 @@ static ani_status BindTextDecoder(ani_env *env)
 
 static ani_status BindUtilHelper(ani_env *env)
 {
-    const char *className = "L@ohos/util/util/UtilHelper;";
+    const char *className = "@ohos.util.util.UtilHelper";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         auto msg = std::string("Cannot find \"") + className + std::string("\" class!");
-        ark::ets::stdlib::ThrowNewError(env, "Lstd/core/RuntimeException;", msg.data(), "Lstd/core/String;:V");
+        ark::ets::stdlib::ThrowNewError(env, "std.core.RuntimeException", msg.data(), "C{std.core.String}:");
         return ANI_ERROR;
     }
 
     const auto methods = std::array {
-        ani_native_function {"generateRandomUUID", "Z:Lstd/core/String;",
+        ani_native_function {"generateRandomUUID", "z:C{std.core.String}",
                              reinterpret_cast<void *>(ark::ets::sdk::util::ETSApiUtilHelperGenerateRandomUUID)},
-        ani_native_function {"generateRandomBinaryUUID", "Z:Lescompat/Uint8Array;",
+        ani_native_function {"generateRandomBinaryUUID", "z:C{escompat.Uint8Array}",
                              reinterpret_cast<void *>(ark::ets::sdk::util::ETSApiUtilHelperGenerateRandomBinaryUUID)}};
 
     if (ANI_OK != env->Class_BindStaticNativeMethods(cls, methods.data(), methods.size())) {
@@ -203,7 +203,7 @@ static ani_boolean AniUtilsIsUndefined(ani_env *env, ani_object aniObj)
 static ani_boolean AniUtilsIsTypeArray(ani_env *env, ani_object aniObj)
 {
     ani_class cls {};
-    env->FindClass("Lescompat/Uint8Array;", &cls);
+    env->FindClass("escompat.Uint8Array", &cls);
     ani_boolean isTypeArray = ANI_FALSE;
     env->Object_InstanceOf(aniObj, cls, &isTypeArray);
     return isTypeArray;
@@ -259,17 +259,17 @@ static ani_string DoEnd(ani_env *env, ani_object object, ani_object typedArray)
 static ani_status BindStringDecoder(ani_env *env)
 {
     ani_class cls;
-    const char *className = "L@ohos/util/util/StringDecoder;";
+    const char *className = "@ohos.util.util.StringDecoder";
     if (ANI_OK != env->FindClass(className, &cls)) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         LOG_ERROR_SDK("StringDecoder:: Not found %{public}s", className);
         return ANI_ERROR;
     }
     std::array methods = {
-        ani_native_function {"bindNativeStringDecoder", "Lstd/core/String;:V",
-                             reinterpret_cast<void *>(BindNativeStringDecoder)},
-        ani_native_function {"doWrite", "Lescompat/Uint8Array;:Lstd/core/String;", reinterpret_cast<void *>(DoWrite)},
-        ani_native_function {"doEnd", "Lescompat/Uint8Array;:Lstd/core/String;", reinterpret_cast<void *>(DoEnd)},
+        ani_native_function {"bindNativeStringDecoder",
+                             "C{std.core.String}:", reinterpret_cast<void *>(BindNativeStringDecoder)},
+        ani_native_function {"doWrite", "C{escompat.Uint8Array}:C{std.core.String}", reinterpret_cast<void *>(DoWrite)},
+        ani_native_function {"doEnd", "C{escompat.Uint8Array}:C{std.core.String}", reinterpret_cast<void *>(DoEnd)},
     };
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)

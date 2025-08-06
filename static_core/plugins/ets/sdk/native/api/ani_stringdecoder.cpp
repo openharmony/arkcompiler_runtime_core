@@ -136,7 +136,7 @@ ani_object StringDecoder::ThrowError(ani_env *env, const std::string &message)
 {
     ani_string errString;
     env->String_NewUTF8(message.c_str(), message.size(), &errString);
-    static const char *className = "L@ohos/util/util/BusinessError;";
+    static const char *className = "@ohos.util.util.BusinessError";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -145,7 +145,7 @@ ani_object StringDecoder::ThrowError(ani_env *env, const std::string &message)
     }
 
     ani_method errorCtor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;:V", &errorCtor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}:", &errorCtor)) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         LOG_ERROR_SDK("StringDecoder:: Class_FindMethod <ctor> Failed");
         return nullptr;

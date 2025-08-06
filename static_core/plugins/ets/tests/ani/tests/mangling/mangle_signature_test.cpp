@@ -769,6 +769,21 @@ TEST_F(MangleSignatureTest, Class_BindNativeMethods)
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, functions.data(), functions.size()), ANI_OK);
 }
 
+TEST_F(MangleSignatureTest, Class_BindNativeMethods_OldFormat)
+{
+    auto *foo1 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo1);
+    auto *foo2 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo2);
+
+    std::array functions = {
+        ani_native_function {"foo", "Lescompat/Array;:Lescompat/Array;", foo1},
+        ani_native_function {"foo", "Lescompat/Array;Lstd/core/Function1;:V", foo2},
+    };
+
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lmsig/F;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Class_BindNativeMethods(cls, functions.data(), functions.size()), ANI_OK);
+}
+
 TEST_F(MangleSignatureTest, Namespace_BindNativeFunctions)
 {
     auto *foo1 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo1);
@@ -784,6 +799,21 @@ TEST_F(MangleSignatureTest, Namespace_BindNativeFunctions)
     ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()), ANI_OK);
 }
 
+TEST_F(MangleSignatureTest, Namespace_BindNativeFunctions_OldFormat)
+{
+    auto *foo1 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo1);
+    auto *foo2 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo2);
+
+    std::array functions = {
+        ani_native_function {"foo", "Lescompat/Array;:Lescompat/Array;", foo1},
+        ani_native_function {"foo", "Lescompat/Array;Lstd/core/Function1;:V", foo2},
+    };
+
+    ani_namespace ns {};
+    ASSERT_EQ(env_->FindNamespace("Lmsig/rls;", &ns), ANI_OK);
+    ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()), ANI_OK);
+}
+
 TEST_F(MangleSignatureTest, Module_BindNativeFunctions)
 {
     auto *foo1 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo1);
@@ -796,6 +826,21 @@ TEST_F(MangleSignatureTest, Module_BindNativeFunctions)
 
     ani_module m {};
     ASSERT_EQ(env_->FindModule("msig", &m), ANI_OK);
+    ASSERT_EQ(env_->Module_BindNativeFunctions(m, functions.data(), functions.size()), ANI_OK);
+}
+
+TEST_F(MangleSignatureTest, Module_BindNativeFunctions_OldFormat)
+{
+    auto *foo1 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo1);
+    auto *foo2 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo2);
+
+    std::array functions = {
+        ani_native_function {"foo", "Lescompat/Array;:Lescompat/Array;", foo1},
+        ani_native_function {"foo", "Lescompat/Array;Lstd/core/Function1;:V", foo2},
+    };
+
+    ani_module m {};
+    ASSERT_EQ(env_->FindModule("Lmsig;", &m), ANI_OK);
     ASSERT_EQ(env_->Module_BindNativeFunctions(m, functions.data(), functions.size()), ANI_OK);
 }
 

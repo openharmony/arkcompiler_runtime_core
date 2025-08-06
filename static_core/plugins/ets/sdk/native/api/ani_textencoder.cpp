@@ -59,7 +59,7 @@ ani_object NewUint8Array(ani_env *env, const char *signature, Args... args)
 {
     ani_class arrayClass;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    ANI_RETURN_NULLPTR_ON_FAILURE(env->FindClass("Lescompat/Uint8Array;", &arrayClass),
+    ANI_RETURN_NULLPTR_ON_FAILURE(env->FindClass("escompat.Uint8Array", &arrayClass),
                                   "Internal failure: env->FindClass()");
     ani_method arrayCtor;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -191,7 +191,7 @@ ani_object OtherEncodeToUint8Array(ani_env *env, ani_string inputStringObj, cons
     if (buffer == nullptr) {
         return nullptr;
     }
-    return NewUint8Array(env, "Lescompat/Buffer;II:V", buffer, ani_int {0},
+    return NewUint8Array(env, "C{escompat.Buffer}ii:", buffer, ani_int {0},
                          static_cast<ani_int>(writeRes.resultSizeBytes));
 }
 
@@ -254,7 +254,7 @@ ani_object DoEncodeInto(ani_env *env, [[maybe_unused]] ani_object object, ani_st
     if (encodingStr == "utf-8") {
         std::string inputString = stdlib::ConvertFromAniString(env, stringObj);
         std::optional<Uint8ArrayWithBufferInfo> arrInfo =
-            NewUint8ArrayWithBufferInfo(env, "I:V", static_cast<ani_int>(inputString.length()));
+            NewUint8ArrayWithBufferInfo(env, "i:", static_cast<ani_int>(inputString.length()));
         if (!arrInfo) {
             return nullptr;
         }
@@ -279,7 +279,7 @@ ani_object DoEncodeInto(ani_env *env, [[maybe_unused]] ani_object object, ani_st
         }
         size_t sizeBytes = utf16Str.length() * 2;  // 2 : 2 bytes per UTF-16 character
         std::optional<Uint8ArrayWithBufferInfo> arrInfo =
-            NewUint8ArrayWithBufferInfo(env, "I:V", static_cast<ani_int>(sizeBytes));
+            NewUint8ArrayWithBufferInfo(env, "i:", static_cast<ani_int>(sizeBytes));
         if (!arrInfo) {
             return nullptr;
         }
@@ -324,14 +324,14 @@ ani_object DoEncodeIntoUint8Array(ani_env *env, [[maybe_unused]] ani_object obje
     }
 
     ani_class resultClass;
-    const char *resultClassName = "L@ohos/util/util/EncodeIntoUint8ArrayInfoInner;";
+    const char *resultClassName = "@ohos.util.util.EncodeIntoUint8ArrayInfoInner";
     if (ANI_OK != env->FindClass(resultClassName, &resultClass)) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         LOG_ERROR_SDK("TextEncoder:: Failed to get class %{public}s", resultClassName);
         return nullptr;
     }
     ani_method resultCtor;
-    if (ANI_OK != env->Class_FindMethod(resultClass, "<ctor>", "II:V", &resultCtor)) {
+    if (ANI_OK != env->Class_FindMethod(resultClass, "<ctor>", "ii:", &resultCtor)) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         LOG_ERROR_SDK("TextEncoder:: Failed to get constructor of class %{public}s", resultClassName);
         return nullptr;

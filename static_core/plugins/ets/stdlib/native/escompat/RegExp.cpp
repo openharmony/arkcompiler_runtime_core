@@ -354,7 +354,7 @@ static ani_object Exec(ani_env *env, ani_object regexp, ani_string pattern, ani_
                        ani_double patternSize, ani_double strSize, ani_double lastIndex, ani_boolean hasSlashU)
 {
     ani_method regexpExecArrayCtor;
-    ANI_FATAL_IF_ERROR(env->Class_FindMethod(refs::g_regexpExecArrayClass, "<ctor>", ":V", &regexpExecArrayCtor));
+    ANI_FATAL_IF_ERROR(env->Class_FindMethod(refs::g_regexpExecArrayClass, "<ctor>", ":", &regexpExecArrayCtor));
     ani_object regexpExecArrayObject;
 
     const bool isUtf16Pattern = IsUtf16(env, pattern);
@@ -379,7 +379,7 @@ static ani_object Match(ani_env *env, ani_object regexp, ani_string pattern, ani
                         ani_double patternSize, ani_double strSize, ani_double lastIndex, ani_boolean hasSlashU)
 {
     ani_method regexpMatchArrayCtor;
-    ANI_FATAL_IF_ERROR(env->Class_FindMethod(refs::g_regexpMatchArrayClass, "<ctor>", ":V", &regexpMatchArrayCtor));
+    ANI_FATAL_IF_ERROR(env->Class_FindMethod(refs::g_regexpMatchArrayClass, "<ctor>", ":", &regexpMatchArrayCtor));
     ani_object regexpMatchArrayObject;
 
     const bool isUtf16Pattern = IsUtf16(env, pattern);
