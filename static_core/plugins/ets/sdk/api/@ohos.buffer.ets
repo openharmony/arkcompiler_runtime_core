@@ -79,12 +79,12 @@ function stringify(buffer: ArrayBuffer, encoding: string, resolvedStart: int, re
             const byte1 = buffer.at(i) & 0xff;
             const byte2 = i + 1 < resolvedEnd ? (buffer.at(i + 1) & 0xff) : NaN;
             const byte3 = i + 2 < resolvedEnd ? (buffer.at(i + 2) & 0xff) : NaN;
-            
+
             const enc1 = byte1 >> 2;
             const enc2 = ((byte1 & 3) << 4) | (byte2 >> 4);
             const enc3 = ((byte2 & 15) << 2) | (byte3 >> 6);
             const enc4 = byte3 & 63;
-            
+
             if (isNaN(byte2)) {
                 base64 += encodings.charAt(enc1) + encodings.charAt(enc2) + '==';
             } else if (isNaN(byte3)) {
@@ -269,7 +269,8 @@ export default namespace buffer {
             const arrBuff: ArrayBuffer = (buff as Buffer).buffer;
             return new Buffer(ArrayBuffer.from(arrBuff));
         }
-        return new Buffer(ArrayBuffer.from(buff as Uint8Array));
+        const u8arr = buff as Uint8Array;
+        return new Buffer(u8arr.buffer as ArrayBuffer);
     }
 
     /**
