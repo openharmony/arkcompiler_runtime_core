@@ -14,6 +14,7 @@
  */
 import {xml} from "@ohos.xml"
 import { BusinessError } from "@ohos.base";
+import { util } from "@ohos.util";
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("XmlPullParser API tests, part9")
@@ -27,7 +28,7 @@ function main(): int {
     suite.addTest("Testing the XML PullParser constructor with an empty string.", testXmlPullParserConstructor0010)
     suite.addTest("Testing the XML PullParser's constructor with namespaces.Verifies that it handles XML namespaces correctly.", testXmlPullParserConstructor0012)
     suite.addTest("Testing the XML PullParser's constructor with long character input.Verifies that it handles large inputs properly.", testXmlPullParserConstructor0011)
-
+    suite.addTest("Testing the XML PullParser's CDATA parsing. testXml017", testXml017)
     return suite.run()
 }
 
@@ -53,7 +54,7 @@ function testXmlPullParserConstructor0001() {
         '  <price>19.99</price>' +
         '  <description>This book is about XML.</description>' +
         '</book>'
-    
+
     let parser = new xml.XmlPullParser(rawStringToBuffer(testXml), "utf-8");
     let options: xml.ParseOptions = {
         supportDoctype: true, ignoreNameSpace: true,
@@ -255,3 +256,31 @@ function testXmlPullParserConstructor0012() {
     }
 }
 
+
+let str = ""
+function testXml017() {
+    let strXml =
+    '<?xml version="1.0" encoding="UTF-8"?>' +
+        '<note importance="high" logged="true">' +
+        '<company><![CDATA[SYSTEM</company>' +
+        '<todo>work</todo>' +
+        '</note>';
+    let textEncoder = new util.TextEncoder();
+    let uint8 = textEncoder.encodeInto(strXml);
+    let pullParse = new xml.XmlPullParser(uint8.buffer as object as ArrayBuffer);
+    str = '';
+    let options: xml.ParseOptions = { supportDoctype: true, ignoreNameSpace: true, tagValueCallbackFunction: func17 }
+    try {
+    pullParse.parseXml(options);
+    arktest.assertTrue(false)
+    } catch (e:BusinessError) {
+    arktest.assertEQ(e.toString(), "BusinessError: Cannot find the ']]>' in xml string.")
+    arktest.assertEQ(e.code ,401)
+    }
+
+}
+
+function func17(name: string, value: string): boolean {
+  str += name + value;
+  return true;
+}
