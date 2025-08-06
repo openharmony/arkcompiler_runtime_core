@@ -72,7 +72,7 @@ function main(): int {
     }
     if (!threw) {
         f += 1
-        console.println("exception not thrown")
+        console.println("error not thrown")
     }
     return f
 }
