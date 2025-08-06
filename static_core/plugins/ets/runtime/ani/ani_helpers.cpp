@@ -58,8 +58,8 @@ public:
         EtsReference *ref = nullptr;
         auto *objPtr = reinterpret_cast<EtsObject **>(v);
         ASSERT(objPtr != nullptr);
-        if (ani::ManagedCodeAccessor::IsUndefined(*objPtr)) {
-            ref = ani::ManagedCodeAccessor::GetUndefinedReference();
+        if (EtsReferenceStorage::IsUndefinedEtsObject(*objPtr)) {
+            ref = EtsReference::GetUndefined();
         } else {
             ref = EtsReferenceStorage::NewEtsStackRef(objPtr);
         }
@@ -369,7 +369,7 @@ extern "C" void EtsNapiEnd(Method *method, ManagedThread *thread, bool isFastNat
 
     auto coroutine = EtsCoroutine::CastFromThread(thread);
     auto storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
-    storage->PopLocalEtsFrame(nullptr);
+    storage->PopLocalEtsFrame(EtsReference::GetUndefined());
 }
 
 extern "C" EtsObject *EtsNapiObjEnd(Method *method, EtsReference *etsRef, ManagedThread *thread, bool isFastNative)
@@ -385,15 +385,14 @@ extern "C" EtsObject *EtsNapiObjEnd(Method *method, EtsReference *etsRef, Manage
 
     Runtime::GetCurrent()->GetNotificationManager()->MethodExitEvent(thread, method);
 
-    EtsObject *ret = nullptr;
-
     auto coroutine = EtsCoroutine::CastFromThread(thread);
     auto storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
-    if (etsRef != nullptr) {
+    EtsObject *ret = nullptr;
+    if (LIKELY(!coroutine->HasPendingException())) {
         ret = storage->GetEtsObject(etsRef);
     }
 
-    storage->PopLocalEtsFrame(nullptr);
+    storage->PopLocalEtsFrame(EtsReference::GetUndefined());
 
     return ret;
 }

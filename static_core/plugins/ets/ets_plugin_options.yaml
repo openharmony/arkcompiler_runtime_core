@@ -20,6 +20,7 @@
       lang_context_class: ark::ets::EtsLanguageContext
       lang_context_header_path: plugins/ets/runtime/ets_language_context.h
       additional_interpter_inl: plugins/ets/runtime/interpreter/interpreter-inl.h
+      entrypoints_header_path: plugins/ets/runtime/ets_entrypoints.h
       language_config:
         lang_type: static
         mt_mode: task
