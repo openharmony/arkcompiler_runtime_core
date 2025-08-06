@@ -68,9 +68,6 @@
 #18080 Push method works for ReadonlyArray
 03.types/17.array_types/02.readonly_array_types/array_readonly_push_n.ets
 
-#27329 Incorrect property 'name' of function object it lambdas
-03.types/19.function_types/01.type_function/positive_8.ets
-
 #25512
 03.types/20.union_types/united_switch_ext_1.ets
 03.types/20.union_types/united_switch_ext_3.ets
