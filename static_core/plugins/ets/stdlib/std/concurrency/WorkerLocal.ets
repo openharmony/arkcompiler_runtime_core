@@ -15,6 +15,27 @@
 
 package std.concurrency;
 
+/**
+ * This class allows to Wrap a value
+ * It is usefull, so we can distinct undefined and Wrapper<undefined>
+ * That way ConcurrentHashMap<Wrapper<T>>.get() where T = SMTH | undefined
+ * returns undefined, if there are no value and Wrapper<T> with undefined if
+ * one has stored an undefined value
+ */
+class Wrapper <T> {
+    constructor() {}
+
+    constructor(value: T) {
+        this.value = value;
+    }
+
+    get(): T {
+        return this.value;
+    }
+
+    private value: T;
+}
+
 export class WorkerLocal<T> {
 
     /**
@@ -43,14 +64,19 @@ export class WorkerLocal<T> {
      */
     get():T {
         const workerId = CoroutineExtras.getWorkerId();
-        if (!this.storage.has(workerId)) {
+
+        let wrapped: Wrapper<T> | undefined = this.storage.get(workerId);
+        if (wrapped === undefined) {
             if (this.init) {
-                this.storage.set(workerId, this.init!());
+                let value = this.init!();
+                this.storage.set(workerId, new Wrapper<T>(value));
+                return value;
             } else {
                 throw new Error("WorkerLocal value not initialized. Call set() first or provide an init function.");
             }
+        } else {
+            return wrapped!.get();
         }
-        return this.storage.get(workerId)!;
     }
 
     /**
@@ -60,7 +86,7 @@ export class WorkerLocal<T> {
      */ 
     set(value: T):void {
         const workerId = CoroutineExtras.getWorkerId();
-        this.storage.set(workerId, value);
+        this.storage.set(workerId, new Wrapper<T>(value));
     }
 
     /**
@@ -71,6 +97,6 @@ export class WorkerLocal<T> {
         this.storage.delete(workerId);
     }
 
-    private storage = new containers.ConcurrentHashMap<WorkerId, T>();
+    private storage = new containers.ConcurrentHashMap<WorkerId, Wrapper<T>>();
     private init?: () => T;
 }
