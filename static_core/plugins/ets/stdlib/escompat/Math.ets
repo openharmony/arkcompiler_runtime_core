@@ -622,9 +622,7 @@ export class Math {
      * Initial seed to the random number generator algorithm can be given using {@link seedRandom()} function.
      *
      */
-    public static random(): double {
-        return random();
-    }
+    public static native random(): double
 
     /**
      * `v` rounded to nearest integer
