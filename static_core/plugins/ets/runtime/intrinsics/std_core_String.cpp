@@ -572,12 +572,11 @@ EtsBoolean StdCoreStringEndsWith(EtsString *thisStr, EtsString *suffix, EtsInt e
     return thisStr->EndsWith(suffix, endIndex);
 }
 
-EtsString *StdCoreStringFromCharCode(ObjectHeader *array)
+EtsString *StdCoreStringFromCharCode(EtsEscompatArray *charCodes)
 {
-    ASSERT(array != nullptr);
-    auto *charCodes = EtsEscompatArray::FromEtsObject(EtsObject::FromCoreType(array));
+    ASSERT(charCodes != nullptr);
     ASSERT(charCodes->GetData() != nullptr);
-    return EtsString::CreateNewStringFromCharCode(charCodes->GetData());
+    return EtsString::CreateNewStringFromCharCode(charCodes->GetData(), charCodes->GetActualLength());
 }
 
 EtsString *StdCoreStringFromCharCodeSingle(EtsDouble charCode)

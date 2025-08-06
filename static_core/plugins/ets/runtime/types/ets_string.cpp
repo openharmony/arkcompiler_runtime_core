@@ -97,10 +97,9 @@ EtsString *EtsString::CreateFromUtf16(const EtsChar *utf16, EtsInt length)
 }
 
 /* static */
-EtsString *EtsString::CreateNewStringFromCharCode(CharCodeArray *charCodes)
+EtsString *EtsString::CreateNewStringFromCharCode(CharCodeArray *charCodes, size_t actualLength)
 {
-    const size_t length = charCodes->GetLength();
-    if (length == 0) {
+    if (actualLength == 0) {
         return CreateNewEmptyString();
     }
 
@@ -109,12 +108,12 @@ EtsString *EtsString::CreateNewStringFromCharCode(CharCodeArray *charCodes)
     [[maybe_unused]] EtsHandleScope scope(coroutine);
     EtsHandle arrayHandle(coroutine, charCodes);
 
-    auto isCompressed = [](CharCodeArray *codes) -> bool {
+    auto isCompressed = [actualLength](CharCodeArray *codes) -> bool {
         if (!Runtime::GetOptions().IsRuntimeCompressedStringsEnabled()) {
             return false;
         }
 
-        for (size_t i = 0; i < codes->GetLength(); ++i) {
+        for (size_t i = 0; i < actualLength; ++i) {
             if (!IsASCIICharacter(
                     // CC-OFFNXT(G.FMT.06-CPP) project code style
                     CodeToChar(EtsBoxPrimitive<EtsDouble>::FromCoreType(codes->Get(i))->GetValue()))) {
@@ -124,15 +123,15 @@ EtsString *EtsString::CreateNewStringFromCharCode(CharCodeArray *charCodes)
         return true;
     };
 
-    auto copyCharsIntoString = [](CharCodeArray *codes, auto *dstData) {
-        Span<std::remove_pointer_t<decltype(dstData)>> to(dstData, codes->GetLength());
-        for (size_t i = 0; i < codes->GetLength(); ++i) {
+    auto copyCharsIntoString = [actualLength](CharCodeArray *codes, auto *dstData) {
+        Span<std::remove_pointer_t<decltype(dstData)>> to(dstData, actualLength);
+        for (size_t i = 0; i < actualLength; ++i) {
             to[i] = CodeToChar(EtsBoxPrimitive<EtsDouble>::FromCoreType(codes->Get(i))->GetValue());
         }
     };
 
     bool compress = isCompressed(arrayHandle.GetPtr());
-    EtsString *s = AllocateNonInitializedString(length, compress);
+    EtsString *s = AllocateNonInitializedString(actualLength, compress);
     if (compress) {
         copyCharsIntoString(arrayHandle.GetPtr(), s->GetDataMUtf8());
     } else {

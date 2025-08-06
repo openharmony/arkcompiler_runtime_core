@@ -488,7 +488,7 @@ extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveCallByNameEntrypoint(const Metho
 extern "C" coretypes::String *CreateStringFromCharCodeEntrypoint(ObjectHeader *array)
 {
     auto *charCodes = EtsEscompatArray::FromEtsObject(EtsObject::FromCoreType(array));
-    return EtsString::CreateNewStringFromCharCode(charCodes->GetData())->GetCoreType();
+    return EtsString::CreateNewStringFromCharCode(charCodes->GetData(), charCodes->GetActualLength())->GetCoreType();
 }
 
 extern "C" coretypes::String *CreateStringFromCharCodeSingleEntrypoint(uint64_t charCode)

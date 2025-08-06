@@ -30,10 +30,9 @@
 
 namespace ark::ets::intrinsics {
 
-EtsObject *EtsEscompatArrayGet(ObjectHeader *arrayHeader, int32_t index)
+EtsObject *EtsEscompatArrayGet(EtsEscompatArray *array, int32_t index)
 {
-    ASSERT(arrayHeader != nullptr);
-    auto *array = EtsEscompatArray::FromEtsObject(EtsObject::FromCoreType(arrayHeader));
+    ASSERT(array != nullptr);
     auto actualLength = array->GetActualLength();
     if (UNLIKELY(static_cast<uint32_t>(index) >= actualLength)) {
         ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR,
@@ -43,10 +42,9 @@ EtsObject *EtsEscompatArrayGet(ObjectHeader *arrayHeader, int32_t index)
     return array->GetData()->Get(index);
 }
 
-void EtsEscompatArraySet(ObjectHeader *arrayHeader, int32_t index, EtsObject *value)
+void EtsEscompatArraySet(EtsEscompatArray *array, int32_t index, EtsObject *value)
 {
-    ASSERT(arrayHeader != nullptr);
-    auto *array = EtsEscompatArray::FromEtsObject(EtsObject::FromCoreType(arrayHeader));
+    ASSERT(array != nullptr);
     auto actualLength = array->GetActualLength();
     if (UNLIKELY(static_cast<uint32_t>(index) >= actualLength)) {
         ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR,
@@ -210,7 +208,7 @@ EtsDouble EtsEscompatArrayIndexOfBigInt(EtsObjectArray *buffer, EtsObject *value
         auto element = buffer->Get(index);
         auto elementClass = element == nullptr ? nullptr : element->GetClass();
         if (elementClass != nullptr && elementClass->IsBigInt() &&
-            EtsBigIntEquality(valueBigInt, EtsBigInt::FromEtsObject(value))) {
+            EtsBigIntEquality(valueBigInt, EtsBigInt::FromEtsObject(element))) {
             return index;
         }
     }
@@ -224,7 +222,7 @@ EtsDouble EtsEscompatArrayLastIndexOfBigInt(EtsObjectArray *buffer, EtsObject *v
         auto element = buffer->Get(index);
         auto elementClass = element == nullptr ? nullptr : element->GetClass();
         if (elementClass != nullptr && elementClass->IsBigInt() &&
-            EtsBigIntEquality(valueBigInt, EtsBigInt::FromEtsObject(value))) {
+            EtsBigIntEquality(valueBigInt, EtsBigInt::FromEtsObject(element))) {
             return index;
         }
     }
@@ -234,7 +232,7 @@ EtsDouble EtsEscompatArrayLastIndexOfBigInt(EtsObjectArray *buffer, EtsObject *v
 template <typename T>
 static auto GetNumericValue(EtsObject *element)
 {
-    return EtsBoxPrimitive<T>::FromCoreType(element)->GetValue();
+    return EtsBoxPrimitive<T>::Unbox(element);
 }
 
 static bool IsIntegerClass(EtsClass *objClass, const EtsPlatformTypes *ptypes)
@@ -341,16 +339,13 @@ EtsDouble EtsEscompatArrayLastIndexOfCommon(EtsObjectArray *buffer, EtsObject *v
     return -1;
 }
 
-EtsInt EtsEscompatArrayInternalIndexOfImpl(ObjectHeader *arrayHeader, EtsObject *value, EtsInt fromIndex)
+EtsInt EtsEscompatArrayInternalIndexOfImpl(EtsEscompatArray *array, EtsObject *value, EtsInt fromIndex)
 {
-    auto actualLength = ObjectAccessor::GetPrimitive<EtsInt>(
-        arrayHeader, cross_values::GetEscompatArrayActualLengthOffset(RUNTIME_ARCH));
+    auto actualLength = static_cast<int32_t>(array->GetActualLength());
     fromIndex = NormalizeArrayIndex(fromIndex, actualLength);
     EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
     const EtsPlatformTypes *ptypes = PlatformTypes(coroutine);
-    ObjectHeader *bufferObjectHeader =
-        ObjectAccessor::GetObject(arrayHeader, cross_values::GetEscompatArrayBufferOffset(RUNTIME_ARCH));
-    EtsObjectArray *buffer = EtsObjectArray::FromCoreType(bufferObjectHeader);
+    EtsObjectArray *buffer = array->GetData();
 
     if (value == nullptr) {
         return EtsEscompatArrayIndexOfUndefined(buffer, fromIndex, actualLength);
@@ -383,29 +378,26 @@ EtsInt EtsEscompatArrayInternalIndexOfImpl(ObjectHeader *arrayHeader, EtsObject 
     return EtsEscompatArrayIndexOfCommon(buffer, value, fromIndex, actualLength);
 }
 
-extern "C" EtsInt EtsEscompatArrayInternalIndexOf(ObjectHeader *arrayHeader, EtsObject *value, EtsInt fromIndex)
+extern "C" EtsInt EtsEscompatArrayInternalIndexOf(EtsEscompatArray *array, EtsObject *value, EtsInt fromIndex)
 {
-    return EtsEscompatArrayInternalIndexOfImpl(arrayHeader, value, fromIndex);
+    return EtsEscompatArrayInternalIndexOfImpl(array, value, fromIndex);
 }
 
-extern "C" EtsDouble EtsEscompatArrayIndexOf(ObjectHeader *arrayHeader, EtsObject *value)
+extern "C" EtsDouble EtsEscompatArrayIndexOf(EtsEscompatArray *array, EtsObject *value)
 {
-    return EtsEscompatArrayInternalIndexOfImpl(arrayHeader, value, 0);
+    return EtsEscompatArrayInternalIndexOfImpl(array, value, 0);
 }
 
-EtsInt EtsEscompatArrayInternalLastIndexOfImpl(ObjectHeader *arrayHeader, EtsObject *value, EtsInt fromIndex)
+EtsInt EtsEscompatArrayInternalLastIndexOfImpl(EtsEscompatArray *array, EtsObject *value, EtsInt fromIndex)
 {
-    auto actualLength = ObjectAccessor::GetPrimitive<EtsInt>(
-        arrayHeader, cross_values::GetEscompatArrayActualLengthOffset(RUNTIME_ARCH));
+    auto actualLength = static_cast<EtsInt>(array->GetActualLength());
     if (actualLength == 0) {
         return -1;
     }
 
     EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
     const EtsPlatformTypes *ptypes = PlatformTypes(coroutine);
-    ObjectHeader *bufferObjectHeader =
-        ObjectAccessor::GetObject(arrayHeader, cross_values::GetEscompatArrayBufferOffset(RUNTIME_ARCH));
-    EtsObjectArray *buffer = EtsObjectArray::FromCoreType(bufferObjectHeader);
+    EtsObjectArray *buffer = array->GetData();
     EtsInt startIndex = 0;
 
     if (fromIndex >= 0) {
@@ -445,16 +437,15 @@ EtsInt EtsEscompatArrayInternalLastIndexOfImpl(ObjectHeader *arrayHeader, EtsObj
     return EtsEscompatArrayLastIndexOfCommon(buffer, value, startIndex);
 }
 
-extern "C" EtsInt EtsEscompatArrayInternalLastIndexOf(ObjectHeader *arrayHeader, EtsObject *value, EtsInt fromIndex)
+extern "C" EtsInt EtsEscompatArrayInternalLastIndexOf(EtsEscompatArray *array, EtsObject *value, EtsInt fromIndex)
 {
-    return EtsEscompatArrayInternalLastIndexOfImpl(arrayHeader, value, fromIndex);
+    return EtsEscompatArrayInternalLastIndexOfImpl(array, value, fromIndex);
 }
 
-extern "C" EtsDouble EtsEscompatArrayLastIndexOf(ObjectHeader *arrayHeader, EtsObject *value)
+extern "C" EtsDouble EtsEscompatArrayLastIndexOf(EtsEscompatArray *array, EtsObject *value)
 {
-    auto actualLength = ObjectAccessor::GetPrimitive<EtsInt>(
-        arrayHeader, cross_values::GetEscompatArrayActualLengthOffset(RUNTIME_ARCH));
-    return EtsEscompatArrayInternalLastIndexOfImpl(arrayHeader, value, actualLength - 1);
+    auto actualLength = static_cast<EtsInt>(array->GetActualLength());
+    return EtsEscompatArrayInternalLastIndexOfImpl(array, value, actualLength - 1);
 }
 
 static uint32_t NormalizeIndex(int32_t idx, int64_t len)
@@ -465,18 +456,17 @@ static uint32_t NormalizeIndex(int32_t idx, int64_t len)
     return idx > len ? len : idx;
 }
 
-extern "C" ObjectHeader *EtsEscompatArrayFill(ObjectHeader *arrayHeader, EtsObject *value, int32_t start, int32_t end)
+extern "C" EtsEscompatArray *EtsEscompatArrayFill(EtsEscompatArray *array, EtsObject *value, int32_t start, int32_t end)
 {
-    ASSERT(arrayHeader != nullptr);
+    ASSERT(array != nullptr);
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(coro);
-    auto *array = EtsEscompatArray::FromEtsObject(EtsObject::FromCoreType(arrayHeader));
     EtsHandle<EtsEscompatArray> arrayHandle(coro, array);
     auto actualLength = static_cast<int64_t>(array->GetActualLength());
     auto startInd = NormalizeIndex(start, actualLength);
     auto endInd = NormalizeIndex(end, actualLength);
     arrayHandle->GetData()->Fill(value, startInd, endInd);
-    return arrayHandle->GetCoreType();
+    return arrayHandle.GetPtr();
 }
 
 struct ElementComputeResult {
@@ -854,15 +844,12 @@ ark::ets::EtsString *EtsEscompatArrayJoinUtf16(EtsObjectArray *buffer, EtsInt &a
     return EtsString::CreateFromUtf16(reinterpret_cast<EtsChar *>(buf.data()), pos);
 }
 
-extern "C" ark::ets::EtsString *EtsEscompatArrayJoinInternal(ObjectHeader *arrayHeader, ark::ets::EtsString *separator)
+extern "C" ark::ets::EtsString *EtsEscompatArrayJoinInternal(EtsEscompatArray *array, ark::ets::EtsString *separator)
 {
     EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
     const EtsPlatformTypes *ptypes = PlatformTypes(coroutine);
-    ObjectHeader *bufferObjectHeader =
-        ObjectAccessor::GetObject(arrayHeader, cross_values::GetEscompatArrayBufferOffset(RUNTIME_ARCH));
-    EtsObjectArray *buffer = EtsObjectArray::FromCoreType(bufferObjectHeader);
-    auto actualLength = ObjectAccessor::GetPrimitive<EtsInt>(
-        arrayHeader, cross_values::GetEscompatArrayActualLengthOffset(RUNTIME_ARCH));
+    EtsObjectArray *buffer = array->GetData();
+    auto actualLength = static_cast<EtsInt>(array->GetActualLength());
     ElementComputeResult res;
     [[maybe_unused]] EtsHandleScope scope(coroutine);
     EtsHandle<EtsString> separatorHandle(coroutine, separator);
@@ -876,19 +863,17 @@ extern "C" ark::ets::EtsString *EtsEscompatArrayJoinInternal(ObjectHeader *array
     return EtsEscompatArrayJoinUtf8(buffer, actualLength, res, ptypes, separatorHandle);
 }
 
-extern "C" EtsObject *EtsEscompatArrayGetUnsafe(ObjectHeader *arrayHeader, int32_t index)
+extern "C" EtsObject *EtsEscompatArrayGetUnsafe(EtsEscompatArray *array, int32_t index)
 {
-    ASSERT(arrayHeader != nullptr);
-    auto *array = EtsEscompatArray::FromEtsObject(EtsObject::FromCoreType(arrayHeader));
+    ASSERT(array != nullptr);
     [[maybe_unused]] auto length = array->GetData()->GetLength();
     ASSERT(static_cast<uint32_t>(index) < length);
     return array->GetData()->Get(index);
 }
 
-extern "C" void EtsEscompatArraySetUnsafe(ObjectHeader *arrayHeader, int32_t index, EtsObject *value)
+extern "C" void EtsEscompatArraySetUnsafe(EtsEscompatArray *array, int32_t index, EtsObject *value)
 {
-    ASSERT(arrayHeader != nullptr);
-    auto *array = EtsEscompatArray::FromEtsObject(EtsObject::FromCoreType(arrayHeader));
+    ASSERT(array != nullptr);
     [[maybe_unused]] auto actualLength = array->GetActualLength();
     ASSERT(static_cast<uint32_t>(index) < actualLength);
     array->GetData()->Set(index, value);

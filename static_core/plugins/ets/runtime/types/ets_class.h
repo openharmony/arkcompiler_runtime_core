@@ -578,12 +578,12 @@ public:
         return static_cast<BoxedType>(BoxedTypeField::Get(GetFlags()));
     }
 
-    [[nodiscard]] bool IsBoxedDouble()
+    [[nodiscard]] bool IsBoxedDouble() const
     {
         return GetBoxedType() == BoxedType::DOUBLE;
     }
 
-    [[nodiscard]] bool IsBoxedInt()
+    [[nodiscard]] bool IsBoxedInt() const
     {
         return GetBoxedType() == BoxedType::INT;
     }
@@ -779,8 +779,6 @@ public:
     constexpr static uint32_t IS_NULLVALUE = 1U << 20U;
     // Class is a boxed type
     constexpr static uint32_t IS_BOXED = 1U << 21U;
-
-private:
     // Class is Function
     constexpr static uint32_t IS_FUNCTION = 1U << 22U;
     // Class is BigInt
@@ -794,8 +792,9 @@ private:
     // To get information about boxed type.
     constexpr static uint32_t BOXED_TYPE_FIELD_START = 27;
     constexpr static uint32_t BOXED_TYPE_FIELD_SIZE = 3;
-    using BoxedTypeField = BitField<uint32_t, BOXED_TYPE_FIELD_START, BOXED_TYPE_FIELD_SIZE>;
 
+private:
+    using BoxedTypeField = BitField<uint32_t, BOXED_TYPE_FIELD_START, BOXED_TYPE_FIELD_SIZE>;
     ark::ObjectHeader header_;  // EtsObject
 
     // ets.Class fields BEGIN
