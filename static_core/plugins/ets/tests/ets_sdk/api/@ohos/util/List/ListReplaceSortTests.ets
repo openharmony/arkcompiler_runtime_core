@@ -32,6 +32,8 @@ function main() {
     suite.addTest("Testing List getIndexOf add->clear->add->insert->sort(a-b)->getSubList", testSortAndGetSubList);
     suite.addTest("Testing List getIndexOf add->clear->add->insert->sort(a-b)->getSubList->add",
         testSortGetSubListAndAdd);
+    suite.addTest("Testing List JSON stringify and sort(a-b)", testListJsonStringifySortAsc);
+    suite.addTest("Testing List JSON stringify and sort(b-a)", testListJsonStringifySortDes);
 
     return suite.run();
 }
@@ -152,4 +154,38 @@ function testSortGetSubListAndAdd() {
     arktest.assertEQ(list.get(3), 8);
     arktest.assertEQ(list.get(4), 10);
     arktest.assertEQ(list.get(5), 3);
+}
+
+function testListJsonStringifySortAsc() {
+    let list = new List<number>();
+    list.add(1);
+    arktest.assertFalse(list.isEmpty(), "The list should not be empty after adding elements");
+    list.clear();
+    arktest.assertTrue(list.isEmpty(), "The list should be empty after clearing all elements");
+    list.add(4);
+    list.add(1);
+    list.insert(2, 0);
+    list.insert(10, 0);
+    list.insert(8, 0);
+    list.sort((first, second) => first - second);
+    list.add(3);
+    let result = `{"0":1,"1":2,"2":4,"3":8,"4":10,"5":3}`;
+    arktest.assertEQ(JSON.stringify(list), result);
+}
+
+function testListJsonStringifySortDes() {
+    let list = new List<number>();
+    list.add(1);
+    arktest.assertFalse(list.isEmpty(), "The list should not be empty after adding elements");
+    list.clear();
+    arktest.assertTrue(list.isEmpty(), "The list should be empty after clearing all elements");
+    list.add(4);
+    list.add(1);
+    list.insert(2, 0);
+    list.insert(10, 0);
+    list.insert(8, 0);
+    list.sort((first, second) => second - first);
+    list.add(3);
+    let result = `{"0":10,"1":8,"2":4,"3":2,"4":1,"5":3}`;
+    arktest.assertEQ(JSON.stringify(list), result);
 }
