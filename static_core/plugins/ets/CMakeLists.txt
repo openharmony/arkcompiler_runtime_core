@@ -186,7 +186,7 @@ if(TARGET es2panda)
             ${RUN_VERIFIER_DST_DIR}/run_verifier.sh
             COPYONLY
         )
-        add_custom_command(TARGET etsstdlib 
+        add_custom_command(TARGET etsstdlib
             COMMAND bash -c "${RUN_VERIFIER_DST_DIR}/run_verifier.sh '${verifier_bin}' '${ETS_STD_LIB}'" -P
         )
 

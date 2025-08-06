@@ -21,6 +21,7 @@ add_custom_target(ets_panda_gtests)
 add_dependencies(ets_tests ets_gtests ets_panda_gtests)
 
 include(cmake/native_gtest.cmake)
+include(cmake/managed_helpers.cmake)
 
 set(BOOT_PANDA_FILES ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc)
 

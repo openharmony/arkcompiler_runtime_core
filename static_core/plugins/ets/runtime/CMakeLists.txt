@@ -254,3 +254,5 @@ endif()
 
 panda_target_sources(arkruntime_interpreter_static PRIVATE ${IRTOC_ETS_FASTPATH_OBJ} ${IRTOC_ETS_LLVM_OBJECTS})
 panda_target_sources(arkruntime_static PRIVATE ${IRTOC_ETS_FASTPATH_OBJ} ${IRTOC_ETS_LLVM_OBJECTS})
+
+panda_target_link_libraries(arkruntime_obj ani_interface)

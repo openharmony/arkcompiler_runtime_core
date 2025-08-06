@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,23 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { Ability } from "../interface/ability";
 
-#include "ani_gtest.h"
-
-// NOLINTNEXTLINE(readability-identifier-naming)
-extern "C" ani_status ANI_CLIB_FindClass(ani_env *env, const char *classDescriptor, ani_class *result);
-
-namespace ark::ets::ani::testing {
-
-class FindClassTest : public AniTest {};
-
-TEST_F(FindClassTest, has_class)
-{
-    ani_class cls {};
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    auto status = ANI_CLIB_FindClass(env_, "ani_ctest.Point", &cls);
-    ASSERT_EQ(status, ANI_OK);
-    ASSERT_NE(cls, nullptr);
+function getAppAbcFiles(): string[] {
+    let pro = new StdProcess.ProcessManager();
+    return pro.getEnvironmentVar("APP_ABC_FILES").split(":");
 }
 
-}  // namespace ark::ets::ani::testing
+export class App implements Ability {
+    override invoke() {
+        const appRuntimeLinker = new AbcRuntimeLinker(Class.of(this).getLinker(), getAppAbcFiles());
+        const pluginAbilityClass = appRuntimeLinker.loadClass("plugin.Plugin");
+        const pluginAbility = pluginAbilityClass.createInstance() as Ability;
+        pluginAbility.invoke();
+    }
+
+}
