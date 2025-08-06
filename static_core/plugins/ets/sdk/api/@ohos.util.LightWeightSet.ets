@@ -58,7 +58,7 @@ interface ReadonlyLightWeightSet<T> extends Iterable<T> {
     entries(): IterableIterator<[T, T]>;
 }
 
-export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
+export class LightWeightSet<T> implements ReadonlyLightWeightSet<T>, JsonReplacer {
     private buckets: LightWeightMap<T, T>;
 
     private static readonly SHIFT_COUNT = 31;
@@ -75,6 +75,23 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
             }
             fn(v.value as V);
         }
+    }
+
+    public jsonReplacer(): Record<String, NullishType> {
+        const buf = this.buckets;
+        const len = buf.length;
+        let arrayObj: Record<String, NullishType> = {};
+        for (let i = 0; i < len; i++) {
+            if (Array.isArray(buf.getKeyAt(i))) {
+                for (let i = 0; i < (buf.getKeyAt(i) as Array<NullishType>).length; i++) {
+                    if ((buf.getKeyAt(i) as Array<NullishType>)[i] === undefined) {
+                        (buf.getKeyAt(i) as Array<NullishType>)[i] = null;
+                    }
+                }
+            }
+            arrayObj[String(i)] = buf.getKeyAt(i);
+        }
+        return arrayObj;
     }
 
     constructor() {
