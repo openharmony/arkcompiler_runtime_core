@@ -14,7 +14,17 @@
 --- # Negative compile-time cases for type of method call expression
 cases:
   - decl: |-
+      // Call static method without return in body
       let e = A.method() // compile-time error as void cannot be used as type annotation
 
   - decl: |-
+      // Call method without return in body
       let e = new A().method()  // compile-time error as void cannot be used as type annotation
+
+  - decl: |-
+      // Call static method with empty return in body
+      let e = A.void1()  // compile-time error as void cannot be used as type annotation
+
+  - decl: |-
+      // Call method with empty return in body
+      let e = new A().void2()  // compile-time error as void cannot be used as type annotation

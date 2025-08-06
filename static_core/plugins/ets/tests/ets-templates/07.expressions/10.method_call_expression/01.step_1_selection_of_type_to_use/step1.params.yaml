@@ -198,3 +198,65 @@ cases:
           let v: A<Z> = new A<Z>()
           v.setFld(new Z())
           arktest.assertEQ( v.m(), "Y" )
+
+    - decl: |-
+        interface MH { name(): string }
+        
+        class A implements MH {
+          name(): string {
+            return 'I am A'
+          }
+        }
+        
+        class B implements MH {
+          name(): string {
+            return 'I am B'
+          }
+        }
+        
+        class C {
+            name(): string {
+                return 'I am C'
+            }
+        }
+        
+        type UT = A | B | C
+
+      use: |-
+        let test0: UT = ((): UT => new A)()
+        arktest.assertEQ('I am A', ((p: UT): string => p.name())(test0))
+        let test1: UT = ((): UT => new B)()
+        arktest.assertEQ('I am B', ((p: UT): string => p.name())(test1))
+        let test2: UT = ((): UT => new C)()
+        arktest.assertEQ('I am C', ((p: UT): string => p.name())(test2))
+
+    - decl: |-
+        interface MH { name(): string }
+        
+        final class A implements MH {
+          name(): string {
+            return 'I am A'
+          }
+        }
+        
+        final class B implements MH {
+          name(): string {
+            return 'I am B'
+          }
+        }
+        
+        final class C {
+            name(): string {
+                return 'I am not MH'
+            }
+        }
+        
+        type UT = MH | C
+
+      use: |-
+        let test0: UT = ((): UT => new A)()
+        arktest.assertEQ('I am A', ((p: UT): string => p.name())(test0))
+        let test1: UT = ((): UT => new B)()
+        arktest.assertEQ('I am B', ((p: UT): string => p.name())(test1))
+        let test2: UT = ((): UT => new C)()
+        arktest.assertEQ('I am not MH', ((p: UT): string => p.name())(test2))
