@@ -14,18 +14,28 @@ limitations under the License.
 ---*/
 
 /*---
-desc: If object reference evaluation completes abruptly, then so does the entire field access expression. The type of "a?." is never, because "?." removes null and undefined from the type, only never is remained.
-tags: [negative, compile-only]
+desc: If object reference evaluation completes abruptly, then so does the entire field access expression.
+tags: []
 ---*/
 
-let i = 0;
-
 class A {
-  b: number[];
+  b: number[] = [1.2345];
+}
+type NullableA = A | null
+
+function getClassAOrNull(returnA: Boolean = true): NullableA {
+    return returnA ? new A : null
 }
 
 function main(): void {
-  let a: A|null = null;
-  a?.b[0] ? i = 1 : i = 2;
-  arktest.assertTrue( i == 0 )
+
+    let a = ((returnA: Boolean = true): NullableA => { return returnA ? new A : null })(false);  // Prevent evaluate value of a statically at compile time...
+    let rb = a?.b
+    let rb0 = a?.b[0]
+    arktest.assertEQ(undefined, rb)
+    arktest.assertEQ(undefined, rb0)
+
+    a = ((returnA: Boolean = true): NullableA => { return returnA ? new A : null })();  // Prevent evaluate value of a statically at compile time...
+    rb0 = a?.b[0]
+    arktest.assertEQ(1.2345, rb0)
 }

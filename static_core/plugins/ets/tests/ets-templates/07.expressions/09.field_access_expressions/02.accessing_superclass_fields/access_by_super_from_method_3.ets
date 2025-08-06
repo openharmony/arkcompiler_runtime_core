@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,15 +14,26 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Safe access to field
-assert: A field access in which objectReference contains ‘?.’ is called safe field access because it handles null safely. The type of "a?." is never, because "?." removes null and undefined from the type, only never is remained.
+desc: The forms using the keyword super are valid in instance methods, constructors of a class or in the initializer of an instance variable of a class. Compile-time error occurs otherwise.
 ---*/
 
 class A {
-  public x: int;
+  private _x: int;
+
+  get x(): int{
+    return this._x;
+  }
+
+  public bar(): int
+}
+
+final class B extends A {
+  public bar(...args: Any[]): Any {
+    return super.x;
+  }
 }
 
 function main(): void {
-    let instance: A|null = null;
-    arktest.assertTrue( ((value: A|null): Int | undefined => { return value?.x })(instance) instanceof undefined )
+  let instance = new B
+  arktest.assertEQ( instance.bar(), 0 )
 }

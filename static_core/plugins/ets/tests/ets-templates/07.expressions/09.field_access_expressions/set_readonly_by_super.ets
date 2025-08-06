@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,27 @@
  */
 
 /*---
-desc: Safe access to field
-assert: A field access in which objectReference contains ‘?.’ is called safe field access because it handles null safely.
+desc: Access to field by keyword super.
+tags: [negative, compile-only]
 ---*/
 
 class A {
-  public x: Int = 1;
+  private readonly _x: Int;
+
+  final get x(): Int {
+    return this._x;
+  }
+
+}
+
+final class B extends A {
+  public bar(input: Int) {
+    super.x = input
+  }
 }
 
 function main(): void {
-    let instance: A|null = new A
-    arktest.assertTrue( ((value: A|null): Int | undefined => { return value?.x })(instance) instanceof Int )
+    let instance = new B
+    arktest.assertEQ( instance.bar(), 0 );
 }
+
