@@ -58,6 +58,11 @@ public:
         SetCurrent(this);
     }
 
+    ~ThreadHolder()
+    {
+        SetCurrent(nullptr);
+    }
+
     static ThreadHolder *GetCurrent();
     static void SetCurrent(ThreadHolder *holder);
 
@@ -154,11 +159,6 @@ public:
     }
 
 private:
-    ~ThreadHolder()
-    {
-        SetCurrent(nullptr);
-    }
-
     // Return false if thread has already binded mutator. Otherwise bind a mutator.
     bool TryBindMutator();
 
