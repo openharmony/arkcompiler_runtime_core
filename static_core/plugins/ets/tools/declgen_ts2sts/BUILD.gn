@@ -13,7 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/templates/cxx/prebuilt.gni")
+if ((defined(ark_standalone_build) && ark_standalone_build) ||
+    (defined(ark_static_standalone_build) && ark_static_standalone_build)) {
+  import("//arkcompiler/runtime_core/static_core/ark_config.gni")
+} else {
+  import(
+      "//build/config/components/runtime_core/static_core/ark_common_config.gni")
+}
 
 action("build_declgen") {
   sources = [
@@ -43,10 +49,11 @@ action("build_declgen") {
   outputs = [ "${target_out_dir}/panda-declgen-1.0.0.tgz" ]
 }
 
-ohos_prebuilt_etc("build_declgen_etc") {
-  source = "README.md"
-  deps = [ ":build_declgen" ]
-  install_enable = false
-  part_name = "runtime_core"
-  subsystem_name = "arkcompiler"
+if (!(defined(ark_static_standalone_build) && ark_static_standalone_build)) {
+  ohos_shared_headers("build_declgen_etc") {
+    include_dirs = []
+    deps = [ ":build_declgen" ]
+    part_name = "runtime_core"
+    subsystem_name = "arkcompiler"
+  }
 }
