@@ -258,7 +258,8 @@ public:
         return runtimeIface_;
     }
 
-    bool LoadNativeLibrary(ani_env *env, const PandaString &name, bool shouldVerifyPermission);
+    bool LoadNativeLibrary(ani_env *env, const PandaString &name, bool shouldVerifyPermission,
+                           const PandaString &fileName);
 
     static PandaEtsVM *FromAniVM(ani_vm *vm)
     {
