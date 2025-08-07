@@ -16,7 +16,7 @@
 /*---
 desc: 2.9.7 Null Literal, 3.8.12 Nullish Types
 name: nullable-function-default-param_8.ets
-
+tags: [compile-only, negative]
 ---*/
 
 function test<NullableInt = int | null>(required: String, param: NullableInt = 42): void {

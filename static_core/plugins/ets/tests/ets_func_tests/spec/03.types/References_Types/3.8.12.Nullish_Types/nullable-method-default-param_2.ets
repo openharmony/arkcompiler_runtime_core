@@ -16,7 +16,7 @@
 /*---
 desc: 2.9.7 Null Literal, 3.8.12 Nullish Types
 name: nullable-method-default-param_1.ets
-
+tags: [compile-only, negative]
 ---*/
 
 class TestC {
