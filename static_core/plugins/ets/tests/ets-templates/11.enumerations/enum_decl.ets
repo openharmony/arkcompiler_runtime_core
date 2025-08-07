@@ -52,7 +52,6 @@ limitations under the License.
 
 /*---
 desc: {{c.desc}}
-files: [./to_export.ets]
 ---*/
 
 {{decl}}
