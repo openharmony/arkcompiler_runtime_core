@@ -54,7 +54,7 @@ function FullGCWeakRefsMarkingCheck(): void
         let gcId = GC.startGC(GC.Cause.FULL);
         GC.waitForFinishGC(gcId);
     } catch (e) {
-        throw new Error("Unexpected exception during GC");
+        throw new Error("Unexpected error during GC");
     }
     arktest.assertEQ(wr.deref(), undefined, "Object referent must be collected after Full GC");
     arktest.assertEQ(wrs.deref(), undefined, "String referent must be collected after Full GC");
@@ -73,7 +73,7 @@ function ConcurrentWeakRefsMarkingCheck(): void
     try {
         GC.registerNativeAllocation(2); // 2 is enough to trigger GC in this test
     } catch (e) {
-        throw new Error("Unexpected exception during GC");
+        throw new Error("Unexpected error during GC");
     }
     arktest.assertEQ(wr.deref(), undefined, "Object referent must be collected after native GC cause");
     arktest.assertEQ(wrs.deref(), undefined, "String referent must be collected after native GC cause");

@@ -23,7 +23,7 @@ function doFullGC(): void {
     try {
         GC.waitForFinishGC(GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE));
     } catch (e) {
-        arktest.assertTrue(false, "Unexpected exception during GC");
+        arktest.assertTrue(false, "Unexpected error during GC");
     }
 }
 
