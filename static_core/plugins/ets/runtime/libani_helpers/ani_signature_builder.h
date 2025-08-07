@@ -59,7 +59,7 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 
-class Type {
+class Type final {
 public:
     class Impl;
 
@@ -73,7 +73,11 @@ public:
     std::string Descriptor() const;
 
 private:
+    std::string AniDescriptor() const;
     std::unique_ptr<Impl> impl_;
+
+    friend class Builder;
+    friend class SignatureBuilder;
 };
 
 class Builder {
