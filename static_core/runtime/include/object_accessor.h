@@ -205,6 +205,9 @@ private:
     template <bool IS_VOLATILE = false, bool IS_DYN = false>
     static void FillObjsNoBarrier(void *objArr, size_t dataOffset, size_t count, size_t elemSize, ObjectHeader *value);
 
+    template <typename T>
+    static T GetAndSubFieldPrimitiveFloat(void *obj, size_t offset, T value, std::memory_order memoryOrder);
+
     template <class T, bool IS_VOLATILE>
     static void Set(void *obj, size_t offset, T value)
     {

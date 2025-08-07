@@ -48,6 +48,17 @@ inline uintptr_t HandleStorage<T>::NewHandle(T value)
 }
 
 template <typename T>
+inline void HandleStorage<T>::FreeExtraNodes(uint32_t nid)
+{
+    for (size_t i = nid; i < nodes_.size(); ++i) {
+        allocator_->Delete(nodes_[i]);
+    }
+    if (nid < nodes_.size()) {
+        nodes_.erase(nodes_.begin() + nid, nodes_.end());
+    }
+}
+
+template <typename T>
 inline void HandleStorage<T>::FreeHandles(uint32_t beginIdx)
 {
     lastIndex_ = beginIdx;
@@ -57,11 +68,14 @@ inline void HandleStorage<T>::FreeHandles(uint32_t beginIdx)
     uint32_t nid = lastIndex_ >> NODE_BLOCK_SIZE_LOG2;
     // reserve at least one block for perf.
     nid++;
-    for (size_t i = nid; i < nodes_.size(); ++i) {
-        allocator_->Delete(nodes_[i]);
-    }
-    if (nid < nodes_.size()) {
-        nodes_.erase(nodes_.begin() + nid, nodes_.end());
+    FreeExtraNodes(nid);
+}
+
+template <typename T>
+void HandleStorage<T>::ZapFreedHandlesForNode(std::array<T, NODE_BLOCK_SIZE> *node, uint32_t start)
+{
+    for (uint32_t j = start; j < NODE_BLOCK_SIZE; ++j) {
+        node->at(j) = reinterpret_cast<T>(static_cast<uint64_t>(0));
     }
 }
 
@@ -73,11 +87,25 @@ void HandleStorage<T>::ZapFreedHandles()
     for (size_t i = nid; i < nodes_.size(); ++i) {
         auto node = nodes_.at(i);
         if (i != nid) {
-            node->fill(reinterpret_cast<T>(static_cast<uint64_t>(0)));
+            ZapFreedHandlesForNode(node);
         } else {
-            for (uint32_t j = offset; j < NODE_BLOCK_SIZE; ++j) {
-                node->at(j) = reinterpret_cast<T>(static_cast<uint64_t>(0));
-            }
+            ZapFreedHandlesForNode(node, offset);
+        }
+    }
+}
+
+template <>
+inline void HandleStorage<coretypes::TaggedType>::UpdateHeapObjectForNode(
+    std::array<coretypes::TaggedType, NODE_BLOCK_SIZE> *node, uint32_t size, const GCRootUpdater &gcRootUpdater)
+{
+    for (uint32_t j = 0; j < size; ++j) {
+        coretypes::TaggedValue obj(node->at(j));
+        if (!obj.IsHeapObject()) {
+            continue;
+        }
+        ObjectHeader *objH = obj.GetHeapObject();
+        if (gcRootUpdater(&objH)) {
+            (*node)[j] = coretypes::TaggedValue(objH).GetRawData();
         }
     }
 }
@@ -94,15 +122,18 @@ inline void HandleStorage<coretypes::TaggedType>::UpdateHeapObject(const GCRootU
     for (uint32_t i = 0; i <= nid; ++i) {
         auto node = nodes_.at(i);
         uint32_t count = (i != nid) ? NODE_BLOCK_SIZE : offset;
-        for (uint32_t j = 0; j < count; ++j) {
-            coretypes::TaggedValue obj(node->at(j));
-            if (!obj.IsHeapObject()) {
-                continue;
-            }
-            ObjectHeader *objH = obj.GetHeapObject();
-            if (gcRootUpdater(&objH)) {
-                (*node)[j] = coretypes::TaggedValue(objH).GetRawData();
-            }
+        UpdateHeapObjectForNode(node, count, gcRootUpdater);
+    }
+}
+
+template <>
+inline void HandleStorage<coretypes::TaggedType>::VisitGCRootsForNode(
+    std::array<coretypes::TaggedType, NODE_BLOCK_SIZE> *node, uint32_t size, const ObjectVisitor &cb)
+{
+    for (uint32_t j = 0; j < size; ++j) {
+        coretypes::TaggedValue obj(node->at(j));
+        if (obj.IsHeapObject()) {
+            cb(obj.GetHeapObject());
         }
     }
 }
@@ -123,12 +154,16 @@ inline void HandleStorage<coretypes::TaggedType>::VisitGCRoots([[maybe_unused]] 
     for (uint32_t i = 0; i <= nid; ++i) {
         auto node = nodes_.at(i);
         uint32_t count = (i != nid) ? NODE_BLOCK_SIZE : offset;
-        for (uint32_t j = 0; j < count; ++j) {
-            coretypes::TaggedValue obj(node->at(j));
-            if (obj.IsHeapObject()) {
-                cb(obj.GetHeapObject());
-            }
-        }
+        VisitGCRootsForNode(node, count, cb);
+    }
+}
+
+template <>
+inline void HandleStorage<ObjectHeader *>::UpdateHeapObjectForNode(std::array<ObjectHeader *, NODE_BLOCK_SIZE> *node,
+                                                                   uint32_t size, const GCRootUpdater &gcRootUpdater)
+{
+    for (uint32_t j = 0; j < size; ++j) {
+        gcRootUpdater(reinterpret_cast<ObjectHeader **>(&(*node)[j]));
     }
 }
 
@@ -148,9 +183,17 @@ inline void HandleStorage<ObjectHeader *>::UpdateHeapObject(const GCRootUpdater 
     for (uint32_t i = 0; i <= nid; ++i) {
         auto node = nodes_.at(i);
         uint32_t count = (i != nid) ? NODE_BLOCK_SIZE : offset;
-        for (uint32_t j = 0; j < count; ++j) {
-            gcRootUpdater(reinterpret_cast<ObjectHeader **>(&(*node)[j]));
-        }
+        UpdateHeapObjectForNode(node, count, gcRootUpdater);
+    }
+}
+
+template <>
+inline void HandleStorage<ObjectHeader *>::VisitGCRootsForNode(std::array<ObjectHeader *, NODE_BLOCK_SIZE> *node,
+                                                               uint32_t size, const ObjectVisitor &cb)
+{
+    for (uint32_t j = 0; j < size; ++j) {
+        auto obj = reinterpret_cast<ObjectHeader *>(node->at(j));
+        cb(obj);
     }
 }
 
@@ -166,10 +209,7 @@ inline void HandleStorage<ObjectHeader *>::VisitGCRoots([[maybe_unused]] const O
     for (uint32_t i = 0; i <= nid; ++i) {
         auto node = nodes_.at(i);
         uint32_t count = (i != nid) ? NODE_BLOCK_SIZE : offset;
-        for (uint32_t j = 0; j < count; ++j) {
-            auto obj = reinterpret_cast<ObjectHeader *>(node->at(j));
-            cb(obj);
-        }
+        VisitGCRootsForNode(node, count, cb);
     }
 }
 

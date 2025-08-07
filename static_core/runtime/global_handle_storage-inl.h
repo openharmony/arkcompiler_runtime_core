@@ -103,6 +103,17 @@ inline void GlobalHandleStorage<coretypes::TaggedType>::DealUpdateObject(std::ar
 
 template <>
 // CC-OFFNXT(G.FUD.06) solid logic
+inline void GlobalHandleStorage<coretypes::TaggedType>::UpdateGCRootsInBlock(std::array<Node, GLOBAL_BLOCK_SIZE> *block,
+                                                                             size_t size,
+                                                                             const GCRootUpdater &gcRootUpdater)
+{
+    for (size_t i = 0; i < size; i++) {
+        DealUpdateObject(block, i, gcRootUpdater);
+    }
+}
+
+template <>
+// CC-OFFNXT(G.FUD.06) solid logic
 inline void GlobalHandleStorage<coretypes::TaggedType>::UpdateHeapObject(const GCRootUpdater &gcRootUpdater)
 {
     if (globalNodes_->empty()) {
@@ -110,16 +121,10 @@ inline void GlobalHandleStorage<coretypes::TaggedType>::UpdateHeapObject(const G
     }
 
     for (size_t i = 0; i < globalNodes_->size() - 1; i++) {
-        auto block = globalNodes_->at(i);
-        for (size_t j = 0; j < GLOBAL_BLOCK_SIZE; j++) {
-            DealUpdateObject(block, j, gcRootUpdater);
-        }
+        UpdateGCRootsInBlock(globalNodes_->at(i), GLOBAL_BLOCK_SIZE, gcRootUpdater);
     }
 
-    auto block = globalNodes_->back();
-    for (int32_t i = 0; i < count_; i++) {
-        DealUpdateObject(block, i, gcRootUpdater);
-    }
+    UpdateGCRootsInBlock(globalNodes_->back(), count_, gcRootUpdater);
 }
 
 template <>
@@ -134,6 +139,16 @@ inline void GlobalHandleStorage<coretypes::TaggedType>::DealVisitGCRoots(std::ar
 
 template <>
 // CC-OFFNXT(G.FUD.06) solid logic
+inline void GlobalHandleStorage<coretypes::TaggedType>::VisitGCRootsInBlock(std::array<Node, GLOBAL_BLOCK_SIZE> *block,
+                                                                            size_t size, const ObjectVisitor &cb)
+{
+    for (size_t i = 0; i < size; i++) {
+        DealVisitGCRoots(block, i, cb);
+    }
+}
+
+template <>
+// CC-OFFNXT(G.FUD.06) solid logic
 inline void GlobalHandleStorage<coretypes::TaggedType>::VisitGCRoots([[maybe_unused]] const ObjectVisitor &cb)
 {
     if (globalNodes_->empty()) {
@@ -141,16 +156,10 @@ inline void GlobalHandleStorage<coretypes::TaggedType>::VisitGCRoots([[maybe_unu
     }
 
     for (size_t i = 0; i < globalNodes_->size() - 1; i++) {
-        auto block = globalNodes_->at(i);
-        for (size_t j = 0; j < GLOBAL_BLOCK_SIZE; j++) {
-            DealVisitGCRoots(block, j, cb);
-        }
+        VisitGCRootsInBlock(globalNodes_->at(i), GLOBAL_BLOCK_SIZE, cb);
     }
 
-    auto block = globalNodes_->back();
-    for (int32_t i = 0; i < count_; i++) {
-        DealVisitGCRoots(block, i, cb);
-    }
+    VisitGCRootsInBlock(globalNodes_->back(), count_, cb);
 }
 
 template class GlobalHandleStorage<coretypes::TaggedType>;

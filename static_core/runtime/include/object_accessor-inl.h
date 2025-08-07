@@ -426,6 +426,24 @@ inline T ObjectAccessor::GetAndAddFieldPrimitive([[maybe_unused]] void *obj, [[m
 }
 
 /* static */
+template <typename T>
+// CC-OFFNXT(G.FMT.06, G.FUD.06) project code style
+T ObjectAccessor::GetAndSubFieldPrimitiveFloat(void *obj, size_t offset, T value, std::memory_order memoryOrder)
+{
+    // Atmoic fetch_add only defined in the atomic specializations for integral and pointer
+    uintptr_t rawAddr = reinterpret_cast<uintptr_t>(obj) + offset;
+    ASSERT(IsAddressInObjectsHeap(rawAddr));
+    auto *atomicAddr = reinterpret_cast<std::atomic<T> *>(rawAddr);
+    // Atomic with parameterized order reason: memory order passed as argument
+    T oldValue = atomicAddr->load(memoryOrder);
+    T newValue;
+    do {
+        newValue = oldValue - value;
+    } while (!atomicAddr->compare_exchange_weak(oldValue, newValue, memoryOrder));
+    return oldValue;
+}
+
+/* static */
 template <typename T, bool USE_UBYTE_ARITHMETIC>
 // CC-OFFNXT(G.FMT.06, G.FUD.06) project code style
 inline std::enable_if_t<!std::is_same_v<T, uint8_t> || USE_UBYTE_ARITHMETIC, T> ObjectAccessor::GetAndSubFieldPrimitive(
@@ -435,17 +453,7 @@ inline std::enable_if_t<!std::is_same_v<T, uint8_t> || USE_UBYTE_ARITHMETIC, T> 
     [[maybe_unused]] std::memory_order memoryOrder)
 {
     if constexpr (std::is_floating_point_v<T>) {  // NOLINT(readability-braces-around-statements)
-        // Atmoic fetch_add only defined in the atomic specializations for integral and pointer
-        uintptr_t rawAddr = reinterpret_cast<uintptr_t>(obj) + offset;
-        ASSERT(IsAddressInObjectsHeap(rawAddr));
-        auto *atomicAddr = reinterpret_cast<std::atomic<T> *>(rawAddr);
-        // Atomic with parameterized order reason: memory order passed as argument
-        T oldValue = atomicAddr->load(memoryOrder);
-        T newValue;
-        do {
-            newValue = oldValue - value;
-        } while (!atomicAddr->compare_exchange_weak(oldValue, newValue, memoryOrder));
-        return oldValue;
+        return GetAndSubFieldPrimitiveFloat<T>(obj, offset, value, memoryOrder);
     } else {  // NOLINT(readability-misleading-indentation, readability-else-after-return)
         uintptr_t rawAddr = reinterpret_cast<uintptr_t>(obj) + offset;
         ASSERT(IsAddressInObjectsHeap(rawAddr));
