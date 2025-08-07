@@ -289,10 +289,7 @@ public:
     /// Called after Zygote fork to reinitialize and restart worker threads.
     virtual void PostZygoteFork() = 0;
     /// NOTE(ivagin): all config-related stuff should be moved to some special class member
-    virtual bool IsExternalTimerEnabled()
-    {
-        return false;
-    };
+    virtual bool IsExternalTimerEnabled() = 0;
 
 protected:
     using EntrypointInfo = Coroutine::EntrypointInfo;
