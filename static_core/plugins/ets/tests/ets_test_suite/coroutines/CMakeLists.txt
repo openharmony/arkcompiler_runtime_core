@@ -191,8 +191,10 @@ if (NOT PANDA_TARGET_ARM32)
                             MODE "AOT"
     )
 
+    # NOTE(26403) Profilesaver is turned off because of data race
     add_ets_coroutines_test(FILE class_load_race.ets
                             SKIP_ARM32_COMPILER
+                            OPTIONS "--profilesaver-enabled=false"
                             IMPL "THREADED" "STACKFUL"
                             OPTION_SETS_THREADED "DEFAULT"
                             OPTION_SETS_STACKFUL "DEFAULT" "POOL"
@@ -200,34 +202,40 @@ if (NOT PANDA_TARGET_ARM32)
                             MODE "INT" "JIT"
     )
 
+    # NOTE(26403) Profilesaver is turned off because of data race
     add_ets_coroutines_test(FILE launch_n_workers.ets
                             SKIP_ARM32_COMPILER
+                            OPTIONS "--profilesaver-enabled=false"
                             IMPL "STACKFUL"
                             OPTION_SETS_STACKFUL "DEFAULT"
                             WORKERS "AUTO"
                             MODE "INT" "JIT" "AOT"
     )
 
+    # NOTE(26403) Profilesaver is turned off because of data race
     add_ets_coroutines_test(FILE launch_n_workers.ets
                             SKIP_ARM32_COMPILER
+                            OPTIONS "--profilesaver-enabled=false"
                             IMPL "STACKFUL"
                             OPTION_SETS_STACKFUL "POOL"
                             WORKERS "AUTO"
                             MODE "INT" "JIT"
     )
 
+    # NOTE(26403) Profilesaver is turned off because of data race
     add_ets_coroutines_test(FILE launch_oom.ets
                             SKIP_ARM32_COMPILER
-                            OPTIONS "--gc-type=epsilon"
+                            OPTIONS "--gc-type=epsilon" "--profilesaver-enabled=false"
                             IMPL "STACKFUL"
                             OPTION_SETS_STACKFUL "POOL"
                             WORKERS "ONE"
                             MODE "INT" "JIT" "AOT"
     )
 
+    # NOTE(26403) Profilesaver is turned off because of data race
     add_ets_coroutines_test(FILE launch_oom.ets
                             SKIP_ARM32_COMPILER
-                            OPTIONS "--gc-type=epsilon"
+                            OPTIONS "--gc-type=epsilon" "--profilesaver-enabled=false"
                             IMPL "STACKFUL"
                             OPTION_SETS_STACKFUL "DEFAULT"
                             WORKERS "ONE"
