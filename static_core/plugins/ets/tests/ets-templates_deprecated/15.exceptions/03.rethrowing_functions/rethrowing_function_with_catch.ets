@@ -14,12 +14,12 @@
  */
 
 /*---
-desc: Rethrowing function declaration with exception parameter.
+desc: Rethrowing function declaration with error parameter.
 assert: A function that that accepts a throwing function as a parameter can be marked with the rethrows keyword. Such function is called a rethrowing function.
 tags: [compile-only, negative]
 ---*/
 
-class TestException extends Exception {}
+class TestError extends Error {}
 type func = (): void;
 
 function foo(bar: func throws): void rethrows {
@@ -27,7 +27,7 @@ function foo(bar: func throws): void rethrows {
 }
 
 function canThrow (): void {
-  throw new TestException();
+  throw new TestError();
 }
 
 function main(): void {
@@ -35,8 +35,10 @@ function main(): void {
   try() {
     foo(canThrow);
   }
-  catch(e: TestException) {
-    y = 5;
+  catch(e) {
+    if (e instanceof TestError) {
+      y = 5;
+    }
   }
   catch() {
     y = 10;
