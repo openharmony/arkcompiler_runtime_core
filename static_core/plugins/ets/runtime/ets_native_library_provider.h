@@ -31,7 +31,8 @@ public:
     NO_COPY_SEMANTIC(NativeLibraryProvider);
     NO_MOVE_SEMANTIC(NativeLibraryProvider);
 
-    std::optional<std::string> LoadLibrary(ani_env *env, const PandaString &name, bool shouldVerifyPermission);
+    std::optional<std::string> LoadLibrary(ani_env *env, const PandaString &name, bool shouldVerifyPermission,
+                                           const PandaString &fileName);
     void *ResolveSymbol(const PandaString &name) const;
 
     PandaVector<PandaString> GetLibraryPath() const;
@@ -42,7 +43,7 @@ private:
     mutable os::memory::RWLock lock_;
     std::optional<std::string> CallAniCtor(ani_env *env, const EtsNativeLibrary *lib);
     std::optional<std::string> GetCallerClassName(ani_env *env);
-    bool CheckLibraryPermission(ani_env *env);
+    bool CheckLibraryPermission(ani_env *env, const PandaString &fileName);
     PandaSet<EtsNativeLibrary> libraries_ GUARDED_BY(lock_);
     PandaVector<PandaString> libraryPath_ GUARDED_BY(lock_);
 };

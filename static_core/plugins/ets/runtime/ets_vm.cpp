@@ -577,11 +577,12 @@ ObjectHeader *PandaEtsVM::GetNullValue() const
     return obj;
 }
 
-bool PandaEtsVM::LoadNativeLibrary(ani_env *env, const PandaString &name, bool shouldVerifyPermission)
+bool PandaEtsVM::LoadNativeLibrary(ani_env *env, const PandaString &name, bool shouldVerifyPermission,
+                                   const PandaString &fileName)
 {
     ASSERT_PRINT(Coroutine::GetCurrent()->IsInNativeCode(), "LoadNativeLibrary must be called at native");
 
-    if (auto error = nativeLibraryProvider_.LoadLibrary(env, name, shouldVerifyPermission)) {
+    if (auto error = nativeLibraryProvider_.LoadLibrary(env, name, shouldVerifyPermission, fileName)) {
         LOG(ERROR, RUNTIME) << "Cannot load library " << name << ": " << error.value();
         return false;
     }

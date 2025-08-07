@@ -72,9 +72,9 @@ Expected<EtsNativeLibrary, os::Error> LoadNativeLibraryFromNamespace(const char 
 }  // namespace
 
 std::optional<std::string> NativeLibraryProvider::LoadLibrary(ani_env *env, const PandaString &name,
-                                                              bool shouldVerifyPermission)
+                                                              bool shouldVerifyPermission, const PandaString &fileName)
 {
-    if (shouldVerifyPermission && !CheckLibraryPermission(env)) {
+    if (shouldVerifyPermission && !CheckLibraryPermission(env, fileName)) {
         return "NativeLibraryProvider::CheckLibraryPermission failed";
     }
     {
@@ -87,6 +87,8 @@ std::optional<std::string> NativeLibraryProvider::LoadLibrary(ani_env *env, cons
     }
     auto loadRes = LoadFromPath(GetLibraryPath(), name);
     if (!shouldVerifyPermission && !loadRes) {
+        LOG(WARNING, RUNTIME) << "Failed to load System library: " << loadRes.Error().ToString()
+                              << "; Attempting to load application library instead.";
         loadRes = LoadNativeLibraryFromNamespace(name.c_str());
     }
     if (!loadRes) {
@@ -153,7 +155,8 @@ std::optional<std::string> NativeLibraryProvider::GetCallerClassName(ani_env *en
     return cls->GetName();
 }
 
-bool NativeLibraryProvider::CheckLibraryPermission([[maybe_unused]] ani_env *env)
+bool NativeLibraryProvider::CheckLibraryPermission([[maybe_unused]] ani_env *env,
+                                                   [[maybe_unused]] const PandaString &fileName)
 {
 #if defined(PANDA_TARGET_OHOS)
     auto classNameOpt = GetCallerClassName(env);
@@ -168,7 +171,7 @@ bool NativeLibraryProvider::CheckLibraryPermission([[maybe_unused]] ani_env *env
         LOG(INFO, RUNTIME) << "ExtensionApiCheckCallback is not registered";
         return false;
     }
-    if (!cb(className)) {
+    if (!cb(className, fileName.c_str())) {
         LOG(ERROR, RUNTIME) << "CheckLibraryPermission failed: class name: " << className
                             << " is not in the API allowed list, loading prohibited";
         return false;

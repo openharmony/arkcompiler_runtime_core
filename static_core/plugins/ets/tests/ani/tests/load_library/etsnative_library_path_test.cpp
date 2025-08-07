@@ -86,8 +86,8 @@ TEST_P(EtsNativeLibraryPathTest, EtsNativeTestLibraryPath)
 {
     auto pandaVm = EtsCoroutine::GetCurrent()->GetPandaVM();
     ASSERT_EQ(pandaVm, GetVm());
-    ASSERT_EQ(GetParam().expected,
-              pandaVm->LoadNativeLibrary(GetEnv(), ConvertToString(GetParam().libraryFile), GetParam().permissionCheck))
+    ASSERT_EQ(GetParam().expected, pandaVm->LoadNativeLibrary(GetEnv(), ConvertToString(GetParam().libraryFile),
+                                                              GetParam().permissionCheck, ""))
         << GetParam();
 }
 
