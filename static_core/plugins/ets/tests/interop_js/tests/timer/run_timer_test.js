@@ -15,7 +15,7 @@
 
 const helper = requireNapiPreview('libinterop_test_helper.so', false);
 
-function runTest(test) {
+function runTest(test, isExternalTimer) {
 	print('Running test ' + test);
 	const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
 	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
@@ -30,19 +30,22 @@ function runTest(test) {
 		'panda-files': gtestAbcPath,
 		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
 	};
+	if (isExternalTimer) {
+		etsOpts['coroutine-enable-features:enable-external-timer'] = 'true'
+	}
 	if (!etsVm.createRuntime(etsOpts)) {
 		throw Error('Cannot create ETS runtime');
 	}
 
 	const runTestImpl = etsVm.getFunction(globalName, test);
-	runTestImpl();
+	runTestImpl(isExternalTimer);
 	let counter = 0;
 	const maxCounter = 5;
 	const checkDelay = 1000;
 	let tId = 0;
 	let checkCallback = () => {
 		++counter;
-		if (counter === maxCounter) {
+		if (counter > maxCounter) {
 			throw new Error('Test failed: timeout.');
 		}
 		const check = etsVm.getFunction(globalName, 'check');
@@ -55,7 +58,7 @@ function runTest(test) {
 }
 
 let args = helper.getArgv();
-if (args.length !== 6) {
+if (args.length < 6 || args.length > 7) {
 	throw Error('Expected test name');
 }
-runTest(args[5]);
+runTest(args[5], args[6] === 'true');

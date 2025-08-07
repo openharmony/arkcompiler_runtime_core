@@ -215,6 +215,10 @@ options:
     type: bool
     default: false
     description: "migrate awakened coroutines"
+  - name: enable-external-timer
+    type: bool
+    default: false
+    description: Enable/disable external timer implementation
 
 - name: coroutine-dump-stats
   lang:
