@@ -24,7 +24,6 @@ class Waiter {
     public wait(val: long, getCurrentValue: () => long, timeout?: number): string {
         ConcurrencyHelpers.mutexLock(this.mutex);
         let check = getCurrentValue();
-        console.log(check, val);
         if (val != check) {
             ConcurrencyHelpers.mutexUnlock(this.mutex);
             return Waiter.notEqualStatus;

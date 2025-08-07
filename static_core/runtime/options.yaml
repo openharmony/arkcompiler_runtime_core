@@ -904,8 +904,13 @@ options:
 
 - name: coroutines-stack-mem-limit
   type: uint64_t
-  default: 268435456
+  default: 536870912
   description: defines the total amount of memory that can be used for stackful coroutine stacks allocation (in bytes)
+
+- name: coroutines-user-limit
+  type: uint64_t
+  default: 0
+  description: The amount of allowed user coroutines (0 to auto)
 
 - name: use-coroutine-pool
   type: bool
