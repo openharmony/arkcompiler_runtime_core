@@ -20,18 +20,16 @@ desc: >-
 ---*/
 
 interface Parent1 {
-    greet(): string;
+    greet(): string {
+        return "Hello from Parent1 (default)";
+    }
 }
 
 interface Parent2 {
     greet(): string;
 }
 
-class Parent1Impl implements Parent1 {
-    greet(): string {
-        return "Hello from Parent1 (default)";
-    }
-}
+class Parent1Impl implements Parent1 {}
 
 class Parent2Impl implements Parent2 {
     greet(): string {

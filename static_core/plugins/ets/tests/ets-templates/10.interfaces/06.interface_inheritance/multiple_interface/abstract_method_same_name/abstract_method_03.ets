@@ -27,19 +27,9 @@ interface Parent2 {
 }
 
 interface Child extends Parent1, Parent2 {
-  greet(message: string | number): void; 
+  greet(message: string | number): void;
 }
 
 class ChildClass implements Child {
-  greet(message: string | number): void {
-    if (typeof message === "string") {
-      console.log(`String Greeting: ${message}`);
-    } else {
-      console.log(`Double Greeting: ${message}`);
-    }
-  }
-
-  greet(message: number): void {
-    console.log(`Double Greeting: ${message}`);
-  }
+  greet(message: string | number): void {}
 }

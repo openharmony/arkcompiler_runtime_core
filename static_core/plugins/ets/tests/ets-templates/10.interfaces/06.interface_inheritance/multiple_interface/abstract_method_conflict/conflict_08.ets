@@ -27,7 +27,6 @@ interface Machine {
 
 class Robot extends Animal implements Machine {
   makeSound(): string {
-    console.log("Beep Beep!");
     return "Sound made!";
   }
 }

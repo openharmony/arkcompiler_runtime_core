@@ -14,31 +14,35 @@
  */
 
 /*---
-desc: The parent class and the method with the same name in the interface, 
+desc: >-
+      The parent class and the method with the same name in the interface,
       the child class chooses to call the parent class implementation.
 ---*/
 
-let result: string = "";
+let result: int = 0;
 
 abstract class Animal {
   makeSound(): void {
-    console.log("Animal sound");
+    result += 1
   }
 }
 
 interface Machine {
-  makeSound(): void;
+  makeSound(): void {
+    result += 2
+  }
 }
 
 class Robot extends Animal implements Machine {
   makeSound(): void {
     super.makeSound(); 
-    result = "Beep";
+    result += 3;
   }
 }
 
 function main(): void {
+  result = 0
   const robot = new Robot();
   robot.makeSound();
-  arktest.assertEQ(result, "Beep");
+  arktest.assertEQ(result, 4);
 }

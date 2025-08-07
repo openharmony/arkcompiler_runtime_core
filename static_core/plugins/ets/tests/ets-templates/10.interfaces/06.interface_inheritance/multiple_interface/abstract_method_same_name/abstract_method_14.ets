@@ -29,7 +29,7 @@ interface Parent2 {
 interface Child extends Parent1, Parent2 {}
 
 class ChildClass implements Child {
-  fetchData(): string | Promise<string> {
+  fetchData(...p: Any[]): Any {
     if (Math.random() > 0.5) {
       return "Data";
     } else {

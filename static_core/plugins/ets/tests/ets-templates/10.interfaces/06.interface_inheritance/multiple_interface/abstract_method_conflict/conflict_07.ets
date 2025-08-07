@@ -29,18 +29,19 @@ interface Machine {
 }
 
 class Robot implements Animal, Machine {
-  makeSound(): void {
-    result = "Beep";
-  }
-
-  makeSound(volume: number): void {
-    result1 = 1 + volume;
+  makeSound(...p: Any[]): Any {
+    if (p.length == 0)
+      result = "Beep";
+    else
+      result1 = 1 + p[0];
+    return
   }
 }
 
 function main(): void {
+  result = "";
   const robot = new Robot();
-  (robot as Animal).makeSound(); 
+  (robot as Animal).makeSound();
   (robot as Machine).makeSound(10);
   arktest.assertEQ(result, "Beep");
   arktest.assertEQ(result1, 11);

@@ -29,11 +29,9 @@ interface Parent2 {
 interface Child extends Parent1, Parent2 {}
 
 class ChildClass implements Child {
-  processString(data: string): string {
-    return `Processed String: ${data}`;
-  }
-
-  processNumber(data: number): number {
-    return data * 2;
+  calculate(...p: Any[]): Any {
+    if (p.length > 0 && p[0] instanceof number)
+        return 1
+    return "str"
   }
 }

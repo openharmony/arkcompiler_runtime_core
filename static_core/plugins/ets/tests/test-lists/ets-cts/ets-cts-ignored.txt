@@ -1328,7 +1328,7 @@
 10.interfaces/05.interface_method_declarations/01.interface_method_overload_signatures/implementation_body_3.ets
 10.interfaces/06.interface_inheritance/inheritance_method_with_declared_signature_any.export_string
 
-#26730
+#26730 implement override/overload
 10.interfaces/05.interface_method_declarations/01.interface_method_overload_signatures/example.ets
 10.interfaces/05.interface_method_declarations/01.interface_method_overload_signatures/implementation_body_0.ets
 10.interfaces/05.interface_method_declarations/01.interface_method_overload_signatures/implementation_body_1.ets

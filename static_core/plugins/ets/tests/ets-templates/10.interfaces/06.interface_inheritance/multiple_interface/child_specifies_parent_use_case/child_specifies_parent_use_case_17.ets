@@ -28,17 +28,16 @@ interface Parent2 {
 }
 
 class Child1Impl implements Parent1, Parent2 {
-    greet(name: string): string {
-        return `Hello ${name} from Child1`;
-    }
-
-    greet(name: string, age: number): string {
-        return `Hello ${name}, ${age} years old from Child1`;
+    greet(...p: Any[]): Any {
+        if (p.length == 1)
+            return "str1"
+        else
+            return "str2"
     }
 }
 
 function main(): void {
     const child = new Child1Impl();
-    arktest.assertEQ(child.greet("Charlie"), "Hello Charlie from Child1");
-    arktest.assertEQ(child.greet("Charlie", 25), "Hello Charlie, 25 years old from Child1");
+    arktest.assertEQ(child.greet("Charlie"), "str1");
+    arktest.assertEQ(child.greet("Charlie", 25), "str2");
 }

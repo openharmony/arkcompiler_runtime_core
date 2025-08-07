@@ -15,7 +15,8 @@
 
 /*---
 desc: >-
-    Verify that a class implementing two interfaces with the same constant name and using the other interface's values.
+    Verify that a class implementing two interfaces with the same constant name
+    can initialize variable with the correct literal value type
 ---*/
 
 interface InterfaceA {

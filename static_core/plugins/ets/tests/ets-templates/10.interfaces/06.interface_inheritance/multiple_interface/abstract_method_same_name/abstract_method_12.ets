@@ -15,7 +15,8 @@
 
 /*---
 desc: >-
-    The method with the same name has the different parameters parameter type but same return types, valid overloading.
+    The method with the same name has the different parameters parameter type
+    but same return types, valid overloading.
 ---*/
 
 interface Parent1 {
@@ -30,13 +31,15 @@ interface Parent2 {
 interface Child extends Parent1, Parent2 {}
 
 class ChildClass implements Child {
-  combine(a: string | number, b: string | number): string {
-    if (typeof a === "string" && typeof b === "number") {
-      return `String: ${a}, Number: ${b}`;
-    } else if (typeof a === "number" && typeof b === "string") {
-      return `Number: ${a}, String: ${b}`;
-    } else {
-      return "Invalid input";
-    }
+  combine(...p: Any[]): Any {
+    if (typeof p[0] === "string")
+      return "str1"
+    return "str2"
   }
+}
+
+function main() {
+  let c: ChildClass = new ChildClass()
+  arktest.assertEQ(c.combine("str", 1),"str1")
+  arktest.assertEQ(c.combine(2, "str"),"str2")
 }

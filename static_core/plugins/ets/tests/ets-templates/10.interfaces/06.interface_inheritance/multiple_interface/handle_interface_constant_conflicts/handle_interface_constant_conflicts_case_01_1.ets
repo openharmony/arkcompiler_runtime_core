@@ -15,17 +15,15 @@
 
 /*---
 desc: >-
-    The method with the same name has the same type and number of parameters, but a method has joint types
-    and cross types.
+    A compile-time error occurs if a field is not declared as readonly in a superclass/superinterface,
+    while an overriding field is marked as readonly.
 tags: [compile-only, negative]
 ---*/
 
-interface Parent1 {
-  process(data: string | number): void; 
+interface InterfaceA {
+    CONSTANT: number;
 }
 
-interface Parent2 {
-  process(data: { value: string } & { id: number }): void;
+class TestClass implements InterfaceA {
+    readonly CONSTANT: number = 42;
 }
-
-interface Child extends Parent1, Parent2 {}

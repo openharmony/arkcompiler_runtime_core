@@ -25,5 +25,5 @@ interface InterfaceA {
 }
 
 class TestClass implements InterfaceA {
-    static readonly CONSTANT?: undefined;
+    readonly CONSTANT?: undefined;
 }

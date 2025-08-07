@@ -15,8 +15,9 @@
 
 /*---
 desc: The method with the same name has different parameter types and quantities, but the return type is the same.
-tags: [compile-only, negative]
 ---*/
+
+let res: int = 0
 
 interface Parent1 {
   log(message: string): void;
@@ -29,11 +30,18 @@ interface Parent2 {
 interface Child extends Parent1, Parent2 {}
 
 class ChildClass implements Child {
-  log(message: string, level?: number): void {
-    if (level !== undefined) {
-      console.log(`[Level ${level}] ${message}`);
-    } else {
-      console.log(message);
-    }
+  log(...p: Any[]): Any {
+    if (p.length == 1)
+      res = 1
+    else
+      res = 2
   }
+}
+
+function main() {
+  let c: ChildClass = new ChildClass()
+  c.log("str")
+  arkts.assertEQ(res, 1)
+  c.log("str", 2)
+  arkts.assertEQ(res, 2)
 }
