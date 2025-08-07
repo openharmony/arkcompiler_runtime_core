@@ -18,7 +18,7 @@ cases:
       function foo(): void {}
 
   - defs: |-
-      function foo(): void throws {}  // CTE on 'throws' expected
+      function foo(): void {}
       function foo(): void {}
 
   - defs: |-

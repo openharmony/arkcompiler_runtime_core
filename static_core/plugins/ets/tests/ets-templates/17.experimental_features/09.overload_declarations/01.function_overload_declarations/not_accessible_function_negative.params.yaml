@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,6 +13,15 @@
 
 ---
 cases:
-  - { type: String, val: '""', call: "foo<String>(v)", res: 1 }
-  - { type: String, val: '""', call: "foo<String, String>(v, v)", res: 2 }
-  - { type: String, val: '""', call: "foo<String, String, String>(v, v, v)", res: 3 }
+  - list: 'fooA'
+  - list: 'fooNS1'
+  - list: 'NS2.foo'
+  - list: 'noName'
+  - list: 'foo1, fooA'
+  - list: 'foo1, NS2.foo'
+  - list: 'foo1, fooNS1'
+  - list: 'foo1, noName'
+  - list: 'fooA, foo1'
+  - list: 'fooNS1, foo1'
+  - list: 'NS2.foo, foo1'
+  - list: 'noName, foo1'

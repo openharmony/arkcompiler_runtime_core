@@ -13,34 +13,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
 /*---
-desc: >-
-    If two functions declared in the same declaration space
-    have the same name but different signatures that are not
-    override-equivalent, then the function name is said to be overloaded.
-params: {{c.type}}
+desc: ArkTS supports the following two overloading mechanisms overload signatures and overload declarations. Legacy overload must be removed.
+tags: [compile-only, negative]
 ---*/
 
-interface I {}
-
-class A {}
-class B extends A implements I {}
-class C extends B {}
-
-function foo(a: A): int {
+function foo(a: int, ...p: int[]): int {
   return 1;
 }
-function foo(a: B): int {
+
+function foo(...p: int[]): int {
   return 2;
 }
-function foo(a: I): int {
+
+function foo(a: boolean, ...p: int[]): int {
   return 3;
 }
 
 function main(): int {
-  let v: {{c.type}} = {{c.val}};
-  if (foo(v) == {{c.res}}) return 0;
-  return 1;
+  foo(1);
 }
-{% endfor %}
