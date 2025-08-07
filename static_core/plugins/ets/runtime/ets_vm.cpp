@@ -35,6 +35,7 @@
 #include "plugins/ets/runtime/types/ets_job.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_array.h"
+#include "plugins/ets/runtime/types/ets_taskpool.h"
 #include "runtime/compiler.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread_scopes.h"
@@ -144,7 +145,12 @@ Expected<PandaEtsVM *, PandaString> PandaEtsVM::Create(Runtime *runtime, const R
         // enable perf stats
         options.IsCoroutineDumpStats(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
         // enable external timer implementation
-        options.IsCoroutineEnableFeaturesEnableExternalTimer(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))};
+        options.IsCoroutineEnableFeaturesEnableExternalTimer(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+        // enable taskpool eaworker mode
+        options.GetTaskpoolMode(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)) ==
+                ets::intrinsics::taskpool::TASKPOOL_EAWORKER_MODE
+            ? ets::intrinsics::taskpool::TASKPOOL_EAWORKER_INIT_NUM
+            : 0};
     vm->coroutineManager_->Initialize(cfg, runtime, vm);
 
     return vm;

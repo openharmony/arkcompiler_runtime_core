@@ -1214,13 +1214,9 @@ void StackfulCoroutineManager::CalculateWorkerLimits(const CoroutineManagerConfi
     size_t eWorkersLimit =
         std::min(AffinityMask::MAX_WORKERS_COUNT - 1, static_cast<size_t>(config.exclusiveWorkersLimit));
 
-#ifdef PANDA_ETS_INTEROP_JS
-    // 2 is for taskpool execution engine eaworker
-    bool res = Runtime::GetOptions().IsTaskpoolSupportInterop(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
-    if (res) {
-        eWorkersLimit += stackful_coroutines::TASKPOOL_EAWORKER_LIMIT;
-    }
-#endif
+    // add preallocated exclusive workers count
+    eWorkersLimit += config.preallocatedExclusiveWorkersCount;
+
     // create and activate workers
     size_t numberOfAvailableCores = std::max(std::thread::hardware_concurrency() / 4ULL, 2ULL);
 
