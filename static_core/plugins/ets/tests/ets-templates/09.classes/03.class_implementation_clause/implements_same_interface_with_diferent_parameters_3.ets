@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,13 +14,16 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Implement interface.
+desc: Class implements two instances of generic superinterface.
 assert: >-
-    Each typeReference must name an accessible interface type (link to access control),
-    or a compile-time error occurs.
-tags: [compile-only,negative]
+    A compile-time error occurs if a class is at the same time a subtype of the instantiation of a generic interface,
+    and a raw type that names the a generic interface.
+tags: [compile-only, negative]
 ---*/
 
-class A implements C, B { }
+abstract class Base {}
+final class Derived extends Base {}
 
-interface C { }
+interface I<T> {}
+
+class C implements I<Derived>, I<Base> {}

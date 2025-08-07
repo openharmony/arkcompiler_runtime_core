@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,14 +14,12 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Implement interface.
-assert: >-
-    Each typeReference must name an accessible interface type (link to access control),
-    or a compile-time error occurs.
-tags: [compile-only,negative]
+desc: >-
+      If some interface is repeated as a direct superinterface in a single implements clause
+      (even if that interface is named differently), then all repetitions are ignored.
+tags: [compile-only]
 ---*/
 
-abstract class B { }
-
-class A implements B { }
-
+interface A {}
+type I = A
+class B implements A, I {}

@@ -22,8 +22,8 @@ assert: >-
 tags: [compile-only]
 ---*/
 
-class A { }
+class A {}
 
-interface B<T extends Object, G extends A> { }
+interface B<T extends Object, G extends A> {}
 
-final class C<T extends Object, G extends A> implements B<T, G> { }
+final class C<T extends Object, G extends A> implements B<T, G> {}

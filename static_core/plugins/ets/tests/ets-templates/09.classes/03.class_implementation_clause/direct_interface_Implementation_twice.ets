@@ -14,13 +14,12 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Class implements one interface two times.
-assert: >-
-    It is a compile-time error if the same interface is mentioned as a direct superinterface more than once
-    in a single implements clause. This is true even if the interface is named in different ways.
-tags: [compile-only, negative]
+desc: >-
+      If some interface is repeated as a direct superinterface in a single implements clause
+      (even if that interface is named differently), then all repetitions are ignored.
+tags: [compile-only]
 ---*/
 
-interface A { }
+interface A {}
 
-class B implements A, A { }
+class B implements A, A {}

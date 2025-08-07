@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,14 +14,19 @@
  */
 
 /*---
-desc: Implement interface.
-assert: >-
-    Each typeReference must name an accessible interface type (link to access control),
-    or a compile-time error occurs.
-tags: [compile-only]
+desc: >-
+      A class can implement Optional Interface Properties) from superinterfaces
+      or use implicitly defined accessors from an interface.
+tags: [negative]
 ---*/
 
-class A implements C, D { }
+interface I {
+  n?: number
+}
 
-interface C { }
-interface D { }
+class C implements I {}
+
+function main() {
+  let c = new C()
+  c.n = 1 // runtime error is thrown
+}

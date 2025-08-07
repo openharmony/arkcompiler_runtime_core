@@ -21,11 +21,11 @@ assert: >-
     if an implements clause is present.
 ---*/
 
-interface A { }
+interface A {}
 
-interface B<T> { }
+interface B<T> {}
 
-final class C<T extends Object> implements B<T>, A { }
+final class C<T extends Object> implements B<T>, A {}
 
 function main(): void {
   let a: C<String> = new C<String>();

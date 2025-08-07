@@ -20,17 +20,23 @@ assert: >-
     if not, the default method is typically inherited and its behavior is as specified by its default body.
 ---*/
 
-class A implements C {
-}
-
 interface C {
   foo(): int {
     return 5;
   };
+  bar(): int {
+    return 6;
+  }
+}
+
+class A implements C {
+  bar(): int {
+    return 7;
+  }
 }
 
 function main(): void {
   let a: A = new A();
-
-  arktest.assertEQ( a.foo(), 5 );
+  arktest.assertEQ(a.foo(), 5);
+  arktest.assertEQ(a.bar(), 7);
 }
