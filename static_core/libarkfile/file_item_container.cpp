@@ -697,6 +697,7 @@ bool ItemContainer::WriteHeaderIndexInfo(Writer *writer)
 bool ItemContainer::WriteHeader(Writer *writer, ssize_t *checksumOffset)
 {
     uint32_t fileSize = ComputeLayout();
+    writer->ReserveBufferCapacity(fileSize);
 
     std::vector<uint8_t> magic;
     magic.assign(File::MAGIC.cbegin(), File::MAGIC.cend());
@@ -800,7 +801,7 @@ bool ItemContainer::Write(Writer *writer, bool deduplicateItems, bool computeLay
     writer->CountChecksum(false);
     writer->WriteChecksum(checksumOffset);
 
-    return true;
+    return writer->FinishWrite();
 }
 
 std::map<std::string, size_t> ItemContainer::GetStat()

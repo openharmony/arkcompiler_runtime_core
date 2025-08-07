@@ -110,6 +110,7 @@ TEST(ItemContainer, TestFileFormatVersionTooOld)
         for (uint8_t b : Span<uint8_t>(reinterpret_cast<uint8_t *>(&header), sizeof(header))) {
             writer.WriteByte(b);
         }
+        EXPECT_TRUE(writer.FinishWrite());
     }
 
     EXPECT_EQ(File::Open(fileName), nullptr);
@@ -136,6 +137,7 @@ TEST(ItemContainer, TestFileFormatVersionTooNew)
         for (uint8_t b : Span<uint8_t>(reinterpret_cast<uint8_t *>(&header), sizeof(header))) {
             writer.WriteByte(b);
         }
+        EXPECT_TRUE(writer.FinishWrite());
     }
 
     EXPECT_EQ(File::Open(fileName), nullptr);
@@ -159,6 +161,7 @@ TEST(ItemContainer, TestFileFormatVersionValid)
         for (uint8_t b : Span<uint8_t>(reinterpret_cast<uint8_t *>(&header), sizeof(header))) {
             writer.WriteByte(b);
         }
+        EXPECT_TRUE(writer.FinishWrite());
     }
 
     EXPECT_NE(File::Open(fileName), nullptr);
