@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,9 +11,86 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
- # List of class members
-members:
-  - { body: "x: int;", type: "int", call: "x", value: "0" }
-  - { body: "getValue(): int { return 1 }", type: "int", call: "getValue()", value: "1" }
-  - { body: "class B { static x: int = 1; }", type: "int", call: "B.x", value: "1", unsupported: "true" }
-  - { body: "enum Color {Red, Green}", type: "int", call: "Color.Red.ordinal()", value: "1", unsupported: "true" }
+---
+tests:
+  - class: |-
+      class A {
+        public x: int = 1
+        foo(): int {
+          return this.x
+        }
+      }
+
+  - class: |-
+      class A {
+        public static x: int = 1
+        foo(): int {
+          return A.x
+        }
+      }
+
+  - class: |-
+      class A {
+        public getValue(): int {
+          return 1
+        }
+        foo(): int {
+          return this.getValue()
+        }
+      }
+
+  - class: |-
+      class A {
+        public static getValue(): int {
+          return 1
+        }
+        foo(): int {
+          return A.getValue()
+        }
+      }
+
+  - class: |-
+      class A {
+        public _val: int = 1
+        public get val(): int {
+          return this._val
+        }
+        foo(): int {
+          return this.val
+        }
+      }
+
+  - class: |-
+      class A {
+        public static _val: int = 1
+        public static get val(): int {
+          return A._val
+        }
+        foo(): int {
+          return A.val
+        }
+      }
+
+  - class: |-
+      class A {
+        public _val: int = 0
+        public set val(i: int) {
+          this._val = i
+        }
+        foo(): int {
+          this.val = 1
+          return this._val
+        }
+      }
+
+  - class: |-
+      class A {
+        public static _val: int = 0
+        public static set val(i: int) {
+          A._val = i
+        }
+        foo(): int {
+          A.val = 1
+          return A._val
+        }
+      }

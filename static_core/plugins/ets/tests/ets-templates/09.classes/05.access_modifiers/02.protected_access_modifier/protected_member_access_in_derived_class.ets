@@ -13,32 +13,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for member in members %}
+{% for test in tests %}
 /*---
 desc: Check members with protected access modifier in derived class.
 assert: >-
     Member or constructor with protected modifier can be accessed only within their declaring class
     and classes derived from their declaring class.
-params: "{{member.body}}"
-{%- if member.unsupported == "true" %}
-tags: [negative, compile-only]
-{%- endif %}
+    {{test.doc}}
 ---*/
 
-class A {
-  protected {{member.body}}
-}
-
-final class B extends A {
-  call(): {{member.type}} {
-    return this.{{member.call}};
-  }
-}
+{{test.decl}}
 
 function main(): void {
-  let instance: B = new B();
-
-  arktest.assertEQ( instance.call(), {{member.value}} );
+ {{test.check}}
 }
 
 {% endfor %}

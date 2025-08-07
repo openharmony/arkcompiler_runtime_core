@@ -18,9 +18,6 @@ limitations under the License.
 desc: Default access modifiers.
 assert: If no modifier is explicitly provided, iy is implicitly declared public dy default.
 params: {{member}}
-{%- if member.unsupported == "true" %}
-tags: [negative, compile-only]
-{%- endif %}
 ---*/
 
 class A {

@@ -13,28 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for member in members %}
+{% for test in tests %}
 /*---
 desc: Check members with private access modifier in class.
-assert: Member or constructor with private modifier can be accessed only eithin their declaring class.
-params: "{{member.body}}"
-{%- if member.unsupported == "true" %}
-tags: [negative, compile-only]
-{%- endif %}
+assert: Member or constructor with private modifier can be accessed only within their declaring class.
 ---*/
 
-class A {
-  private {{member.body}}
-
-  foo(): {{member.type}} {
-    {{member.call}};
-  }
-}
+{{test.decl}}
 
 function main(): void {
-  let instance: A = new A();
-
-  arktest.assertEQ( instance.foo(), {{member.value}} );
+ {{test.check}}
 }
 
 {% endfor %}

@@ -13,9 +13,11 @@
 
  # List of class members
 members:
-  - { body: "x: int;", call: "x"}
-  - { body: "getValue(): int { return 1; }", call: "getValue()" }
-  - { body: "class B { static x: int = 1; }", call: "B.x" }
-  - { body: "enum Color {Red, Green}", call: "Color.Red.ordinal()" }
-  - { body: "get val(): int { return 1; }", call: "val" }
-  - { body: "set val(x: int) { }", call: "val(1)" }
+  - { body: "x: int;", call: "new A().x"}
+  - { body: "static x: int;", call: "A.x"}
+  - { body: "getValue(): int { return 1; }", call: "new A().getValue()" }
+  - { body: "static getValue(): int { return 1; }", call: "A.getValue()" }
+  - { body: "_val: int = 0; private get val(): int { return 1; }", call: "new A().val" }
+  - { body: "static _val: int = 0; private static get val(): int { return 1; }", call: "A.val" }
+  - { body: "_val: int = 0; private set val(x: int) { }", call: "new A().val(1)" }
+  - { body: "static _val: int = 0; private static set val(x: int) { }", call: "A.val(1)" }

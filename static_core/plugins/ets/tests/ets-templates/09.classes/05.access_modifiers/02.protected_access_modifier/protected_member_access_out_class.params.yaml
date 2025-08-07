@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,9 +11,188 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
- # List of class members
-members:
-  - { body: "x: int;", call: "x" }
-  - { body: "getValue(): int { return 1; }", call: "getValue()" }
-  - { body: "class C { static x: int = 1; }", call: "C.x" }
-  - { body: "enum Color {Red, Green}", call: "Color.Red.ordinal()" }
+---
+tests:
+  - doc: access protected field
+    decl: |-
+      class A {
+        protected x: int = 7
+      }
+    check: |-
+      new A().x = 1
+
+  - doc: access protected field from unrelated class
+    decl: |-
+      class A {
+        protected x: int = 7
+      }
+      class B {
+        foo() {
+          new A().x = 1
+        }
+      }
+
+  - doc: access protected static field
+    decl: |-
+      class A {
+        protected static x: int = 7
+      }
+    check: |-
+      A.x = 1
+
+  - doc: access protected static field from unrelated class
+    decl: |-
+      class A {
+        protected static x: int = 7
+      }
+      class B {
+        foo() {
+          A.x = 1
+        }
+      }      
+
+  - doc: access protected method
+    decl: |-
+      class A {
+        protected getValue(): int {
+          return 1
+        }
+      }
+    check: |-
+      new A().getValue()
+
+  - doc: access protected method from unrelated class
+    decl: |-
+      class A {
+        protected getValue(): int {
+          return 1
+        }
+      }
+      class B {
+        foo() {
+          new A().getValue()
+        }
+      }
+
+  - doc: access protected static method
+    decl: |-
+      class A {
+        protected static getValue(): int {
+          return 1
+        }
+      }
+    check: |-
+      A.getValue()
+
+  - doc: access protected static method from unrelated class
+    decl: |-
+      class A {
+        protected static getValue(): int {
+          return 1
+        }
+      }
+      class B {
+        foo() {
+          A.getValue()
+        }
+      }
+
+  - doc: access protected getter
+    decl: |-
+      class A {
+        protected _val: int = 0
+        protected get val(): int {
+          return this._val
+        }
+      }
+    check: |-
+      let i: int = new A().val
+
+  - doc: access protected getter from unrelated class
+    decl: |-
+      class A {
+        protected _val: int = 0
+        protected get val(): int {
+          return this._val
+        }
+      }
+      class B {
+        foo() {
+          let i: int = new A().val
+        }
+      }
+
+  - doc: access protected static getter
+    decl: |-
+      class A {
+        protected static _val: int = 0
+        protected static get val(): int {
+          return A._val
+        }
+      }
+    check: |-
+      let i: int = A.val
+
+  - doc: access protected static getter from unrelated class
+    decl: |-
+      class A {
+        protected static _val: int = 0
+        protected static get val(): int {
+          return A._val
+        }
+      }
+      class B {
+        foo() {
+          let i: int = A.val
+        }
+      }
+
+  - doc: access protected setter
+    decl: |-
+      class A {
+        protected _val: int = 0
+        protected set val(i: int) {
+          this._val = i
+        }
+      }
+    check: |-
+      new A().val = 4
+
+  - doc: access protected setter from unrelated class
+    decl: |-
+      class A {
+        protected _val: int = 0
+        protected set val(i: int) {
+          this._val = i
+        }
+      }
+      class B {
+        foo() {
+          new A().val = 4
+        }
+      }
+
+  - doc: access protected static setter
+    decl: |-
+      class A {
+        protected static _val: int = 0
+        protected static set val(i: int) {
+          A._val = i
+        }
+      }
+    check: |-
+      A.val = 4
+
+  - doc: access protected static setter from unrelated class
+    decl: |-
+      class A {
+        protected static _val: int = 0
+        protected static set val(i: int) {
+          A._val = i
+        }
+      }
+      class B {
+        foo() {
+          A.val = 4
+        }
+      }

@@ -13,28 +13,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for member in members %}
+{% for test in tests %}
 /*---
 desc: Check member with public access modifier in class.
 assert: Member or constructor with public modifier can be accessed everywhere.
-params: "{{member.body}}"
-{%- if member.unsupported == "true" %}
-tags: [negative, compile-only]
-{%- endif %}
 ---*/
 
-class A {
-  public {{member.body}}
-
-  foo(): {{member.type}} {
-    return this.{{member.call}};
-  }
-}
+{{test.class}}
 
 function main(): void {
-  let instance: A = new A();
-
-  arktest.assertEQ( instance.foo(), {{member.value}} );
+  arktest.assertEQ(new A().foo(), 1)
 }
-
 {% endfor %}
