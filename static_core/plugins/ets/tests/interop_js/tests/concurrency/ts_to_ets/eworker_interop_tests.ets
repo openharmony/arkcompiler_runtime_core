@@ -298,14 +298,24 @@ function testEAWorkerInteropLoop() {
 function testFunc(serializeTestObj: ESValue) {
     let value1 = serializeTestObj.getProperty('value1').toString();
     let value2 = serializeTestObj.getProperty('value2').toNumber();
+    let valueArray = serializeTestObj.getProperty('valueArray').getProperty(0).toString();
     arktest.assertEQ(value1, 'SerializeTest');
     arktest.assertEQ(value2, 1);
+    arktest.assertEQ(valueArray, '1');
     return true;
 }
 
 function testEAWorkerSerialize() {
     let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
     let serializeTestObj = module.getProperty('serializeTestObj');
+    let res = eaw.run<boolean>(testFunc, serializeTestObj).Await() as boolean;
+    arktest.assertEQ(res, true);
+}
+
+function testEAWorkerSerializeClassInstantiate() {
+    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+    let SerializeTest = module.getProperty('SerializeTest');
+    let serializeTestObj = SerializeTest.instantiate('SerializeTest', 1, ['1', '2', '3']);
     let res = eaw.run<boolean>(testFunc, serializeTestObj).Await() as boolean;
     arktest.assertEQ(res, true);
 }
@@ -465,6 +475,7 @@ function eworkerInteropTest() {
     eworkerInteropSuite.addTest('testEAWorkerNestedExecute', testEAWorkerNestedExecute);
     eworkerInteropSuite.addTest('testEAWorkerInteropLoop', testEAWorkerInteropLoop);
     eworkerInteropSuite.addTest('testEAWorkerSerialize', testEAWorkerSerialize);
+    eworkerInteropSuite.addTest('testEAWorkerSerializeClassInstantiate', testEAWorkerSerializeClassInstantiate);
     eworkerInteropSuite.addTest('testEAWorkerSerializeUndefined', testEAWorkerSerializeUndefined);
     eworkerInteropSuite.addTest('testEAWorkerSerializeNull', testEAWorkerSerializeNull);
     eworkerInteropSuite.addTest('testEAWorkerMessageCancellation', testEAWorkerMessageCancellation);
