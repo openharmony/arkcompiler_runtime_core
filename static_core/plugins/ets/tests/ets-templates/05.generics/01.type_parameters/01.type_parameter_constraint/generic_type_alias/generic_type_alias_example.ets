@@ -34,7 +34,8 @@ class GType<T extends Base> { }
 type G<T> = GType<T>
 class HType<T extends Base|SomeType> {}
 type H<T> = HType<T>
-class Exotic<T extends "aa"| "bb"> {}
+class ExoticType<T extends "aa" | "bb"> {}
+type Exotic<T extends "aa" | "bb"> = ExoticType<T>
 
 class AType {
   f1: number = 0
@@ -43,8 +44,11 @@ class AType {
 }
 type A = AType
 
-class B <T extends keyof A> {}
+class BType<T extends keyof A> {}
+type B<T extends keyof A> = BType<T>
 
-{{case.decl}}
+function main(): void {
+    {{case.decl}}
+}
 
 {% endfor %}
