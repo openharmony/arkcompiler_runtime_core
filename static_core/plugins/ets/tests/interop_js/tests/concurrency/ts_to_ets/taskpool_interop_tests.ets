@@ -292,14 +292,24 @@ function testTaskpoolInteropLoop() {
 function testSerializeFunc(serializeTestObj: ESValue) {
     let value1 = serializeTestObj.getProperty('value1').toString();
     let value2 = serializeTestObj.getProperty('value2').toNumber();
+    let valueArray = serializeTestObj.getProperty('valueArray').getProperty(0).toString();
     arktest.assertEQ(value1, 'SerializeTest');
     arktest.assertEQ(value2, 1);
+    arktest.assertEQ(valueArray, '1');
     return true;
 }
 
 function testTaskpoolSerialize() {
     let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
     let serializeTestObj = module.getProperty('serializeTestObj');
+    let res = (await taskpool.execute(testSerializeFunc, serializeTestObj)) as boolean;
+    arktest.assertEQ(res, true);
+}
+
+function testTaskpoolSerializeClassInstantiate() {
+    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+    let SerializeTest = module.getProperty('SerializeTest');
+    let serializeTestObj = SerializeTest.instantiate('SerializeTest', 1, ['1', '2', '3']);
     let res = (await taskpool.execute(testSerializeFunc, serializeTestObj)) as boolean;
     arktest.assertEQ(res, true);
 }
@@ -344,6 +354,7 @@ function taskpoolInteropTest() {
     taskpoolInteropSuite.addTest('testTaskpoolNestedExecute', testTaskpoolNestedExecute);
     taskpoolInteropSuite.addTest('testTaskpoolInteropLoop', testTaskpoolInteropLoop);
     taskpoolInteropSuite.addTest('testTaskpoolSerialize', testTaskpoolSerialize);
+    taskpoolInteropSuite.addTest('testTaskpoolSerializeClassInstantiate', testTaskpoolSerializeClassInstantiate);
     taskpoolInteropSuite.addTest('testTaskpoolSerializeUndefined', testTaskpoolSerializeUndefined);
     taskpoolInteropSuite.addTest('testTaskpoolSerializeNull', testTaskpoolSerializeNull);
     taskpoolInteropSuite.run();

@@ -160,12 +160,14 @@ export function CustomErrorFunc(message: string, code: number): void {
 export class SerializeTest {
   value1: string;
   value2: number;
-  constructor(v1: string, v2: number) {
+  valueArray: string[];
+  constructor(v1: string, v2: number, v3: string[]) {
     this.value1 = v1;
     this.value2 = v2;
+    this.valueArray = v3;
   }
 }
 
-export let serializeTestObj = new SerializeTest('SerializeTest', 1);
+export let serializeTestObj = new SerializeTest('SerializeTest', 1, ['1', '2', '3']);
 export let serializeUndefined = undefined;
 export let serializeNull = null;

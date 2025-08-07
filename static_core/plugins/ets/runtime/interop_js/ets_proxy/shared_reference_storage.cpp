@@ -196,6 +196,17 @@ bool SharedReferenceStorage::HasReferenceWithCtx(SharedReference *ref, InteropCt
 }
 
 #if defined(PANDA_JS_ETS_HYBRID_MODE) || defined(PANDA_TARGET_OHOS)
+static napi_value WrapEtsObject(InteropCtx *ctx, ets_proxy::SharedReference *ref)
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    EtsHandleScope scope(coro);
+    EtsHandle<EtsObject> etsObject(coro, ref->GetEtsObject());
+    auto klass = etsObject->GetClass()->GetRuntimeClass();
+    JSRefConvert *refConv = JSRefConvertResolve<true>(ctx, klass);
+    napi_value res = refConv->Wrap(ctx, etsObject.GetPtr());
+    return res;
+}
+
 static napi_value ProxObjectAttachCb([[maybe_unused]] napi_env env, void *data)
 {
     auto *coro = Coroutine::GetCurrent();
@@ -203,12 +214,12 @@ static napi_value ProxObjectAttachCb([[maybe_unused]] napi_env env, void *data)
     auto *ctx = InteropCtx::Current(coro);
     ASSERT(ctx != nullptr);
     auto *ref = AtomicLoad(static_cast<ets_proxy::SharedReference **>(data), std::memory_order_acquire);
+    if (coro->IsManagedCode()) {
+        // TaskPool and EWorker call napi_deserialize_hybrid through intrinsics functions
+        return WrapEtsObject(ctx, ref);
+    }
     ScopedManagedCodeThread v(coro);
-    EtsObject *etsObject = ref->GetEtsObject();
-    auto klass = etsObject->GetClass()->GetRuntimeClass();
-    JSRefConvert *refConv = JSRefConvertResolve<true>(ctx, klass);
-    napi_value res = refConv->Wrap(ctx, etsObject);
-    return res;
+    return WrapEtsObject(ctx, ref);
 }
 #endif
 
