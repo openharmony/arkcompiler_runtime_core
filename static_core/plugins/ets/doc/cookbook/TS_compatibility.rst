@@ -624,3 +624,28 @@ use of the field.
     */
 
 
+|
+
+.. _Differences in Overriding Properties:
+
+Differences in Overriding Properties
+------------------------------------
+
+|LANG| treats fields and properites (i.e., pairs of accessors) differently.
+Thus, mixing fields and properties is not allowed in |LANG|, while the object
+model is |TS| is different as it allows such a mix.
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        num: number = 1
+    }
+    interface I {
+        num: number
+    }
+    class D extends C implements I {
+        num: number = 2 // ArkTS compile-time error, conflict in overriding
+        // Typescript accepts such situation
+    }
+
