@@ -59,6 +59,7 @@ public:
     Coroutine *CreateExclusiveWorkerForThread(Runtime *runtime, PandaVM *vm) override;
     bool DestroyExclusiveWorker() override;
     bool IsExclusiveWorkersLimitReached() const override;
+    bool IsUserCoroutineLimitReached() const override;
 
     void CreateWorkers(size_t howMany, Runtime *runtime, PandaVM *vm) override;
     void FinalizeWorkers(size_t howMany, Runtime *runtime, PandaVM *vm) override;
@@ -256,6 +257,7 @@ private:
      */
     void CalculateWorkerLimits(const CoroutineManagerConfig &config, size_t &exclusiveWorkersLimit,
                                size_t &commonWorkersLimit);
+    void CalculateUserCoroutinesLimits(size_t &userCoroutineCountLimit, size_t limit);
 
     // for thread safety with GC
     mutable os::memory::Mutex coroListLock_;
@@ -278,14 +280,18 @@ private:
     // various counters
     std::atomic_uint32_t coroutineCount_ = 0;
     size_t coroutineCountLimit_ = 0;
+    size_t userCoroutineCountLimit_ = 0;
+    // user coro (= non system) is EP-full mutator
     size_t exclusiveWorkersLimit_ = 0;
     size_t commonWorkersCount_ = 0;
     size_t coroStackSizeBytes_ = 0;
 
+    std::atomic_uint32_t userCoroutineCount_ = 0;
     // active coroutines are runnable + running coroutines
     std::atomic_uint32_t activeCoroutines_ = 0;
     // NOTE(konstanting): make it a map once number of the coroutine types gets bigger
-    std::atomic_uint32_t systemCoroutineCount_ = 0;
+    // Utility coro is a system coro that is FINALIZER or SCHEDULER
+    std::atomic_uint32_t utilityCoroutineCount_ = 0;
 
     /**
      * @brief holds pointers to the cached coroutine instances in order to speedup coroutine creation and destruction.

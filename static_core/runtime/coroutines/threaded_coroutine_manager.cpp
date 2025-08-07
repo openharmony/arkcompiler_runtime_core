@@ -61,6 +61,7 @@ void ThreadedCoroutineManager::CreateWorkers(size_t howMany, Runtime *runtime, P
     activeWorkersCount_ = howMany;
 
     auto *mainCo = CreateMainCoroutine(runtime, vm);
+    ASSERT(mainCo != nullptr);
     mainCo->SetWorker(workers_[0]);
     Coroutine::SetCurrent(mainCo);
 }

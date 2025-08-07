@@ -252,6 +252,37 @@ public:
         return false;
     }
 
+    virtual bool IsUserCoroutineLimitReached() const
+    {
+        return false;
+    }
+
+    /*
+     * @brief Checks if a coroutine is a system, i.e. coro creation fails is fatal
+     * Coroutine is system if it is:
+     *   SCHEDULER (represents the CoroutineWorker's scheduler loop) ──┬── UTILITY CORO
+     *   FINALIZER (used to shut down coroutine workers)             ──╯
+     *   EP-less MUTATOR (represents the defult manged execution context for MAIN and Exclusive workers)
+     */
+    static bool IsSystemCoroutine(Coroutine::Type type, bool hasEntryPoint)
+    {
+        return type == Coroutine::Type::SCHEDULER || (type == Coroutine::Type::FINALIZER) ||
+               (type == Coroutine::Type::MUTATOR && !hasEntryPoint);
+    }
+
+    /*
+     * @brief Checks if a coroutine is a system, i.e. coro creation fails is fatal
+     * Coroutine is system if it is:
+     *   SCHEDULER (represents the CoroutineWorker's scheduler loop) ──┬── UTILITY CORO
+     *   FINALIZER (used to shut down coroutine workers)             ──╯
+     *   EP-less MUTATOR (represents the defult manged execution context for MAIN and Exclusive workers)
+     */
+    static bool IsSystemCoroutine(Coroutine *co)
+    {
+        return CoroutineManager::IsSystemCoroutine(co->GetType(),
+                                                   co->HasNativeEntrypoint() || co->HasManagedEntrypoint());
+    }
+
     /* events */
     /// Should be called when a coro makes the non_active->active transition (see the state diagram in coroutine.h)
     virtual void OnCoroBecameActive([[maybe_unused]] Coroutine *co) {};

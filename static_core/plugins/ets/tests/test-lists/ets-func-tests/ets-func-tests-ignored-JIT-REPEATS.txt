@@ -27,3 +27,6 @@ std/containers/concurrent_set/ConcurrentSet_ConstructorTest.ets
 std/containers/linked_blocking_queue/LinkedBlockingQueue_ConstructorTest.ets
 std/core/NumberTest.ets
 escompat/JsonStringifyTest.ets
+
+#28746
+std/core/EAWorker_out_of_coro_creation.ets

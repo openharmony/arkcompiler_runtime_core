@@ -50,3 +50,14 @@
 
 #26027
 17.experimental_features/03.resizable_array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_5.ets
+
+#28746
+16.concurrency/03.asynchronous_api/01.async_functions/async_functions11.ets
+16.concurrency/03.asynchronous_api/01.async_functions/async_functions12.ets
+16.concurrency/03.asynchronous_api/01.async_functions/async_functions18.ets
+16.concurrency/03.asynchronous_api/01.async_functions/async_functions27.ets
+16.concurrency/03.asynchronous_api/01.async_functions/async_functions30.ets
+16.concurrency/03.asynchronous_api/03.async_methods/async_method19.ets
+16.concurrency/03.asynchronous_api/03.async_methods/async_method20.ets
+16.concurrency/03.asynchronous_api/03.async_methods/async_method21.ets
+16.concurrency/03.asynchronous_api/03.async_methods/async_method29.ets
