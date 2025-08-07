@@ -25,42 +25,42 @@ export class Math {
     /**
      * PI as double value
      */
-    public static readonly PI: number = PI;
+    public static readonly PI: double = PI;
 
     /**
      * Euler number as double value
      */
-    public static readonly E: number = E;
+    public static readonly E: double = E;
 
     /**
      * Natural logarithm of 10 as double value
      */
-    public static readonly LN10: number = LN10;
+    public static readonly LN10: double = LN10;
 
     /**
      * Natural logarithm of 2 as double value
      */
-    public static readonly LN2: number = LN2;
+    public static readonly LN2: double = LN2;
 
     /**
      * Logarithm base 2 of Euler number as double value
      */
-    public static readonly LOG2E: number = LOG2E;
+    public static readonly LOG2E: double = LOG2E;
 
     /**
      * Logarithm base 10 of Euler number as double value
      */
-    public static readonly LOG10E: number = LOG10E;
+    public static readonly LOG10E: double = LOG10E;
 
     /**
      * Square root of 1/2 as double value
      */
-    public static readonly SQRT1_2: number = SQRT1_2;
+    public static readonly SQRT1_2: double = SQRT1_2;
 
     /**
      * Square root of 2 as double value
      */
-    public static readonly SQRT2: number = SQRT2;
+    public static readonly SQRT2: double = SQRT2;
 
     /**
      * Absolute value
@@ -76,7 +76,7 @@ export class Math {
      * Math.abs(doubleNegInf) = Inf
      * ```
      */
-    public static abs(x: number): number {
+    public static abs(x: double): double {
         return abs(x);
     }
 
@@ -96,7 +96,7 @@ export class Math {
      * acos(doubleInf) = nan
      * acos(doubleNegInf) = nan
      */
-    public static acos(x: number): number {
+    public static acos(x: double): double {
         return acos(x);
     }
 
@@ -114,7 +114,7 @@ export class Math {
      * Math.acosh(doubleNegInf) = -NaN
      * ```
      */
-    public static acosh(x: number): number {
+    public static acosh(x: double): double {
         return acosh(x);
     }
 
@@ -125,7 +125,7 @@ export class Math {
      *
      * @returns Arcsine of angle `v`
      */
-    public static asin(x: number): number {
+    public static asin(x: double): double {
         return asin(x);
     }
 
@@ -143,7 +143,7 @@ export class Math {
      * Math.asinh(doubleNegInf) = -Inf
      * ```
      */
-    public static asinh(x: number): number {
+    public static asinh(x: double): double {
         return asinh(x);
     }
 
@@ -161,7 +161,7 @@ export class Math {
      * Math.atan(doubleNegInf) = -1.5708
      * ```
      */
-    public static atan(x: number): number {
+    public static atan(x: double): double {
         return atan(x);
     }
 
@@ -174,7 +174,7 @@ export class Math {
      * The atan2() method measures the counterclockwise angle θ, in radians, between the positive x-axis and the point (x, y).
      * Note that the arguments to this function pass the y-coordinate first and the x-coordinate second.
      */
-    public static atan2(y: number, x: number): number {
+    public static atan2(y: double, x: double): double {
         return atan2(y, x);
     }
 
@@ -192,7 +192,7 @@ export class Math {
      * Math.atanh(doubleNegInf) = -NaN
      * ```
      */
-    public static atanh(x: number): number {
+    public static atanh(x: double): double {
         return atanh(x);
     }
 
@@ -204,7 +204,7 @@ export class Math {
      * @remark
      * Math.𝚌brt(𝚡) = ∛x = the unique y such that y³ = x.
      */
-    public static cbrt(x: number): number {
+    public static cbrt(x: double): double {
         if (isNaN(x) || x == Infinity || x == -Infinity) return x;
         return cbrt(x);
     }
@@ -223,7 +223,7 @@ export class Math {
      * Math.ceil(doubleNegInf) = -inf
      * ```
      */
-    public static ceil(x: number): number {
+    public static ceil(x: double): double {
         return ceil(x);
     }
 
@@ -259,7 +259,7 @@ export class Math {
      * Math.clz32(0x0) == 32
      * ```
      */
-    public static clz32(value: number): number {
+    public static clz32(value: double): double {
         return clz32Double(value);
     }
 
@@ -308,7 +308,7 @@ export class Math {
      * Math.cos(doubleNegInf) = -NaN
      * ```
      */
-    public static cos(x: number): number {
+    public static cos(x: double): double {
         return cos(x);
     }
 
@@ -326,7 +326,7 @@ export class Math {
      * Math.cosh(doubleNegInf) = Inf
      * ```
      */
-    public static cosh(x: number): number {
+    public static cosh(x: double): double {
         return cosh(x);
     }
     /**
@@ -343,7 +343,7 @@ export class Math {
      * Math.exp(doubleNegInf) = 0
      * ```
      */
-    public static exp(x: number): number {
+    public static exp(x: double): double {
         return exp(x);
     }
 
@@ -361,7 +361,7 @@ export class Math {
      * Math.expm1(doubleNegInf) = -1
      * ```
      */
-    public static expm1(x: number): number {
+    public static expm1(x: double): double {
         return expm1(x);
     }
 
@@ -379,7 +379,7 @@ export class Math {
      * Math.floor(doubleNegInf) = -Inf
      * ```
      */
-    public static floor(x: number): number {
+    public static floor(x: double): double {
         return floor(x);
     }
 
@@ -393,7 +393,7 @@ export class Math {
     *  Math.fround(Infinity) // Infinity
     *  Math.fround(NaN) // NaN
     */
-    public static fround(x: number): number {
+    public static fround(x: double): double {
         return fround(x);
     }
 
@@ -405,8 +405,8 @@ export class Math {
      *
      * @returns The square root of the sum of squares of its arguments
      */
-    public static hypot(...values: number[]): number {
-        let max: number = 0;
+    public static hypot(...values: double[]): double {
+        let max: double = 0;
         let hasNaN = false;
 
         for (const value of values) {
@@ -420,7 +420,7 @@ export class Math {
         }
         if (hasNaN) return NaN;
         if (max == 0) return 0;
-        let sum: number = 0.0;
+        let sum: double = 0.0;
         for (const value of values) {
             let normalized = value / max;
             sum += normalized * normalized;
@@ -439,7 +439,7 @@ export class Math {
      *  Math.imul(-5, 5.05) = 25
      *
      */
-    public static imul(a: number, b: number): number {
+    public static imul(a: double, b: double): double {
         return imul(a, b);
     }
 
@@ -458,7 +458,7 @@ export class Math {
      * Math.log(doubleNegInf) = -nan
      * ```
      */
-    public static log(x: number): number {
+    public static log(x: double): double {
         return log(x);
     }
 
@@ -476,7 +476,7 @@ export class Math {
      * Math.log10(doubleNegInf) = -NaN
      * ```
      */
-    public static log10(x: number): number {
+    public static log10(x: double): double {
         return log10(x);
     }
 
@@ -494,7 +494,7 @@ export class Math {
      * Math.log1p(doubleNegInf) = -NaN
      * ```
      */
-    public static log1p(x: number): number {
+    public static log1p(x: double): double {
         return log1p(x);
     }
 
@@ -512,7 +512,7 @@ export class Math {
      * Math.log2(doubleNegInf) = -nan
      * ```
      */
-    public static log2(x: number): number {
+    public static log2(x: double): double {
         return log2(x);
     }
 
@@ -524,7 +524,7 @@ export class Math {
      *
      * @returns Largest value of `u` and `v`
      */
-    public static max(...values: number[]): number {
+    public static max(...values: double[]): double {
         if (values.length == 0) {
             return -Infinity;
         }
@@ -538,15 +538,15 @@ export class Math {
         return max;
     }
 
-    public static max(): number {
+    public static max(): double {
         return -Infinity;
     }
 
-    public static max(val: number): number {
+    public static max(val: double): double {
         return val;
     }
 
-    public static max(val1: number, val2: number): number {
+    public static max(val1: double, val2: double): double {
         if (isNaN(val1) || isNaN(val2)) {
             return NaN
         }
@@ -564,7 +564,7 @@ export class Math {
      *
      * @returns Smallest value of `u` and `v`
      */
-    public static min(...values: number[]): number {
+    public static min(...values: double[]): double {
         if (values.length == 0) {
             return Infinity;
         }
@@ -578,15 +578,15 @@ export class Math {
         return min;
     }
 
-    public static min(): number {
+    public static min(): double {
         return Infinity;
     }
 
-    public static min(val: number): number {
+    public static min(val: double): double {
         return val;
     }
 
-    public static min(val1: number, val2: number): number {
+    public static min(val1: double, val2: double): double {
         if (isNaN(val1) || isNaN(val2)) {
             return NaN
         }
@@ -610,7 +610,7 @@ export class Math {
      * Math.pow(doubleInf, doubleInf) = Inf
      * ```
      */
-    public static pow(u: number, v: number): number {
+    public static pow(u: double, v: double): double {
         return power(u, v);
     }
 
@@ -622,7 +622,7 @@ export class Math {
      * Initial seed to the random number generator algorithm can be given using {@link seedRandom()} function.
      *
      */
-    public static random(): number {
+    public static random(): double {
         return random();
     }
 
@@ -640,7 +640,7 @@ export class Math {
      * Math.round(doubleNegInf) = -Inf
      * ```
      */
-    public static round(x: number): number {
+    public static round(x: double): double {
         return round(x);
     }
 
@@ -650,7 +650,7 @@ export class Math {
      * @returns -1 if `x` is negative, 1 if `x` is positive, 0 if `x` is close to zero (epsilon is 1e-13)
      *
      */
-    public static sign(x: number): number {
+    public static sign(x: double): double {
         if (isNaN(x)) {
             return x;
         }
@@ -671,7 +671,7 @@ export class Math {
      * Math.sin(doubleNegInf) = -nan
      * ```
      */
-    public static sin(x: number): number {
+    public static sin(x: double): double {
         return sin(x);
     }
 
@@ -689,7 +689,7 @@ export class Math {
      * Math.sinh(doubleNegInf) = -inf
      * ```
      */
-    public static sinh(x: number): number {
+    public static sinh(x: double): double {
         return sinh(x);
     }
 
@@ -708,7 +708,7 @@ export class Math {
      * Math.sqrt(doubleNegInf) = -nan
      * ```
      */
-    public static sqrt(x: number): number {
+    public static sqrt(x: double): double {
         return sqrt(x);
     }
 
@@ -726,7 +726,7 @@ export class Math {
      * Math.tan(doubleNegInf) = -nan
      * ```
      */
-    public static tan(x: number): number {
+    public static tan(x: double): double {
         return tan(x);
     }
 
@@ -744,7 +744,7 @@ export class Math {
      * Math.atanh(doubleNegInf) = -nan
      * ```
      */
-    public static tanh(x: number): number {
+    public static tanh(x: double): double {
         if (isNaN(x)) return NaN;
         return tanh(x);
     }
@@ -762,7 +762,7 @@ export class Math {
      * If arg is NaN, NaN is returned
      *
      */
-    public static trunc(x: number): number {
+    public static trunc(x: double): double {
         return trunc(x);
     }
 }

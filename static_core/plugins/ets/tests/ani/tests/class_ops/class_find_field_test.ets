@@ -16,7 +16,7 @@
 class Point {
     x: int;
     y: int;
-    getRadius: (p: Point) => number = (p: Point) => Math.sqrt(p.x * p.x + p.y * p.y);
+    getRadius: (p: Point) => double = (p: Point) => Math.sqrt(p.x * p.x + p.y * p.y);
 }
 
 class ExtendedPoint extends Point {
@@ -64,5 +64,5 @@ class NamedSpaceHandler {
     constructor(space: Required<Space>) {
         this.space = space;
     }
-}   
+}
 
