@@ -769,6 +769,8 @@ class JSONWriter {
             this.writeInteropESValue(obj)
         } else if (obj instanceof JsonElementDeserializable) {
             this.buffer.append(JSON.stringifyJsonElement((obj as JsonElementDeserializable).toJSON()))
+        } else if (obj instanceof ArrayBuffer) {
+            this.buffer.append(JSONObject.EMPTY)
         } else if (this.writeValueTypeWrapper(obj)) {
             // nothing to do - write completed successfully
         } else {
