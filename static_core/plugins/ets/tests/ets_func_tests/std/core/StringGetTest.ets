@@ -17,6 +17,8 @@ function main(): int {
     const suite = new arktest.ArkTestsuite('Sting API test for SDK');
     suite.addTest('stringGetTest1', stringGetTest1);
     suite.addTest('stringGetTest2', stringGetTest2);
+    suite.addTest('stringGetTest3', stringGetTest3);
+    suite.addTest('stringGetTest4', stringGetTest4);
     suite.addTest('stringGetTest5', stringGetTest5);
     suite.addTest('stringGetTest6', stringGetTest6);
     suite.addTest('stringGetTest7', stringGetTest7);
@@ -37,6 +39,22 @@ function stringGetTest2() {
     arktest.assertEQ(typeof str[1], 'string')
     arktest.assertEQ(typeof str[2], 'string')
     arktest.assertEQ(typeof str[3], 'string')
+}
+
+function stringGetTest3() {
+    let str: string = 'abcd'
+    arktest.assertEQ(typeof str[0 as number], 'string')
+    arktest.assertEQ(typeof str[1 as number], 'string')
+    arktest.assertEQ(typeof str[2 as number], 'string')
+    arktest.assertEQ(typeof str[3 as number], 'string')
+}
+
+function stringGetTest4() {
+    let str: string = 'abcd'
+    arktest.assertEQ(str[0 as number], 'a')
+    arktest.assertEQ(str[1 as number], 'b')
+    arktest.assertEQ(str[2 as number], 'c')
+    arktest.assertEQ(str[3 as number], 'd')
 }
 
 function stringGetTest5() {

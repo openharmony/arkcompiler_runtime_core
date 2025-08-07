@@ -256,7 +256,7 @@ export namespace util {
             let bufferLength: int = 0;
 
             for (let i = 0; i < binaryString.length; i++) {
-                buffer = (buffer << Base64Helper.BYTE_SIZE) | binaryString.charCodeAt(i).toInt();
+                buffer = (buffer << Base64Helper.BYTE_SIZE) | binaryString.charCodeAt(i);
                 bufferLength += Base64Helper.BYTE_SIZE;
                 while (bufferLength >= Base64Helper.BASE64_GROUP_SIZE) {
                     bufferLength -= Base64Helper.BASE64_GROUP_SIZE;

@@ -2585,7 +2585,7 @@ export class Decimal {
     private initializeByString(v: string) {
         let i: int;
         let str: string = v;
-        if ((i = v.charCodeAt(0).toInt()) === 45) {
+        if ((i = v.charCodeAt(0)) === 45) {
             str = v.slice(1);
             this.sign = -1;
         } else {
@@ -3187,7 +3187,7 @@ export class Decimal {
         }
 
         for (let i = start; i < len; i++) {
-            str += NUMERALS.charAt(digits[i].toInt());
+            str += NUMERALS.charAt(digits[i]);
         }
         return str;
     }
@@ -3286,7 +3286,7 @@ export class Decimal {
                     roundUp = inexact;
                 }
 
-                i = sd! < xd.length ? xd[sd!.toInt()] : -1;
+                i = sd! < xd.length ? xd[sd!] : -1;
                 let k = base / 2;
                 roundUp = roundUp || (sd! + 1 < xd.length ? xd[sd! + 1] != undefined : false);
                 roundUp = rm != undefined && rm < 4

@@ -23,6 +23,6 @@ interface Data {
 
 function main(): void {
   const data: Data = { value: "hello" };
-  const length = data.value?.toUpperCase()?.length as int;
+  const length = data.value?.toUpperCase()?.length as number;
   arktest.assertEQ(length, 5);
 }

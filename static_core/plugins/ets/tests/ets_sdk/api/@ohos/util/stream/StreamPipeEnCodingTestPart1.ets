@@ -176,7 +176,7 @@ class MyRead3 extends stream.Readable {
     }
 }
 class MyWrite3 extends stream.Writable {
-    sum: number = 0;
+    sum = 0;
 
     constructor() {
         super();

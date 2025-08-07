@@ -2205,7 +2205,7 @@ class DateUnit {
     }
 
     static symbolValue(ch: string): DateUnit {
-        return new DateUnit(DateValueType.DATE_SYMBOL, ch.charCodeAt(0).toInt(), 1);
+        return new DateUnit(DateValueType.DATE_SYMBOL, ch.charCodeAt(0), 1);
     }
 
     static word(type: DateValueType, value: int, length: int): DateUnit {

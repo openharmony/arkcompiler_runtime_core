@@ -177,10 +177,10 @@ int32_t StdCoreStringGetLength(EtsString *s)
     return s->GetLength();
 }
 
-int32_t StdCoreStringLength(EtsString *s)
+double StdCoreStringLength(EtsString *s)
 {
     ASSERT(s != nullptr);
-    return s->GetLength();
+    return static_cast<double>(s->GetLength());
 }
 
 EtsBoolean StdCoreStringIsEmpty(EtsString *s)

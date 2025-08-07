@@ -228,7 +228,7 @@ export namespace url {
         if (input.length == 0) {
             return temp;
         }
-        let pos: int = temp.indexOf("%").toInt();
+        let pos: number = temp.indexOf("%");
         while ((pos != -1) && (pos < len - 2)) {
             if (Char.isHexDigit(temp.charAt(pos.toInt() + 1)) && Char.isHexDigit(temp.charAt(pos.toInt() + 2))) {
                 let subStr = temp.substring(pos + 1, pos + 3);
@@ -749,7 +749,7 @@ export namespace url {
         }
 
         private analysizeUsernameAndPasswd(strHost: string): string {
-            let pos: int = strHost.length - 1;
+            let pos: number = strHost.length - 1;
             for (; pos >= 0; pos--) {
                 if (strHost.charAt(pos.toInt()) == c'@') {
                     break;
@@ -863,7 +863,7 @@ export namespace url {
 
         private parsingHostAndPath(input: string, pos: number) {
             let special: boolean = true;
-            let inputLen: int = input.length;
+            let inputLen: number = input.length;
             for (pos = 0; pos < inputLen; pos++) {
                 if (input.charAt(pos.toInt()) == c'/' || input.charAt(pos.toInt()) == c'\\') {
                     break;
@@ -1010,8 +1010,8 @@ export namespace url {
 
         private analysizeHostAndPath(input: string) {
             if (this.flags[INDEX_SPECIAL]) {
-                let pos: int = 0;
-                let inputLen: int = input.length;
+                let pos: number = 0;
+                let inputLen: number = input.length;
                 while (pos < inputLen) {
                     if (input.charAt(pos.toInt()) == c'/' || input.charAt(pos.toInt()) == c'\\') {
                         pos++;
@@ -1047,7 +1047,7 @@ export namespace url {
             }
             let tempInput = input;
             if (tempInput.indexOf(':') != -1) {
-                let pos = tempInput.indexOf(':').toInt();
+                let pos = tempInput.indexOf(':');
                 pos++;
                 this.flags[INDEX_DOUBLE_SLASH] = (input.charAt(pos.toInt()) == c'/' && input.charAt(pos.toInt() + 1) == c'/');
                 let scheme: string = tempInput.substring(0, pos);

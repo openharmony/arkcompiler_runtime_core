@@ -91,6 +91,17 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @param index index to look at
      *
+     * @returns a primitive at index
+     */
+    public $_get(index: number): String {
+        return this.$_get(index.toInt());
+    }
+
+    /**
+     * Returns an instance of string at passed index.
+     *
+     * @param index index to look at
+     *
      * @returns String value at index
      *
      * @throws StringIndexOutOfBoundsError if index is negative or >= length
@@ -124,8 +135,8 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @returns length of this string
      */
-    public get length(): int {
-        return this.getLength()
+    public get length(): number {
+        return this.getLength().toDouble()
     }
 
     /**
@@ -1191,11 +1202,8 @@ export final class String extends Object implements Comparable<String>, Iterable
     /*
      * The charCodeAt() method returns an integer between 0 and 65535 representing the UTF-16 code unit at the given index.
      */
-    public charCodeAt(index: int): number {
-        if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
-            return NaN;
-        }
-        return this.charAt(index);
+    public charCodeAt(index: int): int {
+        return this.charAt(index).toInt();
     }
 
     /**
@@ -1854,7 +1862,7 @@ export final class String extends Object implements Comparable<String>, Iterable
             (highSurrogateCode - HIGH_SURROGATE_MIN) * SURROGATE_OFFSET +
             (nextCodeUnit - LOW_SURROGATE_MIN);
         // Verify whether the joint code points are legal
-        return Char.isValidCodePoint(codePoint.toInt()) ? String.fromCodePoint(codePoint) : null;
+        return Char.isValidCodePoint(codePoint) ? String.fromCodePoint(codePoint) : null;
     }
 
     /**
@@ -1865,7 +1873,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         let res = new StringBuilder();
         let length = this.getLength();
         for (let i = 0; i < length; i++) {
-            let codeUnit = this.charCodeAt(i).toInt();
+            let codeUnit = this.charCodeAt(i);
             // Currently, it is a high-level proxy item
             if (codeUnit >= HIGH_SURROGATE_MIN && codeUnit <= HIGH_SURROGATE_MAX) {
                 // Check if low level proxy items are paired
