@@ -17,7 +17,7 @@ import { BusinessError } from "@ohos.base";
 
 function testUriConstruction001() {
   let uriText = '#http://username:password@host:8080/directory/file?foo=1&bar=2';
-  let errText = 'BusinessError: Syntax Error. Invalid Uri string: The #It can\'t be the first.';
+  let errText = 'Syntax Error. Invalid Uri string: The #It can\'t be the first.';
   testConstructorThrow(uriText, errText);
 }
 
@@ -33,43 +33,43 @@ function testUriConstruction004() {
 
 function testUriConstruction005() {
   let uriText = 'http://username:password@host:8080/directory/file?foo^=1&bar=2#gaogaofaofao';
-  let errText = 'BusinessError: Syntax Error. Invalid Uri string: The Query does not conform to the rule.'
+  let errText = 'Syntax Error. Invalid Uri string: The Query does not conform to the rule.'
   testConstructorThrow(uriText, errText);
 }
 
 function testUriConstruction006() {
   let uriText = '1http://username:password@host:8080/directory/file?foo=1&bar=2#gaogaofaofao';
-  let errText = "BusinessError: Syntax Error. Invalid Uri string: The Scheme the first character must be a letter.";
+  let errText = "Syntax Error. Invalid Uri string: The Scheme the first character must be a letter.";
   testConstructorThrow(uriText, errText);
 }
 
 function testUriConstruction007() {
   let uriText = 'ht@tp://username:password@host:8080/directory/file?foo=1&bar=2#gaogaofaofao';
-  let errText = "BusinessError: Syntax Error. Invalid Uri string: The Scheme does not conform to the rule.";
+  let errText = "Syntax Error. Invalid Uri string: The Scheme does not conform to the rule.";
   testConstructorThrow(uriText, errText);
 }
 
 function testUriConstruction008() {
   let uriText = 'http://username:password@[::]:80r80/directory/file?foo=1&bar=2#gaogaofaofao';
-  let errText = "BusinessError: Syntax Error. Invalid Uri string: The Port does not conform to the rule.";
+  let errText = "Syntax Error. Invalid Uri string: The Port does not conform to the rule.";
   testConstructorThrow(uriText, errText);
 }
 
 function testUriConstruction009() {
   let uriText = 'http://username:password@[::12:55:8080/directory/file?foo=1&bar=2#gaogaofaofao';
-  let errText = "BusinessError: Syntax Error. Invalid Uri string: The IPv6 is missing a closing bracket.";
+  let errText = "Syntax Error. Invalid Uri string: The IPv6 is missing a closing bracket.";
   testConstructorThrow(uriText, errText);
 }
 
 function testUriConstruction010() {
   let uriText = 'http://username:pa^ssword@[::12:55]:8080/directory/file?foo=1&bar=2#gaogaofaofao';
-  let errText = "BusinessError: Syntax Error. Invalid Uri string: The UserInfo does not conform to the rule.";
+  let errText = "Syntax Error. Invalid Uri string: The UserInfo does not conform to the rule.";
   testConstructorThrow(uriText, errText);
 }
 
 function testUriConstruction011() {
   let uriText = 'http://username:password@[::1你2:55]:8080/directory/file?foo=1&bar=2#gaogaofaofao';
-  let errText = "BusinessError: Syntax Error. Invalid Uri string: The Ipv6 does not conform to the rule.";
+  let errText = "Syntax Error. Invalid Uri string: The Ipv6 does not conform to the rule.";
   testConstructorThrow(uriText, errText);
 }
 
@@ -321,10 +321,7 @@ function testUriConstruction030() {
 }
 
 function testConstructorThrow(uriText: string, errText: string) {
-  let exceptionCheck = (e: Error | Exception): boolean | string => {
-    return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).toString() == errText)
-  }
-  arktest.expectThrow((): void => { let that = new uri.URI(uriText); }, exceptionCheck)
+  arktest.expectError((): void => { let that = new uri.URI(uriText); }, new BusinessError(0, new Error(errText)))
 }
 
 function testUriConstruction031() {

@@ -60,14 +60,14 @@ function reduceRightFuncArg4ArrayNumber(): int {
     }
 
     return check(() => new Array<Number>, (arr: Array<Number>) => {
-        let hasException: boolean = false;
+        let hasError: boolean = false;
         try {
             let res = arr.reduceRight(fn);
             return fail;
         } catch(e) {
-            hasException = true;
+            hasError = true;
         }
-        if (hasException == false) { return fail; }
+        if (hasError == false) { return fail; }
 
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
@@ -88,14 +88,14 @@ function reduceRightFuncArg3(): int {
     }
 
     return check(() => new Array<Number>, (arr: Array<Number>) => {
-        let hasException: boolean = false;
+        let hasError: boolean = false;
         try {
             let res = arr.reduceRight(fn);
             return fail;
         } catch(e) {
-            hasException = true;
+            hasError = true;
         }
-        if (hasException == false) { return fail; }
+        if (hasError == false) { return fail; }
 
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
@@ -113,14 +113,14 @@ function reduceRightFuncArg2(): int {
     }
 
     return check(() => new Array<Number>, (arr: Array<Number>) => {
-        let hasException: boolean = false;
+        let hasError: boolean = false;
         try {
             let res = arr.reduceRight(fn);
             return fail;
         } catch(e) {
-            hasException = true;
+            hasError = true;
         }
-        if (hasException == false) { return fail; }
+        if (hasError == false) { return fail; }
 
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
