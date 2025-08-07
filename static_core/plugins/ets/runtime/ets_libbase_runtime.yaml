@@ -748,7 +748,7 @@ intrinsics:
     method_name: <get>length
     static: false
     signature:
-      ret: f64
+      ret: i32
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreStringLength
 

@@ -29,7 +29,7 @@ sub:
       - |
         "𠮷"
     vars:
-      inds: [0.0, 1.0, "self.length - 1", -100.0, 200.0, -1.0, Infinity, NaN, -Infinity, -5.0]
+      inds: [0.0, 1.0, "self.length - 1.0", -100.0, 200.0, -1.0, Infinity, NaN, -Infinity, -5.0]
       int_inds: [0, 1, "self.length - 1", -100, 200, -1, Infinity, NaN, -Infinity, -5]
       search:
         - |
