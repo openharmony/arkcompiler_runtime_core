@@ -44,39 +44,84 @@ class Point implements Serializable {
 
 class Point3D extends Point {
     z: double
+    y: double = 3.0
     private state: int
     static ZERO: double = 0.0
+    readonly r: int = 1
 }
 
 function testField(): int {
     let pt = Type.of(new Point3D()) as ClassType
 
     let xf = pt.getFieldByName("x")
+    let yf = pt.getFieldByName("y")
     let sf = pt.getFieldByName("state")
     let zf = pt.getFieldByName("ZERO")
+    let rf = pt.getFieldByName("r")
+
+    let isInherited = (f: Field, cls: ClassType): boolean => {
+        return !f.getOwnerType().equals(cls)
+    };
+
+    let isOverrided = (f: Field, cls: ClassType): boolean => {
+        if (!f.getOwnerType().equals(cls)) {
+            return false;
+        }
+        try {
+            cls.getBaseType().getFieldByName(f.getName())
+            return true;
+        } catch(e) {
+            return false;
+        }
+    };
+
 
     return test(xf.getName() == "x",                                        "FieldName: x") +
             test(xf.getOwnerType().equals(Type.of(new Point())),            "   OwnerType: Point") +
             test(xf.getType() == DoubleType.VAL,                            "   Type: double") +
-            test(xf.getAttributes() == Attributes.INHERITED,                "   no attributes") +
+            test(xf.getAttributes() == 0,                                   "   no attributes") +
             test(xf.getAccessModifier() == AccessModifier.PROTECTED,        "   protected access modififer") +
-            test(xf.isInherited(),                                          "   inherited") +
+            test(!xf.isReadonly(),                                          "   not readonly") +
+            test(isInherited(xf, pt),                                       "   inherited") +
+            test(!isOverrided(xf, pt),                                      "   not override") +
             test(!xf.isStatic(),                                            "   not static") +
+            test(yf.getName() == "y",                                       "FieldName: x") +
+            test(yf.getOwnerType().equals(pt),                              "   OwnerType: Point3D") +
+            test(yf.getType() == DoubleType.VAL,                            "   Type: double") +
+            test(yf.getAttributes() == 0,                                   "   no attributes") +
+            test(yf.getAccessModifier() == AccessModifier.PUBLIC,           "   public access modififer") +
+            test(!yf.isReadonly(),                                          "   not readonly") +
+            test(!isInherited(yf, pt),                                      "   not inherited") +
+            test(isOverrided(yf, pt),                                       "   override") +
+            test(!yf.isStatic(),                                            "   not static") +
             test(sf.getName() == "state",                                   "FieldName: state") +
             test(sf.getOwnerType().equals(pt),                              "   OwnerType: Point3D") +
             test(sf.getType() == IntType.VAL,                               "   Type: int") +
             test(sf.getAttributes() == 0,                                   "   no attributes") +
             test(sf.getAccessModifier() == AccessModifier.PRIVATE,          "   private access modifier") +
-            test(!sf.isInherited(),                                         "   not inherited") +
+            test(!sf.isReadonly(),                                          "   not readonly") +
+            test(!isInherited(sf, pt),                                      "   not inherited") +
+            test(!isOverrided(sf, pt),                                      "   not override") +
             test(!sf.isStatic(),                                            "   not static") +
             test(zf.getName() == "ZERO",                                    "FieldName: ZERO") +
             test(zf.getOwnerType().equals(pt),                              "   OwnerType: Point3D") +
             test(zf.getType() == DoubleType.VAL,                            "   Type: double") +
-            test(zf.getAttributes() == 1,                                   "   static attribute") +
+            test(zf.getAttributes() == Attributes.STATIC,                   "   static attribute") +
             test(zf.getAccessModifier() == AccessModifier.PUBLIC,           "   public access modififer") +
             test((zf.getStaticValue() as Double).unboxed() == Point3D.ZERO, "   static value") +
-            test(!zf.isInherited(),                                         "   not inherited") +
-            test(zf.isStatic(),                                             "   static")
+            test(!zf.isReadonly(),                                          "   not readonly") +
+            test(!isInherited(zf, pt),                                      "   not inherited") +
+            test(!isOverrided(zf, pt),                                      "   not override") +
+            test(zf.isStatic(),                                             "   static") +
+            test(rf.getName() == "r",                                       "FieldName: r") +
+            test(rf.getOwnerType().equals(pt),                              "   OwnerType: Point3D") +
+            test(rf.getType() == IntType.VAL,                               "   Type: int") +
+            test(rf.getAttributes() == Attributes.READONLY,                 "   readonly attribute") +
+            test(rf.getAccessModifier() == AccessModifier.PUBLIC,           "   public access modififer") +
+            test(rf.isReadonly(),                                           "   readonly") +
+            test(!isInherited(rf, pt),                                      "   not inherited") +
+            test(!isOverrided(rf, pt),                                      "   not override") +
+            test(!rf.isStatic(),                                            "   not static")
 }
 
 function main(): int {

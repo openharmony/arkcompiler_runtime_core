@@ -6350,7 +6350,7 @@ intrinsics:
     static: true
     signature:
       ret: std.core.Field
-      args: [ std.core.Class, i64, std.core.Type, std.core.Type ]
+      args: [ i64, std.core.Type, std.core.Type ]
     impl: ark::ets::intrinsics::TypeAPIGetField
 
   - name: TypeAPIGetMethodsNum
@@ -6380,7 +6380,7 @@ intrinsics:
     static: true
     signature:
       ret: std.core.Method
-      args: [ std.core.Class, std.core.MethodType ]
+      args: [ std.core.MethodType, std.core.Type]
     impl: ark::ets::intrinsics::TypeAPIGetMethod
 
   - name: TypeAPIGetConstructorsNum
@@ -6463,6 +6463,18 @@ intrinsics:
       ret: i32
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIGetFunctionAttributes
+
+  - name: TypeAPIGetDeclaringClassImpl
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getDeclaringClassImpl
+    static: true
+    signature:
+      ret: std.core.Class
+      args:
+        - U{std.core.LambdaType,std.core.MethodType}
+      impl_args: [ std.core.Type ]
+    impl: ark::ets::intrinsics::TypeAPIGetDeclaringClassImpl
 
   - name: TypeAPIGetStaticFieldValue
     space: ets
@@ -6574,19 +6586,6 @@ intrinsics:
       ret: std.core.String
       args: [ ]
     impl: ark::ets::intrinsics::TypeAPIGetReceiverTypeDescriptor
-
-#######################
-# std.core.LambdaType #
-#######################
-  - name: TypeAPIGetDeclaringClass
-    space: ets
-    class_name: std.core.LambdaType
-    method_name: getDeclaringClass
-    static: false
-    signature:
-      ret: std.core.Class
-      args: [ ]
-    impl: ark::ets::intrinsics::TypeAPIGetDeclaringClass
 
 #################
 # std.core.Char #

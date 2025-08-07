@@ -53,13 +53,13 @@ class TypeAPI {
 
     native static getFieldOwner(fieldPtr: long): Class
 
-    native static getField(cls: Class, fieldPtr: long, fieldType: Type, ownerType: Type): Field
+    native static getField(fieldPtr: long, fieldType: Type, ownerType: Type): Field
 
     native static getMethodsNum(cls: Class): long
 
     native static getMethodDescriptor(cls: Class, i: long): RuntimeTypeDescriptor | undefined
 
-    native static getMethod(cls: Class, methodType: MethodType): Method
+    native static getMethod(methodType: MethodType, ownerType: Type): Method
 
     native static getConstructorsNum(cls: Class): long
 
@@ -110,6 +110,8 @@ class TypeAPI {
         sb.append(";")
         return sb.toString()
     }
+
+    native static getDeclaringClassImpl(type: LambdaType | MethodType): Class | undefined
 }
 
 // NOTE(shumilov-petr): replace to enum, enum not available now
@@ -166,19 +168,16 @@ export const ObjectType: ClassType;
 
 export class Attributes {
     public static readonly STATIC: int      = 1 << 0  // Field, Method
-    public static readonly INHERITED: int   = 1 << 1  // Field, Method
-    public static readonly READONLY: int    = 1 << 2  // Field
-    public static readonly FINAL: int       = 1 << 3  // Method, Class
-    public static readonly ABSTRACT: int    = 1 << 4  // Method
-    public static readonly CONSTRUCTOR: int = 1 << 5  // Method
-    public static readonly REST: int        = 1 << 6  // Parameter
-    public static readonly OPTIONAL: int    = 1 << 7  // Parameter
-    public static readonly THROWING: int    = 1 << 8  // Method, Lambda
-    public static readonly NATIVE: int      = 1 << 9  // Method, Lambda
-    public static readonly ASYNC: int       = 1 << 10 // Method, Lambda
-    public static readonly NEVERRESULT: int = 1 << 11 // Method, Lambda
-    public static readonly GETTER: int      = 1 << 12 // Method
-    public static readonly SETTER: int      = 1 << 13 // Method
+    public static readonly READONLY: int    = 1 << 1  // Field
+    public static readonly FINAL: int       = 1 << 2  // Method, Class
+    public static readonly ABSTRACT: int    = 1 << 3  // Method
+    public static readonly CONSTRUCTOR: int = 1 << 4  // Method
+    public static readonly REST: int        = 1 << 5  // Parameter
+    public static readonly OPTIONAL: int    = 1 << 6  // Parameter
+    public static readonly NATIVE: int      = 1 << 7  // Method, Lambda
+    public static readonly ASYNC: int       = 1 << 8  // Method, Lambda
+    public static readonly GETTER: int      = 1 << 9  // Method
+    public static readonly SETTER: int      = 1 << 10 // Method
 
     private constructor() {}
 }
@@ -1762,7 +1761,7 @@ export final class ClassType extends Type {
         const fieldType = Type.resolve(fieldDesc, this.getContextLinker())!
         const ownerClass = TypeAPI.getFieldOwner(fieldPtr)
         const ownerType = Type.resolve(ownerClass.getDescriptor(), ownerClass.getLinker())!
-        return TypeAPI.getField(this.cls, fieldPtr, fieldType, ownerType)
+        return TypeAPI.getField(fieldPtr, fieldType, ownerType)
     }
 
     /**
@@ -1800,7 +1799,9 @@ export final class ClassType extends Type {
         const td = TypeAPI.getMethodDescriptor(this.cls, i)
         if (td) {
             const methodType = Type.resolve(td, this.getContextLinker())! as MethodType
-            return TypeAPI.getMethod(this.cls, methodType)
+            const ownerClass = TypeAPI.getDeclaringClassImpl(methodType)!
+            const ownerType = Type.resolve(ownerClass.getDescriptor(), ownerClass.getLinker())!
+            return TypeAPI.getMethod(methodType, ownerType)
         }
         throw new TypeError("no method at " + i)
     }
@@ -1828,7 +1829,9 @@ export final class ClassType extends Type {
         const td = TypeAPI.getConstructorDescriptor(this.cls, i)
         if (td) {
             const methodType = Type.resolve(td, this.getContextLinker())! as MethodType
-            return TypeAPI.getMethod(this.cls, methodType)
+            const ownerClass = TypeAPI.getDeclaringClassImpl(methodType)!
+            const ownerType = Type.resolve(ownerClass.getDescriptor(), ownerClass.getLinker())!
+            return TypeAPI.getMethod(methodType, ownerType)
         }
         throw new TypeError("no constructor at " + i)
     }
@@ -2126,7 +2129,9 @@ export final class InterfaceType extends Type {
         const td = TypeAPI.getMethodDescriptor(this.cls, i)
         if (td) {
             const methodType = Type.resolve(td, this.getContextLinker())! as MethodType
-            return TypeAPI.getMethod(this.cls, methodType)
+            const ownerClass = TypeAPI.getDeclaringClassImpl(methodType)!
+            const ownerType = Type.resolve(ownerClass.getDescriptor(), ownerClass.getLinker())!
+            return TypeAPI.getMethod(methodType, ownerType)
         }
         throw new TypeError("no method at " + i)
     }
@@ -2434,42 +2439,6 @@ export abstract class FunctionType extends Type {
     }
 
     /**
-     * Checks whether function type throws some exception
-     *
-     * @returns true if function type throws some exception
-     */
-    public isThrowing(): boolean {
-        return (this.attrs & Attributes.THROWING) != 0
-    }
-
-    /**
-     * Checks whether function type has native modifier
-     *
-     * @returns true if function type has native modifier
-     */
-    public isNative(): boolean {
-        return (this.attrs & Attributes.NATIVE) != 0
-    }
-
-    /**
-     * Checks whether function type has async modifier
-     *
-     * @returns true if function type has async modifier
-     */
-    public isAsync(): boolean {
-        return (this.attrs & Attributes.ASYNC) != 0
-    }
-
-    /**
-     * Checks whether function result type is never
-     *
-     * @returns true if function result type is never
-     */
-    public isNeverResult(): boolean {
-        return (this.attrs & Attributes.NEVERRESULT) != 0
-    }
-
-    /**
      * Checks for equality this instance with provided object, treated as a FunctionType
      *
      * @param other type to be checked against
@@ -2565,7 +2534,7 @@ export final class LambdaType extends FunctionType {
      * @returns LambdaType instance
      */
     public make(): Object {
-        return this.getDeclaringClass()!.createInstance()
+        return TypeAPI.getDeclaringClassImpl(this)!.createInstance()
     }
 
     public override assignableFrom(other: Type): boolean {
@@ -2621,8 +2590,6 @@ export final class LambdaType extends FunctionType {
         }
         throw new Error("invalid conversion")
     }
-
-    private native getDeclaringClass(): Class | undefined
 }
 
 export final class MethodType extends FunctionType {

@@ -25,17 +25,29 @@ namespace ark::ets {
 /*static*/
 panda_file::File::EntityId EtsAnnotation::FindAsyncAnnotation(const Method *method)
 {
-    panda_file::File::EntityId asyncAnnId;
+    return FindAnnotation(method, panda_file_items::class_descriptors::ASYNC);
+}
+
+/*static*/
+panda_file::File::EntityId EtsAnnotation::OptionalParameters(const Method *method)
+{
+    return FindAnnotation(method, panda_file_items::class_descriptors::OPTIONAL_PARAMETERS_ANNOTATION);
+}
+
+/*static*/
+panda_file::File::EntityId EtsAnnotation::FindAnnotation(const Method *method, const std::string_view &sign)
+{
+    panda_file::File::EntityId foundId;
     const panda_file::File &pf = *method->GetPandaFile();
     panda_file::MethodDataAccessor mda(pf, method->GetFileId());
-    mda.EnumerateAnnotations([&pf, &asyncAnnId](panda_file::File::EntityId annId) {
+    mda.EnumerateAnnotations([&pf, &foundId, sign](panda_file::File::EntityId annId) {
         panda_file::AnnotationDataAccessor ada(pf, annId);
         const char *className = utf::Mutf8AsCString(pf.GetStringData(ada.GetClassId()).data);
-        if (className == panda_file_items::class_descriptors::ASYNC) {
-            asyncAnnId = annId;
+        if (className == sign) {
+            foundId = annId;
         }
     });
-    return asyncAnnId;
+    return foundId;
 }
 
 }  // namespace ark::ets

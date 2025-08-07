@@ -27,6 +27,10 @@ namespace ark::ets {
 class EtsAnnotation {
 public:
     static panda_file::File::EntityId FindAsyncAnnotation(const Method *method);
+    static panda_file::File::EntityId OptionalParameters(const Method *method);
+
+private:
+    static panda_file::File::EntityId FindAnnotation(const Method *method, const std::string_view &sign);
 };
 
 }  // namespace ark::ets

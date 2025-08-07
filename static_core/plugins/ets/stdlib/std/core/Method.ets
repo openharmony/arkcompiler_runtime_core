@@ -23,6 +23,7 @@ native function TypeAPIMethodInvokeConstructor(methodType: MethodType, args: Fix
  */
 export final class Method extends Object {
     private methodType: MethodType | undefined // not undefined if already created
+    private ownerType: Type | undefined // not undefined if already created
     private name: string = ""
     private attributes: int
     private accessMod: byte
@@ -38,12 +39,17 @@ export final class Method extends Object {
         return this.methodType!
     }
 
-    public getName(): string {
-        return this.name
+    /**
+     * Returns the type in which the method is declared
+     *
+     * @returns {@link Type} that is method's owner type
+     */
+    public getOwnerType(): Type {
+        return this.ownerType!
     }
 
-    public isInherited(): boolean {
-        return (this.attributes & Attributes.INHERITED) != 0
+    public getName(): string {
+        return this.name
     }
 
     public isStatic(): boolean {
@@ -51,7 +57,6 @@ export final class Method extends Object {
     }
 
     public isFinal(): boolean {
-        // TODO(shumilov-petr): not implemented in front-end
         return (this.attributes & Attributes.FINAL) != 0
     }
 
@@ -70,6 +75,15 @@ export final class Method extends Object {
     public isSetter(): boolean {
         return (this.attributes & Attributes.SETTER) != 0
     }
+
+    public isNative(): boolean {
+        return (this.attributes & Attributes.NATIVE) != 0
+    }
+
+    public isAsync(): boolean {
+        return (this.attributes & Attributes.ASYNC) != 0
+    }
+
 
     public override toString(): string {
         return this.getName() + ": " + this.getType().toString()

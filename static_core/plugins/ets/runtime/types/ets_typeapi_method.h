@@ -62,6 +62,13 @@ public:
         ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsTypeAPIMethod, methodType_), methodType->GetCoreType());
     }
 
+    void SetOwnerType(EtsTypeAPIType *ownerType)
+    {
+        ASSERT(ownerType != nullptr);
+        ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsTypeAPIMethod, ownerType_),
+                                  ownerType->AsObject()->GetCoreType());
+    }
+
     void SetName(EtsString *name)
     {
         ASSERT(name != nullptr);
@@ -80,6 +87,7 @@ public:
 
 private:
     ObjectPointer<EtsTypeAPIType> methodType_;
+    ObjectPointer<EtsTypeAPIType> ownerType_;
     ObjectPointer<EtsString> name_;
     FIELD_UNUSED EtsInt attr_;  // note alignment
     FIELD_UNUSED EtsByte accessMod_;

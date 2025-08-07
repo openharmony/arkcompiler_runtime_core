@@ -80,8 +80,7 @@ public:
 
     bool IsReadonly() const
     {
-        // NOTE(shumilov-petr): Need to dump extra info in frontend
-        return false;
+        return GetCoreType()->IsReadonly();
     }
 
     bool IsStatic() const

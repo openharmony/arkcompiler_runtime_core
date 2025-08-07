@@ -16,9 +16,9 @@
 package std.core;
 
 class AllowedAttributes {
-    internal static readonly FIELD = Attributes.STATIC | Attributes.INHERITED | Attributes.READONLY
-    internal static readonly METHOD = Attributes.STATIC | Attributes.INHERITED | Attributes.FINAL | Attributes.ABSTRACT | Attributes.CONSTRUCTOR | Attributes.THROWING | Attributes.NATIVE | Attributes.ASYNC | Attributes.GETTER | Attributes.SETTER
-    internal static readonly LAMBDA = Attributes.THROWING | Attributes.ASYNC
+    internal static readonly FIELD = Attributes.STATIC | Attributes.READONLY
+    internal static readonly METHOD = Attributes.STATIC | Attributes.FINAL | Attributes.ABSTRACT | Attributes.CONSTRUCTOR | Attributes.NATIVE | Attributes.ASYNC | Attributes.GETTER | Attributes.SETTER
+    internal static readonly LAMBDA = Attributes.ASYNC
     internal static readonly CLASS = Attributes.FINAL
     internal static readonly PARAMETER = Attributes.REST | Attributes.OPTIONAL
 }
@@ -696,15 +696,6 @@ export final class LambdaTypeCreator extends TypeCreator {
      */
     public addAttributes(attrs: int): LambdaTypeCreator {
         this.attrs.add(attrs)
-        return this;
-    }
-
-    /**
-     * Adds attribute with same name
-     * @returns this
-     */
-    public addThrowing(): LambdaTypeCreator {
-        this.attrs.add(Attributes.THROWING, true)
         return this;
     }
 

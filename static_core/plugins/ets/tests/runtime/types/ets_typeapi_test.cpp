@@ -75,6 +75,7 @@ public:
     static std::vector<MirrorFieldInfo> GetTypeAPIMethodClassMembers()
     {
         return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsTypeAPIMethod, methodType_, "methodType"),
+                                             MIRROR_FIELD_INFO(EtsTypeAPIMethod, ownerType_, "ownerType"),
                                              MIRROR_FIELD_INFO(EtsTypeAPIMethod, name_, "name"),
                                              MIRROR_FIELD_INFO(EtsTypeAPIMethod, attr_, "attributes"),
                                              MIRROR_FIELD_INFO(EtsTypeAPIMethod, accessMod_, "accessMod")};
