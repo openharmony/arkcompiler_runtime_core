@@ -21,9 +21,9 @@
 #include <sys/types.h>
 #include <random>
 
+#include "stdlib/native/core/stdlib_ani_helpers.h"
 #include "tools/format_logger.h"
 #include "Util.h"
-#include "stdlib/native/core/stdlib_ani_helpers.h"
 
 namespace ark::ets::sdk::util {
 
@@ -162,5 +162,39 @@ ANI_EXPORT ani_object ETSApiUtilHelperGenerateRandomBinaryUUID(ani_env *env, [[m
     return arr;
 }
 }  // extern "C"
+
+ani_string CreateUtf8String(ani_env *env, const char *data, ani_size size)
+{
+    ani_string result;
+    ANI_FATAL_IF_ERROR(env->String_NewUTF8(data, size, &result));
+    return result;
+}
+
+ani_ref GetAniNull(ani_env *env)
+{
+    ani_ref nullObj {};
+    ANI_FATAL_IF_ERROR(env->GetNull(&nullObj));
+    return nullObj;
+}
+
+bool IsNullishValue(ani_env *env, ani_ref ref)
+{
+    auto isNullish = static_cast<ani_boolean>(false);
+    ANI_FATAL_IF_ERROR(env->Reference_IsNullishValue(ref, &isNullish));
+    return static_cast<bool>(isNullish);
+}
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define FUN_UNBOX_METHOD(aniType, typeName, signature)                                                         \
+    aniType UnboxTo##typeName(ani_env *env, ani_object value)                                                  \
+    {                                                                                                          \
+        aniType result {};                                                                                     \
+        ANI_FATAL_IF_ERROR(env->Object_CallMethodByName_##typeName(value, "unboxed", ":" signature, &result)); \
+        /* CC-OFFNXT(G.PRE.05) function defination, no effects */                                              \
+        return result;                                                                                         \
+    }
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+BOX_VALUE_LIST(FUN_UNBOX_METHOD);
+#undef FUN_UNBOX_METHOD
 
 }  // namespace ark::ets::sdk::util

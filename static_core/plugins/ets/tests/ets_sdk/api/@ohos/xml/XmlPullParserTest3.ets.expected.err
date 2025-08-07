@@ -11,5 +11,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-testXmlIsEmptyElementTag0003 failed, error: BusinessError: The node name contains invalid characters
+testXmlIsEmptyElementTag0003 failed, error: BusinessError: expected:
 testXmlGetAttributeCount0003 failed, error: AssertionError: expected true but was false

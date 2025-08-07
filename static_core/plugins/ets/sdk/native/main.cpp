@@ -20,6 +20,7 @@
 #include "api/ani_textdecoder.h"
 #include "api/ani_textencoder.h"
 #include "api/ani_stringdecoder.h"
+#include "api/ani_xmlpullparser.h"
 #include "api/Util.h"
 #include "ohos/init_data.h"
 #include "tools/format_logger.h"
@@ -27,6 +28,7 @@
 
 using TextDecoder = ark::ets::sdk::util::TextDecoder;
 using StringDecoder = ark::ets::sdk::util::StringDecoder;
+using XmlPullParser = ark::ets::sdk::util::XmlPullParser;
 
 struct ArrayBufferInfo {
     void *data;
@@ -279,6 +281,31 @@ static ani_status BindStringDecoder(ani_env *env)
     return ANI_OK;
 }
 
+static ani_status BindXmlPullParser(ani_env *env)
+{
+    ani_class cls;
+    const char *className = "@ohos.xml.xml.XmlParseHelper";
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        LOG_ERROR_SDK("%{public}s:: Not found %{public}s", __FUNCTION__, className);
+        return ANI_ERROR;
+    }
+    std::array methods = {
+        ani_native_function {"bindNative", "C{std.core.String}:l", reinterpret_cast<void *>(XmlPullParser::BindNative)},
+        ani_native_function {"releaseNative", "l:z", reinterpret_cast<void *>(XmlPullParser::ReleaseNative)},
+        ani_native_function {"parseXmlInner", "lzzC{std.core.Function2}C{std.core.Function2}C{std.core.Function2}:z",
+                             reinterpret_cast<void *>(XmlPullParser::ParseXml)},
+        ani_native_function {"parserErrorInfo", "l:C{std.core.String}",
+                             reinterpret_cast<void *>(XmlPullParser::GetParseError)},
+    };
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, methods.data(), methods.size())) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        LOG_ERROR_SDK("%{public}s:: Cannot bind native methods to %{public}s", __FUNCTION__, className);
+        return ANI_ERROR;
+    }
+    return ANI_OK;
+}
+
 extern "C" ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     ani_env *env;
@@ -288,7 +315,7 @@ extern "C" ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
     // NOLINTNEXTLINE(hicpp-signed-bitwise,-warnings-as-errors)
     auto status = static_cast<ani_status>(BindUtilHelper(env) | BindTextDecoder(env) | BindTextEncoder(env) |
-                                          BindStringDecoder(env));
+                                          BindStringDecoder(env) | BindXmlPullParser(env));
     if (status != ANI_OK) {
         return ANI_ERROR;
     }
