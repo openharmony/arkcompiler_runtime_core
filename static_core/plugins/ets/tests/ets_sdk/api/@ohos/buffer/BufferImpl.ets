@@ -95,6 +95,7 @@ function main(): int {
     suite.addTest("Test variable length Int BE/LE read/write", testVarLengthIntReadWrite)
     suite.addTest("Test variable length UInt BE/LE read/write", testVarLengthUIntReadWrite)
     suite.addTest("Test string write", testStringWrite)
+    suite.addTest("Test string write with invalid encoding", testBufferWrite0022)
     suite.addTest("Test string write base64", testBufferWriteStringBase64)
     suite.addTest("Test string write single parameter", testBufferWriteStringSingleParam)
     suite.addTest("Test string write with infinity length",  testBufferWriteStringInfinity)
@@ -998,6 +999,14 @@ function testStringWrite() {
     const bytesWritten3 = buf.write(longStr, 0, 5, 'utf8')
     arktest.assertEQ(bytesWritten3, 5)
     arktest.assertEQ(buf.toString('utf8', 0, 5), "ThisI")
+}
+
+function testBufferWrite0022() {
+    const TAG = 'testBufferWrite0022';
+    let buf = buffer.alloc(5);
+    arktest.expectError(() => {
+        const res = buf.write("abc", 0, 3, 'invalid_encoding');
+    }, 'Parameter error. The type of "encoding" must be BufferEncoding. the encoding invalid_encoding is unknown');
 }
 
 function testBufferWriteStringBase64() {

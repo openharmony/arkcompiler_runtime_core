@@ -79,12 +79,12 @@ function stringify(buffer: ArrayBuffer, encoding: string, resolvedStart: int, re
             const byte1 = buffer.at(i) & 0xff;
             const byte2 = i + 1 < resolvedEnd ? (buffer.at(i + 1) & 0xff) : NaN;
             const byte3 = i + 2 < resolvedEnd ? (buffer.at(i + 2) & 0xff) : NaN;
-            
+
             const enc1 = byte1 >> 2;
             const enc2 = ((byte1 & 3) << 4) | (byte2 >> 4);
             const enc3 = ((byte2 & 15) << 2) | (byte3 >> 6);
             const enc4 = byte3 & 63;
-            
+
             if (isNaN(byte2)) {
                 base64 += encodings.charAt(enc1) + encodings.charAt(enc2) + '==';
             } else if (isNaN(byte3)) {
@@ -1475,6 +1475,9 @@ Received value is: ${value}`)
                     throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
                         `It must be >= 0 and <= ${this.length - 1}. Received value is: ${offset}`);
                 }
+            }
+            if (!isEncoding(encoding)) {
+                throw createBusinessError(TypeErrorCodeId, 'Parameter error. The type of "encoding" must be BufferEncoding. the encoding invalid_encoding is unknown')
             }
             const resolvedEncoding = encoding as buffer.BufferEncoding;
             const tmpLength = length ?? this.length - offset
