@@ -225,6 +225,7 @@ void DynamicOperands::Reallocate([[maybe_unused]] size_t newCapacity /* =0 */)
     } else if (newCapacity <= capacity_) {
         return;
     }
+    // NOLINTNEXTLINE(bugprone-sizeof-expression)
     auto size = newCapacity * (sizeof(User) + sizeof(Inst *)) + sizeof(Inst *);
     auto newStor = reinterpret_cast<uintptr_t>(allocator_->Alloc(size));
 
@@ -318,96 +319,270 @@ void DynamicOperands::Remove(unsigned index)
     }
 }
 
-void GetAnyTypeNameInst::SetVnObject(VnObject *vnObj)
+void Inst::AppendOpcodeAndTypeToVnObject(VnObject *vnObj) const
 {
-    vnObj->Add(static_cast<uint32_t>(GetAnyType()));
+    vnObj->Add(static_cast<VnObject::HalfObjType>(GetOpcode()), static_cast<VnObject::HalfObjType>(GetType()));
 }
 
-void CompareAnyTypeInst::SetVnObject(VnObject *vnObj)
+void Inst::AppendInputsToVnObject(VnObject *vnObj) const
 {
-    vnObj->Add(static_cast<uint32_t>(GetAnyType()));
+    if (IsCommutative() && !DataType::IsFloatType(GetType())) {
+        ASSERT(GetInputsCount() == 2);  // 2 : Exactly 2 inputs expected for commutative operations
+        auto input0 = GetDataFlowInput(GetInput(0).GetInst());
+        auto input1 = GetDataFlowInput(GetInput(1).GetInst());
+        ASSERT(!input0->IsSaveState() && !input1->IsSaveState() &&
+               "SaveState is unexpected as inputs of commutative operations");
+        ASSERT(input0->GetVN() != INVALID_VN && "VN of inputs must be known before current inst");
+        ASSERT(input1->GetVN() != INVALID_VN && "VN of inputs must be known before current inst");
+        if (input0->GetId() > input1->GetId()) {
+            vnObj->Add(input0->GetVN());
+            vnObj->Add(input1->GetVN());
+        } else {
+            vnObj->Add(input1->GetVN());
+            vnObj->Add(input0->GetVN());
+        }
+        return;
+    }
+    for (auto input : GetInputs()) {
+        auto inputInst = GetDataFlowInput(input.GetInst());
+        if (inputInst->IsSaveState()) {
+            continue;
+        }
+        auto vn = inputInst->GetVN();
+        ASSERT(vn != INVALID_VN && "VN of inputs must be known before current inst");
+        vnObj->Add(vn);
+    }
 }
 
-void BinaryImmOperation::SetVnObject(VnObject *vnObj)
+void FieldMixin::AppendObjFieldToVnObject(VnObject *vnObj) const
 {
+    ASSERT(GetObjField() != nullptr);
+    vnObj->Add(reinterpret_cast<VnObject::DoubleObjType>(GetObjField()));
+}
+
+void MethodDataMixin::AppendMethodIdToVnObject(VnObject *vnObj) const
+{
+    vnObj->Add(GetCallMethodId());
+}
+
+void TypeIdMixin::AppendTypeIdAndMethodToVnObject(VnObject *vnObj) const
+{
+    vnObj->Add(GetTypeId());
+    vnObj->Add(reinterpret_cast<VnObject::DoubleObjType>(GetMethod()));
+}
+
+void CompareAnyTypeInst::SetVnObject(VnObject *vnObj) const
+{
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
+    vnObj->Add(static_cast<VnObject::ObjType>(GetAnyType()));
+}
+
+void GetAnyTypeNameInst::SetVnObject(VnObject *vnObj) const
+{
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
+    vnObj->Add(static_cast<VnObject::ObjType>(GetAnyType()));
+}
+
+void BinaryImmOperation::SetVnObject(VnObject *vnObj) const
+{
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
     vnObj->Add(GetImm());
 }
 
-void BinaryShiftedRegisterOperation::SetVnObject(VnObject *vnObj)
+void BinaryShiftedRegisterOperation::SetVnObject(VnObject *vnObj) const
 {
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
     vnObj->Add(GetImm());
     vnObj->Add(static_cast<uint32_t>(GetShiftType()));
 }
 
-void UnaryShiftedRegisterOperation::SetVnObject(VnObject *vnObj)
+void UnaryShiftedRegisterOperation::SetVnObject(VnObject *vnObj) const
 {
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
     vnObj->Add(GetImm());
     vnObj->Add(static_cast<uint32_t>(GetShiftType()));
 }
 
-void CompareInst::SetVnObject(VnObject *vnObj)
+void CompareInst::SetVnObject(VnObject *vnObj) const
 {
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
     vnObj->Add(static_cast<uint32_t>(GetCc()));
 }
 
-void SelectInst::SetVnObject(VnObject *vnObj)
+void SelectInst::SetVnObject(VnObject *vnObj) const
 {
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
     vnObj->Add(static_cast<uint32_t>(GetCc()));
 }
 
-void IfInst::SetVnObject(VnObject *vnObj)
+void SelectImmInst::SetVnObject(VnObject *vnObj) const
 {
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
+    vnObj->Add(static_cast<VnObject::ObjType>(GetCc()));
+    vnObj->Add(GetImm());
+}
+
+void IfInst::SetVnObject(VnObject *vnObj) const
+{
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
     vnObj->Add(static_cast<uint32_t>(GetCc()));
 }
 
-void IfImmInst::SetVnObject(VnObject *vnObj)
+void IfImmInst::SetVnObject(VnObject *vnObj) const
 {
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
     vnObj->Add(static_cast<uint32_t>(GetCc()));
 }
 
-void UnaryOperation::SetVnObject(VnObject *vnObj)
+void UnaryOperation::SetVnObject(VnObject *vnObj) const
 {
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
     if (GetOpcode() == Opcode::Cast) {
         vnObj->Add(static_cast<uint32_t>(GetInput(0).GetInst()->GetType()));
     }
 }
 
-void CmpInst::SetVnObject(VnObject *vnObj)
+void CmpInst::SetVnObject(VnObject *vnObj) const
 {
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
     if (DataType::IsFloatType(GetOperandsType())) {
         vnObj->Add(static_cast<uint32_t>(IsFcmpg()));
     }
     vnObj->Add(static_cast<uint32_t>(GetInputType(0)));
 }
 
-void LoadFromPoolDynamic::SetVnObject(VnObject *vnObj)
+void LoadFromPoolDynamic::SetVnObject(VnObject *vnObj) const
 {
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
     vnObj->Add(GetTypeId());
 }
 
-void CastInst::SetVnObject(VnObject *vnObj)
+void CastInst::SetVnObject(VnObject *vnObj) const
 {
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
     vnObj->Add(static_cast<uint32_t>(GetInputType(0)));
 }
 
-void LoadImmediateInst::SetVnObject(VnObject *vnObj)
+void LoadImmediateInst::SetVnObject(VnObject *vnObj) const
 {
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
     vnObj->Add(static_cast<uint64_t>(GetObjectType()));
     vnObj->Add(reinterpret_cast<uint64_t>(GetObject()));
 }
 
-void RuntimeClassInst::SetVnObject(VnObject *vnObj)
+void CastAnyTypeValueInst::SetVnObject(VnObject *vnObj) const
 {
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
+    vnObj->Add(static_cast<VnObject::ObjType>(GetAnyType()));
+}
+
+void CastValueToAnyTypeInst::SetVnObject(VnObject *vnObj) const
+{
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
+    vnObj->Add(static_cast<VnObject::ObjType>(GetAnyType()));
+}
+
+void ClassInst::SetVnObject(VnObject *vnObj) const
+{
+    vnObj->Add(static_cast<VnObject::ObjType>(Opcode::InitClass));
+    auto klass = GetClass();
+    if (klass == nullptr) {
+        vnObj->Add(GetTypeId());
+    } else {
+        vnObj->Add(reinterpret_cast<VnObject::DoubleObjType>(klass));
+    }
+}
+
+void GlobalVarInst::SetVnObject(VnObject *vnObj) const
+{
+    vnObj->Add(static_cast<VnObject::ObjType>(Opcode::GetGlobalVarAddress));
+    vnObj->Add(GetTypeId());
+}
+
+void IntrinsicInst::SetVnObject(VnObject *vnObj) const
+{
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
+    vnObj->Add(static_cast<VnObject::ObjType>(GetIntrinsicId()));
+}
+
+void LoadObjectInst::SetVnObject(VnObject *vnObj) const
+{
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
+    AppendObjFieldToVnObject(vnObj);
+}
+
+void LoadStaticInst::SetVnObject(VnObject *vnObj) const
+{
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
+    AppendObjFieldToVnObject(vnObj);
+}
+
+void ResolveObjectFieldInst::SetVnObject(VnObject *vnObj) const
+{
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
+    AppendTypeIdAndMethodToVnObject(vnObj);
+}
+
+void ResolveObjectFieldStaticInst::SetVnObject(VnObject *vnObj) const
+{
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
+    AppendTypeIdAndMethodToVnObject(vnObj);
+}
+
+void ResolveStaticInst::SetVnObject(VnObject *vnObj) const
+{
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
+    AppendMethodIdToVnObject(vnObj);
+}
+
+void ResolveVirtualInst::SetVnObject(VnObject *vnObj) const
+{
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
+    AppendMethodIdToVnObject(vnObj);
+}
+
+void RuntimeClassInst::SetVnObject(VnObject *vnObj) const
+{
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
     vnObj->Add(reinterpret_cast<uint64_t>(GetClass()));
 }
 
-void LoadObjFromConstInst::SetVnObject(VnObject *vnObj)
+void LoadObjFromConstInst::SetVnObject(VnObject *vnObj) const
 {
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
     vnObj->Add(static_cast<uint64_t>(GetObjPtr()));
 }
 
-void FunctionImmediateInst::SetVnObject(VnObject *vnObj)
+void FunctionImmediateInst::SetVnObject(VnObject *vnObj) const
 {
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
     vnObj->Add(static_cast<uint64_t>(GetFunctionPtr()));
 }
 
