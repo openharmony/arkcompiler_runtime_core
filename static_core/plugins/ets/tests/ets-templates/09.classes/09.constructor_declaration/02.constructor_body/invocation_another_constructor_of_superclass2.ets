@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,25 +14,45 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Invocation constructor of same class.
+desc: Invocation constructor of abstract superclass.
 assert: >-
     The first statement of a constructor body may be an explicit invocation of another constructor of the same class
     or of the direct superclass.
 ---*/
 
-class A {
-    public x: int;
+abstract class A {
+    x: int;
 
-    public constructor() {
-        this.fromInt(5);
-    }
-
-    public constructor fromInt(a: int) {
-        this.x = a;
+    constructor fromInt(a: int) {
+        this.x = a + 1
     }
 }
 
+abstract class B extends A {
+    constructor(a: int) {  // secondary constructor
+        this.fromInt(a + 1)
+    }
+
+    constructor fromInt(a: int) { // primary constructor
+        super.fromInt(a + 1)
+    }
+}
+
+class C extends B {
+    constructor() {  // secondary constructor
+        this.fromInt(42)
+    }
+
+    constructor fromInt(a: int) { // primary constructor
+        super(a + 1)
+    }
+}
+
+
 function main() {
-    arktest.assertEQ(new A().x, 5)
-    arktest.assertEQ(new A.fromInt(1).x, 1)
+    let c: C = {}
+    arktest.assertEQ(c.x, 46)
+
+    c = new C.fromInt(1)
+    arktest.assertEQ(c.x, 5)
 }

@@ -18,17 +18,19 @@ desc: this can be passed as an argument only after each object field receives an
 ---*/
 
 class A {
-  public n: number
-  public s: string
+    public n: number
+    public s: string
 
-  foo(a: A) {
-    return a.s.length
-  }
+    foo(a: A) {
+        return a.s.length
+    }
 
-  public constructor() {
-    this.s = "abcd"
-    this.n = this.foo(this)
-  }
+    public constructor() {
+        this.s = "abcd"
+        this.n = this.foo(this)
+    }
 }
 
-arktest.assertEQ(new A().n, 4)
+function main() {
+    arktest.assertEQ(new A().n, 4)
+}

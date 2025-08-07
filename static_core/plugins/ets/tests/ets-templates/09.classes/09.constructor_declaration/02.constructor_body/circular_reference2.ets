@@ -14,31 +14,19 @@ limitations under the License.
 ---*/
 
 /*---
-desc: >-
-    this can be passed as an argument no matter if fields are initialized.
-    If an uninitialized field is used, NullPointerError is thrown.
+desc: If the compiler detects a circular reference, then a compile-time error occurs.
+tags: [compile-only, negative]
 ---*/
 
 class A {
-    public n: number;
-    public s: string;
+    public str: string
 
-    foo(a: A) {
-        return a.s.length;
+    constructor() {
+        this.fromString('')
     }
 
-    public constructor() {
-        this.n = this.foo(this);
-        this.s = "abcd";
+    constructor fromString(s: string) {
+        this()  // CTE: circular ref
+        this.str = s
     }
-}
-
-function main() {
-    try {
-        let a = new A();
-    } catch (e) {
-        arktest.assertTrue(e instanceof NullPointerError);
-        return;
-    }
-    arktest.assertTrue(false, "NPE expected");
 }

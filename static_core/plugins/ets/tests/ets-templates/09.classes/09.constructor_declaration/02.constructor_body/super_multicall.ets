@@ -14,26 +14,28 @@ limitations under the License.
 ---*/
 
 /*---
-desc: A constructor body can have no more than one call to the current class or direct superclass constructor
+desc: >-
+    A constructor body can have no more than one call to the current
+    class or direct superclass constructor
 tags: [compile-only, negative]
 ---*/
 
 class A {
-  public i: int
-  public s: string
+    public i: int
+    public s: string
 
-  public constructor(i: int) {
-    this.i = i
-  }
+    public constructor fromInt(i: int) {
+        this.i = i
+    }
 
-  public constructor(s: string) {
-    this.s = s
-  }
+    public constructor fromString(s: string) {
+        this.s = s
+    }
 }
 
 class B extends A {
-  public constructor() {
-    super(123)
-    super("Just a test")
-  }
+    public constructor() {
+        super.fromInt(123)
+        super.fromString("Just a test") // CTE: second call to superconstructor
+    }
 }
