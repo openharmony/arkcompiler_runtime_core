@@ -936,22 +936,22 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         // left part remains unchanged
         // copy excluded part
         for (let i = 0; i < delete; i++) {
-            ret.buffer[i] = this.buffer[start + i]
+            ret.$_set_unsafe(i, this.$_get_unsafe(start + i))
         }
         // move right part to the right of the buffer
         const rightLen = oldLen - start - delete
         if (items.length > delete) {
             for (let i = 0; i < rightLen; i++) {
-                this.buffer[this.actualLength - 1 - i] = this.buffer[oldLen - 1 - i]
+                this.$_set_unsafe(this.actualLength - 1 - i, this.$_get_unsafe(oldLen - 1 - i))
             }
         } else {
             for (let i = 0; i < rightLen; i++) {
-                this.buffer[start + items.length.toInt() + i] = this.buffer[start + delete + i]
+                this.$_set_unsafe(start + items.length.toInt() + i, this.$_get_unsafe(start + delete + i))
             }
         }
         // insert middle part
         for (let i = 0; i < items.length; i++) {
-            this.buffer[start + i] = items[i]
+            this.$_set_unsafe(start + i, items.$_get_unsafe(i))
         }
         return ret
     }
