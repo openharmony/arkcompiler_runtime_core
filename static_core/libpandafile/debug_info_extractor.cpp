@@ -326,6 +326,11 @@ const char *DebugInfoExtractor::GetSourceCode(File::EntityId methodId) const
     return "";
 }
 
+bool DebugInfoExtractor::IsUserFile() const
+{
+    return false;
+}
+
 std::vector<File::EntityId> DebugInfoExtractor::GetMethodIdList() const
 {
     std::vector<File::EntityId> list;

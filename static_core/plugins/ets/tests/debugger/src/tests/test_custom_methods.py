@@ -111,7 +111,7 @@ async def test_get_possible_breakpoints(
             await client.configure(nursery)
             await client.run_if_waiting_for_debugger()
 
-            start = debugger.Location(script_id=runtime.ScriptId(0), line_number=0)
+            start = debugger.Location(script_id=runtime.ScriptId(1), line_number=0)
             get_breakpoints = await client.get_possible_breakpoints(start)
             assert list(bp.line_number for bp in get_breakpoints) == list(range(8))
 
@@ -150,7 +150,7 @@ async def test_get_script_source(
             await client.configure(nursery)
             await client.run_if_waiting_for_debugger()
 
-            source = await client.get_script_source(runtime.ScriptId(0))
+            source = await client.get_script_source(runtime.ScriptId(1))
             assert source == CODE
 
         process.terminate()
@@ -234,5 +234,6 @@ async def test_disable(
 
         await paused_step.client.connection.send(debugger.disable())
         await paused_step.client.connection.send(debugger.enable())
+        await paused_step.client.resume()
         paused = await paused_step.client.send_and_wait_for_paused(debugger.pause())
         assert paused.call_frames[0].function_name == "foo"

@@ -22,10 +22,10 @@
 #include "os/mutex.h"
 
 namespace ark::tooling::inspector {
-void DebugInfoCache::AddPandaFile(const panda_file::File &file)
+void DebugInfoCache::AddPandaFile(const panda_file::File &file, bool isUserPandafile)
 {
     os::memory::LockHolder lock(debugInfosMutex_);
-    const auto &debugInfo =
+    auto &debugInfo =
         debugInfos_
             .emplace(std::piecewise_construct, std::forward_as_tuple(&file),
                      std::forward_as_tuple(file,
@@ -36,6 +36,7 @@ void DebugInfoCache::AddPandaFile(const panda_file::File &file)
                                                                       std::forward_as_tuple(file, methodId));
                                            }))
             .first->second;
+    debugInfo.SetUserFile(isUserPandafile);
 
     // For all methods add non-empty source code read from debug-info
     for (auto methodId : debugInfo.GetMethodIdList()) {
@@ -57,7 +58,7 @@ void DebugInfoCache::GetSourceLocation(const PtFrame &frame, std::string_view &s
     auto method = frame.GetMethod();
     auto pandaFile = method->GetPandaFile();
     auto debugInfo = GetDebugInfo(pandaFile);
-    if (debugInfo == nullptr) {
+    if (debugInfo == nullptr || !debugInfo->IsUserFile()) {
         lineNumber = 1;
         return;
     }
@@ -141,11 +142,11 @@ std::unordered_set<PtLocation, HashLocation> DebugInfoCache::GetContinueToLocati
     return locations;
 }
 
-std::vector<PtLocation> DebugInfoCache::GetBreakpointLocations(
+std::unordered_set<PtLocation, HashLocation> DebugInfoCache::GetBreakpointLocations(
     const std::function<bool(std::string_view)> &sourceFileFilter, size_t lineNumber,
-    std::set<std::string_view> &sourceFiles)
+    std::set<std::string_view> &sourceFiles) const
 {
-    std::vector<PtLocation> locations;
+    std::unordered_set<PtLocation, HashLocation> locations;
     sourceFiles.clear();
     // clang-format off
     EnumerateLineEntries(
@@ -157,7 +158,7 @@ std::vector<PtLocation> DebugInfoCache::GetBreakpointLocations(
                                                auto &entry, auto /* next */) {
             if (entry.line == lineNumber) {
                 sourceFiles.insert(debugInfo.GetSourceFile(methodId));
-                locations.emplace_back(pandaFile->GetFilename().data(), methodId, entry.offset);
+                locations.emplace(pandaFile->GetFilename().data(), methodId, entry.offset);
                 // Must choose the first found bytecode location in each method
                 return false;
             }
@@ -413,7 +414,7 @@ std::vector<std::string> DebugInfoCache::GetPandaFiles(const std::function<bool(
     return pandaFiles;
 }
 
-const panda_file::DebugInfoExtractor *DebugInfoCache::GetDebugInfo(const panda_file::File *file)
+const panda_file::DebugInfoExtractor *DebugInfoCache::GetDebugInfo(const panda_file::File *file) const
 {
     os::memory::LockHolder lock(debugInfosMutex_);
     auto it = debugInfos_.find(file);
@@ -428,6 +429,16 @@ const char *DebugInfoCache::GetSourceFile(Method *method)
     auto pandaFile = method->GetPandaFile();
     auto debugInfo = GetDebugInfo(pandaFile);
     if (debugInfo == nullptr) {
+        return nullptr;
+    }
+    return debugInfo->GetSourceFile(method->GetFileId());
+}
+
+const char *DebugInfoCache::GetUserSourceFile(Method *method)
+{
+    auto pandaFile = method->GetPandaFile();
+    auto debugInfo = GetDebugInfo(pandaFile);
+    if ((debugInfo == nullptr) || !debugInfo->IsUserFile()) {
         return nullptr;
     }
     return debugInfo->GetSourceFile(method->GetFileId());

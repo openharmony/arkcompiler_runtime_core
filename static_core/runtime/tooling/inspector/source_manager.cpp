@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,21 +21,19 @@
 #include "types/numeric_id.h"
 
 namespace ark::tooling::inspector {
-std::pair<ScriptId, bool> SourceManager::GetScriptId(PtThread thread, std::string_view fileName)
+ScriptId SourceManager::GetScriptId(std::string_view fileName)
 {
     os::memory::LockHolder lock(mutex_);
 
     auto p = fileNameToId_.emplace(std::string(fileName), fileNameToId_.size());
     ScriptId id(p.first->second);
 
-    bool isNewForThread = knownSources_[thread].insert(id).second;
-
     if (p.second) {
         std::string_view name {p.first->first};
         idToFileName_.emplace(id, name);
     }
 
-    return {id, isNewForThread};
+    return id;
 }
 
 std::string_view SourceManager::GetSourceFileName(ScriptId id) const
@@ -52,9 +50,4 @@ std::string_view SourceManager::GetSourceFileName(ScriptId id) const
     return {};
 }
 
-void SourceManager::RemoveThread(PtThread thread)
-{
-    os::memory::LockHolder lock(mutex_);
-    knownSources_.erase(thread);
-}
 }  // namespace ark::tooling::inspector

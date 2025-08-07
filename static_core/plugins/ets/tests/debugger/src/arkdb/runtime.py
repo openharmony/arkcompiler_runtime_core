@@ -256,10 +256,15 @@ class Runtime:
         cwd: Path | None = None,
         debug: bool = True,
         profile: bool = False,
+        additional_options: Options | None = None,
     ) -> AsyncIterator[RuntimeProcess]:
         module.check_exists()
         o = self.options
+        ao = additional_options
         boot_panda_files = [str(f) for f in o.boot_panda_files + module.boot_abc]
+        if ao is not None:
+            boot_panda_files += [str(f) for f in ao.boot_panda_files]
+
         command = [
             str(o.app_path),
             f"--load-runtimes={o.load_runtimes}",

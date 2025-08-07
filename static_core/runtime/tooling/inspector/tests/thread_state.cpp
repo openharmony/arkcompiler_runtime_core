@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#include "thread_state.h"
+#include "debugger/thread_state.h"
 
 #include "gtest/gtest.h"
 
+#include "evaluation/evaluation_engine.h"
 #include "file.h"
 #include "object_header.h"
 #include "runtime_options.h"
@@ -39,11 +40,12 @@ public:
 class ThreadStateTest : public testing::Test {
     void SetUp()
     {
-        state = std::make_unique<ThreadState>(mockEvaluationEngine_);
+        state = std::make_unique<ThreadState>(mockEvaluationEngine_, bpStorage_);
     }
 
 protected:
     MockEvaluationEngine mockEvaluationEngine_;
+    BreakpointStorage bpStorage_;
     std::unique_ptr<ThreadState> state;
     PtLocation fake = PtLocation("", {}, 0);
     PtLocation location0 = PtLocation("test.abc", panda_file::File::EntityId(1), 0);
@@ -154,38 +156,6 @@ TEST_F(ThreadStateTest, StepOver)
     state->OnFramePop();
     state->OnSingleStep(fake, source);
     ASSERT_TRUE(state->IsPaused());
-}
-
-TEST_F(ThreadStateTest, Breakpoint)
-{
-    std::vector<PtLocation> breaks = {location1, location2};
-    auto break_id = state->SetBreakpoint(breaks);
-
-    auto hit_breaks = state->GetBreakpointsByLocation(location3);
-    ASSERT_TRUE(hit_breaks.empty());
-    hit_breaks = state->GetBreakpointsByLocation(location2);
-    ASSERT_FALSE(hit_breaks.empty());
-    ASSERT_EQ(hit_breaks[0], break_id);
-
-    state->Continue();
-    state->OnSingleStep(location0, source);
-    ASSERT_FALSE(state->IsPaused());
-    state->OnSingleStep(location2, source);
-    ASSERT_TRUE(state->IsPaused());
-
-    state->SetBreakpointsActive(false);
-    state->Continue();
-    state->OnSingleStep(location2, source);
-    ASSERT_FALSE(state->IsPaused());
-    state->SetBreakpointsActive(true);
-
-    state->Pause();
-    state->OnSingleStep(fake, source);
-
-    state->RemoveBreakpoint(break_id);
-    state->Continue();
-    state->OnSingleStep(location2, source);
-    ASSERT_FALSE(state->IsPaused());
 }
 
 TEST_F(ThreadStateTest, OnException)

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "debug_info_cache.h"
+#include "debugger/debug_info_cache.h"
 
 #include "gtest/gtest.h"
 
@@ -53,7 +53,7 @@ protected:
         auto pf = panda_file::OpenPandaFile(ASM_FILE_NAME);
         ASSERT_NE(pf, nullptr);
 
-        cache.AddPandaFile(*pf);
+        cache.AddPandaFile(*pf, true);
 
         RuntimeOptions options;
         options.SetShouldInitializeIntrinsics(false);

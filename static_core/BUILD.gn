@@ -182,7 +182,6 @@ config("ark_config") {
 
   if (is_ohos && is_standard_system) {
     defines += [ "PANDA_TARGET_OHOS" ]
-    include_dirs += [ "$hilog_root/include" ]
   }
 
   if (is_linux) {

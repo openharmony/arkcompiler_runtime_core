@@ -19,6 +19,7 @@
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "disassembler/disasm_backed_debug_info_extractor.h"
@@ -34,13 +35,14 @@ public:
     NO_COPY_SEMANTIC(DebugInfoCache);
     NO_MOVE_SEMANTIC(DebugInfoCache);
 
-    void AddPandaFile(const panda_file::File &file);
+    void AddPandaFile(const panda_file::File &file, bool isUserPandafile = false);
     void GetSourceLocation(const PtFrame &frame, std::string_view &sourceFile, std::string_view &methodName,
                            size_t &lineNumber);
     std::unordered_set<PtLocation, HashLocation> GetCurrentLineLocations(const PtFrame &frame);
     std::unordered_set<PtLocation, HashLocation> GetContinueToLocations(std::string_view sourceFile, size_t lineNumber);
-    std::vector<PtLocation> GetBreakpointLocations(const std::function<bool(std::string_view)> &sourceFileFilter,
-                                                   size_t lineNumber, std::set<std::string_view> &sourceFiles);
+    std::unordered_set<PtLocation, HashLocation> GetBreakpointLocations(
+        const std::function<bool(std::string_view)> &sourceFileFilter, size_t lineNumber,
+        std::set<std::string_view> &sourceFiles) const;
     std::set<size_t> GetValidLineNumbers(std::string_view sourceFile, size_t startLine, size_t endLine,
                                          bool restrictToFunction);
 
@@ -52,11 +54,13 @@ public:
 
     const char *GetSourceFile(Method *method);
 
-private:
-    const panda_file::DebugInfoExtractor *GetDebugInfo(const panda_file::File *file);
+    const char *GetUserSourceFile(Method *method);
 
+    const panda_file::DebugInfoExtractor *GetDebugInfo(const panda_file::File *file) const;
+
+private:
     template <typename PFF, typename MF, typename H>
-    void EnumerateLineEntries(PFF &&pandaFileFilter, MF &&methodFilter, H &&handler)
+    void EnumerateLineEntries(PFF &&pandaFileFilter, MF &&methodFilter, H &&handler) const
     {
         os::memory::LockHolder lock(debugInfosMutex_);
 
@@ -65,19 +69,26 @@ private:
                 continue;
             }
 
-            for (auto methodId : debugInfo.GetMethodIdList()) {
-                if (!methodFilter(file, debugInfo, methodId)) {
-                    continue;
-                }
+            EnumerateLineEntries(file, debugInfo, std::forward<MF>(methodFilter), std::forward<H>(handler));
+        }
+    }
 
-                EnumerateLineEntries(file, debugInfo, methodId, std::forward<H>(handler));
+    template <typename MF, typename H>
+    void EnumerateLineEntries(const panda_file::File *file, const disasm::DisasmBackedDebugInfoExtractor &debugInfo,
+                              MF &&methodFilter, H &&handler) const REQUIRES(debugInfosMutex_)
+    {
+        for (const auto &methodId : debugInfo.GetMethodIdList()) {
+            if (!methodFilter(file, debugInfo, methodId)) {
+                continue;
             }
+
+            EnumerateLineEntries(file, debugInfo, methodId, std::forward<H>(handler));
         }
     }
 
     template <typename H>
     void EnumerateLineEntries(const panda_file::File *file, const disasm::DisasmBackedDebugInfoExtractor &debugInfo,
-                              panda_file::File::EntityId methodId, H &&handler) REQUIRES(debugInfosMutex_)
+                              panda_file::File::EntityId methodId, H &&handler) const REQUIRES(debugInfosMutex_)
     {
         auto &table = debugInfo.GetLineNumberTable(methodId);
         for (auto it = table.begin(); it != table.end(); ++it) {
@@ -88,7 +99,7 @@ private:
         }
     }
 
-    os::memory::Mutex debugInfosMutex_;
+    mutable os::memory::Mutex debugInfosMutex_;
     std::unordered_map<const panda_file::File *, disasm::DisasmBackedDebugInfoExtractor> debugInfos_
         GUARDED_BY(debugInfosMutex_);
 

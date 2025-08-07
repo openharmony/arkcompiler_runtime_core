@@ -56,6 +56,14 @@ The debug info could be backed by disassembled code to allow debugging when sour
 
 Inspector utilizes the runtime instrumentation capabilities with the help of a `DebugInterface` object.
 
+### Breakpoints
+
+Represents common and conditional breakpoints.
+For common breakpoint multiple locations are allowed in case of breakpoint location set by regex. For conditional breakpoint only one location is allowed and condition is necessary that is evaluated on location hit.
+
+Breakpoints can be lazily resolved. Resolution is a process of mapping client's breakpoint source code location to bytecode location in binary file executed in the VM. First resolution attempt is done during breakpoint setting and it is succeed if corresponding binary file is loaded. Other resolution attempts are called during load of new binary file, find `LoadModule` in `inspector.cpp` for clarification.
+Conditional breakpoints are resolved once, since they allow only one location. Common breakpoints can be resolved again and new location will be added.
+
 ## InspectorServer
 
 The class is responsible for communication with client. It wraps the `Server` class and gives a convenient Inspector protocol based API. It hides all Inspector protocol related details inside and translates them to the language of runtime (e.g. session and source IDs). The implementation is pretty straightforward. It uses the following helper modules.

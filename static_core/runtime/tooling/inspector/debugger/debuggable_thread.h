@@ -16,6 +16,8 @@
 #ifndef PANDA_TOOLING_INSPECTOR_DEBUGGABLE_THREAD_H
 #define PANDA_TOOLING_INSPECTOR_DEBUGGABLE_THREAD_H
 
+#include "common.h"
+#include "debug_info_cache.h"
 #include "include/managed_thread.h"
 #include "include/tooling/pt_location.h"
 
@@ -43,7 +45,8 @@ public:
     };
 
 public:
-    DebuggableThread(ManagedThread *thread, DebugInterface *debugger, SuspensionCallbacks &&callbacks);
+    DebuggableThread(ManagedThread *thread, DebugInterface *debugger, SuspensionCallbacks &&callbacks,
+                     BreakpointStorage &bpStorage);
     ~DebuggableThread() override = default;
 
     NO_COPY_SEMANTIC(DebuggableThread);
@@ -83,29 +86,11 @@ public:
     // Tells a running thread to pause on the next step
     void Pause();
 
-    // Enables or disables stops on breakpoints
-    void SetBreakpointsActive(bool active);
-
     // Enables or disables skipping all pauses
     void SetSkipAllPauses(bool skip);
 
     // Enables or disables mixdebug && mixstack
     void SetMixedDebugEnabled(bool mixedDebugEnabled);
-
-    /**
-     * @brief Set a breakpoint with optional condition.
-     * @param locations to set breakpoint at, all will have the same BreakpointId.
-     * @param condition pointer to string with panda bytecode, will not be saved.
-     * @returns BreakpointId of set breakpoint on success, empty otherwise.
-     * NOTE: current implementation supports setting a condition only for a single location.
-     */
-    std::optional<BreakpointId> SetBreakpoint(const std::vector<PtLocation> &locations, const std::string *condition);
-
-    // Removes the breakpoint by ID
-    void RemoveBreakpoint(BreakpointId id);
-
-    // Removes all breakpoints with matching location
-    void RemoveBreakpoints(const std::function<bool(const PtLocation &loc)> &filter);
 
     // Tells when stops should be made on exceptions
     void SetPauseOnExceptions(PauseOnExceptionsState state);

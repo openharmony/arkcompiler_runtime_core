@@ -27,10 +27,13 @@
 #include "include/tooling/debug_interface.h"
 #include "include/tooling/pt_thread.h"
 
-#include "debug_info_cache.h"
-#include "debuggable_thread.h"
+#include "debugger/breakpoint_storage.h"
+#include "debugger/debug_info_cache.h"
+#include "debugger/debuggable_thread.h"
+#include "debugger/object_repository.h"
+
+#include "common.h"
 #include "inspector_server.h"
-#include "object_repository.h"
 #include "runtime/tooling/tools.h"
 #include "os/mutex.h"
 #include "types/evaluation_result.h"
@@ -92,12 +95,10 @@ private:
     void SetMixedDebugEnabled(PtThread thread, bool mixedDebugEnabled);
     std::set<size_t> GetPossibleBreakpoints(std::string_view sourceFile, size_t startLine, size_t endLine,
                                             bool restrictToFunction);
-    std::optional<BreakpointId> SetBreakpoint(PtThread thread,
-                                              const InspectorServer::SourceFileFilter &sourceFilesFilter,
-                                              size_t lineNumber, std::set<std::string_view> &sourceFiles,
-                                              const std::string *condition);
+    std::optional<BreakpointId> SetBreakpoint(PtThread thread, SourceFileFilter &&sourceFilesFilter, size_t lineNumber,
+                                              std::set<std::string_view> &sourceFiles, const std::string *condition);
     void RemoveBreakpoint(PtThread thread, BreakpointId id);
-    void RemoveBreakpoints(PtThread thread, const InspectorServer::SourceFileFilter &sourceFilesFilter);
+    void RemoveBreakpoints(PtThread thread, const SourceFileFilter &sourceFilesFilter);
 
     void SetPauseOnExceptions(PtThread thread, PauseOnExceptionsState state);
 
@@ -142,6 +143,11 @@ private:
 
     void RegisterMethodHandlers();
 
+    void ResolveBreakpoints(const panda_file::File &file, const panda_file::DebugInfoExtractor *debugInfoCache);
+    void CollectModules();
+    void DebuggerEnable();
+    void SourceNameInsert(const panda_file::DebugInfoExtractor *extractor);
+
 private:
     bool breakOnStart_;
 
@@ -157,6 +163,8 @@ private:
 
     os::memory::RWLock vmDeathLock_;
     bool isVmDead_ GUARDED_BY(vmDeathLock_) {false};
+
+    BreakpointStorage breakpointStorage_;
 
     std::thread serverThread_;
     uint32_t samplingInterval_ {0};
