@@ -93,15 +93,20 @@ public:
     {
         auto event = Event();
         std::atomic_size_t count {0};
+        // The eaworker limit is 5(2 is set in GetExtraAniOptions, 3 is for taskpool eaworker).
         std::thread worker1([this, &event, &count]() mutable { WaitUntilReachLimit(event, count); });
-
         std::thread worker2([this, &event, &count]() mutable { WaitUntilReachLimit(event, count); });
-
         std::thread worker3([this, &event, &count]() mutable { WaitUntilReachLimit(event, count); });
+        std::thread worker4([this, &event, &count]() mutable { WaitUntilReachLimit(event, count); });
+        std::thread worker5([this, &event, &count]() mutable { WaitUntilReachLimit(event, count); });
+        std::thread worker6([this, &event, &count]() mutable { WaitUntilReachLimit(event, count); });
 
         worker1.join();
         worker2.join();
         worker3.join();
+        worker4.join();
+        worker5.join();
+        worker6.join();
         event.Wait();
         ASSERT(count == 1);
     }

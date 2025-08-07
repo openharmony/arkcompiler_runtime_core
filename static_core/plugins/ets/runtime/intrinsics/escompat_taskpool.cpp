@@ -17,6 +17,7 @@
 #include <thread>
 #include "libpandabase/os/time.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
+#include "plugins/ets/runtime/types/ets_taskpool.h"
 #include "runtime/include/runtime.h"
 
 namespace ark::ets::intrinsics::taskpool {
@@ -24,7 +25,6 @@ namespace ark::ets::intrinsics::taskpool {
 static std::atomic<EtsInt> g_taskId = 1;
 static std::atomic<EtsInt> g_taskGroupId = 1;
 static std::atomic<EtsInt> g_seqRunnerId = 1;
-static constexpr const char *LAUNCH = "launch";
 
 extern "C" EtsInt GenerateTaskId()
 {
@@ -46,7 +46,7 @@ extern "C" EtsBoolean IsUsingLaunchMode()
     const auto &taskpoolMode =
         Runtime::GetOptions().GetTaskpoolMode(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
 
-    bool res = (taskpoolMode == LAUNCH);
+    bool res = (taskpoolMode == TASKPOOL_LAUNCH_MODE);
     return ark::ets::ToEtsBoolean(res);
 }
 
