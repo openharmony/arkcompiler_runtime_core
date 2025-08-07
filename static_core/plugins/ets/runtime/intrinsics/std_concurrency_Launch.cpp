@@ -44,6 +44,7 @@ static EtsMethod *ResolveInvokeMethod(EtsCoroutine *coro, VMHandle<EtsObject> fu
 
     if (method->IsAbstract()) {
         method = func->GetClass()->ResolveVirtualMethod(method);
+        ASSERT(method != nullptr);
     }
 
     if (UNLIKELY(!method->GetPandaMethod()->Verify())) {
