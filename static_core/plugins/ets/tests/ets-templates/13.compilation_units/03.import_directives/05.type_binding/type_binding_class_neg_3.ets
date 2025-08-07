@@ -15,7 +15,7 @@ limitations under the License.
 
 /*---
 desc: Export class and class type in the same module.
-tags: [compile-only, negative]
+tags: [compile-only]
 ---*/
 
 export class A {}
