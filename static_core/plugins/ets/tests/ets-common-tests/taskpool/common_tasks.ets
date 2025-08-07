@@ -1146,6 +1146,14 @@ function taskpoolShrinkTest() {
     reset();
 }
 
+function testExecuteUndefined() {
+    let callback = (arg?: int) => {
+        arktest.assertEQ(arg, undefined);
+    }
+    let task = new taskpool.Task(callback, undefined);
+    await taskpool.execute(task);
+}
+
 function main(): int {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
@@ -1188,6 +1196,7 @@ function main(): int {
     commonTaskSuite.addTest('taskpoolMaxWorkersTest', taskpoolMaxWorkersTest);
     commonTaskSuite.addTest('taskpoolRetriggerShrinkTest', taskpoolRetriggerShrinkTest);
     commonTaskSuite.addTest('taskpoolShrinkTest', taskpoolShrinkTest);
+    commonTaskSuite.addTest('TestExecuteUndefined', testExecuteUndefined);
     let res = commonTaskSuite.run();
     CoroutineExtras.stopTaskpool();
     return res;
