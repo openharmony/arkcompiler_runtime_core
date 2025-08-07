@@ -62,3 +62,118 @@ cases:
     use: |
       let n: number = 1
       f(n)
+  - decl: |
+      function f(this: number) {}
+    use: |
+      let n: number = 1
+      n.f()
+  - decl: |
+      function f(this: byte) {}
+    use: |
+      let n: byte = 1
+      f(n)
+  - decl: |
+      function f(this: byte) {}
+    use: |
+      let n: byte = 1
+      n.f()
+  - decl: |
+      function f(this: short) {}
+    use: |
+      let n: short = 1
+      f(n)
+  - decl: |
+      function f(this: short) {}
+    use: |
+      let n: short = 1
+      n.f()
+  - decl: |
+      function f(this: int) {}
+    use: |
+      let n: int = 1
+      f(n)
+  - decl: |
+      function f(this: int) {}
+    use: |
+      let n: int = 1
+      n.f()
+  - decl: |
+      function f(this: long) {}
+    use: |
+      let n: long = 1
+      f(n)
+  - decl: |
+      function f(this: long) {}
+    use: |
+      let n: long = 1
+      n.f()
+  - decl: |
+      function f(this: bigint) {}
+    use: |
+      let n: bigint = 1n
+      f(n)
+  - decl: |
+      function f(this: bigint) {}
+    use: |
+      let n: bigint = 1n
+      n.f()
+  - decl: |
+      function f(this: float) {}
+    use: |
+      let n: float = 1.0f
+      f(n)
+  - decl: |
+      function f(this: float) {}
+    use: |
+      let n: float = 1.0f
+      n.f()
+  - decl: |
+      function f(this: double) {}
+    use: |
+      let n: double = 1.0
+      f(n)
+  - decl: |
+      function f(this: double) {}
+    use: |
+      let n: double = 1.0
+      n.f()
+  - decl: |
+      function f(this: boolean) {}
+    use: |
+      let n: boolean = true
+      f(n)
+  - decl: |
+      function f(this: boolean) {}
+    use: |
+      let n: boolean = true
+      n.f()
+  - decl: |
+      function f(this: string) {}
+    use: |
+      let n: string = "abc"
+      f(n)
+  - decl: |
+      function f(this: string) {}
+    use: |
+      let n: string = "abc"
+      n.f()
+  - decl: |
+      function f(this: char) {}
+    use: |
+      let n: char = c'a'
+      f(n)
+  - decl: |
+      function f(this: char) {}
+    use: |
+      let n: char = c'a'
+      n.f()
+  - decl: |
+      function f(this: Function) {}
+    use: |
+      let n: Function = (): void => {}
+      f(n)
+  - decl: |
+      function f(this: Function) {}
+    use: |
+      let n: Function = (): void => {}
+      n.f()

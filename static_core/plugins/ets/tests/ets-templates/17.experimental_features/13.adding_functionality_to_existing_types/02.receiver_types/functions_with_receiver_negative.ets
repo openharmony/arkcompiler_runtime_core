@@ -18,6 +18,7 @@
 desc: >-
     A function with receiver declaration is a top-level declaration (see Top-Level Declarations) that looks almost the same
     as Function Declarations, except that the first parameter is mandatory, and the keyword this is used as its name
+tags: [compile-only, negative]
 ---*/
 
 {{c.decl}}

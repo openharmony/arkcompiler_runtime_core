@@ -173,3 +173,37 @@ cases:
     use: |
       let i: I = {}
       f(i)
+  - decl: |
+      function f_a(this: Int): number { return 1 }
+      function f_b(this: Double): number { return 2 }
+      overload f { f_b, f_a }
+    use: |
+      let a: int = 1
+      arktest.assertEQ(a.f(), 1)
+      arktest.assertEQ(a.toDouble().f(), 2)
+  - decl: |
+      class A {}
+      class B extends A {}
+      function f_a(this: A): number { return 1 }
+      function f_b(this: B): number { return 2 }
+      overload f { f_b, f_a }
+    use: |
+      let a: A = new A()
+      let b: B = new B()
+      arktest.assertEQ(f(a), 1)
+      arktest.assertEQ(f(b), 2)
+      a = b
+      arktest.assertEQ(f(a), 2)
+  - decl: |
+      class A {}
+      class B extends A {}
+      function f_a(this: A): number { return 1 }
+      function f_b(this: B): number { return 2 }
+      overload f { f_b, f_a }
+    use: |
+      let a: A = new A()
+      let b: B = new B()
+      arktest.assertEQ(f(a), 1)
+      arktest.assertEQ(f(b), 2)
+      a = b as A
+      arktest.assertEQ(f(a), 1)
