@@ -84,6 +84,22 @@ export abstract class LambdaN implements FunctionN<Any> {
     }
 }
 
+// Implementation body for the Runtime.lambdaUnsafeCallStub
+function __lambdaUnsafeCallStub(fn: Function, r: FixedArray<Any>): Any {
+    let arity: int = r.length
+    if (arity > {{maxarity}}) { throw new Error("Internal arity exceeds threshold") }
+    switch (arity) {
+    {%- for narg in range(maxarity + 1) %}
+        case {{narg}}:
+            if (!(fn instanceof FunctionR{{narg}})) { break }
+            return (fn as FunctionR{{narg}}{{erasedTypeArgsList(narg + 1)}})
+                .{{invokeName(narg, "R")}}({{listArgArrayLoads(narg)}}{{"," if narg != 0 }}
+                {% if narg == 0 %}r{% else %}...Runtime.removeFrontElementsStub(r, {{narg}}){% endif %})
+    {%- endfor %}
+    }
+    throw new ArgumentsUnderapplicationError()
+}
+
 {%- macro defineChainingHelper(name, narg, erasedArgs) -%}
 export interface __{{name}}{{narg}} extends {{name}}{{narg}}{{erasedTypeArgsList(erasedArgs)}}
 {%- endmacro %}
@@ -118,7 +134,7 @@ export interface Function{{ narg }}{{ typeParamsDeclList(narg) }}
     }
 {%- else %}
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < {{narg}}) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < {{narg}}) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.{{invokeName(narg, "R")}}({{listArgArrayLoads(narg)}}{{", " if narg != 0 }}
             ...Runtime.removeFrontElementsStub(r, {{narg}}))
     }
@@ -133,7 +149,7 @@ export interface Function{{ narg }}{{ typeParamsDeclList(narg) }}
 {{ defineLambdaHelper("Lambda", "Function", narg) }} {
     abstract {{invokeName(narg)}}{{erasedSignature(narg)}};
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < {{narg}}) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < {{narg}}) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.{{invokeName(narg)}}({{listArgArrayLoads(narg)}})
     }
 

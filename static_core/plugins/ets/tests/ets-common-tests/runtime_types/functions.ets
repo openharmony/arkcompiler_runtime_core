@@ -51,8 +51,18 @@ function testF1(f: Function1<Any, Any>) {
     xassert(f.invokeR2('a', 'b', 'c'), 'ab')
     xassert(f.invokeR3('a', 'b', 'c'), 'ab')
     xassert(f.invokeR3('a', 'b', 'c', 'd'), 'ab')
+    xassert(f.unsafeCall('a'), 'au')
+    xassert(f.unsafeCall('a', 'b'), 'ab')
+    xassert(f.unsafeCall('a', 'b', 'c'), 'ab')
+}
+
+function testF2(f: Function2<Any, Any, Any>) {
+    xassert(f.unsafeCall('a'), 'au')
+    xassert(f.unsafeCall('a', 'b'), 'ab')
+    xassert(f.unsafeCall('a', 'b', 'c'), 'ab')
 }
 
 function main() {
     testF1(new FakeLambdaObject())
+    testF2(new FakeLambdaObject())
 }

@@ -40,6 +40,100 @@ export abstract class LambdaN implements FunctionN<Any> {
     }
 }
 
+// Implementation body for the Runtime.lambdaUnsafeCallStub
+function __lambdaUnsafeCallStub(fn: Function, r: FixedArray<Any>): Any {
+    let arity: int = r.length
+    if (arity > 16) { throw new Error("Internal arity exceeds threshold") }
+    switch (arity) {
+        case 0:
+            if (!(fn instanceof FunctionR0)) { break }
+            return (fn as FunctionR0<Any, Any>)
+                .invokeR0(
+                r)
+        case 1:
+            if (!(fn instanceof FunctionR1)) { break }
+            return (fn as FunctionR1<Any, Any, Any>)
+                .invokeR1(r[0],
+                ...Runtime.removeFrontElementsStub(r, 1))
+        case 2:
+            if (!(fn instanceof FunctionR2)) { break }
+            return (fn as FunctionR2<Any, Any, Any, Any>)
+                .invokeR2(r[0], r[1],
+                ...Runtime.removeFrontElementsStub(r, 2))
+        case 3:
+            if (!(fn instanceof FunctionR3)) { break }
+            return (fn as FunctionR3<Any, Any, Any, Any, Any>)
+                .invokeR3(r[0], r[1], r[2],
+                ...Runtime.removeFrontElementsStub(r, 3))
+        case 4:
+            if (!(fn instanceof FunctionR4)) { break }
+            return (fn as FunctionR4<Any, Any, Any, Any, Any, Any>)
+                .invokeR4(r[0], r[1], r[2], r[3],
+                ...Runtime.removeFrontElementsStub(r, 4))
+        case 5:
+            if (!(fn instanceof FunctionR5)) { break }
+            return (fn as FunctionR5<Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR5(r[0], r[1], r[2], r[3], r[4],
+                ...Runtime.removeFrontElementsStub(r, 5))
+        case 6:
+            if (!(fn instanceof FunctionR6)) { break }
+            return (fn as FunctionR6<Any, Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR6(r[0], r[1], r[2], r[3], r[4], r[5],
+                ...Runtime.removeFrontElementsStub(r, 6))
+        case 7:
+            if (!(fn instanceof FunctionR7)) { break }
+            return (fn as FunctionR7<Any, Any, Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR7(r[0], r[1], r[2], r[3], r[4], r[5], r[6],
+                ...Runtime.removeFrontElementsStub(r, 7))
+        case 8:
+            if (!(fn instanceof FunctionR8)) { break }
+            return (fn as FunctionR8<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR8(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7],
+                ...Runtime.removeFrontElementsStub(r, 8))
+        case 9:
+            if (!(fn instanceof FunctionR9)) { break }
+            return (fn as FunctionR9<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR9(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8],
+                ...Runtime.removeFrontElementsStub(r, 9))
+        case 10:
+            if (!(fn instanceof FunctionR10)) { break }
+            return (fn as FunctionR10<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR10(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9],
+                ...Runtime.removeFrontElementsStub(r, 10))
+        case 11:
+            if (!(fn instanceof FunctionR11)) { break }
+            return (fn as FunctionR11<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR11(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10],
+                ...Runtime.removeFrontElementsStub(r, 11))
+        case 12:
+            if (!(fn instanceof FunctionR12)) { break }
+            return (fn as FunctionR12<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR12(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11],
+                ...Runtime.removeFrontElementsStub(r, 12))
+        case 13:
+            if (!(fn instanceof FunctionR13)) { break }
+            return (fn as FunctionR13<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR13(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12],
+                ...Runtime.removeFrontElementsStub(r, 13))
+        case 14:
+            if (!(fn instanceof FunctionR14)) { break }
+            return (fn as FunctionR14<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR14(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13],
+                ...Runtime.removeFrontElementsStub(r, 14))
+        case 15:
+            if (!(fn instanceof FunctionR15)) { break }
+            return (fn as FunctionR15<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR15(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14],
+                ...Runtime.removeFrontElementsStub(r, 15))
+        case 16:
+            if (!(fn instanceof FunctionR16)) { break }
+            return (fn as FunctionR16<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR16(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14], r[15],
+                ...Runtime.removeFrontElementsStub(r, 16))
+    }
+    throw new ArgumentsUnderapplicationError()
+}
+
 
 export interface FunctionR0<in PR, out R>
     extends Function, __FunctionR1
@@ -131,7 +225,7 @@ export abstract class LambdaR0 implements __FunctionR0 {
 export abstract class Lambda0 implements __Function0 {
     abstract invoke0(): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 0) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 0) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke0()
     }
 
@@ -259,7 +353,7 @@ export abstract class LambdaR1 implements __FunctionR1 {
 
     abstract invokeR1(p1: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 1) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 1) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR1(r[0], 
             ...Runtime.removeFrontElementsStub(r, 1))
     }
@@ -327,7 +421,7 @@ export abstract class LambdaR1 implements __FunctionR1 {
 export abstract class Lambda1 implements __Function1 {
     abstract invoke1(p1: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 1) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 1) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke1(r[0])
     }
 
@@ -449,7 +543,7 @@ export abstract class LambdaR2 implements __FunctionR2 {
 
     abstract invokeR2(p1: Any, p2: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 2) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 2) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR2(r[0], r[1], 
             ...Runtime.removeFrontElementsStub(r, 2))
     }
@@ -513,7 +607,7 @@ export abstract class LambdaR2 implements __FunctionR2 {
 export abstract class Lambda2 implements __Function2 {
     abstract invoke2(p1: Any, p2: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 2) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 2) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke2(r[0], r[1])
     }
 
@@ -629,7 +723,7 @@ export abstract class LambdaR3 implements __FunctionR3 {
 
     abstract invokeR3(p1: Any, p2: Any, p3: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 3) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 3) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR3(r[0], r[1], r[2], 
             ...Runtime.removeFrontElementsStub(r, 3))
     }
@@ -689,7 +783,7 @@ export abstract class LambdaR3 implements __FunctionR3 {
 export abstract class Lambda3 implements __Function3 {
     abstract invoke3(p1: Any, p2: Any, p3: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 3) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 3) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke3(r[0], r[1], r[2])
     }
 
@@ -799,7 +893,7 @@ export abstract class LambdaR4 implements __FunctionR4 {
 
     abstract invokeR4(p1: Any, p2: Any, p3: Any, p4: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 4) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 4) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR4(r[0], r[1], r[2], r[3], 
             ...Runtime.removeFrontElementsStub(r, 4))
     }
@@ -855,7 +949,7 @@ export abstract class LambdaR4 implements __FunctionR4 {
 export abstract class Lambda4 implements __Function4 {
     abstract invoke4(p1: Any, p2: Any, p3: Any, p4: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 4) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 4) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke4(r[0], r[1], r[2], r[3])
     }
 
@@ -959,7 +1053,7 @@ export abstract class LambdaR5 implements __FunctionR5 {
 
     abstract invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 5) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 5) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR5(r[0], r[1], r[2], r[3], r[4], 
             ...Runtime.removeFrontElementsStub(r, 5))
     }
@@ -1011,7 +1105,7 @@ export abstract class LambdaR5 implements __FunctionR5 {
 export abstract class Lambda5 implements __Function5 {
     abstract invoke5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 5) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 5) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke5(r[0], r[1], r[2], r[3], r[4])
     }
 
@@ -1109,7 +1203,7 @@ export abstract class LambdaR6 implements __FunctionR6 {
 
     abstract invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 6) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 6) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR6(r[0], r[1], r[2], r[3], r[4], r[5], 
             ...Runtime.removeFrontElementsStub(r, 6))
     }
@@ -1157,7 +1251,7 @@ export abstract class LambdaR6 implements __FunctionR6 {
 export abstract class Lambda6 implements __Function6 {
     abstract invoke6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 6) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 6) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke6(r[0], r[1], r[2], r[3], r[4], r[5])
     }
 
@@ -1249,7 +1343,7 @@ export abstract class LambdaR7 implements __FunctionR7 {
 
     abstract invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 7) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 7) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR7(r[0], r[1], r[2], r[3], r[4], r[5], r[6], 
             ...Runtime.removeFrontElementsStub(r, 7))
     }
@@ -1293,7 +1387,7 @@ export abstract class LambdaR7 implements __FunctionR7 {
 export abstract class Lambda7 implements __Function7 {
     abstract invoke7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 7) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 7) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke7(r[0], r[1], r[2], r[3], r[4], r[5], r[6])
     }
 
@@ -1379,7 +1473,7 @@ export abstract class LambdaR8 implements __FunctionR8 {
 
     abstract invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 8) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 8) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR8(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 
             ...Runtime.removeFrontElementsStub(r, 8))
     }
@@ -1419,7 +1513,7 @@ export abstract class LambdaR8 implements __FunctionR8 {
 export abstract class Lambda8 implements __Function8 {
     abstract invoke8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 8) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 8) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke8(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7])
     }
 
@@ -1499,7 +1593,7 @@ export abstract class LambdaR9 implements __FunctionR9 {
 
     abstract invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 9) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 9) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR9(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], 
             ...Runtime.removeFrontElementsStub(r, 9))
     }
@@ -1535,7 +1629,7 @@ export abstract class LambdaR9 implements __FunctionR9 {
 export abstract class Lambda9 implements __Function9 {
     abstract invoke9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 9) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 9) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke9(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8])
     }
 
@@ -1609,7 +1703,7 @@ export abstract class LambdaR10 implements __FunctionR10 {
 
     abstract invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 10) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 10) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR10(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], 
             ...Runtime.removeFrontElementsStub(r, 10))
     }
@@ -1641,7 +1735,7 @@ export abstract class LambdaR10 implements __FunctionR10 {
 export abstract class Lambda10 implements __Function10 {
     abstract invoke10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 10) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 10) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke10(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9])
     }
 
@@ -1709,7 +1803,7 @@ export abstract class LambdaR11 implements __FunctionR11 {
 
     abstract invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 11) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 11) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR11(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], 
             ...Runtime.removeFrontElementsStub(r, 11))
     }
@@ -1737,7 +1831,7 @@ export abstract class LambdaR11 implements __FunctionR11 {
 export abstract class Lambda11 implements __Function11 {
     abstract invoke11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 11) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 11) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke11(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10])
     }
 
@@ -1799,7 +1893,7 @@ export abstract class LambdaR12 implements __FunctionR12 {
 
     abstract invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 12) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 12) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR12(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], 
             ...Runtime.removeFrontElementsStub(r, 12))
     }
@@ -1823,7 +1917,7 @@ export abstract class LambdaR12 implements __FunctionR12 {
 export abstract class Lambda12 implements __Function12 {
     abstract invoke12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 12) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 12) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke12(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11])
     }
 
@@ -1879,7 +1973,7 @@ export abstract class LambdaR13 implements __FunctionR13 {
 
     abstract invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 13) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 13) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR13(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], 
             ...Runtime.removeFrontElementsStub(r, 13))
     }
@@ -1899,7 +1993,7 @@ export abstract class LambdaR13 implements __FunctionR13 {
 export abstract class Lambda13 implements __Function13 {
     abstract invoke13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 13) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 13) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke13(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12])
     }
 
@@ -1949,7 +2043,7 @@ export abstract class LambdaR14 implements __FunctionR14 {
 
     abstract invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 14) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 14) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR14(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], 
             ...Runtime.removeFrontElementsStub(r, 14))
     }
@@ -1965,7 +2059,7 @@ export abstract class LambdaR14 implements __FunctionR14 {
 export abstract class Lambda14 implements __Function14 {
     abstract invoke14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 14) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 14) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke14(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13])
     }
 
@@ -2009,7 +2103,7 @@ export abstract class LambdaR15 implements __FunctionR15 {
 
     abstract invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 15) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 15) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR15(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14], 
             ...Runtime.removeFrontElementsStub(r, 15))
     }
@@ -2021,7 +2115,7 @@ export abstract class LambdaR15 implements __FunctionR15 {
 export abstract class Lambda15 implements __Function15 {
     abstract invoke15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 15) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 15) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke15(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14])
     }
 
@@ -2059,7 +2153,7 @@ export abstract class LambdaR16 implements __FunctionR16 {
 
     abstract invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 16) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 16) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR16(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14], r[15], 
             ...Runtime.removeFrontElementsStub(r, 16))
     }
@@ -2067,7 +2161,7 @@ export abstract class LambdaR16 implements __FunctionR16 {
 export abstract class Lambda16 implements __Function16 {
     abstract invoke16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 16) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 16) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke16(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14], r[15])
     }
 
