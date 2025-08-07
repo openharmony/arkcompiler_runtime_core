@@ -386,7 +386,7 @@ cases:
               constructor(p: T) {
                   this.fld = foo<T>(p)
               }
-              meth(): T {
+              meth(): Awaited<T> {
                   return await this.fld
               }
           }
@@ -408,7 +408,7 @@ cases:
               constructor(p: T) {
                   this.fld = foo<T>(p)
               }
-              meth(): T {
+              meth(): Awaited<T> {
                   return await this.fld
               }
           }

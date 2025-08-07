@@ -6,3 +6,25 @@ std/core/PromiseAllSettledRejectIgnoredDeferred.ets
 std/core/PromiseAllSettledReject.ets
 ### Issue 20584
 std/core/PromiseAllSettledRejectIgnored.ets
+### Issue 27965
+std/core/PromiseAllReject.ets
+std/core/PromiseAllRejectIgnoredDeferred.ets
+std/core/PromiseAllSettledRejectDeferred.ets
+std/core/PromiseAllSettledThenableStatus.ets
+std/core/PromiseAnyPoisonedThen.ets
+std/core/PromiseAnyRejectDeferred.ets
+std/core/PromiseAnyRejectIgnored.ets
+std/core/PromiseAnyRejectIgnoredDeferred.ets
+std/core/PromiseAnyRejectThenable.ets
+std/core/PromiseAnyResolveLateRejectIgnored.ets
+std/core/PromiseExceptionAfterResolveInExecutor.ets
+std/core/PromiseRacePoisonedThen.ets
+std/core/PromiseRaceRejectDeferred.ets
+std/core/PromiseRaceRejectIgnoredDeferred.ets
+std/core/PromiseRaceRejectThenable.ets
+std/core/PromiseRaceResolvePoisonedThen.ets
+std/core/PromiseRaceResolveThenable.ets
+std/core/PromiseResolveByThenable2.ets
+std/core/PromiseResolveThenableSequence.ets
+std/core/PromiseResolveThenableThrowError.ets
+std/core/PromiseStaticResolveThenableThrowError.ets

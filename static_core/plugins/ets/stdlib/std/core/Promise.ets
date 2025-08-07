@@ -20,7 +20,7 @@ package std.core;
  */
 export interface PromiseLike<out T> {
     then<U = T, E = never>(onFulfilled: (value: T) => U|PromiseLike<U>,
-            onRejected?: (error: Error) => E|PromiseLike<E>): PromiseLike<U|E>;
+            onRejected?: (error: Error) => E|PromiseLike<E>): PromiseLike<Awaited<U|E>>;
 }
 
 /**
@@ -104,8 +104,8 @@ export final class Promise<out T> implements PromiseLike<T> {
      * @returns { Promise } new promise that will be resolved after the execution of the callback
      *     or rejected if current promise is rejected or the callback finished with an exception
      */
-    then<U = T>(onFulfilled: () => U|PromiseLike<U>): Promise<U> {
-        let promise = new Promise<U>();
+    then<U = T>(onFulfilled: () => U|PromiseLike<U>): Promise<Awaited<U>> {
+        let promise = new Promise<Awaited<U>>();
         let fn: () => void = (): void => {
             try {
                 if (this.state == Promise.STATE_RESOLVED) {
@@ -131,8 +131,8 @@ export final class Promise<out T> implements PromiseLike<T> {
      *     or rejected in the callback finished with an exception
      */
     then<U = T, E = never>(onFulfilled: (value: T) => U|PromiseLike<U>,
-            onRejected?: (error: Error) => E|PromiseLike<E>): Promise<U|E> {
-        let promise = new Promise<U|E>();
+            onRejected?: (error: Error) => E|PromiseLike<E>): Promise<Awaited<U|E>> {
+        let promise = new Promise<Awaited<U|E>>();
         let fn: () => void = (): void => {
             try {
                 if (this.state == Promise.STATE_RESOLVED) {
@@ -161,8 +161,8 @@ export final class Promise<out T> implements PromiseLike<T> {
      * @returns { Promise } new promise that will be resolved after the execution of the callback
      *     or rejected if current promise is rejected or the callback finished with an exception
      */
-    catch<U = never>(onRejected: () => U|PromiseLike<U>): Promise<T|U> {
-        let promise = new Promise<T|U>();
+    catch<U = never>(onRejected: () => U|PromiseLike<U>): Promise<Awaited<T|U>> {
+        let promise = new Promise<Awaited<T|U>>();
         let fn: () => void = (): void => {
             try {
                 if (this.state == Promise.STATE_REJECTED) {
@@ -187,8 +187,8 @@ export final class Promise<out T> implements PromiseLike<T> {
      * @returns { Promise } new promise that will be resolved after the execution of the callback
      *     or rejected or the callback finished with an exception
      */
-    catch<U = never>(onRejected?: (error: Error) => U|PromiseLike<U>): Promise<T|U> {
-        let promise = new Promise<T|U>();
+    catch<U = never>(onRejected?: (error: Error) => U|PromiseLike<U>): Promise<Awaited<T|U>> {
+        let promise = new Promise<Awaited<T|U>>();
         let fn: () => void = (): void => {
             try {
                 if (this.state == Promise.STATE_REJECTED) {
@@ -217,8 +217,8 @@ export final class Promise<out T> implements PromiseLike<T> {
      * @returns { Promise } new promise that will be completed the same way as the current promise after the execution of the callback
      *     or rejected if the callback finished with an exception
      */
-    finally(onFinally?: () => void): Promise<T> {
-        let promise = new Promise<T>();
+    finally(onFinally?: () => void): Promise<Awaited<T>> {
+        let promise = new Promise<Awaited<T>>();
         let fn: () => void = (): void => {
             try {
                 if (onFinally) {

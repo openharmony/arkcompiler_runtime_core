@@ -213,3 +213,7 @@
 
 # there is no correct return value
 17.experimental_features/09.overload_declarations/01.function_overload_declarations/fn_overloading_35.ets
+
+# 28232 runtime timeout only in CI
+05.generics/03.utility_types/01.awaited_utility_type/awaited_return_1.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_parameter_1.ets
