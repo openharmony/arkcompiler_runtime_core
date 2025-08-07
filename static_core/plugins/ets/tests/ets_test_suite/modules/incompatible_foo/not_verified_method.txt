@@ -1,1 +1,1 @@
-@foo.foo.ETSGLOBAL::dummy
+L@app/module1/ETSGLOBAL;
