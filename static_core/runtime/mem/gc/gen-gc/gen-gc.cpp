@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "runtime/mem/gc/dynamic/gc_marker_dynamic-inl.h"
 #include "runtime/mem/gc/generational-gc-base-inl.h"
 #include "runtime/mem/gc/gc_adaptive_stack_inl.h"
+#include "utils/utils.h"
 
 namespace ark::mem {
 
@@ -305,7 +306,7 @@ void GenGC<LanguageConfig>::CollectYoungAndMove()
             if (objectHeader->IsMarkedForGC<false>()) {
                 auto dst = reinterpret_cast<ObjectHeader *>(objectAllocator->AllocateTenuredWithoutLocks(size));
                 ASSERT(dst != nullptr);
-                memcpy_s(dst, size, objectHeader, size);
+                MemcpyUnsafe(dst, objectHeader, size);
                 youngMoveSize += alignedSize;
                 youngMoveCount++;
                 LOG_DEBUG_OBJECT_EVENTS << "MOVE object " << objectHeader << " -> " << dst << ", size = " << size;

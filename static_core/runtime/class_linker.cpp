@@ -39,6 +39,7 @@
 #include "libarkfile/proto_data_accessor-inl.h"
 #include "runtime/include/tooling/debug_inf.h"
 #include "trace/trace.h"
+#include "utils/utils.h"
 
 namespace ark {
 
@@ -1090,7 +1091,7 @@ static const uint8_t *CopyMutf8String(mem::InternalAllocatorPtr allocator, const
 {
     size_t size = utf::Mutf8Size(descriptor) + 1;  // + 1 - null terminate
     auto *ptr = allocator->AllocArray<uint8_t>(size);
-    memcpy_s(ptr, size, descriptor, size);
+    MemcpyUnsafe(ptr, descriptor, size);
     return ptr;
 }
 

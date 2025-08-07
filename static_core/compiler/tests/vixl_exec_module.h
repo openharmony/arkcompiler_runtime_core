@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,7 @@
 
 #include <cstring>
 #include <cstdlib>
+#include "utils/utils.h"
 
 namespace ark::compiler {
 using namespace vixl::aarch64;  // NOLINT(*-build-using-namespace)
@@ -145,7 +146,7 @@ public:
         T *arr =
             reinterpret_cast<T *>(reinterpret_cast<char *>(arrData) + runtimeInfo_->GetArrayDataOffset(Arch::AARCH64));
 
-        memcpy_s(arr, size * sizeof(T), array, size * sizeof(T));
+        MemcpyUnsafe(arr, array, size * sizeof(T));
         return arrData;
     }
 
@@ -157,7 +158,7 @@ public:
         auto size = lenarr[0];
         T *arr =
             reinterpret_cast<T *>(reinterpret_cast<char *>(arrData) + runtimeInfo_->GetArrayDataOffset(Arch::AARCH64));
-        memcpy_s(array, size * sizeof(T), arr, size * sizeof(T));
+        MemcpyUnsafe(array, arr, size * sizeof(T));
     }
     // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 

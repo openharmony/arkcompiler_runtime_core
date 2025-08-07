@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@
 #include <string>
 #include <unordered_map>
 #include <cstring>
+#include "utils/utils.h"
 
 namespace ark::serializer {
 
@@ -110,7 +111,7 @@ Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t size, T 
     }
 
     auto *ptr = reinterpret_cast<uint8_t *>(&out);
-    memcpy_s(ptr, sizeof(out), data, sizeof(out));
+    MemcpyUnsafe(ptr, data, sizeof(out));
     return sizeof(out);
 }
 
@@ -123,7 +124,7 @@ inline Expected<size_t, const char *> BufferToTypeUnpackString(const uint8_t *da
     }
 
     out.resize(strSize);
-    memcpy_s(out.data(), strSize, data, strSize);
+    MemcpyUnsafe(out.data(), data, strSize);
     return value + strSize;
 }
 
@@ -162,7 +163,7 @@ Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t size, st
     }
 
     vector.resize(vectorSize / sizeof(T));
-    memcpy_s(vector.data(), vectorSize, data, vectorSize);
+    MemcpyUnsafe(vector.data(), data, vectorSize);
 
     return r.Value() + vectorSize;
 }

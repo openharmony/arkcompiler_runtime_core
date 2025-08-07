@@ -21,6 +21,7 @@
 #include "runtime/include/coretypes/dyn_objects.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
+#include "utils/utils.h"
 
 namespace ark::coretypes {
 
@@ -60,7 +61,7 @@ Array *Array::Create(ark::Class *arrayClass, const uint8_t *data, ArraySizeT len
     // length == 0 is guaranteed by AllocateArray
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
     array->SetLength(length);
-    memcpy_s(array->GetData(), array->GetLength() * elemSize, data, length * elemSize);
+    MemcpyUnsafe(array->GetData(), data, length * elemSize);
     TSAN_ANNOTATE_IGNORE_WRITES_END();
     // Witout full memory barrier it is possible that architectures with weak memory order can try fetching array
     // legth before it's set

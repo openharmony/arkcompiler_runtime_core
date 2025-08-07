@@ -33,6 +33,7 @@
 
 #include <securec.h>
 #include <ucontext.h>
+#include "utils/utils.h"
 
 namespace ark {
 
@@ -124,8 +125,8 @@ public:
             userAction_.sa_restorer = newAction->sa_restorer;  // NOLINT
 #endif
             sigemptyset(&userAction_.sa_mask);
-            memcpy_s(&userAction_.sa_mask, sizeof(userAction_.sa_mask), &newAction->sa_mask,
-                     std::min(sizeof(userAction_.sa_mask), sizeof(newAction->sa_mask)));
+            MemcpyUnsafe(&userAction_.sa_mask, &newAction->sa_mask,
+                         std::min(sizeof(userAction_.sa_mask), sizeof(newAction->sa_mask)));
         }
     }
 
@@ -140,8 +141,8 @@ public:
 #if defined(SA_RESTORER)
             result.sa_restorer = userAction_.sa_restorer;
 #endif
-            memcpy_s(&result.sa_mask, sizeof(result.sa_mask), &userAction_.sa_mask,
-                     std::min(sizeof(userAction_.sa_mask), sizeof(result.sa_mask)));
+            MemcpyUnsafe(&result.sa_mask, &userAction_.sa_mask,
+                         std::min(sizeof(userAction_.sa_mask), sizeof(result.sa_mask)));
             return result;
         }
     }

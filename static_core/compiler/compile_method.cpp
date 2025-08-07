@@ -30,6 +30,7 @@
 #include "trace/trace.h"
 #include "optimizer/optimizations/regalloc/reg_alloc_linear_scan.h"
 #include "optimizer/code_generator/codegen.h"
+#include "utils/utils.h"
 
 namespace ark::compiler {
 
@@ -137,12 +138,11 @@ static Span<uint8_t> EmitCode(const Graph *graph, CodeAllocator *allocator)
     }
 
     auto data = reinterpret_cast<uint8_t *>(memRange.GetData());
-    memcpy_s(data, sizeof(CodePrefix), &prefix, sizeof(CodePrefix));
+    MemcpyUnsafe(data, &prefix, sizeof(CodePrefix));
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    memcpy_s(&data[codeOffset], graph->GetCode().size(), graph->GetCode().data(), graph->GetCode().size());
+    MemcpyUnsafe(&data[codeOffset], graph->GetCode().data(), graph->GetCode().size());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    memcpy_s(&data[prefix.codeInfoOffset], graph->GetCodeInfoData().size(), graph->GetCodeInfoData().data(),
-             graph->GetCodeInfoData().size());
+    MemcpyUnsafe(&data[prefix.codeInfoOffset], graph->GetCodeInfoData().data(), graph->GetCodeInfoData().size());
 
     allocator->ProtectCode(memRange);
 

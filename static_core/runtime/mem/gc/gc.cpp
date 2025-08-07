@@ -46,6 +46,7 @@
 #include "runtime/include/coretypes/class.h"
 #include "runtime/thread_manager.h"
 #include "runtime/mem/gc/gc_adaptive_stack_inl.h"
+#include "utils/utils.h"
 
 namespace ark::mem {
 using TaggedValue = coretypes::TaggedValue;
@@ -906,7 +907,7 @@ void GC::MoveObjectsToPygoteSpace()
         size_t size = GetObjectSize(src);
         auto dst = reinterpret_cast<ObjectHeader *>(pygoteSpaceAllocator->Alloc(size));
         ASSERT(dst != nullptr);
-        memcpy_s(dst, size, src, size);
+        MemcpyUnsafe(dst, src, size);
         allSizeMove += size;
         movedObjectsNum++;
         SetForwardAddress(src, dst);
