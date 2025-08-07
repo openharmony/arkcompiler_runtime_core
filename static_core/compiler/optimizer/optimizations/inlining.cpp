@@ -1623,8 +1623,9 @@ bool Inlining::ResolveTarget(CallInst *callInst, InlineContext *ctx)
         return false;
     }
 
-    // If class or method are final we can resolve the method
-    if (runtime->IsMethodFinal(method) || runtime->IsClassFinalOrString(runtime->GetClass(method))) {
+    // Resolve the method directly if: method is marked as 'final' or String or if manual devirtualization is possible.
+    if (runtime->IsMethodFinal(method) || runtime->IsClassFinalOrString(runtime->GetClass(method)) ||
+        IsManualDevirtualize(callInst, runtime)) {
         ctx->method = method;
         return true;
     }
@@ -1689,6 +1690,18 @@ void Inlining::InsertChaGuard(CallInst *callInst, InlineContext *ctx)
 
     GetCha()->AddDependency(ctx->method, GetGraph()->GetOutermostParentGraph()->GetMethod());
     GetGraph()->GetOutermostParentGraph()->AddSingleImplementationMethod(ctx->method);
+}
+
+bool Inlining::IsManualDevirtualize(CallInst *callInst, RuntimeInterface *runtime)
+{
+    auto calleeMethod = GetGraph()->GetMethod();
+    auto calleeClass = runtime->GetClass(calleeMethod);
+    auto method = callInst->GetCallMethod();
+    auto methodClass = runtime->GetClass(method);
+    // Replace CallVirtual instruction for Array methods inside Map methods. Disable inlining for Map constructors since
+    // they can take an array parameter.
+    return runtime->IsClassEscompatMap(calleeClass) && runtime->IsClassEscompatArray(methodClass) &&
+           !runtime->IsMethodEscompatMapCtor(calleeMethod);
 }
 
 bool Inlining::SkipBlock(const BasicBlock *block) const

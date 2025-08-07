@@ -20,11 +20,6 @@ virtual ClassPtr GetEscompatArrayClass() const
     return nullptr;
 }
 
-virtual bool IsClassEscompatArray([[maybe_unused]] ClassPtr klass) const
-{
-    return false;
-}
-
 virtual FieldPtr GetEscompatArrayBuffer([[maybe_unused]] ClassPtr klass) const
 {
     return nullptr;

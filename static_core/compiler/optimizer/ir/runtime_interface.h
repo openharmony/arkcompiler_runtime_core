@@ -441,7 +441,22 @@ public:
         return false;
     }
 
+    virtual bool IsMethodEscompatMapCtor([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatArray([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
     virtual bool IsClassStringBuilder([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatMap([[maybe_unused]] ClassPtr klass) const
     {
         return false;
     }

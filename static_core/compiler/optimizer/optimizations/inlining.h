@@ -128,6 +128,7 @@ protected:
     bool ResolveTarget(CallInst *callInst, InlineContext *ctx);
     bool CanUseTypeInfo(ObjectTypeInfo typeInfo, RuntimeInterface::MethodPtr method);
     void InsertChaGuard(CallInst *callInst, InlineContext *ctx);
+    bool IsManualDevirtualize(CallInst *callInst, RuntimeInterface *runtime);
 
     InlinedGraph BuildGraph(InlineContext *ctx, CallInst *callInst, CallInst *polyCallInst = nullptr);
     bool CheckBytecode(CallInst *callInst, const InlineContext &ctx, bool *calleeCallRuntime);
