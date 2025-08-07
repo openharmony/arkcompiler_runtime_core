@@ -863,10 +863,10 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     public pushOne(val: T): number {
         this.ensureUnusedCapacity(1)
-        return this.pushImpl(val)
+        this.buffer[this.actualLength] = val
+        this.actualLength += 1
+        return this.actualLength
     }
-
-    private final native pushImpl(val: T): number;
 
     overload push{ pushOne, pushArray }
     /**

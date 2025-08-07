@@ -14,12 +14,11 @@
  */
 
 //! CHECKER       escompat Array push
-//! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true, entry: "escompat_array_push.ETSGLOBAL::test_array_push"
 //! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push"
 //! PASS_AFTER    "Codegen"
 //! INST          /CallVirtual.*escompat.Array::push/
-//! INST_COUNT    /CallVirtual.*escompat.Array::push/, 4
+//! INST_COUNT    /CallVirtual.*escompat.Array::push/, 3
 
 function test_array_push() {
     let array_size: int = 3;
@@ -36,7 +35,11 @@ function test_array_push() {
 
     array1.push(2);
     arktest.assertEQ(array1[array1.length - 1], 2);
-    arktest.assertEQ(array1.length, 7);
+
+    array1.push(1, 2, 3);
+    arktest.assertEQ(array1[array1.length - 1], 3);
+
+    arktest.assertEQ(array1.length, 10);
 }
 
 //! CHECKER       escompat Array push2
@@ -45,7 +48,7 @@ function test_array_push() {
 //! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_managed_objects"
 //! PASS_AFTER    "Codegen"
 //! INST          /CallVirtual.*escompat.Array::push/
-//! INST_COUNT    /CallVirtual.*escompat.Array::push/, 5
+//! INST_COUNT    /CallVirtual.*escompat.Array::push/, 3
 function test_array_push_managed_objects() {
     let array: Array<Object> = new Array<Object>();
 
@@ -76,12 +79,11 @@ function test_array_push_managed_objects() {
 }
 
 //! CHECKER       escompat Array push3
-//! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true, entry: "escompat_array_push.ETSGLOBAL::test_array_push_unions"
 //! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_unions"
 //! PASS_AFTER    "Codegen"
 //! INST          /CallVirtual.*escompat.Array::push/
-//! INST_COUNT    /CallVirtual.*escompat.Array::push/, 5
+//! INST_COUNT    /CallVirtual.*escompat.Array::push/, 4
 function test_array_push_unions() {
     let array: Array<Object | null | undefined | number | string> =
         new Array<Object | null | undefined | number | string>();
@@ -107,4 +109,72 @@ function test_array_push_unions() {
     arktest.assertEQ(array[array.length - 1], undefined);
 
     arktest.assertEQ(array.length, 5);
+}
+
+//! CHECKER       escompat Array push4
+//! RUN           force_jit: true, entry: "escompat_array_push.ETSGLOBAL::test_array_push_one"
+//! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_one"
+//! PASS_AFTER    "Codegen"
+//! INST          /CallVirtual.*escompat.Array::pushOne/
+//! INST_COUNT    /CallVirtual.*escompat.Array::pushOne/, 4
+function test_array_push_one() {
+    let array: Array<Object | null | undefined | number | string> =
+        new Array<Object | null | undefined | number | string>();
+    // test number
+    array.pushOne(123);
+    arktest.assertEQ(array[array.length - 1], 123);
+
+    // test string
+    array.pushOne("abc");
+    arktest.assertEQ(array[array.length - 1], "abc");
+
+    // test object
+    let obj: Object = new Object()
+    array.pushOne(obj);
+    arktest.assertEQ(array[array.length - 1], obj);
+
+    // test null
+    array.pushOne(null);
+    arktest.assertEQ(array[array.length - 1], null);
+
+    // test undefined
+    array.pushOne(undefined);
+    arktest.assertEQ(array[array.length - 1], undefined);
+
+    arktest.assertEQ(array.length, 5);
+}
+
+//! CHECKER       escompat Array push5
+//! RUN           force_jit: true, entry: "escompat_array_push.ETSGLOBAL::test_array_push_array"
+//! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_array"
+//! PASS_AFTER    "Codegen"
+//! INST          /CallVirtual.*escompat.Array::pushArray/
+//! INST_COUNT    /CallVirtual.*escompat.Array::pushArray/, 2
+function test_array_push_array() {
+    let array: Array<Object | null | undefined | number | string> =
+        new Array<Object | null | undefined | number | string>();
+    // test number
+    array.pushArray(1, 2, 3);
+    arktest.assertEQ(array[array.length - 1], 3);
+
+    // test string
+    array.pushArray("a", "b", "c");
+    arktest.assertEQ(array[array.length - 1], "c");
+
+    // test object
+    let obj1: Object = new Object()
+    let obj2: Object = new Object()
+    let obj3: Object = new Object()
+    array.pushArray(obj1, obj2, obj3);
+    arktest.assertEQ(array[array.length - 1], obj3);
+
+    // test null
+    array.pushArray(null, null, null);
+    arktest.assertEQ(array[array.length - 1], null);
+
+    // test undefined
+    array.pushArray(undefined, undefined, undefined);
+    arktest.assertEQ(array[array.length - 1], undefined);
+
+    arktest.assertEQ(array.length, 15);
 }
