@@ -17,14 +17,17 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 
+#include "libpandabase/utils/arch.h"
 #include "runtime/handle_scope.h"
 #include "runtime/handle_scope-inl.h"
 #include "runtime/include/thread.h"
 
 namespace ark::ets::intrinsics {
 
+namespace {
+
 /* make sure the class the intrinsic being called from belongs to the boot context */
-static bool EnsureBootContext()
+bool EnsureBootContext()
 {
     auto *coro = EtsCoroutine::GetCurrent();
     auto ctx = StackWalker::Create(coro).GetMethod()->GetClass()->GetLoadContext();
@@ -38,7 +41,33 @@ static bool EnsureBootContext()
 }
 
 template <typename T>
-static T UnsafeMemoryRead(EtsLong addr)
+T UnsafeMemoryReadUnaligned(EtsLong addr)
+{
+    if (EnsureBootContext()) {
+        if constexpr (RUNTIME_ARCH == Arch::AARCH32) {
+            T val {};
+            memcpy_s(&val, sizeof(val), reinterpret_cast<void *>(addr), sizeof(val));
+            return val;
+        }
+        return *reinterpret_cast<T *>(addr);
+    }
+    return static_cast<T>(-1);
+}
+
+template <typename T>
+void UnsafeMemoryWriteUnaligned(EtsLong addr, T val)
+{
+    if (EnsureBootContext()) {
+        if constexpr (RUNTIME_ARCH == Arch::AARCH32) {
+            memcpy_s(reinterpret_cast<void *>(addr), sizeof(val), &val, sizeof(val));
+        } else {
+            *reinterpret_cast<T *>(addr) = val;
+        }
+    }
+}
+
+template <typename T>
+T UnsafeMemoryReadAligned(EtsLong addr)
 {
     if (EnsureBootContext()) {
         return *reinterpret_cast<T *>(addr);
@@ -47,12 +76,36 @@ static T UnsafeMemoryRead(EtsLong addr)
 }
 
 template <typename T>
-static void UnsafeMemoryWrite(EtsLong addr, T val)
+void UnsafeMemoryWriteAligned(EtsLong addr, T val)
 {
     if (EnsureBootContext()) {
         *reinterpret_cast<T *>(addr) = val;
     }
 }
+
+template <typename T>
+T UnsafeMemoryRead(EtsLong addr)
+{
+#ifdef PANDA_TARGET_AARCH32
+    if constexpr (alignof(T) != alignof(std::byte)) {
+        return UnsafeMemoryReadUnaligned<T>(addr);
+    }
+#endif  // PANDA_TARGET_AARCH32
+    return UnsafeMemoryReadAligned<T>(addr);
+}
+
+template <typename T>
+void UnsafeMemoryWrite(EtsLong addr, T val)
+{
+#ifdef PANDA_TARGET_AARCH32
+    if constexpr (alignof(T) != alignof(std::byte)) {
+        return UnsafeMemoryWriteUnaligned(addr, val);
+    }
+#endif  // PANDA_TARGET_AARCH32
+    return UnsafeMemoryWriteAligned(addr, val);
+}
+
+}  // namespace
 
 extern "C" EtsByte UnsafeMemoryReadBoolean(EtsLong addr)
 {
