@@ -38,7 +38,6 @@ host_unittest_action("LibPandaBaseTest") {
     "type_converter_tests.cpp",
     "unique_fd_test.cpp",
     "utf_test.cpp",
-    "worker_queue_test.cpp",
   ]
 
   if (is_linux) {
@@ -52,6 +51,7 @@ host_unittest_action("LibPandaBaseTest") {
       "unix_library_loader_test.cpp",
       "unix_native_stack_test.cpp",
       "unix_thread_test.cpp",
+      "worker_queue_test.cpp",
     ]
   }
 
