@@ -28,6 +28,7 @@
 #include "runtime/include/method.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/managed_thread.h"
+#include "runtime/include/safepoint_timer.h"
 #include "runtime/mem/gc/gc.h"
 
 namespace ark::interpreter {
@@ -310,6 +311,7 @@ public:
      */
     static void Safepoint(ManagedThread *thread)
     {
+        SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(thread->GetInternalId(), true));
 #ifndef NDEBUG
         // NOTE(sarychevkonstantin, #I9624): achieve consistency between mutator lock ownership and IsManaged method
         if (Runtime::GetOptions().IsRunGcEverySafepoint() && Thread::GetCurrent()->GetMutatorLock()->HasLock()) {
@@ -325,6 +327,7 @@ public:
         if (thread->IsSuspended()) {
             ThreadSuspension(thread);
         }
+        SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(thread->GetInternalId(), true));
     }
 
     static void Safepoint()

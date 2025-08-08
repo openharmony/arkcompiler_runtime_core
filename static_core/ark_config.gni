@@ -69,6 +69,10 @@ declare_args() {
     is_llvmbackend = true
   }
 
+  if (!defined(is_safepoint_checkers_build)) {
+    is_safepoint_checkers_build = false
+  }
+
   if ((is_ohos && is_standard_system) || ark_ets_hybrid) {
     ark_ets_interop_js = true
   } else {

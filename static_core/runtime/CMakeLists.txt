@@ -258,6 +258,12 @@ else()
     list(APPEND SOURCES ${PANDA_ROOT}/platforms/common/runtime/verify_app_install.cpp)
 endif()
 
+if (PANDA_WITH_SAFEPOINT_CHECKER)
+    list(APPEND SOURCES
+        timer_table.cpp
+        safepoint_timer.cpp)
+endif()
+
 set(INTERPRETER_IMPL_SOURCES
     interpreter/interpreter_impl.cpp
 )

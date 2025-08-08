@@ -27,6 +27,7 @@
 #include "runtime/include/runtime_notification.h"
 #include "runtime/include/stack_walker.h"
 #include "runtime/include/thread_scopes.h"
+#include "runtime/include/safepoint_timer.h"
 #include "runtime/interpreter/runtime_interface.h"
 #include "runtime/handle_scope-inl.h"
 #include "runtime/mem/object_helpers.h"
@@ -53,7 +54,7 @@ static mem::InternalAllocatorPtr GetInternalAllocator(Thread *thread)
     return Runtime::GetCurrent()->GetInternalAllocator();
 }
 
-MTManagedThread::ThreadId MTManagedThread::GetInternalId()
+ManagedThread::ThreadId ManagedThread::GetInternalId()
 {
     ASSERT(internalId_ != 0);
     return internalId_;
@@ -430,6 +431,7 @@ void ManagedThread::NativeCodeBegin()
         << LogThreadStack(NATIVE_CODE) << " or stack should be empty";
     threadFrameStates_.push(NATIVE_CODE);
 #endif
+    SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(GetInternalId(), true));
     UpdateStatus(ThreadStatus::NATIVE);
     isManagedScope_ = false;
 }
@@ -440,6 +442,7 @@ void ManagedThread::NativeCodeEnd()
     // If this was last frame, it should have been called from Destroy() and it should UpdateStatus to FINISHED
     // after this method
     UpdateStatus(ThreadStatus::RUNNING);
+    SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(GetInternalId(), false));
     isManagedScope_ = true;
 #if defined(VERBOSE_THREAD_STATE_LOG)
     LOG_IF(threadFrameStates_.empty(), FATAL, RUNTIME) << "stack should be not empty";
@@ -461,6 +464,7 @@ void ManagedThread::ManagedCodeBegin()
 {
     // thread_frame_states_ should not be accessed without MutatorLock (as runtime could have been destroyed)
     UpdateStatus(ThreadStatus::RUNNING);
+    SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(GetInternalId(), false));
     isManagedScope_ = true;
 #if defined(VERBOSE_THREAD_STATE_LOG)
     LOG_IF(HasClearStack(), FATAL, RUNTIME) << "stack should be not empty";
@@ -476,6 +480,7 @@ void ManagedThread::ManagedCodeEnd()
     LOG_IF(threadFrameStates_.top() != MANAGED_CODE, FATAL, RUNTIME) << LogThreadStack(MANAGED_CODE);
     threadFrameStates_.pop();
 #endif
+    SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(GetInternalId(), true));
     // Should be NATIVE_CODE
     UpdateStatus(ThreadStatus::NATIVE);
     isManagedScope_ = false;

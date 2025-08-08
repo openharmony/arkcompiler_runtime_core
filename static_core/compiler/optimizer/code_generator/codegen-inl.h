@@ -152,7 +152,19 @@ void Codegen::CallRuntime(Inst *inst, EntrypointId id, Reg dstReg, RegMask prese
 template <typename... Args>
 void Codegen::CallFastPath(Inst *inst, EntrypointId id, Reg dstReg, RegMask preservedRegs, Args &&...params)
 {
+#ifdef SAFEPOINT_TIME_CHECKER_ENABLED
+    // predicate for irtoc intrinsics
+    if (GetRuntime()->IsEntrypointFastPath(id)) {
+        TypedImm entryId(static_cast<uint32_t>(id));
+        InsertCallChecker(EntrypointId::REGISTER_SAFEPOINT_TIMER, entryId);
+        CallEntrypoint<true>(inst, id, dstReg, preservedRegs, std::forward<Args>(params)...);
+        InsertCallChecker(EntrypointId::DISARM_SAFEPOINT_TIMER, entryId);
+    } else {
+        CallEntrypoint<true>(inst, id, dstReg, preservedRegs, std::forward<Args>(params)...);
+    }
+#else
     CallEntrypoint<true>(inst, id, dstReg, preservedRegs, std::forward<Args>(params)...);
+#endif
 }
 
 template <typename... Args>

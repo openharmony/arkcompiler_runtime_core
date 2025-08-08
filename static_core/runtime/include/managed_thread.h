@@ -514,6 +514,8 @@ public:
         return id_.load(std::memory_order_relaxed);
     }
 
+    ThreadId GetInternalId();
+
     void FreeInternalMemory() override;
     void DestroyInternalResources();
 
