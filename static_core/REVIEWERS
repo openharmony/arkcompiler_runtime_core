@@ -53,7 +53,7 @@ static_core/runtime/*deoptimization*  @Prof1983 ^dingding5
 static_core/runtime/*osr*             @Prof1983 ^dingding5
 static_core/runtime/*stack_walker*    @Prof1983 ^dingding5
 static_core/scripts/                  @igelhaus
-static_core/static_linker/            @nazarovkonstantin ^igelhaus
+static_core/static_linker/            @nazarovkonstantin @oatuwwutao @hufeng20 ^igelhaus
 static_core/tests/                    @Prof1983
 static_core/tests/cts-*               @igelhaus
 static_core/tests/irtoc-interpreter-* @mbolshov ^igelhaus
