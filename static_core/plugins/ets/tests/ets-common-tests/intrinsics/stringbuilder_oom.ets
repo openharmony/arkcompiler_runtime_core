@@ -26,10 +26,10 @@ function main(): int {
             if (n != foo(i)) {
                 return 3;
             }
-            // Expected exception caught
+            // Expected error caught
             return 0;
         } catch (e) {
-            // Unexpected exception caught
+            // Unexpected error caught
             return 1;
         }
     }
