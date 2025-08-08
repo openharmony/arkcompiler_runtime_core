@@ -21,8 +21,117 @@ import { Job } from "std/core"
 
 const NUMBER_OF_FREE_REGIONS = 2;
 
+class ArrayAsListObject {
+    private data: FixedArray<Object> = [];
+    private curSize: int;
+
+    private init(capacity: int, val: Object): void {
+        this.data = new Object[capacity];
+        for (let i = 0; i < this.data.length; ++i) {
+            this.data[i] = val;
+        }
+        this.curSize = capacity;
+    }
+
+    /**
+    * Constructs new ArrayAsList with respect to capacity and initial value
+    *
+    * @param capacity
+    *
+    * @param val
+    */
+    constructor(capacity: int, val: Object) {
+        this.init(capacity, val);
+    }
+
+    /**
+    * Constructs new empty ArrayAsList
+    */
+    constructor() {
+        this.init(0, new Object());
+    }
+
+    /**
+    * Constructs new ArrayAsList with required capacity
+    *
+    * @param capacity
+    */
+    constructor(capacity: int) {
+        this.init(capacity, new Object());
+    }
+
+    /**
+    * Increases capacity if passed argument is greater than current capacity
+    *
+    * @param capacity
+    */
+    public reserve(capacity: int): void {
+        if (this.data.length < capacity) {
+            let newData : FixedArray<Object> = new Object[capacity];
+            for (let i = 0; i < this.curSize; ++i) {
+            newData[i] = this.data[i];
+            }
+            this.data = newData;
+        }
+    }
+
+    private static getNewCapacity(currentCapacity: int): int {
+        // TODO(ivan-tyulyandin): select proper capacity increasing strategy
+        const fastGrowThreshold = 8192;
+        const multiplier = 2;
+        if (currentCapacity < fastGrowThreshold) {
+            // Adding 4 to jump over 0
+            return (currentCapacity + 4) * multiplier * 2;
+        } else {
+            return currentCapacity * multiplier;
+        }
+    }
+
+    /**
+    * Pops a value from the begin of the List
+    *
+    * @returns popped value
+    */
+    public popFront(): Object {
+        if (this.curSize === 0) {
+            throw new AssertionError("No data to popFront from ArrayAsList!")
+        }
+        let res: Object = this.data[0];
+        for (let i = 1; i < this.curSize; ++i) {
+            this.data[i-1] = this.data[i];
+        }
+        --this.curSize;
+        return res;
+    }
+
+    /**
+    * Pushes a value to the end of the List
+    *
+    * @param e value to push
+    */
+    public pushBack(e: Object): void {
+        if (this.curSize == this.data.length) {
+            let newData : FixedArray<Object> = new Object[ArrayAsListObject.getNewCapacity(this.data.length)];
+            for (let i = 0; i < this.curSize; ++i) {
+                newData[i] = this.data[i];
+            }
+            this.data = newData;
+        }
+        this.data[this.curSize] = e;
+        ++this.curSize;
+    }
+
+    /**
+    * Returns number of elements in the List
+    */
+    public size(): int {
+        return this.curSize;
+    }
+
+}
+
 function cor(numObjToCreate: int, humongousSize: int): Object|null {
-    let localGarbage = new containers.ArrayAsListObject();
+    let localGarbage = new ArrayAsListObject();
     try {
         for (let i = 0; i < numObjToCreate; i++) {
             localGarbage.pushBack(new byte[humongousSize] as Object);
@@ -41,7 +150,7 @@ function cor(numObjToCreate: int, humongousSize: int): Object|null {
 };
 
 class TestHumongousStress {
-    private static GARBAGE = new containers.ArrayAsListObject();
+    private static GARBAGE = new ArrayAsListObject();
 
     regionSize: int;
     humongousSize: int;
@@ -62,7 +171,7 @@ class TestHumongousStress {
             }
         }
         catch(e: OutOfMemoryError) {
-            TestHumongousStress.GARBAGE = new containers.ArrayAsListObject();
+            TestHumongousStress.GARBAGE = new ArrayAsListObject();
         }
         catch(e) {
             arktest.assertTrue( false, "Some other error: " + e.toString());
@@ -90,16 +199,16 @@ class TestHumongousStress {
                 // Null is returned. Not enough memory. Finish current test.
                 continue;
             }
-            let numOfReturnedObjects = (tmp as containers.ArrayAsListObject).size();
+            let numOfReturnedObjects = (tmp as ArrayAsListObject).size();
             for(let j = 0; j < numOfReturnedObjects; j++) {
                 try {
-                    TestHumongousStress.GARBAGE.pushBack((tmp as containers.ArrayAsListObject).popFront());
+                    TestHumongousStress.GARBAGE.pushBack((tmp as ArrayAsListObject).popFront());
                 }
                 catch(e: OutOfMemoryError) {
                     continue;
                 }
                 catch(e) {
-                    arktest.assertTrue( false : "Some other error: " + e.toString());
+                    arktest.assertTrue( false, "Some other error: " + e.toString());
                 }
             }
         }
@@ -108,10 +217,10 @@ class TestHumongousStress {
                 // Null is returned. Not enough memory. Finish current test.
                 return;
             }
-        let numOfReturnedObjects = (tmp as containers.ArrayAsListObject).size();
+        let numOfReturnedObjects = (tmp as ArrayAsListObject).size();
         for(let j = 0; j < numOfReturnedObjects; j++) {
             try {
-                TestHumongousStress.GARBAGE.pushBack((tmp as containers.ArrayAsListObject).popFront());
+                TestHumongousStress.GARBAGE.pushBack((tmp as ArrayAsListObject).popFront());
             }
             catch(e: OutOfMemoryError) {
                 continue;
@@ -123,12 +232,12 @@ class TestHumongousStress {
     }
 
     public clear(): void {
-        TestHumongousStress.GARBAGE = new containers.ArrayAsListObject();
+        TestHumongousStress.GARBAGE = new ArrayAsListObject();
     }
 }
 
 function main(): void {
-    let tests = new containers.ArrayAsListObject();
+    let tests = new ArrayAsListObject();
 
     tests.pushBack(new TestHumongousStress(4, 3, 1.1));
     tests.pushBack(new TestHumongousStress(16, 5, 2.1));

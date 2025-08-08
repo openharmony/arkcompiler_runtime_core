@@ -1360,31 +1360,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         return new Int8Array(this.buffer, relStart * Int8Array.BYTES_PER_ELEMENT.toInt(), count)
     }
 
-
-    /**
-     * Converts Int8Array to a string with respect to locale
-     *
-     * @param locales
-     *
-     * @param options
-     *
-     * @returns string representation
-     */
-    public toLocaleString(locales: Object, options: Object): string {
-        throw new Error("Int8Array.toLocaleString: not implemented")
-    }
-
-    /**
-     * Converts Int8Array to a string with respect to locale
-     *
-     * @param locales
-     *
-     * @returns string representation
-     */
-    public toLocaleString(locales: Object): string {
-        return this.toLocaleString(new Object(), new Object())
-    }
-
     /**
      * Converts Int8Array to a string with respect to locale
      *
@@ -3190,31 +3165,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         return new Int16Array(this.buffer, relStart * Int16Array.BYTES_PER_ELEMENT.toInt(), count)
     }
 
-
-    /**
-     * Converts Int16Array to a string with respect to locale
-     *
-     * @param locales
-     *
-     * @param options
-     *
-     * @returns string representation
-     */
-    public toLocaleString(locales: Object, options: Object): string {
-        throw new Error("Int16Array.toLocaleString: not implemented")
-    }
-
-    /**
-     * Converts Int16Array to a string with respect to locale
-     *
-     * @param locales
-     *
-     * @returns string representation
-     */
-    public toLocaleString(locales: Object): string {
-        return this.toLocaleString(new Object(), new Object())
-    }
-
     /**
      * Converts Int16Array to a string with respect to locale
      *
@@ -4983,31 +4933,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
             count = 0
         }
         return new Int32Array(this.buffer, relStart * Int32Array.BYTES_PER_ELEMENT.toInt(), count)
-    }
-
-
-    /**
-     * Converts Int32Array to a string with respect to locale
-     *
-     * @param locales
-     *
-     * @param options
-     *
-     * @returns string representation
-     */
-    public toLocaleString(locales: Object, options: Object): string {
-        throw new Error("Int32Array.toLocaleString: not implemented")
-    }
-
-    /**
-     * Converts Int32Array to a string with respect to locale
-     *
-     * @param locales
-     *
-     * @returns string representation
-     */
-    public toLocaleString(locales: Object): string {
-        return this.toLocaleString(new Object(), new Object())
     }
 
     /**
@@ -6789,31 +6714,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         return new BigInt64Array(this.buffer, relStart * BigInt64Array.BYTES_PER_ELEMENT.toInt(), count)
     }
 
-
-    /**
-     * Converts BigInt64Array to a string with respect to locale
-     *
-     * @param locales
-     *
-     * @param options
-     *
-     * @returns string representation
-     */
-    public toLocaleString(locales: Object, options: Object): string {
-        throw new Error("BigInt64Array.toLocaleString: not implemented")
-    }
-
-    /**
-     * Converts BigInt64Array to a string with respect to locale
-     *
-     * @param locales
-     *
-     * @returns string representation
-     */
-    public toLocaleString(locales: Object): string {
-        return this.toLocaleString(new Object(), new Object())
-    }
-
     /**
      * Converts BigInt64Array to a string with respect to locale
      *
@@ -8570,31 +8470,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         return new Float32Array(this.buffer, relStart * Float32Array.BYTES_PER_ELEMENT.toInt(), count)
     }
 
-
-    /**
-     * Converts Float32Array to a string with respect to locale
-     *
-     * @param locales
-     *
-     * @param options
-     *
-     * @returns string representation
-     */
-    public toLocaleString(locales: Object, options: Object): string {
-        throw new Error("Float32Array.toLocaleString: not implemented")
-    }
-
-    /**
-     * Converts Float32Array to a string with respect to locale
-     *
-     * @param locales
-     *
-     * @returns string representation
-     */
-    public toLocaleString(locales: Object): string {
-        return this.toLocaleString(new Object(), new Object())
-    }
-
     /**
      * Converts Float32Array to a string with respect to locale
      *
@@ -10242,31 +10117,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
             count = 0
         }
         return new Float64Array(this.buffer, relStart * Float64Array.BYTES_PER_ELEMENT.toInt(), count)
-    }
-
-
-    /**
-     * Converts Float64Array to a string with respect to locale
-     *
-     * @param locales
-     *
-     * @param options
-     *
-     * @returns string representation
-     */
-    public toLocaleString(locales: Object, options: Object): string {
-        throw new Error("Float64Array.toLocaleString: not implemented")
-    }
-
-    /**
-     * Converts Float64Array to a string with respect to locale
-     *
-     * @param locales
-     *
-     * @returns string representation
-     */
-    public toLocaleString(locales: Object): string {
-        return this.toLocaleString(new Object(), new Object())
     }
 
     /**

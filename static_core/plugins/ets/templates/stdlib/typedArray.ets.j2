@@ -1560,31 +1560,6 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         return new {{N}}Array(this.buffer, relStart * {{N}}Array.BYTES_PER_ELEMENT.toInt(), count)
     }
 
-
-    /**
-     * Converts {{N}}Array to a string with respect to locale
-     *
-     * @param locales
-     *
-     * @param options
-     *
-     * @returns string representation
-     */
-    public toLocaleString(locales: Object, options: Object): string {
-        throw new Error("{{N}}Array.toLocaleString: not implemented")
-    }
-
-    /**
-     * Converts {{N}}Array to a string with respect to locale
-     *
-     * @param locales
-     *
-     * @returns string representation
-     */
-    public toLocaleString(locales: Object): string {
-        return this.toLocaleString(new Object(), new Object())
-    }
-
     /**
      * Converts {{N}}Array to a string with respect to locale
      *

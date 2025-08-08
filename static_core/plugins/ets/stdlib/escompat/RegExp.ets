@@ -983,10 +983,6 @@ export class RegExp extends Object {
     private static $8_: String = ""
     private static $9_: String = ""
 
-    // NOTE(shumilov-petr): Removing the following setter leads to unspecified behaviour of es2panda
-    // The negative test '02.lexical_elements/07.keywords/types_n_12.ets' gets failed if remove this setter
-    set __removeMe(a: int) {}
-
     /** Flags */
     get flags(): String {
         return this.flags_
