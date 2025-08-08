@@ -183,8 +183,8 @@ def process_file(panda_root, file_path):
         for lang, code in extracted_code:
             result = check_code(panda_root, lang, code)
             if result != 0:
-                print("Check failed in " + str(file_path))
-                raise RuntimeError("Check failed in " + str(file_path))
+                print(f"Check failed in {file_path}")
+                raise RuntimeError(f"Check failed in {file_path}")
 
 
 def process_folder(panda_root, folder_path):
