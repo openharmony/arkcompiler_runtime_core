@@ -1415,6 +1415,16 @@ intrinsics:
     impl: ark::intrinsics::MinF64
     safe_intrinsic: true
 
+  - name: EscompatMathRandom
+    space: ets
+    class_name: escompat.Math
+    method_name: random
+    static: true
+    signature:
+      ret: f64
+      args: [ ]
+    impl: ark::ets::intrinsics::StdMathRandom
+
 #################
 # escompat.JSON #
 #################
