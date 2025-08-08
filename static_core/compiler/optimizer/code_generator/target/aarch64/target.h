@@ -333,6 +333,7 @@ public:
     bool CanEncodeImmLogical(uint64_t imm, uint32_t size) override;
     bool CanEncodeScale(uint64_t imm, uint32_t size) override;
     bool CanEncodeFloatSelect() override;
+    bool CanEncodeBitfieldExtractionFor(DataType::Type type) override;
 
     void EncodeCompareAndSwap(Reg dst, Reg obj, Reg offset, Reg val, Reg newval) override;
     void EncodeUnsafeGetAndSet(Reg dst, Reg obj, Reg offset, Reg val) override;

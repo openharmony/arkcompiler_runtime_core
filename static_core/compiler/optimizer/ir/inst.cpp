@@ -510,6 +510,14 @@ void ClassInst::SetVnObject(VnObject *vnObj) const
     }
 }
 
+void ExtractBitfieldInst::SetVnObject(VnObject *vnObj) const
+{
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
+    vnObj->Add(static_cast<VnObject::HalfObjType>((sourceBit_ << 1U) | static_cast<unsigned>(signExt_)),
+               static_cast<VnObject::HalfObjType>(width_));
+}
+
 void GlobalVarInst::SetVnObject(VnObject *vnObj) const
 {
     vnObj->Add(static_cast<VnObject::ObjType>(Opcode::GetGlobalVarAddress));
@@ -752,6 +760,15 @@ template class FixedInputsInst<2U>;
 template class FixedInputsInst<3U>;
 template class FixedInputsInst<4U>;
 #endif
+
+Inst *ExtractBitfieldInst::Clone(const Graph *targetGraph) const
+{
+    auto clone = static_cast<ExtractBitfieldInst *>(FixedInputsInst<1>::Clone(targetGraph));
+    clone->sourceBit_ = this->sourceBit_;
+    clone->width_ = this->width_;
+    clone->signExt_ = this->signExt_;
+    return clone;
+}
 
 Inst *CallInst::Clone(const Graph *targetGraph) const
 {

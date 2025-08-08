@@ -297,6 +297,7 @@ public:
     void EncodeDiv(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
     void EncodeMod(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
     void EncodeMax(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
+    void EncodeExtractBits(Reg dst, Reg src, Imm imm1, Imm imm2, bool signExt) override;
 
     void EncodeLdr(Reg dst, bool dstSigned, MemRef mem) override;
     void EncodeLdr(Reg dst, bool dstSigned, const vixl::aarch32::MemOperand &vixlMem);
@@ -355,6 +356,7 @@ public:
 
     bool CanEncodeImmAddSubCmp(int64_t imm, uint32_t size, bool signedCompare) override;
     bool CanEncodeImmLogical(uint64_t imm, uint32_t size) override;
+    bool CanEncodeBitfieldExtractionFor(DataType::Type type) override;
 
     size_t GetCursorOffset() const override;
     void SetCursorOffset(size_t offset) override;

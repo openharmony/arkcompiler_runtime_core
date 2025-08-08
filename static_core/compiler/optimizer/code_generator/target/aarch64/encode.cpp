@@ -3172,6 +3172,11 @@ bool Aarch64Encoder::CanEncodeFloatSelect()
     return true;
 }
 
+bool Aarch64Encoder::CanEncodeBitfieldExtractionFor(DataType::Type type)
+{
+    return type == DataType::INT32 || type == DataType::UINT32 || type == DataType::INT64 || type == DataType::UINT64;
+}
+
 Reg Aarch64Encoder::AcquireScratchRegister(TypeInfo type)
 {
     ASSERT(GetMasm()->GetCurrentScratchRegisterScope() == nullptr);

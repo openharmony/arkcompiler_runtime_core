@@ -211,6 +211,68 @@ TEST_F(VNTest, VnTestApply2)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
+SRC_GRAPH(VnTestBitfieldExtraction, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        BASIC_BLOCK(2U, -1L)
+        {
+            for (unsigned index = 0; index <= 15; ++index) {
+                INST(1U + index, Opcode::ExtractBitfield).u64().Inputs(0U);
+            }
+            INST(17U, Opcode::SaveState).NoVregs();
+            INST(18U, Opcode::CallStatic)
+                .b()
+                .InputsAutoType(1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U, 9U, 10U, 11U, 12U, 13U, 14U, 15U, 16U, 17U);
+            INST(19U, Opcode::ReturnVoid);
+        }
+        for (unsigned index = 0; index <= 15; ++index) {
+            auto *bfx = INS(1U + index).CastToExtractBitfield();
+            bfx->SetSourceBit(10U + (index & 4U));
+            bfx->SetWidth(30U + (index & 2U));
+            ((index & 1U) != 0) ? bfx->AsSignBitExtension() : bfx->AsZeroExtension();
+        }
+    }
+}
+
+OUT_GRAPH(VnTestBitfieldExtraction, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        BASIC_BLOCK(2U, -1L)
+        {
+            for (unsigned index = 0; index <= 15; ++index) {
+                INST(1U + index, Opcode::ExtractBitfield).u64().Inputs(0U);
+            }
+            INST(17U, Opcode::SaveState).NoVregs();
+            INST(18U, Opcode::CallStatic)
+                .b()
+                .InputsAutoType(1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U, 1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U, 17U);
+            INST(19U, Opcode::ReturnVoid);
+        }
+        for (unsigned index = 0; index <= 15; ++index) {
+            auto *bfx = INS(1U + index).CastToExtractBitfield();
+            bfx->SetSourceBit(10U + (index & 4U));
+            bfx->SetWidth(30U + (index & 2U));
+            ((index & 1U) != 0) ? bfx->AsSignBitExtension() : bfx->AsZeroExtension();
+        }
+    }
+}
+
+TEST_F(VNTest, VnTestBitfieldExtraction)
+{
+    // Remove duplicate Cast,  AddI, Fcmp and Cmp instructions
+    src_graph::VnTestBitfieldExtraction::CREATE(GetGraph());
+    Graph *graphEt = CreateGraphWithDefaultRuntime();
+    out_graph::VnTestBitfieldExtraction::CREATE(graphEt);
+
+    GetGraph()->RunPass<ValNum>();
+    GraphChecker(GetGraph()).Check();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
+}
+
 SRC_GRAPH(VnTestNotApply1, Graph *graph)
 {
     GRAPH(graph)

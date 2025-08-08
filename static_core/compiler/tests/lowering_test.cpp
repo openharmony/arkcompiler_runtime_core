@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -299,6 +299,81 @@ TEST_F(LoweringTest, LoweringLogic)
     ASSERT_EQ(INS(11U).GetPrev()->GetOpcode(), Opcode::XorI);
 }
 
+// 0.i64 Constant n1
+// 1.i64 Constant M = 2^n2 - 1
+// 2. ...
+// 3.Type Shr|Ashr v2, v0
+// 4.Type And v3, v1
+// ====>
+// 0.i64 Constant n1
+// 1.i64 Constant M = 2^n2 - 1
+// 2. ...
+// 3.Type ExtractBitfield v2, n1, n2 - n1 [ZeroExtension]
+TEST_F(LoweringTest, LoweringAndToBitfieldExtraction)
+{
+    struct TestCase {
+        bool expectsApplication;
+        DataType::Type dataType;
+        uint32_t shrValue;
+        uint64_t mask;
+        uint32_t expectedUbfxWidth;
+    };
+    constexpr auto IGNORED = std::numeric_limits<unsigned>::max();
+    auto testCases = std::vector<TestCase> {
+        {true, DataType::INT32, 2, 0x3FU, 6U},
+        {true, DataType::UINT32, 9, 0x7FU, 7U},
+        {true, DataType::INT32, 19, 0x1FFFU, 13U},
+        {true, DataType::UINT32, 14, 0x3FFU, 10U},
+        {true, DataType::INT64, 17, 0x3FF'FFFFU, 26U},
+        {true, DataType::UINT64, 25, 0x7F'FFFF'FFFFULL, 39U},
+        // mask is not 2^n2 - 1
+        {false, DataType::INT32, 4U, 0xDU, IGNORED},
+        {false, DataType::UINT32, 6U, 0x6FU, IGNORED},
+        {false, DataType::INT64, 20U, 0x8FF8U, IGNORED},
+        {false, DataType::UINT64, 40U, 0x7F7F7FU, IGNORED},
+        // shift amount + bit size of mask > bit size of data type
+        {false, DataType::INT32, 18U, 0xFFFFU, IGNORED},
+        {false, DataType::INT64, 45U, 0xFFFFFU, IGNORED},
+    };
+    if (GetGraph()->GetArch() != Arch::AARCH64) {
+        return;
+    }
+    for (size_t i = 0; i < testCases.size(); i++) {
+        const auto &curCase = testCases[i];
+        auto *graph = CreateEmptyLowLevelGraph();
+        GRAPH(graph)
+        {
+            PARAMETER(0U, 1U).type(curCase.dataType);
+            CONSTANT(1U, curCase.shrValue);
+            CONSTANT(2U, curCase.mask);
+            BASIC_BLOCK(2U, -1L)
+            {
+                auto opc = (i % 2 == 0) ? Opcode::Shr : Opcode::AShr;  // Tests Shr and AShr alternatively
+                INST(3U, opc).type(curCase.dataType).Inputs(0U, 1U);
+                INST(4U, Opcode::And).type(curCase.dataType).Inputs(3U, 2U);
+                INST(5U, Opcode::Return).type(curCase.dataType).Inputs(4U);
+            }
+        }
+        graph->RunPass<Lowering>();
+        GraphChecker(graph).Check();
+
+        auto ubfxInstRaw = INS(5U).GetInput(0).GetInst();
+        if (curCase.expectsApplication) {
+            ASSERT_EQ(Opcode::ExtractBitfield, ubfxInstRaw->GetOpcode()) << "Failure in test case #" << i;
+
+            auto *ubfxInst = ubfxInstRaw->CastToExtractBitfield();
+            ASSERT_EQ(curCase.dataType, ubfxInst->GetType());
+            ASSERT_TRUE(ubfxInst->IsZeroExtension());
+            uint32_t expectedSourceBit = curCase.shrValue;
+            ASSERT_EQ(expectedSourceBit, ubfxInst->GetSourceBit());
+            ASSERT_EQ(curCase.expectedUbfxWidth, ubfxInst->GetWidth());
+            ASSERT_EQ(ubfxInst->GetInput(0).GetInst(), &INS(0U));
+        } else {
+            ASSERT_NE(Opcode::ExtractBitfield, ubfxInstRaw->GetOpcode()) << "Failure in test case #" << i;
+        }
+    }
+}
+
 TEST_F(LoweringTest, LoweringShift)
 {
     GRAPH(GetGraph())
@@ -347,6 +422,255 @@ TEST_F(LoweringTest, LoweringShift)
     ASSERT_EQ(INS(9U).GetPrev()->GetOpcode(), Opcode::ShlI);
     ASSERT_EQ(INS(10U).GetPrev()->GetOpcode(), Opcode::ShlI);
     ASSERT_EQ(INS(11U).GetPrev()->GetOpcode(), Opcode::Shl);
+}
+
+// 0.i64 Constant (B - n1 - n2)
+// 1.i64 Constant (B - n2)
+// 2. ...
+// 3.Type Shl v2, v0
+// 4.Type Shr|AShr v3, v1
+// ====>
+// 0.i64 Constant (B - n1 - n2)
+// 1.i64 Constant (B - n2)
+// 2. ...
+// 3.Type ExtractBitfield v2, n1, n2
+TEST_F(LoweringTest, LoweringShiftToBitfieldExtractionCase1)
+{
+    struct TestCase {
+        bool expectsApplication;
+        DataType::Type dataType;
+        uint32_t shlValue;
+        uint32_t shrValue;
+        uint32_t expectedBfxSourceBit;
+        uint32_t expectedBfxWidth;
+    };
+    constexpr auto IGNORED = std::numeric_limits<unsigned>::max();
+    auto testCases = std::vector<TestCase> {
+        {true, DataType::INT32, 3U, 4U, 1U, 28U},
+        {true, DataType::INT32, 6U, 6U, 0U, 26U},
+        {true, DataType::INT32, 9U, 12U, 3U, 20U},
+        {true, DataType::INT64, 12U, 19U, 7U, 45U},
+        {true, DataType::INT64, 45U, 45U, 0U, 19U},
+        // shr amount < shl amount
+        {false, DataType::INT32, 3U, 2U, IGNORED, IGNORED},
+        {false, DataType::INT32, 6U, 4U, IGNORED, IGNORED},
+        {false, DataType::INT64, 31U, 15U, IGNORED, IGNORED},
+    };
+    if (GetGraph()->GetArch() != Arch::AARCH64) {
+        return;
+    }
+    for (size_t i = 0; i < testCases.size(); i++) {
+        const auto &curCase = testCases[i];
+        auto *graph = CreateEmptyLowLevelGraph();
+        GRAPH(graph)
+        {
+            PARAMETER(0U, 1U).type(curCase.dataType);
+            CONSTANT(1U, curCase.shlValue);
+            CONSTANT(2U, curCase.shrValue);
+            BASIC_BLOCK(2U, -1L)
+            {
+                auto opc = (i % 2 == 0) ? Opcode::Shr : Opcode::AShr;  // 2 : Tests Shr and AShr alternatively
+                INST(3U, Opcode::Shl).type(curCase.dataType).Inputs(0U, 1U);
+                INST(4U, opc).type(curCase.dataType).Inputs(3U, 2U);
+                INST(5U, Opcode::Return).type(curCase.dataType).Inputs(4U);
+            }
+        }
+        graph->RunPass<Lowering>();
+        GraphChecker(graph).Check();
+
+        auto bfxInstRaw = INS(5U).GetInput(0).GetInst();
+        if (curCase.expectsApplication) {
+            ASSERT_EQ(Opcode::ExtractBitfield, bfxInstRaw->GetOpcode()) << "Failure in test case #" << i;
+
+            auto *bfxInst = bfxInstRaw->CastToExtractBitfield();
+            ASSERT_EQ(curCase.dataType, bfxInst->GetType());
+            // 2 : Tests Shr and AShr alternatively
+            ASSERT_TRUE(i % 2 == 0 ? bfxInst->IsZeroExtension() : bfxInst->IsSignBitExtension());
+            ASSERT_EQ(curCase.expectedBfxSourceBit, bfxInst->GetSourceBit());
+            ASSERT_EQ(curCase.expectedBfxWidth, bfxInst->GetWidth());
+            ASSERT_EQ(bfxInst->GetInput(0).GetInst(), &INS(0U));
+        } else {
+            ASSERT_NE(Opcode::ExtractBitfield, bfxInstRaw->GetOpcode()) << "Failure in test case #" << i;
+        }
+    }
+}
+
+TEST_F(LoweringTest, LoweringShiftToBitfieldExtractionCase1NonConstant1)
+{
+    if (GetGraph()->GetArch() != Arch::AARCH64) {
+        return;
+    }
+    // Not applied since shl mount is not constant
+    auto *graph = CreateEmptyLowLevelGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(1U, 1U).u32();
+        CONSTANT(2U, 8U);
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(3U, Opcode::Shl).u32().Inputs(0U, 1U);
+            INST(4U, Opcode::AShr).u32().Inputs(3U, 2U);
+            INST(5U, Opcode::Return).u32().Inputs(4U);
+        }
+    }
+    graph->RunPass<Lowering>();
+    GraphChecker(graph).Check();
+
+    auto notSbfxInst = INS(5U).GetInput(0).GetInst();
+    ASSERT_NE(Opcode::ExtractBitfield, notSbfxInst->GetOpcode());
+}
+
+TEST_F(LoweringTest, LoweringShiftToBitfieldExtractionCase1NonConstant2)
+{
+    if (GetGraph()->GetArch() != Arch::AARCH64) {
+        return;
+    }
+    // Not applied since shr mount is not constant
+    auto *graph = CreateEmptyLowLevelGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(1U, 1U).u32();
+        CONSTANT(2U, 8U);
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(3U, Opcode::Shl).u32().Inputs(0U, 2U);
+            INST(4U, Opcode::AShr).u32().Inputs(3U, 1U);
+            INST(5U, Opcode::Return).u32().Inputs(4U);
+        }
+    }
+    graph->RunPass<Lowering>();
+    GraphChecker(graph).Check();
+
+    auto notSbfxInst = INS(5U).GetInput(0).GetInst();
+    ASSERT_NE(Opcode::ExtractBitfield, notSbfxInst->GetOpcode());
+}
+
+// 0.i64 Constant M, where 2^n2 - 2^n1 <= M <= 2^n2 - 1
+// 1.i64 Constant n1
+// 2. ...
+// 3.Type And v2, v0
+// 4.Type Shr|AShr v3, v1
+// ====>
+// 0.i64 Constant M, where 2^n2 - 2^n1 <= M <= 2^n2 - 1
+// 1.i64 Constant n1
+// 2. ...
+// 3.Type ExtractBitfield v2, n1, n2 - n1
+TEST_F(LoweringTest, LoweringShiftToBitfieldExtractionCase2)
+{
+    struct TestCase {
+        bool expectsApplication;
+        bool expectsSbfxOnAShr;
+        DataType::Type dataType;
+        uint64_t mask;
+        uint32_t shrValue;
+        uint32_t expectedBfxWidth;
+    };
+    constexpr auto IGNORED = std::numeric_limits<unsigned>::max();
+    auto testCases = std::vector<TestCase> {
+        {true, false, DataType::INT32, 0x1FU, 2U, 3U},
+        {true, false, DataType::INT32, 0x1FF5U, 4U, 9U},
+        {true, false, DataType::INT32, 0x1FF'FFF8ULL, 8U, 17U},
+        {true, false, DataType::INT64, 0xFFFF'FFFF'FFFFULL, 15U, 33U},
+        {true, true, DataType::INT32, 0xFFFF'FFF8ULL, 8U, 24U},
+        {true, true, DataType::INT64, 0xFFFF'FFFF'FFFF'F123ULL, 15U, 49U},
+        // Invalid mask
+        {false, false, DataType::INT32, 0x1FULL, 5U, IGNORED},
+        {false, false, DataType::INT64, 0x1FF0ULL, 14U, IGNORED},
+        {false, false, DataType::INT32, 0x1FF'FE80ULL, 7U, IGNORED},
+        {false, false, DataType::INT64, 0xFFFF'FFFF'7FFFULL, 12U, IGNORED},
+    };
+    if (GetGraph()->GetArch() != Arch::AARCH64) {
+        return;
+    }
+    for (auto opc : {Opcode::Shr, Opcode::AShr}) {
+        for (const auto &curCase : testCases) {
+            auto *graph = CreateEmptyLowLevelGraph();
+            GRAPH(graph)
+            {
+                PARAMETER(0U, 1U).type(curCase.dataType);
+                CONSTANT(1U, curCase.mask);
+                CONSTANT(2U, curCase.shrValue);
+                BASIC_BLOCK(2U, -1L)
+                {
+                    INST(3U, Opcode::And).type(curCase.dataType).Inputs(0U, 1U);
+                    INST(4U, opc).type(curCase.dataType).Inputs(3U, 2U);
+                    INST(5U, Opcode::Return).type(curCase.dataType).Inputs(4U);
+                }
+            }
+            graph->RunPass<Lowering>();
+            GraphChecker(graph).Check();
+
+            auto bfxInstRaw = INS(5U).GetInput(0).GetInst();
+            if (curCase.expectsApplication) {
+                ASSERT_EQ(Opcode::ExtractBitfield, bfxInstRaw->GetOpcode());
+
+                auto *bfxInst = bfxInstRaw->CastToExtractBitfield();
+                ASSERT_EQ(curCase.dataType, bfxInst->GetType());
+                bool expectsSbfx = opc == Opcode::AShr && curCase.expectsSbfxOnAShr;
+                ASSERT_TRUE(expectsSbfx ? bfxInst->IsSignBitExtension() : bfxInst->IsZeroExtension());
+                uint32_t expectedSourceBit = curCase.shrValue;
+                ASSERT_EQ(expectedSourceBit, bfxInst->GetSourceBit());
+                ASSERT_EQ(curCase.expectedBfxWidth, bfxInst->GetWidth());
+                ASSERT_EQ(bfxInst->GetInput(0).GetInst(), &INS(0U));
+            } else {
+                ASSERT_NE(Opcode::ExtractBitfield, bfxInstRaw->GetOpcode());
+            }
+        }
+    }
+}
+
+TEST_F(LoweringTest, LoweringShiftToBitfieldExtractionCase2NonConstant1)
+{
+    if (GetGraph()->GetArch() != Arch::AARCH64) {
+        return;
+    }
+    // Not applied since mask is not constant
+    auto *graph = CreateEmptyLowLevelGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(1U, 1U).u32();
+        CONSTANT(2U, 8U);
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(3U, Opcode::And).u32().Inputs(0U, 1U);
+            INST(4U, Opcode::Shr).u32().Inputs(3U, 2U);
+            INST(5U, Opcode::Return).u32().Inputs(4U);
+        }
+    }
+    graph->RunPass<Lowering>();
+    GraphChecker(graph).Check();
+
+    auto notUbfxInst = INS(5U).GetInput(0).GetInst();
+    ASSERT_NE(Opcode::ExtractBitfield, notUbfxInst->GetOpcode());
+}
+
+TEST_F(LoweringTest, LoweringShiftToBitfieldExtractionCase2NonConstant2)
+{
+    if (GetGraph()->GetArch() != Arch::AARCH64) {
+        return;
+    }
+    // Not applied since shr amount is not constant
+    auto *graph = CreateEmptyLowLevelGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(1U, 1U).u32();
+        CONSTANT(2U, 0xFFFFFFU);
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(3U, Opcode::And).u32().Inputs(0U, 2U);
+            INST(4U, Opcode::Shr).u32().Inputs(3U, 1U);
+            INST(5U, Opcode::Return).u32().Inputs(4U);
+        }
+    }
+    graph->RunPass<Lowering>();
+    GraphChecker(graph).Check();
+
+    auto ubfxInst = INS(5U).GetInput(0).GetInst();
+    ASSERT_NE(Opcode::ExtractBitfield, ubfxInst->GetOpcode());
 }
 
 void LoweringTest::BuildGraphSaveStateTest()
@@ -1619,8 +1943,8 @@ Graph *LoweringTest::BuildGraphCommutativeBinaryOpWithShiftedOperand(const TypeT
     {
         PARAMETER(0U, 0U).type(types[1U]);
         PARAMETER(1U, 1U).type(types[2U]);
-        CONSTANT(2U, 5U);
-        CONSTANT(3U, 3U);
+        CONSTANT(2U, 3U);
+        CONSTANT(3U, 9U);
 
         BASIC_BLOCK(2U, -1L)
         {
@@ -1655,15 +1979,15 @@ Graph *LoweringTest::BuildExpectedCommutativeBinaryOpWithShiftedOperand(const Ty
     {
         PARAMETER(0U, 0U).type(types[1U]);
         PARAMETER(1U, 1U).type(types[2U]);
-        CONSTANT(2U, 3U);
+        CONSTANT(2U, 9U);
 
         BASIC_BLOCK(2U, -1L)
         {
-            INST(3U, ops.second).Shift(std::get<2U>(shiftOp), 5U).type(type).Inputs(1U, 0U);
-            INST(4U, ops.second).Shift(std::get<2U>(shiftOp), 5U).type(type).Inputs(1U, 1U);
-            INST(5U, ops.second).Shift(std::get<2U>(shiftOp), 5U).type(type).Inputs(2U, 1U);
+            INST(3U, ops.second).Shift(std::get<2U>(shiftOp), 3U).type(type).Inputs(1U, 0U);
+            INST(4U, ops.second).Shift(std::get<2U>(shiftOp), 3U).type(type).Inputs(1U, 1U);
+            INST(5U, ops.second).Shift(std::get<2U>(shiftOp), 3U).type(type).Inputs(2U, 1U);
 
-            INST(6U, std::get<1U>(shiftOp)).Imm(5U).type(type).Inputs(0U);
+            INST(6U, std::get<1U>(shiftOp)).Imm(3U).type(type).Inputs(0U);
             INST(7U, ops.first).type(type).Inputs(1U, 6U);
 
             INST(8U, Opcode::Max).type(type).Inputs(3U, 4U);

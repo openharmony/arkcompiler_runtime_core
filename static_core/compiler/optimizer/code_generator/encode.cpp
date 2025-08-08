@@ -550,6 +550,11 @@ bool Encoder::CanEncodeFloatSelect()
     return false;
 }
 
+bool Encoder::CanEncodeBitfieldExtractionFor([[maybe_unused]] DataType::Type type)
+{
+    return false;
+}
+
 void Encoder::EncodeCompareAndSwap([[maybe_unused]] Reg dst, [[maybe_unused]] Reg obj, [[maybe_unused]] Reg offset,
                                    [[maybe_unused]] Reg val, [[maybe_unused]] Reg newval)
 {

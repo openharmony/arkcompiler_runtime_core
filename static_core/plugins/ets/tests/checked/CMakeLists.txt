@@ -180,6 +180,7 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
         endif()
         if (PANDA_TARGET_ARM64)
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/if_conversion_ubfx.ets)
+            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/lowering_bitfield_extraction.ets)
         endif()
         # inlining of the following intrinsics is only enabled for these two targets
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_isFinite.ets)

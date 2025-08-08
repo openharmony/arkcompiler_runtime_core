@@ -2227,6 +2227,15 @@ void Aarch32Encoder::EncodeMax(Reg dst, bool dstSigned, Reg src0, Reg src1)
     GetMasm()->Mov(cc.Negate(), VixlRegU(dst), VixlRegU(src0));
 }
 
+void Aarch32Encoder::EncodeExtractBits(Reg dst, Reg src, Imm imm1, Imm imm2, bool signExt)
+{
+    if (signExt) {
+        GetMasm()->Sbfx(VixlReg(dst), VixlReg(src), imm1.GetAsInt(), imm2.GetAsInt());
+    } else {
+        GetMasm()->Ubfx(VixlReg(dst), VixlReg(src), imm1.GetAsInt(), imm2.GetAsInt());
+    }
+}
+
 template <bool IS_MAX>
 void Aarch32Encoder::EncodeMinMaxFp(Reg dst, Reg src0, Reg src1)
 {
@@ -3186,6 +3195,11 @@ bool Aarch32Encoder::CanEncodeImmLogical(uint64_t imm, uint32_t size)
     }
 #endif  // NDEBUG
     return vixl::aarch32::ImmediateA32::IsImmediateA32(imm);
+}
+
+bool Aarch32Encoder::CanEncodeBitfieldExtractionFor(DataType::Type type)
+{
+    return type == DataType::INT32 || type == DataType::UINT32;
 }
 
 using vixl::aarch32::MemOperand;
