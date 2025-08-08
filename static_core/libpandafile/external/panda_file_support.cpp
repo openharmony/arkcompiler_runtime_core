@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,33 +39,43 @@ static void CallOnce(bool *onceFlag, OnceCallback callBack)
     }
 }
 
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define LOAD_FUNC_OR_RETURN(CLASS, FUNC, HANDLE)                                           \
+    do {                                                                                   \
+        CLASS::p##FUNC = reinterpret_cast<decltype(CLASS::p##FUNC)>(dlsym(HANDLE, #FUNC)); \
+        if (CLASS::p##FUNC == nullptr) {                                                   \
+            ClearAllLoadedFuncs();                                                         \
+            dlclose(HANDLE);                                                               \
+            return;                                                                        \
+        }                                                                                  \
+    } while (0)
+
+static void ClearAllLoadedFuncs()
+{
+    PandaFileWrapper::pOpenPandafileFromFdExt = nullptr;
+    PandaFileWrapper::pOpenPandafileFromMemoryExt = nullptr;
+    PandaFileWrapper::pQueryMethodSymByOffsetExt = nullptr;
+    PandaFileWrapper::pQueryMethodSymAndLineByOffsetExt = nullptr;
+    PandaFileWrapper::pQueryAllMethodSymsExt = nullptr;
+}
+
 void LoadPandFileExt()
 {
     static bool dlopenOnce = false;
     CallOnce(&dlopenOnce, []() {
-        const char pandafileext[] = "libpandafileExt.so";
+        const char pandafileext[] = "libarkfileExt.so";
         void *hd = dlopen(pandafileext, RTLD_NOW);
         if (hd == nullptr) {
             return;
         }
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOAD_FUNC(CLASS, FUNC)                                                 \
-    do {                                                                       \
-        /* CC-OFFNXT(G.PRE.10) function scope macro */                         \
-        CLASS::p##FUNC = reinterpret_cast<decltype(FUNC) *>(dlsym(hd, #FUNC)); \
-        if (CLASS::p##FUNC == nullptr) {                                       \
-            return; /* CC-OFF(G.PRE.05) function gen */                        \
-        }                                                                      \
-    } while (0)
-
-        LOAD_FUNC(PandaFileWrapper, OpenPandafileFromFdExt);
-        LOAD_FUNC(PandaFileWrapper, OpenPandafileFromMemoryExt);
-        LOAD_FUNC(PandaFileWrapper, QueryMethodSymByOffsetExt);
-        LOAD_FUNC(PandaFileWrapper, QueryMethodSymAndLineByOffsetExt);
-        LOAD_FUNC(PandaFileWrapper, QueryAllMethodSymsExt);
-#undef LOAD_FUNC
+        LOAD_FUNC_OR_RETURN(PandaFileWrapper, OpenPandafileFromFdExt, hd);
+        LOAD_FUNC_OR_RETURN(PandaFileWrapper, OpenPandafileFromMemoryExt, hd);
+        LOAD_FUNC_OR_RETURN(PandaFileWrapper, QueryMethodSymByOffsetExt, hd);
+        LOAD_FUNC_OR_RETURN(PandaFileWrapper, QueryMethodSymAndLineByOffsetExt, hd);
+        LOAD_FUNC_OR_RETURN(PandaFileWrapper, QueryAllMethodSymsExt, hd);
     });
 }
+#undef LOAD_FUNC_OR_RETURN
 
 }  // namespace panda_api::panda_file

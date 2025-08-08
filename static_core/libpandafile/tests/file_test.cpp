@@ -20,6 +20,7 @@
 #include "utils/string_helpers.h"
 #include "zip_archive.h"
 #include "file.h"
+#include "external/panda_file_support.cpp"
 
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
@@ -535,6 +536,27 @@ TEST(File, OpenPandaFileFromSecureMemory)
     std::array<uint8_t, bufferSize> buffer = {0};
     pf = OpenPandaFileFromSecureMemory(buffer.data(), bufferSize);
     EXPECT_EQ(pf, nullptr);
+}
+
+TEST(File, LoadPandFileExt_Behavior)
+{
+    using Wrapper = panda_api::panda_file::PandaFileWrapper;
+
+    // Before loading, all function pointers should be null
+    EXPECT_EQ(Wrapper::pOpenPandafileFromFdExt, nullptr);
+    EXPECT_EQ(Wrapper::pOpenPandafileFromMemoryExt, nullptr);
+    EXPECT_EQ(Wrapper::pQueryMethodSymByOffsetExt, nullptr);
+    EXPECT_EQ(Wrapper::pQueryMethodSymAndLineByOffsetExt, nullptr);
+    EXPECT_EQ(Wrapper::pQueryAllMethodSymsExt, nullptr);
+
+    // Load symbols
+    panda_api::panda_file::LoadPandFileExt();
+
+    bool allSet = Wrapper::pOpenPandafileFromFdExt != nullptr && Wrapper::pOpenPandafileFromMemoryExt != nullptr &&
+                  Wrapper::pQueryMethodSymByOffsetExt != nullptr &&
+                  Wrapper::pQueryMethodSymAndLineByOffsetExt != nullptr && Wrapper::pQueryAllMethodSymsExt != nullptr;
+
+    EXPECT_TRUE(allSet) << "Function pointers are in all_set state";
 }
 
 }  // namespace ark::panda_file::test
