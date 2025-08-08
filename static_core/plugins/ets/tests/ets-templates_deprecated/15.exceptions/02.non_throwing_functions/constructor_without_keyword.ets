@@ -21,7 +21,7 @@ tags: [compile-only, negative]
 
 class A {
   public constructor() {
-    throw new Exception();
+    throw new Error();
   }
 }
 
