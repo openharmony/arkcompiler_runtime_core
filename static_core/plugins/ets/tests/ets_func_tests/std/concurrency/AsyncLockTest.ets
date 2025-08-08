@@ -33,7 +33,7 @@ function asyncLockQueryTest(): int {
 }
 
 /**
- *  Check if the query exception causes deadlock.
+ *  Check if the query error causes deadlock.
  */
 function asyncLockQueryNonexistentNameTest(): int {
     let result = 0;
