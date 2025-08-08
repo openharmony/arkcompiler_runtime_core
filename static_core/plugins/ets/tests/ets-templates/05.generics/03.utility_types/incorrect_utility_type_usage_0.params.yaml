@@ -18,3 +18,5 @@ cases:
   - Required
   - Awaited
   - NonNullable
+  - Record
+  - ReturnType

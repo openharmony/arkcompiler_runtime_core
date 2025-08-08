@@ -16,10 +16,10 @@ limitations under the License.
 {% for c in cases %}
 
 /*---
-desc: Cannot use Required, Readonly, Partial, Awaited and NonNullable as class type name.
+desc: Cannot use Required, Readonly, Partial, Awaited, NonNullable, Record and ReturnType as user defined type.
 tags: [compile-only, negative]
 ---*/
 
-class {{c}} { }
+type {{c}} = String
 
 {% endfor %}

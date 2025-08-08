@@ -13,10 +13,10 @@
 
 ---
 cases:
-  - partial
-  - readonly
-  - required
-  - awaited
-  - nonnullable
-  - record
-  - returntype
+  - Partial
+  - Readonly
+  - Required
+  - Awaited
+  - NonNullable
+  - Record
+  - ReturnType
