@@ -478,6 +478,7 @@ ScalarValueItem *AsmEmitter::CreateScalarRecordValueItem(
         classItem = it->second;
     } else {
         classItem = container->GetOrCreateForeignClassItem(type.GetDescriptor());
+        ASSERT(classItem != nullptr);
     }
 
     if (out != nullptr) {
@@ -1040,6 +1041,7 @@ void AsmEmitter::MakeArrayTypeItems(ItemContainer *items, const Program &program
 {
     for (const auto &t : program.arrayTypes) {
         auto *foreignRecord = items->GetOrCreateForeignClassItem(t.GetDescriptor());
+        ASSERT(foreignRecord != nullptr);
         entities.classItems.insert({t.GetName(), foreignRecord});
     }
 }
@@ -1053,6 +1055,10 @@ bool AsmEmitter::HandleRecordAsForeign(
 {
     Type recordType = Type::FromName(name);
     auto *foreignRecord = items->GetOrCreateForeignClassItem(recordType.GetDescriptor(rec.conflict));
+    if (foreignRecord == nullptr) {
+        SetLastError("'" + name + "' is already defined.");
+        return false;
+    }
     entities.classItems.insert({name, foreignRecord});
     for (const auto &f : rec.fieldList) {
         ASSERT(f.metadata->IsForeign());
@@ -1088,7 +1094,9 @@ bool AsmEmitter::HandleBaseRecord(ItemContainer *items, const Program &program, 
         auto &rec = it->second;
         Type baseType(baseName, 0);
         if (rec.metadata->IsForeign()) {
-            record->SetSuperClass(items->GetOrCreateForeignClassItem(baseType.GetDescriptor(rec.conflict)));
+            auto item = items->GetOrCreateForeignClassItem(baseType.GetDescriptor(rec.conflict));
+            ASSERT(item != nullptr);
+            record->SetSuperClass(item);
         } else {
             record->SetSuperClass(items->GetOrCreateClassItem(baseType.GetDescriptor(rec.conflict)));
         }
@@ -1112,7 +1120,9 @@ bool AsmEmitter::HandleInterfaces(ItemContainer *items, const Program &program, 
         auto &iface = it->second;
         Type ifaceType(item, 0);
         if (iface.metadata->IsForeign()) {
-            record->AddInterface(items->GetOrCreateForeignClassItem(ifaceType.GetDescriptor(iface.conflict)));
+            auto foreignItem = items->GetOrCreateForeignClassItem(ifaceType.GetDescriptor(iface.conflict));
+            ASSERT(foreignItem);
+            record->AddInterface(foreignItem);
         } else {
             record->AddInterface(items->GetOrCreateClassItem(ifaceType.GetDescriptor(iface.conflict)));
         }
@@ -1897,7 +1907,9 @@ TypeItem *AsmEmitter::GetTypeItem(
     }
 
     if (type.IsArray() || type.IsUnion()) {
-        return items->GetOrCreateForeignClassItem(type.GetDescriptor());
+        auto item = items->GetOrCreateForeignClassItem(type.GetDescriptor());
+        ASSERT(item != nullptr);
+        return item;
     }
 
     const auto &name = type.GetName();
@@ -1909,7 +1921,9 @@ TypeItem *AsmEmitter::GetTypeItem(
     auto &rec = iter->second;
 
     if (rec.metadata->IsForeign()) {
-        return items->GetOrCreateForeignClassItem(type.GetDescriptor());
+        auto item = items->GetOrCreateForeignClassItem(type.GetDescriptor());
+        ASSERT(item != nullptr);
+        return item;
     }
 
     return items->GetOrCreateClassItem(type.GetDescriptor());

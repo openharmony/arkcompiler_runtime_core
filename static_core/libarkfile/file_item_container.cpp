@@ -158,7 +158,7 @@ private:
 // NOTE(nsizov): make method for items deletion
 template <class T, class C, class I, class P, class E, class... Args>
 // CC-OFFNXT(G.FUN.01-CPP) solid logic
-static T *GetOrInsert(C &map, I &items, const P &pos, const E &key, bool isForeign, Args &&...args)
+[[nodiscard]] static T *GetOrInsert(C &map, I &items, const P &pos, const E &key, bool isForeign, Args &&...args)
 {
     auto it = map.find(key);
     if (it != map.cend()) {
@@ -167,7 +167,6 @@ static T *GetOrInsert(C &map, I &items, const P &pos, const E &key, bool isForei
             return static_cast<T *>(item);
         }
 
-        UNREACHABLE();
         return nullptr;
     }
 
@@ -190,7 +189,9 @@ ItemContainer::ItemContainer()
 
 ClassItem *ItemContainer::GetOrCreateClassItem(const std::string &str)
 {
-    return GetOrInsert<ClassItem>(classMap_, items_, itemsEnd_, str, false, str);
+    [[maybe_unused]] auto item = GetOrInsert<ClassItem>(classMap_, items_, itemsEnd_, str, false, str);
+    ASSERT(item != nullptr);
+    return item;
 }
 
 ForeignClassItem *ItemContainer::GetOrCreateForeignClassItem(const std::string &str)
@@ -205,43 +206,61 @@ StringItem *ItemContainer::GetOrCreateStringItem(const std::string &str)
         return it->second->GetNameItem();
     }
 
-    return GetOrInsert<StringItem>(stringMap_, items_, itemsEnd_, str, false, str);
+    [[maybe_unused]] auto item = GetOrInsert<StringItem>(stringMap_, items_, itemsEnd_, str, false, str);
+    ASSERT(item != nullptr);
+    return item;
 }
 
 LiteralArrayItem *ItemContainer::GetOrCreateLiteralArrayItem(const std::string &id)
 {
-    return GetOrInsert<LiteralArrayItem>(literalarrayMap_, items_, itemsEnd_, id, false);
+    [[maybe_unused]] auto item = GetOrInsert<LiteralArrayItem>(literalarrayMap_, items_, itemsEnd_, id, false);
+    ASSERT(item != nullptr);
+    return item;
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateIntegerValueItem(uint32_t v)
 {
-    return GetOrInsert<ScalarValueItem>(intValueMap_, items_, itemsEnd_, v, false, v);
+    [[maybe_unused]] auto item = GetOrInsert<ScalarValueItem>(intValueMap_, items_, itemsEnd_, v, false, v);
+    ASSERT(item != nullptr);
+    return item;
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateLongValueItem(uint64_t v)
 {
-    return GetOrInsert<ScalarValueItem>(longValueMap_, items_, itemsEnd_, v, false, v);
+    [[maybe_unused]] auto item = GetOrInsert<ScalarValueItem>(longValueMap_, items_, itemsEnd_, v, false, v);
+    ASSERT(item != nullptr);
+    return item;
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateFloatValueItem(float v)
 {
-    return GetOrInsert<ScalarValueItem>(floatValueMap_, items_, itemsEnd_, bit_cast<uint32_t>(v), false, v);
+    [[maybe_unused]] auto item =
+        GetOrInsert<ScalarValueItem>(floatValueMap_, items_, itemsEnd_, bit_cast<uint32_t>(v), false, v);
+    ASSERT(item != nullptr);
+    return item;
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateDoubleValueItem(double v)
 {
-    return GetOrInsert<ScalarValueItem>(doubleValueMap_, items_, itemsEnd_, bit_cast<uint64_t>(v), false, v);
+    [[maybe_unused]] auto item =
+        GetOrInsert<ScalarValueItem>(doubleValueMap_, items_, itemsEnd_, bit_cast<uint64_t>(v), false, v);
+    ASSERT(item != nullptr);
+    return item;
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateIdValueItem(BaseItem *v)
 {
-    return GetOrInsert<ScalarValueItem>(idValueMap_, items_, itemsEnd_, v, false, v);
+    [[maybe_unused]] auto item = GetOrInsert<ScalarValueItem>(idValueMap_, items_, itemsEnd_, v, false, v);
+    ASSERT(item != nullptr);
+    return item;
 }
 
 ProtoItem *ItemContainer::GetOrCreateProtoItem(TypeItem *retType, const std::vector<MethodParamItem> &params)
 {
     ProtoKey key(retType, params);
-    return GetOrInsert<ProtoItem>(protoMap_, items_, itemsEnd_, key, false, retType, params);
+    [[maybe_unused]] auto item = GetOrInsert<ProtoItem>(protoMap_, items_, itemsEnd_, key, false, retType, params);
+    ASSERT(item != nullptr);
+    return item;
 }
 
 PrimitiveTypeItem *ItemContainer::GetOrCreatePrimitiveTypeItem(Type type)
@@ -251,7 +270,10 @@ PrimitiveTypeItem *ItemContainer::GetOrCreatePrimitiveTypeItem(Type type)
 
 PrimitiveTypeItem *ItemContainer::GetOrCreatePrimitiveTypeItem(Type::TypeId type)
 {
-    return GetOrInsert<PrimitiveTypeItem>(primitiveTypeMap_, items_, itemsEnd_, type, false, type);
+    [[maybe_unused]] auto item =
+        GetOrInsert<PrimitiveTypeItem>(primitiveTypeMap_, items_, itemsEnd_, type, false, type);
+    ASSERT(item != nullptr);
+    return item;
 }
 
 LineNumberProgramItem *ItemContainer::CreateLineNumberProgramItem()
