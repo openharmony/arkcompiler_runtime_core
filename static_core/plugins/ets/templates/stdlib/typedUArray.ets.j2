@@ -899,26 +899,41 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      */
     public static of(...items: FixedArray<{{argType}}>): {{element['name']}}Array {
         let res = new {{element['name']}}Array(items.length.toInt())
+        {%- if argType == 'short' %}
+        res.ofShort(items)
+        {%- elif argType == 'int' %}
+        res.ofInt(items)
+        {%- elif argType == 'long' %}
+        res.ofLong(items)
+        {%- elif argType == 'bigint' %}
         for (let i: int = 0; i < items.length; i++) {
-        {%- if element.get('name') != 'Uint8Clamped' %}
-            {%- if argType == 'bigint' %}
-            res.setUnsafeClamp(i, items[i]{{numberBigIntToPrimitive}})
-            {%- elif argType == 'number' %}
-            {%- if element.get('name') == 'BigUint64' %}
-            res.setUnsafeClamp(i, ({{asElementCompat % 'items[i]'}}){{numberBigIntToPrimitive}})
-            {%- else %}
-            res.setUnsafeClamp(i, res.zeroIfInfinity(items[i]).to{{element['primitiveType'].capitalize()}}())
-            {%- endif %}
-            {%- else %}
-            res.setUnsafeClamp(i, items[i]{{ '.to' + element['primitiveType'].capitalize() + '()' if argType != element['primitiveType'] else ''}})
-            {%- endif %}
-        {%- else %}
-            res.setUnsafeClamp(i, items[i]{{ '.to' + element['primitiveType'].capitalize() + '()' if argType != element['primitiveType'] else ''}})
-        {%- endif %}
+            res.setUnsafeClamp(i, items[i].getULong())
         }
+        {%- else %}
+        {%- if element.get('name') == 'BigUint64' %}
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafeClamp(i, ({{asElementCompat % 'items[i]'}}){{numberBigIntToPrimitive}})
+        }
+        {%- else %}
+        res.ofNumber(items)
+        {%- endif %}
+        {%- endif %}
         return res
     }
     {%- endfor %}
+
+    private final native ofInt(items: FixedArray<int>): void
+    private final native ofNumber(items: FixedArray<number>): void
+
+    {%- if element.get('name') == 'Uint8Clamped' %}
+    private final native ofShort(items: FixedArray<short>): void
+    {%- elif element.get('name') == 'Uint8' %}
+    private final native ofShort(items: FixedArray<short>): void
+    {%- elif element.get('name') == 'Uint32' %}
+    private final native ofLong(items: FixedArray<long>): void
+    {%- elif element.get('name') == 'BigUint64' %}
+    private final native ofLong(items: FixedArray<long>): void
+    {%- endif %}
 
     /**
      * Returns a new array from a set of elements.
