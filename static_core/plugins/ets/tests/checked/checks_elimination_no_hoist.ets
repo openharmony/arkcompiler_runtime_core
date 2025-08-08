@@ -18,7 +18,7 @@ let C:int = 0;
 let C1:int = 2;
 
 //! CHECKER      Verify check's users NO_HOIST if check's input is is hoistable.
-//! RUN          force_jit: true, options: "--compiler-enable-events --compiler-events-path=./events.csv", entry: "checks_elimination_no_hoist.ETSGLOBAL::HoistableInput"
+//! RUN          force_jit: true, options: "--compiler-regex=.*HoistableInput --compiler-enable-events --compiler-events-path=./events.csv", entry: "checks_elimination_no_hoist.ETSGLOBAL::HoistableInput"
 //! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::HoistableInput"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Div/; div1Id = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
@@ -82,7 +82,7 @@ function DomCheckOutside(): int {
 }
 
 //! CHECKER      Verify check's users NO_HOIST if check's input's bounds are invalid at the outermost preheader.
-//! RUN          force_jit: true, options: "--compiler-enable-events --compiler-events-path=./events.csv", entry: "checks_elimination_no_hoist.ETSGLOBAL::InvalidBoundsOutside"
+//! RUN          force_jit: true, options: "--compiler-regex=.*InvalidBoundsOutside --compiler-enable-events --compiler-events-path=./events.csv", entry: "checks_elimination_no_hoist.ETSGLOBAL::InvalidBoundsOutside"
 //! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::InvalidBoundsOutside"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Div/; div1Id = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]

@@ -318,8 +318,9 @@ bool PandaEtsVM::Initialize()
         // library
         ani_env *env = EtsCoroutine::GetCurrent()->GetEtsNapiEnv();
         ark::ets::stdlib::InitNativeMethods(env);
-    }
 
+        stdLibCache_ = CreateStdLibCache(env);
+    }
     const auto lang = plugins::LangToRuntimeType(panda_file::SourceLang::ETS);
     for (const auto &path : Runtime::GetOptions().GetNativeLibraryPath(lang)) {
         nativeLibraryProvider_.AddLibraryPath(ConvertToString(path));
