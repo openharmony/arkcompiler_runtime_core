@@ -123,6 +123,7 @@ public:
 #define DEFINE_VISIT(InstName)                                   \
     static void Visit##InstName(GraphVisitor *v, Inst *inst)     \
     {                                                            \
+        COMPILER_LOG(DEBUG, PEA_EXT) << "Visit " << *inst;       \
         static_cast<EscapeAnalysis *>(v)->Visit##InstName(inst); \
     }
 
@@ -130,6 +131,7 @@ public:
 #define DEFINE_VISIT_WITH_CALLBACK(InstName, Callback)       \
     static void Visit##InstName(GraphVisitor *v, Inst *inst) \
     {                                                        \
+        COMPILER_LOG(DEBUG, PEA_EXT) << "Visit " << *inst;   \
         static_cast<EscapeAnalysis *>(v)->Callback(inst);    \
     }
 
@@ -158,18 +160,22 @@ public:
 
     static void VisitCallStatic([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
     {
+        COMPILER_LOG(DEBUG, PEA_EXT) << "Visit " << *inst;
         static_cast<EscapeAnalysis *>(v)->VisitCall(inst->CastToCallStatic());
     }
     static void VisitCallVirtual([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
     {
+        COMPILER_LOG(DEBUG, PEA_EXT) << "Visit " << *inst;
         static_cast<EscapeAnalysis *>(v)->VisitCall(inst->CastToCallVirtual());
     }
     static void VisitCompare([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
     {
+        COMPILER_LOG(DEBUG, PEA_EXT) << "Visit " << *inst;
         static_cast<EscapeAnalysis *>(v)->VisitCmpRef(inst, inst->CastToCompare()->GetCc());
     }
     static void VisitIf([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
     {
+        COMPILER_LOG(DEBUG, PEA_EXT) << "Visit " << *inst;
         static_cast<EscapeAnalysis *>(v)->VisitCmpRef(inst, inst->CastToIf()->GetCc());
     }
     static void VisitPhi([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
@@ -183,6 +189,7 @@ public:
     // by default all ref-input are materialized and materialized state is recorded for ref-output
     void VisitDefault([[maybe_unused]] Inst *inst) override
     {
+        COMPILER_LOG(DEBUG, PEA_EXT) << "Visit " << *inst;
         VisitSaveStateUser(inst);
         Materialize(inst);
     }
@@ -255,7 +262,7 @@ public:
         void ReplaceDeopt(BasicBlock *deoptBb, BasicBlock *succBb, Inst *deopt, Inst *newDeopt);
         void RecoverDeopt(BasicBlock *deoptBb, DeoptInfo &deoptInfo, Inst *deoptInput);
         void IdentifyDeoptInput(BasicBlock *deoptBb, Opcode opcode, Inst *&deoptInput);
-        void CloneSaveStatesToSucc(BasicBlock *bb, BasicBlock *succBb);
+        void CloneSaveStatesToSucc(BasicBlock *bb, BasicBlock *succBb, BasicBlock *newBb);
     };
 
 #include "optimizer/ir/visitor.inc"
@@ -270,7 +277,8 @@ private:
               fieldsMergeBuffer_(parent->GetLocalAllocator()->Adapter()),
               statesMergeBuffer_(parent->GetLocalAllocator()->Adapter()),
               allFields_(parent->GetLocalAllocator()->Adapter()),
-              pendingInsts_(parent->GetLocalAllocator()->Adapter())
+              pendingInsts_(parent->GetLocalAllocator()->Adapter()),
+              statesToMerge_(parent->GetLocalAllocator()->Adapter())
         {
         }
         ~MergeProcessor() = default;
@@ -286,14 +294,19 @@ private:
         ArenaVector<StateOwner> statesMergeBuffer_;
         ArenaVector<Field> allFields_;
         ArenaVector<StateOwner> pendingInsts_;
+        ArenaVector<VirtualState *> statesToMerge_;
 
-        bool MergeFields(BasicBlock *block, BasicBlockState *blockState, StateId stateToMerge, VirtualState *vstate,
-                         ArenaVector<StateOwner> &mergeQueue);
+        template <bool NO_NEED_MERGE = true>
+        bool MergeFields(BasicBlock *block, BasicBlockState *blockState, VirtualState *vstate);
         bool MergeState(StateOwner inst, BasicBlock *block, BasicBlockState *newState);
         void CheckStatesAndInsertIntoBuffer(StateOwner inst, BasicBlock *block);
         void MaterializeObjectsAtTheBeginningOfBlock(BasicBlock *block);
         void CollectInstructionsToMerge(BasicBlock *block);
         void ProcessPhis(BasicBlock *block, BasicBlockState *newState);
+        bool NeedToMaterialize(Inst *phi);
+        void MaterializePhi(BasicBlockState *newState, Inst *phi);
+        void VirtualizePhi(BasicBlock *block, BasicBlockState *newState, Inst *phi);
+        void MergeNewAlloc(VirtualState *vstate);
     };
 
     Marker visited_ {UNDEF_MARKER};
@@ -332,8 +345,6 @@ private:
     void MaterializeDeoptSaveState(Inst *inst);
 
     void Initialize();
-    void PropagateLoadObjectsUpwards();
-    void CreateTemporaryLoads(Inst *phi);
     bool FindVirtualizableAllocations();
     bool AllPredecessorsVisited(const BasicBlock *block);
 #ifndef NDEBUG
@@ -387,6 +398,10 @@ private:
     void DumpMStates();
     void DumpAliases();
     void Dump();
+
+public:
+    static void DumpStateOwner(const StateOwner &stateOwner);
+    static bool Equals(const StateOwner &lso, const StateOwner &rso, Marker mrk);
 };
 
 class ScalarReplacement {
@@ -434,15 +449,15 @@ private:
     void ResolvePhiInputs();
     void ReplaceAliases();
     Inst *ResolveAlias(const StateOwner &alias, const Inst *inst);
-    Inst *CreateNewObject(Inst *originalInst, Inst *saveState);
-    Inst *CreateNewArray(Inst *originalInst, Inst *saveState);
-    void InitializeObject(Inst *alloc, Inst *instBefore, VirtualState *state);
+    void InitializeObject(Inst *alloc, Inst *instBefore, VirtualState *state, Inst *newAlloc);
     void MaterializeObjects();
-    void Materialize(Inst *originalInst, Inst *ssAlloc, Inst *ssInit, VirtualState *state);
+    void ErasePhiInputsFromVState(ArenaMap<Inst *, VirtualState *> &state);
+    Inst *Materialize(Inst *originalInst, Inst *ssAlloc, Inst *ssInit, VirtualState *state);
     void MaterializeAtNewSaveState(Inst *site, ArenaMap<Inst *, VirtualState *> &state);
     void MaterializeInEmptyBlock(BasicBlock *block, ArenaMap<Inst *, VirtualState *> &state);
     void MaterializeAtExistingSaveState(SaveStateInst *saveState, ArenaMap<Inst *, VirtualState *> &state);
     void CreatePhis();
+    void CreatePhisAndInsertToBB(BasicBlock &bb);
     SaveStateInst *CopySaveState(Inst *inst, VirtualState *except);
     void PatchSaveStates();
     void PatchSaveStatesInBlock(BasicBlock *block, ArenaVector<ArenaSet<Inst *>> &liveness);

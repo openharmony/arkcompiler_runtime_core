@@ -434,6 +434,7 @@ private:
     template <typename T>
     void EncodeImms(const T &imms, bool skipFirstLocation);
 
+    bool CheckPhiClassInputsAreEqual(Inst *phi);
     static bool EnsureParamsFitIn32Bit(std::initializer_list<std::variant<Reg, TypedImm>> params);
 
     template <typename... Args>

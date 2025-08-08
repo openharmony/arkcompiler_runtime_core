@@ -120,6 +120,10 @@ catch_begin:
 #! PASS_AFTER   "ChecksElimination"
 #! INST_NOT     "CheckCast"
 #! INST         "Deoptimize"
+#! PASS_BEFORE  "EscapeAnalysis"
+#! INST_COUNT   "NewObject", 2
+#! PASS_AFTER   "EscapeAnalysis"
+#! INST_COUNT   "NewObject", 2
 
 .function u1 test2(u1 a0) {
     newobj v0, A

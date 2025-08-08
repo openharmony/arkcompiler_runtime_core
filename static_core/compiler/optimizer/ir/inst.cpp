@@ -1029,7 +1029,8 @@ bool IsMovableObjectRec(Inst *inst, Marker visitedMrk)
     if (inst->SetMarker(visitedMrk)) {
         return false;
     }
-    if (inst->IsPhi()) {
+
+    if (inst->IsPhi() || inst->IsOneOf(Opcode::Select, Opcode::SelectImm)) {
         for (size_t i = 0U; i < inst->GetInputsCount(); ++i) {
             if (IsMovableObjectRec(inst->GetDataFlowInput(i), visitedMrk)) {
                 return true;
@@ -1037,6 +1038,7 @@ bool IsMovableObjectRec(Inst *inst, Marker visitedMrk)
         }
         return false;
     }
+
     return inst->IsMovableObject();
 }
 
@@ -1067,7 +1069,9 @@ bool Inst::IsMovableObject()
             // Classes in non moveble space.
             return this->CastToLoadObject()->GetObjectType() != ObjectType::MEM_DYN_CLASS &&
                    this->CastToLoadObject()->GetObjectType() != ObjectType::MEM_DYN_HCLASS;
-        case Opcode::Phi: {
+        case Opcode::Phi:
+        case Opcode::Select:
+        case Opcode::SelectImm: {
             MarkerHolder marker {GetBasicBlock()->GetGraph()};
             return IsMovableObjectRec(this, marker.GetMarker());
         }

@@ -176,6 +176,7 @@ options:
     - bridges-ss
     - pm
     - pea
+    - pea_ext
     - interop-intrinsic-opt
     - native-call-opt
   description: Set log compiler components

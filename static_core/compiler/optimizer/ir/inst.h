@@ -1563,6 +1563,27 @@ public:
         return bitFields_;
     }
 
+    bool Is(Opcode opcode) const
+    {
+        return opcode_ == opcode;
+    }
+
+    bool IsNot(Opcode opcode) const
+    {
+        return opcode_ != opcode;
+    }
+
+    bool IsOneOf(Opcode opcode1, Opcode opcode2) const
+    {
+        return Is(opcode1) || Is(opcode2);
+    }
+
+    template <typename... Ts>
+    bool IsOneOf(Opcode opcode1, Ts... opcodes) const
+    {
+        return Is(opcode1) || IsOneOf(opcodes...);
+    }
+
     bool IsPhi() const
     {
         return opcode_ == Opcode::Phi;
