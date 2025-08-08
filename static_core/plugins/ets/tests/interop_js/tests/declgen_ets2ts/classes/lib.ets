@@ -131,3 +131,8 @@ export class C12 {
     return 2;
   }
 }
+
+export class DeviceInfo {
+  DeviceInfo() {}
+  static instance?: DeviceInfo;
+}

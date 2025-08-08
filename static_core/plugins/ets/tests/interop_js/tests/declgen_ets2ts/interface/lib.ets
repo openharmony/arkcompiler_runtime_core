@@ -88,6 +88,7 @@ enum E02 {
 export interface I04 extends I03 {
     e: E01;
     f: E02;
+    g: E01 | E02;
 }
 
 export namespace N01 {
