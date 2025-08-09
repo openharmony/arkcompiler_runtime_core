@@ -607,7 +607,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_014, TestSize.Level1)
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
 
     unsigned char tries_size = 0x00;           // The known tries_size of the method in the abc file
-    unsigned char method_code_size = 0x35;     // The known code_size of the method in the abc file
+    unsigned char method_code_size = 0x2D;     // The known code_size of the method in the abc file
 
     for (size_t i = 0; i < buffer.size() - 1; ++i) {
         if (buffer[i] == method_code_size && buffer[i + 1] == tries_size) {
