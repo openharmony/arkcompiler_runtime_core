@@ -129,9 +129,6 @@ std/concurrency/AsyncLockTest.ets
 std/core/std_core_value_array_value_all_006.ets
 std/serialization/std_serialization_json_stringify_float_array.ets
 
-# 27952 Dead lock test
-std/containers/concurrency/blocking_queue/blocking_queue_deadLockTests.ets
-
 # 27962 Fails test
 std/containers/concurrency/concurrent_hash_map/concurrent_hash_map_fails.ets
 
