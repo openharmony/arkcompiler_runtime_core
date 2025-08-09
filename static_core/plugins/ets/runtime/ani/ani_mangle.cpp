@@ -26,6 +26,9 @@ PandaString Mangle::ConvertDescriptor(const std::string_view descriptor, bool al
 {
     if (descriptor.empty() || descriptor.back() == ';' || descriptor.find('/') != std::string::npos) {
         // The 'descriptor' does not have a new format, so no conversion is required.
+        if (!descriptor.empty()) {
+            LOG(ERROR, ANI) << "Use new mangling rules for descriptor \"" << descriptor << "\"";
+        }
         return PandaString(descriptor);
     }
 

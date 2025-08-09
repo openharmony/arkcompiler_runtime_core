@@ -61,7 +61,7 @@ std::string GenUuid4(ani_env *env)
         GenRandUint<uint16_t>(), (GenRandUint<uint16_t>() & NULL_FOUR_HIGH_BITS_IN_16) | RFC4122_UUID_VERSION_MARKER,
         (GenRandUint<uint16_t>() & NULL_TWO_HIGH_BITS_IN_16) | RFC4122_UUID_RESERVED_BITS, GenRandUint<uint64_t>());
     if ((n < 0) || (n > static_cast<int>(UUID_LEN))) {
-        stdlib::ThrowNewError(env, "Lstd/core/RuntimeException;", "GenerateRandomUUID failed", "Lstd/core/String;:V");
+        stdlib::ThrowNewError(env, "std.core.RuntimeException", "GenerateRandomUUID failed", "C{std.core.String}:");
         return std::string();
     }
     std::stringstream res;
@@ -79,8 +79,8 @@ std::array<uint8_t, UUID_BINARY_LEN> GenUuid4Binary(ani_env *env)
         GenRandUint<uint16_t>(), (GenRandUint<uint16_t>() & NULL_FOUR_HIGH_BITS_IN_16) | RFC4122_UUID_VERSION_MARKER,
         (GenRandUint<uint16_t>() & NULL_TWO_HIGH_BITS_IN_16) | RFC4122_UUID_RESERVED_BITS, GenRandUint<uint64_t>());
     if ((charsWritten < 0) || (charsWritten > UUID_STR_LEN_NO_DASH)) {
-        stdlib::ThrowNewError(env, "Lstd/core/RuntimeException;", "generateRandomBinaryUUID failed",
-                              "Lescompat/Uint8Array;:V");
+        stdlib::ThrowNewError(env, "std.core.RuntimeException", "generateRandomBinaryUUID failed",
+                              "C{escompat.Uint8Array}:");
         return {};
     }
 
@@ -103,7 +103,7 @@ template <class... Args>
 ani_object NewUint8Array(ani_env *env, const char *signature, Args... args)
 {
     ani_class arrayClass;
-    if (env->FindClass("Lescompat/Uint8Array;", &arrayClass) != ANI_OK) {
+    if (env->FindClass("escompat.Uint8Array", &arrayClass) != ANI_OK) {
         return nullptr;
     }
     ani_method arrayCtor;
@@ -139,7 +139,7 @@ ANI_EXPORT ani_object ETSApiUtilHelperGenerateRandomBinaryUUID(ani_env *env, [[m
         hasUUID = true;
     }
 
-    ani_object arr = NewUint8Array(env, "I:V", static_cast<ani_int>(UUID_BINARY_LEN));
+    ani_object arr = NewUint8Array(env, "i:", static_cast<ani_int>(UUID_BINARY_LEN));
     if (arr == nullptr) {
         return nullptr;
     }
