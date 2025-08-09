@@ -74,6 +74,10 @@ public:
     {
         return false;
     };
+    bool IsExternalTimerEnabled() override
+    {
+        return false;
+    }
 
 protected:
     bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int incMask,
