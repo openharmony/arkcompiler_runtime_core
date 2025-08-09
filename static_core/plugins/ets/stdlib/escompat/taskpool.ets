@@ -612,17 +612,26 @@ export namespace taskpool {
                 this.totalDuration = this.cpuDuration;
                 this.ioDuration = 0;
                 // Process the task finishing
-                const notCanceled: boolean = taskFinished(this);
-                if(isTaskPoolUseLaunch) {
-                    this.notifyDependencies();
-                } else {
-                    ConcurrencyHelpers.lockGuard(taskCountMutex, () => {
-                        totalExecTime += this.getDuration();
-                        totalExecCount++;
+                let taskFinishedhandle = () : void => {
+                    const notCanceled: boolean = taskFinished(this);
+                    if (isTaskPoolUseLaunch) {
+                        this.notifyDependencies();
+                    } else {
+                        ConcurrencyHelpers.lockGuard(taskCountMutex, () => {
+                            totalExecTime += this.getDuration();
+                            totalExecCount++;
+                        });
+                    }
+                    if (!notCanceled) {
+                        this.throwCancelTaskError();
+                    }
+                };
+                if (result instanceof Promise) {
+                    result.then(() => {
+                        taskFinishedhandle();
                     });
-                }
-                if (!notCanceled) {
-                    this.throwCancelTaskError();
+                } else {
+                    taskFinishedhandle();
                 }
             }
             return result;
