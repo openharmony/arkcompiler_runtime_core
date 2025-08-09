@@ -253,6 +253,14 @@ bool PandaRuntimeInterface::IsStringClass(MethodPtr method, IdType id) const
     return ClassCast(cls)->IsStringClass();
 }
 
+bool PandaRuntimeInterface::IsStringClass(ClassPtr klass) const
+{
+    if (klass == nullptr) {
+        return false;
+    }
+    return ClassCast(klass)->IsStringClass();
+}
+
 compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetArrayElementClass(ClassPtr cls) const
 {
     ASSERT(ClassCast(cls)->IsArrayClass());

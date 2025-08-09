@@ -166,6 +166,19 @@ bool EtsRuntimeInterface::IsMethodStringConcat(MethodPtr method) const
            MethodCast(method)->GetProto().GetSignature() == "([Lstd/core/String;)Lstd/core/String;";
 }
 
+Field *EtsRuntimeInterface::GetFieldPtrByName(ClassPtr klass, std::string_view name) const
+{
+    if (klass == nullptr) {
+        return nullptr;
+    }
+    auto etsClass = EtsClass::FromRuntimeClass(ClassCast(klass));
+    auto fieldIndex = etsClass->GetFieldIndexByName(name.data());
+    if (fieldIndex == -1U) {
+        return nullptr;
+    }
+    return etsClass->GetFieldByIndex(fieldIndex)->GetRuntimeField();
+}
+
 bool EtsRuntimeInterface::IsMethodStringBuilderConstructorWithStringArg(MethodPtr method) const
 {
     return MethodCast(method)->IsConstructor() && GetClassNameFromMethod(method) == "std.core.StringBuilder" &&
@@ -367,6 +380,15 @@ uint32_t EtsRuntimeInterface::GetMethodId(MethodPtr method) const
 {
     ASSERT(method != nullptr);
     return static_cast<EtsMethod *>(method)->GetMethodId();
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetInstanceMethodByName(ClassPtr klass, std::string_view name) const
+{
+    if (klass != nullptr) {
+        auto etsClass = EtsClass::FromRuntimeClass(ClassCast(klass));
+        return etsClass->GetInstanceMethod(name.data(), nullptr);
+    }
+    return nullptr;
 }
 
 bool EtsRuntimeInterface::IsFieldBooleanFalse([[maybe_unused]] FieldPtr field) const
@@ -599,9 +621,54 @@ bool EtsRuntimeInterface::IsBoxedClass(ClassPtr klass) const
     return EtsClass::FromRuntimeClass(ClassCast(klass))->IsBoxed();
 }
 
+bool EtsRuntimeInterface::IsEnumClass(ClassPtr klass) const
+{
+    return EtsClass::FromRuntimeClass(ClassCast(klass))->IsEtsEnum();
+}
+
+bool EtsRuntimeInterface::IsBigIntClass(ClassPtr klass) const
+{
+    return EtsClass::FromRuntimeClass(ClassCast(klass))->IsBigInt();
+}
+
+bool EtsRuntimeInterface::IsFunctionReference(ClassPtr klass) const
+{
+    return EtsClass::FromRuntimeClass(ClassCast(klass))->IsFunctionReference();
+}
+
 bool EtsRuntimeInterface::IsClassBoxedBoolean(ClassPtr klass) const
 {
     return PlatformTypes(PandaEtsVM::GetCurrent())->coreBoolean->GetRuntimeClass() == klass;
+}
+
+ark::compiler::DataType::Type EtsRuntimeInterface::GetBoxedClassDataType(ClassPtr klass) const
+{
+    auto platformTypes = PlatformTypes(PandaEtsVM::GetCurrent());
+    if (platformTypes->coreBoolean->GetRuntimeClass() == klass) {
+        return compiler::DataType::BOOL;
+    }
+    if (platformTypes->coreByte->GetRuntimeClass() == klass) {
+        return compiler::DataType::INT8;
+    }
+    if (platformTypes->coreChar->GetRuntimeClass() == klass) {
+        return compiler::DataType::UINT16;
+    }
+    if (platformTypes->coreShort->GetRuntimeClass() == klass) {
+        return compiler::DataType::INT16;
+    }
+    if (platformTypes->coreInt->GetRuntimeClass() == klass) {
+        return compiler::DataType::INT32;
+    }
+    if (platformTypes->coreLong->GetRuntimeClass() == klass) {
+        return compiler::DataType::INT64;
+    }
+    if (platformTypes->coreFloat->GetRuntimeClass() == klass) {
+        return compiler::DataType::FLOAT32;
+    }
+    if (platformTypes->coreDouble->GetRuntimeClass() == klass) {
+        return compiler::DataType::FLOAT64;
+    }
+    return compiler::DataType::NO_TYPE;
 }
 
 size_t EtsRuntimeInterface::GetTlsNativeApiOffset(Arch arch) const

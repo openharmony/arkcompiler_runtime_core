@@ -173,6 +173,12 @@ public:
         return nullptr;
     }
 
+    virtual MethodPtr GetInstanceMethodByName([[maybe_unused]] ClassPtr klass,
+                                              [[maybe_unused]] std::string_view name) const
+    {
+        return nullptr;
+    }
+
     virtual MethodId GetMethodId([[maybe_unused]] MethodPtr method) const
     {
         return 0;
@@ -411,6 +417,11 @@ public:
         return false;
     }
 
+    virtual Field *GetFieldPtrByName([[maybe_unused]] ClassPtr klass, [[maybe_unused]] std::string_view name) const
+    {
+        return nullptr;
+    }
+
     virtual bool IsMethodStringBuilderConstructorWithStringArg([[maybe_unused]] MethodPtr method) const
     {
         return false;
@@ -629,9 +640,29 @@ public:
         return false;
     }
 
+    virtual bool IsEnumClass([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsBigIntClass([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsFunctionReference([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
     virtual bool IsClassBoxedBoolean([[maybe_unused]] ClassPtr klass) const
     {
         return false;
+    }
+
+    virtual DataType::Type GetBoxedClassDataType([[maybe_unused]] ClassPtr klass) const
+    {
+        return DataType::NO_TYPE;
     }
 
     virtual std::string GetMethodName([[maybe_unused]] MethodPtr method) const
@@ -1070,6 +1101,11 @@ public:
     }
 
     virtual bool IsStringClass([[maybe_unused]] MethodPtr method, [[maybe_unused]] IdType id) const
+    {
+        return false;
+    }
+
+    virtual bool IsStringClass([[maybe_unused]] ClassPtr klass) const
     {
         return false;
     }

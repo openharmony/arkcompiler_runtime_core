@@ -200,6 +200,7 @@ intrinsics:
     impl: ark::ets::intrinsics::CompilerEtsIstrue
     clear_flags: [ acc_read, require_state, can_throw, heap_inv, no_dce, no_cse, no_hoist  ]
     need_param_locations: true
+    peephole_func: PeepholeIstrue
 
   - name: CompilerEtsDoubleToStringDecimal
     space: ets
