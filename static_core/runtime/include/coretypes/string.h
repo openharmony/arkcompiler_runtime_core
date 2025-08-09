@@ -96,8 +96,9 @@ public:
      * stored one byte one char in mutf8 format
      * @return The LineString created
      */
-    static String *AllocLineStringObject(size_t length, bool compressed, const LanguageContext &ctx,
-                                         PandaVM *vm = nullptr, bool movable = true, bool pinned = false);
+    static String *AllocLineStringObject(ManagedThread *thread, size_t length, bool compressed,
+                                         const LanguageContext &ctx, PandaVM *vm = nullptr, bool movable = true,
+                                         bool pinned = false);
 
     /**
      * @brief make slice of src string
@@ -117,8 +118,9 @@ public:
      * @param [in]compressed : true if all chars stored in tree are ASCII
      * @return The TreeString created
      */
-    static String *CreateTreeString(String *left, String *right, uint32_t length, bool compressed,
-                                    const LanguageContext &ctx, PandaVM *vm, bool movable = true, bool pinned = false);
+    static String *CreateTreeString(ManagedThread *thread, VMHandle<String> &leftHandle, VMHandle<String> &rightHandle,
+                                    uint32_t length, bool compressed, const LanguageContext &ctx, PandaVM *vm,
+                                    bool movable = true, bool pinned = false);
 
     /**
      * @brief Concat two Strings
@@ -126,8 +128,9 @@ public:
      * @param [in]str2Handle : the second string to be concated
      * @return The concated string
      */
-    PANDA_PUBLIC_API static String *ConcatLineString(VMHandle<String> &str1Handle, VMHandle<String> &str2Handle,
-                                                     const LanguageContext &ctx, PandaVM *vm);
+    PANDA_PUBLIC_API static String *ConcatLineString(ManagedThread *thread, VMHandle<String> &str1Handle,
+                                                     VMHandle<String> &str2Handle, const LanguageContext &ctx,
+                                                     PandaVM *vm);
 
     static String *Concat(String *str1, String *str2, const LanguageContext &ctx, PandaVM *vm);
 
@@ -594,8 +597,8 @@ protected:
      * @brief Alloc a TreeString
      * @return The TreeString created
      */
-    static String *AllocTreeStringObject(const LanguageContext &ctx, PandaVM *vm = nullptr, bool movable = true,
-                                         bool pinned = false);
+    static String *AllocTreeStringObject(ManagedThread *thread, const LanguageContext &ctx, PandaVM *vm = nullptr,
+                                         bool movable = true, bool pinned = false);
 
 private:
     // In last bit of length_ we store if this string is compressed or not.
