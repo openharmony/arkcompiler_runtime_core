@@ -17,6 +17,7 @@ config("arkbase_public_config") {
   include_dirs = [
     "$ark_root",
     "$ark_root/libpandabase",
+    "$ark_root/libpandabase/mem",
     "$target_gen_dir/include",
     "$target_gen_dir",
   ]
