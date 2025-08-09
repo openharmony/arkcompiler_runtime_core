@@ -96,6 +96,13 @@ struct AbckitArktsAnnotationInterface {
     }
 
     AbckitCoreAnnotationInterface *core = nullptr;
+
+    explicit AbckitArktsAnnotationInterface(ark::pandasm::Record *record)
+    {
+        impl = reinterpret_cast<ark::pandasm::Record *>(record);
+    }
+
+    AbckitArktsAnnotationInterface() = default;
 };
 
 struct AbckitCoreAnnotationInterface {
@@ -103,6 +110,11 @@ struct AbckitCoreAnnotationInterface {
      * To refer to the properties of the origin module.
      */
     AbckitCoreModule *owningModule = nullptr;
+
+    /*
+     * To refer to the properties of the parent namepsace.
+     */
+    AbckitCoreNamespace *parentNamespace = nullptr;
 
     /*
      * Contains annotation interface fields
@@ -114,10 +126,37 @@ struct AbckitCoreAnnotationInterface {
     {
         return std::get<std::unique_ptr<AbckitArktsAnnotationInterface>>(impl).get();
     }
+
+    explicit AbckitCoreAnnotationInterface(AbckitCoreModule *m, AbckitArktsAnnotationInterface annotationInterface)
+    {
+        annotationInterface.core = this;
+        impl = std::make_unique<AbckitArktsAnnotationInterface>(annotationInterface);
+        owningModule = m;
+    }
+
+    AbckitCoreAnnotationInterface() = default;
 };
 
 struct AbckitArktsAnnotationInterfaceField {
     AbckitCoreAnnotationInterfaceField *core = nullptr;
+    std::variant<ark::pandasm::Field *> impl;
+
+    ark::pandasm::Field *GetStaticImpl()
+    {
+        return std::get<ark::pandasm::Field *>(impl);
+    }
+
+    explicit AbckitArktsAnnotationInterfaceField(ark::pandasm::Field *field)
+    {
+        impl = field;
+    }
+
+    explicit AbckitArktsAnnotationInterfaceField(AbckitCoreAnnotationInterfaceField *field)
+    {
+        core = field;
+    }
+
+    AbckitArktsAnnotationInterfaceField() = default;
 };
 
 struct AbckitCoreAnnotationInterfaceField {
@@ -145,6 +184,19 @@ struct AbckitCoreAnnotationInterfaceField {
     AbckitArktsAnnotationInterfaceField *GetArkTSImpl()
     {
         return std::get<std::unique_ptr<AbckitArktsAnnotationInterfaceField>>(impl).get();
+    }
+    AbckitCoreAnnotationInterfaceField(AbckitCoreAnnotationInterface *annotationInterface, ark::pandasm::Field *field)
+    {
+        ai = annotationInterface;
+        impl = std::make_unique<AbckitArktsAnnotationInterfaceField>(field);
+        GetArkTSImpl()->core = this;
+    }
+
+    AbckitCoreAnnotationInterfaceField() = default;
+
+    ark::pandasm::Record *GetOwnerStaticImpl() const
+    {
+        return this->ai->GetArkTSImpl()->GetStaticImpl();
     }
 };
 
@@ -188,7 +240,9 @@ struct AbckitCoreAnnotation {
     /*
      * To refer to the properties of the owner.
      */
-    std::variant<AbckitCoreClass *, AbckitCoreFunction *> owner;
+    std::variant<AbckitCoreClass *, AbckitCoreFunction *, AbckitCoreClassField *, AbckitCoreInterface *,
+                 AbckitCoreInterfaceField *>
+        owner;
 
     /*
      * Name of the annotation
@@ -286,6 +340,11 @@ struct AbckitCoreClass {
     std::vector<std::unique_ptr<AbckitCoreAnnotation>> annotations;
 
     /*
+     * Table to store links to the wrapped annotations.
+     */
+    std::unordered_map<std::string, AbckitCoreAnnotation *> annotationTable;
+
+    /*
      * To store class fields.
      */
     std::vector<std::unique_ptr<AbckitCoreClassField>> fields {};
@@ -372,9 +431,19 @@ struct AbckitCoreFunction {
     std::vector<std::unique_ptr<AbckitCoreAnnotation>> annotations;
 
     /*
+     * Table to store links to the wrapped annotations.
+     */
+    std::unordered_map<std::string, AbckitCoreAnnotation *> annotationTable;
+
+    /*
      * To store parameters of the function.
      */
     std::vector<std::unique_ptr<AbckitCoreFunctionParam>> parameters;
+
+    /*
+     * To store function return type
+     */
+    AbckitType *returnType = nullptr;
 
     std::vector<std::unique_ptr<AbckitCoreFunction>> nestedFunction;
     std::vector<std::unique_ptr<AbckitCoreClass>> nestedClasses;
@@ -506,6 +575,13 @@ inline void AbckitCoreNamespace::InsertInstance<AbckitCoreEnum>(const std::strin
                                                                 std::unique_ptr<AbckitCoreEnum> &&instance)
 {
     et.emplace(name, std::move(instance));
+}
+
+template <>
+inline void AbckitCoreNamespace::InsertInstance<AbckitCoreAnnotationInterface>(
+    const std::string &name, std::unique_ptr<AbckitCoreAnnotationInterface> &&instance)
+{
+    at.emplace(name, std::move(instance));
 }
 
 struct AbckitModulePayloadDyn {
@@ -655,6 +731,13 @@ inline void AbckitCoreModule::InsertInstance<AbckitCoreEnum>(const std::string &
                                                              std::unique_ptr<AbckitCoreEnum> &&instance)
 {
     et.emplace(name, std::move(instance));
+}
+
+template <>
+inline void AbckitCoreModule::InsertInstance<AbckitCoreAnnotationInterface>(
+    const std::string &name, std::unique_ptr<AbckitCoreAnnotationInterface> &&instance)
+{
+    at.emplace(name, std::move(instance));
 }
 
 struct AbckitString {
@@ -1185,6 +1268,10 @@ struct AbckitCoreClassField {
      */
     std::vector<std::unique_ptr<AbckitCoreAnnotation>> annotations;
     /*
+     * Table to store links to the wrapped annotations.
+     */
+    std::unordered_map<std::string, std::unique_ptr<AbckitCoreAnnotation>> annotationTable;
+    /*
      * To refer to the properties of the origin class.
      */
     AbckitCoreClass *owner = nullptr;
@@ -1224,6 +1311,10 @@ struct AbckitCoreInterfaceField {
      * Table to store the annotations of the field.
      */
     std::vector<std::unique_ptr<AbckitCoreAnnotation>> annotations;
+    /*
+     * Table to store links to the wrapped annotations.
+     */
+    std::unordered_map<std::string, std::unique_ptr<AbckitCoreAnnotation>> annotationTable;
     /*
      * To refer to the properties of the origin interface.
      */
@@ -1333,6 +1424,10 @@ struct AbckitCoreInterface {
      * Table to store the annotations of the interface.
      */
     std::vector<std::unique_ptr<AbckitCoreAnnotation>> annotations;
+    /*
+     * Table to store links to the wrapped annotations.
+     */
+    std::unordered_map<std::string, std::unique_ptr<AbckitCoreAnnotation>> annotationTable;
     /*
      * Table to store the classes implement the interface.
      */

@@ -750,7 +750,8 @@ void CreateAnnotationInterface(AbckitFile *file, const std::string &recName, pan
         aiField->ai = ai.get();
         aiField->name = CreateNameString(field.name, file);
 
-        aiField->type = GetOrCreateType(file, PandaTypeToAbcKitTypeId(field.type), field.type.GetRank(), nullptr);
+        aiField->type =
+            GetOrCreateType(file, PandaTypeToAbcKitTypeId(field.type), field.type.GetRank(), nullptr, nullptr);
 
         if (field.metadata->GetValue().has_value()) {
             aiField->value = FindOrCreateValueDynamic(file, field.metadata->GetValue().value());

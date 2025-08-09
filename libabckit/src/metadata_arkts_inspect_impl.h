@@ -83,6 +83,8 @@ bool ArkTSInterfaceEnumerateSubInterfaces(AbckitCoreInterface *iface, void *data
                                           bool (*cb)(AbckitCoreInterface *subInterface, void *data));
 bool ArkTSInterfaceEnumerateClasses(AbckitCoreInterface *iface, void *data,
                                     bool (*cb)(AbckitCoreClass *klass, void *data));
+bool ArkTSInterfaceEnumerateAnnotations(AbckitCoreInterface *iface, void *data,
+                                        bool (*cb)(AbckitCoreAnnotation *anno, void *data));
 
 // ========================================
 // Enum
@@ -90,6 +92,15 @@ bool ArkTSInterfaceEnumerateClasses(AbckitCoreInterface *iface, void *data,
 
 bool ArkTSEnumEnumerateMethods(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreFunction *method, void *data));
 bool ArkTSEnumEnumerateFields(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreEnumField *field, void *data));
+
+// ========================================
+// Field
+// ========================================
+
+bool ArkTSClassFieldEnumerateAnnotations(AbckitCoreClassField *field, void *data,
+                                         bool (*cb)(AbckitCoreAnnotation *anno, void *data));
+bool ArkTSInterfaceFieldEnumerateAnnotations(AbckitCoreInterfaceField *field, void *data,
+                                             bool (*cb)(AbckitCoreAnnotation *anno, void *data));
 
 // ========================================
 // Function
@@ -101,6 +112,8 @@ bool ArkTSFunctionEnumerateNestedClasses(AbckitCoreFunction *function, void *dat
                                          bool (*cb)(AbckitCoreClass *nestedClass, void *data));
 bool ArkTSFunctionEnumerateAnnotations(AbckitCoreFunction *function, void *data,
                                        bool (*cb)(AbckitCoreAnnotation *anno, void *data));
+bool ArkTSFunctionEnumerateParameters(AbckitCoreFunction *function, void *data,
+                                      bool (*cb)(AbckitCoreFunctionParam *param, void *data));
 
 // ========================================
 // Annotation

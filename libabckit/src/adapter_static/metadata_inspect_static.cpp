@@ -144,6 +144,13 @@ bool ClassFieldIsPrivateStatic(AbckitCoreClassField *field)
     return (field->GetArkTSImpl()->GetStaticImpl()->metadata->GetAccessFlags() & ACC_PRIVATE) != 0x0;
 }
 
+bool ClassFieldIsInternalStatic(AbckitCoreClassField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto flag = field->GetArkTSImpl()->GetStaticImpl()->metadata->GetAccessFlags();
+    return (flag & ACC_PUBLIC) == 0x0 && (flag & ACC_PROTECTED) == 0x0 && (flag & ACC_PRIVATE) == 0x0;
+}
+
 bool ClassFieldIsStaticStatic(AbckitCoreClassField *field)
 {
     LIBABCKIT_LOG_FUNC;
@@ -331,9 +338,31 @@ bool FunctionIsNativeStatic(AbckitCoreFunction *function)
     return (func->metadata->GetAccessFlags() & ACC_NATIVE) != 0x0;
 }
 
+AbckitType *FunctionGetReturnTypeStatic(AbckitCoreFunction *function)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto *func = function->GetArkTSImpl()->GetStaticImpl();
+    auto returnType = func->returnType;
+    auto file = function->owningModule->file;
+    auto typeName = CreateStringStatic(file, returnType.GetName().data(), returnType.GetName().size());
+    return GetOrCreateType(file, ArkPandasmTypeToAbckitTypeId(returnType), returnType.GetRank(), nullptr, typeName);
+}
+
 // ========================================
 // Annotation
 // ========================================
+
+// ========================================
+// AnnotationInterface
+// ========================================
+
+AbckitString *AnnotationInterfaceGetNameStatic(AbckitCoreAnnotationInterface *ai)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto *record = ai->GetArkTSImpl()->GetStaticImpl();
+    auto [_, annotationInterfaceName] = ClassGetNames(record->name);
+    return CreateStringStatic(ai->owningModule->file, annotationInterfaceName.data(), annotationInterfaceName.size());
+}
 
 // ========================================
 // ImportDescriptor
@@ -537,7 +566,7 @@ AbckitType *ValueGetTypeStatic(AbckitValue *value)
             LIBABCKIT_UNIMPLEMENTED;
     }
     // NOTE implement logic for classes
-    return GetOrCreateType(value->file, id, 0, nullptr);
+    return GetOrCreateType(value->file, id, 0, nullptr, nullptr);
 }
 
 bool ValueGetU1Static(AbckitValue *value)

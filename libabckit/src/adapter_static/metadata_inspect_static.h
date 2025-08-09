@@ -60,6 +60,7 @@ AbckitString *EnumGetNameStatic(AbckitCoreEnum *enm);
 bool ClassFieldIsPublicStatic(AbckitCoreClassField *field);
 bool ClassFieldIsProtectedStatic(AbckitCoreClassField *field);
 bool ClassFieldIsPrivateStatic(AbckitCoreClassField *field);
+bool ClassFieldIsInternalStatic(AbckitCoreClassField *field);
 bool ClassFieldIsStaticStatic(AbckitCoreClassField *field);
 bool InterfaceFieldIsReadonlyStatic(AbckitCoreInterfaceField *field);
 
@@ -73,10 +74,17 @@ bool FunctionIsStaticStatic(AbckitCoreFunction *function);
 bool FunctionIsCtorStatic(AbckitCoreFunction *function);
 bool FunctionIsAnonymousStatic(AbckitCoreFunction *function);
 bool FunctionIsNativeStatic(AbckitCoreFunction *function);
+AbckitType *FunctionGetReturnTypeStatic(AbckitCoreFunction *function);
 
 // ========================================
 // Annotation
 // ========================================
+
+// ========================================
+// AnnotationInterface
+// ========================================
+
+AbckitString *AnnotationInterfaceGetNameStatic(AbckitCoreAnnotationInterface *ai);
 
 // ========================================
 // String

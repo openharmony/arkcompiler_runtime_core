@@ -136,4 +136,27 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassGetInterfacesStatic)
 
     ASSERT_EQ(gotInterfaceNames, expectInterfaceNames);
 }
+
+// Test: test-kind=api, api=InspectApiImpl::classEnumerateAnnotations, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiClassesTest, ClassGetAnnotationsStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static.abc");
+
+    std::set<std::string> gotAnnotationNames;
+    std::set<std::string> expectAnnotationNames = {"A1"};
+
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        auto result = helpers::GetClassByName(module, "C3");
+        ASSERT_NE(result, std::nullopt);
+        const auto &klass = result.value();
+        for (const auto &anno : klass.GetAnnotations()) {
+            gotAnnotationNames.emplace(anno.GetName());
+        }
+    }
+
+    ASSERT_EQ(gotAnnotationNames, expectAnnotationNames);
+}
 }  // namespace libabckit::test

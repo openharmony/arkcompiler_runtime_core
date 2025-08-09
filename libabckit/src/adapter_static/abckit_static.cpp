@@ -49,10 +49,27 @@ constexpr std::string_view STD_ANNOTATION_INTERFACE_OBJECT_LITERAL = "std.annota
 constexpr std::string_view ENUM_BASE = "std.core.BaseEnum";
 constexpr std::string_view INTERFACE_GET_FUNCTION_PATTERN = ".*<get>(.*)";
 constexpr std::string_view INTERFACE_SET_FUNCTION_PATTERN = ".*<set>(.*)";
+constexpr std::string_view INTERFACE_FIELD_PREFIX = "<property>";
 const std::unordered_set<std::string> GLOBAL_CLASS_NAMES = {"ETSGLOBAL", "_GLOBAL"};
 }  // namespace
 
 namespace libabckit {
+// Container of vectors and maps of some kinds of instances
+// Including modules, classes, namespaces, interfaces, enums and functions
+struct Container {
+    std::vector<std::unique_ptr<AbckitCoreClass>> classes;
+    std::vector<std::unique_ptr<AbckitCoreInterface>> interfaces;
+    std::vector<std::unique_ptr<AbckitCoreNamespace>> namespaces;
+    std::vector<std::unique_ptr<AbckitCoreEnum>> enums;
+    std::vector<std::unique_ptr<AbckitCoreFunction>> functions;
+    std::vector<std::unique_ptr<AbckitCoreClass>> interfaceObjectLiterals;
+    std::vector<std::unique_ptr<AbckitCoreAnnotationInterface>> annotationInterfaces;
+    std::unordered_map<std::string, std::unique_ptr<AbckitCoreModule>> nameToModule;
+    std::unordered_map<std::string, AbckitCoreNamespace *> nameToNamespace;
+    std::unordered_map<std::string, AbckitCoreClass *> nameToClass;
+    std::unordered_map<std::string, AbckitCoreInterface *> nameToInterface;
+    std::unordered_map<std::string, AbckitCoreAnnotationInterface *> nameToAnnotationInterface;
+};
 
 static bool IsAbstract(pandasm::ItemMetadata *meta)
 {
@@ -73,6 +90,16 @@ AbckitString *CreateNameString(AbckitFile *file, const std::string &name)
 pandasm::Function *FunctionGetImpl(AbckitCoreFunction *function)
 {
     return function->GetArkTSImpl()->GetStaticImpl();
+}
+
+static AbckitType *PandasmTypeToAbckitType(AbckitFile *file, const pandasm::Type &pandasmType)
+{
+    auto abckitName = CreateNameString(file, pandasmType.GetName());
+    auto typeId = ArkPandasmTypeToAbckitTypeId(pandasmType);
+    auto rank = pandasmType.GetRank();
+    auto type = GetOrCreateType(file, typeId, rank, nullptr, abckitName);
+
+    return type;
 }
 
 static std::pair<std::string, std::string> ClassGetModuleNames(
@@ -139,6 +166,34 @@ static void DumpHierarchy(AbckitFile *file)
     }
 }
 
+static std::unique_ptr<AbckitCoreAnnotation> CreateAnnotation(
+    AbckitFile *file,
+    std::variant<AbckitCoreClass *, AbckitCoreFunction *, AbckitCoreClassField *, AbckitCoreInterface *,
+                 AbckitCoreInterfaceField *>
+        owner,
+    const std::string &name)
+{
+    LIBABCKIT_LOG(DEBUG) << "Found annotation :'" << name << "'\n";
+    auto [_, annotationName] = ClassGetNames(name);
+    auto anno = std::make_unique<AbckitCoreAnnotation>();
+    anno->name = CreateNameString(file, annotationName);
+    anno->owner = owner;
+    anno->impl = std::make_unique<AbckitArktsAnnotation>();
+    anno->GetArkTSImpl()->core = anno.get();
+    return anno;
+}
+
+static std::unique_ptr<AbckitCoreFunctionParam> CreateFunctionParam(AbckitFile *file,
+                                                                    const std::unique_ptr<AbckitCoreFunction> &function,
+                                                                    const pandasm::Function::Parameter &parameter)
+{
+    auto param = std::make_unique<AbckitCoreFunctionParam>();
+    param->function = function.get();
+    param->type = PandasmTypeToAbckitType(file, parameter.type);
+
+    return param;
+}
+
 std::unique_ptr<AbckitCoreFunction> CollectFunction(
     AbckitFile *file, std::unordered_map<std::string, std::unique_ptr<AbckitCoreModule>> &nameToModule,
     std::unordered_map<std::string, AbckitCoreNamespace *> &nameToNamespace, const std::string &functionName,
@@ -163,31 +218,22 @@ std::unique_ptr<AbckitCoreFunction> CollectFunction(
     ASSERT(nameToFunction.count(name) == 0);
     nameToFunction.insert({name, function.get()});
 
-    for (auto &annoImpl : functionImpl.metadata->GetAnnotations()) {
-        auto anno = std::make_unique<AbckitCoreAnnotation>();
-        anno->impl = std::make_unique<AbckitArktsAnnotation>();
-        anno->GetArkTSImpl()->core = anno.get();
-
-        for (auto &annoElemImpl : annoImpl.GetElements()) {
-            auto annoElem = std::make_unique<AbckitCoreAnnotationElement>();
-            annoElem->ann = anno.get();
-            auto annoElemImplName = annoElemImpl.GetName();
-            annoElem->name = CreateStringStatic(file, annoElemImplName.data(), annoElemImplName.size());
-            annoElem->impl = std::make_unique<AbckitArktsAnnotationElement>();
-            annoElem->GetArkTSImpl()->core = annoElem.get();
-            auto value = FindOrCreateValueStatic(file, *annoElemImpl.GetValue());
-            annoElem->value = value;
-
-            anno->elements.emplace_back(std::move(annoElem));
-        }
-        function->annotations.emplace_back(std::move(anno));
+    for (const auto &anno : functionImpl.metadata->GetAttributeValues(ETS_ANNOTATION_CLASS.data())) {
+        function->annotations.emplace_back(CreateAnnotation(file, function.get(), anno));
+        function->annotationTable.emplace(anno, function->annotations.back().get());
     }
+
+    for (auto &functionParam : functionImpl.params) {
+        function->parameters.emplace_back(CreateFunctionParam(file, function, functionParam));
+    }
+
+    function->returnType = PandasmTypeToAbckitType(function->owningModule->file, functionImpl.returnType);
 
     return function;
 }
 
 static std::unique_ptr<AbckitCoreInterfaceField> CreateInterfaceField(
-    const std::unique_ptr<AbckitCoreInterface> &interface, const std::string &fieldName)
+    const std::unique_ptr<AbckitCoreInterface> &interface, AbckitCoreFunction *function, const std::string &fieldName)
 {
     auto field = std::make_unique<AbckitCoreInterfaceField>();
     auto file = interface->owningModule->file;
@@ -196,15 +242,31 @@ static std::unique_ptr<AbckitCoreInterfaceField> CreateInterfaceField(
     field->GetArkTSImpl()->core = field.get();
     field->owner = interface.get();
     field->flag = (ACC_PUBLIC | ACC_READONLY);
+
+    auto returnType = function->GetArkTSImpl()->GetStaticImpl()->returnType;
+    field->type = PandasmTypeToAbckitType(file, returnType);
+
+    for (const auto &[name, anno] : function->annotationTable) {
+        auto annotation = CreateAnnotation(file, field.get(), name);
+        annotation->ai = anno->ai;
+        field->annotationTable.emplace(name, std::move(annotation));
+    }
     return field;
 }
 
 template <typename AbckitCoreType, typename AbckitCoreTypeField>
-static std::unique_ptr<AbckitCoreTypeField> CreateField(AbckitCoreModule *owningModule, AbckitCoreType *owner,
+static std::unique_ptr<AbckitCoreTypeField> CreateField(AbckitFile *file, AbckitCoreType *owner,
                                                         pandasm::Field &recordField)
 {
     auto field = std::make_unique<AbckitCoreTypeField>(owner, &recordField);
-    field->name = CreateNameString(owningModule->file, recordField.name);
+    field->name = CreateNameString(file, recordField.name);
+    field->type = PandasmTypeToAbckitType(file, recordField.type);
+
+    if constexpr (std::is_same_v<AbckitCoreType, AbckitCoreClass>) {
+        for (const auto &anno : recordField.metadata->GetAttributeValues(ETS_ANNOTATION_CLASS.data())) {
+            field->annotationTable.emplace(anno, CreateAnnotation(file, field.get(), anno));
+        }
+    }
     return field;
 }
 
@@ -228,7 +290,7 @@ static void CreateModule(AbckitFile *file,
 
         for (auto &recordField : record.fieldList) {
             LIBABCKIT_LOG(DEBUG) << "Found Module Field: " << recordField.name << "\n";
-            m->fields.emplace_back(CreateField<AbckitCoreModule, AbckitCoreModuleField>(m.get(), m.get(), recordField));
+            m->fields.emplace_back(CreateField<AbckitCoreModule, AbckitCoreModuleField>(file, m.get(), recordField));
         }
         nameToModule.insert({moduleName, std::move(m)});
     }
@@ -247,16 +309,23 @@ static void CreateExternalModule(AbckitFile *file,
     m->isExternal = true;
     for (auto &recordField : record.fieldList) {
         LIBABCKIT_LOG(DEBUG) << "Found Module Field: " << recordField.name << "\n";
-        m->fields.emplace_back(CreateField<AbckitCoreModule, AbckitCoreModuleField>(m.get(), m.get(), recordField));
+        m->fields.emplace_back(CreateField<AbckitCoreModule, AbckitCoreModuleField>(file, m.get(), recordField));
     }
 
     nameToModule.emplace(moduleName, std::move(m));
 }
 
-static std::unique_ptr<AbckitCoreNamespace> CreateNamespace(pandasm::Record &record, const std::string &namespaceName)
+static std::unique_ptr<AbckitCoreNamespace> CreateNamespace(AbckitFile *file, pandasm::Record &record,
+                                                            const std::string &namespaceName)
 {
     LIBABCKIT_LOG(DEBUG) << "  Found namespace: '" << namespaceName << "'\n";
-    return std::make_unique<AbckitCoreNamespace>(nullptr, AbckitArktsNamespace(&record));
+    auto ns = std::make_unique<AbckitCoreNamespace>(nullptr, AbckitArktsNamespace(&record));
+    for (auto &recordField : record.fieldList) {
+        LIBABCKIT_LOG(DEBUG) << "Found Namespace Field: " << recordField.name << "\n";
+        auto field = CreateField<AbckitCoreNamespace, AbckitCoreNamespaceField>(file, ns.get(), recordField);
+        ns->fields.emplace_back(std::move(field));
+    }
+    return ns;
 }
 
 template <typename AbckitCoreType, typename AbckitArktsType, typename AbckitCoreTypeField>
@@ -274,7 +343,7 @@ static std::unique_ptr<AbckitCoreType> CreateInstance(
         for (auto &recordField : record.fieldList) {
             LIBABCKIT_LOG(DEBUG) << "Found instance Field: " << recordField.name << "\n";
             auto field =
-                CreateField<AbckitCoreType, AbckitCoreTypeField>(instanceModule.get(), instance.get(), recordField);
+                CreateField<AbckitCoreType, AbckitCoreTypeField>(instanceModule->file, instance.get(), recordField);
             instance->fields.emplace_back(std::move(field));
         }
     }
@@ -290,6 +359,42 @@ static void AssignOwningModuleOfNamespace(
         auto fullName = ns->GetArkTSImpl()->impl.GetStaticClass()->name;
         auto moduleName = ClassGetModuleNames(fullName, nameToNamespace).first;
         ns->owningModule = nameToModule[moduleName].get();
+    }
+}
+
+static void AssignAnnotationInterfaceToAnnotation(Container &container)
+{
+    auto assign = [&](const std::string &annotationName, AbckitCoreAnnotation *annotation) {
+        if (container.nameToAnnotationInterface.find(annotationName) != container.nameToAnnotationInterface.end()) {
+            auto &ai = container.nameToAnnotationInterface.at(annotationName);
+            annotation->ai = ai;
+        }
+    };
+
+    for (const auto &klass : container.classes) {
+        for (auto &[annotationName, annotation] : klass->annotationTable) {
+            assign(annotationName, annotation);
+        }
+        for (const auto &field : klass->fields) {
+            for (const auto &[annotationName, annotation] : field->annotationTable) {
+                assign(annotationName, annotation.get());
+            }
+        }
+    }
+
+    for (const auto &iface : container.interfaces) {
+        for (const auto &[annotationName, annotation] : iface->annotationTable) {
+            assign(annotationName, annotation.get());
+        }
+    }
+
+    for (const auto &function : container.functions) {
+        if (!function) {
+            continue;
+        }
+        for (auto &[annotationName, annotation] : function->annotationTable) {
+            assign(annotationName, annotation);
+        }
     }
 }
 
@@ -357,7 +462,12 @@ static void AssignInstance(const std::unordered_map<std::string, std::unique_ptr
                            std::vector<std::unique_ptr<AbckitCoreType>> &instances)
 {
     for (auto &instance : instances) {
-        auto fullName = instance->GetArkTSImpl()->impl.GetStaticClass()->name;
+        std::string fullName;
+        if constexpr (std::is_same_v<AbckitCoreType, AbckitCoreAnnotationInterface>) {
+            fullName = instance->GetArkTSImpl()->GetStaticImpl()->name;
+        } else {
+            fullName = instance->GetArkTSImpl()->impl.GetStaticClass()->name;
+        }
         auto [moduleName, instanceName] = ClassGetNames(fullName);
         if (nameToNamespace.find(moduleName) != nameToNamespace.end()) {
             LIBABCKIT_LOG(DEBUG) << "namespaceName, className, fullName: " << moduleName << ", " << instanceName << ", "
@@ -383,17 +493,17 @@ static bool IsInterfaceSetFunction(const std::string &functionName, std::smatch 
     return std::regex_match(functionName, match, std::regex(INTERFACE_SET_FUNCTION_PATTERN.data()));
 }
 
-static void CreateAndAssignInterfaceField(std::unique_ptr<AbckitCoreInterface> &interface,
+static void CreateAndAssignInterfaceField(std::unique_ptr<AbckitCoreInterface> &interface, AbckitCoreFunction *function,
                                           const std::string &functionName)
 {
     std::smatch match;
     if (IsInterfaceGetFunction(functionName, match)) {
-        const auto &fieldName = match[1].str();
+        const auto &fieldName = INTERFACE_FIELD_PREFIX.data() + match[1].str();
         LIBABCKIT_LOG(DEBUG) << "Found interface Field: " << fieldName << "\n";
-        interface->fields.emplace(fieldName, CreateInterfaceField(interface, fieldName));
+        interface->fields.emplace(fieldName, CreateInterfaceField(interface, function, fieldName));
     } else if (IsInterfaceSetFunction(functionName, match)) {
-        const auto &fieldName = match[1].str();
-        interface->fields[fieldName]->flag = ACC_PUBLIC;
+        const auto &fieldName = INTERFACE_FIELD_PREFIX.data() + match[1].str();
+        interface->fields[fieldName]->flag ^= ACC_READONLY;
     }
 }
 
@@ -444,7 +554,7 @@ static void HandleInterfaceFunction(AbckitCoreType *owningInstance, std::unique_
     LIBABCKIT_LOG(DEBUG) << "Assign Interface Function. interface: '" << interfaceName << "' function: '"
                          << functionName << "'\n";
     auto &interface = owningInstance->it[interfaceName];
-    CreateAndAssignInterfaceField(interface, functionName);
+    CreateAndAssignInterfaceField(interface, function.get(), functionName);
     interface->methods.emplace_back(std::move(function));
 }
 
@@ -533,6 +643,11 @@ static bool IsEnum(const pandasm::Record &record)
     return record.metadata->GetBase() == ENUM_BASE;
 }
 
+static bool IsAnnotationInterface(const pandasm::Record &record)
+{
+    return (record.metadata->GetAccessFlags() & ACC_ANNOTATION) != 0;
+}
+
 static bool IsInterfaceFunction(const std::string &instanceName,
                                 const std::unordered_map<std::string, AbckitCoreInterface *> &nameToInterface)
 {
@@ -591,21 +706,6 @@ static std::vector<std::unique_ptr<AbckitCoreFunction>> CollectAllFunctions(
     return functions;
 }
 
-// Container of vectors and maps of some kinds of instances
-// Including modules, classes, namespaces, interfaces, enums and functions
-struct Container {
-    std::vector<std::unique_ptr<AbckitCoreClass>> classes;
-    std::vector<std::unique_ptr<AbckitCoreInterface>> interfaces;
-    std::vector<std::unique_ptr<AbckitCoreNamespace>> namespaces;
-    std::vector<std::unique_ptr<AbckitCoreEnum>> enums;
-    std::vector<std::unique_ptr<AbckitCoreFunction>> functions;
-    std::vector<std::unique_ptr<AbckitCoreClass>> interfaceObjectLiterals;
-    std::unordered_map<std::string, std::unique_ptr<AbckitCoreModule>> nameToModule;
-    std::unordered_map<std::string, AbckitCoreNamespace *> nameToNamespace;
-    std::unordered_map<std::string, AbckitCoreClass *> nameToClass;
-    std::unordered_map<std::string, AbckitCoreInterface *> nameToInterface;
-};
-
 static void CollectExternalModules(pandasm::Program *prog, AbckitFile *file, Container &container)
 {
     for (auto &[recordName, record] : prog->recordTable) {
@@ -625,7 +725,7 @@ static void CollectExternalModules(pandasm::Program *prog, AbckitFile *file, Con
         LIBABCKIT_LOG(DEBUG) << "Record:" << recordName << '\n';
         if (prog->recordTable.find(moduleName) != prog->recordTable.end()) {
             LIBABCKIT_LOG(DEBUG) << "Found External Namespace: " << moduleName << '\n';
-            container.namespaces.emplace_back(CreateNamespace(prog->recordTable.at(moduleName), moduleName));
+            container.namespaces.emplace_back(CreateNamespace(file, prog->recordTable.at(moduleName), moduleName));
             container.nameToNamespace.emplace(moduleName, container.namespaces.back().get());
             continue;
         }
@@ -635,7 +735,7 @@ static void CollectExternalModules(pandasm::Program *prog, AbckitFile *file, Con
     }
 }
 
-static void CollectAllInstances(pandasm::Program *prog, Container &container)
+static void CollectAllInstances(AbckitFile *file, pandasm::Program *prog, Container &container)
 {
     for (auto &[recordName, record] : prog->recordTable) {
         if (recordName.find(LAMBDA_RECORD_KEY) != std::string::npos) {
@@ -644,33 +744,34 @@ static void CollectAllInstances(pandasm::Program *prog, Container &container)
         }
 
         auto [moduleName, className] = ClassGetModuleNames(recordName, container.nameToNamespace);
-        if (IsModuleName(className)) {
-            continue;
-        }
-        if (container.nameToNamespace.find(recordName) != container.nameToNamespace.end()) {
-            auto &ns = container.nameToNamespace[recordName];
-            for (auto &recordField : record.fieldList) {
-                LIBABCKIT_LOG(DEBUG) << "Found namespace Field: " << recordField.name << "\n";
-                auto field =
-                    CreateField<AbckitCoreNamespace, AbckitCoreNamespaceField>(ns->owningModule, ns, recordField);
-                ns->fields.emplace_back(std::move(field));
-            }
+        if (IsModuleName(className) || container.nameToNamespace.find(recordName) != container.nameToNamespace.end()) {
             continue;
         }
 
         auto &nameToModule = container.nameToModule;
         // Collect Interface
         if (IsInterface(record)) {
-            container.interfaces.emplace_back(
-                CreateInstance<AbckitCoreInterface, AbckitArktsInterface, AbckitCoreInterfaceField>(
-                    nameToModule, moduleName, className, record));
-            container.nameToInterface[recordName] = container.interfaces.back().get();
+            auto iface = CreateInstance<AbckitCoreInterface, AbckitArktsInterface, AbckitCoreInterfaceField>(
+                nameToModule, moduleName, className, record);
+            container.nameToInterface[recordName] = iface.get();
+            for (auto &annotationName : record.metadata->GetAttributeValues(ETS_ANNOTATION_CLASS.data())) {
+                iface->annotationTable.emplace(annotationName, CreateAnnotation(file, iface.get(), annotationName));
+            }
+            container.interfaces.emplace_back(std::move(iface));
             continue;
         }
         // Collect Enum
         if (IsEnum(record)) {
             container.enums.emplace_back(CreateInstance<AbckitCoreEnum, AbckitArktsEnum, AbckitCoreEnumField>(
                 nameToModule, moduleName, className, record));
+            continue;
+        }
+        // Collect AnnotationInterface
+        if (IsAnnotationInterface(record)) {
+            auto ai = CreateInstance<AbckitCoreAnnotationInterface, AbckitArktsAnnotationInterface,
+                                     AbckitCoreAnnotationInterfaceField>(nameToModule, moduleName, className, record);
+            container.nameToAnnotationInterface.emplace(recordName, ai.get());
+            container.annotationInterfaces.emplace_back(std::move(ai));
             continue;
         }
         // Collect InterfaceObjectLiteral
@@ -681,8 +782,13 @@ static void CollectAllInstances(pandasm::Program *prog, Container &container)
             continue;
         }
         // Collect Class
-        container.classes.emplace_back(CreateInstance<AbckitCoreClass, AbckitArktsClass, AbckitCoreClassField>(
-            nameToModule, moduleName, className, record));
+        auto klass = CreateInstance<AbckitCoreClass, AbckitArktsClass, AbckitCoreClassField>(nameToModule, moduleName,
+                                                                                             className, record);
+        for (auto &annotationName : record.metadata->GetAttributeValues(ETS_ANNOTATION_CLASS.data())) {
+            klass->annotations.emplace_back(CreateAnnotation(file, klass.get(), annotationName));
+            klass->annotationTable.emplace(annotationName, klass->annotations.back().get());
+        }
+        container.classes.emplace_back(std::move(klass));
         container.nameToClass[recordName] = container.classes.back().get();
     }
 }
@@ -704,7 +810,7 @@ static void CreateWrappers(pandasm::Program *prog, AbckitFile *file)
             continue;
         }
         if (IsNamespace(namespaceName, record)) {
-            container.namespaces.emplace_back(CreateNamespace(record, namespaceName));
+            container.namespaces.emplace_back(CreateNamespace(file, record, namespaceName));
             container.nameToNamespace.emplace(recordName, container.namespaces.back().get());
         }
     }
@@ -714,16 +820,18 @@ static void CreateWrappers(pandasm::Program *prog, AbckitFile *file)
     AssignOwningModuleOfNamespace(nameToModule, nameToNamespace, container.namespaces);
 
     // Collect classes, interfaces and enums
-    CollectAllInstances(prog, container);
+    CollectAllInstances(file, prog, container);
 
     // Functions
     container.functions = CollectAllFunctions(prog, file, nameToModule, nameToNamespace, container.nameToInterface);
 
+    AssignAnnotationInterfaceToAnnotation(container);
     AssignSuperClass(container.nameToClass, container.nameToInterface, container.classes);
     AssignSuperInerface(container.nameToInterface, container.interfaces);
     AssignInterfaceObjectLiteral(container.interfaceObjectLiterals, container.nameToInterface);
     AssignInstance(nameToModule, nameToNamespace, container.classes);
     AssignInstance(nameToModule, nameToNamespace, container.interfaces);
+    AssignInstance(nameToModule, nameToNamespace, container.annotationInterfaces);
     AssignInstance(nameToModule, nameToNamespace, container.enums);
     AssignInstance(nameToModule, nameToNamespace, container.namespaces);
     AssignFunctions(nameToModule, nameToNamespace, container.functions);

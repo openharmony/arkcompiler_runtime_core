@@ -313,6 +313,20 @@ bool InterfaceEnumerateClassesHelper(AbckitCoreInterface *iface, void *data,
     return true;
 }
 
+bool InterfaceEnumerateAnnotationsHelper(AbckitCoreInterface *iface, void *data,
+                                         bool (*cb)(AbckitCoreAnnotation *anno, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(iface, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &[_, anno] : iface->annotationTable) {
+        if (!cb(anno.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool EnumEnumerateMethodsHelper(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreFunction *method, void *data))
 {
     LIBABCKIT_LOG_FUNC;
@@ -339,6 +353,34 @@ bool EnumEnumerateFieldsHelper(AbckitCoreEnum *enm, void *data, bool (*cb)(Abcki
     return true;
 }
 
+bool ClassFieldEnumerateAnnotationsHelper(AbckitCoreClassField *field, void *data,
+                                          bool (*cb)(AbckitCoreAnnotation *anno, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(field, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &[_, anno] : field->annotationTable) {
+        if (!cb(anno.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool InterfaceFieldEnumerateAnnotationsHelper(AbckitCoreInterfaceField *field, void *data,
+                                              bool (*cb)(AbckitCoreAnnotation *anno, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(field, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &[_, anno] : field->annotationTable) {
+        if (!cb(anno.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool IsDynamic(AbckitTarget target)
 {
     return target == ABCKIT_TARGET_JS || target == ABCKIT_TARGET_ARK_TS_V1;
@@ -358,12 +400,13 @@ static size_t HashCombine(size_t seed, size_t value)
     return seed;
 }
 
-AbckitType *GetOrCreateType(AbckitFile *file, AbckitTypeId id, size_t rank, AbckitCoreClass *klass)
+AbckitType *GetOrCreateType(AbckitFile *file, AbckitTypeId id, size_t rank, AbckitCoreClass *klass, AbckitString *name)
 {
     size_t hash = 0;
     hash = HashCombine(hash, (size_t)id);
     hash = HashCombine(hash, rank);
     hash = HashCombine(hash, reinterpret_cast<size_t>(klass));
+    hash = HashCombine(hash, reinterpret_cast<size_t>(name));
 
     auto &cache = file->types;
     if (cache.count(hash) == 1) {
@@ -374,6 +417,7 @@ AbckitType *GetOrCreateType(AbckitFile *file, AbckitTypeId id, size_t rank, Abck
     type->id = id;
     type->rank = rank;
     type->klass = klass;
+    type->name = name;
     cache.insert({hash, std::move(type)});
     return cache[hash].get();
 }
