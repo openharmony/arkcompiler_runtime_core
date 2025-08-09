@@ -155,7 +155,7 @@
     method_return_type: boolean,
     expected_data_item_type: boolean,
     expected_data_type: 'FixedArray<boolean>',
-    expected_test_data: '[true, true, true, true, true, true]',
+    expected_test_data: '[true, true, true, true, true, false]',
     verify_test_result_function: 'comparePrimitiveValue'
   }
 

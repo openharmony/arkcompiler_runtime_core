@@ -114,7 +114,18 @@ export final class BigInt {
     constructor(d: double) {
         // should we cast it to long at then use internal helper?
         // i.e. like this: this.bytes = BigInt.fromLongHelper(d as long, 64)
-        this((d as Double).toString())
+        if (!d.isInteger()) {
+            throw new RangeError(`the number ${d} cannot be converted to a BigInt because it is not an integer`)
+        }
+        if (d > Long.MAX_VALUE || d < Long.MIN_VALUE) {
+            let trimmed = d.toString().trim()
+            let a = BigInt.parseFromString(trimmed)
+            this.bytes = a[0] as FixedArray<int>
+            this.sign = a[1] as int
+            return
+        }
+        this.sign = d < 0 ? -1 : (d == 0 ? 0 : 1)
+        this.bytes = this.sign == 0 ? [] as FixedArray<int> : BigInt.fromLongHelper(d.toLong(), 64, this.sign)
     }
 
     constructor(d: string) {
