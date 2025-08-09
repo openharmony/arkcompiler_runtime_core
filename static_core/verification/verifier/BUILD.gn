@@ -48,7 +48,7 @@ ohos_executable("verifier_bin") {
   external_deps = [ sdk_libc_secshared_dep ]
 
   output_name = "verifier"
-  install_enable = true
+  install_enable = false
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
 }
