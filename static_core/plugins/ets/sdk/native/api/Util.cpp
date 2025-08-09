@@ -180,7 +180,9 @@ ani_ref GetAniNull(ani_env *env)
 bool IsNullishValue(ani_env *env, ani_ref ref)
 {
     auto isNullish = static_cast<ani_boolean>(false);
-    ANI_FATAL_IF_ERROR(env->Reference_IsNullishValue(ref, &isNullish));
+    if (env->Reference_IsNullishValue(ref, &isNullish) != ANI_OK) {
+        return true;
+    }
     return static_cast<bool>(isNullish);
 }
 
