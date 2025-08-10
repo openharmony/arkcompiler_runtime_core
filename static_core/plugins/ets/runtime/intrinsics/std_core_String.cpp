@@ -447,12 +447,6 @@ EtsInt StdCoreStringCodePointToChar(EtsInt codePoint)
     return bit_cast<EtsInt>(ret);
 }
 
-int32_t StdCoreStringHashCode(EtsString *thisStr)
-{
-    ASSERT(thisStr != nullptr);
-    return thisStr->GetHashcode();
-}
-
 EtsBoolean StdCoreStringIsCompressed(EtsString *thisStr)
 {
     ASSERT(thisStr != nullptr);

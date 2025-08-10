@@ -1698,7 +1698,7 @@ export namespace util {
      * @returns { number } Return a hash code of an object.
      */
     export function getHash(obj: object): number {
-        let result: number = obj.$_hashCode();
+        let result: number = Runtime.getHashCodeByValue(obj);
         return result;
     }
 

@@ -121,26 +121,6 @@ export final class Char extends Object implements Comparable<Char> {
         return Char.toInt(this.value) - Char.toInt(other);
     }
 
-    /**
-     * $_hashCode(char) returns a hashcode of the char.
-     *
-     * @param value the char to be hash coded.
-     *
-     * @returns the hash code.
-     */
-    public static $_hashCode(value: char): int {
-        return Char.toInt(value);
-    }
-
-    /**
-     * $_hashCode() returns a hashcode of the underlying char.
-     *
-     * @returns the hash code.
-     */
-    public override $_hashCode(): int {
-        return Char.$_hashCode(this.value);
-    }
-
     public static readonly CHAR_BIT_SIZE = 16;
     public static readonly MAX_CODE_POINT = 0x10FFFF
     public static readonly HIGH_SURROGATE_MIN: char = c'\uD800';

@@ -522,7 +522,7 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
             return 1;
         }
 
-        const keyHash: int = (key! as object).$_hashCode(); // #26217
+        const keyHash: int = Runtime.getHashCodeByValue(key! as object).toInt(); // #26217
         const positiveMask: int = 1 << LightWeightMap.SHIFT_COUNT;
         if (keyHash >= 0) {
             return (keyHash | positiveMask)
