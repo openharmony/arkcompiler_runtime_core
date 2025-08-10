@@ -378,6 +378,63 @@ function testInvalidDate() {
     arktest.assertTrue(isNaN(invalidDate.valueOf()));
 }
 
+function testDateToLocaleStringConstEvent0001() {
+    const event = new Date(Date.UTC(2012, 11, 20, 3, 0, 0));
+    const formattedDate = event.toLocaleString('en-GB', {
+      timeZone: 'UTC'
+    });
+    arktest.assertEQ(formattedDate, '20/12/2012, 03:00:00');
+}
+
+function isUTC8Timezone() {
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return timeZone === 'Asia/Shanghai';
+}
+
+function testDateToLocaleTimeString0001() {
+    let event = new Date('August 19, 1975 23:15:30 GMT+00:00');
+    if (isUTC8Timezone()) {
+        arktest.assertEQ(event.toLocaleTimeString('en-US'), '7:15:30 AM');
+    }
+    let expected = new Date(Date.UTC(1975, 7, 19, 23, 15, 30));
+    arktest.assertEQ(event.toLocaleTimeString('en-US'), expected.toLocaleTimeString('en-US'));
+}
+
+function testDateToLocaleTimeStringAndLocaleString0001() {
+    let date = new Date();
+    // Defaults for toLocaleXXXString
+    let dtfDate = new Intl.DateTimeFormat();
+    let dtfTime = new Intl.DateTimeFormat(
+      [], {hour: 'numeric', minute: 'numeric', second: 'numeric'});
+      let dtfAll = new Intl.DateTimeFormat(
+      [], {year: 'numeric', month: 'numeric', day: 'numeric',
+           hour: 'numeric', minute: 'numeric', second: 'numeric'});
+    arktest.assertEQ(dtfAll.format(date), date.toLocaleString());
+    arktest.assertEQ(dtfDate.format(date), date.toLocaleDateString());
+    arktest.assertEQ(dtfTime.format(date), date.toLocaleTimeString());
+    // Specify locale, default options for toLocaleXXXString
+    let locale = ['sr'];
+    dtfDate = new Intl.DateTimeFormat(locale);
+    dtfTime = new Intl.DateTimeFormat(
+      locale, {hour: 'numeric', minute: 'numeric', second: 'numeric'});
+    dtfAll = new Intl.DateTimeFormat(
+      locale, {year: 'numeric', month: 'numeric', day: 'numeric',
+               hour: 'numeric', minute: 'numeric', second: 'numeric'});
+    arktest.assertEQ(dtfAll.format(date), date.toLocaleString(locale));
+    arktest.assertEQ(dtfDate.format(date), date.toLocaleDateString(locale));
+    arktest.assertEQ(dtfTime.format(date), date.toLocaleTimeString(locale));
+    // Specify locale and options for toLocaleXXXString
+    locale = ['ko'];
+    let dtf = new Intl.DateTimeFormat(locale, {year: 'numeric', month: 'long', day: 'numeric',
+        hour: 'numeric', minute: '2-digit', second: 'numeric'});
+    arktest.assertEQ(dtf.format(date), date.toLocaleString(locale, {year: 'numeric', month: 'long', day: 'numeric',
+        hour: 'numeric', minute: '2-digit', second: 'numeric'}));
+    arktest.assertEQ(dtf.format(date), date.toLocaleDateString(locale, {year: 'numeric', month: 'long', day: 'numeric',
+        hour: 'numeric', minute: '2-digit', second: 'numeric'}));
+    arktest.assertEQ(dtf.format(date), date.toLocaleTimeString(locale, {year: 'numeric', month: 'long', day: 'numeric',
+        hour: 'numeric', minute: '2-digit', second: 'numeric'}));   
+}
+
 function main() {
     let myTestsuite = new arktest.ArkTestsuite("DateTest");
     myTestsuite.addTest('testDateToUTCString', testDateToUTCString);
@@ -413,5 +470,8 @@ function main() {
     myTestsuite.addTest('testInvalidDate', testInvalidDate);
     myTestsuite.addTest('testLeapYear', testLeapYear);
     myTestsuite.addTest('testSpecialDateString', testSpecialDateString);
+    myTestsuite.addTest('testDateToLocaleStringConstEvent0001', testDateToLocaleStringConstEvent0001);
+    myTestsuite.addTest('testDateToLocaleTimeString0001', testDateToLocaleTimeString0001);
+    myTestsuite.addTest('testDateToLocaleTimeStringAndLocaleString0001', testDateToLocaleTimeStringAndLocaleString0001);
     myTestsuite.run();
 }
