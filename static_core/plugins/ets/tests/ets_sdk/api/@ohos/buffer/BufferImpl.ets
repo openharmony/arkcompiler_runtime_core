@@ -38,6 +38,7 @@ function main(): int {
 
     suite.addTest("Test buffer.from with number array", testFromArray)
     suite.addTest("Test buffer.from with ArrayBuffer", testFromArrayBuffer)
+    suite.addTest("Test buffer.from with Uint8Array", testFromUint8Array)
     suite.addTest("Test buffer.from with Buffer/Uint8Array", testFromBufferOrUint8Array)
     suite.addTest("Test buffer.from with string", testFromString)
     suite.addTest("Test buffer.from with string and base64 encoding", testFromStringWithBase64Encoding)
@@ -255,6 +256,15 @@ function testFromBufferOrUint8Array() {
 
     let a = new Uint8Array(buf.buffer, buf.byteOffset, buf.length);
     arktest.assertEQ(a.toString(), "49,50,51,54")
+}
+
+function testFromUint8Array() {
+    let src = new Uint8Array(10);
+    let buf3 = buffer.from(src);
+    buf3.fill(1)
+
+    arktest.assertEQ(src.toString(), '1,1,1,1,1,1,1,1,1,1')
+    arktest.assertEQ(buf3.toString('hex'), '01010101010101010101')
 }
 
 function testFromString() {
