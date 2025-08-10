@@ -130,3 +130,57 @@ cases:
     decl: |-
       type B = A<X|null>[]
     bound: ' extends Object|null'
+
+  # type argument is tuple
+  - use: |-
+      let v: A<[X, X]> = new A<[X, X]>([new X(), new X()])
+
+  - use: |-
+      let v: A<[X, int]> = new A<[X, int]>([new X(), 1])
+
+  - use: |-
+      let v: A<[X, X]|null> = new A<[X, X]|null>(null)
+
+  - use: |-
+      let v: A<[X|null, X]> = new A<[X|null, X]>([null, new X()])
+
+  - use: |-
+      let v: A<A<[X, X]>> = new A<A<[X, X]>>(new A<[X, X]>([new X(), new X()]))
+
+  - use: |-
+      let v: A<[A<X>, A<X>]> = new A<[A<X>, A<X>]>([new A<X>(new X()), new A<X>(new X())])
+
+  # type argument is FixedArray
+  - use: |-
+      let v: A<FixedArray<X>> = new A<FixedArray<X>>([new X()])
+
+  - use: |-
+      let v: A<FixedArray<X>|null> = new A<FixedArray<X>|null>(null)
+
+  - use: |-
+      let v: A<A<FixedArray<X>>> = new A<A<FixedArray<X>>>(new A<FixedArray<X>>([new X()]))
+
+  - use: |-
+      let v: A<FixedArray<A<X>>> = new A<FixedArray<A<X>>>([new A<X>(new X())])
+
+  # type argument is specific type
+  - use: |-
+      let v: A<Any> = new A<Any>(new X())
+
+  - use: |-
+      let v: A<undefined> = new A<undefined>(undefined)
+
+  - use: |-
+      let v: A<null> = new A<null>(null)
+
+  - use: |-
+      let v: A<string> = new A<string>("string")
+
+  - use: |-
+      let v: A<bigint> = new A<bigint>(123n)
+
+  - use: |-
+      let v: A<KeyHolder<keyof Keys>> = new A<KeyHolder<'key'>>(new KeyHolder<'key'>)
+    decl: |-
+      class Keys { key: number = 0 }
+      class KeyHolder<T extends keyof Keys> {}

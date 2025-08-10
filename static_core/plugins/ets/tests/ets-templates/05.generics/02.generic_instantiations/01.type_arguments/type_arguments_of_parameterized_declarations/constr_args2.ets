@@ -41,6 +41,7 @@ enum Color { Red, Green, Blue }
 
 function main(): int {
     {{c.use|indent}}
+    arktest.assertTrue(v instanceof A)
     return 0;
 }
 {% endfor %}

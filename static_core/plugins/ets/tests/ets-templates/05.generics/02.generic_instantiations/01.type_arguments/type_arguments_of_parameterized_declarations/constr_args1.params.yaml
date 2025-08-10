@@ -101,3 +101,23 @@ cases:
     bound: ' extends X[]|null'
     decl: type B = X[]
     tags: 'compile-only, negative'
+
+  # tuples
+  - use: |-
+      let v: A<[X, X]> = new A<[X, X]> ([new X(), new X()])
+
+  - use: |-
+      let v: A<[X, X]|null> = new A<[X, X]|null> ([new X(), new X()])
+
+  - use: |-
+      let v: A<[X, X]|null> = new A<[X, X]|null> (null)
+
+  # FixedArray
+  - use: |-
+      let v: A<FixedArray<X>> = new A<FixedArray<X>> ([new X()])
+
+  - use: |-
+      let v: A<FixedArray<X>|null> = new A<FixedArray<X>|null> ([new X()])
+
+  - use: |-
+      let v: A<FixedArray<X>|null> = new A<FixedArray<X>|null> (null)
