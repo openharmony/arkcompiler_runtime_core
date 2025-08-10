@@ -1477,6 +1477,9 @@ Received value is: ${value}`)
                         `It must be >= 0 and <= ${this.length - 1}. Received value is: ${offset}`);
                 }
             }
+            if (!isEncoding(encoding)) {
+                throw createBusinessError(TypeErrorCodeId, 'Parameter error. The type of "encoding" must be BufferEncoding. the encoding invalid_encoding is unknown')
+            }
             const resolvedEncoding = encoding as buffer.BufferEncoding;
             const tmpLength = length ?? this.length - offset
             if (tmpLength < 0 || tmpLength > this.length) {
