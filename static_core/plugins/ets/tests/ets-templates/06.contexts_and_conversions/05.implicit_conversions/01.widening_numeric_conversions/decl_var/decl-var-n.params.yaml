@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -36,10 +36,10 @@ cases:
     - { from_type: long, expr: 0 as long, to_type: Color }
 
     # from float
-    - { from_type: float, expr: +0.0 as float, to_type: byte }
-    - { from_type: float, expr: +0.0 as float, to_type: short }
-    - { from_type: float, expr: +0.0 as float, to_type: int }
-    - { from_type: float, expr: +0.0 as float, to_type: long }
-    - { from_type: float, expr: +0.0 as float, to_type: boolean }
-    - { from_type: float, expr: +0.0 as float, to_type: Color }
+    - { from_type: float, expr: +0.0.toFloat(), to_type: byte }
+    - { from_type: float, expr: +0.0.toFloat(), to_type: short }
+    - { from_type: float, expr: +0.0.toFloat(), to_type: int }
+    - { from_type: float, expr: +0.0.toFloat(), to_type: long }
+    - { from_type: float, expr: +0.0.toFloat(), to_type: boolean }
+    - { from_type: float, expr: +0.0.toFloat(), to_type: Color }
 

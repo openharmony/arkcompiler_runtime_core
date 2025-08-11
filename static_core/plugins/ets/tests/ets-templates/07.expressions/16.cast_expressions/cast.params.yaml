@@ -27,13 +27,13 @@ cases:
     - decl: |-
           let s = Float.MAX_VALUE
       use: |-
-          let t = s as Float  // boxing
+          let t = s.toFloat()  // boxing
           arktest.assertTrue( t instanceof Float && t.unboxed() == Float.MAX_VALUE )
 
     - decl: |-
-          let s = new Float(3.5 as float)
+          let s = new Float(3.5.toFloat())
       use: |-
-          let t = s as float  // unboxing
+          let t = s.toFloat()  // unboxing
           arktest.assertEQ( t, 3.5 )
 
     - decl: |-

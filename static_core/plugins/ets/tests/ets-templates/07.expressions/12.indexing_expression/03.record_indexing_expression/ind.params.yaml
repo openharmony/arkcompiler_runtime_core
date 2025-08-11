@@ -24,9 +24,9 @@ cases:
           }
           arktest.assertTrue(idx == 3)
           arktest.assertTrue(r["1"] == 1 && r["2"] == 1 && r["3"] == 3)
-          r["1"] = 10 as short
-          r["2"] = 20 as short
-          r["3"] = 30 as short
+          r["1"] = new Short(10)
+          r["2"] = new Short(20)
+          r["3"] = new Short(30)
           arktest.assertTrue(r["1"] == 10 && r["2"] == 20 && r["3"] == 30)
 
     - tags: 'compile-only, negative'
@@ -149,7 +149,7 @@ cases:
           r[b_max] = b_max
           r[b_min] = b_min
           arktest.assertTrue(r[b0] === null && r[b_max] == b_max && r[b_min] == b_min)
-          arktest.assertTrue(r[99 as byte] === undefined)
+          arktest.assertTrue(r[new Byte(99)] === undefined)
 
     - use: |-
           // key is of numeric type, constants
@@ -159,7 +159,7 @@ cases:
           r[s_min] = s_min
           r[s_max] = s_max
           arktest.assertTrue(r[s0] === undefined && r[s_min] == s_min && r[s_max] == s_max)
-          arktest.assertTrue(r[99 as short] === undefined)
+          arktest.assertTrue(r[new Short(99)] === undefined)
 
     - decl: |-
           let v0 = 0, v1 = 1, v_max = Int.MAX_VALUE, v_min = Int.MIN_VALUE
@@ -221,7 +221,7 @@ cases:
           r["" + b_min] = b_min
           arktest.assertTrue(r[b0] === null && r[b_max] == b_max && r[b_min] == b_min)
           arktest.assertTrue(r["" + b0] === null && r["" + b_max] == b_max && r["" + b_min] == b_min)
-          arktest.assertTrue(r[99 as byte] === undefined)
+          arktest.assertTrue(r[new Byte(99)] === undefined)
           arktest.assertTrue(r["99"] === undefined)
 
     - use: |-
@@ -236,7 +236,7 @@ cases:
           r["" + s_max] = s_max
           arktest.assertTrue(r[s0] === undefined && r[s_min] == s_min && r[s_max] == s_max)
           arktest.assertTrue(r["" + s0] === undefined && r["" + s_min] == s_min && r["" + s_max] == s_max)
-          arktest.assertTrue(r[99 as short] === undefined)
+          arktest.assertTrue(r[new Short(99)] === undefined)
           arktest.assertTrue(r["99"] === undefined)
 
     - decl: |-

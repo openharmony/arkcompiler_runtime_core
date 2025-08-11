@@ -17,67 +17,67 @@ cases:
   - decl: |-
       type T = byte;
     init: |-
-      foo = 0x80 as byte;
+      foo = 0x80.toByte();
     check: |-
       function main() {
           let a: A = new A();
-          arktest.assertEQ(a.foo, 0x80 as byte);
-          arktest.assertEQ(a.bar(a.foo), 0x80 as byte);
+          arktest.assertEQ(a.foo, 0x80.toByte());
+          arktest.assertEQ(a.bar(a.foo), 0x80.toByte());
       }
 
   - decl: |-
       type T = short;
     init: |-
-      foo = 0x7FFF as short;
+      foo = 0x7FFF.toShort();
     check: |-
       function main() {
           let a: A = new A();
-          arktest.assertEQ(a.foo, 0x7FFF as short);
-          arktest.assertEQ(a.bar(a.foo), 0x7FFF as short);
+          arktest.assertEQ(a.foo, 0x7FFF.toShort());
+          arktest.assertEQ(a.bar(a.foo), 0x7FFF.toShort());
       }
 
   - decl: |-
       type T = int
     init: |-
-      foo = 127 as int;
+      foo = new Int(127);
     check: |-
       function main() {
           let a: A = new A();
-          arktest.assertEQ(a.foo, 127 as int);
-          arktest.assertEQ(a.bar(a.foo), 127 as int);
+          arktest.assertEQ(a.foo, new Int(127));
+          arktest.assertEQ(a.bar(a.foo), new Int(127));
       }
 
   - decl: |-
       type T = long
     init: |-
-      foo = 127 as long;
+      foo = new Long(127);
     check: |-
       function main() {
           let a: A = new A();
-          arktest.assertEQ(a.foo, 127 as long);
-          arktest.assertEQ(a.bar(a.foo), 127 as long);
+          arktest.assertEQ(a.foo, new Long(127));
+          arktest.assertEQ(a.bar(a.foo), new Long(127));
       }
 
   - decl: |-
       type T = float
     init: |-
-      foo = +0.0 as float;
+      foo = new Float(+0.0);
     check: |-
       function main() {
           let a: A = new A();
-          arktest.assertEQ(a.foo, +0.0 as float);
-          arktest.assertEQ(a.bar(a.foo), +0.0 as float);
+          arktest.assertEQ(a.foo, new Float(+0.0));
+          arktest.assertEQ(a.bar(a.foo), new Float(+0.0));
       }
 
   - decl: |-
       type T = double
     init: |-
-      foo = +0.0 as double;
+      foo = new Double(+0.0);
     check: |-
       function main() {
           let a: A = new A();
-          arktest.assertEQ(a.foo, +0.0 as double);
-          arktest.assertEQ(a.bar(a.foo), +0.0 as double);
+          arktest.assertEQ(a.foo, new Double(+0.0));
+          arktest.assertEQ(a.bar(a.foo), new Double(+0.0));
       }
 
   - decl: |-
@@ -117,67 +117,67 @@ cases:
   - decl: |-
       type T = Byte
     init: |-
-      foo = new Byte(0x7F as byte);
+      foo = new Byte(0x7F.toByte());
     check: |-
       function main() {
           let a: A = new A();
-          arktest.assertEQ(a.foo.unboxed(), 0x7F as byte);
-          arktest.assertEQ(a.bar(a.foo).unboxed(), 0x7F as byte);
+          arktest.assertEQ(a.foo.unboxed(), 0x7F.toByte());
+          arktest.assertEQ(a.bar(a.foo).unboxed(), 0x7F.toByte());
       }
 
   - decl: |-
       type T = Short
     init: |-
-      foo = new Short(2 as short);
+      foo = new Short(2);
     check: |-
       function main() {
           let a: A = new A();
-          arktest.assertEQ(a.foo.unboxed(), 2 as short);
-          arktest.assertEQ(a.bar(a.foo).unboxed(), 2 as short);
+          arktest.assertEQ(a.foo.unboxed(), new Short(2));
+          arktest.assertEQ(a.bar(a.foo).unboxed(), new Short(2));
       }
 
   - decl: |-
       type T = Int
     init: |-
-      foo = new Int(3 as int);
+      foo = new Int(3);
     check: |-
       function main() {
           let a: A = new A();
-          arktest.assertEQ(a.foo.unboxed(), 3 as int);
-          arktest.assertEQ(a.bar(a.foo).unboxed(), 3 as int);
+          arktest.assertEQ(a.foo.unboxed(), new Int(3));
+          arktest.assertEQ(a.bar(a.foo).unboxed(), new Int(3));
       }
 
   - decl: |-
       type T = Long
     init: |-
-      foo = new Long(4 as long);
+      foo = new Long(4);
     check: |-
       function main() {
           let a: A = new A();
-          arktest.assertEQ(a.foo.unboxed(), 4 as long);
-          arktest.assertEQ(a.bar(a.foo).unboxed(), 4 as long);
+          arktest.assertEQ(a.foo.unboxed(), new Long(4));
+          arktest.assertEQ(a.bar(a.foo).unboxed(), new Long(4));
       }
 
   - decl: |-
       type T = Float
     init: |-
-      foo = new Float(0.1 as float);
+      foo = new Float(0.1);
     check: |-
       function main() {
           let a: A = new A();
-          arktest.assertEQ(a.foo.unboxed(), 0.1 as float);
-          arktest.assertEQ(a.bar(a.foo).unboxed(), 0.1 as float);
+          arktest.assertEQ(a.foo.unboxed(), new Float(0.1));
+          arktest.assertEQ(a.bar(a.foo).unboxed(), new Float(0.1));
       }
 
   - decl: |-
       type T = Double
     init: |-
-      foo = new Double(0.1 as double);
+      foo = new Double(0.1);
     check: |-
       function main() {
           let a: A = new A();
-          arktest.assertEQ(a.foo.unboxed(), 0.1 as double);
-          arktest.assertEQ(a.bar(a.foo).unboxed(), 0.1 as double);
+          arktest.assertEQ(a.foo.unboxed(), new Double(0.1));
+          arktest.assertEQ(a.bar(a.foo).unboxed(), new Double(0.1));
       }
 
   - decl: |-

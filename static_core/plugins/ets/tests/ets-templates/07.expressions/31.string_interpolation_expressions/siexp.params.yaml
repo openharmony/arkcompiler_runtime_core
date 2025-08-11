@@ -26,7 +26,7 @@ cases:
           const l2: long = 0 as long
           const l3: long = Long.MAX_VALUE
           const f1: float = Float.MIN_VALUE
-          const f2: float = 0.0 as float
+          const f2: float = 0.0.toFloat()
           const f3: float = Float.MAX_VALUE
           const n1: number = Number.MIN_VALUE
           const n2: number = 0.0
@@ -49,7 +49,7 @@ cases:
           const l2: Long = 0 as long
           const l3: Long = Long.MAX_VALUE
           const f1: Float = Float.MIN_VALUE
-          const f2: Float = 0.0 as float
+          const f2: Float = 0.0.toFloat()
           const f3: Float = Float.MAX_VALUE
           const n1: Number = Number.MIN_VALUE
           const n2: Number = 0.0

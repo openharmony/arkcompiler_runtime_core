@@ -22,12 +22,12 @@ cases:
     - val: '[[0.0f, 2.0]]'
 
     # primitives
-    - { val: '[[0b1 as byte]]', type: byte }
-    - { val: '[[0xF as short]]', type: short}
-    - { val: '[[0o7 as int]]', type: int }
-    - { val: '[[-9223372036854775807 as long]]', type: long }
-    - { val: '[[111e11 as float]]', type: float }
-    - { val: '[[222e22 as double]]', type: number }
+    - { val: '[[0b1.toByte()]]', type: byte }
+    - { val: '[[0xF.toShort()]]', type: short}
+    - { val: '[[0o7.toInt()]]', type: int }
+    - { val: '[[new Long(-9223372036854775807)]]', type: long }
+    - { val: '[[111e11.toFloat()]]', type: float }
+    - { val: '[[222e22.toDouble()]]', type: number }
     - { val: '[[11111111111n]]', type: BigInt }
 
     # boxed
@@ -42,9 +42,9 @@ cases:
     # combinations
     - val: '[[0b1, 0xF, 0o7, 1e1, 3f, 9223372036854775807]]'
     - val: '[[new Byte(), new Short(), new Int(), new Long(), new Float(), new Double()]]'
-    - val: '[[1 as byte, 2 as short, 3 as int, 4 as long, 5 as float, 6 as double, 7n]]'
-    - val: '[[0n, 0, 0 as byte, 0 as short, 0 as int, 0 as long, 0 as float, 0 as double]]'
-    - val: '[[new Byte, 2 as short, new Int(3), 4 as long, new Float(5f), 6 as double, 7n]]'
+    - val: '[[new Byte(1), new Short(2), new Int(3), new Long(4), new Float(5), new Double(6), 7n]]'
+    - val: '[[0n, 0, new Byte(0), new Short(0), new Int(0), new Long(0), new Float(0), new Double(0)]]'
+    - val: '[[new Byte, new Short(2), new Int(3), new Long(4), new Float(5f), new Double(6), 7n]]'
 
     # variables
     - decl: |-
