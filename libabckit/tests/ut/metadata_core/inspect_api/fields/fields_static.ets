@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-const F1: string = "Hello";
+const F1: string = 'Hello';
 
 class C1 {
-  C1F1: string = "public";
-  protected C1F2: string = "protected";
-  private C1F3: string = "private";
-  static C1F4: string = "static";
+  public C1F1: string = 'public';
+  protected C1F2: string = 'protected';
+  private C1F3: string = 'private';
+  public static C1F4: string = 'static';
 }
 
 interface I1 {
@@ -32,5 +32,5 @@ enum E1 {
 }
 
 namespace NS1 {
-  const NS1F1: string[] = ["namespace"];
+  const NS1F1: string[] = ['namespace'];
 }
