@@ -37,11 +37,14 @@ public:
     NO_COPY_SEMANTIC(StackfulCoroutineManager);
     NO_MOVE_SEMANTIC(StackfulCoroutineManager);
 
-    explicit StackfulCoroutineManager(CoroutineFactory factory) : CoroutineManager(factory) {}
+    explicit StackfulCoroutineManager(const CoroutineManagerConfig &config, CoroutineFactory factory)
+        : CoroutineManager(config, factory)
+    {
+    }
     ~StackfulCoroutineManager() override = default;
 
     /* CoroutineManager interfaces, see CoroutineManager class for the details */
-    void Initialize(CoroutineManagerConfig config, Runtime *runtime, PandaVM *vm) override;
+    void Initialize(Runtime *runtime, PandaVM *vm) override;
     void Finalize() override;
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
@@ -111,22 +114,6 @@ public:
     void DisableCoroutineSwitch() override;
     void EnableCoroutineSwitch() override;
     bool IsCoroutineSwitchDisabled() override;
-    bool IsDrainQueueInterfaceEnabled()
-    {
-        return enableDrainQueueIface_;
-    }
-    bool IsMigrationEnabled()
-    {
-        return enableMigration_;
-    }
-    bool IsMigrateAwakenedCorosEnabled()
-    {
-        return migrateAwakenedCoros_;
-    }
-    bool IsExternalTimerEnabled() override
-    {
-        return externalTimerEnabled_;
-    }
 
     /* profiling tools */
     CoroutineStats &GetPerfStats()
@@ -259,10 +246,10 @@ private:
      * @param exclusiveWorkersLimit Output parameter for exclusive workers limit
      * @param commonWorkersLimit Output parameter for common workers limit
      */
-    void CalculateWorkerLimits(const CoroutineManagerConfig &config, size_t &exclusiveWorkersLimit,
-                               size_t &commonWorkersLimit);
+    void CalculateWorkerLimits(size_t &exclusiveWorkersLimit, size_t &commonWorkersLimit);
     void CalculateUserCoroutinesLimits(size_t &userCoroutineCountLimit, size_t limit);
 
+private:  // data members
     // for thread safety with GC
     mutable os::memory::Mutex coroListLock_;
     // all registered coros
@@ -310,14 +297,6 @@ private:
     PandaVector<CoroutineWorkerStats> finalizedWorkerStats_;
 
     os::memory::Mutex eWorkerCreationLock_;
-
-    // Feature flags, eventually will be refactored into some structure.
-    // Should we just store the initial CoroutineConfig?..
-    bool enableDrainQueueIface_ = false;
-    // coroutine migration feature
-    bool enableMigration_ = false;
-    bool migrateAwakenedCoros_ = false;
-    bool externalTimerEnabled_ = false;
 
     // the number of migration triggers
     std::atomic_uint32_t migrateCount_ = 0;

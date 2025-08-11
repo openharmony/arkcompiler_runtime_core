@@ -111,7 +111,7 @@ void StackfulCoroutineWorker::WaitForEvent(CoroutineEvent *awaitee)
 
 void StackfulCoroutineWorker::UnblockWaiters(CoroutineEvent *blocker)
 {
-    bool canMigrateAwait = coroManager_->IsMigrateAwakenedCorosEnabled() && !IsMainWorker() && !InExclusiveMode();
+    bool canMigrateAwait = coroManager_->GetConfig().migrateAwakenedCoros && !IsMainWorker() && !InExclusiveMode();
     Coroutine *unblockedCoro = nullptr;
     {
         os::memory::LockHolder lockW(waitersLock_);
@@ -124,7 +124,7 @@ void StackfulCoroutineWorker::UnblockWaiters(CoroutineEvent *blocker)
                 unblockedCoro->RequestUnblock();
                 PushToRunnableQueue(unblockedCoro, unblockedCoro->GetPriority());
             } else {
-                // (wangyuzhong,#24880): in case of IsMigrateAwakenedCorosEnabled() we need to correctly issue the
+                // (wangyuzhong,#24880): in case of migrateAwakenedCoros == true we need to correctly issue the
                 // external scheduler request from the correct worker. Here the coroutine becomes Active on one
                 // worker(which causes the request to be sent) and then gets potentially transferred to another worker.
                 unblockedCoro->RequestUnblock();

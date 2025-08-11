@@ -25,14 +25,14 @@
 
 namespace ark {
 
-void ThreadedCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime *runtime, PandaVM *vm)
+void ThreadedCoroutineManager::Initialize(Runtime *runtime, PandaVM *vm)
 {
     // create and activate workers
     size_t numberOfAvailableCores = std::max(std::thread::hardware_concurrency() / 4ULL, 2ULL);
-    size_t targetNumberOfWorkers = (config.workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO)
+    size_t targetNumberOfWorkers = (GetConfig().workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO)
                                        ? numberOfAvailableCores
-                                       : config.workersCount;
-    if (config.workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO) {
+                                       : GetConfig().workersCount;
+    if (GetConfig().workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO) {
         LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager(): AUTO mode selected, will set number of coroutine "
                                   "workers to number of CPUs / 4, but not less than 2 = "
                                << targetNumberOfWorkers;
