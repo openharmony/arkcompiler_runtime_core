@@ -4890,7 +4890,7 @@ NO_UB_SANITIZE static ani_status GlobalReference_Delete(VEnv *venv, VRef *vgref)
     VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
 
     ani_ref gref = vgref->GetRef();
-    venv->DeleteDeleteGlobalRef(vgref);
+    venv->DeleteGlobalVerifiedRef(vgref);
     return GetInteractionAPI(venv)->GlobalReference_Delete(venv->GetEnv(), gref);
 }
 

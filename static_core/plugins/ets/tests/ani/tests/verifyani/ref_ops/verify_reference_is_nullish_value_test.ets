@@ -13,8 +13,17 @@
  * limitations under the License.
  */
 
-native function foo(str: null | String): void
+native function foo(str: null | String): long
 
 function checkStackRef(): void {
     foo(null)
+}
+
+native function anotherFrame(str: String): long
+native function checkRefFromAnotherFrame(): long
+native function funcAddress(str: String): long
+native function badStackRef(): long
+
+function getVar(): String {
+    return "var"
 }

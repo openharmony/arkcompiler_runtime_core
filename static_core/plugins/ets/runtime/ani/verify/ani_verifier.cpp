@@ -13,23 +13,29 @@
  * limitations under the License.
  */
 
+#include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 #include "plugins/ets/runtime/ani/verify/ani_verifier.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_stubs-inl.h"
+#include "plugins/ets/runtime/mem/ets_reference.h"
+#include "runtime/include/cframe.h"
+#include "runtime/include/stack_walker-inl.h"
 
 namespace ark::ets::ani::verify {
 
 VRef *ANIVerifier::AddGlobalVerifiedRef(ani_ref gref)
 {
-    auto vrefHolder = MakePandaUnique<VRef>(gref);
-    auto *vref = vrefHolder.get();
+    auto igrefHolder = MakePandaUnique<InternalRef>(gref);
+    auto *igref = igrefHolder.get();
+    auto vgref = InternalRef::CastToVRef(igref);
     {
         os::memory::LockHolder<os::memory::Mutex> lockHolder(grefsMapMutex_);
-        grefsMap_[vref] = std::move(vrefHolder);
+        grefsMap_[vgref] = std::move(igrefHolder);
     }
-    return vref;
+    return vgref;
 }
 
-void ANIVerifier::DeleteDeleteGlobalRef(VRef *vgref)
+void ANIVerifier::DeleteGlobalVerifiedRef(VRef *vgref)
 {
     os::memory::LockHolder<os::memory::Mutex> lockHolder(grefsMapMutex_);
     auto it = grefsMap_.find(vgref);
@@ -99,6 +105,35 @@ void ANIVerifier::Abort(const std::string_view message)
     } else {
         LOG(FATAL, ANI) << ss.str();
     }
+}
+
+bool ANIVerifier::IsValidStackRef(VRef *vref)
+{
+    if (InternalRef::IsUndefinedStackRef(vref)) {
+        return true;
+    }
+
+    if (!InternalRef::IsStackVRef(vref)) {
+        return false;
+    }
+
+    auto stack = StackWalker::Create(ManagedThread::GetCurrent());
+    if (!stack.HasFrame()) {
+        return false;
+    }
+    size_t refIndex = 0;
+    auto &cframe = stack.GetCFrame();
+    bool notEqual = stack.IterateObjectsWithInfo([vref, &refIndex, &cframe, &stack](auto &regInfo, auto &stackReg) {
+        if (EtsMethod::FromRuntimeMethod(stack.GetMethod())->IsFunction() && refIndex++ == 0) {
+            [[maybe_unused]] auto stackEtsObj = EtsObject::FromCoreType(stackReg.GetReference());
+            ASSERT(EtsReferenceStorage::IsUndefinedEtsObject(stackEtsObj));
+            return true;
+        }
+        uintptr_t argRefAddr = reinterpret_cast<uintptr_t>(vref);
+        uintptr_t stackRefAddr = reinterpret_cast<uintptr_t>(cframe.GetValuePtrFromSlot(regInfo.GetValue()));
+        return (argRefAddr != stackRefAddr);
+    });
+    return !notEqual;
 }
 
 }  // namespace ark::ets::ani::verify

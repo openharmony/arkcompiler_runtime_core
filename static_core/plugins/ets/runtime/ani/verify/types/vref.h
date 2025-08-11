@@ -18,24 +18,15 @@
 
 #include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ani/ani.h"
+#include "base/mem.h"
 
 namespace ark::ets::ani::verify {
 
 class VRef {
 public:
-    explicit VRef(ani_ref ref) : ref_(ref) {}
-    ~VRef() = default;
-
-    ani_ref GetRef()
-    {
-        return ref_;
-    }
-
-    DEFAULT_COPY_SEMANTIC(VRef);
-    DEFAULT_MOVE_SEMANTIC(VRef);
-
-private:
-    ani_ref ref_;
+    ani_ref GetRef();
+    VRef() = delete;
+    ~VRef() = delete;
 };
 
 class VModule final : public VRef {
