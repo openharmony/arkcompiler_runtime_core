@@ -1903,6 +1903,7 @@ void Disassembler::SerializeInstructions(const pandasm::Function &method, std::o
         }
     }
 
+    size_t noLabelIdx = 0;
     for (size_t i = 0; i < method.ins.size(); i++) {
         std::string ins = method.ins[i]->ToString("", true, method.regs_num);
         if (method.ins[i]->IsLabel()) {
@@ -1914,10 +1915,14 @@ void Disassembler::SerializeInstructions(const pandasm::Function &method, std::o
 
         if (ins != "") {
             os << "\t" << std::setw(width) << std::left << ins;
-            if (print_method_info && i < method_info_it->second.instructions_info.size()) {
-                os << " # " << method_info_it->second.instructions_info.at(i);
+            if (print_method_info && noLabelIdx < method_info_it->second.instructions_info.size()) {
+                os << " # " << method_info_it->second.instructions_info.at(noLabelIdx);
             }
             os << "\n";
+        }
+
+        if (!method.ins[i]->IsLabel()) {
+            noLabelIdx++;
         }
     }
 }
