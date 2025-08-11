@@ -315,7 +315,9 @@ class TestSuite:
         all_tests = {self.__create_test(test, test in self.ignored_tests) for test in raw_test_files}
         not_tests = {t for t in all_tests if not t.is_valid_test}
         valid_tests = all_tests - not_tests
-
+        if self.config.test_suite.skip_compile_only:
+            compile_only_tests = {t for t in all_tests if t.is_compile_only}
+            valid_tests = valid_tests - compile_only_tests
         _LOGGER.all(f"Loaded {len(valid_tests)} tests")
 
         return list(valid_tests)

@@ -21,29 +21,46 @@ from runner.enum_types.qemu import QemuKind
 from runner.enum_types.verbose_format import VerboseFilter, VerboseKind
 
 args = {
-    'workflow': 'config-1',
-    'config-1.path': Path(__file__).parent.parent.parent.parent.joinpath('cfg/workflows/config-1.yaml').resolve(),
-    'config-1.data': {
+    'workflow': 'config-hybrid',
+    'config-hybrid.path': Path(__file__).with_name('config-hybrid.yaml').resolve(),
+    'config-hybrid.data': {
         'runner-api-level': '0.0.0.1',
         'type': 'workflow',
-        'workflow-name': 'echo',
+        'workflow-name': 'hybrid',
         'parameters': {
-            'string-param': 'hello',
-            'int-param': 20,
-            'bool-param': True,
-            'list-param': ['--gen-stdlib=false', '--thread=0']
+            'build': '.',
+            'source': '.'
         },
         'steps': {
-            'echo': {
+            'ohos_es2abc': {
                 'executable-path': '/usr/bin/echo',
                 'args': [
-                    '--arktsconfig=${parameters.string-param}',
-                    '${parameters.list-param}',
-                    '--extension=ets',
-                    '${test-id}'
+                    '--merge-abc',
+                    '--extension=ts',
+                    '--module',
+                    '--output=${parameters.work-dir}/intermediate/${test-id}.abc',
+                    '${parameters.work-dir}/gen/${test-id}'
                 ],
-                'timeout': '${parameters.int-param}',
-                'can-be-instrumented': '${parameters.bool-param}'
+                'timeout': '30'
+                },
+            'ark_js_napi_cli': {
+                'executable-path': Path(__file__).parent.parent.parent.parent /
+                                   'extensions/generators/ets_arkjs_xgc/ark_js_napi_cli_runner.sh',
+                'args': [
+                    '--work-dir ${parameters.work-dir}/intermediate',
+                    '--build-dir .',
+                    '--stub-file ./gen/arkcompiler/ets_runtime/stub.an',
+                    '--enable-force-gc=false',
+                    '--open-ark-tools=true',
+                    '--entry-point ${test-id}',
+                    '${parameters.work-dir}/intermediate/${test-id}.abc'
+                    ],
+                'env': {
+                    'LD_LIBRARY_PATH': [
+                        './arkcompiler/runtime_core:'
+                        ]
+                    },
+                'timeout': '60'
             }
         }
     },
@@ -52,8 +69,7 @@ args = {
     'config-1.parameters.bool-param': True,
     'config-1.parameters.list-param': ['--gen-stdlib=false', '--thread=0'],
     'test-suite': 'test_suite1',
-    'test_suite1.path': (Path(__file__).parent.parent.parent.parent
-                         .joinpath('cfg/test-suites/test_suite1.yaml').resolve()),
+    'test_suite1.path': (Path(__file__).with_name('test_suite1.yaml').resolve()),
     'test_suite1.data': {
         'version': '0.0.0.1',
         'type': 'test-suite',
@@ -69,7 +85,9 @@ args = {
     'test_suite1.parameters.filter': '*',
     'test_suite1.parameters.repeats': 1,
     'test_suite1.parameters.repeats-by-time': 0,
-    'test_suite1.parameters.with-js': 'with-js',
+    'test_suite1.parameters.exclude-ignored-tests': False,
+    'test_suite1.parameters.skip-compile-only': False,
+    'test_suite1.parameters.with-js': False,
     'test_suite1.parameters.test-list': None,
     'test_suite1.parameters.test-file': None,
     'test_suite1.parameters.skip-test-lists': False,
@@ -90,23 +108,16 @@ args = {
     'test_suite1.parameters.load-runtimes': 'ets',
     'test_suite1.parameters.work-dir': '.',
     'runner.processes': 12,
-    'runner.detailed-report': True,
-    'runner.detailed-report-file': 'my-report',
-    'runner.report-dir': 'my-report-dir',
-    'runner.show-progress': True,
+    'runner.detailed_report': True,
+    'runner.detailed_report_file': 'my-report',
+    'runner.report_dir': 'my-report-dir',
+    'runner.show_progress': True,
     'runner.verbose': VerboseKind.SHORT,
-    'runner.verbose-filter': VerboseFilter.IGNORED,
+    'runner.verbose_filter': VerboseFilter.IGNORED,
     'runner.qemu': QemuKind.ARM64,
-    'runner.enable-time-report': True,
-    'runner.time-edges': [1, 10, 100, 500],
-    'runner.use-llvm-cov': True,
-    'runner.use-lcov': True,
-    'runner.coverage-per-binary': True,
-    'runner.profdata-files-dir': Path.cwd().resolve(),
-    'runner.coverage-html-report-dir': Path.cwd().resolve(),
-    'runner.llvm-cov-exclude': ['/tmp', '*.h'],
-    'runner.lcov-exclude': ['/tmp', '*.h'],
-    'runner.clean-gcda-before-run': True,
-    'runner.gn-build': True,
-    'runner.gcov-tool': '/usr/bin/ls'
+    'runner.enable_time_report': True,
+    'runner.time_edges': [1, 10, 100, 500],
+    'runner.use_llvm_cov': True,
+    'runner.profdata_files_dir': Path.cwd().resolve().as_posix(),
+    'runner.coverage_html_report_dir': Path.cwd().resolve().as_posix()
 }

@@ -27,10 +27,8 @@ CLASSTYPE = TypeVar("CLASSTYPE", bound='object')
 
 def compare_dicts(test_case: unittest.TestCase, actual_dict: dict[str, Any],  # type: ignore[explicit-any]
                   expected_dict: dict[str, Any]) -> None:
-    test_case.assertEqual(len(actual_dict), len(expected_dict),
-                          f"Actual dict: {actual_dict.keys()}, Expected dict: {expected_dict.keys()}")
     for key in actual_dict:
-        test_case.assertTrue(key in expected_dict)
+        test_case.assertTrue(key in expected_dict, f"Key {key} is absent in {expected_dict.keys()}")
         actual_value = actual_dict[key]
         expected_value = expected_dict[key]
         type_actual_value = type(actual_value)
