@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,18 +13,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
 /*---
-desc: >-
-    If two functions declared in the same declaration space
-    have the same name but different signatures that are not
-    override-equivalent, then the function name is said to be overloaded.
+desc: Functions to be imported by the tests
+tags: [compile-only, not-a-test]
 ---*/
 
-{{c.decl}}
-
-function main(): int {
-  if ({{c.cond}}) return 0;
-  return 1;
+export function foo1(i: number): int {
+    return 1;
 }
-{% endfor %}

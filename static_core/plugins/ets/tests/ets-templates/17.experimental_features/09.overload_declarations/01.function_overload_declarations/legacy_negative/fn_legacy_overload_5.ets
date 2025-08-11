@@ -15,16 +15,21 @@
 
 {%- for c in cases %}
 /*---
-desc: |-
-    Declarations with the same name are distinguishable by signatures if:
-      - They are functions with the same name, but their signatures are not override-equivalent.
-      - They are methods with the same name, but their signatures are not override-equivalent.
-      - They are constructors of the same class, but their signatures are not override-equivalent.
-tags: [{{c.tags}}]
+desc: ArkTS supports the following two overloading mechanisms overload signatures and overload declarations. Legacy overload must be removed.
+tags: [compile-only, negative]
 ---*/
-{{c.decl}}
+
+type MyNumber = number;
+
+function foo({{c.arg1}}): int {
+    return 1;
+}
+function foo({{c.arg2}}): int {
+    return 2;
+}
 
 function main() {
-    {{c.use|indent}}
+    foo(1);
 }
+
 {%- endfor %}

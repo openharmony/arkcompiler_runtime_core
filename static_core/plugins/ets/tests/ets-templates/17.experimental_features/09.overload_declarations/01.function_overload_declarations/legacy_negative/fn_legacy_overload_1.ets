@@ -13,14 +13,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
 /*---
-desc: >-
-    If two functions declared in the same declaration space
-    have the same name but different signatures that are not
-    override-equivalent, then the function name is said to be overloaded.
-params: {{c.type}}
-tags: [{{c.tags}}]
+desc: ArkTS supports the following two overloading mechanisms overload signatures and overload declarations. Legacy overload must be removed.
+tags: [compile-only, negative]
 ---*/
 
 function foo(a: byte): int {
@@ -28,9 +23,6 @@ function foo(a: byte): int {
 }
 function foo(a: short): int {
   return 2;
-}
-function foo(a: char): int {
-  return 3;
 }
 function foo(a: int): int {
   return 4;
@@ -62,9 +54,6 @@ function foo(a: FixedArray<byte>): int {
 function foo(a: FixedArray<short>): int {
   return 102;
 }
-function foo(a: FixedArray<char>): int {
-  return 103;
-}
 function foo(a: FixedArray<int>): int {
   return 104;
 }
@@ -85,7 +74,5 @@ function foo(a: FixedArray<Object>): int {
 }
 
 function main(): void {
-  let v: {{c.type}} = {{c.val}};
-  arktest.assertEQ(foo(v), {{c.res}})
+  arktest.assertEQ(foo(1), 4)
 }
-{% endfor %}

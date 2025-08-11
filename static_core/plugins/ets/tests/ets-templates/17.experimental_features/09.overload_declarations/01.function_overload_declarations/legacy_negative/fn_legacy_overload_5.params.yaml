@@ -13,7 +13,8 @@
 
 ---
 cases:
-  - { type: A, val: new B(), res: 2 }
-  - { type: B, val: new C(), res: 2 }
-  - { type: C, val: new C(), res: 2 }
-  - { type: I, val: new C(), res: 2 }
+    - { arg1: '',          arg2: 'x: number'   }
+    - { arg1: 'x: number', arg2: 'x: number[]' }
+    - { arg1: 'x: number', arg2: 'x: string'   }
+    - { arg1: 'x: number', arg2: 'x: number'   }
+    - { arg1: 'x: number', arg2: 'x: MyNumber' }
