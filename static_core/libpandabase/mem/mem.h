@@ -42,7 +42,7 @@ using MemStatsType = MemStatsDefault;
 
 class ObjectHeader;
 
-#ifdef PANDA_USE_32_BIT_POINTER
+#ifdef PANDA_32_BIT_MANAGED_POINTER
 using ObjectPointerType = uint32_t;
 #else
 using ObjectPointerType = uintptr_t;
@@ -232,7 +232,7 @@ constexpr uint64_t PANDA_32BITS_HEAP_END_OBJECTS_ADDRESS = 4_GB;
 
 constexpr bool IsAddressInObjectsHeap([[maybe_unused]] uintptr_t address)
 {
-#ifdef PANDA_USE_32_BIT_POINTER
+#if defined(PANDA_32_BIT_MANAGED_POINTER) && defined(PANDA_TARGET_64)
     return PANDA_32BITS_HEAP_START_ADDRESS <= address && address < PANDA_32BITS_HEAP_END_OBJECTS_ADDRESS;
 #else  // In this case, all 64 bits addresses are valid
     return true;

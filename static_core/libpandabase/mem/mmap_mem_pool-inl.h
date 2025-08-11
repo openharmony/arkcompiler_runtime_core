@@ -173,7 +173,7 @@ inline MmapMemPool::MmapMemPool() : MemPool("MmapMemPool"), nonObjectSpacesCurre
         LOG_MMAP_MEM_POOL(FATAL) << "The memory limits is too high. We can't allocate so much memory from the system";
     }
     ASSERT(objectSpaceSize <= PANDA_MAX_HEAP_SIZE);
-#if defined(PANDA_USE_32_BIT_POINTER) && !defined(PANDA_TARGET_WINDOWS)
+#if defined(PANDA_32_BIT_MANAGED_POINTER) && defined(PANDA_TARGET_64) && !defined(PANDA_TARGET_WINDOWS)
     void *mem = ark::os::mem::MapRWAnonymousInFirst4GB(ToVoidPtr(PANDA_32BITS_HEAP_START_ADDRESS), objectSpaceSize,
                                                        // Object space must be aligned to PANDA_POOL_ALIGNMENT_IN_BYTES
                                                        PANDA_POOL_ALIGNMENT_IN_BYTES);

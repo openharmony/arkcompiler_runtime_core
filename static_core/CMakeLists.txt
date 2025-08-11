@@ -47,7 +47,6 @@ set(PANDA_THIRD_PARTY_CONFIG_DIR ${PANDA_ROOT}/cmake/third_party)
 set(ARKFILE_ROOT ${PANDA_ROOT}/libarkfile)
 
 add_definitions(-DBUILD_FOLDER="${CMAKE_CURRENT_BINARY_DIR}")
-add_definitions(-DBASE_STRING_32BITS)
 
 # List for accumulation of all core gtests binary paths.
 # It's used by CI to archive these binaries into a single artifact
