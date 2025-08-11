@@ -36,31 +36,31 @@ function fillHeap(arr: Object[], numberOfIter: number): void
     throw new Error("ets_vm_init_prealloc_test.ets: unsuccessful attempt of fill the heap.");
 }
 
-function compareExceptionObjects(
+function compareErrorObjects(
     error: Error,
-    expectedExceptionName: string,
-    expectedExceptionMsg: string,
-    expectedExceptionStack: string
+    expectedErrorName: string,
+    expectedErrorMsg: string,
+    expectedErrorStack: string
 ): boolean
 {
-    if (error.name !== expectedExceptionName) {
-        console.log(`Expected '${expectedExceptionName}' exception name, actual '${error.name}'`);
+    if (error.name !== expectedErrorName) {
+        console.log(`Expected '${expectedErrorName}' error name, actual '${error.name}'`);
         return false;
     }
 
-    if (error.message !== expectedExceptionMsg) {
-        console.log(`Expected '${expectedExceptionMsg}' exception message, actual '${error.message}'`);
+    if (error.message !== expectedErrorMsg) {
+        console.log(`Expected '${expectedErrorMsg}' error message, actual '${error.message}'`);
         return false;
     }
 
-    if (error.stack !== expectedExceptionStack) {
-        console.log(`Expected '${expectedExceptionStack}' exception stack, but actual '${error.stack}'`);
+    if (error.stack !== expectedErrorStack) {
+        console.log(`Expected '${expectedErrorStack}' error stack, but actual '${error.stack}'`);
         return false;
     }
 
     let expectedErrorToString = error.name + ((error.name !== "" && error.message)? ": " + error.message: error.message);
     if (error.toString() !== expectedErrorToString) {
-        console.log(`Expected '${expectedErrorToString}' exception stack, but actual '${error.toString()}'`);
+        console.log(`Expected '${expectedErrorToString}' error stack, but actual '${error.toString()}'`);
         return false;
     }
 
@@ -83,16 +83,16 @@ function testThrowingPreallocOOMObjectSuite(): Error
 }
 
 function testThrowingPreallocOOMObject(
-    expectedExceptionName: string,
-    expectedExceptionMsg: string,
-    expectedExceptionStack: string
+    expectedErrorName: string,
+    expectedErrorMsg: string,
+    expectedErrorStack: string
 ): boolean
 {
     let error = testThrowingPreallocOOMObjectSuite();
 
     GC.startGC(GC.Cause.FULL);
 
-    return compareExceptionObjects(error, expectedExceptionName, expectedExceptionMsg, expectedExceptionStack);
+    return compareErrorObjects(error, expectedErrorName, expectedErrorMsg, expectedErrorStack);
 }
 
 function testThrowingPreallocOOMObjectTwiceSuite(): Error
@@ -119,14 +119,14 @@ function testThrowingPreallocOOMObjectTwiceSuite(): Error
 }
 
 function testThrowingPreallocOOMObjectTwice(
-    expectedExceptionName: string,
-    expectedExceptionMsg: string,
-    expectedExceptionStack: string
+    expectedErrorName: string,
+    expectedErrorMsg: string,
+    expectedErrorStack: string
 ): boolean
 {
     let error = testThrowingPreallocOOMObjectTwiceSuite();
 
     GC.startGC(GC.Cause.FULL);
 
-    return compareExceptionObjects(error, expectedExceptionName, expectedExceptionMsg, expectedExceptionStack);
+    return compareErrorObjects(error, expectedErrorName, expectedErrorMsg, expectedErrorStack);
 }

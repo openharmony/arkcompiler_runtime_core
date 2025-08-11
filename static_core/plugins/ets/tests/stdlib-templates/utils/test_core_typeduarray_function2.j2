@@ -1221,10 +1221,10 @@ const testTypedArrayGet = parametrize<ObjectTypeAndExpectations<boolean[]>>(
     const array = args[0]
     const expected = args[1]
 
-    const isMinusOneThrows = testTypedArrayGetException(array, -1) == success
-    const isLengthThrows = testTypedArrayGetException(array, array.length) == success
-    const isNegInfThrows = testTypedArrayGetException(array, -Infinity) == success
-    const isPosInfThrows = testTypedArrayGetException(array, +Infinity) == success
+    const isMinusOneThrows = testTypedArrayGetError(array, -1) == success
+    const isLengthThrows = testTypedArrayGetError(array, array.length) == success
+    const isNegInfThrows = testTypedArrayGetError(array, -Infinity) == success
+    const isPosInfThrows = testTypedArrayGetError(array, +Infinity) == success
 
     const isNanZero = array[NaN] == array[0]
 
@@ -1249,7 +1249,7 @@ const testTypedArrayGet = parametrize<ObjectTypeAndExpectations<boolean[]>>(
   }
 )
 
-function testTypedArrayGetException(array: {{.item.objectType}}, index: number): number {
+function testTypedArrayGetError(array: {{.item.objectType}}, index: number): number {
   try {
     const tmp = array[index]
   } catch (e: RangeError) {
@@ -1273,10 +1273,10 @@ const testTypedArraySet = parametrize<ObjectTypeAndExpectations<boolean[]>>(
     const expected = args[1]
     const value = 100
 
-    const isMinusOneThrows = testTypedArraySetException(array, -1, value) == success
-    const isLengthThrows = testTypedArraySetException(array, array.length, value) == success
-    const isNegInfThrows = testTypedArraySetException(array, -Infinity, value) == success
-    const isPosInfThrows = testTypedArraySetException(array, +Infinity, value) == success
+    const isMinusOneThrows = testTypedArraySetError(array, -1, value) == success
+    const isLengthThrows = testTypedArraySetError(array, array.length, value) == success
+    const isNegInfThrows = testTypedArraySetError(array, -Infinity, value) == success
+    const isPosInfThrows = testTypedArraySetError(array, +Infinity, value) == success
 
     array[NaN] = value
     const isNanZero = array[0] == {{.item.create}}(value)
@@ -1315,7 +1315,7 @@ const testTypedArraySet = parametrize<ObjectTypeAndExpectations<boolean[]>>(
   }
 )
 
-function testTypedArraySetException(array: {{.item.objectType}}, index: number, value: int): number {
+function testTypedArraySetError(array: {{.item.objectType}}, index: number, value: int): number {
   try {
     array[index] = value
   } catch (e: RangeError) {
