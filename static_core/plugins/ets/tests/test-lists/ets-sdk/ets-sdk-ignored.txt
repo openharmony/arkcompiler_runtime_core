@@ -3,6 +3,9 @@ api/@ohos/util/StringDecoder/EncodingTest.ets
 api/@ohos/util/stream/StreamPipeEnCodingTestPart4.ets
 api/@ohos/util/stream/StreamReadableTestPart4.ets
 
+### Issue 25591
+api/@ohos/util/TextDecoder/TextDecoderDecodeToStringTest.ets
+
 ### Issue 27038
 api/@ohos/util/types/IsSetIteratorTest.ets
 ### Issue 27033
