@@ -590,9 +590,14 @@ void SetPropertyWithObject(JSValue *object, JSValue *property, EtsObject *value)
     auto key = JSConvertJSValue::WrapWithNullCheck(env, property);
     auto jsValue = JSConvertEtsObject::WrapWithNullCheck(env, value);
 
+    napi_status jsStatus {};
     {
         ScopedNativeCodeThread nativeScope(coro);
-        NAPI_CHECK_FATAL(napi_set_property(env, jsThis, key, jsValue));
+        jsStatus = napi_set_property(env, jsThis, key, jsValue);
+    }
+    if (jsStatus != napi_ok) {
+        ctx->ForwardJSException(coro);
+        return;
     }
 }
 
@@ -607,9 +612,14 @@ void SetIndexedPropertyWithObject(JSValue *object, uint32_t index, EtsObject *va
     auto jsThis = JSConvertJSValue::WrapWithNullCheck(env, object);
     auto jsValue = JSConvertEtsObject::WrapWithNullCheck(env, value);
 
+    napi_status jsStatus {};
     {
         ScopedNativeCodeThread nativeScope(coro);
-        NAPI_CHECK_FATAL(napi_set_element(env, jsThis, index, jsValue));
+        jsStatus = napi_set_element(env, jsThis, index, jsValue);
+    }
+    if (jsStatus != napi_ok) {
+        ctx->ForwardJSException(coro);
+        return;
     }
 }
 
@@ -624,9 +634,14 @@ void SetNamedPropertyWithObject(JSValue *object, const char *key, EtsObject *val
     auto jsThis = JSConvertJSValue::WrapWithNullCheck(env, object);
     auto jsValue = JSConvertEtsObject::WrapWithNullCheck(env, value);
 
+    napi_status jsStatus {};
     {
         ScopedNativeCodeThread nativeScope(coro);
-        NAPI_CHECK_FATAL(napi_set_named_property(env, jsThis, key, jsValue));
+        jsStatus = napi_set_named_property(env, jsThis, key, jsValue);
+    }
+    if (jsStatus != napi_ok) {
+        ctx->ForwardJSException(coro);
+        return;
     }
 }
 
