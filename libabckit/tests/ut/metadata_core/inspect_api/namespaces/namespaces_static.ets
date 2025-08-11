@@ -15,9 +15,9 @@
  */
 
 namespace N1 {
-    function M1() {}
+    function m1() {}
 
-    const F1: string = "Hello";
+    const F1: string = 'Hello';
 
     class C1 {}
 
@@ -36,6 +36,6 @@ namespace N1 {
     }
 }
 
-const F0:string = "World";
+const F0:string = 'World';
 
 class C0 {}
