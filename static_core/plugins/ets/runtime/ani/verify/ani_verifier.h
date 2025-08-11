@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_ANI_VERIFY_ANI_VERIFIER_H
 
 #include "libarkbase/macros.h"
+#include "plugins/ets/runtime/ani/verify/types/internal_ref.h"
 #include "plugins/ets/runtime/ani/verify/types/vref.h"
 #include "plugins/ets/runtime/ani/verify/types/vmethod.h"
 #include "runtime/include/mem/panda_containers.h"
@@ -38,21 +39,23 @@ public:
     }
 
     VRef *AddGlobalVerifiedRef(ani_ref gref);
-    void DeleteDeleteGlobalRef(VRef *vgref);
+    void DeleteGlobalVerifiedRef(VRef *vgref);
     bool IsValidGlobalVerifiedRef(VRef *vgref);
 
     impl::VMethod *AddMethod(EtsMethod *method);
     void DeleteMethod(impl::VMethod *vmethod);
     bool IsValidVerifiedMethod(impl::VMethod *vmethod);
 
+    bool IsValidStackRef(VRef *vref);
+
 private:
     void (*abortHook_)(void *data, const std::string_view message) {};
     void *abortHookData_ {};
 
-    PandaMap<VRef *, PandaUniquePtr<VRef>> grefsMap_ GUARDED_BY(grefsMapMutex_);
+    PandaMap<VRef *, PandaUniquePtr<InternalRef>> grefsMap_ GUARDED_BY(grefsMapMutex_);
     os::memory::Mutex grefsMapMutex_;
     PandaMap<impl::VMethod *, PandaUniquePtr<impl::VMethod>> methodsSet_ GUARDED_BY(methodsSetLock_);
-    mutable os::memory::RWLock methodsSetLock_;
+    os::memory::RWLock methodsSetLock_;
 
     NO_COPY_SEMANTIC(ANIVerifier);
     NO_MOVE_SEMANTIC(ANIVerifier);

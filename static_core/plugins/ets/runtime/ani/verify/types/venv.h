@@ -64,7 +64,7 @@ public:
 
     // Global refs
     VRef *AddGlobalVerifiedRef(ani_ref gref);
-    void DeleteDeleteGlobalRef(VRef *vgref);
+    void DeleteGlobalVerifiedRef(VRef *vgref);
     bool IsValidGlobalVerifiedRef(VRef *vgref);
 
 private:

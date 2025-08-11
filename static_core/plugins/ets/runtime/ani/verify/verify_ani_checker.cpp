@@ -1118,9 +1118,6 @@ static PandaVector<ExtArgInfo> MakeExtArgInfoList(PandaEnv *pandaEnv, ANIArg::An
 
     PandaVector<ExtArgInfo> extArgInfoList;
     size_t i = 0;
-    if (methodArgs->method == nullptr) {
-        return {};
-    }
 
     CallArgs callArgs(methodArgs->method, methodArgs->vargs);
     auto envANIVerifier = pandaEnv->GetEnvANIVerifier();
