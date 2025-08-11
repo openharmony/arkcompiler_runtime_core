@@ -86,22 +86,22 @@ void UnsafeMemoryWriteAligned(EtsLong addr, T val)
 template <typename T>
 T UnsafeMemoryRead(EtsLong addr)
 {
-#ifdef PANDA_TARGET_AARCH32
+#ifdef PANDA_TARGET_ARM32
     if constexpr (alignof(T) != alignof(std::byte)) {
         return UnsafeMemoryReadUnaligned<T>(addr);
     }
-#endif  // PANDA_TARGET_AARCH32
+#endif  // PANDA_TARGET_ARM32
     return UnsafeMemoryReadAligned<T>(addr);
 }
 
 template <typename T>
 void UnsafeMemoryWrite(EtsLong addr, T val)
 {
-#ifdef PANDA_TARGET_AARCH32
+#ifdef PANDA_TARGET_ARM32
     if constexpr (alignof(T) != alignof(std::byte)) {
         return UnsafeMemoryWriteUnaligned(addr, val);
     }
-#endif  // PANDA_TARGET_AARCH32
+#endif  // PANDA_TARGET_ARM32
     return UnsafeMemoryWriteAligned(addr, val);
 }
 
