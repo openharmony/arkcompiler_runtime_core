@@ -30,13 +30,13 @@ interface InterfaceC {
 }
 
 class ClassA implements InterfaceA {
-    fieldA = "Hello";
-    fieldB = 1.0;
+    public fieldA = 'Hello';
+    public fieldB = 1.0;
 }
 
 class ClassB implements InterfaceB, InterfaceC {
-    fieldA = "Hello";
-    fieldB = 1.0;
-    fieldC = "World";
-    foo(){}
+    public fieldA = 'Hello';
+    public fieldB = 1.0;
+    public fieldC = 'World';
+    public foo(){}
 }

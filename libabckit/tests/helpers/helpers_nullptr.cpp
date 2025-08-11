@@ -52,7 +52,10 @@ namespace libabckit::test::helpers_nullptr {
     reinterpret_cast<AbckitCoreAnnotationInterface *>(0x1);
 [[maybe_unused]] static AbckitCoreAnnotation *g_abckitAnnotation = reinterpret_cast<AbckitCoreAnnotation *>(0x1);
 [[maybe_unused]] static AbckitCoreClass *g_abckitClass = reinterpret_cast<AbckitCoreClass *>(0x1);
+[[maybe_unused]] static AbckitCoreClassField *g_abckitClassField = reinterpret_cast<AbckitCoreClassField *>(0x1);
 [[maybe_unused]] static AbckitCoreInterface *g_abckitInterface = reinterpret_cast<AbckitCoreInterface *>(0x1);
+[[maybe_unused]] static AbckitCoreInterfaceField *g_abckitInterfaceField =
+    reinterpret_cast<AbckitCoreInterfaceField *>(0x1);
 [[maybe_unused]] static AbckitCoreEnum *g_abckitEnum = reinterpret_cast<AbckitCoreEnum *>(0x1);
 [[maybe_unused]] static AbckitCoreExportDescriptor *g_abckitExportdescriptor =
     reinterpret_cast<AbckitCoreExportDescriptor *>(0x1);
@@ -718,7 +721,17 @@ void TestNullptr(bool (*apiToCheck)(AbckitCoreAnnotation *, void *, bool (*cb)(A
     apiToCheck(g_abckitAnnotation, g_void, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
 }
+void TestNullptr(bool (*apiToCheck)(AbckitCoreAnnotation *))
+{
+    apiToCheck(nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
 void TestNullptr(AbckitFile *(*apiToCheck)(AbckitCoreAnnotation *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitString *(*apiToCheck)(AbckitCoreAnnotation *))
 {
     ASSERT_EQ(apiToCheck(nullptr), nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
@@ -830,6 +843,11 @@ void TestNullptr(AbckitFile *(*apiToCheck)(AbckitCoreClass *))
 void TestNullptr(AbckitCoreModule *(*apiToCheck)(AbckitCoreClass *))
 {
     ASSERT_EQ(apiToCheck(nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(bool (*apiToCheck)(AbckitCoreClass *))
+{
+    apiToCheck(nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
 }
 void TestNullptr(AbckitCoreClass *(*apiToCheck)(AbckitCoreClass *))
@@ -959,6 +977,14 @@ void TestNullptr(bool (*apiToCheck)(AbckitCoreFunction *, void *, bool (*cb)(Abc
     apiToCheck(g_abckitFunction, g_void, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
 }
+void TestNullptr(bool (*apiToCheck)(AbckitCoreFunction *, void *, bool (*cb)(AbckitCoreFunctionParam *, void *)))
+{
+    apiToCheck(nullptr, g_void, [](AbckitCoreFunctionParam *, void *) { return false; });
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    apiToCheck(g_abckitFunction, g_void, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
 void TestNullptr(bool (*apiToCheck)(AbckitCoreFunction *, void *, bool (*cb)(AbckitCoreClass *, void *)))
 {
     apiToCheck(nullptr, g_void, [](AbckitCoreClass *, void *) { return false; });
@@ -988,6 +1014,16 @@ void TestNullptr(AbckitString *(*apiToCheck)(AbckitCoreFunction *))
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
 }
 void TestNullptr(AbckitCoreClass *(*apiToCheck)(AbckitCoreFunction *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitType *(*apiToCheck)(AbckitCoreFunction *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitType *(*apiToCheck)(AbckitCoreFunctionParam *))
 {
     ASSERT_EQ(apiToCheck(nullptr), nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
@@ -1109,6 +1145,21 @@ void TestNullptr(AbckitString *(*apiToCheck)(AbckitCoreInterface *))
     ASSERT_EQ(apiToCheck(nullptr), nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
 }
+void TestNullptr(AbckitFile *(*apiToCheck)(AbckitCoreInterface *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitCoreModule *(*apiToCheck)(AbckitCoreInterface *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitCoreNamespace *(*apiToCheck)(AbckitCoreInterface *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
 void TestNullptr(bool (*apiToCheck)(AbckitCoreInterface *, void *, bool (*cb)(AbckitCoreFunction *, void *)))
 {
     apiToCheck(nullptr, g_void, [](AbckitCoreFunction *, void *) { return false; });
@@ -1141,7 +1192,30 @@ void TestNullptr(bool (*apiToCheck)(AbckitCoreInterface *, void *, bool (*cb)(Ab
     apiToCheck(g_abckitInterface, g_void, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
 }
+void TestNullptr(bool (*apiToCheck)(AbckitCoreInterface *, void *, bool (*cb)(AbckitCoreAnnotation *, void *)))
+{
+    apiToCheck(nullptr, g_void, [](AbckitCoreAnnotation *, void *) { return false; });
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    apiToCheck(g_abckitInterface, g_void, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(bool (*apiToCheck)(AbckitCoreEnum *))
+{
+    apiToCheck(nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
 void TestNullptr(AbckitString *(*apiToCheck)(AbckitCoreEnum *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitFile *(*apiToCheck)(AbckitCoreEnum *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitCoreModule *(*apiToCheck)(AbckitCoreEnum *))
 {
     ASSERT_EQ(apiToCheck(nullptr), nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
@@ -1210,6 +1284,92 @@ void TestNullptr(bool (*apiToCheck)(AbckitCoreNamespace *, void *, bool (*cb)(Ab
     apiToCheck(g_abckitNamespace, g_void, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
 }
+void TestNullptr(AbckitCoreModule *(*apiToCheck)(AbckitCoreModuleField *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitString *(*apiToCheck)(AbckitCoreModuleField *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitType *(*apiToCheck)(AbckitCoreModuleField *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitCoreClass *(*apiToCheck)(AbckitCoreClassField *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitString *(*apiToCheck)(AbckitCoreClassField *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitType *(*apiToCheck)(AbckitCoreClassField *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(bool (*apiToCheck)(AbckitCoreClassField *))
+{
+    apiToCheck(nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(bool (*apiToCheck)(AbckitCoreClassField *, void *, bool (*cb)(AbckitCoreAnnotation *, void *)))
+{
+    apiToCheck(nullptr, g_void, [](AbckitCoreAnnotation *, void *) { return false; });
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    apiToCheck(g_abckitClassField, g_void, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitCoreInterface *(*apiToCheck)(AbckitCoreInterfaceField *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitString *(*apiToCheck)(AbckitCoreInterfaceField *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitType *(*apiToCheck)(AbckitCoreInterfaceField *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(bool (*apiToCheck)(AbckitCoreInterfaceField *))
+{
+    apiToCheck(nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(bool (*apiToCheck)(AbckitCoreInterfaceField *, void *, bool (*cb)(AbckitCoreAnnotation *, void *)))
+{
+    apiToCheck(nullptr, g_void, [](AbckitCoreAnnotation *, void *) { return false; });
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    apiToCheck(g_abckitInterfaceField, g_void, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitCoreEnum *(*apiToCheck)(AbckitCoreEnumField *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitString *(*apiToCheck)(AbckitCoreEnumField *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitType *(*apiToCheck)(AbckitCoreEnumField *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
 void TestNullptr(AbckitString *(*apiToCheck)(AbckitCoreNamespace *))
 {
     ASSERT_EQ(apiToCheck(nullptr), nullptr);
@@ -1223,6 +1383,11 @@ void TestNullptr(AbckitCoreClass *(*apiToCheck)(AbckitType *))
 void TestNullptr(AbckitTypeId (*apiToCheck)(AbckitType *))
 {
     apiToCheck(nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitString *(*apiToCheck)(AbckitType *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
 }
 void TestNullptr(double (*apiToCheck)(AbckitValue *))

@@ -182,4 +182,23 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetAnnotationsStatic)
     ASSERT_EQ(gotAnnotationNames, expectAnnotationNames);
 }
 
+// Test: test-kind=api, api=InspectApiImpl::interfaceIsExternal, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceIsExternalStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/interfaces/interfaces_static.abc");
+
+    std::set<std::string> gotInterfaceNames;
+    std::set<std::string> expectInterfaceNames = {"InterfaceA", "InterfaceB", "InterfaceC"};
+
+    for (const auto &module : file.GetModules()) {
+        for (const auto &interface : module.GetInterfaces()) {
+            if (!interface.IsExternal()) {
+                gotInterfaceNames.emplace(interface.GetName());
+            }
+        }
+    }
+
+    ASSERT_EQ(gotInterfaceNames, expectInterfaceNames);
+}
+
 }  // namespace libabckit::test

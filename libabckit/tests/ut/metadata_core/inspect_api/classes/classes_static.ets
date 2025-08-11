@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 class C1 {
-  C1M1(){}
-  static C1M2(){}
+  public c1M1(){}
+  public static c1M2(){}
 }
 
 function main() {
-  console.log("hello from classes_static.ets")
+  console.log('hello from classes_static.ets')
 }
 
 interface I1 {
-  I1F1: string
+  i1F1: string
 }
 
 @interface A1 {
@@ -32,8 +32,10 @@ interface I1 {
 @A1({a1F1: 'Hello'})
 class C3 {}
 
-class C2 extends C1 implements I1 {
-  public F1: string = 'Hello';
-  public F2: number = 1;
-  public I1F1: string = 'World';
+final class C2 extends C1 implements I1 {
+  public f1: string = 'Hello';
+  public f2: number = 1;
+  public i1F1: string = 'World';
 }
+
+abstract class C4 {}

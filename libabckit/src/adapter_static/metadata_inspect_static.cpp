@@ -96,6 +96,24 @@ AbckitString *ClassGetNameStatic(AbckitCoreClass *klass)
     return CreateStringStatic(klass->owningModule->file, className.data(), className.size());
 }
 
+bool ClassIsExternalStatic(AbckitCoreClass *klass)
+{
+    LIBABCKIT_LOG_FUNC;
+    return klass->GetArkTSImpl()->impl.GetStaticClass()->metadata->IsForeign();
+}
+
+bool ClassIsFinalStatic(AbckitCoreClass *klass)
+{
+    LIBABCKIT_LOG_FUNC;
+    return (klass->GetArkTSImpl()->impl.GetStaticClass()->metadata->GetAccessFlags() & ACC_FINAL) != 0x0;
+}
+
+bool ClassIsAbstractStatic(AbckitCoreClass *klass)
+{
+    LIBABCKIT_LOG_FUNC;
+    return (klass->GetArkTSImpl()->impl.GetStaticClass()->metadata->GetAccessFlags() & ACC_ABSTRACT) != 0x0;
+}
+
 // ========================================
 // Interface
 // ========================================
@@ -109,6 +127,12 @@ AbckitString *InterfaceGetNameStatic(AbckitCoreInterface *iface)
     return CreateStringStatic(iface->owningModule->file, interfaceName.data(), interfaceName.size());
 }
 
+bool InterfaceIsExternalStatic(AbckitCoreInterface *iface)
+{
+    LIBABCKIT_LOG_FUNC;
+    return iface->GetArkTSImpl()->impl.GetStaticClass()->metadata->IsForeign();
+}
+
 // ========================================
 // Enum
 // ========================================
@@ -120,6 +144,12 @@ AbckitString *EnumGetNameStatic(AbckitCoreEnum *enm)
     auto [_, enumName] = ClassGetNames(record->name);
 
     return CreateStringStatic(enm->owningModule->file, enumName.data(), enumName.size());
+}
+
+bool EnumIsExternalStatic(AbckitCoreEnum *enm)
+{
+    LIBABCKIT_LOG_FUNC;
+    return enm->GetArkTSImpl()->impl.GetStaticClass()->metadata->IsForeign();
 }
 
 // ========================================
@@ -314,11 +344,13 @@ bool FunctionIsStaticStatic(AbckitCoreFunction *function)
 bool FunctionIsCtorStatic(AbckitCoreFunction *function)
 {
     LIBABCKIT_LOG_FUNC;
-    auto *func = function->GetArkTSImpl()->GetStaticImpl();
-    size_t pos = func->name.rfind('.');
-    ASSERT(pos != std::string::npos);
-    std::string name = func->name.substr(pos + 1);
-    return name == "_ctor_";  // NOTE(ivagin)
+    return function->GetArkTSImpl()->GetStaticImpl()->metadata->IsCtor();
+}
+
+bool FunctionIsCctorStatic(AbckitCoreFunction *function)
+{
+    LIBABCKIT_LOG_FUNC;
+    return function->GetArkTSImpl()->GetStaticImpl()->metadata->IsCctor();
 }
 
 bool FunctionIsAnonymousStatic(AbckitCoreFunction *function)
@@ -336,6 +368,60 @@ bool FunctionIsNativeStatic(AbckitCoreFunction *function)
     LIBABCKIT_LOG_FUNC;
     auto *func = function->GetArkTSImpl()->GetStaticImpl();
     return (func->metadata->GetAccessFlags() & ACC_NATIVE) != 0x0;
+}
+
+bool FunctionIsPublicStatic(AbckitCoreFunction *function)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto *func = function->GetArkTSImpl()->GetStaticImpl();
+    return (func->metadata->GetAccessFlags() & ACC_PUBLIC) != 0x0;
+}
+
+bool FunctionIsProtectedStatic(AbckitCoreFunction *function)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto *func = function->GetArkTSImpl()->GetStaticImpl();
+    return (func->metadata->GetAccessFlags() & ACC_PROTECTED) != 0x0;
+}
+
+bool FunctionIsPrivateStatic(AbckitCoreFunction *function)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto *func = function->GetArkTSImpl()->GetStaticImpl();
+    return (func->metadata->GetAccessFlags() & ACC_PRIVATE) != 0x0;
+}
+
+bool FunctionIsInternalStatic(AbckitCoreFunction *function)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto flag = function->GetArkTSImpl()->GetStaticImpl()->metadata->GetAccessFlags();
+    return (flag & ACC_PUBLIC) == 0x0 && (flag & ACC_PROTECTED) == 0x0 && (flag & ACC_PRIVATE) == 0x0;
+}
+
+bool FunctionIsExternalStatic(AbckitCoreFunction *function)
+{
+    LIBABCKIT_LOG_FUNC;
+    return function->GetArkTSImpl()->GetStaticImpl()->metadata->IsForeign();
+}
+
+bool FunctionIsAbstractStatic(AbckitCoreFunction *function)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto *func = function->GetArkTSImpl()->GetStaticImpl();
+    return (func->metadata->GetAccessFlags() & ACC_ABSTRACT) != 0x0;
+}
+
+bool FunctionIsFinalStatic(AbckitCoreFunction *function)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto *func = function->GetArkTSImpl()->GetStaticImpl();
+    return (func->metadata->GetAccessFlags() & ACC_FINAL) != 0x0;
+}
+
+bool FunctionIsAsyncStatic(AbckitCoreFunction *function)
+{
+    LIBABCKIT_LOG_FUNC;
+    return function->asyncImpl != nullptr;
 }
 
 AbckitType *FunctionGetReturnTypeStatic(AbckitCoreFunction *function)

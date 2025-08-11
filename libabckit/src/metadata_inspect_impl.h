@@ -355,6 +355,11 @@ struct AbckitCoreClass {
     std::vector<AbckitCoreInterface *> interfaces {};
 
     /*
+     * Table to store the object literal
+     */
+    std::vector<std::unique_ptr<AbckitCoreClass>> objectLiterals;
+
+    /*
      * Language-dependent implementation to store class data.
      */
     std::variant<std::unique_ptr<AbckitJsClass>, std::unique_ptr<AbckitArktsClass>> impl;
@@ -449,6 +454,11 @@ struct AbckitCoreFunction {
     std::vector<std::unique_ptr<AbckitCoreClass>> nestedClasses;
 
     bool isAnonymous = false;
+
+    /*
+     * To store asyncImpl of the function.
+     */
+    std::unique_ptr<AbckitCoreFunction> asyncImpl = nullptr;
 
     std::variant<std::unique_ptr<AbckitJsFunction>, std::unique_ptr<AbckitArktsFunction>> impl;
 
@@ -600,11 +610,28 @@ struct AbckitModulePayloadDyn {
     size_t starExportsOffset = 0;
 };
 
+struct AbckitModulePayloadStat {
+    ark::pandasm::Record *record = nullptr;
+
+    explicit AbckitModulePayloadStat(ark::pandasm::Record *record)
+    {
+        this->record = record;
+    }
+};
+
 struct AbckitModulePayload {
     /*
      * Some data structure for STS which should store module's name and other data.
      */
-    std::variant<AbckitModulePayloadDyn> impl;
+    std::variant<AbckitModulePayloadDyn, AbckitModulePayloadStat> impl;
+
+    AbckitModulePayload() = default;
+
+    explicit AbckitModulePayload(ark::pandasm::Record *record)
+    {
+        this->impl = AbckitModulePayloadStat(record);
+    }
+
     /*
      * Implementation for JS.
      */
@@ -612,11 +639,27 @@ struct AbckitModulePayload {
     {
         return std::get<AbckitModulePayloadDyn>(impl);
     }
+
+    /*
+     * Implementation for ArkTS1.2
+     */
+    AbckitModulePayloadStat &GetStatModule()
+    {
+        return std::get<AbckitModulePayloadStat>(impl);
+    }
 };
 
 struct AbckitArktsModule {
     AbckitModulePayload impl;
     AbckitCoreModule *core = nullptr;
+
+    AbckitArktsModule() = default;
+
+    AbckitArktsModule(ark::pandasm::Record *record, AbckitCoreModule *core)
+    {
+        this->impl = AbckitModulePayload(record);
+        this->core = core;
+    }
 };
 
 struct AbckitJsModule {

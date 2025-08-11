@@ -147,6 +147,9 @@ void GraphInvalidateAnalyses(ark::compiler::Graph *graph);
 bool GraphHasUnreachableBlocks(ark::compiler::Graph *graph);
 bool GraphDominatorsTreeAnalysisIsValid(ark::compiler::Graph *graph);
 AbckitTypeId ArkPandasmTypeToAbckitTypeId(const ark::pandasm::Type &type);
+ark::pandasm::Record *GetStaticImplRecord(
+    const std::variant<AbckitCoreModule *, AbckitCoreNamespace *, AbckitCoreClass *, AbckitCoreInterface *,
+                       AbckitCoreEnum *, AbckitCoreAnnotationInterface *> &coreObject);
 
 constexpr AbckitBitImmSize GetBitLengthUnsigned(uint64_t imm)
 {

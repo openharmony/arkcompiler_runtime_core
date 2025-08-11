@@ -13,14 +13,18 @@
  * limitations under the License.
  */
 
-enum EnumA {
-    ONE,
-    TWO,
-    THREE,
+class C1 {
+    public c1F1(){};
+    protected c1F2(){};
+    private c1F3(){};
+    internal c1F4(){};
+    public final c1F5(){};
 }
 
-namespace Ns1 {
-    enum EnumB {
-        RED,
-    }
+abstract class C2 {
+    public abstract c2F6();
 }
+
+native function m0F7(): int;
+
+async function m0F8(){};

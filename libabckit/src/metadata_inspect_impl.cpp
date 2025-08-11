@@ -22,7 +22,6 @@
 #include "libabckit/src/logger.h"
 #include "libabckit/src/macros.h"
 #include "scoped_timer.h"
-
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/metadata_arkts_inspect_impl.h"
 #include "libabckit/src/metadata_js_inspect_impl.h"
@@ -659,23 +658,47 @@ extern "C" AbckitString *ClassGetName(AbckitCoreClass *klass)
 
 extern "C" bool ClassIsExternal(AbckitCoreClass *klass)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)klass;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(klass, false);
+
+    if (IsDynamic(klass->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+
+    return ClassIsExternalStatic(klass);
 }
 
 extern "C" bool ClassIsFinal(AbckitCoreClass *klass)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)klass;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(klass, false);
+
+    if (IsDynamic(klass->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+
+    return ClassIsFinalStatic(klass);
 }
 
 extern "C" bool ClassIsAbstract(AbckitCoreClass *klass)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)klass;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(klass, false);
+
+    if (IsDynamic(klass->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+
+    return ClassIsAbstractStatic(klass);
 }
 
 extern "C" AbckitCoreFunction *ClassGetParentFunction(AbckitCoreClass *klass)
@@ -840,9 +863,17 @@ extern "C" AbckitString *InterfaceGetName(AbckitCoreInterface *iface)
 
 extern "C" bool InterfaceIsExternal(AbckitCoreInterface *iface)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)iface;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(iface, false);
+
+    if (IsDynamic(iface->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+
+    return InterfaceIsExternalStatic(iface);
 }
 
 extern "C" AbckitCoreNamespace *InterfaceGetParentNamespace(AbckitCoreInterface *iface)
@@ -997,16 +1028,26 @@ extern "C" AbckitString *EnumGetName(AbckitCoreEnum *enm)
 
 extern "C" bool EnumIsExternal(AbckitCoreEnum *enm)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)enm;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(enm, false);
+
+    if (IsDynamic(enm->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+
+    return EnumIsExternalStatic(enm);
 }
 
 extern "C" AbckitCoreNamespace *EnumGetParentNamespace(AbckitCoreEnum *enm)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)enm;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(enm, nullptr);
+    return enm->parentNamespace;
 }
 
 extern "C" bool EnumEnumerateMethods(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreFunction *func, void *data))
@@ -1672,9 +1713,16 @@ extern "C" bool FunctionIsCtor(AbckitCoreFunction *function)
 
 extern "C" bool FunctionIsCctor(AbckitCoreFunction *function)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)function;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(function, false);
+
+    if (IsDynamic(function->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+    return FunctionIsCctorStatic(function);
 }
 
 extern "C" bool FunctionIsAnonymous(AbckitCoreFunction *function)
@@ -1692,37 +1740,69 @@ extern "C" bool FunctionIsAnonymous(AbckitCoreFunction *function)
 
 extern "C" bool FunctionIsPublic(AbckitCoreFunction *function)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)function;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(function, false);
+    if (IsDynamic(function->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+    return FunctionIsPublicStatic(function);
 }
 
 extern "C" bool FunctionIsProtected(AbckitCoreFunction *function)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)function;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(function, false);
+    if (IsDynamic(function->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+    return FunctionIsProtectedStatic(function);
 }
 
 extern "C" bool FunctionIsPrivate(AbckitCoreFunction *function)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)function;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(function, false);
+    if (IsDynamic(function->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+    return FunctionIsPrivateStatic(function);
 }
 
 extern "C" bool FunctionIsInternal(AbckitCoreFunction *function)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)function;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(function, false);
+    if (IsDynamic(function->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+    return FunctionIsInternalStatic(function);
 }
 
 extern "C" bool FunctionIsExternal(AbckitCoreFunction *function)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)function;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(function, false);
+
+    if (IsDynamic(function->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+
+    return FunctionIsExternalStatic(function);
 }
 
 extern "C" bool FunctionEnumerateParameters(AbckitCoreFunction *function, void *data,

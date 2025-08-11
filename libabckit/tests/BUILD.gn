@@ -76,6 +76,7 @@ abckit_gtests_sources = [
   "null_args_tests/null_args_tests_ArktsModifyApiImpl_0.cpp",
   "null_args_tests/null_args_tests_GraphApiImpl_0.cpp",
   "null_args_tests/null_args_tests_InspectApiImpl_0.cpp",
+  "null_args_tests/null_args_tests_InspectApiImpl_1.cpp",
   "null_args_tests/null_args_tests_IsaApiDynamicImpl_0.cpp",
   "null_args_tests/null_args_tests_IsaApiDynamicImpl_1.cpp",
   "null_args_tests/null_args_tests_IsaApiStaticImpl_0.cpp",
@@ -103,6 +104,7 @@ abckit_gtests_sources = [
   "scenarios/scan_subclasses/dynamic/subclasses_scanner.cpp",
   "scenarios/static_branch_elimination/static_branch_elimination.cpp",
   "ut/extensions/arkts/inspect_api/api_casts/api_casts.cpp",
+  "ut/extensions/arkts/inspect_api/methods/methods_static_test.cpp",
   "ut/extensions/arkts/inspect_api/modules/modules_dynamic_test.cpp",
   "ut/extensions/arkts/inspect_api/namespace/namespace_arkts.cpp",
   "ut/extensions/arkts/modify_api/annotations/annotations_test.cpp",
@@ -505,6 +507,7 @@ test_ets_files = [
   "ut/ir_core/loops/loop_static",
   "ut/ir_core/insert_try_catch/insert_try_catch_static",
   "ut/ir_core/graph_verifier/graph_verifier",
+  "ut/extensions/arkts/inspect_api/methods/methods_static",
   "ut/extensions/arkts/modify_api/modules/modules_static_modify",
 
   "internal/implementation_api/abc_static",
