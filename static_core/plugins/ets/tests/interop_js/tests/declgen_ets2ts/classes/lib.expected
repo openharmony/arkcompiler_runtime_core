@@ -126,3 +126,19 @@ export declare class DeviceInfo {
     public static set instance(value: DeviceInfo | undefined);
     constructor();
 }
+export declare class ReadOnlyClass {
+    public foo1(nums: readonly number[]): void;
+    public foo2(nums: readonly [number , string]): void;
+    public foo3(nums: readonly number[]): void;
+    public static foo4(nums: readonly number[]): void;
+    public foo5(...nums: readonly number[]): void;
+    public constructor(nums: readonly [number , string]);
+}
+export declare class Dog {
+    public get s(): string;
+    public set s(value: string);
+    public get n(): number;
+    public set n(value: number);
+    public foo1(s?: string, n?: number): void;
+    public constructor(s?: string | undefined, n?: number | undefined);
+}
