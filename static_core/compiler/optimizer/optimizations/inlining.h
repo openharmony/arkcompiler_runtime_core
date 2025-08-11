@@ -18,6 +18,7 @@
 
 #include <string>
 #include "optimizer/pass.h"
+#include "optimizer/ir/graph.h"
 #include "optimizer/ir/inst.h"
 #include "optimizer/ir/runtime_interface.h"
 #include "compiler_options.h"
@@ -133,6 +134,8 @@ protected:
     bool CheckBytecode(CallInst *callInst, const InlineContext &ctx, bool *calleeCallRuntime);
     bool TryBuildGraph(const InlineContext &ctx, Graph *graphInl, CallInst *callInst, CallInst *polyCallInst);
     bool CheckLoops(bool *calleeCallRuntime, Graph *graphInl);
+    bool TryToApplyOptimization(Graph *graphInl, InlineContext *ctx, CallInst *callInst, uint64_t savedPbcInstNum,
+                                PassManagerStatistics *stats);
     static void PropagateObjectInfo(Graph *graphInl, CallInst *callInst);
 
     void ProcessCallReturnInstructions(CallInst *callInst, BasicBlock *callContBb, bool hasRuntimeCalls,
@@ -172,6 +175,17 @@ private:
     uint32_t vregsCount_ {0};
     bool resolveWoInline_ {false};
     IClassHierarchyAnalysis *cha_ {nullptr};
+    ArenaAllocator allocator_ {SpaceType::SPACE_TYPE_COMPILER, nullptr, true};
+    ArenaAllocator localAllocator_ {SpaceType::SPACE_TYPE_COMPILER, nullptr, true};
+    ArenaAllocator *GetAllocator()
+    {
+        return &allocator_;
+    }
+
+    ArenaAllocator *GetLocalAllocator()
+    {
+        return &localAllocator_;
+    }
 };
 }  // namespace ark::compiler
 
