@@ -55,5 +55,5 @@ cases:
         let y = x
         arktest.assertEQ(print_name(x), 'x')
         arktest.assertEQ(print_name(y), 'x')
-        arktest.assertEQ((): void => {}, '')
+        arktest.assertEQ(print_name((): void => {}), '')
 
