@@ -191,6 +191,10 @@ JSValue *JSRuntimeNewJSValueBigInt(EtsBigInt *v)
 
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return nullptr;
+    }
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
@@ -346,6 +350,10 @@ EtsObject *JSRuntimeCreateArray()
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return nullptr;
+    }
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
@@ -575,7 +583,16 @@ JSValue *JSRuntimeGetProperty(JSValue *object, JSValue *property)
     NapiScope jsHandleScope(env);
 
     auto result = JSRuntimeGetPropertyImpl(coro, env, object, property);
-    return JSConvertJSValue::UnwrapWithNullCheck(ctx, env, result).value();
+    auto res = JSConvertJSValue::UnwrapWithNullCheck(ctx, env, result);
+    if (UNLIKELY(!res)) {
+        if (NapiIsExceptionPending(env)) {
+            ctx->ForwardJSException(coro);
+        }
+        ASSERT(ctx->SanityETSExceptionPending());
+        return {};
+    }
+
+    return res.value();
 }
 
 void SetPropertyWithObject(JSValue *object, JSValue *property, EtsObject *value)
@@ -728,6 +745,10 @@ uint8_t JSRuntimeHasElement(EtsObject *object, int index)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return 0;
+    }
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
@@ -747,6 +768,10 @@ uint8_t JSRuntimeHasOwnProperty(EtsObject *object, EtsString *name)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return 0;
+    }
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
