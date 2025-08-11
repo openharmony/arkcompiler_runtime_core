@@ -13,15 +13,24 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
+{% for c in cases %}
+
+{% for decl in c.decl_variants %}
+
+{% set logic_data -%}
+{% if 'logic' in c %}  {{c.logic|indent(width=2)}}{% endif -%}
+{% endset -%}
+
 /*---
-desc: The integer value of an enum constant is set implicitly if an enumeration constant specifies no value.
+desc: {{c.desc}}
 tags: [compile-only, negative]
 ---*/
 
-{{c.decl}}
+{{decl}}
 
 function main() {
-    {{c.use|indent}}
+{{logic_data}}
 }
-{%- endfor %}
+
+{% endfor %}
+{% endfor %}
