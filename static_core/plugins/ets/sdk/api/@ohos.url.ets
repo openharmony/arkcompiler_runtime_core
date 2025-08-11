@@ -228,7 +228,7 @@ export namespace url {
         if (input.length == 0) {
             return temp;
         }
-        let pos: int = temp.indexOf("%").toInt();
+        let pos: int = temp.indexOf("%");
         while ((pos != -1) && (pos < len - 2)) {
             if (Char.isHexDigit(temp.charAt(pos.toInt() + 1)) && Char.isHexDigit(temp.charAt(pos.toInt() + 2))) {
                 let subStr = temp.substring(pos + 1, pos + 3);
@@ -270,11 +270,11 @@ export namespace url {
     }
 
     function formatIPv6(input: string): string {
-        let pos: number = input.indexOf("::");
-        let index: number = pos;
+        let pos: int = input.indexOf("::");
+        let index: int = pos;
         if (pos != -1) {
-            let left: number = 0;
-            let count: number = 0;
+            let left: int = 0;
+            let count: int = 0;
             while ((pos = input.indexOf(":", left)) != -1) {
                 count += 1;
                 left = pos + 1;
@@ -568,8 +568,8 @@ export namespace url {
         }
 
         private removalIPv4(inputStr: string): boolean {
-            let pos: number = 0;
-            let left: number = 0;
+            let pos: int = 0;
+            let left: int = 0;
             pos = inputStr.indexOf(".", left);
             while (pos != -1) {
                 this.ipv4Array.push(inputStr.substring(left, pos));

@@ -3336,7 +3336,7 @@ export class Decimal {
             return this.sign < 0 ? '-' + str : str;
         } else {
             let str = this.finiteToString(false);
-            let i = str.indexOf('.');
+            let i: number = str.indexOf('.');
             let base: int = baseOut;
             if (isExp) {
                 base = 2;
