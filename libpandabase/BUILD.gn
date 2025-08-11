@@ -35,6 +35,7 @@ if (!ark_standalone_build && !is_arkui_x) {
   ohos_shared_headers("arkbase_public_headers") {
     include_dirs = [
       "$ark_root/libpandabase",
+      "$ark_root/libpandabase/mem",
       "$target_gen_dir/include",
       "$target_gen_dir",
     ]
