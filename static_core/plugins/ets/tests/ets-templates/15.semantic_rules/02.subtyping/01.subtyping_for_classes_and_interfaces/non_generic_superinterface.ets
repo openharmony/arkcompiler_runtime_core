@@ -15,9 +15,14 @@ limitations under the License.
 
 /*---
 desc: Subtyping relation among the interface types
-tags: [compile-only]
 ---*/
 
 interface A {}
 
 interface B extends A {}
+
+function main(): void {
+  let instanceB: B = {}
+  let instanceA: A = instanceB
+  arktest.assertTrue(instanceA instanceof B)
+}

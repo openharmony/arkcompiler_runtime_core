@@ -15,9 +15,23 @@
 
 /*---
 desc: Subtyping relation among the generic interface types
-tags: [compile-only]
 ---*/
 
-interface A {}
+class X {}
+class Y extends X {}
 
-interface B<T> extends A {}
+interface A<T> {
+    x: T
+}
+
+interface B<G extends X> extends A<X> {
+    y: G
+}
+
+function main(): void {
+    let instanceB: B<Y>  = {x: new X(), y: new Y()}
+    let instanceA: A<X> = instanceB;
+    arktest.assertTrue(instanceA instanceof B<Y>)
+    arktest.assertTrue(instanceA.x instanceof X)
+    arktest.assertTrue(instanceA.y instanceof Y)
+}

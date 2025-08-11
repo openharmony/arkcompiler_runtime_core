@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+* Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -14,17 +14,22 @@
 */
 
 /*---
-desc: Subtype relation between type literal and type union
+desc: Subtyping relation among the generic interface types
+tags: [negative, compile-only]
 ---*/
 
-type StringUnion = 'some_string' | 'some_other_string'
-type StrLiteral = 'some_string'
+class X {}
+class Y extends X {}
 
-function foo(a: StrLiteral, b: StringUnion) {
-    arktest.assertTrue(a instanceof String)
-    b = a
-    arktest.assertTrue(b instanceof String)
+interface A<T> {
+    x: T
 }
 
-foo('some_string', 'some_string')
+interface B<G extends X> extends A<X> {
+    y: G
+}
 
+function main(): void {
+    let instanceA: A<X>  = {x: new X()}
+    let instanceB: B<Y> = instanceA;
+}

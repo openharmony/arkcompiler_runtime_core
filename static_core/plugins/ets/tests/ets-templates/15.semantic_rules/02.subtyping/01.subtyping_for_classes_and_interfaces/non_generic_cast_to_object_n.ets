@@ -14,33 +14,12 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Subtyping relation among the class types
+desc: Subtyping relation among the class and Object
+tags: [negative, compile-only]
 ---*/
 
-class A {
-  foo(): int { return 1 }
-}
-
-class B extends A {
-  override foo(): int { return 2 }
-}
-
-final class C extends B {
-  override foo(): int { return 3 }
-}
+class B {}
 
 function main(): void {
-  let instanceA = new A
-  let instanceB = new B
-  let instanceC = new C
-
-  instanceB = instanceC
-  instanceA = instanceC
-  instanceA = instanceB
-
-
-  arktest.assertTrue(instanceA instanceof C)
-  arktest.assertTrue(instanceA instanceof B)
-  arktest.assertTrue(instanceA instanceof A)
-  arktest.assertEQ(instanceA.foo(), 3)
+  let instance: B = new Object();
 }

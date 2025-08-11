@@ -915,66 +915,75 @@
 '15':
     title: Semantic Rules
     status: No testable assertions
-'15.1':
+'15.2':
     title: Subtyping
     status: ''
-15.1.1:
-    title: Supertyping
+15.2.1:
+    title: Subtyping for Classes and Interfaces
     status: ''
-'15.2':
+15.2.2:
+    title: Subtyping for Literal Types
+    status: ''
+15.2.3:
+    title: Subtyping for Union Types
+    status: ''
+15.2.4:
+    title: Subtyping for Function Types
+    status: ''
+15.2.5:
+    title: Subtyping for Fixed-Size Array Types
+    status: ''
+'15.3':
     title: Type Identity
     status: No testable assertions
-'15.3':
+'15.4':
     title: Assignability
     status: ''
-'15.4':
+'15.5':
     title: Invariance, Covariance and Contravariance
     status: ''
-'15.5':
+'15.6':
     title: Compatibility of Call Arguments
     status: ''
-'15.6':
+'15.7':
     title: Type Inference
     status: No testable assertions
-15.6.1:
+15.7.2:
     title: Smart Types
     status: Finished
-'15.7':
-    title: Overloading and Overriding
-    status: No testable assertions
-15.7.1:
-    title: Overload-Equivalent Signatures
-    status: ''
-15.7.2:
-    title: Override-Compatible Signatures
-    status: ''
-15.7.3:
-    title: Overloading for Functions
-    status: ''
-15.7.4:
-    title: Overloading and Overriding in Classes
-    status: ''
-15.7.5:
-    title: Overloading and Overriding in Interfaces
-    status: ''
 '15.8':
-    title: Overload Resolution
+    title: Overriding
     status: No testable assertions
 15.8.1:
-    title: Selection of Applicable Candidates
+    title: Overriding in Classes
     status: ''
 15.8.2:
-    title: Selection of Best Candidate
+    title: Overriding and Overload Signatures in Interfaces
+    status: ''
+15.8.3:
+    title: Override-Compatible Signatures
+    status: ''
+15.8.4:
+    title: Overriding and Implementing Methods with Overload Signatures
     status: ''
 '15.9':
-    title: Initializer Block
+    title: Overload Resolution
+    status: No testable assertions
+15.9.1:
+    title: Signature Resolution for Overload Signatures
     status: ''
-'15.10':
+15.9.2:
+    title: Overload Resolution for Overload Declarations
+    status: ''
+'15.11':
+    title: Static Initialization
+    status: ''
+15.11.1:
+    title: Static Initialization Safety
+    status: ''
+'15.13':
     title: Compatibility Features
     status: No testable assertions
-15.10.1:
-    title: Extended Conditional Expressions
-    status: Finished
 '16':
     title: Support for GUI Programming
     status: No testable assertions

@@ -15,12 +15,22 @@ limitations under the License.
 
 /*---
 desc: Subtyping relation among the generic interface types with same parameters
-tags: [compile-only]
 ---*/
 
-interface A {}
-interface B {}
 
-interface C<T extends A, G extends B> {}
+interface C<T extends String, G extends Number> {
+    name: T;
+}
 
-interface D<T extends A, G extends B> extends C<T, G> {}
+interface D<T extends String, G extends Number> extends C<T, G> {
+    name: 'String2'
+    id: G;
+}
+
+function main(): void {
+    let instanceD: D<String, Number> = { name: 'String2', id: 2.0 }
+    let instanceC: C<String, Number> = instanceD;
+    arktest.assertTrue(instanceC instanceof D)
+    arktest.assertTrue(instanceC.name instanceof String)
+    arktest.assertEQ(instanceC.name, 'String2')
+}
