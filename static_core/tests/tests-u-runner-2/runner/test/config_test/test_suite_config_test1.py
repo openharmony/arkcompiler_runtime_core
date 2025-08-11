@@ -15,46 +15,34 @@
 # limitations under the License.
 
 import os
-import shutil
 import unittest
 from pathlib import Path
+from typing import ClassVar
+from unittest.mock import patch
 
 from runner.common_exceptions import InvalidConfiguration
 from runner.options import cli_options_utils as cli_utils
 from runner.options.cli_options import CliOptionsParser, CliParserBuilder, ConfigsLoader
-from runner.test.config_test import data_1, data_2
+from runner.test.config_test.data import data_1, data_2
 from runner.test.test_utils import compare_dicts
 
 
 class TestSuiteConfigTest1(unittest.TestCase):
-    cfg_ext = ".yaml"
     workflow_name = "config-1"
-    workflow_path: Path
     test_suite_name = "test_suite1"
-    test_suite_path: Path
     current_path = Path(__file__).parent
-    cfg_path = current_path.parent.parent.parent.joinpath("cfg")
+    data_folder = current_path / "data"
+    test_environ: ClassVar[dict[str, str]] = {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': Path.cwd().as_posix(),
+        'ARKCOMPILER_ETS_FRONTEND_PATH': Path.cwd().as_posix(),
+        'PANDA_BUILD': Path.cwd().as_posix(),
+        'WORK_DIR': Path.cwd().as_posix()
+    }
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        os.environ["ARKCOMPILER_RUNTIME_CORE_PATH"] = "."
-        os.environ["ARKCOMPILER_ETS_FRONTEND_PATH"] = "."
-        os.environ["WORK_DIR"] = "."
-        os.environ["PANDA_BUILD"] = "."
-
-        shutil.copy(cls.current_path.joinpath(cls.workflow_name + cls.cfg_ext), cls.cfg_path.joinpath("workflows"))
-        cls.workflow_path = cls.cfg_path.joinpath("workflows").joinpath(cls.workflow_name + cls.cfg_ext)
-
-        shutil.copy(cls.current_path.joinpath(cls.test_suite_name + cls.cfg_ext), cls.cfg_path.joinpath("test-suites"))
-        cls.test_suite_path = cls.cfg_path.joinpath("test-suites").joinpath(cls.test_suite_name + cls.cfg_ext)
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        cls.workflow_path.unlink(missing_ok=True)
-        cls.test_suite_path.unlink(missing_ok=True)
-
+    @patch('runner.utils.get_config_workflow_folder', lambda: TestSuiteConfigTest1.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: TestSuiteConfigTest1.data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
     def test_min_args(self) -> None:
-
         configs = ConfigsLoader(self.workflow_name, self.test_suite_name)
 
         parser_builder = CliParserBuilder(configs)
@@ -74,6 +62,9 @@ class TestSuiteConfigTest1(unittest.TestCase):
         expected = data_1.args
         compare_dicts(self, actual, expected)
 
+    @patch('runner.utils.get_config_workflow_folder', lambda: TestSuiteConfigTest1.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: TestSuiteConfigTest1.data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
     def test_args_urunner(self) -> None:
         args = [
             "--show-progress",
@@ -92,7 +83,7 @@ class TestSuiteConfigTest1(unittest.TestCase):
             "--llvm-cov-exclude", "*.h",
             "--lcov-exclude", "/tmp",
             "--lcov-exclude", "*.h",
-            "--profdata-files-dir", ".", 
+            "--profdata-files-dir", ".",
             "--coverage-html-report-dir", ".",
             "--coverage-per-binary",
             "--clean-gcda-before-run",
@@ -119,6 +110,9 @@ class TestSuiteConfigTest1(unittest.TestCase):
         expected = data_2.args
         compare_dicts(self, actual, expected)
 
+    @patch('runner.utils.get_config_workflow_folder', lambda: TestSuiteConfigTest1.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: TestSuiteConfigTest1.data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
     def test_wrong_config_names(self) -> None:
         args = [("panda-int1", "ets-runtime"), ("panda-int", "ets-runtime1"),
                 ("panda-int1", "ets-runtime1")]
