@@ -13,12 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for decl in declarations %}
+{% for c in cases %}
 /*---
-desc: Ambient Class declarations
-tags: [compile-only]
+desc: Ambient Iterable declarations
+files: ['./iterable_decl_d/iterable_decl_{{loop.index0}}.d.ets']
 ---*/
 
-{{decl}}
+import { {{c.import}} } from './iterable_decl_d/iterable_decl_{{loop.index0}}.d'
+
+function main() {
+    {{c.use|indent}}
+}
 
 {% endfor %}
