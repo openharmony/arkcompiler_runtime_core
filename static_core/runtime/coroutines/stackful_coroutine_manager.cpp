@@ -47,9 +47,11 @@ void StackfulCoroutineManager::FreeCoroutineStack(uint8_t *stack)
 void StackfulCoroutineManager::CreateMainCoroAndWorkers(size_t howMany, Runtime *runtime, PandaVM *vm)
 {
     auto *wMain = CreateWorker(runtime, vm, StackfulCoroutineWorker::ScheduleLoopType::FIBER, "[main] worker ", true);
+    ASSERT(wMain != nullptr);
     ASSERT(wMain->GetId() == MAIN_WORKER_ID);
 
     auto *mainCo = CreateMainCoroutine(runtime, vm);
+    ASSERT(mainCo != nullptr);
     wMain->AddRunningCoroutine(mainCo);
     OnWorkerStartupImpl(wMain);
 
@@ -100,6 +102,7 @@ void StackfulCoroutineManager::FinalizeWorkers(size_t howMany, Runtime *runtime,
         auto *finWorker = ChooseWorkerForFinalization();
         auto *co = CreateNativeCoroutine(runtime, vm, coroEntryPoint, &entrypointParam, "[finalize coro] ",
                                          Coroutine::Type::FINALIZER, CoroutinePriority::CRITICAL_PRIORITY);
+        ASSERT(co != nullptr);
         finWorker->AddRunnableCoroutine(co);
     }
     entrypointParam.workerFinalizationEvent.Lock();
@@ -256,6 +259,9 @@ void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime
     coroutineCountLimit_ = coroStackAreaSizeBytes / coroStackSizeBytes_;
 
     CalculateWorkerLimits(config, exclusiveWorkersLimit_, commonWorkersCount_);
+    CalculateUserCoroutinesLimits(userCoroutineCountLimit_,
+                                  Runtime::GetCurrent()->GetOptions().GetCoroutinesUserLimit());
+
     ASSERT(commonWorkersCount_ + exclusiveWorkersLimit_ <= AffinityMask::MAX_WORKERS_COUNT);
     InitializeWorkerIdAllocator();
     {
@@ -288,8 +294,13 @@ void StackfulCoroutineManager::AddToRegistry(Coroutine *co)
     co->GetVM()->GetGC()->OnThreadCreate(co);
     coroutines_.insert(co);
     coroutineCount_++;
+
     if (co->GetType() != Coroutine::Type::MUTATOR) {
-        systemCoroutineCount_++;
+        utilityCoroutineCount_++;
+    }
+
+    if (!CoroutineManager::IsSystemCoroutine(co)) {
+        userCoroutineCount_++;
     }
 }
 
@@ -298,7 +309,10 @@ void StackfulCoroutineManager::RemoveFromRegistry(Coroutine *co)
     coroutines_.erase(co);
     coroutineCount_--;
     if (co->GetType() != Coroutine::Type::MUTATOR) {
-        systemCoroutineCount_--;
+        utilityCoroutineCount_--;
+    }
+    if (!CoroutineManager::IsSystemCoroutine(co)) {
+        userCoroutineCount_--;
     }
 }
 
@@ -794,7 +808,7 @@ void StackfulCoroutineManager::MainCoroutineCompleted()
         }
     }
     // Only system coroutines and current coro (MAIN) are left (1 is for MAIN)
-    ASSERT(activeCoroutines_ == systemCoroutineCount_ + 1);
+    ASSERT(activeCoroutines_ == utilityCoroutineCount_ + 1);
 
     LOG(DEBUG, COROUTINES)
         << "StackfulCoroutineManager::MainCoroutineCompleted(): stopping await loop on the main worker";
@@ -874,6 +888,10 @@ Coroutine *StackfulCoroutineManager::CreateNativeCoroutine(Runtime *runtime, Pan
         // resource limit reached
         return nullptr;
     }
+    if (!IsSystemCoroutine(type, true) && IsUserCoroutineLimitReached()) {
+        // user coro limit reached
+        return nullptr;
+    }
     StackfulCoroutineContext *ctx = CreateCoroutineContextImpl(true);
     if (ctx == nullptr) {
         // do not proceed if we cannot create a context for the new coroutine
@@ -949,7 +967,7 @@ bool StackfulCoroutineManager::IsNoActiveMutatorsExceptCurrent()
 
     // NOTE(konstanting): need to reevaluate the necessity of locks here as
     // atomics difference is somewhat confusing. Also, we may have concurrent access to them.
-    return (activeCoroutines_ - systemCoroutineCount_) <= 1;
+    return (activeCoroutines_ - utilityCoroutineCount_) <= 1;
 }
 
 Coroutine *StackfulCoroutineManager::CreateExclusiveWorkerForThread(Runtime *runtime, PandaVM *vm)
@@ -1007,6 +1025,13 @@ bool StackfulCoroutineManager::IsExclusiveWorkersLimitReached() const
 {
     bool limitIsReached = GetActiveWorkersCount() - commonWorkersCount_ >= exclusiveWorkersLimit_;
     LOG_IF(limitIsReached, DEBUG, COROUTINES) << "The programm reached the limit of exclusive workers";
+    return limitIsReached;
+}
+
+bool StackfulCoroutineManager::IsUserCoroutineLimitReached() const
+{
+    bool limitIsReached = userCoroutineCount_ >= userCoroutineCountLimit_;
+    LOG_IF(limitIsReached, DEBUG, COROUTINES) << "The programm reached the limit of user coroutines";
     return limitIsReached;
 }
 
@@ -1204,6 +1229,29 @@ void StackfulCoroutineManager::PostZygoteFork()
     if (enableMigration_) {
         StartManagerThread();
     }
+}
+
+void StackfulCoroutineManager::CalculateUserCoroutinesLimits(size_t &userCoroutineCountLimit, size_t limit)
+{
+    // for general workers: 2 = 1 EP-less for THREAD schedule + 1 for potential finalizer
+    // for MAIN and EA: 2 = 1 for FIBER schedule loop + 1 for EP-less mutator coro
+    constexpr size_t SYSTEM_COROS_PER_WORKER = 2;
+    size_t estimatedSystemCoroCount = SYSTEM_COROS_PER_WORKER * (commonWorkersCount_ + exclusiveWorkersLimit_);
+
+    size_t userCoroutineMaxLimit = coroutineCountLimit_ - estimatedSystemCoroCount;
+
+    if (limit == 0) {  // Auto set
+        LOG(DEBUG, COROUTINES)
+            << "StackfulCoroutineManager(): AUTO mode selected, will set number of user coroutine limit to it maximum: "
+            << userCoroutineMaxLimit;
+        limit = userCoroutineMaxLimit;           // Do not limit dedicated
+    } else if (limit > userCoroutineMaxLimit) {  // Exceed possible limit
+        LOG(DEBUG, COROUTINES)
+            << "StackfulCoroutineManager(): Setted user coroutine limit exceed maximum. Cutting to maximum: "
+            << userCoroutineMaxLimit;
+        limit = userCoroutineMaxLimit;
+    }
+    userCoroutineCountLimit = limit;
 }
 
 void StackfulCoroutineManager::CalculateWorkerLimits(const CoroutineManagerConfig &config,

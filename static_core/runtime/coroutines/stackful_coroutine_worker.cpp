@@ -40,6 +40,7 @@ StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, 
         scheduleLoopCtx_ = coroManager->CreateNativeCoroutine(GetRuntime(), GetPandaVM(), ScheduleLoopProxy, this,
                                                               "[fiber_sch] " + GetName(), Coroutine::Type::SCHEDULER,
                                                               CoroutinePriority::MEDIUM_PRIORITY);
+        ASSERT(scheduleLoopCtx_ != nullptr);
         scheduleLoopCtx_->LinkToExternalHolder(true);
         AddRunnableCoroutine(scheduleLoopCtx_);
     }
@@ -254,6 +255,7 @@ void StackfulCoroutineWorker::ThreadProc()
     scheduleLoopCtx_ =
         coroManager_->CreateEntrypointlessCoroutine(GetRuntime(), GetPandaVM(), false, "[thr_sch] " + GetName(),
                                                     Coroutine::Type::SCHEDULER, CoroutinePriority::MEDIUM_PRIORITY);
+    ASSERT(scheduleLoopCtx_ != nullptr);
     scheduleLoopCtx_->LinkToExternalHolder(false);
     Coroutine::SetCurrent(scheduleLoopCtx_);
     scheduleLoopCtx_->RequestResume();

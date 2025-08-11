@@ -112,6 +112,7 @@ public:
         auto coro = mainCoro_->GetCoroutineManager()->CreateEntrypointlessCoroutine(
             runtime, runtime->GetPandaVM(), true, "worker", Coroutine::Type::MUTATOR,
             CoroutinePriority::DEFAULT_PRIORITY);
+        ASSERT(coro != nullptr);
         std::mt19937 engine(std::random_device {}());
         std::uniform_real_distribution<> dis(-VALUE_RANGE, VALUE_RANGE);
         std::bernoulli_distribution bern(1.0 / TEST_THREADS);
