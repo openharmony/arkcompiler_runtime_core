@@ -129,7 +129,8 @@ static_core/plugins/ets/runtime/regexp/                                       ^a
 static_core/plugins/ets/runtime/types/*atomic*                                ^dmitriitr @konstanting
 static_core/plugins/ets/runtime/types/*promise*                               ^dmitriitr @konstanting
 static_core/plugins/ets/runtime/types/*typeapi*                               @aleksander-sotov ^anton-sysoev @dreamdoomwalker
-static_core/plugins/ets/stdlib/escompat/Atomics.ets                           ^dmitriitr @konstanting
+static_core/plugins/ets/stdlib/escompat/Atomics.ets                           ^dmitriitr @konstanting @molotkovmikhail 
+static_core/plugins/ets/stdlib/escompat/taskpool.ets                          ^dmitriitr @konstanting
 static_core/plugins/ets/templates/stdlib/                                     ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker
 static_core/plugins/ets/tests/benchmarks/ani                                  @ignatenkooleg @v-cherkashin @Prof1983 @asidorov
 static_core/plugins/ets/tests/benchmarks/interop_js                           @nazarovkonstantin @ignatenkooleg @Prof1983
@@ -160,6 +161,7 @@ static_core/plugins/ets/stdlib/std/core/Promise.ets                           ^d
 static_core/plugins/ets/stdlib/std/core/Type*                                 @aleksander-sotov ^anton-sysoev @dreamdoomwalker @liyiming13 ^lijin1039
 static_core/plugins/ets/stdlib/std/core/UnionCase.ets                         @aleksander-sotov ^anton-sysoev @dreamdoomwalker @liyiming13 ^lijin1039
 static_core/plugins/ets/stdlib/std/core/Value.ets                             @aleksander-sotov ^anton-sysoev @dreamdoomwalker @liyiming13 ^lijin1039
+static_core/plugins/ets/tests/ets-common-tests/taskpool/                      ^konstanting @ipetrov
 static_core/plugins/ets/tests/ets-templates/17.experimental_features/         @dmitriitr @Prof1983 @igelhaus @ragnvald @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
 static_core/plugins/ets/tests/ets-templates/7.expressions/                    @dmitriitr @Prof1983 @igelhaus @ragnvald @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
 static_core/plugins/ets/tests/ets-templates/9.classes/                        @dmitriitr @Prof1983 @igelhaus @ragnvald @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
@@ -171,7 +173,6 @@ static_core/plugins/ets/tests/ets_test_suite/coroutines/                      @k
 static_core/plugins/ets/tests/ets_test_suite/gc/                              @udav
 static_core/plugins/ets/tests/ets_test_suite/gc/*finalization*                @udav ^shemetovphilip
 static_core/plugins/ets/tests/ets_test_suite/gc/*finreg*                      @udav ^shemetovphilip
-static_core/plugins/ets/tests/ets_test_suite/taskpool/                        ^konstanting @ipetrov
 static_core/plugins/ets/tests/interop_js/tests/                               ^igelhaus @nazarovkonstantin ^ignatenkooleg ^rokashevichsvetlana ^kurnevichstanislav
 static_core/plugins/ets/tests/interop_js/xgc/                                 @ipetrov ^udav
 static_core/plugins/ets/tests/native/promise/                                 @konstanting
