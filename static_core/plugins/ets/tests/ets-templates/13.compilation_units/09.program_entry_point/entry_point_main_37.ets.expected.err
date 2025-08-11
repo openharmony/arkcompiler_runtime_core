@@ -10,6 +10,4 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-Unhandled exception: escompat.Error
-Error
-	at escompat.Error.<ctor> (Error.ets:56:0)
+[TID 02592c] E/runtime: Method 'f64 entry_point_main_37.ETSGLOBAL::main()' has invalid signature

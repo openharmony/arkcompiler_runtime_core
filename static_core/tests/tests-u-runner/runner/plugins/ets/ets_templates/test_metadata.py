@@ -73,6 +73,8 @@ class TestMetadata:
     assertion: Optional[str] = None
     params: Optional[Any] = None
     name: Optional[str] = None
+    entry_point: Optional[str] = None
+    test_cli: Optional[List[str]] = None
     package: Optional[str] = None
     module: Optional[str] = None
     ark_options: List[str] = field(default_factory=list)
@@ -99,6 +101,8 @@ def get_metadata(path: Path) -> TestMetadata:
         metadata = {}
     metadata['tags'] = Tags(metadata.get('tags'))
     metadata['assertion'] = metadata.get('assert')
+    metadata['entry_point'] = metadata.get('entry_point')
+    metadata['test_cli'] = metadata.get('test_cli')
     if 'assert' in metadata:
         del metadata['assert']
     if isinstance(type(metadata.get('ark_options')), str):

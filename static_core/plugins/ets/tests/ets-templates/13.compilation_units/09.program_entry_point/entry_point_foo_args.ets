@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
+{%- for c in cases %}
 /*---
-desc: Call a function without parameters.
+desc: >-
+    Entry point function must either have no parameters, or have one parameter
+    of type string[] that provides access to the arguments of a program command line
+tags: [no-warmup, {{c.tags}}]
+entry_point: {{c.entry_point}}
+test_cli: [{{c.cmd_line_args}}]
 ---*/
 
-function foo(): number {
-    return 1;
-}
-
-function main(): void {
-    let a: number = foo();
-    arktest.assertTrue(a === 1);
-}
+{{c.use}}
+{%- endfor %}

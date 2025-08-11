@@ -13,14 +13,12 @@
  * limitations under the License.
  */
 
+{%- for c in cases %}
 /*---
-desc: Explicit void return type for the entry function.
-tags : [compile-only, positive]
+desc: Any exported top-level function can be used as an entry point
+tags: [no-warmup, {{c.tags}}]
+entry_point: {{c.entry_point}}
 ---*/
 
-function foo() {
-}
-
-function main(): void {
-    foo();
-}
+{{c.use}}
+{%- endfor %}

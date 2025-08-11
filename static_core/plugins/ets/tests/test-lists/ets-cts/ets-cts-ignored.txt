@@ -1718,6 +1718,38 @@
 13.compilation_units/07.export_directives/04.re-export_directive/reexported_default_2.ets
 13.compilation_units/07.export_directives/04.re-export_directive/reexported_default_3.ets
 
+#26730 overload signatures not implemented
+13.compilation_units/09.program_entry_point/entry_point_foo_args_9.ets
+13.compilation_units/09.program_entry_point/entry_point_main_args_6.ets
+13.compilation_units/09.program_entry_point/entry_point_main_args_7.ets
+13.compilation_units/09.program_entry_point/entry_point_foo_16.ets
+13.compilation_units/09.program_entry_point/entry_point_foo_17.ets
+13.compilation_units/09.program_entry_point/entry_point_foo_18.ets
+13.compilation_units/09.program_entry_point/entry_point_foo_19.ets
+13.compilation_units/09.program_entry_point/entry_point_foo_args_10.ets
+13.compilation_units/09.program_entry_point/entry_point_foo_args_11.ets
+13.compilation_units/09.program_entry_point/entry_point_foo_args_12.ets
+
+#28972 CTE on string[] type parameter 
+13.compilation_units/09.program_entry_point/entry_point_foo_args_13.ets
+13.compilation_units/09.program_entry_point/entry_point_foo_args_14.ets
+13.compilation_units/09.program_entry_point/entry_point_foo_args_15.ets
+13.compilation_units/09.program_entry_point/entry_point_foo_args_16.ets
+13.compilation_units/09.program_entry_point/entry_point_foo_args_3.ets
+13.compilation_units/09.program_entry_point/entry_point_foo_args_4.ets
+13.compilation_units/09.program_entry_point/entry_point_foo_args_7.ets
+13.compilation_units/09.program_entry_point/entry_point_main_args_0.ets
+13.compilation_units/09.program_entry_point/entry_point_main_args_1.ets
+13.compilation_units/09.program_entry_point/entry_point_main_args_10.ets
+13.compilation_units/09.program_entry_point/entry_point_main_args_11.ets
+13.compilation_units/09.program_entry_point/entry_point_main_args_8.ets
+13.compilation_units/09.program_entry_point/entry_point_main_args_9.ets
+
+#29063 runtime complains on invalid signature
+13.compilation_units/09.program_entry_point/entry_point_foo_args_0.ets
+13.compilation_units/09.program_entry_point/entry_point_foo_args_1.ets
+13.compilation_units/09.program_entry_point/entry_point_foo_args_2.ets
+
 #28847
 14.ambient_declarations/bad_ambient_declarations_18.ets
 14.ambient_declarations/bad_ambient_declarations_19.ets

@@ -46,6 +46,7 @@ class TestFileBased(Test):
         # It's supposed if the first step is failed then no step is executed further
         self.fail_kind: Optional[FailKind] = None
         self.main_entry_point = "_GLOBAL::func_main_0"
+        self.test_cli: List[str] = []
 
     @property
     def ark_extra_options(self) -> List[str]:
@@ -208,6 +209,9 @@ class TestFileBased(Test):
             ark_flags.append(f'{panda_files_opt_name}={test_abc}')
 
         ark_flags.extend([test_abc, self.main_entry_point])
+        if self.test_cli:
+            ark_flags.append('--')
+            ark_flags.extend(self.test_cli)
 
         params = Params(
             timeout=self.ark_timeout,

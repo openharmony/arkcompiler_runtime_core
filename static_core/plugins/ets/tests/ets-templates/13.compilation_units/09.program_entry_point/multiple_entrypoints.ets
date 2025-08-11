@@ -12,21 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+{%- for c in cases %}
 /*---
-desc: Multiple entrypoints with different names
+desc: {{c.desc}}
+tags: [no-warmup, {{c.tags}}]
+entry_point: {{c.entry_point}}
 ---*/
 
-package test;
-
-function main(): void {
-
-}
-
-{% for ident in identifiers %}
-
-function main${{ident}}(): void {
-    
-}
-
+{{c.use}}
 {%- endfor %}

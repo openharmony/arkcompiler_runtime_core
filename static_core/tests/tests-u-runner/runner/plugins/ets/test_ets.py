@@ -36,7 +36,8 @@ class TestETS(TestFileBased):
         TestFileBased.__init__(self, test_env, test_path, flags, test_id)
 
         self.metadata: TestMetadata = get_metadata(Path(test_path))
-        self.main_entry_point = f"{self.metadata.module}.ETSGLOBAL::main"
+        self.main_entry_point = f"{self.metadata.module}.ETSGLOBAL::{self.metadata.entry_point or 'main'}"
+        self.test_cli: List[str] = self.metadata.test_cli or []
         package = self.metadata.get_package_name()
         # Defines if in dependent packages there is at least one file compile-only and negative
         self.dependent_packages: Dict[str, bool] = {
@@ -254,7 +255,7 @@ class TestETS(TestFileBased):
         fail_kind = None
         try:
             self._read_expected_file()
-            if not self.test_env.config.ark.jit.enable:
+            if not self.test_env.config.ark.jit.enable or self.metadata.tags.no_warmup:
                 passed = self._determine_test_status(output, err_output)
             else:
                 self._refactor_expected_str_for_jit()

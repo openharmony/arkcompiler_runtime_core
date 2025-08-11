@@ -49,8 +49,12 @@ class TestStandardFlow(Test):
                  parent_test_id: str = "") -> None:
         Test.__init__(self, test_env, test_path, params, test_id)
 
-        self.main_entry_point: str = self.__DEFAULT_ENTRY_POINT
         self.metadata: TestMetadata = TestMetadata.get_metadata(test_path)
+        self.test_cli: list[str] = self.metadata.test_cli or []
+        self.main_entry_point: str = (
+            f"ETSGLOBAL::{self.metadata.entry_point}"
+            if self.metadata.entry_point else self.__DEFAULT_ENTRY_POINT
+        )
         if self.metadata.package is not None:
             self.main_entry_point = f"{self.metadata.package}.{self.main_entry_point}"
         else:
@@ -283,6 +287,10 @@ class TestStandardFlow(Test):
         new_step.args.insert(-2, "--verification-mode=ahead-of-time")
 
         new_step.args.insert(-2, self.__add_panda_files())
+        if self.metadata.test_cli:
+            new_step.args.append("--")
+            new_step.args.extend(self.metadata.test_cli)
+
         return new_step
 
     def compare_output_with_expected(self, output: str | None, error_output: str | None) -> bool | None:

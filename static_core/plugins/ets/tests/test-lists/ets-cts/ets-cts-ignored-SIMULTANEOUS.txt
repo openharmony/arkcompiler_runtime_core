@@ -104,6 +104,5 @@
 09.classes/04.class_members/class_initializer/class_initializer_declaration_try_neg_1.ets
 09.classes/04.class_members/class_initializer/class_initializer_declaration_try_neg_2.ets
 08.statements/14.throw_statements/throw_neg2.ets
-13.compilation_units/09.program_entry_point/program_entry_no_handle_error.ets
 12.error_handling/01.errors/error_call.ets
 20.implementation_details/04.ensuring_module_initialization/negative_test_rte.ets
