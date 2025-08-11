@@ -49,3 +49,23 @@ function_decls:
         }
       call: |-
         let x = foo();  // CTE, Cannot use type 'void' as value
+
+    - decl: |-
+        let f = () => {}
+      call: |-
+        let x = f();  // CTE, Cannot use type 'void' as value
+
+    - decl: |-
+        let foo = () { // CTE, the execution path of the function or method body has no return statement
+            if(1) return true
+        }
+      call: |-
+        return
+
+    - decl: |-
+        let i = 1
+        let foo() => {  // infer void
+            i += 1
+        }
+      call: |-
+        let x: number = foo();  // CTE, cannot assign void to number
