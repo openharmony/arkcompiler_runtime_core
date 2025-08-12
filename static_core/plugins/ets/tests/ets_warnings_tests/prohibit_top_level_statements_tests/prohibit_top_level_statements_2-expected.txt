@@ -1,5 +1,0 @@
-Warning: Prohibit top-level statements. [prohibit_top_level_statements_2.ets:16:5]
-Warning: Prohibit top-level statements. [prohibit_top_level_statements_2.ets:18:5]
-Warning: Prohibit top-level statements. [prohibit_top_level_statements_2.ets:20:1]
-Warning: Prohibit top-level statements. [prohibit_top_level_statements_2.ets:24:1]
-Warning: Prohibit top-level statements. [prohibit_top_level_statements_2.ets:28:1]
