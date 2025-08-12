@@ -157,373 +157,399 @@ group("arkruntime_header_deps") {
   deps += plugin_arkruntime_header_plugin_deps
 }
 
-ohos_source_set("libarkruntime_set_static") {
-  cflags_cc = [ "-fno-emulated-tls" ]
-  sources = [
-    "arch/asm_support.cpp",
-    "assert_gc_scope.cpp",
-    "bridge/bridge.cpp",
-    "cframe.cpp",
-    "cha.cpp",
-    "class.cpp",
-    "class_helper.cpp",
-    "class_initializer.cpp",
-    "class_linker.cpp",
-    "class_linker_extension.cpp",
-    "compiler.cpp",
-    "compiler_task_manager_worker.cpp",
-    "compiler_thread_pool_worker.cpp",
-    "coretypes/array.cpp",
-    "coretypes/line_string.cpp",
-    "coretypes/string.cpp",
-    "coroutines/coroutine.cpp",
-    "coroutines/coroutine_events.cpp",
-    "coroutines/coroutine_manager.cpp",
-    "coroutines/coroutine_stats.cpp",
-    "coroutines/coroutine_worker.cpp",
-    "coroutines/coroutine_worker_group.cpp",
-    "coroutines/priority_queue.cpp",
-    "coroutines/stackful_coroutine.cpp",
-    "coroutines/stackful_coroutine_manager.cpp",
-    "coroutines/stackful_coroutine_worker.cpp",
-    "coroutines/stackful_coroutine_state_info.cpp",
-    "coroutines/threaded_coroutine.cpp",
-    "coroutines/threaded_coroutine_manager.cpp",
-    "default_debugger_agent.cpp",
-    "deoptimization.cpp",
-    "entrypoints/entrypoints.cpp",
-    "exceptions.cpp",
-    "fibers/fiber_context.cpp",
-    "field.cpp",
-    "file_manager.cpp",
-    "gc_task.cpp",
-    "global_object_lock.cpp",
-    "handle_scope.cpp",
-    "hotreload/hotreload.cpp",
-    "imtable_builder.cpp",
-    "init_icu.cpp",
-    "interpreter/interpreter.cpp",
-    "intrinsics.cpp",
-    "jit/libprofile/pgo_file_builder.cpp",
-    "jit/profiling_loader.cpp",
-    "jit/profiling_saver.cpp",
-    "jit/profile_saver_worker.cpp",
-    "language_context.cpp",
-    "loadable_agent.cpp",
-    "lock_order_graph.cpp",
-    "locks.cpp",
-    "mark_word.cpp",
-    "mem/allocator.cpp",
-    "mem/gc/bitmap.cpp",
-    "mem/gc/card_table.cpp",
-    "mem/gc/cmc-gc-adapter/cmc-allocator-adapter.cpp",
-    "mem/gc/cmc-gc-adapter/cmc-gc-adapter.cpp",
-    "mem/gc/epsilon-g1/epsilon-g1.cpp",
-    "mem/gc/epsilon/epsilon.cpp",
-    "mem/gc/epsilon/epsilon_barrier.cpp",
-    "mem/gc/g1/g1-allocator.cpp",
-    "mem/gc/g1/g1-gc.cpp",
-    "mem/gc/g1/g1-helpers.cpp",
-    "mem/gc/g1/g1_analytics.cpp",
-    "mem/gc/g1/g1_pause_tracker.cpp",
-    "mem/gc/g1/hot_cards.cpp",
-    "mem/gc/g1/ref_updater.cpp",
-    "mem/gc/g1/update_remset_task_queue.cpp",
-    "mem/gc/g1/update_remset_thread.cpp",
-    "mem/gc/g1/update_remset_worker.cpp",
-    "mem/gc/gc-hung/gc_hung.cpp",
-    "mem/gc/gc.cpp",
-    "mem/gc/gc_adaptive_marking_stack.cpp",
-    "mem/gc/gc_barrier_set.cpp",
-    "mem/gc/gc_queue.cpp",
-    "mem/gc/gc_root.cpp",
-    "mem/gc/gc_root_type.cpp",
-    "mem/gc/gc_scope.cpp",
-    "mem/gc/gc_scoped_phase.cpp",
-    "mem/gc/gc_settings.cpp",
-    "mem/gc/gc_stats.cpp",
-    "mem/gc/gc_trigger.cpp",
-    "mem/gc/gen-gc/gen-gc.cpp",
-    "mem/gc/generational-gc-base.cpp",
-    "mem/gc/heap-space-misc/crossing_map.cpp",
-    "mem/gc/heap-space-misc/crossing_map_singleton.cpp",
-    "mem/gc/lang/gc_lang.cpp",
-    "mem/gc/stw-gc/stw-gc.cpp",
-    "mem/gc/workers/gc_worker.cpp",
-    "mem/gc/workers/gc_workers_task_pool.cpp",
-    "mem/gc/workers/gc_workers_task_queue.cpp",
-    "mem/gc/workers/gc_workers_thread_pool.cpp",
-    "mem/heap_manager.cpp",
-    "mem/heap_space.cpp",
-    "mem/heap_verifier.cpp",
-    "mem/internal_allocator.cpp",
-    "mem/mem_stats.cpp",
-    "mem/mem_stats_additional_info.cpp",
-    "mem/mem_stats_default.cpp",
-    "mem/memory_manager.cpp",
-    "mem/object_helpers.cpp",
-    "mem/panda_string.cpp",
-    "mem/refstorage/global_object_storage.cpp",
-    "mem/refstorage/ref_block.cpp",
-    "mem/refstorage/reference_storage.cpp",
-    "mem/region_space.cpp",
-    "mem/rendezvous.cpp",
-    "mem/runslots.cpp",
-    "mem/tlab.cpp",
-    "method.cpp",
-    "methodtrace/trace.cpp",
-    "monitor.cpp",
-    "monitor_object_lock.cpp",
-    "monitor_pool.cpp",
-    "mt_thread_manager.cpp",
-    "object_accessor.cpp",
-    "object_header.cpp",
-    "osr.cpp",
-    "panda_vm.cpp",
-    "plugins.cpp",
-    "profilesaver/profile_dump_info.cpp",
-    "profilesaver/profile_saver.cpp",
-    "regexp/ecmascript/mem/dyn_chunk.cpp",
-    "regexp/ecmascript/regexp_executor.cpp",
-    "regexp/ecmascript/regexp_opcode.cpp",
-    "regexp/ecmascript/regexp_parser.cpp",
-    "runtime.cpp",
-    "runtime_controller.cpp",
-    "runtime_helpers.cpp",
-    "stack_walker.cpp",
-    "string_table.cpp",
-    "thread.cpp",
-    "thread_proxy.cpp",
-    "time_utils.cpp",
-    "timing.cpp",
-    "tooling/backtrace/backtrace.cpp",
-    "tooling/debug_inf.cpp",
-    "tooling/debugger.cpp",
-    "tooling/evaluation/expression_loader.cpp",
-    "tooling/inspector/debugger_arkapi.cpp",
-    "tooling/inspector/types/profile_result.cpp",
-    "tooling/pt_default_lang_extension.cpp",
-    "tooling/pt_thread.cpp",
-    "tooling/sampler/lock_free_queue.cpp",
-    "tooling/sampler/sample_writer.cpp",
-    "tooling/sampler/samples_record.cpp",
-    "tooling/sampler/sampling_profiler.cpp",
-    "tooling/sampler/stack_walker_base.cpp",
-    "tooling/sampler/thread_communicator.cpp",
-    "tooling/tools.cpp",
-    "vtable_builder_base.cpp",
-  ]
-
-  if (!is_mingw) {
-    sources += [
-      "dprofiler/dprofiler.cpp",
-      "signal_handler.cpp",
-    ]
+template("libarkruntime_set_static_template") {
+  use_host_compiler = false
+  if(defined(invoker.use_host_compiler)){
+    use_host_compiler = invoker.use_host_compiler
   }
 
-  if (enable_irtoc) {
-    sources += [ "$ark_root_gen_dir/generated/irtoc_lib.o" ]
-    if (is_llvm_interpreter || is_llvm_fastpath) {
-      sources += [ "$ark_root_gen_dir/generated/irtoc_llvm_lib.o" ]
+  ohos_source_set(target_name) {
+    cflags_cc = [ "-fno-emulated-tls" ]
+    sources = [
+      "arch/asm_support.cpp",
+      "assert_gc_scope.cpp",
+      "bridge/bridge.cpp",
+      "cframe.cpp",
+      "cha.cpp",
+      "class.cpp",
+      "class_helper.cpp",
+      "class_initializer.cpp",
+      "class_linker.cpp",
+      "class_linker_extension.cpp",
+      "compiler.cpp",
+      "compiler_task_manager_worker.cpp",
+      "compiler_thread_pool_worker.cpp",
+      "coretypes/array.cpp",
+      "coretypes/line_string.cpp",
+      "coretypes/string.cpp",
+      "coroutines/coroutine.cpp",
+      "coroutines/coroutine_events.cpp",
+      "coroutines/coroutine_manager.cpp",
+      "coroutines/coroutine_stats.cpp",
+      "coroutines/coroutine_worker.cpp",
+      "coroutines/coroutine_worker_group.cpp",
+      "coroutines/priority_queue.cpp",
+      "coroutines/stackful_coroutine.cpp",
+      "coroutines/stackful_coroutine_manager.cpp",
+      "coroutines/stackful_coroutine_worker.cpp",
+      "coroutines/stackful_coroutine_state_info.cpp",
+      "coroutines/threaded_coroutine.cpp",
+      "coroutines/threaded_coroutine_manager.cpp",
+      "default_debugger_agent.cpp",
+      "deoptimization.cpp",
+      "entrypoints/entrypoints.cpp",
+      "exceptions.cpp",
+      "fibers/fiber_context.cpp",
+      "field.cpp",
+      "file_manager.cpp",
+      "gc_task.cpp",
+      "global_object_lock.cpp",
+      "handle_scope.cpp",
+      "hotreload/hotreload.cpp",
+      "imtable_builder.cpp",
+      "init_icu.cpp",
+      "interpreter/interpreter.cpp",
+      "intrinsics.cpp",
+      "jit/libprofile/pgo_file_builder.cpp",
+      "jit/profiling_loader.cpp",
+      "jit/profiling_saver.cpp",
+      "jit/profile_saver_worker.cpp",
+      "language_context.cpp",
+      "loadable_agent.cpp",
+      "lock_order_graph.cpp",
+      "locks.cpp",
+      "mark_word.cpp",
+      "mem/allocator.cpp",
+      "mem/gc/bitmap.cpp",
+      "mem/gc/card_table.cpp",
+      "mem/gc/cmc-gc-adapter/cmc-allocator-adapter.cpp",
+      "mem/gc/cmc-gc-adapter/cmc-gc-adapter.cpp",
+      "mem/gc/epsilon-g1/epsilon-g1.cpp",
+      "mem/gc/epsilon/epsilon.cpp",
+      "mem/gc/epsilon/epsilon_barrier.cpp",
+      "mem/gc/g1/g1-allocator.cpp",
+      "mem/gc/g1/g1-gc.cpp",
+      "mem/gc/g1/g1-helpers.cpp",
+      "mem/gc/g1/g1_analytics.cpp",
+      "mem/gc/g1/g1_pause_tracker.cpp",
+      "mem/gc/g1/hot_cards.cpp",
+      "mem/gc/g1/ref_updater.cpp",
+      "mem/gc/g1/update_remset_task_queue.cpp",
+      "mem/gc/g1/update_remset_thread.cpp",
+      "mem/gc/g1/update_remset_worker.cpp",
+      "mem/gc/gc-hung/gc_hung.cpp",
+      "mem/gc/gc.cpp",
+      "mem/gc/gc_adaptive_marking_stack.cpp",
+      "mem/gc/gc_barrier_set.cpp",
+      "mem/gc/gc_queue.cpp",
+      "mem/gc/gc_root.cpp",
+      "mem/gc/gc_root_type.cpp",
+      "mem/gc/gc_scope.cpp",
+      "mem/gc/gc_scoped_phase.cpp",
+      "mem/gc/gc_settings.cpp",
+      "mem/gc/gc_stats.cpp",
+      "mem/gc/gc_trigger.cpp",
+      "mem/gc/gen-gc/gen-gc.cpp",
+      "mem/gc/generational-gc-base.cpp",
+      "mem/gc/heap-space-misc/crossing_map.cpp",
+      "mem/gc/heap-space-misc/crossing_map_singleton.cpp",
+      "mem/gc/lang/gc_lang.cpp",
+      "mem/gc/stw-gc/stw-gc.cpp",
+      "mem/gc/workers/gc_worker.cpp",
+      "mem/gc/workers/gc_workers_task_pool.cpp",
+      "mem/gc/workers/gc_workers_task_queue.cpp",
+      "mem/gc/workers/gc_workers_thread_pool.cpp",
+      "mem/heap_manager.cpp",
+      "mem/heap_space.cpp",
+      "mem/heap_verifier.cpp",
+      "mem/internal_allocator.cpp",
+      "mem/mem_stats.cpp",
+      "mem/mem_stats_additional_info.cpp",
+      "mem/mem_stats_default.cpp",
+      "mem/memory_manager.cpp",
+      "mem/object_helpers.cpp",
+      "mem/panda_string.cpp",
+      "mem/refstorage/global_object_storage.cpp",
+      "mem/refstorage/ref_block.cpp",
+      "mem/refstorage/reference_storage.cpp",
+      "mem/region_space.cpp",
+      "mem/rendezvous.cpp",
+      "mem/runslots.cpp",
+      "mem/tlab.cpp",
+      "method.cpp",
+      "methodtrace/trace.cpp",
+      "monitor.cpp",
+      "monitor_object_lock.cpp",
+      "monitor_pool.cpp",
+      "mt_thread_manager.cpp",
+      "object_accessor.cpp",
+      "object_header.cpp",
+      "osr.cpp",
+      "panda_vm.cpp",
+      "plugins.cpp",
+      "profilesaver/profile_dump_info.cpp",
+      "profilesaver/profile_saver.cpp",
+      "regexp/ecmascript/mem/dyn_chunk.cpp",
+      "regexp/ecmascript/regexp_executor.cpp",
+      "regexp/ecmascript/regexp_opcode.cpp",
+      "regexp/ecmascript/regexp_parser.cpp",
+      "runtime.cpp",
+      "runtime_controller.cpp",
+      "runtime_helpers.cpp",
+      "stack_walker.cpp",
+      "string_table.cpp",
+      "thread.cpp",
+      "thread_proxy.cpp",
+      "time_utils.cpp",
+      "timing.cpp",
+      "tooling/backtrace/backtrace.cpp",
+      "tooling/debug_inf.cpp",
+      "tooling/debugger.cpp",
+      "tooling/evaluation/expression_loader.cpp",
+      "tooling/inspector/debugger_arkapi.cpp",
+      "tooling/inspector/types/profile_result.cpp",
+      "tooling/pt_default_lang_extension.cpp",
+      "tooling/pt_thread.cpp",
+      "tooling/sampler/lock_free_queue.cpp",
+      "tooling/sampler/sample_writer.cpp",
+      "tooling/sampler/samples_record.cpp",
+      "tooling/sampler/sampling_profiler.cpp",
+      "tooling/sampler/stack_walker_base.cpp",
+      "tooling/sampler/thread_communicator.cpp",
+      "tooling/tools.cpp",
+      "vtable_builder_base.cpp",
+    ]
+
+    if (!is_mingw) {
+      sources += [
+        "dprofiler/dprofiler.cpp",
+        "signal_handler.cpp",
+      ]
     }
-  }
-  if (current_cpu == "arm") {
-    sources += [
-      "arch/arm/interpreter_support.S",
-      "arch/arm/osr_arm.S",
-      "bridge/arch/arm/compiled_code_to_interpreter_bridge_arm.S",
-      "bridge/arch/arm/compiled_code_to_interpreter_bridge_dyn_arm.S",
-      "bridge/arch/arm/compiled_code_to_runtime_bridge_arm.S",
-      "bridge/arch/arm/deoptimization_arm.S",
-      "bridge/arch/arm/expand_compiled_code_args_dyn_arm.S",
-      "bridge/arch/arm/interpreter_to_compiled_code_bridge_arm.S",
-      "bridge/arch/arm/interpreter_to_compiled_code_bridge_dyn_arm.S",
-      "fibers/arch/arm/get.S",
-      "fibers/arch/arm/switch.S",
-      "fibers/arch/arm/update.S",
+
+    if (enable_irtoc && !use_host_compiler) {
+      sources += [ "$ark_root_gen_dir/generated/irtoc_lib.o" ]
+      if (is_llvm_interpreter || is_llvm_fastpath) {
+        sources += [ "$ark_root_gen_dir/generated/irtoc_llvm_lib.o" ]
+      }
+    }
+    if (current_cpu == "arm") {
+      sources += [
+        "arch/arm/interpreter_support.S",
+        "arch/arm/osr_arm.S",
+        "bridge/arch/arm/compiled_code_to_interpreter_bridge_arm.S",
+        "bridge/arch/arm/compiled_code_to_interpreter_bridge_dyn_arm.S",
+        "bridge/arch/arm/compiled_code_to_runtime_bridge_arm.S",
+        "bridge/arch/arm/deoptimization_arm.S",
+        "bridge/arch/arm/expand_compiled_code_args_dyn_arm.S",
+        "bridge/arch/arm/interpreter_to_compiled_code_bridge_arm.S",
+        "bridge/arch/arm/interpreter_to_compiled_code_bridge_dyn_arm.S",
+        "fibers/arch/arm/get.S",
+        "fibers/arch/arm/switch.S",
+        "fibers/arch/arm/update.S",
+      ]
+      #TODO add arm32 abi hard
+    } else if (current_cpu == "arm64") {
+      sources += [
+        "arch/aarch64/interpreter_support.S",
+        "arch/aarch64/osr_aarch64.S",
+        "bridge/arch/aarch64/compiled_code_to_interpreter_bridge_aarch64.S",
+        "bridge/arch/aarch64/compiled_code_to_interpreter_bridge_dyn_aarch64.S",
+        "bridge/arch/aarch64/compiled_code_to_runtime_bridge_aarch64.S",
+        "bridge/arch/aarch64/deoptimization_aarch64.S",
+        "bridge/arch/aarch64/expand_compiled_code_args_dyn_aarch64.S",
+        "bridge/arch/aarch64/interpreter_to_compiled_code_bridge_aarch64.S",
+        "bridge/arch/aarch64/interpreter_to_compiled_code_bridge_dyn_aarch64.S",
+        "fibers/arch/aarch64/get.S",
+        "fibers/arch/aarch64/switch.S",
+        "fibers/arch/aarch64/update.S",
+      ]
+    } else if (current_cpu == "x86") {
+      sources += [
+        "arch/x86/interpreter_support.S",
+        "arch/x86/osr_x86.S",
+        "bridge/arch/x86/compiled_code_to_interpreter_bridge_x86.S",
+        "bridge/arch/x86/deoptimization_x86.S",
+        "bridge/arch/x86/interpreter_to_compiled_code_bridge_x86.S",
+      ]
+    } else if (current_cpu == "amd64" || current_cpu == "x64" ||
+               current_cpu == "x86_64") {
+      sources += [
+        "arch/amd64/common_amd64.S",
+        "arch/amd64/interpreter_support.S",
+        "arch/amd64/osr_amd64.S",
+        "bridge/arch/amd64/compiled_code_to_interpreter_bridge_amd64.S",
+        "bridge/arch/amd64/compiled_code_to_interpreter_bridge_dyn_amd64.S",
+        "bridge/arch/amd64/compiled_code_to_runtime_bridge_amd64.S",
+        "bridge/arch/amd64/deoptimization_amd64.S",
+        "bridge/arch/amd64/expand_compiled_code_args_dyn_amd64.S",
+        "bridge/arch/amd64/interpreter_to_compiled_code_bridge_amd64.S",
+        "bridge/arch/amd64/interpreter_to_compiled_code_bridge_dyn_amd64.S",
+        "fibers/arch/amd64/get.S",
+        "fibers/arch/amd64/switch.S",
+        "fibers/arch/amd64/update.S",
+      ]
+    }
+
+    if (defined(enable_perf_counters)) {
+      sources += [ "tooling/perf_counter.cpp" ]
+    }
+
+    if (is_mob) {
+      sources += [
+        "$ark_root/platforms/mobile/runtime/thread.cpp",
+        "$ark_root/platforms/mobile/runtime/verify_app_install.cpp",
+      ]
+    } else {
+      sources += [
+        "$ark_root/platforms/common/runtime/thread.cpp",
+        "$ark_root/platforms/common/runtime/verify_app_install.cpp",
+      ]
+    }
+
+    core_vm_sources = [
+      "core/core_class_linker_extension.cpp",
+      "core/core_language_context.cpp",
+      "core/core_vm.cpp",
     ]
-    #TODO add arm32 abi hard
-  } else if (current_cpu == "arm64") {
-    sources += [
-      "arch/aarch64/interpreter_support.S",
-      "arch/aarch64/osr_aarch64.S",
-      "bridge/arch/aarch64/compiled_code_to_interpreter_bridge_aarch64.S",
-      "bridge/arch/aarch64/compiled_code_to_interpreter_bridge_dyn_aarch64.S",
-      "bridge/arch/aarch64/compiled_code_to_runtime_bridge_aarch64.S",
-      "bridge/arch/aarch64/deoptimization_aarch64.S",
-      "bridge/arch/aarch64/expand_compiled_code_args_dyn_aarch64.S",
-      "bridge/arch/aarch64/interpreter_to_compiled_code_bridge_aarch64.S",
-      "bridge/arch/aarch64/interpreter_to_compiled_code_bridge_dyn_aarch64.S",
-      "fibers/arch/aarch64/get.S",
-      "fibers/arch/aarch64/switch.S",
-      "fibers/arch/aarch64/update.S",
+
+    sources += core_vm_sources
+    sources += verifier_sources + plugin_verifier_sources
+    sources += plugin_runtime_sources
+
+    public_configs = [
+      "$ark_root/assembler:arkassembler_public_config",
+      "$ark_root/libpandabase:arkbase_public_config",
+      "$ark_root/libarkfile:arkfile_public_config",
+      "$ark_root/compiler:arkcompiler_public_config",
+      "$ark_root/verification/gen:verification_public_config",
+      ":arkruntime_public_config",
+      ":arkruntime_config",
+      "$ark_root/runtime/asm_defines:asmdefines_public_config",
     ]
-  } else if (current_cpu == "x86") {
-    sources += [
-      "arch/x86/interpreter_support.S",
-      "arch/x86/osr_x86.S",
-      "bridge/arch/x86/compiled_code_to_interpreter_bridge_x86.S",
-      "bridge/arch/x86/deoptimization_x86.S",
-      "bridge/arch/x86/interpreter_to_compiled_code_bridge_x86.S",
+
+    public_configs += plugin_runtime_configs
+
+    deps = [
+      ":arkruntime_header_deps",
+      "$ark_root/assembler:libarktsassembler",
+      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_entrypoints_bridge_asm_macro_inl",
+      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_enum_inl",
+      "$ark_root/compiler/aot:libarkaotmanager",
+      "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
+      "$ark_root/libpandabase:libarktsbase",
+      "$ark_root/libarkfile:libarkfile_type_gen_h",
+      "$ark_root/libarkfile:libarktsfile",
+      "$ark_root/libziparchive:libarktsziparchive",
+      "$ark_root/platforms/target_defaults:arktarget_options",
+      "$ark_root/runtime/asm_defines:asm_defines_generator",
     ]
-  } else if (current_cpu == "amd64" || current_cpu == "x64" ||
-             current_cpu == "x86_64") {
-    sources += [
-      "arch/amd64/common_amd64.S",
-      "arch/amd64/interpreter_support.S",
-      "arch/amd64/osr_amd64.S",
-      "bridge/arch/amd64/compiled_code_to_interpreter_bridge_amd64.S",
-      "bridge/arch/amd64/compiled_code_to_interpreter_bridge_dyn_amd64.S",
-      "bridge/arch/amd64/compiled_code_to_runtime_bridge_amd64.S",
-      "bridge/arch/amd64/deoptimization_amd64.S",
-      "bridge/arch/amd64/expand_compiled_code_args_dyn_amd64.S",
-      "bridge/arch/amd64/interpreter_to_compiled_code_bridge_amd64.S",
-      "bridge/arch/amd64/interpreter_to_compiled_code_bridge_dyn_amd64.S",
-      "fibers/arch/amd64/get.S",
-      "fibers/arch/amd64/switch.S",
-      "fibers/arch/amd64/update.S",
-    ]
-  }
 
-  if (defined(enable_perf_counters)) {
-    sources += [ "tooling/perf_counter.cpp" ]
-  }
+    if(use_host_compiler){
+      deps += [
+        ":arkruntime_interpreter_impl_host",
+        "$ark_root/compiler:libarktscompiler_host",
+      ]
+      public_configs += ["$ark_root:ark_host_config"]
+    } else{
+      deps += [
+        ":arkruntime_interpreter_impl",
+        "$ark_root/compiler:libarktscompiler",
+      ]
+      public_configs += ["$ark_root:ark_config"]
+    }
 
-  if (is_mob) {
-    sources += [
-      "$ark_root/platforms/mobile/runtime/thread.cpp",
-      "$ark_root/platforms/mobile/runtime/verify_app_install.cpp",
-    ]
-  } else {
-    sources += [
-      "$ark_root/platforms/common/runtime/thread.cpp",
-      "$ark_root/platforms/common/runtime/verify_app_install.cpp",
-    ]
-  }
+    if (ark_static_standalone_build) {
+      public_configs += [ zlib_public_config ]
+      deps += [
+        icui18n_dep,
+        zlib_dep,
+      ]
+    }
 
-  core_vm_sources = [
-    "core/core_class_linker_extension.cpp",
-    "core/core_language_context.cpp",
-    "core/core_vm.cpp",
-  ]
-
-  sources += core_vm_sources
-  sources += verifier_sources + plugin_verifier_sources
-  sources += plugin_runtime_sources
-
-  public_configs = [
-    "$ark_root/assembler:arkassembler_public_config",
-    "$ark_root:ark_config",
-    "$ark_root/libpandabase:arkbase_public_config",
-    "$ark_root/libarkfile:arkfile_public_config",
-    "$ark_root/compiler:arkcompiler_public_config",
-    "$ark_root/verification/gen:verification_public_config",
-    ":arkruntime_public_config",
-    ":arkruntime_config",
-    "$ark_root/runtime/asm_defines:asmdefines_public_config",
-  ]
-
-  public_configs += plugin_runtime_configs
-
-  deps = [
-    ":arkruntime_header_deps",
-    ":arkruntime_interpreter_impl",
-    "$ark_root/assembler:libarktsassembler",
-    "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_entrypoints_bridge_asm_macro_inl",
-    "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_enum_inl",
-    "$ark_root/compiler:libarktscompiler",
-    "$ark_root/compiler/aot:libarkaotmanager",
-    "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
-    "$ark_root/libpandabase:libarktsbase",
-    "$ark_root/libarkfile:libarkfile_type_gen_h",
-    "$ark_root/libarkfile:libarktsfile",
-    "$ark_root/libziparchive:libarktsziparchive",
-    "$ark_root/platforms/target_defaults:arktarget_options",
-    "$ark_root/runtime/asm_defines:asm_defines_generator",
-  ]
-
-  if (ark_static_standalone_build) {
-    public_configs += [ zlib_public_config ]
-    deps += [
+    external_deps = [
+      "napi:ace_napi",
+      "node:node_header_notice",
       icui18n_dep,
+      icuuc_dep,
+      sdk_libc_secshared_dep,
       zlib_dep,
     ]
+
+    if (!(ark_standalone_build || ark_static_standalone_build)) {
+      external_deps += [ "pcre2:libpcre2_static" ]
+      external_deps += [ "pcre2:libpcre2_static_16" ]
+    } else if (ark_standalone_build) {
+      deps += [
+        "//third_party/pcre2:libpcre2_static",
+        "//third_party/pcre2:libpcre2_static_16",
+      ]
+    } else if (ark_static_standalone_build) {
+      deps += [
+        ":libpcre2_16",
+        ":libpcre2_8",
+      ]
+      include_dirs = [ "$target_gen_dir/pcre2/common" ]
+    }
+
+    if (!ark_standalone_build) {
+      external_deps += [ "napi:ace_napi" ]
+    }
+
+    deps += plugin_runtime_deps
+    deps += plugin_arkruntime_stdlib_plugin_deps
+
+    if (!is_mingw) {
+      deps += [ "$ark_root/dprof:libdprof" ]
+    }
+
+    if (enable_irtoc && !use_host_compiler) {
+      deps += [ "$ark_root/irtoc:irtoc_generate" ]
+    }
+
+    if (current_cpu == "arm") {
+      deps += [
+        ":bridge_dispatch_arm",
+        ":bridge_dispatch_dyn_arm",
+      ]
+    } else if (current_cpu == "arm64") {
+      deps += [
+        ":bridge_dispatch_aarch64",
+        ":bridge_dispatch_dyn_aarch64",
+      ]
+    } else if (current_cpu == "amd64" || current_cpu == "x64" ||
+               current_cpu == "x86_64") {
+      deps += [
+        ":bridge_dispatch_amd64",
+        ":bridge_dispatch_dyn_amd64",
+      ]
+    }
+
+    if (is_ohos && is_standard_system) {
+      defines = [
+        "PANDA_OHOS_USE_INNER_HILOG",
+        "PANDA_USE_HITRACE",
+        "PANDA_USE_QOS",
+      ]
+      external_deps += [
+        "hilog:libhilog",
+        "hitrace:hitrace_meter",
+        "libuv:uv",
+        "qos_manager:qos",
+      ]
+    }
+
+    part_name = ark_part_name
+    subsystem_name = ark_subsystem_name
   }
+}
 
-  external_deps = [
-    "napi:ace_napi",
-    "node:node_header_notice",
-    icui18n_dep,
-    icuuc_dep,
-    sdk_libc_secshared_dep,
-    zlib_dep,
-  ]
+libarkruntime_set_static_template("libarkruntime_set_static") {
+  use_host_compiler = false
+}
 
-  if (!(ark_standalone_build || ark_static_standalone_build)) {
-    external_deps += [ "pcre2:libpcre2_static" ]
-    external_deps += [ "pcre2:libpcre2_static_16" ]
-  } else if (ark_standalone_build) {
-    deps += [
-      "//third_party/pcre2:libpcre2_static",
-      "//third_party/pcre2:libpcre2_static_16",
-    ]
-  } else if (ark_static_standalone_build) {
-    deps += [
-      ":libpcre2_16",
-      ":libpcre2_8",
-    ]
-    include_dirs = [ "$target_gen_dir/pcre2/common" ]
-  }
-
-  if (!ark_standalone_build) {
-    external_deps += [ "napi:ace_napi" ]
-  }
-
-  deps += plugin_runtime_deps
-  deps += plugin_arkruntime_stdlib_plugin_deps
-
-  if (!is_mingw) {
-    deps += [ "$ark_root/dprof:libdprof" ]
-  }
-
-  if (enable_irtoc) {
-    deps += [ "$ark_root/irtoc:irtoc_generate" ]
-  }
-
-  if (current_cpu == "arm") {
-    deps += [
-      ":bridge_dispatch_arm",
-      ":bridge_dispatch_dyn_arm",
-    ]
-  } else if (current_cpu == "arm64") {
-    deps += [
-      ":bridge_dispatch_aarch64",
-      ":bridge_dispatch_dyn_aarch64",
-    ]
-  } else if (current_cpu == "amd64" || current_cpu == "x64" ||
-             current_cpu == "x86_64") {
-    deps += [
-      ":bridge_dispatch_amd64",
-      ":bridge_dispatch_dyn_amd64",
-    ]
-  }
-
-  if (is_ohos && is_standard_system) {
-    defines = [
-      "PANDA_OHOS_USE_INNER_HILOG",
-      "PANDA_USE_HITRACE",
-      "PANDA_USE_QOS",
-    ]
-    external_deps += [
-      "hilog:libhilog",
-      "hitrace:hitrace_meter",
-      "libuv:uv",
-      "qos_manager:qos",
-    ]
-  }
-
-  part_name = ark_part_name
-  subsystem_name = ark_subsystem_name
+libarkruntime_set_static_template("libarkruntime_set_static_host") {
+  use_host_compiler = true
 }
 
 ohos_static_library("libarkruntime_static") {
@@ -540,6 +566,28 @@ config("ark_integrate_public_config") {
 ohos_shared_library("libarkruntime") {
   public_configs = [ ":ark_integrate_public_config" ]
   deps = [ ":libarkruntime_set_static" ]
+
+  if (ark_hybrid) {
+    external_deps = [ "ets_runtime:libark_jsruntime" ]
+  }
+
+  if ((current_cpu == "amd64" || current_cpu == "x64" ||
+      current_cpu == "x86_64") && (ark_standalone_build || ark_static_standalone_build)) {
+    ldflags = [ "-latomic" ]
+  }
+
+  if (is_mingw || is_mac) {
+    output_extension = "dll"
+  } else {
+    output_extension = "so"
+  }
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
+}
+
+ohos_shared_library("libarkruntime_host") {
+  public_configs = [ ":ark_integrate_public_config" ]
+  deps = [ ":libarkruntime_set_static_host" ]
 
   if (ark_hybrid) {
     external_deps = [ "ets_runtime:libark_jsruntime" ]
@@ -598,40 +646,53 @@ config("arkruntime_interpreter_impl_config") {
     }
   }
 }
+template("arkruntime_interpreter_impl_static_template"){
+  use_host_compiler = false
+  if(defined(invoker.use_host_compiler)){
+    use_host_compiler = invoker.use_host_compiler
+  }
 
-ohos_source_set("arkruntime_interpreter_impl_static") {
-  sources = [ "interpreter/interpreter_impl.cpp" ]
+  ohos_source_set(target_name) {
+    sources = [ "interpreter/interpreter_impl.cpp" ]
 
-  public_configs = [
-    "$ark_root:ark_config",
-    "$ark_root/libpandabase:arkbase_public_config",
-    "$ark_root/libarkfile:arkfile_public_config",
-    "$ark_root/runtime:arkruntime_public_config",
-    "$ark_root/compiler:arkcompiler_public_config",
-    "$ark_root/verification/gen:verification_public_config",
-    ":arkruntime_interpreter_impl_config",
-  ]
+    public_configs = [
+      "$ark_root/libpandabase:arkbase_public_config",
+      "$ark_root/libarkfile:arkfile_public_config",
+      "$ark_root/runtime:arkruntime_public_config",
+      "$ark_root/compiler:arkcompiler_public_config",
+      "$ark_root/verification/gen:verification_public_config",
+      ":arkruntime_interpreter_impl_config",
+    ]
 
-  deps = [
-    ":arkruntime_header_deps",
-    "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
-    "$ark_root/libpandabase:libarktsbase",
-    "$ark_root/libarkfile:libarktsfile",
-  ]
+    if (use_host_compiler) {
+      public_configs += [ "$ark_root:ark_host_config" ]
+    } else {
+      public_configs += [ "$ark_root:ark_config" ]
+    }
 
-  external_deps = [ sdk_libc_secshared_dep ]
+    deps = [
+      ":arkruntime_header_deps",
+      "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
+      "$ark_root/libpandabase:libarktsbase",
+      "$ark_root/libarkfile:libarktsfile",
+    ]
 
-  deps += plugin_arkruntime_stdlib_plugin_deps
+    external_deps = [ sdk_libc_secshared_dep ]
 
-  part_name = ark_part_name
-  subsystem_name = "$ark_subsystem_name"
+    deps += plugin_arkruntime_stdlib_plugin_deps
+
+    part_name = ark_part_name
+    subsystem_name = "$ark_subsystem_name"
+  }
 }
 
 # panda_set_lib_32bit_property not used in android
-ohos_static_library("arkruntime_interpreter_impl") {
-  deps = [ ":arkruntime_interpreter_impl_static" ]
-  part_name = ark_part_name
-  subsystem_name = ark_subsystem_name
+arkruntime_interpreter_impl_static_template("arkruntime_interpreter_impl") {
+  use_host_compiler = false
+}
+
+arkruntime_interpreter_impl_static_template("arkruntime_interpreter_impl_host") {
+  use_host_compiler = true
 }
 
 template("gen_intrinsics_yaml") {

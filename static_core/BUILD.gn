@@ -135,8 +135,7 @@ group("ark_host_tests") {
   }
 }
 
-# Common config for ark source
-config("ark_config") {
+config("ark_common_config") {
   if (!ark_static_standalone_build) {
     visibility = [
       "$abckit_root/*",
@@ -193,9 +192,7 @@ config("ark_config") {
       "PANDA_WITH_BYTECODE_OPTIMIZER",
       "PANDA_WITH_COMPILER",
     ]
-    if (enable_irtoc) {
-      defines += [ "PANDA_WITH_IRTOC" ]
-    }
+
     if (enable_codegen) {
       defines += [ "PANDA_WITH_CODEGEN" ]
     }
@@ -338,7 +335,7 @@ config("ark_config") {
   } else {
     defines += [ "PANDA_32_BIT_MANAGED_POINTER" ]
   }
-    
+
   if (current_cpu == "arm") {
     cflags_cc += [
       "-march=armv7-a",
@@ -376,6 +373,31 @@ config("ark_config") {
       "PANDA_TARGET_64",
       "PANDA_TARGET_AMD64",
     ]
+  }
+}
+
+config("ark_config") {
+  defines = []
+  configs = [
+    ":ark_common_config",
+  ]
+  if (is_linux) {
+    if (enable_irtoc) {
+      defines += [ "PANDA_WITH_IRTOC" ]
+    }
+  }
+}
+
+config("ark_host_config") {
+  defines = []
+  configs = [
+    ":ark_common_config",
+  ]
+  # For host tools, IRTOC requires both conditions to avoid link errors
+  if (is_linux) {
+    if (enable_irtoc && (ark_static_standalone_build || ark_standalone_build)) {
+      defines += [ "PANDA_WITH_IRTOC" ]
+    }
   }
 }
 

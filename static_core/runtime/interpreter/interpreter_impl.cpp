@@ -23,8 +23,10 @@
 #endif
 #include "interpreter-inl_gen.h"
 
+#ifdef PANDA_WITH_IRTOC
 extern "C" void ExecuteImplFast(void *, void *, void *, void *);
 extern "C" void ExecuteImplFastEH(void *, void *, void *, void *);
+#endif
 #ifdef PANDA_LLVM_INTERPRETER
 extern "C" void ExecuteImplFast_LLVM(void *, void *, void *, void *);    // NOLINT(readability-identifier-naming)
 extern "C" void ExecuteImplFastEH_LLVM(void *, void *, void *, void *);  // NOLINT(readability-identifier-naming)

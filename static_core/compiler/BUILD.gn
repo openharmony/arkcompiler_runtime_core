@@ -300,51 +300,67 @@ group("arktscompiler_header_deps") {
   ]
 }
 
-ohos_shared_library("libarktscompiler") {
-  sources = libarkcompiler_sources
+template("libarktscompiler_shared") {
+  with_irtoc = true
+  if (defined(invoker.with_irtoc)) {
+    with_irtoc = invoker.with_irtoc
+  }
 
-  public_configs = libarkcompiler_configs
+  ohos_shared_library(target_name) {
+    sources = libarkcompiler_sources
 
-  deps = [
-    ":arktscompiler_header_deps",
-    ":isa_gen_libarkcompiler_inst_builder_gen_cpp",
-    "$ark_root/libpandabase:libarktsbase",
-    "$ark_root/libarkfile:libarktsfile",
-  ]
+    public_configs = libarkcompiler_configs
 
-  external_deps = [ sdk_libc_secshared_dep ]
-
-  if (enable_irtoc) {
-    deps += [
-      ":irtoc_builder_cpp",
-      ":irtoc_generate_ir_inline",
-      ":irtoc_interface_extensions_inl_h",
-      ":plugin_create_pipeline_inl",
+    deps = [
+      ":arktscompiler_header_deps",
+      ":isa_gen_libarkcompiler_inst_builder_gen_cpp",
+      "$ark_root/libpandabase:libarktsbase",
+      "$ark_root/libarkfile:libarktsfile",
     ]
-  }
-  if (enable_codegen && !is_mac) {
-    deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder" ]
-  }
 
-  deps += plugin_compiler_deps
+    external_deps = [ sdk_libc_secshared_dep ]
 
-  include_dirs = [ "$ark_root/compiler/optimizer" ]
-  if (!is_mac) {
-    include_dirs += [ "$ark_root/compiler/optimizer/code_generator" ]
-  }
+    if (with_irtoc && enable_irtoc) {
+      deps += [
+        ":irtoc_builder_cpp",
+        ":irtoc_generate_ir_inline",
+        ":irtoc_interface_extensions_inl_h",
+        ":plugin_create_pipeline_inl",
+      ]
+    }
+    if (enable_codegen && !is_mac) {
+      deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder" ]
+    }
 
-  if (abckit_enable) {
-    include_dirs += libabckit_includes
-    deps += libabckit_deps
-  }
+    deps += plugin_compiler_deps
 
-  if (is_mingw || is_win) {
-    output_extension = "dll"
-  } else {
-    output_extension = "so"
+    include_dirs = [ "$ark_root/compiler/optimizer" ]
+    if (!is_mac) {
+      include_dirs += [ "$ark_root/compiler/optimizer/code_generator" ]
+    }
+
+    if (abckit_enable) {
+      include_dirs += libabckit_includes
+      deps += libabckit_deps
+    }
+
+    if (is_mingw || is_win) {
+      output_extension = "dll"
+    } else {
+      output_extension = "so"
+    }
+    part_name = ark_part_name
+    subsystem_name = "$ark_subsystem_name"
   }
-  part_name = ark_part_name
-  subsystem_name = "$ark_subsystem_name"
+}
+
+libarktscompiler_shared("libarktscompiler") {
+  with_irtoc = true
+}
+
+libarktscompiler_shared("libarktscompiler_host") {
+  # Disable IRTOC only for the host variant used for OHOS host build
+  with_irtoc = false
 }
 
 ohos_source_set("libarktscompiler_frontend_static") {
