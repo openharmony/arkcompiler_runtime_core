@@ -119,7 +119,7 @@ public:
     static void DestroyInstance();
 
     void PreFork(ThreadHolder *holder);
-    void PostFork();
+    void PostFork(bool enableWarmStartup);
 
     void Init(const RuntimeParam &param);   // Support setting custom parameters
     void Init();                            // Use default parameters
@@ -143,6 +143,7 @@ public:
     static void ChangeGCParams(bool isBackground);
     static bool CheckAndTriggerHintGC(MemoryReduceDegree degree);
     static void NotifyHighSensitive(bool isStart);
+    static void NotifyWarmStart();
 
     HeapParam &GetHeapParam()
     {
