@@ -18,6 +18,8 @@
 
 #include "js_convert_base.h"
 #include "js_convert_stdlib.h"
+#include "napi_impl/ark_napi_helper.h"
+#include "objects/dynamic_object_accessor_util.h"
 
 namespace ark::ets::interop::js {
 
@@ -436,18 +438,14 @@ ALWAYS_INLINE inline std::optional<typename T::cpptype> JSValueGetByName(Interop
                                                                          const char *name)
 {
     auto env = ctx->GetJSEnv();
-    napi_value jsVal = jsvalue->GetNapiValue(env);
-    napi_status jsStatus;
     auto coro = EtsCoroutine::GetCurrent();
-    {
-        ScopedNativeCodeThread nativeScope(coro);
-        jsStatus = napi_get_named_property(env, jsVal, name, &jsVal);
-    }
-    if (jsStatus != napi_ok) {
+    napi_value jsVal = jsvalue->GetNapiValue(env);
+    auto result = common::DynamicObjectAccessorUtil::GetProperty(ArkNapiHelper::ToBaseObject(jsVal), name);
+    if (NapiIsExceptionPending(env)) {
         ctx->ForwardJSException(coro);
         return {};
     }
-    return T::UnwrapWithNullCheck(ctx, env, jsVal);
+    return T::UnwrapWithNullCheck(ctx, env, ArkNapiHelper::ToNapiValue(result));
 }
 
 template <typename T>
