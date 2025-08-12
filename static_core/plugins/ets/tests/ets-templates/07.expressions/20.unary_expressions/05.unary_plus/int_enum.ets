@@ -13,14 +13,32 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
-    The expression must be left-hand-side expression
-tags: [compile-only, negative]
+    Type of the operand expression with the unary operator +
+    must be convertible (see Implicit Conversions)
+    to a numeric type (see Numeric Types)
 ---*/
 
-function main(): void {
-    {{c.use|indent}}
+enum IntEnum {
+    Neg = -1,
+    Pos = 1,
+    Min = -2147483648,
+    Max = 2147483647
 }
-{% endfor %}
+
+function main(): void {
+    let n = +IntEnum.Neg
+    arktest.assertEQ(n, -1)
+    arktest.assertEQ(+n, -1)
+
+    let p = +IntEnum.Pos
+    arktest.assertEQ(p, 1)
+    arktest.assertEQ(+p, 1)
+
+    arktest.assertEQ(+IntEnum.Neg, IntEnum.Neg)
+    arktest.assertEQ(+IntEnum.Pos, IntEnum.Pos)
+
+    arktest.assertEQ(+IntEnum.Min, IntEnum.Min)
+    arktest.assertEQ(+IntEnum.Max, IntEnum.Max)
+}

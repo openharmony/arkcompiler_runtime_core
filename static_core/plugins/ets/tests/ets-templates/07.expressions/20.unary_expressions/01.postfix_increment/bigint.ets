@@ -13,14 +13,30 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: >-
-    The expression must be left-hand-side expression
-tags: [compile-only, negative]
+desc: The value 1 is added to the value of the variable by using necessary conversion
 ---*/
 
-function main(): void {
-    {{c.use|indent}}
+class A {
+    bi: bigint = 13n
 }
-{% endfor %}
+
+
+function main(): void {
+    let x = 13n
+    let a = new A
+    let ar: bigint[] = [-1n, 1n]
+    let r: Record<int, bigint> = {0: 42n}
+
+    arktest.assertEQ(x++, 13n)
+    arktest.assertEQ(x, 14n)
+
+    arktest.assertEQ(a.bi++, 13n)
+    arktest.assertEQ(a.bi, 14n)
+
+    arktest.assertEQ(ar[0]++, -1n)
+    arktest.assertEQ(ar[0], 0n)
+
+    arktest.assertEQ(r[0]++, 42n)
+    arktest.assertEQ(r[0], 43n)
+}

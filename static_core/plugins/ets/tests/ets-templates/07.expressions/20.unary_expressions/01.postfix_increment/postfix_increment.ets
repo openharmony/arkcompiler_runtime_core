@@ -18,11 +18,70 @@ desc: Postfix increment operator
 ---*/
 
 function main(): void {
-  let a = 5;
-  arktest.assertEQ(a++, 5);
-  arktest.assertEQ(a, 6);
-  a += a++
-  arktest.assertEQ(a, 12);
-  let c = 1.0
-  arktest.assertEQ(c++, 1.0)
+
+    let n: number = -3.3;
+    arktest.assertEQ(n++, -3.3)
+    arktest.assertEQ(n, -2.3)
+
+    // special values
+    n = NaN
+    arktest.assertTrue(Number.isNaN(n++))
+    arktest.assertTrue(Number.isNaN(n))
+
+    n = +Infinity
+    arktest.assertEQ(n++, +Infinity)
+    arktest.assertEQ(n, +Infinity)
+
+    let maxByte: byte = 127
+    arktest.assertEQ(maxByte++, 127)
+    arktest.assertEQ(maxByte, -128)
+
+    let maxShort: short = 32767
+    arktest.assertEQ(maxShort++, 32767)
+    arktest.assertEQ(maxShort, -32768)
+
+    let maxInt: int = 2147483647
+    arktest.assertEQ(maxInt++, 2147483647)
+    arktest.assertEQ(maxInt, -2147483648)
+
+    let maxLong: long = 9223372036854775807
+    arktest.assertEQ(maxLong++, 9223372036854775807)
+    arktest.assertEQ(maxLong, -9223372036854775808)
+
+    // operator precedence
+    let l: long = -13;
+    arktest.assertEQ(l++, -13)
+    arktest.assertEQ(l, -12)
+    arktest.assertEQ(-l++, 12)
+    arktest.assertEQ(+l++, -11)
+    arktest.assertEQ(l+++l, -10-9)
+
+    // array
+    let an: number[] = [-1.5, 3.14]
+    arktest.assertEQ(an[0]++, -1.5)
+    arktest.assertEQ(an[0], -0.5)
+
+    let ad: double[] = [-1.5, 3.14]
+    arktest.assertEQ(ad[0]++, -1.5)
+    arktest.assertEQ(ad[0], -0.5)
+
+    let af: float[] = [-1.5f, 3.14f]
+    arktest.assertEQ(af[0]++, -1.5)
+    arktest.assertEQ(af[0], -0.5)
+
+    let al: long[] = [13, -42]
+    arktest.assertEQ(al[1]++, -42)
+    arktest.assertEQ(al[1], -41)
+
+    let ai: int[] = [13, -42]
+    arktest.assertEQ(ai[1]++, -42)
+    arktest.assertEQ(ai[1], -41)
+
+    let sa: short[] = [13, -42]
+    arktest.assertEQ(sa[1]++, -42)
+    arktest.assertEQ(sa[1], -41)
+
+    let ab: byte[] = [13, -42]
+    arktest.assertEQ(ab[1]++, -42)
+    arktest.assertEQ(ab[1], -41)
 }

@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
 desc: Unary plus operator
 assert: The type of the operand expression with the unary operator ‘+’ must be convertible (see Implicit Conversions) to a numeric type (see Numeric Types). Otherwise, a compile-time error occurs.
 tags: [negative, compile-only]
 ---*/
 
+{{c.decl}}
+
 function main(): void {
-  let c = "text"
-  arktest.assertEQ(+c, "text")
+    {{c.use|indent}}
 }
+{% endfor %}

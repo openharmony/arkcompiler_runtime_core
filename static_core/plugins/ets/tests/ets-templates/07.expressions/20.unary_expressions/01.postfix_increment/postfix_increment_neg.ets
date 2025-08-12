@@ -13,12 +13,15 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: Postfix increment operator
-tags: [negative, compile-only]
+desc: >-
+    The expression must be left-hand-side expression (see Left-Hand-Side Expressions),
+    so it denotes a variable.
+tags: [compile-only, negative]
 ---*/
 
 function main(): void {
-  let c = "110"
-  arktest.assertEQ(c++, "110", "If postix increment expression completes abruptly then no incrementation occurs.")
+    {{c.use|indent}}
 }
+{% endfor %}

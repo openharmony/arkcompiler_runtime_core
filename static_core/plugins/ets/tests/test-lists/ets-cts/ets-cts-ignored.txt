@@ -1167,6 +1167,22 @@
 #19951
 07.expressions/18.ensure-not-nullish_expression/null_check.ets
 
+#28958 Unary inc for BigInt
+07.expressions/20.unary_expressions/01.postfix_increment/bigint.ets
+07.expressions/20.unary_expressions/02.postfix_decrement/bigint.ets
+07.expressions/20.unary_expressions/03.prefix_increment/bigint.ets
+07.expressions/20.unary_expressions/04.prefix_decrement/bigint.ets
+
+#28961 Unary inc for Record
+07.expressions/20.unary_expressions/01.postfix_increment/records.ets
+07.expressions/20.unary_expressions/02.postfix_decrement/records.ets
+07.expressions/20.unary_expressions/03.prefix_increment/records.ets
+07.expressions/20.unary_expressions/04.prefix_decrement/records.ets
+
+#28999 Es2Panda crashes on unary plus with Long Enum
+07.expressions/20.unary_expressions/05.unary_plus/long_enum.ets
+07.expressions/20.unary_expressions/06.unary_minus/unary_minus_long_enum.ets
+
 #28004 Exponentiation operator rejected
 07.expressions/21.multiplicative_expressions/04.exponentiation/inf_0.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/inf_1.ets

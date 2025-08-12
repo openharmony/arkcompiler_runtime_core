@@ -18,13 +18,48 @@ desc: Unary plus operator
 ---*/
 
 function main(): void {
-  let a = 5;
-  arktest.assertEQ(+a, a);
-  a += +a
-  arktest.assertEQ(+a, 10)
-  arktest.assertEQ(a, +10)
-  let b = -6
-  arktest.assertEQ(+b, -6)
-  let c = 1.0
-  arktest.assertEQ(+c, 1.0)
+    arktest.assertEQ(+42, 42);
+    arktest.assertEQ(+2 + +2, 4);
+    arktest.assertEQ(+(+(+(+13))), 13);
+    arktest.assertEQ(+1.5e+3, 1500.0);
+    arktest.assertEQ(+0xff, 0xff);
+    arktest.assertEQ(+0b10, 0b10);
+    arktest.assertEQ(+0o70, 0o70);
+    arktest.assertEQ(+0.5f, 0.5f);
+    arktest.assertEQ(+42n, 42n);
+
+    let b: byte = +127
+    arktest.assertEQ(+b, b)
+    arktest.assertEQ(+b, 127)
+
+    let s: short = +32767
+    arktest.assertEQ(+s, s)
+    arktest.assertEQ(+s, 32767)
+
+    let i: int = +-2147483648
+    arktest.assertEQ(+i, i)
+    arktest.assertEQ(+i, -2147483648)
+
+    let l: long = +-9223372036854775808
+    arktest.assertEQ(+l, l);
+    arktest.assertEQ(+l, -9223372036854775808);
+
+    let bi: bigint = +42n
+    arktest.assertEQ(+bi, bi);
+    arktest.assertEQ(+bi, 42n);
+    arktest.assertEQ(+(new BigInt(13)), 13n);
+
+    let n: number = -3.14;
+    arktest.assertEQ(+n, n);
+    arktest.assertEQ(+n, -3.14);
+    arktest.assertEQ(n + +n, -6.28);
+
+    let d: double = 3.14;
+    arktest.assertEQ(+d, d);
+    arktest.assertEQ(+d, 3.14);
+
+    let f: float = 3.14f;
+    arktest.assertEQ(+f, f);
+    arktest.assertEQ(+f, 3.14f);
+
 }
