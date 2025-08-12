@@ -14,6 +14,6 @@
  */
 export type Matrix = number[][]
 export type Handler = (s: string, no: number) => string
-export type Predicate<T> = <T>(x: T) => boolean
+export type Predicate<T> = (x: T) => boolean
 export type NullableNumber = number | null
 export type Dictionary = Map<string, string>

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-type Contravariant<T> = Any;
+type Contravariant<T> = (arg: T) => void;
 export declare let Invbariant: Contravariant<Base>;
 export declare let InvariantChild: Contravariant<Child>;
 declare class Base {

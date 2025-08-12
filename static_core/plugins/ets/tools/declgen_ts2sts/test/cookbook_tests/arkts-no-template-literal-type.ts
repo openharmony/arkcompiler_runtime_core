@@ -1,4 +1,3 @@
-'use static'
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,8 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export type Matrix = number[][];
-export type Handler = (s: string, no: number) => string;
-export type Predicate<T> = (x: T) => boolean;
-export type NullableNumber = number | null;
-export type Dictionary = Map<string, string>;
+
+export type A = `hello ${string}`;
+export let v1: A = 'hello world';
+export function foo(v1: `hello ${string}`): void { };
+export function bar<T extends `hello ${string}`>(arg: `hello ${string}`): A { return arg; };
+
+export type v2 = 'world';
+export type B = `hello ${v2}`;
