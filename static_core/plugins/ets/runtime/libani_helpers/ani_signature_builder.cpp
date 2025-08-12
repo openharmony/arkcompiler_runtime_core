@@ -192,7 +192,7 @@ Type Builder::BuildUndefined()
 
 Type Builder::BuildNull()
 {
-    return CreateType("std.core.Object", "C");
+    return CreateType("std.core.Null", "C");
 }
 
 Type Builder::BuildBoolean()
