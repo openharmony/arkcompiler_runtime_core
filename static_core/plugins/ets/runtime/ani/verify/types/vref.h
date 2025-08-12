@@ -21,34 +21,9 @@
 
 namespace ark::ets::ani::verify {
 
-// NOTE: Remove this enum
-enum class ANIRefType {
-    REFERENCE,
-    MODULE,
-    NAMESPACE,
-    OBJECT,
-    FN_OBJECT,
-    ENUM_ITEM,
-    ERROR,
-    ARRAYBUFFER,
-    STRING,
-    ARRAY,
-    TYPE,
-    CLASS,
-    ENUM,
-    FIXED_ARRAY_BOOLEAN,
-    FIXED_ARRAY_CHAR,
-    FIXED_ARRAY_BYTE,
-    FIXED_ARRAY_SHORT,
-    FIXED_ARRAY_INT,
-    FIXED_ARRAY_LONG,
-    FIXED_ARRAY_FLOAT,
-    FIXED_ARRAY_DOUBLE,
-};
-
 class VRef {
 public:
-    explicit VRef(ani_ref ref, ANIRefType type = ANIRefType::REFERENCE) : ref_(ref), type_(type) {}
+    explicit VRef(ani_ref ref) : ref_(ref) {}
     ~VRef() = default;
 
     ani_ref GetRef()
@@ -56,17 +31,11 @@ public:
         return ref_;
     }
 
-    ANIRefType GetRefType()
-    {
-        return type_;
-    }
-
     DEFAULT_COPY_SEMANTIC(VRef);
     DEFAULT_MOVE_SEMANTIC(VRef);
 
 private:
     ani_ref ref_;
-    ANIRefType type_;
 };
 
 class VModule final : public VRef {

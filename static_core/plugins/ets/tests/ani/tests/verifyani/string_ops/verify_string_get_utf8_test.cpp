@@ -71,7 +71,7 @@ TEST_F(StringGetUtf8Test, null_input_string)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference type: ani_ref"},
+        {"string", "ani_string", "wrong reference type: null"},
         {"utf8Buffer", "char *"},
         {"utf8BufferSize", "ani_size"},
         {"result", "ani_size *"},
@@ -90,7 +90,7 @@ TEST_F(StringGetUtf8Test, undef_input_string)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference type: ani_ref"},
+        {"string", "ani_string", "wrong reference type: undefined"},
         {"utf8Buffer", "char *"},
         {"utf8BufferSize", "ani_size"},
         {"result", "ani_size *"},

@@ -18,7 +18,7 @@
 
 namespace ark::ets::ani::verify {
 
-VRef *ANIVerifier::AddGloablVerifiedRef(ani_ref gref)
+VRef *ANIVerifier::AddGlobalVerifiedRef(ani_ref gref)
 {
     auto vrefHolder = MakePandaUnique<VRef>(gref);
     auto *vref = vrefHolder.get();

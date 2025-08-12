@@ -140,7 +140,7 @@ TEST_F(ObjectNewTest, wrong_cls_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"cls", "ani_class", "wrong reference type: ani_ref"},
+        {"cls", "ani_class", "wrong reference type: null"},
         {"ctor", "ani_method", "wrong class"},
         {"result", "ani_object *"},
         {"...", "       "},
@@ -648,6 +648,35 @@ TEST_F(ObjectNewTest, arg_null)
         {"[5]", "ani_float"},
         {"[6]", "ani_double"},
         {"[7]", "ani_ref", "wrong value"},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_New", testLines);
+}
+TEST_F(ObjectNewTest, cls_undefined)
+{
+    ani_ref undef {};
+    ASSERT_EQ(env_->GetUndefined(&undef), ANI_OK);
+    ani_object argObj {};
+    ASSERT_EQ(env_->c_api->Object_New(env_, static_cast<ani_class>(undef), ctor_, &argObj, z_, c_, b_, s_, i_, l_, f_,
+                                      d_, r_),
+              ANI_ERROR);
+
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"cls", "ani_class", "wrong reference type: undefined"},
+        {"ctor", "ani_method", "wrong class"},
+        {"result", "ani_object *"},
+        {"...", "       "},
+        {"[0]", "ani_boolean"},
+        {"[1]", "ani_char"},
+        {"[2]", "ani_byte"},
+        {"[3]", "ani_short"},
+        {"[4]", "ani_int"},
+        {"[5]", "ani_long"},
+        {"[6]", "ani_float"},
+        {"[7]", "ani_double"},
+        {"[8]", "ani_ref"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_New", testLines);

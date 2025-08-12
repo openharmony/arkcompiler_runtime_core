@@ -48,48 +48,13 @@ public:
     void CreateEscapeLocalScope();
     [[nodiscard]] std::optional<PandaString> DestroyEscapeLocalScope(VRef *vref);
 
-    template <class RefType>
-    auto AddLocalVerifiedRef(RefType ref)
-    {
-        if constexpr (std::is_same_v<RefType, ani_ref>) {
-            return static_cast<VRef *>(DoAddLocalVerifiedRef(ref, ANIRefType::REFERENCE));
-        } else if constexpr (std::is_same_v<RefType, ani_object>) {
-            return static_cast<VObject *>(DoAddLocalVerifiedRef(ref, ANIRefType::OBJECT));
-        } else if constexpr (std::is_same_v<RefType, ani_class>) {
-            return static_cast<VClass *>(DoAddLocalVerifiedRef(ref, ANIRefType::CLASS));
-        } else if constexpr (std::is_same_v<RefType, ani_module>) {
-            return static_cast<VModule *>(DoAddLocalVerifiedRef(ref, ANIRefType::MODULE));
-        } else if constexpr (std::is_same_v<RefType, ani_string>) {
-            return static_cast<VString *>(DoAddLocalVerifiedRef(ref, ANIRefType::STRING));
-        } else if constexpr (std::is_same_v<RefType, ani_error>) {
-            return static_cast<VError *>(DoAddLocalVerifiedRef(ref, ANIRefType::ERROR));
-        } else if constexpr (std::is_same_v<RefType, ani_fixedarray_boolean>) {
-            return static_cast<VFixedArrayBoolean *>(DoAddLocalVerifiedRef(ref, ANIRefType::FIXED_ARRAY_BOOLEAN));
-        } else if constexpr (std::is_same_v<RefType, ani_fixedarray_char>) {
-            return static_cast<VFixedArrayChar *>(DoAddLocalVerifiedRef(ref, ANIRefType::FIXED_ARRAY_CHAR));
-        } else if constexpr (std::is_same_v<RefType, ani_fixedarray_byte>) {
-            return static_cast<VFixedArrayByte *>(DoAddLocalVerifiedRef(ref, ANIRefType::FIXED_ARRAY_BYTE));
-        } else if constexpr (std::is_same_v<RefType, ani_fixedarray_short>) {
-            return static_cast<VFixedArrayShort *>(DoAddLocalVerifiedRef(ref, ANIRefType::FIXED_ARRAY_SHORT));
-        } else if constexpr (std::is_same_v<RefType, ani_fixedarray_int>) {
-            return static_cast<VFixedArrayInt *>(DoAddLocalVerifiedRef(ref, ANIRefType::FIXED_ARRAY_INT));
-        } else if constexpr (std::is_same_v<RefType, ani_fixedarray_long>) {
-            return static_cast<VFixedArrayLong *>(DoAddLocalVerifiedRef(ref, ANIRefType::FIXED_ARRAY_LONG));
-        } else if constexpr (std::is_same_v<RefType, ani_fixedarray_float>) {
-            return static_cast<VFixedArrayFloat *>(DoAddLocalVerifiedRef(ref, ANIRefType::FIXED_ARRAY_FLOAT));
-        } else if constexpr (std::is_same_v<RefType, ani_fixedarray_double>) {
-            return static_cast<VFixedArrayDouble *>(DoAddLocalVerifiedRef(ref, ANIRefType::FIXED_ARRAY_DOUBLE));
-        } else {
-            UNREACHABLE_CONSTEXPR();
-        }
-    }
-    VRef *DoAddLocalVerifiedRef(ani_ref ref, ANIRefType type);
+    VRef *AddLocalVerifiedRef(ani_ref ref);
     void DeleteLocalVerifiedRef(VRef *vref);
 
     VMethod *GetVerifiedMethod(ani_method method);
     VStaticMethod *GetVerifiedStaticMethod(ani_static_method staticMethod);
 
-    VRef *AddGloablVerifiedRef(ani_ref gref);
+    VRef *AddGlobalVerifiedRef(ani_ref gref);
     void DeleteDeleteGlobalRef(VRef *vgref);
     bool IsValidGlobalVerifiedRef(VRef *vgref);
 

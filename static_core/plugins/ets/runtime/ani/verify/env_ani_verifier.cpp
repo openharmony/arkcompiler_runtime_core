@@ -117,12 +117,12 @@ std::optional<PandaString> EnvANIVerifier::DestroyEscapeLocalScope([[maybe_unuse
     return "Verification logic was broken";
 }
 
-VRef *EnvANIVerifier::DoAddLocalVerifiedRef(ani_ref ref, ANIRefType type)
+VRef *EnvANIVerifier::AddLocalVerifiedRef(ani_ref ref)
 {
     ASSERT(!frames_.empty());
     Frame &frame = frames_.back();
 
-    VRef *vref = frame.refsAllocator->New<VRef>(ref, type);
+    VRef *vref = frame.refsAllocator->New<VRef>(ref);
     [[maybe_unused]] auto ret = frame.refs.emplace(vref);
     ASSERT(ret.second);
     return vref;
@@ -190,9 +190,9 @@ bool EnvANIVerifier::IsValidVerifiedRef(const Frame &frame, VRef *vref)
     return frame.refs.find(vref) != frame.refs.cend();
 }
 
-VRef *EnvANIVerifier::AddGloablVerifiedRef(ani_ref gref)
+VRef *EnvANIVerifier::AddGlobalVerifiedRef(ani_ref gref)
 {
-    return verifier_->AddGloablVerifiedRef(gref);
+    return verifier_->AddGlobalVerifiedRef(gref);
 }
 
 void EnvANIVerifier::DeleteDeleteGlobalRef(VRef *vgref)

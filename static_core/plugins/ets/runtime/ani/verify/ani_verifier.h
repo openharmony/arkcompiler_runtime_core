@@ -37,7 +37,7 @@ public:
         abortHookData_ = data;
     }
 
-    VRef *AddGloablVerifiedRef(ani_ref gref);
+    VRef *AddGlobalVerifiedRef(ani_ref gref);
     void DeleteDeleteGlobalRef(VRef *vgref);
     bool IsValidGlobalVerifiedRef(VRef *vgref);
 
