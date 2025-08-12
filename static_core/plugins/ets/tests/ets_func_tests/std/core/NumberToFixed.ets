@@ -107,16 +107,14 @@ function testLargeParameter() {
     let a: Number = TestData.a;
     let big_digits: Number = TestData.big_digits;
 
-    const errorcheck = (e: Error | Exception) => { return (e instanceof RangeError) }
-    arktest.expectThrow((): void => { a.toFixed(big_digits) }, errorcheck)
+    arktest.expectError((): void => { a.toFixed(big_digits) }, new RangeError("toFixed argument must be between 0 and 100"))
 }
 
 function testNegativeParameter() {
     let a: Number = TestData.a;
     let negative_digits: Number = TestData.negative_digits;
 
-    const errorcheck = (e: Error | Exception) => { return (e instanceof RangeError) }
-    arktest.expectThrow((): void => { a.toFixed(negative_digits) }, errorcheck)
+    arktest.expectError((): void => { a.toFixed(negative_digits) }, new RangeError("toFixed argument must be between 0 and 100"))
 }
 
 function testUnionParameter() {

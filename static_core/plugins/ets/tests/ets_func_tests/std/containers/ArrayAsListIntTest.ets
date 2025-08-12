@@ -37,7 +37,7 @@ function main(): int {
     failures += check((): int => { return updateCapacityWithIncrease()}, "Update list capacity with increase");
     failures += check((): int => { return updateCapacityWithDecrease()}, "Update list capacity with decrease");
 
-    failures += check((): int => { return createWithNegativeInitialCapacity()}, "Negative array size passed. Expected to throw NegativeArraySizeError exception");
+    failures += check((): int => { return createWithNegativeInitialCapacity()}, "Negative array size passed. Expected to throw NegativeArraySizeError");
     failures += check((): int => { return accessOutOfBoundsValue()}, "Access value out of bounds. Expected to throw ArrayIndexOutOfBoundsError")
 
     return check(failures, "All tests run");
@@ -250,7 +250,7 @@ function check(fn: () => int, message: String): int {
     try {
         result = fn();
     } catch(e) {
-        console.println("FAILED: " + message + " => Exception catched: " + e);
+        console.println("FAILED: " + message + " => Error catched: " + e);
         return 1;
     }
 

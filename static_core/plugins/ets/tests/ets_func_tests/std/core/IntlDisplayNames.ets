@@ -378,11 +378,11 @@ function testInvalidCodes(): void {
     const displayNames = new Intl.DisplayNames(en_US, { type: "language" });
 
     // DisplayNames.of should throw when given an empty code
-    arktest.expectThrow(
+    arktest.expectError(
         (): void => {
             displayNames.of("");
         },
-        (e: Error | Exception) => { return (e instanceof RangeError) }
+        new RangeError("Code cannot be empty")
     );
 
     const result = displayNames.of("not-a-language-code");
