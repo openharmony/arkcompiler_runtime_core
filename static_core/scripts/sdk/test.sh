@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -eo pipefail
+
 function print_test_help() {
     HELP_MESSAGE="
     This script builds Panda SDK.
@@ -29,8 +31,6 @@ function print_test_help() {
 
     echo "$HELP_MESSAGE"
 }
-
-set -eo pipefail
 
 SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 PANDA_SDK_BUILD_TYPE="Release"
