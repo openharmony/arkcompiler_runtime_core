@@ -284,7 +284,7 @@ extern "C" EtsLong StdCoreDoubleBitCastToLong(EtsDouble f)
 
 static inline bool IsInteger(double v)
 {
-    return std::isfinite(v) && (std::fabs(v - std::trunc(v)) <= std::numeric_limits<double>::epsilon());
+    return std::isfinite(v) && (std::fabs(v - std::trunc(v)) == 0.0);
 }
 
 extern "C" EtsBoolean StdCoreDoubleIsInteger(double v)
