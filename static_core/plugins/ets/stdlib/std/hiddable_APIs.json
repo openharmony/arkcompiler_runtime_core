@@ -74,6 +74,15 @@
         ]
     },
     {
+        "file": "core/Runtime.ets",
+        "interfaces": [
+            "__runtimeEquals",
+            "__runtimeSameValueZero",
+            "__runtimeSameValue",
+            "__runtimeIsSameReference"
+        ]
+    },
+    {
         "file": "core/DisplayNames.ets",
         "interfaces": [
             "DisplayNamesLocaleMatcherOptions",
