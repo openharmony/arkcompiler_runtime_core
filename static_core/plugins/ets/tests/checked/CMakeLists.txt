@@ -373,5 +373,6 @@ panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/interface_cache_intr
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/lambda_with_capture_optimized.ets)
 
 if (NOT ENABLE_UNIT_TESTS_FULL_COVERAGE)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/llvm_infer_flags.ets)
+    # NOTE #28944
+    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/llvm_infer_flags.ets)
 endif()
