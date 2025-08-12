@@ -272,13 +272,28 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     }
 
     private rehash(): void {
-        this.buckets = new MapBucket<K, V>[this.buckets.length * 2]
-        const head = this.headEntry!
-        let e = head.next
-        do {
-            this.getOrCreateBucket(e.key).push(e)
-            e = e.next
-        } while (e !== head)
+        const oldBuckets = this.buckets
+        this.buckets = new MapBucket<K, V>[oldBuckets.length * 2]
+        for (let i: int = 0; i < oldBuckets.length; i++) {
+            const bucket = oldBuckets[i]
+            if (bucket === undefined) {
+                continue;
+            }
+            for (let j: int = 0; j < bucket.actualLength; j++) {
+                const entry = bucket[j]
+                const newIdx = this.getBucketIndex(entry.key)
+                let newBucket = this.buckets[newIdx]
+                if (newBucket === undefined) {
+                    if (bucket.actualLength === 1) {
+                        this.buckets[newIdx] = bucket;
+                        break;
+                    }
+                    newBucket = new Array<MapEntry<K, V>>()
+                    this.buckets[newIdx] = newBucket
+                }
+                newBucket.push(entry)
+            }
+        }
     }
 
 
