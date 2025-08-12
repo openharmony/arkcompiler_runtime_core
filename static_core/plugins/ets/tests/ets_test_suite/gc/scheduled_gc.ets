@@ -25,11 +25,12 @@ function incorrectCounterTest(): void {
     let detected = false;
     try {
         GC.scheduleGcAfterNthAlloc(-1, GC.Cause.YOUNG);
-    } catch (e: IllegalArgumentException) {
-        detected = true;
+    } catch (e) {
+        if (e instanceof IllegalArgumentError) {
+            detected = true;
+        }
     }
-    catch (e) {}
-    arktest.assertTrue(detected, "scheduleGcAfterNthAlloc must throw IllegalArgumentException for negative counter");
+    arktest.assertTrue(detected, "scheduleGcAfterNthAlloc must throw IllegalArgumentError for negative counter");
 }
 
 function main(): int {

@@ -93,7 +93,7 @@
             "ArgumentOutOfRangeException",
             "IllegalStateError",
             "UnsupportedOperationException",
-            "IllegalArgumentException",
+            "IllegalArgumentError",
             "RuntimeException"
         ]
     },
