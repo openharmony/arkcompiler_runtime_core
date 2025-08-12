@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#include "macros.h"
+#include "objects/base_type.h"
+#include "objects/dynamic_object_accessor_util.h"
 #include "plugins/ets/runtime/ets_stubs.h"
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
@@ -22,12 +23,11 @@
 #include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/interop_js/logger.h"
+#include "plugins/ets/runtime/interop_js/napi_impl/ark_napi_helper.h"
 #include "plugins/ets/runtime/types/ets_string.h"
-#include "runtime/include/class_linker-inl.h"
-#include "runtime/coroutines/stackful_coroutine.h"
 #include "types/ets_object.h"
 
-// NOLINTBEGIN(readability-identifier-naming)
+// NOLINTBEGIN(readability-identifier-naming, readability-redundant-declaration)
 // CC-OFFNXT(G.FMT.10-CPP) project code style
 napi_status __attribute__((weak))
 napi_load_module_with_module_request(napi_env env, const char *request_name, napi_value *result);
@@ -39,7 +39,7 @@ napi_serialize_hybrid([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value
 
 napi_status __attribute__((weak)) napi_deserialize_hybrid([[maybe_unused]] napi_env env, [[maybe_unused]] void *buffer,
                                                           [[maybe_unused]] napi_value *object);
-// NOLINTEND(readability-identifier-naming)
+// NOLINTEND(readability-identifier-naming, readability-redundant-declaration)
 
 static bool StringStartWith(std::string_view str, std::string_view startStr)
 {
@@ -48,6 +48,8 @@ static bool StringStartWith(std::string_view str, std::string_view startStr)
 }
 
 namespace ark::ets::interop::js {
+
+using common::TaggedType;
 
 [[maybe_unused]] static bool NotNativeOhmUrl(std::string_view url)
 {
@@ -682,27 +684,34 @@ EtsObject *InvokeWithObjectReturn(EtsObject *thisObj, EtsObject *func, Span<VMHa
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
-    PandaVector<napi_value> realArgs;
+    PandaVector<TaggedType> realArgs;
 
     for (auto &objHeader : args) {
         EtsObject *arg = EtsObject::FromCoreType(objHeader.GetPtr());
         auto realArg = JSConvertEtsObject::WrapWithNullCheck(env, arg);
-        realArgs.push_back(realArg);
+        if (realArg == nullptr) {
+            ctx->ForwardJSException(coro);
+            return nullptr;
+        }
+        auto argTaggedType = ArkNapiHelper::GetTaggedType(realArg);
+        realArgs.push_back(argTaggedType);
     }
 
-    napi_value retVal;
-    napi_status jsStatus;
     auto recvEtsObject = JSConvertEtsObject::WrapWithNullCheck(env, thisObj);
+    auto thisTaggedType = ArkNapiHelper::GetTaggedType(recvEtsObject);
     auto funcEtsObject = JSConvertEtsObject::WrapWithNullCheck(env, func);
+    auto funcTaggedType = ArkNapiHelper::GetTaggedType(funcEtsObject);
+    TaggedType *retVal = nullptr;
     {
         ScopedNativeCodeThread nativeScope(coro);
-        jsStatus = napi_call_function(env, recvEtsObject, funcEtsObject, realArgs.size(), realArgs.data(), &retVal);
+        retVal = common::DynamicObjectAccessorUtil::CallFunction(thisTaggedType, funcTaggedType, realArgs.size(),
+                                                                 realArgs.data());
     }
-    if (jsStatus != napi_ok) {
+    if (NapiIsExceptionPending(env)) {
         ctx->ForwardJSException(coro);
         return nullptr;
     }
-    return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, retVal).value();
+    return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, ArkNapiHelper::ToNapiValue(retVal)).value();
 }
 
 uint8_t JSRuntimeHasPropertyObject(EtsObject *object, EtsObject *property)
@@ -853,7 +862,7 @@ EtsObject *JSRuntimeInvoke(EtsObject *recv, EtsObject *func, EtsArray *args)
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
-    PandaVector<napi_value> realArgs;
+    PandaVector<TaggedType> realArgs;
 
     for (size_t i = 0; i < args->GetLength(); i++) {
         auto objHeader = args->GetCoreType()->Get<ObjectHeader *>(i);
@@ -865,23 +874,21 @@ EtsObject *JSRuntimeInvoke(EtsObject *recv, EtsObject *func, EtsArray *args)
         using Convertor = typename decltype(t)::type;
         using Cpptype = typename Convertor::cpptype;
         Cpptype value = (EtsObject::FromCoreType(objHeader));
-        realArgs.push_back(Convertor::Wrap(env, value));
+        auto argTaggedType = ArkNapiHelper::GetTaggedType(Convertor::Wrap(env, value));
+        realArgs.push_back(argTaggedType);
     }
+    auto jsThis = JSConvertEtsObject::WrapWithNullCheck(env, recv);
+    auto thisTaggedType = ArkNapiHelper::GetTaggedType(jsThis);
+    auto funcNapiValue = JSConvertEtsObject::WrapWithNullCheck(env, func);
+    auto funcTaggedType = ArkNapiHelper::GetTaggedType(funcNapiValue);
+    auto retVal = common::DynamicObjectAccessorUtil::CallFunction(thisTaggedType, funcTaggedType, realArgs.size(),
+                                                                  realArgs.data());
 
-    napi_value retVal;
-    napi_status jsStatus;
-    {
-        ScopedNativeCodeThread nativeScope(coro);
-        jsStatus = napi_call_function(env, JSConvertEtsObject::WrapWithNullCheck(env, recv),
-                                      JSConvertEtsObject::WrapWithNullCheck(env, func), realArgs.size(),
-                                      realArgs.data(), &retVal);
-    }
-
-    if (jsStatus != napi_ok) {
+    if (NapiIsExceptionPending(env)) {
         ctx->ForwardJSException(coro);
         return nullptr;
     }
-    return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, retVal).value();
+    return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, ArkNapiHelper::ToNapiValue(retVal)).value();
 }
 
 EtsObject *JSRuntimeInstantiate(EtsObject *callable, EtsArray *args)
