@@ -39,11 +39,11 @@ cases:
           }
       use: |-
           new Derived<A, B>().foo(new A(), new B());
-          arktest.assertEQ( res, 21);
+          arktest.assertEQ(res, 21);
           new Derived<B, I>().foo(new B(), new C());
-          arktest.assertEQ( res, 21);
-          Derived.foo(new Number(), new String());
-          arktest.assertEQ( res, 22);
+          arktest.assertEQ(res, 21);
+          Derived.foo<Number, String>(new Number(), new String());
+          arktest.assertEQ(res, 22);
 
     - doc: Override as type parameter of derived class function is contravariant to those used in base class
       decl: |-
@@ -69,13 +69,13 @@ cases:
           }
       use: |-
           new Derived().foo(new A());
-          arktest.assertEQ( res, 21);
+          arktest.assertEQ(res, 21);
           new Derived().foo(new B());
-          arktest.assertEQ( res, 21);
+          arktest.assertEQ(res, 21);
           Derived.foo(new A());
-          arktest.assertEQ( res, 22);
+          arktest.assertEQ(res, 22);
           Derived.foo(new B());
-          arktest.assertEQ( res, 22);
+          arktest.assertEQ(res, 22);
 
     - doc: Override as type parameter of derived class function is invariant to those used in base class
       decl: |-
@@ -101,16 +101,16 @@ cases:
           }
       use: |-
           new Derived().foo(new A());
-          arktest.assertEQ( res, 21);
+          arktest.assertEQ(res, 21);
           let i: I = new A();
           new Derived().foo(i);
-          arktest.assertEQ( res, 21);
+          arktest.assertEQ(res, 21);
           Derived.foo(new A());
-          arktest.assertEQ( res, 22);
+          arktest.assertEQ(res, 22);
           Derived.foo(i);
-          arktest.assertEQ( res, 22);
+          arktest.assertEQ(res, 22);
 
-    - doc: Overload as type parameter of derived class function is covariant to those used in base class
+    - doc: override as type parameter of derived class function is contravariant to those used in base class
       decl: |-
           interface I {}
           class A implements I {}
@@ -135,15 +135,15 @@ cases:
       use: |-
           let i: I = new A();
           new Derived().foo(i);
-          arktest.assertEQ( res, 21);
+          arktest.assertEQ(res, 21);
           new Derived().foo(new A());
-          arktest.assertEQ( res, 21);
+          arktest.assertEQ(res, 21);
           Derived.foo(i as I);
-          arktest.assertEQ( res, 22);
+          arktest.assertEQ(res, 22);
           Derived.foo(new A());
-          arktest.assertEQ( res, 12);
+          arktest.assertEQ(res, 22);
 
-    - doc: Overload due to the different number of type parameters
+    - doc: CTE due to the different number of type parameters
       decl: |-
           class A {}
           class B extends A {}
@@ -162,23 +162,18 @@ cases:
                 res = 21;
               }
 
-              static foo<X>(i: X) {
+              static /* @@ label */foo<X>(i: X) {
                 res = 22;
               }
           }
       use: |-
-          new Derived<A, B>().foo(new A(), new B());
-          arktest.assertEQ( res, 11);
-          new Derived<A, B>().foo(new A());
-          arktest.assertEQ( res, 21);
-          Derived.foo<A, B>(new A(), new B());
-          arktest.assertEQ( res, 12);
-          Derived.foo<A>(new A());
-          arktest.assertEQ( res, 22);
+          new Derived<A, B>()
+      tags: "compile-only, negative"
+      expected_error: |-
+          /* @@@ label Error TypeError: Cannot override */
 
     - doc: |-
-          Override failed due to different return value types.
-          Methods are overload-equivalent, so cannot be overloaded.
+          CTE due to different return types.
       tags: compile-only, negative
       decl: |-
           class A {}
@@ -189,16 +184,18 @@ cases:
               }
           }
           class Derived<T,S> extends Base<T,S> {
-              foo(i: T, j: S): int {
+              /* @@ label */foo(i: T, j: S): int {
                 res = 21;
                 return 1;
               }
           }
       use: |-
           new Derived<A, B>();
+      expected_error: |-
+          /* @@@ label Error TypeError: Cannot override */
 
     - doc: |-
-          Base method is overridden as B covariant to A.
+          Base method is overridden as return type B covariant to A.
       decl: |-
           class A {}
           class B extends A {}
@@ -207,19 +204,29 @@ cases:
                 res = 11;
                 return new A();
               }
+              static foo<T, S>(i: T, j: S): A {
+                res = 12;
+                return new A();
+              }
           }
           class Derived<T, S> extends Base<T, S> {
               foo(i: T, j: S): B {
                 res = 21;
                 return new B();
               }
+              static foo<T, S>(i: T, j: S): B {
+                res = 22;
+                return new B();
+              }
           }
       use: |-
           new Derived<Number, String>().foo(new Number(), new String());
-          arktest.assertEQ( res, 21);
+          arktest.assertEQ(res, 21);
+          Derived.foo<Number, String>(new Number(), new String());
+          arktest.assertEQ(res, 22);
 
     - doc: |-
-          Base method is overridden as A invariant to A.
+          Base method is overridden as return type A invariant to A.
       decl: |-
           class A {}
           class B extends A {}
@@ -228,20 +235,29 @@ cases:
                 res = 11;
                 return new A();
               }
+              static foo<T, S>(i: T, j: S): A {
+                res = 12;
+                return new A();
+              }
           }
           class Derived<T,S> extends Base<T,S> {
               foo(i: T, j: S): A {
                 res = 21;
                 return new A();
               }
+              static foo<T, S>(i: T, j: S): A {
+                res = 22;
+                return new A();
+              }
           }
       use: |-
           new Derived<A,B>().foo(new A(), new B());
-          arktest.assertEQ( res, 21);
+          arktest.assertEQ(res, 21);
+          Derived.foo<A, B>(new A(), new B());
+          arktest.assertEQ(res, 22);
 
     - doc: |-
-          Override failed as A contravariant to B.
-          Methods are overload-equivalent, so cannot be overloaded.
+          CTE as return type A contravariant to B.
       tags: compile-only, negative
       decl: |-
           class A {}
@@ -251,62 +267,55 @@ cases:
                 res = 11;
                 return new B();
               }
+              static foo(i: T, j: S): B {
+                res = 12;
+                return new B();
+              }
           }
           class Derived<T, S> extends Base<T, S> {
-              foo(i: T, j: S): A {
+              /* @@ label1 */foo(i: T, j: S): A {
                 res = 21;
+                return new A();
+              }
+              static /* @@ label2 */foo(i: T, j: S): A {
+                res = 22;
                 return new A();
               }
           }
       use: |-
           new Derived<Number, String>();
-
-    - doc: |-
-          Static methods are overload-equivalent, base method gets hidden
-      decl: |-
-          class A {}
-          class B extends A {}
-          class Base<T,S> {
-              static foo<X,Y>(i: X, j: Y): int {
-                res = 11;
-                return 1;
-              }
-          }
-          class Derived<T,S> extends Base<T,S> {
-              static foo<X,Y>(i: X, j: Y): float {
-                res = 21;
-                return 1.1 as float;
-              }
-          }
-      use: |-
-          Derived.foo(new A(), new B());
-          arktest.assertEQ( res, 21);
+      expected_error: |-
+          /* @@@ label1 Error TypeError: Cannot override */
+          /* @@@ label2 Error TypeError: Cannot override */
 
     # Tuple
     - doc: |-
-          Overloading instance method having arguments of tuple with primitives
+          CTE due to different order in tuples
+      tags: compile-only, negative
       decl: |-
           type TPL_BF = [boolean, float];
           type TPL_FB = [float, boolean];
           
           class Base {
-              foo(i: TPL_BF) { res = 11;}
+              foo(i: TPL_BF) { res = 11; }
+              static foo(i: TPL_BF) { res = 12; }
           }
           
           class Derived extends Base {
-              foo(i: TPL_FB) { res = 21;}
+              /* @@ label1 */foo(i: TPL_FB) { res = 21; }
+              static /* @@ label2 */foo(i: TPL_FB) { res = 22; }
           }
       use: |-
-          let a = new Derived();
-          let tpl1: TPL_BF = [ true, 1.1 as float];
-          let tpl2: TPL_FB = [ 1.1 as float, true];
-          a.foo(tpl1);
-          arktest.assertEQ( res, 11);
-          a.foo(tpl2);
-          arktest.assertEQ( res, 21);
+          new Derived();
+      expected_error: |-
+          /* @@@ label1 Error TypeError: Cannot override */
+          /* @@@ label2 Error TypeError: Cannot override */
 
     - doc: |-
-          Overloading instance method having arguments of tuple with reference types.
+          CTE due to covariant relationship presence
+          pair C -> E is covariant (CTE)
+          pair E -> C is contravariant (OK)
+      tags: compile-only, negative
       decl: |-
           class C {}
           class D extends C {}
@@ -316,24 +325,51 @@ cases:
           type TPL_EC = [E, C];
 
           class Base {
-              foo(i: TPL_CE) { res = 11;}
+              foo(i: TPL_CE) { res = 11; }
+              static foo(i: TPL_CE) { res = 12; }
           }
 
           class Derived extends Base {
-              foo(i: TPL_EC) { res = 21;}
+              /* @@ label1 */foo(i: TPL_EC) { res = 21; }
+              static /* @@ label2 */foo(i: TPL_EC) { res = 22; }
+          }
+      use: |-
+          new Derived();
+      expected_error: |-
+          /* @@@ label1 Error TypeError: Cannot override */
+          /* @@@ label2 Error TypeError: Cannot override */
+
+    - doc: |-
+          CTE due to different length of tuples
+      tags: compile-only, negative
+      decl: |-
+          class C {}
+          class D extends C {}
+          class E extends D {}
+
+          type TPL_CD = [C, D];
+          type TPL_CDE = [C, D, E];
+
+          class Base {
+              foo(i: TPL_CD) { res = 11; }
+          }
+
+          class Derived extends Base {
+              /* @@ label1 */foo(i: TPL_CDE) { res = 21; }
           }
       use: |-
           let a = new Derived();
-          let tpl1: TPL_CE = [ new C(), new E() ];
-          let tpl2: TPL_EC = [ new E(), new C() ];
-          a.foo(tpl1);
-          arktest.assertEQ( res, 11);
-          a.foo(tpl2);
-          arktest.assertEQ( res, 21);
+          let tpl_cd: TPL_CD = [new C(), new D()];
+          let tpl_cde: TPL_CDE = [new C(), new D(), new E()];
+          a.foo(tpl_cd);
+          arktest.assertEQ(res, 21);
+          a.foo(tpl_cde);
+          arktest.assertEQ(res, 21);
+      expected_error: |-
+          /* @@@ label1 Error TypeError: Cannot override */
 
     - doc: |-
-          Overriding instance method having arguments of tuple with covariant reference types.
-          Overloading instance method having arguments of tuple with covariant reference types but different number of elements.
+          Overriding instance method having arguments of tuple with contravariant reference types.
       decl: |-
           class C {}
           class D extends C {}
@@ -341,25 +377,21 @@ cases:
 
           type TPL_CD = [C, D];
           type TPL_DE = [D, E];
-          type TPL_CE = [C, E];
-          type TPL_CDE = [C, D, E];
 
           class Base {
-              foo(i: TPL_CD) { res = 11;}
+              foo(i: TPL_DE) { res = 11; }
+              static foo(i: TPL_DE) { res = 12; }
           }
 
           class Derived extends Base {
-              foo(i: TPL_DE) { res = 21;}
-              foo(i: TPL_CDE) { res = 22;}
+              foo(i: TPL_CD) { res = 21; }
+              static foo(i: TPL_CD) { res = 22; }
           }
       use: |-
           let a = new Derived();
-          let tpl1: TPL_CD = [ new C(), new D() ];
-          let tpl2: TPL_DE = [ new D(), new E() ];
-          let tpl3: TPL_CDE = [ new C(), new D(), new E() ];
+          let tpl1: TPL_CD = [new C(), new D()];
+          let tpl2: TPL_DE = [new D(), new E()];
           a.foo(tpl1);
-          arktest.assertEQ( res, 11);
+          arktest.assertEQ(res, 21);
           a.foo(tpl2);
-          arktest.assertEQ( res, 21);
-          a.foo(tpl3);
-          arktest.assertEQ( res, 22);
+          arktest.assertEQ(res, 22);

@@ -17,11 +17,11 @@ limitations under the License.
 /*---
 desc: >-
     An instance method is defined in a subclass with the same name as the instance method in a superclass.
-    If signatures are override-compatible, then overriding is used. Otherwise, overloading is used.
+    If signatures are override-compatible, then overriding is used. Otherwise, a compile-time error occurs.
 
     A static method is defined in a subclass with the same name as the static method in a superclass.
-    If signatures are overload-equivalent, then the static method in the subclass hides the previous static method.
-    Otherwise, overloading is used.
+    If signatures are override-compatible (see Override-Compatible Signatures), then the static method in the
+    subclass hides the previous static method. Otherwise, a compile-time error occurs.
 ---*/
 
 let res: number = 0;
