@@ -22,8 +22,8 @@ cases:
         }
       use: |-
         let i: I<number, string> = {a: 1, b: "abc"}
-        arktest.assertEQ(typeof i.a, 'number')
-        arktest.assertEQ(typeof i.b, 'string')
+        arktest.assertTrue(i.a instanceof number)
+        arktest.assertTrue(i.b instanceof string)
     #case 1
     - decl: |-
         interface I<T, U> {
@@ -31,12 +31,12 @@ cases:
         }
       use: |-
         let i: I<number, string> = {a: [1, "abc"]}
-        arktest.assertEQ(typeof i.a, 'object')
-        arktest.assertEQ(typeof i.a[0], 'number')
-        arktest.assertEQ(typeof i.a[1], 'string')
+        arktest.assertTrue(i.a instanceof object)
+        arktest.assertTrue(i.a[0] instanceof number)
+        arktest.assertTrue(i.a[1] instanceof string)
     #case 2
     - decl: |-
-        interface A<T>{
+        interface A<T> {
             a: T
         }
 
@@ -45,5 +45,72 @@ cases:
         }
       use: |-
         let i: B<number, string> = {a: 1, b: "abc"}
-        arktest.assertEQ(typeof i.a, 'number')
-        arktest.assertEQ(typeof i.b, 'string')
+        arktest.assertTrue(i.a instanceof number)
+        arktest.assertTrue(i.b instanceof string)
+  # specific cases: tuple types, FixedArray, Any, union types, bigint, literal types, function types,
+  # undefined, null, Array<T> or T[], FixedArray<T>
+    - decl: |-
+        interface A<T> {
+            a: T
+        }
+      use: |-
+        let i: A<[number, string]> = {a: [1, "abc"]}
+        arktest.assertTrue(i.a[0] instanceof number)
+        arktest.assertTrue(i.a[1] instanceof string)
+    - decl: |-
+        interface A<T> {
+            a: T
+        }
+      use: |-
+        let i: A<FixedArray<number>> = {a: [1]}
+        arktest.assertTrue(i.a[0] instanceof number)
+    - decl: |-
+        interface A<T> {
+            a: T
+        }
+      use: |-
+        let i: A<Any> = {a: null}
+        arktest.assertTrue(i.a instanceof Any)
+    - decl: |-
+        interface A<T> {
+            a: T
+        }
+      use: |-
+        let i: A<bigint> = {a: 123n}
+        arktest.assertTrue(i.a instanceof bigint)
+    - decl: |-
+        interface A<T> {
+            a: T
+        }
+      use: |-
+        let i: A<"aa" | "bb"> = {a: "aa"}
+        arktest.assertTrue(i.a instanceof string)
+    - decl: |-
+        function foo(): number { return 1 }
+        interface A<T> {
+            a: T
+        }
+      use: |-
+        let i: A<() => number> = {a: foo}
+        arktest.assertTrue(i.a() instanceof number)
+    - decl: |-
+        interface A<T> {
+            a: T
+        }
+      use: |-
+        let i: A<undefined> = {a: undefined}
+        arktest.assertTrue(i.a instanceof undefined)
+    - decl: |-
+        interface A<T> {
+            a: T
+        }
+      use: |-
+        let i: A<Array<number>> = {a: [1]}
+        arktest.assertTrue(i.a[0] instanceof number)
+    - decl: |-
+        interface A<T> {
+            a: T
+        }
+      use: |-
+        let i: A<number[]> = {a: [1]}
+        arktest.assertTrue(i.a[0] instanceof number)

@@ -16,10 +16,9 @@
 {% for c in cases %}
 /*---
 desc: >-
-    In an implicit instantiation, type arguments are not specified explicitly.
-    Such type arguments are inferred from the context the generic is referred in.
+    An explicit generic instantiation is a language construct, which provides a list of type arguments
+    that specify real types or type parameters to substitute corresponding type parameters of a generic.
 params: method
-tags: [{{c.tags}}]
 ---*/
 
 {{c.decl}}

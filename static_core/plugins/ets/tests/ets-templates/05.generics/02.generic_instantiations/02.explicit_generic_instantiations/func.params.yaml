@@ -21,7 +21,7 @@ cases:
         }
       use: |-
         let z = foo<number, boolean>(1.0, true)
-        arktest.assertTrue(typeof z == 'object' && typeof z[0] == 'number' && typeof z[1] == 'boolean')
+        arktest.assertTrue(z instanceof object && z[0] instanceof number && z[1] instanceof boolean)
         arktest.assertTrue(z[0] == 1.0 && z[1])
   # case 1
     - decl: |-
@@ -35,8 +35,8 @@ cases:
 
         let w = foo<[string, string, string, string], [number, number]>(["a", "b", "c", "d"], [1, 2])
         let x = foo<[string], [number, number]>(["a"], [1, 2])
-        arktest.assertEQ(typeof w, 'object')
-        arktest.assertEQ(typeof x, 'object')
+        arktest.assertTrue(w instanceof object)
+        arktest.assertTrue(x instanceof object)
   # case 2
     - decl: |-
         function bar<T>(p: T): Array<T> {
@@ -91,7 +91,7 @@ cases:
         }
       use: |-
         let y = foo<Error, string>(new Error(), "abc")
-        arktest.assertTrue(typeof y == 'object' && typeof y[0] == 'object' && typeof y[1] == 'string')
+        arktest.assertTrue(y instanceof object && y[0] instanceof object && y[1] instanceof string)
         arktest.assertTrue(y[0] instanceof Error && y[1] == "abc")
   # case 6
     - decl: |-
@@ -113,3 +113,70 @@ cases:
       use: |-
         let w = foo<null, undefined>(null, undefined)
         arktest.assertTrue(w[0] === null && w[1] === undefined)
+  # specific cases: tuple types, FixedArray, Any, union types, bigint, literal types, function types,
+  # undefined, null, Array<T> or T[], FixedArray<T>
+    - decl: |-
+        function foo<T>(p: T): T {
+            return p
+        }
+      use: |-
+        let z = foo<[number, string]>([1, "abc"])
+        arktest.assertTrue(z[0] instanceof number)
+        arktest.assertTrue(z[1] instanceof string)
+    - decl: |-
+        function foo<T>(p: T): T {
+            return p
+        }
+      use: |-
+        let z = foo<FixedArray<number>>([1])
+        arktest.assertTrue(z[0] instanceof number)
+    - decl: |-
+        function foo<T>(p: T): T {
+            return p
+        }
+      use: |-
+        let z = foo<Any>(null)
+        arktest.assertTrue(z instanceof Any)
+    - decl: |-
+        function foo<T>(p: T): T {
+            return p
+        }
+      use: |-
+        let z = foo<bigint>(123n)
+        arktest.assertTrue(z instanceof bigint)
+    - decl: |-
+        function foo<T>(p: T): T {
+            return p
+        }
+      use: |-
+        let z = foo<"aa" | "bb">("aa")
+        arktest.assertTrue(z instanceof string)
+    - decl: |-
+        function foo1(): number { return 1 }
+        function foo<T>(p: T): T {
+            return p
+        }
+      use: |-
+        let z = foo<() => number>(foo1)
+        arktest.assertTrue(z() instanceof number)
+    - decl: |-
+        function foo<T>(p: T): T {
+            return p
+        }
+      use: |-
+        let z = foo<undefined>(undefined)
+        arktest.assertTrue(z instanceof undefined)
+    - decl: |-
+        function foo<T>(p: T): T {
+            return p
+        }
+      use: |-
+        let z = foo<Array<number>>([1])
+        arktest.assertTrue(z[0] instanceof number)
+    - decl: |-
+        function foo<T>(p: T): T {
+            return p
+        }
+      use: |-
+        let z = foo<number[]>([1])
+        arktest.assertTrue(z[0] instanceof number)

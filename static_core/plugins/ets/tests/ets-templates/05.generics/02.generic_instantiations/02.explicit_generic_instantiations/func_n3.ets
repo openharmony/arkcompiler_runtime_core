@@ -28,5 +28,5 @@ function foo<T, U>(p: T, q: U): [T, U] {
 function main() {
     let v = foo<function, function>((p: number): number => p * p, (p: number): number => p + p)
     arktest.assertTrue(v[0](5.0) == 25.0 && v[1](42.0) == 84.0)
-    arktest.assertTrue(typeof v[0](5.0) == 'number' && typeof v[1](42.0) == 'number')
+    arktest.assertTrue(v[0](5.0) instanceof number' && v[1](42.0) instanceof number)
 }

@@ -14,8 +14,9 @@
  */
 
 /*---
-desc: In an implicit instantiation, type arguments are not specified explicitly. Such
-  type arguments are inferred from the context the generic is referred in.
+desc: >-
+    An explicit generic instantiation is a language construct, which provides a list of type arguments
+    that specify real types or type parameters to substitute corresponding type parameters of a generic.
 name: 05.generics/02.generic_instantiations/02.explicit_generic_instantiations/interface_n2
 tags:
 - compile-only
@@ -32,6 +33,6 @@ interface B<T, U> extends A<T>{
 
 function main() {
     let i: I<number, string> = {a: 1, b: "abc"}
-    arktest.assertEQ(typeof i.a, 'number')
-    arktest.assertEQ(typeof i.b, 'string')
+    arktest.assertTrue(i.a instanceof number)
+    arktest.assertTrue(i.b instanceof string)
 }
