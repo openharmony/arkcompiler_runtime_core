@@ -21,10 +21,34 @@ tags: [not-a-test, compile-only]
 export enum ColorsInt {
     Red = 1,
     Green,
-    Blue = 3
+    Blue = 4
+}
+
+export const enum ConstColorsInt {
+    Red = 1,
+    Green,
+    Blue = 4
+}
+
+export enum ColorsLong {
+    Red = 0x7FFF_FFFF_1,
+    Green,
+    Blue = 0x7FFF_FFFF_4
+}
+
+export const enum ConstColorsLong {
+    Red = 0x7FFF_FFFF_1,
+    Green,
+    Blue = 0x7FFF_FFFF_4
 }
 
 export enum ColorsStr {
+    Red = "One",
+    Green = "Two",
+    Blue = "Three"
+}
+
+export const enum ConstColorsStr {
     Red = "One",
     Green = "Two",
     Blue = "Three"
