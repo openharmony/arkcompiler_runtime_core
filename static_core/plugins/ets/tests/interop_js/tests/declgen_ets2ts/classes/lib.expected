@@ -120,3 +120,9 @@ export declare class C12 {
     public foo(i: "some str"): number;
     constructor();
 }
+export declare class DeviceInfo {
+    public DeviceInfo(): void;
+    public static get instance(): DeviceInfo | undefined;
+    public static set instance(value: DeviceInfo | undefined);
+    constructor();
+}
