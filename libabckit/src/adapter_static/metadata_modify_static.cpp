@@ -43,8 +43,6 @@
 
 // CC-OFFNXT(WordsTool.95) sensitive word conflict
 // NOLINTNEXTLINE(google-build-using-namespace)
-using namespace ark;
-using namespace abckit::util;
 namespace libabckit {
 
 // ========================================
@@ -293,19 +291,19 @@ bool FunctionSetNameStatic(AbckitArktsFunction *function, const char *name)
     auto *prog = coreFunc->owningModule->file->GetStaticProgram();
     LIBABCKIT_INTERNAL_ERROR(prog, false);
 
-    std::string oldMangleName = GenerateFunctionMangleName(funcImpl->name, *funcImpl);
+    std::string oldMangleName = abckit::util::GenerateFunctionMangleName(funcImpl->name, *funcImpl);
     std::string oldfuncNamewithModule = funcImpl->name;
-    std::string newfuncNamewithModule = ReplaceFunctionModuleName(oldfuncNamewithModule, name);
+    std::string newfuncNamewithModule = abckit::util::ReplaceFunctionModuleName(oldfuncNamewithModule, name);
     funcImpl->name = newfuncNamewithModule;
 
-    std::string newMangleName = GenerateFunctionMangleName(newfuncNamewithModule, *funcImpl);
-    if (!UpdateFunctionTableKey(prog, funcImpl, newfuncNamewithModule, oldMangleName, newMangleName)) {
+    std::string newMangleName = abckit::util::GenerateFunctionMangleName(newfuncNamewithModule, *funcImpl);
+    if (!abckit::util::UpdateFunctionTableKey(prog, funcImpl, newfuncNamewithModule, oldMangleName, newMangleName)) {
         LIBABCKIT_LOG(ERROR) << "[FunctionSetName] Failed to update function table key" << std::endl;
         return false;
     }
 
-    ReplaceInstructionIds(prog, funcImpl, oldMangleName, newMangleName);
-    UpdateFileMap(coreFunc->owningModule->file, oldMangleName, newMangleName);
+    abckit::util::ReplaceInstructionIds(prog, funcImpl, oldMangleName, newMangleName);
+    abckit::util::UpdateFileMap(coreFunc->owningModule->file, oldMangleName, newMangleName);
 
     return true;
 }
@@ -321,22 +319,22 @@ bool FunctionAddParameterStatic(AbckitArktsFunction *func, AbckitArktsFunctionPa
     auto *prog = coreFunc->owningModule->file->GetStaticProgram();
     LIBABCKIT_INTERNAL_ERROR(prog, false);
 
-    std::string oldMangleName = GenerateFunctionMangleName(funcImpl->name, *funcImpl);
+    std::string oldMangleName = abckit::util::GenerateFunctionMangleName(funcImpl->name, *funcImpl);
 
     const auto *paramCore = param->core;
     const auto *paramType = paramCore->type;
 
-    std::string componentName = GetTypeName(coreFunc, paramType, false);
-    AddFunctionParameterImpl(coreFunc, funcImpl, paramCore, componentName);
+    std::string componentName = abckit::util::GetTypeName(coreFunc, paramType, false);
+    abckit::util::AddFunctionParameterImpl(coreFunc, funcImpl, paramCore, componentName);
 
-    std::string newMangleName = GenerateFunctionMangleName(funcImpl->name, *funcImpl);
-    if (!UpdateFunctionTableKey(prog, funcImpl, funcImpl->name, oldMangleName, newMangleName)) {
+    std::string newMangleName = abckit::util::GenerateFunctionMangleName(funcImpl->name, *funcImpl);
+    if (!abckit::util::UpdateFunctionTableKey(prog, funcImpl, funcImpl->name, oldMangleName, newMangleName)) {
         LIBABCKIT_LOG(ERROR) << "[FunctionAddParameter] Failed to update function table key" << std::endl;
         return false;
     }
 
-    ReplaceInstructionIds(prog, funcImpl, oldMangleName, newMangleName);
-    UpdateFileMap(coreFunc->owningModule->file, oldMangleName, newMangleName);
+    abckit::util::ReplaceInstructionIds(prog, funcImpl, oldMangleName, newMangleName);
+    abckit::util::UpdateFileMap(coreFunc->owningModule->file, oldMangleName, newMangleName);
 
     return true;
 }
@@ -352,20 +350,20 @@ bool FunctionRemoveParameterStatic(AbckitArktsFunction *func, size_t index)
     auto *prog = std::get<ark::pandasm::Program *>(coreFunc->owningModule->file->program);
     LIBABCKIT_INTERNAL_ERROR(prog, false);
 
-    std::string oldMangleName = GenerateFunctionMangleName(funcImpl->name, *funcImpl);
+    std::string oldMangleName = abckit::util::GenerateFunctionMangleName(funcImpl->name, *funcImpl);
 
-    if (!RemoveFunctionParameterByIndexImpl(coreFunc, funcImpl, index)) {
+    if (!abckit::util::RemoveFunctionParameterByIndexImpl(coreFunc, funcImpl, index)) {
         LIBABCKIT_LOG(ERROR) << "[FunctionRemoveParameter] Failed to remove parameter at index " << index << std::endl;
         return false;
     }
-    std::string newMangleName = GenerateFunctionMangleName(funcImpl->name, *funcImpl);
-    if (!UpdateFunctionTableKey(prog, funcImpl, funcImpl->name, oldMangleName, newMangleName)) {
+    std::string newMangleName = abckit::util::GenerateFunctionMangleName(funcImpl->name, *funcImpl);
+    if (!abckit::util::UpdateFunctionTableKey(prog, funcImpl, funcImpl->name, oldMangleName, newMangleName)) {
         LIBABCKIT_LOG(ERROR) << "[FunctionRemoveParameter] Failed to update function table key" << std::endl;
         return false;
     }
 
-    ReplaceInstructionIds(prog, funcImpl, oldMangleName, newMangleName);
-    UpdateFileMap(coreFunc->owningModule->file, oldMangleName, newMangleName);
+    abckit::util::ReplaceInstructionIds(prog, funcImpl, oldMangleName, newMangleName);
+    abckit::util::UpdateFileMap(coreFunc->owningModule->file, oldMangleName, newMangleName);
     return true;
 }
 
@@ -380,17 +378,17 @@ bool FunctionSetReturnTypeStatic(AbckitArktsFunction *func, AbckitType *abckitTy
     auto *prog = std::get<ark::pandasm::Program *>(func->core->owningModule->file->program);
     LIBABCKIT_INTERNAL_ERROR(prog, false);
 
-    std::string oldMangleName = GenerateFunctionMangleName(funcImpl->name, *funcImpl);
-    ark::pandasm::Type type(GetTypeName(coreFunc, abckitType, false), abckitType->rank);
+    std::string oldMangleName = abckit::util::GenerateFunctionMangleName(funcImpl->name, *funcImpl);
+    ark::pandasm::Type type(abckit::util::GetTypeName(coreFunc, abckitType, false), abckitType->rank);
     funcImpl->returnType = type;
-    std::string newMangleName = GenerateFunctionMangleName(funcImpl->name, *funcImpl);
-    if (!UpdateFunctionTableKey(prog, funcImpl, funcImpl->name, oldMangleName, newMangleName)) {
+    std::string newMangleName = abckit::util::GenerateFunctionMangleName(funcImpl->name, *funcImpl);
+    if (!abckit::util::UpdateFunctionTableKey(prog, funcImpl, funcImpl->name, oldMangleName, newMangleName)) {
         LIBABCKIT_LOG(ERROR) << "[FunctionSetReturnType] Failed to update function table key" << std::endl;
         return false;
     }
 
-    ReplaceInstructionIds(prog, funcImpl, oldMangleName, newMangleName);
-    UpdateFileMap(coreFunc->owningModule->file, oldMangleName, newMangleName);
+    abckit::util::ReplaceInstructionIds(prog, funcImpl, oldMangleName, newMangleName);
+    abckit::util::UpdateFileMap(coreFunc->owningModule->file, oldMangleName, newMangleName);
     return true;
 }
 }  // namespace libabckit
