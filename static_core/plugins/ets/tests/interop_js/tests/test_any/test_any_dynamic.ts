@@ -99,6 +99,47 @@ export let arrNum = new Array<Number>(1, 2, 3, 4);
 export let arrFill = new Array<Number>(1, 2, 3, 4);
 export let big_val = 1234567890n;
 
+export class UserAccount {
+    private _username: string;
+    private _age: number;
+
+    constructor(username: string, age: number) {
+        this._username = username;
+        this._age = age;
+    }
+
+    get username(): string {
+        return this._username;
+    }
+
+    set username(newUsername: string) {
+        if (newUsername.length < 3) {
+            throw new Error('Username must be at least 3 characters long');
+        }
+        if (newUsername.length > 20) {
+            throw new Error('Username cannot be longer than 20 characters');
+        }
+        this._username = newUsername;
+    }
+
+    get age(): number {
+        return this._age;
+    }
+
+    set age(newAge: number) {
+        if (newAge < 0) {
+            throw new Error('Age cannot be negative');
+        }
+        if (newAge > 150) {
+            throw new Error('Age cannot be greater than 150');
+        }
+        if (!Number.isInteger(newAge)) {
+            throw new Error('Age must be an integer');
+        }
+        this._age = newAge;
+    }
+}
+
 function main() {
     testAll();
 }
