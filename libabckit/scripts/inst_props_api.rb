@@ -17,7 +17,7 @@ abckit_root    = File.expand_path('../', abckit_scripts)
 opcodes_path = File.expand_path('include/libabckit/c/isa/isa_dynamic.h', abckit_root)
 
 Opcodes = []
-File.open(opcodes_path, 'r').read.split()
+File.read(opcodes_path, encoding: 'UTF-8').scrub.split()
   .select{ |opcode|
     opcode.start_with?('ABCKIT_ISA_API_DYNAMIC_OPCODE_')
   }.each{ |opcode|
