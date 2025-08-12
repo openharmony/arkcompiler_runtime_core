@@ -900,11 +900,33 @@
 05.generics/03.utility_types/05.readonly_utility_type/method_excluded_from_readonly_8.ets
 05.generics/03.utility_types/05.readonly_utility_type/method_excluded_from_readonly_9.ets
 
+#28912
+05.generics/03.utility_types/05.readonly_utility_type/bad_readonly_type_0.ets
+05.generics/03.utility_types/05.readonly_utility_type/bad_readonly_type_1.ets
+05.generics/03.utility_types/05.readonly_utility_type/bad_readonly_type_2.ets
+05.generics/03.utility_types/05.readonly_utility_type/bad_readonly_type_3.ets
+05.generics/03.utility_types/05.readonly_utility_type/bad_readonly_type_4.ets
+05.generics/03.utility_types/05.readonly_utility_type/bad_readonly_type_5.ets
+
 #28334 irtoc intrinsic broken for integers other than 'int'
 05.generics/03.utility_types/06.record_utility_type/rec_7.ets
 
 #28679
 05.generics/03.utility_types/06.record_utility_type/enum_record_0.ets
+
+#28970
+05.generics/03.utility_types/07.return_type_utility_type/return_type_func_0.ets
+05.generics/03.utility_types/07.return_type_utility_type/return_type_func_1.ets
+05.generics/03.utility_types/07.return_type_utility_type/return_type_func_2.ets
+05.generics/03.utility_types/07.return_type_utility_type/return_type_func_3.ets
+05.generics/03.utility_types/07.return_type_utility_type/return_type_func_4.ets
+05.generics/03.utility_types/07.return_type_utility_type/return_type_func_5.ets
+05.generics/03.utility_types/07.return_type_utility_type/return_type_func_6.ets
+05.generics/03.utility_types/07.return_type_utility_type/return_type_func_7.ets
+05.generics/03.utility_types/07.return_type_utility_type/return_type_func_8.ets
+
+#28998
+05.generics/03.utility_types/09.nesting_utility_type/PartialWithGeneric.ets
 
 #25175
 05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_12.ets
