@@ -23,6 +23,7 @@
 #endif
 #include "interpreter-inl_gen.h"
 
+// Only be generated and used when irtoc is enabled
 #ifdef PANDA_WITH_IRTOC
 extern "C" void ExecuteImplFast(void *, void *, void *, void *);
 extern "C" void ExecuteImplFastEH(void *, void *, void *, void *);
