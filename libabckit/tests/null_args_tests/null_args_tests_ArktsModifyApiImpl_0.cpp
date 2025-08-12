@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -130,6 +130,13 @@ TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, moduleRemoveExport)
 TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, moduleRemoveImport)
 {
     helpers_nullptr::TestNullptr(g_arktsModifyApiImp->moduleRemoveImport);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::AbckitGetArktsModifyApiImpl,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, AbckitGetArktsModifyApiImpl)
+{
+    helpers_nullptr::TestNullptr(AbckitGetArktsModifyApiImpl);
 }
 
 }  // namespace libabckit::test

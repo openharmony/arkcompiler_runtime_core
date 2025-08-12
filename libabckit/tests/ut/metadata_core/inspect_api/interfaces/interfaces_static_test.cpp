@@ -19,8 +19,15 @@
 
 #include "libabckit/cpp/abckit_cpp.h"
 #include "helpers/helpers.h"
+#include "libabckit/src/metadata_inspect_impl.h"
 
 namespace libabckit::test {
+
+static auto g_impl = AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
+static auto g_implI = AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
+static auto g_implArkI = AbckitGetArktsInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
+static auto g_implArkM = AbckitGetArktsModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
+static auto g_implG = AbckitGetGraphApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitInspectApiInterfacesTest : public ::testing::Test {};
 
@@ -201,4 +208,295 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceIsExternalStatic)
     ASSERT_EQ(gotInterfaceNames, expectInterfaceNames);
 }
 
+// Test: test-kind=api, api=InspectApiImpl::InterfaceGetFile, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetFile)
+{
+    auto input = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/interfaces/interface_test.abc";
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(input, &file);
+
+    helpers::ModuleByNameContext ctx = {nullptr, "interface_test"};
+    g_implI->fileEnumerateModules(file, &ctx, helpers::ModuleByNameFinder);
+
+    helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, "Animal"};
+    g_implI->moduleEnumerateInterfaces(ctx.module, &ifaceCtxFinder, helpers::InterfaceByNameFinder);
+
+    auto abcFile = g_implI->interfaceGetFile(ifaceCtxFinder.face);
+
+    ASSERT_NE(abcFile, nullptr);
+    g_impl->closeFile(file);
+    EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::InterfaceGetModule, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetModule)
+{
+    auto input = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/interfaces/interface_test.abc";
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(input, &file);
+
+    helpers::ModuleByNameContext ctx = {nullptr, "interface_test"};
+    g_implI->fileEnumerateModules(file, &ctx, helpers::ModuleByNameFinder);
+
+    helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, "Animal"};
+    g_implI->moduleEnumerateInterfaces(ctx.module, &ifaceCtxFinder, helpers::InterfaceByNameFinder);
+
+    auto module = g_implI->interfaceGetModule(ifaceCtxFinder.face);
+
+    ASSERT_NE(module, nullptr);
+    g_impl->closeFile(file);
+    EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::InterfaceGetModule, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetName)
+{
+    auto input = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/interfaces/interface_test.abc";
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(input, &file);
+
+    helpers::ModuleByNameContext ctx = {nullptr, "interface_test"};
+    g_implI->fileEnumerateModules(file, &ctx, helpers::ModuleByNameFinder);
+
+    helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, "Animal"};
+    g_implI->moduleEnumerateInterfaces(ctx.module, &ifaceCtxFinder, helpers::InterfaceByNameFinder);
+
+    ifaceCtxFinder.face->owningModule->target = ABCKIT_TARGET_ARK_TS_V1;
+    auto name = g_implI->interfaceGetName(ifaceCtxFinder.face);
+
+    ASSERT_EQ(name, nullptr);
+    g_impl->closeFile(file);
+    EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::InterfaceGetParentNamespace, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetParentNamespace)
+{
+    auto input = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/interfaces/interface_test.abc";
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(input, &file);
+
+    helpers::ModuleByNameContext ctx = {nullptr, "interface_test"};
+    g_implI->fileEnumerateModules(file, &ctx, helpers::ModuleByNameFinder);
+
+    helpers::NamepsaceByNameContext nameSapceCtx = {nullptr, "MyNamespace"};
+    g_implI->moduleEnumerateNamespaces(ctx.module, &nameSapceCtx, helpers::NamespaceByNameFinder);
+
+    helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, "MyInterface"};
+    g_implI->namespaceEnumerateInterfaces(nameSapceCtx.n, &ifaceCtxFinder, helpers::InterfaceByNameFinder);
+
+    auto petNamespace = g_implI->interfaceGetParentNamespace(ifaceCtxFinder.face);
+
+    ASSERT_NE(petNamespace, nullptr);
+    g_impl->closeFile(file);
+    EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::InterfaceEnumerateSuperInterfaces, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceEnumerateSuperInterfaces)
+{
+    auto input = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/interfaces/interface_test.abc";
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(input, &file);
+
+    helpers::ModuleByNameContext ctx = {nullptr, "interface_test"};
+    g_implI->fileEnumerateModules(file, &ctx, helpers::ModuleByNameFinder);
+
+    helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, "ChildInterface"};
+    g_implI->moduleEnumerateInterfaces(ctx.module, &ifaceCtxFinder, helpers::InterfaceByNameFinder);
+
+    ifaceCtxFinder.face->owningModule->target = ABCKIT_TARGET_UNKNOWN;
+
+    void *data = nullptr;
+    auto ret = g_implI->interfaceEnumerateSuperInterfaces(ifaceCtxFinder.face, data, helpers::InterfaceByNameFinder);
+
+    ASSERT_FALSE(ret);
+    g_impl->closeFile(file);
+    EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::InterfaceEnumerateSubInterfaces, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceEnumerateSubInterfaces)
+{
+    auto input = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/interfaces/interface_test.abc";
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(input, &file);
+
+    helpers::ModuleByNameContext ctx = {nullptr, "interface_test"};
+    g_implI->fileEnumerateModules(file, &ctx, helpers::ModuleByNameFinder);
+
+    helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, "Animal"};
+    g_implI->moduleEnumerateInterfaces(ctx.module, &ifaceCtxFinder, helpers::InterfaceByNameFinder);
+
+    ifaceCtxFinder.face->owningModule->target = ABCKIT_TARGET_UNKNOWN;
+    void *data = nullptr;
+    auto ret = g_implI->interfaceEnumerateSubInterfaces(ifaceCtxFinder.face, data, helpers::InterfaceByNameFinder);
+
+    ASSERT_FALSE(ret);
+    g_impl->closeFile(file);
+    EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::InterfaceEnumerateClasses, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceEnumerateClasses)
+{
+    auto input = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/interfaces/interface_test.abc";
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(input, &file);
+
+    helpers::ModuleByNameContext ctx = {nullptr, "interface_test"};
+    g_implI->fileEnumerateModules(file, &ctx, helpers::ModuleByNameFinder);
+
+    helpers::InterfaceByNameContext ifaceCtx = {nullptr, "Clickable"};
+    g_implI->moduleEnumerateInterfaces(ctx.module, &ifaceCtx, helpers::InterfaceByNameFinder);
+
+    ifaceCtx.face->owningModule->target = ABCKIT_TARGET_UNKNOWN;
+    helpers::ClassByNameContext classCtx = {nullptr, "MyButton"};
+    auto ret = g_implI->interfaceEnumerateClasses(ifaceCtx.face, &classCtx, helpers::ClassByNameFinder);
+    ASSERT_FALSE(ret);
+    g_impl->closeFile(file);
+    EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::InterfaceEnumerateMethods, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceEnumerateMethods)
+{
+    auto input = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/interfaces/interface_test.abc";
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(input, &file);
+
+    helpers::ModuleByNameContext ctx = {nullptr, "interface_test"};
+    g_implI->fileEnumerateModules(file, &ctx, helpers::ModuleByNameFinder);
+
+    helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, "Animal"};
+    g_implI->moduleEnumerateInterfaces(ctx.module, &ifaceCtxFinder, helpers::InterfaceByNameFinder);
+
+    ifaceCtxFinder.face->owningModule->target = ABCKIT_TARGET_UNKNOWN;
+
+    helpers::MethodByNameContext methodCtx = {nullptr, ""};
+    auto ret = g_implI->interfaceEnumerateMethods(ifaceCtxFinder.face, &methodCtx, helpers::MethodByNameFinder);
+
+    ASSERT_FALSE(ret);
+    g_impl->closeFile(file);
+    EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::InterfaceEnumerateAnnotations, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceEnumerateAnnotations)
+{
+    auto input = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/interfaces/interface_test.abc";
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(input, &file);
+
+    helpers::ModuleByNameContext ctx = {nullptr, "interface_test"};
+    g_implI->fileEnumerateModules(file, &ctx, helpers::ModuleByNameFinder);
+
+    helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, "Animal"};
+    g_implI->moduleEnumerateInterfaces(ctx.module, &ifaceCtxFinder, helpers::InterfaceByNameFinder);
+
+    ifaceCtxFinder.face->owningModule->target = ABCKIT_TARGET_UNKNOWN;
+
+    helpers::AnnotationByNameContext annotationCtx = {nullptr, ""};
+    auto ret =
+        g_implI->interfaceEnumerateAnnotations(ifaceCtxFinder.face, &annotationCtx, helpers::AnnotationByNameFinder);
+
+    ASSERT_FALSE(ret);
+    g_impl->closeFile(file);
+    EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::InterfaceEnumerateFields, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceEnumerateFields)
+{
+    auto input = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/interfaces/interface_test.abc";
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(input, &file);
+
+    helpers::ModuleByNameContext ctx = {nullptr, "interface_test"};
+    g_implI->fileEnumerateModules(file, &ctx, helpers::ModuleByNameFinder);
+
+    helpers::InterfaceByNameContext ifaceCtx = {nullptr, "Animal"};
+    g_implI->moduleEnumerateInterfaces(ctx.module, &ifaceCtx, helpers::InterfaceByNameFinder);
+
+    ifaceCtx.face->owningModule->target = ABCKIT_TARGET_UNKNOWN;
+    helpers::FieldByNameContext fieldCtx = {nullptr, ""};
+    auto ret = g_implI->interfaceEnumerateFields(ifaceCtx.face, &fieldCtx, helpers::FiledByNameFinder);
+
+    ASSERT_FALSE(ret);
+    g_impl->closeFile(file);
+    EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::InterfaceGetFile, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetFile02)
+{
+    auto input = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/interfaces/interface_test.abc";
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(input, &file);
+
+    helpers::ModuleByNameContext ctx = {nullptr, "interface_test"};
+    g_implI->fileEnumerateModules(file, &ctx, helpers::ModuleByNameFinder);
+
+    helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, ""};
+
+    auto abcFile = g_implI->interfaceGetFile(ifaceCtxFinder.face);
+
+    ASSERT_EQ(abcFile, nullptr);
+    g_impl->closeFile(file);
+    EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::InterfaceGetModule, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetModule02)
+{
+    auto input = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/interfaces/interface_test.abc";
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(input, &file);
+
+    helpers::ModuleByNameContext ctx = {nullptr, "interface_test"};
+    g_implI->fileEnumerateModules(file, &ctx, helpers::ModuleByNameFinder);
+
+    helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, ""};
+
+    auto module = g_implI->interfaceGetModule(ifaceCtxFinder.face);
+
+    ASSERT_EQ(module, nullptr);
+    g_impl->closeFile(file);
+    EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::InterfaceGetParentNamespace, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetParentNamespace02)
+{
+    auto input = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/interfaces/interface_test.abc";
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(input, &file);
+
+    helpers::ModuleByNameContext ctx = {nullptr, "interface_test"};
+    g_implI->fileEnumerateModules(file, &ctx, helpers::ModuleByNameFinder);
+
+    helpers::NamepsaceByNameContext nameSapceCtx = {nullptr, "MyNamespace"};
+    g_implI->moduleEnumerateNamespaces(ctx.module, &nameSapceCtx, helpers::NamespaceByNameFinder);
+
+    helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, ""};
+
+    auto petNamespace = g_implI->interfaceGetParentNamespace(ifaceCtxFinder.face);
+
+    ASSERT_EQ(petNamespace, nullptr);
+    g_impl->closeFile(file);
+    EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
 }  // namespace libabckit::test

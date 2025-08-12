@@ -13,18 +13,24 @@
  * limitations under the License.
  */
 
-const moduleField: string = 'Module Field';
+ class Person {
+  name: string = "Alice";
+  age: number = 30;
+  static cnt: number = 0;
 
-interface InterfaceA {}
+  constructor(n: string, a: number) {
+    this.name = n;
+    this.age = a;
+  }
 
-enum EnumA {
-    RED,
+  showName() {
+    console.log(this.name);
+  }
 }
 
-namespace Ns1 {}
-
-function main()
-{
-    let add = (a: int, b: int): int => a + b;
-    console.log(add(1, 2));
+function main() {
+  let c = new Person("Alice", 20);
+  Person.cnt++;
+  console.log(Person.cnt);
+  console.log(c.name);
 }

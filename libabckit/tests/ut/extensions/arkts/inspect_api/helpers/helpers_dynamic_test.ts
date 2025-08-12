@@ -13,18 +13,15 @@
  * limitations under the License.
  */
 
-const moduleField: string = 'Module Field';
+export class DyPerson {
+  private name: string;
+  private age: number;
+  constructor(name: string, age: number) {
+    this.name = name;
+    this.age = age;
+  }
 
-interface InterfaceA {}
-
-enum EnumA {
-    RED,
-}
-
-namespace Ns1 {}
-
-function main()
-{
-    let add = (a: int, b: int): int => a + b;
-    console.log(add(1, 2));
+  public getName(): string {
+    return this.name;
+  }
 }

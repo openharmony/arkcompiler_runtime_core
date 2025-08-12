@@ -13,18 +13,40 @@
  * limitations under the License.
  */
 
-const moduleField: string = 'Module Field';
-
-interface InterfaceA {}
-
-enum EnumA {
-    RED,
+namespace MyNamespace {
+    interface MyInterface {
+        fieldA: string;
+        readonly fieldB: number;
+        bar(): void;
+    }
 }
 
-namespace Ns1 {}
+interface ParentA {
+  methodA(): void;
+}
 
-function main()
-{
-    let add = (a: int, b: int): int => a + b;
-    console.log(add(1, 2));
+interface ParentB {
+  methodB(): string;
+}
+
+interface ChildInterface extends ParentA, ParentB {
+  childMethod(): number;
+}
+
+interface Animal {
+  name: string;
+  eat(): void;
+}
+
+interface Dog extends Animal {
+  breed: string;
+  bark(): void;
+}
+
+interface Clickable {
+  disabled: boolean;
+}
+
+class MyButton implements Clickable {
+  disabled: boolean = false;
 }

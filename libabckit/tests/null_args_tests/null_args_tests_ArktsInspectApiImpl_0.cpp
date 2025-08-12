@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,8 @@
 #include "libabckit/c/ir_core.h"
 #include "libabckit/c/isa/isa_dynamic.h"
 #include "libabckit/c/isa/isa_static.h"
+#include "metadata_arkts_inspect_impl.h"
+#include "metadata_inspect_impl.h"
 
 #include "helpers/helpers.h"
 #include "helpers/helpers_nullptr.h"
@@ -188,4 +190,88 @@ TEST_F(LibAbcKitNullptrTestsArktsInspectApiImpl0, functionIsNative)
     helpers_nullptr::TestNullptr(g_arktsInspectApiImp->functionIsNative);
 }
 
+// Test: test-kind=api, api=ArktsInspectApiImpl::AbckitGetArktsInspectApiImpl,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsInspectApiImpl0, AbckitGetArktsInspectApiImpl)
+{
+    helpers_nullptr::TestNullptr(AbckitGetArktsInspectApiImpl);
+}
+
+// Test: test-kind=api, api=ArktsInspectApiImpl::ArkTSClassEnumerateAnnotations,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsInspectApiImpl0, ArkTSClassEnumerateAnnotations)
+{
+    auto g_impl = AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
+    ASSERT_EQ(ArkTSClassEnumerateAnnotations(nullptr, nullptr, nullptr), false);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    panda::pandasm::Function *func = nullptr;
+    auto arktsClass = std::make_unique<AbckitArktsClass>(func);
+    auto coreClass = std::make_unique<AbckitCoreClass>(nullptr, *arktsClass.get());
+    ASSERT_EQ(ArkTSClassEnumerateAnnotations(coreClass.get(), nullptr, nullptr), false);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+
+// Test: test-kind=api, api=ArktsInspectApiImpl::ArkTSFunctionEnumerateAnnotations,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsInspectApiImpl0, ArkTSFunctionEnumerateAnnotations)
+{
+    auto g_impl = AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
+    ASSERT_EQ(ArkTSFunctionEnumerateAnnotations(nullptr, nullptr, nullptr), false);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    auto func = std::make_unique<AbckitCoreFunction>();
+    ASSERT_EQ(ArkTSFunctionEnumerateAnnotations(func.get(), nullptr, nullptr), false);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+
+// Test: test-kind=api, api=ArktsInspectApiImpl::ArkTSFunctionEnumerateParameters,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsInspectApiImpl0, ArkTSFunctionEnumerateParameters)
+{
+    auto g_impl = AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
+    ASSERT_EQ(ArkTSFunctionEnumerateParameters(nullptr, nullptr, nullptr), false);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    auto func = std::make_unique<AbckitCoreFunction>();
+    ASSERT_EQ(ArkTSFunctionEnumerateParameters(func.get(), nullptr, nullptr), false);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+
+// Test: test-kind=api, api=ArktsInspectApiImpl::ArkTSAnnotationEnumerateElements,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsInspectApiImpl0, ArkTSAnnotationEnumerateElements)
+{
+    auto g_impl = AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
+    ASSERT_EQ(ArkTSAnnotationEnumerateElements(nullptr, nullptr, nullptr), false);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    auto anno = std::make_unique<AbckitCoreAnnotation>();
+    ASSERT_EQ(ArkTSAnnotationEnumerateElements(anno.get(), nullptr, nullptr), false);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    auto callBack = [](AbckitCoreAnnotationElement *ae, void *data) -> bool { return false; };
+    anno->ai = nullptr;
+    ASSERT_EQ(ArkTSAnnotationEnumerateElements(anno.get(), nullptr, callBack), false);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_INTERNAL_ERROR);
+
+    auto ai = std::make_unique<AbckitCoreAnnotationInterface>();
+    anno->ai = ai.get();
+    ai->owningModule = nullptr;
+    ASSERT_EQ(ArkTSAnnotationEnumerateElements(anno.get(), nullptr, callBack), false);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+
+// Test: test-kind=api, api=ArktsInspectApiImpl::ArkTSAnnotationInterfaceEnumerateFields,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsInspectApiImpl0, ArkTSAnnotationInterfaceEnumerateFields)
+{
+    auto g_impl = AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
+    ASSERT_EQ(ArkTSAnnotationInterfaceEnumerateFields(nullptr, nullptr, nullptr), false);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    auto ai = std::make_unique<AbckitCoreAnnotationInterface>();
+    ASSERT_EQ(ArkTSAnnotationInterfaceEnumerateFields(ai.get(), nullptr, nullptr), false);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
 }  // namespace libabckit::test

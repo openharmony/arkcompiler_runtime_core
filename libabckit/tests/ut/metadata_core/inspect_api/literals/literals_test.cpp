@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "libabckit/c/abckit.h"
 #include "helpers/helpers.h"
 #include "libabckit/c/metadata_core.h"
+#include "libabckit/src/metadata_inspect_impl.h"
 
 namespace libabckit::test {
 
@@ -461,6 +462,79 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetTag_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
+// Test: test-kind=api, api=InspectApiImpl::literalGetTag, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetTag_3)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_static.abc", &file);
+    AbckitLiteral *res = g_implM->createLiteralString(file, "asdf", strlen("asdf"));
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_STRING);
+    res = g_implM->createLiteralBool(file, true);
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_BOOL);
+    res = g_implM->createLiteralU8(file, 0);
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_BYTE);
+    res = g_implM->createLiteralU16(file, 0);
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_SHORT);
+    res = g_implM->createLiteralU32(file, 0);
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_INTEGER);
+    res = g_implM->createLiteralU64(file, 0);
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_LONG);
+    res = g_implM->createLiteralFloat(file, 0);
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_FLOAT);
+    res = g_implM->createLiteralMethod(file, helpers::FindMethodByName(file, "ConsoleLogStr"));
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_METHOD);
+    res = g_implM->createLiteralMethodAffiliate(file, 1);
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_METHODAFFILIATE);
+
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::literalGetTag, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetTag_Coverage)
+{
+    struct LiteralMock {
+        uint8_t tag;
+        std::variant<bool, uint8_t, uint16_t, uint32_t, uint64_t, float, double, std::string> value;
+    };
+
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_static.abc", &file);
+    AbckitLiteral *res = g_implM->createLiteralBool(file, 0);
+    auto *litImpl = reinterpret_cast<LiteralMock *>(res->val.get());
+    litImpl->tag = 0x00;
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_TAGVALUE);
+    litImpl->tag = 0x01;
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_BOOL);
+    litImpl->tag = 0x02;
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_INTEGER);
+    litImpl->tag = 0x08;
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_METHOD);
+    litImpl->tag = 0x0d;
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_BYTE);
+    litImpl->tag = 0x0f;
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_SHORT);
+    litImpl->tag = 0x11;
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_INTEGER);
+    litImpl->tag = 0x13;
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_LONG);
+    litImpl->tag = 0x14;
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_FLOAT);
+    litImpl->tag = 0x15;
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_DOUBLE);
+    litImpl->tag = 0x16;
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_STRING);
+    litImpl->tag = 0x17;
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_METHOD);
+    litImpl->tag = 0xff;
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_NULLVALUE);
+    litImpl->tag = 0x20;
+    ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_INVALID);
+
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
 // Test: test-kind=api, api=InspectApiImpl::literalGetFile, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetFile_2)
 {
@@ -790,6 +864,22 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetString_4)
     // Write output file
     g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::literalGetString, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetString_5)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_static.abc", &file);
+    std::string testString = "testString";
+    AbckitLiteral *res = g_implM->createLiteralString(file, testString.c_str(), testString.length());
+    auto val = g_implI->literalGetString(res);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(val, nullptr);
+    ASSERT_EQ(helpers::AbckitStringToString(val), testString);
+
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }

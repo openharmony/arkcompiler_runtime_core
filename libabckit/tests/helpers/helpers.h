@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -256,6 +256,15 @@ struct AnnotationByNameContext {
     const char *name;
 };
 
+struct InterfaceByNameContext {
+    AbckitCoreInterface *face;
+    const char *name;
+};
+
+struct FieldByNameContext {
+    AbckitCoreInterfaceField *field;
+    const char *name;
+};
 AbckitCoreFunction *FindMethodByName(AbckitFile *file, const std::string &name);
 AbckitCoreNamespace *FindNamespaceByName(AbckitFile *file, const std::string &name);
 bool ModuleByNameFinder(AbckitCoreModule *module, void *data);
@@ -284,6 +293,8 @@ std::optional<abckit::core::Enum> GetEnumByName(const abckit::core::Module &modu
 std::optional<abckit::core::Namespace> GetNamespaceByName(const abckit::core::Module &module, const std::string &name);
 std::optional<abckit::core::Function> GetFunctionByName(const abckit::core::Module &module, const std::string &name);
 
+bool InterfaceByNameFinder(AbckitCoreInterface *iface, void *data);
+bool FiledByNameFinder(AbckitCoreInterfaceField *field, void *data);
 }  // namespace libabckit::test::helpers
 
 #endif  // LIBABCKIT_TESTS_HELPERS
