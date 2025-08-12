@@ -27,7 +27,7 @@
 #include "os/library_loader.h"
 #include "plugins/ets/runtime/ets_native_library.h"
 using CreateNamespaceCallback = std::function<bool(const std::string &bundleModuleName, std::string &namespaceName)>;
-using ExtensionApiCheckCallback = std::function<bool(const std::string &className)>;
+using ExtensionApiCheckCallback = std::function<bool(const std::string &className, const std::string &fileName)>;
 namespace ark::ets {
 class EtsNamespaceManagerImpl {
 public:
