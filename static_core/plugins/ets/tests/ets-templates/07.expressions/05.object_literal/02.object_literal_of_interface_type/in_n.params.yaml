@@ -41,3 +41,10 @@ cases:
           }
       use: |-
           let a: A = { name: "John", name: "James" } // CTE, duplicate field
+
+    - decl: |-
+          interface A {
+              age: number
+          }
+      use: |-
+          let a: A = {} // CTE, non-optional property must be assigned a value.

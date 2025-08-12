@@ -22,7 +22,7 @@ function SetTimeoutTest(): void {
 }
 
 function AbortTest(): void {
-    const params: LaunchParams = {abortFlag: true};
+    const params: LaunchParams = {abortFlag: true,  workerGroupId: 0};
     try {
         let j = launch<int, () => int>(Failing, params);
         j.Await();
@@ -31,7 +31,7 @@ function AbortTest(): void {
 }
 
 function NoAbortTest(): void {
-    const params: LaunchParams = {abortFlag: false};
+    const params: LaunchParams = {abortFlag: false,  workerGroupId: 0};
     try {
         let j = launch<int, () => int>(Failing, params);
         j.Await();
