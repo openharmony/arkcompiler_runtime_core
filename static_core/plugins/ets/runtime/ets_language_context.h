@@ -122,7 +122,7 @@ public:
 
     const uint8_t *GetIllegalStateExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ILLEGAL_STATE_EXCEPTION.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ILLEGAL_STATE_ERROR.data());
     }
     const uint8_t *GetNegativeArraySizeExceptionClassDescriptor() const override
     {
