@@ -20,6 +20,7 @@ import { visitVisitResult } from './utils/ASTHelpers';
 import { 
   ETSKeyword,
   FINAL_CLASS,
+  ArrayType,
   JSValue,
   ESObject,
   KitPrefix,
@@ -72,10 +73,11 @@ export class Autofixer {
         this[FaultID.StringTypeAlias].bind(this),
         this[FaultID.IndexAccessType].bind(this),
         this[FaultID.ConditionalTypes].bind(this),
-        this[FaultID.TypeQuery].bind(this),
-        this[FaultID.TypeGeneric].bind(this)
+        this[FaultID.TypeQuery].bind(this)
       ]
     ],
+    [ts.SyntaxKind.ConstructorType, [this[FaultID.ConstructorType].bind(this)]],
+    [ts.SyntaxKind.TemplateLiteralType, [this[FaultID.TemplateLiteralType].bind(this)]],
     [ts.SyntaxKind.ModuleDeclaration, [this[FaultID.Module].bind(this)]],
     [
       ts.SyntaxKind.ModuleBlock,
@@ -100,12 +102,13 @@ export class Autofixer {
     [ts.SyntaxKind.SymbolKeyword, [this[FaultID.SymbolToJSValue].bind(this)]],
     [ts.SyntaxKind.IntersectionType, [this[FaultID.IntersectionTypeJSValue].bind(this)]],
     [
-      ts.SyntaxKind.TypeReference, 
+      ts.SyntaxKind.TypeReference,
       [
         this[FaultID.ObjectParametersToJSValue].bind(this),
         this[FaultID.InstanceType].bind(this),
         this[FaultID.NoBuiltInType].bind(this),
-        this[FaultID.ESObjectType].bind(this)
+        this[FaultID.ESObjectType].bind(this),
+        this[FaultID.UtilityType].bind(this)
       ]
     ],
     [
@@ -994,41 +997,41 @@ export class Autofixer {
     return node;
   }
 
-  /*
-   * Rule: `arkts-no-type-generic`
-   */
-  private [FaultID.TypeGeneric](node: ts.Node): ts.VisitResult<ts.Node> {
-    void this;
-
+  /**
+    * Rule: `arkts-no-ts-utility-type`
+    */
+  private [FaultID.UtilityType](node: ts.Node): ts.VisitResult<ts.Node> {
     /**
-     * Generic type alias mapped to JSValue in arkts1.2
+     * Map TS utility type to JSValue in arkts1.2
      */
 
-    if (ts.isTypeAliasDeclaration(node)) {
-      const shouldReplace = [
-        (checkNode: ts.Node): boolean => {
-          return SpecificTypes.includes(ts.SyntaxKind[checkNode.kind]);
-        },
-        (checkNode: ts.Node): boolean => {
-          return (
-            ts.isTypeReferenceNode(checkNode) &&
-            ts.isIdentifier(checkNode.typeName) &&
-            UtilityTypes.includes(checkNode.typeName.text)
-          );
-        }
-      ].some((check) => {
-        return check(node.type);
-      });
-      if (shouldReplace) {
-        return ts.factory.createTypeAliasDeclaration(
-          node.modifiers,
-          node.name,
-          node.typeParameters,
-          ts.factory.createTypeReferenceNode(JSValue, undefined)
-        );
-      }
+    if (ts.isTypeReferenceNode(node) && isUtilityTypes(node)) {
+      return createNodeFromUtilType(
+        UtilityTypes.get((node.typeName as ts.Identifier).text)!,
+        this.context.factory
+      );
     }
     return node;
+  }
+
+  /**
+   * Rule: `arkts-no-constructor-type`
+   */
+  private [FaultID.ConstructorType](node: ts.Node): ts.VisitResult<ts.Node> {
+    return this.context.factory.createTypeReferenceNode(
+      this.context.factory.createIdentifier(JSValue),
+      undefined
+    );
+  }
+
+  /**
+   * Rule: `arkts-no-template-literal-type`
+   */
+  private [FaultID.TemplateLiteralType](node: ts.Node): ts.VisitResult<ts.Node> {
+    return this.context.factory.createTypeReferenceNode(
+      this.context.factory.createIdentifier(JSValue),
+      undefined
+    );
   }
 
   /**
@@ -2386,4 +2389,25 @@ function isNotOptionalMemberFunction(member: ts.ClassElement): boolean {
     return false;
   }
   return true;
+}
+
+function isUtilityTypes(node: ts.TypeReferenceNode): boolean {
+  return ts.isIdentifier(node.typeName) &&
+    UtilityTypes.has(node.typeName.text);
+}
+
+function isSpecificTypes(node: ts.Node): boolean {
+  return SpecificTypes.includes(node.kind);
+}
+
+/**
+ * Creates an AST node that represents a type compatible with ArkTS 1.2,
+ * based on the given utility type in ArkTS 1.1
+ */
+function createNodeFromUtilType(targetType: string, factory: ts.NodeFactory):
+  ts.TypeReferenceNode | ts.ArrayTypeNode {
+  if (targetType == ArrayType) {
+    return factory.createArrayTypeNode(factory.createTypeReferenceNode(JSValue));
+  }
+  return factory.createTypeReferenceNode(JSValue);
 }

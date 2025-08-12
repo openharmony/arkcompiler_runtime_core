@@ -16,9 +16,9 @@
 export type AnyAlias<T> = Any;
 export type UnknownAlias<T> = Any;
 export type SymbolAlias<T> = Any;
-export type FunctionAlias<T> = Any;
+export type FunctionAlias<T> = (arg: T) => void;
 export type ObjectAlias<T> = Any;
-export type CallSignatureAlias<T, R> = Any;
+export type CallSignatureAlias<T, R> = (arg: T) => R;
 export type ConstructorSignatureAlias<T> = Any;
 export type IndexSignatureAlias<T> = Any;
 export type IntersectionAlias<T, U> = Any;
@@ -37,9 +37,9 @@ export type PickAlias<T, K extends Any> = Any;
 export type Person3 = Any;
 export type NameOnly = PickAlias<Person, 'name'>;
 export type MappedArray<T, U> = Array<(item: T) => U>;
-export type ArrayFilter<T> = Any;
-export type FunctionTransformer<Input, Output, NewInput, NewOutput> = Any;
-export type FunctionComposer<Input, Middle, Output> = Any;
+export type ArrayFilter<T> = (item: T) => boolean;
+export type FunctionTransformer<Input, Output, NewInput, NewOutput> = (fn: (input: Input) => Output) => (newInput: NewInput) => NewOutput;
+export type FunctionComposer<Input, Middle, Output> = (f: (input: Input) => Middle, g: (middle: Middle) => Output) => (input: Input) => Output;
 export type ObjectPropertyMapper<T, U> = Any;
 export type Fox<T> = Any;
 declare class MyClass<T> {
