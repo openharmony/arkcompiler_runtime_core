@@ -494,7 +494,7 @@ export namespace uri {
     set encodedAuthority(input: string) {
       this.uriEntry.setAuthority(input);
     }
- 
+
     /**
      * NOTE(zhangziye):#25267 Unable to use different getter/setter signature 
      */
@@ -510,10 +510,110 @@ export namespace uri {
       .replaceAll("%25", '%');
   }
 
+  interface Rules {
+    g_ruleAlphaLookup: Uint8Array;
+    g_ruleSchemeLookup: Uint8Array;
+    g_ruleUrlcLookup: Uint8Array;
+    g_ruleUserInfoLookup: Uint8Array;
+    g_rulePortLookup: Uint8Array;
+    g_ruleDigitLookup: Uint8Array;
+    g_rulePathLookup: Uint8Array;
+  }
+
+  function initializeUriRules(): Rules {
+
+    const digitAggregate = "0123456789";
+    const alphasAggregate = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const schemeAggregate = "+-.| _-~!$&=,;'(){}*"
+    const uricAggregate = "/?:@[]%\""
+    const pathAggregate = "/:@%";
+    const userInfoAggregate = ":%";
+    const portAggregate = ".:@-;&=+$,-_!~*'()";
+
+    let g_ruleAlphaLookup = new Uint8Array(128);
+    let g_ruleSchemeLookup = new Uint8Array(128);
+    let g_ruleUrlcLookup = new Uint8Array(128);
+    let g_ruleUserInfoLookup = new Uint8Array(128);
+    let g_rulePortLookup = new Uint8Array(128);
+    let g_ruleDigitLookup = new Uint8Array(128);
+    let g_rulePathLookup = new Uint8Array(128);
+
+    for (let i = 0; i < digitAggregate.length; i++) {
+      const code = digitAggregate.charCodeAt(i);
+      if (code < 128) {
+        g_ruleSchemeLookup[code] = 1;
+        g_ruleUrlcLookup[code] = 1;
+        g_ruleUserInfoLookup[code] = 1;
+        g_ruleDigitLookup[code] = 1;
+        g_rulePortLookup[code] = 1;
+        g_rulePathLookup[code] = 1;
+      }
+    }
+
+    for (let i = 0; i < alphasAggregate.length; i++) {
+      const code = alphasAggregate.charCodeAt(i);
+      if (code < 128) {
+        g_ruleSchemeLookup[code] = 1;
+        g_ruleUrlcLookup[code] = 1;
+        g_ruleUserInfoLookup[code] = 1;
+        g_ruleAlphaLookup[code] = 1;
+        g_rulePortLookup[code] = 1;
+        g_rulePathLookup[code] = 1;
+      }
+    }
+
+    for (let i = 0; i < schemeAggregate.length; i++) {
+      const code = schemeAggregate.charCodeAt(i);
+      if (code < 128) {
+        g_ruleSchemeLookup[code] = 1;
+        g_ruleUrlcLookup[code] = 1;
+        g_ruleUserInfoLookup[code] = 1;
+        g_rulePathLookup[code] = 1;
+      }
+    }
+
+    for (let i = 0; i < uricAggregate.length; i++) {
+      const code = uricAggregate.charCodeAt(i);
+      if (code < 128) {
+        g_ruleUrlcLookup[code] = 1;
+      }
+    }
+
+    for (let i = 0; i < pathAggregate.length; i++) {
+      const code = pathAggregate.charCodeAt(i);
+      if (code < 128) {
+        g_rulePathLookup[code] = 1;
+      }
+    }
+
+    for (let i = 0; i < userInfoAggregate.length; i++) {
+      const code = userInfoAggregate.charCodeAt(i);
+      if (code < 128) {
+        g_ruleUserInfoLookup[code] = 1;
+      }
+    }
+
+    for (let i = 0; i < portAggregate.length; i++) {
+      const code = portAggregate.charCodeAt(i);
+      if (code < 128) {
+        g_rulePortLookup[code] = 1;
+      }
+    }
+    return {
+      g_ruleAlphaLookup,
+      g_ruleSchemeLookup,
+      g_ruleUrlcLookup,
+      g_ruleUserInfoLookup,
+      g_rulePortLookup,
+      g_ruleDigitLookup,
+      g_rulePathLookup,
+    }
+  }
   /**
   * Handling specific URI logic
   */
   class UriEntry {
+    private static uriRules: Rules = initializeUriRules();
     private errStr: string = "";
     private data: string = "";
     private inputUri: string = "";
@@ -528,14 +628,6 @@ export namespace uri {
     private authority: string = "";
     private schemeSpecificPart: string = "";
 
-    private REG_ALPHA = new RegExp("[a-zA-Z]", 'g');
-    private REG_SCHEME = new RegExp("[\\da-zA-Z+\\-.| _~!$&=,;'(){}*]", 'g');
-    private REG_URLC = new RegExp("[\\da-zA-Z+\\-.| _~!$&=,;'(){}*/?:@\\[\\]%\"]", 'g');
-    private REG_PATH = new RegExp("[\\da-zA-Z+\\-.| _~!$&=,;'(){}*/:@%]", 'g');
-    private REG_USER_INFO = new RegExp("[\\da-zA-Z+\\-.| _~!$&=,;'(){}*:%]", 'g');
-    private REG_PORT = new RegExp("[\\da-zA-Z.:@\\-;&=+$,_!~*'()]", 'g');
-    private REG_NONASC = new RegExp("[^\\x00-\\x7F]", 'g');
-
     constructor(input: string) {
       if (input == "") {
         this.errStr = "Uri is empty.";
@@ -544,6 +636,7 @@ export namespace uri {
       this.inputUri = input;
       this.analysisUri();
     }
+
     getQueryValue(key: string): string | null {
       let queryList = this.getQueryList();
       for (let i = 0; i < queryList.length; i += 2) {
@@ -619,12 +712,21 @@ export namespace uri {
       }
     }
 
-    private checkCharacter(str: string, regex: RegExp, ignoreNonAscll: boolean) {
-      if (ignoreNonAscll) {
-        str = str.replaceAll(this.REG_NONASC, '');
+    private checkCharacter(data: string, rule: Uint8Array, ignoreNonAscll: boolean): boolean {
+      const len = data.length;
+
+      for (let i = 0; i < len; i++) {
+        const code = data.charCodeAt(i);
+
+        if (code < 128) {
+          if (rule[code] === 0) {
+            return false;
+          }
+        } else if (!ignoreNonAscll) {
+          return false;
+        }
       }
-      str = str.replaceAll(regex, "");
-      return str == '';
+      return true;
     }
 
     private getQueryList(): Array<string> {
@@ -643,7 +745,7 @@ export namespace uri {
     }
 
     private specialPath() {
-      if (!this.checkCharacter(this.data, this.REG_PATH, true)) {
+      if (!this.checkCharacter(this.data, UriEntry.uriRules.g_rulePathLookup, true)) {
         this.errStr = "SpecialPath does not conform to the rule.";
         return;
       }
@@ -657,7 +759,7 @@ export namespace uri {
         return;
       }
       let fragment = this.data.substring(pos + 1);
-      if (!this.checkCharacter(fragment, this.REG_URLC, true)) {
+      if (!this.checkCharacter(fragment, UriEntry.uriRules.g_ruleUrlcLookup, true)) {
         this.errStr = "Fragment does not conform to the rule.";
         return;
       }
@@ -667,7 +769,7 @@ export namespace uri {
 
     private analysisQuery(pos: number) {
       let query = this.data.substring(pos + 1);
-      if (!this.checkCharacter(query, this.REG_URLC, true)) {
+      if (!this.checkCharacter(query, UriEntry.uriRules.g_ruleUrlcLookup, true)) {
         this.errStr = "Query does not conform to the rule.";
         return;
       }
@@ -684,12 +786,12 @@ export namespace uri {
         this.schemeSpecificPart += (this.query);
         this.data = "";
       } else {
-        if (!this.REG_ALPHA.test(this.data.substring(0, 1))) {
+        if (!this.checkCharacter(this.data[0], UriEntry.uriRules.g_ruleAlphaLookup, true)) {
           this.errStr = "Scheme the first character must be a letter.";
           return;
         }
         let scheme = this.data.substring(0, pos);
-        if (!this.checkCharacter(scheme, this.REG_SCHEME, false)) {
+        if (!this.checkCharacter(scheme, UriEntry.uriRules.g_ruleSchemeLookup, false)) {
           this.errStr = "Scheme does not conform to the rule.";
           return;
         }
@@ -758,7 +860,7 @@ export namespace uri {
 
     private analysisPath(pos: number) {
       let path = this.data.substring(pos);
-      if (!this.checkCharacter(path, this.REG_PATH, true)) {
+      if (!this.checkCharacter(path, UriEntry.uriRules.g_rulePathLookup, true)) {
         this.errStr = "Path does not conform to the rule.";
         return;
       }
@@ -768,7 +870,7 @@ export namespace uri {
 
     private analysisUserInfo(pos: number) {
       let userInfo = this.data.substring(0, pos);
-      if (!this.checkCharacter(userInfo, this.REG_USER_INFO, true)) {
+      if (!this.checkCharacter(userInfo, UriEntry.uriRules.g_ruleUserInfoLookup, true)) {
         this.errStr = "UserInfo does not conform to the rule.";
         return;
       }
@@ -778,7 +880,7 @@ export namespace uri {
 
     private analysisPort(pos: number) {
       let portStr = this.data.substring(pos + 1);
-      if (!this.checkCharacter(portStr, this.REG_PORT, true)) {
+      if (!this.checkCharacter(portStr, UriEntry.uriRules.g_rulePortLookup, true)) {
         this.errStr = "Port does not conform to the rule.";
         return false;
       }
@@ -800,13 +902,76 @@ export namespace uri {
       return true;
     }
 
+    private isValidIPv4(ip: string) {
+      const segments = ip.split('.');
+      if (segments.length !== 4) return false;
+
+      for (const segment of segments) {
+        if (segment === "") return false;
+
+        if (segment.length > 1 && segment[0] === '0') return false;
+
+        const num = Number(segment);
+        if (isNaN(num) || num < 0 || num > 255) return false;
+      }
+      return true;
+    }
+
+    private isAlphanumeric(code: string) {
+      return  (code >= 'a' && code <= 'z') ||
+        (code >= 'A' && code <= 'Z') ||
+        (code >= '0' && code <= '9');
+    }
+
+    private isLetter(code: string) {
+      return (code >= 'a' && code <= 'z') || (code >= 'A' && code <= 'Z');
+    }
+
+    private isValidChar(code: string) {
+      const allowedChars = `-~_|+{}!$&=,;:'()* `;
+      return this.isAlphanumeric(code) || allowedChars.includes(code);
+    }
+
+    private isValidHostname(hostname: string) {
+      if (hostname.length === 0 || hostname.length > 253) return false;
+
+      if (!hostname.includes('.')) {
+        if (!this.isAlphanumeric(hostname[0])) return false;
+        if (hostname.length > 1 && !this.isValidChar(hostname[hostname.length - 1]))
+          return false;
+
+        for (let i = 1; i < hostname.length - 1; i++) {
+          if (!this.isValidChar(hostname[i])) return false;
+        }
+        return true;
+      }
+
+      const labels: Array<string> = hostname.split('.');
+      if (labels.length < 2) return false;
+
+      for (let i = 0; i < labels.length; i++) {
+        const label = labels[i];
+        if (label.length === 0 || label.length > 63) return false;
+
+        if (i === labels.length - 1) {
+          if (!this.isLetter(label[0])) return false;
+        } else {
+          if (!this.isAlphanumeric(label[0])) return false;
+        }
+
+        if (!this.isValidChar(label[label.length - 1]))
+          return false;
+
+        for (let j = 1; j < label.length - 1; j++) {
+          if (!this.isValidChar(label[j])) return false;
+        }
+      }
+
+      return true;
+    }
+
     private analysisIPV4() {
-      let ipv4 = new RegExp("^((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]\\d|\\d)\\.){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]\\d|\\d)$");
-      let hostname = new RegExp("^(([a-zA-Z0-9]([a-zA-Z0-9\\-~_|\\+{}!$&=,;:'()\\*\\s]*[a-zA-Z0-9])?\\.)+([a-zA-Z]"
-        + "([a-zA-Z0-9\\-~_|\\+{}!$&=,;:'()\\*\\s]*[a-zA-Z0-9\\-~_|\\+{}!$&=,;:'()\\*\\s])?))$|^([a-zA-Z0-9]([a-zA-Z0-9\\-~_|\\+{}!$&=,;:'()\\*\\s]*[a-zA-Z0-9])?)$");
-      let isIpv4 = ipv4.test(this.data);
-      let isHosName = hostname.test(this.data);
-      if (!isIpv4 && !isHosName) {
+      if (!this.isValidIPv4(this.data) && !this.isValidHostname(this.data)) {
         return false;
       } else {
         this.host = this.data;
@@ -1046,7 +1211,7 @@ export namespace uri {
     }
 
     setScheme(scheme: string): void {
-      if (!this.checkCharacter(scheme.substring(0, 1), this.REG_ALPHA, true)) {
+      if (!this.checkCharacter(scheme[0], UriEntry.uriRules.g_ruleAlphaLookup, true)) {
         this.errStr = "Scheme the first character must be a letter.";
         return;
       }
@@ -1058,7 +1223,7 @@ export namespace uri {
         temp = scheme;
       }
 
-      if (!this.checkCharacter(temp, this.REG_SCHEME, false)) {
+      if (!this.checkCharacter(temp, UriEntry.uriRules.g_ruleSchemeLookup, false)) {
         this.errStr = "Scheme does not conform to the rule.";
         return;
       }
@@ -1080,7 +1245,7 @@ export namespace uri {
         const userStr = this.data.substring(0, atPos);
         this.data = this.data.substring(atPos + 1);
 
-        if (!this.checkCharacter(userStr, this.REG_USER_INFO, true)) {
+        if (!this.checkCharacter(userStr, UriEntry.uriRules.g_ruleUserInfoLookup, true)) {
           this.errStr = "userInfo does not conform to the rule";
           return;
         }
@@ -1141,7 +1306,7 @@ export namespace uri {
     }
 
     setUserInfo(userInfo: string): void {
-      if (!this.host || !this.checkCharacter(userInfo, this.REG_USER_INFO, true)) {
+      if (!this.host || !this.checkCharacter(userInfo, UriEntry.uriRules.g_ruleUserInfoLookup, true)) {
         this.errStr = "userInfo does not conform to the rule";
         return;
       }
@@ -1152,7 +1317,7 @@ export namespace uri {
     }
 
     setPath(pathStr: string): void {
-      if (!this.checkCharacter(pathStr, this.REG_PATH, true)) {
+      if (!this.checkCharacter(pathStr, UriEntry.uriRules.g_rulePathLookup, true)) {
         this.errStr = "pathStr does not conform to the rule";
         return;
       }
@@ -1162,7 +1327,7 @@ export namespace uri {
     }
 
     setQuery(queryStr: string): void {
-      if (!this.checkCharacter(queryStr, this.REG_URLC, true)) {
+      if (!this.checkCharacter(queryStr, UriEntry.uriRules.g_ruleUrlcLookup, true)) {
         this.errStr = "QueryStr does not conform to the rule";
         return;
       }
@@ -1172,7 +1337,7 @@ export namespace uri {
     }
 
     setFragment(fragmentStr: string): void {
-      if (!this.checkCharacter(fragmentStr, this.REG_URLC, true)) {
+      if (!this.checkCharacter(fragmentStr, UriEntry.uriRules.g_ruleUrlcLookup, true)) {
         this.errStr = "Fragment does not conform to the rule";
         return;
       }
