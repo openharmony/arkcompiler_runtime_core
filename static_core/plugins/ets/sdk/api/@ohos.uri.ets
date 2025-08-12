@@ -198,11 +198,7 @@ export namespace uri {
     * @returns { string } Returns the last decoded segment, or null if the path is empty.
     */
     getLastSegment(): string {
-      let segments = this.uriEntry.getSegments();
-      if (segments.length == 0) {
-        return "";
-      }
-      return segments[segments.length - 1];
+      return this.uriEntry.getLastSegment();
     }
 
     /**
@@ -913,6 +909,32 @@ export namespace uri {
         result += "#" + this.fragment;
       }
       return result;
+    }
+
+    getLastSegment(): string {
+      let input = "";
+      let end = this.path.length - 1;
+      while (end >= 0 && this.path[end] == '/') {
+        end--;
+      }
+      while (end >= 0) {
+        let start = end;
+        let tmp = "";
+        while (start >= 0 && this.path[start] != '/') {
+          start --;
+        }
+        for (let i = start + 1; i <= end; i++) {
+          tmp += this.path[i];
+        }
+        tmp = tmp.trim();
+        if (tmp != "") {
+          input = tmp;
+          break;
+        } else {
+          end = start - 1;
+        }
+      }
+      return decodeURIComponent(input);
     }
 
     getSegments(): Array<string> {

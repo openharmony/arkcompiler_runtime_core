@@ -294,30 +294,40 @@ export class Formatter {
         if (args.length == 0) {
             return s.replaceAll("%%", "%")
         }
-
-        while((i = ((ss = s.substring(preI, s.length)).search("%")).toInt()) != -1 && (preI + i < s.length - 1) && (argCounter < args.length)) {
-            res.append(s.substring(preI, preI + i))
-            let flagIndex = preI + i + 1
-            let flag: string = s[flagIndex].toString()
-            if (flags.includes(flag)) {
-                let d = args[argCounter]
-                if (d != undefined && d != null) {
-                    res.append(Formatter.processArg(flag, __narrowAny<object>(d)))
-                } else {
-                    // behavior for null and undefined expected to be the same as for empty string
-                    res.append(Formatter.processArg(flag, ""))
+        while (preI < s.length) {
+            let i = -1;
+            for (let j = preI; j < s.length; j++) {
+                if (s[j] == '%') {
+                    i = j - preI;
+                    break;
                 }
-
-                ++argCounter
-            } else if (flag == "%") {
-                res.append("%")
-            } else {
-                res.append("%" + flag)
             }
-            preI += i + 2
+            if (i == -1 || preI + i >= s.length - 1 || argCounter >= args.length) {
+                break;
+            }
+            for (let j = preI; j < preI + i; j++) {
+                res.append(s[j]);
+            }
+            const flagIndex = preI + i + 1;
+            const flag = s[flagIndex];
+            if (flags.includes(flag)) {
+                let d = args[argCounter];
+                if (d == undefined || d == null) {
+                    d = "";
+                }
+                res.append(Formatter.processArg(flag, __narrowAny<object>(d)));
+                ++argCounter;
+            } else if (flag == "%") {
+                res.append("%");
+            } else {
+                res.append("%" + flag);
+            }
+            preI += i + 2;
         }
         if (preI < s.length) {
-            res.append(s.substring(preI,s.length))
+            for (let j = preI; j < s.length; j++) {
+                res.append(s[j]);
+            }
         }
         let strArgsList = Formatter.joinLastArgs(argCounter, args)
         let resStr = res.toString()
