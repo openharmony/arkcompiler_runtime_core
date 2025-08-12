@@ -13,18 +13,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for type in class_types %}
+{% for c in cases %}
 /*---
-desc: class field and a method from one of superinterfaces that a class implements have the same name
+desc: {{type}} {{c.doc}}
 assert: >-
     A compile-time error occurs if a class field and a method from one of superinterfaces that a class implements
     have the same name, except when one is static and the other is not.
-tags: [compile-only,negative]
+tags: [{{c.tags}}]
 ---*/
 
 interface IC {
-  foo(): int;
+  {{c.interface}}
 }
 
-class CA implements IC {
-  foo: int;
+{{type}} class CA implements IC {
+  {{c.class}}
 }
+{% endfor %}
+{% endfor %}

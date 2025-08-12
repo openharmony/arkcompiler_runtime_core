@@ -21,6 +21,9 @@ assert: >-
 tags: [compile-only, negative]
 ---*/
 
+class Base {}
+class Derived extends Base {}
+
 interface IA <T> {}
 
-class IC implements IA<Object>, IA {}
+class IC implements IA<Base>, IA<Derived> {}

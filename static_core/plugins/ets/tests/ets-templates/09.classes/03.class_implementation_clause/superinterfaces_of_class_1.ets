@@ -20,11 +20,11 @@ assert: >-
     using the definition of "superinterface of an interface" given in link to interface’s superinterfaces.
 ---*/
 
-interface I { }
+interface I {}
 
-interface J extends I { }
+interface J extends I {}
 
-final class C implements J { }
+final class C implements J {}
 
 function main(): void {
   let c: I = new C();

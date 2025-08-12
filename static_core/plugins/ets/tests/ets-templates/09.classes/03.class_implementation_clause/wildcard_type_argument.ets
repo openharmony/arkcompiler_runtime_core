@@ -23,8 +23,8 @@ assert: >-
 tags: [compile-only]
 ---*/
 
-interface A<{{option}}> { }
+interface A<{{option}}> {}
 
-class B implements A<Int> { }
+class B implements A<Int> {}
 
 {% endfor %}

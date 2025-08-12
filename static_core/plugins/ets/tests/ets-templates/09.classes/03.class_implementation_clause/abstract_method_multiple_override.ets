@@ -44,6 +44,6 @@ function main(): void {
   let c: A = new A();
   let b: A = new A();
 
-  arktest.assertEQ( c.foo(), 5 );
-  arktest.assertEQ( b.bar(), 10 );
+  arktest.assertEQ(c.foo(), 5);
+  arktest.assertEQ(b.bar(), 10);
 }

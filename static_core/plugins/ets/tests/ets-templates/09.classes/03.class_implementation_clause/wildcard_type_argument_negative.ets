@@ -23,6 +23,6 @@ assert: >-
 tags: [compile-only, negative]
 ---*/
 
-class B implements {{option}} { }
+class B implements {{option}} {}
 
 {% endfor %}
