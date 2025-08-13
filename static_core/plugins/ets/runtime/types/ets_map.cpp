@@ -18,7 +18,6 @@
 #include "plugins/ets/runtime/types/ets_bigint.h"
 
 namespace ark::ets {
-static constexpr uint32_t HASH_SIGN_SHIFT = 31;
 static const uint8_t *g_hashCodeMethod = utf::CStringAsMutf8("$_hashCode");
 static constexpr int NUMERIC_INT_MAX = std::numeric_limits<int>::max();
 static constexpr int NUMERIC_INT_MIN = std::numeric_limits<int>::min();
@@ -145,10 +144,13 @@ static bool Compare(EtsObject *a, EtsObject *b)
 }
 
 template <typename T>
-static inline uint32_t GetHashFloats(EtsObject *obj)
+static uint32_t GetHashFloats(EtsObject *obj)
 {
     T val = EtsBoxPrimitive<T>::Unbox(obj);
     // Like ETS.
+    if (std::isnan(val)) {
+        return 0;
+    }
     if (val > static_cast<T>(NUMERIC_INT_MAX)) {
         return NUMERIC_INT_MAX;
     }
@@ -159,19 +161,6 @@ static inline uint32_t GetHashFloats(EtsObject *obj)
 
     // AARCH64 needs float->int->uint cast to avoid returning 0.
     return static_cast<uint32_t>(static_cast<int32_t>(val));
-}
-
-static uint32_t GetBigIntHashCode(EtsBigInt *b)
-{
-    auto hashCode = static_cast<uint32_t>(b->GetSign());
-    auto *bytes = reinterpret_cast<EtsIntArray *>(b->GetBytes());
-    if (bytes == nullptr) {
-        return hashCode;
-    }
-    for (size_t i = 0; i < bytes->GetLength(); i++) {
-        hashCode = hashCode * HASH_SIGN_SHIFT + static_cast<int32_t>(bytes->Get(i));
-    }
-    return hashCode;
 }
 
 uint32_t EtsEscompatMap::GetHashCode(EtsObject *&key)
@@ -211,36 +200,21 @@ uint32_t EtsEscompatMap::GetHashCode(EtsObject *&key)
     }
 
     if (klass->IsBigInt()) {
-        return GetBigIntHashCode(reinterpret_cast<EtsBigInt *>(key));
+        return (reinterpret_cast<EtsBigInt *>(key))->GetHashCode();
     }
 
     return key->GetHashCode();
 }
 
-static inline uint32_t GetBucketIdx(EtsCoroutine *&coro, EtsEscompatMap *&map, EtsObject *&key)
+static inline EtsEscompatArray *GetBucket(EtsCoroutine *&coro, EtsEscompatMap *&map, EtsInt idx)
 {
-    if (key == nullptr) {
-        return 1;  // like ETS.
-    }
-
-    // Using int for keyHash to maintain ETS compatibility.
-    int32_t keyHash = EtsEscompatMap::GetHashCode(key);
-    // NOLINTNEXTLINE(hicpp-signed-bitwise)
-    uint32_t tmp = keyHash >> HASH_SIGN_SHIFT;
-    // NOLINTNEXTLINE(hicpp-signed-bitwise)
-    return ((keyHash ^ tmp) - tmp) & (map->GetBuckets(coro)->GetActualLength() - 1);
+    return reinterpret_cast<EtsEscompatArray *>(map->GetBuckets(coro)->GetData()->Get(idx));
 }
 
-static inline EtsEscompatArray *GetBucket(EtsCoroutine *&coro, EtsEscompatMap *&map, EtsObject *&key)
-{
-    const uint32_t index = GetBucketIdx(coro, map, key);
-    return reinterpret_cast<EtsEscompatArray *>(map->GetBuckets(coro)->GetData()->Get(index));
-}
-
-EtsBoolean EtsEscompatMap::Has(EtsEscompatMap *map, EtsObject *key)
+EtsBoolean EtsEscompatMap::Has(EtsEscompatMap *map, EtsObject *key, EtsInt idx)
 {
     auto *coro = EtsCoroutine::GetCurrent();
-    auto *bucket = GetBucket(coro, map, key);
+    auto *bucket = GetBucket(coro, map, idx);
     if (bucket != nullptr) {
         uint32_t bucketSize = bucket->GetActualLength();
         for (uint32_t i = 0; i < bucketSize; ++i) {
@@ -254,10 +228,10 @@ EtsBoolean EtsEscompatMap::Has(EtsEscompatMap *map, EtsObject *key)
     return ToEtsBoolean(false);
 }
 
-EtsObject *EtsEscompatMap::Get(EtsEscompatMap *map, EtsObject *key)
+EtsObject *EtsEscompatMap::Get(EtsEscompatMap *map, EtsObject *key, EtsInt idx)
 {
     auto *coro = EtsCoroutine::GetCurrent();
-    auto *bucket = GetBucket(coro, map, key);
+    auto *bucket = GetBucket(coro, map, idx);
     if (bucket != nullptr) {
         uint32_t bucketSize = bucket->GetActualLength();
         for (uint32_t i = 0; i < bucketSize; ++i) {
@@ -271,10 +245,10 @@ EtsObject *EtsEscompatMap::Get(EtsEscompatMap *map, EtsObject *key)
     return nullptr;
 }
 
-EtsBoolean EtsEscompatMap::Delete(EtsEscompatMap *map, EtsObject *key)
+EtsBoolean EtsEscompatMap::Delete(EtsEscompatMap *map, EtsObject *key, EtsInt idx)
 {
     auto *coro = EtsCoroutine::GetCurrent();
-    auto *bucket = GetBucket(coro, map, key);
+    auto *bucket = GetBucket(coro, map, idx);
     if (bucket == nullptr) {
         return ToEtsBoolean(false);
     }

@@ -229,9 +229,9 @@ public:
         ObjectAccessor::SetObject(coro, this, GetBucketsOffset(), buckets->GetCoreType());
     }
 
-    static EtsBoolean Has(EtsEscompatMap *map, EtsObject *key);
-    static EtsObject *Get(EtsEscompatMap *map, EtsObject *key);
-    static EtsBoolean Delete(EtsEscompatMap *map, EtsObject *key);
+    static EtsBoolean Has(EtsEscompatMap *map, EtsObject *key, EtsInt idx);
+    static EtsObject *Get(EtsEscompatMap *map, EtsObject *key, EtsInt idx);
+    static EtsBoolean Delete(EtsEscompatMap *map, EtsObject *key, EtsInt idx);
     static uint32_t GetHashCode(EtsObject *&key);
 
 private:

@@ -37,27 +37,51 @@ module MapConstants
 
   ETS_CLASS_IS_NULLVALUE_FLAG = "cross_values::GetEtsClassIsNullvalueFlag(graph->GetArch())"
   ETS_CLASS_IS_BOXED_FLAG = "cross_values::GetEtsClassIsBoxedFlag(graph->GetArch())"
+  ETS_CLASS_IS_BIGINT_FLAG = "cross_values::GetEtsClassIsBigintFlag(graph->GetArch())"
 
   INT_MAX = "std::numeric_limits<int>::max()"
   INT_MIN = "std::numeric_limits<int>::min()"
 
-  FLOAT32_NAN = "0x7fc00000"
-  FLOAT64_NAN = "0x7ff8000000000000"
+  FLOAT32_NAN_EXPONENT_BITS = "(~(~0u << 8)) << 23"
+  FLOAT32_NAN_SIGNIFICAND_BITS = "~(~0u << 23)"
+  FLOAT64_NAN_EXPONENT_BITS = "(~(~0Lu << 11)) << 52"
+  FLOAT64_NAN_SIGNIFICAND_BITS = "~(~0Lu << 52)"
 
   SET_ELEMENTS_OFFSET = "cross_values::GetEscompatSetElementsOffset(graph->GetArch())"
 end
 
 ################################################################
 
+scoped_macro(:isNan32) do |val| 
+  bits := Bitcast(val).u32
+  exponent := AndI(bits).Imm(MapConstants::FLOAT32_NAN_EXPONENT_BITS).u32
+  significand := AndI(bits).Imm(MapConstants::FLOAT32_NAN_SIGNIFICAND_BITS).u32  
+  is_nan := And(Compare(exponent, MapConstants::FLOAT32_NAN_EXPONENT_BITS).b, Not(Compare(significand, 0).b).b).b
+end
+
+scoped_macro(:isNan64) do |val| 
+  bits := Bitcast(val).u64
+  exponent := AndI(bits).Imm(MapConstants::FLOAT64_NAN_EXPONENT_BITS).u64
+  significand := AndI(bits).Imm(MapConstants::FLOAT64_NAN_SIGNIFICAND_BITS).u64
+  is_nan := And(Compare(exponent, MapConstants::FLOAT64_NAN_EXPONENT_BITS).b, Not(Compare(significand, 0).b).b).b
+end
+
+scoped_macro(:isHashedString) do |obj|
+  Compare(LoadI(obj).Imm(Constants::STRING_HASHCODE_OFFSET).u32, 0).NE.b
+end
+
+scoped_macro(:isHashedObject) do |obj|
+  mark_word := LoadI(obj).Imm(Constants::MARK_WORD_OFFSET).u32
+  obj_status := AndI(mark_word).Imm(MapConstants::MARK_WORD_STATUS_MASK_IN_PLACE).u32
+  Compare(obj_status, MapConstants::MARK_WORD_STATUS_HASHED_IN_PLACE).EQ.b
+end
+
 scoped_macro(:isHashed) do |obj, is_string|
   If(is_string, 0).NE.b {
-    is_hashed_str := Compare(LoadI(obj).Imm(Constants::STRING_HASHCODE_OFFSET).u32, 0).NE.b
+    is_hashed_str := isHashedString(obj)
   } Else {
-    mark_word := LoadI(obj).Imm(Constants::MARK_WORD_OFFSET).u32
-    obj_status := AndI(mark_word).Imm(MapConstants::MARK_WORD_STATUS_MASK_IN_PLACE).u32
-    is_hashed_obj := Compare(obj_status, MapConstants::MARK_WORD_STATUS_HASHED_IN_PLACE).EQ.b
+    is_hashed_obj := isHashedObject(obj)
   }
-
   is_hashed := Phi(is_hashed_str, is_hashed_obj).b
 end
 
@@ -78,16 +102,29 @@ scoped_macro(:isBoxedType) do |flags|
   AndI(flags).Imm(MapConstants::ETS_CLASS_IS_BOXED_FLAG).u32
 end
 
+scoped_macro(:isBigintType) do |flags|
+  AndI(flags).Imm(MapConstants::ETS_CLASS_IS_BIGINT_FLAG).u32
+end
+
+
+scoped_macro(:fetchHashCodeString) do |obj|
+  LoadI(obj).Imm(Constants::STRING_HASHCODE_OFFSET).u32
+end
+
+scoped_macro(:fetchHashCodeObject) do |obj|
+  mark_word := LoadI(obj).Imm(Constants::MARK_WORD_OFFSET).u32
+  AndI(mark_word).Imm(MapConstants::MARK_WORD_HASH_CODE_MASK).u32
+end
+
 scoped_macro(:fetchHashCode) do |obj, is_string|
   If(is_string, 0).NE.b {
-    hash_code_str := LoadI(obj).Imm(Constants::STRING_HASHCODE_OFFSET).u32
+    hash_code_str := fetchHashCodeString(obj)
   } Else {
-    mark_word := LoadI(obj).Imm(Constants::MARK_WORD_OFFSET).u32
-    hash_code_obj := AndI(mark_word).Imm(MapConstants::MARK_WORD_HASH_CODE_MASK).u32
+    hash_code_obj := fetchHashCodeObject(obj)
   }
-
   hash_code := Phi(hash_code_str, hash_code_obj).u32
 end
+
 
 scoped_macro(:calcHashCode) do |obj, type|
   ptypes := LoadI(%tr).Imm(EtsConstants::CORO_LOCAL_STORAGE_OFFSET).ptr
@@ -99,7 +136,7 @@ scoped_macro(:calcHashCode) do |obj, type|
   If(type, double_type).EQ.b {
     value_double := LoadI(obj).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).f64
 
-    IfImm(Compare(Bitcast(value_double).u64, EtsConstants::FLOAT64_NAN).EQ.b).Imm(0).NE.b {
+    If(isNan64(value_double), 0).NE.b {
       hash_code_double_nan := 0
       Goto(:ValueDoubleDone)
     }
@@ -122,7 +159,7 @@ Label(:ValueDoubleDone)
   If(type, float_type).EQ.b {
     value_float := LoadI(obj).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).f32
 
-    IfImm(Compare(Bitcast(value_float).u32, EtsConstants::FLOAT32_NAN).EQ.b).Imm(0).NE.b {
+    If(isNan32(value_float), 0).NE.b {
       hash_code_float_nan := 0
       Goto(:ValueFloatDone)
     }
@@ -197,8 +234,8 @@ scoped_macro(:compareByVal) do |obj, type, key_val, long_type, float_type, doubl
 
   is_double := Compare(type, double_type).b
   If(is_double, 0).NE.b {
-    is_key_nan := Compare(key_val, EtsConstants::FLOAT64_NAN).EQ.b
-    is_obj_nan := Compare(obj_val, EtsConstants::FLOAT64_NAN).EQ.b
+    is_key_nan := isNan64(key_val)
+    is_obj_nan := isNan64(obj_val)
 
     IfImm(Or(is_key_nan, is_obj_nan).b).Imm(0).EQ.b {
       key_f64 := Bitcast(key_val).f64
@@ -216,12 +253,12 @@ scoped_macro(:compareByVal) do |obj, type, key_val, long_type, float_type, doubl
 
   is_float := Compare(type, float_type).b
   If(is_float, 0).NE.b {
-    is_key_nan := Compare(Cast(key_val).u32, EtsConstants::FLOAT32_NAN).EQ.b
-    is_obj_nan := Compare(Cast(obj_val).u32, EtsConstants::FLOAT32_NAN).EQ.b
+    key_f32 := Bitcast(Cast(key_val).u32).f32
+    obj_f32 := Bitcast(Cast(obj_val).u32).f32
+    is_key_nan := isNan32(key_f32)
+    is_obj_nan := isNan32(obj_f32)
 
     IfImm(Or(is_key_nan, is_obj_nan).b).Imm(0).EQ.b {
-      key_f32 := Bitcast(Cast(key_val).u32).f32
-      obj_f32 := Bitcast(Cast(obj_val).u32).f32
       res_f32_norm := Compare(obj_f32, key_f32).b
       Goto(:FloatDone)
     } Else {
@@ -364,7 +401,7 @@ end
 
 ################################################################
 
-macro(:findOffset) do |map, key, ret_none_expr|
+macro(:findOffset) do |map, key, buck_idx, ret_none_expr|
   buck_arr_hdr := LoadI(map).Imm(MapConstants::BUCKETS_OFFSET).ref
   buck_arr_len := LoadI(buck_arr_hdr).Imm(EtsConstants::ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET).u32
 
@@ -385,11 +422,10 @@ macro(:findOffset) do |map, key, ret_none_expr|
     klass := LoadI(key).Imm(Constants::OBJECT_CLASS_OFFSET).ref
     type := LoadI(klass).Imm(Constants::BASE_CLASS_MANAGED_OBJECT_OFFSET).ref
     flags := LoadI(klass).Imm(EtsConstants::ETS_CLASS_FLAGS_FROM_RUNTIME_CLASS_OFFSET).u32
-    is_string := isString(klass)
-    buck_idx := getBucketIdx(key, is_string, type, flags, buck_arr_len)
-    If(buck_idx, -1).EQ.b {
+    If(isBigintType(flags), 0).NE.b {
       Goto(:SlowPathEntrypoint)
     }
+    is_string := isString(klass)
 
     buck_array := LoadI(buck_arr_hdr).Imm(EtsConstants::ESCOMPAT_ARRAY_DATA_OFFSET).ref
     buck_array_data := AddI(buck_array).Imm(Constants::ARRAY_DATA_OFFSET).ptr
@@ -418,21 +454,21 @@ end
 
 ################################################################
 
-scoped_macro(:processMapHas) do |map, key, mode|
-  findOffset(map, key, "Return(0).b")
+scoped_macro(:processMapHas) do |map, key, idx, mode|
+  findOffset(map, key, idx, "Return(0).b")
   Return(1).b
 Label(:SlowPathEntrypoint)
   if mode == :NativePlus
-    Return(Call(map, key).Method('EtsEscompatMapHas').b).b
+    Return(Call(map, key, idx).Method('EtsEscompatMapHas').b).b
   else
-    entrypoint = get_entrypoint_offset("MAP_HAS_USUAL")
-    Intrinsic(:SLOW_PATH_ENTRY, map, key).AddImm(entrypoint).MethodAsImm("MapHasUsualBridge").Terminator.b
+    entrypoint = get_entrypoint_offset("MAP_HAS_ODD_SAVED")
+    Intrinsic(:SLOW_PATH_ENTRY, map, key, idx).AddImm(entrypoint).MethodAsImm("MapHasOddSavedBridge").Terminator.b
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   end
 end
 
-scoped_macro(:processMapGet) do |map, key, mode|
-  offset := findOffset(map, key, "Return(nullptr).ptr")
+scoped_macro(:processMapGet) do |map, key, idx, mode|
+  offset := findOffset(map, key, idx, "Return(nullptr).ptr")
 
   entry := Load(buck_data, offset).ref
   object := get_object_pointer_imm(entry, MapConstants::ENTRY_VAL_OFFSET)
@@ -440,17 +476,17 @@ scoped_macro(:processMapGet) do |map, key, mode|
 
 Label(:SlowPathEntrypoint)
   if mode == :NativePlus
-    Return(Call(map, key).Method('EtsEscompatMapGet').b).b
+    Return(Call(map, key, idx).Method('EtsEscompatMapGet').b).b
   else
-    entrypoint = get_entrypoint_offset("MAP_GET_USUAL")
-    Intrinsic(:SLOW_PATH_ENTRY, map, key).AddImm(entrypoint).MethodAsImm("MapGetUsualBridge").Terminator.ptr
+    entrypoint = get_entrypoint_offset("MAP_GET_ODD_SAVED")
+    Intrinsic(:SLOW_PATH_ENTRY, map, key, idx).AddImm(entrypoint).MethodAsImm("MapGetOddSavedBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   end
 end
 
 
-scoped_macro(:processMapDelete) do |map, key, mode|
-  offset := findOffset(map, key, "Return(0).b")
+scoped_macro(:processMapDelete) do |map, key, idx, mode|
+  offset := findOffset(map, key, idx, "Return(0).b")
 
   entry := Load(buck_data, offset).ref
   entry_next := LoadI(entry).Imm(MapConstants::ENTRY_NEXT_OFFSET).ref
@@ -474,10 +510,10 @@ scoped_macro(:processMapDelete) do |map, key, mode|
 
 Label(:SlowPathEntrypoint)
   if mode == :NativePlus
-    Return(Call(map, key).Method('EtsEscompatMapDelete').b).b
+    Return(Call(map, key, idx).Method('EtsEscompatMapDelete').b).b
   else
-    entrypoint = get_entrypoint_offset("MAP_DELETE_USUAL")
-    Intrinsic(:SLOW_PATH_ENTRY, map, key).AddImm(entrypoint).MethodAsImm("MapDeleteUsualBridge").Terminator.b
+    entrypoint = get_entrypoint_offset("MAP_DELETE_ODD_SAVED")
+    Intrinsic(:SLOW_PATH_ENTRY, map, key, idx).AddImm(entrypoint).MethodAsImm("MapDeleteOddSavedBridge").Terminator.b
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   end
 end

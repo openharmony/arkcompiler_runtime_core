@@ -14,24 +14,42 @@
  */
 
 #include "plugins/ets/runtime/types/ets_map.h"
+#include "plugins/ets/runtime/types/ets_bigint.h"
 
 #include "types/ets_object.h"
 
 namespace ark::ets::intrinsics {
 
-extern "C" EtsBoolean EtsEscompatMapHas(EtsEscompatMap *map, EtsObject *key)
+extern "C" EtsBoolean EtsEscompatMapHas(EtsEscompatMap *map, EtsObject *key, EtsInt idx)
 {
-    return EtsEscompatMap::Has(map, key);
+    return EtsEscompatMap::Has(map, key, idx);
 }
 
-extern "C" EtsObject *EtsEscompatMapGet(EtsEscompatMap *map, EtsObject *key)
+extern "C" EtsObject *EtsEscompatMapGet(EtsEscompatMap *map, EtsObject *key, EtsInt idx)
 {
-    return EtsEscompatMap::Get(map, key);
+    return EtsEscompatMap::Get(map, key, idx);
 }
 
-extern "C" EtsBoolean EtsEscompatMapDelete(EtsEscompatMap *map, EtsObject *key)
+extern "C" EtsBoolean EtsEscompatMapDelete(EtsEscompatMap *map, EtsObject *key, EtsInt idx)
 {
-    return EtsEscompatMap::Delete(map, key);
+    return EtsEscompatMap::Delete(map, key, idx);
+}
+
+extern "C" EtsLong GetHashCodeString(EtsObject *obj)
+{
+    ASSERT(obj->GetClass()->IsStringClass());
+    return static_cast<EtsLong>(EtsString::FromEtsObject(obj)->GetCoreType()->GetHashcode());
+}
+
+extern "C" EtsLong GetHashCodeBigint(EtsObject *obj)
+{
+    ASSERT(obj->GetClass()->IsBigInt());
+    return static_cast<EtsLong>(reinterpret_cast<EtsBigInt *>(obj)->GetHashCode());
+}
+
+extern "C" EtsLong GetHashCodeObject(EtsObject *obj)
+{
+    return static_cast<EtsLong>(obj->GetHashCode());
 }
 
 }  // namespace ark::ets::intrinsics

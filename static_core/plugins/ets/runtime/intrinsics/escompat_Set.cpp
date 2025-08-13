@@ -18,14 +18,4 @@
 
 namespace ark::ets::intrinsics {
 
-extern "C" EtsBoolean EtsEscompatSetHas(EtsEscompatSet *set, EtsObject *key)
-{
-    return EtsEscompatMapHas(set->GetElements(), key);
-}
-
-extern "C" EtsBoolean EtsEscompatSetDelete(EtsEscompatSet *set, EtsObject *key)
-{
-    return EtsEscompatMapDelete(set->GetElements(), key);
-}
-
 }  // namespace ark::ets::intrinsics
