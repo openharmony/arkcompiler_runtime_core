@@ -36,9 +36,9 @@ cases:
     
     - arg: float
       values:
-          - { val: 0b0 as byte, result: 0.0 as float }
-          - { val: Byte.MIN_VALUE, result: -128.0 as float }
-          - { val: Byte.MAX_VALUE, result: 127.0 as float }
+          - { val: 0b0 as byte, result: 0.0f }
+          - { val: Byte.MIN_VALUE, result: -128.0f }
+          - { val: Byte.MAX_VALUE, result: 127.0f }
 
     
     - arg: double
@@ -71,9 +71,9 @@ cases:
     
     - arg: float
       values:
-          - { val: 0b0 as short, result: 0.0 as float }
-          - { val: Short.MIN_VALUE, result: -32_768.0 as float }
-          - { val: Short.MAX_VALUE, result: 32_767.0 as float }
+          - { val: 0b0 as short, result: 0.0.toFloat() }
+          - { val: Short.MIN_VALUE, result: -32_768.0.toFloat() }
+          - { val: Short.MAX_VALUE, result: 32_767.0.toFloat() }
 
     
     - arg: double
@@ -99,9 +99,9 @@ cases:
     
     - arg: float
       values:
-          - { val: 0, result: 0.0 as float }
-          - { val: Int.MIN_VALUE, result: -2147483600.0 as float } # expected loss of precision
-          - { val: Int.MAX_VALUE, result: 2147483600 as float } # expected loss of precision
+          - { val: 0, result: new Float(0.0) }
+          - { val: Int.MIN_VALUE, result: new Float(-2147483600.0) } # expected loss of precision
+          - { val: Int.MAX_VALUE, result: new Float(2147483600) } # expected loss of precision
 
     
     - arg: double
@@ -120,9 +120,9 @@ cases:
     
     - arg: float
       values:
-          - { val: 0 as long, result: 0.0 as float }
-          - { val: Long.MIN_VALUE, result: -9223372000000000000 as float }
-          - { val: Long.MAX_VALUE, result: 9223372000000000000 as float }
+          - { val: 0 as long, result: new Float(0.0) }
+          - { val: Long.MIN_VALUE, result: new Float(-9223372000000000000) }
+          - { val: Long.MAX_VALUE, result: new Float(9223372000000000000) }
 
     
     - arg: double
@@ -141,12 +141,12 @@ cases:
     
     - arg: double
       values:
-          - { val: +0.0 as float, result: +0.0 }
-          - { val: -0.0 as float, result: -0.0 }
-          - { val: 3.4028234663852886e38 as float, result: 3.4028234663852886e38 as double }
-          - { val: 1.401298464324817e-45 as float, result: 1.401298464324817e-45 as double }
-          - { val: -3.4028234663852886e38 as float, result: -3.4028234663852886e38 as double }
-          - { val: -1.401298464324817e-45 as float, result: -1.401298464324817e-45 as double }
+          - { val: +0.0.toFloat(), result: +0.0 }
+          - { val: -0.0.toFloat(), result: -0.0 }
+          - { val: 3.4028234663852886e38.toFloat(), result: 3.4028234663852886e38 as double }
+          - { val: 1.401298464324817e-45.toFloat(), result: 1.401298464324817e-45 as double }
+          - { val: -3.4028234663852886e38.toFloat(), result: -3.4028234663852886e38 as double }
+          - { val: -1.401298464324817e-45.toFloat(), result: -1.401298464324817e-45 as double }
 
 
     - arg: int
@@ -171,9 +171,9 @@ cases:
       defs: |-
           enum Color { Red=10, Green=20, Blue=30 }
       values:
-          - { val: Color.Red, result: 10.0 as float }
-          - { val: Color.Green, result: 20.0 as float }
-          - { val: Color.Blue, result: 30.0 as float }
+          - { val: Color.Red, result: 10.0f }
+          - { val: Color.Green, result: 20.0f }
+          - { val: Color.Blue, result: 30.0f }
 
     
     - arg: double

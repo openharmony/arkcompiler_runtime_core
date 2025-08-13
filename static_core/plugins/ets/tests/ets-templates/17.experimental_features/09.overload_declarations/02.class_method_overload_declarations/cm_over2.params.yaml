@@ -50,7 +50,7 @@ cases:
               meth(p: long): long { return Long.MIN_VALUE }
               meth(p: Char): Char { return Char.MAX_VALUE as Char }
               meth(p: boolean): boolean { return false as boolean }
-              meth(p: Float): Float { return Float.MAX_VALUE as Float }
+              meth(p: Float): Float { return Float.MAX_VALUE.toFloat() }
               meth(p: double): double { return Double.MIN_VALUE }
           }
       use: |-
@@ -82,7 +82,7 @@ cases:
               meth(p: boolean[]): boolean { return false }
               meth(p: Boolean[]): Boolean { return true as Boolean }
               meth(p: float[]): float { if (p.length == 0) throw ex; else return Float.MIN_VALUE }
-              meth(p: Float[]): Float { return Float.MAX_VALUE as Float }
+              meth(p: Float[]): Float { return Float.MAX_VALUE.toFloat() }
               meth(p: double[]): double { return Double.MIN_VALUE }
               meth(p: Double[]): Double { if (p.length == 0) throw ex; else return Double.MAX_VALUE as Double }
           }
@@ -95,7 +95,7 @@ cases:
               arktest.assertEQ( a.meth([new Long(-1 as long)]), Long.MAX_VALUE )
               arktest.assertEQ( a.meth([new Char(c'A')]), Char.MAX_VALUE )
               arktest.assertEQ( a.meth([new Boolean(false)]), true )
-              arktest.assertEQ( a.meth([new Float(3.14 as float)]), Float.MAX_VALUE )
+              arktest.assertEQ( a.meth([new Float(3.14.toFloat())]), Float.MAX_VALUE )
               arktest.assertEQ( a.meth([new Double(3.14)]), Double.MAX_VALUE )
               arktest.assertEQ( a.meth([-1 as long]), Long.MIN_VALUE )
               arktest.assertEQ( a.meth([-1 as int]), Int.MIN_VALUE )
@@ -104,7 +104,7 @@ cases:
               arktest.assertEQ( a.meth([c'A']), Char.MIN_VALUE )
               arktest.assertEQ( a.meth([false]), false )
               arktest.assertEQ( a.meth([3.14]), Double.MIN_VALUE )
-              arktest.assertEQ( a.meth([3.14 as float]), Float.MIN_VALUE )
+              arktest.assertEQ( a.meth([3.14.toFloat()]), Float.MIN_VALUE )
           } catch (e) {
               arktest.assertTrue( false, "Unexpected error" )
           }

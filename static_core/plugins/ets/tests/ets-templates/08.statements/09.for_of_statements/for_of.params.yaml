@@ -54,7 +54,7 @@ cases:
 
     - use: |-
           let v: Float;
-          for (v of [1.1f,2.2f,3.3f,4.4f] as Float[]) res += v
+          for (v of [1.1f,2.2f,3.3f,4.4f]) res += v
           arktest.assertEQ( res, "1.12.23.34.4" )
 
     - use: |-
@@ -101,7 +101,7 @@ cases:
 
     - use: |-
           let arr: Long[] = new Long[3]
-          for (let i: int = 0; i < 3; i++) arr[i] = new Long(i as long)
+          for (let i: int = 0; i < 3; i++) arr[i] = new Long(i.toLong())
           for (let i of arr) res += i
           arktest.assertEQ( res, "012" )
 
