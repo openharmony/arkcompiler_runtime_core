@@ -56,7 +56,7 @@ class TestSuiteOptions(IOptions):
     __DEFAULT_REPEATS_BY_TIME = 0
     __WITH_JS = "with-js"
     __DEFAULT_WITH_JS = False
-    __SKIP_COMPILE_ONLY = "skip-compile-only"
+    __SKIP_COMPILE_ONLY_NEG = "skip-compile-only-neg"
     __DEFAULT_SKIP_COMPILE_ONLY = False
     __WORK_DIR = "work-dir"
 
@@ -132,9 +132,9 @@ class TestSuiteOptions(IOptions):
             dest=f"{dest}{TestSuiteOptions.__WITH_JS}",
             help='enable JS-related tests')
         config.add_argument(
-            f'--{TestSuiteOptions.__SKIP_COMPILE_ONLY}', action='store_true',
+            f'--{TestSuiteOptions.__SKIP_COMPILE_ONLY_NEG}', action='store_true',
             default=TestSuiteOptions.__DEFAULT_SKIP_COMPILE_ONLY,
-            dest=f"{dest}{TestSuiteOptions.__SKIP_COMPILE_ONLY}",
+            dest=f"{dest}{TestSuiteOptions.__SKIP_COMPILE_ONLY_NEG}",
             help='if set the tests marked as `compile-only` are excluded from launch. '
                  'By default, all tests are launched.')
 
@@ -180,8 +180,8 @@ class TestSuiteOptions(IOptions):
         return self.__parameters
 
     @cached_property
-    def skip_compile_only(self) -> bool:
-        return cast(bool, self.get_parameter(self.__SKIP_COMPILE_ONLY, self.__DEFAULT_SKIP_COMPILE_ONLY))
+    def skip_compile_only_neg(self) -> bool:
+        return cast(bool, self.get_parameter(self.__SKIP_COMPILE_ONLY_NEG, self.__DEFAULT_SKIP_COMPILE_ONLY))
 
     def extension(self, collection: CollectionsOptions | None = None) -> str:
         return str(self.get_parameter(self.__EXTENSION, self.__DEFAULT_EXTENSION, collection))

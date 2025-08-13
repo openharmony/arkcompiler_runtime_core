@@ -80,7 +80,7 @@ class TestsLoadingTest(TestCase):
 
     @patch('runner.utils.get_config_workflow_folder', lambda: TestsLoadingTest.data_folder)
     @patch('runner.utils.get_config_test_suite_folder', lambda: TestsLoadingTest.data_folder)
-    @patch('sys.argv', ["runner.sh", "workflow", "test_suite", "--skip-compile-only"])
+    @patch('sys.argv', ["runner.sh", "workflow", "test_suite", "--skip-compile-only-neg"])
     @patch.dict(os.environ, test_environ, clear=True)
     @patch('runner.suites.test_lists.TestLists.cmake_cache', cmake_cache)
     def test_skip_compile_only(self) -> None:
@@ -96,6 +96,7 @@ class TestsLoadingTest(TestCase):
         expected_tests = [
             "test1.ets",
             "test2.ets",
+            "test3.ets",
             "test5.ets",
         ]
         self.assertListEqual(actual_tests, expected_tests)
@@ -129,7 +130,7 @@ class TestsLoadingTest(TestCase):
 
     @patch('runner.utils.get_config_workflow_folder', lambda: TestsLoadingTest.data_folder)
     @patch('runner.utils.get_config_test_suite_folder', lambda: TestsLoadingTest.data_folder)
-    @patch('sys.argv', ["runner.sh", "workflow", "test_suite", "--exclude-ignored-tests", "--skip-compile-only"])
+    @patch('sys.argv', ["runner.sh", "workflow", "test_suite", "--exclude-ignored-tests", "--skip-compile-only-neg"])
     @patch.dict(os.environ, test_environ, clear=True)
     @patch('runner.suites.test_lists.TestLists.cmake_cache', cmake_cache)
     def test_both_exclude_ignored_skip_compile_only(self) -> None:
@@ -147,6 +148,7 @@ class TestsLoadingTest(TestCase):
         actual_tests = sorted(test.test_id for test in runner.tests)
         expected_tests = [
             "test2.ets",
+            "test3.ets"
         ]
         self.assertListEqual(actual_tests, expected_tests)
         # clear up
