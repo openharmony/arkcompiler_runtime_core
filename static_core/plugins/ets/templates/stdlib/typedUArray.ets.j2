@@ -31,7 +31,6 @@ const IS_LITTLE_ENDIAN: boolean;
     {%- set fromElementCompat = ('%s.to' + element['primitiveType'].capitalize() + '()') if element['subsetType'] != 'BigInt' else '%s.getULong()' %}
     {%- set numberBigIntToPrimitive = ('.to' + element['primitiveType'].capitalize() + '()') if element['subsetType'] != 'BigInt' else '.getULong()' %}
     {%- set numberBigIntUndefToPrimitive = (numberBigIntToPrimitive) %}
-    {%- set isNonCompat = '/* public */ internal' if element['subsetType'] != 'BigInt' else 'private' %}
     {%- set valueOrBigIntGetULong = '%s' if element['subsetType'] != 'BigInt' else 'new BigInt(%s).getULong()' %}
     {%- set asElementCompatOrBigInt = ('%s.to' + element['primitiveType'].capitalize() + '()') if element['subsetType'] != 'BigInt' else '%s' %}
 
@@ -68,7 +67,7 @@ class {{element['name']}}ArrayIterator implements IterableIterator<{{element['su
     }
 
     override next(): IteratorResult<{{element['subsetTypeValues']}}> {
-        if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
+        if (this.idx < 0 || this.idx >= this.parent.length) {
             return new IteratorResult<{{element['subsetTypeValues']}}>()
         }
         return new IteratorResult<{{element['subsetTypeValues']}}>(false, new {{element['subsetTypeValues']}}(this.parent[this.idx++]))
@@ -90,7 +89,7 @@ class {{element['name']}}ArrayIteratorEntries implements IterableIterator<{{subs
     }
 
     override next(): IteratorResult<{{subsetTypeValuesEntries}}> {
-        if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
+        if (this.idx < 0 || this.idx >= this.parent.length) {
             return new IteratorResult<{{subsetTypeValuesEntries}}>()
         }
         return new IteratorResult<{{subsetTypeValuesEntries}}>(
@@ -111,9 +110,9 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     /** Underlying Buffer */
     public readonly buffer: ArrayBuffer
 
-    internal readonly byteOffsetInt: int
-    internal readonly byteLengthInt: int
-    internal readonly lengthInt: int
+    private readonly byteOffsetInt: int
+    private readonly byteLengthInt: int
+    protected readonly lengthInt: int
 
     /**
      * Creates an empty {{element['name']}}Array.
@@ -368,7 +367,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
 
 
 {%- if element.get('name') not in ['Uint8Clamped', 'BigUint64'] %}{#- comment: Uint8Array and others, except Uint8Clamped, BigUint64 #}
-    internal zeroIfInfinity(val: {{element['subsetType']}}): {{element['subsetType']}} {
+    private zeroIfInfinity(val: {{element['subsetType']}}): {{element['subsetType']}} {
         {%- if element.get('subsetType') == 'number' %}
         if ((val == Infinity) || (val == -Infinity)) {
         {%- else %}
@@ -379,7 +378,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         return {{ 'val' if element['subsetType'] != 'BigInt' else 'new BigInt(val)' }}
     }
 
-    internal zeroIfInfinity(val: {{element['primitiveType']}}): {{element['primitiveType']}} {
+    private zeroIfInfinity(val: {{element['primitiveType']}}): {{element['primitiveType']}} {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0
         }
@@ -2066,7 +2065,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         return val
     }
 
-    internal setUnsafeClamp(insertPos: int, val: {{element['primitiveType']}}): void {
+    private setUnsafeClamp(insertPos: int, val: {{element['primitiveType']}}): void {
         {%- if element.get('clamped', False) %}
         val = {{element['name']}}Array.clamp(val)
         {%- endif %}
@@ -2075,7 +2074,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
 
     private final native getUnsafe(index: int): {{element['primitiveType']}}
 
-    internal setUnsafe(index: int, val: {{element['primitiveType']}}): void {
+    private setUnsafe(index: int, val: {{element['primitiveType']}}): void {
         const BPE = {{element['name']}}Array.BYTES_PER_ELEMENT.toInt()
         let byteIndex = index * BPE + this.byteOffsetInt
         let buf = this.buffer

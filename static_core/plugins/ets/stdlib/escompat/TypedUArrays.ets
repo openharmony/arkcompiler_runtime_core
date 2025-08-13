@@ -52,7 +52,7 @@ class Uint8ClampedArrayIterator implements IterableIterator<Number> {
     }
 
     override next(): IteratorResult<Number> {
-        if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
+        if (this.idx < 0 || this.idx >= this.parent.length) {
             return new IteratorResult<Number>()
         }
         return new IteratorResult<Number>(false, new Number(this.parent[this.idx++]))
@@ -72,7 +72,7 @@ class Uint8ClampedArrayIteratorEntries implements IterableIterator<[Number, Numb
     }
 
     override next(): IteratorResult<[Number, Number]> {
-        if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
+        if (this.idx < 0 || this.idx >= this.parent.length) {
             return new IteratorResult<[Number, Number]>()
         }
         return new IteratorResult<[Number, Number]>(
@@ -93,9 +93,9 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     /** Underlying Buffer */
     public readonly buffer: ArrayBuffer
 
-    internal readonly byteOffsetInt: int
-    internal readonly byteLengthInt: int
-    internal readonly lengthInt: int
+    private readonly byteOffsetInt: int
+    private readonly byteLengthInt: int
+    protected readonly lengthInt: int
 
     /**
      * Creates an empty Uint8ClampedArray.
@@ -1809,14 +1809,14 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
         return val
     }
 
-    internal setUnsafeClamp(insertPos: int, val: int): void {
+    private setUnsafeClamp(insertPos: int, val: int): void {
         val = Uint8ClampedArray.clamp(val)
         this.setUnsafe(insertPos, val)
     }
 
     private final native getUnsafe(index: int): int
 
-    internal setUnsafe(index: int, val: int): void {
+    private setUnsafe(index: int, val: int): void {
         const BPE = Uint8ClampedArray.BYTES_PER_ELEMENT.toInt()
         let byteIndex = index * BPE + this.byteOffsetInt
         let buf = this.buffer
@@ -1858,7 +1858,7 @@ class Uint8ArrayIterator implements IterableIterator<Number> {
     }
 
     override next(): IteratorResult<Number> {
-        if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
+        if (this.idx < 0 || this.idx >= this.parent.length) {
             return new IteratorResult<Number>()
         }
         return new IteratorResult<Number>(false, new Number(this.parent[this.idx++]))
@@ -1878,7 +1878,7 @@ class Uint8ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
     }
 
     override next(): IteratorResult<[Number, Number]> {
-        if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
+        if (this.idx < 0 || this.idx >= this.parent.length) {
             return new IteratorResult<[Number, Number]>()
         }
         return new IteratorResult<[Number, Number]>(
@@ -1899,9 +1899,9 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     /** Underlying Buffer */
     public readonly buffer: ArrayBuffer
 
-    internal readonly byteOffsetInt: int
-    internal readonly byteLengthInt: int
-    internal readonly lengthInt: int
+    private readonly byteOffsetInt: int
+    private readonly byteLengthInt: int
+    protected readonly lengthInt: int
 
     /**
      * Creates an empty Uint8Array.
@@ -2102,14 +2102,14 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             this.setUnsafeClamp(i, this.zeroIfInfinity(numbers[i]).toInt())
         }
     }
-    internal zeroIfInfinity(val: number): number {
+    private zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0
         }
         return val
     }
 
-    internal zeroIfInfinity(val: int): int {
+    private zeroIfInfinity(val: int): int {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0
         }
@@ -3620,13 +3620,13 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
         return val
     }
 
-    internal setUnsafeClamp(insertPos: int, val: int): void {
+    private setUnsafeClamp(insertPos: int, val: int): void {
         this.setUnsafe(insertPos, val)
     }
 
     private final native getUnsafe(index: int): int
 
-    internal setUnsafe(index: int, val: int): void {
+    private setUnsafe(index: int, val: int): void {
         const BPE = Uint8Array.BYTES_PER_ELEMENT.toInt()
         let byteIndex = index * BPE + this.byteOffsetInt
         let buf = this.buffer
@@ -3668,7 +3668,7 @@ class Uint16ArrayIterator implements IterableIterator<Number> {
     }
 
     override next(): IteratorResult<Number> {
-        if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
+        if (this.idx < 0 || this.idx >= this.parent.length) {
             return new IteratorResult<Number>()
         }
         return new IteratorResult<Number>(false, new Number(this.parent[this.idx++]))
@@ -3688,7 +3688,7 @@ class Uint16ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
     }
 
     override next(): IteratorResult<[Number, Number]> {
-        if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
+        if (this.idx < 0 || this.idx >= this.parent.length) {
             return new IteratorResult<[Number, Number]>()
         }
         return new IteratorResult<[Number, Number]>(
@@ -3709,9 +3709,9 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     /** Underlying Buffer */
     public readonly buffer: ArrayBuffer
 
-    internal readonly byteOffsetInt: int
-    internal readonly byteLengthInt: int
-    internal readonly lengthInt: int
+    private readonly byteOffsetInt: int
+    private readonly byteLengthInt: int
+    protected readonly lengthInt: int
 
     /**
      * Creates an empty Uint16Array.
@@ -3919,14 +3919,14 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             this.setUnsafeClamp(i, this.zeroIfInfinity(numbers[i]).toInt())
         }
     }
-    internal zeroIfInfinity(val: number): number {
+    private zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0
         }
         return val
     }
 
-    internal zeroIfInfinity(val: int): int {
+    private zeroIfInfinity(val: int): int {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0
         }
@@ -5422,13 +5422,13 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
         return val
     }
 
-    internal setUnsafeClamp(insertPos: int, val: int): void {
+    private setUnsafeClamp(insertPos: int, val: int): void {
         this.setUnsafe(insertPos, val)
     }
 
     private final native getUnsafe(index: int): int
 
-    internal setUnsafe(index: int, val: int): void {
+    private setUnsafe(index: int, val: int): void {
         const BPE = Uint16Array.BYTES_PER_ELEMENT.toInt()
         let byteIndex = index * BPE + this.byteOffsetInt
         let buf = this.buffer
@@ -5481,7 +5481,7 @@ class Uint32ArrayIterator implements IterableIterator<Number> {
     }
 
     override next(): IteratorResult<Number> {
-        if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
+        if (this.idx < 0 || this.idx >= this.parent.length) {
             return new IteratorResult<Number>()
         }
         return new IteratorResult<Number>(false, new Number(this.parent[this.idx++]))
@@ -5501,7 +5501,7 @@ class Uint32ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
     }
 
     override next(): IteratorResult<[Number, Number]> {
-        if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
+        if (this.idx < 0 || this.idx >= this.parent.length) {
             return new IteratorResult<[Number, Number]>()
         }
         return new IteratorResult<[Number, Number]>(
@@ -5522,9 +5522,9 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     /** Underlying Buffer */
     public readonly buffer: ArrayBuffer
 
-    internal readonly byteOffsetInt: int
-    internal readonly byteLengthInt: int
-    internal readonly lengthInt: int
+    private readonly byteOffsetInt: int
+    private readonly byteLengthInt: int
+    protected readonly lengthInt: int
 
     /**
      * Creates an empty Uint32Array.
@@ -5732,14 +5732,14 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             this.setUnsafeClamp(i, this.zeroIfInfinity(numbers[i]).toLong())
         }
     }
-    internal zeroIfInfinity(val: number): number {
+    private zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0
         }
         return val
     }
 
-    internal zeroIfInfinity(val: long): long {
+    private zeroIfInfinity(val: long): long {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0
         }
@@ -7270,13 +7270,13 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         return val
     }
 
-    internal setUnsafeClamp(insertPos: int, val: long): void {
+    private setUnsafeClamp(insertPos: int, val: long): void {
         this.setUnsafe(insertPos, val)
     }
 
     private final native getUnsafe(index: int): long
 
-    internal setUnsafe(index: int, val: long): void {
+    private setUnsafe(index: int, val: long): void {
         const BPE = Uint32Array.BYTES_PER_ELEMENT.toInt()
         let byteIndex = index * BPE + this.byteOffsetInt
         let buf = this.buffer
@@ -7329,7 +7329,7 @@ class BigUint64ArrayIterator implements IterableIterator<BigInt> {
     }
 
     override next(): IteratorResult<BigInt> {
-        if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
+        if (this.idx < 0 || this.idx >= this.parent.length) {
             return new IteratorResult<BigInt>()
         }
         return new IteratorResult<BigInt>(false, new BigInt(this.parent[this.idx++]))
@@ -7349,7 +7349,7 @@ class BigUint64ArrayIteratorEntries implements IterableIterator<[Number, BigInt]
     }
 
     override next(): IteratorResult<[Number, BigInt]> {
-        if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
+        if (this.idx < 0 || this.idx >= this.parent.length) {
             return new IteratorResult<[Number, BigInt]>()
         }
         return new IteratorResult<[Number, BigInt]>(
@@ -7370,9 +7370,9 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     /** Underlying Buffer */
     public readonly buffer: ArrayBuffer
 
-    internal readonly byteOffsetInt: int
-    internal readonly byteLengthInt: int
-    internal readonly lengthInt: int
+    private readonly byteOffsetInt: int
+    private readonly byteLengthInt: int
+    protected readonly lengthInt: int
 
     /**
      * Creates an empty BigUint64Array.
@@ -9107,13 +9107,13 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
         return val
     }
 
-    internal setUnsafeClamp(insertPos: int, val: long): void {
+    private setUnsafeClamp(insertPos: int, val: long): void {
         this.setUnsafe(insertPos, val)
     }
 
     private final native getUnsafe(index: int): long
 
-    internal setUnsafe(index: int, val: long): void {
+    private setUnsafe(index: int, val: long): void {
         const BPE = BigUint64Array.BYTES_PER_ELEMENT.toInt()
         let byteIndex = index * BPE + this.byteOffsetInt
         let buf = this.buffer

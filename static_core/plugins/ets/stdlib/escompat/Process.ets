@@ -57,7 +57,7 @@ export namespace StdProcess {
      * @class Represents child process created by executing process.runCmd()
      */
     export final class ChildProcess {
-
+        //NOTE(ekaterinazaytseva): unable to replace internal - used outside in runCmd as public
         internal constructor(bufferSize: int) {
             this.outBuffer = new ArrayBuffer(bufferSize);
             this.errBuffer = new ArrayBuffer(bufferSize);
@@ -129,6 +129,7 @@ export namespace StdProcess {
             this.killImpl(killSignal);
         }
 
+        // NOTE(ekaterinazaytseva): unable to replace internal - called outside as public from runCmd
         internal native spawn(command: string, timeout: int, killSignal: int): void;
 
         private native killImpl(signal: int): void;

@@ -154,7 +154,7 @@ export namespace containers {
             const keyHash: int = Runtime.getHashCodeByValue(k! as object).toInt(); // #26217
             const t = keyHash >> 31;
 
-            return ((keyHash ^ t) - t) & (this.buckets.actualLength - 1);
+            return ((keyHash ^ t) - t) & (this.buckets.length - 1);
         }
 
         private getInitialBucketsCount(entriesCount: int): int {
@@ -237,7 +237,7 @@ export namespace containers {
             }
             ConcurrencyHelpers.mutexLock(mutex);
             try {
-                if (i >= bucket.actualLength || i < 0) {
+                if (i >= bucket.length || i < 0) {
                     return null;
                 }
                 return bucket.$_get_unsafe(i);
@@ -297,7 +297,7 @@ export namespace containers {
                     entriesBuf.push(entry);
                 }
             }
-            const bucketsCount = this.getInitialBucketsCount(entriesBuf.actualLength);
+            const bucketsCount = this.getInitialBucketsCount(entriesBuf.length);
             this.buckets = new ConcurrentHashMapBucket<K, V>[bucketsCount];
             this.bucketMutex = new (Object | undefined)[bucketsCount];
 
@@ -360,7 +360,7 @@ export namespace containers {
             const buck = this.getOrCreateBucket(key);
             const buckIndex = this.getBucketIndex(key);
             ConcurrencyHelpers.mutexUnlock(this.bucketsMutex);
-            const buckSize = buck.actualLength;
+            const buckSize = buck.length;
             ConcurrencyHelpers.mutexLock(this.mutex);
             for (let i = 0; i < buckSize; i++) {
                 const node = this.atomicBucketAt(buckIndex, buck, i);
@@ -408,7 +408,7 @@ export namespace containers {
         public replace(key: K, newValue: V): boolean {
             const buck = this.getBucket(key);
             if (buck !== undefined) {
-                const buckSize = buck.actualLength;
+                const buckSize = buck.length;
                 ConcurrencyHelpers.mutexLock(this.bucketsMutex);
                 const buckIndex = this.getBucketIndex(key);
                 ConcurrencyHelpers.mutexUnlock(this.bucketsMutex);
@@ -440,7 +440,7 @@ export namespace containers {
         public override has(key: K): boolean {
             const buck = this.getBucket(key);
             if (buck !== undefined) {
-                const buckSize = buck.actualLength;
+                const buckSize = buck.length;
                 ConcurrencyHelpers.mutexLock(this.bucketsMutex);
                 const buckIndex = this.getBucketIndex(key);
                 ConcurrencyHelpers.mutexUnlock(this.bucketsMutex);
@@ -504,7 +504,7 @@ export namespace containers {
             const buckIndex = this.getBucketIndex(key);
             ConcurrencyHelpers.mutexUnlock(this.bucketsMutex);
             ConcurrencyHelpers.mutexLock(this.delMutex);
-            const buckSize = buck.actualLength;
+            const buckSize = buck.length;
             for (let i = 0; i < buckSize; i++) {
                 const node = this.atomicBucketAt(buckIndex, buck, i);
                 if (node === null) {
@@ -529,7 +529,7 @@ export namespace containers {
                 if (buckMutex !== undefined) {
                     ConcurrencyHelpers.mutexLock(buckMutex);
                     const popped = buck.pop()!;
-                    if (i != buckSize - 1 || buck.actualLength > buckSize) {
+                    if (i != buckSize - 1 || buck.length > buckSize) {
                         buck[i] = popped;
                     }
                     ConcurrencyHelpers.mutexUnlock(buckMutex);
@@ -583,7 +583,7 @@ export namespace containers {
         public override get(key: K): V | undefined {
             const buck = this.getBucket(key);
             if (buck !== undefined) {
-                const buckSize = buck.actualLength;
+                const buckSize = buck.length;
                 ConcurrencyHelpers.mutexLock(this.bucketsMutex);
                 const buckIndex = this.getBucketIndex(key);
                 ConcurrencyHelpers.mutexUnlock(this.bucketsMutex);
@@ -613,7 +613,7 @@ export namespace containers {
             return false;
         }
 
-        internal mappedIterator<R>(fn: (e: MapNode<K, V>) => R): IterableIterator<R> {
+        protected mappedIterator<R>(fn: (e: MapNode<K, V>) => R): IterableIterator<R> {
             ConcurrencyHelpers.mutexLock(this.mutex);
             try {
                 const headNode = this.headNode;

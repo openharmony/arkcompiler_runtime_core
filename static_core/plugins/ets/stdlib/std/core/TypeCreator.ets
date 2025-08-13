@@ -16,11 +16,11 @@
 package std.core;
 
 class AllowedAttributes {
-    internal static readonly FIELD = Attributes.STATIC | Attributes.INHERITED | Attributes.READONLY
-    internal static readonly METHOD = Attributes.STATIC | Attributes.INHERITED | Attributes.FINAL | Attributes.ABSTRACT | Attributes.CONSTRUCTOR | Attributes.THROWING | Attributes.NATIVE | Attributes.ASYNC | Attributes.GETTER | Attributes.SETTER
-    internal static readonly LAMBDA = Attributes.THROWING | Attributes.ASYNC
-    internal static readonly CLASS = Attributes.FINAL
-    internal static readonly PARAMETER = Attributes.REST | Attributes.OPTIONAL
+    public static readonly FIELD = Attributes.STATIC | Attributes.READONLY
+    public static readonly METHOD = Attributes.STATIC | Attributes.FINAL | Attributes.ABSTRACT | Attributes.CONSTRUCTOR | Attributes.NATIVE | Attributes.ASYNC | Attributes.GETTER | Attributes.SETTER
+    public static readonly LAMBDA = Attributes.ASYNC
+    public static readonly CLASS = Attributes.FINAL
+    public static readonly PARAMETER = Attributes.REST | Attributes.OPTIONAL
 }
 
 /**
@@ -42,8 +42,9 @@ type CollectTypesCB = (tc: TypeOrCreator) => void
  * Base for all type creators, supports creation of {@link Type}
  */
 export abstract class TypeCreator {
+    // NOTE(ekaterinazaytseva): unable to replace internal - used as public in FreezableCreator
     internal typ?: Type // not undefined if already created
-    internal ctxItemPtr: long = 0 // resides in ctx, no need to free
+    protected ctxItemPtr: long = 0 // resides in ctx, no need to free
 
     /**
      * Forces creation of `this` creator and creators it depends on
@@ -62,27 +63,31 @@ export abstract class TypeCreator {
         return this.typ!
     }
 
-    internal abstract getTargetLinker(): RuntimeLinker
+    protected abstract getTargetLinker(): RuntimeLinker
 
     /**
      * Traverses all types on which this `TypeCreator` depends
      * @param collector callback to be called with every type
      */
+    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
     internal abstract collectTypes(collector: CollectTypesCB): void
 
     /**
      * Must declare up to the point where future type descriptor is determinated
      * @param ctx current context
      */
+    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
     internal abstract declare(ctx: TypeCreatorCtx): void
 
     /**
      * Defines rest of the body, called after {@link declare}
      * @param ctx current context
      */
+    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
     internal abstract define(ctx: TypeCreatorCtx): void
 
     /** Makes class sealed in stdlib */
+    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
     internal constructor() {}
 
     /**
@@ -96,6 +101,7 @@ export abstract class TypeCreator {
      * @returns type descriptor that created type will habe
      * @note will be called only after {@link define}
      */
+    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
     internal getTypeDescriptor(): RuntimeTypeDescriptor {
         if (this.typ != undefined) {
             return this.typ!.getTypeDesc()
@@ -159,7 +165,7 @@ final class TypeOrCreator_Creator extends TypeOrCreator {
 }
 
 final class TypeCreatorCtx {
-    internal ctxPtr: long
+    public ctxPtr: long
     /** all objects that were passed to cpp code as their ids (indexes in this `Array`) */
     private objects: Array<Object> = new Array<Object>();
 
@@ -182,38 +188,38 @@ final class TypeCreatorCtx {
     private static native commit(ctxPtr: long, objects: FixedArray<Object>, targetLinker: RuntimeLinker): string | undefined
 
     private static native getError(ctxPtr: long): string | undefined
-    internal static native getObjectsArrayForCCtor(ctxPtr: long): FixedArray<Object>
+    public static native getObjectsArrayForCCtor(ctxPtr: long): FixedArray<Object>
 
-    internal static native getTypeDescFromPointer(ctxItemPtr: long): RuntimeTypeDescriptor
+    public static native getTypeDescFromPointer(ctxItemPtr: long): RuntimeTypeDescriptor
 
-    internal static native classCreate(ctxPtr: long, name: string, attrs: int): long
-    internal static native classSetBase(classPtr: long, base: RuntimeTypeDescriptor): string | undefined
-    internal static native classAddIface(classPtr: long, iface: RuntimeTypeDescriptor): string | undefined
-    internal static native classAddField(classPtr: long, name: string, field: RuntimeTypeDescriptor, attrs: int, access: int): string | undefined
+    public static native classCreate(ctxPtr: long, name: string, attrs: int): long
+    public static native classSetBase(classPtr: long, base: RuntimeTypeDescriptor): string | undefined
+    public static native classAddIface(classPtr: long, iface: RuntimeTypeDescriptor): string | undefined
+    public static native classAddField(classPtr: long, name: string, field: RuntimeTypeDescriptor, attrs: int, access: int): string | undefined
 
-    internal static native interfaceCreate(ctxPtr: long, name: string): long
-    internal static native interfaceAddBase(ifacePtr: long, base: RuntimeTypeDescriptor): string | undefined
+    public static native interfaceCreate(ctxPtr: long, name: string): long
+    public static native interfaceAddBase(ifacePtr: long, base: RuntimeTypeDescriptor): string | undefined
 
-    internal static native lambdaTypeCreate(ctxPtr: long, attrs: int): long
-    internal static native lambdaTypeAddParam(ftPtr: long, param: RuntimeTypeDescriptor, attrs: int): string | undefined
-    internal static native lambdaTypeAddResult(ftPtr: long, result: RuntimeTypeDescriptor): string | undefined
-    internal static native lambdaTypeAdd(ftPtr: long): string | undefined
+    public static native lambdaTypeCreate(ctxPtr: long, attrs: int): long
+    public static native lambdaTypeAddParam(ftPtr: long, param: RuntimeTypeDescriptor, attrs: int): string | undefined
+    public static native lambdaTypeAddResult(ftPtr: long, result: RuntimeTypeDescriptor): string | undefined
+    public static native lambdaTypeAdd(ftPtr: long): string | undefined
 
-    internal static native methodCreate(ctxItemPtr: long, name: string, attrs: int): long
-    internal static native methodAddAccessMod(methPtr: long, access: int): string | undefined
-    internal static native methodAddParam(methPtr: long, td: RuntimeTypeDescriptor, name: string, attrs: int): string | undefined
-    internal static native methodAddResult(methPtr: long, result: RuntimeTypeDescriptor): string | undefined
-    internal static native methodAddBodyFromMethod(methPtr: long, methodType: MethodType): string | undefined
-    internal static native methodAddBodyFromLambda(methPtr: long, id: int, lambdaType: LambdaType): string | undefined
-    internal static native methodAddBodyFromErasedLambda(methPtr: long, id: int): string | undefined
-    internal static native methodAddBodyDefault(methPtr: long): string | undefined
-    internal static native methodAdd(methPtr: long): string | undefined
+    public static native methodCreate(ctxItemPtr: long, name: string, attrs: int): long
+    public static native methodAddAccessMod(methPtr: long, access: int): string | undefined
+    public static native methodAddParam(methPtr: long, td: RuntimeTypeDescriptor, name: string, attrs: int): string | undefined
+    public static native methodAddResult(methPtr: long, result: RuntimeTypeDescriptor): string | undefined
+    public static native methodAddBodyFromMethod(methPtr: long, methodType: MethodType): string | undefined
+    public static native methodAddBodyFromLambda(methPtr: long, id: int, lambdaType: LambdaType): string | undefined
+    public static native methodAddBodyFromErasedLambda(methPtr: long, id: int): string | undefined
+    public static native methodAddBodyDefault(methPtr: long): string | undefined
+    public static native methodAdd(methPtr: long): string | undefined
 
     /**
      * checks that context is errorneous
      * used after long-returning types (that can't throw an exception explicitly)
      */
-    internal checkError(): void {
+    public checkError(): void {
         this.checkError(TypeCreatorCtx.getError(this.ctxPtr))
     }
 
@@ -222,7 +228,7 @@ final class TypeCreatorCtx {
      * @param ptr pointer to one of items allocated in the context
      * @returns `ptr`
      */
-    internal checkCtxItemPtr(ptr: long): long {
+    public checkCtxItemPtr(ptr: long): long {
         if (ptr == 0) {
             this.checkError()
         }
@@ -233,7 +239,7 @@ final class TypeCreatorCtx {
      * Cleans up offheap memory for this context.
      * Must be called.
      */
-    internal deinit(): void {
+    public deinit(): void {
         if (this.ctxPtr === 0) {
             throw new AssertionError("cannot call deinit when ctxPtr is null")
         }
@@ -242,7 +248,7 @@ final class TypeCreatorCtx {
     }
 
     /** default constructor */
-    internal constructor() {
+    public constructor() {
         this.ctxPtr = TypeCreatorCtx.createCtx()
     }
 
@@ -332,7 +338,7 @@ final class TypeCreatorCtx {
      * Example: lambdas of body methods.
      * @returns id of saved object that can be passed to runtime intrinsics
      */
-    internal registerObject(o: Object): int {
+    public registerObject(o: Object): int {
         const r = this.objects.length
         this.objects.push(o)
         return r.toInt()
@@ -342,7 +348,7 @@ final class TypeCreatorCtx {
      * Checks if ctx function returned an error
      * @throws TypeAPICreateError if error was found
      */
-    internal checkError(arg: string | undefined): void {
+    public checkError(arg: string | undefined): void {
         if (arg != undefined) {
             throw new TypeAPICreateError(arg as string)
         }
@@ -471,7 +477,7 @@ export final class ClassTypeCreator extends TypeCreator {
         }
     }
 
-    internal override getTargetLinker(): RuntimeLinker {
+    protected override getTargetLinker(): RuntimeLinker {
         return this.targetLinker
     }
 
@@ -618,7 +624,7 @@ export final class InterfaceTypeCreator extends TypeCreator {
         this.ctxItemPtr = ctx.checkCtxItemPtr(TypeCreatorCtx.interfaceCreate(ctx.ctxPtr, this.name))
     }
 
-    internal override getTargetLinker(): RuntimeLinker {
+    protected override getTargetLinker(): RuntimeLinker {
         return this.targetLinker
     }
 }
@@ -741,7 +747,7 @@ export final class LambdaTypeCreator extends TypeCreator {
     internal override define(ctx: TypeCreatorCtx): void {
     }
 
-    internal override getTargetLinker(): RuntimeLinker {
+    protected override getTargetLinker(): RuntimeLinker {
         return this.targetLinker
     }
 }
@@ -876,11 +882,14 @@ class HasAccessMod {
  * Creator for {@link Field}. Must be used as a part of {@link TypeCreator}.
  */
 export final class FieldCreator {
+    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
     internal name: string
+    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
     internal typ: TypeOrCreator
-    internal frozen: FreezableImpl = new FreezableImpl()
+    private frozen: FreezableImpl = new FreezableImpl()
+    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
     internal attrs: HasAttributes = new HasAttributes(this.frozen, AllowedAttributes.FIELD)
-    internal accessMod: HasAccessMod = new HasAccessMod(this.frozen)
+    private accessMod: HasAccessMod = new HasAccessMod(this.frozen)
 
     /**
      * @param name new field name
@@ -925,6 +934,7 @@ export final class FieldCreator {
  * Creator for {@link Parameter}. Must be used as a part of {@link MethodCreator}.
  */
 export final class ParameterCreator {
+    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
     internal typ: TypeOrCreator
     internal name?: string
     internal frozen: FreezableImpl = new FreezableImpl()
@@ -1002,13 +1012,14 @@ export final class ParameterCreator {
  * Creator for {@link Method}. Must be used as a part of {@link ClassTypeCreator} or {@link InterfaceTypeCreatpr}.
  */
 export final class MethodCreator {
+    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
     internal name: string
     internal params: Array<ParameterCreator> = new Array<ParameterCreator>();
     internal result: TypeOrCreator = TypeOrCreator.from(VoidType.REF);
-    internal body?: CallableBody
+    private body?: CallableBody
     internal frozen: FreezableImpl = new FreezableImpl()
     internal attrs: HasAttributes = new HasAttributes(this.frozen, AllowedAttributes.METHOD)
-    internal accessMod: HasAccessMod = new HasAccessMod(this.frozen)
+    private accessMod: HasAccessMod = new HasAccessMod(this.frozen)
 
     /**
      * @param name method name, which can contain [a-zA-Z0-9] and be a valid identifier
@@ -1062,6 +1073,7 @@ export final class MethodCreator {
      * @param typ type of result
      * @returns this
      */
+    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
     internal addResult(typ: TypeOrCreator): MethodCreator {
         checkNotFrozen(this.frozen)
         this.result = typ
@@ -1144,6 +1156,7 @@ export final class MethodCreator {
     /**
      * adds method to interface or class
      */
+    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
     internal addToCtxItemPtr(ctx: TypeCreatorCtx, classOrIfacePtr: long): void {
         const fptr = ctx.checkCtxItemPtr(TypeCreatorCtx.methodCreate(classOrIfacePtr, this.name, this.attrs.get()))
         ctx.checkError(TypeCreatorCtx.methodAddAccessMod(fptr, this.accessMod.get()))
@@ -1187,7 +1200,7 @@ export final class MethodCreator {
  */
 export class CallableBody {
     /** Makes class package-sealed */
-    internal constructor() {}
+    protected constructor() {}
 }
 
 /**
@@ -1203,7 +1216,7 @@ export final class CallableBodyDefault extends CallableBody {
  * Represents call to other method with forwarding all arguments as-is
  */
 export final class CallableBodyMethod extends CallableBody {
-    internal readonly body: Method
+    private readonly body: Method
 
     public constructor(m: Method) {
         super()
@@ -1215,7 +1228,7 @@ export final class CallableBodyMethod extends CallableBody {
  * Represents call to lambda with forwarding all arguments as-is
  */
 export final class CallableBodyFunction extends CallableBody {
-    internal readonly body: Object
+    private readonly body: Object
 
     /**
      * @param m lambda to call
@@ -1235,7 +1248,7 @@ export final class CallableBodyFunction extends CallableBody {
  * Represents call to lambda with boxing all arguments
  */
 export final class CallableBodyErasedFunction extends CallableBody {
-    internal /* readonly */ body: (recv: NullishType, args: FixedArray<NullishType>) => NullishType
+    private /* readonly */ body: (recv: NullishType, args: FixedArray<NullishType>) => NullishType
     public constructor(m: (recv: NullishType, args: FixedArray<NullishType>) => NullishType) {
         super()
         this.body = m

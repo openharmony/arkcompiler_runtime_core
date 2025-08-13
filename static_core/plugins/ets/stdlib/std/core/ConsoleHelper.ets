@@ -16,7 +16,7 @@
 package std.core;
 
 export class Formatter {
-    internal static objectToString(obj: Object, full: boolean = false): string {
+    private static objectToString(obj: Object, full: boolean = false): string {
         return (new Formatter).stringifyObject(obj, '\n', 1, full)
     }
 

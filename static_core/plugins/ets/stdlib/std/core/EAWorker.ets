@@ -90,7 +90,7 @@ export class EAWorker {
     // eaworkerNum is the current count of the worker, will be used for identifying the worker in workers map
     private readonly eaworkerNum: int;
     // TODO: using managed mutex instead of concurrent hash map
-    internal messages: containers.ConcurrentHashMap<concurrency.Message, MessageStatus>;
+    private messages: containers.ConcurrentHashMap<concurrency.Message, MessageStatus>;
     private loopStarted: AtomicFlag = new AtomicFlag(false);
     private readonly isMain: boolean;
     private isStarted: AtomicFlag = new AtomicFlag(false);
@@ -299,7 +299,7 @@ export class EAWorker {
         }
         return currentWorker;
     }
-
+    // NOTE(ekaterinazaytseva): unable to replace internal - used as public in MessageHandler.ets
     internal enqueue(message: concurrency.Message) {
         if (this.isMain) {
             EAWorker.postToMain(message.getTarget().handler, message);
@@ -360,7 +360,7 @@ export class EAWorker {
      * @param { Message } message The message to check
      * @returns { MessageStatus | undefined } The status of the message, or undefined if not found
      */
-    internal getMessageStatus(message: concurrency.Message): MessageStatus | undefined {
+    protected getMessageStatus(message: concurrency.Message): MessageStatus | undefined {
         if (this.isMain) {
             return undefined;
         }
