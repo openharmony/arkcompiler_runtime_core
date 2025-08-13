@@ -79,16 +79,21 @@ constexpr int Ctz(T x)
 template <typename T>
 constexpr int Popcount(T x)
 {
-    constexpr size_t RADIX = 2;
-    static_assert(std::is_integral<T>::value, "T must be integral");
-    static_assert(std::is_unsigned<T>::value, "T must be unsigned");
-    static_assert(std::numeric_limits<T>::radix == RADIX, "Unexpected radix!");
-    static_assert(sizeof(T) == sizeof(uint64_t) || sizeof(T) <= sizeof(uint32_t), "Unsupported sizeof(T)");
+    if constexpr (std::is_enum_v<T>) {
+        using UnderlyingType = std::underlying_type_t<T>;
+        return Popcount(static_cast<UnderlyingType>(x));
+    } else {
+        constexpr size_t RADIX = 2;
+        static_assert(std::is_integral<T>::value, "T must be integral");
+        static_assert(std::is_unsigned<T>::value, "T must be unsigned");
+        static_assert(std::numeric_limits<T>::radix == RADIX, "Unexpected radix!");
+        static_assert(sizeof(T) == sizeof(uint64_t) || sizeof(T) <= sizeof(uint32_t), "Unsupported sizeof(T)");
 
-    if (sizeof(T) == sizeof(uint64_t)) {
-        return PANDA_BIT_UTILS_POPCOUNTLL(x);
+        if (sizeof(T) == sizeof(uint64_t)) {
+            return PANDA_BIT_UTILS_POPCOUNTLL(x);
+        }
+        return PANDA_BIT_UTILS_POPCOUNT(x);
     }
-    return PANDA_BIT_UTILS_POPCOUNT(x);
 }
 
 // How many bits (minimally) does it take to store the constant 'value'? i.e. 1 for 1, 2 for 2 and 3, 3 for 4 and 5 etc.
@@ -112,6 +117,43 @@ constexpr size_t MinimumBitsToStore(T value)
             return 0;
         }
         return std::numeric_limits<T>::digits - Clz(value);
+    }
+}
+
+template <typename T>
+constexpr T BitFloor(T value)
+{
+    constexpr size_t RADIX = 2;
+    static_assert(std::is_integral<T>::value, "T must be integral");
+    static_assert(std::is_unsigned<T>::value, "T must be unsigned");
+    static_assert(std::numeric_limits<T>::radix == RADIX, "Unexpected radix!");
+    static_assert(sizeof(T) == sizeof(uint64_t) || sizeof(T) <= sizeof(uint32_t), "Unsupported sizeof(T)");
+
+    if (value != 0) {
+        return T {1} << (MinimumBitsToStore(value) - 1);
+    }
+    return 0;
+}
+
+template <typename T>
+constexpr T BitCeil(T value)
+{
+    constexpr size_t RADIX = 2;
+    static_assert(std::is_integral<T>::value, "T must be integral");
+    static_assert(std::is_unsigned<T>::value, "T must be unsigned");
+    static_assert(std::numeric_limits<T>::radix == RADIX, "Unexpected radix!");
+    static_assert(sizeof(T) == sizeof(uint64_t) || sizeof(T) <= sizeof(uint32_t), "Unsupported sizeof(T)");
+
+    if (value <= 1U) {
+        return T {1};
+    }
+    if constexpr (std::is_same_v<T, decltype(+value)>) {
+        return T {1} << MinimumBitsToStore(value - 1);  // Without integral promotion
+    } else {
+        // With integral promotion: UB is triggered if the bit-ceil value can not be represented by T, analogous to the
+        // behavior of shifting left operator (x << y) when y exceeds bit size of decltype(+x).
+        constexpr int OFFSET_FOR_UB = std::numeric_limits<unsigned>::digits - std::numeric_limits<T>::digits;
+        return T {1U << (MinimumBitsToStore(value - 1U) + OFFSET_FOR_UB) >> OFFSET_FOR_UB};
     }
 }
 

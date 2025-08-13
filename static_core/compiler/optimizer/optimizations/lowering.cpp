@@ -134,6 +134,9 @@ void Lowering::VisitOr(GraphVisitor *v, Inst *inst)
 
 void Lowering::VisitAnd(GraphVisitor *v, Inst *inst)
 {
+    if (static_cast<Lowering *>(v)->LowerAndAsBitfieldExtraction(inst) != nullptr) {
+        return;
+    }
     VisitBitwiseBinaryOperation<Opcode::And>(v, inst);
 }
 
@@ -701,6 +704,9 @@ void Lowering::LowerShift(Inst *inst)
         return;
     }
 
+    if (TryLowerShrAsBitfieldExtraction(inst, val)) {
+        return;
+    }
     Inst *newInst;
     if (opc == Opcode::Shr) {
         newInst = graph->CreateInstShrI(inst, inst->GetInput(0).GetInst(), val);
@@ -710,6 +716,111 @@ void Lowering::LowerShift(Inst *inst)
         newInst = graph->CreateInstShlI(inst, inst->GetInput(0).GetInst(), val);
     }
     InsertInstruction(inst, newInst);
+}
+
+bool Lowering::TryLowerShrAsBitfieldExtraction(Inst *inst, uint64_t shrValue)
+{
+    Graph *graph = inst->GetBasicBlock()->GetGraph();
+    if (graph->IsBytecodeOptimizer() || !graph->GetEncoder()->CanEncodeBitfieldExtractionFor(inst->GetType())) {
+        return false;
+    }
+    if (inst->GetOpcode() != Opcode::Shr && inst->GetOpcode() != Opcode::AShr) {
+        return false;
+    }
+    Inst *lhs = inst->GetInput(0).GetInst();
+    bool isCase1 = lhs->GetOpcode() == Opcode::Shl || lhs->GetOpcode() == Opcode::ShlI;
+    bool isCase2 = lhs->GetOpcode() == Opcode::And || lhs->GetOpcode() == Opcode::AndI;
+    if (!isCase1 && !isCase2) {
+        return false;
+    }
+    uint64_t val = 0;
+    if (lhs->IsBinaryInst()) {  // Shl or And
+        ConstantInst *lhsInput1 = GetCheckInstAndGetConstInput(lhs);
+        if (lhsInput1 == nullptr) {
+            return false;
+        }
+        val = lhsInput1->GetIntValue();
+    } else if (lhs->IsBinaryImmInst()) {  // ShlI or AndI
+        val = static_cast<BinaryImmOperation *>(lhs)->GetImm();
+    } else {
+        return false;
+    }
+    Inst *input = lhs->GetInput(0).GetInst();
+    if (input->GetType() != inst->GetType()) {
+        return false;
+    }
+    return (isCase1 && TryLowerShrAsBitfieldExtractionCase1(inst, input, val, shrValue)) ||
+           (isCase2 && TryLowerShrAsBitfieldExtractionCase2(inst, input, val, shrValue));
+}
+
+// 0.i64 Constant (B - n1 - n2)
+// 1.i64 Constant (B - n2)
+// 2. ...
+// 3.Type Shl v2, v0
+// 4.Type Shr/AShr v3, v1
+// ====>
+// 0.i64 Constant (B - n1 - n2)
+// 1.i64 Constant (B - n2)
+// 2. ...
+// 3.Type ExtractBitfield v2, n1, n2 where n1 = v1 - v0, n2 = B - v1
+bool Lowering::TryLowerShrAsBitfieldExtractionCase1(Inst *inst, Inst *input, uint64_t shlValue, uint64_t shrValue)
+{
+    Graph *graph = inst->GetBasicBlock()->GetGraph();
+    uint32_t size = DataType::GetTypeSize(inst->GetType(), graph->GetArch());
+
+    [[maybe_unused]] Inst *lhs = inst->GetInput(0).GetInst();
+    ASSERT(lhs->GetOpcode() == Opcode::Shl || lhs->GetOpcode() == Opcode::ShlI);
+    ASSERT(inst->GetOpcode() == Opcode::Shr || inst->GetOpcode() == Opcode::AShr);
+    ASSERT(inst->GetType() == input->GetType());
+    ASSERT(shrValue < size);
+
+    if (shlValue > shrValue) {
+        return false;
+    }
+    uint64_t sourceBit = shrValue - shlValue;
+    uint64_t width = size - shrValue;
+    bool signExt = (inst->GetOpcode() == Opcode::AShr);
+    InsertInstruction(inst, graph->CreateInstExtractBitfield(inst, input, sourceBit, width, signExt));
+    return true;
+}
+
+// 0.i64 Constant M, where 2^n2 - 2^n1 <= M <= 2^n2 - 1
+// 1.i64 Constant n1
+// 2. ...
+// 3.Type And v2, v0
+// 4.Type Shr|AShr v3, v1
+// ====>
+// 0.i64 Constant M, where 2^n2 - 2^n1 <= M <= 2^n2 - 1
+// 1.i64 Constant n1
+// 2. ...
+// 3.Type ExtractBitfield v2, n1, n2 - n1
+bool Lowering::TryLowerShrAsBitfieldExtractionCase2(Inst *inst, Inst *input, uint64_t mask, uint64_t shrValue)
+{
+    Graph *graph = inst->GetBasicBlock()->GetGraph();
+    uint32_t size = DataType::GetTypeSize(inst->GetType(), graph->GetArch());
+
+    [[maybe_unused]] Inst *lhs = inst->GetInput(0).GetInst();
+    ASSERT(lhs->GetOpcode() == Opcode::And || lhs->GetOpcode() == Opcode::AndI);
+    ASSERT(inst->GetOpcode() == Opcode::Shr || inst->GetOpcode() == Opcode::AShr);
+    ASSERT(inst->GetType() == input->GetType());
+    ASSERT(shrValue < size);
+
+    size_t maskSize = MinimumBitsToStore(mask);
+    if (maskSize > size) {
+        ASSERT(size <= HALF_SIZE);
+        mask &= ((1ULL << size) - 1);
+        maskSize = size;
+    }
+    // Checks whether 2^n2 - 2^n1 <= M <= 2^n2 - 1
+    // Note: The expression (1ULL << maskSize) may be UB when maskSize == WORD_SIZE which is 64
+    if (maskSize > shrValue && mask >= (maskSize < WORD_SIZE ? 1ULL << maskSize : 0) - (1ULL << shrValue)) {
+        uint64_t sourceBit = shrValue;
+        uint64_t width = maskSize - shrValue;
+        bool signExt = (inst->GetOpcode() == Opcode::AShr) && (maskSize == size);
+        InsertInstruction(inst, graph->CreateInstExtractBitfield(inst, input, sourceBit, width, signExt));
+        return true;
+    }
+    return false;
 }
 
 constexpr Opcode Lowering::GetInstructionWithShiftedOperand(Opcode opcode)
@@ -735,6 +846,7 @@ constexpr Opcode Lowering::GetInstructionWithShiftedOperand(Opcode opcode)
             return Opcode::NegSR;
         default:
             UNREACHABLE();
+            return Opcode::INVALID;
     }
 }
 
@@ -766,10 +878,11 @@ ShiftType Lowering::GetShiftTypeByOpcode(Opcode opcode)
             return ShiftType::ASR;
         default:
             UNREACHABLE();
+            return ShiftType::INVALID_SHIFT;
     }
 }
 
-Inst *Lowering::GetCheckInstAndGetConstInput(Inst *inst)
+ConstantInst *Lowering::GetCheckInstAndGetConstInput(Inst *inst)
 {
     DataType::Type type = inst->GetType();
     if (type != DataType::INT64 && type != DataType::UINT64 && type != DataType::INT32 && type != DataType::UINT32 &&
@@ -788,8 +901,7 @@ Inst *Lowering::GetCheckInstAndGetConstInput(Inst *inst)
         inst->SetInput(0, input);
         inst->SetInput(1, cnst);
     }
-    ASSERT(cnst->GetOpcode() == Opcode::Constant);
-    return cnst;
+    return cnst->CastToConstant();
 }
 
 ShiftOpcode Lowering::ConvertOpcode(Opcode newOpcode)
@@ -1170,6 +1282,58 @@ Inst *Lowering::LowerLogic(Inst *inst)
     } else {
         newInst = graph->CreateInstXorI(inst, inst->GetInput(0).GetInst(), val);
     }
+    InsertInstruction(inst, newInst);
+    return newInst;
+}
+
+// 0.i64 Constant n1
+// 1.i64 Constant M = 2^n2 - 1
+// 2. ...
+// 3.Type Shr v2, v0
+// 4.Type And v3, v1
+// ====>
+// 0.i64 Constant n1
+// 1.i64 Constant M = 2^n2 - 1
+// 2. ...
+// 3.Type ExtractBitfield v2, n1, n2 [ZeroExtension]
+Inst *Lowering::LowerAndAsBitfieldExtraction(Inst *inst)
+{
+    ASSERT(inst->GetOpcode() == Opcode::And);
+    Graph *graph = inst->GetBasicBlock()->GetGraph();
+    if (graph->IsBytecodeOptimizer() || !graph->GetEncoder()->CanEncodeBitfieldExtractionFor(inst->GetType())) {
+        return nullptr;
+    }
+    ConstantInst *pred = GetCheckInstAndGetConstInput(inst);
+    if (pred == nullptr) {
+        return nullptr;
+    }
+    uint32_t size = DataType::GetTypeSize(inst->GetType(), graph->GetArch());
+    uint64_t andMask = pred->GetIntValue();
+    uint64_t andMaskSize = MinimumBitsToStore(andMask);
+    if (andMaskSize == 0 || andMaskSize >= size || static_cast<unsigned>(Popcount(andMask)) != andMaskSize) {
+        return nullptr;
+    }
+
+    Inst *lhs = inst->GetInput(0).GetInst();
+    uint64_t shrValue = std::numeric_limits<uint64_t>::max();
+    if (lhs->GetOpcode() == Opcode::Shr || lhs->GetOpcode() == Opcode::AShr) {
+        ConstantInst *c = GetCheckInstAndGetConstInput(lhs);
+        if (c == nullptr) {
+            return nullptr;
+        }
+        shrValue = c->GetIntValue();
+    } else if (lhs->GetOpcode() == Opcode::ShrI || lhs->GetOpcode() == Opcode::AShrI) {
+        shrValue = static_cast<BinaryImmOperation *>(lhs)->GetImm();
+    }
+    if (shrValue >= size || shrValue + andMaskSize > size) {
+        return nullptr;
+    }
+    Inst *input = lhs->GetInput(0).GetInst();
+    if (input->GetType() != inst->GetType()) {
+        return nullptr;
+    }
+    // signExt=false, i.e. zero extension
+    auto *newInst = graph->CreateInstExtractBitfield(inst, input, shrValue, andMaskSize, false);
     InsertInstruction(inst, newInst);
     return newInst;
 }

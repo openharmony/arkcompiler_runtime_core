@@ -2746,6 +2746,7 @@ public:
 
     void SetWidth(unsigned width)
     {
+        ASSERT(width > 0);
         width_ = width;
     }
 
@@ -2780,6 +2781,10 @@ public:
     {
         return !signExt_;
     }
+
+    void SetVnObject(VnObject *vnObj) const override;
+    PANDA_PUBLIC_API Inst *Clone(const Graph *targetGraph) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
 private:
     unsigned sourceBit_ {0};

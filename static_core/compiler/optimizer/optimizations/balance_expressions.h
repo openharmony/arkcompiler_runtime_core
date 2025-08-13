@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,61 +89,6 @@ private:
     void SetIsApplied(bool value)
     {
         isApplied_ = value;
-    }
-
-    // Calculates the lowest integral power of two that is greater than `val`
-    // Same as std::bit_ceil() introduced in C++20
-    template <typename T>
-    T GetBitCeil(T val)
-    {
-        static_assert(std::is_unsigned<T>::value);
-        if (val <= 1) {
-            return 1;
-        }
-
-        size_t highestBitIdx = 0;
-        T valCopy = val;
-        while (valCopy != 0) {
-            valCopy = valCopy >> 1U;
-            highestBitIdx++;
-        }
-
-        T res = 1U;
-        ASSERT(highestBitIdx >= 1);
-        if ((val << (std::numeric_limits<T>::digits - highestBitIdx + 1)) == 0) {
-            // (highest_bit_idx >= 1) as soon as (val > 1)
-            // NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult)
-            return res << (highestBitIdx - 1);
-        }
-        return res << (highestBitIdx);
-    }
-
-    // If x is not 0 or 1, calculates the largest integral power of two that is less than `val`
-    // Same as std::bit_floor() introduced in C++20, except that return strictly less than `val`
-    template <typename T>
-    T GetBitFloor(T val)
-    {
-        static_assert(std::is_unsigned<T>::value);
-        if (val <= 1) {
-            return 0;
-        }
-
-        size_t highestBitIdx = 0;
-        T valCopy = val;
-        while (valCopy != 0) {
-            valCopy = valCopy >> 1U;
-            highestBitIdx++;
-        }
-        T res = 1U;
-        ASSERT(highestBitIdx >= 2U);
-        if ((val << (std::numeric_limits<T>::digits - highestBitIdx + 1)) == 0) {
-            // (highest_bit_idx >= 2) as soon as (val > 1)
-            // NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult)
-            return res << (highestBitIdx - 2U);
-        }
-        // (highest_bit_idx >= 2) as soon as (val > 1)
-        // NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult)
-        return res << (highestBitIdx - 1);
     }
 
 private:

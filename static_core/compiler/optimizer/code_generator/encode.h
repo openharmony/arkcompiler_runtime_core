@@ -321,6 +321,7 @@ public:
     virtual bool CanEncodeCompressedStringCharAt();
     virtual bool CanEncodeCompressedStringCharAtI();
     virtual bool CanEncodeFloatSelect();
+    virtual bool CanEncodeBitfieldExtractionFor(DataType::Type type);
     virtual void EncodeCompareAndSwap(Reg dst, Reg obj, Reg offset, Reg val, Reg newval);
     virtual void EncodeCompareAndSwap(Reg dst, Reg addr, Reg val, Reg newval);
     virtual void EncodeUnsafeGetAndSet(Reg dst, Reg obj, Reg offset, Reg val);

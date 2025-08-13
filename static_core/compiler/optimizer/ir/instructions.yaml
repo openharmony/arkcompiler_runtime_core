@@ -195,7 +195,7 @@ instructions:
   - opcode: ExtractBitfield
     base: ExtractBitfieldInst
     signature: [d-int, int]
-    flags: [acc_write, acc_read]
+    flags: [low_level, acc_write, acc_read]
     description: Extract bitfield of integer.
 
   - opcode: Compare

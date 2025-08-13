@@ -279,6 +279,14 @@ bool BinaryShiftedRegisterOperation::DumpInputs(std::ostream *out) const
     return true;
 }
 
+bool ExtractBitfieldInst::DumpInputs(std::ostream *out) const
+{
+    Inst::DumpInputs(out);
+    (*out) << ", " << sourceBit_ << ", " << width_;
+    (*out) << " [" << (signExt_ ? "SignExt" : "ZeroExt") << ']';
+    return true;
+}
+
 bool UnaryShiftedRegisterOperation::DumpInputs(std::ostream *out) const
 {
     Inst::DumpInputs(out);
