@@ -51,7 +51,7 @@ class ArrayKeysIterator<T> implements IterableIterator<number> {
     }
 
     override next(): IteratorResult<number> {
-        if (this.isDone || this.idx >= this.parent.actualLength) {
+        if (this.isDone || this.idx >= this.parent.length) {
             this.isDone = true
             return new IteratorResult<number>()
         }
@@ -75,7 +75,7 @@ type arrType = String | undefined;
 
 export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     private buffer: FixedArray<Any>
-    internal actualLength: int
+    protected actualLength: int
 
     override get length(): int {
         return this.actualLength
@@ -91,6 +91,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 
     public override native $_get(idx: int): T;
 
+    //NOTE(ekaterinazaytseva): unable to replace internal - using from friend class ArrayValuesIterator_T provide accsess problems
     internal final native $_get_unsafe(idx: int): T
 
     public native $_set(idx: int, val: T): void;
@@ -109,11 +110,12 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         this(arrayLen.toInt())
     }
 
-    internal constructor(_tag: FromBuffer, buf: FixedArray<Any>) {
+    protected constructor(_tag: FromBuffer, buf: FixedArray<NullishType>) {
         this.buffer = buf
         this.actualLength = buf.length
     }
 
+    //NOTE(ekaterinazaytseva): unable to replace internal - using default c-tor from non-inherited classes provide accsess problems
     internal constructor() {
         this.buffer = new Any[4]
         this.actualLength = 0
@@ -1998,7 +2000,7 @@ class ArrayValuesIterator_T<T> implements IterableIterator<T> {
     }
 
     override next(): IteratorResult<T> {
-        if (this.isDone || this.idx >= this.parent.actualLength) {
+        if (this.isDone || this.idx >= this.parent.length) {
             this.isDone = true
             return new IteratorResult<T>()
         }
@@ -2024,7 +2026,7 @@ class ArrayEntriesIterator_T<T> implements IterableIterator<[number, T]> {
     }
 
     override next(): IteratorResult<[number, T]> {
-        if (this.isDone || this.idx >= this.parent.actualLength) {
+        if (this.isDone || this.idx >= this.parent.length) {
             this.isDone = true
             return new IteratorResult<[number, T]>()
         }

@@ -220,6 +220,7 @@ export abstract class Type extends Object {
      *
      * @returns instance of appropriate type or undefined if resolving is failed
      */
+    // NOTE(ekaterinazaytseva): unable to replace internal - used in TypeCreator.ets as public
     internal static resolve(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker): Type | undefined {
         let kind = (TypeAPI.getTypeKind(td, contextLinker) & TypeKindMask).toByte()
         switch (kind) {

@@ -412,6 +412,7 @@ export class ArrayBuffer extends Buffer
     */
     public static native stringify(buffer: ArrayBuffer, encoding: string, start: int, end: int): string;
 
+    //NOTE(ekaterinazaytseva): unable to replace internal - used in frined class Atomics
     internal native atomicAddI8(index: int, byteOffset: int, value: byte): double;
 
     internal native atomicAndI8(index: int, byteOffset: int, value: byte): double;

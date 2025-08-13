@@ -30,7 +30,7 @@ class ArrayKeysIterator<T> implements IterableIterator<number> {
     }
 
     override next(): IteratorResult<number> {
-        if (this.isDone || this.idx >= this.parent.actualLength) {
+        if (this.isDone || this.idx >= this.parent.length) {
             this.isDone = true
             return new IteratorResult<number>()
         }
@@ -54,7 +54,7 @@ type arrType = String | undefined;
 
 export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     private buffer: FixedArray<Any>
-    internal actualLength: int
+    protected actualLength: int
 
     override get length(): int {
         return this.actualLength
@@ -70,6 +70,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 
     public override native $_get(idx: int): T;
 
+    //NOTE(ekaterinazaytseva): unable to replace internal - using from friend class ArrayValuesIterator_T provide accsess problems
     internal final native $_get_unsafe(idx: int): T
 
     public native $_set(idx: int, val: T): void;
@@ -88,11 +89,12 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         this(arrayLen.toInt())
     }
 
-    internal constructor(_tag: FromBuffer, buf: FixedArray<Any>) {
+    protected constructor(_tag: FromBuffer, buf: FixedArray<NullishType>) {
         this.buffer = buf
         this.actualLength = buf.length
     }
 
+    //NOTE(ekaterinazaytseva): unable to replace internal - using default c-tor from non-inherited classes provide accsess problems
     internal constructor() {
         this.buffer = new Any[4]
         this.actualLength = 0
@@ -1106,7 +1108,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 % ctx.this_arg = ''
 % ctx.this_len_int = 'this.actualLength'
 % ctx.this_array = 'escompat_array'
-% ctx.array_len_int = Proc.new { |v| "#{v}.actualLength" }
+% ctx.array_len_int = Proc.new { |v| "#{v}.length" }
 % ctx.access_public = 'public'
 % ctx.access_private = 'private'
 % ctx.override = 'override'
