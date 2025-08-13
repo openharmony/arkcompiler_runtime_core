@@ -174,9 +174,10 @@ void TimerModule::TimerCallback(uv_timer_t *timer)
         auto *coro = ark::ets::EtsCoroutine::GetCurrent();
         ASSERT(coro != nullptr);
         ark::ScopedManagedCodeThread managedScope(coro);
-        coro->GetCoroutineManager()->LaunchNative(
-            timerFunc, timer, std::move(coroName), ark::CoroutineLaunchMode::SAME_WORKER,
-            ark::ets::EtsCoroutine::TIMER_CALLBACK, true, ark::CoroutineWorkerGroup::ANY_ID);
+        coro->GetCoroutineManager()->LaunchNative(timerFunc, timer, std::move(coroName),
+                                                  ark::CoroutineWorkerGroup::GenerateExactWorkerId(
+                                                      ark::ets::EtsCoroutine::GetCurrent()->GetWorker()->GetId()),
+                                                  ark::ets::EtsCoroutine::TIMER_CALLBACK, true);
     }
     uv_timer_stop(timer);
 }
