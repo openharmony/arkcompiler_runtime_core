@@ -1235,7 +1235,7 @@ Expected<int, Runtime::Error> Runtime::ExecutePandaFile(std::string_view filenam
             }
             return true;
         });
-        return false;
+        return 0;
     }
 
     return Execute(entryPoint, args);

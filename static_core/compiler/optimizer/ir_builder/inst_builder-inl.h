@@ -1635,6 +1635,7 @@ bool InstBuilder::TryBuildStringCharAtIntrinsic(const BytecodeInstruction *bcIns
     return true;
 }
 
+// NOLINTNEXTLINE(misc-definitions-in-headers)
 void InstBuilder::BuildStringGetIntrinsic(const BytecodeInstruction *bcInst, bool accRead,
                                           RuntimeInterface::IntrinsicId intrinsicId)
 {
