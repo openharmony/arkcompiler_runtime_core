@@ -167,23 +167,7 @@ export function copyOf(src: FixedArray<boolean>): FixedArray<boolean> {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: FixedArray<boolean>, dst: FixedArray<boolean>, dstStart: int, srcStart: int, srcEnd: int): void {
-    if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
-    }
-    if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsError("copyTo: dst bounds verification failed")
-    }
-    if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsError("Destination array must have enough space")
-    }
-
-    let j: int = dstStart;
-    for (let i: int = srcStart; i < srcEnd; i++) {
-        dst[j] = src[i];
-        j++;
-    }
-}
+export native function copyTo(src: FixedArray<boolean>, dst: FixedArray<boolean>, dstStart: int, srcStart: int, srcEnd: int): void;
 
 // C++ semantics
 // (lower|upper)BoundSearch([1, 1, 2, 2, 2, 3, 3], 2, 0, 7)
@@ -333,23 +317,7 @@ export function copyOf(src: FixedArray<byte>): FixedArray<byte> {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: FixedArray<byte>, dst: FixedArray<byte>, dstStart: int, srcStart: int, srcEnd: int): void {
-    if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
-    }
-    if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsError("copyTo: dst bounds verification failed")
-    }
-    if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsError("Destination array must have enough space")
-    }
-
-    let j: int = dstStart;
-    for (let i: int = srcStart; i < srcEnd; i++) {
-        dst[j] = src[i];
-        j++;
-    }
-}
+export native function copyTo(src: FixedArray<byte>, dst: FixedArray<byte>, dstStart: int, srcStart: int, srcEnd: int): void;
 
 // C++ semantics
 // (lower|upper)BoundSearch([1, 1, 2, 2, 2, 3, 3], 2, 0, 7)
@@ -499,23 +467,7 @@ export function copyOf(src: FixedArray<short>): FixedArray<short> {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: FixedArray<short>, dst: FixedArray<short>, dstStart: int, srcStart: int, srcEnd: int): void {
-    if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
-    }
-    if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsError("copyTo: dst bounds verification failed")
-    }
-    if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsError("Destination array must have enough space")
-    }
-
-    let j: int = dstStart;
-    for (let i: int = srcStart; i < srcEnd; i++) {
-        dst[j] = src[i];
-        j++;
-    }
-}
+export native function copyTo(src: FixedArray<short>, dst: FixedArray<short>, dstStart: int, srcStart: int, srcEnd: int): void;
 
 // C++ semantics
 // (lower|upper)BoundSearch([1, 1, 2, 2, 2, 3, 3], 2, 0, 7)
@@ -665,23 +617,7 @@ export function copyOf(src: FixedArray<int>): FixedArray<int> {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: FixedArray<int>, dst: FixedArray<int>, dstStart: int, srcStart: int, srcEnd: int): void {
-    if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
-    }
-    if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsError("copyTo: dst bounds verification failed")
-    }
-    if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsError("Destination array must have enough space")
-    }
-
-    let j: int = dstStart;
-    for (let i: int = srcStart; i < srcEnd; i++) {
-        dst[j] = src[i];
-        j++;
-    }
-}
+export native function copyTo(src: FixedArray<int>, dst: FixedArray<int>, dstStart: int, srcStart: int, srcEnd: int): void;
 
 // C++ semantics
 // (lower|upper)BoundSearch([1, 1, 2, 2, 2, 3, 3], 2, 0, 7)
@@ -831,23 +767,7 @@ export function copyOf(src: FixedArray<long>): FixedArray<long> {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: FixedArray<long>, dst: FixedArray<long>, dstStart: int, srcStart: int, srcEnd: int): void {
-    if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
-    }
-    if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsError("copyTo: dst bounds verification failed")
-    }
-    if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsError("Destination array must have enough space")
-    }
-
-    let j: int = dstStart;
-    for (let i: int = srcStart; i < srcEnd; i++) {
-        dst[j] = src[i];
-        j++;
-    }
-}
+export native function copyTo(src: FixedArray<long>, dst: FixedArray<long>, dstStart: int, srcStart: int, srcEnd: int): void;
 
 // C++ semantics
 // (lower|upper)BoundSearch([1, 1, 2, 2, 2, 3, 3], 2, 0, 7)
@@ -997,23 +917,7 @@ export function copyOf(src: FixedArray<float>): FixedArray<float> {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: FixedArray<float>, dst: FixedArray<float>, dstStart: int, srcStart: int, srcEnd: int): void {
-    if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
-    }
-    if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsError("copyTo: dst bounds verification failed")
-    }
-    if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsError("Destination array must have enough space")
-    }
-
-    let j: int = dstStart;
-    for (let i: int = srcStart; i < srcEnd; i++) {
-        dst[j] = src[i];
-        j++;
-    }
-}
+export native function copyTo(src: FixedArray<float>, dst: FixedArray<float>, dstStart: int, srcStart: int, srcEnd: int): void;
 
 // C++ semantics
 // (lower|upper)BoundSearch([1, 1, 2, 2, 2, 3, 3], 2, 0, 7)
@@ -1163,23 +1067,7 @@ export function copyOf(src: FixedArray<double>): FixedArray<double> {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: FixedArray<double>, dst: FixedArray<double>, dstStart: int, srcStart: int, srcEnd: int): void {
-    if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
-    }
-    if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsError("copyTo: dst bounds verification failed")
-    }
-    if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsError("Destination array must have enough space")
-    }
-
-    let j: int = dstStart;
-    for (let i: int = srcStart; i < srcEnd; i++) {
-        dst[j] = src[i];
-        j++;
-    }
-}
+export native function copyTo(src: FixedArray<double>, dst: FixedArray<double>, dstStart: int, srcStart: int, srcEnd: int): void;
 
 // C++ semantics
 // (lower|upper)BoundSearch([1, 1, 2, 2, 2, 3, 3], 2, 0, 7)
@@ -1329,23 +1217,7 @@ export function copyOf(src: FixedArray<char>): FixedArray<char> {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: FixedArray<char>, dst: FixedArray<char>, dstStart: int, srcStart: int, srcEnd: int): void {
-    if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
-    }
-    if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsError("copyTo: dst bounds verification failed")
-    }
-    if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsError("Destination array must have enough space")
-    }
-
-    let j: int = dstStart;
-    for (let i: int = srcStart; i < srcEnd; i++) {
-        dst[j] = src[i];
-        j++;
-    }
-}
+export native function copyTo(src: FixedArray<char>, dst: FixedArray<char>, dstStart: int, srcStart: int, srcEnd: int): void;
 
 /**
  * Makes an array shallow copy
@@ -1382,20 +1254,4 @@ export function copyOf(src: FixedArray<NullishType>): FixedArray<NullishType> {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: FixedArray<NullishType>, dst: FixedArray<NullishType>, dstStart: int, srcStart: int, srcEnd: int): void {
-    if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
-    }
-    if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsError("copyTo: dst bounds verification failed")
-    }
-    if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsError("Destination array must have enough space")
-    }
-
-    let j: int = dstStart;
-    for (let i: int = srcStart; i < srcEnd; i++) {
-        dst[j] = src[i];
-        j++;
-    }
-}
+export native function copyTo(src: FixedArray<NullishType>, dst: FixedArray<NullishType>, dstStart: int, srcStart: int, srcEnd: int): void;

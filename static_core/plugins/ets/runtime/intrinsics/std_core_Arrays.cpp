@@ -14,7 +14,9 @@
  */
 
 #include "ets_class_root.h"
+#include "ets_vm.h"
 #include "intrinsics.h"
+#include "interpreter/runtime_interface.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_language_context.h"
@@ -22,21 +24,28 @@
 
 namespace ark::ets::intrinsics {
 
+static const char *CheckCopyToPreConditions(int32_t srcStart, int32_t srcLen, int32_t srcEnd, int32_t dstStart,
+                                            int32_t dstLen)
+{
+    if (srcStart < 0 || srcStart > srcEnd || srcEnd > srcLen) {
+        return "copyTo: src bounds verification failed";
+    }
+    if (dstStart < 0 || dstStart > dstLen) {
+        return "copyTo: dst bounds verification failed";
+    }
+    if ((srcEnd - srcStart) > (dstLen - dstStart)) {
+        return "copyTo: Destination array doesn't have enough space";
+    }
+    return nullptr;
+}
+
 template <typename T>
 static void StdCoreCopyTo(coretypes::Array *src, coretypes::Array *dst, int32_t dstStart, int32_t srcStart,
                           int32_t srcEnd)
 {
     auto srcLen = static_cast<int32_t>(src->GetLength());
     auto dstLen = static_cast<int32_t>(dst->GetLength());
-    const char *errmsg = nullptr;
-
-    if (srcStart < 0 || srcStart > srcEnd || srcEnd > srcLen) {
-        errmsg = "copyTo: src bounds verification failed";
-    } else if (dstStart < 0 || dstStart > dstLen) {
-        errmsg = "copyTo: dst bounds verification failed";
-    } else if ((srcEnd - srcStart) > (dstLen - dstStart)) {
-        errmsg = "copyTo: Destination array doesn't have enough space";
-    }
+    const char *errmsg = CheckCopyToPreConditions(srcStart, srcLen, srcEnd, dstStart, dstLen);
 
     if (errmsg == nullptr) {
         auto srcAddr = ToVoidPtr(ToUintPtr(src->GetData()) + srcStart * sizeof(T));
@@ -114,6 +123,160 @@ extern "C" void StdCoreDoubleCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_
                                     int32_t srcEnd)
 {
     StdCoreCopyTo<uint64_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
+}
+
+template <typename T>
+static void MemAtomicCopy(const void *srcAddr, void *dstAddr)
+{
+    auto src = reinterpret_cast<const std::atomic<T> *>(srcAddr);
+    auto dst = reinterpret_cast<std::atomic<T> *>(dstAddr);
+    // Atomic with relaxed order reason: use the relaxed memory order in hope the GC takes care
+    // of the memory ordering at a higher logical level
+    dst->store(src->load(std::memory_order_relaxed), std::memory_order_relaxed);
+}
+
+template <typename T>
+static void MemAtomicCopyReadBarrier(mem::GCBarrierSet *barrierSet, const void *srcStart, const void *srcAddr,
+                                     void *dstAddr)
+{
+    auto *dst = reinterpret_cast<std::atomic<T> *>(dstAddr);
+    auto *src = reinterpret_cast<const std::atomic<T> *>(barrierSet->PreReadBarrier(
+        srcStart, reinterpret_cast<const uint8_t *>(srcAddr) - reinterpret_cast<const uint8_t *>(srcStart)));
+    // Atomic with relaxed order reason: use the relaxed memory order in hope the GC takes care
+    // of the memory ordering at a higher logical level
+    dst->store(src->load(std::memory_order_relaxed), std::memory_order_relaxed);
+}
+
+template <typename T>
+static auto GetCopy([[maybe_unused]] void *srcAddr)
+{
+#ifdef ARK_HYBRID
+    auto *readBarrierSet = Thread::GetCurrent()->GetBarrierSet();
+    bool usePreReadBarrier = readBarrierSet->IsPreReadBarrierEnabled();
+
+    return [usePreReadBarrier, readBarrierSet, srcAddr](T *srcPtr, T *dstPtr) {
+        if (usePreReadBarrier) {
+            MemAtomicCopyReadBarrier<T>(readBarrierSet, srcAddr, srcPtr, dstPtr);
+        } else {
+            MemAtomicCopy<T>(srcPtr, dstPtr);
+        }
+    };
+#else
+    return [](T *srcPtr, T *dstPtr) { MemAtomicCopy<T>(srcPtr, dstPtr); };
+#endif
+}
+
+// Performance measurement on the device demonstrates that COPIED_BETWEEN_SAFEPOINT_THRESHOLD object pointers
+// are copied in 0.07-0.1 ms.
+static constexpr size_t COPIED_BETWEEN_SAFEPOINT_THRESHOLD = 100000UL;
+
+template <typename T, typename Copy, typename PutSP>
+static void CopyForward(T *src, T *dst, size_t length, Copy copy, PutSP putSafepoint)
+{
+    for (size_t i = 0; i < length / COPIED_BETWEEN_SAFEPOINT_THRESHOLD; ++i) {
+        for (size_t j = i * COPIED_BETWEEN_SAFEPOINT_THRESHOLD; j < (i + 1) * COPIED_BETWEEN_SAFEPOINT_THRESHOLD; ++j) {
+            copy(&src[j], &dst[j]);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        }
+        putSafepoint();
+    }
+    for (size_t i = (length / COPIED_BETWEEN_SAFEPOINT_THRESHOLD) * COPIED_BETWEEN_SAFEPOINT_THRESHOLD; i < length;
+         ++i) {
+        copy(&src[i], &dst[i]);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    }
+}
+
+template <typename T, typename Copy, typename PutSP>
+static void CopyBackward(T *src, T *dst, size_t length, Copy copy, PutSP putSafepoint)
+{
+    for (size_t i = length; i > (length / COPIED_BETWEEN_SAFEPOINT_THRESHOLD) * COPIED_BETWEEN_SAFEPOINT_THRESHOLD;
+         --i) {
+        copy(&src[i - 1], &dst[i - 1]);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    }
+    for (size_t i = length / COPIED_BETWEEN_SAFEPOINT_THRESHOLD; i > 0; --i) {
+        putSafepoint();
+        for (size_t j = i * COPIED_BETWEEN_SAFEPOINT_THRESHOLD; j > (i - 1) * COPIED_BETWEEN_SAFEPOINT_THRESHOLD; --j) {
+            copy(&src[j - 1], &dst[j - 1]);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        }
+    }
+}
+
+template <typename T, bool NEED_PRE_WRITE_BARRIER = true>
+static void RefCopy(void *srcAddr, void *dstAddr, int32_t length)
+{
+    auto *src = static_cast<T *>(srcAddr);
+    auto *dst = static_cast<T *>(dstAddr);
+    bool backwards = reinterpret_cast<int64_t>(srcAddr) < reinterpret_cast<int64_t>(dstAddr);
+    auto copy = GetCopy<T>(srcAddr);
+
+    if constexpr (NEED_PRE_WRITE_BARRIER) {
+        auto *barrierSet = Thread::GetCurrent()->GetBarrierSet();
+        bool usePreBarrier = barrierSet->IsPreBarrierEnabled();
+        auto copyWithBarriers = [&copy, &usePreBarrier, barrierSet](T *srcPtr, T *dstPtr) {
+            if (usePreBarrier) {
+                barrierSet->PreBarrier(reinterpret_cast<void *>(*dstPtr));
+            }
+            copy(srcPtr, dstPtr);
+        };
+        auto putSafepoint = [&usePreBarrier, barrierSet]() {
+            ark::interpreter::RuntimeInterface::Safepoint();
+            usePreBarrier = barrierSet->IsPreBarrierEnabled();
+        };
+        if (backwards) {
+            CopyBackward(src, dst, length, copyWithBarriers, putSafepoint);
+        } else {
+            CopyForward(src, dst, length, copyWithBarriers, putSafepoint);
+        }
+    } else {
+        auto putSafepoint = []() { ark::interpreter::RuntimeInterface::Safepoint(); };
+        if (backwards) {
+            CopyBackward(src, dst, length, copy, putSafepoint);
+        } else {
+            CopyForward(src, dst, length, copy, putSafepoint);
+        }
+    }
+}
+
+template <bool NEED_PRE_WRITE_BARRIER = true>
+void StdCoreCopyToForObjects(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart, int32_t srcEnd)
+{
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coroutine);
+    auto srcArray = EtsHandle(coroutine, src);
+    auto dstArray = EtsHandle(coroutine, dst);
+
+    auto srcLen = static_cast<int32_t>(srcArray->GetLength());
+    auto dstLen = static_cast<int32_t>(dstArray->GetLength());
+    auto length = srcEnd - srcStart;
+    const char *errmsg = CheckCopyToPreConditions(srcStart, srcLen, srcEnd, dstStart, dstLen);
+    if (errmsg != nullptr) {
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ARRAY_INDEX_OUT_OF_BOUNDS_ERROR, errmsg);
+        return;
+    }
+
+    /* the result will be exactly the same as it is */
+    if (length == 0 || (srcArray.GetPtr() == dstArray.GetPtr() && srcStart == dstStart)) {
+        return;
+    }
+
+    auto srcAddr = ToVoidPtr(ToUintPtr(srcArray->GetCoreType()->GetData()) + srcStart * sizeof(ObjectPointerType));
+    auto dstAddr = ToVoidPtr(ToUintPtr(dstArray->GetCoreType()->GetData()) + dstStart * sizeof(ObjectPointerType));
+
+    TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
+    RefCopy<ObjectPointerType, NEED_PRE_WRITE_BARRIER>(srcAddr, dstAddr, length);
+    TSAN_ANNOTATE_IGNORE_WRITES_END();
+
+    auto *barrierSet = Thread::GetCurrent()->GetBarrierSet();
+    if (barrierSet->GetPostType() != ark::mem::BarrierType::POST_WRB_NONE) {
+        constexpr uint32_t OFFSET = ark::coretypes::Array::GetDataOffset();
+        const uint32_t size = length * sizeof(ObjectPointerType);
+        barrierSet->PostBarrier(dstArray.GetPtr(), OFFSET + dstStart * sizeof(ObjectPointerType), size);
+    }
+}
+
+extern "C" void StdCoreObjectCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
+                                    int32_t srcEnd)
+{
+    StdCoreCopyToForObjects<true>(src, dst, dstStart, srcStart, srcEnd);
 }
 
 }  // namespace ark::ets::intrinsics
