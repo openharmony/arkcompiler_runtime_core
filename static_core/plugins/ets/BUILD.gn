@@ -297,11 +297,11 @@ if (with_stdlib) {
                json_array,
                "list lines")
     write_file(
-        "$root_build_dir/ohos-sdk/linux/ets/ets1.2/build-tools/ets2panda/bin/arktsconfig.json",
+        "$root_build_dir/ohos-sdk/linux/ets/static/build-tools/ets2panda/bin/arktsconfig.json",
         json_relative_path_array,
         "json")
     write_file(
-        "$root_build_dir/ohos-sdk/windows/ets/ets1.2/build-tools/ets2panda/bin/arktsconfig.json",
+        "$root_build_dir/ohos-sdk/windows/ets/static/build-tools/ets2panda/bin/arktsconfig.json",
         json_relative_path_array,
         "json")
     if (defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable) {
@@ -326,7 +326,7 @@ if (with_stdlib) {
       } else {
         sources = [ "$target_gen_dir/etsstdlib.abc" ]
       }
-      outputs = [ "$root_build_dir/ohos-sdk/linux/ets/ets1.2/build-tools/ets2panda/lib/etsstdlib.abc" ]
+      outputs = [ "$root_build_dir/ohos-sdk/linux/ets/static/build-tools/ets2panda/lib/etsstdlib.abc" ]
     }
   }
 
@@ -338,7 +338,7 @@ if (with_stdlib) {
       } else {
         sources = [ "$target_gen_dir/etsstdlib.abc" ]
       }
-      outputs = [ "$root_build_dir/ohos-sdk/windows/ets/ets1.2/build-tools/ets2panda/lib/etsstdlib.abc" ]
+      outputs = [ "$root_build_dir/ohos-sdk/windows/ets/static/build-tools/ets2panda/lib/etsstdlib.abc" ]
     }
   }
 
