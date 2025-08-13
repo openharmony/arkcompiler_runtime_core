@@ -148,7 +148,7 @@ static napi_value TupleSetCallBackHandler(napi_env env, size_t argc, napi_value 
 }
 
 template <bool IS_TUPLEN>
-napi_value JSRefConvertTuple<IS_TUPLEN>::CreateJsProxyHandler(InteropCtx *ctx)
+napi_ref JSRefConvertTuple<IS_TUPLEN>::CreateJsProxyHandler(InteropCtx *ctx)
 {
     // init jsProxyHandler
     napi_env env = ctx->GetJSEnv();
@@ -168,7 +168,9 @@ napi_value JSRefConvertTuple<IS_TUPLEN>::CreateJsProxyHandler(InteropCtx *ctx)
     NAPI_CHECK_FATAL(napi_set_named_property(env, jsProxyHandler, "get", getHandlerFunc));
     NAPI_CHECK_FATAL(napi_set_named_property(env, jsProxyHandler, "set", setHandlerFunc));
 
-    return jsProxyHandler;
+    napi_ref jsProxyHandlerRef = nullptr;
+    NAPI_CHECK_FATAL(napi_create_reference(env, jsProxyHandler, 1, &jsProxyHandlerRef));
+    return jsProxyHandlerRef;
 }
 
 template <bool IS_TUPLEN>
@@ -186,9 +188,12 @@ napi_value JSRefConvertTuple<IS_TUPLEN>::WrapImpl(InteropCtx *ctx, EtsObject *et
             return storage->GetJsObject(etsObject, env);
         }
 
+        napi_value jsProxyHandler = nullptr;
+        NAPI_CHECK_FATAL(napi_get_reference_value(env, jsProxyHandlerRef_, &jsProxyHandler));
+
         napi_value targetObject;
         NAPI_CHECK_FATAL(napi_create_object(env, &targetObject));
-        std::vector<napi_value> args = {targetObject, this->jsProxyHandler_};
+        std::vector<napi_value> args = {targetObject, jsProxyHandler};
 
         napi_value proxyObject {};
         napi_value jsProxyCtor = ctx->GetCommonJSObjectCache()->GetProxy();

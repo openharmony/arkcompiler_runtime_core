@@ -27,8 +27,20 @@ template <bool IS_TUPLEN>
 class JSRefConvertTuple : public JSRefConvert {
 public:
     explicit JSRefConvertTuple(InteropCtx *ctx, Class *klass)
-        : JSRefConvert(this), klass_ {EtsClass::FromRuntimeClass(klass)}, jsProxyHandler_ {CreateJsProxyHandler(ctx)}
+        : JSRefConvert(this), klass_ {EtsClass::FromRuntimeClass(klass)}, jsProxyHandlerRef_ {CreateJsProxyHandler(ctx)}
     {
+    }
+
+    JSRefConvertTuple(const JSRefConvertTuple &) = delete;
+    JSRefConvertTuple(JSRefConvertTuple &&) = delete;
+
+    JSRefConvertTuple &operator=(const JSRefConvertTuple &) = delete;
+    JSRefConvertTuple &operator=(JSRefConvertTuple &&) = delete;
+
+    ~JSRefConvertTuple() override
+    {
+        napi_env env = InteropCtx::Current(EtsCoroutine::GetCurrent())->GetJSEnv();
+        NAPI_CHECK_FATAL(napi_delete_reference(env, jsProxyHandlerRef_));
     }
 
     napi_value WrapImpl(InteropCtx *ctx, EtsObject *etsObject);
@@ -36,9 +48,9 @@ public:
 
 private:
     EtsClass *klass_;
-    napi_value jsProxyHandler_;
+    napi_ref jsProxyHandlerRef_;
 
-    napi_value CreateJsProxyHandler(InteropCtx *ctx);
+    napi_ref CreateJsProxyHandler(InteropCtx *ctx);
 };
 
 }  // namespace ark::ets::interop::js
