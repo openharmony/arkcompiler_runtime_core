@@ -347,15 +347,15 @@ function testGetDepth() {
     let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tokenValueCallbackFunction": tokenCb}
     parser.parseXml(options)
 
-    let expectedTextStr = '{  : 0 }; { note : 1 }; {  : 1 }; { title : 2 }; {  : 2 }; { title : 1 }; {  : 1 }; \
-{ todo : 2 }; {  : 2 }; { todo : 1 }; {  : 1 }; { todo : 2 }; {  : 2 }; { todo : 1 }; { note : 1 }; {  : 0 }; '
-
+    let expectedTextStr = '{  : 0 }; { note : 1 }; {  : 1 }; { title : 2 }; {  : 2 }; ' +
+        '{ title : 2 }; {  : 1 }; { todo : 2 }; {  : 2 }; { todo : 2 }; {  : 1 }; ' +
+        '{ todo : 2 }; {  : 2 }; { todo : 2 }; { note : 1 }; {  : 0 }; '
     arktest.assertEQ(textStr, expectedTextStr)
 
     // key0 - xml, key2 - start, key3 - close, key 4 - text, key10 - whitespace
-    let oldExpected = new Array<string>("key:0 value:0 key:2 value:1 key:10 value:1 key:2 value:2 key:4 value:2",
-    "key:3 value:1 key:10 value:1 key:2 value:2 key:4 value:2 key:3 value:1 key:10 value:1",
-    "key:2 value:2 key:4 value:2 key:3 value:1 key:3 value:1 key:1 value:0 ").join(" ")
+    let oldExpected = "key:0 value:0 key:2 value:1 key:10 value:1 key:2 value:2 key:4 value:2 " +
+        "key:3 value:2 key:10 value:1 key:2 value:2 key:4 value:2 key:3 value:2 key:10 value:1 " +
+        "key:2 value:2 key:4 value:2 key:3 value:2 key:3 value:1 key:1 value:0 ";
 
     arktest.assertEQ(oldStr, oldExpected)
 }

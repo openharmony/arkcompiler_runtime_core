@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-testXmlPullParserConstructor0006 failed, error: AssertionError: expected true but was false
-testXmlPullParserConstructor0004 failed, error: AssertionError: expected true but was false
-testXmlPullParserConstructor0001 failed, error: BusinessError: The node name contains invalid characters
+testXmlPullParserConstructor0006 failed, error: BusinessError: The node name contains invalid characters: 1
+testXmlPullParserConstructor0004 failed, error: BusinessError: expected: /b read: i
+testXmlPullParserConstructor0001 failed, error: BusinessError: attr value delimiter missing!
 testXmlPullParserConstructor0010 failed, error: AssertionError: expected true but was false
