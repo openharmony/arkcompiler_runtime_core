@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_COROUTINES_STACKFUL_COMMON_H
-#define PANDA_RUNTIME_COROUTINES_STACKFUL_COMMON_H
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TASKPOOL_H
+#define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TASKPOOL_H
 
-namespace ark::stackful_coroutines {
+namespace ark::ets::intrinsics::taskpool {
 
-// common constants and globals will reside here...
-}  // namespace ark::stackful_coroutines
+constexpr const char *TASKPOOL_LAUNCH_MODE = "launch";
+constexpr const char *TASKPOOL_EAWORKER_MODE = "eaworker";
+// taskpool eaworker limit
+constexpr uint32_t TASKPOOL_EAWORKER_INIT_NUM = 3;
 
-#endif /* PANDA_RUNTIME_COROUTINES_STACKFUL_COMMON_H */
+}  // namespace ark::ets::intrinsics::taskpool
+
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TASKPOOL_H

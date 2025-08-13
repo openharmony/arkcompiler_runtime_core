@@ -18,6 +18,7 @@
 #include "runtime/coroutines/coroutine_context.h"
 #include "runtime/thread_manager.h"
 #include "runtime/include/runtime.h"
+#include "runtime/coroutines/stackful_common.h"
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/coroutines/coroutine_events.h"
 #include "runtime/coroutines/coroutine_worker_group.h"
@@ -42,6 +43,8 @@ struct CoroutineManagerConfig {
     bool enablePerfStats = false;
     /// Enable external timer implementation
     bool enableExternalTimer = false;
+    // number of exclusive workers created for runtime needs
+    uint32_t preallocatedExclusiveWorkersCount = 0;
 };
 
 /// @brief defines the requested launch mode for a coroutine
