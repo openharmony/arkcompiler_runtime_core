@@ -14,6 +14,7 @@
  */
 
 import {util} from "@ohos.util";
+import { BusinessError } from "@ohos.base";
 
 interface Person {
     name: string,
@@ -138,4 +139,22 @@ function testUtilGetHash011() {
     let result1 = util.getHash(regex1);
     let result2 = util.getHash(regex2);
     arktest.assertNE(result1, result2, "The object should have the different hash code");
+}
+
+function testUtilGetHash012() {
+    try {
+        util.getHash(null);
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Parameter error. The type of Parameter must be object.");
+        return;
+    }
+}
+
+function testUtilGetHash013() {
+    try {
+        util.getHash(undefined);
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Parameter error. The type of Parameter must be object.");
+        return;
+    }
 }
