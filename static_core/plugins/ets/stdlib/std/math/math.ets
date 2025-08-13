@@ -937,14 +937,14 @@ export native function random(): double;
  *
  * @param v An integer expression.
  *
- * @throws ArgumentOutOfRangeException if v < 1.
+ * @throws ArgumentOutOfRangeError if v < 1.
  *
  * @returns Returns the base 10 logarithm of a number.
  *
  */
 export function log10(v: int): int {
     if (v < 1) {
-        throw new ArgumentOutOfRangeException("Integer argument for log10 should be positive");
+        throw new ArgumentOutOfRangeError("Integer argument for log10 should be positive");
     }
     return (v >= 1000000000) ? 9 : (v >= 100000000) ? 8 :
         (v >= 10000000) ? 7 : (v >= 1000000) ? 6 :

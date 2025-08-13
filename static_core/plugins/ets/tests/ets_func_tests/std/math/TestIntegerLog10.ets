@@ -46,8 +46,6 @@ function test(result: int, message: String ): int {
 function bad():int {
     try {
         log10(-1)
-    } catch(aor: ArgumentOutOfRangeException) {        
-        return 0;
     } catch(e) {
         return 0;   
     }

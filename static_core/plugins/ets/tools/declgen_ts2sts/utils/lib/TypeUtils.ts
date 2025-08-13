@@ -52,7 +52,7 @@ export const SpecificTypes = [
     'UnknownKeyword'
 ];
 export const FINAL_CLASS: string[] = [
-    'ArgumentOutOfRangeException',
+    'ArgumentOutOfRangeError',
     'ArrayIndexOutOfBoundsError',
     'ArrayStoreError',
     'ArrayType',
