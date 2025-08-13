@@ -44,7 +44,7 @@ std::string RemoveAccents(ani_env *env, const std::string &str)
     accentsConverter->transliterate(source);
     delete accentsConverter;
     if (UNLIKELY(U_FAILURE(status))) {
-        ThrowNewError(env, "std.core.RuntimeException", "Removing accents failed, transliterate failed",
+        ThrowNewError(env, "std.core.RuntimeError", "Removing accents failed, transliterate failed",
                       "C{std.core.String}:");
         return std::string();
     }
@@ -97,7 +97,7 @@ ani_double StdCoreIntlCollatorLocaleCmp(ani_env *env, [[maybe_unused]] ani_class
     locale.setUnicodeKeywordValue(collationName, collationValue, status);
     if (UNLIKELY(U_FAILURE(status))) {
         const auto errorMessage = std::string("Collation '").append(collation).append("' is invalid or not supported");
-        ThrowNewError(env, "std.core.RuntimeException", errorMessage.c_str(), "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RuntimeError", errorMessage.c_str(), "C{std.core.String}:");
         return 0;
     }
 
@@ -109,7 +109,7 @@ ani_double StdCoreIntlCollatorLocaleCmp(ani_env *env, [[maybe_unused]] ani_class
         std::string localeName;
         dispName.toUTF8String(localeName);
         const auto errorMessage = std::string("Failed to create the collator for ").append(localeName);
-        ThrowNewError(env, "std.core.RuntimeException", errorMessage.c_str(), "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RuntimeError", errorMessage.c_str(), "C{std.core.String}:");
     }
 
     auto strPiece1 = icu::StringPiece(str1.c_str());
@@ -117,7 +117,7 @@ ani_double StdCoreIntlCollatorLocaleCmp(ani_env *env, [[maybe_unused]] ani_class
     if ((strPiece1.empty() != 0) && (strPiece2.empty() != 0)) {
         auto res = collator->compareUTF8(strPiece1, strPiece2, status);
         if (UNLIKELY(U_FAILURE(status))) {
-            ThrowNewError(env, "std.core.RuntimeException", "Comparison failed", "C{std.core.String}:");
+            ThrowNewError(env, "std.core.RuntimeError", "Comparison failed", "C{std.core.String}:");
         }
         return res;
     }
@@ -126,7 +126,7 @@ ani_double StdCoreIntlCollatorLocaleCmp(ani_env *env, [[maybe_unused]] ani_class
     icu::UnicodeString target = StdStrToUnicode(str2);
     auto res = collator->compare(source, target, status);
     if (UNLIKELY(U_FAILURE(status))) {
-        ThrowNewError(env, "std.core.RuntimeException", "Comparison failed", "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RuntimeError", "Comparison failed", "C{std.core.String}:");
     }
     return res;
 }

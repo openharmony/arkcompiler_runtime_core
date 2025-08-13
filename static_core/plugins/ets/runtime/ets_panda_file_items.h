@@ -180,7 +180,7 @@ static constexpr std::string_view REFERENCE_ERROR                      = "Lescom
 static constexpr std::string_view URI_ERROR                            = "Lescompat/URIError;";
 static constexpr std::string_view TYPE_ERROR                           = "Lescompat/TypeError;";
 // remove or make an Error
-static constexpr std::string_view RUNTIME_EXCEPTION                    = "Lstd/core/RuntimeException;";
+static constexpr std::string_view RUNTIME_ERROR                        = "Lstd/core/RuntimeError;";
 static constexpr std::string_view STACK_OVERFLOW_ERROR                 = "Lstd/core/StackOverflowError;";
 static constexpr std::string_view STRING_INDEX_OUT_OF_BOUNDS_ERROR     = "Lstd/core/StringIndexOutOfBoundsError;";
 // remove or make an Error

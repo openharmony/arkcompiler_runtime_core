@@ -119,7 +119,7 @@ export const FINAL_CLASS: string[] = [
     'ParameterCreator',
     'Promise',
     'Runtime',
-    'RuntimeException',
+    'RuntimeError',
     'Short',
     'ShortType',
     'ShortValue',
