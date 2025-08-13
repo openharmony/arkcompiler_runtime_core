@@ -910,32 +910,40 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      */
     public static of(...items: FixedArray<{{argType}}>): {{N}}Array {
         let res = new {{N}}Array(items.length.toInt())
+        {%- if argType == 'byte' %}
+        res.ofByte(items)
+        {%- elif argType == 'short' %}
+        res.ofShort(items)
+        {%- elif argType == 'int' %}
+        res.ofInt(items)
+        {%- elif argType == 'long' %}
+        res.ofLong(items)
+        {%- elif argType == 'float' %}
+        res.ofFloat(items)
+        {%- elif argType == 'bigint' %}
         for (let i: int = 0; i < items.length; i++) {
-        {%- if argType == 'number' %}
-            {%- if N == 'BigInt64' %}
-            res.setUnsafe(i, items[i].toLong())
-            {%- elif N == 'Int32' or N == 'Int16' or N == 'Int8' %}
-            let temp: double = items[i];
-            if (Double.isNaN(temp) || temp == Double.POSITIVE_INFINITY || temp == Double.NEGATIVE_INFINITY) {
-                res.setUnsafe(i, 0);
-            } else {
-                res.setUnsafe(i, {{N}}Array.doubleToInt(temp));
-            }
-            {%- else %}
-            res.setUnsafe(i, items[i]{{ '.to' + BT + '()' if argType != T and T != 'double' else ''}})
-            {%- endif %}
-        {%- else %}
-            {%- if N == 'BigInt64' and argType == 'bigint' %}
             res.setUnsafe(i, items[i].getLong())
-            {%- else %}
-            res.setUnsafe(i, items[i]{{ '.to' + BT + '()' if argType != T else ''}})
-            {%- endif %}
-        {%- endif %}
         }
+        {%- else %}
+        res.ofNumber(items)
+        {%- endif %}
         return res
     }
         {%- endif %}
     {%- endfor %}
+
+    private final native ofInt(items: FixedArray<int>): void
+    private final native ofNumber(items: FixedArray<number>): void
+
+    {%- if N == 'Int8' %}
+    private final native ofByte(items: FixedArray<byte>): void
+    {%- elif N == 'Int16' %}
+    private final native ofShort(items: FixedArray<short>): void
+    {%- elif N == 'BigInt64' %}
+    private final native ofLong(items: FixedArray<long>): void
+    {%- elif N == 'Float32' %}
+    private final native ofFloat(items: FixedArray<float>): void
+    {%- endif %}
 
     /**
      * Returns a new array from a set of elements.

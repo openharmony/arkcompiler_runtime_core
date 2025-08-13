@@ -1791,4 +1791,321 @@ extern "C" EtsInt TypedArrayDoubleToUint8(EtsDouble val)
     return static_cast<EtsInt>(reinterpret_cast<uint8_t>(*pTmp));
 }
 
+template <typename T>
+static T CastNumberHelper(double val) = delete;
+
+template <typename T>
+static T CastNumber(double val)
+{
+    if (std::isinf(val)) {
+        return 0;
+    }
+    if (std::isnan(val)) {
+        return 0;
+    }
+    return CastNumberHelper<T>(val);
+}
+
+template <>
+EtsByte CastNumberHelper(double val)
+{
+    return TypedArrayDoubleToInt8(val);
+}
+
+template <>
+EtsShort CastNumberHelper(double val)
+{
+    return TypedArrayDoubleToInt16(val);
+}
+
+template <>
+EtsInt CastNumberHelper(double val)
+{
+    return TypedArrayDoubleToInt32(val);
+}
+
+template <>
+EtsLong CastNumberHelper(double val)
+{
+    return StdCoreDoubleToLong(val);
+}
+
+template <typename T>
+static T CastNumberUnsignedHelper(double val) = delete;
+
+template <typename T>
+static T CastNumberUnsigned(double val)
+{
+    if (std::isinf(val)) {
+        return 0;
+    }
+    return CastNumberUnsignedHelper<T>(val);
+}
+
+template <>
+uint8_t CastNumberUnsignedHelper(double val)
+{
+    return StdCoreDoubleToInt(val);
+}
+
+template <>
+uint16_t CastNumberUnsignedHelper(double val)
+{
+    return StdCoreDoubleToInt(val);
+}
+
+template <>
+uint32_t CastNumberUnsignedHelper(double val)
+{
+    return StdCoreDoubleToLong(val);
+}
+
+template <typename T1, typename T2>
+static void EtsEscompatArrayOfImpl(T1 *thisArray, T2 *src)
+{
+    auto *arrayPtr = GetNativeData(thisArray);
+    if (UNLIKELY(arrayPtr == nullptr)) {
+        return;
+    }
+
+    using ElementType = typename T1::ElementType;
+    auto *dst = reinterpret_cast<ElementType *>(ToUintPtr(arrayPtr) + static_cast<int>(thisArray->GetByteOffset()));
+    std::copy_n(src, thisArray->GetLengthInt(), dst);
+}
+
+template <typename T1, typename T2>
+static void EtsEscompatArrayOfImplNumber(T1 *thisArray, T2 *src)
+{
+    auto *arrayPtr = GetNativeData(thisArray);
+    if (UNLIKELY(arrayPtr == nullptr)) {
+        return;
+    }
+
+    using ElementType = typename T1::ElementType;
+    auto *dst = reinterpret_cast<ElementType *>(ToUintPtr(arrayPtr) + static_cast<int>(thisArray->GetByteOffset()));
+    for (int i = 0; i < thisArray->GetLengthInt(); i++) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        dst[i] = CastNumber<ElementType>(src[i]);
+    }
+}
+
+template <typename T1, typename T2>
+static void EtsEscompatArrayOfImplNumberUnsigned(T1 *thisArray, T2 *src)
+{
+    auto *arrayPtr = GetNativeData(thisArray);
+    if (UNLIKELY(arrayPtr == nullptr)) {
+        return;
+    }
+
+    using ElementType = typename T1::ElementType;
+    auto *dst = reinterpret_cast<ElementType *>(ToUintPtr(arrayPtr) + static_cast<int>(thisArray->GetByteOffset()));
+    for (int i = 0; i < thisArray->GetLengthInt(); i++) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        dst[i] = CastNumberUnsigned<ElementType>(src[i]);
+    }
+}
+
+static int Clamp(double val)
+{
+    const int minUint8 = 0;
+    const int maxUint8 = 255;
+    if (val > maxUint8) {
+        val = maxUint8;
+    } else if (val < minUint8) {
+        val = minUint8;
+    }
+    return val;
+}
+
+template <typename T1, typename T2>
+static void EtsEscompatArrayOfImplClamped(T1 *thisArray, T2 *src)
+{
+    auto *arrayPtr = GetNativeData(thisArray);
+    if (UNLIKELY(arrayPtr == nullptr)) {
+        return;
+    }
+
+    using ElementType = typename T1::ElementType;
+    auto *dst = reinterpret_cast<ElementType *>(ToUintPtr(arrayPtr) + static_cast<int>(thisArray->GetByteOffset()));
+    for (int i = 0; i < thisArray->GetLengthInt(); i++) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        dst[i] = Clamp(src[i]);
+    }
+}
+
+extern "C" void EtsEscompatInt8ArrayOfInt(ark::ets::EtsEscompatInt8Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatInt8ArrayOfNumber(ark::ets::EtsEscompatInt8Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImplNumber(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatInt8ArrayOfByte(ark::ets::EtsEscompatInt8Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsByte *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatInt16ArrayOfInt(ark::ets::EtsEscompatInt16Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatInt16ArrayOfNumber(ark::ets::EtsEscompatInt16Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImplNumber(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatInt16ArrayOfShort(ark::ets::EtsEscompatInt16Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsShort *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatInt32ArrayOfInt(ark::ets::EtsEscompatInt32Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatInt32ArrayOfNumber(ark::ets::EtsEscompatInt32Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImplNumber(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatBigInt64ArrayOfInt(ark::ets::EtsEscompatBigInt64Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatBigInt64ArrayOfLong(ark::ets::EtsEscompatBigInt64Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsLong *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatBigInt64ArrayOfNumber(ark::ets::EtsEscompatBigInt64Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImplNumber(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatFloat32ArrayOfInt(ark::ets::EtsEscompatFloat32Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatFloat32ArrayOfFloat(ark::ets::EtsEscompatFloat32Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsFloat *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatFloat32ArrayOfNumber(ark::ets::EtsEscompatFloat32Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatFloat64ArrayOfInt(ark::ets::EtsEscompatFloat64Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatFloat64ArrayOfNumber(ark::ets::EtsEscompatFloat64Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatUint8ClampedArrayOfNumber(ark::ets::EtsEscompatUInt8ClampedArray *thisArray,
+                                                     EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImplClamped(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatUint8ClampedArrayOfInt(ark::ets::EtsEscompatUInt8ClampedArray *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImplClamped(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatUint8ClampedArrayOfShort(ark::ets::EtsEscompatUInt8ClampedArray *thisArray,
+                                                    EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsShort *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImplClamped(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatUint8ArrayOfNumber(ark::ets::EtsEscompatUInt8Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImplNumberUnsigned(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatUint8ArrayOfInt(ark::ets::EtsEscompatUInt8Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatUint8ArrayOfShort(ark::ets::EtsEscompatUInt8Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsShort *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatUint16ArrayOfNumber(ark::ets::EtsEscompatUInt16Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImplNumberUnsigned(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatUint16ArrayOfInt(ark::ets::EtsEscompatUInt16Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatUint32ArrayOfNumber(ark::ets::EtsEscompatUInt32Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImplNumberUnsigned(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatUint32ArrayOfInt(ark::ets::EtsEscompatUInt32Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsUint *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatUint32ArrayOfLong(ark::ets::EtsEscompatUInt32Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsLong *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatBigUint64ArrayOfInt(ark::ets::EtsEscompatBigUInt64Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatBigUint64ArrayOfLong(ark::ets::EtsEscompatBigUInt64Array *thisArray, EtsCharArray *src)
+{
+    auto *srcAddress = reinterpret_cast<EtsLong *>(ToUintPtr(src->GetCoreType()->GetData()));
+    EtsEscompatArrayOfImpl(thisArray, srcAddress);
+}
 }  // namespace ark::ets::intrinsics

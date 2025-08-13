@@ -748,14 +748,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<number>): Int8Array {
         let res = new Int8Array(items.length.toInt())
-        for (let i: int = 0; i < items.length; i++) {
-            let temp: double = items[i];
-            if (Double.isNaN(temp) || temp == Double.POSITIVE_INFINITY || temp == Double.NEGATIVE_INFINITY) {
-                res.setUnsafe(i, 0);
-            } else {
-                res.setUnsafe(i, Int8Array.doubleToInt(temp));
-            }
-        }
+        res.ofNumber(items)
         return res
     }
 
@@ -768,9 +761,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<int>): Int8Array {
         let res = new Int8Array(items.length.toInt())
-        for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, items[i].toByte())
-        }
+        res.ofInt(items)
         return res
     }
 
@@ -783,11 +774,13 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<byte>): Int8Array {
         let res = new Int8Array(items.length.toInt())
-        for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, items[i])
-        }
+        res.ofByte(items)
         return res
     }
+
+    private final native ofInt(items: FixedArray<int>): void
+    private final native ofNumber(items: FixedArray<number>): void
+    private final native ofByte(items: FixedArray<byte>): void
 
     /**
      * Returns a new array from a set of elements.
@@ -2578,14 +2571,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<number>): Int16Array {
         let res = new Int16Array(items.length.toInt())
-        for (let i: int = 0; i < items.length; i++) {
-            let temp: double = items[i];
-            if (Double.isNaN(temp) || temp == Double.POSITIVE_INFINITY || temp == Double.NEGATIVE_INFINITY) {
-                res.setUnsafe(i, 0);
-            } else {
-                res.setUnsafe(i, Int16Array.doubleToInt(temp));
-            }
-        }
+        res.ofNumber(items)
         return res
     }
 
@@ -2598,9 +2584,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<int>): Int16Array {
         let res = new Int16Array(items.length.toInt())
-        for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, items[i].toShort())
-        }
+        res.ofInt(items)
         return res
     }
 
@@ -2613,11 +2597,13 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<short>): Int16Array {
         let res = new Int16Array(items.length.toInt())
-        for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, items[i])
-        }
+        res.ofShort(items)
         return res
     }
+
+    private final native ofInt(items: FixedArray<int>): void
+    private final native ofNumber(items: FixedArray<number>): void
+    private final native ofShort(items: FixedArray<short>): void
 
     /**
      * Returns a new array from a set of elements.
@@ -4400,14 +4386,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<number>): Int32Array {
         let res = new Int32Array(items.length.toInt())
-        for (let i: int = 0; i < items.length; i++) {
-            let temp: double = items[i];
-            if (Double.isNaN(temp) || temp == Double.POSITIVE_INFINITY || temp == Double.NEGATIVE_INFINITY) {
-                res.setUnsafe(i, 0);
-            } else {
-                res.setUnsafe(i, Int32Array.doubleToInt(temp));
-            }
-        }
+        res.ofNumber(items)
         return res
     }
 
@@ -4420,11 +4399,12 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<int>): Int32Array {
         let res = new Int32Array(items.length.toInt())
-        for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, items[i])
-        }
+        res.ofInt(items)
         return res
     }
+
+    private final native ofInt(items: FixedArray<int>): void
+    private final native ofNumber(items: FixedArray<number>): void
 
     /**
      * Returns a new array from a set of elements.
@@ -6183,9 +6163,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      */
     public static of(...items: FixedArray<number>): BigInt64Array {
         let res = new BigInt64Array(items.length.toInt())
-        for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, items[i].toLong())
-        }
+        res.ofNumber(items)
         return res
     }
 
@@ -6198,9 +6176,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      */
     public static of(...items: FixedArray<int>): BigInt64Array {
         let res = new BigInt64Array(items.length.toInt())
-        for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, items[i].toLong())
-        }
+        res.ofInt(items)
         return res
     }
 
@@ -6213,9 +6189,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      */
     public static of(...items: FixedArray<long>): BigInt64Array {
         let res = new BigInt64Array(items.length.toInt())
-        for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, items[i])
-        }
+        res.ofLong(items)
         return res
     }
 
@@ -6233,6 +6207,10 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         }
         return res
     }
+
+    private final native ofInt(items: FixedArray<int>): void
+    private final native ofNumber(items: FixedArray<number>): void
+    private final native ofLong(items: FixedArray<long>): void
 
     /**
      * Returns a new array from a set of elements.
@@ -7975,9 +7953,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<number>): Float32Array {
         let res = new Float32Array(items.length.toInt())
-        for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, items[i].toFloat())
-        }
+        res.ofNumber(items)
         return res
     }
 
@@ -7990,9 +7966,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<int>): Float32Array {
         let res = new Float32Array(items.length.toInt())
-        for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, items[i].toFloat())
-        }
+        res.ofInt(items)
         return res
     }
 
@@ -8005,11 +7979,13 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<float>): Float32Array {
         let res = new Float32Array(items.length.toInt())
-        for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, items[i])
-        }
+        res.ofFloat(items)
         return res
     }
+
+    private final native ofInt(items: FixedArray<int>): void
+    private final native ofNumber(items: FixedArray<number>): void
+    private final native ofFloat(items: FixedArray<float>): void
 
     /**
      * Returns a new array from a set of elements.
@@ -9690,9 +9666,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<number>): Float64Array {
         let res = new Float64Array(items.length.toInt())
-        for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, items[i])
-        }
+        res.ofNumber(items)
         return res
     }
 
@@ -9705,11 +9679,12 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static of(...items: FixedArray<int>): Float64Array {
         let res = new Float64Array(items.length.toInt())
-        for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, items[i].toDouble())
-        }
+        res.ofInt(items)
         return res
     }
+
+    private final native ofInt(items: FixedArray<int>): void
+    private final native ofNumber(items: FixedArray<number>): void
 
     /**
      * Returns a new array from a set of elements.
