@@ -13,28 +13,14 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+
 /*---
-desc: >-
-    Type K is restricted to numeric types, type string, string literal types, enum types, and union
-    types constructed from these types.
-tags: [{{c.tags}}]
+desc: If a key is a union of literal types or an enum type, then all variants must be listed in the object literal.
+tags: []
 ---*/
 
-{{c.decl}}
-
 function main() {
-    let r: Record<{{c.type}}, {{c.type}}> = {
-{%- for v in c['values'] %}
-        {{v.key}}: {{v.val}},
-{%- endfor %}
-    }
-{%- for v in c['values'] %}
-    arktest.assertTrue(r[{{v.key}}] == {{v.val}})
-{%- endfor %}
-{%- for v in c['values2'] %}
-    r[{{v.key}}] = {{v.val}}
-    arktest.assertTrue(r[{{v.key}}] == {{v.val}})
-{%- endfor %}
+    const k1 = 'aa'
+    const k2 = 'bb'
+    let map: Record<'aa' | 'bb', number> = { k1: 1, k2: 2 }
 }
-{% endfor %}
