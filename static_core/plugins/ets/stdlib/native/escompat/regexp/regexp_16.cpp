@@ -29,14 +29,14 @@ constexpr int PCRE2_MATCH_DATA_UNIT_WIDTH = 2;
 constexpr int PCRE2_CHARACTER_WIDTH = 2;
 constexpr int PCRE2_GROUPS_NAME_ENTRY_SHIFT = 4;
 
-Pcre2Obj RegExp16::CreatePcre2Object(const uint16_t *patternStr, uint32_t flags, uint32_t extraFlags, const int len)
+Pcre2Obj RegExp16::CreatePcre2Object(const uint16_t *pattern, uint32_t flags, uint32_t extraFlags, const int len)
 {
     int errorNumber;
-    PCRE2_SPTR pattern = static_cast<PCRE2_SPTR>(patternStr);
+    PCRE2_SPTR patternStr = static_cast<PCRE2_SPTR>(pattern);
     PCRE2_SIZE errorOffset;
     auto *compileContext = pcre2_compile_context_create(nullptr);
     pcre2_set_compile_extra_options(compileContext, extraFlags);
-    auto re = pcre2_compile(pattern, len, flags, &errorNumber, &errorOffset, compileContext);
+    auto re = pcre2_compile(patternStr, len, flags, &errorNumber, &errorOffset, compileContext);
     pcre2_compile_context_free(compileContext);
     return reinterpret_cast<Pcre2Obj>(re);
 }
