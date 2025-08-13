@@ -218,6 +218,12 @@ function testStringifyObjects(): void {
     arktest.assertTrue(result.startsWith('{') && result.endsWith('}'), "Object should be wrapped in braces");
     arktest.assertFalse(result.includes("\n"), "Object should not contain newlines");
     arktest.assertEQ(result.length, 39, "Object should be 39 characters long");
+
+    const root = new jsonx.JsonElement({} as Record<string, jsonx.JsonElement>)
+    const unionElmt = new jsonx.JsonElement()
+    unionElmt.setUndefined()
+    root.setElement("union", unionElmt)
+    arktest.assertEQ(JSON.stringifyJsonElement(root), "{}", "Undefined object should not stringify")
 }
 
 function testStringifyNestedStructures(): void {
