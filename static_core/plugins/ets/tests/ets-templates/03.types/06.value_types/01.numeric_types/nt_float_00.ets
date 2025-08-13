@@ -18,8 +18,8 @@ desc: Test floating-point comparison(<).
 ---*/
 
 function main(): void {
-  let a: float = 10f;
-  let b: float = 3f;
+  let a: float = 10.0f;
+  let b: float = 3.0f;
 
   arktest.assertFalse(a < b);
 }

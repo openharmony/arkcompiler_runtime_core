@@ -92,17 +92,17 @@ float_comparison:
 
   # NaNs
 
-  - {xtype: float, xalias: Float, xvalue: "sqrt(-1f)", ytype: float, yalias: Float, yvalue: 0.0f, op: ">", result: "false"}
-  - {xtype: float, xalias: Float, xvalue: 0.0f, ytype: float, yalias: Float, yvalue: "sqrt(-1f)", op: ">", result: "false"}
+  - {xtype: float, xalias: Float, xvalue: "sqrt(-1.0f)", ytype: float, yalias: Float, yvalue: 0.0f, op: ">", result: "false"}
+  - {xtype: float, xalias: Float, xvalue: 0.0f, ytype: float, yalias: Float, yvalue: "sqrt(-1.0f)", op: ">", result: "false"}
 
-  - {xtype: float, xalias: Float, xvalue: "sqrt(-1f)", ytype: float, yalias: Float, yvalue: 0.0f, op: "<", result: "false"}
-  - {xtype: float, xalias: Float, xvalue: 0.0f, ytype: float, yalias: Float, yvalue: "sqrt(-1f)", op: "<", result: "false"}
+  - {xtype: float, xalias: Float, xvalue: "sqrt(-1.0f)", ytype: float, yalias: Float, yvalue: 0.0f, op: "<", result: "false"}
+  - {xtype: float, xalias: Float, xvalue: 0.0f, ytype: float, yalias: Float, yvalue: "sqrt(-1.0f)", op: "<", result: "false"}
 
-  - {xtype: float, xalias: Float, xvalue: "sqrt(-1f)", ytype: float, yalias: Float, yvalue: 0.0f, op: ">=", result: "false"}
-  - {xtype: float, xalias: Float, xvalue: 0.0f, ytype: float, yalias: Float, yvalue: "sqrt(-1f)", op: ">=", result: "false"}
+  - {xtype: float, xalias: Float, xvalue: "sqrt(-1.0f)", ytype: float, yalias: Float, yvalue: 0.0f, op: ">=", result: "false"}
+  - {xtype: float, xalias: Float, xvalue: 0.0f, ytype: float, yalias: Float, yvalue: "sqrt(-1.0f)", op: ">=", result: "false"}
 
   - {xtype: float, xalias: Float, xvalue: "sqrt(-1)", ytype: float, yalias: Float, yvalue: 0.0f, op: "<=", result: "false"}
-  - {xtype: float, xalias: Float, xvalue: 0.0f, ytype: float, yalias: Float, yvalue: "sqrt(-1f)", op: "<=", result: "false"}
+  - {xtype: float, xalias: Float, xvalue: 0.0f, ytype: float, yalias: Float, yvalue: "sqrt(-1.0f)", op: "<=", result: "false"}
 
   - {xtype: double, xalias: Double, xvalue: "sqrt(-1)", ytype: double, yalias: Double, yvalue: 0.0, op: ">", result: "false"}
   - {xtype: double, xalias: Double, xvalue: 0.0, ytype: double, yalias: Double, yvalue: "sqrt(-1)", op: ">", result: "false"}
@@ -118,20 +118,20 @@ float_comparison:
 
   # INFs
 
-  - {xtype: float, xalias: Float, xvalue: "log(0f)", ytype: float, yalias: Float, yvalue: 0.0f, op: "<", result: "true"}
-  - {xtype: float, xalias: Float, xvalue: "log(0f)", ytype: float, yalias: Float, yvalue: 0.0f, op: "<=", result: "true"}
-  - {xtype: float, xalias: Float, xvalue: "log(0f)", ytype: float, yalias: Float, yvalue: 0.0f, op: ">", result: "false"}
-  - {xtype: float, xalias: Float, xvalue: "log(0f)", ytype: float, yalias: Float, yvalue: 0.0f, op: ">=", result: "false"}
+  - {xtype: float, xalias: Float, xvalue: "log(0.0f)", ytype: float, yalias: Float, yvalue: 0.0f, op: "<", result: "true"}
+  - {xtype: float, xalias: Float, xvalue: "log(0.0f)", ytype: float, yalias: Float, yvalue: 0.0f, op: "<=", result: "true"}
+  - {xtype: float, xalias: Float, xvalue: "log(0.0f)", ytype: float, yalias: Float, yvalue: 0.0f, op: ">", result: "false"}
+  - {xtype: float, xalias: Float, xvalue: "log(0.0f)", ytype: float, yalias: Float, yvalue: 0.0f, op: ">=", result: "false"}
 
   - {xtype: float, xalias: Float, xvalue: 0.0f, ytype: float, yalias: Float, yvalue: 1.0f/0.0f, op: "<", result: "true"}
   - {xtype: float, xalias: Float, xvalue: 0.0f, ytype: float, yalias: Float, yvalue: 1.0f/0.0f, op: "<=", result: "true"}
   - {xtype: float, xalias: Float, xvalue: 0.0f, ytype: float, yalias: Float, yvalue: 1.0f/0.0f, op: ">", result: "false"}
   - {xtype: float, xalias: Float, xvalue: 0.0f, ytype: float, yalias: Float, yvalue: 1.0f/0.0f, op: ">=", result: "false"}
 
-  - {xtype: float, xalias: Float, xvalue: "log(0f)", ytype: float, yalias: Float, yvalue: 1.0f/0.0f, op: "<", result: "true"}
-  - {xtype: float, xalias: Float, xvalue: "log(0f)", ytype: float, yalias: Float, yvalue: 1.0f/0.0f, op: "<=", result: "true"}
-  - {xtype: float, xalias: Float, xvalue: "log(0f)", ytype: float, yalias: Float, yvalue: 1.0f/0.0f, op: ">", result: "false"}
-  - {xtype: float, xalias: Float, xvalue: "log(0f)", ytype: float, yalias: Float, yvalue: 1.0f/0.0f, op: ">=", result: "false"}
+  - {xtype: float, xalias: Float, xvalue: "log(0.0f)", ytype: float, yalias: Float, yvalue: 1.0f/0.0f, op: "<", result: "true"}
+  - {xtype: float, xalias: Float, xvalue: "log(0.0f)", ytype: float, yalias: Float, yvalue: 1.0f/0.0f, op: "<=", result: "true"}
+  - {xtype: float, xalias: Float, xvalue: "log(0.0f)", ytype: float, yalias: Float, yvalue: 1.0f/0.0f, op: ">", result: "false"}
+  - {xtype: float, xalias: Float, xvalue: "log(0.0f)", ytype: float, yalias: Float, yvalue: 1.0f/0.0f, op: ">=", result: "false"}
 
 
   - {xtype: double, xalias: Double, xvalue: "log(0)", ytype: double, yalias: Double, yvalue: 0.0, op: "<", result: "true"}

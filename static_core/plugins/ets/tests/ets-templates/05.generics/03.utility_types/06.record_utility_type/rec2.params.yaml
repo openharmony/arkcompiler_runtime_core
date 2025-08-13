@@ -51,8 +51,8 @@ cases:
 
     - type: float
       values:
-          - { key: 0f, val: 0f }
-          - { key: 0f, val: 55f }
+          - { key: 0.0f, val: 0.0f }
+          - { key: 0.0f, val: 55.0f }
           - { key: Float.MIN_VALUE, val: Float.MIN_VALUE }
           - { key: Float.MIN_VALUE, val: Float.MAX_VALUE }
           - { key: Float.MAX_VALUE, val: Float.MAX_VALUE }
@@ -61,8 +61,8 @@ cases:
           - { key: Float.NEGATIVE_INFINITY, val: Float.POSITIVE_INFINITY }
           - { key: Float.POSITIVE_INFINITY, val: Float.POSITIVE_INFINITY }
           - { key: Float.POSITIVE_INFINITY, val: Float.NEGATIVE_INFINITY }
-          - { key: Float.NaN, val: 42f }
-          - { key: Float.NaN, val: 84f }
+          - { key: Float.NaN, val: 42.0f }
+          - { key: Float.NaN, val: 84.0f }
 
     - type: double
       values:
@@ -150,8 +150,8 @@ cases:
 
     - type: float|string
       values:
-          - { key: 0f, val: 0f }
-          - { key: 0f, val: 55f }
+          - { key: 0.0f, val: 0.0f }
+          - { key: 0.0f, val: 55.0f }
           - { key: Float.MIN_VALUE, val: Float.MIN_VALUE }
           - { key: Float.MIN_VALUE, val: Float.MAX_VALUE }
           - { key: Float.MAX_VALUE, val: Float.MAX_VALUE }
@@ -160,8 +160,8 @@ cases:
           - { key: Float.NEGATIVE_INFINITY, val: Float.POSITIVE_INFINITY }
           - { key: Float.POSITIVE_INFINITY, val: Float.POSITIVE_INFINITY }
           - { key: Float.POSITIVE_INFINITY, val: Float.NEGATIVE_INFINITY }
-          - { key: Float.NaN, val: 42f }
-          - { key: Float.NaN, val: 84f }
+          - { key: Float.NaN, val: 42.0f }
+          - { key: Float.NaN, val: 84.0f }
           - { key: '"a"', val: '""' }
           - { key: '"a"', val: '"\u0000"' }
           - { key: '"\u0000"', val: '""' }

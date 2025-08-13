@@ -40,11 +40,11 @@ cases:
     - { val: '[new BigInt(5)]', type: BigInt }
 
     # combinations
-    - val: '[0b1, 0xF, 0o7, 1e1, 3f, 9223372036854775807]'
+    - val: '[0b1, 0xF, 0o7, 1e1, 3.0f, 9223372036854775807]'
     - val: '[new Byte(), new Short(), new Int(), new Long(), new Float(), new Double()]'
     - val: '[new Byte(1), new Short(2), new Int(3), new Long(4), new Float(5), new Double(6), 7n]'
     - val: '[0n, 0, new Byte(0), new Short(0), new Int(0), new Long(0), new Float(0), new Double(0)]'
-    - val: '[new Byte, new Short(2), new Int(3), new Long(4), new Float(5f), new Double(6), 7n]'
+    - val: '[new Byte, new Short(2), new Int(3), new Long(4), new Float(5.0f), new Double(6), 7n]'
 
     # variables
     - decl: |-

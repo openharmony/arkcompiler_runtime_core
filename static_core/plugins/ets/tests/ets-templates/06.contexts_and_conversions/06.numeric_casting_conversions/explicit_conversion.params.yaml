@@ -21,14 +21,14 @@ types:
   
   - { dtype: Int, dval: 21845, type: Short, val: 0x5555 }
   - { dtype: Long, dval: 21845, type: Short, val: 0x5555 }
-  - { dtype: Float, dval: 32f, type: Short, val: 0x20 }
+  - { dtype: Float, dval: 32.0f, type: Short, val: 0x20 }
   - { dtype: Double, dval: 32.0, type: Short, val: 0x20 }
 
   - { dtype: Long, dval: 303, type: Int, val: 0x12f }
   - { dtype: Float, dval: 47, type: Int, val: 0x2f }
   - { dtype: Double, dval: 47, type: Int, val: 0x2f }
 
-  - { dtype: Float, dval: 4f, type: Long, val: 4 }
+  - { dtype: Float, dval: 4.0f, type: Long, val: 4 }
   - { dtype: Double, dval: 4, type: Long, val: 4 }
 
   - { dtype: Double, dval: 0.5, type: Float, val: 0.5f }

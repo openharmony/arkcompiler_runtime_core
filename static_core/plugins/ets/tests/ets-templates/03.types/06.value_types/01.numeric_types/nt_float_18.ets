@@ -19,7 +19,7 @@ desc: Test floating-point logical operators(true).
 
 function main(): void {
   let a: float = 10.5f;
-  let b = a > 5f ? true : false;
+  let b = a > 5.0f ? true : false;
 
   arktest.assertTrue(b === true);
 }

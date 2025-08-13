@@ -49,12 +49,12 @@ cases:
     - decl: |-
           function foo(a: [Number, Float, Int]) {
               arktest.assertTrue(Number.isNaN(a[0]))
-              arktest.assertEQ(a[1], 0f)
+              arktest.assertEQ(a[1], 0.0f)
               arktest.assertEQ(a[2], -2147483647)
           }
       use: |-
           // call context, tuple of boxed
-          foo([Number.NaN, 0f, -2147483647])
+          foo([Number.NaN, 0.0f, -2147483647])
 
     - decl: |-
           function foo(a: [[string, string], string, string]) {
@@ -103,8 +103,8 @@ cases:
 
     - decl: |-
           function foo(a: [[Float, Float], [Long, Long], [Short]]) {
-              arktest.assertEQ(a[0][0], -16777215f)
-              arktest.assertEQ(a[0][1], 16777215f)
+              arktest.assertEQ(a[0][0], -16777215.0f)
+              arktest.assertEQ(a[0][1], 16777215.0f)
               arktest.assertEQ(a[1][0], -9223372036854775808)
               arktest.assertEQ(a[1][1], 9223372036854775807)
               arktest.assertEQ(a[2][0], 32767)

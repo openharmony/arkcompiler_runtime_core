@@ -68,15 +68,15 @@ cases:
           arktest.assertEQ(a[0][0],  "a")
           arktest.assertTrue(a[0][1] instanceof Object)
           arktest.assertEQ(a[1][0], Number.POSITIVE_INFINITY)
-          arktest.assertEQ(a[1][1], 16777215f)
+          arktest.assertEQ(a[1][1], 16777215.0f)
 
     - use: |-
           // casting context, tuple of tuple of primitives
-          let a = [[-2147483647, Double.NEGATIVE_INFINITY], [ 0x7f, 16777215f, -32768]] as [[int, double], [byte, float, short]]
+          let a = [[-2147483647, Double.NEGATIVE_INFINITY], [ 0x7f, 16777215.0f, -32768]] as [[int, double], [byte, float, short]]
           arktest.assertEQ(a[0][0], -2147483647)
           arktest.assertEQ(a[0][1], Double.NEGATIVE_INFINITY)
           arktest.assertEQ(a[1][0], 127)
-          arktest.assertEQ(a[1][1], 16777215f)
+          arktest.assertEQ(a[1][1], 16777215.0f)
           arktest.assertEQ(a[1][2], -32768)
 
     - use: |-

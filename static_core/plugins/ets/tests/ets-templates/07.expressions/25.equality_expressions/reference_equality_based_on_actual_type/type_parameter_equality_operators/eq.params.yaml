@@ -19,7 +19,7 @@ cases:
           - '-128 as short'
           - '-128'
           - '-128 as long'
-          - '-128f'
+          - '-128.0f'
           - '-128.0'
 
     - case1:
@@ -28,12 +28,12 @@ cases:
           - new Byte(127 as byte)
           - new Int(127)
           - new Long(127 as long)
-          - new Float(127f)
+          - new Float(127.0f)
           - new Double(127.0)
           - new Char(c'\u007f')
 
     - case1:
-          - '0f'
+          - '0.0f'
           - '0 as long'
       case2:
           - '0 as short'

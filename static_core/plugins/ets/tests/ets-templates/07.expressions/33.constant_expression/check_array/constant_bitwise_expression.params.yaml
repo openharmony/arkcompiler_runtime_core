@@ -28,9 +28,9 @@ cases:
   - { type: long, value: 10, expression: '| 7', expected: 15 }
   - { type: long, value: 10, expression: '^ 7', expected: 13 }
 
-  - { type: float, value: 10.5f, expression: '& 7f', expected: 2  }
-  - { type: float, value: 10.5f, expression: '| 7f', expected: 15 }
-  - { type: float, value: 10.5f, expression: '^ 7f', expected: 13 }
+  - { type: float, value: 10.5f, expression: '& 7.0f', expected: 2  }
+  - { type: float, value: 10.5f, expression: '| 7.0f', expected: 15 }
+  - { type: float, value: 10.5f, expression: '^ 7.0f', expected: 13 }
 
   - { type: number, value: 10.9, expression: '& 7.1', expected: 2  }
   - { type: number, value: 10.9, expression: '| 7.1', expected: 15 }
