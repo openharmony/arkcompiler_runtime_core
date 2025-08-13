@@ -162,36 +162,36 @@ function testFillBigUint64Array() {
 
 function checkArray(arr: ArrayLike<number>, expected: ArrayLike<number>) {
     if (arr.length != expected.length) {
-        throw new Exception('Unexpected array length')
+        throw new Error('Unexpected array length')
     }
     for (let i = 0; i < expected.length; i++) {
         if (isNaN(arr[i]) && isNaN(expected[i])) {
             continue
         }
         if (arr[i] != expected[i]) {
-            throw new Exception('Unexpected element with index ' + i)
+            throw new Error('Unexpected element with index ' + i)
         }
     }
 }
 
 function checkArray(arr: BigInt64Array, expected: BigInt64Array) {
     if (arr.length != expected.length) {
-        throw new Exception('Unexpected array length')
+        throw new Error('Unexpected array length')
     }
     for (let i = 0; i < expected.length; i++) {
         if (arr[i] != expected[i]) {
-            throw new Exception('Unexpected element with index ' + i)
+            throw new Error('Unexpected element with index ' + i)
         }
     }
 }
 
 function checkArray(arr: BigUint64Array, expected: BigUint64Array) {
     if (arr.length != expected.length) {
-        throw new Exception('Unexpected array length')
+        throw new Error('Unexpected array length')
     }
     for (let i = 0; i < expected.length; i++) {
         if (arr[i] != expected[i]) {
-            throw new Exception('Unexpected element with index ' + i)
+            throw new Error('Unexpected element with index ' + i)
         }
     }
 }

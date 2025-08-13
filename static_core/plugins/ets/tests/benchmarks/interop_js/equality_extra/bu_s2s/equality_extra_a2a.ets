@@ -52,7 +52,7 @@ class equalityExtra {
     compareFuncs(): boolean {
         let res: boolean = true;
         res &= this.comparison(foo, fooOther, this.noEqual);
-        // [TID 00657a] E/runtime: Unhandled exception: escompat.Error
+        // [TID 00657a] E/runtime: Unhandled error: escompat.Error
         // [TID 00657a] E/runtime: at escompat.Error.$_invoke (etsstdlib.ets:114:0)
         res &= this.comparison(foo, foo, this.equal);
         return res;

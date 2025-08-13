@@ -24,10 +24,10 @@
 function find(arr: FixedArray<byte>, indexes: FixedArray<byte>, elem: int): int {
   let x : int = 0;
   try {
-    __noinline__foo(arr.length, elem); // can throw exception
+    __noinline__foo(arr.length, elem); // can throw error
     x = indexes[0]; // NullCheck can be not executed
   } catch (e) {
-    arktest.assertTrue(false, "exception, " + e.toString());
+    arktest.assertTrue(false, "error, " + e.toString());
   }
 
   for (let i: int = 0; i < arr.length; ++i) {

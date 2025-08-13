@@ -203,7 +203,7 @@ function test_array_string_join() {
 }
 
 
-//! CHECKER      OOM exception for Array.join
+//! CHECKER      OOM error for Array.join
 //! SKIP_IF       @architecture == "arm32"
 //! RUN          force_jit: true, options: "--compiler-enable-osr=false --compiler-regex='ETSGLOBAL::test_oom'", entry: "escompat_array_join.ETSGLOBAL::test_oom"
 //! EVENT        /Exception,escompat.Array::join.*NATIVE/
@@ -218,10 +218,10 @@ function test_array_join_oom(): string {
             n += 100;
         } catch (e) {
             if (e instanceof OutOfMemoryError) {
-                // Expected exception caught
+                // Expected error caught
                 return "Catch OOM excepiton right";
             } else {
-                // Unexpected exception caught
+                // Unexpected error caught
                 return "Catch Other excepiton";
             }
         }

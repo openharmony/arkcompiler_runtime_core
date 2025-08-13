@@ -41,8 +41,8 @@
 //! PASS_AFTER   "TryCatchResolving"
 //! INST_NOT     "Throw"
 
-class Exception0 extends Exception {}
-class Exception1 extends Exception {}
+class Error0 extends Error {}
+class Error1 extends Error {}
 
 class MultipleCatch {
   __noinline__multipleCatch() : int {
@@ -52,9 +52,9 @@ class MultipleCatch {
         try {
             switch (k) {
             case 0:
-                throw new Exception0();
+                throw new Error0();
             case 1:
-                throw new Exception1();
+                throw new Error1();
             }
         } catch (e) {
             res += 1;
