@@ -283,16 +283,22 @@ JSCONVERT_WRAP(ESError)
     auto klass = etsVal->GetClass();
     INTEROP_FATAL_IF(klass->GetRuntimeClass() != ctx->GetESErrorClass());
 
-    auto fieldIdx = etsVal->GetClass()->GetFieldIndexByName("jserr_");
+    auto fieldIdx = etsVal->GetClass()->GetFieldIndexByName("err_");
     auto field = etsVal->GetClass()->GetFieldByIndex(fieldIdx);
     auto etsObject = etsVal->GetFieldObject(field);
+    ASSERT(etsObject != nullptr);
+
+    auto method = etsObject->GetClass()->GetInstanceMethod("unwrap", nullptr);
+    std::array args {ark::Value(etsObject->GetCoreType())};
+    Value res = method->GetPandaMethod()->Invoke(coro, args.data());
+    EtsObject *errObject = EtsObject::FromCoreType(res.GetAs<ObjectHeader *>());
 
     interop::js::ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
-    if (LIKELY(storage->HasReference(etsObject, env))) {
-        auto jsThis = storage->GetJsObject(etsObject, env);
+    if (LIKELY(storage->HasReference(errObject, env))) {
+        auto jsThis = storage->GetJsObject(errObject, env);
         return jsThis;
     }
-    return JSConvertEtsObject::WrapWithNullCheck(env, etsObject);
+    return JSConvertEtsObject::WrapWithNullCheck(env, errObject);
 
     UNREACHABLE();
 }

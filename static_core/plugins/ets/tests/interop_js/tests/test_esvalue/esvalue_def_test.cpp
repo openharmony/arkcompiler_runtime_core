@@ -227,4 +227,9 @@ TEST_F(EtsESValueJsToEtsTest, test_esvalue_test_undefined)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testUndefined"));
 }
 
+TEST_F(EtsESValueJsToEtsTest, checkThrowNullOrUndefined)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkThrowNullOrUndefined"));
+}
+
 }  // namespace ark::ets::interop::js::testing
