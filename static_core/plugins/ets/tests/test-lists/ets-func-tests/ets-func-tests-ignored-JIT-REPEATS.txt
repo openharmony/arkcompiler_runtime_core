@@ -28,3 +28,6 @@ escompat/JsonStringifyTest.ets
 
 #28746
 std/core/EAWorker_out_of_coro_creation.ets
+
+#28966
+std/containers/concurrency/concurrent_hash_map/concurrent_hash_map_concurrent_replace.ets
