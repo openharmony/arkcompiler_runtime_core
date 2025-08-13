@@ -886,7 +886,14 @@ const uint8_t *EtsClassLinkerExtension::ComputeLUB(const ClassLinkerContext *ctx
         idx += typeSp.Size();
 
         PandaString typeDescCopy(utf::Mutf8AsCString(typeSp.Data()), typeSp.Size());
-        auto [typePf, typeClassId] = GetClassInfo(ctx, utf::CStringAsMutf8(typeDescCopy.c_str()));
+
+        auto cda = RefTypeLink(ctx, utf::CStringAsMutf8(typeDescCopy.c_str())).CreateCDA();
+        if (!cda.has_value()) {
+            return nullptr;
+        }
+
+        auto typePf = &cda.value().GetPandaFile();
+        auto typeClassId = cda.value().GetClassId();
 
         if (lub.GetDescriptor() == nullptr) {
             lub = RefTypeLink(ctx, typePf, typeClassId);
