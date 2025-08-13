@@ -362,6 +362,32 @@ function testTaskpoolInfoOfNoneNameTask() {
     arktest.assertEQ(await p, 'result');
 }
 
+function testTaskPoolInfoasyncawaitTask() {
+    const caseName : string = 'testasyncawaitTask';
+    let flagforTask = new Event();
+    let isRunTask = new Event();
+    let asyncfuncforTask = async (ms : int) : Promise<int> => {
+        const promise = await new Promise<int>(reslove => {
+            isRunTask.fire();
+            flagforTask.wait();
+            resolve(ms);
+        })
+        return promise;
+    };
+    let task : taskpool.Task = new taskpool.Task(caseName, asyncfuncforTask, 3000);
+    taskpool.execute(task, taskpool.Priority.HIGH);
+    isRunTask.wait();
+    let taskpoolInfo: taskpool.TaskPoolInfo =  taskpool.getTaskPoolInfo();
+    flagforTask.fire();
+    let state = 0;
+    for(const taskInfo of taskpoolInfo.taskInfos) {
+        if(taskInfo.name == caseName) {
+            state = taskInfo.state;
+        }
+    }
+    arktest.assertEQ(state.toInt(), taskpool.State.RUNNING);
+}
+
 function returnNumber(): int {
     return 100;
 }
@@ -1160,6 +1186,7 @@ function main(): int {
     commonTaskSuite.addTest('GetTaskpoolInfoTest', testTaskpoolInfo);
     commonTaskSuite.addTest('GetTaskpoolInfoOfNoneNameTaskTest', testTaskpoolInfoOfNoneNameTask);
     commonTaskSuite.addTest('ExceedContinueTaskCountTest', exceedContinueTaskTest);
+    commonTaskSuite.addTest('GetTaskpoolInfoOfasyncawaitTaskTest', testTaskPoolInfoasyncawaitTask);
     commonTaskSuite.addTest('OneTaskExecutionTest', oneTaskExecutionTest);
     commonTaskSuite.addTest('CallbackTest', callbackTest);
     commonTaskSuite.addTest('IsCancelTest', isCancelTest);
