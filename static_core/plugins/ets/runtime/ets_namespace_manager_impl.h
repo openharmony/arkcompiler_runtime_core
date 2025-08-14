@@ -27,7 +27,7 @@
 #include "os/library_loader.h"
 #include "plugins/ets/runtime/ets_native_library.h"
 using CreateNamespaceCallback = std::function<bool(const std::string &bundleModuleName, std::string &namespaceName)>;
-
+using ExtensionApiCheckCallback = std::function<bool(const std::string &className, const std::string &fileName)>;
 namespace ark::ets {
 class EtsNamespaceManagerImpl {
 public:
@@ -35,6 +35,19 @@ public:
 
     Expected<EtsNativeLibrary, os::Error> LoadNativeLibraryFromNs(const std::string &pathKey, const char *name);
     void RegisterNamespaceName(const std::string &key, const std::string &value);
+
+    void SetExtensionApiCheckCallback(const ExtensionApiCheckCallback &cb)
+    {
+        os::memory::WriteLockHolder wlh(lock_);
+        checkLibraryPermissionCallback_ = cb;
+    }
+
+    ExtensionApiCheckCallback GetExtensionApiCheckCallback() const
+    {
+        os::memory::ReadLockHolder rlh(lock_);
+        return checkLibraryPermissionCallback_;
+    }
+
     virtual ~EtsNamespaceManagerImpl();
 
     NO_COPY_SEMANTIC(EtsNamespaceManagerImpl);
@@ -46,6 +59,7 @@ private:
 
     mutable os::memory::RWLock lock_;
     std::map<std::string, std::string> namespaceNames_ GUARDED_BY(lock_);
+    ExtensionApiCheckCallback checkLibraryPermissionCallback_ {nullptr};
 };
 }  // namespace ark::ets
 #endif  // !PLUGINS_ETS_RUNTIME_NAMESPACE_MANAGER_IMPL_H

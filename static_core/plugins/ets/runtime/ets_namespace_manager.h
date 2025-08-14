@@ -20,6 +20,7 @@
 #include <libpandabase/macros.h>
 #include <functional>
 using CreateNamespaceCallback = std::function<bool(const std::string &bundleModuleName, std::string &namespaceName)>;
+using ExtensionApiCheckCallback = std::function<bool(const std::string &className, const std::string &fileName)>;
 
 // key is abcPath, value is namespaceName
 using AppBundleModuleNamePathMap = std::map<std::string, std::string>;
@@ -27,6 +28,7 @@ namespace ark::ets {
 class PANDA_PUBLIC_API EtsNamespaceManager {
 public:
     static void SetAppLibPaths(const AppBundleModuleNamePathMap &appModuleNames, CreateNamespaceCallback &cb);
+    static void SetExtensionApiCheckCallback(const ExtensionApiCheckCallback &cb);
     ~EtsNamespaceManager() = default;
 
     NO_COPY_SEMANTIC(EtsNamespaceManager);

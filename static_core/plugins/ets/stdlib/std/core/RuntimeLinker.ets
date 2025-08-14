@@ -107,3 +107,10 @@ export abstract class RuntimeLinker {
  * @param path to library to load
  */
 export native function loadLibrary(path: String): void;
+
+/**
+ * use the permission check hook when loadLibrary 
+ * @param path to library to load
+ * @param fileName The name of the file, for example: @ohos.bundle.d.ts
+ */
+export native function loadLibraryWithPermissionCheck(path: String, fileName: String): void;

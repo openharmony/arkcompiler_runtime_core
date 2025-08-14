@@ -250,7 +250,8 @@ public:
         return runtimeIface_;
     }
 
-    bool LoadNativeLibrary(EtsEnv *env, const PandaString &name);
+    bool LoadNativeLibrary(EtsEnv *env, const PandaString &name, bool shouldVerifyPermission,
+                           const PandaString &fileName);
 
     void ResolveNativeMethod(Method *method);
 

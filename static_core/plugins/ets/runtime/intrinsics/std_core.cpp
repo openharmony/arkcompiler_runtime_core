@@ -90,27 +90,35 @@ static PandaString ResolveLibraryName(const PandaString &name)
 #endif  // PANDA_TARGET_UNIX
 }
 
-extern "C" void LoadLibrary(ark::ets::EtsString *name)
+void LoadNativeLibraryHandler(ark::ets::EtsString *name, bool shouldVerifyPermission,
+                              ark::ets::EtsString *fileName = nullptr)
 {
     ASSERT(name->AsObject()->IsStringClass());
+    auto coroutine = EtsCoroutine::GetCurrent();
+    if (shouldVerifyPermission) {
+        ASSERT(fileName != nullptr);
+        ASSERT(fileName->AsObject()->IsStringClass());
+    }
 
     if (name->IsUtf16()) {
         LOG(FATAL, RUNTIME) << "UTF-16 native library pathes are not supported";
         return;
     }
 
-    auto coroutine = EtsCoroutine::GetCurrent();
     auto nameStr = name->GetMutf8();
     if (nameStr.empty()) {
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::FILE_NOT_FOUND_ERROR,
                           "The native library path is empty");
         return;
     }
-
+    PandaString fileNameStr = fileName != nullptr ? fileName->GetMutf8() : "";
+    LOG(INFO, RUNTIME) << "load library name is " << nameStr.c_str()
+                       << "; shouldVerifyPermission: " << shouldVerifyPermission
+                       << "; fileName: " << fileNameStr.c_str();
     ScopedNativeCodeThread snct(coroutine);
-
     auto env = coroutine->GetEtsNapiEnv();
-    if (!coroutine->GetPandaVM()->LoadNativeLibrary(env, ResolveLibraryName(nameStr))) {
+    if (!coroutine->GetPandaVM()->LoadNativeLibrary(env, ResolveLibraryName(nameStr), shouldVerifyPermission,
+                                                    fileNameStr)) {
         ScopedManagedCodeThread smct(coroutine);
 
         PandaStringStream ss;
@@ -118,6 +126,16 @@ extern "C" void LoadLibrary(ark::ets::EtsString *name)
 
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::EXCEPTION_IN_INITIALIZER_ERROR, ss.str());
     }
+}
+
+extern "C" void LoadLibrary(ark::ets::EtsString *name)
+{
+    LoadNativeLibraryHandler(name, false);
+}
+
+extern "C" void LoadLibraryWithPermissionCheck(ark::ets::EtsString *name, ark::ets::EtsString *fileName)
+{
+    LoadNativeLibraryHandler(name, true, fileName);
 }
 
 extern "C" void StdSystemScheduleCoroutine()

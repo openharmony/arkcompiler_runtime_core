@@ -72,11 +72,14 @@ Expected<EtsNativeLibrary, os::Error> LoadNativeLibraryFromNamespace(const char 
 }
 }  // namespace
 
-std::optional<std::string> NativeLibraryProvider::LoadLibrary(EtsEnv *env, const PandaString &name)
+std::optional<std::string> NativeLibraryProvider::LoadLibrary(EtsEnv *env, const PandaString &name,
+                                                              bool shouldVerifyPermission, const PandaString &fileName)
 {
+    if (shouldVerifyPermission && !CheckLibraryPermission(env, fileName)) {
+        return "NativeLibraryProvider::CheckLibraryPermission failed";
+    }
     {
         os::memory::ReadLockHolder lock(lock_);
-
         auto it =
             std::find_if(libraries_.begin(), libraries_.end(), [&name](auto &lib) { return lib.GetName() == name; });
         if (it != libraries_.end()) {
@@ -84,7 +87,9 @@ std::optional<std::string> NativeLibraryProvider::LoadLibrary(EtsEnv *env, const
         }
     }
     auto loadRes = LoadFromPath(GetLibraryPath(), name);
-    if (!loadRes) {
+    if (!shouldVerifyPermission && !loadRes) {
+        LOG(WARNING, RUNTIME) << "Failed to load System library: " << loadRes.Error().ToString()
+                              << "; Attempting to load application library instead.";
         loadRes = LoadNativeLibraryFromNamespace(name.c_str());
     }
     if (!loadRes) {
@@ -93,16 +98,18 @@ std::optional<std::string> NativeLibraryProvider::LoadLibrary(EtsEnv *env, const
     const EtsNativeLibrary *lib = nullptr;
     {
         os::memory::WriteLockHolder lock(lock_);
-
         auto [it, inserted] = libraries_.emplace(std::move(loadRes.Value()));
         if (!inserted) {
             return {};
         }
-
         lib = &*it;
     }
     ASSERT(lib != nullptr);
+    return CallAniCtor(env, lib);
+}
 
+std::optional<std::string> NativeLibraryProvider::CallAniCtor(EtsEnv *env, const EtsNativeLibrary *lib)
+{
     if (auto onLoadSymbol = lib->FindSymbol("EtsNapiOnLoad")) {
         using EtsNapiOnLoadHandle = ets_int (*)(EtsEnv *);
         auto onLoadHandle = reinterpret_cast<EtsNapiOnLoadHandle>(onLoadSymbol.Value());
@@ -124,10 +131,61 @@ std::optional<std::string> NativeLibraryProvider::LoadLibrary(EtsEnv *env, const
         }
     } else {
         // NODE: Return error "Native library doesn't have ANI_Constructor" when ets_napi will be dropped. #22232
-        LOG(WARNING, ANI) << name << " doesn't contain ANI_Constructor";
+        LOG(WARNING, ANI) << lib->GetName() << " doesn't contain ANI_Constructor";
     }
-
     return {};
+}
+
+std::optional<std::string> NativeLibraryProvider::GetCallerClassName(EtsEnv *env)
+{
+    auto coroutine = PandaEnv::FromEtsEnv(env)->GetEtsCoroutine();
+    if (coroutine == nullptr) {
+        LOG(ERROR, RUNTIME) << "Coroutine is null, failed to get class name.";
+        return std::nullopt;
+    }
+    auto stack = StackWalker::Create(coroutine);
+    if (!stack.HasFrame()) {
+        LOG(ERROR, RUNTIME) << "No valid method in stack, failed to determine class.";
+        return std::nullopt;
+    }
+    auto *method = stack.GetMethod();
+    if (method == nullptr) {
+        LOG(ERROR, RUNTIME) << "Method is null, failed to get class name.";
+        return std::nullopt;
+    }
+    auto *cls = method->GetClass();
+    auto *ctx = cls->GetLoadContext();
+    if (ctx == nullptr || !ctx->IsBootContext()) {
+        LOG(ERROR, RUNTIME) << "load context is not a boot context.";
+        return std::nullopt;
+    }
+    return cls->GetName();
+}
+
+bool NativeLibraryProvider::CheckLibraryPermission([[maybe_unused]] EtsEnv *env,
+                                                   [[maybe_unused]] const PandaString &fileName)
+{
+#if defined(PANDA_TARGET_OHOS)
+    auto classNameOpt = GetCallerClassName(env);
+    if (!classNameOpt.has_value()) {
+        LOG(ERROR, RUNTIME) << "Failed to retrieve class name during permission check.";
+        return false;
+    }
+    auto className = classNameOpt.value();
+    auto &instance = EtsNamespaceManagerImpl::GetInstance();
+    const auto cb = instance.GetExtensionApiCheckCallback();
+    if (cb == nullptr) {
+        LOG(INFO, RUNTIME) << "ExtensionApiCheckCallback is not registered";
+        return false;
+    }
+    if (!cb(className, fileName.c_str())) {
+        LOG(ERROR, RUNTIME) << "CheckLibraryPermission failed: class name: " << className
+                            << " is not in the API allowed list, loading prohibited";
+        return false;
+    }
+    LOG(INFO, RUNTIME) << "NativeLibraryProvider::CheckLibraryPermission: class name detection passed";
+#endif
+    return true;
 }
 
 void *NativeLibraryProvider::ResolveSymbol(const PandaString &name) const

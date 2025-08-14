@@ -544,11 +544,12 @@ ObjectHeader *PandaEtsVM::GetNullValue() const
     return obj;
 }
 
-bool PandaEtsVM::LoadNativeLibrary(EtsEnv *env, const PandaString &name)
+bool PandaEtsVM::LoadNativeLibrary(EtsEnv *env, const PandaString &name, bool shouldVerifyPermission,
+                                   const PandaString &fileName)
 {
     ASSERT_PRINT(Coroutine::GetCurrent()->IsInNativeCode(), "LoadNativeLibrary must be called at native");
 
-    if (auto error = nativeLibraryProvider_.LoadLibrary(env, name)) {
+    if (auto error = nativeLibraryProvider_.LoadLibrary(env, name, shouldVerifyPermission, fileName)) {
         LOG(ERROR, RUNTIME) << "Cannot load library " << name << ": " << error.value();
         return false;
     }

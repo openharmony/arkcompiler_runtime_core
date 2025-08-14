@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,14 +32,16 @@ struct TestParams {
     bool expected;
     std::string libraryPath;
     std::string libraryFile;
+    bool permissionCheck;
 };
 
 inline std::ostream &operator<<(std::ostream &out, const TestParams &val)
 {
     std::ios_base::fmtflags f = out.flags();
-    out << std::boolalpha                                  //-
-        << "libraryPath is '" << val.libraryPath << "'"    //-
-        << ", libraryFile is '" << val.libraryFile << "'"  //-
+    out << std::boolalpha                                          //-
+        << "libraryPath is '" << val.libraryPath << "'"            //-
+        << ", libraryFile is '" << val.libraryFile << "'"          //-
+        << ", permissionCheck is '" << val.permissionCheck << "'"  //-
         << ", expected is " << std::boolalpha << val.expected;
     out.setf(f);
     return out;
@@ -85,7 +87,8 @@ TEST_P(EtsNativeLibraryPathTest, EtsNativeTestLibraryPath)
 {
     auto pandaVm = EtsCoroutine::GetCurrent()->GetPandaVM();
     ASSERT_EQ(pandaVm, GetVm());
-    ASSERT_EQ(GetParam().expected, pandaVm->LoadNativeLibrary(GetEnv(), ConvertToString(GetParam().libraryFile)))
+    ASSERT_EQ(GetParam().expected, pandaVm->LoadNativeLibrary(GetEnv(), ConvertToString(GetParam().libraryFile),
+                                                              GetParam().permissionCheck, ""))
         << GetParam();
 }
 
@@ -104,6 +107,7 @@ INSTANTIATE_TEST_SUITE_P(  //-
             true,
             GetLibraryPath(),
             TEST_LIBRARY_FILE,
+            false,
         },
         TestParams {
             true,
@@ -115,11 +119,19 @@ INSTANTIATE_TEST_SUITE_P(  //-
                 return ss.str();
             }(),
             TEST_LIBRARY_FILE,
+            false,
         },
         TestParams {
             false,
             {},
             TEST_LIBRARY_FILE,
+            false,
+        },
+        TestParams {
+            true,
+            GetLibraryPath(),
+            TEST_LIBRARY_FILE,
+            true,
         }));
 
 }  // namespace ark::ets::test

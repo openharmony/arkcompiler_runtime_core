@@ -37,4 +37,12 @@ PANDA_PUBLIC_API void EtsNamespaceManager::SetAppLibPaths(const AppBundleModuleN
         }
     }
 }
+
+PANDA_PUBLIC_API void EtsNamespaceManager::SetExtensionApiCheckCallback(const ExtensionApiCheckCallback &cb)
+{
+    LOG(INFO, RUNTIME) << "Set ExtensionApiCheckCallback begins";
+    EtsNamespaceManagerImpl &instance = EtsNamespaceManagerImpl::GetInstance();
+    instance.SetExtensionApiCheckCallback(cb);
+}
+
 }  // namespace ark::ets

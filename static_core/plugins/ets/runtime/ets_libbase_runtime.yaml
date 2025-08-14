@@ -651,6 +651,16 @@ intrinsics:
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::LoadLibrary
 
+  - name: StdCoreLoadLibraryWithPermissionCheck
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: loadLibraryWithPermissionCheck
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.String, std.core.String ]
+    impl: ark::ets::intrinsics::LoadLibraryWithPermissionCheck
+
 ###################
 # Escompat.JSON #
 ###################
