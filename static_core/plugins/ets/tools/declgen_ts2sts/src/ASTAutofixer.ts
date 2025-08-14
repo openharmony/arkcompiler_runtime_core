@@ -930,10 +930,16 @@ export class Autofixer {
             return modifier.kind === ts.SyntaxKind.PrivateKeyword;
           }));
       });
-      const nodeCanHaveModifiers = ts.canHaveModifiers(node);
-      const validModifiers = nodeCanHaveModifiers ? ts.getModifiers(node) : undefined;
-      return ts.factory.createClassDeclaration(
-        validModifiers,
+      
+      const decorators = ts.getAllDecorators(node) ?? [];
+      const modifiers = ts.canHaveModifiers(node) ? (ts.getModifiers(node) ?? []) : [];
+
+      const modifierLike: ts.NodeArray<ts.ModifierLike> | undefined = (decorators.length || modifiers.length) ?
+        ts.factory.createNodeArray<ts.ModifierLike>([...decorators, ...modifiers]) : undefined;
+
+      return this.context.factory.updateClassDeclaration(
+        node,
+        modifierLike,
         node.name,
         node.typeParameters,
         node.heritageClauses,
@@ -995,7 +1001,6 @@ export class Autofixer {
     if (!isExported) {
       return node;
     }
-
     const hasDeclare = modifiers.some(m => m.kind === ts.SyntaxKind.DeclareKeyword);
     if (hasDeclare) {
       return node;
@@ -1297,7 +1302,7 @@ export class Autofixer {
     }
 
     let decorators: ts.Decorator[] = [];
-    
+
     const illegalDecorators = ts.getAllDecorators(node)
     decorators = illegalDecorators?.filter(ts.isDecorator) as ts.Decorator[];
     // Filter out restricted decorators
