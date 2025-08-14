@@ -23,7 +23,7 @@ tags: [compile-only, negative]
 
 class A {}
 class B {}
-
+ 
 function main(): void {
   let b: B = new B()
 

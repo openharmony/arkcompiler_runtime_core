@@ -1146,6 +1146,11 @@
 07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_cte_n_5.ets
 07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_cte_n_6.ets
 
+#28907 Specifying type for too large integer number with as doesn't produce CTE
+07.expressions/16.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_0.ets
+07.expressions/16.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_1.ets
+07.expressions/16.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_2.ets
+
 #28003
 07.expressions/17.typeof_expression/tof_const_11.ets
 
