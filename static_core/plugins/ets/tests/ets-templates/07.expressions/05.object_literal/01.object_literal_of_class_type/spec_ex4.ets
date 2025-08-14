@@ -15,28 +15,23 @@
 
 /*---
 desc: >-
-    A parameterless constructor is executed to produce an instance a of class A. The execution of the object literal
-    completes abruptly if so does the execution of the constructor.
+    If some class fields have default values (see Default Values for Types)
+    or explicit initializers (see Variable and Constant Declarations),
+    then such fields can be skipped in the object literal.
 ---*/
 
-class A {
-    name: string|null = null
-    age: number|null = null
-    constructor() {
-        let x = 0
-        let y = 1
-        let z = y/x
-    }
+class Friend {
+    name: string = ""
+    private nick: string = ""
+    age: number
+    sex?: "male"|"female"
 }
 
-function main(): int {
-  let a: A|null = null;
-  try {
-      a = { name: "Bob", age: 42 } as A
-  } catch (e) {
-      arktest.assertTrue(e instanceof ArithmeticError)
-      arktest.assertEQ(a, null);
-      return 0;
-  }
-  return 1;
+function main(): void {
+    // name, nick, age, and sex have either default value or explicit initializer
+    let f: Friend = {}
+    arktest.assertTrue(f instanceof Friend)
+    arktest.assertEQ(f.name, "")
+    arktest.assertEQ(f.age, 0)
+    arktest.assertEQ(f.sex, undefined)
 }

@@ -15,28 +15,34 @@
 
 /*---
 desc: >-
-    A parameterless constructor is executed to produce an instance a of class A. The execution of the object literal
-    completes abruptly if so does the execution of the constructor.
+    Compilation error when
+    The context is a union type,
+    and an object literal can be treated as value of several of union component types
 ---*/
 
-class A {
-    name: string|null = null
-    age: number|null = null
-    constructor() {
-        let x = 0
-        let y = 1
-        let z = y/x
-    }
+class A { x: double = 1 }
+class B { y: double = 1 }
+
+class C {
+    a: A = {}
+    x: long = 1
+}
+class D {
+    a: A = {}
+    y: long = 1
 }
 
-function main(): int {
-  let a: A|null = null;
-  try {
-      a = { name: "Bob", age: 42 } as A
-  } catch (e) {
-      arktest.assertTrue(e instanceof ArithmeticError)
-      arktest.assertEQ(a, null);
-      return 0;
-  }
-  return 1;
+class Z {
+    z?: number = 1
+}
+class X {}
+
+
+function main(): void {
+    let a: A | B = {x: 1}
+    arktest.assertTrue(a instanceof A)
+    let c: D | A | C = {a: {x: 1}, x: 1}
+    arktest.assertTrue(c instanceof C)
+    let z: X | Z = {z: 1}
+    arktest.assertTrue(z instanceof Z)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +15,14 @@
 
 /*---
 desc: >-
-    Interface type I must contain properties only.
-    If interface type I contains a method,
-    then a compile-time error occurs
+    If a class has accessors (see Accessor Declarations) for a property,
+    and its setter is provided, then this property can be used as a part of an object literal.
+    Otherwise, a compile-time error occurs
 tags: [compile-only, negative]
 ---*/
 
-interface I {
-    name: string
-    foo(): void
+class Err {
+    get attr (): number { return 42 }
 }
 
-let i: I = {name: "Bob"} // compile-time error, interface has methods
+const b: Err = {attr: 42} // compile-time error - no setter for 'attr'

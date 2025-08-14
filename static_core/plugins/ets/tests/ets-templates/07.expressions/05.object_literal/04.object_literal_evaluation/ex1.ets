@@ -28,7 +28,8 @@ function main(): int {
   let a: A|null = null;
   try {
       a = { name: "Bob", age: t[5] } as A
-  } catch (e: RangeError) {
+  } catch (e) {
+      arktest.assertTrue(e instanceof RangeError)
       arktest.assertTrue( a == null );
       return 0;
   }

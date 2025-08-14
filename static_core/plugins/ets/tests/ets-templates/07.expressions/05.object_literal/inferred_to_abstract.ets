@@ -15,7 +15,6 @@
 
 /*---
 desc: An abstract class without abstract methods can be used.
-tags: [compile-only]
 ---*/
 
 abstract class AbstractPerson {

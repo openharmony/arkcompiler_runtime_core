@@ -427,3 +427,33 @@ cases:
           // lambda expression in expression
           let r: [int, int] = [...((p: [int, int]): [int, int] => [p[1], p[0]])(a2)]
           arktest.assertTrue(r[0] == 5 && r[1] == 6)
+
+# FixedArray
+    - use: |-
+          let fa1: FixedArray<int> = [1]
+          let a2: int[] = [2, 3, 4]
+          let fa3: FixedArray<int> = [...fa1, ...a2]
+          arktest.assertEQ(fa3.length, 4)
+          arktest.assertEQ(fa3[0], 1)
+          arktest.assertEQ(fa3[3], 4)
+
+    - decl: |-
+          class C {
+              x: int = 13
+          }
+      use: |-
+          let a: FixedArray<C> = [new C]
+          let c: FixedArray<C> = [...a]
+          arktest.assertEQ(c.length, 1)
+          arktest.assertEQ(c[0].x, 13)
+
+    - use: |-
+          let a: int[] = [100, 101]
+          let fa: FixedArray<int> = [
+              ...((p: int[]): int[] => [p[1], p[0]])(a),
+              10, 11,
+              ...a]
+          arktest.assertEQ(fa.length, 6)
+          arktest.assertEQ(fa[0], 101)
+          arktest.assertEQ(fa[2], 10)
+          arktest.assertEQ(fa[4], 100)

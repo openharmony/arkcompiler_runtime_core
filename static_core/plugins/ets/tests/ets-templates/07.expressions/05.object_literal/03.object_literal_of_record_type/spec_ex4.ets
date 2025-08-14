@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +15,14 @@
 
 /*---
 desc: >-
-    Interface type I must contain properties only.
-    If interface type I contains a method,
-    then a compile-time error occurs
+    If a key is a union of literal types or an enum type,
+    then all variants must be listed in the object literal.
+    Otherwise, a compile-time error occurs
 tags: [compile-only, negative]
 ---*/
 
-interface I {
-    name: string
-    foo(): void
-}
-
-let i: I = {name: "Bob"} // compile-time error, interface has methods
+enum Enum {A, B}
+const map1: Record<Enum, number> = {
+    Enum.A: 1
+} // compile-time error: key "Enum.b" is missing
+// Note: Error message is masked by #28679 currently

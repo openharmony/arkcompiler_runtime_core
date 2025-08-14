@@ -169,3 +169,14 @@ cases:
           // expressions in field values
           let a: A = { first_name: fn, last_name: ln(), full_name: fn + " " + ln() }
           arktest.assertTrue(a.full_name == "John Smith")
+
+    - decl: |-
+          interface A {
+              age: number
+              name?: string
+          }
+      use: |-
+          let a: A = { age: 42 }
+          arktest.assertTrue(a instanceof A)
+          arktest.assertEQ(a.age, 42)
+          arktest.assertEQ(a.name, undefined)

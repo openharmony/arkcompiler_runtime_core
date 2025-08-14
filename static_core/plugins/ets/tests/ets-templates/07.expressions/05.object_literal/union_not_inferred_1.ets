@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +15,15 @@
 
 /*---
 desc: >-
-    Interface type I must contain properties only.
-    If interface type I contains a method,
-    then a compile-time error occurs
-tags: [compile-only, negative]
+    Compilation error when
+    The context is a union type,
+    and an object literal can be treated as value of several of union component types
+tags: [negative, compile-only]
 ---*/
 
-interface I {
-    name: string
-    foo(): void
-}
+class A { field = 1 }
+class B { field = 2 }
 
-let i: I = {name: "Bob"} // compile-time error, interface has methods
+function main(): void {
+    let a: A | B = {field: 6}
+}

@@ -44,6 +44,14 @@ cases:
 
     - decl: |-
           interface A {
+              name?: string
+              age: number
+          }
+      use: |-
+          let a: A = { name: "John" } // CTE, missed field
+
+    - decl: |-
+          interface A {
               age: number
           }
       use: |-

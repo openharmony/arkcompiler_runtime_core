@@ -15,7 +15,6 @@
 
 /*---
 desc: A compile-time error occurs if The inferred type has abstract methods
-tags: [compile-only]
 ---*/
 
 abstract class AbstractPerson {

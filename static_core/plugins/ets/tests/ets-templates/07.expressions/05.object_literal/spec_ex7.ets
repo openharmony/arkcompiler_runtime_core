@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +15,26 @@
 
 /*---
 desc: >-
-    Interface type I must contain properties only.
-    If interface type I contains a method,
-    then a compile-time error occurs
-tags: [compile-only, negative]
+    any reference to this in object literals methods
+    is the reference to the type of the object literal - the class defined above
 ---*/
 
-interface I {
-    name: string
-    foo(): void
+class Blue {
+    name = "blue"
+    m(): string {
+        return "wrong"
+    }
 }
 
-let i: I = {name: "Bob"} // compile-time error, interface has methods
+class Red {
+    name = "red"
+    m(): string {
+       const b: Blue = { m(){ return this.name } }
+       return b.m()
+    }
+}
+
+function main(): void {
+    const r = new Red()
+    arktest.assertEQ(r.m(), "blue")
+}

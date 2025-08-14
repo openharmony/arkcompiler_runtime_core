@@ -15,27 +15,34 @@
 
 /*---
 desc: >-
-    A parameterless constructor is executed to produce an instance a of class A. The execution of the object literal
-    completes abruptly if so does the execution of the constructor.
+    Name-value pairs of the object literal are then executed from left to right
+    in the textual order they occur in the source code.
 ---*/
 
-class A {
-    name: string|null = null
-    age: number|null = null
-    constructor() {
-        let x = 0
-        let y = 1
-        let z = y/x
+interface I {
+    a: number
+    b: number
+    c: number
+}
+
+function mayThrow(n: number): number {
+    if (n == 1) {
+        throw new NullPointerError()
     }
+    if (n == 2) {
+        throw new RangeError()
+    }
+    if (n == 3) {
+        throw new ArithmeticError()
+    }
+    return n;
 }
 
 function main(): int {
-  let a: A|null = null;
   try {
-      a = { name: "Bob", age: 42 } as A
+      let i: I = { c: mayThrow(1), b: mayThrow(2), a: mayThrow(3) }
   } catch (e) {
-      arktest.assertTrue(e instanceof ArithmeticError)
-      arktest.assertEQ(a, null);
+      arktest.assertTrue(e instanceof NullPointerError)
       return 0;
   }
   return 1;

@@ -198,3 +198,34 @@ cases:
           // expressions in field values
           let a: A = { first_name: undefined, last_name: null }
           arktest.assertTrue(a.first_name === undefined && a.last_name === null)
+    - decl: |-
+          class B {
+              c?: number
+          }
+          class A {
+              b?: B
+          }
+      use: |-
+          let a: A = {}
+          arktest.assertTrue(a instanceof A)
+    - decl: |-
+          class HasTuple {
+              tuple: [boolean, Object] = [false, {}]
+          }
+          class HasArrayOfTuples {
+              tuples: HasTuple[] = []
+           }
+      use: |-
+          let t: HasTuple = {tuple: [true, {}]}
+          arktest.assertTrue(t instanceof HasTuple)
+          let at: HasArrayOfTuples = {tuples: [{tuple: [false, {}]}, t]}
+          arktest.assertTrue(at instanceof HasArrayOfTuples)
+    - decl: |-
+          type RecStrBool = Record<"yes" | "no", boolean>
+          class HasRecStrBool {
+              r: RecStrBool = { "yes": true, "no": false }
+          }
+      use: |-
+          let f: HasRecStrBool = { r: {"yes": false, "no": true} }
+          arktest.assertTrue(f instanceof HasRecStrBool)
+          arktest.assertEQ(f.r["yes"], false)

@@ -14,13 +14,17 @@
  */
 
 /*---
-desc: If the class type C is inferred from the context, then the type of object literal is C.
+desc: >-
+    A compile-time error occurs if type of an expression in a name-value pair
+    is not assignable (see Assignability) to the field type
 tags: [compile-only, negative]
 ---*/
 
 class Friend {
     name: string = ""
-    age: number = 0
+    private nick: string = ""
+    age: number
+    sex?: "male"|"female"
 }
-// compile-time error, nick is private:
-let f: Friend = {name: 123, age: 55}
+
+let f: Friend = {name: 123}  // CTE: not assignable

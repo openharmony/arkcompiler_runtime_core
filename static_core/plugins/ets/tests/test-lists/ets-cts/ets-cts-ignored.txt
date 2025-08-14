@@ -1018,8 +1018,36 @@
 07.expressions/04.array_literal/arr_n_2.ets
 07.expressions/04.array_literal/arr_n_3.ets
 
+#28441 Method in object literal rejected
+07.expressions/05.object_literal/spec_ex1.ets
+07.expressions/05.object_literal/spec_ex3.ets
+07.expressions/05.object_literal/spec_ex7.ets
+
+#28484 Interface has methods
+07.expressions/05.object_literal/spec_ex6.ets
+
+#28748 Interface literal missing property
+07.expressions/05.object_literal/02.object_literal_of_interface_type/in_n_4.ets
+07.expressions/05.object_literal/02.object_literal_of_interface_type/in_n_5.ets
+
+#28721 Accessor in object literal allowed
+07.expressions/05.object_literal/02.object_literal_of_interface_type/spec_ex4.ets
+07.expressions/05.object_literal/02.object_literal_of_interface_type/spec_ex5.ets
+
 #25990
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_14.ets
+
+#28679 Record with enum keys
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_24.ets
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_25.ets
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_26.ets
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_27.ets
+
+#28898 Iterable refused as spread
+07.expressions/06.spread_expression/iterable.ets
+
+#26981 Unable to spread Record
+07.expressions/06.spread_expression/spex_func_50.ets
 
 #24006 Array literal type inference needs to be improved
 07.expressions/06.spread_expression/spex_lmbd_36.ets

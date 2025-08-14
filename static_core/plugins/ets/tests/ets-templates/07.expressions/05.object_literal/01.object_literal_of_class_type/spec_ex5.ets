@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +15,15 @@
 
 /*---
 desc: >-
-    Interface type I must contain properties only.
-    If interface type I contains a method,
-    then a compile-time error occurs
-tags: [compile-only, negative]
+    If a class has accessors (see Accessor Declarations) for a property,
+    and its setter is provided, then this property can be used as a part of an object literal.
 ---*/
 
-interface I {
-    name: string
-    foo(): void
+class OK {
+    set attr (attr: number) {}
 }
 
-let i: I = {name: "Bob"} // compile-time error, interface has methods
+function main(): void {
+    const a: OK = {attr: 42} // OK, as the setter be called
+    arktest.assertTrue(a instanceof OK)
+}

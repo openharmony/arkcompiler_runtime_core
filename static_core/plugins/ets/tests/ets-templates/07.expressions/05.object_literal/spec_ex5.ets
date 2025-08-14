@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +15,22 @@
 
 /*---
 desc: >-
-    Interface type I must contain properties only.
-    If interface type I contains a method,
-    then a compile-time error occurs
-tags: [compile-only, negative]
+    A compile-time error occurs if a class has a private or a protected method,
+    and its object literal contains same-name methods with override-compatible signatures
+tags: [negative, compile-only]
 ---*/
 
+class Base {}
+
+class Derived extends Base {}
+
 interface I {
-    name: string
-    foo(): void
+  method (p: Derived): Base
 }
 
-let i: I = {name: "Bob"} // compile-time error, interface has methods
+function main(): void {
+    const o: I = {
+        method (p: Base): Derived { return new Derived } // OK
+    }
+    o.method (new Base) // compile-time error
+}
