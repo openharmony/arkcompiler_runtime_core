@@ -500,6 +500,7 @@ public:
     void GenerateEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob) override;
     void GenerateNativePrologue(const FrameInfo &frameInfo) override;
     void GenerateNativeEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob) override;
+    void GenerateEpilogueHead(const FrameInfo &frameInfo, std::function<void()> postJob) override;
 
     void *GetCodeEntry() override;
     uint32_t GetCodeSize() override;

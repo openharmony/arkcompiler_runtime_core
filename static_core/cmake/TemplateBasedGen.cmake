@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -172,7 +172,7 @@ function(panda_gen_file)
 
     add_custom_command(OUTPUT ${ARG_OUTPUTFILE}
         COMMENT "Generate file for ${ARG_TEMPLATE}"
-        COMMAND ${GENERATOR} ${ARG_EXTRA_ARGV} --template ${ARG_TEMPLATE} --data ${DATA_STR} --api ${API_STR} --output ${ARG_OUTPUTFILE} ${REQUIRE_OPTION}
+        COMMAND ${GENERATOR} ${ARG_EXTRA_ARGV} --template ${ARG_TEMPLATE} --data ${DATA_STR} --api ${API_STR}  --target ${CMAKE_SYSTEM_PROCESSOR} --output ${ARG_OUTPUTFILE} ${REQUIRE_OPTION}
         DEPENDS ${DEPENDS_LIST} ${ARG_EXTRA_DEPENDENCIES}
     )
 endfunction()

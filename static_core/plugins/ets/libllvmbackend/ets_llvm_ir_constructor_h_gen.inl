@@ -137,12 +137,12 @@ bool EmitBigUint64ArraySetValuesFromArray(Inst *inst)
 
 bool EmitMapGet(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_GET_FAST_PATH, 2U);
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_GET, 2U);
 }
 
 bool EmitMapHas(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_HAS_FAST_PATH, 2U);
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_HAS, 2U);
 }
 
 bool EmitMapDelete(Inst *inst)

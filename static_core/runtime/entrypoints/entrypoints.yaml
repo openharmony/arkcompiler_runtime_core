@@ -1378,6 +1378,24 @@ entrypoints:
     - ark::coretypes::String*  # first string
     - ark::coretypes::String*  # second string
 
+- name: StringCompareToUsual
+  entrypoint: CoreStringCompareTo
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - int32_t                  # compare result
+    - ark::coretypes::String*  # first string
+    - ark::coretypes::String*  # second string
+
+- name: StringCompareToSlowPath
+  entrypoint: CoreStringCompareTo
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - int32_t                  # compare result
+    - ark::coretypes::String*  # first string
+    - ark::coretypes::String*  # second string
+
 - name: StringEqualsUsual
   entrypoint: CoreStringEquals
   bridge: entrypoint
@@ -1393,5 +1411,15 @@ entrypoints:
   properties: [intrinsic]
   signature:
     - uint8_t
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringEqualsUnrollCompressedNativePlus
+  entrypoint: StringEqualsUnrollCompressedNativePlus
+  bridge: none
+  properties: []
+  signature:
+    - uint8_t
+    - void*                     # MethodPtr, fake
     - ark::coretypes::String*
     - ark::coretypes::String*

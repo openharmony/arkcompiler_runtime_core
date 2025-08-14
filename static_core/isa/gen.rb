@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -84,6 +84,7 @@ optparser = OptionParser.new do |opts|
   opts.on('-o', '--output FILE', 'Output file (default is stdout)')
   opts.on('-a', '--assert FILE', 'Go through assertions on data provided and exit')
   opts.on('-r', '--require foo,bar,baz', Array, 'List of additional Ruby files to be required for generation')
+  opts.on('--target [arch]', 'Currently selected target')
 
   opts.on('-h', '--help', 'Prints this help') do
     puts opts
@@ -91,6 +92,9 @@ optparser = OptionParser.new do |opts|
   end
 end
 optparser.parse!(into: options)
+
+# export the current panda target for the scripts that need it
+$selected_target = options['target'].sub('x86_64', 'amd64') if options['target']
 
 check_option(optparser, options, :data)
 check_option(optparser, options, :api)

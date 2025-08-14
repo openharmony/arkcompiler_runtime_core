@@ -398,10 +398,9 @@ void Codegen::GeneratePrologue()
 
     GetCallingConvention()->GeneratePrologue(*frameInfo_);
 
-    if (!GetGraph()->GetMode().IsNative()) {
+    if (!(GetGraph()->GetMode().IsNative() || GetGraph()->GetMode().IsNativePlus())) {
+        // Set the frame kind to "Compiled"
         GetEncoder()->EncodeSti(1, 1, MemRef(ThreadReg(), GetRuntime()->GetTlsFrameKindOffset(GetArch())));
-    }
-    if (!GetGraph()->GetMode().IsNative()) {
         // Create stack overflow check
         GetEncoder()->EncodeStackOverflowCheck(-GetRuntime()->GetStackOverflowCheckOffset());
         // Create empty stackmap for the stack overflow check
@@ -2406,7 +2405,7 @@ void Codegen::VisitCall(CallInst *inst)
     ASSERT(GetGraph()->GetRelocationHandler() != nullptr);
 
     auto mode = GetGraph()->GetMode();
-    ASSERT(mode.IsFastPath() || mode.IsInterpreter() || mode.IsNative());
+    ASSERT(mode.IsFastPath() || mode.IsInterpreter() || mode.IsNative() || mode.IsNativePlus());
     ASSERT(mode.IsFastPath() || !HasLiveCallerSavedRegs(inst));
 
     RegMask callerRegs;

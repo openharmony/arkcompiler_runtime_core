@@ -1945,4 +1945,18 @@ extern "C" uint8_t CoreStringEquals(coretypes::String *str1, coretypes::String *
     return coretypes::String::StringsAreEqual(str1, str2);
 }
 
+extern "C" int32_t CoreStringCompareTo(coretypes::String *str1, coretypes::String *str2)
+{
+    /* corner cases */
+    if (str1->GetLength() == 0) {
+        return -str2->GetLength();
+    }
+    if (str2->GetLength() == 0) {
+        return str1->GetLength();
+    }
+
+    /* use the default implementation otherwise */
+    return str1->Compare(str2, Runtime::GetCurrent()->GetPandaVM()->GetLanguageContext());
+}
+
 }  // namespace ark

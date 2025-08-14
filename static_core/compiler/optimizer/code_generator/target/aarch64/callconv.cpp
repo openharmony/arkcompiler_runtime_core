@@ -309,13 +309,23 @@ void Aarch64CallingConvention::GenerateEpilogueImpl(const FrameInfo &frameInfo, 
         GetMasm()->PopCPURegList(vixl::aarch64::CPURegList(VixlReg(fp), VixlReg(lr)));
     }
     SET_CFI_OFFSET(popFplr, GetEncoder()->GetCursorOffset());
-
-    GetMasm()->Ret();
 }
 
 void Aarch64CallingConvention::GenerateEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob)
 {
     GenerateEpilogueImpl<false>(frameInfo, postJob);
+    GetMasm()->Ret();
+}
+
+void Aarch64CallingConvention::GenerateNativeEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob)
+{
+    GenerateEpilogueImpl<true>(frameInfo, postJob);
+    GetMasm()->Ret();
+}
+
+void Aarch64CallingConvention::GenerateEpilogueHead(const FrameInfo &frameInfo, std::function<void()> postJob)
+{
+    GenerateEpilogueImpl<true>(frameInfo, postJob);
 }
 
 void Aarch64CallingConvention::GenerateNativePrologue(const FrameInfo &frameInfo)
@@ -349,10 +359,5 @@ void Aarch64CallingConvention::GenerateNativePrologue(const FrameInfo &frameInfo
         auto spToFrameEndOffset = (spToRegsSlots + fl.GetRegsSlotsCount()) * fl.GetSlotSize();
         encoder->EncodeSub(sp, sp, Imm(spToFrameEndOffset));
     }
-}
-
-void Aarch64CallingConvention::GenerateNativeEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob)
-{
-    GenerateEpilogueImpl<true>(frameInfo, postJob);
 }
 }  // namespace ark::compiler::aarch64

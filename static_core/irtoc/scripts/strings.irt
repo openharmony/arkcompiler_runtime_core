@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,8 +16,9 @@
 include_relative 'common.irt'
 include_relative 'string_helpers.irt'
 
-GenerateStringEquals(lang='', dynamic=false, compressed=true)
-GenerateStringEquals(lang='', dynamic=false, compressed=false)
+GenerateStringEquals(lang='', dynamic=false, compressed=true, :FastPath)
+GenerateStringEquals(lang='', dynamic=false, compressed=true, :NativePlus)
+GenerateStringEquals(lang='', dynamic=false, compressed=false, :FastPath)
 GenerateCreateStringFromStringTlab(string_compression_enabled=true)
 GenerateCreateStringFromStringTlab(string_compression_enabled=false)
 GenerateCreateStringFromCharArrayTlab(string_compression_enabled=true)
@@ -28,8 +29,9 @@ GenerateSubstringFromStringTlab(string_compression_enabled=true)
 GenerateSubstringFromStringTlab(string_compression_enabled=false)
 GenerateStringGetCharsTlab(string_compression_enabled=true)
 GenerateStringGetCharsTlab(string_compression_enabled=false)
-GenerateStringHashCode(string_compression_enabled=true)
-GenerateStringHashCode(string_compression_enabled=false)
+GenerateStringHashCode(string_compression_enabled=true, :FastPath)
+GenerateStringHashCode(string_compression_enabled=true, :NativePlus)
+GenerateStringHashCode(string_compression_enabled=false, :FastPath)
 
 available_regs = $panda_mask
 function(:StringConcat2Tlab,
@@ -314,21 +316,37 @@ Label(:SlowPathEntrypoint)
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
-function(:StringCompareTo,
-         params: {str1: 'ref', str2: 'ref'},
-         regmap: $full_regmap,
-         regalloc_set: $panda_mask,
-         mode: [:FastPath]) {
-  # Arm32 is not supported
-  if Options.arch == :arm32
-    Intrinsic(:UNREACHABLE).void.Terminator
-    next
-  end
-  
-  check_string_type(str1)
-  check_string_type(str2)
+def GenerateStringCompareTo(cgmode)
+  suffix = (cgmode == :NativePlus ? 'NativePlus': '')
+  function("StringCompareTo#{suffix}",
+           params: {str1: 'ref', str2: 'ref'},
+           regmap: $full_regmap,
+           regalloc_set: $panda_mask,
+           mode: [cgmode]) {
 
-  Return(macroStringCompareTo(str1, str2)).i32
-}
+    # Arm32 is not supported
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).void.Terminator
+      next
+    end
+
+    check_string_type(str1)
+    check_string_type(str2)
+
+    Return(macroStringCompareTo(str1, str2)).i32
+
+Label(:SlowPathEntrypoint)
+    if cgmode == :NativePlus
+        Return(Call(str1, str2).Method('CoreStringCompareTo').i32).i32
+    else
+      entrypoint = get_entrypoint_offset("STRING_COMPARE_TO_SLOW_PATH")
+      Intrinsic(:SLOW_PATH_ENTRY, str1, str2).AddImm(entrypoint).MethodAsImm("StringCompareToUsualBridge").Terminator.i32
+      Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+    end
+  }
+end
+
+GenerateStringCompareTo(:FastPath)
+GenerateStringCompareTo(:NativePlus)
 
 include_plugin 'ets_string'

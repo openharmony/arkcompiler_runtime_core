@@ -729,14 +729,14 @@ void Codegen::CreateReadString(IntrinsicInst *inst, Reg dst, SRCREGS src)
 void Codegen::CreateMapGet([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(GetArch() != Arch::AARCH32);
-    auto entrypointId = EntrypointId::MAP_GET_FAST_PATH;
+    auto entrypointId = EntrypointId::MAP_GET;
     CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);
 }
 
 void Codegen::CreateMapHas([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(GetArch() != Arch::AARCH32);
-    auto entrypointId = EntrypointId::MAP_HAS_FAST_PATH;
+    auto entrypointId = EntrypointId::MAP_HAS;
     CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);
 }
 

@@ -31,6 +31,10 @@ namespace <%= ns %> {
 %     if i.private
 #ifndef PANDA_PRODUCT_BUILD
 %     end
+%   if i.respond_to?(:irtoc_impl) && i.codegen_arch.include?($selected_target)
+// Generate NativePlus irtoc intrinsic prototype if exists and is relevant for the selected architecture
+      extern "C" PANDA_PUBLIC_API <%= i.impl_signature.ret %> <%= i.irtoc_impl %>(<%= i.impl_signature.args.join(', ') %>); // NOLINT(readability-named-parameter)
+%   end
     extern "C" PANDA_PUBLIC_API <%= i.impl_signature.ret %> <%= impl_name %>(<%= i.impl_signature.args.join(', ') %>); // NOLINT(readability-named-parameter)
 %     if i.need_abi_wrapper?
 %       impl_name = i.orig_impl.rpartition('::').last

@@ -14,44 +14,59 @@
 
 include_relative 'map_set_common.irt'
 
-function(:MapGetIrToc,
-        params: {map: 'ref', key: 'ref'},
-        regmap: $full_regmap,
-        regalloc_set: $panda_mask,
-        mode: [:FastPath]) {
+def GenerateMapGet(cgmode)
+  prefix = (cgmode == :NativePlus ? 'NativePlus' : '')
+  function("MapGet#{prefix}".to_sym,
+          params: {map: 'ref', key: 'ref'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [cgmode]) {
 
-  if Options.arch == :arm32
-    Intrinsic(:UNREACHABLE).Terminator.void
-    next
-  end
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void
+      next
+    end
 
-  processMapGet(map, key)
+    processMapGet(map, key, cgmode)
 }
+end
 
-function(:MapDeleteIrToc,
-        params: {map: 'ref', key: 'ref'},
-        regmap: $full_regmap,
-        regalloc_set: $panda_mask,
-        mode: [:FastPath]) {
+def GenerateMapDelete(cgmode)
+  prefix = (cgmode == :NativePlus ? 'NativePlus': '')
+  function("MapDelete#{prefix}".to_sym,
+          params: {map: 'ref', key: 'ref'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [cgmode]) {
 
-  if Options.arch == :arm32
-    Intrinsic(:UNREACHABLE).Terminator.void
-    next
-  end
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void
+      next
+    end
 
-  processMapDelete(map, key)
+    processMapDelete(map, key, cgmode)
 }
+end
 
-function(:MapHasIrToc,
-        params: {map: 'ref', key: 'ref'},
-        regmap: $full_regmap,
-        regalloc_set: $panda_mask,
-        mode: [:FastPath]) {
+def GenerateMapHas(cgmode)
+  prefix = (cgmode == :NativePlus ? 'NativePlus': '')
+  function("MapHas#{prefix}".to_sym,
+          params: {map: 'ref', key: 'ref'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [cgmode]) {
 
-  if Options.arch == :arm32
-    Intrinsic(:UNREACHABLE).Terminator.void
-    next
-  end
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void
+      next
+    end
 
-  processMapHas(map, key)
+    processMapHas(map, key, cgmode)
 }
+end
+GenerateMapGet(:FastPath)
+GenerateMapGet(:NativePlus)
+GenerateMapDelete(:FastPath)
+GenerateMapDelete(:NativePlus)
+GenerateMapHas(:FastPath)
+GenerateMapHas(:NativePlus)

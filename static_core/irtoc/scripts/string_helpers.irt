@@ -39,14 +39,13 @@ macro(:check_string_type) do |str|
   }
 end
 
-def GenerateStringEquals(lang, dynamic, compression)
-    suffix = (compression ? "Compressed" : "")
+def GenerateStringEquals(lang, dynamic, compression, cgmode = :FastPath)
+    suffix = (compression ? 'Compressed' : '') + (cgmode == :NativePlus ? 'NativePlus': '')
     length_shift = Constants::STRING_LENGTH_SHIFT
-    mode = [:FastPath]
-    mode.push(:DynamicMethod, :DynamicStub) if dynamic
+    mode = (dynamic ? [:FastPath, :DynamicMethod, :DynamicStub] : [cgmode] )
 
     reg_mask = Options.arch == :arm64 ?
-        RegMask.new($full_regmap, :arg0, :arg1, :callee0, :callee1, :callee2, :callee3, :callee4, :callee5, :callee6, :callee7, :tmp0, :tmp1) :
+        RegMask.new($full_regmap, :arg0, :arg1, :callee0, :callee1, :callee2, :callee3, :callee4, :callee5, :callee6, :callee7) :
         $panda_mask + :tmp0 + :tmp1 + :tr
 
     function("#{lang}StringEqualsUnroll#{suffix}".to_sym,
@@ -108,7 +107,7 @@ def GenerateStringEquals(lang, dynamic, compression)
         Return(0).b
     }
 
-    reg_mask = Options.arch == :arm64 ? RegMask.new($full_regmap, :arg0, :arg1, :tmp0, :tmp1, :callee0, :callee2) :
+    reg_mask = Options.arch == :arm64 ? RegMask.new($full_regmap, :arg0, :arg1, :callee0, :callee2) :
         RegMask.new($full_regmap, :arg0, :arg1, :tmp0, :tmp1, :callee0, :caller1)
 
     function("#{lang}StringEquals#{suffix}".to_sym,
@@ -176,11 +175,17 @@ def GenerateStringEquals(lang, dynamic, compression)
     Label(:Long)
         unroll := Compare(length, 64).GE.b
         IfImm(unroll).Imm(0).SrcType("DataType::BOOL").NE.b {
+          if cgmode == :NativePlus
+            LiveOut(str1).DstReg(regmap[:arg1]).ref
+            LiveOut(str2).DstReg(regmap[:arg2]).ref
+          else
             LiveOut(str1).DstReg(regmap[:arg0]).ref
             LiveOut(str2).DstReg(regmap[:arg1]).ref
-            entrypoint_id = "#{lang.empty? ? '' : lang.upcase + '_'}STRING_EQUALS_UNROLL" + (compression ? "_COMPRESSED" : "");
+          end
+            upsuffix = (compression ? '_COMPRESSED' : '') + (cgmode == :NativePlus ? '_NATIVE_PLUS' : '')
+            entrypoint_id = "#{lang.empty? ? '' : lang.upcase + '_'}STRING_EQUALS_UNROLL" + upsuffix;
             entrypoint_offset = get_entrypoint_offset(entrypoint_id)
-            entrypoint_name = "#{lang.empty? ? '' : lang}StringEqualsUnroll" + (compression ? "Compressed" : "");
+            entrypoint_name = "#{lang.empty? ? '' : lang}StringEqualsUnroll" + suffix;
             Intrinsic(:TAIL_CALL).AddImm(entrypoint_offset).MethodAsImm(entrypoint_name).Terminator.b
         }
         first_idx := Constants::STRING_DATA_OFFSET
@@ -204,9 +209,13 @@ def GenerateStringEquals(lang, dynamic, compression)
     Label(:NotEqual)
         Return(0).b
     Label(:SlowPathEntrypoint)
-      entrypoint = get_entrypoint_offset("STRING_EQUALS_SLOW_PATH")
-      Intrinsic(:SLOW_PATH_ENTRY, str1, str2).AddImm(entrypoint).MethodAsImm("StringEqualsUsualBridge").Terminator.b
-      Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+      if cgmode == :NativePlus
+        Return(Call(str1, str2).Method("CoreStringEquals").b).b
+      else
+        entrypoint = get_entrypoint_offset("STRING_EQUALS_SLOW_PATH")
+        Intrinsic(:SLOW_PATH_ENTRY, str1, str2).AddImm(entrypoint).MethodAsImm("StringEqualsUsualBridge").Terminator.b
+        Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+      end
     }
 end
 
@@ -1096,18 +1105,19 @@ Label(:Loop_hash)
 end  # u16_string_hashcode
 
 
-def GenerateStringHashCode(string_compression_enabled)
+def GenerateStringHashCode(string_compression_enabled, cgmode)
   suffix = (string_compression_enabled ? "Compressed" : "")
+  suffix = suffix + (cgmode == :NativePlus ? 'NativePlus': '')
 if Options.arch == :arm64
-  available_regs = $temps_mask + :arg0 + :callee0 + :callee1 + :callee2 + :callee3
-else
+  available_regs = RegMask.new($full_regmap, :arg0, :callee0, :callee1, :callee2, :callee3)
+elsif Options.arch == :x86_64
   available_regs = $temps_mask + :arg0 + :callee0 + :caller0 + :caller1
 end
   function("StringHashCode#{suffix}".to_sym,
             params: {str: 'ref'},
             regmap: $full_regmap,
             regalloc_set: available_regs,
-            mode: [:FastPath]) {
+            mode: [cgmode]) {
 
     if Options.arch == :arm32
       Intrinsic(:UNREACHABLE).Terminator.void
@@ -1145,6 +1155,7 @@ end
     end
   }
 end  # def GenerateStringHashCode
+
 
 scoped_macro(:macroStringCompareTo) do |str1, str2|
   If(str1, str2).EQ.Unlikely.b {
