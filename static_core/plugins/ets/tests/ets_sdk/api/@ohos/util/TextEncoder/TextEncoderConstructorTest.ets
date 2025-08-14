@@ -22,7 +22,7 @@ function CharCodeEqual(resStr: String, expect: number)
 
 function main() {
     const suite = new arktest.ArkTestsuite("TextEncoder API tests");
-    
+
     suite.addTest("test_encoder_utf8", test_encoder_utf8);
     suite.addTest("test_encoder_u16le_helloworld", test_encoder_u16le_helloworld);
     suite.addTest("test_encoder_u16le_he", test_encoder_u16le_he);
@@ -45,8 +45,7 @@ function main() {
     return suite.run()
 }
 
-function test_encoder_utf8()
-{
+function test_encoder_utf8() {
     const enc = new util.TextEncoder('utf-8');
     let str = 'Hello world';
     const bytes = enc.encodeInto(str);
@@ -56,8 +55,7 @@ function test_encoder_utf8()
     }
 }
 
-function test_encoder_u16le_helloworld()
-{
+function test_encoder_u16le_helloworld() {
     const enc = new util.TextEncoder('utf-16le');
     let str = 'Hello world';
     const bytes = enc.encodeInto(str);
@@ -65,32 +63,28 @@ function test_encoder_u16le_helloworld()
     arktest.assertEQ(bytes[3], 0);
 }
 
-function test_encoder_u16le_he()
-{
+function test_encoder_u16le_he() {
     const enc = new util.TextEncoder('utf-16le');
     const bytes = enc.encodeInto('He');
     arktest.assertEQ(bytes[0], 72);
     arktest.assertEQ(bytes[3], 0);
 }
 
-function test_encoder_u16be_helloworld()
-{
+function test_encoder_u16be_helloworld() {
     const enc = new util.TextEncoder('utf-16be');
     const bytes = enc.encodeInto('Hello world');
     arktest.assertEQ(bytes[0], 0);
     arktest.assertEQ(bytes[1], 72);
 }
 
-function test_encoder_u16be_he()
-{
+function test_encoder_u16be_he() {
     const enc = new util.TextEncoder('utf-16be');
     const bytes = enc.encodeInto('He');
     arktest.assertEQ(bytes[0], 0);
     arktest.assertEQ(bytes[1], 72);
 }
 
-function test_encoder_GB2312()
-{
+function test_encoder_GB2312() {
     let enc = util.TextEncoder.create('GB2312');
     let result = enc.encodeInto('abc哈熠');
     let typedArray = new Uint8Array([97,98,99,185,254,236,218]);
@@ -99,8 +93,7 @@ function test_encoder_GB2312()
     }
 }
 
-function test_encoder_u16be_cnstr()
-{
+function test_encoder_u16be_cnstr() {
     let enc= new util.TextEncoder('utf-16be');
     let result = enc.encodeInto('abc哈熠');
     let res = new Uint8Array([0,97,0,98,0,99,84,200,113,160]);
@@ -108,8 +101,7 @@ function test_encoder_u16be_cnstr()
     arktest.assertEQ(result[1], 97);
 }
 
-function test_encoder_u16le_cnstr()
-{
+function test_encoder_u16le_cnstr() {
     let enc = new util.TextEncoder('utf-16le');
     let result = enc.encodeInto('abc哈熠');
     let res3 = new Uint8Array([97,0,98,0,99,0,200,84,160,113]);
@@ -117,29 +109,25 @@ function test_encoder_u16le_cnstr()
     arktest.assertEQ(result[1], 0);
 }
 
-function test_encoder_default_abc()
-{
+function test_encoder_default_abc() {
     let enc = new util.TextEncoder();
     let result = enc.encodeInto('abc')
     arktest.assertEQ(result[0], 0x61);
 }
 
-function test_encoder_default_cnstr()
-{
+function test_encoder_default_cnstr() {
     let enc = new util.TextEncoder()
     let result = enc.encodeInto('\uD800楼楼')
     arktest.assertEQ(result[5], 188);
 }
 
-function test_encoder_default_empty()
-{
+function test_encoder_default_empty() {
     let enc = new util.TextEncoder();
     let result = enc.encodeInto('');
     arktest.assertEQ(result.length, 0);
 }
 
-function test_encoder_encode_into_uint8array_escape()
-{
+function test_encoder_encode_into_uint8array_escape() {
     let enc = new util.TextEncoder()
     let buffer = new ArrayBuffer(10)
     let typedArray = new Uint8Array(buffer)
@@ -156,8 +144,7 @@ function test_encoder_encode_into_uint8array_escape()
     }
 }
 
-function test_encoder_encode_into_uint8array_enstr()
-{
+function test_encoder_encode_into_uint8array_enstr() {
     let enc = new util.TextEncoder('utf-16le');
     let buffer = new ArrayBuffer(20);
     let typedArray = new Uint8Array(buffer);
@@ -172,8 +159,7 @@ function test_encoder_encode_into_uint8array_enstr()
     }
 }
 
-function test_encoder_encode_into_uint8array_enstrbe()
-{
+function test_encoder_encode_into_uint8array_enstrbe() {
     let enc = new util.TextEncoder('utf-16be');
     let buffer = new ArrayBuffer(20);
     let typedArray = new Uint8Array(buffer);
@@ -188,15 +174,13 @@ function test_encoder_encode_into_uint8array_enstrbe()
     }
 }
 
-function test_encoding_utf8()
-{
+function test_encoding_utf8() {
     let enc = new util.TextEncoder();
     let str = enc.encoding;
     arktest.assertEQ(str, 'utf-8');
 }
 
-function test_encoding_gb18030()
-{
+function test_encoding_gb18030() {
     let enc = new util.TextEncoder('gb18030');
     let str = enc.encoding;
     arktest.assertEQ(str, 'gb18030');
@@ -205,8 +189,7 @@ function test_encoding_gb18030()
     arktest.assertEQ(str, 'GB18030');
 }
 
-function test_encoding_gbk()
-{
+function test_encoding_gbk() {
     let enc = new util.TextEncoder('gbk');
     let str = enc.encoding;
     arktest.assertEQ(str, 'gbk');
@@ -218,8 +201,7 @@ function test_encoding_gbk()
     arktest.assertEQ(str, 'GbK');
 }
 
-function test_encoding_gb2312()
-{
+function test_encoding_gb2312() {
     let enc = new util.TextEncoder('gb2312');
     let str = enc.encoding;
     arktest.assertEQ(str, 'gb2312');
@@ -231,8 +213,7 @@ function test_encoding_gb2312()
     arktest.assertEQ(str, 'gB2312');
 }
 
-function test_encoding_utf16le()
-{
+function test_encoding_utf16le() {
     let enc = new util.TextEncoder('utf-16le');
     let str = enc.encoding;
     arktest.assertEQ(str, 'utf-16le');
@@ -241,8 +222,7 @@ function test_encoding_utf16le()
     arktest.assertEQ(str, 'Utf-16le');
 }
 
-function test_encoding_iso88593()
-{
+function test_encoding_iso88593() {
     let enc = new util.TextEncoder('ISO-8859-3');
     let str = enc.encoding;
     arktest.assertEQ(str, 'ISO-8859-3');

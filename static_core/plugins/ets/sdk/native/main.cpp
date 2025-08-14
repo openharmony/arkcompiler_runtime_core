@@ -154,12 +154,12 @@ static ani_status BindTextDecoder(ani_env *env)
     std::array barMethods = {
         ani_native_function {
             "doEncodeInto",
-            "C{std.core.String}C{std.core.String}:C{escompat.Uint8Array}",
+            "C{std.core.String}C{std.core.String}:C{escompat.ArrayBuffer}",
             reinterpret_cast<void *>(ark::ets::sdk::util::DoEncodeInto),
         },
         ani_native_function {
             "doEncodeInfoUint8Array",
-            "C{std.core.String}C{std.core.String}C{escompat.Uint8Array}:C{@ohos.util.util.EncodeIntoUint8ArrayInfo}",
+            "C{std.core.String}C{std.core.String}C{escompat.Uint8Array}:C{escompat.Array}",
             reinterpret_cast<void *>(ark::ets::sdk::util::DoEncodeIntoUint8Array),
         },
     };

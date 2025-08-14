@@ -71,8 +71,8 @@ struct Uint8ArrayWithBufferInfo {
     size_t bufferLength;
 };
 
-ani_object DoEncodeInto(ani_env *env, ani_object object, ani_string stringObj, ani_string aniEncoding);
-ani_object DoEncodeIntoUint8Array(ani_env *env, ani_object object, ani_string inputStringObj, ani_string encodingObj,
-                                  ani_object destObj);
+ani_arraybuffer DoEncodeInto(ani_env *env, ani_object object, ani_string stringObj, ani_string aniEncoding);
+ani_array_int DoEncodeIntoUint8Array(ani_env *env, ani_object object, ani_string inputStringObj, ani_string encodingObj,
+                                     ani_object destObj);
 }  // namespace ark::ets::sdk::util
 #endif  // ANI_TEXTENCODER_H
