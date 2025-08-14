@@ -15,7 +15,7 @@
 
 /*---
 desc: Issue 25112 Assertion at compile lambda expression
-tags: [compile-only]
+tags: [compile-only, negative]
 ---*/
 
 function boo() {}
@@ -23,4 +23,3 @@ function boo() {}
 function main() {
     let accept: (value: String) => undefined = s =>  boo()
 }
-

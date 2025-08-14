@@ -53,7 +53,7 @@ class A {
             this.count_ = value1 + value2;
         }
 
-        return method(data1, data2);
+        method(data1, data2);
     }
 
     public recursionMethod(a0: int): void
@@ -61,7 +61,7 @@ class A {
         if (a0 > 100) {
             this.count_ = a0;
         } else {
-            return this.recursionMethod(a0 + 10);
+            this.recursionMethod(a0 + 10);
         }
     }
 }

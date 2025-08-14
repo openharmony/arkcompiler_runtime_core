@@ -37,7 +37,7 @@ class A {
     }
 
     static funcB(a0: int, a1: int): void {
-        return A.funcA(a0, a1);
+        A.funcA(a0, a1);
     }
 
     static getCount(): int {

@@ -584,7 +584,7 @@ class InteropWorker implements InternalWorker {
                 break;
             }
         }
-        
+
         // handle message cancellation
         if (currentMessage !== undefined) {
             if (this.messages.get(currentMessage) === MessageStatus.CANCELLED) {
@@ -790,7 +790,7 @@ class StaticWorker implements InternalWorker {
             }
 
             if (shouldExecute) {
-                task(); 
+                task();
             }
         }
     }
