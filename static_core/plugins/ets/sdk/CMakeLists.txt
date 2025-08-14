@@ -34,7 +34,6 @@ set(SDK_SRCS
     "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.Deque.ets"
     "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.HashMap.ets"
     "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.HashSet.ets"
-    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.json.ets"
     "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.LightWeightMap.ets"
     "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.LightWeightSet.ets"
     "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.LinkedList.ets"

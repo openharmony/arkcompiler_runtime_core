@@ -646,19 +646,18 @@ export class JSON {
         return JSON.parse<T>(text, undefined, type)
     }
 
-    public static parse<T>(text: string, reviver: ((key: string, value: NullishType) => NullishType) | undefined, type: Type, bigIntMode?: int): Nullish<T> {
+    public static parse<T>(text: string, reviver: ((key: string, value: NullishType) => NullishType) | undefined, type: Type, options?: jsonx.ParseOptions): Nullish<T> {
         if (!JSON.checkType(type, new Array<TypeColor>())) {
             throw new Error("Incorrect type: " + type.toString())
         }
 
-        if (bigIntMode == undefined) {
-            bigIntMode = 0
-        } else if (bigIntMode > 2 || bigIntMode < 0) {
-            throw new Error("bigIntMode value should be from 0 to 2, current value is" + bigIntMode)
+        let bigIntOpt: int = options ? options.bigIntMode as int : 0
+        if (bigIntOpt > 2 || bigIntOpt < 0) {
+            throw new Error("bigIntMode value should be from 0 to 2, current value is" + bigIntOpt)
         }
 
         let jsonValue = JSONParser.parse(text)
-        const parsingResult = new JSONValueParser(reviver, bigIntMode as int).parse(jsonValue, type) as T
+        const parsingResult = new JSONValueParser(reviver, bigIntOpt).parse(jsonValue, type) as T
 
         if (reviver !== undefined) {
             return reviver("", parsingResult) as T
