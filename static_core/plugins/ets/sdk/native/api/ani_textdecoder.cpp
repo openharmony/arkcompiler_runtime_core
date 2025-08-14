@@ -16,13 +16,18 @@
 #include <algorithm>
 #include <cstdint>
 #include <iostream>
-#include "ani_textdecoder.h"
+
 #include "ani.h"
 #include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
 #include "securec.h"
 #include "ohos/init_data.h"
+#include "Util.h"
+
+#include "ani_textdecoder.h"
 
 namespace ark::ets::sdk::util {
+constexpr int ERROR_CODE_INVALID_ARG = 401;
+
 UConverter *CreateConverter(std::string &encStr, UErrorCode &codeflag)
 {
     UConverter *conv = ucnv_open(encStr.c_str(), &codeflag);
@@ -81,23 +86,6 @@ ani_string TextDecoder::GetResultStr(ani_env *env, const UChar *arrDat, size_t l
     return resultStr;
 }
 
-ani_object TextDecoder::CreateThrowErrorObject(ani_env *env, const std::string &message)
-{
-    ani_string errString;
-    ANI_FATAL_IF_ERROR(env->String_NewUTF8(message.c_str(), message.size(), &errString));
-    static const char *className = "L@ohos/util/util/BusinessError;";
-    ani_class cls;
-    ANI_FATAL_IF_ERROR(env->FindClass(className, &cls));
-
-    ani_method errorCtor;
-    ANI_FATAL_IF_ERROR(env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;:V", &errorCtor));
-
-    ani_object errorObj;
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    ANI_FATAL_IF_ERROR(env->Object_New(cls, errorCtor, &errorObj, errString));
-    return errorObj;
-}
-
 ani_string TextDecoder::DecodeToString(ani_env *env, const char *source, int32_t byteOffset, uint32_t length,
                                        bool iflag)
 {
@@ -125,9 +113,7 @@ ani_string TextDecoder::DecodeToString(ani_env *env, const char *source, int32_t
     ucnv_toUnicode(GetConverterPtr(), &target, targetLimit, &source, sourceLimit, nullptr, flush, &codeFlag);
     if (codeFlag != U_ZERO_ERROR) {
         std::string message = "Parameter error. Please check if the decode data matches the encoding format.";
-        if (auto errorObj = CreateThrowErrorObject(env, message)) {
-            env->ThrowError(static_cast<ani_error>(errorObj));
-        }
+        ThrowBusinessError(env, ERROR_CODE_INVALID_ARG, message);
         return nullptr;
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
