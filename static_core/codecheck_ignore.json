@@ -210,6 +210,7 @@
   "tests/tests-u-runner-2/runner/test/launches_test/__init__.py": "*",
   "tests/tests-u-runner-2/runner/test/launches_test/data/data_test_suite0.py": "*",
   "tests/tests-u-runner-2/runner/test/metadata_test/__init__.py": "*",
+  "tests/tests-u-runner-2/runner/test/func_test/__init__.py": "*",
   "tests/tests-u-runner-2/runner/test/runner_test/data/__init__.py": "*",
   "tests/verifier-tests": "*",
   "tests/vm-benchmarks": "*",

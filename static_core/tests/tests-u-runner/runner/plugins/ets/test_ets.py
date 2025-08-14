@@ -149,8 +149,13 @@ class TestETS(TestFileBased):
 
     @staticmethod
     def _normalize_error_report(report: str) -> str:
-        pattern = ".(TID .{6}])."
+        pattern = r"\[TID [0-9a-fA-F]{6,}\]\s*"
         return re.sub(pattern, "", report)
+
+    @staticmethod
+    def _remove_file_info_from_error(error_message: str) -> str:
+        pattern = r'\s*\[\s*[^]]+\.ets:\d+:\d+\s*]|\s*\[\s*[^]]+\.abc\s*]'
+        return re.sub(pattern, '', error_message)
 
     def get_all_abc_dependent_files(self) -> List[str]:
         result: List[str] = []
@@ -241,52 +246,52 @@ class TestETS(TestFileBased):
         return self
 
 
-    def compare_output_with_expected(self, output: str, err_output: str) -> Tuple[bool, TestReport, Optional[FailKind]]:
+    def compare_output_with_expected(self, output: str, err_output: str) -> Tuple[bool, Optional[FailKind]]:
         """Compares test output with .expected or .expected.err files"""
         fail_kind = None
-        if not self.report:
-            return False, TestReport(output="", error="No test report to compare output", return_code=1), fail_kind
-        report = self.report
         try:
             self._read_expected_file()
-            passed = self.passed
             if not self.test_env.config.ark.jit.enable:
-                if self.expected and not self.expected_err:
-                    # Compare with output from std.OUT
-                    passed = self.expected == output.strip() and not err_output
-                elif self.expected_err and not self.expected:
-                    # Compare with output from std.ERR
-                    report_error = self._normalize_error_report(err_output)
-                    passed = self.expected_err == report_error.strip()
-                elif self.expected and self.expected_err:
-                    # Compare .expected file with std.OUT and .expected.err with std.ERR
-                    passed_stdout = self.expected == output.strip()
-                    report_error = self._normalize_error_report(err_output)
-                    passed_stderr = self.expected_err == report_error.strip()
-                    passed = passed_stdout and passed_stderr
+                passed = self._determine_test_status(output, err_output)
             else:
                 self._refactor_expected_str_for_jit()
-                if self.expected and not self.expected_err:
-                    # Compare with output from std.OUT
-                    passed = self.expected in output.strip() and not err_output
-                elif self.expected_err and not self.expected:
-                    # Compare with output from std.ERR
-                    report_error = self._normalize_error_report(err_output)
-                    passed = self.expected_err in report_error.strip()
-                elif self.expected and self.expected_err:
-                    # Compare .expected file with std.OUT and .expected.err with std.ERR
-                    passed_stdout = self.expected.strip() in output
-                    report_error = self._normalize_error_report(err_output)
-                    passed_stderr = self.expected_err.strip() in report_error.strip()
-                    passed = passed_stdout and passed_stderr
+                passed = self._determine_test_status(output, err_output, jit=True)
 
-        except OSError as error:
+        except OSError:
             passed = False
-            report = TestReport(error=str(error), output=self.report.output, return_code=self.report.return_code)
 
         if not passed:
             fail_kind = FailKind.COMPARE_OUTPUT_FAIL
-        return bool(passed), report, fail_kind
+        return bool(passed), fail_kind
+
+    def _determine_test_status(self, output: str, err_output: str, jit: bool = False) -> bool:
+
+        passed = True
+        output = output.strip()
+        err_output = err_output.strip()
+
+        def compare(expected: str, actual: str) -> bool:
+            if jit:
+                return expected in actual
+            return expected == actual
+
+        if self.expected and not self.expected_err and output:
+            # Compare with output from std.OUT
+            report_output = self._remove_file_info_from_error(output)
+            passed = compare(self.expected, report_output) and not err_output
+        elif self.expected_err and not self.expected and err_output:
+            # Compare with output from std.ERR
+            report_error = self._remove_file_info_from_error(self._normalize_error_report(err_output))
+            passed = compare(self.expected_err, report_error)
+        elif self.expected and self.expected_err and output and err_output:
+            # Compare .expected file with std.OUT and .expected.err with std.ERR
+            report_output = self._remove_file_info_from_error(output)
+            passed_stdout = compare(self.expected, report_output)
+            report_error = self._remove_file_info_from_error(self._normalize_error_report(err_output))
+            passed_stderr = compare(self.expected_err, report_error)
+            passed = passed_stdout and passed_stderr
+
+        return bool(passed)
 
     def _read_expected_file(self) -> None:
         if self.has_expected:
@@ -295,23 +300,25 @@ class TestETS(TestFileBased):
             self.expected_err = self._read_file(self.test_expected_err)
 
     def _refactor_expected_str_for_jit(self) -> None:
+        def _remove_after_main(s: str) -> str:
+            index_to_delete = len(s.split("\n"))
+            if index_to_delete > 1:
+                expected = s.split("\n")
+                for i, item in enumerate(expected):
+                    if '.main' in item:
+                        index_to_delete = i
+                        break
+                s = '\n'.join(expected[:index_to_delete])
+            else:
+                s = s.replace('main', 'main_run')
+
+            return s
+
         if self.expected:
-            index_to_delete = len(self.expected.split("\n"))
-            expected = self.expected.split("\n")
-            for i, item in enumerate(expected):
-                if '.main' in item:
-                    index_to_delete = i
-                    break
-            self.expected = '\n'.join(expected[:index_to_delete])
+            self.expected = _remove_after_main(self.expected)
 
         if self.expected_err:
-            index_to_delete = len(self.expected_err.split("\n"))
-            expected_err = self.expected_err.split("\n")
-            for i, item in enumerate(expected_err):
-                if '.main' in item:
-                    index_to_delete = i
-                    break
-            self.expected_err = '\n'.join(expected_err[:index_to_delete])
+            self.expected_err = _remove_after_main(self.expected_err)
 
     def _run_compare_mode(self) -> TestETS:
         files = []
@@ -342,7 +349,7 @@ class TestETS(TestFileBased):
 
         if (not self.is_negative_runtime and return_code == 0) or (self.is_negative_runtime and return_code != 0):
             if self.has_expected or self.has_expected_err:
-                comparison_res, self.report, self.fail_kind = self.compare_output_with_expected(output, err)
+                comparison_res, self.fail_kind = self.compare_output_with_expected(output, err)
 
                 if not comparison_res:
                     self.log_cmd("The comparison with .expected or .expected.err file failed.")
@@ -390,18 +397,38 @@ class TestETS(TestFileBased):
         passed, report, fail_kind = self.run_one_step(
             name="es2panda",
             params=params,
-            result_validator=lambda _, _2, rc: self._validate_compiler(rc, test_abc)
+            result_validator=lambda output, error, rc: self._validate_compiler(output, error, rc, test_abc)
         )
         if fail_kind == FailKind.ES2PANDA_FAIL and report and report.return_code == 0:
             fail_kind = FailKind.ES2PANDA_NEG_FAIL
         return passed, report, fail_kind
 
-    def _validate_compiler(self, return_code: int, output_path: str) -> bool:
+    def _validate_compiler(self, output: str, err: str, return_code: int, output_path: str) -> bool:
         dep_package = self.metadata.get_package_name()
         package_compile = self.dependent_packages.get(dep_package, False)
+        negative_test_passed = False
+        test_passed = False
         if self.is_negative_compile or package_compile:
-            return return_code == self.CTE_RETURN_CODE
-        return return_code == 0 and path.exists(output_path) and path.getsize(output_path) > 0
+            negative_test_passed = return_code == self.CTE_RETURN_CODE
+        else:
+            test_passed = return_code == 0 and path.exists(output_path) and path.getsize(output_path) > 0
+
+        if not (negative_test_passed or test_passed):
+            return False
+
+        if self.has_expected or self.has_expected_err:
+            comparison_res, self.fail_kind = self.compare_output_with_expected(output, err)
+
+            if not comparison_res:
+                self.log_cmd("The comparison with .expected or .expected.err file failed.")
+                return False
+            return True
+
+        if not err:
+            # for passed tests stderr should be empty or there should be .expected.err file to compare with
+            return True
+        return False
+
 
     def _run_verifier(self, test_abc: str) -> Tuple[bool, TestReport, Optional[FailKind]]:
         TestCase().assertTrue(

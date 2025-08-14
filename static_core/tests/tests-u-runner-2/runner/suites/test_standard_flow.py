@@ -177,6 +177,16 @@ class TestStandardFlow(Test):
                 f"Check value of 'validator' parameter")
         return class_obj
 
+    @staticmethod
+    def _normalize_error_report(report: str) -> str:
+        pattern = ".(TID .{6}])."
+        return re.sub(pattern, "", report).strip()
+
+    @staticmethod
+    def _remove_file_info_from_error(error_message: str) -> str:
+        pattern = r'\s*\[\s*[^]]+\.ets:\d+:\d+\s*]|\s*\[\s*[^]]+\.abc\s*]'
+        return re.sub(pattern, '', error_message)
+
     def continue_after_process_dependent_files(self) -> bool:
         """
         Processes dependent files
@@ -209,6 +219,7 @@ class TestStandardFlow(Test):
                              (self.is_compile_only or self.metadata.tags.not_a_test)))
                 if is_break:
                     return self
+
         return self
 
     def dependent_abc_files(self) -> list[str]:
@@ -255,21 +266,29 @@ class TestStandardFlow(Test):
         new_step.args.insert(-2, self.__add_panda_files())
         return new_step
 
+    def compare_output_with_expected(self, output: str | None, error_output: str | None) -> bool | None:
+        """Compares test output with expected"""
+
+        try:
+            self._read_expected_file()
+            passed = self._determine_test_status(output, error_output)
+
+        except OSError:
+            passed = False
+
+        return passed
+
     def __do_run_one_step(self, step: Step) -> tuple[bool, TestReport | None, str | None]:
         if not step.enabled:
             passed, report, fail_kind = True, None, None
         elif step.step_kind == StepKind.COMPILER:
             passed, report, fail_kind = self.__run_step(self.prepare_compiler_step(step))
-            if self.is_negative_compile:
-                passed = not passed
         elif step.step_kind == StepKind.VERIFIER:
             passed, report, fail_kind = self.__run_step(self.prepare_verifier_step(step))
         elif step.step_kind == StepKind.AOT:
             passed, report, fail_kind = self.__run_step(self.prepare_aot_step(step))
         elif step.step_kind == StepKind.RUNTIME:
             passed, report, fail_kind = self.__run_step(self.prepare_runtime_step(step))
-            if self.is_negative_runtime:
-                passed = not passed
         else:
             passed, report, fail_kind = self.__run_step(step)
         return passed, report, fail_kind
@@ -388,3 +407,49 @@ class TestStandardFlow(Test):
         if validator is not None:
             return validator(self, step.name, output, error, return_code)
         return True
+
+    def _read_expected_file(self) -> None:
+        if self.has_expected:
+            self.expected = utils.read_expected_file(self.path_to_expected)
+        if self.has_expected_err:
+            self.expected_err = utils.read_expected_file(self.path_to_expected_err)
+
+    def _refactor_expected_str_for_jit(self) -> None:
+        if self.expected:
+            index_to_delete = len(self.expected.split("\n"))
+            expected = self.expected.split("\n")
+            for i, item in enumerate(expected):
+                if '.main' in item:
+                    index_to_delete = i
+                    break
+            self.expected = '\n'.join(expected[:index_to_delete])
+
+        if self.expected_err:
+            index_to_delete = len(self.expected_err.split("\n"))
+            expected_err = self.expected_err.split("\n")
+            for i, item in enumerate(expected_err):
+                if '.main' in item:
+                    index_to_delete = i
+                    break
+            self.expected_err = '\n'.join(expected_err[:index_to_delete])
+
+    def _determine_test_status(self, output: str | None, error: str | None) -> bool:
+        passed = True
+        if self.expected and not self.expected_err and output:
+            # Compare with output from std.OUT
+            output_without_file_info = self._remove_file_info_from_error(output.strip())
+            passed = self._remove_file_info_from_error(self.expected) == output_without_file_info and not error
+        elif not self.expected and self.expected_err and error:
+            # Compare with output from std.ERR
+            report_error = self._remove_file_info_from_error(self._normalize_error_report(error))
+            passed = self._remove_file_info_from_error(self.expected_err) == report_error.strip()
+        elif self.expected and self.expected_err and output and error:
+            # Compare .expected with std.Output and .expected.err with std.Error
+            output_without_file_info = self._remove_file_info_from_error(output.strip())
+            passed_output = self._remove_file_info_from_error(self.expected) == output_without_file_info
+
+            report_error = self._remove_file_info_from_error(self._normalize_error_report(error))
+            passed_error = self._remove_file_info_from_error(self.expected_err) == report_error.strip()
+            passed = passed_output and passed_error
+
+        return bool(passed)

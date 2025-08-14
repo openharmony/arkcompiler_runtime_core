@@ -14,9 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from typing import TYPE_CHECKING
+
 from runner.extensions.validators.ivalidator import IValidator
 from runner.logger import Log
 from runner.options.step import StepKind
+
+if TYPE_CHECKING:
+    from runner.suites.test_standard_flow import TestStandardFlow
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -27,9 +32,41 @@ class BaseValidator(IValidator):
             self.add(value, BaseValidator.check_return_code_0)
 
     @staticmethod
-    def check_return_code_0(_: object, step_name: str, output: str, error: str, return_code: int) -> bool:
-        if error.strip():
-            _LOGGER.all(f"Step validator {step_name}: get error output '{error}'")
+    def check_return_code_0(test: "TestStandardFlow", step_name: str, output: str,
+                            error_output: str, return_code: int) -> bool:
+        if error_output.strip():
+            _LOGGER.all(f"Step validator {step_name}: get error output '{error_output}'")
         if output.find('[Fail]Device not founded or connected') > -1:
             return False
-        return return_code == 0
+
+        if BaseValidator._step_passed(test, return_code):
+            # the step has passed
+
+            if (test.has_expected or test.has_expected_err) and (output or error_output):
+                comparison_res = test.compare_output_with_expected(output, error_output)
+
+                if comparison_res:
+                    return True
+
+                test.reproduce += "Comparison with .expected or .expected.err file failed\n"
+                return False
+
+            if not error_output:
+                return True
+
+            test.reproduce += ("\nThe test has passed, but stderr is not empty. "
+                               "There is no .expected.err file to compare with\n")
+            return False
+
+        return False
+
+    @staticmethod
+    def _step_passed(test: "TestStandardFlow", return_code: int) -> bool:
+        if (return_code == 0 and not test.is_negative_compile) or \
+            (return_code == 0 and not test.is_negative_runtime):
+            return True
+        if (return_code == 1 and test.is_negative_compile) or \
+            (return_code == 1 and test.is_negative_runtime):
+            return True
+
+        return False

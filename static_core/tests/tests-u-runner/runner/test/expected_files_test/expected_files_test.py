@@ -44,7 +44,7 @@ class ExpectedFilesTest(unittest.TestCase):
         expected_err_file = "ConsoleTest1.ets.expected.err"
         test_result = get_test_instance(report_stdout, report_stderr, expected_file, expected_err_file)
         if test_result.report is not None:
-            passed, _, _ = test_result.compare_output_with_expected(test_result.report.output,
+            passed, _ = test_result.compare_output_with_expected(test_result.report.output,
                                                                     test_result.report.error)
             self.assertTrue(passed)
 
@@ -55,7 +55,7 @@ class ExpectedFilesTest(unittest.TestCase):
         expected_err_file = "ConsoleTest1.ets.expected.err"
         test_result = get_test_instance(report_stdout, report_stderr, expected_file, expected_err_file)
         if test_result.report is not None:
-            passed, _, _ = test_result.compare_output_with_expected(test_result.report.output,
+            passed, _ = test_result.compare_output_with_expected(test_result.report.output,
                                                                     test_result.report.error)
             self.assertFalse(passed)
 
@@ -66,7 +66,7 @@ class ExpectedFilesTest(unittest.TestCase):
         expected_err_file = "ConsoleTest1.ets.expected.err"
         test_result = get_test_instance(report_stdout, report_stderr, expected_file, expected_err_file)
         if test_result.report is not None:
-            passed, _, _ = test_result.compare_output_with_expected(test_result.report.output,
+            passed, _ = test_result.compare_output_with_expected(test_result.report.output,
                                                                     test_result.report.error)
             self.assertFalse(passed)
 
@@ -77,7 +77,7 @@ class ExpectedFilesTest(unittest.TestCase):
         expected_err_file = "ConsoleTest2.ets.expected.err"
         test_result = get_test_instance(report_stdout, report_stderr, expected_file, expected_err_file)
         if test_result.report is not None:
-            passed, _, _ = test_result.compare_output_with_expected(test_result.report.output,
+            passed, _ = test_result.compare_output_with_expected(test_result.report.output,
                                                                     test_result.report.error)
             self.assertTrue(passed)
 
@@ -88,7 +88,7 @@ class ExpectedFilesTest(unittest.TestCase):
         expected_err_file = "ConsoleTest2.ets.expected.err"
         test_result = get_test_instance(report_stdout, report_stderr, expected_file, expected_err_file)
         if test_result.report is not None:
-            passed, _, _ = test_result.compare_output_with_expected(test_result.report.output,
+            passed, _ = test_result.compare_output_with_expected(test_result.report.output,
                                                                     test_result.report.error)
             self.assertFalse(passed)
 
@@ -99,6 +99,6 @@ class ExpectedFilesTest(unittest.TestCase):
         expected_err_file = "ConsoleTest3.ets.expected.err"
         test_result = get_test_instance(report_stdout, report_stderr, expected_file, expected_err_file)
         if test_result.report is not None:
-            passed, _, _ = test_result.compare_output_with_expected(test_result.report.output,
+            passed, _ = test_result.compare_output_with_expected(test_result.report.output,
                                                                     test_result.report.error)
             self.assertTrue(passed)

@@ -62,6 +62,7 @@ class Test:
         self.update_expected = self.test_env.config.test_suite.test_lists.update_expected
         # Expected output. Used only in the Parser test suite
         self.expected = ""
+        self.expected_err = ""
         # Contains fields output, error, and return_code of the last executed step
         self.report: TestReport | None = None
         # Test result: True if all steps passed, False is any step fails
@@ -78,6 +79,18 @@ class Test:
         # Reports if generated. Key is ReportFormat.XXX. Value is a path to the generated report
         self.reports: dict[ReportFormat, str] = {}
         self.repeat = 1
+        self.path_to_expected = Path(f"{self.path}.expected")
+        self.path_to_expected_err = Path(f"{self.path}.expected.err")
+
+    @property
+    def has_expected(self) -> bool:
+        """ True if test.expected file exists """
+        return self.path_to_expected.exists()
+
+    @property
+    def has_expected_err(self) -> bool:
+        """ True if test.expected.err file exists """
+        return self.path_to_expected_err.exists()
 
     def run(self, repeat: int) -> Test:
         start = datetime.now(pytz.UTC)

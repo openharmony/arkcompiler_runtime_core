@@ -150,6 +150,11 @@ def read_file(file_path: Path | str) -> str:
     return text
 
 
+def read_expected_file(path_to_file: Path) -> str:
+    with open(path_to_file, encoding='utf-8') as f:
+        return ''.join(line for line in f if not line.startswith('#')).strip()
+
+
 def get_opener(mode: int) -> Callable[[str | Path, int], int]:
     def opener(path_name: str | Path, flags: int) -> int:
         return os.open(path_name, os.O_RDWR | os.O_APPEND | os.O_CREAT | flags, mode)
