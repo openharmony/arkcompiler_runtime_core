@@ -21,11 +21,11 @@ desc: |-
     {{c.desc}} - "{{c.name}}"
 ---*/
 
-arktest.assertEQ(t, "{{c.name}}")
-
 {{c.decl}}
 
 const t = typeof c
+
+arktest.assertEQ(t, "{{c.name}}")
 
 // Auxiliary stuff
 enum EN { a, b, c }
