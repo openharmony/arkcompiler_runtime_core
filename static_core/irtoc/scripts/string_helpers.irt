@@ -239,7 +239,7 @@ macro(:allocate_string_tlab) do |string_klass, data_size|
   # Store class of the object
   store_class(_start, string_klass)
   # Update the TLAB state
-  StoreI(Add(_tlab, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr, Add(_start, _size).ptr).Imm(0).Volatile.ptr
+  StoreI(Add(_tlab, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr, Add(_start, _size).ptr).Imm(0).ptr
   # Return a pointer to the newly allocated string
   _allocated_string := _start
 end
@@ -349,7 +349,7 @@ macro(:allocate_array_of_chars_tlab) do |array_klass, char_count|
   # Store array length
   StoreI(_start, elements_num).Imm(Constants::ARRAY_LENGTH_OFFSET).word
   # Update the TLAB state
-  StoreI(Add(_tlab, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr, Add(_start, _size).ptr).Imm(0).Volatile.ptr
+  StoreI(Add(_tlab, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr, Add(_start, _size).ptr).Imm(0).ptr
   # Return a pointer to the newly allocated array
   _allocated_array := _start
 end
