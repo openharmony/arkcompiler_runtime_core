@@ -1608,7 +1608,7 @@ export namespace taskpool {
 
             if (managerWorker === undefined) {
                 // Create managerWorker, and start to trigger shrink.
-                managerWorker = new TaskPoolWorker();
+                managerWorker = new TaskPoolWorker(isTaskpoolSupportInterop);
                 managerWorker.retriggerShrink();
             }
 
