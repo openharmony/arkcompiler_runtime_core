@@ -350,10 +350,10 @@ public:
     void EncodeCompareTest(Reg dst, Reg src0, Reg src1, Condition cc) override;
     void EncodeAtomicByteOr(Reg addr, Reg value, bool fastEncoding) override;
 
-    void EncodeSelect(ArgsSelect &&args) override;
-    void EncodeSelect(ArgsSelectImm &&args) override;
-    void EncodeSelectTest(ArgsSelect &&args) override;
-    void EncodeSelectTest(ArgsSelectImm &&args) override;
+    void EncodeSelect(const ArgsSelect &args) override;
+    void EncodeSelect(const ArgsSelectImm &args) override;
+    void EncodeSelectTest(const ArgsSelect &args) override;
+    void EncodeSelectTest(const ArgsSelectImm &args) override;
 
     bool CanEncodeImmAddSubCmp(int64_t imm, uint32_t size, bool signedCompare) override;
     bool CanEncodeImmLogical(uint64_t imm, uint32_t size) override;

@@ -60,7 +60,15 @@ private:
     bool IsPhisAllowed(BasicBlock *bb, BasicBlock *pred1, BasicBlock *pred2, uint32_t *phiCount);
     static bool IsConditionChainPhi(Inst *phi);
     uint32_t GetIfcLimit(BasicBlock *bb);
-    bool TryReplaceSelectImmVariablesWithConstants();
+    bool TryOptimizeSelectInsts();
+    bool TryOptimizeSelectInst(Inst *selectInst);
+    bool TryOptimizeSelectInstByMergingUnaryOperation(Inst *selectInst, Inst *v0, Inst *v1);
+    bool TryOptimizeSelectInstWithIncrement(Inst *selectInst, Inst *v0, Inst *v1);
+    bool TryOptimizeSelectInstWithBitwiseInversion(Inst *selectInst, Inst *v0, Inst *v1);
+    bool TryOptimizeSelectInstWithArithmeticNegation(Inst *selectInst, Inst *v0, Inst *v1);
+    // CC-OFFNXT(G.FUN.01-CPP) Internal helper function
+    bool OptimizeSelectInstWithTransform(SelectTransformType transform, Inst *selectInst, Inst *v0, Inst *v1,
+                                         bool inputsSwapped = false, bool secondInputIsIdentity = false);
 };
 }  // namespace ark::compiler
 

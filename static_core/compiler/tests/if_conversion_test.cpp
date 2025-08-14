@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1203,6 +1203,610 @@ TEST_F(IfConversionTest, NonLoopInvariantNotPreventConversion)
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+TEST_F(IfConversionTest, SelectTransformNot1)
+{
+    Graph *graph = GetGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).i32();
+        PARAMETER(1U, 1U).i32();
+        PARAMETER(2U, 2U).f64();
+        PARAMETER(3U, 3U).f64();
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(5U, Opcode::Not).i32().Inputs(0U);
+            INST(6U, Opcode::Not).i32().Inputs(1U);
+            INST(7U, Opcode::Select).i32().SrcType(DataType::FLOAT64).CC(CC_LE).Inputs(5U, 6U, 2U, 3U);
+            INST(8U, Opcode::Return).i32().Inputs(7U);
+        }
+    }
+    ASSERT_TRUE(graph->RunPass<IfConversion>());
+    ASSERT_TRUE(graph->RunPass<Cleanup>());
+    GraphChecker(graph).Check();
+
+    Graph *expected = CreateEmptyGraph();
+    GRAPH(expected)
+    {
+        PARAMETER(0U, 0U).i32();
+        PARAMETER(1U, 1U).i32();
+        PARAMETER(2U, 2U).f64();
+        PARAMETER(3U, 3U).f64();
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(9U, Opcode::Select).i32().SrcType(DataType::FLOAT64).CC(CC_LE).Inputs(0U, 1U, 2U, 3U);
+            INST(10U, Opcode::Not).i32().Inputs(9U);
+            INST(8U, Opcode::Return).i32().Inputs(10U);
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(graph, expected));
+}
+
+TEST_F(IfConversionTest, SelectTransformNot2)
+{
+    auto makeGraphFn = [this](Graph *curGraph) {
+        GRAPH(curGraph)
+        {
+            PARAMETER(0U, 0U).i32();
+            PARAMETER(1U, 1U).i32();
+            PARAMETER(2U, 2U).f64();
+            PARAMETER(3U, 3U).f64();
+
+            BASIC_BLOCK(4U, -1L)
+            {
+                INST(5U, Opcode::Not).i32().Inputs(0U);
+                INST(6U, Opcode::Not).i32().Inputs(1U);
+                INST(7U, Opcode::Select).f64().SrcType(DataType::INT32).CC(CC_LE).Inputs(2U, 3U, 5U, 6U);
+                INST(8U, Opcode::Return).f64().Inputs(7U);
+            }
+        }
+    };
+    Graph *graph = GetGraph();
+    makeGraphFn(graph);
+    ASSERT_FALSE(graph->RunPass<IfConversion>());
+    GraphChecker(graph).Check();
+
+    Graph *noChangeExpected = CreateEmptyGraph();
+    makeGraphFn(noChangeExpected);
+    ASSERT_TRUE(GraphComparator().Compare(graph, noChangeExpected));
+}
+
+TEST_F(IfConversionTest, SelectTransformNot3)
+{
+    Graph *graph = GetGraph();
+    if (graph->GetArch() != Arch::AARCH64) {
+        return;
+    }
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).i32();
+        PARAMETER(1U, 1U).i32();
+        PARAMETER(2U, 2U).f64();
+        PARAMETER(3U, 3U).f64();
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(5U, Opcode::Not).i32().Inputs(1U);
+            INST(6U, Opcode::Select).i32().SrcType(DataType::FLOAT64).CC(CC_GE).Inputs(0U, 5U, 2U, 3U);
+            INST(7U, Opcode::Return).i32().Inputs(6U);
+        }
+    }
+    ASSERT_TRUE(graph->RunPass<IfConversion>());
+    ASSERT_TRUE(graph->RunPass<Cleanup>());
+    GraphChecker(graph).Check();
+
+    Graph *expected = CreateEmptyGraph();
+    GRAPH(expected)
+    {
+        PARAMETER(0U, 0U).i32();
+        PARAMETER(1U, 1U).i32();
+        PARAMETER(2U, 2U).f64();
+        PARAMETER(3U, 3U).f64();
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(8U, Opcode::SelectTransform)
+                .i32()
+                .SrcType(DataType::FLOAT64)
+                .CC(CC_GE)
+                .Inputs(0U, 1U, 2U, 3U)
+                .SelectTransform(SelectTransformType::INV);
+            INST(9U, Opcode::Return).i32().Inputs(8U);
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(graph, expected));
+}
+
+TEST_F(IfConversionTest, SelectTransformNot4)
+{
+    Graph *graph = GetGraph();
+    if (graph->GetArch() != Arch::AARCH64) {
+        return;
+    }
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).i32();
+        PARAMETER(1U, 1U).i32();
+        PARAMETER(2U, 2U).f64();
+        PARAMETER(3U, 3U).f64();
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(5U, Opcode::Not).i32().Inputs(0U);
+            INST(6U, Opcode::Select).i32().SrcType(DataType::FLOAT64).CC(CC_GT).Inputs(5U, 1U, 2U, 3U);
+            INST(7U, Opcode::Return).i32().Inputs(6U);
+        }
+    }
+    ASSERT_TRUE(graph->RunPass<IfConversion>());
+    ASSERT_TRUE(graph->RunPass<Cleanup>());
+    GraphChecker(graph).Check();
+
+    Graph *expected = CreateEmptyGraph();
+    GRAPH(expected)
+    {
+        PARAMETER(0U, 0U).i32();
+        PARAMETER(1U, 1U).i32();
+        PARAMETER(2U, 2U).f64();
+        PARAMETER(3U, 3U).f64();
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(8U, Opcode::SelectTransform)
+                .i32()
+                .SrcType(DataType::FLOAT64)
+                .CC(CC_LT)               // Inverse of CC_GT
+                .Inputs(1U, 0U, 2U, 3U)  // Candidate operands swapped
+                .SelectTransform(SelectTransformType::INV);
+            INST(9U, Opcode::Return).i32().Inputs(8U);
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(graph, expected));
+}
+
+TEST_F(IfConversionTest, SelectTransformNeg1)
+{
+    constexpr uint64_t IMM = 42;
+    Graph *graph = GetGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u32();
+
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(4U, Opcode::Neg).u64().Inputs(0U);
+            INST(5U, Opcode::Neg).u64().Inputs(1U);
+            INST(6U, Opcode::SelectImm).u64().SrcType(DataType::UINT32).CC(CC_AE).Inputs(4U, 5U, 2U).Imm(IMM);
+            INST(7U, Opcode::Return).u64().Inputs(6U);
+        }
+    }
+    ASSERT_TRUE(graph->RunPass<IfConversion>());
+    ASSERT_TRUE(graph->RunPass<Cleanup>());
+    GraphChecker(graph).Check();
+
+    Graph *expected = CreateEmptyGraph();
+    GRAPH(expected)
+    {
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u32();
+
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(8U, Opcode::SelectImm).u64().SrcType(DataType::UINT32).CC(CC_AE).Inputs(0U, 1U, 2U).Imm(IMM);
+            INST(9U, Opcode::Neg).u64().Inputs(8U);
+            INST(7U, Opcode::Return).u64().Inputs(9U);
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(graph, expected));
+}
+
+TEST_F(IfConversionTest, SelectTransformNeg2)
+{
+    constexpr uint64_t IMM = 42;
+    auto makeGraphFn = [this](Graph *curGraph) {
+        GRAPH(curGraph)
+        {
+            PARAMETER(0U, 0U).u64();
+            PARAMETER(1U, 1U).f32();
+            PARAMETER(2U, 2U).f32();
+
+            BASIC_BLOCK(3U, -1L)
+            {
+                INST(4U, Opcode::Neg).u64().Inputs(0U);
+                INST(5U, Opcode::SelectImm).f32().SrcType(DataType::UINT64).CC(CC_AE).Inputs(1U, 2U, 4U).Imm(IMM);
+                INST(6U, Opcode::Return).f32().Inputs(5U);
+            }
+        }
+    };
+    Graph *graph = GetGraph();
+    makeGraphFn(graph);
+    ASSERT_FALSE(graph->RunPass<IfConversion>());
+    GraphChecker(graph).Check();
+
+    Graph *noChangeExpected = CreateEmptyGraph();
+    makeGraphFn(noChangeExpected);
+    ASSERT_TRUE(GraphComparator().Compare(graph, noChangeExpected));
+}
+
+TEST_F(IfConversionTest, SelectTransformNeg3)
+{
+    constexpr uint64_t IMM = 42;
+    Graph *graph = GetGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u32();
+
+        // Note: The Neg-Not patterns are expected to be optimized out, but not in IfConversion pass.
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(4U, Opcode::Neg).u64().Inputs(0U);
+            INST(5U, Opcode::Neg).u64().Inputs(1U);
+            INST(6U, Opcode::Not).u64().Inputs(4U);
+            INST(7U, Opcode::Not).u64().Inputs(5U);
+            INST(8U, Opcode::Neg).u64().Inputs(6U);
+            INST(9U, Opcode::Neg).u64().Inputs(7U);
+            INST(10U, Opcode::Not).u64().Inputs(8U);
+            INST(11U, Opcode::Not).u64().Inputs(9U);
+            INST(12U, Opcode::SelectImm).u64().SrcType(DataType::UINT32).CC(CC_AE).Inputs(10U, 11U, 2U).Imm(IMM);
+            INST(13U, Opcode::Return).u64().Inputs(12U);
+        }
+    }
+    ASSERT_TRUE(graph->RunPass<IfConversion>());
+    ASSERT_TRUE(graph->RunPass<Cleanup>());
+    GraphChecker(graph).Check();
+
+    Graph *expected = CreateEmptyGraph();
+    GRAPH(expected)
+    {
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u32();
+
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(14U, Opcode::SelectImm).u64().SrcType(DataType::UINT32).CC(CC_AE).Inputs(0U, 1U, 2U).Imm(IMM);
+            INST(15U, Opcode::Neg).u64().Inputs(14U);
+            INST(16U, Opcode::Not).u64().Inputs(15U);
+            INST(17U, Opcode::Neg).u64().Inputs(16U);
+            INST(18U, Opcode::Not).u64().Inputs(17U);
+            INST(13U, Opcode::Return).u64().Inputs(18U);
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(graph, expected));
+}
+
+TEST_F(IfConversionTest, SelectTransformNeg4)
+{
+    Graph *graph = GetGraph();
+    if (graph->GetArch() != Arch::AARCH64) {
+        return;
+    }
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).i32();
+        PARAMETER(1U, 1U).i32();
+        PARAMETER(2U, 2U).u64();
+        PARAMETER(3U, 3U).u64();
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(5U, Opcode::Neg).i32().Inputs(1U);
+            INST(6U, Opcode::Select).i32().SrcType(DataType::UINT64).CC(CC_BE).Inputs(0U, 5U, 2U, 3U);
+            INST(7U, Opcode::Return).i32().Inputs(6U);
+        }
+    }
+    ASSERT_TRUE(graph->RunPass<IfConversion>());
+    ASSERT_TRUE(graph->RunPass<Cleanup>());
+    GraphChecker(graph).Check();
+
+    Graph *expected = CreateEmptyGraph();
+    GRAPH(expected)
+    {
+        PARAMETER(0U, 0U).i32();
+        PARAMETER(1U, 1U).i32();
+        PARAMETER(2U, 2U).u64();
+        PARAMETER(3U, 3U).u64();
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(8U, Opcode::SelectTransform)
+                .i32()
+                .SrcType(DataType::UINT64)
+                .CC(CC_BE)
+                .Inputs(0U, 1U, 2U, 3U)
+                .SelectTransform(SelectTransformType::NEG);
+            INST(9U, Opcode::Return).i32().Inputs(8U);
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(graph, expected));
+}
+
+TEST_F(IfConversionTest, SelectTransformNeg5)
+{
+    Graph *graph = GetGraph();
+    if (graph->GetArch() != Arch::AARCH64) {
+        return;
+    }
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).i32();
+        PARAMETER(1U, 1U).i32();
+        PARAMETER(2U, 2U).u64();
+        PARAMETER(3U, 3U).u64();
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(5U, Opcode::Not).i32().Inputs(0U);
+            INST(6U, Opcode::Select).i32().SrcType(DataType::UINT64).CC(CC_BE).Inputs(5U, 1U, 2U, 3U);
+            INST(7U, Opcode::Return).i32().Inputs(6U);
+        }
+    }
+    ASSERT_TRUE(graph->RunPass<IfConversion>());
+    ASSERT_TRUE(graph->RunPass<Cleanup>());
+    GraphChecker(graph).Check();
+
+    Graph *expected = CreateEmptyGraph();
+    GRAPH(expected)
+    {
+        PARAMETER(0U, 0U).i32();
+        PARAMETER(1U, 1U).i32();
+        PARAMETER(2U, 2U).u64();
+        PARAMETER(3U, 3U).u64();
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(8U, Opcode::SelectTransform)
+                .i32()
+                .SrcType(DataType::UINT64)
+                .CC(CC_AE)               // Inverse of CC_BE
+                .Inputs(1U, 0U, 2U, 3U)  // Candidate operands swapped
+                .SelectTransform(SelectTransformType::NEG);
+            INST(9U, Opcode::Return).i32().Inputs(8U);
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(graph, expected));
+}
+
+TEST_F(IfConversionTest, SelectTransformAdd1)
+{
+    constexpr uint64_t IMM = 42;
+    Graph *graph = GetGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).i64();
+        PARAMETER(1U, 1U).i64();
+        PARAMETER(2U, 2U).f64();
+        PARAMETER(3U, 3U).f64();
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(5U, Opcode::AddI).i64().Inputs(0U).Imm(IMM);
+            INST(6U, Opcode::AddI).i64().Inputs(1U).Imm(IMM);
+            INST(7U, Opcode::Select).i64().SrcType(DataType::FLOAT64).CC(CC_LE).Inputs(5U, 6U, 2U, 3U);
+            INST(8U, Opcode::Return).i64().Inputs(7U);
+        }
+    }
+    ASSERT_TRUE(graph->RunPass<IfConversion>());
+    ASSERT_TRUE(graph->RunPass<Cleanup>());
+    GraphChecker(graph).Check();
+
+    Graph *expected = CreateEmptyGraph();
+    GRAPH(expected)
+    {
+        PARAMETER(0U, 0U).i64();
+        PARAMETER(1U, 1U).i64();
+        PARAMETER(2U, 2U).f64();
+        PARAMETER(3U, 3U).f64();
+
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(9U, Opcode::Select).i64().SrcType(DataType::FLOAT64).CC(CC_LE).Inputs(0U, 1U, 2U, 3U);
+            INST(10U, Opcode::AddI).i64().Inputs(9U).Imm(IMM);
+            INST(8U, Opcode::Return).i64().Inputs(10U);
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(graph, expected));
+}
+
+TEST_F(IfConversionTest, SelectTransformAdd2)
+{
+    constexpr auto IMM = std::array<uint64_t, 8> {11, 13, 17, 19, 23, 29, 31, 37};
+    Graph *graph = GetGraph();
+    if (graph->GetArch() != Arch::AARCH64) {
+        return;
+    }
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).i64();
+        PARAMETER(1U, 1U).i64();
+        PARAMETER(2U, 2U).f64();
+        PARAMETER(3U, 3U).f64();
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(5U, Opcode::AddI).i64().Inputs(0U).Imm(1);
+            INST(6U, Opcode::XorI).i64().Inputs(5U).Imm(IMM[0]);  // 0 : IMM index (UT only)
+            INST(7U, Opcode::XorI).i64().Inputs(1U).Imm(IMM[0]);  // 0 : IMM index (UT only)
+            INST(8U, Opcode::AddI).i64().Inputs(6U).Imm(IMM[1]);  // 1 : IMM index (UT only)
+            INST(9U, Opcode::AddI).i64().Inputs(7U).Imm(IMM[1]);  // 1 : IMM index (UT only)
+            INST(10U, Opcode::Not).i64().Inputs(8U);
+            INST(11U, Opcode::Not).i64().Inputs(9U);
+            INST(12U, Opcode::DivI).i64().Inputs(10U).Imm(IMM[2]);  // 2 : IMM index (UT only)
+            INST(13U, Opcode::DivI).i64().Inputs(11U).Imm(IMM[2]);  // 2 : IMM index (UT only)
+            INST(14U, Opcode::AndI).i64().Inputs(12U).Imm(IMM[3]);  // 3 : IMM index (UT only)
+            INST(15U, Opcode::AndI).i64().Inputs(13U).Imm(IMM[3]);  // 3 : IMM index (UT only)
+            INST(16U, Opcode::Neg).i64().Inputs(14U);
+            INST(17U, Opcode::Neg).i64().Inputs(15U);
+            INST(18U, Opcode::XorI).i64().Inputs(16U).Imm(IMM[4]);  // 4 : IMM index (UT only)
+            INST(19U, Opcode::XorI).i64().Inputs(17U).Imm(IMM[4]);  // 4 : IMM index (UT only)
+            INST(20U, Opcode::SubI).i64().Inputs(18U).Imm(IMM[5]);  // 5 : IMM index (UT only)
+            INST(21U, Opcode::SubI).i64().Inputs(19U).Imm(IMM[5]);  // 5 : IMM index (UT only)
+            INST(22U, Opcode::OrI).i64().Inputs(20U).Imm(IMM[6]);   // 6 : IMM index (UT only)
+            INST(23U, Opcode::OrI).i64().Inputs(21U).Imm(IMM[6]);   // 6 : IMM index (UT only)
+            INST(24U, Opcode::ModI).i64().Inputs(22U).Imm(IMM[7]);  // 7 : IMM index (UT only)
+            INST(25U, Opcode::ModI).i64().Inputs(23U).Imm(IMM[7]);  // 7 : IMM index (UT only)
+            INST(26U, Opcode::Select).i64().SrcType(DataType::FLOAT64).CC(CC_LE).Inputs(24U, 25U, 2U, 3U);
+            INST(27U, Opcode::Return).i64().Inputs(26U);
+        }
+    }
+    ASSERT_TRUE(graph->RunPass<IfConversion>());
+    ASSERT_TRUE(graph->RunPass<Cleanup>());
+    GraphChecker(graph).Check();
+
+    Graph *expected = CreateEmptyGraph();
+    GRAPH(expected)
+    {
+        PARAMETER(0U, 0U).i64();
+        PARAMETER(1U, 1U).i64();
+        PARAMETER(2U, 2U).f64();
+        PARAMETER(3U, 3U).f64();
+
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(27U, Opcode::SelectTransform)
+                .i64()
+                .SrcType(DataType::FLOAT64)
+                .CC(CC_GE)               // Inverse of CC_LE
+                .Inputs(1U, 0U, 2U, 3U)  // Candidate operands swapped
+                .SelectTransform(SelectTransformType::INC);
+            INST(28U, Opcode::XorI).i64().Inputs(27U).Imm(IMM[0]);  // 0 : IMM index (UT only)
+            INST(29U, Opcode::AddI).i64().Inputs(28U).Imm(IMM[1]);  // 1 : IMM index (UT only)
+            INST(30U, Opcode::Not).i64().Inputs(29U);
+            INST(31U, Opcode::DivI).i64().Inputs(30U).Imm(IMM[2]);  // 2 : IMM index (UT only)
+            INST(32U, Opcode::AndI).i64().Inputs(31U).Imm(IMM[3]);  // 3 : IMM index (UT only)
+            INST(33U, Opcode::Neg).i64().Inputs(32U);
+            INST(34U, Opcode::XorI).i64().Inputs(33U).Imm(IMM[4]);  // 4 : IMM index (UT only)
+            INST(35U, Opcode::SubI).i64().Inputs(34U).Imm(IMM[5]);  // 5 : IMM index (UT only)
+            INST(36U, Opcode::OrI).i64().Inputs(35U).Imm(IMM[6]);   // 6 : IMM index (UT only)
+            INST(37U, Opcode::ModI).i64().Inputs(36U).Imm(IMM[7]);  // 7 : IMM index (UT only)
+            INST(8U, Opcode::Return).i64().Inputs(37U);
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(graph, expected));
+}
+
+TEST_F(IfConversionTest, SelectTransformAdd3)
+{
+    constexpr uint64_t IMM = 42;
+    Graph *graph = GetGraph();
+    if (graph->GetArch() != Arch::AARCH64) {
+        return;
+    }
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).i32();
+        PARAMETER(1U, 1U).i32();
+        PARAMETER(2U, 2U).u64();
+
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(4U, Opcode::AddI).i32().Inputs(1U).Imm(1);
+            INST(5U, Opcode::SelectImm).i32().SrcType(DataType::UINT64).CC(CC_BE).Inputs(0U, 4U, 2U).Imm(IMM);
+            INST(6U, Opcode::Return).i32().Inputs(5U);
+        }
+    }
+    ASSERT_TRUE(graph->RunPass<IfConversion>());
+    ASSERT_TRUE(graph->RunPass<Cleanup>());
+    GraphChecker(graph).Check();
+
+    Graph *expected = CreateEmptyGraph();
+    GRAPH(expected)
+    {
+        PARAMETER(0U, 0U).i32();
+        PARAMETER(1U, 1U).i32();
+        PARAMETER(2U, 2U).u64();
+
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(7U, Opcode::SelectImmTransform)
+                .i32()
+                .SrcType(DataType::UINT64)
+                .CC(CC_BE)
+                .Inputs(0U, 1U, 2U)
+                .SelectTransform(SelectTransformType::INC);
+            INST(6U, Opcode::Return).i32().Inputs(7U);
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(graph, expected));
+}
+
+TEST_F(IfConversionTest, SelectTransformAdd4)
+{
+    struct TestCase {
+        bool expectsApplication;
+        Opcode opc;
+        ConditionCode cc;
+        uint64_t imm1;
+        uint64_t imm2;
+        uint64_t expectedImm;
+        ConditionCode expectedCc;
+    };
+    constexpr uint64_t IGNORED = std::numeric_limits<uint64_t>::max();
+    constexpr ConditionCode IGNORED_CC = CC_FIRST;
+    auto testCases = std::vector<TestCase> {
+        {true, Opcode::AddI, CC_EQ, 4, 5, 4, CC_EQ},
+        {true, Opcode::AddI, CC_NE, 5, 4, 4, CC_EQ},  // CC inversion expected
+        {false, Opcode::AddI, CC_LT, 5, 3, IGNORED, IGNORED_CC},
+        {true, Opcode::SubI, CC_GT, 6, 7, 7, CC_LE},  // CC inversion expected
+        {true, Opcode::SubI, CC_LE, 7, 6, 7, CC_LE},
+        {false, Opcode::SubI, CC_GE, 2, 4, IGNORED, IGNORED_CC},
+        {false, Opcode::AndI, CC_TST_EQ, 8, 9, IGNORED, IGNORED_CC},
+    };
+    if (GetGraph()->GetArch() != Arch::AARCH64) {
+        return;
+    }
+    for (const auto &curCase : testCases) {
+        Graph *graph = CreateEmptyGraph();
+        GRAPH(graph)
+        {
+            PARAMETER(0U, 0U).u32();
+            PARAMETER(1U, 1U).i64();
+            PARAMETER(2U, 2U).i64();
+
+            BASIC_BLOCK(3U, -1L)
+            {
+                INST(4U, curCase.opc).u32().Inputs(0U).Imm(curCase.imm1);
+                INST(5U, curCase.opc).u32().Inputs(0U).Imm(curCase.imm2);
+                INST(6U, Opcode::Select).u32().SrcType(DataType::INT64).CC(curCase.cc).Inputs(4U, 5U, 1U, 2U);
+                INST(7U, Opcode::Return).u32().Inputs(6U);
+            }
+        }
+        if (curCase.expectsApplication) {
+            ASSERT_TRUE(graph->RunPass<IfConversion>());
+            ASSERT_TRUE(graph->RunPass<Cleanup>());
+            GraphChecker(graph).Check();
+
+            Graph *expected = CreateEmptyGraph();
+            GRAPH(expected)
+            {
+                PARAMETER(0U, 0U).u32();
+                PARAMETER(1U, 1U).i64();
+                PARAMETER(2U, 2U).i64();
+
+                BASIC_BLOCK(3U, -1L)
+                {
+                    INST(4U, curCase.opc).u32().Inputs(0U).Imm(curCase.expectedImm);
+                    INST(8U, Opcode::SelectTransform)
+                        .u32()
+                        .SrcType(DataType::INT64)
+                        .CC(curCase.expectedCc)
+                        .Inputs(4U, 4U, 1U, 2U)
+                        .SelectTransform(SelectTransformType::INC);
+                    INST(7U, Opcode::Return).u32().Inputs(8U);
+                }
+            }
+            ASSERT_TRUE(GraphComparator().Compare(graph, expected));
+        } else {
+            ASSERT_FALSE(graph->RunPass<IfConversion>());
+        }
+    }
 }
 // NOLINTEND(readability-magic-numbers)
 

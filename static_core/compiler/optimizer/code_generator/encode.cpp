@@ -260,12 +260,22 @@ void Encoder::EncodeCompressedStringCharAtI([[maybe_unused]] ArgsCompressedStrin
     SetFalseResult();
 }
 
-void Encoder::EncodeSelect([[maybe_unused]] ArgsSelect &&args)
+void Encoder::EncodeSelect([[maybe_unused]] const ArgsSelect &args)
 {
     SetFalseResult();
 }
 
-void Encoder::EncodeSelectTest([[maybe_unused]] ArgsSelect &&args)
+void Encoder::EncodeSelectTest([[maybe_unused]] const ArgsSelect &args)
+{
+    SetFalseResult();
+}
+
+void Encoder::EncodeSelectTransform([[maybe_unused]] const ArgsSelectTransform &args)
+{
+    SetFalseResult();
+}
+
+void Encoder::EncodeSelectTestTransform([[maybe_unused]] const ArgsSelectTransform &args)
 {
     SetFalseResult();
 }
@@ -361,12 +371,22 @@ void Encoder::EncodeRoundToPInfReturnScalar([[maybe_unused]] Reg dst, [[maybe_un
     SetFalseResult();
 }
 
-void Encoder::EncodeSelect([[maybe_unused]] ArgsSelectImm &&args)
+void Encoder::EncodeSelect([[maybe_unused]] const ArgsSelectImm &args)
 {
     SetFalseResult();
 }
 
-void Encoder::EncodeSelectTest([[maybe_unused]] ArgsSelectImm &&args)
+void Encoder::EncodeSelectTest([[maybe_unused]] const ArgsSelectImm &args)
+{
+    SetFalseResult();
+}
+
+void Encoder::EncodeSelectTransform([[maybe_unused]] const ArgsSelectImmTransform &args)
+{
+    SetFalseResult();
+}
+
+void Encoder::EncodeSelectTestTransform([[maybe_unused]] const ArgsSelectImmTransform &args)
 {
     SetFalseResult();
 }
@@ -551,6 +571,11 @@ bool Encoder::CanEncodeFloatSelect()
 }
 
 bool Encoder::CanEncodeBitfieldExtractionFor([[maybe_unused]] DataType::Type type)
+{
+    return false;
+}
+
+bool Encoder::CanEncodeSelectTransformFor([[maybe_unused]] DataType::Type type)
 {
     return false;
 }

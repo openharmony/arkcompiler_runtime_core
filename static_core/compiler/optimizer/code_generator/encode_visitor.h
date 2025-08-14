@@ -309,6 +309,10 @@ protected:
 
     static void VisitSelectImm(GraphVisitor *visitor, Inst *inst);
 
+    static void VisitSelectTransform(GraphVisitor *visitor, Inst *inst);
+
+    static void VisitSelectImmTransform(GraphVisitor *visitor, Inst *inst);
+
     static void VisitLoadArrayPair(GraphVisitor *visitor, Inst *inst);
 
     static void VisitLoadArrayPairI(GraphVisitor *visitor, Inst *inst);

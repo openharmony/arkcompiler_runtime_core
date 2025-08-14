@@ -53,7 +53,7 @@ const size_t MAX_VECTOR_PARAM_ID = 7;  // v0-v7
 
 class Aarch64CallingConvention;
 
-static inline vixl::aarch64::Register VixlRegCaseScalar(Reg reg)
+inline vixl::aarch64::Register VixlRegCaseScalar(Reg reg)
 {
     size_t regSize = reg.GetSize();
     if (regSize < WORD_SIZE) {
@@ -67,7 +67,7 @@ static inline vixl::aarch64::Register VixlRegCaseScalar(Reg reg)
     return vixlReg;
 }
 
-static inline vixl::aarch64::Register VixlReg(Reg reg)
+inline vixl::aarch64::Register VixlReg(Reg reg)
 {
     ASSERT(reg.IsValid());
     if (reg.IsScalar()) {
@@ -82,14 +82,14 @@ static inline vixl::aarch64::Register VixlReg(Reg reg)
     return vixl::aarch64::xzr;
 }
 
-static inline vixl::aarch64::Register VixlRegCaseScalar(Reg reg, const uint8_t size)
+inline vixl::aarch64::Register VixlRegCaseScalar(Reg reg, const uint8_t size)
 {
     auto vixlReg = vixl::aarch64::Register(reg.GetId(), (size < WORD_SIZE ? WORD_SIZE : size));
     ASSERT(vixlReg.IsValid());
     return vixlReg;
 }
 
-static inline vixl::aarch64::Register VixlReg(Reg reg, const uint8_t size)
+inline vixl::aarch64::Register VixlReg(Reg reg, const uint8_t size)
 {
     ASSERT(reg.IsValid());
     if (reg.IsScalar()) {
@@ -104,12 +104,12 @@ static inline vixl::aarch64::Register VixlReg(Reg reg, const uint8_t size)
     return vixl::aarch64::xzr;
 }
 
-static inline vixl::aarch64::Operand VixlImm(const int64_t imm)
+inline vixl::aarch64::Operand VixlImm(const int64_t imm)
 {
     return vixl::aarch64::Operand(imm);
 }
 
-static inline vixl::aarch64::Operand VixlImm(Imm imm)
+inline vixl::aarch64::Operand VixlImm(Imm imm)
 {
     return vixl::aarch64::Operand(imm.GetAsInt());
 }
@@ -159,7 +159,7 @@ private:
     vixl::aarch64::CPURegList calleeSavedv_ {vixl::aarch64::kCalleeSavedV};
     vixl::aarch64::CPURegList callerSavedv_ {vixl::aarch64::kCallerSavedV};
 
-    static inline constexpr const uint8_t UNDEF_VREG = std::numeric_limits<uint8_t>::max();
+    static constexpr const uint8_t UNDEF_VREG = std::numeric_limits<uint8_t>::max();
     // The number of register in Push/Pop list must be even. The regisers are used for alignment vetor register lists
     uint8_t allignmentVregCallee_ {UNDEF_VREG};
     uint8_t allignmentVregCaller_ {UNDEF_VREG};
@@ -283,10 +283,14 @@ public:
     void EncodeCompareTest(Reg dst, Reg src0, Reg src1, Condition cc) override;
     void EncodeAtomicByteOr(Reg addr, Reg value, bool fastEncoding) override;
 
-    void EncodeSelect(ArgsSelect &&args) override;
-    void EncodeSelect(ArgsSelectImm &&args) override;
-    void EncodeSelectTest(ArgsSelect &&args) override;
-    void EncodeSelectTest(ArgsSelectImm &&args) override;
+    void EncodeSelect(const ArgsSelect &args) override;
+    void EncodeSelect(const ArgsSelectImm &args) override;
+    void EncodeSelectTransform(const ArgsSelectTransform &args) override;
+    void EncodeSelectTransform(const ArgsSelectImmTransform &args) override;
+    void EncodeSelectTest(const ArgsSelect &args) override;
+    void EncodeSelectTest(const ArgsSelectImm &args) override;
+    void EncodeSelectTestTransform(const ArgsSelectTransform &args) override;
+    void EncodeSelectTestTransform(const ArgsSelectImmTransform &args) override;
 
     void EncodeLdp(Reg dst0, Reg dst1, bool dstSigned, MemRef mem) override;
 
@@ -333,6 +337,7 @@ public:
     bool CanEncodeImmLogical(uint64_t imm, uint32_t size) override;
     bool CanEncodeScale(uint64_t imm, uint32_t size) override;
     bool CanEncodeFloatSelect() override;
+    bool CanEncodeSelectTransformFor(DataType::Type type) override;
     bool CanEncodeBitfieldExtractionFor(DataType::Type type) override;
 
     void EncodeCompareAndSwap(Reg dst, Reg obj, Reg offset, Reg val, Reg newval) override;

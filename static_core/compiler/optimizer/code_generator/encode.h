@@ -29,6 +29,7 @@
 #include <variant>
 
 #include "operands.h"
+#include "optimizer/select_transform_type.h"
 #include "registers_description.h"
 #include "utils/cframe_layout.h"
 #include "target_info.h"
@@ -242,8 +243,8 @@ public:
         Reg src3;
         Condition cc;
     };
-    virtual void EncodeSelect(ArgsSelect &&args);
-    virtual void EncodeSelectTest(ArgsSelect &&args);
+    virtual void EncodeSelect(const ArgsSelect &args);
+    virtual void EncodeSelectTest(const ArgsSelect &args);
 
     struct ArgsSelectImm {
         Reg dst;
@@ -253,8 +254,32 @@ public:
         Imm imm;
         Condition cc;
     };
-    virtual void EncodeSelect(ArgsSelectImm &&args);
-    virtual void EncodeSelectTest(ArgsSelectImm &&args);
+    virtual void EncodeSelect(const ArgsSelectImm &args);
+    virtual void EncodeSelectTest(const ArgsSelectImm &args);
+
+    struct ArgsSelectTransform {
+        Reg dst;
+        Reg src0;
+        Reg src1;
+        Reg src2;
+        Reg src3;
+        Condition cc;
+        SelectTransformType transform;
+    };
+    virtual void EncodeSelectTransform(const ArgsSelectTransform &args);
+    virtual void EncodeSelectTestTransform(const ArgsSelectTransform &args);
+
+    struct ArgsSelectImmTransform {
+        Reg dst;
+        Reg src0;
+        Reg src1;
+        Reg src2;
+        Imm imm;
+        Condition cc;
+        SelectTransformType transform;
+    };
+    virtual void EncodeSelectTransform(const ArgsSelectImmTransform &args);
+    virtual void EncodeSelectTestTransform(const ArgsSelectImmTransform &args);
 
     virtual void EncodeIsInf(Reg dst, Reg src0);
     virtual void EncodeIsInteger(Reg dst, Reg src0);
@@ -321,6 +346,7 @@ public:
     virtual bool CanEncodeCompressedStringCharAt();
     virtual bool CanEncodeCompressedStringCharAtI();
     virtual bool CanEncodeFloatSelect();
+    virtual bool CanEncodeSelectTransformFor(DataType::Type type);
     virtual bool CanEncodeBitfieldExtractionFor(DataType::Type type);
     virtual void EncodeCompareAndSwap(Reg dst, Reg obj, Reg offset, Reg val, Reg newval);
     virtual void EncodeCompareAndSwap(Reg dst, Reg addr, Reg val, Reg newval);

@@ -2258,7 +2258,7 @@ void Amd64Encoder::EncodeCmp(Reg dst, Reg src0, Reg src1, Condition cc)
     GetMasm()->bind(end);
 }
 
-void Amd64Encoder::EncodeSelect(ArgsSelect &&args)
+void Amd64Encoder::EncodeSelect(const ArgsSelect &args)
 {
     auto [dst, src0, src1, src2, src3, cc] = args;
     ASSERT(!src0.IsFloat() && !src1.IsFloat());
@@ -2295,7 +2295,7 @@ void Amd64Encoder::EncodeSelect(ArgsSelect &&args)
     }
 }
 
-void Amd64Encoder::EncodeSelect(ArgsSelectImm &&args)
+void Amd64Encoder::EncodeSelect(const ArgsSelectImm &args)
 {
     auto [dst, src0, src1, src2, imm, cc] = args;
     ASSERT(!src0.IsFloat() && !src1.IsFloat() && !src2.IsFloat());
@@ -2321,7 +2321,7 @@ void Amd64Encoder::EncodeSelect(ArgsSelectImm &&args)
     }
 }
 
-void Amd64Encoder::EncodeSelectTest(ArgsSelect &&args)
+void Amd64Encoder::EncodeSelectTest(const ArgsSelect &args)
 {
     auto [dst, src0, src1, src2, src3, cc] = args;
     ASSERT(!src0.IsFloat() && !src1.IsFloat() && !src2.IsFloat());
@@ -2340,7 +2340,7 @@ void Amd64Encoder::EncodeSelectTest(ArgsSelect &&args)
     }
 }
 
-void Amd64Encoder::EncodeSelectTest(ArgsSelectImm &&args)
+void Amd64Encoder::EncodeSelectTest(const ArgsSelectImm &args)
 {
     auto [dst, src0, src1, src2, imm, cc] = args;
     ASSERT(!src0.IsFloat() && !src1.IsFloat() && !src2.IsFloat());
