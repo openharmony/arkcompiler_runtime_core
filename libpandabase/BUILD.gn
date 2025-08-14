@@ -153,6 +153,10 @@ if (is_mingw) {
     libarkbase_sources += [ "$ark_root/libpandabase/os/mutex.cpp" ]
   }
 
+  if (is_arkui_x && target_os == "ios") {
+    libarkbase_sources += [ "$ark_root/libpandabase/os/filesystem.cpp" ]
+  }
+
   if (is_mac && !is_arkui_x) {
     libarkbase_sources += [ "$ark_root/libpandabase/os/filesystem.cpp" ]
   }
@@ -259,6 +263,9 @@ ohos_source_set("libarkbase_frontend_set_static") {
 
   if (is_arkui_x) {
     deps += [ "$ark_third_party_root/bounds_checking_function:libsec_static" ]
+    if (target_os == "ios") {
+      defines = [ "IOS_PLATFORM" ]
+    }
   } else {
     external_deps = [
       "json:nlohmann_json_static",
