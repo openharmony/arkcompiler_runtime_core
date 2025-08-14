@@ -190,7 +190,7 @@ TEST_F(ClassSetStaticFieldRefTest, check_initialization)
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
 
     ani_string string {};
-    ASSERT_EQ(env_->String_NewUTF8("test", 10U, &string), ANI_OK);
+    ASSERT_EQ(env_->String_NewUTF8("test", 4U, &string), ANI_OK);
 
     ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_ref_test.TestSetRefA"));
     ASSERT_EQ(env_->Class_SetStaticField_Ref(cls, field, string), ANI_OK);
