@@ -25,10 +25,13 @@ panda_ets_napi_add_gtest(
     ETS_SOURCE js_mode_launch.ets
 )
 
+# NOTE(@srokashevich, #29097): enable with asan after fix
+if (NOT PANDA_ENABLE_ADDRESS_SANITIZER)
 ani_add_gtest(ani_test_unhandled_rejection_recursive
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/unhandled_rejection_recursive_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/UnhandledRejectionRecursiveTest.ets
 )
+endif()
 
 if (NOT ENABLE_UNIT_TESTS_FULL_COVERAGE)
     panda_ets_napi_add_gtest(

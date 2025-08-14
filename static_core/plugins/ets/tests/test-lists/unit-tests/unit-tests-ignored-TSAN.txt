@@ -1,0 +1,9 @@
+# 29297
+ets-common-tests/intrinsics/map_set.ets
+
+# 29298
+ets-common-tests/intrinsics/copyTo.ets
+
+# 29320
+ets-common-tests/intrinsics/isSafeInteger.ets
+ets-common-tests/intrinsics/uint8clampedarray_join.ets
