@@ -92,7 +92,7 @@
             "NoDataException",
             "ArgumentOutOfRangeError",
             "IllegalStateError",
-            "UnsupportedOperationException",
+            "UnsupportedOperationError",
             "IllegalArgumentError",
             "RuntimeError"
         ]

@@ -54,19 +54,12 @@ export class IllegalStateError extends Error {
 }
 
 /**
- * Represents exception that is thrown when the requested operation is not supported.
+ * Represents error that is thrown when the requested operation is not supported.
  */
-export final class UnsupportedOperationException extends Exception {
-    constructor() {
-        super();
-    }
-
-    constructor(s: String) {
-        super(s);
-    }
-
-    constructor(s: String, cause: Object) {
-        super(s, cause);
+export final class UnsupportedOperationError extends Error {
+    // NOTE(kparshukov): #28318 move to std/core/Errors.ets
+    constructor(message?: String, options?: ErrorOptions) {
+        super("UnsupportedOperationError", message, options)
     }
 }
 

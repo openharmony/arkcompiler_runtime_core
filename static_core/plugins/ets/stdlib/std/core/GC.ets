@@ -85,7 +85,7 @@ export namespace GC {
      * @param inPlaceMode run GC in place mode
      *
      * @throws IllegalArgumentError if current GC does not support requested cause
-     * @throws UnsupportedOperationException if current GC does not support requested cause
+     * @throws UnsupportedOperationError if current GC does not support requested cause
      * @throws IllegalStateError if try to run threshold GC collection not in place after calling postponeGCStart
      *
      * @returns id of started GC.
@@ -115,7 +115,7 @@ export namespace GC {
      * @param cause cause of requested GC
      *
      * @throws IllegalArgumentError if current GC does not support requested cause
-     * @throws UnsupportedOperationException if VM is running with incorrect GC trigger
+     * @throws UnsupportedOperationError if VM is running with incorrect GC trigger
      */
     native function scheduleGcAfterNthAllocImpl(counter: int, cause: int): void;
 
@@ -139,7 +139,7 @@ export namespace GC {
      *
      * @see postponeGCEnd
      *
-     * @throws UnsupportedOperationException if GC doesn't support postponing
+     * @throws UnsupportedOperationError if GC doesn't support postponing
      * @throws IllegalStateError if it called after calling postponeGCStart
      *         without calling postponeGCEnd
      */
@@ -151,7 +151,7 @@ export namespace GC {
      *
      * @see postponeGCStart
      *
-     * @throws UnsupportedOperationException if GC doesn't support postponing
+     * @throws UnsupportedOperationError if GC doesn't support postponing
      * @throws IllegalStateError if it called without calling postponeGCStart
      */
     export native function postponeGCEnd(): void;
@@ -163,7 +163,7 @@ export namespace GC {
      *
      * @see unpinObject
      *
-     * @throws UnsupportedOperationException if used GC does not support pinning
+     * @throws UnsupportedOperationError if used GC does not support pinning
      */
     export native function pinObject(obj: Object): void;
 
@@ -187,7 +187,7 @@ export namespace GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     * @throws UnsupportedOperationException if used GC does not support pinning
+     * @throws UnsupportedOperationError if used GC does not support pinning
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of boolean
@@ -202,7 +202,7 @@ export namespace GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     * @throws UnsupportedOperationException if used GC does not support pinning
+     * @throws UnsupportedOperationError if used GC does not support pinning
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of byte
@@ -217,7 +217,7 @@ export namespace GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     * @throws UnsupportedOperationException if used GC does not support pinning
+     * @throws UnsupportedOperationError if used GC does not support pinning
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of char
@@ -232,7 +232,7 @@ export namespace GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     * @throws UnsupportedOperationException if used GC does not support pinning
+     * @throws UnsupportedOperationError if used GC does not support pinning
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of short
@@ -247,7 +247,7 @@ export namespace GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     * @throws UnsupportedOperationException if used GC does not support pinning
+     * @throws UnsupportedOperationError if used GC does not support pinning
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of int
@@ -262,7 +262,7 @@ export namespace GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     * @throws UnsupportedOperationException if used GC does not support pinning
+     * @throws UnsupportedOperationError if used GC does not support pinning
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of long
@@ -277,7 +277,7 @@ export namespace GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     * @throws UnsupportedOperationException if used GC does not support pinning
+     * @throws UnsupportedOperationError if used GC does not support pinning
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of float
@@ -292,7 +292,7 @@ export namespace GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     * @throws UnsupportedOperationException if used GC does not support pinning
+     * @throws UnsupportedOperationError if used GC does not support pinning
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of double

@@ -231,7 +231,7 @@ public:
 
     const uint8_t *GetUnsupportedOperationExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_EXCEPTION.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_ERROR.data());
     }
 
     const uint8_t *GetVerifyErrorClassDescriptor() const override
