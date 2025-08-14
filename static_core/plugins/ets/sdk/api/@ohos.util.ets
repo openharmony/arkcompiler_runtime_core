@@ -247,16 +247,12 @@ export namespace util {
          */
         private static encodeBase64(bytes: Uint8Array, urlSafe: boolean, mime: boolean): string {
             let table = urlSafe ? Base64Helper.BASE64_URL_SAFE_CHARS : Base64Helper.BASE64_CHARS;
-            let binaryString: string = "";
-            for (let i = 0; i < bytes.length; i++) {
-                binaryString += String.fromCharCode(bytes[i]);
-            }
             let encoded: string = "";
             let buffer: int = 0;
             let bufferLength: int = 0;
 
-            for (let i = 0; i < binaryString.length; i++) {
-                buffer = (buffer << Base64Helper.BYTE_SIZE) | binaryString.charCodeAt(i);
+            for (let i = 0; i < bytes.length; i++) {
+                buffer = (buffer << Base64Helper.BYTE_SIZE) | bytes[i].toInt();
                 bufferLength += Base64Helper.BYTE_SIZE;
                 while (bufferLength >= Base64Helper.BASE64_GROUP_SIZE) {
                     bufferLength -= Base64Helper.BASE64_GROUP_SIZE;
