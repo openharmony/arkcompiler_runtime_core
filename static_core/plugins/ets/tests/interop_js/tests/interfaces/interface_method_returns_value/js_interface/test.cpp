@@ -34,8 +34,7 @@ TEST_F(EtsInteropInterfaceReturnsValuesArkToJs, test_interface_returns_string_ty
     ASSERT_EQ(ret, true);
 }
 
-// NOTE 17741 -- disabled while JSValue BigInt is unsupported
-TEST_F(EtsInteropInterfaceReturnsValuesArkToJs, DISABLED_test_interface_returns_bigint_type_imported)
+TEST_F(EtsInteropInterfaceReturnsValuesArkToJs, test_interface_returns_bigint_type_imported)
 {
     [[maybe_unused]] auto ret = CallEtsFunction<bool>(GetPackageName(), "type_imported__returnBigint");
     ASSERT_EQ(ret, true);

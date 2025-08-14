@@ -15,7 +15,7 @@
 
 #include "objects/base_type.h"
 #include "objects/dynamic_object_accessor_util.h"
-#include "plugins/ets/runtime/ets_stubs.h"
+#include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
 #include "plugins/ets/runtime/interop_js/js_value.h"
@@ -433,6 +433,16 @@ uint8_t JSRuntimeInstanceOfStatic(JSValue *etsJsValue, EtsClass *etsCls)
     }
 
     return 0;
+}
+
+static ALWAYS_INLINE inline bool CheckEtsObjectFoundException(EtsCoroutine *coroutine, EtsObject *etsObject)
+{
+    if (EtsReferenceNullish(coroutine, etsObject)) {
+        PandaString message = "Need object";
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::TYPE_ERROR, message.c_str());
+        return true;
+    }
+    return false;
 }
 
 std::pair<std::string_view, std::string_view> ResolveModuleName(std::string_view module)
@@ -886,7 +896,9 @@ EtsString *JSRuntimeTypeOf(JSValue *object)
 EtsObject *JSRuntimeInvoke(EtsObject *recv, EtsObject *func, EtsArray *args)
 {
     auto coro = EtsCoroutine::GetCurrent();
-
+    if (CheckEtsObjectFoundException(coro, func)) {
+        return nullptr;
+    }
     HandleScope<ObjectHeader *> scope(coro);
     size_t argc = args->GetLength();
     std::vector<VMHandle<ObjectHeader>> argsVec;
@@ -921,17 +933,6 @@ EtsObject *JSRuntimeInstantiate(EtsObject *callable, EtsArray *args)
     }
     Span<VMHandle<ObjectHeader>> internalArgs = Span<VMHandle<ObjectHeader>>(argsVec.data(), argc);
     return EtsCallNew(coro, callable, internalArgs);
-}
-
-bool CheckEtsObjectFoundException(EtsCoroutine *coroutine, EtsObject *etsObject)
-{
-    PandaString message = "Need object";
-    if (etsObject == nullptr ||
-        etsObject->GetClass()->GetDescriptor() == ark::ets::panda_file_items::class_descriptors::NULL_VALUE) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::TYPE_ERROR, message.c_str());
-        return true;
-    }
-    return false;
 }
 
 void ESValueAnyIndexedSetter(EtsObject *etsObject, int32_t index, EtsObject *value)

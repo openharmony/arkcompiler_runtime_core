@@ -13,90 +13,90 @@
  * limitations under the License.
  */
 
-import {
-	tsString,
-	LiteralClass,
-	UnionClass,
-	InterfaceClass,
-	AbstractClass,
-	GClass,
-	literalClass,
-	unionClass,
-	interfaceClass,
-	abstractClass,
-	genericFunction,
-	tupleDeclaredType,
-	explicitlyDeclaredType,
-} from 'dynamic_import';
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/generic/ts_to_ets/generic')
+let tsString = module.getProperty('tsString');
+let etsLiteralClass = module.getProperty('LiteralClass');
+let etsUnionClass = module.getProperty('UnionClass');
+let etsInterfaceClass = module.getProperty('InterfaceClass');
+let etsAbstractClass = module.getProperty('AbstractClass');
+let etsGClass = module.getProperty('GClass');
+let etsliteralClass = module.getProperty('literalClass');
+let etsunionClass = module.getProperty('unionClass');
+let etsinterfaceClass = module.getProperty('interfaceClass');
+let etsabstractClass = module.getProperty('abstractClass');
+let etsgenericFunction = module.getProperty('genericFunction');
+let etstupleDeclaredType = module.getProperty('tupleDeclaredType');
+let etsexplicitlyDeclaredType = module.getProperty('explicitlyDeclaredType');
 
 const strContent = 'ets_test_string';
 const numContent = 1;
 const boolContent = true;
 
 function checkLiteralClassGeneric(): boolean {
-	const literalClass = new LiteralClass(strContent);
+	const literalClass = etsLiteralClass.instantiate(strContent);
 
-	return strContent == literalClass.get();
+	return strContent == literalClass.invokeMethod('get').toString();
 }
 
 function checkUnionClassGeneric(): boolean {
-	const unionClass = new UnionClass(strContent);
+	const unionClass = etsUnionClass.instantiate(strContent);
 
-	return strContent == unionClass.get();
+	return strContent == unionClass.invokeMethod('get').toString();
 }
 
 function checkInterfaceClassGeneric(): boolean {
-	const interfaceClass = new InterfaceClass(strContent);
+	const interfaceClass = etsInterfaceClass.instantiate(strContent);
 
-	return strContent == interfaceClass.get();
+	return strContent == interfaceClass.invokeMethod('get').toString();
 }
 
 function checkAbstractClassGeneric(): boolean {
-	const abstractClass = new AbstractClass(strContent);
+	const abstractClass = etsAbstractClass.instantiate(strContent);
 
-	return strContent == abstractClass.get();
+	return strContent == abstractClass.invokeMethod('get').toString();
 }
 
 function checkGenericClassGeneric(): boolean {
-	const gClass = new GClass(strContent);
+	const gClass = etsGClass.instantiate(strContent);
 
-	return strContent == gClass.get();
+	return strContent == gClass.invokeMethod('get').toString();
 }
 
 function checkGenericLiteralClassObjectFromTs(): boolean {
-	return tsString === literalClass.get();
+	return tsString.toString() === etsliteralClass.invokeMethod('get').toString();
 }
 
 function checkGenericUnionClassObjectFromTs(): boolean {
-	return tsString === unionClass.get();
+	return tsString.toString() === etsunionClass.invokeMethod('get').toString();
 }
 
 function checkGenericInterfaceClassObjectFromTs(): boolean {
-	return tsString === interfaceClass.get();
+	return tsString.toString() === etsinterfaceClass.invokeMethod('get').toString();
 }
 
 function checkGenericAbstractClassObjectFromTs(): boolean {
-	return tsString === abstractClass.get();
+	return tsString.toString() === etsabstractClass.invokeMethod('get').toString();
 }
 
 function checkGenericFunctionTypeAnyString(): boolean {
-	return strContent == genericFunction(strContent);
+	return strContent == etsgenericFunction.invoke(strContent).toString();
 }
 
 function checkGenericFunctionTypeAnyInt(): boolean {
-	return numContent == genericFunction(numContent);
+	return numContent == etsgenericFunction.invoke(numContent).toNumber().toInt();
 }
 
 function checkGenericFunctionTypeAnyBool(): boolean {
-	return (boolContent as boolean) == (genericFunction(boolContent) as boolean);
+	return (boolContent as boolean) == (etsgenericFunction.invoke(boolContent).toBoolean());
 }
 
 function checkGenericFunctionTupleType() {
 	const arr: [int, string] = [numContent, strContent];
-	const result = tupleDeclaredType<[int, string]>(arr);
-	return arr[0] == result[0] && arr[1] == result[1];
+	//const result = etstupleDeclaredType<[int, string]>(arr);
+	const result = etstupleDeclaredType.invoke(arr);
+	return  arr[0] == result.getProperty(0).toNumber() && arr[1] == result.getProperty(1).toString();
 }
 
 function checkGenericExplicitlyDeclaredType(): boolean {
-	return tsString === explicitlyDeclaredType();
+	return ESValue.areEqualSafe(tsString, etsexplicitlyDeclaredType.invoke());
 }
