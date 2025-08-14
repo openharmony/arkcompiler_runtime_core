@@ -154,12 +154,12 @@ static ani_status BindTextDecoder(ani_env *env)
     std::array barMethods = {
         ani_native_function {
             "doEncodeInto",
-            "Lstd/core/String;Lstd/core/String;:Lescompat/Uint8Array;",
+            "Lstd/core/String;Lstd/core/String;:Lescompat/ArrayBuffer;",
             reinterpret_cast<void *>(ark::ets::sdk::util::DoEncodeInto),
         },
         ani_native_function {
             "doEncodeInfoUint8Array",
-            "Lstd/core/String;Lstd/core/String;Lescompat/Uint8Array;:L@ohos/util/util/EncodeIntoUint8ArrayInfo;",
+            "Lstd/core/String;Lstd/core/String;Lescompat/Uint8Array;:Lescompat/Array;",
             reinterpret_cast<void *>(ark::ets::sdk::util::DoEncodeIntoUint8Array),
         },
     };
