@@ -35,12 +35,14 @@ action("build_declgen") {
   ]
 
   script = "compile_declgen.py"
+  tgz_name = "panda-declgen-1.0.0.tgz"
   args = [
     rebase_path(get_path_info("./", "abspath")),
     rebase_path("${target_out_dir}"),
+    tgz_name,
   ]
 
-  outputs = [ "${target_out_dir}/panda-declgen-1.0.0.tgz" ]
+  outputs = [ "${target_out_dir}/${tgz_name}" ]
 }
 
 ohos_copy("declgen_ts2sts_compile_declgen") {
