@@ -87,7 +87,7 @@ function testGeneralDomain() {
 
     for (let i = 0; i < TEST_ITERATIONS; i++) {
         test();
-        launch<void, () => void>((): void => { test(); });
+        launch<void, () => void>((): void => { test(); }).Await();
         ea.run<void>(() => { test(); }).Await();
     }
 
@@ -118,7 +118,7 @@ function testExactIdDomain() {
 
     for (let i = 0; i < TEST_ITERATIONS; i++) {
         test();
-        launch<void, () => void>((): void => { test(); });
+        launch<void, () => void>((): void => { test(); }).Await();
         ea.run<void>(() => { test(); }).Await();
     }
 
@@ -142,7 +142,7 @@ function testMainDomain() {
 
     for (let i = 0; i < TEST_ITERATIONS; i++) {
         test();
-        launch<void, () => void>((): void => { test(); });
+        launch<void, () => void>((): void => { test(); }).Await();
         ea.run<void>(() => { test(); }).Await();
     }
 
@@ -173,7 +173,7 @@ function testEADomain() {
 
     for (let i = 0; i < TEST_ITERATIONS; i++) {
         test();
-        launch<void, () => void>((): void => { test(); });
+        launch<void, () => void>((): void => { test(); }).Await();
         ea1.run<void>(() => { test(); }).Await();
         ea2.run<void>(() => { test(); }).Await();
     }
