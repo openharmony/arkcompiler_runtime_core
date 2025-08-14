@@ -24,6 +24,7 @@
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/types/ets_string.h"
 
 #include <cstdint>
 #include <thread>
@@ -172,7 +173,9 @@ EtsInt ExclusiveLaunch(EtsObject *task, uint8_t needInterop, EtsString *name, Et
     }
     {
         PandaVector<uint8_t> nameBuf;
-        PandaString nameStr(name->ConvertToStringView(&nameBuf));
+        EtsHandleScope handleScope(coro);
+        EtsHandle<EtsString> nameHandle(coro, name);
+        PandaString nameStr(nameHandle->ConvertToStringView(&nameBuf));
         ScopedNativeCodeThread nativeScope(coro);
         auto event = os::memory::Event();
         auto t = std::thread(
