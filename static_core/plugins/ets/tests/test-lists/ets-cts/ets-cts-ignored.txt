@@ -2025,6 +2025,12 @@
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_8.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_9.ets
 
+#24859
+17.experimental_features/03.resizable_array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_2.ets
+
+#28488
+17.experimental_features/03.resizable_array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_15.ets
+
 #18763 es2panda aborts on for-of over a union type array
 17.experimental_features/06.iterable_types/it_11.ets
 17.experimental_features/06.iterable_types/it_12.ets
@@ -2179,13 +2185,6 @@
 
 #21301 Not work overloading with union parameter, different union have the similar assambly signature, mangling is necessary
 17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_ab_22.ets
-
-
-#24859 undefined register, Register type conflict
-17.experimental_features/03.resizable_array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_1.ets
-17.experimental_features/03.resizable_array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_2.ets
-17.experimental_features/03.resizable_array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_3.ets
-17.experimental_features/03.resizable_array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_4.ets
 
 #25679
 17.experimental_features/02.fixed_array_types/far4a.ets
