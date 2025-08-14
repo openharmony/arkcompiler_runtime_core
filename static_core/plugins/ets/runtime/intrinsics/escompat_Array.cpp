@@ -879,4 +879,32 @@ extern "C" void EtsEscompatArraySetUnsafe(EtsEscompatArray *array, int32_t index
     ASSERT(static_cast<uint32_t>(index) < actualLength);
     array->GetData()->Set(index, value);
 }
+
+extern "C" void EtsEscompatArrayUnshiftInternal(EtsEscompatArray *array, ObjectHeader *bufferHeader,
+                                                EtsEscompatArray *values)
+{
+    ASSERT(array != nullptr);
+    ASSERT(bufferHeader != nullptr);
+    ASSERT(values != nullptr);
+    auto *buffer = EtsArray::FromEtsObject(EtsObject::FromCoreType(bufferHeader));
+    auto dstLen = buffer->GetLength() * sizeof(ObjectPointerType);
+    auto *dst = buffer->GetData<ObjectPointerType>();
+    auto *arraySrc = array->GetData()->GetData<ObjectPointerType>();
+    auto arraySrcLen = array->GetActualLength() * sizeof(ObjectPointerType);
+    auto valuesSrcLen = values->GetActualLength() * sizeof(ObjectPointerType);
+    [[maybe_unused]] auto error0 =
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        memmove_s(dst + values->GetActualLength(), dstLen - valuesSrcLen, arraySrc, arraySrcLen);
+    ASSERT(error0 == 0);
+    auto *valuesSrc = values->GetData()->GetData<ObjectPointerType>();
+    [[maybe_unused]] auto error1 = memmove_s(dst, dstLen, valuesSrc, valuesSrcLen);
+    ASSERT(error1 == 0);
+
+    auto *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    auto *barrierSet = thread->GetBarrierSet();
+    if (barrierSet != nullptr) {
+        barrierSet->PostBarrier(buffer, EtsArray::GetDataOffset(), arraySrcLen + valuesSrcLen);
+    }
+}
 }  // namespace ark::ets::intrinsics

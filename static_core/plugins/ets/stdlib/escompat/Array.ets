@@ -1020,20 +1020,20 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns new length of the Array
      */
     public unshift(...values: T[]): number {
-        let buffer = this.buffer
-        if (this.buffer.length <= values.length + this.actualLength) {
-            buffer = new NullishType[this.buffer.length * 2 + values.length]
+        if (this.buffer.length <= values.actualLength + this.actualLength) {
+            let buffer: FixedArray<Any> = new Any[this.buffer.length * 2 + values.actualLength]
+            this.unshiftInternal(buffer, values)
+            this.buffer = buffer
         }
-        for (let i = 0; i < this.actualLength; i++) {
-            buffer[this.actualLength + values.length.toInt() - i - 1] = this.buffer[this.actualLength - 1 - i]
+        else {
+            this.unshiftInternal(this.buffer, values)
         }
-        for (let i = 0; i < values.length; i++) {
-            buffer[i] = values[i]
-        }
-        this.buffer = buffer
-        this.actualLength += values.length.toInt()
+
+        this.actualLength += values.actualLength
         return this.actualLength
     }
+
+    private final native unshiftInternal(buffer: FixedArray<Any>, values: T[]): void
 
     /**
      * Returns an iterator over all indices
