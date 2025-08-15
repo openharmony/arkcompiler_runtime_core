@@ -842,23 +842,25 @@ class JSONWriter {
         let fieldDumped = false
         for (let fieldIdx = 0; fieldIdx < tupleFields.length; fieldIdx++) {
             const objToDump = tupleFields[fieldIdx][FIELD_VALUE].getData();
-            if (objToDump !== undefined) {
-                if (fieldDumped) {
-                    this.buffer.append(",")
-                    if (this.useIndent) {
-                        this.buffer.append("\n")
-                    }
-                } else {
-                    fieldDumped = true
-                }
-
-                this.writePadding()
-
+            if (fieldDumped) {
+                this.buffer.append(",")
                 if (this.useIndent) {
-                    this.buffer.append(" ")
+                    this.buffer.append("\n")
                 }
+            } else {
+                fieldDumped = true
+            }
 
+            this.writePadding()
+
+            if (this.useIndent) {
+                this.buffer.append(" ")
+            }
+
+            if (objToDump !== undefined) {
                 this.writeObject(objToDump)
+            } else {
+                this.buffer.append("null")
             }
         }
 

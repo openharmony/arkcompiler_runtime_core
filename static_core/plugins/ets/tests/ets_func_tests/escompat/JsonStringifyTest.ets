@@ -317,6 +317,13 @@ function jsonStringifyEscapeCharacter(): void {
     }
 }
 
+function jsonStringifyTupleWithUndefinedValue(): void {
+    const odds = new Set<undefined>([undefined]);
+    let set = odds.entries();
+    // NOTE: rewrite this comparison after #28848 solved
+    arktest.assertEQ(JSON.stringify(set.next().value), "[null,null]");
+}
+
 function main(): int {
     const suite = new arktest.ArkTestsuite("Json stringify for ArrayLike tests ")
     suite.addTest('JSON.stringify for ArrayBuffer', jsonStringifyArrayBuffer);
@@ -352,6 +359,7 @@ function main(): int {
     suite.addTest('JSON.stringify for cyclic Record', jsonStringifyCyclicRecord);
     suite.addTest('JSON.stringify for control character', jsonStringifyControlCharacter);
     suite.addTest('JSON.stringify for escape character', jsonStringifyEscapeCharacter);
+    suite.addTest('JSON.stringify for tuple with undefined value', jsonStringifyTupleWithUndefinedValue);
 
     return suite.run()
 }
