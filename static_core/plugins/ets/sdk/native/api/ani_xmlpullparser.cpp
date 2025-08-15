@@ -112,7 +112,7 @@ PARSE_INFO_FIELD_LIST(PARSE_INFO_SETTER)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CHECK_NON_NULL_PARSER_AND_RETURN(pointer, returnVal)   \
     if ((pointer) == 0) {                                      \
-        LOG_ERROR_SDK("%s:: object is nullptr", __FUNCTION__); \
+        LOG_FATAL_SDK("%s:: object is nullptr", __FUNCTION__); \
         /* CC-OFFNXT(G.PRE.05) return if invalid argument */   \
         return (returnVal);                                    \
     }                                                          \
@@ -129,7 +129,7 @@ ani_long XmlPullParser::BindNative(ani_env *env, [[maybe_unused]] ani_class self
     auto *binding = new XmlPullParser(strContent.substr(0, strLen));
     if (binding == nullptr) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("%s:: memory allocate failed, binding is nullptr", __FUNCTION__);
+        LOG_FATAL_SDK("%s:: memory allocate failed, binding is nullptr", __FUNCTION__);
     }
     return reinterpret_cast<ani_long>(binding);
 }

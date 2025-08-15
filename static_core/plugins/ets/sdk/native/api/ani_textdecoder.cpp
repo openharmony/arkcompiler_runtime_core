@@ -18,6 +18,7 @@
 #include <iostream>
 #include "ani_textdecoder.h"
 #include "ani.h"
+#include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
 #include "securec.h"
 #include "ohos/init_data.h"
 
@@ -27,13 +28,13 @@ UConverter *CreateConverter(std::string &encStr, UErrorCode &codeflag)
     UConverter *conv = ucnv_open(encStr.c_str(), &codeflag);
     if (U_FAILURE(codeflag) != 0) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("TextDecoder:: Unable to create a UConverter object %{public}s", u_errorName(codeflag));
+        LOG_FATAL_SDK("TextDecoder:: Unable to create a UConverter object %{public}s", u_errorName(codeflag));
         return nullptr;
     }
     ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_SUBSTITUTE, nullptr, nullptr, nullptr, &codeflag);
     if (U_FAILURE(codeflag) != 0) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("TextDecoder:: Unable to set the from Unicode callback function");
+        LOG_FATAL_SDK("TextDecoder:: Unable to set the from Unicode callback function");
         ucnv_close(conv);
         return nullptr;
     }
@@ -41,7 +42,7 @@ UConverter *CreateConverter(std::string &encStr, UErrorCode &codeflag)
     ucnv_setToUCallBack(conv, UCNV_TO_U_CALLBACK_SUBSTITUTE, nullptr, nullptr, nullptr, &codeflag);
     if (U_FAILURE(codeflag) != 0) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("TextDecoder:: Unable to set the to Unicode callback function");
+        LOG_FATAL_SDK("TextDecoder:: Unable to set the to Unicode callback function");
         ucnv_close(conv);
         return nullptr;
     }
@@ -58,7 +59,7 @@ TextDecoder::TextDecoder(std::string &buff, uint32_t flags) : encStr_(buff), tra
     UConverter *conv = CreateConverter(encStr_, codeflag);
     if (U_FAILURE(codeflag) != 0) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("TextDecoder:: ucnv_open failed !");
+        LOG_FATAL_SDK("TextDecoder:: ucnv_open failed !");
         return;
     }
     if (fatal) {
@@ -72,44 +73,24 @@ TextDecoder::TextDecoder(std::string &buff, uint32_t flags) : encStr_(buff), tra
 ani_string TextDecoder::GetResultStr(ani_env *env, const UChar *arrDat, size_t length)
 {
     ani_string resultStr = nullptr;
-    ani_status status = env->String_NewUTF16(reinterpret_cast<const uint16_t *>(arrDat), length, &resultStr);
-    if (status != ANI_OK) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("TextDecoder:: String creation failed");
-    }
+    ANI_FATAL_IF_ERROR(env->String_NewUTF16(reinterpret_cast<const uint16_t *>(arrDat), length, &resultStr));
     return resultStr;
 }
 
 ani_object TextDecoder::CreateThrowErrorObject(ani_env *env, const std::string &message)
 {
     ani_string errString;
-    if (env->String_NewUTF8(message.c_str(), message.size(), &errString) != ANI_OK) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("TextDecoder:: Data allocation failed");
-        return nullptr;
-    }
+    ANI_FATAL_IF_ERROR(env->String_NewUTF8(message.c_str(), message.size(), &errString));
     static const char *className = "@ohos.util.util.BusinessError";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("TextDecoder:: Not found %{public}s", className);
-        return nullptr;
-    }
+    ANI_FATAL_IF_ERROR(env->FindClass(className, &cls));
 
     ani_method errorCtor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}:", &errorCtor)) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("TextDecoder:: Class_FindMethod <ctor> Failed");
-        return nullptr;
-    }
+    ANI_FATAL_IF_ERROR(env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}:", &errorCtor));
 
     ani_object errorObj;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    if (ANI_OK != env->Object_New(cls, errorCtor, &errorObj, errString)) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("TextDecoder:: Object_New Array Faild");
-        return nullptr;
-    }
+    ANI_FATAL_IF_ERROR(env->Object_New(cls, errorCtor, &errorObj, errString));
     return errorObj;
 }
 
