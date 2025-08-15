@@ -48,7 +48,7 @@ function test_array_push() {
 //! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_managed_objects"
 //! PASS_AFTER    "Codegen"
 //! INST          /CallVirtual.*escompat.Array::push/
-//! INST_COUNT    /CallVirtual.*escompat.Array::push/, 3
+//! INST_COUNT    /CallVirtual.*escompat.Array::push/, 2
 function test_array_push_managed_objects() {
     let array: Array<Object> = new Array<Object>();
 
@@ -83,7 +83,7 @@ function test_array_push_managed_objects() {
 //! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_unions"
 //! PASS_AFTER    "Codegen"
 //! INST          /CallVirtual.*escompat.Array::push/
-//! INST_COUNT    /CallVirtual.*escompat.Array::push/, 4
+//! INST_COUNT    /CallVirtual.*escompat.Array::push/, 5
 function test_array_push_unions() {
     let array: Array<Object | null | undefined | number | string> =
         new Array<Object | null | undefined | number | string>();
@@ -116,7 +116,7 @@ function test_array_push_unions() {
 //! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_one"
 //! PASS_AFTER    "Codegen"
 //! INST          /CallVirtual.*escompat.Array::pushOne/
-//! INST_COUNT    /CallVirtual.*escompat.Array::pushOne/, 4
+//! INST_COUNT    /CallVirtual.*escompat.Array::pushOne/, 5
 function test_array_push_one() {
     let array: Array<Object | null | undefined | number | string> =
         new Array<Object | null | undefined | number | string>();

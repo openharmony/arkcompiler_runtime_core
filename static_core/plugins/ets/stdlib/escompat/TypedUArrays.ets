@@ -1739,7 +1739,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     }
 
     /** Number of int stored in Uint8ClampedArray */
-    public get length(): number {
+    public get length(): int {
         return this.lengthInt
     }
 
@@ -3488,7 +3488,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /** Number of int stored in Uint8Array */
-    public get length(): number {
+    public get length(): int {
         return this.lengthInt
     }
 
@@ -5223,7 +5223,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /** Number of int stored in Uint16Array */
-    public get length(): number {
+    public get length(): int {
         return this.lengthInt
     }
 
@@ -7004,7 +7004,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /** Number of long stored in Uint32Array */
-    public get length(): number {
+    public get length(): int {
         return this.lengthInt
     }
 
@@ -8787,7 +8787,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     }
 
     /** Number of long stored in BigUint64Array */
-    public get length(): number {
+    public get length(): int {
         return this.lengthInt
     }
 

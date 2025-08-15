@@ -54,7 +54,7 @@ class ArrayLikeImplTest<T> implements ArrayLike<T> {
         return this.buffer[idx] as T;
     }
 
-    get length(): number {
+    get length(): int {
         return this.actualLength;
     }
 

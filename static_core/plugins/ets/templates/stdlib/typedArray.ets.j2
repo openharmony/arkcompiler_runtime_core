@@ -446,7 +446,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     public native $_set(index: int, val: {{T}}): void
 
     /** Number of {{T}} stored in {{N}}Array */
-    public get length(): number {
+    public get length(): int {
         return this.lengthInt
     }
 

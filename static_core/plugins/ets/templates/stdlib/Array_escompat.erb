@@ -56,12 +56,12 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     private buffer: FixedArray<NullishType>
     internal actualLength: int
 
-    override get length(): number {
-        return this.actualLength.toDouble()
+    override get length(): int {
+        return this.actualLength
     }
 
-    set length(newLen: number) {
-        const len = newLen.toInt()
+    set length(newLen: int) {
+        const len = newLen
         if (len < 0 || len > this.actualLength) {
             throw new RangeError("can't change length to bigger or negative")
         }
