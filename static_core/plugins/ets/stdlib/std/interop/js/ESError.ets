@@ -17,12 +17,10 @@ package std.interop.js;
 
 export final class ESError extends Error {
     private err_: ESValue;
-    private jserr_: JSValue;
 
-    private constructor(err: JSValue) {
-        super("ESError", "", new ErrorOptions(err as Object));
+    private constructor(err: Any) {
+        super("ESError", "", undefined);
         this.err_ = new ESValue(err);
-        this.jserr_ = err;
     }
 
     /**
