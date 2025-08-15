@@ -19,27 +19,28 @@ const myMap = etsVm.getClass('Lmap/test/ETSGLOBAL;').myMap;
 const GetMapElement = etsVm.getFunction('Lmap/test/ETSGLOBAL;', 'GetMapElement');
 const HasMapElement = etsVm.getFunction('Lmap/test/ETSGLOBAL;', 'HasMapElement');
 const GetMapSize = etsVm.getFunction('Lmap/test/ETSGLOBAL;', 'GetMapSize');
+const WeekDays = etsVm.getClass('Lmap/test/ETSGLOBAL;').WeekDays;
 
 function testMapSet(): boolean {
     let res: boolean = true;
     myMap.set('banana', 2);
     myMap.set('cherry', 3);
     res = myMap.get('apple') === 1 && myMap.get('banana') === 2 && myMap.get('cherry') === 3 &&
-    GetMapElement('banana') === 2 && GetMapElement('cherry') === 3;
+        GetMapElement('banana') === 2 && GetMapElement('cherry') === 3;
     return res;
 }
 
 function testMapGet(): boolean {
     let res: boolean = true;
     res = myMap.get('apple') === 1 && myMap.get('banana') === 2 &&
-          myMap.get('cherry') === 3 && myMap.get('unknown') === undefined;
+        myMap.get('cherry') === 3 && myMap.get('unknown') === undefined;
     return res;
 }
 
 function testMapHas(): boolean {
     let res: boolean = true;
     res = myMap.has('apple') && myMap.has('banana') &&
-          myMap.has('cherry') && !myMap.has('unknown');
+        myMap.has('cherry') && !myMap.has('unknown');
     return res;
 }
 
@@ -65,7 +66,7 @@ function testMapKeys(): boolean {
         keys.push(key);
     }
     res = keys[0] === 'apple' && keys[1] === 'cherry' &&
-          keys[2] === 'banana' && keys.length === 3;
+        keys[2] === 'banana' && keys.length === 3;
     return res;
 }
 
@@ -76,14 +77,24 @@ function testMapValues(): boolean {
         values.push(value);
     }
     res = values[0] === 1 && values[1] === 3 &&
-          values[2] === 2 && values.length === 3;
+        values[2] === 2 && values.length === 3;
     return res;
 }
 
 function testMapEntries(): boolean {
-    let res: boolean = true;
-    myMap.entries();
-    return res;
+    // Will the static Tuple class
+    let WeekDaysStatic: Map<string, number> = new Map<string, number>();
+    WeekDaysStatic.set('Monday', 1);
+    WeekDaysStatic.set('Tuesday', 2);
+    WeekDaysStatic.set('Wednesday', 3);
+    WeekDaysStatic.set('Thursday', 4);
+    WeekDaysStatic.set('Friday', 5);
+    WeekDaysStatic.set('Saturday', 6);
+    WeekDaysStatic.set('Sunday', 7);
+    for (let day of WeekDays.entries()) {
+        ASSERT_TRUE(WeekDaysStatic.has(day[0]) && WeekDaysStatic.get(day[0]) === day[1]);
+    }
+    return true;
 }
 
 function testMapForEach(): boolean {
@@ -95,7 +106,7 @@ function testMapForEach(): boolean {
         values.push(val);
     });
     res = keys[0] === 'apple' && keys[1] === 'cherry' && keys[2] === 'banana' && keys.length === 3 &&
-          values[0] === 1 && values[1] === 3 && values[2] === 2 && values.length === 3;
+        values[0] === 1 && values[1] === 3 && values[2] === 2 && values.length === 3;
     return res;
 }
 
