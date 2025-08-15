@@ -50,70 +50,34 @@ module Constants
   LOG2_BYTES_PER_I32 = "2"
 end
 
-def GenerateTypedArrayFillInternal(name, prefix, type, scale)
-    function("#{name}ArrayFillInternalFastPath".to_sym,
+def GenerateTypedArrayFillInternal(name, prefix, type, outType, scale, cgmode)
+    signed = (['i8', 'i16', 'i32', 'i64', 'f32', 'f64'].include?(outType) ? true : false)
+    suffix = (cgmode == :NativePlus ? 'NativePlus' : '')
+    function("#{name}ArrayFillInternal#{suffix}".to_sym,
             params: {arr: 'ref', val: type, startPos: 'i32', endPos: 'i32'},
             regmap: $full_regmap,
             regalloc_set: $panda_mask,
-            mode: [:FastPath]) {
+            mode: [cgmode]) {
 
         if Options.arch == :arm32
             Intrinsic(:UNREACHABLE).Terminator.void
             next
         end
-        buffer := LoadI(arr).Imm(Constants::TYPED_ARRAY_BUFFER_OFFSET).ref
-        bufferData := LoadI(buffer).Imm(Constants::ARRAY_BUFFER_DATA_OFFSET).ref
-        If(bufferData, 0).EQ.Unlikely {
-          Goto(:SlowPathEntrypoint)
-        }
-        byteOffsetF64 := LoadI(arr).Imm(Constants::TYPED_ARRAY_BYTE_OFFSET_OFFSET).f64
-        byteOffset := Cast(byteOffsetF64).i32
-        arrayDataOffset := AddI(byteOffset).Imm(Constants::ARRAY_DATA_OFFSET).i32
-        offset0 := Add(arrayDataOffset, ShlI(startPos).Imm(scale).i32).i32
-        offsetEnd := Add(arrayDataOffset, ShlI(endPos).Imm(scale).i32).i32
-
-      Label(:Loop)
-        offset := Phi(offset0, offset1).u32
-        If(offset, offsetEnd).GE {
-            Goto(:End)
-        }
-        Store(bufferData, offset, val).send(type)
-        offset1 := AddI(offset).Imm(1 << scale).i32
-        Goto(:Loop)
-
-      Label(:End)
-        ReturnVoid().void
-      Label(:SlowPathEntrypoint)
-        ep_offset = get_entrypoint_offset("#{prefix}_ARRAY_FILL_INTERNAL_USUAL")
-        Intrinsic(:SLOW_PATH_ENTRY, arr, val, startPos, endPos).AddImm(ep_offset).MethodAsImm("#{name}ArrayFillInternalUsualBridge").Terminator.void
-        Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
-    }
-end
-
-GenerateTypedArrayFillInternal('Int8', 'INT8', 'i8', 0)
-GenerateTypedArrayFillInternal('Int16', 'INT16', 'i16', 1)
-GenerateTypedArrayFillInternal('Int32', 'INT32', 'i32', 2)
-GenerateTypedArrayFillInternal('BigInt64', 'BIG_INT64', 'i64', 3)
-GenerateTypedArrayFillInternal('Float32', 'FLOAT32', 'i32', 2)
-GenerateTypedArrayFillInternal('Float64', 'FLOAT64', 'i64', 3)
-
-def GenerateTypedUnsignedArrayFillInternal(name, prefix, inType, outType, scale)
-    function("#{name}ArrayFillInternalFastPath".to_sym,
-            params: {arr: 'ref', val: inType, startPos: 'i32', endPos: 'i32'},
-            regmap: $full_regmap,
-            regalloc_set: $panda_mask,
-            mode: [:FastPath]) {
-
-        if Options.arch == :arm32
-            Intrinsic(:UNREACHABLE).Terminator.void
-            next
+        if signed
+          buffer := LoadI(arr).Imm(Constants::TYPED_ARRAY_BUFFER_OFFSET).ref
+        else
+          buffer := LoadI(arr).Imm(Constants::TYPED_UNSIGNED_ARRAY_BUFFER_OFFSET).ref
         end
-        buffer := LoadI(arr).Imm(Constants::TYPED_UNSIGNED_ARRAY_BUFFER_OFFSET).ref
         bufferData := LoadI(buffer).Imm(Constants::ARRAY_BUFFER_DATA_OFFSET).ref
         If(bufferData, 0).EQ.Unlikely {
           Goto(:SlowPathEntrypoint)
         }
-        byteOffset := LoadI(arr).Imm(Constants::TYPED_ARRAY_BYTE_OFFSET_OFFSET).i32
+        if signed
+          byteOffsetF64 := LoadI(arr).Imm(Constants::TYPED_ARRAY_BYTE_OFFSET_OFFSET).f64
+          byteOffset := Cast(byteOffsetF64).i32
+        else
+          byteOffset := LoadI(arr).Imm(Constants::TYPED_UNSIGNED_ARRAY_BYTE_OFFSET_OFFSET).i32
+        end
         arrayDataOffset := AddI(byteOffset).Imm(Constants::ARRAY_DATA_OFFSET).i32
         offset0 := Add(arrayDataOffset, ShlI(startPos).Imm(scale).i32).i32
         offsetEnd := Add(arrayDataOffset, ShlI(endPos).Imm(scale).i32).i32
@@ -127,20 +91,43 @@ def GenerateTypedUnsignedArrayFillInternal(name, prefix, inType, outType, scale)
         offset1 := AddI(offset).Imm(1 << scale).i32
         Goto(:Loop)
 
+      Label(:SlowPathEntrypoint)
+        if cgmode == :NativePlus
+          Call(arr, val, startPos, endPos).Method("EtsEscompat#{name}ArrayFillInternal").void
+          Goto(:End)
+        else
+          ep_offset = get_entrypoint_offset("#{prefix}_ARRAY_FILL_INTERNAL_USUAL")
+          Intrinsic(:SLOW_PATH_ENTRY, arr, val, startPos, endPos).AddImm(ep_offset).MethodAsImm("#{name}ArrayFillInternalUsualBridge").Terminator.void
+          Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+        end
       Label(:End)
         ReturnVoid().void
-      Label(:SlowPathEntrypoint)
-        ep_offset = get_entrypoint_offset("#{prefix}_ARRAY_FILL_INTERNAL_USUAL")
-        Intrinsic(:SLOW_PATH_ENTRY, arr, val, startPos, endPos).AddImm(ep_offset).MethodAsImm("#{name}ArrayFillInternalUsualBridge").Terminator.void
-        Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
     }
 end
 
-GenerateTypedUnsignedArrayFillInternal('UInt8Clamped', 'U_INT8', 'i32', 'u8', 0)
-GenerateTypedUnsignedArrayFillInternal('UInt8', 'U_INT8', 'i32', 'u8', 0)
-GenerateTypedUnsignedArrayFillInternal('UInt16', 'U_INT16', 'i32', 'u16', 1)
-GenerateTypedUnsignedArrayFillInternal('UInt32', 'U_INT32', 'i64', 'u32', 2)
-GenerateTypedUnsignedArrayFillInternal('BigUInt64', 'BIG_U_INT64', 'i64', 'u64', 3)
+GenerateTypedArrayFillInternal('Int8', 'INT8', 'i8', 'i8', 0, :FastPath)
+GenerateTypedArrayFillInternal('Int16', 'INT16', 'i16', 'i16', 1, :FastPath)
+GenerateTypedArrayFillInternal('Int32', 'INT32', 'i32', 'i32', 2, :FastPath)
+GenerateTypedArrayFillInternal('BigInt64', 'BIG_INT64', 'i64', 'i64', 3, :FastPath)
+GenerateTypedArrayFillInternal('Float32', 'FLOAT32', 'i32', 'i32', 2, :FastPath)
+GenerateTypedArrayFillInternal('Float64', 'FLOAT64', 'i64', 'i64', 3, :FastPath)
+GenerateTypedArrayFillInternal('Int8', 'INT8', 'i8', 'i8', 0, :NativePlus)
+GenerateTypedArrayFillInternal('Int16', 'INT16', 'i16', 'i16', 1, :NativePlus)
+GenerateTypedArrayFillInternal('Int32', 'INT32', 'i32', 'i32', 2, :NativePlus)
+GenerateTypedArrayFillInternal('BigInt64', 'BIG_INT64', 'i64', 'i64', 3, :NativePlus)
+GenerateTypedArrayFillInternal('Float32', 'FLOAT32', 'f32', 'f32', 2, :NativePlus)
+GenerateTypedArrayFillInternal('Float64', 'FLOAT64', 'f64', 'f64', 3, :NativePlus)
+
+GenerateTypedArrayFillInternal('UInt8Clamped', 'U_INT8_CLAMPED', 'i32', 'u8', 0, :FastPath)
+GenerateTypedArrayFillInternal('UInt8', 'U_INT8', 'i32', 'u8', 0, :FastPath)
+GenerateTypedArrayFillInternal('UInt16', 'U_INT16', 'i32', 'u16', 1, :FastPath)
+GenerateTypedArrayFillInternal('UInt32', 'U_INT32', 'i64', 'u32', 2, :FastPath)
+GenerateTypedArrayFillInternal('BigUInt64', 'BIG_U_INT64', 'i64', 'u64', 3, :FastPath)
+GenerateTypedArrayFillInternal('UInt8Clamped', 'U_INT8_CLAMPED', 'i32', 'u8', 0, :NativePlus)
+GenerateTypedArrayFillInternal('UInt8', 'U_INT8', 'i32', 'u8', 0, :NativePlus)
+GenerateTypedArrayFillInternal('UInt16', 'U_INT16', 'i32', 'u16', 1, :NativePlus)
+GenerateTypedArrayFillInternal('UInt32', 'U_INT32', 'i64', 'u32', 2, :NativePlus)
+GenerateTypedArrayFillInternal('BigUInt64', 'BIG_U_INT64', 'i64', 'u64', 3, :NativePlus)
 
 # Try to allocate object in TLAB.
 # The result is either a pointer to a new object or null if there is no enough space in TLAB.

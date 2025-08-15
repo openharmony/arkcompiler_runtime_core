@@ -1904,6 +1904,7 @@ intrinsics:
       ret: void
       args: [i8, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatInt8ArrayFillInternal
+    irtoc_impl: Int8ArrayFillInternalNativePlus
     codegen_func: CreateInt8ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitInt8ArrayFillInternal
@@ -2030,6 +2031,7 @@ intrinsics:
       ret: void
       args: [i16, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatInt16ArrayFillInternal
+    irtoc_impl: Int16ArrayFillInternalNativePlus
     codegen_func: CreateInt16ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitInt16ArrayFillInternal
@@ -2126,6 +2128,7 @@ intrinsics:
       ret: void
       args: [i32, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatInt32ArrayFillInternal
+    irtoc_impl: Int32ArrayFillInternalNativePlus
     codegen_func: CreateInt32ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitInt32ArrayFillInternal
@@ -2222,6 +2225,7 @@ intrinsics:
       ret: void
       args: [i64, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayFillInternal
+    irtoc_impl: BigInt64ArrayFillInternalNativePlus
     codegen_func: CreateBigInt64ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitBigInt64ArrayFillInternal
@@ -2308,6 +2312,7 @@ intrinsics:
       ret: void
       args: [f32, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayFillInternal
+    irtoc_impl: Float32ArrayFillInternalNativePlus
     codegen_func: CreateFloat32ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitFloat32ArrayFillInternal
@@ -2414,6 +2419,7 @@ intrinsics:
       ret: void
       args: [f64, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayFillInternal
+    irtoc_impl: Float64ArrayFillInternalNativePlus
     codegen_func: CreateFloat64ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitFloat64ArrayFillInternal
@@ -2520,6 +2526,7 @@ intrinsics:
       ret: void
       args: [i32, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayFillInternal
+    irtoc_impl: UInt8ClampedArrayFillInternalNativePlus
     codegen_func: CreateUInt8ClampedArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitUInt8ClampedArrayFillInternal
@@ -2626,6 +2633,7 @@ intrinsics:
       ret: void
       args: [i32, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayFillInternal
+    irtoc_impl: UInt8ArrayFillInternalNativePlus
     codegen_func: CreateUInt8ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitUInt8ArrayFillInternal
@@ -2722,6 +2730,7 @@ intrinsics:
       ret: void
       args: [i32, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayFillInternal
+    irtoc_impl: UInt16ArrayFillInternalNativePlus
     codegen_func: CreateUInt16ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitUInt16ArrayFillInternal
@@ -2838,6 +2847,7 @@ intrinsics:
       ret: void
       args: [i64, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayFillInternal
+    irtoc_impl: UInt32ArrayFillInternalNativePlus
     codegen_func: CreateUInt32ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitUInt32ArrayFillInternal
@@ -2944,6 +2954,7 @@ intrinsics:
       ret: void
       args: [i64, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayFillInternal
+    irtoc_impl: BigUInt64ArrayFillInternalNativePlus
     codegen_func: CreateBigUInt64ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitBigUInt64ArrayFillInternal

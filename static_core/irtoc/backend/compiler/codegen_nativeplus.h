@@ -26,6 +26,11 @@ public:
 
     explicit CodegenNativePlus(Graph *graph) : CodegenFastPath(graph) {}
 
+    void CreateFrameInfo() override
+    {
+        Codegen::CreateFrameInfo();  // NOLINT(bugprone-parent-virtual-call)
+    }
+
     void GeneratePrologue() override
     {
         Codegen::GeneratePrologue();  // NOLINT(bugprone-parent-virtual-call)
