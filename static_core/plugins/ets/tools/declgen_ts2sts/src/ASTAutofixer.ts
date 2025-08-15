@@ -137,7 +137,8 @@ export class Autofixer {
     [ts.SyntaxKind.ExportSpecifier, [this[FaultID.NoETSKeyword].bind(this)]],
     [ts.SyntaxKind.MappedType, [this[FaultID.MappedType].bind(this)]],
     [ts.SyntaxKind.TupleType, [this[FaultID.TupleTypeToArray].bind(this)]],
-    [ts.SyntaxKind.StructDeclaration, [this[FaultID.StructDeclaration].bind(this)]]
+    [ts.SyntaxKind.StructDeclaration, [this[FaultID.StructDeclaration].bind(this)]],
+    [ts.SyntaxKind.IndexedAccessType, [this[FaultID.IndexAccessType].bind(this)]]
   ]);
 
   fixNode(node: ts.Node): ts.VisitResult<ts.Node> {
@@ -344,6 +345,8 @@ export class Autofixer {
         // Create a new type alias declaration node
         return ts.factory.createTypeAliasDeclaration(node.modifiers, node.name, node.typeParameters, newType);
       }
+    } else if (ts.isIndexedAccessTypeNode(node) && !ts.isLiteralTypeNode(node.indexType)) {
+      return this.context.factory.createTypeReferenceNode(this.context.factory.createIdentifier(JSValue), undefined);
     }
 
     return node;
