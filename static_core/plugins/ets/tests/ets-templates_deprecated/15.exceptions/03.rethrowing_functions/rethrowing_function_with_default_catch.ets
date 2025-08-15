@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Rethrowing function declaration with default exception.
+desc: Rethrowing function declaration with default error.
 assert: A function that that accepts a throwing function as a parameter can be marked with the rethrows keyword. Such function is called a rethrowing function.
 tags: [compile-only, negative]
 ---*/
@@ -26,7 +26,7 @@ function foo(bar: func throws): void rethrows {
 }
 
 function canThrow (): void {
-  throw new Exception();
+  throw new Error();
 }
 
 function main(): void {

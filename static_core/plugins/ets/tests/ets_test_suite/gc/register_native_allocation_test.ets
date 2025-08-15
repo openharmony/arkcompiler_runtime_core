@@ -22,20 +22,24 @@ function CreateWeakRefString(s: string): WeakRef<String>
 function RegisterNativeAllocation(): void {
     let total: long = 0;
     let size: long = 16384;
-    let exception_catched: boolean = false;
+    let error_catched: boolean = false;
     try {
         GC.registerNativeAllocation(-size);
-    } catch(error: NegativeArraySizeError) {
-        exception_catched = true;
+    } catch(error) {
+        if (error instanceof NegativeArraySizeError) {
+            error_catched = true;
+        }
     }
-    arktest.assertTrue(exception_catched, "Didn't catch the exception");
-    exception_catched = false;
+    arktest.assertTrue(error_catched, "Didn't catch the error");
+    error_catched = false;
     try {
         GC.registerNativeFree(-size);
-    } catch(error: NegativeArraySizeError) {
-        exception_catched = true;
+    } catch(error) {
+        if (error instanceof NegativeArraySizeError) {
+            error_catched = true;
+        }
     }
-    arktest.assertTrue(exception_catched, "Didn't catch the exception");
+    arktest.assertTrue(error_catched, "Didn't catch the error");
 
     for (let i = 0; i < 2048; i++) {
         GC.registerNativeAllocation(size);
@@ -55,7 +59,7 @@ function main(): int {
         // Calling RegisterNativeAllocation to trigger GC
         RegisterNativeAllocation();
     } catch(e) {
-        arktest.assertTrue(false, "Unexpected exception");
+        arktest.assertTrue(false, "Unexpected error");
     }
 
     arktest.assertTrue(weak_ref_string.deref() === undefined, "String referent must be collected after GC was triggered");

@@ -92,9 +92,9 @@ function createWithNegativeInitialCapacity(): int {
         if (e instanceof NegativeArraySizeError) {
             return success;
         }
-        throw new Error(`Expects NegativeArraySizeError to be thrown, but actual exception: '${e}'`);
+        throw new Error(`Expects NegativeArraySizeError to be thrown, but actual error: '${e}'`);
     }
-    throw new Error("Expects NegativeArraySizeError to be thrown, but no exception in actual.");
+    throw new Error("Expects NegativeArraySizeError to be thrown, but no error in actual.");
 }
 
 function createWithGivenZeroSize(): int {
@@ -263,7 +263,7 @@ function check(fn: () => int, message: String): int {
     // try {
         result = fn();
     // } catch(e) {
-    //     console.println("FAILED: " + message + " => Exception catched: " + e);
+    //     console.println("FAILED: " + message + " => Error catched: " + e);
     //     return fail;
     // }
     if (result == success) {

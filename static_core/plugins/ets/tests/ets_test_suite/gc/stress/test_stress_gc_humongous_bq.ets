@@ -48,7 +48,7 @@ class TestHumongousStress {
                 GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
             }
             catch (e) {
-                arktest.assertTrue( false, "Unexpected exception during GC");
+                arktest.assertTrue( false, "Unexpected error during GC");
             }
         }
         catch(e) {
@@ -109,7 +109,7 @@ class TestHumongousStress {
             GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
         }
         catch (e) {
-            arktest.assertTrue( false, "Unexpected exception during GC");
+            arktest.assertTrue( false, "Unexpected error during GC");
         }
     }
 }

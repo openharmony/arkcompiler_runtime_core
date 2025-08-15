@@ -14,12 +14,12 @@
  */
 
 /*---
-desc: Rethrowing function declaration with exception parameter.
+desc: Rethrowing function declaration with error parameter.
 assert: When calling a rethrowing function R its argument can be both throwing and non-throwing function. 
 tags: [compile-only]
 ---*/
 
-class TestException extends Exception {}
+class TestError extends Error {}
 type func = () => void;
 
 function foo(bar: func throws): void rethrows {

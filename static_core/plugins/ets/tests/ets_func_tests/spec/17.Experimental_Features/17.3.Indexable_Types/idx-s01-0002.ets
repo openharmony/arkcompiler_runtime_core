@@ -40,7 +40,7 @@ class Bar {
           case 2:
             return this.data3;
           default:
-            throw new Exception ("Hmm ...");
+            throw new Error("Hmm ...");
         }
     }
 
@@ -56,7 +56,7 @@ class Bar {
             this.data3 = value;
             break;
           default:
-            throw new Exception ("Hmm ...");
+            throw new Error("Hmm ...");
         }
     }
 

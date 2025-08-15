@@ -20,7 +20,7 @@ const success = 0
 const fail = 1
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("LRUCache API Exception tests")
+    const suite = new arktest.ArkTestsuite("LRUCache API Error tests")
 
     suite.addTest("LRUCache Constructor Long", testLRUCacheConstructor_Long);
     suite.addTest("LRUCache Constructor Decimal", testLRUCacheConstructor_Decimal);
@@ -44,7 +44,7 @@ function testLRUCacheUpdateGetCapacity_Long() {
         arktest.assertEQ(err.message, "Parameter error. The type of 2147483648 must be small integer")
         return
     }
-    arktest.assertTrue(false, "LRUCache should throw an exception when capacity is not int");
+    arktest.assertTrue(false, "LRUCache should throw an error when capacity is not int");
 }
 
 function testLRUCacheUpdateGetCapacity_Decimal() {
@@ -55,7 +55,7 @@ function testLRUCacheUpdateGetCapacity_Decimal() {
         arktest.assertEQ(err.message, "Parameter error. The type of 2.5 must be small integer")
         return
     }
-    arktest.assertTrue(false, "LRUCache should throw an exception when capacity is not int");
+    arktest.assertTrue(false, "LRUCache should throw an error when capacity is not int");
 }
 
 function testLRUCacheUpdateGetCapacity_Zero() {
@@ -66,7 +66,7 @@ function testLRUCacheUpdateGetCapacity_Zero() {
         arktest.assertEQ(err.message, "Parameter error. The type of 0 must be small integer")
         return
     }
-    arktest.assertTrue(false, "LRUCache should throw an exception when capacity is not int");
+    arktest.assertTrue(false, "LRUCache should throw an error when capacity is not int");
 }
 
 function testLRUCacheUpdateGetCapacity_Negative() {
@@ -77,7 +77,7 @@ function testLRUCacheUpdateGetCapacity_Negative() {
         arktest.assertEQ(err.message, "Parameter error. The type of -1 must be small integer")
         return
     }
-    arktest.assertTrue(false, "LRUCache should throw an exception when capacity is negative");
+    arktest.assertTrue(false, "LRUCache should throw an error when capacity is negative");
 }
 
 function testLRUCacheConstructor_Long() {
@@ -87,7 +87,7 @@ function testLRUCacheConstructor_Long() {
         arktest.assertEQ(err.message, "Parameter error. The type of 2147483648 must be small integer")
         return
     }
-    arktest.assertTrue(false, "LRUCache should throw an exception when capacity is not int");
+    arktest.assertTrue(false, "LRUCache should throw an error when capacity is not int");
 }
 
 function testLRUCacheConstructor_Decimal() {
@@ -97,7 +97,7 @@ function testLRUCacheConstructor_Decimal() {
         arktest.assertEQ(err.message, "Parameter error. The type of 0.1 must be small integer")
         return
     }
-    arktest.assertTrue(false, "LRUCache should throw an exception when capacity is not int");
+    arktest.assertTrue(false, "LRUCache should throw an error when capacity is not int");
 }
 
 function testLRUCacheConstructor_Zero() {
@@ -116,7 +116,7 @@ function testLRUCacheConstructor_Negative() {
         arktest.assertEQ(err.message, "Parameter error. The type of -1 must be small integer")
         return
     }
-    arktest.assertTrue(false, "LRUCache should throw an exception when capacity is negative");
+    arktest.assertTrue(false, "LRUCache should throw an error when capacity is negative");
 }
 
 function testLRUCacheConstructor_NumberMin() {
@@ -126,7 +126,7 @@ function testLRUCacheConstructor_NumberMin() {
         arktest.assertEQ(err.message, "Parameter error. The type of 5e-324 must be small integer")
         return
     }
-    arktest.assertTrue(false, "LRUCache should throw an exception when capacity is not int");
+    arktest.assertTrue(false, "LRUCache should throw an error when capacity is not int");
 }
 
 function testLRUCacheUpdateGetCapacity_NumberMin() {
@@ -137,5 +137,5 @@ function testLRUCacheUpdateGetCapacity_NumberMin() {
         arktest.assertEQ(err.message, "Parameter error. The type of 5e-324 must be small integer")
         return
     }
-    arktest.assertTrue(false, "LRUCache should throw an exception when capacity is not int");
+    arktest.assertTrue(false, "LRUCache should throw an error when capacity is not int");
 }
