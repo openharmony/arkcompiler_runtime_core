@@ -25,9 +25,6 @@ ObjectHeader *ETSAnyLdbyname(ManagedThread *thread, ObjectHeader *thisObj, panda
     auto ldObj =
         ets::EtsLdbyname(ets::EtsCoroutine::CastFromThread(thread), ets::EtsObject::FromCoreType(thisObj), name)
             ->GetCoreType();
-    if (ldObj == nullptr) {
-        interpreter::RuntimeInterface::ThrowNullPointerException();
-    }
     return ldObj;
 }
 
@@ -43,9 +40,6 @@ ObjectHeader *ETSAnyLdbyidx(ManagedThread *thread, ObjectHeader *thisObj, double
     auto idx = static_cast<uint32_t>(key);
     auto ldObj = ets::EtsLdbyidx(ets::EtsCoroutine::CastFromThread(thread), ets::EtsObject::FromCoreType(thisObj), idx)
                      ->GetCoreType();
-    if (ldObj == nullptr) {
-        interpreter::RuntimeInterface::ThrowNullPointerException();
-    }
     return ldObj;
 }
 
@@ -62,9 +56,6 @@ ObjectHeader *ETSAnyLdbyval(ManagedThread *thread, ObjectHeader *thisObj, Object
     auto ldObj = ets::EtsLdbyval(ets::EtsCoroutine::CastFromThread(thread), ets::EtsObject::FromCoreType(thisObj),
                                  ets::EtsObject::FromCoreType(key))
                      ->GetCoreType();
-    if (ldObj == nullptr) {
-        interpreter::RuntimeInterface::ThrowNullPointerException();
-    }
     return ldObj;
 }
 
