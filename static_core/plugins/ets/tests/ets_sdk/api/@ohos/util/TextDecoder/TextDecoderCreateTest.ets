@@ -15,14 +15,9 @@
 
 import {util} from "@ohos.util";
 
-function NumberEqual(resStr:number, expect:number)
-{
-    return resStr === expect;
-}
-
 function main() {
     const suite = new arktest.ArkTestsuite("TextDecoder API tests");
-    
+
     suite.addTest("test_utf8_hello", test_utf8_hello);
     suite.addTest("test_utf8_hello_prefix", test_utf8_hello_prefix);
     suite.addTest("test_utf8_hello_ignoreBOM", test_utf8_hello_ignoreBOM);
@@ -35,11 +30,12 @@ function main() {
     suite.addTest("test_utf8_ignoreBOM", test_utf8_ignoreBOM);
     suite.addTest("test_utf16be_encoding", test_utf16be_encoding);
     suite.addTest("test_utf16le_ignoreBOM", test_utf16le_ignoreBOM);
+    suite.addTest("test_create_with_encoding", test_create_with_encoding)
+
     return suite.run()
 }
 
-function test_utf8_hello_ignoreBOM_prefix()
-{
+function test_utf8_hello_ignoreBOM_prefix() {
     let textDecoder = util.TextDecoder.create('utf-8', {ignoreBOM:true});
     let uint8 = new Uint8Array([0xEF,0xBB,0xBF,228,189,160,0,0,229,165,189,0]);
     let resStr = textDecoder.decodeToString(uint8);
@@ -47,8 +43,7 @@ function test_utf8_hello_ignoreBOM_prefix()
     arktest.assertEQ(resStr, expect);
 }
 
-function test_utf8_hello_prefix()
-{
+function test_utf8_hello_prefix() {
     let textDecoder = util.TextDecoder.create('utf-8', {ignoreBOM:false});
     let uint8 = new Uint8Array([0xEF,0xBB,0xBF,228,189,160,0,0,229,165,189,0]);
     let resStr = textDecoder.decodeToString(uint8);
@@ -57,8 +52,7 @@ function test_utf8_hello_prefix()
     arktest.assertEQ(resStr.length, 6);
 }
 
-function test_utf8_hello()
-{
+function test_utf8_hello() {
     let textDecoder = util.TextDecoder.create('utf-8', {ignoreBOM:false});
     let uint8 = new Uint8Array([228,189,160,0,0,229,165,189,0]);
     let resStr = textDecoder.decodeToString(uint8);
@@ -67,8 +61,7 @@ function test_utf8_hello()
     arktest.assertEQ(resStr.length, 5);
 }
 
-function test_utf8_hello_ignoreBOM()
-{
+function test_utf8_hello_ignoreBOM() {
     let textDecoder = util.TextDecoder.create('utf-8', {ignoreBOM:true});
     let uint8 = new Uint8Array([228,189,160,0,0,229,165,189,0]);
     let resStr = textDecoder.decodeToString(uint8);
@@ -77,8 +70,7 @@ function test_utf8_hello_ignoreBOM()
     arktest.assertEQ(resStr.length, 5);
 }
 
-function test_utf8_hello_strip()
-{
+function test_utf8_hello_strip() {
     let textDecoder = util.TextDecoder.create('utf-8', {ignoreBOM:false});
     let uint8 = new Uint8Array([228,189,160,229]);
     let retStr = textDecoder.decodeToString(uint8, {stream: true});
@@ -90,17 +82,15 @@ function test_utf8_hello_strip()
     arktest.assertEQ(resStr, expe);
 }
 
-function test_utf8_empty()
-{
+function test_utf8_empty() {
     let textDecoder = util.TextDecoder.create('utf-8', {ignoreBOM:false});
     let uint8 = new Uint8Array();
     let resStr = textDecoder.decodeToString(uint8);
-    let expect = ''; 
+    let expect = '';
     arktest.assertEQ(resStr, expect);
 }
 
-function test_decodeToString_empty_para()
-{
+function test_decodeToString_empty_para() {
     let textDecode = util.TextDecoder.create('utf-8');
     let uint8 = new Uint8Array([0xE4, 0xBD, 0xA0]);
     let resStr = textDecode.decodeToString(uint8, {});
@@ -108,8 +98,7 @@ function test_decodeToString_empty_para()
     arktest.assertEQ(resStr, expect);
 }
 
-function test_utf8_encoding()
-{
+function test_utf8_encoding() {
     let textDecoderOptions : util.TextDecoderOptions = {
         fatal: false,
         ignoreBOM : true
@@ -119,8 +108,7 @@ function test_utf8_encoding()
     arktest.assertEQ(retStr, 'utf-8');
 }
 
-function test_utf8_options()
-{
+function test_utf8_options() {
     let textDecoderOptions : util.TextDecoderOptions = {
         fatal: false,
         ignoreBOM : false
@@ -130,8 +118,7 @@ function test_utf8_options()
     arktest.assertEQ(encodingStr, 'utf-8');
 }
 
-function test_utf8_ignoreBOM()
-{
+function test_utf8_ignoreBOM() {
     let textDecoderOptions : util.TextDecoderOptions = {
         fatal: false,
         ignoreBOM : true
@@ -141,8 +128,7 @@ function test_utf8_ignoreBOM()
     arktest.assertEQ(encodingStr, 'utf-8');
 }
 
-function test_utf16be_encoding()
-{
+function test_utf16be_encoding() {
     let textDecoderOptions : util.TextDecoderOptions = {
         fatal: false,
         ignoreBOM : false
@@ -152,8 +138,7 @@ function test_utf16be_encoding()
     arktest.assertEQ(encodingStr, 'utf-16be');
 }
 
-function test_utf16le_ignoreBOM()
-{
+function test_utf16le_ignoreBOM() {
     let textDecoderOptions : util.TextDecoderOptions = {
         fatal: false,
         ignoreBOM : false
@@ -176,4 +161,57 @@ function test_utf16le_ignoreBOM()
     let rel = 'abc';
     let re = BOM + rel;
     arktest.assertEQ(retStr, re);
+}
+
+function test_create_with_encoding() {
+    {
+        let that = util.TextDecoder.create('utf-8', { ignoreBOM : true });
+        let retStr = that.encoding;
+        arktest.assertEQ(retStr, 'utf-8');
+    }
+    {
+        let that = util.TextDecoder.create('utf-16le')
+        let encodingStr = that.encoding
+        arktest.assertEQ(encodingStr, 'utf-16le')
+    }
+    {
+        let that = util.TextDecoder.create('utf-16be')
+        let encodingStr = that.encoding
+        arktest.assertEQ(encodingStr, 'utf-16be')
+    }
+    {
+        let that = util.TextDecoder.create('utf-16be', { ignoreBOM : true })
+        let encodingStr = that.encoding
+        arktest.assertEQ(encodingStr, 'utf-16be')
+    }
+    {
+        let that = util.TextDecoder.create('utf-16be', { ignoreBOM : false })
+        let encodingStr = that.encoding
+        arktest.assertEQ(encodingStr, 'utf-16be')
+    }
+    {
+        let that = util.TextDecoder.create()
+        let encodingStr = that.encoding
+        arktest.assertEQ(encodingStr, 'utf-8')
+    }
+    {
+        let that = util.TextDecoder.create(undefined, { ignoreBOM : false })
+        let encodingStr = that.encoding
+        arktest.assertEQ(encodingStr, 'utf-8')
+    }
+    {
+        let that = util.TextDecoder.create(undefined);
+        let encodingStr = that.encoding;
+        arktest.assertEQ(encodingStr, 'utf-8');
+    }
+    {
+        let that = util.TextDecoder.create('utf-8', undefined);
+        let encodingStr = that.encoding;
+        arktest.assertEQ(encodingStr, 'utf-8');
+    }
+    {
+        let that = util.TextDecoder.create(undefined, { ignoreBOM : true });
+        let encodingStr = that.encoding;
+        arktest.assertEQ(encodingStr, 'utf-8');
+    }
 }

@@ -711,21 +711,6 @@ export namespace util {
         private native decode(input: Uint8Array, decodeWithStream: boolean): string;
         private static native nativeDestroy(ptr: long): void;
     }
-
-    export interface EncodeIntoUint8ArrayInfo {
-        read: int;
-        written: int;
-    }
-
-    class EncodeIntoUint8ArrayInfoInner implements EncodeIntoUint8ArrayInfo {
-        read: int;
-        written: int;
-        constructor(outRead: int, outWritten: int) {
-            this.read = outRead;
-            this.written = outWritten;
-        }
-    }
-
     export class RationalNumber {
         private mnum: number = 0;
         private mden: number = 0;
@@ -961,6 +946,11 @@ export namespace util {
         }
     }
 
+    export interface EncodeIntoUint8ArrayInfo {
+        read: int;
+        written: int;
+    }
+
     export class TextEncoder {
 
         static { loadLibrary("ets_sdk_native") }
@@ -974,8 +964,7 @@ export namespace util {
                 return;
             }
             let tempString: string = encoding.toLowerCase();
-            let flag: boolean = TextEncoder.checkEncodingFormat(tempString);
-            if (!flag) {
+            if (!(TextEncoder.KNOWN_ENCODINGS.has(tempString))) {
                 throw createBusinessError(TypeErrorCodeId, `Wrong encoding format, the current '${encoding}' format is not support.`)
             }
             this.encoding_ = encoding;
@@ -991,43 +980,38 @@ export namespace util {
             if (!input) {
                 return new Uint8Array(0);
             }
-            return TextEncoder.doEncodeInto(input, this.encoding_);
+            return new Uint8Array(TextEncoder.doEncodeInto(input, this.encoding_));
         }
 
         encodeIntoUint8Array(input: string, dest: Uint8Array): EncodeIntoUint8ArrayInfo
         {
-            return TextEncoder.doEncodeInfoUint8Array(input, this.encoding_, dest);
+            let res: Array<int> = TextEncoder.doEncodeInfoUint8Array(input, this.encoding_, dest);
+            let result: EncodeIntoUint8ArrayInfo = {read: 0, written: 0};
+            result.read = res[0];
+            result.written = res[1];
+            return result;
         }
 
         get encoding(): string {
             return this.encoding_;
         }
 
-        private static checkEncodingFormat(encoding: string): boolean
-        {
-            const knownEncodings: string[] = [
-                "utf-8", "utf-16be", "utf-16le", "gbk", "gb2312", "gb18030", "ibm866",
-                "iso-8859-1", "iso-8859-2", "iso-8859-3", "iso-8859-4", "iso-8859-5", "iso-8859-6",
-                "iso-8859-7", "iso-8859-8", "iso-8859-8-i", "iso-8859-10", "iso-8859-13",
-                "iso-8859-14", "iso-8859-15", "koi8-r", "koi8-u", "macintosh",
-                "windows-874", "windows-1250", "windows-1251", "windows-1252",
-                "windows-1253", "windows-1254", "windows-1255", "windows-1256",
-                "windows-1257", "windows-1258", "big5", "euc-jp", "iso-2022-jp",
-                "shift_jis", "euc-kr", "x-mac-cyrillic"
-            ];
-            for (const enc of knownEncodings) {
-                if (enc == encoding) {
-                    return true;
-                }
-            }
-            return false;
-        }
+        private static readonly KNOWN_ENCODINGS: Set<string> = new Set<string>([
+            "utf-8", "utf-16be", "utf-16le", "gbk", "gb2312", "gb18030", "ibm866",
+            "iso-8859-1", "iso-8859-2", "iso-8859-3", "iso-8859-4", "iso-8859-5", "iso-8859-6",
+            "iso-8859-7", "iso-8859-8", "iso-8859-8-i", "iso-8859-10", "iso-8859-13",
+            "iso-8859-14", "iso-8859-15", "koi8-r", "koi8-u", "macintosh",
+            "windows-874", "windows-1250", "windows-1251", "windows-1252",
+            "windows-1253", "windows-1254", "windows-1255", "windows-1256",
+            "windows-1257", "windows-1258", "big5", "euc-jp", "iso-2022-jp",
+            "shift_jis", "euc-kr", "x-mac-cyrillic"
+        ]);
 
         private static native doEncodeInto(
-            input: string, inputEncoding: string): Uint8Array;
+            input: string, inputEncoding: string): ArrayBuffer;
 
         private static native doEncodeInfoUint8Array(
-            input: string, inputEncoding: string, destArray: Uint8Array): EncodeIntoUint8ArrayInfo;
+            input: string, inputEncoding: string, destArray: Uint8Array): Array<int>;
     }
 
     export class StringDecoder {

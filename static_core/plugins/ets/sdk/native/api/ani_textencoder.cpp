@@ -184,15 +184,14 @@ ani_arraybuffer OtherEncodeToBuffer(ani_env *env, ani_string inputStringObj, con
     return buffer;
 }
 
-ani_object OtherEncodeToUint8Array(ani_env *env, ani_string inputStringObj, const UConverterWrapper &cvt)
+ani_arraybuffer OtherEncodeToUint8Array(ani_env *env, ani_string inputStringObj, const UConverterWrapper &cvt)
 {
     WriteEncodedDataResult writeRes {};
     ani_arraybuffer buffer = OtherEncodeToBuffer(env, inputStringObj, cvt, &writeRes);
     if (buffer == nullptr) {
         return nullptr;
     }
-    return NewUint8Array(env, "Lescompat/Buffer;II:V", buffer, ani_int {0},
-                         static_cast<ani_int>(writeRes.resultSizeBytes));
+    return buffer;
 }
 
 std::optional<WriteEncodedDataResult> WriteEncodedData(ani_env *env, ani_string inputStringObj,
@@ -248,22 +247,25 @@ std::optional<WriteEncodedDataResult> WriteEncodedData(ani_env *env, ani_string 
     return OtherEncode(env, inputStringObj, cvt, dest, destSizeBytes);
 }
 
-ani_object DoEncodeInto(ani_env *env, [[maybe_unused]] ani_object object, ani_string stringObj, ani_string aniEncoding)
+ani_arraybuffer DoEncodeInto(ani_env *env, [[maybe_unused]] ani_object object, ani_string stringObj,
+                             ani_string aniEncoding)
 {
+    ani_arraybuffer arrayBuffer = nullptr;
+    void *rawData = nullptr;
     std::string encodingStr = stdlib::ConvertFromAniString(env, aniEncoding);
     if (encodingStr == "utf-8") {
         std::string inputString = stdlib::ConvertFromAniString(env, stringObj);
-        std::optional<Uint8ArrayWithBufferInfo> arrInfo =
-            NewUint8ArrayWithBufferInfo(env, "I:V", static_cast<ani_int>(inputString.length()));
-        if (!arrInfo) {
+        if (ANI_OK != env->CreateArrayBuffer(inputString.length(), &rawData, &arrayBuffer)) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+            LOG_ERROR_SDK("TextEncoder:: CreateArrayBuffer failed.");
             return nullptr;
         }
-        if (EOK != memcpy_s(arrInfo->bufferData, arrInfo->bufferLength, inputString.data(), inputString.length())) {
+        if (EOK != memcpy_s(rawData, inputString.length(), inputString.data(), inputString.length())) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             LOG_ERROR_SDK("TextEncoder:: Failure during memcpy_s.");
             return nullptr;
         }
-        return arrInfo->arrayObject;
+        return arrayBuffer;
     }
     if (encodingStr == "utf-16le" || encodingStr == "utf-16be") {
         std::string inputString = stdlib::ConvertFromAniString(env, stringObj);
@@ -278,28 +280,27 @@ ani_object DoEncodeInto(ani_env *env, [[maybe_unused]] ani_object object, ani_st
             utf16Str = ani_helper::Utf16LEToBE(utf16Str);
         }
         size_t sizeBytes = utf16Str.length() * 2;  // 2 : 2 bytes per UTF-16 character
-        std::optional<Uint8ArrayWithBufferInfo> arrInfo =
-            NewUint8ArrayWithBufferInfo(env, "I:V", static_cast<ani_int>(sizeBytes));
-        if (!arrInfo) {
+        if (ANI_OK != env->CreateArrayBuffer(sizeBytes, &rawData, &arrayBuffer)) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+            LOG_ERROR_SDK("TextEncoder:: CreateArrayBuffer failed.");
             return nullptr;
         }
-        if (EOK != memcpy_s(arrInfo->bufferData, arrInfo->bufferLength, utf16Str.data(), sizeBytes)) {
+        if (EOK != memcpy_s(rawData, sizeBytes, utf16Str.data(), sizeBytes)) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             LOG_ERROR_SDK("TextEncoder:: Failure during memcpy_s.");
             return nullptr;
         }
-        return arrInfo->arrayObject;
+        return arrayBuffer;
     }
     UConverterWrapper cvt(encodingStr.c_str());
     if (!cvt.IsValid()) {
         return nullptr;
     }
-    ani_object res = OtherEncodeToUint8Array(env, stringObj, cvt);
-    return res;
+    return OtherEncodeToUint8Array(env, stringObj, cvt);
 }
 
-ani_object DoEncodeIntoUint8Array(ani_env *env, [[maybe_unused]] ani_object object, ani_string inputStringObj,
-                                  ani_string encodingObj, ani_object destObj)
+ani_array_int DoEncodeIntoUint8Array(ani_env *env, [[maybe_unused]] ani_object object, ani_string inputStringObj,
+                                     ani_string encodingObj, ani_object destObj)
 {
     std::string encoding = stdlib::ConvertFromAniString(env, encodingObj);
     ani_int byteLength;
@@ -322,28 +323,21 @@ ani_object DoEncodeIntoUint8Array(ani_env *env, [[maybe_unused]] ani_object obje
     if (!writeRes) {
         return nullptr;
     }
-
-    ani_class resultClass;
-    const char *resultClassName = "L@ohos/util/util/EncodeIntoUint8ArrayInfoInner;";
-    if (ANI_OK != env->FindClass(resultClassName, &resultClass)) {
+    ani_array_int pathsArray;
+    if (ANI_OK != env->Array_New_Int(2U, &pathsArray)) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("TextEncoder:: Failed to get class %{public}s", resultClassName);
+        LOG_ERROR_SDK("TextEncoder:: CreateArray failed.");
         return nullptr;
     }
-    ani_method resultCtor;
-    if (ANI_OK != env->Class_FindMethod(resultClass, "<ctor>", "II:V", &resultCtor)) {
+    const ani_size offset = 0;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+    ani_int nativeParams[] = {static_cast<ani_int>(writeRes->nInputCharsConsumed),
+                              static_cast<ani_int>(writeRes->resultSizeBytes)};
+    if (ANI_OK != env->Array_SetRegion_Int(pathsArray, offset, 2U, nativeParams)) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("TextEncoder:: Failed to get constructor of class %{public}s", resultClassName);
+        LOG_ERROR_SDK("TextEncoder:: SetArray failed.");
         return nullptr;
     }
-    ani_object res;
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    if (ANI_OK != env->Object_New(resultClass, resultCtor, &res, static_cast<ani_int>(writeRes->nInputCharsConsumed),
-                                  static_cast<ani_int>(writeRes->resultSizeBytes))) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("TextEncoder:: Failed to construct object of class %{public}s", resultClassName);
-        return nullptr;
-    }
-    return res;
+    return pathsArray;
 }
 }  // namespace ark::ets::sdk::util
