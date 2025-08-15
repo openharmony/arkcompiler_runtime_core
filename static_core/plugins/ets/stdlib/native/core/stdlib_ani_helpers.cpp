@@ -108,7 +108,7 @@ ANI_EXPORT std::string StatusToString(ani_status status)
 
 ANI_EXPORT ani_string CreateUtf8String(ani_env *env, const char *data, ani_size size)
 {
-    ani_string result;
+    ani_string result {};
 
     auto status = env->String_NewUTF8(data, size, &result);
     if (status != ANI_OK) {

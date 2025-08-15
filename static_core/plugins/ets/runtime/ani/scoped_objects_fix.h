@@ -31,7 +31,6 @@ namespace ark::ets::ani {
 
 class ManagedCodeAccessor {
     // We use 'long' type for the magic number to support both 32-bit and 64-bit architectures at the same time.
-    static constexpr long REF_UNDEFINED_VALUE = -1UL;   // NOLINT(google-runtime-int)
     static constexpr long WREF_UNDEFINED_VALUE = -2UL;  // NOLINT(google-runtime-int)
 
 public:
@@ -50,22 +49,12 @@ public:
 
     static bool IsUndefined(ani_ref ref)
     {
-        return ref == ToNativePtr<__ani_ref>(REF_UNDEFINED_VALUE);
+        return EtsReference::IsUndefined(reinterpret_cast<EtsReference *>(ref));
     }
 
     static bool IsUndefined(ani_wref ref)
     {
         return ref == ToNativePtr<__ani_wref>(WREF_UNDEFINED_VALUE);
-    }
-
-    static bool IsUndefined(EtsObject *object)
-    {
-        return object == nullptr;
-    }
-
-    static EtsObject *GetUndefinedObject()
-    {
-        return nullptr;
     }
 
     static ani_status GetUndefinedWRef(ani_wref *result)
@@ -76,7 +65,7 @@ public:
 
     static ani_status GetUndefinedRef(ani_ref *result)
     {
-        *result = ToNativePtr<__ani_ref>(REF_UNDEFINED_VALUE);
+        *result = reinterpret_cast<ani_ref>(EtsReference::GetUndefined());
         return ANI_OK;
     }
 
@@ -124,7 +113,7 @@ public:
     EtsObject *ToInternalType(ani_ref ref)
     {
         if (IsUndefined(ref)) {
-            return GetUndefinedObject();
+            return EtsReferenceStorage::GetUndefinedEtsObject();
         }
         return GetInternalType(ref);
     }
@@ -168,7 +157,8 @@ public:
     EtsPromise *ToInternalType(ani_resolver resolver)
     {
         auto resolverRef = reinterpret_cast<ani_ref>(resolver);
-        EtsObject *obj = IsUndefined(resolverRef) ? GetUndefinedObject() : GetInternalType(resolverRef);
+        EtsObject *obj =
+            IsUndefined(resolverRef) ? EtsReferenceStorage::GetUndefinedEtsObject() : GetInternalType(resolverRef);
         return reinterpret_cast<EtsPromise *>(obj);
     }
 
@@ -238,7 +228,7 @@ public:
 
     ani_status AddGlobalRef(EtsObject *obj, ani_ref *result)
     {
-        if (IsUndefined(obj)) {
+        if (EtsReferenceStorage::IsUndefinedEtsObject(obj)) {
             return GetUndefinedRef(result);
         }
         EtsReference *gref = GetRefStorage()->NewEtsRef(obj, EtsReference::EtsObjectType::GLOBAL);
@@ -249,7 +239,7 @@ public:
 
     ani_status AddLocalRef(EtsObject *obj, ani_ref *result)
     {
-        if (IsUndefined(obj)) {
+        if (EtsReferenceStorage::IsUndefinedEtsObject(obj)) {
             return GetUndefinedRef(result);
         }
         EtsReference *etsRef = GetRefStorage()->NewEtsRef(obj, EtsReference::EtsObjectType::LOCAL);
@@ -294,7 +284,7 @@ public:
 
     ani_status DestroyLocalScope()
     {
-        GetRefStorage()->PopLocalEtsFrame(nullptr);
+        GetRefStorage()->PopLocalEtsFrame(EtsReference::GetUndefined());
         return ANI_OK;
     }
 
@@ -312,7 +302,7 @@ public:
     ani_status DestroyEscapeLocalScope(ani_ref ref, ani_ref *result)
     {
         if (IsUndefined(ref)) {
-            GetRefStorage()->PopLocalEtsFrame(nullptr);
+            GetRefStorage()->PopLocalEtsFrame(EtsReference::GetUndefined());
             return GetUndefinedRef(result);
         }
         EtsReference *resultEtsRef = AniRefToEtsRef(ref);

@@ -31,11 +31,18 @@
 
 namespace ark::ets::stdlib::intl {
 
+static bool IsUndefined(ani_env *env, ani_ref ref)
+{
+    ani_boolean isUndefined = ANI_FALSE;
+    [[maybe_unused]] auto status = env->Reference_IsUndefined(ref, &isUndefined);
+    ASSERT(status == ANI_OK);
+    return isUndefined == ANI_TRUE;
+}
+
 static std::string CallOptionGetter(ani_env *env, ani_object options, const char *getterName)
 {
     ani_class optionsClass = nullptr;
-    if (env->FindClass("std.core.Intl.RelativeTimeFormatOptionsImpl", &optionsClass) != ANI_OK ||
-        optionsClass == nullptr) {
+    if (env->FindClass("std.core.Intl.RelativeTimeFormatOptionsImpl", &optionsClass) != ANI_OK) {
         return "";
     }
 
@@ -46,7 +53,7 @@ static std::string CallOptionGetter(ani_env *env, ani_object options, const char
 
     ani_ref resultRef = nullptr;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    if (env->Object_CallMethod_Ref(options, getter, &resultRef) != ANI_OK || resultRef == nullptr) {
+    if (env->Object_CallMethod_Ref(options, getter, &resultRef) != ANI_OK || IsUndefined(env, resultRef)) {
         return "";
     }
 
@@ -114,7 +121,7 @@ static std::unique_ptr<icu::Locale> ToIcuLocale(ani_env *env, ani_object self)
 {
     ani_ref localeRef = nullptr;
     ani_status aniStatus = env->Object_GetFieldByName_Ref(self, "locale", &localeRef);
-    if (aniStatus != ANI_OK || localeRef == nullptr) {
+    if (aniStatus != ANI_OK || IsUndefined(env, localeRef)) {
         return std::make_unique<icu::Locale>(icu::Locale::getDefault());
     }
 
