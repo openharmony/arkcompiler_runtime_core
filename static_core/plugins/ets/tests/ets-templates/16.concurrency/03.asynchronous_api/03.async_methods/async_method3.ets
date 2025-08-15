@@ -16,7 +16,6 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous method.
       The asynchronous method returns a void.
-tags: [compile-only, negative]
 ---*/
 
 class MethodReturnVoid {

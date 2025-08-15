@@ -162,7 +162,7 @@ export class RegExpResultArray /*extends Array<String>*/ {
      * @param val
      */
     public $_set(index: number, val: String) {
-        this.$_set(index.toInt(), val);
+        return this.$_set(index.toInt(), val);
     }
 
     get length(): int {
