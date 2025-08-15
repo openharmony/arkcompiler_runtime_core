@@ -691,7 +691,7 @@ cases:
           }
       use: |-
           // new expression in expression
-          arktest.assertEQ(foo(...new number[256]), 0)
+          arktest.assertEQ(foo(...new FixedArray<number>(256)), 0)
 
     - decl: |-
           function foo(...p: FixedArray<double>): double {

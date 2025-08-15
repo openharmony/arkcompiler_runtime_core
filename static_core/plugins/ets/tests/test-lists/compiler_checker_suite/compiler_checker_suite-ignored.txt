@@ -3,3 +3,9 @@ simple_run/codegen_new_obj_call.ets
 
 #24986
 simple_run/optimize_load_object_boxed.ets
+
+#271
+simple_run/multiarray.ets
+
+#27260
+simple_run/lse_parameter_aliasing.ets

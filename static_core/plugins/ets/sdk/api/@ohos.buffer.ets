@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -230,7 +230,7 @@ export default namespace buffer {
      * @returns {Buffer} A new allocated Buffer containing the array data
      */
     export function from(array: double[]): Buffer {
-        let arr: FixedArray<byte> = new Byte[array.length]
+        let arr: FixedArray<byte> = new FixedArray<byte>(array.length)
         for (let i = 0; i < array.length; ++i) {
             arr[i] = array[i].toByte()
         }

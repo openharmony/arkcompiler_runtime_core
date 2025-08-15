@@ -62,7 +62,7 @@ export class ArrayBuffer
             }
         }
         this.isResizable = (maxByteLength != undefined)
-        this.data = new byte[this.isResizable ? maxByteLength! : length]
+        this.data = new FixedArray<byte>(this.isResizable ? maxByteLength! : length)
         this._byteLength = length
         this.dataAddress = 0 // not needed in managed code
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,7 +71,7 @@ class TestBailout {
 
     static mayAlias_ref(): int {
         let src: FixedArray<string> = ["6", "7", "8"];
-        let dst: FixedArray<object> = new object[3];
+        let dst: FixedArray<object> = new FixedArray<object>(3);
         return check(TestBailout.__noinline__mayAlias_ref(src, dst), ["6", "7", "8"]);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -113,7 +113,7 @@ function main(): int {
         // =============== Test 4 ===============
         // An element of array may be changed after StringBuilder is constructed from the array.
         // So StringBuilder must add a copy of the array to the buffer.
-        let arr4: FixedArray<char> = new char[3];
+        let arr4: FixedArray<char> = new FixedArray<char>(3)
         arr4[0] = c'a';
         arr4[1] = c'b';
         arr4[2] = c'c';

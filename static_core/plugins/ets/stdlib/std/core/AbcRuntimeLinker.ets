@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@ export class AbcRuntimeLinker extends RuntimeLinker {
     public constructor(parentLinker: RuntimeLinker | undefined, paths: string[]) {
         super()
         this.parentLinker = parentLinker ?? getBootRuntimeLinker()
-        this.abcFiles = new (AbcFile | undefined)[paths.length]
+        this.abcFiles = new FixedArray<AbcFile | undefined>(paths.length)
         this.sharedLibraryLoaders = []
         for (let i = 0; i < paths.length; i++) {
             this.abcFiles[i] = AbcFile.loadAbcFile(this, paths[i])
@@ -36,8 +36,8 @@ export class AbcRuntimeLinker extends RuntimeLinker {
     public constructor(parentLinker: RuntimeLinker | undefined, paths: string[], sharedLibraryLoaders: AbcRuntimeLinker[]) {
         super()
         this.parentLinker = parentLinker ?? getBootRuntimeLinker()
-        this.abcFiles = new (AbcFile | undefined)[paths.length]
-        this.sharedLibraryLoaders = new (AbcRuntimeLinker | undefined)[sharedLibraryLoaders.length]
+        this.abcFiles = new FixedArray<AbcFile | undefined>(paths.length)
+        this.sharedLibraryLoaders = new FixedArray<AbcRuntimeLinker | undefined>(sharedLibraryLoaders.length)
         for (let i = 0; i < sharedLibraryLoaders.length; i++) {
             this.sharedLibraryLoaders[i] = sharedLibraryLoaders[i]
         }
@@ -54,7 +54,7 @@ export class AbcRuntimeLinker extends RuntimeLinker {
      * @throws errors happened on loading ABC file.
      */
     public addAbcFiles(paths: string[]): void {
-        const newFiles : FixedArray<AbcFile | undefined> = new (AbcFile | undefined)[paths.length]
+        const newFiles : FixedArray<AbcFile | undefined> = new FixedArray<AbcFile | undefined>(paths.length)
         for (let i = 0; i < paths.length; i++) {
             newFiles[i] = AbcFile.loadAbcFile(this, paths[i])
         }

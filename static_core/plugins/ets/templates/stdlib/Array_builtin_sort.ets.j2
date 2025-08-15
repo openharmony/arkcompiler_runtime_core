@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,8 +48,8 @@ function insertion_sort(arr: FixedArray<{{TT}}>, startIndex: int, endIndex: int,
 function arr_perform_merge(arr: FixedArray<{{TT}}>, startIndex: int, midIndex: int, endIndex: int, comp: (lhs: {{T}}, rhs: {{T}}) => number): void {
     const len1 = midIndex - startIndex + 1;
     const len2 = endIndex - midIndex;
-    let left : FixedArray<{{TT}}> = new {{TT}}[len1];
-    let right : FixedArray<{{TT}}> = new {{TT}}[len2];
+    let left : FixedArray<{{TT}}> = new FixedArray<{{TT}}>(len1);
+    let right : FixedArray<{{TT}}> = new FixedArray<{{TT}}>(len2);
     for (let i = 0; i < len1; i++) {
         left[i] = arr[startIndex + i];
     }
@@ -134,7 +134,7 @@ function copyPart(dst: FixedArray<{{T}}>, counter: int, src: FixedArray<{{T}}>, 
 }
 
 function merge(left: FixedArray<{{T}}>, right: FixedArray<{{T}}>, cmp: (lhs: {{T}}, rhs: {{T}}) => number): FixedArray<{{T}}> {
-    const result:FixedArray<{{T}}> = new {{T}}[right.length + left.length]
+    const result:FixedArray<{{T}}> = new FixedArray<{{T}}>(right.length + left.length)
     let leftIndex = 0;
     let rightIndex = 0;
     let counter: int = 0
@@ -164,12 +164,12 @@ export function mergeSort(array: FixedArray<{{T}}>, cmp: (lhs: {{T}}, rhs: {{T}}
         return array;
     }
     const middle = Math.floor(begin + arrLength / 2).toInt()
-    const leftHalf:FixedArray<{{T}}> = new {{T}}[middle]
+    const leftHalf:FixedArray<{{T}}> = new FixedArray<{{T}}>(middle)
     let counter: int = 0
     copyPart(leftHalf, counter, array, 0, middle)
 
     counter = 0
-    const rightHalf:FixedArray<{{T}}> = new {{T}}[arrLength - middle]
+    const rightHalf:FixedArray<{{T}}> = new FixedArray<{{T}}>(arrLength - middle)
     copyPart(rightHalf, counter, array, middle)
 
     return merge(mergeSort(leftHalf, cmp), mergeSort(rightHalf, cmp), cmp);
@@ -466,7 +466,7 @@ export function sort_subarray{{Tdef}}(arr: FixedArray<{{T}}>, startIndex: int, m
 
 {%- if T == 'byte' %}
 function countSort(arr: FixedArray<byte>, startIndex: int, endIndex: int): void {
-    const cnts : FixedArray<int> = new int[256]
+    const cnts : FixedArray<int> = new FixedArray<int>(256)
     for (let i = startIndex; i < endIndex; i++) {
         cnts[arr[i] + 128]++
     }

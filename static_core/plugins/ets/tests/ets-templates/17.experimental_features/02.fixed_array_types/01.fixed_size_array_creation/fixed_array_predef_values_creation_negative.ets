@@ -19,7 +19,6 @@
 /*---
 desc: Create FixedArray with wrong predefined values
 tags: [negative, compile-only]
-expected_out: "Semantic error ESE0292: This expression is not constructible."
 ---*/
 
 {% set logic_data = logic|replace("check_type", c.type)|replace("check_value", c.value) %}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -300,7 +300,7 @@ function store_reserve39() : string {
 }
 
 function chain_reserve40() : String {
-    let chars:FixedArray<char> = new char[1]
+    let chars:FixedArray<char> = new FixedArray<char>(1)
     chars[0] = c'0'
     return new StringBuilder(chars).append(1).append(2).toString()   // applied
 }

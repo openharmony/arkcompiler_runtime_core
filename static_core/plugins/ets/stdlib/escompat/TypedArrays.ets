@@ -727,7 +727,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int8Array {
         let res = new Int8Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new int[1]
+        const idx : FixedArray<int> = new FixedArray<int>(1)
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             const mapped = mapfn(x as T, idx[0])
@@ -772,7 +772,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
 
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Int8Array(6)
-        let index : FixedArray<int> = new int[1]
+        let index : FixedArray<int> = new FixedArray<int>(1)
         index[0] = 0
 
         iteratorForEach<number>(iter, (x: number): void => {
@@ -1226,7 +1226,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         const MAX_SHORT_LENGTH = 24
 
         if (this.lengthInt > MAX_SHORT_LENGTH) {
-            let arr: FixedArray<byte> = new byte[this.lengthInt]
+            let arr: FixedArray<byte> = new FixedArray<byte>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 arr[i] = this.getUnsafe(i)
             }
@@ -1238,7 +1238,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
                 this.setUnsafe(i, arr[i])
             }
         } else {
-            let buffer: FixedArray<Byte> = new Byte[this.lengthInt]
+            let buffer: FixedArray<Byte> = new FixedArray<Byte>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 buffer[i] = this.getUnsafe(i)
             }
@@ -1409,7 +1409,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a new Int8Array with elements from current Int8Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: int, array: Int8Array) => boolean): Int8Array {
-        let markers : FixedArray<boolean> = new boolean[this.lengthInt]
+        let markers : FixedArray<boolean> = new FixedArray<boolean>(this.lengthInt)
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
             markers[i] = fn((this.getUnsafe(i)).toDouble(), i, this)
@@ -2237,7 +2237,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int16Array {
         let res = new Int16Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new int[1]
+        const idx : FixedArray<int> = new FixedArray<int>(1)
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             const mapped = mapfn(x as T, idx[0])
@@ -2282,7 +2282,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
 
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Int16Array(6)
-        let index : FixedArray<int> = new int[1]
+        let index : FixedArray<int> = new FixedArray<int>(1)
         index[0] = 0
 
         iteratorForEach<number>(iter, (x: number): void => {
@@ -2736,7 +2736,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         const MAX_SHORT_LENGTH = 24
 
         if (this.lengthInt > MAX_SHORT_LENGTH) {
-            let arr: FixedArray<short> = new short[this.lengthInt]
+            let arr: FixedArray<short> = new FixedArray<short>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 arr[i] = this.getUnsafe(i)
             }
@@ -2748,7 +2748,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
                 this.setUnsafe(i, arr[i])
             }
         } else {
-            let buffer: FixedArray<Short> = new Short[this.lengthInt]
+            let buffer: FixedArray<Short> = new FixedArray<Short>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 buffer[i] = this.getUnsafe(i)
             }
@@ -2919,7 +2919,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a new Int16Array with elements from current Int16Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: int, array: Int16Array) => boolean): Int16Array {
-        let markers : FixedArray<boolean> = new boolean[this.lengthInt]
+        let markers : FixedArray<boolean> = new FixedArray<boolean>(this.lengthInt)
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
             markers[i] = fn((this.getUnsafe(i)).toDouble(), i, this)
@@ -3724,7 +3724,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int32Array {
         let res = new Int32Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new int[1]
+        const idx : FixedArray<int> = new FixedArray<int>(1)
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             const mapped = mapfn(x as T, idx[0])
@@ -3769,7 +3769,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
 
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Int32Array(6)
-        let index : FixedArray<int> = new int[1]
+        let index : FixedArray<int> = new FixedArray<int>(1)
         index[0] = 0
 
         iteratorForEach<number>(iter, (x: number): void => {
@@ -4223,7 +4223,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         const MAX_SHORT_LENGTH = 24
 
         if (this.lengthInt > MAX_SHORT_LENGTH) {
-            let arr: FixedArray<int> = new int[this.lengthInt]
+            let arr: FixedArray<int> = new FixedArray<int>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 arr[i] = this.getUnsafe(i)
             }
@@ -4235,7 +4235,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
                 this.setUnsafe(i, arr[i])
             }
         } else {
-            let buffer: FixedArray<Int> = new Int[this.lengthInt]
+            let buffer: FixedArray<Int> = new FixedArray<Int>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 buffer[i] = this.getUnsafe(i)
             }
@@ -4406,7 +4406,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a new Int32Array with elements from current Int32Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: int, array: Int32Array) => boolean): Int32Array {
-        let markers : FixedArray<boolean> = new boolean[this.lengthInt]
+        let markers : FixedArray<boolean> = new FixedArray<boolean>(this.lengthInt)
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
             markers[i] = fn((this.getUnsafe(i)).toDouble(), i, this)
@@ -5242,7 +5242,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => BigInt): BigInt64Array {
         let res = new BigInt64Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new int[1]
+        const idx : FixedArray<int> = new FixedArray<int>(1)
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             const mapped = mapfn(x as T, idx[0])
@@ -5287,7 +5287,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
 
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new BigInt64Array(6)
-        let index : FixedArray<int> = new int[1]
+        let index : FixedArray<int> = new FixedArray<int>(1)
         index[0] = 0
 
         iteratorForEach<BigInt>(iter, (x: BigInt): void => {
@@ -5742,7 +5742,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         const MAX_SHORT_LENGTH = 24
 
         if (this.lengthInt > MAX_SHORT_LENGTH) {
-            let arr: FixedArray<long> = new long[this.lengthInt]
+            let arr: FixedArray<long> = new FixedArray<long>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 arr[i] = this.getUnsafe(i)
             }
@@ -5754,7 +5754,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
                 this.setUnsafe(i, arr[i])
             }
         } else {
-            let buffer: FixedArray<Long> = new Long[this.lengthInt]
+            let buffer: FixedArray<Long> = new FixedArray<Long>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 buffer[i] = this.getUnsafe(i)
             }
@@ -5925,7 +5925,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns a new BigInt64Array with elements from current BigInt64Array that satisfy condition fn
      */
     public filter(fn: (val: BigInt, index: int, array: BigInt64Array) => boolean): BigInt64Array {
-        let markers : FixedArray<boolean> = new boolean[this.lengthInt]
+        let markers : FixedArray<boolean> = new FixedArray<boolean>(this.lengthInt)
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
             markers[i] = fn(new BigInt(this.getUnsafe(i)), i, this)
@@ -6733,7 +6733,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Float32Array {
         let res = new Float32Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new int[1]
+        const idx : FixedArray<int> = new FixedArray<int>(1)
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             const mapped = mapfn(x as T, idx[0])
@@ -6778,7 +6778,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
 
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Float32Array(6)
-        let index : FixedArray<int> = new int[1]
+        let index : FixedArray<int> = new FixedArray<int>(1)
         index[0] = 0
 
         iteratorForEach<number>(iter, (x: number): void => {
@@ -7234,7 +7234,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         let naNCounter = 0
 
         if (this.lengthInt > MAX_SHORT_LENGTH) {
-            let arr: FixedArray<float> = new float[this.lengthInt]
+            let arr: FixedArray<float> = new FixedArray<float>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 let val = this.getUnsafe(i)
                 if (isNaN(val)) {
@@ -7254,7 +7254,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
                 this.setUnsafe(i, arr[i])
             }
         } else {
-            let buffer: FixedArray<Float> = new Float[this.lengthInt]
+            let buffer: FixedArray<Float> = new FixedArray<Float>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 let val = this.getUnsafe(i)
                 if (isNaN(val)) {
@@ -7433,7 +7433,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a new Float32Array with elements from current Float32Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: int, array: Float32Array) => boolean): Float32Array {
-        let markers : FixedArray<boolean> = new boolean[this.lengthInt]
+        let markers : FixedArray<boolean> = new FixedArray<boolean>(this.lengthInt)
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
             markers[i] = fn((this.getUnsafe(i)).toDouble(), i, this)
@@ -8164,7 +8164,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Float64Array {
         let res = new Float64Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new int[1]
+        const idx : FixedArray<int> = new FixedArray<int>(1)
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             const mapped = mapfn(x as T, idx[0])
@@ -8209,7 +8209,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
 
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Float64Array(6)
-        let index : FixedArray<int> = new int[1]
+        let index : FixedArray<int> = new FixedArray<int>(1)
         index[0] = 0
 
         iteratorForEach<number>(iter, (x: number): void => {
@@ -8624,7 +8624,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         let naNCounter = 0
 
         if (this.lengthInt > MAX_SHORT_LENGTH) {
-            let arr: FixedArray<double> = new double[this.lengthInt]
+            let arr: FixedArray<double> = new FixedArray<double>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 let val = this.getUnsafe(i)
                 if (isNaN(val)) {
@@ -8644,7 +8644,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
                 this.setUnsafe(i, arr[i])
             }
         } else {
-            let buffer: FixedArray<Double> = new Double[this.lengthInt]
+            let buffer: FixedArray<Double> = new FixedArray<Double>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 let val = this.getUnsafe(i)
                 if (isNaN(val)) {
@@ -8823,7 +8823,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a new Float64Array with elements from current Float64Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: int, array: Float64Array) => boolean): Float64Array {
-        let markers : FixedArray<boolean> = new boolean[this.lengthInt]
+        let markers : FixedArray<boolean> = new FixedArray<boolean>(this.lengthInt)
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
             markers[i] = fn((this.getUnsafe(i)).toDouble(), i, this)

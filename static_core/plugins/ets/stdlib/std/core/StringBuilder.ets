@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,7 @@ package std.core;
 export final class StringBuilder {
     private static readonly INITIAL_BUF_SIZE: int = 16;
 
-    private buf: FixedArray<(Object|undefined)> = new (Object|undefined)[StringBuilder.INITIAL_BUF_SIZE]; // array with pointers to strings or char[]
+    private buf: FixedArray<(Object|undefined)> = new FixedArray<Object|undefined>(StringBuilder.INITIAL_BUF_SIZE); // array with pointers to strings or char[]
     private index: int = 0;                                             // index of the current free element in the buf
     private length: int = 0;                                            // length of the resulting string
     private compress: boolean = true;                                   // compress or not the resulting string.

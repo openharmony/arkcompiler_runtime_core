@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,7 +59,7 @@ function test(arr: FixedArray<A>, value: A | B) : int {
 }
 
 function main(): int {
-    let arr: FixedArray<A> = new A[5];
+    let arr: FixedArray<A> = new FixedArray<A>(5);
     if (test(arr, new A()) != 5) {
         return 1;
     }
@@ -115,7 +115,7 @@ function test2(arr: FixedArray<Object>, value: A | B) : int {
 }
 
 function main2(): int {
-    let arr: FixedArray<A> = new A[5];
+    let arr: FixedArray<A> = new FixedArray<A>(5);
     if (test2(arr, new A()) != 5) {
         return 1;
     }

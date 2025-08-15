@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1656,7 +1656,7 @@ export namespace util {
                         resolve(value);
                     }
                 };
-                const newArgs: FixedArray<Any> = new Any[args.length + 1];
+                const newArgs: FixedArray<Any> = new FixedArray<Any>(args.length + 1);
                 for (let i = 0; i < args.length; i++) {
                     newArgs[i] = args[i];
                 }
@@ -1672,7 +1672,7 @@ export namespace util {
                 throw new Error('maybe is not function');
             }
             const func: Function = args[args.length - 1] as Function;
-            const newArgs: FixedArray<Any> = new Any[args.length - 1];
+            const newArgs: FixedArray<Any> = new FixedArray<Any>(args.length - 1);
             for (let i = 0; i < args.length - 1; i++) {
                 newArgs[i] = args[i];
             }

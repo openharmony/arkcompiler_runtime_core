@@ -549,7 +549,7 @@ export class JSON {
      * @returns String - JSON representation of Object
      */
     public static stringify(obj: Any, replacer: FixedArray<double | string>, space?: int | string): string {
-        const filter : FixedArray<string> = new string[replacer.length]
+        const filter : FixedArray<string> = new FixedArray<string>(replacer.length)
         for (let i = 0; i < replacer.length; i++) {
             filter[i] = `${replacer[i]}`
         }
@@ -562,7 +562,7 @@ export class JSON {
     }
 
     public static stringify(obj: Any, replacer: Array<double | string>, space?: int | string): string {
-        const filter : FixedArray<string> = new string[replacer.length]
+        const filter : FixedArray<string> = new FixedArray<string>(replacer.length)
         for (let i = 0; i < replacer.length; i++) {
             filter[i] = `${replacer[i]}`
         }
@@ -1798,7 +1798,7 @@ class EscapeStringBuilder {
 
     static createEscapeTable(): FixedArray<string> {
         const asciiRange: int = 128
-        const table: FixedArray<string> = new string[asciiRange]
+        const table: FixedArray<string> = new FixedArray<string>(asciiRange)
         for (let code = 0; code < asciiRange; code++) {
             switch (code.toChar()) {
                 case c'\"':

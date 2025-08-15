@@ -863,7 +863,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => {{element['subsetType']}}): {{element['name']}}Array {
         let res = new {{element['name']}}Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new int[1]
+        const idx : FixedArray<int> = new FixedArray<int>(1)
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             const mapped = mapfn(x as T, idx[0].toDouble())
@@ -920,7 +920,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
 
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new {{element['name']}}Array(6)
-        let index : FixedArray<int> = new int[1]
+        let index : FixedArray<int> = new FixedArray<int>(1)
         index[0] = 0
 
         iteratorForEach<{{element['subsetType']}}>(arrayLike.$_iterator(), (x: {{element['subsetType']}}): void => {
@@ -1296,7 +1296,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         }
         const MAX_SHORT_LENGTH = 24
         if (this.lengthInt > MAX_SHORT_LENGTH) {
-            let arr: FixedArray<{{element['primitiveType']}}> = new {{element['primitiveType']}}[this.lengthInt]
+            let arr: FixedArray<{{element['primitiveType']}}> = new FixedArray<{{element['primitiveType']}}>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 arr[i] = this.getUnsafe(i)
             }
@@ -1305,7 +1305,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
                 this.setUnsafe(i, arr[i])
             }
         } else {
-            let buffer: FixedArray<{{element['primitiveTypeBoxed']}}> = new {{element['primitiveTypeBoxed']}}[this.lengthInt]
+            let buffer: FixedArray<{{element['primitiveTypeBoxed']}}> = new FixedArray<{{element['primitiveTypeBoxed']}}>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 buffer[i] = this.getUnsafe(i)
             }
@@ -1630,7 +1630,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns a new {{element['name']}}Array with elements from current {{element['name']}}Array that satisfy condition fn
      */
     public filter(fn: (val: {{elType}}, index: {{idxType}}, array: {{element['name']}}Array) => boolean): {{element['name']}}Array {
-        let markers : FixedArray<boolean> = new boolean[this.lengthInt]
+        let markers : FixedArray<boolean> = new FixedArray<boolean>(this.lengthInt)
         let resLen = 0
         for (let i = 0; i < this.lengthInt; i++) {
             markers[i] = fn({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)

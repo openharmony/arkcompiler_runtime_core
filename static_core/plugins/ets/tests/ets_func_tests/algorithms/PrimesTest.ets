@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,7 +64,7 @@ function prime_factors_trivial_plus(n0: long): FixedArray<long> {
 }
 
 function sieve_primes(n: int): FixedArray<long> {
-    let is_prime: FixedArray<boolean> = new boolean[n+1];
+    let is_prime: FixedArray<boolean> = new FixedArray<boolean>(n+1);
     let primes: FixedArray<long> = [];
     fill(is_prime, true);
     // 0 and 1 are not primes

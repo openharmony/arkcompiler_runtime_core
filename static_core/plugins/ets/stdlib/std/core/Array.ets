@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,7 +64,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             throw new RangeError("can't change length to bigger or negative")
         }
         if (len == 0) {
-            this.buffer = new Any[Array.INIT_CAPACITY]
+            this.buffer = new FixedArray<Any>(Array.INIT_CAPACITY)
         } else {
             const other = this.slice(0, len)
             this.buffer = other.buffer
@@ -84,7 +84,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * Creates a new instance of Array
      */
     public constructor(arrayLen: int) {
-        this.buffer = new Any[arrayLen]
+        this.buffer = new FixedArray<Any>(arrayLen)
         this.actualLength = arrayLen
     }
 
@@ -94,7 +94,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     public constructor() {
-        this.buffer = new Any[Array.INIT_CAPACITY]
+        this.buffer = new FixedArray<Any>(Array.INIT_CAPACITY)
         this.actualLength = 0
     }
 
@@ -104,7 +104,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @param d Array initializer
      */
     public constructor(first: T, ...d: T[]) {
-        this.buffer = new Any[d.length + 1]
+        this.buffer = new FixedArray<Any>(d.length + 1)
         this.actualLength = d.length.toInt() + 1
 
         this.buffer[0] = first
@@ -125,7 +125,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      */
     public constructor(arrayLen: int, initializer: (index: int) => T) {
-        this.buffer = new Any[arrayLen]
+        this.buffer = new FixedArray<Any>(arrayLen)
         this.actualLength = arrayLen
         for (let k: int = 0; k < arrayLen; k++) {
             this.$_set_unsafe(k, initializer(k))
@@ -241,7 +241,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     */
     public static from<T>(arr: FixedArray<T>): Array<T> {
         const len = arr.length
-        const ret : FixedArray<Any> = new Any[len.toInt()]
+        const ret : FixedArray<Any> = new FixedArray<Any>(len.toInt())
         for (let i: int = 0; i < len; i++) {
             ret[i] = arr[i]
         }
@@ -302,7 +302,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     public static from<T, U>(iterable: ArrayLike<T> | Iterable<T>, mapfn: (v: T, k: number) => U): Array<U> {
         const ret = new Array<U>()
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new int[1]
+        const idx : FixedArray<int> = new FixedArray<int>(1)
         idx[0] = 0
         iteratorForEach<T>(iterable.$_iterator(), (x: T): void => {
             ret.push(mapfn(x, idx[0].toDouble()))
@@ -491,7 +491,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     private copyArray(): FixedArray<Any> {
         let len: int = this.actualLength
-        let res : FixedArray<Any> = new Any[len]
+        let res : FixedArray<Any> = new FixedArray<Any>(len)
         for (let i = 0; i < len; i++) {
             res[i] = this.$_get_unsafe(i)
         }
@@ -501,7 +501,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     private wrap_default_sort(): void {
         let idxNonUndef = 0
         try {
-            let strArr : FixedArray<arrType> = new arrType[this.actualLength]
+            let strArr : FixedArray<arrType> = new FixedArray<arrType>(this.actualLength)
             for (let i = 0; i < this.actualLength; i++) {
                 const vl = this.$_get_unsafe(i)
                 if (vl !== undefined) {
@@ -666,7 +666,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 
     private ensureUnusedCapacity(cap: int): void {
         if (this.actualLength + cap > this.buffer.length) {
-            const copy : FixedArray<Any> = new Any[this.buffer.length * 2 + cap]
+            const copy : FixedArray<Any> = new FixedArray<Any>(this.buffer.length * 2 + cap)
             for (let i = 0; i < this.actualLength; i++) {
                 copy[i] = this.buffer[i]
             }
@@ -787,7 +787,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     public unshift(...values: T[]): int {
         if (this.buffer.length <= values.actualLength + this.actualLength) {
-            let buffer: FixedArray<Any> = new Any[this.buffer.length * 2 + values.actualLength]
+            let buffer: FixedArray<Any> = new FixedArray<Any>(this.buffer.length * 2 + values.actualLength)
             Array.unshiftInternal(this.buffer, this.actualLength, buffer, values)
             this.buffer = buffer
         } else {
@@ -880,7 +880,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             totalAdd += items[i].length.toInt()
         }
 
-        const buf : FixedArray<Any> = new Any[totalAdd];
+        const buf : FixedArray<Any> = new FixedArray<Any>(totalAdd);
         copyTo(this.buffer, buf, 0, 0, this.actualLength)
 
         let insertTo = this.actualLength;
@@ -1265,7 +1265,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         if (count < 0) {
             count = 0;
         }
-        let res : FixedArray<Any> = new Any[count]
+        let res : FixedArray<Any> = new FixedArray<Any>(count)
         copyToFast(this.buffer, res, 0, relStart, relStart + count);
         return new Array<T>(FROM_BUFFER, res)
     }
@@ -1490,7 +1490,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         if (start > len - delete) {
             delete = len - start
         }
-        const res : FixedArray<Any> = new Any[len - delete + items.length];
+        const res : FixedArray<Any> = new FixedArray<Any>(len - delete + items.length);
         for (let i = 0; i < start; i++) {
             res[i] = this.$_get_unsafe(i)
         }
@@ -1629,7 +1629,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns reversed copy of the current Array
      */
     public toReversed(): Array<T> {
-        let arr : FixedArray<Any> = new Any[this.actualLength]
+        let arr : FixedArray<Any> = new FixedArray<Any>(this.actualLength)
         for (let i = 0; i < this.actualLength; i++) {
             arr[this.actualLength - 1 - i] = this.$_get_unsafe(i)
         }
@@ -1681,7 +1681,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     public override map<U>(callbackfn: (value: T, index: int, array: Array<T>) => U): Array<U> {
         const len = this.actualLength;
-        let res : FixedArray<Any> = new Any[len];
+        let res : FixedArray<Any> = new FixedArray<Any>(len);
         for (let i = 0; i < len && i < this.actualLength; i++) {
             res[i] = callbackfn(this.$_get_unsafe(i), i, this);
         }

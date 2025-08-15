@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,7 +61,7 @@ export final class FinalizationRegistry<T> {
         this.callback = callback;
         this.workerId = FinalizationRegistry.getWorkerId();
         this.workerDomain = FinalizationRegistry.getWorkerDomain();
-        this.buckets = new (FinRegNode<T> | undefined)[FinalizationRegistry.INITIAL_BUCKETS_COUNT];
+        this.buckets = new FixedArray<FinRegNode<T> | undefined>(FinalizationRegistry.INITIAL_BUCKETS_COUNT)
     }
 
     /**
@@ -162,7 +162,7 @@ export final class FinalizationRegistry<T> {
     private rehash(newSizeArg: int) {
         const oldMap = this.buckets;
         const newSize = newSizeArg;
-        this.buckets = new (FinRegNode<T> | undefined)[newSize];
+        this.buckets = new FixedArray<(FinRegNode<T> | undefined)>(newSize);
         this.mapSize = 0;
         for (let oldMapIdx = 0; oldMapIdx < oldMap.length; oldMapIdx++) {
             let nextNode: (FinRegNode<T> | undefined) = undefined;

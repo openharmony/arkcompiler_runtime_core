@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,7 @@ package std.core;
 export class MemoryRuntimeLinker extends AbcRuntimeLinker {
     public constructor(parentLinker: RuntimeLinker | undefined, rawAbcFiles: Array<FixedArray<byte>>) {
         super(parentLinker, [])
-        const abcFiles : FixedArray<AbcFile | undefined> = new (AbcFile | undefined)[Double.toInt(rawAbcFiles.length)]
+        const abcFiles : FixedArray<AbcFile | undefined> = new FixedArray<AbcFile | undefined>(Double.toInt(rawAbcFiles.length))
         for (let i = 0; i < rawAbcFiles.length; i++) {
             abcFiles[i] = AbcFile.loadFromMemory(this, rawAbcFiles[i])
         }

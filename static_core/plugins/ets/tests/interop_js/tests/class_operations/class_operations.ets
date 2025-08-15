@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,7 +80,7 @@ function testJSONStringifyESObjectArray(): boolean {
         const gtestEnv = global.getProperty("gtest_env")
         const moduleObj = gtestEnv.getProperty("module")
 
-        const arr: FixedArray<number> = new number[3]
+        const arr: FixedArray<number> = new FixedArray<number>(3)
         for (let i = 0; i < arr.length; i++) {
             arr[i] = i + 1
         }
@@ -375,7 +375,7 @@ function jscallArray(): int {
         const gtestEnv = global.getProperty("gtest_env")
         const module = gtestEnv.getProperty("module")
 
-        const v0: FixedArray<int> = new int[10]
+        const v0: FixedArray<int> = new FixedArray<int>(10)
         for (let i = 0; i < 10; ++i) {
             v0[i] = i * i
         }
@@ -400,7 +400,7 @@ function jsnewArray(): int {
         const gtestEnv = global.getProperty("gtest_env")
         const module = gtestEnv.getProperty("module")
 
-        const v0: FixedArray<int> = new int[10]
+        const v0: FixedArray<int> = new FixedArray<int>(10)
         for (let i = 0; i < 10; ++i) {
             v0[i] = i * i
         }
@@ -428,7 +428,7 @@ function jsnewSetPropertyArray(): int {
         const gtestEnv = global.getProperty("gtest_env")
         const module = gtestEnv.getProperty("module")
 
-        const v0: FixedArray<int> = new int[10]
+        const v0: FixedArray<int> = new FixedArray<int>(10)
         for (let i = 0; i < 10; ++i) {
             v0[i] = i * i
         }
@@ -459,7 +459,7 @@ function jscallStaticMethodArray(): int {
         const gtestEnv = global.getProperty("gtest_env")
         const module = gtestEnv.getProperty("module")
 
-        const v0: FixedArray<int> = new int[10]
+        const v0: FixedArray<int> = new FixedArray<int>(10)
         for (let i = 0; i < 10; ++i) {
             v0[i] = i * i
         }

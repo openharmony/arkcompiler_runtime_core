@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -687,11 +687,11 @@ function jscallOverridden(): int {
 
 function testRehash(): int {
     let count = 40
-    let jsValues: FixedArray<JSValue> = new JSValue[count];
+    let jsValues: FixedArray<JSValue> = new FixedArray<JSValue>(count)
     for (let i = 0; i < count; i++) {
         jsValues[i] = (i as Int).toString() as JSValue
     }
-    let jsValues2: FixedArray<JSValue> = new JSValue[count];
+    let jsValues2: FixedArray<JSValue> = new FixedArray<JSValue>(count)
     for (let i = 0; i < count; i++) {
         jsValues2[i] = (i as Int).toString() as JSValue
     }
