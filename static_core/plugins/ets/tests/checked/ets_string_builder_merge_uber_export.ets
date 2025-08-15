@@ -86,12 +86,12 @@ export function uber_chain_concat4(do_exit: boolean, a: String, n: int, b: Strin
         for (let i = 0; i < m; ++i) {
             try {
                 if (do_throw0)
-                    throw new Exception();
+                    throw new Error();
                 str0 += b;
                 str1 += c;
                 str3 += d;
                 if (do_throw1)
-                    throw new Exception();
+                    throw new Error();
             }
             catch(ex) {
                 str0 += a;
@@ -109,12 +109,12 @@ export function uber_chain_concat4(do_exit: boolean, a: String, n: int, b: Strin
         for (let i = 0; i < m; ++i) {
             try {
                 if (do_throw0)
-                    throw new Exception();
+                    throw new Error();
                 str0 += c;
                 str1 += d;
                 str3 += a;
                 if (do_throw1)
-                    throw new Exception();
+                    throw new Error();
             }
             catch(ex) {
                 str0 += b;
@@ -164,11 +164,11 @@ export function uber_chain_concat4(do_exit: boolean, a: String, n: int, b: Strin
             if (cond1) {
                 try {
                     if (do_throw0)
-                        throw new Exception();
+                        throw new Error();
                     str0 += d;
                     str3 += a;
                     if (do_throw1)
-                        throw new Exception();
+                        throw new Error();
                 }
                 catch(ex) {
                     str0 += b;
@@ -182,11 +182,11 @@ export function uber_chain_concat4(do_exit: boolean, a: String, n: int, b: Strin
             else {
                 try {
                     if (do_throw0)
-                        throw new Exception();
+                        throw new Error();
                     str0 += b;
                     str3 += c;
                     if (do_throw1)
-                        throw new Exception();
+                        throw new Error();
                 }
                 catch(ex) {
                     str0 += d;

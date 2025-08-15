@@ -30,23 +30,23 @@ function main(): void {
     arktest.assertEQ(str[0], "a", "Wrong str.get(0)");
     arktest.assertEQ(str[6], "g", "Wrong str.get(6)");
 
-    let exceptionFlag = 0;
+    let errorFlag = 0;
     try {
         console.log(str[-1]);
     } catch (e: StringIndexOutOfBoundsError) {
-        exceptionFlag = 1;
+        errorFlag = 1;
     } catch (e) {
-        exceptionFlag = 2;
+        errorFlag = 2;
     }
-    arktest.assertEQ(1, exceptionFlag);
+    arktest.assertEQ(1, errorFlag);
 
-    exceptionFlag = 0;
+    errorFlag = 0;
     try {
         console.log(str[7]);
     } catch (e: StringIndexOutOfBoundsError) {
-        exceptionFlag = 1;
+        errorFlag = 1;
     } catch (e) {
-        exceptionFlag = 2;
+        errorFlag = 2;
     }
-    arktest.assertEQ(1, exceptionFlag);
+    arktest.assertEQ(1, errorFlag);
 }
