@@ -14,6 +14,13 @@
 ---
 cases:
     - decl: |-
+          async function foo(): Promise<void> {}
+      use: |-
+          // Promise of void
+          let r = foo()
+          arktest.assertTrue((await r) == undefined)
+
+    - decl: |-
           async function foo(p: int): Promise<Int> {
               return p + p
           }

@@ -21,11 +21,5 @@ tags: [compile-only, negative]
 
 {{c.decl}}
 
-function main() {
-    {% if c.use is defined %}
-        {{c.use|indent}}
-    {% else %}
-
-    {% endif %}
-}
+function main() {}
 {% endfor %}

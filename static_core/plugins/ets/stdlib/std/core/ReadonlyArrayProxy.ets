@@ -79,7 +79,7 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
     }
 
     override forEach(action: (value: T, index: number, array: ReadonlyArray<T>) => void): void {
-    	this.target.forEach(action)
+    	return this.target.forEach(action)
     }
 
     override join(separator?: string): string {

@@ -42,7 +42,7 @@ class EventLoop {
     }
 
     static clearTimer(id: TimerId) {
-        EventLoop.timerTable.clearTimer(id);
+        return EventLoop.timerTable.clearTimer(id);
     }
 
     static getOrCreate(): EventLoop {

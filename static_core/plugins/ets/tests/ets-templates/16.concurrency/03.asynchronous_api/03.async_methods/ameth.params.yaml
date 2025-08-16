@@ -15,6 +15,15 @@
 cases:
     - decl: |-
           class A {
+              async foo(): Promise<void> {}
+          }
+      use: |-
+          // Promise of void
+          let r = new A().foo()
+          arktest.assertTrue((await r) == undefined)
+
+    - decl: |-
+          class A {
               async foo(p: int): Promise<Int> {
                   return p + p
               }
