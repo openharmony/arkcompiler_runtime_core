@@ -51,7 +51,8 @@ export class User {
 }
 
 export let doubledObj = {
-    3.2: 'aaa'
+    3.2: 'aaa',
+    4.5: 'bbb',
 };
 
 export let propObj = {

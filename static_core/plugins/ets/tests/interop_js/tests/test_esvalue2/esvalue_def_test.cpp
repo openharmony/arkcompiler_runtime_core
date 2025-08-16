@@ -166,10 +166,9 @@ TEST_F(EtsESValueJsToEtsTest, test_esvalue_get_property_by_name_safe)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGetPropertyByNameSafe"));
 }
 
-TEST_F(EtsESValueJsToEtsTest, DISABLED_test_esvalue_get_property_by_index)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_get_property_by_index)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGetPropertyByIndex"));
-    // NOTE(www): #ICMNGF, need to handle when key is double.
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGetPropertyByIndexDouble"));
 }
 
