@@ -1,5 +1,6 @@
+'use static'
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,17 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include <gtest/gtest.h>
-#include "ets_interop_js_gtest.h"
-
-namespace ark::ets::interop::js::testing {
-
-class EtsImportRegExpTsToEtsTest : public EtsInteropTest {};
-
-TEST_F(EtsImportRegExpTsToEtsTest, DISABLED_checkChangeRegExp)
-{
-    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkChangeRegExp"));
-}
-
-}  // namespace ark::ets::interop::js::testing
+export declare let numArray: number[];
+export declare let strArray: string[];
+export declare let booArray: boolean[];

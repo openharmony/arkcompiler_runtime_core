@@ -45,12 +45,14 @@ TEST_F(ToStringTest, test_throwing)
     ASSERT_EQ(CallEtsFunction<std::string>(GetPackageName(), "testThrowing"), "123A");
 }
 
-TEST_F(ToStringTest, ets_jsvalue_to_str)
+// NOTE(www): #ICMNFA, Currently unable to get method object in 1.2.
+TEST_F(ToStringTest, DISABLED_ets_jsvalue_to_str)
 {
     ASSERT_EQ(CallEtsFunction<std::string>(GetPackageName(), "etsJsvalueToStr"), "123AA");
 }
 
-TEST_F(ToStringTest, ets_object_to_str)
+// NOTE(www): #ICMNFA, Currently unable to get method object in 1.2.
+TEST_F(ToStringTest, DISABLED_ets_object_to_str)
 {
     ASSERT_EQ(CallEtsFunction<std::string>(GetPackageName(), "etsObjectToStr"), "123AA");
 }

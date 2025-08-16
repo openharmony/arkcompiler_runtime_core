@@ -13,28 +13,28 @@
  * limitations under the License.
  */
 
-import {
-    tsString,
-    tsNumber,
-    checkLiteralType,
-    AgeNameLiteralClass,
-    instanceAgeNameLiteralClass,
-    ChildAgeNameLiteralClass,
-    instanceChildAgeNameLiteralClass,
-} from 'main_js';
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/intersection_signature/main');
+let tsNumber = module.getProperty('tsNumber').toNumber();
+let tsString = module.getProperty('tsString').toString();
+let checkLiteralType = module.getProperty('checkLiteralType');
+let AgeNameLiteralClass = module.getProperty('AgeNameLiteralClass');
+let instanceAgeNameLiteralClass = module.getProperty('instanceAgeNameLiteralClass');
+let ChildAgeNameLiteralClass = module.getProperty('ChildAgeNameLiteralClass');
+let instanceChildAgeNameLiteralClass = module.getProperty('instanceChildAgeNameLiteralClass');
 
+
+class IntersectionWrong {
+    age = tsNumber;
+}
 function checkArgFuFromSts(): boolean {
-    class IntersectionWrong {
-        age = tsNumber;
-    }
 
-    return checkLiteralType(new IntersectionWrong()) as boolean == false;
+    return checkLiteralType.invoke(new IntersectionWrong()).toBoolean() == false;
 }
 
 
 function checkIntersectionClass(): boolean {
     try {
-        new AgeNameLiteralClass(tsNumber);
+        AgeNameLiteralClass.instantiate(tsNumber);
 
         return false;
     } catch (e) {
@@ -45,8 +45,8 @@ function checkIntersectionClass(): boolean {
 
 function checkIntersectionClassMethod(): boolean {
     try {
-        const Intersection = new AgeNameLiteralClass(tsString, tsNumber);
-        Intersection.createUser(tsNumber);
+        const Intersection = AgeNameLiteralClass.instantiate(tsString, tsNumber);
+        Intersection.invokeMethod('createUser', tsNumber);
 
         return false;
     } catch (e) {
@@ -55,7 +55,7 @@ function checkIntersectionClassMethod(): boolean {
 }
 function checkInstanceIntersectionTypeClass(): boolean {
     try {
-        instanceAgeNameLiteralClass.createUser(tsNumber);
+        instanceAgeNameLiteralClass.invokeMethod('createUser', tsNumber);
 
         return false;
     } catch (e) {
@@ -65,7 +65,7 @@ function checkInstanceIntersectionTypeClass(): boolean {
 
 function checkChildIntersectionClass(): boolean {
     try {
-        new ChildAgeNameLiteralClass(tsNumber);
+        ChildAgeNameLiteralClass.instantiate(tsNumber);
 
         return false;
     } catch (e) {
@@ -76,8 +76,8 @@ function checkChildIntersectionClass(): boolean {
 
 function checkChildIntersectionClassMethod(): boolean {
     try {
-        const Intersection = new ChildAgeNameLiteralClass(tsString, tsNumber);
-        Intersection.createUser(tsNumber);
+        const Intersection = ChildAgeNameLiteralClass.instantiate(tsString, tsNumber);
+        Intersection.invokeMethod('createUser', tsNumber);
 
         return false;
     } catch (e) {
@@ -86,7 +86,7 @@ function checkChildIntersectionClassMethod(): boolean {
 }
 function checkInstanceChildIntersectionTypeClass(): boolean {
     try {
-        instanceChildAgeNameLiteralClass.createUser(tsNumber);
+        instanceChildAgeNameLiteralClass.invokeMethod('createUser', tsNumber);
 
         return false;
     } catch (e) {

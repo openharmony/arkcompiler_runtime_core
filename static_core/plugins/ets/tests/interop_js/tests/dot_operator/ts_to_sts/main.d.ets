@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,22 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include "ets_interop_js_gtest.h"
-
-namespace ark::ets::interop::js::testing {
-
-class EtsImportRegExpTsToEtsTest : public EtsInteropTest {};
-
-TEST_F(EtsImportRegExpTsToEtsTest, DISABLED_checkChangeRegExp)
-{
-    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkChangeRegExp"));
+export declare const tsInt: number;
+export declare const tsString: string;
+export declare interface InsideInterface {
+    name: string;
+    test?: string;
 }
-
-}  // namespace ark::ets::interop::js::testing
+export declare interface ObjInterface {
+    name: string;
+    inside: InsideInterface;
+    sum: () => number;
+    arr: number[];
+    test?: string;
+}
+export declare const Obj: ObjInterface;
+declare interface OptionalProp {
+    name?: string;
+    secondName: null | undefined;
+}
+export declare const notNullishObj: OptionalProp;

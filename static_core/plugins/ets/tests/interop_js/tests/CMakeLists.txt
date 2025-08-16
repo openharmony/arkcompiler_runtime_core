@@ -13,30 +13,14 @@
 
 set(DISABLES_TESTS
     checked
-    declgen_ets2ts
-    dot_operator
-    escompat_demo
-    es_object
     generic_as_parameter
     generic_call_params
     generic_static
     getter
     getter_arkjs
-    import
-    indexed_type
-    instanceof
-    interface
-    intersection_signature
-    mimic_iterator
-    mimic_special_function
     number_subtypes
-    optional_reference_type
-    passing_optional_type
     perf
-    promise
-    scenarios
     standalone_function
-    test_class_methods_returning_values
     test_intrins
 )
 

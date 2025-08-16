@@ -760,7 +760,7 @@ function testPromiseThenOnRejection(): void {
         globalTest!.fail();
     }, (error: Error): string => {
         return "correct flow";
-    }).then<string, void>((value): string => {
+    }).then<string, void>((value: string): string => {
         globalTest!.success();
         return value as string
     }, (error: Error): void => {

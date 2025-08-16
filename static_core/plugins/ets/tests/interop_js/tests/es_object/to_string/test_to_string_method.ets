@@ -13,104 +13,102 @@
  * limitations under the License.
  */
 
-import {
-    Identity,
-    IntValue,
-    Optional,
-    Curry,
-    CurryToString,
-    StringifyValue,
-    Throwing,
-    NullVal,
-    NanVal,
-    UndefinedVal,
-} from "to_string";
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/es_object/to_string/test_to_string_method');
+let etsIdentity = module.getProperty('Identity');
+let etsIntValue = module.getProperty('IntValue');
+let etsOptional = module.getProperty('Optional');
+let etsCurry = module.getProperty('Curry');
+let etsCurryToString = module.getProperty('CurryToString');
+let etsStringifyValue = module.getProperty('StringifyValue');
+let etsThrowing = module.getProperty('Throwing');
+let etsNullVal = module.getProperty('NullVal');
+let etsNanVal = module.getProperty('NanVal');
+let etsUndefinedVal = module.getProperty('UndefinedVal');
 
-function vstringify(val: JSValue): String {
-    return StringifyValue(val) as String;
+function vstringify(val: Any): String {
+    return etsStringifyValue.invoke(ESValue.wrap(val)).toString();
 }
 
-function castToObject(x: Object) : Object {
+function castToObject(x: Object): Object {
     return x;
 }
 
 class A {
-    toString() : String {
-        return CurryToString(123) + "A";
+    toString(): String {
+        return etsCurryToString.invoke(123).invokeMethod('toString').toString() + 'A';
     };
 }
 
 function etsJsvalueToStr() {
-    let x: JSValue = Identity(new A());
-    return x + "A";
+    let x: Any = etsIdentity.invoke(new A()).invokeMethod('toString').toString();
+    return x + 'A';
 }
 
 function etsObjectToStr() {
-    let x: JSValue = Identity(new A());
-    let y = castToObject(x);
-    return y + "A";
+    let x: Any = etsIdentity.invoke(new A()).invokeMethod('toString').toString();
+    let y = castToObject(x).toString();
+    return y + 'A';
 }
 
 function jsvalObjectToStr(): String {
-    let x: JSValue = Curry(123);
+    let x: Any = etsCurry.invoke(123).invokeMethod('toString');
     try {
         let z: String = x.toString();
         arktest.assertTrue(false);
     } catch (z: TypeError) {
-        let y = castToObject(x);
-        return y + "A";
+        let y = castToObject(x.toNumber());
+        return y + 'A';
     }
-    return "Unreachable"
+    return 'Unreachable';
 }
 
 function implicitToString(): String {
-    let x = Optional(false);
-    console.log(123, x)
-    arktest.assertTrue(vstringify(x) == "string:optionalVal")
-    return x + "A";
+    let x = etsOptional.invoke(false).toString();
+    arktest.assertTrue(vstringify(x) === 'string:optionalVal');
+    return x + 'A';
 }
 
-function testFunctional1() : String {
-    return Curry("Str1") + "A";
+function testFunctional1(): String {
+    return etsCurry.invoke('Str1').invokeMethod('toString').toString() + 'A';
 }
 
-function testFunctional2() : String {
-    return CurryToString(123) + "A";
+function testFunctional2(): String {
+    return etsCurryToString.invoke(123).invokeMethod('toString').toString() + 'A';
 }
 
-function testNanCall() : String {
-    return Curry(NaN) + "A";
+function testNanCall(): String {
+    return etsCurry.invoke(NaN).invokeMethod('toString').toNumber() + 'A';
 }
 
-function testThrowing() : String {
+function testThrowing(): String {
     try {
-        return Throwing() + "A";
+        return etsThrowing.invoke().invokeMethod('toString') + 'A';
     } catch (e: ESError) {
-        return e.getJsError() + "A";
+        return e.getValue().toNumber() + 'A';
     }
 }
 
 function concatNullToString(): String {
-    let x = NullVal() as JSValue | null;
-    return x + "A";
+    let x = etsNullVal.invoke().toNull();
+    return x + 'A';
 }
 
 function concatUndefinedToString(): String {
-   let x = UndefinedVal();
-   let y = x + "A";
-   return y;
+    let x = etsUndefinedVal.invoke().toUndefined();
+    let y = x + 'A';
+    return y;
 }
 
 function concatNanToString(): String {
-    let x = NanVal();
-    let y = x + "A";
+    let x = etsNanVal.invoke();
+    let y = x.toNumber() + 'A';
     return y;
 }
 
 function explicitOptionalToString(): String {
     try {
-        return Optional(true) + "A";
+        return etsOptional.invoke(true).toString() + 'A';
     } catch (e: NullPointerError) {
-        return "NPE";
+        return 'NPE';
     }
 }

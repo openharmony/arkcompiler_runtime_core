@@ -13,67 +13,76 @@
  * limitations under the License.
  */
 
-import * as js from "pure_js_conflict"
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/scenarios/js_to_ets/js_suites/conflict_types');
+let functionArgTypeConflictArray = module.getProperty('functionArgTypeConflictArray');
+let functionArgTypeConflictArrayBuffer = module.getProperty('functionArgTypeConflictArrayBuffer');
+let functionArgTypeConflictBoolean = module.getProperty('functionArgTypeConflictBoolean');
+let functionArgTypeConflictDataView = module.getProperty('functionArgTypeConflictDataView');
+let functionArgTypeConflictDate = module.getProperty('functionArgTypeConflictDate');
+let functionArgTypeConflictError = module.getProperty('functionArgTypeConflictError');
+let functionArgTypeConflictMap = module.getProperty('functionArgTypeConflictMap');
+let functionArgTypeConflictObject = module.getProperty('functionArgTypeConflictObject');
+let functionArgTypeConflictString = module.getProperty('functionArgTypeConflictString');
 
 function TestFunctionArgTypeConflictArray(): boolean {
-    const array:Array<Object> = js.functionArgTypeConflictArray() as Array<Object>;
+    const array:Array<Object> = functionArgTypeConflictArray.invoke().unwrap() as Array<Object>;
     const EXPECTED_LENGTH = 2;
     const EXPECTED_INT = 123;
     const EXPECTED_STRING = 'foo';
 
-    arktest.assertTrue(array.length == EXPECTED_LENGTH);
+    arktest.assertTrue(array.length === EXPECTED_LENGTH);
 
-    return (array.at(0) as Number == EXPECTED_INT) && (array.at(1) as string == EXPECTED_STRING);
+    return (array.at(0) as Number === EXPECTED_INT) && (array.at(1) as string === EXPECTED_STRING);
 }
 
 function TestFunctionArgTypeConflictArraybuffer(): boolean {
-    const buffer = InteropTransferHelper.transferArrayBufferToStatic(js.functionArgTypeConflictArrayBuffer());
+    const buffer = InteropTransferHelper.transferArrayBufferToStatic(functionArgTypeConflictArrayBuffer.invoke().unwrap());
     const view = new Int32Array(buffer as ArrayBuffer);
     const EXPECTED_INT = 123;
 
-    return view.at(0) == EXPECTED_INT;
+    return view.at(0) === EXPECTED_INT;
 }
 
 function TestFunctionArgTypeConflictBoolean(): boolean {
-    const value = js.functionArgTypeConflictBoolean().valueOf() as Boolean;
-    return value == true;
+    const value = functionArgTypeConflictBoolean.invoke().unwrap() as Boolean;
+    return value === true;
 }
 
 function TestFunctionArgTypeConflictDataview(): boolean {
-    const view = js.functionArgTypeConflictDataView() as DataView;
+    const view = functionArgTypeConflictDataView.invoke().unwrap() as DataView;
     const EXPECTED_INT = 123;
 
-    return view.getInt32(0) == EXPECTED_INT;
+    return view.getInt32(0) === EXPECTED_INT;
 }
 
 function TestFunctionArgTypeConflictDate(): boolean {
-    const date = js.functionArgTypeConflictDate() as Date;
-    return date.valueOf() == 1;
+    const date = functionArgTypeConflictDate.invoke().unwrap() as Date;
+    return date.valueOf() === 1;
 }
 
 function TestFunctionArgTypeConflictError(): boolean {
-    const error = js.functionArgTypeConflictError() as Error;
+    const error = functionArgTypeConflictError.invoke().unwrap() as Error;
     const EXPECTED_STRING = 'foo';
 
-    return error.message == EXPECTED_STRING;
+    return error.message === EXPECTED_STRING;
 }
 
 function TestFunctionArgTypeConflictMap(): boolean {
-    const dataMap = js.functionArgTypeConflictMap() as Map<string, string>;
+    const dataMap = functionArgTypeConflictMap.invoke().unwrap() as Map<string, string>;
     const KEY = 'foo';
     const EXPECTED_VALUE = 'bar';
 
-    return dataMap.get(KEY) == EXPECTED_VALUE;
+    return dataMap.get(KEY) === EXPECTED_VALUE;
 }
 
 function TestFunctionArgTypeConflictObject(): boolean {
-    const obj = js.functionArgTypeConflictObject() as Object;
-    return typeof obj == 'object' && obj instanceof Object;
+    const obj = functionArgTypeConflictObject.invoke().unwrap() as Object;
+    return typeof obj === 'object' && obj instanceof Object;
 }
 
 function TestFunctionArgTypeConflictString(): boolean {
-    const value = js.functionArgTypeConflictString() as string;
+    const value = functionArgTypeConflictString.invoke().unwrap() as string;
     const EXPECTED_STRING = 'foo';
 
-    return value == EXPECTED_STRING;
+    return value === EXPECTED_STRING;
 }

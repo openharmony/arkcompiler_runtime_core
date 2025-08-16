@@ -13,77 +13,75 @@
  * limitations under the License.
  */
 
-import {
-    tsNumber,
-    tsString,
-    AgeNameInterfaceClass,
-    checkIntersectionInterface,
-    createAgeNameClassInterfaceFromTs,
-    callMethodAgeNameClassInterfaceFromTs,
-    instanceAgeNameInterfaceClass,
-    ChildAgeNameInterfaceClass,
-    createChildAgeNameClassInterfaceFromTs,
-    callMethodChildAgeNameClassInterfaceFromTs,
-    instanceChildAgeNameInterfaceClass,
-} from 'main_js';
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/intersection_signature/main');
+let tsNumber = module.getProperty('tsNumber').toNumber();
+let tsString = module.getProperty('tsString').toString();
+let AgeNameInterfaceClass = module.getProperty('AgeNameInterfaceClass');
+let checkIntersectionInterface = module.getProperty('checkIntersectionInterface');
+let createAgeNameClassInterfaceFromTs = module.getProperty('createAgeNameClassInterfaceFromTs');
+let callMethodAgeNameClassInterfaceFromTs = module.getProperty('callMethodAgeNameClassInterfaceFromTs');
+let instanceAgeNameInterfaceClass = module.getProperty('instanceAgeNameInterfaceClass');
+let ChildAgeNameInterfaceClass = module.getProperty('ChildAgeNameInterfaceClass');
+let createChildAgeNameClassInterfaceFromTs = module.getProperty('createChildAgeNameClassInterfaceFromTs');
+let callMethodChildAgeNameClassInterfaceFromTs = module.getProperty('callMethodChildAgeNameClassInterfaceFromTs');
+let instanceChildAgeNameInterfaceClass = module.getProperty('instanceChildAgeNameInterfaceClass');
 
+class AgeNameClass {
+    age = tsNumber;
+    name = tsString;
+}
 function checkArgFuFromSts(): boolean {
-    class AgeNameClass {
-        age = tsNumber;
-        name = tsString;
-    }
-
-    return checkIntersectionInterface(new AgeNameClass()) as boolean;
+    return checkIntersectionInterface.invoke(new AgeNameClass()).toBoolean();
 }
 
 function checkAgeNameClass(): boolean {
-    new AgeNameInterfaceClass(tsString, tsNumber);
+    AgeNameInterfaceClass.instantiate(tsString, tsNumber);
 
     return true;
 }
 
 function checkAgeNameClassMethod(): boolean {
-    const AgeName = new AgeNameInterfaceClass(tsString, tsNumber);
-    AgeName.createUser(tsString, tsNumber);
+    const AgeName = AgeNameInterfaceClass.instantiate(tsString, tsNumber);
+    AgeName.invokeMethod('createUser', tsString, tsNumber);
 
     return true;
 }
 
 function checkCreateAgeNameClassInterfaceFromTs(): boolean {
-    return createAgeNameClassInterfaceFromTs() as boolean;
+    return createAgeNameClassInterfaceFromTs.invoke().toBoolean();
 }
 
 function checkCallMethodAgeNameClassInterfaceFromTs(): boolean {
-    return callMethodAgeNameClassInterfaceFromTs() as boolean;
+    return callMethodAgeNameClassInterfaceFromTs.invoke().toBoolean();
 }
 
 function checkInstanceAgeNameInterfaceClass(): boolean {
-    instanceAgeNameInterfaceClass.createUser(tsString, tsNumber);
+    instanceAgeNameInterfaceClass.invokeMethod('createUser', tsString, tsNumber);
     return true;
 }
 
 function checkChildAgeNameInterfaceClass(): boolean {
-    const AgeName = new ChildAgeNameInterfaceClass(tsString, tsNumber);
+    const AgeName = ChildAgeNameInterfaceClass.instantiate(tsString, tsNumber);
 
     return true;
 }
 
 function checkChildAgeNameInterfaceClassMethod(): boolean {
-    const AgeName = new ChildAgeNameInterfaceClass(tsString, tsNumber);
-    AgeName.createUser(tsString, tsNumber);
+    const AgeName = ChildAgeNameInterfaceClass.instantiate(tsString, tsNumber);
+    AgeName.invokeMethod('createUser', tsString, tsNumber);
 
     return true;
 }
 
 function checkCreateChildAgeNameClassInterfaceFromTs(): boolean {
-    return createChildAgeNameClassInterfaceFromTs() as boolean;
+    return createChildAgeNameClassInterfaceFromTs.invoke().toBoolean();
 }
 
 function checkCallMethodChildAgeNameClassInterfaceFromTs(): boolean {
-    return callMethodChildAgeNameClassInterfaceFromTs() as boolean;
+    return callMethodChildAgeNameClassInterfaceFromTs.invoke().toBoolean();
 }
 
 function checkInstanceChildAgeNameInterfaceClass(): boolean {
-    instanceChildAgeNameInterfaceClass.createUser(tsString, tsNumber);
+    instanceChildAgeNameInterfaceClass.invokeMethod('createUser', tsString, tsNumber);
     return true;
 }

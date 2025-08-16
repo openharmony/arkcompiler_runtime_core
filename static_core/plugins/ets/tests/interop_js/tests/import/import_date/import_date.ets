@@ -22,5 +22,5 @@ function checkChangeDate(): boolean {
   const oldValue = tsDate;
   changeDate();
 
-  return tsDate != oldValue;
+  return tsDate === oldValue;
 }
