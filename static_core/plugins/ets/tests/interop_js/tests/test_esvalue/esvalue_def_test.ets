@@ -208,6 +208,15 @@ function checkSetPropertyByIndex(): boolean {
     return val.toBoolean() === false;
 }
 
+function checkSetPropertyByIndexDouble(): boolean {
+    let index = 4.2;
+    let val = 'cccc';
+    jsDoubledObj.setProperty(index, val);
+    jsDoubledObj.setProperty(ESValue.wrap(4.5), val);
+    return jsDoubledObj.getProperty(index).toString() === val &&
+        jsDoubledObj.getProperty(ESValue.wrap(4.5)).toString() === val;
+}
+
 function checkSetProperty(): boolean {
     let value = ESValue.wrapNumber(5);
     let property = ESValue.wrapString('property1');
@@ -363,8 +372,8 @@ function testUndefined(): boolean {
     propObj.setProperty('property2', ESValue.wrap(undefined));
     propObj.setProperty(123, undefined);
     return propObj.getProperty('property1').isUndefined() &&
-           propObj.getProperty('property2').isUndefined() &&
-           propObj.getProperty(123).isUndefined();
+        propObj.getProperty('property2').isUndefined() &&
+        propObj.getProperty(123).isUndefined();
 }
 
 function checkThrowNullOrUndefined(): boolean {

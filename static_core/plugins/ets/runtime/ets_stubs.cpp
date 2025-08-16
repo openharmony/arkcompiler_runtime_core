@@ -578,16 +578,9 @@ EtsObject *EtsLdbyval(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *valObj)
             if (valObj->IsStringClass()) {
                 return xRefObjectThis.GetProperty(
                     coro, utf::Mutf8AsCString(EtsString::FromEtsObject(valObj)->GetDataMUtf8()));
-            }
-            if (valObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
+            } else {
                 return xRefObjectThis.GetProperty(coro, valObj);
             }
-            auto unboxedValue = GetBoxedNumericValue<int64_t>(PlatformTypes(coro), valObj);
-            if (unboxedValue.has_value()) {
-                return xRefObjectThis.GetProperty(coro, unboxedValue.value());
-            }
-            ThrowEtsInvalidKey(coro, valObj->GetClass()->GetDescriptor());
-            return nullptr;
         });
     } else {
         // ASSERTION. LHS is not a JSValue
@@ -627,17 +620,9 @@ bool EtsStbyval(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *key, EtsObjec
             if (key->IsStringClass()) {
                 std::string name = utf::Mutf8AsCString(EtsString::FromEtsObject(key)->GetDataMUtf8());
                 return xRefObjectOperator.SetProperty(coro, name, value);
-            }
-            if (key->GetClass()->GetRuntimeClass()->IsXRefClass()) {
+            } else {
                 return xRefObjectOperator.SetProperty(coro, key, value);
             }
-            auto unboxedValue = GetBoxedNumericValue<int64_t>(PlatformTypes(coro), key);
-            if (unboxedValue.has_value()) {
-                uint32_t index = unboxedValue.value();
-                return xRefObjectOperator.SetProperty(coro, index, value);
-            }
-            ThrowEtsInvalidKey(coro, key->GetClass()->GetDescriptor());
-            return false;
         });
     } else {
         // ASSERTION. LHS is not a JSValue
