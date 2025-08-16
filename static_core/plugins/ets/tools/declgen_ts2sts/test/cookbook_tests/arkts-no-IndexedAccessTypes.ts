@@ -13,10 +13,16 @@
  * limitations under the License.
  */
 
-type Person = {
+export type NonNull<T, K extends keyof T = keyof T> = NonNullable<T[K]>
+
+export function Get<Type extends {}, Key extends keyof Type = keyof Type, Value extends Type[Key] = Type[Key]>(key: Key,value: Type): NonNullable<Value> {
+  return value[key] as NonNullable<Value>
+}
+
+export type Person = {
     age: number;
     name: string;
     alive: boolean;
 }
 
-type Age = Person["age"];
+export type Age = Person["age"];
