@@ -269,12 +269,12 @@ uint8_t JSRuntimeInstanceOfStaticTypeIntrinsic(JSValue *object, EtsTypeAPIType *
     return JSRuntimeInstanceOfStaticType(object, paramType);
 }
 
-EtsObject *JSRuntimeInvokeIntrinsic(EtsObject *recv, EtsObject *func, ObjectHeader *args)
+EtsObject *JSRuntimeInvokeIntrinsic(EtsObject *recv, EtsObject *func, EtsObjectArray *args)
 {
     return JSRuntimeInvoke(recv, func, reinterpret_cast<EtsArray *>(args));
 }
 
-EtsObject *JSRuntimeInstantiateIntrinsic(EtsObject *callable, ObjectHeader *args)
+EtsObject *JSRuntimeInstantiateIntrinsic(EtsObject *callable, EtsObjectArray *args)
 {
     return JSRuntimeInstantiate(callable, reinterpret_cast<EtsArray *>(args));
 }
@@ -461,6 +461,11 @@ EtsLong InteropSerializeHelperSerializeHandleImplIntrinsic(JSValue *value)
 JSValue *InteropSerializeHelperDeserializeHandleImplIntrinsic(EtsLong value)
 {
     return DeserializeHandle(value);
+}
+
+EtsObject *JSRuntimeInvokeDynamicFunctionIntrinsic(EtsObject *thisObject, EtsObjectArray *args)
+{
+    return JSRuntimeInvokeDynamicFunction(thisObject, args);
 }
 
 }  // namespace ark::ets::interop::js::intrinsics

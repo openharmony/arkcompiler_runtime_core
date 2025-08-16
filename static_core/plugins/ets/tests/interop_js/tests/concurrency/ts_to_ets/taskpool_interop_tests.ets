@@ -236,11 +236,8 @@ function testCustomThrowError() {
             module.getProperty('CustomErrorFunc').invoke(ESValue.wrapString(CustomErrorMessage), ESValue.wrapNumber(CustomErrorCode));
             res = false;
     } catch (e: Error) {
-        let errObj: ESValue = (e as ESError).getValue()
-        let msg: ESValue = errObj.getProperty('message')
-        let code: ESValue = errObj.getProperty('code')
-        res = (e instanceof Error) && (msg.toString() == CustomErrorMessage) &&
-              (code.toNumber() == CustomErrorCode);
+        res = (e instanceof Error) && (e.message == CustomErrorMessage) &&
+              (e.code == CustomErrorCode);
         }
         return res;
     }

@@ -124,6 +124,8 @@ function(do_panda_ets_package TARGET)
                 COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:verifier> ${VERIFIER_ARGUMENTS} ${OUTPUT_ABC}
                 DEPENDS verifier ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc ${OUTPUT_ABC}
             )
+        else()
+            message(STATUS "do_panda_ets_package: Skip verify: ${TARGET}")
         endif()
     else()
         add_custom_command(

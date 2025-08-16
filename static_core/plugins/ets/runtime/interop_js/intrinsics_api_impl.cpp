@@ -24,8 +24,13 @@
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/interop_js/logger.h"
 #include "plugins/ets/runtime/interop_js/napi_impl/ark_napi_helper.h"
+#include "plugins/ets/runtime/interop_js/xref_object_operator.h"
+#include "plugins/ets/runtime/types/ets_array.h"
+#include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
-#include "types/ets_object.h"
+#include "runtime/coroutines/stackful_coroutine.h"
+#include "runtime/include/class_linker-inl.h"
+#include "runtime/include/object_header.h"
 
 // NOLINTBEGIN(readability-identifier-naming, readability-redundant-declaration)
 // CC-OFFNXT(G.FMT.10-CPP) project code style
@@ -867,43 +872,12 @@ EtsObject *JSRuntimeInvoke(EtsObject *recv, EtsObject *func, EtsArray *args)
             argsVec.emplace_back(VMHandle<ObjectHeader>(coro, objHeader));
         }
     }
+
     Span<VMHandle<ObjectHeader>> internalArgs = Span<VMHandle<ObjectHeader>>(argsVec.data(), argc);
     if (recv == nullptr) {
         return EtsCall(coro, func, internalArgs);
     }
-
-    auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
-    auto env = ctx->GetJSEnv();
-    NapiScope jsHandleScope(env);
-
-    PandaVector<TaggedType> realArgs;
-
-    for (size_t i = 0; i < args->GetLength(); i++) {
-        auto objHeader = args->GetCoreType()->Get<ObjectHeader *>(i);
-        if (objHeader == nullptr) {
-            break;
-        }
-
-        auto t = helpers::TypeIdentity<JSConvertEtsObject>();
-        using Convertor = typename decltype(t)::type;
-        using Cpptype = typename Convertor::cpptype;
-        Cpptype value = (EtsObject::FromCoreType(objHeader));
-        auto argTaggedType = ArkNapiHelper::GetTaggedType(Convertor::Wrap(env, value));
-        realArgs.push_back(argTaggedType);
-    }
-    auto jsThis = JSConvertEtsObject::WrapWithNullCheck(env, recv);
-    auto thisTaggedType = ArkNapiHelper::GetTaggedType(jsThis);
-    auto funcNapiValue = JSConvertEtsObject::WrapWithNullCheck(env, func);
-    auto funcTaggedType = ArkNapiHelper::GetTaggedType(funcNapiValue);
-    auto retVal = common::DynamicObjectAccessorUtil::CallFunction(thisTaggedType, funcTaggedType, realArgs.size(),
-                                                                  realArgs.data());
-
-    if (NapiIsExceptionPending(env)) {
-        ctx->ForwardJSException(coro);
-        return nullptr;
-    }
-    return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, ArkNapiHelper::ToNapiValue(retVal)).value();
+    return EtsCallThis(coro, recv, func, internalArgs);
 }
 
 EtsObject *JSRuntimeInstantiate(EtsObject *callable, EtsArray *args)
@@ -1767,6 +1741,24 @@ JSValue *DeserializeHandle(EtsLong value)
     INTEROP_FATAL_IF(status != napi_ok);
 
     return JSValue::Create(coro, ctx, retVal);
+}
+
+EtsObject *JSRuntimeInvokeDynamicFunction(EtsObject *functionObject, EtsObjectArray *args)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
+
+    HandleScope<ObjectHeader *> scope(coro);
+    auto staticArgs = args;
+    PandaVector<VMHandle<ObjectHeader>> argsVec;
+    argsVec.reserve(staticArgs->GetLength());
+    for (size_t idx = 0; idx != staticArgs->GetLength(); idx++) {
+        ObjectHeader *argHeader = staticArgs->Get(idx)->GetCoreType();
+        argsVec.emplace_back(VMHandle<ObjectHeader>(coro, argHeader));
+    }
+
+    auto xRefObjectOperator = XRefObjectOperator::FromEtsObject(functionObject);
+    return xRefObjectOperator.Invoke(coro, Span<VMHandle<ObjectHeader>>(argsVec.data(), argsVec.size()));
 }
 
 }  // namespace ark::ets::interop::js
