@@ -23,6 +23,12 @@ export function foo1(x: string): string {
 
 export class X {
     s: string = ""
+    n: number = 0
+    constructor(...nums: number[]) {
+        for(let num of nums) {
+            this.n += num
+        }
+    }
 }
 
 export class Y {
