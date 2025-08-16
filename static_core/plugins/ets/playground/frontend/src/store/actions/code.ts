@@ -20,6 +20,7 @@ import {handleResponseLogs} from '../../models/logs';
 import { RootState } from '..';
 import { clearErrLogs, clearOutLogs } from './logs';
 import { setOptionsPicked } from '../slices/options';
+import { setClearHighLightErrs } from '../slices/logs';
 
 export const fetchCompileCode = createAsyncThunk(
     '@code/compileCode',
@@ -32,6 +33,7 @@ export const fetchCompileCode = createAsyncThunk(
         const appState = state?.appState || false;
         const logsState = state?.logs || [];
         const optionsState = state.options || {};
+        thunkAPI.dispatch(setClearHighLightErrs([]));
         if (appState.clearLogsEachRun) {
             thunkAPI.dispatch(clearOutLogs());
             thunkAPI.dispatch(clearErrLogs());
@@ -63,6 +65,7 @@ export const fetchRunCode = createAsyncThunk(
         const appState = state?.appState || false;
         const logsState = state?.logs;
         const optionsState = state?.options || {};
+        thunkAPI.dispatch(setClearHighLightErrs([]));
         if (appState.clearLogsEachRun) {
             thunkAPI.dispatch(clearOutLogs());
             thunkAPI.dispatch(clearErrLogs());

@@ -56,6 +56,7 @@ export const mockAllState: RootState = {
         verifierErr: [],
         out: [],
         err: [],
+        highlightErrors: []
     },
 };
 describe('Redux Selectors', () => {

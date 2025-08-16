@@ -27,6 +27,14 @@ interface IState {
     verifierErr: ILog[]
     out: ILog[]
     err: ILog[]
+    highlightErrors: HighlightError[];
+}
+
+export interface HighlightError {
+    message: string;
+    line: number;
+    column: number;
+    type?: string
 }
 
 const initialState: IState = {
@@ -39,7 +47,8 @@ const initialState: IState = {
     verifierOut: [],
     verifierErr: [],
     out: [],
-    err: []
+    err: [],
+    highlightErrors: []
 };
 
 const logsSlice = createSlice({
@@ -76,6 +85,12 @@ const logsSlice = createSlice({
         setErrLogs(state, action: PayloadAction<ILog[]>) {
             state.err = action.payload;
         },
+        setHighlightErrors: (state, action) => {
+            state.highlightErrors = state.highlightErrors.concat(action.payload);
+        },
+        setClearHighLightErrs: (state, action) => {
+            state.highlightErrors = [];
+        }
     }
 });
 
@@ -89,7 +104,9 @@ export const {
     setVerifierOutLogs,
     setVerifierErrLogs,
     setOutLogs,
-    setErrLogs
+    setErrLogs,
+    setHighlightErrors,
+    setClearHighLightErrs
 } = logsSlice.actions;
 
 export default logsSlice.reducer;

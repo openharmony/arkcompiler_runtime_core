@@ -22,6 +22,7 @@ import {
     selectDisasmErrLogs,
     selectOutLogs,
     selectErrLogs,
+    selectHighlightErrors,
 } from './logs';
 import { RootState } from '..';
 import {mockAllState} from './appState.test';
@@ -42,6 +43,7 @@ describe('Log Selectors', () => {
                 verifierErr: [{ message: 'verifier error log', isRead: false }],
                 out: [{ message: 'general output log', isRead: true }],
                 err: [{ message: 'general error log', isRead: false }],
+                highlightErrors: []
             },
         };
     });
@@ -84,5 +86,13 @@ describe('Log Selectors', () => {
     it('should select general error logs', () => {
         expect(selectErrLogs(mockState))
             .toEqual([{ message: 'general error log', isRead: false }]);
+    });
+    it('should select highlight errors', () => {
+        mockState.logs.highlightErrors = [
+            { line: 1, column: 2, message: 'Syntax error' },
+        ];
+        expect(selectHighlightErrors(mockState)).toEqual([
+            { line: 1, column: 2, message: 'Syntax error' },
+        ]);
     });
 });
