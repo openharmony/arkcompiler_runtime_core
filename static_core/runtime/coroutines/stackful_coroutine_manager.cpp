@@ -247,19 +247,13 @@ bool StackfulCoroutineManager::IsCoroutineSwitchDisabled()
     return GetCurrentWorker()->IsCoroutineSwitchDisabled();
 }
 
-void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime *runtime, PandaVM *vm)
+void StackfulCoroutineManager::Initialize(Runtime *runtime, PandaVM *vm)
 {
     // enable stats collection if needed
-    if (config.enablePerfStats) {
+    if (GetConfig().enablePerfStats) {
         stats_.Enable();
     }
     ScopedCoroutineStats s(&stats_, CoroutineTimeStats::INIT);
-    // set feature flags
-    enableDrainQueueIface_ = config.enableDrainQueueIface;
-    enableMigration_ = config.enableMigration;
-    migrateAwakenedCoros_ = config.migrateAwakenedCoros;
-    externalTimerEnabled_ = config.enableExternalTimer;
-
     // set limits
     coroStackSizeBytes_ = Runtime::GetCurrent()->GetOptions().GetCoroutineStackSizePages() * os::mem::GetPageSize();
     if (coroStackSizeBytes_ != AlignUp(coroStackSizeBytes_, PANDA_POOL_ALIGNMENT_IN_BYTES)) {
@@ -270,7 +264,7 @@ void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime
     size_t coroStackAreaSizeBytes = Runtime::GetCurrent()->GetOptions().GetCoroutinesStackMemLimit();
     coroutineCountLimit_ = coroStackAreaSizeBytes / coroStackSizeBytes_;
 
-    CalculateWorkerLimits(config, exclusiveWorkersLimit_, commonWorkersCount_);
+    CalculateWorkerLimits(exclusiveWorkersLimit_, commonWorkersCount_);
     CalculateUserCoroutinesLimits(userCoroutineCountLimit_,
                                   Runtime::GetCurrent()->GetOptions().GetCoroutinesUserLimit());
 
@@ -283,7 +277,7 @@ void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime
                                << " coroutine workers";
         programCompletionEvent_ = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>(this);
     }
-    if (enableMigration_) {
+    if (GetConfig().enableMigration) {
         StartManagerThread();
     }
 }
@@ -779,7 +773,7 @@ void StackfulCoroutineManager::MainCoroutineCompleted()
     LOG(DEBUG, COROUTINES)
         << "StackfulCoroutineManager::MainCoroutineCompleted(): waiting for other coroutines to complete";
     WaitForNonMainCoroutinesCompletion();
-    if (enableMigration_) {
+    if (GetConfig().enableMigration) {
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::MainCoroutineCompleted(): stop manager thread";
         StopManagerThread();
     }
@@ -919,7 +913,7 @@ void StackfulCoroutineManager::OnCoroBecameNonActive([[maybe_unused]] Coroutine 
 
 void StackfulCoroutineManager::OnNativeCallExit(Coroutine *co)
 {
-    if (IsDrainQueueInterfaceEnabled()) {
+    if (GetConfig().enableDrainQueueIface) {
         // A temporary hack for draining the coroutine queue on the current worker.
         // Will stay there until we have the proper design for the execution model and
         // the rules for interaction with the app framework.
@@ -1156,7 +1150,7 @@ void StackfulCoroutineManager::TriggerMigration()
     if (worker->IsMainWorker() || worker->InExclusiveMode()) {
         return;
     }
-    if (!IsMigrationEnabled()) {
+    if (!GetConfig().enableMigration) {
         LOG(DEBUG, COROUTINES) << "Migration is not supported.";
         return;
     }
@@ -1239,7 +1233,7 @@ CoroutineWorkerGroup::Id StackfulCoroutineManager::GenerateWorkerGroupId(Corouti
 void StackfulCoroutineManager::PreZygoteFork()
 {
     WaitForNonMainCoroutinesCompletion();
-    if (enableMigration_) {
+    if (GetConfig().enableMigration) {
         StopManagerThread();
     }
 
@@ -1251,7 +1245,7 @@ void StackfulCoroutineManager::PostZygoteFork()
     os::memory::LockHolder lh(workersLock_);
     Runtime *runtime = Runtime::GetCurrent();
     CreateWorkers(commonWorkersCount_ - 1, runtime, runtime->GetPandaVM());
-    if (enableMigration_) {
+    if (GetConfig().enableMigration) {
         StartManagerThread();
     }
 }
@@ -1279,15 +1273,14 @@ void StackfulCoroutineManager::CalculateUserCoroutinesLimits(size_t &userCorouti
     userCoroutineCountLimit = limit;
 }
 
-void StackfulCoroutineManager::CalculateWorkerLimits(const CoroutineManagerConfig &config,
-                                                     size_t &exclusiveWorkersLimit, size_t &commonWorkersLimit)
+void StackfulCoroutineManager::CalculateWorkerLimits(size_t &exclusiveWorkersLimit, size_t &commonWorkersLimit)
 {
     // 1 is for MAIN
     size_t eWorkersLimit =
-        std::min(AffinityMask::MAX_WORKERS_COUNT - 1, static_cast<size_t>(config.exclusiveWorkersLimit));
+        std::min(AffinityMask::MAX_WORKERS_COUNT - 1, static_cast<size_t>(GetConfig().exclusiveWorkersLimit));
 
     // add preallocated exclusive workers count
-    eWorkersLimit += config.preallocatedExclusiveWorkersCount;
+    eWorkersLimit += GetConfig().preallocatedExclusiveWorkersCount;
 
     // create and activate workers
     size_t numberOfAvailableCores = std::max(std::thread::hardware_concurrency() / 4ULL, 2ULL);
@@ -1296,10 +1289,10 @@ void StackfulCoroutineManager::CalculateWorkerLimits(const CoroutineManagerConfi
     const size_t maxCommonWorkers =
         std::max(AffinityMask::MAX_WORKERS_COUNT - eWorkersLimit, static_cast<size_t>(2ULL));
 
-    commonWorkersLimit = (config.workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO)
+    commonWorkersLimit = (GetConfig().workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO)
                              ? std::min(numberOfAvailableCores, maxCommonWorkers)
-                             : std::min(static_cast<size_t>(config.workersCount), maxCommonWorkers);
-    if (config.workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO) {
+                             : std::min(static_cast<size_t>(GetConfig().workersCount), maxCommonWorkers);
+    if (GetConfig().workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO) {
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager(): AUTO mode selected, will set number of coroutine "
                                   "common workers to number of CPUs / 4, but not less than 2 and no more than "
                                << maxCommonWorkers << " = " << commonWorkersLimit;

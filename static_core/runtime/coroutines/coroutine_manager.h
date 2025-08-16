@@ -25,27 +25,35 @@
 
 namespace ark {
 
+// For now, it is much more readable to store the config in a struct with constants, instead of having
+// a class with numerous accessors. Can be reconsidered in future if the config becomes something more than POD.
+// The member naming is directly related: THIS_MEMBER_NAME_CASE_STYLE has poor redability in this case.
+// NOLINTBEGIN(readability-identifier-naming, misc-non-private-member-variables-in-classes)
+
 /// @brief describes the set of adjustable parameters for CoroutineManager and its descendants initialization
 struct CoroutineManagerConfig {
     static constexpr uint32_t WORKERS_COUNT_AUTO = 0;
 
     /// enable the experimental task execution interface
-    bool enableDrainQueueIface = false;
+    const bool enableDrainQueueIface = false;
     /// enable migration
-    bool enableMigration = false;
+    const bool enableMigration = false;
     /// migrate coroutines that resumed from wait
-    bool migrateAwakenedCoros = false;
+    const bool migrateAwakenedCoros = false;
     /// Number of coroutine workers for the N:M mode
-    uint32_t workersCount = WORKERS_COUNT_AUTO;
+    const uint32_t workersCount = WORKERS_COUNT_AUTO;
     /// Limit on the number of exclusive coroutines workers
-    uint32_t exclusiveWorkersLimit = 0;
+    const uint32_t exclusiveWorkersLimit = 0;
     /// Collection of performance statistics
-    bool enablePerfStats = false;
+    const bool enablePerfStats = false;
     /// Enable external timer implementation
-    bool enableExternalTimer = false;
-    // number of exclusive workers created for runtime needs
-    uint32_t preallocatedExclusiveWorkersCount = 0;
+    const bool enableExternalTimer = false;
+    /// Number of exclusive workers created for runtime needs
+    const uint32_t preallocatedExclusiveWorkersCount = 0;
+
+    CoroutineManagerConfig() = delete;
 };
+// NOLINTEND(readability-identifier-naming, misc-non-private-member-variables-in-classes)
 
 /// @brief defines the scheduling policy for a coroutine. Maybe in future we would like to add more types.
 enum class CoroutineSchedulingPolicy {
@@ -108,7 +116,7 @@ public:
     NO_MOVE_SEMANTIC(CoroutineManager);
 
     /// Factory is used to create coroutines when needed. See CoroutineFactory for details.
-    explicit CoroutineManager(CoroutineFactory factory);
+    explicit CoroutineManager(const CoroutineManagerConfig &config, CoroutineFactory factory);
     ~CoroutineManager() override = default;
 
     /**
@@ -117,7 +125,7 @@ public:
      *
      * @param config describes the CoroutineManager operation mode
      */
-    virtual void Initialize(CoroutineManagerConfig config, Runtime *runtime, PandaVM *vm) = 0;
+    virtual void Initialize(Runtime *runtime, PandaVM *vm) = 0;
     /// Should be called after all execution is finished. Destroys the main coroutine.
     virtual void Finalize() = 0;
     /// Add coroutine to registry (used for enumeration and tracking) and perform all the required actions
@@ -331,8 +339,12 @@ public:
     virtual void PreZygoteFork() = 0;
     /// Called after Zygote fork to reinitialize and restart worker threads.
     virtual void PostZygoteFork() = 0;
-    /// NOTE(ivagin): all config-related stuff should be moved to some special class member
-    virtual bool IsExternalTimerEnabled() = 0;
+
+    /// read only (implying no const_casts!) version of the initial config
+    const CoroutineManagerConfig &GetConfig() const
+    {
+        return config_;
+    }
 
 protected:
     using EntrypointInfo = Coroutine::EntrypointInfo;
@@ -374,6 +386,9 @@ private:
     os::memory::Mutex idsLock_;
     std::bitset<MAX_COROUTINE_ID> coroutineIds_ GUARDED_BY(idsLock_);
     uint32_t lastCoroutineId_ GUARDED_BY(idsLock_) = UNINITIALIZED_COROUTINE_ID;
+
+    // the coroutine manager config
+    CoroutineManagerConfig config_;
 };
 
 /// Disables coroutine switch on the current worker for some scope. Can be used recursively.

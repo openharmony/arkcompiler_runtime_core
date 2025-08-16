@@ -18,7 +18,8 @@
 
 namespace ark {
 
-CoroutineManager::CoroutineManager(CoroutineFactory factory) : coFactory_(factory)
+CoroutineManager::CoroutineManager(const CoroutineManagerConfig &config, CoroutineFactory factory)
+    : coFactory_(factory), config_(config)
 {
     ASSERT(factory != nullptr);
 }

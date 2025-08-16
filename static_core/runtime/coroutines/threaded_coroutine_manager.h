@@ -36,11 +36,14 @@ public:
     NO_COPY_SEMANTIC(ThreadedCoroutineManager);
     NO_MOVE_SEMANTIC(ThreadedCoroutineManager);
 
-    explicit ThreadedCoroutineManager(CoroutineFactory factory) : CoroutineManager(factory) {}
+    explicit ThreadedCoroutineManager(const CoroutineManagerConfig &config, CoroutineFactory factory)
+        : CoroutineManager(config, factory)
+    {
+    }
     ~ThreadedCoroutineManager() override = default;
 
     /* CoroutineManager interfaces, see CoroutineManager class for the details */
-    void Initialize(CoroutineManagerConfig config, Runtime *runtime, PandaVM *vm) override;
+    void Initialize(Runtime *runtime, PandaVM *vm) override;
     void Finalize() override;
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
@@ -74,10 +77,6 @@ public:
     {
         return false;
     };
-    bool IsExternalTimerEnabled() override
-    {
-        return false;
-    }
 
 protected:
     bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int incMask,
