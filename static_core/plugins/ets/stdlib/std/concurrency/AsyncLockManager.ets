@@ -21,7 +21,11 @@ package std.concurrency;
  */
 class AsyncLockManager {
 
-    internal constructor() {}
+    internal constructor() {
+        this.finreg = new FinalizationRegistry<String>((s: String) => {
+            this.locks.delete(s)
+        });
+    }
 
     /**
     * Find or create an instance of AsyncLock using the specified name.
@@ -101,9 +105,7 @@ class AsyncLockManager {
 
     internal locks: Map<string, WeakRef<AsyncLock>> = new Map<string, WeakRef<AsyncLock>>();
     private mutex: Object = ConcurrencyHelpers.mutexCreate();
-    private finreg: FinalizationRegistry<String> = new FinalizationRegistry<String>((s: String) => {
-            this.locks.delete(s)
-        }); 
+    private finreg: FinalizationRegistry<String> 
 }
 
 const asyncLockManager: AsyncLockManager;

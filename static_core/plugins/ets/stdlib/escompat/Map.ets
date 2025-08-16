@@ -71,13 +71,15 @@ export interface ReadonlyMap<K, V> extends Iterable<[K, V]> {
 }
 
 final class MapEntry<K, V> {
-    prev: MapEntry<K, V> = this
-    next: MapEntry<K, V> = this
+    prev: MapEntry<K, V>
+    next: MapEntry<K, V>
 
     key: K
     val: V
 
     constructor(key: K, val: V) {
+        this.prev = this
+        this.next = this
         this.key = key
         this.val = val
     }
