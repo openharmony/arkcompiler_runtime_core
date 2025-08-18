@@ -14,11 +14,6 @@
  */
 
 let etsVm = globalThis.gtest.etsVm;
-let checkReadonlyDataFromTs = etsVm.getFunction('Ltest_sts_readonly/ETSGLOBAL;', 'checkReadonlyDataFromTs');
-let checkWritableDataFromTs = etsVm.getFunction('Ltest_sts_readonly/ETSGLOBAL;', 'checkWritableDataFromTs');
-let checkReadonlyDataInEts = etsVm.getFunction('Ltest_sts_readonly/ETSGLOBAL;', 'checkReadonlyDataInEts');
-let checkWritableDataInEts = etsVm.getFunction('Ltest_sts_readonly/ETSGLOBAL;', 'checkWritableDataInEts');
-let checkDataEts = etsVm.getFunction('Ltest_sts_readonly/ETSGLOBAL;', 'checkDataEts');
 
 export class Test {
 	public name: string;
@@ -45,6 +40,12 @@ export function checkReadonlyDataInTs(data: ReadonlyTypeTest): number {
 export function checkWritableDataInTs(data: WritableTypeTest): number {
 	return data.data1 + data.data2;
 }
+
+let checkReadonlyDataFromTs = etsVm.getFunction('Ltest_sts_readonly/ETSGLOBAL;', 'checkReadonlyDataFromTs');
+let checkWritableDataFromTs = etsVm.getFunction('Ltest_sts_readonly/ETSGLOBAL;', 'checkWritableDataFromTs');
+let checkReadonlyDataInEts = etsVm.getFunction('Ltest_sts_readonly/ETSGLOBAL;', 'checkReadonlyDataInEts');
+let checkWritableDataInEts = etsVm.getFunction('Ltest_sts_readonly/ETSGLOBAL;', 'checkWritableDataInEts');
+let checkDataEts = etsVm.getFunction('Ltest_sts_readonly/ETSGLOBAL;', 'checkDataEts');
 
 ASSERT_TRUE(checkReadonlyDataFromTs() === 3);
 ASSERT_TRUE(checkWritableDataFromTs() === 7);
