@@ -24,8 +24,6 @@
 extern "C" {
 #endif
 
-#define ARKTS_INTEROP_EXPORT __attribute__((visibility("default")))
-
 /**
  * @brief Opens scope where N-API usage is allowed.
  *
@@ -37,7 +35,7 @@ extern "C" {
  * @param[out] result A pointer to store `napi_env` corresponding to the opened scope.
  * @returns true if the scope was opened successful, false otherwise.
  */
-ARKTS_INTEROP_EXPORT bool arkts_napi_scope_open(ani_env *env, napi_env *result);
+__attribute__((visibility("default"))) bool arkts_napi_scope_open(ani_env *env, napi_env *result);
 
 /**
  * @brief Destroys the current N-API scope and propagates references.
@@ -53,7 +51,8 @@ ARKTS_INTEROP_EXPORT bool arkts_napi_scope_open(ani_env *env, napi_env *result);
  * @param[out] result A pointer to store `Any` references to `values`. Must be non null if `nValues` is not 0.
  * @returns true if the scope was destroyed successful, false otherwise.
  */
-ARKTS_INTEROP_EXPORT bool arkts_napi_scope_close_n(napi_env env, size_t nValues, napi_value *values, ani_ref *result);
+__attribute__((visibility("default"))) bool arkts_napi_scope_close_n(napi_env env, size_t nValues, napi_value *values,
+                                                                     ani_ref *result);
 
 #ifdef __cplusplus
 }

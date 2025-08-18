@@ -1783,6 +1783,26 @@ intrinsics:
       args: [escompat.ArrayBuffer, std.core.String, i32, i32]
     impl: ark::ets::intrinsics::EtsArrayBufferToString
 
+  - name: EtsArrayBufferRegisterWeakRef
+    space: ets
+    class_name: escompat.ArrayBuffer
+    method_name: registerWeakRef
+    static: true
+    signature:
+      ret: std.core.Object
+      args: [ escompat.ArrayBuffer, i64, i64 ]
+    impl: ark::ets::intrinsics::EtsArrayBufferRegisterWeakRef
+
+  - name: EtsArrayBufferUnregisterWeakRef
+    space: ets
+    class_name: escompat.ArrayBuffer
+    method_name: unregisterWeakRef
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsArrayBufferUnregisterWeakRef
+
   - name: Int8ArraySetInt
     space: ets
     class_name: escompat.Int8Array

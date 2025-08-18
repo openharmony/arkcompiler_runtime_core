@@ -17,6 +17,7 @@
 #include <limits>
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/tests/native/native_test_helper.h"
+#include "plugins/ets/runtime/libani_helpers/external_array_buffer.h"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)
 
@@ -32,8 +33,9 @@ static constexpr int THREE_HUNDRED_FOURTY_FIVE = 345;
 static constexpr const char *CHECK_ARRAY_BUFFER_FUNCTION = "checkCreatedArrayBuffer";
 static constexpr const char *IS_DETACHED = "isDetached";
 
-static void TestFinalizer(void *data, [[maybe_unused]] void *finalizerHint)
+static void TestFinalizer(void *data, void *expectedData)
 {
+    ASSERT_EQ(data, expectedData);
     delete[] reinterpret_cast<int64_t *>(data);
 }
 
@@ -85,7 +87,7 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferCreateExternalEmpty)
 {
     ani_arraybuffer arrayBuffer;
     void *data = new int64_t[0];
-    auto status = DoCreateExternalArrayBuffer(env_, data, 0, TestFinalizer, nullptr, &arrayBuffer);
+    auto status = CreateFinalizableArrayBuffer(env_, data, 0, TestFinalizer, data, &arrayBuffer);
     ASSERT_EQ(status, ANI_OK);
     ASSERT_NE(arrayBuffer, nullptr);
     CheckUnhandledError(env_);
@@ -110,7 +112,7 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferCreateExternalWithLength)
     data[1] = TWO_HUNDRED_THIRTY_FOUR;
     data[TWO] = THREE_HUNDRED_FOURTY_FIVE;
 
-    auto status = DoCreateExternalArrayBuffer(env_, data, TWENTY_FOUR, TestFinalizer, nullptr, &arrayBuffer);
+    auto status = CreateFinalizableArrayBuffer(env_, data, THREE, TestFinalizer, data, &arrayBuffer);
     ASSERT_EQ(status, ANI_OK);
     ASSERT_NE(arrayBuffer, nullptr);
     CheckUnhandledError(env_);
@@ -120,13 +122,13 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferCreateExternalWithLength)
     auto resultStatus = env_->ArrayBuffer_GetInfo(arrayBuffer, reinterpret_cast<void **>(&resultData), &resultLength);
     ASSERT_EQ(resultStatus, ANI_OK);
     ASSERT_EQ(resultData, data);
-    ASSERT_EQ(resultLength, TWENTY_FOUR);
+    ASSERT_EQ(resultLength, THREE);
     ASSERT_EQ(resultData[0], HUNDRED_TWENTY_THREE);
     ASSERT_EQ(resultData[1], TWO_HUNDRED_THIRTY_FOUR);
     ASSERT_EQ(resultData[TWO], THREE_HUNDRED_FOURTY_FIVE);
 
     ani_boolean bufferIsExpected = ANI_FALSE;
-    CallEtsFunction(&bufferIsExpected, "NativeTest", CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, TWENTY_FOUR);
+    CallEtsFunction(&bufferIsExpected, "NativeTest", CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, THREE);
     ASSERT_EQ(bufferIsExpected, ANI_TRUE);
 }
 
@@ -139,17 +141,17 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferDetachNonDetachable)
     ASSERT_NE(arrayBuffer, nullptr);
     CheckUnhandledError(env_);
 
-    bool result = false;
-    auto resultStatus = ArrayBufferIsDetached(env_, arrayBuffer, &result);
+    ani_boolean result = ANI_FALSE;
+    auto resultStatus = IsDetachedArrayBuffer(env_, arrayBuffer, &result);
     ASSERT_EQ(resultStatus, ANI_OK);
-    ASSERT_EQ(result, false);
+    ASSERT_EQ(result, ANI_FALSE);
 
-    auto resultstatus1 = ArrayBufferDetach(env_, arrayBuffer);
+    auto resultstatus1 = DetachArrayBuffer(env_, arrayBuffer);
     ASSERT_EQ(resultstatus1, ANI_INVALID_ARGS);
 
-    auto resultstatus2 = ArrayBufferIsDetached(env_, arrayBuffer, &result);
+    auto resultstatus2 = IsDetachedArrayBuffer(env_, arrayBuffer, &result);
     ASSERT_EQ(resultstatus2, ANI_OK);
-    ASSERT_EQ(result, false);
+    ASSERT_EQ(result, ANI_FALSE);
 
     ani_boolean isDetached = ANI_FALSE;
     CallEtsFunction(&isDetached, "NativeTest", IS_DETACHED, arrayBuffer);
@@ -159,34 +161,35 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferDetachNonDetachable)
 TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferDetachDetachable)
 {
     ani_arraybuffer arrayBuffer;
-    auto *data = new int64_t[THREE];
+    // Buffer will be manually detached later in the test, so allocate buffer as `unique_ptr`
+    auto data = std::make_unique<int64_t[]>(THREE);  // NOLINT(modernize-avoid-c-arrays)
 
-    auto status = DoCreateExternalArrayBuffer(env_, data, TWENTY_FOUR, TestFinalizer, nullptr, &arrayBuffer);
+    auto status = CreateFinalizableArrayBuffer(env_, data.get(), THREE, TestFinalizer, data.get(), &arrayBuffer);
     ASSERT_EQ(status, ANI_OK);
     ASSERT_NE(arrayBuffer, nullptr);
     CheckUnhandledError(env_);
 
     ani_boolean bufferIsExpected = ANI_FALSE;
-    CallEtsFunction(&bufferIsExpected, "NativeTest", CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, TWENTY_FOUR);
+    CallEtsFunction(&bufferIsExpected, "NativeTest", CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, THREE);
     ASSERT_EQ(bufferIsExpected, ANI_TRUE);
 
-    bool result = false;
-    auto resultStatus = ArrayBufferIsDetached(env_, arrayBuffer, &result);
+    ani_boolean result = false;
+    auto resultStatus = IsDetachedArrayBuffer(env_, arrayBuffer, &result);
     ASSERT_EQ(resultStatus, ANI_OK);
-    ASSERT_EQ(result, false);
+    ASSERT_EQ(result, ANI_FALSE);
 
-    auto resultstatus1 = ArrayBufferDetach(env_, arrayBuffer);
+    auto resultstatus1 = DetachArrayBuffer(env_, arrayBuffer);
     ASSERT_EQ(resultstatus1, ANI_OK);
 
-    auto resultstatus2 = ArrayBufferIsDetached(env_, arrayBuffer, &result);
+    auto resultstatus2 = IsDetachedArrayBuffer(env_, arrayBuffer, &result);
     ASSERT_EQ(resultstatus2, ANI_OK);
-    ASSERT_EQ(result, true);
+    ASSERT_EQ(result, ANI_TRUE);
 
     ani_boolean isDetached = ANI_FALSE;
     CallEtsFunction(&isDetached, "NativeTest", IS_DETACHED, arrayBuffer);
     ASSERT_EQ(isDetached, ANI_TRUE);
 
-    auto resultstatus3 = ArrayBufferDetach(env_, arrayBuffer);
+    auto resultstatus3 = DetachArrayBuffer(env_, arrayBuffer);
     ASSERT_EQ(resultstatus3, ANI_INVALID_ARGS);
 
     CallEtsFunction(&isDetached, "NativeTest", IS_DETACHED, arrayBuffer);
@@ -216,22 +219,22 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferInvalidArgs)
 
     auto externalData = std::make_unique<int64_t[]>(THREE);  // NOLINT(modernize-avoid-c-arrays)
 
-    auto status4 = DoCreateExternalArrayBuffer(env_, externalData.get(), TWENTY_FOUR, TestFinalizer, nullptr, nullptr);
+    auto status4 = CreateFinalizableArrayBuffer(env_, externalData.get(), THREE, TestFinalizer, nullptr, nullptr);
     ASSERT_EQ(status4, ANI_INVALID_ARGS);
 
     ani_arraybuffer arrayBuffer5;
-    auto status5 = DoCreateExternalArrayBuffer(env_, externalData.get(), -1, TestFinalizer, nullptr, &arrayBuffer5);
+    auto status5 = CreateFinalizableArrayBuffer(env_, externalData.get(), -1, TestFinalizer, nullptr, &arrayBuffer5);
     ASSERT_EQ(status5, ANI_INVALID_ARGS);
 
     ani_arraybuffer arrayBuffer6;
-    auto status6 = DoCreateExternalArrayBuffer(env_, nullptr, TWENTY_FOUR, TestFinalizer, nullptr, &arrayBuffer6);
+    auto status6 = CreateFinalizableArrayBuffer(env_, nullptr, THREE, TestFinalizer, nullptr, &arrayBuffer6);
     ASSERT_EQ(status6, ANI_INVALID_ARGS);
 
     ani_arraybuffer arrayBuffer7;
-    auto status7 = DoCreateExternalArrayBuffer(env_, externalData.get(), TWENTY_FOUR, nullptr, nullptr, &arrayBuffer7);
+    auto status7 = CreateFinalizableArrayBuffer(env_, externalData.get(), THREE, nullptr, nullptr, &arrayBuffer7);
     ASSERT_EQ(status7, ANI_INVALID_ARGS);
 
-    auto status8 = DoCreateExternalArrayBuffer(env_, nullptr, 0, nullptr, nullptr, nullptr);
+    auto status8 = CreateFinalizableArrayBuffer(env_, nullptr, 0, nullptr, nullptr, nullptr);
     ASSERT_EQ(status8, ANI_INVALID_ARGS);
 
     ani_arraybuffer arrayBuffer9;
@@ -258,17 +261,17 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferInvalidArgs2)
     auto status11 = env_->ArrayBuffer_GetInfo(nullptr, &resultData11, &length11);
     ASSERT_EQ(status11, ANI_INVALID_ARGS);
 
-    bool result12;
-    auto status12 = ArrayBufferIsDetached(env_, nullptr, &result12);
+    ani_boolean result12;
+    auto status12 = IsDetachedArrayBuffer(env_, nullptr, &result12);
     ASSERT_EQ(status12, ANI_INVALID_ARGS);
 
     ani_arraybuffer arrayBuffer13;
     void *data13;
     ASSERT_EQ(env_->CreateArrayBuffer(EIGHT, &data13, &arrayBuffer13), ANI_OK);
-    auto status13 = ArrayBufferIsDetached(env_, arrayBuffer13, nullptr);
+    auto status13 = IsDetachedArrayBuffer(env_, arrayBuffer13, nullptr);
     ASSERT_EQ(status13, ANI_INVALID_ARGS);
 
-    auto status14 = ArrayBufferDetach(env_, nullptr);
+    auto status14 = DetachArrayBuffer(env_, nullptr);
     ASSERT_EQ(status14, ANI_INVALID_ARGS);
 
     CheckUnhandledError(env_);
