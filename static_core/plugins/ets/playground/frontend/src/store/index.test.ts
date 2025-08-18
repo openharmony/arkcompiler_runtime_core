@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,11 +66,11 @@ describe('Redux Store Configuration', () => {
     });
 
     it('should handle logs actions', () => {
-        const mockCompileLogs = [{ message: 'Compile success', isRead: false }];
+        const mockCompileLogs = [{ message: [{message: 'Compile success'}], isRead: false }];
         store.dispatch(setCompileOutLogs(mockCompileLogs));
         expect(store.getState().logs.compileOut).toEqual(mockCompileLogs);
 
-        const mockRunErrLogs = [{ message: 'Run error', isRead: false }];
+        const mockRunErrLogs = [{ message: [{message: 'Run error'}], isRead: false }];
         store.dispatch(setRunErrLogs(mockRunErrLogs));
         expect(store.getState().logs.runErr).toEqual(mockRunErrLogs);
     });

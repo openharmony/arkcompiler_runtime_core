@@ -13,6 +13,7 @@
  * limitations under the License.
  */
  
-.container > div {
-  padding: 12px 0;
+.editor {
+  margin-top: 12px;
+  background: var(--vscode-editorGutter-background);
 }

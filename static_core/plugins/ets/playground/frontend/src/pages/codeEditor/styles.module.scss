@@ -16,4 +16,25 @@
 .editor {
   margin-top: 12px;
   background: var(--vscode-editorGutter-background);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+.statusBar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12px;
+  padding: 4px 22px;
+  border-top: 1px solid rgba(127, 127, 127, 0.2);
+  color: var(--text-color);
+  opacity: 0.3;
+  background: var(--vscode-editorGutter-background);;
+}
+.editorContent {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
 }

@@ -93,11 +93,12 @@ const DisasmEditor: React.FC = () => {
             defaultValue={code}
             value={isCompileLoading || isRunLoading ? 'Loading...' : code}
             theme={theme === 'dark' ? 'vs-dark' : 'light'}
-            className={styles.container}
+            className={styles.editor}
             options={{
                 readOnly: true,
                 wordWrap: 'on',
                 minimap: { enabled: false },
+                automaticLayout: true
             }}
         />
     );

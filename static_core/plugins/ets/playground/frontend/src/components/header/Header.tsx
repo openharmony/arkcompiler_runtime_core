@@ -101,7 +101,7 @@ const exampleMenu = (
             </pre>
             <pre className={styles.preTag}>
                 <span className={styles.versionTitle}>es2panda:</span>
-                {versionsData?.es2panda}
+                {versionsData?.es2pandaVersion}
             </pre>
         </div>
     </Menu>
