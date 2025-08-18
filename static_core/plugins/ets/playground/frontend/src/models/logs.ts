@@ -18,6 +18,7 @@ import {
     setCompileErrLogs,
     setCompileOutLogs, setDisasmErrLogs, setDisasmOutLogs,
     setErrLogs,
+    setHighlightErrors,
     setOutLogs,
     setRunErrLogs,
     setRunOutLogs,
@@ -38,7 +39,7 @@ export enum ELogType {
 }
 
 export interface ILog {
-    message: string;
+    message: {message: string, line?: number, column?: number}[];
     isRead?: boolean;
     from?: ELogType;
 }
@@ -76,6 +77,56 @@ export interface IApiResponse {
     };
 }
 
+type HighlightItem = { message: string; line?: number; column?: number; type?: string };
+
+const collectHighlights = (str?: string): HighlightItem[] => {
+    if (!str) {
+        return [];
+    }
+
+    const re =
+    /(?<type>\w+(?:Error|Exception|Warning|Notice|Info|Debug|Fatal)?):\s+(?<msg>[\s\S]*?)\s+\[(?<file>[^\[\]]+?):(?<line>\d+):(?<col>\d+)\]/g;
+
+    const out: HighlightItem[] = [];
+
+    const pushPlainSegments = (text: string) => {
+        const parts = text.match(/(?:[\s\S]*?\n|[^\n]+$)/g) ?? [];
+        for (const p of parts) {
+            if (p === '') {
+                continue;
+            }
+            out.push({ message: p });
+        }
+    };
+
+    let last = 0;
+    for (const m of str.matchAll(re)) {
+        const start = m.index ?? 0;
+        const full = m[0] ?? '';
+        const end = start + full.length;
+
+        if (start > last) {
+            pushPlainSegments(str.slice(last, start));
+        }
+        const { type, msg, file, line, col } = (m.groups ?? {}) as {
+            type?: string; msg?: string; file?: string; line?: string; col?: string;
+        };
+
+        out.push({
+            message: `${type}: ${(msg ?? '').trim()} [${file ?? ''}:${line ?? ''}:${col ?? ''}]`,
+            line: line ? Number(line) : undefined,
+            column: col ? Number(col) : undefined,
+            type,
+        });
+        last = end;
+    }
+
+    if (last < str.length) {
+        pushPlainSegments(str.slice(last));
+    }
+    return out;
+};
+
 export const handleResponseLogs = createAsyncThunk(
     'logs/compileLogs',
     async (response: IApiResponse, thunkAPI) => {
@@ -97,28 +148,28 @@ export const handleResponseLogs = createAsyncThunk(
             if (data.output && data.error) {
                 thunkAPI.dispatch(setOutAction(
                     logsState.out.concat([{
-                        message: data.output,
+                        message: collectHighlights(data.output),
                         isRead: false,
                         from: logTypeOut
                     }])
                 ));
                 thunkAPI.dispatch(setOutLogs(
                     logsState.out.concat({
-                        message: data.output,
+                        message: collectHighlights(data.output),
                         isRead: false,
                         from: logTypeOut
                     })
                 ));
                 thunkAPI.dispatch(setErrAction(
                     logsState.err.concat([{
-                        message: data.error,
+                        message: collectHighlights(data.error),
                         isRead: false,
                         from: logTypeErr
                     }])
                 ));
                 thunkAPI.dispatch(setErrLogs(
                     logsState.err.concat({
-                        message: data.error,
+                        message: collectHighlights(data.error),
                         isRead: false,
                         from: logTypeErr
                     })
@@ -126,14 +177,14 @@ export const handleResponseLogs = createAsyncThunk(
             } else if (data.error) {
                 thunkAPI.dispatch(setErrAction(
                     logsState.err.concat([{
-                        message: data.error,
+                        message: collectHighlights(data.error),
                         isRead: false,
                         from: logTypeErr
                     }])
                 ));
                 thunkAPI.dispatch(setErrLogs(
                     logsState.err.concat({
-                        message: data.error,
+                        message: collectHighlights(data.error),
                         isRead: false,
                         from: logTypeErr
                     })
@@ -141,14 +192,14 @@ export const handleResponseLogs = createAsyncThunk(
             } else if ((data.exit_code === 0 || data.exit_code === 254) && data.output && !data.error) {
                 thunkAPI.dispatch(setOutAction(
                     logsState.out.concat({
-                        message: data.output,
+                        message: collectHighlights(data.output),
                         isRead: false,
                         from: logTypeOut
                     })
                 ));
                 thunkAPI.dispatch(setOutLogs(
                     logsState.out.concat({
-                        message: data.output,
+                        message: collectHighlights(data.output),
                         isRead: false,
                         from: logTypeOut
                     })
@@ -156,14 +207,14 @@ export const handleResponseLogs = createAsyncThunk(
             } else if (data.exit_code === 0 && !data.error && !data.output) {
                 thunkAPI.dispatch(setOutAction(
                     logsState.out.concat({
-                        message: successMessage,
+                        message: [{message: successMessage}],
                         isRead: false,
                         from: logTypeOut
                     })
                 ));
                 thunkAPI.dispatch(setOutLogs(
                     logsState.out.concat({
-                        message: successMessage,
+                        message: [{message: successMessage}],
                         isRead: false,
                         from: logTypeOut
                     })
@@ -171,19 +222,22 @@ export const handleResponseLogs = createAsyncThunk(
             } else if (data.exit_code && data.exit_code !== 0 && data.exit_code !== 254) {
                 thunkAPI.dispatch(setErrAction(
                     logsState.err.concat({
-                        message: data.output || `Exit code: ${data.exit_code}`,
+                        message: collectHighlights(data.output) || `Exit code: ${data.exit_code}`,
                         isRead: false,
                         from: logTypeErr
                     })
                 ));
                 thunkAPI.dispatch(setErrLogs(
                     logsState.err.concat({
-                        message: data.output || `Exit code: ${data.exit_code}`,
+                        message: collectHighlights(data.output) || `Exit code: ${data.exit_code}`,
                         isRead: false,
                         from: logTypeErr
                     })
                 ));
             }
+            const outHighlight = collectHighlights(data.output)
+            const errHighlight = collectHighlights(data.error)
+            thunkAPI.dispatch(setHighlightErrors([...outHighlight, ...errHighlight]));
         };
 
         handleLog(
