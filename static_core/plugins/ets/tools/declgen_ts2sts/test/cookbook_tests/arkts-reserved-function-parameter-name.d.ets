@@ -18,6 +18,11 @@ export declare namespace ns {
 }
 export declare function greet(_this: string): number;
 export declare const fun: (_this: number, a: number) => number;
+export declare const foo: (_short: number, _long: string, _int: number) => number;
+export declare const fox: (_byte: number, _char: string) => number;
+export declare const corge: (_float: string, _double: string) => string;
+export declare function grault(_boolean: number): void;
+export declare function waldo(_abstract: string, _async: string): void;
 export declare class A {
     value: number;
     foo(_this: A, a: number): void;

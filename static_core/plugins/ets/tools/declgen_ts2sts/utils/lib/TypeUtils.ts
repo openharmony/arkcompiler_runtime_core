@@ -141,5 +141,17 @@ export const FINAL_CLASS: string[] = [
     'VoidValue',
     'WeakRef'
 ];
-export const InvalidFuncParaNames: string[] = ['this'];
+export const InvalidFuncParaNames: Set<string> = new Set([
+    'this',
+    'short',
+    'long',
+    'int',
+    'char',
+    'byte',
+    'float',
+    'double',
+    'boolean',
+    'abstract',
+    'async'
+]);
 export const LIMIT_DECORATOR: string[] = ['Sendable', 'Concurrent'];

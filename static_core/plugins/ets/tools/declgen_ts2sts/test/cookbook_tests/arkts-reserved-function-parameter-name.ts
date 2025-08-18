@@ -32,3 +32,19 @@ export function greet(this: string) {
 export const fun = function bar(this: number, a: number): number {
     return a + 1
 }
+
+export const foo = function qux(short: number, long: string, int: number): number {
+    return short + 1
+}
+
+export const fox = function run(byte: number, char: string): number {
+    return byte + 1
+}
+
+export const corge = function plugh(float: string, double: string): string {
+    return float + double
+}
+
+export function grault(boolean: number): void { }
+
+export function waldo(abstract: string, async: string): void { }
