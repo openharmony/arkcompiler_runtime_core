@@ -12,26 +12,19 @@
 # limitations under the License.
 
 cases:
-  # functions
   - decl: |-
-      function fun(x: int): string { return x.toString()}
+      import {bar} from './declarations_n.d'
     use: |-
-      arktest.assertEQ(fun(1), '1');
+      bar('3')  // should be verification error
+
   - decl: |-
-      function foo(x: number, y: string, z: Object[]): double { 
-        return (x * y.length * z.length).toDouble();
-      }
+      import {B} from './declarations_n.d'
     use: |-
-      arktest.assertEQ(foo(1, '1', ['', 1]), 2.0);
+      let b: B = new B(4)
+      b.foo(4) // should be verification error
+    
   - decl: |-
-      export function bar<U, V, R>(x: U, y: V): R {
-        return JSON.stringify([x, y]) as R
-      }
+      import {C} from './declarations_n.d'
     use: |-
-      arktest.assertEQ(bar<number, number, string>(5, 5), '[5,5]');
-  - decl: |-
-      function baz(y: string, x?: int): string {
-        return x ? x.toString() : y;
-      }
-    use: |-
-      arktest.assertEQ(baz('', 1), '1');
+      let c: C = new C('4')
+      c.foo('4') // should be verification error

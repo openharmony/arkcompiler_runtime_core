@@ -13,12 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for decl in declarations %}
+{% for c in cases %}
 /*---
 desc: Ambient Function declarations
-tags: [compile-only]
+files: ['./function_declarations.d.ets']
 ---*/
 
-declare {{decl}}
+{{c.decl}}
+
+function main() {
+   {{c.use|indent}}
+}
 
 {% endfor %}

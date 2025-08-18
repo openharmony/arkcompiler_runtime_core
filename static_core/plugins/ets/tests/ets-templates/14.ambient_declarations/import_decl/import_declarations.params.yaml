@@ -12,26 +12,25 @@
 # limitations under the License.
 
 cases:
-  # functions
   - decl: |-
-      function fun(x: int): string { return x.toString()}
+      import {foo, bar} from './declarations.d'
     use: |-
-      arktest.assertEQ(fun(1), '1');
+      arktest.assertEQ(foo(''), 1)
+      arktest.assertEQ(bar(''), 3)
+
   - decl: |-
-      function foo(x: number, y: string, z: Object[]): double { 
-        return (x * y.length * z.length).toDouble();
-      }
+      import {A,B} from './declarations.d'
     use: |-
-      arktest.assertEQ(foo(1, '1', ['', 1]), 2.0);
+      let a: A = new A('2')
+      arktest.assertEQ(a.x, '2')
+      let b: B = new B(4)
+      arktest.assertEQ(b.x, 4)
+    
   - decl: |-
-      export function bar<U, V, R>(x: U, y: V): R {
-        return JSON.stringify([x, y]) as R
-      }
+      import {A,B} from './declarations.d'
     use: |-
-      arktest.assertEQ(bar<number, number, string>(5, 5), '[5,5]');
-  - decl: |-
-      function baz(y: string, x?: int): string {
-        return x ? x.toString() : y;
-      }
-    use: |-
-      arktest.assertEQ(baz('', 1), '1');
+      let a: A = new A('2')
+      arktest.assertEQ(a.foo(), '2')
+      let b: B = new B(4)
+      arktest.assertEQ(b.foo(), 4)
+

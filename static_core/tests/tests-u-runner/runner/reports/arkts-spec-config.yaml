@@ -892,6 +892,9 @@
     title: Ambient Function Declarations
     status: ''
 '14.3':
+    title: Ambient Overload Function Declarations
+    status: ''
+'14.3':
     title: Ambient Class Declarations
     status: ''
 14.3.1:

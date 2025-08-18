@@ -14,24 +14,22 @@
 cases:
   # functions
   - decl: |-
-      function fun(x: int): string { return x.toString()}
+      fun
     use: |-
       arktest.assertEQ(fun(1), '1');
+      arktest.assertEQ(fun('1'), '1');
   - decl: |-
-      function foo(x: number, y: string, z: Object[]): double { 
-        return (x * y.length * z.length).toDouble();
-      }
+      N
     use: |-
-      arktest.assertEQ(foo(1, '1', ['', 1]), 2.0);
+      arktest.assertEQ(N.foo(1, '1'), 1.0);
+      arktest.assertEQ(N.foo(1, '1', ['1', '2']), 2.0);
   - decl: |-
-      export function bar<U, V, R>(x: U, y: V): R {
-        return JSON.stringify([x, y]) as R
-      }
+      bar
     use: |-
       arktest.assertEQ(bar<number, number, string>(5, 5), '[5,5]');
+      arktest.assertEQ(bar<number, number, string>(5), '5');
   - decl: |-
-      function baz(y: string, x?: int): string {
-        return x ? x.toString() : y;
-      }
+      baz
     use: |-
       arktest.assertEQ(baz('', 1), '1');
+      arktest.assertEQ(baz('1'), '11');
