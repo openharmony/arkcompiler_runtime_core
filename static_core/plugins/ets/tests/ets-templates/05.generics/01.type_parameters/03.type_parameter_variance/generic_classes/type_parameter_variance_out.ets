@@ -17,6 +17,7 @@
 
 /*---
 desc: Test of covariant _out_ type parameter modifier. 
+tags: [compile-only, {{c.tag}}]
 ---*/
 
 class A<out T> {
