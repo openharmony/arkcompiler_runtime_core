@@ -67,6 +67,13 @@ napi_value GetETSClassImpl(napi_env env, std::string_view classDescriptor)
         return nullptr;
     }
 
+    // When a module class is imported by dynamic runtime,
+    // initialize the class to ensure top-level statements are executed.
+    // ** ClassLinker::InitializeClass() is a run-once method. **
+    if (UNLIKELY(etsKlass->IsModule())) {
+        coro->GetPandaVM()->GetClassLinker()->InitializeClass(coro, etsKlass);
+    }
+
     EtsClassWrapper *etsClassWrapper = EtsClassWrapper::Get(ctx, etsKlass);
     if (UNLIKELY(etsClassWrapper == nullptr)) {
         return nullptr;
