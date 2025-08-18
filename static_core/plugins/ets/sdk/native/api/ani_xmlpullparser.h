@@ -85,13 +85,14 @@ private:
         };
 
         explicit ParseInfoClassCache(ani_env *env);
+        ~ParseInfoClassCache();
         ani_object New() const;
-        ani_status InitFieldCache(ani_field &cache, const char *name, const FieldIndex index);
+        void InitFieldCache();
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define FIELD_SETTER(_cache, func, _item, type, _typeName) \
     /* CC-OFFNXT(G.PRE.09) function defination */          \
-    ani_status Set##func(ani_object object, type value);
+    ani_status Set##func(ani_object object, type value) const;
         PARSE_INFO_FIELD_LIST(FIELD_SETTER)
 #undef FIELD_SETTER
     private:
@@ -99,7 +100,6 @@ private:
         ani_class cachedClass_ {};
         ani_method constructor_ {};
 
-        uint16_t fieldCacheState_ {0};
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CACHED_FIELD(cache, _func, _item, _type, _typeName) \
     /* CC-OFFNXT(G.PRE.09) member defination */             \
@@ -108,8 +108,8 @@ private:
 #undef CACHED_FIELD
     };
 
-    explicit XmlPullParser(std::string strXml) : strXml_(std::move(strXml)) {};
-    ~XmlPullParser() = default;
+    XmlPullParser(ani_env *env, std::string strXml);
+    ~XmlPullParser();
 
     std::string XmlPullParserError() const;
     void Parse(ani_env *env);
@@ -154,9 +154,9 @@ private:
 
     bool ParseTag(ani_env *env) const;
     bool ParseAttr(ani_env *env) const;
-    bool ParseToken(ani_env *env, ParseInfoClassCache &classCache, ani_enum eTypeCache) const;
+    bool ParseToken(ani_env *env) const;
     bool HandleTagFunc(ani_env *env);
-    bool HandleTokenFunc(ani_env *env, ParseInfoClassCache &classCache, ani_enum eTypeCache);
+    bool HandleTokenFunc(ani_env *env);
     bool HandleAttrFunc(ani_env *env);
 
     void ParseNspFunction();
@@ -173,6 +173,9 @@ private:
     TagEnum DealLtGroup();
     void DealWhiteSpace(unsigned char c);
 
+    ani_env *env_ {};
+    ParseInfoClassCache infoClass_;
+    ani_enum enumTypeClass_ {};
     bool bDoctype_ {};
     bool bIgnoreNS_ {};
     bool bStartDoc_ {true};

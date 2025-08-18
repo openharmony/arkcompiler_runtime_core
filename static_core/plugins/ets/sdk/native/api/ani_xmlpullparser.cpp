@@ -69,8 +69,17 @@ std::map<std::string, std::string> &GetDefaultEntities()
 
 XmlPullParser::ParseInfoClassCache::ParseInfoClassCache(ani_env *env) : env_(env)
 {
-    ANI_FATAL_IF_ERROR(env->FindClass("@ohos.xml.xml.ParseInfoImpl", &cachedClass_));
+    ani_class result {};
+    ANI_FATAL_IF_ERROR(env->FindClass("@ohos.xml.xml.ParseInfoImpl", &result));
+    ANI_FATAL_IF_ERROR(
+        env->GlobalReference_Create(static_cast<ani_ref>(result), reinterpret_cast<ani_ref *>(&cachedClass_)));
     ANI_FATAL_IF_ERROR(env->Class_FindMethod(cachedClass_, "<ctor>", nullptr, &constructor_));
+    InitFieldCache();
+}
+
+XmlPullParser::ParseInfoClassCache::~ParseInfoClassCache()
+{
+    ANI_FATAL_IF_ERROR(env_->GlobalReference_Delete(static_cast<ani_ref>(cachedClass_)));
 }
 
 ani_object XmlPullParser::ParseInfoClassCache::New() const
@@ -81,30 +90,22 @@ ani_object XmlPullParser::ParseInfoClassCache::New() const
     return object;
 }
 
-ani_status XmlPullParser::ParseInfoClassCache::InitFieldCache(ani_field &cache, const char *name,
-                                                              XmlPullParser::ParseInfoClassCache::FieldIndex index)
+void XmlPullParser::ParseInfoClassCache::InitFieldCache()
 {
-    if ((fieldCacheState_ & (1UL << static_cast<uint16_t>(index))) != 0) {
-        return ANI_OK;
-    }
-    ani_status status = env_->Class_FindField(cachedClass_, name, &cache);
-    if (status == ANI_OK) {
-        fieldCacheState_ |= (1UL << static_cast<uint16_t>(index));
-    }
-    return status;
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CACHE_LIST_TO_MAP(cache, _func, _item, _type, _typeName) \
+    /* CC-OFFNXT(G.PRE.09) function defination */                \
+    ANI_FATAL_IF_ERROR(env_->Class_FindField(cachedClass_, #cache, &cache##_));
+    PARSE_INFO_FIELD_LIST(CACHE_LIST_TO_MAP)
+#undef CACHE_LIST_TO_MAP
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define PARSE_INFO_SETTER(cache, func, item, type, typeName)                                \
-    ani_status XmlPullParser::ParseInfoClassCache::Set##func(ani_object object, type value) \
-    {                                                                                       \
-        ani_status status = InitFieldCache(cache##_, #cache, FieldIndex::item);             \
-        if (status != ANI_OK) {                                                             \
-            /* CC-OFFNXT(G.PRE.05) function defination */                                   \
-            return status;                                                                  \
-        }                                                                                   \
-        /* CC-OFFNXT(G.PRE.05) function defination */                                       \
-        return env_->Object_SetField_##typeName(object, cache##_, value);                   \
+#define PARSE_INFO_SETTER(cache, func, item, type, typeName)                                      \
+    ani_status XmlPullParser::ParseInfoClassCache::Set##func(ani_object object, type value) const \
+    {                                                                                             \
+        /* CC-OFFNXT(G.PRE.05) function defination */                                             \
+        return env_->Object_SetField_##typeName(object, cache##_, value);                         \
     }
 PARSE_INFO_FIELD_LIST(PARSE_INFO_SETTER)
 #undef PARSE_INFO_SETTER
@@ -126,7 +127,7 @@ ani_long XmlPullParser::BindNative(ani_env *env, [[maybe_unused]] ani_class self
     std::string strContent;
     strContent.resize(strLen + 1);
     env->String_GetUTF8(content, strContent.data(), strContent.size(), &strLen);
-    auto *binding = new XmlPullParser(strContent.substr(0, strLen));
+    auto *binding = new XmlPullParser(env, strContent.substr(0, strLen));
     if (binding == nullptr) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         LOG_ERROR_SDK("%s:: memory allocate failed, binding is nullptr", __FUNCTION__);
@@ -141,6 +142,19 @@ ani_boolean XmlPullParser::ReleaseNative([[maybe_unused]] ani_env *env, [[maybe_
     CHECK_NON_NULL_PARSER_AND_RETURN(pointer, false);
     delete that;
     return static_cast<ani_boolean>(true);
+}
+
+XmlPullParser::XmlPullParser(ani_env *env, std::string strXml) : env_(env), infoClass_(env), strXml_(std::move(strXml))
+{
+    ani_enum eTypeCache {};
+    ANI_FATAL_IF_ERROR(env->FindEnum("@ohos.xml.xml.EventType", &eTypeCache));
+    ANI_FATAL_IF_ERROR(
+        env->GlobalReference_Create(static_cast<ani_ref>(eTypeCache), reinterpret_cast<ani_ref *>(&enumTypeClass_)));
+}
+
+XmlPullParser::~XmlPullParser()
+{
+    ANI_FATAL_IF_ERROR(env_->GlobalReference_Delete(static_cast<ani_ref>(enumTypeClass_)));
 }
 
 // CC-OFFNXT(G.FUN.01-CPP) options of parse
@@ -226,26 +240,26 @@ bool XmlPullParser::ParseTag(ani_env *env) const
     return static_cast<bool>(UnboxToBoolean(env, static_cast<ani_object>(returnVal)));
 }
 
-bool XmlPullParser::ParseToken(ani_env *env, ParseInfoClassCache &classCache, ani_enum eTypeCache) const
+bool XmlPullParser::ParseToken(ani_env *env) const
 {
     ASSERT(type_ >= TagEnum::START_DOCUMENT || type_ <= TagEnum::WHITESPACE);
-    ani_object info = classCache.New();
+    ani_object info = infoClass_.New();
 
-    classCache.SetDepth(info, static_cast<ani_int>(depth_));
-    classCache.SetColumnNumber(info, static_cast<ani_int>(GetColumnNumber()));
-    classCache.SetLineNumber(info, static_cast<ani_int>(GetLineNumber()));
-    classCache.SetAttributeCount(info, static_cast<ani_int>(attrCount_));
+    infoClass_.SetDepth(info, static_cast<ani_int>(depth_));
+    infoClass_.SetColumnNumber(info, static_cast<ani_int>(GetColumnNumber()));
+    infoClass_.SetLineNumber(info, static_cast<ani_int>(GetLineNumber()));
+    infoClass_.SetAttributeCount(info, static_cast<ani_int>(attrCount_));
 
-    classCache.SetName(info, CreateStringUtf8(env, name_));
-    classCache.SetNameSpace(info, CreateStringUtf8(env, namespace_));
-    classCache.SetPrefix(info, CreateStringUtf8(env, prefix_));
-    classCache.SetText(info, CreateStringUtf8(env, GetText()));
+    infoClass_.SetName(info, CreateStringUtf8(env, name_));
+    infoClass_.SetNameSpace(info, CreateStringUtf8(env, namespace_));
+    infoClass_.SetPrefix(info, CreateStringUtf8(env, prefix_));
+    infoClass_.SetText(info, CreateStringUtf8(env, GetText()));
 
-    classCache.SetEmptyElementTag(info, static_cast<ani_boolean>(bEndFlag_));
-    classCache.SetWhitespace(info, static_cast<ani_boolean>(bWhitespace_));
+    infoClass_.SetEmptyElementTag(info, static_cast<ani_boolean>(bEndFlag_));
+    infoClass_.SetWhitespace(info, static_cast<ani_boolean>(bWhitespace_));
 
     ani_enum_item eTypeItem {};
-    env->Enum_GetEnumItemByIndex(eTypeCache, static_cast<ani_size>(type_), &eTypeItem);
+    env->Enum_GetEnumItemByIndex(enumTypeClass_, static_cast<ani_size>(type_), &eTypeItem);
     std::vector<ani_ref> argv {eTypeItem, info};
     ani_ref returnVal {};
     env->FunctionalObject_Call(tokenFunc_, argv.size(), argv.data(), &returnVal);
@@ -276,12 +290,12 @@ bool XmlPullParser::HandleTagFunc(ani_env *env)
     return bRec || type_ != TagEnum::START_TAG;
 }
 
-bool XmlPullParser::HandleTokenFunc(ani_env *env, ParseInfoClassCache &classCache, ani_enum eTypeCache)
+bool XmlPullParser::HandleTokenFunc(ani_env *env)
 {
     if (IsNullishValue(env, static_cast<ani_ref>(tokenFunc_))) {
         return true;
     }
-    return ParseToken(env, classCache, eTypeCache);
+    return ParseToken(env);
 }
 
 /**
@@ -301,24 +315,23 @@ bool XmlPullParser::HandleAttrFunc(ani_env *env)
 
 void XmlPullParser::Parse(ani_env *env)
 {
-    if (IsNullishValue(env, static_cast<ani_ref>(tagFunc_)) && IsNullishValue(env, static_cast<ani_ref>(attrFunc_)) &&
-        IsNullishValue(env, static_cast<ani_ref>(tokenFunc_))) {
+    bool tagFuncIsNull = IsNullishValue(env, static_cast<ani_ref>(tagFunc_));
+    bool attrFuncIsNull = IsNullishValue(env, static_cast<ani_ref>(attrFunc_));
+    bool tokenFuncIsNull = IsNullishValue(env, static_cast<ani_ref>(tokenFunc_));
+    if (tagFuncIsNull && attrFuncIsNull && tokenFuncIsNull) {
         return;
     }
-    ParseInfoClassCache classCache(env);
-    ani_enum eTypeCache {};
-    env->FindEnum("@ohos.xml.xml.EventType", &eTypeCache);
     while (type_ != TagEnum::END_DOCUMENT) {
         if (ParseOneTag() == TagEnum::ERROR) {
             break;
         }
-        if (!HandleTagFunc(env)) {
+        if (!tagFuncIsNull && !HandleTagFunc(env)) {
             break;
         }
-        if (!HandleTokenFunc(env, classCache, eTypeCache)) {
+        if (!tokenFuncIsNull && !HandleTokenFunc(env)) {
             break;
         }
-        if (!HandleAttrFunc(env)) {
+        if (!attrFuncIsNull && !HandleAttrFunc(env)) {
             break;
         }
     }
@@ -662,7 +675,7 @@ std::string XmlPullParser::GetNamespace(const std::string &prefix)
     size_t temp = GetNSCount(depth_) << 1UL;
     if (temp != 0UL) {
         size_t i = temp - 2;  // 2: number of args
-        for (;; i -= 2) {     // 2: number of args
+        while (true) {
             if (prefix.empty() && nspStack_[i].empty()) {
                 return nspStack_[i + 1];
             }
@@ -672,6 +685,7 @@ std::string XmlPullParser::GetNamespace(const std::string &prefix)
             if (i == 0) {
                 break;
             }
+            i -= 2;  // 2: number of args
         }
     }
     return "";
