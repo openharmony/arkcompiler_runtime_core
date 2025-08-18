@@ -79,6 +79,18 @@ function primitiveParameter() : void {
     eaw.run<void>(testPrimitive, 1, 'bbb', true, 1.0).Await();
 }
 
+function undefinedTest() {
+    let callback = (arg?: int): boolean => {
+        if (arg == undefined) {
+            return true;
+        }
+        return false;
+    }
+    let job = eaw.run<boolean>(callback, undefined);
+    let res = job.Await();
+    arktest.assertEQ(res, true);
+}
+
 let eaw:EAWorker = new EAWorker();
 
 function main(): int {
@@ -88,6 +100,7 @@ function main(): int {
     testSuite.addTest('returnArray', returnArray);
     testSuite.addTest('arrayParameter', arrayParameter);
     testSuite.addTest('primitiveParameter', primitiveParameter);
+    testSuite.addTest("undefinedTest", undefinedTest);
     let res = testSuite.run();
     eaw.join();
     return res;
