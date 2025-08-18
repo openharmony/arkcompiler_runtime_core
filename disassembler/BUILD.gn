@@ -110,6 +110,9 @@ ohos_static_library("arkdisassembler_frontend_static") {
     "$ark_root/libpandafile:libarkfile_frontend_static",
   ]
   external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
@@ -138,6 +141,9 @@ ohos_executable("ark_disasm") {
   ]
 
   external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
 
   libs = platform_libs
   if (!is_mac && !is_mingw && (is_build_sdk && !is_ohos)) {

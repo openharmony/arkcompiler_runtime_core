@@ -102,8 +102,7 @@ ohos_static_library("libarkbytecodeopt_frontend_static") {
     deps += [ "$ark_third_party_root/bounds_checking_function:libsec_static" ]
   } else {
     external_deps = [ sdk_libc_secshared_dep ]
-    if (enable_hilog && defined(ohos_indep_compiler_enable) &&
-        ohos_indep_compiler_enable) {
+    if (enable_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }
   }

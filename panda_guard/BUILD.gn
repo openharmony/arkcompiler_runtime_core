@@ -75,8 +75,7 @@ ohos_static_library("panda_guard_static") {
   ]
 
   external_deps = [ sdk_libc_secshared_dep ]
-  if (enable_hilog && defined(ohos_indep_compiler_enable) &&
-      ohos_indep_compiler_enable) {
+  if (enable_hilog) {
     external_deps += [ "hilog:libhilog" ]
   }
 
