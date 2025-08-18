@@ -18,7 +18,7 @@
 
 #include "libpandabase/taskmanager/task_queue_set.h"
 #include "libpandabase/taskmanager/task_scheduler.h"
-#include "libpandabase/taskmanager/utils/task_time_stats.h"
+#include "libpandabase/taskmanager/timer_thread.h"
 #include "libpandabase/macros.h"
 
 namespace ark::taskmanager {
@@ -43,13 +43,20 @@ public:
      * @brief Method creates task manager with specified count of workers. Also you can specify usage of execution time
      * stats collection. Method creates count of workers that can execute tasks from TaskQueue. This method can be
      * called next time only after execution of the TaskManager::Finish() method.
-     * @see TaskManager::Finish()
+     * This method does not enable usage of wait list methods in TaskQueue. Please see TaskManager::EnableTimerThread()
+     * for details.
+     * @see TaskManager::Finish();
+     * @see TaskManager::EnableTimerThread();
      */
     static PANDA_PUBLIC_API void Start(size_t workerCount,
                                        TaskTimeStatsType statsType = TaskTimeStatsType::NO_STATISTICS);
     /**
-     * @brief Method finishs usage of TaskManager. All TaskQueues should be deleted before calling. This method can be
+     * @brief Method finishes usage of TaskManager. All TaskQueues should be deleted before calling. This method can be
      * called after TaskManager::Start(...) method.
+     * If you have used TaskManager::EnableTimerThread() you should execute TaskManager::DisableTimerThread() before
+     * this method.
+     * @see TaskManager::Start(...);
+     * @see TaskManager::DisableTimerThread();
      */
     static PANDA_PUBLIC_API void Finish();
     /// @returns true if task manager exists, otherwise false
@@ -82,6 +89,23 @@ public:
     static PANDA_PUBLIC_API void SetWorkersCount(size_t count);
     /// @returns count of workers
     static PANDA_PUBLIC_API size_t GetWorkersCount();
+    /**
+     * @brief Method starts TimerThread utility in TaskManager. If you want use methods like
+     * TaskQueue::AddForegroundTaskInWaitList, you need to execute this method before. Otherwise they will return
+     * invalid index. Also you should disable TimerThread with TaskManager::DisableTimerThread() before
+     * TaskQueue::Finish().
+     * @see TaskQueue::AddForegroundTaskInWaitList();
+     * @see TaskManager::DisableTimerThread();
+     */
+    static PANDA_PUBLIC_API void EnableTimerThread();
+    /**
+     * @brief Method finishes usage of TimerThread in TaskManager. After its exectuion methods like
+     * TaskQueue::AddForegroundTaskInWaitList will return invalid index.
+     * @see TaskQueue::AddForegroundTaskInWaitList();
+     */
+    static PANDA_PUBLIC_API void DisableTimerThread();
+
+    static PANDA_PUBLIC_API bool IsTimerThreadEnabled();
 
     NO_COPY_SEMANTIC(TaskManager);
     NO_MOVE_SEMANTIC(TaskManager);
@@ -91,6 +115,7 @@ private:
     ~TaskManager() = default;
 
     TaskWaitList waitList_;
+    internal::TimerThread timerThread_;
     internal::TaskQueueSet queueSet_;
     internal::TaskScheduler scheduler_;
 

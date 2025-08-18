@@ -74,6 +74,7 @@ libarkbase_sources = [
   "$ark_root/libpandabase/taskmanager/task_manager.cpp",
   "$ark_root/libpandabase/taskmanager/task_queue_set.cpp",
   "$ark_root/libpandabase/taskmanager/task_scheduler.cpp",
+  "$ark_root/libpandabase/taskmanager/timer_thread.cpp",
   "$ark_root/libpandabase/taskmanager/utils/task_time_stats.cpp",
   "$ark_root/libpandabase/taskmanager/worker_thread.cpp",
   "$ark_root/libpandabase/utils/dfx.cpp",

@@ -412,6 +412,7 @@ TEST_F(TaskSchedulerTest, TaskSchedulerAddTaskToWaitListWithTimeTest)
     // Create TaskScheduler
     constexpr size_t THREADS_COUNT = 1U;
     TaskManager::Start(THREADS_COUNT);
+    TaskManager::EnableTimerThread();
     // Create and register 2 queues
     // CC-OFFNXT(G.NAM.03-CPP): static_core files have specifice codestyle
     constexpr uint8_t QUEUE_PRIORITY = DEFAULT_QUEUE_PRIORITY;
@@ -431,6 +432,25 @@ TEST_F(TaskSchedulerTest, TaskSchedulerAddTaskToWaitListWithTimeTest)
     gcQueue->WaitTasks();
     ASSERT_EQ(sleepCount, WAIT_LIST_USAGE_COUNT);
     // Fill queues with tasks that increment counter with its type.
+    TaskManager::DestroyTaskQueue(gcQueue);
+    TaskManager::DisableTimerThread();
+    TaskManager::Finish();
+}
+
+TEST_F(TaskSchedulerTest, TaskSchedulerWaitListWithoutTimerThread)
+{
+    srand(GetSeed());
+    // Create TaskScheduler
+    constexpr size_t THREADS_COUNT = 1U;
+    TaskManager::Start(THREADS_COUNT);
+    // Create and register 2 queues
+    // CC-OFFNXT(G.NAM.03-CPP): static_core files have specifice codestyle
+    constexpr uint8_t QUEUE_PRIORITY = DEFAULT_QUEUE_PRIORITY;
+    TaskQueueInterface *gcQueue = TaskManager::CreateTaskQueue(QUEUE_PRIORITY);
+
+    ASSERT_EQ(gcQueue->AddForegroundTaskInWaitList([]() {}, 100U), INVALID_WAITER_ID);
+    ASSERT_EQ(gcQueue->AddForegroundTaskInWaitList([]() {}), INVALID_WAITER_ID);
+
     TaskManager::DestroyTaskQueue(gcQueue);
     TaskManager::Finish();
 }

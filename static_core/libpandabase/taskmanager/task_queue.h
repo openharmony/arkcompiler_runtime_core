@@ -23,6 +23,7 @@
 #include "taskmanager/utils/task_time_stats.h"
 #include "libpandabase/taskmanager/task.h"
 #include "libpandabase/taskmanager/utils/two_lock_queue.h"
+#include "taskmanager/utils/wait_list.h"
 
 namespace ark::taskmanager::internal {
 
@@ -89,7 +90,8 @@ public:
 
     TaskTimeStatsBase *GetTaskTimeStats() const override;
 
-    void SetCallbacks(SignalWorkersCallback signalWorkersCallback) override;
+    void SetCallbacks(SignalWorkersCallback signalWorkersCallback,
+                      CheckIfTimerThreadIsEnabledCallback checkTimerThreadExistCallback) override;
     void UnsetCallbacks() override;
 
 private:
@@ -115,6 +117,7 @@ private:
 
     /// subscriber_lock_ is used in case of calling new_tasks_callback_
     SignalWorkersCallback signalWorkersCallback_;
+    CheckIfTimerThreadIsEnabledCallback checkTimerThreadExistCallback_;
     TaskTimeStatsBase *taskTimeStats_ {nullptr};
 
     os::memory::Mutex waitingMutex_;
@@ -191,6 +194,9 @@ template <class Allocator>
 inline PANDA_PUBLIC_API WaiterId TaskQueue<Allocator>::AddForegroundTaskInWaitList(RunnerCallback runner,
                                                                                    uint64_t timeToWait)
 {
+    if (!checkTimerThreadExistCallback_()) {
+        return INVALID_WAITER_ID;
+    }
     IncrementCountOfLiveForegroundTasks();
     auto waitListCallback = [this](RunnerCallback &&irunner) { AddForegroundTaskImpl(std::move(irunner)); };
     return waitList_->AddValueToWait({std::move(runner), waitListCallback}, timeToWait);
@@ -200,6 +206,9 @@ template <class Allocator>
 inline PANDA_PUBLIC_API WaiterId TaskQueue<Allocator>::AddBackgroundTaskInWaitList(RunnerCallback runner,
                                                                                    uint64_t timeToWait)
 {
+    if (!checkTimerThreadExistCallback_()) {
+        return INVALID_WAITER_ID;
+    }
     IncrementCountOfLiveBackgroundTasks();
     auto waitListCallback = [this](RunnerCallback &&irunner) { AddBackgroundTaskImpl(std::move(irunner)); };
     return waitList_->AddValueToWait({std::move(runner), waitListCallback}, timeToWait);
@@ -208,6 +217,9 @@ inline PANDA_PUBLIC_API WaiterId TaskQueue<Allocator>::AddBackgroundTaskInWaitLi
 template <class Allocator>
 inline PANDA_PUBLIC_API WaiterId TaskQueue<Allocator>::AddForegroundTaskInWaitList(RunnerCallback runner)
 {
+    if (!checkTimerThreadExistCallback_()) {
+        return INVALID_WAITER_ID;
+    }
     IncrementCountOfLiveForegroundTasks();
     auto waitListCallback = [this](RunnerCallback &&irunner) { AddForegroundTaskImpl(std::move(irunner)); };
     return waitList_->AddValueToWait({std::move(runner), waitListCallback});
@@ -216,6 +228,9 @@ inline PANDA_PUBLIC_API WaiterId TaskQueue<Allocator>::AddForegroundTaskInWaitLi
 template <class Allocator>
 inline PANDA_PUBLIC_API WaiterId TaskQueue<Allocator>::AddBackgroundTaskInWaitList(RunnerCallback runner)
 {
+    if (!checkTimerThreadExistCallback_()) {
+        return INVALID_WAITER_ID;
+    }
     IncrementCountOfLiveBackgroundTasks();
     auto waitListCallback = [this](RunnerCallback &&irunner) { AddBackgroundTaskImpl(std::move(irunner)); };
     return waitList_->AddValueToWait({std::move(runner), waitListCallback});
@@ -224,6 +239,9 @@ inline PANDA_PUBLIC_API WaiterId TaskQueue<Allocator>::AddBackgroundTaskInWaitLi
 template <class Allocator>
 void TaskQueue<Allocator>::SignalWaitList(WaiterId id)
 {
+    if (!checkTimerThreadExistCallback_()) {
+        return;
+    }
     auto waitVal = waitList_->GetValueById(id);
     if (!waitVal.has_value()) {
         return;
@@ -433,9 +451,11 @@ inline TaskTimeStatsBase *TaskQueue<Allocator>::GetTaskTimeStats() const
 }
 
 template <class Allocator>
-inline void TaskQueue<Allocator>::SetCallbacks(SignalWorkersCallback signalWorkersCallback)
+inline void TaskQueue<Allocator>::SetCallbacks(SignalWorkersCallback signalWorkersCallback,
+                                               CheckIfTimerThreadIsEnabledCallback checkTimerThreadExistCallback)
 {
     signalWorkersCallback_ = std::move(signalWorkersCallback);
+    checkTimerThreadExistCallback_ = std::move(checkTimerThreadExistCallback);
 }
 
 template <class Allocator>

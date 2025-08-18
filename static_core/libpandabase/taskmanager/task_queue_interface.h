@@ -38,15 +38,63 @@ public:
     }
     PANDA_PUBLIC_API virtual ~TaskQueueInterface() = default;
 
+    /**
+     * Method pushes runner in TaskQueue as foreground task.
+     * @return current count of foreground tasks in queue
+     */
     PANDA_PUBLIC_API virtual size_t AddForegroundTask(RunnerCallback runner) = 0;
+    /**
+     * Method pushes runner in TaskQueue as background task.
+     * @return current count of background tasks in queue
+     */
     PANDA_PUBLIC_API virtual size_t AddBackgroundTask(RunnerCallback runner) = 0;
 
-    PANDA_PUBLIC_API virtual WaiterId AddForegroundTaskInWaitList(RunnerCallback runtime, uint64_t timeToWait) = 0;
-    PANDA_PUBLIC_API virtual WaiterId AddBackgroundTaskInWaitList(RunnerCallback runtime, uint64_t timeToWait) = 0;
+    /**
+     * Method adds your foreground RunnerCallback in WaitList with delay you specify. If you did not enable usage of
+     * TimerThread this method will return INVALID_WAITER_ID.
+     * @param runner - functor use want ot adds;
+     * @param timeToWait - the time for which the task will be postponed;
+     * @return WaiterId associated with the pending runner. If TimerThread is disabled returns invalid WaiterId.
+     * @see TaskManager::EnableTimerThread;
+     */
+    PANDA_PUBLIC_API virtual WaiterId AddForegroundTaskInWaitList(RunnerCallback runner, uint64_t timeToWait) = 0;
+    /**
+     * Method adds your background RunnerCallback in WaitList with delay you specify. If you did not enable usage of
+     * TimerThread this method will return INVALID_WAITER_ID.
+     * @param runner - functor use want ot adds;
+     * @param timeToWait - the time for which the task will be postponed;
+     * @return WaiterId associated with the pending runner. If TimerThread is disabled returns invalid WaiterId.
+     * @see TaskManager::EnableTimerThread;
+     */
+    PANDA_PUBLIC_API virtual WaiterId AddBackgroundTaskInWaitList(RunnerCallback runner, uint64_t timeToWait) = 0;
 
-    PANDA_PUBLIC_API virtual WaiterId AddForegroundTaskInWaitList(RunnerCallback runtime) = 0;
-    PANDA_PUBLIC_API virtual WaiterId AddBackgroundTaskInWaitList(RunnerCallback runtime) = 0;
+    /**
+     * Method adds your foreground RunnerCallback in WaitList. You should notify WaitList with
+     * TaskQueue::SignalWaitList() to release runner. If you did not enable usage of TimerThread this method will return
+     * INVALID_WAITER_ID.
+     * @param runner - functor use want ot adds;
+     * @param timeToWait - the time for which the task will be postponed;
+     * @return WaiterId associated with the pending runner. If TimerThread is disabled returns invalid WaiterId.
+     * @see TaskManager::EnableTimerThread;
+     */
+    PANDA_PUBLIC_API virtual WaiterId AddForegroundTaskInWaitList(RunnerCallback runner) = 0;
+    /**
+     * Method adds your background RunnerCallback in WaitList. You should notify WaitList with
+     * TaskQueue::SignalWaitList() to release runner. If you did not enable usage of TimerThread this method will return
+     * INVALID_WAITER_ID.
+     * @param runner - functor use want ot adds;
+     * @param timeToWait - the time for which the task will be postponed;
+     * @return WaiterId associated with the pending runner. If TimerThread is disabled returns invalid WaiterId.
+     * @see TaskManager::EnableTimerThread;
+     */
+    PANDA_PUBLIC_API virtual WaiterId AddBackgroundTaskInWaitList(RunnerCallback runner) = 0;
 
+    /**
+     * Method notifies WaitList to release runner associated with inputed WaiterId. If you did not enable usage of
+     * TimerThread method will do nothing.
+     * @param id - WaiterId value associated with runner you want to release
+     * @see TaskManager::EnableTimerThread;
+     */
     PANDA_PUBLIC_API virtual void SignalWaitList(WaiterId id) = 0;
 
     [[nodiscard]] PANDA_PUBLIC_API virtual bool IsEmpty() const = 0;
