@@ -17,10 +17,11 @@
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert.h"
-#include "plugins/ets/runtime/interop_js/js_convert.h"
-#include "runtime/mem/local_object_handle.h"
-
 #include "plugins/ets/runtime/interop_js/js_refconvert_array.h"
+#include "plugins/ets/runtime/interop_js/js_refconvert_function.h"
+#include "plugins/ets/runtime/interop_js/js_convert.h"
+#include "plugins/ets/runtime/types/ets_object.h"
+#include "runtime/mem/local_object_handle.h"
 
 // NOLINTBEGIN(readability-identifier-naming)
 // CC-OFF(G.FMT.07) project code style
@@ -366,8 +367,7 @@ private:
             return wTypeError_->CreateJSBuiltinProxy(ctxx, jsValue);
         }
 
-        // NOTE(vpukhov): compat: remove when compat/Error is implemented
-        return BuiltinConvert<JSConvertESError>(ctxx, env, jsValue);
+        return wError_->CreateJSBuiltinProxy(ctxx, jsValue);
     }
 
     EtsObject *MObjectObject(InteropCtx *ctxx, napi_value jsValue)
@@ -431,10 +431,13 @@ private:
                 return BuiltinConvert<JSConvertBigInt>(ctxx, env, jsValue);
             case napi_symbol:
                 [[fallthrough]];
-            case napi_function:
-                [[fallthrough]];
             case napi_external:
                 return BuiltinConvert<JSConvertJSValue>(ctxx, env, jsValue);
+            case napi_function: {
+                auto refconv = JSRefConvertResolve<true>(ctxx, PlatformTypes()->coreFunction->GetRuntimeClass());
+                ASSERT(refconv != nullptr);
+                return EtsObject::FromCoreType(refconv->Unwrap(ctxx, jsValue)->GetCoreType());
+            }
             default:
                 ASSERT(!IsNullOrUndefined(env, jsValue));
                 InteropCtx::Fatal("Bad jsType in Object value matcher");

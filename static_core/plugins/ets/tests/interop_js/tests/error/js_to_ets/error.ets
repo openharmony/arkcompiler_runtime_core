@@ -61,23 +61,44 @@ function checkObjError(): boolean {
 }
 
 function checkSubClassError(): boolean {
-    try { throwErrorSubClass.invoke(); } catch (e: Error) {
-        let errObj: ESValue = (e as ESError).getValue();
-        let extraField: ESValue = errObj.getProperty('extraField');
-        let foo: ESValue = errObj.getProperty('foo');
-        return (extraField.toNumber() === 123) && (foo.invoke().toNumber() === 456);
+    let errorCaught: boolean = false;
+    try { 
+        throwErrorSubClass.invoke(); 
+    } catch (e: Error) {
+        errorCaught = true;
+        arktest.assertEQ(e instanceof Error, true);
     }
-    return false;
+    return errorCaught;
 }
 
 function checkErrorData(): boolean {
-    try { throwError1.invoke(); } catch (e: Error) {
-        let errObj: ESValue = (e as ESError).getValue();
-        let msg: ESValue = errObj.getProperty('message');
-        let data: ESValue = msg.getProperty('data');
-        return data.toNumber() === 123;
+    let isThrowErrorCaught: boolean = false;
+    let errorThrown: Error | undefined = undefined;
+
+    try { 
+        throwError1.invoke(); 
+    } catch (e: Error) {
+        isThrowErrorCaught = true;
+
+        arktest.assertEQ(e instanceof Error, true);
+        errorThrown = e;
     }
-    return false;
+
+    let isGetMessageErrorCaught: boolean = false;
+
+    try {
+        // in static, the error message must be string
+        // in the case, the message is an object in dynamic
+        // so a runtime error will be thrown when accessing the message
+        let msg = errorThrown?.message;
+    } catch (e: Error) {
+        arktest.assertEQ(e instanceof Error, true);
+
+        isGetMessageErrorCaught = true;
+        arktest.assertTrue(e.message.includes(`String expected`));
+    }
+
+    return isThrowErrorCaught && isGetMessageErrorCaught;
 }
 
 function checkErrorMsg(): boolean {
@@ -88,14 +109,17 @@ function checkErrorMsg(): boolean {
 }
 
 function checkErrorCause(): boolean {
-    try { throwError3.invoke(); } catch (e: Error) {
-        let errObj: ESValue = (e as ESError).getValue();
-        let curMsg: ESValue = errObj.getProperty('message');
-        let cause: ESValue = errObj.getProperty('cause');
-        let orgMsg: ESValue = cause.getProperty('message');
-        return curMsg.toString() === 'current error' && orgMsg.toString() === 'original error';
+    let errorCaught: boolean = false;
+    try { 
+        throwError3.invoke(); 
+    } catch (e: Error) {
+        errorCaught = true;
+
+        let cause = e.cause as Error;
+        arktest.assertEQ(e.message, 'current error');
+        arktest.assertEQ(cause.message, 'original error');
     }
-    return false;
+    return errorCaught;
 }
 
 // Check Error

@@ -52,6 +52,160 @@ class MimicJSValueIteratableIterator implements IterableIterator<Any> {
     }
 }
 
+export final class DynamicFunction implements Function0<Any> {
+    private invokeDynamic(...args: FixedArray<Any>): Any {
+        return JSRuntime.invokeDynamicFunction(this as Object, args);
+    }
+
+    get name(): string {
+        return "InteropDynamicFunction";
+    }
+
+    final unsafeCall(...r: FixedArray<Any>): Any {
+        return this.invokeR0(...r)
+    }
+
+    final invoke0(): Any {
+        return this.invokeDynamic();
+    }
+
+    final invoke1(arg1: Any): Any {
+        return this.invokeDynamic(arg1);
+    }
+
+    final invoke2(arg1: Any, arg2: Any): Any {
+        return this.invokeDynamic(...[arg1, arg2]);
+    }
+
+    final invoke3(arg1: Any, arg2: Any, arg3: Any): Any {
+        return this.invokeDynamic(arg1, arg2, arg3);
+    }
+
+    final invoke4(arg1: Any, arg2: Any, arg3: Any, arg4: Any): Any {
+        return this.invokeDynamic(arg1, arg2, arg3, arg4);
+    }
+
+    final invoke5(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any): Any {
+        return this.invokeDynamic(arg1, arg2, arg3, arg4, arg5);
+    }
+
+    final invoke6(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any): Any {
+        return this.invokeDynamic(arg1, arg2, arg3, arg4, arg5, arg6);
+    }
+
+    final invoke7(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any): Any {
+        return this.invokeDynamic(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+    }
+
+    final invoke8(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, arg8: Any): Any {
+        return this.invokeDynamic(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+    }
+
+    final invoke9(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, arg8: Any, arg9: Any): Any {
+        return this.invokeDynamic(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+    }
+
+    final invoke10(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, arg8: Any, arg9: Any, arg10: Any): Any {
+        return this.invokeDynamic(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+    }
+
+    final invoke11(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, arg8: Any, arg9: Any, arg10: Any, arg11: Any): Any {
+        return this.invokeDynamic(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+    }
+
+    final invoke12(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, arg8: Any, arg9: Any, arg10: Any, arg11: Any, arg12: Any): Any {
+        return this.invokeDynamic(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
+    }
+
+    final invoke13(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, arg8: Any, arg9: Any, arg10: Any, arg11: Any, arg12: Any, arg13: Any): Any {
+        return this.invokeDynamic(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
+    }
+
+    final invoke14(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, arg8: Any, arg9: Any, arg10: Any, arg11: Any, arg12: Any, arg13: Any, arg14: Any): Any {
+        return this.invokeDynamic(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14);
+    }
+
+    final invoke15(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, arg8: Any, arg9: Any, arg10: Any, arg11: Any, arg12: Any, arg13: Any, arg14: Any, arg15: Any): Any {
+        return this.invokeDynamic(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15);
+    }
+
+    final invoke16(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, arg8: Any, arg9: Any, arg10: Any, arg11: Any, arg12: Any, arg13: Any, arg14: Any, arg15: Any, arg16: Any): Any {
+        return this.invokeDynamic(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16);
+    }
+
+    final invokeR0(...r: FixedArray<Any>): Any {
+        return this.invokeDynamic(...[...r]);
+    }
+
+    final invokeR1(arg1: Any, ...r: FixedArray<Any>): Any {
+        return this.invokeDynamic(...[arg1, ...r]);
+    }
+
+    final invokeR2(arg1: Any, arg2: Any, ...r: FixedArray<Any>): Any {
+        return this.invokeDynamic(...[arg1, arg2, ...r]);
+    }
+
+    final invokeR3(arg1: Any, arg2: Any, arg3: Any, ...r: FixedArray<Any>): Any {
+        return this.invokeDynamic(...[arg1, arg2, arg3, ...r]);
+    }
+
+    final invokeR4(arg1: Any, arg2: Any, arg3: Any, arg4: Any, ...r: FixedArray<Any>): Any {
+        return this.invokeDynamic(...[arg1, arg2, arg3, arg4, ...r]);
+    }
+
+    final invokeR5(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, ...r: FixedArray<Any>): Any {
+        return this.invokeDynamic(...[arg1, arg2, arg3, arg4, arg5, ...r]);
+    }
+
+    final invokeR6(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, ...r: FixedArray<Any>): Any {
+        return this.invokeDynamic(...[arg1, arg2, arg3, arg4, arg5, arg6, ...r]);
+    }
+
+    final invokeR7(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, ...r: FixedArray<Any>): Any {
+        return this.invokeDynamic(...[arg1, arg2, arg3, arg4, arg5, arg6, arg7, ...r]);
+    }
+
+    final invokeR8(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, arg8: Any, ...r: FixedArray<Any>): Any {
+        return this.invokeDynamic(...[arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, ...r]);
+    }
+
+    final invokeR9(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, arg8: Any, arg9: Any, ...r: FixedArray<Any>): Any {
+        return this.invokeDynamic(...[arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, ...r]);
+    }
+
+    final invokeR10(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, arg8: Any, arg9: Any, arg10: Any, ...r: FixedArray<Any>): Any {
+        return this.invokeDynamic(...[arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, ...r]);
+    }
+
+    final invokeR11(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, arg8: Any, arg9: Any, arg10: Any, arg11: Any, ...r: FixedArray<Any>): Any {
+        return this.invokeDynamic(...[arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, ...r]);
+    }
+
+    final invokeR12(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, arg8: Any, arg9: Any, arg10: Any, arg11: Any, arg12: Any, ...r: FixedArray<Any>): Any {
+        return this.invokeDynamic(...[arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, ...r]);
+    }
+
+    final invokeR13(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, arg8: Any, arg9: Any, arg10: Any, arg11: Any, arg12: Any, arg13: Any, ...r: FixedArray<Any>): Any {
+        return this.invokeDynamic(...[arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, ...r]);
+    }
+
+    final invokeR14(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, arg8: Any, arg9: Any, arg10: Any, arg11: Any, arg12: Any, arg13: Any, arg14: Any, ...r: FixedArray<Any>): Any {
+        return this.invokeDynamic(...[arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, ...r]);
+    }
+
+    final invokeR15(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, arg8: Any, arg9: Any, arg10: Any, arg11: Any, arg12: Any, arg13: Any, arg14: Any, arg15: Any, ...r: FixedArray<Any>): Any {
+        return this.invokeDynamic(...[arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, ...r]);
+    }
+
+    final invokeR16(arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, arg8: Any, arg9: Any, arg10: Any, arg11: Any, arg12: Any, arg13: Any, arg14: Any, arg15: Any, arg16: Any, ...r: FixedArray<Any>): Any {
+        return this.invokeDynamic(...[arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, ...r]);
+    }
+
+    private static CreateDynamicFunction(): DynamicFunction {
+        return new DynamicFunction();
+    }
+}
+
 export final class JSRuntime {
     // ==================
     // newJSValue<TYPE>()
@@ -479,6 +633,8 @@ export final class JSRuntime {
      * @see GC.waitForFinishGC
      */
     public static native xgc(): long;
+
+    public static native invokeDynamicFunction(func: Object, args: FixedArray<Any>): Any;
 
     private static checkIntrinsicMethod(): never {
         let msg = "This method must not be called";
