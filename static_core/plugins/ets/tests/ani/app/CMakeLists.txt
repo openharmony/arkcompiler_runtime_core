@@ -29,6 +29,8 @@ panda_add_library(ani_app_lib SHARED plugin/plugin.cpp)
 panda_target_link_libraries(ani_app_lib ani_interface)
 add_dependencies(ani_app ani_app_lib)
 
+panda_add_sanitizers(TARGET ani_app SANITIZERS ${PANDA_SANITIZERS_LIST})
+
 set(ANI_APP_ETS_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/interface/ability.ets
     ${CMAKE_CURRENT_SOURCE_DIR}/plugin/plugin.ets
