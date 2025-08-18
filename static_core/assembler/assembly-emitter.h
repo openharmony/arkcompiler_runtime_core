@@ -22,7 +22,7 @@
 #include <unordered_map>
 
 #include "assembly-ins.h"
-#include "assembly-literals.h"
+#include "assembly-methodhandle.h"
 #include "assembly-program.h"
 #include "assembly-type.h"
 #include "assembly-function.h"
@@ -276,7 +276,7 @@ private:
                                const Program &program, const AsmEmitter::AsmEntityCollections &entities);
 
     static bool AssignProfileInfo(std::unordered_map<size_t, std::vector<Ins *>> &instMap,
-                                  const std::map<std::string, pandasm::Function> &functionTable);
+                                  std::map<std::string, pandasm::Function> &functionTable);
 
     // NOTE(mgonopolsky): Refactor to introduce a single error-processing mechanism for parser and emitter
     // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)

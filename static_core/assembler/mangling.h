@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "assembly-function.h"
 
 #include <string>
+#include <sstream>
 #include <vector>
 
 namespace ark::pandasm {
@@ -32,9 +33,9 @@ constexpr const std::string_view SIGNATURE_TYPES_SEPARATOR_R = ")";
 
 inline std::string DeMangleName(const std::string &name)
 {
-    auto iter = name.find_first_of(MANGLE_BEGIN);
-    if (iter != std::string::npos) {
-        return name.substr(0, name.find_first_of(MANGLE_BEGIN));
+    auto const pos = name.find_first_of(MANGLE_BEGIN);
+    if (pos != std::string::npos) {
+        return name.substr(0, pos);
     }
     return name;
 }
@@ -42,40 +43,33 @@ inline std::string DeMangleName(const std::string &name)
 inline std::string MangleFunctionName(const std::string &name, const std::vector<pandasm::Function::Parameter> &params,
                                       const pandasm::Type &returnType)
 {
-    std::string mangleName {name};
-    mangleName += MANGLE_BEGIN;
+    std::ostringstream result;
+    result << name << MANGLE_BEGIN;
     for (const auto &p : params) {
-        mangleName += p.type.GetName() + std::string(MANGLE_SEPARATOR);
+        result << p.type.GetName() << MANGLE_SEPARATOR;
     }
-    mangleName += returnType.GetName() + std::string(MANGLE_SEPARATOR);
-
-    return mangleName;
+    result << returnType.GetName() << MANGLE_SEPARATOR;
+    return result.str();
 }
 
 inline std::string MangleFieldName(const std::string &name, const pandasm::Type &type)
 {
-    std::string mangleName {name};
-    mangleName += MANGLE_BEGIN;
-    mangleName += type.GetName() + std::string(MANGLE_SEPARATOR);
-    return mangleName;
+    std::ostringstream result;
+    result << name << MANGLE_BEGIN << type.GetName() << MANGLE_SEPARATOR;
+    return result.str();
 }
 
 inline std::string GetFunctionSignatureFromName(std::string name,
                                                 const std::vector<pandasm::Function::Parameter> &params)
 {
-    name += SIGNATURE_BEGIN;
-    name += SIGNATURE_TYPES_SEPARATOR_L;
-
-    bool first = true;
-    for (const auto &p : params) {
-        name += (first) ? "" : SIGNATURE_TYPES_SEPARATOR;
-        first = false;
-        name += p.type.GetPandasmName();
+    std::ostringstream result;
+    result << name << SIGNATURE_BEGIN << SIGNATURE_TYPES_SEPARATOR_L;
+    for (auto iter = params.begin(); iter != params.end(); ++iter) {
+        result << ((iter != params.begin()) ? SIGNATURE_TYPES_SEPARATOR : "");
+        result << iter->type.GetPandasmName();
     }
-
-    name += SIGNATURE_TYPES_SEPARATOR_R;
-
-    return name;
+    result << SIGNATURE_TYPES_SEPARATOR_R;
+    return result.str();
 }
 
 inline std::string GetFunctionNameFromSignature(const std::string &sig)
