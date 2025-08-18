@@ -152,10 +152,10 @@ static constexpr std::string_view EXCEPTION_IN_INITIALIZER_ERROR       = "Lstd/c
 static constexpr std::string_view FILE_NOT_FOUND_ERROR                 = "Lstd/core/FileNotFoundError;";
 static constexpr std::string_view ILLEGAL_ACCESS_ERROR                 = "Lstd/core/IllegalAccessError;";
 // remove or make an Error
-static constexpr std::string_view ILLEGAL_ARGUMENT_ERROR               = "Lstd/core/IllegalArgumentError;";
+static constexpr std::string_view ILLEGAL_ARGUMENT_EXCEPTION           = "Lstd/core/IllegalArgumentException;";
 static constexpr std::string_view ILLEGAL_MONITOR_STATE_ERROR          = "Lstd/core/IllegalMonitorStateError;";
 // remove or make an Error
-static constexpr std::string_view ILLEGAL_STATE_ERROR                  = "Lstd/core/IllegalStateError;";
+static constexpr std::string_view ILLEGAL_STATE_EXCEPTION              = "Lstd/core/IllegalStateException;";
 static constexpr std::string_view INDEX_OUT_OF_BOUNDS_ERROR            = "Lstd/core/IndexOutOfBoundsError;";
 static constexpr std::string_view INSTANTIATION_ERROR                  = "Lstd/core/InstantiationError;";
 // has no class defined

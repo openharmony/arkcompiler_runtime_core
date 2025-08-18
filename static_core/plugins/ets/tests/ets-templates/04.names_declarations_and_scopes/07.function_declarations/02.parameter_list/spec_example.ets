@@ -20,7 +20,7 @@ desc: >-
   explicitly defined.
 ---*/
 
-function power(base: double, exponent: double): double {
+function power(base: number, exponent: number): number {
     return Math.pow(base, exponent)
 }
 

@@ -44,7 +44,7 @@
 //! INST_NOT     "Throw"
 //! INST         "DeoptimizeIf"
 
-class Ex extends Error {}
+class Ex extends Exception {}
 let ex: Ex = new Ex()
 
 class A {

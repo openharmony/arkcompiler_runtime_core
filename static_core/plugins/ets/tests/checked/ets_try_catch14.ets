@@ -44,8 +44,8 @@
 //! INST_NOT     "Throw"
 //! INST         "DeoptimizeIf"
 
-class Error0 extends Error {}
-class Error1 extends Error {}
+class Exception0 extends Exception {}
+class Exception1 extends Exception {}
 
 class IfCatch {
 
@@ -57,16 +57,14 @@ class IfCatch {
           k = 0;
         }
         if (k < 1) {
-          throw new Error0();
+          throw new Exception0();
         } else {
-          throw new Error1();
+          throw new Exception1();
         }
+      } catch (e: Exception0) {
+        res += 1;
       } catch (e) {
-        if (e instanceof Error0) {
-          res += 1;
-        } else {
-          res += 2;
-        }
+        res += 2;
       }
     }
     return res;

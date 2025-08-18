@@ -106,12 +106,12 @@ uint32_t CastToBitMask(ani_env *env, ani_string checkStr)
                 flagsBitsTemp = FLAG_STICKY;
                 break;
             default: {
-                ThrowNewError(env, "Lstd/core/IllegalArgumentError;", "invalid regular expression flags");
+                ThrowNewError(env, "Lstd/core/IllegalArgumentException;", "invalid regular expression flags");
                 return 0;
             }
         }
         if ((flagsBits & flagsBitsTemp) != 0) {
-            ThrowNewError(env, "Lstd/core/IllegalArgumentError;", "invalid regular expression flags");
+            ThrowNewError(env, "Lstd/core/IllegalArgumentException;", "invalid regular expression flags");
             return 0;
         }
         flagsBits |= flagsBitsTemp;

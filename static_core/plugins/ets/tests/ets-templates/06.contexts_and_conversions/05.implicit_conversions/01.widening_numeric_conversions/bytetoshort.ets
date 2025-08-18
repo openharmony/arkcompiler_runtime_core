@@ -17,7 +17,7 @@
 desc: Casting conversions byte to short.
 ---*/
 
-function byteToShort(byteValue: double): double {
+function byteToShort(byteValue: number): number {
     byteValue = Math.max(-128, Math.min(127, byteValue));
     return byteValue;
 }

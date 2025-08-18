@@ -51,12 +51,19 @@ export final class ArgumentOutOfRangeException extends Exception {
 }
 
 /**
- * Represents error that is thrown when a method has been invoked at an illegal or inappropriate time.
+ * Represents exception that is thrown when a method has been invoked at an illegal or inappropriate time.
  */
-export class IllegalStateError extends Error {
-    // NOTE(kparshukov): #28318 move to std/core/Errors.ets
-    constructor(message?: String, options?: ErrorOptions) {
-        super("IllegalStateError", message, options)
+export class IllegalStateException extends Exception {
+    constructor() {
+        super();
+    }
+
+    constructor(s: String) {
+        super(s);
+    }
+
+    constructor(s: String, cause: Object) {
+        super(s, cause);
     }
 }
 
@@ -78,13 +85,20 @@ export final class UnsupportedOperationException extends Exception {
 }
 
 /**
- * @class Represents error that is thrown when
+ * @class Represents exception that is thrown when
  * a method has been passed an illegal argument
  */
-export final class IllegalArgumentError extends Error {
-    // NOTE(kparshukov): #28318 move to std/core/Errors.ets
-    constructor(message?: String, options?: ErrorOptions) {
-        super("IllegalArgumentError", message, options)
+export final class IllegalArgumentException extends Exception {
+    constructor() {
+        super();
+    }
+
+    constructor(s: String) {
+        super(s);
+    }
+
+    constructor(s: String, cause: Object) {
+        super(s, cause);
     }
 }
 
