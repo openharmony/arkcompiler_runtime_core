@@ -17,48 +17,57 @@
 #define PANDA_ASSEMBLER_ASSEMBLY_PROGRAM_H
 
 #include <string>
-#include <unordered_set>
+#include <utility>
 
 #include "assembly-function.h"
 #include "assembly-record.h"
 #include "assembly-type.h"
-#include "assembly-methodhandle.h"
 #include "assembly-literals.h"
-#include "extensions/extensions.h"
-#include "macros.h"
 
 namespace ark::pandasm {
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 struct Program {
     using StringT = std::set<std::string>;
+    using RecordTableT = std::map<std::string, Record>;
+    using FunctionTableT = std::map<std::string, Function>;
+    using FunctionSynonymsT = std::unordered_map<std::string, std::vector<std::string>>;
+    using LiteralArrayTableT = std::map<std::string, LiteralArray>;
+    using ArrayTypesT = std::set<Type>;
 
-    ark::panda_file::SourceLang lang {ark::panda_file::SourceLang::PANDA_ASSEMBLY};
-    std::map<std::string, ark::pandasm::Record> recordTable;
-    std::map<std::string, ark::pandasm::Function> functionInstanceTable;
-    std::map<std::string, ark::pandasm::Function> functionStaticTable;
-    std::unordered_map<std::string, std::vector<std::string>>
-        functionSynonyms;  // we might keep unordered, since we don't iterate over it
-    std::map<std::string, ark::pandasm::LiteralArray> literalarrayTable;
+    panda_file::SourceLang lang {panda_file::SourceLang::PANDA_ASSEMBLY};
+    RecordTableT recordTable;
+    FunctionTableT functionInstanceTable;
+    FunctionTableT functionStaticTable;
+    FunctionSynonymsT functionSynonyms;  // we might keep unordered, since we don't iterate over it
+    LiteralArrayTableT literalarrayTable;
     StringT strings;
-    std::set<Type> arrayTypes;
+    ArrayTypesT arrayTypes;
 
     /*
      * Returns a JSON string with the program structure and scopes locations
      */
     PANDA_PUBLIC_API std::string JsonDump() const;
 
-    void AddToFunctionTable(ark::pandasm::Function func, const std::string &name = "")
+    void AddToFunctionTable(Function &&func, const std::string &name = {})
     {
-        if (func.IsStatic()) {
-            functionStaticTable.emplace(name.empty() ? func.name : name, std::move(func));
-        } else {
-            functionInstanceTable.emplace(name.empty() ? func.name : name, std::move(func));
-        }
+        auto &table = func.IsStatic() ? functionStaticTable : functionInstanceTable;
+        table.emplace(name.empty() ? std::string {func.name} : name, std::move(func));
     }
 
-    std::optional<std::map<std::basic_string<char>, ark::pandasm::Function>::const_iterator> FindAmongAllFunctions(
-        const std::string &name, bool isAmbiguous = false, bool isStatic = false) const
+    void AddToRecordTable(Record &&record)
+    {
+        recordTable.emplace(std::string {record.name}, std::move(record));
+    }
+
+    void AddToLiteralArrayTable(LiteralArray::LiteralVector &&array, std::string const &name)
+    {
+        literalarrayTable.emplace(name, std::move(array));
+    }
+
+    std::optional<FunctionTableT::const_iterator> FindAmongAllFunctions(const std::string &name,
+                                                                        bool isAmbiguous = false,
+                                                                        bool isStatic = false) const
     {
         const auto &firstSearchTable = isStatic ? functionStaticTable : functionInstanceTable;
         const auto &secondSearchTable = isStatic ? functionInstanceTable : functionStaticTable;

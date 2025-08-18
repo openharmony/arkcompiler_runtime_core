@@ -180,12 +180,11 @@ struct LiteralArray {
         }
     };
 
-    std::vector<ark::pandasm::LiteralArray::Literal> literals;  // NOLINT(misc-non-private-member-variables-in-classes)
+    using LiteralVector = std::vector<ark::pandasm::LiteralArray::Literal>;
 
-    explicit LiteralArray(std::vector<ark::pandasm::LiteralArray::Literal> literalsVec)
-        : literals(std::move(literalsVec))
-    {
-    }
+    LiteralVector literals;  // NOLINT(misc-non-private-member-variables-in-classes)
+
+    explicit LiteralArray(LiteralVector literalsVec) : literals(std::move(literalsVec)) {}
     explicit LiteralArray() = default;
 
     static constexpr panda_file::LiteralTag GetArrayTagFromComponentType(panda_file::Type::TypeId type)
