@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,8 +15,6 @@
 # Bounds for wildcards
 bounds:
   - ''
-  - 'in '
-  - 'out '
 
 # Wrong type constraints for generic parameters
 wrong_constraints:
@@ -26,19 +24,9 @@ wrong_constraints:
   - double
   - float
   - int
-  - int & Object
-  - int & Object & String
   - long
-  - Object & int
-  - Object & int & String
-  - Object & String & int
   - short
   - void
-  - "enum Color { Red, Green, Blue }"
-  - "int[]"
-
 # Generic types declarations with one type parameter
 type_with_one_generic:
-  - {decl: "class ClassGener<T> {}", type: "ClassGener", curly_if_need: "{}"}
-  - {decl: "interface IfaceGener<T> {}", type: "IfaceGener", curly_if_need: "{}"}
-  
+  - {decl: "function FuncGener<T>(): void {}", type: "FuncGener", curly_if_need: ""}
