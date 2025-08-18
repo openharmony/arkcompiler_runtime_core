@@ -16,6 +16,7 @@
 #include "ani_stringdecoder.h"
 #include <codecvt>
 #include <locale>
+#include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
 #include "tools/format_logger.h"
 #include "unicode/unistr.h"
 #include <memory>
@@ -26,13 +27,13 @@ UConverter *UtilHelper::CreateConverter(const std::string &encStr, UErrorCode &c
     UConverter *conv = ucnv_open(encStr.c_str(), &codeflag);
     if (U_FAILURE(codeflag) != 0) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("Unable to create a UConverter object: %s\n", u_errorName(codeflag));
+        LOG_FATAL_SDK("Unable to create a UConverter object: %s\n", u_errorName(codeflag));
         return nullptr;
     }
     ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_SUBSTITUTE, nullptr, nullptr, nullptr, &codeflag);
     if (U_FAILURE(codeflag) != 0) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("Unable to set the from Unicode callback function");
+        LOG_FATAL_SDK("Unable to set the from Unicode callback function");
         ucnv_close(conv);
         return nullptr;
     }
@@ -40,7 +41,7 @@ UConverter *UtilHelper::CreateConverter(const std::string &encStr, UErrorCode &c
     ucnv_setToUCallBack(conv, UCNV_TO_U_CALLBACK_SUBSTITUTE, nullptr, nullptr, nullptr, &codeflag);
     if (U_FAILURE(codeflag) != 0) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("Unable to set the to Unicode callback function");
+        LOG_FATAL_SDK("Unable to set the to Unicode callback function");
         ucnv_close(conv);
         return nullptr;
     }
@@ -57,7 +58,7 @@ ani_string StringDecoder::Write(ani_env *env, const char *source, int32_t byteOf
 {
     size_t limit = static_cast<size_t>(ucnv_getMinCharSize(conv_)) * length;
     if (limit <= 0) {
-        ThrowError(env, "Error obtaining minimum number of input bytes");
+        env->ThrowError(static_cast<ani_error>(ThrowError(env, "Error obtaining minimum number of input bytes")));
         return nullptr;
     }
     std::vector<UChar> arr(limit + 1, 0);
@@ -83,11 +84,7 @@ ani_string StringDecoder::Write(ani_env *env, const char *source, int32_t byteOf
     pend_ = source + length - pendingLen_;
     ani_string resultStr {};
     size_t resultLen = target - arr.data();
-    if (env->String_NewUTF16(reinterpret_cast<uint16_t *>(arr.data()), resultLen, &resultStr) != ANI_OK) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("StringDecoder:: create string error!");
-        return nullptr;
-    }
+    ANI_FATAL_IF_ERROR(env->String_NewUTF16(reinterpret_cast<uint16_t *>(arr.data()), resultLen, &resultStr));
     return resultStr;
 }
 
@@ -124,11 +121,8 @@ ani_string StringDecoder::End(ani_env *env)
     if (convertedChars < outputBuffer.size()) {
         outputBuffer[convertedChars] = 0;
     }
-    if (env->String_NewUTF16(reinterpret_cast<uint16_t *>(outputBuffer.data()), convertedChars, &resultStr) != ANI_OK) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("StringDecoder::End create string error!");
-        return nullptr;
-    }
+    ANI_FATAL_IF_ERROR(
+        env->String_NewUTF16(reinterpret_cast<uint16_t *>(outputBuffer.data()), convertedChars, &resultStr));
     return resultStr;
 }
 
