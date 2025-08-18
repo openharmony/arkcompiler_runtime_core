@@ -16,3 +16,4 @@ add_subdirectory(bouncing_pandas)
 # issue #24750
 # add_subdirectory(exporting-ambient-decl)
 add_subdirectory(import_from_abc_simple)
+add_subdirectory(import_from_declaration_cache)
