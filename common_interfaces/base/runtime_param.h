@@ -164,11 +164,6 @@ struct GCParam {
     * The maximum remaining bytes for next heuristic gc, the default value is 512KB.
     */
     size_t kMaxConcurrentRemainingBytes;
-
-    /*
-    * The maximum size for garbage cache, the default size is 16M.
-    */
-    uint64_t maxGarbageCacheSize;
 };
 
 /*
