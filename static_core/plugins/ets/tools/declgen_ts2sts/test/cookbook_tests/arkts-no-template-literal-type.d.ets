@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export type Matrix = number[][];
-export type Handler = (s: string, no: number) => string;
-export type Predicate<T> = (x: T) => boolean;
-export type NullableNumber = number | null;
-export type Dictionary = Map<string, string>;
+export type A = Any;
+export declare let v1: A;
+export declare function foo(v1: Any): void;
+export declare function bar<T extends Any>(arg: Any): A;
+export type v2 = string;
+export type B = Any;

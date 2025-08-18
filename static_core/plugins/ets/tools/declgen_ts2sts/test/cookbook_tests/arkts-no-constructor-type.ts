@@ -1,4 +1,3 @@
-'use static'
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,8 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export type Matrix = number[][];
-export type Handler = (s: string, no: number) => string;
-export type Predicate<T> = (x: T) => boolean;
-export type NullableNumber = number | null;
-export type Dictionary = Map<string, string>;
+
+export class UserIns {
+    name: string;
+    age: number;
+    constructor(name: string, age: number) {
+        this.name = name
+        this.age = age
+    };
+}
+export function foo<T extends new (...args: any[]) => any>(Class: T): void { }
+export let v1: new (...args: any[]) => any = UserIns;
+export let v2: new (name: string, age: number) => { name: string; age: number };
