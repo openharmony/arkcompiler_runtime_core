@@ -17,7 +17,7 @@
 desc: Type compatibility test for number type in finding the minimum value in an array.
 ---*/
 
-function findMinimumValue(arr: number[]) {
+function findMinimumValue(arr: double[]) {
     return Math.min(...arr);
 }
 

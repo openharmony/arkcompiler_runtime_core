@@ -44,8 +44,8 @@
 //! INST_NOT     "Throw"
 //! INST_NOT     "DeoptimizeIf"
 
-class Exception0 extends Exception {}
-class Exception1 extends Exception {}
+class Error0 extends Error {}
+class Error1 extends Error {}
 
 class IfCatch {
 
@@ -59,15 +59,17 @@ class IfCatch {
       try {
         if (k == 0) {
           res = this.__noinline__inc(res, 1);
-          throw new Exception0();
+          throw new Error0();
         } else {
           res = this.__noinline__inc(res, 2);
-          throw new Exception1();
+          throw new Error1();
         }
-      } catch (e: Exception0) {
-        res = this.__noinline__inc(res, 1);
       } catch (e) {
-        res = this.__noinline__inc(res, 2);
+        if (e instanceof Error0) {
+          res = this.__noinline__inc(res, 1);
+        } else {
+          res = this.__noinline__inc(res, 2);
+        }
       }
     }
     return res;

@@ -397,7 +397,7 @@ static ani_boolean PManagerKill(ani_env *env, [[maybe_unused]] ani_object proces
     int integerPid = static_cast<int>(pid);
     auto ownPid = ark::os::thread::GetPid();
     if (integerPid == 0 || integerPid == -1 || integerPid == ownPid || integerPid == -ownPid) {
-        ThrowNewError(env, "std.core.IllegalArgumentException", "Invalid pid argument", "C{std.core.String}:");
+        ThrowNewError(env, "std.core.IllegalArgumentError", "Invalid pid argument", "C{std.core.String}:");
         return 0U;
     }
 
@@ -405,7 +405,7 @@ static ani_boolean PManagerKill(ani_env *env, [[maybe_unused]] ani_object proces
     constexpr int MAX_SINAL_VALUE = 64;
 
     if (std::trunc(signal) != signal || signal < MIN_SIGNAL_VALUE || signal > MAX_SINAL_VALUE) {
-        ThrowNewError(env, "std.core.IllegalArgumentException", "Invalid signal argument", "C{std.core.String}:");
+        ThrowNewError(env, "std.core.IllegalArgumentError", "Invalid signal argument", "C{std.core.String}:");
         return 0U;
     }
 

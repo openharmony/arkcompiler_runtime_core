@@ -22,11 +22,12 @@ if (ark_standalone_build) {
 }
 
 action("copy_stdlib") {
-  script = "package_stdlib.sh"
+  script = "package_stdlib.py"
   args = [
-    rebase_path("std"),
-    rebase_path("escompat"),
-    rebase_path("${root_out_dir}/arkcompiler/stdlib"),
+    "--std-dir", rebase_path("std"),
+    "--escompat-dir", rebase_path("escompat"),
+    "--target-dir", rebase_path("${root_out_dir}/arkcompiler/stdlib"),
+    "--json-file", rebase_path("hiddable_APIs.json")
   ]
   outputs = [ "${root_out_dir}/arkcompiler/stdlib" ]
 }

@@ -38,6 +38,7 @@ function main(): int {
 
     suite.addTest("Test buffer.from with number array", testFromArray)
     suite.addTest("Test buffer.from with ArrayBuffer", testFromArrayBuffer)
+    suite.addTest("Test buffer.from with Uint8Array", testFromUint8Array)
     suite.addTest("Test buffer.from with Buffer/Uint8Array", testFromBufferOrUint8Array)
     suite.addTest("Test buffer.from with string", testFromString)
     suite.addTest("Test buffer.from with string and base64 encoding", testFromStringWithBase64Encoding)
@@ -95,6 +96,7 @@ function main(): int {
     suite.addTest("Test variable length Int BE/LE read/write", testVarLengthIntReadWrite)
     suite.addTest("Test variable length UInt BE/LE read/write", testVarLengthUIntReadWrite)
     suite.addTest("Test string write", testStringWrite)
+    suite.addTest("Test string write with invalid encoding", testBufferWrite0022)
     suite.addTest("Test string write base64", testBufferWriteStringBase64)
     suite.addTest("Test string write single parameter", testBufferWriteStringSingleParam)
     suite.addTest("Test string write with infinity length",  testBufferWriteStringInfinity)
@@ -255,6 +257,15 @@ function testFromBufferOrUint8Array() {
 
     let a = new Uint8Array(buf.buffer, buf.byteOffset, buf.length);
     arktest.assertEQ(a.toString(), "49,50,51,54")
+}
+
+function testFromUint8Array() {
+    let src = new Uint8Array(10);
+    let buf3 = buffer.from(src);
+    buf3.fill(1)
+
+    arktest.assertEQ(src.toString(), '1,1,1,1,1,1,1,1,1,1')
+    arktest.assertEQ(buf3.toString('hex'), '01010101010101010101')
 }
 
 function testFromString() {
@@ -998,6 +1009,14 @@ function testStringWrite() {
     const bytesWritten3 = buf.write(longStr, 0, 5, 'utf8')
     arktest.assertEQ(bytesWritten3, 5)
     arktest.assertEQ(buf.toString('utf8', 0, 5), "ThisI")
+}
+
+function testBufferWrite0022() {
+    const TAG = 'testBufferWrite0022';
+    let buf = buffer.alloc(5);
+    arktest.expectError(() => {
+        const res = buf.write("abc", 0, 3, 'invalid_encoding');
+    }, 'Parameter error. The type of "encoding" must be BufferEncoding. the encoding invalid_encoding is unknown');
 }
 
 function testBufferWriteStringBase64() {
