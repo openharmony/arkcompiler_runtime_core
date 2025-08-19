@@ -1091,15 +1091,14 @@
 07.expressions/06.spread_expression/spex_lmbd_30.ets
 07.expressions/06.spread_expression/spex_lmbd_31.ets
 
-#23996
-07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_17.ets
-07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_18.ets
-07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_20.ets
-07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_21.ets
+#29053
+07.expressions/10.method_call_expression/01.step_1_selection_of_type_to_use/step1_7.ets
 
-#23997
-07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_23.ets
-07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_24.ets
+#29019
+07.expressions/10.method_call_expression/01.step_1_selection_of_type_to_use/step1_8.ets
+
+#26730
+07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_27.ets
 
 #19951
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_17.ets

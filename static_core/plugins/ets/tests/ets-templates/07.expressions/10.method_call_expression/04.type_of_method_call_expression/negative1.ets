@@ -13,27 +13,18 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
 /*---
 desc: Type of method call expression
+tags:
+- compile-only
+- negative
 ---*/
-type LTS = 'LTS'
 
-final class A {
-    static method() { }
-    method() { }
-    void1() {}
-    void2() { return }
-    nevermore(): never { throw new Error }
-    giveu(): undefined { return undefined }
-    givenull(): null { return null }
-
-    lts(): LTS { return 'LTS' }
+class A {
+    nevermore(): void { return null } // TypeError: Unexpected return value, enclosing method return type is void.
 }
 
 function main() {
-    {{c.decl}}
 }
 
-{% endfor %}
+

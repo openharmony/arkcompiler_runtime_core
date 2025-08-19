@@ -20,3 +20,32 @@ cases:
   - decl: |-
       // Call instance method
       new A().method()
+
+  - decl: |-
+      // Call instance method
+      let x: LTS = new A().lts();
+      arktest.assertEQ("LTS", x)
+
+  - decl: |-
+      // Call instance method
+      new A().void1()
+
+  - decl: |-
+      // Call instance method
+      new A().void2()
+
+  - decl: |-
+      try {
+        let x: never = new A().nevermore()
+      } catch(e) {
+      }
+
+  - decl: |-
+      // Call instance method
+      let uu = new A().giveu()
+      arktest.assertEQ(undefined, uu)
+
+  - decl: |-
+      // Call instance method
+      let uu = new A().givenull()
+      arktest.assertEQ(null, uu)

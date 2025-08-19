@@ -25,8 +25,12 @@ tags:
 class A {
     static method() { }
     method() { }
+    static void1() { return }
+    void2() { return }
 }
 
-{{c.decl}}
+function main() {
+    {{c.decl}}
+}
 
 {% endfor %}
