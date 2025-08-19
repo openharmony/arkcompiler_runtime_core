@@ -57,6 +57,7 @@ cases:
               fld2: number = Color.Blue + Color.Green
               fld3: int = s + Color.Green - 42.0
           }
+      tags: 'negative, compile-only'
       use: |-
           // assignment-like context, field declaration
           let a: A = new A()
@@ -71,6 +72,7 @@ cases:
               fld2: int
               fld3: number
           }
+      tags: 'negative, compile-only'
       use: |-
           // assignment-like context, field assignment
           let a: A = new A()
@@ -86,6 +88,7 @@ cases:
           function foo(p: int): number {
               return p + 1
           }
+      tags: 'negative, compile-only'
       use: |-
           // call context, function
           arktest.assertEQ(foo(Color.Red), 1.0)
@@ -114,6 +117,7 @@ cases:
                   this.fld = p
               }
           }
+      tags: 'negative, compile-only'
       use: |-
           // call context, constructor
           arktest.assertEQ(new A(Color.Red).fld, 0.0)
@@ -122,6 +126,7 @@ cases:
 
     - decl: |-
           let s: int = 42
+      tags: 'negative, compile-only'
       use: |-
           // call context, lambda
           arktest.assertEQ(((p: number): number => { return p })(Color.Red), 0.0)
