@@ -143,7 +143,8 @@ export class Autofixer {
     [ts.SyntaxKind.StructDeclaration, [this[FaultID.StructDeclaration].bind(this)]],
     [ts.SyntaxKind.UnionType, [this[FaultID.NoVoidUnionType].bind(this)]],
     [ts.SyntaxKind.VariableDeclaration, [this[FaultID.ConstLiteralToType].bind(this)]],
-    [ts.SyntaxKind.IndexedAccessType, [this[FaultID.IndexAccessType].bind(this)]]
+    [ts.SyntaxKind.IndexedAccessType, [this[FaultID.IndexAccessType].bind(this)]],
+    [ts.SyntaxKind.FunctionType, [this[FaultID.FunctionType].bind(this)]]
   ]);
 
   fixNode(node: ts.Node): ts.VisitResult<ts.Node> {
@@ -1419,6 +1420,51 @@ export class Autofixer {
       }
     }
 
+    return node;
+  }
+
+  /**
+   * Rule: `arkts-no-generic-function-type`
+   */
+  private [FaultID.FunctionType](node: ts.Node): ts.VisitResult<ts.Node> {
+    /**
+     * For function types with generic parameters, convert them to Any
+     */
+    if (ts.isFunctionTypeNode(node)) {
+      if (node.typeParameters && node.typeParameters.length > 0) {
+        return this.context.factory.createTypeReferenceNode(
+          this.context.factory.createIdentifier(JSValue),
+          undefined
+        );
+      }
+
+      let hasImportType = false;
+      const visitNode = (childNode: ts.Node) => {
+        if (ts.isImportTypeNode(childNode)) {
+          hasImportType = true;
+          return;
+        }
+        ts.forEachChild(childNode, visitNode);
+      };
+
+      node.parameters.forEach(param => {
+        if (param.type) {
+          visitNode(param.type);
+        }
+      });
+    
+      if (node.type) {
+        visitNode(node.type);
+      }
+    
+      if (hasImportType) {
+        return this.context.factory.createTypeReferenceNode(
+          this.context.factory.createIdentifier(JSValue),
+          undefined
+        );
+      }
+    }
+  
     return node;
   }
 }
