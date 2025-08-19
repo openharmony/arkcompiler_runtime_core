@@ -16,7 +16,7 @@ import("//arkcompiler/runtime_core/ark_config.gni")
 #####################hydra-fuzz###################
 import("//build/ohos.gni")
 import("//build/test.gni")
-module_output_path = "arkcompiler/runtime_core"
+module_output_path = "runtime_core/runtime_core"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("PandargsFuzzTest") {
