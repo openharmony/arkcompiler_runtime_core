@@ -15,7 +15,7 @@ import("//build/ohos.gni")
 
 #####################hydra-fuzz###################
 import("//build/test.gni")
-module_output_path = "arkcompiler/runtime_core"
+module_output_path = "runtime_core/runtime_core"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("OpenFromMemory1ArgFuzzTest") {
