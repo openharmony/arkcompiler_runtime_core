@@ -1396,6 +1396,7 @@ Class *ClassLinker::GetClass(const uint8_t *descriptor, bool needCopyDescriptor,
                              ClassLinkerErrorHandler *errorHandler /* = nullptr */)
 {
     ASSERT(context != nullptr);
+    ASSERT(descriptor != nullptr);
     ASSERT(!MTManagedThread::ThreadIsMTManagedThread(Thread::GetCurrent()) ||
            !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
 
@@ -1699,6 +1700,7 @@ Field *ClassLinker::GetField(const panda_file::File &pf, panda_file::File::Entit
 
     if (klass == nullptr) {
         auto className = pf.GetStringData(fieldDataAccessor.GetClassId()).data;
+        ASSERT(className != nullptr);
         LOG(INFO, CLASS_LINKER) << "Cannot find class '" << className << "' in ctx " << context;
         return nullptr;
     }
@@ -1755,6 +1757,7 @@ Field *ClassLinker::GetField(const Method &caller, panda_file::File::EntityId id
         return field;
     }
     auto *ext = GetExtension(caller.GetClass()->GetSourceLang());
+    ASSERT(ext != nullptr);
     field = GetField(*caller.GetPandaFile(), id, isStatic, caller.GetClass()->GetLoadContext(),
                      (errorHandler == nullptr) ? ext->GetErrorHandler() : errorHandler);
     if (LIKELY(field != nullptr)) {

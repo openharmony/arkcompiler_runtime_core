@@ -145,6 +145,7 @@ Array *String::GetChars(String *src, uint32_t start, uint32_t utf16Length, const
     // allocator may trig gc and move 'src', need to hold it
     auto thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    ASSERT(src != nullptr);
     VMHandle<String> strHandle(thread, src);
     auto *klass = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::ARRAY_U16);
     Array *array = Array::Create(klass, utf16Length);

@@ -57,8 +57,8 @@ EtsMethod *EtsMethod::FromTypeDescriptor(const PandaString &td, EtsRuntimeLinker
     EtsClassLinker *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
     if (td[0] == METHOD_PREFIX) {
         // here we resolve method in existing class, which is stored as pointer to panda file + entity id
-        uint64_t filePtr;
-        uint64_t id;
+        uint64_t filePtr = 0;
+        uint64_t id = 0;
         const auto scanfStr = std::string_view {td}.substr(1).data();
         // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg,cert-err34-c)
         [[maybe_unused]] auto res = sscanf_s(scanfStr, "%" PRIu64 ";%" PRIu64 ";", &filePtr, &id);

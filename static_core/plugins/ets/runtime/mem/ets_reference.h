@@ -122,6 +122,7 @@ public:
 
     [[nodiscard]] EtsObject *GetEtsObject(EtsReference *etsRef)
     {
+        ASSERT(etsRef != nullptr);
         return EtsObject::FromCoreType(GetObject(EtsReference::CastToReference(etsRef)));
     }
 
