@@ -1535,6 +1535,26 @@
 10.interfaces/06.interface_inheritance/multi_layer_interface/type_system/type_system_23.ets
 10.interfaces/06.interface_inheritance/superinterfaces_and_subinterfaces/interface_inheritance_const/const_06.ets
 
+#28964
+11.enumerations/01.enumeration_integer_values/enum_long_10.ets
+11.enumerations/01.enumeration_integer_values/enum_long_11.ets
+11.enumerations/01.enumeration_integer_values/enum_long_12.ets
+11.enumerations/01.enumeration_integer_values/enum_long_13.ets
+11.enumerations/01.enumeration_integer_values/enum_long_14.ets
+11.enumerations/01.enumeration_integer_values/enum_long_15.ets
+
+#28992
+11.enumerations/01.enumeration_integer_values/enum_long_16.ets
+11.enumerations/01.enumeration_integer_values/enum_long_17.ets
+11.enumerations/01.enumeration_integer_values/enum_long_18.ets
+11.enumerations/01.enumeration_integer_values/enum_long_19.ets
+
+#28994
+11.enumerations/01.enumeration_integer_values/enum_long_20.ets
+11.enumerations/01.enumeration_integer_values/enum_long_21.ets
+11.enumerations/01.enumeration_integer_values/enum_long_22.ets
+11.enumerations/01.enumeration_integer_values/enum_long_23.ets
+
 #28243
 13.compilation_units/07.export_directives/04.re-export_directive/pkg01_re-export_all_by_old_names.ets
 13.compilation_units/07.export_directives/04.re-export_directive/pkg02_re-export_all_with_rename.ets
