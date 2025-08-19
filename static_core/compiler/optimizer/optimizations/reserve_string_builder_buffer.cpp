@@ -222,6 +222,10 @@ Inst *CreateInstructionNewObjectsArray(Graph *graph, Inst *ctorCall, uint64_t si
 
     // Create LoadAndInitClass instruction for Object[] type
     auto objectsArrayClassId = runtime->GetClassOffsetObjectsArray(method);
+    if (objectsArrayClassId == 0U) {
+        return nullptr;
+    }
+
     auto loadClassObjectsArray = graph->CreateInstLoadAndInitClass(
         DataType::REFERENCE, ctorCall->GetPc(), CopySaveState(graph, ctorCall->GetSaveState()),
         TypeIdMixin {objectsArrayClassId, method}, runtime->ResolveType(method, objectsArrayClassId));
@@ -323,10 +327,11 @@ void ReserveStringBuilderBuffer::ReplaceInitialBufferSizeConstantNotInlined(Inst
     Inst *ctorArg = nullptr;
     StringBuilderConstructorSignature ctorSignature = GetStringBuilderConstructorSignature(instance, ctorCall, ctorArg);
 
-    ASSERT(ctorCall != nullptr);
-
     // Create NewArray instruction for Object[] type and new array size
     auto newObjectsArray = CreateInstructionNewObjectsArray(GetGraph(), ctorCall, appendCallsCount);
+    if (newObjectsArray == nullptr) {
+        return;
+    }
 
     // Create StoreArray instruction to store constructor argument
     Inst *argLength = nullptr;
