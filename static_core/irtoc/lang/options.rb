@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -39,7 +39,7 @@ class << Options
     end.parse!
 
     if Options.working_dir
-      Dir.mkdir(Options.working_dir) unless File.exists?(Options.working_dir)
+      Dir.mkdir(Options.working_dir) unless File.exist?(Options.working_dir)
       Dir.chdir(Options.working_dir)
     end
 

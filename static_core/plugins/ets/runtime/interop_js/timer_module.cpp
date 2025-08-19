@@ -102,7 +102,7 @@ ani_int TimerModule::StartTimer(ani_env *env, ani_object funcObject, ani_int del
 {
     ASSERT(ark::ets::interop::js::InteropCtx::Current() != nullptr);
 
-    auto *timer = new uv_timer_t();
+    auto *timer = ark::ets::interop::js::EventLoop::CreateTimer();
     auto timerTable = GetTimerTable(env);
     ani_ref timerInfoRef {};
 
@@ -195,8 +195,7 @@ void TimerModule::RepeatTimer(uv_timer_t *timer, uint64_t timerId)
 
 void TimerModule::DisarmTimer(uv_timer_t *timer)
 {
-    uv_timer_stop(timer);
-    uv_close(reinterpret_cast<uv_handle_t *>(timer), [](uv_handle_t *handle) { delete handle; });
+    ark::ets::interop::js::EventLoop::CloseTimer(timer);
 }
 
 ani_object TimerModule::GetTimerTable(ani_env *env)
