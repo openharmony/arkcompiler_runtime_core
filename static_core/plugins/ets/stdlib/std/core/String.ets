@@ -453,11 +453,11 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @returns index of the str from the beginning of this string, or -1 if not found
      */
-    public indexOf(str: String, fromIndex?: Number): number {
+    public indexOf(str: String, fromIndex?: int): int {
         if (fromIndex == undefined) {
-            return this.indexOf(str, 0)
+            return this.indexOfImpl(str, 0)
         }
-        return this.indexOf(str, fromIndex.toInt())
+        return this.indexOfImpl(str, fromIndex.toInt())
     }
 
     /**
@@ -469,7 +469,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @returns index of the str from the beginning of this string, or -1 if not found
      */
-    public native indexOf(str: String, fromIndex: int): int;
+    public native indexOfImpl(str: String, fromIndex: int): int;
 
     /**
      * Finds the last occurrence of a character in this String.
@@ -514,11 +514,11 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @returns index of the str from the beginning of this string, or -1 if not found
      */
-    public lastIndexOf(str: String, fromIndex?: Number): number {
+    public lastIndexOf(str: String, fromIndex?: int): int {
         if (fromIndex == undefined || isNaN(fromIndex)) {
-            return this.lastIndexOf(str, Int.MAX_VALUE as int)
+            return this.lastIndexOfImpl(str, Int.MAX_VALUE as int)
         }
-        return this.lastIndexOf(str, fromIndex.toInt())
+        return this.lastIndexOfImpl(str, fromIndex.toInt())
     }
 
     /**
@@ -530,7 +530,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @returns index of the str from the beginning of this string, or -1 if not found
      */
-    public native lastIndexOf(str: String, fromIndex: int): int;
+    private native lastIndexOfImpl(str: String, fromIndex: int): int;
 
     /**
      * Selects a substring of this String, starting at a specified index

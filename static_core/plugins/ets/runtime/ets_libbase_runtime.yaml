@@ -913,7 +913,7 @@ intrinsics:
   - name: StdCoreStringIndexOfString
     space: ets
     class_name: std.core.String
-    method_name: indexOf
+    method_name: indexOfImpl
     static: false
     signature:
       ret: i32
@@ -924,7 +924,7 @@ intrinsics:
   - name: StdCoreStringLastIndexOfString
     space: ets
     class_name: std.core.String
-    method_name: lastIndexOf
+    method_name: lastIndexOfImpl
     static: false
     signature:
       ret: i32
