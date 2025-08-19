@@ -447,6 +447,11 @@ template("es2panda_gen") {
       if (defined(invoker.sources)) {
         sources = invoker.sources
       }
+      if (defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable) {
+        zlib_dir = "${es2panda_root_out}/obj/binarys/third_party/zlib/innerapis/shared_libz/clang_x64/libs/"
+      } else {
+        zlib_dir = "${es2panda_root_out}/thirdparty/zlib/"
+      }
       args = [
         "--script-file",
         es2panda_bin,
@@ -456,7 +461,7 @@ template("es2panda_gen") {
         rebase_path("${es2panda_root_out}/arkcompiler/runtime_core/") + ":" +
             rebase_path("${es2panda_root_out}/arkcompiler/ets_frontend/") +
             ":" + rebase_path("${es2panda_root_out}/arkcompiler/ets_runtime/") +
-            ":" + rebase_path("${es2panda_root_out}/thirdparty/zlib/") + ":" +
+            ":" + rebase_path("$zlib_dir") + ":" +
             rebase_path("${es2panda_root_out}/thirdparty/icu/"),
         "--expect-output",
         "0",
