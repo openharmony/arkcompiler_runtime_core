@@ -13,17 +13,32 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
 desc: >-
     An explicit generic instantiation is a language construct, which provides a list of type arguments
     that specify real types or type parameters to substitute corresponding type parameters of a generic.
-tags: [compile-only, negative]
+params: method
 ---*/
 
-class Cls {
-    a: number
+class Base {}
+class Derived extends Base {}
+
+interface BaseI {}
+interface DerivedI extends BaseI {}
+
+function fooBase(d1: Derived, d2: Derived): Base { return d1 }
+type fooBaseType = (d1: Derived, d2: Derived) => Base
+function fooSubtype(d1: Derived, d2: Base): Derived { return d1 }
+
+class Cls<T> {
+    a: T
+    constructor(a: T) {
+        this.a = a
+    }
 }
 
 function main() {
-    let cls = new Cls<number>
+    {{c.use|indent}}
 }
+{% endfor %}

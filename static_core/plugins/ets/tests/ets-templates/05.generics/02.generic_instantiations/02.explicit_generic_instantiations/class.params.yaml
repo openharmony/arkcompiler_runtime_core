@@ -25,8 +25,8 @@ cases:
         }
       use: |-
         let cls = new Cls<number, string>(1, "abc")
-        arktest.assertEQ(typeof cls.a, 'number')
-        arktest.assertEQ(typeof cls.b, 'string')
+        arktest.assertTrue(cls.a instanceof number)
+        arktest.assertTrue(cls.b instanceof string)
     # case 1
     - decl: |-
         class Cls<T, U> {
@@ -37,9 +37,9 @@ cases:
         }
       use: |-
         let cls = new Cls<number, string>(1, "abc")
-        arktest.assertEQ(typeof cls.a, 'object')
-        arktest.assertEQ(typeof cls.a[0], 'number')
-        arktest.assertEQ(typeof cls.a[1], 'string')
+        arktest.assertTrue(cls.a instanceof object)
+        arktest.assertTrue(cls.a[0] instanceof number)
+        arktest.assertTrue(cls.a[1] instanceof string)
     # case 2
     - decl: |-
         class A<T>{
@@ -58,8 +58,8 @@ cases:
         }
       use: |-
         let cls: B<number, string> = new B<number, string>(1, "abc")
-        arktest.assertEQ(typeof cls.a, 'number')
-        arktest.assertEQ(typeof cls.b, 'string')
+        arktest.assertTrue(cls.a instanceof number)
+        arktest.assertTrue(cls.b instanceof string)
     # case 3
     - decl: |-
         class A {}
@@ -150,3 +150,97 @@ cases:
         }
       use: |-
         let cls6: Cls<B, B> = new Cls<B, B>(new B(), new B())
+  # specific cases: tuple types, FixedArray, Any, union types, bigint, literal types, function types,
+  # undefined, null, Array<T> or T[], FixedArray<T>
+    - decl: |-
+        class Cls<T> {
+            a: T
+            constructor(a: T) {
+                this.a = a
+            }
+        }
+      use: |-
+        let cls = new Cls<[number, string]>([1, "abc"])
+        arktest.assertTrue(cls.a[0] instanceof number)
+        arktest.assertTrue(cls.a[1] instanceof string)
+    - decl: |-
+        class Cls<T> {
+            a: T
+            constructor(a: T) {
+                this.a = a
+            }
+        }
+      use: |-
+        let cls = new Cls<FixedArray<number>>([1])
+        arktest.assertTrue(cls.a[0] instanceof number)
+    - decl: |-
+        class Cls<T> {
+            a: T
+            constructor(a: T) {
+                this.a = a
+            }
+        }
+      use: |-
+        let cls = new Cls<Any>(null)
+        arktest.assertTrue(cls.a instanceof Any)
+    - decl: |-
+        class Cls<T> {
+            a: T
+            constructor(a: T) {
+                this.a = a
+            }
+        }
+      use: |-
+        let cls = new Cls<bigint>(123n)
+        arktest.assertTrue(cls.a instanceof bigint)
+    - decl: |-
+        class Cls<T> {
+            a: T
+            constructor(a: T) {
+                this.a = a
+            }
+        }
+      use: |-
+        let cls = new Cls<"aa" | "bb">("aa")
+        arktest.assertTrue(cls.a instanceof string)
+    - decl: |-
+        function foo(): number { return 1 }
+        class Cls<T> {
+            a: T
+            constructor(a: T) {
+                this.a = a
+            }
+        }
+      use: |-
+        let cls = new Cls<() => number>(foo)
+        arktest.assertTrue(cls.a() instanceof number)
+    - decl: |-
+        class Cls<T> {
+            a: T
+            constructor(a: T) {
+                this.a = a
+            }
+        }
+      use: |-
+        let cls = new Cls<undefined>(undefined)
+        arktest.assertTrue(cls.a instanceof undefined)
+    - decl: |-
+        class Cls<T> {
+            a: T
+            constructor(a: T) {
+                this.a = a
+            }
+        }
+      use: |-
+        let cls = new Cls<Array<number>>([1])
+        arktest.assertTrue(cls.a[0] instanceof number)
+    - decl: |-
+        class Cls<T> {
+            a: T
+            constructor(a: T) {
+                this.a = a
+            }
+        }
+      use: |-
+        let cls = new Cls<number[]>([1])
+        arktest.assertTrue(cls.a[0] instanceof number)
