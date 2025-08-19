@@ -24,6 +24,10 @@ function asIntOrDefault(n: Number | undefined, def: int): int {
     return (n!).toInt();
 }
 
+function asIntOrDefault(n: int | undefined, def: int): int {
+    return n ?? def
+}
+
 function normalizeIndex(idx: int, len: int): int {
     if (idx < -len) {
         return 0
@@ -1836,7 +1840,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns index of val, -1 otherwise
      */
-    public native indexOf(val: T, fromIndex: int): int;
+    private native indexOfImpl(val: T, fromIndex1: int): int;
 
     /**
      * Returns the first index at which a given element
@@ -1848,11 +1852,11 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns index of val, -1 otherwise
      */
-    public override indexOf(val: T, fromIndex?: Number): number {
-        return this.indexOf(val, asIntOrDefault(fromIndex, 0))
+    public override indexOf(val: T, fromIndex?: int): int {
+        return this.indexOfImpl(val, asIntOrDefault(fromIndex, 0))
     }
 
-    public native indexOf(val: T): number;
+    public native indexOf(val: T): int;
 
     /**
      * Copying version of the sort() method.
