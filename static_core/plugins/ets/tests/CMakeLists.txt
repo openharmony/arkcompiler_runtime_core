@@ -621,13 +621,21 @@ add_custom_target(ets_time02_tests)
 add_custom_target(ets_time03_tests)
 add_custom_target(ets_time04_tests)
 add_custom_target(ets_time05_tests)
+add_custom_target(ets_time06_tests)
+add_custom_target(ets_time07_tests)
+add_custom_target(ets_time08_tests)
+add_custom_target(ets_time09_tests)
 
 add_dependencies(ets_tests
     ets_time01_tests
     ets_time02_tests
     ets_time03_tests
     ets_time04_tests
-    ets_time05_tests)
+    ets_time05_tests
+    ets_time06_tests
+    ets_time07_tests
+    ets_time08_tests
+    ets_time09_tests)
 
 function(add_target_to_group group test_target)
     if (TARGET ${test_target})
@@ -671,3 +679,8 @@ add_target_to_group(ets_time04_tests ets_run_int_ets_code_tests)
 
 add_target_to_group(ets_time05_tests ets_run_int_ets_code_tests)
 # ---- end of groups by time
+
+add_target_to_group(ets_time06_tests ani_tests)
+add_target_to_group(ets_time07_tests sampler_ani_test_suite)
+add_target_to_group(ets_time08_tests es2panda_gtests)
+add_target_to_group(ets_time09_tests compiler_tests)
