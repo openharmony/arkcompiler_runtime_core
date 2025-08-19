@@ -316,6 +316,9 @@ spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-08.ets
 ### Type Erasure
 std/containers/BuiltinArrayMapTest.ets
 
+#29117
+std/containers/BlockingQueue/AddAndPollStress.ets
+
 #27586
 std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
 
@@ -324,6 +327,9 @@ std/core/ConsoleArrayTest.ets
 
 #27145
 std/core/dateformat/IntlDateFormatTest.ets
+
+#25130
+std/core/dateformat/DateTimeFormatTest.ets
 
 #11468
 std/core/std_core_array_forEach_boolean_array_func_boolean.ets
@@ -394,6 +400,9 @@ escompat/JsonTest.ets
 spec/09.classes/Accessor_Declarations/issue-15142_9.ets
 std/core/NumberTest.ets
 escompat/JsonStringifyTest.ets
+
+#28345
+escompat/JsonParseTest.ets
 
 ############
 # temporary place for the tests related to primitive types refactoring

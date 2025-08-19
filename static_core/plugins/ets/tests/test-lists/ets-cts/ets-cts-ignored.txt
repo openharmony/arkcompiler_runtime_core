@@ -113,9 +113,6 @@
 04.names_declarations_and_scopes/04.accessible/type_name_const_enum.ets
 04.names_declarations_and_scopes/04.accessible/type_name_variable_enum.ets
 
-#27255
-04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_neg_15.ets
-
 #23643
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/04.type_inference_from_initializer/infer_12.ets
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/04.type_inference_from_initializer/infer_13.ets
@@ -996,6 +993,9 @@
 # 21362
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/nase3.ets
 
+# 27209
+07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/oome1.ets
+
 #22791 FixedArray and Array<T> support is not implemented yet
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_cast_23.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_cast_27.ets
@@ -1133,9 +1133,6 @@
 07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_res_n_3.ets
 07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_res_n_4.ets
 07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_res_n_5.ets
-
-#27156
-07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_res_type.ets
 
 #27158
 07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_cte_n_0.ets
@@ -2428,7 +2425,6 @@
 
 # 27390
 15.semantic_rules/01.semantic_essentials/01.type_of_standalone_expression/union_types.ets
-15.semantic_rules/01.semantic_essentials/03.specifics_of_variable_initialization_context/expression_type_evaluation_2.ets
 
 # 27628
 15.semantic_rules/01.semantic_essentials/04.specifics_of_numeric_operator_contexts/negative_unary_operator.ets
