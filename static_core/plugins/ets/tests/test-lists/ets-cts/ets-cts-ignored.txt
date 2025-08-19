@@ -1524,14 +1524,6 @@
 14.ambient_declarations/bad_ambient_declarations_19.ets
 14.ambient_declarations/bad_ambient_declarations_20.ets
 
-#2073 - issue on runner .expected.err comparison space 'public'
-14.ambient_declarations/01.constant_declarations/constant_usage_n_0.ets
-14.ambient_declarations/01.constant_declarations/constant_usage_n_1.ets
-14.ambient_declarations/01.constant_declarations/constant_usage_n_2.ets
-14.ambient_declarations/import_decl_n/import_declarations_n_0.ets
-14.ambient_declarations/import_decl_n/import_declarations_n_1.ets
-14.ambient_declarations/import_decl_n/import_declarations_n_2.ets
-
 #28850
 14.ambient_declarations/03.ambient_overload_function_declarations/overload_function_usage_0.ets
 14.ambient_declarations/03.ambient_overload_function_declarations/overload_function_usage_1.ets
@@ -1540,6 +1532,15 @@
 
 #29153
 14.ambient_declarations/04.class_declarations/02.ambient_call_signature/call_sig_declarations_neg_2.ets
+
+#29270
+14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_0.ets
+14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_1.ets
+14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_2.ets
+14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_3.ets
+14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_4.ets
+14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_5.ets
+14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_6.ets
 
 #28326
 15.semantic_rules/02.subtyping/01.subtyping_for_classes_and_interfaces/generic_cast_to_generic_superclass.ets

@@ -13,12 +13,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for decl in declarations %}
+{% for c in cases %}
 /*---
-desc: Ambient Interface declarations
-tags: [compile-only]
+desc: Ambient Interface implementations
+files: ['./interface_declarations.d.ets']
 ---*/
 
-{{decl}}
+import { {{c.import}} } from './interface_declarations.d'
+
+{{c.decl}}
+
+function main() {
+  {{c.use|indent}}
+}
 
 {% endfor %}

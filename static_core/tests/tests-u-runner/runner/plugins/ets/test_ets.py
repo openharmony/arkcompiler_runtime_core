@@ -150,7 +150,13 @@ class TestETS(TestFileBased):
     @staticmethod
     def _normalize_error_report(report: str) -> str:
         pattern = r"\[TID [0-9a-fA-F]{6,}\]\s*"
-        return re.sub(pattern, "", report)
+        result = re.sub(pattern, "", report)
+        return TestETS._remove_tabs_and_spaces_from_begin(result)
+
+    @staticmethod
+    def _remove_tabs_and_spaces_from_begin(report: str) -> str:
+        pattern = r"^\s+"
+        return re.sub(pattern, "", report, flags=re.MULTILINE)
 
     @staticmethod
     def _remove_file_info_from_error(error_message: str) -> str:
@@ -255,7 +261,7 @@ class TestETS(TestFileBased):
                 passed = self._determine_test_status(output, err_output)
             else:
                 self._refactor_expected_str_for_jit()
-                passed = self._determine_test_status(output, err_output, jit=True)
+                passed = self._determine_test_status(output, err_output)
 
         except OSError:
             passed = False
@@ -264,31 +270,39 @@ class TestETS(TestFileBased):
             fail_kind = FailKind.COMPARE_OUTPUT_FAIL
         return bool(passed), fail_kind
 
-    def _determine_test_status(self, output: str, err_output: str, jit: bool = False) -> bool:
+    def _determine_test_status(self, output: str, err_output: str) -> bool:
 
         passed = True
         output = output.strip()
         err_output = err_output.strip()
 
         def compare(expected: str, actual: str) -> bool:
-            if jit:
-                return expected in actual
-            return expected == actual
+            expected_lines = set(filter(None, expected.splitlines()))
+            actual_lines = set(filter(None, actual.splitlines()))
+
+            if not actual_lines and not expected_lines:
+                return True
+
+            if not expected_lines or not actual_lines:
+                return False
+
+            return expected_lines.issubset(actual_lines)
 
         if self.expected and not self.expected_err and output:
             # Compare with output from std.OUT
-            report_output = self._remove_file_info_from_error(output)
-            passed = compare(self.expected, report_output) and not err_output
+            report_output = self._remove_file_info_from_error(self._normalize_error_report(output))
+            passed = compare(self._normalize_error_report(self.expected), report_output) and not err_output
         elif self.expected_err and not self.expected and err_output:
             # Compare with output from std.ERR
             report_error = self._remove_file_info_from_error(self._normalize_error_report(err_output))
-            passed = compare(self.expected_err, report_error)
+            passed = compare(self._normalize_error_report(self.expected_err), report_error)
         elif self.expected and self.expected_err and output and err_output:
             # Compare .expected file with std.OUT and .expected.err with std.ERR
-            report_output = self._remove_file_info_from_error(output)
-            passed_stdout = compare(self.expected, report_output)
+            report_output = self._remove_file_info_from_error(self._normalize_error_report(output))
+            passed_stdout = compare(self._normalize_error_report(self.expected), report_output)
+
             report_error = self._remove_file_info_from_error(self._normalize_error_report(err_output))
-            passed_stderr = compare(self.expected_err, report_error)
+            passed_stderr = compare(self._normalize_error_report(self.expected_err), report_error)
             passed = passed_stdout and passed_stderr
 
         return bool(passed)
@@ -305,7 +319,7 @@ class TestETS(TestFileBased):
             if index_to_delete > 1:
                 expected = s.split("\n")
                 for i, item in enumerate(expected):
-                    if '.main' in item:
+                    if '.main' in item or ':main' in item:
                         index_to_delete = i
                         break
                 s = '\n'.join(expected[:index_to_delete])

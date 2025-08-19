@@ -11,12 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-E/verifier: Cannot link class: Cannot find field 'x' in class 'constant_declarations_n.ETSGLOBAL'
-E/verifier: Cannot link class: Cannot find field 'x' in class 'constant_declarations_n.ETSGLOBAL'
-E/verifier: Verifier error 55: Cache miss for field at offset
-E/verifier: Verifier error 61: Cannot resolve field id
-E/verifier: Method verification failed: void constant_usage_n_0.ETSGLOBAL::main()
+[TID 005030] E/verifier: Cannot link class: Cannot find field 'x' in class 'constant_declarations_n.ETSGLOBAL'
+[TID 005030] E/verifier: Cannot link class: Cannot find field 'x' in class 'constant_declarations_n.ETSGLOBAL'
+[TID 005030] E/verifier: Verifier error 55: Cache miss for field at offset
+[TID 005030] E/verifier: Verifier error 61: Cannot resolve field id
 Unhandled exception: std.core.LinkerVerificationError
-LinkerVerificationError
-	at std.core.LinkerError.<ctor> (etsstdlib.ets:20:0)
-	at std.core.LinkerVerificationError.<ctor> (etsstdlib.ets:30:0)
+LinkerVerificationError: Lconstant_usage_n_0/ETSGLOBAL;

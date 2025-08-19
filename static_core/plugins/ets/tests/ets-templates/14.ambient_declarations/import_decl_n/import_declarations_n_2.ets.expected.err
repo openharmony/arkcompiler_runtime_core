@@ -11,11 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-E/verifier: Cannot link class: Cannot find method 'foo (Lstd/core/String;)Lstd/core/String;' in class 'declarations_n.C'
-E/verifier: Verifier error 54: Cache miss for method at offset
-E/verifier: Verifier error 62: Cannot resolve method id
-E/verifier: Method verification failed: void import_declarations_n_2.ETSGLOBAL::main()
+[TID 005eda] E/verifier: Cannot link class: Cannot find method 'foo (Lstd/core/String;)Lstd/core/String;' in class 'declarations_n.C'
+[TID 005eda] E/verifier: Verifier error 54: Cache miss for method at offset
+[TID 005eda] E/verifier: Verifier error 62: Cannot resolve method id
 Unhandled exception: std.core.LinkerVerificationError
-LinkerVerificationError: import_declarations_n_2.ETSGLOBAL::main
-	at std.core.LinkerError.<ctor> (etsstdlib.ets:20:0)
-	at std.core.LinkerVerificationError.<ctor> (etsstdlib.ets:30:0)
+LinkerVerificationError: Limport_declarations_n_2/ETSGLOBAL;

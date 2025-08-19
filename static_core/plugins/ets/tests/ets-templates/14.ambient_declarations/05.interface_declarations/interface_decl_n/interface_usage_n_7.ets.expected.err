@@ -10,38 +10,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-declarations:
-  # interfaces
-  - >
-    declare interface A {}
-  - >
-    declare interface B {
-       a: int
-       b: float
-       c: Byte[]
-    }
-  - >
-    declare interface C {
-      foo(x: number, y: string, z: double[]): void
-    }
-  - >
-    declare interface D<T1, T2> {
-      a: T1
-      b: T2
-    }
-  - >
-    declare interface E<U, V, R> {
-      foo(x: U, y: V): R
-    }
-  - >
-    declare interface A {
-    }
-    
-    declare interface B extends A {
-    }
-  - >
-    declare interface A {
-      get foo(): int
-      set foo(v: int)
-    }
+#
+E/verifier: Cannot link class: Cannot find method 'foo (D)Lstd/core/String;' in class 'interface_declarations.J'
+E/verifier: Verifier error 54: Cache miss for method at offset
+E/verifier: Verifier error 62: Cannot resolve method id
+E/verifier: Method verification failed: void interface_usage_n_7.ETSGLOBAL::main()
+E/verifier: Class verification failed: 'interface_usage_n_7.ETSGLOBAL' method: void interface_usage_n_7.ETSGLOBAL::main()
+Unhandled exception: std.core.LinkerVerificationError
+LinkerVerificationError: Linterface_usage_n_7/ETSGLOBAL;
