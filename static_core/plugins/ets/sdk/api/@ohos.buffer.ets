@@ -1678,7 +1678,22 @@ Received value is: ${value}`)
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
                     `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
             }
-            return this.getDataView().getInt32(offset.toInt(), false).toLong()
+            return this.read32Big(offset);
+        }
+
+        private read32Big(byteOffset: int): int {
+            let len = this.length;
+            if (byteOffset < 0 || byteOffset + 4 > len) {
+                throw new RangeError("wrong index");
+            }
+            let res: int = 0;
+            const startByte = byteOffset;
+            for (let i = 0; i < 4; i++) {
+                let byteVal: int = (this.bufferData.at(startByte + 3 - i));
+                byteVal &= 0xff;
+                res = (res | byteVal << (8 * i));
+            }
+            return res;
         }
 
         /**
@@ -1693,7 +1708,22 @@ Received value is: ${value}`)
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
                     `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
             }
-            return this.getDataView().getInt32(offset.toInt(), true).toLong()
+            return this.read32Little(offset);
+        }
+
+        private read32Little(byteOffset: int): int {
+            let len = this.length;
+            if (byteOffset < 0 || byteOffset + 4 > len) {
+                throw new RangeError("wrong index");
+            }
+            let res: int = 0;
+            const startByte = byteOffset;
+            for (let i = 0; i < 4; i++) {
+                let byteVal: int = (this.buffer.at(startByte + i));
+                byteVal &= 0xff;
+                res = (res | byteVal << (8 * i));
+            }
+            return res;
         }
 
         /**
@@ -1753,7 +1783,22 @@ Received value is: ${value}`)
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
                     `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
             }
-            return this.getDataView().getUint32(offset.toInt(), false).toLong()
+            return this.readUInt32Big(offset).toLong();
+        }
+
+        private readUInt32Big(byteOffset: int): long {
+            let len = this.length;
+            if (byteOffset < 0 || byteOffset + 4 > len) {
+                throw new RangeError("wrong index");
+            }
+            let res: long = 0;
+            const startByte = byteOffset;
+            for (let i = 0; i < 4; i++) {
+                let byteVal: long = (this.buffer.at(startByte + 3 - i));
+                byteVal &= 0xff;
+                res = (res | byteVal << (8 * i));
+            }
+            return res;
         }
 
         /**
@@ -1768,7 +1813,22 @@ Received value is: ${value}`)
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
                     `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
             }
-            return this.getDataView().getUint32(offset.toInt(), true).toLong()
+            return this.readUInt32Little(offset);
+        }
+
+        private readUInt32Little(offset: int): long {
+            let len = this.length;
+            if (offset < 0 || offset + 4 > len) {
+                throw new RangeError("wrong index");
+            }
+            let res: long = 0;
+            const startByte = offset;
+            for (let i = 0; i < 4; i++) {
+                let byteVal: long = (this.bufferData.at(startByte + i));
+                byteVal &= 0xff;
+                res = (res | byteVal << (8 * i));
+            }
+            return res;
         }
 
         /**
@@ -2129,8 +2189,24 @@ Received value is: ${value}`)
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
                     `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
             }
-            this.getDataView().setUint32(offset.toInt(), value, true);
+            this.set32Litter(offset, value);
             return offset + 4;
+        }
+
+        private set32Litter(byteOffset: int, value: long): void {
+            let len = this.length;
+            if (byteOffset < 0 || byteOffset + 4.0 > len) {
+                throw new RangeError("wrong index");
+            }
+            let bits = value;
+            if (bits == Long.MAX_VALUE || bits == Long.MIN_VALUE) {
+                bits = 0;
+            }
+            const startByte = byteOffset;
+            for (let i = 0; i < 4; i++) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff).toByte();
+                this.buffer.set(startByte + i, byteVal);
+            }
         }
 
         /**
