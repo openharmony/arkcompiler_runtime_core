@@ -47,6 +47,9 @@ steps:
         args:
             - "${parameters.es2panda-full-args}"
             - "${parameters.work-dir}/gen/${test-id}"
+        env:
+            LD_LIBRARY_PATH:
+                - "${parameters.build}/arkcompiler/runtime_core"
     verifier:
         executable-path: ${parameters.build}/arkcompiler/runtime_core/verifier
         timeout: ${parameters.verifier-timeout}
@@ -57,3 +60,11 @@ steps:
             - "--load-runtimes=${parameters.load-runtimes}"
             - "--config-file=${parameters.verifier-config}"
             - "${parameters.output-file}"
+        env:
+            LD_LIBRARY_PATH:
+                - "${parameters.build}/arkcompiler/runtime_core:"
+                - "${parameters.build}/arkcompiler/ets_runtime:"
+                - "${parameters.build}/arkui/napi:"
+                - "${parameters.build}/thirdparty/icu:"
+                - "${parameters.build}/thirdparty/libuv:"
+                - "${parameters.build}/thirdparty/bounds_checking_function"
