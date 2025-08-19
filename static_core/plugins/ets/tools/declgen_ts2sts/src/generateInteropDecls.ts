@@ -17,11 +17,20 @@ import * as ts from 'typescript';
 import { Logger } from '../utils/logger/Logger';
 import { logMessages, SilentLogger } from '../utils/logger/SilentLogger';
 import { DeclgenCLIOptions } from './cli/DeclgenCLI';
-import { Declgen } from './Declgen';
+import { CodeInput, Declgen } from './Declgen';
 
 export interface RunnerParms {
   inputFiles: string[];
   inputDirs: string[];
+  outDir: string;
+  rootDir?: string;
+  customResolveModuleNames?: (moduleName: string[], containingFile: string) => ts.ResolvedModuleFull[];
+  customCompilerOptions?: ts.CompilerOptions;
+  includePaths?: string[];
+}
+
+export interface CodeInputParams {
+  codeInputs: CodeInput[];
   outDir: string;
   rootDir?: string;
   customResolveModuleNames?: (moduleName: string[], containingFile: string) => ts.ResolvedModuleFull[];
@@ -41,6 +50,30 @@ export function generateInteropDecls(config: RunnerParms): string[] {
     includePaths: config.includePaths
   }
   const declgen = new Declgen(tsConfig, config.customResolveModuleNames, config.customCompilerOptions);
+  declgen.run();
+  return logMessages;
+}
+
+//Create ArkTS1.2 declaration file based on file contend.
+export function generateInteropDeclsFromCode(config: CodeInputParams): string[] {
+  Logger.init(new SilentLogger());
+
+  const tsConfig: DeclgenCLIOptions = {
+    outDir: config.outDir,
+    inputFiles: [],
+    inputDirs: [],
+    rootDir: config.rootDir,
+    tsconfig: undefined,
+    includePaths: config.includePaths
+  }
+
+  const declgen = new Declgen(
+    tsConfig, 
+    config.customResolveModuleNames, 
+    config.customCompilerOptions,
+    config.codeInputs
+  );
+
   declgen.run();
   return logMessages;
 }
