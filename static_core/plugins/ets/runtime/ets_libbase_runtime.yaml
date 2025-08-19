@@ -1625,6 +1625,18 @@ intrinsics:
       args: [ i32, std.core.Object ]
     impl: ark::ets::intrinsics::EtsEscompatArraySetUnsafe
 
+  - name: EscompatArrayUnshiftInternal
+    space: ets
+    class_name: escompat.Array
+    method_name: unshiftInternal
+    static: false
+    signature:
+      ret: void
+      args:
+        - std.core.Object[]
+        - escompat.Array
+    impl: ark::ets::intrinsics::EtsEscompatArrayUnshiftInternal
+
 ########################
 # escompat.ArrayBuffer #
 ########################
