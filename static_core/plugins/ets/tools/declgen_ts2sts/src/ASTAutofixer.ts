@@ -120,7 +120,12 @@ export class Autofixer {
         this[FaultID.RemoveLimitDecorator].bind(this)
       ]
     ],
-    [ts.SyntaxKind.Parameter,[this[FaultID.ReservedFuncParameter].bind(this)]],
+    [ts.SyntaxKind.Parameter,
+      [
+        this[FaultID.ReservedFuncParameter].bind(this),
+        this[FaultID.RestParameterArray].bind(this)
+      ]
+    ],
     [ts.SyntaxKind.TypeQuery, [this[FaultID.TypeQuery].bind(this)]],
     [ts.SyntaxKind.TypeParameter, [this[FaultID.LiteralType].bind(this)]],
     [
@@ -1316,7 +1321,7 @@ export class Autofixer {
     if (
       ts.isParameter(node) &&
       ts.isIdentifier(node.name) &&
-      InvalidFuncParaNames.includes(node.name.text)
+      InvalidFuncParaNames.has(node.name.text)
     ) {
       const updatedNode = this.context.factory.updateParameterDeclaration(
         node,
@@ -1328,6 +1333,41 @@ export class Autofixer {
         node.initializer
       );
       return updatedNode;
+    }
+    return node;
+  }
+
+  /**
+   * Rule: `arkts-rest-parameter-array`
+   */
+  private [FaultID.RestParameterArray](node: ts.Node): ts.VisitResult<ts.Node> {
+    /**
+     * Rest parameters named `ESObject` will be converted to `Any[]` type in ArkTS 1.2.
+     */
+    if (
+      ts.isParameter(node) &&
+      node.dotDotDotToken &&
+      node.type &&
+      ts.isTypeReferenceNode(node.type)
+    ) {
+      const typeName = node.type.typeName;
+      if (
+        ts.isIdentifier(typeName) &&
+        (typeName.text === ESObject || typeName.text === JSValue)
+      ) {
+        const typeNode = this.context.factory.createArrayTypeNode(
+          this.context.factory.createTypeReferenceNode(JSValue, undefined)
+        );
+        return this.context.factory.updateParameterDeclaration(
+          node,
+          node.modifiers,
+          node.dotDotDotToken,
+          node.name,
+          node.questionToken,
+          typeNode,
+          node.initializer
+        );
+      }
     }
     return node;
   }
