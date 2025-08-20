@@ -44,6 +44,9 @@ inline ani_string CreateStringUtf8(ani_env *env, const std::string &str)
 ani_ref GetAniNull(ani_env *env);
 bool IsNullishValue(ani_env *env, ani_ref ref);
 
+ani_error CreateBusinessError(ani_env *env, int code, const std::string &message);
+void ThrowBusinessError(ani_env *env, int code, const std::string &message);
+
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define BOX_VALUE_LIST(V)        \
     V(ani_boolean, Boolean, "z") \

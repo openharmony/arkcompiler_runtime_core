@@ -14,15 +14,18 @@
  */
 
 import { util } from "@ohos.util";
+import { BusinessError } from "@ohos.base";
 
 function main() {
     const suite = new arktest.ArkTestsuite("StringDecoder API encoding utf-8 tests");
 
     suite.addTest("Returns a decoded string, ensuring that any incomplete multibyte characters at the end of the Uint8Array are", testwrite001);
     suite.addTest("Returns a decoded string, ensuring that any incomplete multibyte characters at the end of the Uint8Array are", testwrite002);
+    suite.addTest("Handle exception and check code and name.", testwrite003);
     suite.addTest("Returns any remaining input stored in the internal buffer as a string.", testend002);
     suite.addTest("Returns any remaining input stored in the internal buffer as a string.", testend003);
     suite.addTest("Returns any remaining input stored in the internal buffer as a string.", testend004);
+    suite.addTest("Handle exception and check code and name.", testend005);
     return suite.run();
 }
 
@@ -87,7 +90,7 @@ function testend003() {
 }
 
 /**
- * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_UTIL_01006
+ * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_UTIL_0006
  * @tc.name: testend004
  * @tc.desc: Returns any remaining input stored in the internal buffer as a string.
  * @tc.size: MediumTest
@@ -101,4 +104,36 @@ function testend004() {
     const decodeend = decoder.end(input.slice(5));
     arktest.assertEQ(decoded, '你');
     arktest.assertEQ(decodeend, '好');
+}
+
+function testwrite003() {
+    let decoder = new util.StringDecoder('utf-8');
+    let input = new Uint8Array(0);
+    arktest.expectThrow(() => {
+        decoder.write(input);
+    }, (e: Error | Exception) => {
+        arktest.assertTrue(e instanceof BusinessError);
+        const err = e as BusinessError;
+        arktest.assertEQ(err.code, 401);
+        arktest.assertEQ(err.name, 'BusinessError');
+        arktest.assertEQ(err.message, 'Error obtaining minimum number of input bytes');
+        return true;
+    });
+}
+
+function testend005() {
+    let decoder = new util.StringDecoder('utf-8');
+    let input = new Uint8Array([0xE4, 0xBD, 0xA0, 0xE5, 0xA5, 0xBD]);
+    const decoded = decoder.write(input.slice(0, 5));
+    arktest.assertEQ(decoded, '你');
+    arktest.expectThrow(() => {
+        decoder.end(new Uint8Array(0));
+    }, (e: Error | Exception) => {
+        arktest.assertTrue(e instanceof BusinessError);
+        const err = e as BusinessError;
+        arktest.assertEQ(err.code, 401);
+        arktest.assertEQ(err.name, 'BusinessError');
+        arktest.assertEQ(err.message, 'Error obtaining minimum number of input bytes');
+        return true;
+    });
 }

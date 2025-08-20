@@ -13,15 +13,20 @@
  * limitations under the License.
  */
 
-#include "ani_stringdecoder.h"
 #include <codecvt>
 #include <locale>
+#include <memory>
+
 #include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
 #include "tools/format_logger.h"
 #include "unicode/unistr.h"
-#include <memory>
+#include "Util.h"
+
+#include "ani_stringdecoder.h"
 
 namespace ark::ets::sdk::util {
+constexpr int ERROR_CODE = 401;
+
 UConverter *UtilHelper::CreateConverter(const std::string &encStr, UErrorCode &codeflag)
 {
     UConverter *conv = ucnv_open(encStr.c_str(), &codeflag);
@@ -58,7 +63,7 @@ ani_string StringDecoder::Write(ani_env *env, const char *source, int32_t byteOf
 {
     size_t limit = static_cast<size_t>(ucnv_getMinCharSize(conv_)) * length;
     if (limit <= 0) {
-        env->ThrowError(static_cast<ani_error>(ThrowError(env, "Error obtaining minimum number of input bytes")));
+        ThrowBusinessError(env, ERROR_CODE, "Error obtaining minimum number of input bytes");
         return nullptr;
     }
     std::vector<UChar> arr(limit + 1, 0);
@@ -76,7 +81,7 @@ ani_string StringDecoder::Write(ani_env *env, const char *source, int32_t byteOf
     if (U_FAILURE(codeFlag)) {
         std::string err = "decoder error, ";
         err += u_errorName(codeFlag);
-        ThrowError(env, err);
+        ThrowBusinessError(env, ERROR_CODE, err);
         return nullptr;
     }
     pendingLen_ = ucnv_toUCountPending(conv_, &codeFlag);
@@ -114,7 +119,7 @@ ani_string StringDecoder::End(ani_env *env)
     if (U_FAILURE(errorCode)) {
         std::string err = "decoder error, ";
         err += u_errorName(errorCode);
-        ThrowError(env, err);
+        ThrowBusinessError(env, ERROR_CODE, err);
         return nullptr;
     }
     const size_t convertedChars = target - outputBuffer.data();
@@ -124,33 +129,5 @@ ani_string StringDecoder::End(ani_env *env)
     ANI_FATAL_IF_ERROR(
         env->String_NewUTF16(reinterpret_cast<uint16_t *>(outputBuffer.data()), convertedChars, &resultStr));
     return resultStr;
-}
-
-ani_object StringDecoder::ThrowError(ani_env *env, const std::string &message)
-{
-    ani_string errString;
-    env->String_NewUTF8(message.c_str(), message.size(), &errString);
-    static const char *className = "@ohos.util.util.BusinessError";
-    ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("StringDecoder:: Not found %{public}s", className);
-        return nullptr;
-    }
-
-    ani_method errorCtor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}:", &errorCtor)) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("StringDecoder:: Class_FindMethod <ctor> Failed");
-        return nullptr;
-    }
-
-    ani_object errorObj;
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    if (ANI_OK != env->Object_New(cls, errorCtor, &errorObj, errString)) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("StringDecoder:: Object_New Error Faild");
-    }
-    return errorObj;
 }
 }  // namespace ark::ets::sdk::util

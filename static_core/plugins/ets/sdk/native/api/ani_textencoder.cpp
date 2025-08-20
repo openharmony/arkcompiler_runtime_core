@@ -255,11 +255,7 @@ ani_arraybuffer DoEncodeInto(ani_env *env, [[maybe_unused]] ani_object object, a
     std::string encodingStr = stdlib::ConvertFromAniString(env, aniEncoding);
     if (encodingStr == "utf-8") {
         std::string inputString = stdlib::ConvertFromAniString(env, stringObj);
-        if (ANI_OK != env->CreateArrayBuffer(inputString.length(), &rawData, &arrayBuffer)) {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-            LOG_ERROR_SDK("TextEncoder:: CreateArrayBuffer failed.");
-            return nullptr;
-        }
+        ANI_FATAL_IF_ERROR(env->CreateArrayBuffer(inputString.length(), &rawData, &arrayBuffer));
         if (EOK != memcpy_s(rawData, inputString.length(), inputString.data(), inputString.length())) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             LOG_FATAL_SDK("TextEncoder:: Failure during memcpy_s.");
@@ -280,11 +276,7 @@ ani_arraybuffer DoEncodeInto(ani_env *env, [[maybe_unused]] ani_object object, a
             utf16Str = ani_helper::Utf16LEToBE(utf16Str);
         }
         size_t sizeBytes = utf16Str.length() * 2;  // 2 : 2 bytes per UTF-16 character
-        if (ANI_OK != env->CreateArrayBuffer(sizeBytes, &rawData, &arrayBuffer)) {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-            LOG_ERROR_SDK("TextEncoder:: CreateArrayBuffer failed.");
-            return nullptr;
-        }
+        ANI_FATAL_IF_ERROR(env->CreateArrayBuffer(sizeBytes, &rawData, &arrayBuffer));
         if (EOK != memcpy_s(rawData, sizeBytes, utf16Str.data(), sizeBytes)) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             LOG_FATAL_SDK("TextEncoder:: Failure during memcpy_s.");
