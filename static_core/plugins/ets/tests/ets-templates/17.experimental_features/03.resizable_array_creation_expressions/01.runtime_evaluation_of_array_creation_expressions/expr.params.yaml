@@ -42,7 +42,7 @@ cases:
           let expectedError = (e: Error): boolean => {
               return (e instanceof Error)
           }
-          arktest.expectThrowError(() => {v = new number[foo(1)][foo(2)][foo(3)][foo(4)][foo(5)]}, expectedError)
+          arktest.expectThrow(() => {v = new number[foo(1)][foo(2)][foo(3)][foo(4)][foo(5)]}, expectedError)
           arktest.assertEQ(res, "123")
           arktest.assertEQ(v, null)
 
@@ -84,7 +84,7 @@ cases:
           let expectedError = (e: Error): boolean => {
               return (e instanceof NegativeArraySizeError)
           }
-          arktest.expectThrowError(() => {v = new number[foo(1)][foo(2)][foo(3)][foo(-4)][foo(5)]}, expectedError)
+          arktest.expectThrow(() => {v = new number[foo(1)][foo(2)][foo(3)][foo(-4)][foo(5)]}, expectedError)
           arktest.assertEQ(res, "123-45")
           arktest.assertEQ(v, null)
 
@@ -101,7 +101,7 @@ cases:
           let expectedError = (e: Error): boolean => {
               return (e instanceof NegativeArraySizeError)
           }
-          arktest.expectThrowError(() => {v = new number[foo(-1)][foo(-2)][foo(-3)][foo(4)][foo(-5)]}, expectedError)
+          arktest.expectThrow(() => {v = new number[foo(-1)][foo(-2)][foo(-3)][foo(4)][foo(-5)]}, expectedError)
           arktest.assertEQ(res, "-1-2-34-5")
           arktest.assertEQ(v, null)
 
@@ -121,7 +121,7 @@ cases:
           let expectedError = (e: Error): boolean => {
               return (e instanceof Error)
           }
-          arktest.expectThrowError(() => {v = new number[foo(-1)][foo(-2)][foo(3)][foo(4)][foo(-5)]}, expectedError)
+          arktest.expectThrow(() => {v = new number[foo(-1)][foo(-2)][foo(3)][foo(4)][foo(-5)]}, expectedError)
           arktest.assertEQ(res, "-1-23")
           arktest.assertEQ(v, null)
 

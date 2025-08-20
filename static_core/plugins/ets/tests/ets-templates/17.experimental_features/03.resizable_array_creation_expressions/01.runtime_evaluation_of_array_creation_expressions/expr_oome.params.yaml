@@ -27,5 +27,5 @@ cases:
           let expectedError = (e: Error): boolean => {
               return (e instanceof OutOfMemoryError)
           }
-          arktest.expectThrowError(() => {v = new number[foo(size)][foo(size)]}, expectedError)
+          arktest.expectThrow(() => {v = new number[foo(size)][foo(size)]}, expectedError)
           arktest.assertEQ(v, null)
