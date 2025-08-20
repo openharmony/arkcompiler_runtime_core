@@ -23,7 +23,7 @@
     "prettier-fix": "npx prettier --write .",
     "fix": "npm run prettier-fix && npm run eslint-fix",
     "declgen": "node ./dist/declgen.js",
-    "test": "npm run compile && TEST_OUT=build/test_artifacts && rimraf ${TEST_OUT} && node build/src/TestRunner.js --testDirPath test/ -t cookbook_tests --testOutPath ${TEST_OUT}"
+    "test": "npm run compile && TEST_OUT=build/test_artifacts && rimraf ${TEST_OUT} && node build/src/TestRunner.js --testDirPath test/cookbook_tests -t ts_source -t dts_declarations --testOutPath ${TEST_OUT}"
   },
   "dependencies": {
     "commander": "^9.4.0",

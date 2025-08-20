@@ -13,8 +13,5 @@
  * limitations under the License.
  */
 
-export class C {
-    foo(a: number, b: number):void;
-    foo(a: number){}
-}
-  
+export declare function foo(...nums: number[]): void;
+export declare let foo1: (...nums: number[]) => void;

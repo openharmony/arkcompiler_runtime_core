@@ -1,3 +1,4 @@
+'use static'
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-export class C {
-    static foo(a: number, b: number)
-    static foo(a: number){}
+export declare class MathUtils2 {
+    add(num: number): number;
+    add(num1: number, num2: number): number;
 }
-  
