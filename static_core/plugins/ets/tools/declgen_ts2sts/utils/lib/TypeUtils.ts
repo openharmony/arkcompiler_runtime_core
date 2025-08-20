@@ -113,7 +113,7 @@ export const FINAL_CLASS: string[] = [
     'MethodCreator',
     'MethodType',
     'NegativeArraySizeError',
-    'NoDataException',
+    'NoDataError',
     'NullType',
     'NullValue',
     'Parameter',
