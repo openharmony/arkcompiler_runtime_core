@@ -21,15 +21,10 @@ namespace ark {
 void CoroutineWorker::TriggerSchedulerExternally(Coroutine *requester)
 {
     if (requester->GetType() == Coroutine::Type::MUTATOR && IsExternalSchedulingEnabled()) {
-        auto *coroMan = requester->GetManager();
-// Note: Currently passing lambda to PostExternalCallback will cause a crash in Arm32
-// detail infomation can be seen at #24085
-#ifdef PANDA_TARGET_ARM32
-        std::function<void()> callback = [coroMan]() { coroMan->Schedule(); };
-        PostExternalCallback(std::move(callback));
-#else
-        PostExternalCallback([coroMan]() { coroMan->Schedule(); });
-#endif
+        os::memory::LockHolder l(posterLock_);
+        if (extSchedulingPoster_ != nullptr) {
+            extSchedulingPoster_->Post();
+        }
     }
 }
 

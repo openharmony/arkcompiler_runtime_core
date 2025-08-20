@@ -67,6 +67,24 @@ private:
     ThreadSafeCallbackQueue *callbackQueue_;
 };
 
+class SingleEventPoster : public CallbackPoster {
+public:
+    explicit SingleEventPoster(WrappedCallback &&callback);
+    ~SingleEventPoster() override;
+    NO_COPY_SEMANTIC(SingleEventPoster);
+    NO_MOVE_SEMANTIC(SingleEventPoster);
+
+private:
+    void PostImpl([[maybe_unused]] WrappedCallback &&callback) override {};
+
+    void PostImpl() override;
+
+    static void CallbackExecutor(uv_async_t *async);
+
+    uv_async_t *async_ = nullptr;
+    WrappedCallback callback_;
+};
+
 class EventLoopCallbackPosterFactoryImpl : public CallbackPosterFactoryIface {
 public:
     EventLoopCallbackPosterFactoryImpl() = default;
