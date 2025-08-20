@@ -758,7 +758,9 @@ void StackfulCoroutineManager::WaitForNonMainCoroutinesCompletion()
             // NOTE(konstanting, #IAD5MH): test for the spurious wakeup
             programCompletionLock_.Lock();
         }
+        programCompletionLock_.Unlock();
         ListUnhandledEventsOnProgramExit();
+        programCompletionLock_.Lock();
     } while (GetActiveWorkersCount() + 1 < coroutineCount_);  // 1 is for MAIN
     // coroutineCount_ < 1 + GetActiveWorkersCount() in case of concurrent EWorker destroy
     // in this case coroutineCount_ >= 1 + GetActiveWorkersCount() - ExclusiveWorkersCount()
@@ -1021,7 +1023,8 @@ bool StackfulCoroutineManager::IsExclusiveWorkersLimitReached() const
 bool StackfulCoroutineManager::IsUserCoroutineLimitReached() const
 {
     bool limitIsReached = userCoroutineCount_ >= userCoroutineCountLimit_;
-    LOG_IF(limitIsReached, DEBUG, COROUTINES) << "The programm reached the limit of user coroutines";
+    LOG_IF(limitIsReached, DEBUG, COROUTINES)
+        << "The programm reached the limit of user coroutines " << userCoroutineCountLimit_;
     return limitIsReached;
 }
 

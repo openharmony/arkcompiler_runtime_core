@@ -49,14 +49,22 @@ public:
     /// @brief Removes rejected promise from internal storage
     void RemoveRejectedPromise(EtsPromise *promise, EtsCoroutine *removerCoro);
 
-    /// @brief Invokes managed method to apply custom handler on stored rejected promises for a specific worker
-    void ListRejectedPromises(EtsCoroutine *coro);
+    /**
+     * Invokes managed method to apply custom handler on stored rejected promises
+     * @param coro - current coroutine
+     * @param listAllObjects - if false, list objects associated with current worker
+     */
+    void ListRejectedPromises(EtsCoroutine *coro, bool listAllObjects);
 
     /// @brief Checks if manager has unhandled failed job objects captured
     bool HasFailedJobObjects() const;
 
-    /// @brief Checks if manager has unhandled rejected promise objects captured for a specific worker
-    bool HasRejectedPromiseObjects(EtsCoroutine *coro) const;
+    /**
+     * Checks if manager has unhandled rejected promise objects captured
+     * @param coro - current coroutine
+     * @param listAllObjects - if false, checks for the current worker
+     */
+    bool HasRejectedPromiseObjects(EtsCoroutine *coro, bool listAllObjects) const;
 
     /// @brief Updates references to objects moved by GC
     void UpdateObjects(const GCRootUpdater &gcRootUpdater);
