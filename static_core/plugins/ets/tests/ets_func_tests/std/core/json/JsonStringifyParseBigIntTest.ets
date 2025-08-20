@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {json} from "@ohos.util.json";
+import { jsonx } from "std/core"
 
 function main() {
     testStringifyParseBigInt()
@@ -43,20 +43,20 @@ class SuperUser extends UserWithFields {
 function testStringifyParseBigInt(): void {
     let classType = Type.of(new SuperUser() as Object)
     let str = "{\"id\":10,\"g\":true,\"name\":\"Name\",\"users\":[{\"id\":12,\"g\":true,\"name\":\"Name1\"},{\"id\":13,\"g\":false,\"name\":\"Name2\"}]}";
-    let x = json.stringify(json.parse<SuperUser>(str, classType, undefined, {bigIntMode: json.BigIntMode.ALWAYS_PARSE_AS_BIGINT} as json.ParseOptions) as SuperUser)
+    let x = JSON.stringify(JSON.parse<SuperUser>(str, undefined, classType, {bigIntMode: jsonx.BigIntMode.ALWAYS_PARSE_AS_BIGINT} as jsonx.ParseOptions) as SuperUser)
     arktest.assertEQ(x, str)
 }
 
 function testStringifyParseOptOne(): void {
     let classType = Type.of(new SuperUser() as Object)
     let str = "{\"id\":10,\"g\":true,\"name\":\"Name\",\"users\":[{\"id\":12,\"g\":true,\"name\":\"Name1\"},{\"id\":13,\"g\":false,\"name\":\"Name2\"}]}";
-    arktest.expectThrow(() => {json.parse<SuperUser>(str, classType,  undefined, {bigIntMode: json.BigIntMode.PARSE_AS_BIGINT} as json.ParseOptions)})
+    arktest.expectThrow(() => {JSON.parse<SuperUser>(str, undefined, classType, {bigIntMode: jsonx.BigIntMode.PARSE_AS_BIGINT} as jsonx.ParseOptions)})
 }
 
 function testStringifyParseOptZero(): void {
     let classType = Type.of(new SuperUser() as Object)
     let str = "{\"id\":10,\"g\":true,\"name\":\"Name\",\"users\":[{\"id\":12,\"g\":true,\"name\":\"Name1\"},{\"id\":13,\"g\":false,\"name\":\"Name2\"}]}";
-    arktest.expectThrow(() => {json.parse<SuperUser>(str, classType,  undefined, {bigIntMode: json.BigIntMode.DEFAULT} as json.ParseOptions)})
+    arktest.expectThrow(() => {JSON.parse<SuperUser>(str, undefined, classType, {bigIntMode: jsonx.BigIntMode.DEFAULT} as jsonx.ParseOptions)})
 }
 
 function testStringifyParseBigIntWithReviver(): void {
@@ -69,7 +69,7 @@ function testStringifyParseBigIntWithReviver(): void {
     }
     let str = "{\"id\":10,\"g\":true,\"name\":\"Name\",\"users\":[{\"id\":12,\"g\":true,\"name\":\"Name1\"},{\"id\":13,\"g\":false,\"name\":\"Name2\"}]}";
     let expected_str = "{\"id\":1,\"g\":true,\"name\":\"Name\",\"users\":[{\"id\":1,\"g\":true,\"name\":\"Name1\"},{\"id\":1,\"g\":false,\"name\":\"Name2\"}]}";
-    let x = json.stringify(json.parse<SuperUser>(str, classType, reviver, {bigIntMode: json.BigIntMode.ALWAYS_PARSE_AS_BIGINT} as json.ParseOptions) as SuperUser)
+    let x = JSON.stringify(JSON.parse<SuperUser>(str, reviver, classType, {bigIntMode: jsonx.BigIntMode.ALWAYS_PARSE_AS_BIGINT} as jsonx.ParseOptions) as SuperUser)
     arktest.assertEQ(x, expected_str)
 }
 
@@ -83,19 +83,20 @@ class NumbersTest extends User {
 function testParseNoBigInt() {
     let classType = Type.of(new NumbersTest())
     let str = "{\"val\":123444444421,\"str\":\"true\",\"bul\":false}"
-    let x = json.stringify(json.parse<NumbersTest>(str, classType, undefined, {bigIntMode: json.BigIntMode.DEFAULT} as json.ParseOptions) as NumbersTest)
+    let x = JSON.stringify(JSON.parse<NumbersTest>(str, undefined, classType, {bigIntMode: jsonx.BigIntMode.DEFAULT} as jsonx.ParseOptions) as NumbersTest)
     arktest.assertEQ(x, str)
 }
 
 function testParseNoBigIntParseAsBigint() {
     let classType = Type.of(new NumbersTest())
     let str = "{\"val\":123444444421,\"str\":\"true\",\"bul\":false}"
-    let x = json.stringify(json.parse<NumbersTest>(str, classType, undefined, {bigIntMode: json.BigIntMode.PARSE_AS_BIGINT} as json.ParseOptions) as NumbersTest)
+    let x = JSON.stringify(JSON.parse<NumbersTest>(str, undefined, classType, {bigIntMode: jsonx.BigIntMode.PARSE_AS_BIGINT} as jsonx.ParseOptions) as NumbersTest)
     arktest.assertEQ(x, str)
 }
 
 function testParseNoBigIntAlwaysParseAsBigint() {
     let classType = Type.of(new NumbersTest())
     let str = "{\"val\":123444444421,\"str\":\"true\",\"bul\":false}"
-    arktest.expectThrow(() => {json.parse<NumbersTest>(str, classType, undefined, {bigIntMode: json.BigIntMode.ALWAYS_PARSE_AS_BIGINT} as json.ParseOptions) as NumbersTest})
+    arktest.expectThrow(() => {JSON.parse<NumbersTest>(str, undefined, classType, {bigIntMode: jsonx.BigIntMode.ALWAYS_PARSE_AS_BIGINT} as jsonx.ParseOptions) as NumbersTest})
 }
+
