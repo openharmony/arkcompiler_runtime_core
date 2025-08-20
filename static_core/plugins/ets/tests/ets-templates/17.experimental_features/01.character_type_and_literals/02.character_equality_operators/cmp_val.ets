@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,15 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-{% for case in cases %}
+{%- for v in  vals %}
 /*---
-desc: Incorrect char literals
-tags: [negative, compile-only]
+desc: >-
+    ArkTS provides a number of operators to act on character values:
+    Comparison operators that produce a value of type boolean.
 ---*/
 
-function main(): void {
-    let c: char;
-    c = {{case}};
+function main() {
+    const v1: char = {{v.v1}}
+    const v2: char = {{v.v2}}
+
+    {%- for c in v.cases %}
+    arktest.assertEQ( (v1 {{c.op}} v2), {{c.r}} )
+    {%- endfor %}
 }
-{% endfor %}
+{%- endfor %}

@@ -19,10 +19,10 @@ desc: Correct char literals
 
 function main() {
     // check escaped characters
-    let escaped_chars: Char[] = [ c'\b', c'\f', c'\n', c'\r', c'\t', c'\v', c'\\', c'\'', c'\"' ]
-    let escaped_vals: Int[] = [ 8, 12, 10, 13, 9, 11, 92, 39, 34 ]
+    let escaped_chars: Char[] = [c'\b', c'\f', c'\n', c'\r', c'\t', c'\v', c'\\', c'\'', c'\"']
+    let escaped_vals: Int[] = [8, 12, 10, 13, 9, 11, 92, 39, 34]
     for (let i = 0; i < escaped_chars.length; i++) {
-        arktest.assertEQ( escaped_chars[i], escaped_vals[i].toChar() )
+        arktest.assertEQ(escaped_chars[i], escaped_vals[i].toChar())
     }
 
     // check hex-formatted characters
@@ -43,7 +43,7 @@ function main() {
         c'\x7c', c'\x7d', c'\x7e', c'\x7f'
     ]
     for (let i: Int = 0; i < 128; i++) {
-        arktest.assertEQ( hex_chars[i], i.toChar() )
+        arktest.assertEQ(hex_chars[i], i.toChar())
     }
 
     // check unicode-formatted characters
@@ -55,10 +55,10 @@ function main() {
         c'\u94b1', c'\u9899', c'\u9c81', c'\ua069', c'\ua451', c'\ua839', c'\uac21', c'\ub009',
         c'\ub3f1', c'\ub7d9', c'\ubbc1', c'\ubfa9', c'\uc391', c'\uc779', c'\ucb61', c'\ucf49',
         c'\ud331', c'\ud719', c'\udb01', c'\udee9', c'\ue2d1', c'\ue6b9', c'\ueaa1', c'\uee89',
-        c'\uf271', c'\uf659', c'\ufa41', c'\ufe29'
+        c'\uf271', c'\uf659', c'\ufa41', c'\ufe29', c'\uffff'
     ]
     let j = 0;
     for (let i: Int = 65; i < 65536; i += 1000) {
-        arktest.assertEQ( unicode_chars[j++], i.toChar() )
+        arktest.assertEQ(unicode_chars[j++], i.toChar())
     }
 }

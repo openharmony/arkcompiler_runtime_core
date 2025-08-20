@@ -22,14 +22,17 @@ function main() {
     let c2 = c'\n'
     let c3 = c'\x7F'
     let c4 = c'\u0000'
+    let c5 = c'\uffff'
 
     let c1b = new Char(c1)
     let c2b = new Char(c2)
     let c3b = new Char(c3)
     let c4b = new Char(c4)
+    let c5b = new Char(c5)
 
-    arktest.assertEQ( c1b.unboxed(), c1 )
-    arktest.assertEQ( c2b.unboxed(), c2 )
-    arktest.assertEQ( c3b.unboxed(), c3 )
-    arktest.assertEQ( c4b.unboxed(), c4 )
+    arktest.assertEQ(c1b, c1)
+    arktest.assertEQ(c2b, c2)
+    arktest.assertEQ(c3b, c3)
+    arktest.assertEQ(c4b, c4)
+    arktest.assertEQ(c5b, c5)
 }
