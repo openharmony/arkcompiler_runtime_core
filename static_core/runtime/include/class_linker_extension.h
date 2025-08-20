@@ -101,12 +101,6 @@ public:
         UNREACHABLE();
     }
 
-    virtual const uint8_t *ComputeLUB([[maybe_unused]] const ClassLinkerContext *ctx,
-                                      [[maybe_unused]] const uint8_t *descriptor)
-    {
-        UNREACHABLE();
-    }
-
     Class *GetClassRoot(ClassRoot root) const
     {
         return classRoots_[ToIndex(root)];
