@@ -1245,6 +1245,8 @@ NO_UB_SANITIZE static ani_status Array_GetLength(ani_env *env, ani_array array, 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Array_New_Boolean(ani_env *env, ani_size length, ani_array_boolean *result)
 {
+    LOG(ERROR, ANI) << "Function 'Array_New_Boolean' is deprecated. Use Array_New instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(result);
@@ -1254,6 +1256,8 @@ NO_UB_SANITIZE static ani_status Array_New_Boolean(ani_env *env, ani_size length
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Array_New_Char(ani_env *env, ani_size length, ani_array_char *result)
 {
+    LOG(ERROR, ANI) << "Function 'Array_New_Char' is deprecated. Use Array_New instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(result);
@@ -1263,6 +1267,8 @@ NO_UB_SANITIZE static ani_status Array_New_Char(ani_env *env, ani_size length, a
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Array_New_Byte(ani_env *env, ani_size length, ani_array_byte *result)
 {
+    LOG(ERROR, ANI) << "Function 'Array_New_Byte' is deprecated. Use Array_New instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(result);
@@ -1272,6 +1278,8 @@ NO_UB_SANITIZE static ani_status Array_New_Byte(ani_env *env, ani_size length, a
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Array_New_Short(ani_env *env, ani_size length, ani_array_short *result)
 {
+    LOG(ERROR, ANI) << "Function 'Array_New_Short' is deprecated. Use Array_New instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(result);
@@ -1281,6 +1289,8 @@ NO_UB_SANITIZE static ani_status Array_New_Short(ani_env *env, ani_size length, 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Array_New_Int(ani_env *env, ani_size length, ani_array_int *result)
 {
+    LOG(ERROR, ANI) << "Function 'Array_New_Int' is deprecated. Use Array_New instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(result);
@@ -1290,6 +1300,8 @@ NO_UB_SANITIZE static ani_status Array_New_Int(ani_env *env, ani_size length, an
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Array_New_Long(ani_env *env, ani_size length, ani_array_long *result)
 {
+    LOG(ERROR, ANI) << "Function 'Array_New_Long' is deprecated. Use Array_New instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(result);
@@ -1299,6 +1311,8 @@ NO_UB_SANITIZE static ani_status Array_New_Long(ani_env *env, ani_size length, a
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Array_New_Float(ani_env *env, ani_size length, ani_array_float *result)
 {
+    LOG(ERROR, ANI) << "Function 'Array_New_Float' is deprecated. Use Array_New instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(result);
@@ -1308,6 +1322,8 @@ NO_UB_SANITIZE static ani_status Array_New_Float(ani_env *env, ani_size length, 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Array_New_Double(ani_env *env, ani_size length, ani_array_double *result)
 {
+    LOG(ERROR, ANI) << "Function 'Array_New_Double' is deprecated. Use Array_New instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(result);
@@ -1318,6 +1334,8 @@ NO_UB_SANITIZE static ani_status Array_New_Double(ani_env *env, ani_size length,
 NO_UB_SANITIZE static ani_status Array_GetRegion_Boolean(ani_env *env, ani_array_boolean array, ani_size offset,
                                                          ani_size length, ani_boolean *nativeBuffer)
 {
+    LOG(ERROR, ANI) << "Function 'Array_GetRegion_Boolean' is deprecated. Use Array_Get instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(array);
@@ -1329,6 +1347,8 @@ NO_UB_SANITIZE static ani_status Array_GetRegion_Boolean(ani_env *env, ani_array
 NO_UB_SANITIZE static ani_status Array_GetRegion_Char(ani_env *env, ani_array_char array, ani_size offset,
                                                       ani_size length, ani_char *nativeBuffer)
 {
+    LOG(ERROR, ANI) << "Function 'Array_GetRegion_Char' is deprecated. Use Array_Get instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(array);
@@ -1340,6 +1360,8 @@ NO_UB_SANITIZE static ani_status Array_GetRegion_Char(ani_env *env, ani_array_ch
 NO_UB_SANITIZE static ani_status Array_GetRegion_Byte(ani_env *env, ani_array_byte array, ani_size offset,
                                                       ani_size length, ani_byte *nativeBuffer)
 {
+    LOG(ERROR, ANI) << "Function 'Array_GetRegion_Byte' is deprecated. Use Array_Get instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(array);
@@ -1351,6 +1373,8 @@ NO_UB_SANITIZE static ani_status Array_GetRegion_Byte(ani_env *env, ani_array_by
 NO_UB_SANITIZE static ani_status Array_GetRegion_Short(ani_env *env, ani_array_short array, ani_size offset,
                                                        ani_size length, ani_short *nativeBuffer)
 {
+    LOG(ERROR, ANI) << "Function 'Array_GetRegion_Short' is deprecated. Use Array_Get instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(array);
@@ -1362,6 +1386,8 @@ NO_UB_SANITIZE static ani_status Array_GetRegion_Short(ani_env *env, ani_array_s
 NO_UB_SANITIZE static ani_status Array_GetRegion_Int(ani_env *env, ani_array_int array, ani_size offset,
                                                      ani_size length, ani_int *nativeBuffer)
 {
+    LOG(ERROR, ANI) << "Function 'Array_GetRegion_Int' is deprecated. Use Array_Get instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(array);
@@ -1373,6 +1399,8 @@ NO_UB_SANITIZE static ani_status Array_GetRegion_Int(ani_env *env, ani_array_int
 NO_UB_SANITIZE static ani_status Array_GetRegion_Long(ani_env *env, ani_array_long array, ani_size offset,
                                                       ani_size length, ani_long *nativeBuffer)
 {
+    LOG(ERROR, ANI) << "Function 'Array_GetRegion_Long' is deprecated. Use Array_Get instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(array);
@@ -1384,6 +1412,8 @@ NO_UB_SANITIZE static ani_status Array_GetRegion_Long(ani_env *env, ani_array_lo
 NO_UB_SANITIZE static ani_status Array_GetRegion_Float(ani_env *env, ani_array_float array, ani_size offset,
                                                        ani_size length, ani_float *nativeBuffer)
 {
+    LOG(ERROR, ANI) << "Function 'Array_GetRegion_Float' is deprecated. Use Array_Get instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(array);
@@ -1395,6 +1425,8 @@ NO_UB_SANITIZE static ani_status Array_GetRegion_Float(ani_env *env, ani_array_f
 NO_UB_SANITIZE static ani_status Array_GetRegion_Double(ani_env *env, ani_array_double array, ani_size offset,
                                                         ani_size length, ani_double *nativeBuffer)
 {
+    LOG(ERROR, ANI) << "Function 'Array_GetRegion_Double' is deprecated. Use Array_Get instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(array);
@@ -1406,6 +1438,8 @@ NO_UB_SANITIZE static ani_status Array_GetRegion_Double(ani_env *env, ani_array_
 NO_UB_SANITIZE static ani_status Array_SetRegion_Char(ani_env *env, ani_array_char array, ani_size offset,
                                                       ani_size length, const ani_char *nativeBuffer)
 {
+    LOG(ERROR, ANI) << "Function 'Array_SetRegion_Char' is deprecated. Use Array_Set instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(array);
@@ -1417,6 +1451,8 @@ NO_UB_SANITIZE static ani_status Array_SetRegion_Char(ani_env *env, ani_array_ch
 NO_UB_SANITIZE static ani_status Array_SetRegion_Boolean(ani_env *env, ani_array_boolean array, ani_size offset,
                                                          ani_size length, const ani_boolean *nativeBuffer)
 {
+    LOG(ERROR, ANI) << "Function 'Array_SetRegion_Boolean' is deprecated. Use Array_Set instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(array);
@@ -1428,6 +1464,8 @@ NO_UB_SANITIZE static ani_status Array_SetRegion_Boolean(ani_env *env, ani_array
 NO_UB_SANITIZE static ani_status Array_SetRegion_Short(ani_env *env, ani_array_short array, ani_size offset,
                                                        ani_size length, const ani_short *nativeBuffer)
 {
+    LOG(ERROR, ANI) << "Function 'Array_SetRegion_Short' is deprecated. Use Array_Set instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(array);
@@ -1439,6 +1477,8 @@ NO_UB_SANITIZE static ani_status Array_SetRegion_Short(ani_env *env, ani_array_s
 NO_UB_SANITIZE static ani_status Array_SetRegion_Int(ani_env *env, ani_array_int array, ani_size offset,
                                                      ani_size length, const ani_int *nativeBuffer)
 {
+    LOG(ERROR, ANI) << "Function 'Array_SetRegion_Int' is deprecated. Use Array_Set instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(array);
@@ -1450,6 +1490,8 @@ NO_UB_SANITIZE static ani_status Array_SetRegion_Int(ani_env *env, ani_array_int
 NO_UB_SANITIZE static ani_status Array_SetRegion_Long(ani_env *env, ani_array_long array, ani_size offset,
                                                       ani_size length, const ani_long *nativeBuffer)
 {
+    LOG(ERROR, ANI) << "Function 'Array_SetRegion_Long' is deprecated. Use Array_Set instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(array);
@@ -1461,6 +1503,8 @@ NO_UB_SANITIZE static ani_status Array_SetRegion_Long(ani_env *env, ani_array_lo
 NO_UB_SANITIZE static ani_status Array_SetRegion_Float(ani_env *env, ani_array_float array, ani_size offset,
                                                        ani_size length, const ani_float *nativeBuffer)
 {
+    LOG(ERROR, ANI) << "Function 'Array_SetRegion_Float' is deprecated. Use Array_Set instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(array);
@@ -1472,6 +1516,8 @@ NO_UB_SANITIZE static ani_status Array_SetRegion_Float(ani_env *env, ani_array_f
 NO_UB_SANITIZE static ani_status Array_SetRegion_Double(ani_env *env, ani_array_double array, ani_size offset,
                                                         ani_size length, const ani_double *nativeBuffer)
 {
+    LOG(ERROR, ANI) << "Function 'Array_SetRegion_Double' is deprecated. Use Array_Set instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(array);
@@ -1483,6 +1529,8 @@ NO_UB_SANITIZE static ani_status Array_SetRegion_Double(ani_env *env, ani_array_
 NO_UB_SANITIZE static ani_status Array_SetRegion_Byte(ani_env *env, ani_array_byte array, ani_size offset,
                                                       ani_size length, const ani_byte *nativeBuffer)
 {
+    LOG(ERROR, ANI) << "Function 'Array_SetRegion_Byte' is deprecated. Use Array_Set instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(array);
@@ -1494,6 +1542,8 @@ NO_UB_SANITIZE static ani_status Array_SetRegion_Byte(ani_env *env, ani_array_by
 NO_UB_SANITIZE static ani_status Array_New_Ref(ani_env *env, ani_type type, ani_size length, ani_ref initialElement,
                                                ani_array_ref *result)
 {
+    LOG(ERROR, ANI) << "Function 'Array_New_Ref' is deprecated. Use Array_New instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     ANI_CHECK_RETURN_IF_GT(length, std::numeric_limits<uint32_t>::max(), ANI_INVALID_ARGS);
@@ -1515,6 +1565,8 @@ NO_UB_SANITIZE static ani_status Array_New_Ref(ani_env *env, ani_type type, ani_
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Array_Set_Ref(ani_env *env, ani_array_ref array, ani_size index, ani_ref ref)
 {
+    LOG(ERROR, ANI) << "Function 'Array_Set_Ref' is deprecated. Use Array_Set instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(array);
@@ -1548,6 +1600,8 @@ NO_UB_SANITIZE static ani_status Array_Set_Ref(ani_env *env, ani_array_ref array
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Array_Get_Ref(ani_env *env, ani_array_ref array, ani_size index, ani_ref *result)
 {
+    LOG(ERROR, ANI) << "Function 'Array_Get_Ref' is deprecated. Use Array_Get instead";
+
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(array);
