@@ -12,10 +12,13 @@
 # limitations under the License.
 
 add_custom_target(ani_tests COMMENT "Common target to run ANI ETS tests")
+add_custom_target(ani_tests_without_bridges COMMENT "Common target to run ANI ETS tests exclude bridges tests")
+
+add_dependencies(ani_tests ani_tests_without_bridges)
 
 add_dependencies(ets_tests ani_tests)
 
-# Add gtest-based tests to ani_tests target.
+# Add gtest-based tests to ani_tests_without_bridges target.
 #
 # Example usage:
 #   ani_add_gtest(test_name
@@ -53,6 +56,7 @@ function(ani_add_gtest TARGET)
         ETS_GTEST_ABC_PATH "ANI_GTEST_ABC_PATH"
         INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani
         VERIFY_SOURCES ${VERIFY_SOURCES}
-        TEST_GROUP ani_tests
+        TEST_GROUP ani_tests_without_bridges
     )
+
 endfunction(ani_add_gtest)

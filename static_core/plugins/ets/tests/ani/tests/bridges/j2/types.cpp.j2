@@ -17,21 +17,17 @@
 #include <string>
 #include <iostream>
 #include <cstring>
-#include <cassert>
 #include <vector>
 #include <algorithm>
+#include "utils/logger.h"
 
 [[maybe_unused]] static void GetStdString(ani_env *env, ani_string str, std::string &result)
 {
     ani_size sz {};
-    if (env->String_GetUTF8Size(str, &sz) != ANI_OK) {
-        exit(1);
-    }
+    LOG_IF(env->String_GetUTF8Size(str, &sz) != ANI_OK, FATAL, ANI) << "Can't get UTF8 string";
     result.resize(sz + 1);
 
-    if (env->String_GetUTF8SubString(str, 0, sz, result.data(), result.size(), &sz) != ANI_OK) {
-        exit(1);
-    }
+    LOG_IF(env->String_GetUTF8SubString(str, 0, sz, result.data(), result.size(), &sz) != ANI_OK, FATAL, ANI) << "Can't get UTF8 substring";
     result.resize(sz);
 }
 
@@ -46,23 +42,27 @@
 {% if (name != "Direct" or type != "string") and (arm32 == "false" or name != "Direct") %}
 void print{{ name }}{{ Type }}{{ count }}({% if name != "Direct" %}[[maybe_unused]] ani_env *env, {% endif %}
 {% for k in range(count) -%}
-    [[maybe_unused]] ani_{{ type }} a{{ loop.index }}{% if not loop.last %}, {% endif %}
+    ani_{{ type }} a{{ loop.index }}{% if not loop.last %}, {% endif %}
 {% endfor -%})
 {
 {% if type == "double" or type == "float" -%}
-    assert(
     {% for k in range(count) -%}
-        Equal(a{{ loop.index }}, {{ loop.index }}.{{ loop.index }}){% if not loop.last %} && {% endif %}
-    {% endfor -%});
+        LOG_IF(!Equal(a{{ loop.index }}, {{ loop.index }}.{{ loop.index }}), FATAL, ANI) << "'" << a{{ loop.index }} << "' not equal to"
+                                                                                         << {{ loop.index }}.{{ loop.index }};
+    {% endfor -%}
 {%- elif type == "boolean" -%}
-    assert(
     {% for k in range(count) -%}
-        a{{ loop.index }} == {%- if k % 2 == 0 -%}
+        LOG_IF(a{{ loop.index }} != {%- if k % 2 == 0 -%}
             true
         {%- else -%}
             false
-        {%- endif -%}{% if not loop.last %} && {% endif %}
-    {% endfor -%});
+        {%- endif -%}, FATAL, ANI) << "'" << a{{ loop.index }} << "' not equal to '"
+        << {%- if k % 2 == 0 -%}
+            "true"
+        {%- else -%}
+            "false"
+        {%- endif -%} << "'";
+    {% endfor -%}
 {%- elif type == "string" -%}
     {% for k in range(count) -%}
         std::string s{{ loop.index }};
@@ -70,15 +70,15 @@ void print{{ name }}{{ Type }}{{ count }}({% if name != "Direct" %}[[maybe_unuse
     {% for k in range(count) -%}
         GetStdString(env, a{{ loop.index }}, s{{ loop.index }});
     {% endfor -%}
-    assert(
     {% for k in range(count) -%}
-        s{{ loop.index }} == "{{ loop.index }}"{% if not loop.last %} && {% endif %}
-    {% endfor -%});
+        LOG_IF(s{{ loop.index }} != "{{ loop.index }}", FATAL, ANI) << "'" << s{{ loop.index }} << "' not equal to '"
+                                                                           << {{ loop.index }} << "'";
+    {% endfor -%}
 {%- else %}
-    assert(
     {% for k in range(count) -%}
-        a{{ loop.index }} == {{ loop.index }}{% if not loop.last %} && {% endif %}
-    {% endfor -%});
+        LOG_IF(a{{ loop.index }} != {{ loop.index }}, FATAL, ANI) << "'" << a{{ loop.index }} << "' not equal to '"
+                                                                           << {{ loop.index }} << "'";
+    {% endfor -%}
 {%- endif %}
 }
 {% endif %}
@@ -95,23 +95,16 @@ const std::vector<ani_native_function> g_{{ type }}Methods = {
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     ani_env *env;
-    if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
-        std::cerr << "Unsupported ANI_VERSION_1" << std::endl;
-        return ANI_ERROR;
-    }
+    LOG_IF(vm->GetEnv(ANI_VERSION_1, &env) != ANI_OK, FATAL, ANI) << "Unsupported ANI_VERSION_1";
+
     static const char *moduleName = "EtsAniTests";
 
     ani_module module;
 
-    if (ANI_OK != env->FindModule(moduleName, &module)) {
-        std::cerr << "Not found '" << moduleName << "'" << std::endl;
-        return ANI_ERROR;
-    }
+    LOG_IF(env->FindModule(moduleName, &module) != ANI_OK, FATAL, ANI) << "Not found '" << moduleName << "'";
 
     for (auto &m : g_{{ type }}Methods) {
-        if (env->Module_BindNativeFunctions(module, &m, 1) != ANI_OK) {
-            return ANI_ERROR;
-        }
+        LOG_IF(env->Module_BindNativeFunctions(module, &m, 1) != ANI_OK, FATAL, ANI) << "Can't bind function '" << m.name << "'";
     }
     *result = ANI_VERSION_1;
     return ANI_OK;
