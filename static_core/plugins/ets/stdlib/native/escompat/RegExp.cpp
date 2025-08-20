@@ -351,7 +351,7 @@ static ani_object DoExec(ani_env *env, ani_object regexp, ani_class resultClass,
 
 // CC-OFFNXT(G.FUN.01, huge_method) solid logic
 static ani_object Exec(ani_env *env, ani_object regexp, ani_string pattern, ani_string flags, ani_string str,
-                       ani_double patternSize, ani_double strSize, ani_double lastIndex, ani_boolean hasSlashU)
+                       ani_int patternSize, ani_int strSize, ani_int lastIndex, ani_boolean hasSlashU)
 {
     ani_method regexpExecArrayCtor;
     ANI_FATAL_IF_ERROR(env->Class_FindMethod(refs::g_regexpExecArrayClass, "<ctor>", ":", &regexpExecArrayCtor));
@@ -376,7 +376,7 @@ static ani_object Exec(ani_env *env, ani_object regexp, ani_string pattern, ani_
 
 // CC-OFFNXT(G.FUN.01, huge_method) solid logic
 static ani_object Match(ani_env *env, ani_object regexp, ani_string pattern, ani_string flags, ani_string str,
-                        ani_double patternSize, ani_double strSize, ani_double lastIndex, ani_boolean hasSlashU)
+                        ani_int patternSize, ani_int strSize, ani_int lastIndex, ani_boolean hasSlashU)
 {
     ani_method regexpMatchArrayCtor;
     ANI_FATAL_IF_ERROR(env->Class_FindMethod(refs::g_regexpMatchArrayClass, "<ctor>", ":", &regexpMatchArrayCtor));
@@ -404,10 +404,10 @@ void RegisterRegExpNativeMethods(ani_env *env)
     const auto regExpImpls = std::array {
         ani_native_function {"compile", ":C{escompat.RegExp}", reinterpret_cast<void *>(Compile)},
         ani_native_function {"execImpl",
-                             "C{std.core.String}C{std.core.String}C{std.core.String}dddz:C{escompat.RegExpExecArray}",
+                             "C{std.core.String}C{std.core.String}C{std.core.String}iiiz:C{escompat.RegExpExecArray}",
                              reinterpret_cast<void *>(Exec)},
         ani_native_function {"matchImpl",
-                             "C{std.core.String}C{std.core.String}C{std.core.String}dddz:C{escompat.RegExpMatchArray}",
+                             "C{std.core.String}C{std.core.String}C{std.core.String}iiiz:C{escompat.RegExpMatchArray}",
                              reinterpret_cast<void *>(Match)}};
 
     ani_class regexpClassLocal;
