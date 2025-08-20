@@ -105,7 +105,6 @@ if (!(ark_standalone_build ||
       "./sdk/api/@ohos.util.Deque.ets",
       "./sdk/api/@ohos.util.HashMap.ets",
       "./sdk/api/@ohos.util.HashSet.ets",
-      "./sdk/api/@ohos.util.json.ets",
       "./sdk/api/@ohos.util.LightWeightMap.ets",
       "./sdk/api/@ohos.util.LightWeightSet.ets",
       "./sdk/api/@ohos.util.LinkedList.ets",

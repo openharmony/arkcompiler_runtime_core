@@ -17,6 +17,22 @@ package std.core;
 
 export namespace jsonx {
     /**
+     * Enumration of BigIntMode
+     */
+    export enum BigIntMode {
+        DEFAULT = 0,
+        PARSE_AS_BIGINT = 1,
+        ALWAYS_PARSE_AS_BIGINT = 2
+    }
+
+    /**
+     * ParseOptions for JSON.parse to pass BigIntMode
+     */
+    export interface ParseOptions {
+        bigIntMode: BigIntMode
+    }
+
+    /**
      * Enumeration of possible JSON value types.
      * Used to identify the type of a JsonElement at runtime.
      */
