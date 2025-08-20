@@ -57,7 +57,7 @@ export namespace concurrency {
          * @param { MessageHandler } handler The message handler
          * @param { Object } obj Additional object data
          */
-        constructor(what: int,obj: Object, handler: concurrency.MessageHandler) {
+        constructor(what: int, obj: Object, handler: concurrency.MessageHandler) {
             this.handler = handler;
             this.what = what;
             this.obj = obj;

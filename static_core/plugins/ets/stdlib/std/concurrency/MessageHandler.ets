@@ -51,7 +51,7 @@ export namespace concurrency {
          * @returns { boolean } True if the callback exists, false otherwise
          */
         public hasCallbacks(callback: Task): boolean {
-            return this.worker.contains(new concurrency.Message(callback, this));
+            return this.worker.hasCallbacks(this, callback);
         }
 
         /**
@@ -60,7 +60,7 @@ export namespace concurrency {
          * @returns { boolean } True if messages with the identifier exist, false otherwise
          */
         public hasMessages(what: int): boolean {
-            return this.worker.contains(new concurrency.Message(what, this));
+            return this.worker.hasMessages(this, what, undefined);
         }
 
         /**
@@ -70,7 +70,7 @@ export namespace concurrency {
          * @returns { boolean } True if messages with the identifier and object exist, false otherwise
          */
         public hasMessages(what: int, obj: Object): boolean {
-            return this.worker.contains(new concurrency.Message(what, obj, this));
+            return this.worker.hasMessages(this, what, obj);
         }
 
         /**
@@ -94,8 +94,7 @@ export namespace concurrency {
          * @returns { boolean } True if the callback was successfully removed, false otherwise
          */
         public removeCallbacks(callback: Task): boolean {
-            let msg = new concurrency.Message(callback, this);
-            return this.worker.cancelMessage(msg);
+            return this.worker.removeCallbacks(this, callback);
         }
 
         /**
@@ -104,8 +103,7 @@ export namespace concurrency {
          * @returns { boolean } True if messages were successfully removed, false otherwise
          */
         public removeMessages(what: int): boolean {
-            let msg = new concurrency.Message(what, this);
-            return this.worker.cancelMessage(msg);
+            return this.worker.removeMessages(this, what, undefined);
         }
 
         /**
@@ -115,8 +113,7 @@ export namespace concurrency {
          * @returns { boolean } True if messages were successfully removed, false otherwise
          */
         public removeMessages(what: int, obj: Object): boolean {
-            let msg = new concurrency.Message(what, obj, this);
-            return this.worker.cancelMessage(msg);
+            return this.worker.removeMessages(this, what, obj);
         }
 
         /**
