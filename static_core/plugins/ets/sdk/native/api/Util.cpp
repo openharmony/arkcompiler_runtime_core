@@ -186,6 +186,30 @@ bool IsNullishValue(ani_env *env, ani_ref ref)
     return static_cast<bool>(isNullish);
 }
 
+ani_error CreateBusinessError(ani_env *env, int code, const std::string &message)
+{
+    ani_class cls {};
+    ANI_FATAL_IF_ERROR(env->FindClass("@ohos.base.BusinessError", &cls));
+    ani_method ctor {};
+    ANI_FATAL_IF_ERROR(env->Class_FindMethod(cls, "<ctor>", ":", &ctor));
+    ani_object errObj {};
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    ANI_FATAL_IF_ERROR(env->Object_New(cls, ctor, &errObj));
+    if (code != 0) {
+        ANI_FATAL_IF_ERROR(env->Object_SetFieldByName_Int(errObj, "code", static_cast<ani_int>(code)));
+    }
+    ANI_FATAL_IF_ERROR(
+        env->Object_SetPropertyByName_Ref(errObj, "message", static_cast<ani_ref>(CreateStringUtf8(env, message))));
+    ANI_FATAL_IF_ERROR(env->Object_SetPropertyByName_Ref(
+        errObj, "name", static_cast<ani_ref>(CreateStringUtf8(env, std::string("BusinessError")))));
+    return static_cast<ani_error>(errObj);
+}
+
+void ThrowBusinessError(ani_env *env, int code, const std::string &message)
+{
+    ANI_FATAL_IF_ERROR(env->ThrowError(CreateBusinessError(env, code, message)));
+}
+
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define FUN_UNBOX_METHOD(aniType, typeName, signature)                                                         \
     aniType UnboxTo##typeName(ani_env *env, ani_object value)                                                  \

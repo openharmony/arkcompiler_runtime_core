@@ -48,7 +48,6 @@ public:
     }
 
 private:
-    ani_object ThrowError(ani_env *env, const std::string &message);
     const char *pend_ {};
     int pendingLen_ {};
     UConverter *conv_ {};

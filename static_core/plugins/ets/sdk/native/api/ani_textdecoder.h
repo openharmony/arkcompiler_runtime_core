@@ -84,7 +84,6 @@ private:
     uint32_t label_ {};
     std::string encStr_ {};
     TransformToolPointer tranTool_;
-    ani_object CreateThrowErrorObject(ani_env *env, const std::string &message);
 };
 }  // namespace ark::ets::sdk::util
 #endif  // ANI_TEXTDECODER_H
