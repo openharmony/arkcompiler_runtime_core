@@ -803,6 +803,9 @@ export class Date {
      * @returns An integer number, between 1 and 31, representing the day of the month for the given date according to local time.
      */
     public getDate(): number {
+        if (this.isValid === false) {
+            return NaN;
+        }
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
         let day: int = ecmaDayFromTime(localTime) - ecmaDayFromYear(ecmaYearFromTime(localTime));
         let inLeapYear = ecmaInLeapYear(this.getFullYear().toInt());
@@ -846,6 +849,9 @@ export class Date {
      * @returns An integer number, between 1 and 31, representing the day of the month for the given date according to local time.
      */
     public getUTCDate(): number {
+        if (this.isValid === false) {
+            return NaN;
+        }
         let localTime = this.ms;
         let day: int = ecmaDayFromTime(localTime) - ecmaDayFromYear(ecmaYearFromTime(localTime));
         let inLeapYear = ecmaInLeapYear(this.getFullYear().toInt());
@@ -903,6 +909,9 @@ export class Date {
      * for the given date, according to local time: 0 for Sunday, 1 for Monday, 2 for Tuesday, and so on.
      */
     public getDay(): number {
+        if (this.isValid === false) {
+            return NaN;
+        }
         return (ecmaWeekDay(this.ms - this.TZOffset * 60 * msPerSecond)).toDouble();
     }
 
@@ -913,6 +922,9 @@ export class Date {
      * for the given date, according to local time: 0 for Sunday, 1 for Monday, 2 for Tuesday, and so on.
      */
     public getUTCDay(): number {
+        if (this.isValid === false) {
+            return NaN;
+        }
         return (ecmaWeekDay(this.ms)).toDouble();
     }
 
@@ -941,6 +953,9 @@ export class Date {
      * @returns year
      */
     public getUTCFullYear(): number {
+        if (this.isValid === false) {
+            return NaN;
+        }
         return (ecmaYearFromTime(this.ms)).toDouble();
     }
 
@@ -962,6 +977,9 @@ export class Date {
      * ```
      */
     public getFullYear(): number {
+        if (this.isValid === false) {
+            return NaN;
+        }
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
         return (ecmaYearFromTime(localTime)).toDouble();
     }
@@ -1055,6 +1073,9 @@ export class Date {
      * ```
      */
     public getHours(): number {
+        if (this.isValid === false) {
+            return NaN;
+        }
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
         return ecmaHourFromTime(localTime).toDouble();
     }
@@ -1065,6 +1086,9 @@ export class Date {
      * @returns An integer number, between 0 and 23, representing the hour for the given date according to UTC time.
      */
     public getUTCHours(): number {
+        if (this.isValid === false) {
+            return NaN;
+        }
         return ecmaHourFromTime(this.ms).toDouble();
     }
 
@@ -1148,6 +1172,9 @@ export class Date {
      * ```
      */
     public getMilliseconds(): number {
+        if (this.isValid === false) {
+            return NaN;
+        }
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
         return (ecmaMsFromTime(localTime)).toDouble();
     }
@@ -1224,6 +1251,9 @@ export class Date {
      * @returns the milliseconds portion of the time object's value according to universal time.
      */
     public getUTCMilliseconds(): number {
+        if (this.isValid === false) {
+            return NaN;
+        }
         let localTime = this.ms;
         return (ecmaMsFromTime(localTime)).toDouble();
     }
@@ -1284,6 +1314,9 @@ export class Date {
      * ```
      */
     public getSeconds(): number {
+        if (this.isValid === false) {
+            return NaN;
+        }
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
         return (ecmaSecFromTime(localTime)).toDouble();
     }
@@ -1294,6 +1327,9 @@ export class Date {
      * @returns the seconds in the specified date according to universal time.
      */
     public getUTCSeconds(): number {
+        if (this.isValid === false) {
+            return NaN;
+        }
         return (ecmaSecFromTime(this.ms)).toDouble();
     }
 
@@ -1362,6 +1398,9 @@ export class Date {
      * ```
      */
     public getMinutes(): number {
+        if (this.isValid === false) {
+            return NaN;
+        }
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
         return ecmaMinFromTime(localTime).toDouble();
     }
@@ -1402,6 +1441,9 @@ export class Date {
      * @returns the minutes in the specified date according to universal time.
      */
     public getUTCMinutes(): number {
+        if (this.isValid === false) {
+            return NaN;
+        }
         return ecmaMinFromTime(this.ms).toDouble();
     }
 
@@ -1451,6 +1493,9 @@ export class Date {
      * ```
      */
     public getMonth(): number {
+        if (this.isValid === false) {
+            return NaN;
+        }
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
         return ecmaMonthFromTime(localTime).toDouble();
     }
@@ -1462,6 +1507,9 @@ export class Date {
      * 0 corresponds to January, 1 to February, and so on.
      */
     public getUTCMonth(): number {
+        if (this.isValid === false) {
+            return NaN;
+        }
         return ecmaMonthFromTime(this.ms).toDouble();
     }
 
@@ -1526,6 +1574,9 @@ export class Date {
      * @returns A number representing the milliseconds elapsed between 1 January 1970 00:00:00 UTC and the given date.
      */
     public getTime(): number {
+        if (this.isValid === false) {
+            return NaN;
+        }
         return this.valueOf();
     }
 
@@ -1540,6 +1591,7 @@ export class Date {
      * @returns A number representing the milliseconds elapsed between 1 January 1970 00:00:00 UTC and the given date.
      */
     public setTime(value: long): void {
+        this.isValid = true;
         this.ms = value;
     }
 
@@ -1554,6 +1606,10 @@ export class Date {
      * @returns A number representing the milliseconds elapsed between 1 January 1970 00:00:00 UTC and the given date.
      */
     public setTime(value: number): number {
+        if (Double.isNaN(value)) {
+            this.isValid = false;
+            return value;
+        }
         this.setTime(value.toLong());
         return this.ms.toDouble();
     }
@@ -1838,6 +1894,9 @@ export class Date {
      */
     public override toString(): string {
         let res: String = "Invalid Date";
+        if (this.isValid === false) {
+            return res;
+        }
         try {
             res = this.toDateString() + " " + this.toTimeString();
         }
@@ -1859,7 +1918,7 @@ export class Date {
      * ```
      */
     public toUTCString(): string {
-        if (!this.isDateValid()) {
+        if (this.isValid === false || !this.isDateValid()) {
             throw new Error("Invalid Date");
         }
         let s: String = this.toUTCDateString() + " " + this.toUTCTimeString();
