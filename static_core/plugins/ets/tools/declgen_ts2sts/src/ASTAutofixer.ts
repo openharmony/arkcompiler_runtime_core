@@ -120,7 +120,8 @@ export class Autofixer {
         this[FaultID.RemoveLimitDecorator].bind(this)
       ]
     ],
-    [ts.SyntaxKind.Parameter,
+    [
+      ts.SyntaxKind.Parameter,
       [
         this[FaultID.ReservedFuncParameter].bind(this),
         this[FaultID.RestParameterArray].bind(this)
@@ -139,7 +140,13 @@ export class Autofixer {
       ]
     ],
     [ts.SyntaxKind.MethodDeclaration, [this[FaultID.NoETSKeyword].bind(this)]],
-    [ts.SyntaxKind.ImportDeclaration, [this[FaultID.NoEmptyImport].bind(this)]],
+    [
+      ts.SyntaxKind.ImportDeclaration,
+      [
+        this[FaultID.NoEmptyImport].bind(this),
+        this[FaultID.NoLazyImport].bind(this),
+      ]
+    ],
     [ts.SyntaxKind.ImportSpecifier, [this[FaultID.NoETSKeyword].bind(this)]],
     [ts.SyntaxKind.ExportDeclaration, [this[FaultID.NoEmptyExport].bind(this)]],
     [ts.SyntaxKind.ExportSpecifier, [this[FaultID.NoETSKeyword].bind(this)]],
@@ -1171,6 +1178,33 @@ export class Autofixer {
       }
     }
 
+    return node;
+  }
+
+  /**
+   * Rule: `arkts-no-lazy-import`
+   */
+  private [FaultID.NoLazyImport](node: ts.Node): ts.VisitResult<ts.Node> {
+    /**
+     * Remove lazy property from import statements
+     */
+    if (ts.isImportDeclaration(node)) {
+      const importClause = node.importClause;
+      if (importClause && importClause.isLazy) {
+        const newImportClause = this.context.factory.createImportClause(
+          importClause.isTypeOnly,
+          importClause.name,
+          importClause.namedBindings
+        );
+        return this.context.factory.updateImportDeclaration(
+          node,
+          node.modifiers,
+          newImportClause,
+          node.moduleSpecifier,
+          node.assertClause
+        );
+      }
+    }
     return node;
   }
 

@@ -20,3 +20,16 @@ export declare class C1 {
 export declare class NormalClass {
     method4(): void;
 }
+export declare class HumanClass {
+    run(): void;
+}
+export declare class AnimalClass {
+    run(): void;
+}
+export declare class DogClass extends AnimalClass {
+    bark(): void;
+}
+export declare function bar(): void;
+export declare function qux(): void;
+export declare function foo(): void;
+export declare function fox(): void;
