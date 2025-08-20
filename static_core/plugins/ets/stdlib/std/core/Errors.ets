@@ -208,6 +208,12 @@ export class CoroutinesLimitExceedError extends Error {
     }
 }
 
+export class IllegalLockStateError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("IllegalLockStateError", message, options)
+    }
+}
+
 /**
  * @class Represents the error that is thrown when a requested coroutine operation is invalid in the current context.
  */

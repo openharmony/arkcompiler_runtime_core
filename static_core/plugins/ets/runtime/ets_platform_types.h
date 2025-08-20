@@ -95,6 +95,7 @@ public:
     EtsClass *coreEvent {};
     EtsClass *coreCondVar {};
     EtsClass *coreQueueSpinlock {};
+    EtsClass *coreRWLock {};
 
     /* Finalization */
     EtsClass *coreFinalizableWeakRef {};
