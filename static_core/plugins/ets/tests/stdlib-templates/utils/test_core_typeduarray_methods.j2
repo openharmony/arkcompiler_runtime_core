@@ -126,17 +126,17 @@ const testTypedArrayEvery = parametrize<ObjectTypeAndExpectations<FixedArray<boo
             `[${array}].every((x, index, arr) => x + index == sum(arr))`
         )
 
-        const eqByInd = (x: {{.item.type}}, index: number, arr: {{.item.objectType}}) => x == arr[index]
+        const eqByInd = (x: {{.item.type}}, index: number, arr: {{.item.objectType}}) => x == arr[index.toInt()]
         const isValueEqualToArrayByIndex = array.every(eqByInd)
         failures += check(
             boolToResult(isValueEqualToArrayByIndex == expected[7]),
-            `[${array}].every((x, index, arr) => x == arr[index])`
+            `[${array}].every((x, index, arr) => x == arr[index.toInt()])`
         )
         
         const isNoEvenNumbers = array.every(
             (x: {{.item.type}}, index: number, arr: {{.item.objectType}}) => {
                 if (x{{.item.cast2primitive}} % 2 == 0) {
-                    arr[index] = {{.item.create}}(0)
+                    arr[index.toInt()] = {{.item.create}}(0)
                     return false
                 }
                 return true
@@ -180,7 +180,7 @@ const testTypedArraySome = parametrize<ObjectTypeAndExpectations<boolean[]>>(
         const hasPositivesSome = array.some((x: {{.item.type}}) => x > {{.item.create}}(0))
         const hasElementsWithValueEqIndex = array.some((x: {{.item.type}}, index: number) => x == {{.item.create}}(index))
 
-        const neByInd = (x: {{.item.type}}, index: number, arr: {{.item.objectType}}) => x != arr[index]
+        const neByInd = (x: {{.item.type}}, index: number, arr: {{.item.objectType}}) => x != arr[index.toInt()]
         const isValueNotEqualToArrayByIndex = array.some(neByInd)
 
         let failures = 0
@@ -310,17 +310,17 @@ function testTypedArrayMap(): number {
 
     let squared = ta.map((num: {{.item.type}}) => (num * num) as {{.item.type}})
     const isSquared = squared.every(
-       (num: {{.item.type}}, index: number) => num == ta[index] * ta[index]
+       (num: {{.item.type}}, index: number) => num == ta[index.toInt()] * ta[index.toInt()]
     )
 
     let mapWithIndex = ta.map((num: {{.item.type}}, index: number) => (num + {{.item.create}}(index)) as {{.item.type}})
     const isMappedWithIndex = mapWithIndex.every(
-       (num: {{.item.type}}, index: number) => num == ta[index] + {{.item.create}}(index)
+       (num: {{.item.type}}, index: number) => num == ta[index.toInt()] + {{.item.create}}(index)
     )
 
     let mapWithIndexAndThis = ta.map((num: {{.item.type}}, index: number, array: {{.item.objectType}}) => num)
     const isMappedWithIndexAndThis = mapWithIndexAndThis.every(
-       (num: {{.item.type}}, index: number, array: {{.item.objectType}}) => num == array[index]
+       (num: {{.item.type}}, index: number, array: {{.item.objectType}}) => num == array[index.toInt()]
     )
 
     let failures = 0
@@ -467,8 +467,8 @@ const testTypedArrayReduce = parametrize<ObjectTypeAndExpectations<[{{.item.type
         const isCorrectPrevCurIndex = testPrevCurIndex == {{.item.create}}(expectedWithIndices)
 
         // (prev: {{.item.type}}, cur: {{.item.type}}, curIndex: number, array: {{.item.objectType}}) => {{.item.type}} (Using prev, current element, index, and array)
-        const testPrevCurIndexArray = array.reduce((prev: {{.item.type}}, cur: {{.item.type}}, curIndex: number, arr: {{.item.objectType}}): {{.item.type}} => prev + cur + arr[curIndex], initialValue)
-        const expectedResultFull = array.reduce((sum: {{.item.type}}, val: {{.item.type}}, idx: number, arr: {{.item.objectType}}) => sum + val + arr[idx], initialValue)
+        const testPrevCurIndexArray = array.reduce((prev: {{.item.type}}, cur: {{.item.type}}, curIndex: number, arr: {{.item.objectType}}): {{.item.type}} => prev + cur + arr[curIndex.toInt()], initialValue)
+        const expectedResultFull = array.reduce((sum: {{.item.type}}, val: {{.item.type}}, idx: number, arr: {{.item.objectType}}) => sum + val + arr[idx.toInt()], initialValue)
         const isCorrectPrevCurIndexArray = testPrevCurIndexArray == {{.item.create}}(expectedResultFull)
 
         // Validating all results
@@ -538,8 +538,8 @@ const testTypedArrayReduceRight = parametrize<ObjectTypeAndExpectations<[{{.item
         const isCorrectPrevCurIndex = testPrevCurIndex == {{.item.create}}(expectedWithIndices)
 
         // (prev: {{.item.type}}, cur: {{.item.type}}, curIndex: number, array: {{.item.objectType}}) => {{.item.type}} (Using prev, current element, index, and array)
-        const testPrevCurIndexArray = array.reduceRight((prev: {{.item.type}}, cur: {{.item.type}}, curIndex: number, arr: {{.item.objectType}}): {{.item.type}} => prev + cur + arr[curIndex], initialValue)
-        const expectedResultFull = array.reduceRight((sum: {{.item.type}}, val: {{.item.type}}, idx: number, arr: {{.item.objectType}}) => sum + val + arr[idx], initialValue)
+        const testPrevCurIndexArray = array.reduceRight((prev: {{.item.type}}, cur: {{.item.type}}, curIndex: number, arr: {{.item.objectType}}): {{.item.type}} => prev + cur + arr[curIndex.toInt()], initialValue)
+        const expectedResultFull = array.reduceRight((sum: {{.item.type}}, val: {{.item.type}}, idx: number, arr: {{.item.objectType}}) => sum + val + arr[idx.toInt()], initialValue)
         const isCorrectPrevCurIndexArray = testPrevCurIndexArray == {{.item.create}}(expectedResultFull)
 
         // Validating all results
@@ -639,12 +639,12 @@ const testTypedArrayFill2Args = parametrize<ObjectTypeAndExpectations<boolean[]>
                 failures += check(boolToResult(isAllChangedExceptFirst == expected[1]), `.fill(value, 1) = ${fill1}`)
                 
                 const fillLen = copy().fill(value, array.length)
-                const isNothingChanged = fillLen.every((x, i) => x == array[i])
+                const isNothingChanged = fillLen.every((x, i) => x == array[i.toInt()])
                 failures += check(boolToResult(isNothingChanged == expected[2]), `.fill(value, array.length) = ${fillLen}`)
                 
                 const fillM1 = copy().fill(value, -1)
                 const isOnlyLastChanged = fillM1[last]{{.item.cast2primitive}} == val &&
-                    fillM1.slice(0, last - 1).every((x, i) => x == array[i])
+                    fillM1.slice(0, last - 1).every((x, i) => x == array[i.toInt()])
                 failures += check(boolToResult(isOnlyLastChanged == expected[3]), `.fill(value, -1) = ${fillM1}`)
                 
                 const fillMLen = copy().fill(value, -array.length);
@@ -684,12 +684,12 @@ const testTypedArrayFill3Args = parametrize<ObjectTypeAndExpectations<boolean[]>
                 const value = {{.item.create}}(val)
 
                 const fill00 = copy().fill(value, 0, 0)
-                const isNothingChanged = fill00.every((x, i) => x == array[i])
+                const isNothingChanged = fill00.every((x, i) => x == array[i.toInt()])
                 failures += check(boolToResult(isNothingChanged == expected[0]), `.fill(value, 0, 0) = ${fill00}`)
                 
                 const fill01 = copy().fill(value, 0, 1)
                 const isOnlyFirstChanged = fill01[0]{{.item.cast2primitive}} == val &&
-                    fill01.slice(1).every((x, i) => x == array[i + 1])
+                    fill01.slice(1).every((x, i) => x == array[i.toInt() + 1])
                 failures += check(boolToResult(isOnlyFirstChanged == expected[1]), `.fill(value, 0, 1) = ${fill01}`)
                 
                 const fill0Len = copy().fill(value, 0, array.length)
@@ -702,7 +702,7 @@ const testTypedArrayFill3Args = parametrize<ObjectTypeAndExpectations<boolean[]>
                 failures += check(boolToResult(isAllChangedExceptLast == expected[3]), `.fill(value, 0, -1) = ${fill0M1}`)
                 
                 const fill0MLen = copy().fill(value, 0, -array.length)
-                const isNothingChangedNeg = fill0MLen.every((x, i) => x == array[i])
+                const isNothingChangedNeg = fill0MLen.every((x, i) => x == array[i.toInt()])
                 failures += check(boolToResult(isNothingChangedNeg == expected[4]), `.fill(value, 0, -array.length) = ${fill0MLen}`)
 
                 const fill1Last = copy().fill(value, 1, last)
@@ -716,11 +716,11 @@ const testTypedArrayFill3Args = parametrize<ObjectTypeAndExpectations<boolean[]>
                 failures += check(boolToResult(isOnlyCenterChangedNeg == expected[6]), `.fill(value, 0, -1) = ${fill1M1}`)
             
                 const fillLast1 = copy().fill(value, last, 1)
-                const isNothingChangedReverse = fillLast1.every((x, i) => x == array[i])
+                const isNothingChangedReverse = fillLast1.every((x, i) => x == array[i.toInt()])
                 failures += check(boolToResult(isNothingChangedReverse == expected[7]), `.fill(value, last, 1) = ${fillLast1}`)
 
                 const fillM11 = copy().fill(value, -1, 1)
-                const isNothingChangedReverseNeg = fillM11.every((x, i) => x == array[i])
+                const isNothingChangedReverseNeg = fillM11.every((x, i) => x == array[i.toInt()])
                 failures += check(boolToResult(isNothingChangedReverseNeg == expected[8]), `.fill(value, -1, 1) = ${fillM11}`)
             }
         }
@@ -834,7 +834,7 @@ const testTypedArrayFind = parametrize<ObjectTypeAndExpectations<({{.item.type}}
         const mutable = new {{.item.objectType}}(array)
         const changesArray = mutable.find((value, index, obj) => {
             if (index === 1) {
-                obj[index] = {{.item.create}}(10)
+                obj[index.toInt()] = {{.item.create}}(10)
             }
             return value > {{.item.create}}(4)
         })
@@ -954,7 +954,7 @@ const testTypedArrayFindIndex = parametrize<ObjectTypeAndExpectations<number[]>>
         const mutableIndexArray = new {{.item.objectType}}(array)
         const changesArrayIndex = mutableIndexArray.findIndex((value, index, obj) => {
             if (index === 1) {
-                obj[index] = {{.item.create}}(10)
+                obj[index.toInt()] = {{.item.create}}(10)
             }
             return value > {{.item.create}}(4)
         })

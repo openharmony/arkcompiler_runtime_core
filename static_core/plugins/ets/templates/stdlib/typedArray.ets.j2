@@ -383,17 +383,6 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @param index index to change
      */
-    public $_set(index: number, val: {{elementCompat}}): void {
-        this.$_set(index.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
     public $_set(index: int, val: {{elementCompat}}): void {
         {%- if not N in ['Float32', 'Float64', 'BigInt64'] %}
         let v = this.zeroIfInfinity(val)
@@ -412,30 +401,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @param index index to change
      */
-    public $_set(index: number, val: int): void {
-        this.$_set(index.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
     public native $_set(index: int, val: int): void
     {%- endif %}
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: number, val: {{T}}): void {
-        this.$_set(index.toInt(), val)
-    }
 
     /**
      * Assigns val as element on index.
@@ -449,17 +416,6 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     /** Number of {{T}} stored in {{N}}Array */
     public get length(): int {
         return this.lengthInt
-    }
-
-    /**
-     * Returns an instance of {{elementCompat}} at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
-    public override $_get(index: number): {{subsetTypeValues}} {
-        return {{ 'this.$_get(index.toInt())' if elementCompat != 'BigInt' else 'new BigInt(this.$_get(index.toInt()))' }}
     }
 
     /**
@@ -778,7 +734,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @param insertPos index to change
      */
     public set(insertPos: number, val: {{elementCompat}}): void {
-        this.$_set(insertPos, val)
+        this.$_set(insertPos.toInt(), val)
     }
 
     /**
@@ -887,7 +843,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         for (let i = 0; i < array.length.toInt(); ++i) {
         {%- if (N == 'BigInt64') %}
             let truncatedVal: BigInt = BigInt.asIntN(64, array[i])
-            this.$_set(offset + i, truncatedVal{{fromElementCompat}})
+            this.$_set(insertPos + i, truncatedVal{{fromElementCompat}})
         {%- elif (N != 'Float32') and (N != 'Float64') %}
             let v = this.zeroIfInfinity(array[i])
             this.$_set(insertPos + i, v{{fromElementCompat}})

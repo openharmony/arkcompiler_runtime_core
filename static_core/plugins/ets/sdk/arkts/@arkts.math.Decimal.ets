@@ -1693,7 +1693,7 @@ export class Decimal {
             if (e < y.d!.length - 1) {
                 return new Decimal(NaN);
             }
-            if ((e < y.d!.length ? y.d![e] & 1 : 0) == 0) {
+            if ((e < y.d!.length ? y.d![e.toInt()] & 1 : 0) == 0) {
                 s = 1;
             }
             if (x.e == 0 && x.d![0] == 1 && x.d!.length == 1) {
@@ -2196,13 +2196,13 @@ export class Decimal {
         // Ensure |x| < 0.42
         // atan(x) = 2 * atan(x / (1 + sqrt(1 + x^2)))
         let k = Math.min(28, wpr / LOG_BASE + 2 | 0);
-        let i: double = 0;
-        for (i = k; i; --i) {
+        let i: int = 0;
+        for (i = k.toInt(); i; --i) {
             x = x.div(x.mul(x).add(1).sqrt().add(1));
         }
         external = false;
 
-        let j = Math.ceil(wpr / LOG_BASE);
+        let j = Math.ceil(wpr / LOG_BASE).toInt();
         let n = 1;
         let x2 = x.mul(x);
         r = new Decimal(x);
@@ -2363,13 +2363,17 @@ export class Decimal {
         let k = Math.floor(this.e / LOG_BASE);
         let e = Math.floor(y.e / LOG_BASE);
         xd = xd!.slice();
-        let i = k - e;
-        let len: double;
+        let i = (k - e).toInt();
+        let len: int;
         let d: Array<double>;
         if (i) {
             if (i < 0) {
                 d = xd;
-                i = -i;
+                if (i == Int.MIN_VALUE) {
+                    i = Int.MAX_VALUE;
+                } else {
+                    i = -i;
+                }
                 len = yd.length;
             } else {
                 d = yd;
@@ -2377,7 +2381,7 @@ export class Decimal {
                 len = xd.length;
             }
             k = Math.ceil(pr / LOG_BASE);
-            len = k > len ? k + 1 : len + 1;
+            len = (k > len ? k + 1 : len + 1).toInt();
             if (i > len) {
                 i = len;
                 d.length = 1;
@@ -2463,8 +2467,8 @@ export class Decimal {
         let xExp = Math.floor(x.e / LOG_BASE);
         xd = xd.slice();
         let expDiff = xExp - yExp;
-        let len: double;
-        let i: double;
+        let len: int;
+        let i: int;
         let xLessThanY: boolean = false;
         if (expDiff) {
             xLessThanY = expDiff < 0;
@@ -2515,7 +2519,7 @@ export class Decimal {
             xd.push(0);
             len++
         }
-        let j: double;
+        let j: int;
         for (i = yd.length; i > expDiff && i > 0;) {
             if (xd[--i] < yd[i]) {
                 for (j = i; j && xd[--j] === 0;) {
@@ -2561,10 +2565,10 @@ export class Decimal {
                 : (!xd || !yd) ? y.s / 0 : y.s * 0);
         }
         let e = Math.floor(this.exponent / LOG_BASE) + Math.floor(y.e / LOG_BASE);
-        let xdL: double = xd!.length;
-        let ydL: double = yd!.length;
+        let xdL: int = xd!.length;
+        let ydL: int = yd!.length;
         let r: Array<double> | null;
-        let rL: double;
+        let rL: int;
         if (xdL < ydL) {
           r = xd;
           xd = yd;
@@ -2575,13 +2579,13 @@ export class Decimal {
         }
         r = new Array<double>();
         rL = xdL + ydL;
-        let i: double;
+        let i: int;
         for (i = rL; i--;) {
             r.push(0);
         }
 
         let carry: Long = 0;
-        let k: double;
+        let k: int;
         let t: double;
         for (i = ydL; --i >= 0;) {
           carry = 0;
@@ -2784,7 +2788,7 @@ export class Decimal {
                 `The type of "test(str)" must be Hex/Binary/Octal. Received value is: ${str}`);
         }
 
-        let i = str.search(new RegExp("p", "i"));
+        let i = str.search(new RegExp("p", "i")).toInt();
         let p: double = 0;
         if (i > 0) {
             p = Utils.toNumber(str.slice(i + 1));
@@ -2793,13 +2797,13 @@ export class Decimal {
             str = str.slice(2);
         }
 
-        i = str.indexOf('.');
+        i = str.indexOf('.').toInt();
         let isFloat: boolean = i >= 0;
-        let len: double = 0;
+        let len: int = 0;
         let divisor: Decimal = new Decimal(0);
         if (isFloat) {
             str = str.replace('.', '');
-            len = str.length;
+            len = str.length.toInt();
             i = len - i;
             divisor = this.intPow(new Decimal(base), i, i * 2);
         }
@@ -2846,8 +2850,8 @@ export class Decimal {
             n = Math.floor(n / 2);
             if (n === 0) {
                 n = r.d!.length - 1;
-                if (isTruncated && r.d![n] === 0) {
-                    ++r.d![n];
+                if (isTruncated && r.d![n.toInt()] === 0) {
+                    ++r.d![n.toInt()];
                 }
                 break;
             }
@@ -2875,7 +2879,7 @@ export class Decimal {
     }
 
     private convertBase(str: string, baseIn: int, baseOut: double): Array<double> {
-        let arrL: double;
+        let arrL: int;
         let arr: Array<double> = Utils.updateDigits(0);
         for (let i = 0; i < str.length;) {
             for (arrL = arr.length; arrL--;) {
@@ -3166,14 +3170,14 @@ export class Decimal {
 
     private taylorSeries(n: int, x: Decimal, y: Decimal, isHyperbolic?: boolean): Decimal {
         let pr = Decimal.precision;
-        let k = Math.ceil(pr / LOG_BASE);
+        let k = Math.ceil(pr / LOG_BASE).toInt();
 
         external = false;
         let x2 = x.mul(x);
         let u = new Decimal(y);
         let i: int = 1;
         let t: Decimal = new Decimal(0);
-        let j: double = 0;
+        let j: int = 0;
         while(true) {
             t = Utils.divide(u.mul(x2), new Decimal(n++ * n++), pr, 1);
             u = isHyperbolic ? y.add(t) : y.sub(t);
@@ -3192,7 +3196,7 @@ export class Decimal {
             i++;
         }
         external = true;
-        t.d!.length = (k + 1).toInt();
+        t.d!.length = k + 1;
         return t;
     }
 
@@ -3262,8 +3266,8 @@ export class Decimal {
         return r;
     }
 
-    private getDigitsValidIndex(digits: Array<double>): double {
-        let len: double = 0;
+    private getDigitsValidIndex(digits: Array<double>): int {
+        let len: int = 0;
         for (len = digits.length; !digits[len - 1]; --len);
         return len;
     }
@@ -3319,7 +3323,9 @@ export class Decimal {
 
     private toStringBinary(baseOut: int, sd?: double, rm?: int) {
         let isExp = (sd != undefined);
+        let significantDigits: int;
         if (isExp) {
+            significantDigits = sd!.toInt()
             Utils.checkInt32(sd!, 1, MAX_DIGITS);
             if (rm == undefined) {
                 rm = Decimal.rounding;
@@ -3327,7 +3333,7 @@ export class Decimal {
                 Utils.checkInt32(rm!, 0, 8);
             }
         } else {
-            sd = Decimal.precision;
+            significantDigits = Decimal.precision.toInt();
             rm = Decimal.rounding;
         }
 
@@ -3341,9 +3347,9 @@ export class Decimal {
             if (isExp) {
                 base = 2;
                 if (baseOut == 16) {
-                    sd = sd! * 4 - 3;
+                    significantDigits = significantDigits * 4 - 3;
                 } else if (baseOut == 8) {
-                    sd = sd! * 3 - 2;
+                    significantDigits = significantDigits * 3 - 2;
                 }
             }
 
@@ -3357,7 +3363,7 @@ export class Decimal {
             }
             let xd = this.convertBase(str, 10, base);
             let e: number = xd.length;
-            let len: number = xd.length;
+            let len: int = xd.length;
             for (; len >= 1 && xd[--len] == 0;) {
                 xd.pop();
             }
@@ -3371,45 +3377,45 @@ export class Decimal {
                 } else {
                     x.digits = xd;
                     x.exponent = e;
-                    x = Utils.divide(x, y, sd, rm, false, base);
+                    x = Utils.divide(x, y, significantDigits, rm, false, base);
                     xd = x.d!;
                     e = x.e;
                     roundUp = inexact;
                 }
 
-                i = sd! < xd.length ? xd[sd!.toInt()] : -1;
+                i = significantDigits < xd.length ? xd[significantDigits] : -1;
                 let k = base / 2;
-                roundUp = roundUp || (sd! + 1 < xd.length ? xd[sd! + 1] != undefined : false);
+                roundUp = roundUp || (significantDigits + 1 < xd.length ? xd[significantDigits + 1] != undefined : false);
                 roundUp = rm != undefined && rm < 4
                     ? roundUp && (rm === 0 || rm === (x.s < 0 ? 3 : 2))
-                    : i > k || i === k && (rm === 4 || roundUp || rm === 6 && (xd[sd! - 1] & 1) > 0 ||
+                    : i > k || i === k && (rm === 4 || roundUp || rm === 6 && (xd[significantDigits - 1] & 1) > 0 ||
                         rm === (x.s < 0 ? 8 : 7));
 
                 // ArkTs1.2's Array can't change length to bigger or negative.
-                if (sd! <= xd.length) {
-                    xd.length = sd!.toInt();
+                if (significantDigits <= xd.length) {
+                    xd.length = significantDigits;
                 } else {
-                    xd.extendTo(sd!, 0);
+                    xd.extendTo(significantDigits, 0);
                 }
 
                 if (roundUp) {
-                    sd!--;
-                    xd[sd!] += 1
-                    for (; xd[sd!] > (base - 1);) {
-                        xd[sd!] = 0;
-                        if (!sd) {
+                    significantDigits--;
+                    xd[significantDigits] += 1
+                    for (; xd[significantDigits] > (base - 1);) {
+                        xd[significantDigits] = 0;
+                        if (!significantDigits) {
                             ++e;
                             xd.unshift(1);
                         }
-                        sd!--;
-                        if (sd! < 0) {
+                        significantDigits--;
+                        if (significantDigits < 0) {
                             break;
                         }
-                        xd[sd!] += 1
+                        xd[significantDigits] += 1
                     }
                 }
 
-                len = this.getDigitsValidIndex(xd).toInt();
+                len = this.getDigitsValidIndex(xd);
                 str = this.digitsToString(xd, 0, '', len);
                 str = this.completeStringWithZero(isExp, len, baseOut, str, base, e);
             }
@@ -3475,7 +3481,7 @@ class Utils {
     public static multiplyInteger(x: Array<double>, k: double, base: double): Array<double> {
         let temp: double = 0;
         let carry: Long = 0;
-        let i: double = x.length;
+        let i: int = x.length;
         for (x = x.slice(); i--;) {
             temp = x[i] * k + carry;
             x[i] = temp % base | 0;
@@ -3488,7 +3494,7 @@ class Utils {
     }
 
     public static compare(a: Array<double>, b: Array<double>, aL: double, bL: double): double {
-        let r: double = 0;
+        let r: int = 0;
         if (aL != bL) {
             r = aL > bL ? 1 : -1;
         } else {
@@ -3504,10 +3510,11 @@ class Utils {
 
     public static subtract(a: Array<double>, b: Array<double>, aL: double, base: double): void {
         let i: int = 0;
-        for (; aL--;) {
-            a[aL] = a[aL] - i;
-            i = a[aL] < b[aL] ? 1 : 0;
-            a[aL] = i * base + a[aL] - b[aL];
+        let j: int = aL.toInt();
+        for (; j--;) {
+            a[j] = a[j] - i;
+            i = a[j] < b[j] ? 1 : 0;
+            a[j] = i * base + a[j] - b[j];
         }
         for (; !a[0] && a.length > 1;) {
             a.shift();
@@ -3529,13 +3536,13 @@ class Utils {
         for (k = d[0]; k >= 10; k /= 10) {
             --i;
         }
-        let di: double;
+        let di: int;
         // Is the rounding digit in the first word of d?
         if (--i < 0) {
             i += LOG_BASE;
             di = 0;
         } else {
-            di = Math.ceil((i + 1) / LOG_BASE);
+            di = Math.ceil((i + 1) / LOG_BASE).toInt();
             i %= LOG_BASE;
         }
         // i is the index (0 - 6) of the rounding digit.
@@ -3634,7 +3641,7 @@ class Utils {
         let w: double = digits.length - 1;
         let len = w * LOG_BASE + 1;
 
-        w = digits[w];
+        w = digits[w.toInt()];
         if (w) {
             for (; w % 10 == 0; w /= 10) {
                 len--;
@@ -3696,7 +3703,7 @@ class Utils {
             // w: the word of xd containing rd, a base 1e7 number.
             let w: double;
             // xdi: the index of w within xd.
-            let xdi: double = 0;
+            let xdi: int = 0;
             // rd: the rounding digit, i.e. the digit after the digit that may be rounded up.
             let rd: double;
             if (i < 0) {
@@ -3706,7 +3713,7 @@ class Utils {
                 // Get the rounding digit at index j of w.
                 rd = w / Math.pow(10, digits - j - 1) % 10 | 0;
             } else {
-                xdi = Math.ceil((i + 1) / LOG_BASE);
+                xdi = Math.ceil((i + 1) / LOG_BASE).toInt();
                 k = xd.length;
                 if (xdi >= k) {
                     if (isTruncated) {
@@ -3756,11 +3763,11 @@ class Utils {
             }
 
             if (i == 0) {
-                xd!.length = xdi.toInt();
+                xd!.length = xdi;
                 k = 1;
                 xdi--;
             } else {
-               xd!.length = (xdi + 1).toInt();
+               xd!.length = xdi + 1;
                k = Math.pow(10, LOG_BASE - i);
                xd![xdi] = j > 0 ? (w / Math.pow(10, digits - j) % Math.pow(10, j) | 0) * k : 0;
             }
@@ -3793,7 +3800,7 @@ class Utils {
                     }
                 }
             }
-            for (i = xd.length; xd![--i] === 0;) {
+            for (i = xd.length; xd![(--i).toInt()] === 0;) {
                 xd!.pop();
             }
         }
@@ -3846,12 +3853,12 @@ class Utils {
             logBase = LOG_BASE;
             e = Math.floor(x.e / logBase) - Math.floor(y.e / logBase);
         }
-        let yL: number = yd.length;
-        let xL: number = xd.length;
+        let yL: int = yd.length;
+        let xL: int = xd.length;
         let q = new Decimal(sign);
         let qd = new Array<double>();
         q.digits = qd;
-        let i: double;
+        let i: int;
         for (i = 0; i < yL && yd[i] == (i < xL ? xd[i] || 0 : 0); i++);
 
         if (i < yL && yd[i] > (i < xL ? xd[i] || 0 : 0)) {
@@ -3884,7 +3891,7 @@ class Utils {
                     qd.push(t / ydv | 0);
                     k = t % ydv | 0;
                 }
-                more = (k || i) < xL;
+                more = (k || i.toDouble()) < xL;
             } else {
                 k = base / (yd[0] + 1) | 0;
                 if (k > 1) {
@@ -3895,7 +3902,7 @@ class Utils {
                 }
                 let xi = yL;
                 let rem: Array<double> | undefined = xd.slice(0, yL);
-                let remL: double = rem.length;
+                let remL: int = rem.length;
                 for (; remL < yL;) {
                     if (remL == rem.length) {
                         rem.push(0);

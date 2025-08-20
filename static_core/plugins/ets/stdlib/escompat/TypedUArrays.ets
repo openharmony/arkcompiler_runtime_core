@@ -339,29 +339,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns a primitive at index
      */
-    public override $_get(index: number): Number {
-        return this.$_get(index.toInt()).toDouble()
-    }
-
-    /**
-     * Returns an instance of number at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
     public native $_get(i: int): number
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: number, val: number): void {
-        this.$_set(index.toInt(), val)
-    }
 
     /**
      * Assigns val as element on index.
@@ -372,17 +350,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      */
     public $_set(index: int, val: number): void {
         this.$_set(index, val.toInt())
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: number, val: int): void {
-        this.$_set(index.toInt(), val)
     }
 
     /**
@@ -2161,29 +2128,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a primitive at index
      */
-    public override $_get(index: number): Number {
-        return this.$_get(index.toInt()).toDouble()
-    }
-
-    /**
-     * Returns an instance of number at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
     public native $_get(i: int): number
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: number, val: number): void {
-        this.$_set(index.toInt(), val)
-    }
 
     /**
      * Assigns val as element on index.
@@ -2195,17 +2140,6 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     public $_set(index: int, val: number): void {
         let v = this.zeroIfInfinity(val)
         this.$_set(index, v.toInt())
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: number, val: int): void {
-        this.$_set(index.toInt(), val)
     }
 
     /**
@@ -3976,29 +3910,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a primitive at index
      */
-    public override $_get(index: number): Number {
-        return this.$_get(index.toInt()).toDouble()
-    }
-
-    /**
-     * Returns an instance of number at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
     public native $_get(i: int): number
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: number, val: number): void {
-        this.$_set(index.toInt(), val)
-    }
 
     /**
      * Assigns val as element on index.
@@ -4010,17 +3922,6 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     public $_set(index: int, val: number): void {
         let v = this.zeroIfInfinity(val)
         this.$_set(index, v.toInt())
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: number, val: int): void {
-        this.$_set(index.toInt(), val)
     }
 
     /**
@@ -5788,29 +5689,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a primitive at index
      */
-    public override $_get(index: number): Number {
-        return this.$_get(index.toInt()).toDouble()
-    }
-
-    /**
-     * Returns an instance of number at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
     public native $_get(i: int): number
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: number, val: number): void {
-        this.$_set(index.toInt(), val)
-    }
 
     /**
      * Assigns val as element on index.
@@ -5831,29 +5710,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: number, val: long): void {
-        this.$_set(index.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
     public native $_set(index: int, val: long): void
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: number, val: int): void {
-        this.$_set(index.toInt(), val.toInt())
-    }
 
     /**
      * Assigns val as element on index.
@@ -7625,32 +7482,10 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns a primitive at index
      */
-    public override $_get(index: number): BigInt {
-        return new BigInt(this.$_get(index.toInt()))
-    }
-
-    /**
-     * Returns an instance of BigInt at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
     public $_get(i: int): BigInt {
         return BigInt.fromULong(this.getLong(i))
     }
     private native getLong(i: int): long
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: number, val: BigInt): void {
-        this.$_set(index.toInt(), val)
-    }
 
     /**
      * Assigns val as element on index.
@@ -7670,29 +7505,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @param index index to change
      */
-    public $_set(index: number, val: long): void {
-        this.$_set(index.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
     public native $_set(index: int, val: long): void
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: number, val: int): void {
-        this.$_set(index.toInt(), val.toInt())
-    }
 
     /**
      * Assigns val as element on index.

@@ -1082,7 +1082,7 @@ function testTypedUArrayForEach(): number {
 
   let resultArray = new {{.item.objectType}}(typedUArray.length);
   typedUArray.forEach((value: {{.item.type}}, index: number, array: {{.item.objectType}}) => {
-    resultArray[index] = value * {{.item.create}}(2);
+    resultArray[index.toInt()] = value * {{.item.create}}(2);
   });
 
   // Compare the modified array with the expected result
@@ -1118,7 +1118,7 @@ function testTypedUArrayForEachValueIndexCallback(): number {
 
     let resultArray = new {{.item.objectType}}(typedUArray.length);
     typedUArray.forEach((value: {{.item.type}}, index: number) => {
-      resultArray[index] = value * {{.item.create}}(2);
+      resultArray[index.toInt()] = value * {{.item.create}}(2);
     });
 
     // Compare the modified array with the expected result
@@ -1223,10 +1223,6 @@ const testTypedArrayGet = parametrize<ObjectTypeAndExpectations<boolean[]>>(
 
     const isMinusOneThrows = testTypedArrayGetError(array, -1) == success
     const isLengthThrows = testTypedArrayGetError(array, array.length) == success
-    const isNegInfThrows = testTypedArrayGetError(array, -Infinity) == success
-    const isPosInfThrows = testTypedArrayGetError(array, +Infinity) == success
-
-    const isNanZero = array[NaN] == array[0]
 
     let isCorrectValues = true
     for (let i = 0; i < array.length; i++) {
@@ -1240,16 +1236,13 @@ const testTypedArrayGet = parametrize<ObjectTypeAndExpectations<boolean[]>>(
 
     failures += check(boolToResult(isMinusOneThrows == expected[0]), `didn't throw: array[-1]`)
     failures += check(boolToResult(isLengthThrows == expected[1]), `didn't throw: array[array.length]`)
-    failures += check(boolToResult(isNegInfThrows == expected[2]), `didn't throw: array[-Infinity]`)
-    failures += check(boolToResult(isPosInfThrows == expected[3]), `didn't throw: array[+Infinity]`)
-    failures += check(boolToResult(isNanZero == expected[4]), `failed: array[NaN] == array[0]`)
-    failures += check(boolToResult(isCorrectValues == expected[5]), `failed: array[i] == (i + 1) * 10`)
+    failures += check(boolToResult(isCorrectValues == expected[2]), `failed: array[i] == (i + 1) * 10`)
 
     return failures == 0 ? success: fail
   }
 )
 
-function testTypedArrayGetError(array: {{.item.objectType}}, index: number): number {
+function testTypedArrayGetError(array: {{.item.objectType}}, index: int): number {
   try {
     const tmp = array[index]
   } catch (e: RangeError) {
@@ -1275,11 +1268,6 @@ const testTypedArraySet = parametrize<ObjectTypeAndExpectations<boolean[]>>(
 
     const isMinusOneThrows = testTypedArraySetError(array, -1, value) == success
     const isLengthThrows = testTypedArraySetError(array, array.length, value) == success
-    const isNegInfThrows = testTypedArraySetError(array, -Infinity, value) == success
-    const isPosInfThrows = testTypedArraySetError(array, +Infinity, value) == success
-
-    array[NaN] = value
-    const isNanZero = array[0] == {{.item.create}}(value)
 
     {%- if item.objectType != 'BigUint64Array' %}
 
@@ -1301,21 +1289,18 @@ const testTypedArraySet = parametrize<ObjectTypeAndExpectations<boolean[]>>(
 
     failures += check(boolToResult(isMinusOneThrows == expected[0]), `didn't throw: array[-1] = value`)
     failures += check(boolToResult(isLengthThrows == expected[1]), `didn't throw: array[array.length] = value`)
-    failures += check(boolToResult(isNegInfThrows == expected[2]), `didn't throw: array[-Infinity] = value`)
-    failures += check(boolToResult(isPosInfThrows == expected[3]), `didn't throw: array[+Infinity] = value`)
-    failures += check(boolToResult(isNanZero == expected[4]), `failed: array[NaN] = value`)
     {%- if item.objectType != 'BigUint64Array' %}
-    failures += check(boolToResult(isNumberNumberCorrect == expected[5]), `failed: array[0.toDouble()] = value.toDouble()`)
-    failures += check(boolToResult(isIntNumberCorrect == expected[6]), `failed: array[0 as int] = value.toDouble()`)
+    failures += check(boolToResult(isNumberNumberCorrect == expected[2]), `failed: array[0.toDouble()] = value.toDouble()`)
+    failures += check(boolToResult(isIntNumberCorrect == expected[3]), `failed: array[0 as int] = value.toDouble()`)
     {%- endif %}
-    failures += check(boolToResult(isNumberIntCorrect == expected[7]), `failed: array[0.toDouble()] = value as int`)
-    failures += check(boolToResult(isIntIntCorrect == expected[8]), `failed: array[0 as int] = value as int`)
+    failures += check(boolToResult(isNumberIntCorrect == expected[4]), `failed: array[0.toDouble()] = value as int`)
+    failures += check(boolToResult(isIntIntCorrect == expected[5]), `failed: array[0 as int] = value as int`)
 
     return failures == 0 ? success: fail
   }
 )
 
-function testTypedArraySetError(array: {{.item.objectType}}, index: number, value: int): number {
+function testTypedArraySetError(array: {{.item.objectType}}, index: int, value: int): number {
   try {
     array[index] = value
   } catch (e: RangeError) {
