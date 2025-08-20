@@ -386,10 +386,15 @@ public:
                 helpstr << DOUBLE_DASH << i->GetName() << ": " << i->GetDesc() << "\n";
             }
         }
+        return helpstr.str();
+    }
+
+    std::string GetTailArgs() const
+    {
+        std::ostringstream helpstr;
         if (!tailArgs_.empty()) {
-            helpstr << "Tail arguments:\n";
             for (auto i : tailArgs_) {
-                helpstr << i->GetName() << ": " << i->GetDesc() << "\n";
+                std::cerr << i->GetName() << ": " << i->GetDesc() << "\n";
             }
         }
         return helpstr.str();
