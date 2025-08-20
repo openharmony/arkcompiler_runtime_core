@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -127,7 +127,7 @@ public:
     void deallocate([[maybe_unused]] pointer p, [[maybe_unused]] size_type n) {}
 
     template <typename U, typename... Args>
-    void construct(U *p, Args &&... args)  // NOLINT(readability-identifier-naming)
+    void construct(U *p, Args &&...args)  // NOLINT(readability-identifier-naming)
     {
         ::new (static_cast<void *>(p)) U(std::forward<Args>(args)...);
     }

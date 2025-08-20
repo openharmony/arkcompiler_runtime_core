@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -91,11 +91,13 @@ public:
     ArenaAllocatorAdapter &operator=(const ArenaAllocatorAdapter &) = default;
     ArenaAllocatorAdapter(ArenaAllocatorAdapter &&other) noexcept
     {
+        ASSERT(other.allocator_ != nullptr);
         allocator_ = other.allocator_;
         other.allocator_ = nullptr;
     }
     ArenaAllocatorAdapter &operator=(ArenaAllocatorAdapter &&other) noexcept
     {
+        ASSERT(other.allocator_ != nullptr);
         allocator_ = other.allocator_;
         other.allocator_ = nullptr;
         return *this;
@@ -124,6 +126,7 @@ public:
                      [[maybe_unused]] typename ArenaAllocatorAdapter<void, USE_OOM_HANDLER>::pointer ptr = nullptr)
     {
         ASSERT(n <= max_size());
+        ASSERT(allocator_ != nullptr);
         return allocator_->template AllocArray<T>(n);
     }
 
@@ -133,6 +136,7 @@ public:
     template <typename U, typename... Args>
     void construct(U *p, Args &&...args)  // NOLINT(readability-identifier-naming)
     {
+        ASSERT(p != nullptr);
         ::new (static_cast<void *>(p)) U(std::forward<Args>(args)...);
     }
     template <typename U>
