@@ -1814,3 +1814,63 @@
   signature:
     - uint8_t             # boolean
     - ark::ObjectHeader*
+
+- name: ArrayFastCopyTo_Ref_Sync
+  entrypoint: ArrayFastCopyToRefSync
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArrayFastCopyTo_Ref_Async
+  entrypoint: ArrayFastCopyToRefAsync
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArrayFastCopyTo_Ref_AsyncManual
+  entrypoint: ArrayFastCopyToRefAsyncManual
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArrayFastCopyTo_Ref_Hybrid
+  entrypoint: ArrayFastCopyToRefHybrid
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArrayFastCopyToRefEntrypoint
+  entrypoint: EscompatObjectFastCopyToUnchecked
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t

@@ -68,11 +68,6 @@
         - plugins_main_loop: plugins/ets/irtoc_scripts/interpreter_main_loop.irt
         - plugins_string_builder: plugins/ets/irtoc_scripts/string_builder.irt
         - plugins_string: plugins/ets/irtoc_scripts/string.irt
-        - plugins_to_string_cache: plugins/ets/irtoc_scripts/to_string_cache.irt
-        - plugins_typed_arrays: plugins/ets/irtoc_scripts/typed_arrays.irt
-        - plugins_escompat_array: plugins/ets/irtoc_scripts/escompat_array.irt
-        - plugins_map: plugins/ets/irtoc_scripts/map.irt
-        - plugins_set: plugins/ets/irtoc_scripts/set.irt
 
       Metadatas:
         - RecordMetadata:

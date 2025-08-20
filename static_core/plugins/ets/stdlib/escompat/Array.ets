@@ -1352,10 +1352,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             count = 0;
         }
         let res : FixedArray<Any> = new Any[count]
-        for (let i = 0; i < count; i++) {
-            res[i] = this.$_get_unsafe(relStart + i);
-        }
-
+        copyToFast(this.buffer, res, 0, relStart, relStart + count);
         return new Array<T>(FROM_BUFFER, res)
     }
 
@@ -1810,6 +1807,27 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
 }
+
+/**
+ * copies src array into dst with respect to passed indexes and without setting pre-write barriers.
+ * dst must be a new allocated array and have enough space, otherwise out-of-bounds might occur
+ *
+ * @param src source array to be copied
+ *
+ * @param dst destination array
+ *
+ * @param dstStart index of dst to start from
+ *
+ * @param srcStart index of src to start from
+ *
+ * @param srcEnd last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
+ *
+ * @example: copy src to dst
+ * ```
+ * copyToFast(src, dst, 0, 0, src.length)
+ * ```
+ */
+native function copyToFast(src: FixedArray<Any>, dst: FixedArray<Any>, dstStart: int, srcStart: int, srcEnd: int): void;
 
 class ArrayValuesIterator_T<T> implements IterableIterator<T> {
     private parent: Array<T>

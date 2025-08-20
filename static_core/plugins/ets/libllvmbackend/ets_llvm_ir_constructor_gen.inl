@@ -485,3 +485,59 @@ bool LLVMIrConstructor::EmitWriteString(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::WRITE_STRING_TO_MEM, 2U);
 }
+
+static RuntimeInterface::EntrypointId GetArrayFastCopyToRefEntrypointId(mem::BarrierType barrierType)
+{
+    using EntrypointId = RuntimeInterface::EntrypointId;
+    switch (barrierType) {
+        case mem::BarrierType::POST_INTERGENERATIONAL_BARRIER:  // Gen GC
+            return EntrypointId::ARRAY_FAST_COPY_TO_REF_ASYNC_MANUAL;
+        case mem::BarrierType::POST_CMC_WRITE_BARRIER:  // CMC GC
+            return EntrypointId::ARRAY_FAST_COPY_TO_REF_HYBRID;
+        case mem::BarrierType::POST_INTERREGION_BARRIER:  // G1 GC
+            return EntrypointId::ARRAY_FAST_COPY_TO_REF_ASYNC;
+        default:  // STW GC
+            return EntrypointId::ARRAY_FAST_COPY_TO_REF_SYNC;
+    }
+}
+
+bool LLVMIrConstructor::EmitArrayFastCopyToRef(Inst *inst)
+{
+    if (GetGraph()->GetArch() == Arch::AARCH32) {
+        return false;
+    }
+
+    auto srcObj = GetInputValue(inst, 0);
+    auto dstObj = GetInputValue(inst, 1);
+    auto dstStart = GetInputValue(inst, 2);
+    auto srcStart = GetInputValue(inst, 3);
+    auto srcEnd = GetInputValue(inst, 4);
+
+    // Check whether the source range less or equal to what fits in a single GC card table. If not, go to the
+    // slow path.
+    static constexpr size_t IN_ONE_CARD_TABLE_PAGE_ITERATION_THRESHOLD =
+        mem::CardTable::GetCardSize() / sizeof(ObjectPointerType);
+    auto onePageThreshold = builder_.getInt32(IN_ONE_CARD_TABLE_PAGE_ITERATION_THRESHOLD);
+
+    auto fastPathBb =
+        llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "emit_go_to_fastpath"), func_);
+    auto slowPathBb =
+        llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "emit_go_to_slowpath"), func_);
+    auto returnBb = llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "emit_return"), func_);
+    auto rangeSize = builder_.CreateSub(srcEnd, srcStart);
+    builder_.CreateCondBr(builder_.CreateICmpUGT(rangeSize, onePageThreshold), slowPathBb, fastPathBb);
+    const std::array callArgs = {srcObj, dstObj, dstStart, srcStart, srcEnd};
+
+    SetCurrentBasicBlock(fastPathBb);
+    auto fastPathEntrypointId = GetArrayFastCopyToRefEntrypointId(GetGraph()->GetRuntime()->GetPostType());
+    CreateFastPathCall(inst, fastPathEntrypointId, callArgs);
+    builder_.CreateBr(returnBb);
+
+    SetCurrentBasicBlock(slowPathBb);
+    constexpr auto slowPathEntrypointId = RuntimeInterface::EntrypointId::ARRAY_FAST_COPY_TO_REF_ENTRYPOINT;
+    CreateEntrypointCall(slowPathEntrypointId, inst, callArgs);
+    builder_.CreateBr(returnBb);
+
+    SetCurrentBasicBlock(returnBb);
+    return true;
+}

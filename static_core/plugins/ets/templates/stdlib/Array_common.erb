@@ -396,10 +396,7 @@
         count = 0;
     }
     let res : <%= make_fixed_array %> = <%= make_buffer.('count') %>
-    for (let i = 0; i < count; i++) {
-        res[i] = <%= get_unsafe.(this, 'relStart + i') %>;
-    }
-
+    <%=copy_function%>(<%= this_buffer %>, res, 0, relStart, relStart + count);
     return <%= from_buffer.('res') %>
 }
 

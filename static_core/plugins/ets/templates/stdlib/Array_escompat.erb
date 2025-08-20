@@ -971,6 +971,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 % $ctx = ctx
 % ctx.this = 'this'
 % ctx.this_arg = ''
+% ctx.this_buffer = 'this.buffer'
 % ctx.this_len_int = 'this.actualLength'
 % ctx.this_array = 'escompat_array'
 % ctx.array_len_int = Proc.new { |v| "#{v}.length" }
@@ -1000,12 +1001,36 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 % ctx.this_generic = ''
 % ctx.this_generic_one = ''
 % ctx.this_iterator_generic = '<T>'
+% ctx.copy_function = 'copyToFast'
 % template = ERB.new(File.read("Array_common.erb"), trim_mode: '%', eoutvar: '_sub01')
 <%= template.result(ctx.instance_eval { binding }).gsub(/^/, '    ') %>
 % template = ERB.new(File.read("Array_map.erb"), trim_mode: '%', eoutvar: '_sub02')
 % ctx.mapped_type = 'U'
 % ctx.map_generic = '<U>'
 <%= template.result(ctx.instance_eval { binding }).gsub(/^/, '    ') %>
+
 }
+
+%# When ['T'] is added to BuiltinArray, the copyToFast() function should be declared and for BuiltinArray too.
+/**
+ * copies src array into dst with respect to passed indexes and without setting pre-write barriers.
+ * dst must be a new allocated array and have enough space, otherwise out-of-bounds might occur
+ *
+ * @param src source array to be copied
+ *
+ * @param dst destination array
+ *
+ * @param dstStart index of dst to start from
+ *
+ * @param srcStart index of src to start from
+ *
+ * @param srcEnd last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
+ *
+ * @example: copy src to dst
+ * ```
+ * copyToFast(src, dst, 0, 0, src.length)
+ * ```
+ */
+native function copyToFast(src: FixedArray<Any>, dst: FixedArray<Any>, dstStart: int, srcStart: int, srcEnd: int): void;
 % template = ERB.new(File.read("Array_common_top_scope.erb"), trim_mode: '%', eoutvar: '_sub03')
 <%= template.result(ctx.instance_eval { binding }).rstrip %>

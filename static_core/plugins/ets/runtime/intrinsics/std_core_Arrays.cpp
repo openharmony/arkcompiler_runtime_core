@@ -177,31 +177,44 @@ static void CopyForward(T *src, T *dst, size_t length, Copy copy, PutSP putSafep
         for (size_t j = i * COPIED_BETWEEN_SAFEPOINT_THRESHOLD; j < (i + 1) * COPIED_BETWEEN_SAFEPOINT_THRESHOLD; ++j) {
             copy(&src[j], &dst[j]);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
-        putSafepoint();
+        putSafepoint(i * COPIED_BETWEEN_SAFEPOINT_THRESHOLD, COPIED_BETWEEN_SAFEPOINT_THRESHOLD);
     }
-    for (size_t i = (length / COPIED_BETWEEN_SAFEPOINT_THRESHOLD) * COPIED_BETWEEN_SAFEPOINT_THRESHOLD; i < length;
-         ++i) {
+    size_t batchesFinalIdx = (length / COPIED_BETWEEN_SAFEPOINT_THRESHOLD) * COPIED_BETWEEN_SAFEPOINT_THRESHOLD;
+    for (size_t i = batchesFinalIdx; i < length; ++i) {
         copy(&src[i], &dst[i]);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
+    putSafepoint(batchesFinalIdx, length - batchesFinalIdx);
 }
 
 template <typename T, typename Copy, typename PutSP>
 static void CopyBackward(T *src, T *dst, size_t length, Copy copy, PutSP putSafepoint)
 {
-    for (size_t i = length; i > (length / COPIED_BETWEEN_SAFEPOINT_THRESHOLD) * COPIED_BETWEEN_SAFEPOINT_THRESHOLD;
-         --i) {
+    size_t batchesStartIdx = (length / COPIED_BETWEEN_SAFEPOINT_THRESHOLD) * COPIED_BETWEEN_SAFEPOINT_THRESHOLD;
+    for (size_t i = length; i > batchesStartIdx; --i) {
         copy(&src[i - 1], &dst[i - 1]);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
+    putSafepoint(batchesStartIdx, length - batchesStartIdx);
     for (size_t i = length / COPIED_BETWEEN_SAFEPOINT_THRESHOLD; i > 0; --i) {
-        putSafepoint();
         for (size_t j = i * COPIED_BETWEEN_SAFEPOINT_THRESHOLD; j > (i - 1) * COPIED_BETWEEN_SAFEPOINT_THRESHOLD; --j) {
             copy(&src[j - 1], &dst[j - 1]);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
+        putSafepoint((i - 1) * COPIED_BETWEEN_SAFEPOINT_THRESHOLD, COPIED_BETWEEN_SAFEPOINT_THRESHOLD);
+    }
+}
+
+static void PostWrite(ManagedThread *thread, EtsHandle<EtsCharArray> dstArray, size_t dstStart, size_t length)
+{
+    auto *barrierSet = thread->GetBarrierSet();
+    if (barrierSet->GetPostType() != ark::mem::BarrierType::POST_WRB_NONE) {
+        constexpr uint32_t OFFSET = ark::coretypes::Array::GetDataOffset();
+        const uint32_t size = length * sizeof(ObjectPointerType);
+        barrierSet->PostBarrier(dstArray.GetPtr(), OFFSET + dstStart * sizeof(ObjectPointerType), size);
     }
 }
 
 template <typename T, bool NEED_PRE_WRITE_BARRIER = true>
-static void RefCopy(void *srcAddr, void *dstAddr, int32_t length)
+static void RefCopy(ManagedThread *thread, EtsHandle<EtsCharArray> dstArray, void *srcAddr, void *dstAddr,
+                    int32_t length)
 {
     auto *src = static_cast<T *>(srcAddr);
     auto *dst = static_cast<T *>(dstAddr);
@@ -209,7 +222,7 @@ static void RefCopy(void *srcAddr, void *dstAddr, int32_t length)
     auto copy = GetCopy<T>(srcAddr);
 
     if constexpr (NEED_PRE_WRITE_BARRIER) {
-        auto *barrierSet = Thread::GetCurrent()->GetBarrierSet();
+        auto *barrierSet = thread->GetBarrierSet();
         bool usePreBarrier = barrierSet->IsPreBarrierEnabled();
         auto copyWithBarriers = [&copy, &usePreBarrier, barrierSet](T *srcPtr, T *dstPtr) {
             if (usePreBarrier) {
@@ -217,8 +230,9 @@ static void RefCopy(void *srcAddr, void *dstAddr, int32_t length)
             }
             copy(srcPtr, dstPtr);
         };
-        auto putSafepoint = [&usePreBarrier, barrierSet]() {
-            ark::interpreter::RuntimeInterface::Safepoint();
+        auto putSafepoint = [&usePreBarrier, barrierSet, dstArray, thread](size_t dstStart, size_t count) {
+            PostWrite(thread, dstArray, dstStart, count);
+            ark::interpreter::RuntimeInterface::Safepoint(thread);
             usePreBarrier = barrierSet->IsPreBarrierEnabled();
         };
         if (backwards) {
@@ -227,7 +241,10 @@ static void RefCopy(void *srcAddr, void *dstAddr, int32_t length)
             CopyForward(src, dst, length, copyWithBarriers, putSafepoint);
         }
     } else {
-        auto putSafepoint = []() { ark::interpreter::RuntimeInterface::Safepoint(); };
+        auto putSafepoint = [thread, dstArray](size_t dstStart, size_t count) {
+            PostWrite(thread, dstArray, dstStart, count);
+            ark::interpreter::RuntimeInterface::Safepoint(thread);
+        };
         if (backwards) {
             CopyBackward(src, dst, length, copy, putSafepoint);
         } else {
@@ -236,7 +253,7 @@ static void RefCopy(void *srcAddr, void *dstAddr, int32_t length)
     }
 }
 
-template <bool NEED_PRE_WRITE_BARRIER = true>
+template <bool NEED_PRE_WRITE_BARRIER = true, bool CHECKED = true>
 void StdCoreCopyToForObjects(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart, int32_t srcEnd)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
@@ -247,10 +264,12 @@ void StdCoreCopyToForObjects(EtsCharArray *src, EtsCharArray *dst, int32_t dstSt
     auto srcLen = static_cast<int32_t>(srcArray->GetLength());
     auto dstLen = static_cast<int32_t>(dstArray->GetLength());
     auto length = srcEnd - srcStart;
-    const char *errmsg = CheckCopyToPreConditions(srcStart, srcLen, srcEnd, dstStart, dstLen);
-    if (errmsg != nullptr) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ARRAY_INDEX_OUT_OF_BOUNDS_ERROR, errmsg);
-        return;
+    if constexpr (CHECKED) {
+        const char *errmsg = CheckCopyToPreConditions(srcStart, srcLen, srcEnd, dstStart, dstLen);
+        if (errmsg != nullptr) {
+            ThrowEtsException(coroutine, panda_file_items::class_descriptors::ARRAY_INDEX_OUT_OF_BOUNDS_ERROR, errmsg);
+            return;
+        }
     }
 
     /* the result will be exactly the same as it is */
@@ -262,21 +281,20 @@ void StdCoreCopyToForObjects(EtsCharArray *src, EtsCharArray *dst, int32_t dstSt
     auto dstAddr = ToVoidPtr(ToUintPtr(dstArray->GetCoreType()->GetData()) + dstStart * sizeof(ObjectPointerType));
 
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
-    RefCopy<ObjectPointerType, NEED_PRE_WRITE_BARRIER>(srcAddr, dstAddr, length);
+    RefCopy<ObjectPointerType, NEED_PRE_WRITE_BARRIER>(coroutine, dstArray, srcAddr, dstAddr, length);
     TSAN_ANNOTATE_IGNORE_WRITES_END();
-
-    auto *barrierSet = Thread::GetCurrent()->GetBarrierSet();
-    if (barrierSet->GetPostType() != ark::mem::BarrierType::POST_WRB_NONE) {
-        constexpr uint32_t OFFSET = ark::coretypes::Array::GetDataOffset();
-        const uint32_t size = length * sizeof(ObjectPointerType);
-        barrierSet->PostBarrier(dstArray.GetPtr(), OFFSET + dstStart * sizeof(ObjectPointerType), size);
-    }
 }
 
 extern "C" void StdCoreObjectCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
                                     int32_t srcEnd)
 {
     StdCoreCopyToForObjects<true>(src, dst, dstStart, srcStart, srcEnd);
+}
+
+extern "C" void EscompatObjectFastCopyToUnchecked(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart,
+                                                  int32_t srcStart, int32_t srcEnd)
+{
+    StdCoreCopyToForObjects<false, false>(src, dst, dstStart, srcStart, srcEnd);
 }
 
 }  // namespace ark::ets::intrinsics

@@ -152,7 +152,10 @@ bool EmitGetHashCodeByValue(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::GET_HASH_CODE_BY_VALUE_FAST_PATH, 1U);
 }
+
 bool EmitEscompatArrayIsPlatformArray(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::ESCOMPAT_ARRAY_IS_PLATFORM_ARRAY_FAST, 1U);
 }
+
+bool EmitArrayFastCopyToRef(Inst *inst);
