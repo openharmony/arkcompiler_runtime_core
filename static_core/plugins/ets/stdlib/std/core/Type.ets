@@ -1747,6 +1747,16 @@ export final class ClassType extends Type {
         throw new TypeError("no field \"" + name + "\"")
     }
 
+    public getMethodByName(name: string): Method{
+        for (let methodIdx = 0; methodIdx < this.getMethodsNum(); ++methodIdx) {
+            const method = this.getMethod(methodIdx)
+            if (method.getName() == name && !method.isStatic()) {
+                return method
+            }
+        }
+        throw new TypeError("no instance method \"" + name + "\"")
+    }
+
     private getFieldImpl(fieldPtr: long): Field {
         const fieldDesc = TypeAPI.getFieldDescriptor(fieldPtr)
         const fieldType = Type.resolve(fieldDesc, this.getContextLinker())!

@@ -96,14 +96,20 @@ interface ProxyTest {
 
 class interfaceProxyHandler<T extends Object> implements proxy.ProxyHandler<T>{
     public get(target:T, name:string):NullishType {
-        const value = Reflect.get(target, name) as Any
-        return value
+        return (reflect.Value.of(target) as ClassValue).getFieldByName(name).getData()
     }
 
     public set(target:T, name:string, newValue:NullishType):boolean {
-        if (Reflect.get(target, name) !== newValue) {
-            const result = Reflect.set(target, name, newValue)
-            return result
+        const targetValue = reflect.Value.of(target) as ClassValue
+        const value = targetValue.getFieldByName(name).getData()
+
+        if (value !== newValue) {
+            try {
+                targetValue.setFieldByName(name, reflect.Value.of(newValue))
+            } catch(e) {
+                console.error(e)
+                return false
+            }
         }
         return true
     }
